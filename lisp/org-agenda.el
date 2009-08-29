@@ -5585,12 +5585,14 @@ at the text of the entry itself."
   (interactive "P")
   (let* ((marker (or (get-text-property (point) 'org-hd-marker)
 		     (get-text-property (point) 'org-marker)))
-	 (buffer (and marker (marker-buffer marker)))
-	 (txt (concat (buffer-substring (point-at-bol) (point-at-eol))
-		      "\n"
-		      (and marker
-			   (org-agenda-get-some-entry-text marker 100)))))
-    (org-offer-links-from-string txt arg buffer)))
+	 (buffer (and marker (marker-buffer marker))))
+    (unless buffer (error "Don't know where to look for links"))
+    (with-current-buffer buffer
+      (save-excursion
+	(save-restriction
+	  (widen)
+	  (goto-char marker)
+	  (org-offer-links-in-entry arg))))))
 
 (defun org-agenda-copy-local-variable (var)
   "Get a variable from a referenced buffer and install it here."

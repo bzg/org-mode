@@ -7892,10 +7892,7 @@ application the system uses for this file type."
 	       (concat org-plain-link-re "\\|" 
 		       org-bracket-link-regexp "\\|"
 		       org-angle-link-re))))
-    (org-offer-links-from-string (buffer-substring
-				  (point-at-bol)
-				  (save-excursion
-				    (outline-next-heading) (point)))))
+    (org-offer-links-in-entry in-emacs))
    ((org-at-timestamp-p t) (org-follow-timestamp-link))
    ((or (org-footnote-at-reference-p) (org-footnote-at-definition-p))
     (org-footnote-action))
@@ -8055,44 +8052,47 @@ application the system uses for this file type."
    (move-marker org-open-link-marker nil)
    (run-hook-with-args 'org-follow-link-hook)))
 
-(defun org-offer-links-from-string (string &optional nth reference-buffer)
-  "Offer links in STRING and follow the selected link.
-If NTH is an integer immediately pick the NTH link found.
-REFERENCE-BUFFER is the buffer that should be current when following the
-link to retrieve the value of `org-link-abbrev-alist-local', from, which is
-needed for the interpretation of abbreviated links."
+(defun org-offer-links-in-entry (&optional nth)
+  "Offer links in the curren entry and follow the selected link.
+If there is only one link, follow it immediately as well.
+If NTH is an integer immediately pick the NTH link found."
   (let ((re (concat "\\(" org-bracket-link-regexp "\\)\\|"
 		    "\\(" org-angle-link-re "\\)\\|"
 		    "\\(" org-plain-link-re "\\)"))
 	(cnt 0)
+	(in-emacs (if (integerp nth) nil nth))
+	end
 	links link c)
-    (with-temp-buffer
-      (insert string)
-      (goto-char (point-min))
-      (while (re-search-forward re nil t)
+    (save-excursion
+      (org-back-to-heading t)
+      (setq end (save-excursion (outline-next-heading) (point)))
+      (while (re-search-forward re end t)
 	(push (match-string 0) links))
-      (setq links (reverse links))
-      (unless links (error "No links"))
-      
-      (unless (and (integerp nth) (>= (length links) nth))
-	(save-excursion
-	  (save-window-excursion
-	    (delete-other-windows)
-	    (with-output-to-temp-buffer "*Select Link*"
-	      (princ "Select link\n\n")
-	      (mapc (lambda (l) (princ (format "[%d] %s\n" (incf cnt) l)))
-		    links))
-	    (org-fit-window-to-buffer (get-buffer-window "*Select Link*"))
-	    (message "Select link to open:")
-	    (setq c (read-char-exclusive))
-	      (and (get-buffer "*Select Link*") (kill-buffer "*Select Link*"))))
-	(setq nth (- c ?0)))
-      
+      (setq links (reverse links)))
+
+    (cond
+     ((null links) (error "No links"))
+     ((equal (length links) 1)
+      (setq link (car links)))
+     ((and (integerp nth) (>= (length links) nth))
+      (setq link (nth (1- nth) links)))
+     (t ; we have to select a link
+      (save-excursion
+	(save-window-excursion
+	  (delete-other-windows)
+	  (with-output-to-temp-buffer "*Select Link*"
+	    (princ "Select link\n\n")
+	    (mapc (lambda (l) (princ (format "[%d] %s\n" (incf cnt) l)))
+		  links))
+	  (org-fit-window-to-buffer (get-buffer-window "*Select Link*"))
+	  (message "Select link to open:")
+	  (setq c (read-char-exclusive))
+	  (and (get-buffer "*Select Link*") (kill-buffer "*Select Link*"))))
+      (setq nth (- c ?0))
       (unless (and (integerp nth) (>= (length links) nth))
 	(error "Invalid link selection"))
-      (setq link (nth (1- nth) links)
-	    nth nil))
-    (org-open-link-from-string link nil reference-buffer)))
+      (setq link (nth (1- nth) links))))
+    (org-open-link-from-string link in-emacs (current-buffer))))
 
 ;;;; Time estimates
 
