@@ -1328,6 +1328,9 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
     (let* ((beg (org-table-begin))
 	   (end (org-table-end))
 	   (raw-table (buffer-substring beg end))
+	   (org-table-last-alignment (copy-sequence org-table-last-alignment))
+	   (org-table-last-column-widths (copy-sequence
+					  org-table-last-column-widths))
 	   fnum fields line lines olines gr colgropen line-fmt align
 	   caption label attr floatp longtblp)
       (if org-export-latex-tables-verbatim
@@ -1352,6 +1355,9 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 	  (apply 'delete-region (list beg end))
 	  (when org-export-table-remove-special-lines
 	    (setq lines (org-table-clean-before-export lines 'maybe-quoted)))
+	  (when org-table-clean-did-remove-column
+	      (pop org-table-last-alignment)
+	      (pop org-table-last-column-widths))
 	  ;; make a formatting string to reflect aligment
 	  (setq olines lines)
 	  (while (and (not line-fmt) (setq line (pop olines)))
