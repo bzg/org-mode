@@ -1,5 +1,8 @@
 2009-08-29  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-agenda.el (org-agenda): Keep window setup when calling
+	agenda from within agenda window.
+
 	* org-latex.el (org-export-latex-tables): Fix
 	`org-table-last-alignment' and `org-table-last-column-widths' if
 	the first column has been removed.
