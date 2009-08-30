@@ -1,3 +1,7 @@
+2009-08-30  Bastien Guerry  <bzg@altern.org>
+
+	* org-latex.el (org-export-latex-first-lines): Bugfix.
+
 2009-08-29  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-clock.el (org-clock-modify-effort-estimate): Emit message
