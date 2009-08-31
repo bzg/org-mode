@@ -1,5 +1,8 @@
 2009-08-31  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-latex.el (org-export-latex-protect-amp): New function.
+	(org-export-latex-links): Protect link ampersands in tables.
+
 	* org-exp.el (org-export-select-backend-specific-text): Match in 2
 	steps, to avoid regexp problems.
 

@@ -1571,9 +1571,24 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 	     ((not type)
 	      (insert (format "\\hyperref[%s]{%s}"
 			      (org-remove-initial-hash
-			       (org-solidify-link-text raw-path)) desc)))
-	     (path (insert (format "\\href{%s}{%s}" path desc)))
+			       (org-solidify-link-text raw-path))
+			      (org-export-latex-protect-special desc))))
+	     (path 
+	      (when (org-at-table-p)
+		;; There is a strange problem when we have a link in a table,
+		;; ampersands then cause a problem.  I think this must be
+		;; a LaTeX issue, but we here implement a work-around anyway.
+		(setq path (org-export-latex-protect-amp path)
+		      desc (org-export-latex-protect-amp desc)))
+	      (insert (format "\\href{%s}{%s}" path
+			      (org-export-latex-protect-special desc))))
 	     (t (insert "\\texttt{" desc "}")))))))
+
+(defun org-export-latex-protect-amp (s)
+  (while (string-match "\\([^\\\\]\\)\\(&\\)" s)
+    (setq s (replace-match (concat (match-string 1 s) "\\" (match-string 2 s))
+			   t t s)))
+  s)
 
 (defun org-remove-initial-hash (s)
   (if (string-match "\\`#" s)
