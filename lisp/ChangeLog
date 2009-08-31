@@ -1,5 +1,8 @@
 2009-08-31  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-src.el (org-edit-fixed-width-region): Set org-src-mode only
+	after the local variables are set.
+
 	* org-latex.el (org-export-latex-protect-amp): New function.
 	(org-export-latex-links): Protect link ampersands in tables.
 
