@@ -1,5 +1,9 @@
 2009-08-31  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-agenda.el (org-agenda-show-1): Make more consistent with
+	normal cycling.
+	(org-agenda-cycle-show): Make more consistent with normal cycling.
+
 	* org-gnus.el (org-gnus-store-link): Restore the linking to a
 	website.
 

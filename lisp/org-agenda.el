@@ -5653,8 +5653,8 @@ The prefix arg causes further revieling:
 
 0   hide the subtree
 1   just show the entry according to defaults.
-2   show the text below the heading
-3   show the entire subtree
+2   show the children view
+3   show the subtree view
 4   show the entire subtree and any LOGBOOK drawers
 5   show the entire subtree and any drawers
 With prefix argument FULL-ENTRY, make the entire entry visible
@@ -5666,21 +5666,25 @@ if it was hidden in the outline."
     (cond
      ((= more 0)
       (hide-subtree)
-      (message "Remote: hide subtree"))
+      (save-excursion
+	(org-back-to-heading)
+	(run-hook-with-args 'org-cycle-hook 'folded))
+      (message "Remote: FOLDED"))
      ((and (interactive-p) (= more 1))
       (message "Remote: show with default settings"))
      ((= more 2)
       (show-entry)
+      (show-children)
       (save-excursion
 	(org-back-to-heading)
-	(org-cycle-hide-drawers 'children))
-      (message "Remote: show entry"))
+	(run-hook-with-args 'org-cycle-hook 'children))
+      (message "Remote: CHILDREN"))
      ((= more 3)
       (show-subtree)
       (save-excursion
 	(org-back-to-heading)
-	(org-cycle-hide-drawers 'subtree))
-      (message "Remote: show subtree"))
+	(run-hook-with-args 'org-cycle-hook 'subtree))
+      (message "Remote: SUBTREE"))
      ((= more 4)
       (let* ((org-drawers (delete "LOGBOOK" (copy-sequence org-drawers)))
 	     (org-drawer-regexp
@@ -5691,10 +5695,10 @@ if it was hidden in the outline."
 	(save-excursion
 	  (org-back-to-heading)
 	  (org-cycle-hide-drawers 'subtree)))
-      (message "Remote: show subtree and LOGBOOK"))
+      (message "Remote: SUBTREE AND LOGBOOK"))
      ((> more 4)
       (show-subtree)
-      (message "Remote: show subtree and LOGBOOK")))
+      (message "Remote: SUBTREE AND ALL DRAWERS")))
     (select-window win)))
 
 (defun org-recenter-heading (n)
@@ -5703,20 +5707,27 @@ if it was hidden in the outline."
     (recenter n)))
 
 (defvar org-agenda-cycle-counter nil)
-(defun org-agenda-cycle-show (n)
+(defun org-agenda-cycle-show (&optional n)
   "Show the current entry in another window, with default settings.
 Default settings are taken from `org-show-hierarchy-above' and siblings.
-When use repeadedly in immediate succession, the remote entry will cycle
+When use repeatedly in immediate succession, the remote entry will cycle
 through visibility
 
-entry -> subtree -> subtree with logbook"
-  (interactive "p")
-  (when (and (= n 1)
-	     (not (eq last-command this-command)))
-    (setq org-agenda-cycle-counter 0))
-  (setq org-agenda-cycle-counter (1+ org-agenda-cycle-counter))
-  (if (> org-agenda-cycle-counter 4)
-      (setq org-agenda-cycle-counter 0))
+children -> subtree -> folded
+
+When called with a numeric prefix arg, that arg will be passed through to
+`org-agenda-show-1'.  For the interpretation of that argument, see the
+docstring of `org-agenda-show-1'."
+  (interactive "P")
+  (if (integerp n)
+      (setq org-agenda-cycle-counter n)
+    (if (not (eq last-command this-command))
+	(setq org-agenda-cycle-counter 1)
+      (if (equal org-agenda-cycle-counter 0)
+	  (setq org-agenda-cycle-counter 2)
+	(setq org-agenda-cycle-counter (1+ org-agenda-cycle-counter))
+	(if (> org-agenda-cycle-counter 3)
+	    (setq org-agenda-cycle-counter 0)))))
   (org-agenda-show-1 org-agenda-cycle-counter))
 
 (defun org-agenda-recenter (arg)
