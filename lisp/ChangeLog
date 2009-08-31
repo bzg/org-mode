@@ -1,5 +1,8 @@
 2009-08-31  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp.el (org-export-select-backend-specific-text): Match in 2
+	steps, to avoid regexp problems.
+
 	* org.el (org-offer-links-in-entry): Improve working with many and
 	duplicate links.
 
