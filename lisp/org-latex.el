@@ -1572,7 +1572,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 	      (insert (format "\\hyperref[%s]{%s}"
 			      (org-remove-initial-hash
 			       (org-solidify-link-text raw-path))
-			      (org-export-latex-protect-special desc))))
+			      desc)))
 	     (path 
 	      (when (org-at-table-p)
 		;; There is a strange problem when we have a link in a table,
@@ -1580,8 +1580,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 		;; a LaTeX issue, but we here implement a work-around anyway.
 		(setq path (org-export-latex-protect-amp path)
 		      desc (org-export-latex-protect-amp desc)))
-	      (insert (format "\\href{%s}{%s}" path
-			      (org-export-latex-protect-special desc))))
+	      (insert (format "\\href{%s}{%s}" path desc)))
 	     (t (insert "\\texttt{" desc "}")))))))
 
 (defun org-export-latex-protect-amp (s)
