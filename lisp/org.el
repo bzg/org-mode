@@ -7891,7 +7891,8 @@ application the system uses for this file type."
 	 (not (org-in-regexp
 	       (concat org-plain-link-re "\\|" 
 		       org-bracket-link-regexp "\\|"
-		       org-angle-link-re))))
+		       org-angle-link-re "\\|"
+		       "[ \t]:[^ \t\n]+:[ \t]*$"))))
     (org-offer-links-in-entry in-emacs))
    ((org-at-timestamp-p t) (org-follow-timestamp-link))
    ((or (org-footnote-at-reference-p) (org-footnote-at-definition-p))
@@ -8059,7 +8060,7 @@ If NTH is an integer immediately pick the NTH link found."
   (let ((re (concat "\\(" org-bracket-link-regexp "\\)\\|"
 		    "\\(" org-angle-link-re "\\)\\|"
 		    "\\(" org-plain-link-re "\\)"))
-	(cnt 0)
+	(cnt ?0)
 	(in-emacs (if (integerp nth) nil nth))
 	end
 	links link c)
@@ -8068,7 +8069,7 @@ If NTH is an integer immediately pick the NTH link found."
       (setq end (save-excursion (outline-next-heading) (point)))
       (while (re-search-forward re end t)
 	(push (match-string 0) links))
-      (setq links (reverse links)))
+      (setq links (org-uniquify (reverse links))))
 
     (cond
      ((null links) (error "No links"))
@@ -8082,12 +8083,21 @@ If NTH is an integer immediately pick the NTH link found."
 	  (delete-other-windows)
 	  (with-output-to-temp-buffer "*Select Link*"
 	    (princ "Select link\n\n")
-	    (mapc (lambda (l) (princ (format "[%d] %s\n" (incf cnt) l)))
+	    (mapc (lambda (l)
+		    (if (not (string-match org-bracket-link-regexp l))
+			(princ (format "[%c]  %s\n" (incf cnt)
+				       (org-remove-angle-brackets l)))
+		      (if (match-end 3)
+			  (princ (format "[%c]  %s (%s)\n" (incf cnt)
+					 (match-string 3 l) (match-string 1 l)))
+			(princ (format "[%c]  %s\n" (incf cnt)
+				       (match-string 1 l))))))
 		  links))
 	  (org-fit-window-to-buffer (get-buffer-window "*Select Link*"))
 	  (message "Select link to open:")
 	  (setq c (read-char-exclusive))
 	  (and (get-buffer "*Select Link*") (kill-buffer "*Select Link*"))))
+      (when (equal c ?q) (error "Abort"))
       (setq nth (- c ?0))
       (unless (and (integerp nth) (>= (length links) nth))
 	(error "Invalid link selection"))

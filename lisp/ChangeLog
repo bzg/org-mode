@@ -1,5 +1,8 @@
 2009-08-31  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-offer-links-in-entry): Improve working with many and
+	duplicate links.
+
 	* org-agenda.el (org-agenda-show-1): Make more consistent with
 	normal cycling.
 	(org-agenda-cycle-show): Make more consistent with normal cycling.
