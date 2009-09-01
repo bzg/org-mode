@@ -70,7 +70,8 @@ then run `org-babel-pop-to-session'."
 
 (add-hook 'org-metadown-hook 'org-babel-pop-to-session-maybe)
 
-(defvar org-babel-default-header-args '((:session . "none") (:results . "replace"))
+(defvar org-babel-default-header-args
+  '((:session . "none") (:results . "replace") (:exports . "code"))
   "Default arguments to use when evaluating a source block.")
 
 (defvar org-babel-default-inline-header-args '((:results . "silent") (:exports . "code"))
@@ -115,7 +116,6 @@ then run `org-babel-pop-to-session'."
 `org-babel-src-block-regexp' appropriately."
   (unless (member interpreter org-babel-interpreters)
     (setq org-babel-interpreters (cons interpreter org-babel-interpreters))
-    ;; (add-to-list 'org-babel-session-defaults (cons interpreter (format "org-babel-%s" interpreter)))
     (org-babel-set-interpreters 'org-babel-interpreters org-babel-interpreters)))
 
 (defcustom org-babel-interpreters '()
@@ -343,7 +343,8 @@ may be specified in the properties of the current outline entry."
          (lang-headers (intern (concat "org-babel-default-header-args:" lang)))
          (body (org-babel-clean-text-properties (match-string 4))))
     (list lang
-          (with-temp-buffer ;; get src block body removing properties, protective commas, and indentation
+          ;; get src block body removing properties, protective commas, and indentation
+          (with-temp-buffer
             (save-match-data
               (insert (org-babel-strip-protective-commas body))
               (org-do-remove-indentation)
@@ -662,7 +663,7 @@ parameters when merging lists."
                                           ("output" "value"))
                                         results (split-string (cdr pair)))))
                         (:exports
-                         (setq exports (e-merge '(("code" "results" "both"))
+                         (setq exports (e-merge '(("code" "results" "both" "none"))
                                                 exports (split-string (cdr pair)))))
                         (:tangle
                          (setq tangle (e-merge '(("yes" "no"))

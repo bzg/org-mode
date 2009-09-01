@@ -50,8 +50,15 @@ none ----- do not display either code or results upon export"
   (interactive)
   (unless headers (error "org-babel can't process a source block without knowing the source code"))
   (message "org-babel-exp processing...")
-  (let ((lang (car headers))
-        (params (org-babel-parse-header-arguments (mapconcat #'identity (cdr headers) " "))))
+  (let* ((lang (car headers))
+         (lang-headers (intern (concat "org-babel-default-header-args:" lang)))
+         (params (org-babel-merge-params
+                  org-babel-default-header-args
+                  (org-babel-params-from-properties)
+                  (if (boundp lang-headers) (eval lang-headers) nil)
+                  (org-babel-parse-header-arguments
+                   (mapconcat #'identity (cdr headers) " ")))))
+    (message "exporting params are %S" params)
     (org-babel-exp-do-export lang body params)))
 
 (defun org-babel-exp-inline-src-blocks (start end)
