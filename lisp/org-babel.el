@@ -601,8 +601,7 @@ relies on `org-babel-insert-result'."
   "Return an `org-mode' link with the path being the value or
 RESULT, and the display being the `file-name-nondirectory' if
 non-nil."
-  (let ((name (file-name-nondirectory result)))
-    (concat "[[file:" result (if name (concat "][" name "]]") "]]"))))
+  (concat "[[file:" result "]]"))
 
 (defun org-babel-examplize-region (beg end)
   "Comment out region using the ': ' org example quote."
