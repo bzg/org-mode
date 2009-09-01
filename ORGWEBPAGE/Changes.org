@@ -6,9 +6,202 @@
 
 #+STARTUP: indent hidestars
 
-* Version 6.29
+* Version 6.30
  :PROPERTIES:
  :VISIBILITY: content
+ :CUSTOM_ID: v6.30
+ :END:
+
+** Inconsistent changes
+
+*** Agenda now uses =f= and =b= to move through time
+
+Up to now, the Org-mode agenda used the cursor keys =left= and
+=right= to switch the agenda view forward an backward through
+time.  However, many people found this confusing, and others
+wanted to be able to do cursor motion in the agenda, for example
+to select text.  Therefore, after an extensive discussion on
+=emacs-orgmode@gnu.org=, it was decided to use the =b= and 
+=f= keys instead, and to let the cursor keys do cursor motion
+again.
+
+*** Agenda follow mode is now on the =F= key
+
+This was necessary to free up the =f= key, see above.
+
+** Details
+
+*** Maintenance
+
+**** New command to submit a bug report
+
+There is now a special command =M-x org-submit-bug-report=.  This
+command will create a mail buffer with lots of useful details.
+In particular, it contains complete version information for Emacs
+and Org-mode.  It will also (if you agree to it) contain all
+non-standard settings of org-mode and outline-mode related
+variables.  Even if you do not sent your emails from within
+Emacs, please still use this command to generate the information
+and then copy it into your mail program.
+
+The command will not generate and include a =*Backtrace*= buffer,
+please do this yourself if you have hit an error.  For more
+information, see the [[http://orgmode.org/manual/Feedback.html#Feedback][feedback section]] of the manual.
+
+**** New contributed package org-track.el
+
+This package allows to keep up-to-date with current Org
+development, using only Emacs on-board means.  So if you don't
+want or cannot use =git=, but still want to run the latest and
+hottest Org-mode, this is for you.
+
+Thanks to Sebastian Rose for this contribution.
+
+*** Agenda
+
+**** Agenda now uses =f= and =b= to move through time
+
+Up to now, the Org-mode agenda used the cursor keys =left= and
+=right= to switch the agenda view forward an backward through
+time.  However, many people found this confusing, and others
+wanted to be able to do cursor motion in the agenda, for example
+to select text.  Therefore, after an extensive discussion on
+=emacs-orgmode@gnu.org=, it was decided to use the =b= and 
+=f= keys instead, and to let the cursor keys do cursor motion
+again.
+
+**** Agenda follow mode is now on the =F= key
+
+This was necessary to free up the =f= key, see above.
+
+**** The agenda can be put into a dedicated frame
+
+When the variable =org-agenda-window-setup= has the value
+=separate-frame=, then the new frame created to show the agenda
+will now have the window marked as /dedicated/.  As a
+consequence, exiting the agenda while the agenda is the only
+window on the frame will kill that frame.
+
+This was a request by Henry Atting.
+
+**** New mode to show some entry body text in the agenda
+
+There is now a new agenda sub-mode called
+=org-agenda-entry-text-mode=.  It is toggled with the =E= key.
+When active, all entries in the agenda will be accompanied by a
+few lines from the outline entry.  The amount of text can be
+customized with the variable =org-agenda-entry-text-maxlines=.
+
+This was a request by Anthony Fairchild, Manish, and others.
+
+**** Improve following links from the agenda
+    
+=C-c C-o= in the agenda will now offer all links in the headline
+and text of an entry.  If there is only a single link, it will be
+followed immediately.
+
+**** Avoid some duplicate entries
+
+There is a new variable that can be used to avoid some duplicate
+agenda entries: =org-agenda-skip-scheduled-if-deadline-is-shown=
+If that is set, it avoids that an entry shows up in the agenda for
+today for both a scheduling and a deadline entry.  See the
+docstring of the variables for more details.
+
+This partially addresses a request by Samuel Wales. 
+
+**** Mark the running clock in the agenda.
+
+If the entry currently being clocked is present in the agenda, it
+will be highlighted with the face =org-agenda-clocking=.
+
+This was a request by Rainer Stengele.
+
+
+*** Export
+
+**** Allow LaTeX export to use the listings package
+
+The LaTeX =listings= package can now be used for formatting
+fontified source code in many programming languages.  For more
+information, see
+http://thread.gmane.org/gmane.emacs.orgmode/16269 and
+http://orgmode.org/worg/org-faq.php#fontified_source_code_w_latex
+
+Thanks to Eric Schulte for this patch.
+
+**** Remove table rows that only contain width and alignment markers
+    
+The width and alignment in table columns can be set with a cookie
+like "<10>" or "<r>" or "<r10>".  In order to keep Org from
+exporting such lines, the first column of a line should contain
+only "/".  However, for convenience, there is now a special case:
+If the entire row contains only such markers, the line will
+automatically be discarded during export, even is the first
+column is not "/".
+
+**** Allow Macro calls to span several lines.
+
+Macro calls may now span several lines, to write several
+arguments in a cleaner way.  The result of a macro call can also
+span several lines, by inserting the string "\n" (backslash
+followed by n) into the value in the macro definition.
+
+These were requests by Stefan Vollmar.
+
+*** Misc
+
+**** Quick access to all links in an entry
+
+If =C-c C-o= is called while the cursor is in a headline, but not
+directly on a link, then all links in the entry will be offered
+in a small menu.  If there is only a single link, it will be
+followed without a prompt.
+
+**** Visibility Cycling: Allow to show all empty lines after a headline
+    
+=org-cycle-separator-lines= can now be set to a negative value,
+to indicate that, if the number of empty lines before a visible
+entry is greater than the specified number, then *all* empty
+lines should be shown.
+
+This was a request by "PT" whatever this means.
+
+**** Allow language names to replace some strange major mode names
+
+Sometimes a language uses a major mode which can't be guessed
+from it's name.  There is now a new variable =org-src-lang-modes=
+which can be used to map language names to major modes when this
+is the case.  This is used when editing a source-code 
+block, or when exporting fontified source-code with htmlize.
+
+Thanks to Eric Schulte for a patch to this effect.
+
+**** iswitchb support for many completion prompts
+    
+This is enabled using =org-completion-use-iswitchb=, and follows
+the same model of usage as for ido users.
+
+Thanks to John Wiegley for a patch to this effect.
+
+**** New commands to set the effort property of an entry
+
+There is now a special command, =C-c C-x e= to set the =Effort=
+property of an entry.  From the agenda you can even use =e=.
+If you have set up allowed values for the =Effort= property, then
+using a prefix argument will directly select the nth allowed
+value.  For example, in the agenda, =5 e= will select the 5th
+allowed value.
+
+This was a request by Michael Gilbert
+
+**** Edit src works now better with killing buffer
+
+Thanks to Dan Davison for a patch to this effect
+
+
+* Version 6.29
+ :PROPERTIES:
  :CUSTOM_ID: v6.29
  :END:
 
