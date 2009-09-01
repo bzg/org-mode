@@ -43,8 +43,8 @@ both ---- display the code and the results
 code ---- the default, display the code inside the block but do
           not process
 
-results - process the block and replace it with the results of
-          execution
+results - just like none only the block is run on export ensuring
+          that it's results are present in the org-mode buffer
 
 none ----- do not display either code or results upon export"
   (interactive)
@@ -80,7 +80,10 @@ options and are taken from `org-babel-defualt-inline-header-args'."
   (case (intern (or (cdr (assoc :exports params)) "code"))
     ('none "")
     ('code (org-babel-exp-code body lang params inline))
-    ('results (org-babel-exp-results body lang params inline))
+    ('results (save-excursion
+                ;; org-exp-blocks places us at the end of the block
+                (re-search-backward org-babel-src-block-regexp nil t)
+                (org-babel-execute-src-block) ""))
     ('both (concat (org-babel-exp-code body lang params inline)
                    "\n\n"
                    (org-babel-exp-results body lang params inline)))))
@@ -90,21 +93,6 @@ options and are taken from `org-babel-defualt-inline-header-args'."
       (format "=%s=" body)
     (format "#+BEGIN_SRC %s\n%s%s\n#+END_SRC" lang body
             (if (string-match "\n$" body) "" "\n"))))
-
-(defun org-babel-exp-results (body lang params &optional inline)
-  ;; I expect there's a good reason why not, but would it be possible
-  ;; to use org-babel-execute-src-block here? [ded]
-  (let* ((cmd (intern (concat "org-babel-execute:" lang)))
-         (result
-	  (multiple-value-bind (session vars result-params result-type)
-	      (org-babel-process-params params) (funcall cmd body params)))
-         (result-as-org (org-babel-result-to-org-string result)))
-    (if inline
-        (format "=%s=" result)
-      (if (stringp result)
-          (format "#+BEGIN_EXAMPLE\n%s%s\n#+END_EXAMPLE" result
-                  (if (string-match "\n$" body) "" "\n"))
-        result-as-org))))
 
 (provide 'org-babel-exp)
 ;;; org-babel-exp.el ends here
