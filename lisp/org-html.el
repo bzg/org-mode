@@ -1642,7 +1642,7 @@ lang=\"%s\" xml:lang=\"%s\">
       (push (mapconcat
 	     (lambda (x)
 	       (setq gr (pop org-table-colgroup-info))
-	       (format "%s<col align=\"%s\"></col>%s"
+	       (format "%s<col align=\"%s\" />%s"
 		       (if (memq gr '(:start :startend))
 			   (prog1
 			       (if colgropen "</colgroup>\n<colgroup>" "<colgroup>")

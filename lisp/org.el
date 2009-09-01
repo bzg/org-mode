@@ -9655,6 +9655,39 @@ changes because there are uncheckd boxes in this entry."
 	      (throw 'dont-block nil)))))
     t)) ; do not block
 
+(defun org-update-statistics-cookies (all)
+  "Update the statistics cookie, either from TODO or from checkboxes.
+This should be called with the cursor in a line with a statistics cookie."
+  (interactive "P")
+  (if all
+      (progn
+	(org-update-checkbox-count 'all)
+	(org-map-entries 'org-update-parent-todo-statistics))
+    (if (not (org-on-heading-p))
+	(org-update-checkbox-count)
+      (let ((pos (move-marker (make-marker) (point)))
+	    end l1 l2)
+	(ignore-errors (org-back-to-heading t))
+	(if (not (org-on-heading-p))
+	    (org-update-checkbox-count)
+	  (setq l1 (org-outline-level))
+	  (setq end (save-excursion
+		      (outline-next-heading)
+		      (if (org-on-heading-p) (setq l2 (org-outline-level)))
+		      (point)))
+	  (if (and (save-excursion (re-search-forward
+				    "^[ \t]*[-+*] \\[[- X]\\]" end t))
+		   (not (save-excursion (re-search-forward
+					 ":COOKIE_DATA:.*\\<todo\\>" end t))))
+	      (org-update-checkbox-count)
+	    (if (and l2 (> l2 l1))
+		(progn
+		  (goto-char end)
+		  (org-update-parent-todo-statistics))
+	      (error "No data for statistics cookie"))))
+	(goto-char pos)
+	(move-marker pos nil)))))
+  
 (defvar org-entry-property-inherited-from) ;; defined below
 (defun org-update-parent-todo-statistics ()
   "Update any statistics cookie in the parent of the current headline.
@@ -12766,7 +12799,7 @@ Also, store the cursor date in variable org-ans2."
 	(setq org-ans2 (format-time-string "%Y-%m-%d" time))))
     (org-move-overlay org-date-ovl (1- (point)) (1+ (point)) (current-buffer))
     (select-window sw)
-    (select-frame-set-input-focus sf)))
+    (org-select-frame-set-input-focus sf)))
 
 (defun org-calendar-select ()
   "Return to `org-read-date' with the date currently selected.
@@ -14287,7 +14320,7 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
 (org-defkey org-mode-map "\C-c^"    'org-sort)
 (org-defkey org-mode-map "\C-c\C-c" 'org-ctrl-c-ctrl-c)
 (org-defkey org-mode-map "\C-c\C-k" 'org-kill-note-or-show-branches)
-(org-defkey org-mode-map "\C-c#"    'org-update-checkbox-count)
+(org-defkey org-mode-map "\C-c#"    'org-update-statistics-cookies)
 (org-defkey org-mode-map "\C-m"     'org-return)
 (org-defkey org-mode-map "\C-j"     'org-return-indent)
 (org-defkey org-mode-map "\C-c?"    'org-table-field-info)
@@ -14897,6 +14930,8 @@ This command does many different things, depending on context:
 - If a function in `org-ctrl-c-ctrl-c-hook' recognizes this location,
   this is what we do.
 
+- If the cursor is on a statistics cookie, update it.
+
 - If the cursor is in a headline, prompt for tags and insert them
   into the current line, aligned to `org-tags-column'.  When called
   with prefix arg, realign all tags in the current buffer.
@@ -14948,6 +14983,9 @@ This command does many different things, depending on context:
      ((org-at-property-p)
       (call-interactively 'org-property-action))
      ((org-on-target-p) (call-interactively 'org-update-radio-target-regexp))
+     ((and (org-in-regexp "\\[\\([0-9]*%\\|[0-9]*/[0-9]*\\)\\]")
+	   (or (org-on-heading-p) (org-at-item-p)))
+      (call-interactively 'org-update-statistics-cookies))
      ((org-on-heading-p) (call-interactively 'org-set-tags))
      ((org-at-table.el-p)
       (require 'table)
@@ -15493,7 +15531,7 @@ such private information before sending the email.")
 	 list))
      nil nil
      "Remember to cover the basics, that is, what you expected to happen and
-what in fact did happen.  You don't know hoe to make a good report?  See
+what in fact did happen.  You don't know how to make a good report?  See
 
      http://orgmode.org/manual/Feedback.html#Feedback
 

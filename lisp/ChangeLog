@@ -1,3 +1,22 @@
+2009-09-02  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-agenda.el (org-agenda-quit): When the agenda window is
+	dedicated, remove other windows before exiting, so that the frame
+	really will be killed.
+
+	* org-exp.el (org-export-handle-include-files): Reset START and
+	END for each loop cycle.
+
+2009-09-01  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-eval-in-calendar): Use
+	`org-select-frame-set-input-focus'.
+
+	* org-compat.el (org-select-frame-set-input-focus): New function.
+
+	* org.el (org-update-statistics-cookies): New function.
+	(org-mode-map): Bind `C-c #' to `org-update-statistics-cookies'.
+
 2009-08-31  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-src.el (org-edit-fixed-width-region): Set org-src-mode only

@@ -3822,7 +3822,8 @@ with detailed subtasks on the tree@footnote{To keep subtasks out of the
 global TODO list, see the @code{org-agenda-todo-list-sublevels}.}.  To keep
 the overview over the fraction of subtasks that are already completed, insert
 either @samp{[/]} or @samp{[%]} anywhere in the headline.  These cookies will
-be updates each time the todo status of a child changes.  For example:
+be updates each time the todo status of a child changes, or when pressing
+@kbd{C-c C-c} on the cookie.  For example:
 
 @example
 * Organize Party [33%]
@@ -3970,12 +3971,13 @@ for better visibility, customize the variable
 @code{org-track-ordered-property-with-tag}.
 @kindex C-c #
 @item C-c #
-Update the checkbox statistics in the current outline entry.  When
-called with a @kbd{C-u} prefix, update the entire file.  Checkbox
-statistic cookies are updated automatically if you toggle checkboxes
-with @kbd{C-c C-c} and make new ones with @kbd{M-S-@key{RET}}.  If you
-delete boxes or add/change them by hand, use this command to get things
-back into sync.  Or simply toggle any checkbox twice with @kbd{C-c C-c}.
+Update the statistics cookie in the current outline entry.  When called with
+a @kbd{C-u} prefix, update the entire file.  Checkbox statistic cookies are
+updated automatically if you toggle checkboxes with @kbd{C-c C-c} and make
+new ones with @kbd{M-S-@key{RET}}.  TODO statistics cookies update when
+changing TODO states.  If you delete boxes/entries or add/change them by
+hand, use this command to get things back into sync.  Or simply toggle any
+entry twice (checkboxes with @kbd{C-c C-c}).
 @end table
 
 @node Tags, Properties and Columns, TODO Items, Top
@@ -10334,6 +10336,8 @@ drawer, offer property commands.
 @item
 If the cursor is at a footnote reference, go to the corresponding
 definition, and vice versa.
+@item
+If the cursor is on a statistics cookie, update it.
 @item
 If the cursor is in a plain list item with a checkbox, toggle the status
 of the checkbox.
