@@ -1,5 +1,9 @@
 2009-09-02  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-plot.el (require): Require CL only at compile time.
+
+	* org-exp.el (require): Require CL only at compile time.
+
 	* org-agenda.el (org-agenda-quit): When the agenda window is
 	dedicated, remove other windows before exiting, so that the frame
 	really will be killed.

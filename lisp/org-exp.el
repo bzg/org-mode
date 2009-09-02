@@ -6,7 +6,7 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 6.30
+;; Version: 6.30a
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -29,7 +29,7 @@
 (require 'org)
 (require 'org-agenda)
 (require 'org-exp-blocks)
-(eval-and-compile
+(eval-when-compile
   (require 'cl))
 
 (declare-function org-export-latex-preprocess "org-latex" (parameters))
