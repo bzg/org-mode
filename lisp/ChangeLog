@@ -1,5 +1,8 @@
 2009-09-02  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-protocol.el (org-protocol-store-link)
+	(org-protocol-remember, org-protocol-open-source): Add autoloads.
+
 	* org-compat.el (org-float-time): New function.
 
 	* org.el (org-clock-update-time-maybe)
