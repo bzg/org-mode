@@ -27,6 +27,7 @@
 ;;; Commentary:
 
 (require 'org-exp)
+(eval-when-compile (require 'cl))
 
 (declare-function org-id-find-id-file "org-id" (id))
 (declare-function htmlize-region "ext:htmlize" (beg end))

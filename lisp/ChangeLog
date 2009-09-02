@@ -1,5 +1,7 @@
 2009-09-02  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-html.el (require): require cl for compilation.
+
 	* org.el:  Avoid using `default-major-mode'.
 
 	* org-html.el (org-export-as-html):  Avoid using
