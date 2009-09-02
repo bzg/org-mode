@@ -1420,7 +1420,8 @@ lang=\"%s\" xml:lang=\"%s\">
 
       (unless (plist-get opt-plist :buffer-will-be-killed)
 	(normal-mode)
-	(if (eq major-mode default-major-mode) (html-mode)))
+	(if (eq major-mode (default-value 'major-mode))
+	    (html-mode)))
 
       ;; insert the table of contents
       (goto-char (point-min))

@@ -1,5 +1,13 @@
 2009-09-02  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el:  Avoid using `default-major-mode'.
+
+	* org-html.el (org-export-as-html):  Avoid using
+	`default-major-mode'.
+
+	* org-docbook.el (org-export-as-docbook): Avoid using
+	`default-major-mode'.
+
 	* org-plot.el (require): Require CL only at compile time.
 
 	* org-exp.el (require): Require CL only at compile time.
