@@ -405,85 +405,9 @@ org-feed.el has a (require 'sha1) and org-publish.el uses it too.
       source code block, and lang is the language major mode. The
       latter might be unnecessary?
 
-#+begin_example 
-diff --git a/lisp/org-src.el b/lisp/org-src.el
-index 2083c77..2be21e6 100644
---- a/lisp/org-src.el
-+++ b/lisp/org-src.el
-@@ -113,7 +113,7 @@ but which mess up the display of a snippet in Org exported files.")
- 
- (defvar org-src-mode-map (make-sparse-keymap))
- (define-key org-src-mode-map "\C-c'" 'org-edit-src-exit)
--(define-key org-src-mode-map "\C-x\C-s" 'org-edit-src-save)
-+;; (define-key org-src-mode-map "\C-x\C-s" 'org-edit-src-save)
- (defvar org-edit-src-force-single-line nil)
- (defvar org-edit-src-from-org-mode nil)
- (defvar org-edit-src-picture nil)
-@@ -168,7 +168,8 @@ the edited version."
- 	    (if (boundp 'org-edit-src-overlay)
- 		(org-delete-overlay org-edit-src-overlay)))
- 	  (kill-buffer buffer))
--	(setq buffer (generate-new-buffer "*Org Edit Src Example*"))
-+	(setq buffer (generate-new-buffer
-+		      (concat "*Org Src " (file-name-nondirectory buffer-file-name) "[" lang "]*")))
- 	(setq ovl (org-make-overlay beg end))
- 	(org-overlay-put ovl 'face 'secondary-selection)
- 	(org-overlay-put ovl 'edit-buffer buffer)
-@@ -186,8 +187,7 @@ the edited version."
- 				'(display nil invisible nil intangible nil))
- 	(org-do-remove-indentation)
- 	(let ((org-inhibit-startup t))
--	  (funcall lang-f)
--	  (org-src-mode))
-+	  (funcall lang-f))
- 	(set (make-local-variable 'org-edit-src-force-single-line) single)
- 	(set (make-local-variable 'org-edit-src-from-org-mode) org-mode-p)
- 	(when lfmt
-@@ -201,6 +201,7 @@ the edited version."
- 	(org-set-local 'org-edit-src-end-marker end)
- 	(org-set-local 'org-edit-src-overlay ovl)
- 	(org-set-local 'org-edit-src-nindent nindent)
-+	(org-src-mode)
- 	(and org-edit-src-persistent-message
- 	     (org-set-local 'header-line-format msg)))
-       (message "%s" msg)
-@@ -400,12 +401,13 @@ the language, a switch telling of the content should be in a single line."
- (defun org-edit-src-exit ()
-   "Exit special edit and protect problematic lines."
-   (interactive)
--  (unless (string-match "\\`*Org Edit " (buffer-name (current-buffer)))
--    (error "This is not an sub-editing buffer, something is wrong..."))
-+  (unless org-edit-src-from-org-mode
-+    (error "This is not a sub-editing buffer, something is wrong..."))
-   (let ((beg org-edit-src-beg-marker)
- 	(end org-edit-src-end-marker)
- 	(ovl org-edit-src-overlay)
- 	(buffer (current-buffer))
-+	(buffer-file-name nil)
- 	(nindent org-edit-src-nindent)
- 	code line)
-     (untabify (point-min) (point-max))
-@@ -464,6 +466,17 @@ the language, a switch telling of the content should be in a single line."
-     (goto-char (min p (point-max)))
-     (message (or msg ""))))
- 
-+(defun org-src-mode-configure-buffer ()
-+  (setq buffer-offer-save t)
-+  (setq buffer-file-name
-+	(concat (buffer-file-name (marker-buffer org-edit-src-beg-marker))
-+		"[" (buffer-name) "]"))
-+  (setq write-contents-functions '(org-edit-src-save))
-+  (org-add-hook 'kill-buffer-hook
-+		'(lambda () (org-delete-overlay org-edit-src-overlay)) nil 'local))
-+
-+(org-add-hook 'org-src-mode-hook 'org-src-mode-configure-buffer)
-+
- (provide 'org-src)
- 
- ;; arch-tag: 6a1fc84f-dec7-47be-a416-64be56bea5d8
-      
-#+end_example
-
+    These changes were added to the main org repository in commit
+    4b6988bf36cb458c9d113ee4332e016990c1eb04
+    
 **** Detailed working notes to go with that patch
 ***** Recap of current org-src-mode
       
