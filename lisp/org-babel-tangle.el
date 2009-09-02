@@ -124,8 +124,8 @@ exported source code blocks by language."
                   (add-to-list 'path-collector file-name))))
             specs)))
        (org-babel-tangle-collect-blocks lang))
-      (message "tangled %d source-code block%s" block-counter
-               (if (> block-counter 1) "s" ""))
+      (message "tangled %d code block%s" block-counter
+               (if (= block-counter 1) "" "s"))
       path-collector)))
 
 (defun org-babel-tangle-clean ()
