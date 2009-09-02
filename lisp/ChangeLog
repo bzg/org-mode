@@ -1,5 +1,8 @@
 2009-09-02  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp.el (org-get-file-contents): Only protect lines that
+	really need it.
+
 	* org-html.el (require): require cl for compilation.
 
 	* org.el:  Avoid using `default-major-mode'.

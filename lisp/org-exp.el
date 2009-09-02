@@ -2170,7 +2170,7 @@ take care of the block they are in."
     (buffer-string)
     (when (member markup '("src" "example"))
       (goto-char (point-min))
-      (while (re-search-forward "^\\(\\*\\|[ \t]*#\\)" nil t)
+      (while (re-search-forward "^\\([*#]\\|[ \t]*#\\+\\)" nil t)
 	(goto-char (match-beginning 0))
 	(insert ",")
 	(end-of-line 1)))
