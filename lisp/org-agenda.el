@@ -2618,7 +2618,7 @@ continue from there."
 
 (defvar org-agenda-markers nil
   "List of all currently active markers created by `org-agenda'.")
-(defvar org-agenda-last-marker-time (time-to-seconds (current-time))
+(defvar org-agenda-last-marker-time (org-float-time)
   "Creation time of the last agenda marker.")
 
 (defun org-agenda-new-marker (&optional pos)
@@ -2626,7 +2626,7 @@ continue from there."
 Org-mode keeps a list of these markers and resets them when they are
 no longer in use."
   (let ((m (copy-marker (or pos (point)))))
-    (setq org-agenda-last-marker-time (time-to-seconds (current-time)))
+    (setq org-agenda-last-marker-time (org-float-time))
     (push m org-agenda-markers)
     m))
 
@@ -3672,7 +3672,7 @@ So the example above may also be written as
 The function expects the lisp variables `entry' and `date' to be provided
 by the caller, because this is how the calendar works.  Don't use this
 function from a program - use `org-agenda-get-day-entries' instead."
-  (when (> (- (time-to-seconds (current-time))
+  (when (> (- (org-float-time)
 	      org-agenda-last-marker-time)
 	   5)
     (org-agenda-reset-markers))

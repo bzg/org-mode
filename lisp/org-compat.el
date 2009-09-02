@@ -355,6 +355,13 @@ that can be added."
 	 (when focus-follows-mouse
 	   (set-mouse-position frame (1- (frame-width frame)) 0)))))
 
+(defun org-float-time (&optional time)
+  "Convert time value TIME to a floating point number.
+TIME defaults to the current time."
+  (if (featurep 'xemacs)
+      (time-to-seconds (or time (current-time)))
+    (float-time time)))
+
 (provide 'org-compat)
 
 ;; arch-tag: a0a0579f-e68c-4bdf-9e55-93768b846bbe

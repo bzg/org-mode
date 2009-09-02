@@ -1,5 +1,22 @@
 2009-09-02  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-compat.el (org-float-time): New function.
+
+	* org.el (org-clock-update-time-maybe)
+	(org-sort-entries-or-items, org-do-sort)
+	(org-evaluate-time-range, org-time-string-to-seconds)
+	(org-closed-in-range): Use `org-float-time'.
+
+	* org-timer.el (org-timer-start, org-timer-pause-or-continue)
+	(org-timer-seconds):  Use `org-float-time'.
+
+	* org-clock.el (org-clock-get-clocked-time, org-clock-out)
+	(org-clock-sum, org-dblock-write:clocktable)
+	(org-clocktable-steps):  Use `org-float-time'.
+
+	* org-agenda.el (org-agenda-last-marker-time)
+	(org-agenda-new-marker, org-diary):  Use `org-float-time'.
+
 	* org-compat.el (w32-focus-frame): Declare the w32-focus-frame
 	function.
 

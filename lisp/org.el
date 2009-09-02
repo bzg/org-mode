@@ -3165,9 +3165,9 @@ Otherwise, return nil."
 	  (end-of-line 1)
 	  (setq ts (match-string 1)
 		te (match-string 3))
-	  (setq s (- (time-to-seconds
+	  (setq s (- (org-float-time
 		      (apply 'encode-time (org-parse-time-string te)))
-		     (time-to-seconds
+		     (org-float-time
 		      (apply 'encode-time (org-parse-time-string ts))))
 		neg (< s 0)
 		s (abs s)
@@ -6657,7 +6657,7 @@ WITH-CASE, the sorting considers case as well."
 			   (re-search-forward org-ts-regexp-both
 					      (point-at-eol) t))
 		       (org-time-string-to-seconds (match-string 0))
-		     (time-to-seconds now)))
+		     (org-float-time now)))
 		  ((= dcst ?f)
 		   (if getkey-func
 		       (progn
@@ -6681,24 +6681,24 @@ WITH-CASE, the sorting considers case as well."
 		 (if (or (re-search-forward org-ts-regexp end t)
 			 (re-search-forward org-ts-regexp-both end t))
 		     (org-time-string-to-seconds (match-string 0))
-		   (time-to-seconds now))))
+		   (org-float-time now))))
 	      ((= dcst ?c)
 	       (let ((end (save-excursion (outline-next-heading) (point))))
 		 (if (re-search-forward
 		      (concat "^[ \t]*\\[" org-ts-regexp1 "\\]")
 		      end t)
 		     (org-time-string-to-seconds (match-string 0))
-		   (time-to-seconds now))))
+		   (org-float-time now))))
 	      ((= dcst ?s)
 	       (let ((end (save-excursion (outline-next-heading) (point))))
 		 (if (re-search-forward org-scheduled-time-regexp end t)
 		     (org-time-string-to-seconds (match-string 1))
-		   (time-to-seconds now))))
+		   (org-float-time now))))
 	      ((= dcst ?d)
 	       (let ((end (save-excursion (outline-next-heading) (point))))
 		 (if (re-search-forward org-deadline-time-regexp end t)
 		     (org-time-string-to-seconds (match-string 1))
-		   (time-to-seconds now))))
+		   (org-float-time now))))
 	      ((= dcst ?p)
 	       (if (re-search-forward org-priority-regexp (point-at-eol) t)
 		   (string-to-char (match-string 2))
@@ -6757,7 +6757,7 @@ If WITH-CASE is non-nil, the sorting will be case-sensitive."
 	    (lambda (x)
 	      (if (or (string-match org-ts-regexp x)
 		      (string-match org-ts-regexp-both x))
-		  (time-to-seconds
+		  (org-float-time
 		   (org-time-string-to-time (match-string 0 x)))
 		0))
 	    comparefun (if (= dcst sorting-type) '< '>)))
@@ -13030,8 +13030,8 @@ days in order to avoid rounding problems."
 	  (match-end (match-end 0))
 	  (time1 (org-time-string-to-time ts1))
 	  (time2 (org-time-string-to-time ts2))
-	  (t1 (time-to-seconds time1))
-	  (t2 (time-to-seconds time2))
+	  (t1 (org-float-time time1))
+	  (t2 (org-float-time time2))
 	  (diff (abs (- t2 t1)))
 	  (negative (< (- t2 t1) 0))
 	  ;; (ys (floor (* 365 24 60 60)))
@@ -13087,7 +13087,7 @@ days in order to avoid rounding problems."
 (defun org-time-string-to-time (s)
   (apply 'encode-time (org-parse-time-string s)))
 (defun org-time-string-to-seconds (s)
-  (time-to-seconds (org-time-string-to-time s)))
+  (org-float-time (org-time-string-to-time s)))
 
 (defun org-time-string-to-absolute (s &optional daynr prefer show-all)
   "Convert a time stamp to an absolute day number.
@@ -17137,14 +17137,14 @@ To get rid of the restriction, use \\[org-agenda-remove-restriction-lock]."
 Still experimental, may disappear in the future."
   (interactive)
   ;; Get the time interval from the user.
-  (let* ((time1 (time-to-seconds
+  (let* ((time1 (org-float-time
                  (org-read-date nil 'to-time nil "Starting date: ")))
-         (time2 (time-to-seconds
+         (time2 (org-float-time
                  (org-read-date nil 'to-time nil "End date:")))
          ;; callback function
          (callback (lambda ()
                      (let ((time
-                            (time-to-seconds
+                            (org-float-time
                              (apply 'encode-time
                                     (org-parse-time-string
                                      (match-string 1))))))
