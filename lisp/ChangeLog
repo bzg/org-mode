@@ -1,17 +1,14 @@
 2009-09-02  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-compat.el (w32-focus-frame): Declare the w32-focus-frame
+	function.
+
 	* org-exp.el (org-get-file-contents): Only protect lines that
 	really need it.
 
-	* org-html.el (require): require cl for compilation.
+	* org-html.el (require): Require cl for compilation.
 
 	* org.el:  Avoid using `default-major-mode'.
-
-	* org-html.el (org-export-as-html):  Avoid using
-	`default-major-mode'.
-
-	* org-docbook.el (org-export-as-docbook): Avoid using
-	`default-major-mode'.
 
 	* org-plot.el (require): Require CL only at compile time.
 
@@ -42,8 +39,8 @@
 	* org-latex.el (org-export-latex-protect-amp): New function.
 	(org-export-latex-links): Protect link ampersands in tables.
 
-	* org-exp.el (org-export-select-backend-specific-text): Match in 2
-	steps, to avoid regexp problems.
+	* org-exp.el (org-export-select-backend-specific-text): Match in
+	two steps, to avoid regexp problems.
 
 	* org.el (org-offer-links-in-entry): Improve working with many and
 	duplicate links.
@@ -167,7 +164,7 @@
 	(org-agenda-get-some-entry-text, org-agenda-redo): Don't use
 	`goto-line'.
 
-2009-08-26  Bernt Hansen  <bernt@norang.ca>  (tiny change)
+2009-08-26  Bernt Hansen  <bernt@norang.ca>
 
 	* org-clock.el (org-notify): Bugfix.
 
@@ -381,6 +378,22 @@
 
 	* org-remember.el (org-remember-finalize): Avoid buffer-modified
 	messages.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 2009-08-05  Carsten Dominik  <carsten.dominik@gmail.com>
 

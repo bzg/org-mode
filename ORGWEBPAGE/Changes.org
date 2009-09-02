@@ -77,7 +77,7 @@ This was necessary to free up the =f= key, see above.
 **** The agenda can be put into a dedicated frame
 
 When the variable =org-agenda-window-setup= has the value
-=separate-frame=, then the new frame created to show the agenda
+=other-frame=, then the new frame created to show the agenda
 will now have the window marked as /dedicated/.  As a
 consequence, exiting the agenda while the agenda is the only
 window on the frame will kill that frame.
