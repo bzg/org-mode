@@ -3880,6 +3880,8 @@ Respect keys that are already there."
 
 (defvar org-window-configuration nil
   "Used in various places to store a window configuration.")
+(defvar org-selected-window nil
+  "Used in various places to store a window configuration.")
 (defvar org-finish-function nil
   "Function to be called when `C-c C-c' is used.
 This is for getting out of special buffers like remember.")

@@ -1,5 +1,12 @@
 2009-09-03  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-selected-window): New variable.
+
+	* org-table.el (org-table-edit-formulas): Remember the selected
+	window.
+	(org-table-fedit-finish, org-table-fedit-abort): Select the window
+	that was originally selected.
+
 	* org-exp.el (org-export-preprocess-apply-macros): Scan the
 	expansion of a macro for more macro definitions.
 

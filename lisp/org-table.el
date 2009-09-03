@@ -2712,6 +2712,7 @@ Parameters get priority."
 	(pos (move-marker (make-marker) (point)))
 	(startline 1)
 	(wc (current-window-configuration))
+	(sel-win (selected-window))
 	(titles '((column . "# Column Formulas\n")
 		  (field . "# Field Formulas\n")
 		  (named . "# Named Field Formulas\n")))
@@ -2724,6 +2725,7 @@ Parameters get priority."
     (org-set-local 'font-lock-global-modes (list 'not major-mode))
     (org-set-local 'org-pos pos)
     (org-set-local 'org-window-configuration wc)
+    (org-set-local 'org-selected-window sel-win)
     (use-local-map org-table-fedit-map)
     (org-add-hook 'post-command-hook 'org-table-fedit-post-command t t)
     (easy-menu-add org-table-fedit-menu)
@@ -2944,7 +2946,7 @@ With prefix ARG, apply the new formulas to the table."
       (progn
 	(org-table-fedit-convert-buffer 'org-table-convert-refs-to-rc)
 	(setq org-table-buffer-is-an nil)))
-  (let ((pos org-pos) eql var form)
+  (let ((pos org-pos) (sel-win org-selected-window) eql var form)
     (goto-char (point-min))
     (while (re-search-forward
 	    "^\\(@[0-9]+\\$[0-9]+\\|\\$\\([a-zA-Z0-9]+\\)\\) *= *\\(.*\\(\n[ \t]+.*$\\)*\\)"
@@ -2960,7 +2962,7 @@ With prefix ARG, apply the new formulas to the table."
 	(push (cons var form) eql)))
     (setq org-pos nil)
     (set-window-configuration org-window-configuration)
-    (select-window (get-buffer-window (marker-buffer pos)))
+    (select-window sel-win)
     (goto-char pos)
     (unless (org-at-table-p)
       (error "Lost table position - cannot install formulae"))
@@ -2975,9 +2977,9 @@ With prefix ARG, apply the new formulas to the table."
   "Abort editing formulas, without installing the changes."
   (interactive)
   (org-table-remove-rectangle-highlight)
-  (let ((pos org-pos))
+  (let ((pos org-pos) (sel-win org-selected-window))
     (set-window-configuration org-window-configuration)
-    (select-window (get-buffer-window (marker-buffer pos)))
+    (select-window sel-win)
     (goto-char pos)
     (move-marker pos nil)
     (message "Formula editing aborted without installing changes")))
