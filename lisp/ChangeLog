@@ -1,7 +1,19 @@
+2009-09-04  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-offer-links-in-entry): New argument ZERO to
+	implement a link with index zero.
+
+	* org-agenda.el (org-agenda-open-link): Pass the prefix to
+	`org-offer-links-in-entry'.
+
 2009-09-03  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-agenda.el (org-agenda-quit): Provide the window argument for
 	`window-dedicated-p', Emacs 22 needs it.
+	(org-format-agenda-item): If the category is a link, arrange for
+	invisible text to replaced with spaces.
+	(org-compile-prefix-format): Add the extra space.
+	(org-prefix-category-length): New variable.
 
 	* org-exp.el (org-export-cleanup-toc-line): Remove footnote
 	references from TOC lines.

@@ -4311,6 +4311,8 @@ The flag is set if the currently compiled format contains a `%T'.")
 (defvar org-prefix-has-effort nil
   "A flag, set by `org-compile-prefix-format'.
 The flag is set if the currently compiled format contains a `%e'.")
+(defvar org-prefix-category-length nil
+  "Used by `org-compile-prefix-format' to remember the category field widh.")
 
 (defun org-format-agenda-item (extra txt &optional category tags dotime
 				     noprefix remove-re)
@@ -4345,7 +4347,7 @@ Any match of REMOVE-RE will be removed from TXT."
 			   (if (stringp dotime) dotime "")
 			   (and org-agenda-search-headline-for-time txt))))
 	   (time-of-day (and dotime (org-get-time-of-day ts)))
-	   stamp plain s0 s1 s2 t1 t2 rtn srp
+	   stamp plain s0 s1 s2 t1 t2 rtn srp l
 	   duration)
       (and (org-mode-p) buffer-file-name
 	   (add-to-list 'org-agenda-contributing-files buffer-file-name))
@@ -4428,6 +4430,15 @@ Any match of REMOVE-RE will be removed from TXT."
 			 (t ""))
 	      extra (or extra "")
 	      category (if (symbolp category) (symbol-name category) category))
+	(when (string-match org-bracket-link-regexp category)
+	  (setq l (if (match-end 3)
+		      (- (match-end 3) (match-beginning 3))
+		    (- (match-end 1) (match-beginning 1))))
+	  (when (< l (or org-prefix-category-length 0))
+	    (setq category (copy-sequence category))
+	    (org-add-props category nil
+	      'extra-space (make-string
+			    (- org-prefix-category-length l 1) ?\ ))))
 	;; Evaluate the compiled format
 	(setq rtn (concat (eval org-prefix-format-compiled) txt)))
 
@@ -4515,7 +4526,7 @@ a double colon separates inherited tags from local tags."
 The resulting form is returned and stored in the variable
 `org-prefix-format-compiled'."
   (setq org-prefix-has-time nil org-prefix-has-tag nil
-	org-prefix-has-effort nil)
+	org-prefix-category-length nil	org-prefix-has-effort nil)
   (let ((s (cond
 	    ((stringp org-agenda-prefix-format)
 	     org-agenda-prefix-format)
@@ -4535,13 +4546,16 @@ The resulting form is returned and stored in the variable
       (if (equal var 'time) (setq org-prefix-has-time t))
       (if (equal var 'tag)  (setq org-prefix-has-tag  t))
       (if (equal var 'effort) (setq org-prefix-has-effort t))
+      (if (equal var 'category)
+	  (setq org-prefix-category-length
+		(abs (string-to-number (match-string 2 s)))))
       (setq f (concat "%" (match-string 2 s) "s"))
       (if opt
 	  (setq varform
 		`(if (equal "" ,var)
 		     ""
 		   (format ,f (if (equal "" ,var) "" (concat ,var ,c)))))
-	(setq varform `(format ,f (if (equal ,var "") "" (concat ,var ,c)))))
+	(setq varform `(format ,f (if (equal ,var "") "" (concat ,var ,c (get-text-property 0 'extra-space ,var))))))
       (setq s (replace-match "%s" t nil s))
       (push varform vars))
     (setq vars (nreverse vars))
@@ -5599,14 +5613,18 @@ at the text of the entry itself."
   (interactive "P")
   (let* ((marker (or (get-text-property (point) 'org-hd-marker)
 		     (get-text-property (point) 'org-marker)))
-	 (buffer (and marker (marker-buffer marker))))
+	 (buffer (and marker (marker-buffer marker)))
+	 (prefix (buffer-substring
+		  (point-at-bol)
+		  (+ (point-at-bol)
+		     (get-text-property (point) 'prefix-length)))))
     (unless buffer (error "Don't know where to look for links"))
     (with-current-buffer buffer
       (save-excursion
 	(save-restriction
 	  (widen)
 	  (goto-char marker)
-	  (org-offer-links-in-entry arg))))))
+	  (org-offer-links-in-entry arg prefix))))))
 
 (defun org-agenda-copy-local-variable (var)
   "Get a variable from a referenced buffer and install it here."

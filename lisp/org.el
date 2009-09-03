@@ -8055,30 +8055,34 @@ application the system uses for this file type."
    (move-marker org-open-link-marker nil)
    (run-hook-with-args 'org-follow-link-hook)))
 
-(defun org-offer-links-in-entry (&optional nth)
+(defun org-offer-links-in-entry (&optional nth zero)
   "Offer links in the curren entry and follow the selected link.
 If there is only one link, follow it immediately as well.
-If NTH is an integer immediately pick the NTH link found."
+If NTH is an integer, immediately pick the NTH link found.
+If ZERO is a string, check also this string for a link, and if
+there is one, offer it as link number zero."
   (let ((re (concat "\\(" org-bracket-link-regexp "\\)\\|"
 		    "\\(" org-angle-link-re "\\)\\|"
 		    "\\(" org-plain-link-re "\\)"))
 	(cnt ?0)
 	(in-emacs (if (integerp nth) nil nth))
-	end
-	links link c)
+	have-zero end links link c)
+    (when (and (stringp zero) (string-match org-bracket-link-regexp zero))
+      (push (match-string 0 zero) links)
+      (setq cnt (1- cnt) have-zero t))
     (save-excursion
       (org-back-to-heading t)
       (setq end (save-excursion (outline-next-heading) (point)))
       (while (re-search-forward re end t)
 	(push (match-string 0) links))
       (setq links (org-uniquify (reverse links))))
-
+    
     (cond
      ((null links) (error "No links"))
      ((equal (length links) 1)
       (setq link (car links)))
-     ((and (integerp nth) (>= (length links) nth))
-      (setq link (nth (1- nth) links)))
+     ((and (integerp nth) (>= (length links) (if have-zero (1+ nth) nth)))
+      (setq link (nth (if have-zero nth (1- nth)) links)))
      (t ; we have to select a link
       (save-excursion
 	(save-window-excursion
@@ -8101,6 +8105,7 @@ If NTH is an integer immediately pick the NTH link found."
 	  (and (get-buffer "*Select Link*") (kill-buffer "*Select Link*"))))
       (when (equal c ?q) (error "Abort"))
       (setq nth (- c ?0))
+      (if have-zero (setq nth (1+ nth)))
       (unless (and (integerp nth) (>= (length links) nth))
 	(error "Invalid link selection"))
       (setq link (nth (1- nth) links))))
