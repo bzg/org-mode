@@ -2807,6 +2807,8 @@ If yes remove the column and the special lines."
   (while (string-match org-bracket-link-regexp s)
     (setq s (replace-match (match-string (if (match-end 3) 3 1) s)
 			   t t s)))
+  (while (string-match "\\[\\([0-9]\\|fn:[^]]*\\)\\]" s)
+    (setq s (replace-match "" t t s)))
   s)
 
 (defun org-create-multibrace-regexp (left right n)

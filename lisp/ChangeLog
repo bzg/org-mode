@@ -1,5 +1,8 @@
 2009-09-03  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp.el (org-export-cleanup-toc-line): Remove footnote
+	references from TOC lines.
+
 	* org.el (org-selected-window): New variable.
 
 	* org-table.el (org-table-edit-formulas): Remember the selected
