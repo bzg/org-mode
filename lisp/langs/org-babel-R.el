@@ -117,12 +117,17 @@ last statement in BODY, as elisp."
     ;; comint session evaluation
     (org-babel-comint-in-buffer buffer
       (let* ((tmp-file (make-temp-file "org-babel-R"))
-             (last-value-eval
-              (format "write.table(.Last.value, file=\"%s\", sep=\"\\t\", na=\"nil\",row.names=FALSE, col.names=%s, quote=FALSE)" tmp-file (if column-names-p "TRUE" "FALSE")))
-             (full-body (mapconcat #'org-babel-chomp
-				   (list body last-value-eval org-babel-R-eoe-indicator) "\n"))
-             (raw (org-babel-comint-with-output buffer org-babel-R-eoe-output nil
-                    (insert full-body) (inferior-ess-send-input))) broke results)
+	     (full-body
+	      (case result-type
+		(value
+		 (mapconcat #'org-babel-chomp (list body
+						    (format "write.table(.Last.value, file=\"%s\", sep=\"\\t\", na=\"nil\",row.names=FALSE, col.names=%s, quote=FALSE)" tmp-file (if column-names-p "TRUE" "FALSE"))
+						    org-babel-R-eoe-indicator) "\n"))
+		(output
+		 (mapconcat #'org-babel-chomp (list body org-babel-R-eoe-indicator) "\n"))))
+	     (raw (org-babel-comint-with-output buffer org-babel-R-eoe-output nil
+                    (insert full-body) (inferior-ess-send-input)))
+	     broke results)
         (case result-type
           (value (org-babel-R-process-value-result
 		  (org-babel-import-elisp-from-file tmp-file) column-names-p))
