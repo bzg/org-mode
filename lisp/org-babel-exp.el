@@ -58,7 +58,6 @@ none ----- do not display either code or results upon export"
                   (if (boundp lang-headers) (eval lang-headers) nil)
                   (org-babel-parse-header-arguments
                    (mapconcat #'identity (cdr headers) " ")))))
-    (message "exporting params are %S" params)
     (org-babel-exp-do-export lang body params)))
 
 (defun org-babel-exp-inline-src-blocks (start end)
