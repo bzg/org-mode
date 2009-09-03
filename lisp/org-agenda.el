@@ -4802,7 +4802,7 @@ If ERROR is non-nil, throw an error, otherwise just return nil."
   (interactive)
   (if org-agenda-columns-active
       (org-columns-quit)
-    (if (window-dedicated-p) (delete-other-windows))
+    (if (window-dedicated-p (selected-window)) (delete-other-windows))
     (let ((buf (current-buffer)))
       (and (not (eq org-agenda-window-setup 'current-window))
            (not (one-window-p))

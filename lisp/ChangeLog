@@ -1,5 +1,8 @@
 2009-09-03  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-agenda.el (org-agenda-quit): Provide the window argument for
+	`window-dedicated-p', Emacs 22 needs it.
+
 	* org-exp.el (org-export-cleanup-toc-line): Remove footnote
 	references from TOC lines.
 
