@@ -2077,36 +2077,41 @@ TYPE must be a string, any of:
     (while (re-search-forward
 	    "{{{\\([a-zA-Z][-a-zA-Z0-9_]*\\)\\(([ \t\n]*\\([^\000]*?\\))\\)?}}}"
 	    nil t)
-      (setq key (downcase (match-string 1))
-	    args (match-string 3))
-      (when (setq val (or (plist-get org-export-opt-plist
-				     (intern (concat ":macro-" key)))
-			  (plist-get org-export-opt-plist
-				     (intern (concat ":" key)))))
-	(save-match-data
-	  (when args
-	    (setq args (org-split-string args ",[ \t\n]*") args2 nil)
-	    (setq args (mapcar 'org-trim args))
-	    (while args
-	      (while (string-match "\\\\\\'" (car args))
-		;; repair bad splits
-		(setcar (cdr args) (concat (substring (car args) 0 -1)
-					   ";" (nth 1 args)))
-		(pop args))
-	      (push (pop args) args2))
-	    (setq args (nreverse args2))
-	    (setq s 0)
-	    (while (string-match "\\$\\([0-9]+\\)" val s)
-	      (setq s (1+ (match-beginning 0))
-		    n (string-to-number (match-string 1 val)))
-	      (and (>= (length args) n)
-		   (setq val (replace-match (nth (1- n) args) t t val)))))
-	  (when (string-match "\\`(eval\\>" val)
-	    (setq val (eval (read val))))
-	  (if (and val (not (stringp val)))
-	      (setq val (format "%s" val))))
-	(and (stringp val)
-	     (replace-match val t t))))))
+      (unless (save-match-data
+		(save-excursion
+		  (goto-char (point-at-bol))
+		  (looking-at "[ \t]*#\\+macro")))
+	(setq key (downcase (match-string 1))
+	      args (match-string 3))
+	(when (setq val (or (plist-get org-export-opt-plist
+				       (intern (concat ":macro-" key)))
+			    (plist-get org-export-opt-plist
+				       (intern (concat ":" key)))))
+	  (save-match-data
+	    (when args
+	      (setq args (org-split-string args ",[ \t\n]*") args2 nil)
+	      (setq args (mapcar 'org-trim args))
+	      (while args
+		(while (string-match "\\\\\\'" (car args))
+		  ;; repair bad splits
+		  (setcar (cdr args) (concat (substring (car args) 0 -1)
+					     ";" (nth 1 args)))
+		  (pop args))
+		(push (pop args) args2))
+	      (setq args (nreverse args2))
+	      (setq s 0)
+	      (while (string-match "\\$\\([0-9]+\\)" val s)
+		(setq s (1+ (match-beginning 0))
+		      n (string-to-number (match-string 1 val)))
+		(and (>= (length args) n)
+		     (setq val (replace-match (nth (1- n) args) t t val)))))
+	    (when (string-match "\\`(eval\\>" val)
+	      (setq val (eval (read val))))
+	    (if (and val (not (stringp val)))
+		(setq val (format "%s" val))))
+	  (and (stringp val)
+	       (prog1 (replace-match val t t)
+		 (goto-char (match-beginning 0)))))))))
 
 (defun org-export-apply-macros-in-string (s)
   "Apply the macros in string S."

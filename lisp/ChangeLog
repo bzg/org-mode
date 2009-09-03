@@ -1,5 +1,8 @@
 2009-09-03  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp.el (org-export-preprocess-apply-macros): Scan the
+	expansion of a macro for more macro definitions.
+
 	* org-agenda.el (org-agenda-dim-blocked-tasks): Make sure the
 	invisibility overlay starts on the newline.
 
