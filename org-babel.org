@@ -218,7 +218,7 @@ would then be [[#sandbox][the sandbox]].
 #+end_src
 
   
-* Tasks [47/64]
+* Tasks [47/65]
 ** STARTED share org-babel [1/6]
 how should we share org-babel?
 *** DONE post to org-mode
@@ -523,6 +523,11 @@ buffer had no associated filename. So this is a problem which needs
 addressing. Maybe defadvice could be used on ess functions where
 necessary to make org/org-babel play nicely with ess?
 
+**** TODO C-x s steals focus
+     With two modified edit buffers open, make one of them the current
+     buffer and issue C-x s. It will offer to save both of them, but
+     the second one to be saved will become the current buffer at the
+     end.
 *** DONE name edit buffer according to #+srcname (and language?)
     See above patch agains org.
 *** DONE optionally evaluate header references when we switch to =*Org Edit Src*= buffer
