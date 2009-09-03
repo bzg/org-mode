@@ -1,3 +1,8 @@
+2009-09-03  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-agenda.el (org-agenda-dim-blocked-tasks): Make sure the
+	invisibility overlay starts on the newline.
+
 2009-09-02  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-protocol.el (org-protocol-store-link)
