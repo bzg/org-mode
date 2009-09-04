@@ -3454,15 +3454,16 @@ special faces for some of them.  This can be done using the variable
 @lisp
 @group
 (setq org-todo-keyword-faces
-      '(("TODO"      . org-warning)
-        ("DEFERRED"  . shadow)
-        ("CANCELED"  . (:foreground "blue" :weight bold))))
+      '(("TODO" . org-warning) ("STARTED" . "yellow")
+        ("CANCELED" . (:foreground "blue" :weight bold))))
 @end group
 @end lisp
 
-While using a list with face properties as shown for CANCELED
-@emph{should} work, this does not aways seem to be the case.  If
-necessary, define a special face and use that.
+While using a list with face properties as shown for CANCELED @emph{should}
+work, this does not aways seem to be the case.  If necessary, define a
+special face and use that.  A string is interpreted as a color.  The variable
+@code{org-faces-easy-properties} determines if that color is interpreted as a
+foreground or a background color.
 
 @node TODO dependencies,  , Faces for TODO keywords, TODO extensions
 @subsection TODO dependencies
@@ -3767,11 +3768,13 @@ this
 @end example
 
 @noindent
+@vindex org-priority-faces
 By default, Org mode supports three priorities: @samp{A}, @samp{B}, and
-@samp{C}.  @samp{A} is the highest priority.  An entry without a cookie
-is treated as priority @samp{B}.  Priorities make a difference only in
-the agenda (@pxref{Weekly/daily agenda}); outside the agenda, they have
-no inherent meaning to Org mode.
+@samp{C}.  @samp{A} is the highest priority.  An entry without a cookie is
+treated as priority @samp{B}.  Priorities make a difference only in the
+agenda (@pxref{Weekly/daily agenda}); outside the agenda, they have no
+inherent meaning to Org mode.  The cookies can be highlighted with special
+faces by customizing the variable @code{org-priority-faces}.
 
 Priorities can be attached to any outline tree entries; they do not need
 to be TODO items.

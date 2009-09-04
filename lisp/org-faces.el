@@ -338,29 +338,53 @@ This face is only used if `org-fontify-done-headline' is set.  If applies
 to the part of the headline after the DONE keyword."
   :group 'org-faces)
 
+(defcustom org-faces-easy-properties
+  '((todo . :foreground) (tag . :foreground) (priority . :foreground))
+  "The property changes by easy faces.
+This is an alist, the keys show the area of application, the values
+can be `:foreground' or `:background'.  A color string for special
+keywords will then be interpreted as either foreground or background
+color."
+  :group 'org-faces
+  :group 'org-todo
+  :type '(repeat
+	  (cons (choice (const todo) (const tag) (const priority))
+		(choice (const :foreground) (const :background)))))
+
 (defcustom org-todo-keyword-faces nil
   "Faces for specific TODO keywords.
 This is a list of cons cells, with TODO keywords in the car
-and faces in the cdr.  The face can be a symbol, or a property
-list of attributes, like (:foreground \"blue\" :weight bold :underline t)."
+and faces in the cdr.  The face can be a symbol, a color
+as a string (in which case the rest is inherited from the `org-todo' face),
+or a property list of attributes, like
+   (:foreground \"blue\" :weight bold :underline t).
+If it is a color string, the variable `org-faces-easy-properties'
+determines if it is a foreground or a background color."
   :group 'org-faces
   :group 'org-todo
   :type '(repeat
 	  (cons
-	   (string :tag "keyword")
-	   (sexp :tag "face"))))
+	   (string :tag "Keyword")
+	   (choice :tag "Face   "
+	    (string :tag "Color")
+	    (sexp :tag "Face")))))
 
 (defcustom org-priority-faces nil
   "Faces for specific Priorities.
 This is a list of cons cells, with priority character in the car
-and faces in the cdr.  The face can be a symbol, or a property
-list of attributes, like (:foreground \"blue\" :weight bold :underline t)."
+and faces in the cdr.  The face can be a symbol, a color as
+as a string, or a property list of attributes, like
+    (:foreground \"blue\" :weight bold :underline t).
+If it is a color string, the variable `org-faces-easy-properties'
+determines if it is a foreground or a background color."
   :group 'org-faces
   :group 'org-todo
   :type '(repeat
 	  (cons
 	   (character :tag "Priority")
-	   (sexp :tag "face"))))
+	   (choice    :tag "Face    "
+	    (string :tag "Color")
+	    (sexp :tag "Face")))))
 
 (defvar org-tags-special-faces-re nil)
 (defun org-set-tag-faces (var value)
@@ -386,7 +410,8 @@ list of attributes, like (:foreground \"blue\" :weight bold :underline t)."
 (defcustom org-tag-faces nil
   "Faces for specific tags.
 This is a list of cons cells, with tags in the car and faces in the cdr.
-The face can be a symbol, or a property list of attributes,
+The face can be a symbol, a foreground color (in which case the rest is
+inherited from the `org-tag' face) or a property list of attributes,
 like (:foreground \"blue\" :weight bold :underline t).
 If you set this variable through customize, it will immediately be effective
 in new buffers and in modified lines.
@@ -397,8 +422,10 @@ changes."
   :set 'org-set-tag-faces
   :type '(repeat
 	  (cons
-	   (string :tag "Tag")
-	   (sexp :tag "Face"))))
+	   (string :tag "Tag ")
+	   (choice :tag "Face"
+	    (string :tag "Foreground color")
+	    (sexp :tag "Face")))))
 
 (defface org-table ;; originally copied from font-lock-function-name-face
   (org-compatible-face nil

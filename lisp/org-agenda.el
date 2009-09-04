@@ -1349,8 +1349,10 @@ cookies, not the entire task.
 This may also be an association list of priority faces, whose
 keys are the character values of `org-highest-priority',
 `org-default-priority', and `org-lowest-priority' (the default values
-are ?A, ?B, and ?C, respectively).  The face may be a named face,
-or a list like `(:background \"Red\")'."
+are ?A, ?B, and ?C, respectively).  The face may be a named face, a
+color as a string, or a list like `(:background \"Red\")'.
+If it is a color, the variable `org-faces-easy-properties'
+determines if it is a foreground or a background color."
   :group 'org-agenda-line-format
   :type '(choice
 	  (const :tag "Never" nil)
@@ -1358,7 +1360,9 @@ or a list like `(:background \"Red\")'."
 	  (const :tag "Cookies only" cookies)
 	  (repeat :tag "Specify"
 		  (list (character :tag "Priority" :value ?A)
-			(sexp :tag "face")))))
+			(choice    :tag "Face    "
+				   (string :tag "Color")
+				   (sexp :tag "Face"))))))
 
 (defgroup org-agenda-column-view nil
   "Options concerning column view in the agenda."
@@ -2790,9 +2794,13 @@ bind it in the options section.")
 	      ov (org-make-overlay b e))
 	(org-overlay-put
 	 ov 'face
-	 (cond ((cdr (assoc p org-priority-faces)))
+	 (cond ((org-face-from-face-or-color
+		 'priority nil
+		 (cdr (assoc p org-priority-faces))))
 	       ((and (listp org-agenda-fontify-priorities)
-		     (cdr (assoc p org-agenda-fontify-priorities))))
+		     (org-face-from-face-or-color
+		      'priority nil
+		      (cdr (assoc p org-agenda-fontify-priorities)))))
 	       ((equal p l) 'italic)
 	       ((equal p h) 'bold)))
 	(org-overlay-put ov 'org-type 'org-priority)))))

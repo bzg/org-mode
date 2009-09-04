@@ -1,7 +1,16 @@
 2010-02-25  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-face-from-face-or-color): New function.
+	(org-get-todo-face, org-font-lock-add-priority-faces)
+	(org-get-tag-face): Use `org-face-from-face-or-color'.
+
+	* org-faces.el (org-todo-keyword-faces, org-priority-faces): Allow
+	simple colors as values.
+	(org-faces-easy-properties): New option.
+
 	* org-agenda.el (org-agenda-set-mode-name): Show if the agenda is
 	restricted, as an agenda mode.
+	(org-agenda-fontify-priorities): Allow simple colors as values.
 
 2010-02-25  Bastien Guerry  <bzg@altern.org>
 

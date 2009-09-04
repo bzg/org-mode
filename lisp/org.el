@@ -5060,9 +5060,19 @@ For plain list items, if they are matched by `outline-regexp', this returns
   "Get the right face for a TODO keyword KWD.
 If KWD is a number, get the corresponding match group."
   (if (numberp kwd) (setq kwd (match-string kwd)))
-  (or (cdr (assoc kwd org-todo-keyword-faces))
+  (or (org-face-from-face-or-color
+       'todo 'org-todo (cdr (assoc kwd org-todo-keyword-faces)))
       (and (member kwd org-done-keywords) 'org-done)
       'org-todo))
+
+(defun org-face-from-face-or-color (context inherit face-or-color)
+  "Create a face list that inherits INHERIT, but sets the foreground color.
+When FACE-OR-COLOR is not a string, just return it."
+  (if (stringp face-or-color)
+      (list :inherit inherit
+	    (cdr (assoc context org-faces-easy-properties))
+	    face-or-color)
+    face-or-color))
 
 (defun org-font-lock-add-tag-faces (limit)
   "Add the special tag faces."
@@ -5078,8 +5088,10 @@ If KWD is a number, get the corresponding match group."
   (while (re-search-forward "\\[#\\([A-Z0-9]\\)\\]" limit t)
     (add-text-properties
      (match-beginning 0) (match-end 0)
-     (list 'face (or (cdr (assoc (char-after (match-beginning 1))
-				 org-priority-faces))
+     (list 'face (or (org-face-from-face-or-color
+		      'priority 'org-special-keyword
+		      (cdr (assoc (char-after (match-beginning 1))
+				  org-priority-faces)))
 		     'org-special-keyword)
 	   'font-lock-fontified t))))
 
@@ -5087,7 +5099,8 @@ If KWD is a number, get the corresponding match group."
   "Get the right face for a TODO keyword KWD.
 If KWD is a number, get the corresponding match group."
   (if (numberp kwd) (setq kwd (match-string kwd)))
-  (or (cdr (assoc kwd org-tag-faces))
+  (or (org-face-from-face-or-color
+       'tag 'org-tag (cdr (assoc kwd org-tag-faces)))
       'org-tag))
 
 (defun org-unfontify-region (beg end &optional maybe_loudly)
