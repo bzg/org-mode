@@ -202,7 +202,7 @@ matrix(rnorm(6), nrow=2)
     :END:
     Org-babel provides two fundamentally different modes for capturing
     the results of code evaluation, specified by the =:results= header
-    argument:
+    argument.
 **** =:results value= (functional mode)
      This means that the 'result' of code evaluation is defined to be
      the *value* of the last statement in the block. Thus with this
@@ -210,6 +210,23 @@ matrix(rnorm(6), nrow=2)
      value. And not only can you view it that way, but you can
      actually use the return value of one source block as input for
      another (see later). This setting is the default.
+     
+     As an example, consider the following block of python code and its
+     output.
+
+#+begin_src python :results value
+import time
+print("Hello, today's date is %s" % time.ctime())
+print('Two plus two is')
+2 + 2
+#+end_src
+
+#+resname:
+: 4
+
+Notice that in functional mode, the output consists of the value of
+the last statement, and nothing else.
+
 **** =:results output= (scripting mode)
      With this setting, org-babel captures all the text output of the
      code block and places it in the org buffer. One can think of this
@@ -217,7 +234,26 @@ matrix(rnorm(6), nrow=2)
      commands, and you get the output of all the commands. Unlike in
      the 'functional' mode, the code block has no return value. (This
      mode will be familiar to Sweave users).
-     
+
+     Now consider the result of evaluating the same source block as
+     before, but under scripting mode.
+
+#+srcname: name
+#+begin_src python :results output
+import time
+print("Hello, today's date is %s" % time.ctime())
+print('Two plus two is')
+2 + 2
+#+end_src
+
+#+resname: name
+: Hello, today's date is Fri Sep  4 19:49:06 2009
+: Two plus two is
+
+So, we got what we asked for: all the text output by python
+(stdout). Since we didn't print the last value (2 + 2), we didn't get
+it in our output.
+
 *** Arguments to source code blocks
     :PROPERTIES:
     :CUSTOM_ID: arguments-to-source-code-blocks
