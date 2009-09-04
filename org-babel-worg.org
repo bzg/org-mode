@@ -1,4 +1,4 @@
-#+OPTIONS:    H:3 num:nil toc:2 \n:nil @:t ::t |:t ^:t -:t f:t *:t TeX:t LaTeX:t skip:nil d:(HIDE) tags:not-in-toc
+#+OPTIONS:    H:3 num:nil toc:2 \n:nil @:t ::t |:t ^:{} -:t f:t *:t TeX:t LaTeX:t skip:nil d:(HIDE) tags:not-in-toc
 #+STARTUP:    align fold nodlcheck hidestars oddeven lognotestate hideblocks
 #+SEQ_TODO:   TODO(t) INPROGRESS(i) WAITING(w@) | DONE(d) CANCELED(c@)
 #+TAGS:       Write(w) Update(u) Fix(f) Check(c) 
@@ -44,14 +44,6 @@
   1. Interactive source code execution
   2. Arguments to source code blocks
   3. Exportation of source code blocks to files (literate programming)
-
-Much of this document consists of interactive examples, and it might
- therefore make most sense to grab the plain text version of this file
-#+HTML: <a href="org-babel-worg.org">org-babel-worg.org</a>
-and work through it in Emacs. Alternatively you can the htmlized
-version of the plain text of this file at
-#+HTML: <a href="org-babel-worg.org.html">org-babel-worg.html</a>
-allows the plain text version to be viewed (non-interactively) in a web browser.
 
 * Getting started
   :PROPERTIES:
@@ -104,41 +96,74 @@ allows the plain text version to be viewed (non-interactively) in a web browser.
   :PROPERTIES:
   :CUSTOM_ID: basic-functionality
   :END:
-*** Source code execution
+*** Source code blocks
     :PROPERTIES:
-    :CUSTOM_ID: source-code-execution
+    :CUSTOM_ID: source-code-blocks
     :END:
-    For interpreted languages such as shell, python, R, etc, org-babel
-    allows source blocks to be executed: the code is passed to the
-    interpreter and you have control over what is done with the
-    results of excecution. E.g. place point anywhere in the following
-    block and use =C-c C-c= to run the code:
-    
-    *Note:* calling =C-c C-o= on a source-code block will open the
-    blocks results
 
-[[http://www.ruby-lang.org/][Ruby]] source code
+    Org-babel is all about *source blocks* in org mode. These are
+    blocks of code (in whatever language), surrounded by special
+    starting and ending lines. For example, the following is a source
+    block containing [[http://www.ruby-lang.org/][ruby]] code:
+
+: #+begin_src ruby
+: "This file was last evaluated on #{Date.today}"
+: #+end_src
+
+If you are unfamiliar with the notion of source blocks in org-mode,
+please have a look at the [[http://orgmode.org/manual/Literal-examples.html][relevant manual section]] before proceding.
+
+Note that above is what the source block looks like in the org-mode
+file. We had to take [[FIXME:link to manual section][special steps]] to make it look that way in the
+HTML output; normally, when exported to HTML, source blocks are
+fontified according to their language, and the begin_src...end_src
+mark-up is omitted, like this:
+
 #+begin_src ruby
 "This file was last evaluated on #{Date.today}"
 #+end_src
 
-Results of Ruby evaluation
+From now on, if you are viewing the HTML version, you will see the
+HTML output only. However, much of this document consists of
+interactive examples, and therefore in order to get a feeling for the
+mechanics of Org-babel it might make most sense to grab the plain text
+version of this file
+#+HTML: <a href="org-babel-worg.org">org-babel-worg.org</a>
+and work through it in Emacs. Alternatively the htmlized
+version of the plain text of this file at
+#+HTML: <a href="org-babel-worg.org.html">org-babel-worg.html</a>
+allows the plain text version to be viewed (non-interactively) in a web browser.
+*** Source code execution
+    :PROPERTIES:
+    :CUSTOM_ID: source-code-execution
+    :END:
+For interpreted languages such as shell, python, R, etc, org-babel
+allows source blocks to be executed: the code is passed to the
+interpreter and you have control over what is done with the
+results of excecution. E.g. place point anywhere in the following
+block and use =C-c C-c= to run the code:
+
+*Note:* calling =C-c C-o= on a source-code block will open the
+block's results.
+
+**** Ruby
+     Here's the result of evaluating the ruby block above
 #+resname:
 : This file was last evaluated on 2009-08-09
 
-[[http://www.r-project.org/][R]] source code
+**** [[http://www.r-project.org/][R]] 
+Source block:
 #+begin_src R :results value
-x = 4
-date()
-c(5, 10)
+matrix(rnorm(6), nrow=2)
 #+end_src
 
-Results of R evaluation
+Results of R evaluation:
 #+resname:
-|  5 |
-| 10 |
+| "-0.0519932008632584" | "-0.226627055077931" | 0.117163647485067 |
+|      0.61982500448072 | "-1.47733875944235"  | 0.482345264970892 |
 
-[[http://ditaa.sourceforge.net/][ditaa]] source code
+**** [[http://ditaa.sourceforge.net/][ditaa]]
+ Source block:
 #+begin_src ditaa :file images/blue.png :cmdline -r
 +---------+
 | cBLU    |
@@ -149,6 +174,7 @@ Results of R evaluation
 +----+----+
 #+end_src
 
+Results of ditaa evaluation:
 #+resname:
 [[file:images/blue.png]]
 
