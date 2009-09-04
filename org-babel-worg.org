@@ -101,7 +101,7 @@
     :CUSTOM_ID: source-code-blocks
     :END:
 
-    Org-babel is all about *source blocks* in org mode. These are
+    Org-babel is all about *source code blocks* in org mode. These are
     blocks of code (in whatever language), surrounded by special
     starting and ending lines. For example, the following is a source
     block containing [[http://www.ruby-lang.org/][ruby]] code:
@@ -110,12 +110,13 @@
 : "This file was last evaluated on #{Date.today}"
 : #+end_src
 
-If you are unfamiliar with the notion of source blocks in org-mode,
-please have a look at the [[http://orgmode.org/manual/Literal-examples.html][relevant manual section]] before proceding.
+If you are unfamiliar with the notion of source code blocks in
+org-mode, please have a look at the [[http://orgmode.org/manual/Literal-examples.html][relevant manual section]] before
+proceding.
 
 Note that above is what the source block looks like in the org-mode
-file. We had to take [[FIXME:link to manual section][special steps]] to make it look that way in the
-HTML output; normally, when exported to HTML, source blocks are
+file. We had to take [[http://orgmode.org/manual/Literal-examples.html#Literal-examples][special steps]] to make it look that way in the
+HTML output. Normally, when exported to HTML, source blocks are
 fontified according to their language, and the begin_src...end_src
 mark-up is omitted, like this:
 
@@ -139,31 +140,29 @@ allows the plain text version to be viewed (non-interactively) in a web browser.
     :END:
 For interpreted languages such as shell, python, R, etc, org-babel
 allows source blocks to be executed: the code is passed to the
-interpreter and you have control over what is done with the
-results of excecution. E.g. place point anywhere in the following
-block and use =C-c C-c= to run the code:
-
-*Note:* calling =C-c C-o= on a source-code block will open the
-block's results.
+interpreter and you have control over what is done with the results of
+excecution. E.g. place point anywhere in the following blocks and use
+=C-c C-c= to run the code[fn:1]. In each case the code comes first,
+followed by the results of evlauting the block.
 
 **** Ruby
-     Here's the result of evaluating the ruby block above
+#+begin_src ruby
+"This file was last evaluated on #{Date.today}"
+#+end_src
+
 #+resname:
 : This file was last evaluated on 2009-08-09
 
 **** [[http://www.r-project.org/][R]] 
-Source block:
 #+begin_src R :results value
 matrix(rnorm(6), nrow=2)
 #+end_src
 
-Results of R evaluation:
 #+resname:
-| "-0.0519932008632584" | "-0.226627055077931" | 0.117163647485067 |
-|      0.61982500448072 | "-1.47733875944235"  | 0.482345264970892 |
+|   0.496600061063252 | "-1.44355317891110" |   0.106411785870013 |
+| "-1.81619611674921" | "-1.25542979009380" | 0.00969467528507845 |
 
 **** [[http://ditaa.sourceforge.net/][ditaa]]
- Source block:
 #+begin_src ditaa :file images/blue.png :cmdline -r
 +---------+
 | cBLU    |
@@ -174,33 +173,50 @@ Results of R evaluation:
 +----+----+
 #+end_src
 
-Results of ditaa evaluation:
 #+resname:
 [[file:images/blue.png]]
 
+*** New source block syntax
+    Org-babel adds some new syntactical elements to source blocks in
+    org-mode, illustrated here:
+
+: #+srcname: source-block-name(arg1=value1, arg2=value2)
+: #+begin_src language :var1 var1-value :var2 var2-value ...
+: 
+: <code goes here>
+: 
+: #+end_src
+    
+  Note the following two new features
+**** =srcname= with optional arguments
+     The optional =srcname= line allows a name to be given to the
+     source block, together with any arguments to the source block
+     (see [[#arguments-to-source-code-blocks][below]])
+**** Header arguments
+     An arbitrary series of :variable value pairs can be specified
+     after the language, controlling various aspects of org-babel
+     operation. The available header arguments are documented [[#header-arguments][below.]]
 *** What happens to the results?
     :PROPERTIES:
     :CUSTOM_ID: results
     :END:
     Org-babel provides two fundamentally different modes for capturing
-    the results of code evaluation, specified by the :results header
+    the results of code evaluation, specified by the =:results= header
     argument:
-**** :results value
+**** =:results value= (functional mode)
      This means that the 'result' of code evaluation is defined to be
      the *value* of the last statement in the block. Thus with this
      setting, one can view the code block as a function with a return
-     value. And not only can one view it that way, but you can
+     value. And not only can you view it that way, but you can
      actually use the return value of one source block as input for
      another (see later). This setting is the default.
-**** :results output
+**** =:results output= (scripting mode)
      With this setting, org-babel captures all the text output of the
      code block and places it in the org buffer. One can think of this
      as a 'scripting' mode: the code block contains a series of
      commands, and you get the output of all the commands. Unlike in
-     the 'functional' mode specified by =:results value=, the code
-     block has no return value. (This mode will be familiar to Sweave
-     users).
-**** Additional :results settings
+     the 'functional' mode, the code block has no return value. (This
+     mode will be familiar to Sweave users).
      
 *** Arguments to source code blocks
     :PROPERTIES:
