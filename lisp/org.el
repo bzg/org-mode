@@ -7269,7 +7269,8 @@ For file links, arg negates `org-context-in-file-links'."
 			  (condition-case nil
 			      (org-make-org-heading-search-string txt)
 			    (error "")))
-		  desc (or (nth 4 (org-heading-components)) "NONE"))))
+		  desc (or (nth 4 (ignore-errors
+				    (org-heading-components))) "NONE"))))
 	(if (string-match "::\\'" cpltxt)
 	    (setq cpltxt (substring cpltxt 0 -2)))
 	(setq link (org-make-link cpltxt)))))

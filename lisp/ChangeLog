@@ -6,6 +6,7 @@
 	hidden.
 	(org-iswitchb-completing-read): Bind `switchb-use-virtual-buffers'
 	to nil for special completion.
+	(org-store-link): Don't error before the first heading.
 
 	* org-agenda.el (org-agenda-open-link): Pass the prefix to
 	`org-offer-links-in-entry'.
