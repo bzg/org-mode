@@ -40,17 +40,18 @@
 
   Org-babel provides the following modifications to [[http://orgmode.org/manual/Literal-examples.html][the existing
   support]] for blocks of source code examples in the org-mode core.
-  1. interactive source code execution
-  2. arguments to source code blocks
-  3. exportation of source code blocks to files (literate programming)
 
-Much of this document includes interactive examples.  The reader is
-encouraged to grab either the plain text version of this file
+  1. Interactive source code execution
+  2. Arguments to source code blocks
+  3. Exportation of source code blocks to files (literate programming)
+
+Much of this document consists of interactive examples, and it might
+ therefore make most sense to grab the plain text version of this file
 #+HTML: <a href="org-babel-worg.org">org-babel-worg.org</a>
-which can be read and run in Emacs or the htmlized version of the
-plain text of this file
+and work through it in Emacs. Alternatively you can the htmlized
+version of the plain text of this file at
 #+HTML: <a href="org-babel-worg.org.html">org-babel-worg.html</a>
-which is viewable through the web browser.
+allows the plain text version to be viewed (non-interactively) in a web browser.
 
 * Getting started
   :PROPERTIES:
