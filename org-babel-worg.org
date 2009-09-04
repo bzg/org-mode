@@ -558,7 +558,7 @@ For a simple example of usage follow these 4 steps.
      (require 'org-babel-init)
      
      ;; load up all literate org-mode files in this directory
-     (mapc #'org-babel-load-file (directory-files ditfiles-dir t "\\.org$"))
+     (mapc #'org-babel-load-file (directory-files dotfiles-dir t "\\.org$"))
      
      ;;; init.el ends here
    #+end_src
