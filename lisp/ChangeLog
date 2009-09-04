@@ -4,6 +4,8 @@
 	implement a link with index zero.
 	(org-cycle-show-empty-lines): Not keep empty line under header
 	hidden.
+	(org-iswitchb-completing-read): Bind `switchb-use-virtual-buffers'
+	to nil for special completion.
 
 	* org-agenda.el (org-agenda-open-link): Pass the prefix to
 	`org-offer-links-in-entry'.
