@@ -669,6 +669,21 @@ when exporting the agenda, configure the variable
   :group 'org-agenda
   :type 'integer)
 
+(defcustom org-agenda-entry-text-exclude-regexps nil
+  "List of regular expressions to clean up entry text.
+The complete matches of all regular expressions in this list will be
+removed from entry text before it is shown in the agenda."
+  :group 'org-agenda
+  :type '(repeat (regexp)))
+
+(defvar org-agenda-entry-text-cleanup-hook nil
+  "Hook that is run after basic cleanup of entry text to be shown in agenda.
+This cleanup is done in a temporary buffer, so the function may inspect and
+change the entire buffer.
+Some default stuff like drawers and scheduling/deadline dates will already
+have been removed when this is called, as will any matches for regular
+expressions listed in `org-agenda-entry-text-exclude-regexps'.")
+
 (defvar org-agenda-include-inactive-timestamps nil
   "Non-nil means, include inactive time stamps in agenda and timeline.")
 
@@ -2320,7 +2335,14 @@ This will ignore drawers etc, just get the text."
 		(if (re-search-forward "[ \t\n]+\\'" nil t)
 		    (replace-match ""))
 		(goto-char (point-min))
-		;; find min indentation
+		(when org-agenda-entry-text-exclude-regexps
+		  (let ((re-list org-agenda-entry-text-exclude-regexps)	re)
+		    (while (setq re (pop re-list))
+		      (goto-char (point-min))
+		      (while (re-search-forward re nil t)
+			(replace-match "")))))
+
+		;; find and remove min common indentation
 		(goto-char (point-min))
 		(untabify (point-min) (point-max))
 		(setq ind (org-get-indentation))
@@ -2334,6 +2356,9 @@ This will ignore drawers etc, just get the text."
 		    (move-to-column ind)
 		    (delete-region (point-at-bol) (point)))
 		  (beginning-of-line 2))
+
+		(run-hooks 'org-agenda-entry-text-cleanup-hook)
+
 		(goto-char (point-min))
 		(while (and (not (eobp)) (re-search-forward "^" nil t))
 		  (replace-match "    > "))

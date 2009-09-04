@@ -1,5 +1,12 @@
 2009-09-04  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-agenda.el (org-agenda-entry-text-exclude-regexps): New
+	variable.
+	(org-agenda-entry-text-cleanup-hook): New hook.
+	(org-agenda-get-some-entry-text): Remove matches of
+	`org-agenda-entry-text-exclude-regexps' and run the hook
+	`org-agenda-entry-text-cleanup-hook'.
+
 	* org.el (org-offer-links-in-entry): New argument ZERO to
 	implement a link with index zero.
 	(org-cycle-show-empty-lines): Not keep empty line under header
