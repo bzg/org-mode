@@ -5261,7 +5261,11 @@ are at least `org-cycle-separator-lines' empty lines before the headline."
 		  (setq b (save-excursion
 			    (goto-char (match-beginning 0))
 			    (org-back-over-empty-lines)
-			    (point)))
+			    (if (save-excursion
+				  (goto-char (max (point-min) (1- (point))))
+				  (org-on-heading-p))
+				(1- (point))
+			      (point))))
 		(setq b (match-beginning 1)))
 	      (outline-flag-region b e nil)))))))
   ;; Never hide empty lines at the end of the file.

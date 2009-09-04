@@ -2,6 +2,8 @@
 
 	* org.el (org-offer-links-in-entry): New argument ZERO to
 	implement a link with index zero.
+	(org-cycle-show-empty-lines): Not keep empty line under header
+	hidden.
 
 	* org-agenda.el (org-agenda-open-link): Pass the prefix to
 	`org-offer-links-in-entry'.
