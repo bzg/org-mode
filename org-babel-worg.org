@@ -63,34 +63,20 @@
        (require 'org-babel-init)
      #+end_src
 
-  3) Then activate the subset of supported Org-babel languages which
-     you will want to be able to execute on your system.  The
-     following can be added to your .emacs and used to activate
-     languages.  It includes a brief list of the requirements for each
-     language.  *Note*: this also serves as the list of languages
-     currently supported by Org-babel.
-     #+begin_src emacs-lisp 
-       ;; Uncomment each of the following require lines if you want org-babel
-       ;; to support that language.  Each language has a comment explaining
-       ;; it's dependencies.  See the related files in lisp/langs for more
-       ;; detailed explanations of requirements.
-       ;; (require 'org-babel-R)         ;; R and ess-mode
-       ;; (require 'org-babel-asymptote) ;; asymptote
-       ;; (require 'org-babel-css)       ;; none
-       ;; (require 'org-babel-ditaa)     ;; ditaa
-       ;; (require 'org-babel-dot)       ;; dot
-       ;; (require 'org-babel-gnuplot)   ;; gnuplot, and gnuplot-mode
-       ;; (require 'org-babel-haskell)   ;; haskell, haskell-mode, inf-haskell
-       ;; (require 'org-babel-ocaml)     ;; ocaml, and tuareg-mode
-       ;; (require 'org-babel-python)    ;; python, and python-mode
-       ;; (require 'org-babel-ruby)      ;; ruby, irb, ruby-mode, and inf-ruby
-       ;; (require 'org-babel-sass)      ;; sass, sass-mode
-       ;; (require 'org-babel-sql)       ;; none
-       ;; 
-       ;; Once you've activated languages, load the library of babel for
-       ;; pre-built helpers in the languages you will be using.
-       (org-babel-load-library-of-babel)
-     #+end_src
+  3) Finally, activate the subset of supported Org-babel languages
+     which you want to be able to execute on your system. As an
+     example, the following activates python, ruby and R. For a full
+     list of languages and notes on their dependencies see the
+     [[#reference-and-documentation][Reference / Documentation]] section below.
+#+begin_src emacs-lisp
+  (require 'org-babel-python)
+  (require 'org-babel-ruby)
+  (require 'org-babel-R)
+  ;;
+  ;; Once you've activated languages, load the library of babel to
+  ;; make pre-built helper functions available in the languages you will be using.
+  (org-babel-load-library-of-babel)
+#+end_src
   
 * Basic org-babel functionality
   :PROPERTIES:
@@ -649,6 +635,29 @@ For a simple example of usage follow these 4 steps.
   :PROPERTIES:
   :CUSTOM_ID: reference-and-documentation
   :END:
+*** Languages
+    The following can be added to your .emacs and used to activate
+    languages.  It includes a brief list of the requirements for each
+    language.  *Note*: this also serves as the list of languages
+    currently supported by Org-babel.
+     #+begin_src emacs-lisp 
+       ;; Uncomment each of the following require lines if you want org-babel
+       ;; to support that language.  Each language has a comment explaining
+       ;; it's dependencies.  See the related files in lisp/langs for more
+       ;; detailed explanations of requirements.
+       ;; (require 'org-babel-R)         ;; R and ess-mode
+       ;; (require 'org-babel-asymptote) ;; asymptote
+       ;; (require 'org-babel-css)       ;; none
+       ;; (require 'org-babel-ditaa)     ;; ditaa
+       ;; (require 'org-babel-dot)       ;; dot
+       ;; (require 'org-babel-gnuplot)   ;; gnuplot, and gnuplot-mode
+       ;; (require 'org-babel-haskell)   ;; haskell, haskell-mode, inf-haskell
+       ;; (require 'org-babel-ocaml)     ;; ocaml, and tuareg-mode
+       ;; (require 'org-babel-python)    ;; python, and python-mode
+       ;; (require 'org-babel-ruby)      ;; ruby, irb, ruby-mode, and inf-ruby
+       ;; (require 'org-babel-sass)      ;; sass, sass-mode
+       ;; (require 'org-babel-sql)       ;; none
+     #+end_src
 
 *** Source Code block syntax
 
