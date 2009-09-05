@@ -16,20 +16,14 @@
   </div>
   <div id="logo">
     <p>
-      <img src="images/tower-of-babel.png"  alt="images/tower-of-babel.png"
-           title="And the Lord said, Behold, the people is one, and they have all one language; and this they begin to do; and now nothing will be restrained from them, which they have imagined to do. Genesis 11:1-9"/>
+      <img src="images/Brueghel-little-tower-of-babel.png"
+           alt="images/Brueghel-little-tower-of-babel.png"
+           title="And the Lord said, Behold, the people is one, and they
+                  have all one language; and this they begin to do; and now
+                  nothing will be restrained from them, which they have
+                  imagined to do. Genesis 11:1-9"/>
       <div id="attr">
-      The "Little" Tower of Babel by Pieter Bruegel the Elder     
-        <a href="http://www.flickr.com/photos/23379658@N05/" title=""><b>Martijn Streefkerk</b></a>
-      </div>
-    </p>
-    <p>
-      <img src="images/tower-of-babel.png"  alt="images/tower-of-babel.png"
-           title="The Tower of Babel by Pieter Bruegel the Elder"/>
-      <div id="attr">
-And the Lord said, Behold, the people is one, and they have all one
-language; and this they begin to do; and now nothing will be
-restrained from them, which they have imagined to do. Genesis 11:1-9
+        The Tower of Babel by Pieter Bruegel the Elder
       </div>
     </p>
   </div>
@@ -44,10 +38,11 @@ restrained from them, which they have imagined to do. Genesis 11:1-9
   :PROPERTIES:
   :CUSTOM_ID: introduction
   :END:
-  Org-babel is an extension to the very excellent [[http://orgmode.org/][Org-mode]]; an [[http://www.gnu.org/software/emacs/][Emacs]]
-  major mode for doing almost anything with plain text.  If you are
-  not familiar with Org-mode please take a moment to read [[http://orgmode.org/][the Org-mode
-  homepage]] before continuing.
+  Org-babel is an extension to the very excellent [[http://orgmode.org/][Org-mode]], providing
+ the ability to execute source code in many different languages within
+ org-mode documents. Org-mode is an [[http://www.gnu.org/software/emacs/][Emacs]] major mode for doing almost
+ anything with plain text.  If you are not familiar with Org-mode
+ please take a moment to read [[http://orgmode.org/][the Org-mode homepage]] before continuing.
 
   Org-babel provides the following modifications to [[http://orgmode.org/manual/Literal-examples.html][the existing
   support]] for blocks of source code examples in the org-mode core.
