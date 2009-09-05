@@ -4618,7 +4618,7 @@ Here is an example for a complete columns definition, along with allowed
 values.
 
 @example
-:COLUMNS:  %20ITEM %9Approved(Approved?)@{X@} %Owner %11Status \@footnote{Please note that the COLUMNS definition must be on a single line---it is wrapped here only because of formatting constraints.}
+:COLUMNS:  %25ITEM %9Approved(Approved?)@{X@} %Owner %11Status \@footnote{Please note that the COLUMNS definition must be on a single line---it is wrapped here only because of formatting constraints.}
                    %10Time_Estimate@{:@} %CLOCKSUM
 :Owner_ALL:    Tammy Mark Karl Lisa Don
 :Status_ALL:   "In progress" "Not started yet" "Finished" ""
@@ -8112,13 +8112,13 @@ property @code{EXPORT_TITLE}, that will take precedence.
 @subheading Headings and sections
 @cindex headings and sections, markup rules
 
-@vindex org-headline-levels
+@vindex org-export-headline-levels
 The outline structure of the document as described in @ref{Document
 Structure}, forms the basis for defining sections of the exported document.
 However, since the outline structure is also used for (for example) lists of
 tasks, only the first three outline levels will be used as headings.  Deeper
 levels will become itemized lists.  You can change the location of this
-switch globally by setting the variable @code{org-headline-levels}, or on a
+switch globally by setting the variable @code{org-export-headline-levels}, or on a
 per-file basis with a line
 
 @cindex #+OPTIONS
@@ -9032,13 +9032,13 @@ view:    @r{Initial view when website is first shown.  Possible values are:}
          showall   @r{Folding interface, all headlines and text visible.}
 sdepth:  @r{Maximum headline level that will still become an independent}
          @r{section for info and folding modes.  The default is taken from}
-         @r{@code{org-headline-levels} (= the @code{H} switch in @code{#+OPTIONS}).}
-         @r{If this is smaller than in @code{org-headline-levels}, each}
+         @r{@code{org-export-headline-levels} (= the @code{H} switch in @code{#+OPTIONS}).}
+         @r{If this is smaller than in @code{org-export-headline-levels}, each}
          @r{info/folding section can still contain child headlines.}
 toc:     @r{Should the table of content @emph{initially} be visible?}
          @r{Even when @code{nil}, you can always get to the "toc" with @kbd{i}.}
 tdepth:  @r{The depth of the table of contents.  The defaults are taken from}
-         @r{the variables @code{org-headline-levels} and @code{org-export-with-toc}.}
+         @r{the variables @code{org-export-headline-levels} and @code{org-export-with-toc}.}
 ftoc:    @r{Does the css of the page specify a fixed position for the "toc"?}
          @r{If yes, the toc will never be displayed as a section.}
 ltoc:    @r{Should there be short contents (children) in each section?}
