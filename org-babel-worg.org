@@ -68,7 +68,7 @@
   3) Finally, activate the subset of supported Org-babel languages
      which you want to be able to execute on your system. As an
      example, the following activates python, ruby and R. For a full
-     list of languages and notes on their dependencies see the
+     list of languages, with notes on their dependencies see the
      [[#reference-and-documentation][Reference / Documentation]] section below.
 #+begin_src emacs-lisp
   (require 'org-babel-python)
@@ -90,15 +90,15 @@
     :END:
 
     Org-babel is all about *source code blocks* in org mode. These are
-    blocks of code (in whatever language), surrounded by special
-    starting and ending lines. For example, the following is a source
-    block containing [[http://www.ruby-lang.org/][ruby]] code:
+    blocks of code (in whatever language), that can occur anywhere in
+    an org-mode file. For example, the following is a source block
+    containing [[http://www.ruby-lang.org/][ruby]] code:
 
 : #+begin_src ruby
 : "This file was last evaluated on #{Date.today}"
 : #+end_src
 
-If you are unfamiliar with the notion of source code blocks in
+If you are unfamiliar with the notion of a source code block in
 org-mode, please have a look at the [[http://orgmode.org/manual/Literal-examples.html][relevant manual section]] before
 proceding.
 
@@ -129,9 +129,11 @@ allows the plain text version to be viewed (non-interactively) in a web browser.
 For interpreted languages such as shell, python, R, etc, org-babel
 allows source blocks to be executed: the code is passed to the
 interpreter and you have control over what is done with the results of
-excecution. E.g. place point anywhere in the following blocks and use
-=C-c C-c= to run the code[fn:1]. In the first two cases the code comes
-first, followed by the results of evlauting the block.
+excecution. Here are three examples of code blocks in three different
+languages, followed by their output. If you are viewing the plain text
+version of this document in emacs, place point anywhere inside the
+blocks and use =C-c C-c= to run the code[fn:1] (and feel free to alter
+it!).
 
 **** Ruby
 #+begin_src ruby
@@ -174,21 +176,24 @@ The basic syntax of source-code blocks in Org-babel is as follows:
 : #+end_src
 
 - name :: This name is associated with the source-code block.  This is
-     similar to the =#+TBLNAME= lines which can be used to name tables
+     similar to the =#+tblname= lines which can be used to name tables
      in org-mode files.  By referencing the srcname of a source-code
      block it is possible to evaluate the block from other places,
      files, or from inside tables.
 - arguments :: Code blocks can have arguments (see [[#arguments-to-source-code-blocks][below]]) which are
                provided using a familiar function-call syntax similar
                to (e.g.)  python or R.
-- language :: The language of the code in the source-code block, valid
+- language :: The language of the code in the source-code block. Valid
      values must be members of `org-babel-interpreters'.
 - header-arguments :: Header arguments control many facets of the
-     evaluation, and output of source-code blocks.  See the [[* Header Arguments][Header
+     evaluation and output of source-code blocks.  See the [[* Header Arguments][Header
      Arguments]] section for a complete review of available header
      arguments.
-- body :: The actual source code which will be evaluated.  This can be
-          edited with `org-edit-special'.
+- body :: The actual source code which will be evaluated.  An
+          important key-binding to become familiar with is =C-c
+          '=. This calls `org-edit-special' which brings up an edit
+          buffer containing the code using the emacs major mode
+          appropriate to the language.
 
 *** What happens to the results?
     :PROPERTIES:
@@ -227,7 +232,7 @@ the last statement, and nothing else.
      as a 'scripting' mode: the code block contains a series of
      commands, and you get the output of all the commands. Unlike in
      the 'functional' mode, the code block has no return value. (This
-     mode will be familiar to Sweave users).
+     mode will be more familiar to Sweave users).
 
      Now consider the result of evaluating the same source block as
      before, but under scripting mode.
