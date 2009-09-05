@@ -128,8 +128,8 @@ For interpreted languages such as shell, python, R, etc, org-babel
 allows source blocks to be executed: the code is passed to the
 interpreter and you have control over what is done with the results of
 excecution. E.g. place point anywhere in the following blocks and use
-=C-c C-c= to run the code[fn:1]. In each case the code comes first,
-followed by the results of evlauting the block.
+=C-c C-c= to run the code[fn:1]. In the first two cases the code comes
+first, followed by the results of evlauting the block.
 
 **** Ruby
 #+begin_src ruby
