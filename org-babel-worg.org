@@ -162,7 +162,7 @@ matrix(rnorm(6), nrow=2)
 #+resname:
 [[file:images/blue.png]]
 
-*** New source block syntax
+*** Additional source block syntax
     Org-babel adds some new syntactical elements to source blocks in
     org-mode, illustrated here:
 
@@ -236,9 +236,9 @@ print('Two plus two is')
 : Hello, today's date is Fri Sep  4 19:49:06 2009
 : Two plus two is
 
-So, we got what we asked for: all the text output by python
-(stdout). Since we didn't print the last value (2 + 2), we didn't get
-it in our output.
+Again, we got what we asked for: all the text output (stdout) from
+python. Since we didn't print the last value (2 + 2), we didn't get it
+in our output.
 
 *** Arguments to source code blocks
     :PROPERTIES:
@@ -770,3 +770,9 @@ be referenced by using a =<<code-block-name>>= syntax.  When a
 document is tangled these references are replaced with the named code.
 An example is provided in the [[literate-programming-example]] in this
 document.
+
+* Footnotes
+
+[fn:1] Calling =C-c C-o= on a source-code block will open the
+block's results in a separate buffer.
+
