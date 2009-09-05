@@ -38,7 +38,7 @@ the Org-babel documentation.
     float: right
   
   #attr
-    font: 8pt
+    font-size: 8pt
     float: center
     text-align: center
     margin-top: -1em
@@ -50,10 +50,19 @@ the Org-babel documentation.
   #content
     color: #2e2e2e
   
+  .outline-text-2
+    margin-left: 2em
+  
   .outline-text-3
     margin-left: 2em
   
-  .outline-text-2
+  .outline-text-4
+    margin-left: 2em
+  
+  .outline-text-5
+    margin-left: 2em
+  
+  .outline-text-6
     margin-left: 2em
   
   h3
