@@ -19,8 +19,17 @@
       <img src="images/tower-of-babel.png"  alt="images/tower-of-babel.png"
            title="And the Lord said, Behold, the people is one, and they have all one language; and this they begin to do; and now nothing will be restrained from them, which they have imagined to do. Genesis 11:1-9"/>
       <div id="attr">
-        from
+      The "Little" Tower of Babel by Pieter Bruegel the Elder     
         <a href="http://www.flickr.com/photos/23379658@N05/" title=""><b>Martijn Streefkerk</b></a>
+      </div>
+    </p>
+    <p>
+      <img src="images/tower-of-babel.png"  alt="images/tower-of-babel.png"
+           title="The Tower of Babel by Pieter Bruegel the Elder"/>
+      <div id="attr">
+And the Lord said, Behold, the people is one, and they have all one
+language; and this they begin to do; and now nothing will be
+restrained from them, which they have imagined to do. Genesis 11:1-9
       </div>
     </p>
   </div>
