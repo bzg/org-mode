@@ -219,11 +219,17 @@ would then be [[#sandbox][the sandbox]].
 
   
 * Tasks [47/65]
-** STARTED share org-babel [1/6]
+** STARTED share org-babel [1/7]
 how should we share org-babel?
 *** DONE post to org-mode
 *** TODO post to ess mailing list
-*** TODO create a org-babel page on worg
+    I'd like to not rush in to this, get some feedback from the org
+    list first and let my R usage of org-babel settle down. [DD]
+*** STARTED create a org-babel page on worg
+**** TODO Getting hold of it instructions
+     - What about non-git users?
+     - Are we moving/copying to contrib/?
+**** TODO Fixed width HTML output created by =...= is ugly!
 *** TODO create a short screencast demonstrating org-babel in action
 *** PROPOSED a peer-reviewed publication?
 
@@ -2992,7 +2998,6 @@ This is a problem in [[file:lisp/org-babel-exp.el][org-babel-exp.el]].
 
 #+resname: please-name-my-result
 : I'm the result
-
 
 ** DONE Python session evaluation bug
    The following block evaluates correctly with :session none
