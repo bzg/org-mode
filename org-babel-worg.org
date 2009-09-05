@@ -70,15 +70,15 @@
      example, the following activates python, ruby and R. For a full
      list of languages, with notes on their dependencies see the
      [[#reference-and-documentation][Reference / Documentation]] section below.
-#+begin_src emacs-lisp
-  (require 'org-babel-python)
-  (require 'org-babel-ruby)
-  (require 'org-babel-R)
-  ;;
-  ;; Once you've activated languages, load the library of babel to
-  ;; make pre-built helper functions available in the languages you will be using.
-  (org-babel-load-library-of-babel)
-#+end_src
+     #+begin_src emacs-lisp
+       (require 'org-babel-python)
+       (require 'org-babel-ruby)
+       (require 'org-babel-R)
+       ;;
+       ;; Once you've activated languages, load the library of babel to
+       ;; make pre-built helper functions available in the languages you will be using.
+       (org-babel-load-library-of-babel)
+     #+end_src
   
 * Basic org-babel functionality
   :PROPERTIES:
@@ -129,7 +129,7 @@ allows the plain text version to be viewed (non-interactively) in a web browser.
 For interpreted languages such as shell, python, R, etc, org-babel
 allows source blocks to be executed: the code is passed to the
 interpreter and you have control over what is done with the results of
-excecution. Here are three examples of code blocks in three different
+execution. Here are three examples of code blocks in three different
 languages, followed by their output. If you are viewing the plain text
 version of this document in emacs, place point anywhere inside the
 blocks and use =C-c C-c= to run the code[fn:1] (and feel free to alter
@@ -208,7 +208,8 @@ The basic syntax of source-code blocks in Org-babel is as follows:
      setting, one can view the code block as a function with a return
      value. And not only can you view it that way, but you can
      actually use the return value of one source block as input for
-     another (see later). This setting is the default.
+     another (see [[meta-programming-language]]). This setting is the
+     default.
      
      As an example, consider the following block of python code and its
      output.
@@ -282,6 +283,7 @@ In the org-mode file that looks like this:
 Now we use the source block:
 
 : #+lob: square(x=6)
+(/for information on the/ =lob= /syntax see [[library-of-babel]]/)
 
 #+lob: square(x=6)
 
@@ -457,10 +459,18 @@ b + 4
   located in the [[file:library-of-babel.org][library-of-babel.org]] file. It is possible to add
   source-code blocks from any org-mode file to the library by calling
 
-#+srcname: add-file-to-lob
-#+begin_src emacs-lisp 
-(org-babel-lob-ingest "path/to/file.org")
-#+end_src
+  #+srcname: add-file-to-lob
+  #+begin_src emacs-lisp 
+  (org-babel-lob-ingest "path/to/file.org")
+  #+end_src
+
+  Once a function has been loaded into the Library of Babel it can be
+  called using the following short =lob= notation.
+  : #+lob: square(x=6)
+
+  Note that it is also possible to pass table values or the output of
+  a source-code block to lob functions, and it is possible to
+  reference lob functions in source block arguments.
 
 * Reproducible Research
   :PROPERTIES:
