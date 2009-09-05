@@ -164,26 +164,32 @@ matrix(rnorm(6), nrow=2)
 #+resname:
 [[file:images/blue.png]]
 
-*** Additional source block syntax
-    Org-babel adds some new syntactical elements to source blocks in
-    org-mode, illustrated here:
+*** Source code block syntax
 
-: #+srcname: source-block-name(arg1=value1, arg2=value2)
-: #+begin_src language :var1 var1-value :var2 var2-value ...
-: 
-: <code goes here>
-: 
+The basic syntax of source-code blocks in Org-babel is as follows:
+
+: #+srcname: name(arguments)
+: #+begin_src language header-arguments
+: body
 : #+end_src
-    
-  Note the following two new features
-**** =srcname= with optional arguments
-     The optional =srcname= line allows a name to be given to the
-     source block, together with any arguments to the source block
-     (see [[#arguments-to-source-code-blocks][below]])
-**** Header arguments
-     An arbitrary series of :variable value pairs can be specified
-     after the language, controlling various aspects of org-babel
-     operation. The available header arguments are documented [[#header-arguments][below.]]
+
+- name :: This name is associated with the source-code block.  This is
+     similar to the =#+TBLNAME= lines which can be used to name tables
+     in org-mode files.  By referencing the srcname of a source-code
+     block it is possible to evaluate the block from other places,
+     files, or from inside tables.
+- arguments :: Code blocks can have arguments (see [[#arguments-to-source-code-blocks][below]]) which are
+               provided using a familiar function-call syntax similar
+               to (e.g.)  python or R.
+- language :: The language of the code in the source-code block, valid
+     values must be members of `org-babel-interpreters'.
+- header-arguments :: Header arguments control many facets of the
+     evaluation, and output of source-code blocks.  See the [[* Header Arguments][Header
+     Arguments]] section for a complete review of available header
+     arguments.
+- body :: The actual source code which will be evaluated.  This can be
+          edited with `org-edit-special'.
+
 *** What happens to the results?
     :PROPERTIES:
     :CUSTOM_ID: results
@@ -468,8 +474,8 @@ generated the figures.
 [[http://reproducibleresearch.net/index.php/Main_Page][Reproducible Research]] (RR) is the practice of distributing along with
 an article of research all data, code, and tools required to reproduce
 the results discussed in the paper.  As such the paper becomes not
-only a document describing the research but a complete laboratory
-reproducing the research.
+only a document describing the research but a complete laboratory in
+which the research can be reproduced and extended.
 
 Org-mode already has exceptional support for [[http://orgmode.org/manual/Exporting.html#Exporting][exporting to html and
 LaTeX]].  Org-babel makes Org-mode a tool for RR by *activating* the
@@ -478,12 +484,14 @@ entire document executable.  This makes it not only possible, but
 natural to distribute research in a format that encourages readers to
 recreate your results, and perform their own analysis.
 
-Existing RR tools like [[http://en.wikipedia.org/wiki/Sweave][Sweave]] provide for the embedding of [[http://www.r-project.org/][R]] code into
-LaTeX documents.  While this is very useful, such documents often
-still require a large degree of "glue code" in the form of external
-shell scripts, python scripts, and Makefiles.  To our knowledge
-Org-babel is the only RR tool which allows multiple languages and data
-to coexist and cooperate inside of a single document.
+One notable existing RR tool is [[http://en.wikipedia.org/wiki/Sweave][Sweave]] which provides for the
+embedding of [[http://www.r-project.org/][R]] code into LaTeX documents.  While Sweave is a mature
+and very useful tool, we believe that Org-babel has several
+advantages:
+ - It supports multiple languages (we're not aware of other RR tools that do this)
+ - The [[http://orgmode.org/manual/Exporting.html#Exporting][export process]] is flexible and powerful, including HTML as a target in addition to LaTeX
+ - The document can make native use of all the features of Org-mode,
+   such as those for [[http://orgmode.org/manual/Agenda-Views.html#Agenda-Views][project planning]] and [[http://orgmode.org/manual/TODO-Items.html#TODO-Items][task management]]
 
 * Literate programming
   :PROPERTIES:
@@ -693,29 +701,6 @@ For a simple example of usage follow these 4 steps.
        ;; (require 'org-babel-sass)      ;; sass, sass-mode
        ;; (require 'org-babel-sql)       ;; none
      #+end_src
-
-*** Source Code block syntax
-
-The basic syntax of source-code blocks is as follows:
-
-: #+srcname: name
-: #+begin_src language header-arguments
-: body
-: #+end_src
-
-- name :: This name is associated with the source-code block.  This is
-     similar to the =#+TBLNAME= lines which can be used to name tables
-     in org-mode files.  By referencing the srcname of a source-code
-     block it is possible to evaluate the block for other places,
-     files, or from inside tables.
-- language :: The language of the code in the source-code block, valid
-     values must be members of `org-babel-interpreters'.
-- header-arguments :: Header arguments control many facets of the
-     input to, evaluation of, and output of source-code blocks.  See
-     the [[* Header Arguments][Header Arguments]] section for a complete review of available
-     header arguments.
-- body :: The actual source code which will be evaluated.  This can be
-          edited with `org-edit-special'.
 
 *** Header Arguments
      :PROPERTIES:
