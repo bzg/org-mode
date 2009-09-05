@@ -3,10 +3,12 @@
 #+SEQ_TODO:   TODO(t) INPROGRESS(i) WAITING(w@) | DONE(d) CANCELED(c@)
 #+TAGS:       Write(w) Update(u) Fix(f) Check(c) 
 #+TITLE:      Org-babel
-#+AUTHOR:     Dan Davison, Eric Schulte
-#+EMAIL:      davison at stats dot ox dot ac dot uk
+#+AUTHOR:     Eric Schulte, Dan Davison
+#+EMAIL:      schulte.eric at gmail dot com, davison at stats dot ox dot ac dot uk
 #+LANGUAGE:   en
 #+CATEGORY:   worg
+
+# #+INFOJS_OPT: view:content
 
 #+begin_html
   <div id="subtitle">
