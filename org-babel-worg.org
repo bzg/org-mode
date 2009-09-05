@@ -246,9 +246,42 @@ it in our output.
     :END:
     In addition to evaluation of code blocks, org-babel allows them to
     be parameterised (i.e. have arguments). Thus source code blocks
-    now have the status of *functions*.
+    now have the status of *functions*. Arguments to code blocks can
+    be used in both functional and scripting mode.
 
-Inputs for fibonacci-seq
+**** Simple example of using a source block as a function
+
+     First let's look at a very simple example. The following source
+     block defines an org-babel function that will square its input.
+
+#+srcname: square(x)
+#+begin_src python
+x*x
+#+end_src
+
+In the org-mode file that looks like this:
+: #+srcname: square(x)
+: #+begin_src python
+: x*x
+: #+end_src
+
+
+Now we use the source block:
+
+: #+lob: square(x=6)
+
+#+lob: square(x=6)
+
+#+resname: square(x=6)
+: 36
+
+**** A more complex example: using an org-table as input
+
+     In this example we're going to define a function to compute a
+     Fibonacci sequence, and we're going to make it take its input
+     from a table in the org-mode buffer.
+
+     Here are the inputs for fibonacci-seq:
 
 #+tblname: fibonacci-inputs
 | 1 | 2 | 3 | 4 |  5 |  6 |  7 |  8 |  9 | 10 |
@@ -260,8 +293,8 @@ in the Org-mode buffer this looks like
 : | 2 | 4 | 6 | 8 | 10 | 12 | 14 | 16 | 18 | 20 |
 
 [[http://www.gnu.org/software/emacs/manual/elisp.html][Emacs Lisp]] source code
-#+srcname: fibonacci-seq
-#+begin_src emacs-lisp :var fib-inputs=fibonacci-inputs
+#+srcname: fibonacci-seq(fib-inputs=fibonacci-inputs)
+#+begin_src emacs-lisp
   (defun fibonacci (n)
     (if (or (= n 0) (= n 1))
         n
@@ -272,8 +305,8 @@ in the Org-mode buffer this looks like
 #+end_src
 
 in the Org-mode buffer this looks like
-: #+srcname: fibonacci-seq
-: #+begin_src emacs-lisp :var fib-inputs=fibonacci-inputs
+: #+srcname: fibonacci-seq(fib-inputs=fibonacci-inputs)
+: #+begin_src emacs-lisp
 :   (defun fibonacci (n)
 :     (if (or (= n 0) (= n 1))
 :         n
