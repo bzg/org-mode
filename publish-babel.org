@@ -33,19 +33,33 @@ publishing.  Publish a project with =C-c C-e X=.
 Calling =org-babel-tangle= in this file will export the css file for
 the Org-babel documentation.
 
-#+begin_src css :tangle doc/stylesheet
-  #logo {
-      float:right;
-  }
+#+begin_src sass :file doc/stylesheet.css :results silent
+  #logo
+    float: right
   
-  #logo #attr {
-      float:center;
-      text-align:center;
-      margin-top:-1em;
-  }
+  #logo #attr
+    font: 9pt
+    float: center
+    text-align: center
+    margin-top: -1em
   
-  #subtitle {
-      float:center;
-      text-align:center;
-  }
+  #subtitle
+    float: center
+    text-align: center
+  
+  #content
+    color: #2e2e2e
+  
+  .outline-text-3
+    margin-left: 2em
+  
+  h3
+    margin-left: 1em
+    color: #000
+  
+  a
+    text-decoration: none
+    color: #4a708b
+  a:hover
+    text-decoration: underline
 #+end_src
