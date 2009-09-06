@@ -22,13 +22,13 @@
         <a href="http://commons.wikimedia.org/wiki/Pieter_Brueghel_the_Elder" title="">
           <b>Pieter Brueghel the Elder</b>
         </a>
-        <p>
-          "And the Lord said, Behold, the people is one, and they have
-          all one language; and this they begin to do; and now nothing
-          will be restrained from them, which they have imagined to
-          do. Genesis 11:1-9"
-        </p>
       </div>
+      <p>
+        And the Lord said, Behold, the people is one, and they have all
+        one language; and this they begin to do; and now nothing will be
+        restrained from them, which they have imagined to do. Genesis
+        11:1-9
+      </p>
     </p>
   </div>
 #+end_html
