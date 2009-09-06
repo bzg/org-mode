@@ -1,3 +1,8 @@
+2009-09-06  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-src.el (org-edit-src-save): Save window setup while saving.
+	(org-edit-src-code): Use new buffer name construction scheme.
+
 2009-09-04  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-agenda.el (org-agenda-entry-text-exclude-regexps): New

@@ -185,7 +185,7 @@ the edited version."
 		(org-delete-overlay org-edit-src-overlay)))
 	  (kill-buffer buffer))
 	(setq buffer (generate-new-buffer
-		      (concat "*Org Src " (file-name-nondirectory buffer-file-name) "[" lang "]*")))
+		      (org-src-construct-edit-buffer-name (buffer-name) lang)))
 	(setq ovl (org-make-overlay beg end))
 	(org-overlay-put ovl 'face 'secondary-selection)
 	(org-overlay-put ovl 'edit-buffer buffer)
@@ -230,6 +230,10 @@ the edited version."
   (let ((buf (get-char-property (point) 'edit-buffer)))
     (if buf (switch-to-buffer buf)
       (error "Something is wrong here"))))
+
+(defun org-src-construct-edit-buffer-name (org-buffer-name lang)
+  "Construct the buffer name for a source editing buffer"
+  (concat "*Org Src " org-buffer-name "[ " lang " ]*"))
 
 (defun org-edit-src-find-buffer (beg end)
   "Find a source editing buffer that is already editing the region BEG to END."
@@ -289,7 +293,9 @@ the fragment in the Org-mode buffer."
 	    (if (boundp 'org-edit-src-overlay)
 		(org-delete-overlay org-edit-src-overlay)))
 	  (kill-buffer buffer))
-	(setq buffer (generate-new-buffer "*Org Edit Src Example*"))
+	(setq buffer (generate-new-buffer
+		      (org-src-construct-edit-buffer-name
+		       (buffer-name) "Fixed Width")))
 	(setq ovl (org-make-overlay beg end))
 	(org-overlay-put ovl 'face 'secondary-selection)
 	(org-overlay-put ovl 'edit-buffer buffer)
@@ -474,14 +480,15 @@ the language, a switch telling of the content should be in a single line."
 (defun org-edit-src-save ()
   "Save parent buffer with current state source-code buffer."
   (interactive)
-  (let ((p (point)) (m (mark)) msg)
-    (org-edit-src-exit)
-    (save-buffer)
-    (setq msg (current-message))
-    (org-edit-src-code)
-    (push-mark m 'nomessage)
-    (goto-char (min p (point-max)))
-    (message (or msg ""))))
+  (save-window-excursion
+    (let ((p (point)) (m (mark)) msg)
+      (org-edit-src-exit)
+      (save-buffer)
+      (setq msg (current-message))
+      (org-edit-src-code)
+      (push-mark m 'nomessage)
+      (goto-char (min p (point-max)))
+      (message (or msg "")))))
 
 (defun org-src-mode-configure-edit-buffer ()
   (when org-edit-src-from-org-mode
