@@ -18,7 +18,7 @@
     <p>
       <img src="images/tower-of-babel.png"  alt="images/tower-of-babel.png"/>
       <div id="attr">
-        by
+        The Tower of Babel by
         <a href="http://commons.wikimedia.org/wiki/Pieter_Brueghel_the_Elder" title="">
           <b>Pieter Brueghel the Elder</b>
         </a>
