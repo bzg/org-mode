@@ -16,15 +16,19 @@
   </div>
   <div id="logo">
     <p>
-      <img src="images/Brueghel-little-tower-of-babel.png"
-           alt="images/Brueghel-little-tower-of-babel.png"
-           title="And the Lord said, Behold, the people is one, and they
-                  have all one language; and this they begin to do; and now
-                  nothing will be restrained from them, which they have
-                  imagined to do. Genesis 11:1-9"/>
+      <img src="images/tower-of-babel.png"  alt="images/tower-of-babel.png"/>
       <div id="attr">
-        The Tower of Babel by Pieter Bruegel the Elder
+        by
+        <a href="http://commons.wikimedia.org/wiki/Pieter_Brueghel_the_Elder" title="">
+          <b>Pieter Brueghel the Elder</b>
+        </a>
       </div>
+      <p>
+        And the Lord said, Behold, the people is one, and they have all
+        one language; and this they begin to do; and now nothing will be
+        restrained from them, which they have imagined to do. Genesis
+        11:1-9
+      </p>
     </p>
   </div>
 #+end_html

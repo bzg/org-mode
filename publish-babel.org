@@ -36,12 +36,11 @@ the Org-babel documentation.
 #+begin_src sass :file doc/stylesheet.css :results silent
   #logo
     float: right
-  
-  #attr
-    font-size: 8pt
-    float: center
     text-align: center
-    margin-top: -1em
+    max-width: 240px
+    font-size: 8pt
+    #attr
+      margin: -0.5em
   
   #subtitle
     float: center
