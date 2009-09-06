@@ -16312,7 +16312,7 @@ which make use of the date at the cursor."
   ;; text in a line directly attached to a headline would otherwise
   ;; fill the headline as well.
   (org-set-local 'comment-start-skip "^#+[ \t]*")
-  (org-set-local 'paragraph-separate "\f\\|\\*+ \\|[ 	]*$\\|[ \t]*[:|]")
+  (org-set-local 'paragraph-separate "\f\\|\\*+ \\|[ 	]*$\\|[ \t]*[:|#]")
   ;; The paragraph starter includes hand-formatted lists.
   (org-set-local
    'paragraph-start
@@ -16320,6 +16320,7 @@ which make use of the date at the cursor."
     "\f" "\\|"
     "[ 	]*$" "\\|"
     "\\*+ " "\\|"
+    "[ \t]*#" "\\|"
     "[ \t]*\\([-+*][ \t]+\\|[0-9]+[.)][ \t]+\\)" "\\|"
     "[ \t]*[:|]" "\\|"
     "\\$\\$" "\\|"
