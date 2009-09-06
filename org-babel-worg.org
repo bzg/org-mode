@@ -391,7 +391,7 @@ then graph them with R.
    #+end_src
 4. Results of R code [[file:images/dirs.png]]
 
-* Spreadsheet plugins for org-mode in any language
+* Multilingual spreadsheet plugins for org-mode
   :PROPERTIES:
   :CUSTOM_ID: spreadsheet
   :END:
@@ -457,27 +457,41 @@ b <- 9
 b + 4
 #+end_src
 
-* Library of Babel
+* The Library of Babel
   :PROPERTIES:
   :CUSTOM_ID: library-of-babel
   :END:
-  What about those source code blocks which are so useful you want to
-  have them available in every org-mode buffer?
+  As we saw above with the [[*Simple%20example%20of%20using%20a%20source%20block%20as%20a%20function][=square=]] example, once a source block
+  function has been defined it can be called using the following short
+  =lob= notation:
 
-  The [[file:library-of-babel.org][Library of Babel]] is an extensible collection of ready-made and
-  easily-shortcut-callable source-code blocks for handling common
-  tasks.  Org-babel comes pre-populated with the source-code blocks
-  located in the [[file:library-of-babel.org][library-of-babel.org]] file. It is possible to add
-  source-code blocks from any org-mode file to the library by calling
+  : #+lob: square(x=6)
+
+  But what about those source code blocks which are so useful you want
+  to have them available in every org-mode buffer?
+
+  In addition to the current buffer, Org-babel searches for
+  pre-defined source block functions in the [[file:library-of-babel.org][Library of Babel]]. This is
+  a user-extensible collection of ready-made source-code blocks for
+  handling common tasks.  One use for the LoB (not yet done!) will be
+  to provide a choice of data graphing procedures for data held in
+  org-mode tables, using languages such as R, gnuplot, asymptote,
+  etc. If you implement something that might be of use to other org
+  users, please consider adding it to the LoB; similarly, feel free to
+  request help solving a problem using external code via org-babel --
+  there's always a chance that other org users will be able to
+  contribute some helpful code. Org-mode demonstrates that an enormous
+  amount can be achieved using plain text and emacs lisp; the LoB is
+  intended to fill in the gaps.
+
+  Org-babel comes pre-populated with the source-code blocks located in
+  the [[file:library-of-babel.org][library-of-babel.org]] file. It is possible to add source-code
+  blocks from any org-mode file to the library by calling
 
   #+srcname: add-file-to-lob
   #+begin_src emacs-lisp 
   (org-babel-lob-ingest "path/to/file.org")
   #+end_src
-
-  Once a function has been loaded into the Library of Babel it can be
-  called using the following short =lob= notation.
-  : #+lob: square(x=6)
 
   Note that it is also possible to pass table values or the output of
   a source-code block to lob functions, and it is possible to
