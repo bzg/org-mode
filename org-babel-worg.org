@@ -361,13 +361,16 @@ functions from many languages can work together.
 As an example, lets take some system diagnostics in the shell, and
 then graph them with R.
 
-1. Shell source code
+1. First we create a code block containing shell code creating a list
+   of the directories in our home directory, together with their
+   sizes. Org-babel automatically converts the output into an org
+   table.
+   
 #+srcname: directories
    #+begin_src bash :results replace
    cd ~ && du -sc * |grep -v total
    #+end_src
-2. Results of the shell source code (on my system, grab this org-mode
-   files and try running it on your own)
+   
 #+resname: directories
 |       72 | "Desktop"   |
 | 12156104 | "Documents" |
@@ -384,12 +387,14 @@ then graph them with R.
 |  3821872 | "mail"      |
 | 10605392 | "src"       |
 |     1264 | "tools"     |
-3. R source code (which calls the previous shell source code)
-#+srcname: directory-pie
-   #+begin_src R :var dirs = directories :session R-pie-example
+2. Now we use a single line of R code to plot the data as a
+   pie-chart. Note the way that this source block uses the =srcname=
+   of the previous source block to obtain the data.
+#+srcname: directory-pie-chart(dirs = directories)
+   #+begin_src R :session R-pie-example
    pie(dirs[,1], labels = dirs[,2])
    #+end_src
-4. Results of R code [[file:images/dirs.png]]
+ [[file:images/dirs.png]]
 
 * Multilingual spreadsheet plugins for org-mode
   :PROPERTIES:
