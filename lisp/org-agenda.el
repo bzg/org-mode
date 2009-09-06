@@ -2332,8 +2332,6 @@ This will ignore drawers etc, just get the text."
 		(goto-char (point-min))
 		(while (re-search-forward kwd-time-re nil t)
 		  (replace-match ""))
-		(if (re-search-forward "[ \t\n]+\\'" nil t)
-		    (replace-match ""))
 		(goto-char (point-min))
 		(when org-agenda-entry-text-exclude-regexps
 		  (let ((re-list org-agenda-entry-text-exclude-regexps)	re)
@@ -2341,6 +2339,9 @@ This will ignore drawers etc, just get the text."
 		      (goto-char (point-min))
 		      (while (re-search-forward re nil t)
 			(replace-match "")))))
+		(goto-char (point-max))
+		(skip-chars-backward " \t\n")
+		(if (looking-at "[ \t\n]+\\'") (replace-match ""))
 
 		;; find and remove min common indentation
 		(goto-char (point-min))
