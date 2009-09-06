@@ -2304,9 +2304,9 @@ This will ignore drawers etc, just get the text."
 	    (save-restriction
 	      (widen)
 	      (goto-char marker)
-	      (beginning-of-line 2)
+	      (end-of-line 1)
 	      (setq txt (buffer-substring
-			 (point)
+			 (min (1+ (point)) (point-max))
 			 (progn (outline-next-heading) (point)))
 		    drawer-re org-drawer-regexp
 		    kwd-time-re (concat "^[ \t]*" org-keyword-time-regexp
