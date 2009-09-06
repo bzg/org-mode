@@ -4033,7 +4033,9 @@ the final heading will have the tags @samp{:work:}, @samp{:boss:},
 @samp{:notes:}, and @samp{:action:} even though the final heading is not
 explicitly marked with those tags.  You can also set tags that all entries in
 a file should inherit just as if these tags were defined in a hypothetical
-level zero that surrounds the entire file.
+level zero that surrounds the entire file.  Use a line like this@footnote{As
+with all these in-buffer settings, pressing @kbd{C-c C-c} activates any
+changes in the line.}:
 
 @cindex #+FILETAGS
 @example
