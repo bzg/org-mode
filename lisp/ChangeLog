@@ -1,5 +1,8 @@
 2009-09-06  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-latex.el (org-export-latex-preprocess): Do not protect in
+	the LaTeX header.
+
 	* org-src.el (org-edit-src-save): Save window setup while saving.
 	(org-edit-src-code): Use new buffer name construction scheme.
 
