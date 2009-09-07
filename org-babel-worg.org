@@ -431,8 +431,8 @@ Here's a sample of our test suite.
 
 *** code blocks for tests
 
-#+srcname: basic-elisp
-#+begin_src emacs-lisp :var n=7
+#+srcname: basic-elisp(n=7)
+#+begin_src emacs-lisp
 (* 2 n)
 #+end_src
 
