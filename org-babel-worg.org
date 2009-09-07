@@ -466,6 +466,18 @@ b + 4
   :PROPERTIES:
   :CUSTOM_ID: library-of-babel
   :END:
+#+begin_html 
+  <div id="logo">
+    <p>
+      <img src="images/library-of-babel.png"  alt="images/tower-of-babel.png" />
+      <div id="attr">
+        from <a href="http://www.poetryfoundation.org/harriet/2008/01/random-poetry-02/">poetryfoundation.org</a>
+        <a href="http://downlode.org/Etext/library_of_babel.html">Full text of the Borges short story</a>
+      </div>
+    </p>  
+  </div>
+#+end_html
+
   As we saw above with the [[*Simple%20example%20of%20using%20a%20source%20block%20as%20a%20function][=square=]] example, once a source block
   function has been defined it can be called using the following short
   =lob= notation:
@@ -476,7 +488,7 @@ b + 4
   to have them available in every org-mode buffer?
 
   In addition to the current buffer, Org-babel searches for
-  pre-defined source block functions in the [[file:library-of-babel.org][Library of Babel]]. This is
+  pre-defined source block functions in the Library of Babel. This is
   a user-extensible collection of ready-made source-code blocks for
   handling common tasks.  One use for the LoB (not yet done!) will be
   to provide a choice of data graphing procedures for data held in
