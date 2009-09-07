@@ -471,8 +471,10 @@ b + 4
     <p>
       <img src="images/library-of-babel.png"  alt="images/tower-of-babel.png" />
       <div id="attr">
-        from <a href="http://www.poetryfoundation.org/harriet/2008/01/random-poetry-02/">poetryfoundation.org</a>
+        The Library of Babel, from <a href="http://www.poetryfoundation.org/harriet/2008/01/random-poetry-02/">poetryfoundation.org</a>
+        <p>
         <a href="http://downlode.org/Etext/library_of_babel.html">Full text of the Borges short story</a>
+        </p>
       </div>
     </p>  
   </div>
