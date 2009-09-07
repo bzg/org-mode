@@ -469,9 +469,9 @@ b + 4
 #+begin_html 
   <div id="logo">
     <p>
-      <img src="images/library-of-babel.png"  alt="images/tower-of-babel.png" />
+      <img src="images/library-of-babel-clayette.png" />
       <div id="attr">
-        The Library of Babel, from <a href="http://www.poetryfoundation.org/harriet/2008/01/random-poetry-02/">poetryfoundation.org</a>
+        The Library of Babel, by Pierre Clayette
         <p>
         <a href="http://downlode.org/Etext/library_of_babel.html">Full text of the Borges short story</a>
         </p>
