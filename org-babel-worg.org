@@ -401,11 +401,11 @@ then graph them with R.
   :CUSTOM_ID: spreadsheet
   :END:
 
-** Example 1: data summaries using R
+*** Example 1: data summaries using R
 As a simple example, we'll fill in a cell in an org-table with the
 average value of a few numbers. First, let's make some data. The
-following source block creates an org table filled with random numbers
-between 0 and 1.
+following source block creates an org table filled with five random
+numbers between 0 and 1.
 
 #+srcname: tbl-example-data()
 #+begin_src R 
@@ -437,16 +437,13 @@ the table formula line.
 To recalculate the table formula, use =C-u C-c C-c= in the
 table. Notice that as things stand the calculated value doesn't
 change, because the data (held in the table above named
-"tbl-example-data") is static. However, if you delete that data table
+"tbl-example-data") are static. However, if you delete that data table
 then the reference will be interpreted as a reference to the source
 block responsible for generating the data; each time the table formula
 is recalculated the source block will be evaluated again, and
 therefore the calculated average value will change.
 
-** Example 2: Org-babel test suite
-*NOTE*: Maybe in-addition-to/in-stead-of this example we should do a
-more traditional "spreadsheet" example with R [Eric]
-
+*** Example 2: Org-babel test suite
 Not only can Org-babel pass entire tables of data to source code
 blocks (see [[arguments-to-source-code-blocks]]), Org-babel can also be
 used to call source code blocks from *within* tables using the
@@ -471,7 +468,7 @@ Here's a sample of our test suite.
 | R                | basic-R      |     |          13 |          13 | pass |
 #+TBLFM: $5='(if (= (length $3) 1) (sbe $2 (n $3)) (sbe $2)) :: $6='(if (string= $4 $5) "pass" (format "expected %S but was %S" $4 $5))
 
-*** code blocks for tests
+**** code blocks for tests
 
 #+srcname: basic-elisp(n)
 #+begin_src emacs-lisp
