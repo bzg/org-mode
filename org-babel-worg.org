@@ -400,6 +400,10 @@ then graph them with R.
   :PROPERTIES:
   :CUSTOM_ID: spreadsheet
   :END:
+Not only can Org-babel pass entire tables of data to source code
+blocks (see [[arguments-to-source-code-blocks]]), Org-babel can also be
+used to call source code blocks from *within* tables using the
+Org-mode's [[http://orgmode.org/manual/The-spreadsheet.html#The-spreadsheet][existing spreadsheet functionality]].
 
 *** Example 1: data summaries using R
 As a simple example, we'll fill in a cell in an org-table with the
@@ -444,15 +448,11 @@ is recalculated the source block will be evaluated again, and
 therefore the calculated average value will change.
 
 *** Example 2: Org-babel test suite
-Not only can Org-babel pass entire tables of data to source code
-blocks (see [[arguments-to-source-code-blocks]]), Org-babel can also be
-used to call source code blocks from *within* tables using the
-Org-mode's [[http://orgmode.org/manual/The-spreadsheet.html#The-spreadsheet][existing spreadsheet functionality]].
-
-In fact the functional test suite for Org-babel is implemented as a
-large Org-mode table.  To run the entire test suite you simple
-evaluate the table =C-u C-c C-c=, and all of the tests are run
-updating the table with pass/fail statistics.
+While developing Org-babel, we have used a suite of tests implemented
+as a large Org-mode table.  To run the entire test suite you simply
+evaluate the table with =C-u C-c C-c=, and all of the tests are run,
+the results are compared with expectations, and the table is updated
+with results and pass/fail statistics.
 
 Here's a sample of our test suite.
 
