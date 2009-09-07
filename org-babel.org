@@ -2989,7 +2989,16 @@ dot("$(2a,0)$",(2,0),N+E);
 *** DONE sh
 
 
-* Bugs [39/43]
+* Bugs [39/44]
+** TODO blank srcname takes srcname from next line
+#+srcname: 
+#+begin_src R :session *R*
+5
+#+end_src
+
+#+resname: #+begin_src
+: 5
+
 ** DONE stripping indentation from source-code blocks
 This is a problem in [[file:lisp/org-babel-exp.el][org-babel-exp.el]].
 
