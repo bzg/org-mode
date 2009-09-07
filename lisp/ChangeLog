@@ -1,3 +1,8 @@
+2009-09-07  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-exp.el (org-export-remove-special-table-lines): Remove bad
+	slow regexp match.
+
 2009-09-06  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-latex.el (org-export-latex-preprocess): Do not protect in
