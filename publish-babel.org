@@ -39,6 +39,7 @@ the Org-babel documentation.
     text-align: center
     max-width: 240px
     font-size: 8pt
+    margin-left: 1em
     #attr
       margin: -0.5em
   
