@@ -1478,7 +1478,8 @@ The following commands are available:
      ["Refile" org-agenda-refile t])
     ["Delete subtree" org-agenda-kill t]
     ("Bulk action"
-     ["Toggle mark entry" org-agenda-bulk-mark t]
+     ["Mark entry" org-agenda-bulk-mark t]
+     ["Unmark entry" org-agenda-bulk-unmark t]
      ["Act on all marked" org-agenda-bulk-action t]
      ["Unmark all entries" org-agenda-bulk-remove-all-marks :active t :keys "C-u s"])
     "--"

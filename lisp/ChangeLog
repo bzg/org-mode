@@ -1,5 +1,8 @@
 2009-09-07  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-agenda.el (org-agenda-menu): Fix bugs in the bulk action
+	menu.
+
 	* org-exp.el (org-export-remove-special-table-lines): Remove bad
 	slow regexp match.
 
