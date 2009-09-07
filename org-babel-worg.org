@@ -401,6 +401,49 @@ then graph them with R.
   :CUSTOM_ID: spreadsheet
   :END:
 
+** Example 1: data summaries using R
+As a simple example, we'll fill in a cell in an org-table with the
+average value of a few numbers. First, let's make some data. The
+following source block creates an org table filled with random numbers
+between 0 and 1.
+
+#+srcname: tbl-example-data()
+#+begin_src R 
+runif(n=5, min=0, max=1)
+#+end_src
+
+#+resname: tbl-example-data
+| 0.850250755203888 |
+| 0.745323235634714 |
+| 0.845673063071445 |
+| 0.761818468105048 |
+| 0.525476417969912 |
+
+Now we define a source block to do the calculation we want.
+#+srcname: R-mean(x)
+#+begin_src R 
+mean(x)
+#+end_src
+
+Finally we create the table which is going to make use of the R
+code. This is done using the =sbe= ('source block evaluate') macro in
+the table formula line.
+#+tblname: summaries
+|              mean |
+|-------------------|
+| 0.533130449522286 |
+#+TBLFM: @2$1='(sbe "R-mean" (x "generate-data()"))
+
+To recalculate the table formula, use =C-u C-c C-c= in the
+table. Notice that as things stand the calculated value doesn't
+change, because the data (held in the table above named
+"tbl-example-data") is static. However, if you delete that data table
+then the reference will be interpreted as a reference to the source
+block responsible for generating the data; each time the table formula
+is recalculated the source block will be evaluated again, and
+therefore the calculated average value will change.
+
+** Example 2: Org-babel test suite
 *NOTE*: Maybe in-addition-to/in-stead-of this example we should do a
 more traditional "spreadsheet" example with R [Eric]
 
