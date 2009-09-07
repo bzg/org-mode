@@ -16880,7 +16880,7 @@ If there is no such heading, return nil."
   (if (eq major-mode 'org-mode)
       (progn
 	(org-end-of-subtree nil t)
-	(backward-char 1))
+	(unless (eobp) (backward-char 1)))
     ad-do-it))
 
 (defun org-forward-same-level (arg &optional invisible-ok)
