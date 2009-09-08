@@ -1841,16 +1841,17 @@ When it is nil, all comments will be removed."
   (while (re-search-forward "^[ \t]*|" nil t)
     (beginning-of-line 1)
     (if (or (looking-at "[ \t]*| *[!_^] *|")
-	    (memq
-	     nil
-	     (mapcar
-	      (lambda (f)
-		(or (= (length f) 0)
-		    (string-match
-		     "\\`<\\([0-9]\\|[rl]\\|[rl][0-9]+\\)>\\'" f)))
-	      (org-split-string ;; FIXME, can't we do this without splitting???
-	       (buffer-substring (point-at-bol) (point-at-eol))
-	       "[ \t]*|[ \t]*"))))
+	    (not 
+	     (memq
+	      nil
+	      (mapcar
+	       (lambda (f)
+		 (or (= (length f) 0)
+		     (string-match
+		      "\\`<\\([0-9]\\|[rl]\\|[rl][0-9]+\\)>\\'" f)))
+	       (org-split-string ;; FIXME, can't we do this without splitting???
+		(buffer-substring (point-at-bol) (point-at-eol))
+		"[ \t]*|[ \t]*")))))
 	(delete-region (max (point-min) (1- (point-at-bol)))
 		       (point-at-eol))
       (end-of-line 1))))
