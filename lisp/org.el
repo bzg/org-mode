@@ -172,7 +172,7 @@ and loading it will require that you have downloaded and properly installed
 the org-mode distribution.
 
 You can also use this system to load external packages (i.e. neither Org
-core modules, not modules from the CONTRIB directory).  Just add symbols
+core modules, nor modules from the CONTRIB directory).  Just add symbols
 to the end of the list.  If the package is called org-xyz.el, then you need
 to add the symbol `xyz', and the package must have a call to
 
@@ -16880,7 +16880,7 @@ If there is no such heading, return nil."
   (if (eq major-mode 'org-mode)
       (progn
 	(org-end-of-subtree nil t)
-	(backward-char 1))
+	(unless (eobp) (backward-char 1)))
     ad-do-it))
 
 (defun org-forward-same-level (arg &optional invisible-ok)

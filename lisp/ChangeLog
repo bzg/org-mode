@@ -1,3 +1,8 @@
+2009-09-07  Andreas Burtzlaff <andy13@gmx.net>  (tiny change)
+
+	* org.el (outline-end-of-subtree): Bugfix: advise this function in
+	a way that prevents any trailing character from being displayed.
+
 2009-09-07  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-agenda.el (org-agenda-menu): Fix bugs in the bulk action
