@@ -1,3 +1,11 @@
+2009-09-08  Bastien Guerry  <bzg@altern.org>
+
+	* org.el (org-offer-links-in-entry): Don't use "Select link" as a
+	prompt in the temporary window.
+
+	* org-agenda.el (org-agenda-bulk-mark): Use a slightly soberer
+	prefix for marked entries in the agenda view.
+
 2009-09-07  Andreas Burtzlaff <andy13@gmx.net>  (tiny change)
 
 	* org.el (outline-end-of-subtree): Bugfix: advise this function in

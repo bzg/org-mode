@@ -6559,7 +6559,7 @@ This is a command that has to be installed in `calendar-mode-map'."
       (unless m (error "Nothing to mark at point"))
       (push m org-agenda-bulk-marked-entries)
       (setq ov (org-make-overlay (point-at-bol) (+ 2 (point-at-bol))))
-      (org-overlay-display ov ">>"
+      (org-overlay-display ov "> "
 			   (org-get-todo-face "TODO")
 			   'evaporate)
       (org-overlay-put ov 'type 'org-marked-entry-overlay))

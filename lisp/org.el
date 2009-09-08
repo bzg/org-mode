@@ -8094,7 +8094,6 @@ there is one, offer it as link number zero."
 	(save-window-excursion
 	  (delete-other-windows)
 	  (with-output-to-temp-buffer "*Select Link*"
-	    (princ "Select link\n\n")
 	    (mapc (lambda (l)
 		    (if (not (string-match org-bracket-link-regexp l))
 			(princ (format "[%c]  %s\n" (incf cnt)
