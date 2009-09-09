@@ -241,7 +241,7 @@ the edited version."
     (mapc
      (lambda (b)
        (with-current-buffer b
-	 (if (and (string-match "\\`*Org Edit " (buffer-name))
+	 (if (and (string-match "\\`*Org Src " (buffer-name))
 		  (local-variable-p 'org-edit-src-beg-marker (current-buffer))
 		  (local-variable-p 'org-edit-src-end-marker (current-buffer))
 		  (equal beg org-edit-src-beg-marker)
