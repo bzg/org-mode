@@ -1,3 +1,7 @@
+2009-09-09  Bastien Guerry  <bzg@altern.org>
+
+	* org.el (org-check-agenda-file): Use a more explicit message
+
 2009-09-08  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-exp.el (org-export-remove-special-table-lines): Don't remove
