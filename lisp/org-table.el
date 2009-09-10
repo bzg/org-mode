@@ -614,6 +614,7 @@ When nil, simply write \"#ERROR\" in corrupted fields.")
 		      (re-search-forward "<[rl]?[0-9]+>" end t)))
     (goto-char beg)
     (setq falign (re-search-forward "<[rl][0-9]*>" end t))
+    (goto-char beg)
     ;; Get the rows
     (setq lines (org-split-string
 		 (buffer-substring beg end) "\n"))
