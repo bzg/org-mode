@@ -14617,9 +14617,10 @@ See the individual commands for more information."
   (cond
    ((org-at-table-p) (call-interactively 'org-table-previous-field))
    ((integerp arg)
-    (message "Content view to level: %d" arg)
-    (org-content (prefix-numeric-value arg))
-    (setq org-cycle-global-status 'overview))
+    (let ((arg2 (if org-odd-levels-only (1- (* 2 arg)) arg)))
+      (message "Content view to level: %d" arg)
+      (org-content (prefix-numeric-value arg2))
+      (setq org-cycle-global-status 'overview)))
    (t (call-interactively 'org-global-cycle))))
 
 (defun org-shiftmetaleft ()

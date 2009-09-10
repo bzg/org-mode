@@ -1,3 +1,8 @@
+2009-09-10  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-shifttab): Interpret arg differently when using only
+	odd levels.
+
 2009-09-09  Bastien Guerry  <bzg@altern.org>
 
 	* org.el (org-check-agenda-file): Use a more explicit message
