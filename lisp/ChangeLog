@@ -1,5 +1,8 @@
 2009-09-10  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-latex.el (org-export-latex-first-lines): Fix problem with
+	LaTeX export of first line and selected subtree.
+
 	* org.el (org-shifttab): Interpret arg differently when using only
 	odd levels.
 

@@ -1003,11 +1003,10 @@ If BEG is non-nil, it is the beginning of the region.
 If END is non-nil, it is the end of the region."
   (save-excursion
     (goto-char (or beg (point-min)))
-    (let* ((pt (point)))
-      (or end
-	  (and (re-search-forward "^\\*+ " end t)
-	       (setq end (match-beginning 0)))
-	  (setq end (point-max)))
+    (let* ((pt (point))
+	   (end (if (re-search-forward "^\\*+ " end t)
+		    (goto-char (match-beginning 0))
+		  (goto-char (or end (point-max))))))
       (prog1
 	  (org-export-latex-content
 	   (org-export-preprocess-string
