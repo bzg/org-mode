@@ -1,0 +1,77 @@
+#+TITLE: Tools for publishing Org-babel documentation
+#+OPTIONS: toc:t h:3 num:nil ^:nil
+
+This file contains the code required to export the documentation of Org-babel.
+
+* org-babel-documentation Project
+
+This defines the =org-babel-documentation= project, for ease of
+publishing.  Publish a project with =C-c C-e X=.
+
+#+begin_src emacs-lisp :results silent
+  (setq org-babel-dir (file-name-directory (or load-file-name buffer-file-name)))
+  (unless (boundp 'org-publish-project-alist)
+    (setq org-publish-project-alist nil))
+  (setq org-publish-project-alist
+        (cons
+         `("org-babel-documentation"
+           :base-directory ,org-babel-dir
+           :base-extension "org"
+           :exclude ,(regexp-opt-group '("org-babel.org" "test-export.org" "test-tangle.org" "test-tangle-load.org"))
+           :publishing-directory ,(expand-file-name "doc" org-babel-dir)
+           :index-filename "org-babel-worg.org"
+           :auto-postamble nil
+           :style "<link rel=\"stylesheet\"href=\"stylesheet.css\"type=\"text/css\">"
+           :publishing-function (org-publish-org-to-html org-publish-org-to-org)
+           :plain-source t
+           :htmlized-source t)
+         org-publish-project-alist))
+#+end_src
+
+* org-babel-documentation stylesheet
+
+Calling =org-babel-tangle= in this file will export the css file for
+the Org-babel documentation.
+
+#+begin_src sass :file doc/stylesheet.css :results silent
+  #logo
+    float: right
+    text-align: center
+    max-width: 240px
+    font-size: 8pt
+    margin-left: 1em
+    #attr
+      margin: -0.5em
+  
+  #subtitle
+    float: center
+    text-align: center
+  
+  #content
+    color: #2e2e2e
+  
+  .outline-text-2
+    margin-left: 2em
+  
+  .outline-text-3
+    margin-left: 2em
+  
+  .outline-text-4
+    margin-left: 2em
+  
+  .outline-text-5
+    margin-left: 2em
+  
+  .outline-text-6
+    margin-left: 2em
+  
+  h3
+    margin-left: 1em
+    color: #000
+  
+  a
+    text-decoration: none
+    color: #4a708b
+  a:hover
+    text-decoration: underline
+#+end_src

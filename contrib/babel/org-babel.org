@@ -1,0 +1,5142 @@
+#+TITLE: org-babel --- facilitating communication between programming languages and people
+#+SEQ_TODO: PROPOSED TODO STARTED | DONE DEFERRED REJECTED
+#+OPTIONS:    H:3 num:nil toc:2 \n:nil @:t ::t |:t ^:t -:t f:t *:t TeX:t LaTeX:t skip:nil d:(HIDE) tags:not-in-toc
+#+STARTUP: oddeven hideblocks
+
+#+begin_html 
+  <div id="subtitle">
+    <p>executable source code blocks in org-mode</p>
+  </div>
+  <div id="logo">
+    <p>
+      <img src="images/tower-of-babel.png"  alt="images/tower-of-babel.png" />
+      <div id="attr">from <a href="http://www.flickr.com/photos/23379658@N05/" title=""><b>Martijn Streefkerk</b></a></div>
+    </p>  
+  </div>
+#+end_html
+
+Org-Babel makes source-code blocks in Org-Mode executable and allows
+data to pass seamlessly between different programming languages,
+Org-Mode constructs (tables, file links, example text) and interactive
+comint buffers.
+
+In this document:
+- The [[* Introduction][Introduction]] :: provides a brief overview of the design and use
+     of Org-Babel including tutorials and examples.
+- In [[* Getting started][Getting Started]] :: find instructions for installing org-babel
+     into your emacs configuration.
+- The [[* Tasks][Tasks]] :: section contains current and past tasks roughly ordered
+     by TODO state, then importance or date-completed.  This would be
+     a good place to suggest ideas for development.
+- The [[* Bugs][Bugs]] :: section contains bug reports.
+- The [[* Tests][Tests]] :: section consists of a large table which can be
+     evaluated to run Org-Babel's functional test suite.  This
+     provides a good overview of the current functionality with
+     pointers to example source blocks.
+- The [[* Sandbox][Sandbox]] :: demonstrates much of the early/basic functionality
+     through commented source-code blocks.
+
+Also see the [[file:library-of-babel.org][Library of Babel]], an extensible collection of ready-made
+and easily-shortcut-callable source-code blocks for handling common
+tasks.
+
+* Introduction
+
+Org-Babel enables *communication* between programming languages and
+between people.
+
+Org-Babel provides:
+- communication between programs :: Data passes seamlessly between
+     different programming languages, Org-Mode constructs (tables,
+     file links, example text) and interactive comint buffers.
+- communication between people :: Data and calculations are embedded
+     in the same document as notes explanations and reports.
+
+** communication between programs
+
+Org-Mode supports embedded blocks of source code (in any language)
+inside of Org documents.  Org-Babel allows these blocks of code to be
+executed from within Org-Mode with natural handling of their inputs
+and outputs.
+
+*** simple execution
+with both scalar, file, and table output
+
+*** reading information from tables
+
+*** reading information from other source blocks (disk usage in your home directory)
+
+This will work for Linux and Mac users, not so sure about shell
+commands for windows users.
+
+To run place the cursor on the =#+begin_src= line of the source block
+labeled directory-pie and press =\C-c\C-c=.
+
+#+srcname: directories
+#+begin_src bash :results replace
+cd ~ && du -sc * |grep -v total
+#+end_src
+
+#+resname: directories
+|       64 | "Desktop"   |
+| 11882808 | "Documents" |
+|  8210024 | "Downloads" |
+|   879800 | "Library"   |
+|    57344 | "Movies"    |
+|  7590248 | "Music"     |
+|  5307664 | "Pictures"  |
+|        0 | "Public"    |
+|      152 | "Sites"     |
+|        8 | "System"    |
+|       56 | "bin"       |
+|  3274848 | "mail"      |
+|  5282032 | "src"       |
+|     1264 | "tools"     |
+
+#+srcname: directory-pie
+#+begin_src R :var dirs = directories :session R-pie-example
+pie(dirs[,1], labels = dirs[,2])
+#+end_src
+
+
+
+
+
+
+*** operations in/on tables
+
+#+tblname: grades-table
+| student | grade | letter |
+|---------+-------+--------|
+|       1 |    99 | A      |
+|       2 |    59 | F      |
+|       3 |    75 | C      |
+|       4 |    15 | F      |
+|       5 |     7 | F      |
+|       6 |    13 | F      |
+#+TBLFM: $2='(sbe random-score-generator)::$3='(sbe assign-grade (score $2))
+
+#+srcname: assign-grade
+#+begin_src ruby :var score=99
+case score
+   when 0..59: "F"
+   when 60..69: "D"
+   when 70..79: "C"
+   when 80..89: "B"
+   when 90..100: "A"
+   else "Invalid Score"
+end
+#+end_src
+
+#+srcname: random-score-generator
+#+begin_src ruby 
+rand(100)
+#+end_src
+
+#+srcname: show-distribution
+#+begin_src R :var grades=grades-table :session *R*
+hist(grades$grade)
+#+end_src
+
+
+
+
+
+** communication between people
+Quick overview of Org-Mode's exportation abilities, with links to the
+online Org-Mode documentation, a focus on source-code blocks, and the
+exportation options provided by Org-Babel.
+
+*** Interactive tutorial
+This would demonstrate applicability to Reproducible Research, and
+Literate Programming.
+
+*** Tests embedded in documentation
+org-babels own functional tests are contained in a large org-mode
+table, allowing the test suite to be run be evaluation of the table
+and the results to be collected in the same table.
+
+*** Emacs initialization files stored in Org-Mode buffers
+Using `org-babel-tangle' it is possible to embed your Emacs
+initialization into org-mode files.  This allows for folding,
+note-taking, todo's etc... embedded with the source-code of your Emacs
+initialization, and through org-mode's publishing features aids in
+sharing your customizations with others.
+
+It may be worthwhile to create a fork of Phil Hagelberg's
+[[http://github.com/technomancy/emacs-starter-kit/tree/master][emacs-starter-kit]] which uses literate org-mode files for all of the
+actual elisp customization.  These org-mode files could then be
+exported to html and used to populate the repositories wiki on [[http://github.com/][github]].
+
+
+** features
+
+*** code evaluation (comint buffer sessions and external processes)
+There are two main ways to evaluate source blocks with org-babel.
+
+- external :: By default (if the =:session= header argument is not
+              present) all source code blocks are evaluated in
+              external processes.  In these cases an external process
+              is used to evaluate the source-code blocks.
+- session :: Session based evaluation uses persistent sessions in
+             comint buffers.  Sessions can be used across multiple
+             source blocks setting and accessing variables in the
+             global environment.
+
+             Evaluating source blocks in sessions also allows for
+             interaction with the code.  To jump to the session of a
+             source block use the `org-babel-pop-to-session' command
+             or press =M-[down]= while inside of a source code block.
+             When called with a prefix argument
+             `org-babel-pop-to-session' will evaluate all header
+             arguments before jumping to the source-code block.
+
+*** results (values and outputs)
+Either the *value* or the *output* of source code blocks can be
+collected after evaluation.
+
+- value :: The default way to collect results from a source-code block
+           is to return the value of the last statement in the block.
+           This can be thought of as the return value of the block.
+           In this case any printed output of the block is ignored.
+           This can be though of a similar to a "functional" value of
+           evaluation.
+- output :: Another way of generating results from a source-code block
+            is to collect the output generated by the execution of the
+            block.  In this case all printed output is collected
+            throughout the execution of the block.  This can be
+            thought of as similar to a "script" style of evaluation.
+
+
+* Getting started
+Add the following lines to your .emacs, replacing the path as
+appropriate. A good place to check that things are up and running
+would then be [[#sandbox][the sandbox]].
+#+begin_src emacs-lisp
+  (add-to-list 'load-path "/path/to/org-babel/lisp")
+  (require 'org-babel-init)
+#+end_src
+
+  
+* Tasks [46/65]
+** TODO allow tangle to be called on a single source block
+this should have a reasonable binding
+
+** STARTED share org-babel [1/7]
+how should we share org-babel?
+*** DONE post to org-mode
+*** TODO post to ess mailing list
+    I'd like to not rush in to this, get some feedback from the org
+    list first and let my R usage of org-babel settle down. [DD]
+*** STARTED create a org-babel page on worg
+**** TODO Getting hold of it instructions
+     - What about non-git users?
+     - Are we moving/copying to contrib/?
+**** TODO Fixed width HTML output created by =...= is ugly!
+*** TODO create a short screencast demonstrating org-babel in action
+*** PROPOSED a peer-reviewed publication?
+
+    The following notes are biased towards statistics-oriented
+    journals because ESS and Sweave are written by people associated
+    with / in statistics departments. But I am sure there are suitable
+    journals out there for an article on using org mode for
+    reproducible research (and literate programming etc).
+
+    Clearly, we would invite Carsten to be involved with this.
+
+     ESS is described in a peer-reviewed journal article:
+     Emacs Speaks Statistics: A Multiplatform, Multipackage Development Environment for Statistical Analysis  [Abstract]
+     Journal of Computational & Graphical Statistics 13(1), 247-261
+     Rossini, A.J, Heiberger, R.M., Sparapani, R.A., Maechler, M., Hornik, K. (2004) 
+     [[http://www.amstat.org/publications/jcgs.cfm][Journal of Computational and Graphical Statistics]]
+
+     Also [[http://www.amstat.org/publications/jss.cfm][Journal of Statistical Software]] Established in 1996, the
+     Journal of Statistical Software publishes articles, book reviews,
+     code snippets, and software reviews. The contents are freely
+     available online. For both articles and code snippets, the source
+     code is published along with the paper.
+
+    Sweave has a paper: 
+
+    Friedrich Leisch and Anthony J. Rossini. Reproducible statistical
+    research. Chance, 16(2):46-50, 2003. [ bib ]
+
+    also
+
+    Friedrich Leisch. Sweave: Dynamic generation of statistical reports
+    using literate data analysis. In Wolfgang Härdle and Bernd Rönz,
+    editors, Compstat 2002 - Proceedings in Computational Statistics,
+    pages 575-580. Physica Verlag, Heidelberg, 2002. ISBN 3-7908-1517-9.
+
+    also
+
+    We could also look at the Journals publishing these [[http://www.reproducibleresearch.net/index.php/RR_links#Articles_about_RR_.28chronologically.29][Reproducible
+    Research articles]].
+    
+*** PROPOSED an article in [[http://journal.r-project.org/][The R Journal]]
+This looks good.  It seems that their main topic to software tools for
+use by R programmers, and Org-babel is certainly that.
+
+*** existing similar tools
+try to collect pointers to similar tools 
+
+Reproducible Research
+- [[http://en.wikipedia.org/wiki/Sweave][Sweave]]
+
+Literate Programming
+- [[http://www.cs.tufts.edu/~nr/noweb/][Noweb]]
+- [[http://www-cs-faculty.stanford.edu/~knuth/cweb.html][Cweb]]
+- [[http://www.lri.fr/~filliatr/ocamlweb/][OCamlWeb]]
+
+Meta Functional Programming
+- ?
+
+Programmable Spreadsheet
+- ?
+
+*** examples
+we need to think up some good examples
+
+**** interactive tutorials
+This could be a place to use [[* org-babel assertions][org-babel assertions]].
+
+for example the first step of a tutorial could assert that the version
+of the software-package (or whatever) is equal to some value, then
+source-code blocks could be used with confidence (and executed
+directly from) the rest of the tutorial.
+
+**** answering a text-book question w/code example
+org-babel is an ideal environment enabling both the development and
+demonstrationg of the code snippets required as answers to many
+text-book questions.
+
+**** something using tables
+maybe something along the lines of calculations from collected grades
+
+**** file sizes
+Maybe something like the following which outputs sizes of directories
+under the home directory, and then instead of the trivial =emacs-lisp=
+block we could use an R block to create a nice pie chart of the
+results.
+
+#+srcname: sizes
+#+begin_src bash :results replace
+du -sc ~/*
+#+end_src
+
+#+begin_src emacs-lisp :var sizes=sizes :results replace
+(mapcar #'car sizes)
+#+end_src
+*** Answer to question on list
+From: Hector Villafuerte <hectorvd@gmail.com>
+Subject: [Orgmode] Merge tables
+Date: Wed, 19 Aug 2009 10:08:40 -0600
+To: emacs-orgmode@gnu.org
+
+Hi,
+I've just discovered Org and are truly impressed with it; using it for
+more and more tasks.
+
+Here's what I want to do: I have 2 tables with the same number of rows
+(one row per subject). I would like to make just one big table by
+copying the second table to the right of the first one. This is a
+no-brainer in a spreadsheet but my attempts in Org have failed. Any
+ideas?
+
+By the way, thanks for this great piece of software!
+-- 
+ hector
+
+**** Suppose the tables are as follows
+#+tblname: tab1
+| a | b | c |
+|---+---+---|
+| 1 | 2 | 3 |
+| 7 | 8 | 9 |
+
+#+tblname: tab2
+|  d |  e |  f |
+|----+----+----|
+|  4 |  5 |  6 |
+| 10 | 11 | 12 |
+
+**** Here is an answer using R in org-babel
+
+#+srcname: column-bind(a=tab1, b=tab2)
+#+begin_src R :colnames t
+cbind(a, b)
+#+end_src
+
+#+resname: column-bind
+| "a" | "b" | "c" | "d" | "e" | "f" |
+|-----+-----+-----+-----+-----+-----|
+|   1 |   2 |   3 |   4 |   5 |   6 |
+|   7 |   8 |   9 |  10 |  11 |  12 |
+
+
+**** Alternatively
+     Use org-table-export, do it in external spreadsheet software,
+     then org-table-import
+** TODO sha1 hash based caching
+   :PROPERTIES:
+   :CUSTOM_ID: sha1-caching
+   :END:
+
+#+begin_quote 
+I wonder if we should consider some cashing of images, also for
+export.  I think we could have an alist with sha1 hashes as keys and
+image files as values.  The sha1 hash could be made from the entire
+code and the command that is used to create the image..
+
+-- Carsten
+#+end_quote
+
+
+#+begin_quote 
+(sha1 stuff) seems to work.
+
+org-feed.el has a (require 'sha1) and org-publish.el uses it too.
+
+-- Bernt
+#+end_quote
+
+** TODO support for working with =*Org Edit Src Example*= buffers [4/7]
+*** STARTED Patch against org source. 
+    I've worked on several related changes to source code edit buffer
+    behaviour in the org core.  My current patch (below) does the
+    following. Detailed explanation / working notes are below.
+    - C-x s offers to save edit buffers
+    - C-x C-c offers to save edit buffers
+    - C-x k warns that you're killing an edit buffer
+    - If you do kill an edit buffer, the overlay in the parent buffer is removed
+    - Edit buffers are named *Org Src <orgbuf>[<lang>]*, where
+      <orgbuf> is the name of the org-mode buffer containing this
+      source code block, and lang is the language major mode. The
+      latter might be unnecessary?
+
+    These changes were added to the main org repository in commit
+    4b6988bf36cb458c9d113ee4332e016990c1eb04
+    
+**** Detailed working notes to go with that patch
+***** Recap of current org-src-mode
+      
+      If you use C-c ' to work on code in a begin_source block, the code
+      buffer is put in minor mode org-src-mode, which features the
+      following two useful key-bindings:
+
+      | C-x s | org-edit-src-save | save the code in the source code block in the parent org file |
+      | C-c ' | org-edit-src-exit | return to the parent org file with new code                   |
+
+      Furthermore, while the edit buffer is alive, the originating code
+      block is subject to a special overlay which links to the edit
+      buffer when you click on it.
+
+      This is all excellent, and I use it daily, but I think there's
+      still a couple of improvements that we should make.
+
+***** Proposed bug I
+      C-x k kills the buffer without questions; the overlay remains, but
+      now links to a deleted buffer.
+***** Proposed bug II
+      C-x C-c kills a modified edit buffer silently, without offering to
+      save your work. I have lost work like that a number of times
+      recently.
+***** Proposed bug III
+      C-x s does not offer to save a modified edit buffer
+***** Notes on solution
+****** write-contents-functions
+       A good start seems to be to use org-src-mode-hook to add
+       org-edit-src-save to the write-contents-functions list. This
+       means that when it comes to saving, org-edit-src-save will be
+       called and no subsequent attempt will be made to save the buffer
+       in the normal way. (This should obviate the remapping of C-x C-s
+       to org-edit-src-save in org-src.el)
+****** buffer-offer-save
+       We also want to set this to t.
+
+****** Where does this get us?
+
+       - C-x s still does *not* offer to save the edit buffer. That's
+	 because buffer-file-name is nil.
+       
+       - C-x C-c does ask us whether we want to save the
+	 edit buffer. However, since buffer-file-name is nil it asks us
+	 for a file name. The check in org-edit-src-exit throws an error
+	 unless the buffer is named '* Org Edit '...
+
+       - C-x k kills the buffer silently, leaving a broken overlay
+	 link. If buffer-file-name were set, it would have warned that
+	 the buffer was modified.
+
+****** buffer-file-name
+       So, that all suggests that we need to set buffer-file-name, even
+       though we don't really want to associate this buffer with a file
+       in the normal way. As for the file name, my current suggestion
+       is parent-org-filename[edit-buffer-name].
+       
+       [I had to move the (org-src-mode) call to the end of
+       org-edit-src-code to make sure that the required variables were
+       defined when the hook was called.]
+       
+****** And so where are we now?
+       - C-x s *does* offer to save the edit buffer, but in saving
+	 produces a warning that the edit buffer is modified.
+       - C-x k now gives a warning that the edit buffer is modified
+	 (even if it's not).
+       - C-x C-c is working as desired, except that again we get
+	 warnings that the edit buffer is modified, once when we save,
+	 and again just before exiting emacs.
+       - And C-c ' now issues a warning that the edit buffer is
+	 modified when we leave it, which we don't want.
+****** So, we need to get rid of the buffer modification warnings.
+       I've made buffer-file-name nil inside the let binding in
+       org-edit-src-exit.
+****** And?
+       - C-x s behaves as desired, except that as was already the case,
+	 the edit buffer is always considered modified, and so repeated
+	 invocations keep saving it.
+       - As was already the case, C-x k always gives a warning that the
+	 edit buffer has been modified.
+       - C-x C-c is as desired (offers to save the edit buffer) except
+	 that it warns of the modified buffer just before exiting.
+       - C-c ' is as it should be (silent)
+***** Conclusion
+      We've got the desired behaviour, at the cost of being forced to
+      assign a buffer-file-name to the edit buffer. The consequence is
+      that the edit buffer is considered to always be modified, since
+      a file of that name is never actually written to (doesn't even
+      exist). I couldn't see a way to trick emacs into believing that
+      the buffer was unmodified since last save. But in any case, I
+      think there's an argument that these modifications warnings are
+      a good thing, because one should not leave active edit buffers
+      around: you should always have exited with C-c ' first.
+
+**** TODO Doesn't currently work with ess-load-file
+     ess-load-file contains these two lines
+#+begin_src emacs-lisp
+  (let ((source-buffer (get-file-buffer filename)))
+    (if (ess-check-source filename)
+	(error "Buffer %s has not been saved" (buffer-name source-buffer)))
+#+end_src
+
+which have the effect of, in the course of saving, deleting the buffer
+`source-buffer', and then attempting to use it subsequently. The only
+solution I have thought of so far is submitting a patch to ess which
+would, e.g. reverse the order of those two lines (perform the error
+check outside the let binding).
+
+In fact, even after doing that there are further problems generated by
+the fact that the edit buffer has an associated filename for which the
+file doesn't exist. I think this worked OK in the past when the edit
+buffer had no associated filename. So this is a problem which needs
+addressing. Maybe defadvice could be used on ess functions where
+necessary to make org/org-babel play nicely with ess?
+
+**** TODO C-x s steals focus
+     With two modified edit buffers open, make one of them the current
+     buffer and issue C-x s. It will offer to save both of them, but
+     the second one to be saved will become the current buffer at the
+     end.
+*** DONE name edit buffer according to #+srcname (and language?)
+    See above patch agains org.
+*** DONE optionally evaluate header references when we switch to =*Org Edit Src*= buffer
+That seems to imply that the header references need to be evaluated
+and transformed into the target language object when we hit C-c ' to
+enter the *Org Edit Src* buffer [DED]
+
+Good point, I heartily agree that this should be supported [Eric]
+
+(or at least before the first time we attempt to evaluate code in that
+buffer -- I suppose there might be an argument for lazy evaluation, in
+case someone hits C-c ' but is "just looking" and not actually
+evaluating anything.) Of course if evaluating the reference is
+computationally intensive then the user might have to wait before they
+get the *Org Edit Src* buffer. [DED]
+
+I fear that it may be hard to anticipate when the references will be
+needed, some major-modes do on-the-fly evaluation while the buffer is
+being edited.  I think that we should either do this before the buffer
+is opened or not at all, specifically I think we should resolve
+references if the user calls C-c ' with a prefix argument.  Does that
+sound reasonable? [Eric]
+
+Yes [Dan]
+
+[Dan] So now that we have org-src-mode and org-src-mode-hook, I guess
+org-babel should do this by using the hook to make sure that, when C-c
+C-' is issued on a source block, any references are resolved and
+assignments are made in the appropriate session.
+
+#+tblname: my-little-table
+| 1 | 2 |
+| 3 | 4 |
+
+#+srcname: resolve-vars-on-edit
+#+begin_src ruby :var table=my-little-table :results silent :session test
+  table.size.times.do |n|
+    puts n
+  end
+#+end_src
+
+*** TODO set buffer-local-process variables appropriately [DED]
+    I think something like this would be great. You've probably
+already thought of this, but just to note it down: it would be really
+nice if org-babel's notion of a buffer's 'session/process' played
+nicely with ESS's notion of the buffer's session/process. ESS keeps
+the current process name for a buffer in a buffer-local variable
+ess-local-process-name. So one thing we will probably want to do is
+make sure that the *Org Edit Src Example* buffer sets that variable
+appropriately. [DED]
+
+I had not thought of that, but I agree whole heartedly. [Eric]
+
+Once this is done every variable should be able to dump regions into
+their inferior-process buffer using major-mode functions.
+*** REJECTED send code to inferior process
+Another thought on this topic: I think we will want users to send
+chunks of code to the interpreter from within the *Org Edit Src*
+buffer, and I think that's what you have in mind already. In ESS that
+is done using the ess-eval-* functions. [DED]
+
+I think we can leave this up to the major-mode in the source code
+buffer, as almost every source-code major mode will have functions for
+doing things like sending regions to the inferior process.  If
+anything we might need to set the value of the buffer local inferior
+process variable. [Eric]
+
+*** DONE some possible requests/proposed changes for Carsten [4/4]
+    While I remember, some possible requests/proposed changes for Carsten
+    come to mind in that regard:
+
+**** DONE Remap C-x C-s to save the source to the org buffer?
+     I've done this personally and I find it essential. I'm using 
+#+begin_src emacs-lisp
+(defun org-edit-src-save ()
+  "Update the parent org buffer with the edited source code, save
+the parent org-buffer, and return to the source code edit
+buffer."
+  (interactive)
+  (let ((p (point)))
+    (org-edit-src-exit)
+    (save-buffer)
+    (org-edit-src-code)
+    (goto-char p)))
+
+(define-key org-exit-edit-mode-map "\C-x\C-s" 'org-edit-src-save)
+#+end_src     
+    which seems to work.
+
+I think this is great, but I think it should be implemented in the
+org-mode core
+
+**** DEFERRED Rename buffer and minor mode?
+     Something shorter than *Org Edit Src Example* for the buffer
+     name. org-babel is bringing org's source code interaction to a
+     level of maturity where the 'example' is no longer
+     appropriate. And if further keybindings are going to be added to
+     the minor mode then maybe org-edit-src-mode is a better name than
+     org-exit-edit-mode.
+
+     Maybe we should name the buffer with a combination of the source
+     code and the session.  I think that makes sense.
+
+     [ES] Are you also suggesting a new org-edit-src minor mode?
+     [DED] org-exit-edit-mode is a minor mode that already exists:
+
+     Minor mode installing a single key binding, "C-c '" to exit special edit.
+
+     org-edit-src-save now has a binding in that mode, so I guess all
+     I'm saying at this stage is that it's a bit of a misnomer. But
+     perhaps we will also have more functionality to add to that minor
+     mode, making it even more of a misnomer. Perhaps something like
+     org-src-mode would be better.
+**** DONE Changed minor mode name and added hooks
+     
+**** DONE a hook called when the src edit buffer is created
+     This should be implemented in the org-mode core
+** TODO resolve references to other org buffers/files
+   This would allow source blocks to call upon tables, source-blocks,
+   and results in other org buffers/files.
+   
+   See...
+   - [[file:lisp/org-babel-ref.el::TODO%20allow%20searching%20for%20names%20in%20other%20buffers][org-babel-ref.el:searching-in-other-buffers]]
+   - [[file:lisp/org-babel.el::defun%20org-babel%20find%20named%20result%20name][org-babel.el#org-babel-find-named-result]]
+** TODO resolve references to other non-org files
+   - tabular data in .csv, .tsv etc format
+   - files of interpreted code: anything stopping us giving such files
+     similar status to a source code block?
+   - Would be nice to allow org and non-org files to be remote
+** TODO Finalise behaviour regarding vector/scalar output
+*** DONE Stop spaces causing vector output
+This simple example of multilingual chaining produces vector output if
+there are spaces in the message and scalar otherwise.
+
+[Not any more]
+
+#+srcname: msg-from-R(msg=msg-from-python)
+#+begin_src R
+paste(msg, "und R", sep=" ")
+#+end_src
+
+#+resname:
+: org-babel speaks elisp y python und R
+
+#+srcname: msg-from-python(msg=msg-from-elisp)
+#+begin_src python
+msg + " y python"
+#+end_src
+
+#+srcname: msg-from-elisp(msg="org-babel speaks")
+#+begin_src emacs-lisp
+(concat msg " elisp")
+#+end_src
+** TODO command line execution
+Allow source code blocks to be called form the command line.  This
+will be easy using the =sbe= function in [[file:lisp/org-babel-table.el][org-babel-table.el]].
+
+This will rely upon [[* resolve references to other buffers][resolve references to other buffers]].
+
+** TODO inline source code blocks [3/5]
+   Like the =\R{ code }= blocks
+
+   not sure what the format should be, maybe just something simple
+   like =src_lang[]{}= where lang is the name of the source code
+   language to be evaluated, =[]= is optional and contains any header
+   arguments and ={}= contains the code.
+
+   (see [[* (sandbox) inline source blocks][the-sandbox]])
+
+*** DONE evaluation with \C-c\C-c
+Putting aside the header argument issue for now we can just run these
+with the following default header arguments
+- =:results= :: silent
+- =:exports= :: results
+
+*** DONE inline exportation
+Need to add an interblock hook (or some such) through org-exp-blocks
+*** DONE header arguments
+We should make it possible to use header arguments.
+
+*** TODO fontification
+we should color these blocks differently
+
+*** TODO refine html exportation
+should use a span class, and should show original source in tool-tip
+** TODO LoB: re-implement plotting and analysis functions from org-R
+   I'll do this soon, now that we things are a bit more settled and we
+   have column names in R.
+** TODO Improved error checking
+   E.g. when trying to execute sass block, I did not have sass
+   installed, and so shell-command returned code 127, but org-babel
+   did not warn me that anything had gone wrong.
+*** DEFERRED figure out how to handle errors during evaluation
+    I expect it will be hard to do this properly, but ultimately it
+    would be nice to be able to specify somewhere to receive STDERR,
+    and to be warned if it is non-empty.
+
+    Probably simpler in non-session evaluation than session? At least
+    the mechanism will be different I guess.
+
+    R has a try function, with error handling, along the lines of
+    python. I bet ruby does too. Maybe more of an issue for functional
+    style; in my proposed scripting style the error just gets dumped to
+    the org buffer and the user is thus alerted.
+
+    For now I think the current behavior of returning any error
+    messages generated by the source language is sufficient.
+** PROPOSED Control precision of numerical output
+   Does org have an option controlling precision of numbers in tables?
+** PROPOSED allow `anonymous' function block with function call args?
+   My question here is simply whether we're going to allow
+#+begin_src python(arg=ref)
+# whatever
+#+end_src
+
+but with preference given to
+#+srcname blockname(arg=ref)
+** PROPOSED allow :result as synonym for :results?
+** PROPOSED allow 'output mode to return stdout as value?
+   Maybe we should allow this. In fact, if block x is called
+   with :results output, and it references blocks y and z, then
+   shouldn't the output of x contain a concatenation of the outputs of
+   y and z, together with x's own output? That would raise the
+   question of what happens if y is defined with :results output and z
+   with :results value. I guess z's (possibly vector/tabular) output
+   would be inside a literal example block containing the whole lot.
+** PROPOSED make tangle files read-only?
+   With a file-local variable setting, yea that makes sense.  Maybe
+   the header should reference the related org-mode file.
+** PROPOSED Creating presentations
+   The [[mairix:t:@@9854.1246500519@gamaville.dokosmarshall.org][recent thread]] containing posts by Nick Dokos and Sebastian
+   Vaubán on exporting to beamer looked very interesting, but I
+   haven't had time to try it out yet. I would really like it if,
+   eventually, we can generate a presentation (with graphics generated
+   by code blocks) from the same org file that contains all the notes
+   and code etc. I just wanted that to be on record in this document;
+   I don't have anything more profound to say about it at the moment,
+   and I'm not sure to what extent it is an org-babel issue.
+** PROPOSED conversion between org-babel and noweb (e.g. .Rnw) format
+   I haven't thought about this properly. Just noting it down. What
+   Sweave uses is called "R noweb" (.Rnw).
+   
+   I found a good description of noweb in the following article (see
+   the [[http://www.cs.tufts.edu/~nr/pubs/lpsimp.pdf][pdf]]).
+   
+   I think there are two parts to noweb, the construction of
+   documentation and the extraction of source-code (with notangle).
+
+   *documentation*: org-mode handles all of our documentation needs in
+   a manner that I believe is superior to noweb.
+   
+   *source extraction* At this point I don't see anyone writing large
+   applications with 100% of the source code contained in org-babel
+   files, rather I see org-babel files containing things like
+   - notes with active code chunks
+   - interactive tutorials
+   - requirements documents with code running test suites
+   - and of course experimental reports with the code to run the
+     experiment, and perform analysis
+
+   Basically I think the scope of the programs written in org-babel
+   (at least initially) will be small enough that it wont require the
+   addition of a tangle type program to extract all of the source code
+   into a running application.
+
+   On the other hand, since we already have named blocks of source
+   code which reference other blocks on which they rely, this
+   shouldn't be too hard to implement either on our own, or possibly
+   relying on something like noweb/notangle.
+
+** PROPOSED support for passing paths to files between source blocks
+Maybe this should be it's own result type (in addition to scalars and
+vectors).  The reason being that some source-code blocks (for example
+ditaa or anything that results in the creation of a file) may want to
+pass a file path back to org-mode which could then be inserted into
+the org-mode buffer as a link to the file...
+
+This would allow for display of images upon export providing
+functionality similar to =org-exp-blocks= only in a more general
+manner.
+** DEFERRED optional timestamp for output
+   *DEFERRED*: I'm deferring this in deference to the better caching
+   system proposed by Carsten. (see [[sha1-caching]])
+
+   Add option to place an (inactive) timestamp at the #+resname, to
+   record when that output was generated.
+
+*** source code block timestamps (optional addition)
+    [Eric] If we did this would we then want to place a timestamp on the
+    source-code block, so that we would know if the results are
+    current or out of date?  This would have the effect of caching the
+    results of calculations and then only re-running if the
+    source-code has changed.  For the caching to work we would need to
+    check not only the timestamp on a source-code block, but also the
+    timestamps of any tables or source-code blocks referenced by the
+    original source-code block.
+
+    [Dan] I do remember getting frustrated by Sweave always having to
+    re-do everything, so this could be desirable, as long as it's easy
+    to over-ride of course. I'm not sure it should be the default
+    behaviour unless we are very confident that it works well.
+
+**** maintaining source-code block timestamps
+     It may make sense to add a hook to `org-edit-special' which could
+     update the source-code blocks timestamp.  If the user edits the
+     contents of a source-code block directly I can think of no
+     efficient way of maintaining the timestamp.
+** DEFERRED source-name visible in LaTeX and html exports
+Maybe this should be done in backend specific manners.
+
+The listings package may provide for naming a source-code block...
+
+Actually there is no obvious simple and attractive way to implement
+this.  Closing this issue for now.
+** DEFERRED Support rownames and other org babel table features?
+
+   The full org table features are detailed in the manual [[http://orgmode.org/manual/Advanced-features.html#Advanced-features][here]].
+
+*** rownames
+   Perhaps add a :rownames header arg. This would be an integer
+    (usually 1) which would have the effect of post-processing all the
+    variables created in the R session in the following way: if the
+    integer is j, set the row names to the contents of column j and
+    delete column j. Perhaps it is artificial to allow this integer to
+    take any value other than 1. The default would be nil which would
+    mean no such behaviour.
+
+    Actually I don't know about that. If multiple variables are passed
+    in, it's not appropriate to alter them all in the same way. The
+    rownames specification would normally refer to just one of the
+    variables. For now maybe just say this has to be done in R. E.g.
+
+#+TBLNAME: sample-sizes
+  | collection      | size | exclude | include | exclude2 | include2 |
+  |-----------------+------+---------+---------+----------+----------|
+  | 58C             | 2936 |       8 |    2928 |      256 |     2680 |
+  | MS              | 5852 |     771 |    5081 |      771 |     5081 |
+  | NBS             | 2929 |      64 |    2865 |      402 |     2527 |
+  | POBI            | 2717 |       1 |    2716 |        1 |     2716 |
+  | 58C+MS+NBS+POBI |      |         |   13590 |          |    13004 |
+#+TBLFM: @2$4=@2$2 - @2$3::@2$6=@2$2 - @2$5::@3$4=@3$2-@3$3::@3$6=@3$2 - @3$5::@4$4=@4$2 - @4$3::@4$6=@4$2 - @4$5::@5$4=@5$2-@5$3::@5$6=@5$2 - @5$5::@6$4=vsum(@2$4..@5$4)::@6$6=vsum(@2$6..@5$6)
+
+#+srcname: make-size-table(size=sample-sizes)
+#+begin_src R 
+  rownames(size) <- size[,1]
+  size <- size[,-1]
+#+end_src
+
+
+*** Old notes
+    [I don't think it's as problematic as this makes out]
+    This is non-trivial, but may be worth doing, in particular to
+    develop a nice framework for sending data to/from R.
+**** Notes
+    In R, indexing vector elements, and rows and columns, using
+    strings rather than integers is an important part of the
+    language.
+ - elements of a vector may have names
+ - matrices and data.frames may have "column names" and "row names"
+   which can be used for indexing
+ - In a data frame, row names *must* be unique
+Examples
+#+begin_example
+> # a named vector
+> vec <- c(a=1, b=2)
+> vec["b"]
+b 
+2 
+> mat <- matrix(1:4, nrow=2, ncol=2, dimnames=list(c("r1","r2"), c("c1","c2")))
+> mat
+   c1 c2
+r1  1  3
+r2  2  4
+> # The names are separate from the data: they do not interfere with operations on the data
+> mat * 3
+   c1 c2
+r1  3  9
+r2  6 12
+> mat["r1","c2"]
+[1] 3
+> df <- data.frame(var1=1:26, var2=26:1, row.names=letters)
+> df$var2
+ [1] 26 25 24 23 22 21 20 19 18 17 16 15 14 13 12 11 10  9  8  7  6  5  4  3  2  1
+> df["g",]
+  var1 var2
+g    7   20
+#+end_example
+
+ So it's tempting to try to provide support for this in org-babel. For example
+ - allow R to refer to columns of a :var reference by their names
+ - When appropriate, results from R appear in the org buffer with "named
+   columns (and rows)"
+
+   However none (?) of the other languages we are currently supporting
+   really have a native matrix type, let alone "column names" or "row
+   names". Names are used in e.g. python and perl to refer to entries
+   in dicts / hashes.
+
+   It currently seems to me that support for this in org-babel would
+   require setting rules about when org tables are considered to have
+   named columns/fields, and ensuring that (a) languages with a notion
+   of named columns/fields use them appropriately and (b) languages
+   with no such notion do not treat then as data.
+
+ - Org allows something that *looks* like column names to be separated
+   by a hline
+ - Org also allows a row to *function* as column names when special
+   markers are placed in the first column. An hline is unnecessary
+   (indeed hlines are purely cosmetic in org [correct?]
+ - Org does not have a notion of "row names" [correct?]
+    
+   The full org table functionality exeplified [[http://orgmode.org/manual/Advanced-features.html#Advanced-features][here]] has features that
+   we would not support in e.g. R (like names for the row below).
+   
+**** Initial statement: allow tables with hline to be passed as args into R
+   This doesn't seem to work at the moment (example below). It would
+   also be nice to have a natural way for the column names of the org
+   table to become the column names of the R data frame, and to have
+   the option to specify that the first column is to be used as row
+   names in R (these must be unique). But this might require a bit of
+   thinking about.
+
+
+#+TBLNAME: egtable
+| col1 | col2    | col3 |
+|------+---------+------|
+|    1 | 2       |    3 |
+|    4 | schulte |    6 |
+
+#+TBLNAME: egtable2
+| 1 |         2 | 3 |
+| 4 | schulte   | 6 |
+
+#+begin_src R :var tabel=egtable :colnames t
+tabel
+#+end_src
+
+#+resname:
+| "col1" | "col2"    | "col3" |
+|--------+-----------+--------|
+|      1 | 2         |      3 |
+|      4 | "schulte" |      6 |
+
+
+Another example is in the [[*operations%20in%20on%20tables][grades example]].
+** DEFERRED use textConnection to pass tsv to R?
+   When passing args from the org buffer to R, the following route is
+   used: arg in buffer -> elisp -> tsv on file -> data frame in R. I
+   think it would be possible to avoid having to write to file by
+   constructing an R expression in org-babel-R-assign-elisp, something
+   like this
+
+#+begin_src emacs-lisp
+(org-babel-R-input-command
+ (format  "%s <- read.table(textConnection(\"%s\"), sep=\"\\t\", as.is=TRUE)"
+	  name (orgtbl-to-tsv value '(:sep "\t" :fmt org-babel-R-quote-tsv-field))))
+#+end_src
+
+   I haven't tried to implement this yet as it's basically just
+   fiddling with something that works. The only reason for it I can
+   think of would be efficiency and I haven't tested that.
+
+   This Didn't work after an initial test.  I still think this is a
+   good idea (I also think we should try to do something similar when
+   writing out results frmo R to elisp) however as it wouldn't result
+   in any functional changes I'm bumping it down to deferred for
+   now. [Eric]
+
+for quick tests
+
+#+tblname: quick-test
+| 1 | 2 | 3 |
+
+#+srcname: quick-test-src-blk
+#+begin_src R :var vec=quick-test
+mean(mean(vec))
+#+end_src
+
+#+resname:
+: 2
+
+
+: 2
+
+** DEFERRED Rework Interaction with Running Processes [2/5]
+*** DONE robust to errors interrupting execution
+
+#+srcname: long-runner-ruby
+#+begin_src ruby :results silent
+  sleep(10)
+  :patton_is_an_grumpy
+#+end_src
+
+*** DEFERRED use =C-g= keyboard-quit to push processing into the background
+This may be possible using the `run-with-timer' command.
+
+I have no idea how this could work...
+
+#+srcname: long-runner-ruby
+#+begin_src ruby :results silent
+  sleep(10)
+  :patton_is_an_grumpy
+#+end_src
+
+*** TODO ability to select which of multiple sessions is being used
+    Increasingly it is looking like we're going to want to run all
+    source code blocks in comint buffer (sessions).  Which will have
+    the benefits of
+    1) allowing background execution
+    2) maintaining state between source-blocks
+       - allowing inline blocks w/o header arguments 
+
+**** R sessions
+     (like ess-switch-process in .R buffers)
+     
+     Maybe this could be packaged into a header argument, something
+     like =:R_session= which could accept either the name of the
+     session to use, or the string =prompt=, in which case we could use
+     the =ess-switch-process= command to select a new process.
+     
+*** TODO evaluation of shell code as background process? 
+    After C-c C-c on an R code block, the process may appear to
+    block, but C-g can be used to reclaim control of the .org buffer,
+    without interrupting the R evalution. However I believe this is not
+    true of bash/sh evaluation. [Haven't tried other languages] Perhaps
+    a solution is just to background the individual shell commands.
+
+    The other languages (aside from emacs lisp) are run through the
+    shell, so if we find a shell solution it should work for them as
+    well.
+    
+    Adding an ampersand seems to be a supported way to run commands in
+    the background (see [[http://www.emacswiki.org/emacs/ExecuteExternalCommand#toc4][external-commands]]).  Although a more extensible
+    solution may involve the use of the [[elisp:(progn (describe-function 'call-process-region) nil)][call-process-region]] function.
+    
+    Going to try this out in a new file [[file:lisp/org-babel-proc.el][org-babel-proc.el]].  This should
+    contain functions for asynchronously running generic shell commands
+    in the background, and then returning their input.
+
+**** partial update of org-mode buffer
+    The sleekest solution to this may be using a comint buffer, and
+    then defining a filter function which would incrementally interpret
+    the results as they are returned, including insertion into the
+    org-mode buffer.  This may actually cause more problems than it is
+    worth, what with the complexities of identifying the types of
+    incrementally returned results, and the need for maintenance of a
+    process marker in the org buffer.
+
+**** 'working' spinner
+     It may be nice and not too difficult to place a spinner on/near the
+     evaluating source code block
+
+*** TODO conversion of output from interactive shell, R (and python) sessions to org-babel buffers
+    [DED] This would be a nice feature I think. Although an org-babel
+    purist would say that it's working the wrong way round... After
+    some interactive work in a *R* buffer, you save the buffer, maybe
+    edit out some lines, and then convert it to org-babel format for
+    posterity. Same for a shell session either in a *shell* buffer, or
+    pasted from another terminal emulator. And python of course.
+** DEFERRED improve the source-block snippet
+any real improvement seems somewhat beyond the ability of yasnippet
+for now.
+
+[[file:~/src/emacs-starter-kit/src/snippets/text-mode/rst-mode/chap::name%20Chapter%20title][file:~/src/emacs-starter-kit/src/snippets/text-mode/rst-mode/chap::name Chapter title]]
+#+begin_example
+,#name : Chapter title
+,# --
+${1:Chapter}
+${1:$(make-string (string-width text) ?\=)}
+
+$0
+#+end_example
+
+[[file:snippets/org-mode/sb][sb -- snippet]]
+
+waiting for guidance from those more familiar with yasnippets
+
+** REJECTED re-implement R evaluation using ess-command or ess-execute
+   I don't have any complaints with the current R evaluation code or
+   behaviour, but I think it would be good to use the ESS functions
+   from a political point of view. Plus of course it has the normal
+   benefits of an API (insulates us from any underlying changes etc). [DED]
+
+   I'll look into this.  I believe that I looked at and rejected these
+   functions initially but now I can't remember why.  I agree with
+   your overall point about using API's where available.  I will take
+   a look back at these and either switch to using the ess commands,
+   or at least articulate under this TODO the reasons for using our
+   custom R-interaction commands. [Eric]
+
+   ess-execute
+
+   Lets just replace =org-babel-R-input-command= with =ess-execute=.
+
+   I tried this, and although it works in some situations, I find that
+   =ess-command= will often just hang indefinitely without returning
+   results.  Also =ess-execute= will occasionally hang, and pops up
+   the buffer containing the results of the command's execution, which
+   is undesirable.  For now these functions can not be used.  Maybe
+   someone more familiar with the ESS code can recommend proper usage
+   of =ess-command= or some other lower-level function which could be
+   used in place of [[file:lisp/org-babel-R.el::defun%20org-babel%20R%20input%20command%20command][org-babel-R-input-command]].
+
+*** ess functions
+   
+#+begin_quote ess-command
+(ess-command COM &optional BUF SLEEP NO-PROMPT-CHECK)
+
+Send the ESS process command COM and delete the output
+from the ESS process buffer.  If an optional second argument BUF exists
+save the output in that buffer. BUF is erased before use.
+COM should have a terminating newline.
+Guarantees that the value of .Last.value will be preserved.
+When optional third arg SLEEP is non-nil, `(sleep-for (* a SLEEP))'
+will be used in a few places where `a' is proportional to `ess-cmd-delay'.
+#+end_quote
+
+#+begin_quote ess-execute
+(ess-execute COMMAND &optional INVERT BUFF MESSAGE)
+
+Send a command to the ESS process.
+A newline is automatically added to COMMAND.  Prefix arg (or second arg
+INVERT) means invert the meaning of
+`ess-execute-in-process-buffer'.  If INVERT is 'buffer, output is
+forced to go to the process buffer.  If the output is going to a
+buffer, name it *BUFF*.	 This buffer is erased before use.  Optional
+fourth arg MESSAGE is text to print at the top of the buffer (defaults
+to the command if BUFF is not given.)
+#+end_quote
+
+*** out current setup
+
+    1) The body of the R source code block is wrapped in a function
+    2) The function is called inside of a =write.table= function call
+       writing the results to a table
+    3) The table is read using =org-table-import=
+** DONE figure out how to handle graphic output
+   
+This is listed under [[* graphical output][graphical output]] in out objectives.
+
+This should take advantage of the =:results file= option, and
+languages which almost always produce graphical output should set
+=:results file= to true by default (this is currently done for the
+gnuplot and ditaa languages).  That would handle placing these results
+in the buffer.  Then if there is a combination of =silent= and =file=
+=:results= headers we could drop the results to a temp buffer and pop
+open that buffer...
+
+Display of file results is addressed in the [[* =\C-c \C-o= to open results of source block][open-results-task]].
+
+I think this is done for now.  With the ability of the file option it
+is now possible to save images directly to a file.  Then calling
+=\C-c\C-o= with point on the source block will open the related
+results.
+
+*** R graphics to screen means session evaluation
+    If R graphical output is going to screen then evaluation must be
+    in a session, otherwise the graphics will disappear as soon as the
+    R process dies.
+
+*** Adding to a discussion started in email
+    I'm not deeply wedded to these ideas, just noting them down. I'm
+    probably just thinking of R and haven't really thought about how
+    this fits with the other graphics-generating languages.
+Dan:
+> I used the approach below to get graphical file output
+> today, which is one idea at least. Maybe it could be linked up with
+> your :results file variable. (Or do we need a :results image for R?)
+>
+Eric:
+I don't think we need a special image results variable, but I may be
+missing what the code below accomplishes.  Would the task I added about
+adding org-open-at-point functionality to source code blocks take care
+of this need?
+
+Dan: I'm not sure. I think the ability for a script to generate both
+text and graphical output might be a natural expectation, at least for
+R users.
+
+>
+> Dan
+>
+> #+srcname: cohort-scatter-plots-2d(org_babel_graphical_output_file="cohort-scatter-plots-2d.png")
+> #+begin_src R 
+>   if(exists("org_babel_output_file"))
+>       png(filename=org_babel_graphical_output_file, width=1000, height=1000)
+>   ## plotting code in here
+>   if(exists("org_babel_graphical_output_file")) dev.off()
+> #+end_src
+
+Dan: Yes, the results :file option is nice for dealing with graphical
+output, and that could well be enough. Something based on the scheme
+above would have a couple of points in its favour:
+1. It's easy to switch between output going to on-screen graphics and
+   output going to file: Output will go to screen unless a string variable
+   with a standard name (e.g. ""org_babel_graphical_output_file"")
+   exists in which case it will go to the file indicated by the value
+   of that variable.
+2. The block can return a result / script output, as well as produce
+   graphical output.
+
+In interactive use we might want to allow the user to choose between
+screen and file output. In non-interactive use such as export, it
+would be file output (subject to the :exports directives).
+** DONE new results types (org, html, latex)
+   Thanks to Tom Short for this recommendation.
+
+   - raw or org :: in which case the results are implemented raw, unquoted
+                   into the org-mode file.  This would also handle links as
+                   source block output.
+   - html :: the results are inserted inside of a #+BEGIN_HTML block
+   - latex :: the results are inserted inside of a #+BEGIN_LATEX block
+
+   It might look like:
+: #+begin_src R :session *R* :results org
+: cat("***** This is a table\n")
+: cat("| 1 | 2 | 3 |\n")
+: cat("[[http://google.com][Google it here]]\n"
+: #+end_src
+:        
+: #+resname:
+: ***** This is a table
+: | 1 | 2 | 3 |
+[[http://google.com][: Google it here]]
+
+We actually might want to remove the =#+resname= line if the results
+type is org-mode, not sure...  Either way I don't think there is a
+good way to capture/remove org type results.
+
+*** LaTeX
+#+srcname: latex-results
+#+begin_src emacs-lisp :results latex
+"this should be inside of a LaTeX block"
+#+end_src
+
+#+resname:
+#+BEGIN_LaTeX
+this should be inside of a LaTeX block
+#+END_LaTeX
+
+*** Html
+#+srcname: html-results
+#+begin_src emacs-lisp :results html
+"this should be inside of a HTML block
+
+
+
+and more
+
+
+
+is long"
+#+end_src
+
+#+resname:
+#+BEGIN_HTML
+this should be inside of a HTML block
+
+
+
+and more
+
+
+
+is long
+#+END_HTML
+
+*** raw
+
+Added a =raw= results header argument, which will insert the results
+of a source-code block into an org buffer un-escaped.  Also, if the
+results look like a table, then the table will be aligned.
+
+#+srcname: raw-table-demonstration
+#+begin_src ruby :results output raw
+  puts "| root | square |"
+  puts "|---"
+  10.times do |n|
+    puts "| #{n} | #{n*n} |"
+  end
+#+end_src
+
+#+resname:
+| root | square |
+|------+--------|
+|    0 |      0 |
+|    1 |      1 |
+|    2 |      4 |
+|    3 |      9 |
+|    4 |     16 |
+|    5 |     25 |
+|    6 |     36 |
+|    7 |     49 |
+|    8 |     64 |
+|    9 |     81 |
+
+Not sure how/if this would work, but it may be desirable.
+** DONE org-bable-tangle: no default extension if one already exists
+** DONE take default values for header args from properties
+   Use file-wide and subtree wide properties to set default values for
+   header args.
+   
+   [DED] One thing I'm finding when working with R is that an org file
+   may contain many source blocks, but that I just want to evaluate a
+   subset of them. Typically this is in order to take up where I left
+   off: I need to recreate a bunch of variables in the session
+   environment. I'm thinking maybe we want to use a tag-based
+   mechanism similar to :export: and :noexport: to control evaluation
+   on a per-subtree basis.
+
+*** test-header with properties
+    :PROPERTIES:
+    :tangle:   yes
+    :var:      def=8
+    :END:
+
+Ahh... as is so often the case, just had to wrap
+`org-babel-params-from-properties' in a `save-match-data' form.
+
+#+tblname: why-def-props-cause-probs
+| 1 | 2 | 3 | 4 |
+
+#+srcname: default-props-implementation
+#+begin_src emacs-lisp :tangle no :var my-lis=why-def-props-cause-probs :results silent
+(+ (length my-lis) def)
+#+end_src
+
+** DONE new reference syntax *inside* source code blocks
+This is from an email discussion on the org-mode mailing list with
+Sébastien.  The goal here is to mimic the source-block reference style
+of Noweb.  Upon export and/or tangle these references could be
+replaced with the actual body of the referenced source-code block.
+
+See the following for an example.
+
+#+srcname: ems-ruby-print-header
+#+begin_src ruby 
+puts "---------------------------header---------------------------"
+#+end_src
+
+#+srcname: emacs-ruby-print-footer
+#+begin_src ruby 
+puts "---------------------------footer---------------------------"
+#+end_src
+
+#+srcname: ems-ruby-print-message
+#+begin_src ruby :file ruby-noweb.rb
+  # <<ems-ruby-print-header>>
+  puts "                            Ruby                            "
+  # <<ems-ruby-print-footer>>
+#+end_src
+
+Upon export the previous source-code block would result in a file
+being generated at =ruby-noweb.rb= with the following contents
+
+: puts "---------------------------header---------------------------"
+: puts "                            Ruby                            "
+: puts "---------------------------footer---------------------------"
+
+the body of a source-code block with all =<<src-name>>= references
+expanded can now be returned by `org-babel-expand-noweb-references'.
+This function is now called by default on all source-code blocks on
+export.
+
+** DONE re-work tangling system
+Sometimes when tangling a file (e.g. when extracting elisp from a
+org-mode file) we want to get nearly every source-code block.
+
+Sometimes we want to only extract those source-code blocks which
+reference a indicate that they should be extracted (e.g. traditional
+literate programming along the Noweb model)
+
+I'm not sure how we can devise a single simple tangling system that
+naturally fits both of these use cases.
+
+*** new setup
+the =tangle= header argument will default to =no= meaning source-code
+blocks will *not* be exported by default.  In order for a source-code
+block to be tangled it needs to have an output file specified.  This
+can happen in two ways...
+
+1) a file-wide default output file can be passed to `org-babel-tangle'
+   which will then be used for all blocks
+2) if the value of the =tangle= header argument is anything other than
+   =no= or =yes= then it is used as the file name
+
+#+srcname: test-new-tangling
+#+begin_src emacs-lisp 
+  (org-babel-load-file "test-tangle.org")
+  (if (string= test-tangle-advert "use org-babel-tangle for all your emacs initialization files!!")
+      "succeed"
+    "fail")
+#+end_src
+
+#+resname:
+: succeed
+
+** DONE =\C-c \C-o= to open results of source block
+by adding a =defadvice= to =org-open-at-point= we can use the common
+=\C-c \C-o= keybinding to open the results of a source-code block.
+This would be especially useful for source-code blocks which generate
+graphical results and insert a file link as the results in the
+org-mode buffer.  (see [[* figure out how to handle graphic output][TODO figure out how to handle graphic output]]).
+This could also act reasonably with other results types...
+
+- file :: use org-open-at-point to open the file
+- scalar :: open results unquoted in a new buffer
+- tabular :: export the table to a new buffer and open that buffer
+
+when called with a prefix argument the block is re-run
+
+#+srcname: task-opening-results-of-blocks
+#+begin_src ditaa :results replace :file blue.png :cmdline -r
++---------+
+| cBLU    |
+|         |
+|    +----+
+|    |cPNK|
+|    |    |
++----+----+
+#+end_src
+
+#+resname:
+[[file:blue.png][blue.png]]
+
+#+srcname: task-open-vector
+#+begin_src emacs-lisp
+'((1 2) (3 4))
+#+end_src
+
+#+resname:
+| 1 | 2 |
+| 3 | 4 |
+
+#+srcname: task-open-scalar
+#+begin_src ruby :results output
+  8.times do |n|
+    puts "row #{n}"
+  end
+#+end_src
+
+#+resname:
+: row 0
+: row 1
+: row 2
+: row 3
+: row 4
+: row 5
+: row 6
+: row 7
+
+** DONE Stop spaces causing vector output
+This simple example of multilingual chaining produces vector output if
+there are spaces in the message and scalar otherwise.
+
+[Not any more]
+
+#+srcname: msg-from-R(msg=msg-from-python)
+#+begin_src R
+paste(msg, "und R", sep=" ")
+#+end_src
+
+#+resname:
+: org-babel speaks elisp y python und R
+
+#+srcname: msg-from-python(msg=msg-from-elisp)
+#+begin_src python
+msg + " y python"
+#+end_src
+
+#+srcname: msg-from-elisp(msg="org-babel speaks")
+#+begin_src emacs-lisp
+(concat msg " elisp")
+#+end_src
+
+** DONE add =:tangle= family of header arguments
+values are
+- no :: don't include source-code block when tangling
+- yes :: do include source-code block when tangling
+
+this is tested in [[file:test-tangle.org::*Emacs%20Lisp%20initialization%20stuff][test-tangle.org]]
+
+** DONE extensible library of callable source blocks
+*** Current design
+    This is covered by the [[file:library-of-babel.org][Library of Babel]], which will contain
+    ready-made source blocks designed to carry out useful common tasks.
+*** Initial statement [Eric]
+    Much of the power of org-R seems to be in it's helper functions for
+    the quick graphing of tables.  Should we try to re-implement these
+    functions on top of org-babel?
+
+    I'm thinking this may be useful both to add features to org-babel-R and
+    also to potentially suggest extensions of the framework.  For example
+    one that comes to mind is the ability to treat a source-code block
+    like a function which accepts arguments and returns results. Actually
+    this can be it's own TODO (see [[* source blocks as functions][source blocks as functions]]).
+*** Objectives [Dan]
+    - We want to provide convenient off-the-shelf actions
+      (e.g. plotting data) that make use of our new code evaluation
+      environment but do not require any actual coding.
+*** Initial Design proposal [Dan]
+    - *Input data* will be specified using the same mechanism as :var
+      references, thus the input data may come from a table, or
+      another source block, and it is initially available as an elisp
+      data structure.
+    - We introduce a new #+ line, e.g.  #+BABELDO. C-c C-c on that
+      line will apply an *action* to the referenced data.
+    - *Actions correspond to source blocks*: our library of available
+      actions will be a library of org-babel source blocks. Thus the
+      code for executing an action, and the code for dealing with the
+      output of the action will be the same code as for executing
+      source blocks in general
+    - Optionally, the user can have the relevant source block inserted
+      into the org buffer after the (say) #+BABELDO line. This will
+      allow the user to fine tune the action by modifying the code
+      (especially useful for plots).
+    - So maybe a #+BABELDO line will have header args
+      - :data (a reference to a table or source code block)
+      - :action (or should that be :srcname?) which will be something
+        like :action pie-chart, referring to a source block which will
+        be executed with the :data referent passed in using a :var arg.
+      - :showcode or something controlling whether to show the code
+      
+*** Modification to design
+    I'm implementing this, at least initially, as a new interpreter
+    named 'babel', which has an empty body. 'babel' blocks take
+    a :srcname header arg, and look for the source-code block with
+    that name. They then execute the referenced block, after first
+    appending their own header args on to the target block's header
+    args.
+
+    If the target block is in the library of babel (a.o.t. e.g. the
+    current buffer), then the code in the block will refer to the
+    input data with a name dictated by convention (e.g. __data__
+    (something which is syntactically legal in all languages...). Thus
+    the babel block will use a :var __data__ = whatever header arg to
+    reference the data to be plotted.
+
+** DONE Column names in R input/output
+   This has been implemented: Automatic on input to R; optional in
+   output. Note that this equates column names with the header row in
+   an org table; whereas org actually has a mechanism whereby a row
+   with a '!' in the first field defines column names. I have not
+   attempted to support these org table mechanisms yet. See [[*Support%20rownames%20and%20other%20org%20babel%20table%20features][this
+   DEFERRED todo item]].
+** DONE use example block for large amounts of stdout output?
+   We're currently `examplizing' with : at the beginning of the line,
+   but should larger amounts of output be in a
+   \#+begin_example...\#+end_example block? What's the cutoff? > 1
+   line?  This would be nice as it would allow folding of lengthy
+   output. Sometimes one will want to see stdout just to check
+   everything looks OK, and then fold it away.
+
+   I'm addressing this in branch 'examplizing-output'.
+   Yea, that makes sense.  (either that or allow folding of large
+   blocks escaped with =:=).
+
+   Proposed cutoff of 10 lines, we can save this value in a user
+   customizable variable.
+*** DONE add ability to remove such results
+** DONE exclusive =exports= params
+   
+#+srcname: implement-export-exclusivity
+#+begin_src ruby 
+:this_is_a_test
+#+end_src
+
+#+resname:
+: :this_is_a_test
+** DONE LoB: allow output in buffer
+** DONE allow default header arguments by language
+org-babel-default-header-args:lang-name
+
+An example of when this is useful is for languages which always return
+files as their results (e.g. [[*** ditaa][ditaa]], and [[*** gnuplot][gnuplot]]).
+** DONE singe-function tangling and loading elisp from literate org-mode file [3/3]
+
+This function should tangle the org-mode file for elisp, and then call
+`load-file' on the resulting tangled file.
+
+#+srcname: test-loading-embedded-emacs-lisp
+#+begin_src emacs-lisp :results replace
+  (setq test-tangle-advert nil)
+  (setq test-tangle-loading nil)
+  (setq results (list :before test-tangle-loading test-tangle-advert))
+  (org-babel-load-file "test-tangle.org")
+  (setq results (list (list :after test-tangle-loading test-tangle-advert) results))
+  (delete-file "test-tangle.el")
+  (reverse results)
+#+end_src
+
+#+resname: test-loading-embedded-emacs-lisp
+| :before | nil                 | nil                                                              |
+| :after  | "org-babel tangles" | "use org-babel-tangle for all your emacs initialization files!!" |
+
+*** DONE add optional language limiter to org-babel-tangle
+This should check to see if there is any need to re-export
+
+*** DONE ensure that org-babel-tangle returns the path to the tangled file(s)
+
+#+srcname: test-return-value-of-org-babel-tangle
+#+begin_src emacs-lisp :results replace
+  (mapcar #'file-name-nondirectory (org-babel-tangle-file "test-tangle.org" "emacs-lisp"))
+#+end_src
+
+#+resname:
+| "test-tangle.el" |
+
+*** DONE only tangle the file if it's actually necessary
+** DONE add a function to jump to a source-block by name
+   I've had an initial stab at that in org-babel-find-named-block
+   (library-of-babel branch).
+
+   At the same time I introduced org-babel-named-src-block-regexp, to
+   match src-blocks with srcname.
+
+   This is now working with the command
+   `org-babel-goto-named-source-block', all we need is a good key
+   binding.
+
+** DONE add =:none= session argument (for purely functional execution) [4/4]
+This would allow source blocks to be run in their own new process
+
+- These blocks could then also be run in the background (since we can
+  detach and just wait for the process to signal that it has terminated)
+- We wouldn't be drowning in session buffers after running the tests
+- we can re-use much of the session code to run in a more /functional/
+  mode
+
+While session provide a lot of cool features, like persistent
+environments, [[* DONE function to bring up inferior-process buffer][pop-to-session]], and hints at exportation for
+org-babel-tangle, they also have some down sides and I'm thinking that
+session-based execution maybe shouldn't be the default behavior.
+
+Down-sides to sessions
+- *much* more complicated than functional evaluation
+  - maintaining the state of the session has weird issues
+  - waiting for evaluation to finish
+  - prompt issues like [[* TODO weird escaped characters in shell prompt break shell evaluation][shell-prompt-escapes-bug]]
+- can't run in background
+- litter emacs with session buffers
+
+*** DONE ruby
+
+#+srcname: ruby-task-no-session
+#+begin_src ruby :results replace output
+puts :eric
+puts :schulte
+[1, 2, 3]
+#+end_src
+
+#+resname: ruby-task-no-session
+| "eric"    |
+| "schulte" |
+*** DONE python
+
+#+srcname: task-python-none-session
+#+begin_src python :session none :results replace value
+print 'something'
+print 'output'
+[1, 2, 3]
+#+end_src
+
+#+resname: task-python-none-session
+| 1 | 2 | 3 |
+
+*** DONE sh
+
+#+srcname: task-session-none-sh
+#+begin_src sh :results replace
+echo "first"
+echo "second"
+#+end_src
+
+#+resname: task-session-none-sh
+| "first"  |
+| "second" |
+
+*** DONE R
+
+#+srcname: task-no-session-R
+#+begin_src R :results replace output
+a <- 8
+b <- 9
+a + b
+b - a
+#+end_src
+
+#+resname: task-no-session-R
+| "[1]" | 17 |
+| "[1]" |  1 |
+
+** DONE fully purge org-babel-R of direct comint interaction
+try to remove all code under the [[file:lisp/org-babel-R.el::functions%20for%20evaluation%20of%20R%20code][;; functions for evaluation of R code]] line
+
+** DONE Create objects in top level (global) environment [5/5]
+*sessions*
+
+*** initial requirement statement [DED]
+   At the moment, objects created by computations performed in the
+   code block are evaluated in the scope of the
+   code-block-function-body and therefore disappear when the code
+   block is evaluated {unless you employ some extra trickery like
+   assign('name', object, env=globalenv()) }. I think it will be
+   desirable to also allow for a style wherein objects that are
+   created in one code block persist in the R global environment and
+   can be re-used in a separate block.
+
+   This is what Sweave does, and while I'm not saying we have to be
+   the same as Sweave, it wouldn't be hard for us to provide the same
+   behaviour in this case; if we don't, we risk undeservedly being
+   written off as an oddity by some.
+
+   IOW one aspect of org-babel is that of a sort of functional
+   meta-programming language. This is crazy, in a very good
+   way. Nevertheless, wrt R I think there's going to be a lot of value
+   in providing for a working style in which the objects are stored in
+   the R session, rather than elisp/org buffer. This will be a very
+   familiar working style to lots of people.
+
+   There are no doubt a number of different ways of accomplishing
+   this, the simplest being a hack like adding
+
+#+begin_src R
+for(objname in ls())
+    assign(objname, get(objname), envir=globalenv())
+#+end_src
+
+to the source code block function body. (Maybe wrap it in an on.exit() call).
+
+However this may deserve to be thought about more carefully, perhaps
+with a view to having a uniform approach across languages. E.g. shell
+code blocks have the same semantics at the moment (no persistence of
+variables across code blocks), because the body is evaluated in a new
+bash shell process rather than a running shell. And I guess the same
+is true for python. However, in both these cases, you could imagine
+implementing the alternative in which the body is evaluated in a
+persistent interactive session. It's just that it's particularly
+natural for R, seeing as both ESS and org-babel evaluate commands in a
+single persistent R session.
+
+*** sessions [Eric]
+
+Thanks for bringing this up.  I think you are absolutely correct that we
+should provide support for a persistent environment (maybe called a
+*session*) in which to evaluate code blocks.  I think the current setup
+demonstrates my personal bias for a functional style of programming
+which is certainly not ideal in all contexts.
+
+While the R function you mention does look like an elegant solution, I
+think we should choose an implementation that would be the same across
+all source code types.  Specifically I think we should allow the user to
+specify an optional *session* as a header variable (when not present we
+assume a default session for each language).  The session name could be
+used to name a comint buffer (like the *R* buffer) in which all
+evaluation would take place (within which variables would retain their
+values --at least once I remove some of the functional method wrappings
+currently in place-- ).
+
+This would allow multiple environments to be used in the same buffer,
+and once this setup was implemented we should be able to fairly easily
+implement commands for jumping between source code blocks and the
+related session buffers, as well as for dumping the last N commands from
+a session into a new or existing source code block.
+
+Please let me know if you foresee any problems with this proposed setup,
+or if you think any parts might be confusing for people coming from
+Sweave.  I'll hopefully find some time to work on this later in the
+week.
+
+*** can functional and interpreted/interactive models coexist?
+
+Even though both of these use the same =*R*= buffer the value of =a=
+is not preserved because it is assigned inside of a functional
+wrapper.
+
+#+srcname: task-R-sessions
+#+begin_src R 
+a <- 9
+b <- 21
+a + b
+#+end_src
+
+#+srcname: task-R-same-session
+#+begin_src R 
+a
+#+end_src
+
+This functional wrapper was implemented in order to efficiently return
+the results of the execution of the entire source code block.  However
+it inhibits the evaluation of source code blocks in the top level,
+which would allow for persistence of variable assignment across
+evaluations.  How can we allow *both* evaluation in the top level, and
+efficient capture of the return value of an entire source code block
+in a language independent manner?
+
+Possible solutions...
+1) we can't so we will have to implement two types of evaluation
+   depending on which is appropriate (functional or imperative)
+2) we remove the functional wrapper and parse the source code block
+   into it's top level statements (most often but not always on line
+   breaks) so that we can isolate the final segment which is our
+   return value.
+3) we add some sort of "#+return" line to the code block
+4) we take advantage of each languages support for meta-programming
+   through =eval= type functions, and use said to evaluate the entire
+   blocks in such a way that their environment can be combined with the
+   global environment, and their results are still captured.
+5) I believe that most modern languages which support interactive
+   sessions have support for a =last_result= type function, which
+   returns the result of the last input without re-calculation.  If
+   widely enough present this would be the ideal solution to a
+   combination of functional and imperative styles.
+
+None of these solutions seem very desirable, but for now I don't see
+what else would be possible.
+
+Of these options I was leaning towards (1) and (4) but now believe
+that if it is possible option (5) will be ideal.
+
+**** (1) both functional and imperative evaluation
+Pros
+- can take advantage of built in functions for sending regions to the
+  inferior process
+- retains the proven tested and working functional wrappers
+
+Cons
+- introduces the complication of keeping track of which type of
+  evaluation is best suited to a particular context
+- the current functional wrappers may require some changes in order to
+  include the existing global context
+
+**** (4) exploit language meta-programming constructs to explicitly evaluate code
+Pros
+- only one type of evaluation
+
+Cons
+- some languages may not have sufficient meta-programming constructs
+
+**** (5) exploit some =last_value= functionality if present
+
+Need to ensure that most languages have such a function, those without
+will simply have to implement their own similar solution...
+
+| language   | =last_value= function       |
+|------------+-----------------------------|
+| R          | .Last.value                 |
+| ruby       | _                           |
+| python     | _                           |
+| shell      | see [[* last command for shells][last command for shells]] |
+| emacs-lisp | see [[* emacs-lisp will be a special case][special-case]]            |
+
+#+srcname: task-last-value
+#+begin_src ruby
+82 + 18
+#+end_src
+
+***** last command for shells
+Do this using the =tee= shell command, and continually pipe the output
+to a file.
+
+Got this idea from the following [[http://linux.derkeiler.com/Mailing-Lists/Fedora/2004-01/0898.html][email-thread]].
+
+suggested from mailing list
+
+#+srcname: bash-save-last-output-to-file
+#+begin_src sh 
+while read line 
+do 
+  bash -c "$line" | tee /tmp/last.out1 
+  mv /tmp/last.out1 /tmp/last.out 
+done
+#+end_src
+
+another proposed solution from the above thread
+
+#+srcname: bash-save-in-variable
+#+begin_src sh 
+#!/bin/bash 
+# so - Save Output. Saves output of command in OUT shell variable. 
+OUT=`$*` 
+echo $OUT 
+#+end_src
+
+and another
+
+#+begin_quote
+.inputrc: 
+"^[k": accept-line 
+"^M": " | tee /tmp/h_lastcmd.out ^[k" 
+
+.bash_profile: 
+export __=/tmp/h_lastcmd.out 
+
+If you try it, Alt-k will stand for the old Enter; use "command $__" to 
+access the last output. 
+
+Best, 
+
+--
+
+Herculano de Lima Einloft Neto
+#+end_quote
+
+***** emacs-lisp will be a special case
+While it is possible for emacs-lisp to be run in a console type
+environment (see the =elim= function) it is *not* possible to run
+emacs-lisp in a different *session*.  Meaning any variable set top
+level of the console environment will be set *everywhere* inside
+emacs.  For this reason I think that it doesn't make any sense to
+worry about session support for emacs-lisp.
+
+*** Further thoughts on 'scripting' vs. functional approaches
+
+    These are just thoughts, I don't know how sure I am about this.
+    And again, perhaps I'm not saying anything very radical, just that
+    it would be nice to have some options supporting things like
+    receiving text output in the org buffer.
+
+    I can see that you've already gone some way down the road towards
+    the 'last value' approach, so sorry if my comments come rather
+    late. I am concerned that we are not giving sufficient attention
+    to stdout / the text that is returned by the interpreters. In
+    contrast, many of our potential users will be accustomed to a
+    'scripting' approach, where they are outputting text at various
+    points in the code block, not just at the end. I am leaning
+    towards thinking that we should have 2 modes of evaluation:
+    'script' mode, and 'functional' mode.
+
+    In script mode, evaluation of a code block would result in *all*
+    text output from that code block appearing as output in the org
+    buffer, presumably as an #+begin_example...#+end_example. There
+    could be an :echo option controlling whether the input commands
+    also appear in the output. [This is like Sweave].
+
+    In functional mode, the *result* of the code block is available as
+    an elisp object, and may appear in the org buffer as an org
+    table/string, via the mechanisms you have developed already.
+
+    One thing I'm wondering about is whether, in script mode, there
+    simply should not be a return value. Perhaps this is not so
+    different from what exists: script mode would be new, and what
+    exists currently would be functional mode.
+
+    I think it's likely that, while code evaluation will be exciting
+    to people, a large majority of our users in a large majority of
+    their usage will not attempt to actually use the return value from
+    a source code block in any meaningful way. In that case, it seems
+    rather restrictive to only allow them to see output from the end
+    of the code block.
+
+    Instead I think the most accessible way to introduce org-babel to
+    people, at least while they are learning it, is as an immensely
+    powerful environment in which to embed their 'scripts', which now
+    also allows them to 'run' their 'scripts'. Especially as such
+    people are likely to be the least capable of the user-base, a
+    possible design-rule would be to make the scripting style of usage
+    easy (default?), perhaps requiring a special option to enable a
+    functional style. Those who will use the functional style won't
+    have a problem understanding what's going on, whereas the 'skript
+    kiddies' might not even know the syntax for defining a function in
+    their language of choice. And of course we can allow the user to
+    set a variable in their .emacs controlling the preference, so that
+    functional users are not inconveniennced by having to provide
+    header args the whole time.
+
+    Please don't get the impression that I am down-valuing the
+    functional style of org-babel. I am constantly horrified at the
+    messy 'scripts' that my colleagues produce in perl or R or
+    whatever! Nevertheless that seems to be how a lot of people work.
+    
+    I think you were leaning towards the last-value approach because
+    it offered the possibility of unified code supporting both the
+    single evaluation environment and the functional style. If you
+    agree with any of the above then perhaps it will impact upon this
+    and mean that the code in the two branches has to differ a bit. In
+    that case, functional mode could perhaps after all evaluate each
+    code block in its own environment, thus (re)approaching 'true'
+    functional programming (side-effects are hard to achieve).
+
+#+begin_src sh
+ls > files
+echo "There are `wc -l files` files in this directory"
+
+#+end_src
+
+*** even more thoughts on evaluation, results, models and options
+
+Thanks Dan, These comments are invaluable.
+
+What do you think about this as a new list of priorities/requirements
+for the execution of source-code blocks.
+
+- Sessions
+   1)  we want the evaluation of the source code block to take place in a
+       session which can persist state (variables, current directory,
+       etc...).
+   2)  source code blocks can specify their session with a header argument
+   3)  each session should correspond to an Emacs comint buffer so that the
+       user can drop into the session and experiment with live code
+       evaluation.
+- Results
+  1) each source-code block generates some form of results which (as
+     we have already implemented) is transfered into emacs-lisp
+     after which it can be inserted into the org-mode buffer, or
+     used by other source-code blocks
+  2) when the results are translated into emacs-lisp, forced to be
+     interpreted as a scalar (dumping their raw values into the
+     org-mode buffer), as a vector (which is often desirable with R
+     code blocks), or interpreted on the fly (the default option).
+     Note that this is very nearly currently implemented through the
+     [[* DONE results-type header (vector/file)][results-type-header]].
+  3) there should be *two* means of collecting results from the
+     execution of a source code block.  *Either* the value of the
+     last statement of the source code block, or the collection of
+     all that has been passed to STDOUT during the evaluation.
+
+**** header argument or return line (*header argument*)
+
+   Rather than using a header argument to specify how the return value
+   should be passed back, I'm leaning towards the use of a =#+RETURN=
+   line inside the block.  If such a line *is not present* then we
+   default to using STDOUT to collect results, but if such a line *is
+   present* then we use it's value as the results of the block.  I
+   think this will allow for the most elegant specification between
+   functional and script execution.  This also cleans up some issues
+   of implementation and finding which statement is the last
+   statement.
+
+   Having given this more thought, I think a header argument is
+   preferable.  The =#+return:= line adds new complicating syntax for
+   something that does little more than we would accomplish through
+   the addition of a header argument.  The only benefit being that we
+   know where the final statement starts, which is not an issue in
+   those languages which contain 'last value' operators.
+
+   new header =:results= arguments
+   - script :: explicitly states that we want to use STDOUT to
+               initialize our results
+   - return_last :: stdout is ignored instead the *value* of the final
+                    statement in the block is returned
+   - echo :: means echo the contents of the source-code block along
+             with the results (this implies the *script* =:results=
+             argument as well)
+
+*** DONE rework evaluation lang-by-lang [4/4]
+
+This should include...
+- functional results working with the comint buffer
+- results headers
+  - script :: return the output of STDOUT
+    - write a macro which runs the first redirection, executes the
+      body, then runs the second redirection
+  - last :: return the value of the last statement
+    - 
+
+- sessions in comint buffers
+
+**** DONE Ruby [4/4]
+- [X] functional results working with comint
+- [X] script results
+- [X] ensure scalar/vector results args are taken into consideration
+- [X] ensure callable by other source block
+
+#+srcname: ruby-use-last-output
+#+begin_src ruby :results replace
+a = 2
+b = 4
+c = a + b
+[a, b, c, 78]
+#+end_src
+
+#+resname: ruby-use-last-output
+| 2 | 4 | 6 | 78 |
+
+#+srcname: task-call-use-last-output
+#+begin_src ruby :var last=ruby-use-last-output :results replace
+last.flatten.size + 1
+#+end_src
+
+#+resname: task-call-use-last-output
+: 5
+
+***** ruby sessions
+
+#+srcname: first-ruby-session-task
+#+begin_src ruby :session schulte :results silent
+schulte = 27
+#+end_src
+
+#+srcname: second-ruby-session-task
+#+begin_src ruby :session schulte :results silent
+schulte + 3
+#+end_src
+
+#+srcname: without-the-right-session
+#+begin_src ruby :results silent
+schulte
+#+end_src
+
+**** DONE R [4/4]
+
+- [X] functional results working with comint
+- [X] script results
+- [X] ensure scalar/vector results args are taken into consideration
+- [X] ensure callable by other source block
+
+To redirect output to a file, you can use the =sink()= command.
+
+#+srcname: task_R_B
+#+begin_src R :results value vector silent
+a <- 9
+b <- 10
+b - a
+a + b
+#+end_src
+
+#+srcname: task-R-use-other-output
+#+begin_src R :var twoentyseven=task_R_B() :results replace value
+83
+twoentyseven + 9
+#+end_src
+
+#+resname: task-R-use-other-output
+: 28
+
+**** DONE Python [4/4]
+- [X] functional results working with comint
+- [X] script results
+- [X] ensure scalar/vector results args are taken into consideration
+- [X] ensure callable by other source block
+
+#+srcname: task-new-eval-for-python
+#+begin_src python :results silent output scalar
+8
+9
+10
+#+end_src
+
+#+srcname: task-use-new-eval
+#+begin_src python :var tasking=task-new-eval-for-python() :results replace
+tasking + 2
+#+end_src
+
+#+resname: task-use-new-eval
+: 12
+
+**** DONE Shells [4/4]
+- [X] functional results working with comint
+- [X] script results
+- [X] ensure scalar/vector results args are taken into consideration
+- [X] ensure callable by other source block
+
+#+srcname: task-shell-new-evaluation
+#+begin_src sh :results silent value scalar
+echo 'eric'
+date
+#+end_src
+
+#+srcname: task-call-other-shell
+#+begin_src sh :var other=task-shell-new-evaluation() :results replace  scalar
+echo $other ' is the old date'
+#+end_src
+
+#+resname: task-call-other-shell
+: $ Fri Jun 12 13:08:37 PDT 2009  is the old date
+
+*** DONE implement a *session* header argument [4/4]
+=:session= header argument to override the default *session* buffer
+
+**** DONE ruby
+
+#+srcname: task-ruby-named-session
+#+begin_src ruby :session schulte :results replace
+schulte = :in_schulte
+#+end_src
+
+#+resname: task-ruby-named-session
+: :in_schulte
+
+#+srcname: another-in-schulte
+#+begin_src ruby :session schulte 
+schulte
+#+end_src
+
+#+resname: another-in-schulte
+: :in_schulte
+: :in_schulte
+: :in_schulte
+
+**** DONE python
+
+#+srcname: python-session-task
+#+begin_src python :session what :results silent
+what = 98
+#+end_src
+
+#+srcname: python-get-from-session
+#+begin_src python :session what :results replace
+what
+#+end_src
+
+#+resname: python-get-from-session
+: 98
+
+**** DONE shell
+
+#+srcname: task-shell-sessions
+#+begin_src sh :session what
+WHAT='patton'
+#+end_src
+
+#+srcname: task-shell-sessions-what
+#+begin_src sh :session what :results replace
+echo $WHAT
+#+end_src
+
+#+resname: task-shell-sessions-what
+: patton
+
+**** DONE R
+
+#+srcname: task-R-session
+#+begin_src R :session what :results replace
+a <- 9
+b <- 8
+a + b
+#+end_src
+
+#+resname: task-R-session
+: 17
+
+#+srcname: another-task-R-session
+#+begin_src R :session what :results replace
+a + b
+#+end_src
+
+*** DONE function to bring up inferior-process buffer [4/4]
+
+This should be callable from inside of a source-code block in an
+org-mode buffer.  It should evaluate the header arguments, then bring
+up the inf-proc buffer using =pop-to-buffer=.
+
+For lack of a better place, lets add this to the `org-metadown-hook'
+hook.
+
+To give this a try, place the cursor on a source block with variables,
+(optionally git a prefix argument) then hold meta and press down.
+
+**** DONE ruby
+
+#+srcname: task-ruby-pop-to-session
+#+begin_src ruby :var num=9 :var another="something else"
+num.times{|n| puts another}
+#+end_src
+
+**** DONE python
+
+#+srcname: task-python-pop-to-session
+#+begin_src python :var num=9 :var another="something else"
+another * num
+#+end_src
+**** DONE R
+
+#+srcname: task-R-pop-to-session
+#+begin_src R :var a=9 :var b=8
+a * b
+#+end_src
+
+**** DONE shell
+
+#+srcname: task-shell-pop-sessions
+#+begin_src sh :var NAME="eric"
+echo $NAME
+#+end_src
+
+*** DEFERRED function to dump last N lines from inf-proc buffer into the current source block
+
+Callable with a prefix argument to specify how many lines should be
+dumped into the source-code buffer.
+
+*** REJECTED comint notes
+
+Implementing comint integration in [[file:lisp/org-babel-comint.el][org-babel-comint.el]].
+
+Need to have...
+- handling of outputs
+  - split raw output from process by prompts
+  - a ring of the outputs, buffer-local, `org-babel-comint-output-ring'
+  - a switch for dumping all outputs to a buffer
+- inputting commands
+
+Lets drop all this language specific stuff, and just use
+org-babel-comint to split up our outputs, and return either the last
+value of an execution or the combination of values from the
+executions.
+
+**** comint filter functions
+: ;;  comint-input-filter-functions	hook	process-in-a-buffer
+: ;;  comint-output-filter-functions	hook	function modes.
+: ;;  comint-preoutput-filter-functions   hook
+: ;;  comint-input-filter			function ...
+
+#+srcname: obc-filter-ruby
+#+begin_src ruby :results last
+1
+2
+3
+4
+5
+#+end_src
+
+** DONE Remove protective commas from # comments before evaluating
+   org inserts protective commas in front of ## comments in language
+   modes that use them. We need to remove them prior to sending code
+   to the interpreter.
+
+#+srcname: testing-removal-of-protective-comas
+#+begin_src ruby
+,# this one might break it??
+:comma_protection
+#+end_src
+
+** DONE pass multiple reference arguments into R
+   Can we do this? I wasn't sure how to supply multiple 'var' header
+   args. Just delete this if I'm being dense.
+
+   This should be working, see the following example...
+
+#+srcname: two-arg-example
+#+begin_src R :var n=2 :var m=8
+n + m
+#+end_src
+
+#+resname: two-arg-example
+: 10
+
+** DONE ensure that table ranges work
+when a table range is passed to org-babel as an argument, it should be
+interpreted as a vector.
+
+| 1 | 2 | simple       |
+| 2 | 3 | Fixnum:1     |
+| 3 | 4 | Array:123456 |
+| 4 | 5 |              |
+| 5 | 6 |              |
+| 6 | 7 |              |
+#+TBLFM: @1$3='(sbe simple-sbe-example (n 4))::@2$3='(sbe task-table-range (n @1$1..@6$1))::@3$3='(sbe task-table-range (n (@1$1..@6$1)))
+
+#+srcname: simple-sbe-example
+#+begin_src emacs-lisp 
+"simple"
+#+end_src
+
+#+srcname: task-table-range
+#+begin_src ruby :var n=simple-sbe-example
+"#{n.class}:#{n}"
+#+end_src
+
+#+srcname: simple-results
+#+begin_src emacs-lisp :var n=task-table-range(n=(1 2 3))
+n
+#+end_src
+
+#+resname: simple-results
+: Array:123
+
+#+srcname: task-arr-referent
+#+begin_src ruby :var ar=(1 2 3)
+ar.size
+#+end_src
+
+#+resname: task-arr-referent
+: 3
+
+** DONE global variable indicating default to vector output
+how about an alist... =org-babel-default-header-args= this may already
+exist... just execute the following and all source blocks will default
+to vector output
+
+#+begin_src emacs-lisp 
+(setq org-babel-default-header-args '((:results . "vector")))
+#+end_src
+
+** DONE name named results if source block is named
+currently this isn't happening although it should be
+
+#+srcname: test-naming-named-source-blocks
+#+begin_src emacs-lisp 
+:namer
+#+end_src
+
+#+resname: test-naming-named-source-blocks
+: :namer
+** DONE (simple caching) check for named results before source blocks
+see the TODO comment in [[file:lisp/org-babel-ref.el::TODO%20This%20should%20explicitly%20look%20for%20resname%20lines%20before][org-babel-ref.el#org-babel-ref-resolve-reference]]
+** DONE set =:results silent= when eval with prefix argument
+
+#+begin_src emacs-lisp
+'silentp
+#+end_src
+** DONE results-type header (vector/file) [3/3]
+   In response to a point in Dan's email.  We should allow the user to
+   force scalar or vector results.  This could be done with a header
+   argument, and the default behavior could be controlled through a
+   configuration variable.
+   
+#+srcname: task-trivial-vector
+#+begin_src ruby :results replace vector
+:scalar
+#+end_src
+
+#+resname:
+| ":scalar" |
+
+   since it doesn't make sense to turn a vector into a scalar, lets
+   just add a two values...
+   
+   - vector :: forces the results to be a vector (potentially 1 dimensional)
+   - file :: this throws an error if the result isn't a string, and
+             tries to treat it as a path to a file.
+
+   I'm just going to cram all of these into the =:results= header
+   argument.  Then if we allow multiple header arguments it should
+   work out, for example one possible header argument string could be
+   =:results replace vector file=, which would *replace* any existing
+   results forcing the results into an org-mode table, and
+   interpreting any strings as file paths.
+
+*** DONE multiple =:results= headers
+
+#+srcname: multiple-result-headers
+#+begin_src ruby :results replace silent
+:schulte
+#+end_src
+
+#+resname:
+
+*** DONE file result types
+When inserting into an org-mode buffer create a link with the path
+being the value, and optionally the display being the
+=file-name-nondirectory= if it exists.
+
+#+srcname: task-file-result
+#+begin_src python :results replace file
+"something"
+#+end_src
+
+#+resname:
+[[something][something]]
+
+
+This will be useful because blocks like =ditaa= and =dot= can return
+the string path of their files, and can add =file= to their results
+header.
+
+*** DONE vector result types
+
+#+srcname: task-force-results
+#+begin_src emacs-lisp :results vector
+8
+#+end_src
+
+#+resname:
+| 8 |
+
+** DONE results name
+    In order to do this we will need to start naming our results.
+    Since the source blocks are named with =#+srcname:= lines we can
+    name results with =#+resname:= lines (if the source block has no
+    name then no name is given to the =#+resname:= line on creation,
+    otherwise the name of the source block is used).
+
+    This will have the additional benefit of allowing results and
+    source blocks to be located in different places in a buffer (and
+    eventually in different buffers entirely).
+
+#+srcname: developing-resnames
+#+begin_src emacs-lisp  :results silent
+'schulte
+#+end_src
+
+    Once source blocks are able to find their own =#+resname:= lines
+    we then need to...
+
+#+srcname: sbe-w-new-results
+#+begin_src emacs-lisp :results replace
+(sbe "developing-resnames")
+#+end_src
+
+#+resname:
+: schulte
+
+*** TODO change the results insertion functions to use these lines
+
+*** TODO teach references to resolve =#+resname= lines.
+
+** DONE org-babel tests org-babel [1/1]
+since we are accumulating this nice collection of source-code blocks
+in the sandbox section we should make use of them as unit tests.
+What's more, we should be able to actually use org-babel to run these
+tests.
+
+We would just need to cycle over every source code block under the
+sandbox, run it, and assert that the return value is equal to what we
+expect.
+
+I have the feeling that this should be possible using only org-babel
+functions with minimal or no additional elisp.  It would be very cool
+for org-babel to be able to test itself.
+
+This is now done, see [[* Tests]].
+
+*** DEFERRED org-babel assertions (may not be necessary)
+These could be used to make assertions about the results of a
+source-code block.  If the assertion fails then the point could be
+moved to the block, and error messages and highlighting etc... could
+ensue
+
+** DONE make C-c C-c work anywhere within source code block?
+   This seems like it would be nice to me, but perhaps it would be
+   inefficient or ugly in implementation? I suppose you could search
+   forward, and if you find #+end_src before you find #+begin_src,
+   then you're inside one. [DED]
+
+   Agreed, I think inside of the =#+srcname: line= would be useful as
+   well.
+
+#+srcname: testing-out-cc
+#+begin_src emacs-lisp
+'schulte
+#+end_src
+
+** DONE integration with org tables
+We should make it easy to call org-babel source blocks from org-mode
+table formulas.  This is practical now that it is possible to pass
+arguments to org-babel source blocks.
+
+See the related [[* (sandbox) integration w/org tables][sandbox]] header for tests/examples.
+
+*** digging in org-table.el
+In the past [[file:~/src/org/lisp/org-table.el::org%20table%20el%20The%20table%20editor%20for%20Org%20mode][org-table.el]] has proven difficult to work with.
+
+Should be a hook in [[file:~/src/org/lisp/org-table.el::defun%20org%20table%20eval%20formula%20optional%20arg%20equation][org-table-eval-formula]].
+
+Looks like I need to change this [[file:~/src/org/lisp/org-table.el::if%20lispp][if statement]] (line 2239) into a cond
+expression.
+
+** DONE source blocks as functions
+
+Allow source code blocks to be called like functions, with arguments
+specified.  We are already able to call a source-code block and assign
+it's return result to a variable.  This would just add the ability to
+specify the values of the arguments to the source code block assuming
+any exist.  For an example see 
+
+When a variable appears in a header argument, how do we differentiate
+between it's value being a reference or a literal value?  I guess this
+could work just like a programming language.  If it's escaped or in
+quotes, then we count it as a literal, otherwise we try to look it up
+and evaluate it.
+
+** DONE folding of code blocks? [2/2]
+   [DED] In similar way to using outline-minor-mode for folding function
+   bodies, can we fold code blocks?  #+begin whatever statements are
+   pretty ugly, and in any case when you're thinking about the overall
+   game plan you don't necessarily want to see the code for each Step.
+
+*** DONE folding of source code block
+    Sounds good, and wasn't too hard to implement.  Code blocks should
+    now be fold-able in the same manner as headlines (by pressing TAB
+    on the first line).
+
+*** REJECTED folding of results
+    So, lets do a three-stage tab cycle... First fold the src block,
+    then fold the results, then unfold.
+    
+    There's no way to tell if the results are a table or not w/o
+    actually executing the block which would be too expensive of an
+    operation.
+
+** DONE selective export of text, code, figures
+   [DED] The org-babel buffer contains everything (code, headings and
+   notes/prose describing what you're up to, textual/numeric/graphical
+   code output, etc). However on export to html / LaTeX one might want
+   to include only a subset of that content. For example you might
+   want to create a presentation of what you've done which omits the
+   code.
+
+   [EMS] So I think this should be implemented as a property which can
+   be set globally or on the outline header level (I need to review
+   the mechanics of org-mode properties).  And then as a source block
+   header argument which will apply only to a specific source code
+   block.  A header argument of =:export= with values of
+   
+   - =code= :: just show the code in the source code block
+   - =none= :: don't show the code or the results of the evaluation
+   - =results= :: just show the results of the code evaluation (don't
+                  show the actual code)
+   - =both= :: show both the source code, and the results
+
+this will be done in [[* (sandbox) selective export][(sandbox) selective export]].
+
+** DONE a header argument specifying silent evaluation (no output)
+This would be useful across all types of source block.  Currently
+there is a =:replace t= option to control output, this could be
+generalized to an =:output= option which could take the following
+options (maybe more)
+
+- =t= :: this would be the default, and would simply insert the
+         results after the source block
+- =replace= :: to replace any results which may already be there
+- =silent= :: this would inhibit any insertion of the results
+
+This is now implemented see the example in the [[* silent evaluation][sandbox]]
+
+** DONE assign variables from tables in R
+This is now working (see [[* (sandbox table) R][(sandbox-table)-R]]).  Although it's not that
+impressive until we are able to print table results from R.
+
+** DONE insert 2-D R results as tables
+everything is working but R and shell
+
+*** DONE shells
+
+*** DONE R
+
+This has already been tackled by Dan in [[file:existing_tools/org-R.el::defconst%20org%20R%20write%20org%20table%20def][org-R:check-dimensions]].  The
+functions there should be useful in combination with [[http://cran.r-project.org/doc/manuals/R-data.html#Export-to-text-files][R-export-to-csv]]
+as a means of converting multidimensional R objects to emacs lisp.
+
+It may be as simple as first checking if the data is multidimensional,
+and then, if so using =write= to write the data out to a temporary
+file from which emacs can read the data in using =org-table-import=.
+
+Looking into this further, is seems that there is no such thing as a
+scalar in R [[http://tolstoy.newcastle.edu.au/R/help/03a/3733.html][R-scalar-vs-vector]]  In that light I am not sure how to
+deal with trivial vectors (scalars) in R.  I'm tempted to just treat
+them as vectors, but then that would lead to a proliferation of
+trivial 1-cell tables...
+
+** DONE allow variable initialization from source blocks
+Currently it is possible to initialize a variable from an org-mode
+table with a block argument like =table=sandbox= (note that the
+variable doesn't have to named =table=) as in the following example
+
+#+TBLNAME: sandbox
+| 1 |       2 | 3 |
+| 4 | schulte | 6 |
+
+#+begin_src emacs-lisp :var table=sandbox :results replace
+(message (format "table = %S" table))
+#+end_src
+
+: "table = ((1 2 3) (4 \"schulte\" 6))"
+
+It would be good to allow initialization of variables from the results
+of other source blocks in the same manner.  This would probably
+require the addition of =#+SRCNAME: example= lines for the naming of
+source blocks, also the =table=sandbox= syntax may have to be expanded
+to specify whether the target is a source code block or a table
+(alternately we could just match the first one with the given name
+whether it's a table or a source code block).
+
+At least initially I'll try to implement this so that there is no need
+to specify whether the reference is to a table or a source-code block.
+That seems to be simpler both in terms of use and implementation.
+
+This is now working for emacs-lisp, ruby and python (and mixtures of
+the three) source blocks.  See the examples in the [[* (sandbox) referencing other source blocks][sandbox]].
+
+This is currently working only with emacs lisp as in the following
+example in the [[* emacs lisp source reference][emacs lisp source reference]].
+
+
+** TODO Add languages [11/16]
+I'm sure there are many more that aren't listed here.  Please add
+them, and bubble any that you particularly care about up to the top.
+
+Any new language should be implemented in a org-babel-lang.el file.
+Follow the pattern set by [[file:lisp/org-babel-script.el][org-babel-script.el]], [[file:lisp/org-babel-shell.el][org-babel-shell.el]] and
+[[file:lisp/org-babel-R.el][org-babel-R.el]].
+
+*** STARTED Haskell
+#+begin_src haskell
+"hello Haskell"
+#+end_src
+
+#+resname:
+: hello Haskell
+
+#+begin_src haskell
+  let fac n = if n == 0 then 1 else n * fac (n - 1)
+  fac 4
+#+end_src
+
+#+resname:
+: 24
+
+#+begin_src haskell
+[1, 2, 3, 4, 5]
+#+end_src
+
+#+resname:
+| 1 | 2 | 3 | 4 | 5 |
+
+**** allow non-interactive evaluation
+
+*** STARTED ocaml [2/3]
+
+- [X] Working for the simple case (no arguments, simple output)
+- [X] correct handling of vector/list output
+- [ ] ability to import arguments
+
+#+begin_src ocaml
+let rec fib x =
+  match x with
+    | 0 -> 1
+    | 1 -> 1
+    | n -> fib(n - 1) + fib(n - 2) in
+  fib 12
+#+end_src
+
+#+resname:
+: 233
+
+#+begin_src ocaml
+"string"
+#+end_src
+
+#+resname:
+: "string"
+
+#+begin_src ocaml
+[1; 2; 3; 4]
+#+end_src
+
+#+resname:
+| 1 | 2 | 3 | 4 |
+
+#+begin_src ocaml
+[|"ocaml"; "array"|]
+#+end_src
+
+#+resname:
+| "ocaml" | "array" |
+
+*** TODO perl
+This could probably be added to [[file:lisp/org-babel-script.el][org-babel-script.el]]
+*** TODO java
+*** STARTED SQL
+Things left to do
+- support for sessions
+- add more useful header arguments (user, passwd, database, etc...)
+- support for more engines (currently only supports mysql)
+- what's a reasonable way to drop table data into SQL?
+
+#+srcname: sql-example
+#+begin_src sql :engine mysql
+  show databases
+#+end_src
+
+#+resname:
+| "Database"           |
+| "information_schema" |
+| "test"               |
+
+*** DONE SASS
+Sass is a very nice extension of CSS, which is much nicer to read and
+write (see [[http://sass-lang.com/][sass-lang]]).
+
+#+srcname: sass-example
+#+begin_src sass :file stylesheet.css :results file
+  #me
+    position: absolute
+    top: 1em
+    left: 1em
+    .head
+      text-align: center
+#+end_src
+
+#+resname:
+[[file:stylesheet.css][stylesheet.css]]
+
+*** DONE CSS
+trivial [[file:lisp/langs/org-babel-css.el][org-babel-css.el]]
+
+*** DONE ditaa
+(see [[* file result types][file result types]])
+
+#+srcname: implementing-ditaa
+#+begin_src ditaa :results replace :file blue.png :cmdline -r
++---------+
+| cBLU    |
+|         |
+|    +----+
+|    |cPNK|
+|    |    |
++----+----+
+#+end_src
+
+#+resname: implementing-ditaa
+[[file:blue.png][blue.png]]
+
+*** DONE gnuplot [7/7]
+(see [[* file result types][file result types]])
+
+#+PLOT: title:"Citas" ind:1 deps:(3) type:2d with:histograms set:"yrange [0:]"
+#+TBLNAME: gnuplot-data
+| independent var | first dependent var | second dependent var |
+|-----------------+---------------------+----------------------|
+|             0.1 |               0.425 |                0.375 |
+|             0.2 |              0.3125 |               0.3375 |
+|             0.3 |          0.24999993 |           0.28333338 |
+|             0.4 |               0.275 |              0.28125 |
+|             0.5 |                0.26 |                 0.27 |
+|             0.6 |          0.25833338 |           0.24999993 |
+|             0.7 |          0.24642845 |           0.23928553 |
+|             0.8 |             0.23125 |               0.2375 |
+|             0.9 |          0.23333323 |            0.2333332 |
+|               1 |              0.2225 |                 0.22 |
+|             1.1 |          0.20909075 |           0.22272708 |
+|             1.2 |          0.19999998 |           0.21458333 |
+|             1.3 |          0.19615368 |           0.21730748 |
+
+#+srcname: implementing-gnuplot
+#+begin_src gnuplot :var data=gnuplot-data :results silent
+set title "Implementing Gnuplot"
+plot data using 1:2 with lines
+#+end_src
+
+**** DONE add variables
+     gnuplot 4.2 and up support user defined variables.  This is how
+     we will handle variables with org-babel (meaning we will need to
+     require gnuplot 4.2 and up for variable support, which can be
+     install using [[http://www.macports.org/install.php][macports]] on Mac OSX).
+
+     - scalar variables should be replaced in the body of the gnuplot code
+     - vector variables should be exported to tab-separated files, and
+       the variable names should be replaced with the path to the files
+
+**** DONE direct plotting w/o session
+**** DEFERRED gnuplot support for column/row names
+This should be implemented along the lines of the [[* STARTED Column (and row) names of tables in R input/output][R-colname-support]].
+
+We can do something similar to the :labels param in org-plot, we just
+have to be careful to ensure that each label is aligned with the
+related data file.
+
+This may be walking too close to an entirely prebuilt plotting tool
+rather than straight gnuplot code evaluation.  For now I think this
+can wait.
+
+**** DONE a =file= header argument
+to specify a file holding the results
+
+#+srcname: gnuplot-to-file-implementation
+#+begin_src gnuplot :file plot.png :var data=gnuplot-data
+plot data using 1:2, data using 1:3 with lines
+#+end_src
+
+#+resname:
+[[file:plot.png][plot.png]]
+
+**** DONE helpers from org-plot.el
+There are a variety of helpers in org-plot which can be fit nicely
+into custom gnuplot header arguments.
+
+These should all be in place by now.
+
+**** DEFERRED header argument specifying 3D data
+
+#+tblname: org-grid
+| 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| 0 | 0 | 1 | 1 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | 0 | 1 | 1 | 1 | 0 | 0 |
+| 0 | 1 | 0 | 0 | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 1 | 0 |
+| 0 | 1 | 0 | 0 | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 1 | 0 |
+| 0 | 1 | 0 | 0 | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 1 | 0 | 1 | 1 | 1 | 0 |
+| 0 | 1 | 0 | 0 | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | 0 |
+| 0 | 1 | 0 | 0 | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | 0 |
+| 0 | 1 | 0 | 0 | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 1 | 0 |
+| 0 | 1 | 0 | 0 | 1 | 0 | 1 | 1 | 0 | 1 | 0 | 1 | 0 | 0 | 0 | 1 | 0 |
+| 0 | 0 | 1 | 1 | 0 | 0 | 1 | 0 | 1 | 1 | 0 | 0 | 1 | 1 | 1 | 0 | 0 |
+| 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+
+#+srcname: implementing-gnuplot-grid-plots
+#+begin_src gnuplot :vars data=org-grid
+
+#+end_src
+
+**** DONE gnuplot sessions
+Working on this, we won't support multiple sessions as `gnuplot-mode'
+isn't setup for such things.
+
+Also we can't display results with the default :none session, so for
+gnuplot we really want the default behavior to be :default, and to
+only run a :none session when explicitly specified.
+
+#+srcname: implementing-gnuplot-sessions
+#+begin_src gnuplot :var data=gnuplot-data :session none :file session.png
+set title "Implementing Gnuplot Sessions"
+plot data using 1:2 with lines
+#+end_src
+
+#+resname:
+[[file:session.png][session.png]]
+
+*** DONE dot
+(see [[* file result types][file result types]])
+
+#+srcname: implementing-dot-support
+#+begin_src dot :file test-dot.png :cmdline -Tpng
+digraph data_relationships {
+  "data_requirement" [shape=Mrecord, label="{DataRequirement|description\lformat\l}"]
+  "data_product" [shape=Mrecord, label="{DataProduct|name\lversion\lpoc\lformat\l}"]
+  "data_requirement" -> "data_product"
+}
+#+end_src
+
+#+resname:
+[[file:test-dot.png][test-dot.png]]
+
+*** DONE asymptote
+(see [[* file result types][file result types]])
+
+for information on asymptote see http://asymptote.sourceforge.net
+
+#+begin_src asymptote :file asymptote-test.png
+import graph;
+
+size(0,4cm);
+
+real f(real t) {return 1+cos(t);}
+
+path g=polargraph(f,0,2pi,operator ..)--cycle;
+filldraw(g,pink);
+
+xaxis("$x$",above=true);
+yaxis("$y$",above=true);
+
+dot("$(a,0)$",(1,0),N);
+dot("$(2a,0)$",(2,0),N+E);
+#+end_src
+
+#+resname:
+[[file:asymptote-test.png][asymptote-test.png]]
+
+*** DONE ruby
+*** DONE python
+*** DONE R
+*** DONE emacs-lisp
+*** DONE sh
+
+
+* Bugs [39/44]
+** TODO blank srcname takes srcname from next line
+#+srcname: 
+#+begin_src R :session *R*
+5
+#+end_src
+
+#+resname: #+begin_src
+: 5
+
+** DONE stripping indentation from source-code blocks
+This is a problem in [[file:lisp/org-babel-exp.el][org-babel-exp.el]].
+
+** DONE failing to write srcname to resname when evaluating a named block
+
+#+srcname: please-name-my-result
+#+begin_src emacs-lisp 
+"I'm the result"
+#+end_src
+
+#+resname: please-name-my-result
+: I'm the result
+
+** DONE Python session evaluation bug
+   The following block evaluates correctly with :session none
+   (set :results to output), but fails with session-based evaluation
+   (with :results value, as below, you see the error message)
+
+   I edebug'ed it and it seems fine until [[file:lisp/langs/org-babel-python.el::comint%20session%20evaluation%20org%20babel%20comint%20in%20buffer%20buffer%20let%20full%20body][we go to comint]].
+
+#+begin_src python :session pysession :results value
+  import os
+  from subprocess import *
+  
+  chunk = 10000
+  format = '.gen.gz'
+  
+  cc = [('58C','NBS'),
+        ('58C','POBI'),
+        ('NBS','POBI')]
+  
+  for outdir in ['none', 'noscots', 'lax', 'strict']:
+      outdir = os.path.join('exclusion-study', outdir)
+      for case, control in cc:
+          outfile = os.path.join(outdir, '%s-vs-%s-direct' % (case, control))
+          cmd = 'snptest %s -frequentist 1 -hwe ' % ('-gen_gz' if format == '.gen.gz' else '')
+          cmd += '-cases %s %s ' % (case + format, case + '.sample')
+
+          cmd += '-controls %s %s ' % (control + format, control + '.sample')
+          cmd += '-exclude_samples %s ' % os.path.join(outdir, 'exclusions')
+          cmd += '-o %s ' % outfile
+          cmd += '-chunk %d ' % chunk
+          cmd += '> %s' % outfile + '.log'
+          # os.system(cmd)
+          print(cmd)
+#+end_src
+
+#+resname:
+#+begin_example
+snptest -gen_gz -frequentist 1 -hwe -cases 58C.gen.gz 58C.sample -controls NBS.gen.gz NBS.sample -exclude_samples exclusion-study/none/exclusions -o exclusion-study/none/58C-vs-NBS-direct -chunk 10000 > exclusion-study/none/58C-vs-NBS-direct.log
+snptest -gen_gz -frequentist 1 -hwe -cases 58C.gen.gz 58C.sample -controls POBI.gen.gz POBI.sample -exclude_samples exclusion-study/none/exclusions -o exclusion-study/none/58C-vs-POBI-direct -chunk 10000 > exclusion-study/none/58C-vs-POBI-direct.log
+snptest -gen_gz -frequentist 1 -hwe -cases NBS.gen.gz NBS.sample -controls POBI.gen.gz POBI.sample -exclude_samples exclusion-study/none/exclusions -o exclusion-study/none/NBS-vs-POBI-direct -chunk 10000 > exclusion-study/none/NBS-vs-POBI-direct.log
+snptest -gen_gz -frequentist 1 -hwe -cases 58C.gen.gz 58C.sample -controls NBS.gen.gz NBS.sample -exclude_samples exclusion-study/noscots/exclusions -o exclusion-study/noscots/58C-vs-NBS-direct -chunk 10000 > exclusion-study/noscots/58C-vs-NBS-direct.log
+snptest -gen_gz -frequentist 1 -hwe -cases 58C.gen.gz 58C.sample -controls POBI.gen.gz POBI.sample -exclude_samples exclusion-study/noscots/exclusions -o exclusion-study/noscots/58C-vs-POBI-direct -chunk 10000 > exclusion-study/noscots/58C-vs-POBI-direct.log
+snptest -gen_gz -frequentist 1 -hwe -cases NBS.gen.gz NBS.sample -controls POBI.gen.gz POBI.sample -exclude_samples exclusion-study/noscots/exclusions -o exclusion-study/noscots/NBS-vs-POBI-direct -chunk 10000 > exclusion-study/noscots/NBS-vs-POBI-direct.log
+snptest -gen_gz -frequentist 1 -hwe -cases 58C.gen.gz 58C.sample -controls NBS.gen.gz NBS.sample -exclude_samples exclusion-study/lax/exclusions -o exclusion-study/lax/58C-vs-NBS-direct -chunk 10000 > exclusion-study/lax/58C-vs-NBS-direct.log
+snptest -gen_gz -frequentist 1 -hwe -cases 58C.gen.gz 58C.sample -controls POBI.gen.gz POBI.sample -exclude_samples exclusion-study/lax/exclusions -o exclusion-study/lax/58C-vs-POBI-direct -chunk 10000 > exclusion-study/lax/58C-vs-POBI-direct.log
+snptest -gen_gz -frequentist 1 -hwe -cases NBS.gen.gz NBS.sample -controls POBI.gen.gz POBI.sample -exclude_samples exclusion-study/lax/exclusions -o exclusion-study/lax/NBS-vs-POBI-direct -chunk 10000 > exclusion-study/lax/NBS-vs-POBI-direct.log
+snptest -gen_gz -frequentist 1 -hwe -cases 58C.gen.gz 58C.sample -controls NBS.gen.gz NBS.sample -exclude_samples exclusion-study/strict/exclusions -o exclusion-study/strict/58C-vs-NBS-direct -chunk 10000 > exclusion-study/strict/58C-vs-NBS-direct.log
+snptest -gen_gz -frequentist 1 -hwe -cases 58C.gen.gz 58C.sample -controls POBI.gen.gz POBI.sample -exclude_samples exclusion-study/strict/exclusions -o exclusion-study/strict/58C-vs-POBI-direct -chunk 10000 > exclusion-study/strict/58C-vs-POBI-direct.log
+snptest -gen_gz -frequentist 1 -hwe -cases NBS.gen.gz NBS.sample -controls POBI.gen.gz POBI.sample -exclude_samples exclusion-study/strict/exclusions -o exclusion-study/strict/NBS-vs-POBI-direct -chunk 10000 > exclusion-study/strict/NBS-vs-POBI-direct.log
+#+end_example
+
+** DONE require users to explicitly turn on each language
+As we continue to add more languages to org-babel, many of which will
+require new major-modes we need to re-think how languages are added to
+org-babel.
+
+Currently we are requiring all available languages in the
+[[file:lisp/org-babel-init.el][org-babel-init.el]] file.  I think we need to change this to a user
+setting so that only the language which have their requirements met
+(in terms of system executables and emacs major modes) are loaded.  It
+is one more step for install, but it seems to me to be the only
+solution.  Thoughts?
+
+*** proposed
+
+we add something like the following to the instillation instructions  
+
+#+begin_src emacs-lisp
+;; Uncomment each of the following require lines if you want org-babel
+;; to support that language.  Each language has a comment explaining
+;; it's dependencies.  See the related files in lisp/langs for more
+;; detailed explanations of requirements.
+;; 
+;; (require 'org-babel-R)         ;; ess-mode
+;; (require 'org-babel-asymptote) ;; asymptote be installed on your system
+;; (require 'org-babel-css)       ;; none
+;; (require 'org-babel-ditaa)     ;; ditaa be installed on your system
+;; (require 'org-babel-dot)       ;; dot be installed on your system
+;; (require 'org-babel-gnuplot)   ;; gnuplot-mode
+;; (require 'org-babel-python)    ;; python-mode
+;; (require 'org-babel-ruby)      ;; inf-ruby mode, ruby and irb must be installed on your system
+;; (require 'org-babel-sql)       ;; none
+#+end_src
+
+note that =org-babel-sh=, =org-babel-emacs-lisp= are not included in
+the list as they can safely be assumed to work on any system.
+
+*** impetus
+we should come up with a way to gracefully degrade when support for a
+specific language is missing
+
+> To demonstrate creation of documents, open the "test-export.org" file in
+> the base of the org-babel directory, and export it as you would any
+> other org-mode file.  The "exports" header argument controls how
+> source-code blocks are exported, with the following options
+>
+> - none :: no part of the source-code block is exported in the document
+> - results :: only the output of the evaluated block is exported
+> - code :: the code itself is exported
+> - both :: both the code and results are exported
+
+I have this error showing up:
+
+executing Ruby source code block
+apply: Searching for program: no such file or directory, irb
+
+** DONE problem with newlines in output when :results value
+
+#+begin_src python :results value
+'\n'.join(map(str, range(4)))
+#+end_src
+
+#+resname:
+: 0
+: 1
+: 2
+: 3
+
+Whereas I was hoping for
+
+| 0 |
+| 1 |
+| 2 |
+| 3 |
+
+*Note*: to generate the above you can try using the new =raw= results
+header.
+
+#+begin_src python :results value raw
+'|'+'|\n|'.join(map(str, range(4)))+'|'
+#+end_src
+
+#+resname:
+| 0 |
+| 1 |
+| 2 |
+| 3 |
+
+This is now working, it doesn't return as a table because the value
+returned is technically a string.  To return the table mentioned above
+try something like the following.
+
+#+begin_src python
+[[0], [1], [2], [3]]
+#+end_src
+
+#+resname:
+| 0 |
+| 1 |
+| 2 |
+| 3 |
+
+This is some sort of non-printing char / quoting issue I think. Note
+that
+
+#+begin_src python :results value
+'\\n'.join(map(str, range(4)))
+#+end_src
+
+#+resname:
+: 0\n1\n2\n3
+
+Also, note that
+#+begin_src python :results output
+print('\n'.join(map(str, range(4))))
+#+end_src
+
+#+resname:
+: 0
+: 1
+: 2
+: 3
+
+*** collapsing consecutive newlines in string output
+    
+    This is an example of the same bug
+
+#+srcname: multi-line-string-output
+#+begin_src ruby :results output
+"the first line ends here
+
+
+     and this is the second one
+
+even a third"
+#+end_src
+
+This doesn't produce anything at all now. I believe that's because
+I've changed things so that :results output really does *not* get the
+value of the block, only the STDOUT. So if we add a print statement
+this works OK.
+
+#+srcname: multi-line-string-output
+#+begin_src ruby :results output
+print "the first line ends here
+
+
+     and this is the second one
+
+even a third"
+#+end_src
+
+#+resname:
+: the first line ends here
+: 
+: 
+:      and this is the second one
+: 
+: even a third
+
+However, the behaviour with :results value is wrong
+
+#+srcname: multi-line-string-value
+#+begin_src ruby
+"the first line ends here
+
+
+     and this is the second one
+
+even a third"
+#+end_src
+
+#+resname:
+: 0
+
+** TODO prompt characters appearing in output with R
+#+begin_src R :session *R* :results output
+  x <- 6
+  y <- 8
+  3
+#+end_src      
+
+#+resname:
+: > [1] 3
+
+** TODO o-b-execute-subtree overwrites heading when subtree is folded
+*** Example
+    Try M-x org-babel-execute-subtree with the subtree folded and
+    point at the beginning of the heading line.
+#+begin_src sh
+size=5
+#+end_src
+** DONE non-orgtbl formatted lists
+for example
+
+#+srcname: this-doesn't-match-orgtbl
+#+begin_src emacs-lisp :results replace
+'((:results . "replace"))
+#+end_src
+
+#+resname:
+| (:results . "replace") |
+
+#+srcname: this-probably-also-wont-work
+#+begin_src emacs-lisp :results replace
+'(eric schulte)
+#+end_src
+
+#+resname:
+| eric | schulte |
+
+** PROPOSED allow un-named arguments
+
+#+srcname: f(x)
+#+begin_src python 
+x
+#+end_src
+
+#+lob: f(5)
+
+## produces no output
+
+ It's not essential but would be nice for this to work. To do it
+properly, would mean that we'd have to specify rules for how a string
+of supplied arguments (some possibly named) interact with the
+arguments in the definition (some possibly with defaults) to give
+values to the variables in the funbction body.
+** PROPOSED external shell execution can't isolate return values
+I have no idea how to do this as of yet.  The result is that when
+shell functions are run w/o a session there is no difference between
+the =output= and =value= result arguments.
+
+Yea, I don't know how to do this either.  I searched extensively on
+how to isolate the *last* output of a series of shell commands (see
+[[* last command for
+ shells][last command for shells]]).  The results of the search were basically
+that it was not possible (or at least not accomplish-able with a
+reasonable amount of effort).
+
+That fact combined with the tenancy to all ways use standard out in
+shell scripts led me to treat these two options (=output= and =value=)
+as identical in shell evaluation.  Not ideal but maybe good enough for
+the moment.
+
+In the `results' branch I've changed this so that they're not quite
+identical: output results in raw stdout contents, whereas value
+converts it to elisp, perhaps to a table if it looks tabular. This is
+the same for the other languages. [Dan]
+   
+** DONE adding blank line when source-block produces no output
+
+#+srcname: show-org-babel-trim
+#+begin_src sh
+find . \( -path \*/SCCS -o -path \*/RCS -o -path \*/CVS -o -path \*/MCVS -o -path \*/.svn -o -path \*/.git -o -path \*/.hg -o -path \*/.bzr -o -path \*/_MTN -o -path \*/_darcs -o -path \*/\{arch\} \) -prune -o  -type f \( -iname \*.el \) -exec grep -i -nH -e org-babel-trim {} \;
+#+end_src
+
+** DONE Allow source blocks to be recognised when #+ are not first characters on the line
+   I think Carsten has recently altered the core so that #+ can have
+   preceding whitespace, at least for literal/code examples. org-babel
+   should support this.
+
+#+srcname: testing-indentation
+   #+begin_src emacs-lisp :results silent
+   (message "i'm indented")
+   #+end_src
+
+#+srcname: testing-non-indentation
+#+begin_src emacs-lisp :results silent
+(message "I'm not indented")
+#+end_src
+
+#+srcname: i-resolve-references-to-the-indented
+#+begin_src emacs-lisp :var speech=testing-indentation :results silent
+(message "I said %s" speech)
+#+end_src
+
+** DONE are the org-babel-trim s necessary?
+   at the end of e.g. org-babel-R-evaluate, org-babel-python-evaluate, but
+   not org-babel-ruby-evaluate
+   
+   I think it depends on the language, if we find that extra blank
+   lines are being inserted in a particular language that is a good
+   indication that the trim or chomp functions may be appropriate.
+
+   org-babel-trim and the related org-babel-chomp are use throughout
+   org-babel...
+
+#+srcname: show-org-babel-trim-usage
+#+begin_src sh :results output
+find lisp/ \( -path \*/SCCS -o -path \*/RCS -o -path \*/CVS -o -path \*/MCVS -o -path \*/.svn -o -path \*/.git -o -path \*/.hg -o -path \*/.bzr -o -path \*/_MTN -o -path \*/_darcs -o -path \*/\{arch\} \) -prune -o  -type f \( -iname \*.el \) -exec grep -i -nH org-babel-trim {} \;
+#+end_src
+
+#+resname:
+#+begin_example
+lisp//langs/org-babel-python.el:49:		     vars "\n") "\n" (org-babel-trim body) "\n")) ;; then the source block body
+lisp//langs/org-babel-python.el:143:			       (org-remove-indentation (org-babel-trim body)) "[\r\n]")))
+lisp//langs/org-babel-python.el:158:	       #'org-babel-trim
+lisp//langs/org-babel-python.el:166:                                           (reverse (mapcar #'org-babel-trim raw)))))))
+lisp//langs/org-babel-python.el:169:	  (output (org-babel-trim (mapconcat #'identity (reverse (cdr results)) "\n")))
+lisp//langs/org-babel-python.el:170:	  (value (org-babel-python-table-or-string (org-babel-trim (car results)))))))))
+lisp//langs/org-babel-ruby.el:149:                                                  (mapcar #'org-babel-trim raw)))))))
+lisp//langs/org-babel-sh.el:148:                                                  (mapcar #'org-babel-trim raw)))))))
+lisp//langs/org-babel-sh.el:151:            (output (org-babel-trim (mapconcat #'org-babel-trim (reverse results) "\n")))
+lisp//org-babel-ref.el:161:    (mapcar #'org-babel-trim (reverse (cons buffer return)))))
+lisp//org-babel.el:198:    (with-temp-buffer (insert (org-babel-trim body)) (copy-region-as-kill (point-min) (point-max)))
+lisp//org-babel.el:465:           (org-babel-trim
+lisp//org-babel.el:706:(defun org-babel-trim (string &optional regexp)
+#+end_example
+
+#+srcname: show-org-babel-chomp-usage
+#+begin_src sh :results output
+find lisp/ \( -path \*/SCCS -o -path \*/RCS -o -path \*/CVS -o -path \*/MCVS -o -path \*/.svn -o -path \*/.git -o -path \*/.hg -o -path \*/.bzr -o -path \*/_MTN -o -path \*/_darcs -o -path \*/\{arch\} \) -prune -o  -type f \( -iname \*.el \) -exec grep -i -nH org-babel-chomp {} \;
+#+end_src
+
+#+resname:
+#+begin_example
+lisp//langs/org-babel-R.el:122:             (full-body (mapconcat #'org-babel-chomp
+lisp//langs/org-babel-R.el:143:	      (delete nil (mapcar #'extractor (mapcar #'org-babel-chomp raw))) "\n"))))))))
+lisp//langs/org-babel-ruby.el:143:	     #'org-babel-chomp
+lisp//langs/org-babel-sh.el:142:	   (full-body (mapconcat #'org-babel-chomp
+lisp//org-babel-tangle.el:163:      (insert (format "\n%s\n" (org-babel-chomp body)))
+lisp//org-babel.el:362:			 (org-babel-chomp (match-string 2 arg)))
+lisp//org-babel.el:698:(defun org-babel-chomp (string &optional regexp)
+lisp//org-babel.el:707:  "Like `org-babel-chomp' only it runs on both the front and back of the string"
+lisp//org-babel.el:708:  (org-babel-chomp (org-babel-reverse-string
+lisp//org-babel.el:709:                    (org-babel-chomp (org-babel-reverse-string string) regexp)) regexp))
+#+end_example
+
+** DONE LoB is not populated on startup
+   org-babel-library-of-babel is nil for me on startup. I have to
+   evaluate the [[file:lisp/org-babel-lob.el::][org-babel-lob-ingest]] line manually.
+
+#+tblname: R-plot-example-data
+| 1 |  2 |
+| 2 |  4 |
+| 3 |  9 |
+| 4 | 16 |
+| 5 | 25 |
+
+#+lob: R-plot(data=R-plot-example-data)
+
+
+
+   I've added a section to [[file:lisp/org-babel-init.el][org-babel-init.el]] which will load the
+   library of babel on startup.
+
+   Note that this needs to be done in [[file:lisp/org-babel-init.el][org-babel-init.el]] rather than in
+   [[file:lisp/org-babel-lob.el][org-babel-lob.el]], not entirely sure why, something about it being
+   required directly?
+
+   Also, I'm now having the file closed if it wasn't being visited by
+   a buffer before being loaded.
+
+** DONE use new merge function [[file:lisp/org-babel-ref.el::t%20nil%20org%20combine%20plists%20args%20nil][here]]?
+   And at other occurrences of org-combine-plists?
+** DONE creeping blank lines
+   There's still inappropriate addition of blank lines in some circumstances. 
+
+   Hmm, it's a bit confusing. It's to do with o-b-remove-result. LoB
+   removes the entire (#+resname and result) and starts from scratch,
+   whereas #+begin_src only removes the result. I haven't worked out
+   what the correct fix is yet. Maybe the right thing to do is to make
+   sure that those functions (o-b-remove-result et al.) are neutral
+   with respect to newlines. Sounds easy, but...
+
+   E.g.
+
+#+begin_src sh
+b=5
+#+end_src
+
+
+
+   Compare the results of
+#+lob: adder(a=5, b=17)
+
+#+resname: python-add(a=5, b=17)
+: 22
+--------------------------------
+
+#+begin_src python
+23
+#+end_src
+
+#+resname:
+: 23
+---------------------
+** DONE #+srcname arg parsing bug
+#+srcname: test-zz(arg=adder(a=1, b=1))
+#+begin_src python 
+arg
+#+end_src
+
+#+resname: test-zz
+: 2
+
+
+#+srcname: test-zz-nasty(arg=adder(a=adder(a=19,b=adder(a=5,b=2)),b=adder(a=adder(a=1,b=9),b=adder(a=1,b=3))))
+#+begin_src python 
+arg
+#+end_src
+
+#+resname: test-zz-nasty
+: 40
+
+
+
+#+srcname: test-zz-hdr-arg
+#+begin_src python :var arg=adder(a=adder(a=19,b=adder(a=5,b=2)),b=adder(a=adder(a=1,b=9),b=adder(a=1,b=3)))
+arg
+#+end_src
+
+#+resname:
+: 40
+
+** DONE Fix nested evaluation and default args
+   The current parser / evaluator fails with greater levels of nested
+   function block calls (example below).
+
+*** Initial statement [ded]
+    If we want to overcome this I think we'd have to redesign some of
+    the evaluation mechanism. Seeing as we are also facing issues like
+    dealing with default argument values, and seeing as we now know
+    how we want the library of babel to behave in addition to the
+    source blocks, now might be a good time to think about this. It
+    would be nice to do the full thing at some point, but otoh we may
+    not consider it a massive priority.
+    
+    AIui, there are two stages: (i) construct a parse tree, and (ii)
+    evaluate it and return the value at the root. In the parse tree
+    each node represents an unevaluated value (either a literal value
+    or a reference). Node v may have descendent nodes, which represent
+    values upon which node v's evaluation depends. Once that tree is
+    constructed, then we evaluate the nodes from the tips towards the
+    root (a post-order traversal).
+
+    [This would also provide a solution for concatenating the STDOUTs
+    of called blocks, which is a [[*allow%20output%20mode%20to%20return%20stdout%20as%20value][task below]]; we concatenate them in
+    whatever order the traversal is done in.]
+
+    In addition to the variable references (i.e. daughter nodes), each
+    node would contain the information needed to evaluate that node
+    (e.g. lang body). Then we would pass a function postorder over the
+    tree which would call o-b-execute-src-block at each node, finally
+    returning the value at the root.
+
+    Fwiw I made a very tentative small start at stubbing this out in
+    org-babel-call.el in the 'evaluation' branch. And I've made a start
+    at sketching a parsing algorithm below.
+**** Parse tree algorithm
+    Seeing as we're just trying to parse a string like
+    f(a=1,b=g(c=2,d=3)) it shouldn't be too hard. But of course there
+    are 'proper' parsers written in elisp out there,
+    e.g. [[http://cedet.sourceforge.net/semantic.shtml][Semantic]]. Perhaps we can find what we need -- our syntax is
+    pretty much the same as python and R isn't it?
+
+    Or, a complete hack, but maybe it would be we easy to transform it
+    to XML and then parse that with some existing tool?
+    
+    But if we're doing it ourselves, something very vaguely like this?
+    (I'm sure there're lots of problems with this)
+
+#+srcname: org-babel-call-parse(call)
+#+begin_src python 
+  ## we are currently reading a reference name: the name of the root function
+  whereami = "refname"
+  node = root = Node()
+  for c in call_string:
+      if c == '(':
+          varnum = 0
+          whereami = "varname" # now we're reading a variable name
+      if c == '=':
+          new = Node()
+          node.daughters = [node.daughters, new]
+          new.parent = node
+          node = new
+          whereami = "refname"
+      if c == ',':
+          whereami = "varname"
+          varnum += 1
+      elif c == ')':
+          node = node.parent
+      elif c == ' ':
+          pass
+      else:
+          if whereami = "varname":
+              node.varnames[varnum] += c
+          elif whereami = "refname":
+              node.name += c
+#+end_src
+    
+*** discussion / investigation
+I believe that this issue should be addressed as a bug rather than as
+a point for new development.   The code in [[file:lisp/org-babel-ref.el][org-babel-ref.el]] already
+resolves variable references in a recursive manner which *should* work
+in the same manner regardless of the depth of the number of nested
+function calls.  This recursive evaluation has the effect of
+implicitly constructing the parse tree that your are thinking of
+constructing explicitly.
+
+Through using some of the commented out debugging statements in
+[[file:lisp/org-babel-ref.el][org-babel-ref.el]] I have looked at what may be going wrong in the
+current evaluation setup, and it seems that nested variables are being
+set using the =:var= header argument, and these variables are being
+overridden by the *default* variables which are being entered through
+the new functional syntax (see the demonstration header below).
+
+I believe that once this bug is fixed we should be back to fully
+resolution of nested arguments.  We should capture this functionality
+in a test to ensure that we continue to test it as we move forward.  I
+can take a look at implementing this once I get a chance.
+
+Looks like the problem may be in [[file:lisp/org-babel.el::defun%20org%20babel%20merge%20params%20rest%20plists][org-babel-merge-params]], which seems
+to be trampling the provided :vars values.
+
+Nope, now it seems that we are actually looking up the results line,
+rather than the actual source-code block, which would make sense given
+that the results-line will return the same value regardless of the
+arguments supplied.  See the output of this [[file:lisp/org-babel-ref.el::message%20type%20S%20type%20debugging][debug-statement]].
+
+We need to be sure that we don't read from a =#+resname:= line when we
+have a non-nil set of arguments.
+
+**** demonstration
+After uncommenting the debugging statements located [[file:lisp/org-babel-ref.el::message%20format%20first%20second%20S%20S%20new%20refere%20new%20referent%20debugging][here]] and more
+importantly [[file:lisp/org-babel-ref.el::message%20nested%20args%20S%20args%20debugging][here]], we can see that the current reference code does
+evaluate the references correctly, and it uses the =:var= header
+argument to set =a=8=, however the default variables specified using
+the functional syntax in =adder(a=3, b=2)= is overriding this
+specification.
+
+***** doesn't work with functional syntax
+
+#+srcname: adder-func(a=3, b=2)
+#+begin_src python 
+a + b
+#+end_src
+
+#+resname: adder-func
+: 5
+
+#+srcname: after-adder-func(arg=adder-func(a=8))
+#+begin_src python 
+arg
+#+end_src
+
+#+resname: after-adder-func
+: 5
+
+***** still does work with =:var= syntax
+
+so it looks like regardless of the syntax used we're not overriding
+the default argument values.
+
+#+srcname: adder-header
+#+begin_src python :var a=3 :var b=2
+a + b
+#+end_src
+
+#+resname: adder-header
+: 5
+
+#+srcname: after-adder-header
+#+begin_src python :var arg=adder-header(a=8, b=0)
+arg
+#+end_src
+
+#+resname: after-adder-header
+: 5
+
+*** Set of test cases
+**** Both defaults provided in definition
+#+srcname: adder1(a=10,b=20)
+#+begin_src python
+a+b
+#+end_src
+
+#+resname: adder1
+: 30
+****** DONE Rely on defaults
+#+lob: adder1()
+
+#+resname: adder1()
+: 30
+
+## should be 30
+## OK, but
+******* DONE empty parens () not recognised as lob call
+	E.g. remove spaces between parens above
+
+        updated [[file:lisp/org-babel-lob.el::defvar%20org%20babel%20lob%20one%20liner%20regexp%20lob%20t%20n%20n%20t%20n][org-babel-lob-one-liner-regexp]]
+
+****** DONE One supplied, one default
+#+lob: adder1(a=0)
+
+#+resname: adder1(a=0)
+: 20
+
+## should be 20
+
+#+lob: adder1(b=0)
+
+#+resname: adder1(b=0)
+## should be 10
+: 10
+
+****** DONE Both supplied
+#+lob: adder1(a=1,b=2)
+
+#+resname: adder1(a=1,b=2)
+
+: 3
+**** One arg lacks default in definition
+#+srcname: adder2(a=10,b)
+#+begin_src python
+a+b
+#+end_src
+****** DEFERRED Rely on defaults (one of which is missing)
+#+lob: adder2( )
+
+[no output]
+
+## should be error: b has no default
+
+Maybe we should let the programming language handle this case.  For
+example python spits out an error in the =#+lob= line above.  Maybe
+rather than catching these errors our-selves we should raise an error
+when the source-block returns an error.  I'll propose a [[* PROPOSED raise elisp error when source-blocks return errors][task]] for this
+idea, I'm not sure how/if it would work...
+
+****** DEFERRED Default over-ridden
+#+lob: adder2(a=1)
+
+See the above [[* DEFERRED Rely on defaults (one of which is missing)][deferred]] and the new proposed [[* PROPOSED raise elisp error when source-blocks return errors][task]], I think it may be
+more flexible to allow the source block language to handle the error.
+
+[no output ]
+## should be error: b has no default
+
+****** DONE Missing default supplied
+#+lob: adder2(b=1)
+
+#+resname: adder2(b=1)
+: 11
+
+
+## should be 11
+## OK
+
+****** DONE One over-ridden, one supplied
+#+lob: adder2(a=1,b=2)
+
+#+resname: adder2(a=1,b=2)
+: 3
+
+## should be 3
+
+*** Example that fails
+    
+#+srcname: adder(a=0, b=99)
+#+begin_src python 
+a+b
+#+end_src
+
+
+
+#+srcname: one()
+#+begin_src python
+1
+#+end_src
+
+**** nesting
+#+srcname: level-one-nesting()
+#+begin_src python :var arg=adder(a=one(),b=one())
+arg
+#+end_src
+
+#+resname: level-one-nesting
+
+: nil
+
+#+srcname: level-one-nesting()
+#+begin_src python :var arg=adder(a=adder(a=one(),b=one()),b=adder(a=one(),b=one()))
+arg
+#+end_src
+
+#+resname:
+: 12
+
+*** DONE deeply nested arguments still fails
+
+#+srcname: deeply-nested-args-bug
+#+begin_src python :var arg=adder(a=adder(a=one(),b=one()),b=adder(a=one(),b=one()))
+arg
+#+end_src
+
+#+resname:
+: 4
+
+**** Used to result in this error
+: supplied params=nil
+: new-refere="adder", new-referent="a=adder(a=one(),b=one()),b=adder(a=one(),b=one())"
+: args=((:var . "a=adder(a=one()") (:var . "b=one())") (:var . "b=adder(a=one()") (:var . "b=one())"))
+: type=source-block
+: supplied params=((:var . "a=adder(a=one()") (:var . "b=one())") (:var . "b=adder(a=one()") (:var . "b=one())"))
+: new-refere="adder", new-referent="a=one("
+: args=((:var . "a=one("))
+: type=source-block
+: supplied params=((:var . "a=one("))
+: reference 'one(' not found in this buffer
+
+Need to change the regexp in [[file:lisp/org-babel-ref.el::assign%20any%20arguments%20to%20pass%20to%20source%20block][org-babel-ref-resolve-reference]] so that
+it only matches when the parenthesis are balanced.  Maybe look at
+[[http://www.gnu.org/software/emacs/elisp/html_node/List-Motion.html][this]].
+
+*** DONE Still some problems with deeply nested arguments and defaults
+**** sandbox
+**** DONE Parsing / defaults bug
+     Try inserting a space between 'a=0,' and 'b=0' and comparing results
+#+srcname: parsing-defaults-bug()
+#+begin_src python :var arg=adder(a=adder(a=0,b=0))
+arg
+#+end_src
+
+#+resname: parsing-defaults-bug
+
+: 99
+
+#+srcname: deeply-nested-args-bug-orig()
+#+begin_src python :var arg=adder(a=adder(a=one(),b=one()),b=adder(a=adder(a=3, b=4),b=one()))
+arg
+#+end_src
+
+#+resname: deeply-nested-args-bug-orig
+
+: 10
+
+
+**** DONE Nesting problem II
+     This generates parsing errors
+
+     Fixed: c2bef96b7f644c05be5a38cad6ad1d28723533aa
+
+#+srcname: deeply-nested-args-bug-II-1()
+#+begin_src python :var arg=adder(a=adder(a=one(),b=adder(a=2,b=4)))
+arg
+#+end_src
+
+#+resname: deeply-nested-args-bug-II-1
+
+: 106
+
+#+srcname: deeply-nested-args-bug-II-original()
+#+begin_src python :var arg=adder(a=adder(a=one(),b=one()),b=adder(a=one(),b=adder(a=1,b=4)))
+arg
+#+end_src
+
+#+resname: deeply-nested-args-bug-II-original
+: 8
+
+
+
+**** DONE Why does this give 8?
+     It was picking up the wrong definition of adder
+#+srcname: deeply-nested-args-bug-2()
+#+begin_src python :var arg=adder(a=adder(a=one(),b=one()))
+arg
+#+end_src
+
+#+resname: deeply-nested-args-bug-2
+
+: 101
+
+**** DONE Problem with empty argument list
+     This gives empty list with () and 'no output' with ( )
+
+     I think this is OK now.
+
+#+srcname: x
+#+begin_src python :var arg=adder( )
+arg
+#+end_src
+
+#+resname:
+: 99
+
+#+srcname: deeply-nested-args-bug-orig()
+#+begin_src python :var arg=adder(a=adder(a=one(),b=one()),b=adder(a=adder(a=3, b=4),b=one()))
+arg
+#+end_src
+
+#+resname: deeply-nested-args-bug-orig
+
+: 10
+
+
+**** DONE Nesting problem II
+     This generates parsing errors
+
+     Fixed: c2bef96b7f644c05be5a38cad6ad1d28723533aa
+
+#+srcname: deeply-nested-args-bug-II-1()
+#+begin_src python :var arg=adder(a=adder(a=one(),b=adder(a=2,b=4)))
+arg
+#+end_src
+
+#+resname: deeply-nested-args-bug-II-1
+
+: 106
+
+#+srcname: deeply-nested-args-bug-II-original()
+#+begin_src python :var arg=adder(a=adder(a=one(),b=one()),b=adder(a=one(),b=adder(a=1,b=4)))
+arg
+#+end_src
+
+#+resname: deeply-nested-args-bug-II-original
+: 8
+
+
+
+**** DONE Why does this give 8?
+     It was picking up the wrong definition of adder
+#+srcname: deeply-nested-args-bug-2()
+#+begin_src python :var arg=adder(a=adder(a=one(),b=one()))
+arg
+#+end_src
+
+#+resname: deeply-nested-args-bug-2
+
+: 101
+
+**** DONE Problem with empty argument list
+     This gives empty list with () and 'no output' with ( )
+
+     I think this is OK now.
+
+#+srcname: x
+#+begin_src python :var arg=adder( )
+arg
+#+end_src
+
+#+resname:
+: 99
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#+srcname: test-zz(arg=adder(a=adder(a=19,b=adder(a=5,b=2)),b=adder(a=adder(a=1,b=9),b=adder(a=1,b=3))))
+#+begin_src python 
+arg
+#+end_src
+
+
+*** DONE Arg lacking default
+   This would be good thing to address soon. I'm imagining that
+   e.g. here, the 'caller' block would return the answer 30. I believe
+   there's a few issues here: i.e. the naked 'a' without a reference
+   is not understood; the default arg b=6 is not understood.
+
+#+srcname: adder-with-arg-lacking-default(a, b=6)
+#+begin_src python 
+a+b
+#+end_src
+
+
+
+#+srcname: caller(var=adder-with-arg-lacking-default(a=24))
+#+begin_src python :results silent
+var
+#+end_src
+
+** DONE allow srcname to omit function call parentheses
+   Someone needs to revisit those regexps. Is there an argument for
+   moving some of the regexps used to match function calls into
+   defvars? (i.e. in o-b.el and o-b-ref.el)
+
+   This seems to work now. It still might be a good idea to separate
+   out some of the key regexps into defvars at some point.
+
+#+srcname: omit-parens-test
+#+begin_src ruby :results output
+3.times {puts 'x'}
+#+end_src
+
+#+resname:
+: x
+: x
+: x
+
+** DONE avoid stripping whitespace from output when :results output
+   This may be partly solved by using o-b-chomp rather than o-b-trim
+   in the o-b-LANG-evaluate functions.
+** DEFERRED weird escaped characters in shell prompt break shell evaluation
+   E.g. this doesn't work. Should the shell sessions set a sane prompt
+   when they start up? Or is it a question of altering
+   comint-prompt-regexp? Or altering org-babel regexps?
+   
+#+begin_src sh   
+   black=30 ; red=31 ; green=32 ; yellow=33 ; blue=34 ; magenta=35 ; cyan=36 ; white=37
+   prompt_col=$red
+   prompt_char='>'
+   export PS1="\[\033[${prompt_col}m\]\w${prompt_char} \[\033[0m\]"
+#+end_src
+
+   I just pushed a good amount of changes, could you see if your shell
+   problems still exist?
+
+   The problem's still there. Specifically, aIui, at [[file:lisp/langs/org-babel-sh.el::raw%20org%20babel%20comint%20with%20output%20buffer%20org%20babel%20sh%20eoe%20output%20nil%20insert%20full%20body%20comint%20send%20input%20nil%20t][this line]] of
+   org-babel-sh.el, raw gets the value
+
+("" "[0m Sun Jun 14 19:26:24 EDT 2009\n" "[0m org_babel_sh_eoe\n" "[0m ")
+
+   and therefore (member org-babel-sh-eoe-output ...) fails
+
+   I think that `comint-prompt-regexp' needs to be altered to match
+   the shell prompt.  This shouldn't be too difficult to do by hand,
+   using the `regexp-builder' command and should probably be part of
+   the user's regular emacs init.  I can't think of a way for us to
+   set this automatically, and we are SOL without a regexp to match
+   the prompt.
+** DONE function calls in #+srcname: refs
+   
+   My srcname references don't seem to be working for function
+   calls. This needs fixing.
+   
+#+srcname: called()
+#+begin_src python 
+59
+#+end_src
+
+srcname function call doesn't work for calling a source block
+#+srcname: caller(var1=called())
+#+begin_src python
+var1
+#+end_src
+
+#+resname: caller
+: 59
+
+
+
+
+
+
+They do work for a simple reference
+#+srcname: caller2(var1=56)
+#+begin_src python 
+var1
+#+end_src
+
+#+resname: caller2
+: 59
+
+
+and they do work for :var header arg
+#+srcname: caller3
+#+begin_src python :var var1=called() 
+var1
+#+end_src
+
+#+resname:
+: 58
+** DONE LoB: with output to buffer, not working in buffers other than library-of-babel.org
+*** Initial report
+   I haven't fixed this yet. org-babel-ref-resolve-reference moves
+   point around, inside a save-excursion. Somehow when it comes to
+   inserting the results (after possible further recursive calls to
+   org-babel-ref-resolve-reference), point hasn't gone back to the
+   lob line.
+
+#+tblname: test-data
+| 1 |    1 |
+| 2 |   .5 |
+| 3 | .333 |
+
+#+lob: R-plot(data=test-data)
+
+#+lob: python-add(a=2, b=9)
+
+#+resname: python-add(a=2, b=9)
+: 11
+
+*** Now
+    I think this got fixed in the bugfixes before merging results into master.
+
+** DONE cursor movement when evaluating source blocks
+   E.g. the pie chart example. Despite the save-window-excursion in
+   org-babel-execute:R. (I never learned how to do this properly: org-R
+   jumps all over the place...)
+
+   I don't see this now [ded]
+
+** DONE LoB: calls fail if reference has single character name
+   commit 21d058869df1ff23f4f8cc26f63045ac9c0190e2
+**** This doesn't work
+#+lob: R-plot(data=X)
+
+#+tblname: X
+| 1 |     1 |
+| 2 |    .5 |
+| 3 | .3333 |
+| 4 |   .25 |
+| 5 |    .2 |
+| 6 | .1666 |
+
+**** But this is OK
+#+tblname: XX
+| 1 |     1 |
+| 2 |    .5 |
+| 3 | .3333 |
+| 4 |   .25 |
+| 5 |    .2 |
+| 6 | .1666 |
+
+#+lob: R-plot(data=XX)
+
+** DONE make :results replace the default?
+   I'm tending to think that appending results to pre-existing results
+   creates mess, and that the cleaner `replace' option should be the
+   default. E.g. when a source block creates an image, we would want
+   that to be updated, rather than have a new one be added.
+   
+   I agree.
+
+** DONE ruby evaluation not working under ubuntu emacs 23
+   With emacs 23.0.91.1 on ubuntu, for C-h f run-ruby I have the
+   following, which seems to conflict with [[file:lisp/langs/org-babel-ruby.el::let%20session%20buffer%20save%20window%20excursion%20run%20ruby%20nil%20session%20current%20buffer][this line]] in org-babel-ruby.el.
+
+#+begin_example
+run-ruby is an interactive compiled Lisp function.
+
+(run-ruby cmd)
+
+Run an inferior Ruby process, input and output via buffer *ruby*.
+If there is a process already running in `*ruby*', switch to that buffer.
+With argument, allows you to edit the command line (default is value
+of `ruby-program-name').  Runs the hooks `inferior-ruby-mode-hook'
+(after the `comint-mode-hook' is run).
+(Type C-h m in the process buffer for a list of commands.)
+#+end_example
+
+   So, I may have a non-standard inf-ruby.el.  Here's my version of
+   run-ruby.
+
+#+begin_example 
+run-ruby is an interactive Lisp function in `inf-ruby.el'.
+
+(run-ruby &optional COMMAND NAME)
+
+Run an inferior Ruby process, input and output via buffer *ruby*.
+If there is a process already running in `*ruby*', switch to that buffer.
+With argument, allows you to edit the command line (default is value
+of `ruby-program-name').  Runs the hooks `inferior-ruby-mode-hook'
+(after the `comint-mode-hook' is run).
+(Type C-h m in the process buffer for a list of commands.)
+#+end_example
+
+   It seems we could either bundle my version of inf-ruby.el (as it's
+   the newest).  Or we could change the use of `run-ruby' so that it
+   is robust across multiple distributions.  I think I'd prefer the
+   former, unless the older version of inf-ruby is actually bundled
+   with emacs, in which case maybe we should go out of our way to
+   support it.  Thoughts?
+
+   I think for now I'll just include the latest [[file:util/inf-ruby.el][inf-ruby.el]] in the
+   newly created utility directory.  I doubt anyone would have a
+   problem using the latest version of this file.
+** DONE test failing forcing vector results with =test-forced-vector-results= ruby code block
+Note that this only seems to happen the *second* time the test table
+is evaluated
+
+#+srcname: bug-trivial-vector
+#+begin_src emacs-lisp :results vector silent
+8
+#+end_src
+
+#+srcname: bug-forced-vector-results
+#+begin_src ruby :var triv=test-trivial-vector :results silent
+triv.class.name
+#+end_src
+
+mysteriously this seems to be fixed...
+** DONE defunct R sessions
+Sometimes an old R session will turn defunct, and newly inserted code
+will not be evaluated (leading to a hang).
+
+This seems to be fixed by using `inferior-ess-send-input' rather than `comint-send-input'.
+** DONE ruby fails on first call to non-default session
+
+#+srcname: bug-new-session
+#+begin_src ruby :session is-new
+:patton
+#+end_src
+
+** DONE when reading results from =#+resname= line
+
+Errors when trying to read from resname lines.
+
+#+resname: bug-in-resname
+: 8
+
+#+srcname: bug-in-resname-reader
+#+begin_src emacs-lisp :var buggy=bug-in-resname() :results silent
+buggy
+#+end_src
+
+** DONE R-code broke on "org-babel" rename
+
+#+srcname: bug-R-babels
+#+begin_src R 
+8 * 2
+#+end_src
+
+** DONE error on trivial R results
+
+So I know it's generally not a good idea to squash error without
+handling them, but in this case the error almost always means that
+there was no file contents to be read by =org-table-import=, so I
+think it's ok.
+
+#+srcname: bug-trivial-r1
+#+begin_src R :results replace
+pie(c(1, 2, 3), labels = c(1, 2, 3))
+#+end_src
+
+#+srcname: bug-trivial-r2
+#+begin_src R :results replace
+8
+#+end_src
+
+#+resname: bug-trivial-r2
+: 8
+
+#+srcname: bug-trivial-r3
+#+begin_src R :results replace
+c(1,2,3)
+#+end_src
+
+#+resname: bug-trivial-r3
+| 1 |
+| 2 |
+| 3 |
+
+** DONE ruby new variable creation (multi-line ruby blocks)
+Actually it looks like we were dropping all but the last line.
+
+#+srcname: multi-line-ruby-test
+#+begin_src ruby :var table=bug-numerical-table :results replace
+total = 0
+table.each{|n| total += n}
+total/table.size
+#+end_src
+
+#+resname:
+: 2
+
+** DONE R code execution seems to choke on certain inputs
+Currently the R code seems to work on vertical (but not landscape)
+tables
+
+#+srcname: little-fake
+#+begin_src emacs-lisp 
+"schulte"
+#+end_src
+
+
+#+begin_src R :var num=little-fake
+num
+#+end_src
+
+#+resname:
+: schulte
+
+#+srcname: set-debug-on-error
+#+begin_src emacs-lisp :results silent
+(setq debug-on-error t)
+#+end_src
+
+#+srcname: bug-numerical-table
+#+begin_src emacs-lisp :results silent
+'(1 2 3)
+#+end_src
+
+
+
+
+#+srcname: bug-R-number-evaluation
+#+begin_src R :var table=bug-numerical-table
+mean(mean(table))
+#+end_src
+
+#+resname:
+: 2
+
+
+
+#+tblname: bug-vert-table
+| 1 |
+| 2 |
+| 3 |
+
+#+srcname: bug-R-vertical-table
+#+begin_src R :var table=bug-vert-table :results silent
+mean(table)
+#+end_src
+
+** DONE org bug/request: prevent certain org behaviour within code blocks
+   E.g. [[]] gets recognised as a link (when there's text inside the
+   brackets). This is bad for R code at least, and more generally
+   could be argued to be inappropriate. Is it difficult to get org to
+   ignore text in code blocks? [DED]
+   
+   I believe Carsten addressed this recently on the mailing list with
+   the comment that it was indeed a difficult issue.  I believe this
+   may be one area where we could wait for an upstream (org-mode) fix.
+
+   [Dan] Carsten has fixed this now in the core.
+
+** DONE with :results replace, non-table output doesn't replace table output
+   And vice versa. E.g. Try this first with table and then with len(table) [DED]
+#+begin_src python :var table=sandbox :results replace
+table
+#+end_src
+
+| 1 |         2 | 3 |
+| 4 | "schulte" | 6 |
+: 2
+
+Yes, this is certainly a problem.  I fear that if we begin replacing
+anything immediately following a source block (regardless of whether
+it matches the type of our current results) we may accidentally delete
+hand written portions of the user's org-mode buffer.
+
+I think that the best solution here would be to actually start
+labeling results with a line that looks something like...
+
+#+results: name
+
+This would have a couple of benefits...
+1) we wouldn't have to worry about possibly deleting non-results
+   (which is currently an issue)
+2) we could reliably replace results even if there are different types
+3) we could reference the results of a source-code block in variable
+   definitions, which would be useful if for example we don't wish to
+   re-run a source-block every time because it is long-running.
+
+Thoughts?  If no-one objects, I believe I will implement the labeling
+of results.
+
+** DONE extra quotes for nested string
+Well R appears to be reading the tables without issue...
+
+these *should* be quoted
+#+srcname: ls
+#+begin_src sh :results replace
+ls
+#+end_src
+
+| "COPYING"          |
+| "README.markdown"  |
+| "block"            |
+| "examples.org"     |
+| "existing_tools"   |
+| "intro.org"        |
+| "org-babel"          |
+| "rorg.org"         |
+| "test-export.html" |
+| "test-export.org"  |
+
+#+srcname: test-quotes
+#+begin_src ruby :var tab=ls
+tab[1][0]
+#+end_src
+
+: README.markdown
+
+#+srcname: test-quotes
+#+begin_src R :var tab=ls
+as.matrix(tab[2,])
+#+end_src
+
+: README.markdown
+
+** DONE simple ruby arrays not working
+
+As an example eval the following.  Adding a line to test
+
+#+tblname: simple-ruby-array
+| 3 | 4 | 5 |
+
+#+srcname: ruby-array-test
+#+begin_src ruby :var ar = simple-ruby-array :results silent
+ar.first.first
+#+end_src
+
+** DONE space trailing language name
+fix regexp so it works when there's a space trailing the language name
+
+#+srcname: test-trailing-space
+#+begin_src ruby 
+:schulte
+#+end_src
+
+** DONE Args out of range error
+   
+The following block resulted in the error below [DED]. It ran without
+error directly in the shell.
+#+begin_src sh
+cd ~/work/genopca
+for platf in ill aff ; do
+    for pop in CEU YRI ASI ; do
+	rm -f $platf/hapmap-genos-$pop-all $platf/hapmap-rs-all
+	cat $platf/hapmap-genos-$pop-* > $platf/hapmap-genos-$pop-all
+	cat $platf/hapmap-rs-* > $platf/hapmap-rs-all
+    done
+done
+#+end_src
+  
+ executing source block with sh...
+finished executing source block
+string-equal: Args out of range: "", -1, 0
+
+the error =string-equal: Args out of range: "", -1, 0= looks like what
+used to be output when the block returned an empty results string.
+This should be fixed in the current version, you should now see the
+following message =no result returned by source block=.
+
+** DONE ruby arrays not recognized as such
+
+Something is wrong in [[file:lisp/org-babel-script.el]] related to the
+recognition of ruby arrays as such.
+
+#+begin_src ruby :results replace
+[1, 2, 3, 4]
+#+end_src
+
+| 1 | 2 | 3 | 4 |
+
+#+begin_src python :results replace
+[1, 2, 3, 4]
+#+end_src
+
+| 1 | 2 | 3 | 4 |
+** REJECTED elisp reference fails for literal number
+   That's a bug in Dan's elisp, not in org-babel.
+#+srcname: elisp-test(a=4)
+#+begin_src emacs-lisp 
+(message a)
+#+end_src
+
+
+
+
+
+: 30
+
+
+* Tests
+Evaluate all the cells in this table for a comprehensive test of the
+org-babel functionality.
+
+*Note*: if you have customized =org-babel-default-header-args= then some
+of these tests may fail.
+
+#+TBLNAME: org-babel-tests
+| functionality           | block                      | arg |    expected |     results | pass |
+|-------------------------+----------------------------+-----+-------------+-------------+------|
+| basic evaluation        |                            |     |             |             | pass |
+|-------------------------+----------------------------+-----+-------------+-------------+------|
+| emacs lisp              | basic-elisp                |     |           5 |           5 | pass |
+| shell                   | basic-shell                |     |           6 |           6 | pass |
+| ruby                    | basic-ruby                 |     |   org-babel |   org-babel | pass |
+| python                  | basic-python               |     | hello world | hello world | pass |
+| R                       | basic-R                    |     |          13 |          13 | pass |
+|-------------------------+----------------------------+-----+-------------+-------------+------|
+| tables                  |                            |     |             |             | pass |
+|-------------------------+----------------------------+-----+-------------+-------------+------|
+| emacs lisp              | table-elisp                |     |           3 |           3 | pass |
+| ruby                    | table-ruby                 |     |       1-2-3 |       1-2-3 | pass |
+| python                  | table-python               |     |           5 |           5 | pass |
+| R                       | table-R                    |     |         3.5 |         3.5 | pass |
+| R: col names in R       | table-R-colnames           |     |          -3 |          -3 | pass |
+| R: col names in org     | table-R-colnames-org       |     |         169 |         169 | pass |
+|-------------------------+----------------------------+-----+-------------+-------------+------|
+| source block references |                            |     |             |             | pass |
+|-------------------------+----------------------------+-----+-------------+-------------+------|
+| all languages           | chained-ref-last           |     |       Array |       Array | pass |
+|-------------------------+----------------------------+-----+-------------+-------------+------|
+| source block functions  |                            |     |             |             | pass |
+|-------------------------+----------------------------+-----+-------------+-------------+------|
+| emacs lisp              | defun-fibb                 |     |       fibbd |       fibbd | pass |
+| run over                | Fibonacci                  |   0 |           1 |           1 | pass |
+| a                       | Fibonacci                  |   1 |           1 |           1 | pass |
+| variety                 | Fibonacci                  |   2 |           2 |           2 | pass |
+| of                      | Fibonacci                  |   3 |           3 |           3 | pass |
+| different               | Fibonacci                  |   4 |           5 |           5 | pass |
+| arguments               | Fibonacci                  |   5 |           8 |           8 | pass |
+|-------------------------+----------------------------+-----+-------------+-------------+------|
+| bugs and tasks          |                            |     |             |             | pass |
+|-------------------------+----------------------------+-----+-------------+-------------+------|
+| simple ruby arrays      | ruby-array-test            |     |           3 |           3 | pass |
+| R number evaluation     | bug-R-number-evaluation    |     |           2 |           2 | pass |
+| multi-line ruby blocks  | multi-line-ruby-test       |     |           2 |           2 | pass |
+| forcing vector results  | test-forced-vector-results |     |       Array |       Array | pass |
+| deeply nested arguments | deeply-nested-args-bug     |     |           4 |           4 | pass |
+|-------------------------+----------------------------+-----+-------------+-------------+------|
+| sessions                |                            |     |             |             | pass |
+|-------------------------+----------------------------+-----+-------------+-------------+------|
+| set ruby session        | set-ruby-session-var       |     |        :set |        :set | pass |
+| get from ruby session   | get-ruby-session-var       |     |           3 |           3 | pass |
+| set python session      | set-python-session-var     |     |         set |         set | pass |
+| get from python session | get-python-session-var     |     |           4 |           4 | pass |
+| set R session           | set-R-session-var          |     |         set |         set | pass |
+| get from R session      | get-R-session-var          |     |           5 |           5 | pass |
+#+TBLFM: $5='(if (= (length $3) 1) (progn (message (format "running %S" '(sbe $2 (n $3)))) (sbe $2 (n $3))) (sbe $2))::$6='(if (string= $4 $5) "pass" (format "expected %S but was %S" $4 $5))
+#+TBLFM: $5=""::$6=""
+
+
+The second TBLFM line (followed by replacing '[]' with '') can be used
+to blank out the table results, in the absence of a better method.
+
+** basic tests
+
+#+srcname: basic-elisp
+#+begin_src emacs-lisp :results silent
+(+ 1 4)
+#+end_src
+
+
+#+srcname: basic-shell
+#+begin_src sh :results silent
+expr 1 + 5
+#+end_src
+
+
+#+srcname: date-simple
+#+begin_src sh :results silent
+date
+#+end_src
+
+#+srcname: basic-ruby
+#+begin_src ruby :results silent
+"org-babel"
+#+end_src
+
+
+#+srcname: basic-python
+#+begin_src python :results silent
+'hello world'
+#+end_src
+
+
+#+srcname: basic-R
+#+begin_src R :results silent
+b <- 9
+b + 4
+#+end_src
+
+
+** read tables
+
+#+tblname: test-table
+| 1 | 2 | 3 |
+| 4 | 5 | 6 |
+
+#+tblname: test-table-colnames
+| var1 | var2 | var3 |
+|------+------+------|
+|    1 |   22 |   13 |
+|   41 |   55 |   67 |
+
+#+srcname: table-elisp
+#+begin_src emacs-lisp :results silent :var table=test-table
+(length (car table))
+#+end_src
+
+
+#+srcname: table-ruby
+#+begin_src ruby :results silent :var table=test-table
+table.first.join("-")
+#+end_src
+
+
+#+srcname: table-python
+#+begin_src python :var table=test-table
+table[1][1]
+#+end_src
+
+#+srcname: table-R(table=test-table)
+#+begin_src R
+mean(mean(table))
+#+end_src
+
+#+srcname: table-R-colnames(table=test-table-colnames)
+#+begin_src R :results silent
+sum(table$var2 - table$var3)
+#+end_src
+
+#+srcname: R-square(x=default-name-doesnt-exist)
+#+begin_src R :colnames t
+x^2
+#+end_src
+
+This should return 169. The fact that R is able to use the column name
+to index the data frame (x$var3) proves that a table with column names
+(a header row) has been recognised as input for the R-square function
+block, and that the R-square block has output an elisp table with
+column names, and that the colnames have again been recognised when
+creating the R variables in this block.
+#+srcname: table-R-colnames-org(x = R-square(x=test-table-colnames))
+#+begin_src R
+x$var3[1]
+#+end_src
+
+
+
+
+** references
+
+Lets pass a references through all of our languages...
+
+Lets start by reversing the table from the previous examples
+
+#+srcname: chained-ref-first
+#+begin_src python :var table = test-table
+table.reverse()
+table
+#+end_src
+
+#+resname: chained-ref-first
+| 4 | 5 | 6 |
+| 1 | 2 | 3 |
+
+Take the first part of the list
+
+#+srcname: chained-ref-second
+#+begin_src R :var table = chained-ref-first
+table[1]
+#+end_src
+
+#+resname: chained-ref-second
+| 4 |
+| 1 |
+
+Turn the numbers into string
+
+#+srcname: chained-ref-third
+#+begin_src emacs-lisp :var table = chained-ref-second
+(mapcar (lambda (el) (format "%S" el)) table)
+#+end_src
+
+#+resname: chained-ref-third
+| "(4)" | "(1)" |
+
+and Check that it is still a list
+
+#+srcname: chained-ref-last
+#+begin_src ruby :var table=chained-ref-third
+table.class.name
+#+end_src
+
+
+** source blocks as functions
+
+#+srcname: defun-fibb
+#+begin_src emacs-lisp :results silent
+(defun fibbd (n) (if (< n 2) 1 (+ (fibbd (- n 1)) (fibbd (- n 2)))))
+#+end_src
+
+
+#+srcname: fibonacci
+#+begin_src emacs-lisp :results silent :var n=7
+(fibbd n)
+#+end_src
+
+
+
+
+
+
+
+** sbe tests (these don't seem to be working...)
+Testing the insertion of results into org-mode tables.
+
+#+srcname: multi-line-output
+#+begin_src ruby :results replace
+"the first line ends here
+
+
+     and this is the second one
+
+even a third"
+#+end_src
+
+#+resname:
+: the first line ends here\n\n\n     and this is the second one\n\neven a third
+
+#+srcname: multi-line-error
+#+begin_src ruby :results replace
+raise "oh nooooooooooo"
+#+end_src
+
+#+resname:
+: oh nooooooooooo
+
+| the first line ends here... | -:5: warning: parenthesize argument(s) for future version... |
+#+TBLFM: $1='(sbe "multi-line-output")::$2='(sbe "multi-line-error")
+
+** forcing results types tests
+
+#+srcname: test-trivial-vector
+#+begin_src emacs-lisp :results vector silent
+8
+#+end_src
+
+#+srcname: test-forced-vector-results
+#+begin_src ruby :var triv=test-trivial-vector :results silent
+triv.class.name
+#+end_src
+
+** sessions
+
+#+srcname: set-ruby-session-var
+#+begin_src ruby :session :results silent
+var = [1, 2, 3]
+:set
+#+end_src
+
+#+srcname: get-ruby-session-var
+#+begin_src ruby :session :results silent
+var.size
+#+end_src
+
+#+srcname: set-python-session-var
+#+begin_src python :session
+var=4
+'set'
+#+end_src
+
+#+srcname: get-python-session-var
+#+begin_src python :session
+var
+#+end_src
+
+#+srcname: set-R-session-var
+#+begin_src R :session
+a <- 5
+'set'
+#+end_src
+
+#+srcname: get-R-session-var
+#+begin_src R :session
+a
+#+end_src
+
+
+* Sandbox
+  :PROPERTIES:
+  :CUSTOM_ID: sandbox
+  :END:
+To run these examples evaluate [[file:lisp/org-babel-init.el][org-babel-init.el]]
+
+** org-babel.el beginning functionality
+
+#+begin_src sh  :results replace
+date
+#+end_src
+
+#+resname:
+: Sun Jul  5 18:54:39 EDT 2009
+
+#+begin_src ruby
+Time.now
+#+end_src
+
+#+resname:
+: Sun Jul 05 18:54:35 -0400 2009
+
+#+begin_src python
+"Hello World"
+#+end_src
+
+#+resname:
+: Hello World
+
+
+** org-babel-R
+
+#+begin_src R :results replace
+a <- 9
+b <- 16
+a + b
+#+end_src
+
+#+resname:
+: 25
+
+#+begin_src R
+hist(rgamma(20,3,3))
+#+end_src
+
+
+
+** org-babel plays with tables
+Alright, this should demonstrate both the ability of org-babel to read
+tables into a lisp source code block, and to then convert the results
+of the source code block into an org table.  It's using the classic
+"lisp is elegant" demonstration transpose function.  To try this
+out...
+
+1. evaluate [[file:lisp/org-babel-init.el]] to load org-babel and friends
+2. evaluate the transpose definition =\C-c\\C-c= on the beginning of
+   the source block
+3. evaluate the next source code block, this should read in the table
+   because of the =:var table=previous=, then transpose the table, and
+   finally it should insert the transposed table into the buffer
+   immediately following the block
+
+*** Emacs lisp
+
+#+begin_src emacs-lisp :results silent
+(defun transpose (table)
+  (apply #'mapcar* #'list table))
+#+end_src
+
+
+#+TBLNAME: sandbox
+| 1 |       2 | 3 |
+| 4 | schulte | 6 |
+
+#+begin_src emacs-lisp :var table=sandbox :results replace
+(transpose table)
+#+end_src
+
+
+#+begin_src emacs-lisp
+'(1 2 3 4 5)
+#+end_src
+
+#+resname:
+| 1 | 2 | 3 | 4 | 5 |
+
+*** Ruby and Python
+
+#+begin_src ruby :var table=sandbox :results replace
+table.first.join(" - ")
+#+end_src
+
+#+resname:
+: 1 - 2 - 3
+
+#+begin_src python :var table=sandbox
+table[0]
+#+end_src
+
+
+#+begin_src ruby :var table=sandbox :results replace
+table
+#+end_src
+
+#+resname:
+: [[1, 2, 3], [4, "schulte", 6]]
+
+
+| 1 |         2 | 3 |
+| 4 | "schulte" | 6 |
+
+#+begin_src python :var table=sandbox :results replace
+len(table)
+#+end_src
+
+: 2
+
+| "__add__" | "__class__" | "__contains__" | "__delattr__" | "__delitem__" | "__delslice__" | "__doc__" | "__eq__" | "__format__" | "__ge__" | "__getattribute__" | "__getitem__" | "__getslice__" | "__gt__" | "__hash__" | "__iadd__" | "__imul__" | "__init__" | "__iter__" | "__le__" | "__len__" | "__lt__" | "__mul__" | "__ne__" | "__new__" | "__reduce__" | "__reduce_ex__" | "__repr__" | "__reversed__" | "__rmul__" | "__setattr__" | "__setitem__" | "__setslice__" | "__sizeof__" | "__str__" | "__subclasshook__" | "append" | "count" | "extend" | "index" | "insert" | "pop" | "remove" | "reverse" | "sort" |
+
+*** (sandbox table) R
+
+#+TBLNAME: sandbox_r
+| 1 |       2 | 3 |
+| 4 | schulte | 6 |
+
+#+begin_src R :results replace
+x <- c(rnorm(10, mean=-3, sd=1), rnorm(10, mean=3, sd=1))
+x
+#+end_src
+
+| -3.35473133869346 |
+|    -2.45714878661 |
+| -3.32819924928633 |
+| -2.97310212756194 |
+| -2.09640758369576 |
+| -5.06054014378736 |
+| -2.20713700711221 |
+| -1.37618039712037 |
+| -1.95839385821742 |
+| -3.90407396475502 |
+|  2.51168071590226 |
+|  3.96753011570494 |
+|  3.31793212627865 |
+|  1.99829753972341 |
+|  4.00403686419829 |
+|  4.63723764452927 |
+|  3.94636744261313 |
+|  3.58355906547775 |
+|  3.01563442274226 |
+|   1.7634976849927 |
+
+#+begin_src R var tabel=sandbox_r :results replace
+tabel
+#+end_src
+
+| 1 |         2 | 3 |
+| 4 | "schulte" | 6 |
+
+*** shell
+Now shell commands are converted to tables using =org-table-import=
+and if these tables are non-trivial (i.e. have multiple elements) then
+they are imported as org-mode tables...
+
+#+begin_src sh :results replace
+ls -l
+#+end_src
+
+| "total"      | 208 | ""    | ""    |    "" |   "" | "" | ""                |
+| "-rw-r--r--" |   1 | "dan" | "dan" |    57 | 2009 | 15 | "block"           |
+| "-rw-r--r--" |   1 | "dan" | "dan" | 35147 | 2009 | 15 | "COPYING"         |
+| "-rw-r--r--" |   1 | "dan" | "dan" |   722 | 2009 | 18 | "examples.org"    |
+| "drwxr-xr-x" |   4 | "dan" | "dan" |  4096 | 2009 | 19 | "existing_tools"  |
+| "-rw-r--r--" |   1 | "dan" | "dan" |  2207 | 2009 | 14 | "intro.org"       |
+| "drwxr-xr-x" |   2 | "dan" | "dan" |  4096 | 2009 | 18 | "org-babel"         |
+| "-rw-r--r--" |   1 | "dan" | "dan" |   277 | 2009 | 20 | "README.markdown" |
+| "-rw-r--r--" |   1 | "dan" | "dan" | 11837 | 2009 | 18 | "rorg.html"       |
+| "-rw-r--r--" |   1 | "dan" | "dan" | 61829 | 2009 | 19 | "#rorg.org#"      |
+| "-rw-r--r--" |   1 | "dan" | "dan" | 60190 | 2009 | 19 | "rorg.org"        |
+| "-rw-r--r--" |   1 | "dan" | "dan" |   972 | 2009 | 11 | "test-export.org" |
+
+
+** silent evaluation
+
+#+begin_src ruby
+:im_the_results
+#+end_src
+
+: :im_the_results
+
+#+begin_src ruby :results silent
+:im_the_results
+#+end_src
+
+#+begin_src ruby :results replace
+:im_the_results_
+#+end_src
+
+: :im_the_results_
+
+
+** (sandbox) referencing other source blocks
+Doing this in emacs-lisp first because it's trivial to convert
+emacs-lisp results to and from emacs-lisp.
+
+*** emacs lisp source reference
+This first example performs a calculation in the first source block
+named =top=, the results of this calculation are then saved into the
+variable =first= by the header argument =:var first=top=, and it is
+used in the calculations of the second source block.
+
+#+SRCNAME: top
+#+begin_src emacs-lisp
+(+ 4 2)
+#+end_src
+
+#+begin_src emacs-lisp :var first=top :results replace
+(* first 3)
+#+end_src
+
+: 18
+
+This example is the same as the previous only the variable being
+passed through is a table rather than a number.
+
+#+begin_src emacs-lisp :results silent
+(defun transpose (table)
+  (apply #'mapcar* #'list table))
+#+end_src
+
+#+TBLNAME: top_table
+| 1 |       2 | 3 |
+| 4 | schulte | 6 |
+
+#+SRCNAME: second_src_example
+#+begin_src emacs-lisp :var table=top_table
+(transpose table)
+#+end_src
+
+#+begin_src emacs-lisp :var table=second_src_example :results replace
+(transpose table)
+#+end_src
+
+| 1 |         2 | 3 |
+| 4 | "schulte" | 6 |
+*** ruby python
+Now working for ruby
+
+#+srcname: start
+#+begin_src ruby
+89
+#+end_src
+
+#+begin_src ruby :var other=start :results replace
+2 * other
+#+end_src
+
+and for python
+
+#+SRCNAME: start_two
+#+begin_src python
+98
+#+end_src
+
+#+begin_src python :var another=start_two :results replace
+another*3
+#+end_src
+
+*** mixed languages
+Since all variables are converted into Emacs Lisp it is no problem to
+reference variables specified in another language.
+
+#+SRCNAME: ruby-block
+#+begin_src ruby
+2
+#+end_src
+
+#+SRCNAME: lisp_block
+#+begin_src emacs-lisp :var ruby-variable=ruby-block
+(* ruby-variable 8)
+#+end_src
+
+#+begin_src python :var lisp_var=lisp_block
+lisp_var + 4
+#+end_src
+
+: 20
+
+*** R
+
+#+srcname: first_r
+#+begin_src R :results replace
+a <- 9
+a
+#+end_src
+
+: 9
+
+#+begin_src R :var other=first_r :results replace
+other + 2
+#+end_src
+
+: 11
+
+
+** (sandbox) selective export
+
+For exportation tests and examples see (including exportation of
+inline source code blocks) [[file:test-export.org]]
+
+
+** (sandbox) source blocks as functions
+
+#+srcname: default
+#+begin_src emacs-lisp :results silent
+5
+#+end_src
+
+#+srcname: triple
+#+begin_src emacs-lisp :var n=default :results replace
+(* 3 n)
+#+end_src
+
+: 15
+
+#+begin_src emacs-lisp :var result=triple(n=3, m=98) :results replace
+result
+#+end_src
+
+: 294
+
+The following just demonstrates the ability to assign variables to
+literal values, which was not implemented until recently.
+
+#+begin_src ruby :var num="eric" :results replace
+num+" schulte "
+#+end_src
+
+: "eric schulte "
+
+
+** (sandbox) inline source blocks
+
+This is an inline source code block src_ruby{1 + 6}.  And another
+source block with text output src_emacs-lisp{"eric"}.
+
+This is an inline source code block with header
+arguments.  src_ruby[:var n=fibbd( n = 0 )]{n}
+
+
+** (sandbox) integration w/org tables
+
+#+begin_src emacs-lisp :results silent
+(defun fibbd (n) (if (< n 2) 1 (+ (fibbd (- n 1)) (fibbd (- n 2)))))
+#+end_src
+
+#+srcname: fibbd
+#+begin_src emacs-lisp :var n=4 :results silent
+(fibbd n)
+#+end_src
+
+#+begin_src emacs-lisp :results silent
+(mapcar #'fibbd '(0 1 2 3 4 5 6 7 8))
+#+end_src
+
+Something is not working here.  The function `sbe ' works fine when
+called from outside of the table (see the source block below), but
+produces an error when called from inside the table.  I think there
+must be some narrowing going on during intra-table emacs-lisp
+evaluation.
+
+| original | fibbd |
+|----------+-------|
+|        0 |     1 |
+|        1 |     1 |
+|        2 |     2 |
+|        3 |     3 |
+|        4 |     5 |
+|        5 |     8 |
+|        6 |    13 |
+|        7 |    21 |
+|        8 |    34 |
+|        9 |    55 |
+#+TBLFM: $2='(sbe "fibbd" (n $1))
+
+silent-result
+
+#+begin_src emacs-lisp :results silent
+(sbe 'fibbd (n "8"))
+#+end_src
+
+
+* Buffer Dictionary
+ LocalWords:  DBlocks dblocks org-babel el eric fontification
+
+
