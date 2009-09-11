@@ -29,30 +29,40 @@
 ;; for more information see the comments in org-babel.el
 
 ;;; Code:
-(require 'cl)
-(require 'org)
-(require 'org-exp-blocks)
-(require 'org-babel)
-(require 'org-babel-ref)
-(require 'org-babel-exp)
-(require 'org-babel-table)
-(require 'org-babel-comint)
-(require 'org-babel-lob)
-(require 'org-babel-tangle)
+(let* ((babel-dir (expand-file-name
+                   "lisp"
+                   (expand-file-name
+                    "babel"
+                    (expand-file-name
+                     ".." (file-name-directory (or load-file-name buffer-file-name))))))
+       
+       (langs-dir (expand-file-name "langs" babel-dir))
+       (load-path (append
+                   (list babel-dir langs-dir)
+                   (or load-path nil))))
 
-;; language specific files
-(add-to-list 'load-path (expand-file-name "langs" (file-name-directory (or load-file-name buffer-file-name))))
-(require 'org-babel-lisp)
-(require 'org-babel-sh)
+  ;; org-babel core
+  (require 'cl)
+  (require 'org)
+  (require 'org-exp-blocks)
+  (require 'org-babel)
+  (require 'org-babel-ref)
+  (require 'org-babel-exp)
+  (require 'org-babel-table)
+  (require 'org-babel-comint)
+  (require 'org-babel-lob)
+  (require 'org-babel-tangle)
 
-;; Library of babel
-(defvar org-babel-lob-dir
-  (expand-file-name ".."
-                    (file-name-directory
-                     (or load-file-name buffer-file-name)))
-  "The directory holding the library-of-babel")
-(defun org-babel-load-library-of-babel ()
-  (org-babel-lob-ingest (expand-file-name "library-of-babel.org" org-babel-lob-dir)))
+  ;; org-babel languages
+  (require 'org-babel-lisp)
+  (require 'org-babel-sh)
+
+  ;; Library of babel
+  (defvar org-babel-lob-dir
+    (expand-file-name ".." babel-dir)
+    "The directory holding the library-of-babel")
+  (defun org-babel-load-library-of-babel ()
+    (org-babel-lob-ingest (expand-file-name "library-of-babel.org" org-babel-lob-dir))))
 
 (provide 'org-babel-init)
 ;;; org-babel-init.el ends here

@@ -3,23 +3,6 @@
 #+OPTIONS:  H:3 num:nil toc:2 \n:nil @:t ::t |:t ^:t -:t f:t *:t TeX:t LaTeX:t skip:nil d:(HIDE) tags:not-in-toc
 #+STARTUP:  odd hideblocks
 
-#+begin_html 
-  <div id="subtitle">
-    <p>
-      off-the-shelf functions for data analysis and plotting using <a href="org-babel-worg.html">org-babel</a><br/>
-      <a href="http://downlode.org/Etext/library_of_babel.html">Full text of the Borges short story</a>
-    </p>
-  </div>
-  <div id="logo">
-    <p>
-      <img src="images/library-of-babel.png"  alt="images/tower-of-babel.png" />
-      <div id="attr">
-        from <a href="http://www.poetryfoundation.org/harriet/2008/01/random-poetry-02/">poetryfoundation.org</a>
-      </div>
-    </p>  
-  </div>
-#+end_html
-
 * Introduction
   The Library of Babel is an extensible collection of ready-made and
   easily-shortcut-callable source-code blocks for handling common
