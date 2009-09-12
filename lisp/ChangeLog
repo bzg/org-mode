@@ -2,6 +2,7 @@
 
 	* org.el (org-store-link): When in agenda buffer, link to
 	referenced entry.
+	(org-add-planning-info): Remove spaces at eol.
 
 	* org-macs.el (org-with-point-at): Add a `lisp-indent-function'
 	property.

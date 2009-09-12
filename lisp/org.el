@@ -10194,6 +10194,7 @@ be removed."
 			     (re-search-forward org-closed-time-regexp nil t)))
 		(replace-match "")
 		(if (looking-at "--+<[^>]+>") (replace-match ""))
+		(skip-chars-backward " ")
 		(if (looking-at " +") (replace-match ""))))
 	    (goto-char (point-max))
 	    (when what
