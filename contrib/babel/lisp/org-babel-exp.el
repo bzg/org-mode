@@ -54,8 +54,8 @@ none ----- do not display either code or results upon export"
          (lang-headers (intern (concat "org-babel-default-header-args:" lang)))
          (params (org-babel-merge-params
                   org-babel-default-header-args
-                  (org-babel-params-from-properties)
                   (if (boundp lang-headers) (eval lang-headers) nil)
+                  (org-babel-params-from-properties)
                   (org-babel-parse-header-arguments
                    (mapconcat #'identity (cdr headers) " ")))))
     (org-babel-exp-do-export lang body params)))
@@ -79,19 +79,22 @@ options and are taken from `org-babel-defualt-inline-header-args'."
   (case (intern (or (cdr (assoc :exports params)) "code"))
     ('none "")
     ('code (org-babel-exp-code body lang params inline))
-    ('results (save-excursion
-                ;; org-exp-blocks places us at the end of the block
-                (re-search-backward org-babel-src-block-regexp nil t)
-                (org-babel-execute-src-block) ""))
+    ('results (org-babel-exp-results))
     ('both (concat (org-babel-exp-code body lang params inline)
                    "\n\n"
-                   (org-babel-exp-results body lang params inline)))))
+                   (org-babel-exp-results)))))
 
 (defun org-babel-exp-code (body lang params &optional inline)
   (if inline
       (format "=%s=" body)
     (format "#+BEGIN_SRC %s\n%s%s\n#+END_SRC" lang body
             (if (string-match "\n$" body) "" "\n"))))
+
+(defun org-babel-exp-results ()
+  (save-excursion
+    ;; org-exp-blocks places us at the end of the block
+    (re-search-backward org-babel-src-block-regexp nil t)
+    (org-babel-execute-src-block) ""))
 
 (provide 'org-babel-exp)
 ;;; org-babel-exp.el ends here
