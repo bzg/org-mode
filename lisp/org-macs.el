@@ -102,6 +102,7 @@ We use a macro so that the test can happen at compilation time."
      (save-excursion
        (goto-char (or ,pom (point)))
        ,@body)))
+(put 'org-with-point-at 'lisp-indent-function 1)
 
 (defmacro org-no-warnings (&rest body)
   (cons (if (fboundp 'with-no-warnings) 'with-no-warnings 'progn) body))

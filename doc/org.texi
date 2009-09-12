@@ -2973,6 +2973,11 @@ search string.  If the automatically created link is not working correctly or
 accurately enough, you can write custom functions to select the search string
 and to do the search for particular file types---see @ref{Custom searches}.
 The key binding @kbd{C-c l} is only a suggestion---see @ref{Installation}.
+
+@b{Agenda view}@*
+When the cursor is in an agenda view, the created link points to the
+entry referenced by the current line.
+
 @c
 @kindex C-c C-l
 @cindex link completion

@@ -1,3 +1,11 @@
+2009-09-12  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-store-link): When in agenda buffer, link to
+	referenced entry.
+
+	* org-macs.el (org-with-point-at): Add a `lisp-indent-function'
+	property.
+
 2009-09-10  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-latex.el (org-export-latex-first-lines): Fix problem with

@@ -7141,6 +7141,8 @@ type.  For a simple example of an export function, see `org-bbdb.el'."
       (setcdr (assoc type org-link-protocols) (list follow export))
     (push (list type follow export) org-link-protocols)))
 
+(defvar org-agenda-buffer-name)
+
 ;;;###autoload
 (defun org-store-link (arg)
   "\\<org-mode-map>Store an org-link to the current location.
@@ -7179,6 +7181,14 @@ For file links, arg negates `org-context-in-file-links'."
 	(if (< (current-column) gc) (org-move-to-column gc t) (insert " "))
 	(insert link)
 	(setq link (concat "(" label ")") desc nil)))
+
+     ((equal (org-bound-and-true-p org-agenda-buffer-name) (buffer-name))
+      ;; We are in the agenda, link to referenced location
+      (let ((m (or (get-text-property (point) 'org-hd-marker)
+		   (get-text-property (point) 'org-marker))))
+	(unless m (error "Don't know what location to link to"))
+	(org-with-point-at m
+	  (call-interactively 'org-store-link))))
 
      ((eq major-mode 'calendar-mode)
       (let ((cd (calendar-cursor-to-date)))
