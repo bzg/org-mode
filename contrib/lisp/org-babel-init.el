@@ -54,7 +54,7 @@
   (require 'org-babel-tangle)
 
   ;; org-babel languages
-  (require 'org-babel-lisp)
+  (require 'org-babel-emacs-lisp)
   (require 'org-babel-sh)
 
   ;; Library of babel

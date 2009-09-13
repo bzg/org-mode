@@ -1,4 +1,4 @@
-;;; org-babel-lisp.el --- org-babel functions for lisp code evaluation
+;;; org-babel-emacs-lisp.el --- org-babel functions for emacs-lisp code evaluation
 
 ;; Copyright (C) 2009 Eric Schulte
 
@@ -26,7 +26,7 @@
 
 ;;; Commentary:
 
-;; Org-Babel support for evaluating lisp code
+;; Org-Babel support for evaluating emacs-lisp code
 
 ;;; Code:
 (require 'org-babel)
@@ -44,5 +44,5 @@ function is called by `org-babel-execute-src-block' via multiple-value-bind."
       (eval `(let ,(mapcar (lambda (var) `(,(car var) ',(cdr var))) vars)
 	       ,(read (concat "(progn " body ")")))))))
 
-(provide 'org-babel-lisp)
-;;; org-babel-lisp.el ends here
+(provide 'org-babel-emacs-lisp)
+;;; org-babel-emacs-lisp.el ends here
