@@ -2,6 +2,21 @@
 #+SEQ_TODO: TODO PROPOSED | DONE DEFERRED REJECTED
 #+OPTIONS:  H:3 num:nil toc:2 \n:nil @:t ::t |:t ^:t -:t f:t *:t TeX:t LaTeX:t skip:nil d:(HIDE) tags:not-in-toc
 #+STARTUP:  odd hideblocks
+#+STYLE:    <style type="text/css">#outline-container-1 { clear:both; }</style>
+
+#+begin_html
+  <div id="logo" style="float: left; text-align: center; max-width: 340px; font-size: 8pt; margin-left: 1em;">
+    <p>
+      <img src="../../images/babel/library-of-babel.png" alt="Library of Babel"/>
+      <div id="attr">
+        The Library of Babel, by Pierre Clayette
+        <p>
+        <a href="http://downlode.org/Etext/library_of_babel.html">Full text of the Borges short story</a>
+        </p>
+      </div>
+    </p>  
+  </div>
+#+end_html
 
 * Introduction
   The Library of Babel is an extensible collection of ready-made and
@@ -10,6 +25,15 @@
   located in this file. It is possible to add source-code blocks from
   any org-mode file to the library by calling =(org-babel-lob-ingest
   "path/to/file.org")=.
+  
+  This file is included in worg mainly less for viewing through the
+  web interface, and more for contribution through the worg git
+  repository.  If you have code snippets that you think others may
+  find useful please add them to this file and [[file:~/src/worg/worg-git.org::contribute-to-worg][contribute them]] to
+  worg.
+  
+  The raw Org-mode text of this file can be downloaded at
+  [[repofile:contrib/babel/library-of-babel.org][library-of-babel.org]]
 
 * Plotting code
 
