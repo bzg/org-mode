@@ -15499,6 +15499,13 @@ See the individual commands for more information."
       :style toggle :selected (and (boundp 'org-export-with-LaTeX-fragments)
 				   org-export-with-LaTeX-fragments)])
     "--"
+    ("MobileOrg"
+     ["Push Files and Views" org-mobile-push t]
+     ["Pull Captured and Flagged" org-mobile-pull t]
+     ["Find FLAGGED Tasks" (org-agenda nil "?") t]
+     "--"
+     ["Setup" (progn (require 'org-mobile) (customize-group 'org-mobile)) t])
+    "--"
     ("Documentation"
      ["Show Version" org-version t]
      ["Info Documentation" org-info t])

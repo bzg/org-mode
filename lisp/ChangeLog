@@ -16,6 +16,7 @@
 2009-09-15  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-autoload): Autoload org-mobile.el.
+	(org-org-menu): Add menu commands for MobileOrg in the Org menu.
 
 	* org-id.el (org-id-get): Fix bug with forcing ID on an item.
 
