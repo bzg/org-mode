@@ -259,7 +259,7 @@ Capture
 
 Remember
 
-* Setting up Remember for Org:: Some code for .emacs to get things going
+* Setting up Remember for Org::  Some code for .emacs to get things going
 * Remember templates::          Define the outline of different note types
 * Storing notes::               Directly get the note to where it belongs
 * Refiling notes::              Moving a note or task to a project
@@ -272,7 +272,7 @@ Agenda Views
 * Presentation and sorting::    How agenda items are prepared for display
 * Agenda commands::             Remote editing of Org trees
 * Custom agenda views::         Defining special searches and views
-* Exporting Agenda Views::
+* Exporting Agenda Views::      Writing a view to a file
 * Agenda column view::          Using column view for collected entries
 
 The built-in agenda views
@@ -5676,7 +5676,7 @@ with specific templates.  It also allows you to select the location where a
 note should be stored interactively, on the fly.
 
 @menu
-* Setting up Remember for Org:: Some code for .emacs to get things going
+* Setting up Remember for Org::  Some code for .emacs to get things going
 * Remember templates::          Define the outline of different note types
 * Storing notes::               Directly get the note to where it belongs
 * Refiling notes::              Moving a note or task to a project
@@ -6167,7 +6167,7 @@ window configuration is restored when the agenda exits:
 * Presentation and sorting::    How agenda items are prepared for display
 * Agenda commands::             Remote editing of Org trees
 * Custom agenda views::         Defining special searches and views
-* Exporting Agenda Views::
+* Exporting Agenda Views::      Writing a view to a file
 * Agenda column view::          Using column view for collected entries
 @end menu
 
