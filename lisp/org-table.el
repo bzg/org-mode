@@ -3343,7 +3343,8 @@ table editor in arbitrary modes.")
 (defvar org-old-auto-fill-inhibit-regexp nil
   "Local variable used by `orgtbl-mode'")
 
-(defconst orgtbl-line-start-regexp "[ \t]*\\(|\\|#\\+\\(TBLFM\\|ORGTBL\\):\\)"
+(defconst orgtbl-line-start-regexp
+  "[ \t]*\\(|\\|#\\+\\(TBLFM\\|ORGTBL\\|TBLNAME\\):\\)"
   "Matches a line belonging to an orgtbl.")
 
 (defconst orgtbl-extra-font-lock-keywords
@@ -4224,7 +4225,7 @@ list of the fields in the rectangle ."
 	  (save-excursion
 	    (goto-char (point-min))
 	    (if (re-search-forward
-		 (concat "^#[ \t]*\\+TBLNAME:[ \t]*" (regexp-quote name-or-id) "[ \t]*$")
+		 (concat "^[ \t]*#\\+TBLNAME:[ \t]*" (regexp-quote name-or-id) "[ \t]*$")
 		 nil t)
 		(setq buffer (current-buffer) loc (match-beginning 0))
 	      (setq id-loc (org-id-find name-or-id 'marker))

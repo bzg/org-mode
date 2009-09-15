@@ -1,5 +1,10 @@
 2009-09-15  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-table.el (orgtbl-line-start-regexp): Match also TBLNAME
+	statements.
+	(org-table-get-remote-range): Match indented #+TBLNAME
+	statements.
+
 	* org.el (org-convert-to-odd-levels)
 	(org-convert-to-oddeven-levels): Work also correctly if the file
 	is in outline-mode.
