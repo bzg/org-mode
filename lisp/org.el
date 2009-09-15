@@ -3223,6 +3223,13 @@ If yes, offer to stop it and to save the buffer with the changes."
    "org-indent"
    '(org-indent-mode)))
 
+;; Autoload org-mobile.el
+
+(eval-and-compile
+  (org-autoload
+   "org-mobile"
+   '(org-mobile-push org-mobile-pull org-mobile-create-sumo-agenda)))
+
 ;; Autoload archiving code
 ;; The stuff that is needed for cycling and tags has to be defined here.
 
