@@ -44,6 +44,7 @@
   ;; org-babel core
   (require 'cl)
   (require 'org)
+  (require 'org-table)
   (require 'org-exp-blocks)
   (require 'org-babel)
   (require 'org-babel-ref)
