@@ -164,10 +164,10 @@ the header arguments specified at the source code block."
          (lang (first info))
          (body (second info))
          (params (org-babel-merge-params
-		  (third info) (org-babel-get-src-block-function-args) params))
-	 (processed-params (org-babel-process-params params))
-	 (result-params (third processed-params))
-	 (result-type (fourth processed-params))
+                  (third info) (org-babel-get-src-block-function-args) params))
+         (processed-params (org-babel-process-params params))
+         (result-params (third processed-params))
+         (result-type (fourth processed-params))
          (cmd (intern (concat "org-babel-execute:" lang)))
          result)
     ;; (message "params=%S" params) ;; debugging statement
@@ -175,9 +175,9 @@ the header arguments specified at the source code block."
       (error "Language is not in `org-babel-interpreters': %s" lang))
     (when arg (setq result-params (cons "silent" result-params)))
     (setq result (multiple-value-bind (session vars result-params result-type) processed-params
-		   (funcall cmd body params)))
+                   (funcall cmd body params)))
     (if (eq result-type 'value)
-	(setq result (org-babel-process-value-result result result-params)))
+        (setq result (org-babel-process-value-result result result-params)))
     (org-babel-insert-result result result-params)
     (case result-type (output nil) (value result))))
 

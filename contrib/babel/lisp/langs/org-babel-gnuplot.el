@@ -72,64 +72,65 @@ variable names and the value to be used in the gnuplot code."
   "Execute a block of Gnuplot code with org-babel.  This function is
 called by `org-babel-execute-src-block' via multiple-value-bind."
   (message "executing Gnuplot source code block")
-  (let* ((vars (org-babel-gnuplot-process-vars params))
-         (out-file (cdr (assoc :file params)))
-         (term (or (cdr (assoc :term params))
-                   (when out-file (file-name-extension out-file))))
-         (cmdline (cdr (assoc :cmdline params)))
-         (in-file (make-temp-file "org-babel-ditaa"))
-	 (title (plist-get params :title))
-         (lines (plist-get params :line))
-	 (sets (plist-get params :set))
-	 (x-labels (plist-get params :xlabels))
-	 (y-labels (plist-get params :ylabels))
-	 (timefmt (plist-get params :timefmt))
-         (time-ind (or (plist-get params :timeind)
-                       (when timefmt 1))))
-    (flet ((add-to-body (text)
-                        (setq body (concat text "\n" body))))
-      ;; append header argument settings to body
-      (when title (add-to-body (format "set title '%s'" title))) ;; title
-      (when lines (mapc (lambda (el) (add-to-body el)) lines)) ;; line
-      (when sets
-        (mapc (lambda (el) (add-to-body (format "set %s" el))) sets))
-      (when x-labels
-        (add-to-body
-         (format "set xtics (%s)"
-                 (mapconcat (lambda (pair)
-                              (format "\"%s\" %d" (cdr pair) (car pair)))
-                            x-labels ", "))))
-      (when y-labels
-        (add-to-body
-         (format "set ytics (%s)"
-                 (mapconcat (lambda (pair)
-                              (format "\"%s\" %d" (cdr pair) (car pair)))
-                            y-labels ", "))))
-      (when time-ind
-        (add-to-body "set xdata time")
-        (add-to-body (concat "set timefmt \""
-                             (or timefmt
-                                 "%Y-%m-%d-%H:%M:%S") "\"")))
-      (when out-file (add-to-body (format "set output \"%s\"" out-file)))
-      (when term (add-to-body (format "set term %s" term)))
-      ;; insert variables into code body: this should happen last
-      ;; placing the variables at the *top* of the code in case their
-      ;; values are used later
-      (add-to-body (mapconcat
-                    (lambda (pair) (format "%s = \"%s\"" (car pair) (cdr pair)))
-                    vars "\n"))
-      ;; evaluate the code body with gnuplot
-      (if (string= session "none")
-          (let ((script-file (make-temp-file "org-babel-gnuplot-script")))
-            (with-temp-file script-file
-              (insert (concat body "\n")))
-            (message "gnuplot \"%s\"" script-file)
-            (message (shell-command-to-string (format "gnuplot \"%s\"" script-file))))
-        (with-temp-buffer
-          (insert (concat body "\n"))
-          (gnuplot-mode)
-          (gnuplot-send-buffer-to-gnuplot)))
-      out-file)))
+  (save-window-excursion
+    (let* ((vars (org-babel-gnuplot-process-vars params))
+           (out-file (cdr (assoc :file params)))
+           (term (or (cdr (assoc :term params))
+                     (when out-file (file-name-extension out-file))))
+           (cmdline (cdr (assoc :cmdline params)))
+           (in-file (make-temp-file "org-babel-ditaa"))
+           (title (plist-get params :title))
+           (lines (plist-get params :line))
+           (sets (plist-get params :set))
+           (x-labels (plist-get params :xlabels))
+           (y-labels (plist-get params :ylabels))
+           (timefmt (plist-get params :timefmt))
+           (time-ind (or (plist-get params :timeind)
+                         (when timefmt 1))))
+      (flet ((add-to-body (text)
+                          (setq body (concat text "\n" body))))
+        ;; append header argument settings to body
+        (when title (add-to-body (format "set title '%s'" title))) ;; title
+        (when lines (mapc (lambda (el) (add-to-body el)) lines)) ;; line
+        (when sets
+          (mapc (lambda (el) (add-to-body (format "set %s" el))) sets))
+        (when x-labels
+          (add-to-body
+           (format "set xtics (%s)"
+                   (mapconcat (lambda (pair)
+                                (format "\"%s\" %d" (cdr pair) (car pair)))
+                              x-labels ", "))))
+        (when y-labels
+          (add-to-body
+           (format "set ytics (%s)"
+                   (mapconcat (lambda (pair)
+                                (format "\"%s\" %d" (cdr pair) (car pair)))
+                              y-labels ", "))))
+        (when time-ind
+          (add-to-body "set xdata time")
+          (add-to-body (concat "set timefmt \""
+                               (or timefmt
+                                   "%Y-%m-%d-%H:%M:%S") "\"")))
+        (when out-file (add-to-body (format "set output \"%s\"" out-file)))
+        (when term (add-to-body (format "set term %s" term)))
+        ;; insert variables into code body: this should happen last
+        ;; placing the variables at the *top* of the code in case their
+        ;; values are used later
+        (add-to-body (mapconcat
+                      (lambda (pair) (format "%s = \"%s\"" (car pair) (cdr pair)))
+                      vars "\n"))
+        ;; evaluate the code body with gnuplot
+        (if (string= session "none")
+            (let ((script-file (make-temp-file "org-babel-gnuplot-script")))
+              (with-temp-file script-file
+                (insert (concat body "\n")))
+              (message "gnuplot \"%s\"" script-file)
+              (message (shell-command-to-string (format "gnuplot \"%s\"" script-file))))
+          (with-temp-buffer
+            (insert (concat body "\n"))
+            (gnuplot-mode)
+            (gnuplot-send-buffer-to-gnuplot)))
+        out-file))))
 
 (defun org-babel-prep-session:gnuplot (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."
