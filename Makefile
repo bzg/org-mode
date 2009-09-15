@@ -91,6 +91,7 @@ LISPF      = 	org.el			\
 	     	org-macs.el		\
 		org-mew.el              \
 		org-mhe.el		\
+		org-mobile.el		\
 		org-mouse.el		\
 		org-publish.el		\
 		org-plot.el		\
@@ -362,6 +363,7 @@ lisp/org-mac-message.elc:	lisp/org.el
 lisp/org-macs.elc:
 lisp/org-mew.elc:	lisp/org.el
 lisp/org-mhe.elc:	lisp/org.el
+lisp/org-mobile.elc:	lisp/org.el
 lisp/org-mouse.elc:	lisp/org.el
 lisp/org-plot.elc:	lisp/org.el lisp/org-exp.el lisp/org-table.el
 lisp/org-publish.elc:
