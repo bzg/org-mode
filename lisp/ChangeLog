@@ -22,6 +22,15 @@
 	(org-agenda-title-append): Define variable.
 	(org-write-agenda): New export to Org files.
 	(org-agenda-get-some-entry-text): New arguments INDENT and KEEP.
+	(org-agenda): Allow to keep the restricted file list if a special
+	variable is bound to t.
+	(org-agenda): Define a special agenda view for working on flagged
+	entries.
+	(org-agenda-get-restriction-and-command): List the new agenda
+	view.
+	(org-agenda-show-the-flagging-note): New command.
+	(org-agenda-mode-map): New key `?' for looking at the flagging
+	note.
 
 	* org.el (org-autoload): Autoload org-mobile.el.
 	(org-org-menu): Add menu commands for MobileOrg in the Org menu.

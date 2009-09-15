@@ -1451,6 +1451,7 @@ The following commands are available:
 (org-defkey org-agenda-mode-map "/" 'org-agenda-filter-by-tag)
 (org-defkey org-agenda-mode-map "\\" 'org-agenda-filter-by-tag-refine)
 (org-defkey org-agenda-mode-map ";" 'org-timer-set-timer)
+(define-key org-agenda-mode-map "?" 'org-agenda-show-the-flagging-note)
 
 (defvar org-agenda-keymap (copy-keymap org-agenda-mode-map)
   "Local keymap for agenda entries from Org-mode.")
@@ -1722,9 +1723,11 @@ Pressing `<' twice means to restrict to the current subtree or region
 	   (buf (current-buffer))
 	   (bfn (buffer-file-name (buffer-base-buffer)))
 	   entry key type match lprops ans)
-      ;; Turn off restriction unless there is an overriding one
+      ;; Turn off restriction unless there is an overriding one,
       (unless org-agenda-overriding-restriction
-	(put 'org-agenda-files 'org-restrict nil)
+	(unless (org-bound-and-true-p org-agenda-keep-restriced-file-list)
+	  ;; There is a request to keep the file list in place
+	  (put 'org-agenda-files 'org-restrict nil))
 	(setq org-agenda-restrict nil)
 	(move-marker org-agenda-restrict-begin nil)
 	(move-marker org-agenda-restrict-end nil))
@@ -1803,6 +1806,22 @@ Pressing `<' twice means to restrict to the current subtree or region
        ((equal keys "m") (call-interactively 'org-tags-view))
        ((equal keys "M") (org-call-with-arg 'org-tags-view (or arg '(4))))
        ((equal keys "e") (call-interactively 'org-store-agenda-views))
+       ((equal keys "?") (org-tags-view nil "+FLAGGED")
+	(org-add-hook
+	 'post-command-hook
+	 (lambda ()
+	   (unless (current-message)
+	     (let* ((m (org-agenda-get-any-marker))
+		    (note (and m (org-entry-get m "THEFLAGGINGNOTE"))))
+	       (when note
+		 (message (concat
+			   "FLAGGING-NOTE ([?] for more info): "
+			   (org-add-props
+			       (replace-regexp-in-string
+				"\\\\n" "//"
+				(copy-sequence note))
+			       nil 'face 'org-warning)))))))
+	 t t))
        ((equal keys "L")
 	(unless (org-mode-p)
 	  (error "This is not an Org-mode file"))
@@ -1848,7 +1867,7 @@ t   List of all TODO entries            T   Entries with special TODO kwd
 m   Match a TAGS/PROP/TODO query        M   Like m, but only TODO entries
 L   Timeline for current buffer         #   List stuck projects (!=configure)
 s   Search for keywords                 C   Configure custom agenda commands
-/   Multi-occur
+/   Multi-occur                         ?   Find :FLAGGED: entries
 ")
 			(start 0))
 		    (while (string-match
@@ -1967,7 +1986,7 @@ s   Search for keywords                 C   Configure custom agenda commands
 	   ((eq c ?>)
 	    (org-agenda-remove-restriction-lock 'noupdate)
 	    (setq restriction nil))
-	   ((and (equal selstring "") (memq c '(?s ?a ?t ?m ?L ?C ?e ?T ?M ?# ?! ?/)))
+	   ((and (equal selstring "") (memq c '(?s ?a ?t ?m ?L ?C ?e ?T ?M ?# ?! ?/ ??)))
 	    (throw 'exit (cons (setq selstring (char-to-string c)) restriction)))
            ((and (> (length selstring) 0) (eq c ?\d))
             (delete-window)
@@ -6806,6 +6825,53 @@ This will remove the markers, and the overlays."
 		 ""
 	       (format ", skipped %d (disappeared before their turn)"
 		       cntskip)))))
+
+;;; Flagging notes
+
+(defun org-agenda-show-the-flagging-note ()
+  "Display the flagging note in the other window.
+When called a second time in direct sequence, offer to remove the FLAGGING
+tag and (if present) the flagging note."
+  (interactive)
+  (let ((hdmarker (get-text-property (point) 'org-hd-marker))
+	(win (selected-window))
+	note heading newhead)
+    (unless hdmarker
+      (error "No linked entry at point"))
+    (if (and (eq this-command last-command)
+	     (y-or-n-p "Unflag and remove any flagging note? "))
+	(progn
+	  (org-agenda-remove-flag hdmarker)
+	  (let ((win (get-buffer-window "*Flagging Note*")))
+	    (and win (delete-window win)))
+	  (message "Entry unflaged"))
+      (setq note (org-entry-get hdmarker "THEFLAGGINGNOTE"))
+      (unless note
+	(error "No flagging note"))
+      (org-kill-new note)
+      (org-switch-to-buffer-other-window "*Flagging Note*")
+      (erase-buffer)
+      (insert note)
+      (goto-char (point-min))
+      (while (re-search-forward "\\\\n" nil t)
+	(replace-match "\n" t t))
+      (goto-char (point-min))
+      (select-window win)
+      (message "Flagging note pushed to kill ring.  Press [?] again to remove tag and note"))))
+
+(defun org-agenda-remove-flag (marker)
+  "Remove the FLAGGED tag and any flaging note in the entry."
+  (let (newhead)
+    (org-with-point-at marker
+      (org-toggle-tag "FLAGGED" 'off)
+      (org-entry-delete nil "THEFLAGGINGNOTE")
+      (setq newhead (org-get-heading)))
+    (org-agenda-change-all-lines newhead marker)
+    (message "Entry unflaged")))
+
+(defun org-agenda-get-any-marker (&optional pos)
+  (or (get-text-property (or pos (point)) 'org-hd-marker)
+      (get-text-property (or pos (point)) 'org-marker)))
 
 ;;; Appointment reminders
 
