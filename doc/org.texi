@@ -7414,10 +7414,10 @@ This is a globally available command, and also available in the agenda menu.
 Write the agenda view to a file.  Depending on the extension of the selected
 file name, the view will be exported as HTML (extension @file{.html} or
 @file{.htm}), Postscript (extension @file{.ps}), PDF (extension @file{.pdf}),
-or plain text (any other extension).  When called with a @kbd{C-u} prefix
-argument, immediately open the newly created file.  Use the variable
-@code{org-agenda-exporter-settings} to set options for @file{ps-print} and
-for @file{htmlize} to be used during export.
+Org-mode (extension @file{.org}), and plain text (any other extension).  When
+called with a @kbd{C-u} prefix argument, immediately open the newly created
+file.  Use the variable @code{org-agenda-exporter-settings} to set options
+for @file{ps-print} and for @file{htmlize} to be used during export.
 
 @tsubheading{Quit and Exit}
 @kindex q
@@ -7641,13 +7641,13 @@ you want to do this only occasionally, use the command
 @cindex exporting agenda views
 @cindex agenda views, exporting
 @vindex org-agenda-exporter-settings
-Write the agenda view to a file.  Depending on the extension of the
-selected file name, the view will be exported as HTML (extension
-@file{.html} or @file{.htm}), Postscript (extension @file{.ps}),
-iCalendar (extension @file{.ics}), or plain text (any other extension).
-Use the variable @code{org-agenda-exporter-settings} to
-set options for @file{ps-print} and for @file{htmlize} to be used during
-export, for example
+Write the agenda view to a file.  Depending on the extension of the selected
+file name, the view will be exported as HTML (extension @file{.html} or
+@file{.htm}), Postscript (extension @file{.ps}), iCalendar (extension
+@file{.ics}), Org-mode (extension @file{.org}), or plain text (any other
+extension).  Use the variable @code{org-agenda-exporter-settings} to set
+options for @file{ps-print} and for @file{htmlize} to be used during export,
+for example
 
 @vindex org-agenda-add-entry-text-maxlines
 @vindex htmlize-output-type
