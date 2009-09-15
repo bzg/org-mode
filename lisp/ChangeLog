@@ -15,6 +15,10 @@
 
 2009-09-15  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-id.el (org-id-get): Fix bug with forcing ID on an item.
+
+2009-09-15  Carsten Dominik  <carsten.dominik@gmail.com>
+
 	* org-table.el (orgtbl-line-start-regexp): Match also TBLNAME
 	statements.
 	(org-table-get-remote-range): Match indented #+TBLNAME
