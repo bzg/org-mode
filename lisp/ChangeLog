@@ -1,3 +1,9 @@
+2009-09-15  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-convert-to-odd-levels)
+	(org-convert-to-oddeven-levels): Work also correctly if the file
+	is in outline-mode.
+
 2009-09-12  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-store-link): When in agenda buffer, link to

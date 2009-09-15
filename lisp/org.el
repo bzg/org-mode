@@ -6059,7 +6059,9 @@ This will leave level 1 alone, convert level 2 to level 3, level 3 to
 level 5 etc."
   (interactive)
   (when (yes-or-no-p "Are you sure you want to globally change levels to odd? ")
-    (let ((org-odd-levels-only nil) n)
+    (let ((outline-regexp org-outline-regexp)
+	  (outline-level 'org-outline-level)
+	  (org-odd-levels-only nil) n)
       (save-excursion
 	(goto-char (point-min))
 	(while (re-search-forward "^\\*\\*+ " nil t)
@@ -6067,7 +6069,6 @@ level 5 etc."
 	  (while (>= (setq n (1- n)) 0)
 	    (org-demote))
 	  (end-of-line 1))))))
-
 
 (defun org-convert-to-oddeven-levels ()
   "Convert an org-mode file with only odd levels to one with odd and even levels.
@@ -6081,7 +6082,9 @@ is signaled in this case."
     (org-show-context t)
     (error "Not all levels are odd in this file.  Conversion not possible."))
   (when (yes-or-no-p "Are you sure you want to globally change levels to odd-even? ")
-    (let ((org-odd-levels-only nil) n)
+    (let ((outline-regexp org-outline-regexp)
+	  (outline-level 'org-outline-level)
+	  (org-odd-levels-only nil) n)
       (save-excursion
 	(goto-char (point-min))
 	(while (re-search-forward "^\\*\\*+ " nil t)
