@@ -17,6 +17,11 @@
 
 	* org-agenda.el (org-agenda-menu): Reorganize the menu for more
 	consistency.
+	(org-batch-store-agenda-views): New function.
+	(org-mobile-force-id-on-agenda-items): Mention variable.
+	(org-agenda-title-append): Define variable.
+	(org-write-agenda): New export to Org files.
+	(org-agenda-get-some-entry-text): New arguments INDENT and KEEP.
 
 	* org.el (org-autoload): Autoload org-mobile.el.
 	(org-org-menu): Add menu commands for MobileOrg in the Org menu.

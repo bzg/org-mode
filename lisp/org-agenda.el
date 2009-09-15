@@ -55,10 +55,12 @@
 (declare-function calendar-persian-date-string  "cal-persia" (&optional date))
 (declare-function org-columns-quit              "org-colview" ())
 (defvar calendar-mode-map)
+(defvar org-mobile-force-id-on-agenda-items) ; defined in org-mobile.el
 
 ;; Defined somewhere in this file, but used before definition.
 (defvar org-agenda-buffer-name)
 (defvar org-agenda-overriding-header)
+(defvar org-agenda-title-append nil)
 (defvar entry)
 (defvar date)
 (defvar org-agenda-undo-list)
@@ -2179,6 +2181,17 @@ so the export commands can easily use it."
 	  (and (get-buffer org-agenda-buffer-name)
 	       (kill-buffer org-agenda-buffer-name)))))))
 
+(defun org-agenda-mark-header-line (pos)
+  "Mark the line at POS as an agenda structure header."
+  (save-excursion
+    (goto-char pos)
+    (put-text-property (point-at-bol) (point-at-eol)
+		       'org-agenda-structural-header t)
+    (when org-agenda-title-append
+      (put-text-property (point-at-bol) (point-at-eol)
+			 'org-agenda-title-append org-agenda-title-append))))
+
+
 (defun org-write-agenda (file &optional open nosettings)
   "Write the current buffer (an agenda view) as a file.
 Depending on the extension of the file name, plain text (.txt),
@@ -2201,7 +2214,7 @@ higher priority settings."
     '(save-excursion
        (save-window-excursion
 	 (org-agenda-mark-filtered-text)
-	 (let ((bs (copy-sequence (buffer-string))) beg)
+	 (let ((bs (copy-sequence (buffer-string))) beg app)
 	   (org-agenda-unmark-filtered-text)
 	   (with-temp-buffer
 	     (insert bs)
@@ -2241,6 +2254,63 @@ higher priority settings."
 			      (concat (file-name-sans-extension file) ".ps"))
 			     (expand-file-name file))
 	       (message "PDF written to %s" file))
+	      ((string-match "\\.org\\'" file)
+	       (let ((all (buffer-string)) in-date id pl prefix line)
+		 (with-temp-file file
+		   (org-mode)
+		   (insert all)
+		   (goto-char (point-min))
+		   (while (not (eobp))
+		     (cond
+		      ((looking-at "[ \t]*$")) ; keep empty lines
+		      ((looking-at "=+$")
+		       ;; remove underlining
+		       (delete-region (point) (point-at-eol)))
+		      ((get-text-property (point) 'org-agenda-structural-header)
+		       (setq in-date nil)
+		       (setq app (get-text-property (point)
+						     'org-agenda-title-append))
+		       (setq short (get-text-property (point)
+						      'short-heading))
+		       (when (and short (looking-at ".+"))
+			 (replace-match short)
+			 (beginning-of-line 1))
+		       (when app
+			 (end-of-line 1)
+			 (insert app)
+			 (beginning-of-line 1))
+		       (insert "* "))
+		      ((get-text-property (point) 'org-agenda-date-header)
+		       (setq in-date t)
+		       (insert "** "))
+		      ((setq m (or (get-text-property (point) 'org-hd-marker)
+				   (get-text-property (point) 'org-marker)))
+		       (if (setq pl (get-text-property (point) 'prefix-length))
+			   (progn
+			     (setq prefix (org-trim (buffer-substring
+						     (point) (+ (point) pl)))
+				   line (org-trim (buffer-substring
+						   (+ (point) pl)
+						   (point-at-eol))))
+			     (delete-region (point-at-bol) (point-at-eol))
+			     (insert line "<break>" prefix)
+			     (beginning-of-line 1))
+			 (and (looking-at "[ \t]+") (replace-match "")))
+		       (insert (if in-date "***  " "**  "))
+		       (end-of-line 1)
+		       (insert "\n")
+		       (insert (org-agenda-get-some-entry-text
+				m 10 "   " 'planning)
+			       "\n")
+		       (when (setq id
+				   (if (org-bound-and-true-p
+					org-mobile-force-id-on-agenda-items)
+				       (org-id-get m 'create)
+				     (org-entry-get m "ID")))
+			 (insert "   :PROPERTIES:\n   :ORIGINAL_ID: " id
+				 "\n   :END:\n"))))
+		     (beginning-of-line 2)))
+		 (message "Agenda written to Org file %s" file)))
 	      ((string-match "\\.ics\\'" file)
 	       (require 'org-icalendar)
 	       (let ((org-agenda-marker-table
@@ -2302,13 +2372,17 @@ Drawers will be excluded, also the line with scheduling/deadline info."
 	(if (not (setq m (get-text-property (point) 'org-hd-marker)))
 	    (beginning-of-line 2)
 	  (setq txt (org-agenda-get-some-entry-text
-		     m org-agenda-add-entry-text-maxlines))
+		     m org-agenda-add-entry-text-maxlines "    > "))
 	  (end-of-line 1)
 	  (if (string-match "\\S-" txt) (insert "\n" txt)))))))
 
-(defun org-agenda-get-some-entry-text (marker n-lines)
+(defun org-agenda-get-some-entry-text (marker n-lines &optional indent
+					      &rest keep)
   "Extract entry text from MARKER, at most N-LINES lines.
-This will ignore drawers etc, just get the text."
+This will ignore drawers etc, just get the text.
+If INDENT is given, prefix every line with this string.  If KEEP is
+given, it is a list of symbols, defining stuff that hould not be
+removed from the entry content.  Currently only `planning' is allowed here."
   (let (txt drawer-re kwd-time-re ind)
     (save-excursion
       (with-current-buffer (marker-buffer marker)
@@ -2343,9 +2417,10 @@ This will ignore drawers etc, just get the text."
 		   (progn (re-search-forward
 			   "^[ \t]*:END:.*\n?" nil 'move)
 			  (point))))
-		(goto-char (point-min))
-		(while (re-search-forward kwd-time-re nil t)
-		  (replace-match ""))
+		(unless (member 'planning keep)
+		  (goto-char (point-min))
+		  (while (re-search-forward kwd-time-re nil t)
+		    (replace-match "")))
 		(goto-char (point-min))
 		(when org-agenda-entry-text-exclude-regexps
 		  (let ((re-list org-agenda-entry-text-exclude-regexps)	re)
@@ -2375,8 +2450,9 @@ This will ignore drawers etc, just get the text."
 		(run-hooks 'org-agenda-entry-text-cleanup-hook)
 
 		(goto-char (point-min))
-		(while (and (not (eobp)) (re-search-forward "^" nil t))
-		  (replace-match "    > "))
+		(when indent
+		  (while (and (not (eobp)) (re-search-forward "^" nil t))
+		    (replace-match indent t t)))
 		(goto-char (point-min))
 		(while (looking-at "[ \t]*\n") (replace-match ""))
 		(goto-char (point-max))
@@ -2692,7 +2768,7 @@ no longer in use."
       (error "No marker points to an entry here"))
     (setq txt (concat "\n" (org-no-properties
 			    (org-agenda-get-some-entry-text
-			     m org-agenda-entry-text-maxlines))))
+			     m org-agenda-entry-text-maxlines "    > "))))
     (when (string-match "\\S-" txt)
       (setq o (org-make-overlay (point-at-bol) (point-at-eol)))
       (org-overlay-put o 'evaporate t)
@@ -2767,6 +2843,10 @@ dates."
     (push :scheduled args)
     (push :sexp args)
     (if dotodo (push :todo args))
+    (insert "Timeline of file " entry "\n")
+    (add-text-properties (point-min) (point)
+			 (list 'face 'org-agenda-structure))
+    (org-agenda-mark-header-line (point-min))
     (while (setq d (pop day-numbers))
       (if (and (listp d) (eq (car d) :omitted))
 	  (progn
@@ -2799,6 +2879,7 @@ dates."
 				     'org-agenda-date-weekend
 				   'org-agenda-date))
 	      (put-text-property s (1- (point)) 'org-date-line t)
+	      (put-text-property s (1- (point)) 'org-agenda-date-header t)
 	      (if (equal d today)
 		  (put-text-property s (1- (point)) 'org-today t))
 	      (and rtn (insert (org-finalize-agenda-entries rtn) "\n"))
@@ -2947,9 +3028,10 @@ given in `org-agenda-start-on-weekday'."
 		     file date :todo))
 	  (setq rtnall (append rtnall rtn))))
       (when rtnall
-	(insert "ALL CURRENTLY OPEN TODO ITEMS:\n")
+	(insert "All currently open TODO items:\n")
 	(add-text-properties (point-min) (1- (point))
-			     (list 'face 'org-agenda-structure))
+			     (list 'face 'org-agenda-structure
+				   'short-heading "All TODO items"))
 	(insert (org-finalize-agenda-entries rtnall) "\n")))
     (unless org-agenda-compact-blocks
       (let* ((d1 (car day-numbers))
@@ -2969,7 +3051,8 @@ given in `org-agenda-start-on-weekday'."
 		    "")
 		  ":\n")))
       (add-text-properties s (1- (point)) (list 'face 'org-agenda-structure
-						'org-date-line t)))
+						'org-date-line t))
+      (org-agenda-mark-header-line s))
     (while (setq d (pop day-numbers))
       (setq date (calendar-gregorian-from-absolute d)
 	    wd (calendar-day-of-week date)
@@ -3016,6 +3099,7 @@ given in `org-agenda-start-on-weekday'."
 				   'org-agenda-date-weekend
 				 'org-agenda-date))
 	    (put-text-property s (1- (point)) 'org-date-line t)
+	    (put-text-property s (1- (point)) 'org-agenda-date-header t)
 	    (put-text-property s (1- (point)) 'org-day-cnt day-cnt)
 	    (when todayp
 	      (put-text-property s (1- (point)) 'org-today t)
@@ -3246,6 +3330,7 @@ in `org-agenda-text-search-extra-files'."
 	(insert "Press `[', `]' to add/sub word, `{', `}' to add/sub regexp, `C-u r' to edit\n")
 	(add-text-properties pos (1- (point))
 			     (list 'face 'org-agenda-structure))))
+    (org-agenda-mark-header-line (point-min))
     (when rtnall
       (insert (org-finalize-agenda-entries rtnall) "\n"))
     (goto-char (point-min))
@@ -3300,7 +3385,11 @@ for a keyword.  A numeric prefix directly selects the Nth keyword in
 		    nil 'face 'org-agenda-structure) "\n")
       (insert "Global list of TODO items of type: ")
       (add-text-properties (point-min) (1- (point))
-			   (list 'face 'org-agenda-structure))
+			   (list 'face 'org-agenda-structure
+				 'short-heading
+				 (concat "ToDo: "
+					 (or org-select-this-todo-keyword "ALL"))))
+      (org-agenda-mark-header-line (point-min))
       (setq pos (point))
       (insert (or org-select-this-todo-keyword "ALL") "\n")
       (add-text-properties pos (1- (point)) (list 'face 'org-warning))
@@ -3316,6 +3405,7 @@ for a keyword.  A numeric prefix directly selects the Nth keyword in
 		kwds))
 	(insert "\n"))
       (add-text-properties pos (1- (point)) (list 'face 'org-agenda-structure)))
+    (org-agenda-mark-header-line (point-min))
     (when rtnall
       (insert (org-finalize-agenda-entries rtnall) "\n"))
     (goto-char (point-min))
@@ -3375,7 +3465,9 @@ The prefix arg TODO-ONLY limits the search to TODO entries."
 		    nil 'face 'org-agenda-structure) "\n")
       (insert "Headlines with TAGS match: ")
       (add-text-properties (point-min) (1- (point))
-			   (list 'face 'org-agenda-structure))
+			   (list 'face 'org-agenda-structure
+				 'short-heading
+				 (concat "Match: " match)))
       (setq pos (point))
       (insert match "\n")
       (add-text-properties pos (1- (point)) (list 'face 'org-warning))
@@ -3383,6 +3475,7 @@ The prefix arg TODO-ONLY limits the search to TODO entries."
       (unless org-agenda-multi
 	(insert "Press `C-u r' to search again with new search string\n"))
       (add-text-properties pos (1- (point)) (list 'face 'org-agenda-structure)))
+    (org-agenda-mark-header-line (point-min))
     (when rtnall
       (insert (org-finalize-agenda-entries rtnall) "\n"))
     (goto-char (point-min))
