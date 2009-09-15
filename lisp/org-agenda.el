@@ -1463,78 +1463,11 @@ The following commands are available:
   '("Agenda"
     ("Agenda Files")
     "--"
-    ["Show" org-agenda-show t]
-    ["Go To (other window)" org-agenda-goto t]
-    ["Go To (this window)" org-agenda-switch-to t]
-    ["Follow Mode" org-agenda-follow-mode
-     :style toggle :selected org-agenda-follow-mode :active t]
-    ["Tree to indirect frame" org-agenda-tree-to-indirect-buffer t]
-    "--"
-    ["Cycle TODO" org-agenda-todo t]
-    ("Archive and Refile"
-     ["Toggle ARCHIVE tag" org-agenda-toggle-archive-tag t]
-     ["Move to archive sibling" org-agenda-archive-to-archive-sibling t]
-     ["Archive subtree" org-agenda-archive t]
-     ["Refile" org-agenda-refile t])
-    ["Delete subtree" org-agenda-kill t]
-    ("Bulk action"
-     ["Mark entry" org-agenda-bulk-mark t]
-     ["Unmark entry" org-agenda-bulk-unmark t]
-     ["Act on all marked" org-agenda-bulk-action t]
-     ["Unmark all entries" org-agenda-bulk-remove-all-marks :active t :keys "C-u s"])
-    "--"
-    ["Add note" org-agenda-add-note t]
-    "--"
-    ["Goto Today" org-agenda-goto-today (org-agenda-check-type nil 'agenda 'timeline)]
-    ["Next Dates" org-agenda-later (org-agenda-check-type nil 'agenda)]
-    ["Previous Dates" org-agenda-earlier (org-agenda-check-type nil 'agenda)]
-    ["Jump to date" org-agenda-goto-date (org-agenda-check-type nil 'agenda)]
-    "--"
-    ("Tags and Properties"
-     ["Show all Tags" org-agenda-show-tags t]
-     ["Set Tags current line" org-agenda-set-tags (not (org-region-active-p))]
-     ["Change tag in region" org-agenda-set-tags (org-region-active-p)]
-     "--"
-     ["Column View" org-columns t])
-    ("Date/Schedule"
-     ["Schedule" org-agenda-schedule t]
-     ["Set Deadline" org-agenda-deadline t]
-     "--"
-     ["Mark item" org-agenda-action :active t :keys "k m"]
-     ["Show mark item" org-agenda-action :active t :keys "k v"]
-     ["Schedule marked item" org-agenda-action :active t :keys "k s"]
-     ["Set Deadline for marked item" org-agenda-action :active t :keys "k d"]
-     "--"
-     ["Change Date +1 day" org-agenda-date-later (org-agenda-check-type nil 'agenda 'timeline)]
-     ["Change Date -1 day" org-agenda-date-earlier (org-agenda-check-type nil 'agenda 'timeline)]
-     ["Change Time +1 hour" org-agenda-do-date-later :active (org-agenda-check-type nil 'agenda 'timeline) :keys "C-u S-right"]
-     ["Change Time -1 hour" org-agenda-do-date-earlier :active (org-agenda-check-type nil 'agenda 'timeline) :keys "C-u S-left"]
-     ["Change Time +  min" org-agenda-date-later :active (org-agenda-check-type nil 'agenda 'timeline) :keys "C-u C-u S-right"]
-     ["Change Time -  min" org-agenda-date-earlier :active (org-agenda-check-type nil 'agenda 'timeline) :keys "C-u C-u S-left"]
-     ["Change Date to ..." org-agenda-date-prompt (org-agenda-check-type nil 'agenda 'timeline)])
-    ("Clock and Effort"
-     ["Clock in" org-agenda-clock-in t]
-     ["Clock out" org-agenda-clock-out t]
-     ["Clock cancel" org-agenda-clock-cancel t]
-     ["Goto running clock" org-clock-goto t]
-     "--"
-     ["Set Effort" org-agenda-set-effort t]
-     ["Change clocked effort" org-clock-modify-effort-estimate
-      (org-clock-is-active)])
-    ("Priority"
-     ["Set Priority" org-agenda-priority t]
-     ["Increase Priority" org-agenda-priority-up t]
-     ["Decrease Priority" org-agenda-priority-down t]
-     ["Show Priority" org-agenda-show-priority t])
-    ("Calendar/Diary"
-     ["New Diary Entry" org-agenda-diary-entry (org-agenda-check-type nil 'agenda 'timeline)]
-     ["Goto Calendar" org-agenda-goto-calendar (org-agenda-check-type nil 'agenda 'timeline)]
-     ["Phases of the Moon" org-agenda-phases-of-moon (org-agenda-check-type nil 'agenda 'timeline)]
-     ["Sunrise/Sunset" org-agenda-sunrise-sunset (org-agenda-check-type nil 'agenda 'timeline)]
-     ["Holidays" org-agenda-holidays (org-agenda-check-type nil 'agenda 'timeline)]
-     ["Convert" org-agenda-convert-date (org-agenda-check-type nil 'agenda 'timeline)]
-     "--"
-     ["Create iCalendar file" org-export-icalendar-combine-agenda-files t])
+    ("Agenda Dates"
+     ["Goto Today" org-agenda-goto-today (org-agenda-check-type nil 'agenda 'timeline)]
+     ["Next Dates" org-agenda-later (org-agenda-check-type nil 'agenda)]
+     ["Previous Dates" org-agenda-earlier (org-agenda-check-type nil 'agenda)]
+     ["Jump to date" org-agenda-goto-date (org-agenda-check-type nil 'agenda)])
     "--"
     ("View"
      ["Day View" org-agenda-day-view
@@ -1584,7 +1517,87 @@ The following commands are available:
     ["Rebuild buffer" org-agenda-redo t]
     ["Save all Org-mode Buffers" org-save-all-org-buffers t]
     "--"
+    ["Show original entry" org-agenda-show t]
+    ["Go To (other window)" org-agenda-goto t]
+    ["Go To (this window)" org-agenda-switch-to t]
+    ["Follow Mode" org-agenda-follow-mode
+     :style toggle :selected org-agenda-follow-mode :active t]
+;    ["Tree to indirect frame" org-agenda-tree-to-indirect-buffer t]
+    "--"
+    ("TODO"
+     ["Cycle TODO" org-agenda-todo t]
+     ["Next TODO set" org-agenda-todo-nextset t]
+     ["Previous TODO set" org-agenda-todo-previousset t]
+     ["Add note" org-agenda-add-note t])
+    ("Archive/Refile/Delete"
+     ["Toggle ARCHIVE tag" org-agenda-toggle-archive-tag t]
+     ["Move to archive sibling" org-agenda-archive-to-archive-sibling t]
+     ["Archive subtree" org-agenda-archive t]
+     "--"
+     ["Refile" org-agenda-refile t]
+     "--"
+     ["Delete subtree" org-agenda-kill t])
+    ("Bulk action"
+     ["Mark entry" org-agenda-bulk-mark t]
+     ["Unmark entry" org-agenda-bulk-unmark t]
+     ["Act on all marked" org-agenda-bulk-action t]
+     ["Unmark all entries" org-agenda-bulk-remove-all-marks :active t :keys "C-u s"])
+    "--"
+    ("Tags and Properties"
+     ["Show all Tags" org-agenda-show-tags t]
+     ["Set Tags current line" org-agenda-set-tags (not (org-region-active-p))]
+     ["Change tag in region" org-agenda-set-tags (org-region-active-p)]
+     "--"
+     ["Column View" org-columns t])
+    ("Deadline/Schedule"
+     ["Schedule" org-agenda-schedule t]
+     ["Set Deadline" org-agenda-deadline t]
+     "--"
+     ["Mark item" org-agenda-action :active t :keys "k m"]
+     ["Show mark item" org-agenda-action :active t :keys "k v"]
+     ["Schedule marked item" org-agenda-action :active t :keys "k s"]
+     ["Set Deadline for marked item" org-agenda-action :active t :keys "k d"]
+     "--"
+     ["Change Date +1 day" org-agenda-date-later (org-agenda-check-type nil 'agenda 'timeline)]
+     ["Change Date -1 day" org-agenda-date-earlier (org-agenda-check-type nil 'agenda 'timeline)]
+     ["Change Time +1 hour" org-agenda-do-date-later :active (org-agenda-check-type nil 'agenda 'timeline) :keys "C-u S-right"]
+     ["Change Time -1 hour" org-agenda-do-date-earlier :active (org-agenda-check-type nil 'agenda 'timeline) :keys "C-u S-left"]
+     ["Change Time +  min" org-agenda-date-later :active (org-agenda-check-type nil 'agenda 'timeline) :keys "C-u C-u S-right"]
+     ["Change Time -  min" org-agenda-date-earlier :active (org-agenda-check-type nil 'agenda 'timeline) :keys "C-u C-u S-left"]
+     ["Change Date to ..." org-agenda-date-prompt (org-agenda-check-type nil 'agenda 'timeline)])
+    ("Clock and Effort"
+     ["Clock in" org-agenda-clock-in t]
+     ["Clock out" org-agenda-clock-out t]
+     ["Clock cancel" org-agenda-clock-cancel t]
+     ["Goto running clock" org-clock-goto t]
+     "--"
+     ["Set Effort" org-agenda-set-effort t]
+     ["Change clocked effort" org-clock-modify-effort-estimate
+      (org-clock-is-active)])
+    ("Priority"
+     ["Set Priority" org-agenda-priority t]
+     ["Increase Priority" org-agenda-priority-up t]
+     ["Decrease Priority" org-agenda-priority-down t]
+     ["Show Priority" org-agenda-show-priority t])
+    ("Calendar/Diary"
+     ["New Diary Entry" org-agenda-diary-entry (org-agenda-check-type nil 'agenda 'timeline)]
+     ["Goto Calendar" org-agenda-goto-calendar (org-agenda-check-type nil 'agenda 'timeline)]
+     ["Phases of the Moon" org-agenda-phases-of-moon (org-agenda-check-type nil 'agenda 'timeline)]
+     ["Sunrise/Sunset" org-agenda-sunrise-sunset (org-agenda-check-type nil 'agenda 'timeline)]
+     ["Holidays" org-agenda-holidays (org-agenda-check-type nil 'agenda 'timeline)]
+     ["Convert" org-agenda-convert-date (org-agenda-check-type nil 'agenda 'timeline)]
+     "--"
+     ["Create iCalendar File" org-export-icalendar-combine-agenda-files t])
+    "--"
     ["Undo Remote Editing" org-agenda-undo org-agenda-undo-list]
+    "--"
+    ("MobileOrg"
+     ["Push Files and Views" org-mobile-push t]
+     ["Pull Captured and Flagged" org-mobile-pull t]
+     ["Find FLAGGED Tasks" (org-agenda nil "?") t]
+     ["Show note / unflag" org-agenda-show-the-flagging-note t]
+     "--"
+     ["Setup" (progn (require 'org-mobile) (customize-group 'org-mobile)) t])
     "--"
     ["Quit" org-agenda-quit t]
     ["Exit and Release Buffers" org-agenda-exit t]

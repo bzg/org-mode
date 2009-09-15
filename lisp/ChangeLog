@@ -15,6 +15,9 @@
 
 2009-09-15  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-agenda.el (org-agenda-menu): Reorganize the menu for more
+	consistency.
+
 	* org.el (org-autoload): Autoload org-mobile.el.
 	(org-org-menu): Add menu commands for MobileOrg in the Org menu.
 
