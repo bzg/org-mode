@@ -1,0 +1,92 @@
+#+title:    The Library of Babel
+#+SEQ_TODO: TODO PROPOSED | DONE DEFERRED REJECTED
+#+OPTIONS:  H:3 num:nil toc:2 \n:nil @:t ::t |:t ^:t -:t f:t *:t TeX:t LaTeX:t skip:nil d:(HIDE) tags:not-in-toc
+#+STARTUP:  odd hideblocks
+#+STYLE:    <style type="text/css">#outline-container-1 { clear:both; }</style>
+
+#+begin_html
+  <div id="logo" style="float: left; text-align: center; max-width: 340px; font-size: 8pt; margin-left: 1em;">
+    <p>
+      <img src="../../images/babel/library-of-babel.png" alt="Library of Babel"/>
+      <div id="attr">
+        The Library of Babel, by Pierre Clayette
+        <p>
+        <a href="http://downlode.org/Etext/library_of_babel.html">Full text of the Borges short story</a>
+        </p>
+      </div>
+    </p>  
+  </div>
+#+end_html
+
+* Introduction
+  The Library of Babel is an extensible collection of ready-made and
+  easily-shortcut-callable source-code blocks for handling common
+  tasks.  Org-babel comes pre-populated with the source-code blocks
+  located in this file. It is possible to add source-code blocks from
+  any org-mode file to the library by calling =(org-babel-lob-ingest
+  "path/to/file.org")=.
+  
+  This file is included in worg mainly less for viewing through the
+  web interface, and more for contribution through the worg git
+  repository.  If you have code snippets that you think others may
+  find useful please add them to this file and [[file:~/src/worg/worg-git.org::contribute-to-worg][contribute them]] to
+  worg.
+  
+  The raw Org-mode text of this file can be downloaded at
+  [[repofile:contrib/babel/library-of-babel.org][library-of-babel.org]]
+
+* Plotting code
+
+** R
+  Plot column 2 (y axis) against column 1 (x axis). Columns 3 and beyond, if present, are ignored.
+
+#+srcname: R-plot(data=R-plot-example-data)
+#+begin_src R :session *R*
+plot(data)
+#+end_src
+
+#+tblname: R-plot-example-data
+| 1 |  2 |
+| 2 |  4 |
+| 3 |  9 |
+| 4 | 16 |
+| 5 | 25 |
+
+#+lob: R-plot(data=R-plot-example-data)
+
+#+resname: R-plot(data=R-plot-example-data)
+: nil
+
+** Gnuplot
+
+* Table/Matrix manipulation
+
+Elegant lisp code for transposing a matrix.
+
+#+tblname: transpose-example
+| 1 | 2 | 3 |
+| 4 | 5 | 6 |
+
+#+srcname: transpose
+#+begin_src emacs-lisp :var table=transpose-example
+  (apply #'mapcar* #'list table)
+#+end_src
+
+#+resname:
+| 1 | 4 |
+| 2 | 5 |
+| 3 | 6 |
+
+* Misc
+#+srcname: python-identity(a=1)
+#+begin_src python
+a
+#+end_src
+
+#+srcname: python-add(a=1, b=2)
+#+begin_src python
+a + b
+#+end_src
+
+
+
