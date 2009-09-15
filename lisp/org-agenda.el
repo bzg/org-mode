@@ -2514,7 +2514,7 @@ bind it in the options section.")
       (org-agenda-mark-clocking-task)
       (when org-agenda-entry-text-mode
 	(org-agenda-entry-text-hide)
-	(org-agenda-entry-text-show))	
+	(org-agenda-entry-text-show))
       (run-hooks 'org-finalize-agenda-hook)
       (setq org-agenda-type (get-text-property (point) 'org-agenda-type))
       (when (get 'org-agenda-filter :preset-filter)
