@@ -66,7 +66,15 @@
 ;; - Vitaly Ostanin
 
 (require 'org)
-(require 'epg)
+
+(declare-function epg-decrypt-string "epg" (context cipher))
+(declare-function epg-list-keys "epg" (context &optional name mode))
+(declare-function epg-make-context "epg"
+		  (&optional protocol armor textmode include-certs
+			     cipher-algorithm digest-algorithm
+			     compress-algorithm))
+(declare-function epg-encrypt-string "epg"
+		  (context plain recipients &optional sign always-trust))
 
 (defgroup org-crypt nil
   "Org Crypt"
@@ -95,6 +103,7 @@ heading.  This can also be overridden in the CRYPTKEY property."
 (defun org-encrypt-entry ()
   "Encrypt the content of the current headline."
   (interactive)
+  (require 'epg)
   (save-excursion
     (org-back-to-heading t)
     (forward-line)
@@ -122,6 +131,7 @@ heading.  This can also be overridden in the CRYPTKEY property."
 
 (defun org-decrypt-entry ()
   (interactive)
+  (require 'epg)
   (save-excursion
     (org-back-to-heading t)
     (forward-line)
