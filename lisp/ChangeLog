@@ -1,5 +1,7 @@
 2009-09-16  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-iswitchb-completing-read): Fix typo.
+
 	* org-crypt.el: New file.
 
 	* org.el: Add an entry for org-crypt.

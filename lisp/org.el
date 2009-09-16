@@ -7724,7 +7724,7 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
   "Use iswitch as a completing-read replacement to choose from choices.
 PROMPT is a string to prompt with.  CHOICES is a list of strings to choose
 from."
-  (let* ((switchb-use-virtual-buffers nil)
+  (let* ((iswitchb-use-virtual-buffers nil)
 	 (iswitchb-make-buflist-hook
 	  (lambda ()
 	    (setq iswitchb-temp-buflist choices))))
