@@ -38,6 +38,12 @@
 ;;
 ;; 4) there are no variables (at least for now)
 
+;;; Requirements:
+
+;; - The asymptote program :: http://asymptote.sourceforge.net/
+;;
+;; - asy-mode :: Major mode for editing asymptote files
+
 ;;; Code:
 (require 'org-babel)
 

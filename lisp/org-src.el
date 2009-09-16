@@ -110,7 +110,8 @@ or similar things which you want to have when editing a source code file,
 but which mess up the display of a snippet in Org exported files.")
 
 (defcustom org-src-lang-modes
-  '(("ocaml" . tuareg) ("elisp" . emacs-lisp) ("ditaa" . artist))
+  '(("ocaml" . tuareg) ("elisp" . emacs-lisp) ("ditaa" . artist)
+    ("asymptote" . asy))
   "Alist mapping languages to their major mode.
 The key is the language name, the value is the string that should
 be inserted as the name of the major mode.  For many languages this is
