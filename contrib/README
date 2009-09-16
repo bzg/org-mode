@@ -25,6 +25,7 @@ org-expiry.el 	         --- Expiry mechanism for Org entries
 org-exp-bibtex.el        --- Export citations to LaTeX and HTML
 org-export-generic.el    --- Export framework for configurable backends
 org-interactive-query.el --- Interactive modification of tags query
+org-invoice.el           --- Help manage client invoices in OrgMode
 org-jira.el              --- Add a jira:ticket protocol to Org
 org-mairix.el 	         --- Hook mairix search into Org for different MUAs
 org-mac-iCal.el          --- Imports events from iCal.app to the Emacs diary
