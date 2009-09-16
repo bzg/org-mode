@@ -1,3 +1,9 @@
+2009-09-16  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-crypt.el: New file.
+
+	* org.el: Add an entry for org-crypt.
+
 2009-09-15  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-table.el (orgtbl-line-start-regexp): Match also TBLNAME

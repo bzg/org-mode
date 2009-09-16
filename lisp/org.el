@@ -183,6 +183,7 @@ to add the symbol `xyz', and the package must have a call to
   '(set :greedy t
 	(const :tag "   bbdb:              Links to BBDB entries" org-bbdb)
 	(const :tag "   bibtex:            Links to BibTeX entries" org-bibtex)
+	(const :tag "   crypt:             Encryption of subtrees" org-crypt)
 	(const :tag "   gnus:              Links to GNUS folders/messages" org-gnus)
 	(const :tag "   id:                Global IDs for identifying entries" org-id)
 	(const :tag "   info:              Links to Info nodes" org-info)

@@ -1,3 +1,7 @@
+2009-09-16  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* Makefile: Add dependencies for org-crypt.el.
+
 2009-08-06  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* ORGWEBPAGE/index.org: Document that Emacs 23.1 ships with
