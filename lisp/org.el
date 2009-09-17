@@ -13279,11 +13279,11 @@ When SHOW-ALL is nil, only return the current occurrence of a time stamp."
       (setq n0 n1  n1 (min n1 n2)  n2 (max n0 n2))
       (if show-all
 	  (cond
-	   ((eq prefer 'past) n1)
+	   ((eq prefer 'past)   (if (= cday n2) n2 n1))
 	   ((eq prefer 'future) (if (= cday n1) n1 n2))
 	   (t (if (> (abs (- cday n1)) (abs (- cday n2))) n2 n1)))
 	(cond
-	 ((eq prefer 'past) n1)
+	 ((eq prefer 'past)   (if (= cday n2) n2 n1))
 	 ((eq prefer 'future) (if (= cday n1) n1 n2))
 	 (t (if (= cday n1) n1 n2)))))))
 

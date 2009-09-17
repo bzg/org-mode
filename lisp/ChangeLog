@@ -1,5 +1,7 @@
 2009-09-17  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-closest-date): Fix issue with past preference.
+
 	* org-mobile.el (org-mobile-apply-flags): Require `org-archive'.
 
 	* org-archive.el (org-archive-set-tag)
