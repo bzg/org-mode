@@ -14377,6 +14377,8 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
 (org-defkey org-mode-map "\C-c:"    'org-toggle-fixed-width-section)
 (org-defkey org-mode-map "\C-c\C-x\C-f" 'org-emphasize)
 (org-defkey org-mode-map "\C-c\C-xf"    'org-footnote-action)
+(org-defkey org-mode-map "\C-c\C-xmg"    'org-mobile-pull)
+(org-defkey org-mode-map "\C-c\C-xmp"    'org-mobile-push)
 (org-defkey org-mode-map [?\C-c (control ?*)] 'org-list-make-subtree)
 ;;(org-defkey org-mode-map [?\C-c (control ?-)] 'org-list-make-list-from-subtree)
 
@@ -15501,8 +15503,8 @@ See the individual commands for more information."
     "--"
     ("MobileOrg"
      ["Push Files and Views" org-mobile-push t]
-     ["Pull Captured and Flagged" org-mobile-pull t]
-     ["Find FLAGGED Tasks" (org-agenda nil "?") t]
+     ["Get Captured and Flagged" org-mobile-pull t]
+     ["Find FLAGGED Tasks" (org-agenda nil "?") :active t :keys "C-c a ?"]
      "--"
      ["Setup" (progn (require 'org-mobile) (customize-group 'org-mobile)) t])
     "--"

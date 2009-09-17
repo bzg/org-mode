@@ -1452,6 +1452,8 @@ The following commands are available:
 (org-defkey org-agenda-mode-map "\\" 'org-agenda-filter-by-tag-refine)
 (org-defkey org-agenda-mode-map ";" 'org-timer-set-timer)
 (define-key org-agenda-mode-map "?" 'org-agenda-show-the-flagging-note)
+(org-defkey org-agenda-mode-map "\C-c\C-xmg"    'org-mobile-pull)
+(org-defkey org-agenda-mode-map "\C-c\C-xmp"    'org-mobile-push)
 
 (defvar org-agenda-keymap (copy-keymap org-agenda-mode-map)
   "Local keymap for agenda entries from Org-mode.")
@@ -1596,8 +1598,8 @@ The following commands are available:
     "--"
     ("MobileOrg"
      ["Push Files and Views" org-mobile-push t]
-     ["Pull Captured and Flagged" org-mobile-pull t]
-     ["Find FLAGGED Tasks" (org-agenda nil "?") t]
+     ["Get Captured and Flagged" org-mobile-pull t]
+     ["Find FLAGGED Tasks" (org-agenda nil "?") :active t :keys "C-c a ?"]
      ["Show note / unflag" org-agenda-show-the-flagging-note t]
      "--"
      ["Setup" (progn (require 'org-mobile) (customize-group 'org-mobile)) t])
