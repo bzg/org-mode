@@ -184,16 +184,24 @@ agenda view showing the flagged items."
 			 (file-name-sans-extension
 			  (file-name-nondirectory file))))))
       (insert (format "* [[file:%s][Captured before last sync]]\n"
-		      (file-name-sans-extension org-mobile-capture-file))))))
+		      org-mobile-capture-file)))))
 
 (defun org-mobile-copy-agenda-files ()
   "Copy all agenda files to the stage or WebDAV directory."
-  (let ((files (org-agenda-files t)) file)
+  (let ((files (org-agenda-files t)) file buf)
     (while (setq file (pop files))
       (if (file-exists-p file)
 	  (copy-file file (expand-file-name (file-name-nondirectory file)
 					    org-mobile-directory)
-		     'ok-if-exists)))))
+		     'ok-if-exists)))
+    (setq file (expand-file-name org-mobile-capture-file
+				 org-mobile-directory))
+    (unless (file-exists-p file)
+      (save-excursion
+	(setq buf (find-file file))
+	(insert "\n")
+	(save-buffer)
+      (kill-buffer buf)))))
 
 (defun org-mobile-write-checksums ()
   "Create checksums for all files in `org-mobile-directory'.

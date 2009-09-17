@@ -1,3 +1,7 @@
+2009-09-17  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Setting up the staging area): Fix the example.
+
 2009-09-15  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (MobileOrg): New section.

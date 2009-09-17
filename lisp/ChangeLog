@@ -1,5 +1,10 @@
 2009-09-17  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-mobile.el (org-mobile-create-index-file): Fix link to
+	capture file.
+	(org-mobile-copy-agenda-files): Create the capture file if it does
+	not exist.
+
 	* org-clock.el (org-clock-clocktable-default-properties): New
 	option.
 	(org-clock-report): Use

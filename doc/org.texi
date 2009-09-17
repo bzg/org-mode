@@ -11682,7 +11682,7 @@ staged in @file{~/stage}, and Org-mode hooks take care of moving files to and
 from the WebDAV directory using @file{scp}.
 
 @example
-(setq org-mobile-directory "~/MobileOrg/stage/")
+(setq org-mobile-directory "~/stage/")
 (add-hook 'org-mobile-post-push-hook
   (lambda ()
    (shell-command "scp ~/stage/* user@@webdavhost:mobile/")))
