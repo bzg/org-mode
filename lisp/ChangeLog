@@ -1,5 +1,10 @@
 2009-09-17  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-mobile.el (org-mobile-apply-flags): Require `org-archive'.
+
+	* org-archive.el (org-archive-set-tag)
+	(org-archive-subtree-default): New commands.
+
 	* org-mobile.el (org-mobile-create-index-file): Fix link to
 	capture file.
 	(org-mobile-copy-agenda-files): Create the capture file if it does

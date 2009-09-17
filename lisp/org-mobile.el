@@ -319,6 +319,7 @@ If nothing new has beed added, return nil."
   "Apply all flags in the current buffer.
 If BEG and END are given, only do this in that region."
   (interactive)
+  (require 'org-archive)
   (setq org-mobile-last-flagged-files nil)
   (setq beg (or beg (point-min)) end (or end (point-max)))
   (goto-char beg)
