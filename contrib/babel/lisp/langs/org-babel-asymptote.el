@@ -34,9 +34,17 @@
 ;;
 ;; 2) we are generally only going to return results of type "file"
 ;;
-;; 3) we are adding the "file" and "cmdline" header arguments
+;; 3) we are adding the "file" and "cmdline" header arguments, if file
+;;    is omitted then the -V option is passed to the asy command for
+;;    interactive viewing
 ;;
 ;; 4) there are no variables (at least for now)
+
+;;; Requirements:
+
+;; - The asymptote program :: http://asymptote.sourceforge.net/
+;;
+;; - asy-mode :: Major mode for editing asymptote files
 
 ;;; Code:
 (require 'org-babel)
@@ -54,14 +62,19 @@ called by `org-babel-execute-src-block'."
   (message "executing Asymptote source code block")
   (let* ((result-params (split-string (or (cdr (assoc :results params)) "")))
          (out-file (cdr (assoc :file params)))
-         (format (or (and (string-match ".+\\.\\(.+\\)" out-file)
+         (format (or (and out-file
+                          (string-match ".+\\.\\(.+\\)" out-file)
                           (match-string 1 out-file))
                      "pdf"))
          (cmdline (cdr (assoc :cmdline params)))
-         (in-file (make-temp-file "org-babel-asymptote")))
+         (in-file (make-temp-file "org-babel-asymptote"))
+         (cmd (concat "asy "
+                      (if out-file
+                          (concat "-globalwrite -f " format " -o " out-file)
+                        "-V")
+                      " " cmdline " " in-file)))
     (with-temp-file in-file (insert body))
-    (message (concat "asy -globalwrite -f " format " -o " out-file " " cmdline " " in-file))
-    (shell-command (concat "asy -globalwrite -f " format " -o " out-file " " cmdline " " in-file))
+    (message cmd) (shell-command cmd)
     out-file))
 
 (defun org-babel-prep-session:asymptote (session params)

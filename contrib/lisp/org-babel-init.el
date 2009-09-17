@@ -35,11 +35,11 @@
                     "babel"
                     (expand-file-name
                      ".." (file-name-directory (or load-file-name buffer-file-name))))))
-       
-       (langs-dir (expand-file-name "langs" babel-dir))
-       (load-path (append
-                   (list babel-dir langs-dir)
-                   (or load-path nil))))
+
+       (langs-dir (expand-file-name "langs" babel-dir)))
+
+  (add-to-list 'load-path babel-dir)
+  (add-to-list 'load-path langs-dir)
 
   ;; org-babel core
   (require 'cl)
