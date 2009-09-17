@@ -14377,8 +14377,8 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
 (org-defkey org-mode-map "\C-c:"    'org-toggle-fixed-width-section)
 (org-defkey org-mode-map "\C-c\C-x\C-f" 'org-emphasize)
 (org-defkey org-mode-map "\C-c\C-xf"    'org-footnote-action)
-(org-defkey org-mode-map "\C-c\C-xmg"    'org-mobile-pull)
-(org-defkey org-mode-map "\C-c\C-xmp"    'org-mobile-push)
+(org-defkey org-mode-map "\C-c\C-x\C-mg"    'org-mobile-pull)
+(org-defkey org-mode-map "\C-c\C-x\C-mp"    'org-mobile-push)
 (org-defkey org-mode-map [?\C-c (control ?*)] 'org-list-make-subtree)
 ;;(org-defkey org-mode-map [?\C-c (control ?-)] 'org-list-make-list-from-subtree)
 

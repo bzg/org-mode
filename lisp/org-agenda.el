@@ -1452,8 +1452,8 @@ The following commands are available:
 (org-defkey org-agenda-mode-map "\\" 'org-agenda-filter-by-tag-refine)
 (org-defkey org-agenda-mode-map ";" 'org-timer-set-timer)
 (define-key org-agenda-mode-map "?" 'org-agenda-show-the-flagging-note)
-(org-defkey org-agenda-mode-map "\C-c\C-xmg"    'org-mobile-pull)
-(org-defkey org-agenda-mode-map "\C-c\C-xmp"    'org-mobile-push)
+(org-defkey org-agenda-mode-map "\C-c\C-x\C-mg"    'org-mobile-pull)
+(org-defkey org-agenda-mode-map "\C-c\C-x\C-mp"    'org-mobile-push)
 
 (defvar org-agenda-keymap (copy-keymap org-agenda-mode-map)
   "Local keymap for agenda entries from Org-mode.")
