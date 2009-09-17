@@ -412,7 +412,8 @@ If the point is not on a source block then return nil."
         (re-search-backward "#\\+begin_src" nil t) (setq top (point))
         (re-search-forward "#\\+end_src" nil t) (setq bottom (point))
         (< top initial) (< initial bottom)
-        (goto-char top) (looking-at org-babel-src-block-regexp)
+        (goto-char top) (move-beginning-of-line 1)
+        (looking-at org-babel-src-block-regexp)
         (point))))))
 
 (defun org-babel-goto-named-source-block (&optional name)
