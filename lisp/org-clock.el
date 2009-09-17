@@ -201,6 +201,12 @@ string as argument."
 	  (string :tag "Program")
 	  (function :tag "Function")))
 
+(defcustom org-clock-clocktable-default-properties '(:maxlevel 2 :scope file)
+  "Default properties for new clocktables."
+  :group 'org-clock
+  :type 'plist)
+
+
 (defvar org-clock-in-prepare-hook nil
   "Hook run when preparing the clock.
 This hook is run before anything happens to the task that
@@ -1035,8 +1041,8 @@ buffer and update it."
     (org-show-entry))
   (if (org-in-clocktable-p)
       (goto-char (org-in-clocktable-p))
-    (org-create-dblock (list :name "clocktable"
-			     :maxlevel 2 :scope 'file)))
+    (org-create-dblock (append (list :name "clocktable")
+			       org-clock-clocktable-default-properties)))
   (org-update-dblock))
 
 (defun org-in-clocktable-p ()
