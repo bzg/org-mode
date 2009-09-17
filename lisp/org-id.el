@@ -212,16 +212,17 @@ If the entry does not have an ID, the function returns nil.
 However, when CREATE is non nil, create an ID if none is present already.
 PREFIX will be passed through to `org-id-new'.
 In any case, the ID of the entry is returned."
-  (let ((id (org-entry-get pom "ID")))
-    (cond
-     ((and id (stringp id) (string-match "\\S-" id))
-      id)
-     (create
-      (setq id (org-id-new prefix))
-      (org-entry-put pom "ID" id)
-      (org-id-add-location id (buffer-file-name (buffer-base-buffer)))
-      id)
-     (t nil))))
+  (org-with-point-at pom
+    (let ((id (org-entry-get nil "ID")))
+      (cond
+       ((and id (stringp id) (string-match "\\S-" id))
+	id)
+       (create
+	(setq id (org-id-new prefix))
+	(org-entry-put pom "ID" id)
+	(org-id-add-location id (buffer-file-name (buffer-base-buffer)))
+	id)
+       (t nil)))))
 
 ;;;###autoload
 (defun org-id-get-with-outline-path-completion (&optional targets)

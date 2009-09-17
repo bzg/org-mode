@@ -1,3 +1,9 @@
+2009-09-15  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (MobileOrg): New section.
+	(Agenda commands, Exporting Agenda Views): Document exporting the
+	agenda view to Org files.
+
 2009-08-29  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* orgcard.tex: Document new effort setting commands.
