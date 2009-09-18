@@ -428,7 +428,7 @@ the whole buffer."
 	  (re "\\(\\(\\[[0-9]*%\\]\\)\\|\\(\\[[0-9]*/[0-9]*\\]\\)\\)")
 	  (re-box "^[ \t]*\\([-+*]\\|[0-9]+[.)]\\) +\\(\\[[- X]\\]\\)")
 	  (re-find (concat re "\\|" re-box))
-	  beg-cookie end-cookie is-percent c-on c-off lim
+	  beg-cookie end-cookie is-percent c-on c-off lim new
 	  eline curr-ind next-ind continue-from startsearch
 	  (recursive
 	   (or (not org-hierarchical-checkbox-statistics)
@@ -489,12 +489,12 @@ the whole buffer."
 	 (goto-char continue-from)
 	 ;; update cookie
 	 (when end-cookie
-	   (delete-region beg-cookie end-cookie)
+	   (setq new (if is-percent
+			 (format "[%d%%]" (/ (* 100 c-on) (max 1 (+ c-on c-off))))
+		       (format "[%d/%d]" c-on (+ c-on c-off))))
 	   (goto-char beg-cookie)
-	   (insert
-	    (if is-percent
-		(format "[%d%%]" (/ (* 100 c-on) (max 1 (+ c-on c-off))))
-	      (format "[%d/%d]" c-on (+ c-on c-off)))))
+	   (insert new)
+	   (delete-region (point) (+ (point) (- end-cookie beg-cookie))))
 	 ;; update items checkbox if it has one
 	 (when (org-at-item-p)
 	   (org-beginning-of-item)

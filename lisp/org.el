@@ -9767,7 +9767,7 @@ statistics everywhere."
 		  lim))
 	 (first t)
 	 (box-re "\\(\\(\\[[0-9]*%\\]\\)\\|\\(\\[[0-9]*/[0-9]*\\]\\)\\)")
-	 level ltoggle l1
+	 level ltoggle l1 new ndel
 	 (cnt-all 0) (cnt-done 0) is-percent kwd cookie-present)
     (catch 'exit
       (save-excursion
@@ -9806,10 +9806,14 @@ statistics everywhere."
 		(and (member kwd org-done-keywords)
 		     (setq cnt-done (1+ cnt-done)))
 		(outline-next-heading)))
-	    (replace-match
-	     (if is-percent
-		 (format "[%d%%]" (/ (* 100 cnt-done) (max 1 cnt-all)))
-	       (format "[%d/%d]" cnt-done cnt-all)))))
+	    (setq new
+		  (if is-percent
+		      (format "[%d%%]" (/ (* 100 cnt-done) (max 1 cnt-all)))
+		    (format "[%d/%d]" cnt-done cnt-all))
+		  ndel (- (match-end 0) (match-beginning 0)))
+	    (goto-char (match-beginning 0))
+	    (insert new)
+	    (delete-region (point) (+ (point) ndel))))
 	(when cookie-present
 	  (run-hook-with-args 'org-after-todo-statistics-hook
 			      cnt-done (- cnt-all cnt-done)))))
