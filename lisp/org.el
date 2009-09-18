@@ -7205,9 +7205,9 @@ For file links, arg negates `org-context-in-file-links'."
       ;; We are in the agenda, link to referenced location
       (let ((m (or (get-text-property (point) 'org-hd-marker)
 		   (get-text-property (point) 'org-marker))))
-	(unless m (error "Don't know what location to link to"))
-	(org-with-point-at m
-	  (call-interactively 'org-store-link))))
+	(when m
+	  (org-with-point-at m
+	    (call-interactively 'org-store-link)))))
 
      ((eq major-mode 'calendar-mode)
       (let ((cd (calendar-cursor-to-date)))

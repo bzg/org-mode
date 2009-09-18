@@ -2,6 +2,8 @@
 
 	* org.el (org-on-heading-p, org-at-heading-p): Make sure these are
 	always with `invisible-ok'.
+	(org-store-link): No error when there is nothing to link to in the
+	agenda.
 
 	* org-list.el (org-update-checkbox-count): Insert changed cookie
 	before the old, to avoid problems with invisibility at the end of
