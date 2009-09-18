@@ -4366,7 +4366,8 @@ will be prompted for."
 	     beg (match-end 0)
 	     '(font-lock-fontified t face org-meta-line))
 	    t)
-	   ((or (member dc1 '("caption:" "label:" "orgtbl:" "tblfm:" "tblname:"))
+	   ((or (member dc1 '("begin:" "end:" "caption:" "label:"
+			      "orgtbl:" "tblfm:" "tblname:"))
 		(and (match-end 4) (equal dc3 "attr")))
 	    (add-text-properties
 	     beg (match-end 0)
@@ -8968,23 +8969,26 @@ If not found, stay at current position and return nil."
     pos))
 
 (defconst org-dblock-start-re
-  "^#\\+BEGIN:[ \t]+\\(\\S-+\\)\\([ \t]+\\(.*\\)\\)?"
+  "^[ \t]*#\\+BEGIN:[ \t]+\\(\\S-+\\)\\([ \t]+\\(.*\\)\\)?"
   "Matches the startline of a dynamic block, with parameters.")
 
-(defconst org-dblock-end-re "^#\\+END\\([: \t\r\n]\\|$\\)"
+(defconst org-dblock-end-re "^[ \t]*#\\+END\\([: \t\r\n]\\|$\\)"
   "Matches the end of a dynamic block.")
 
 (defun org-create-dblock (plist)
   "Create a dynamic block section, with parameters taken from PLIST.
 PLIST must contain a :name entry which is used as name of the block."
-  (unless (bolp) (newline))
-  (let ((name (plist-get plist :name)))
+  (when (string-match "\\S-" (buffer-substring (point-at-bol) (point-at-eol)))
+    (end-of-line 1)
+    (newline))
+  (let ((col (current-column))
+	(name (plist-get plist :name)))
     (insert "#+BEGIN: " name)
     (while plist
       (if (eq (car plist) :name)
 	  (setq plist (cddr plist))
 	(insert " " (prin1-to-string (pop plist)))))
-    (insert "\n\n#+END:\n")
+    (insert "\n\n" (make-string col ?\ ) "#+END:\n")
     (beginning-of-line -2)))
 
 (defun org-prepare-dblock ()
@@ -8997,6 +9001,10 @@ the property list including an extra property :name with the block name."
 	 (name (org-no-properties (match-string 1)))
 	 (params (append (list :name name)
 			 (read (concat "(" (match-string 3) ")")))))
+    (save-excursion
+      (beginning-of-line 1)
+      (skip-chars-forward " \t")
+      (setq params (plist-put params :indentation-column (current-column))))
     (unless (re-search-forward org-dblock-end-re nil t)
       (error "Dynamic block not terminated"))
     (setq params
@@ -9044,11 +9052,24 @@ the correct writing function."
 	   (line (org-current-line))
 	   (params (org-prepare-dblock))
 	   (name (plist-get params :name))
+	   (indent (plist-get params :indentation-column))
 	   (cmd (intern (concat "org-dblock-write:" name))))
       (message "Updating dynamic block `%s' at line %d..." name line)
       (funcall cmd params)
       (message "Updating dynamic block `%s' at line %d...done" name line)
-      (goto-char pos))))
+      (goto-char pos)
+      (when (and indent (> indent 0))
+	(setq indent (make-string indent ?\ ))
+	(save-excursion
+	(org-beginning-of-dblock)
+	(forward-line 1)
+	(while (not (looking-at org-dblock-end-re))
+	  (insert indent)
+	  (beginning-of-line 2))
+	(when (looking-at org-dblock-end-re)
+	  (and (looking-at "[ \t]+")
+	       (replace-match ""))
+	  (insert indent)))))))
 
 (defun org-beginning-of-dblock ()
   "Find the beginning of the dynamic block at point.
@@ -15048,7 +15069,7 @@ This command does many different things, depending on context:
       (if arg
 	  (call-interactively 'org-toggle-checkbox)
 	(call-interactively 'org-maybe-renumber-ordered-list)))
-     ((save-excursion (beginning-of-line 1) (looking-at "#\\+BEGIN:"))
+     ((save-excursion (beginning-of-line 1) (looking-at org-dblock-start-re))
       ;; Dynamic block
       (beginning-of-line 1)
       (save-excursion (org-update-dblock)))

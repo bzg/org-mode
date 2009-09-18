@@ -1,6 +1,14 @@
 2009-09-18  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-sort-entries-or-items): Include the final newline.
+	(org-fontify-meta-lines-and-blocks): Add indented dynamic block
+	lines for fontification.
+	(org-dblock-start-re, org-dblock-end-re): Allow indentation.
+	(org-prepare-dblock): Store the current indentation of the BEGIN
+	line.
+	(org-update-dblock): Apply the indentation of the begin line to
+	the rest of the block.
+	(org-ctrl-c-ctrl-c): Also find indented dblock lines.
 
 2009-09-17  Carsten Dominik  <carsten.dominik@gmail.com>
 
