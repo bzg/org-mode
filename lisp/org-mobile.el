@@ -56,7 +56,8 @@ This should not be changed, because MobileOrg assumes this name.")
 
 (defcustom org-mobile-index-file "index.org"
   "The index file with inks to all Org files that should be loaded by MobileOrg.
-Relative to `org-mobile-directory'."
+Relative to `org-mobile-directory'.  The Address field in the MobileOrg setup
+should point to this file."
   :group 'org-mobile
   :type 'file)
 
