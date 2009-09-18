@@ -11692,10 +11692,10 @@ from the WebDAV directory using @file{scp}.
    (shell-command "scp ~/stage/* user@@webdavhost:mobile/")))
 (add-hook 'org-mobile-pre-pull-hook
   (lambda ()
-   (shell-command "scp user@@webdavhost:mobile/mobile-capture.org ~/stage/ ")))
+   (shell-command "scp user@@webdavhost:mobile/mobileorg.org ~/stage/ ")))
 (add-hook 'org-mobile-post-pull-hook
   (lambda ()
-   (shell-command "scp ~/stage/mobile-capture.org user@@webdavhost:mobile/")))
+   (shell-command "scp ~/stage/mobileorg.org user@@webdavhost:mobile/")))
 @end example
 
 @node Pushing to MobileOrg, Pulling from MobileOrg, Setting up the staging area, MobileOrg
@@ -11719,13 +11719,13 @@ files will be downloaded to the iPhone.
 
 When @i{MobileOrg} synchronizes with the WebDAV server, it not only pulls the
 Org files for viewing.  It also appends captured entries and pointers to
-flagged entries to the file @file{mobile-capture.org} on the server.  Org has
+flagged entries to the file @file{mobileorg.org} on the server.  Org has
 a @emph{pull} operation that integrates this information into an inbox file
 and operates on the pointers to flagged entries.  Here is how it works:
 
 @enumerate
 @item
-Org moves all entries found in @file{mobile-capture.org} and appends them to
+Org moves all entries found in @file{mobileorg.org} and appends them to
 the file pointed to by the variable @code{org-mobile-inbox-for-pull}.  Each
 captured entry will be a top-level entry in the inbox file.
 @item

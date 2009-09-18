@@ -50,11 +50,9 @@ been appended to the file given here."
   :group 'org-mobile
   :type 'file)
 
-(defcustom org-mobile-capture-file "mobile-capture.org"
+(defconst org-mobile-capture-file "mobileorg.org"
   "The capture file where the mobile stores captured notes and flags.
-Relative to `org-mobile-directory'."
-  :group 'org-mobile
-  :type 'file)
+This should not be changed, because MobileOrg assumes this name.")
 
 (defcustom org-mobile-index-file "index.org"
   "The index file with inks to all Org files that should be loaded by MobileOrg.

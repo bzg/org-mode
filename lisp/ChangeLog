@@ -1,5 +1,8 @@
 2009-09-18  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-mobile.el (org-mobile-capture-file): Use `mobileorg.org' as
+	the capture file, and make it non-configurable.
+
 	* org.el (org-on-heading-p, org-at-heading-p): Make sure these are
 	always with `invisible-ok'.
 	(org-store-link): No error when there is nothing to link to in the
