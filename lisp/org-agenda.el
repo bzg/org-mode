@@ -4784,7 +4784,7 @@ HH:MM."
 	(setq x (concat (substring x 0 (match-end 1))
 			(format org-agenda-todo-keyword-format
 				(match-string 2 x))
-			" "
+			(org-add-props " " (text-properties-at 0 x))
 			(substring x (match-end 3)))))
       x)))
 

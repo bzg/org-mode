@@ -1,5 +1,8 @@
 2009-09-18  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-agenda.el (org-agenda-highlight-todo): Fix text property
+	problem.
+
 	* org-mobile.el (org-mobile-capture-file): Use `mobileorg.org' as
 	the capture file, and make it non-configurable.
 
