@@ -16781,9 +16781,9 @@ interactive command with similar behavior."
   (save-excursion
     (null (re-search-backward "^\\*+ " nil t))))
 
-(defun org-on-heading-p ()
+(defun org-on-heading-p (&optional ignored)
   (outline-on-heading-p t))
-(defun org-at-heading-p ()
+(defun org-at-heading-p (&optional ignored)
   (outline-on-heading-p t))
 
 (defun org-at-heading-or-item-p ()
