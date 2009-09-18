@@ -894,6 +894,7 @@ the previously used indirect buffer.
 @cindex @code{overview}, STARTUP keyword
 @cindex @code{content}, STARTUP keyword
 @cindex @code{showall}, STARTUP keyword
+@cindex @code{showeverything}, STARTUP keyword
 
 When Emacs first visits an Org file, the global state is set to
 OVERVIEW, @ie only the top level headlines are visible.  This can be
@@ -905,6 +906,7 @@ buffer:
 #+STARTUP: overview
 #+STARTUP: content
 #+STARTUP: showall
+#+STARTUP: showeverything
 @end example
 
 @cindex property, VISIBILITY
@@ -10171,10 +10173,12 @@ tree.  The corresponding variable for global default settings is
 @cindex @code{overview}, STARTUP keyword
 @cindex @code{content}, STARTUP keyword
 @cindex @code{showall}, STARTUP keyword
+@cindex @code{showeverything}, STARTUP keyword
 @example
-overview   @r{top-level headlines only}
-content    @r{all headlines}
-showall    @r{no folding at all, show everything}
+overview         @r{top-level headlines only}
+content          @r{all headlines}
+showall          @r{no folding of any entries}
+showeverything   @r{show even drawer contents}
 @end example
 
 @vindex org-startup-indented

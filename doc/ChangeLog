@@ -1,3 +1,8 @@
+2009-09-18  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Visibility cycling): Document showeverything keyword.
+	(In-buffer settings): Document showeverything keyword.
+
 2009-09-17  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Setting up the staging area): Fix the example.

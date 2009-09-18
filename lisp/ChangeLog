@@ -9,6 +9,10 @@
 	(org-update-dblock): Apply the indentation of the begin line to
 	the rest of the block.
 	(org-ctrl-c-ctrl-c): Also find indented dblock lines.
+	(org-startup-folded): New allowed value `showeverything'.
+	(org-startup-options): Add STARTUP keyword `showeverything'.
+	(org-set-startup-visibility): Respect value `showeverything' in
+	org-startup-folded.
 
 2009-09-17  Carsten Dominik  <carsten.dominik@gmail.com>
 
