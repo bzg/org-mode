@@ -277,4 +277,5 @@ Point is assumed to be at the beginning of a headline."
 
 (provide 'org-indent)
 
+;; arch-tag: b76736bc-9f4a-43cd-977c-ecfd6689846a
 ;;; org-indent.el ends here
