@@ -1,3 +1,7 @@
+2009-09-18  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-sort-entries-or-items): Include the final newline.
+
 2009-09-17  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-closest-date): Fix issue with past preference.

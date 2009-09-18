@@ -5651,7 +5651,7 @@ frame is not changed."
 	  (outline-up-heading 1 t)))
       (setq beg (point)
 	    heading (org-get-heading))
-      (org-end-of-subtree t) (setq end (point)))
+      (org-end-of-subtree t t) (setq end (point)))
     (if (and (buffer-live-p org-last-indirect-buffer)
 	     (not (eq org-indirect-buffer-display 'new-frame))
 	     (not arg))
@@ -6420,7 +6420,7 @@ If yes, remember the marker and the distance to BEG."
     (save-match-data
       (narrow-to-region
        (progn (org-back-to-heading t) (point))
-       (progn (org-end-of-subtree t) (point))))))
+       (progn (org-end-of-subtree t t) (point))))))
 
 (defun org-clone-subtree-with-time-shift (n &optional shift)
   "Clone the task (subtree) at point N times.
