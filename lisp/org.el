@@ -16781,8 +16781,11 @@ interactive command with similar behavior."
   (save-excursion
     (null (re-search-backward "^\\*+ " nil t))))
 
-(defalias 'org-on-heading-p 'outline-on-heading-p)
-(defalias 'org-at-heading-p 'outline-on-heading-p)
+(defun org-on-heading-p ()
+  (outline-on-heading-p t))
+(defun org-at-heading-p ()
+  (outline-on-heading-p t))
+
 (defun org-at-heading-or-item-p ()
   (or (org-on-heading-p) (org-at-item-p)))
 

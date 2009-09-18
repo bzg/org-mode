@@ -1,5 +1,8 @@
 2009-09-18  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-on-heading-p, org-at-heading-p): Make sure these are
+	always with `invisible-ok'.
+
 	* org-list.el (org-update-checkbox-count): Insert changed cookie
 	before the old, to avoid problems with invisibility at the end of
 	the line.
