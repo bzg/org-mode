@@ -173,9 +173,20 @@ agenda view showing the flagged items."
 (defun org-mobile-create-index-file ()
   "Write the index file in the WebDAV directory."
   (interactive)
-  (with-temp-file (expand-file-name org-mobile-index-file org-mobile-directory)
-    (insert "* [[file:agendas.org][Agenda Views]]\n")
-    (let ((files (org-agenda-files t)) file)
+  (let ((files (org-agenda-files t))
+	file todo-kwds done-kwds drawers)
+    (org-prepare-agenda-buffers (org-agenda-files t))
+    (setq done-kwds (org-uniquify org-done-keywords-for-agenda))
+    (setq todo-kwds (org-delete-all
+		     done-kwds
+		     (org-uniquify org-todo-keywords-for-agenda)))
+    (setq drawers (org-uniquify org-drawers-for-agenda))
+    (with-temp-file
+	(expand-file-name org-mobile-index-file org-mobile-directory)
+      (insert "#+TODO: " (mapconcat 'identity todo-kwds " ") " | "
+	      (mapconcat 'identity done-kwds " ") "\n"
+	      "#+DRAWERS: " (mapconcat 'identity drawers " ") "\n")
+      (insert "* [[file:agendas.org][Agenda Views]]\n")
       (while (setq file (pop files))
 	(insert (format "* [[file:%s][%s]]\n"
 			(file-name-nondirectory file)

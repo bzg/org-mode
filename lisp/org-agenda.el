@@ -2554,6 +2554,7 @@ bind it in the options section.")
 (defun org-prepare-agenda (&optional name)
   (setq org-todo-keywords-for-agenda nil)
   (setq org-done-keywords-for-agenda nil)
+  (setq org-drawers-for-agenda nil)
   (setq org-agenda-filter nil)
   (put 'org-agenda-filter :preset-filter org-agenda-filter-preset)
   (if org-agenda-multi
@@ -2575,6 +2576,7 @@ bind it in the options section.")
 	  (org-uniquify org-todo-keywords-for-agenda))
     (setq org-done-keywords-for-agenda
 	  (org-uniquify org-done-keywords-for-agenda))
+    (setq org-drawers-for-agenda (org-uniquify org-drawers-for-agenda))
     (let* ((abuf (get-buffer-create org-agenda-buffer-name))
 	   (awin (get-buffer-window abuf)))
       (cond

@@ -1,8 +1,18 @@
 2009-09-19  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-mobile.el (org-mobile-create-index-file): Add the list of
+	TODO keywords, and the list of drawers to the index file.
+
+	* org-agenda.el (org-prepare-agenda): Reset
+	`org-drawers-for-agenda'.
+	(org-prepare-agenda): Uniquify list of drawers.
+
 	* org.el (org-complex-heading-regexp-format): New variable.
 	(org-set-regexps-and-options): Define
 	`org-complex-heading-regexp-format'.
+	(org-drawers-for-agenda): New variable.
+	(org-map-entries): Bind `org-drawers-for-agenda'.
+	(org-prepare-agenda-buffers): Add to `org-drawers-for-agenda'.
 
 	* org-remember.el (org-go-to-remember-target)
 	(org-remember-handler): Use `org-complex-heading-regexp-format'.
