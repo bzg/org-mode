@@ -1,3 +1,12 @@
+2009-09-19  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-complex-heading-regexp-format): New variable.
+	(org-set-regexps-and-options): Define
+	`org-complex-heading-regexp-format'.
+
+	* org-remember.el (org-go-to-remember-target)
+	(org-remember-handler): Use `org-complex-heading-regexp-format'.
+
 2009-09-18  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-agenda.el (org-agenda-highlight-todo): Fix text property

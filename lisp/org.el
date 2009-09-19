@@ -3422,6 +3422,8 @@ group 3: Priority cookie
 group 4: True headline
 group 5: Tags")
 (make-variable-buffer-local 'org-complex-heading-regexp)
+(defvar org-complex-heading-regexp-format nil)
+(make-variable-buffer-local 'org-complex-heading-regexp-format)
 (defvar org-todo-line-tags-regexp nil
   "Matches a headline and puts TODO state into group 2 if present.
 Also put tags into group 4 if tags are present.")
@@ -3776,6 +3778,11 @@ means to push this value onto the list in the variable.")
 	    (concat "^\\(\\*+\\)[ \t]+\\(?:\\("
 		    (mapconcat 'regexp-quote org-todo-keywords-1 "\\|")
 		    "\\)\\>\\)?\\(?:[ \t]*\\(\\[#.\\]\\)\\)?[ \t]*\\(.*?\\)"
+		    "\\(?:[ \t]+\\(:[[:alnum:]_@:]+:\\)\\)?[ \t]*$")
+	    org-complex-heading-regexp-format
+	    (concat "^\\(\\*+\\)[ \t]+\\(?:\\("
+		    (mapconcat 'regexp-quote org-todo-keywords-1 "\\|")
+		    "\\)\\>\\)?\\(?:[ \t]*\\(\\[#.\\]\\)\\)?[ \t]*\\(%s\\)"
 		    "\\(?:[ \t]+\\(:[[:alnum:]_@:]+:\\)\\)?[ \t]*$")
 	    org-nl-done-regexp
 	    (concat "\n\\*+[ \t]+"
