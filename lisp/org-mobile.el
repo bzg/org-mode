@@ -94,23 +94,23 @@ they may accumulate.")
 (defvar org-mobile-post-push-hook nil
   "Hook run after running `org-mobile-push'.
 If Emacs does not have direct write access to the WebDAV directory used
-by the mobile device, this hook could be used to copy all files from the
-local `org-mobile-directory' to the WebDAV directory, for example using
-`rsync' or `scp'.")
+by the mobile device, this hook should be used to copy all files from the
+local staging directory `org-mobile-directory' to the WebDAV directory,
+for example using `rsync' or `scp'.")
 
 (defvar org-mobile-pre-pull-hook nil
   "Hook run before executing `org-mobile-pull'.
 If Emacs does not have direct write access to the WebDAV directory used
-by the mobile device, this hook could be used to copy all files from the
-WebDAV location to the local staging directory `org-mobile-directory'.")
+by the mobile device, this hook should be used to copy the capture file
+`mobileorg.org' from the WebDAV location to the local staging
+directory `org-mobile-directory'.")
 
 (defvar org-mobile-post-pull-hook nil
   "Hook run after running `org-mobile-pull'.
 If Emacs does not have direct write access to the WebDAV directory used
-by the mobile device, this hook could be used to copy all files from the
-local `org-mobile-directory' to the WebDAV directory, for example using
-`rsync' or `scp'.  The only file that will be changed after a pull is
-`org-mobile-capture-file'.")
+by the mobile device, this hook should be used to copy the emptied
+capture file `mobileorg.org' back to the WebDAV directory, for example
+using `rsync' or `scp'.")
 
 (defvar org-mobile-last-flagged-files nil
   "List of files containing entreis flagged in the latest pull.")

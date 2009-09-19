@@ -11725,9 +11725,11 @@ and operates on the pointers to flagged entries.  Here is how it works:
 
 @enumerate
 @item
-Org moves all entries found in @file{mobileorg.org} and appends them to
-the file pointed to by the variable @code{org-mobile-inbox-for-pull}.  Each
-captured entry will be a top-level entry in the inbox file.
+Org moves all entries found in
+@file{mobileorg.org}@footnote{@file{mobileorg.org} will be empty after this
+operation.} and appends them to the file pointed to by the variable
+@code{org-mobile-inbox-for-pull}.  Each captured entry will be a top-level
+entry in the inbox file.
 @item
 After moving the entries, Org will attempt to act on the flags.  Some flags
 specify simple operations that will be executed directly and without user
