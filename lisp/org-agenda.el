@@ -6410,7 +6410,7 @@ be used to request time specification in the time stamp."
 	(widen)
 	(goto-char pos)
 	(setq ts (org-deadline arg)))
-      (org-agenda-show-new-time marker ts "S"))
+      (org-agenda-show-new-time marker ts "D"))
 	(message "Deadline for this item set to %s" ts)))
 
 (defun org-agenda-action ()
