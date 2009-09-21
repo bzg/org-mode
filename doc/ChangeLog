@@ -1,3 +1,8 @@
+2009-09-21  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (The date/time prompt, Timestamps): Be more accurate
+	over ISO format dates and times.
+
 2009-09-18  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Visibility cycling): Document showeverything keyword.

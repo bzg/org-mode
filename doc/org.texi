@@ -4852,13 +4852,13 @@ is used in a much wider sense.
 @cindex deadlines
 @cindex scheduling
 
-A timestamp is a specification of a date (possibly with a time or a range
-of times) in a special format, either @samp{<2003-09-16 Tue>} or
+A timestamp is a specification of a date (possibly with a time or a range of
+times) in a special format, either @samp{<2003-09-16 Tue>} or
 @samp{<2003-09-16 Tue 09:39>} or @samp{<2003-09-16 Tue
-12:00-12:30>}@footnote{This is the standard ISO date/time format.  To
-use an alternative format, see @ref{Custom time format}.}.  A timestamp
-can appear anywhere in the headline or body of an Org tree entry.  Its
-presence causes entries to be shown on specific dates in the agenda
+12:00-12:30>}@footnote{This is inspired by the standard ISO 7801 date/time
+format.  To use an alternative format, see @ref{Custom time format}.}.  A
+timestamp can appear anywhere in the headline or body of an Org tree entry.
+Its presence causes entries to be shown on specific dates in the agenda
 (@pxref{Weekly/daily agenda}).  We distinguish:
 
 @table @var
@@ -5006,21 +5006,20 @@ the following column).
 @cindex time, reading in minibuffer
 
 @vindex org-read-date-prefer-future
-When Org mode prompts for a date/time, the default is shown as an ISO
-date, and the prompt therefore seems to ask for an ISO date.  But it
-will in fact accept any string containing some date and/or time
-information, and it is really smart about interpreting your input.  You
+When Org mode prompts for a date/time, the default is shown in default
+date/time format, and the prompt therefore seems to ask for a specific
+format.  But it will in fact accept any string containing some date and/or
+time information, and it is really smart about interpreting your input.  You
 can, for example, use @kbd{C-y} to paste a (possibly multi-line) string
-copied from an email message.  Org mode will find whatever information
-is in there and derive anything you have not specified from the
-@emph{default date and time}.  The default is usually the current date
-and time, but when modifying an existing timestamp, or when entering
-the second stamp of a range, it is taken from the stamp in the buffer.
-When filling in information, Org mode assumes that most of the time you
-will want to enter a date in the future: if you omit the month/year and
-the given day/month is @i{before} today, it will assume that you mean a
-future date@footnote{See the variable
-@code{org-read-date-prefer-future}.}.
+copied from an email message.  Org mode will find whatever information is in
+there and derive anything you have not specified from the @emph{default date
+and time}.  The default is usually the current date and time, but when
+modifying an existing timestamp, or when entering the second stamp of a
+range, it is taken from the stamp in the buffer.  When filling in
+information, Org mode assumes that most of the time you will want to enter a
+date in the future: if you omit the month/year and the given day/month is
+@i{before} today, it will assume that you mean a future date@footnote{See the
+variable @code{org-read-date-prefer-future}.}.
 
 For example, let's assume that today is @b{June 13, 2006}.  Here is how
 various inputs will be interpreted, the items filled in by Org mode are
