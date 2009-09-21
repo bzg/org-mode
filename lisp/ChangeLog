@@ -1,3 +1,8 @@
+2009-09-21  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-agenda.el (org-agenda-date-prompt): Mark the changed time
+	stamp in the agenda.
+
 2009-09-19  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-mobile.el (org-mobile-create-index-file): Add the list of

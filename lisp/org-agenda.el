@@ -6369,8 +6369,9 @@ be used to request time specification in the time stamp."
 	(goto-char pos)
 	(if (not (org-at-timestamp-p))
 	    (error "Cannot find time stamp"))
-	(org-time-stamp arg)
-	(message "Time stamp changed to %s" org-last-changed-timestamp)))))
+	(org-time-stamp arg))
+      (org-agenda-show-new-time marker org-last-changed-timestamp))
+    (message "Time stamp changed to %s" org-last-changed-timestamp)))
 
 (defun org-agenda-schedule (arg)
   "Schedule the item at point."
