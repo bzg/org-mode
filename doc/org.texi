@@ -4855,7 +4855,7 @@ is used in a much wider sense.
 A timestamp is a specification of a date (possibly with a time or a range of
 times) in a special format, either @samp{<2003-09-16 Tue>} or
 @samp{<2003-09-16 Tue 09:39>} or @samp{<2003-09-16 Tue
-12:00-12:30>}@footnote{This is inspired by the standard ISO 7801 date/time
+12:00-12:30>}@footnote{This is inspired by the standard ISO 6801 date/time
 format.  To use an alternative format, see @ref{Custom time format}.}.  A
 timestamp can appear anywhere in the headline or body of an Org tree entry.
 Its presence causes entries to be shown on specific dates in the agenda
