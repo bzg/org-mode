@@ -699,10 +699,11 @@ expressions listed in `org-agenda-entry-text-exclude-regexps'.")
 Possible values for this option are:
 
 current-window    Show agenda in the current window, keeping all other windows.
-other-frame       Use `switch-to-buffer-other-frame' to display agenda.
 other-window      Use `switch-to-buffer-other-window' to display agenda.
 reorganize-frame  Show only two windows on the current frame, the current
                   window and the agenda.
+other-frame       Use `switch-to-buffer-other-frame' to display agenda.
+                  Also, when exiting the agenda, kill that frame.
 See also the variable `org-agenda-restore-windows-after-quit'."
   :group 'org-agenda-windows
   :type '(choice
@@ -2588,8 +2589,7 @@ bind it in the options section.")
        ((equal org-agenda-window-setup 'other-window)
 	(org-switch-to-buffer-other-window abuf))
        ((equal org-agenda-window-setup 'other-frame)
-	(switch-to-buffer-other-frame abuf)
-	(set-window-dedicated-p (selected-window) t))
+	(switch-to-buffer-other-frame abuf))
        ((equal org-agenda-window-setup 'reorganize-frame)
 	(delete-other-windows)
 	(org-switch-to-buffer-other-window abuf))))
@@ -4972,15 +4972,21 @@ If ERROR is non-nil, throw an error, otherwise just return nil."
   (interactive)
   (if org-agenda-columns-active
       (org-columns-quit)
-    (if (window-dedicated-p (selected-window)) (delete-other-windows))
     (let ((buf (current-buffer)))
-      (and (not (eq org-agenda-window-setup 'current-window))
-           (not (one-window-p))
-           (delete-window))
-      (kill-buffer buf)
-      (org-agenda-reset-markers)
-      (org-columns-remove-overlays)
-      (setq org-agenda-archives-mode nil))
+      (if (eq org-agenda-window-setup 'other-frame)
+	  (progn
+	    (kill-buffer buf)
+	    (org-agenda-reset-markers)
+	    (org-columns-remove-overlays)
+	    (setq org-agenda-archives-mode nil)
+	    (delete-frame))
+	(and (not (eq org-agenda-window-setup 'current-window))
+	     (not (one-window-p))
+	     (delete-window))
+	(kill-buffer buf)
+	(org-agenda-reset-markers)
+	(org-columns-remove-overlays)
+	(setq org-agenda-archives-mode nil)))
     ;; Maybe restore the pre-agenda window configuration.
     (and org-agenda-restore-windows-after-quit
 	 (not (eq org-agenda-window-setup 'other-frame))

@@ -1,3 +1,10 @@
+2009-09-22  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-agenda.el (org-prepare-agenda): Don't officially mark this
+	window dedicated.
+	(org-agenda-quit): Kill the frame containing the agenda window if
+	that frame was created for the agenda.
+
 2009-09-21  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-agenda.el (org-agenda-date-prompt): Mark the changed time
