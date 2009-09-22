@@ -1,5 +1,8 @@
 2009-09-22  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-faces.el (org-copy-face): New function.  Use it to create
+	various faces formerly created by using `copy-face'.
+
 	* org-agenda.el (org-prepare-agenda): Don't officially mark this
 	window dedicated.
 	(org-agenda-quit): Kill the frame containing the agenda window if
