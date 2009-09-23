@@ -469,8 +469,8 @@ line.  If no result exists for this block then create a
                           ;; or (with optional insert) we need to back up and make one ourselves
                           (when insert
                             (goto-char end) (open-line 2) (forward-char 1)
-                            (insert (concat "#+resname:" (if name (concat " " name))))
-                            (move-beginning-of-line 1) t)))
+                            (insert (concat "#+resname:" (if name (concat " " name)) "\n"))
+                            (move-beginning-of-line 0) t)))
                (point))))))
 
 (defun org-babel-read-result ()
@@ -576,27 +576,26 @@ relies on `org-babel-insert-result'."
   (interactive)
   (save-excursion
     (goto-char (org-babel-where-is-src-block-result t)) (forward-line 1)
-    (delete-region (save-excursion (move-beginning-of-line 0) (point)) (org-babel-result-end))))
+    (delete-region (point) (org-babel-result-end))))
 
 (defun org-babel-result-end ()
   "Return the point at the end of the current set of results"
   (save-excursion
     (if (org-at-table-p)
-        (progn (goto-char (org-table-end)) (forward-line 1) (point))
+        (progn (goto-char (org-table-end)) (point))
       (let ((case-fold-search t))
         (cond
          ((looking-at "#\\+begin_latex")
           (search-forward "#+end_latex" nil t)
-          (forward-line 2))
+          (forward-line 1))
          ((looking-at "#\\+begin_html")
           (search-forward "#+end_html" nil t)
-          (forward-line 2))
+          (forward-line 1))
          ((looking-at "#\\+begin_example")
           (search-forward "#+end_example" nil t)
-          (forward-line 2))
+          (forward-line 1))
          (t (progn (while (looking-at "\\(: \\|\\[\\[\\)")
-                     (forward-line 1))
-                   (forward-line 1)))))
+                     (forward-line 1))))))
       (point))))
 
 (defun org-babel-result-to-file (result)
