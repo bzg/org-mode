@@ -27,6 +27,7 @@
 ;;; Commentary:
 
 (require 'org)
+(require 'org-macs)
 (require 'org-agenda)
 (require 'org-exp-blocks)
 (eval-when-compile
