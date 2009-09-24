@@ -5691,7 +5691,7 @@ frame is not changed."
       (switch-to-buffer ibuf))
      ((eq org-indirect-buffer-display 'other-window)
       (pop-to-buffer ibuf))
-     (t (error "Invalid value.")))
+     (t (error "Invalid value")))
     (if (featurep 'xemacs)
         (save-excursion (org-mode) (turn-on-font-lock)))
     (narrow-to-region beg end)
@@ -6104,7 +6104,7 @@ is signaled in this case."
   ;; First check if there are no even levels
   (when (re-search-forward "^\\(\\*\\*\\)+ " nil t)
     (org-show-context t)
-    (error "Not all levels are odd in this file.  Conversion not possible."))
+    (error "Not all levels are odd in this file.  Conversion not possible"))
   (when (yes-or-no-p "Are you sure you want to globally change levels to odd-even? ")
     (let ((outline-regexp org-outline-regexp)
 	  (outline-level 'org-outline-level)
@@ -14668,8 +14668,8 @@ See `org-ctrl-c-ctrl-c-hook' for more information.")
 (defun org-shiftselect-error ()
   "Throw an error because Shift-Cursor command was applied in wrong context."
   (if (and (boundp 'shift-select-mode) shift-select-mode)
-      (error "To use shift-selection with Org-mode, customize `org-support-shift-select'.")
-    (error "This command works only in special context like headlines or timestamps.")))
+      (error "To use shift-selection with Org-mode, customize `org-support-shift-select'")
+    (error "This command works only in special context like headlines or timestamps")))
 
 (defun org-call-for-shift-select (cmd)
   (let ((this-command-keys-shift-translated t))
@@ -15109,7 +15109,7 @@ This command does many different things, depending on context:
 	(let ((org-inhibit-startup t)) (org-mode-restart))
 	(message "Local setup has been refreshed"))))
      ((org-clock-update-time-maybe))
-     (t (error "C-c C-c can do nothing useful at this location.")))))
+     (t (error "C-c C-c can do nothing useful at this location")))))
 
 (defun org-mode-restart ()
   "Restart Org-mode, to scan again for special lines.

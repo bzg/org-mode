@@ -1627,7 +1627,7 @@ This undoes changes both in the agenda buffer and in the remote buffer
 that have been changed along."
   (interactive)
   (or org-agenda-allow-remote-undo
-      (error "Check the variable `org-agenda-allow-remote-undo' to activate remote undo."))
+      (error "Check the variable `org-agenda-allow-remote-undo' to activate remote undo"))
   (if (not (eq this-command last-command))
       (setq org-agenda-undo-has-started-in nil
 	    org-agenda-pending-undo-list org-agenda-undo-list))
@@ -2525,7 +2525,7 @@ removed from the entry content.  Currently only `planning' is allowed here."
 (defun org-check-for-org-mode ()
   "Make sure current buffer is in org-mode.  Error if not."
   (or (org-mode-p)
-      (error "Cannot execute org-mode agenda command on buffer in %s."
+      (error "Cannot execute org-mode agenda command on buffer in %s"
 	     major-mode)))
 
 (defun org-fit-agenda-window ()
