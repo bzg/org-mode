@@ -1,3 +1,8 @@
+2009-09-24  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-latex.el (org-export-latex-emph-format): Use better commands
+	to insert special characters in verbatim snippets.
+
 2009-09-22  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-faces.el (org-copy-face): New function.  Use it to create
