@@ -8098,9 +8098,9 @@ application the system uses for this file type."
 	      (error "Abort"))))
 
 	 (t
-	  (browse-url-at-point))))))
-   (move-marker org-open-link-marker nil)
-   (run-hook-with-args 'org-follow-link-hook)))
+	  (browse-url-at-point)))))))
+  (move-marker org-open-link-marker nil)
+  (run-hook-with-args 'org-follow-link-hook))
 
 (defun org-offer-links-in-entry (&optional nth zero)
   "Offer links in the curren entry and follow the selected link.

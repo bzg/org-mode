@@ -2,6 +2,7 @@
 
 	* org.el (org-fontify-meta-lines-and-blocks): Treat lines with a
 	space after #+ as comments.
+	(org-open-at-point): Run `org-follow-link-hook' always.
 
 	* org-latex.el (org-export-latex-emph-format): Use better commands
 	to insert special characters in verbatim snippets.
