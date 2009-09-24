@@ -8471,7 +8471,8 @@ exported as a horizontal line (@samp{<hr/>} in HTML).
 @cindex #+BEGIN_COMMENT
 
 Lines starting with @samp{#} in column zero are treated as comments and will
-never be exported.  Also entire subtrees starting with the word
+never be exported. If you want an indented line to be treated as a comment,
+start it with @samp{#+ }.  Also entire subtrees starting with the word
 @samp{COMMENT} will never be exported.  Finally, regions surrounded by
 @samp{#+BEGIN_COMMENT} ... @samp{#+END_COMMENT} will not be exported.
 

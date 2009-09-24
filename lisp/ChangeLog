@@ -1,5 +1,8 @@
 2009-09-24  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-fontify-meta-lines-and-blocks): Treat lines with a
+	space after #+ as comments.
+
 	* org-latex.el (org-export-latex-emph-format): Use better commands
 	to insert special characters in verbatim snippets.
 
