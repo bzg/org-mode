@@ -1,3 +1,9 @@
+2009-09-25  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-special-ctrl-a/e): Improve documentation and
+	customize type.
+	(org-end-of-line): Don't jump to after the ellipsis.
+
 2009-09-24  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-fontify-meta-lines-and-blocks): Treat lines with a

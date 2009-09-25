@@ -765,7 +765,9 @@ it to the beginning of the line.
 
 `C-e' will jump to the end of the headline, ignoring the presence of tags
 in the headline.  A second `C-e' will then jump to the true end of the
-line, after any tags.
+line, after any tags.  This also means that, when this variable is
+non-nil, `C-e' also will never jump beyond the end of the heading of a
+folded section, i.e. not after the ellipses.
 
 When set to the symbol `reversed', the first `C-a' or `C-e' works normally,
 going to the true line boundary first.  Only a directly following, identical
@@ -776,17 +778,17 @@ set separately."
   :group 'org-edit-structure
   :type '(choice
 	  (const :tag "off" nil)
-	  (const :tag "after stars/bullet and before tags first" t)
-	  (const :tag "true line boundary first" reversed)
+	  (const :tag "on: after stars/bullet and before tags first" t)
+	  (const :tag "reversed: true line boundary first" reversed)
 	  (cons :tag "Set C-a and C-e separately"
 		(choice :tag "Special C-a"
 			(const :tag "off" nil)
-			(const :tag "after  stars/bullet first" t)
-			(const :tag "before stars/bullet first" reversed))
+			(const :tag "on: after  stars/bullet first" t)
+			(const :tag "reversed: before stars/bullet first" reversed))
 		(choice :tag "Special C-e"
 			(const :tag "off" nil)
-			(const :tag "before tags first" t)
-			(const :tag "after tags first" reversed)))))
+			(const :tag "on: before tags first" t)
+			(const :tag "reversed: after tags first" reversed)))))
 (if (fboundp 'defvaralias)
     (defvaralias 'org-special-ctrl-a 'org-special-ctrl-a/e))
 
@@ -16612,7 +16614,7 @@ beyond the end of the headline."
 	       (t 'end-of-line)))
       (let ((pos (point)))
 	(beginning-of-line 1)
-	(if (looking-at (org-re ".*?\\([ \t]*\\)\\(:[[:alnum:]_@:]+:\\)[ \t]*$"))
+	(if (looking-at (org-re ".*?\\(?:\\([ \t]*\\)\\(:[[:alnum:]_@:]+:\\)?[ \t]*\\)?$"))
 	    (if (eq special t)
 		(if (or (< pos (match-beginning 1))
 			(= pos (match-end 0)))
