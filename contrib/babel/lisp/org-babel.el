@@ -61,6 +61,15 @@ to `org-open-at-point'."
   (interactive "P")
   (or (call-interactively #'org-babel-open-src-block-result) ad-do-it))
 
+(defun org-babel-load-in-session-maybe ()
+  "Detect if this is context for a org-babel src-block and if so
+then run `org-babel-load-in-session'."
+  (interactive)
+  (let ((info (org-babel-get-src-block-info)))
+    (if info (progn (org-babel-load-in-session current-prefix-arg info) t) nil)))
+
+(add-hook 'org-metaup-hook 'org-babel-load-in-session-maybe)
+
 (defun org-babel-pop-to-session-maybe ()
   "Detect if this is context for a org-babel src-block and if so
 then run `org-babel-pop-to-session'."
@@ -180,6 +189,22 @@ the header arguments specified at the source code block."
         (setq result (org-babel-process-value-result result result-params)))
     (org-babel-insert-result result result-params)
     (case result-type (output nil) (value result))))
+
+(defun org-babel-load-in-session (&optional arg info)
+  "Load the body of the current source-code block.  Evaluate the
+header arguments for the source block before entering the
+session.  After loading the body this pops open the session."
+  (interactive)
+  (let* ((info (or info (org-babel-get-src-block-info)))
+         (lang (first info))
+         (body (second info))
+         (params (third info))
+         (session (cdr (assoc :session params))))
+    (unless (member lang org-babel-interpreters)
+      (error "Language is not in `org-babel-interpreters': %s" lang))
+    ;; if called with a prefix argument, then process header arguments
+    (pop-to-buffer (funcall (intern (concat "org-babel-load-session:" lang)) session body params))
+    (move-end-of-line 1)))
 
 (defun org-babel-pop-to-session (&optional arg info)
   "Pop to the session of the current source-code block.  If
