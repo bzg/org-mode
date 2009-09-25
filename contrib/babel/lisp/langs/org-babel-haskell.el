@@ -81,9 +81,29 @@ variables pre-set using `multiple-value-bind'.
       (match-string 1 string)
     string))
 
+(defun org-babel-haskell-initiate-session (&optional session)
+  "If there is not a current inferior-process-buffer in SESSION
+then create.  Return the initialized session."
+  ;; TODO: make it possible to have multiple sessions
+  (run-haskell) (current-buffer))
+
 (defun org-babel-prep-session:haskell (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."
-  (save-window-excursion (run-haskell) (current-buffer)))
+  (save-window-excursion
+    (org-babel-haskell-initiate-session session)
+    (let* ((vars (org-babel-ref-variables params))
+           (var-lines (mapconcat ;; define any variables
+                       (lambda (pair)
+                         (format "%s=%s"
+                                 (car pair)
+                                 (org-babel-ruby-var-to-ruby (cdr pair))))
+                       vars "\n"))
+           (load-file (concat (make-temp-file "org-babel-haskell-load") ".hs")))
+      (when vars
+        (with-temp-buffer
+          (insert var-lines) (write-file load-file)
+          (haskell-mode) (inferior-haskell-load-file)))
+      (current-buffer))))
 
 (defun org-babel-haskell-table-or-string (results)
   "If the results look like a table, then convert them into an
