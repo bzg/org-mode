@@ -3,6 +3,7 @@
 	* org.el (org-special-ctrl-a/e): Improve documentation and
 	customize type.
 	(org-end-of-line): Don't jump to after the ellipsis.
+	(org-mode-map): Bind <home> and <end> as well.
 
 2009-09-24  Carsten Dominik  <carsten.dominik@gmail.com>
 
