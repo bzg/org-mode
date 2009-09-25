@@ -15728,6 +15728,10 @@ With prefix arg UNCOMPILED, load the uncompiled versions."
 
 ;;; Generally useful functions
 
+(defun org-get-at-bol (property)
+  "Get text property PROPERTY at beginning of line."
+  (get-text-property (point-at-bol) property))
+
 (defun org-find-text-property-in-string (prop s)
   "Return the first non-nil value of property PROP in string S."
   (or (get-text-property 0 prop s)

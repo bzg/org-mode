@@ -1,5 +1,38 @@
 2009-09-25  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-agenda-get): New function.
+
+	* org-agenda.el (org-agenda-post-command-hook): No longer move
+	point away from end of line.
+	(org-agenda-add-entry-text, org-agenda-collect-markers)
+	(org-finalize-agenda, org-agenda-mark-clocking-task)
+	(org-agenda-dim-blocked-tasks, org-agenda-entry-text-show-here)
+	(org-agenda-entry-text-show, org-agenda-highlight-todo)
+	(org-agenda-compare-effort, org-agenda-filter-apply)
+	(org-agenda-later, org-agenda-change-time-span)
+	(org-agenda-post-command-hook, org-agenda-show-priority)
+	(org-agenda-show-tags, org-agenda-goto, org-agenda-kill)
+	(org-agenda-archive, org-agenda-archive-to-archive-sibling)
+	(org-remove-subtree-entries-from-agenda, org-agenda-refile)
+	(org-agenda-open-link, org-agenda-copy-local-variable)
+	(org-agenda-switch-to, org-agenda-check-no-diary)
+	(org-agenda-tree-to-indirect-buffer, org-agenda-todo)
+	(org-agenda-add-note, org-agenda-change-all-lines)
+	(org-agenda-priority, org-agenda-set-tags)
+	(org-agenda-set-property, org-agenda-set-effort)
+	(org-agenda-toggle-archive-tag, org-agenda-date-later)
+	(org-agenda-show-new-time, org-agenda-date-prompt)
+	(org-agenda-schedule, org-agenda-deadline, org-agenda-action)
+	(org-agenda-clock-in, org-agenda-bulk-mark)
+	(org-agenda-bulk-unmark, org-agenda-show-the-flagging-note): Use
+	`org-get-at-bol'.
+
+	* org-colview.el (org-columns-display-here)
+	(org-columns-edit-allowed, org-agenda-columns): Use
+	`org-get-at-bol'.
+
+2009-09-25  Carsten Dominik  <carsten.dominik@gmail.com>
+
 	* org.el (org-special-ctrl-a/e): Improve documentation and
 	customize type.
 	(org-end-of-line): Don't jump to after the ellipsis.
