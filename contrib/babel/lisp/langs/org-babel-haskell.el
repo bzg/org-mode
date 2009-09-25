@@ -87,6 +87,16 @@ then create.  Return the initialized session."
   ;; TODO: make it possible to have multiple sessions
   (run-haskell) (current-buffer))
 
+(defun org-babel-load-session:haskell (session body params)
+  "Load BODY into SESSION."
+  (save-window-excursion
+    (let* ((buffer (org-babel-prep-session:haskell session params))
+           (load-file (concat (make-temp-file "org-babel-haskell-load") ".hs")))
+      (with-temp-buffer
+        (insert body) (write-file load-file)
+        (haskell-mode) (inferior-haskell-load-file))
+      buffer)))
+
 (defun org-babel-prep-session:haskell (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."
   (save-window-excursion
@@ -98,10 +108,10 @@ then create.  Return the initialized session."
                                  (car pair)
                                  (org-babel-ruby-var-to-ruby (cdr pair))))
                        vars "\n"))
-           (load-file (concat (make-temp-file "org-babel-haskell-load") ".hs")))
+           (vars-file (concat (make-temp-file "org-babel-haskell-vars") ".hs")))
       (when vars
         (with-temp-buffer
-          (insert var-lines) (write-file load-file)
+          (insert var-lines) (write-file vars-file)
           (haskell-mode) (inferior-haskell-load-file)))
       (current-buffer))))
 
