@@ -14127,7 +14127,9 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
   "Regular expressions for matching embedded LaTeX.")
 
 (defun org-format-latex (prefix &optional dir overlays msg at forbuffer)
-  "Replace LaTeX fragments with links to an image, and produce images."
+  "Replace LaTeX fragments with links to an image, and produce images.
+Some of the options can be changed using the variable
+`org-format-latex-options'."
   (if (and overlays (fboundp 'clear-image-cache)) (clear-image-cache))
   (let* ((prefixnodir (file-name-nondirectory prefix))
 	 (absprefix (expand-file-name prefix dir))
@@ -14205,6 +14207,7 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
 (defvar org-export-latex-packages-alist) ;; defined in org-latex.el
 ;; This function borrows from Ganesh Swami's latex2png.el
 (defun org-create-formula-image (string tofile options buffer)
+  "This calls dvipng."
   (require 'org-latex)
   (let* ((tmpdir (if (featurep 'xemacs)
 		     (temp-directory)

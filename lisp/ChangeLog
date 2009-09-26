@@ -1,3 +1,8 @@
+2009-09-26  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-format-latex): Mention `org-format-latex-options' in
+	the docstring.
+
 2009-09-25  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-agenda-get): New function.

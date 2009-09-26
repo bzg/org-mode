@@ -1,3 +1,9 @@
+2009-09-26  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Processing LaTeX fragments): Document that the size of
+	images can be changes using the variable
+	`org-format-latex-options'.
+
 2009-09-21  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (The date/time prompt, Timestamps): Be more accurate

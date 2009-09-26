@@ -7971,6 +7971,12 @@ process the entire buffer.
 Remove the overlay preview images.
 @end table
 
+@vindex org-format-latex-options
+You can customize the variable @code{org-format-latex-options} to influence
+some aspects of the preview. In particular, the @code{:scale} (and for HTML
+export, @code{:html-scale}) property can be used to adjust the size of the
+preview images.
+
 During HTML export (@pxref{HTML export}), all La@TeX{} fragments are
 converted into images and inlined into the document if the following
 setting is active:
