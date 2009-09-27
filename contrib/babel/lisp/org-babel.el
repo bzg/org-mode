@@ -480,7 +480,7 @@ line.  If no result exists for this block then create a
   (save-excursion
     (let* ((on-lob-line (progn (beginning-of-line 1)
 			       (looking-at org-babel-lob-one-liner-regexp)))
-	   (name (if on-lob-line (org-babel-lob-get-info) (org-babel-get-src-block-name)))
+	   (name (if on-lob-line (first (org-babel-lob-get-info)) (org-babel-get-src-block-name)))
 	   (head (unless on-lob-line (org-babel-where-is-src-block-head))) end)
       (when head (goto-char head))
       (or (and name (org-babel-find-named-result name))
