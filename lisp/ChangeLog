@@ -1,5 +1,7 @@
 2009-09-28  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-format-latex-header): Inline fullpage.sty.
+
 	* org-footnote.el (org-footnote-create-definition): Reveal context
 	to add a new footnote definition.
 
