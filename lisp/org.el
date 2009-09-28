@@ -15111,7 +15111,7 @@ This command does many different things, depending on context:
 	  (beginning-of-line 1)
 	  (skip-chars-backward " \r\n\t")
 	  (if (org-at-table-p)
-	      (org-call-with-arg 'org-table-recalculate t))))
+	      (org-call-with-arg 'org-table-recalculate (or arg t)))))
        (t
 ;	(org-set-regexps-and-options)
 ;	(org-restart-font-lock)

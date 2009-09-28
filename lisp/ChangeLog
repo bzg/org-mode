@@ -1,5 +1,8 @@
 2009-09-28  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-ctrl-c-ctrl-c): Pass prefix arg to
+	org-table-recalculate when cursor is in TBLFM line.
+
 	* org-list.el (org-renumber-ordered-list): Fix cursor position
 	when bullet length has changed.
 
