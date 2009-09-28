@@ -1,5 +1,7 @@
 2009-09-28  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-macs.el (org-if-unprotected-at): Fix docstring.
+
 	* org-agenda.el (org-agenda-change-all-lines): Handle invisible
 	text in the prefix (if category is a link).
 

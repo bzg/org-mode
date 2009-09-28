@@ -118,7 +118,7 @@ We use a macro so that the test can happen at compilation time."
      ,@body))
 
 (defmacro org-if-unprotected-at (pos &rest body)
-  "Execute BODY if there is no `org-protected' text property at point-1."
+  "Execute BODY if there is no `org-protected' text property at POS."
   `(unless (get-text-property ,pos 'org-protected)
      ,@body))
 
