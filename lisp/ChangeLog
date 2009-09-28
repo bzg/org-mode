@@ -2,6 +2,15 @@
 
 	* org-mobile.el (org-mobile-files-alist): Add the list of tags to
 	the index file.
+	(org-mobile-files): New option.
+	(org-mobile-files-alist, org-mobile-checksum-files): New variable.
+	(org-mobile-prepare-file-lists, org-mobile-files-alist): New
+	functions.
+	(org-mobile-push): Start by creating the files lists.
+	(org-mobile-copy-agenda-files): Move killing the buffer to after
+	the save-excursion has exited.
+	(org-mobile-write-checksums): Write checksums also for files in
+	sub-directories.
 
 	* org.el (org-ctrl-c-ctrl-c): Pass prefix arg to
 	org-table-recalculate when cursor is in TBLFM line.

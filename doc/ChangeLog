@@ -1,3 +1,7 @@
+2009-09-28  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Pushing to MobileOrg): Document `org-mobile-files'.
+
 2009-09-26  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Processing LaTeX fragments): Document that the size of

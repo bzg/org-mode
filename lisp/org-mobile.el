@@ -27,7 +27,9 @@
 ;;
 ;; This file contains the code to interact with Richard Moreland's iPhone
 ;; application MobileOrg.  This code is documented in Appendix B of the
-;; Org-mode manual.
+;; Org-mode manual.  The code is not specific for the iPhone, however.
+;; Any external viewer and flagging application that uses the same
+;; conventions could be used.
 
 (require 'org)
 (require 'org-agenda)
@@ -36,6 +38,26 @@
   "Options concerning support for a viewer on a mobile device."
   :tag "Org Mobile"
   :group 'org)
+
+(defcustom org-mobile-files '(org-agenda-files)
+  "Files to be staged for MobileOrg.
+This is basically a list of filesand directories.  Files will be staged
+directly.  Directories will be search for files with the extension `.org'.
+In addition to this, the list may also contain the following symbols:
+
+org-agenda-files
+     This means, include the complete, unrestricted list of files given in
+     the variable `org-agenda-files'.
+org-agenda-text-search-extra-files
+     Include the files given in the variable
+     `org-agenda-text-search-extra-files'"
+  :group 'org-mobile
+  :type '(list :greedy t
+	       (option (const :tag "org-agenda-files" org-agenda-files))
+	       (option (const :tag "org-agenda-text-search-extra-files"
+			      org-agenda-text-search-extra-files))
+	       (repeat :inline t :tag "Additional files"
+		       (file))))
 
 (defcustom org-mobile-directory ""
   "The WebDAV directory where the interaction with the mobile takes place."
@@ -115,6 +137,43 @@ using `rsync' or `scp'.")
 (defvar org-mobile-last-flagged-files nil
   "List of files containing entreis flagged in the latest pull.")
 
+(defvar org-mobile-files-alist nil)
+(defvar org-mobile-checksum-files nil)
+
+(defun org-mobile-prepare-file-lists ()
+  (setq org-mobile-files-alist (org-mobile-files-alist))
+  (setq org-mobile-checksum-files (mapcar 'cdr org-mobile-files-alist)))
+
+(defun org-mobile-files-alist ()
+  "Expand the list in `org-mobile-files' to a list of existing files."
+  (let* ((files
+	  (apply 'append (mapcar
+			  (lambda (f)
+			    (cond
+			     ((eq f 'org-agenda-files) (org-agenda-files t))
+			     ((eq f 'org-agenda-text-search-extra-files)
+			      org-agenda-text-search-extra-files)
+			     ((and (stringp f) (file-directory-p f))
+			      (directory-files f 'full "\\.org\\'"))
+			     ((and (stringp f) (file-exists-p f))
+			      (list f))
+			     (t nil)))
+			  org-mobile-files)))
+	 (orgdir-uname (file-name-as-directory (file-truename org-directory)))
+	 (orgdir-re (concat "\\`" (regexp-quote orgdir-uname)))
+	 uname seen rtn)
+    ;; Make the files unique, and determine the name under which they will
+    ;; be listed.
+    (while (setq file (pop files))
+      (setq uname (file-truename file))
+      (unless (member uname seen)
+	(push uname seen)
+	(if (string-match orgdir-re uname)
+	    (setq link-name (substring uname (match-end 0)))
+	  (setq link-name (file-name-nondirectory uname)))
+	(push (cons file link-name) rtn)))
+    (nreverse rtn)))
+
 ;;;###autoload
 (defun org-mobile-push ()
   "Push the current state of Org affairs to the WebDAV directory.
@@ -122,6 +181,7 @@ This will create the index file, copy all agenda files there, and also
 create all custom agenda views, for upload to the mobile phone."
   (interactive)
   (org-mobile-check-setup)
+  (org-mobile-prepare-file-lists)
   (run-hooks 'org-mobile-pre-push-hook)
   (org-mobile-create-sumo-agenda)
   (org-save-all-org-buffers) ; to save any IDs created by this process
@@ -222,8 +282,8 @@ agenda view showing the flagged items."
       (save-excursion
 	(setq buf (find-file file))
 	(insert "\n")
-	(save-buffer)
-      (kill-buffer buf)))))
+	(save-buffer))
+      (kill-buffer buf))))
 
 (defun org-mobile-write-checksums ()
   "Create checksums for all files in `org-mobile-directory'.
@@ -231,12 +291,19 @@ The table of checksums is written to the file mobile-checksums."
   (let ((cmd (cond ((executable-find "shasum"))
 		   ((executable-find "sha1sum"))
 		   ((executable-find "md5sum"))
-		   ((executable-find "md5")))))
+		   ((executable-find "md5"))))
+	(files org-mobile-checksum-files))
     (if (not cmd)
 	(message "Checksums could not be generated: no executable")
       (with-temp-buffer
 	(cd org-mobile-directory)
-	(if (equal 0 (shell-command (concat cmd " *.org > checksums.dat")))
+	(if (file-exists-p "agendas.org")
+	    (push "agendas.org" files))
+	(if (file-exists-p "mobileorg.org")
+	    (push "mobileorg.org" files))
+	(setq cmd (concat cmd " " (mapconcat 'shell-quote-argument files " ")
+			  " > checksums.dat"))
+	(if (equal 0 (shell-command cmd))
 	    (message "Checksums written")
 	  (message "Checksums could not be generated"))))))
 
