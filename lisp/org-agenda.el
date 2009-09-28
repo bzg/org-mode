@@ -6061,7 +6061,8 @@ If FORCE-TAGS is non nil, the car of it returns the new tags."
 		pl (org-get-at-bol 'prefix-length)
 		undone-face (org-get-at-bol 'undone-face)
 		done-face (org-get-at-bol 'done-face))
-	  (org-move-to-column pl)
+	  (goto-char (+ (point) pl))
+	  ;; (org-move-to-column pl)  FIXME: does the above line work correctly?
 	  (cond
 	   ((equal new "")
 	    (beginning-of-line 1)

@@ -1,5 +1,8 @@
 2009-09-28  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-agenda.el (org-agenda-change-all-lines): Handle invisible
+	text in the prefix (if category is a link).
+
 	* org-latex.el (org-export-latex-preprocess): Deal properly with
 	empty lines in verse environments.
 
