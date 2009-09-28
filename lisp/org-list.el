@@ -813,7 +813,7 @@ with something like \"1.\" or \"2)\"."
 	      (buffer-substring (point-at-bol) (match-beginning 3))))
 	;; (term (substring (match-string 3) -1))
 	ind1 (n (1- arg))
-	fmt bobp old new)
+	fmt bobp old new delta)
     ;; find where this list begins
     (org-beginning-of-item-list)
     (setq bobp (bobp))
@@ -835,7 +835,9 @@ with something like \"1.\" or \"2)\"."
 	  (delete-region (match-beginning 2) (match-end 2))
 	  (goto-char (match-beginning 2))
 	  (insert (setq new (format fmt (setq n (1+ n)))))
-	  (org-shift-item-indentation (- (length new) (length old))))))
+	  (setq delta (- (length new) (length old)))
+	  (org-shift-item-indentation delta)
+	  (if (= (org-current-line) line) (setq col (+ col delta))))))
     (org-goto-line line)
     (org-move-to-column col)))
 

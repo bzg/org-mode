@@ -1,3 +1,8 @@
+2009-09-28  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-list.el (org-renumber-ordered-list): Fix cursor position
+	when bullet length has changed.
+
 2009-09-26  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-format-latex): Mention `org-format-latex-options' in
