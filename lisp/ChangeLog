@@ -1,5 +1,8 @@
 2009-09-28  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-mobile.el (org-mobile-files-alist): Add the list of tags to
+	the index file.
+
 	* org.el (org-ctrl-c-ctrl-c): Pass prefix arg to
 	org-table-recalculate when cursor is in TBLFM line.
 

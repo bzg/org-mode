@@ -172,38 +172,50 @@ agenda view showing the flagged items."
 
 (defun org-mobile-create-index-file ()
   "Write the index file in the WebDAV directory."
-  (interactive)
-  (let ((files (org-agenda-files t))
-	file todo-kwds done-kwds drawers)
-    (org-prepare-agenda-buffers (org-agenda-files t))
+  (let ((files-alist org-mobile-files-alist)
+	file todo-kwds done-kwds tags drawers entry)
+    (org-prepare-agenda-buffers (mapcar 'car files-alist))
     (setq done-kwds (org-uniquify org-done-keywords-for-agenda))
     (setq todo-kwds (org-delete-all
 		     done-kwds
 		     (org-uniquify org-todo-keywords-for-agenda)))
     (setq drawers (org-uniquify org-drawers-for-agenda))
+    (setq tags (org-uniquify
+		(delq nil
+		      (mapcar
+		       (lambda (e)
+			 (cond ((stringp e) e)
+			       ((listp e)
+				(if (stringp (car e)) (car e) nil))
+			       (t nil)))
+		       org-tag-alist-for-agenda))))
     (with-temp-file
 	(expand-file-name org-mobile-index-file org-mobile-directory)
       (insert "#+TODO: " (mapconcat 'identity todo-kwds " ") " | "
 	      (mapconcat 'identity done-kwds " ") "\n"
+	      "#+TAGS: " (mapconcat 'identity tags " ") "\n"
 	      "#+DRAWERS: " (mapconcat 'identity drawers " ") "\n")
       (insert "* [[file:agendas.org][Agenda Views]]\n")
-      (while (setq file (pop files))
+      (while (setq entry (pop files-alist))
+	(setq file (car entry)
+	      link-name (cdr entry))
 	(insert (format "* [[file:%s][%s]]\n"
-			(file-name-nondirectory file)
-			(capitalize
-			 (file-name-sans-extension
-			  (file-name-nondirectory file))))))
+			link-name link-name)))
       (insert (format "* [[file:%s][Captured before last sync]]\n"
 		      org-mobile-capture-file)))))
 
 (defun org-mobile-copy-agenda-files ()
   "Copy all agenda files to the stage or WebDAV directory."
-  (let ((files (org-agenda-files t)) file buf)
-    (while (setq file (pop files))
-      (if (file-exists-p file)
-	  (copy-file file (expand-file-name (file-name-nondirectory file)
-					    org-mobile-directory)
-		     'ok-if-exists)))
+  (let ((files-alist org-mobile-files-alist)
+	file buf entry link-name target-path target-dir)
+    (while (setq entry (pop files-alist))
+      (setq file (car entry) link-name (cdr entry))
+      (when (file-exists-p file)
+	(setq target-path (expand-file-name link-name org-mobile-directory)
+	      target-dir (file-name-directory target-path))
+	(unless (file-directory-p target-dir)
+	  (make-directory target-dir 'parents)
+	  (copy-file file target-path 'ok-if-exists))))
     (setq file (expand-file-name org-mobile-capture-file
 				 org-mobile-directory))
     (unless (file-exists-p file)
