@@ -58,6 +58,11 @@ in this way, it will be wrapped."
   :group 'org-export-ascii
   :type 'boolean)
 
+;;; Hooks
+
+(defvar org-export-ascii-final-hook nil
+  "Hook run at the end of ASCII export, in the new buffer.")
+
 ;;; ASCII export
 
 (defvar org-ascii-current-indentation nil) ; For communication
@@ -457,6 +462,7 @@ publishing directory."
 	(setq end (next-single-property-change beg 'org-cwidth))
 	(delete-region beg end)
 	(goto-char beg)))
+    (run-hooks 'org-export-ascii-final-hook)
     (or to-buffer (save-buffer))
     (goto-char (point-min))
     (or (org-export-push-to-kill-ring "ASCII")

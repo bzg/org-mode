@@ -419,6 +419,9 @@ This may also be a function, building and inserting the postamble.")
 (defvar org-export-html-after-blockquotes-hook nil
   "Hook run during HTML export, after blockquote, verse, center are done.")
 
+(defvar org-export-html-final-hook nil
+  "Hook run during HTML export, after blockquote, verse, center are done.")
+
 ;;; HTML export
 
 (defun org-export-html-preprocess (parameters)
@@ -1461,6 +1464,7 @@ lang=\"%s\" xml:lang=\"%s\">
 	  (delete-region beg end)
 	  (insert (format "<span style=\"visibility:hidden;\">%s</span>"
 			  (make-string n ?x)))))
+      (run-hooks 'org-export-html-final-hook)
       (or to-buffer (save-buffer))
       (goto-char (point-min))
       (or (org-export-push-to-kill-ring "HTML")
