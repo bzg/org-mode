@@ -317,7 +317,7 @@ one function which returns more data than just the name. [Eric]"
                 ;; the second match of this regexp is used later to
                 ;; find arguments in the "functional" style, where
                 ;; they are passed as part of the source name line
-		(looking-at "#\\+srcname:[ \f\t\n\r\v]*\\([^ ()\f\t\n\r\v]+\\)\\(\(\\(.*\\)\)\\|\\)"))
+		(looking-at "#\\+srcname:[ \t]*\\([^ ()\f\t\n\r\v]+\\)\\(\(\\(.*\\)\)\\|\\)"))
 	      (org-babel-clean-text-properties (match-string 1)))))))
 
 (defun org-babel-get-src-block-info ()
