@@ -49,6 +49,7 @@
 (require 'footnote)
 (require 'org)
 (require 'org-exp)
+(require 'org-macs)
 
 ;;; Variables:
 (defvar org-export-latex-class nil)
