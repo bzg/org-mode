@@ -1232,9 +1232,8 @@ SUBSUP corresponds to the ^: option in the #+OPTIONS line.
 Convert CHAR depending on STRING-BEFORE and STRING-AFTER."
   (cond ((equal string-before "\\")
 	 (concat string-before char string-after))
-	;; this is part of a math formula
-	((and (string-match "\\S-+" string-before)
-	      (string-match "\\S-+" string-after))
+	((and (string-match "\\S-+" string-after))
+	 ;; this is part of a math formula
 	 (cond ((eq 'org-link (get-text-property 0 'face char))
 		(concat string-before "\\" char string-after))
 	       ((save-match-data (org-inside-latex-math-p))
