@@ -480,7 +480,7 @@ line.  If no result exists for this block then create a
   (save-excursion
     (let* ((on-lob-line (progn (beginning-of-line 1)
 			       (looking-at org-babel-lob-one-liner-regexp)))
-	   (name (if on-lob-line (org-babel-lob-get-info) (org-babel-get-src-block-name)))
+	   (name (if on-lob-line (first (org-babel-lob-get-info)) (org-babel-get-src-block-name)))
 	   (head (unless on-lob-line (org-babel-where-is-src-block-head))) end)
       (when head (goto-char head))
       (or (and name (org-babel-find-named-result name))
@@ -655,7 +655,11 @@ non-nil."
 elements of PLISTS override the values of previous element.  This
 takes into account some special considerations for certain
 parameters when merging lists."
-  (let (params results exports tangle vars var ref)
+  (let ((results-exclusive-groups
+	 '(("file" "vector" "scalar" "raw" "org" "html" "latex")
+	   ("replace" "silent")
+	   ("output" "value")))
+	params results exports tangle vars var ref)
     (flet ((e-merge (exclusive-groups &rest result-params)
                     ;; maintain exclusivity of mutually exclusive parameters
                     (let (output)
@@ -682,11 +686,12 @@ parameters when merging lists."
                                  ref (match-string 2 (cdr pair))
                                  vars (cons (cons var ref) (assq-delete-all var vars)))))
                         (:results
-                         (setq results (e-merge
-                                        '(("file" "vector" "scalar" "raw" "org" "html" "latex")
-                                          ("replace" "silent")
-                                          ("output" "value"))
-                                        results (split-string (cdr pair)))))
+                         (setq results
+			       (e-merge results-exclusive-groups results (split-string (cdr pair)))))
+			(:file
+			 (when (cdr pair)
+			   (setq results (e-merge results-exclusive-groups results '("file")))
+			   (setq params (cons pair (assq-delete-all (car pair) params)))))
                         (:exports
                          (setq exports (e-merge '(("code" "results" "both" "none"))
                                                 exports (split-string (cdr pair)))))

@@ -55,7 +55,7 @@ add files to this list use the `org-babel-lob-ingest' command."
 
 ;; functions for executing lob one-liners
 
-(defvar org-babel-lob-one-liner-regexp "#\\+lob:[ \t]+\\([^\(\)\n]+\\)\(\\([^\n]*\\)\)[ \t]*\n")
+(defvar org-babel-lob-one-liner-regexp "#\\+lob:[ \t]+\\([^\(\)\n]+\\)\(\\([^\n]*\\)\)[ \t]*\\([^\n]*\\)\n")
 
 (defun org-babel-lob-execute-maybe ()
   "Detect if this is context for a org-babel Library Of Babel
@@ -63,7 +63,7 @@ src-block and if so then run the appropriate source block from
 the Library."
   (interactive)
   (let ((info (org-babel-lob-get-info)))
-    (if info (progn (org-babel-lob-execute info) t) nil)))
+    (if (first info) (progn (org-babel-lob-execute info) t) nil)))
 
 (add-hook 'org-ctrl-c-ctrl-c-hook 'org-babel-lob-execute-maybe)
 
@@ -81,13 +81,16 @@ the word 'call'."
     (save-excursion
       (move-beginning-of-line 1)
       (if (looking-at org-babel-lob-one-liner-regexp)
-          (org-babel-clean-text-properties 
-	   (format "%s(%s)" (match-string 1) (match-string 2)))))))
-
+          (mapcar #'org-babel-clean-text-properties 
+		  (list (format "%s(%s)" (match-string 1) (match-string 2))
+			(match-string 3)))))))
+  
 (defun org-babel-lob-execute (info)
   (let ((params (org-babel-merge-params
 		 org-babel-default-header-args
-		 (org-babel-parse-header-arguments (concat ":var results=" info)))))
+		 (org-babel-parse-header-arguments
+		  (org-babel-clean-text-properties
+		   (concat ":var results=" (mapconcat #'identity info " ")))))))
     (org-babel-execute-src-block nil (list "emacs-lisp" "results" params))))
 
 (provide 'org-babel-lob)
