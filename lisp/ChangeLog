@@ -1,5 +1,8 @@
 2009-09-29  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-inlinetask.el (org-inlinetask-export): Option removed.
+	(org-inlinetask-export-handler): Better export.
+
 	* org-xoxo.el (org-export-xoxo-final-hook): New hook.
 	(org-export-as-xoxo): Run the new hook.
 
