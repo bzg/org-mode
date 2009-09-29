@@ -1,5 +1,8 @@
 2009-09-29  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-mobile.el (org-mobile-create-sumo-agenda): Call
+	`org-sore-agenda-views' instead of `org-batch-store-agenda-views'.
+
 	* org-latex.el (org-export-latex-treat-sub-super-char): Allow a
 	space character as the character before the ^/_.
 	(org-export-latex-final-hook): New hook.

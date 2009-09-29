@@ -161,7 +161,7 @@ using `rsync' or `scp'.")
 			  org-mobile-files)))
 	 (orgdir-uname (file-name-as-directory (file-truename org-directory)))
 	 (orgdir-re (concat "\\`" (regexp-quote orgdir-uname)))
-	 uname seen rtn)
+	 uname seen rtn file link-name)
     ;; Make the files unique, and determine the name under which they will
     ;; be listed.
     (while (setq file (pop files))
@@ -233,7 +233,7 @@ agenda view showing the flagged items."
 (defun org-mobile-create-index-file ()
   "Write the index file in the WebDAV directory."
   (let ((files-alist org-mobile-files-alist)
-	file todo-kwds done-kwds tags drawers entry)
+	file link-name todo-kwds done-kwds tags drawers entry)
     (org-prepare-agenda-buffers (mapcar 'car files-alist))
     (setq done-kwds (org-uniquify org-done-keywords-for-agenda))
     (setq todo-kwds (org-delete-all
@@ -373,7 +373,7 @@ The table of checksums is written to the file mobile-checksums."
 			(list (list file))))))
     (unless (file-writable-p file)
       (error "Cannot write to file %s" file))
-    (org-batch-store-agenda-views)))
+    (org-store-agenda-views)))
 
 (defun org-mobile-move-capture ()
   "Move the contents of the capture file to the inbox file.
