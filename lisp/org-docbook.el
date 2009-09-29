@@ -242,6 +242,11 @@ the variable to
   :group 'org-export-docbook
   :type 'string)
 
+;;; Hooks
+
+(defvar org-export-docbook-final-hook nil
+  "Hook run at the end of DocBook export, in the new buffer.")
+
 ;;; Autoload functions:
 
 ;;;###autoload
@@ -1123,6 +1128,7 @@ publishing directory."
       (goto-char (point-max))
       (unless body-only
 	(insert "</article>"))
+      (run-hooks 'org-export-docbook-final-hook)
       (or to-buffer (save-buffer))
       (goto-char (point-min))
       (or (org-export-push-to-kill-ring "DocBook")

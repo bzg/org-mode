@@ -6,9 +6,55 @@
 
 #+STARTUP: indent hidestars
 
-* Version 6.30
+* Version 6.31 (in preparation)
  :PROPERTIES:
  :VISIBILITY: content
+ :CUSTOM_ID: v6.31
+ :END:
+
+** New hook `org-export-latex-final-hook'.
+
+** Indented lines starting with "#+ " are treated as comments
+** New STARTUP keyword `showeverything'
+    
+This will make even drawer contents visible upon startup.
+Requested by Jeff Kowalczyk.
+
+** MobileOrg support
+
+Richard Morelands iPhone/iPod Touch program [[http://mobileorg.ncogni.to/][MobileOrg]] can view
+Org files, mark entries as DONE, flag entries for later
+attention, and capture new entries on the road.  Org-mode has now
+support to produce a staging area where MobileOrg can download
+its files, and to integrate changes done on the phone in a half
+automatic, half interactive way.  See the new appendix B in the
+manual for more information.
+
+** New contributed package org-invoice.el
+
+This package collects clocking information for billing
+customers.
+
+Thanks to Peter Jones for this contribution.
+
+** Encrypting subtrees
+
+/org-crypt.el/ by John Wiegley and Peter Jones allows encryption
+of individual subtrees in Org-mode outlines.  Thanks to John and
+Peter for this contribution.
+
+** Agenda: Support for including a link in the category string
+    
+The category (as specified by an #+CATEGORY line or CATEGORY
+property can contain a bracket link.  While this sort-of worked
+in the past, it now is officially supported and should cause no
+problems in agenda display or update.  The link can be followed
+by clicking on it, or with =C-c C-o 0=.
+
+This was a request by Peter Westlake.
+
+* Version 6.30
+ :PROPERTIES:
  :CUSTOM_ID: v6.30
  :END:
 

@@ -30,6 +30,9 @@
 
 ;;; XOXO export
 
+(defvar org-export-xoxo-final-hook nil
+  "Hook run after XOXO export, in the new buffer.")
+
 (defun org-export-as-xoxo-insert-into (buffer &rest output)
   (with-current-buffer buffer
     (apply 'insert output)))
@@ -112,6 +115,7 @@ The XOXO buffer is named *xoxo-<source buffer name>*"
       ;; Finish the buffer off and clean it up.
       (switch-to-buffer-other-window out)
       (indent-region (point-min) (point-max) nil)
+      (run-hooks 'org-export-xoxo-final-hook)
       (save-buffer)
       (goto-char (point-min))
       )))
