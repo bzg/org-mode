@@ -488,10 +488,11 @@ line.  If no result exists for this block then create a
                (progn (move-end-of-line 1)
 		      (if (eobp) (insert "\n") (forward-char 1))
 		      (setq end (point))
-                      (or (progn ;; either an unnamed #+resname: line already exists
-                            (re-search-forward "[^ \f\t\n\r\v]" nil t)
-                            (move-beginning-of-line 1) (looking-at "#\\+resname:"))
-                          ;; or (with optional insert) we need to back up and make one ourselves
+                      (or (and (not name)
+			       (progn ;; either the unnamed #+resname: line already exists
+				 (re-search-forward "[^ \f\t\n\r\v]" nil t)
+				 (move-beginning-of-line 1) (looking-at "#\\+resname:\n")))
+			  ;; or (with optional insert) we need to back up and make one ourselves
                           (when insert
                             (goto-char end) (open-line 2) (forward-char 1)
                             (insert (concat "#+resname:" (if name (concat " " name)) "\n"))
