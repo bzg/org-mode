@@ -1,5 +1,17 @@
 2009-09-29  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-xoxo.el (org-export-xoxo-final-hook): New hook.
+	(org-export-as-xoxo): Run the new hook.
+
+	* org-html.el (org-export-html-final-hook): New hook.
+	(org-export-as-html): Run the new hook.
+
+	* org-docbook.el (org-export-docbook-final-hook): New hook.
+	(org-export-as-docbook): Run the new hook.
+
+	* org-ascii.el (org-export-ascii-final-hook): New hook.
+	(org-export-as-ascii): Run the new hook.
+
 	* org-mobile.el (org-mobile-create-sumo-agenda): Call
 	`org-sore-agenda-views' instead of `org-batch-store-agenda-views'.
 
