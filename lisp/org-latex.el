@@ -410,6 +410,9 @@ These are the .aux, .log, .out, and .toc files."
 (defvar org-export-latex-after-blockquotes-hook nil
   "Hook run during LaTeX export, after blockquote, verse, center are done.")
 
+(defvar org-export-latex-final-hook nil
+  "Hook run in the finalized LaTeX buffer.")
+
 ;;; Autoload functions:
 
 ;;;###autoload
@@ -662,6 +665,7 @@ when PUB-DIR is set, use this as the publishing directory."
       (and (re-search-forward "\\[TABLE-OF-CONTENTS\\]" nil t)
 	   (replace-match "\\tableofcontents" t t)))
 
+    (run-hooks 'org-export-latex-final-hook)
     (or to-buffer (save-buffer))
     (goto-char (point-min))
     (or (org-export-push-to-kill-ring "LaTeX")

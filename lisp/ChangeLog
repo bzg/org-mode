@@ -2,6 +2,8 @@
 
 	* org-latex.el (org-export-latex-treat-sub-super-char): Allow a
 	space character as the character before the ^/_.
+	(org-export-latex-final-hook): New hook.
+	(org-export-as-latex): Run `org-export-latex-final-hook'.
 
 2009-09-28  Carsten Dominik  <carsten.dominik@gmail.com>
 
