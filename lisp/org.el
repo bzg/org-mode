@@ -9129,7 +9129,7 @@ This function can be used in a hook."
 (defconst org-additional-option-like-keywords
   '("BEGIN_HTML"  "END_HTML"  "HTML:" "ATTR_HTML"
     "BEGIN_DocBook"  "END_DocBook"  "DocBook:" "ATTR_DocBook"
-    "BEGIN_LaTeX" "END_LaTeX" "LaTeX:" "LATEX_HEADER:"  "ATTR_LaTeX"
+    "BEGIN_LaTeX" "END_LaTeX" "LaTeX:" "LATEX_HEADER:" "LATEX_CLASS:" "ATTR_LaTeX"
     "BEGIN:" "END:"
     "ORGTBL" "TBLFM:" "TBLNAME:"
     "BEGIN_EXAMPLE" "END_EXAMPLE"

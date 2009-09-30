@@ -1,3 +1,13 @@
+2009-09-30  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-latex.el (org-export-latex-set-initial-vars): Also check in
+	the plist.
+
+	* org.el (org-additional-option-like-keywords): Add LATEX_CLASS
+	keyword.
+
+	* org-exp.el (org-infile-export-plist): Add LATEX_CLASS keyword.
+
 2009-09-29  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-inlinetask.el (org-inlinetask-export): Option removed.

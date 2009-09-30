@@ -928,6 +928,7 @@ LEVEL indicates the default depth for export."
 		(goto-char (point-min))
 		(and (re-search-forward "^#\\+LaTeX_CLASS:[ \t]*\\([a-zA-Z]+\\)" nil t)
 		     (match-string 1))))
+	    (plist-get org-export-latex-options-plist :latex-class)
 	    org-export-latex-default-class)
 	org-export-latex-class
 	(or (car (assoc org-export-latex-class org-export-latex-classes))
