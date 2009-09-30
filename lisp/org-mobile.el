@@ -91,16 +91,21 @@ should point to this file."
 (defcustom org-mobile-action-alist
   '(("d" . (org-todo 'done))
     ("a" . (org-archive-subtree-default))
-    ("d-a" . (progn (org-todo 'done) (org-archive-subtree-default))))
+    ("d-a" . (progn (org-todo 'done) (org-archive-subtree-default)))
+    ("todo" . (org-todo data))
+    ("tags" . (org-set-tags-to data)))
   "Alist with flags and actions for mobile sync.
 When flagging an entry, MobileOrg will create entries that look like
 
-  * F(action)  [[id:entry-id][entry title]]
+  * F(action:data)  [[id:entry-id][entry title]]
 
-This alist defines that the action in the parentheses of F() should mean,
-i.e. what action should be taken.  The car of each elements of the alist
-is an actions string.  The cdr is an Emacs Lisp form that will be evaluated
-with the cursor on the headline of that entry."
+This alist defines that the ACTION in the parentheses of F() should mean,
+i.e. what action should be taken.  The :data part in the parenthesis is
+optional.  If present, the string after the colon will be passed to the
+action form as the `data' variable.
+The car of each elements of the alist is an actions string.  The cdr is
+an Emacs Lisp form that will be evaluated with the cursor on the headline
+of that entry."
   :group 'org-mobile
   :type '(repeat
 	  (cons (string :tag "Action flag")
@@ -413,14 +418,16 @@ If BEG and END are given, only do this in that region."
   (setq beg (or beg (point-min)) end (or end (point-max)))
   (goto-char beg)
   (let ((marker (make-marker))
+	(org-inhibit-logging 'note)
 	(end (move-marker (make-marker) end))
-	action id id-pos cmd text)
+	action data id id-pos cmd text)
     (while (re-search-forward
-	    "^\\*+[ \t]+F(\\([^()\n]*\\))[ \t]+\\[\\[id:\\([^]\n ]+\\)" end t)
+	    "^\\*+[ \t]+F(\\([^():\n]*\\)\\(:\\([^()\n]*\\)\\)?)[ \t]+\\[\\[id:\\([^]\n ]+\\)" end t)
       (goto-char (- (match-beginning 1) 2))
       (catch 'next
 	(setq action (match-string 1)
-	      id (match-string 2)
+	      data (and (match-end 3) (match-string 3))
+	      id (match-string 4)
 	      cmd (if (equal action "")
 		      '(progn
 			 (org-toggle-tag "FLAGGED" 'on)

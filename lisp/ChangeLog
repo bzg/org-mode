@@ -1,5 +1,11 @@
 2009-09-30  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-set-tags-to): New command.
+
+	* org-mobile.el (org-mobile-action-alist): Add more options and
+	update the docstring.
+	(org-mobile-apply-flags): Parse for and use the data.
+
 	* org-latex.el (org-export-latex-set-initial-vars): Also check in
 	the plist.
 
