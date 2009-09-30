@@ -155,6 +155,12 @@ last statement in BODY, as elisp."
 		 (mapconcat #'org-babel-chomp (list body org-babel-R-eoe-indicator) "\n"))))
 	     (raw (org-babel-comint-with-output buffer org-babel-R-eoe-output nil
                     (insert full-body) (inferior-ess-send-input)))
+	     (comint-prompt-regexp
+	      (concat "^\\("
+		      inferior-ess-primary-prompt
+		      "\\|"
+		      inferior-ess-secondary-prompt
+		      "\\)*"))
 	     broke results)
         (case result-type
           (value (org-babel-R-process-value-result
