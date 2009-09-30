@@ -11265,7 +11265,7 @@ If DATA is nil or the empty string, any tags will be removed."
 		  ":"))
 	 ((listp data)
 	  (concat ":" (mapconcat 'identity data ":") ":"))
-	 t nil))
+	 (t nil)))
   (when data
     (save-excursion
       (org-back-to-heading t)
