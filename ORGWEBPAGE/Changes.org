@@ -12,6 +12,52 @@
  :CUSTOM_ID: v6.31
  :END:
 
+** Org-babel is now part of the Org distribution
+
+Org-babel provides the ability to execute source code in many
+different languages within org-mode documents.  The results of
+code execution -- text, tables and graphics -- can be integrated
+into Org-mode documents and can be automatically updated during
+publishing.  Since Org-babel allows execution of arbitrary code,
+the range of tasks that can be addressed from within an Org mode
+file becomes very large.  Examples of ways in which Org-babel
+might be used include
+
+- Documenting a task that involves some programming so that it is
+  automatically repeatable
+- Creating dynamic (executable) reports that respond to changes
+  in the underlying data (Reproducible Research)
+- Exportation of code contained in an Org-mode document into
+  regular source code files (Literate Programming)
+
+Additionally, Org-babel provides a programming environment within
+Org files, in which data can be transmitted between parameterised
+source code blocks in different languages, as well as between
+source code blocks and Org-mode tables.
+
+A simple API is defined so that users can add support for new
+"languages" (broadly construed).  Languages currently supported
+are:
+
+- asymptote
+- css
+- ditaa
+- dot
+- emacs-lisp
+- gnuplot
+- haskell
+- ocaml
+- python
+- R
+- ruby
+- sass
+- sh
+- sql
+
+Org-babel was designed and implemented Eric Schulte with continued
+significant help on both accounts from Dan Davison.
+
+
 ** New hook `org-export-latex-final-hook'.
 
 ** Indented lines starting with "#+ " are treated as comments
