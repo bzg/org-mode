@@ -1554,8 +1554,8 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
        (cond ((and imgp (plist-get org-export-latex-options-plist :inline-images))
 	      (insert
 	       (concat
-		(if floatp "\\begin{figure}[htb]\n")
-		(format "\\centerline{\\includegraphics[%s]{%s}}\n"
+		(if floatp "\\begin{figure}[htb]\n\\centering\n")
+		(format "\\includegraphics[%s]{%s}\n"
 			attr
 			(if (file-name-absolute-p raw-path)
 			    (expand-file-name raw-path)
@@ -1564,7 +1564,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 		    (format "\\caption{%s%s}\n"
 			    (if label (concat "\\label{" label "}") "")
 			    (or caption "")))
-		(if floatp "\\end{figure}\n"))))
+		(if floatp "\\end{figure}"))))
 	     (coderefp
 	      (insert (format
 		       (org-export-get-coderef-format path desc)
