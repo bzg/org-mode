@@ -6,7 +6,7 @@
 
 #+STARTUP: indent hidestars
 
-* Version 6.31 (in preparation)
+* Version 6.31
  :PROPERTIES:
  :VISIBILITY: content
  :CUSTOM_ID: v6.31
@@ -57,15 +57,6 @@ are:
 Org-babel was designed and implemented Eric Schulte with continued
 significant help on both accounts from Dan Davison.
 
-
-** New hook `org-export-latex-final-hook'.
-
-** Indented lines starting with "#+ " are treated as comments
-** New STARTUP keyword `showeverything'
-    
-This will make even drawer contents visible upon startup.
-Requested by Jeff Kowalczyk.
-
 ** MobileOrg support
 
 Richard Morelands iPhone/iPod Touch program [[http://mobileorg.ncogni.to/][MobileOrg]] can view
@@ -75,6 +66,18 @@ support to produce a staging area where MobileOrg can download
 its files, and to integrate changes done on the phone in a half
 automatic, half interactive way.  See the new appendix B in the
 manual for more information.
+
+
+** Indented lines starting with "#+ " are treated as comments
+
+To allow comments in plain lists without breaking the list
+structure, you can now have indented comment lines that start
+with "#+ ".
+
+** New STARTUP keyword `showeverything'
+    
+This will make even drawer contents visible upon startup.
+Requested by Jeff Kowalczyk.
 
 ** New contributed package org-invoice.el
 
