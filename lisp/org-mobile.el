@@ -238,7 +238,10 @@ agenda view showing the flagged items."
 (defun org-mobile-create-index-file ()
   "Write the index file in the WebDAV directory."
   (let ((files-alist org-mobile-files-alist)
-	file link-name todo-kwds done-kwds tags drawers entry)
+	(def-todo (default-value 'org-todo-keywords))
+	(def-tags (default-value 'org-tag-alist))
+	file link-name todo-kwds done-kwds tags drawers entry dwds twds)
+    
     (org-prepare-agenda-buffers (mapcar 'car files-alist))
     (setq done-kwds (org-uniquify org-done-keywords-for-agenda))
     (setq todo-kwds (org-delete-all
@@ -256,10 +259,34 @@ agenda view showing the flagged items."
 		       org-tag-alist-for-agenda))))
     (with-temp-file
 	(expand-file-name org-mobile-index-file org-mobile-directory)
-      (insert "#+TODO: " (mapconcat 'identity todo-kwds " ") " | "
-	      (mapconcat 'identity done-kwds " ") "\n"
-	      "#+TAGS: " (mapconcat 'identity tags " ") "\n"
-	      "#+DRAWERS: " (mapconcat 'identity drawers " ") "\n")
+      (while (setq entry (pop def-todo))
+	(setq kwds (mapcar (lambda (x) (if (string-match "(" x)
+					   (substring x 0 (match-beginning 0))
+					 x))
+			   (cdr entry)))
+	(insert "#+TODO: " (mapconcat 'identity kwds " ") "\n")
+	(setq dwds (member "|" kwds)
+	      twds (org-delete-all dwds kwds)
+	      todo-kwds (org-delete-all twds todo-kwds)
+	      done-kwds (org-delete-all dwds done-kwds)))
+      (when (or todo-kwds done-kwds)
+	(insert "#+TODO: " (mapconcat 'identity todo-kwds " ") " | "
+		(mapconcat 'identity done-kwds " ") "\n"))
+      (setq def-tags (mapcar
+		      (lambda (x)
+			(cond ((null x) nil)
+			      ((stringp x) x)
+			      ((eq (car x) :startgroup) "{")
+			      ((eq (car x) :endgroup) "}")
+			      ((eq (car x) :newline) nil)
+			      ((listp x) (car x))
+			      (t nil)))
+		      def-tags))
+      (setq def-tags (delq nil def-tags))
+      (setq tags (org-delete-all def-tags tags))
+      (setq tags (append def-tags tags nil))
+      (insert "#+TAGS: " (mapconcat 'identity tags " ") "\n")
+      (insert "#+DRAWERS: " (mapconcat 'identity drawers " ") "\n")
       (insert "* [[file:agendas.org][Agenda Views]]\n")
       (while (setq entry (pop files-alist))
 	(setq file (car entry)

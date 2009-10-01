@@ -1,5 +1,8 @@
 2009-10-03  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-mobile.el (org-mobile-create-index-file): Improve the
+	listing of tags and todo keywords.
+
 	* org-latex.el (org-export-latex-format-image): New function.
 	(org-export-latex-links): Use `org-export-latex-format-image'.
 
