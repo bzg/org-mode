@@ -16074,7 +16074,7 @@ and :keyword."
 	(push (org-point-in-group p 2 :todo-keyword) clist)
 	(push (org-point-in-group p 4 :tags) clist))
       (goto-char p)
-      (skip-chars-backward "^[\n\r \t") (or (eobp) (backward-char 1))
+      (skip-chars-backward "^[\n\r \t") (or (bobp) (backward-char 1))
       (if (looking-at "\\[#[A-Z0-9]\\]")
 	  (push (org-point-in-group p 0 :priority) clist)))
 

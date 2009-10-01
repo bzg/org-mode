@@ -1,5 +1,7 @@
 2009-10-01  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-context): Call `bobp', not `eobp'.
+
 	* org-clock.el (org-clock-cancel): Remove quotes from marker
 	variables.
 
