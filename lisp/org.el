@@ -2188,20 +2188,29 @@ Custom commands can set this variable in the options section."
 (defcustom org-read-date-prefer-future t
   "Non-nil means, assume future for incomplete date input from user.
 This affects the following situations:
-1. The user gives a day, but no month.
+1. The user gives a month but not a year.
+   For example, if it is april and you enter \"feb 2\", this will be read
+   as feb 2, *next* year.  \"May 5\", however, will be this year.
+2. The user gives a day, but no month.
    For example, if today is the 15th, and you enter \"3\", Org-mode will
    read this as the third of *next* month.  However, if you enter \"17\",
    it will be considered as *this* month.
-2. The user gives a month but not a year.
-   For example, if it is april and you enter \"feb 2\", this will be read
-   as feb 2, *next* year.  \"May 5\", however, will be this year.
 
-Currently this does not work for ISO week specifications.
+If you set this variable to the symbol `time', then also the following
+will work:
 
-When this option is nil, the current month and year will always be used
-as defaults."
+3. If the user gives a time, but no day.  If the time is before now,
+   to will be interpreted as tomorrow.
+
+Currently none of this works for ISO week specifications.
+
+When this option is nil, the current day, month and year will always be
+used as defaults."
   :group 'org-time
-  :type 'boolean)
+  :type '(choice
+	  (const :tag "Never" nil)
+	  (const :tag "Check month and day" t)
+	  (const :tag "Check month, day, and time" time)))
 
 (defcustom org-read-date-display-live t
   "Non-nil means, display current interpretation of date prompt live.
@@ -12702,6 +12711,7 @@ user."
 (defvar def)
 (defvar defdecode)
 (defvar with-time)
+(defvar org-read-date-analyze-futurep nil)
 (defun org-read-date-display ()
   "Display the current date prompt interpretation in the minibuffer."
   (when org-read-date-display-live
@@ -12731,6 +12741,8 @@ user."
 	(setq txt (concat (substring txt 0 (match-end 0)) "-"
 			  org-end-time-was-given
 			  (substring txt (match-end 0)))))
+      (when org-read-date-analyze-futurep
+	(setq txt (concat txt " (=>F)")))
       (setq org-read-date-overlay
 	    (org-make-overlay (1- (point-at-eol)) (point-at-eol)))
       (org-overlay-display org-read-date-overlay txt 'secondary-selection))))
@@ -12740,8 +12752,8 @@ user."
   ;; FIXME: cleanup and comment
   (let (delta deltan deltaw deltadef year month day
 	      hour minute second wday pm h2 m2 tl wday1
-	      iso-year iso-weekday iso-week iso-year iso-date)
-
+	      iso-year iso-weekday iso-week iso-year iso-date futurep)
+    (setq org-read-date-analyze-futurep nil)
     (when (string-match "\\`[ \t]*\\.[ \t]*\\'" ans)
       (setq ans "+0"))
 
@@ -12814,22 +12826,36 @@ user."
 	  month (or (nth 4 tl)
 		    (if (and org-read-date-prefer-future
 			     (nth 3 tl) (< (nth 3 tl) (nth 3 defdecode)))
-			(1+ (nth 4 defdecode))
+			(prog (1+ (nth 4 defdecode)) (setq futurep t))
 		      (nth 4 defdecode)))
 	  year (or (nth 5 tl)
 		   (if (and org-read-date-prefer-future
 			    (nth 4 tl) (< (nth 4 tl) (nth 4 defdecode)))
-		       (1+ (nth 5 defdecode))
+		       (prog1 (1+ (nth 5 defdecode)) (setq futurep t))
 		     (nth 5 defdecode)))
 	  hour (or (nth 2 tl) (nth 2 defdecode))
 	  minute (or (nth 1 tl) (nth 1 defdecode))
 	  second (or (nth 0 tl) 0)
 	  wday (nth 6 tl))
 
+    (when (and (eq org-read-date-prefer-future 'time)
+	       (not (nth 3 tl)) (not (nth 4 tl)) (not (nth 5 tl))
+	       (equal day (nth 3 defdecode))
+	       (equal month (nth 4 defdecode))
+	       (equal year (nth 5 defdecode))
+	       (nth 2 tl)
+	       (or (< (nth 2 tl) (nth 2 defdecode))
+		   (and (= (nth 2 tl) (nth 2 defdecode))
+			(nth 1 tl)
+			(< (nth 1 tl) (nth 1 defdecode)))))
+      (setq day (1+ day)
+	    futurep t))
+
     ;; Special date definitions below
     (cond
      (iso-week
       ;; There was an iso week
+      (setq futurep nil)
       (setq year (or iso-year year)
 	    day (or iso-weekday wday 1)
 	    wday nil ; to make sure that the trigger below does not match
@@ -12849,6 +12875,7 @@ user."
 	    year (nth 2 iso-date)
 	    day (nth 1 iso-date)))
      (deltan
+      (setq futurep nil)
       (unless deltadef
 	(let ((now (decode-time (current-time))))
 	  (setq day (nth 3 now) month (nth 4 now) year (nth 5 now))))
@@ -12857,6 +12884,7 @@ user."
 	    ((equal deltaw "m") (setq month (+ month deltan)))
 	    ((equal deltaw "y") (setq year (+ year deltan)))))
      ((and wday (not (nth 3 tl)))
+      (setq futurep nil)
       ;; Weekday was given, but no day, so pick that day in the week
       ;; on or after the derived date.
       (setq wday1 (nth 6 (decode-time (encode-time 0 0 0 day month year))))
@@ -12867,6 +12895,7 @@ user."
 	(setq org-time-was-given t))
     (if (< year 100) (setq year (+ 2000 year)))
     (if (< year 1970) (setq year (nth 5 defdecode))) ; not representable
+    (setq org-read-date-analyze-futurep futurep)
     (list second minute hour day month year)))
 
 (defvar parse-time-weekdays)

@@ -5019,7 +5019,10 @@ range, it is taken from the stamp in the buffer.  When filling in
 information, Org mode assumes that most of the time you will want to enter a
 date in the future: if you omit the month/year and the given day/month is
 @i{before} today, it will assume that you mean a future date@footnote{See the
-variable @code{org-read-date-prefer-future}.}.
+variable @code{org-read-date-prefer-future}.  You may set that variable to
+the symbol @code{time} to even make a time before now shift the date to
+tomorrow.}.  If the date has been automatically shifted into the future, the
+time prompt will show this with @samp{(=>F).}
 
 For example, let's assume that today is @b{June 13, 2006}.  Here is how
 various inputs will be interpreted, the items filled in by Org mode are
