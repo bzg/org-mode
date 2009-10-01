@@ -1,5 +1,8 @@
 2009-10-01  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-clock.el (org-clock-cancel): Remove quotes from marker
+	variables.
+
 	* org.el (org-read-date-prefer-future): New allowed value `time'.
 	(org-read-date-analyze): Shift day to tomorrow depending on time
 	entered and value of `org-read-date-prefer-future'.

@@ -818,8 +818,8 @@ If there is no running clock, throw an error, unless FAIL-QUIETLY is set."
     (set-buffer (marker-buffer org-clock-marker))
     (goto-char org-clock-marker)
     (delete-region (1- (point-at-bol)) (point-at-eol)))
-  (move-marker 'org-clock-marker nil)
-  (move-marker 'org-clock-hd-marker nil)
+  (move-marker org-clock-marker nil)
+  (move-marker org-clock-hd-marker nil)
   (setq global-mode-string
 	(delq 'org-mode-line-string global-mode-string))
   (force-mode-line-update)
