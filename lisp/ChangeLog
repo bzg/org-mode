@@ -1,5 +1,8 @@
 2009-10-02  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp.el (org-export-select-backend-specific-text): Remove the
+	region markers.
+
 	* org-inlinetask.el (org-inlinetask-export-handler): fix bug for
 	tasks without content.
 

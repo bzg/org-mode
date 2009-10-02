@@ -1728,7 +1728,12 @@ from the buffer."
 	  (setq end (match-end 0) end-content (match-beginning 0))
 	  (if (eq (car fmt) backend)
 	      ;; yes, keep this
-	      (add-text-properties beg-content end-content '(org-protected t))
+	      (progn
+		(add-text-properties beg-content end-content '(org-protected t))
+		(delete-region (match-beginning 0) (match-end 0))
+		(save-excursion
+		  (goto-char beg)
+		  (delete-region (point) (1+ (point-at-eol)))))
 	    ;; No, this is for a different backend, kill it
 	    (delete-region beg end)))))))
 
