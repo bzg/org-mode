@@ -524,7 +524,11 @@ the clocking selection, associated with the letter `d'."
 	;; Mark as default clocking task
 	(org-clock-mark-default-task))
 
-      (setq target-pos (point))  ;; we want to clock in at this location
+      ;; Clock in at which position?
+      (setq target-pos
+	    (if (and (eobp) (not (org-on-heading-p)))
+		(point-at-bol 0)
+	      (point)))
       (run-hooks 'org-clock-in-prepare-hook)
       (save-excursion
 	(when (and selected-task (marker-buffer selected-task))
@@ -535,6 +539,7 @@ the clocking selection, associated with the letter `d'."
 	  (move-marker selected-task nil))
 	(save-excursion
 	  (save-restriction
+	    (if (and 
 	    (widen)
 	    (goto-char target-pos)
 	    (org-back-to-heading t)
