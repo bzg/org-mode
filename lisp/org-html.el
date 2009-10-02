@@ -1505,17 +1505,22 @@ lang=\"%s\" xml:lang=\"%s\">
       (let* ((caption (org-find-text-property-in-string 'org-caption src))
 	     (attr (org-find-text-property-in-string 'org-attributes src))
 	     (label (org-find-text-property-in-string 'org-label src)))
-	(format "%s<div %sclass=\"figure\">
-<p><img src=\"%s\"%s /></p>%s
-</div>%s"
-		(if org-par-open "</p>\n" "")
-		(if label (format "id=\"%s\" " label) "")
+	(concat
+	(if caption
+	    (format "%s<div %sclass=\"figure\">
+<p>"
+		    (if org-par-open "</p>\n" "")
+		    (if label (format "id=\"%s\" " label) "")))
+	(format "<img src=\"%s\"%s />"
 		src
 		(if (string-match "\\<alt=" (or attr ""))
 		    (concat " " attr )
-		  (concat " " attr " alt=\"" src "\""))
-		(if caption (concat "\n<p>" caption "</p>") "")
-		(if org-par-open "\n<p>" ""))))))
+		  (concat " " attr " alt=\"" src "\"")))
+	(if caption
+	    (format "</p>%s
+</div>%s"
+		(concat "\n<p>" caption "</p>")
+		(if org-par-open "\n<p>" ""))))))))
 
 (defun org-export-html-get-bibliography ()
   "Find bibliography, cut it out and return it."

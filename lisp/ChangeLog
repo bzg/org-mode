@@ -1,5 +1,8 @@
 2009-10-02  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-html.el (org-export-html-format-image): Wrap image into
+	figure div only when there is a caption.
+
 	* org-archive.el (org-archive-mark-done): Change default value to
 	nil.
 
