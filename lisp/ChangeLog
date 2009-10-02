@@ -1,5 +1,8 @@
 2009-10-02  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-inlinetask.el (org-inlinetask-export-handler): fix bug for
+	tasks without content.
+
 	* org-clock.el: Make sure the clock-in target position does not
 	move to a different node by widening the buffer.
 
