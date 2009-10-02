@@ -1,5 +1,9 @@
 2009-10-02  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-inlinetask.el (org-inlinetask-get-current-indentation)
+	(org-inlinetask-remove-terminator): New functions.
+	(org-inlinetask-export-handler): Terminate the description list.
+
 	* org-exp.el (org-export-select-backend-specific-text): Remove the
 	region markers.
 

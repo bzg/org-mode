@@ -151,13 +151,29 @@ Either remove headline and meta data, or do special formatting."
 		(setq content (substring content 0 (match-beginning 0))))
 	    (setq content (org-remove-indentation content))
 	    (if latexp (setq content (concat "\\quad \\\\\n" content)))))
-	(insert "- ")
+	(insert (make-string (org-inlinetask-get-current-indentation) ?\ )
+		"- ")
 	(setq indent (make-string (current-column) ?\ ))
 	(insert headline " ::")
-	(when content
-	  (insert (if htmlp " " (concat "\n" indent))
-		  (mapconcat 'identity (org-split-string content "\n")
-			     (concat "\n" indent)) "\n"))))))
+	(if content
+	    (insert (if htmlp " " (concat "\n" indent))
+		    (mapconcat 'identity (org-split-string content "\n")
+			       (concat "\n" indent)) "\n")
+	  (insert "\n"))
+	(insert indent)
+	(backward-delete-char 2)
+	(insert "THISISTHEINLINELISTTEMINATOR\n")))))
+
+(defun org-inlinetask-get-current-indentation ()
+  "Get the indentation of the last non-while line above this one."
+  (save-excursion
+    (beginning-of-line 1)
+    (skip-chars-backward " \t\n")
+    (beginning-of-line 1)
+    (or (org-at-item-p)
+	(looking-at "[ \t]*"))
+    (goto-char (match-end 0))
+    (current-column)))
 
 (defun org-inlinetask-fontify (limit)
   "Fontify the inline tasks."
@@ -181,11 +197,31 @@ Either remove headline and meta data, or do special formatting."
 			    org-inlinetask-min-level))
     (replace-match "")))
 
+(defun org-inlinetask-remove-terminator ()
+  (let (beg end)
+    (save-excursion
+      (goto-char (point-min))
+      (while (re-search-forward "THISISTHEINLINELISTTEMINATOR\n" nil t)
+	(setq beg (match-beginning 0) end (match-end 0))
+	(save-excursion
+	  (beginning-of-line 1)
+	  (and (looking-at "<p\\(ara\\)?>THISISTHEINLINELISTTEMINATOR[ \t\n]*</p\\(ara\\)?>")
+	       (setq beg (point) end (match-end 0))))
+	(delete-region beg end)))))
+
 (eval-after-load "org-exp"
   '(add-hook 'org-export-preprocess-after-tree-selection-hook
 	     'org-inlinetask-export-handler))
 (eval-after-load "org"
   '(add-hook 'org-font-lock-hook 'org-inlinetask-fontify))
+(eval-after-load "org-html"
+  '(add-hook 'org-export-html-final-hook 'org-inlinetask-remove-terminator))
+(eval-after-load "org-latex"
+  '(add-hook 'org-export-latex-final-hook 'org-inlinetask-remove-terminator))
+(eval-after-load "org-ascii"
+  '(add-hook 'org-export-ascii-final-hook 'org-inlinetask-remove-terminator))
+(eval-after-load "org-docbook"
+  '(add-hook 'org-export-docbook-final-hook 'org-inlinetask-remove-terminator))
 
 (provide 'org-inlinetask)
 
