@@ -1,3 +1,8 @@
+2009-10-02  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-archive.el (org-archive-mark-done): Change default value to
+	nil.
+
 2009-10-01  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-context): Call `bobp', not `eobp'.

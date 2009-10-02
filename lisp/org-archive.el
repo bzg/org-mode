@@ -50,7 +50,7 @@ See `org-archive-to-archive-sibling' for more information."
   :group 'org-archive
   :type 'string)
 
-(defcustom org-archive-mark-done t
+(defcustom org-archive-mark-done nil
   "Non-nil means, mark entries as DONE when they are moved to the archive file.
 This can be a string to set the keyword to use.  When t, Org-mode will
 use the first keyword in its list that means done."
