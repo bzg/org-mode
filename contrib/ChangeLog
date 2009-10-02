@@ -1,3 +1,10 @@
+2009-10-02  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* lisp/org-special-blocks.el (org-special-blocks-ignore-regexp):
+	New variable.
+	(org-special-blocks-make-special-cookies): Use
+	`org-special-blocks-ignore-regexp'.
+
 2009-09-16  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* lisp/org-invoice.el: New file.

@@ -40,17 +40,23 @@
 ;; user to add this class to his or her stylesheet if this div is to
 ;; mean anything.
 
+(defvar org-special-blocks-ignore-regexp "^\\(LaTeX\\|HTML\\)$"
+  "A regexp indicating the names of blocks that should be ignored
+by org-special-blocks.  These blocks will presumably be
+interpreted by other mechanisms.")
+
 (defun org-special-blocks-make-special-cookies ()
   "Adds special cookies when #+begin_foo and #+end_foo tokens are
 seen.  This is run after a few special cases are taken care of."
   (when (or htmlp latexp)
     (goto-char (point-min))
     (while (re-search-forward "^#\\+\\(begin\\|end\\)_\\(.*\\)$" nil t)
-      (replace-match
-       (if (equal (downcase (match-string 1)) "begin")
-	   (concat "ORG-" (match-string 2) "-START")
-	 (concat "ORG-" (match-string 2) "-END"))
-       t t))))
+      (unless (string-match-p org-special-blocks-ignore-regexp (match-string 2))
+	(replace-match
+	 (if (equal (downcase (match-string 1)) "begin")
+	     (concat "ORG-" (match-string 2) "-START")
+	   (concat "ORG-" (match-string 2) "-END"))
+	 t t)))))
 
 (add-hook 'org-export-preprocess-after-blockquote-hook
 	  'org-special-blocks-make-special-cookies)
