@@ -183,7 +183,7 @@ current  Only the time in the current instance of the clock
 today    All time clocked inot this task today
 repeat   All time clocked into this task since last repeat
 all      All time ever recorded for this task
-auto     Automtically, either `all', or `repeat' for repeating tasks"
+auto     Automatically, either `all', or `repeat' for repeating tasks"
   :group 'org-clock
   :type '(choice
 	  (const :tag "Current clock" current)
