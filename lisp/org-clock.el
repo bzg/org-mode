@@ -519,11 +519,11 @@ the clocking selection, associated with the letter `d'."
 		     (marker-position org-clock-marker)
 		     (marker-buffer org-clock-marker))
 	(org-clock-out t))
-
+      
       (when (equal select '(16))
 	;; Mark as default clocking task
 	(org-clock-mark-default-task))
-
+      
       ;; Clock in at which position?
       (setq target-pos
 	    (if (and (eobp) (not (org-on-heading-p)))
@@ -539,7 +539,6 @@ the clocking selection, associated with the letter `d'."
 	  (move-marker selected-task nil))
 	(save-excursion
 	  (save-restriction
-	    (if (and 
 	    (widen)
 	    (goto-char target-pos)
 	    (org-back-to-heading t)
@@ -1570,3 +1569,4 @@ The details of what will be saved are regulated by the variable
 ;; arch-tag: 7b42c5d4-9b36-48be-97c0-66a869daed4c
 
 ;;; org-clock.el ends here
+)
