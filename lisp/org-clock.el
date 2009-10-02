@@ -1569,4 +1569,3 @@ The details of what will be saved are regulated by the variable
 ;; arch-tag: 7b42c5d4-9b36-48be-97c0-66a869daed4c
 
 ;;; org-clock.el ends here
-)
