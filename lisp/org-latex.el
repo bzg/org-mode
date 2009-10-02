@@ -94,6 +94,8 @@
 \\usepackage[T1]{fontenc}
 \\usepackage{graphicx}
 \\usepackage{longtable}
+\\usepackage{float}
+\\usepackage{wrapfig}
 \\usepackage{soul}
 \\usepackage{hyperref}"
      ("\\section{%s}" . "\\section*{%s}")
@@ -107,6 +109,8 @@
 \\usepackage[T1]{fontenc}
 \\usepackage{graphicx}
 \\usepackage{longtable}
+\\usepackage{float}
+\\usepackage{wrapfig}
 \\usepackage{soul}
 \\usepackage{hyperref}"
      ("\\part{%s}" . "\\part*{%s}")
@@ -120,6 +124,8 @@
 \\usepackage[T1]{fontenc}
 \\usepackage{graphicx}
 \\usepackage{longtable}
+\\usepackage{float}
+\\usepackage{wrapfig}
 \\usepackage{soul}
 \\usepackage{hyperref}"
      ("\\part{%s}" . "\\part*{%s}")
@@ -1522,7 +1528,6 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 	    (attr (or (org-find-text-property-in-string 'org-attributes raw-path)
 		      (plist-get org-export-latex-options-plist :latex-image-options)))
 	    (label (org-find-text-property-in-string 'org-label raw-path))
-	    (floatp (or label caption))
 	    imgp radiop
 	    ;; define the path of the link
 	    (path (cond
@@ -1552,20 +1557,11 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 				       raw-path))))))))
        ;; process with link inserting
        (apply 'delete-region remove)
-       (cond ((and imgp (plist-get org-export-latex-options-plist :inline-images))
+       (cond ((and imgp
+		   (plist-get org-export-latex-options-plist :inline-images))
+	      ;; OK, we need to inline an image
 	      (insert
-	       (concat
-		(if floatp "\\begin{figure}[htb]\n\\centering\n")
-		(format "\\includegraphics[%s]{%s}\n"
-			attr
-			(if (file-name-absolute-p raw-path)
-			    (expand-file-name raw-path)
-			  raw-path))
-		(if floatp
-		    (format "\\caption{%s%s}\n"
-			    (if label (concat "\\label{" label "}") "")
-			    (or caption "")))
-		(if floatp "\\end{figure}"))))
+	       (org-export-latex-format-image raw-path caption label attr)))
 	     (coderefp
 	      (insert (format
 		       (org-export-get-coderef-format path desc)
@@ -1586,6 +1582,61 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 		      desc (org-export-latex-protect-amp desc)))
 	      (insert (format "\\href{%s}{%s}" path desc)))
 	     (t (insert "\\texttt{" desc "}")))))))
+
+
+(defun org-export-latex-format-image (path caption label attr)
+  "Format the image element, depending on user settings."
+  (let (floatp wrapp placement figenv)
+    (setq floatp (or caption label))
+    (when (and attr (stringp attr))
+      (if (string-match "[ \t]*\\<wrap\\>" attr)
+	  (setq wrapp t floatp nil attr (replace-match "" t t attr)))
+      (if (string-match "[ \t]*\\<float\\>" attr)
+	  (setq wrapp nil floatp t attr (replace-match "" t t attr))))
+    
+    (setq placement
+	  (cond
+	   (wrapp "{l}{0.5\\textwidth}")
+	   (floatp "[htb]")
+	   (t "")))
+
+    (when (and attr (stringp attr)
+	       (string-match "[ \t]*\\<placement=\\(\\S-+\\)" attr))
+      (setq placement (match-string 1 attr)
+	    attr (replace-match "" t t attr)))
+    (setq attr (and attr (org-trim attr)))
+    (when (or (not attr) (= (length attr) 0))
+      (setq attr (cond (floatp "width=0.7\\textwidth")
+		       (wrapp "width=0.48\\textwidth")
+		       (t attr))))
+    (setq figenv
+	  (cond
+	   (wrapp "\\begin{wrapfigure}%placement
+\\centering
+\\includegraphics[%attr]{%path}
+\\caption{%labelcmd%caption}
+\\end{wrapfigure}")
+	   (floatp "\\begin{figure}%placement
+\\centering
+\\includegraphics[%attr]{%path}
+\\caption{%labelcmd%caption}
+\\end{figure}")
+	   (t "\\includegraphics[%attr]{%path}")))
+
+    (if (and (not label) (not caption)
+	     (string-match "^\\\\caption{.*\n" figenv))
+	(setq figenv (replace-match "" t t figenv)))
+    (org-fill-template
+     figenv
+     (list (cons "path"
+		 (if (file-name-absolute-p path)
+		     (expand-file-name path)
+		   path))
+	   (cons "attr" attr)
+	   (cons "labelcmd" (if label (format "\\label{%s}"
+					      label)""))
+	   (cons "caption" (or caption ""))
+	   (cons "placement" (or placement ""))))))
 
 (defun org-export-latex-protect-amp (s)
   (while (string-match "\\([^\\\\]\\)\\(&\\)" s)

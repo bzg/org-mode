@@ -1,3 +1,8 @@
+2009-10-03  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-latex.el (org-export-latex-format-image): New function.
+	(org-export-latex-links): Use `org-export-latex-format-image'.
+
 2009-10-02  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-inlinetask.el (org-inlinetask-get-current-indentation)

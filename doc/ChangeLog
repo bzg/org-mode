@@ -1,3 +1,13 @@
+2009-10-03  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Links in HTML export, Images in HTML export): Extend
+	the section titles.
+	(Images in HTML export): Document the align option.
+	(Text areas in HTML export): Extend the section title.
+	(Images in LaTeX export): Explain image placement in LaTeX.
+
+	* org.texi: Removed @Ie, @ie, @Eg, @eg macros.
+
 2009-09-28  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Pushing to MobileOrg): Document `org-mobile-files'.
