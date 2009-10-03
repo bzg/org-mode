@@ -1,3 +1,8 @@
+2009-10-04  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Cap): New chapter.
+	(Markup): New chapter.
+
 2009-10-03  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Links in HTML export, Images in HTML export): Extend

@@ -22,17 +22,18 @@ $contents = <<EOF;
 <li><a name="toc_Tags" href="Tags.html#Tags">6 Tags</a>
 <li><a name="toc_Properties-and-Columns" href="Properties-and-Columns.html#Properties-and-Columns">7 Properties and Columns</a>
 <li><a name="toc_Dates-and-Times" href="Dates-and-Times.html#Dates-and-Times">8 Dates and Times</a>
-<li><a name="toc_Capture" href="Capture.html#Capture">9 Capture</a>
+<li><a name="toc_Capture" href="Capture-_002d-Refile-_002d-Archive.html#Capture-_002d-Refile-_002d-Archive">9 Capture-Refile-Archive</a>
 <li><a name="toc_Agenda-Views" href="Agenda-Views.html#Agenda-Views">10 Agenda Views</a>
-<li><a name="toc_Embedded-LaTeX" href="Embedded-LaTeX.html#Embedded-LaTeX">11 Embedded LaTeX</a>
+<li><a name="toc_Markup" href="Markup.html#Markup">11 Markup</a>
 <li><a name="toc_Exporting" href="Exporting.html#Exporting">12 Exporting</a>
 <li><a name="toc_Publishing" href="Publishing.html#Publishing">13 Publishing</a>
 <li><a name="toc_Miscellaneous" href="Miscellaneous.html#Miscellaneous">14 Miscellaneous</a>
 <li><a name="toc_Hacking" href="Hacking.html#Hacking">A Hacking</a>
 <li><a name="toc_MobileOrg" href="MobileOrg.html#MobileOrg">B MobileOrg</a>
-<li><a name="toc_History-and-Acknowledgments" href="History-and-Acknowledgments.html#History-and-Acknowledgments">C History and Acknowledgments</a>
+<li><a name="toc_History-and-Acknowledgments" href="History-and-Acknowledgments.html#History-and-Acknowledgments">C History and Thanks</a>
 <li><a name="toc_Main-Index" href="Main-Index.html#Main-Index">Main Index</a>
 <li><a name="toc_Key-Index" href="Key-Index.html#Key-Index">Key Index</a>
+<li><a name="toc_Variable-Index" href="Variable-Index.html#Variable-Index">Variable Index</a>
 </li></ul>
 </div>
 </div>

@@ -102,9 +102,9 @@ license to the document, as described in section 6 of the license.
 * Tags::                        Tagging headlines and matching sets of tags
 * Properties and Columns::      Storing information about an entry
 * Dates and Times::             Making items useful for planning
-* Capture::                     Creating tasks and attaching files
+* Capture - Refile - Archive::  The ins and outs for projects
 * Agenda Views::                Collecting information into views
-* Embedded LaTeX::              LaTeX fragments and formulas
+* Markup::                      Prepare text for rich export
 * Exporting::                   Sharing and publishing of notes
 * Publishing::                  Create a web site of linked Org files
 * Miscellaneous::               All the rest which did not fit elsewhere
@@ -133,18 +133,12 @@ Document Structure
 * Visibility cycling::          Show and hide, much simplified
 * Motion::                      Jumping to other headlines
 * Structure editing::           Changing sequence and level of headlines
-* Archiving::                   Move done task trees to a different place
 * Sparse trees::                Matches embedded in context
 * Plain lists::                 Additional structure within an entry
 * Drawers::                     Tucking stuff away
 * Blocks::                      Folding blocks
 * Footnotes::                   How footnotes are defined in Org's syntax
 * Orgstruct mode::              Structure editing outside Org
-
-Archiving
-
-* ARCHIVE tag::                 Marking a tree as inactive
-* Moving subtrees::             Moving a tree to an archive file
 
 Tables
 
@@ -250,19 +244,25 @@ Deadlines and scheduling
 * Inserting deadline/schedule::  Planning items
 * Repeated tasks::              Items that show up again and again
 
-Capture
+Capture - Refile - Archive
 
 * Remember::                    Capture new tasks/ideas with little interruption
 * Attachments::                 Add files to tasks.
 * RSS Feeds::                   Getting input from RSS feeds
 * Protocols::                   External (e.g. Browser) access to Emacs and Org
+* Refiling notes::              Moving a tree from one place to another
+* Archiving::                   What to do with finished projects
 
 Remember
 
 * Setting up Remember for Org::  Some code for .emacs to get things going
 * Remember templates::          Define the outline of different note types
 * Storing notes::               Directly get the note to where it belongs
-* Refiling notes::              Moving a note or task to a project
+
+Archiving
+
+* Moving subtrees::             Moving a tree to an archive file
+* Internal archiving::          Switch off a tree but keep i in the file
 
 Agenda Views
 
@@ -296,17 +296,38 @@ Custom agenda views
 * Block agenda::                All the stuff you need in a single buffer
 * Setting Options::             Changing the rules
 
+Markup for rich export
+
+* Structural markup elements::  The basic structure as seen by the exporter
+* Images and tables::           Tables and Images will be included
+* Literal examples::            Source code examples with special formatting
+* Include files::               Include additional files into a document
+* Macro replacement::           Use macros to create complex output
+* Embedded LaTeX::              LaTeX can be freely used inside Org documents
+
+Structural markup elements
+
+* Document title::              Where the title is taken from
+* Headings and sections::       The document structure as seen by the exporter
+* Table of contents::           The if and where of the table of contents
+* Initial text::                Text before the first heading?
+* Lists::                       Lists
+* Paragraphs::                  Paragraphs
+* Footnote markup::             Footnotes
+* Emphasis and monospace::      Bold, italic, etc.
+* Horizontal rules::            Make a line
+* Comment lines::               What will *not* be exported
+
 Embedded La@TeX{}
 
-* Math symbols::                @TeX{} macros for symbols and Greek letters
+* Special symbols::             Greek letters and other symbols
 * Subscripts and superscripts::  Simple syntax for raising/lowering text
 * LaTeX fragments::             Complex formulas made easy
-* Processing LaTeX fragments::  Previewing La@TeX{} processing
+* Previewing LaTeX fragments::  What will this snippet look like?
 * CDLaTeX mode::                Speed up entering of formulas
 
 Exporting
 
-* Markup rules::                Which structures are recognized?
 * Selective export::            Using tags to select and exclude trees
 * Export options::              Per-file export settings
 * The export dispatcher::       How to access exporter commands
@@ -317,30 +338,11 @@ Exporting
 * XOXO export::                 Exporting to XOXO
 * iCalendar export::            Exporting in iCalendar format
 
-Markup rules
-
-* Document title::              How the document title is determined
-* Headings and sections::       The main structure of the exported document
-* Table of contents::           If, where, how to create a table of contents
-* Initial text::                Text before the first headline
-* Lists::                       Plain lists are exported
-* Paragraphs::                  What determines beginning and ending
-* Literal examples::            Source code and other examples
-* Include files::               Include the contents of a file during export
-* Tables exported::             Tables are exported richly
-* Inlined images::              How to inline images during export
-* Footnote markup::             ASCII representation of footnotes
-* Emphasis and monospace::      To bold or not to bold
-* TeX macros and LaTeX fragments::  Create special, rich export.
-* Horizontal rules::            A line across the page
-* Comment lines::               Some lines will not be exported
-* Macro replacement::           Global replacement of place holders
-
 HTML export
 
 * HTML Export commands::        How to invoke HTML export
 * Quoting HTML tags::           Using direct HTML in Org mode
-* Links::                       Transformation of links for HTML
+* Links in HTML export::        How links will be interpreted and formatted
 * Tables in HTML export::       How to modify the formatting of tables
 * Images in HTML export::       How to insert figures into HTML output
 * Text areas in HTML export::   An alternative way to show an example
@@ -750,7 +752,6 @@ edit the structure of the document.
 * Visibility cycling::          Show and hide, much simplified
 * Motion::                      Jumping to other headlines
 * Structure editing::           Changing sequence and level of headlines
-* Archiving::                   Move done task trees to a different place
 * Sparse trees::                Matches embedded in context
 * Plain lists::                 Additional structure within an entry
 * Drawers::                     Tucking stuff away
@@ -969,7 +970,7 @@ q            @r{Quit}
 See also the variable @code{org-goto-interface}.
 @end table
 
-@node Structure editing, Archiving, Motion, Document Structure
+@node Structure editing, Sparse trees, Motion, Document Structure
 @section Structure editing
 @cindex structure editing
 @cindex headline, promotion and demotion
@@ -1111,145 +1112,8 @@ just after the last headline to change.  Note that when the cursor is
 inside a table (@pxref{Tables}), the Meta-Cursor keys have different
 functionality.
 
-@node Archiving, Sparse trees, Structure editing, Document Structure
-@section Archiving
-@cindex archiving
 
-When a project represented by a (sub)tree is finished, you may want
-to move the tree out of the way and to stop it from contributing to the
-agenda.  Org mode knows two ways of archiving.  You can mark a tree with
-the ARCHIVE tag, or you can move an entire (sub)tree to a different
-location.
-
-@menu
-* ARCHIVE tag::                 Marking a tree as inactive
-* Moving subtrees::             Moving a tree to an archive file
-@end menu
-
-@node ARCHIVE tag, Moving subtrees, Archiving, Archiving
-@subsection The ARCHIVE tag
-@cindex internal archiving
-
-A headline that is marked with the ARCHIVE tag (@pxref{Tags}) stays at
-its location in the outline tree, but behaves in the following way:
-@itemize @minus
-@item
-@vindex org-cycle-open-archived-trees
-It does not open when you attempt to do so with a visibility cycling
-command (@pxref{Visibility cycling}).  You can force cycling archived
-subtrees with @kbd{C-@key{TAB}}, or by setting the option
-@code{org-cycle-open-archived-trees}.  Also normal outline commands like
-@code{show-all} will open archived subtrees.
-@item
-@vindex org-sparse-tree-open-archived-trees
-During sparse tree construction (@pxref{Sparse trees}), matches in
-archived subtrees are not exposed, unless you configure the option
-@code{org-sparse-tree-open-archived-trees}.
-@item
-@vindex org-agenda-skip-archived-trees
-During agenda view construction (@pxref{Agenda Views}), the content of
-archived trees is ignored unless you configure the option
-@code{org-agenda-skip-archived-trees}, in which case these trees will always
-be included.  In the agenda you can press the @kbd{v} key to get archives
-temporarily included.
-@item
-@vindex org-export-with-archived-trees
-Archived trees are not exported (@pxref{Exporting}), only the headline
-is.  Configure the details using the variable
-@code{org-export-with-archived-trees}.
-@item
-@vindex org-columns-skip-arrchived-trees
-Archived trees are excluded from column view unless the variable
-@code{org-columns-skip-arrchived-trees} is configured to @code{nil}.
-@end itemize
-
-The following commands help managing the ARCHIVE tag:
-
-@table @kbd
-@kindex C-c C-x a
-@item C-c C-x a
-Toggle the ARCHIVE tag for the current headline.  When the tag is set,
-the headline changes to a shadowed face, and the subtree below it is
-hidden.
-@kindex C-u C-c C-x a
-@item C-u C-c C-x a
-Check if any direct children of the current headline should be archived.
-To do this, each subtree is checked for open TODO entries.  If none are
-found, the command offers to set the ARCHIVE tag for the child.  If the
-cursor is @emph{not} on a headline when this command is invoked, the
-level 1 trees will be checked.
-@kindex C-@kbd{TAB}
-@item C-@kbd{TAB}
-Cycle a tree even if it is tagged with ARCHIVE.
-@end table
-
-@node Moving subtrees,  , ARCHIVE tag, Archiving
-@subsection Moving subtrees
-@cindex external archiving
-
-Once an entire project is finished, you may want to move it to a different
-location.  Org can move it to an @emph{Archive Sibling} in the same tree, to a
-different tree in the current file, or to a different file, the archive file.
-
-@table @kbd
-@kindex C-c C-x A
-@item C-c C-x A
-Move the current entry to the @emph{Archive Sibling}.  This is a sibling of
-the entry with the heading @samp{Archive} and the tag @samp{ARCHIVE}
-(@pxref{ARCHIVE tag}).  The entry becomes a child of that sibling and in this
-way retains a lot of its original context, including inherited tags and
-approximate position in the outline.
-@kindex C-c $
-@kindex C-c C-x C-s
-@itemx C-c $
-@item C-c C-x C-s
-@vindex org-archive-location
-Archive the subtree starting at the cursor position to the location
-given by @code{org-archive-location}.  Context information that could be
-lost, like the file name, the category, inherited tags, and the TODO
-state will be stored as properties in the entry.
-@kindex C-u C-c C-x C-s
-@item C-u C-c C-x C-s
-Check if any direct children of the current headline could be moved to
-the archive.  To do this, each subtree is checked for open TODO entries.
-If none are found, the command offers to move it to the archive
-location.  If the cursor is @emph{not} on a headline when this command
-is invoked, the level 1 trees will be checked.
-@end table
-
-@cindex archive locations
-The default archive location is a file in the same directory as the
-current file, with the name derived by appending @file{_archive} to the
-current file name.  For information and examples on how to change this,
-see the documentation string of the variable
-@code{org-archive-location}.  There is also an in-buffer option for
-setting this variable, for example@footnote{For backward compatibility,
-the following also works: If there are several such lines in a file,
-each specifies the archive location for the text below it.  The first
-such line also applies to any text before its definition.  However,
-using this method is @emph{strongly} deprecated as it is incompatible
-with the outline structure of the document.  The correct method for
-setting multiple archive locations in a buffer is using properties.}:
-
-@cindex #+ARCHIVE
-@example
-#+ARCHIVE: %s_done::
-@end example
-
-@cindex property, ARCHIVE
-@noindent
-If you would like to have a special ARCHIVE location for a single entry
-or a (sub)tree, give the entry an @code{:ARCHIVE:} property with the
-location as the value (@pxref{Properties and Columns}).
-
-@vindex org-archive-save-context-info
-When a subtree is moved, it receives a number of special properties that
-record context information like the file from where the entry came, its
-outline path the archiving time etc.  Configure the variable
-@code{org-archive-save-context-info} to adjust the amount of information
-added.
-
-@node Sparse trees, Plain lists, Archiving, Document Structure
+@node Sparse trees, Plain lists, Structure editing, Document Structure
 @section Sparse trees
 @cindex sparse trees
 @cindex trees, sparse
@@ -2298,7 +2162,7 @@ containing the field.  If you provide the @samp{N} mode switch, all
 referenced elements will be numbers (non-number fields will be zero) and
 interpolated as Lisp numbers, without quotes.  If you provide the
 @samp{L} flag, all fields will be interpolated literally, without quotes.
-I.e.{}, if you want a reference to be interpreted as a string by the Lisp
+I.e., if you want a reference to be interpreted as a string by the Lisp
 form, enclose the reference operator itself in double-quotes, like
 @code{"$3"}.  Ranges are inserted as space-separated fields, so you can
 embed them in list or vector syntax.  A few examples, note how the
@@ -2540,7 +2404,7 @@ to reserve the first column of the table for special marking characters.
 @table @kbd
 @kindex C-#
 @item C-#
-Rotate the calculation mark in first column through the states @samp{},
+Rotate the calculation mark in first column through the states @samp{ },
 @samp{#}, @samp{*}, @samp{!}, @samp{$}.  When there is an active region,
 change all marks in the region.
 @end table
@@ -4013,7 +3877,7 @@ support for tags.
 @vindex org-tag-faces
 Every headline can contain a list of tags; they occur at the end of the
 headline.  Tags are normal words containing letters, numbers, @samp{_}, and
-@samp{@@}.  Tags must be preceded and followed by a single colon, e.g.{},
+@samp{@@}.  Tags must be preceded and followed by a single colon, e.g.,
 @samp{:work:}.  Several tags can be specified, as in @samp{:work:urgent:}.
 Tags will by default be in bold face with the same color as the headline.
 You may specify special faces for specific tags using the variable
@@ -4820,7 +4684,7 @@ be used by Emacs Lisp programs to work with properties and to implement
 features based on them.  For more information see @ref{Using the
 property API}.
 
-@node Dates and Times, Capture, Properties and Columns, Top
+@node Dates and Times, Capture - Refile - Archive, Properties and Columns, Top
 @chapter Dates and Times
 @cindex dates
 @cindex times
@@ -5648,23 +5512,27 @@ by a certain amount.  This can be used to fix timer strings if the timer was
 not started at exactly the right moment.
 @end table
 
-@node Capture, Agenda Views, Dates and Times, Top
-@chapter Capture
+@node Capture - Refile - Archive, Agenda Views, Dates and Times, Top
+@chapter Capture - Refile - Archive
 @cindex capture
 
 An important part of any organization system is the ability to quickly
 capture new ideas and tasks, and to associate reference material with them.
 Org uses the @file{remember.el} package to create tasks, and stores files
-related to a task (@i{attachments}) in a special directory.
+related to a task (@i{attachments}) in a special directory.  Once in the
+system, tasks and projects need to be moved around.  Moving completed project
+trees to an archive file keeps the system compact and fast.
 
 @menu
 * Remember::                    Capture new tasks/ideas with little interruption
 * Attachments::                 Add files to tasks.
 * RSS Feeds::                   Getting input from RSS feeds
 * Protocols::                   External (e.g. Browser) access to Emacs and Org
+* Refiling notes::              Moving a tree from one place to another
+* Archiving::                   What to do with finished projects
 @end menu
 
-@node Remember, Attachments, Capture, Capture
+@node Remember, Attachments, Capture - Refile - Archive, Capture - Refile - Archive
 @section Remember
 @cindex @file{remember.el}
 
@@ -5683,7 +5551,6 @@ note should be stored interactively, on the fly.
 * Setting up Remember for Org::  Some code for .emacs to get things going
 * Remember templates::          Define the outline of different note types
 * Storing notes::               Directly get the note to where it belongs
-* Refiling notes::              Moving a note or task to a project
 @end menu
 
 @node Setting up Remember for Org, Remember templates, Remember, Remember
@@ -5853,7 +5720,7 @@ If you change your mind about which template to use, call
 @code{org-remember} in the remember buffer.  You may then select a new
 template that will be filled with the previous context information.
 
-@node Storing notes, Refiling notes, Remember templates, Remember
+@node Storing notes,  , Remember templates, Remember
 @subsection Storing notes
 
 @vindex org-remember-clock-out-on-exit
@@ -5914,48 +5781,8 @@ headline is constructed from the current date.  If you have indented the text
 of the note below the headline, the indentation will be adapted if inserting
 the note into the tree requires demotion from level 1.
 
-@node Refiling notes,  , Storing notes, Remember
-@subsection Refiling notes
-@cindex refiling notes
 
-Remember is usually used to quickly capture notes and tasks into one or
-a few capture lists.  When reviewing the captured data, you may want to
-refile some of the entries into a different list, for example into a
-project.  Cutting, finding the right location, and then pasting the note
-is cumbersome.  To simplify this process, you can use the following
-special command:
-
-@table @kbd
-@kindex C-c C-w
-@item C-c C-w
-@vindex org-reverse-note-order
-@vindex org-refile-targets
-@vindex org-refile-use-outline-path
-@vindex org-outline-path-complete-in-steps
-@vindex org-refile-allow-creating-parent-nodes
-Refile the entry or region at point.  This command offers possible locations
-for refiling the entry and lets you select one with completion.  The item (or
-all items in the region) is filed below the target heading as a subitem.
-Depending on @code{org-reverse-note-order}, it will be either the first or
-last subitem.@*
-By default, all level 1 headlines in the current buffer are considered to be
-targets, but you can have more complex definitions across a number of files.
-See the variable @code{org-refile-targets} for details.  If you would like to
-select a location via a file-path-like completion along the outline path, see
-the variables @code{org-refile-use-outline-path} and
-@code{org-outline-path-complete-in-steps}.  If you would like to be able to
-create new nodes as new parents for for refiling on the fly, check the
-variable @code{org-refile-allow-creating-parent-nodes}.
-@kindex C-u C-c C-w
-@item C-u C-c C-w
-Use the refile interface to jump to a heading.
-@kindex C-u C-u C-c C-w
-@item C-u C-u C-c C-w
-Jump to the location where @code{org-refile} last moved a tree to.
-@end table
-
-
-@node Attachments, RSS Feeds, Remember, Capture
+@node Attachments, RSS Feeds, Remember, Capture - Refile - Archive
 @section Attachments
 @cindex attachments
 
@@ -6056,7 +5883,7 @@ same directory for attachments as the parent does.
 @end table
 @end table
 
-@node RSS Feeds, Protocols, Attachments, Capture
+@node RSS Feeds, Protocols, Attachments, Capture - Refile - Archive
 @section RSS feeds
 @cindex RSS feeds
 
@@ -6099,7 +5926,7 @@ list of drawers in that file:
 For more information, see @file{org-feed.el} and the docstring of
 @code{org-feed-alist}.
 
-@node Protocols,  , RSS Feeds, Capture
+@node Protocols, Refiling notes, RSS Feeds, Capture - Refile - Archive
 @section Protocols for external access
 @cindex protocols, for external access
 @cindex emacsserver
@@ -6113,8 +5940,183 @@ a remote website you are looking at with the browser.  See
 @uref{http://orgmode.org/worg/org-contrib/org-protocol.php} for detailed
 documentation and setup instructions.
 
+@node Refiling notes, Archiving, Protocols, Capture - Refile - Archive
+@section Refiling notes
+@cindex refiling notes
 
-@node Agenda Views, Embedded LaTeX, Capture, Top
+When reviewing the captured data, you may want to refile some of the entries
+into a different list, for example into a project.  Cutting, finding the
+right location, and then pasting the note is cumbersome.  To simplify this
+process, you can use the following special command:
+
+@table @kbd
+@kindex C-c C-w
+@item C-c C-w
+@vindex org-reverse-note-order
+@vindex org-refile-targets
+@vindex org-refile-use-outline-path
+@vindex org-outline-path-complete-in-steps
+@vindex org-refile-allow-creating-parent-nodes
+Refile the entry or region at point.  This command offers possible locations
+for refiling the entry and lets you select one with completion.  The item (or
+all items in the region) is filed below the target heading as a subitem.
+Depending on @code{org-reverse-note-order}, it will be either the first or
+last subitem.@*
+By default, all level 1 headlines in the current buffer are considered to be
+targets, but you can have more complex definitions across a number of files.
+See the variable @code{org-refile-targets} for details.  If you would like to
+select a location via a file-path-like completion along the outline path, see
+the variables @code{org-refile-use-outline-path} and
+@code{org-outline-path-complete-in-steps}.  If you would like to be able to
+create new nodes as new parents for for refiling on the fly, check the
+variable @code{org-refile-allow-creating-parent-nodes}.
+@kindex C-u C-c C-w
+@item C-u C-c C-w
+Use the refile interface to jump to a heading.
+@kindex C-u C-u C-c C-w
+@item C-u C-u C-c C-w
+Jump to the location where @code{org-refile} last moved a tree to.
+@end table
+
+@node Archiving,  , Refiling notes, Capture - Refile - Archive
+@section Archiving
+@cindex archiving
+
+When a project represented by a (sub)tree is finished, you may want
+to move the tree out of the way and to stop it from contributing to the
+agenda.  Archiving is important to keep your working files compact and global
+searches like the construction of agenda views fast.
+
+@menu
+* Moving subtrees::             Moving a tree to an archive file
+* Internal archiving::          Switch off a tree but keep i in the file
+@end menu
+
+@node Moving subtrees, Internal archiving, Archiving, Archiving
+@subsection Moving a tree to the archive file
+@cindex external archiving
+
+The most common archiving action is to move a project tree to another file,
+the archive file.
+
+@table @kbd
+@kindex C-c $
+@kindex C-c C-x C-s
+@itemx C-c $
+@item C-c C-x C-s
+@vindex org-archive-location
+Archive the subtree starting at the cursor position to the location
+given by @code{org-archive-location}.
+@kindex C-u C-c C-x C-s
+@item C-u C-c C-x C-s
+Check if any direct children of the current headline could be moved to
+the archive.  To do this, each subtree is checked for open TODO entries.
+If none are found, the command offers to move it to the archive
+location.  If the cursor is @emph{not} on a headline when this command
+is invoked, the level 1 trees will be checked.
+@end table
+
+@cindex archive locations
+The default archive location is a file in the same directory as the
+current file, with the name derived by appending @file{_archive} to the
+current file name.  For information and examples on how to change this,
+see the documentation string of the variable
+@code{org-archive-location}.  There is also an in-buffer option for
+setting this variable, for example@footnote{For backward compatibility,
+the following also works: If there are several such lines in a file,
+each specifies the archive location for the text below it.  The first
+such line also applies to any text before its definition.  However,
+using this method is @emph{strongly} deprecated as it is incompatible
+with the outline structure of the document.  The correct method for
+setting multiple archive locations in a buffer is using properties.}:
+
+@cindex #+ARCHIVE
+@example
+#+ARCHIVE: %s_done::
+@end example
+
+@cindex property, ARCHIVE
+@noindent
+If you would like to have a special ARCHIVE location for a single entry
+or a (sub)tree, give the entry an @code{:ARCHIVE:} property with the
+location as the value (@pxref{Properties and Columns}).
+
+@vindex org-archive-save-context-info
+When a subtree is moved, it receives a number of special properties that
+record context information like the file from where the entry came, its
+outline path the archiving time etc.  Configure the variable
+@code{org-archive-save-context-info} to adjust the amount of information
+added.
+
+
+@node Internal archiving,  , Moving subtrees, Archiving
+@subsection Internal archiving
+
+If you want to just switch off (for agenda views) certain subtrees without
+moving them to a different file, you can use the @code{ARCHIVE tag}.
+
+A headline that is marked with the ARCHIVE tag (@pxref{Tags}) stays at
+its location in the outline tree, but behaves in the following way:
+@itemize @minus
+@item
+@vindex org-cycle-open-archived-trees
+It does not open when you attempt to do so with a visibility cycling
+command (@pxref{Visibility cycling}).  You can force cycling archived
+subtrees with @kbd{C-@key{TAB}}, or by setting the option
+@code{org-cycle-open-archived-trees}.  Also normal outline commands like
+@code{show-all} will open archived subtrees.
+@item
+@vindex org-sparse-tree-open-archived-trees
+During sparse tree construction (@pxref{Sparse trees}), matches in
+archived subtrees are not exposed, unless you configure the option
+@code{org-sparse-tree-open-archived-trees}.
+@item
+@vindex org-agenda-skip-archived-trees
+During agenda view construction (@pxref{Agenda Views}), the content of
+archived trees is ignored unless you configure the option
+@code{org-agenda-skip-archived-trees}, in which case these trees will always
+be included.  In the agenda you can press the @kbd{v} key to get archives
+temporarily included.
+@item
+@vindex org-export-with-archived-trees
+Archived trees are not exported (@pxref{Exporting}), only the headline
+is.  Configure the details using the variable
+@code{org-export-with-archived-trees}.
+@item
+@vindex org-columns-skip-arrchived-trees
+Archived trees are excluded from column view unless the variable
+@code{org-columns-skip-arrchived-trees} is configured to @code{nil}.
+@end itemize
+
+The following commands help managing the ARCHIVE tag:
+
+@table @kbd
+@kindex C-c C-x a
+@item C-c C-x a
+Toggle the ARCHIVE tag for the current headline.  When the tag is set,
+the headline changes to a shadowed face, and the subtree below it is
+hidden.
+@kindex C-u C-c C-x a
+@item C-u C-c C-x a
+Check if any direct children of the current headline should be archived.
+To do this, each subtree is checked for open TODO entries.  If none are
+found, the command offers to set the ARCHIVE tag for the child.  If the
+cursor is @emph{not} on a headline when this command is invoked, the
+level 1 trees will be checked.
+@kindex C-@kbd{TAB}
+@item C-@kbd{TAB}
+Cycle a tree even if it is tagged with ARCHIVE.
+@kindex C-c C-x A
+@item C-c C-x A
+Move the current entry to the @emph{Archive Sibling}.  This is a sibling of
+the entry with the heading @samp{Archive} and the tag @samp{ARCHIVE}.  The
+entry becomes a child of that sibling and in this way retains a lot of its
+original context, including inherited tags and approximate position in the
+outline.
+@end table
+
+
+@node Agenda Views, Markup, Capture - Refile - Archive, Top
 @chapter Agenda Views
 @cindex agenda views
 
@@ -7826,263 +7828,8 @@ the agenda).
 @end enumerate
 
 
-@node Embedded LaTeX, Exporting, Agenda Views, Top
-@chapter Embedded La@TeX{}
-@cindex @TeX{} interpretation
-@cindex La@TeX{} interpretation
-
-Plain ASCII is normally sufficient for almost all note taking.  One
-exception, however, are scientific notes which need to be able to contain
-mathematical symbols and the occasional formula.  La@TeX{}@footnote{La@TeX{}
-is a macro system based on Donald E. Knuth's @TeX{} system.  Many of the
-features described here as ``La@TeX{}'' are really from @TeX{}, but for
-simplicity I am blurring this distinction.}  is widely used to typeset
-scientific documents. Org mode supports embedding La@TeX{} code into its
-files, because many academics are used to reading La@TeX{} source code, and
-because it can be readily processed into images for HTML production.
-
-It is not necessary to mark La@TeX{} macros and code in any special way.
-If you observe a few conventions, Org mode knows how to find it and what
-to do with it.
-
-@menu
-* Math symbols::                @TeX{} macros for symbols and Greek letters
-* Subscripts and superscripts::  Simple syntax for raising/lowering text
-* LaTeX fragments::             Complex formulas made easy
-* Processing LaTeX fragments::  Previewing La@TeX{} processing
-* CDLaTeX mode::                Speed up entering of formulas
-@end menu
-
-@node Math symbols, Subscripts and superscripts, Embedded LaTeX, Embedded LaTeX
-@section Math symbols
-@cindex math symbols
-@cindex @TeX{} macros
-
-You can use La@TeX{} macros to insert special symbols like @samp{\alpha} to
-indicate the Greek letter, or @samp{\to} to indicate an arrow.  Completion
-for these macros is available, just type @samp{\} and maybe a few letters,
-and press @kbd{M-@key{TAB}} to see possible completions.  Unlike La@TeX{}
-code, Org mode allows these macros to be present without surrounding math
-delimiters, for example:
-
-@example
-Angles are written as Greek letters \alpha, \beta and \gamma.
-@end example
-@noindent
-During HTML export (@pxref{HTML export}), these symbols are translated
-into the proper syntax for HTML, for the above examples this is
-@samp{&alpha;} and @samp{&rarr;}, respectively.  If you need such a symbol
-inside a word, terminate it like this: @samp{\Aacute@{@}stor}.
-
-@node Subscripts and superscripts, LaTeX fragments, Math symbols, Embedded LaTeX
-@section Subscripts and superscripts
-@cindex subscript
-@cindex superscript
-
-Just like in La@TeX{}, @samp{^} and @samp{_} are used to indicate super-
-and subscripts.  Again, these can be used without embedding them in
-math-mode delimiters.  To increase the readability of ASCII text, it is
-not necessary (but OK) to surround multi-character sub- and superscripts
-with curly braces.  For example
-
-@example
-The mass if the sun is M_sun = 1.989 x 10^30 kg.  The radius of
-the sun is R_@{sun@} = 6.96 x 10^8 m.
-@end example
-
-To avoid interpretation as raised or lowered text, you can quote
-@samp{^} and @samp{_} with a backslash: @samp{\^} and @samp{\_}.
-
-During HTML export (@pxref{HTML export}), subscript and superscripts
-are surrounded with @code{<sub>} and @code{<sup>} tags, respectively.
-
-@node LaTeX fragments, Processing LaTeX fragments, Subscripts and superscripts, Embedded LaTeX
-@section La@TeX{} fragments
-@cindex La@TeX{} fragments
-
-@vindex org-format-latex-header
-With symbols, sub- and superscripts, HTML is pretty much at its end when
-it comes to representing mathematical formulas@footnote{Yes, there is
-MathML, but that is not yet fully supported by many browsers, and there
-is no decent converter for turning La@TeX{} or ASCII representations of
-formulas into MathML. So for the time being, converting formulas into
-images seems the way to go.}. More complex expressions need a dedicated
-formula processor. To this end, Org mode can contain arbitrary La@TeX{}
-fragments. It provides commands to preview the typeset result of these
-fragments, and upon export to HTML, all fragments will be converted to
-images and inlined into the HTML document@footnote{The La@TeX{} export
-will not use images for displaying La@TeX{} fragments but include these
-fragments directly into the La@TeX{} code.}. For this to work you
-need to be on a system with a working La@TeX{} installation. You also
-need the @file{dvipng} program, available at
-@url{http://sourceforge.net/projects/dvipng/}. The La@TeX{} header that
-will be used when processing a fragment can be configured with the
-variable @code{org-format-latex-header}.
-
-La@TeX{} fragments don't need any special marking at all.  The following
-snippets will be identified as La@TeX{} source code:
-@itemize @bullet
-@item
-Environments of any kind.  The only requirement is that the
-@code{\begin} statement appears on a new line, preceded by only
-whitespace.
-@item
-Text within the usual La@TeX{} math delimiters.  To avoid conflicts with
-currency specifications, single @samp{$} characters are only recognized as
-math delimiters if the enclosed text contains at most two line breaks, is
-directly attached to the @samp{$} characters with no whitespace in between,
-and if the closing @samp{$} is followed by whitespace, punctuation or a dash.
-For the other delimiters, there is no such restriction, so when in doubt, use
-@samp{\(...\)} as inline math delimiters.
-@end itemize
-
-@noindent For example:
-
-@example
-\begin@{equation@}                          % arbitrary environments,
-x=\sqrt@{b@}                                % even tables, figures
-\end@{equation@}                            % etc
-
-If $a^2=b$ and \( b=2 \), then the solution must be
-either $$ a=+\sqrt@{2@} $$ or \[ a=-\sqrt@{2@} \].
-@end example
-
-@noindent
-@vindex org-format-latex-options
-If you need any of the delimiter ASCII sequences for other purposes, you
-can configure the option @code{org-format-latex-options} to deselect the
-ones you do not wish to have interpreted by the La@TeX{} converter.
-
-@node Processing LaTeX fragments, CDLaTeX mode, LaTeX fragments, Embedded LaTeX
-@section Processing LaTeX fragments
-@cindex LaTeX fragments, preview
-
-La@TeX{} fragments can be processed to produce preview images of the
-typeset expressions:
-
-@table @kbd
-@kindex C-c C-x C-l
-@item C-c C-x C-l
-Produce a preview image of the La@TeX{} fragment at point and overlay it
-over the source code.  If there is no fragment at point, process all
-fragments in the current entry (between two headlines).  When called
-with a prefix argument, process the entire subtree.  When called with
-two prefix arguments, or when the cursor is before the first headline,
-process the entire buffer.
-@kindex C-c C-c
-@item C-c C-c
-Remove the overlay preview images.
-@end table
-
-@vindex org-format-latex-options
-You can customize the variable @code{org-format-latex-options} to influence
-some aspects of the preview. In particular, the @code{:scale} (and for HTML
-export, @code{:html-scale}) property can be used to adjust the size of the
-preview images.
-
-During HTML export (@pxref{HTML export}), all La@TeX{} fragments are
-converted into images and inlined into the document if the following
-setting is active:
-
-@lisp
-(setq org-export-with-LaTeX-fragments t)
-@end lisp
-
-@node CDLaTeX mode,  , Processing LaTeX fragments, Embedded LaTeX
-@section Using CDLa@TeX{} to enter math
-@cindex CDLa@TeX{}
-
-CDLa@TeX{} mode is a minor mode that is normally used in combination with a
-major La@TeX{} mode like AUC@TeX{} in order to speed-up insertion of
-environments and math templates.  Inside Org mode, you can make use of
-some of the features of CDLa@TeX{} mode.  You need to install
-@file{cdlatex.el} and @file{texmathp.el} (the latter comes also with
-AUC@TeX{}) from @url{http://www.astro.uva.nl/~dominik/Tools/cdlatex}.
-Don't use CDLa@TeX{} mode itself under Org mode, but use the light
-version @code{org-cdlatex-mode} that comes as part of Org mode.  Turn it
-on for the current buffer with @code{M-x org-cdlatex-mode}, or for all
-Org files with
-
-@lisp
-(add-hook 'org-mode-hook 'turn-on-org-cdlatex)
-@end lisp
-
-When this mode is enabled, the following features are present (for more
-details see the documentation of CDLa@TeX{} mode):
-@itemize @bullet
-@kindex C-c @{
-@item
-Environment templates can be inserted with @kbd{C-c @{}.
-@item
-@kindex @key{TAB}
-The @key{TAB} key will do template expansion if the cursor is inside a
-La@TeX{} fragment@footnote{Org mode has a method to test if the cursor is
-inside such a fragment, see the documentation of the function
-@code{org-inside-LaTeX-fragment-p}.}.  For example, @key{TAB} will
-expand @code{fr} to @code{\frac@{@}@{@}} and position the cursor
-correctly inside the first brace.  Another @key{TAB} will get you into
-the second brace.  Even outside fragments, @key{TAB} will expand
-environment abbreviations at the beginning of a line.  For example, if
-you write @samp{equ} at the beginning of a line and press @key{TAB},
-this abbreviation will be expanded to an @code{equation} environment.
-To get a list of all abbreviations, type @kbd{M-x cdlatex-command-help}.
-@item
-@kindex _
-@kindex ^
-@vindex cdlatex-simplify-sub-super-scripts
-Pressing @kbd{_} and @kbd{^} inside a La@TeX{} fragment will insert these
-characters together with a pair of braces.  If you use @key{TAB} to move
-out of the braces, and if the braces surround only a single character or
-macro, they are removed again (depending on the variable
-@code{cdlatex-simplify-sub-super-scripts}).
-@item
-@kindex `
-Pressing the backquote @kbd{`} followed by a character inserts math
-macros, also outside La@TeX{} fragments.  If you wait more than 1.5 seconds
-after the backquote, a help window will pop up.
-@item
-@kindex '
-Pressing the single-quote @kbd{'} followed by another character modifies
-the symbol before point with an accent or a font.  If you wait more than
-1.5 seconds after the backquote, a help window will pop up.  Character
-modification will work only inside La@TeX{} fragments, outside the quote
-is normal.
-@end itemize
-
-@node Exporting, Publishing, Embedded LaTeX, Top
-@chapter Exporting
-@cindex exporting
-
-Org-mode documents can be exported into a variety of other formats.  For
-printing and sharing of notes, ASCII export produces a readable and simple
-version of an Org file.  HTML export allows you to publish a notes file on
-the web, while the XOXO format provides a solid base for exchange with a
-broad range of other applications. La@TeX{} export lets you use Org mode and
-its structured editing functions to easily create La@TeX{} files.  DocBook
-export makes it possible to convert Org files to many other formats using
-DocBook tools.  To incorporate entries with associated times like deadlines
-or appointments into a desktop calendar program like iCal, Org mode can also
-produce extracts in the iCalendar format.  Currently Org mode only supports
-export, not import of these different formats.
-
-Org supports export of selected regions when @code{transient-mark-mode} is
-enabled (default in Emacs 23).
-
-@menu
-* Markup rules::                Which structures are recognized?
-* Selective export::            Using tags to select and exclude trees
-* Export options::              Per-file export settings
-* The export dispatcher::       How to access exporter commands
-* ASCII export::                Exporting to plain ASCII
-* HTML export::                 Exporting to HTML
-* LaTeX and PDF export::        Exporting to La@TeX{}, and processing to PDF
-* DocBook export::              Exporting to DocBook
-* XOXO export::                 Exporting to XOXO
-* iCalendar export::            Exporting in iCalendar format
-@end menu
-
-@node Markup rules, Selective export, Exporting, Exporting
-@section Markup rules
+@node Markup, Exporting, Agenda Views, Top
+@chapter Markup for rich export
 
 When exporting Org-mode documents, the exporter tries to reflect the
 structure of the document as accurately as possible in the backend.  Since
@@ -8091,25 +7838,31 @@ Org mode has rules on how to prepare text for rich export.  This section
 summarizes the markup rules used in an Org-mode buffer.
 
 @menu
-* Document title::              How the document title is determined
-* Headings and sections::       The main structure of the exported document
-* Table of contents::           If, where, how to create a table of contents
-* Initial text::                Text before the first headline
-* Lists::                       Plain lists are exported
-* Paragraphs::                  What determines beginning and ending
-* Literal examples::            Source code and other examples
-* Include files::               Include the contents of a file during export
-* Tables exported::             Tables are exported richly
-* Inlined images::              How to inline images during export
-* Footnote markup::             ASCII representation of footnotes
-* Emphasis and monospace::      To bold or not to bold
-* TeX macros and LaTeX fragments::  Create special, rich export.
-* Horizontal rules::            A line across the page
-* Comment lines::               Some lines will not be exported
-* Macro replacement::           Global replacement of place holders
+* Structural markup elements::  The basic structure as seen by the exporter
+* Images and tables::           Tables and Images will be included
+* Literal examples::            Source code examples with special formatting
+* Include files::               Include additional files into a document
+* Macro replacement::           Use macros to create complex output
+* Embedded LaTeX::              LaTeX can be freely used inside Org documents
 @end menu
 
-@node Document title, Headings and sections, Markup rules, Markup rules
+@node Structural markup elements, Images and tables, Markup, Markup
+@section Structural markup elements
+
+@menu
+* Document title::              Where the title is taken from
+* Headings and sections::       The document structure as seen by the exporter
+* Table of contents::           The if and where of the table of contents
+* Initial text::                Text before the first heading?
+* Lists::                       Lists
+* Paragraphs::                  Paragraphs
+* Footnote markup::             Footnotes
+* Emphasis and monospace::      Bold, italic, etc.
+* Horizontal rules::            Make a line
+* Comment lines::               What will *not* be exported
+@end menu
+
+@node Document title, Headings and sections, Structural markup elements, Structural markup elements
 @subheading Document title
 @cindex document title, markup rules
 
@@ -8132,7 +7885,7 @@ If you are exporting only a subtree by marking is as the region, the heading
 of the subtree will become the title of the document.  If the subtree has a
 property @code{EXPORT_TITLE}, that will take precedence.
 
-@node Headings and sections, Table of contents, Document title, Markup rules
+@node Headings and sections, Table of contents, Document title, Structural markup elements
 @subheading Headings and sections
 @cindex headings and sections, markup rules
 
@@ -8150,7 +7903,7 @@ per-file basis with a line
 #+OPTIONS: H:4
 @end example
 
-@node Table of contents, Initial text, Headings and sections, Markup rules
+@node Table of contents, Initial text, Headings and sections, Structural markup elements
 @subheading Table of contents
 @cindex table of contents, markup rules
 
@@ -8168,7 +7921,7 @@ the table of contents entirely, by configuring the variable
 #+OPTIONS: toc:nil        (no TOC at all)
 @end example
 
-@node Initial text, Lists, Table of contents, Markup rules
+@node Initial text, Lists, Table of contents, Structural markup elements
 @subheading Text before the first headline
 @cindex text before first headline, markup rules
 @cindex #+TEXT
@@ -8196,7 +7949,7 @@ If you still want to have some text before the first headline, use the
 #+TEXT: This goes between the table of contents and the first headline
 @end example
 
-@node Lists, Paragraphs, Initial text, Markup rules
+@node Lists, Paragraphs, Initial text, Structural markup elements
 @subheading Lists
 @cindex lists, markup rules
 
@@ -8204,7 +7957,7 @@ Plain lists as described in @ref{Plain lists}, are translated to the backend's
 syntax for such lists.  Most backends support unordered, ordered, and
 description lists.
 
-@node Paragraphs, Literal examples, Lists, Markup rules
+@node Paragraphs, Footnote markup, Lists, Structural markup elements
 @subheading Paragraphs, line breaks, and quoting
 @cindex paragraphs, markup rules
 
@@ -8246,8 +7999,89 @@ but not any simpler
 #+END_CENTER
 @end example
 
-@node Literal examples, Include files, Paragraphs, Markup rules
-@subheading Literal examples
+
+@node Footnote markup, Emphasis and monospace, Paragraphs, Structural markup elements
+@subheading Footnote markup
+@cindex footnotes, markup rules
+@cindex @file{footnote.el}
+
+Footnotes defined in the way described in @ref{Footnotes}, will be exported by
+all backends.  Org allows multiple references to the same note, and
+different backends support this to varying degrees.
+
+@node Emphasis and monospace, Horizontal rules, Footnote markup, Structural markup elements
+@subheading Emphasis and monospace
+
+@cindex underlined text, markup rules
+@cindex bold text, markup rules
+@cindex italic text, markup rules
+@cindex verbatim text, markup rules
+@cindex code text, markup rules
+@cindex strike-through text, markup rules
+You can make words @b{*bold*}, @i{/italic/}, _underlined_, @code{=code=}
+and @code{~verbatim~}, and, if you must, @samp{+strike-through+}.  Text
+in the code and verbatim string is not processed for Org-mode specific
+syntax, it is exported verbatim.
+
+@node Horizontal rules, Comment lines, Emphasis and monospace, Structural markup elements
+@subheading  Horizontal rules
+@cindex horizontal rules, markup rules
+A line consisting of only dashes, and at least 5 of them, will be
+exported as a horizontal line (@samp{<hr/>} in HTML).
+
+@node Comment lines,  , Horizontal rules, Structural markup elements
+@subheading Comment lines
+@cindex comment lines
+@cindex exporting, not
+@cindex #+BEGIN_COMMENT
+
+Lines starting with @samp{#} in column zero are treated as comments and will
+never be exported. If you want an indented line to be treated as a comment,
+start it with @samp{#+ }.  Also entire subtrees starting with the word
+@samp{COMMENT} will never be exported.  Finally, regions surrounded by
+@samp{#+BEGIN_COMMENT} ... @samp{#+END_COMMENT} will not be exported.
+
+@table @kbd
+@kindex C-c ;
+@item C-c ;
+Toggle the COMMENT keyword at the beginning of an entry.
+@end table
+
+
+@node Images and tables, Literal examples, Structural markup elements, Markup
+@section Images and Tables
+
+@cindex tables, markup rules
+Both the native Org mode tables (@pxref{Tables}) and tables formatted with
+the @file{table.el} package will be exported properly.  For Org mode tables,
+the lines before the first horizontal separator line will become table header
+lines.  You can use the following lines somewhere before the table to assign
+a caption and a label for cross references:
+
+@example
+#+CAPTION: This is the caption for the next table (or link)
+#+LABEL:   tbl:basic-data
+@end example
+
+@cindex inlined images, markup rules
+Some backends (HTML, La@TeX{}, and DocBook) allow you to directly include
+images into the exported document.  Org does this, if a link to an image
+files does not have a description part, for example @code{[[./img/a.jpg]]}.
+If you wish to define a caption for the image and maybe a label for internal
+cross references, you can use (before, but close to the link)
+
+@example
+#+CAPTION: This is the caption for the next figure link (or table)
+#+LABEL:   fig:SED-HR4049
+@end example
+
+You may also define additional attributes for the figure.  As this is
+backend-specific, see the sections about the individual backends for more
+information.
+
+
+@node Literal examples, Include files, Images and tables, Markup
+@section Literal examples
 @cindex literal examples, markup rules
 @cindex code line references, markup rules
 
@@ -8353,8 +8187,8 @@ label is stored as a link @samp{(label)}, for retrieval with @kbd{C-c C-l}.
 @end table
 
 
-@node Include files, Tables exported, Literal examples, Markup rules
-@subheading Include files
+@node Include files, Macro replacement, Literal examples, Markup
+@section Include files
 @cindex include files, markup rules
 
 During export, you can include the content of another file.  For example, to
@@ -8384,115 +8218,9 @@ the selected markup.  For example, to include a file as an item, use
 Visit the include file at point.
 @end table
 
-@node Tables exported, Inlined images, Include files, Markup rules
-@subheading Tables
-@cindex tables, markup rules
 
-Both the native Org mode tables (@pxref{Tables}) and tables formatted with
-the @file{table.el} package will be exported properly.  For Org mode tables,
-the lines before the first horizontal separator line will become table header
-lines.  You can use the following lines somewhere before the table to assign
-a caption and a label for cross references:
-
-@example
-#+CAPTION: This is the caption for the next table (or link)
-#+LABEL:   tbl:basic-data
-@end example
-
-@node Inlined images, Footnote markup, Tables exported, Markup rules
-@subheading Inlined Images
-@cindex inlined images, markup rules
-
-Some backends (HTML, La@TeX{}, and DocBook) allow you to directly include images
-into the exported document.  Org does this, if a link to an image files does
-not have a description part, for example @code{[[./img/a.jpg]]}.  If you wish
-to define a caption for the image and maybe a label for internal cross
-references, you can use (before, but close to the link)
-
-@example
-#+CAPTION: This is the caption for the next figure link (or table)
-#+LABEL:   fig:SED-HR4049
-@end example
-
-You may also define additional attributes for the figure.  As this is
-backend-specific, see the sections about the individual backends for more
-information.
-
-@node Footnote markup, Emphasis and monospace, Inlined images, Markup rules
-@subheading Footnote markup
-@cindex footnotes, markup rules
-@cindex @file{footnote.el}
-
-Footnotes defined in the way described in @ref{Footnotes}, will be exported by
-all backends.  Org allows multiple references to the same note, and
-different backends support this to varying degrees.
-
-@node Emphasis and monospace, TeX macros and LaTeX fragments, Footnote markup, Markup rules
-@subheading Emphasis and monospace
-
-@cindex underlined text, markup rules
-@cindex bold text, markup rules
-@cindex italic text, markup rules
-@cindex verbatim text, markup rules
-@cindex code text, markup rules
-@cindex strike-through text, markup rules
-You can make words @b{*bold*}, @i{/italic/}, _underlined_, @code{=code=}
-and @code{~verbatim~}, and, if you must, @samp{+strike-through+}.  Text
-in the code and verbatim string is not processed for Org-mode specific
-syntax, it is exported verbatim.
-
-@node TeX macros and LaTeX fragments, Horizontal rules, Emphasis and monospace, Markup rules
-@subheading @TeX{} macros and La@TeX{} fragments
-@cindex La@TeX{} fragments, markup rules
-@cindex @TeX{} macros, markup rules
-@cindex HTML entities
-@cindex La@TeX{} entities
-
-@vindex org-html-entities
-A @TeX{}-like syntax is used to specify special characters.  Where possible,
-these will be transformed into the native format of the exporter backend.
-Strings like @code{\alpha} will be exported as @code{&alpha;} in the HTML
-output, and as @code{$\alpha$} in the La@TeX{} output.  Similarly,
-@code{\nbsp} will become @code{&nbsp;} in HTML and @code{~} in La@TeX{}.
-This applies for a large number of entities, with names taken from both HTML
-and La@TeX{}, see the variable @code{org-html-entities} for the complete
-list.  If you are unsure about a name, use @kbd{M-@key{TAB}} for completion
-after having typed the backslash and optionally a few characters
-(@pxref{Completion}).
-
-La@TeX{} fragments are converted into images for HTML export, and they are
-written literally into the La@TeX{} export.  See also @ref{Embedded LaTeX}.
-
-Finally, @samp{\-} is treated as a shy hyphen, and @samp{--}, @samp{---}, and
-@samp{...} are all converted into special commands creating hyphens of
-different lengths or a compact set of dots.
-
-@node Horizontal rules, Comment lines, TeX macros and LaTeX fragments, Markup rules
-@subheading  Horizontal rules
-@cindex horizontal rules, markup rules
-A line consisting of only dashes, and at least 5 of them, will be
-exported as a horizontal line (@samp{<hr/>} in HTML).
-
-@node Comment lines, Macro replacement, Horizontal rules, Markup rules
-@subheading Comment lines
-@cindex comment lines
-@cindex exporting, not
-@cindex #+BEGIN_COMMENT
-
-Lines starting with @samp{#} in column zero are treated as comments and will
-never be exported. If you want an indented line to be treated as a comment,
-start it with @samp{#+ }.  Also entire subtrees starting with the word
-@samp{COMMENT} will never be exported.  Finally, regions surrounded by
-@samp{#+BEGIN_COMMENT} ... @samp{#+END_COMMENT} will not be exported.
-
-@table @kbd
-@kindex C-c ;
-@item C-c ;
-Toggle the COMMENT keyword at the beginning of an entry.
-@end table
-
-@node Macro replacement,  , Comment lines, Markup rules
-@subheading Macro replacement
+@node Macro replacement, Embedded LaTeX, Include files, Markup
+@section Macro replacement
 @cindex macro replacement, during export
 @cindex #+MACRO
 
@@ -8512,7 +8240,285 @@ and to the modification time of the file being exported, respectively.
 @var{FORMAT} should be a format string understood by
 @code{format-time-string}.
 
-@node Selective export, Export options, Markup rules, Exporting
+Macro expansion takes place during export, and some people use it to
+construct complex HTML code.
+
+
+@node Embedded LaTeX,  , Macro replacement, Markup
+@section Embedded La@TeX{}
+@cindex @TeX{} interpretation
+@cindex La@TeX{} interpretation
+
+Plain ASCII is normally sufficient for almost all note taking.  One
+exception, however, are scientific notes which need to be able to contain
+mathematical symbols and the occasional formula.  La@TeX{}@footnote{La@TeX{}
+is a macro system based on Donald E. Knuth's @TeX{} system.  Many of the
+features described here as ``La@TeX{}'' are really from @TeX{}, but for
+simplicity I am blurring this distinction.}  is widely used to typeset
+scientific documents. Org mode supports embedding La@TeX{} code into its
+files, because many academics are used to reading La@TeX{} source code, and
+because it can be readily processed into images for HTML production.
+
+It is not necessary to mark La@TeX{} macros and code in any special way.
+If you observe a few conventions, Org mode knows how to find it and what
+to do with it.
+
+@menu
+* Special symbols::             Greek letters and other symbols
+* Subscripts and superscripts::  Simple syntax for raising/lowering text
+* LaTeX fragments::             Complex formulas made easy
+* Previewing LaTeX fragments::  What will this snippet look like?
+* CDLaTeX mode::                Speed up entering of formulas
+@end menu
+
+@node Special symbols, Subscripts and superscripts, Embedded LaTeX, Embedded LaTeX
+@subsection Special symbols
+@cindex math symbols
+@cindex special symbols
+@cindex @TeX{} macros
+@cindex La@TeX{} fragments, markup rules
+@cindex HTML entities
+@cindex La@TeX{} entities
+
+You can use La@TeX{} macros to insert special symbols like @samp{\alpha} to
+indicate the Greek letter, or @samp{\to} to indicate an arrow.  Completion
+for these macros is available, just type @samp{\} and maybe a few letters,
+and press @kbd{M-@key{TAB}} to see possible completions.  Unlike La@TeX{}
+code, Org mode allows these macros to be present without surrounding math
+delimiters, for example:
+
+@example
+Angles are written as Greek letters \alpha, \beta and \gamma.
+@end example
+
+@vindex org-html-entities
+During export, these symbols will be transformed into the native format of
+the exporter backend.  Strings like @code{\alpha} will be exported as
+@code{&alpha;} in the HTML output, and as @code{$\alpha$} in the La@TeX{}
+output.  Similarly, @code{\nbsp} will become @code{&nbsp;} in HTML and
+@code{~} in La@TeX{}.  If you need such a symbol inside a word, terminate it
+like this: @samp{\Aacute@{@}stor}.
+
+A large number of entities is provided, with names taken from both HTML and
+La@TeX{}, see the variable @code{org-html-entities} for the complete list.
+@samp{\-} is treated as a shy hyphen, and @samp{--}, @samp{---}, and
+@samp{...} are all converted into special commands creating hyphens of
+different lengths or a compact set of dots.
+
+@node Subscripts and superscripts, LaTeX fragments, Special symbols, Embedded LaTeX
+@subsection Subscripts and superscripts
+@cindex subscript
+@cindex superscript
+
+Just like in La@TeX{}, @samp{^} and @samp{_} are used to indicate super-
+and subscripts.  Again, these can be used without embedding them in
+math-mode delimiters.  To increase the readability of ASCII text, it is
+not necessary (but OK) to surround multi-character sub- and superscripts
+with curly braces.  For example
+
+@example
+The mass if the sun is M_sun = 1.989 x 10^30 kg.  The radius of
+the sun is R_@{sun@} = 6.96 x 10^8 m.
+@end example
+
+@vindex org-export-with-sub-superscripts
+To avoid interpretation as raised or lowered text, you can quote @samp{^} and
+@samp{_} with a backslash: @samp{\^} and @samp{\_}.  If you write a text
+where the underscore is often used in a different context, Org's convention
+to always interpret these as subscripts can get in your way.  Configure the
+variable @code{org-export-with-sub-superscripts} to globally change this
+convention, or use, on a per-file basis:
+
+@example
+#+OPTIONS: ^:@{@}
+@end example
+
+
+@node LaTeX fragments, Previewing LaTeX fragments, Subscripts and superscripts, Embedded LaTeX
+@subsection La@TeX{} fragments
+@cindex La@TeX{} fragments
+
+@vindex org-format-latex-header
+With symbols, sub- and superscripts, HTML is pretty much at its end when
+it comes to representing mathematical formulas@footnote{Yes, there is
+MathML, but that is not yet fully supported by many browsers, and there
+is no decent converter for turning La@TeX{} or ASCII representations of
+formulas into MathML. So for the time being, converting formulas into
+images seems the way to go.}. More complex expressions need a dedicated
+formula processor. To this end, Org mode can contain arbitrary La@TeX{}
+fragments. It provides commands to preview the typeset result of these
+fragments, and upon export to HTML, all fragments will be converted to
+images and inlined into the HTML document@footnote{The La@TeX{} export
+will not use images for displaying La@TeX{} fragments but include these
+fragments directly into the La@TeX{} code.}. For this to work you
+need to be on a system with a working La@TeX{} installation. You also
+need the @file{dvipng} program, available at
+@url{http://sourceforge.net/projects/dvipng/}. The La@TeX{} header that
+will be used when processing a fragment can be configured with the
+variable @code{org-format-latex-header}.
+
+La@TeX{} fragments don't need any special marking at all.  The following
+snippets will be identified as La@TeX{} source code:
+@itemize @bullet
+@item
+Environments of any kind.  The only requirement is that the
+@code{\begin} statement appears on a new line, preceded by only
+whitespace.
+@item
+Text within the usual La@TeX{} math delimiters.  To avoid conflicts with
+currency specifications, single @samp{$} characters are only recognized as
+math delimiters if the enclosed text contains at most two line breaks, is
+directly attached to the @samp{$} characters with no whitespace in between,
+and if the closing @samp{$} is followed by whitespace, punctuation or a dash.
+For the other delimiters, there is no such restriction, so when in doubt, use
+@samp{\(...\)} as inline math delimiters.
+@end itemize
+
+@noindent For example:
+
+@example
+\begin@{equation@}                          % arbitrary environments,
+x=\sqrt@{b@}                                % even tables, figures
+\end@{equation@}                            % etc
+
+If $a^2=b$ and \( b=2 \), then the solution must be
+either $$ a=+\sqrt@{2@} $$ or \[ a=-\sqrt@{2@} \].
+@end example
+
+@noindent
+@vindex org-format-latex-options
+If you need any of the delimiter ASCII sequences for other purposes, you
+can configure the option @code{org-format-latex-options} to deselect the
+ones you do not wish to have interpreted by the La@TeX{} converter.
+
+@node Previewing LaTeX fragments, CDLaTeX mode, LaTeX fragments, Embedded LaTeX
+@subsection Previewing LaTeX fragments
+@cindex LaTeX fragments, preview
+
+La@TeX{} fragments can be processed to produce preview images of the
+typeset expressions:
+
+@table @kbd
+@kindex C-c C-x C-l
+@item C-c C-x C-l
+Produce a preview image of the La@TeX{} fragment at point and overlay it
+over the source code.  If there is no fragment at point, process all
+fragments in the current entry (between two headlines).  When called
+with a prefix argument, process the entire subtree.  When called with
+two prefix arguments, or when the cursor is before the first headline,
+process the entire buffer.
+@kindex C-c C-c
+@item C-c C-c
+Remove the overlay preview images.
+@end table
+
+@vindex org-format-latex-options
+You can customize the variable @code{org-format-latex-options} to influence
+some aspects of the preview. In particular, the @code{:scale} (and for HTML
+export, @code{:html-scale}) property can be used to adjust the size of the
+preview images.
+
+During HTML export (@pxref{HTML export}), all La@TeX{} fragments are
+converted into images and inlined into the document if the following
+setting is active:
+
+@lisp
+(setq org-export-with-LaTeX-fragments t)
+@end lisp
+
+@node CDLaTeX mode,  , Previewing LaTeX fragments, Embedded LaTeX
+@subsection Using CDLa@TeX{} to enter math
+@cindex CDLa@TeX{}
+
+CDLa@TeX{} mode is a minor mode that is normally used in combination with a
+major La@TeX{} mode like AUC@TeX{} in order to speed-up insertion of
+environments and math templates.  Inside Org mode, you can make use of
+some of the features of CDLa@TeX{} mode.  You need to install
+@file{cdlatex.el} and @file{texmathp.el} (the latter comes also with
+AUC@TeX{}) from @url{http://www.astro.uva.nl/~dominik/Tools/cdlatex}.
+Don't use CDLa@TeX{} mode itself under Org mode, but use the light
+version @code{org-cdlatex-mode} that comes as part of Org mode.  Turn it
+on for the current buffer with @code{M-x org-cdlatex-mode}, or for all
+Org files with
+
+@lisp
+(add-hook 'org-mode-hook 'turn-on-org-cdlatex)
+@end lisp
+
+When this mode is enabled, the following features are present (for more
+details see the documentation of CDLa@TeX{} mode):
+@itemize @bullet
+@kindex C-c @{
+@item
+Environment templates can be inserted with @kbd{C-c @{}.
+@item
+@kindex @key{TAB}
+The @key{TAB} key will do template expansion if the cursor is inside a
+La@TeX{} fragment@footnote{Org mode has a method to test if the cursor is
+inside such a fragment, see the documentation of the function
+@code{org-inside-LaTeX-fragment-p}.}.  For example, @key{TAB} will
+expand @code{fr} to @code{\frac@{@}@{@}} and position the cursor
+correctly inside the first brace.  Another @key{TAB} will get you into
+the second brace.  Even outside fragments, @key{TAB} will expand
+environment abbreviations at the beginning of a line.  For example, if
+you write @samp{equ} at the beginning of a line and press @key{TAB},
+this abbreviation will be expanded to an @code{equation} environment.
+To get a list of all abbreviations, type @kbd{M-x cdlatex-command-help}.
+@item
+@kindex _
+@kindex ^
+@vindex cdlatex-simplify-sub-super-scripts
+Pressing @kbd{_} and @kbd{^} inside a La@TeX{} fragment will insert these
+characters together with a pair of braces.  If you use @key{TAB} to move
+out of the braces, and if the braces surround only a single character or
+macro, they are removed again (depending on the variable
+@code{cdlatex-simplify-sub-super-scripts}).
+@item
+@kindex `
+Pressing the backquote @kbd{`} followed by a character inserts math
+macros, also outside La@TeX{} fragments.  If you wait more than 1.5 seconds
+after the backquote, a help window will pop up.
+@item
+@kindex '
+Pressing the single-quote @kbd{'} followed by another character modifies
+the symbol before point with an accent or a font.  If you wait more than
+1.5 seconds after the backquote, a help window will pop up.  Character
+modification will work only inside La@TeX{} fragments, outside the quote
+is normal.
+@end itemize
+
+@node Exporting, Publishing, Markup, Top
+@chapter Exporting
+@cindex exporting
+
+Org-mode documents can be exported into a variety of other formats.  For
+printing and sharing of notes, ASCII export produces a readable and simple
+version of an Org file.  HTML export allows you to publish a notes file on
+the web, while the XOXO format provides a solid base for exchange with a
+broad range of other applications. La@TeX{} export lets you use Org mode and
+its structured editing functions to easily create La@TeX{} files.  DocBook
+export makes it possible to convert Org files to many other formats using
+DocBook tools.  To incorporate entries with associated times like deadlines
+or appointments into a desktop calendar program like iCal, Org mode can also
+produce extracts in the iCalendar format.  Currently Org mode only supports
+export, not import of these different formats.
+
+Org supports export of selected regions when @code{transient-mark-mode} is
+enabled (default in Emacs 23).
+
+@menu
+* Selective export::            Using tags to select and exclude trees
+* Export options::              Per-file export settings
+* The export dispatcher::       How to access exporter commands
+* ASCII export::                Exporting to plain ASCII
+* HTML export::                 Exporting to HTML
+* LaTeX and PDF export::        Exporting to La@TeX{}, and processing to PDF
+* DocBook export::              Exporting to DocBook
+* XOXO export::                 Exporting to XOXO
+* iCalendar export::            Exporting in iCalendar format
+@end menu
+
+@node Selective export, Export options, Exporting, Exporting
 @section Selective export
 @cindex export, selective by tags
 
@@ -8748,7 +8754,7 @@ language, but with additional support for tables.
 @menu
 * HTML Export commands::        How to invoke HTML export
 * Quoting HTML tags::           Using direct HTML in Org mode
-* Links::                       Transformation of links for HTML
+* Links in HTML export::        How links will be interpreted and formatted
 * Tables in HTML export::       How to modify the formatting of tables
 * Images in HTML export::       How to insert figures into HTML output
 * Text areas in HTML export::   An alternative way to show an example
@@ -8816,7 +8822,7 @@ specify it with a numeric prefix argument.  For example,
 @noindent
 creates two levels of headings and does the rest as items.
 
-@node Quoting HTML tags, Links, HTML Export commands, HTML export
+@node Quoting HTML tags, Links in HTML export, HTML Export commands, HTML export
 @subsection Quoting HTML tags
 
 Plain @samp{<} and @samp{>} are always transformed to @samp{&lt;} and
@@ -8869,7 +8875,7 @@ and @code{style} attributes for a link:
 [[http://orgmode.org]]
 @end example
 
-@node Tables in HTML export, Images in HTML export, Links, HTML export
+@node Tables in HTML export, Images in HTML export, Links in HTML export, HTML export
 @subsection Tables
 @cindex tables, in HTML
 @vindex org-export-html-table-tag
@@ -9209,7 +9215,7 @@ additional classes.  You can also use @code{#+LATEX_HEADER:
 @cindex tables, in La@TeX{} export
 
 For La@TeX{} export of a table, you can specify a label and a caption
-(@pxref{Markup rules}).  You can also use the @code{ATTR_LaTeX} line to
+(@pxref{Images and tables}).  You can also use the @code{ATTR_LaTeX} line to
 request a longtable environment for the table, so that it may span several
 pages.  Finally, you can set the alignment string:
 
@@ -9234,12 +9240,13 @@ Images that are linked to without a description part in the link, like
 @samp{[[file:img.jpg]]} or @samp{[[./img.jpg]]} will be inserted into the PDF
 output file resulting from La@TeX{} processing.  Org will use an
 @code{\includegraphics} macro to insert the image.  If you have specified a
-caption and/or a label as described in @ref{Markup rules}, the figure will be
-wrapped into a @code{figure} environment and thus become a floating element.
-You can use an @code{#+ATTR_LaTeX:} line to specify the various options that
-can be used in the optional argument of the @code{\includegraphics} macro.
-To modify the placement option of the @code{figure} environment, add
-something like @samp{placement=[h!]} to the Attributes.
+caption and/or a label as described in @ref{Images and tables}, the figure
+will be wrapped into a @code{figure} environment and thus become a floating
+element.  You can use an @code{#+ATTR_LaTeX:} line to specify the various
+options that can be used in the optional argument of the
+@code{\includegraphics} macro.  To modify the placement option of the
+@code{figure} environment, add something like @samp{placement=[h!]} to the
+Attributes.
 
 If you'd like to let text flow around the image, add the word @samp{wrap} to
 the @code{#+ATTR_LaTeX:} line, which will make the figure occupy the left
@@ -9257,7 +9264,7 @@ settings for @code{\includegraphics} and @code{wrapfigure}.
 #+ATTR_LaTeX: width=5cm,angle=90
 [[./img/sed-hr4049.pdf]]
 
-#+ATTR_LaTeX: width=0.38\textwidth wrap placement={r}{0.4\textwidth}
+#+ATTR_LaTeX: width=0.38\textwidth wrap placement=@{r@}@{0.4\textwidth@}
 [[./img/hst.png]]
 @end example
 
@@ -9391,7 +9398,7 @@ Images that are linked to without a description part in the link, like
 @samp{[[file:img.jpg]]} or @samp{[[./img.jpg]]}, will be exported to DocBook
 using @code{mediaobject} elements.  Each @code{mediaobject} element contains
 an @code{imageobject} that wraps an @code{imagedata} element.  If you have
-specified a caption for an image as described in @ref{Markup rules}, a
+specified a caption for an image as described in @ref{Images and tables}, a
 @code{caption} element will be added in @code{mediaobject}.  If a label is
 also specified, it will be exported as an @code{xml:id} attribute of the
 @code{mediaobject} element.
