@@ -306,8 +306,8 @@ agenda view showing the flagged items."
 	(setq target-path (expand-file-name link-name org-mobile-directory)
 	      target-dir (file-name-directory target-path))
 	(unless (file-directory-p target-dir)
-	  (make-directory target-dir 'parents)
-	  (copy-file file target-path 'ok-if-exists))))
+	  (make-directory target-dir 'parents))
+	(copy-file file target-path 'ok-if-exists)))
     (setq file (expand-file-name org-mobile-capture-file
 				 org-mobile-directory))
     (unless (file-exists-p file)
