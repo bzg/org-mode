@@ -50,6 +50,8 @@
 
 (add-to-list 'org-babel-tangle-langs '("haskell" "hs"))
 
+(defvar org-babel-haskell-lhs2tex-command "lhs2tex")
+
 (defvar org-babel-haskell-eoe "\"org-babel-haskell-eoe\"")
 
 (defun org-babel-execute:haskell (body params)
@@ -141,7 +143,6 @@ Note that all standard org-babel literate programming
 constructs (header arguments, no-web syntax etc...) are ignored."
   (interactive)
   (let* ((contents (buffer-string))
-         (lhs2tex-command "~/.cabal/bin/lhs2tex")
          (haskell-regexp
           (concat "^\\([ \t]*\\)#\\+begin_src[ \t]haskell*\\(.*\\)?[\r\n]"
                   "\\([^\000]*?\\)[\r\n][ \t]*#\\+end_src.*"))
@@ -151,6 +152,7 @@ constructs (header arguments, no-web syntax etc...) are ignored."
          (tmp-tex-file (concat tmp-file ".tex"))
          (lhs-file (concat base-name ".lhs"))
          (tex-file (concat base-name ".tex"))
+         (command (concat org-babel-haskell-lhs2tex-command " " lhs-file " > " tex-file))
          indentation)
     ;; escape haskell source-code blocks
     (with-temp-file tmp-org-file
@@ -177,12 +179,8 @@ constructs (header arguments, no-web syntax etc...) are ignored."
     (delete-file tmp-tex-file)
     ;; save org exported latex to a .lhs file
     (with-temp-file lhs-file (insert contents))
-    ;; process .lhs file with lhs2tex and place results in .tex file
-    (with-temp-file tex-file
-      (insert (shell-command-to-string (concat lhs2tex-command " " lhs-file))))
-    (message "created %s and %s"
-             (file-name-nondirectory lhs-file)
-             (file-name-nondirectory tex-file))))
+    ;; process .lhs file with lhs2tex
+    (message "running %s" command) (shell-command command)))
 
 (provide 'org-babel-haskell)
 ;;; org-babel-haskell.el ends here
