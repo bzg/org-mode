@@ -8052,6 +8052,8 @@ Toggle the COMMENT keyword at the beginning of an entry.
 @section Images and Tables
 
 @cindex tables, markup rules
+@cindex #+CAPTION
+@cindex #+LABEL
 Both the native Org mode tables (@pxref{Tables}) and tables formatted with
 the @file{table.el} package will be exported properly.  For Org mode tables,
 the lines before the first horizontal separator line will become table header
@@ -8061,6 +8063,8 @@ a caption and a label for cross references:
 @example
 #+CAPTION: This is the caption for the next table (or link)
 #+LABEL:   tbl:basic-data
+   | ... | ...|
+   |-----|----|
 @end example
 
 @cindex inlined images, markup rules
@@ -8068,11 +8072,13 @@ Some backends (HTML, La@TeX{}, and DocBook) allow you to directly include
 images into the exported document.  Org does this, if a link to an image
 files does not have a description part, for example @code{[[./img/a.jpg]]}.
 If you wish to define a caption for the image and maybe a label for internal
-cross references, you can use (before, but close to the link)
+cross references, you sure that the link is on a line by itself precede it
+with:
 
 @example
 #+CAPTION: This is the caption for the next figure link (or table)
 #+LABEL:   fig:SED-HR4049
+[[./img/a.jpg]]
 @end example
 
 You may also define additional attributes for the figure.  As this is
@@ -8886,6 +8892,7 @@ cell borders and frame.  If you would like to change this for individual
 tables, place somthing like the following before the table:
 
 @cindex #+CAPTION
+@cindex #+ATTR_HTML
 @example
 #+CAPTION: This is a table with lines around and between cells
 #+ATTR_HTML: border="2" rules="all" frame="all"
@@ -8918,6 +8925,7 @@ In the example below we specify the @code{alt} and @code{title} attributes to
 support text viewers and accessibility, and align it to the right.
 
 @cindex #+CAPTION
+@cindex #+ATTR_HTML
 @example
 #+CAPTION: A black cat stalking a spider
 #+ATTR_HTML: alt="cat/spider image" title="Action!" align="right"
