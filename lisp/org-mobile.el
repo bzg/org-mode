@@ -28,14 +28,14 @@
 ;; This file contains the code to interact with Richard Moreland's iPhone
 ;; application MobileOrg.  This code is documented in Appendix B of the
 ;; Org-mode manual.  The code is not specific for the iPhone, however.
-;; Any external viewer and flagging application that uses the same
+;; Any external viewer/flagging/editing application that uses the same
 ;; conventions could be used.
 
 (require 'org)
 (require 'org-agenda)
 
 (defgroup org-mobile nil
-  "Options concerning support for a viewer on a mobile device."
+  "Options concerning support for a viewer/editor on a mobile device."
   :tag "Org Mobile"
   :group 'org)
 
@@ -88,12 +88,30 @@ should point to this file."
   :group 'org-mobile
   :type 'boolean)
 
+(defcustom org-mobile-force-mobile-change nil
+  "Non-nil means, force the change made on the mobile device.
+So even if there have been changes to the computer version of the entry,
+force the new value set on the mobile.
+When nil, mark the entry from the mobile with an error message.
+Instead of nil or t, this variable can also be a list of symbols, indicating
+the editing types for which the mobile version should always dominate."
+  :group 'org-mobile
+  :type '(choice
+	  (const :tag "Always" t)
+	  (const :tag "Never" nil)
+	  (set :greedy t :tag "Specify"
+	       (const todo)
+	       (const tags)
+	       (const priority)
+	       (const heading)
+	       (const body))))
+
 (defcustom org-mobile-action-alist
   '(("d" . (org-todo 'done))
     ("a" . (org-archive-subtree-default))
-    ("d-a" . (progn (org-todo 'done) (org-archive-subtree-default)))
-    ("todo" . (org-todo data))
-    ("tags" . (org-set-tags-to data)))
+    ("d-a" . (progn (org-todo 'done) (run-hooks 'post-command-hook)
+		    (org-archive-subtree-default)))
+    ("edit" . (org-mobile-edit data old new)))
   "Alist with flags and actions for mobile sync.
 When flagging an entry, MobileOrg will create entries that look like
 
@@ -208,7 +226,7 @@ agenda view showing the flagged items."
     (if (not (markerp insertion-marker))
 	(message "No new items")
       (org-with-point-at insertion-marker
-	(org-mobile-apply-flags (point) (point-max)))
+	(org-mobile-apply (point) (point-max)))
       (move-marker insertion-marker nil)
       (run-hooks 'org-mobile-post-pull-hook)
       (when org-mobile-last-flagged-files
@@ -240,7 +258,7 @@ agenda view showing the flagged items."
   (let ((files-alist org-mobile-files-alist)
 	(def-todo (default-value 'org-todo-keywords))
 	(def-tags (default-value 'org-tag-alist))
-	file link-name todo-kwds done-kwds tags drawers entry dwds twds)
+	file link-name todo-kwds done-kwds tags drawers entry kwds dwds twds)
     
     (org-prepare-agenda-buffers (mapcar 'car files-alist))
     (setq done-kwds (org-uniquify org-done-keywords-for-agenda))
@@ -287,6 +305,7 @@ agenda view showing the flagged items."
       (setq tags (append def-tags tags nil))
       (insert "#+TAGS: " (mapconcat 'identity tags " ") "\n")
       (insert "#+DRAWERS: " (mapconcat 'identity drawers " ") "\n")
+      (insert "#+ALLPRIORITIES: A B C" "\n")
       (insert "* [[file:agendas.org][Agenda Views]]\n")
       (while (setq entry (pop files-alist))
 	(setq file (car entry)
@@ -369,10 +388,10 @@ The table of checksums is written to the file mobile-checksums."
 	      settings (nth 4 e))
 	(setq settings
 	      (cons (list 'org-agenda-title-append
-			  (concat "<break>KEYS=" key " TITLE: "
+			  (concat "<after>KEYS=" key " TITLE: "
 				  (if (and (stringp desc) (> (length desc) 0))
 				      desc (symbol-name type))
-				  " " match))
+				  " " match "</after>"))
 		    settings))
 	(push (list type match settings) new))
        ((symbolp (nth 2 e))
@@ -387,12 +406,75 @@ The table of checksums is written to the file mobile-checksums."
 	  (setq settings (append gsettings settings))
 	  (setq settings
 		(cons (list 'org-agenda-title-append
-			    (concat "<break>KEYS=" gkey "#" (number-to-string
+			    (concat "<after>KEYS=" gkey "#" (number-to-string
 						      (setq cnt (1+ cnt)))
-				    " TITLE: " gdesc " " match))
+				    " TITLE: " gdesc " " match "</after>"))
 		      settings))
 	  (push (list type match settings) new)))))
     (list "X" "SUMO" (reverse new) nil)))
+
+(defvar org-mobile-creating-agendas nil)
+(defun org-mobile-write-agenda-for-mobile (file)
+  (let ((all (buffer-string)) in-date id pl prefix line app short m sexp)
+    (with-temp-file file
+      (org-mode)
+      (insert "#+READONLY\n")
+      (insert all)
+      (goto-char (point-min))
+      (while (not (eobp))
+	(cond
+	 ((looking-at "[ \t]*$")) ; keep empty lines
+	 ((looking-at "=+$")
+	  ;; remove underlining
+	  (delete-region (point) (point-at-eol)))
+	 ((get-text-property (point) 'org-agenda-structural-header)
+	  (setq in-date nil)
+	  (setq app (get-text-property (point)
+				       'org-agenda-title-append))
+	  (setq short (get-text-property (point)
+					 'short-heading))
+	  (when (and short (looking-at ".+"))
+	    (replace-match short)
+	    (beginning-of-line 1))
+	  (when app
+	    (end-of-line 1)
+	    (insert app)
+	    (beginning-of-line 1))
+	  (insert "* "))
+	 ((get-text-property (point) 'org-agenda-date-header)
+	  (setq in-date t)
+	  (insert "** "))
+	 ((setq m (or (get-text-property (point) 'org-hd-marker)
+		      (get-text-property (point) 'org-marker)))
+	  (setq sexp (member (get-text-property (point) 'type)
+			     '("diary" "sexp")))
+	  (if (setq pl (get-text-property (point) 'prefix-length))
+	      (progn
+		(setq prefix (org-trim (buffer-substring
+					(point) (+ (point) pl)))
+		      line (org-trim (buffer-substring
+				      (+ (point) pl)
+				      (point-at-eol))))
+		(delete-region (point-at-bol) (point-at-eol))
+		(insert line "<before>" prefix "</before>")
+		(beginning-of-line 1))
+	    (and (looking-at "[ \t]+") (replace-match "")))
+	  (insert (if in-date "***  " "**  "))
+	  (end-of-line 1)
+	  (insert "\n")
+	  (unless sexp
+	    (insert (org-agenda-get-some-entry-text
+		     m 10 "   " 'planning)
+		    "\n")
+	    (when (setq id
+			(if (org-bound-and-true-p
+			     org-mobile-force-id-on-agenda-items)
+			    (org-id-get m 'create)
+			  (org-entry-get m "ID")))
+	      (insert "   :PROPERTIES:\n   :ORIGINAL_ID: " id
+		      "\n   :END:\n")))))
+	(beginning-of-line 2)))
+    (message "Agenda written to Org file %s" file)))
 
 ;;;###autoload
 (defun org-mobile-create-sumo-agenda ()
@@ -402,7 +484,8 @@ The table of checksums is written to the file mobile-checksums."
 				 org-mobile-directory))
 	 (org-agenda-custom-commands
 	  (list (append (org-mobile-sumo-agenda-command)
-			(list (list file))))))
+			(list (list file)))))
+	 (org-mobile-write-agenda-for-mobile t))
     (unless (file-writable-p file)
       (error "Cannot write to file %s" file))
     (org-store-agenda-views)))
@@ -436,67 +519,130 @@ If nothing new has beed added, return nil."
     (kill-buffer capture-buffer)
     (if not-empty insertion-point)))
 
-(defun org-mobile-apply-flags (&optional beg end)
-  "Apply all flags in the current buffer.
+(defun org-mobile-apply (&optional beg end)
+  "Apply all change requests in the current buffer.
 If BEG and END are given, only do this in that region."
   (interactive)
   (require 'org-archive)
   (setq org-mobile-last-flagged-files nil)
   (setq beg (or beg (point-min)) end (or end (point-max)))
   (goto-char beg)
+
+  ;; First, find all the referenced entries
   (let ((marker (make-marker))
-	(org-inhibit-logging 'note)
+	(bos-marker (make-marker))
 	(end (move-marker (make-marker) end))
-	action data id id-pos cmd text)
+	buf-list
+	id-pos org-mobile-error)
     (while (re-search-forward
-	    "^\\*+[ \t]+F(\\([^():\n]*\\)\\(:\\([^()\n]*\\)\\)?)[ \t]+\\[\\[id:\\([^]\n ]+\\)" end t)
-      (goto-char (- (match-beginning 1) 2))
+	    "^\\*+[ \t]+F(\\([^():\n]*\\)\\(:\\([^()\n]*\\)\\)?)[ \t]+\\[\\[\\(\\(id\\|olp\\):\\([^]\n ]+\\)\\)" end t)
+      (setq id-pos (condition-case msg
+		       (org-mobile-locate-entry (match-string 4))
+		     (error (nth 1 msg))))
+      (when (and (markerp id-pos)
+		 (not (member (marker-buffer id-pos) buf-list)))
+	(org-mobile-timestamp-buffer (marker-buffer id-pos))
+	(push (marker-buffer id-pos) buf-list))
+				     
+      (if (or (not id-pos) (stringp id-pos))
+	  (progn
+	    (goto-char (+ 2 (point-at-bol)))
+	    (insert id-pos " "))
+	(add-text-properties (point-at-bol) (point-at-eol)
+			     (list 'org-mobile-marker
+				   (or id-pos "Linked entry not found")))))
+
+    ;; OK, now go back and start applying
+    (goto-char beg)
+    (while (re-search-forward "^\\*+[ \t]+F(\\([^():\n]*\\)\\(:\\([^()\n]*\\)\\)?)" end t)
       (catch 'next
-	(setq action (match-string 1)
-	      data (and (match-end 3) (match-string 3))
-	      id (match-string 4)
-	      cmd (if (equal action "")
-		      '(progn
-			 (org-toggle-tag "FLAGGED" 'on)
-			 (and text (org-entry-put nil "THEFLAGGINGNOTE" text)))
-		    (cdr (assoc action org-mobile-action-alist)))
-	      text (org-trim (buffer-substring (1+ (point-at-eol))
-					       (save-excursion
-						 (org-end-of-subtree t))))
-	      id-pos (org-id-find id 'marker))
-	(if (> (length text) 0)
-	    ;; Make TEXT into a single line, to fit into a property
-	    (setq text (mapconcat 'identity
-				  (org-split-string text "\n")
-				  "\\n"))
-	  (setq text nil))
-	(unless id-pos
-	  (insert "BAD ID REFERENCE ")
-	  (throw 'next t))
-	(unless cmd
-	  (insert "BAD FLAG ")
-	  (throw 'next t))
-	(move-marker marker (point))
-	(save-excursion
-	  (condition-case nil
-	      (org-with-point-at id-pos
-		(progn
+	(setq id-pos (get-text-property (point-at-bol) 'org-mobile-marker))
+	(if (not (markerp id-pos))
+	    (progn
+	      (insert "UNKNOWN PROBLEM"))
+	  (let* ((action (match-string 1))
+		 (data (and (match-end 3) (match-string 3)))
+		 (bos (point-at-bol))
+		 (eos (org-end-of-subtree t t))
+		 (cmd (if (equal action "")
+			  '(progn
+			     (org-toggle-tag "FLAGGED" 'on)
+			     (and note
+				  (org-entry-put nil "THEFLAGGINGNOTE" note)))
+			(cdr (assoc action org-mobile-action-alist))))
+		 (note (and (equal action "")
+			    (buffer-substring (1+ (point-at-eol)) eos)))
+		 (org-inhibit-logging 'note)
+		 old new)
+	    (goto-char bos)
+	    (move-marker bos-marker (point))
+	    (if (re-search-forward "^** Old value[ \t]*$" eos t)
+		(setq old (buffer-substring
+			   (1+ (match-end 0))
+			   (progn (outline-next-heading) (point)))))
+	    (if (re-search-forward "^** New value[ \t]*$" eos t)
+		(setq new (buffer-substring
+			   (1+ (match-end 0))
+			   (progn (outline-next-heading)
+				  (if (eobp) (org-back-over-empty-lines))
+				  (point)))))
+	    (setq old (if (string-match "\\S-" old) old nil))
+	    (setq new (if (string-match "\\S-" new) new nil))
+	    (if (and note (> (length note) 0))
+		;; Make Note into a single line, to fit into a property
+		(setq note (mapconcat 'identity
+				      (org-split-string (org-trim note) "\n")
+				      "\\n")))
+	    (unless (equal data "body")
+	      (setq new (and new (org-trim new))
+		    old (and old (org-trim old))))
+	    (goto-char (+ 2 bos-marker))
+	    (unless (markerp id-pos)
+	      (insert "BAD REFERENCE ")
+	      (throw 'next t))
+	    (unless cmd
+	      (insert "BAD FLAG ")
+	      (throw 'next t))
+	    ;; Remember this place so tha we can return
+	    (move-marker marker (point))
+	    (setq org-mobile-error nil)
+	    (save-excursion
+	      (condition-case msg
+		  (org-with-point-at id-pos
+		    (progn
 		  (eval cmd)
 		  (if (member "FLAGGED" (org-get-tags))
 		      (add-to-list 'org-mobile-last-flagged-files
 				   (buffer-file-name (current-buffer))))))
-	    (error
-	     (progn
-	       (switch-to-buffer (marker-buffer marker))
-	       (goto-char marker)
-	       (insert "EXECUTION FAILED ")
-	       (throw 'next t)))))
-	;; If we get here, the action has been applied successfully
-	;; So remove the entry
-	(org-back-to-heading t)
-	(delete-region (point) (org-end-of-subtree t t))))
+		(error (setq org-mobile-error msg))))
+	    (when org-mobile-error
+	      (switch-to-buffer (marker-buffer marker))
+	      (goto-char marker)
+	      (insert (if (stringp (nth 1 org-mobile-error))
+			  (nth 1 org-mobile-error)
+			"EXECUTION FAILED")
+		      " ")
+	      (throw 'next t))
+	    ;; If we get here, the action has been applied successfully
+	    ;; So remove the entry
+	    (goto-char bos-marker)
+	    (delete-region (point) (org-end-of-subtree t t))))))
     (move-marker marker nil)
     (move-marker end nil)))
+
+(defun org-mobile-timestamp-buffer (buf)
+  "Time stamp buffer BUF, just to make sure its checksum will change."
+  (with-current-buffer buf
+    (save-excursion
+      (save-restriction
+	(widen)
+	(goto-char (point-min))
+	(when (re-search-forward
+	       "^\\([ \t]*\\)#\\+LAST_MOBILE_CHANGE:.*\n?" nil t)
+	  (goto-char (match-end 1))
+	  (delete-region (point) (match-end 0)))
+	(insert "#+LAST_MOBILE_CHANGE: "
+		(format-time-string "%Y-%m-%d %T") "\n")))))
 
 (defun org-mobile-smart-read ()
   "Parse the entry at point for shortcuts and expand them.
@@ -529,6 +675,155 @@ td. kwd                set this todo keyword, change case where necessary
 FIXME: Hmmm, not sure if we can make his work against the
 auto-correction feature.  Needs a bit more thinking.  So this function
 is currently a noop.")
+
+
+(defun org-find-olp (path)
+  "Return  a marker pointing to the entry at outline path OLP.
+If anything goes wrong, the return value will instead an error message,
+as a string."
+  (let* ((file (pop path))
+	 (buffer (find-file-noselect file))
+	 (level 1)
+	 (lmin 1)
+	 (lmax 1)
+	 limit re end found pos heading cnt)
+    (unless buffer (error "File not found :%s" file))
+    (with-current-buffer buffer
+      (save-excursion
+	(save-restriction
+	  (widen)
+	  (setq limit (point-max))
+	  (goto-char (point-min))
+	  (while (setq heading (pop path))
+	    (setq re (format org-complex-heading-regexp-format
+			     (regexp-quote heading)))
+	    (setq cnt 0 pos (point))
+	    (while (re-search-forward re end t)
+	      (setq level (- (match-end 1) (match-beginning 1)))
+	      (if (and (>= level lmin) (<= level lmax))
+		  (setq found (match-beginning 0) cnt (1+ cnt))))
+	    (when (= cnt 0) (error "Heading not found on level %d: %s"
+				   lmax heading))
+	    (when (> cnt 1) (error "Heading not unique on level %d: %s"
+				   lmax heading))
+	    (goto-char found)
+	    (setq lmin (1+ level) lmax (+ lmin (if org-odd-levels-only 1 0)))
+	    (setq end (save-excursion (org-end-of-subtree t t))))
+	  (when (org-on-heading-p)
+	    (throw 'exit (move-marker (make-marker) (point)))))))))
+
+(defun org-mobile-locate-entry (link)
+  (if (string-match "\\`id:\\(.*\\)$" link)
+      (org-id-find (match-string 1 link) 'marker)
+    (if (not (string-match "\\`olp:\\(.*?\\):\\(.*\\)$" link))
+	nil
+      (let ((file (match-string 1 link))
+	    (path (match-string 2 link))
+	    (table '((?: . "%3a") (?\[ . "%5b") (?\] . "%5d") (?/ . "%2f"))))
+	(setq file (org-link-unescape file table))
+	(setq path (mapcar (lambda (x) (org-link-unescape x table))
+			   (org-split-string path "/")))
+	(org-find-olp (cons file path))))))
+
+(defun org-mobile-edit (what old new)
+  "Edit item WHAT in the current entry by replacing OLD wih NEW.
+WHAT can be \"heading\", \"todo\", \"tags\", \"priority\", or \"body\".
+The edit only takes place if the current value is equal (except for
+white space) the OLD.  If this is so, OLD will be replace by NEW
+and the command will return t.  If something goes wrong, a string will
+be returned that indicates what went wrong."
+  (let (current old1 new1)
+    (if (stringp what) (setq what (intern what)))
+    (case what
+
+      ((todo todostate)
+       (setq current (org-get-todo-state))
+       (cond
+	((equal new current) t) ; nothing needs to be done
+	((or (equal current old)
+	     (eq org-mobile-force-mobile-change t)
+	     (memq 'todo org-mobile-force-mobile-change))
+	 (org-todo new) t)
+	(t (error "State before change was expected as \"%s\", but is \"%s\""
+		   old current))))
+      
+      (tags
+       (setq current (org-get-tags)
+	     new1 (and new (org-split-string new ":+"))
+	     old1 (and old (org-split-string old ":+")))
+       (cond
+	((org-mobile-tags-same-p current new1) t) ; no change needed
+	((or (org-mobile-tags-same-p current old1)
+	     (eq org-mobile-force-mobile-change t)
+	     (memq 'tags org-mobile-force-mobile-change))
+	 (org-set-tags-to new1) t)
+	(t (error "State before change was expected as \"%s\", but is \"%s\""
+		  (or old "") (or current "")))))
+
+      (priority
+       (when (looking-at org-complex-heading-regexp)
+	 (setq current (and (match-end 3) (substring (match-string 3) 2 3)))
+	 (cond
+	  ((equal current new) t) ; no action required
+	  ((or (equal current old)
+	       (eq org-mobile-force-mobile-change t)
+	       (memq 'tags org-mobile-force-mobile-change))
+	   (org-priority (and new (string-to-char new))))
+	  (t (error "Priority was expected to be %s, but is %s"
+		    old current)))))
+      (heading
+       (when (looking-at org-complex-heading-regexp)
+	 (setq current (match-string 4))
+	 (cond
+	  ((equal current new) t) ; no action required
+	  ((or (equal current old)
+	       (eq org-mobile-force-mobile-change t)
+	       (memq 'heading org-mobile-force-mobile-change))
+	   (goto-char (match-beginning 4))
+	   (insert new)
+	   (delete-region (point) (+ (point) (length current)))
+	   (org-set-tags nil 'align))
+	  (t (error "Heading changed in MobileOrg and on the computer")))))
+
+      (body
+       (setq current (buffer-substring (min (1+ (point-at-eol)) (point-max))
+				       (save-excursion (outline-next-heading)
+						       (point))))
+       (if (not (string-match "\\S-" current)) (setq current nil))
+       (cond
+	((org-mobile-bodies-same-p current new) t) ; no ation necesary
+	((or (org-mobile-bodies-same-p current old)
+	     (eq org-mobile-force-mobile-change t)
+	     (memq 'body org-mobile-force-mobile-change))
+	 (save-excursion
+	   (end-of-line 1)
+	   (insert "\n" new)
+	   (or (bolp) (insert "\n"))
+	   (delete-region (point) (progn (org-back-to-heading t)
+					 (outline-next-heading)
+					 (point))))
+	 t)
+	(t (error "Body was changed in MobileOrg and on the computer")))))))
+       
+
+(defun org-mobile-tags-same-p (list1 list2)
+  "Are the two tag lists the same?"
+  (not (or (org-delete-all list1 list2)
+	   (org-delete-all list2 list1))))
+
+(defun org-mobile-bodies-same-p (a b)
+  "Compare if A and B are visually equal strings.
+We first remove leading and trailing white space from the entire strings.
+Then we split the strings into lines and remove leading/trailing whitespace
+from each line.  Then we compare.
+A and B must be strings or nil."
+  (cond
+   ((and (not a) (not b)) t)
+   ((or (not a) (not b)) nil)
+   (t (setq a (org-trim a) b (org-trim b))
+      (setq a (mapconcat 'identity (org-split-string a "[ \t]*\n[ \t]*") "\n"))
+      (setq b (mapconcat 'identity (org-split-string b "[ \t]*\n[ \t]*") "\n"))
+      (equal a b))))
 
 (provide 'org-mobile)
 

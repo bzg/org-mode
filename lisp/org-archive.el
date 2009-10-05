@@ -447,7 +447,7 @@ the children that do not contain any open TODO items."
   "Archive the current subtree with the default command.
 This command is set with the variable `org-archive-default-command'."
   (interactive)
-  (call-interactively 'org-archive-default-command))
+  (call-interactively org-archive-default-command))
 
 (provide 'org-archive)
 
