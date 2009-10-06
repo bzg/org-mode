@@ -38,6 +38,8 @@
 ;; - haskell-mode :: http://www.iro.umontreal.ca/~monnier/elisp/#haskell-mode
 ;;
 ;; - inf-haskell :: http://www.iro.umontreal.ca/~monnier/elisp/#haskell-mode
+;;
+;; - (optionally) lhs2tex :: http://people.cs.uu.nl/andres/lhs2tex/
 
 ;;; Code:
 (require 'org-babel)
@@ -47,6 +49,8 @@
 (org-babel-add-interpreter "haskell")
 
 (add-to-list 'org-babel-tangle-langs '("haskell" "hs"))
+
+(defvar org-babel-haskell-lhs2tex-command "lhs2tex")
 
 (defvar org-babel-haskell-eoe "\"org-babel-haskell-eoe\"")
 
@@ -127,6 +131,56 @@ Emacs-lisp table, otherwise return the results as a string."
                                "," " " (replace-regexp-in-string
                                          "'" "\"" results)))))
      results)))
+
+(defun org-babel-haskell-export-to-lhs ()
+  "Export to a .lhs with all haskell code blocks escaped
+appropriately, then process the resulting .lhs file using
+lhs2tex.  This function will create two new files, base-name.lhs
+and base-name.tex where base-name is the name of the current
+org-mode file.
+
+Note that all standard org-babel literate programming
+constructs (header arguments, no-web syntax etc...) are ignored."
+  (interactive)
+  (let* ((contents (buffer-string))
+         (haskell-regexp
+          (concat "^\\([ \t]*\\)#\\+begin_src[ \t]haskell*\\(.*\\)?[\r\n]"
+                  "\\([^\000]*?\\)[\r\n][ \t]*#\\+end_src.*"))
+         (base-name (file-name-sans-extension (buffer-file-name)))
+         (tmp-file (make-temp-file "ob-haskell"))
+         (tmp-org-file (concat tmp-file ".org"))
+         (tmp-tex-file (concat tmp-file ".tex"))
+         (lhs-file (concat base-name ".lhs"))
+         (tex-file (concat base-name ".tex"))
+         (command (concat org-babel-haskell-lhs2tex-command " " lhs-file " > " tex-file))
+         indentation)
+    ;; escape haskell source-code blocks
+    (with-temp-file tmp-org-file
+      (insert contents)
+      (goto-char (point-min))
+      (while (re-search-forward haskell-regexp nil t)
+        (save-match-data (setq indentation (length (match-string 1))))
+        (replace-match (save-match-data (concat
+                                         "#+begin_latex\n\\begin{code}\n"
+                                         (org-remove-indentation (match-string 3))
+                                         "\n\\end{code}\n#+end_latex\n"))
+                       t t)
+        (indent-code-rigidly (match-beginning 0) (match-end 0) indentation)))
+    (save-excursion
+      ;; export to latex w/org and save as .lhs
+      (find-file tmp-org-file) (call-interactively 'org-export-as-latex)
+      (kill-buffer)
+      (delete-file tmp-org-file)
+      (find-file tmp-tex-file)
+      (goto-char (point-min)) (forward-line 2)
+      (insert "%include polycode.fmt\n")
+      (setq contents (buffer-string))
+      (save-buffer) (kill-buffer))
+    (delete-file tmp-tex-file)
+    ;; save org exported latex to a .lhs file
+    (with-temp-file lhs-file (insert contents))
+    ;; process .lhs file with lhs2tex
+    (message "running %s" command) (shell-command command)))
 
 (provide 'org-babel-haskell)
 ;;; org-babel-haskell.el ends here
