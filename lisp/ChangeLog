@@ -1,5 +1,9 @@
 2009-10-06  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-src.el (org-edit-src-code)
+	(org-edit-src-find-region-and-lang, org-edit-src-exit): Handle
+	macro editing.
+
 	* org-agenda.el (org-prefix-category-max-length): New variable.
 	(org-format-agenda-item): Use `org-prefix-category-max-length'.
 	(org-compile-prefix-format): Set `org-prefix-category-max-length'.
