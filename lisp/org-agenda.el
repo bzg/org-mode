@@ -4468,6 +4468,8 @@ The flag is set if the currently compiled format contains a `%T'.")
 The flag is set if the currently compiled format contains a `%e'.")
 (defvar org-prefix-category-length nil
   "Used by `org-compile-prefix-format' to remember the category field widh.")
+(defvar org-prefix-category-max-length nil
+  "Used by `org-compile-prefix-format' to remember the category field widh.")
 
 (defun org-format-agenda-item (extra txt &optional category tags dotime
 				     noprefix remove-re)
@@ -4503,7 +4505,7 @@ Any match of REMOVE-RE will be removed from TXT."
 			   (and org-agenda-search-headline-for-time txt))))
 	   (time-of-day (and dotime (org-get-time-of-day ts)))
 	   stamp plain s0 s1 s2 t1 t2 rtn srp l
-	   duration)
+	   duration thecategory)
       (and (org-mode-p) buffer-file-name
 	   (add-to-list 'org-agenda-contributing-files buffer-file-name))
       (when (and dotime time-of-day)
@@ -4584,23 +4586,28 @@ Any match of REMOVE-RE will be removed from TXT."
 			 (s1 (concat s1 "......"))
 			 (t ""))
 	      extra (or extra "")
-	      category (if (symbolp category) (symbol-name category) category))
-	(when (string-match org-bracket-link-regexp category)
-	  (setq l (if (match-end 3)
-		      (- (match-end 3) (match-beginning 3))
-		    (- (match-end 1) (match-beginning 1))))
-	  (when (< l (or org-prefix-category-length 0))
-	    (setq category (copy-sequence category))
-	    (org-add-props category nil
-	      'extra-space (make-string
-			    (- org-prefix-category-length l 1) ?\ ))))
+	      category (if (symbolp category) (symbol-name category) category)
+	      thecategory (copy-sequence category))
+	(if (string-match org-bracket-link-regexp category)
+	    (progn
+	      (setq l (if (match-end 3)
+			  (- (match-end 3) (match-beginning 3))
+			(- (match-end 1) (match-beginning 1))))
+	      (when (< l (or org-prefix-category-length 0))
+		(setq category (copy-sequence category))
+		(org-add-props category nil
+		  'extra-space (make-string
+				(- org-prefix-category-length l 1) ?\ ))))
+	  (if (and org-prefix-category-max-length
+		   (>= (length category) org-prefix-category-max-length))
+	      (setq category (substring category 0 (1- org-prefix-category-max-length)))))
 	;; Evaluate the compiled format
 	(setq rtn (concat (eval org-prefix-format-compiled) txt)))
 
       ;; And finally add the text properties
       (remove-text-properties 0 (length rtn) '(line-prefix t wrap-prefix t) rtn)
       (org-add-props rtn nil
-	'org-category (downcase category)
+	'org-category (downcase thecategory)
 	'tags (mapcar 'org-downcase-keep-props tags)
 	'org-highest-priority org-highest-priority
 	'org-lowest-priority org-lowest-priority
@@ -4701,10 +4708,15 @@ The resulting form is returned and stored in the variable
       (if (equal var 'time) (setq org-prefix-has-time t))
       (if (equal var 'tag)  (setq org-prefix-has-tag  t))
       (if (equal var 'effort) (setq org-prefix-has-effort t))
-      (if (equal var 'category)
-	  (setq org-prefix-category-length
-		(abs (string-to-number (match-string 2 s)))))
       (setq f (concat "%" (match-string 2 s) "s"))
+      (when (equal var 'category)
+	(setq org-prefix-category-length
+	      (floor (abs (string-to-number (match-string 2 s)))))
+	(setq org-prefix-category-max-length
+	      (let ((x (match-string 2 s)))
+		(save-match-data
+		  (if (string-match "\\.[0-9]+" x)
+		      (string-to-number (substring (match-string 0 x) 1)))))))
       (if opt
 	  (setq varform
 		`(if (equal "" ,var)
