@@ -1,3 +1,9 @@
+2009-10-06  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-agenda.el (org-prefix-category-max-length): New variable.
+	(org-format-agenda-item): Use `org-prefix-category-max-length'.
+	(org-compile-prefix-format): Set `org-prefix-category-max-length'.
+
 2009-10-03  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-mobile.el (org-mobile-create-index-file): Improve the
