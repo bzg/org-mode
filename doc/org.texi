@@ -11694,7 +11694,7 @@ a special capture file, that is only @i{read} by the computer-based system.
 This appendix describes the support Org has for creating agenda views in a
 format that can be displayed by @i{MobileOrg}, and for integrating notes
 captured by @i{MobileOrg} into the main system.  It does not cover the
-operation of @i{MobileOrg} itself (see @uref{http://ncogni.to/mobileorg/}).
+operation of @i{MobileOrg} itself (see @uref{http://mobileorg.ncogni.to/}).
 
 @menu
 * Setting up the staging area::  Where to interact with the mobile device
