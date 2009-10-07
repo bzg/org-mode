@@ -4607,7 +4607,7 @@ Any match of REMOVE-RE will be removed from TXT."
       ;; And finally add the text properties
       (remove-text-properties 0 (length rtn) '(line-prefix t wrap-prefix t) rtn)
       (org-add-props rtn nil
-	'org-category (downcase thecategory)
+	'org-category (if thecategory (downcase thecategory) category)
 	'tags (mapcar 'org-downcase-keep-props tags)
 	'org-highest-priority org-highest-priority
 	'org-lowest-priority org-lowest-priority
