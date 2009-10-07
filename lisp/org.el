@@ -12826,7 +12826,7 @@ user."
 	  month (or (nth 4 tl)
 		    (if (and org-read-date-prefer-future
 			     (nth 3 tl) (< (nth 3 tl) (nth 3 defdecode)))
-			(prog (1+ (nth 4 defdecode)) (setq futurep t))
+			(prog1 (1+ (nth 4 defdecode)) (setq futurep t))
 		      (nth 4 defdecode)))
 	  year (or (nth 5 tl)
 		   (if (and org-read-date-prefer-future
