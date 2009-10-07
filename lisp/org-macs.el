@@ -121,6 +121,8 @@ We use a macro so that the test can happen at compilation time."
   "Execute BODY if there is no `org-protected' text property at POS."
   `(unless (get-text-property ,pos 'org-protected)
      ,@body))
+(put 'org-if-unprotected-at 'lisp-indent-function 1)
+
 
 (defmacro org-with-remote-undo (_buffer &rest _body)
   "Execute BODY while recording undo information in two buffers."

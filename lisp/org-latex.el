@@ -1336,114 +1336,115 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
   "Convert tables to LaTeX and INSERT it."
   (goto-char (point-min))
   (while (re-search-forward "^\\([ \t]*\\)|" nil t)
-    (org-table-align)
-    (let* ((beg (org-table-begin))
-	   (end (org-table-end))
-	   (raw-table (buffer-substring beg end))
-	   (org-table-last-alignment (copy-sequence org-table-last-alignment))
-	   (org-table-last-column-widths (copy-sequence
-					  org-table-last-column-widths))
-	   fnum fields line lines olines gr colgropen line-fmt align
-	   caption label attr floatp longtblp)
-      (if org-export-latex-tables-verbatim
-	  (let* ((tbl (concat "\\begin{verbatim}\n" raw-table
-			      "\\end{verbatim}\n")))
-	    (apply 'delete-region (list beg end))
-	    (insert (org-export-latex-protect-string tbl)))
-	(progn
-	  (setq caption (org-find-text-property-in-string
-			 'org-caption raw-table)
-		attr (org-find-text-property-in-string
-		      'org-attributes raw-table)
-		label (org-find-text-property-in-string
-		       'org-label raw-table)
-		longtblp (and attr (stringp attr)
-			      (string-match "\\<longtable\\>" attr))
-		align (and attr (stringp attr)
-			   (string-match "\\<align=\\([^ \t\n\r,]+\\)" attr)
-			   (match-string 1 attr))
-		floatp (or caption label))
-	  (setq lines (org-split-string raw-table "\n"))
-	  (apply 'delete-region (list beg end))
-	  (when org-export-table-remove-special-lines
-	    (setq lines (org-table-clean-before-export lines 'maybe-quoted)))
-	  (when org-table-clean-did-remove-column
+    (org-if-unprotected-at (1- (point))
+      (org-table-align)
+      (let* ((beg (org-table-begin))
+             (end (org-table-end))
+             (raw-table (buffer-substring beg end))
+             (org-table-last-alignment (copy-sequence org-table-last-alignment))
+             (org-table-last-column-widths (copy-sequence
+                                            org-table-last-column-widths))
+             fnum fields line lines olines gr colgropen line-fmt align
+             caption label attr floatp longtblp)
+        (if org-export-latex-tables-verbatim
+            (let* ((tbl (concat "\\begin{verbatim}\n" raw-table
+                                "\\end{verbatim}\n")))
+              (apply 'delete-region (list beg end))
+              (insert (org-export-latex-protect-string tbl)))
+          (progn
+            (setq caption (org-find-text-property-in-string
+                           'org-caption raw-table)
+                  attr (org-find-text-property-in-string
+                        'org-attributes raw-table)
+                  label (org-find-text-property-in-string
+                         'org-label raw-table)
+                  longtblp (and attr (stringp attr)
+                                (string-match "\\<longtable\\>" attr))
+                  align (and attr (stringp attr)
+                             (string-match "\\<align=\\([^ \t\n\r,]+\\)" attr)
+                             (match-string 1 attr))
+                  floatp (or caption label))
+            (setq lines (org-split-string raw-table "\n"))
+            (apply 'delete-region (list beg end))
+            (when org-export-table-remove-special-lines
+              (setq lines (org-table-clean-before-export lines 'maybe-quoted)))
+            (when org-table-clean-did-remove-column
 	      (pop org-table-last-alignment)
 	      (pop org-table-last-column-widths))
-	  ;; make a formatting string to reflect aligment
-	  (setq olines lines)
-	  (while (and (not line-fmt) (setq line (pop olines)))
-	    (unless (string-match "^[ \t]*|-" line)
-	      (setq fields (org-split-string line "[ \t]*|[ \t]*"))
-	      (setq fnum (make-vector (length fields) 0))
-	      (setq line-fmt
-		    (mapconcat
-		     (lambda (x)
-		       (setq gr (pop org-table-colgroup-info))
-		       (format "%s%%s%s"
-			       (cond ((eq gr :start)
-				      (prog1 (if colgropen "|" "|")
-					(setq colgropen t)))
-				     ((eq gr :startend)
-				      (prog1 (if colgropen "|" "|")
-					(setq colgropen nil)))
-				     (t ""))
-			       (if (memq gr '(:end :startend))
-				   (progn (setq colgropen nil) "|")
-				 "")))
-		     fnum ""))))
-	  ;; fix double || in line-fmt
-	  (setq line-fmt (replace-regexp-in-string "||" "|" line-fmt))
-	  ;; maybe remove the first and last "|"
-	  (when (and (not org-export-latex-tables-column-borders)
-		     (string-match "^\\(|\\)?\\(.+\\)|$" line-fmt))
-	    (setq line-fmt (match-string 2 line-fmt)))
-	  ;; format alignment
-	  (unless align
-	    (setq align (apply 'format
-			       (cons line-fmt
-				     (mapcar (lambda (x) (if x "r" "l"))
-					     org-table-last-alignment)))))
-	  ;; prepare the table to send to orgtbl-to-latex
-	  (setq lines
-		(mapcar
-		 (lambda(elem)
-		   (or (and (string-match "[ \t]*|-+" elem) 'hline)
-		       (org-split-string (org-trim elem) "|")))
-		 lines))
-	  (when insert
-	    (insert (org-export-latex-protect-string
-		     (concat
-		      (if longtblp
-			  (concat "\\begin{longtable}{" align "}\n")
-			(if floatp "\\begin{table}[htb]\n"))
-		      (if (or floatp longtblp)
-			  (format
-			   "\\caption{%s%s}"
-			   (if label (concat "\\\label{" label "}") "")
-			   (or caption "")))
-		      (if longtblp "\\\\\n" "\n")
-		      (if (and org-export-latex-tables-centered (not longtblp))
-			  "\\begin{center}\n")
-		      (if (not longtblp) (concat "\\begin{tabular}{" align "}\n"))
-		      (orgtbl-to-latex
-		       lines
-		       `(:tstart nil :tend nil
-				 :hlend ,(if longtblp
-					     (format "\\\\
+            ;; make a formatting string to reflect aligment
+            (setq olines lines)
+            (while (and (not line-fmt) (setq line (pop olines)))
+              (unless (string-match "^[ \t]*|-" line)
+                (setq fields (org-split-string line "[ \t]*|[ \t]*"))
+                (setq fnum (make-vector (length fields) 0))
+                (setq line-fmt
+                      (mapconcat
+                       (lambda (x)
+                         (setq gr (pop org-table-colgroup-info))
+                         (format "%s%%s%s"
+                                 (cond ((eq gr :start)
+                                        (prog1 (if colgropen "|" "|")
+                                          (setq colgropen t)))
+                                       ((eq gr :startend)
+                                        (prog1 (if colgropen "|" "|")
+                                          (setq colgropen nil)))
+                                       (t ""))
+                                 (if (memq gr '(:end :startend))
+                                     (progn (setq colgropen nil) "|")
+                                   "")))
+                       fnum ""))))
+            ;; fix double || in line-fmt
+            (setq line-fmt (replace-regexp-in-string "||" "|" line-fmt))
+            ;; maybe remove the first and last "|"
+            (when (and (not org-export-latex-tables-column-borders)
+                       (string-match "^\\(|\\)?\\(.+\\)|$" line-fmt))
+              (setq line-fmt (match-string 2 line-fmt)))
+            ;; format alignment
+            (unless align
+              (setq align (apply 'format
+                                 (cons line-fmt
+                                       (mapcar (lambda (x) (if x "r" "l"))
+                                               org-table-last-alignment)))))
+            ;; prepare the table to send to orgtbl-to-latex
+            (setq lines
+                  (mapcar
+                   (lambda(elem)
+                     (or (and (string-match "[ \t]*|-+" elem) 'hline)
+                         (org-split-string (org-trim elem) "|")))
+                   lines))
+            (when insert
+              (insert (org-export-latex-protect-string
+                       (concat
+                        (if longtblp
+                            (concat "\\begin{longtable}{" align "}\n")
+                          (if floatp "\\begin{table}[htb]\n"))
+                        (if (or floatp longtblp)
+                            (format
+                             "\\caption{%s%s}"
+                             (if label (concat "\\\label{" label "}") "")
+                             (or caption "")))
+                        (if longtblp "\\\\\n" "\n")
+                        (if (and org-export-latex-tables-centered (not longtblp))
+                            "\\begin{center}\n")
+                        (if (not longtblp) (concat "\\begin{tabular}{" align "}\n"))
+                        (orgtbl-to-latex
+                         lines
+                         `(:tstart nil :tend nil
+                                   :hlend ,(if longtblp
+                                               (format "\\\\
 \\hline
 \\endhead
 \\hline\\multicolumn{%d}{r}{Continued on next page}\\
 \\endfoot
 \\endlastfoot" (length org-table-last-alignment))
-					   nil)))
-		      (if (not longtblp) (concat "\n\\end{tabular}"))
-		      (if longtblp "\n" (if org-export-latex-tables-centered
-					    "\n\\end{center}\n" "\n"))
-		      (if longtblp
-			  "\\end{longtable}"
-			(if floatp "\\end{table}"))))
-		    "\n\n")))))))
+                                             nil)))
+                        (if (not longtblp) (concat "\n\\end{tabular}"))
+                        (if longtblp "\n" (if org-export-latex-tables-centered
+                                              "\n\\end{center}\n" "\n"))
+                        (if longtblp
+                            "\\end{longtable}"
+                          (if floatp "\\end{table}"))))
+                      "\n\n"))))))))
 
 (defun org-export-latex-fontify ()
   "Convert fontification to LaTeX."

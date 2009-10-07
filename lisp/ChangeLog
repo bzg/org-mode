@@ -1,3 +1,8 @@
+2009-10-07  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-latex.el (org-export-latex-tables): Don't format in
+	protected regions.
+
 2009-10-06  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-src.el (org-edit-src-code)
