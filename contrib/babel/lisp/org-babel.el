@@ -366,13 +366,14 @@ may be specified in the properties of the current outline entry."
 (defun org-babel-parse-src-block-match ()
   (let* ((lang (org-babel-clean-text-properties (match-string 1)))
          (lang-headers (intern (concat "org-babel-default-header-args:" lang)))
-         (body (org-babel-clean-text-properties (match-string 4))))
+         (body (org-babel-clean-text-properties (match-string 4)))
+	 (preserve-indentation org-src-preserve-indentation))
     (list lang
           ;; get src block body removing properties, protective commas, and indentation
           (with-temp-buffer
             (save-match-data
               (insert (org-babel-strip-protective-commas body))
-              (org-do-remove-indentation)
+	      (unless preserve-indentation (org-do-remove-indentation))
               (buffer-string)))
 	  (org-babel-merge-params
 	   org-babel-default-header-args
