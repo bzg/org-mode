@@ -10269,6 +10269,7 @@ be removed."
 		(skip-chars-backward " ")
 		(if (looking-at " +") (replace-match ""))))
 	    (goto-char (point-max))
+	    (and org-adapt-indentation (bolp) (org-indent-to-column col))
 	    (when what
 	      (insert
 	       (if (not (or (bolp) (eq (char-before) ?\ ))) " " "")
