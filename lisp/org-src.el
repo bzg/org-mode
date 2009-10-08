@@ -92,7 +92,7 @@ These are the regions where each line starts with a colon."
   :type 'boolean)
 
 (defcustom org-edit-src-content-indentation 2
-  "Indentation for the content is a source code block.
+  "Indentation for the content of a source code block.
 This should be the number of spaces added to the indentation of the #+begin
 line in order to compute the indentation of the block content after
 editing it with \\[org-edit-src-code]. Has no effect if
@@ -363,7 +363,7 @@ the fragment in the Org-mode buffer."
 (defun org-edit-src-find-region-and-lang ()
   "Find the region and language for a local edit.
 Return a list with beginning and end of the region, a string representing
-the language, a switch telling of the content should be in a single line."
+the language, a switch telling if the content should be in a single line."
   (let ((re-list
 	 (append
 	  org-edit-src-region-extra
@@ -444,7 +444,7 @@ the language, a switch telling of the content should be in a single line."
 	(match-string 1 s))))
 
 (defun org-edit-src-get-indentation (pos)
-  "Extract the label format."
+  "Count leading whitespace characters on line"
   (save-match-data
     (goto-char pos)
     (org-get-indentation)))
