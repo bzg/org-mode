@@ -174,6 +174,10 @@ constructs (header arguments, no-web syntax etc...) are ignored."
       (find-file tmp-tex-file)
       (goto-char (point-min)) (forward-line 2)
       (insert "%include polycode.fmt\n")
+      ;; ensure all \begin/end{code} statements start at the first column
+      (while (re-search-forward "^[ \t]+\\\\begin{code}[^\000]+\\\\end{code}" nil t)
+        (replace-match (save-match-data (org-remove-indentation (match-string 0)))
+                       t t))
       (setq contents (buffer-string))
       (save-buffer) (kill-buffer))
     (delete-file tmp-tex-file)
