@@ -164,6 +164,7 @@ This will remove the original code in the Org buffer, and replace it with
 the edited version."
   (interactive)
   (let ((line (org-current-line))
+	(col (current-column))
 	(case-fold-search t)
 	(msg (substitute-command-keys
 	      "Edit, then exit with C-c ' (C-c and single quote)"))
@@ -230,6 +231,8 @@ the edited version."
 	  (while (re-search-forward "^," nil t)
 	    (replace-match "")))
 	(org-goto-line (1+ (- line begline)))
+	(org-move-to-column
+	 (if preserve-indentation col (max 0 (- col total-nindent))))
 	(org-set-local 'org-edit-src-beg-marker beg)
 	(org-set-local 'org-edit-src-end-marker end)
 	(org-set-local 'org-edit-src-overlay ovl)
@@ -277,6 +280,7 @@ exit with \\[org-edit-src-exit].  The edited text will then replace
 the fragment in the Org-mode buffer."
   (interactive)
   (let ((line (org-current-line))
+	(col (current-column))
 	(case-fold-search t)
 	(msg (substitute-command-keys
 	      "Edit, then exit with C-c ' (C-c and single quote)"))
@@ -342,6 +346,7 @@ the fragment in the Org-mode buffer."
 	(while (re-search-forward "^[ \t]*: ?" nil t)
 	  (replace-match ""))
 	(org-goto-line (1+ (- line begline)))
+	(org-move-to-column (max 0 (- col block-nindent 2)))
 	(org-set-local 'org-edit-src-beg-marker beg)
 	(org-set-local 'org-edit-src-end-marker end)
 	(org-set-local 'org-edit-src-overlay ovl)
@@ -458,7 +463,7 @@ the language, a switch telling of the content should be in a single line."
 	 (total-nindent (+ (or org-edit-src-block-indentation 0)
 			   org-edit-src-content-indentation))
 	 (preserve-indentation org-src-preserve-indentation)
-	 code line indent)
+	 code line col indent)
     (untabify (point-min) (point-max))
     (save-excursion
       (goto-char (point-min))
@@ -467,7 +472,8 @@ the language, a switch telling of the content should be in a single line."
 	(if (re-search-forward "\n[ \t\n]*\\'" nil t) (replace-match ""))))
     (setq line (if (org-bound-and-true-p org-edit-src-force-single-line)
 		   1
-		 (org-current-line)))
+		 (org-current-line))
+	  col (current-column))
     (when single
       (goto-char (point-min))
       (if (re-search-forward "\\s-+\\'" nil t) (replace-match ""))
@@ -508,6 +514,7 @@ the language, a switch telling of the content should be in a single line."
     (goto-char beg)
     (if single (just-one-space))
     (org-goto-line (1- (+ (org-current-line) line)))
+    (org-move-to-column (if preserve-indentation col (+ col total-nindent)))
     (move-marker beg nil)
     (move-marker end nil)))
 
