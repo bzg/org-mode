@@ -132,16 +132,16 @@ Emacs-lisp table, otherwise return the results as a string."
                                          "'" "\"" results)))))
      results)))
 
-(defun org-babel-haskell-export-to-lhs ()
+(defun org-babel-haskell-export-to-lhs (&optional arg)
   "Export to a .lhs with all haskell code blocks escaped
-appropriately, then process the resulting .lhs file using
-lhs2tex.  This function will create two new files, base-name.lhs
-and base-name.tex where base-name is the name of the current
-org-mode file.
+appropriately.  When called with a prefix argument the resulting
+.lhs file will be exported to a .tex file.  This function will
+create two new files, base-name.lhs and base-name.tex where
+base-name is the name of the current org-mode file.
 
 Note that all standard org-babel literate programming
 constructs (header arguments, no-web syntax etc...) are ignored."
-  (interactive)
+  (interactive "P")
   (let* ((contents (buffer-string))
          (haskell-regexp
           (concat "^\\([ \t]*\\)#\\+begin_src[ \t]haskell*\\(.*\\)?[\r\n]"
@@ -168,7 +168,7 @@ constructs (header arguments, no-web syntax etc...) are ignored."
         (indent-code-rigidly (match-beginning 0) (match-end 0) indentation)))
     (save-excursion
       ;; export to latex w/org and save as .lhs
-      (find-file tmp-org-file) (call-interactively 'org-export-as-latex)
+      (find-file tmp-org-file) (funcall 'org-export-as-latex nil)
       (kill-buffer)
       (delete-file tmp-org-file)
       (find-file tmp-tex-file)
@@ -183,8 +183,10 @@ constructs (header arguments, no-web syntax etc...) are ignored."
     (delete-file tmp-tex-file)
     ;; save org exported latex to a .lhs file
     (with-temp-file lhs-file (insert contents))
-    ;; process .lhs file with lhs2tex
-    (message "running %s" command) (shell-command command)))
+    (if (not arg)
+        (find-file lhs-file)
+      ;; process .lhs file with lhs2tex
+      (message "running %s" command) (shell-command command) (find-file tex-file))))
 
 (provide 'org-babel-haskell)
 ;;; org-babel-haskell.el ends here
