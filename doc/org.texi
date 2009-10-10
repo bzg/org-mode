@@ -7420,10 +7420,10 @@ This is a globally available command, and also available in the agenda menu.
 Write the agenda view to a file.  Depending on the extension of the selected
 file name, the view will be exported as HTML (extension @file{.html} or
 @file{.htm}), Postscript (extension @file{.ps}), PDF (extension @file{.pdf}),
-Org-mode (extension @file{.org}), and plain text (any other extension).  When
-called with a @kbd{C-u} prefix argument, immediately open the newly created
-file.  Use the variable @code{org-agenda-exporter-settings} to set options
-for @file{ps-print} and for @file{htmlize} to be used during export.
+and plain text (any other extension).  When called with a @kbd{C-u} prefix
+argument, immediately open the newly created file.  Use the variable
+@code{org-agenda-exporter-settings} to set options for @file{ps-print} and
+for @file{htmlize} to be used during export.
 
 @tsubheading{Quit and Exit}
 @kindex q
@@ -7650,10 +7650,9 @@ you want to do this only occasionally, use the command
 Write the agenda view to a file.  Depending on the extension of the selected
 file name, the view will be exported as HTML (extension @file{.html} or
 @file{.htm}), Postscript (extension @file{.ps}), iCalendar (extension
-@file{.ics}), Org-mode (extension @file{.org}), or plain text (any other
-extension).  Use the variable @code{org-agenda-exporter-settings} to set
-options for @file{ps-print} and for @file{htmlize} to be used during export,
-for example
+@file{.ics}), or plain text (any other extension).  Use the variable
+@code{org-agenda-exporter-settings} to set options for @file{ps-print} and
+for @file{htmlize} to be used during export, for example
 
 @vindex org-agenda-add-entry-text-maxlines
 @vindex htmlize-output-type
@@ -11684,17 +11683,15 @@ The following example counts the number of entries with TODO keyword
 @cindex MobileOrg
 
 @i{MobileOrg} is an application for the @i{iPhone/iPod Touch} series of
-devices, developed by Richard Moreland.  Instead of trying to implement the
-full feature set of Org and fighting with synchronization issues, this
-application chooses a different path.  @i{MobileOrg} provides offline viewing
-and capture support for an Org-mode system rooted on a ``real'' computer.
-Synchronization issues are avoided by making @i{MobileOrg} only @i{write} to
-a special capture file, that is only @i{read} by the computer-based system.
+devices, developed by Richard Moreland.  @i{MobileOrg} offers offline viewing
+and capture support for an Org-mode system rooted on a ``real'' computer.  It
+does also allow you to edit existing entries.
 
 This appendix describes the support Org has for creating agenda views in a
 format that can be displayed by @i{MobileOrg}, and for integrating notes
-captured by @i{MobileOrg} into the main system.  It does not cover the
-operation of @i{MobileOrg} itself (see @uref{http://mobileorg.ncogni.to/}).
+captured and changes made by @i{MobileOrg} into the main system.  It does not
+cover the operation of @i{MobileOrg} itself (see
+@uref{http://mobileorg.ncogni.to/}).
 
 @menu
 * Setting up the staging area::  Where to interact with the mobile device

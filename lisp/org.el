@@ -9511,6 +9511,8 @@ For calling through lisp, arg is also interpreted in the following way:
 			    (or (car (cdr (member head org-todo-heads)))
 				(car org-todo-heads))))
 			 ((car (member arg org-todo-keywords-1)))
+			 ((stringp arg)
+			  (error "State `%s' not valid in this file" arg))
 			 ((nth (1- (prefix-numeric-value arg))
 			       org-todo-keywords-1))))
 		       ((null member) (or head (car org-todo-keywords-1)))

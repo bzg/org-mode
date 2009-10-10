@@ -53,6 +53,7 @@
 (declare-function calendar-mayan-date-string    "cal-mayan"  (&optional date))
 (declare-function calendar-persian-date-string  "cal-persia" (&optional date))
 (declare-function org-columns-quit              "org-colview" ())
+(declare-function org-mobile-write-agenda-for-mobile "org-mobile" (file))
 (defvar calendar-mode-map)
 (defvar org-mobile-force-id-on-agenda-items) ; defined in org-mobile.el
 
@@ -2212,7 +2213,7 @@ so the export commands can easily use it."
       (put-text-property (point-at-bol) (point-at-eol)
 			 'org-agenda-title-append org-agenda-title-append))))
 
-
+(defvar org-mobile-creating-agendas)
 (defun org-write-agenda (file &optional open nosettings)
   "Write the current buffer (an agenda view) as a file.
 Depending on the extension of the file name, plain text (.txt),
@@ -2235,7 +2236,7 @@ higher priority settings."
     '(save-excursion
        (save-window-excursion
 	 (org-agenda-mark-filtered-text)
-	 (let ((bs (copy-sequence (buffer-string))) beg app)
+	 (let ((bs (copy-sequence (buffer-string))) beg)
 	   (org-agenda-unmark-filtered-text)
 	   (with-temp-buffer
 	     (insert bs)
@@ -2247,6 +2248,8 @@ higher priority settings."
 			(point-max))))
 	     (run-hooks 'org-agenda-before-write-hook)
 	     (cond
+	      ((org-bound-and-true-p org-mobile-creating-agendas)
+	       (org-mobile-write-agenda-for-mobile))
 	      ((string-match "\\.html?\\'" file)
 	       (set-buffer (htmlize-buffer (current-buffer)))
 
@@ -2275,63 +2278,6 @@ higher priority settings."
 			      (concat (file-name-sans-extension file) ".ps"))
 			     (expand-file-name file))
 	       (message "PDF written to %s" file))
-	      ((string-match "\\.org\\'" file)
-	       (let ((all (buffer-string)) in-date id pl prefix line)
-		 (with-temp-file file
-		   (org-mode)
-		   (insert all)
-		   (goto-char (point-min))
-		   (while (not (eobp))
-		     (cond
-		      ((looking-at "[ \t]*$")) ; keep empty lines
-		      ((looking-at "=+$")
-		       ;; remove underlining
-		       (delete-region (point) (point-at-eol)))
-		      ((get-text-property (point) 'org-agenda-structural-header)
-		       (setq in-date nil)
-		       (setq app (get-text-property (point)
-						     'org-agenda-title-append))
-		       (setq short (get-text-property (point)
-						      'short-heading))
-		       (when (and short (looking-at ".+"))
-			 (replace-match short)
-			 (beginning-of-line 1))
-		       (when app
-			 (end-of-line 1)
-			 (insert app)
-			 (beginning-of-line 1))
-		       (insert "* "))
-		      ((get-text-property (point) 'org-agenda-date-header)
-		       (setq in-date t)
-		       (insert "** "))
-		      ((setq m (or (get-text-property (point) 'org-hd-marker)
-				   (get-text-property (point) 'org-marker)))
-		       (if (setq pl (get-text-property (point) 'prefix-length))
-			   (progn
-			     (setq prefix (org-trim (buffer-substring
-						     (point) (+ (point) pl)))
-				   line (org-trim (buffer-substring
-						   (+ (point) pl)
-						   (point-at-eol))))
-			     (delete-region (point-at-bol) (point-at-eol))
-			     (insert line "<break>" prefix)
-			     (beginning-of-line 1))
-			 (and (looking-at "[ \t]+") (replace-match "")))
-		       (insert (if in-date "***  " "**  "))
-		       (end-of-line 1)
-		       (insert "\n")
-		       (insert (org-agenda-get-some-entry-text
-				m 10 "   " 'planning)
-			       "\n")
-		       (when (setq id
-				   (if (org-bound-and-true-p
-					org-mobile-force-id-on-agenda-items)
-				       (org-id-get m 'create)
-				     (org-entry-get m "ID")))
-			 (insert "   :PROPERTIES:\n   :ORIGINAL_ID: " id
-				 "\n   :END:\n"))))
-		     (beginning-of-line 2)))
-		 (message "Agenda written to Org file %s" file)))
 	      ((string-match "\\.ics\\'" file)
 	       (require 'org-icalendar)
 	       (let ((org-agenda-marker-table
