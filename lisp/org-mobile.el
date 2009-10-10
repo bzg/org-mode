@@ -278,6 +278,7 @@ agenda view showing the flagged items."
     (with-temp-file
 	(expand-file-name org-mobile-index-file org-mobile-directory)
       (while (setq entry (pop def-todo))
+	(insert "#+READONLY\n")
 	(setq kwds (mapcar (lambda (x) (if (string-match "(" x)
 					   (substring x 0 (match-beginning 0))
 					 x))
