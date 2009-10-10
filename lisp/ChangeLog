@@ -1,3 +1,8 @@
+2009-10-10  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-exp.el (org-export-handle-export-tags): Remove inlinetask
+	END if present.
+
 2009-10-07  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-latex.el (org-export-latex-tables): Don't format in

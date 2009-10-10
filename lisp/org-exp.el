@@ -1603,8 +1603,10 @@ removed as well."
 	(when (org-at-heading-p)
 	  (org-back-to-heading t)
 	  (setq beg (point))
-	  (org-end-of-subtree t)
-	  (delete-region beg (point)))))
+	  (org-end-of-subtree t t)
+	  (delete-region beg (point))
+	  (when (featurep 'org-inlinetask)
+	    (org-inlinetask-remove-END-maybe)))))
     ;; Remove everything that is now still marked for deletion
     (goto-char (point-min))
     (while (setq beg (text-property-any (point-min) (point-max) :org-delete t))
