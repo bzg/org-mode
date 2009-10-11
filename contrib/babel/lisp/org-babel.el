@@ -674,6 +674,8 @@ parameters when merging lists."
 	 '(("file" "vector" "table" "scalar" "raw" "org" "html" "latex" "code" "pp")
 	   ("replace" "silent")
 	   ("output" "value")))
+	(exports-exclusive-groups
+	 '(("code" "results" "both" "none")))
 	params results exports tangle vars var ref)
     (flet ((e-merge (exclusive-groups &rest result-params)
                     ;; maintain exclusivity of mutually exclusive parameters
@@ -706,9 +708,11 @@ parameters when merging lists."
 			(:file
 			 (when (cdr pair)
 			   (setq results (e-merge results-exclusive-groups results '("file")))
+			   (unless (or (member "both" exports) (member "none" exports))
+			     (setq exports (e-merge exports-exclusive-groups exports '("results"))))
 			   (setq params (cons pair (assq-delete-all (car pair) params)))))
                         (:exports
-                         (setq exports (e-merge '(("code" "results" "both" "none"))
+                         (setq exports (e-merge exports-exclusive-groups
                                                 exports (split-string (cdr pair)))))
                         (:tangle
                          (setq tangle (e-merge '(("yes" "no"))
