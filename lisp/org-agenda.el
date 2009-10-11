@@ -2249,7 +2249,7 @@ higher priority settings."
 	     (run-hooks 'org-agenda-before-write-hook)
 	     (cond
 	      ((org-bound-and-true-p org-mobile-creating-agendas)
-	       (org-mobile-write-agenda-for-mobile))
+	       (org-mobile-write-agenda-for-mobile file))
 	      ((string-match "\\.html?\\'" file)
 	       (set-buffer (htmlize-buffer (current-buffer)))
 

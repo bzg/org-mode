@@ -312,9 +312,7 @@ agenda view showing the flagged items."
 	(setq file (car entry)
 	      link-name (cdr entry))
 	(insert (format "* [[file:%s][%s]]\n"
-			link-name link-name)))
-      (insert (format "* [[file:%s][Captured before last sync]]\n"
-		      org-mobile-capture-file)))))
+			link-name link-name))))))
 
 (defun org-mobile-copy-agenda-files ()
   "Copy all agenda files to the stage or WebDAV directory."
@@ -486,7 +484,7 @@ The table of checksums is written to the file mobile-checksums."
 	 (org-agenda-custom-commands
 	  (list (append (org-mobile-sumo-agenda-command)
 			(list (list file)))))
-	 (org-mobile-write-agenda-for-mobile t))
+	 (org-mobile-creating-agendas t))
     (unless (file-writable-p file)
       (error "Cannot write to file %s" file))
     (org-store-agenda-views)))
