@@ -229,6 +229,7 @@ the edited version."
 	(when org-mode-p
 	  (goto-char (point-min))
 	  (while (re-search-forward "^," nil t)
+	    (if (eq (org-current-line) line) (setq total-nindent (1+ total-nindent)))
 	    (replace-match "")))
 	(org-goto-line (1+ (- line begline)))
 	(org-move-to-column
@@ -463,7 +464,7 @@ the language, a switch telling if the content should be in a single line."
 	 (total-nindent (+ (or org-edit-src-block-indentation 0)
 			   org-edit-src-content-indentation))
 	 (preserve-indentation org-src-preserve-indentation)
-	 code line col indent)
+	 (delta 0) code line col indent)
     (untabify (point-min) (point-max))
     (save-excursion
       (goto-char (point-min))
@@ -490,6 +491,7 @@ the language, a switch telling if the content should be in a single line."
       (goto-char (point-min))
       (while (re-search-forward
 	      (if (org-mode-p) "^\\(.\\)" "^\\([*]\\|[ \t]*#\\+\\)") nil t)
+	(if (eq (org-current-line) line) (setq delta (1+ delta)))
 	(replace-match ",\\1")))
     (when (org-bound-and-true-p org-edit-src-picture)
       (setq preserve-indentation nil)
@@ -514,7 +516,7 @@ the language, a switch telling if the content should be in a single line."
     (goto-char beg)
     (if single (just-one-space))
     (org-goto-line (1- (+ (org-current-line) line)))
-    (org-move-to-column (if preserve-indentation col (+ col total-nindent)))
+    (org-move-to-column (if preserve-indentation col (+ col total-nindent delta)))
     (move-marker beg nil)
     (move-marker end nil)))
 
