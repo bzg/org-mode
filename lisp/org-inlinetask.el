@@ -93,6 +93,12 @@ the value of this variable."
   :group 'org-inlinetask
   :type 'boolean)
 
+(defcustom org-inlinetask-export nil
+  "Non-nil means, export inline tasts.
+When nil, they will not be exported."
+  :group 'org-inlinetask
+  :type 'boolean)
+
 (defvar org-odd-levels-only)
 (defvar org-keyword-time-regexp)
 (defvar org-drawer-regexp)
@@ -139,30 +145,31 @@ Either remove headline and meta data, or do special formatting."
 	(setq content (buffer-substring beg (1- (point-at-bol))))
 	(delete-region beg (1+ (match-end 0))))
       (goto-char beg)
-      (when (string-match org-complex-heading-regexp headline)
-	(setq headline (concat
-			(if (match-end 2)
-			    (concat (match-string 2 headline) " ") "")
-			(match-string 4 headline)))
-	(when content
-	  (if (not (string-match "\\S-" content))
-	      (setq content nil)
-	    (if (string-match "[ \t\n]+\\'" content)
-		(setq content (substring content 0 (match-beginning 0))))
-	    (setq content (org-remove-indentation content))
-	    (if latexp (setq content (concat "\\quad \\\\\n" content)))))
-	(insert (make-string (org-inlinetask-get-current-indentation) ?\ )
-		"- ")
-	(setq indent (make-string (current-column) ?\ ))
-	(insert headline " ::")
-	(if content
-	    (insert (if htmlp " " (concat "\n" indent))
-		    (mapconcat 'identity (org-split-string content "\n")
-			       (concat "\n" indent)) "\n")
-	  (insert "\n"))
-	(insert indent)
-	(backward-delete-char 2)
-	(insert "THISISTHEINLINELISTTEMINATOR\n")))))
+      (when org-inlinetask-export
+	(when (string-match org-complex-heading-regexp headline)
+	  (setq headline (concat
+			  (if (match-end 2)
+			      (concat (match-string 2 headline) " ") "")
+			  (match-string 4 headline)))
+	  (when content
+	    (if (not (string-match "\\S-" content))
+		(setq content nil)
+	      (if (string-match "[ \t\n]+\\'" content)
+		  (setq content (substring content 0 (match-beginning 0))))
+	      (setq content (org-remove-indentation content))
+	      (if latexp (setq content (concat "\\quad \\\\\n" content)))))
+	  (insert (make-string (org-inlinetask-get-current-indentation) ?\ )
+		  "- ")
+	  (setq indent (make-string (current-column) ?\ ))
+	  (insert headline " ::")
+	  (if content
+	      (insert (if htmlp " " (concat "\n" indent))
+		      (mapconcat 'identity (org-split-string content "\n")
+				 (concat "\n" indent)) "\n")
+	    (insert "\n"))
+	  (insert indent)
+	  (backward-delete-char 2)
+	  (insert "THISISTHEINLINELISTTEMINATOR\n"))))))
 
 (defun org-inlinetask-get-current-indentation ()
   "Get the indentation of the last non-while line above this one."

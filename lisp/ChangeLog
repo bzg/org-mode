@@ -1,3 +1,10 @@
+2009-10-12  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-inlinetask.el (org-inlinetask-export): Re-introduce
+	variable.
+	(org-inlinetask-export-handler): Only export inline task if the
+	user option calls for it.
+
 2009-10-10  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-exp.el (org-export-handle-export-tags): Remove inlinetask
