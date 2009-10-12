@@ -93,7 +93,7 @@ the value of this variable."
   :group 'org-inlinetask
   :type 'boolean)
 
-(defcustom org-inlinetask-export nil
+(defcustom org-inlinetask-export t
   "Non-nil means, export inline tasts.
 When nil, they will not be exported."
   :group 'org-inlinetask
