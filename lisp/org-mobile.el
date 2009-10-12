@@ -537,7 +537,7 @@ If BEG and END are given, only do this in that region."
 	buf-list
 	id-pos org-mobile-error)
     (while (re-search-forward
-	    "^\\*+[ \t]+F(\\([^():\n]*\\)\\(:\\([^()\n]*\\)\\)?)[ \t]+\\[\\[\\(\\(id\\|olp\\):\\([^]\n ]+\\)\\)" end t)
+	    "^\\*+[ \t]+F(\\([^():\n]*\\)\\(:\\([^()\n]*\\)\\)?)[ \t]+\\[\\[\\(\\(id\\|olp\\):\\([^]\n]+\\)\\)" end t)
       (setq id-pos (condition-case msg
 		       (org-mobile-locate-entry (match-string 4))
 		     (error (nth 1 msg))))
@@ -712,7 +712,7 @@ as a string."
 	    (setq lmin (1+ level) lmax (+ lmin (if org-odd-levels-only 1 0)))
 	    (setq end (save-excursion (org-end-of-subtree t t))))
 	  (when (org-on-heading-p)
-	    (throw 'exit (move-marker (make-marker) (point)))))))))
+	    (move-marker (make-marker) (point))))))))
 
 (defun org-mobile-locate-entry (link)
   (if (string-match "\\`id:\\(.*\\)$" link)
