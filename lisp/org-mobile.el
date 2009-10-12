@@ -303,6 +303,7 @@ agenda view showing the flagged items."
 		      def-tags))
       (setq def-tags (delq nil def-tags))
       (setq tags (org-delete-all def-tags tags))
+      (setq tags (sort tags (lambda (a b) (string< (downcase a) (downcase b)))))
       (setq tags (append def-tags tags nil))
       (insert "#+TAGS: " (mapconcat 'identity tags " ") "\n")
       (insert "#+DRAWERS: " (mapconcat 'identity drawers " ") "\n")
@@ -527,7 +528,11 @@ If BEG and END are given, only do this in that region."
   (setq beg (or beg (point-min)) end (or end (point-max)))
   (goto-char beg)
 
-  ;; First, find all the referenced entries
+  ;; Remove all Note IDs
+  (while (re-search-forward "^\\*\\* Note ID: [-0-9A-F]+[ \t]*\n" nil t)
+    (replace-match ""))
+
+  ;; Find all the referenced entries, without making any changes yet
   (let ((marker (make-marker))
 	(bos-marker (make-marker))
 	(end (move-marker (make-marker) end))
