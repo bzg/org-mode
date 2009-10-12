@@ -2058,10 +2058,13 @@ before running the agenda command."
     (set-buffer org-agenda-buffer-name)
     (princ (org-encode-for-stdout (buffer-string)))))
 
+;(defun org-encode-for-stdout (string)
+;  (if (fboundp 'encode-coding-string)
+;      (encode-coding-string string buffer-file-coding-system)
+;    string))
+
 (defun org-encode-for-stdout (string)
-  (if (fboundp 'encode-coding-string)
-      (encode-coding-string string buffer-file-coding-system)
-    string))
+  string)
 
 (defvar org-agenda-info nil)
 
