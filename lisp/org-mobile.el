@@ -107,11 +107,7 @@ the editing types for which the mobile version should always dominate."
 	       (const body))))
 
 (defcustom org-mobile-action-alist
-  '(("d" . (org-todo 'done))
-    ("a" . (org-archive-subtree-default))
-    ("d-a" . (progn (org-todo 'done) (run-hooks 'post-command-hook)
-		    (org-archive-subtree-default)))
-    ("edit" . (org-mobile-edit data old new)))
+  '(("edit" . (org-mobile-edit data old new)))
   "Alist with flags and actions for mobile sync.
 When flagging an entry, MobileOrg will create entries that look like
 
@@ -123,7 +119,9 @@ optional.  If present, the string after the colon will be passed to the
 action form as the `data' variable.
 The car of each elements of the alist is an actions string.  The cdr is
 an Emacs Lisp form that will be evaluated with the cursor on the headline
-of that entry."
+of that entry.
+
+For now, it is not recommended to change this variable."
   :group 'org-mobile
   :type '(repeat
 	  (cons (string :tag "Action flag")
@@ -576,7 +574,7 @@ If BEG and END are given, only do this in that region."
 			(cdr (assoc action org-mobile-action-alist))))
 		 (note (and (equal action "")
 			    (buffer-substring (1+ (point-at-eol)) eos)))
-		 (org-inhibit-logging 'note)
+		 (org-inhibit-logging 'note) ;; Do not take notes interactively
 		 old new)
 	    (goto-char bos)
 	    (move-marker bos-marker (point))
@@ -743,6 +741,9 @@ be returned that indicates what went wrong."
       ((todo todostate)
        (setq current (org-get-todo-state))
        (cond
+	((equal new "DONEARCHIVE")
+	 (org-todo 'done)
+	 (org-archive-subtree-default))
 	((equal new current) t) ; nothing needs to be done
 	((or (equal current old)
 	     (eq org-mobile-force-mobile-change t)
