@@ -83,7 +83,7 @@ resource.  If REF is literal then return it's value, otherwise
 return nil."
   (let ((out (org-babel-read ref)))
     (if (equal out ref)
-        (if (string-match "\"\\(.+\\)\"" ref)
+        (if (string-match "^\".+\"$" ref)
             (read ref))
       out)))
 
