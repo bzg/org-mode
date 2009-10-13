@@ -4659,6 +4659,13 @@ between words."
 	t)))
 
 (defun org-outline-level ()
+  "Compute the outline level of the heading at point.
+This function assumes that the cursor is at the beginning of a line matched
+by outline-regexp.  Otherwise it returns garbage.
+If this is called at a normal headline, the level is the number of stars.
+Use `org-reduced-level' to remove the effect of `org-odd-levels'.
+For plain list items, if they are matched by `outline-regexp', this returns
+1000 plus the line indentation."
   (save-excursion
     (looking-at outline-regexp)
     (if (match-beginning 1)
