@@ -6991,6 +6991,8 @@ The cursor may be at a date in the calendar, or in the Org agenda."
       (org-agenda-do-action '(org-deadline nil org-overriding-default-time)))
      ((equal ans ?r)
       (org-agenda-do-action '(org-remember) t))
+     ((equal ans ?c)
+      (org-agenda-do-action '(org-capture) t))
      ((equal ans ?\ )
       (let ((cw (selected-window)))
 	(org-switch-to-buffer-other-window

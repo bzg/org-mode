@@ -4317,7 +4317,11 @@ means to push this value onto the list in the variable.")
 	    org-complex-heading-regexp-format
 	    (concat "^\\(\\*+\\)[ \t]+\\(?:\\("
 		    (mapconcat 'regexp-quote org-todo-keywords-1 "\\|")
-		    "\\)\\>\\)?\\(?:[ \t]*\\(\\[#.\\]\\)\\)?[ \t]*\\(%s\\)"
+		    "\\)\\>\\)?"
+		    "\\(?:[ \t]*\\(\\[#.\\]\\)\\)?"
+		    "\\(?:[ \t]*\\(?:\\[[0-9%%/]+\\]\\)\\)?" ;; stats cookie
+		    "[ \t]*\\(%s\\)"
+		    "\\(?:[ \t]*\\(?:\\[[0-9%%/]+\\]\\)\\)?" ;; stats cookie
 		    "\\(?:[ \t]+\\(:[[:alnum:]_@:]+:\\)\\)?[ \t]*$")
 	    org-nl-done-regexp
 	    (concat "\n\\*+[ \t]+"
@@ -13775,7 +13779,7 @@ completion."
     (skip-chars-forward " \t")
     (run-hook-with-args 'org-property-changed-functions key nval)))
 
-(defun org-find-olp (path)
+(defun org-find-olp (path &optional this-buffer)
   "Return a marker pointing to the entry at outline path OLP.
 If anything goes wrong, throw an error.
 You can wrap this call to cathc the error like this:
@@ -13785,9 +13789,12 @@ You can wrap this call to cathc the error like this:
     (error (nth 1 msg)))
 
 The return value will then be either a string with the error message,
-or a marker if everyhing is OK."
-  (let* ((file (pop path))
-	 (buffer (find-file-noselect file))
+or a marker if everyhing is OK.
+
+If THIS-BUFFER is set, the putline path does not contain a file,
+only headings."
+  (let* ((file (if this-buffer buffer-file-name (pop path)))
+	 (buffer (if this-buffer (current-buffer) (find-file-noselect file)))
 	 (level 1)
 	 (lmin 1)
 	 (lmax 1)

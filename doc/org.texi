@@ -5953,8 +5953,8 @@ as level 1 entries to the beginning or end of the file, respectively.  It may
 also be the symbol @code{date-tree}.  Then, a tree with year on level 1,
 month on level 2 and day on level three will be built in the file, and the
 entry will be filed into the tree under the current date@footnote{If the file
-contains an entry with a @code{DATE_TREE} property, the entire date tree will
-be built under that entry.}
+contains an entry with a @code{DATE_TREE} property (arbitrary value), the
+entire date tree will be built under that entry.}
 
 An optional sixth element specifies the contexts in which the user can select
 the template.  This element can be a list of major modes or a function.
