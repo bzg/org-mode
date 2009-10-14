@@ -5085,7 +5085,7 @@ to switch to narrowing."
     (dolist (x (append (get 'org-agenda-filter :preset-filter)
 		       org-agenda-filter))
       (if (member x '("-" "+"))
-	  (setq f1 '(not tags))
+	  (setq f1 (if (equal x "-") 'tags '(not tags)))
 	(if (string-match "[<=>?]" x)
 	    (setq f1 (org-agenda-filter-effort-form x))
 	  (setq f1 (list 'member (downcase (substring x 1)) 'tags)))

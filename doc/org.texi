@@ -7129,16 +7129,16 @@ binding the variable @code{org-agenda-filter-preset} as an option.  This
 filter will then be applied to the view and persist as a basic filter through
 refreshes and more secondary filtering.}
 
-You will be prompted for a tag selection letter.  Pressing @key{TAB} at that
-prompt will offer use completion to select a tag (including any tags that do
-not have a selection character).  The command then hides all entries that do
-not contain or inherit this tag.  When called with prefix arg, remove the
-entries that @emph{do} have the tag.  A second @kbd{/} at the prompt will
-turn off the filter and unhide any hidden entries.  If the first key you
-press is either @kbd{+} or @kbd{-}, the previous filter will be narrowed by
-requiring or forbidding the selected additional tag.  Instead of pressing
-@kbd{+} or @kbd{-} after @kbd{/}, you can also immediately use the @kbd{\}
-command.
+You will be prompted for a tag selection letter, SPC will mean any tag at
+all.  Pressing @key{TAB} at that prompt will offer use completion to select a
+tag (including any tags that do not have a selection character).  The command
+then hides all entries that do not contain or inherit this tag.  When called
+with prefix arg, remove the entries that @emph{do} have the tag.  A second
+@kbd{/} at the prompt will turn off the filter and unhide any hidden entries.
+If the first key you press is either @kbd{+} or @kbd{-}, the previous filter
+will be narrowed by requiring or forbidding the selected additional tag.
+Instead of pressing @kbd{+} or @kbd{-} after @kbd{/}, you can also
+immediately use the @kbd{\} command.
 
 @vindex org-sort-agenda-noeffort-is-high
 In order to filter for effort estimates, you should set-up allowed
