@@ -306,7 +306,8 @@ agenda view showing the flagged items."
       (insert "#+TAGS: " (mapconcat 'identity tags " ") "\n")
       (insert "#+DRAWERS: " (mapconcat 'identity drawers " ") "\n")
       (insert "#+ALLPRIORITIES: A B C" "\n")
-      (insert "* [[file:agendas.org][Agenda Views]]\n")
+      (when (file-exists-p "agendas.org")
+	(insert "* [[file:agendas.org][Agenda Views]]\n"))
       (while (setq entry (pop files-alist))
 	(setq file (car entry)
 	      link-name (cdr entry))
@@ -409,7 +410,7 @@ The table of checksums is written to the file mobile-checksums."
 				    " TITLE: " gdesc " " match "</after>"))
 		      settings))
 	  (push (list type match settings) new)))))
-    (list "X" "SUMO" (reverse new) nil)))
+    (and new (list "X" "SUMO" (reverse new) nil))))
 
 (defvar org-mobile-creating-agendas nil)
 (defun org-mobile-write-agenda-for-mobile (file)
@@ -480,13 +481,14 @@ The table of checksums is written to the file mobile-checksums."
   (interactive)
   (let* ((file (expand-file-name "agendas.org"
 				 org-mobile-directory))
+	 (sumo (org-mobile-sumo-agenda-command))
 	 (org-agenda-custom-commands
-	  (list (append (org-mobile-sumo-agenda-command)
-			(list (list file)))))
+	  (list (append sumo (list (list file)))))
 	 (org-mobile-creating-agendas t))
     (unless (file-writable-p file)
       (error "Cannot write to file %s" file))
-    (org-store-agenda-views)))
+    (when sumo
+      (org-store-agenda-views))))
 
 (defun org-mobile-move-capture ()
   "Move the contents of the capture file to the inbox file.
