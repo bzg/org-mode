@@ -2,6 +2,7 @@
 
 	* org.texi (Agenda commands): Document that SPC is a filter for
 	any tag.
+	(Search view): Renamed from "Keyword search".
 
 2009-10-04  Carsten Dominik  <carsten.dominik@gmail.com>
 

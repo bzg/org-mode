@@ -281,7 +281,7 @@ The built-in agenda views
 * Global TODO list::            All unfinished action items
 * Matching tags and properties::  Structured information with fine-tuned search
 * Timeline::                    Time-sorted view for single file
-* Keyword search::              Finding entries by keyword
+* Search view::                 Find entries by searching for text
 * Stuck projects::              Find projects you need to review
 
 Presentation and sorting
@@ -6143,14 +6143,14 @@ TODO state associated with them,
 a @emph{timeline view} that shows all events in a single Org file,
 in time-sorted view,
 @item
-a @emph{keyword search view} that shows all entries from multiple files
+a @emph{text search view} that shows all entries from multiple files
 that contain specified keywords,
 @item
 a @emph{stuck projects view} showing projects that currently don't move
 along, and
 @item
-@emph{custom views} that are special tag/keyword searches and
-combinations of different views.
+@emph{custom views} that are special searches and combinations of different
+views.
 @end itemize
 
 @noindent
@@ -6320,7 +6320,7 @@ In this section we describe the built-in views.
 * Global TODO list::            All unfinished action items
 * Matching tags and properties::  Structured information with fine-tuned search
 * Timeline::                    Time-sorted view for single file
-* Keyword search::              Finding entries by keyword
+* Search view::                 Find entries by searching for text
 * Stuck projects::              Find projects you need to review
 @end menu
 
@@ -6670,7 +6670,7 @@ Select @samp{:work:}-tagged TODO lines that are either @samp{WAITING} or
 @samp{NEXT}.
 @end table
 
-@node Timeline, Keyword search, Matching tags and properties, Built-in agenda views
+@node Timeline, Search view, Matching tags and properties, Built-in agenda views
 @subsection Timeline for a single file
 @cindex timeline, single file
 @cindex time-sorted view
@@ -6691,10 +6691,11 @@ When called with a @kbd{C-u} prefix, all unfinished TODO entries
 The commands available in the timeline buffer are listed in
 @ref{Agenda commands}.
 
-@node Keyword search, Stuck projects, Timeline, Built-in agenda views
-@subsection Keyword search
-@cindex keyword search
-@cindex searching, for keywords
+@node Search view, Stuck projects, Timeline, Built-in agenda views
+@subsection Search view
+@cindex search view
+@cindex text search
+@cindex searching, for text
 
 This agenda view is a general text search facility for Org mode entries.
 It is particularly useful to find notes.
@@ -6702,15 +6703,14 @@ It is particularly useful to find notes.
 @table @kbd
 @kindex C-c a s
 @item C-c a s
-This is a special search that lets you select entries by keywords or
-regular expression, using a boolean logic.  For example, the search
-string
-
-@example
-+computer +wifi -ethernet -@{8\.11[bg]@}
-@end example
-
-@noindent
+This is a special search that lets you select entries by matching a substring
+or specific words using a boolean logic.
+@end table
+For example, the search string @samp{computer equipment} will find entries
+that contain @samp{computer equipment} as a substring.  If the two words are
+separated by more space or a line break, the search will still match.
+Search view can also search for specific keywords in the entry, using Boolean
+logic.  The search string @samp{+computer +wifi -ethernet -@{8\.11[bg]@}}
 will search for note entries that contain the keywords @code{computer}
 and @code{wifi}, but not the keyword @code{ethernet}, and which are also
 not matched by the regular expression @code{8\.11[bg]}, meaning to
@@ -6719,9 +6719,8 @@ exclude both 8.11b and 8.11g.
 @vindex org-agenda-text-search-extra-files
 Note that in addition to the agenda files, this command will also search
 the files listed in @code{org-agenda-text-search-extra-files}.
-@end table
 
-@node Stuck projects,  , Keyword search, Built-in agenda views
+@node Stuck projects,  , Search view, Built-in agenda views
 @subsection Stuck projects
 
 If you are following a system like David Allen's GTD to organize your
@@ -11693,7 +11692,7 @@ format that can be displayed by @i{MobileOrg}, and for integrating notes
 captured and changes made by @i{MobileOrg} into the main system.
 
 For changing tags and TODO states in MobileOrg, you should have set up the
-customization variables @code{org-todo-keywords} and {org-tags-alist} to
+customization variables @code{org-todo-keywords} and @code{org-tags-alist} to
 cover all important tags and todo keywords, even if individual files use only
 part of these.  MobileOrg will also offer you states and tags set up with
 in-buffer settings, but it will understand the logistics of todo state
