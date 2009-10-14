@@ -526,13 +526,14 @@ If BEG and END are given, only do this in that region."
   (require 'org-archive)
   (setq org-mobile-last-flagged-files nil)
   (setq beg (or beg (point-min)) end (or end (point-max)))
-  (goto-char beg)
 
   ;; Remove all Note IDs
+  (goto-char beg)
   (while (re-search-forward "^\\*\\* Note ID: [-0-9A-F]+[ \t]*\n" nil t)
     (replace-match ""))
 
   ;; Find all the referenced entries, without making any changes yet
+  (goto-char beg)
   (let ((marker (make-marker))
 	(bos-marker (make-marker))
 	(end (move-marker (make-marker) end))
