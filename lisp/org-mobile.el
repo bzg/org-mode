@@ -306,7 +306,8 @@ agenda view showing the flagged items."
       (insert "#+TAGS: " (mapconcat 'identity tags " ") "\n")
       (insert "#+DRAWERS: " (mapconcat 'identity drawers " ") "\n")
       (insert "#+ALLPRIORITIES: A B C" "\n")
-      (when (file-exists-p "agendas.org")
+      (when (file-exists-p (expand-file-name
+			    org-mobile-directory "agendas.org"))
 	(insert "* [[file:agendas.org][Agenda Views]]\n"))
       (while (setq entry (pop files-alist))
 	(setq file (car entry)
