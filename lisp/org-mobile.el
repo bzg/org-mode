@@ -765,7 +765,7 @@ be returned that indicates what went wrong."
 	     (eq org-mobile-force-mobile-change t)
 	     (memq 'tags org-mobile-force-mobile-change))
 	 (org-set-tags-to new1) t)
-	(t (error "State before change was expected as \"%s\", but is \"%s\""
+	(t (error "Tags before change were expected as \"%s\", but are \"%s\""
 		  (or old "") (or current "")))))
 
       (priority
