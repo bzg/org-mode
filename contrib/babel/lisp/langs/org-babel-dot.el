@@ -57,10 +57,11 @@ called by `org-babel-execute-src-block'."
   (let ((result-params (split-string (or (cdr (assoc :results params)) "")))
         (out-file (cdr (assoc :file params)))
         (cmdline (cdr (assoc :cmdline params)))
+        (cmd (or (cdr (assoc :cmd params)) "dot"))
         (in-file (make-temp-file "org-babel-dot")))
     (with-temp-file in-file (insert body))
-    (message (concat "dot " in-file " " cmdline " -o " out-file))
-    (shell-command (concat "dot " in-file " " cmdline " -o " out-file))
+    (message (concat cmd " " in-file " " cmdline " -o " out-file))
+    (shell-command (concat cmd " " in-file " " cmdline " -o " out-file))
     out-file))
 
 (defun org-babel-prep-session:dot (session params)

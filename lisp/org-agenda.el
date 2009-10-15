@@ -482,6 +482,10 @@ this one will be used."
   "Options concerning the general tags/property/todo match agenda view."
   :tag "Org Agenda Match View"
   :group 'org-agenda)
+(defgroup org-agenda-search-view nil
+  "Options concerning the general tags/property/todo match agenda view."
+  :tag "Org Agenda Match View"
+  :group 'org-agenda)
 
 (defvar org-agenda-archives-mode nil
   "Non-nil means, the agenda will include archived items.
@@ -871,6 +875,16 @@ current display in the agenda."
   :group 'org-agenda-daily/weekly
   :type 'plist)
 
+(defcustom org-agenda-search-view-search-words-only nil
+  "Non-nil means, the search string is interpreted as individual words
+The search then looks for each word separately in each entry and
+selects entries that have matches for all words.
+When nil, matching as loose words will only take place if the first
+word is preceded by + or -.  If that is not the case, the search
+string will just be matched as a substring in the entry, but with
+each space character allowing for any whitespace, including newlines."
+  :group 'org-agenda-search-view
+  :type 'boolean)
 
 (defgroup org-agenda-time-grid nil
   "Options concerning the time grid in the Org-mode Agenda."
@@ -3142,10 +3156,19 @@ user should get a chance to edit this string, with cursor at position
 EDIT-AT.
 
 The search string is broken into \"words\" by splitting at whitespace.
-The individual words are then interpreted as a boolean expression with
-logical AND.  Words prefixed with a minus must not occur in the entry.
-Words without a prefix or prefixed with a plus must occur in the entry.
-Matching is case-insensitive and the words are enclosed by word delimiters.
+Depending on the variable `org-agenda-search-view-search-words-only'
+and on wether the first character in the search string is \"+\" or \"-\",
+The string is then interpreted either as a substrig with variable amounts
+of whitespace, or as a list or individual words that should be matched.
+
+The default is a substring match, where each space in the search string
+can expand to an arbitrary amount of whitespace, including newlines.
+
+If matching individual words, these words are then interpreted as a
+boolean expression with logical AND.  Words prefixed with a minus must
+not occur in the entry. Words without a prefix or prefixed with a plus
+must occur in the entry.  Matching is case-insensitive and the words
+are enclosed by word delimiters.
 
 Words enclosed by curly braces are interpreted as regular expressions
 that must or must not match in the entry.
@@ -3170,7 +3193,7 @@ in `org-agenda-text-search-extra-files'."
 		      'keymap org-agenda-keymap
 		      'help-echo (format "mouse-2 or RET jump to location")))
 	 regexp rtn rtnall files file pos
-	 marker category tags c neg re
+	 marker category tags c neg re as-words
 	 ee txt beg end words regexps+ regexps- hdl-only buffer beg1 str)
     (unless (and (not edit-at)
 		 (stringp string)
@@ -3193,19 +3216,25 @@ in `org-agenda-text-search-extra-files'."
     (when (equal (string-to-char words) ?!)
       (setq todo-only t
 	    words (substring words 1)))
+    (if (or org-agenda-search-view-search-words-only
+	    (member (string-to-char string) '(?- ?+)))
+	(setq as-words t))
     (setq words (org-split-string words))
-    (mapc (lambda (w)
-	    (setq c (string-to-char w))
-	    (if (equal c ?-)
-		(setq neg t w (substring w 1))
-	      (if (equal c ?+)
-		  (setq neg nil w (substring w 1))
-		(setq neg nil)))
-	    (if (string-match "\\`{.*}\\'" w)
-		(setq re (substring w 1 -1))
-	      (setq re (concat "\\<" (regexp-quote (downcase w)) "\\>")))
-	    (if neg (push re regexps-) (push re regexps+)))
-	  words)
+    (if as-words
+	(mapc (lambda (w)
+		(setq c (string-to-char w))
+		(if (equal c ?-)
+		    (setq neg t w (substring w 1))
+		  (if (equal c ?+)
+		      (setq neg nil w (substring w 1))
+		  (setq neg nil)))
+		(if (string-match "\\`{.*}\\'" w)
+		    (setq re (substring w 1 -1))
+		  (setq re (concat "\\<" (regexp-quote (downcase w)) "\\>")))
+		(if neg (push re regexps-) (push re regexps+)))
+	      words)
+      (push (mapconcat (lambda (w) (regexp-quote w)) words "\\s-+")
+	    regexps+))
     (setq regexps+ (sort regexps+ (lambda (a b) (> (length a) (length b)))))
     (if (not regexps+)
 	(setq regexp (concat "^" org-outline-regexp))
@@ -5085,7 +5114,7 @@ to switch to narrowing."
     (dolist (x (append (get 'org-agenda-filter :preset-filter)
 		       org-agenda-filter))
       (if (member x '("-" "+"))
-	  (setq f1 '(not tags))
+	  (setq f1 (if (equal x "-") 'tags '(not tags)))
 	(if (string-match "[<=>?]" x)
 	    (setq f1 (org-agenda-filter-effort-form x))
 	  (setq f1 (list 'member (downcase (substring x 1)) 'tags)))

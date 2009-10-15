@@ -1,3 +1,15 @@
+2009-10-14  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-agenda.el (org-agenda-filter-make-matcher): Allow to filter
+	entries that have no tags.
+	(org-agenda-search-view): New customize group.
+	(org-agenda-search-view-search-words-only): New option.
+	(org-search-view): Implement substring search.
+
+2009-10-13  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-outline-level): Add doc string.
+
 2009-10-12  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-inlinetask.el (org-inlinetask-export): Re-introduce
