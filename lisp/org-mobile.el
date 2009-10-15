@@ -739,79 +739,81 @@ and the command will return t.  If something goes wrong, a string will
 be returned that indicates what went wrong."
   (let (current old1 new1)
     (if (stringp what) (setq what (intern what)))
-    (case what
 
-      ((todo todostate)
-       (setq current (org-get-todo-state))
-       (cond
-	((equal new "DONEARCHIVE")
-	 (org-todo 'done)
-	 (org-archive-subtree-default))
-	((equal new current) t) ; nothing needs to be done
-	((or (equal current old)
-	     (eq org-mobile-force-mobile-change t)
-	     (memq 'todo org-mobile-force-mobile-change))
-	 (org-todo new) t)
-	(t (error "State before change was expected as \"%s\", but is \"%s\""
-		   old current))))
+    (cond
+
+     ((memq what '(todo todostate))
+      (setq current (org-get-todo-state))
+      (cond
+       ((equal new "DONEARCHIVE")
+	(org-todo 'done)
+	(org-archive-subtree-default))
+       ((equal new current) t) ; nothing needs to be done
+       ((or (equal current old)
+	    (eq org-mobile-force-mobile-change t)
+	    (memq 'todo org-mobile-force-mobile-change))
+	(org-todo new) t)
+       (t (error "State before change was expected as \"%s\", but is \"%s\""
+		 old current))))
       
-      (tags
-       (setq current (org-get-tags)
-	     new1 (and new (org-split-string new ":+"))
-	     old1 (and old (org-split-string old ":+")))
-       (cond
-	((org-mobile-tags-same-p current new1) t) ; no change needed
-	((or (org-mobile-tags-same-p current old1)
-	     (eq org-mobile-force-mobile-change t)
-	     (memq 'tags org-mobile-force-mobile-change))
-	 (org-set-tags-to new1) t)
-	(t (error "Tags before change were expected as \"%s\", but are \"%s\""
-		  (or old "") (or current "")))))
+     ((eq what 'tags)
+      (setq current (org-get-tags)
+	    new1 (and new (org-split-string new ":+"))
+	    old1 (and old (org-split-string old ":+")))
+      (cond
+       ((org-mobile-tags-same-p current new1) t) ; no change needed
+       ((or (org-mobile-tags-same-p current old1)
+	    (eq org-mobile-force-mobile-change t)
+	    (memq 'tags org-mobile-force-mobile-change))
+	(org-set-tags-to new1) t)
+       (t (error "Tags before change were expected as \"%s\", but are \"%s\""
+		 (or old "") (or current "")))))
+     
+     ((eq what 'priority)
+      (when (looking-at org-complex-heading-regexp)
+	(setq current (and (match-end 3) (substring (match-string 3) 2 3)))
+	(cond
+	 ((equal current new) t) ; no action required
+	 ((or (equal current old)
+	      (eq org-mobile-force-mobile-change t)
+	      (memq 'tags org-mobile-force-mobile-change))
+	  (org-priority (and new (string-to-char new))))
+	 (t (error "Priority was expected to be %s, but is %s"
+		   old current)))))
 
-      (priority
-       (when (looking-at org-complex-heading-regexp)
-	 (setq current (and (match-end 3) (substring (match-string 3) 2 3)))
-	 (cond
-	  ((equal current new) t) ; no action required
-	  ((or (equal current old)
-	       (eq org-mobile-force-mobile-change t)
-	       (memq 'tags org-mobile-force-mobile-change))
-	   (org-priority (and new (string-to-char new))))
-	  (t (error "Priority was expected to be %s, but is %s"
-		    old current)))))
-      (heading
-       (when (looking-at org-complex-heading-regexp)
-	 (setq current (match-string 4))
-	 (cond
-	  ((equal current new) t) ; no action required
-	  ((or (equal current old)
-	       (eq org-mobile-force-mobile-change t)
-	       (memq 'heading org-mobile-force-mobile-change))
-	   (goto-char (match-beginning 4))
-	   (insert new)
-	   (delete-region (point) (+ (point) (length current)))
-	   (org-set-tags nil 'align))
-	  (t (error "Heading changed in MobileOrg and on the computer")))))
-
-      (body
-       (setq current (buffer-substring (min (1+ (point-at-eol)) (point-max))
-				       (save-excursion (outline-next-heading)
-						       (point))))
-       (if (not (string-match "\\S-" current)) (setq current nil))
-       (cond
-	((org-mobile-bodies-same-p current new) t) ; no ation necesary
-	((or (org-mobile-bodies-same-p current old)
-	     (eq org-mobile-force-mobile-change t)
-	     (memq 'body org-mobile-force-mobile-change))
-	 (save-excursion
-	   (end-of-line 1)
-	   (insert "\n" new)
-	   (or (bolp) (insert "\n"))
-	   (delete-region (point) (progn (org-back-to-heading t)
-					 (outline-next-heading)
-					 (point))))
-	 t)
-	(t (error "Body was changed in MobileOrg and on the computer")))))))
+     ((eq what 'heading)
+      (when (looking-at org-complex-heading-regexp)
+	(setq current (match-string 4))
+	(cond
+	 ((equal current new) t) ; no action required
+	 ((or (equal current old)
+	      (eq org-mobile-force-mobile-change t)
+	      (memq 'heading org-mobile-force-mobile-change))
+	  (goto-char (match-beginning 4))
+	  (insert new)
+	  (delete-region (point) (+ (point) (length current)))
+	  (org-set-tags nil 'align))
+	 (t (error "Heading changed in MobileOrg and on the computer")))))
+     
+     ((eq what 'body)
+      (setq current (buffer-substring (min (1+ (point-at-eol)) (point-max))
+				      (save-excursion (outline-next-heading)
+						      (point))))
+      (if (not (string-match "\\S-" current)) (setq current nil))
+      (cond
+       ((org-mobile-bodies-same-p current new) t) ; no ation necesary
+       ((or (org-mobile-bodies-same-p current old)
+	    (eq org-mobile-force-mobile-change t)
+	    (memq 'body org-mobile-force-mobile-change))
+	(save-excursion
+	  (end-of-line 1)
+	  (insert "\n" new)
+	  (or (bolp) (insert "\n"))
+	  (delete-region (point) (progn (org-back-to-heading t)
+					(outline-next-heading)
+					(point))))
+	t)
+       (t (error "Body was changed in MobileOrg and on the computer")))))))
        
 
 (defun org-mobile-tags-same-p (list1 list2)
