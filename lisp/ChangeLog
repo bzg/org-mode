@@ -1,3 +1,7 @@
+2009-10-15  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-exp.el (org-inlinetask-remove-END-maybe): Declare function.
+
 2009-10-14  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-agenda.el (org-agenda-filter-make-matcher): Allow to filter
