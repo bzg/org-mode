@@ -551,7 +551,12 @@ html ---- results are added inside of a #+BEGIN_HTML block.  This
 
 latex --- results are added inside of a #+BEGIN_LATEX block.
           This is a good option if you code block will output
-          latex formatted text."
+          latex formatted text.
+
+code ---- the results are extracted in the syntax of the source
+          code of the language being evaluated and are added
+          inside of a #+BEGIN_SRC block with the source-code
+          language set appropriately."
   (if (stringp result)
       (progn
         (setq result (org-babel-clean-text-properties result))
@@ -572,25 +577,26 @@ latex --- results are added inside of a #+BEGIN_LATEX block.
       (save-excursion
 	(let ((existing-result (org-babel-where-is-src-block-result t)))
 	  (when existing-result (goto-char existing-result) (forward-line 1)))
-        (if (stringp result) ;; assume the result is a table if it's not a string
-            (if (member "file" insert)
-                (insert result)
-              (if (member "html" insert)
-                  (insert (format "#+BEGIN_HTML\n%s#+END_HTML\n" result))
-                (if (member "latex" insert)
-                    (insert (format "#+BEGIN_LaTeX\n%s#+END_LaTeX\n" result))
-                  (if (or (member "raw" insert) (member "org" insert))
-                      (progn (save-excursion (insert result))
-                             (if (org-at-table-p) (org-cycle)))
-                    (org-babel-examplize-region (point) (progn (insert result) (point)))))))
-          (progn
-            (insert
-             (concat (orgtbl-to-orgtbl
-                      (if (and (listp (car result)) (listp (cdr (car result))))
-                          result (list result))
-                      '(:fmt (lambda (cell) (format "%S" cell)))) "\n"))
-            (forward-line -1)
-            (org-cycle))))
+        (cond
+         ;; assume the result is a table if it's not a string
+         ((not (stringp result))
+          (insert (concat (orgtbl-to-orgtbl
+                           (if (and (listp (car result)) (listp (cdr (car result))))
+                               result (list result))
+                           '(:fmt (lambda (cell) (format "%S" cell)))) "\n"))
+          (forward-line -1) (org-cycle))
+         ((member "file" insert)
+          (insert result))
+         ((member "html" insert)
+          (insert (format "#+BEGIN_HTML\n%s#+END_HTML\n" result)))
+         ((member "latex" insert)
+          (insert (format "#+BEGIN_LaTeX\n%s#+END_LaTeX\n" result)))
+         ((member "code" insert)
+          (insert (format "#+BEGIN_SRC %s\n%s#+END_SRC\n" lang result)))
+         ((or (member "raw" insert) (member "org" insert))
+          (save-excursion (insert result)) (if (org-at-table-p) (org-cycle)))
+         (t
+          (org-babel-examplize-region (point) (progn (insert result) (point))))))
       (message "finished"))))
 
 (defun org-babel-result-to-org-string (result)
@@ -620,6 +626,9 @@ relies on `org-babel-insert-result'."
           (forward-line 1))
          ((looking-at "#\\+begin_example")
           (search-forward "#+end_example" nil t)
+          (forward-line 1))
+         ((looking-at "#\\+begin_src")
+          (search-forward "#+end_src" nil t)
           (forward-line 1))
          (t (progn (while (looking-at "\\(: \\|\\[\\[\\)")
                      (forward-line 1))))))
@@ -658,7 +667,7 @@ elements of PLISTS override the values of previous element.  This
 takes into account some special considerations for certain
 parameters when merging lists."
   (let ((results-exclusive-groups
-	 '(("file" "vector" "scalar" "raw" "org" "html" "latex")
+	 '(("file" "vector" "scalar" "raw" "org" "html" "latex" "code")
 	   ("replace" "silent")
 	   ("output" "value")))
 	params results exports tangle vars var ref)

@@ -42,7 +42,10 @@ function is called by `org-babel-execute-src-block' via multiple-value-bind."
   (save-window-excursion
     (let ((print-level nil) (print-length nil))
       (eval `(let ,(mapcar (lambda (var) `(,(car var) ',(cdr var))) vars)
-	       ,(read (concat "(progn " body ")")))))))
+	       ,(read (concat "(progn "
+                              (if (member "code" result-params)
+                                  (concat "(pp " body ")") body)
+                              ")")))))))
 
 (provide 'org-babel-emacs-lisp)
 ;;; org-babel-emacs-lisp.el ends here
