@@ -1,3 +1,8 @@
+2009-10-16  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-agenda.el (org-agenda-list): Mark the all-todo items line as
+	a header line.
+
 2009-10-15  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-exp.el (org-inlinetask-remove-END-maybe): Declare function.

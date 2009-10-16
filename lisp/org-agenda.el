@@ -3017,6 +3017,7 @@ given in `org-agenda-start-on-weekday'."
 	(add-text-properties (point-min) (1- (point))
 			     (list 'face 'org-agenda-structure
 				   'short-heading "All TODO items"))
+	(org-agenda-mark-header-line (point-min))
 	(insert (org-finalize-agenda-entries rtnall) "\n")))
     (unless org-agenda-compact-blocks
       (let* ((d1 (car day-numbers))
