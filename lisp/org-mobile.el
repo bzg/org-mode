@@ -411,7 +411,8 @@ The table of checksums is written to the file mobile-checksums."
 				    " TITLE: " gdesc " " match "</after>"))
 		      settings))
 	  (push (list type match settings) new)))))
-    (and new (list "X" "SUMO" (reverse new) nil))))
+    (and new (list "X" "SUMO" (reverse new)
+		   '((org-agenda-compact-blocks nil))))))
 
 (defvar org-mobile-creating-agendas nil)
 (defun org-mobile-write-agenda-for-mobile (file)
