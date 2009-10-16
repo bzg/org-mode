@@ -145,8 +145,11 @@ last statement in BODY, as elisp."
                (insert (format org-babel-ruby-wrapper-method body tmp-file))
                ;; (message "buffer=%s" (buffer-string)) ;; debugging
                (shell-command-on-region (point-min) (point-max) "ruby"))
-             (org-babel-ruby-table-or-string
-	      (with-temp-buffer (insert-file-contents tmp-file) (buffer-string)))))))
+             (let ((raw (with-temp-buffer (insert-file-contents tmp-file)
+                                          (buffer-string))))
+               (if (member "code" result-params)
+                   raw
+                 (org-babel-ruby-table-or-string raw)))))))
     ;; comint session evaluation
     (let* ((full-body
 	    (mapconcat
@@ -159,7 +162,10 @@ last statement in BODY, as elisp."
                                                   (mapcar #'org-babel-trim raw)))))))
       (case result-type
         (output (mapconcat #'identity (reverse (cdr results)) "\n"))
-        (value (org-babel-ruby-table-or-string (car results)))))))
+        (value
+         (if (member "code" result-params)
+             (car results)
+           (org-babel-ruby-table-or-string (car results))))))))
 
 (defun org-babel-ruby-read-string (string)
   "Strip \\\"s from around ruby string"
