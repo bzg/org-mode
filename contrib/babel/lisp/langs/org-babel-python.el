@@ -149,8 +149,10 @@ last statement in BODY, as elisp."
 		 tmp-file))
                ;; (message "buffer=%s" (buffer-string)) ;; debugging
                (shell-command-on-region (point-min) (point-max) "python"))
-             (org-babel-python-table-or-string
-	      (with-temp-buffer (insert-file-contents tmp-file) (buffer-string)))))))
+             (let ((raw (with-temp-buffer (insert-file-contents tmp-file) (buffer-string))))
+               (if (member "code" result-params)
+                   raw
+                 (org-babel-python-table-or-string raw)))))))
     ;; comint session evaluation
     (org-babel-comint-in-buffer buffer
       (let* ((raw (org-babel-comint-with-output buffer org-babel-python-eoe-indicator t
@@ -168,7 +170,10 @@ last statement in BODY, as elisp."
         (setq results (mapcar #'org-babel-python-read-string results))
         (case result-type
 	  (output (org-babel-trim (mapconcat #'identity (reverse (cdr results)) "\n")))
-	  (value (org-babel-python-table-or-string (org-babel-trim (car results)))))))))
+	  (value
+           (if (member "code" result-params)
+               (car results)
+             (org-babel-python-table-or-string (org-babel-trim (car results))))))))))
 
 (defun org-babel-python-read-string (string)
   "Strip 's from around ruby string"
