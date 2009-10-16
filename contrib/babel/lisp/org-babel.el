@@ -360,7 +360,8 @@ may be specified in the properties of the current outline entry."
     (delq nil
           (mapcar
            (lambda (header-arg)
-             (let ((val (org-entry-get (point) header-arg)))
+             (let ((val (or (org-entry-get (point) header-arg 'selective)
+			    (cdr (assoc header-arg org-file-properties)))))
                (when val
                  ;; (message "param-from-property %s=%s" header-arg val) ;; debugging statement
                  (cons (intern (concat ":" header-arg)) val))))
