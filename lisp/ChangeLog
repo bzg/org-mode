@@ -1,5 +1,21 @@
 2009-10-17  John Wiegley  <johnw@newartisans.com>
 
+	* org-clock.el (org-clock-resolve-clock): New function that
+	resolves a clock to a specific time, closing or resuming as need
+	be, and possibly even starting a new clock.
+	(org-clock-resolve): New function used by `org-resolve-clocks'
+	that sets up for the call to `org-clock-resolve-clock'.  It
+	determines the time to resolve to based on a single-character
+	selection from the user to either keep time, subtract away time or
+	cancel the clock.
+	(org-resolve-clocks): New user command which resolves dangling
+	clocks -- that is, open but not active -- anywhere in the file
+	list returned by `org-files-list'.
+	(org-clock-in): Automatically resolve dangling clocks whenever a
+	user clocks in.
+	(org-clock-cancel): If the user cancels the solely clock in a
+	LOGBOOK, remove the empty drawer.
+
 	* org-clock.el (org-clock-idle-time): New user customizable option
 	for detecting whether the user has left a clock idle.  Note: it is
 	only used in this commit to test whether it's worthwhile to check

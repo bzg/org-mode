@@ -3141,6 +3141,8 @@ If TABLE-TYPE is non-nil, also check for table.el-type tables."
 (declare-function org-clock-save-markers-for-cut-and-paste "org-clock"
 		  (beg end))
 (declare-function org-clock-update-mode-line "org-clock" ())
+(declare-function org-resolve-clocks "org-clock"
+		  (&optional also-non-dangling-p prompt last-valid))
 (defvar org-clock-start-time)
 (defvar org-clock-marker (make-marker)
   "Marker recording the last clock-in.")
@@ -3158,7 +3160,7 @@ The return value is actually the clock marker."
 		  org-clock-goto org-clock-sum org-clock-display
 		  org-clock-remove-overlays org-clock-report
 		  org-clocktable-shift org-dblock-write:clocktable
-		  org-get-clocktable)))
+		  org-get-clocktable org-resolve-clocks)))
 
 (defun org-clock-update-time-maybe ()
   "If this is a CLOCK line, update it and return t.
