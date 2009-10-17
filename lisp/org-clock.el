@@ -206,6 +206,13 @@ string as argument."
   :group 'org-clock
   :type 'plist)
 
+(defcustom org-clock-idle-time nil
+  "When non-nil, resolve open clocks if the user is idle more than X minutes."
+  :group 'org-clock
+  :type '(choice
+	  (const :tag "Never" nil)
+	  (integer :tag "After N minutes")))
+
 
 (defvar org-clock-in-prepare-hook nil
   "Hook run when preparing the clock.
@@ -567,6 +574,30 @@ If necessary, clock-out of the currently active clock."
       (org-with-clock clock
 	(org-clock-cancel)))
     (setcar clock temp)))
+
+(defun org-emacs-idle-seconds ()
+  "Return the current Emacs idle time in seconds, or nil if not idle."
+  (let ((idle-time (current-idle-time)))
+    (if idle-time
+	(time-to-seconds idle-time)
+      0)))
+
+(defun org-mac-idle-seconds ()
+  "Return the current Mac idle time in seconds"
+  (string-to-number (shell-command-to-string "ioreg -c IOHIDSystem | perl -ane 'if (/Idle/) {$idle=(pop @F)/1000000000; print $idle; last}'")))
+
+(defun org-user-idle-seconds ()
+  "Return the number of seconds the user has been idle for.
+This routine returns a floating point number."
+  (if (eq system-type 'darwin)
+      (let ((emacs-idle (org-emacs-idle-seconds)))
+	;; If Emacs has been idle for longer than the user's
+	;; `org-clock-idle-time' value, check whether the whole system has
+	;; really been idle for that long.
+	(if (> emacs-idle (* 60 org-clock-idle-time))
+	    (min emacs-idle (org-mac-idle-seconds))
+	  emacs-idle))
+    (org-emacs-idle-seconds)))
 
 (defun org-clock-in (&optional select)
   "Start the clock on the current item.

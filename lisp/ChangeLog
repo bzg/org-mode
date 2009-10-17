@@ -1,5 +1,18 @@
 2009-10-17  John Wiegley  <johnw@newartisans.com>
 
+	* org-clock.el (org-clock-idle-time): New user customizable option
+	for detecting whether the user has left a clock idle.  Note: it is
+	only used in this commit to test whether it's worthwhile to check
+	OS X to get the Mac user's current idle time.  If the Emacs idle
+	time is less than the value, the user hasn't been away long enough
+	to be worth checking (a more expensive test than just getting
+	Emacs idle time).
+	(org-user-idle-seconds, org-mac-idle-seconds)
+	(org-emacs-idle-seconds): This three functions, in conjunction
+	with the user customization variable `org-clock-idle-time', return
+	the number of seconds (as a floating point) that the user has been
+	away from their Emacs (or, if running on OS X, their computer).
+
 	* org-clock.el (org-find-open-clocks): New function that returns a
 	list of all open clocks in the given FILE.  Note that each clock
 	it returns is a cons cell of the format (MARKER . START-TIME).
