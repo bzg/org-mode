@@ -751,7 +751,7 @@ line and position cursor in that line."
 	    (and (re-search-forward org-property-end-re nil t)
 		 (goto-char (match-beginning 0))))))))
 
-(defun org-clock-out (&optional fail-quietly)
+(defun org-clock-out (&optional fail-quietly at-time)
   "Stop the currently running clock.
 If there is no running clock, throw an error, unless FAIL-QUIETLY is set."
   (interactive)
@@ -772,7 +772,8 @@ If there is no running clock, throw an error, unless FAIL-QUIETLY is set."
 	  (goto-char (match-end 0))
 	  (delete-region (point) (point-at-eol))
 	  (insert "--")
-	  (setq te (org-insert-time-stamp (current-time) 'with-hm 'inactive))
+	  (setq te (org-insert-time-stamp (or at-time (current-time))
+					  'with-hm 'inactive))
 	  (setq s (- (org-float-time (apply 'encode-time (org-parse-time-string te)))
 		     (org-float-time (apply 'encode-time (org-parse-time-string ts))))
 		h (floor (/ s 3600))
