@@ -1,3 +1,62 @@
+2009-10-17  John Wiegley  <johnw@newartisans.com>
+
+	* org-clock.el (org-clock-idle-time): New user customizable option
+	for detecting whether the user has left a clock idle.  Note: it is
+	only used in this commit to test whether it's worthwhile to check
+	OS X to get the Mac user's current idle time.  If the Emacs idle
+	time is less than the value, the user hasn't been away long enough
+	to be worth checking (a more expensive test than just getting
+	Emacs idle time).
+	(org-user-idle-seconds, org-mac-idle-seconds)
+	(org-emacs-idle-seconds): This three functions, in conjunction
+	with the user customization variable `org-clock-idle-time', return
+	the number of seconds (as a floating point) that the user has been
+	away from their Emacs (or, if running on OS X, their computer).
+
+	* org-clock.el (org-find-open-clocks): New function that returns a
+	list of all open clocks in the given FILE.  Note that each clock
+	it returns is a cons cell of the format (MARKER . START-TIME).
+	This "clock" value is used by several of the new clock module
+	utility functions.
+	(org-is-active-clock): New inline function which tests whether the
+	given clock value is the same as the currently active clock.
+	Returns non-nil if this is the case.
+	(org-with-clock-position): New macro that evaluates FORMS with
+	point in the buffer and at the position of the given clock.
+	Changes to the current clock are global.
+	(org-with-clock): New macro that evaluates FORMS with point in the
+	buffer and at the position of the given clock.  However, changes
+	to the current clock are local and have no effect on the user's
+	active clock.  This allows, for example, far any clock to be
+	cancelled without cancelling the active clock.
+	(org-clock-clock-in): New inline function that switches the active
+	clock to the given clock.  If either the argument RESUME, or the
+	global `org-clock-in-resume', are non-nil, it will resume a clock
+	that was previously left open.
+	(org-clock-clock-out): New inline function that clocks out the
+	given clock value without affecting the currently active clock.
+	(org-clock-clock-cancel): New inline function that cancels the
+	given clock value without affecting the currently active clock.
+
+	* org-clock.el (org-clock-in): Before creating
+	`org-clock-mode-line-timer', check to make sure an older timer is
+	not currently running.
+	(org-clock-out): Accept new third parameter `at-time', which
+	permits a clock to be clocked out at a specific time.  Note that
+	no attempt is made to verify that the clock out time is later than
+	the clock in time.
+
+	* org.el (org-files-list): New utility function for returning a
+	list of all open org-mode buffers, plus all files used to build
+	the agenda buffer.  Note that not all the files will necessarily
+	be visited by a buffer at time of call.
+	(org-entry-beginning-position): Like the function
+	`line-beginning-position', this inline function returns the
+	beginning position of the current heading/entry.
+	(org-entry-end-position): Like the function `line-end-position',
+	this inline function returns the end position of the current
+	heading/entry.
+
 2009-10-16  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-agenda.el (org-agenda-list): Mark the all-todo items line as

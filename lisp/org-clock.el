@@ -206,6 +206,13 @@ string as argument."
   :group 'org-clock
   :type 'plist)
 
+(defcustom org-clock-idle-time nil
+  "When non-nil, resolve open clocks if the user is idle more than X minutes."
+  :group 'org-clock
+  :type '(choice
+	  (const :tag "Never" nil)
+	  (integer :tag "After N minutes")))
+
 
 (defvar org-clock-in-prepare-hook nil
   "Hook run when preparing the clock.
@@ -495,6 +502,103 @@ Use alsa's aplay tool if available."
 (defvar org-clock-mode-line-entry nil
   "Information for the modeline about the running clock.")
 
+(defun org-find-open-clocks (file)
+  "Search through the given file and find all open clocks."
+  (let ((buf (or (get-file-buffer file)
+		 (find-file-noselect file)))
+	clocks)
+    (with-current-buffer buf
+      (save-excursion
+	(goto-char (point-min))
+	(while (re-search-forward "CLOCK: \\(\\[.*?\\]\\)$" nil t)
+	  (push (cons (copy-marker (1- (match-end 1)) t)
+		      (org-time-string-to-time (match-string 1))) clocks))))
+    clocks))
+
+(defsubst org-is-active-clock (clock)
+  "Return t if CLOCK is the currently active clock."
+  (and (org-clock-is-active)
+       (= org-clock-marker (car clock))))
+
+(defmacro org-with-clock-position (clock &rest forms)
+  "Evaluate FORMS with CLOCK as the current active clock."
+  `(with-current-buffer (marker-buffer (car ,clock))
+     (save-excursion
+       (save-restriction
+	 (widen)
+	 (goto-char (car ,clock))
+	 (beginning-of-line)
+	 ,@forms))))
+
+(put 'org-with-clock-position 'lisp-indent-function 1)
+
+(defmacro org-with-clock (clock &rest forms)
+  "Evaluate FORMS with CLOCK as the current active clock.
+This macro also protects the current active clock from being altered."
+  `(org-with-clock-position ,clock
+     (let ((org-clock-start-time (cdr ,clock))
+	   (org-clock-total-time)
+	   (org-clock-history)
+	   (org-clock-effort)
+	   (org-clock-marker (car ,clock))
+	   (org-clock-hd-marker (save-excursion
+				  (outline-back-to-heading t)
+				  (point-marker))))
+       ,@forms)))
+
+(put 'org-with-clock 'lisp-indent-function 1)
+
+(defsubst org-clock-clock-in (clock &optional resume)
+  "Clock in to the clock located by CLOCK.
+If necessary, clock-out of the currently active clock."
+  (org-with-clock-position clock
+    (let ((org-clock-in-resume (or resume org-clock-in-resume)))
+      (org-clock-in))))
+
+(defsubst org-clock-clock-out (clock &optional fail-quietly at-time)
+  "Clock out of the clock located by CLOCK."
+  (let ((temp (copy-marker (car clock)
+			   (marker-insertion-type (car clock)))))
+    (if (org-is-active-clock clock)
+	(org-clock-out fail-quietly at-time)
+      (org-with-clock clock
+	(org-clock-out fail-quietly at-time)))
+    (setcar clock temp)))
+
+(defsubst org-clock-clock-cancel (clock)
+  "Cancel the clock located by CLOCK."
+  (let ((temp (copy-marker (car clock)
+			   (marker-insertion-type (car clock)))))
+    (if (org-is-active-clock clock)
+	(org-clock-cancel)
+      (org-with-clock clock
+	(org-clock-cancel)))
+    (setcar clock temp)))
+
+(defun org-emacs-idle-seconds ()
+  "Return the current Emacs idle time in seconds, or nil if not idle."
+  (let ((idle-time (current-idle-time)))
+    (if idle-time
+	(time-to-seconds idle-time)
+      0)))
+
+(defun org-mac-idle-seconds ()
+  "Return the current Mac idle time in seconds"
+  (string-to-number (shell-command-to-string "ioreg -c IOHIDSystem | perl -ane 'if (/Idle/) {$idle=(pop @F)/1000000000; print $idle; last}'")))
+
+(defun org-user-idle-seconds ()
+  "Return the number of seconds the user has been idle for.
+This routine returns a floating point number."
+  (if (eq system-type 'darwin)
+      (let ((emacs-idle (org-emacs-idle-seconds)))
+	;; If Emacs has been idle for longer than the user's
+	;; `org-clock-idle-time' value, check whether the whole system has
+	;; really been idle for that long.
+	(if (> emacs-idle (* 60 org-clock-idle-time))
+	    (min emacs-idle (org-mac-idle-seconds))
+	  emacs-idle))
+    (org-emacs-idle-seconds)))
+
 (defun org-clock-in (&optional select)
   "Start the clock on the current item.
 If necessary, clock-out of the currently active clock.
@@ -616,6 +720,9 @@ the clocking selection, associated with the letter `d'."
 		(setq global-mode-string
 		      (append global-mode-string '(org-mode-line-string))))
 	    (org-clock-update-mode-line)
+	    (when org-clock-mode-line-timer
+	      (cancel-timer org-clock-mode-line-timer)
+	      (setq org-clock-mode-line-timer nil))
 	    (setq org-clock-mode-line-timer
 		  (run-with-timer 60 60 'org-clock-update-mode-line))
 	    (message "Clock starts at %s - %s" ts msg-extra)
@@ -748,7 +855,7 @@ line and position cursor in that line."
 	    (and (re-search-forward org-property-end-re nil t)
 		 (goto-char (match-beginning 0))))))))
 
-(defun org-clock-out (&optional fail-quietly)
+(defun org-clock-out (&optional fail-quietly at-time)
   "Stop the currently running clock.
 If there is no running clock, throw an error, unless FAIL-QUIETLY is set."
   (interactive)
@@ -769,7 +876,8 @@ If there is no running clock, throw an error, unless FAIL-QUIETLY is set."
 	  (goto-char (match-end 0))
 	  (delete-region (point) (point-at-eol))
 	  (insert "--")
-	  (setq te (org-insert-time-stamp (current-time) 'with-hm 'inactive))
+	  (setq te (org-insert-time-stamp (or at-time (current-time))
+					  'with-hm 'inactive))
 	  (setq s (- (org-float-time (apply 'encode-time (org-parse-time-string te)))
 		     (org-float-time (apply 'encode-time (org-parse-time-string ts))))
 		h (floor (/ s 3600))
