@@ -235,9 +235,13 @@ to add an effort property.")
 (put 'org-mode-line-string 'risky-local-variable t)
 
 (defvar org-clock-mode-line-timer nil)
+(defvar org-clock-idle-timer nil)
 (defvar org-clock-heading "")
 (defvar org-clock-heading-for-remember "")
 (defvar org-clock-start-time "")
+
+(defvar org-clock-left-over-time nil
+  "If non-nil, user cancelled a clock; this is when leftover time started.")
 
 (defvar org-clock-effort ""
   "Effort estimate of the currently clocking task")
@@ -576,6 +580,8 @@ If necessary, clock-out of the currently active clock."
     (setcar clock temp)))
 
 (defvar org-clock-clocking-in nil)
+(defvar org-clock-resolving-clocks nil)
+(defvar org-clock-resolving-clocks-due-to-idleness nil)
 
 (defun org-clock-resolve-clock (clock resolve-to &optional close-p
 				      restart-p fail-quietly)
@@ -610,30 +616,32 @@ This routine can do one of many things:
        start a new clock for the same item
     else just enter a closing time for this clock
        and then start a new clock for the same item"
-  (cond
-   ((null resolve-to)
-    (org-clock-clock-cancel clock)
-    (if (and restart-p (not org-clock-clocking-in))
-	(org-clock-clock-in clock)))
+  (let ((org-clock-resolving-clocks t))
+    (cond
+     ((null resolve-to)
+      (org-clock-clock-cancel clock)
+      (if (and restart-p (not org-clock-clocking-in))
+	  (org-clock-clock-in clock)))
 
-   ((eq resolve-to 'now)
-    (if restart-p
-	(error "RESTART-P is not valid here"))
-    (if (or close-p org-clock-clocking-in)
-	(org-clock-clock-out clock fail-quietly)
-      (unless (org-is-active-clock clock)
-	(org-clock-clock-in clock t))))
+     ((eq resolve-to 'now)
+      (if restart-p
+	  (error "RESTART-P is not valid here"))
+      (if (or close-p org-clock-clocking-in)
+	  (org-clock-clock-out clock fail-quietly)
+	(unless (org-is-active-clock clock)
+	  (org-clock-clock-in clock t))))
 
-   ((not (time-less-p resolve-to (current-time)))
-    (error "RESOLVE-TO must refer to a time in the past"))
+     ((not (time-less-p resolve-to (current-time)))
+      (error "RESOLVE-TO must refer to a time in the past"))
 
-   (t
-    (if restart-p
-	(error "RESTART-P is not valid here"))
-    (org-clock-clock-out clock fail-quietly resolve-to)
-    (unless org-clock-clocking-in
-      (if (not close-p)
-	  (org-clock-clock-in clock))))))
+     (t
+      (if restart-p
+	  (error "RESTART-P is not valid here"))
+      (org-clock-clock-out clock fail-quietly resolve-to)
+      (unless org-clock-clocking-in
+	(if close-p
+	    (setq org-clock-left-over-time last-valid)
+	  (org-clock-clock-in clock)))))))
 
 (defun org-clock-resolve (clock &optional prompt-fn last-valid fail-quietly)
   "Resolve an open org-mode clock.
@@ -658,22 +666,23 @@ was started."
   (let* ((ch
 	  (save-window-excursion
 	    (save-excursion
-	      (org-with-clock clock
-		(org-clock-goto))
-	      (with-current-buffer (marker-buffer (car clock))
-		(goto-char (car clock))
-		(if org-clock-into-drawer
-		    (ignore-errors
-		      (outline-flag-region (save-excursion
-					     (outline-back-to-heading t)
-					     (search-forward ":LOGBOOK:")
-					     (goto-char (match-beginning 0)))
-					   (save-excursion
-					     (outline-back-to-heading t)
-					     (search-forward ":LOGBOOK:")
-					     (search-forward ":END:")
-					     (goto-char (match-end 0)))
-					   nil))))
+	      (unless org-clock-resolving-clocks-due-to-idleness
+		(org-with-clock clock
+		  (org-clock-goto))
+		(with-current-buffer (marker-buffer (car clock))
+		  (goto-char (car clock))
+		  (if org-clock-into-drawer
+		      (ignore-errors
+			(outline-flag-region (save-excursion
+					       (outline-back-to-heading t)
+					       (search-forward ":LOGBOOK:")
+					       (goto-char (match-beginning 0)))
+					     (save-excursion
+					       (outline-back-to-heading t)
+					       (search-forward ":LOGBOOK:")
+					       (search-forward ":END:")
+					       (goto-char (match-end 0)))
+					     nil)))))
 	      (let (char-pressed)
 		(while (null char-pressed)
 		  (setq char-pressed
@@ -710,8 +719,6 @@ was started."
        (and start-over
 	    (not (memq ch '(?K ?S ?C))))
        fail-quietly))))
-
-(defvar org-clock-resolving-clocks nil)
 
 (defun org-resolve-clocks (&optional also-non-dangling-p prompt-fn last-valid)
   "Resolve all currently open org-mode clocks.
@@ -763,6 +770,26 @@ This routine returns a floating point number."
 	  emacs-idle))
     (org-emacs-idle-seconds)))
 
+(defun org-resolve-clocks-if-idle ()
+  "Resolve all currently open org-mode clocks.
+This is performed after `org-clock-idle-time' minutes, to check
+if the user really wants to stay clocked in after being idle for
+so long."
+  (when (and org-clock-idle-time (not org-clock-resolving-clocks)
+	     org-clock-marker)
+    (let ((idle (org-user-idle-seconds))
+	  (org-clock-resolving-clocks-due-to-idleness t))
+      (if (> idle (* 60 org-clock-idle-time))
+	  (org-clock-resolve
+	   (cons org-clock-marker
+		 org-clock-start-time)
+	   (function
+	    (lambda (clock)
+	      (format "Clocked in & idle for %d mins"
+		      (/ (org-user-idle-seconds) 60))))
+	   (time-subtract (current-time)
+			  (seconds-to-time (org-user-idle-seconds))))))))
+
 (defun org-clock-in (&optional select)
   "Start the clock on the current item.
 If necessary, clock-out of the currently active clock.
@@ -773,9 +800,14 @@ the clocking selection, associated with the letter `d'."
   (interactive "P")
   (setq org-clock-notification-was-shown nil)
   (catch 'abort
-    (let ((interrupting (marker-buffer org-clock-marker))
-	  ts selected-task target-pos (msg-extra ""))
-      (unless org-clock-clocking-in
+    (let ((interrupting (and (not org-clock-resolving-clocks-due-to-idleness)
+			     (marker-buffer org-clock-marker)))
+	  ts selected-task target-pos (msg-extra "")
+	  (left-over (and (not org-clock-resolving-clocks)
+			  org-clock-left-over-time)))
+      (unless (or org-clock-clocking-in
+		  org-clock-resolving-clocks)
+	(setq org-clock-left-over-time nil)
 	(let ((org-clock-clocking-in t))
 	  (org-resolve-clocks)))	; check if any clocks are dangling
       (when (equal select '(4))
@@ -875,7 +907,15 @@ the clocking selection, associated with the letter `d'."
 	      (setq org-clock-effort (org-get-effort))
 	      (setq org-clock-total-time (org-clock-sum-current-item
 					  (org-clock-get-sum-start)))
-	      (setq org-clock-start-time (current-time))
+	      (setq org-clock-start-time
+		    (or (and left-over
+			     (y-or-n-p
+			      (format
+			       "You stopped another clock %d mins ago; start this one from then? "
+			       (/ (- (time-to-seconds (current-time))
+				     (time-to-seconds left-over)) 60)))
+			     left-over)
+			(current-time)))
 	      (setq ts (org-insert-time-stamp org-clock-start-time
 					      'with-hm 'inactive))))
 	    (move-marker org-clock-marker (point) (buffer-base-buffer))
@@ -892,6 +932,11 @@ the clocking selection, associated with the letter `d'."
 	      (setq org-clock-mode-line-timer nil))
 	    (setq org-clock-mode-line-timer
 		  (run-with-timer 60 60 'org-clock-update-mode-line))
+	    (when org-clock-idle-timer
+	      (cancel-timer org-clock-idle-timer)
+	      (setq org-clock-idle-timer nil))
+	    (setq org-clock-idle-timer
+		  (run-with-timer 60 60 'org-resolve-clocks-if-idle))
 	    (message "Clock starts at %s - %s" ts msg-extra)
 	    (run-hooks 'org-clock-in-hook)))))))
 
@@ -1066,6 +1111,9 @@ If there is no running clock, throw an error, unless FAIL-QUIETLY is set."
 	  (when org-clock-mode-line-timer
 	    (cancel-timer org-clock-mode-line-timer)
 	    (setq org-clock-mode-line-timer nil))
+	  (when org-clock-idle-timer
+	    (cancel-timer org-clock-idle-timer)
+	    (setq org-clock-idle-timer nil))
 	  (setq global-mode-string
 		(delq 'org-mode-line-string global-mode-string))
 	  (when org-clock-out-switch-to-state

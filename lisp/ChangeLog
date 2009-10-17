@@ -31,6 +31,25 @@
 
 2009-10-17  John Wiegley  <johnw@newartisans.com>
 
+	* org-clock.el (org-clock-resolve-clock): If keeping or
+	subtracting time results in a clock out at a time in the past, and
+	if the resolution occurred due to idleness or invoking `M-x
+	org-resolve-clocks', remember that past moment in time.  On the
+	next clock in, the user will be prompted to see if they want to
+	back-date their new clock to then.
+	(org-clock-resolve): Do not jump the user to the location of a
+	dangling clock if the resolution is occuring due to an idle
+	timeout.  In that case there is typically only one dangling clock,
+	the active one, and there is no value gained by shuffling their
+	windows around to show it to them.  Being prompted to resolve an
+	idle clock should be as inobtrusive as possible.
+	(org-resolve-clocks-if-idle): New function that resolves only the
+	currently active clock if the user has exceeded the time returned
+	by `org-user-idle-seconds', based on the value of
+	`org-clock-idle-time'.
+	(org-clock-in): If, after resolving clocks, 
+	(org-clock-out): Cancel the `org-clock-idle-timer' on clock out.
+
 	* org-clock.el (org-clock-resolve-clock): New function that
 	resolves a clock to a specific time, closing or resuming as need
 	be, and possibly even starting a new clock.

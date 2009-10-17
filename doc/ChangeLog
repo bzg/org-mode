@@ -3,6 +3,11 @@
 	* org.texi (Pushing to MobileOrg): Mention that `org-directory'
 	should be set.
 
+2009-10-17  John Wiegley  <johnw@newartisans.com>
+
+	* org.texi (Resolving idle time): Added a section on how idle and
+	dangling clocks are resolved.
+
 2009-10-14  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Agenda commands): Document that SPC is a filter for
