@@ -3,6 +3,10 @@
 	* org-clock.el (org-clock-in): Before creating
 	`org-clock-mode-line-timer', check to make sure an older timer is
 	not currently running.
+	(org-clock-out): Accept new third parameter `at-time', which
+	permits a clock to be clocked out at a specific time.  Note that
+	no attempt is made to verify that the clock out time is later than
+	the clock in time.
 
 	* org.el (org-files-list): New utility function for returning a
 	list of all open org-mode buffers, plus all files used to build
