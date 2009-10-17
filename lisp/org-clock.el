@@ -495,6 +495,79 @@ Use alsa's aplay tool if available."
 (defvar org-clock-mode-line-entry nil
   "Information for the modeline about the running clock.")
 
+(defun org-find-open-clocks (file)
+  "Search through the given file and find all open clocks."
+  (let ((buf (or (get-file-buffer file)
+		 (find-file-noselect file)))
+	clocks)
+    (with-current-buffer buf
+      (save-excursion
+	(goto-char (point-min))
+	(while (re-search-forward "CLOCK: \\(\\[.*?\\]\\)$" nil t)
+	  (push (cons (copy-marker (1- (match-end 1)) t)
+		      (org-time-string-to-time (match-string 1))) clocks))))
+    clocks))
+
+(defsubst org-is-active-clock (clock)
+  "Return t if CLOCK is the currently active clock."
+  (and (org-clock-is-active)
+       (= org-clock-marker (car clock))))
+
+(defmacro org-with-clock-position (clock &rest forms)
+  "Evaluate FORMS with CLOCK as the current active clock."
+  `(with-current-buffer (marker-buffer (car ,clock))
+     (save-excursion
+       (save-restriction
+	 (widen)
+	 (goto-char (car ,clock))
+	 (beginning-of-line)
+	 ,@forms))))
+
+(put 'org-with-clock-position 'lisp-indent-function 1)
+
+(defmacro org-with-clock (clock &rest forms)
+  "Evaluate FORMS with CLOCK as the current active clock.
+This macro also protects the current active clock from being altered."
+  `(org-with-clock-position ,clock
+     (let ((org-clock-start-time (cdr ,clock))
+	   (org-clock-total-time)
+	   (org-clock-history)
+	   (org-clock-effort)
+	   (org-clock-marker (car ,clock))
+	   (org-clock-hd-marker (save-excursion
+				  (outline-back-to-heading t)
+				  (point-marker))))
+       ,@forms)))
+
+(put 'org-with-clock 'lisp-indent-function 1)
+
+(defsubst org-clock-clock-in (clock &optional resume)
+  "Clock in to the clock located by CLOCK.
+If necessary, clock-out of the currently active clock."
+  (org-with-clock-position clock
+    (let ((org-clock-in-resume (or resume org-clock-in-resume)))
+      (org-clock-in))))
+
+(defsubst org-clock-clock-out (clock &optional fail-quietly at-time)
+  "Clock out of the clock located by CLOCK."
+  (let ((temp (copy-marker (car clock)
+			   (marker-insertion-type (car clock)))))
+    (if (org-is-active-clock clock)
+	(org-clock-out fail-quietly at-time)
+      (org-with-clock clock
+	(org-clock-out fail-quietly at-time)))
+    (setcar clock temp)))
+
+(defsubst org-clock-clock-cancel (clock)
+  "Cancel the clock located by CLOCK."
+  (let ((temp (copy-marker (car clock)
+			   (marker-insertion-type (car clock)))))
+    (if (org-is-active-clock clock)
+	(org-clock-cancel)
+      (org-with-clock clock
+	(org-clock-cancel)))
+    (setcar clock temp)))
+
 (defun org-clock-in (&optional select)
   "Start the clock on the current item.
 If necessary, clock-out of the currently active clock.

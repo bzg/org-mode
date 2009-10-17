@@ -1,5 +1,30 @@
 2009-10-17  John Wiegley  <johnw@newartisans.com>
 
+	* org-clock.el (org-find-open-clocks): New function that returns a
+	list of all open clocks in the given FILE.  Note that each clock
+	it returns is a cons cell of the format (MARKER . START-TIME).
+	This "clock" value is used by several of the new clock module
+	utility functions.
+	(org-is-active-clock): New inline function which tests whether the
+	given clock value is the same as the currently active clock.
+	Returns non-nil if this is the case.
+	(org-with-clock-position): New macro that evaluates FORMS with
+	point in the buffer and at the position of the given clock.
+	Changes to the current clock are global.
+	(org-with-clock): New macro that evaluates FORMS with point in the
+	buffer and at the position of the given clock.  However, changes
+	to the current clock are local and have no effect on the user's
+	active clock.  This allows, for example, far any clock to be
+	cancelled without cancelling the active clock.
+	(org-clock-clock-in): New inline function that switches the active
+	clock to the given clock.  If either the argument RESUME, or the
+	global `org-clock-in-resume', are non-nil, it will resume a clock
+	that was previously left open.
+	(org-clock-clock-out): New inline function that clocks out the
+	given clock value without affecting the currently active clock.
+	(org-clock-clock-cancel): New inline function that cancels the
+	given clock value without affecting the currently active clock.
+
 	* org-clock.el (org-clock-in): Before creating
 	`org-clock-mode-line-timer', check to make sure an older timer is
 	not currently running.
