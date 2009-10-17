@@ -1,3 +1,16 @@
+2009-10-17  John Wiegley  <johnw@newartisans.com>
+
+	* org.el (org-files-list): New utility function for returning a
+	list of all open org-mode buffers, plus all files used to build
+	the agenda buffer.  Note that not all the files will necessarily
+	be visited by a buffer at time of call.
+	(org-entry-beginning-position): Like the function
+	`line-beginning-position', this inline function returns the
+	beginning position of the current heading/entry.
+	(org-entry-end-position): Like the function `line-end-position',
+	this inline function returns the end position of the current
+	heading/entry.
+
 2009-10-16  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-agenda.el (org-agenda-list): Mark the all-todo items line as

@@ -5335,6 +5335,27 @@ are at least `org-cycle-separator-lines' empty lines before the headline."
     (let ((context (if (org-up-heading-safe) 'children 'overview)))
       (org-cycle-show-empty-lines context))))
 
+(defun org-files-list ()
+  "Return `org-agenda-files' list, plus all open org-mode files.
+This is useful for operations that need to scan all of a user's
+open and agenda-wise Org files."
+  (let ((files (mapcar 'expand-file-name org-agenda-files)))
+    (dolist (buf (buffer-list))
+      (with-current-buffer buf
+	(if (eq major-mode 'org-mode)
+	    (let ((file (expand-file-name (buffer-file-name))))
+	      (unless (member file files)
+		(push file files))))))
+    files))
+
+(defsubst org-entry-beginning-position ()
+  "Return the beginning position of the current entry."
+  (save-excursion (outline-back-to-heading t) (point)))
+
+(defsubst org-entry-end-position ()
+  "Return the end position of the current entry."
+  (save-excursion (outline-next-heading) (point)))
+
 (defun org-cycle-hide-drawers (state)
   "Re-hide all drawers after a visibility state change."
   (when (and (org-mode-p)
