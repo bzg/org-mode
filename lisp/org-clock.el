@@ -616,6 +616,9 @@ the clocking selection, associated with the letter `d'."
 		(setq global-mode-string
 		      (append global-mode-string '(org-mode-line-string))))
 	    (org-clock-update-mode-line)
+	    (when org-clock-mode-line-timer
+	      (cancel-timer org-clock-mode-line-timer)
+	      (setq org-clock-mode-line-timer nil))
 	    (setq org-clock-mode-line-timer
 		  (run-with-timer 60 60 'org-clock-update-mode-line))
 	    (message "Clock starts at %s - %s" ts msg-extra)

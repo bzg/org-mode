@@ -1,5 +1,9 @@
 2009-10-17  John Wiegley  <johnw@newartisans.com>
 
+	* org-clock.el (org-clock-in): Before creating
+	`org-clock-mode-line-timer', check to make sure an older timer is
+	not currently running.
+
 	* org.el (org-files-list): New utility function for returning a
 	list of all open org-mode buffers, plus all files used to build
 	the agenda buffer.  Note that not all the files will necessarily
