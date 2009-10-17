@@ -991,7 +991,7 @@ categories by priority.
 
 Instead of a single list, this can also be a set of list for specific
 contents, with a context symbol in the car of the list, any of
-`agenda', `todo', `tags' for the corresponding agenda views.
+`agenda', `todo', `tags', `search' for the corresponding agenda views.
 
 Custom commands can bind this variable in the options section."
   :group 'org-agenda-sorting
@@ -1003,6 +1003,8 @@ Custom commands can bind this variable in the options section."
 		(cons (const :tag "Strategy for TODO lists" todo)
 		      (repeat ,org-sorting-choice))
 		(cons (const :tag "Strategy for Tags matches" tags)
+		      (repeat ,org-sorting-choice))
+		(cons (const :tag "Strategy for search matches" search)
 		      (repeat ,org-sorting-choice)))))
 
 (defcustom org-agenda-cmp-user-defined nil

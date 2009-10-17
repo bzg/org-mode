@@ -1,3 +1,11 @@
+2009-10-17  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-agenda.el (org-agenda-sorting-strategy): Fix customization
+	type.
+
+	* org.el (org-pre-cycle-hook): Document that `empty' can also be
+	the value of ARG when doing local cycling.
+
 2009-10-17  John Wiegley  <johnw@newartisans.com>
 
 	* org-clock.el (org-clock-idle-time): New user customizable option
