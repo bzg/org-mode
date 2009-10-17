@@ -681,13 +681,13 @@ was started."
 					   " [(kK)eep (sS)ubtract (C)ancel]? ")
 				   nil 45)))
 		char-pressed))))
-	 (default (floor (/ (time-to-seconds
+	 (default (floor (/ (org-float-time
 			     (time-subtract (current-time) last-valid)) 60)))
 	 (keep (and (memq ch '(?k ?K))
 		    (read-number "Keep how many minutes? " default)))
 	 (subtractp (memq ch '(?s ?S)))
-	 (barely-started-p (< (- (time-to-seconds last-valid)
-				 (time-to-seconds (cdr clock))) 45))
+	 (barely-started-p (< (- (org-float-time last-valid)
+				 (org-float-time (cdr clock))) 45))
 	 (start-over (and subtractp barely-started-p)))
     (if (or (null ch)
 	    (not (memq ch '(?k ?K ?s ?S ?C))))
@@ -734,8 +734,8 @@ non-dangling (i.e., currently open and valid) clocks."
 			(format
 			 "Dangling clock started %d mins ago"
 			 (floor
-			  (/ (- (time-to-seconds (current-time))
-				(time-to-seconds (cdr clock))) 60))))))
+			  (/ (- (org-float-time (current-time))
+				(org-float-time (cdr clock))) 60))))))
 		 (or last-valid
 		     (cdr clock)))))))))))
 
@@ -743,7 +743,7 @@ non-dangling (i.e., currently open and valid) clocks."
   "Return the current Emacs idle time in seconds, or nil if not idle."
   (let ((idle-time (current-idle-time)))
     (if idle-time
-	(time-to-seconds idle-time)
+	(org-float-time idle-time)
       0)))
 
 (defun org-mac-idle-seconds ()
