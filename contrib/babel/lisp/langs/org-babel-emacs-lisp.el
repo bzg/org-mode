@@ -39,13 +39,15 @@
   "Execute a block of emacs-lisp code with org-babel.  This
 function is called by `org-babel-execute-src-block' via multiple-value-bind."
   (message "executing emacs-lisp code block...")
-  (save-window-excursion
-    (let ((print-level nil) (print-length nil))
-      (eval `(let ,(mapcar (lambda (var) `(,(car var) ',(cdr var))) vars)
-	       ,(read (concat "(progn "
-                              (if (member "code" result-params)
-                                  (concat "(pp " body ")") body)
-                              ")")))))))
+  (case result-type
+    (output '())
+    (value (save-window-excursion
+             (let ((print-level nil) (print-length nil))
+               (eval `(let ,(mapcar (lambda (var) `(,(car var) ',(cdr var))) vars)
+                        ,(read (concat "(progn "
+                                       (if (member "code" result-params)
+                                           (concat "(pp " body ")") body)
+                                       ")")))))))))
 
 (provide 'org-babel-emacs-lisp)
 ;;; org-babel-emacs-lisp.el ends here
