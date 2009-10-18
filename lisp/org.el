@@ -5344,7 +5344,7 @@ open and agenda-wise Org files."
   (let ((files (mapcar 'expand-file-name org-agenda-files)))
     (dolist (buf (buffer-list))
       (with-current-buffer buf
-	(if (eq major-mode 'org-mode)
+	(if (and (eq major-mode 'org-mode) (buffer-file-name))
 	    (let ((file (expand-file-name (buffer-file-name))))
 	      (unless (member file files)
 		(push file files))))))

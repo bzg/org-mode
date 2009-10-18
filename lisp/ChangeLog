@@ -1,5 +1,8 @@
 2009-10-18  John Wiegley  <johnw@newartisans.com>
 
+	* org.el (org-files-list): Don't attempt to return a file name for
+	Org buffers which have no associated file.
+
 	* org-agenda.el (org-agenda-do-action): Fixed a typo.
 
 2009-10-18  Carsten Dominik  <carsten.dominik@gmail.com>
