@@ -669,7 +669,7 @@ elements of PLISTS override the values of previous element.  This
 takes into account some special considerations for certain
 parameters when merging lists."
   (let ((results-exclusive-groups
-	 '(("file" "vector" "table" "scalar" "raw" "org" "html" "latex" "code")
+	 '(("file" "vector" "table" "scalar" "raw" "org" "html" "latex" "code" "pp")
 	   ("replace" "silent")
 	   ("output" "value")))
 	params results exports tangle vars var ref)

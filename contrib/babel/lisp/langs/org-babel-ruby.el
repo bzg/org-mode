@@ -113,6 +113,8 @@ then create.  Return the initialized session."
 
 (defvar org-babel-ruby-last-value-eval "_"
   "When evaluated by Ruby this returns the return value of the last statement.")
+(defvar org-babel-ruby-pp-last-value-eval "require 'pp'; pp(_)"
+  "When evaluated by Ruby this pretty prints value of the last statement.")
 (defvar org-babel-ruby-eoe-indicator ":org_babel_ruby_eoe"
   "Used to indicate that evaluation is has completed.")
 (defvar org-babel-ruby-wrapper-method
@@ -122,6 +124,18 @@ def main()
 end
 results = main()
 File.open('%s', 'w'){ |f| f.write((results.class == String) ? results : results.inspect) }
+")
+(defvar org-babel-ruby-pp-wrapper-method
+  "
+require 'pp'
+def main()
+%s
+end
+results = main()
+File.open('%s', 'w') do |f|
+  $stdout = f
+  pp results
+end
 ")
 
 (defun org-babel-ruby-evaluate (buffer body &optional result-type)
@@ -142,19 +156,24 @@ last statement in BODY, as elisp."
           (value
            (let ((tmp-file (make-temp-file "ruby-functional-results")))
              (with-temp-buffer
-               (insert (format org-babel-ruby-wrapper-method body tmp-file))
+               (insert (format (if (member "pp" result-params)
+                                   org-babel-ruby-pp-wrapper-method
+                                 org-babel-ruby-wrapper-method) body tmp-file))
                ;; (message "buffer=%s" (buffer-string)) ;; debugging
                (shell-command-on-region (point-min) (point-max) "ruby"))
              (let ((raw (with-temp-buffer (insert-file-contents tmp-file)
                                           (buffer-string))))
-               (if (member "code" result-params)
+               (if (or (member "code" result-params) (member "pp" result-params))
                    raw
                  (org-babel-ruby-table-or-string raw)))))))
     ;; comint session evaluation
     (let* ((full-body
 	    (mapconcat
 	     #'org-babel-chomp
-	     (list body org-babel-ruby-last-value-eval org-babel-ruby-eoe-indicator) "\n"))
+	     (list body (if (member "pp" result-params)
+                            org-babel-ruby-pp-last-value-eval
+                          org-babel-ruby-last-value-eval)
+                   org-babel-ruby-eoe-indicator) "\n"))
            (raw (org-babel-comint-with-output buffer org-babel-ruby-eoe-indicator t
                   (insert full-body) (comint-send-input nil t)))
            (results (cdr (member org-babel-ruby-eoe-indicator
@@ -163,7 +182,7 @@ last statement in BODY, as elisp."
       (case result-type
         (output (mapconcat #'identity (reverse (cdr results)) "\n"))
         (value
-         (if (member "code" result-params)
+         (if (or (member "code" result-params) (member "pp" result-params))
              (car results)
            (org-babel-ruby-table-or-string (car results))))))))
 

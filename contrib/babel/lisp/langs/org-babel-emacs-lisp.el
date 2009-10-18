@@ -45,7 +45,8 @@ function is called by `org-babel-execute-src-block' via multiple-value-bind."
              (let ((print-level nil) (print-length nil))
                (eval `(let ,(mapcar (lambda (var) `(,(car var) ',(cdr var))) vars)
                         ,(read (concat "(progn "
-                                       (if (member "code" result-params)
+                                       (if (or (member "code" result-params)
+                                               (member "pp" result-params))
                                            (concat "(pp " body ")") body)
                                        ")")))))))))
 

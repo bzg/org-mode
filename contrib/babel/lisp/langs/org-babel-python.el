@@ -109,6 +109,12 @@ then create.  Return the initialized session."
 
 (defvar org-babel-python-last-value-eval "_"
   "When evaluated by Python this returns the return value of the last statement.")
+(defvar org-babel-python-pp-last-value-eval
+  '("results = _"
+    "import pprint"
+    "org_babel_pp = pprint.PrettyPrinter()"
+    "org_babel_pp.pprint(results)")
+  "When evaluated by Python this pretty prints the value of the last statement.")
 (defvar org-babel-python-eoe-indicator "'org_babel_python_eoe'"
   "Used to indicate that evaluation is has completed.")
 (defvar org-babel-python-wrapper-method
@@ -117,6 +123,13 @@ def main():
 %s
 
 open('%s', 'w').write( str(main()) )")
+(defvar org-babel-python-pp-wrapper-method
+  "
+import pprint
+def main():
+%s
+
+open('%s', 'w').write( pprint.pformat(main()) )")
 
 (defun org-babel-python-evaluate (buffer body &optional result-type)
   "Pass BODY to the Python process in BUFFER.  If RESULT-TYPE equals
@@ -138,7 +151,9 @@ last statement in BODY, as elisp."
              (with-temp-buffer
                (insert
 		(format
-		 org-babel-python-wrapper-method
+		 (if (member "pp" result-params)
+                     org-babel-python-pp-wrapper-method
+                   org-babel-python-wrapper-method)
 		 (let ((lines (split-string
 			       (org-remove-indentation (org-babel-trim body)) "[\r\n]")))
 		   (concat
@@ -150,7 +165,7 @@ last statement in BODY, as elisp."
                ;; (message "buffer=%s" (buffer-string)) ;; debugging
                (shell-command-on-region (point-min) (point-max) "python"))
              (let ((raw (with-temp-buffer (insert-file-contents tmp-file) (buffer-string))))
-               (if (member "code" result-params)
+               (if (or (member "code" result-params) (member "pp" result-params))
                    raw
                  (org-babel-python-table-or-string raw)))))))
     ;; comint session evaluation
@@ -160,18 +175,22 @@ last statement in BODY, as elisp."
                     (mapc (lambda (statement) (insert statement) (comint-send-input nil t))
                           (split-string (org-babel-trim full-body) "[\r\n]+"))
                     (comint-send-input nil t) (comint-send-input nil t)
-                    (insert org-babel-python-last-value-eval)
-                    (comint-send-input nil t)
+                    (if (member "pp" result-params)
+                        (mapc (lambda (statement) (insert statement) (comint-send-input nil t))
+                              org-babel-python-pp-last-value-eval)
+                      (insert org-babel-python-last-value-eval))
+                    (comint-send-input nil t) (comint-send-input nil t)
                     (insert org-babel-python-eoe-indicator)
                     (comint-send-input nil t)))
              (results (delete org-babel-python-eoe-indicator
                               (cdr (member org-babel-python-eoe-indicator
                                            (reverse (mapcar #'org-babel-trim raw)))))))
-        (setq results (mapcar #'org-babel-python-read-string results))
+        (unless (or (member "code" result-params) (member "pp" result-params))
+          (setq results (mapcar #'org-babel-python-read-string results)))
         (case result-type
 	  (output (org-babel-trim (mapconcat #'identity (reverse (cdr results)) "\n")))
 	  (value
-           (if (member "code" result-params)
+           (if (or (member "code" result-params) (member "pp" result-params))
                (car results)
              (org-babel-python-table-or-string (org-babel-trim (car results))))))))))
 
