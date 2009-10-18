@@ -5,6 +5,8 @@
 	(org-mobile-inbox-for-pull): Document the best location for this
 	file.
 	(org-mobile-check-setup): Verify `org-directory'.
+	(org-mobile-create-index-file): Sort the files to be listed in
+	index.org.
 
 2009-10-17  Carsten Dominik  <carsten.dominik@gmail.com>
 

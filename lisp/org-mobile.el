@@ -261,7 +261,8 @@ agenda view showing the flagged items."
 
 (defun org-mobile-create-index-file ()
   "Write the index file in the WebDAV directory."
-  (let ((files-alist org-mobile-files-alist)
+  (let ((files-alist (sort (copy-sequence org-mobile-files-alist)
+			   (lambda (a b) (string< (cdr a) (cdr b)))))
 	(def-todo (default-value 'org-todo-keywords))
 	(def-tags (default-value 'org-tag-alist))
 	file link-name todo-kwds done-kwds tags drawers entry kwds dwds twds)
