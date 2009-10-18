@@ -6466,7 +6466,7 @@ The cursor may be at a date in the calendar, or in the Org agenda."
     (if current-buffer
 	(eval form)
       (if (not (marker-buffer org-agenda-action-marker))
-	  (error "No entry has bee selected for agenda action")
+	  (error "No entry has been selected for agenda action")
 	(with-current-buffer (marker-buffer org-agenda-action-marker)
 	  (save-excursion
 	    (save-restriction

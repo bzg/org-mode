@@ -1,3 +1,7 @@
+2009-10-18  John Wiegley  <johnw@newartisans.com>
+
+	* org-agenda.el (org-agenda-do-action): Fixed a typo.
+
 2009-10-18  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-mobile.el (org-mobile-locate-entry): Interpret files
