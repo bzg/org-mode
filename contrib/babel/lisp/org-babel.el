@@ -260,7 +260,7 @@ results already exist."
   "Process returned value for insertion in buffer.
 
 Currently, this function forces to table output if :results
-vector has been supplied.
+table or :results vector has been supplied.
 
   You can see below the various fragments of results-processing
 code that were present in the language-specific files. Out of
@@ -270,7 +270,9 @@ org-babel-*-evaluate functions. I think those should only be used
 in the :results value case, as in the 'output case we are not
 concerned with creating elisp versions of results. "
 
-  (if (and (member "vector" result-params) (not (listp result)))
+  (if (and (or (member "vector" result-params)
+               (member "table" result-params))
+           (not (listp result)))
       (list (list result))
     result))
 
@@ -667,7 +669,7 @@ elements of PLISTS override the values of previous element.  This
 takes into account some special considerations for certain
 parameters when merging lists."
   (let ((results-exclusive-groups
-	 '(("file" "vector" "scalar" "raw" "org" "html" "latex" "code")
+	 '(("file" "vector" "table" "scalar" "raw" "org" "html" "latex" "code")
 	   ("replace" "silent")
 	   ("output" "value")))
 	params results exports tangle vars var ref)
