@@ -11735,19 +11735,20 @@ from the WebDAV directory using @file{scp}.
 This operation copies all files currently listed in @code{org-mobile-files}
 to the directory @code{org-mobile-directory}.  By default this list contains
 all agenda files (as listed in @code{org-agenda-files}), but additional files
-can be included by customizing @code{org-mobiles-files}.  The push operation
-also creates (in the same directory) a special Org file @file{agendas.org}.
-This file is an Org-mode style outline, containing every custom agenda view
-defined by the user.  While creating the agendas, Org-mode will
-force@footnote{See the variable @code{org-mobile-force-id-on-agenda-items}.}
-an ID property on all entries referenced by the agendas, so that these
-entries can be uniquely identified if @i{MobileOrg} flags them for further
-action.  Finally, Org writes the file @file{index.org}, containing links to
-all other files.  If @i{MobileOrg} is configured to request this file from
-the WebDAV server, all agendas and Org files will be downloaded to the
-device.  To speed up the download, MobileOrg will only read files whose
-checksums@footnote{stored automatically in the file @file{checksums.dat}}
-have changed.
+can be included by customizing @code{org-mobiles-files}.  File names will be
+staged with path relative to @code{org-directory}, so all files should be
+inside this directory.  The push operation also creates (in the same
+directory) a special Org file @file{agendas.org}.  This file is an Org-mode
+style outline, containing every custom agenda view defined by the user.
+While creating the agendas, Org-mode will force@footnote{See the variable
+@code{org-mobile-force-id-on-agenda-items}.}  an ID property on all entries
+referenced by the agendas, so that these entries can be uniquely identified
+if @i{MobileOrg} flags them for further action.  Finally, Org writes the file
+@file{index.org}, containing links to all other files.  If @i{MobileOrg} is
+configured to request this file from the WebDAV server, all agendas and Org
+files will be downloaded to the device.  To speed up the download, MobileOrg
+will only read files whose checksums@footnote{stored automatically in the
+file @file{checksums.dat}} have changed.
 
 @node Pulling from MobileOrg,  , Pushing to MobileOrg, MobileOrg
 @section Pulling from MobileOrg

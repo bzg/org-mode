@@ -68,7 +68,8 @@ org-agenda-text-search-extra-files
   "The file where captured notes and flags will be appended to.
 During the execution of `org-mobile-pull', the file
 `org-mobile-capture-file' will be emptied it's contents have
-been appended to the file given here."
+been appended to the file given here.  This file should be in
+`org-directory', and not in the staging area or on the web server."
   :group 'org-mobile
   :type 'file)
 
@@ -236,18 +237,25 @@ agenda view showing the flagged items."
 
 (defun org-mobile-check-setup ()
   "Check if org-mobile-directory has been set up."
-  (when (or (not org-mobile-directory)
-	    (not (stringp org-mobile-directory))
-	    (not (string-match "\\S-" org-mobile-directory))
-	    (not (file-exists-p org-mobile-directory))
-	    (not (file-directory-p org-mobile-directory)))
+  (unless (and org-directory
+	       (stringp org-directory)
+	       (string-match "\\S-" org-directory)
+	       (file-exists-p org-directory)
+	       (file-directory-p org-directory))
+    (error
+     "Please set `org-directory' to the directory where your org files live"))
+  (unless (and org-mobile-directory
+	       (stringp org-mobile-directory)
+	       (string-match "\\S-" org-mobile-directory)
+	       (file-exists-p org-mobile-directory)
+	       (file-directory-p org-mobile-directory))
     (error
      "Variable `org-mobile-directory' must point to an existing directory"))
-  (when (or (not org-mobile-inbox-for-pull)
-	    (not (stringp org-mobile-inbox-for-pull))
-	    (not (string-match "\\S-" org-mobile-inbox-for-pull))
-	    (not (file-exists-p
-		  (file-name-directory org-mobile-inbox-for-pull))))
+  (unless (and org-mobile-inbox-for-pull
+	       (stringp org-mobile-inbox-for-pull)
+	       (string-match "\\S-" org-mobile-inbox-for-pull)
+	       (file-exists-p
+		(file-name-directory org-mobile-inbox-for-pull)))
     (error
      "Variable `org-mobile-inbox-for-pull' must point to a file in an existing directory")))
 
@@ -728,6 +736,7 @@ as a string."
 	    (path (match-string 2 link))
 	    (table '((?: . "%3a") (?\[ . "%5b") (?\] . "%5d") (?/ . "%2f"))))
 	(setq file (org-link-unescape file table))
+	(setq file (expand-file-name file org-directory))
 	(setq path (mapcar (lambda (x) (org-link-unescape x table))
 			   (org-split-string path "/")))
 	(org-find-olp (cons file path))))))

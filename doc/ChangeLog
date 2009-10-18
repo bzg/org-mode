@@ -1,3 +1,8 @@
+2009-10-18  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Pushing to MobileOrg): Mention that `org-directory'
+	should be set.
+
 2009-10-14  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Agenda commands): Document that SPC is a filter for
