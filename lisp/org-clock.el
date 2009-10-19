@@ -213,6 +213,11 @@ string as argument."
 	  (const :tag "Never" nil)
 	  (integer :tag "After N minutes")))
 
+(defcustom org-clock-disable-clock-resolution nil
+  "When non-nil, do not resolve open clocks on clock-in."
+  :group 'org-clock
+  :type 'boolean)
+
 
 (defvar org-clock-in-prepare-hook nil
   "Hook run when preparing the clock.
@@ -806,7 +811,8 @@ the clocking selection, associated with the letter `d'."
 	  (left-over (and (not org-clock-resolving-clocks)
 			  org-clock-left-over-time)))
       (unless (or org-clock-clocking-in
-		  org-clock-resolving-clocks)
+		  org-clock-resolving-clocks
+		  org-clock-disable-clock-resolution)
 	(setq org-clock-left-over-time nil)
 	(let ((org-clock-clocking-in t))
 	  (org-resolve-clocks)))	; check if any clocks are dangling

@@ -6,6 +6,15 @@
 
 2009-10-19  John Wiegley  <johnw@newartisans.com>
 
+	* org-clock.el (org-clock-disable-clock-resolution): New
+	customization variable that disable automatic clock resolution on
+	clock in.
+	(org-clock-in): If `org-clock-disable-clock-resolution' is set, do
+	not automatically resolve anything.  This is does not affect
+	idle-time resolution, however, if `org-clock-idle-time' is set.
+
+2009-10-19  John Wiegley  <johnw@newartisans.com>
+
 	* org-agenda.el (org-agenda-auto-exclude-function): New
 	customization variable for allowing the user to create an "auto
 	exclusion" filter for doing context-aware auto tag filtering.
