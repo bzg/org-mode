@@ -77,6 +77,7 @@ LISPF      = 	org.el			\
 		org-feed.el		\
 		org-footnote.el		\
 		org-gnus.el		\
+		org-habit.el		\
 		org-html.el		\
 		org-icalendar.el	\
 		org-id.el		\

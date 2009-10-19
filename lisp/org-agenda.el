@@ -201,6 +201,7 @@ you can \"misuse\" it to also add other text to the header.  However,
     (const priority-up) (const priority-down)
     (const todo-state-up) (const todo-state-down)
     (const effort-up) (const effort-down)
+    (const habit-up) (const habit-down)
     (const user-defined-up) (const user-defined-down))
   "Sorting choices.")
 
@@ -950,9 +951,9 @@ a grid line."
   :group 'org-agenda)
 
 (defcustom org-agenda-sorting-strategy
-  '((agenda time-up        priority-down category-keep)
-    (todo   priority-down  category-keep)
-    (tags   priority-down  category-keep)
+  '((agenda habit-down time-up priority-down category-keep)
+    (todo   priority-down category-keep)
+    (tags   priority-down category-keep)
     (search category-keep))
   "Sorting structure for the agenda items of a single day.
 This is a list of symbols which will be used in sequence to determine
@@ -975,6 +976,8 @@ effort-up          Sort numerically by estimated effort, high effort last.
 effort-down        Sort numerically by estimated effort, high effort first.
 user-defined-up    Sort according to `org-agenda-cmp-user-defined', high last.
 user-defined-down  Sort according to `org-agenda-cmp-user-defined', high first.
+habit-up           Put entries that are habits first
+habit-down         Put entries that are habits last
 
 The different possibilities will be tried in sequence, and testing stops
 if one comparison returns a \"not-equal\".  For example, the default
@@ -2600,6 +2603,8 @@ bind it in the options section.")
       (when org-agenda-entry-text-mode
 	(org-agenda-entry-text-hide)
 	(org-agenda-entry-text-show))
+      (if (functionp 'org-habit-insert-consistency-graphs)
+	  (org-habit-insert-consistency-graphs))
       (run-hooks 'org-finalize-agenda-hook)
       (setq org-agenda-type (org-get-at-bol 'org-agenda-type))
       (when (get 'org-agenda-filter :preset-filter)
@@ -4214,7 +4219,7 @@ the documentation of `org-diary'."
 	 (regexp org-deadline-time-regexp)
 	 (todayp (org-agenda-todayp date)) ; DATE bound by calendar
 	 (d1 (calendar-absolute-from-gregorian date))  ; DATE bound by calendar
-	 d2 diff dfrac wdays pos pos1 category tags
+	 d2 diff dfrac wdays pos pos1 category tags habitp
 	 ee txt head face s todo-state upcomingp donep timestr)
     (goto-char (point-min))
     (while (re-search-forward regexp nil t)
@@ -4227,15 +4232,22 @@ the documentation of `org-diary'."
 		  (match-string 1) d1 'past
 		  org-agenda-repeating-timestamp-show-all)
 	      diff (- d2 d1)
+	      ;; Never show habits as deadline entries, only as scheduled
+	      ;; entries.  The habit code already requires that every habit
+	      ;; have a scheduled date if it has a deadline, and that the
+	      ;; scheduled date is prior to the deadline.
+	      habitp (and (functionp 'org-is-habit-p)
+			  (org-is-habit-p))
 	      wdays (org-get-wdays s)
 	      dfrac (/ (* 1.0 (- wdays diff)) (max wdays 1))
 	      upcomingp (and todayp (> diff 0)))
 	;; When to show a deadline in the calendar:
 	;; If the expiration is within wdays warning time.
 	;; Past-due deadlines are only shown on the current date
-	(if (or (and (<= diff wdays)
-		     (and todayp (not org-agenda-only-exact-dates)))
-		(= diff 0))
+	(if (and (or (and (<= diff wdays)
+			  (and todayp (not org-agenda-only-exact-dates)))
+		     (= diff 0))
+		 (not habitp))
 	    (save-excursion
 	      (setq todo-state (org-get-todo-state))
 	      (setq donep (member todo-state org-done-keywords))
@@ -4311,11 +4323,11 @@ FRACTION is what fraction of the head-warning time has passed."
 	 mm
 	 (deadline-position-alist
 	  (mapcar (lambda (a) (and (setq mm (get-text-property
-					     0 'org-hd-marker a))
-				   (cons (marker-position mm) a)))
+					0 'org-hd-marker a))
+			      (cons (marker-position mm) a)))
 		  deadline-results))
 	 d2 diff pos pos1 category tags donep
-	 ee txt head pastschedp todo-state face timestr s)
+	 ee txt head pastschedp todo-state face timestr s habitp)
     (goto-char (point-min))
     (while (re-search-forward regexp nil t)
       (catch :skip
@@ -4330,60 +4342,69 @@ FRACTION is what fraction of the head-warning time has passed."
 	(setq pastschedp (and todayp (< diff 0)))
 	;; When to show a scheduled item in the calendar:
 	;; If it is on or past the date.
-	(if (or (and (< diff 0)
-		     (< (abs diff) org-scheduled-past-days)
-		     (and todayp (not org-agenda-only-exact-dates)))
-		(= diff 0))
-	    (save-excursion
-	      (setq todo-state (org-get-todo-state))
-	      (setq donep (member todo-state org-done-keywords))
-	      (if (and donep
-		       (or org-agenda-skip-scheduled-if-done
-			   (not (= diff 0))))
-		  (setq txt nil)
-		(setq category (org-get-category))
-		(if (not (re-search-backward "^\\*+[ \t]+" nil t))
-		    (setq txt org-agenda-no-heading-message)
-		  (goto-char (match-end 0))
-		  (setq pos1 (match-beginning 0))
+	(when (or (and (< diff 0)
+		       (< (abs diff) org-scheduled-past-days)
+		       (and todayp (not org-agenda-only-exact-dates)))
+		  (= diff 0))
+	  (save-excursion
+	    (setq todo-state (org-get-todo-state))
+	    (setq donep (member todo-state org-done-keywords))
+	    (setq habitp (and (functionp 'org-is-habit-p)
+			      (org-is-habit-p)))
+	    (if (and donep
+		     (or habitp org-agenda-skip-scheduled-if-done
+			 (not (= diff 0))))
+		(setq txt nil)
+	      (setq category (org-get-category))
+	      (if (not (re-search-backward "^\\*+[ \t]+" nil t))
+		  (setq txt org-agenda-no-heading-message)
+		(goto-char (match-end 0))
+		(setq pos1 (match-beginning 0))
+		(if habitp
+		    (if (or (not org-habit-show-habits)
+			    (and (not todayp)
+				 org-habit-show-habits-only-for-today))
+			(throw :skip nil))
 		  (if (and
 		       (or (eq t org-agenda-skip-scheduled-if-deadline-is-shown)
 			   (and org-agenda-skip-scheduled-if-deadline-is-shown
 				pastschedp))
 		       (setq mm (assoc pos1 deadline-position-alist)))
-		      (throw :skip nil))
-		  (setq tags (org-get-tags-at))
-		  (setq head (buffer-substring-no-properties
-			      (point)
-			      (progn (skip-chars-forward "^\r\n") (point))))
-		  (if (string-match " \\([012]?[0-9]:[0-9][0-9]\\)" s)
-		      (setq timestr
-			    (concat (substring s (match-beginning 1)) " "))
-		    (setq timestr 'time))
-		  (setq txt (org-format-agenda-item
-			     (if (= diff 0)
-				 (car org-agenda-scheduled-leaders)
-			       (format (nth 1 org-agenda-scheduled-leaders)
-				       (- 1 diff)))
-			     head category tags
-			     (if (not (= diff 0)) nil timestr)))))
-	      (when txt
-		(setq face
-		      (cond
-		       (pastschedp 'org-scheduled-previously)
-		       (todayp 'org-scheduled-today)
-		       (t 'org-scheduled)))
-		(org-add-props txt props
-		  'undone-face face
-		  'face (if donep 'org-agenda-done face)
-		  'org-marker (org-agenda-new-marker pos)
-		  'org-hd-marker (org-agenda-new-marker pos1)
-		  'type (if pastschedp "past-scheduled" "scheduled")
-		  'date (if pastschedp d2 date)
-		  'priority (+ 94 (- 5 diff) (org-get-priority txt))
-		  'org-category category
-		  'todo-state todo-state)
-		(push txt ee))))))
+		      (throw :skip nil)))
+		(setq tags (org-get-tags-at))
+		(setq head (buffer-substring-no-properties
+			    (point)
+			    (progn (skip-chars-forward "^\r\n") (point))))
+		(if (string-match " \\([012]?[0-9]:[0-9][0-9]\\)" s)
+		    (setq timestr
+			  (concat (substring s (match-beginning 1)) " "))
+		  (setq timestr 'time))
+		(setq txt (org-format-agenda-item
+			   (if (= diff 0)
+			       (car org-agenda-scheduled-leaders)
+			     (format (nth 1 org-agenda-scheduled-leaders)
+				     (- 1 diff)))
+			   head category tags
+			   (if (not (= diff 0)) nil timestr)
+			   nil nil habitp))))
+	    (when txt
+	      (setq face
+		    (cond
+		     (pastschedp 'org-scheduled-previously)
+		     (todayp 'org-scheduled-today)
+		     (t 'org-scheduled)))
+	      (org-add-props txt props
+		'undone-face face
+		'face (if donep 'org-agenda-done face)
+		'org-marker (org-agenda-new-marker pos)
+		'org-hd-marker (org-agenda-new-marker pos1)
+		'type (if pastschedp "past-scheduled" "scheduled")
+		'date (if pastschedp d2 date)
+		'priority (+ 94 (- 5 diff) (org-get-priority txt))
+		'org-category category
+		'org-habit-p (and habitp (org-habit-parse-todo))
+		'todo-state todo-state)
+	      (push txt ee))))))
     (nreverse ee)))
 
 (defun org-agenda-get-blocks ()
@@ -4462,7 +4483,7 @@ The flag is set if the currently compiled format contains a `%e'.")
   "Used by `org-compile-prefix-format' to remember the category field widh.")
 
 (defun org-format-agenda-item (extra txt &optional category tags dotime
-				     noprefix remove-re)
+				     noprefix remove-re habitp)
   "Format TXT to be inserted into the agenda buffer.
 In particular, it adds the prefix and corresponding text properties.  EXTRA
 must be a string and replaces the `%s' specifier in the prefix format.
@@ -4575,7 +4596,7 @@ Any match of REMOVE-RE will be removed from TXT."
 	(setq time (cond (s2 (concat s1 "-" s2))
 			 (s1 (concat s1 "......"))
 			 (t ""))
-	      extra (or extra "")
+	      extra (or (and (not habitp) extra) "")
 	      category (if (symbolp category) (symbol-name category) category)
 	      thecategory (copy-sequence category))
 	(if (string-match org-bracket-link-regexp category)
@@ -4858,6 +4879,14 @@ HH:MM."
 	  ((< tb ta) +1)
 	  (t nil))))
 
+(defsubst org-cmp-habit-p (a b)
+  "Compare the todo states of strings A and B."
+  (let ((ha (get-text-property 1 'org-habit-p a))
+	(hb (get-text-property 1 'org-habit-p b)))
+    (cond ((and ha (not hb)) -1)
+	  ((and (not ha) hb) +1)
+	  (t nil))))
+
 (defun org-entries-lessp (a b)
   "Predicate for sorting agenda entries."
   ;; The following variables will be used when the form is evaluated.
@@ -4875,6 +4904,8 @@ HH:MM."
 	 (tag-down (if tag-up (- tag-up) nil))
 	 (todo-state-up (org-cmp-todo-state a b))
 	 (todo-state-down (if todo-state-up (- todo-state-up) nil))
+	 (habit-up (org-cmp-habit-p a b))
+	 (habit-down (if habit-up (- habit-up) nil))
 	 user-defined-up user-defined-down)
     (if (and org-agenda-cmp-user-defined
 	     (functionp org-agenda-cmp-user-defined))

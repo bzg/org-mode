@@ -1,3 +1,8 @@
+2009-10-19  John Wiegley  <johnw@newartisans.com>
+
+	* org.texi (Tracking your habits): Added a new section in the
+	manual about how to track habits.
+
 2009-10-18  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Pushing to MobileOrg): Mention that `org-directory'

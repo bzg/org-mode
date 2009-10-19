@@ -1,3 +1,8 @@
+2009-10-20  John Wiegley  <johnw@newartisans.com>
+
+	* org-agenda.el (org-finalize-agenda): Draw habit consistency
+	graphs after everything else in the buffer has been setup.
+
 2009-10-19  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-mobile.el (org-mobile-apply): Count success and failure.
@@ -14,6 +19,17 @@
 	idle-time resolution, however, if `org-clock-idle-time' is set.
 
 2009-10-19  John Wiegley  <johnw@newartisans.com>
+
+	* org-habit.el: New file, which implements code to build a "habit
+	consistency graph".
+
+	* org-agenda.el (org-agenda-get-deadlines)
+	(org-agenda-get-scheduled): Display consistency graphs when
+	outputting habits into the agenda.  The graphs are always relative
+	to the current time.
+	(org-format-agenda-item): Added new parameter `habitp', which
+	indicates whether we are formatting a habit or not.  Do not
+	display "extra" leading information if habitp is true.
 
 	* org.el (org-repeat-re): Improved regexp to include .+ and ++
 	leaders for repeat strings.

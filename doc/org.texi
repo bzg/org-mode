@@ -198,6 +198,7 @@ Progress logging
 
 * Closing items::               When was this entry marked DONE?
 * Tracking TODO state changes::  When did the status change?
+* Tracking your habits::        How consistent have you been?
 
 Tags
 
@@ -3524,6 +3525,7 @@ work time}.
 @menu
 * Closing items::               When was this entry marked DONE?
 * Tracking TODO state changes::  When did the status change?
+* Tracking your habits::        How consistent have you been?
 @end menu
 
 @node Closing items, Tracking TODO state changes, Progress logging, Progress logging
@@ -3558,7 +3560,7 @@ In the timeline (@pxref{Timeline}) and in the agenda
 display the TODO items with a @samp{CLOSED} timestamp on each day,
 giving you an overview of what has been done.
 
-@node Tracking TODO state changes,  , Closing items, Progress logging
+@node Tracking TODO state changes, Tracking your habits, Closing items, Progress logging
 @subsection Tracking TODO state changes
 @cindex drawer, for state change recording
 
@@ -3634,6 +3636,103 @@ settings like @code{TODO(!)}.  For example
   :LOGGING: nil
   :END:
 @end example
+
+@node Tracking your habits,  , Tracking TODO state changes, Progress logging
+@subsection Tracking your habits
+@cindex habits
+
+Org has the ability to track the consistency of a special category of TODOs,
+called ``habits''.  A habit has the following properties:
+
+@enumerate
+@item
+The habit is a TODO, with a TODO keyword that represents an open state.
+@item
+The property @code{STYLE} is set to the value @code{habit}.
+@item
+The TODO has a scheduled date, with a @code{.+} style repeat interval.
+@item
+The TODO may also have a deadline, as long as it also has a @code{.+} style
+repeat interval and it starts a number of days after the scheduled date equal
+to the difference between the repeat interval lengths@footnote{Note that if
+you don't set this right, Org will alert you as to what's incorrect about the
+habit definition.}.
+@item
+You must also have state logging for the @code{DONE} state enabled, in order
+for historical data to be represented in the consistency graph.  If it's not
+enabled it's not an error, but the consistency graphs will be largely
+meaningless.
+@end enumerate
+
+To give you an idea of what the above rules look like in action, here's an
+actual habit with some history:
+
+@example
+** TODO Shave
+   SCHEDULED: <2009-10-17 Sat .+2d> DEADLINE: <2009-10-19 Mon .+4d>
+   - State "DONE"       from "TODO"       [2009-10-15 Thu]
+   - State "DONE"       from "TODO"       [2009-10-12 Mon]
+   - State "DONE"       from "TODO"       [2009-10-10 Sat]
+   - State "DONE"       from "TODO"       [2009-10-04 Sun]
+   - State "DONE"       from "TODO"       [2009-10-02 Fri]
+   - State "DONE"       from "TODO"       [2009-09-29 Tue]
+   - State "DONE"       from "TODO"       [2009-09-25 Fri]
+   - State "DONE"       from "TODO"       [2009-09-19 Sat]
+   - State "DONE"       from "TODO"       [2009-09-16 Wed]
+   - State "DONE"       from "TODO"       [2009-09-12 Sat]
+   :PROPERTIES:
+   :STYLE:    habit
+   :LAST_REPEAT: [2009-10-19 Mon 00:36]
+   :END:
+@end example
+
+What this habit says is: I want to shave at most every 2 days (given by the
+@code{SCHEDULED} date and repeat interval) at least every 4 days (given by
+the @code{DEADLINE} date and repeat interval).  If today is the 15th, then
+the habit first appears in the agenda on Oct 17, after the minimum of 2 days
+has elapsed, and will appear overdue on Oct 19, after four days have elapsed.
+
+What's really useful about habits is that they are displayed along with a
+conistency graph, to show how consistent you've been at getting that task
+done in the past.  This graph shows every day that the task was done over the
+past three weeks, with colors for each day.  The colors used are:
+
+@table @code
+@item Blue
+If the task wasn't to be done yet on that day.
+@item Green
+If the task could have been done on that day.
+@item Yellow
+If the task was going to be overdue the next day.
+@item Red
+If the task was overdue on that day.
+@end table
+
+In addition to coloring each day, the day is also marked with an asterix if
+the task was actually done that day, and an exclamation mark to show where
+the current day falls in the graph.
+
+There are several configuration variables that can be used to change the way
+habits are displayed in the agenda.
+
+@table @code
+@item org-habit-graph-column
+The buffer column at which the consistency graph should be drawn.  This will
+overwite any text in that column, so it's a good idea to keep your habits'
+titles brief and to the point.
+@item org-habit-preceding-days
+The amount of history, in days before today, to appear in consistency graphs.
+@item org-habit-following-days
+The number of days after today that will appear in consistency graphs.
+@item org-habit-show-habits-only-for-today
+If non-nil, only show habits in today's agenda view.  This is set to true by
+default.
+@end table
+
+Lastly, pressing @kbd{K} in the agenda buffer will cause habits to
+temporarily be disabled and they won't appear at all.  Press @kbd{K} again to
+bring them back.  They are also subject to tag filtering, if you have habits
+which should only be done in certain contexts, for example.
 
 @node Priorities, Breaking down tasks, Progress logging, TODO Items
 @section Priorities
