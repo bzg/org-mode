@@ -1,3 +1,9 @@
+2009-10-19  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-mobile.el (org-mobile-apply): Count success and failure.
+
+	* org.el (org-indent-line-function): Fix regexp replace problem.
+
 2009-10-19  John Wiegley  <johnw@newartisans.com>
 
 	* org-agenda.el (org-agenda-auto-exclude-function): New

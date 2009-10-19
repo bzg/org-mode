@@ -16500,9 +16500,10 @@ which make use of the date at the cursor."
     (beginning-of-line 1)
     (if (looking-at
 	 "\\([ \t]+\\)\\(:[-_0-9a-zA-Z]+:\\)[ \t]*\\(\\S-.*\\(\\S-\\|$\\)\\)")
-	(replace-match (concat "\\1" (format org-property-format
-					     (match-string 2) (match-string 3)))
-		       t nil))
+	(replace-match (concat (match-string 1)
+			       (format org-property-format
+				       (match-string 2) (match-string 3)))
+		       t t))
     (org-move-to-column column)))
 
 (defun org-set-autofill-regexps ()

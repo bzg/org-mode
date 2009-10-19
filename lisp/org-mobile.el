@@ -547,16 +547,28 @@ If BEG and END are given, only do this in that region."
 
   ;; Remove all Note IDs
   (goto-char beg)
-  (while (re-search-forward "^\\*\\* Note ID: [-0-9A-F]+[ \t]*\n" nil t)
+  (while (re-search-forward "^\\*\\* Note ID: [-0-9A-F]+[ \t]*\n" end t)
     (replace-match ""))
 
   ;; Find all the referenced entries, without making any changes yet
-  (goto-char beg)
   (let ((marker (make-marker))
 	(bos-marker (make-marker))
 	(end (move-marker (make-marker) end))
+	(cnt-new 0)
+	(cnt-edit 0)
+	(cnt-flag 0)
+	(cnt-error 0)
 	buf-list
 	id-pos org-mobile-error)
+
+    ;; Count the new captures
+    (goto-char beg)
+    (while (re-search-forward "^\\* \\(.*\\)" end t)
+      (and (>= (- (match-end 1) (match-beginning 1)) 2)
+	   (not (equal (downcase (substring (match-string 1) 0 2)) "f("))
+	   (incf cnt-new)))
+
+    (goto-char beg)
     (while (re-search-forward
 	    "^\\*+[ \t]+F(\\([^():\n]*\\)\\(:\\([^()\n]*\\)\\)?)[ \t]+\\[\\[\\(\\(id\\|olp\\):\\([^]\n]+\\)\\)" end t)
       (setq id-pos (condition-case msg
@@ -570,7 +582,8 @@ If BEG and END are given, only do this in that region."
       (if (or (not id-pos) (stringp id-pos))
 	  (progn
 	    (goto-char (+ 2 (point-at-bol)))
-	    (insert id-pos " "))
+	    (insert id-pos " ")
+	    (incf cnt-error))
 	(add-text-properties (point-at-bol) (point-at-eol)
 			     (list 'org-mobile-marker
 				   (or id-pos "Linked entry not found")))))
@@ -582,16 +595,19 @@ If BEG and END are given, only do this in that region."
 	(setq id-pos (get-text-property (point-at-bol) 'org-mobile-marker))
 	(if (not (markerp id-pos))
 	    (progn
+	      (incf cnt-error)
 	      (insert "UNKNOWN PROBLEM"))
 	  (let* ((action (match-string 1))
 		 (data (and (match-end 3) (match-string 3)))
 		 (bos (point-at-bol))
-		 (eos (org-end-of-subtree t t))
+		 (eos (save-excursion (org-end-of-subtree t t)))
 		 (cmd (if (equal action "")
 			  '(progn
+			     (incf cnt-flag)
 			     (org-toggle-tag "FLAGGED" 'on)
 			     (and note
 				  (org-entry-put nil "THEFLAGGINGNOTE" note)))
+			(incf cnt-edit)
 			(cdr (assoc action org-mobile-action-alist))))
 		 (note (and (equal action "")
 			    (buffer-substring (1+ (point-at-eol)) eos)))
@@ -609,8 +625,8 @@ If BEG and END are given, only do this in that region."
 			   (progn (outline-next-heading)
 				  (if (eobp) (org-back-over-empty-lines))
 				  (point)))))
-	    (setq old (if (string-match "\\S-" old) old nil))
-	    (setq new (if (string-match "\\S-" new) new nil))
+	    (setq old (and old (if (string-match "\\S-" old) old nil)))
+	    (setq new (and new (if (string-match "\\S-" new) new nil)))
 	    (if (and note (> (length note) 0))
 		;; Make Note into a single line, to fit into a property
 		(setq note (mapconcat 'identity
@@ -622,9 +638,11 @@ If BEG and END are given, only do this in that region."
 	    (goto-char (+ 2 bos-marker))
 	    (unless (markerp id-pos)
 	      (insert "BAD REFERENCE ")
+	      (incf cnd-error)
 	      (throw 'next t))
 	    (unless cmd
 	      (insert "BAD FLAG ")
+	      (incf cnt-error)
 	      (throw 'next t))
 	    ;; Remember this place so tha we can return
 	    (move-marker marker (point))
@@ -641,6 +659,7 @@ If BEG and END are given, only do this in that region."
 	    (when org-mobile-error
 	      (switch-to-buffer (marker-buffer marker))
 	      (goto-char marker)
+	      (incf cnt-error)
 	      (insert (if (stringp (nth 1 org-mobile-error))
 			  (nth 1 org-mobile-error)
 			"EXECUTION FAILED")
@@ -651,7 +670,10 @@ If BEG and END are given, only do this in that region."
 	    (goto-char bos-marker)
 	    (delete-region (point) (org-end-of-subtree t t))))))
     (move-marker marker nil)
-    (move-marker end nil)))
+    (move-marker end nil)
+    (message "%d new, %d edits, %d flags, %d errors" cnt-new
+	     cnt-edit cnt-flag cnt-error)
+    (sit-for 1)))
 
 (defun org-mobile-timestamp-buffer (buf)
   "Time stamp buffer BUF, just to make sure its checksum will change."
@@ -771,7 +793,7 @@ be returned that indicates what went wrong."
        ((or (equal current old)
 	    (eq org-mobile-force-mobile-change t)
 	    (memq 'todo org-mobile-force-mobile-change))
-	(org-todo new) t)
+	(org-todo (or new 'none)) t)
        (t (error "State before change was expected as \"%s\", but is \"%s\""
 		 old current))))
       
