@@ -474,7 +474,7 @@ An entry can be toggled between QUOTE and normal with
   :type 'string)
 
 (defconst org-repeat-re
-  "<[0-9]\\{4\\}-[0-9][0-9]-[0-9][0-9] [^>\n]*\\([.+]?\\+[0-9]+[dwmy]\\)"
+  "<[0-9]\\{4\\}-[0-9][0-9]-[0-9][0-9] [^>\n]*\\([.+]+?\\+[0-9]+[dwmy]\\)"
   "Regular expression for specifying repeated events.
 After a match, group 1 contains the repeat expression.")
 
@@ -10047,14 +10047,16 @@ Returns the new TODO keyword, or nil if no state change should occur."
 	     (throw 'exit t)))
       nil)))
 
-(defun org-get-repeat ()
+(defun org-get-repeat (&optional tagline)
   "Check if there is a deadline/schedule with repeater in this entry."
   (save-match-data
     (save-excursion
       (org-back-to-heading t)
-      (if (re-search-forward
-	   org-repeat-re (save-excursion (outline-next-heading) (point)) t)
-	  (match-string 1)))))
+      (and (re-search-forward (if tagline
+				  (concat tagline ":[^:]+" org-repeat-re)
+				org-repeat-re)
+			      (org-entry-end-position) t)
+	   (match-string-no-properties 1)))))
 
 (defvar org-last-changed-timestamp)
 (defvar org-last-inserted-timestamp)
