@@ -231,7 +231,7 @@ Dates and Times
 * Creating timestamps::         Commands which insert timestamps
 * Deadlines and scheduling::    Planning your work
 * Clocking work time::          Tracking how long you spend on a task
-* Resolving idle time::         
+* Resolving idle time::         Resolving time if you've been idle
 * Effort estimates::            Planning work effort in advance
 * Relative timer::              Notes with a running timer
 
@@ -4704,7 +4704,7 @@ is used in a much wider sense.
 * Creating timestamps::         Commands which insert timestamps
 * Deadlines and scheduling::    Planning your work
 * Clocking work time::          Tracking how long you spend on a task
-* Resolving idle time::         
+* Resolving idle time::         Resolving time if you've been idle
 * Effort estimates::            Planning work effort in advance
 * Relative timer::              Notes with a running timer
 @end menu
