@@ -354,12 +354,13 @@ agenda view showing the flagged items."
 		org-mobile-checksum-files))))
     (setq file (expand-file-name org-mobile-capture-file
 				 org-mobile-directory))
-    (unless (file-exists-p file)
-      (save-excursion
-	(setq buf (find-file file))
-	(insert "\n")
-	(save-buffer))
-      (kill-buffer buf))))
+    (save-excursion
+      (setq buf (find-file file))
+      (and (= (point-min) (point-max)) (insert "\n"))
+      (save-buffer)
+      (push (cons org-mobile-capture-file (md5 (buffer-string)))
+	    org-mobile-checksum-files))
+    (kill-buffer buf)))
 
 (defun org-mobile-write-checksums ()
   "Create checksums for all files in `org-mobile-directory'.
