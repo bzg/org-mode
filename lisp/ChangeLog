@@ -1,3 +1,11 @@
+2009-10-19  John Wiegley  <johnw@newartisans.com>
+
+	* org-agenda.el (org-agenda-auto-exclude-function): New
+	customization variable for allowing the user to create an "auto
+	exclusion" filter for doing context-aware auto tag filtering.
+	(org-agenda-filter-by-tag): Changes to support the use of
+	`org-agenda-auto-exclude-function'.  See the new manual addition,.
+
 2009-10-18  John Wiegley  <johnw@newartisans.com>
 
 	* org.el (org-files-list): Don't attempt to return a file name for

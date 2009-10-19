@@ -1276,6 +1276,15 @@ estimate."
   :group 'org-agenda-column-view
   :type 'boolean)
 
+(defcustom org-agenda-auto-exclude-function nil
+  "A function called with a tag to decide if it is filtered on '/ RET'.
+The sole argument to the function, which is called once for each
+possible tag, is a string giving the name of the tag.  The
+function should return either nil if the tag should be included
+as normal, or \"-<TAG>\" to exclude the tag."
+  :group 'org-agenda
+  :type 'function)
+
 (eval-when-compile
   (require 'cl))
 (require 'org)
@@ -5037,22 +5046,23 @@ used to narrow the search - the interactive user can also press `-' or `+'
 to switch to narrowing."
   (interactive "P")
   (let* ((alist org-tag-alist-for-agenda)
-	(tag-chars (mapconcat
-		    (lambda (x) (if (cdr x) (char-to-string (cdr x)) ""))
-		    alist ""))
-	(efforts (org-split-string
-		  (or (cdr (assoc (concat org-effort-property "_ALL")
-				  org-global-properties))
-		      "0 0:10 0:30 1:00 2:00 3:00 4:00 5:00 6:00 7:00 8:00"		      "")))
-	(effort-op org-agenda-filter-effort-default-operator)
-	(effort-prompt "")
-	(inhibit-read-only t)
-	(current org-agenda-filter)
-	char a n tag)
+	 (tag-chars (mapconcat
+		     (lambda (x) (if (cdr x) (char-to-string (cdr x)) ""))
+		     alist ""))
+	 (efforts (org-split-string
+		   (or (cdr (assoc (concat org-effort-property "_ALL")
+				   org-global-properties))
+		       "0 0:10 0:30 1:00 2:00 3:00 4:00 5:00 6:00 7:00 8:00"		      "")))
+	 (effort-op org-agenda-filter-effort-default-operator)
+	 (effort-prompt "")
+	 (inhibit-read-only t)
+	 (current org-agenda-filter)
+	 char a n tag)
     (unless char
       (message
-       "%s by tag [%s ], [TAB], [/]:off, [+-]:narrow, [>=<?]:effort: "
-       (if narrow "Narrow" "Filter") tag-chars)
+       "%s by tag [%s ], [TAB], %s[/]:off, [+-]:narrow, [>=<?]:effort: "
+       (if narrow "Narrow" "Filter") tag-chars
+       (if org-agenda-auto-exclude-function "[RET], " ""))
       (setq char (read-char)))
     (when (member char '(?+ ?-))
       ;; Narrowing down
@@ -5084,6 +5094,17 @@ to switch to narrowing."
 	(setq tag (org-icompleting-read
 		   "Tag: " org-global-tags-completion-table))))
     (cond
+     ((equal char ?\r)
+      (org-agenda-filter-by-tag-show-all)
+      (when org-agenda-auto-exclude-function
+	(setq org-agenda-filter '())
+	(dolist (tag org-tag-alist-for-agenda)
+	  (let ((modifier (funcall org-agenda-auto-exclude-function
+				   (car tag))))
+	    (if modifier
+		(push modifier org-agenda-filter))))
+	(if (not (null org-agenda-filter))
+	    (org-agenda-filter-apply org-agenda-filter))))
      ((equal char ?/)
       (org-agenda-filter-by-tag-show-all)
       (when (get 'org-agenda-filter :preset-filter)
