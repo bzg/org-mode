@@ -171,9 +171,10 @@ the header arguments specified at the source code block."
   ;; (message "supplied params=%S" params) ;; debugging
   (let* ((info (or info (org-babel-get-src-block-info)))
          (lang (first info))
-         (body (second info))
          (params (org-babel-merge-params
                   (third info) (org-babel-get-src-block-function-args) params))
+         (body (if (assoc :noweb params)
+                   (org-babel-expand-noweb-references info) (second info)))
          (processed-params (org-babel-process-params params))
          (result-params (third processed-params))
          (result-type (fourth processed-params))
@@ -721,6 +722,50 @@ parameters when merging lists."
           (cons (cons :exports (mapconcat 'identity exports " "))
                 (cons (cons :results (mapconcat 'identity results " "))
                       params)))))
+
+(defun org-babel-expand-noweb-references (&optional info parent-buffer)
+  "This function expands Noweb style references in the body of
+the current source-code block.  For example the following
+reference would be replaced with the body of the source-code
+block named 'example-block' (assuming the '#' character starts a
+comment) .
+
+# <<example-block>>
+
+This function must be called from inside of the buffer containing
+the source-code block which holds BODY."
+  (let* ((parent-buffer (or parent-buffer (current-buffer)))
+         (info (or info (org-babel-get-src-block-info)))
+         (lang (first info))
+         (body (second info))
+         (new-body "") index source-name)
+    (flet ((nb-add (text)
+                   (setq new-body (concat new-body text))))
+      (with-temp-buffer
+        (insert body) (goto-char (point-min))
+        (funcall (intern (concat (or (and (cdr (assoc lang org-src-lang-modes))
+                                          (symbol-name
+                                           (cdr (assoc lang org-src-lang-modes))))
+                                     lang) "-mode")))
+        (setq index (point))
+        (while (and (re-search-forward "<<\\(.+\\)>>" nil t))
+          (save-match-data (setf source-name (match-string 1)))
+          ;; add interval to new-body
+          (goto-char (match-end 0)) (move-end-of-line nil)
+          (nb-add (buffer-substring index (point)))
+          (setq index (point))
+          ;; if found, add body of referenced source-block
+          (nb-add (save-excursion
+                    (set-buffer parent-buffer)
+                    (let ((point (org-babel-find-named-block source-name)))
+                      (if point
+                          (save-excursion
+                            (goto-char point)
+                            (concat "\n" (org-babel-expand-noweb-references
+                                          (org-babel-get-src-block-info))))
+                        "")))))
+        (nb-add (buffer-substring index (point-max)))))
+    new-body))
 
 (defun org-babel-clean-text-properties (text)
   "Strip all properties from text return."
