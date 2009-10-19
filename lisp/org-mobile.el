@@ -132,7 +132,7 @@ For now, it is not recommended to change this variable."
 					  (executable-find "sha1sum")
 					  (executable-find "md5sum")
 					  (executable-find "md5"))
-  "Executable used for computing checksums of aenda files."
+  "Executable used for computing checksums of agenda files."
   :group 'org-mobile
   :type 'string)
 
@@ -534,9 +534,24 @@ If nothing new has beed added, return nil."
 	(save-buffer)
 	(set-buffer capture-buffer)
 	(erase-buffer)
-	(save-buffer)))
+	(save-buffer)
+	(org-mobile-update-checksum-for-capture-file (buffer-string))))
     (kill-buffer capture-buffer)
     (if not-empty insertion-point)))
+
+(defun org-mobile-update-checksum-for-capture-file (buffer-string)
+  (let* ((file (expand-file-name "checksums.dat" org-mobile-directory))
+	 (buffer (find-file-noselect file)))
+    (when buffer
+      (with-current-buffer buffer
+	(when (re-search-forward (concat "\\([0-9a-fA-F]\\{30,\\}\\).*?"
+					 (regexp-quote org-mobile-capture-file)
+					 "[ \t]*$"))
+	  (goto-char (match-beginning 1))
+	  (delete-region (match-beginning 1) (match-end 1))
+	  (insert (md5 buffer-string))
+	  (save-buffer)))
+      (kill-buffer buffer))))
 
 (defun org-mobile-apply (&optional beg end)
   "Apply all change requests in the current buffer.
