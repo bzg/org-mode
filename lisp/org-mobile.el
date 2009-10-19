@@ -128,6 +128,14 @@ For now, it is not recommended to change this variable."
 	  (cons (string :tag "Action flag")
 		(sexp   :tag "Action form"))))
 
+(defcustom org-mobile-checksum-binary (or (executable-find "shasum")
+					  (executable-find "sha1sum")
+					  (executable-find "md5sum")
+					  (executable-find "md5"))
+  "Executable used for computing checksums of aenda files."
+  :group 'org-mobile
+  :type 'string)
+
 (defvar org-mobile-pre-push-hook nil
   "Hook run before running `org-mobile-push'.
 This could be used to clean up `org-mobile-directory', for example to
@@ -164,7 +172,7 @@ using `rsync' or `scp'.")
 
 (defun org-mobile-prepare-file-lists ()
   (setq org-mobile-files-alist (org-mobile-files-alist))
-  (setq org-mobile-checksum-files (mapcar 'cdr org-mobile-files-alist)))
+  (setq org-mobile-checksum-files nil))
 
 (defun org-mobile-files-alist ()
   "Expand the list in `org-mobile-files' to a list of existing files."
@@ -322,7 +330,9 @@ agenda view showing the flagged items."
 	(setq file (car entry)
 	      link-name (cdr entry))
 	(insert (format "* [[file:%s][%s]]\n"
-			link-name link-name))))))
+			link-name link-name)))
+      (push (cons org-mobile-index-file (md5 (buffer-string)))
+	    org-mobile-checksum-files))))
 
 (defun org-mobile-copy-agenda-files ()
   "Copy all agenda files to the stage or WebDAV directory."
@@ -335,7 +345,13 @@ agenda view showing the flagged items."
 	      target-dir (file-name-directory target-path))
 	(unless (file-directory-p target-dir)
 	  (make-directory target-dir 'parents))
-	(copy-file file target-path 'ok-if-exists)))
+	(copy-file file target-path 'ok-if-exists)
+	(setq check (shell-command-to-string
+		     (concat org-mobile-checksum-binary " "
+			     (shell-quote-argument (expand-file-name file)))))
+	(when (string-match "[a-fA-F0-9]\\{30,40\\}" check)
+	  (push (cons link-name (match-string 0 check))
+		org-mobile-checksum-files))))
     (setq file (expand-file-name org-mobile-capture-file
 				 org-mobile-directory))
     (unless (file-exists-p file)
@@ -348,24 +364,13 @@ agenda view showing the flagged items."
 (defun org-mobile-write-checksums ()
   "Create checksums for all files in `org-mobile-directory'.
 The table of checksums is written to the file mobile-checksums."
-  (let ((cmd (cond ((executable-find "shasum"))
-		   ((executable-find "sha1sum"))
-		   ((executable-find "md5sum"))
-		   ((executable-find "md5"))))
-	(files org-mobile-checksum-files))
-    (if (not cmd)
-	(message "Checksums could not be generated: no executable")
-      (with-temp-buffer
-	(cd org-mobile-directory)
-	(if (file-exists-p "agendas.org")
-	    (push "agendas.org" files))
-	(if (file-exists-p "mobileorg.org")
-	    (push "mobileorg.org" files))
-	(setq cmd (concat cmd " " (mapconcat 'shell-quote-argument files " ")
-			  " > checksums.dat"))
-	(if (equal 0 (shell-command cmd))
-	    (message "Checksums written")
-	  (message "Checksums could not be generated"))))))
+  (let ((sumfile (expand-file-name "checksums.dat" org-mobile-directory))
+	(files org-mobile-checksum-files)
+	entry file sum)
+    (with-temp-file sumfile
+      (while (setq entry (pop files))
+	(setq file (car entry) sum (cdr entry))
+	(insert (format "%s  %s\n" sum file))))))
 
 (defun org-mobile-sumo-agenda-command ()
   "Return an agenda custom command that comprises all custom commands."
@@ -483,7 +488,9 @@ The table of checksums is written to the file mobile-checksums."
 			  (org-entry-get m "ID")))
 	      (insert "   :PROPERTIES:\n   :ORIGINAL_ID: " id
 		      "\n   :END:\n")))))
-	(beginning-of-line 2)))
+	(beginning-of-line 2))
+      (push (cons (file-name-nondirectory file) (md5 (buffer-string)))
+	    org-mobile-checksum-files))
     (message "Agenda written to Org file %s" file)))
 
 ;;;###autoload
