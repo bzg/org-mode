@@ -9476,7 +9476,7 @@ For calling through lisp, arg is also interpreted in the following way:
       (setq org-blocker-hook nil))
     (save-excursion
       (catch 'exit
-	(org-back-to-heading)
+	(org-back-to-heading t)
 	(if (looking-at outline-regexp) (goto-char (1- (match-end 0))))
 	(or (looking-at (concat " +" org-todo-regexp "\\( +\\|$\\)"))
 	    (looking-at " *"))
