@@ -71,6 +71,7 @@ LISPF      = 	org.el			\
 	     	org-colview.el		\
 	     	org-colview-xemacs.el	\
 	     	org-compat.el		\
+	     	org-complete.el		\
 	     	org-crypt.el		\
 	     	org-ctags.el		\
 	     	org-datetree.el		\

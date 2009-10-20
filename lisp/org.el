@@ -75,6 +75,7 @@
   (require 'gnus-sum))
 
 (require 'calendar)
+(require 'pcomplete)
 ;; Emacs 22 calendar compatibility:  Make sure the new variables are available
 (when (fboundp 'defvaralias)
   (unless (boundp 'calendar-view-holidays-initially-flag)
@@ -98,6 +99,7 @@
 (require 'org-compat)
 (require 'org-faces)
 (require 'org-list)
+(require 'org-complete)
 (require 'org-src)
 (require 'org-footnote)
 
@@ -3516,8 +3518,8 @@ Note that this variable has only an effect if `org-completion-use-ido' is nil."
   :type 'boolean)
 
 (defcustom org-completion-fallback-command 'hippie-expand
-  "The expansion command called by \\[org-complete] in normal context.
-Normal means no org-mode-specific context."
+  "The expansion command called by \\[pcomplete] in normal context.
+Normal means, no org-mode-specific context."
   :group 'org-completion
   :type 'function)
 
@@ -4748,6 +4750,17 @@ The following commands are available:
 
   ;; Turn on org-beamer-mode?
   (and org-startup-with-beamer-mode (org-beamer-mode 1))
+
+  ;; Setup the pcomplete hooks
+  (set (make-local-variable 'pcomplete-command-completion-function)
+       'org-complete-initial)
+  (set (make-local-variable 'pcomplete-command-name-function)
+       'org-command-at-point)
+  (set (make-local-variable 'pcomplete-default-completion-function)
+       'ignore)
+  (set (make-local-variable 'pcomplete-parse-arguments-function)
+       'org-parse-arguments)
+  (set (make-local-variable 'pcomplete-termination-string) "")
 
   ;; If empty file that did not turn on org-mode automatically, make it to.
   (if (and org-insert-mode-line-in-empty-file
@@ -10620,137 +10633,6 @@ expands them."
     (insert rpl)
     (if (re-search-backward "\\?" start t) (delete-char 1))))
 
-
-(defun org-complete (&optional arg)
-  "Perform completion on word at point.
-At the beginning of a headline, this completes TODO keywords as given in
-`org-todo-keywords'.
-If the current word is preceded by a backslash, completes the TeX symbols
-that are supported for HTML support.
-If the current word is preceded by \"#+\", completes special words for
-setting file options.
-In the line after \"#+STARTUP:, complete valid keywords.\"
-At all other locations, this simply calls the value of
-`org-completion-fallback-command'."
-  (interactive "P")
-  (org-without-partial-completion
-   (catch 'exit
-     (let* ((a nil)
-	    (end (point))
-	    (beg1 (save-excursion
-		    (skip-chars-backward (org-re "[:alnum:]_@#%"))
-		    (point)))
-	    (beg (save-excursion
-		   (skip-chars-backward "a-zA-Z0-9_:$")
-		   (point)))
-	    (confirm (lambda (x) (stringp (car x))))
-	    (searchhead (equal (char-before beg) ?*))
-	    (struct
-	     (when (and (member (char-before beg1) '(?. ?<))
-			(setq a (assoc (buffer-substring beg1 (point))
-				       org-structure-template-alist)))
-	       (org-complete-expand-structure-template (1- beg1) a)
-	       (throw 'exit t)))
-	    (tag (and (equal (char-before beg1) ?:)
-		      (equal (char-after (point-at-bol)) ?*)))
-	    (prop (or (and (equal (char-before beg1) ?:)
-			   (not (equal (char-after (point-at-bol)) ?*)))
-		      (string-match "^#\\+PROPERTY:.*"
-				    (buffer-substring (point-at-bol) (point)))))
-	    (texp (equal (char-before beg) ?\\))
-	    (link (equal (char-before beg) ?\[))
-	    (opt (equal (buffer-substring (max (point-at-bol) (- beg 2))
-					  beg)
-			"#+"))
-	    (startup (string-match "^#\\+STARTUP:.*"
-				   (buffer-substring (point-at-bol) (point))))
-	    (completion-ignore-case opt)
-	    (type nil)
-	    (tbl nil)
-	    (table (cond
-		    (opt
-		     (setq type :opt)
-		     (require 'org-exp)
-		     (append
-		      (delq nil
-			    (mapcar
-			     (lambda (x)
-			       (if (string-match
-				    "^#\\+\\(\\([A-Z_]+:?\\).*\\)" x)
-				   (cons (match-string 2 x)
-					 (match-string 1 x))))
-			     (org-split-string (org-get-current-options) "\n")))
-		      (mapcar 'list org-additional-option-like-keywords)))
-		    (startup
-		     (setq type :startup)
-		     org-startup-options)
-		    (link (append org-link-abbrev-alist-local
-				  org-link-abbrev-alist))
-		    (texp
-		     (setq type :tex)
-		     (append org-entities-user org-entities))
-		    ((string-match "\\`\\*+[ \t]+\\'"
-				   (buffer-substring (point-at-bol) beg))
-		     (setq type :todo)
-		     (mapcar 'list org-todo-keywords-1))
-		    (searchhead
-		     (setq type :searchhead)
-		     (save-excursion
-		       (goto-char (point-min))
-		       (while (re-search-forward org-todo-line-regexp nil t)
-			 (push (list
-				(org-make-org-heading-search-string
-				 (match-string 3) t))
-			       tbl)))
-		     tbl)
-		    (tag (setq type :tag beg beg1)
-			 (or org-tag-alist (org-get-buffer-tags)))
-		    (prop (setq type :prop beg beg1)
-			  (mapcar 'list (org-buffer-property-keys nil t t)))
-		    (t (progn
-			 (call-interactively org-completion-fallback-command)
-			 (throw 'exit nil)))))
-	    (pattern (buffer-substring-no-properties beg end))
-	    (completion (try-completion pattern table confirm)))
-       (cond ((eq completion t)
-	      (if (not (assoc (upcase pattern) table))
-		  (message "Already complete")
-		(if (and (equal type :opt)
-			 (not (member (car (assoc (upcase pattern) table))
-				      org-additional-option-like-keywords)))
-		    (insert (substring (cdr (assoc (upcase pattern) table))
-				       (length pattern)))
-		  (if (memq type '(:tag :prop)) (insert ":")))))
-	     ((null completion)
-	      (message "Can't find completion for \"%s\"" pattern)
-	      (ding))
-	     ((not (string= pattern completion))
-	      (delete-region beg end)
-	      (if (string-match " +$" completion)
-		  (setq completion (replace-match "" t t completion)))
-	      (insert completion)
-	      (if (get-buffer-window "*Completions*")
-		  (delete-window (get-buffer-window "*Completions*")))
-	      (if (assoc completion table)
-		  (if (eq type :todo) (insert " ")
-		    (if (and (memq type '(:tag :prop))
-			     (not (string-match "^#[ \t]*\\+property:"
-						(org-current-line-string t))))
-			(insert ":"))))
-	      (if (and (equal type :opt) (assoc completion table))
-		  (message "%s" (substitute-command-keys
-				 "Press \\[org-complete] again to insert example settings"))))
-	     (t
-	      (message "Making completion list...")
-	      (let ((list (sort (all-completions pattern table confirm)
-				'string<)))
-		(with-output-to-temp-buffer "*Completions*"
-		  (condition-case nil
-		      ;; Protection needed for XEmacs and emacs 21
-		      (display-completion-list list pattern)
-		    (error (display-completion-list list)))))
-	      (message "Making completion list...%s" "done")))))))
-
 ;;;; TODO, DEADLINE, Comments
 
 (defun org-toggle-comment ()
@@ -16298,9 +16180,9 @@ BEG and END default to the buffer boundaries."
 (org-defkey org-mode-map "\C-i"       'org-cycle)
 (org-defkey org-mode-map [(tab)]      'org-cycle)
 (org-defkey org-mode-map [(control tab)] 'org-force-cycle-archived)
-(org-defkey org-mode-map [(meta tab)] 'org-complete)
-(org-defkey org-mode-map "\M-\t" 'org-complete)
-(org-defkey org-mode-map "\M-\C-i"      'org-complete)
+(org-defkey org-mode-map [(meta tab)] 'pcomplete)
+(org-defkey org-mode-map "\M-\t" 'pcomplete)
+(org-defkey org-mode-map "\M-\C-i"      'pcomplete)
 ;; The following line is necessary under Suse GNU/Linux
 (unless (featurep 'xemacs)
   (org-defkey org-mode-map [S-iso-lefttab]  'org-shifttab))
@@ -16365,7 +16247,7 @@ BEG and END default to the buffer boundaries."
   (org-defkey org-mode-map [?\C-c (right)] 'org-shiftright)
   (org-defkey org-mode-map [?\C-c ?\C-x (right)] 'org-shiftcontrolright)
   (org-defkey org-mode-map [?\C-c ?\C-x (left)] 'org-shiftcontrolleft)
-  (org-defkey org-mode-map [?\e (tab)] 'org-complete)
+  (org-defkey org-mode-map [?\e (tab)] 'pcomplete)
   (org-defkey org-mode-map [?\e (shift return)] 'org-insert-todo-heading)
   (org-defkey org-mode-map [?\e (shift left)]   'org-shiftmetaleft)
   (org-defkey org-mode-map [?\e (shift right)]  'org-shiftmetaright)
@@ -17695,7 +17577,7 @@ See the individual commands for more information."
      ("Select keyword"
       ["Next keyword" org-shiftright (org-on-heading-p)]
       ["Previous keyword" org-shiftleft (org-on-heading-p)]
-      ["Complete Keyword" org-complete (assq :todo-keyword (org-context))]
+      ["Complete Keyword" pcomplete (assq :todo-keyword (org-context))]
       ["Next keyword set" org-shiftcontrolright (and (> (length org-todo-sets) 1) (org-on-heading-p))]
       ["Previous keyword set" org-shiftcontrolright (and (> (length org-todo-sets) 1) (org-on-heading-p))])
      ["Show TODO Tree" org-show-todo-tree :active t :keys "C-c / t"]
