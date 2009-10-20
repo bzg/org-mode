@@ -123,6 +123,12 @@
 	(org-mobile-create-index-file): Sort the files to be listed in
 	index.org.
 
+2009-10-17  James TD Smith  <ahktenzero@mohorovi.cc>
+
+	* org.el (org-fast-tag-selection): Add a way to display a
+	description for a tag group. This is done by adding a string to
+	either the startgroup or endgroup cell.
+
 2009-10-17  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-clock.el (org-clock-resolve, org-resolve-clocks)

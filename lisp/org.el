@@ -11546,15 +11546,15 @@ Returns the new tags string, or nil to not change the current settings."
       (setq tbl fulltable char ?a cnt 0)
       (while (setq e (pop tbl))
 	(cond
-	 ((equal e '(:startgroup))
+	 ((equal (car e) :startgroup)
 	  (push '() groups) (setq ingroup t)
 	  (when (not (= cnt 0))
 	    (setq cnt 0)
 	    (insert "\n"))
-	  (insert "{ "))
-	 ((equal e '(:endgroup))
+	  (insert (if (cdr e) (format "%s: " (cdr e)) "") "{ "))
+	 ((equal (car e) :endgroup)
 	  (setq ingroup nil cnt 0)
-	  (insert "}\n"))
+	  (insert "}" (if (cdr e) (format " (%s) " (cdr e)) "") "\n"))
 	 ((equal e '(:newline))
 	  (when (not (= cnt 0))
 	    (setq cnt 0)
@@ -11599,8 +11599,8 @@ Returns the new tags string, or nil to not change the current settings."
       (setq rtn
 	    (catch 'exit
 	      (while t
-		(message "[a-z..]:Toggle [SPC]:clear [RET]:accept [TAB]:free%s%s"
-			 (if groups " [!] no groups" " [!]groups")
+		(message "[a-z..]:Toggle [SPC]:clear [RET]:accept [TAB]:free [!] %sgroups%s"
+			 (if (not groups) "no " "")
 			 (if expert " [C-c]:window" (if exit-after-next " [C-c]:single" " [C-c]:multi")))
 		(setq c (let ((inhibit-quit t)) (read-char-exclusive)))
 		(cond
