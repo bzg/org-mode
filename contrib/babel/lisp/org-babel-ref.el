@@ -57,10 +57,12 @@
 (defun org-babel-ref-variables (params)
   "Takes a parameter alist, and return an alist of variable
 names, and the emacs-lisp representation of the related value."
-  (mapcar #'org-babel-ref-parse
-          (delq nil (mapcar (lambda (pair) (if (eq (car pair) :var) (cdr pair))) params))))
+  (let ((assignments
+	 (delq nil (mapcar (lambda (pair) (if (eq (car pair) :var) (cdr pair))) params)))
+	(other-params (assq-delete-all :var params)))
+    (mapcar (lambda (assignment) (org-babel-ref-parse assignment other-params)) assignments)))
 
-(defun org-babel-ref-parse (assignment)
+(defun org-babel-ref-parse (assignment params)
   "Parse a variable ASSIGNMENT in a header argument.  If the
 right hand side of the assignment has a literal value return that
 value, otherwise interpret as a reference to an external resource
@@ -74,7 +76,7 @@ emacs-lisp representation of the value of the variable."
             (ref (match-string 2 assignment)))
         (cons (intern var)
               (or (org-babel-ref-literal ref)
-                  (org-babel-ref-resolve-reference ref))))))
+                  (org-babel-ref-resolve-reference ref params))))))
 
 (defun org-babel-ref-literal (ref)
   "Determine if the right side of a header argument variable
@@ -83,11 +85,11 @@ resource.  If REF is literal then return it's value, otherwise
 return nil."
   (let ((out (org-babel-read ref)))
     (if (equal out ref)
-        (if (string-match "\"\\(.+\\)\"" ref)
+        (if (string-match "^\".+\"$" ref)
             (read ref))
       out)))
 
-(defun org-babel-ref-resolve-reference (ref)
+(defun org-babel-ref-resolve-reference (ref params)
   "Resolve the reference and return its value"
   (save-excursion
     (let ((case-fold-search t)
@@ -114,7 +116,7 @@ return nil."
             ;; goto ref in the current buffer
             (or (and (not args)
                      (or (re-search-forward result_regexp nil t)
-                         (re-search-forward result_regexp nil t)))
+                         (re-search-backward result_regexp nil t)))
                 (re-search-forward regexp nil t)
                 (re-search-backward regexp nil t)
                 ;; check the Library of Babel
@@ -134,14 +136,14 @@ return nil."
           (beginning-of-line)
           (if (or (= (point) (point-min)) (= (point) (point-max)))
               (error "reference not found"))))
-      ;; (message "type=%S" type) ;; debugging
-      (case type
-        ('results-line (org-babel-read-result))
-        ('table (org-babel-read-table))
-        ('source-block
-         (setq result (org-babel-execute-src-block t nil args))
-         (if (symbolp result) (format "%S" result) result))
-        ('lob (setq result (org-babel-execute-src-block t lob-info args)))))))
+      (setq params (org-babel-merge-params params args))
+      (setq result
+	    (case type
+	      ('results-line (org-babel-read-result))
+	      ('table (org-babel-read-table))
+	      ('source-block (org-babel-execute-src-block t nil params))
+	      ('lob (org-babel-execute-src-block t lob-info params))))
+      (if (symbolp result) (format "%S" result) result))))
 
 (defun org-babel-ref-split-args (arg-string)
   "Split ARG-STRING into top-level arguments of balanced parenthesis."
