@@ -40,14 +40,17 @@
 called by `org-babel-execute-src-block' via multiple-value-bind."
   (message "executing R source code block...")
   (save-window-excursion
-    (let ((full-body (concat
-		      (mapconcat ;; define any variables
-		       (lambda (pair)
-			 (org-babel-R-assign-elisp (car pair) (cdr pair)))
-		       vars "\n") "\n" body "\n"))
-	  (session (org-babel-R-initiate-session session))
-	  (column-names-p (cdr (assoc :colnames params))))
-      (org-babel-R-evaluate session full-body result-type column-names-p))))
+    (let* ((session (org-babel-R-initiate-session session))
+	   (column-names-p (cdr (assoc :colnames params)))
+	   (out-file (cdr (assoc :file params)))
+	   (augmented-body
+	    (concat
+	     (if out-file (concat (org-babel-R-construct-graphics-device-call out-file params) "\n") "")
+	     (mapconcat ;; define any variables
+	      (lambda (pair) (org-babel-R-assign-elisp (car pair) (cdr pair))) vars "\n")
+	     "\n" body "\n" (if out-file "dev.off()\n" "")))
+	   (result (org-babel-R-evaluate session augmented-body result-type column-names-p)))
+      (or out-file result))))
 
 (defun org-babel-prep-session:R (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."
@@ -86,6 +89,31 @@ called by `org-babel-execute-src-block' via multiple-value-bind."
 	(R)
 	(rename-buffer (if (bufferp session) (buffer-name session)
 			 (if (stringp session) session (buffer-name)))) (current-buffer)))))
+
+(defun org-babel-R-construct-graphics-device-call (out-file params)
+  "Construct the call to the graphics device"
+  (let ((devices
+	 '((:bmp . "bmp")
+	   (:jpg . "jpeg")
+	   (:jpeg . "jpeg")
+	   (:tiff . "tiff")
+	   (:png . "png")
+	   (:pdf . "pdf")
+	   (:ps . "postscript")
+	   (:postscript . "postscript")))
+	(allowed-args '(:width :height :bg :units :pointsize
+			       :antialias :quality :compression :res :type
+			       :family :title :fonts :version :paper :encoding
+			       :pagecentre :colormodel :useDingbats :horizontal))
+	(device (and (string-match ".+\\.\\([^.]+\\)" out-file) (match-string 1 out-file)))
+	(extra-args (cdr (assq :R-dev-args params))) filearg args)
+    (setq device (or (and device (cdr (assq (intern (concat ":" device)) devices))) "png"))
+    (setq filearg (if (member device '("pdf" "postscript")) "file" "filename"))
+    (setq args (mapconcat (lambda (pair)
+			    (if (member (car pair) allowed-args)
+				(format ",%s=%s" (substring (symbol-name (car pair)) 1) (cdr pair)) ""))
+			  params ""))
+    (format "%s(%s=\"%s\"%s%s%s)\n" device filearg out-file args (if extra-args "," "") (or extra-args ""))))
 
 (defvar org-babel-R-eoe-indicator "'org_babel_R_eoe'")
 (defvar org-babel-R-eoe-output "[1] \"org_babel_R_eoe\"")
