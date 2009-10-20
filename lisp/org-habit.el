@@ -67,60 +67,70 @@ relative to the current effective time."
   :group 'org-habit
   :type 'boolean)
 
-(defcustom org-habit-clear-color "slateblue"
-  "Color for days on which a task shouldn't be done yet."
+(defface org-habit-clear-face
+  '((((background light)) (:background "slateblue"))
+    (((background dark)) (:background "blue")))
+  "Face for days on which a task shouldn't be done yet."
   :group 'org-habit
-  :group 'org-faces
-  :type 'color)
-(defcustom org-habit-clear-future-color "powderblue"
-  "Color for future days on which a task shouldn't be done yet."
+  :group 'org-faces)
+(defface org-habit-clear-future-face
+  '((((background light)) (:background "powderblue"))
+    (((background dark)) (:background "midnightblue")))
+  "Face for future days on which a task shouldn't be done yet."
   :group 'org-habit
-  :group 'org-faces
-  :type 'color)
+  :group 'org-faces)
 
-(defcustom org-habit-ready-color "green"
-  "Color for days on which a task should start to be done."
+(defface org-habit-ready-face
+  '((((background light)) (:background "green"))
+    (((background dark)) (:background "forestgreen")))
+  "Face for days on which a task should start to be done."
   :group 'org-habit
-  :group 'org-faces
-  :type 'color)
-(defcustom org-habit-ready-future-color "palegreen"
-  "Color for days on which a task should start to be done."
+  :group 'org-faces)
+(defface org-habit-ready-future-face
+  '((((background light)) (:background "palegreen"))
+    (((background dark)) (:background "darkgreen")))
+  "Face for days on which a task should start to be done."
   :group 'org-habit
-  :group 'org-faces
-  :type 'color)
+  :group 'org-faces)
 
-(defcustom org-habit-warning-color "yellow"
-  "Color for days on which a task ought to be done."
+(defface org-habit-warning-face
+  '((((background light)) (:background "yellow"))
+    (((background dark)) (:background "gold")))
+  "Face for days on which a task ought to be done."
   :group 'org-habit
-  :group 'org-faces
-  :type 'color)
-(defcustom org-habit-warning-future-color "palegoldenrod"
-  "Color for days on which a task ought be done."
+  :group 'org-faces)
+(defface org-habit-warning-future-face
+  '((((background light)) (:background "palegoldenrod"))
+    (((background dark)) (:background "darkgoldenrod")))
+  "Face for days on which a task ought be done."
   :group 'org-habit
-  :group 'org-faces
-  :type 'color)
+  :group 'org-faces)
 
-(defcustom org-habit-alert-color "yellow"
-  "Color for days on which a task is due."
+(defface org-habit-alert-face
+  '((((background light)) (:background "yellow"))
+    (((background dark)) (:background "gold")))
+  "Face for days on which a task is due."
   :group 'org-habit
-  :group 'org-faces
-  :type 'color)
-(defcustom org-habit-alert-future-color "palegoldenrod"
-  "Color for days on which a task is due."
+  :group 'org-faces)
+(defface org-habit-alert-future-face
+  '((((background light)) (:background "palegoldenrod"))
+    (((background dark)) (:background "darkgoldenrod")))
+  "Face for days on which a task is due."
   :group 'org-habit
-  :group 'org-faces
-  :type 'color)
+  :group 'org-faces)
 
-(defcustom org-habit-overdue-color "red"
-  "Color for days on which a task is overdue."
+(defface org-habit-overdue-face
+  '((((background light)) (:background "red"))
+    (((background dark)) (:background "firebrick")))
+  "Face for days on which a task is overdue."
   :group 'org-habit
-  :group 'org-faces
-  :type 'color)
-(defcustom org-habit-overdue-future-color "mistyrose"
-  "Color for days on which a task is overdue."
+  :group 'org-faces)
+(defface org-habit-overdue-future-face
+  '((((background light)) (:background "mistyrose"))
+    (((background dark)) (:background "darkred")))
+  "Face for days on which a task is overdue."
   :group 'org-habit
-  :group 'org-faces
-  :type 'color)
+  :group 'org-faces)
 
 (defun org-habit-duration-to-days (ts)
   (if (string-match "\\([0-9]+\\)\\([dwmy]\\)" ts)
@@ -181,7 +191,7 @@ This list represents a \"habit\" for the rest of this module."
 (defsubst org-habit-done-dates (habit)
   (nth 4 habit))
 
-(defun org-habit-get-colors (habit &optional moment scheduled-time donep)
+(defun org-habit-get-faces (habit &optional moment scheduled-time donep)
   "Return faces for HABIT relative to MOMENT and SCHEDULED-TIME.
 MOMENT defaults to the current time if it is nil.
 SCHEDULED-TIME defaults to the habit's actual scheduled time if nil.
@@ -207,23 +217,23 @@ Habits are assigned colors on the following basis:
 		     (org-habit-deadline habit))))
     (cond
      ((time-less-p moment scheduled)
-      (cons org-habit-clear-color org-habit-clear-future-color))
+      '(org-habit-clear-face . org-habit-clear-future-face))
      ((time-less-p moment scheduled-end)
-      (cons org-habit-ready-color org-habit-ready-future-color))
+      '(org-habit-ready-face . org-habit-ready-future-face))
      ((and deadline
 	   (time-less-p moment deadline))
       (if donep
-	  (cons org-habit-ready-color org-habit-ready-future-color)
-	(cons org-habit-warning-color org-habit-warning-future-color)))
+	  '(org-habit-ready-face . org-habit-ready-future-face)
+	'(org-habit-warning-face . org-habit-warning-future-face)))
      ((= (time-to-days moment)
 	 (if deadline
 	     (time-to-days deadline)
 	   (time-to-days scheduled-end)))
       (if donep
-	  (cons org-habit-ready-color org-habit-ready-future-color)
-	(cons org-habit-alert-color org-habit-alert-future-color)))
+	  '(org-habit-ready-face . org-habit-ready-future-face)
+	'(org-habit-alert-face . org-habit-alert-future-face)))
      (t
-      (cons org-habit-overdue-color org-habit-overdue-future-color)))))
+      '(org-habit-overdue-face . org-habit-overdue-future-face)))))
 
 (defun org-habit-build-graph (habit &optional starting current ending)
   "Build a color graph for the given HABIT, from STARTING to ENDING."
@@ -245,16 +255,14 @@ Habits are assigned colors on the following basis:
 	     (todayp (= now-days current-days))
 	     (donep (and done-dates
 			 (= now-days (time-to-days (car done-dates)))))
-	     (colors (if (and in-the-past-p (not last-done-date))
-			 (cons org-habit-clear-color
-			       org-habit-clear-future-color)
-		       (org-habit-get-colors
-			habit day
-			(and in-the-past-p
-			     (time-add last-done-date
-				       (days-to-time s-repeat)))
-			donep)))
-	     markedp color)
+	     (faces (if (and in-the-past-p (not last-done-date))
+			'(org-habit-clear-face . org-habit-clear-future-face)
+		      (org-habit-get-faces
+		       habit day (and in-the-past-p
+				      (time-add last-done-date
+						(days-to-time s-repeat)))
+		       donep)))
+	     markedp face)
 	(if donep
 	    (progn
 	      (aset graph index ?*)
@@ -263,16 +271,15 @@ Habits are assigned colors on the following basis:
 		    markedp t))
 	  (if todayp
 	      (aset graph index ?!)))
-	(setq color (if (or in-the-past-p
+	(setq face (if (or in-the-past-p
 			    todayp)
-			(car colors)
-		      (cdr colors)))
+			(car faces)
+		      (cdr faces)))
 	(if (and in-the-past-p
-		 (not (string= color org-habit-overdue-color))
+		 (not (eq face 'org-habit-overdue-face))
 		 (not markedp))
-	    (setq color (cdr colors)))
-	(put-text-property index (1+ index)
-			   'face (list :background color) graph))
+	    (setq face (cdr faces)))
+	(put-text-property index (1+ index) 'face face graph))
       (setq day (time-add day (days-to-time 1))
 	    index (1+ index)))
     graph))

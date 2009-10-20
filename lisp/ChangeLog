@@ -1,5 +1,8 @@
 2009-10-20  John Wiegley  <jwiegley@gmail.com>
 
+	* org-habit.el: Changed all "color" variables to faces, and made
+	them appropriate for light and dark backgrounds.
+
 	* org-habit.el (org-habit-duration-to-days): Made this function
 	more general.
 	(org-habit-parse-todo): Parse the new ".+N/N" style repeater.
