@@ -1,3 +1,9 @@
+2009-10-20  John Wiegley  <jwiegley@gmail.com>
+
+	* org-agenda.el (org-agenda-set-mode-name): Show Habit in the
+	modeline when habits are being displayed (if that module is being
+	loaded).
+
 2009-10-20  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-agenda.el (org-agenda-next-line): New command.

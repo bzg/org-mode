@@ -5643,8 +5643,10 @@ When called with a prefix argument, include all archive files as well."
 		(if org-agenda-entry-text-mode " ETxt"   "")
 		(if org-agenda-include-diary   " Diary"  "")
 		(if org-agenda-use-time-grid   " Grid"   "")
+		(if (and (boundp 'org-habit-show-habits)
+			 org-habit-show-habits) " Habit"   "")
 		(if (consp org-agenda-show-log) " LogAll"
-		    (if org-agenda-show-log " Log" ""))
+		  (if org-agenda-show-log " Log" ""))
 		(if (or org-agenda-filter (get 'org-agenda-filter
 					       :preset-filter))
 		    (concat " {" (mapconcat
