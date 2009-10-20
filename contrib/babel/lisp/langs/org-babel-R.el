@@ -33,7 +33,7 @@
 
 (org-babel-add-interpreter "R")
 
-(add-to-list 'org-babel-tangle-langs '("R" "r"))
+(add-to-list 'org-babel-tangle-langs '("R" "R" "#!/usr/bin/env Rscript"))
 
 (defun org-babel-execute:R (body params)
   "Execute a block of R code with org-babel.  This function is
