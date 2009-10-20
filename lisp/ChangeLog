@@ -1,5 +1,8 @@
 2009-10-20  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-icompleting-read): Turn off partial completion mode
+	for the duration of this completion round.
+
 	* org-latex.el (org-export-latex-fontify-headline): Protect TeX
 	macros in author lines and similar stuff.
 
