@@ -123,7 +123,7 @@ relative to the current effective time."
   :type 'color)
 
 (defun org-habit-duration-to-days (ts)
-  (if (string-match "\\([0-9]+\\)\\([dwmy]\\)\\'" ts)
+  (if (string-match "\\([0-9]+\\)\\([dwmy]\\)" ts)
       ;; lead time is specified.
       (floor (* (string-to-number (match-string 1 ts))
 		(cdr (assoc (match-string 2 ts)
@@ -148,41 +148,27 @@ This list represents a \"habit\" for the rest of this module."
   (save-excursion
     (if pom (goto-char pom))
     (assert (org-is-habit-p (point)))
-    (let ((scheduled (org-get-scheduled-time (point)))
-	  (scheduled-repeat (org-get-repeat "SCHEDULED"))
-	  (deadline (org-get-deadline-time (point)))
-	  (deadline-repeat (org-get-repeat "DEADLINE")))
+    (let* ((scheduled (org-get-scheduled-time (point)))
+	   (scheduled-repeat (org-get-repeat "SCHEDULED"))
+	   (sr-days (org-habit-duration-to-days scheduled-repeat))
+	   (end (org-entry-end-position))
+	   closed-dates deadline dr-days)
       (unless scheduled
 	(error "Habit has no scheduled date"))
       (unless scheduled-repeat
 	(error "Habit has no scheduled repeat period"))
-      (unless (string-match "\\`\\.\\+[0-9]+" scheduled-repeat)
-	(error "Habit's scheduled repeat period does not match `.+[0-9]*'"))
-      (if (and deadline (not deadline-repeat))
-	  (error "Habit has a deadline, but no deadline repeat period"))
-      (if (and deadline
-	       (not (string-match "\\`\\.\\+[0-9]+" scheduled-repeat))) 
-	  (error "Habit's deadline repeat period does not match `.+[0-9]*'"))
-      (let ((sr-days (org-habit-duration-to-days scheduled-repeat))
-	    (dr-days (and deadline-repeat
-			  (org-habit-duration-to-days deadline-repeat))))
-	(when (and scheduled deadline)
-	  (cond
-	   ((time-less-p deadline scheduled)
-	    (error "Habit's deadline date is before the scheduled date"))
-	   ((< dr-days sr-days)
-	    (error "Habit's deadline repeat period is less than scheduled"))
-	   ((/= (- (time-to-days deadline)
-		   (time-to-days scheduled))
-		(- dr-days sr-days))
-	    (error "Habit's deadline and scheduled period lengths are off"))))
-	(let ((end (org-entry-end-position))
-	      closed-dates)
-	  (org-back-to-heading t)
-	  (while (re-search-forward "- State \"DONE\".*\\[\\([^]]+\\)\\]" end t)
-	    (push (org-time-string-to-time (match-string-no-properties 1))
-		  closed-dates))
-	  (list scheduled sr-days deadline dr-days closed-dates))))))
+      (when (string-match "/\\([0-9]+[dwmy]\\)" scheduled-repeat)
+	(setq dr-days (org-habit-duration-to-days
+		       (match-string-no-properties 1 scheduled-repeat)))
+	(if (<= dr-days sr-days)
+	    (error "Habit's deadline repeat period is less than or equal to scheduled"))
+	(setq deadline (time-add scheduled
+				 (days-to-time (- dr-days sr-days)))))
+      (org-back-to-heading t)
+      (while (re-search-forward "- State \"DONE\".*\\[\\([^]]+\\)\\]" end t)
+	(push (org-time-string-to-time (match-string-no-properties 1))
+	      closed-dates))
+      (list scheduled sr-days deadline dr-days closed-dates))))
 
 (defsubst org-habit-scheduled (habit)
   (nth 0 habit))
@@ -215,7 +201,7 @@ Habits are assigned colors on the following basis:
 	 (s-repeat (org-habit-scheduled-repeat habit))
 	 (scheduled-end (time-add scheduled (days-to-time s-repeat)))
 	 (d-repeat (org-habit-deadline-repeat habit))
-	 (deadline (if scheduled-time
+	 (deadline (if (and scheduled-time d-repeat)
 		       (time-add scheduled-time
 				 (days-to-time (- d-repeat s-repeat)))
 		     (org-habit-deadline habit))))

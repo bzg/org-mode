@@ -4231,7 +4231,7 @@ the documentation of `org-diary'."
 	 (regexp org-deadline-time-regexp)
 	 (todayp (org-agenda-todayp date)) ; DATE bound by calendar
 	 (d1 (calendar-absolute-from-gregorian date))  ; DATE bound by calendar
-	 d2 diff dfrac wdays pos pos1 category tags habitp
+	 d2 diff dfrac wdays pos pos1 category tags
 	 ee txt head face s todo-state upcomingp donep timestr)
     (goto-char (point-min))
     (while (re-search-forward regexp nil t)
@@ -4244,12 +4244,6 @@ the documentation of `org-diary'."
 		  (match-string 1) d1 'past
 		  org-agenda-repeating-timestamp-show-all)
 	      diff (- d2 d1)
-	      ;; Never show habits as deadline entries, only as scheduled
-	      ;; entries.  The habit code already requires that every habit
-	      ;; have a scheduled date if it has a deadline, and that the
-	      ;; scheduled date is prior to the deadline.
-	      habitp (and (functionp 'org-is-habit-p)
-			  (org-is-habit-p))
 	      wdays (org-get-wdays s)
 	      dfrac (/ (* 1.0 (- wdays diff)) (max wdays 1))
 	      upcomingp (and todayp (> diff 0)))
@@ -4258,8 +4252,7 @@ the documentation of `org-diary'."
 	;; Past-due deadlines are only shown on the current date
 	(if (and (or (and (<= diff wdays)
 			  (and todayp (not org-agenda-only-exact-dates)))
-		     (= diff 0))
-		 (not habitp))
+		     (= diff 0)))
 	    (save-excursion
 	      (setq todo-state (org-get-todo-state))
 	      (setq donep (member todo-state org-done-keywords))
@@ -4402,7 +4395,8 @@ FRACTION is what fraction of the head-warning time has passed."
 	    (when txt
 	      (setq face
 		    (cond
-		     (pastschedp 'org-scheduled-previously)
+		     ((and (not habitp) pastschedp)
+		      'org-scheduled-previously)
 		     (todayp 'org-scheduled-today)
 		     (t 'org-scheduled)))
 	      (org-add-props txt props

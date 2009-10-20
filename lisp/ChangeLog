@@ -1,5 +1,16 @@
 2009-10-20  John Wiegley  <jwiegley@gmail.com>
 
+	* org-habit.el (org-habit-duration-to-days): Made this function
+	more general.
+	(org-habit-parse-todo): Parse the new ".+N/N" style repeater.
+
+	* org-agenda.el (org-agenda-get-deadlines): Removed all mention of
+	habits, since they don't use DEADLINE anymore.
+
+	* org.el (org-repeat-re, org-display-custom-time)
+	(org-timestamp-change): Extended to support the new ".+N/N"
+	syntax, used for habits.
+
 	* org-clock.el (org-clock-resolve-clock): Fixed an incorrect
 	variable reference.
 

@@ -3646,17 +3646,18 @@ called ``habits''.  A habit has the following properties:
 
 @enumerate
 @item
-The habit is a TODO, with a TODO keyword that represents an open state.
+You have enabled the @code{habits} module by customizing the variable
+@code{org-modules}.
+@item
+The habit is a TODO, with a TODO keyword representing an open state.
 @item
 The property @code{STYLE} is set to the value @code{habit}.
 @item
 The TODO has a scheduled date, with a @code{.+} style repeat interval.
 @item
-The TODO may also have a deadline, as long as it also has a @code{.+} style
-repeat interval and it starts a number of days after the scheduled date equal
-to the difference between the repeat interval lengths@footnote{Note that if
-you don't set this right, Org will alert you as to what's incorrect about the
-habit definition.}.
+The TODO may also have minimum and maximum ranges specified by using the
+syntax @samp{.+2d/3d}, which says that you want to do the task at least every
+three days, but at most every two days.
 @item
 You must also have state logging for the @code{DONE} state enabled, in order
 for historical data to be represented in the consistency graph.  If it's not
@@ -3669,7 +3670,7 @@ actual habit with some history:
 
 @example
 ** TODO Shave
-   SCHEDULED: <2009-10-17 Sat .+2d> DEADLINE: <2009-10-19 Mon .+4d>
+   SCHEDULED: <2009-10-17 Sat .+2d/4d>
    - State "DONE"       from "TODO"       [2009-10-15 Thu]
    - State "DONE"       from "TODO"       [2009-10-12 Mon]
    - State "DONE"       from "TODO"       [2009-10-10 Sat]
@@ -3687,10 +3688,10 @@ actual habit with some history:
 @end example
 
 What this habit says is: I want to shave at most every 2 days (given by the
-@code{SCHEDULED} date and repeat interval) at least every 4 days (given by
-the @code{DEADLINE} date and repeat interval).  If today is the 15th, then
-the habit first appears in the agenda on Oct 17, after the minimum of 2 days
-has elapsed, and will appear overdue on Oct 19, after four days have elapsed.
+@code{SCHEDULED} date and repeat interval) and at least every 4 days.  If
+today is the 15th, then the habit first appears in the agenda on Oct 17,
+after the minimum of 2 days has elapsed, and will appear overdue on Oct 19,
+after four days have elapsed.
 
 What's really useful about habits is that they are displayed along with a
 conistency graph, to show how consistent you've been at getting that task
