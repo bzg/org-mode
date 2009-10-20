@@ -1393,7 +1393,9 @@ The following commands are available:
 (org-defkey org-agenda-mode-map "$"        'org-agenda-archive)
 (org-defkey org-agenda-mode-map "A"        'org-agenda-archive-to-archive-sibling)
 (org-defkey org-agenda-mode-map "\C-c\C-o" 'org-agenda-open-link)
-(org-defkey org-agenda-mode-map " "        'org-agenda-show)
+(org-defkey org-agenda-mode-map " "        'org-agenda-show-and-scroll-up)
+(org-defkey org-agenda-mode-map [backspace] 'org-agenda-show-scroll-down)
+(org-defkey org-agenda-mode-map "\\d" 'org-agenda-show-scroll-down)
 (org-defkey org-agenda-mode-map [(control shift right)] 'org-agenda-todo-nextset)
 (org-defkey org-agenda-mode-map [(control shift left)]  'org-agenda-todo-previousset)
 (org-defkey org-agenda-mode-map "\C-c\C-xb" 'org-agenda-tree-to-indirect-buffer)
@@ -1446,8 +1448,12 @@ The following commands are available:
 (org-defkey org-agenda-mode-map "s" 'org-save-all-org-buffers)
 (org-defkey org-agenda-mode-map "P" 'org-agenda-show-priority)
 (org-defkey org-agenda-mode-map "T" 'org-agenda-show-tags)
-(org-defkey org-agenda-mode-map "n" 'next-line)
-(org-defkey org-agenda-mode-map "p" 'previous-line)
+(org-defkey org-agenda-mode-map "n" 'org-agenda-next-line)
+(org-defkey org-agenda-mode-map "p" 'org-agenda-previous-line)
+(substitute-key-definition 'next-line 'org-agenda-next-line
+			   org-agenda-mode-map global-map)
+(substitute-key-definition 'previous-line 'org-agenda-previous-line
+			   org-agenda-mode-map global-map)
 (org-defkey org-agenda-mode-map "\C-c\C-a" 'org-attach)
 (org-defkey org-agenda-mode-map "\C-c\C-n" 'org-agenda-next-date-line)
 (org-defkey org-agenda-mode-map "\C-c\C-p" 'org-agenda-previous-date-line)
@@ -5540,6 +5546,8 @@ so that the date SD will be in that range."
   (interactive)
   (setq org-agenda-follow-mode (not org-agenda-follow-mode))
   (org-agenda-set-mode-name)
+  (if (and org-agenda-follow-mode (org-get-at-bol 'org-marker))
+      (org-agenda-show))
   (message "Follow mode is %s"
 	   (if org-agenda-follow-mode "on" "off")))
 
@@ -5657,9 +5665,20 @@ When called with a prefix argument, include all archive files as well."
   (setq org-agenda-type
 	(or (get-text-property (point) 'org-agenda-type)
 	    (get-text-property (max (point-min) (1- (point)))
-			       'org-agenda-type)))
-  (if (and org-agenda-follow-mode
-	   (org-get-at-bol 'org-marker))
+			       'org-agenda-type))))
+
+(defun org-agenda-next-line ()
+  "Move cursor to the next line, and show if follow-mode is active."
+  (interactive)
+  (call-interactively 'next-line)
+  (if (and org-agenda-follow-mode (org-get-at-bol 'org-marker))
+      (org-agenda-show)))
+(defun org-agenda-previous-line ()
+  "Move cursor to the previous line, and show if follow-mode is active."
+
+  (interactive)
+  (call-interactively 'previous-line)
+  (if (and org-agenda-follow-mode (org-get-at-bol 'org-marker))
       (org-agenda-show)))
 
 (defun org-agenda-show-priority ()
@@ -5878,6 +5897,31 @@ if it was hidden in the outline."
 	  (org-agenda-goto t))
       (org-agenda-goto t))
     (select-window win)))
+
+(defvar org-agenda-show-window nil)
+(defun org-agenda-show-and-scroll-up ()
+  "Display the Org-mode file which contains the item at point.
+When called repeatedly, scroll the window that is displaying the buffer."
+  (interactive)
+  (let ((win (selected-window)))
+    (if (and (window-live-p org-agenda-show-window)
+	     (eq this-command last-command))
+	(progn
+	  (select-window org-agenda-show-window)
+	  (ignore-errors (scroll-up)))
+      (org-agenda-goto t)
+      (show-subtree)
+      (setq org-agenda-show-window (selected-window)))
+    (select-window win)))
+
+(defun org-agenda-show-scroll-down ()
+  "Scroll down the window showing the agenda."
+  (interactive)
+  (let ((win (selected-window)))
+    (when (window-live-p org-agenda-show-window)
+      (select-window org-agenda-show-window)
+      (ignore-errors (scroll-down))
+      (select-window win))))
 
 (defun org-agenda-show-1 (&optional more)
   "Display the Org-mode file which contains the item at point.

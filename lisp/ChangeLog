@@ -1,5 +1,16 @@
 2009-10-20  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-agenda.el (org-agenda-next-line): New command.
+	(org-agenda-previous-line): New commands.
+	(org-agenda-show-and-scroll-up, org-agenda-show-scroll-down): New
+	commands.
+	(org-agenda-follow-mode): Do the follow immediately if the mode is
+	turned on here.
+	(previous-line, next-line): Replace keys with the corresponding
+	org functions.
+	(org-agenda-mode-map): Bind backspace and delete to the scrolling
+	command.
+
 	* org.el (org-icompleting-read): Turn off partial completion mode
 	for the duration of this completion round.
 
