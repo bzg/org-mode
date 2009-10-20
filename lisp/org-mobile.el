@@ -33,6 +33,7 @@
 
 (require 'org)
 (require 'org-agenda)
+(eval-when-compile (require 'cl))
 
 (defgroup org-mobile nil
   "Options concerning support for a viewer/editor on a mobile device."
@@ -337,7 +338,7 @@ agenda view showing the flagged items."
 (defun org-mobile-copy-agenda-files ()
   "Copy all agenda files to the stage or WebDAV directory."
   (let ((files-alist org-mobile-files-alist)
-	file buf entry link-name target-path target-dir)
+	file buf entry link-name target-path target-dir check)
     (while (setq entry (pop files-alist))
       (setq file (car entry) link-name (cdr entry))
       (when (file-exists-p file)
@@ -654,7 +655,7 @@ If BEG and END are given, only do this in that region."
 	    (goto-char (+ 2 bos-marker))
 	    (unless (markerp id-pos)
 	      (insert "BAD REFERENCE ")
-	      (incf cnd-error)
+	      (incf cnt-error)
 	      (throw 'next t))
 	    (unless cmd
 	      (insert "BAD FLAG ")

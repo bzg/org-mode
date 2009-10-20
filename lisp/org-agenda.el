@@ -54,8 +54,14 @@
 (declare-function calendar-persian-date-string  "cal-persia" (&optional date))
 (declare-function org-columns-quit              "org-colview" ())
 (declare-function org-mobile-write-agenda-for-mobile "org-mobile" (file))
+(declare-function org-habit-insert-consistency-graphs
+		  "org-habit" (&optional line))
+(declare-function org-is-habit-p "org-habit" (&optional pom))
+(declare-function org-habit-parse-todo "org-habit" (&optional pom))
 (defvar calendar-mode-map)
 (defvar org-mobile-force-id-on-agenda-items) ; defined in org-mobile.el
+(defvar org-habit-show-habits)
+(defvar org-habit-show-habits-only-for-today)
 
 ;; Defined somewhere in this file, but used before definition.
 (defvar org-agenda-buffer-name)

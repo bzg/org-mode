@@ -918,8 +918,8 @@ the clocking selection, associated with the letter `d'."
 			     (y-or-n-p
 			      (format
 			       "You stopped another clock %d mins ago; start this one from then? "
-			       (/ (- (time-to-seconds (current-time))
-				     (time-to-seconds left-over)) 60)))
+			       (/ (- (org-float-time (current-time))
+				     (org-float-time left-over)) 60)))
 			     left-over)
 			(current-time)))
 	      (setq ts (org-insert-time-stamp org-clock-start-time
