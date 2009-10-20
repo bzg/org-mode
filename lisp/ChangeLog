@@ -1,3 +1,8 @@
+2009-10-20  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-file-tags): Fix docstring.
+	(org-get-buffer-tags): Add the #+FILETAGS tags.
+
 2009-10-20  John Wiegley  <johnw@newartisans.com>
 
 	* org-agenda.el (org-finalize-agenda): Draw habit consistency

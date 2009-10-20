@@ -2311,7 +2311,7 @@ To disable these tags on a per-file basis, insert anywhere in the file:
   "List of tags that can be inherited by all entries in the file.
 The tags will be inherited if the variable `org-use-tag-inheritance'
 says they should be.
-This variable is populated from #+TAG lines.")
+This variable is populated from #+FILETAGS lines.")
 
 (defcustom org-use-fast-tag-selection 'auto
   "Non-nil means, use fast tag selection scheme.
@@ -11704,6 +11704,7 @@ Returns the new tags string, or nil to not change the current settings."
 	(when (equal (char-after (point-at-bol 0)) ?*)
 	  (mapc (lambda (x) (add-to-list 'tags x))
 		(org-split-string (org-match-string-no-properties 1) ":")))))
+    (mapc (lambda (s) (add-to-list 'tags s)) org-file-tags)
     (mapcar 'list tags)))
 
 ;;;; The mapping API
