@@ -1,5 +1,8 @@
 2009-10-20  John Wiegley  <jwiegley@gmail.com>
 
+	* org-clock.el (org-clock-resolve-clock): Fixed an incorrect
+	variable reference.
+
 	* org-agenda.el (org-agenda-set-mode-name): Show Habit in the
 	modeline when habits are being displayed (if that module is being
 	loaded).

@@ -645,7 +645,7 @@ This routine can do one of many things:
       (org-clock-clock-out clock fail-quietly resolve-to)
       (unless org-clock-clocking-in
 	(if close-p
-	    (setq org-clock-left-over-time last-valid)
+	    (setq org-clock-left-over-time resolve-to)
 	  (org-clock-clock-in clock)))))))
 
 (defun org-clock-resolve (clock &optional prompt-fn last-valid fail-quietly)
