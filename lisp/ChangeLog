@@ -1077,21 +1077,10 @@
 	* org-remember.el (org-remember-finalize): Avoid buffer-modified
 	messages.
 
+2009-08-06  James TD Smith  <ahktenzero@mohorovi.cc>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	* org-plot.el (org-plot/gnuplot): Stop datafile from being deleted
+	before gnuplot can read it.
 
 2009-08-05  Carsten Dominik  <carsten.dominik@gmail.com>
 
@@ -5549,7 +5538,7 @@
 	(org-clock-special-range): Also undertand yesterday, lastweek etc.
 
 2008-06-18  Glenn Morris  <rgm@gnu.org>
-        * org.el (org-map-entries): Let-bind `file'.
+	* org.el (org-map-entries): Let-bind `file'.
 
 2008-06-19  Carsten Dominik  <dominik@science.uva.nl>
 
