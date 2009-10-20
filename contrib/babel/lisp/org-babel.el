@@ -189,7 +189,7 @@ the header arguments specified at the source code block."
     (if (eq result-type 'value)
         (setq result (org-babel-process-value-result result result-params)))
     (org-babel-insert-result result result-params)
-    (case result-type (output nil) (value result))))
+    result))
 
 (defun org-babel-load-in-session (&optional arg info)
   "Load the body of the current source-code block.  Evaluate the
@@ -360,7 +360,8 @@ may be specified in the properties of the current outline entry."
     (delq nil
           (mapcar
            (lambda (header-arg)
-             (let ((val (org-entry-get (point) header-arg)))
+             (let ((val (or (org-entry-get (point) header-arg 'selective)
+			    (cdr (assoc header-arg org-file-properties)))))
                (when val
                  ;; (message "param-from-property %s=%s" header-arg val) ;; debugging statement
                  (cons (intern (concat ":" header-arg)) val))))
@@ -673,6 +674,8 @@ parameters when merging lists."
 	 '(("file" "vector" "table" "scalar" "raw" "org" "html" "latex" "code" "pp")
 	   ("replace" "silent")
 	   ("output" "value")))
+	(exports-exclusive-groups
+	 '(("code" "results" "both" "none")))
 	params results exports tangle vars var ref)
     (flet ((e-merge (exclusive-groups &rest result-params)
                     ;; maintain exclusivity of mutually exclusive parameters
@@ -705,9 +708,11 @@ parameters when merging lists."
 			(:file
 			 (when (cdr pair)
 			   (setq results (e-merge results-exclusive-groups results '("file")))
+			   (unless (or (member "both" exports) (member "none" exports))
+			     (setq exports (e-merge exports-exclusive-groups exports '("results"))))
 			   (setq params (cons pair (assq-delete-all (car pair) params)))))
                         (:exports
-                         (setq exports (e-merge '(("code" "results" "both" "none"))
+                         (setq exports (e-merge exports-exclusive-groups
                                                 exports (split-string (cdr pair)))))
                         (:tangle
                          (setq tangle (e-merge '(("yes" "no"))

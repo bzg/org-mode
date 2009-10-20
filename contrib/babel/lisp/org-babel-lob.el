@@ -55,7 +55,7 @@ add files to this list use the `org-babel-lob-ingest' command."
 
 ;; functions for executing lob one-liners
 
-(defvar org-babel-lob-one-liner-regexp "#\\+lob:[ \t]+\\([^\(\)\n]+\\)\(\\([^\n]*\\)\)[ \t]*\\(\n\\|\\'\\)")
+(defvar org-babel-lob-one-liner-regexp "#\\+lob:[ \t]+\\([^\(\)\n]+\\)\(\\([^\n]*\\)\)[ \t]*\\([^\n]*\\)")
 
 (defun org-babel-lob-execute-maybe ()
   "Detect if this is context for a org-babel Library Of Babel

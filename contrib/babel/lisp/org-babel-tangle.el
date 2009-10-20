@@ -62,6 +62,7 @@ file using `load-file'."
 specify a default export file for all source blocks.  Optional
 argument LANG can be used to limit the exported source code
 blocks by language."
+  (interactive "fFile to tangle: \nP")
   (save-window-excursion (find-file file) (org-babel-tangle target-file lang)))
 
 (defun org-babel-tangle (&optional target-file lang)
