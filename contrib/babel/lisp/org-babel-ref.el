@@ -116,7 +116,7 @@ return nil."
             ;; goto ref in the current buffer
             (or (and (not args)
                      (or (re-search-forward result_regexp nil t)
-                         (re-search-forward result_regexp nil t)))
+                         (re-search-backward result_regexp nil t)))
                 (re-search-forward regexp nil t)
                 (re-search-backward regexp nil t)
                 ;; check the Library of Babel
