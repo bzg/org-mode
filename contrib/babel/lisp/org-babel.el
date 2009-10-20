@@ -189,7 +189,7 @@ the header arguments specified at the source code block."
     (if (eq result-type 'value)
         (setq result (org-babel-process-value-result result result-params)))
     (org-babel-insert-result result result-params)
-    (case result-type (output nil) (value result))))
+    result))
 
 (defun org-babel-load-in-session (&optional arg info)
   "Load the body of the current source-code block.  Evaluate the
