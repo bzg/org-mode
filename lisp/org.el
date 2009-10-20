@@ -17325,7 +17325,7 @@ To get rid of the restriction, use \\[org-agenda-remove-restriction-lock]."
        (flyspell-delete-region-overlays beg end))
   (add-text-properties beg end '(org-no-flyspell t)))
 
-;; Make `bookmark-jump' show the jump location if it was hidden.
+;; Make `bookmark-jump' shows the jump location if it was hidden.
 (eval-after-load "bookmark"
   '(if (boundp 'bookmark-after-jump-hook)
        ;; We can use the hook
@@ -17335,11 +17335,18 @@ To get rid of the restriction, use \\[org-agenda-remove-restriction-lock]."
        "Make the position visible."
        (org-bookmark-jump-unhide))))
 
-;; Make sure saveplace show the location if it was hidden
+;; Make sure saveplace shows the location if it was hidden
 (eval-after-load "saveplace"
   '(defadvice save-place-find-file-hook (after org-make-visible activate)
      "Make the position visible."
      (org-bookmark-jump-unhide)))
+
+;; Make sure ecb shows the location if it was hidden
+(eval-after-load "ecb"
+  '(defadvice ecb-method-clicked (after esf/org-show-context)
+     "Make hierarchy visible when jumping into location from ECB tree buffer."
+     (if (eq major-mode 'org-mode)
+	 (org-show-context))))
 
 (defun org-bookmark-jump-unhide ()
   "Unhide the current position, to show the bookmark location."
