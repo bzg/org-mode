@@ -1,3 +1,10 @@
+2009-10-19  James TD Smith  <ahktenzero@mohorovi.cc>
+
+	* lisp/org-registry.el (org-registry-assoc-all): Stop this from
+	deleting the links it finds from the registry.
+	(org-registry-find-all): Add a new function which returns all
+	registry entries which satisfy a test function.
+
 2009-10-02  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* lisp/org-special-blocks.el (org-special-blocks-ignore-regexp):
@@ -284,5 +291,3 @@
 	* lisp/org-irc.el: New file.
 
 	* ChangeLog: New file.
-
-
