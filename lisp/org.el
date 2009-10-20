@@ -17344,7 +17344,7 @@ To get rid of the restriction, use \\[org-agenda-remove-restriction-lock]."
 
 ;; Make sure ecb shows the location if it was hidden
 (eval-after-load "ecb"
-  '(defadvice ecb-method-clicked (after esf/org-show-context)
+  '(defadvice ecb-method-clicked (after esf/org-show-context activate)
      "Make hierarchy visible when jumping into location from ECB tree buffer."
      (if (eq major-mode 'org-mode)
 	 (org-show-context))))
