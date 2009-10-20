@@ -984,7 +984,7 @@ OPT-PLIST is the options plist for current buffer."
      ;; insert author info
      (if (plist-get opt-plist :author-info)
 	 (format "\\author{%s}\n"
-		 (org-export-latex-fontify-headline (or author user-full-name)));????????????????????
+		 (org-export-latex-fontify-headline (or author user-full-name)))
        (format "%%\\author{%s}\n"
 	       (or author user-full-name)))
      ;; insert the date
@@ -1131,6 +1131,15 @@ links, keywords, lists, tables, fixed-width"
     ;; the beginning of the buffer - inserting "\n" is safe here though.
     (insert "\n" string)
     (goto-char (point-min))
+    (let ((re (concat "\\\\[a-zA-Z]+\\(?:"
+		      "\\[.*\\]"
+		      "\\)?"
+		      (org-create-multibrace-regexp "{" "}" 3))))
+      (while (re-search-forward re nil t)
+	(unless (save-excursion (goto-char (match-beginning 0))
+				(equal (char-after (point-at-bol)) ?#))
+	  (add-text-properties (match-beginning 0) (match-end 0)
+			       '(org-protected t)))))
     (when (plist-get org-export-latex-options-plist :emphasize)
       (org-export-latex-fontify))
     (org-export-latex-keywords-maybe)
