@@ -1,5 +1,9 @@
 2009-10-20  John Wiegley  <jwiegley@gmail.com>
 
+	* org-habit.el (org-habit-build-graph): Start displaying colors
+	from the first scheduled date, if that date is earlier than the
+	first completion date.
+
 	* org-habit.el: Changed all "color" variables to faces, and made
 	them appropriate for light and dark backgrounds.
 

@@ -238,6 +238,7 @@ Habits are assigned colors on the following basis:
 (defun org-habit-build-graph (habit &optional starting current ending)
   "Build a color graph for the given HABIT, from STARTING to ENDING."
   (let ((done-dates (sort (org-habit-done-dates habit) 'time-less-p))
+	(scheduled (org-habit-scheduled habit))
 	(s-repeat (org-habit-scheduled-repeat habit))
 	(day starting)
 	(current-days (time-to-days current))
@@ -255,12 +256,16 @@ Habits are assigned colors on the following basis:
 	     (todayp (= now-days current-days))
 	     (donep (and done-dates
 			 (= now-days (time-to-days (car done-dates)))))
-	     (faces (if (and in-the-past-p (not last-done-date))
+	     (faces (if (and in-the-past-p
+			     (not last-done-date)
+			     (not (time-less-p scheduled current)))
 			'(org-habit-clear-face . org-habit-clear-future-face)
 		      (org-habit-get-faces
 		       habit day (and in-the-past-p
-				      (time-add last-done-date
-						(days-to-time s-repeat)))
+				      (if last-done-date
+					  (time-add last-done-date
+						    (days-to-time s-repeat))
+					scheduled))
 		       donep)))
 	     markedp face)
 	(if donep
@@ -272,9 +277,9 @@ Habits are assigned colors on the following basis:
 	  (if todayp
 	      (aset graph index ?!)))
 	(setq face (if (or in-the-past-p
-			    todayp)
-			(car faces)
-		      (cdr faces)))
+			   todayp)
+		       (car faces)
+		     (cdr faces)))
 	(if (and in-the-past-p
 		 (not (eq face 'org-habit-overdue-face))
 		 (not markedp))
