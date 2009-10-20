@@ -191,6 +191,33 @@ This list represents a \"habit\" for the rest of this module."
 (defsubst org-habit-done-dates (habit)
   (nth 4 habit))
 
+(defsubst org-habit-get-priority (habit)
+  "Determine the relative priority of a habit.
+This must take into account not just urgency, but consistency as well."
+  (let ((pri 1000)
+	(days (time-to-days
+	       (time-subtract (current-time)
+			      (list 0 (* 3600 org-extend-today-until) 0))))
+	(s-days (time-to-days (org-habit-scheduled habit)))
+	(d-days (time-to-days (org-habit-deadline habit))))
+    ;; add 10 for every day past the scheduled date, and subtract for every
+    ;; day before it
+    (let ((slip (- days s-days)))
+      (if (> slip 0)
+	  (setq pri (+ pri (* slip 10)))
+	(setq pri (+ pri (* slip 10)))))
+    ;; add 20 for every day beyond the deadline date, and subtract 5 for every
+    ;; day before it
+    (if (/= s-days d-days)
+	;; add 100 if the deadline is today
+	(if (= days d-days)
+	    (setq pri (+ pri 100))))
+    (let ((slip (- days d-days)))
+      (if (> slip 0)
+	  (setq pri (+ pri (* slip 20)))
+	(setq pri (+ pri (* slip 5)))))
+    pri))
+
 (defun org-habit-get-faces (habit &optional moment scheduled-time donep)
   "Return faces for HABIT relative to MOMENT and SCHEDULED-TIME.
 MOMENT defaults to the current time if it is nil.

@@ -4398,7 +4398,8 @@ FRACTION is what fraction of the head-warning time has passed."
 		     ((and (not habitp) pastschedp)
 		      'org-scheduled-previously)
 		     (todayp 'org-scheduled-today)
-		     (t 'org-scheduled)))
+		     (t 'org-scheduled))
+		    habitp (and habitp (org-habit-parse-todo)))
 	      (org-add-props txt props
 		'undone-face face
 		'face (if donep 'org-agenda-done face)
@@ -4406,9 +4407,11 @@ FRACTION is what fraction of the head-warning time has passed."
 		'org-hd-marker (org-agenda-new-marker pos1)
 		'type (if pastschedp "past-scheduled" "scheduled")
 		'date (if pastschedp d2 date)
-		'priority (+ 94 (- 5 diff) (org-get-priority txt))
+		'priority (if habitp
+			      (org-habit-get-priority habitp)
+			    (+ 94 (- 5 diff) (org-get-priority txt)))
 		'org-category category
-		'org-habit-p (and habitp (org-habit-parse-todo))
+		'org-habit-p habitp
 		'todo-state todo-state)
 	      (push txt ee))))))
     (nreverse ee)))

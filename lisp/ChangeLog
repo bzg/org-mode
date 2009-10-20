@@ -1,5 +1,12 @@
 2009-10-20  John Wiegley  <jwiegley@gmail.com>
 
+	* org-habit.el (org-habit-get-priority): A new function that
+	determines the relative priority of a habit, based on how long
+	past its scheduled date it is, and how near the deadline is.
+
+	* org-agenda.el (org-agenda-get-scheduled): Set habit priority
+	using `org-habit-get-priority'.
+
 	* org-habit.el (org-habit-build-graph): Start displaying colors
 	from the first scheduled date, if that date is earlier than the
 	first completion date.
