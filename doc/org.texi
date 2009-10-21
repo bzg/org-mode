@@ -12097,6 +12097,10 @@ around a match in a hidden outline tree.
 @item
 @i{Niels Giesen} had the idea to automatically archive DONE trees.
 @item
+@i{Mikael Fornius} works as a mailing list moderator.
+@item
+@i{Austin Frank} works as a mailing list moderator.
+@item
 @i{Bastien Guerry} wrote the La@TeX{} exporter and @file{org-bibtex.el}, and
 has been prolific with patches, ideas, and bug reports.
 @item
@@ -12163,7 +12167,8 @@ into bundles of 20 for undo.
 @i{Matthias Rempe} (Oelde) provided ideas, Windows support, and quality
 control.
 @item
-@i{Paul Rivier} provided the basic implementation of named footnotes.
+@i{Paul Rivier} provided the basic implementation of named footnotes.  He
+also acted as mailing list moderator for some time.
 @item
 @i{Kevin Rogers} contributed code to access VM files on remote hosts.
 @item
@@ -12228,7 +12233,8 @@ these packages.  But with time I have occasionally looked at John's code and
 learned a lot from it.  John has also contributed a number of great ideas and
 patches directly to Org, including the attachment system
 (@file{org-attach.el}), integration with Apple Mail
-(@file{org-mac-message.el}), and hierarchical dependencies of TODO items.
+(@file{org-mac-message.el}), hierarchical dependencies of TODO items, habit
+tracking (@file{org-habits.el}) and support for pcomplete.
 @item
 @i{Carsten Wimmer} suggested some changes and helped fix a bug in
 linking to Gnus.
