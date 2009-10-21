@@ -201,13 +201,6 @@ please go to [[http://orgmode.org/worg/][the Worg page]], and start from there.
 
 You can always contribute with ideas and bug reports on the mailing
 list.  If you want to contribute a patch, code snippets, or a full
-add-on, this is very welcome too!  We do distribute good add-ons as
-contributed packages under more-or-less arbitrary licenses.  However,
-to integrate additions into the Org-mode core, the author needs to
-assign the copyright to the [[http://www.fsf.org/][Free Software Foundation]].  This is because
-the Org-mode core is part of Emacs.  Emacs is distributed under the
-[[http://www.gnu.org/licenses/gpl.html][GNU Public License version 3]], and all packages included with it must
-do the same.  If you would like to sign the papers, use [[file:request-assign-future.txt][this form]],
-fill it in and [[mailto:assign@gnu.org,carsten.dominik@gmail.com][send]] it to the FSF with a copy to the Org-mode
-maintainer.
+add-on, this is very welcome too!  Detailed information on how and
+what to contribute can be found [[http://orgmode.org/worg/org-contribute.php][here]].
 
