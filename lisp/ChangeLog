@@ -1,3 +1,8 @@
+2009-10-21  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-latex.el (org-export-latex-preprocess): Protect the vspace
+	macro in the VERSE environment.
+
 2009-10-20  John Wiegley  <jwiegley@gmail.com>
 
 	* org-habit.el (org-habit-get-priority): A new function that

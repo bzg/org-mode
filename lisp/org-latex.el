@@ -1728,7 +1728,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 	  (concat "\\hspace*{1cm}" (match-string 2))) t t)
 	(beginning-of-line 1))
       (if (looking-at "[ \t]*$")
-	  (insert "\\vspace*{1em}")
+	  (insert (org-export-latex-protect-string "\\vspace*{1em}"))
 	(unless (looking-at ".*?[^ \t\n].*?\\\\\\\\[ \t]*$")
 	  (end-of-line 1)
 	  (insert "\\\\")))
