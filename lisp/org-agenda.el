@@ -1395,7 +1395,7 @@ The following commands are available:
 (org-defkey org-agenda-mode-map "\C-c\C-o" 'org-agenda-open-link)
 (org-defkey org-agenda-mode-map " "        'org-agenda-show-and-scroll-up)
 (org-defkey org-agenda-mode-map [backspace] 'org-agenda-show-scroll-down)
-(org-defkey org-agenda-mode-map "\\d" 'org-agenda-show-scroll-down)
+(org-defkey org-agenda-mode-map "\d" 'org-agenda-show-scroll-down)
 (org-defkey org-agenda-mode-map [(control shift right)] 'org-agenda-todo-nextset)
 (org-defkey org-agenda-mode-map [(control shift left)]  'org-agenda-todo-previousset)
 (org-defkey org-agenda-mode-map "\C-c\C-xb" 'org-agenda-tree-to-indirect-buffer)
