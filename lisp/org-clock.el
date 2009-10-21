@@ -762,16 +762,22 @@ non-dangling (i.e., currently open and valid) clocks."
   "Return the current Mac idle time in seconds"
   (string-to-number (shell-command-to-string "ioreg -c IOHIDSystem | perl -ane 'if (/Idle/) {$idle=(pop @F)/1000000000; print $idle; last}'")))
 
+(defun org-x11-idle-seconds ()
+  "Return the current X11 idle time in seconds"
+  (/ (string-to-number (shell-command-to-string "x11idle")) 1000))
+
 (defun org-user-idle-seconds ()
   "Return the number of seconds the user has been idle for.
 This routine returns a floating point number."
-  (if (eq system-type 'darwin)
+  (if (or (eq system-type 'darwin) (eq window-system 'x))
       (let ((emacs-idle (org-emacs-idle-seconds)))
 	;; If Emacs has been idle for longer than the user's
 	;; `org-clock-idle-time' value, check whether the whole system has
 	;; really been idle for that long.
 	(if (> emacs-idle (* 60 org-clock-idle-time))
-	    (min emacs-idle (org-mac-idle-seconds))
+	    (min emacs-idle (if (eq system-type 'darwin)
+				(org-mac-idle-seconds)
+			      (org-x11-idle-seconds)))
 	  emacs-idle))
     (org-emacs-idle-seconds)))
 

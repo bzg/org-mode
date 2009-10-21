@@ -73,6 +73,12 @@
 	modeline when habits are being displayed (if that module is being
 	loaded).
 
+2009-10-21  James TD Smith  <ahktenzero@mohorovi.cc>
+
+	* org-clock.el (org-x11-idle-seconds): Add a method to get the X11
+	idle time using the xscreensaver extension.
+	(org-user-idle-seconds): Use X11 idle time if available.
+
 2009-10-20  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-agenda.el (org-agenda-next-line): New command.
@@ -197,7 +203,7 @@
 	currently active clock if the user has exceeded the time returned
 	by `org-user-idle-seconds', based on the value of
 	`org-clock-idle-time'.
-	(org-clock-in): If, after resolving clocks, 
+	(org-clock-in): If, after resolving clocks,
 	(org-clock-out): Cancel the `org-clock-idle-timer' on clock out.
 
 	* org-clock.el (org-clock-resolve-clock): New function that
