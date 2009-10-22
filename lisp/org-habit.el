@@ -159,7 +159,7 @@ This list represents a \"habit\" for the rest of this module."
     (if pom (goto-char pom))
     (assert (org-is-habit-p (point)))
     (let* ((scheduled (org-get-scheduled-time (point)))
-	   (scheduled-repeat (org-get-repeat "SCHEDULED"))
+	   (scheduled-repeat (org-get-repeat org-scheduled-string))
 	   (sr-days (org-habit-duration-to-days scheduled-repeat))
 	   (end (org-entry-end-position))
 	   closed-dates deadline dr-days)

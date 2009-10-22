@@ -1,5 +1,12 @@
 2009-10-22  John Wiegley  <jwiegley@gmail.com>
 
+	* org.el (org-get-repeat): Change so that this function can be
+	called with either `org-scheduled-string' or
+	`org-deadline-string'.
+
+	* org-habit.el (org-habit-parse-todo): Use `org-scheduled-string'
+	to find the scheduled date.
+
 	* org-clock.el (org-clock-auto-clock-resolution): Renamed
 	`org-clock-disable-clock-resolution', since negatives don't sound
 	good in customization variables.

@@ -10055,7 +10055,7 @@ Returns the new TODO keyword, or nil if no state change should occur."
     (save-excursion
       (org-back-to-heading t)
       (and (re-search-forward (if tagline
-				  (concat tagline ":[^:]+" org-repeat-re)
+				  (concat tagline "\\s-*" org-repeat-re)
 				org-repeat-re)
 			      (org-entry-end-position) t)
 	   (match-string-no-properties 1)))))
