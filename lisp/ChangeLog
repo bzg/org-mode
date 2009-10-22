@@ -2,6 +2,8 @@
 
 	* org-mobile.el (org-mobile-update-checksum-for-capture-file):
 	Make sure the regexp search can fail without throwing an error.
+	(org-mobile-apply): Save the inbox buffer after removing
+	successfully applied changes.
 
 2009-10-22  John Wiegley  <jwiegley@gmail.com>
 

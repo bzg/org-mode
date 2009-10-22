@@ -686,6 +686,7 @@ If BEG and END are given, only do this in that region."
 	    ;; So remove the entry
 	    (goto-char bos-marker)
 	    (delete-region (point) (org-end-of-subtree t t))))))
+    (save-buffer)
     (move-marker marker nil)
     (move-marker end nil)
     (message "%d new, %d edits, %d flags, %d errors" cnt-new
