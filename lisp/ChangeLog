@@ -1,5 +1,13 @@
 2009-10-22  John Wiegley  <jwiegley@gmail.com>
 
+	* org-clock.el (org-clock-auto-clock-resolution): Renamed
+	`org-clock-disable-clock-resolution', since negatives don't sound
+	good in customization variables.
+	(org-clock-in): Don't use the auto-resolution logic if the user is
+	clocking into a different task while an active clock is running.
+	This then allows the default behavior of clocking out of the open
+	task and then into the new task.
+
 	* org-habit.el (org-habit-parse-todo): Generate an error if a
 	habit has a scheduled repeat period < 1.
 	(org-habit-get-faces): Fixes to the way that colors are computed.

@@ -213,7 +213,7 @@ string as argument."
 	  (const :tag "Never" nil)
 	  (integer :tag "After N minutes")))
 
-(defcustom org-clock-disable-clock-resolution nil
+(defcustom org-clock-auto-clock-resolution t
   "When non-nil, do not resolve open clocks on clock-in."
   :group 'org-clock
   :type 'boolean)
@@ -810,9 +810,10 @@ the clocking selection, associated with the letter `d'."
 	  ts selected-task target-pos (msg-extra "")
 	  (left-over (and (not org-clock-resolving-clocks)
 			  org-clock-left-over-time)))
-      (unless (or org-clock-clocking-in
+      (unless (or interrupting
+		  org-clock-clocking-in
 		  org-clock-resolving-clocks
-		  org-clock-disable-clock-resolution)
+		  (not org-clock-auto-clock-resolution))
 	(setq org-clock-left-over-time nil)
 	(let ((org-clock-clocking-in t))
 	  (org-resolve-clocks)))	; check if any clocks are dangling
