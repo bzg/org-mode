@@ -1,5 +1,11 @@
 2009-10-22  John Wiegley  <jwiegley@gmail.com>
 
+	* org-habit.el (org-habit-parse-todo): Generate an error if a
+	habit has a scheduled repeat period < 1.
+	(org-habit-get-faces): Fixes to the way that colors are computed.
+	(org-habit-build-graph): The graph wasn't displaying beyond any
+	day that had two completions in it.
+
 	* org.el (org-modules): Made this variable more consistent, since
 	it was referring to Org, OrgMode and Org-mode, whereas the docs
 	for the variable always refer to Org-mode.

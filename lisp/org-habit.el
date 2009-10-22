@@ -167,6 +167,8 @@ This list represents a \"habit\" for the rest of this module."
 	(error "Habit has no scheduled date"))
       (unless scheduled-repeat
 	(error "Habit has no scheduled repeat period"))
+      (unless (> sr-days 0)
+	(error "Habit's scheduled repeat period is less than 1d"))
       (when (string-match "/\\([0-9]+[dwmy]\\)" scheduled-repeat)
 	(setq dr-days (org-habit-duration-to-days
 		       (match-string-no-properties 1 scheduled-repeat)))
@@ -236,26 +238,29 @@ Habits are assigned colors on the following basis:
   (unless moment (setq moment (current-time)))
   (let* ((scheduled (or scheduled-time (org-habit-scheduled habit)))
 	 (s-repeat (org-habit-scheduled-repeat habit))
-	 (scheduled-end (time-add scheduled (days-to-time s-repeat)))
+	 (scheduled-end (time-add scheduled (days-to-time (1- s-repeat))))
 	 (d-repeat (org-habit-deadline-repeat habit))
 	 (deadline (if (and scheduled-time d-repeat)
 		       (time-add scheduled-time
 				 (days-to-time (- d-repeat s-repeat)))
-		     (org-habit-deadline habit))))
+		     (org-habit-deadline habit)))
+	 (m-days (time-to-days moment))
+	 (s-days (time-to-days scheduled))
+	 (s-end-days (time-to-days scheduled-end))
+	 (d-days (and deadline (time-to-days deadline))))
     (cond
-     ((time-less-p moment scheduled)
+     ((< m-days s-days)
       '(org-habit-clear-face . org-habit-clear-future-face))
-     ((time-less-p moment scheduled-end)
+     ((or (< m-days s-end-days)
+	  (and deadline (< m-days d-days)))
       '(org-habit-ready-face . org-habit-ready-future-face))
-     ((and deadline
-	   (time-less-p moment deadline))
+     ((and deadline (< m-days d-days))
       (if donep
 	  '(org-habit-ready-face . org-habit-ready-future-face)
 	'(org-habit-warning-face . org-habit-warning-future-face)))
-     ((= (time-to-days moment)
-	 (if deadline
-	     (time-to-days deadline)
-	   (time-to-days scheduled-end)))
+     ((= m-days (if deadline
+		    d-days
+		  s-end-days))
       (if donep
 	  '(org-habit-ready-face . org-habit-ready-future-face)
 	'(org-habit-alert-face . org-habit-alert-future-face)))
@@ -298,9 +303,11 @@ Habits are assigned colors on the following basis:
 	(if donep
 	    (progn
 	      (aset graph index ?*)
-	      (setq last-done-date (car done-dates)
-		    done-dates (cdr done-dates)
-		    markedp t))
+	      (setq markedp t)
+	      (while (and done-dates
+			  (= now-days (time-to-days (car done-dates))))
+		(setq last-done-date (car done-dates)
+		      done-dates (cdr done-dates))))
 	  (if todayp
 	      (aset graph index ?!)))
 	(setq face (if (or in-the-past-p
