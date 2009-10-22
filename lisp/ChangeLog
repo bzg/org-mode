@@ -1,3 +1,9 @@
+2009-10-22  John Wiegley  <jwiegley@gmail.com>
+
+	* org.el (org-modules): Made this variable more consistent, since
+	it was referring to Org, OrgMode and Org-mode, whereas the docs
+	for the variable always refer to Org-mode.
+
 2009-10-21  James TD Smith  <ahktenzero@mohorovi.cc>
 
 	* org.el (org-repeat-re): The changed org-repeat-re no longer
