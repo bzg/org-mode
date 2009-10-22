@@ -218,7 +218,6 @@ string as argument."
   :group 'org-clock
   :type 'boolean)
 
-
 (defvar org-clock-in-prepare-hook nil
   "Hook run when preparing the clock.
 This hook is run before anything happens to the task that

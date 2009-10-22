@@ -1,3 +1,8 @@
+2009-10-22  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-mobile.el (org-mobile-update-checksum-for-capture-file):
+	Make sure the regexp search can fail without throwing an error.
+
 2009-10-22  John Wiegley  <jwiegley@gmail.com>
 
 	* org-clock.el (org-resolve-clocks-if-idle): Fix to the way idle

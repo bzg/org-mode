@@ -547,7 +547,7 @@ If nothing new has beed added, return nil."
       (with-current-buffer buffer
 	(when (re-search-forward (concat "\\([0-9a-fA-F]\\{30,\\}\\).*?"
 					 (regexp-quote org-mobile-capture-file)
-					 "[ \t]*$"))
+					 "[ \t]*$") nil t)
 	  (goto-char (match-beginning 1))
 	  (delete-region (match-beginning 1) (match-end 1))
 	  (insert (md5 buffer-string))
