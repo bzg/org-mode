@@ -14,6 +14,9 @@
 
 2009-10-22  John Wiegley  <jwiegley@gmail.com>
 
+	* org-habit.el (org-habit-build-graph): Fix to the graph building
+	when last DONE date is earlier than `org-habit-preceding-days'.
+
 	* org-clock.el (org-resolve-clocks-if-idle): Fix to the way idle
 	time is reported after the user comes back (but before they
 	resolve time).

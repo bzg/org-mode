@@ -278,10 +278,10 @@ Habits are assigned colors on the following basis:
 	(graph (make-string (1+ (- (time-to-days ending)
 				   (time-to-days starting))) ?\ ))
 	(index 0))
-    (if done-dates
-	(while (time-less-p (car done-dates) starting)
-	  (setq last-done-date (car done-dates)
-		done-dates (cdr done-dates))))
+    (while (and done-dates
+		(time-less-p (car done-dates) starting))
+      (setq last-done-date (car done-dates)
+	    done-dates (cdr done-dates)))
     (while (time-less-p day ending)
       (let* ((now-days (time-to-days day))
 	     (in-the-past-p (< now-days current-days))
