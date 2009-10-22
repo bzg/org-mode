@@ -1,3 +1,8 @@
+2009-10-22  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* lisp/org-registry.el (org-registry-assoc-all)
+	(org-registry-find-all): Clean rewrite
+
 2009-10-19  James TD Smith  <ahktenzero@mohorovi.cc>
 
 	* lisp/org-registry.el (org-registry-assoc-all): Stop this from

@@ -145,19 +145,16 @@ buffer."
 
 (defun org-registry-assoc-all (link &optional registry)
   "Return all associated entries of LINK in the registry."
-  (let ((reg (copy-list (or org-registry-alist registry))) entry output)
-    (while (setq entry (assoc link reg))
-      (add-to-list 'output entry)
-      (setq reg (delete entry reg)))
-    (nreverse output)))
+  (org-registry-find-all 
+   (lambda (entry) (string= link (car entry)))
+   registry))
 
 (defun org-registry-find-all (test &optional registry)
   "Return all entries satisfying `test' in the registry."
-  (let ((reg (copy-list (or org-registry-alist registry))) entry output)
-    (while (setq entry (find-if test reg))
-      (add-to-list 'output entry)
-      (setq reg (delete entry reg)))
-    (nreverse output)))
+  (delq nil 
+        (mapcar 
+         (lambda (x) (and (funcall test x) x)) 
+         (or registry org-registry-alist))))
 
 ;;;###autoload
 (defun org-registry-visit ()
