@@ -775,6 +775,8 @@ This routine returns a floating point number."
 	  emacs-idle))
     (org-emacs-idle-seconds)))
 
+(defvar org-clock-user-idle-seconds)
+
 (defun org-resolve-clocks-if-idle ()
   "Resolve all currently open org-mode clocks.
 This is performed after `org-clock-idle-time' minutes, to check
@@ -782,18 +784,18 @@ if the user really wants to stay clocked in after being idle for
 so long."
   (when (and org-clock-idle-time (not org-clock-resolving-clocks)
 	     org-clock-marker)
-    (let ((idle (org-user-idle-seconds))
+    (let ((org-clock-user-idle-seconds (org-user-idle-seconds))
 	  (org-clock-resolving-clocks-due-to-idleness t))
-      (if (> idle (* 60 org-clock-idle-time))
+      (if (> org-clock-user-idle-seconds (* 60 org-clock-idle-time))
 	  (org-clock-resolve
 	   (cons org-clock-marker
 		 org-clock-start-time)
 	   (function
 	    (lambda (clock)
 	      (format "Clocked in & idle for %d mins"
-		      (/ (org-user-idle-seconds) 60))))
+		      (/ org-clock-user-idle-seconds 60))))
 	   (time-subtract (current-time)
-			  (seconds-to-time (org-user-idle-seconds))))))))
+			  (seconds-to-time org-clock-user-idle-seconds)))))))
 
 (defun org-clock-in (&optional select)
   "Start the clock on the current item.
