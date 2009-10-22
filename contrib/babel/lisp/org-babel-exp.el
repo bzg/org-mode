@@ -67,10 +67,13 @@ options and are taken from `org-babel-defualt-inline-header-args'."
   (interactive)
   (save-excursion
     (goto-char start)
-    (while (and (< (point) end) (re-search-forward org-babel-inline-src-block-regexp end t))
+    (while (and (< (point) end)
+                (re-search-forward org-babel-inline-src-block-regexp end t))
       (let* ((info (save-match-data (org-babel-parse-inline-src-block-match)))
              (replacement (save-match-data
-                            (org-babel-exp-do-export (first info) (second info) (third info) t))))
+                            (org-babel-exp-do-export
+                             (first info) (second info) (third info) t))))
+        ;; (message "%s -> %s" (second info) replacement) ;; debugging
         (setf end (+ end (- (length replacement)
                             (+ 6 (length (first info)) (length (second info))))))
         (replace-match replacement t t)))))
@@ -79,10 +82,10 @@ options and are taken from `org-babel-defualt-inline-header-args'."
   (case (intern (or (cdr (assoc :exports params)) "code"))
     ('none "")
     ('code (org-babel-exp-code body lang params inline))
-    ('results (org-babel-exp-results))
+    ('results (org-babel-exp-results body lang params inline))
     ('both (concat (org-babel-exp-code body lang params inline)
                    "\n\n"
-                   (org-babel-exp-results)))))
+                   (org-babel-exp-results body lang params inline)))))
 
 (defun org-babel-exp-code (body lang params &optional inline)
   (if inline
@@ -90,11 +93,11 @@ options and are taken from `org-babel-defualt-inline-header-args'."
     (format "#+BEGIN_SRC %s\n%s%s\n#+END_SRC" lang body
             (if (string-match "\n$" body) "" "\n"))))
 
-(defun org-babel-exp-results ()
-  (save-excursion
-    ;; org-exp-blocks places us at the end of the block
-    (re-search-backward org-babel-src-block-regexp nil t)
-    (org-babel-execute-src-block) ""))
+(defun org-babel-exp-results (body lang params &optional inline)
+  (let ((raw (org-babel-execute-src-block
+              nil (list lang body params) '(("results" . "silent")))))
+    (if (and (stringp raw) (= 0 (length raw)))
+        "=(no results)=" (format "=%S=" raw))))
 
 (provide 'org-babel-exp)
 ;;; org-babel-exp.el ends here
