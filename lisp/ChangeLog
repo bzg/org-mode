@@ -1,8 +1,3 @@
-2009-10-21  James TD Smith  <ahktenzero@mohorovi.cc>
-
-	* org.el (org-repeat-re): The changed org-repeat-re no longer
-	matched simple +2d type repeaters. Fix it so it does.
-
 2009-10-21  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-latex.el (org-export-latex-preprocess): Protect the vspace
