@@ -181,6 +181,7 @@ the header arguments specified at the source code block."
          (cmd (intern (concat "org-babel-execute:" lang)))
          result)
     ;; (message "params=%S" params) ;; debugging statement
+    ;; (message "vars=%S" (second processed-params)) ;; debugging statement
     (unless (member lang org-babel-interpreters)
       (error "Language is not in `org-babel-interpreters': %s" lang))
     (when arg (setq result-params (cons "silent" result-params)))

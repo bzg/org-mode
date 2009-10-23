@@ -94,8 +94,17 @@ options and are taken from `org-babel-defualt-inline-header-args'."
             (if (string-match "\n$" body) "" "\n"))))
 
 (defun org-babel-exp-results (body lang params &optional inline)
-  (let ((raw (org-babel-execute-src-block
-              nil (list lang body params) '(("results" . "silent")))))
+  (let* ((params
+          ;; lets ensure that we lookup references in the original file
+          (mapcar (lambda (pair)
+                    (if (and (eq (car pair) :var)
+                             (string-match org-babel-ref-split-regexp (cdr pair)))
+                        `(:var . ,(concat (match-string 1 (cdr pair))
+                                          "=" org-current-export-file
+                                          ":" (match-string 2 (cdr pair))))
+                      pair)) params))
+         (raw (org-babel-execute-src-block
+               nil (list lang body params) '(("results" . "silent")))))
     (if (and (stringp raw) (= 0 (length raw)))
         "=(no results)=" (format "=%S=" raw))))
 
