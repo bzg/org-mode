@@ -196,6 +196,8 @@ using `rsync' or `scp'.")
     ;; Make the files unique, and determine the name under which they will
     ;; be listed.
     (while (setq file (pop files))
+      (if (not (file-name-absolute-p file))
+	  (setq file (expand-file-name file org-directory)))
       (setq uname (file-truename file))
       (unless (member uname seen)
 	(push uname seen)
