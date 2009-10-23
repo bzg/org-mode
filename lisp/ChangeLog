@@ -1,5 +1,13 @@
 2009-10-23  John Wiegley  <jwiegley@gmail.com>
 
+	* org-habit.el (org-habit-build-graph): None of the arguments
+	should be optional.
+	(org-habit-parse-todo, org-habit-deadline)
+	(org-habit-get-priority, org-habit-get-faces)
+	(org-habit-build-graph): Further simplifications by storing all
+	past, scheduled and deadline dates as a number of days past the
+	epoch, and not as times.
+
 	* org-habit.el (org-habit-warning-face)
 	(org-habit-warning-future-face): Removed because these are no
 	longer used.

@@ -63,7 +63,7 @@ Note that consistency graphs will overwrite anything else in the buffer."
 (defcustom org-habit-show-habits-only-for-today t
   "If non-nil, only show habits on today's agenda, and not for future days.
 Note that even when shown for future days, the graph is always
-relative to the current effective time."
+relative to the current effective date."
   :group 'org-habit
   :type 'boolean)
 
@@ -150,7 +150,8 @@ This list represents a \"habit\" for the rest of this module."
 	   (sr-days (org-habit-duration-to-days scheduled-repeat))
 	   (end (org-entry-end-position))
 	   closed-dates deadline dr-days)
-      (unless scheduled
+      (if scheduled
+	  (setq scheduled (time-to-days scheduled))
 	(error "Habit has no scheduled date"))
       (unless scheduled-repeat
 	(error "Habit has no scheduled repeat period"))
@@ -161,11 +162,11 @@ This list represents a \"habit\" for the rest of this module."
 		       (match-string-no-properties 1 scheduled-repeat)))
 	(if (<= dr-days sr-days)
 	    (error "Habit's deadline repeat period is less than or equal to scheduled"))
-	(setq deadline (time-add scheduled
-				 (days-to-time (- dr-days sr-days)))))
+	(setq deadline (+ scheduled (- dr-days sr-days))))
       (org-back-to-heading t)
       (while (re-search-forward "- State \"DONE\".*\\[\\([^]]+\\)\\]" end t)
-	(push (org-time-string-to-time (match-string-no-properties 1))
+	(push (time-to-days
+	       (org-time-string-to-time (match-string-no-properties 1)))
 	      closed-dates))
       (list scheduled sr-days deadline dr-days closed-dates))))
 
@@ -176,42 +177,43 @@ This list represents a \"habit\" for the rest of this module."
 (defsubst org-habit-deadline (habit)
   (let ((deadline (nth 2 habit)))
     (or deadline
-	(time-add (org-habit-scheduled habit)
-		  (days-to-time (1- (org-habit-scheduled-repeat habit)))))))
+	(+ (org-habit-scheduled habit)
+	   (1- (org-habit-scheduled-repeat habit))))))
 (defsubst org-habit-deadline-repeat (habit)
   (or (nth 3 habit)
       (org-habit-scheduled-repeat habit)))
 (defsubst org-habit-done-dates (habit)
   (nth 4 habit))
 
-(defsubst org-habit-get-priority (habit)
+(defsubst org-habit-get-priority (habit &optional moment)
   "Determine the relative priority of a habit.
 This must take into account not just urgency, but consistency as well."
   (let ((pri 1000)
-	(days (time-to-days
-	       (time-subtract (current-time)
-			      (list 0 (* 3600 org-extend-today-until) 0))))
-	(s-days (time-to-days (org-habit-scheduled habit)))
-	(d-days (time-to-days (org-habit-deadline habit))))
+	(now (time-to-days
+	      (or moment
+		  (time-subtract (current-time)
+				 (list 0 (* 3600 org-extend-today-until) 0)))))
+	(scheduled (org-habit-scheduled habit))
+	(deadline (org-habit-deadline habit)))
     ;; add 10 for every day past the scheduled date, and subtract for every
     ;; day before it
-    (setq pri (+ pri (* (- days s-days) 10)))
+    (setq pri (+ pri (* (- now scheduled) 10)))
     ;; add 50 if the deadline is today
-    (if (and (/= s-days d-days)
-	     (= days d-days))
+    (if (and (/= scheduled deadline)
+	     (= now deadline))
 	(setq pri (+ pri 50)))
     ;; add 100 for every day beyond the deadline date, and subtract 10 for
     ;; every day before it
-    (let ((slip (- days (1- d-days))))
+    (let ((slip (- now (1- deadline))))
       (if (> slip 0)
 	  (setq pri (+ pri (* slip 100)))
 	(setq pri (+ pri (* slip 10)))))
     pri))
 
-(defun org-habit-get-faces (habit &optional moment scheduled-time donep)
-  "Return faces for HABIT relative to MOMENT and SCHEDULED-TIME.
-MOMENT defaults to the current time if it is nil.
-SCHEDULED-TIME defaults to the habit's actual scheduled time if nil.
+(defun org-habit-get-faces (habit &optional now-days scheduled-days donep)
+  "Return faces for HABIT relative to NOW-DAYS and SCHEDULED-DAYS.
+NOW-DAYS defaults to the current time's days-past-the-epoch if nil.
+SCHEDULED-DAYS defaults to the habit's actual scheduled days if nil.
 
 Habits are assigned colors on the following basis:
   Blue      Task is before the scheduled date.
@@ -223,62 +225,57 @@ Habits are assigned colors on the following basis:
             no deadline, the end of the schedule's repeat period.
   Red       The task has gone beyond the deadline day or the
             schedule's repeat period."
-  (unless moment (setq moment (current-time)))
-  (let* ((scheduled (or scheduled-time (org-habit-scheduled habit)))
+  (let* ((scheduled (or scheduled-days (org-habit-scheduled habit)))
 	 (s-repeat (org-habit-scheduled-repeat habit))
-	 (scheduled-end (time-add scheduled (days-to-time (1- s-repeat))))
+	 (scheduled-end (+ scheduled (1- s-repeat)))
 	 (d-repeat (org-habit-deadline-repeat habit))
-	 (deadline (if (and scheduled-time d-repeat)
-		       (time-add scheduled-time
-				 (days-to-time (- d-repeat s-repeat)))
+	 (deadline (if scheduled-days
+		       (+ scheduled-days (- d-repeat s-repeat))
 		     (org-habit-deadline habit)))
-	 (m-days (time-to-days moment))
-	 (s-days (time-to-days scheduled))
-	 (s-end-days (time-to-days scheduled-end))
-	 (d-days (time-to-days deadline)))
+	 (m-days (or now-days (time-to-days (current-time)))))
     (cond
-     ((< m-days s-days)
+     ((< m-days scheduled)
       '(org-habit-clear-face . org-habit-clear-future-face))
-     ((< m-days d-days)
+     ((< m-days deadline)
       '(org-habit-ready-face . org-habit-ready-future-face))
-     ((= m-days d-days)
+     ((= m-days deadline)
       (if donep
 	  '(org-habit-ready-face . org-habit-ready-future-face)
 	'(org-habit-alert-face . org-habit-alert-future-face)))
      (t
       '(org-habit-overdue-face . org-habit-overdue-future-face)))))
 
-(defun org-habit-build-graph (habit &optional starting current ending)
-  "Build a color graph for the given HABIT, from STARTING to ENDING."
-  (let ((done-dates (sort (org-habit-done-dates habit) 'time-less-p))
-	(scheduled (org-habit-scheduled habit))
-	(s-repeat (org-habit-scheduled-repeat habit))
-	(day starting)
-	(current-days (time-to-days current))
-	last-done-date
-	(graph (make-string (1+ (- (time-to-days ending)
-				   (time-to-days starting))) ?\ ))
-	(index 0))
-    (while (and done-dates
-		(time-less-p (car done-dates) starting))
+(defun org-habit-build-graph (habit starting current ending)
+  "Build a graph for the given HABIT, from STARTING to ENDING.
+CURRENT gives the current time between STARTING and ENDING, for
+the purpose of drawing the graph.  It need not be the actual
+current time."
+  (let* ((done-dates (sort (org-habit-done-dates habit) '<))
+	 (scheduled (org-habit-scheduled habit))
+	 (s-repeat (org-habit-scheduled-repeat habit))
+	 (start (time-to-days starting))
+	 (now (time-to-days current))
+	 (end (time-to-days ending))
+	 (graph (make-string (1+ (- end start)) ?\ ))
+	 (index 0)
+	 last-done-date)
+    (while (and done-dates (< (car done-dates) start))
       (setq last-done-date (car done-dates)
 	    done-dates (cdr done-dates)))
-    (while (time-less-p day ending)
-      (let* ((now-days (time-to-days day))
-	     (in-the-past-p (< now-days current-days))
-	     (todayp (= now-days current-days))
+    (while (< start end)
+      (let* ((in-the-past-p (< start now))
+	     (todayp (= start now))
 	     (donep (and done-dates
-			 (= now-days (time-to-days (car done-dates)))))
+			 (= start (car done-dates))))
 	     (faces (if (and in-the-past-p
 			     (not last-done-date)
-			     (not (time-less-p scheduled current)))
+			     (not (< scheduled now)))
 			'(org-habit-clear-face . org-habit-clear-future-face)
 		      (org-habit-get-faces
-		       habit day (and in-the-past-p
-				      (if last-done-date
-					  (time-add last-done-date
-						    (days-to-time s-repeat))
-					scheduled))
+		       habit start (and in-the-past-p
+					(if last-done-date
+					    (+ last-done-date s-repeat)
+					  scheduled))
 		       donep)))
 	     markedp face)
 	(if donep
@@ -286,13 +283,12 @@ Habits are assigned colors on the following basis:
 	      (aset graph index ?*)
 	      (setq markedp t)
 	      (while (and done-dates
-			  (= now-days (time-to-days (car done-dates))))
+			  (= start (car done-dates)))
 		(setq last-done-date (car done-dates)
 		      done-dates (cdr done-dates))))
 	  (if todayp
 	      (aset graph index ?!)))
-	(setq face (if (or in-the-past-p
-			   todayp)
+	(setq face (if (or in-the-past-p todayp)
 		       (car faces)
 		     (cdr faces)))
 	(if (and in-the-past-p
@@ -300,7 +296,7 @@ Habits are assigned colors on the following basis:
 		 (not markedp))
 	    (setq face (cdr faces)))
 	(put-text-property index (1+ index) 'face face graph))
-      (setq day (time-add day (days-to-time 1))
+      (setq start (1+ start)
 	    index (1+ index)))
     graph))
 
