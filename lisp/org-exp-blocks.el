@@ -133,8 +133,7 @@ blocks is as follows...
     (org-export-blocks-set 'org-export-blocks org-export-blocks)))
 
 (defcustom org-export-interblocks
-  '((r org-export-interblocks-format-R)
-    (R org-export-interblocks-format-R))
+  '()
   "Use this a-list to associate block types with block exporting
 functions.  The type of a block is determined by the text
 immediately following the '#+BEGIN_' portion of the block header.
@@ -318,119 +317,6 @@ other backends, it converts the comment into an EXAMPLE segment."
 	      body
 	      (if (string-match "\n\\'" body) "" "\n")
 	      "#+END_EXAMPLE\n")))))
-
-;;--------------------------------------------------------------------------------
-;; R: Sweave-type functionality
-(defvar interblock-R-buffer nil
-  "Holds the buffer for the current R process")
-
-(defvar count) ; dynamicaly scoped from `org-export-blocks-preprocess'?
-(defun org-export-blocks-format-R (body &rest headers)
-  "Process R blocks and replace \R{} forms outside the blocks
-with their values as determined by R."
-  (interactive)
-  (message "R processing...")
-  (let ((image-path (or (and (car headers)
-			     (string-match "\\(.?\\)\.\\(EPS\\|eps\\)" (car headers))
-			     (match-string 1 (car headers)))
-			(and (> (length (car headers)) 0)
-			     (car headers))
-			;; create the default filename
-			(format "Rplot-%03d" count)))
-	(plot (string-match "plot" body))
-	R-proc)
-    (setf count (+ count 1))
-    (interblock-initiate-R-buffer)
-    (setf R-proc (get-buffer-process interblock-R-buffer))
-    ;; send strings to the ESS process using `comint-send-string'
-    (setf body (mapconcat (lambda (line)
-			    (interblock-R-input-command line) (concat "> " line))
-			  (butlast (split-string body "[\r\n]"))
-			  "\n"))
-    ;; if there is a plot command, then create the images
-    (when plot
-      (interblock-R-input-command (format "dev.copy2eps(file=\"%s.eps\")" image-path)))
-    (concat (cond
-	     (htmlp (org-export-blocks-html-quote body
-						  (format "<div id=\"R-%d\">\n<pre>\n" count)
-						  "</pre>\n</div>\n"))
-	     (latexp (org-export-blocks-latex-quote body
-						    "\\begin{Schunk}\n\\begin{Sinput}\n"
-						    "\\end{Sinput}\n\\end{Schunk}\n"))
-	     (t (insert ;; default export
-		 "#+begin_R " (mapconcat 'identity headers " ") "\n"
-		 body (if (string-match "\n$" body) "" "\n")
-		 "#+end_R\n")))
-	    (if plot
-		(format "[[file:%s.eps]]\n" image-path)
-	      ""))))
-
-(defun org-export-interblocks-format-R (start end)
-  "This is run over parts of the org-file which are between R
-blocks.  Its main use is to expand the \R{stuff} chunks for
-export."
-  (save-excursion
-    (goto-char start)
-    (interblock-initiate-R-buffer)
-    (let (code replacement)
-      (while (and (< (point) end) (re-search-forward "\\\\R{\\(.*\\)}" end t))
-	(save-match-data (setf code (match-string 1)))
-	(setf replacement (interblock-R-command-to-string code))
-	(setf replacement (cond
-			   (htmlp replacement)
-			   (latexp replacement)
-			   (t replacement)))
-	(setf end (+ end (- (length replacement) (length code))))
-	(replace-match replacement t t)))))
-
-(defun interblock-initiate-R-buffer ()
-  "If there is not a current R process then create one."
-  (unless (and (buffer-live-p interblock-R-buffer) (get-buffer interblock-R-buffer))
-    (save-excursion
-      (R)
-      (setf interblock-R-buffer (current-buffer))
-      (interblock-R-wait-for-output)
-      (interblock-R-input-command ""))))
-
-(defun interblock-R-command-to-string (command)
-  "Send a command to R, and return the results as a string."
-  (interblock-R-input-command command)
-  (interblock-R-last-output))
-
-(defun interblock-R-input-command (command)
-  "Pass COMMAND to the R process running in `interblock-R-buffer'."
-  (save-excursion
-    (save-match-data
-      (set-buffer interblock-R-buffer)
-      (goto-char (process-mark (get-buffer-process (current-buffer))))
-      (insert command)
-      (comint-send-input)
-      (interblock-R-wait-for-output))))
-
-(defun interblock-R-wait-for-output ()
-  "Wait until output arrives"
-  (save-excursion
-    (save-match-data
-      (set-buffer interblock-R-buffer)
-      (while (progn
-	       (goto-char comint-last-input-end)
-	       (not (re-search-forward comint-prompt-regexp nil t)))
-	(accept-process-output (get-buffer-process (current-buffer)))))))
-
-(defun interblock-R-last-output ()
-  "Return the last R output as a string"
-  (save-excursion
-    (save-match-data
-      (set-buffer interblock-R-buffer)
-      (goto-char (process-mark (get-buffer-process (current-buffer))))
-      (forward-line 0)
-      (let ((raw (buffer-substring comint-last-input-end (- (point) 1))))
-	(if (string-match "\n" raw)
-	    raw
-	  (and (string-match "\\[[[:digit:]+]\\] *\\(.*\\)$" raw)
-	       (message raw)
-	       (message (match-string 1 raw))
-	       (match-string 1 raw)))))))
 
 (provide 'org-exp-blocks)
 
