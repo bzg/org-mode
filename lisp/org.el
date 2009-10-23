@@ -2283,8 +2283,12 @@ See the manual for details."
 	  (choice
 	   (cons   (string    :tag "Tag name")
 		   (character :tag "Access char"))
-	   (const :tag "Start radio group" (:startgroup))
-	   (const :tag "End radio group" (:endgroup))
+	   (list :tag "Start radio group"
+		 (const :startgroup)
+		 (option (string :tag "Group description")))
+	   (list :tag "End radio group"
+		 (const :endgroup)
+		 (option (string :tag "Group description")))
 	   (const :tag "New line" (:newline)))))
 
 (defcustom org-tag-persistent-alist nil
