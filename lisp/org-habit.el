@@ -93,19 +93,6 @@ relative to the current effective time."
   :group 'org-habit
   :group 'org-faces)
 
-(defface org-habit-warning-face
-  '((((background light)) (:background "yellow"))
-    (((background dark)) (:background "gold")))
-  "Face for days on which a task ought to be done."
-  :group 'org-habit
-  :group 'org-faces)
-(defface org-habit-warning-future-face
-  '((((background light)) (:background "palegoldenrod"))
-    (((background dark)) (:background "darkgoldenrod")))
-  "Face for days on which a task ought be done."
-  :group 'org-habit
-  :group 'org-faces)
-
 (defface org-habit-alert-face
   '((((background light)) (:background "yellow"))
     (((background dark)) (:background "gold")))
@@ -187,9 +174,13 @@ This list represents a \"habit\" for the rest of this module."
 (defsubst org-habit-scheduled-repeat (habit)
   (nth 1 habit))
 (defsubst org-habit-deadline (habit)
-  (nth 2 habit))
+  (let ((deadline (nth 2 habit)))
+    (or deadline
+	(time-add (org-habit-scheduled habit)
+		  (days-to-time (1- (org-habit-scheduled-repeat habit)))))))
 (defsubst org-habit-deadline-repeat (habit)
-  (nth 3 habit))
+  (or (nth 3 habit)
+      (org-habit-scheduled-repeat habit)))
 (defsubst org-habit-done-dates (habit)
   (nth 4 habit))
 
@@ -204,20 +195,17 @@ This must take into account not just urgency, but consistency as well."
 	(d-days (time-to-days (org-habit-deadline habit))))
     ;; add 10 for every day past the scheduled date, and subtract for every
     ;; day before it
-    (let ((slip (- days s-days)))
+    (setq pri (+ pri (* (- days s-days) 10)))
+    ;; add 50 if the deadline is today
+    (if (and (/= s-days d-days)
+	     (= days d-days))
+	(setq pri (+ pri 50)))
+    ;; add 100 for every day beyond the deadline date, and subtract 10 for
+    ;; every day before it
+    (let ((slip (- days (1- d-days))))
       (if (> slip 0)
-	  (setq pri (+ pri (* slip 10)))
+	  (setq pri (+ pri (* slip 100)))
 	(setq pri (+ pri (* slip 10)))))
-    ;; add 20 for every day beyond the deadline date, and subtract 5 for every
-    ;; day before it
-    (if (/= s-days d-days)
-	;; add 100 if the deadline is today
-	(if (= days d-days)
-	    (setq pri (+ pri 100))))
-    (let ((slip (- days d-days)))
-      (if (> slip 0)
-	  (setq pri (+ pri (* slip 20)))
-	(setq pri (+ pri (* slip 5)))))
     pri))
 
 (defun org-habit-get-faces (habit &optional moment scheduled-time donep)
@@ -247,20 +235,13 @@ Habits are assigned colors on the following basis:
 	 (m-days (time-to-days moment))
 	 (s-days (time-to-days scheduled))
 	 (s-end-days (time-to-days scheduled-end))
-	 (d-days (and deadline (time-to-days deadline))))
+	 (d-days (time-to-days deadline)))
     (cond
      ((< m-days s-days)
       '(org-habit-clear-face . org-habit-clear-future-face))
-     ((or (< m-days s-end-days)
-	  (and deadline (< m-days d-days)))
+     ((< m-days d-days)
       '(org-habit-ready-face . org-habit-ready-future-face))
-     ((and deadline (< m-days d-days))
-      (if donep
-	  '(org-habit-ready-face . org-habit-ready-future-face)
-	'(org-habit-warning-face . org-habit-warning-future-face)))
-     ((= m-days (if deadline
-		    d-days
-		  s-end-days))
+     ((= m-days d-days)
       (if donep
 	  '(org-habit-ready-face . org-habit-ready-future-face)
 	'(org-habit-alert-face . org-habit-alert-future-face)))
