@@ -58,6 +58,7 @@
 		  "org-habit" (&optional line))
 (declare-function org-is-habit-p "org-habit" (&optional pom))
 (declare-function org-habit-parse-todo "org-habit" (&optional pom))
+(declare-function org-habit-get-priority "org-habit" (habit))
 (defvar calendar-mode-map)
 (defvar org-mobile-force-id-on-agenda-items) ; defined in org-mobile.el
 (defvar org-habit-show-habits)
