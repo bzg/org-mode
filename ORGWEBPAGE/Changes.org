@@ -6,9 +6,143 @@
 
 #+STARTUP: indent hidestars
 
-* Version 6.31
+* Version 6.32
  :PROPERTIES:
  :VISIBILITY: content
+ :CUSTOM_ID: v6.32
+ :END:
+
+** Rewrite of org-mobile.org, for MobileOrg 1.0 (build 20)
+
+MobileOrg is currently under review at the iPhone App Store.  You
+will need Org-mode version 6.32 to interact with it.
+
+** Added support for habit consistency tracking
+    
+/org-habit.el/ contains new code to track habits.  Please
+configure the variable org-modules to activate it.  When active,
+habits (a special TODO entry) will be displayed in the agenda
+together with a "consistency graph".  Habit tracking is described
+in a new [[http://orgmode.org/manual/Tracking-your-habits.html][manual section]].
+
+Thanks to John Wiegley for this contribution.
+    
+** New context-aware tag auto-exclusion 
+
+After writing a function relating to location and context
+information, you will be able to press =/ RET= in the agenda to
+exclude tasks that cannot be done in the current context. 
+For details, see the information about filtering in the manual.
+
+Thanks to John Wiegley for a patch to this effect.
+
+** New clock resolving tools
+
+When clocking into a new task while no clock is running, Org now
+checks for orphaned CLOCK lines and offers to repair these before
+starting the clock.  You can also configure this feature to check
+for idle time and prompt you to subtract that time from the
+running timer.
+    
+See the new [[http://orgmode.org/manual/Resolving-idle-time.html][manual section]] for more details.
+    
+Thanks to John Wiegley for a patch to this effect.
+
+** Mutually exclusive tag groups can now have a name in the tags interface
+
+The customize interface allows to optionally add a string to the
+beginning or end of such a group.
+    
+Thanks to James TD Smith for a patch to this effect.
+
+** Agenda Search view: Search for substrings
+    
+The default in search view (/C-c a s/)is now that the search
+expression is searched for as a /substring/, i.e. the different
+words must occur in direct sequence, and it may be only part of
+a word.  If you want to look for a number of separate keywords
+with Boolean logic, all words must be preceded by =+= or =-=.
+
+This was, more-or-less, requested by John Wiegley.
+
+** Make space and backspace scroll the show window in the agenda
+
+Pressing SPC again after using it to show an agenda item in
+another window will make the entire subtree visible, and show
+scroll it.  Backspace and DEL will scroll back.
+
+This was a request by Eric Fraga.
+    
+** File tags are now offered for completion during a tag prompts
+
+Requested by Matt Lundin.
+
+** Make `- SPC' an agenda filter that selects entries without any tags
+    
+Request by John Wiegley.
+
+** Better way to edit multi-line macro definitions
+
+The editing tool key =C-c '= now also edits =#+MACRO=
+definitions, including multiline macros.
+
+** Restructured Manual
+
+The manual has been slightly reorganized.  The archiving stuff,
+which was - somewhat obscurely - hidden in the /Document
+Structure/ chapter, has been moved into the new chapter
+/Capture-Refile-Archive/.  Also, there is a new chapter /Markup/
+which contains both the markup rules (moved there from the Export
+chapter) and the documentation for embedded LaTeX.
+
+** Improved figure placement in LaTeX and HTML export
+    
+Text can now be wrapped around figures.  See the manual for
+details.
+
+** Allow date to be shifted into the future if time given is earlier than now
+    
+By setting
+
+:     (setq org-read-date-prefer-future 'time)
+
+you indicate to Org that, if you only give a time at the
+date/time prompt, and if this time is earlier then the current
+time, then the date of tomorrow will be assumed to be valid for
+this event.  A similar mechanism was already in place for dates,
+but now you can make it work for times as well.
+
+** Collected changes in org-babel
+- Source blocks can now reference source-blocks in other files
+  using =filepath:srcname= syntax.
+- Inline code blocks like =src_python{2+2}= are now exported
+- Remote source block calls using the =#+lob: srcname(arg=val)=
+  syntax can now be exported.
+- When =:file= is supplied with an =R= block, graphics are
+  automatically sent to file and linked from the org buffer, thus
+  appearing on export.  The image format is obtained from the
+  filename extension.  Possible values are =.png, .jpg, .jpeg,
+  .tiff, .bmp, .pdf, .ps, .postscript=, defaulting to =png=.
+- Results can be returned as parseable code using =:results code=,
+  and as pretty-printed code using =:results pp= (emacs-lisp,
+  python, ruby).  Thanks to Benny Andresen for the idea and patch
+  for emacs-lisp.
+- When =:file filename= is supplied, =:exports file= is unnecessary
+- Header args are taken from org-file-properties in addition to
+  properties active in the subtree.
+- =:noweb= header argument now expands noweb references before
+  source-block evaluation.
+- Tangling honours the new org variable
+  org-src-preserve-indentation, so that correct code is output for
+  a language like python that depends on indentation.
+
+** Changes in org-exp-blocks.el
+- Interblocks export has been simplified.
+- Support for R code (=begin_R= blocks and inline =\R{}=) has been
+  removed.  Please use org-babel instead.
+
+* Version 6.31
+ :PROPERTIES:
  :CUSTOM_ID: v6.31
  :END:
 
