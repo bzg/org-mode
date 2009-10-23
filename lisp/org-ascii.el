@@ -58,6 +58,13 @@ in this way, it will be wrapped."
   :group 'org-export-ascii
   :type 'boolean)
 
+(defcustom org-export-ascii-table-keep-all-vertical-lines nil
+  "Non-nil means, keep all vertical lines in ASCII tables.
+When nil, vertical lines will be removed except for those needed
+for column grouping."
+  :group 'org-export-ascii
+  :type 'boolean)
+
 ;;; Hooks
 
 (defvar org-export-ascii-final-hook nil
@@ -585,18 +592,20 @@ publishing directory."
       ;; column and the special lines
       (setq lines (org-table-clean-before-export lines)))
     ;; Get rid of the vertical lines except for grouping
-    (let ((vl (org-colgroup-info-to-vline-list org-table-colgroup-info))
-	  rtn line vl1 start)
-      (while (setq line (pop lines))
-	(if (string-match org-table-hline-regexp line)
-	    (and (string-match "|\\(.*\\)|" line)
-		 (setq line (replace-match " \\1" t nil line)))
-	  (setq start 0 vl1 vl)
-	  (while (string-match "|" line start)
-	    (setq start (match-end 0))
-	    (or (pop vl1) (setq line (replace-match " " t t line)))))
-	(push line rtn))
-      (nreverse rtn))))
+    (if org-export-ascii-table-keep-all-vertical-lines
+	lines
+      (let ((vl (org-colgroup-info-to-vline-list org-table-colgroup-info))
+	    rtn line vl1 start)
+	(while (setq line (pop lines))
+	  (if (string-match org-table-hline-regexp line)
+	      (and (string-match "|\\(.*\\)|" line)
+		   (setq line (replace-match " \\1" t nil line)))
+	    (setq start 0 vl1 vl)
+	    (while (string-match "|" line start)
+	      (setq start (match-end 0))
+	      (or (pop vl1) (setq line (replace-match " " t t line)))))
+	  (push line rtn))
+	(nreverse rtn)))))
 
 (defun org-colgroup-info-to-vline-list (info)
   (let (vl new last)

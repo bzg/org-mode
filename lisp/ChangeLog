@@ -1,5 +1,8 @@
 2009-10-23  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-ascii.el (org-export-ascii-table-keep-all-vertical-lines):
+	New option.
+
 	* org.el (org-tag-alist): Fix customization type.
 
 2009-10-22  Carsten Dominik  <carsten.dominik@gmail.com>
