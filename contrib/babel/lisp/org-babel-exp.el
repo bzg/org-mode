@@ -105,11 +105,19 @@ options and are taken from `org-babel-defualt-inline-header-args'."
                      pair)) params)))
     (if inline
         (let ((raw (org-babel-execute-src-block
-                    nil (list lang body params) '((:results . "silent")))))
-          (if (and (stringp raw) (= 0 (length raw)))
-              "=(no results)=" (format "=%S=" raw)))
-      (save-excursion
-        ;; org-exp-blocks places us at the end of the block
+                    nil (list lang body params) '((:results . "silent"))))
+              (result-params (split-string (cdr (assoc :results params)))))
+          (cond ;; respect the value of the :results header argument
+           ((member "file" result-params)
+            (org-babel-result-to-file raw))
+           ((or (member "raw" result-params) (member "org" result-params))
+            raw)
+           ((member "code" result-params)
+            (format "src_%s{%s}" lang raw))
+           (t
+            (if (and (stringp raw) (= 0 (length raw)))
+                "=(no results)=" (format "=%S=" raw)))))
+      (save-excursion ;; org-exp-blocks places us at the end of the block
         (re-search-backward org-babel-src-block-regexp nil t)
         (org-babel-execute-src-block
          nil nil (org-babel-merge-params params '((:results . "replace")))) ""))))
