@@ -183,10 +183,10 @@ specified in BLOCKS which default to the value of
 	  (case-fold-search t)
 	  (types '())
 	  indentation type func start end)
-      (flet ((interblock (start end type)
+      (flet ((interblock (start end)
 			 (save-match-data
-			   (when (setf func (cadr (assoc type org-export-interblocks)))
-			     (funcall func start end)))))
+                           (mapcar (lambda (pair) (funcall (second pair) start end))
+                                   org-export-interblocks))))
 	(goto-char (point-min))
 	(setf start (point))
 	(while (re-search-forward
@@ -195,7 +195,7 @@ specified in BLOCKS which default to the value of
 	  (save-match-data (setf type (intern (match-string 2))))
 	  (unless (memq type types) (setf types (cons type types)))
 	  (setf end (save-match-data (match-beginning 0)))
-	  (interblock start end type)
+	  (interblock start end)
 	  (if (setf func (cadr (assoc type org-export-blocks)))
 	      (progn
                 (replace-match (save-match-data
@@ -206,9 +206,7 @@ specified in BLOCKS which default to the value of
                 ;; indent block
                 (indent-code-rigidly (match-beginning 0) (match-end 0) indentation)))
 	  (setf start (save-match-data (match-end 0))))
-	(mapcar (lambda (type)
-		  (interblock start (point-max) type))
-		types)))))
+	(interblock start (point-max))))))
 
 (add-hook 'org-export-preprocess-hook 'org-export-blocks-preprocess)
 
