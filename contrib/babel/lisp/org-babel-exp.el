@@ -58,7 +58,7 @@ none ----- do not display either code or results upon export"
                   (org-babel-params-from-properties)
                   (org-babel-parse-header-arguments
                    (mapconcat #'identity (cdr headers) " ")))))
-    (org-babel-exp-do-export lang body params)))
+    (org-babel-exp-do-export lang body params 'block)))
 
 (defun org-babel-exp-inline-src-blocks (start end)
   "Process inline src blocks between START and END for export.
@@ -72,28 +72,28 @@ options and are taken from `org-babel-defualt-inline-header-args'."
       (let* ((info (save-match-data (org-babel-parse-inline-src-block-match)))
              (replacement (save-match-data
                             (org-babel-exp-do-export
-                             (first info) (second info) (third info) t))))
+                             (first info) (second info) (third info) 'inline))))
         ;; (message "%s -> %s" (second info) replacement) ;; debugging
         (setf end (+ end (- (length replacement)
                             (+ 6 (length (first info)) (length (second info))))))
         (replace-match replacement t t)))))
 
-(defun org-babel-exp-do-export (lang body params &optional inline)
+(defun org-babel-exp-do-export (lang body params type)
   (case (intern (or (cdr (assoc :exports params)) "code"))
     ('none "")
-    ('code (org-babel-exp-code body lang params inline))
-    ('results (org-babel-exp-results body lang params inline))
-    ('both (concat (org-babel-exp-code body lang params inline)
+    ('code (org-babel-exp-code body lang params type))
+    ('results (org-babel-exp-results body lang params type))
+    ('both (concat (org-babel-exp-code body lang params type)
                    "\n\n"
-                   (org-babel-exp-results body lang params inline)))))
+                   (org-babel-exp-results body lang params type)))))
 
-(defun org-babel-exp-code (body lang params &optional inline)
-  (if inline
-      (format "=%s=" body)
-    (format "#+BEGIN_SRC %s\n%s%s\n#+END_SRC" lang body
-            (if (string-match "\n$" body) "" "\n"))))
+(defun org-babel-exp-code (body lang params type)
+  (case type
+    ('inline (format "=%s=" body))
+    ('block (format "#+BEGIN_SRC %s\n%s%s\n#+END_SRC" lang body
+                    (if (string-match "\n$" body) "" "\n")))))
 
-(defun org-babel-exp-results (body lang params &optional inline)
+(defun org-babel-exp-results (body lang params type)
   (let ((params
          ;; lets ensure that we lookup references in the original file
          (mapcar (lambda (pair)
@@ -103,7 +103,8 @@ options and are taken from `org-babel-defualt-inline-header-args'."
                                          "=" org-current-export-file
                                          ":" (match-string 2 (cdr pair))))
                      pair)) params)))
-    (if inline
+    (case type
+      ('inline
         (let ((raw (org-babel-execute-src-block
                     nil (list lang body params) '((:results . "silent"))))
               (result-params (split-string (cdr (assoc :results params)))))
@@ -116,11 +117,12 @@ options and are taken from `org-babel-defualt-inline-header-args'."
             (format "src_%s{%s}" lang raw))
            (t
             (if (and (stringp raw) (= 0 (length raw)))
-                "=(no results)=" (format "=%S=" raw)))))
-      (save-excursion ;; org-exp-blocks places us at the end of the block
-        (re-search-backward org-babel-src-block-regexp nil t)
-        (org-babel-execute-src-block
-         nil nil (org-babel-merge-params params '((:results . "replace")))) ""))))
+                "=(no results)=" (format "=%S=" raw))))))
+      ('block
+          (save-excursion ;; org-exp-blocks places us at the end of the block
+            (re-search-backward org-babel-src-block-regexp nil t)
+            (org-babel-execute-src-block
+             nil nil (org-babel-merge-params params '((:results . "replace")))) "")))))
 
 (provide 'org-babel-exp)
 ;;; org-babel-exp.el ends here
