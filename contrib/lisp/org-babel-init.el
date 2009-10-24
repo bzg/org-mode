@@ -65,5 +65,8 @@
   (defun org-babel-load-library-of-babel ()
     (org-babel-lob-ingest (expand-file-name "library-of-babel.org" org-babel-lob-dir))))
 
+(unless (assoc "babel" org-src-lang-modes)
+  (add-to-list 'org-src-lang-modes (cons "babel" 'python)))
+
 (provide 'org-babel-init)
 ;;; org-babel-init.el ends here

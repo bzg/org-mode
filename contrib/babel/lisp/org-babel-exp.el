@@ -33,6 +33,7 @@
 (require 'org-exp-blocks)
 (org-export-blocks-add-block '(src org-babel-exp-src-blocks nil))
 (add-to-list 'org-export-interblocks '(src org-babel-exp-inline-src-blocks))
+(add-to-list 'org-export-interblocks '(lob org-babel-exp-lob-one-liners))
 
 (defun org-babel-exp-src-blocks (body &rest headers)
   "Process src block for export.  Depending on the 'export'
@@ -78,6 +79,30 @@ options and are taken from `org-babel-defualt-inline-header-args'."
                             (+ 6 (length (first info)) (length (second info))))))
         (replace-match replacement t t)))))
 
+(defun org-babel-exp-lob-one-liners (start end)
+  "Process #+lob (Library of Babel) calls between START and END for export.
+See `org-babel-exp-src-blocks' for export options. Currently the
+options are taken from `org-babel-default-header-args'."
+  (interactive)
+  (let (replacement)
+    (save-excursion
+      (goto-char start)
+      (while (and (< (point) end)
+		  (re-search-forward org-babel-lob-one-liner-regexp nil t))
+	(setq replacement
+	      (save-match-data
+		(org-babel-exp-do-export
+		 "emacs-lisp" "results"
+		 (org-babel-merge-params
+		  org-babel-default-header-args
+		  (org-babel-parse-header-arguments
+		   (org-babel-clean-text-properties
+		    (concat ":var results="
+			    (mapconcat #'identity (org-babel-lob-get-info) " ")))))
+		 'lob)))
+	(setq end (+ end (- (length replacement) (length (match-string 0)))))
+	(replace-match replacement t t)))))
+
 (defun org-babel-exp-do-export (lang body params type)
   (case (intern (or (cdr (assoc :exports params)) "code"))
     ('none "")
@@ -88,10 +113,13 @@ options and are taken from `org-babel-defualt-inline-header-args'."
                    (org-babel-exp-results body lang params type)))))
 
 (defun org-babel-exp-code (body lang params type)
-  (case type
-    ('inline (format "=%s=" body))
-    ('block (format "#+BEGIN_SRC %s\n%s%s\n#+END_SRC" lang body
-                    (if (string-match "\n$" body) "" "\n")))))
+    (case type
+      ('inline (format "=%s=" body))
+      ('block (format "#+BEGIN_SRC %s\n%s%s\n#+END_SRC" lang body
+		      (if (string-match "\n$" body) "" "\n")))
+      ('lob (save-excursion
+	      (re-search-backward org-babel-lob-one-liner-regexp)
+	      (format "#+BEGIN_SRC babel\n%s\n#+END_SRC" (first (org-babel-lob-get-info)))))))
 
 (defun org-babel-exp-results (body lang params type)
   (let ((params
@@ -122,7 +150,12 @@ options and are taken from `org-babel-defualt-inline-header-args'."
           (save-excursion ;; org-exp-blocks places us at the end of the block
             (re-search-backward org-babel-src-block-regexp nil t)
             (org-babel-execute-src-block
-             nil nil (org-babel-merge-params params '((:results . "replace")))) "")))))
+             nil nil (org-babel-merge-params params '((:results . "replace")))) ""))
+      ('lob
+          (save-excursion
+            (re-search-backward org-babel-lob-one-liner-regexp nil t)
+            (org-babel-execute-src-block
+             nil (list lang body (org-babel-merge-params params '((:results . "replace"))))) "")))))
 
 (provide 'org-babel-exp)
 ;;; org-babel-exp.el ends here
