@@ -1,3 +1,12 @@
+2009-10-24  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-clock.el (org-clock-persist): New value, to store only the
+	clock history.
+	(org-clock-save): Don't save the clock if only the history should
+	be stored.
+	(org-clock-load): Turn off John Wiegley's auto resolving mechanism
+	when restoring a saved clock.
+
 2009-10-24  John Wiegley  <jwiegley@gmail.com>
 
 	* org-clock.el (org-clock-display, org-clock-put-overlay): Use

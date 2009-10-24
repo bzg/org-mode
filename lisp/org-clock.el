@@ -142,6 +142,7 @@ All this depends on running `org-clock-persistence-insinuate' in .emacs"
   :group 'org-clock
   :type '(choice
 	  (const :tag "Just the running clock" clock)
+	  (const :tag "Just the history" history)
 	  (const :tag "Clock and history" t)
 	  (const :tag "No persistence" nil)))
 
@@ -1832,7 +1833,8 @@ The details of what will be saved are regulated by the variable
 	  (insert (format ";; org-persist.el - %s at %s\n"
 			  system-name (format-time-string
 				       (cdr org-time-stamp-formats))))
-	  (if (and (setq b (marker-buffer org-clock-marker))
+	  (if (and (memq org-clock-persist '(t clock))
+		   (setq b (marker-buffer org-clock-marker))
 		   (setq b (or (buffer-base-buffer b) b))
 		   (buffer-live-p b)
 		   (buffer-file-name b)
@@ -1846,7 +1848,8 @@ The details of what will be saved are regulated by the variable
 		      "))\n"))
 	  ;; Store clocked task history. Tasks are stored reversed to make
 	  ;; reading simpler
-	  (when (and org-clock-history (eq org-clock-persist t))
+	  (when (and (memq org-clock-persist '(t history))
+		     org-clock-history)
 	    (insert
 	     "(setq stored-clock-history '("
 	     (mapconcat
@@ -1902,9 +1905,10 @@ The details of what will be saved are regulated by the variable
 	  (when (file-exists-p (car resume-clock))
 	    (with-current-buffer (find-file (car resume-clock))
 	      (goto-char (cdr resume-clock))
-	      (org-clock-in)
-	      (if (org-invisible-p)
-		  (org-show-context)))))))))
+	      (let ((org-clock-auto-clock-resolution nil))
+		(org-clock-in)
+		(if (org-invisible-p)
+		    (org-show-context))))))))))
 
 ;;;###autoload
 (defun org-clock-persistence-insinuate ()

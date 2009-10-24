@@ -1,3 +1,12 @@
+2009-10-24  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Clocking work time): Better description on how to save
+	and restore a clock.
+	(Resolving idle time): Mention the x11idle program to get true
+	idleness also under X11.
+	(Resolving idle time): Use @kbd instead of @key for normal
+	letters, because this is how he rest of the manual does this.
+
 2009-10-19  John Wiegley  <johnw@newartisans.com>
 
 	* org.texi (Tracking your habits): Added a new section in the

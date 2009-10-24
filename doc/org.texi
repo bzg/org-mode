@@ -5329,15 +5329,20 @@ Org mode allows you to clock the time you spend on specific tasks in a
 project.  When you start working on an item, you can start the clock.
 When you stop working on that task, or when you mark the task done, the
 clock is stopped and the corresponding time interval is recorded.  It
-also computes the total time spent on each subtree of a project.
+also computes the total time spent on each subtree of a project.  And it
+remembers a history or tasks recently clocked, to that you can jump quickly
+between a number of tasks absorbing your time.
 
-Normally, the clock does not survive exiting and re-entering Emacs, but you
-can arrange for the clock information to persist across Emacs sessions with
-
+To save the clock history across Emacs sessions, use
 @lisp
-(setq org-clock-persist t)
+(setq org-clock-persist 'history)
 (org-clock-persistence-insinuate)
 @end lisp
+When you clock into a new task after resuming Emacs, the incomplete
+clock@footnote{To resume the clock under the assumption that you have worked
+on this task while outside Emacs, use @code{(setq org-clock-persist t)}.}
+will be found (@pxref{Resolving idle time}) and you will be prompted about
+what to do with it.
 
 @table @kbd
 @kindex C-c C-x C-i
@@ -5521,30 +5526,33 @@ applying it to another one.
 By customizing the variable @code{org-clock-idle-time} to some integer, such
 as 10 or 15, Emacs can alert you when you get back to your computer after
 being idle for that many minutes@footnote{On computers using Mac OS X,
-idleness is based on actual user idleness, not just Emacs' idle time.}, and
-ask what you want to do with the idle time.  There will be a question waiting
-for you when you get back, indicating how much idle time has passed
-(constantly updated with the current amount), as well as a set of choices to
-correct the discrepancy:
+idleness is based on actual user idleness, not just Emacs' idle time.  For
+X11, you can install a utility program @file{x11idle.c}, available in the
+UTILITIES directory of the Org git distribution, to get the same general
+treatment of idleness.  On other systems, idle time refers to Emacs idle time
+only.}, and ask what you want to do with the idle time.  There will be a
+question waiting for you when you get back, indicating how much idle time has
+passed (constantly updated with the current amount), as well as a set of
+choices to correct the discrepancy:
 
 @table @kbd
 @item k
-To keep some or all of the minutes and stay clocked in, press @key{k}.  Org
+To keep some or all of the minutes and stay clocked in, press @kbd{k}.  Org
 will ask how many of the minutes to keep.  Press @key{RET} to keep them all,
 effectively changing nothing, or enter a number to keep that many minutes.
 @item K
-If you use the shift key and press @key{K}, it will keep however many minutes
+If you use the shift key and press @kbd{K}, it will keep however many minutes
 you request and then immediately clock out of that task.  If you keep all of
 the minutes, this is the same as just clocking out of the current task.
 @item s
-To keep none of the minutes, use @key{s} to subtract all the away time from
+To keep none of the minutes, use @kbd{s} to subtract all the away time from
 the clock, and then check back in from the moment you returned.
 @item S
 To keep none of the minutes and just clock out at the start of the away time,
-use the shift key and press @key{S}.  Remember that using shift will always
+use the shift key and press @kbd{S}.  Remember that using shift will always
 leave you clocked out, no matter which option you choose.
 @item C
-To cancel the clock altogether, use @key{C}.  Note that if instead of
+To cancel the clock altogether, use @kbd{C}.  Note that if instead of
 cancelling you subtract the away time, and the resulting clock amount is less
 than a minute, the clock will still be cancelled rather than clutter up the
 log with an empty entry.
