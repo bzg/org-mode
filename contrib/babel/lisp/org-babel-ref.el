@@ -62,6 +62,9 @@ names, and the emacs-lisp representation of the related value."
 	(other-params (assq-delete-all :var params)))
     (mapcar (lambda (assignment) (org-babel-ref-parse assignment other-params)) assignments)))
 
+(defvar org-babel-ref-split-regexp
+  "[ \f\t\n\r\v]*\\(.+?\\)[ \f\t\n\r\v]*=[ \f\t\n\r\v]*\\(.+\\)[ \f\t\n\r\v]*")
+
 (defun org-babel-ref-parse (assignment params)
   "Parse a variable ASSIGNMENT in a header argument.  If the
 right hand side of the assignment has a literal value return that
@@ -70,8 +73,7 @@ and find it's value using `org-babel-ref-resolve-reference'.
 Return a list with two elements.  The first element of the list
 will be the name of the variable, and the second will be an
 emacs-lisp representation of the value of the variable."
-  (if (string-match
-       "[ \f\t\n\r\v]*\\(.+?\\)[ \f\t\n\r\v]*=[ \f\t\n\r\v]*\\(.+\\)[ \f\t\n\r\v]*" assignment)
+  (if (string-match org-babel-ref-split-regexp assignment)
       (let ((var (match-string 1 assignment))
             (ref (match-string 2 assignment)))
         (cons (intern var)
@@ -93,7 +95,7 @@ return nil."
   "Resolve the reference and return its value"
   (save-excursion
     (let ((case-fold-search t)
-          type args new-refere new-referent result lob-info)
+          type args new-refere new-referent result lob-info split-file split-ref)
       ;; assign any arguments to pass to source block
       (when (string-match "^\\(.+?\\)\(\\(.*\\)\)$" ref)
         (setq new-refere (match-string 1 ref))
@@ -105,9 +107,10 @@ return nil."
                                  (org-babel-ref-split-args new-referent))))
           ;; (message "args=%S" args) ;; debugging
           (setq ref new-refere)))
-      (when (string-match "\\(.+\\):\\(.+\\)" ref)
-        (find-file (match-string 1 ref))
-        (setf ref (match-string 2 ref)))
+      (when (string-match "^\\(.+\\):\\(.+\\)$" ref)
+        (setq split-file (match-string 1 ref))
+        (setq split-ref (match-string 2 ref))
+        (find-file split-file) (setq ref split-ref))
       (goto-char (point-min))
       (if (let ((result_regexp (concat "^#\\+\\(TBL\\|RES\\)NAME:[ \t]*"
                                        (regexp-quote ref) "[ \t]*$"))

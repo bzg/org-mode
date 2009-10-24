@@ -83,7 +83,7 @@ then run `org-babel-pop-to-session'."
   '((:session . "none") (:results . "replace") (:exports . "code"))
   "Default arguments to use when evaluating a source block.")
 
-(defvar org-babel-default-inline-header-args '((:results . "silent") (:exports . "code"))
+(defvar org-babel-default-inline-header-args '((:results . "silent") (:exports . "results"))
   "Default arguments to use when evaluating an inline source block.")
 
 (defvar org-babel-src-block-regexp nil
@@ -181,6 +181,7 @@ the header arguments specified at the source code block."
          (cmd (intern (concat "org-babel-execute:" lang)))
          result)
     ;; (message "params=%S" params) ;; debugging statement
+    ;; (message "vars=%S" (second processed-params)) ;; debugging statement
     (unless (member lang org-babel-interpreters)
       (error "Language is not in `org-babel-interpreters': %s" lang))
     (when arg (setq result-params (cons "silent" result-params)))
