@@ -2175,6 +2175,18 @@ org-mode generates a time duration."
   :group 'org-time
   :type 'string)
 
+(defcustom org-time-clocksum-use-fractional nil
+  "If non-nil, \\[org-clock-display] uses fractional times.
+org-mode generates a time duration."
+  :group 'org-time
+  :type 'boolean)
+
+(defcustom org-time-clocksum-fractional-format "%.2f"
+  "The format string used when creating CLOCKSUM lines, or when
+org-mode generates a time duration."
+  :group 'org-time
+  :type 'string)
+
 (defcustom org-deadline-warning-days 14
   "No. of days before expiration during which a deadline becomes active.
 This variable governs the display in sparse trees and in the agenda.

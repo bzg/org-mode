@@ -1,3 +1,13 @@
+2009-10-24  John Wiegley  <jwiegley@gmail.com>
+
+	* org-clock.el (org-clock-display, org-clock-put-overlay): Use
+	`org-time-clock-use-fractional'.
+
+	* org.el (org-time-clocksum-use-fractional)
+	(org-time-clocksum-fractional-format): Two new customizable
+	variables which allow the user to select fractional times (1.25
+	instead of 1:25) in the `org-clock-display' report.
+
 2009-10-23  John Wiegley  <jwiegley@gmail.com>
 
 	* org-habit.el (org-habit-build-graph): None of the arguments
