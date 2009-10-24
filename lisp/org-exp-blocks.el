@@ -60,11 +60,6 @@
 ;;            their own divs with author-specific ids allowing for css
 ;;            coloring of comments based on the author.
 ;;
-;; R :: Implements Sweave type exporting, evaluates blocks of R code,
-;;      and also replaces \R{} chunks in the file with their result
-;;      when passed to R.  This require the `R' command which is
-;;      provided by ESS (Emacs Speaks Statistics).
-;;
 ;;; Adding new blocks
 ;;
 ;; When adding a new block type first define a formatting function
@@ -76,16 +71,10 @@
   (require 'cl))
 (require 'org)
 
-(defvar comint-last-input-end)
-(defvar comint-prompt-regexp)
-(defvar comint-last-input-end)
 (defvar htmlp)
 (defvar latexp)
 (defvar docbookp)
 (defvar asciip)
-
-(declare-function comint-send-input "comint" (&optional no-newline artificial))
-(declare-function R "ext:ess" nil)
 
 (defun org-export-blocks-set (var value)
   "Set the value of `org-export-blocks' and install fontification."
@@ -102,9 +91,7 @@
 (defcustom org-export-blocks
   '((comment org-export-blocks-format-comment t)
     (ditaa org-export-blocks-format-ditaa nil)
-    (dot org-export-blocks-format-dot nil)
-    (r org-export-blocks-format-R nil)
-    (R org-export-blocks-format-R nil))
+    (dot org-export-blocks-format-dot nil))
   "Use this a-list to associate block types with block exporting
 functions.  The type of a block is determined by the text
 immediately following the '#+BEGIN_' portion of the block header.
