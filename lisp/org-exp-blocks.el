@@ -164,34 +164,30 @@ specified in BLOCKS which default to the value of
 `org-export-blocks-witheld'."
   (interactive)
   (save-window-excursion
-    (let ((count 0)
-	  (blocks org-export-blocks-witheld)
-	  (case-fold-search t)
+    (let ((case-fold-search t)
 	  (types '())
-	  indentation type func start end)
+	  indentation type func start)
       (flet ((interblock (start end)
-			 (save-match-data
-                           (mapcar (lambda (pair) (funcall (second pair) start end))
-                                   org-export-interblocks))))
+			 (mapcar (lambda (pair) (funcall (second pair) start end))
+				 org-export-interblocks)))
 	(goto-char (point-min))
-	(setf start (point))
+	(setq start (point))
 	(while (re-search-forward
 		"^\\([ \t]*\\)#\\+begin_\\(\\S-+\\)[ \t]*\\(.*\\)?[\r\n]\\([^\000]*?\\)[\r\n][ \t]*#\\+end_\\S-+.*" nil t)
-          (save-match-data (setq indentation (length (match-string 1))))
-	  (save-match-data (setf type (intern (match-string 2))))
-	  (unless (memq type types) (setf types (cons type types)))
-	  (setf end (save-match-data (match-beginning 0)))
-	  (interblock start end)
-	  (if (setf func (cadr (assoc type org-export-blocks)))
+          (setq indentation (length (match-string 1)))
+	  (setq type (intern (match-string 2)))
+	  (unless (memq type types) (setq types (cons type types)))
+	  (save-match-data (interblock start (match-beginning 0)))
+	  (if (setq func (cadr (assoc type org-export-blocks)))
 	      (progn
                 (replace-match (save-match-data
-                                 (if (memq type blocks)
+                                 (if (memq type org-export-blocks-witheld)
                                      ""
                                    (apply func (save-match-data (org-remove-indentation (match-string 4)))
                                           (split-string (match-string 3) " ")))) t t)
                 ;; indent block
                 (indent-code-rigidly (match-beginning 0) (match-end 0) indentation)))
-	  (setf start (save-match-data (match-end 0))))
+	  (setq start (match-end 0)))
 	(interblock start (point-max))))))
 
 (add-hook 'org-export-preprocess-hook 'org-export-blocks-preprocess)
