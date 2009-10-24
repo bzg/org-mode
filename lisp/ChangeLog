@@ -1,3 +1,35 @@
+2009-10-24  John Wiegley  <jwiegley@gmail.com>
+
+	* org-clock.el (org-clock-display, org-clock-put-overlay): Use
+	`org-time-clock-use-fractional'.
+
+	* org.el (org-time-clocksum-use-fractional)
+	(org-time-clocksum-fractional-format): Two new customizable
+	variables which allow the user to select fractional times (1.25
+	instead of 1:25) in the `org-clock-display' report.
+
+2009-10-23  John Wiegley  <jwiegley@gmail.com>
+
+	* org-habit.el (org-habit-build-graph): None of the arguments
+	should be optional.
+	(org-habit-parse-todo, org-habit-deadline)
+	(org-habit-get-priority, org-habit-get-faces)
+	(org-habit-build-graph): Further simplifications by storing all
+	past, scheduled and deadline dates as a number of days past the
+	epoch, and not as times.
+
+	* org-habit.el (org-habit-warning-face)
+	(org-habit-warning-future-face): Removed because these are no
+	longer used.
+	(org-habit-deadline, org-habit-deadline-repeat): Now always
+	returns a date; computed if there was a scheduled repeater but no
+	deadline repeater.
+	(org-habit-get-priority): Further improvements to the priority
+	algorithm.  In particular, items past due should always appear
+	before items due or not yet due.
+	(org-habit-get-faces): Greatly simplified the logic, now that
+	`org-habit-deadline' always returns a valid time.
+
 2009-10-23  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-ascii.el (org-export-ascii-table-keep-all-vertical-lines):
@@ -13,6 +45,9 @@
 	successfully applied changes.
 
 2009-10-22  John Wiegley  <jwiegley@gmail.com>
+
+	* org-habit.el (org-habit-build-graph): Fix to the graph building
+	when last DONE date is earlier than `org-habit-preceding-days'.
 
 	* org-clock.el (org-resolve-clocks-if-idle): Fix to the way idle
 	time is reported after the user comes back (but before they

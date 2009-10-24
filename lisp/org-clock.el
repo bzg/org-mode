@@ -1285,7 +1285,12 @@ in the echo area."
 	(when org-remove-highlights-with-change
 	  (org-add-hook 'before-change-functions 'org-clock-remove-overlays
 			nil 'local))))
-    (message (concat "Total file time: " org-time-clocksum-format " (%d hours and %d minutes)") h m h m)))
+    (if org-time-clocksum-use-fractional
+	(message (concat "Total file time: " org-time-clocksum-fractional-format
+			 " (%d hours and %d minutes)")
+		 (/ (+ (* h 60.0) m) 60.0) h m)
+      (message (concat "Total file time: " org-time-clocksum-format
+		       " (%d hours and %d minutes)") h m h m))))
 
 (defvar org-clock-overlays nil)
 (make-variable-buffer-local 'org-clock-overlays)
@@ -1297,7 +1302,9 @@ This creates a new overlay and stores it in `org-clock-overlays', so that it
 will be easy to remove."
   (let* ((c 60) (h (floor (/ time 60))) (m (- time (* 60 h)))
 	 (l (if level (org-get-valid-level level 0) 0))
-	 (fmt (concat "%s " org-time-clocksum-format "%s"))
+	 (fmt (concat "%s " (if org-time-clocksum-use-fractional
+				org-time-clocksum-fractional-format
+			      org-time-clocksum-format) "%s"))
 	 (off 0)
 	 ov tx)
     (org-move-to-column c)
@@ -1306,9 +1313,14 @@ will be easy to remove."
     (setq ov (org-make-overlay (1- (point)) (point-at-eol))
 	  tx (concat (buffer-substring (1- (point)) (point))
 		     (make-string (+ off (max 0 (- c (current-column)))) ?.)
-		     (org-add-props (format fmt
-					    (make-string l ?*) h m
-					    (make-string (- 16 l) ?\ ))
+		     (org-add-props (if org-time-clocksum-use-fractional
+					(format fmt
+						(make-string l ?*)
+						(/ (+ (* h 60.0) m) 60.0)
+						(make-string (- 16 l) ?\ ))
+				      (format fmt
+					      (make-string l ?*) h m
+					      (make-string (- 16 l) ?\ )))
 			 (list 'face 'org-clock-overlay))
 		     ""))
     (if (not (featurep 'xemacs))
