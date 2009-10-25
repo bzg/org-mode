@@ -104,13 +104,13 @@ options are taken from `org-babel-default-header-args'."
 (defun org-babel-exp-do-export (lang body params type)
   (case (intern (or (cdr (assoc :exports params)) "code"))
     ('none "")
-    ('code (org-babel-exp-code body lang params type))
-    ('results (org-babel-exp-results body lang params type))
-    ('both (concat (org-babel-exp-code body lang params type)
+    ('code (org-babel-exp-code lang body params type))
+    ('results (org-babel-exp-results lang body params type))
+    ('both (concat (org-babel-exp-code lang body params type)
                    "\n\n"
-                   (org-babel-exp-results body lang params type)))))
+                   (org-babel-exp-results lang body params type)))))
 
-(defun org-babel-exp-code (body lang params type)
+(defun org-babel-exp-code (lang body params type)
     (case type
       ('inline (format "=%s=" body))
       ('block (format "#+BEGIN_SRC %s\n%s%s\n#+END_SRC" lang body
@@ -120,7 +120,7 @@ options are taken from `org-babel-default-header-args'."
 	      (format "#+BEGIN_SRC org-babel-lob\n%s\n#+END_SRC"
                       (first (org-babel-lob-get-info)))))))
 
-(defun org-babel-exp-results (body lang params type)
+(defun org-babel-exp-results (lang body params type)
   (let ((params
          ;; lets ensure that we lookup references in the original file
          (mapcar (lambda (pair)
