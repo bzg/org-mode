@@ -117,7 +117,8 @@ options are taken from `org-babel-default-header-args'."
 		      (if (string-match "\n$" body) "" "\n")))
       ('lob (save-excursion
 	      (re-search-backward org-babel-lob-one-liner-regexp)
-	      (format "#+BEGIN_SRC babel\n%s\n#+END_SRC" (first (org-babel-lob-get-info)))))))
+	      (format "#+BEGIN_SRC org-babel-lob\n%s\n#+END_SRC"
+                      (first (org-babel-lob-get-info)))))))
 
 (defun org-babel-exp-results (body lang params type)
   (let ((params
