@@ -94,8 +94,7 @@ the word 'call'."
     (org-babel-execute-src-block nil (list "emacs-lisp" "results" params))))
 
 (define-generic-mode org-babel-lob-mode
-  '("#") '("exports" "results" "tangle" "cmdline" "file" "session")
-  nil nil nil
+  '("#") nil nil nil nil
   "Major mode for fontification of library of babel lines on export")
 
 (provide 'org-babel-lob)
