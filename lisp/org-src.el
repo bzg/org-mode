@@ -530,15 +530,15 @@ the language, a switch telling if the content should be in a single line."
 (defun org-edit-src-save ()
   "Save parent buffer with current state source-code buffer."
   (interactive)
-  (save-window-excursion
-    (let ((p (point)) (m (mark)) msg)
+  (let ((p (point)) (m (mark)) msg)
+    (save-window-excursion
       (org-edit-src-exit)
       (save-buffer)
       (setq msg (current-message))
-      (org-edit-src-code)
-      (push-mark m 'nomessage)
-      (goto-char (min p (point-max)))
-      (message (or msg "")))))
+      (org-edit-src-code))
+    (push-mark m 'nomessage)
+    (goto-char (min p (point-max)))
+    (message (or msg ""))))
 
 (defun org-src-mode-configure-edit-buffer ()
   (when org-edit-src-from-org-mode
