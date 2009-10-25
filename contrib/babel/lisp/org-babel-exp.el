@@ -74,9 +74,7 @@ options and are taken from `org-babel-defualt-inline-header-args'."
              (replacement (save-match-data
                             (org-babel-exp-do-export
                              (first info) (second info) (third info) 'inline))))
-        ;; (message "%s -> %s" (second info) replacement) ;; debugging
-        (setf end (+ end (- (length replacement)
-                            (+ 6 (length (first info)) (length (second info))))))
+        (setq end (+ end (- (length replacement) (length (match-string 0)))))
         (replace-match replacement t t)))))
 
 (defun org-babel-exp-lob-one-liners (start end)
@@ -145,7 +143,7 @@ options are taken from `org-babel-default-header-args'."
             (format "src_%s{%s}" lang raw))
            (t
             (if (and (stringp raw) (= 0 (length raw)))
-                "=(no results)=" (format "=%S=" raw))))))
+                " =(no results)= " (format " =%S= " raw))))))
       ('block
           (save-excursion ;; org-exp-blocks places us at the end of the block
             (re-search-backward org-babel-src-block-regexp nil t)

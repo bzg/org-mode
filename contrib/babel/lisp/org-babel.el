@@ -115,11 +115,11 @@ then run `org-babel-pop-to-session'."
                 "\\([ \t]+\\([^\n]+\\)\\)?\n" ;; match header arguments
                 "\\([^\000]+?\\)#\\+end_src"))
   (setq org-babel-inline-src-block-regexp
-	(concat "src_\\("
+	(concat "[ \t\n]src_\\("
 		(mapconcat 'regexp-quote value "\\|")
 		"\\)"
                 "\\(\\|\\[\\(.*\\)\\]\\)"
-                "{\\([^\n]+\\)}")))
+                "{\\([^\n]+\\)}\\(?:[ \t\n]\\|\\'\\)")))
 
 (defun org-babel-add-interpreter (interpreter)
   "Add INTERPRETER to `org-babel-interpreters' and update
