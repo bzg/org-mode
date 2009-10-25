@@ -233,6 +233,8 @@ to add an effort property.")
   "Hook run when cancelling the current clock.")
 (defvar org-clock-goto-hook nil
   "Hook run when selecting the currently clocked-in entry.")
+(defvar org-clock-has-been-used nil
+  "Has the clock been used during the current Emacs session?")
 
 ;;; The clock for measuring work time.
 
@@ -937,6 +939,7 @@ the clocking selection, associated with the letter `d'."
 	    (move-marker org-clock-hd-marker
 			 (save-excursion (org-back-to-heading t) (point))
 			 (buffer-base-buffer))
+	    (setq org-clock-has-been-used t)
 	    (or global-mode-string (setq global-mode-string '("")))
 	    (or (memq 'org-mode-line-string global-mode-string)
 		(setq global-mode-string
@@ -1824,7 +1827,10 @@ This function is made for clock tables."
   "Persist various clock-related data to disk.
 The details of what will be saved are regulated by the variable
 `org-clock-persist'."
-  (when org-clock-persist
+  (when (and org-clock-persist
+             (or org-clock-loaded
+		 org-clock-has-been-used
+		 (not (file-exists-p org-clock-persist-file))))
     (let (b)
       (with-current-buffer (find-file (expand-file-name org-clock-persist-file))
 	(progn

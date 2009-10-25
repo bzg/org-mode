@@ -1,3 +1,10 @@
+2009-10-25  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-clock.el (org-clock-has-been-used): New variable.
+	(org-clock-in): Set `org-clock-has-been-used'.
+	(org-clock-save): Save only if clock data has been used or created
+	during this session.
+
 2009-10-24  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-clock.el (org-clock-persist): New value, to store only the
