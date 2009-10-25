@@ -1,3 +1,11 @@
+2009-10-25  John Wiegley  <jwiegley@gmail.com>
+
+	* org-clock.el
+	(org-clock-auto-clock-resolution): Now takes three values: nil, t
+	and `when-no-clock-is-running'.
+	(org-clock-in): Use `org-clock-auto-clock-resolution' to determine
+	whether or not to resolve Org buffers on clock in.
+
 2009-10-25  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-clock.el (org-clock-has-been-used): New variable.
