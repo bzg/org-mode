@@ -197,8 +197,8 @@ the edited version."
 	(error "No such language mode: %s" lang-f))
       (org-goto-line line)
       (if (and (setq buffer (org-edit-src-find-buffer beg end))
-	       org-src-ask-before-returning-to-edit-buffer
-	       (y-or-n-p "Return to existing edit buffer? [n] will revert changes: "))
+	       (if org-src-ask-before-returning-to-edit-buffer
+		   (y-or-n-p "Return to existing edit buffer? [n] will revert changes: ") t))
 	  (switch-to-buffer buffer)
 	(when buffer
 	  (with-current-buffer buffer
