@@ -2376,7 +2376,8 @@ VALUE defaults to t."
 This will add a maximum of `org-agenda-add-entry-text-maxlines' lines of the
 entry text following headings shown in the agenda.
 Drawers will be excluded, also the line with scheduling/deadline info."
-  (when (> org-agenda-add-entry-text-maxlines 0)
+  (when (and (> org-agenda-add-entry-text-maxlines 0)
+	     (not (org-bound-and-true-p org-mobile-creating-agendas)))
     (let (m txt)
       (goto-char (point-min))
       (while (not (eobp))

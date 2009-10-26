@@ -1827,6 +1827,9 @@ This function is made for clock tables."
 			tot))))
 	0))))
 
+(defvar org-clock-loaded nil
+  "Was the clock file loaded?")
+
 (defun org-clock-save ()
   "Persist various clock-related data to disk.
 The details of what will be saved are regulated by the variable
@@ -1874,9 +1877,6 @@ The details of what will be saved are regulated by the variable
 	      (reverse org-clock-history) " ") "))\n"))
 	  (save-buffer)
 	  (kill-buffer (current-buffer)))))))
-
-(defvar org-clock-loaded nil
-  "Was the clock file loaded?")
 
 (defun org-clock-load ()
   "Load clock-related data from disk, maybe resuming a stored clock."

@@ -1,3 +1,8 @@
+2009-10-26  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-agenda.el (org-agenda-add-entry-text): Never add entry text
+	while pushing the mobile agenda.
+
 2009-10-25  John Wiegley  <jwiegley@gmail.com>
 
 	* org-clock.el
