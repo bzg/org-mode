@@ -7838,7 +7838,9 @@ from."
 	      (boundp 'iswitchb-mode) iswitchb-mode
 	      (listp (second args)))
 	 (apply 'org-iswitchb-completing-read (concat (car args))
-		(mapcar (lambda (x) (car x)) (nth 1 args))
+		(if (consp (car (nth 1 args)))
+		    (mapcar (lambda (x) (car x)) (nth 1 args))
+		  (nth 1 args))
 		(cddr args))
        (apply 'completing-read args)))))
 
