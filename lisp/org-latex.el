@@ -1172,8 +1172,9 @@ links, keywords, lists, tables, fixed-width"
 			("\\(\\s-\\|(\\)'" "`")))))
     (mapc (lambda(l) (goto-char (point-min))
 	    (while (re-search-forward (car l) nil t)
-	      (let ((rpl (concat (match-string 1) (cadr l))))
-		(org-export-latex-protect-string rpl)
+	      (let ((rpl (concat (match-string 1)
+				 (org-export-latex-protect-string
+				  (copy-sequence (cadr l))))))
 		(org-if-unprotected-1
 		 (replace-match rpl t t))))) quote-rpl)))
 
@@ -1468,7 +1469,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
       (unless emph
 	(message "`org-export-latex-emphasis-alist' has no entry for formatting triggered by \"%s\""
 		 (match-string 3)))
-      (unless (or (get-text-property (1- (point)) 'org-protected)
+      (unless (or (get-text-property (- (point) 2) 'org-protected)
 		  (save-excursion
 		    (goto-char (match-beginning 1))
 		    (save-match-data
