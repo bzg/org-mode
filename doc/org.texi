@@ -1212,7 +1212,7 @@ as bullets.
 @emph{Ordered} list items start with a numeral followed by either a period or
 a right parenthesis, such as @samp{1.} or @samp{1)}.
 @item
-@emph{Description} list items are like unordered list items, but contain the
+@emph{Description} list items are unordered list items, and contain the
 separator @samp{ :: } to separate the description @emph{term} from the
 description.
 @end itemize
