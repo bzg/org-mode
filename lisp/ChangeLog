@@ -1,5 +1,8 @@
 2009-10-26  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-table.el (org-table-convert-region): Correctly interpret
+	quoting in csv import.
+
 	* org.el (org-icompleting-read): Make iswitchb completion work
 	with lists and tables.
 
