@@ -594,6 +594,28 @@ new-frame        Make a new frame each time.  Note that in this case
 	  (const :tag "Each time a new frame" new-frame)
 	  (const :tag "One dedicated frame" dedicated-frame)))
 
+(defcustom org-use-speed-commands nil
+  "Non-nil means, activate single letter commands at beginning of a headline."
+  :group 'org-structure
+  :type 'boolean)
+
+(defcustom org-speed-commands-user nil
+    "Alist of additional speed commands.
+This list will be checked before `org-speed-commands-default'
+when the variable `org-use-speed-commands' is non-nil
+and when the cursor is at the beginning of a headline.
+The car if each entry is a string with a single letter, which must
+be assigned to `self-insert-command' in the global map.
+The cdr is either a command to be called interactively, a function
+to be called, or a form to be evaluated."
+    :group 'org-structure
+    :type '(repeat
+	    (cons
+	     (string "Command letter")
+	     (choice
+	      (function)
+	      (sexp)))))
+
 (defgroup org-cycle nil
   "Options concerning visibility cycling in Org-mode."
   :tag "Org Cycle"
@@ -14600,34 +14622,105 @@ Some of the options can be changed using the variable
   (org-defkey org-mode-map 'button3   'popup-mode-menu))
 
 
+(defconst org-speed-commands-default
+  '(
+    ("c" . org-cycle)
+    ("C" . org-shifttab)
+    ("n" . outline-next-visible-heading)
+    ("p" . outline-previous-visible-heading)
+    ("f" . org-forward-same-level)
+    ("b" . org-backward-same-level)
+    ("u" . outline-up-heading)
+    ("U" . org-shiftmetaup)
+    ("D" . org-shiftmetadown)
+    ("r" . org-metaright)
+    ("l" . org-metaleft)
+    ("R" . org-shiftmetaright)
+    ("L" . org-shiftmetaleft)
+    ("i" . (progn (forward-char 1) (call-interactively
+				    'org-insert-heading-respect-content)))
+    ("a" . org-archive-subtree-default)
+    ("t" . org-todo)
+    ("j" . org-goto)
+    ("1" . (org-priority ?A))
+    ("2" . (org-priority ?B))
+    ("3" . (org-priority ?C))
+    ("." . outline-mark-subtree)
+    ("^" . org-sort)
+    ("w" . org-refile)
+    ("z" . org-add-note)
+    ("/" . org-sparse-tree)
+    ("?" . org-speed-command-help)
+    )
+  "The default speed commands.")
+
+(defun org-print-speed-command (e)
+  (princ (car e))
+  (princ "   ")
+  (if (symbolp (cdr e))
+      (princ (symbol-name (cdr e)))
+    (prin1 (cdr e)))
+  (princ "\n"))
+
+(defun org-speed-command-help ()
+  "Show the available speed commands."
+  (interactive)
+  (if (not org-use-speed-commands)
+      (error "Speed commands are not activated, customize `org-use-speed-commands'.")
+    (with-output-to-temp-buffer "*Help*"
+      (princ "Speed commands\n==============\n")
+      (mapc 'org-print-speed-command org-speed-commands-user)
+      (princ "\n")
+      (mapc 'org-print-speed-command org-speed-commands-default))))
+
 (defvar org-self-insert-command-undo-counter 0)
 
 (defvar org-table-auto-blank-field) ; defined in org-table.el
+(defvar org-speed-command nil)
 (defun org-self-insert-command (N)
   "Like `self-insert-command', use overwrite-mode for whitespace in tables.
 If the cursor is in a table looking at whitespace, the whitespace is
 overwritten, and the table is not marked as requiring realignment."
   (interactive "p")
-  (if (and
-       (org-table-p)
-       (progn
-	 ;; check if we blank the field, and if that triggers align
-	 (and (featurep 'org-table) org-table-auto-blank-field
-	      (member last-command
-		      '(org-cycle org-return org-shifttab org-ctrl-c-ctrl-c yas/expand))
-	      (if (or (equal (char-after) ?\ ) (looking-at "[^|\n]*  |"))
-		  ;; got extra space, this field does not determine column width
-		  (let (org-table-may-need-update) (org-table-blank-field))
+  (cond
+   ((and org-use-speed-commands
+	 (bolp)
+	 (looking-at outline-regexp)
+	 (setq
+	  org-speed-command
+	  (or (cdr (assoc (this-command-keys) org-speed-commands-user))
+	      (cdr (assoc (this-command-keys) org-speed-commands-default)))))
+    (cond
+     ((commandp org-speed-command)
+      (setq this-command org-speed-command)
+      (call-interactively org-speed-command))
+     ((functionp org-speed-command)
+      (funcall org-speed-command))     
+     ((and org-speed-command (listp org-speed-command))
+      (eval org-speed-command))
+     (t (let (org-use-speed-commands)
+	  (call-interactively 'org-self-insert-command)))))
+   ((and
+     (org-table-p)
+     (progn
+       ;; check if we blank the field, and if that triggers align
+       (and (featurep 'org-table) org-table-auto-blank-field
+	    (member last-command
+		    '(org-cycle org-return org-shifttab org-ctrl-c-ctrl-c yas/expand))
+	    (if (or (equal (char-after) ?\ ) (looking-at "[^|\n]*  |"))
+		;; got extra space, this field does not determine column width
+		(let (org-table-may-need-update) (org-table-blank-field))
 		;; no extra space, this field may determine column width
-		(org-table-blank-field)))
-	 t)
-       (eq N 1)
-       (looking-at "[^|\n]*  |"))
-      (let (org-table-may-need-update)
-	(goto-char (1- (match-end 0)))
-	(delete-backward-char 1)
-	(goto-char (match-beginning 0))
-	(self-insert-command N))
+	      (org-table-blank-field)))
+       t)
+     (eq N 1)
+     (looking-at "[^|\n]*  |"))
+    (let (org-table-may-need-update)
+      (goto-char (1- (match-end 0)))
+      (delete-backward-char 1)
+      (goto-char (match-beginning 0))
+      (self-insert-command N)))
+   (t
     (setq org-table-may-need-update t)
     (self-insert-command N)
     (org-fix-tags-on-the-fly)
@@ -14641,7 +14734,7 @@ overwritten, and the table is not marked as requiring realignment."
 		 (not (cadr buffer-undo-list)) ; remove nil entry
 		 (setcdr buffer-undo-list (cddr buffer-undo-list)))
 	    (setq org-self-insert-command-undo-counter
-		  (1+ org-self-insert-command-undo-counter)))))))
+		  (1+ org-self-insert-command-undo-counter))))))))
 
 (defun org-fix-tags-on-the-fly ()
   (when (and (equal (char-after (point-at-bol)) ?*)
