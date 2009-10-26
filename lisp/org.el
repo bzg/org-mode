@@ -137,6 +137,11 @@ With prefix arg HERE, insert it at point."
   :group 'hypermedia
   :group 'calendar)
 
+(defcustom org-mode-hook nil
+  "Mode hook for Org-mode, run after the mode was turned on."
+  :group 'org
+  :type 'hook)
+
 (defcustom org-load-hook nil
   "Hook that is run after org.el has been loaded."
   :group 'org
@@ -3974,8 +3979,6 @@ This variable is set by `org-before-change-function'.
   "Every change indicates that a table might need an update."
   (setq org-table-may-need-update t))
 (defvar org-mode-map)
-(defvar org-mode-hook nil
-  "Mode hook for Org-mode, run after the mode was turned on.")
 (defvar org-inhibit-startup nil)        ; Dynamically-scoped param.
 (defvar org-agenda-keep-modes nil)      ; Dynamically-scoped param.
 (defvar org-inhibit-logging nil)        ; Dynamically-scoped param.
