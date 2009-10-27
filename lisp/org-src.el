@@ -208,7 +208,6 @@ the edited version."
 	(setq buffer (generate-new-buffer
 		      (org-src-construct-edit-buffer-name (buffer-name) lang)))
 	(setq ovl (org-make-overlay beg end))
-	(org-overlay-put ovl 'face 'secondary-selection)
 	(org-overlay-put ovl 'edit-buffer buffer)
 	(org-overlay-put ovl 'help-echo "Click with mouse-1 to switch to buffer editing this segment")
 	(org-overlay-put ovl 'face 'secondary-selection)
