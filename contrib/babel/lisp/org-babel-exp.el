@@ -74,8 +74,8 @@ options and are taken from `org-babel-defualt-inline-header-args'."
              (replacement (save-match-data
                             (org-babel-exp-do-export
                              (first info) (second info) (third info) 'inline))))
-        (setq end (+ end (- (length replacement) (length (match-string 0)))))
-        (replace-match replacement t t)))))
+        (setq end (+ end (- (length replacement) (length (match-string 1)))))
+        (replace-match replacement t t nil 1)))))
 
 (defun org-babel-exp-lob-one-liners (start end)
   "Process #+lob (Library of Babel) calls between START and END for export.
