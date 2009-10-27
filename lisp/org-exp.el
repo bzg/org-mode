@@ -849,6 +849,8 @@ value of `org-export-run-in-background'."
 \[D] export as DocBook
 \[V] export as DocBook, process to PDF, and open the resulting PDF document
 
+\[m] export as Freemind mind map
+
 \[x] export as XOXO
 \[g] export using Wes Hardaker's generic exporter
 
@@ -871,6 +873,7 @@ value of `org-export-run-in-background'."
 	    (?g org-export-generic t)
 	    (?D org-export-as-docbook t)
 	    (?V org-export-as-docbook-pdf-and-open t)
+	    (?m org-export-as-freemind t)
 	    (?l org-export-as-latex t)
 	    (?p org-export-as-pdf t)
 	    (?d org-export-as-pdf-and-open t)
@@ -2899,3 +2902,4 @@ The depends on the variable `org-export-copy-to-kill'."
 ;; arch-tag: 65985fe9-095c-49c7-a7b6-cb4ee15c0a95
 
 ;;; org-exp.el ends here
+

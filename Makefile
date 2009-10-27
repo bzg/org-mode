@@ -29,8 +29,7 @@ infodir = $(prefix)/share/info
 # Using emacs in batch mode.
 
 BATCH=$(EMACS) -batch -q -no-site-file -eval                             \
-  "(progn (add-to-list (quote load-path) \"$(lispdir)\") \
- 	  (add-to-list (quote load-path) (expand-file-name \"./lisp/\")))"
+  "(progn (add-to-list (quote load-path) \"$(lispdir)\") (add-to-list (quote load-path) (expand-file-name \"./lisp/\")))"
 
 # Specify the byte-compiler for compiling org-mode files
 ELC= $(BATCH) -f batch-byte-compile
@@ -76,6 +75,7 @@ LISPF      = 	org.el			\
 		org-faces.el		\
 		org-feed.el		\
 		org-footnote.el		\
+		org-freemind.el		\
 		org-gnus.el		\
 		org-habit.el		\
 		org-html.el		\
@@ -350,8 +350,10 @@ lisp/org-docbook.elc:	lisp/org.el lisp/org-exp.el
 lisp/org-faces.elc:	lisp/org-macs.el lisp/org-compat.el
 lisp/org-feed.elc:	lisp/org.el
 lisp/org-footnotes.elc:	lisp/org-macs.el lisp/org-compat.el
+lisp/org-freemind.elc:	lisp/org.el
 lisp/org-gnus.elc:	lisp/org.el
 lisp/org-html.elc:	lisp/org-exp.el
+lisp/org-habit.elc:	lisp/org.el lisp/org-agenda.el
 lisp/org-icalendar.elc:	lisp/org-exp.el
 lisp/org-id.elc:	lisp/org.el
 lisp/org-indent.elc:	lisp/org.el lisp/org-macs.el lisp/org-compat.el

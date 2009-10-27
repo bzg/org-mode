@@ -337,6 +337,7 @@ Exporting
 * HTML export::                 Exporting to HTML
 * LaTeX and PDF export::        Exporting to La@TeX{}, and processing to PDF
 * DocBook export::              Exporting to DocBook
+* Freemind export::             Exporting to Freemind mind maps
 * XOXO export::                 Exporting to XOXO
 * iCalendar export::            Exporting in iCalendar format
 
@@ -8755,6 +8756,7 @@ enabled (default in Emacs 23).
 * HTML export::                 Exporting to HTML
 * LaTeX and PDF export::        Exporting to La@TeX{}, and processing to PDF
 * DocBook export::              Exporting to DocBook
+* Freemind export::             Exporting to Freemind mind maps
 * XOXO export::                 Exporting to XOXO
 * iCalendar export::            Exporting in iCalendar format
 @end menu
@@ -9514,7 +9516,7 @@ settings for @code{\includegraphics} and @code{wrapfigure}.
 If you need references to a label created in this way, write
 @samp{\ref@{fig:SED-HR4049@}} just like in La@TeX{}.
 
-@node DocBook export, XOXO export, LaTeX and PDF export, Exporting
+@node DocBook export, Freemind export, LaTeX and PDF export, Exporting
 @section DocBook export
 @cindex DocBook export
 @cindex PDF export
@@ -9707,7 +9709,20 @@ special characters included in XHTML entities:
 "
 @end example
 
-@node XOXO export, iCalendar export, DocBook export, Exporting
+@node Freemind export, XOXO export, DocBook export, Exporting
+@section Freemind export
+@cindex Freemind export
+@cindex mind map
+
+The freemind exporter was written by Lennart Borgman.
+
+@table @kbd
+@kindex C-c C-e m
+@item C-c C-e m
+Export as Freemind mind map @file{myfile.mm}.
+@end table
+
+@node XOXO export, iCalendar export, Freemind export, Exporting
 @section XOXO export
 @cindex XOXO export
 
