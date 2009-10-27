@@ -143,8 +143,10 @@ options are taken from `org-babel-default-header-args'."
            ((member "code" result-params)
             (format "src_%s{%s}" lang raw))
            (t
-            (if (and (stringp raw) (= 0 (length raw)))
-                " =(no results)= " (format " =%S= " raw))))))
+            (if (stringp raw)
+		(if (= 0 (length raw)) "=(no results)="
+		  (format "=%s=" raw))
+	      (format "=%S=" raw))))))
       ('block
           (save-excursion ;; org-exp-blocks places us at the end of the block
             (re-search-backward org-babel-src-block-regexp nil t)
