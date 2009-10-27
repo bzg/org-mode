@@ -1395,6 +1395,7 @@ See `org-file-apps'.")
 (defcustom org-file-apps
   '(
     (auto-mode . emacs)
+    ("\\.mm\\'" . default)
     ("\\.x?html?\\'" . default)
     ("\\.pdf\\'" . default)
     )
