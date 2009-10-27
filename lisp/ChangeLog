@@ -1,6 +1,7 @@
 2009-10-27  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-default-properties): Add STYLE property.
+	(org-files-list): Use the function call to get the files.
 
 2009-10-26  Carsten Dominik  <carsten.dominik@gmail.com>
 
