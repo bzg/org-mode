@@ -2,6 +2,8 @@
 
 	* org.el (org-default-properties): Add STYLE property.
 	(org-files-list): Use the function call to get the files.
+	(org-additional-option-like-keywords): Add SETUPFILE to completion
+	list.
 
 2009-10-26  Carsten Dominik  <carsten.dominik@gmail.com>
 

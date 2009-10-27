@@ -9194,6 +9194,7 @@ This function can be used in a hook."
     "BEGIN_SRC" "END_SRC"
     "CATEGORY" "COLUMNS"
     "CAPTION" "LABEL"
+    "SETUPFILE"
     "BIND"
     "MACRO"))
 
