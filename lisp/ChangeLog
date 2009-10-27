@@ -1,5 +1,12 @@
 2009-10-27  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-src.el (org-src-window-setup): New option.
+	(org-src-switch-to-buffer): New function.
+	(org-edit-src-exit): Add optional argument CONTEXT and use it to
+	restore window configuration.
+	(org-edit-src-code, org-edit-src-continue, org-edit-src-exit):
+	Call `org-src-switch-to-buffer'.
+
 	* org.el (org-default-properties): Add STYLE property.
 	(org-files-list): Use the function call to get the files.
 	(org-additional-option-like-keywords): Add SETUPFILE to completion

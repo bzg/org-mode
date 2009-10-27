@@ -114,10 +114,12 @@ When nil, the message will only be shown intermittently in the echo area."
   "How the source code edit buffer should be displayed.
 Possible values for this option are:
 
-current-window    Show edit buffer in the current window, keeping all other windows.
+current-window    Show edit buffer in the current window, keeping all other
+                  windows.
 other-window      Use `switch-to-buffer-other-window' to display edit buffer.
 reorganize-frame  Show only two windows on the current frame, the current
-                  window and the edit buffer. When exiting the edit buffer, return to one window.
+                  window and the edit buffer. When exiting the edit buffer,
+                  return to one window.
 other-frame       Use `switch-to-buffer-other-frame' to display edit buffer.
                   Also, when exiting the edit buffer, kill that frame."
   :group 'org-edit-structure
