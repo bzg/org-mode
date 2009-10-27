@@ -74,8 +74,8 @@ options and are taken from `org-babel-defualt-inline-header-args'."
              (replacement (save-match-data
                             (org-babel-exp-do-export
                              (first info) (second info) (third info) 'inline))))
-        (setq end (+ end (- (length replacement) (length (match-string 0)))))
-        (replace-match replacement t t)))))
+        (setq end (+ end (- (length replacement) (length (match-string 1)))))
+        (replace-match replacement t t nil 1)))))
 
 (defun org-babel-exp-lob-one-liners (start end)
   "Process #+lob (Library of Babel) calls between START and END for export.
@@ -104,13 +104,13 @@ options are taken from `org-babel-default-header-args'."
 (defun org-babel-exp-do-export (lang body params type)
   (case (intern (or (cdr (assoc :exports params)) "code"))
     ('none "")
-    ('code (org-babel-exp-code body lang params type))
-    ('results (org-babel-exp-results body lang params type))
-    ('both (concat (org-babel-exp-code body lang params type)
+    ('code (org-babel-exp-code lang body params type))
+    ('results (org-babel-exp-results lang body params type))
+    ('both (concat (org-babel-exp-code lang body params type)
                    "\n\n"
-                   (org-babel-exp-results body lang params type)))))
+                   (org-babel-exp-results lang body params type)))))
 
-(defun org-babel-exp-code (body lang params type)
+(defun org-babel-exp-code (lang body params type)
     (case type
       ('inline (format "=%s=" body))
       ('block (format "#+BEGIN_SRC %s\n%s%s\n#+END_SRC" lang body
@@ -120,7 +120,7 @@ options are taken from `org-babel-default-header-args'."
 	      (format "#+BEGIN_SRC org-babel-lob\n%s\n#+END_SRC"
                       (first (org-babel-lob-get-info)))))))
 
-(defun org-babel-exp-results (body lang params type)
+(defun org-babel-exp-results (lang body params type)
   (let ((params
          ;; lets ensure that we lookup references in the original file
          (mapcar (lambda (pair)
@@ -143,8 +143,10 @@ options are taken from `org-babel-default-header-args'."
            ((member "code" result-params)
             (format "src_%s{%s}" lang raw))
            (t
-            (if (and (stringp raw) (= 0 (length raw)))
-                " =(no results)= " (format " =%S= " raw))))))
+            (if (stringp raw)
+		(if (= 0 (length raw)) "=(no results)="
+		  (format "=%s=" raw))
+	      (format "=%S=" raw))))))
       ('block
           (save-excursion ;; org-exp-blocks places us at the end of the block
             (re-search-backward org-babel-src-block-regexp nil t)

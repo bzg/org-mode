@@ -109,17 +109,19 @@ then run `org-babel-pop-to-session'."
 (defun org-babel-set-interpreters (var value)
   (set-default var value)
   (setq org-babel-src-block-regexp
-	(concat "^[ \t]*#\\+begin_src \\("
+	(concat "^[ \t]*#\\+begin_src[ \t]+\\("
 		(mapconcat 'regexp-quote value "\\|")
 		"\\)[ \t]*"
                 "\\([ \t]+\\([^\n]+\\)\\)?\n" ;; match header arguments
                 "\\([^\000]+?\\)#\\+end_src"))
   (setq org-babel-inline-src-block-regexp
-	(concat "[ \t\n]src_\\("
+	(concat "[ \f\t\n\r\v]\\(src_"                ;; (1)   replacement target
+		"\\("                                 ;; (2)   lang
 		(mapconcat 'regexp-quote value "\\|")
 		"\\)"
-                "\\(\\|\\[\\(.*\\)\\]\\)"
-                "{\\([^\n]+\\)}\\(?:[ \t\n]\\|\\'\\)")))
+                "\\(\\|\\[\\(.*\\)\\]\\)"             ;; (3,4) (unused, headers)
+                "{\\([^\f\n\r\v]+\\)}"                ;; (5)   body
+		"\\)")))
 
 (defun org-babel-add-interpreter (interpreter)
   "Add INTERPRETER to `org-babel-interpreters' and update
@@ -333,7 +335,6 @@ of the following form.  (language body header-arguments-alist)"
         (save-excursion (goto-char head) (org-babel-parse-src-block-match))
       (if (save-excursion ;; inline source block
             (re-search-backward "[ \f\t\n\r\v]" nil t)
-            (forward-char 1)
             (looking-at org-babel-inline-src-block-regexp))
           (org-babel-parse-inline-src-block-match)
         nil)))) ;; indicate that no source block was found
@@ -388,15 +389,15 @@ may be specified in the properties of the current outline entry."
 	   (org-babel-parse-header-arguments (org-babel-clean-text-properties (or (match-string 3) "")))))))
 
 (defun org-babel-parse-inline-src-block-match ()
-  (let* ((lang (org-babel-clean-text-properties (match-string 1)))
+  (let* ((lang (org-babel-clean-text-properties (match-string 2)))
          (lang-headers (intern (concat "org-babel-default-header-args:" lang))))
     (list lang
-          (org-babel-strip-protective-commas (org-babel-clean-text-properties (match-string 4)))
+          (org-babel-strip-protective-commas (org-babel-clean-text-properties (match-string 5)))
           (org-babel-merge-params
            org-babel-default-inline-header-args
            (org-babel-params-from-properties)
            (if (boundp lang-headers) (eval lang-headers) nil)
-           (org-babel-parse-header-arguments (org-babel-clean-text-properties (or (match-string 3) "")))))))
+           (org-babel-parse-header-arguments (org-babel-clean-text-properties (or (match-string 4) "")))))))
 
 (defun org-babel-parse-header-arguments (arg-string)
   "Parse a string of header arguments returning an alist."
