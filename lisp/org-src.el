@@ -5,6 +5,7 @@
 ;;
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;;	   Bastien Guerry <bzg AT altern DOT org>
+;;         Dan Davison <davison at stats dot ox dot ac dot uk>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
 ;; Version: 6.32trans
@@ -109,6 +110,23 @@ When nil, the message will only be shown intermittently in the echo area."
   :type 'boolean)
 
 
+(defcustom org-src-window-setup 'reorganize-frame
+  "How the source code edit buffer should be displayed.
+Possible values for this option are:
+
+current-window    Show edit buffer in the current window, keeping all other windows.
+other-window      Use `switch-to-buffer-other-window' to display edit buffer.
+reorganize-frame  Show only two windows on the current frame, the current
+                  window and the edit buffer. When exiting the edit buffer, return to one window.
+other-frame       Use `switch-to-buffer-other-frame' to display edit buffer.
+                  Also, when exiting the edit buffer, kill that frame."
+  :group 'org-edit-structure
+  :type '(choice
+	  (const current-window)
+	  (const other-frame)
+	  (const other-window)
+	  (const reorganize-frame)))
+
 (defvar org-src-mode-hook nil
   "Hook  run after Org switched a source code snippet to its Emacs mode.
 This hook will run
@@ -199,7 +217,7 @@ the edited version."
       (if (and (setq buffer (org-edit-src-find-buffer beg end))
 	       (if org-src-ask-before-returning-to-edit-buffer
 		   (y-or-n-p "Return to existing edit buffer? [n] will revert changes: ") t))
-	  (switch-to-buffer buffer)
+	  (org-src-switch-to-buffer buffer 'return)
 	(when buffer
 	  (with-current-buffer buffer
 	    (if (boundp 'org-edit-src-overlay)
@@ -217,7 +235,7 @@ the edited version."
 			   (define-key map [mouse-1] 'org-edit-src-continue)
 			   map))
 	(org-overlay-put ovl :read-only "Leave me alone")
-	(switch-to-buffer buffer)
+	(org-src-switch-to-buffer buffer 'edit)
 	(if (eq single 'macro-definition)
 	    (setq code (replace-regexp-in-string "\\\\n" "\n" code t t)))
 	(insert code)
@@ -255,8 +273,34 @@ the edited version."
   (interactive "e")
   (mouse-set-point e)
   (let ((buf (get-char-property (point) 'edit-buffer)))
-    (if buf (switch-to-buffer buf)
+    (if buf (org-src-switch-to-buffer buf 'continue)
       (error "Something is wrong here"))))
+
+(defun org-src-switch-to-buffer (buffer context)
+  (case org-src-window-setup
+    ('current-window
+     (switch-to-buffer buffer))
+    ('other-window
+     (switch-to-buffer-other-window buffer))
+    ('other-frame
+     (case context
+       ('exit
+	(let ((frame (selected-frame)))
+	  (switch-to-buffer-other-frame buffer)
+	  (delete-frame frame)))
+       ('save
+	(kill-buffer (current-buffer))
+	(switch-to-buffer buffer))
+       (t
+	(switch-to-buffer-other-frame buffer))))
+    ('reorganize-frame
+     (if (eq context 'edit) (delete-other-windows))
+     (org-switch-to-buffer-other-window buffer)
+     (if (eq context 'exit) (delete-other-windows)))
+    (t
+     (message "Invalid value %s for org-src-window-setup"
+	      (symbol-name org-src-window-setup))
+     (switch-to-buffer buffer))))
 
 (defun org-src-construct-edit-buffer-name (org-buffer-name lang)
   "Construct the buffer name for a source editing buffer"
@@ -456,7 +500,7 @@ the language, a switch telling if the content should be in a single line."
     (goto-char pos)
     (org-get-indentation)))
 
-(defun org-edit-src-exit ()
+(defun org-edit-src-exit (&optional context)
   "Exit special edit and protect problematic lines."
   (interactive)
   (unless org-edit-src-from-org-mode
@@ -514,7 +558,7 @@ the language, a switch telling if the content should be in a single line."
 	(setq total-nindent (+ total-nindent 2)))
     (setq code (buffer-string))
     (set-buffer-modified-p nil)
-    (switch-to-buffer (marker-buffer beg))
+    (org-src-switch-to-buffer (marker-buffer beg) (or context 'exit))
     (kill-buffer buffer)
     (goto-char beg)
     (delete-region beg end)
@@ -531,10 +575,13 @@ the language, a switch telling if the content should be in a single line."
   (interactive)
   (let ((p (point)) (m (mark)) msg)
     (save-window-excursion
-      (org-edit-src-exit)
+      (org-edit-src-exit 'save)
       (save-buffer)
       (setq msg (current-message))
-      (org-edit-src-code))
+      (if (eq org-src-window-setup 'other-frame)
+	  (let ((org-src-window-setup 'current-window))
+	    (org-edit-src-code))
+	(org-edit-src-code)))
     (push-mark m 'nomessage)
     (goto-char (min p (point-max)))
     (message (or msg ""))))
