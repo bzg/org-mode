@@ -1,5 +1,9 @@
 2009-10-28  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-icalendar.el (org-icalendar-use-plain-timestamp): New option.
+	(org-print-icalendar-entries): Skip entries where the timestamp is
+	not a deadline and not scheduled, if the user requests that.
+
 	* org-latex.el (org-export-latex-quotation-marks): Allow a bracket
 	before an opening quote.
 

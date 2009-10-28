@@ -47,6 +47,11 @@ The file name should be absolute, the file will be overwritten without warning."
   :group 'org-export-icalendar
   :type 'string)
 
+(defcustom org-icalendar-use-plain-timestamp t
+  "Non-nil means, make an event from every plain time stamp."
+  :group 'org-export-icalendar
+  :type 'boolean)
+
 (defcustom org-icalendar-use-deadline '(event-if-not-todo todo-due)
   "Contexts where iCalendar export should use a deadline time stamp.
 This is a list with several symbols in it.  Valid symbol are:
@@ -307,6 +312,9 @@ When COMBINE is non nil, add the category to each line."
 		  todo (org-get-todo-state)
 		  ;; donep (org-entry-is-done-p)
 		  ))
+	  (when (and (not org-icalendar-use-plain-timestamp)
+		     (not deadlinep) (not scheduledp))
+	    (throw :skip t))
 	  (when (and
 		 deadlinep
 		 (if todo
