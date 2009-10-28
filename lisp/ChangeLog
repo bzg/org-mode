@@ -1,5 +1,8 @@
 2009-10-28  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-latex.el (org-export-latex-quotation-marks): Allow a bracket
+	before an opening quote.
+
 	* org-archive.el (org-archive-subtree): Keep archive after
 	archiving something.
 
