@@ -1,3 +1,8 @@
+2009-10-28  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-id.el (org-id-update-id-locations): Add archive files if
+	that is required by `org-id-extra-files'.
+
 2009-10-27  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-src.el (org-src-window-setup): New option.
