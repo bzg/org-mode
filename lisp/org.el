@@ -219,6 +219,7 @@ to add the symbol `xyz', and the package must have a call to
 	(const :tag "C  eval-light:        Evaluate inbuffer-code on demand" org-eval-light)
 	(const :tag "C  expiry:            Expiry mechanism for Org-mode entries" org-expiry)
 	(const :tag "C  exp-bibtex:        Export citations using BibTeX" org-exp-bibtex)
+	(const :tag "C  git-link:          Provide org links to specific file version" org-git-link)
 	(const :tag "C  interactive-query: Interactive modification of tags query\n\t\t\t(PARTIALLY OBSOLETE, see secondary filtering)" org-interactive-query)
 
         (const :tag "C  invoice            Help manage client invoices in Org-mode" org-invoice)
