@@ -1,5 +1,8 @@
 2009-10-28  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-archive.el (org-archive-subtree): Keep archive after
+	archiving something.
+
 	* org-id.el (org-id-update-id-locations): Add archive files if
 	that is required by `org-id-extra-files'.
 
