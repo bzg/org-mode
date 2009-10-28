@@ -1,3 +1,11 @@
+2009-10-29  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-latex.el (org-export-latex-fontify): Apply verbatim
+	emphasis.
+
+	* org-exp.el (org-export-protect-verbatim): Add an
+	`org-verbatim-emph' property to such text.
+
 2009-10-28  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-icalendar.el (org-icalendar-use-plain-timestamp): New option.

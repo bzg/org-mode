@@ -15890,6 +15890,10 @@ With prefix arg UNCOMPILED, load the uncompiled versions."
   "Is point in a line starting with `#'?"
   (equal (char-after (point-at-bol)) ?#))
 
+(defun org-in-verbatim-emphasis ()
+  (save-match-data
+    (and (org-in-regexp org-emph-re 2) (member (match-string 3) '("=" "~")))))
+
 (defun org-goto-marker-or-bmk (marker &optional bookmark)
   "Go to MARKER, widen if necessary.  When marker is not live, try BOOKMARK."
   (if (and marker (marker-buffer marker)

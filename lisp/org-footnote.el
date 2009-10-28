@@ -365,7 +365,7 @@ referenced sequence."
       ;; Now find footnote references, and extract the definitions
       (goto-char (point-min))
       (while (re-search-forward org-footnote-re nil t)
-	(unless (org-in-commented-line)
+	(unless (or (org-in-commented-line) (org-in-verbatim-emphasis))
 	  (org-if-unprotected
 	   (setq def (match-string 4)
 		 idef def

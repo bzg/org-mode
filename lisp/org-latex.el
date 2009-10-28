@@ -1469,7 +1469,9 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
       (unless emph
 	(message "`org-export-latex-emphasis-alist' has no entry for formatting triggered by \"%s\""
 		 (match-string 3)))
-      (unless (or (get-text-property (- (point) 2) 'org-protected)
+      (unless (or (and (get-text-property (- (point) 2) 'org-protected)
+		       (not (get-text-property
+			     (- (point) 2) 'org-verbatim-emph)))
 		  (save-excursion
 		    (goto-char (match-beginning 1))
 		    (save-match-data
@@ -1799,9 +1801,10 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
     (goto-char (point-min))
     (while (re-search-forward "\\[\\([0-9]+\\)\\]" nil t)
       (org-if-unprotected
-       (when (save-match-data
-	       (save-excursion (beginning-of-line)
-			       (looking-at "[^:|#]")))
+       (when (and (save-match-data
+		    (save-excursion (beginning-of-line)
+				    (looking-at "[^:|#]")))
+		  (not (org-in-verbatim-emphasis)))
 	 (let ((foot-beg (match-beginning 0))
 	       (foot-end (match-end 0))
 	       (foot-prefix (match-string 0))

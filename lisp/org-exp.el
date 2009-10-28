@@ -1686,7 +1686,7 @@ from the buffer."
   (goto-char (point-min))
   (while (re-search-forward org-verbatim-re nil t)
     (add-text-properties (match-beginning 4) (match-end 4)
-			 '(org-protected t))
+			 '(org-protected t org-verbatim-emph t))
     (goto-char (1+ (match-end 4)))))
 
 (defun org-export-protect-colon-examples ()
