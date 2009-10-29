@@ -124,7 +124,8 @@ options are taken from `org-babel-default-header-args'."
   (let ((params
          ;; lets ensure that we lookup references in the original file
          (mapcar (lambda (pair)
-                   (if (and (eq (car pair) :var)
+                   (if (and org-current-export-file
+                            (eq (car pair) :var)
                             (string-match org-babel-ref-split-regexp (cdr pair)))
                        `(:var . ,(concat (match-string 1 (cdr pair))
                                          "=" org-current-export-file
