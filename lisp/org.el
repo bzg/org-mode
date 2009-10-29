@@ -4141,8 +4141,9 @@ The following commands are available:
       (org-indent-mode 1))
     (org-set-startup-visibility)))
 
-(abbrev-table-put org-mode-abbrev-table
-                  :parents (list text-mode-abbrev-table))
+(eval-after-load "abbrev"
+  '(abbrev-table-put org-mode-abbrev-table
+		     :parents (list text-mode-abbrev-table)))
 
 (put 'org-mode 'flyspell-mode-predicate 'org-mode-flyspell-verify)
 
