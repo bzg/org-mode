@@ -1,8 +1,8 @@
 ;;; org-babel-tangle.el --- Extract source code from org-mode files
 
-;; Copyright (C) 2009 Dan Davison, Eric Schulte
+;; Copyright (C) 2009 Eric Schulte
 
-;; Author: Dan Davison, Eric Schulte
+;; Author: Eric Schulte
 ;; Keywords: literate programming, reproducible research
 ;; Homepage: http://orgmode.org
 ;; Version: 0.01

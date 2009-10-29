@@ -1,8 +1,8 @@
 ;;; org-babel-exp.el --- Exportation of org-babel source blocks
 
-;; Copyright (C) 2009 Eric Schulte
+;; Copyright (C) 2009 Eric Schulte, Dan Davison
 
-;; Author: Eric Schulte
+;; Author: Eric Schulte, Dan Davison
 ;; Keywords: literate programming, reproducible research
 ;; Homepage: http://orgmode.org
 ;; Version: 0.01
