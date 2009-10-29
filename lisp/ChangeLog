@@ -2,6 +2,8 @@
 
 	* org-latex.el (org-export-latex-fontify): Apply verbatim
 	emphasis.
+	(org-export-latex-make-header): Insert \obeylines if line breaks
+	should be preserved.
 
 	* org-exp.el (org-export-protect-verbatim): Add an
 	`org-verbatim-emph' property to such text.
