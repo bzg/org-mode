@@ -1,5 +1,8 @@
 2009-10-29  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-list.el (org-list-send-list): Fix bug related to match
+	data.
+
 	* org-latex.el (org-export-latex-fontify): Apply verbatim
 	emphasis.
 	(org-export-latex-make-header): Insert \obeylines if line breaks

@@ -1186,8 +1186,8 @@ this list."
 	    (throw 'exit nil)
 	  (error "Don't know how to transform this list"))))
     (let* ((name (match-string 1))
-	   (item-beginning (org-list-item-beginning))
 	   (transform (intern (match-string 2)))
+	   (item-beginning (org-list-item-beginning))
 	   (txt (buffer-substring-no-properties
 		 (car item-beginning)
 		 (org-list-end (cdr item-beginning))))
