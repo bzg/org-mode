@@ -741,12 +741,26 @@ comment) .
 # <<example-block>>
 
 This function must be called from inside of the buffer containing
-the source-code block which holds BODY."
+the source-code block which holds BODY.
+
+In addition the following syntax can be used to insert the
+results of evaluating the source-code block named 'example-block'.
+
+# <<example-block()>>
+
+Any optional arguments can be passed to example-block by placing
+the arguments inside the parenthesis following the convention
+defined by `org-babel-lob'.  For example
+
+# <<example-block(a=9)>>
+
+would set the value of argument \"a\" equal to \"9\".  Note that
+these arguments are not evaluated in the current source-code block but are passed literally to the \"example-block\"."
   (let* ((parent-buffer (or parent-buffer (current-buffer)))
          (info (or info (org-babel-get-src-block-info)))
          (lang (first info))
          (body (second info))
-         (new-body "") index source-name)
+         (new-body "") index source-name evaluate)
     (flet ((nb-add (text)
                    (setq new-body (concat new-body text))))
       (with-temp-buffer
@@ -758,20 +772,25 @@ the source-code block which holds BODY."
         (setq index (point))
         (while (and (re-search-forward "<<\\(.+\\)>>" nil t))
           (save-match-data (setf source-name (match-string 1)))
-          ;; add interval to new-body
-          (goto-char (match-end 0)) (move-end-of-line nil)
+          (save-match-data (setq evaluate (string-match "\(.*\)" source-name)))
+          ;; add interval to new-body (removing noweb reference)
+          (goto-char (match-beginning 0))
           (nb-add (buffer-substring index (point)))
+          (goto-char (match-end 0))
           (setq index (point))
-          ;; if found, add body of referenced source-block
           (nb-add (save-excursion
                     (set-buffer parent-buffer)
-                    (let ((point (org-babel-find-named-block source-name)))
-                      (if point
-                          (save-excursion
-                            (goto-char point)
-                            (concat "\n" (org-babel-expand-noweb-references
-                                          (org-babel-get-src-block-info))))
-                        "")))))
+                    (if evaluate
+                        (let ((raw (org-babel-ref-resolve-reference
+                                    source-name nil)))
+                          (if (stringp raw) raw (format "%S" raw)))
+                      (let ((point (org-babel-find-named-block source-name)))
+                        (if point
+                            (save-excursion
+                              (goto-char point)
+                              (concat "\n" (org-babel-expand-noweb-references
+                                            (org-babel-get-src-block-info))))
+                          ""))))))
         (nb-add (buffer-substring index (point-max)))))
     new-body))
 
