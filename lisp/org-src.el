@@ -34,9 +34,12 @@
 
 (require 'org-macs)
 (require 'org-compat)
+(eval-when-compile
+  (require 'cl))
 
 (declare-function org-do-remove-indentation "org" (&optional n))
 (declare-function org-get-indentation "org" (&optional line))
+(declare-function org-switch-to-buffer-other-window "org" (&rest args))
 
 (defcustom org-edit-src-region-extra nil
   "Additional regexps to identify regions for editing with `org-edit-src-code'.

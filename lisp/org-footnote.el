@@ -46,6 +46,7 @@
 (declare-function org-show-context "org" (&optional key))
 (declare-function org-back-to-heading "org" (&optional invisible-ok))
 (declare-function org-end-of-subtree "org"  (&optional invisible-ok to-heading))
+(declare-function org-in-verbatim-emphasis "org" ())
 (defvar org-odd-levels-only) ;; defined in org.el
 
 (defconst org-footnote-re
