@@ -58,6 +58,12 @@
 	* org-exp-blocks.el: Modify split separator regexp to avoid empty
 	strings.
 
+2009-11-01  James TD Smith  <ahktenzero@mohorovi.cc>
+
+	* org-colview.el (org-columns-new): Make this work with the new
+	operators.
+	(org-columns-store-format): Make this work with the new operators.
+
 2009-11-01  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-src.el (org-src-preserve-indentation): Document that this

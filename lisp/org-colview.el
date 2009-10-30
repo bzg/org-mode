@@ -729,14 +729,11 @@ around it."
     (":mean" mean_times
      (lambda (&rest x) (/ (apply '+ x) (float (length x))))
      identity)
-    ("@min" age min
+    ("@min" min_age min (lambda (x) (- org-columns-time x)))
+    ("@max" max_age max (lambda (x) (- org-columns-time x)))
+    ("@mean" mean_age
+     (lambda (&rest x) (/ (apply '+ x) (float (length x))))
      (lambda (x) (- org-columns-time x)))
-    ("@max" age max
-     (lambda (x) (- org-columns-time x)))
-    ("@mean" age
-     (lambda (&rest x)
-       (/ (apply '+ x) (float (length x))))
-     (lambda (x) (- org-columns-time x))))
   "Operator <-> format,function map.
 Used to compile/uncompile columns format and completing read in
 interactive function org-columns-new.")
@@ -760,7 +757,7 @@ interactive function org-columns-new.")
 		       org-columns-compile-map)
 	       nil t))
     (setq fmt (intern fmt)
-	  fun (cadr (assoc fmt (mapcar 'cdr org-columns-compile-map))))
+	  funcs (cdr (assoc fmt (mapcar 'cdr org-columns-compile-map))))
     (if (eq fmt 'none) (setq fmt nil))
     (if editp
 	(progn
@@ -768,7 +765,8 @@ interactive function org-columns-new.")
 	  (setcdr editp (list title width nil fmt nil fun)))
       (setq cell (nthcdr (1- (current-column))
 			 org-columns-current-fmt-compiled))
-      (setcdr cell (cons (list prop title width nil fmt nil fun)
+      (setcdr cell (cons (list prop title width nil fmt nil
+			       (car funcs) (cadr funcs))
 			 (cdr cell))))
     (org-columns-store-format)
     (org-columns-redo)))
@@ -1023,7 +1021,7 @@ Don't set this, this is meant for dynamic scoping.")
    (printf (format printf n))
    ((eq fmt 'currency)
     (format "%.2f" n))
-   ((eq fmt 'age)
+   ((memq fmt '(min_age max_age mean_age))
     (org-format-time-period n))
    (t (number-to-string n))))
 
@@ -1036,7 +1034,7 @@ Don't set this, this is meant for dynamic scoping.")
   "Convert a column value to a number that can be used for column computing."
   (if s
       (cond
-       ((eq fmt 'age)
+       ((memq fmt '(min_age max_age mean_age))
 	(if (string= s "")
 	    org-columns-time
 	  (time-to-number-of-days (apply 'encode-time (org-parse-time-string s t)))))
@@ -1060,8 +1058,9 @@ Don't set this, this is meant for dynamic scoping.")
 	    op (nth 3 e)
 	    fmt (nth 4 e)
 	    printf (nth 5 e)
-	    fun (nth 6 e))
-      (when (setq op-match (rassoc (list fmt fun) org-columns-compile-map))
+	    fun (nth 6 e)
+	    calc (nth 7 e))
+      (when (setq op-match (rassoc (list fmt fun calc) org-columns-compile-map))
 	(setq op (car op-match)))
       (if (and op printf) (setq op (concat op ";" printf)))
       (if (equal title prop) (setq title nil))
