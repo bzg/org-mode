@@ -1,5 +1,16 @@
 2009-10-30  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-offer-links-in-entry): Return nil if there are no
+	links, t if a link has been selected.
+	(org-open-at-point): Open attachment directory when called in the
+	headline and there are no links in the entry body.
+	(org-speed-commands-default): Add "o" for open-at-point as a speed
+	command.
+
+	* org-attach.el (org-attach-reveal): Optional prefix arg
+	IF-EXISTS, which avoids creating the attachment directory if it
+	does not yet exist.
+
 	* org-agenda.el (org-agenda, org-run-agenda-series): Evaluate
 	MATCH.
 

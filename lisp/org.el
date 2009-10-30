@@ -8040,7 +8040,8 @@ application the system uses for this file type."
 		       org-bracket-link-regexp "\\|"
 		       org-angle-link-re "\\|"
 		       "[ \t]:[^ \t\n]+:[ \t]*$"))))
-    (org-offer-links-in-entry in-emacs))
+    (or (org-offer-links-in-entry in-emacs)
+	(org-attach-reveal 'if-exists)))
    ((org-at-timestamp-p t) (org-follow-timestamp-link))
    ((or (org-footnote-at-reference-p) (org-footnote-at-definition-p))
     (org-footnote-action))
@@ -8223,7 +8224,8 @@ there is one, offer it as link number zero."
       (setq links (org-uniquify (reverse links))))
 
     (cond
-     ((null links) (error "No links"))
+     ((null links)
+      (message "No links"))
      ((equal (length links) 1)
       (setq link (car links)))
      ((and (integerp nth) (>= (length links) (if have-zero (1+ nth) nth)))
@@ -8253,7 +8255,9 @@ there is one, offer it as link number zero."
       (unless (and (integerp nth) (>= (length links) nth))
 	(error "Invalid link selection"))
       (setq link (nth (1- nth) links))))
-    (org-open-link-from-string link in-emacs (current-buffer))))
+    (if link
+	(progn (org-open-link-from-string link in-emacs (current-buffer)) t)
+      nil)))
 
 ;;;; Time estimates
 
@@ -14644,6 +14648,7 @@ Some of the options can be changed using the variable
     ("i" . (progn (forward-char 1) (call-interactively
 				    'org-insert-heading-respect-content)))
     ("a" . org-archive-subtree-default)
+    ("o" . org-open-at-point)
     ("t" . org-todo)
     ("j" . org-goto)
     ("1" . (org-priority ?A))

@@ -365,11 +365,11 @@ This ignores files starting with a \".\", and files ending in \"~\"."
 	(mapcar (lambda (x) (if (string-match "^\\." x) nil x))
 		(directory-files dir nil "[^~]\\'"))))
 
-(defun org-attach-reveal ()
+(defun org-attach-reveal (&optional if-exists)
   "Show the attachment directory of the current task in dired."
-  (interactive)
-  (let ((attach-dir (org-attach-dir t)))
-    (org-open-file attach-dir)))
+  (interactive "P")
+  (let ((attach-dir (org-attach-dir (not if-exists))))
+    (and attach-dir (org-open-file attach-dir))))
 
 (defun org-attach-reveal-in-emacs ()
   "Show the attachment directory of the current task.
