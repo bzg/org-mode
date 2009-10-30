@@ -14647,7 +14647,6 @@ Some of the options can be changed using the variable
     ("L" . org-shiftmetaleft)
     ("i" . (progn (forward-char 1) (call-interactively
 				    'org-insert-heading-respect-content)))
-    ("a" . org-archive-subtree-default)
     ("o" . org-open-at-point)
     ("t" . org-todo)
     ("j" . org-goto)
@@ -14657,7 +14656,6 @@ Some of the options can be changed using the variable
     ("." . outline-mark-subtree)
     ("^" . org-sort)
     ("w" . org-refile)
-    ("z" . org-add-note)
     ("/" . org-sparse-tree)
     ("?" . org-speed-command-help)
     )
