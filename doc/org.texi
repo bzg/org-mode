@@ -6162,6 +6162,14 @@ to move the tree out of the way and to stop it from contributing to the
 agenda.  Archiving is important to keep your working files compact and global
 searches like the construction of agenda views fast.
 
+@table @kbd
+@kindex C-c C-x C-a
+@item C-c C-x C-a
+@vindex org-archive-default-command
+Archive the current entry using the command specified in the variable
+@code{org-archive-default-command}.
+@end table
+
 @menu
 * Moving subtrees::             Moving a tree to an archive file
 * Internal archiving::          Switch off a tree but keep i in the file
@@ -6177,8 +6185,7 @@ the archive file.
 @table @kbd
 @kindex C-c $
 @kindex C-c C-x C-s
-@itemx C-c $
-@item C-c C-x C-s
+@item C-c C-x C-s@ @r{or short} @ C-c $
 @vindex org-archive-location
 Archive the subtree starting at the cursor position to the location
 given by @code{org-archive-location}.
@@ -6250,7 +6257,7 @@ archived subtrees are not exposed, unless you configure the option
 During agenda view construction (@pxref{Agenda Views}), the content of
 archived trees is ignored unless you configure the option
 @code{org-agenda-skip-archived-trees}, in which case these trees will always
-be included.  In the agenda you can press the @kbd{v} key to get archives
+be included.  In the agenda you can press @kbd{v a} to get archives
 temporarily included.
 @item
 @vindex org-export-with-archived-trees
@@ -7380,6 +7387,7 @@ negative search term which @i{must not} occur/match in the entry for it to be
 selected.
 @end table
 
+@page
 @tsubheading{Remote editing}
 @cindex remote editing, from agenda
 
@@ -7398,6 +7406,11 @@ both in the agenda buffer and in the remote buffer.
 Change the TODO state of the item, both in the agenda and in the
 original org file.
 @c
+@kindex C-S-@key{right}
+@kindex C-S-@key{left}
+@item C-S-@key{right}@r{/}@key{left}
+Switch to the next/previous set of TODO keywords.
+@c
 @kindex C-k
 @item C-k
 @vindex org-agenda-confirm-kill
@@ -7410,17 +7423,26 @@ variable @code{org-agenda-confirm-kill}.
 @item C-c C-w
 Refile the entry at point.
 @c
+@kindex C-c C-x C-a
 @kindex a
-@item a
+@item C-c C-x C-a @ @r{or short} @ a
+@vindex org-archive-default-command
+Archive the subtree corresponding to the entry at point using the default
+archiving command set in @code{org-archive-default-command}.  When using the
+@code{a} key, confirmation will be required.
+@c
+@kindex C-c C-x a
+@item C-c C-x a
 Toggle the ARCHIVE tag for the current headline.
 @c
-@kindex A
-@item A
+@kindex C-c C-x A
+@item C-c C-x A
 Move the subtree corresponding to the current entry to its @emph{archive
 sibling}.
 @c
 @kindex $
-@item $
+@kindex C-c C-x C-s
+@item C-c C-x C-s @ @r{or short} @ $
 Archive the subtree corresponding to the current headline.  This means the
 entry will be moved to the configured archive location, most likely a
 different file.
