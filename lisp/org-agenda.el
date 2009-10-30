@@ -1805,7 +1805,8 @@ Pressing `<' twice means to restrict to the current subtree or region
        ((setq entry (assoc keys org-agenda-custom-commands))
 	(if (or (symbolp (nth 2 entry)) (functionp (nth 2 entry)))
 	    (progn
-	      (setq type (nth 2 entry) match (nth 3 entry) lprops (nth 4 entry))
+	      (setq type (nth 2 entry) match (eval (nth 3 entry))
+		    lprops (nth 4 entry))
 	      (put 'org-agenda-redo-command 'org-lprops lprops)
 	      (cond
 	       ((eq type 'agenda)
@@ -2048,7 +2049,7 @@ s   Search for keywords                 C   Configure custom agenda commands
 	 match ;; The byte compiler incorrectly complains about this.  Keep it!
 	 cmd type lprops)
     (while (setq cmd (pop cmds))
-      (setq type (car cmd) match (nth 1 cmd) lprops (nth 2 cmd))
+      (setq type (car cmd) match (eval (nth 1 cmd)) lprops (nth 2 cmd))
       (cond
        ((eq type 'agenda)
 	(org-let2 gprops lprops
