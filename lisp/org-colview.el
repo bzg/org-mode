@@ -1294,7 +1294,8 @@ and tailing newline characters."
   (org-verify-version 'columns)
   (org-columns-remove-overlays)
   (move-marker org-columns-begin-marker (point))
-  (let (fmt cache maxwidths m p a d)
+  (let ((org-columns-time (time-to-number-of-days (current-time)))
+	 cache maxwidths m p a d)
     (cond
      ((and (boundp 'org-agenda-overriding-columns-format)
 	   org-agenda-overriding-columns-format)
