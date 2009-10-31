@@ -49,23 +49,12 @@ results - just like none only the block is run on export ensuring
 
 none ----- do not display either code or results upon export"
   (interactive)
-  (unless headers (error "org-babel can't process a source block without knowing the source code"))
   (message "org-babel-exp processing...")
-  (let* ((lang (car headers))
-         (lang-headers (intern (concat "org-babel-default-header-args:" lang)))
-	 (switches (cdr headers)) params)
-    (while (and (cadr headers) (not (string-match "[ \t]*:" (cadr headers))))
-      (pop headers))
-    (setq params (cdr headers))
-    (setf (cdr headers) nil)
-    (setq switches (mapconcat #'identity switches " "))
-    (setq params (org-babel-merge-params
-                  org-babel-default-header-args
-                  (if (boundp lang-headers) (eval lang-headers) nil)
-                  (org-babel-params-from-properties)
-                  (org-babel-parse-header-arguments
-                   (mapconcat #'identity params " "))))
-    (org-babel-exp-do-export (list lang body params switches) 'block)))
+  (let ((info (save-excursion
+		(if (re-search-backward org-babel-src-block-regexp nil t)
+		    (org-babel-get-src-block-info)
+		  (error "Failed to find src block.")))))
+    (org-babel-exp-do-export info 'block)))
 
 (defun org-babel-exp-inline-src-blocks (start end)
   "Process inline src blocks between START and END for export.
