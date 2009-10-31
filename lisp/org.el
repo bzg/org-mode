@@ -14524,7 +14524,7 @@ Some of the options can be changed using the variable
 (org-defkey org-mode-map "\C-c\C-b"    'org-backward-same-level)
 (org-defkey org-mode-map "\C-c$"    'org-archive-subtree)
 (org-defkey org-mode-map "\C-c\C-x\C-s" 'org-advertized-archive-subtree)
-(org-defkey org-mode-map "\C-c\C-x\C-a" 'org-toggle-archive-tag)
+(org-defkey org-mode-map "\C-c\C-x\C-a" 'org-archive-subtree-default)
 (org-defkey org-mode-map "\C-c\C-xa" 'org-toggle-archive-tag)
 (org-defkey org-mode-map "\C-c\C-xA" 'org-archive-to-archive-sibling)
 (org-defkey org-mode-map "\C-c\C-xb" 'org-tree-to-indirect-buffer)
@@ -14657,6 +14657,7 @@ Some of the options can be changed using the variable
     ("." . outline-mark-subtree)
     ("^" . org-sort)
     ("w" . org-refile)
+    ("a" . org-archive-subtree-default-with-confirmation)
     ("/" . org-sparse-tree)
     ("?" . org-speed-command-help)
     )
@@ -15639,21 +15640,11 @@ See the individual commands for more information."
      ["Footnote new/jump" org-footnote-action t]
      ["Footnote extra" (org-footnote-action t) :active t :keys "C-u C-c C-x f"])
     ("Archive"
-     ["Toggle ARCHIVE tag" org-toggle-archive-tag t]
-;     ["Check and Tag Children" (org-toggle-archive-tag (4))
-;      :active t :keys "C-u C-c C-x C-a"]
-     ["Sparse trees open ARCHIVE trees"
-      (setq org-sparse-tree-open-archived-trees
-	    (not org-sparse-tree-open-archived-trees))
-      :style toggle :selected org-sparse-tree-open-archived-trees]
-     ["Cycling opens ARCHIVE trees"
-      (setq org-cycle-open-archived-trees (not org-cycle-open-archived-trees))
-      :style toggle :selected org-cycle-open-archived-trees]
+     ["Archive (default method)" org-archive-subtree-default t]
      "--"
-     ["Move subtree to archive sibling" org-archive-to-archive-sibling t]
-     ["Move Subtree to Archive" org-advertized-archive-subtree t]
- ;    ["Check and Move Children" (org-archive-subtree '(4))
- ;     :active t :keys "C-u C-c C-x C-s"]
+     ["Move Subtree to Archive file" org-advertized-archive-subtree t]
+     ["Toggle ARCHIVE tag" org-toggle-archive-tag t]
+     ["Move subtree to Archive sibling" org-archive-to-archive-sibling t]
      )
     "--"
     ("Hyperlinks"

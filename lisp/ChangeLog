@@ -1,5 +1,21 @@
 2009-10-31  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-mode-map): Define the new archiving keys.
+	(org-speed-commands-default): Define an archiving key in the speed
+	command map.
+	(org-org-menu): Improve the menu structure concerning archiving.
+
+	* org-archive.el (org-archive-subtree-default-with-confirmation):
+	New command.
+
+	* org-agenda.el (org-agenda-mode-map): Define the new archiving keys.
+	(org-agenda-menu): Add the new archiving commands to the menu.
+	(org-agenda-archive-default)
+	(org-agenda-archive-default-with-confirmation): New commands.
+	(org-agenda-archive, org-agenda-archive-to-archive-sibling): Just
+	call `org-agenda-archive-with'.
+	(org-agenda-archive-with): New function.
+
 	* org-table.el (org-table-convert-region): Inert spaces around "|"
 	to avoid line beginnings like "|-1" which will be mistaken as
 	hlines.

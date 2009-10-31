@@ -35,8 +35,7 @@
 (declare-function org-inlinetask-remove-END-maybe "org-inlinetask" ())
 
 (defcustom org-archive-default-command 'org-archive-subtree
-  "The default archiving command.
-Currently this is only used by org-mobile.el."
+  "The default archiving command."
   :group 'org-archive
   :type '(choice
 	  (const org-archive-subtree)
@@ -443,6 +442,14 @@ the children that do not contain any open TODO items."
 This command is set with the variable `org-archive-default-command'."
   (interactive)
   (call-interactively org-archive-default-command))
+
+(defun org-archive-subtree-default-with-confirmation ()
+  "Archive the current subtree with the default command.
+This command is set with the variable `org-archive-default-command'."
+  (interactive)
+  (if (y-or-n-p "Archive this subtree or entry? ")
+      (call-interactively org-archive-default-command)
+    (error "Abort")))
 
 (provide 'org-archive)
 

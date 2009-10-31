@@ -1,3 +1,13 @@
+2009-10-31  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* orgcard.tex: Document the new archiving keys.
+
+	* org.texi (Archiving): Document the default archiving command.
+	(Moving subtrees): Documen the new keys for archiving.
+	(Internal archiving): Fix incorrect key.
+	(Agenda commands): Document the TODO set switching commands.
+	(Agenda commands): Document the new archiving keys.
+
 2009-10-24  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Clocking work time): Better description on how to save

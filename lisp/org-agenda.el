@@ -1389,10 +1389,12 @@ The following commands are available:
 (org-defkey org-agenda-mode-map "U"        'org-agenda-bulk-remove-all-marks)
 (org-defkey org-agenda-mode-map "B"        'org-agenda-bulk-action)
 (org-defkey org-agenda-mode-map "\C-c\C-x!" 'org-reload)
-(org-defkey org-agenda-mode-map "\C-c$"    'org-agenda-archive)
+(org-defkey org-agenda-mode-map "\C-c\C-x\C-a" 'org-agenda-archive-default)
+(org-defkey org-agenda-mode-map "\C-c\C-xa"    'org-agenda-toggle-archive-tag)
+(org-defkey org-agenda-mode-map "\C-c\C-xA"    'org-agenda-archive-to-archive-sibling)
 (org-defkey org-agenda-mode-map "\C-c\C-x\C-s" 'org-agenda-archive)
+(org-defkey org-agenda-mode-map "\C-c$"        'org-agenda-archive)
 (org-defkey org-agenda-mode-map "$"        'org-agenda-archive)
-(org-defkey org-agenda-mode-map "A"        'org-agenda-archive-to-archive-sibling)
 (org-defkey org-agenda-mode-map "\C-c\C-o" 'org-agenda-open-link)
 (org-defkey org-agenda-mode-map " "        'org-agenda-show-and-scroll-up)
 (org-defkey org-agenda-mode-map [backspace] 'org-agenda-show-scroll-down)
@@ -1404,7 +1406,7 @@ The following commands are available:
 (org-defkey org-agenda-mode-map "L"        'org-agenda-recenter)
 (org-defkey org-agenda-mode-map "\C-c\C-t" 'org-agenda-todo)
 (org-defkey org-agenda-mode-map "t"        'org-agenda-todo)
-(org-defkey org-agenda-mode-map "a"        'org-agenda-toggle-archive-tag)
+(org-defkey org-agenda-mode-map "a"        'org-agenda-archive-default-with-confirmation)
 (org-defkey org-agenda-mode-map ":"        'org-agenda-set-tags)
 (org-defkey org-agenda-mode-map "\C-c\C-q" 'org-agenda-set-tags)
 (org-defkey org-agenda-mode-map "."        'org-agenda-goto-today)
@@ -1577,6 +1579,8 @@ The following commands are available:
      ["Previous TODO set" org-agenda-todo-previousset t]
      ["Add note" org-agenda-add-note t])
     ("Archive/Refile/Delete"
+     ["Archive default" org-agenda-archive-default t]
+     ["Archive default" org-agenda-archive-default-with-confirmation t]
      ["Toggle ARCHIVE tag" org-agenda-toggle-archive-tag t]
      ["Move to archive sibling" org-agenda-archive-to-archive-sibling t]
      ["Archive subtree" org-agenda-archive t]
@@ -5756,25 +5760,29 @@ Point is in the buffer where the item originated.")
      (with-current-buffer buffer (delete-region dbeg dend))
      (message "Agenda item and source killed"))))
 
+(defun org-agenda-archive-default ()
+  "Archive the entry or subtree belonging to the current agenda entry."
+  (interactive)
+  (require 'org-archive)
+  (org-agenda-archive-with org-archive-default-command))
+
+(defun org-agenda-archive-default-with-confirmation ()
+  "Archive the entry or subtree belonging to the current agenda entry."
+  (interactive)
+  (require 'org-archive)
+  (org-agenda-archive-with org-archive-default-command 'confirm))
+
 (defun org-agenda-archive ()
   "Archive the entry or subtree belonging to the current agenda entry."
   (interactive)
-  (or (eq major-mode 'org-agenda-mode) (error "Not in agenda"))
-  (let* ((marker (or (org-get-at-bol 'org-marker)
-		     (org-agenda-error)))
-	 (buffer (marker-buffer marker))
-	 (pos (marker-position marker)))
-    (org-with-remote-undo buffer
-      (with-current-buffer buffer
-	(if (org-mode-p)
-	    (save-excursion
-	      (goto-char pos)
-	      (org-remove-subtree-entries-from-agenda)
-	      (org-back-to-heading t)
-	      (org-archive-subtree))
-	  (error "Archiving works only in Org-mode files"))))))
+  (org-agenda-archive-with 'org-archive-subtree))
 
 (defun org-agenda-archive-to-archive-sibling ()
+  "Move the entry to the archive sibling."
+  (interactive)
+  (org-agenda-archive-with 'org-archive-to-archive-sibling))
+
+(defun org-agenda-archive-with (cmd &optional confirm)
   "Move the entry to the archive sibling."
   (interactive)
   (or (eq major-mode 'org-agenda-mode) (error "Not in agenda"))
@@ -5785,11 +5793,14 @@ Point is in the buffer where the item originated.")
     (org-with-remote-undo buffer
       (with-current-buffer buffer
 	(if (org-mode-p)
-	    (save-excursion
-	      (goto-char pos)
-	      (org-remove-subtree-entries-from-agenda)
-	      (org-back-to-heading t)
-	      (org-archive-to-archive-sibling))
+	    (if (and confirm
+		     (not (y-or-n-p "Archive this subtree or entry? ")))
+		(error "Abort")
+	      (save-excursion
+		(goto-char pos)
+		(org-remove-subtree-entries-from-agenda)
+		(org-back-to-heading t)
+		(funcall cmd)))
 	  (error "Archiving works only in Org-mode files"))))))
 
 (defun org-remove-subtree-entries-from-agenda (&optional buf beg end)
