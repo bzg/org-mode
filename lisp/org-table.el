@@ -429,15 +429,14 @@ nil      When nil, the command tries to be smart and figure out the
 	(while (<= (point) end)
 	  ;; parse the csv stuff
 	  (cond
-	   ((looking-at "^") (insert "|"))
-	   ((looking-at "[ \t]*$") (replace-match "|") (beginning-of-line 2))
+	   ((looking-at "^") (insert "| "))
+	   ((looking-at "[ \t]*$") (replace-match " |") (beginning-of-line 2))
 	   ((looking-at "[ \t]*\"\\([^\"\n]*\\)\"")
 	    (replace-match "\\1")
 	    (if (looking-at "\"") (insert "\"")))
 	   ((looking-at "[^,\n]+") (goto-char (match-end 0)))
 	   ((looking-at "[ \t]*,") (replace-match " | "))
-	   (t (beginning-of-line 2)
-	      (if (< (point) end) (insert "|")))))
+	   (t (beginning-of-line 2))))
       (setq re (cond
 		((equal separator '(4)) "^\\|\"?[ \t]*,[ \t]*\"?")
 		((equal separator '(16)) "^\\|\t")

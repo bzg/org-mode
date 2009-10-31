@@ -1,3 +1,9 @@
+2009-10-31  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-table.el (org-table-convert-region): Inert spaces around "|"
+	to avoid line beginnings like "|-1" which will be mistaken as
+	hlines.
+
 2009-10-30  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-offer-links-in-entry): Return nil if there are no
