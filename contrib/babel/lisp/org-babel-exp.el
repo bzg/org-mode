@@ -53,13 +53,19 @@ none ----- do not display either code or results upon export"
   (message "org-babel-exp processing...")
   (let* ((lang (car headers))
          (lang-headers (intern (concat "org-babel-default-header-args:" lang)))
-         (params (org-babel-merge-params
+	 (switches (cdr headers)) params)
+    (while (and (cadr headers) (not (string-match "[ \t]*:" (cadr headers))))
+      (pop headers))
+    (setq params (cdr headers))
+    (setf (cdr headers) nil)
+    (setq switches (mapconcat #'identity switches " "))
+    (setq params (org-babel-merge-params
                   org-babel-default-header-args
                   (if (boundp lang-headers) (eval lang-headers) nil)
                   (org-babel-params-from-properties)
                   (org-babel-parse-header-arguments
-                   (mapconcat #'identity (cdr headers) " ")))))
-    (org-babel-exp-do-export (list lang body params) 'block)))
+                   (mapconcat #'identity params " "))))
+    (org-babel-exp-do-export (list lang body params switches) 'block)))
 
 (defun org-babel-exp-inline-src-blocks (start end)
   "Process inline src blocks between START and END for export.
@@ -111,10 +117,11 @@ options are taken from `org-babel-default-header-args'."
 
 (defun org-babel-exp-code (info type)
   (let ((lang (first info))
-	(body (second info)))
+	(body (second info))
+	(switches (fourth info)))
     (case type
       ('inline (format "=%s=" (second info)))
-      ('block (format "#+BEGIN_SRC %s\n%s%s\n#+END_SRC" lang body
+      ('block (format "#+BEGIN_SRC %s %s\n%s%s\n#+END_SRC" lang switches body
 		      (if (string-match "\n$" body) "" "\n")))
       ('lob (save-excursion
 	      (re-search-backward org-babel-lob-one-liner-regexp)
