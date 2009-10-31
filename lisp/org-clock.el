@@ -795,7 +795,8 @@ if the user really wants to stay clocked in after being idle for
 so long."
   (when (and org-clock-idle-time (not org-clock-resolving-clocks)
 	     org-clock-marker)
-    (let ((org-clock-user-idle-seconds (org-user-idle-seconds))
+    (let ((org-clock-user-idle-start (current-time))
+	  (org-clock-user-idle-seconds (org-user-idle-seconds))
 	  (org-clock-resolving-clocks-due-to-idleness t))
       (if (> org-clock-user-idle-seconds (* 60 org-clock-idle-time))
 	  (org-clock-resolve
@@ -804,7 +805,9 @@ so long."
 	   (function
 	    (lambda (clock)
 	      (format "Clocked in & idle for %d mins"
-		      (/ org-clock-user-idle-seconds 60))))
+		      (/ (time-to-seconds
+			  (time-subtract (current-time)
+					 org-clock-user-idle-start)) 60))))
 	   (time-subtract (current-time)
 			  (seconds-to-time org-clock-user-idle-seconds)))))))
 
