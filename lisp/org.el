@@ -3015,6 +3015,7 @@ Normal means, no org-mode-specific context."
 (declare-function org-inlinetask-remove-END-maybe "org-inlinetask" ())
 (declare-function org-indent-mode "org-indent" (&optional arg))
 (declare-function parse-time-string "parse-time" (string))
+(declare-function org-attach-reveal "org-attach" (&optional if-exists))
 (defvar remember-data-file)
 (defvar texmathp-why)
 (declare-function speedbar-line-directory "speedbar" (&optional depth))
@@ -8041,7 +8042,7 @@ application the system uses for this file type."
 		       org-angle-link-re "\\|"
 		       "[ \t]:[^ \t\n]+:[ \t]*$"))))
     (or (org-offer-links-in-entry in-emacs)
-	(org-attach-reveal 'if-exists)))
+	(progn (require 'org-attach) (org-attach-reveal 'if-exists))))
    ((org-at-timestamp-p t) (org-follow-timestamp-link))
    ((or (org-footnote-at-reference-p) (org-footnote-at-definition-p))
     (org-footnote-action))
