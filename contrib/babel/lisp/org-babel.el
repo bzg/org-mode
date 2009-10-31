@@ -109,11 +109,11 @@ then run `org-babel-pop-to-session'."
 (defun org-babel-set-interpreters (var value)
   (set-default var value)
   (setq org-babel-src-block-regexp
-	(concat "^[ \t]*#\\+begin_src[ \t]+\\("
+	(concat "^[ \t]*#\\+begin_src[ \t]+\\("       ;; (1)   lang
 		(mapconcat 'regexp-quote value "\\|")
 		"\\)[ \t]*"
-                "\\([ \t]+\\([^\n]+\\)\\)?\n" ;; match header arguments
-                "\\([^\000]+?\\)#\\+end_src"))
+                "\\([ \t]+\\([^\n]+\\)\\)?\n"         ;; (2, 3) (unused, headers)
+                "\\([^\000]+?\\)#\\+end_src"))        ;; (4)   body
   (setq org-babel-inline-src-block-regexp
 	(concat "[ \f\t\n\r\v]\\(src_"                ;; (1)   replacement target
 		"\\("                                 ;; (2)   lang
