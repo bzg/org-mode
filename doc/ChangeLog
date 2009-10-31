@@ -3,7 +3,7 @@
 	* orgcard.tex: Document the new archiving keys.
 
 	* org.texi (Archiving): Document the default archiving command.
-	(Moving subtrees): Documen the new keys for archiving.
+	(Moving subtrees): Document the new keys for archiving.
 	(Internal archiving): Fix incorrect key.
 	(Agenda commands): Document the TODO set switching commands.
 	(Agenda commands): Document the new archiving keys.
