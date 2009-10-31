@@ -121,7 +121,7 @@ options are taken from `org-babel-default-header-args'."
 	(switches (fourth info)))
     (case type
       ('inline (format "=%s=" (second info)))
-      ('block (format "#+BEGIN_SRC %s %s\n%s%s\n#+END_SRC" lang switches body
+      ('block (format "#+BEGIN_SRC %s %s\n%s%s#+END_SRC" lang switches body
 		      (if (string-match "\n$" body) "" "\n")))
       ('lob (save-excursion
 	      (re-search-backward org-babel-lob-one-liner-regexp)
