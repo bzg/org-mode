@@ -46,8 +46,8 @@ add files to this list use the `org-babel-lob-ingest' command."
   "Add all source-blocks defined in FILE to `org-babel-library-of-babel'."
   (interactive "f")
   (org-babel-map-source-blocks file
-    (let ((source-name (intern (org-babel-get-src-block-name)))
-          (info (org-babel-get-src-block-info)))
+    (let* ((info (org-babel-get-src-block-info))
+	   (source-name (intern (fifth info))))
       (when source-name
         (setq org-babel-library-of-babel
               (cons (cons source-name info)

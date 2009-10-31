@@ -175,8 +175,7 @@ the header arguments specified at the source code block."
   ;; (message "supplied params=%S" params) ;; debugging
   (let* ((info (or info (org-babel-get-src-block-info)))
          (lang (first info))
-         (params (org-babel-merge-params
-                  (third info) (org-babel-get-src-block-function-args) params))
+         (params (org-babel-merge-params (third info) params))
          (body (if (assoc :noweb params)
                    (org-babel-expand-noweb-references info) (second info)))
          (processed-params (org-babel-process-params params))
@@ -300,50 +299,33 @@ concerned with creating elisp versions of results. "
     (org-babel-execute-buffer)
     (widen)))
 
-(defun org-babel-get-src-block-name ()
-  "Return the name of the current source block if one exists.
-
-This function is analogous to org-babel-lob-get-info. For both
-functions, after they are called, (match-string 1) matches the
-function name, and (match-string 3) matches the function
-arguments inside the parentheses. I think perhaps these functions
-should be renamed to bring out this similarity, perhaps involving
-the word 'call'.
-
-Currently the function `org-babel-get-src-block-function-args'
-relies on the match-data from a match in this function.  I think
-splitting a match and the use of it's data is bad form, and we
-should re-work these two functions, perhaps combining them into
-one function which returns more data than just the name. [Eric]"
-  (let ((case-fold-search t)
-	(head (org-babel-where-is-src-block-head)))
-    (if head
-	(save-excursion
-	  (goto-char head)
-	  (if (save-excursion
-		(forward-line -1)
-                ;; the second match of this regexp is used later to
-                ;; find arguments in the "functional" style, where
-                ;; they are passed as part of the source name line
-		(looking-at "#\\+srcname:[ \t]*\\([^ ()\f\t\n\r\v]+\\)\\(\(\\(.*\\)\)\\|\\)"))
-	      (org-babel-clean-text-properties (match-string 1)))))))
-
-(defun org-babel-get-src-block-info ()
-  "Return the information of the current source block as a list
-of the following form.  (language body header-arguments-alist)"
-  (let ((case-fold-search t) head)
+(defun org-babel-get-src-block-info (&optional header-vars-only)
+  "Get information of the current source block.
+Returns a list (language body header-arguments-alist switches
+name).  Unless HEADER-VARS-ONLY is non-nil, any variable
+references provided in 'function call style' (i.e. in a
+parenthesised argument list following the src block name) are
+added to the header-arguments-alist."
+  (let ((case-fold-search t) head info)
     (if (setq head (org-babel-where-is-src-block-head))
-        (save-excursion (goto-char head) (org-babel-parse-src-block-match))
+        (save-excursion
+	  (goto-char head)
+	  (setq info (org-babel-parse-src-block-match))
+	  (forward-line -1)
+	  (when (looking-at "#\\+srcname:[ \t]*\\([^ ()\f\t\n\r\v]+\\)\\(\(\\(.*\\)\)\\|\\)")
+	    (setq info (append info (list (org-babel-clean-text-properties (match-string 1)))))
+	    (unless header-vars-only
+	      (setf (third info)
+		    (org-babel-merge-params
+		     (mapcar (lambda (ref) (cons :var ref))
+			     (org-babel-ref-split-args (match-string 3)))
+		     (third info)))))
+	  info)
       (if (save-excursion ;; inline source block
             (re-search-backward "[ \f\t\n\r\v]" nil t)
             (looking-at org-babel-inline-src-block-regexp))
           (org-babel-parse-inline-src-block-match)
         nil)))) ;; indicate that no source block was found
-
-(defun org-babel-get-src-block-function-args ()
-  (when (org-babel-get-src-block-name)
-    (mapcar (lambda (ref) (cons :var ref))
-	    (org-babel-ref-split-args (match-string 3)))))
 
 (defmacro org-babel-map-source-blocks (file &rest body)
   "Evaluate BODY forms on each source-block in FILE."
@@ -492,7 +474,8 @@ line.  If no result exists for this block then create a
   (save-excursion
     (let* ((on-lob-line (progn (beginning-of-line 1)
 			       (looking-at org-babel-lob-one-liner-regexp)))
-	   (name (if on-lob-line (first (org-babel-lob-get-info)) (org-babel-get-src-block-name)))
+	   (name (if on-lob-line (first (org-babel-lob-get-info))
+		   (fifth (org-babel-get-src-block-info))))
 	   (head (unless on-lob-line (org-babel-where-is-src-block-head))) end)
       (when head (goto-char head))
       (or (and name (org-babel-find-named-result name))
