@@ -54,9 +54,19 @@ add files to this list use the `org-babel-lob-ingest' command."
               (cons (cons source-name info)
                     (assq-delete-all source-name org-babel-library-of-babel)))))))
 
-;; functions for executing lob one-liners
+(defconst org-babel-lob-call-aliases '("lob" "call")
+  "These can be used interchangeably to call a source block
+  function. If you change the value of this variable then your
+  files may become unusable by other org-babel users, and vice
+  versa.")
+  
+(defconst org-babel-lob-one-liner-regexp
+  (concat "^[ \t]*#\\+\\(?:"
+	  (mapconcat #'regexp-quote org-babel-lob-call-aliases "\\|")
+	  "\\):[ \t]+\\([^\(\)\n]+\\)\(\\([^\n]*\\)\)[ \t]*\\([^\n]*\\)")
+  "Regexp to match calls to predefined source block functions")
 
-(defvar org-babel-lob-one-liner-regexp "^[ \t]*#\\+lob:[ \t]+\\([^\(\)\n]+\\)\(\\([^\n]*\\)\)[ \t]*\\([^\n]*\\)")
+;; functions for executing lob one-liners
 
 (defun org-babel-lob-execute-maybe ()
   "Detect if this is context for a org-babel Library Of Babel
