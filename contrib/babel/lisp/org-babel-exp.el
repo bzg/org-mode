@@ -1,8 +1,8 @@
 ;;; org-babel-exp.el --- Exportation of org-babel source blocks
 
-;; Copyright (C) 2009 Eric Schulte
+;; Copyright (C) 2009 Eric Schulte, Dan Davison
 
-;; Author: Eric Schulte
+;; Author: Eric Schulte, Dan Davison
 ;; Keywords: literate programming, reproducible research
 ;; Homepage: http://orgmode.org
 ;; Version: 0.01
@@ -35,6 +35,27 @@
 (add-to-list 'org-export-interblocks '(src org-babel-exp-inline-src-blocks))
 (add-to-list 'org-export-interblocks '(lob org-babel-exp-lob-one-liners))
 
+(defvar org-babel-function-def-export-keyword "function"
+  "When exporting a source block function, this keyword will
+appear in the exported version in the place of #+srcname:. A
+source block is considered to be a source block function if the
+srcname is present and is followed by a parenthesised argument
+list. The parentheses may be empty or contain whitespace. An
+example is the following which generates n random
+(uniform) numbers.
+
+#+srcname: rand(n)
+#+begin_src R
+  runif(n)
+#+end_src
+")
+
+(defvar org-babel-function-def-export-indent 4
+  "When exporting a source block function, the block contents
+will be indented by this many characters. See
+`org-babel-function-def-export-name' for the definition of a
+source block function.")
+
 (defun org-babel-exp-src-blocks (body &rest headers)
   "Process src block for export.  Depending on the 'export'
 headers argument in replace the source code block with...
@@ -49,17 +70,12 @@ results - just like none only the block is run on export ensuring
 
 none ----- do not display either code or results upon export"
   (interactive)
-  (unless headers (error "org-babel can't process a source block without knowing the source code"))
   (message "org-babel-exp processing...")
-  (let* ((lang (car headers))
-         (lang-headers (intern (concat "org-babel-default-header-args:" lang)))
-         (params (org-babel-merge-params
-                  org-babel-default-header-args
-                  (if (boundp lang-headers) (eval lang-headers) nil)
-                  (org-babel-params-from-properties)
-                  (org-babel-parse-header-arguments
-                   (mapconcat #'identity (cdr headers) " ")))))
-    (org-babel-exp-do-export lang body params 'block)))
+  (let ((info (save-excursion
+		(if (re-search-backward org-babel-src-block-regexp nil t)
+		    (org-babel-get-src-block-info)
+		  (error "Failed to find src block.")))))
+    (org-babel-exp-do-export info 'block)))
 
 (defun org-babel-exp-inline-src-blocks (start end)
   "Process inline src blocks between START and END for export.
@@ -72,8 +88,7 @@ options and are taken from `org-babel-defualt-inline-header-args'."
                 (re-search-forward org-babel-inline-src-block-regexp end t))
       (let* ((info (save-match-data (org-babel-parse-inline-src-block-match)))
              (replacement (save-match-data
-                            (org-babel-exp-do-export
-                             (first info) (second info) (third info) 'inline))))
+                            (org-babel-exp-do-export info 'inline))))
         (setq end (+ end (- (length replacement) (length (match-string 1)))))
         (replace-match replacement t t nil 1)))))
 
@@ -90,38 +105,61 @@ options are taken from `org-babel-default-header-args'."
 	(setq replacement
 	      (save-match-data
 		(org-babel-exp-do-export
-		 "emacs-lisp" "results"
-		 (org-babel-merge-params
-		  org-babel-default-header-args
-		  (org-babel-parse-header-arguments
-		   (org-babel-clean-text-properties
-		    (concat ":var results="
-			    (mapconcat #'identity (org-babel-lob-get-info) " ")))))
+		 (list "emacs-lisp" "results"
+		       (org-babel-merge-params
+			org-babel-default-header-args
+			(org-babel-parse-header-arguments
+			 (org-babel-clean-text-properties
+			  (concat ":var results="
+				  (mapconcat #'identity (org-babel-lob-get-info) " "))))))
 		 'lob)))
 	(setq end (+ end (- (length replacement) (length (match-string 0)))))
 	(replace-match replacement t t)))))
 
-(defun org-babel-exp-do-export (lang body params type)
-  (case (intern (or (cdr (assoc :exports params)) "code"))
+(defun org-babel-exp-do-export (info type)
+  (case (intern (or (cdr (assoc :exports (third info))) "code"))
     ('none "")
-    ('code (org-babel-exp-code lang body params type))
-    ('results (org-babel-exp-results lang body params type))
-    ('both (concat (org-babel-exp-code lang body params type)
+    ('code (org-babel-exp-code info type))
+    ('results (org-babel-exp-results info type))
+    ('both (concat (org-babel-exp-code info type)
                    "\n\n"
-                   (org-babel-exp-results lang body params type)))))
+                   (org-babel-exp-results info type)))))
 
-(defun org-babel-exp-code (lang body params type)
+(defun org-babel-exp-code (info type)
+  (let ((lang (first info))
+	(body (second info))
+	(switches (fourth info))
+	(name (fifth info))
+	(args (sixth info))
+	(function-def-line ""))
     (case type
-      ('inline (format "=%s=" body))
-      ('block (format "#+BEGIN_SRC %s\n%s%s\n#+END_SRC" lang body
-		      (if (string-match "\n$" body) "" "\n")))
+      ('inline (format "=%s=" (second info)))
+      ('block
+	  (when args
+	    (unless (string-match "-i\\>" switches)
+	      (setq switches (concat switches " -i")))
+	    (setq body (with-temp-buffer
+			 (insert body)
+			 (indent-code-rigidly (point-min) (point-max) org-babel-function-def-export-indent)
+			 (buffer-string)))
+	    (setq args (mapconcat #'identity
+				  (delq nil (mapcar (lambda (el) (and (length (cdr el)) (cdr el))) args))
+				  ", "))
+	    (setq function-def-line
+		  (format "#+BEGIN_SRC org-babel-lob\n%s %s(%s):\n#+END_SRC\n"
+			  org-babel-function-def-export-keyword name args)))
+        (concat function-def-line
+                (format "#+BEGIN_SRC %s %s\n%s%s#+END_SRC" lang switches body
+                        (if (string-match "\n$" body) "" "\n"))))
       ('lob (save-excursion
 	      (re-search-backward org-babel-lob-one-liner-regexp)
 	      (format "#+BEGIN_SRC org-babel-lob\n%s\n#+END_SRC"
-                      (first (org-babel-lob-get-info)))))))
+                      (first (org-babel-lob-get-info))))))))
 
-(defun org-babel-exp-results (lang body params type)
-  (let ((params
+(defun org-babel-exp-results (info type)
+  (let ((lang (first info))
+	(body (second info))
+	(params
          ;; lets ensure that we lookup references in the original file
          (mapcar (lambda (pair)
                    (if (and org-current-export-file
@@ -130,11 +168,12 @@ options are taken from `org-babel-default-header-args'."
                        `(:var . ,(concat (match-string 1 (cdr pair))
                                          "=" org-current-export-file
                                          ":" (match-string 2 (cdr pair))))
-                     pair)) params)))
+                     pair))
+		 (third info))))
     (case type
       ('inline
         (let ((raw (org-babel-execute-src-block
-                    nil (list lang body params) '((:results . "silent"))))
+                    nil info '((:results . "silent"))))
               (result-params (split-string (cdr (assoc :results params)))))
           (cond ;; respect the value of the :results header argument
            ((member "file" result-params)

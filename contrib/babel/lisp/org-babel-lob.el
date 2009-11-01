@@ -1,8 +1,8 @@
 ;;; org-babel-lob.el --- The Library of Babel: off-the-shelf functions for data analysis and plotting using org-babel
 
-;; Copyright (C) 2009 Dan Davison, Eric Schulte
+;; Copyright (C) 2009 Eric Schulte, Dan Davison
 
-;; Author: Dan Davison, Eric Schulte
+;; Author: Eric Schulte, Dan Davison
 ;; Keywords: literate programming, reproducible research
 ;; Homepage: http://orgmode.org
 ;; Version: 0.01
@@ -31,6 +31,7 @@
 ;;; Code:
 (require 'org-babel)
 (require 'org-babel-table)
+(require 'org-babel-exp)
 
 (defvar org-babel-library-of-babel nil
   "Library of source-code blocks.  This is an association list.
@@ -46,8 +47,8 @@ add files to this list use the `org-babel-lob-ingest' command."
   "Add all source-blocks defined in FILE to `org-babel-library-of-babel'."
   (interactive "f")
   (org-babel-map-source-blocks file
-    (let ((source-name (intern (org-babel-get-src-block-name)))
-          (info (org-babel-get-src-block-info)))
+    (let* ((info (org-babel-get-src-block-info))
+	   (source-name (intern (fifth info))))
       (when source-name
         (setq org-babel-library-of-babel
               (cons (cons source-name info)
@@ -94,7 +95,7 @@ the word 'call'."
     (org-babel-execute-src-block nil (list "emacs-lisp" "results" params))))
 
 (define-generic-mode org-babel-lob-mode
-  '("#") nil nil nil nil
+  '("#") (list org-babel-function-def-export-keyword) nil nil nil
   "Major mode for fontification of library of babel lines on export")
 
 (provide 'org-babel-lob)
