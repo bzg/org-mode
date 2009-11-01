@@ -176,7 +176,7 @@ specified in BLOCKS which default to the value of
 		"^\\([ \t]*\\)#\\+begin_\\(\\S-+\\)[ \t]*\\(.*\\)?[\r\n]\\([^\000]*?\\)[\r\n][ \t]*#\\+end_\\S-+.*" nil t)
           (setq indentation (length (match-string 1)))
 	  (setq type (intern (match-string 2)))
-	  (setq headers (save-match-data (split-string (match-string 3) "[ \t]")))
+	  (setq headers (save-match-data (org-split-string (match-string 3) "[ \t]+")))
 	  (setq body (match-string 4))
 	  (setq preserve-indent (or org-src-preserve-indentation (member "-i" headers)))
 	  (unless preserve-indent

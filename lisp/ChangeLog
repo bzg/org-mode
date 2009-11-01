@@ -1,3 +1,8 @@
+2009-11-01  Dan Davison  <davison@stats.ox.ac.uk>
+
+	* org-exp-blocks.el: Modify split separator regexp to avoid empty
+	strings.
+
 2009-11-01  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-src.el (org-src-preserve-indentation): Document that this
