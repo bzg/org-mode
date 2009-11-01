@@ -764,7 +764,7 @@ these arguments are not evaluated in the current source-code block but are passe
                                            (cdr (assoc lang org-src-lang-modes))))
                                      lang) "-mode")))
         (setq index (point))
-        (while (and (re-search-forward "<<\\(.+\\)>>" nil t))
+        (while (and (re-search-forward "<<\\(.+?\\)>>" nil t))
           (save-match-data (setf source-name (match-string 1)))
           (save-match-data (setq evaluate (string-match "\(.*\)" source-name)))
           ;; add interval to new-body (removing noweb reference)
