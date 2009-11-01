@@ -764,7 +764,7 @@ these arguments are not evaluated in the current source-code block but are passe
                                            (cdr (assoc lang org-src-lang-modes))))
                                      lang) "-mode")))
         (setq index (point))
-        (while (and (re-search-forward "<<\\(.+\\)>>" nil t))
+        (while (and (re-search-forward "<<\\(.+?\\)>>" nil t))
           (save-match-data (setf source-name (match-string 1)))
           (save-match-data (setq evaluate (string-match "\(.*\)" source-name)))
           ;; add interval to new-body (removing noweb reference)
@@ -782,8 +782,8 @@ these arguments are not evaluated in the current source-code block but are passe
                         (if point
                             (save-excursion
                               (goto-char point)
-                              (concat "\n" (org-babel-expand-noweb-references
-                                            (org-babel-get-src-block-info))))
+                              (org-babel-trim (org-babel-expand-noweb-references
+			       (org-babel-get-src-block-info))))
                           ""))))))
         (nb-add (buffer-substring index (point-max)))))
     new-body))
@@ -852,9 +852,10 @@ the table is trivial, then return it as a scalar."
   "Remove any trailing space or carriage returns characters from
 STRING.  Default regexp used is \"[ \f\t\n\r\v]\" but can be
 overwritten by specifying a regexp as a second argument."
-  (while (and (> (length string) 0) (string-match "[ \f\t\n\r\v]" (substring string -1)))
-    (setq string (substring string 0 -1)))
-  string)
+  (let ((regexp (or regexp "[ \f\t\n\r\v]")))
+    (while (and (> (length string) 0) (string-match regexp (substring string -1)))
+      (setq string (substring string 0 -1)))
+    string))
 
 (defun org-babel-trim (string &optional regexp)
   "Like `org-babel-chomp' only it runs on both the front and back of the string"
