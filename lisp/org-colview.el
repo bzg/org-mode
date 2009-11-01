@@ -733,10 +733,20 @@ around it."
     ("@max" max_age max (lambda (x) (- org-columns-time x)))
     ("@mean" mean_age
      (lambda (&rest x) (/ (apply '+ x) (float (length x))))
-     (lambda (x) (- org-columns-time x)))
-  "Operator <-> format,function map.
+     (lambda (x) (- org-columns-time x))))
+  "Operator <-> format,function,calc  map.
 Used to compile/uncompile columns format and completing read in
-interactive function org-columns-new.")
+interactive function org-columns-new.
+
+operator    string used in #+COLUMNS definition describing the
+            summary type
+format      symbol describing summary type selected interactively in
+            org-columns-new and internally in
+            org-columns-number-to-string and
+            org-columns-string-to-number 
+function    called with a list of values as argument to calculate
+            the summary value
+calc        function called on every element before summarizing")
 
 (defun org-columns-new (&optional prop title width op fmt fun &rest rest)
   "Insert a new column, to the left of the current column."
@@ -757,7 +767,7 @@ interactive function org-columns-new.")
 		       org-columns-compile-map)
 	       nil t))
     (setq fmt (intern fmt)
-	  funcs (cdr (assoc fmt (mapcar 'cdr org-columns-compile-map))))
+	  fun (cdr (assoc fmt (mapcar 'cdr org-columns-compile-map))))
     (if (eq fmt 'none) (setq fmt nil))
     (if editp
 	(progn
@@ -766,7 +776,7 @@ interactive function org-columns-new.")
       (setq cell (nthcdr (1- (current-column))
 			 org-columns-current-fmt-compiled))
       (setcdr cell (cons (list prop title width nil fmt nil
-			       (car funcs) (cadr funcs))
+			       (car fun) (cadr fun))
 			 (cdr cell))))
     (org-columns-store-format)
     (org-columns-redo)))
@@ -1050,7 +1060,7 @@ Don't set this, this is meant for dynamic scoping.")
 
 (defun org-columns-uncompile-format (cfmt)
   "Turn the compiled columns format back into a string representation."
-  (let ((rtn "") e s prop title op op-match width fmt printf fun)
+  (let ((rtn "") e s prop title op op-match width fmt printf fun calc)
     (while (setq e (pop cfmt))
       (setq prop (car e)
 	    title (nth 1 e)
@@ -1295,7 +1305,7 @@ and tailing newline characters."
   (org-columns-remove-overlays)
   (move-marker org-columns-begin-marker (point))
   (let ((org-columns-time (time-to-number-of-days (current-time)))
-	 cache maxwidths m p a d)
+	 cache maxwidths m p a d fmt)
     (cond
      ((and (boundp 'org-agenda-overriding-columns-format)
 	   org-agenda-overriding-columns-format)
