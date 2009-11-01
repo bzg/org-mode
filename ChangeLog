@@ -1,3 +1,8 @@
+2009-11-01  Dan Davison  <davison@stats.ox.ac.uk>
+
+	* org-exp-blocks.el: Modify split separator regexp to avoid empty
+	strings.
+
 2009-10-21  James TD Smith  <ahktenzero@mohorovi.cc>
 
 	* UTILITIES/x11idle.c: Add a small C program which outputs the X11
