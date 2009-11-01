@@ -852,9 +852,10 @@ the table is trivial, then return it as a scalar."
   "Remove any trailing space or carriage returns characters from
 STRING.  Default regexp used is \"[ \f\t\n\r\v]\" but can be
 overwritten by specifying a regexp as a second argument."
-  (while (and (> (length string) 0) (string-match "[ \f\t\n\r\v]" (substring string -1)))
-    (setq string (substring string 0 -1)))
-  string)
+  (let ((regexp (or regexp "[ \f\t\n\r\v]")))
+    (while (and (> (length string) 0) (string-match regexp (substring string -1)))
+      (setq string (substring string 0 -1)))
+    string))
 
 (defun org-babel-trim (string &optional regexp)
   "Like `org-babel-chomp' only it runs on both the front and back of the string"
