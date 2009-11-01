@@ -112,7 +112,8 @@ then run `org-babel-pop-to-session'."
 	(concat "^[ \t]*#\\+begin_src[ \t]+\\("       ;; (1)   lang
 		(mapconcat 'regexp-quote value "\\|")
 		"\\)[ \t]*"
-                "\\([ \t]+\\([^\n]+\\)\\)?\n"         ;; (2, 3) (unused, headers)
+		"\\([^:\n]*\\)"                       ;; (2)   switches
+		"\\([^\n]*\\)\n"                      ;; (3)   header arguments
                 "\\([^\000]+?\\)#\\+end_src"))        ;; (4)   body
   (setq org-babel-inline-src-block-regexp
 	(concat "[ \f\t\n\r\v]\\(src_"                ;; (1)   replacement target
@@ -373,8 +374,10 @@ may be specified in the properties of the current outline entry."
 (defun org-babel-parse-src-block-match ()
   (let* ((lang (org-babel-clean-text-properties (match-string 1)))
          (lang-headers (intern (concat "org-babel-default-header-args:" lang)))
+	 (switches (match-string 2))
          (body (org-babel-clean-text-properties (match-string 4)))
-	 (preserve-indentation org-src-preserve-indentation))
+	 (preserve-indentation (or org-src-preserve-indentation
+				   (string-match "-i\\>" switches))))
     (list lang
           ;; get src block body removing properties, protective commas, and indentation
           (with-temp-buffer
@@ -386,7 +389,8 @@ may be specified in the properties of the current outline entry."
 	   org-babel-default-header-args
            (org-babel-params-from-properties)
 	   (if (boundp lang-headers) (eval lang-headers) nil)
-	   (org-babel-parse-header-arguments (org-babel-clean-text-properties (or (match-string 3) "")))))))
+	   (org-babel-parse-header-arguments (org-babel-clean-text-properties (or (match-string 3) ""))))
+	  switches)))
 
 (defun org-babel-parse-inline-src-block-match ()
   (let* ((lang (org-babel-clean-text-properties (match-string 2)))
