@@ -782,8 +782,8 @@ these arguments are not evaluated in the current source-code block but are passe
                         (if point
                             (save-excursion
                               (goto-char point)
-                              (concat "\n" (org-babel-expand-noweb-references
-                                            (org-babel-get-src-block-info))))
+                              (org-babel-trim (org-babel-expand-noweb-references
+			       (org-babel-get-src-block-info))))
                           ""))))))
         (nb-add (buffer-substring index (point-max)))))
     new-body))
