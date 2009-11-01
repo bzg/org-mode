@@ -202,7 +202,7 @@ date range so that Emacs calendar view doesn't grind to a halt"
     (goto-line 1)
     (write-region (point-min) (point-max) string))
 
-  (icalendar-import-file string (expand-file-name "~/.emacs.d/diary")))
+  (icalendar-import-file string diary-file))
 
 (defun omi-kill-diary-buffer (list)
   (mapc

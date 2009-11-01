@@ -1,3 +1,8 @@
+2009-11-01  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* lisp/org-mac-iCal.el (omi-import-ics): Use `diary-file'
+	variable.
+
 2009-10-22  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* lisp/org-registry.el (org-registry-assoc-all)
