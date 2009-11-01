@@ -3,6 +3,12 @@
 	* org.texi (Structure editing, Plain lists): Document indentation
 	cycling in empty entries with TAB.
 
+2009-11-01  James TD Smith  <ahktenzero@mohorovi.cc>
+
+	* org.texi (Column attributes): Add the new age summary operators.
+	Also, mention the fact you can only use one summary operator per
+	property.
+
 2009-10-31  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* orgcard.tex: Document the new archiving keys.
