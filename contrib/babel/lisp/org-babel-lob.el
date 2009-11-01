@@ -31,6 +31,7 @@
 ;;; Code:
 (require 'org-babel)
 (require 'org-babel-table)
+(require 'org-babel-exp)
 
 (defvar org-babel-library-of-babel nil
   "Library of source-code blocks.  This is an association list.
@@ -94,7 +95,7 @@ the word 'call'."
     (org-babel-execute-src-block nil (list "emacs-lisp" "results" params))))
 
 (define-generic-mode org-babel-lob-mode
-  '("#") nil nil nil nil
+  '("#") (list org-babel-function-def-export-keyword) nil nil nil
   "Major mode for fontification of library of babel lines on export")
 
 (provide 'org-babel-lob)

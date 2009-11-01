@@ -35,6 +35,27 @@
 (add-to-list 'org-export-interblocks '(src org-babel-exp-inline-src-blocks))
 (add-to-list 'org-export-interblocks '(lob org-babel-exp-lob-one-liners))
 
+(defvar org-babel-function-def-export-keyword "function"
+  "When exporting a source block function, this keyword will
+appear in the exported version in the place of #+srcname:. A
+source block is considered to be a source block function if the
+srcname is present and is followed by a parenthesised argument
+list. The parentheses may be empty or contain whitespace. An
+example is the following which generates n random
+(uniform) numbers.
+
+#+srcname: rand(n)
+#+begin_src R
+  runif(n)
+#+end_src
+")
+
+(defvar org-babel-function-def-export-indent 4
+  "When exporting a source block function, the block contents
+will be indented by this many characters. See
+`org-babel-function-def-export-name' for the definition of a
+source block function.")
+
 (defun org-babel-exp-src-blocks (body &rest headers)
   "Process src block for export.  Depending on the 'export'
 headers argument in replace the source code block with...
@@ -107,11 +128,29 @@ options are taken from `org-babel-default-header-args'."
 (defun org-babel-exp-code (info type)
   (let ((lang (first info))
 	(body (second info))
-	(switches (fourth info)))
+	(switches (fourth info))
+	(name (fifth info))
+	(args (sixth info))
+	(function-def-line ""))
     (case type
       ('inline (format "=%s=" (second info)))
-      ('block (format "#+BEGIN_SRC %s %s\n%s%s#+END_SRC" lang switches body
-		      (if (string-match "\n$" body) "" "\n")))
+      ('block
+	  (when args
+	    (unless (string-match "-i\\>" switches)
+	      (setq switches (concat switches " -i")))
+	    (setq body (with-temp-buffer
+			 (insert body)
+			 (indent-code-rigidly (point-min) (point-max) org-babel-function-def-export-indent)
+			 (buffer-string)))
+	    (setq args (mapconcat #'identity
+				  (delq nil (mapcar (lambda (el) (and (length (cdr el)) (cdr el))) args))
+				  ", "))
+	    (setq function-def-line
+		  (format "#+BEGIN_SRC org-babel-lob\n%s %s(%s):\n#+END_SRC\n"
+			  org-babel-function-def-export-keyword name args)))
+        (concat function-def-line
+                (format "#+BEGIN_SRC %s %s\n%s%s#+END_SRC" lang switches body
+                        (if (string-match "\n$" body) "" "\n"))))
       ('lob (save-excursion
 	      (re-search-backward org-babel-lob-one-liner-regexp)
 	      (format "#+BEGIN_SRC org-babel-lob\n%s\n#+END_SRC"
