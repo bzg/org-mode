@@ -2273,6 +2273,8 @@ INDENT was the original indentation of the block."
 	    rpllbl (string-match "-r\\>" opts)
 	    keepp (string-match "-k\\>" opts)
 	    textareap (string-match "-t\\>" opts)
+	    preserve-indentp (or org-src-preserve-indentation
+				 (string-match "-i\\>" opts))
 	    cols (if (string-match "-w[ \t]+\\([0-9]+\\)" opts)
 		     (string-to-number (match-string 1 opts))
 		   80)
@@ -2285,7 +2287,7 @@ INDENT was the original indentation of the block."
 	;; we cannot use numbering or highlighting.
 	(setq num nil cont nil lang nil))
       (if keepp (setq rpllbl 'keep))
-      (setq rtn (org-remove-indentation code))
+      (setq rtn (if preserve-indentp code (org-remove-indentation code)))
       (when (string-match "^," rtn)
 	(setq rtn (with-temp-buffer
 		    (insert rtn)

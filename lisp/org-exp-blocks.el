@@ -166,7 +166,7 @@ specified in BLOCKS which default to the value of
   (save-window-excursion
     (let ((case-fold-search t)
 	  (types '())
-	  indentation type func start)
+	  indentation type func start body headers preserve-indent)
       (flet ((interblock (start end)
 			 (mapcar (lambda (pair) (funcall (second pair) start end))
 				 org-export-interblocks)))
@@ -176,17 +176,20 @@ specified in BLOCKS which default to the value of
 		"^\\([ \t]*\\)#\\+begin_\\(\\S-+\\)[ \t]*\\(.*\\)?[\r\n]\\([^\000]*?\\)[\r\n][ \t]*#\\+end_\\S-+.*" nil t)
           (setq indentation (length (match-string 1)))
 	  (setq type (intern (match-string 2)))
+	  (setq headers (save-match-data (split-string (match-string 3) "[ \t]")))
+	  (setq body (match-string 4))
+	  (setq preserve-indent (or org-src-preserve-indentation (member "-i" headers)))
+	  (unless preserve-indent
+	    (setq body (save-match-data (org-remove-indentation body))))
 	  (unless (memq type types) (setq types (cons type types)))
 	  (save-match-data (interblock start (match-beginning 0)))
 	  (if (setq func (cadr (assoc type org-export-blocks)))
 	      (progn
                 (replace-match (save-match-data
-                                 (if (memq type org-export-blocks-witheld)
-                                     ""
-                                   (apply func (save-match-data (org-remove-indentation (match-string 4)))
-                                          (split-string (match-string 3) " ")))) t t)
-                ;; indent block
-                (indent-code-rigidly (match-beginning 0) (match-end 0) indentation)))
+                                 (if (memq type org-export-blocks-witheld) ""
+                                   (apply func body headers))) t t)
+                (unless preserve-indent
+		  (indent-code-rigidly (match-beginning 0) (match-end 0) indentation))))
 	  (setq start (match-end 0)))
 	(interblock start (point-max))))))
 
