@@ -1,3 +1,16 @@
+2009-11-01  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-src.el (org-src-preserve-indentation): Document that this
+	variable is also used during export.
+
+	* org-exp.el (org-export-format-source-code-or-example): Preserve
+	indentation if a block has a -i option, or if
+	`org-src-preserve-indentation' is set.
+
+	* org-exp-blocks.el (org-export-blocks-preprocess): Preserve
+	indentation if a block has a -i option, or if
+	`org-src-preserve-indentation' is set.
+
 2009-10-31  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-mode-map): Define the new archiving keys.
