@@ -1,5 +1,9 @@
 2009-11-02  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-remember.el (org-remember-handler): Set
+	text-before-node-creation even if this already looks like a node,
+	because the string might be needed on non-org-mode target files.
+
 	* org-agenda.el (org-agenda-open-link): Make this work in agenda
 	clocktables.
 	(org-agenda-switch-to): Follow a link at point if

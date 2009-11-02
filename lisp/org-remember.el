@@ -887,9 +887,9 @@ See also the variable `org-reverse-note-order'."
       	    ;; remove empty lines at end
       	    (replace-match "")))
       (goto-char (point-min))
+      (setq text-before-node-creation (buffer-string))
       (unless (looking-at org-outline-regexp)
 	;; add a headline
-	(setq text-before-node-creation (buffer-string))
 	(insert (concat "* " (current-time-string)
 			" (" (remember-buffer-desc) ")\n"))
 	(backward-char 1)
