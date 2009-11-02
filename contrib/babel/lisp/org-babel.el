@@ -506,6 +506,7 @@ line.  If no result exists for this block then create a
   (let ((case-fold-search t) result-string)
     (cond
      ((org-at-table-p) (org-babel-read-table))
+     ((looking-at org-block-regexp) (org-babel-trim (match-string 4)))
      ((looking-at ": ")
       (setq result-string
 	    (org-babel-trim
