@@ -1017,6 +1017,12 @@ variable @code{org-treat-insert-todo-heading-as-state-change}.
 Insert new TODO entry with same level as current heading.  Like
 @kbd{C-@key{RET}}, the new headline will be inserted after the current
 subtree.
+@kindex @key{TAB}
+@item @key{TAB} @r{in new, empty entry}
+In a new entry with no text yet, the first @key{TAB} demotes the entry to
+become a child of the previous one.  The next @key{TAB} makes it a parent,
+and so on, all the way to top level.  Yet another @key{TAB}, and you are back
+to the initial level.
 @kindex M-@key{left}
 @item M-@key{left}
 Promote current heading by one level.
@@ -1286,6 +1292,12 @@ bullet, a bullet is added to the current line.
 @kindex M-S-@key{RET}
 @item M-S-@key{RET}
 Insert a new item with a checkbox (@pxref{Checkboxes}).
+@kindex @key{TAB}
+@item @key{TAB} @r{in new, empty item}
+In a new item with no text yet, the first @key{TAB} demotes the item to
+become a child of the previous one.  The next @key{TAB} makes it a parent,
+and so on, all the way to the left margin.  Yet another @key{TAB}, and you
+are back to the initial level.
 @kindex S-@key{up}
 @kindex S-@key{down}
 @item S-@key{up}

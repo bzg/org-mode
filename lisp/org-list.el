@@ -840,6 +840,7 @@ with something like \"1.\" or \"2)\"."
     (org-goto-line line)
     (org-move-to-column col)))
 
+(defvar org-suppress-item-indentation) ; dynamically scoped parameter
 (defun org-fix-bullet-type (&optional force-bullet)
   "Make sure all items in this list have the same bullet as the first item.
 Also, fix the indentation."
@@ -874,7 +875,8 @@ Also, fix the indentation."
 	  (looking-at "\\S-+ *")
 	  (setq oldbullet (match-string 0))
 	  (unless (equal bullet oldbullet) (replace-match bullet))
-	  (org-shift-item-indentation (- (length bullet) (length oldbullet))))))
+	  (org-shift-item-indentation (- (length bullet)
+					 (length oldbullet))))))
     (org-goto-line line)
     (org-move-to-column col)
     (if (string-match "[0-9]" bullet)
@@ -882,19 +884,20 @@ Also, fix the indentation."
 
 (defun org-shift-item-indentation (delta)
   "Shift the indentation in current item by DELTA."
-  (save-excursion
-    (let ((beg (point-at-bol))
-	  (end (progn (org-end-of-item) (point)))
-	  i)
-      (goto-char end)
-      (beginning-of-line 0)
-      (while (> (point) beg)
-	(when (looking-at "[ \t]*\\S-")
-	  ;; this is not an empty line
-	  (setq i (org-get-indentation))
-	  (if (and (> i 0) (> (setq i (+ i delta)) 0))
-	      (indent-line-to i)))
-	(beginning-of-line 0)))))
+  (unless (org-bound-and-true-p org-suppress-item-indentation)
+    (save-excursion
+      (let ((beg (point-at-bol))
+	    (end (progn (org-end-of-item) (point)))
+	    i)
+	(goto-char end)
+	(beginning-of-line 0)
+	(while (> (point) beg)
+	  (when (looking-at "[ \t]*\\S-")
+	    ;; this is not an empty line
+	    (setq i (org-get-indentation))
+	    (if (and (> i 0) (> (setq i (+ i delta)) 0))
+		(indent-line-to i)))
+	  (beginning-of-line 0))))))
 
 (defun org-beginning-of-item-list ()
   "Go to the beginning of the current item list.
@@ -1039,6 +1042,29 @@ Assumes cursor in item line."
     (list (cons ind bullet)
 	  (cons ind-up bullet-up)
 	  (cons ind-down bullet-down))))
+
+(defvar org-tab-ind-state) ; defined in org.el
+(defun org-cycle-item-indentation ()
+  (let ((org-suppress-item-indentation t)
+	(org-adapt-indentation nil))
+    (cond
+     ((and (looking-at "[ \t]*$")
+	   (looking-back "^\\([ \t]*\\)\\([-+*]\\|[0-9]+[).]\\)[ \t]+"))
+      (setq this-command 'org-cycle-item-indentation)
+      (if (eq last-command 'org-cycle-item-indentation)
+	  (condition-case nil
+	      (progn (org-outdent-item 1)
+		     (if (equal org-tab-ind-state (org-get-indentation))
+			 (org-outdent-item 1))
+		     (end-of-line 1))
+	    (error
+	     (progn
+	       (while (< (org-get-indentation) org-tab-ind-state)
+		 (progn (org-indent-item 1) (end-of-line 1)))
+	       (setq this-command 'org-cycle))))
+	(setq org-tab-ind-state (org-get-indentation))
+	(org-indent-item 1))
+      t))))
 
 (defun org-get-bullet ()
   (save-excursion

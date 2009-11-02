@@ -1,5 +1,11 @@
 2009-11-03  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-tab-ind-state): New variable.
+	(org-cycle-level): New function.
+	(org-cycle-level-after-item/entry-creation): New option.
+
+	* org-list.el (org-cycle-item-indentation): New function.
+
 	* org.el (org-refile): Make prefix argument 2 refile to current
 	clock.
 	(org-priority): Interpret action `remove' as call to remove the

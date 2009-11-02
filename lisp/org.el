@@ -680,6 +680,21 @@ of the buffer."
   :group 'org-cycle
   :type 'boolean)
 
+(defcustom org-cycle-level-after-item/entry-creation t
+  "Non-nil means, cycle entry level or item indentation in new empty entries.
+
+When the cursor is at the end of an empty headline, i.e with only stars
+and maybe a TODO keyword, TAB will then switch the entry to become a child,
+and then all possible anchestor states, before returning to the original state.
+This makes data entry extremely fast:  M-RET to create a new hedline,
+on TAB to make it a child, two or more tabs to make it a (grand-)uncle.
+
+When the cursor is at the end of an empty plain list item, one TAB will
+make it a subitem, two or more tabs will back up to make this an item
+higher up in the item hierarchy."
+  :group 'org-cycle
+  :type 'boolean)
+
 (defcustom org-cycle-emulate-tab t
   "Where should `org-cycle' emulate TAB.
 nil         Never
@@ -4953,7 +4968,10 @@ in special contexts.
   But only if also the variable `org-cycle-global-at-bob' is t."
   (interactive "P")
   (org-load-modules-maybe)
-  (unless (run-hook-with-args-until-success 'org-tab-first-hook)
+  (unless (or (run-hook-with-args-until-success 'org-tab-first-hook)
+	      (and org-cycle-level-after-item/entry-creation
+		   (or (org-cycle-level)
+		       (org-cycle-item-indentation))))
     (let* ((limit-level
 	    (or org-cycle-max-level
 		(and (boundp 'org-inlinetask-min-level)
@@ -5039,6 +5057,9 @@ in special contexts.
        ((org-try-structure-completion))
 
        ((org-try-cdlatex-tab))
+
+       ((run-hook-with-args-until-success
+	 'org-tab-before-tab-emulation-hook))
 
        ((and (eq org-cycle-emulate-tab 'exc-hl-bol)
 	     (or (not (bolp))
@@ -6077,6 +6098,16 @@ in the region."
 	    ((eolp) (insert " "))
 	    ((equal (char-after) ?\ ) (forward-char 1))))))
 
+(defun org-current-level ()
+  "Return the level of the current entry, or nil if before the first headline.
+The level is the number of stars at the beginning of the headline."
+  (save-excursion
+    (condition-case nil
+	(progn
+	  (org-back-to-heading t)
+	  (funcall outline-level))
+      (error nil))))
+
 (defun org-reduced-level (l)
   "Compute the effective level of a heading.
 This takes into account the setting of `org-odd-levels-only'."
@@ -6128,6 +6159,31 @@ in the region."
     (and org-auto-align-tags (org-set-tags nil t))
     (if org-adapt-indentation (org-fixup-indentation diff))
     (run-hooks 'org-after-demote-entry-hook)))
+
+(defvar org-tab-ind-state nil)
+
+(defun org-cycle-level ()
+  (let ((org-adapt-indentation nil))
+    (when (and (looking-at "[ \t]*$")
+	       (looking-back
+		(concat "^\\(\\*+\\)[ \t]+\\(" org-todo-regexp "\\)?[ \t]*")))
+      (setq this-command 'org-cycle-level)
+      (if (eq last-command 'org-cycle-level)
+	  (condition-case nil
+	      (progn (org-do-promote)
+		     (if (equal org-tab-ind-state (org-current-level))
+			 (org-do-promote)))
+	    (error
+	     (progn
+	       (save-excursion
+		 (beginning-of-line 1)
+		 (and (looking-at "\\*+")
+		      (replace-match
+		       (make-string org-tab-ind-state ?*))))
+	       (setq this-command 'org-cycle))))
+	(setq org-tab-ind-state (- (match-end 1) (match-beginning 1)))
+	(org-do-demote))
+      t)))
 
 (defun org-map-tree (fun)
   "Call FUN for every heading underneath the current one."
@@ -14893,6 +14949,12 @@ This hook runs after it has been established that not table field motion and
 not visibility should be done because of current context.  This is probably
 the place where a package like yasnippets can hook in.")
 
+(defvar org-tab-before-tab-emulation-hook nil
+  "Hook for functions to attach themselves to TAB.
+See `org-ctrl-c-ctrl-c-hook' for more information.
+This hook runs after every other options for TAB have been exhausted, but
+before indentation and \t insertion takes place.")
+
 (defvar org-metaleft-hook nil
   "Hook for functions attaching themselves to `M-left'.
 See `org-ctrl-c-ctrl-c-hook' for more information.")
@@ -17533,3 +17595,4 @@ Still experimental, may disappear in the future."
 ;; arch-tag: e77da1a7-acc7-4336-b19e-efa25af3f9fd
 
 ;;; org.el ends here
+
