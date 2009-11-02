@@ -96,17 +96,20 @@ the the Emacs diary"
 				      (omi-checked x))
 				    all-calendars)))
 
-  ;; for each caledar, concatenate individual events into a single ics file
+  ;; for each calendar, concatenate individual events into a single ics file
   (with-temp-buffer
     (shell-command "sw_vers" " *temp*")
     (when (re-search-backward "10.5" nil t)
       (omi-concat-leopard-ics all-calendars)))
   
-  ;; move any caldav ics files to the same place as local ics files
+  ;; move all caldav ics files to the same place as local ics files
   (mapc
    (lambda (x)
-     (when (directory-files x 1 ".*ics$")
-       (rename-file (car (directory-files x 1 ".*ics$")) (concat "~/Library/Calendars/" (car (directory-files x nil ".*ics$"))))))
+     (mapc
+      (lambda (y)
+        (rename-file (concat x "/" y);
+                     (concat "~/Library/Calendars/" y)))
+      (directory-files x nil ".*ics$")))
    caldav-folders)
   
   ;; check calendar has contents and import
