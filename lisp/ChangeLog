@@ -1,3 +1,11 @@
+2009-11-02  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-agenda.el (org-agenda-open-link): Make this work in agenda
+	clocktables.
+	(org-agenda-switch-to): Follow a link at point if
+	org-return-follows-link' is set and there is nothing else to do in
+	this line.
+
 2009-11-01  Dan Davison  <davison@stats.ox.ac.uk>
 
 	* org-exp-blocks.el: Modify split separator regexp to avoid empty

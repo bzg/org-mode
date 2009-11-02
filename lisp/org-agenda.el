@@ -5851,7 +5851,7 @@ If this information is not given, the function uses the tree at point."
 
 (defun org-agenda-open-link (&optional arg)
   "Follow the link in the current line, if any.
-This looks for a link in the displayed lin in the agenda.  It also looks
+This looks for a link in the displayed line in the agenda.  It also looks
 at the text of the entry itself."
   (interactive "P")
   (let* ((marker (or (org-get-at-bol 'org-hd-marker)
@@ -5860,14 +5860,21 @@ at the text of the entry itself."
 	 (prefix (buffer-substring
 		  (point-at-bol)
 		  (+ (point-at-bol)
-		     (org-get-at-bol 'prefix-length)))))
-    (unless buffer (error "Don't know where to look for links"))
-    (with-current-buffer buffer
-      (save-excursion
-	(save-restriction
-	  (widen)
-	  (goto-char marker)
-	  (org-offer-links-in-entry arg prefix))))))
+		     (or (org-get-at-bol 'prefix-length) 0)))))
+    (cond
+     (buffer
+      (with-current-buffer buffer
+	(save-excursion
+	  (save-restriction
+	    (widen)
+	    (goto-char marker)
+	    (org-offer-links-in-entry arg prefix)))))
+     ((or (org-in-regexp (concat "\\(" org-bracket-link-regexp "\\)"))
+	  (save-excursion
+	    (beginning-of-line 1)
+	    (looking-at (concat ".*?\\(" org-bracket-link-regexp "\\)"))))
+      (org-open-link-from-string (match-string 1)))
+     (t (error "No link to open here")))))
 
 (defun org-agenda-copy-local-variable (var)
   "Get a variable from a referenced buffer and install it here."
@@ -5879,19 +5886,23 @@ at the text of the entry itself."
 (defun org-agenda-switch-to (&optional delete-other-windows)
   "Go to the Org-mode file which contains the item at point."
   (interactive)
-  (let* ((marker (or (org-get-at-bol 'org-marker)
-		     (org-agenda-error)))
-	 (buffer (marker-buffer marker))
-	 (pos (marker-position marker)))
-    (switch-to-buffer buffer)
-    (and delete-other-windows (delete-other-windows))
-    (widen)
-    (goto-char pos)
-    (when (org-mode-p)
-      (org-show-context 'agenda)
-      (save-excursion
-	(and (outline-next-heading)
-	     (org-flag-heading nil))))))  ; show the next heading
+  (if (and org-return-follows-link
+	   (not (org-get-at-bol 'org-marker))
+	   (org-in-regexp org-bracket-link-regexp))
+      (org-open-link-from-string (match-string 0))
+    (let* ((marker (or (org-get-at-bol 'org-marker)
+		       (org-agenda-error)))
+	   (buffer (marker-buffer marker))
+	   (pos (marker-position marker)))
+      (switch-to-buffer buffer)
+      (and delete-other-windows (delete-other-windows))
+      (widen)
+      (goto-char pos)
+      (when (org-mode-p)
+	(org-show-context 'agenda)
+	(save-excursion
+	  (and (outline-next-heading)
+	       (org-flag-heading nil)))))))  ; show the next heading
 
 (defun org-agenda-goto-mouse (ev)
   "Go to the Org-mode file which contains the item at the mouse click."
