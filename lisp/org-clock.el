@@ -500,13 +500,14 @@ Use alsa's aplay tool if available."
    ((not org-clock-sound))
    ((eq org-clock-sound t) (beep t) (beep t))
    ((stringp org-clock-sound)
-    (if (file-exists-p org-clock-sound)
-	(if (org-program-exists "aplay")
-	    (start-process "org-clock-play-notification" nil
-			   "aplay" org-clock-sound)
-	  (condition-case nil
-	      (play-sound-file org-clock-sound)
-	    (error (beep t) (beep t))))))))
+    (let ((file (expand-file-name org-clock-sound)))
+      (if (file-exists-p file)
+	  (if (org-program-exists "aplay")
+	      (start-process "org-clock-play-notification" nil
+			     "aplay" file)
+	    (condition-case nil
+		(play-sound-file file)
+	      (error (beep t) (beep t)))))))))
 
 (defun org-program-exists (program-name)
   "Checks whenever we can locate program and launch it."

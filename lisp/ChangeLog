@@ -1,5 +1,8 @@
 2009-11-02  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-clock.el (org-clock-play-sound): Expand file in
+	org-clock-sound, to allow ~ for home.
+
 	* org-remember.el (org-remember-handler): Set
 	text-before-node-creation even if this already looks like a node,
 	because the string might be needed on non-org-mode target files.
