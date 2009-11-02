@@ -503,21 +503,23 @@ line.  If no result exists for this block then create a
 
 (defun org-babel-read-result ()
   "Read the result at `point' into emacs-lisp."
-  (cond
-   ((org-at-table-p) (org-babel-read-table))
-   ((looking-at ": ")
-    (let ((result-string
-           (org-babel-trim
-            (mapconcat (lambda (line) (if (and (> (length line) 1)
-                                               (string= ": " (substring line 0 2)))
-                                          (substring line 2)
-                                        line))
-                       (split-string
-                        (buffer-substring (point) (org-babel-result-end)) "[\r\n]+")
-                       "\n"))))
-      (or (org-babel-number-p result-string) result-string)))
-   ((looking-at "^#\\+RESNAME:")
-    (save-excursion (forward-line 1) (org-babel-read-result)))))
+  (let ((case-fold-search t) result-string)
+    (cond
+     ((org-at-table-p) (org-babel-read-table))
+     ((looking-at org-block-regexp) (org-babel-trim (match-string 4)))
+     ((looking-at ": ")
+      (setq result-string
+	    (org-babel-trim
+	     (mapconcat (lambda (line) (if (and (> (length line) 1)
+						(string= ": " (substring line 0 2)))
+					   (substring line 2)
+					 line))
+			(split-string
+			 (buffer-substring (point) (org-babel-result-end)) "[\r\n]+")
+			"\n")))
+      (or (org-babel-number-p result-string) result-string))
+     ((looking-at "^#\\+RESNAME:")
+      (save-excursion (forward-line 1) (org-babel-read-result))))))
 
 (defun org-babel-read-table ()
   "Read the table at `point' into emacs-lisp."
