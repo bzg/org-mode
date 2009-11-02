@@ -117,6 +117,17 @@ all         include both done and not done items."
 	  (const :tag "Unblocked" unblocked)
 	  (const :tag "All" all)))
 
+(defvar org-icalendar-verify-function nil
+  "Function to verify entries for iCalendar export.
+This can be set to a function that will be called at each entry that
+is considered for export to iCalendar.  When the function returns nil,
+the entry will be skipped.  When it returns a non-nil value, the entry
+will be considered for export.
+This is used internally when an agenda buffer is exported to an ics file,
+to make sure that only entries currently listed in the agenda will end
+up in the ics file.  But for normal iCalendar export, you can use this
+for whatevery you need.")
+
 (defcustom org-icalendar-include-bbdb-anniversaries nil
   "Non-nil means, a combined iCalendar files should include anniversaries.
 The anniversaries are define in the BBDB database."
