@@ -53,6 +53,10 @@
 	org-return-follows-link' is set and there is nothing else to do in
 	this line.
 
+2009-11-02  James TD Smith  <ahktenzero@mohorovi.cc>
+
+	* org-colview-xemacs.el: Add in changes from org-colview.el
+
 2009-11-01  Dan Davison  <davison@stats.ox.ac.uk>
 
 	* org-exp-blocks.el: Modify split separator regexp to avoid empty
