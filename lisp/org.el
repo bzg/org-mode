@@ -14645,6 +14645,11 @@ Some of the options can be changed using the variable
 
 (defconst org-speed-commands-default
   '(
+    ("a" . org-agenda)
+    ("/" . org-sparse-tree)
+    (";" . org-set-tags-command)
+    ("I" . org-clock-in)
+    ("O" . org-clock-out)
     ("c" . org-cycle)
     ("C" . org-shifttab)
     ("n" . outline-next-visible-heading)
@@ -14663,6 +14668,9 @@ Some of the options can be changed using the variable
     ("o" . org-open-at-point)
     ("t" . org-todo)
     ("j" . org-goto)
+    ("g" . (org-refile t))
+    ("e" . org-set-effort)
+    ("0" . (org-priority ?\ ))
     ("1" . (org-priority ?A))
     ("2" . (org-priority ?B))
     ("3" . (org-priority ?C))
