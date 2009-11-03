@@ -5,6 +5,7 @@
 	(org-cycle-level-after-item/entry-creation): New option.
 	(org-flag-subtree): New function.
 	(org-hide-archived-subtrees): Call `org-flag-subtree'.
+	(org-set-effort): Indexed access.
 
 	* org-list.el (org-cycle-item-indentation): New function.
 

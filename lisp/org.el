@@ -12032,7 +12032,15 @@ allowed value."
 		(or (car (nth (1- value) allowed))
 		    (car (org-last allowed))))
 	       (allowed
-		(org-completing-read "Value: " allowed nil 'req-match))
+		(message "Select 1-9,0, [RET]: %s" (mapconcat 'car allowed " "))
+		(setq rpl (read-char-exclusive))
+		(if (equal rpl ?\r)
+		    (setq val cur)
+		  (setq rpl (- rpl ?0))
+		  (if (equal rpl 0) (setq rpl 10))
+		  (if (and (> rpl 0) (<= rpl (length allowed)))
+		      (car (nth (1- rpl) allowed))
+		    (org-completing-read "Value: " allowed nil))))
 	       (t
 		(let (org-completion-use-ido org-completion-use-iswitchb)
 		  (org-completing-read
