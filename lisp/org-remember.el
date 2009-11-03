@@ -588,7 +588,7 @@ to be run from that hook to function properly."
 		   (pall (concat prop "_ALL"))
 		   (allowed
 		    (with-current-buffer
-			(get-buffer (file-name-nondirectory file))
+			(or (find-buffer-visiting file) (current-buffer))
 		      (or (cdr (assoc pall org-file-properties))
 			  (cdr (assoc pall org-global-properties))
 			  (cdr (assoc pall org-global-properties-fixed)))))
