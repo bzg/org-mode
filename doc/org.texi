@@ -6151,6 +6151,8 @@ Use the refile interface to jump to a heading.
 @kindex C-u C-u C-c C-w
 @item C-u C-u C-c C-w
 Jump to the location where @code{org-refile} last moved a tree to.
+@item C-2 C-c C-w
+Refile as the child of the tiem currently being clocked.
 @end table
 
 @node Archiving,  , Refiling notes, Capture - Refile - Archive

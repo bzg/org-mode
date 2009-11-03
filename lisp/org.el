@@ -8866,6 +8866,7 @@ With prefix arg GOTO, the command will only visit the target location,
 not actually move anything.
 With a double prefix `C-u C-u', go to the location where the last refiling
 operation has put the subtree.
+With a prefix argument of `2', refile to the running clock.
 
 RFLOC can be a refile location obtained in a different way.
 
@@ -8887,11 +8888,20 @@ See also `org-refile-use-outline-path' and `org-completion-use-ido'"
 	(error "The region is not a (sequence of) subtree(s)")))
     (if (equal goto '(16))
 	(org-refile-goto-last-stored)
-      (when (setq it (or rfloc
-			 (save-excursion
-			   (org-refile-get-location
-			    (if goto "Goto: " "Refile to: ") default-buffer
-			    org-refile-allow-creating-parent-nodes))))
+      (when (or
+	     (and org-clock-hd-marker (marker-buffer org-clock-hd-marker)
+		  (prog1
+		      (setq it (list (or org-clock-heading "running clock")
+				     (buffer-file-name
+				      (marker-buffer org-clock-hd-marker))
+				     ""
+				     (marker-position org-clock-hd-marker)))
+		    (setq goto nil)))
+	     (setq it (or rfloc
+			  (save-excursion
+			    (org-refile-get-location
+			     (if goto "Goto: " "Refile to: ") default-buffer
+			     org-refile-allow-creating-parent-nodes)))))
 	(setq file (nth 1 it)
 	      re (nth 2 it)
 	      pos (nth 3 it))

@@ -1,5 +1,8 @@
 2009-11-03  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-refile): Make prefix argument 2 refile to current
+	clock.
+
 	* org-remember.el (org-remember-apply-template): Don't depend on
 	buffer name being like file name.
 
