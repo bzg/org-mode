@@ -10770,6 +10770,8 @@ ACTION can be `set', `up', `down', or a character."
 		have t)
 	(setq current org-default-priority))
       (cond
+       ((eq action 'remove)
+	(setq remote t new ?\ ))
        ((or (eq action 'set)
 	    (if (featurep 'xemacs) (characterp action) (integerp action)))
 	(if (not (eq action 'set))

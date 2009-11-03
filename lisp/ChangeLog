@@ -2,6 +2,8 @@
 
 	* org.el (org-refile): Make prefix argument 2 refile to current
 	clock.
+	(org-priority): Interpret action `remove' as call to remove the
+	priority cookie.
 
 	* org-remember.el (org-remember-apply-template): Don't depend on
 	buffer name being like file name.
