@@ -3,6 +3,8 @@
 	* org.el (org-tab-ind-state): New variable.
 	(org-cycle-level): New function.
 	(org-cycle-level-after-item/entry-creation): New option.
+	(org-flag-subtree): New function.
+	(org-hide-archived-subtrees): Call `org-flag-subtree'.
 
 	* org-list.el (org-cycle-item-indentation): New function.
 

@@ -3443,8 +3443,16 @@ collapsed state."
     (let* ((re (concat ":" org-archive-tag ":")))
       (goto-char beg)
       (while (re-search-forward re end t)
-	(and (org-on-heading-p) (hide-subtree))
+	(and (org-on-heading-p) (org-flag-subtree t))
 	(org-end-of-subtree t)))))
+
+(defun org-flag-subtree (flag)
+  (save-excursion
+    (org-back-to-heading t)
+    (outline-end-of-heading)
+    (outline-flag-region (point)
+			 (progn (org-end-of-subtree t) (point))
+			 flag)))
 
 (defalias 'org-advertized-archive-subtree 'org-archive-subtree)
 
