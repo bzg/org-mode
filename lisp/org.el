@@ -3210,6 +3210,8 @@ If TABLE-TYPE is non-nil, also check for table.el-type tables."
   "Marker recording the last clock-in.")
 (defvar org-clock-hd-marker (make-marker)
   "Marker recording the last clock-in, but the headline position.")
+(defvar org-clock-heading ""
+  "The heading of the current clock entry.")
 (defun org-clock-is-active ()
  "Return non-nil if clock is currently running.
 The return value is actually the clock marker."
@@ -10827,7 +10829,7 @@ ACTION can be `set', `up', `down', or a character."
 	(setq current org-default-priority))
       (cond
        ((eq action 'remove)
-	(setq remote t new ?\ ))
+	(setq remove t new ?\ ))
        ((or (eq action 'set)
 	    (if (featurep 'xemacs) (characterp action) (integerp action)))
 	(if (not (eq action 'set))

@@ -246,7 +246,7 @@ to add an effort property.")
 
 (defvar org-clock-mode-line-timer nil)
 (defvar org-clock-idle-timer nil)
-(defvar org-clock-heading "")
+(defvar org-clock-heading) ; defined in org.el
 (defvar org-clock-heading-for-remember "")
 (defvar org-clock-start-time "")
 
@@ -806,7 +806,7 @@ so long."
 	   (function
 	    (lambda (clock)
 	      (format "Clocked in & idle for %d mins"
-		      (/ (time-to-seconds
+		      (/ (org-float-time
 			  (time-subtract (current-time)
 					 org-clock-user-idle-start)) 60))))
 	   (time-subtract (current-time)
