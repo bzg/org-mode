@@ -183,17 +183,17 @@ form
   (link source-name params body)"
   (flet ((insert-comment (text)
                          (when commentable
+                           (insert "\n")
                            (comment-region (point) (progn (insert text) (point)))
-                           (move-end-of-line nil))))
+                           (move-end-of-line nil)
+                           (insert "\n"))))
     (let ((link (first spec))
           (source-name (second spec))
           (body (fourth spec))
           (commentable (not (fifth spec))))
-      (insert "\n\n")
       (insert-comment (format "[[%s][%s]]" (org-link-escape link) source-name))
-      (insert (format "\n%s\n" (org-babel-chomp body)))
-      (insert-comment (format "%s ends here" source-name))
-      (insert "\n"))))
+      (insert (format "%s" (org-babel-chomp body)))
+      (insert-comment (format "%s ends here" source-name)))))
 
 (provide 'org-babel-tangle)
 ;;; org-babel-tangle.el ends here
