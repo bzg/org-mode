@@ -578,28 +578,30 @@ code ---- the results are extracted in the syntax of the source
                           (string-equal (substring result -1) "\r"))))
         (setq result (concat result "\n")))
       (save-excursion
-	(let ((existing-result (org-babel-where-is-src-block-result t info)))
-	  (when existing-result (goto-char existing-result) (forward-line 1)))
-        (cond
-         ;; assume the result is a table if it's not a string
-         ((not (stringp result))
-          (insert (concat (orgtbl-to-orgtbl
-                           (if (and (listp (car result)) (listp (cdr (car result))))
-                               result (list result))
-                           '(:fmt (lambda (cell) (format "%S" cell)))) "\n"))
-          (forward-line -1) (org-cycle))
-         ((member "file" insert)
-          (insert result))
-         ((member "html" insert)
-          (insert (format "#+BEGIN_HTML\n%s#+END_HTML\n" result)))
-         ((member "latex" insert)
-          (insert (format "#+BEGIN_LaTeX\n%s#+END_LaTeX\n" result)))
-         ((member "code" insert)
-          (insert (format "#+BEGIN_SRC %s\n%s#+END_SRC\n" lang result)))
-         ((or (member "raw" insert) (member "org" insert))
-          (save-excursion (insert result)) (if (org-at-table-p) (org-cycle)))
-         (t
-          (org-babel-examplize-region (point) (progn (insert result) (point))))))
+	(let ((existing-result (org-babel-where-is-src-block-result t info))
+	      (results-switches (cdr (assoc :results_switches (third info)))))
+	  (when existing-result (goto-char existing-result) (forward-line 1))
+	  (setq results-switches (if results-switches (concat " " results-switches) ""))
+	  (cond
+	   ;; assume the result is a table if it's not a string
+	   ((not (stringp result))
+	    (insert (concat (orgtbl-to-orgtbl
+			     (if (and (listp (car result)) (listp (cdr (car result))))
+				 result (list result))
+			     '(:fmt (lambda (cell) (format "%S" cell)))) "\n"))
+	    (forward-line -1) (org-cycle))
+	   ((member "file" insert)
+	    (insert result))
+	   ((member "html" insert)
+	    (insert (format "#+BEGIN_HTML%s\n%s#+END_HTML\n" results-switches result)))
+	   ((member "latex" insert)
+	    (insert (format "#+BEGIN_LaTeX%s\n%s#+END_LaTeX\n" results-switches result)))
+	   ((member "code" insert)
+	    (insert (format "#+BEGIN_SRC %s%s\n%s#+END_SRC\n" lang results-switches result)))
+	   ((or (member "raw" insert) (member "org" insert))
+	    (save-excursion (insert result)) (if (org-at-table-p) (org-cycle)))
+	   (t
+	    (org-babel-examplize-region (point) (progn (insert result) (point)) results-switches)))))
       (message "finished"))))
 
 (defun org-babel-result-to-org-string (result)
@@ -643,7 +645,7 @@ RESULT, and the display being the `file-name-nondirectory' if
 non-nil."
   (concat "[[file:" result "]]"))
 
-(defun org-babel-examplize-region (beg end)
+(defun org-babel-examplize-region (beg end &optional results-switches)
   "Comment out region using the ': ' org example quote."
   (interactive "*r")
   (let ((size (abs (- (line-number-at-pos end)
@@ -660,7 +662,9 @@ non-nil."
 	       (move-beginning-of-line 1) (insert ": ") (forward-line 1)))
 	    (t
 	     (goto-char beg)
-	     (insert "#+begin_example\n")
+	     (insert (if results-switches
+                         (format "#+begin_example%s\n" results-switches)
+                       "#+begin_example\n"))
 	     (forward-char (- end beg))
 	     (insert "#+end_example\n"))))))
 
