@@ -12032,7 +12032,9 @@ allowed value."
 		(or (car (nth (1- value) allowed))
 		    (car (org-last allowed))))
 	       (allowed
-		(message "Select 1-9,0, [RET]: %s" (mapconcat 'car allowed " "))
+		(message "Select 1-9,0, [RET%s]: %s"
+			 (if cur (concat "=" cur) "")
+			 (mapconcat 'car allowed " "))
 		(setq rpl (read-char-exclusive))
 		(if (equal rpl ?\r)
 		    (setq val cur)
