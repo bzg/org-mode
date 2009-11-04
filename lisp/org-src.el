@@ -171,6 +171,7 @@ For example, there is no ocaml-mode in Emacs, but the mode to use is
 (defvar org-edit-src-end-marker nil)
 (defvar org-edit-src-overlay nil)
 (defvar org-edit-src-block-indentation nil)
+(defvar org-edit-src-saved-temp-window-config nil)
 
 (defvar org-src-ask-before-returning-to-edit-buffer t
   "If nil, when org-edit-src code is used on a block that already
@@ -193,6 +194,7 @@ to the correct language mode.  When done, exit with \\[org-edit-src-exit].
 This will remove the original code in the Org buffer, and replace it with
 the edited version."
   (interactive)
+  (setq org-edit-src-saved-temp-window-config (current-window-configuration))
   (let ((line (org-current-line))
 	(col (current-column))
 	(case-fold-search t)
@@ -574,7 +576,10 @@ the language, a switch telling if the content should be in a single line."
     (org-goto-line (1- (+ (org-current-line) line)))
     (org-move-to-column (if preserve-indentation col (+ col total-nindent delta)))
     (move-marker beg nil)
-    (move-marker end nil)))
+    (move-marker end nil))
+  (when org-edit-src-saved-temp-window-config
+    (set-window-configuration org-edit-src-saved-temp-window-config)
+    (setq org-edit-src-saved-temp-window-config nil)))
 
 (defun org-edit-src-save ()
   "Save parent buffer with current state source-code buffer."
