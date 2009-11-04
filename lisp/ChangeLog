@@ -1,3 +1,8 @@
+2009-11-04  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-remember.el (org-remember-apply-template): Make sure the
+	buffer exists.
+
 2009-11-03  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-tab-ind-state): New variable.

@@ -588,12 +588,14 @@ to be run from that hook to function properly."
 		   (pall (concat prop "_ALL"))
 		   (allowed
 		    (with-current-buffer
-			(or (find-buffer-visiting file) (current-buffer))
+			(or (find-buffer-visiting file)
+			    (find-file-noselect file))
 		      (or (cdr (assoc pall org-file-properties))
 			  (cdr (assoc pall org-global-properties))
 			  (cdr (assoc pall org-global-properties-fixed)))))
 		   (existing (with-current-buffer
-				 (get-buffer (file-name-nondirectory file))
+				 (or (find-buffer-visiting file)
+				     (find-file-noselect file))
 			       (mapcar 'list (org-property-values prop))))
 		   (propprompt (concat "Value for " prop ": "))
 		   (val (if allowed
