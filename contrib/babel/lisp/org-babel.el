@@ -175,7 +175,7 @@ the header arguments specified at the source code block."
   ;; (message "supplied params=%S" params) ;; debugging
   (let* ((info (or info (org-babel-get-src-block-info)))
          (lang (first info))
-         (params (org-babel-merge-params (third info) params))
+	 (params (setf (third info) (org-babel-merge-params (third info) params)))
          (body (if (assoc :noweb params)
                    (org-babel-expand-noweb-references info) (second info)))
          (processed-params (org-babel-process-params params))
@@ -192,7 +192,7 @@ the header arguments specified at the source code block."
                    (funcall cmd body params)))
     (if (eq result-type 'value)
         (setq result (org-babel-process-value-result result result-params)))
-    (org-babel-insert-result result result-params)
+    (org-babel-insert-result result result-params info)
     result))
 
 (defun org-babel-load-in-session (&optional arg info)
@@ -473,7 +473,7 @@ buffer or nil if no such result exists."
 	   (concat "#\\+resname:[ \t]*" (regexp-quote name) "[ \t\n\f\v\r]") nil t)
       (move-beginning-of-line 0) (point))))
 
-(defun org-babel-where-is-src-block-result (&optional insert)
+(defun org-babel-where-is-src-block-result (&optional insert info)
   "Return the point at the beginning of the result of the current
 source block.  Specifically at the beginning of the #+RESNAME:
 line.  If no result exists for this block then create a
@@ -482,7 +482,7 @@ line.  If no result exists for this block then create a
     (let* ((on-lob-line (progn (beginning-of-line 1)
 			       (looking-at org-babel-lob-one-liner-regexp)))
 	   (name (if on-lob-line (first (org-babel-lob-get-info))
-		   (fifth (org-babel-get-src-block-info))))
+		   (fifth (or info (org-babel-get-src-block-info)))))
 	   (head (unless on-lob-line (org-babel-where-is-src-block-head))) end)
       (when head (goto-char head))
       (or (and name (org-babel-find-named-result name))
@@ -528,7 +528,7 @@ line.  If no result exists for this block then create a
               (mapcar #'org-babel-read row)))
           (org-table-to-lisp)))
 
-(defun org-babel-insert-result (result &optional insert)
+(defun org-babel-insert-result (result &optional insert info)
   "Insert RESULT into the current buffer after the end of the
 current source block.  With optional argument INSERT controls
 insertion of results in the org-mode file.  INSERT can take the
@@ -566,7 +566,7 @@ code ---- the results are extracted in the syntax of the source
         (if (member "file" insert) (setq result (org-babel-result-to-file result))))
     (unless (listp result) (setq result (format "%S" result))))
   (if (and insert (member "replace" insert) (not (member "silent" insert)))
-      (org-babel-remove-result))
+      (org-babel-remove-result info))
   (if (= (length result) 0)
       (if (member "value" result-params)
 	  (message "No result returned by source block")
@@ -578,7 +578,7 @@ code ---- the results are extracted in the syntax of the source
                           (string-equal (substring result -1) "\r"))))
         (setq result (concat result "\n")))
       (save-excursion
-	(let ((existing-result (org-babel-where-is-src-block-result t)))
+	(let ((existing-result (org-babel-where-is-src-block-result t info)))
 	  (when existing-result (goto-char existing-result) (forward-line 1)))
         (cond
          ;; assume the result is a table if it's not a string
@@ -607,11 +607,11 @@ code ---- the results are extracted in the syntax of the source
 relies on `org-babel-insert-result'."
   (with-temp-buffer (org-babel-insert-result result) (buffer-string)))
 
-(defun org-babel-remove-result ()
+(defun org-babel-remove-result (&optional info)
   "Remove the result of the current source block."
   (interactive)
   (save-excursion
-    (goto-char (org-babel-where-is-src-block-result t)) (forward-line 1)
+    (goto-char (org-babel-where-is-src-block-result t info)) (forward-line 1)
     (delete-region (point) (org-babel-result-end))))
 
 (defun org-babel-result-end ()
