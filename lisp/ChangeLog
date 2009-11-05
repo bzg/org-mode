@@ -1,3 +1,8 @@
+2009-11-05  John Wiegley  <jwiegley@gmail.com>
+
+	* org-clock.el (org-resolve-clocks-if-idle): Another fix to the
+	way the amount of idle time is presented in the minibuffer.
+
 2009-11-05  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-refile): Refile to clock only if the prefix arg is
