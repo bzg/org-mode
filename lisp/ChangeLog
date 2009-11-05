@@ -1,5 +1,8 @@
 2009-11-05  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-icalendar.el (org-print-icalendar-entries): Use
+	org-icalendar-verify-function only if non-nil.
+
 	* org.el (org-refile): Refile to clock only if the prefix arg is
 	2.
 	(org-sparse-tree): Fix docstring to be in line with prompt.

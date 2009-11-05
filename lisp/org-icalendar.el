@@ -280,7 +280,7 @@ When COMBINE is non nil, add the category to each line."
       (while (re-search-forward re1 nil t)
 	(catch :skip
 	  (org-agenda-skip)
-	  (when (boundp 'org-icalendar-verify-function)
+	  (when org-icalendar-verify-function
 	    (unless (funcall org-icalendar-verify-function)
 	      (outline-next-heading)
 	      (backward-char 1)
@@ -403,7 +403,7 @@ END:VEVENT\n"
 	(while (re-search-forward org-todo-line-regexp nil t)
 	  (catch :skip
 	    (org-agenda-skip)
-	    (when (boundp 'org-icalendar-verify-function)
+	    (when org-icalendar-verify-function
 	      (unless (save-match-data
 			(funcall org-icalendar-verify-function))
 		(outline-next-heading)
