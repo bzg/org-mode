@@ -179,7 +179,8 @@ using `rsync' or `scp'.")
   "Expand the list in `org-mobile-files' to a list of existing files."
   (let* ((include-archives
 	  (and (member 'org-agenda-text-search-extra-files org-mobile-files)
-	       (member 'agenda-archives	org-agenda-text-search-extra-files)))
+	       (member 'agenda-archives	org-agenda-text-search-extra-files)
+	       t))
 	 (files
 	  (apply 'append
 		 (mapcar
