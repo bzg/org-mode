@@ -1,5 +1,10 @@
 2009-11-05  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-icalendar.el (org-print-icalendar-entries): Save match data
+	around call to verify function.
+	(org-print-icalendar-entries): Add a call to the verification
+	function.
+
 	* org.el (org-speedbar-set-agenda-restriction): Remove unnecessary
 	save-restrivtion' form.
 

@@ -281,7 +281,7 @@ When COMBINE is non nil, add the category to each line."
 	(catch :skip
 	  (org-agenda-skip)
 	  (when org-icalendar-verify-function
-	    (unless (funcall org-icalendar-verify-function)
+	    (unless (save-match-data (funcall org-icalendar-verify-function))
 	      (outline-next-heading)
 	      (backward-char 1)
 	      (throw :skip nil)))
@@ -387,6 +387,11 @@ END:VEVENT\n"
 	(while (re-search-forward "^&?%%(" nil t)
 	  (catch :skip
 	    (org-agenda-skip)
+	    (when org-icalendar-verify-function
+	      (unless (save-match-data (funcall org-icalendar-verify-function))
+		(outline-next-heading)
+		(backward-char 1)
+		(throw :skip nil)))
 	    (setq b (match-beginning 0))
 	    (goto-char (1- (match-end 0)))
 	    (forward-sexp 1)
