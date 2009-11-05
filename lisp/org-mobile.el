@@ -177,19 +177,26 @@ using `rsync' or `scp'.")
 
 (defun org-mobile-files-alist ()
   "Expand the list in `org-mobile-files' to a list of existing files."
-  (let* ((files
-	  (apply 'append (mapcar
-			  (lambda (f)
-			    (cond
-			     ((eq f 'org-agenda-files) (org-agenda-files t))
-			     ((eq f 'org-agenda-text-search-extra-files)
-			      org-agenda-text-search-extra-files)
-			     ((and (stringp f) (file-directory-p f))
-			      (directory-files f 'full "\\.org\\'"))
-			     ((and (stringp f) (file-exists-p f))
-			      (list f))
-			     (t nil)))
-			  org-mobile-files)))
+  (let* ((include-archives
+	  (and (member 'org-agenda-text-search-extra-files org-mobile-files)
+	       (member 'agenda-archives	org-agenda-text-search-extra-files)))
+	 (files
+	  (apply 'append
+		 (mapcar
+		  (lambda (f)
+		    (cond
+		     ((eq f 'org-agenda-files) (org-agenda-files
+						t include-archives))
+		     ((eq f 'org-agenda-text-search-extra-files)
+		      (delq 'agenda-archives
+			    (copy-sequence
+			     org-agenda-text-search-extra-files)))
+		     ((and (stringp f) (file-directory-p f))
+		      (directory-files f 'full "\\.org\\'"))
+		     ((and (stringp f) (file-exists-p f))
+		      (list f))
+		     (t nil)))
+		  org-mobile-files)))
 	 (orgdir-uname (file-name-as-directory (file-truename org-directory)))
 	 (orgdir-re (concat "\\`" (regexp-quote orgdir-uname)))
 	 uname seen rtn file link-name)
