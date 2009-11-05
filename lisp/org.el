@@ -10653,7 +10653,7 @@ t      Show entries with a specific TODO keyword.
 m      Show entries selected by a tags/property match.
 p      Enter a property name and its value (both with completion on existing
        names/values) and show entries with that property.
-r      Show entries matching a regular expression.
+/      Show entries matching a regular expression (`r' can be used as well)
 d      Show deadlines due within `org-deadline-warning-days'.
 b      Show deadlines and scheduled items before a date.
 a      Show deadlines and scheduled items after a date."

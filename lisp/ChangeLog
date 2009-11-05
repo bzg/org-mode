@@ -2,6 +2,7 @@
 
 	* org.el (org-refile): Refile to clock only if the prefix arg is
 	2.
+	(org-sparse-tree): Fix docstring to be in line with prompt.
 
 2009-11-04  Carsten Dominik  <carsten.dominik@gmail.com>
 
