@@ -266,12 +266,6 @@ upload_release:
 upload_manual:
 	rsync -avuz --delete doc/manual/ cdominik@orgmode.org:orgmode.org/manual/
 
-snap:
-	${MAKE} release TAG=snapshot
-	scp RELEASEDIR/org-snapshot.zip cdominik@orgmode.org:orgmode.org/
-	scp RELEASEDIR/org-snapshot.tar.gz cdominik@orgmode.org:orgmode.org/
-	${MAKE} cleanrel
-
 relup0:
 	${MAKE} release
 	${MAKE} upload_release
@@ -299,7 +293,7 @@ cleandoc:
 cleanrel:
 	rm -rf RELEASEDIR
 	rm -rf org-6.*
-	rm -rf org-6*zip org-6*tar.gz org-snapshot*
+	rm -rf org-6*zip org-6*tar.gz
 
 clean:
 	${MAKE} cleanelc
