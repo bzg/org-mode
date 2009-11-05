@@ -110,8 +110,7 @@ With prefix arg HERE, insert it at point."
 	(let ((pwd (substring (pwd) 10)))
 	  (cd dir)
 	  (if (eql 0 (shell-command "git describe --abbrev=4 HEAD"))
-	      (save-excursion
-		(set-buffer "*Shell Command Output*")
+	      (with-current-buffer "*Shell Command Output*"
 		(goto-char (point-min))
 		(re-search-forward "[^\n]+")
 		(setq git-version (match-string 0))
@@ -8836,8 +8835,8 @@ on the system \"/user@host:\"."
 			       "\\}[ \t]")))
 	 (t (error "Bad refiling target description %s" desc)))
 	(while (setq f (pop files))
-	  (save-excursion
-	    (set-buffer (if (bufferp f) f (org-get-agenda-file-buffer f)))
+	  (with-current-buffer
+	      (if (bufferp f) f (org-get-agenda-file-buffer f))
 	    (if (bufferp f) (setq f (buffer-file-name (buffer-base-buffer f))))
 	    (setq f (expand-file-name f))
 	    (if (eq org-refile-use-outline-path 'file)
@@ -8996,9 +8995,8 @@ See also `org-refile-use-outline-path' and `org-completion-use-ido'"
 		(org-kill-new (buffer-substring region-start region-end))
 		(org-save-markers-in-region region-start region-end))
 	    (org-copy-subtree 1 nil t))
-	  (save-excursion
-	    (set-buffer (setq nbuf (or (find-buffer-visiting file)
-				       (find-file-noselect file))))
+	  (with-current-buffer (setq nbuf (or (find-buffer-visiting file)
+					      (find-file-noselect file)))
 	    (setq reversed (org-notes-order-reversed-p))
 	    (save-excursion
 	      (save-restriction
@@ -10610,8 +10608,7 @@ EXTRA is additional text that will be inserted into the notes buffer."
 	 org-log-note-marker))
       (setq lines nil))
     (when lines
-      (save-excursion
-	(set-buffer (marker-buffer org-log-note-marker))
+      (with-current-buffer (marker-buffer org-log-note-marker)
 	(save-excursion
 	  (goto-char org-log-note-marker)
 	  (move-marker org-log-note-marker nil)
@@ -13497,8 +13494,7 @@ This uses the icalendar.el library."
 	 (tmpfile (make-temp-name
 		   (expand-file-name "orgics" tmpdir)))
 	 buf rtn b e)
-    (save-excursion
-      (set-buffer frombuf)
+    (with-current-buffer frombuf
       (icalendar-export-region (point-min) (point-max) tmpfile)
       (setq buf (find-buffer-visiting tmpfile))
       (set-buffer buf)
