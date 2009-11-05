@@ -8955,7 +8955,8 @@ See also `org-refile-use-outline-path' and `org-completion-use-ido'"
     (if (equal goto '(16))
 	(org-refile-goto-last-stored)
       (when (or
-	     (and org-clock-hd-marker (marker-buffer org-clock-hd-marker)
+	     (and (equal goto 2)
+		  org-clock-hd-marker (marker-buffer org-clock-hd-marker)
 		  (prog1
 		      (setq it (list (or org-clock-heading "running clock")
 				     (buffer-file-name
