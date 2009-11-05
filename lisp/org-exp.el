@@ -1688,9 +1688,10 @@ from the buffer."
   "Mark verbatim snippets with the protection property."
   (goto-char (point-min))
   (while (re-search-forward org-verbatim-re nil t)
-    (add-text-properties (match-beginning 4) (match-end 4)
-			 '(org-protected t org-verbatim-emph t))
-    (goto-char (1+ (match-end 4)))))
+    (org-if-unprotected
+     (add-text-properties (match-beginning 4) (match-end 4)
+			  '(org-protected t org-verbatim-emph t))
+     (goto-char (1+ (match-end 4))))))
 
 (defun org-export-protect-colon-examples ()
   "Protect lines starting with a colon."
