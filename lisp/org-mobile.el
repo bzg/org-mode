@@ -185,8 +185,8 @@ using `rsync' or `scp'.")
 		 (mapcar
 		  (lambda (f)
 		    (cond
-		     ((eq f 'org-agenda-files) (org-agenda-files
-						t include-archives))
+		     ((eq f 'org-agenda-files)
+		      (org-agenda-files	t include-archives))
 		     ((eq f 'org-agenda-text-search-extra-files)
 		      (delq 'agenda-archives
 			    (copy-sequence
