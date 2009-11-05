@@ -1,5 +1,9 @@
 2009-11-05  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-timer.el (org-timer-set-timer): Set variables
+	org-timer-timer[123] correctly.
+
+
 	* org-mobile.el (org-mobile-files-alist): Make it work when
 	`agenda-archives' is included in
 	`org-agenda-text-search-extra-files'.

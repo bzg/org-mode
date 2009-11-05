@@ -312,12 +312,12 @@ VALUE can be `on', `off', or `pause'."
 		(t (error "Not in an Org buffer"))))
 	   timer-set)
       (mapcar (lambda(timer)
-		(if (not (or (eval timer) timer-set))
-		    (setq timer-set t
-			  timer
-			  (run-with-timer
-			   secs nil 'org-notify (format "%s: time out" hl) t)
-			  org-timer-last-timer timer)))
+		(when (not (or (eval timer) timer-set))
+		  (setq timer-set t)
+		  (setq org-timer-last-timer
+			(run-with-timer
+			secs nil 'org-notify (format "%s: time out" hl) t))
+		  (set timer org-timer-last-timer)))
 	      '(org-timer-timer1
 		org-timer-timer2
 		org-timer-timer3)))))
