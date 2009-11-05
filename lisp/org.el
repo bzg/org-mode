@@ -17493,11 +17493,9 @@ To get rid of the restriction, use \\[org-agenda-remove-restriction-lock]."
      ((setq p (text-property-any (point-at-bol) (point-at-eol)
 				 'org-imenu t))
       (setq m (get-text-property p 'org-imenu-marker))
-      (save-excursion
-	(save-restriction
-	  (set-buffer (marker-buffer m))
-	  (goto-char m)
-	  (org-agenda-set-restriction-lock 'subtree))))
+      (with-current-buffer (marker-buffer m)
+	(goto-char m)
+	(org-agenda-set-restriction-lock 'subtree)))
      ((setq p (text-property-any (point-at-bol) (point-at-eol)
 				 'speedbar-function 'speedbar-find-file))
       (setq tp (previous-single-property-change
@@ -17507,14 +17505,12 @@ To get rid of the restriction, use \\[org-agenda-remove-restriction-lock]."
 	    dir (speedbar-line-directory)
 	    txt (buffer-substring-no-properties (or tp (point-min))
 						(or np (point-max))))
-      (save-excursion
-	(save-restriction
-	  (set-buffer (find-file-noselect
-		       (let ((default-directory dir))
-			 (expand-file-name txt))))
-	  (unless (org-mode-p)
-	    (error "Cannot restrict to non-Org-mode file"))
-	  (org-agenda-set-restriction-lock 'file))))
+      (with-current-buffer (find-file-noselect
+			    (let ((default-directory dir))
+			      (expand-file-name txt)))
+	(unless (org-mode-p)
+	  (error "Cannot restrict to non-Org-mode file"))
+	(org-agenda-set-restriction-lock 'file)))
      (t (error "Don't know how to restrict Org-mode's agenda")))
     (org-move-overlay org-speedbar-restriction-lock-overlay
 		      (point-at-bol) (point-at-eol))

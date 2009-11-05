@@ -1,3 +1,8 @@
+2009-11-05  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-speedbar-set-agenda-restriction): Remove unnecessary
+	save-restrivtion' form.
+
 2009-11-05  Dan Davison  <davison@stats.ox.ac.uk>
 
 	* org-exp.el (org-export-format-source-code-or-example): restrict
