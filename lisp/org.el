@@ -9973,7 +9973,7 @@ statistics everywhere."
 	(while (and (setq level (org-up-heading-safe))
 		    (or recursive first)
 		    (>= (point) lim))
-	  (setq first nil)
+	  (setq first nil cookie-present nil)
 	  (unless (and level
 		       (not (string-match
 			     "\\<checkbox\\>"
@@ -10008,10 +10008,10 @@ statistics everywhere."
 		  ndel (- (match-end 0) (match-beginning 0)))
 	    (goto-char (match-beginning 0))
 	    (insert new)
-	    (delete-region (point) (+ (point) ndel))))
-	(when cookie-present
-	  (run-hook-with-args 'org-after-todo-statistics-hook
-			      cnt-done (- cnt-all cnt-done)))))
+	    (delete-region (point) (+ (point) ndel)))
+	  (when cookie-present
+	    (run-hook-with-args 'org-after-todo-statistics-hook
+				cnt-done (- cnt-all cnt-done))))))
     (run-hooks 'org-todo-statistics-hook)))
 
 (defvar org-after-todo-statistics-hook nil

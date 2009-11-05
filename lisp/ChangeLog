@@ -3,6 +3,8 @@
 	* org.el (org-refile): Refile to clock only if the prefix arg is
 	2.
 	(org-sparse-tree): Fix docstring to be in line with prompt.
+	(org-update-parent-todo-statistics): Call
+	`org-after-todo-statistics-hook' on each level.
 
 2009-11-04  Carsten Dominik  <carsten.dominik@gmail.com>
 
