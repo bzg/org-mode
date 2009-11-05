@@ -28,6 +28,7 @@ org-git-link.el          --- Provide org links to specific file version
 org-interactive-query.el --- Interactive modification of tags query
 org-invoice.el           --- Help manage client invoices in OrgMode
 org-jira.el              --- Add a jira:ticket protocol to Org
+org-learn.el             --- SuperMemo's incremental learning algorithm
 org-mairix.el 	         --- Hook mairix search into Org for different MUAs
 org-mac-iCal.el          --- Imports events from iCal.app to the Emacs diary
 org-man.el 	         --- Support for links to manpages in Org-mode
