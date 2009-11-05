@@ -153,6 +153,7 @@ constructs (header arguments, no-web syntax etc...) are ignored."
          (lhs-file (concat base-name ".lhs"))
          (tex-file (concat base-name ".tex"))
          (command (concat org-babel-haskell-lhs2tex-command " " lhs-file " > " tex-file))
+         (preserve-indentp org-src-preserve-indentation)
          indentation)
     ;; escape haskell source-code blocks
     (with-temp-file tmp-org-file
@@ -160,10 +161,14 @@ constructs (header arguments, no-web syntax etc...) are ignored."
       (goto-char (point-min))
       (while (re-search-forward haskell-regexp nil t)
         (save-match-data (setq indentation (length (match-string 1))))
-        (replace-match (save-match-data (concat
-                                         "#+begin_latex\n\\begin{code}\n"
-                                         (org-remove-indentation (match-string 3))
-                                         "\n\\end{code}\n#+end_latex\n"))
+        (replace-match (save-match-data
+                         (concat
+                          "#+begin_latex\n\\begin{code}\n"
+                          (if (or preserve-indentp
+                                  (string-match "-i" (match-string 2)))
+                              (match-string 3)
+                            (org-remove-indentation (match-string 3)))
+                          "\n\\end{code}\n#+end_latex\n"))
                        t t)
         (indent-code-rigidly (match-beginning 0) (match-end 0) indentation)))
     (save-excursion
