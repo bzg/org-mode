@@ -3,6 +3,7 @@
 	* org-mobile.el (org-mobile-files-alist): Make it work when
 	`agenda-archives' is included in
 	`org-agenda-text-search-extra-files'.
+	(org-mobile-push): Restore agenda after mobile push.
 
 2009-11-05  John Wiegley  <jwiegley@gmail.com>
 

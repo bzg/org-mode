@@ -221,17 +221,37 @@ using `rsync' or `scp'.")
 This will create the index file, copy all agenda files there, and also
 create all custom agenda views, for upload to the mobile phone."
   (interactive)
-  (org-mobile-check-setup)
-  (org-mobile-prepare-file-lists)
-  (run-hooks 'org-mobile-pre-push-hook)
-  (org-mobile-create-sumo-agenda)
-  (org-save-all-org-buffers) ; to save any IDs created by this process
-  (org-mobile-copy-agenda-files)
-  (org-mobile-create-index-file)
-  (org-mobile-write-checksums)
-  (run-hooks 'org-mobile-post-push-hook)
+  (let ((a-buffer (get-buffer org-agenda-buffer-name)))
+    (let ((org-agenda-buffer-name "*SUMO*")
+	  (org-agenda-filter org-agenda-filter)
+	  (org-agenda-redo-command org-agenda-redo-command))
+      (save-excursion
+	(save-window-excursion
+	  (org-mobile-check-setup)
+	  (org-mobile-prepare-file-lists)
+	  (run-hooks 'org-mobile-pre-push-hook)
+	  (message "Creating agendas...")
+	  (let ((inhibit-redisplay t)) (org-mobile-create-sumo-agenda))
+	  (message "Creating agendas...done")
+	  (org-save-all-org-buffers) ; to save any IDs created by this process
+	  (message "Copying files...")
+	  (org-mobile-copy-agenda-files)
+	  (message "Writing index file...")
+	  (org-mobile-create-index-file)
+	  (message "Writing checksums...")
+	  (org-mobile-write-checksums)
+	  (run-hooks 'org-mobile-post-push-hook))))
+    (redraw-display)
+    (when (and a-buffer (buffer-live-p a-buffer))
+      (if (not (get-buffer-window a-buffer))
+	  (kill-buffer a-buffer)
+	(let ((cw (selected-window)))
+	  (select-window (get-buffer-window a-buffer))
+	  
+	  (org-agenda-redo)
+	  (select-window cw)))))
   (message "Files for mobile viewer staged"))
-
+  
 ;;;###autoload
 (defun org-mobile-pull ()
   "Pull the contents of `org-mobile-capture-file' and integrate them.
