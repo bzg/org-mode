@@ -2750,8 +2750,9 @@ Does include HTML export options as well as TODO and CATEGORY stuff."
 	 ((not org-log-done) "nologdone"))
    (or (mapconcat (lambda (x)
 		    (cond
-		     ((equal '(:startgroup) x) "{")
-		     ((equal '(:endgroup) x) "}")
+		     ((equal :startgroup (car x)) "{")
+		     ((equal :endgroup (car x)) "}")
+		     ((equal :newline (car x)) "")
 		     ((cdr x) (format "%s(%c)" (car x) (cdr x)))
 		     (t (car x))))
 		  (or org-tag-alist (org-get-buffer-tags)) " ") "")

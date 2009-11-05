@@ -5094,7 +5094,10 @@ to switch to narrowing."
   (interactive "P")
   (let* ((alist org-tag-alist-for-agenda)
 	 (tag-chars (mapconcat
-		     (lambda (x) (if (cdr x) (char-to-string (cdr x)) ""))
+		     (lambda (x) (if (and (not (symbolp (car x)))
+					  (cdr x))
+				     (char-to-string (cdr x))
+				   ""))
 		     alist ""))
 	 (efforts (org-split-string
 		   (or (cdr (assoc (concat org-effort-property "_ALL")
