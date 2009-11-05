@@ -12028,6 +12028,7 @@ allowed value."
 	 (cur (org-entry-get nil prop))
 	 (allowed (org-property-get-allowed-values nil prop 'table))
 	 (existing (mapcar 'list (org-property-values prop)))
+	 rpl
 	 (val (cond
 	       ((stringp value) value)
 	       ((and allowed (integerp value))
@@ -12039,7 +12040,7 @@ allowed value."
 			 (mapconcat 'car allowed " "))
 		(setq rpl (read-char-exclusive))
 		(if (equal rpl ?\r)
-		    (setq val cur)
+		    cur
 		  (setq rpl (- rpl ?0))
 		  (if (equal rpl 0) (setq rpl 10))
 		  (if (and (> rpl 0) (<= rpl (length allowed)))

@@ -1,3 +1,9 @@
+2009-11-05  Dan Davison  <davison@stats.ox.ac.uk>
+
+	* org-exp.el (org-export-format-source-code-or-example): restrict
+	scope of preserve-indentp to the let binding.
+	(org-src): require org-src, since org-src-preserve-indentation is used.
+
 2009-11-05  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-timer.el (org-timer-set-timer): Set variables

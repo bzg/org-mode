@@ -30,6 +30,7 @@
 (require 'org-macs)
 (require 'org-agenda)
 (require 'org-exp-blocks)
+(require 'org-src)
 (eval-when-compile
   (require 'cl))
 
@@ -2270,7 +2271,7 @@ Code formatting according to language currently only works for HTML.
 Numbering lines works for all three major backends (html, latex, and ascii).
 INDENT was the original indentation of the block."
   (save-match-data
-    (let (num cont rtn rpllbl keepp textareap cols rows fmt)
+    (let (num cont rtn rpllbl keepp textareap preserve-indentp cols rows fmt)
       (setq opts (or opts "")
 	    num (string-match "[-+]n\\>" opts)
 	    cont (string-match "\\+n\\>" opts)

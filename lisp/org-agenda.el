@@ -5763,6 +5763,7 @@ Point is in the buffer where the item originated.")
      (with-current-buffer buffer (delete-region dbeg dend))
      (message "Agenda item and source killed"))))
 
+(defvar org-archive-default-command)
 (defun org-agenda-archive-default ()
   "Archive the entry or subtree belonging to the current agenda entry."
   (interactive)
