@@ -90,6 +90,10 @@ If you'd like to know what other people have said about Org-mode, take
 a look at our [[http://orgmode.org/worg/org-quotes.php][collected quotes about Org]].
 
 * News
+#+ATTR_HTML: style="float:right;"
+  [[http://mobileorg.ncogni.to/][http://mobileorg.ncogni.to/images/screenshot-browse.png]]
+
+- <2009-11-03 Tue>: iPhone App [[http://mobileorg.ncogni.to/][MobileOrg]] available in the AppStore
 - <2009-10-26 Mon>: Release 6.32
 - <2009-09-30 Wed>: Release 6.31
 - <2009-09-01 Tue>: Release 6.30
