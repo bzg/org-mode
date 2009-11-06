@@ -4925,6 +4925,7 @@ If KWD is a number, get the corresponding match group."
     (remove-text-properties
      beg end
      (if org-indent-mode
+	 ;; also remove line-prefix and wrap-prefix properties
 	 '(mouse-face t keymap t org-linked-text t
 		      invisible t intangible t
 		      line-prefix t wrap-prefix t
