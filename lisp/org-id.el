@@ -437,12 +437,14 @@ When CHECK is given, prepare detailed information about duplicate IDs."
 		  (if (member id found)
 		      (progn
 			(message "Duplicate ID \"%s\", also in file %s"
-				 id (car (delq
-					  nil
-					  (mapcar
-					   (lambda (x)
-					     (if (member id (cdr x)) (car x)))
-					   reg))))
+				 id (or (car (delq
+					      nil
+					      (mapcar
+					       (lambda (x)
+						 (if (member id (cdr x))
+						     (car x)))
+					       reg)))
+					(buffer-file-name)))
 			(when (= ndup 0)
 			  (ding)
 			  (sit-for 2))

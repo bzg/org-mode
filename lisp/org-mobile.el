@@ -624,7 +624,7 @@ If BEG and END are given, only do this in that region."
 		 (not (member (marker-buffer id-pos) buf-list)))
 	(org-mobile-timestamp-buffer (marker-buffer id-pos))
 	(push (marker-buffer id-pos) buf-list))
-				     
+
       (if (or (not id-pos) (stringp id-pos))
 	  (progn
 	    (goto-char (+ 2 (point-at-bol)))
