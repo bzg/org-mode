@@ -491,7 +491,7 @@ use libnotify if available, or fall back on a message."
 			"notify-send" notification))
 	;; Maybe the handler will send a message, so only use message as
 	;; a fall back option
-	(t (message notification))))
+	(t (message "%s" notification))))
 
 (defun org-clock-play-sound ()
   "Play sound as configured by `org-clock-sound'.
