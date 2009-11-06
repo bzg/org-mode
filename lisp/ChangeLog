@@ -1,5 +1,8 @@
 2009-11-06  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-mobile.el (org-mobile-before-process-capture-hook): New hook.
+	(org-mobile-pull): Run `org-mobile-before-process-capture-hook'.
+
 	* org.el (org-indent-mode): Define variable already in org.el.
 	(org-unfontify-region): Remove line-prefix and wrap-prefix
 	properties only if org-indent-mode is active.

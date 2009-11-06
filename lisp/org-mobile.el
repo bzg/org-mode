@@ -252,6 +252,11 @@ create all custom agenda views, for upload to the mobile phone."
 	  (select-window cw)))))
   (message "Files for mobile viewer staged"))
   
+(defvar org-mobile-before-process-capture-hook nil
+  "Hook that is run after content was moved to `org-mobile-inbox-for-pull'.
+The inbox file is in the current buffer, and the buffer is arrowed to the
+new captured data.")
+
 ;;;###autoload
 (defun org-mobile-pull ()
   "Pull the contents of `org-mobile-capture-file' and integrate them.
@@ -263,6 +268,10 @@ agenda view showing the flagged items."
   (let ((insertion-marker (org-mobile-move-capture)))
     (if (not (markerp insertion-marker))
 	(message "No new items")
+      (org-with-point-at insertion-marker
+	(save-restriction
+	  (narrow-to-region (point) (point-max))
+	  (run-hooks 'org-mobile-before-process-capture-hook)))
       (org-with-point-at insertion-marker
 	(org-mobile-apply (point) (point-max)))
       (move-marker insertion-marker nil)
