@@ -543,7 +543,7 @@ The table of checksums is written to the file mobile-checksums."
 (defun org-mobile-move-capture ()
   "Move the contents of the capture file to the inbox file.
 Return a marker to the location where the new content has been added.
-If nothing new has beed added, return nil."
+If nothing new has been added, return nil."
   (interactive)
   (let ((inbox-buffer (find-file-noselect org-mobile-inbox-for-pull))
 	(capture-buffer (find-file-noselect

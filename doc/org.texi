@@ -6173,7 +6173,7 @@ Use the refile interface to jump to a heading.
 @item C-u C-u C-c C-w
 Jump to the location where @code{org-refile} last moved a tree to.
 @item C-2 C-c C-w
-Refile as the child of the tiem currently being clocked.
+Refile as the child of the item currently being clocked.
 @end table
 
 @node Archiving,  , Refiling notes, Capture - Refile - Archive
