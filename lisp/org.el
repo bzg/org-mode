@@ -4016,7 +4016,6 @@ This is for getting out of special buffers like remember.")
 (defvar org-struct-menu)
 (defvar org-org-menu)
 (defvar org-tbl-menu)
-(defvar org-agenda-keymap)
 
 ;;;; Define the Org-mode
 
@@ -10946,7 +10945,6 @@ only lines with a TODO keyword are included in the output."
 		      'mouse-face 'highlight
 		      'org-not-done-regexp org-not-done-regexp
 		      'org-todo-regexp org-todo-regexp
-		      'keymap org-agenda-keymap
 		      'help-echo
 		      (format "mouse-2 or RET jump to org file %s"
 			      (abbreviate-file-name

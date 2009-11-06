@@ -1312,6 +1312,8 @@ works you probably want to add it to `org-agenda-custom-commands' for good."
 
 (defvar org-agenda-mode-map (make-sparse-keymap)
   "Keymap for `org-agenda-mode'.")
+(if (fboundp 'defvaralias)
+    (defvaralias 'org-agenda-keymap 'org-agenda-mode-map))
 
 (defvar org-agenda-menu) ; defined later in this file.
 (defvar org-agenda-restrict) ; defined later in this file.
@@ -1499,15 +1501,12 @@ The following commands are available:
 (org-defkey org-agenda-mode-map "\C-c\C-x\C-mg"    'org-mobile-pull)
 (org-defkey org-agenda-mode-map "\C-c\C-x\C-mp"    'org-mobile-push)
 
-(defvar org-agenda-keymap (copy-keymap org-agenda-mode-map)
-  "Local keymap for agenda entries from Org-mode.")
-
-(org-defkey org-agenda-keymap
+(org-defkey org-agenda-mode-map
   (if (featurep 'xemacs) [(button2)] [(mouse-2)]) 'org-agenda-goto-mouse)
-(org-defkey org-agenda-keymap
+(org-defkey org-agenda-mode-map
   (if (featurep 'xemacs) [(button3)] [(mouse-3)]) 'org-agenda-show-mouse)
 (when org-agenda-mouse-1-follows-link
-  (org-defkey org-agenda-keymap [follow-link] 'mouse-face))
+  (org-defkey org-agenda-mode-map [follow-link] 'mouse-face))
 (easy-menu-define org-agenda-menu org-agenda-mode-map "Agenda menu"
   '("Agenda"
     ("Agenda Files")
@@ -3226,7 +3225,6 @@ in `org-agenda-text-search-extra-files'."
 		      'org-todo-regexp org-todo-regexp
 		      'org-complex-heading-regexp org-complex-heading-regexp
 		      'mouse-face 'highlight
-		      'keymap org-agenda-keymap
 		      'help-echo (format "mouse-2 or RET jump to location")))
 	 regexp rtn rtnall files file pos
 	 marker category tags c neg re as-words
@@ -3774,7 +3772,6 @@ date.  It also removes lines that contain only whitespace."
   "Add text properties to string, allowing org-mode to act on it."
   (org-add-props string nil
     'mouse-face 'highlight
-    'keymap org-agenda-keymap
     'help-echo (if buffer-file-name
 		   (format "mouse-2 or RET jump to diary file %s"
 			   (abbreviate-file-name buffer-file-name))
@@ -3927,7 +3924,6 @@ the documentation of `org-diary'."
 		      'org-todo-regexp org-todo-regexp
 		      'org-complex-heading-regexp org-complex-heading-regexp
 		      'mouse-face 'highlight
-		      'keymap org-agenda-keymap
 		      'help-echo
 		      (format "mouse-2 or RET jump to org file %s"
 			      (abbreviate-file-name buffer-file-name))))
@@ -3998,7 +3994,6 @@ the documentation of `org-diary'."
 		      'org-todo-regexp org-todo-regexp
 		      'org-complex-heading-regexp org-complex-heading-regexp
 		      'mouse-face 'highlight
-		      'keymap org-agenda-keymap
 		      'help-echo
 		      (format "mouse-2 or RET jump to org file %s"
 			      (abbreviate-file-name buffer-file-name))))
@@ -4092,7 +4087,6 @@ the documentation of `org-diary'."
   (require 'diary-lib)
   (let* ((props (list 'face nil
 		      'mouse-face 'highlight
-		      'keymap org-agenda-keymap
 		      'help-echo
 		      (format "mouse-2 or RET jump to org file %s"
 			      (abbreviate-file-name buffer-file-name))))
@@ -4137,7 +4131,6 @@ the documentation of `org-diary'."
 		      'org-not-done-regexp org-not-done-regexp
 		      'org-todo-regexp org-todo-regexp
 		      'org-complex-heading-regexp org-complex-heading-regexp
-		      'keymap org-agenda-keymap
 		      'help-echo
 		      (format "mouse-2 or RET jump to org file %s"
 			      (abbreviate-file-name buffer-file-name))))
@@ -4231,7 +4224,6 @@ the documentation of `org-diary'."
 		      'org-not-done-regexp org-not-done-regexp
 		      'org-todo-regexp org-todo-regexp
 		      'org-complex-heading-regexp org-complex-heading-regexp
-		      'keymap org-agenda-keymap
 		      'help-echo
 		      (format "mouse-2 or RET jump to org file %s"
 			      (abbreviate-file-name buffer-file-name))))
@@ -4325,7 +4317,6 @@ FRACTION is what fraction of the head-warning time has passed."
 		      'org-complex-heading-regexp org-complex-heading-regexp
 		      'done-face 'org-agenda-done
 		      'mouse-face 'highlight
-		      'keymap org-agenda-keymap
 		      'help-echo
 		      (format "mouse-2 or RET jump to org file %s"
 			      (abbreviate-file-name buffer-file-name))))
@@ -4430,7 +4421,6 @@ FRACTION is what fraction of the head-warning time has passed."
 		      'org-todo-regexp org-todo-regexp
 		      'org-complex-heading-regexp org-complex-heading-regexp
 		      'mouse-face 'highlight
-		      'keymap org-agenda-keymap
 		      'help-echo
 		      (format "mouse-2 or RET jump to org file %s"
 			      (abbreviate-file-name buffer-file-name))))
