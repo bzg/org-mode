@@ -97,6 +97,7 @@
 \\usepackage{float}
 \\usepackage{wrapfig}
 \\usepackage{soul}
+\\usepackage{amssymb}
 \\usepackage{hyperref}"
      ("\\section{%s}" . "\\section*{%s}")
      ("\\subsection{%s}" . "\\subsection*{%s}")
@@ -112,6 +113,7 @@
 \\usepackage{float}
 \\usepackage{wrapfig}
 \\usepackage{soul}
+\\usepackage{amssymb}
 \\usepackage{hyperref}"
      ("\\part{%s}" . "\\part*{%s}")
      ("\\chapter{%s}" . "\\chapter*{%s}")
@@ -127,6 +129,7 @@
 \\usepackage{float}
 \\usepackage{wrapfig}
 \\usepackage{soul}
+\\usepackage{amssymb}
 \\usepackage{hyperref}"
      ("\\part{%s}" . "\\part*{%s}")
      ("\\chapter{%s}" . "\\chapter*{%s}")
@@ -290,7 +293,7 @@ string should be like \"\\end{itemize\"."
 		 (string :tag "Use a section string" :value "\\subparagraph{%s}")))
 
 (defcustom org-export-latex-list-parameters
-  '(:cbon "\\texttt{[X]}" :cboff "\\texttt{[ ]}")
+  '(:cbon "$\\boxtimes$" :cboff "$\\Box$")
   "Parameters for the LaTeX list exporter.
 These parameters will be passed on to `org-list-to-latex', which in turn
 will pass them (combined with the LaTeX default list parameters) to

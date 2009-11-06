@@ -1305,6 +1305,8 @@ Valid parameters PARAMS are
 		   (setq sublist (replace-match cbon t t sublist)))
 	       (if (string-match "\\[CBOFF\\]" sublist)
 		   (setq sublist (replace-match cboff t t sublist)))
+	       (if (string-match "\\[-\\]" sublist)
+		   (setq sublist (replace-match "$\\boxminus$" t t sublist)))
 	       (setq rtn (concat rtn istart term ddstart
 				 sublist ddend iend isep)))
 	      (t (setq rtn (concat rtn	 ;; previous list
