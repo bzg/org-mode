@@ -1,3 +1,9 @@
+2009-11-06  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-indent-mode): Define variable already in org.el.
+	(org-unfontify-region): Remove line-prefix and wrap-prefix
+	properties only if org-indent-mode is active.
+
 2009-11-05  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-icalendar.el (org-print-icalendar-entries): Save match data

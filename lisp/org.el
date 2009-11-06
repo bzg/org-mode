@@ -3304,6 +3304,11 @@ If yes, offer to stop it and to save the buffer with the changes."
 
 ;; Autoload org-indent.el
 
+;; Define the variable already here, to make sure we have it.
+(defvar org-indent-mode nil
+  "Non-nil if Org-Indent mode is enabled.
+Use the command `org-indent-mode' to change this variable.")
+
 (eval-and-compile
   (org-autoload
    "org-indent"
@@ -4917,11 +4922,16 @@ If KWD is a number, get the corresponding match group."
 	 (inhibit-read-only t) (inhibit-point-motion-hooks t)
 	 (inhibit-modification-hooks t)
 	 deactivate-mark buffer-file-name buffer-file-truename)
-    (remove-text-properties beg end
-			    '(mouse-face t keymap t org-linked-text t
-					 invisible t intangible t
-					 line-prefix t wrap-prefix t
-					 org-no-flyspell t))))
+    (remove-text-properties
+     beg end
+     (if org-indent-mode
+	 '(mouse-face t keymap t org-linked-text t
+		      invisible t intangible t
+		      line-prefix t wrap-prefix t
+		      org-no-flyspell t)
+       '(mouse-face t keymap t org-linked-text t
+		    invisible t intangible t
+		    org-no-flyspell t)))))
 
 ;;;; Visibility cycling, including org-goto and indirect buffer
 
