@@ -1,5 +1,8 @@
 2009-11-06  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-remember.el (org-remember-apply-template): Turn of partial
+	completion.
+
 	* org-mobile.el (org-mobile-before-process-capture-hook): New hook.
 	(org-mobile-pull): Run `org-mobile-before-process-capture-hook'.
 

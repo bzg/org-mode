@@ -616,11 +616,12 @@ to be run from that hook to function properly."
 				     nil nil (list org-end-time-was-given)))
 	     (t
 	      (let (org-completion-use-ido)
-		(insert (org-completing-read-no-i
-			 (concat (if prompt prompt "Enter string")
-				 (if default (concat " [" default "]"))
-				 ": ")
-			 completions nil nil nil histvar default)))))))
+		(insert (org-without-partial-completion
+			 (org-completing-read-no-i
+			  (concat (if prompt prompt "Enter string")
+				  (if default (concat " [" default "]"))
+				  ": ")
+			  completions nil nil nil histvar default))))))))
 
 	(goto-char (point-min))
 	(if (re-search-forward "%\\?" nil t)
