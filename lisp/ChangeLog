@@ -72,6 +72,10 @@
 	* org-docbook.el (org-export-as-docbook): Protect targets in
 	verbatim emphasis.
 
+2009-11-07  James TD Smith  <ahktenzero@mohorovi.cc>
+
+	* org.el (org-link-display-format): Should be literal replacement.
+
 2009-11-06  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-clock.el (org-show-notification): Handle messages that
