@@ -161,7 +161,7 @@ last statement in BODY, as elisp."
 		    (mapconcat
 		     (lambda (line) (format "\t%s" line))
 		     (butlast lines) "\n")
-		    (format "\n\treturn %s" (last lines))))
+		    (format "\n\treturn %s" (car (last lines)))))
 		 tmp-file))
                ;; (message "buffer=%s" (buffer-string)) ;; debugging
                (shell-command-on-region (point-min) (point-max) "python"))
