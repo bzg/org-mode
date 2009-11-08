@@ -7633,10 +7633,22 @@ date at the cursor.
 @cindex diary entries, creating from agenda
 @kindex i
 @item i
-Insert a new entry into the diary.  Prompts for the type of entry
-(day, weekly, monthly, yearly, anniversary, cyclic) and creates a new
-entry in the diary, just as @kbd{i d}, etc., would do in the calendar.
-The date is taken from the cursor position.
+@vindex org-agenda-diary-file
+Insert a new entry into the diary, using the date at the cursor and (for
+clock entries) the date at the mark.  This will add to the Emacs diary
+file@footnote{This file is parsed for the agenda when
+@code{org-agenda-include-diary} is set.}, in a way similar to the @kbd{i}
+command in the calendar.  The diary file will pop up in another window, where
+you can add the entry.
+
+If you configure @code{org-agenda-diary-file} to point to an Org-mode file
+instead, Org will create entries in that file.  Most entries will be stored
+in a date-based outline tree that will later make it easy to archive
+appointments from previous months/years.  Emacs will prompt you for the entry
+text - if you specify it, the entry will be created in
+@code{org-agenda-diary-file} without further interaction.  If you directly
+press @key{RET} at the prompt without typing text, the target file will be
+shown in another window for you to finish the entry there.
 @c
 @kindex M
 @item M

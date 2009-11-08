@@ -1,5 +1,15 @@
 2009-11-08  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-agenda.el (org-agenda-diary-entry-in-org-file)
+	(org-agenda-add-entry-to-org-agenda-diary-file)
+	(org-agenda-insert-diary-make-new-entry): New functions.
+	(org-agenda-diary-entry): Call
+	`org-agenda-diary-entry-in-org-file' when appropriate.
+
+	* org.el (org-calendar-insert-diary-entry-key): New option.
+	(org-agenda-diary-file): New option.
+	("calendar"): Install our insertion function in the calendar.
+
 	* org-remember.el (org-datetree): Require.
 	(org-remember-templates): Add new positioning option.
 	(org-remember-reference-date): New variable.

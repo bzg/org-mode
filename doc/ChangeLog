@@ -1,3 +1,7 @@
+2009-11-08  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Agenda commands): Document the new `i' command.
+
 2009-11-03  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Structure editing, Plain lists): Document indentation

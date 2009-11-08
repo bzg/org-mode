@@ -52,7 +52,9 @@
 (declare-function calendar-julian-date-string   "cal-julian" (&optional date))
 (declare-function calendar-mayan-date-string    "cal-mayan"  (&optional date))
 (declare-function calendar-persian-date-string  "cal-persia" (&optional date))
+(declare-function org-datetree-find-date-create "org-datetree" (date))
 (declare-function org-columns-quit              "org-colview" ())
+(declare-function diary-date-display-form       "diary-lib"  (&optional type))
 (declare-function org-mobile-write-agenda-for-mobile "org-mobile" (file))
 (declare-function org-habit-insert-consistency-graphs
 		  "org-habit" (&optional line))
@@ -6644,47 +6646,162 @@ The cursor may be at a date in the calendar, or in the Org agenda."
   (org-with-remote-undo (marker-buffer org-clock-marker)
     (org-clock-cancel)))
 
+(defun org-agenda-diary-entry-in-org-file ()
+  "Make a diary entry in the file `org-agenda-diary-file'."
+  (let (d1 d2 char (text ""))
+    (if (equal (buffer-name) "*Calendar*")
+	(setq d1 (calendar-cursor-to-date t)
+	      d2 (car calendar-mark-ring))
+      (setq d1 (calendar-gregorian-from-absolute
+		(get-text-property (point) 'day))
+	    d2 (and (mark) (get-text-property (mark) 'day)
+		    (calendar-gregorian-from-absolute
+		     (get-text-property (mark) 'day)))))
+    (message "Diary entry: [d]ay [a]nniversary [b]lock [j]ump to date tree")
+    (setq char (read-char-exclusive))
+    (cond
+     ((equal char ?d)
+      (setq text (read-string "Day entry: "))
+      (org-agenda-add-entry-to-org-agenda-diary-file 'day text d1))
+     ((equal char ?a)
+      (setq d1 (list (car d1) (nth 1 d1)
+		     (read-number (format "Referece year [%d]: " (nth 2 d1))
+				  (nth 2 d1))))
+      (setq text (read-string "Anniversary (use %d to show years): "))
+      (org-agenda-add-entry-to-org-agenda-diary-file 'anniversary text d1))
+     ((equal char ?b)
+      (setq text (read-string "Block entry: "))
+      (org-agenda-add-entry-to-org-agenda-diary-file 'block text d1 d2))
+     ((equal char ?j)
+      (org-switch-to-buffer-other-window
+       (find-file-noselect org-agenda-diary-file))
+      (org-datetree-find-date-create d1))
+     (t (error "Invalid selection character `%c'" char)))))
+
+(defun org-agenda-add-entry-to-org-agenda-diary-file (type text &optional d1 d2)
+  "Add a diary entry with TYPE to `org-agenda-diary-file'.
+If TEXT is not empty, it will become the headling of the new entry, and
+the resulting entry will not be shown.  When TEXT is empty, switch to
+`org-agenda-diary-file' and let the user finish the entry there."
+  (let ((cw (current-window-configuration)))
+    (org-switch-to-buffer-other-window
+     (find-file-noselect org-agenda-diary-file))
+    (widen)
+    (goto-char (point-min))
+    (cond
+     ((eq type 'anniversary)
+      (or (re-search-forward "^*[ \t]+Anniversaries" nil t)
+	(progn
+	  (or (org-on-heading-p t)
+	      (progn
+		(outline-next-heading)
+		(insert "* Anniversaries\n\n")
+		(beginning-of-line -1)))))
+      (outline-next-heading)
+      (org-back-over-empty-lines)
+      (backward-char 1)
+      (insert "\n")
+      (let ((calendar-date-display-form (diary-date-display-form)))
+	(insert (format "%%%%(diary-anniversary %s) %s"
+			(calendar-date-string d1 nil t) text))))
+     ((eq type 'day)
+      (require 'org-datetree)
+      (org-datetree-find-date-create d1)
+      (org-agenda-insert-diary-make-new-entry text)
+      (org-insert-time-stamp (org-time-from-absolute
+			      (calendar-absolute-from-gregorian d1)))
+      (end-of-line 0))
+     ((eq type 'block)
+      (if (> (calendar-absolute-from-gregorian d1)
+	     (calendar-absolute-from-gregorian d2))
+	  (setq d1 (prog1 d2 (setq d2 d1))))
+      (require 'org-datetree)
+      (org-datetree-find-date-create d1)
+      (org-agenda-insert-diary-make-new-entry text)
+      (org-insert-time-stamp (org-time-from-absolute
+			      (calendar-absolute-from-gregorian d1)))
+      (insert "--")
+      (org-insert-time-stamp (org-time-from-absolute
+			      (calendar-absolute-from-gregorian d2)))
+      (end-of-line 0)))
+    (if (string-match "\\S-" text)
+	(progn
+	  (set-window-configuration cw)
+	  (message "%s entry added to %s"
+		   (capitalize (symbol-name type))
+		   (abbreviate-file-name org-agenda-diary-file)))
+      (message "Please finish entry here"))))
+
+(defun org-agenda-insert-diary-make-new-entry (text)
+  "Make new entry as last child of current entry.
+Add TEXT as headline, and position the cursor in the second line so that
+a timestamp can be added there."
+  (let ((org-show-following-heading t)
+	(org-show-siblings t)
+	(org-show-hierarchy-above t)
+	(org-show-entry-below t)
+	col)
+    (outline-next-heading)
+    (org-back-over-empty-lines)
+    (or (looking-at "[ \t]*$")
+	(progn (insert "\n") (backward-char 1)))
+    (org-insert-heading)
+    (org-do-demote)
+    (setq col (current-column))
+    (insert text "\n")
+    (if org-adapt-indentation (org-indent-to-column col))
+    (let ((org-show-following-heading t)
+	  (org-show-siblings t)
+	  (org-show-hierarchy-above t)
+	  (org-show-entry-below t))
+      (org-show-context))))
+
 (defun org-agenda-diary-entry ()
   "Make a diary entry, like the `i' command from the calendar.
-All the standard commands work: block, weekly etc."
+All the standard commands work: block, weekly etc.
+When `org-agenda-diary-file' points to a file,
+`org-agenda-diary-entry-in-org-file' is called instead to create
+entries in that Org-mode file."
   (interactive)
   (org-agenda-check-type t 'agenda 'timeline)
-  (require 'diary-lib)
-  (let* ((char (progn
-		 (message "Diary entry: [d]ay [w]eekly [m]onthly [y]early [a]nniversary [b]lock [c]yclic")
-		 (read-char-exclusive)))
-	 (cmd (cdr (assoc char
-			  '((?d . insert-diary-entry)
-			    (?w . insert-weekly-diary-entry)
-			    (?m . insert-monthly-diary-entry)
-			    (?y . insert-yearly-diary-entry)
-			    (?a . insert-anniversary-diary-entry)
-			    (?b . insert-block-diary-entry)
-			    (?c . insert-cyclic-diary-entry)))))
-	 (oldf (symbol-function 'calendar-cursor-to-date))
-;	 (buf (get-file-buffer (substitute-in-file-name diary-file)))
-	 (point (point))
-	 (mark (or (mark t) (point))))
-    (unless cmd
-      (error "No command associated with <%c>" char))
-    (unless (and (get-text-property point 'day)
-		 (or (not (equal ?b char))
-		     (get-text-property mark 'day)))
-      (error "Don't know which date to use for diary entry"))
-    ;; We implement this by hacking the `calendar-cursor-to-date' function
-    ;; and the `calendar-mark-ring' variable.  Saves a lot of code.
-    (let ((calendar-mark-ring
-	   (list (calendar-gregorian-from-absolute
-		  (or (get-text-property mark 'day)
-		      (get-text-property point 'day))))))
-      (unwind-protect
-	  (progn
-	    (fset 'calendar-cursor-to-date
-		  (lambda (&optional error dummy)
-		    (calendar-gregorian-from-absolute
-		     (get-text-property point 'day))))
+  (if (not (eq org-agenda-diary-file 'diary-file))
+      (org-agenda-diary-entry-in-org-file)
+    (require 'diary-lib)
+    (let* ((char (progn
+		   (message "Diary entry: [d]ay [w]eekly [m]onthly [y]early [a]nniversary [b]lock [c]yclic")
+		   (read-char-exclusive)))
+	   (cmd (cdr (assoc char
+			    '((?d . insert-diary-entry)
+			      (?w . insert-weekly-diary-entry)
+			      (?m . insert-monthly-diary-entry)
+			      (?y . insert-yearly-diary-entry)
+			      (?a . insert-anniversary-diary-entry)
+			      (?b . insert-block-diary-entry)
+			      (?c . insert-cyclic-diary-entry)))))
+	   (oldf (symbol-function 'calendar-cursor-to-date))
+	   ;; (buf (get-file-buffer (substitute-in-file-name diary-file)))
+	   (point (point))
+	   (mark (or (mark t) (point))))
+      (unless cmd
+	(error "No command associated with <%c>" char))
+      (unless (and (get-text-property point 'day)
+		   (or (not (equal ?b char))
+		       (get-text-property mark 'day)))
+	(error "Don't know which date to use for diary entry"))
+      ;; We implement this by hacking the `calendar-cursor-to-date' function
+      ;; and the `calendar-mark-ring' variable.  Saves a lot of code.
+      (let ((calendar-mark-ring
+	     (list (calendar-gregorian-from-absolute
+		    (or (get-text-property mark 'day)
+			(get-text-property point 'day))))))
+	(unwind-protect
+	    (progn
+	      (fset 'calendar-cursor-to-date
+		    (lambda (&optional error dummy)
+		      (calendar-gregorian-from-absolute
+		       (get-text-property point 'day))))
 	      (call-interactively cmd))
-	(fset 'calendar-cursor-to-date oldf)))))
+	  (fset 'calendar-cursor-to-date oldf))))))
 
 (defun org-agenda-execute-calendar-command (cmd)
   "Execute a calendar command from the agenda, with the date associated to

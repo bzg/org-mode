@@ -2711,12 +2711,39 @@ default is the character `k' because we use the same key in the agenda."
   :group 'org-agenda
   :type 'sexp)
 
+(defcustom org-calendar-insert-diary-entry-key [?i]
+  "The key to be installed in `calendar-mode-map' for adding diary entries.
+This option is irrelevant until `org-agenda-diary-file' has been configured
+to point to an Org-mode file.  When that is the case, the command
+`org-agenda-diary-entry' will be bound to the key given here, by default
+`i'.  In the calendar, `i' normally adds entries to `diary-file'.  So
+if you want to continue doing this, you need to change this to a defferent
+key."
+  :group 'org-agenda
+  :type 'sexp)
+
+(defcustom org-agenda-diary-file 'diary-file
+  "File to which to add new entries with the `i' key in agenda and calendar.
+When this is the symbol `diary-file', the functionality in the Emacs
+calendar will be used to add entries to the `diary-file'.  But when this
+points to a file, `org-agenda-diary-entry' will be used instead."
+  :group 'org-agenda
+  :type '(choice
+	  (const :tag "The standard Emacs diary file" diary-file)
+	  (file :tag "Special Org file diary entries")))
+
 (eval-after-load "calendar"
   '(progn
      (org-defkey calendar-mode-map org-calendar-to-agenda-key
 		 'org-calendar-goto-agenda)
      (org-defkey calendar-mode-map org-calendar-agenda-action-key
-		 'org-agenda-action)))
+		 'org-agenda-action)
+     (add-hook 'calendar-mode-hook
+	       (lambda ()
+		 (unless (eq org-agenda-diary-file 'diary-file)
+		   (define-key calendar-mode-map
+		     org-calendar-insert-diary-entry-key
+		     'org-agenda-diary-entry))))))
 
 (defgroup org-latex nil
   "Options for embedding LaTeX code into Org-mode."
