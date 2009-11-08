@@ -1,5 +1,12 @@
 2009-11-08  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-remember.el (org-datetree): Require.
+	(org-remember-templates): Add new positioning option.
+	(org-remember-reference-date): New variable.
+	(org-remember-apply-template): Store the reference date in a local
+	variable.
+	(org-remember-handler): Implement date tree positioning of entries.
+
 	* org-datetree.el: New file.
 
 	* org-latex.el (org-export-latex-preprocess): Protect targets in

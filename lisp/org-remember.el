@@ -34,6 +34,7 @@
 (eval-when-compile
   (require 'cl))
 (require 'org)
+(require 'org-datetree)
 
 (declare-function remember-mode "remember" ())
 (declare-function remember "remember" (&optional initial))
@@ -189,7 +190,8 @@ calendar           |  %:type %:date"
 		 (function :tag "Function")
 		 (const :tag "Use `org-remember-default-headline'" nil)
 		 (const :tag "At beginning of file" top)
-		 (const :tag "At end of file" bottom))
+		 (const :tag "At end of file" bottom)
+		 (const :tag "In a date tree" date-tree))
 		(choice :tag "Context"
 		 (const :tag "Use in all contexts" nil)
 		 (const :tag "Use in all contexts" t)
@@ -296,6 +298,7 @@ RET at beg-of-buf -> Append to file as level 2 headline
 
 (defvar org-jump-to-target-location nil)
 (defvar org-remember-previous-location nil)
+(defvar org-remember-reference-date nil)
 (defvar org-force-remember-template-char) ;; dynamically scoped
 
 ;; Save the major mode of the buffer we called remember from
@@ -534,6 +537,8 @@ to be run from that hook to function properly."
 	    (org-set-local 'org-default-notes-file file))
 	(if headline
 	    (org-set-local 'org-remember-default-headline headline))
+	(org-set-local 'org-remember-reference-date
+		       (list (nth 4 dct) (nth 3 dct) (nth 5 dct)))
 	;; Interactive template entries
 	(goto-char (point-min))
 	(while (re-search-forward "%^\\({\\([^}]*\\)}\\)?\\([gGtTuUCLp]\\)?" nil t)
@@ -851,6 +856,7 @@ See also the variable `org-reverse-note-order'."
 		     (delete-file (concat backup-file "~"))))
 	      (set-buffer-modified-p nil)
 	      (throw 'quit t)))
+	   (reference-date org-remember-reference-date)
 	   (previousp (and (member current-prefix-arg '((16) 0))
 			   org-remember-previous-location))
 	   (clockp (equal current-prefix-arg 2))
@@ -949,6 +955,10 @@ See also the variable `org-reverse-note-order'."
 	       ((eq heading 'bottom)
 		(goto-char (point-max))
 		(or (bolp) (newline))
+		(setq org-goto-start-pos (point)))
+	       ((eq heading 'date-tree)
+		(org-datetree-find-date-create reference-date)
+		(setq reversed nil)
 		(setq org-goto-start-pos (point)))
 	       ((and (stringp heading) (string-match "\\S-" heading))
 		(goto-char (point-min))
