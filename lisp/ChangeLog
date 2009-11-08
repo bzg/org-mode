@@ -1,3 +1,14 @@
+2009-11-08  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-latex.el (org-export-latex-preprocess): Protect targets in
+	verbatim emphasis.
+
+	* org-html.el (org-export-as-html): Protect targets in verbatim
+	emphasis.
+
+	* org-docbook.el (org-export-as-docbook): Protect targets in
+	verbatim emphasis.
+
 2009-11-06  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-clock.el (org-show-notification): Handle messages that

@@ -1785,7 +1785,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
   (while (re-search-forward
 	  (concat "<<<?" org-export-latex-all-targets-re
 		  ">>>?\\((INVISIBLE)\\)?") nil t)
-    (org-if-unprotected
+    (org-if-unprotected-at (+ (match-beginning 0) 2)
      (replace-match
       (org-export-latex-protect-string
        (format "\\label{%s}%s" (save-match-data (org-solidify-link-text

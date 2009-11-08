@@ -736,8 +736,12 @@ publishing directory."
 	  ;; Make targets to anchors.  Note that currently FOP does not
 	  ;; seem to support <anchor> tags when generating PDF output,
 	  ;; but this can be used in DocBook --> HTML conversion.
-	  (while (string-match "<<<?\\([^<>]*\\)>>>?\\((INVISIBLE)\\)?[ \t]*\n?" line)
+	  (setq start 0)
+	  (while (string-match
+		  "<<<?\\([^<>]*\\)>>>?\\((INVISIBLE)\\)?[ \t]*\n?" line start)
 	    (cond
+	     ((get-text-property (match-beginning 1) 'org-protected line)
+	      (setq start (match-end 1)))
 	     ((match-end 2)
 	      (setq line (replace-match
 			  (format "@<anchor xml:id=\"%s\"/>"

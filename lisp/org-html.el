@@ -972,9 +972,12 @@ lang=\"%s\" xml:lang=\"%s\">
 		(setq line (concat line "\\\\")))))
 
 	  ;; make targets to anchors
+	  (setq start 0)
 	  (while (string-match
-		  "<<<?\\([^<>]*\\)>>>?\\((INVISIBLE)\\)?[ \t]*\n?" line)
+		  "<<<?\\([^<>]*\\)>>>?\\((INVISIBLE)\\)?[ \t]*\n?" line start)
 	    (cond
+	     ((get-text-property (match-beginning 1) 'org-protected line)
+	      (setq start (match-end 1)))
 	     ((match-end 2)
 	      (setq line (replace-match
 			  (format
@@ -985,16 +988,18 @@ lang=\"%s\" xml:lang=\"%s\">
 	     ((and org-export-with-toc (equal (string-to-char line) ?*))
 	      ;; FIXME: NOT DEPENDENT on TOC?????????????????????
 	      (setq line (replace-match
-			  (concat "@<span class=\"target\">" (match-string 1 line) "@</span> ")
-;			  (concat "@<i>" (match-string 1 line) "@</i> ")
+			  (concat "@<span class=\"target\">"
+				  (match-string 1 line) "@</span> ")
+			  ;; (concat "@<i>" (match-string 1 line) "@</i> ")
 			  t t line)))
 	     (t
 	      (setq line (replace-match
 			  (concat "@<a name=\""
 				  (org-solidify-link-text (match-string 1 line))
-				  "\" class=\"target\">" (match-string 1 line) "@</a> ")
+				  "\" class=\"target\">" (match-string 1 line)
+				  "@</a> ")
 			  t t line)))))
-
+	    
 	  (setq line (org-html-handle-time-stamps line))
 
 	  ;; replace "&" by "&amp;", "<" and ">" by "&lt;" and "&gt;"
