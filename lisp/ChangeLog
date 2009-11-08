@@ -1,5 +1,7 @@
 2009-11-08  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-datetree.el: New file.
+
 	* org-latex.el (org-export-latex-preprocess): Protect targets in
 	verbatim emphasis.
 
