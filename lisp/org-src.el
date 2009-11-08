@@ -187,14 +187,16 @@ This minor mode is turned on in two situations:
 There is a mode hook, and keybindings for `org-edit-src-exit' and
 `org-edit-src-save'")
 
-(defun org-edit-src-code ()
+(defun org-edit-src-code (&optional context)
   "Edit the source code example at point.
 The example is copied to a separate buffer, and that buffer is switched
 to the correct language mode.  When done, exit with \\[org-edit-src-exit].
 This will remove the original code in the Org buffer, and replace it with
-the edited version."
+the edited version. Optional argument CONTEXT is used by 
+\\[org-edit-src-save] when calling this function."
   (interactive)
-  (setq org-edit-src-saved-temp-window-config (current-window-configuration))
+  (unless (eq context 'save)
+    (setq org-edit-src-saved-temp-window-config (current-window-configuration)))
   (let ((line (org-current-line))
 	(col (current-column))
 	(case-fold-search t)
@@ -577,9 +579,10 @@ the language, a switch telling if the content should be in a single line."
     (org-move-to-column (if preserve-indentation col (+ col total-nindent delta)))
     (move-marker beg nil)
     (move-marker end nil))
-  (when org-edit-src-saved-temp-window-config
-    (set-window-configuration org-edit-src-saved-temp-window-config)
-    (setq org-edit-src-saved-temp-window-config nil)))
+  (unless (eq context 'save)
+    (when org-edit-src-saved-temp-window-config
+      (set-window-configuration org-edit-src-saved-temp-window-config)
+      (setq org-edit-src-saved-temp-window-config nil))))
 
 (defun org-edit-src-save ()
   "Save parent buffer with current state source-code buffer."
@@ -591,8 +594,8 @@ the language, a switch telling if the content should be in a single line."
       (setq msg (current-message))
       (if (eq org-src-window-setup 'other-frame)
 	  (let ((org-src-window-setup 'current-window))
-	    (org-edit-src-code))
-	(org-edit-src-code)))
+	    (org-edit-src-code 'save))
+	(org-edit-src-code 'save)))
     (push-mark m 'nomessage)
     (goto-char (min p (point-max)))
     (message (or msg ""))))
