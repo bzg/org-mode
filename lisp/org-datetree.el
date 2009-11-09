@@ -33,11 +33,26 @@
 
 (require 'org)
 
+(defvar org-datetree-base-level 1
+  "The level at which years should be placed in the date tree.
+This is normally one, but if the buffer has an entry with a DATE_TREE
+property, the date tree will become a subtree under that entry, so the
+base level will be properly adjusted.")
+
 (defun org-datetree-find-date-create (date)
   "Find or create an entry for DATE."
   (let ((year (nth 2 date))
 	(month (car date))
 	(day (nth 1 date)))
+    (org-set-local 'org-datetree-base-level 1)
+    (widen)
+    (goto-char (point-min))
+    (when (re-search-forward "^[ \t]*:DATE_TREE:[ \t]+\\S-" nil t)
+      (org-back-to-heading t)
+      (org-set-local 'org-datetree-base-level
+		     (org-get-valid-level (funcall outline-level) 1))
+      (org-narrow-to-subtree))
+    (goto-char (point-min))
     (org-datetree-find-year-create year)
     (org-datetree-find-month-create year month)
     (org-datetree-find-day-create year month day)
@@ -103,7 +118,7 @@
   (let ((pos (point)))
     (skip-chars-backward " \t\n")
     (delete-region (point) pos)
-    (insert "\n* \n")
+    (insert "\n" (make-string org-datetree-base-level ?*) " \n")
     (backward-char 1)
     (if month (org-do-demote))
     (if day (org-do-demote))
