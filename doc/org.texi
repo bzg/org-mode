@@ -12191,6 +12191,8 @@ calculations and improved XEmacs compatibility, in particular by porting
 @item
 @i{Baoqiu Cui} contributed the DocBook exporter.
 @item
+@i{Dan Davison} wrote (together with @i{Eric Schulte}) Org Babel.
+@item
 @i{Eddward DeVilla} proposed and tested checkbox statistics.  He also
 came up with the idea of properties, and that there should be an API for
 them.
@@ -12214,11 +12216,13 @@ HTML agendas.
 @i{John Foerch} figured out how to make incremental search show context
 around a match in a hidden outline tree.
 @item
-@i{Niels Giesen} had the idea to automatically archive DONE trees.
+@i{Raimar Finken} wrote @file{org-git-line.el}.
 @item
 @i{Mikael Fornius} works as a mailing list moderator.
 @item
 @i{Austin Frank} works as a mailing list moderator.
+@item
+@i{Niels Giesen} had the idea to automatically archive DONE trees.
 @item
 @i{Bastien Guerry} wrote the La@TeX{} exporter and @file{org-bibtex.el}, and
 has been prolific with patches, ideas, and bug reports.
@@ -12307,8 +12311,8 @@ of feedback, developed and applied standards to the Org documentation.
 @i{Christian Schlauer} proposed angular brackets around links, among
 other things.
 @item
-@i{Eric Schulte} wrote @file{org-plot.el} and contributed various patches,
-small features and modules.
+@i{Eric Schulte} wrote @file{org-plot.el} and (together with @i{Dan Davison})
+Org Babel, and contributed various patches, small features and modules.
 @item
 Linking to VM/BBDB/Gnus was first inspired by @i{Tom Shannon}'s
 @file{organizer-mode.el}.
