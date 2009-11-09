@@ -1469,7 +1469,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 		       org-export-latex-emphasis-alist))
 	  (beg (match-beginning 0))
 	  (end (match-end 0))
-	  rpl)
+	  rpl s)
       (unless emph
 	(message "`org-export-latex-emphasis-alist' has no entry for formatting triggered by \"%s\""
 		 (match-string 3)))
@@ -1482,12 +1482,20 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 		      (and (org-at-table-p)
 			   (string-match
 			    "[|\n]" (buffer-substring beg end))))))
+	(setq s (match-string 4))
 	(setq rpl (concat (match-string 1)
 			  (org-export-latex-emph-format (cadr emph)
 							(match-string 4))
 			  (match-string 5)))
 	(if (caddr emph)
-	    (setq rpl (org-export-latex-protect-string rpl)))
+	    (setq rpl (org-export-latex-protect-string rpl))
+	  (save-match-data
+	    (if (string-match "\\`.\\(\\\\[a-z]+{\\)\\(.*\\)\\(}\\).\\'" rpl)
+		(progn
+		  (add-text-properties (match-beginning 1) (match-end 1)
+				       '(org-protected t) rpl)
+		  (add-text-properties (match-beginning 3) (match-end 3)
+				       '(org-protected t) rpl)))))
 	(replace-match rpl t t)))
     (backward-char)))
 
@@ -1520,8 +1528,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 	    (setq char (or (cdr (assoc char trans)) (concat "\\" char))
 		  rtn (concat rtn char)))
 	  (setq string (concat rtn string) format "\\texttt{%s}")))))
-  (setq string (org-export-latex-protect-string
-		(format format string))))
+  (format format string))
 
 (defun org-export-latex-links ()
   ;; Make sure to use the LaTeX hyperref and graphicx package
