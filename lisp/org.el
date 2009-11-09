@@ -1951,7 +1951,7 @@ Possible values are:
 
 nil     Don't add anything, just change the keyword
 time    Add a time stamp to the task
-note    Prompt a closing note and add it with template `org-log-note-headings'
+note    Prompt for a note and add it with template `org-log-note-headings'
 
 This option can also be set with on a per-file-basis with
 
@@ -1966,13 +1966,58 @@ property to one or more of these keywords."
   :type '(choice
 	  (const :tag "No logging" nil)
 	  (const :tag "Record CLOSED timestamp" time)
-	  (const :tag "Record CLOSED timestamp with closing note." note)))
+	  (const :tag "Record CLOSED timestamp with note." note)))
 
 ;; Normalize old uses of org-log-done.
 (cond
  ((eq org-log-done t) (setq org-log-done 'time))
  ((and (listp org-log-done) (memq 'done org-log-done))
   (setq org-log-done 'note)))
+
+(defcustom org-log-reschedule nil
+  "Information to record when the scheduling date of a tasks is modified.
+
+Possible values are:
+
+nil     Don't add anything, just change the date
+time    Add a time stamp to the task
+note    Prompt for a note and add it with template `org-log-note-headings'
+
+This option can also be set with on a per-file-basis with
+
+   #+STARTUP: nologreschedule
+   #+STARTUP: logreschedule
+   #+STARTUP: lognotereschedule"
+  :group 'org-todo
+  :group 'org-progress
+  :type '(choice
+	  (const :tag "No logging" nil)
+	  (const :tag "Record timestamp" time)
+	  (const :tag "Record timestamp with note." note)))
+
+(defcustom org-log-redeadline nil
+  "Information to record when the deadline date of a tasks is modified.
+
+Possible values are:
+
+nil     Don't add anything, just change the date
+time    Add a time stamp to the task
+note    Prompt for a note and add it with template `org-log-note-headings'
+
+This option can also be set with on a per-file-basis with
+
+   #+STARTUP: nologredeadline
+   #+STARTUP: logredeadline
+   #+STARTUP: lognoteredeadline
+
+You can have local logging settings for a subtree by setting the LOGGING
+property to one or more of these keywords."
+  :group 'org-todo
+  :group 'org-progress
+  :type '(choice
+	  (const :tag "No logging" nil)
+	  (const :tag "Record timestamp" time)
+	  (const :tag "Record timestamp with note." note)))
 
 (defcustom org-log-note-clock-out nil
   "Non-nil means, record a note when clocking out of an item.
@@ -1995,6 +2040,8 @@ When nil, only the date will be recorded."
   '((done .  "CLOSING NOTE %t")
     (state . "State %-12s from %-12S %t")
     (note .  "Note taken on %t")
+    (reschedule .  "Rescheduled from %S on %t")
+    (redeadline .  "New deadline from %S on %t")
     (clock-out . ""))
   "Headings for notes added to entries.
 The value is an alist, with the car being a symbol indicating the note
@@ -2013,7 +2060,9 @@ empty string.
 		       "Heading when changing todo state (todo sequence only)"
 		       state) string)
 	  (cons (const :tag "Heading when just taking a note" note) string)
-	  (cons (const :tag "Heading when clocking out" clock-out) string)))
+	  (cons (const :tag "Heading when clocking out" clock-out) string)
+	  (cons (const :tag "Heading when rescheduling" reschedule) string)
+	  (cons (const :tag "Heading when changing deadline" redeadline) string)))
 
 (unless (assq 'note org-log-note-headings)
   (push '(note . "%t") org-log-note-headings))
@@ -3630,6 +3679,12 @@ After a match, the following groups carry important information:
     ("logrepeat" org-log-repeat state)
     ("lognoterepeat" org-log-repeat note)
     ("nologrepeat" org-log-repeat nil)
+    ("logreschedule" org-log-reschedule time)
+    ("lognotereschedule" org-log-reschedule note)
+    ("nologreschedule" org-log-reschedule nil)
+    ("logredeadline" org-log-redeadline time)
+    ("lognoteredeadline" org-log-redeadline note)
+    ("nologredeadline" org-log-redeadline nil)
     ("fninline" org-footnote-define-inline t)
     ("nofninline" org-footnote-define-inline nil)
     ("fnlocal" org-footnote-section nil)
@@ -10312,29 +10367,41 @@ With argument REMOVE, remove any deadline from the item.
 When TIME is set, it should be an internal time specification, and the
 scheduling will use the corresponding date."
   (interactive "P")
-  (if remove
-      (progn
-	(org-remove-timestamp-with-keyword org-deadline-string)
-	(message "Item no longer has a deadline."))
-    (if (org-get-repeat)
-	(error "Cannot change deadline on task with repeater, please do that by hand")
-      (org-add-planning-info 'deadline time 'closed)
-      (message "Deadline on %s" org-last-inserted-timestamp))))
-
+  (let ((old-date (org-entry-get nil "DEADLINE")))
+    (if remove
+	(progn
+	  (org-remove-timestamp-with-keyword org-deadline-string)
+	  (message "Item no longer has a deadline."))
+      (if (org-get-repeat)
+	  (error "Cannot change deadline on task with repeater, please do that by hand")
+	(org-add-planning-info 'deadline time 'closed)
+	(when (and old-date org-log-redeadline
+		   (not (equal old-date
+			       (substring org-last-inserted-timestamp 1 -1))))
+	  (org-add-log-setup 'redeadline nil old-date 'findpos
+			     org-log-redeadline))
+	(message "Deadline on %s" org-last-inserted-timestamp)))))
+	
 (defun org-schedule (&optional remove time)
   "Insert the SCHEDULED: string with a timestamp to schedule a TODO item.
 With argument REMOVE, remove any scheduling date from the item.
 When TIME is set, it should be an internal time specification, and the
 scheduling will use the corresponding date."
   (interactive "P")
-  (if remove
-      (progn
-	(org-remove-timestamp-with-keyword org-scheduled-string)
-	(message "Item is no longer scheduled."))
-    (if (org-get-repeat)
-	(error "Cannot reschedule task with repeater, please do that by hand")
-      (org-add-planning-info 'scheduled time 'closed)
-      (message "Scheduled to %s" org-last-inserted-timestamp))))
+  (let ((old-date (org-entry-get nil "SCHEDULED")))
+    (if remove
+	(progn
+	  (org-remove-timestamp-with-keyword org-scheduled-string)
+	  (message "Item is no longer scheduled."))
+      (if (org-get-repeat)
+	  (error "Cannot reschedule task with repeater, please do that by hand")
+	(org-add-planning-info 'scheduled time 'closed)
+	(when (and old-date org-log-reschedule
+		   (not (equal old-date
+			       (substring org-last-inserted-timestamp 1 -1))))
+	  (org-add-log-setup 'reschedule nil old-date 'findpos
+			     org-log-reschedule))
+	(message "Scheduled to %s" org-last-inserted-timestamp)))))
 
 (defun org-get-scheduled-time (pom &optional inherit)
   "Get the scheduled time as a time tuple, of a format suitable
@@ -10576,6 +10643,10 @@ EXTRA is additional text that will be inserted into the notes buffer."
 		      (format "state change from \"%s\" to \"%s\""
 			      (or org-log-note-previous-state "")
 			      (or org-log-note-state "")))
+		     ((eq org-log-note-purpose 'reschedule)
+		      "rescheduling")
+		     ((eq org-log-note-purpose 'redeadline)
+		      "changing deadline")
 		     ((eq org-log-note-purpose 'note)
 		      "this entry")
 		     (t (error "This should not happen")))))
