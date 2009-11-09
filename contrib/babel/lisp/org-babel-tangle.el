@@ -72,6 +72,7 @@ TARGET-FILE can be used to specify a default export file for all
 source blocks.  Optional argument LANG can be used to limit the
 exported source code blocks by language."
   (interactive)
+  (save-buffer)
   (save-excursion
     (let ((block-counter 0)
           path-collector)
