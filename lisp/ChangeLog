@@ -1,5 +1,9 @@
 2009-11-09  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-clock.el (org-clock-out, org-clock-cancel): Revert to
+	instances to switching to with-current-buffer, because these seem
+	to cause problems - no idea why.
+
 	* org-agenda.el (org-agenda-add-entry-to-org-agenda-diary-file):
 	Require diary-lib for (diary-date-display-form).
 
