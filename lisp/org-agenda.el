@@ -6702,6 +6702,7 @@ the resulting entry will not be shown.  When TEXT is empty, switch to
       (org-back-over-empty-lines)
       (backward-char 1)
       (insert "\n")
+      (require 'diary-lib)
       (let ((calendar-date-display-form (diary-date-display-form)))
 	(insert (format "%%%%(diary-anniversary %s) %s"
 			(calendar-date-string d1 nil t) text))))

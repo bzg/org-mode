@@ -1,5 +1,8 @@
 2009-11-09  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-agenda.el (org-agenda-add-entry-to-org-agenda-diary-file):
+	Require diary-lib for (diary-date-display-form).
+
 	* org.el (org-log-reschedule, org-log-redeadline): New options.
 	(org-log-note-headings): Add templates for rescheduling and
 	deadline changing.
