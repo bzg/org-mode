@@ -40,15 +40,16 @@
   "Execute a block of Python code with org-babel.  This function is
 called by `org-babel-execute-src-block' via multiple-value-bind."
   (message "executing Python source code block")
-  (let ((full-body (concat
+  (let* ((full-body (concat
 		    (mapconcat ;; define any variables
 		     (lambda (pair)
 		       (format "%s=%s"
 			       (car pair)
 			       (org-babel-python-var-to-python (cdr pair))))
 		     vars "\n") "\n" (org-babel-trim body) "\n")) ;; then the source block body
-	(session (org-babel-python-initiate-session session)))
-    (org-babel-python-evaluate session full-body result-type)))
+	(session (org-babel-python-initiate-session session))
+	(result (org-babel-python-evaluate session full-body result-type)))
+    (or (cdr (assoc :file params)) result)))
 
 (defun org-babel-prep-session:python (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."
@@ -160,7 +161,7 @@ last statement in BODY, as elisp."
 		    (mapconcat
 		     (lambda (line) (format "\t%s" line))
 		     (butlast lines) "\n")
-		    (format "\n\treturn %s" (last lines))))
+		    (format "\n\treturn %s" (car (last lines)))))
 		 tmp-file))
                ;; (message "buffer=%s" (buffer-string)) ;; debugging
                (shell-command-on-region (point-min) (point-max) "python"))
