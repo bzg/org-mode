@@ -5225,17 +5225,25 @@ an item:
 @c
 @kindex C-c C-d
 @item C-c C-d
-Insert @samp{DEADLINE} keyword along with a stamp.  The insertion will
-happen in the line directly following the headline.  When called with a
-prefix arg, an existing deadline will be removed from the entry.
+Insert @samp{DEADLINE} keyword along with a stamp.  The insertion will happen
+in the line directly following the headline.  When called with a prefix arg,
+an existing deadline will be removed from the entry.  Depending on the
+variable @code{org-log-redeadline}@footnote{with corresponding
+@code{#+STARTUP} keyqwords @code{logredeadline}, @code{lognoteredeadline},
+and @code{nologredeadline}}, a note will be taken when changing an existing
+deadline.
 @c FIXME Any CLOSED timestamp will be removed.????????
 @c
 @kindex C-c C-s
 @item C-c C-s
 Insert @samp{SCHEDULED} keyword along with a stamp.  The insertion will
-happen in the line directly following the headline.  Any CLOSED
-timestamp will be removed.  When called with a prefix argument, remove
-the scheduling date from the entry.
+happen in the line directly following the headline.  Any CLOSED timestamp
+will be removed.  When called with a prefix argument, remove the scheduling
+date from the entry.  Depending on the variable
+@code{org-log-reschedule}@footnote{with corresponding @code{#+STARTUP}
+keywords @code{logredeadline}, @code{lognoteredeadline}, and
+@code{nologredeadline}}, a note will be taken when changing an existing
+scheduling time.
 @c
 @kindex C-c C-x C-k
 @kindex k a
@@ -10525,6 +10533,12 @@ configured using these options (see variables @code{org-log-done},
 @cindex @code{logrepeat}, STARTUP keyword
 @cindex @code{lognoterepeat}, STARTUP keyword
 @cindex @code{nologrepeat}, STARTUP keyword
+@cindex @code{logreschedule}, STARTUP keyword
+@cindex @code{lognotereschedule}, STARTUP keyword
+@cindex @code{nologreschedule}, STARTUP keyword
+@cindex @code{logredeadline}, STARTUP keyword
+@cindex @code{lognoteredeadline}, STARTUP keyword
+@cindex @code{nologredeadline}, STARTUP keyword
 @example
 logdone            @r{record a timestamp when an item is marked DONE}
 lognotedone        @r{record timestamp and a note when DONE}
@@ -10534,6 +10548,12 @@ lognoterepeat      @r{record a note when reinstating a repeating item}
 nologrepeat        @r{do not record when reinstating repeating item}
 lognoteclock-out   @r{record a note when clocking out}
 nolognoteclock-out @r{don't record a note when clocking out}
+logreschedule      @r{record a timestamp when scheduling time changes}
+lognotereschedule  @r{record a note when scheduling time changes}
+nologreschedule    @r{do not record when a scheduling date changes}
+logredeadline      @r{record a timestamp when deadline changes}
+lognoteredeadline  @r{record a note when deadline changes}
+nologredeadline    @r{do not record when a deadline date changes}
 @end example
 @vindex org-hide-leading-stars
 @vindex org-odd-levels-only

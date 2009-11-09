@@ -1,3 +1,15 @@
+2009-11-09  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-log-reschedule, org-log-redeadline): New options.
+	(org-log-note-headings): Add templates for rescheduling and
+	deadline changing.
+	(org-startup-options): Add in-buffer settings for logging changing
+	schedule and deadline time stamps.
+	(org-deadline, org-schedule): Check for existing date and arrange
+	for logging if the user requests it.
+	(org-add-log-note): Prepare proper note buffers for rescheduling
+	and deadline changes.
+
 2009-11-08  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-agenda.el (org-agenda-diary-entry-in-org-file)
