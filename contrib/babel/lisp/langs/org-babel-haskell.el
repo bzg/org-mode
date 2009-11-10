@@ -55,13 +55,13 @@
 (defvar org-babel-haskell-eoe "\"org-babel-haskell-eoe\"")
 
 (defun org-babel-execute:haskell (body params)
-  "Execute a block of Haskell code with org-babel.  This function
-is called by `org-babel-execute-src-block' with the following
-variables pre-set using `multiple-value-bind'.
-
-  (session vars result-params result-type)"
+  "Execute a block of Haskell code with org-babel."
   (message "executing haskell source code block")
-  (let* ((full-body (concat
+  (let* ((processed-params (org-babel-process-params params))
+         (session (first processed-params))
+         (vars (second processed-params))
+         (result-type (fourth processed-params))
+         (full-body (concat
                      (mapconcat
                       (lambda (pair) (format "let %s = %s;" (car pair) (cdr pair)))
                       vars "\n") "\n" body "\n"))

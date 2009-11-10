@@ -40,15 +40,20 @@
   "Execute a block of Python code with org-babel.  This function is
 called by `org-babel-execute-src-block' via multiple-value-bind."
   (message "executing Python source code block")
-  (let* ((full-body (concat
-		    (mapconcat ;; define any variables
-		     (lambda (pair)
-		       (format "%s=%s"
-			       (car pair)
-			       (org-babel-python-var-to-python (cdr pair))))
-		     vars "\n") "\n" (org-babel-trim body) "\n")) ;; then the source block body
-	(session (org-babel-python-initiate-session session))
-	(result (org-babel-python-evaluate session full-body result-type)))
+  (let* ((processed-params (org-babel-process-params params))
+         (session (org-babel-python-initiate-session (first processed-params)))
+         (vars (second processed-params))
+         (result-params (third processed-params))
+         (result-type (fourth processed-params))
+         (full-body (concat
+                     (mapconcat ;; define any variables
+                      (lambda (pair)
+                        (format "%s=%s"
+                                (car pair)
+                                (org-babel-python-var-to-python (cdr pair))))
+                      vars "\n") "\n" (org-babel-trim body) "\n")) ;; then the source block body
+         
+         (result (org-babel-python-evaluate session full-body result-type)))
     (or (cdr (assoc :file params)) result)))
 
 (defun org-babel-prep-session:python (session params)

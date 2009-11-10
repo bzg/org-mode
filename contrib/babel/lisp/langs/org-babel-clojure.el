@@ -195,14 +195,11 @@ last statement in BODY, as elisp."
     (org-babel-clojure-evaluate-external-process buffer body result-type)))
 
 (defun org-babel-execute:clojure (body params)
-  "Execute a block of Clojure code with org-babel.  This function
-is called by `org-babel-execute-src-block' with the following
-variables pre-set using `multiple-value-bind'.
-
-  (session vars result-params result-type)"
-  
-  (let* ((body (org-babel-clojure-build-full-form body vars))     
-         (session (org-babel-clojure-initiate-session session)))  
-    (org-babel-clojure-evaluate session body result-type)))
+  "Execute a block of Clojure code with org-babel."
+  (let* ((processed-params (org-babel-process-params params))
+         (vars (second processed-params))
+         (body (org-babel-clojure-build-full-form body vars))     
+         (session (org-babel-clojure-initiate-session (first processed-params))))  
+    (org-babel-clojure-evaluate session body (fourth processed-params))))
 
 (provide 'org-babel-clojure)

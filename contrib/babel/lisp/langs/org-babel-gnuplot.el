@@ -74,6 +74,7 @@ called by `org-babel-execute-src-block' via multiple-value-bind."
   (message "executing Gnuplot source code block")
   (save-window-excursion
     (let* ((vars (org-babel-gnuplot-process-vars params))
+           (session (cdr (assoc :session params)))
            (out-file (cdr (assoc :file params)))
            (term (or (cdr (assoc :term params))
                      (when out-file (file-name-extension out-file))))

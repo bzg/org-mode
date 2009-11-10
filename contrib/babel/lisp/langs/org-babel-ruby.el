@@ -50,15 +50,19 @@
   "Execute a block of Ruby code with org-babel.  This function is
 called by `org-babel-execute-src-block' via multiple-value-bind."
   (message "executing Ruby source code block")
-  (let* ((full-body (concat
+  (let* ((processed-params (org-babel-process-params params))
+         (session (org-babel-ruby-initiate-session (first processed-params)))
+         (vars (second processed-params))
+         (result-params (third processed-params))
+         (result-type (fourth processed-params))
+         (full-body (concat
 		    (mapconcat ;; define any variables
 		     (lambda (pair)
 		       (format "%s=%s"
 			       (car pair)
 			       (org-babel-ruby-var-to-ruby (cdr pair))))
 		     vars "\n") "\n" body "\n")) ;; then the source block body
-	(session (org-babel-ruby-initiate-session session))
-	(result (org-babel-ruby-evaluate session full-body result-type)))
+         (result (org-babel-ruby-evaluate session full-body result-type)))
     (or (cdr (assoc :file params)) result)))
 
 (defun org-babel-prep-session:ruby (session params)
