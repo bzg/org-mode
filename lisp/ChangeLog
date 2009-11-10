@@ -8,6 +8,14 @@
 	(org-datetree-file-entry-under): New function.
 	(org-datetree-cleanup): New command.
 
+2009-11-08  Dan Davison  <davison@stats.ox.ac.uk>
+
+	* org-src.el (org-edit-src-code): New optional argument context
+	allows calling functions to avoid altering the saved window
+	configuration.
+	(org-edit-src-exit): Do not restore window configuration when this
+	function is used in the context of saving the edit buffer.
+
 2009-11-09  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-clock.el (org-clock-out, org-clock-cancel): Revert to
