@@ -44,9 +44,6 @@ orgtbl-sqlinsert.el      --- Convert Org-mode tables to SQL insertions.
 PACKAGES
 ========
 
-org-export-freemind  --- exporting utilities from org-mode to freemind
-
-
 SCRIPTS (shell, bash, etc.)
 ===========================
 
