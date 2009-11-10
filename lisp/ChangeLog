@@ -1,3 +1,19 @@
+2009-11-12  James TD Smith  <ahktenzero@mohorovi.cc>
+
+	* org-colview.el (org-columns-display-here): Don't try to
+	calculate values if the underlying property is not set.
+	(org-columns-string-to-number): Convert age strings back into
+	fractional days.
+	(org-agenda-colview-summarize): Handle extended summary types
+	properly.
+
+	* org-colview-xemacs.el (org-columns-display-here): Don't try to
+	calculate values if the underlying property is not set.
+	(org-columns-string-to-number): Convert age strings back into
+	fractional days.
+	(org-agenda-colview-summarize): Handle extended summary types
+	properly.
+
 2009-11-11  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-protocol.el (org-protocol-char-to-string): New defsubst.

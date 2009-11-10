@@ -203,6 +203,7 @@ This is the compiled version of the format.")
 			    (org-agenda-columns-cleanup-item
 			     val pl cphr org-columns-current-fmt-compiled)))
 			 ((and calc (functionp calc)
+			       (not (string= val ""))
 			       (not (get-text-property 0 'org-computed val)))
 			  (org-columns-number-to-string
 			   (funcall calc (org-columns-string-to-number
@@ -1044,9 +1045,16 @@ Don't set this, this is meant for dynamic scoping.")
   (if s
       (cond
        ((memq fmt '(min_age max_age mean_age))
-	(if (string= s "")
-	    org-columns-time
-	  (time-to-number-of-days (apply 'encode-time (org-parse-time-string s t)))))
+	(cond ((string= s "") org-columns-time)
+	      ((string-match
+		"\\([0-9]+\\)d \\([0-9]+\\)h \\([0-9]+\\)m \\([0-9]+\\)s"
+		s)
+	       (+ (* 60 (+ (* 60 (+ (* 24 (string-to-number (match-string 1 s)))
+				    (string-to-number (match-string 2 s))))
+			   (string-to-number (match-string 3 s))))
+		  (string-to-number (match-string 4 s))))
+	      (t (time-to-number-of-days (apply 'encode-time
+						(org-parse-time-string s t))))))
        ((string-match ":" s)
 	(let ((l (nreverse (org-split-string s ":"))) (sum 0.0))
 	  (while l
@@ -1054,8 +1062,7 @@ Don't set this, this is meant for dynamic scoping.")
 	  sum))
        ((memq fmt '(checkbox checkbox-n-of-m checkbox-percent))
 	(if (equal s "[X]") 1. 0.000001))
-       (t (string-to-number s)))
-    0))
+       (t (string-to-number s)))))
 
 (defun org-columns-uncompile-format (cfmt)
   "Turn the compiled columns format back into a string representation."
@@ -1364,10 +1371,11 @@ and tailing newline characters."
   "Summarize the summarizable columns in column view in the agenda.
 This will add overlays to the date lines, to show the summary for each day."
   (let* ((fmt (mapcar (lambda (x)
-			(list (car x) (if (equal (car x) "CLOCKSUM")
-					  'add_times (nth 4 x))))
+			(if (equal (car x) "CLOCKSUM")
+			    (list "CLOCKSUM" (nth 2 x) add_times + identity)
+			  (cdr x)))
 		      org-columns-current-fmt-compiled))
-	 line c c1 stype props lsum entries prop v)
+	 line c c1 stype calc sumfunc props lsum entries prop v)
     (catch 'exit
       (when (delq nil (mapcar 'cadr fmt))
 	;; OK, at least one summation column, it makes sense to try this
@@ -1390,24 +1398,40 @@ This will add overlays to the date lines, to show the summary for each day."
 	      (setq props
 		    (mapcar
 		     (lambda (f)
-		       (setq prop (car f) stype (nth 1 f))
+		       (setq prop (car f)
+			     stype (nth 3 f)
+			     sumfunc (nth 5 f)
+			     calc (or (nth 6 f) 'identity))
 		       (cond
 			((equal prop "ITEM")
 			 (cons prop (buffer-substring (point-at-bol)
 						      (point-at-eol))))
 			((not stype) (cons prop ""))
-			(t
-			 ;; do the summary
-			 (setq lsum 0)
-			 (mapc (lambda (x)
-				 (setq v (cdr (assoc prop x)))
-				 (if v (setq lsum (+ lsum
-						     (org-columns-string-to-number
-						      v stype)))))
-			       entries)
-			 (setq lsum (org-columns-number-to-string lsum stype))
-			 (put-text-property
-			  0 (length lsum) 'face 'bold lsum)
+			(t ;; do the summary
+			 (setq lsum nil)
+			 (dolist (x entries)
+			   (setq v (cdr (assoc prop x)))
+			   (if v
+			       (push
+				(funcall
+				 (if (not (get-text-property 0 'org-computed v))
+				     calc
+				   'identity)
+				 (org-columns-string-to-number
+				  v stype))
+				lsum)))
+			 (setq lsum (remove nil lsum))
+			 (setq lsum
+			       (cond ((> (length lsum) 1)
+				      (org-columns-number-to-string
+				       (apply sumfunc lsum) stype))
+				     ((eq (length lsum) 1)
+				      (org-columns-number-to-string
+				       (car lsum) stype))
+				     (t "")))
+			 (put-text-property 0 (length lsum) 'face 'bold lsum)
+			 (if (neq calc 'identity)
+			     (put-text-property 0 (length lsum) 'org-computed t lsum))
 			 (cons prop lsum))))
 		     fmt))
 	      (org-columns-display-here props 'dateline)
