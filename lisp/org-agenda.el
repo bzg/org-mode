@@ -6740,6 +6740,7 @@ the resulting entry will not be shown.  When TEXT is empty, switch to
 	  (message "%s entry added to %s"
 		   (capitalize (symbol-name type))
 		   (abbreviate-file-name org-agenda-diary-file)))
+      (org-reveal t)
       (message "Please finish entry here"))))
 
 (defun org-agenda-insert-diary-make-new-entry (text)
