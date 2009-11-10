@@ -80,6 +80,7 @@
 
 (require 'xml)
 (require 'org)
+(require 'org-exp)
 (eval-when-compile (require 'cl))
 
 ;; Fix-me: I am not sure these are useful:
@@ -240,8 +241,11 @@ NOT READY YET."
                       ))))
     fm-str))
 
+
 (defun org-freemind-unescape-str-to-org (fm-str)
-  (let ((org-str fm-str))
+  (let ((org-str fm-str)
+	str) ; str is scoped into the lambda below by replace-regexp-in-string
+					; We bind it anyway, to shut up compiler
     (setq org-str (replace-regexp-in-string "&quot;" "\"" org-str))
     (setq org-str (replace-regexp-in-string "&amp;" "&" org-str))
     (setq org-str (replace-regexp-in-string "&lt;" "<" org-str))
@@ -317,6 +321,7 @@ NOT READY YET."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Org => FreeMind
 
+(defvar drawers-regexp) ;; dynamically scoped
 (defun org-freemind-org-text-to-freemind-subnode/note (node-name start end)
   ;; fix-me: doc
   (let ((text (buffer-substring-no-properties start end))
@@ -394,6 +399,16 @@ NOT READY YET."
                         "</node>\n" ;; ok
                         )))
       (list node-res note-res))))
+
+;; The following variables are all dynamically scoped within this module
+(defvar next-node-start) 
+(defvar mm-buffer)
+(defvar next-level)
+(defvar current-level)
+(defvar this-children-visible)
+(defvar next-has-some-visible-child)
+(defvar base-level)
+(defvar num-left-nodes)
 
 (defun org-freemind-write-node (this-m2 this-node-end)
   (let* (this-icons
