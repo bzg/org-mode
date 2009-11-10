@@ -73,7 +73,7 @@
   (slime-eval-async `(swank:eval-and-grab-output ,string)
                     (or handler #'identity)))
 
-(defun clojure-slime-eval-sync (string)
+(defun org-babel-clojure-slime-eval-sync (string)
   (slime-eval `(swank:eval-and-grab-output ,string)))
 
 ;;taken from swank-clojure.el
