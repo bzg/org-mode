@@ -206,9 +206,7 @@ to add the symbol `xyz', and the package must have a call to
 	(const :tag "   mouse:             Additional mouse support" org-mouse)
 
 	(const :tag "C  annotate-file:     Annotate a file with org syntax" org-annotate-file)
-	(const :tag "C  annotation-helper: Call Remember directly from Browser\n\t\t\t(OBSOLETE, use org-protocol)" org-annotation-helper)
 	(const :tag "C  bookmark:          Org-mode links to bookmarks" org-bookmark)
-	(const :tag "C  browser-url:       Store link, directly from Browser\n\t\t\t(OBSOLETE, use org-protocol)" org-browser-url)
 	(const :tag "C  checklist:         Extra functions for checklists in repeated tasks" org-checklist)
 	(const :tag "C  choose:            Use TODO keywords to mark decisions states" org-choose)
 	(const :tag "C  collector:         Collect properties into tables" org-collector)
