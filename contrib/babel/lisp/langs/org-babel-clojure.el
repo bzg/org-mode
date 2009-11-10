@@ -159,16 +159,19 @@ then create.  Return the initialized session."
       (output
        (with-temp-buffer
          (insert body)
-         (shell-command-on-region (point-min) (point-max)
-                                  (format "%s - " (string-join " " (babel-clojure-cmd)))
-                                  'replace)
+         (shell-command-on-region
+          (point-min) (point-max)
+          (format "%s - " (mapconcat #'identity (org-babel-clojure-babel-clojure-cmd) " "))
+          'replace)
          (buffer-string)))
       (value
        (let ((tmp-src-file (make-temp-file "clojure_babel_input_"))
              (tmp-results-file (make-temp-file "clojure_babel_results_")))                 
          (with-temp-file tmp-src-file
            (insert (format org-babel-clojure-wrapper-method body tmp-results-file tmp-results-file)))
-         (shell-command (format "%s %s" (string-join " " (babel-clojure-cmd)) tmp-src-file))
+         (shell-command
+          (format "%s %s" (mapconcat #'identity (org-babel-clojure-babel-clojure-cmd) " ")
+                  tmp-src-file))
          (org-babel-clojure-table-or-string
           (with-temp-buffer (insert-file-contents tmp-results-file) (buffer-string))))))))
 
