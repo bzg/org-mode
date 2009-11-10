@@ -61,12 +61,11 @@
     string))
 
 (defmacro sbe (source-block &rest variables)
-  "Return the results of calling SOURCE-BLOCK with all assigning
-every variable in VARIABLES.  Each element of VARIABLES should be
-a two element list, whose first element is the name of the
-variable and second element is a string of its value.  The
-following call to `sbe' would be equivalent to the following
-source code block.
+  "Return the results of calling SOURCE-BLOCK assigning every
+variable in VARIABLES.  Each element of VARIABLES should be a two
+element list, whose first element is the name of the variable and
+second element is a string of its value.  The following call to
+`sbe' would be equivalent to the following source code block.
 
  (sbe 'source-block (n 2) (m 3))
 
@@ -85,7 +84,9 @@ results
 					   (format "%S=%s" (first var-spec) (second var-spec)))
 					 ',variables ", ")
 			      ")")))))
-         (org-babel-execute-src-block t (list "emacs-lisp" "results" params)))
+         (org-babel-execute-src-block
+          nil (list "emacs-lisp" "results"
+                    (org-babel-merge-params '((:results . "silent")) params))))
      "")))
 
 (provide 'org-babel-table)
