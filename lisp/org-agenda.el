@@ -6705,7 +6705,13 @@ the resulting entry will not be shown.  When TEXT is empty, switch to
       (backward-char 1)
       (insert "\n")
       (require 'diary-lib)
-      (let ((calendar-date-display-form (diary-date-display-form)))
+      (let ((calendar-date-display-form
+	     (if (if (boundp 'calendar-date-style)
+		     (eq calendar-date-style 'european)
+		   european-calendar-style) ; Emacs 22
+		 '(day " " month " " year)
+	       '(month " " day " " year))))
+
 	(insert (format "%%%%(diary-anniversary %s) %s"
 			(calendar-date-string d1 nil t) text))))
      ((eq type 'day)
