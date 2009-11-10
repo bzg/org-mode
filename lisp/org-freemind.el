@@ -55,6 +55,7 @@
 ;; 2009-02-21: Fixed bug in `org-freemind-to-org-mode'.
 ;; 2009-10-25: Added support for `org-odd-levels-only'.
 ;;             Added y/n question before showing in FreeMind.
+;; 2009-11-04: Added support for #+BEGIN_HTML.
 ;;
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -218,6 +219,8 @@ NOT READY YET."
 ;;; Format converters
 
 (defun org-freemind-escape-str-from-org (org-str)
+  "Do some html-escaping of ORG-STR and return the result.
+The characters \"&<> will be escaped."
   (let ((chars (append org-str nil))
         (fm-str ""))
     (dolist (cc chars)
@@ -241,11 +244,11 @@ NOT READY YET."
                       ))))
     fm-str))
 
-
 (defun org-freemind-unescape-str-to-org (fm-str)
-  (let ((org-str fm-str)
-	str) ; str is scoped into the lambda below by replace-regexp-in-string
-					; We bind it anyway, to shut up compiler
+  "Do some html-unescaping of FM-STR and return the result.
+This is the opposite of `org-freemind-escape-str-from-org' but it
+will also unescape &#nn;."
+  (let ((org-str fm-str))
     (setq org-str (replace-regexp-in-string "&quot;" "\"" org-str))
     (setq org-str (replace-regexp-in-string "&amp;" "&" org-str))
     (setq org-str (replace-regexp-in-string "&lt;" "<" org-str))
@@ -253,7 +256,7 @@ NOT READY YET."
     (setq org-str (replace-regexp-in-string
                "&#x\\([a-f0-9]\\{2\\}\\);"
                (lambda (m)
-                 (char-to-string (+ (string-to-number (match-string 1 str) 16)
+                     (char-to-string (+ (string-to-number (match-string 1 org-str) 16)
                                     ?\x800)))
                org-str))))
 
@@ -268,6 +271,7 @@ NOT READY YET."
 ;;     ))
 
 (defun org-freemind-convert-links-from-org (org-str)
+  "Convert org links in ORG-STR to freemind links and return the result."
   (let ((fm-str (replace-regexp-in-string
                  (rx (not (any "[\""))
                      (submatch
@@ -288,6 +292,7 @@ NOT READY YET."
 
 ;;(org-freemind-convert-links-to-org "<a href=\"http://www.somewhere/\">link-text</a>")
 (defun org-freemind-convert-links-to-org (fm-str)
+  "Convert freemind links in FM-STR to org links and return the result."
   (let ((org-str (replace-regexp-in-string
                   (rx "<a"
                       space
@@ -305,8 +310,9 @@ NOT READY YET."
                   fm-str)))
     org-str))
 
-(defun org-freemind-convert-drawers-from-org (text)
-  )
+;; Fix-me:
+;;(defun org-freemind-convert-drawers-from-org (text)
+;;  )
 
 ;; (org-freemind-test-links)
 ;; (defun org-freemind-test-links ()
@@ -321,14 +327,28 @@ NOT READY YET."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Org => FreeMind
 
-(defvar drawers-regexp) ;; dynamically scoped
-(defun org-freemind-org-text-to-freemind-subnode/note (node-name start end)
+(defun org-freemind-convert-text-p (text)
+  "Convert TEXT to html with <p> paragraphs."
+  (setq text (org-freemind-escape-str-from-org text))
+  (setq text (replace-regexp-in-string (rx "\n" (0+ blank) "\n") "</p><p>\n" text))
+  ;;(setq text (replace-regexp-in-string (rx bol (1+ blank) eol) "" text))
+  ;;(setq text (replace-regexp-in-string (rx bol (1+ blank)) "<br />" text))
+  (setq text (replace-regexp-in-string "\n" "<br />" text))
+  (concat "<p>"
+          (org-freemind-convert-links-from-org text)
+          "</p>\n"))
+
+(defun org-freemind-org-text-to-freemind-subnode/note (node-name start end drawers-regexp)
+  "Convert text part of org node to freemind subnode or note.
+Convert the text part of the org node named NODE-NAME. The text
+is in the current buffer between START and END. Drawers matching
+DRAWERS-REGEXP are converted to freemind notes."
   ;; fix-me: doc
   (let ((text (buffer-substring-no-properties start end))
         (node-res "")
         (note-res ""))
     (save-match-data
-      (setq text (org-freemind-escape-str-from-org text))
+      ;;(setq text (org-freemind-escape-str-from-org text))
       ;; First see if there is something that should be moved to the
       ;; note part:
       (let (drawers)
@@ -372,14 +392,30 @@ NOT READY YET."
                         "</style>\n"
                         "</head>\n"
                         "<body>\n"))
-        (setq node-res (concat node-res "<p>"))
-        (setq text (replace-regexp-in-string (rx "\n" (0+ blank) "\n") "</p><p>\n" text))
-        ;;(setq text (replace-regexp-in-string (rx bol (1+ blank) eol) "" text))
-        ;;(setq text (replace-regexp-in-string (rx bol (1+ blank)) "<br />" text))
-        (setq text (replace-regexp-in-string "\n" "<br />" text))
-        (org-freemind-convert-links-from-org text)
-        (setq node-res (concat node-res text))
-        (setq node-res (concat node-res "</p>\n"))
+        (let ((begin-html-mark (regexp-quote "#+BEGIN_HTML"))
+              (end-html-mark   (regexp-quote "#+END_HTML"))
+              head
+              end-pos
+              end-pos-match
+              )
+          ;; Take care of #+BEGIN_HTML - #+END_HTML
+          (while (string-match begin-html-mark text)
+            (setq head (substring text 0 (match-beginning 0)))
+            (setq end-pos-match (match-end 0))
+            (setq node-res (concat node-res
+                                   (org-freemind-convert-text-p head)))
+            (setq text (substring text end-pos-match))
+            (setq end-pos (string-match end-html-mark text))
+            (if end-pos
+                (setq end-pos-match (match-end 0))
+              (message "org-freemind: Missing #+END_HTML")
+              (setq end-pos (length text))
+              (setq end-pos-match end-pos))
+            (setq node-res (concat node-res
+                                   (substring text 0 end-pos)))
+            (setq text (substring text end-pos-match)))
+          (setq node-res (concat node-res
+                                 (org-freemind-convert-text-p text))))
         (setq node-res (concat
                         node-res
                         "</body>\n"
@@ -400,17 +436,7 @@ NOT READY YET."
                         )))
       (list node-res note-res))))
 
-;; The following variables are all dynamically scoped within this module
-(defvar next-node-start) 
-(defvar mm-buffer)
-(defvar next-level)
-(defvar current-level)
-(defvar this-children-visible)
-(defvar next-has-some-visible-child)
-(defvar base-level)
-(defvar num-left-nodes)
-
-(defun org-freemind-write-node (this-m2 this-node-end)
+(defun org-freemind-write-node (mm-buffer drawers-regexp num-left-nodes base-level current-level next-level this-m2 this-node-end this-children-visible next-node-start next-has-some-visible-child)
   (let* (this-icons
          this-bg-color
          this-m2-escaped
@@ -448,13 +474,14 @@ NOT READY YET."
     (setq this-m2-escaped (org-freemind-escape-str-from-org this-m2))
     (let ((node-notes (org-freemind-org-text-to-freemind-subnode/note
                        this-m2-escaped
-                       this-node-end (1- next-node-start))))
+                       this-node-end
+                       (1- next-node-start)
+                       drawers-regexp)))
       (setq this-rich-node (nth 0 node-notes))
       (setq this-rich-note (nth 1 node-notes)))
     (with-current-buffer mm-buffer
       (insert "<node text=\"" this-m2-escaped "\"")
       (org-freemind-get-node-style this-m2)
-      ;;(when (and (> current-level base-level) (> next-level current-level))
       (when (> next-level current-level)
         (unless (or this-children-visible
                     next-has-some-visible-child)
@@ -472,11 +499,17 @@ NOT READY YET."
       )
     (with-current-buffer mm-buffer
       (when this-rich-note (insert this-rich-note))
-      (when this-rich-node (insert this-rich-node))
-      )
-  ))
+      (when this-rich-node (insert this-rich-node))))
+  num-left-nodes)
 
 (defun org-freemind-check-overwrite (file interactively)
+  "Check if file FILE already exists.
+If FILE does not exists return t.
+
+If INTERACTIVELY is non-nil ask if the file should be replaced
+and return t/nil if it should/should not be replaced.
+
+Otherwise give an error say the file exists."
   (if (file-exists-p file)
       (if interactively
           (y-or-n-p (format "File %s exists, replace it? " file))
@@ -505,6 +538,7 @@ NOT READY YET."
         ))))
 
 (defun org-freemind-goto-line (line)
+  "Go to line number LINE."
   (save-restriction
     (widen)
     (goto-char (point-min))
@@ -641,7 +675,11 @@ NOT READY YET."
                     (setq skipped-odd (1+ skipped-odd)))
                   (unless (or (= next-level (1+ current-level))
                               skipping-odd)
-                    (error "Next level step > +1 for node ending at line %s" (line-number-at-pos))
+                    (if (or org-odd-levels-only
+                            (/= next-level (+ 2 current-level)))
+                        (error "Next level step > +1 for node ending at line %s" (line-number-at-pos))
+                      (error "Next level step = +2 for node ending at line %s, forgot org-odd-levels-only?"
+                             (line-number-at-pos)))
                     ))
                 (setq next-children-visible
                       (not (eq 'outline
@@ -650,12 +688,11 @@ NOT READY YET."
                       (if next-children-visible t
                         (org-freemind-look-for-visible-child next-level)))
                 (when this-m2
-                  (org-freemind-write-node this-m2 this-node-end))
+                  (setq num-left-nodes (org-freemind-write-node mm-buffer drawers-regexp num-left-nodes base-level current-level next-level this-m2 this-node-end this-children-visible next-node-start next-has-some-visible-child)))
                 (when (if (= num-top1-nodes 1) (> current-level base-level) t)
                   (while (>= current-level next-level)
                     (with-current-buffer mm-buffer
                       (insert "</node>\n")
-                      ;;(insert (format "</node>\ncurrent-level=%s, next-level%s\n" current-level next-level))
                       (setq current-level (1- current-level))
                       (when (< 0 skipped-odd)
                         (setq skipped-odd (1- skipped-odd))
@@ -676,7 +713,7 @@ NOT READY YET."
               (setq next-node-start (if node-at-line-last
                                         (1+ node-at-line-last)
                                       (point-max)))
-              (org-freemind-write-node this-m2 this-node-end)
+              (setq num-left-nodes (org-freemind-write-node mm-buffer drawers-regexp num-left-nodes base-level current-level next-level this-m2 this-node-end this-children-visible next-node-start next-has-some-visible-child))
               (with-current-buffer mm-buffer (insert "</node>\n"))
               ;)
             )
@@ -868,6 +905,8 @@ NOT READY YET."
 
 ;; (org-freemind-symbols= 'a (car '(A B)))
 (defsubst org-freemind-symbols= (sym-a sym-b)
+  "Return t if downcased names of SYM-A and SYM-B are equal.
+SYM-A and SYM-B should be symbols."
   (or (eq sym-a sym-b)
       (string= (downcase (symbol-name sym-a))
                (downcase (symbol-name sym-b)))))
@@ -876,8 +915,7 @@ NOT READY YET."
   "Find children node to PARENT from PATH.
 PATH should be a list of steps, where each step has the form
 
-  '(NODE-NAME (ATTR-NAME . ATTR-VALUE))
-"
+  '(NODE-NAME (ATTR-NAME . ATTR-VALUE))"
   ;; Fix-me: maybe implement op? step: Name, number, attr, attr op val
   ;; Fix-me: case insensitive version for children?
   (let* ((children (if (not (listp (car parent)))
@@ -989,7 +1027,7 @@ PATH should be a list of steps, where each step has the form
       ntxt)))
 
 (defun org-freemind-get-richcontent-node-text (node)
-  "Get the node text as from the richcontent note NODE."
+  "Get the node text as from the richcontent node NODE."
   (save-match-data
     (let* ((rc (org-freemind-get-richcontent-node node))
            (txt (org-freemind-get-tree-text rc)))
