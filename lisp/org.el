@@ -14827,18 +14827,14 @@ Some of the options can be changed using the variable
 
 (defconst org-speed-commands-default
   '(
-    ("a" . org-agenda)
-    ("/" . org-sparse-tree)
-    (";" . org-set-tags-command)
-    ("I" . org-clock-in)
-    ("O" . org-clock-out)
-    ("c" . org-cycle)
-    ("C" . org-shifttab)
     ("n" . outline-next-visible-heading)
     ("p" . outline-previous-visible-heading)
     ("f" . org-forward-same-level)
     ("b" . org-backward-same-level)
     ("u" . outline-up-heading)
+
+    ("c" . org-cycle)
+    ("C" . org-shifttab)
     ("U" . org-shiftmetaup)
     ("D" . org-shiftmetadown)
     ("r" . org-metaright)
@@ -14847,6 +14843,12 @@ Some of the options can be changed using the variable
     ("L" . org-shiftmetaleft)
     ("i" . (progn (forward-char 1) (call-interactively
 				    'org-insert-heading-respect-content)))
+
+    ("a" . org-agenda)
+    ("/" . org-sparse-tree)
+    (";" . org-set-tags-command)
+    ("I" . org-clock-in)
+    ("O" . org-clock-out)
     ("o" . org-open-at-point)
     ("t" . org-todo)
     ("j" . org-goto)
