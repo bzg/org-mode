@@ -1536,7 +1536,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
   "Convert links to LaTeX."
   (goto-char (point-min))
   (while (re-search-forward org-bracket-link-analytic-regexp++ nil t)
-    (org-if-unprotected
+    (org-if-unprotected-1
      (goto-char (match-beginning 0))
      (let* ((re-radio org-export-latex-all-targets-re)
 	    (remove (list (match-beginning 0) (match-end 0)))
