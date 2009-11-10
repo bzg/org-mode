@@ -6671,6 +6671,8 @@ The cursor may be at a date in the calendar, or in the Org agenda."
       (org-agenda-add-entry-to-org-agenda-diary-file 'anniversary text d1))
      ((equal char ?b)
       (setq text (read-string "Block entry: "))
+      (unless (and d1 d2 (not (equal d1 d2)))
+	(error "No block of days selected"))
       (org-agenda-add-entry-to-org-agenda-diary-file 'block text d1 d2))
      ((equal char ?j)
       (org-switch-to-buffer-other-window

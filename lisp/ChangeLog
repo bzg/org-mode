@@ -1,5 +1,8 @@
 2009-11-10  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-agenda.el (org-agenda-diary-entry-in-org-file): Add error
+	message when no block is selected.
+
 	* org-latex.el (org-export-latex-links): Check for protectedness
 	in the last matched character, not after the match.
 
