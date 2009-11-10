@@ -38,7 +38,7 @@
 
 (defun org-babel-execute:python (body params)
   "Execute a block of Python code with org-babel.  This function is
-called by `org-babel-execute-src-block' via multiple-value-bind."
+called by `org-babel-execute-src-block'."
   (message "executing Python source code block")
   (let* ((processed-params (org-babel-process-params params))
          (session (org-babel-python-initiate-session (first processed-params)))

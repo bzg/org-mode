@@ -184,9 +184,10 @@ the header arguments specified at the source code block."
          (body (setf (second info)
 		     (if (assoc :noweb params)
 			 (org-babel-expand-noweb-references info) (second info))))
-         (processed-params (org-babel-process-params params))
-         (result-params (third processed-params))
-         (result-type (fourth processed-params))
+         (result-params (split-string (or (cdr (assoc :results params)) "")))
+         (result-type (cond ((member "output" result-params) 'output)
+			    ((member "value" result-params) 'value)
+			    (t 'value)))
          (cmd (intern (concat "org-babel-execute:" lang)))
          result)
     ;; (message "params=%S" params) ;; debugging
@@ -395,9 +396,7 @@ may be specified in the properties of the current outline entry."
 (defun org-babel-process-params (params)
   "Parse params and resolve references.
 
-Return a list (session vars result-params result-type). These are
-made available to the org-babel-execute:LANG functions via
-multiple-value-bind."
+Return a list (session vars result-params result-type)."
   (let* ((session (cdr (assoc :session params)))
 	 (vars (org-babel-ref-variables params))
 	 (result-params (split-string (or (cdr (assoc :results params)) "")))

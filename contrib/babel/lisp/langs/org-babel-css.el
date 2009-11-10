@@ -38,7 +38,7 @@
 
 (defun org-babel-execute:css (body params)
   "Execute a block of CSS code with org-babel.  This function is
-called by `org-babel-execute-src-block' via multiple-value-bind."
+called by `org-babel-execute-src-block'."
   (message "executing CSS source code block")
   body)
 

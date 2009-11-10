@@ -48,7 +48,7 @@
 
 (defun org-babel-execute:ruby (body params)
   "Execute a block of Ruby code with org-babel.  This function is
-called by `org-babel-execute-src-block' via multiple-value-bind."
+called by `org-babel-execute-src-block'."
   (message "executing Ruby source code block")
   (let* ((processed-params (org-babel-process-params params))
          (session (org-babel-ruby-initiate-session (first processed-params)))
