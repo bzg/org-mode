@@ -101,6 +101,11 @@ then run `org-babel-pop-to-session'."
   lines. This variable only takes effect if the :results output
   option is in effect.")
 
+(defvar org-babel-noweb-error-langs nil
+  "List of language for which errors should be raised when the
+  source code block satisfying a noweb reference in this language
+  can not be resolved.")
+
 (defun org-babel-named-src-block-regexp-for-name (name)
   "Regexp used to match named src block."
   (concat "#\\+srcname:[ \t]*" (regexp-quote name) "[ \t\n]*"
@@ -790,8 +795,13 @@ these arguments are not evaluated in the current source-code block but are passe
                             (save-excursion
                               (goto-char point)
                               (org-babel-trim (org-babel-expand-noweb-references
-			       (org-babel-get-src-block-info))))
-                          ""))))))
+                                               (org-babel-get-src-block-info))))
+                          ;; optionally raise an error if named source-block doesn't exist
+                          (if (member lang org-babel-noweb-error-langs)
+                              (error
+                               "<<%s>> could not be resolved (see `org-babel-noweb-error-langs')"
+                               source-name)
+                            "")))))))
         (nb-add (buffer-substring index (point-max)))))
     new-body))
 
