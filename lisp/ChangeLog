@@ -1,5 +1,11 @@
 2009-11-11  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp.el (org-export-format-drawer-function): New variable.
+	(org-export-format-drawer): New function.
+	(org-export-preprocess-string): Pass the backend as a parameter to
+	`org-export-remove-or-extract-drawers'.
+	(org-export-remove-or-extract-drawers): New parameter BACKEND.
+
 	* org-protocol.el (org-protocol-char-to-string): New defsubst.
 
 2009-11-10  Carsten Dominik  <carsten.dominik@gmail.com>

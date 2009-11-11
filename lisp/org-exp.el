@@ -1310,8 +1310,8 @@ on this string to produce the exported version."
       (setq target-alist (org-export-define-heading-targets target-alist))
 
       ;; Get rid of drawers
-      (org-export-remove-or-extract-drawers drawers
-					    (plist-get parameters :drawers))
+      (org-export-remove-or-extract-drawers
+       drawers (plist-get parameters :drawers) backend)
 
       ;; Get the correct stuff before the first headline
       (when (plist-get parameters :skip-before-1st-heading)
@@ -1535,33 +1535,61 @@ the current file."
 	 (unless desc (insert "][" link))
 	 (add-text-properties pos (point) props))))))
 
-(defun org-export-remove-or-extract-drawers (all-drawers exp-drawers)
-  "Remove drawers, or extract the content.
+(defun org-export-remove-or-extract-drawers (all-drawers exp-drawers backend)
+  "Remove drawers, or extract and format the content.
 ALL-DRAWERS is a list of all drawer names valid in the current buffer.
 EXP-DRAWERS can be t to keep all drawer contents, or a list of drawers
-whose content to keep."
-  (unless (eq t exp-drawers)
-    (goto-char (point-min))
-    (let ((re (concat "^[ \t]*:\\("
-		      (mapconcat
-		       'identity
-		       (org-delete-all exp-drawers
-				       (copy-sequence all-drawers))
-		       "\\|")
-		      "\\):[ \t]*$"))
-	  beg eol)
-      (while (re-search-forward re nil t)
-	(org-if-unprotected
-	 (setq beg (match-beginning 0)
-	       eol (match-end 0))
-	 (if (re-search-forward "^\\([ \t]*:END:[ \t]*\n?\\)\\|^\\*+[ \t]"
-				nil t)
-	     (if (match-end 1)
-		 ;; terminated in this entry
-		 (progn
-		   (delete-region beg (match-end 1))
-		   (goto-char beg))
-	       (goto-char eol))))))))
+whose content to keep.  Any drawers that are in ALL-DRAWERS but not in
+EXP-DRAWERS will be removed.
+BACKEND is the current export backend."
+  (goto-char (point-min))
+  (let ((re (concat "^[ \t]*:\\("
+		    (mapconcat 'identity all-drawers "\\|")
+		    "\\):[ \t]*$"))
+	name beg beg-content eol)
+    (while (re-search-forward re nil t)
+      (org-if-unprotected
+       (setq name (match-string 1))
+       (setq beg (match-beginning 0)
+	     beg-content (1+ (point-at-eol))
+	     eol (point-at-eol))
+       (if (not (and (re-search-forward
+		      "^\\([ \t]*:END:[ \t]*\n?\\)\\|^\\*+[ \t]" nil t)
+		     (match-end 1)))
+	   (goto-char eol)
+	 (goto-char (match-beginning 0))
+	 (and (looking-at ".*\n?") (replace-match ""))
+	 (setq content (buffer-substring beg-content (point)))
+	 (delete-region beg (point))
+	 (when (or (eq exp-drawers t)
+		   (member name exp-drawers))
+	   (setq content (funcall (or org-export-format-drawer-function
+				      'org-export-format-drawer)
+				  name content backend))
+	   (insert content)))))))
+
+(defvar org-export-format-drawer-function nil
+  "Function to be called to format the contents of a drawer.
+The function must accept three parameters:
+  BACKEND  one of the symbols html, docbook, latex, ascii, xoxo
+  NAME     the drawer name, like \"PROPERIES\"
+  CONTENT  the content of the drawer.
+The function should return the text to be inserted into the buffer.
+If this is nil, `org-export-format-drawer' is used as a default.")
+
+(defun org-export-format-drawer (name content backend)
+  "Format the content of a drawer as a colon example."
+  (if (string-match "[ \t]+\\'" content)
+      (setq content (substring content (match-beginning 0))))
+  (while (string-match "\\`[ \t]*\n" content)
+    (steq content (substring content (match-end 0))))
+  (setq content (org-remove-indentation content))
+  (setq content (concat ": " (mapconcat 'identity
+					(org-split-string content "\n")
+					"\n: ")
+			"\n"))
+  (setq content (concat " : " (upcase name) "\n" content))
+  (org-add-props content nil 'org-protected t))
 
 (defun org-export-handle-export-tags (select-tags exclude-tags)
   "Modify the buffer, honoring SELECT-TAGS and EXCLUDE-TAGS.
