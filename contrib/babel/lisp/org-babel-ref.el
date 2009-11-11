@@ -59,8 +59,9 @@
 names, and the emacs-lisp representation of the related value."
   (let ((assignments
 	 (delq nil (mapcar (lambda (pair) (if (eq (car pair) :var) (cdr pair))) params)))
-	(other-params (assq-delete-all :var params)))
-    (mapcar (lambda (assignment) (org-babel-ref-parse assignment other-params)) assignments)))
+	(others
+         (delq nil (mapcar (lambda (pair) (unless (eq :var (car pair)) pair)) params))))
+    (mapcar (lambda (assignment) (org-babel-ref-parse assignment others)) assignments)))
 
 (defvar org-babel-ref-split-regexp
   "[ \f\t\n\r\v]*\\(.+?\\)[ \f\t\n\r\v]*=[ \f\t\n\r\v]*\\(.+\\)[ \f\t\n\r\v]*")

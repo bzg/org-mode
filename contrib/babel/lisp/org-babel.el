@@ -184,20 +184,23 @@ the header arguments specified at the source code block."
          (body (setf (second info)
 		     (if (assoc :noweb params)
 			 (org-babel-expand-noweb-references info) (second info))))
-         (processed-params (org-babel-process-params params))
-         (result-params (third processed-params))
-         (result-type (fourth processed-params))
+         (result-params (split-string (or (cdr (assoc :results params)) "")))
+         (result-type (cond ((member "output" result-params) 'output)
+			    ((member "value" result-params) 'value)
+			    (t 'value)))
          (cmd (intern (concat "org-babel-execute:" lang)))
          result)
-    ;; (message "params=%S" params) ;; debugging statement
-    ;; (message "vars=%S" (second processed-params)) ;; debugging statement
+    ;; (message "params=%S" params) ;; debugging
     (unless (member lang org-babel-interpreters)
       (error "Language is not in `org-babel-interpreters': %s" lang))
     (when arg (setq result-params (cons "silent" result-params)))
-    (setq result (multiple-value-bind (session vars result-params result-type) processed-params
-                   (funcall cmd body params)))
+    (setq result (funcall cmd body params))
     (if (eq result-type 'value)
-        (setq result (org-babel-process-value-result result result-params)))
+        (setq result (if (and (or (member "vector" result-params)
+                                  (member "table" result-params))
+                              (not (listp result)))
+                         (list (list result))
+                       result)))
     (org-babel-insert-result result result-params info)
     result))
 
@@ -266,26 +269,6 @@ results already exist."
               ;; scalar result
               (insert (echo-res results))))))
       t)))
-
-(defun org-babel-process-value-result (result result-params)
-  "Process returned value for insertion in buffer.
-
-Currently, this function forces to table output if :results
-table or :results vector has been supplied.
-
-  You can see below the various fragments of results-processing
-code that were present in the language-specific files. Out of
-those fragments, I've moved the org-babel-python-table-or-results
-and org-babel-import-elisp-from-file functionality into the
-org-babel-*-evaluate functions. I think those should only be used
-in the :results value case, as in the 'output case we are not
-concerned with creating elisp versions of results. "
-
-  (if (and (or (member "vector" result-params)
-               (member "table" result-params))
-           (not (listp result)))
-      (list (list result))
-    result))
 
 (defun org-babel-execute-buffer (&optional arg)
   "Replace EVAL snippets in the entire buffer."
@@ -413,9 +396,7 @@ may be specified in the properties of the current outline entry."
 (defun org-babel-process-params (params)
   "Parse params and resolve references.
 
-Return a list (session vars result-params result-type). These are
-made available to the org-babel-execute:LANG functions via
-multiple-value-bind."
+Return a list (session vars result-params result-type)."
   (let* ((session (cdr (assoc :session params)))
 	 (vars (org-babel-ref-variables params))
 	 (result-params (split-string (or (cdr (assoc :results params)) "")))

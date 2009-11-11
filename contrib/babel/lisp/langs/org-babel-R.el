@@ -37,10 +37,13 @@
 
 (defun org-babel-execute:R (body params)
   "Execute a block of R code with org-babel.  This function is
-called by `org-babel-execute-src-block' via multiple-value-bind."
+called by `org-babel-execute-src-block'."
   (message "executing R source code block...")
   (save-window-excursion
-    (let* ((session (org-babel-R-initiate-session session))
+    (let* ((processed-params (org-babel-process-params params))
+           (result-type (fourth processed-params))
+           (session (org-babel-R-initiate-session (first processed-params)))
+           (vars (second processed-params))
 	   (column-names-p (cdr (assoc :colnames params)))
 	   (out-file (cdr (assoc :file params)))
 	   (augmented-body
@@ -120,8 +123,8 @@ called by `org-babel-execute-src-block' via multiple-value-bind."
 (defvar org-babel-R-wrapper-method "main <- function ()\n{\n%s\n}
 write.table(main(), file=\"%s\", sep=\"\\t\", na=\"nil\",row.names=FALSE, col.names=%s, quote=FALSE)")
 
-(defun org-babel-R-evaluate (buffer body result-type column-names-p)
-  "Pass BODY to the R process in BUFFER.  If RESULT-TYPE equals
+(defun org-babel-R-evaluate (session body result-type column-names-p)
+  "Pass BODY to the R process in SESSION.  If RESULT-TYPE equals
 'output then return a list of the outputs of the statements in
 BODY, if RESULT-TYPE equals 'value then return the value of the
 last statement in BODY, as elisp."
@@ -143,7 +146,7 @@ last statement in BODY, as elisp."
 	   (org-babel-R-process-value-result
 	    (org-babel-import-elisp-from-file out-tmp-file) column-names-p))))
     ;; comint session evaluation
-    (org-babel-comint-in-buffer buffer
+    (org-babel-comint-in-buffer session
       (let* ((tmp-file (make-temp-file "org-babel-R"))
 	     (full-body
 	      (case result-type
@@ -153,7 +156,7 @@ last statement in BODY, as elisp."
 						    org-babel-R-eoe-indicator) "\n"))
 		(output
 		 (mapconcat #'org-babel-chomp (list body org-babel-R-eoe-indicator) "\n"))))
-	     (raw (org-babel-comint-with-output buffer org-babel-R-eoe-output nil
+	     (raw (org-babel-comint-with-output session org-babel-R-eoe-output nil
                     (insert full-body) (inferior-ess-send-input)))
 	     (comint-prompt-regexp
 	      (concat "^\\("

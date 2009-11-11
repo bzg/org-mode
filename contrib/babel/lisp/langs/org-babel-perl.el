@@ -37,9 +37,14 @@
 
 (defun org-babel-execute:perl (body params)
   "Execute a block of Perl code with org-babel.  This function is
-called by `org-babel-execute-src-block' via multiple-value-bind."
+called by `org-babel-execute-src-block'."
   (message "executing Perl source code block")
-  (let ((full-body (concat
+  (let* ((processed-params (org-babel-process-params params))
+         (session (first processed-params))
+         (vars (second processed-params))
+         (result-params (third processed-params))
+         (result-type (fourth processed-params))
+         (full-body (concat
 		    (mapconcat ;; define any variables
 		     (lambda (pair)
 		       (format "$%s=%s;"

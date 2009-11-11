@@ -53,7 +53,7 @@
 
 (defun org-babel-execute:sql (body params)
   "Execute a block of Sql code with org-babel.  This function is
-called by `org-babel-execute-src-block' via multiple-value-bind."
+called by `org-babel-execute-src-block'."
   (message "executing Sql source code block")
   (let* ((result-params (split-string (or (cdr (assoc :results params)) "")))
          (cmdline (cdr (assoc :cmdline params)))

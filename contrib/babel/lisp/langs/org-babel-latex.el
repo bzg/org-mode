@@ -53,7 +53,7 @@ called by `org-babel-execute-src-block'."
                  (regexp-quote (format "%S" (car pair)))
                  (if (stringp (cdr pair))
                      (cdr pair) (format "%S" (cdr pair)))
-                 body))) vars)
+                 body))) (second (org-babel-process-params params)))
   body)
 
 (defun org-babel-prep-session:latex (session params)

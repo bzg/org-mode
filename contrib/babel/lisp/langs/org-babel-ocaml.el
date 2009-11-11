@@ -49,13 +49,11 @@
 (defvar org-babel-ocaml-eoe-output "org-babel-ocaml-eoe")
 
 (defun org-babel-execute:ocaml (body params)
-  "Execute a block of Ocaml code with org-babel.  This function
-is called by `org-babel-execute-src-block' with the following
-variables pre-set using `multiple-value-bind'.
-
-  (session vars result-params result-type)"
+  "Execute a block of Ocaml code with org-babel."
   (message "executing ocaml source code block")
-  (let* ((full-body (concat
+  (let* ((processed-params (org-babel-process-params params))
+         (vars (second processed-params))
+         (full-body (concat
                      (mapconcat
                       (lambda (pair) (format "let %s = %s;" (car pair) (cdr pair)))
                       vars "\n") "\n" body "\n"))
