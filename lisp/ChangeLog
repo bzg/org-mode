@@ -1,3 +1,7 @@
+2009-11-11  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-protocol.el (org-protocol-char-to-string): New defsubst.
+
 2009-11-10  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-agenda.el (org-agenda-diary-entry-in-org-file): Add error

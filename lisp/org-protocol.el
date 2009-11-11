@@ -280,6 +280,17 @@ decode each split part."
 	  (mapcar 'org-protocol-unhex-string split-parts))
       split-parts)))
 
+;; This inline function is needed in org-protocol-unhex-compound to do
+;; the right thing to decode UTF-8 char integer values.
+(eval-when-compile
+  (if (>= emacs-major-version 23)
+      (defsubst org-protocol-char-to-string(c)
+	"Defsubst to decode UTF-8 character values in emacs 23 and beyond."
+	(char-to-string sum))
+    (defsubst org-protocol-char-to-string (c)
+      "Defsubst to decode UTF-8 character values in emacs 22."
+      (string (decode-char 'ucs sum)))))
+
 (defun org-protocol-unhex-string(str)
   "Unhex hexified unicode strings as returned from the JavaScript function
 encodeURIComponent. E.g. `%C3%B6' is the german Umlaut `ü'."
@@ -331,7 +342,7 @@ encodeURIComponent. E.g. `%C3%B6' is the german Umlaut `ü'."
 	(setq sum (+ (lsh sum shift) val))
 	(if (> eat 0) (setq eat (- eat 1)))
 	(when (= 0 eat)
-	  (setq ret (concat ret (char-to-string sum)))
+	  (setq ret (concat ret (org-protocol-char-to-string sum)))
 	  (setq sum 0))
 	)) ;; end (while bytes
     ret ))
