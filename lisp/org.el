@@ -102,28 +102,29 @@
   "Show the org-mode version in the echo area.
 With prefix arg HERE, insert it at point."
   (interactive "P")
-  (let* ((version org-version)
+  (let* ((origin default-directory)
+	 (version org-version)
 	 (git-version)
 	 (dir (concat (file-name-directory (locate-library "org")) "../" )))
-    (if (and (file-exists-p (expand-file-name ".git" dir))
-	     (executable-find "git"))
-	(let ((pwd (substring (pwd) 10)))
-	  (cd dir)
-	  (if (eql 0 (shell-command "git describe --abbrev=4 HEAD"))
+    (when (and (file-exists-p (expand-file-name ".git" dir))
+	       (executable-find "git"))
+      (unwind-protect
+	  (progn
+	    (cd dir)
+	    (when (eql 0 (shell-command "git describe --abbrev=4 HEAD"))
 	      (with-current-buffer "*Shell Command Output*"
 		(goto-char (point-min))
-		(re-search-forward "[^\n]+")
-		(setq git-version (match-string 0))
-		(subst-char-in-string ?- ?. git-version t)
-		(shell-command "git diff-index --name-only HEAD --")
-		(unless (eql 1 (point-max))
-		  (setq git-version (concat git-version ".dirty")))
-		(setq version (concat version " (" git-version ")")))
-	    (cd pwd))))
+		(setq git-version (buffer-substring (point) (point-at-eol))))
+	      (subst-char-in-string ?- ?. git-version t)
+	      (when (string-match "\\S-"
+				  (shell-command-to-string
+				   "git diff-index --name-only HEAD --"))
+		(setq git-version (concat git-version ".dirty")))
+	      (setq version (concat version " (" git-version ")"))))
+	(cd origin)))
     (setq version (format "Org-mode version %s" version))
     (if here (insert version))
-    (message version)
-    version))
+    (message version)))
 
 ;;; Compatibility constants
 
