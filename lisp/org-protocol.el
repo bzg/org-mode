@@ -286,10 +286,10 @@ decode each split part."
   (if (>= emacs-major-version 23)
       (defsubst org-protocol-char-to-string(c)
 	"Defsubst to decode UTF-8 character values in emacs 23 and beyond."
-	(char-to-string sum))
+	(char-to-string c))
     (defsubst org-protocol-char-to-string (c)
       "Defsubst to decode UTF-8 character values in emacs 22."
-      (string (decode-char 'ucs sum)))))
+      (string (decode-char 'ucs c)))))
 
 (defun org-protocol-unhex-string(str)
   "Unhex hexified unicode strings as returned from the JavaScript function
