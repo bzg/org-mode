@@ -1,4 +1,4 @@
-;;; org-datetree.el --- Create Date entries in a tree
+;;; org-datetree.el --- Create date entries in a tree
 
 ;; Copyright (C) 2009 Free Software Foundation, Inc.
 
