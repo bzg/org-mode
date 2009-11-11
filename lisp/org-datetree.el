@@ -154,7 +154,7 @@ before running this command, even though the command tries to be smart."
   (goto-char (point-min))
   (let ((dre (concat "\\<" org-deadline-string "\\>[ \t]*\\'"))
 	(sre (concat "\\<" org-scheduled-string "\\>[ \t]*\\'"))
-	dct ts tmp date year month date pos hdl-pos)
+	dct ts tmp date year month day pos hdl-pos)
   (while (re-search-forward org-ts-regexp nil t)
     (catch 'next
       (setq ts (match-string 0))
