@@ -54,11 +54,11 @@
   "
 (defn spit
   [f content]
-  (with-open [#^java.io.PrintWriter w 
-                 (java.io.PrintWriter. 
-                   (java.io.BufferedWriter. 
-                     (java.io.OutputStreamWriter. 
-                       (java.io.FileOutputStream. 
+  (with-open [#^java.io.PrintWriter w
+                 (java.io.PrintWriter.
+                   (java.io.BufferedWriter.
+                     (java.io.OutputStreamWriter.
+                       (java.io.FileOutputStream.
                          (java.io.File. f)))))]
       (.print w content)))
 
@@ -136,7 +136,7 @@ specifying a var of the same value."
          (vars (org-babel-ref-variables params))
          (var-lines (mapcar ;; define any top level session variables
                      (lambda (pair)
-                       (format "(defn %s %s)\n" (car pair) (org-babel-clojure-var-to-clojure (cdr pair))))
+                       (format "(def %s %s)\n" (car pair) (org-babel-clojure-var-to-clojure (cdr pair))))
                      vars)))
     session-buf))
 
@@ -146,7 +146,7 @@ then create.  Return the initialized session."
   (unless (string= session "none")
     (if (comint-check-proc "*inferior-lisp*")
         (get-buffer "*inferior-lisp*")
-      (let ((session-buffer (save-window-excursion (slime 'clojure) (current-buffer))))      
+      (let ((session-buffer (save-window-excursion (slime 'clojure) (current-buffer))))
         (sit-for 5)
         (if (slime-connected-p)
             session-buffer
@@ -166,7 +166,7 @@ then create.  Return the initialized session."
          (buffer-string)))
       (value
        (let ((tmp-src-file (make-temp-file "clojure_babel_input_"))
-             (tmp-results-file (make-temp-file "clojure_babel_results_")))                 
+             (tmp-results-file (make-temp-file "clojure_babel_results_")))
          (with-temp-file tmp-src-file
            (insert (format org-babel-clojure-wrapper-method body tmp-results-file tmp-results-file)))
          (shell-command
@@ -198,8 +198,8 @@ last statement in BODY, as elisp."
   "Execute a block of Clojure code with org-babel."
   (let* ((processed-params (org-babel-process-params params))
          (vars (second processed-params))
-         (body (org-babel-clojure-build-full-form body vars))     
-         (session (org-babel-clojure-initiate-session (first processed-params))))  
+         (body (org-babel-clojure-build-full-form body vars))
+         (session (org-babel-clojure-initiate-session (first processed-params))))
     (org-babel-clojure-evaluate session body (fourth processed-params))))
 
 (provide 'org-babel-clojure)
