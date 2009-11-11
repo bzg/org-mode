@@ -108,11 +108,10 @@ last statement in BODY, as elisp."
 		 (if (member "pp" result-params)
                      (error "Pretty-printing not implemented for perl")
                    org-babel-perl-wrapper-method)
-		 (let ((lines (split-string
-			       (org-remove-indentation (org-babel-trim body)) "[\r\n]")))
-		   (concat
-		    (mapconcat #'identity (butlast lines) "\n")
-		    (format "\nreturn %s" (car (last lines)))))
+		 (mapconcat
+		  (lambda (line) (format "\t%s" line))
+		  (split-string
+		   (org-remove-indentation (org-babel-trim body)) "[\r\n]") "\n")
 		 tmp-file))
                ;; (message "buffer=%s" (buffer-string)) ;; debugging
                (shell-command-on-region (point-min) (point-max) "perl"))

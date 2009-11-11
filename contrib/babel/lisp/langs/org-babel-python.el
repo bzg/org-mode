@@ -160,13 +160,10 @@ last statement in BODY, as elisp."
 		 (if (member "pp" result-params)
                      org-babel-python-pp-wrapper-method
                    org-babel-python-wrapper-method)
-		 (let ((lines (split-string
-			       (org-remove-indentation (org-babel-trim body)) "[\r\n]")))
-		   (concat
-		    (mapconcat
-		     (lambda (line) (format "\t%s" line))
-		     (butlast lines) "\n")
-		    (format "\n\treturn %s" (car (last lines)))))
+		 (mapconcat
+		  (lambda (line) (format "\t%s" line))
+		  (split-string
+		   (org-remove-indentation (org-babel-trim body)) "[\r\n]") "\n")
 		 tmp-file))
                ;; (message "buffer=%s" (buffer-string)) ;; debugging
                (shell-command-on-region (point-min) (point-max) "python"))
