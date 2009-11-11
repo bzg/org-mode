@@ -894,23 +894,21 @@ around it."
 (eval-when-compile (defvar org-columns-time))
 
 (defvar org-columns-compile-map
-  '(("none" none + identity)
-    (":" add_times + identity)
-    ("+" add_numbers + identity)
-    ("$" currency + identity)
-    ("X" checkbox + identity)
-    ("X/" checkbox-n-of-m + identity)
-    ("X%" checkbox-percent + identity)
-    ("max" max_numbers max identity)
-    ("min" min_numbers min identity)
+  '(("none" none +)
+    (":" add_times +)
+    ("+" add_numbers +)
+    ("$" currency +)
+    ("X" checkbox +)
+    ("X/" checkbox-n-of-m +)
+    ("X%" checkbox-percent +)
+    ("max" max_numbers max)
+    ("min" min_numbers min)
     ("mean" mean_numbers
-     (lambda (&rest x) (/ (apply '+ x) (float (length x))))
-     identity)
-    (":max" max_times max identity)
-    (":min" min_times min identity)
+     (lambda (&rest x) (/ (apply '+ x) (float (length x)))))
+    (":max" max_times max)
+    (":min" min_times min)
     (":mean" mean_times
-     (lambda (&rest x) (/ (apply '+ x) (float (length x))))
-     identity)
+     (lambda (&rest x) (/ (apply '+ x) (float (length x)))))
     ("@min" min_age min (lambda (x) (- org-columns-time x)))
     ("@max" max_age max (lambda (x) (- org-columns-time x)))
     ("@mean" mean_age
@@ -928,7 +926,9 @@ around it."
 	     org-columns-string-to-number
  function    called with a list of values as argument to calculate
 	     the summary value
- calc        function called on every element before summarizing")
+ calc        function called on every element before summarizing. This is
+	     optional and should only be specified if needed")
+
 
 (defun org-columns-new (&optional prop title width op fmt fun &rest rest)
   "Insert a new column, to the left of the current column."
