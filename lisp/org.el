@@ -9894,7 +9894,8 @@ changes.  Such blocking occurs when:
 	      (member (plist-get change-plist :from)
 		      (cons 'done org-done-keywords))
 	      (member (plist-get change-plist :to)
-		      (cons 'todo org-not-done-keywords)))
+		      (cons 'todo org-not-done-keywords))
+	      (not (plist-get change-plist :to)))
       (throw 'dont-block t))
     ;; If this task has children, and any are undone, it's blocked
     (save-excursion
@@ -9984,7 +9985,8 @@ changes because there are uncheckd boxes in this entry."
 	      (member (plist-get change-plist :from)
 		      (cons 'done org-done-keywords))
 	      (member (plist-get change-plist :to)
-		      (cons 'todo org-not-done-keywords)))
+		      (cons 'todo org-not-done-keywords))
+	      (not (plist-get change-plist :to)))
       (throw 'dont-block t))
     ;; If this task has checkboxes that are not checked, it's blocked
     (save-excursion

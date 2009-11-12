@@ -1,3 +1,9 @@
+2009-11-12  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-block-todo-from-children-or-siblings-or-parent)
+	(org-block-todo-from-checkboxes): Do not block changes to a nil
+	TODO state.
+
 2009-11-12  James TD Smith  <ahktenzero@mohorovi.cc>
 
 	* org-habit.el (org-habit-parse-todo): Indicate which habit is
