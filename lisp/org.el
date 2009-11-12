@@ -6735,6 +6735,7 @@ and still retain the repeater to cover future instances of the task."
     (org-back-to-heading t)
     (setq beg (point))
     (org-end-of-subtree t t)
+    (or (bolp) (insert "\n"))
     (setq end (point))
     (setq template (buffer-substring beg end))
     (when (and doshift
