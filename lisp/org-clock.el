@@ -181,7 +181,7 @@ This can be overruled locally using the CLOCK_MODELINE_TOTAL property.
 Allowed values are:
 
 current  Only the time in the current instance of the clock
-today    All time clocked inot this task today
+today    All time clocked into this task today
 repeat   All time clocked into this task since last repeat
 all      All time ever recorded for this task
 auto     Automatically, either `all', or `repeat' for repeating tasks"
@@ -423,8 +423,8 @@ previous clocking intervals."
 
 (defun org-clock-modify-effort-estimate (&optional value)
  "Add to or set the effort estimate of the item currently being clocked.
-VALUE can be a number of minutes, or a string with forat hh:mm or mm.
-WHen the strig starts with a + or a - sign, the current value of the effort
+VALUE can be a number of minutes, or a string with format hh:mm or mm.
+When the string starts with a + or a - sign, the current value of the effort
 property will be changed by that amount.
 This will update the \"Effort\" property of currently clocked item, and
 the mode line."

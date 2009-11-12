@@ -149,7 +149,7 @@ toggle a checkbox with \\[org-ctrl-c-ctrl-c]."
 (defcustom org-hierarchical-checkbox-statistics t
   "Non-nil means, checkbox statistics counts only the state of direct children.
 When nil, all boxes below the cookie are counted.
-This can be set to nil on a per-node basis using a COCKIE_DATA property
+This can be set to nil on a per-node basis using a COOKIE_DATA property
 with the word \"recursive\" in the value."
   :group 'org-plain-lists
   :type 'boolean)
@@ -1198,7 +1198,7 @@ INDENT is the indentation of the list, as a string."
     (goto-char pos)))
 
 (defun org-list-send-list (&optional maybe)
-  "Send a tranformed version of this list to the receiver position.
+  "Send a transformed version of this list to the receiver position.
 With argument MAYBE, fail quietly if no transformation is defined for
 this list."
   (interactive)

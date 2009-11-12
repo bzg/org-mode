@@ -685,7 +685,7 @@ of the buffer."
 When the cursor is at the end of an empty headline, i.e with only stars
 and maybe a TODO keyword, TAB will then switch the entry to become a child,
 and then all possible anchestor states, before returning to the original state.
-This makes data entry extremely fast:  M-RET to create a new hedline,
+This makes data entry extremely fast:  M-RET to create a new headline,
 on TAB to make it a child, two or more tabs to make it a (grand-)uncle.
 
 When the cursor is at the end of an empty plain list item, one TAB will
@@ -1015,7 +1015,7 @@ See also the variable `org-table-auto-blank-field'."
 
 (defcustom org-self-insert-cluster-for-undo t
   "Non-nil means cluster self-insert commands for undo when possible.
-If this is set, then, like in the Emacs command loop, 20 consequtive
+If this is set, then, like in the Emacs command loop, 20 consecutive
 characters will be undone together.
 This is configurable, because there is some impact on typing performance."
   :group 'org-table
@@ -1334,7 +1334,7 @@ changes to the current buffer."
 When nil, an error will be generated.
 This variable applies only to external applications because they
 might choke on non-existing files.  If the link is to a file that
-will be openend in Emacs, the variable is ignored."
+will be opened in Emacs, the variable is ignored."
   :group 'org-link-follow
   :type 'boolean)
 
@@ -2765,7 +2765,7 @@ This option is irrelevant until `org-agenda-diary-file' has been configured
 to point to an Org-mode file.  When that is the case, the command
 `org-agenda-diary-entry' will be bound to the key given here, by default
 `i'.  In the calendar, `i' normally adds entries to `diary-file'.  So
-if you want to continue doing this, you need to change this to a defferent
+if you want to continue doing this, you need to change this to a different
 key."
   :group 'org-agenda
   :type 'sexp)
@@ -2895,7 +2895,7 @@ Changing this variable requires a restart of Emacs to take effect."
 (defcustom org-fontify-whole-heading-line nil
   "Non-nil means fontify the whole line for headings.
 This is useful when setting a background color for the
-org-leve-* faces."
+org-level-* faces."
   :group 'org-font-lock
   :type 'boolean)
 
@@ -3051,7 +3051,7 @@ See also `org-completion-use-iswitchb'."
 Note that `iswitchb-mode' must be active for this variable to be relevant.
 If you decide to turn this variable on, you might well want to turn off
 `org-outline-path-complete-in-steps'.
-Note that thi variable has only an effect if `org-completion-use-ido' is nil."
+Note that this variable has only an effect if `org-completion-use-ido' is nil."
   :group 'org-completion
   :type 'boolean)
 
@@ -3061,7 +3061,7 @@ Normal means, no org-mode-specific context."
   :group 'org-completion
   :type 'function)
 
-;;; Functions and variables from ther packages
+;;; Functions and variables from their packages
 ;;  Declared here to avoid compiler warnings
 
 ;; XEmacs only
@@ -3436,7 +3436,7 @@ Here are a few examples:
 	Archive in file ~/org/archive.org (absolute path), as top-level trees.
 
 \"~/org/archive.org::From %s\"
-	Archive in file ~/org/archive.org (absolute path), und headlines
+	Archive in file ~/org/archive.org (absolute path), under headlines
         \"From FILENAME\" where file name is the current file name.
 
 \"basement::** Finished Tasks\"
@@ -3677,7 +3677,7 @@ groups carry important information:
   "Regular expression to match a timestamp time or time range.
 After a match, the following groups carry important information:
 0  the full match
-1  date plus weekday, for backreferencing to make sure both times on same day
+1  date plus weekday, for back referencing to make sure both times are on the same day
 2  the first time, range or not
 4  the second time, if it is a range.")
 
@@ -5031,7 +5031,7 @@ If KWD is a number, get the corresponding match group."
   "TAB-action and visibility cycling for Org-mode.
 
 This is the command invoked in Org-mode by the TAB key.  Its main purpose
-is outine visibility cycling, but it also invokes other actions
+is outline visibility cycling, but it also invokes other actions
 in special contexts.
 
 - When this function is called with a prefix argument, rotate the entire
@@ -5577,7 +5577,7 @@ Optional argument N means, put the headline into the Nth line of the window."
   "Regular expression for hiding blocks.")
 
 (defvar org-hide-block-overlays nil
-  "Overays hiding blocks.")
+  "Overlays hiding blocks.")
 (make-variable-buffer-local 'org-hide-block-overlays)
 
 (defun org-block-map (function &optional start end)
@@ -5708,7 +5708,7 @@ RET=jump to location             [Q]uit and return to previous location
 
 (defvar org-goto-start-pos) ; dynamically scoped parameter
 
-;; FIXME: Docstring doe not mention both interfaces
+;; FIXME: Docstring does not mention both interfaces
 (defun org-goto (&optional alternative-interface)
   "Look up a different location in the current file, keeping current visibility.
 
@@ -6811,7 +6811,7 @@ n   Numerically, by converting the beginning of the entry/item to a number.
 a   Alphabetically, ignoring the TODO keyword and the priority, if any.
 t   By date/time, either the first active time stamp in the entry, or, if
     none exist, by the first inactive one.
-    In items, only the first line will be chekced.
+    In items, only the first line will be checked.
 s   By the scheduled date/time.
 d   By deadline date/time.
 c   By creation time, which is assumed to be the first inactive time stamp
@@ -8130,7 +8130,7 @@ This is still an experimental function, your mileage may vary."
    ;; Planner has a slash, we do not.
    (setq type "elisp" path (substring path 1)))
   ((string-match "^//\\(.?*\\)/\\(<.*>\\)$" path)
-   ;; A typical message link.  Planner has the id after the fina slash,
+   ;; A typical message link.  Planner has the id after the final slash,
    ;; we separate it with a hash mark
    (setq path (concat (match-string 1 path) "#"
 		      (org-remove-angle-brackets (match-string 2 path)))))
@@ -8360,7 +8360,7 @@ application the system uses for this file type."
   (run-hook-with-args 'org-follow-link-hook))
 
 (defun org-offer-links-in-entry (&optional nth zero)
-  "Offer links in the curren entry and follow the selected link.
+  "Offer links in the current entry and follow the selected link.
 If there is only one link, follow it immediately as well.
 If NTH is an integer, immediately pick the NTH link found.
 If ZERO is a string, check also this string for a link, and if
@@ -9256,7 +9256,7 @@ If not found, stay at current position and return nil."
 
 (defconst org-dblock-start-re
   "^[ \t]*#\\+BEGIN:[ \t]+\\(\\S-+\\)\\([ \t]+\\(.*\\)\\)?"
-  "Matches the startline of a dynamic block, with parameters.")
+  "Matches the start line of a dynamic block, with parameters.")
 
 (defconst org-dblock-end-re "^[ \t]*#\\+END\\([: \t\r\n]\\|$\\)"
   "Matches the end of a dynamic block.")
@@ -9677,7 +9677,7 @@ DONE are present, add TODO at the beginning of the heading.
 With C-u prefix arg, use completion to determine the new state.
 With numeric prefix arg, switch to that state.
 With a double C-u prefix, switch to the next set of TODO keywords (nextset).
-With a tripple C-u prefix, circumvent any state blocking.
+With a triple C-u prefix, circumvent any state blocking.
 
 For calling through lisp, arg is also interpreted in the following way:
 'none             -> empty state
@@ -9977,7 +9977,7 @@ See variable `org-track-ordered-property-with-tag'."
 (defun org-block-todo-from-checkboxes (change-plist)
   "Block turning an entry into a TODO, using checkboxes.
 This checks whether the current task should be blocked from state
-changes because there are uncheckd boxes in this entry."
+changes because there are unchecked boxes in this entry."
   (catch 'dont-block
     ;; If this is not a todo state change, or if this entry is already DONE,
     ;; do not block
@@ -10124,7 +10124,7 @@ when there is a statistics cookie in the headline!
 
 (defvar org-todo-statistics-hook nil
   "Hook that is run whenever Org thinks TODO statistics should be updated.
-This hook runs even if there is no statisics cookie present, in which case
+This hook runs even if there is no statistics cookie present, in which case
 `org-after-todo-statistics-hook' would not run.")
 
 (defun org-todo-trigger-tag-changes (state)
@@ -10441,7 +10441,7 @@ returns nil."
 
 (defun org-get-deadline-time (pom &optional inherit)
   "Get the deadine as a time tuple, of a format suitable for
-calling org-deadlin with, or if there is no scheduling, returns
+calling org-deadline with, or if there is no scheduling, returns
 nil."
   (let ((time (org-entry-get pom "DEADLINE" inherit)))
     (when time
@@ -10740,7 +10740,7 @@ EXTRA is additional text that will be inserted into the notes buffer."
   (and org-log-post-message (message "%s" org-log-post-message)))
 
 (defun org-remove-empty-drawer-at (drawer pos)
-  "Remove an emptyr DARWER drawer at position POS.
+  "Remove an empty drawer DRAWER at position POS.
 POS may also be a marker."
   (with-current-buffer (if (markerp pos) (marker-buffer pos) (current-buffer))
     (save-excursion
@@ -11007,7 +11007,7 @@ ACTION can be `set', `up', `down', or a character."
 (defvar org-agenda-archives-mode)
 (defvar org-map-continue-from nil
   "Position from where mapping should continue.
-Can be set byt the action argument to `org-scan-tag's and `org-map-entries'.")
+Can be set by the action argument to `org-scan-tag's and `org-map-entries'.")
 
 (defvar org-scanner-tags nil
   "The current tag list while the tags scanner is running.")
@@ -13958,7 +13958,7 @@ If there is already a time stamp at the cursor position, update it."
 
 (defun org-hh:mm-string-to-minutes (s)
   "Convert a string H:MM to a number of minutes.
-If the string is just a number, interprete it as minutes.
+If the string is just a number, interpret it as minutes.
 In fact, the first hh:mm or number in the string will be taken,
 there can be extra stuff in the string.
 If no number is found, the return value is 0."
@@ -16975,7 +16975,7 @@ This looks for a line like
 
 #+BIBLIOGRAPHY: foo plain option:-d
 
-and derives from it that foo.bib is the bbliography file relevant
+and derives from it that foo.bib is the bibliography file relevant
 for this document.  It then installs the necessary environment for RefTeX
 to work in this buffer and calls `reftex-citation'  to insert a citation
 into the buffer.

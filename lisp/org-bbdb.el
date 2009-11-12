@@ -64,7 +64,7 @@
 ;;
 ;;  - an identifier for a class of anniversaries (eg. birthday or
 ;;    wedding) from `org-bbdb-anniversary-format-alist' which then
-;;    defines the format tring for this class
+;;    defines the format string for this class
 ;;  - the (format) string displayed in the diary.
 ;;
 ;; You can enter multiple anniversaries for a single BBDB record by

@@ -106,9 +106,9 @@ all-tags    All tags, including inherited ones."
 (defcustom org-icalendar-include-todo nil
   "Non-nil means, export to iCalendar files should also cover TODO items.
 Valid values are:
-nil         don't inlcude any TODO items
+nil         don't include any TODO items
 t           include all TODO items that are not in a DONE state
-unblocked   include all TODO idems that are not blocked
+unblocked   include all TODO items that are not blocked
 all         include both done and not done items."
   :group 'org-export-icalendar
   :type '(choice
@@ -126,7 +126,7 @@ will be considered for export.
 This is used internally when an agenda buffer is exported to an ics file,
 to make sure that only entries currently listed in the agenda will end
 up in the ics file.  But for normal iCalendar export, you can use this
-for whatevery you need.")
+for whatever you need.")
 
 (defcustom org-icalendar-include-bbdb-anniversaries nil
   "Non-nil means, a combined iCalendar files should include anniversaries.

@@ -217,7 +217,7 @@ If the integer is negative, the string will start with \"-\"."
 (defvar org-timer-mode-line-string nil)
 
 (defun org-timer-set-mode-line (value)
-  "Set the mode-line dispay of the relative timer.
+  "Set the mode-line display of the relative timer.
 VALUE can be `on', `off', or `pause'."
   (or global-mode-string (setq global-mode-string '("")))
   (or (memq 'org-timer-mode-line-string global-mode-string)
@@ -284,7 +284,7 @@ VALUE can be `on', `off', or `pause'."
 				  (current-time))))
 	   (rsecs (nth 0 rtime))
 	   (rmins (nth 1 rtime)))
-      (message "%d minutes %d secondes left before next time out"
+      (message "%d minutes %d seconds left before next time out"
 	       rmins rsecs))))
 
 ;;;###autoload

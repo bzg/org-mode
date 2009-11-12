@@ -171,7 +171,7 @@ FIXME:  How to update when broken?"
   (org-compatible-face nil nil)
   "Face for outline indentation.
 The default is to make it look like whitespace.  But you may find it
-useful to make it evver so slightly different."
+useful to make it ever so slightly different."
   :group 'org-faces)
 
 (defun org-indent-indent-buffer ()

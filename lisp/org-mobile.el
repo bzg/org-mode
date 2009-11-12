@@ -42,7 +42,7 @@
 
 (defcustom org-mobile-files '(org-agenda-files)
   "Files to be staged for MobileOrg.
-This is basically a list of filesand directories.  Files will be staged
+This is basically a list of files and directories.  Files will be staged
 directly.  Directories will be search for files with the extension `.org'.
 In addition to this, the list may also contain the following symbols:
 
@@ -166,7 +166,7 @@ capture file `mobileorg.org' back to the WebDAV directory, for example
 using `rsync' or `scp'.")
 
 (defvar org-mobile-last-flagged-files nil
-  "List of files containing entreis flagged in the latest pull.")
+  "List of files containing entries flagged in the latest pull.")
 
 (defvar org-mobile-files-alist nil)
 (defvar org-mobile-checksum-files nil)
@@ -699,7 +699,7 @@ If BEG and END are given, only do this in that region."
 	      (insert "BAD FLAG ")
 	      (incf cnt-error)
 	      (throw 'next t))
-	    ;; Remember this place so tha we can return
+	    ;; Remember this place so that we can return
 	    (move-marker marker (point))
 	    (setq org-mobile-error nil)
 	    (save-excursion
@@ -755,7 +755,7 @@ The entry is expected to contain an inactive time stamp indicating when
 the entry was created.  When setting dates and
 times (for example for deadlines), the time strings are interpreted
 relative to that creation date.
-Abbreviations are expected to take up entire lines, jst because it is so
+Abbreviations are expected to take up entire lines, just because it is so
 easy to type RET on a mobile device.  Abbreviations start with one or two
 letters, followed immediately by a dot and then additional information.
 Generally the entire shortcut line is removed after action have been taken.
@@ -828,7 +828,7 @@ as a string."
 	(org-find-olp (cons file path))))))
 
 (defun org-mobile-edit (what old new)
-  "Edit item WHAT in the current entry by replacing OLD wih NEW.
+  "Edit item WHAT in the current entry by replacing OLD with NEW.
 WHAT can be \"heading\", \"todo\", \"tags\", \"priority\", or \"body\".
 The edit only takes place if the current value is equal (except for
 white space) the OLD.  If this is so, OLD will be replace by NEW
@@ -898,7 +898,7 @@ be returned that indicates what went wrong."
 						      (point))))
       (if (not (string-match "\\S-" current)) (setq current nil))
       (cond
-       ((org-mobile-bodies-same-p current new) t) ; no ation necesary
+       ((org-mobile-bodies-same-p current new) t) ; no action necessary
        ((or (org-mobile-bodies-same-p current old)
 	    (eq org-mobile-force-mobile-change t)
 	    (memq 'body org-mobile-force-mobile-change))

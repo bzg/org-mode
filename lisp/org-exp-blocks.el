@@ -158,7 +158,7 @@ CLOSE tags will be inserted around BODY."
    "#+END_LaTeX\n"))
 
 (defun org-export-blocks-preprocess ()
-  "Export all blocks acording to the `org-export-blocks' block
+  "Export all blocks according to the `org-export-blocks' block
 exportation alist.  Does not export block types specified in
 specified in BLOCKS which default to the value of
 `org-export-blocks-witheld'."

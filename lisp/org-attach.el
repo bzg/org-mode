@@ -209,7 +209,7 @@ the directory and (if necessary) the corresponding ID will be created."
 	   attach-dir))))
 
 (defun org-attach-check-absolute-path (dir)
-  "Check if we have enough information to root the atachment directory.
+  "Check if we have enough information to root the attachment directory.
 When DIR is given, check also if it is already absolute.  Otherwise,
 assume that it will be relative, and check if `org-attach-directory' is
 absolute, or if at least the current buffer has a file name.

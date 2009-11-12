@@ -1651,7 +1651,7 @@ lang=\"%s\" xml:lang=\"%s\">
     (unless splice (push "</table>\n" html))
     (setq html (nreverse html))
     (unless splice
-      ;; Put in col tags with the alignment (unfortuntely often ignored...)
+      ;; Put in col tags with the alignment (unfortunately often ignored...)
       (unless (car org-table-colgroup-info)
 	(setq org-table-colgroup-info
 	      (cons :start (cdr org-table-colgroup-info))))

@@ -1572,7 +1572,7 @@ BACKEND is the current export backend."
   "Function to be called to format the contents of a drawer.
 The function must accept three parameters:
   BACKEND  one of the symbols html, docbook, latex, ascii, xoxo
-  NAME     the drawer name, like \"PROPERIES\"
+  NAME     the drawer name, like \"PROPERTIES\"
   CONTENT  the content of the drawer.
 The function should return the text to be inserted into the buffer.
 If this is nil, `org-export-format-drawer' is used as a default.")
@@ -2293,8 +2293,8 @@ in the list) and remove property and value from the list in LISTVAR."
   (backend lang code &optional opts indent)
   "Format CODE from language LANG and return it formatted for export.
 If LANG is nil, do not add any fontification.
-OPTS contains formatting optons, like `-n' for triggering numbering lines,
-and `+n' for continuing previous numering.
+OPTS contains formatting options, like `-n' for triggering numbering lines,
+and `+n' for continuing previous numbering.
 Code formatting according to language currently only works for HTML.
 Numbering lines works for all three major backends (html, latex, and ascii).
 INDENT was the original indentation of the block."

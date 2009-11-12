@@ -78,7 +78,7 @@
 ;;
 ;; Creating better remember template information was inspired by a request
 ;; of Austin Frank: http://article.gmane.org/gmane.emacs.orgmode/4112
-;; and then imlemented by Bastien Guerry.
+;; and then implemented by Bastien Guerry.
 ;;
 ;; Org-mode loads this module by default - if this is not what you want,
 ;; configure the variable `org-modules'.

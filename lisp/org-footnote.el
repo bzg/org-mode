@@ -76,7 +76,7 @@ If this is a string, during export, all subtrees starting with this
 heading will be removed after extracting footnote definitions."
   :group 'org-footnotes
   :type '(choice
-	  (string :tag "Collect fotnotes under heading")
+	  (string :tag "Collect footnotes under heading")
 	  (const :tag "Define footnotes locally" nil)))
 
 (defcustom org-footnote-tag-for-non-org-mode-files "Footnotes:"
@@ -109,7 +109,7 @@ confirm    like t, but let the user edit the created value.  In particular,
 plain      Automatically create plain number labels like [1]"
   :group 'org-footnote
   :type '(choice
-	  (const :tag "Frompt for label" nil)
+	  (const :tag "Prompt for label" nil)
 	  (const :tag "Create automatic [fn:N]" t)
 	  (const :tag "Offer automatic [fn:N] for editing" confirm)
 	  (const :tag "Create automatic [N]" plain)))
@@ -311,7 +311,7 @@ or new, let the user edit the definition of the footnote."
 (defun org-footnote-action (&optional special)
   "Do the right thing for footnotes.
 When at a footnote reference, jump to the definition.  When at a definition,
-jump to the refernces.  When neither at definition or reference,
+jump to the references.  When neither at definition or reference,
 create a new footnote, interactively.
 With prefix arg SPECIAL, offer additional commands in a menu."
   (interactive "P")

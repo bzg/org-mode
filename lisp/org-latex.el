@@ -186,7 +186,7 @@ to represent the section title."
 Each element of the list is a list of three elements.
 The first element is the character used as a marker for fontification.
 The second element is a formatting string to wrap fontified text with.
-If it is \"\\verb\", Org will automatically select a deimiter
+If it is \"\\verb\", Org will automatically select a delimiter
 character that is not in the string.
 The third element decides whether to protect converted text from other
 conversions."
@@ -278,7 +278,7 @@ the %s stands here for the inserted headline and is mandatory.
 It may also be a list of three string to define a user-defined environment
 that should be used.  The first string should be the like
 \"\\begin{itemize}\", the second should be like \"\\item %s %s\" with up
-to two occurrences of %s for the title and a lable, respectively.  The third
+to two occurrences of %s for the title and a label, respectively.  The third
 string should be like \"\\end{itemize\"."
   :group 'org-export-latex
   :type '(choice (const :tag "Ignore" nil)
@@ -398,12 +398,12 @@ as a command.  %s in the command will be replaced by the full file name, %b
 by the file base name (i.e. without extension).
 The reason why this is a list is that it usually takes several runs of
 pdflatex, maybe mixed with a call to bibtex.  Org does not have a clever
-mechanism to detect whihc of these commands have to be run to get to a stable
+mechanism to detect which of these commands have to be run to get to a stable
 result, and it also does not do any error checking.
 
 Alternatively, this may be a Lisp function that does the processing, so you
 could use this to apply the machinery of AUCTeX or the Emacs LaTeX mode.
-THis function should accept the file name as its single argument."
+This function should accept the file name as its single argument."
   :group 'org-export-latex
   :type '(choice (repeat :tag "Shell command sequence"
 		  (string :tag "Shell command"))
@@ -1385,7 +1385,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
             (when org-table-clean-did-remove-column
 	      (pop org-table-last-alignment)
 	      (pop org-table-last-column-widths))
-            ;; make a formatting string to reflect aligment
+            ;; make a formatting string to reflect alignment
             (setq olines lines)
             (while (and (not line-fmt) (setq line (pop olines)))
               (unless (string-match "^[ \t]*|-" line)

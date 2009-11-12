@@ -119,7 +119,7 @@ entities, you can set this variable to:
 ]>
 \"
 
-If you want to process DocBook documents without internet
+If you want to process DocBook documents without an Internet
 connection, it is suggested that you download the required entity
 file(s) and use system identifier(s) (external files) in the
 DOCTYPE declaration."

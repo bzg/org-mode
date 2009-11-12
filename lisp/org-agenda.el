@@ -622,7 +622,7 @@ have turned on `org-enforce-todo-dependencies',
 `org-enforce-todo-checkbox-dependencies', or any other blocking
 mechanism, this will create useful feedback in the agenda.
 
-Instead ot t, this variable can also have the value `invisible'.
+Instead of t, this variable can also have the value `invisible'.
 Then blocked tasks will be invisible and only become visible when
 they become unblocked.  An exemption to this behavior is when a task is
 blocked because of unchecked checkboxes below it.  Since checkboxes do
@@ -635,7 +635,7 @@ will only be dimmed."
   :type '(choice
 	  (const :tag "Do not dim" nil)
 	  (const :tag "Dim to a grey face" t)
-	  (const :tag "Make invisibe" invisible)))
+	  (const :tag "Make invisible" invisible)))
 
 (defcustom org-timeline-show-empty-dates 3
   "Non-nil means, `org-timeline' also shows dates without an entry.
@@ -677,7 +677,7 @@ Needs to be set before org.el is loaded."
   :type 'boolean)
 
 (defcustom org-agenda-entry-text-maxlines 5
-  "Number of text lines to be added when `E' is presed in the agenda.
+  "Number of text lines to be added when `E' is pressed in the agenda.
 
 Note that this variable only used during agenda display.  Add add entry text
 when exporting the agenda, configure the variable
@@ -1089,7 +1089,7 @@ If there is punctuation or whitespace character just before the final
 format letter, this character will be appended to the field value if
 the value is not empty.  For example, the format \"%-12:c\" leads to
 \"Diary: \" if the category is \"Diary\".  If the category were be
-empty, no additional colon would be interted.
+empty, no additional colon would be inserted.
 
 The default value of this option is \"  %-12:c%?-12t% s\", meaning:
 - Indent the line with two space characters
@@ -1788,7 +1788,7 @@ Pressing `<' twice means to restrict to the current subtree or region
 	(setq ans (org-agenda-get-restriction-and-command prefix-descriptions)
 	      keys (car ans)
 	      restriction (cdr ans)))
-      ;; Estabish the restriction, if any
+      ;; Establish the restriction, if any
       (when (and (not org-agenda-overriding-restriction) restriction)
 	(put 'org-agenda-files 'org-restrict (list bfn))
 	(cond
@@ -2271,7 +2271,7 @@ HTML (.html or .htm) or Postscript (.ps) is produced.
 If the extension is .ics, run icalendar export over all files used
 to construct the agenda and limit the export to entries listed in the
 agenda now.
-With prefic argument OPEN, open the new file immediately.
+With prefix argument OPEN, open the new file immediately.
 If NOSETTINGS is given, do not scope the settings of
 `org-agenda-exporter-settings' into the export commands.  This is used when
 the settings have already been scoped and we do not wish to overrule other,
@@ -2399,7 +2399,7 @@ Drawers will be excluded, also the line with scheduling/deadline info."
   "Extract entry text from MARKER, at most N-LINES lines.
 This will ignore drawers etc, just get the text.
 If INDENT is given, prefix every line with this string.  If KEEP is
-given, it is a list of symbols, defining stuff that hould not be
+given, it is a list of symbols, defining stuff that should not be
 removed from the entry content.  Currently only `planning' is allowed here."
   (let (txt drawer-re kwd-time-re ind)
     (save-excursion
@@ -2782,7 +2782,7 @@ no longer in use."
 ;;; Entry text mode
 
 (defun org-agenda-entry-text-show-here ()
-  "Add some text from te entry as context to the current line."
+  "Add some text from the entry as context to the current line."
   (let (m txt o)
     (setq m (org-get-at-bol 'org-hd-marker))
     (unless (marker-buffer m)
@@ -3194,8 +3194,8 @@ EDIT-AT.
 
 The search string is broken into \"words\" by splitting at whitespace.
 Depending on the variable `org-agenda-search-view-search-words-only'
-and on wether the first character in the search string is \"+\" or \"-\",
-The string is then interpreted either as a substrig with variable amounts
+and on whether the first character in the search string is \"+\" or \"-\",
+The string is then interpreted either as a substring with variable amounts
 of whitespace, or as a list or individual words that should be matched.
 
 The default is a substring match, where each space in the search string
@@ -4927,7 +4927,7 @@ HH:MM."
 ;;; Agenda restriction lock
 
 (defvar org-agenda-restriction-lock-overlay (org-make-overlay 1 1)
-  "Overlay to mark the headline to which arenda commands are restricted.")
+  "Overlay to mark the headline to which agenda commands are restricted.")
 (org-overlay-put org-agenda-restriction-lock-overlay
 		 'face 'org-agenda-restriction-lock)
 (org-overlay-put org-agenda-restriction-lock-overlay
@@ -5945,7 +5945,7 @@ When called repeatedly, scroll the window that is displaying the buffer."
 
 (defun org-agenda-show-1 (&optional more)
   "Display the Org-mode file which contains the item at point.
-The prefix arg causes further revieling:
+The prefix arg selects the amount of information to display:
 
 0   hide the subtree
 1   just show the entry according to defaults.
@@ -6683,7 +6683,7 @@ The cursor may be at a date in the calendar, or in the Org agenda."
 
 (defun org-agenda-add-entry-to-org-agenda-diary-file (type text &optional d1 d2)
   "Add a diary entry with TYPE to `org-agenda-diary-file'.
-If TEXT is not empty, it will become the headling of the new entry, and
+If TEXT is not empty, it will become the headline of the new entry, and
 the resulting entry will not be shown.  When TEXT is empty, switch to
 `org-agenda-diary-file' and let the user finish the entry there."
   (let ((cw (current-window-configuration)))
@@ -7111,7 +7111,7 @@ tag and (if present) the flagging note."
       (message "Flagging note pushed to kill ring.  Press [?] again to remove tag and note"))))
 
 (defun org-agenda-remove-flag (marker)
-  "Remove the FLAGGED tag and any flaging note in the entry."
+  "Remove the FLAGGED tag and any flagging note in the entry."
   (let (newhead)
     (org-with-point-at marker
       (org-toggle-tag "FLAGGED" 'off)
