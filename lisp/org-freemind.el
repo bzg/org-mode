@@ -246,6 +246,7 @@ The characters \"&<> will be escaped."
 
 ;;(org-freemind-unescape-str-to-org "&#x6d;A&#x224C;B&lt;C&#x3C;&#x3D;")
 ;;(org-freemind-unescape-str-to-org "&#x3C;&lt;")
+(defvar str)
 (defun org-freemind-unescape-str-to-org (fm-str)
   "Do some html-unescaping of FM-STR and return the result.
 This is the opposite of `org-freemind-escape-str-from-org' but it
