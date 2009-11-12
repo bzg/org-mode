@@ -409,6 +409,7 @@ The table of checksums is written to the file mobile-checksums."
 	(files org-mobile-checksum-files)
 	entry file sum)
     (with-temp-file sumfile
+      (set-buffer-file-coding-system 'undecided-unix nil)
       (while (setq entry (pop files))
 	(setq file (car entry) sum (cdr entry))
 	(insert (format "%s  %s\n" sum file))))))
