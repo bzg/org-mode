@@ -2046,7 +2046,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
       (when (consp x)
 	(add-to-list 'org-latex-entities-exceptions x)
 	(setq x (car x)))
-      (if (string-match "[a-z][A-Z]$" x)
+      (if (string-match "[a-zA-Z]$" x)
 	  (push x names)
 	(push x rest)))
     (concat "\\(" (regexp-opt (nreverse names)) "\\>\\)"

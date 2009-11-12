@@ -1,5 +1,7 @@
 2009-11-12  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-latex.el (org-latex-entities-regexp): Fix typo in regexp.
+
 	* org.el (org-block-todo-from-children-or-siblings-or-parent)
 	(org-block-todo-from-checkboxes): Do not block changes to a nil
 	TODO state.
