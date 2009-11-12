@@ -244,6 +244,8 @@ The characters \"&<> will be escaped."
                       ))))
     fm-str))
 
+;;(org-freemind-unescape-str-to-org "&#x6d;A&#x224C;B&lt;C&#x3C;&#x3D;")
+;;(org-freemind-unescape-str-to-org "&#x3C;&lt;")
 (defun org-freemind-unescape-str-to-org (fm-str)
   "Do some html-unescaping of FM-STR and return the result.
 This is the opposite of `org-freemind-escape-str-from-org' but it
@@ -254,21 +256,25 @@ will also unescape &#nn;."
     (setq org-str (replace-regexp-in-string "&lt;" "<" org-str))
     (setq org-str (replace-regexp-in-string "&gt;" ">" org-str))
     (setq org-str (replace-regexp-in-string
-               "&#x\\([a-f0-9]\\{2\\}\\);"
-               (lambda (m)
-                     (char-to-string (+ (string-to-number (match-string 1 org-str) 16)
-                                    ?\x800)))
-               org-str))))
+                   "&#x\\([a-f0-9]\\{2,4\\}\\);"
+                   (lambda (m)
+                     (char-to-string
+                      ;; Note: str is scoped dynamically from
+                      ;; `replace-regexp-in-string'.
+                      (+ (string-to-number (match-string 1 str) 16)
+                         0 ;?\x800 ;; What is this for? Encoding?
+                         )))
+                   org-str))))
 
 ;; (org-freemind-test-escape)
-;; (defun org-freemind-test-escape ()
-;;   (let* ((str1 "a quote: \", an amp: &, lt: <; over 256: öåäÖÅÄ")
-;;          (str2 (org-freemind-escape-str-from-org str1))
-;;          (str3 (org-freemind-unescape-str-to-org str2))
-;;         )
-;;     (unless (string= str1 str3)
-;;       (error "str3=%s" str3))
-;;     ))
+(defun org-freemind-test-escape ()
+  (let* ((str1 "a quote: \", an amp: &, lt: <; over 256: öåäÖÅÄ")
+         (str2 (org-freemind-escape-str-from-org str1))
+         (str3 (org-freemind-unescape-str-to-org str2))
+        )
+    (unless (string= str1 str3)
+      (error "str3=%s" str3))
+    ))
 
 (defun org-freemind-convert-links-from-org (org-str)
   "Convert org links in ORG-STR to freemind links and return the result."
@@ -652,6 +658,7 @@ Otherwise give an error say the file exists."
                 this-node-end
                 this-children-visible
                 next-m2
+                next-node-start
                 next-level
                 next-has-some-visible-child
                 next-children-visible
@@ -661,9 +668,9 @@ Otherwise give an error say the file exists."
                     (if node-at-line-last (<= (point) node-at-line-last) t)
                     )
               (let* ((next-m1 (match-string-no-properties 1))
-                     (next-node-start (match-beginning 0))
                      (next-node-end (match-end 0))
                      )
+                (setq next-node-start (match-beginning 0))
                 (setq next-m2 (match-string-no-properties 2))
                 (setq next-level (length next-m1))
                 (when (> next-level current-level)
@@ -1128,4 +1135,5 @@ PATH should be a list of steps, where each step has the form
 
 ;; arch-tag: e7b0d776-94fd-404a-b35e-0f855fae3627
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; org-freemind.el ends here
