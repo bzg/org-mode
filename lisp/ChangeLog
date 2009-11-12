@@ -1,3 +1,8 @@
+2009-11-12  John Wiegley  <jwiegley@gmail.com>
+
+	* org-clock.el (org-clock-resolve): If `org-clock-into-string' is
+	a string, use that to find the LOGBOOK drawer.
+
 2009-11-12  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-clone-subtree-with-time-shift): Make it work at the

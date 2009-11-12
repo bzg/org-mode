@@ -678,22 +678,26 @@ was started."
 	  (save-window-excursion
 	    (save-excursion
 	      (unless org-clock-resolving-clocks-due-to-idleness
-		(org-with-clock clock
-		  (org-clock-goto))
+		(org-with-clock clock (org-clock-goto))
 		(with-current-buffer (marker-buffer (car clock))
 		  (goto-char (car clock))
 		  (if org-clock-into-drawer
-		      (ignore-errors
-			(outline-flag-region (save-excursion
-					       (outline-back-to-heading t)
-					       (search-forward ":LOGBOOK:")
-					       (goto-char (match-beginning 0)))
-					     (save-excursion
-					       (outline-back-to-heading t)
-					       (search-forward ":LOGBOOK:")
-					       (search-forward ":END:")
-					       (goto-char (match-end 0)))
-					     nil)))))
+		      (let ((logbook
+			     (if (stringp org-clock-into-drawer)
+				 (concat ":" org-clock-into-drawer ":")
+			       ":LOGBOOK:")))
+			(ignore-errors
+			  (outline-flag-region
+			   (save-excursion
+			     (outline-back-to-heading t)
+			     (search-forward logbook)
+			     (goto-char (match-beginning 0)))
+			   (save-excursion
+			     (outline-back-to-heading t)
+			     (search-forward logbook)
+			     (search-forward ":END:")
+			     (goto-char (match-end 0)))
+			   nil))))))
 	      (let (char-pressed)
 		(while (null char-pressed)
 		  (setq char-pressed
