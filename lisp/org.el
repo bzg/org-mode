@@ -17575,10 +17575,11 @@ Show the heading too, if it is currently invisible."
 if no description is present"
   (save-match-data
     (if (string-match org-bracket-link-analytic-regexp link)
-	(replace-match (or (match-string 5 link)
-			   (concat (match-string 1 link)
-				   (match-string 3 link)))
-		       nil nil link)
+	    (replace-match (if (match-end 5)
+			       (match-string 5 link)
+			     (concat (match-string 1 link)
+				     (match-string 3 link)))
+			   nil t link)
       link)))
 
 ;; Speedbar support

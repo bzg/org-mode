@@ -148,19 +148,21 @@ This list represents a \"habit\" for the rest of this module."
 	   (scheduled-repeat (org-get-repeat org-scheduled-string))
 	   (sr-days (org-habit-duration-to-days scheduled-repeat))
 	   (end (org-entry-end-position))
+	   (habit-entry (org-no-properties (nth 5 (org-heading-components))))
 	   closed-dates deadline dr-days)
       (if scheduled
 	  (setq scheduled (time-to-days scheduled))
-	(error "Habit has no scheduled date"))
+	(error "Habit %s has no scheduled date" habit-entry))
       (unless scheduled-repeat
-	(error "Habit has no scheduled repeat period"))
+	(error "Habit %s has no scheduled repeat period" habit-entry))
       (unless (> sr-days 0)
-	(error "Habit's scheduled repeat period is less than 1d"))
+	(error "Habit %s scheduled repeat period is less than 1d" habit-entry))
       (when (string-match "/\\([0-9]+[dwmy]\\)" scheduled-repeat)
 	(setq dr-days (org-habit-duration-to-days
 		       (match-string-no-properties 1 scheduled-repeat)))
 	(if (<= dr-days sr-days)
-	    (error "Habit's deadline repeat period is less than or equal to scheduled"))
+	    (error "Habit %s deadline repeat period is less than or equal to scheduled (%s)"
+		   habit-entry scheduled-repeat))
 	(setq deadline (+ scheduled (- dr-days sr-days))))
       (org-back-to-heading t)
       (while (re-search-forward "- State \"DONE\".*\\[\\([^]]+\\)\\]" end t)
@@ -217,13 +219,13 @@ SCHEDULED-DAYS defaults to the habit's actual scheduled days if nil.
 Habits are assigned colors on the following basis:
   Blue      Task is before the scheduled date.
   Green     Task is on or after scheduled date, but before the
-            end of the schedule's repeat period.
+	    end of the schedule's repeat period.
   Yellow    If the task has a deadline, then it is after schedule's
-            repeat period, but before the deadline.
+	    repeat period, but before the deadline.
   Orange    The task has reached the deadline day, or if there is
-            no deadline, the end of the schedule's repeat period.
+	    no deadline, the end of the schedule's repeat period.
   Red       The task has gone beyond the deadline day or the
-            schedule's repeat period."
+	    schedule's repeat period."
   (let* ((scheduled (or scheduled-days (org-habit-scheduled habit)))
 	 (s-repeat (org-habit-scheduled-repeat habit))
 	 (scheduled-end (+ scheduled (1- s-repeat)))
