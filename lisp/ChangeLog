@@ -2,6 +2,8 @@
 
 	* org-mobile.el (org-mobile-write-checksums): Specify coding
 	system.
+	(org-mobile-timestamp-buffer): Keep local variable/mode line at
+	beginning of buffer.
 
 	* org-latex.el (org-latex-entities-regexp): Fix typo in regexp.
 

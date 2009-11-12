@@ -739,10 +739,13 @@ If BEG and END are given, only do this in that region."
       (save-restriction
 	(widen)
 	(goto-char (point-min))
-	(when (re-search-forward
-	       "^\\([ \t]*\\)#\\+LAST_MOBILE_CHANGE:.*\n?" nil t)
-	  (goto-char (match-end 1))
-	  (delete-region (point) (match-end 0)))
+	(if (re-search-forward
+	     "^\\([ \t]*\\)#\\+LAST_MOBILE_CHANGE:.*\n?" nil t)
+	    (progn
+              (goto-char (match-end 1))
+	      (delete-region (point) (match-end 0)))
+          (if (looking-at ".*?-\\*-.*-\\*-")
+              (forward-line 1)))
 	(insert "#+LAST_MOBILE_CHANGE: "
 		(format-time-string "%Y-%m-%d %T") "\n")))))
 
