@@ -246,26 +246,23 @@ The characters \"&<> will be escaped."
 
 ;;(org-freemind-unescape-str-to-org "&#x6d;A&#x224C;B&lt;C&#x3C;&#x3D;")
 ;;(org-freemind-unescape-str-to-org "&#x3C;&lt;")
-(defvar str)
 (defun org-freemind-unescape-str-to-org (fm-str)
-  "Do some html-unescaping of FM-STR and return the result.
+ "Do some html-unescaping of FM-STR and return the result.
 This is the opposite of `org-freemind-escape-str-from-org' but it
 will also unescape &#nn;."
-  (let ((org-str fm-str))
-    (setq org-str (replace-regexp-in-string "&quot;" "\"" org-str))
-    (setq org-str (replace-regexp-in-string "&amp;" "&" org-str))
-    (setq org-str (replace-regexp-in-string "&lt;" "<" org-str))
-    (setq org-str (replace-regexp-in-string "&gt;" ">" org-str))
-    (setq org-str (replace-regexp-in-string
-                   "&#x\\([a-f0-9]\\{2,4\\}\\);"
-                   (lambda (m)
-                     (char-to-string
-                      ;; Note: str is scoped dynamically from
-                      ;; `replace-regexp-in-string'.
-                      (+ (string-to-number (match-string 1 str) 16)
-                         0 ;?\x800 ;; What is this for? Encoding?
-                         )))
-                   org-str))))
+ (let ((org-str fm-str))
+   (setq org-str (replace-regexp-in-string "&quot;" "\"" org-str))
+   (setq org-str (replace-regexp-in-string "&amp;" "&" org-str))
+   (setq org-str (replace-regexp-in-string "&lt;" "<" org-str))
+   (setq org-str (replace-regexp-in-string "&gt;" ">" org-str))
+   (setq org-str (replace-regexp-in-string
+                  "&#x\\([a-f0-9]\\{2,4\\}\\);"
+                  (lambda (m)
+                    (char-to-string
+                     (+ (string-to-number (match-string 1 m) 16)
+                        0 ;?\x800 ;; What is this for? Encoding?
+                        )))
+                  org-str))))
 
 ;; (org-freemind-test-escape)
 (defun org-freemind-test-escape ()
