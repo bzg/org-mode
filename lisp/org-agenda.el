@@ -6665,7 +6665,7 @@ The cursor may be at a date in the calendar, or in the Org agenda."
       (org-agenda-add-entry-to-org-agenda-diary-file 'day text d1))
      ((equal char ?a)
       (setq d1 (list (car d1) (nth 1 d1)
-		     (read-number (format "Referece year [%d]: " (nth 2 d1))
+		     (read-number (format "Reference year [%d]: " (nth 2 d1))
 				  (nth 2 d1))))
       (setq text (read-string "Anniversary (use %d to show years): "))
       (org-agenda-add-entry-to-org-agenda-diary-file 'anniversary text d1))
