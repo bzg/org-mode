@@ -1774,7 +1774,7 @@ Pressing `<' twice means to restrict to the current subtree or region
 	   entry key type match lprops ans)
       ;; Turn off restriction unless there is an overriding one,
       (unless org-agenda-overriding-restriction
-	(unless (org-bound-and-true-p org-agenda-keep-restriced-file-list)
+	(unless (org-bound-and-true-p org-agenda-keep-restricted-file-list)
 	  ;; There is a request to keep the file list in place
 	  (put 'org-agenda-files 'org-restrict nil))
 	(setq org-agenda-restrict nil)

@@ -280,7 +280,7 @@ agenda view showing the flagged items."
 	;; Make an agenda view of flagged entries, but only in the files
 	;; where stuff has been added.
 	(put 'org-agenda-files 'org-restrict org-mobile-last-flagged-files)
-	(let ((org-agenda-keep-restriced-file-list t))
+	(let ((org-agenda-keep-restricted-file-list t))
 	  (org-agenda nil "?"))))))
 
 (defun org-mobile-check-setup ()
