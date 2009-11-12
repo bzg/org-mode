@@ -1,5 +1,8 @@
 2009-11-12  James TD Smith  <ahktenzero@mohorovi.cc>
 
+	* org-habit.el (org-habit-parse-todo): Indicate which habit is
+	wrongly set up in the error messages.
+
 	* org-colview.el (org-columns-display-here): Don't try to
 	calculate values if the underlying property is not set.
 	(org-columns-string-to-number): Convert age strings back into
