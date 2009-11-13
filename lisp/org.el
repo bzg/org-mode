@@ -599,8 +599,8 @@ This may also be a function to test for appropriate locations where speed
 commands should be active."
   :group 'org-structure
   :type '(choice
-	  (const :tag "Never")
-	  (const :tag "At beginning of headline stars")
+	  (const :tag "Never" nil)
+	  (const :tag "At beginning of headline stars" t)
 	  (function)))
 
 (defcustom org-speed-commands-user nil
