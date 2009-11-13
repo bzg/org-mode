@@ -9042,6 +9042,7 @@ See also `org-refile-use-outline-path' and `org-completion-use-ido'"
 	 (region-length (and regionp (- region-end region-start)))
 	 (filename (buffer-file-name (buffer-base-buffer cbuf)))
 	 pos it nbuf file re level reversed)
+    (setq last-command nil)
     (when regionp
       (goto-char region-start)
       (or (bolp) (goto-char (point-at-bol)))
