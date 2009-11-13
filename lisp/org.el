@@ -16068,7 +16068,7 @@ what in fact did happen.  You don't know how to make a good report?  See
 Your bug report will be posted to the Org-mode mailing list.
 ------------------------------------------------------------------------")
     (save-excursion
-      (if (re-search-backward "^\\(Subject: \\)\\(Org-mode version.*?\\);[ \t]*\\(.*\\)" nil t)
+      (if (re-search-backward "^\\(Subject: \\)Org-mode version \\(.*?\\);[ \t]*\\(.*\\)" nil t)
 	  (replace-match "\\1Bug: \\3 [\\2]")))))
     
 
