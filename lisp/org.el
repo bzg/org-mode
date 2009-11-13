@@ -594,9 +594,14 @@ new-frame        Make a new frame each time.  Note that in this case
 	  (const :tag "One dedicated frame" dedicated-frame)))
 
 (defcustom org-use-speed-commands nil
-  "Non-nil means, activate single letter commands at beginning of a headline."
+  "Non-nil means, activate single letter commands at beginning of a headline.
+This may also be a function to test for appropriate locations where speed
+commands should be active."
   :group 'org-structure
-  :type 'boolean)
+  :type '(choice
+	  (const :tag "Never")
+	  (const :tag "At beginning of headline stars")
+	  (function)))
 
 (defcustom org-speed-commands-user nil
     "Alist of additional speed commands.
@@ -14829,11 +14834,12 @@ Some of the options can be changed using the variable
 
 (defconst org-speed-commands-default
   '(
-    ("n" . outline-next-visible-heading)
-    ("p" . outline-previous-visible-heading)
-    ("f" . org-forward-same-level)
-    ("b" . org-backward-same-level)
-    ("u" . outline-up-heading)
+    ("n" . org-speed-move-safe)
+    ("p" . org-speed-move-safe)
+    ("f" . org-speed-move-safe)
+    ("b" . org-speed-move-safe)
+    ("u" . org-speed-move-safe)
+    (" " . org-display-outline-path)
 
     ("c" . org-cycle)
     ("C" . org-shifttab)
@@ -14846,7 +14852,7 @@ Some of the options can be changed using the variable
     ("i" . (progn (forward-char 1) (call-interactively
 				    'org-insert-heading-respect-content)))
 
-    ("a" . org-agenda)
+    ("v" . org-agenda)
     ("/" . org-sparse-tree)
     (";" . org-set-tags-command)
     ("I" . org-clock-in)
@@ -14888,6 +14894,19 @@ Some of the options can be changed using the variable
       (princ "\n")
       (mapc 'org-print-speed-command org-speed-commands-default))))
 
+(defun org-speed-move-safe ()
+  (interactive)
+  (let ((pos (point))
+	(tbl '(("n" . outline-next-visible-heading)
+	       ("p" . outline-previous-visible-heading)
+	       ("f" . org-forward-same-level)
+	       ("b" . org-backward-same-level)
+	       ("u" . outline-up-heading))))
+    (call-interactively (cdr (assoc (this-command-keys) tbl)))
+    (unless (and (bolp) (org-on-heading-p))
+      (goto-char pos)
+      (error "Boundary reached"))))
+
 (defvar org-self-insert-command-undo-counter 0)
 
 (defvar org-table-auto-blank-field) ; defined in org-table.el
@@ -14899,8 +14918,9 @@ overwritten, and the table is not marked as requiring realignment."
   (interactive "p")
   (cond
    ((and org-use-speed-commands
-	 (bolp)
-	 (looking-at outline-regexp)
+	 (or (and (bolp) (looking-at outline-regexp))
+	     (and (functionp org-use-speed-commands)
+		  (funcall org-use-speed-commands)))
 	 (setq
 	  org-speed-command
 	  (or (cdr (assoc (this-command-keys) org-speed-commands-user))

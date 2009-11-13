@@ -1,3 +1,13 @@
+2009-11-13  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-use-speed-commands): Allow function value.
+	(org-speed-commands-default): Make headline motion safe, so that
+	these commands always end on a headline.
+	(org-speed-commands-default): New key `v' for `org-agenda'.
+	(org-speed-move-safe): New function.
+	(org-self-insert-command): Use the function value of
+	`org-use-speed-commands'.
+
 2009-11-12  John Wiegley  <jwiegley@gmail.com>
 
 	* org-clock.el (org-clock-resolve): If `org-clock-into-string' is
