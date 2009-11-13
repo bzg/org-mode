@@ -71,11 +71,11 @@ results - just like none only the block is run on export ensuring
 none ----- do not display either code or results upon export"
   (interactive)
   (message "org-babel-exp processing...")
-  (let ((info (save-excursion
-		(if (re-search-backward org-babel-src-block-regexp nil t)
-		    (org-babel-get-src-block-info)
-		  (error "Failed to find src block.")))))
-    (org-babel-exp-do-export info 'block)))
+  (or (and (re-search-backward org-babel-src-block-regexp nil t)
+           (org-babel-exp-do-export (org-babel-get-src-block-info) 'block))
+      (and (re-search-backward org-block-regexp nil t)
+           (match-string 0))
+      (error "Unmatched block [bug in `org-babel-exp-src-blocks'].")))
 
 (defun org-babel-exp-inline-src-blocks (start end)
   "Process inline src blocks between START and END for export.
