@@ -216,87 +216,13 @@ linking to files in a bare git repository for the experts.
 
 Thanks to Raimar Finken for this contribution.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 *** /org-annotation-helper.el/ and /org-browser-url.e./ have been removed
 Please switch to /org-protocol.el/, into which contains the same
 functionality in a more general framework.
 *** The contributed /org-export-freemind/ package has been removed.
 Org now contains a new freemind exporter, /org-freemind.el/.
-*** Org-babel Changes
+
+** Org-babel Changes
 - Clojure is supported [Thanks to Joel Boehland]
 - Perl is supported
 - Ruby and Python now respond to the :file header argument
