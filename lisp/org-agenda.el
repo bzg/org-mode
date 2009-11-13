@@ -671,6 +671,11 @@ Needs to be set before org.el is loaded."
   :group 'org-agenda-startup
   :type 'boolean)
 
+(defcustom org-agenda-show-outline-path t
+  "Non-il means, show outline path in echo area after line motion."
+  :group 'org-agenda-startup
+  :type 'boolean)
+
 (defcustom org-agenda-start-with-entry-text-mode nil
   "The initial value of entry-text-mode in a newly created agenda window."
   :group 'org-agenda-startup
@@ -5672,15 +5677,23 @@ When called with a prefix argument, include all archive files as well."
   "Move cursor to the next line, and show if follow-mode is active."
   (interactive)
   (call-interactively 'next-line)
-  (if (and org-agenda-follow-mode (org-get-at-bol 'org-marker))
-      (org-agenda-show)))
+  (org-agenda-do-context-action))
+
 (defun org-agenda-previous-line ()
   "Move cursor to the previous line, and show if follow-mode is active."
 
   (interactive)
   (call-interactively 'previous-line)
-  (if (and org-agenda-follow-mode (org-get-at-bol 'org-marker))
-      (org-agenda-show)))
+  (org-agenda-do-context-action))
+
+(defun org-agenda-do-context-action ()
+  "Show outline path and, maybe, follow-mode window."
+  (let ((m (org-get-at-bol 'org-marker)))
+    (if (and org-agenda-follow-mode m)
+	(org-agenda-show))
+    (if (and m org-agenda-show-outline-path)
+	(message (org-with-point-at m
+		   (org-display-outline-path t))))))
 
 (defun org-agenda-show-priority ()
   "Show the priority of the current item.

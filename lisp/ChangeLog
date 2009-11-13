@@ -1,5 +1,10 @@
 2009-11-13  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-agenda.el (org-agenda-show-outline-path): New option.
+	(org-agenda-do-context-action): New function.
+	(org-agenda-next-line, org-agenda-previous-line): Use
+	`org-agenda-do-context-action'.
+
 	* org.el (org-use-speed-commands): Allow function value.
 	(org-speed-commands-default): Make headline motion safe, so that
 	these commands always end on a headline.
@@ -7,6 +12,9 @@
 	(org-speed-move-safe): New function.
 	(org-self-insert-command): Use the function value of
 	`org-use-speed-commands'.
+	(org-get-outline-path): Improve docstring.
+	(org-format-outline-path): New function.
+	(org-display-outline-path): New function.
 
 2009-11-12  John Wiegley  <jwiegley@gmail.com>
 

@@ -8985,7 +8985,10 @@ on the system \"/user@host:\"."
 (defvar org-olpa (make-vector 20 nil))
 
 (defun org-get-outline-path (&optional fastp level heading)
-  "Return the outline path to the current entry, as a list."
+  "Return the outline path to the current entry, as a list.
+The parameters FASTP, LEVEL, and HEADING are for use be a scanner
+routine which makes outline path derivations for an entire file,
+avoiding backtracing."
   (if fastp
       (progn
 	(if (> level 19)
@@ -9001,6 +9004,59 @@ on the system \"/user@host:\"."
 	  (when (looking-at org-complex-heading-regexp)
 	    (push (org-match-string-no-properties 4) rtn)))
 	rtn))))
+
+(defun org-format-outline-path (path &optional width prefix)
+  "Format the outlie path PATH for display.
+Width is the maximum number of characters that is available.
+Prefix is a prefix to be included in the returned string,
+such as the file name."
+  (setq width (or width 79))
+  (if prefix (setq width (- width (length prefix))))
+  (if (not path)
+      (or prefix "")
+    (let* ((nsteps (length path))
+	   (total-width (+ nsteps (apply '+ (mapcar 'length path))))
+	   (maxwidth (if (<= total-width width)
+			 10000  ;; everything fits
+		       ;; we need to shorten the level headings
+		       (/ (- width nsteps) nsteps)))
+	   (org-odd-levels-only nil)
+	   (n 0)
+	   (total (1+ (length prefix))))
+      (setq maxwidth (max maxwidth 10))
+      (concat prefix
+	      (mapconcat
+	       (lambda (h)
+		 (setq n (1+ n))
+		 (if (and (= n nsteps) (< maxwidth 10000))
+		     (setq maxwidth (- total-width total)))
+		 (if (< (length h) maxwidth)
+		     (progn (setq total (+ total (length h) 1)) h)
+		   (setq h (substring h 0 (- maxwidth 2))
+			 total (+ total maxwidth 1))
+		   (if (string-match "[ \t]+\\'" h)
+		       (setq h (substring h 0 (match-beginning 0))))
+		   (setq h (concat  h "..")))
+		 (org-add-props h nil 'face
+				(nth (% (1- n) org-n-level-faces)
+				     org-level-faces))
+		 h)
+	       path "/")))))
+
+(defun org-display-outline-path (&optional file current)
+  "Display the current outline path in the echo area."
+  (interactive "P")
+  (let ((bfn (buffer-file-name (buffer-base-buffer)))
+	(path (and (org-mode-p) (org-get-outline-path))))
+    (if current (setq path (append path
+				   (save-excursion
+				     (org-back-to-heading t)
+				     (if (looking-at org-complex-heading-regexp)
+					 (list (match-string 4)))))))
+    (message (org-format-outline-path
+	      path
+	      (1- (frame-width))
+	      (and file bfn (concat (file-name-nondirectory bfn) "/"))))))
 
 (defvar org-refile-history nil
   "History for refiling operations.")
