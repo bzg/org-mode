@@ -16066,7 +16066,11 @@ what in fact did happen.  You don't know how to make a good report?  See
      http://orgmode.org/manual/Feedback.html#Feedback
 
 Your bug report will be posted to the Org-mode mailing list.
-------------------------------------------------------------------------")))
+------------------------------------------------------------------------")
+    (save-excursion
+      (if (re-search-backward "^\\(Subject: \\)\\(Org-mode version.*?\\);[ \t]*\\(.*\\)" nil t)
+	  (replace-match "\\1Bug: \\3 [\\2]")))))
+    
 
 (defun org-install-agenda-files-menu ()
   (let ((bl (buffer-list)))
