@@ -80,7 +80,7 @@ then run `org-babel-pop-to-session'."
 (add-hook 'org-metadown-hook 'org-babel-pop-to-session-maybe)
 
 (defvar org-babel-default-header-args
-  '((:session . "none") (:results . "replace") (:exports . "code"))
+  '((:session . "none") (:results . "replace") (:exports . "code") (:nocache))
   "Default arguments to use when evaluating a source block.")
 
 (defvar org-babel-default-inline-header-args
@@ -697,7 +697,7 @@ parameters when merging lists."
 	   ("output" "value")))
 	(exports-exclusive-groups
 	 '(("code" "results" "both" "none")))
-	params results exports tangle vars var ref)
+	params results exports tangle cache vars var ref)
     (flet ((e-merge (exclusive-groups &rest result-params)
                     ;; maintain exclusivity of mutually exclusive parameters
                     (let (output)
@@ -738,16 +738,18 @@ parameters when merging lists."
                         (:tangle
                          (setq tangle (e-merge '(("yes" "no"))
                                                tangle (split-string (cdr pair)))))
+                        (:cache (setq cache t)) (:nocache (setq cache nil))
                         (t ;; replace: this covers e.g. :session
                          (setq params (cons pair (assq-delete-all (car pair) params))))))
                     plist))
             plists))
     (setq vars (mapcar (lambda (pair) (format "%s=%s" (car pair) (cdr pair))) vars))
     (while vars (setq params (cons (cons :var (pop vars)) params)))
-    (cons (cons :tangle (mapconcat 'identity tangle " "))
-          (cons (cons :exports (mapconcat 'identity exports " "))
-                (cons (cons :results (mapconcat 'identity results " "))
-                      params)))))
+    (cons (if cache (list :cache) (list :nocache))
+          (cons (cons :tangle (mapconcat 'identity tangle " "))
+                (cons (cons :exports (mapconcat 'identity exports " "))
+                      (cons (cons :results (mapconcat 'identity results " "))
+                            params))))))
 
 (defun org-babel-expand-noweb-references (&optional info parent-buffer)
   "This function expands Noweb style references in the body of
