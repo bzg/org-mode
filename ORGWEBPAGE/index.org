@@ -93,6 +93,7 @@ a look at our [[http://orgmode.org/worg/org-quotes.php][collected quotes about O
 #+ATTR_HTML: style="float:right;"
   [[http://mobileorg.ncogni.to/][http://mobileorg.ncogni.to/images/screenshot-browse.png]]
 
+- <2009-11-13 Fri>: Release 6.33
 - <2009-11-03 Tue>: iPhone App [[http://mobileorg.ncogni.to/][MobileOrg]] available in the AppStore
 - <2009-10-26 Mon>: Release 6.32
 - <2009-09-30 Wed>: Release 6.31

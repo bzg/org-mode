@@ -1535,6 +1535,15 @@ the current file."
 	 (unless desc (insert "][" link))
 	 (add-text-properties pos (point) props))))))
 
+(defvar org-export-format-drawer-function nil
+  "Function to be called to format the contents of a drawer.
+The function must accept three parameters:
+  BACKEND  one of the symbols html, docbook, latex, ascii, xoxo
+  NAME     the drawer name, like \"PROPERTIES\"
+  CONTENT  the content of the drawer.
+The function should return the text to be inserted into the buffer.
+If this is nil, `org-export-format-drawer' is used as a default.")
+
 (defun org-export-remove-or-extract-drawers (all-drawers exp-drawers backend)
   "Remove drawers, or extract and format the content.
 ALL-DRAWERS is a list of all drawer names valid in the current buffer.
@@ -1546,7 +1555,7 @@ BACKEND is the current export backend."
   (let ((re (concat "^[ \t]*:\\("
 		    (mapconcat 'identity all-drawers "\\|")
 		    "\\):[ \t]*$"))
-	name beg beg-content eol)
+	name beg beg-content eol content)
     (while (re-search-forward re nil t)
       (org-if-unprotected
        (setq name (match-string 1))
@@ -1568,21 +1577,12 @@ BACKEND is the current export backend."
 				  name content backend))
 	   (insert content)))))))
 
-(defvar org-export-format-drawer-function nil
-  "Function to be called to format the contents of a drawer.
-The function must accept three parameters:
-  BACKEND  one of the symbols html, docbook, latex, ascii, xoxo
-  NAME     the drawer name, like \"PROPERTIES\"
-  CONTENT  the content of the drawer.
-The function should return the text to be inserted into the buffer.
-If this is nil, `org-export-format-drawer' is used as a default.")
-
 (defun org-export-format-drawer (name content backend)
   "Format the content of a drawer as a colon example."
   (if (string-match "[ \t]+\\'" content)
       (setq content (substring content (match-beginning 0))))
   (while (string-match "\\`[ \t]*\n" content)
-    (steq content (substring content (match-end 0))))
+    (setq content (substring content (match-end 0))))
   (setq content (org-remove-indentation content))
   (setq content (concat ": " (mapconcat 'identity
 					(org-split-string content "\n")

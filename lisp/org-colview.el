@@ -34,6 +34,7 @@
 (require 'org)
 
 (declare-function org-agenda-redo "org-agenda" ())
+(declare-function org-agenda-show "org-agenda" (&optional full-entry))
 
 ;;; Column View
 
