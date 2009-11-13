@@ -6,7 +6,7 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 6.33trans
+;; Version: 6.33a
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -34,7 +34,7 @@
 (require 'org)
 
 (declare-function org-agenda-redo "org-agenda" ())
-(declare-function org-agenda-show "org-agenda" (&optional full-entry))
+(declare-function org-agenda-do-context-action "org-agenda" ())
 
 ;;; Column View
 
