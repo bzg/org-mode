@@ -117,7 +117,7 @@ then run `org-babel-pop-to-session'."
 	(concat "^[ \t]*#\\+begin_src[ \t]+\\("       ;; (1)   lang
 		(mapconcat 'regexp-quote value "\\|")
 		"\\)[ \t]*"
-		"\\([^:\n]*\\)"                       ;; (2)   switches
+		"\\([^\":\n]*\"[^\"\n*]*\"[^\":\n]*\\|[^\":\n]*\\)" ;; (2)   switches
 		"\\([^\n]*\\)\n"                      ;; (3)   header arguments
                 "\\([^\000]+?\\)#\\+end_src"))        ;; (4)   body
   (setq org-babel-inline-src-block-regexp
