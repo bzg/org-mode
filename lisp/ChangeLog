@@ -1,3 +1,10 @@
+2009-11-14  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-speed-commands-user): Allow documentation headlines.
+	(org-speed-commands-default): Organize the value of this constant
+	with descriptive headlines.
+	(org-print-speed-command): Output the headlines.
+
 2009-11-13  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-agenda.el (org-agenda-show-outline-path): New option.

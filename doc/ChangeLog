@@ -1,3 +1,7 @@
+2009-11-14  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Speed keys): New section.
+
 2009-11-08  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Agenda commands): Document the new `i' command.

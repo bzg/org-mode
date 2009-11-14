@@ -611,14 +611,19 @@ and when the cursor is at the beginning of a headline.
 The car if each entry is a string with a single letter, which must
 be assigned to `self-insert-command' in the global map.
 The cdr is either a command to be called interactively, a function
-to be called, or a form to be evaluated."
+to be called, or a form to be evaluated.
+An entry that is just a list with a single string will be interpreted
+as a descriptive headline that will be added when listing the speed
+copmmands in the Help buffer using the `?' speed command."
     :group 'org-structure
-    :type '(repeat
-	    (cons
-	     (string "Command letter")
-	     (choice
-	      (function)
-	      (sexp)))))
+    :type '(repeat :value ("k" . ignore)
+	    (choice :value ("k" . ignore)
+	     (list :tag "Descriptive Headline" (string :tag "Headline"))
+	     (cons :tag "Letter and Command"
+	      (string :tag "Command letter")
+	      (choice
+	       (function)
+	       (sexp))))))
 
 (defgroup org-cycle nil
   "Options concerning visibility cycling in Org-mode."
@@ -14891,15 +14896,19 @@ Some of the options can be changed using the variable
 
 (defconst org-speed-commands-default
   '(
-    ("n" . org-speed-move-safe)
-    ("p" . org-speed-move-safe)
-    ("f" . org-speed-move-safe)
-    ("b" . org-speed-move-safe)
-    ("u" . org-speed-move-safe)
-    (" " . org-display-outline-path)
-
+    ("Outline Navigation")
+    ("n" . (org-speed-move-safe 'outline-next-visible-heading))
+    ("p" . (org-speed-move-safe 'outline-previous-visible-heading))
+    ("f" . (org-speed-move-safe 'org-forward-same-level))
+    ("b" . (org-speed-move-safe 'org-backward-same-level))
+    ("u" . (org-speed-move-safe 'outline-up-heading))
+    ("j" . org-goto)
+    ("g" . (org-refile t))
+    ("Outline Visibility")
     ("c" . org-cycle)
     ("C" . org-shifttab)
+    (" " . org-display-outline-path)
+    ("Outline Structure Editing")
     ("U" . org-shiftmetaup)
     ("D" . org-shiftmetadown)
     ("r" . org-metaright)
@@ -14908,37 +14917,45 @@ Some of the options can be changed using the variable
     ("L" . org-shiftmetaleft)
     ("i" . (progn (forward-char 1) (call-interactively
 				    'org-insert-heading-respect-content)))
-
-    ("v" . org-agenda)
-    ("/" . org-sparse-tree)
-    (";" . org-set-tags-command)
+    ("^" . org-sort)
+    ("w" . org-refile)
+    ("a" . org-archive-subtree-default-with-confirmation)
+    ("." . outline-mark-subtree)
+    ("Clock Commands")
     ("I" . org-clock-in)
     ("O" . org-clock-out)
-    ("o" . org-open-at-point)
+    ("Meta Data Editing")
     ("t" . org-todo)
-    ("j" . org-goto)
-    ("g" . (org-refile t))
-    ("e" . org-set-effort)
     ("0" . (org-priority ?\ ))
     ("1" . (org-priority ?A))
     ("2" . (org-priority ?B))
     ("3" . (org-priority ?C))
-    ("." . outline-mark-subtree)
-    ("^" . org-sort)
-    ("w" . org-refile)
-    ("a" . org-archive-subtree-default-with-confirmation)
+    (";" . org-set-tags-command)
+    ("e" . org-set-effort)
+    ("Agenda Views etc")
+    ("v" . org-agenda)
     ("/" . org-sparse-tree)
+    ("/" . org-sparse-tree)
+    ("Misc")
+    ("o" . org-open-at-point)
     ("?" . org-speed-command-help)
     )
   "The default speed commands.")
 
 (defun org-print-speed-command (e)
-  (princ (car e))
-  (princ "   ")
-  (if (symbolp (cdr e))
-      (princ (symbol-name (cdr e)))
-    (prin1 (cdr e)))
-  (princ "\n"))
+  (if (> (length (car e)) 1)
+      (progn
+	(princ "\n")
+	(princ (car e))
+	(princ "\n")
+	(princ (make-string (length (car e)) ?-))
+	(princ "\n"))
+    (princ (car e))
+    (princ "   ")
+    (if (symbolp (cdr e))
+	(princ (symbol-name (cdr e)))
+      (prin1 (cdr e)))
+    (princ "\n")))
 
 (defun org-speed-command-help ()
   "Show the available speed commands."
@@ -14946,23 +14963,23 @@ Some of the options can be changed using the variable
   (if (not org-use-speed-commands)
       (error "Speed commands are not activated, customize `org-use-speed-commands'.")
     (with-output-to-temp-buffer "*Help*"
-      (princ "Speed commands\n==============\n")
+      (princ "User-defined Speed commands\n===========================\n")
       (mapc 'org-print-speed-command org-speed-commands-user)
       (princ "\n")
-      (mapc 'org-print-speed-command org-speed-commands-default))))
+      (princ "Built-in Speed commands\n=======================\n")
+      (mapc 'org-print-speed-command org-speed-commands-default))
+    (with-current-buffer "*Help*"
+      (setq truncate-lines t))))
 
-(defun org-speed-move-safe ()
+(defun org-speed-move-safe (cmd)
+  "Execute CMD, but make sure that the cursor always ends up in a headline.
+If not, return to the original position and throw an error."
   (interactive)
-  (let ((pos (point))
-	(tbl '(("n" . outline-next-visible-heading)
-	       ("p" . outline-previous-visible-heading)
-	       ("f" . org-forward-same-level)
-	       ("b" . org-backward-same-level)
-	       ("u" . outline-up-heading))))
-    (call-interactively (cdr (assoc (this-command-keys) tbl)))
+  (let ((pos (point)))
+    (call-interactively cmd)
     (unless (and (bolp) (org-on-heading-p))
       (goto-char pos)
-      (error "Boundary reached"))))
+      (error "Boundary reached while executing %s" cmd))))
 
 (defvar org-self-insert-command-undo-counter 0)
 
