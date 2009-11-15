@@ -96,7 +96,12 @@ return nil."
   "Resolve the reference and return its value"
   (save-excursion
     (let ((case-fold-search t)
-          type args new-refere new-referent result lob-info split-file split-ref)
+          type args new-refere new-referent result lob-info split-file split-ref
+          index index-row index-col)
+      ;; if ref is indexed grab the indices
+      (when (string-match "\\[\\(.+\\)\\]" ref)
+        (setq index (match-string 1 ref))
+        (setq ref (substring ref 0 (match-beginning 0))))
       ;; assign any arguments to pass to source block
       (when (string-match "^\\(.+?\\)\(\\(.*\\)\)$" ref)
         (setq new-refere (match-string 1 ref))
@@ -147,7 +152,32 @@ return nil."
 	      ('table (org-babel-read-table))
 	      ('source-block (org-babel-execute-src-block t nil params))
 	      ('lob (org-babel-execute-src-block t lob-info params))))
-      (if (symbolp result) (format "%S" result) result))))
+      (if (symbolp result)
+          (format "%S" result)
+        (if (and index (listp result))
+            (org-babel-ref-index-list index result)
+          result)))))
+
+(defun org-babel-ref-index-list (index lis)
+  "Return the subset of LIS indexed by INDEX.  If INDEX is
+separated by ,s then each PORTION is assumed to index into the
+next deepest nesting or dimension.  A valid PORTION can consist
+of either an integer index, or two integers separated by a : in
+which case the entire range is returned."
+  (if (string-match "^,?\\([^,]+\\)" index)
+      (let ((length (length lis))
+            (portion (match-string 1 index))
+            (remainder (substring index (match-end 0))))
+        (flet ((wrap (num) (if (< num 0) (+ length num) num)))
+          (mapcar
+           (lambda (sub-lis) (org-babel-ref-index-list remainder sub-lis))
+           (if (string-match "\\([-[:digit:]]+\\):\\([-[:digit:]]+\\)" portion)
+               (mapcar (lambda (n) (nth n lis))
+                       (number-sequence
+                        (wrap (string-to-number (match-string 1 portion)))
+                        (wrap (string-to-number (match-string 2 portion)))))
+             (list (nth (wrap (string-to-number portion)) lis))))))
+    lis))
 
 (defun org-babel-ref-split-args (arg-string)
   "Split ARG-STRING into top-level arguments of balanced parenthesis."
