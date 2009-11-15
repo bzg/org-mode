@@ -620,6 +620,7 @@ when PUB-DIR is set, use this as the publishing directory."
 	   :tags (plist-get opt-plist :tags)
 	   :priority (plist-get opt-plist :priority)
 	   :footnotes (plist-get opt-plist :footnotes)
+	   :drawers (plist-get opt-plist :drawers)
 	   :timestamps (plist-get opt-plist :timestamps)
 	   :todo-keywords (plist-get opt-plist :todo-keywords)
 	   :add-text (if (eq to-buffer 'string) nil text)

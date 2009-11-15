@@ -1,3 +1,7 @@
+2009-11-15  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-latex.el (org-export-as-latex): Add the :drawers property.
+
 2009-11-14  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-speed-commands-user): Allow documentation headlines.
