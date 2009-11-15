@@ -3,7 +3,7 @@
 #+EMAIL:    phil@yax.org.uk
 #+LANGUAGE: en
 #+STARTUP:  showall
-#+TEXT:     Notes to myself justifying the coventions and standards in my
+#+TEXT:     Notes to myself justifying the conventions and standards in my
 #+TEXT:     set of recent doc patches.
 #+OPTIONS:  H:3 num:t toc:t \n:nil @:t ::t |:t ^:t *:t TeX:t
 

@@ -27,8 +27,8 @@ xemacs/
     does not work under XEmacs without this file installed.  It did
     until version 4.37, but no longer.
 
-CONTRIB/
-    A diretory with third-party additions for Org.  Some really cool
+contrib/
+    A directory with third-party additions for Org.  Some really cool
     stuff is in there.
 
 ORGWEBPAGE/
