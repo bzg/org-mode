@@ -5413,19 +5413,6 @@ This function is the default value of the hook `org-cycle-hook'."
      ((eq state 'children) (or (org-subtree-end-visible-p) (recenter 1)))
      ((eq state 'subtree)  (or (org-subtree-end-visible-p) (recenter 1))))))
 
-;; FIXME: no longer in use
-(defun org-compact-display-after-subtree-move ()
-  "Show a compacter version of the tree of the entry's parent."
-  (save-excursion
-    (if (org-up-heading-safe)
-	(progn
-	  (hide-subtree)
-	  (show-entry)
-	  (show-children)
-	  (org-cycle-show-empty-lines 'children)
-	  (org-cycle-hide-drawers 'children))
-      (org-overview))))
-
 (defun org-remove-empty-overlays-at (pos)
   "Remove outline overlays that do not contain non-white stuff."
   (mapc

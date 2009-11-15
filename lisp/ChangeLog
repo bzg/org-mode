@@ -2,6 +2,7 @@
 
 	* org.el (org-set-effort): Improve prompt.
 	(org-get-outline-path): Widen to get full path.
+	(org-compact-display-after-subtree-move): Function removed.
 
 	* org-latex.el (org-export-as-latex): Add the :drawers property.
 
