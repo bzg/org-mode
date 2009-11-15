@@ -12219,11 +12219,11 @@ allowed value."
 		  (if (equal rpl 0) (setq rpl 10))
 		  (if (and (> rpl 0) (<= rpl (length allowed)))
 		      (car (nth (1- rpl) allowed))
-		    (org-completing-read "Value: " allowed nil))))
+		    (org-completing-read "Effort: " allowed nil))))
 	       (t
 		(let (org-completion-use-ido org-completion-use-iswitchb)
 		  (org-completing-read
-		   (concat "Value " (if (and cur (string-match "\\S-" cur))
+		   (concat "Effort " (if (and cur (string-match "\\S-" cur))
 					(concat "[" cur "]") "")
 			   ": ")
 		   existing nil nil "" nil cur))))))
