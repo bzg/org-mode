@@ -3100,8 +3100,9 @@ Normal means, no org-mode-specific context."
 (declare-function org-gnus-follow-link "org-gnus" (&optional group article))
 (defvar org-agenda-tags-todo-honor-ignore-options)
 (declare-function org-agenda-skip "org-agenda" ())
-(declare-function org-format-agenda-item "org-agenda"
-		  (extra txt &optional category tags dotime noprefix remove-re))
+(declare-function
+ org-format-agenda-item "org-agenda"
+ (extra txt &optional category tags dotime noprefix remove-re habitp))
 (declare-function org-agenda-new-marker "org-agenda" (&optional pos))
 (declare-function org-agenda-change-all-lines "org-agenda"
 		  (newhead hdmarker &optional fixface just-this))
