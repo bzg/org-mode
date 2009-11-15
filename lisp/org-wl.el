@@ -91,7 +91,11 @@
 		 wl-summary-buffer-elmo-folder msgnum)
 	      (elmo-msgdb-overview-get-entity
 	       msgnum (wl-summary-buffer-msgdb))))
-	   (from (wl-summary-line-from))
+	   (from (let ((from-field (elmo-message-entity-field wl-message-entity
+							      'from)))
+		   (if (listp from-field)
+		       (car from-field)
+		     from-field)))
 	   (to (let ((to-field (elmo-message-entity-field wl-message-entity
 							  'to)))
 		 (if (listp to-field)

@@ -1,5 +1,8 @@
 2009-11-15  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-wl.el (org-wl-store-link): Handle the case that
+	`wl-use-petname' is set.
+
 	* org.el (org-set-effort): Improve prompt.
 	(org-get-outline-path): Widen to get full path.
 	(org-compact-display-after-subtree-move): Function removed.
