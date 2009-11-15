@@ -9006,10 +9006,12 @@ avoiding backtracing."
 	  (aset org-olpa level heading)))
     (let (rtn)
       (save-excursion
-	(while (org-up-heading-safe)
-	  (when (looking-at org-complex-heading-regexp)
-	    (push (org-match-string-no-properties 4) rtn)))
-	rtn))))
+	(save-restriction
+	  (widen)
+	  (while (org-up-heading-safe)
+	    (when (looking-at org-complex-heading-regexp)
+	      (push (org-match-string-no-properties 4) rtn)))
+	  rtn)))))
 
 (defun org-format-outline-path (path &optional width prefix)
   "Format the outlie path PATH for display.

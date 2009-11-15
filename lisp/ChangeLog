@@ -1,6 +1,7 @@
 2009-11-15  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-set-effort): Improve prompt.
+	(org-get-outline-path): Widen to get full path.
 
 	* org-latex.el (org-export-as-latex): Add the :drawers property.
 
