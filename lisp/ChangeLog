@@ -1,3 +1,8 @@
+2009-11-16  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-html.el (org-export-html-home/up-format): Add an ID to the
+	up/home div.
+
 2009-11-15  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-wl.el (org-wl-store-link): Handle the case that
