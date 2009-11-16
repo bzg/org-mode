@@ -188,10 +188,9 @@ options are taken from `org-babel-default-header-args'."
 		  (format "=%s=" raw))
 	      (format "=%S=" raw))))))
       ('block
-          (save-excursion ;; org-exp-blocks places us at the end of the block
-            (re-search-backward org-babel-src-block-regexp nil t)
-            (org-babel-execute-src-block
-             nil nil (org-babel-merge-params params '((:results . "replace")))) ""))
+          (org-babel-execute-src-block
+           nil nil (org-babel-merge-params params '((:results . "replace"))))
+        "")
       ('lob
           (save-excursion
             (re-search-backward org-babel-lob-one-liner-regexp nil t)
