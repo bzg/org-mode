@@ -1,5 +1,8 @@
 2009-11-17  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-html.el (org-export-as-html): Move the home/up link into
+	the content div.
+
 	* org.el (org-export-latex-packages-alist): Option definition
 	moved here from org-latex.el.
 

@@ -753,7 +753,6 @@ PUB-DIR is set, use this as the publishing directory."
 <html xmlns=\"http://www.w3.org/1999/xhtml\"
 lang=\"%s\" xml:lang=\"%s\">
 <head>
-%s
 <title>%s</title>
 <meta http-equiv=\"Content-Type\" content=\"text/html;charset=%s\"/>
 <meta name=\"generator\" content=\"Org-mode\"/>
@@ -765,6 +764,7 @@ lang=\"%s\" xml:lang=\"%s\">
 </head>
 <body>
 <div id=\"content\">
+%s
 "
 		 (format
 		  (or (and (stringp org-export-html-xml-declaration)
@@ -775,17 +775,17 @@ lang=\"%s\" xml:lang=\"%s\">
 		      "")
 		  (or charset "iso-8859-1"))
 		 language language
+		 (org-html-expand title)
+		 (or charset "iso-8859-1")
+		 date author description keywords
+		 style
 		 (if (or link-up link-home)
 		     (concat
 		      (format org-export-html-home/up-format
 			      (or link-up link-home)
 			      (or link-home link-up))
 		      "\n")
-		   "")
-		 (org-html-expand title)
-		 (or charset "iso-8859-1")
-		 date author description keywords
-		 style))
+		   "")))
 
         (org-export-html-insert-plist-item opt-plist :preamble opt-plist)
 
