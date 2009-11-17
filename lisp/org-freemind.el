@@ -240,7 +240,7 @@ The characters \"&<> will be escaped."
                       ;; file is utf-8:
                       ;;
                       ;; (format "&#x%x;" (- cc ;; ?\x800))
-                      (char-to-string cc)
+		      (format "&#x%x" (encode xx 'ucs))
                       ))))
     fm-str))
 

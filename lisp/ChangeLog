@@ -1,3 +1,7 @@
+2009-11-17  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-freemind.el (org-freemind-escape-str-from-org): Fix encoding.
+
 2009-11-17  Eric Schulte  <schulte.eric@gmail.com>
 
 	* org-exp-blocks.el (org-export-blocks-format-ditaa): Use sha1
