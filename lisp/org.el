@@ -2858,6 +2858,17 @@ appears on the page."
   :group 'org-latex
   :type 'string)
 
+;; The following variable is defined here because is it also used
+;; when formatting latex fragments.  Originally it was part of the
+;; LaTeX exporter, which is why the name includes "export".
+(defcustom org-export-latex-packages-alist nil
+  "Alist of packages to be inserted in the header.
+Each cell is of the format \( \"option\" . \"package\" \)."
+  :group 'org-export-latex
+  :type '(repeat
+	  (list
+	   (string :tag "option")
+	   (string :tag "package"))))
 
 (defgroup org-font-lock nil
   "Font-lock settings for highlighting in Org-mode."
@@ -14550,15 +14561,9 @@ Some of the options can be changed using the variable
 	 (opt org-format-latex-options)
 	 (matchers (plist-get opt :matchers))
 	 (re-list org-latex-regexps)
-	 (cnt 0) txt link beg end re e checkdir
+	 (cnt 0) txt hash link beg end re e checkdir
 	 executables-checked
 	 m n block linkfile movefile ov)
-    ;; Check if there are old images files with this prefix, and remove them
-    (when (file-directory-p todir)
-      (mapc 'delete-file
-	    (directory-files
-	     todir 'full
-	     (concat (regexp-quote prefixnodir) "_[0-9]+\\.png$"))))
     ;; Check the different regular expressions
     (while (setq e (pop re-list))
       (setq m (car e) re (nth 1 e) n (nth 2 e)
@@ -14576,9 +14581,15 @@ Some of the options can be changed using the variable
 	    (setq txt (match-string n)
 		  beg (match-beginning n) end (match-end n)
 		  cnt (1+ cnt)
-		  linkfile (format "%s_%04d.png" prefix cnt)
-		  movefile (format "%s_%04d.png" absprefix cnt)
 		  link (concat block "[[file:" linkfile "]]" block))
+	    (let (print-length print-level) ; make sure full list is printed
+	      (setq hash (sha1 (prin1-to-string
+				(list org-format-latex-header
+				      org-export-latex-packages-alist
+				      org-format-latex-options
+				      forbuffer txt)))
+		    linkfile (format "%s_%s.png" prefix hash)
+		    movefile (format "%s_%s.png" absprefix hash)))
 	    (if msg (message msg cnt))
 	    (goto-char beg)
 	    (unless checkdir ; make sure the directory exists
@@ -14592,8 +14603,9 @@ Some of the options can be changed using the variable
 	       "dvipng" "needed to convert LaTeX fragments to images")
 	      (setq executables-checked t))
 
-	    (org-create-formula-image
-	     txt movefile opt forbuffer)
+            (unless (file-exists-p movefile)
+              (org-create-formula-image
+               txt movefile opt forbuffer))
 	    (if overlays
 		(progn
 		  (mapc (lambda (o)
@@ -14617,7 +14629,6 @@ Some of the options can be changed using the variable
 	      (delete-region beg end)
 	      (insert link))))))))
 
-(defvar org-export-latex-packages-alist) ;; defined in org-latex.el
 ;; This function borrows from Ganesh Swami's latex2png.el
 (defun org-create-formula-image (string tofile options buffer)
   "This calls dvipng."

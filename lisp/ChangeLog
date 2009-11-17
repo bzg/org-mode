@@ -1,3 +1,14 @@
+2009-11-17  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-export-latex-packages-alist): Option definition
+	moved here from org-latex.el.
+
+2009-11-17  Eric Schulte  <schulte.eric@gmail.com>
+
+	* org.el (org-format-latex): Latex images are now saved to files
+	named by the sha1 hash of the latex source text avoiding
+	regeneration of identical images.
+
 2009-11-16  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-html.el (org-export-html-home/up-format): Add an ID to the

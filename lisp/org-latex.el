@@ -256,15 +256,6 @@ When nil, grouping causes only separation lines between groups."
   :group 'org-export-latex
   :type 'boolean)
 
-(defcustom org-export-latex-packages-alist nil
-  "Alist of packages to be inserted in the header.
-Each cell is of the format \( \"option\" . \"package\" \)."
-  :group 'org-export-latex
-  :type '(repeat
-	  (list
-	   (string :tag "option")
-	   (string :tag "package"))))
-
 (defcustom org-export-latex-low-levels 'itemize
   "How to convert sections below the current level of sectioning.
 This is specified by the `org-export-headline-levels' option or the
