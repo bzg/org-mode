@@ -1,3 +1,8 @@
+2009-11-18  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Column attributes): Cross-reference special
+	properties.
+
 2009-11-14  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Speed keys): New section.
