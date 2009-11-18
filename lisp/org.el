@@ -4540,7 +4540,7 @@ will be prompted for."
 	      (beg1 (line-beginning-position 2))
 	      (dc1 (downcase (match-string 2)))
 	      (dc3 (downcase (match-string 3)))
-	      end end1 quoting)
+	      end end1 quoting block-type)
 	  (cond
 	   ((member dc1 '("html:" "ascii:" "latex:" "docbook:"))
 	    ;; a single line of backend-specific content
@@ -4554,8 +4554,8 @@ will be prompted for."
 	    t)
 	   ((and (match-end 4) (equal dc3 "begin"))
 	    ;; Truely a block
-	    (setq quoting (member (downcase (match-string 5))
-				  org-protecting-blocks))
+	    (setq block-type (downcase (match-string 5))
+		  quoting (member block-type org-protecting-blocks))
 	    (when (re-search-forward
 		   (concat "^[ \t]*#\\+end" (match-string 4) "\\>.*")
 		   nil t)  ;; on purpose, we look further than LIMIT
@@ -4568,8 +4568,13 @@ will be prompted for."
 	       '(font-lock-fontified t font-lock-multiline t))
 	      (add-text-properties beg beg1 '(face org-meta-line))
 	      (add-text-properties end1 end '(face org-meta-line))
-	      (when quoting
+	      (cond
+	       (quoting
 		(add-text-properties beg1 end1 '(face org-block)))
+	       ((string= block-type "quote")
+		(add-text-properties beg1 end1 '(face org-quote)))
+	       ((string= block-type "verse")
+		(add-text-properties beg1 end1 '(face org-verse))))
 	      t))
 	   ((not (member (char-after beg) '(?\  ?\t)))
 	    ;; just any other in-buffer setting, but not indented

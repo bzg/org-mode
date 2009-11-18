@@ -1,5 +1,11 @@
 2009-11-18  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-fontify-meta-lines-and-blocks): Apply special faces
+	for special blocks.
+
+	* org-faces.el (org-copy-face): Set lisp indentation.
+	(org-quote, org-verse): New faces.
+
 	* org-agenda.el (org-agenda-remove-date): Remove variable.
 
 2009-11-17  Carsten Dominik  <carsten.dominik@gmail.com>
