@@ -94,7 +94,7 @@ then run `org-babel-pop-to-session'."
   "Regexp used to test when on an inline org-babel src-block")
 
 (defvar org-babel-result-regexp
-  "#\\+resname\\(\\[\\([[:alnum:]]+\\)\\]\\)?\\:"
+  "#\\+res\\(ults\\|name\\)\\(\\[\\([[:alnum:]]+\\)\\]\\)?\\:"
   "Regular expressions used to match result lines.  If the
 results are associated with a hash key then the hash will be
 saved in the second match data.")
@@ -553,7 +553,7 @@ following the source block."
 			  ;; or (with optional insert) back up and make one ourselves
                           (when insert
                             (goto-char end) (forward-char 1)
-                            (insert (concat "#+resname" (if hash (concat "["hash"]"))
+                            (insert (concat "#+results" (if hash (concat "["hash"]"))
                                             ":"(if name (concat " " name)) "\n"))
                             (move-beginning-of-line 0)
                             (if hash (org-babel-hide-hash)) t)))
