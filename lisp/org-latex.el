@@ -1456,7 +1456,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
   "Convert fontification to LaTeX."
   (goto-char (point-min))
   (while (re-search-forward org-emph-re nil t)
-    ;; The match goes one char after the *string*
+    ;; The match goes one char after the *string*, except at the end of a line
     (let ((emph (assoc (match-string 3)
 		       org-export-latex-emphasis-alist))
 	  (beg (match-beginning 0))
@@ -1482,7 +1482,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 	(if (caddr emph)
 	    (setq rpl (org-export-latex-protect-string rpl))
 	  (save-match-data
-	    (if (string-match "\\`.\\(\\\\[a-z]+{\\)\\(.*\\)\\(}\\).\\'" rpl)
+	    (if (string-match "\\`.\\(\\\\[a-z]+{\\)\\(.*\\)\\(}\\).?\\'" rpl)
 		(progn
 		  (add-text-properties (match-beginning 1) (match-end 1)
 				       '(org-protected t) rpl)
