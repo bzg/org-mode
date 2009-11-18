@@ -3561,7 +3561,9 @@ collapsed state."
 (eval-and-compile
   (org-autoload "org-archive"
    '(org-add-archive-files org-archive-subtree
-     org-archive-to-archive-sibling org-toggle-archive-tag)))
+     org-archive-to-archive-sibling org-toggle-archive-tag
+     org-archive-subtree-default
+     org-archive-subtree-default-with-confirmation)))
 
 ;; Autoload Column View Code
 

@@ -1,5 +1,8 @@
 2009-11-18  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-archive.el (org-archive-subtree-default-with-confirmation):
+	Autoload.
+
 	* org-latex.el (org-export-latex-fontify): Fix regexp to make char
 	after match optional (happens at the end of a line...).
 

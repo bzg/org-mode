@@ -443,6 +443,7 @@ This command is set with the variable `org-archive-default-command'."
   (interactive)
   (call-interactively org-archive-default-command))
 
+;;;###autoload
 (defun org-archive-subtree-default-with-confirmation ()
   "Archive the current subtree with the default command.
 This command is set with the variable `org-archive-default-command'."
