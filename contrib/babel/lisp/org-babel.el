@@ -111,6 +111,9 @@ effect if the :results output option is in effect.")
 source code block satisfying a noweb reference in this language
 can not be resolved.")
 
+(defvar org-babel-hash-show 4
+  "Number of initial characters to show of a hidden results hash.")
+
 (defun org-babel-named-src-block-regexp-for-name (name)
   "Regexp used to match named src block."
   (concat "#\\+srcname:[ \t]*" (regexp-quote name) "[ \t\n]*"
@@ -347,6 +350,47 @@ added to the header-arguments-alist."
   (org-babel-where-is-src-block-result nil info)
   (org-babel-clean-text-properties (match-string 2)))
 
+(defun org-babel-hide-hash ()
+  "Hide the hash in the current results line.  Only the initial
+`org-babel-hash-show' characters of the hash will remain
+visible."
+  (org-add-to-invisibility-spec '(org-babel-hide-hash . t))
+  (save-excursion
+    (when (and (re-search-forward org-babel-result-regexp nil t)
+               (match-string 3))
+      (let* ((start (match-beginning 3))
+             (hide-start (+ org-babel-hash-show start))
+             (end (match-end 3))
+             (hash (match-string 3))
+             ov1 ov2)
+        (setq ov1 (org-make-overlay start hide-start))
+        (setq ov2 (org-make-overlay hide-start end))
+        (org-overlay-put ov2 'invisible 'org-babel-hide-hash)
+        (org-overlay-put ov1 'babel-hash hash)))))
+
+(defun org-babel-hide-all-hashes ()
+  "Hide the hash in the current buffer.  Only the initial
+`org-babel-hash-show' characters of each hash will remain
+visible.  This function should be called as part of the
+`org-mode-hook'."
+  (save-excursion
+    (while (re-search-forward org-babel-result-regexp nil t)
+      (goto-char (match-beginning 0))
+      (org-babel-hide-hash)
+      (goto-char (match-end 0)))))
+(add-hook 'org-mode-hook 'org-babel-hide-all-hashes)
+
+(defun org-babel-hash-at-point (&optional point)
+  "Return the value of the hash at `point'.  The hash is also
+added as the last element of the kill ring.  This can be called
+with C-c C-c."
+  (interactive)
+  (let ((hash (car (delq nil (mapcar
+                               (lambda (ol) (org-overlay-get ol 'babel-hash))
+                              (org-overlays-at (or point (point))))))))
+    (when hash (kill-new hash) (message hash))))
+(add-hook 'org-ctrl-c-ctrl-c-hook 'org-babel-hash-at-point)
+
 (defmacro org-babel-map-source-blocks (file &rest body)
   "Evaluate BODY forms on each source-block in FILE."
   (declare (indent 1))
@@ -511,7 +555,8 @@ following the source block."
                             (goto-char end) (forward-char 1)
                             (insert (concat "#+resname" (if hash (concat "["hash"]"))
                                             ":"(if name (concat " " name)) "\n"))
-                            (move-beginning-of-line 0) t)))
+                            (move-beginning-of-line 0)
+                            (if hash (org-babel-hide-hash)) t)))
                (point))))))
 
 (defun org-babel-read-result ()
