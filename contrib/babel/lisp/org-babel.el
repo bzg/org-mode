@@ -191,7 +191,10 @@ block."
   ;; (message "supplied params=%S" params) ;; debugging
   (let* ((info (or info (org-babel-get-src-block-info)))
          (lang (first info))
-	 (params (setf (third info) (org-babel-merge-params (third info) params)))
+	 (params (setf (third info)
+                       (sort (org-babel-merge-params (third info) params)
+                             (lambda (el1 el2) (string< (symbol-name (car el1))
+                                                   (symbol-name (car el2)))))))
          (new-hash (unless (assoc :nocache params) (org-babel-sha1-hash info)))
          (old-hash (org-babel-result-hash info))
          (body (setf (second info)
@@ -353,7 +356,7 @@ added to the header-arguments-alist."
 
 (defun org-babel-result-hash (&optional info)
   (org-babel-where-is-src-block-result nil info)
-  (org-babel-clean-text-properties (match-string 2)))
+  (org-babel-clean-text-properties (match-string 3)))
 
 (defun org-babel-hide-hash ()
   "Hide the hash in the current results line.  Only the initial
