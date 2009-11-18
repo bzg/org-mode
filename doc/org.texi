@@ -9375,7 +9375,7 @@ pages, configure the variable @code{org-export-html-use-infojs}.
 @section La@TeX{} and PDF export
 @cindex La@TeX{} export
 @cindex PDF export
-@cindex Guerry, Bastian
+@cindex Guerry, Bastien
 
 Org mode contains a La@TeX{} exporter written by Bastien Guerry.  With
 further processing, this backend is also used to produce PDF output.  Since
