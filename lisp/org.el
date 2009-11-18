@@ -13122,7 +13122,7 @@ user."
             deltadef (nth 2 delta)))
 
     ;; Check if there is an iso week date in there
-    ;; If yes, sore the info and postpone interpreting it until the rest
+    ;; If yes, store the info and postpone interpreting it until the rest
     ;; of the parsing is done
     (when (string-match "\\<\\(?:\\([0-9]+\\)-\\)?[wW]\\([0-9]\\{1,2\\}\\)\\(?:-\\([0-6]\\)\\)?\\([ \t]\\|$\\)" ans)
       (setq iso-year (if (match-end 1) (org-small-year-to-year (string-to-number (match-string 1 ans))))

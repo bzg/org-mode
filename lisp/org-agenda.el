@@ -2970,7 +2970,6 @@ When EMPTY is non-nil, also include days without any entries."
 (defvar org-starting-day nil) ; local variable in the agenda buffer
 (defvar org-agenda-span nil) ; local variable in the agenda buffer
 (defvar org-include-all-loc nil) ; local variable
-(defvar org-agenda-remove-date nil) ; dynamically scoped FIXME: not used???
 
 ;;;###autoload
 (defun org-agenda-list (&optional include-all start-day ndays)
