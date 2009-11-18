@@ -37,14 +37,14 @@
 
 (defvar org-babel-function-def-export-keyword "function"
   "When exporting a source block function, this keyword will
-appear in the exported version in the place of #+srcname:. A
-source block is considered to be a source block function if the
-srcname is present and is followed by a parenthesised argument
-list. The parentheses may be empty or contain whitespace. An
-example is the following which generates n random
+appear in the exported version in the place of source name
+line. A source block is considered to be a source block function
+if the source name is present and is followed by a parenthesized
+argument list. The parentheses may be empty or contain
+whitespace. An example is the following which generates n random
 (uniform) numbers.
 
-#+srcname: rand(n)
+#+source: rand(n)
 #+begin_src R
   runif(n)
 #+end_src

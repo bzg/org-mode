@@ -95,9 +95,13 @@ then run `org-babel-pop-to-session'."
 
 (defvar org-babel-result-regexp
   "#\\+res\\(ults\\|name\\)\\(\\[\\([[:alnum:]]+\\)\\]\\)?\\:"
-  "Regular expressions used to match result lines.  If the
+  "Regular expression used to match result lines.  If the
 results are associated with a hash key then the hash will be
 saved in the second match data.")
+
+(defvar org-babel-source-name-regexp
+  "#\\+\\(srcname\\|source\\|function\\):[ \t]*"
+  "Regular expression used to match a source name line.")
 
 (defvar org-babel-min-lines-for-block-output 10
   "If number of lines of output is equal to or exceeds this
@@ -116,7 +120,7 @@ can not be resolved.")
 
 (defun org-babel-named-src-block-regexp-for-name (name)
   "Regexp used to match named src block."
-  (concat "#\\+srcname:[ \t]*" (regexp-quote name) "[ \t\n]*"
+  (concat org-babel-source-name-regexp (regexp-quote name) "[ \t\n]*"
 	  (substring org-babel-src-block-regexp 1)))
 
 (defun org-babel-set-interpreters (var value)
@@ -316,15 +320,16 @@ added to the header-arguments-alist."
 	  (goto-char head)
 	  (setq info (org-babel-parse-src-block-match))
 	  (forward-line -1)
-	  (when (looking-at "#\\+srcname:[ \t]*\\([^ ()\f\t\n\r\v]+\\)\\(\(\\(.*\\)\)\\|\\)")
-	    (setq info (append info (list (org-babel-clean-text-properties (match-string 1)))))
+	  (when (looking-at (concat org-babel-source-name-regexp
+                                    "\\([^ ()\f\t\n\r\v]+\\)\\(\(\\(.*\\)\)\\|\\)"))
+	    (setq info (append info (list (org-babel-clean-text-properties (match-string 2)))))
 	    ;; Note that e.g. "name()" and "name( )" result in ((:var . "")).
 	    ;; We maintain that behaviour, and the resulting non-nil sixth
 	    ;; element is relied upon in org-babel-exp-code to detect a functional-style
 	    ;; block in those cases. However, "name" without any
 	    ;; parentheses would result in the same thing, so we
 	    ;; explicitly avoid that.
-	    (if (setq args (match-string 3))
+	    (if (setq args (match-string 4))
 		(setq info (append info (list (mapcar (lambda (ref) (cons :var ref))
 						      (org-babel-ref-split-args args))))))
 	    (unless header-vars-only
@@ -479,9 +484,9 @@ block.  Specifically at the beginning of the #+BEGIN_SRC line.
 If the point is not on a source block then return nil."
   (let ((initial (point)) top bottom)
     (or
-     (save-excursion ;; on a #+srcname: line
+     (save-excursion ;; on a source name line
        (beginning-of-line 1)
-       (and (looking-at "#\\+srcname") (forward-line 1)
+       (and (looking-at org-babel-source-name-regexp) (forward-line 1)
             (looking-at org-babel-src-block-regexp)
             (point)))
      (save-excursion ;; on a #+begin_src line
@@ -508,9 +513,9 @@ If the point is not on a source block then return nil."
 
 (defun org-babel-find-named-block (name)
   "Find a named source-code block.
-Return the location of the source block identified by
-#+srcname NAME, or nil if no such block exists. Set match data
-according to org-babel-named-src-block-regexp."
+Return the location of the source block identified by source
+NAME, or nil if no such block exists. Set match data according to
+org-babel-named-src-block-regexp."
   (save-excursion
     (let ((case-fold-search t)
 	  (regexp (org-babel-named-src-block-regexp-for-name name)) msg)
