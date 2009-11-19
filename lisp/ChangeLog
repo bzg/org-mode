@@ -1,3 +1,7 @@
+2009-11-19  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-habit.el (org-is-habit-p): Add doc string.
+
 2009-11-18  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-archive.el (org-archive-subtree-default-with-confirmation):

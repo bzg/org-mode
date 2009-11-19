@@ -128,6 +128,7 @@ relative to the current effective date."
     (error "Invalid duration string: %s" ts)))
 
 (defun org-is-habit-p (&optional pom)
+  "Is the task at POM or point a habit?"
   (string= "habit" (org-entry-get (or pom (point)) "STYLE")))
 
 (defun org-habit-parse-todo (&optional pom)
