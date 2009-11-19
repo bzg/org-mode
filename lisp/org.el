@@ -4520,6 +4520,7 @@ will be prompted for."
 		nil
 	      (add-text-properties (match-beginning 0) (match-end 0)
 				   (list 'mouse-face 'highlight
+					 'face 'org-link
 					 'keymap org-mouse-map))
 	      (org-rear-nonsticky-at (match-end 0)))
 	    t)))))
@@ -4905,7 +4906,7 @@ For plain list items, if they are matched by `outline-regexp', this returns
 	   ;; Links
 	   (if (memq 'tag lk) '(org-activate-tags (1 'org-tag prepend)))
 	   (if (memq 'angle lk) '(org-activate-angle-links (0 'org-link t)))
-	   (if (memq 'plain lk) '(org-activate-plain-links (0 'org-link t)))
+	   (if (memq 'plain lk) '(org-activate-plain-links))
 	   (if (memq 'bracket lk) '(org-activate-bracket-links (0 'org-link t)))
 	   (if (memq 'radio lk) '(org-activate-target-links (0 'org-link t)))
 	   (if (memq 'date lk) '(org-activate-dates (0 'org-date t)))

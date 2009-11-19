@@ -2,6 +2,9 @@
 
 	* org.el (org-occur-in-agenda-files): Make sure none of the
 	buffers is narrowed.
+	(org-activate-plain-links): Add the face property here.
+	(org-set-font-lock-defaults): Do not add the face to plain links,
+	the activator function does this.
 
 	* org-habit.el (org-is-habit-p): Add doc string.
 
