@@ -16663,7 +16663,12 @@ really on, so that the block visually is on the match."
 	(add-to-list 'files f 'append)
 	(add-to-list 'tnames (file-truename f) 'append)))
     (multi-occur
-     (mapcar (lambda (x) (or (get-file-buffer x) (find-file-noselect x))) files)
+     (mapcar (lambda (x)
+	       (with-current-buffer
+		   (or (get-file-buffer x) (find-file-noselect x))
+		 (widen)
+		 (current-buffer)))
+	     files)
      regexp)))
 
 (if (boundp 'occur-mode-find-occurrence-hook)

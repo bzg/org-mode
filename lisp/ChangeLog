@@ -1,5 +1,8 @@
 2009-11-19  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-occur-in-agenda-files): Make sure none of the
+	buffers is narrowed.
+
 	* org-habit.el (org-is-habit-p): Add doc string.
 
 2009-11-18  Carsten Dominik  <carsten.dominik@gmail.com>
