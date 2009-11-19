@@ -6694,6 +6694,17 @@ The cursor may be at a date in the calendar, or in the Org agenda."
       (org-reveal t))
      (t (error "Invalid selection character `%c'" char)))))
 
+(defcustom org-agenda-insert-diary-strategy 'date-tree
+  "Where in `org-agenda-diary-file' should new entries be added?
+Valid values:
+
+date-tree    in the date tree, as child of the date
+top-level    as top-level entries at the end of the file."
+  :group 'org-agenda
+  :type '(choice
+	  (const :tag "in a date tree" date-tree)
+	  (const :tag "as top level at end of file" top-level)))
+
 (defun org-agenda-add-entry-to-org-agenda-diary-file (type text &optional d1 d2)
   "Add a diary entry with TYPE to `org-agenda-diary-file'.
 If TEXT is not empty, it will become the headline of the new entry, and
@@ -6728,9 +6739,11 @@ the resulting entry will not be shown.  When TEXT is empty, switch to
 	(insert (format "%%%%(diary-anniversary %s) %s"
 			(calendar-date-string d1 nil t) text))))
      ((eq type 'day)
-      (require 'org-datetree)
-      (org-datetree-find-date-create d1)
-      (org-agenda-insert-diary-make-new-entry text)
+      (if (eq org-agenda-insert-diary-strategy 'top-level)
+	  (org-agenda-insert-diary-as-top-level text)
+	(require 'org-datetree)
+	(org-datetree-find-date-create d1)
+	(org-agenda-insert-diary-make-new-entry text))
       (org-insert-time-stamp (org-time-from-absolute
 			      (calendar-absolute-from-gregorian d1)))
       (end-of-line 0))
@@ -6738,9 +6751,11 @@ the resulting entry will not be shown.  When TEXT is empty, switch to
       (if (> (calendar-absolute-from-gregorian d1)
 	     (calendar-absolute-from-gregorian d2))
 	  (setq d1 (prog1 d2 (setq d2 d1))))
-      (require 'org-datetree)
-      (org-datetree-find-date-create d1)
-      (org-agenda-insert-diary-make-new-entry text)
+      (if (eq org-agenda-insert-diary-strategy 'top-level)
+	  (org-agenda-insert-diary-as-top-level text)
+	(require 'org-datetree)
+	(org-datetree-find-date-create d1)
+	(org-agenda-insert-diary-make-new-entry text))
       (org-insert-time-stamp (org-time-from-absolute
 			      (calendar-absolute-from-gregorian d1)))
       (insert "--")
@@ -6755,6 +6770,16 @@ the resulting entry will not be shown.  When TEXT is empty, switch to
 		   (abbreviate-file-name org-agenda-diary-file)))
       (org-reveal t)
       (message "Please finish entry here"))))
+
+(defun org-agenda-insert-diary-as-top-level (text)
+  "Make new entry as a top-level entry at the end of the file.
+Add TEXT as headline, and position the cursor in the second line so that
+a timestamp can be added there."
+  (widen)
+  (goto-char (point-max))
+  (or (bolp) (insert "\n"))
+  (insert "* " text "\n")
+  (if org-adapt-indentation (org-indent-to-column 2)))
 
 (defun org-agenda-insert-diary-make-new-entry (text)
   "Make new entry as last child of current entry.

@@ -1,5 +1,10 @@
 2009-11-19  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-agenda.el (org-agenda-insert-diary-strategy): New variable.
+	(org-agenda-insert-diary-as-top-level): New function.
+	(org-agenda-add-entry-to-org-agenda-diary-file): Call
+	`org-agenda-insert-diary-as-top-level'.
+
 	* org.el (org-occur-in-agenda-files): Make sure none of the
 	buffers is narrowed.
 	(org-activate-plain-links): Add the face property here.
