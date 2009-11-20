@@ -1,3 +1,8 @@
+2009-11-20  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* lisp/org-git-link.el (org-git-gitrepos-p): Make definition
+	XEmacs compatible.
+
 2009-11-01  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* lisp/org-mac-iCal.el (omi-import-ics): Use `diary-file'

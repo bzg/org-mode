@@ -130,9 +130,10 @@
       (list (expand-file-name ".git" dir) relpath))))
 
 
-(defalias 'org-git-gitrepos-p 'org-git-find-gitdir
-  "Return non-nil if path is in git repository")
-
+(if (featurep 'xemacs)
+    (defalias 'org-git-gitrepos-p 'org-git-find-gitdir)
+  (defalias 'org-git-gitrepos-p 'org-git-find-gitdir
+  "Return non-nil if path is in git repository"))
 
 ;; splitting the link string
 
