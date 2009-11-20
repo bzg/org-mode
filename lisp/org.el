@@ -9082,7 +9082,8 @@ such as the file name."
 				     (org-back-to-heading t)
 				     (if (looking-at org-complex-heading-regexp)
 					 (list (match-string 4)))))))
-    (message (org-format-outline-path
+    (message "%s"
+	     (org-format-outline-path
 	      path
 	      (1- (frame-width))
 	      (and file bfn (concat (file-name-nondirectory bfn) "/"))))))

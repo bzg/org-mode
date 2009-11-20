@@ -1,8 +1,14 @@
 2009-11-20  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-display-outline-path): Use a format specifier for
+	message, to avoid problems with heading containing `%'.
+
 	* org-agenda.el (org-agenda-hide-tags-regexp): New option.
 	(org-format-agenda-item): Call `org-agenda-fix-displayed-tags'.
 	(org-agenda-fix-displayed-tags): New function.
+	(org-agenda-do-context-action): Just call
+	`org-display-outline-path', without piping the result through
+	`message'.
 
 	* org-latex.el (org-export-latex-preprocess): Protect secondary
 	footnote references.

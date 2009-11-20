@@ -5715,8 +5715,8 @@ When called with a prefix argument, include all archive files as well."
     (if (and org-agenda-follow-mode m)
 	(org-agenda-show))
     (if (and m org-agenda-show-outline-path)
-	(message (org-with-point-at m
-		   (org-display-outline-path t))))))
+	(org-with-point-at m
+	  (org-display-outline-path t)))))
 
 (defun org-agenda-show-priority ()
   "Show the priority of the current item.
