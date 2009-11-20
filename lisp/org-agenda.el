@@ -1309,7 +1309,10 @@ estimate."
 The sole argument to the function, which is called once for each
 possible tag, is a string giving the name of the tag.  The
 function should return either nil if the tag should be included
-as normal, or \"-<TAG>\" to exclude the tag."
+as normal, or \"-<TAG>\" to exclude the tag.
+Note that for the purpose of tag filtering, only the lower-case version of
+all tags will be considered, so that this function will only ever see
+the lower-case version of all tags."
   :group 'org-agenda
   :type 'function)
 
@@ -5168,9 +5171,8 @@ to switch to narrowing."
       (org-agenda-filter-by-tag-show-all)
       (when org-agenda-auto-exclude-function
 	(setq org-agenda-filter '())
-	(dolist (tag org-tag-alist-for-agenda)
-	  (let ((modifier (funcall org-agenda-auto-exclude-function
-				   (car tag))))
+	(dolist (tag org-agenda-get-represented-tags)
+	  (let ((modifier (funcall org-agenda-auto-exclude-function tag)))
 	    (if modifier
 		(push modifier org-agenda-filter))))
 	(if (not (null org-agenda-filter))
@@ -5196,6 +5198,17 @@ to switch to narrowing."
 		  (if narrow current nil)))
       (org-agenda-filter-apply org-agenda-filter))
      (t (error "Invalid tag selection character %c" char)))))
+
+(defun org-agenda-get-represented-tags ()
+  "Get a list of all tags currently represented in the agenda."
+  (let (p tags)
+    (save-excursion
+      (goto-char (point-min))
+      (while (setq p (next-single-property-change (point) 'tags))
+	(goto-char p)
+	(mapc (lambda (x) (add-to-list 'tags x))
+	      (get-text-property (point) 'tags))))
+    tags))
 
 (defun org-agenda-filter-by-tag-refine (strip &optional char)
   "Refine the current filter.  See `org-agenda-filter-by-tag."

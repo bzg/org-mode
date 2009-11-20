@@ -2,6 +2,9 @@
 
 	* org-agenda.el (org-agenda-diary-entry-in-org-file): Rebuild
 	agenda after adding new entry.
+	(org-agenda-get-represented-tags): New function.
+	(org-agenda-filter-by-tag): Use `org-agenda-get-represented-tags'
+	to get a list of tags in the agenda.
 
 	* org-datetree.el (org-datetree-find-day-create): Fix regular
 	expression.
