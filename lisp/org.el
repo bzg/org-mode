@@ -14944,7 +14944,6 @@ Some of the options can be changed using the variable
     ("Agenda Views etc")
     ("v" . org-agenda)
     ("/" . org-sparse-tree)
-    ("/" . org-sparse-tree)
     ("Misc")
     ("o" . org-open-at-point)
     ("?" . org-speed-command-help)
