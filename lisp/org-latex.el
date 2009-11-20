@@ -1815,7 +1815,8 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 	   (save-excursion
 	     (if (not (re-search-forward (concat "^" (regexp-quote foot-prefix))
 					 nil t))
-		 (replace-match "$^{\\1}$")
+		 (replace-match (org-export-latex-protect-string
+				 (concat "$^{" (match-string 1) "}$")))
 	       (replace-match "")
 	       (let ((end (save-excursion
 			    (if (re-search-forward "^$\\|^#.*$\\|\\[[0-9]+\\]" nil t)

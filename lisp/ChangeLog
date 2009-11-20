@@ -1,5 +1,8 @@
 2009-11-20  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-latex.el (org-export-latex-preprocess): Protect secondary
+	footnote references.
+
 	* org-indent.el (org-indent-initialize): Avoid empty strings as
 	line prefixes.
 
