@@ -1,5 +1,8 @@
 2009-11-20  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-indent.el (org-indent-initialize): Avoid empty strings as
+	line prefixes.
+
 	* org-agenda.el (org-agenda-diary-entry-in-org-file): Make sure
 	hat checking for the mark does not throw an error.
 	(org-agenda-diary-entry-in-org-file): Catch the case that there is
