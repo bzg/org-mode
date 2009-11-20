@@ -1,5 +1,8 @@
 2009-11-20  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-sort-entries-or-items): Make sure that the final
+	entry has a newline before doing the sorting.
+
 	* org-agenda.el (org-agenda-diary-entry-in-org-file): Get the text
 	property at the beginning of the line.
 

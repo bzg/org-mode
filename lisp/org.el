@@ -6861,7 +6861,9 @@ WITH-CASE, the sorting considers case as well."
      ((org-at-item-p)
       ;; we will sort this plain list
       (org-beginning-of-item-list) (setq start (point))
-      (org-end-of-item-list) (setq end (point))
+      (org-end-of-item-list)
+      (or (bolp) (insert "\n"))
+      (setq end (point))
       (goto-char start)
       (setq plain-list-p t
 	    what "plain list"))
@@ -6871,6 +6873,7 @@ WITH-CASE, the sorting considers case as well."
       (org-back-to-heading)
       (setq start (point)
 	    end (progn (org-end-of-subtree t t)
+		       (or (bolp) (insert "\n"))
 		       (org-back-over-empty-lines)
 		       (point))
 	    what "children")
@@ -6881,7 +6884,15 @@ WITH-CASE, the sorting considers case as well."
       ;; we will sort the top-level entries in this file
       (goto-char (point-min))
       (or (org-on-heading-p) (outline-next-heading))
-      (setq start (point) end (point-max) what "top-level")
+      (setq start (point))
+      (goto-char (point-max))
+      (beginning-of-line 1)
+      (when (looking-at ".*?\\S-")
+	;; File ends in a non-white line
+	(end-of-line 1)
+	(insert "\n"))
+      (setq end (point-max))
+      (setq what "top-level")
       (goto-char start)
       (show-all)))
 
