@@ -5171,7 +5171,7 @@ to switch to narrowing."
       (org-agenda-filter-by-tag-show-all)
       (when org-agenda-auto-exclude-function
 	(setq org-agenda-filter '())
-	(dolist (tag org-agenda-get-represented-tags)
+	(dolist (tag (org-agenda-get-represented-tags))
 	  (let ((modifier (funcall org-agenda-auto-exclude-function tag)))
 	    (if modifier
 		(push modifier org-agenda-filter))))
