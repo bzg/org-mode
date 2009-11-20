@@ -1,5 +1,8 @@
 2009-11-20  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-agenda.el (org-agenda-diary-entry-in-org-file): Get the text
+	property at the beginning of the line.
+
 	* org.el (org-make-link-string): Don't allow a description with
 	only white space.
 

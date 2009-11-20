@@ -6661,15 +6661,17 @@ The cursor may be at a date in the calendar, or in the Org agenda."
 
 (defun org-agenda-diary-entry-in-org-file ()
   "Make a diary entry in the file `org-agenda-diary-file'."
-  (let (d1 d2 char (text ""))
+  (let (d1 d2 char (text "") dp)
     (if (equal (buffer-name) "*Calendar*")
 	(setq d1 (calendar-cursor-to-date t)
 	      d2 (car calendar-mark-ring))
       (setq d1 (calendar-gregorian-from-absolute
-		(get-text-property (point) 'day))
-	    d2 (and (mark) (get-text-property (mark) 'day)
-		    (calendar-gregorian-from-absolute
-		     (get-text-property (mark) 'day)))))
+		(get-text-property (point-at-bol) 'day))
+	    d2 (and (mark)
+		    (save-excursion
+		      (goto-char (mark))
+		      (setq dp (get-text-property (point-at-bol) 'day)))
+		    (calendar-gregorian-from-absolute dp))))
     (message "Diary entry: [d]ay [a]nniversary [b]lock [j]ump to date tree")
     (setq char (read-char-exclusive))
     (cond
