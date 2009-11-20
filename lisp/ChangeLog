@@ -1,5 +1,9 @@
 2009-11-20  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-agenda.el (org-agenda-hide-tags-regexp): New option.
+	(org-format-agenda-item): Call `org-agenda-fix-displayed-tags'.
+	(org-agenda-fix-displayed-tags): New function.
+
 	* org-latex.el (org-export-latex-preprocess): Protect secondary
 	footnote references.
 

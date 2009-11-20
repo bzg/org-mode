@@ -1208,6 +1208,16 @@ When non-nil, this must be the number of minutes, e.g. 60 for one hour."
   :group 'org-agenda-line-format
   :type 'boolean)
 
+(defcustom org-agenda-hide-tags-regexp nil
+  "Regular expression used to filter away specific tags in agenda views.
+This means that these tags will be present, but not be shown in the agenda
+line.  Secondayt filltering will still work on the hidden tags.
+Nil means don't hide any tags."
+  :group 'org-agenda-line-format
+  :type '(choice
+	  (const  :tag "Hide none" nil)
+	  (string :tag "Regexp   ")))
+
 (defcustom org-agenda-remove-tags nil
   "Non-nil means, remove the tags from the headline copy in the agenda.
 When this is the symbol `prefix', only remove tags when
@@ -4512,9 +4522,12 @@ Any match of REMOVE-RE will be removed from TXT."
   (save-match-data
     ;; Diary entries sometimes have extra whitespace at the beginning
     (if (string-match "^ +" txt) (setq txt (replace-match "" nil nil txt)))
-    (when org-agenda-show-inherited-tags
-      ;; Fix the tags part in txt
-      (setq txt (org-agenda-add-inherited-tags txt tags)))
+
+    ;; Fix the tags part in txt
+    (setq txt (org-agenda-fix-displayed-tags
+	       txt tags
+	       org-agenda-show-inherited-tags
+	       org-agenda-hide-tags-regexp))
     (let* ((category (or category
 			 org-category
 			 (if buffer-file-name
@@ -4645,27 +4658,37 @@ Any match of REMOVE-RE will be removed from TXT."
 	'extra extra
 	'dotime dotime))))
 
-(defun org-agenda-add-inherited-tags (txt tags)
-  "Remove tags string from TXT, and add complete list of tags.
-The new list includes inherited tags.  If any inherited tags are present,
-a double colon separates inherited tags from local tags."
-  (if (string-match (org-re "\\([ \t]+\\)\\(:[[:alnum:]_@:]+:\\)[ \t]*$") txt)
-      (setq txt (substring txt 0 (match-beginning 0))))
-  (when tags
-    (let ((have-i (get-text-property 0 'inherited (car tags)))
-	  i)
-      (setq txt (concat txt " :"
-			(mapconcat
-			 (lambda (x)
-			   (setq i (get-text-property 0 'inherited x))
-			   (if (and have-i (not i))
-			       (progn
-				 (setq have-i nil)
-				 (concat ":" x))
-			     x))
-			 tags ":")
-			(if have-i "::" ":")))))
-  txt)
+(defun org-agenda-fix-displayed-tags (txt tags add-inherited hide-re)
+  "Remove tags string from TXT, and add a modified list of tags.
+The modified list may contain inherited tags, and tags matched by
+`org-agenda-hide-tags-regexp' will be removed."
+  (when (or add-inherited hide-re)
+    (if (string-match (org-re "\\([ \t]+\\)\\(:[[:alnum:]_@:]+:\\)[ \t]*$") txt)
+	(setq txt (substring txt 0 (match-beginning 0))))
+    (when tags
+      (setq tags
+	    (delq nil
+		  (mapcar (lambda (tg)
+			    (if (or (and hide-re (string-match hide-re tg))
+				    (and (not add-inherited)
+					 (get-text-property 0 'inherited tg)))
+				nil
+			      tg))
+			  tags)))
+      (let ((have-i (get-text-property 0 'inherited (car tags)))
+	    i)
+	(setq txt (concat txt " :"
+			  (mapconcat
+			   (lambda (x)
+			     (setq i (get-text-property 0 'inherited x))
+			     (if (and have-i (not i))
+				 (progn
+				   (setq have-i nil)
+				   (concat ":" x))
+			       x))
+			   tags ":")
+			  (if have-i "::" ":"))))))
+    txt)
 
 (defun org-downcase-keep-props (s)
   (let ((props (text-properties-at 0 s)))
