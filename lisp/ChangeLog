@@ -1,5 +1,8 @@
 2009-11-20  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-protocol.el (org-protocol-remember): Cater for empty title,
+	region, link.
+
 	* org-agenda.el (org-agenda-diary-entry-in-org-file): Rebuild
 	agenda after adding new entry.
 	(org-agenda-get-represented-tags): New function.

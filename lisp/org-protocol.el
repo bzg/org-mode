@@ -470,9 +470,10 @@ Now template ?b will be used."
              (url (org-protocol-sanitize-uri (car parts)))
              (type (if (string-match "^\\([a-z]+\\):" url)
                        (match-string 1 url)))
-             (title (cadr parts))
-             (region (caddr parts))
-             (orglink (org-make-link-string url title))
+             (title (or (cadr parts) ""))
+             (region (or (caddr parts) ""))
+             (orglink (org-make-link-string
+		       url (if (string-match "[^[:space:]]" title) title url)))
              remember-annotation-functions)
         (setq org-stored-links
               (cons (list url title) org-stored-links))
