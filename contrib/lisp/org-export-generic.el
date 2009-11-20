@@ -96,6 +96,7 @@
 ;;; Commentary:
 
 (require 'org-exp)
+(require 'assoc)
 
 (defgroup org-export-generic nil
   "Options specific for ASCII export of Org-mode files."
@@ -440,7 +441,7 @@ in this way, it will be wrapped."
 (defun org-set-generic-type (type definition)
   "Adds a TYPE and DEFINITION to the existing list of defined generic
 export definitions."
-  (set-alist 'org-generic-alist type definition))
+  (aput 'org-generic-alist type definition))
 
 (defun org-export-generic-remember-section (type suffix &optional prefix)
   (setq org-export-generic-section-type type)

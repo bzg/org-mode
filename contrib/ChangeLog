@@ -1,5 +1,7 @@
 2009-11-20  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* lisp/org-export-generic.el (org-set-generic-type): Use `aput'.
+
 	* lisp/org-git-link.el (org-git-gitrepos-p): Make definition
 	XEmacs compatible.
 
