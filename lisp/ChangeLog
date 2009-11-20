@@ -1,3 +1,8 @@
+2009-11-20  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-make-link-string): Don't allow a description with
+	only white space.
+
 2009-11-19  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-agenda.el (org-agenda-insert-diary-strategy): New variable.

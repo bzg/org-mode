@@ -7709,6 +7709,10 @@ according to FMT (default from `org-email-link-description-format')."
   "Make a link with brackets, consisting of LINK and DESCRIPTION."
   (unless (string-match "\\S-" link)
     (error "Empty link"))
+  (when (and description
+	     (stringp description)
+	     (not (string-match "\\S-" description)))
+    (setq description nil))
   (when (stringp description)
     ;; Remove brackets from the description, they are fatal.
     (while (string-match "\\[" description)
