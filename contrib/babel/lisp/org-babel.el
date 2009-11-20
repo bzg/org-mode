@@ -93,18 +93,23 @@ then run `org-babel-pop-to-session'."
 (defvar org-babel-inline-src-block-regexp nil
   "Regexp used to test when on an inline org-babel src-block")
 
+(defvar org-babel-result-regexp
+  "#\\+resname\\(\\[\\([[:alnum:]]+\\)\\]\\)?\\:"
+  "Regular expressions used to match result lines.  If the
+results are associated with a hash key then the hash will be
+saved in the second match data.")
+
 (defvar org-babel-min-lines-for-block-output 10
   "If number of lines of output is equal to or exceeds this
-  value, the output is placed in a
-  #+begin_example...#+end_example block. Otherwise the output is
-  marked as literal by inserting colons at the starts of the
-  lines. This variable only takes effect if the :results output
-  option is in effect.")
+value, the output is placed in a #+begin_example...#+end_example
+block. Otherwise the output is marked as literal by inserting
+colons at the starts of the lines. This variable only takes
+effect if the :results output option is in effect.")
 
 (defvar org-babel-noweb-error-langs nil
   "List of language for which errors should be raised when the
-  source code block satisfying a noweb reference in this language
-  can not be resolved.")
+source code block satisfying a noweb reference in this language
+can not be resolved.")
 
 (defun org-babel-named-src-block-regexp-for-name (name)
   "Regexp used to match named src block."
@@ -164,23 +169,24 @@ lisp code use the `org-babel-add-interpreter' function."
 
 ;;; functions
 (defun org-babel-execute-src-block (&optional arg info params)
-  "Execute the current source code block, and dump the results
-into the buffer immediately following the block.  Results are
-commented by `org-toggle-fixed-width-section'.  With optional
-prefix don't dump results into buffer but rather return the
-results in raw elisp (this is useful for automated execution of a
-source block).
+  "Execute the current source code block, and insert the results
+into the buffer.  Source code execution and the collection and
+formatting of results can be controlled through a variety of
+header arguments.
 
 Optionally supply a value for INFO in the form returned by
 `org-babel-get-src-block-info'.
 
 Optionally supply a value for PARAMS which will be merged with
-the header arguments specified at the source code block."
+the header arguments specified at the front of the source code
+block."
   (interactive)
   ;; (message "supplied params=%S" params) ;; debugging
   (let* ((info (or info (org-babel-get-src-block-info)))
          (lang (first info))
 	 (params (setf (third info) (org-babel-merge-params (third info) params)))
+         (new-hash (unless (assoc :nocache params) (org-babel-sha1-hash info)))
+         (old-hash (org-babel-result-hash info))
          (body (setf (second info)
 		     (if (assoc :noweb params)
 			 (org-babel-expand-noweb-references info) (second info))))
@@ -193,16 +199,21 @@ the header arguments specified at the source code block."
     ;; (message "params=%S" params) ;; debugging
     (unless (member lang org-babel-interpreters)
       (error "Language is not in `org-babel-interpreters': %s" lang))
-    (when arg (setq result-params (cons "silent" result-params)))
-    (setq result (funcall cmd body params))
-    (if (eq result-type 'value)
-        (setq result (if (and (or (member "vector" result-params)
-                                  (member "table" result-params))
-                              (not (listp result)))
-                         (list (list result))
-                       result)))
-    (org-babel-insert-result result result-params info)
-    result))
+    (if (and (not arg) new-hash (equal new-hash old-hash))
+        (save-excursion ;; return cached result
+          (goto-char (org-babel-where-is-src-block-result nil info))
+          (move-end-of-line 1) (forward-char 1)
+          (setq result (org-babel-read-result))
+          (message (replace-regexp-in-string "%" "%%" (format "%S" result))) result)
+      (setq result (funcall cmd body params))
+      (if (eq result-type 'value)
+          (setq result (if (and (or (member "vector" result-params)
+                                    (member "table" result-params))
+                                (not (listp result)))
+                           (list (list result))
+                         result)))
+      (org-babel-insert-result result result-params info new-hash)
+      result)))
 
 (defun org-babel-load-in-session (&optional arg info)
   "Load the body of the current source-code block.  Evaluate the
@@ -322,6 +333,19 @@ added to the header-arguments-alist."
             (looking-at org-babel-inline-src-block-regexp))
           (org-babel-parse-inline-src-block-match)
         nil)))) ;; indicate that no source block was found
+
+(defun org-babel-sha1-hash (&optional info)
+  (interactive)
+  (let* ((info (or info (org-babel-get-src-block-info)))
+         (hash (sha1 (format "%s-%s" (mapconcat (lambda (arg) (format "%S" arg))
+                                                (third info) ":")
+                             (second info)))))
+    (when (interactive-p) (message hash))
+    hash))
+
+(defun org-babel-result-hash (&optional info)
+  (org-babel-where-is-src-block-result nil info)
+  (org-babel-clean-text-properties (match-string 2)))
 
 (defmacro org-babel-map-source-blocks (file &rest body)
   "Evaluate BODY forms on each source-block in FILE."
@@ -456,15 +480,15 @@ according to org-babel-named-src-block-regexp."
 buffer or nil if no such result exists."
   (save-excursion
     (goto-char (point-min))
-    (when (re-search-forward ;; ellow end-of-buffer in following regexp?
-	   (concat "#\\+resname:[ \t]*" (regexp-quote name) "[ \t\n\f\v\r]") nil t)
+    (when (re-search-forward
+           (concat org-babel-result-regexp "[ \t]" (regexp-quote name) "[ \t\n\f\v\r]") nil t)
       (move-beginning-of-line 0) (point))))
 
-(defun org-babel-where-is-src-block-result (&optional insert info)
+(defun org-babel-where-is-src-block-result (&optional insert info hash)
   "Return the point at the beginning of the result of the current
-source block.  Specifically at the beginning of the #+RESNAME:
-line.  If no result exists for this block then create a
-#+RESNAME: line following the source block."
+source block.  Specifically at the beginning of the results line.
+If no result exists for this block then create a results line
+following the source block."
   (save-excursion
     (let* ((on-lob-line (progn (beginning-of-line 1)
 			       (looking-at org-babel-lob-one-liner-regexp)))
@@ -478,13 +502,15 @@ line.  If no result exists for this block then create a
 		      (if (eobp) (insert "\n") (forward-char 1))
 		      (setq end (point))
                       (or (and (not name)
-			       (progn ;; either the unnamed #+resname: line already exists
+			       (progn ;; unnamed results line already exists
 				 (re-search-forward "[^ \f\t\n\r\v]" nil t)
-				 (move-beginning-of-line 1) (looking-at "#\\+resname:\n")))
-			  ;; or (with optional insert) we need to back up and make one ourselves
+				 (move-beginning-of-line 1)
+                                 (looking-at (concat org-babel-result-regexp "\n"))))
+			  ;; or (with optional insert) back up and make one ourselves
                           (when insert
-                            (goto-char end) (open-line 2) (forward-char 1)
-                            (insert (concat "#+resname:" (if name (concat " " name)) "\n"))
+                            (goto-char end) (forward-char 1)
+                            (insert (concat "#+resname" (if hash (concat "["hash"]"))
+                                            ":"(if name (concat " " name)) "\n"))
                             (move-beginning-of-line 0) t)))
                (point))))))
 
@@ -505,7 +531,7 @@ line.  If no result exists for this block then create a
 			 (buffer-substring (point) (org-babel-result-end)) "[\r\n]+")
 			"\n")))
       (or (org-babel-number-p result-string) result-string))
-     ((looking-at "^#\\+RESNAME:")
+     ((looking-at org-babel-result-regexp)
       (save-excursion (forward-line 1) (org-babel-read-result))))))
 
 (defun org-babel-read-table ()
@@ -515,11 +541,11 @@ line.  If no result exists for this block then create a
               (mapcar #'org-babel-read row)))
           (org-table-to-lisp)))
 
-(defun org-babel-insert-result (result &optional insert info)
+(defun org-babel-insert-result (result &optional result-params info hash)
   "Insert RESULT into the current buffer after the end of the
-current source block.  With optional argument INSERT controls
-insertion of results in the org-mode file.  INSERT can take the
-following values...
+current source block.  With optional argument RESULT-PARAMS
+controls insertion of results in the org-mode file.
+RESULT-PARAMS can take the following values...
 
 replace - (default option) insert results after the source block
           replacing any previously inserted results
@@ -550,45 +576,51 @@ code ---- the results are extracted in the syntax of the source
   (if (stringp result)
       (progn
         (setq result (org-babel-clean-text-properties result))
-        (if (member "file" insert) (setq result (org-babel-result-to-file result))))
+        (when (member "file" result-params)
+          (setq result (org-babel-result-to-file result))))
     (unless (listp result) (setq result (format "%S" result))))
-  (if (and insert (member "replace" insert) (not (member "silent" insert)))
+  (if (and result-params (member "replace" result-params)
+           (not (member "silent" result-params)))
       (org-babel-remove-result info))
   (if (= (length result) 0)
       (if (member "value" result-params)
 	  (message "No result returned by source block")
 	(message "Source block produced no output"))
-    (if (and insert (member "silent" insert))
-        (progn (message (replace-regexp-in-string "%" "%%" (format "%S" result))) result)
+    (if (and result-params (member "silent" result-params))
+        (progn (message (replace-regexp-in-string "%" "%%" (format "%S" result)))
+               result)
       (when (and (stringp result) ;; ensure results end in a newline
                  (not (or (string-equal (substring result -1) "\n")
                           (string-equal (substring result -1) "\r"))))
         (setq result (concat result "\n")))
       (save-excursion
-	(let ((existing-result (org-babel-where-is-src-block-result t info))
+	(let ((existing-result (org-babel-where-is-src-block-result t info hash))
 	      (results-switches (cdr (assoc :results_switches (third info)))))
 	  (when existing-result (goto-char existing-result) (forward-line 1))
-	  (setq results-switches (if results-switches (concat " " results-switches) ""))
+	  (setq results-switches
+                (if results-switches (concat " " results-switches) ""))
 	  (cond
 	   ;; assume the result is a table if it's not a string
 	   ((not (stringp result))
 	    (insert (concat (orgtbl-to-orgtbl
-			     (if (and (listp (car result)) (listp (cdr (car result))))
+			     (if (and (listp (car result))
+                                      (listp (cdr (car result))))
 				 result (list result))
 			     '(:fmt (lambda (cell) (format "%S" cell)))) "\n"))
 	    (forward-line -1) (org-cycle))
-	   ((member "file" insert)
+	   ((member "file" result-params)
 	    (insert result))
-	   ((member "html" insert)
+	   ((member "html" result-params)
 	    (insert (format "#+BEGIN_HTML%s\n%s#+END_HTML\n" results-switches result)))
-	   ((member "latex" insert)
+	   ((member "latex" result-params)
 	    (insert (format "#+BEGIN_LaTeX%s\n%s#+END_LaTeX\n" results-switches result)))
-	   ((member "code" insert)
+	   ((member "code" result-params)
 	    (insert (format "#+BEGIN_SRC %s%s\n%s#+END_SRC\n" lang results-switches result)))
-	   ((or (member "raw" insert) (member "org" insert))
+	   ((or (member "raw" result-params) (member "org" result-params))
 	    (save-excursion (insert result)) (if (org-at-table-p) (org-cycle)))
 	   (t
-	    (org-babel-examplize-region (point) (progn (insert result) (point)) results-switches)))))
+	    (org-babel-examplize-region
+             (point) (progn (insert result) (point)) results-switches)))))
       (message "finished"))))
 
 (defun org-babel-result-to-org-string (result)
@@ -599,9 +631,11 @@ relies on `org-babel-insert-result'."
 (defun org-babel-remove-result (&optional info)
   "Remove the result of the current source block."
   (interactive)
-  (save-excursion
-    (goto-char (org-babel-where-is-src-block-result t info)) (forward-line 1)
-    (delete-region (point) (org-babel-result-end))))
+  (let ((location (org-babel-where-is-src-block-result nil info)) start)
+    (when location
+      (save-excursion
+        (goto-char location) (setq start (point)) (forward-line 1)
+        (delete-region start (org-babel-result-end))))))
 
 (defun org-babel-result-end ()
   "Return the point at the end of the current set of results"
@@ -639,10 +673,7 @@ non-nil."
 		      (line-number-at-pos beg)))))
     (save-excursion
       (cond ((= size 0)
-	     (error "This should be impossible: a newline was appended to result if missing")
-	     (let ((result (buffer-substring beg end)))
-	       (delete-region beg end)
-	       (insert (concat ": " result))))
+	     (error "This should be impossible: a newline was appended to result if missing"))
 	    ((< size org-babel-min-lines-for-block-output)
 	     (goto-char beg)
 	     (dotimes (n size)
