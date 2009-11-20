@@ -118,9 +118,9 @@ return nil."
         (setq split-ref (match-string 2 ref))
         (find-file split-file) (setq ref split-ref))
       (goto-char (point-min))
-      (if (let ((result_regexp (concat "^#\\+\\(TBL\\|RES\\)NAME:[ \t]*"
+      (if (let ((result_regexp (concat "^#\\+\\(TBLNAME\\|RESNAME\\|RESULT\\):[ \t]*"
                                        (regexp-quote ref) "[ \t]*$"))
-                (regexp (concat "^#\\+SRCNAME:[ \t]*"
+                (regexp (concat org-babel-source-name-regexp
                                 (regexp-quote ref) "\\(\(.*\)\\)?" "[ \t]*$")))
             ;; goto ref in the current buffer
             (or (and (not args)
@@ -145,13 +145,13 @@ return nil."
           (beginning-of-line)
           (if (or (= (point) (point-min)) (= (point) (point-max)))
               (error "reference not found"))))
-      (setq params (org-babel-merge-params params args))
+      (setq params (org-babel-merge-params params args '((:results . "silent"))))
       (setq result
 	    (case type
 	      ('results-line (org-babel-read-result))
 	      ('table (org-babel-read-table))
-	      ('source-block (org-babel-execute-src-block t nil params))
-	      ('lob (org-babel-execute-src-block t lob-info params))))
+	      ('source-block (org-babel-execute-src-block nil nil params))
+	      ('lob (org-babel-execute-src-block nil lob-info params))))
       (if (symbolp result)
           (format "%S" result)
         (if (and index (listp result))
@@ -202,7 +202,7 @@ of the supported reference types are found.  Supported reference
 types are tables and source blocks."
   (cond ((org-at-table-p) 'table)
         ((looking-at "^#\\+BEGIN_SRC") 'source-block)
-        ((looking-at "^#\\+RESNAME:") 'results-line)))
+        ((looking-at org-babel-result-regexp) 'results-line)))
 
 (provide 'org-babel-ref)
 ;;; org-babel-ref.el ends here

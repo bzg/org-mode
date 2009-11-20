@@ -32,12 +32,13 @@
 (require 'org-babel)
 
 (defvar org-babel-tangle-langs nil
-  "Association list matching source-block languages.  The car of
-each element should be a string indicating the source block
-language, and the cdr should be a list containing the extension
-shebang(#!) line to use when writing out the language to file,
-and an optional flag indicating that the language is not
-commentable.")
+  "List of languages supported by `org-babel-tangle'.  The first
+element of each language's list is a string indicating the name
+of the language, the second element should be the file extension
+of the language, an optional third element the shebang(#!)  line
+to use when writing out the language to file, and an optional
+fourth element is a flag which when true indicates that the
+language does not support comments.")
 
 (defun org-babel-load-file (file)
   "Load the contents of the Emacs Lisp source code blocks in the
