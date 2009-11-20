@@ -1,5 +1,11 @@
 2009-11-20  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-agenda.el (org-agenda-diary-entry-in-org-file): Rebuild
+	agenda after adding new entry.
+
+	* org-datetree.el (org-datetree-find-day-create): Fix regular
+	expression.
+
 	* org.el (org-display-outline-path): Use a format specifier for
 	message, to avoid problems with heading containing `%'.
 
