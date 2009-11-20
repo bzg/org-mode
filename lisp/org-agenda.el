@@ -6667,7 +6667,7 @@ The cursor may be at a date in the calendar, or in the Org agenda."
 	      d2 (car calendar-mark-ring))
       (setq d1 (calendar-gregorian-from-absolute
 		(get-text-property (point-at-bol) 'day))
-	    d2 (and (mark)
+	    d2 (and (ignore-errors (mark))
 		    (save-excursion
 		      (goto-char (mark))
 		      (setq dp (get-text-property (point-at-bol) 'day)))
