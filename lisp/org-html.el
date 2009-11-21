@@ -1469,6 +1469,10 @@ lang=\"%s\" xml:lang=\"%s\">
 	  (delete-region beg end)
 	  (insert (format "<span style=\"visibility:hidden;\">%s</span>"
 			  (make-string n ?x)))))
+      ;; Remove empty lines at the beginning of the file.
+      (goto-char (point-min))
+      (when (looking-at "\\s-+\n") (replace-match ""))
+      ;; Run the hook
       (run-hooks 'org-export-html-final-hook)
       (or to-buffer (save-buffer))
       (goto-char (point-min))
