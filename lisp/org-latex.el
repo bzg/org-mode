@@ -1639,6 +1639,12 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 \\end{figure}")
 	   (t "\\includegraphics[%attr]{%path}")))
 
+
+    (setq figenv (mapconcat 'identity (split-string figenv "\n")
+			    (save-excursion (beginning-of-line 1)
+					    (looking-at "[ \t]*")
+					    (concat "\n" (match-string 0)))))
+
     (if (and (not label) (not caption)
 	     (string-match "^\\\\caption{.*\n" figenv))
 	(setq figenv (replace-match "" t t figenv)))

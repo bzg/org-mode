@@ -1,5 +1,8 @@
 2009-11-22  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-latex.el (org-export-latex-format-image): Indent figure
+	environment, so that it does not interrupt plain list.
+
 	* org.el (org-open-at-point): Allow long link descriptions.
 
 2009-11-21  Carsten Dominik  <carsten.dominik@gmail.com>
