@@ -67,52 +67,52 @@ relative to the current effective date."
   :type 'boolean)
 
 (defface org-habit-clear-face
-  '((((background light)) (:background "slateblue"))
+  '((((background light)) (:background "#8270f9"))
     (((background dark)) (:background "blue")))
   "Face for days on which a task shouldn't be done yet."
   :group 'org-habit
   :group 'org-faces)
 (defface org-habit-clear-future-face
-  '((((background light)) (:background "powderblue"))
+  '((((background light)) (:background "#d6e4fc"))
     (((background dark)) (:background "midnightblue")))
   "Face for future days on which a task shouldn't be done yet."
   :group 'org-habit
   :group 'org-faces)
 
 (defface org-habit-ready-face
-  '((((background light)) (:background "green"))
+  '((((background light)) (:background "#4df946"))
     (((background dark)) (:background "forestgreen")))
   "Face for days on which a task should start to be done."
   :group 'org-habit
   :group 'org-faces)
 (defface org-habit-ready-future-face
-  '((((background light)) (:background "palegreen"))
+  '((((background light)) (:background "#acfca9"))
     (((background dark)) (:background "darkgreen")))
   "Face for days on which a task should start to be done."
   :group 'org-habit
   :group 'org-faces)
 
 (defface org-habit-alert-face
-  '((((background light)) (:background "yellow"))
+  '((((background light)) (:background "#f5f946"))
     (((background dark)) (:background "gold")))
   "Face for days on which a task is due."
   :group 'org-habit
   :group 'org-faces)
 (defface org-habit-alert-future-face
-  '((((background light)) (:background "palegoldenrod"))
+  '((((background light)) (:background "#fafca9"))
     (((background dark)) (:background "darkgoldenrod")))
   "Face for days on which a task is due."
   :group 'org-habit
   :group 'org-faces)
 
 (defface org-habit-overdue-face
-  '((((background light)) (:background "red"))
+  '((((background light)) (:background "#f9372d"))
     (((background dark)) (:background "firebrick")))
   "Face for days on which a task is overdue."
   :group 'org-habit
   :group 'org-faces)
 (defface org-habit-overdue-future-face
-  '((((background light)) (:background "mistyrose"))
+  '((((background light)) (:background "#fc9590"))
     (((background dark)) (:background "darkred")))
   "Face for days on which a task is overdue."
   :group 'org-habit
