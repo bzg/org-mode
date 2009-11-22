@@ -8241,7 +8241,7 @@ application the system uses for this file type."
       (catch 'match
 	(save-excursion
 	  (skip-chars-forward "^]\n\r")
-	  (when (org-in-regexp org-bracket-link-regexp)
+	  (when (org-in-regexp org-bracket-link-regexp 1)
 	    (setq link (org-extract-attributes
 			(org-link-unescape (org-match-string-no-properties 1))))
 	    (while (string-match " *\n *" link)

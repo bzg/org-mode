@@ -1,3 +1,7 @@
+2009-11-22  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-open-at-point): Allow long link descriptions.
+
 2009-11-21  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-html.el (org-export-as-html): Remove empty lines at the
