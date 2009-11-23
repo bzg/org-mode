@@ -5972,7 +5972,9 @@ If point is at the beginning of a headline, insert a sibling before the
 current headline.  If point is not at the beginning, do not split the line,
 but create the new headline after the current line."
   (interactive "P")
-  (if (= (buffer-size) 0)
+  (if (or (= (buffer-size) 0)
+	  (not (save-excursion (and (ignore-errors (org-back-to-heading))
+				    (org-on-heading-p)))))
       (insert "\n* ")
     (when (or force-heading (not (org-insert-item)))
       (let* ((empty-line-p nil)

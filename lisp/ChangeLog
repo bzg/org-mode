@@ -1,3 +1,8 @@
+2009-11-23  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-insert-heading): Catch before-first-headline when
+	inserting a headline.
+
 2009-11-22  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-latex.el (org-export-latex-format-image): Indent figure
