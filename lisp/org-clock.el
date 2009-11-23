@@ -360,21 +360,22 @@ pointing to it."
 	(save-excursion
 	  (save-restriction
 	    (widen)
-	    (goto-char marker)
-	    (setq file (buffer-file-name (marker-buffer marker))
-		  cat (or (org-get-category)
-			  (progn (org-refresh-category-properties)
-				 (org-get-category)))
-		  heading (org-get-heading 'notags)
-		  prefix (save-excursion
-			   (org-back-to-heading t)
-			   (looking-at "\\*+ ")
-			   (match-string 0))
-		  task (substring
-			(org-fontify-like-in-org-mode
-			 (concat prefix heading)
-			 org-odd-levels-only)
-			(length prefix))))))
+	    (ignore-errors
+	      (goto-char marker)
+	      (setq file (buffer-file-name (marker-buffer marker))
+		    cat (or (org-get-category)
+			    (progn (org-refresh-category-properties)
+				   (org-get-category)))
+		    heading (org-get-heading 'notags)
+		    prefix (save-excursion
+			     (org-back-to-heading t)
+			     (looking-at "\\*+ ")
+			     (match-string 0))
+		    task (substring
+			  (org-fontify-like-in-org-mode
+			   (concat prefix heading)
+			   org-odd-levels-only)
+			  (length prefix)))))))
       (when (and cat task)
 	(insert (format "[%c] %-15s %s\n" i cat task))
 	(cons i marker)))))

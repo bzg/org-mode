@@ -1,5 +1,8 @@
 2009-11-23  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-clock.el (org-clock-insert-selection-line): Catch error when
+	an old tasks no longer exists.
+
 	* org-latex.el (org-export-as-pdf): Remove also the .idx file.
 	(org-export-as-pdf): Don't remove the old PDF file before making
 	the new one.
