@@ -720,7 +720,7 @@ when PUB-DIR is set, use this as the publishing directory."
 	(error "PDF file was not produced")
       (set-window-configuration wconfig)
       (when org-export-pdf-remove-logfiles
-	(dolist (ext '("aux" "log" "out" "toc"))
+	(dolist (ext '("aux" "idx" "log" "out" "toc"))
 	  (setq file (concat base "." ext))
 	  (and (file-exists-p file) (delete-file file))))
       (message "Exporting to PDF...done")
