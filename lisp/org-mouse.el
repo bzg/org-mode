@@ -189,7 +189,7 @@ Changing this variable requires a restart of Emacs to get activated."
   (interactive)
   (end-of-line)
   (skip-chars-backward "\t ")
-  (when (looking-back ":[A-Za-z]+:")
+  (when (org-looking-back ":[A-Za-z]+:")
     (skip-chars-backward ":A-Za-z")
     (skip-chars-backward "\t ")))
 
@@ -607,7 +607,7 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
     (:end				; insert text here
      (skip-chars-backward " \t")
      (kill-region (point) (point-at-eol))
-     (unless (looking-back org-mouse-punctuation)
+     (unless (org-looking-back org-mouse-punctuation)
        (insert (concat org-mouse-punctuation " ")))))
 
   (insert text)
@@ -674,7 +674,7 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
 				      'org-mode-restart))))
    ((or (eolp)
 	(and (looking-at "\\(  \\|\t\\)\\(+:[0-9a-zA-Z_:]+\\)?\\(  \\|\t\\)+$")
-	     (looking-back "  \\|\t")))
+	     (org-looking-back "  \\|\t")))
     (org-mouse-popup-global-menu))
    ((get-context :checkbox)
     (popup-menu

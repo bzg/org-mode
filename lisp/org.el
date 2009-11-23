@@ -6285,7 +6285,7 @@ in the region."
 (defun org-cycle-level ()
   (let ((org-adapt-indentation nil))
     (when (and (looking-at "[ \t]*$")
-	       (looking-back
+	       (org-looking-back
 		(concat "^\\(\\*+\\)[ \t]+\\(" org-todo-regexp "\\)?[ \t]*")))
       (setq this-command 'org-cycle-level)
       (if (eq last-command 'org-cycle-level)

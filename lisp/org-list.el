@@ -1049,7 +1049,7 @@ Assumes cursor in item line."
 	(org-adapt-indentation nil))
     (cond
      ((and (looking-at "[ \t]*$")
-	   (looking-back "^\\([ \t]*\\)\\([-+*]\\|[0-9]+[).]\\)[ \t]+"))
+	   (org-looking-back "^\\([ \t]*\\)\\([-+*]\\|[0-9]+[).]\\)[ \t]+"))
       (setq this-command 'org-cycle-item-indentation)
       (if (eq last-command 'org-cycle-item-indentation)
 	  (condition-case nil

@@ -1,5 +1,15 @@
 2009-11-23  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-mouse.el (org-mouse-end-headline, org-mouse-insert-item)
+	(org-mouse-context-menu): Use `org-looking-back'.
+
+	* org.el (org-cycle-level): Use `org-looking-back'.
+
+	* org-list.el (org-cycle-item-indentation): Use
+	`org-looking-back'.
+
+	* org-compat.el (org-looking-back): New function.
+
 	* org.el (org-insert-heading): Catch before-first-headline when
 	inserting a headline.
 
