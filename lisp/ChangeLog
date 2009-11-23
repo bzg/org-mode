@@ -1,6 +1,8 @@
 2009-11-23  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-latex.el (org-export-as-pdf): Remove also the .idx file.
+	(org-export-as-pdf): Don't remove the old PDF file before making
+	the new one.
 
 	* org-mouse.el (org-mouse-end-headline, org-mouse-insert-item)
 	(org-mouse-context-menu): Use `org-looking-back'.

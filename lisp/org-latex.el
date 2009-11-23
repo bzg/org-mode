@@ -698,7 +698,6 @@ when PUB-DIR is set, use this as the publishing directory."
 		       (re-search-forward "\\\\bibliography{" nil t))))
 	 cmd)
     (with-current-buffer outbuf (erase-buffer))
-    (and (file-exists-p pdffile) (delete-file pdffile))
     (message "Processing LaTeX file...")
     (if (and cmds (symbolp cmds))
 	(funcall cmds file)
