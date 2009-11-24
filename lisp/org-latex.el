@@ -1601,8 +1601,9 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 
 (defun org-export-latex-format-image (path caption label attr)
   "Format the image element, depending on user settings."
-  (let (floatp wrapp placement figenv)
+  (let (ind floatp wrapp placement figenv)
     (setq floatp (or caption label))
+    (setq ind (org-get-text-property-any 0 'original-indentation path))
     (when (and attr (stringp attr))
       (if (string-match "[ \t]*\\<wrap\\>" attr)
 	  (setq wrapp t floatp nil attr (replace-match "" t t attr)))
@@ -1647,17 +1648,19 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
     (if (and (not label) (not caption)
 	     (string-match "^\\\\caption{.*\n" figenv))
 	(setq figenv (replace-match "" t t figenv)))
-    (org-fill-template
-     figenv
-     (list (cons "path"
-		 (if (file-name-absolute-p path)
-		     (expand-file-name path)
-		   path))
-	   (cons "attr" attr)
-	   (cons "labelcmd" (if label (format "\\label{%s}"
-					      label)""))
-	   (cons "caption" (or caption ""))
-	   (cons "placement" (or placement ""))))))
+    (org-add-props
+	(org-fill-template
+	 figenv
+	 (list (cons "path"
+		     (if (file-name-absolute-p path)
+			 (expand-file-name path)
+		       path))
+	       (cons "attr" attr)
+	       (cons "labelcmd" (if label (format "\\label{%s}"
+						  label)""))
+	       (cons "caption" (or caption ""))
+	       (cons "placement" (or placement ""))))
+	nil 'original-indentation ind)))
 
 (defun org-export-latex-protect-amp (s)
   (while (string-match "\\([^\\\\]\\)\\(&\\)" s)
