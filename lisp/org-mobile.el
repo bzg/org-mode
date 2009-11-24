@@ -85,6 +85,22 @@ should point to this file."
   :group 'org-mobile
   :type 'file)
 
+(defcustom org-mobile-agendas 'all
+  "The agendas that should be pushed to MobileOrg.
+Allowed values:
+
+default  the weekly agenda and the global TODO list
+custom   all custom agendas defined by the user
+all      the custom agendas and the default ones
+list     a list of selection key(s) as string."
+  :group 'org-mobile
+  :type '(choice
+	  (const :tag "Default Agendas" default)
+	  (const :tag "Custom Agendas" custom)
+	  (const :tag "Default and Custom Agendas" all)
+	  (repeat :tag "Selected"
+		  (string :tag "Selection Keys"))))
+
 (defcustom org-mobile-force-id-on-agenda-items t
   "Non-nil means make all agenda items carry and ID."
   :group 'org-mobile
@@ -426,8 +442,22 @@ The table of checksums is written to the file mobile-checksums."
 			((not (nth 1 x)) (cons (car x) (cons "" (cddr x))))
 			(t (cons (car x) (cons "" (cdr x))))))
 		org-agenda-custom-commands)))
-	new e key desc type match settings cmds gkey gdesc gsettings cnt)
-    (while (setq e (pop custom-list))
+	(default-list '(("a" "Agenda" agenda) ("t" "All TODO" alltodo)))
+	thelist	new e key desc type match settings cmds gkey gdesc gsettings cnt)
+    (cond
+     ((eq org-mobile-agendas 'custom)
+      (setq thelist custom-list))
+     ((eq org-mobile-agendas 'default)
+      (setq thelist default-list))
+     ((eq org-mobile-agendas 'all)
+      (setq thelist custom-list)
+      (unless (assoc "t" thelist) (push '("t" "ALL TODO" alltodo) thelist))
+      (unless (assoc "a" thelist) (push '("a" "Agenda" agenda) thelist)))
+     ((listp org-mobile-agendas)
+      (setq thelist (append custom-list default-list))
+      (setq thelist (delq nil (mapcar (lambda (k) (assoc k thelist))
+				      org-mobile-agendas)))))
+    (while (setq e (pop thelist))
       (cond
        ((stringp (cdr e))
 	;; this is a description entry - skip it
@@ -438,7 +468,7 @@ The table of checksums is written to the file mobile-checksums."
        ((memq (nth 2 e) '(todo-tree tags-tree occur-tree))
 	;; These are trees, not really agenda commands
 	)
-       ((memq (nth 2 e) '(agenda todo tags))
+       ((memq (nth 2 e) '(agenda alltodo todo tags))
 	;; a normal command
 	(setq key (car e) desc (nth 1 e) type (nth 2 e) match (nth 3 e)
 	      settings (nth 4 e))

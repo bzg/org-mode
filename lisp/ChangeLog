@@ -1,5 +1,8 @@
 2009-11-24  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-mobile.el (org-mobile-agendas): New option.
+	(org-mobile-sumo-agenda-command): Select the right agendas.
+
 	* org-latex.el (org-export-latex-format-image): Preserve the
 	original-indentation property.
 
