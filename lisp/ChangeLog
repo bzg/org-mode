@@ -4,6 +4,7 @@
 	(org-export-latex-parse-content)
 	(org-export-latex-parse-subcontent): Use
 	`org-re-search-forward-unprotected'.
+	(org-export-as-pdf): Remove log files produced by XeTeX.
 
 	* org-macs.el (org-re-search-forward-unprotected): New function.
 
