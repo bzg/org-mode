@@ -7,6 +7,13 @@
 
 	* org-macs.el (org-re-search-forward-unprotected): New function.
 
+2009-11-25  James TD Smith  <ahktenzero@mohorovi.cc>
+
+	* org-colview.el (org-agenda-colview-summarize): Sort out some
+	confusion between properties and titles, which resulted in
+	agenda summaries not working if a title was set for a column.
+>>>>>>> james/bugfixes:lisp/ChangeLog
+
 2009-11-24  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-mobile.el (org-mobile-agendas): New option.

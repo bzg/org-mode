@@ -1377,8 +1377,9 @@ and tailing newline characters."
 This will add overlays to the date lines, to show the summary for each day."
   (let* ((fmt (mapcar (lambda (x)
 			(if (equal (car x) "CLOCKSUM")
-			    (list "CLOCKSUM" (nth 2 x) nil 'add_times nil '+ 'identity)
-			  (cdr x)))
+			    (list "CLOCKSUM" (nth 1 x) (nth 2 x) ":" 'add_times
+				  nil '+ nil)
+			  x))
 		      org-columns-current-fmt-compiled))
 	 line c c1 stype calc sumfunc props lsum entries prop v)
     (catch 'exit
@@ -1404,9 +1405,10 @@ This will add overlays to the date lines, to show the summary for each day."
 		    (mapcar
 		     (lambda (f)
 		       (setq prop (car f)
-			     stype (nth 3 f)
-			     sumfunc (nth 5 f)
-			     calc (or (nth 6 f) 'identity))
+			     title (nth 1 f)
+			     stype (nth 4 f)
+			     sumfunc (nth 6 f)
+			     calc (or (nth 7 f) 'identity))
 		       (cond
 			((equal prop "ITEM")
 			 (cons prop (buffer-substring (point-at-bol)
