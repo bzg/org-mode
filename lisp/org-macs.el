@@ -123,6 +123,14 @@ We use a macro so that the test can happen at compilation time."
      ,@body))
 (put 'org-if-unprotected-at 'lisp-indent-function 1)
 
+(defun org-re-search-forward-unprotected (&rest args)
+  "Like re-search-forward, but stop only in unprotected places."
+  (catch 'exit
+    (while t
+      (unless (apply 're-search-forward args)
+	(throw 'exit nil))
+      (unless (get-text-property (match-beginning 0) 'org-protected)
+	(throw 'exit (point))))))
 
 (defmacro org-with-remote-undo (_buffer &rest _body)
   "Execute BODY while recording undo information in two buffers."

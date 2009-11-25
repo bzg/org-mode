@@ -744,7 +744,7 @@ Return a list reflecting the document structure."
     (goto-char (point-min))
     (let* ((cnt 0) output
 	   (depth org-export-latex-sectioning-depth))
-      (while (re-search-forward
+      (while (org-re-search-forward-unprotected
 	      (concat "^\\(\\(?:\\*\\)\\{"
 		      (number-to-string (+ (if odd 2 1) level))
 		      "\\}\\) \\(.*\\)$")
@@ -752,7 +752,7 @@ Return a list reflecting the document structure."
 	      (when (> level 0)
 		(save-excursion
 		  (save-match-data
-		    (re-search-forward
+		    (org-re-search-forward-unprotected
 		     (concat "^\\(\\(?:\\*\\)\\{"
 			     (number-to-string level)
 			     "\\}\\) \\(.*\\)$") nil t)))) t)
@@ -764,7 +764,7 @@ Return a list reflecting the document structure."
 	    (narrow-to-region
 	     (point)
 	     (save-match-data
-	       (if (re-search-forward
+	       (if (org-re-search-forward-unprotected
 		    (concat "^\\(\\(?:\\*\\)\\{"
 			    (number-to-string (+ (if odd 2 1) level))
 			    "\\}\\) \\(.*\\)$") nil t)
@@ -788,7 +788,7 @@ Return a list reflecting the document structure."
 (defun org-export-latex-parse-content ()
   "Extract the content of a section."
   (let ((beg (point))
-	(end (if (re-search-forward "^\\(\\*\\)+ .*$" nil t)
+	(end (if (org-re-search-forward-unprotected "^\\(\\*\\)+ .*$" nil t)
 		 (progn (beginning-of-line) (point))
 	       (point-max))))
     (buffer-substring beg end)))
@@ -796,7 +796,7 @@ Return a list reflecting the document structure."
 (defun org-export-latex-parse-subcontent (level odd)
   "Extract the subcontent of a section at LEVEL.
 If ODD Is non-nil, assume subcontent only contains odd sections."
-  (if (not (re-search-forward
+  (if (not (org-re-search-forward-unprotected
 	    (concat "^\\(\\(?:\\*\\)\\{"
 		    (number-to-string (+ (if odd 4 2) level))
 		    "\\}\\) \\(.*\\)$")
