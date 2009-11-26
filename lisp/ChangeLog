@@ -40,7 +40,6 @@
 	* org-colview.el (org-agenda-colview-summarize): Sort out some
 	confusion between properties and titles, which resulted in
 	agenda summaries not working if a title was set for a column.
->>>>>>> james/bugfixes:lisp/ChangeLog
 
 2009-11-24  Carsten Dominik  <carsten.dominik@gmail.com>
 
