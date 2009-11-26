@@ -1,5 +1,8 @@
 2009-11-26  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-agenda.el (org-agenda-get-blocks): Look at time string also
+	on days after the first one.
+
 	* org.el (org-insert-heading): Also check for item before assuming
 	before-first-heading condition.
 

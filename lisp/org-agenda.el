@@ -4481,7 +4481,7 @@ FRACTION is what fraction of the head-warning time has passed."
 				 org-agenda-timerange-leaders)
 			    (1+ (- d0 d1)) (1+ (- d2 d1)))
 			   head category tags
-			   (if (= d0 d1) timestr))))
+			   timestr)))
 	      (org-add-props txt props
 		'org-marker marker 'org-hd-marker hdmarker
 		'type "block" 'date date
