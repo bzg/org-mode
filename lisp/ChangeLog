@@ -1,5 +1,10 @@
 2009-11-26  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-footnote.el (org-footnote-normalize): Don't take optional
+	arguments in LaTeX macros as footnotes.
+
+	* org.el (org-inside-latex-macro-p): New function.
+
 	* org-latex.el (org-latex-to-pdf-process): Change customization
 	group to `org-export-pdf'.
 

@@ -14482,6 +14482,10 @@ looks only before point, not after."
 	(goto-char pos)
 	(if dd-on (cons "$$" m))))))
 
+(defun org-inside-latex-macro-p ()
+  "Is point inside a LaTeX macro or its arguments?"
+  (org-in-regexp
+   "\\\\[a-zA-Z]+\\*?\\(\\[[^][\n{}]*\\]\\)?\\({[^{}\n]*}\\)?"))
 
 (defun org-try-cdlatex-tab ()
   "Check if it makes sense to execute `cdlatex-tab', and do it if yes.
