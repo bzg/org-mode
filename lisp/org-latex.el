@@ -404,7 +404,7 @@ This function should accept the file name as its single argument."
   '("aux" "idx" "log" "out" "toc" "nav" "snm" "vrb")
   "The list of file extensions to consider as LaTeX logfiles."
   :group 'org-export-pdf
-  :type 'sexp)
+  :type '(repeat (string :tag "Extension")))
 
 (defcustom org-export-pdf-remove-logfiles t
   "Non-nil means, remove the logfiles produced by PDF production.

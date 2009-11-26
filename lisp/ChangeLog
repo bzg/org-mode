@@ -3,6 +3,7 @@
 	* org-latex.el (org-latex-to-pdf-process): Fix typo in group tag.
 	(org-export-pdf-logfiles): New option.
 	(org-export-as-pdf): Use `org-export-pdf-logfiles'.
+	(org-export-pdf-logfiles): Fix customization type.
 
 	* org.el (org-insert-link): Improve error message when there is no
 	default link to select with RET.
