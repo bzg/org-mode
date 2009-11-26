@@ -1,5 +1,8 @@
 2009-11-26  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-insert-link): Improve error message when there is no
+	default link to select with RET.
+
 	* org-agenda.el (org-agenda-filter-by-tag): Use char argument from
 	parameter list.
 

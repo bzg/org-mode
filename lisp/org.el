@@ -7926,6 +7926,8 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
 		     nil nil nil
 		     'tmphist
 		     (car (car org-stored-links)))))
+	    (if (not (string-match "\\S-" link))
+		(error "No link selected"))
 	    (if (or (member link all-prefixes)
 		    (and (equal ":" (substring link -1))
 			 (member (substring link 0 -1) all-prefixes)
