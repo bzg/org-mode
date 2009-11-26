@@ -376,7 +376,7 @@ allowed.  The default we use here encompasses both."
 
 (defgroup org-export-pdf nil
   "Options for exporting Org-mode files to PDF, via LaTeX."
-  :tag "Org Export LaTeX"
+  :tag "Org Export PDF"
   :group 'org-export-latex
   :group 'org-export)
 

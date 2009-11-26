@@ -1,5 +1,7 @@
 2009-11-26  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-latex.el (org-latex-to-pdf-process): Fix typo in group tag.
+
 	* org.el (org-insert-link): Improve error message when there is no
 	default link to select with RET.
 
