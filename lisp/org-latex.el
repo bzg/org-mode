@@ -395,7 +395,7 @@ result, and it also does not do any error checking.
 Alternatively, this may be a Lisp function that does the processing, so you
 could use this to apply the machinery of AUCTeX or the Emacs LaTeX mode.
 This function should accept the file name as its single argument."
-  :group 'org-export-latex
+  :group 'org-export-pdf
   :type '(choice (repeat :tag "Shell command sequence"
 		  (string :tag "Shell command"))
 		 (function)))

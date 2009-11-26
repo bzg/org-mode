@@ -1,5 +1,8 @@
 2009-11-26  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-latex.el (org-latex-to-pdf-process): Change customization
+	group to `org-export-pdf'.
+
 	* org-agenda.el (org-agenda-get-blocks): Look at time string also
 	on days after the first one.
 
