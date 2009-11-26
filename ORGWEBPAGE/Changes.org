@@ -6,9 +6,252 @@
 
 #+STARTUP: indent hidestars
 
-* Version 6.33
+* Version 6.34
  :PROPERTIES:
  :VISIBILITY: content
+ :CUSTOM_ID: v6.34
+ :END:
+
+** Incompatible changes
+
+*** Tags in org-agenda-auto-exclude-function must be lower case.
+
+When defining an =org-agenda-auto-exclude-function=, you need to
+be aware that tag that is being passed into the function is
+always lower case - even if it was defined in upper case
+originally.
+
+** Details
+
+*** Support for creating BEAMER presentations from Org-mode documents
+
+Org-mode documents or subtrees can now be converted directly in
+to BEAMER presentation.  Turning a tree into a simple
+presentations is straight forward, and there is also quite some
+support to make richer presentations as well.  See the [[http://orgmode.org/manual/Beamer-class-export#Beamer-class-export][BEAMER
+section]] in the manual for more details.
+
+Thanks to everyone who has contributed to the discussion about
+BEAMER support and how it should work.  This was a great example
+for how this community can achieve a much better result than any
+individual could.
+
+*** Hyperlinks
+
+**** Add Paul Sexton's org-ctags.el
+
+Targets like =<<my target>>= can now be found by Emacs' etag
+functionality, and Org-mode links can be used to to link to
+etags, also in non-Org-mode files.  For details, see the file
+/org-ctags.el/.
+
+This feature uses a new hook =org-open-link-functions= which will
+call function to do something special with text links.
+
+Thanks to Paul Sexton for this contribution.
+
+**** Add Jan Böker's org-docview.el
+
+This new module allows links to various file types using docview,
+where Emacs displays images of document pages.  Docview link
+types can point to a specific page in a document, for example to
+page 131 of the Org-mode manual:
+
+: [[docview:~/.elisp/org/doc/org.pdf::131][Org-Mode Manual]]
+
+Thanks to Jan Böker for this contribution.
+    
+**** New link types that force special ways of opening the file
+    
+- =file+sys:/path/to/file=  will use the system to open the file,
+  like double-clicking would.
+- file+emacs:/path/to/file will force opening the linked file
+  with Emacs.
+
+This was a request by John Wiegley.
+
+**** Open all links in a node
+
+When using =C-c C-o= on a headline to get a list of links in the
+entry, pressing =RET= will open *all* links.  This allows
+something like projects to be defined, with a number of files
+that have to be opened by different applications.
+
+This was a request by John Wiegley.
+
+*** Agenda Views
+
+**** Improve the logic of the search view.
+
+The logic of search views is changed a bit.  See the docstring of
+the function =or-search-view=.
+
+These changes resulted from a discussion with Matt Lundin.
+
+**** New face for entries from the Emacs diary
+
+Entries that enter the Agenda through the Emacs diary now get the
+face =org-agenda-diary=.
+
+This was a request by Thierry Volpiatto.
+
+**** New function `org-diary-class' to schedule classes with skipped weeks.
+
+This was a request by Daniel Martins.
+
+**** Empty matcher means prompt in agenda custom commands
+    
+When an agenda custom command has an empty string as MATCH
+element, so far this would lead to a meaningless search using an
+empty matcher.  Now an empty (or white) string will be
+interpreted just like a nil matcher, i.e. the user will be
+prompted for the match.
+
+**** Agenda: Selectively remove some tags from agenda display
+
+If you use tags very extensively, you might want to exclude some
+from being displayed in the agenda, in order to keep the display
+compact.  See the new option =org-agenda-hide-tags-regexp= for
+details.
+    
+This was largely a patch by Martin Pohlack.
+
+*** Export
+
+**** Direct export of only the current subtree
+
+Pressing =1= after =C-c C-e= and before the key that selects the
+export backend, only the current subtree will be exported,
+exactly as it you had selected it first with =C-c @=.  So for
+example, =C-c C-e 1 b= will export the current subtree to HTML
+and open the result in the browser.
+
+**** Direct export of enclosing node
+
+Pressing =SPC= after =C-c C-e= and before the key that selects
+the export backend, the enclosing subree that is set up for
+subtree export will be exported, exactly as it you had selected
+it first with =C-c @=.  So for example, =C-c C-e SPC d= will find
+the enclosing node with a LaTeX_CLASS property or an
+EXPORT_FILE_NAME property and export that.
+
+**** Caching export images
+
+Images that are created for example using LaTeX or ditaa for
+inclusion into exported files are now cached.  This works by
+adding a hash to the image name, that reflects the source code
+and all relevant settings.  So as long as the hash does not
+change, the image does not have to be made again.  His can lead
+to a substantial reduction in export/publishing times.
+
+Thanks to Eric Schulte for a patch to this effect.
+
+**** Preserving line breaks for export no longer works
+    
+ASCII export always preserves them - no other export format
+does.  We had attempted to use =\obeylines= for this in LaTeX,
+but that does create too many problems.
+
+**** New symbols =\EUR= and =\checkmark=
+
+=\EUR= symbols from Marvosym package, and =\checkmark= are now
+supported symbols in Org-mode, i.e. they will be exported
+properly to the various backends.
+
+**** Allow LaTeX_CLASS_OPTIONS to set options, also from a property
+
+You can set the options to the =\documentclass= command on a
+per-file basis, using
+
+: #+LaTeX_CLASS_OPTIONS: [11pt]
+
+or on a per-tree basis using the corresponding property.  The
+defined string will replace the default options entirely.
+
+**** The encoding of LaTeX files is now handled property
+
+Org now makes sure that the encoding used by the file created
+through the export mechanism is reflected correctly in the
+
+: \usepackage[CODINGSYSTEM]{inputenc}
+
+command.  So as long as the =org-export-latex-classes= definition
+contains an =\usepackage[utf8]{inputenc}= statement, that
+statement will be modified so that the correct option is used.
+
+If you wan to use special encodings, for example =utf8x= instead
+of =utf8=, see the variable =org-export-latex-inputenc-alist=.
+
+This was a request by Francesco Pizzolante.
+
+*** Property API enhancements
+    
+**** Make a new special property BLOCKED, indicating if entry is blocked
+
+A new special property BLOCKED returns "t" when the entry is
+blocked from switching the TODO state to a DONE state.
+
+This was a request by John Wiegley.
+
+**** New hooks for external support for allowed property values
+
+It is now possible to hook into Org in order to provide the
+allowed values for any property with a lisp function.  See the
+docstring of the variable =org-property-allowed-value-functions=
+
+**** Allow unrestricted completion on properties
+
+When listing the allowed values for a property, for example with
+a =:name_ALL:= property, completion on these values enforces that
+one of the values will be chosen.  Now, if you add ":ETC" to the
+list of allowed values, it will be interpreted as a switch, and
+the completion will be non-restrictive, so you can also choose to
+type a new value.
+
+*** Changes to Org-babel
+
+- The documentation for Org-babel has been drastically improved
+  and is available on Worg at
+  http://orgmode.org/worg/org-contrib/babel/
+- Source-code block names are now exported to HTML and LaTeX
+- Org-babel functions are now bound to keys behind a common key
+  prefix (see
+  http://orgmode.org/worg/org-contrib/babel/reference.php#sec-5)
+- Results are now foldable with TAB
+- Header argument values can now be lisp forms
+- Readable aliases for #+srcname: and #+resname:
+- Sha1 hash based caching of results in buffer
+- Can now index into variable values
+- org-babel-clojure now supports multiple named sessions
+
+*** Miscellaneous changes
+
+**** Make =C-c r C= customize remember templates
+
+=C-c r C= is now a shortcut for
+
+:  M-x customize-variable RET org-remember-templates RET
+
+This was a proposal by Adam Spiers.
+
+**** Use John Gruber's regular expression for URL's
+
+We now use a better regexp to spot plain links in text.  This
+regexp is adopted from [[http://daringfireball.net/2009/11/liberal_regex_for_matching_urls][John Gruber's blogpost]].
+
+Thanks to William Henney for the pointer.
+
+**** Implement tag completion of all tags in all agenda files
+    
+The new option =org-complete-tags-always-offer-all-agenda-tags=
+makes Org complete all tags from all agenda files if non-nil.
+Usually, setting it locally to t in org-remember buffers is the
+most useful application of this new feature.
+
+Thanks to Tassilo Horn for a patch to this effect.
+
+* Version 6.33
+ :PROPERTIES:
  :CUSTOM_ID: v6.33
  :END:
 

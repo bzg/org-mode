@@ -12971,7 +12971,7 @@ then applies it to the property in the column format's scope."
     (org-columns-compute prop)))
 
 (defvar org-property-allowed-value-functions nil
-  "Hook for functions supplying allowed values for specific.
+  "Hook for functions supplying allowed values for a specific property.
 The functions must take a single argument, the name of the property, and
 return a flat list of allowed values.  If \":ETC\" is one of
 the values, this means that these values are intended as defaults for
