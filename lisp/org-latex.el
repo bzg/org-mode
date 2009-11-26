@@ -400,6 +400,12 @@ This function should accept the file name as its single argument."
 		  (string :tag "Shell command"))
 		 (function)))
 
+(defcustom org-export-pdf-logfiles
+  '("aux" "idx" "log" "out" "toc" "nav" "snm" "vrb")
+  "The list of file extensions to consider as LaTeX logfiles."
+  :group 'org-export-pdf
+  :type 'sexp)
+
 (defcustom org-export-pdf-remove-logfiles t
   "Non-nil means, remove the logfiles produced by PDF production.
 These are the .aux, .log, .out, and .toc files."
@@ -719,7 +725,7 @@ when PUB-DIR is set, use this as the publishing directory."
 	(error "PDF file was not produced")
       (set-window-configuration wconfig)
       (when org-export-pdf-remove-logfiles
-	(dolist (ext '("aux" "idx" "log" "out" "toc" "nav" "snm" "vrb"))
+	(dolist (ext org-export-pdf-logfiles)
 	  (setq file (concat base "." ext))
 	  (and (file-exists-p file) (delete-file file))))
       (message "Exporting to PDF...done")
