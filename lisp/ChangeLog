@@ -1,5 +1,8 @@
 2009-11-26  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-insert-heading): Also check for item before assuming
+	before-first-heading condition.
+
 	* org-latex.el (org-latex-to-pdf-process): Fix typo in group tag.
 	(org-export-pdf-logfiles): New option.
 	(org-export-as-pdf): Use `org-export-pdf-logfiles'.

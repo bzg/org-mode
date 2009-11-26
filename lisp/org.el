@@ -5973,8 +5973,9 @@ current headline.  If point is not at the beginning, do not split the line,
 but create the new headline after the current line."
   (interactive "P")
   (if (or (= (buffer-size) 0)
-	  (not (save-excursion (and (ignore-errors (org-back-to-heading))
-				    (org-on-heading-p)))))
+	  (and (not (save-excursion (and (ignore-errors (org-back-to-heading))
+					 (org-on-heading-p))))
+	       (not (org-in-item-p))))
       (insert "\n* ")
     (when (or force-heading (not (org-insert-item)))
       (let* ((empty-line-p nil)
