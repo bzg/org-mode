@@ -5130,7 +5130,7 @@ to switch to narrowing."
 	 (effort-prompt "")
 	 (inhibit-read-only t)
 	 (current org-agenda-filter)
-	 char a n tag)
+	 a n tag)
     (unless char
       (message
        "%s by tag [%s ], [TAB], %s[/]:off, [+-]:narrow, [>=<?]:effort: "

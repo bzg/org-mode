@@ -1,3 +1,8 @@
+2009-11-26  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-agenda.el (org-agenda-filter-by-tag): Use char argument from
+	parameter list.
+
 2009-11-25  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-latex.el (org-export-latex-parse-global)
