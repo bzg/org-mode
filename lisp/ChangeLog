@@ -1,8 +1,5 @@
 2009-11-27  Carsten Dominik  <carsten.dominik@gmail.com>
 
-	* org-clock.el (org-clock-in): Fix current task detection when a
-	task is selected from the clock history.
-
 	* org-latex.el (org-export-latex-class-options): New variable.
 	(org-export-latex-set-initial-vars): Use the class options.
 

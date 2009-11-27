@@ -854,13 +854,8 @@ the clocking selection, associated with the letter `d'."
 	(when (save-excursion
 		(org-back-to-heading t)
 		(and (equal (marker-buffer org-clock-hd-marker)
-			    (if selected-task
-				(marker-buffer selected-task)
-			      (current-buffer)))
-		     (= (marker-position org-clock-hd-marker)
-			(if selected-task
-			    (marker-position selected-task)
-			  (point)))))
+			    (current-buffer))
+		     (= (marker-position org-clock-hd-marker) (point))))
 	  (message "Clock continues in \"%s\"" org-clock-heading)
 	  (throw 'abort nil))
 	(move-marker org-clock-interrupted-task
