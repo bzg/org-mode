@@ -854,15 +854,29 @@ the clocking selection, associated with the letter `d'."
       (when interrupting
 	;; We are interrupting the clocking of a different task.
 	;; Save a marker to this task, so that we can go back.
+	;; First check if we are trying to clock into the same task!
+	(when (save-excursion
+		(unless selected-task
+		  (org-back-to-heading t))
+		(and (equal (marker-buffer org-clock-hd-marker)
+			    (if selected-task
+				(marker-buffer selected-task)
+			      (current-buffer)))
+		     (= (marker-position org-clock-hd-marker)
+			(if selected-task
+			    (marker-position selected-task)
+			  (point)))))
+	  (message "Clock continues in \"%s\"" org-clock-heading)
+	  (throw 'abort nil))
 	(move-marker org-clock-interrupted-task
 		     (marker-position org-clock-marker)
 		     (marker-buffer org-clock-marker))
 	(org-clock-out t))
-      
+
       (when (equal select '(16))
 	;; Mark as default clocking task
 	(org-clock-mark-default-task))
-      
+
       ;; Clock in at which position?
       (setq target-pos
 	    (if (and (eobp) (not (org-on-heading-p)))
