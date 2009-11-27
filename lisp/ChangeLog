@@ -7,9 +7,6 @@
 	with an invisible character.
 	(org-additional-option-like-keywords): Add LaTeX_CLASS_OPTIONS.
 
-	* org-clock.el (org-clock-in): Do not restart the clock in the
-	same entry where it is running now.
-
 2009-11-26  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-footnote.el (org-footnote-normalize): Don't take optional
