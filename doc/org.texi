@@ -9484,14 +9484,18 @@ By default, the La@TeX{} output uses the class @code{article}.
 @vindex org-export-latex-classes
 @cindex #+LATEX_HEADER
 @cindex #+LATEX_CLASS
+@cindex #+LATEX_CLASS_OPTIONS
 @cindex property, LATEX_CLASS
+@cindex property, LATEX_CLASS_OPTIONS
 You can change this globally by setting a different value for
 @code{org-export-latex-default-class} or locally by adding an option like
 @code{#+LaTeX_CLASS: myclass} in your file, or with a @code{:LaTeX_CLASS:}
 property that applies when exporting a region containing only this (sub)tree.
 The class should be listed in @code{org-export-latex-classes}, where you can
 also define the sectioning structure for each class, as well as defining
-additional classes.  You can also use @code{#+LATEX_HEADER:
+additional classes.  In a similar way, @code{#+LaTeX_CLASS_OPTIONS} or a
+@code{LaTeX_CLASS_OPTIONS} property can specify the options for the
+@code{\documentclass} macro.  You can also use @code{#+LATEX_HEADER:
 \usepackage@{xyz@}} to add lines to the header.
 
 @node Tables in LaTeX export, Images in LaTeX export, Sectioning structure, LaTeX and PDF export
