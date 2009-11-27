@@ -90,38 +90,18 @@ Emacs-lisp table, otherwise return the results as a string."
                                          "'" "\"" results)))))
      results)))
 
-(defvar org-babel-sh-buffers '(:default . nil))
-
-(defun org-babel-sh-session-buffer (session)
-  (cdr (assoc session org-babel-sh-buffers)))
-
-(defun org-babel-sh-initiate-session-by-key (&optional session)
-  "If there is not a current inferior-process-buffer in SESSION
-then create.  Return the initialized session."
-  (save-window-excursion
-    (let* ((session (if session (intern session) :default))
-           (sh-buffer (org-babel-sh-session-buffer session))
-           (newp (not (org-babel-comint-buffer-livep sh-buffer))))
-      (if (and sh-buffer (get-buffer sh-buffer) (not (buffer-live-p sh-buffer)))
-          (setq sh-buffer nil))
-      (shell sh-buffer)
-      (when newp
-        (setq sh-buffer (current-buffer))
-        (org-babel-comint-wait-for-output sh-buffer))
-      (setq org-babel-sh-buffers (cons (cons session sh-buffer)
-				       (assq-delete-all session org-babel-sh-buffers)))
-      session)))
-
 (defun org-babel-sh-initiate-session (&optional session)
   (unless (string= session "none")
-    (org-babel-sh-session-buffer (org-babel-sh-initiate-session-by-key session))))
+    (save-window-excursion
+      (or (org-babel-comint-buffer-livep session)
+          (progn (shell session) (get-buffer (current-buffer)))))))
 
 (defvar org-babel-sh-eoe-indicator "echo 'org_babel_sh_eoe'"
   "Used to indicate that evaluation is has completed.")
 (defvar org-babel-sh-eoe-output "org_babel_sh_eoe"
   "Used to indicate that evaluation is has completed.")
 
-(defun org-babel-sh-evaluate (buffer body &optional result-type)
+(defun org-babel-sh-evaluate (session body &optional result-type)
   "Pass BODY to the Shell process in BUFFER.  If RESULT-TYPE equals
 'output then return a list of the outputs of the statements in
 BODY, if RESULT-TYPE equals 'value then return the value of the
@@ -141,19 +121,32 @@ last statement in BODY."
 	       (with-temp-file tmp-file (insert results))
 	       (org-babel-import-elisp-from-file tmp-file))))))
     ;; comint session evaluation
-    (let* ((tmp-file (make-temp-file "org-babel-sh"))
-	   (full-body (mapconcat #'org-babel-chomp
-                                 (list body org-babel-sh-eoe-indicator) "\n"))
-           (raw (org-babel-comint-with-output buffer org-babel-sh-eoe-output nil
-                  (insert full-body) (comint-send-input nil t)))
-           (results (cdr (member org-babel-sh-eoe-output
-                                 (reverse (mapcar #'org-babel-sh-strip-weird-long-prompt
-                                                  (mapcar #'org-babel-trim raw)))))))
-      ;; (message (replace-regexp-in-string "%" "%%" (format "processed-results=%S" results))) ;; debugging
-      (or (case result-type
-            (output (org-babel-trim (mapconcat #'org-babel-trim (reverse results) "\n")))
-            (value (with-temp-file tmp-file (insert (car results)))
-		   (org-babel-import-elisp-from-file tmp-file)))) "")))
+    (flet ((strip-empty (lst)
+                        (delq nil (mapcar (lambda (el) (unless (= (length el) 0) el)) lst))))
+      (let ((tmp-file (make-temp-file "org-babel-sh"))
+            (results
+             (cdr (member
+                   org-babel-sh-eoe-output
+                   (strip-empty
+                    (reverse
+                     (mapcar #'org-babel-sh-strip-weird-long-prompt
+                             (mapcar #'org-babel-trim
+                                     (org-babel-comint-with-output
+                                         session org-babel-sh-eoe-output t
+                                       (mapc (lambda (line) (insert line) (comint-send-input))
+                                             (strip-empty (split-string body "\n")))
+                                       (insert org-babel-sh-eoe-indicator)
+                                       (comint-send-input))))))))))
+        ;; (message (replace-regexp-in-string
+        ;;           "%" "%%" (format "processed-results=%S" results))) ;; debugging
+        (or (and results
+                 (case result-type
+                   (output (org-babel-trim (mapconcat #'org-babel-trim
+                                                      (reverse results) "\n")))
+                   (value (with-temp-file tmp-file
+                            (insert (car results)) (insert "\n"))
+                          (org-babel-import-elisp-from-file tmp-file))))
+            "")))))
 
 (defun org-babel-sh-strip-weird-long-prompt (string)
   (while (string-match "^% +[\r\n$]+ *" string)
