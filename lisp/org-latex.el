@@ -53,6 +53,7 @@
 
 ;;; Variables:
 (defvar org-export-latex-class nil)
+(defvar org-export-latex-class-options nil)
 (defvar org-export-latex-header nil)
 (defvar org-export-latex-append-header nil)
 (defvar org-export-latex-options-plist nil)
@@ -935,6 +936,19 @@ LEVEL indicates the default depth for export."
 		     (match-string 1))))
 	    (plist-get org-export-latex-options-plist :latex-class)
 	    org-export-latex-default-class)
+	org-export-latex-class-options
+	(or (and (org-region-active-p)
+		 (save-excursion
+		   (goto-char (region-beginning))
+		   (and (looking-at org-complex-heading-regexp)
+			(org-entry-get nil "LaTeX_CLASS_OPTIONS" 'selective))))
+	    (save-excursion
+	      (save-restriction
+		(widen)
+		(goto-char (point-min))
+		(and (re-search-forward "^#\\+LaTeX_CLASS_OPTIONS:[ \t]*\\(.*?\\)[ \t]*$" nil t)
+		     (match-string 1))))
+	    (plist-get org-export-latex-options-plist :latex-class-options))
 	org-export-latex-class
 	(or (car (assoc org-export-latex-class org-export-latex-classes))
 	    (error "No definition for class `%s' in `org-export-latex-classes'"
@@ -948,7 +962,14 @@ LEVEL indicates the default depth for export."
 	    (let ((hl-levels
 		   (plist-get org-export-latex-options-plist :headline-levels))
 		  (sec-depth (length org-export-latex-sectioning)))
-	      (if (> hl-levels sec-depth) sec-depth hl-levels)))))
+	      (if (> hl-levels sec-depth) sec-depth hl-levels))))
+  (when (and org-export-latex-class-options
+	     (string-match "\\S-" org-export-latex-class-options)
+	     (string-match "^[ \t]*\\(\\\\documentclass\\)\\(\\[.*?\\]\\)?" org-export-latex-header))
+    (setq org-export-latex-header
+	  (concat (substring org-export-latex-header 0 (match-end 1))
+		  org-export-latex-class-options
+		  (substring org-export-latex-header (match-end 0))))))
 
 (defun org-export-latex-make-header (title opt-plist)
   "Make the LaTeX header and return it as a string.
