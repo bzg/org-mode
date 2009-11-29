@@ -639,7 +639,8 @@ following the source block."
                                  (looking-at (concat org-babel-result-regexp "\n"))))
 			  ;; or (with optional insert) back up and make one ourselves
                           (when insert
-                            (goto-char end) (forward-char 1)
+                            (goto-char end)
+			    (if (looking-at "[\n\r]") (forward-char 1) (insert "\n"))
                             (insert (concat "#+results" (if hash (concat "["hash"]"))
                                             ":"(if name (concat " " name)) "\n"))
                             (move-beginning-of-line 0)
