@@ -118,7 +118,7 @@ return nil."
         (setq split-ref (match-string 2 ref))
         (find-file split-file) (setq ref split-ref))
       (goto-char (point-min))
-      (if (let ((result_regexp (concat "^#\\+\\(TBLNAME\\|RESNAME\\|RESULT\\):[ \t]*"
+      (if (let ((result_regexp (concat "^#\\+\\(TBLNAME\\|RESNAME\\|RESULTS\\):[ \t]*"
                                        (regexp-quote ref) "[ \t]*$"))
                 (regexp (concat org-babel-source-name-regexp
                                 (regexp-quote ref) "\\(\(.*\)\\)?" "[ \t]*$")))
