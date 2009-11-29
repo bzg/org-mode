@@ -1,3 +1,10 @@
+2009-11-29  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-footnote.el (org-footnote-normalize): Protect replacement
+	text.
+
+	* org.el (org-inside-latex-macro-p): Save match data.
+
 2009-11-27  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-latex.el (org-export-latex-class-options): New variable.

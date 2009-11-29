@@ -398,7 +398,7 @@ referenced sequence."
 		   (skip-chars-backward " \t\n\t")
 		   (delete-region (1+ (point)) (match-beginning 0))))))
 	   (unless sort-only
-	     (replace-match (concat before "[" marker "]"))
+	     (replace-match (concat before "[" marker "]") t t)
 	     (and idef
 		  org-footnote-fill-after-inline-note-extraction
 		  (fill-paragraph)))
