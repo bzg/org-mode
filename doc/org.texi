@@ -2760,7 +2760,7 @@ file:sometextfile::NNN                    @r{file with line number to jump to}
 file:projects.org                         @r{another Org file}
 file:projects.org::some words             @r{text search in Org file}
 file:projects.org::*task title            @r{heading search in Org file}
-docview:papers/last.pdf::NNN              @r{file with page number to open in doc-view mode}
+docview:papers/last.pdf::NNN              @r{open file in doc-view mode at page NNN}
 id:B7423F4D-2E8A-471B-8810-C40F074717E9   @r{Link to heading by ID}
 news:comp.emacs                           @r{Usenet link}
 mailto:adent@@galaxy.net                   @r{Mail link}
