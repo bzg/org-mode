@@ -5,6 +5,10 @@
 
 	* org.el (org-inside-latex-macro-p): Save match data.
 
+2009-11-28  Jan Böcker  <jan.boecker@jboecker.de>
+
+	* org-docview.el: New file.
+
 2009-11-27  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-latex.el (org-export-latex-class-options): New variable.
