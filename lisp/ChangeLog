@@ -1,3 +1,9 @@
+2009-11-30  Tassilo Horn  <tassilo@member.fsf.org>
+
+	* org.el (org-complete-tags-always-offer-all-agenda-tags): New
+	variable.
+	(org-set-tags): Use it.
+
 2009-11-30  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-list.el (org-empty-line-terminates-plain-lists): Update

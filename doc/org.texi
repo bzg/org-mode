@@ -4234,6 +4234,26 @@ C-c}).  If you set the variable to the value @code{expert}, the special
 window is not even shown for single-key tag selection, it comes up only
 when you press an extra @kbd{C-c}.
 
+@vindex org-complete-tags-always-offer-all-agenda-tags
+As said before, when setting tags and @code{org-tag-alist} is nil, then the
+list of tags in the current buffer is used.  Normally, this behavior is very
+convenient, except in org remember buffers (@pxref{Remember}), because there
+are no tags that can be calculated dynamically.  Here, you most probably want
+to have completion for all tags in all agenda files.  This can be done by
+setting @code{org-complete-tags-always-offer-all-agenda-tags} to non-nil in
+those buffers.
+
+@lisp
+(add-hook 'org-remember-mode-hook
+          (lambda ()
+            (set (make-local-variable
+                  'org-complete-tags-always-offer-all-agenda-tags)
+                 t)))
+@end lisp
+
+Of course, you can also set it to @code{t} globally if you always want to
+have completion of all tags in all agenda files.
+
 @node Tag searches,  , Setting tags, Tags
 @section Tag searches
 @cindex tag searches

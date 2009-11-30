@@ -1,3 +1,8 @@
+2009-11-30  Tassilo Horn  <tassilo@member.fsf.org>
+
+	* org.texi (Setting tags): Document variable
+	org-complete-tags-always-offer-all-agenda-tags.
+
 2009-11-18  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Column attributes): Cross-reference special

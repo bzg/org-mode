@@ -2426,6 +2426,20 @@ To disable these tags on a per-file basis, insert anywhere in the file:
 	   (const :tag "End radio group" (:endgroup))
 	   (const :tag "New line" (:newline)))))
 
+(defcustom org-complete-tags-always-offer-all-agenda-tags nil
+  "If non-nil, always offer completion for all tags of all agenda files.
+Instead of customizing this variable directly, you might want to
+set it locally for remember buffers, because there no list of
+tags in that file can be created dynamically (there are none).
+
+  (add-hook 'org-remember-mode-hook
+            (lambda ()
+              (set (make-local-variable
+                    'org-complete-tags-always-offer-all-agenda-tags)
+                   t)))"
+  :group 'org-tags
+  :type 'boolean)
+
 (defvar org-file-tags nil
   "List of tags that can be inherited by all entries in the file.
 The tags will be inherited if the variable `org-use-tag-inheritance'
@@ -10509,7 +10523,7 @@ scheduling will use the corresponding date."
 	  (org-add-log-setup 'redeadline nil old-date 'findpos
 			     org-log-redeadline))
 	(message "Deadline on %s" org-last-inserted-timestamp)))))
-	
+
 (defun org-schedule (&optional remove time)
   "Insert the SCHEDULED: string with a timestamp to schedule a TODO item.
 With argument REMOVE, remove any scheduling date from the item.
@@ -11684,7 +11698,9 @@ With prefix ARG, realign all tags in headings in the current buffer."
 	;; Get a new set of tags from the user
 	(save-excursion
 	  (setq table (append org-tag-persistent-alist
-			      (or org-tag-alist (org-get-buffer-tags)))
+			      (or org-tag-alist (org-get-buffer-tags))
+			      (and org-complete-tags-always-offer-all-agenda-tags
+				   (org-global-tags-completion-table (org-agenda-files))))
 		org-last-tags-completion-table table
 		current-tags (org-split-string current ":")
 		inherited-tags (nreverse
@@ -15040,7 +15056,7 @@ overwritten, and the table is not marked as requiring realignment."
       (setq this-command org-speed-command)
       (call-interactively org-speed-command))
      ((functionp org-speed-command)
-      (funcall org-speed-command))     
+      (funcall org-speed-command))
      ((and org-speed-command (listp org-speed-command))
       (eval org-speed-command))
      (t (let (org-use-speed-commands)
@@ -16200,7 +16216,7 @@ Your bug report will be posted to the Org-mode mailing list.
     (save-excursion
       (if (re-search-backward "^\\(Subject: \\)Org-mode version \\(.*?\\);[ \t]*\\(.*\\)" nil t)
 	  (replace-match "\\1Bug: \\3 [\\2]")))))
-    
+
 
 (defun org-install-agenda-files-menu ()
   (let ((bl (buffer-list)))
