@@ -276,12 +276,12 @@ are preserved on all copies.
 
 \section{Getting Started}
 %
-\vskip -2mm
-\beginexample%
-(add-to-list 'auto-mode-alist '("\\\\.org\$" . org-mode))
-(define-key global-map "\\C-cl" 'org-store-link)$^1$
-(define-key global-map "\\C-ca" 'org-agenda)$^1$
-\endexample
+%\vskip -2mm
+%\beginexample%
+%(add-to-list 'auto-mode-alist '("\\\\.org\$" . org-mode))
+%(define-key global-map "\\C-cl" 'org-store-link)$^1$
+%(define-key global-map "\\C-ca" 'org-agenda)$^1$
+%\endexample
 %
 \metax{To read the on-line documentation try}{M-x org-info}
 
@@ -371,9 +371,9 @@ Outside of tables, the same keys may have other functionality.
 
 {\bf Regions}
 
-\key{cut rectangular region}{C-c C-x C-w}
-\key{copy rectangular region}{C-c C-x M-w}
-\key{paste rectangular region}{C-c C-x C-y}
+\metax{cut/copy/paste rectangular region}{C-c C-x C-w/M-w/C-y}
+%\key{copy rectangular region}{C-c C-x M-w}
+%\key{paste rectangular region}{C-c C-x C-y}
 \key{fill paragraph across selected cells}{C-c C-q}
 
 {\bf Miscellaneous}
