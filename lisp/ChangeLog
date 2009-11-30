@@ -1,5 +1,8 @@
 2009-11-30  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-list.el (org-empty-line-terminates-plain-lists): Update
+	docstring.
+
 	* org.el (org-format-latex): Fix link creation for processed latex
 	snippets.
 

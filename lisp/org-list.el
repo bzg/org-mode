@@ -126,6 +126,8 @@ the bullet in each item of he list."
 
 (defcustom org-empty-line-terminates-plain-lists nil
   "Non-nil means, an empty line ends all plain list levels.
+This is currently effective only during export.  It should also have
+an effect for indentation and plain list folding, but it does not.
 When nil, empty lines are part of the preceding item."
   :group 'org-plain-lists
   :type 'boolean)
