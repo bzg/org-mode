@@ -14616,8 +14616,7 @@ Some of the options can be changed using the variable
 				  'org-latex-overlay))))
 	    (setq txt (match-string n)
 		  beg (match-beginning n) end (match-end n)
-		  cnt (1+ cnt)
-		  link (concat block "[[file:" linkfile "]]" block))
+		  cnt (1+ cnt))
 	    (let (print-length print-level) ; make sure full list is printed
 	      (setq hash (sha1 (prin1-to-string
 				(list org-format-latex-header
@@ -14626,6 +14625,7 @@ Some of the options can be changed using the variable
 				      forbuffer txt)))
 		    linkfile (format "%s_%s.png" prefix hash)
 		    movefile (format "%s_%s.png" absprefix hash)))
+            (setq link (concat block "[[file:" linkfile "]]" block))
 	    (if msg (message msg cnt))
 	    (goto-char beg)
 	    (unless checkdir ; make sure the directory exists

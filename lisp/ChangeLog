@@ -1,3 +1,8 @@
+2009-11-30  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-format-latex): Fix link creation for processed latex
+	snippets.
+
 2009-11-29  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-footnote.el (org-footnote-normalize): Protect replacement
