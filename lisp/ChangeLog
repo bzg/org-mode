@@ -1,3 +1,13 @@
+2009-12-03  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-clock.el (org-clock-select-task): Convert integer to
+	character for XEmacs.
+
+2009-12-02  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-clock.el (org-clock-resolve): Make reading a char XEmacs
+	compatible.
+
 2009-11-30  Tassilo Horn  <tassilo@member.fsf.org>
 
 	* org.el (org-complete-tags-always-offer-all-agenda-tags): New
