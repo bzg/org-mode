@@ -1083,7 +1083,10 @@ Return a list containing first level items as strings and
 sublevels as a list of strings."
   (let* ((item-beginning (org-list-item-beginning))
 	 (start (car item-beginning))
-	 (end (org-list-end (cdr item-beginning)))
+	 (end (save-excursion
+		(goto-char (org-list-end (cdr item-beginning)))
+		(org-back-over-empty-lines)
+		(point)))
 	 output itemsep ltype)
     (while (re-search-forward org-list-beginning-re end t)
       (goto-char (match-beginning 3))

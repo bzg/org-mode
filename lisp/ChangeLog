@@ -1,5 +1,8 @@
 2009-12-03  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-list.el (org-list-parse-list): Leave empty lines after the
+	list, don't consider them as part of the list.
+
 	* org-mobile.el (org-mobile-sumo-agenda-command): Allow tagstodo
 	searches.
 
