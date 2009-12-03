@@ -1,5 +1,8 @@
 2009-12-03  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp.el (org-export-format-source-code-or-example): Avoid
+	additional extra white lines in LaTeX.
+
 	* org-list.el (org-list-parse-list): Leave empty lines after the
 	list, don't consider them as part of the list.
 

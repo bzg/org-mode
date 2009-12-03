@@ -2403,7 +2403,7 @@ INDENT was the original indentation of the block."
 	      (concat "\n#+BEGIN_HTML\n" (org-add-props rtn '(org-protected t)) "\n#+END_HTML\n\n"))
 	     ((eq backend 'latex)
 	      (setq rtn (org-export-number-lines rtn 'latex 0 0 num cont rpllbl fmt))
-	      (concat "\n#+BEGIN_LaTeX\n"
+	      (concat "#+BEGIN_LaTeX\n"
 		      (org-add-props
                           (if org-export-latex-listings
                               (concat
@@ -2423,7 +2423,7 @@ INDENT was the original indentation of the block."
                             (concat (car org-export-latex-verbatim-wrap)
                                     rtn (cdr org-export-latex-verbatim-wrap)))
 			  '(org-protected t))
-		      "#+END_LaTeX\n\n"))
+		      "#+END_LaTeX\n"))
 	     ((eq backend 'ascii)
 	      ;; This is not HTML or LaTeX, so just make it an example.
 	      (setq rtn (org-export-number-lines rtn 'ascii 0 0 num cont rpllbl fmt))
