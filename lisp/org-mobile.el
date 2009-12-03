@@ -468,7 +468,7 @@ The table of checksums is written to the file mobile-checksums."
        ((memq (nth 2 e) '(todo-tree tags-tree occur-tree))
 	;; These are trees, not really agenda commands
 	)
-       ((memq (nth 2 e) '(agenda alltodo todo tags))
+       ((memq (nth 2 e) '(agenda alltodo todo tags tagstodo))
 	;; a normal command
 	(setq key (car e) desc (nth 1 e) type (nth 2 e) match (nth 3 e)
 	      settings (nth 4 e))

@@ -1,5 +1,8 @@
 2009-12-03  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-mobile.el (org-mobile-sumo-agenda-command): Allow tagstodo
+	searches.
+
 	* org-clock.el (org-clock-select-task): Convert integer to
 	character for XEmacs.
 
