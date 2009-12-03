@@ -120,6 +120,12 @@ called by `org-babel-execute-src-block'."
         (add-to-body (mapconcat
                       (lambda (pair) (format "%s = \"%s\"" (car pair) (cdr pair)))
                       vars "\n"))
+        ;; replace any variable names preceded by '$' with the actual
+        ;; value of the variable
+        (mapc (lambda (pair)
+                (setq body (replace-regexp-in-string
+                            (format "\\$%s" (car pair)) (cdr pair) body)))
+              vars)
         ;; evaluate the code body with gnuplot
         (if (string= session "none")
             (let ((script-file (make-temp-file "org-babel-gnuplot-script")))
