@@ -70,6 +70,7 @@ LISPF      = 	org.el			\
 	     	org-compat.el		\
 	     	org-crypt.el		\
 	     	org-datetree.el		\
+	     	org-docview.el		\
 		org-exp.el		\
 		org-exp-blocks.el	\
 		org-docbook.el		\
@@ -339,6 +340,7 @@ lisp/org-colview-xemacs.elc:	lisp/org.el
 lisp/org-compat.elc:	lisp/org-macs.el
 lisp/org-crypt.elc:	lisp/org-crypt.el lisp/org.el
 lisp/org-datetree.elc:	lisp/org.el
+lisp/org-docview.elc:	lisp/org.el
 lisp/org-exp.elc:	lisp/org.el lisp/org-agenda.el
 lisp/org-exp-blocks.elc: lisp/org.el
 lisp/org-latex.elc:	lisp/org.el lisp/org-exp.el
