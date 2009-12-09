@@ -4384,7 +4384,8 @@ This should be called after the variable `org-link-types' has changed."
 	org-plain-link-re
 	(concat
 	 "\\<\\(" (mapconcat 'identity org-link-types "\\|") "\\):"
-	 "\\([^]\t\n\r<>() ]+[^]\t\n\r<>,.;() ]\\)")
+	 (org-re "[^ \t\n()<>]+\\(?:([[:word:]0-9]+)\\|\\([^[:punct:] \t\n]\\|/\\)\\)"))
+	;;	 "\\([^]\t\n\r<>() ]+[^]\t\n\r<>,.;() ]\\)")
 	org-bracket-link-regexp
 	"\\[\\[\\([^][]+\\)\\]\\(\\[\\([^][]+\\)\\]\\)?\\]"
 	org-bracket-link-analytic-regexp

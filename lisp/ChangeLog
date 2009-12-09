@@ -1,5 +1,10 @@
 2009-12-09  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-make-link-regexps): Use John Gruber's regexp for
+	urls.
+
+	* org-macs.el (org-re): Interpret :punct: in regexps.
+
 	* org-exp.el (org-export-replace-src-segments-and-examples): Also
 	take the final newline after the END line.
 

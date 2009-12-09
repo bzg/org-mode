@@ -63,6 +63,8 @@ Also, do not record undo information."
 	    (setq ss (replace-match "a-zA-Z0-9" t t ss)))
 	  (while (string-match "\\[:alpha:\\]" ss)
 	    (setq ss (replace-match "a-zA-Z" t t ss)))
+	  (while (string-match "\\[:punct:\\]" ss)
+	    (setq ss (replace-match "\001-@[-`{-~" t t ss)))
 	  ss))
     s))
 
