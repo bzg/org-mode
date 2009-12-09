@@ -1,5 +1,7 @@
 2009-12-09  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-latex.el (org-export-latex-make-header): Remove \obeylines.
+
 	* org.el (org-make-link-regexps): Use John Gruber's regexp for
 	urls.
 

@@ -1027,9 +1027,7 @@ OPT-PLIST is the options plist for current buffer."
 	      (format "\\setcounter{tocdepth}{%s}\n\\tableofcontents\n\\vspace*{1cm}\n"
 		      (min toc (plist-get opt-plist :headline-levels))))
 	     (toc (format "\\setcounter{tocdepth}{%s}\n\\tableofcontents\n\\vspace*{1cm}\n"
-			  (plist-get opt-plist :headline-levels)))))
-     (when (plist-get opt-plist :preserve-breaks)
-       "\\obeylines\n"))))
+			  (plist-get opt-plist :headline-levels))))))))
 
 (defun org-export-latex-first-lines (opt-plist &optional beg end)
   "Export the first lines before first headline.

@@ -8926,7 +8926,7 @@ you can:
 H:         @r{set the number of headline levels for export}
 num:       @r{turn on/off section-numbers}
 toc:       @r{turn on/off table of contents, or set level limit (integer)}
-\n:        @r{turn on/off line-break-preservation}
+\n:        @r{turn on/off line-break-preservation (DOES NOT WORK)}
 @@:         @r{turn on/off quoted HTML tags}
 ::         @r{turn on/off fixed-width sections}
 |:         @r{turn on/off tables}
