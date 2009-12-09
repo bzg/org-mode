@@ -5481,7 +5481,9 @@ This function is the default value of the hook `org-cycle-hook'."
 	  ;; Properly fold already folded siblings
 	  (goto-char (point-min))
 	  (while (re-search-forward re nil t)
-	    (if (save-excursion (goto-char (point-at-eol)) (org-invisible-p))
+	    (if (and (not (org-invisible-p))
+		     (save-excursion
+		       (goto-char (point-at-eol)) (org-invisible-p)))
 		(hide-entry))))
 	(org-cycle-show-empty-lines 'overview)
 	(org-cycle-hide-drawers 'overview)))))

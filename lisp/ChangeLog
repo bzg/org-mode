@@ -1,3 +1,8 @@
+2009-12-09  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-clean-visibility-after-subtree-move): Only fix
+	entries that are not entirely invisible already.
+
 2009-12-03  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-exp.el (org-export-format-source-code-or-example): Avoid
