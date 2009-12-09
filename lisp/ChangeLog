@@ -1,5 +1,8 @@
 2009-12-09  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp.el (org-export-replace-src-segments-and-examples): Also
+	take the final newline after the END line.
+
 	* org.el (org-clean-visibility-after-subtree-move): Only fix
 	entries that are not entirely invisible already.
 	(org-insert-link): Respect org-link-file-path-type for
