@@ -7978,8 +7978,9 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
 	      (setq link search)))))
 
     ;; Check if we can/should use a relative path.  If yes, simplify the link
-    (when (string-match "^file:\\(.*\\)" link)
-      (let* ((path (match-string 1 link))
+    (when (string-match "^\\(file:\\|docview:\\)\\(.*\\)" link)
+      (let* ((type (match-string 1 link))
+	     (path (match-string 2 link))
 	     (origpath path)
 	     (case-fold-search nil))
 	(cond
@@ -8000,7 +8001,7 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
 		(setq path (substring (expand-file-name path)
 				      (match-end 0)))
 	      (setq path (abbreviate-file-name (expand-file-name path)))))))
-	(setq link (concat "file:" path))
+	(setq link (concat type path))
 	(if (equal desc origpath)
 	    (setq desc path))))
 

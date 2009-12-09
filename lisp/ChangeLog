@@ -2,6 +2,8 @@
 
 	* org.el (org-clean-visibility-after-subtree-move): Only fix
 	entries that are not entirely invisible already.
+	(org-insert-link): Respect org-link-file-path-type for
+	"docview:" links in addition to "file:" links.
 
 2009-12-03  Carsten Dominik  <carsten.dominik@gmail.com>
 
