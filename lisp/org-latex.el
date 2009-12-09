@@ -1795,7 +1795,8 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
   (let ((re (concat "\\\\[a-zA-Z]+\\(?:"
 		    "\\[.*\\]"
 		    "\\)?"
-		    (org-create-multibrace-regexp "{" "}" 3))))
+		    "\\(" (org-create-multibrace-regexp "{" "}" 3)
+		    "\\)\\{1,3\\}")))
     (while (re-search-forward re nil t)
       (unless (save-excursion (goto-char (match-beginning 0))
 			      (equal (char-after (point-at-bol)) ?#))

@@ -4,6 +4,8 @@
 	(org-export-latex-fontify): Fix regexp bug that takes special
 	care of protecting the right boundary characters in emphasis
 	matches.
+	(org-export-latex-preprocess): Allow multiple arguments to latex
+	macros.
 
 	* org.el (org-make-link-regexps): Use John Gruber's regexp for
 	urls.
