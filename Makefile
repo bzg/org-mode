@@ -212,7 +212,7 @@ doc/orgcard_letter.ps: doc/orgcard_letter.dvi
 # Below here are special targets for maintenance only
 
 updateweb:
-	ssh cdominik@caprisun.dreamhost.com 'pull-worg-org.sh && publish-worg-org.sh'
+	ssh cdominik@orgmode.org 'pull-worg-org.sh && publish-worg-org.sh'
 
 html: doc/org.html
 
