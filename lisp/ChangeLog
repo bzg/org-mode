@@ -1,5 +1,8 @@
 2009-12-10  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-archive.el (org-archive-all-done): Make this work in a file
+	with org-odd-levels-only set.
+
 	* org.el (org-get-refile-targets): Catch the case when a buffer
 	has no file.
 

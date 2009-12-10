@@ -389,7 +389,8 @@ When TAG is non-nil, don't move trees, but mark them with the ARCHIVE tag."
 	(progn
 	  (setq re1 (concat "^" (regexp-quote
 				 (make-string
-				  (1+ (- (match-end 0) (match-beginning 0) 1))
+				  (+ (- (match-end 0) (match-beginning 0) 1)
+				     (if org-odd-levels-only 2 1))
 				  ?*))
 			    " "))
 	  (move-marker begm (point))
