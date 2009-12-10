@@ -466,7 +466,7 @@ When CHECK is given, prepare detailed information about duplicate IDs."
 
 (defun org-id-locations-save ()
   "Save `org-id-locations' in `org-id-locations-file'."
-  (when org-id-track-globally
+  (when (and org-id-track-globally org-id-locations)
     (let ((out (if (hash-table-p org-id-locations)
 		   (org-id-hash-to-alist org-id-locations)
 		 org-id-locations)))

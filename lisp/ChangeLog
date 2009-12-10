@@ -1,5 +1,8 @@
 2009-12-10  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-id.el (org-id-locations-save): Only write the id locations
+	if any are defined.
+
 	* org-archive.el (org-archive-all-done): Make this work in a file
 	with org-odd-levels-only set.
 
