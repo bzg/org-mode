@@ -616,7 +616,8 @@ Error if not at a plain list, or if this is the first item in the list."
 	(if (looking-at "[ \t]*$")
 	    nil
 	  (if (<= (setq ind1 (org-get-indentation)) ind)
-	      (throw 'exit t)))))
+	      (throw 'exit t)))
+	(if (bobp) (throw 'exit t))))
     (condition-case nil
 	(if (or (not (org-at-item-p))
 		(< ind1 (1- ind)))

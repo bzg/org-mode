@@ -1,5 +1,8 @@
 2009-12-10  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-list.el (org-previous-item): Exit at the beginning of the
+	buffer.
+
 	* org-id.el (org-id-locations-save): Only write the id locations
 	if any are defined.
 
