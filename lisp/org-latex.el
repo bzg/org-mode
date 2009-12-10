@@ -673,6 +673,13 @@ when PUB-DIR is set, use this as the publishing directory."
       (and (re-search-forward "\\[TABLE-OF-CONTENTS\\]" nil t)
 	   (replace-match "\\tableofcontents" t t)))
 
+    ;; Cleanup forced line ends in itmes where they are not needed
+    (goto-char (point-min))
+    (while (re-search-forward
+	    "^[ \t]*\\\\item\\>.*\\(\\\\\\\\\\)[ \t]*\\(\n\\\\label.*\\)?\n\\\\begin"
+	    nil t)
+      (delete-region (match-beginning 1) (match-end 1)))
+
     (run-hooks 'org-export-latex-final-hook)
     (or to-buffer (save-buffer))
     (goto-char (point-min))
@@ -855,7 +862,9 @@ If NUM, export sections as numerical sections."
 			     label-list "\n") "\n"))
 	(insert (org-export-latex-content content))
 	(cond ((stringp subcontent) (insert subcontent))
-	      ((listp subcontent) (org-export-latex-sub subcontent)))
+	      ((listp subcontent)
+	       (while (org-looking-back "\n\n") (backward-delete-char 1))
+	       (org-export-latex-sub subcontent)))
 	(if end (insert end "\n"))))
      ;; At a level under the hl option: we can drop this subsection
      ((> level org-export-latex-sectioning-depth)
@@ -864,7 +873,7 @@ If NUM, export sections as numerical sections."
 			       (buffer-substring (point-at-bol 0) (point)))
 		 (delete-region (point-at-bol 0) (point))
 	       (insert "\\begin{description}\n"))
-	     (insert (format "\n\\item[%s]%s~\n\n"
+	     (insert (format "\n\\item[%s]%s~\n"
 			     heading
 			     (if label (format "\\label{%s}" label) "")))
 	     (insert (org-export-latex-content content))
@@ -877,7 +886,7 @@ If NUM, export sections as numerical sections."
 		 (delete-region (point-at-bol 0) (point))
 	       (insert (format "\\begin{%s}\n"
 			       (symbol-name org-export-latex-low-levels))))
-	     (insert (format "\n\\item %s\\\\\n%s\n"
+	     (insert (format "\n\\item %s\\\\\n%s%%"
 			     heading
 			     (if label (format "\\label{%s}" label) "")))
 	     (insert (org-export-latex-content content))

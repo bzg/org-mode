@@ -1,3 +1,9 @@
+2009-12-10  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-latex.el (org-export-as-latex): Cleanup forced line ends
+	where they are not needed.
+	(org-export-latex-subcontent): Remove unnecessary newlines.
+
 2009-12-09  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-latex.el (org-export-latex-make-header): Remove \obeylines.
