@@ -1,5 +1,8 @@
 2009-12-10  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-get-refile-targets): Catch the case when a buffer
+	has no file.
+
 	* org-latex.el (org-export-as-latex): Cleanup forced line ends
 	where they are not needed.
 	(org-export-latex-subcontent): Remove unnecessary newlines.

@@ -8986,7 +8986,7 @@ on the system \"/user@host:\"."
 	  (with-current-buffer
 	      (if (bufferp f) f (org-get-agenda-file-buffer f))
 	    (if (bufferp f) (setq f (buffer-file-name (buffer-base-buffer f))))
-	    (setq f (expand-file-name f))
+	    (setq f (and f (expand-file-name f)))
 	    (if (eq org-refile-use-outline-path 'file)
 		(push (list (file-name-nondirectory f) f nil nil) targets))
 	    (save-excursion
