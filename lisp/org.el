@@ -16477,7 +16477,8 @@ N may optionally be the number of spaces to remove."
 
 (defun org-fill-template (template alist)
   "Find each %key of ALIST in TEMPLATE and replace it."
-  (let (entry key value)
+  (let ((case-fold-search nil)
+	entry key value)
     (setq alist (sort (copy-sequence alist)
 		      (lambda (a b) (< (length (car a)) (length (car b))))))
     (while (setq entry (pop alist))

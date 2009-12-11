@@ -1,5 +1,10 @@
 2009-12-11  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-fill-template): Make template searches case sensitive.
+
+	* org-exp.el (org-export): Use "1" as a sign to export only the
+	subtree.
+
 	* org-colview-xemacs.el (org-columns-edit-value): Use
 	org-unrestricted property.
 
