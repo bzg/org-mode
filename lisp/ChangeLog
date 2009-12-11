@@ -1,5 +1,10 @@
 2009-12-11  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-startup-with-beamer-mode): New option.
+
+	* org-exp.el (org-export-select-backend-specific-text): Add the
+	special beamer tags.
+
 	* org-beamer.el
 	(org-export-preprocess-before-selecting-backend-code-hook): New
 	file.

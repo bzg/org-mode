@@ -323,6 +323,15 @@ the following lines anywhere in the buffer:
 	  (const :tag "Not" nil)
 	  (const :tag "Globally (slow on startup in large files)" t)))
 
+(defcustom org-startup-with-beamer-mode nil
+  "Non-nil means, turn on `org-beamer-mode' on startup.
+This can also be configured on a per-file basis by adding one of
+the following lines anywhere in the buffer:
+
+   #+STARTUP: beamer"
+  :group 'org-startup
+  :type 'boolean)
+
 (defcustom org-startup-align-all-tables nil
   "Non-nil means, align all tables when visiting a file.
 This is useful when the column width in tables is forced with <N> cookies
@@ -3763,7 +3772,8 @@ After a match, the following groups carry important information:
     ("constSI" constants-unit-system SI)
     ("noptag" org-tag-persistent-alist nil)
     ("hideblocks" org-hide-block-startup t)
-    ("nohideblocks" org-hide-block-startup nil))
+    ("nohideblocks" org-hide-block-startup nil)
+    ("beamer" org-startup-with-beamer-mode t))
   "Variable associated with STARTUP options for org-mode.
 Each element is a list of three items: The startup options as written
 in the #+STARTUP line, the corresponding variable, and the value to
