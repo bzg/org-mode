@@ -1755,6 +1755,7 @@ from the buffer."
   (let ((formatters
 	 '((docbook "DOCBOOK" "BEGIN_DOCBOOK" "END_DOCBOOK")
 	   (html "HTML" "BEGIN_HTML" "END_HTML")
+	   (beamer "BEAMER" "BEGIN_BEAMER" "END_BEAMER")
 	   (ascii "ASCII" "BEGIN_ASCII" "END_ASCII")
 	   (latex "LaTeX" "BEGIN_LaTeX" "END_LaTeX")))
 	(case-fold-search t)
