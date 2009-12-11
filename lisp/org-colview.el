@@ -1387,7 +1387,7 @@ This will add overlays to the date lines, to show the summary for each day."
 				  nil '+ nil)
 			  x))
 		      org-columns-current-fmt-compiled))
-	 line c c1 stype calc sumfunc props lsum entries prop v)
+	 line c c1 stype calc sumfunc props lsum entries prop v title)
     (catch 'exit
       (when (delq nil (mapcar 'cadr fmt))
 	;; OK, at least one summation column, it makes sense to try this
