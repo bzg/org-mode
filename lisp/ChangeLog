@@ -1,5 +1,10 @@
 2009-12-11  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp.el
+	(org-export-preprocess-before-selecting-backend-code-hook): New hook.
+	(org-export-preprocess-string): Run
+	`org-export-preprocess-before-selecting-backend-code-hook'.
+
 	* org-xoxo.el (org-export-as-xoxo): Run `org-export-first-hook'.
 
 	* org-latex.el (org-export-region-as-latex): Run

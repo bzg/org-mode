@@ -375,6 +375,10 @@ This is run after selection of trees to be exported has happened.
 This selection includes tags-based selection, as well as removal
 of commented and archived trees.")
 
+(defvar org-export-preprocess-before-selecting-backend-code-hook nil
+  "Hook for preprocessing an export buffer.
+This is run just before backend-specific blocks get selected.")
+
 (defvar org-export-preprocess-after-blockquote-hook nil
   "Hook for preprocessing an export buffer.
 This is run after blockquote/quote/verse/center have been marked
@@ -1337,6 +1341,7 @@ on this string to produce the exported version."
 
       ;; Select and protect backend specific stuff, throw away stuff
       ;; that is specific for other backends
+      (run-hooks 'org-export-preprocess-before-selecting-backend-code-hook)
       (org-export-select-backend-specific-text backend)
 
       ;; Protect quoted subtrees
