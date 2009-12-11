@@ -359,6 +359,7 @@ La@TeX{} and PDF export
 * Sectioning structure::        Changing sectioning in La@TeX{} output
 * Tables in LaTeX export::      Options for exporting tables to La@TeX{}
 * Images in LaTeX export::      How to insert figures into La@TeX{} output
+* Beamer class export::         Turning the file into a presentation
 
 DocBook export
 
@@ -9409,6 +9410,7 @@ references, the PDF output file will be fully linked.
 * Sectioning structure::        Changing sectioning in La@TeX{} output
 * Tables in LaTeX export::      Options for exporting tables to La@TeX{}
 * Images in LaTeX export::      How to insert figures into La@TeX{} output
+* Beamer class export::         Turning the file into a presentation
 @end menu
 
 @node LaTeX/PDF export commands, Quoting LaTeX code, LaTeX and PDF export, LaTeX and PDF export
@@ -9540,7 +9542,7 @@ pages.  Finally, you can set the alignment string:
 @end example
 
 
-@node Images in LaTeX export,  , Tables in LaTeX export, LaTeX and PDF export
+@node Images in LaTeX export, Beamer class export, Tables in LaTeX export, LaTeX and PDF export
 @subsection Images in La@TeX{} export
 @cindex images, inline in La@TeX{}
 @cindex inlining images in La@TeX{}
@@ -9579,6 +9581,116 @@ settings for @code{\includegraphics} and @code{wrapfigure}.
 
 If you need references to a label created in this way, write
 @samp{\ref@{fig:SED-HR4049@}} just like in La@TeX{}.
+
+@node Beamer class export,  , Images in LaTeX export, LaTeX and PDF export
+@subsection Beamer class export
+
+The LaTeX class @file{beamer} allows to produce high quality presentations
+using LaTeX can pdf processing.  Org-mode has special support for turning an
+Org-mode file or tree into a @file{beamer} presentation.
+
+When the LaTeX class for the current buffer (as set with @code{#+LaTeX_CLASS:
+beamer}) or subtree (set with a @code{LaTeX_CLASS} property) is
+@code{beamer}, a special export mode will turn the file or tree into a beamer
+presentation.  Any tree with not to deep level nesting should in principle be
+exportable as a beamer presentation.  By default, the top-level entries (or
+the first level below the selected subtree heading) will be turned into
+frames, and the outline structure below this level will become itemize lists.
+You can also configure the variable @code{org-beamer-frame-level} to a
+different level - then the hierarchy above frames will produce the sectioning
+structure of the presentation.
+
+A template for useful in-buffer settings or properties can be inserted into
+the buffer with @kbd{M-x org-beamer-settings-template}.  Among other things,
+this will install a column view format which is very handy for editing
+special properties used by beamer.
+
+You can influence the structure of the presentation using the following
+properties:
+
+@table @code
+@item BEAMER_env
+The environment that should be used to format this entry.  Valid environments
+are defined in the constant @code{org-beamer-environments-default}, and you
+can define more in @code{org-beamer-environments-extra}.  If this property is
+set, the entry will also get a @code{:B_environment:} tag to make this
+visible.  This tag has no semantic meaning, it is only a visual aid.
+@item BEAMER_envargs
+The beamer-special arguments that should be used for the environment, like
+@code{[t]} or @code{[<+->]} of @code{<2-3>}.  If the @code{BEAMER_col}
+property is also set, something like @code{C[t]} can be added here as well to
+set an options argument for the implied @code{columns} environment.
+@code{c[t]} will set an option for the implied @code{column} environment.
+@item BEAMER_col
+The width of a column that should start with this entry.  If this property is
+set, the entry will also get a @code{:BMCOL:} property to make this visible.
+Also this tag is only a visual aid.
+@item BEAMER_extra
+Additional commands that should be inserted after the environment has been
+opened.  For example, when creating a frame, this can be used to specify
+transitions.
+@end table
+
+Frames will automatically receive a @code{fragile} option if they contain
+source code that uses the verbatim environment.  Special @file{beamer}
+specific code can be inserted using @code{#+BEAMER:} and
+@code{#+BEGIN_beamer...#+end_beamer} constructs, similar to other export
+backends, but with the difference that @code{#+LaTeX:} stuff will be included
+in the presentation as well.
+
+You can turn on a special minor mode @code{org-beamer-mode} for editing
+support with
+
+@example
+#+STARTUP: beamer
+@end example
+
+@table @kbd
+@kindex C-c C-b
+@item C-c C-b
+In @code{org-beamer-mode}, this key offers fast selection of a beamer
+environment or the @code{BEAMER_col} property.
+@end table
+
+Column view provides a great way to set the environment of a node and other
+important parameters.  Make sure you are using a COLUMN format that is geared
+toward this special purpose.  The command @kbd{M-x
+org-beamer-settings-template} does define such a format.
+
+Here is a simple) example Org document that is intended for beamer export.
+
+@smallexample
+#+LaTeX_CLASS: beamer
+#+TITLE: Example Presentation
+#+AUTHOR: Carsten Dominik
+#+LaTeX_CLASS_OPTIONS: [presentation]
+#+BEAMER_FRAME_LEVEL: 2
+#+BEAMER_HEADER_EXTRA: \usetheme@{Madrid@}\usecolortheme@{default@}
+#+COLUMNS: %35ITEM %10BEAMER_env(Env) %10BEAMER_envargs(Args) %4BEAMER_col(Col) %8BEAMER_extra(Ex)
+
+* This is the first structural section
+ 
+** Frame 1 \\ with a subtitle
+*** Thanks to Eric Fraga                                      :BMCOL:B_block:
+    :PROPERTIES:
+    :BEAMER_env: block
+    :BEAMER_envargs: C[t]
+    :BEAMER_col: 0.5
+    :END:
+    for the first viable beamer setup in Org
+*** Thanks to everyone else                                   :BMCOL:B_block:
+    :PROPERTIES:
+    :BEAMER_col: 0.5
+    :BEAMER_env: block
+    :BEAMER_envargs: <2->
+    :END:
+    for contributing to the discussion
+** Frame 2 \\ where we will not use columns
+*** Request                                                         :B_block:
+    Please test this stuff!
+@end smallexample
+
+For more information, see the documentation on Worg.
 
 @node DocBook export, Freemind export, LaTeX and PDF export, Exporting
 @section DocBook export
