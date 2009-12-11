@@ -982,11 +982,17 @@ LEVEL indicates the default depth for export."
 	      (if (> hl-levels sec-depth) sec-depth hl-levels))))
   (when (and org-export-latex-class-options
 	     (string-match "\\S-" org-export-latex-class-options)
-	     (string-match "^[ \t]*\\(\\\\documentclass\\)\\(\\[.*?\\]\\)?" org-export-latex-header))
+	     (string-match "^[ \t]*\\(\\\\documentclass\\)\\(\\[.*?\\]\\)?"
+			   org-export-latex-header))
     (setq org-export-latex-header
 	  (concat (substring org-export-latex-header 0 (match-end 1))
 		  org-export-latex-class-options
 		  (substring org-export-latex-header (match-end 0))))))
+
+(defvar org-export-latex-format-toc-function
+  'org-export-latex-format-toc-default
+  "The function formatting returning the string to createthe table of contents.
+The function mus take one parameter, the depth of the table of contents.")
 
 (defun org-export-latex-make-header (title opt-plist)
   "Make the LaTeX header and return it as a string.
@@ -1040,11 +1046,15 @@ OPT-PLIST is the options plist for current buffer."
      ;; table of contents
      (when (and org-export-with-toc
 		(plist-get opt-plist :section-numbers))
-       (cond ((numberp toc)
-	      (format "\\setcounter{tocdepth}{%s}\n\\tableofcontents\n\\vspace*{1cm}\n"
-		      (min toc (plist-get opt-plist :headline-levels))))
-	     (toc (format "\\setcounter{tocdepth}{%s}\n\\tableofcontents\n\\vspace*{1cm}\n"
-			  (plist-get opt-plist :headline-levels))))))))
+       (funcall org-export-latex-format-toc-function
+		(cond ((numberp toc)
+		       (min toc (plist-get opt-plist :headline-levels)))
+		      (toc  (plist-get opt-plist :headline-levels))))))))
+
+(defun org-export-latex-format-toc-default (depth)
+  (when depth
+    (format "\\setcounter{tocdepth}{%s}\n\\tableofcontents\n\\vspace*{1cm}\n"
+	    depth)))
 
 (defun org-export-latex-first-lines (opt-plist &optional beg end)
   "Export the first lines before first headline.

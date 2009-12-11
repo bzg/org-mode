@@ -3,6 +3,9 @@
 	* org-latex.el (org-export-latex-after-initial-vars-hook): New hook.
 	(org-export-as-latex): Run
 	`org-export-latex-after-initial-vars-hook'.
+	(org-export-latex-format-toc-function)
+	(org-export-latex-make-header): Call
+	`org-export-latex-format-toc-function'.
 
 	* org.el (org-fill-template): Make template searches case sensitive.
 
