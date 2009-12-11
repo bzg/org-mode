@@ -3807,11 +3807,11 @@ means to push this value onto the list in the variable.")
     (let ((re (org-make-options-regexp
 	       '("CATEGORY" "TODO" "COLUMNS"
 		 "STARTUP" "ARCHIVE" "FILETAGS" "TAGS" "LINK" "PRIORITIES"
-		 "CONSTANTS" "PROPERTY" "DRAWERS" "SETUPFILE")
+		 "CONSTANTS" "PROPERTY" "DRAWERS" "SETUPFILE" "LATEX_CLASS")
 	       "\\(?:[a-zA-Z][0-9a-zA-Z_]*_TODO\\)"))
 	  (splitre "[ \t]+")
 	  kwds kws0 kwsa key log value cat arch tags const links hw dws
-	  tail sep kws1 prio props ftags drawers
+	  tail sep kws1 prio props ftags drawers beamer-p
 	  ext-setup-or-nil setup-contents (start 0))
       (save-excursion
 	(save-restriction
@@ -3882,6 +3882,8 @@ means to push this value onto the list in the variable.")
 	      (setq arch (replace-match "" t t value))
 	      (remove-text-properties 0 (length arch)
 				      '(face t fontified t) arch))
+	     ((equal key "LATEX_CLASS")
+	      (setq beamer-p (equal value "beamer")))
 	     ((equal key "SETUPFILE")
 	      (setq setup-contents (org-file-contents
 				    (expand-file-name
@@ -4295,6 +4297,9 @@ The following commands are available:
     ;; Emacs 22 deals with this through a special variable
     (org-set-local 'outline-isearch-open-invisible-function
 		   (lambda (&rest ignore) (org-show-context 'isearch))))
+
+  ;; Turn on org-beamer-mode?
+  (and org-startup-with-beamer-mode (org-beamer-mode 1))
 
   ;; If empty file that did not turn on org-mode automatically, make it to.
   (if (and org-insert-mode-line-in-empty-file
@@ -4879,7 +4884,7 @@ between words."
 (defun org-activate-tags (limit)
   (if (re-search-forward (org-re "^\\*+.*[ \t]\\(:[[:alnum:]_@:]+:\\)[ \r\n]") limit t)
       (progn
-	(org-remove-flyspell-overlays-in (match-beginning 0) (match-end 0))
+	(org-remove-flyspell-overlays-in (match-beginning 1) (match-end 1))
 	(add-text-properties (match-beginning 1) (match-end 1)
 			     (list 'mouse-face 'highlight
 				   'keymap org-mouse-map))
@@ -11767,7 +11772,8 @@ With prefix ARG, realign all tags in headings in the current buffer."
 	(if (equal tags "")
 	    (setq rpl "")
 	  (goto-char (match-beginning 0))
-	  (setq c0 (current-column) p0 (point)
+	  (setq c0 (current-column) p0 (if (equal (char-before) ?*)
+					   (1+ (point)) (point))
 		c1 (max (1+ c0) (if (> org-tags-column 0)
 				    org-tags-column
 				  (- (- org-tags-column) (length tags))))
@@ -11870,6 +11876,7 @@ This works in the agenda, and also in an org-mode buffer."
       (put-text-property 0 (length s) 'face '(secondary-selection org-tag) s)
       (org-overlay-display org-tags-overlay (concat prefix s)))))
 
+(defvar org-last-tag-selection-key nil)
 (defun org-fast-tag-selection (current inherited table &optional todo-table)
   "Fast tag selection with single keys.
 CURRENT is the current list of tags in the headline, INHERITED is the
@@ -11984,6 +11991,7 @@ Returns the new tags string, or nil to not change the current settings."
 			 (if (not groups) "no " "")
 			 (if expert " [C-c]:window" (if exit-after-next " [C-c]:single" " [C-c]:multi")))
 		(setq c (let ((inhibit-quit t)) (read-char-exclusive)))
+		(setq org-last-tag-selection-key c)
 		(cond
 		 ((= c ?\r) (throw 'exit t))
 		 ((= c ?!)
@@ -16157,7 +16165,9 @@ See the individual commands for more information."
 		(not org-export-with-LaTeX-fragments))
 	(require 'org-exp))
       :style toggle :selected (and (boundp 'org-export-with-LaTeX-fragments)
-				   org-export-with-LaTeX-fragments)])
+				   org-export-with-LaTeX-fragments)]
+     "--"
+     ["Template for BEAMER" org-beamer-settings-template t])
     "--"
     ("MobileOrg"
      ["Push Files and Views" org-mobile-push t]
