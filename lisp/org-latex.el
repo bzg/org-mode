@@ -50,6 +50,7 @@
 (require 'org)
 (require 'org-exp)
 (require 'org-macs)
+(require 'org-beamer)
 
 ;;; Variables:
 (defvar org-export-latex-class nil)
@@ -136,7 +137,20 @@
      ("\\chapter{%s}" . "\\chapter*{%s}")
      ("\\section{%s}" . "\\section*{%s}")
      ("\\subsection{%s}" . "\\subsection*{%s}")
-     ("\\subsubsection{%s}" . "\\subsubsection*{%s}")))
+     ("\\subsubsection{%s}" . "\\subsubsection*{%s}"))
+    ("beamer"
+     "\\documentclass{beamer}
+\\usepackage[utf8]{inputenc}
+\\usepackage[T1]{fontenc}
+\\usepackage{graphicx}
+\\usepackage{longtable}
+\\usepackage{float}
+\\usepackage{wrapfig}
+\\usepackage{soul}
+\\usepackage{amssymb}
+\\usepackage{hyperref}"
+     org-beamer-sectioning
+))
   "Alist of LaTeX classes and associated header and structure.
 If #+LaTeX_CLASS is set in the buffer, use its value and the
 associated information.  Here is the structure of each cell:
@@ -160,7 +174,13 @@ or
 
 providing opening and closing strings for an environment that should
 represent the document section.  The opening clause should have a %s
-to represent the section title."
+to represent the section title.
+
+Instead of a list of sectioning commands, you can also specify a
+function name.  that function will be called with two parameters,
+the (reduced) level of the headline, and the headline text.  The functions
+returns a cons cell with the (possibly modified) headline text, and the
+sectioning list in the cdr."
   :group 'org-export-latex
   :type '(repeat
 	  (list (string :tag "LaTeX class")
@@ -168,13 +188,14 @@ to represent the section title."
 		(repeat :tag "Levels" :inline t
 			(choice
 			 (cons :tag "Heading"
-			       (string :tag "numbered")
-			       (string :tag "unnumbered)"))
+			       (string :tag "  numbered")
+			       (string :tag "unnumbered"))
 			 (list :tag "Environment"
-			       (string :tag "Opening (numbered)  ")
-			       (string :tag "Closing (numbered)  ")
+			       (string :tag "Opening   (numbered)")
+			       (string :tag "Closing   (numbered)")
 			       (string :tag "Opening (unnumbered)")
-			       (string :tag "Closing (unnumbered)")))))))
+			       (string :tag "Closing (unnumbered)"))
+			 (function :tag "Hook computing sectioning"))))))
 
 (defcustom org-export-latex-emphasis-alist
   '(("*" "\\textbf{%s}" nil)
@@ -671,6 +692,11 @@ when PUB-DIR is set, use this as the publishing directory."
     ;; finalization
     (unless body-only (insert "\n\\end{document}"))
 
+    ;; Attach description terms to the \item macro
+    (goto-char (point-min))
+    (while (re-search-forward "^[ \t]*\\\\item\\([ \t]+\\)\\[" nil t)
+      (delete-region (match-beginning 1) (match-end 1)))
+
     ;; Relocate the table of contents
     (goto-char (point-min))
     (when (re-search-forward "\\[TABLE-OF-CONTENTS\\]" nil t)
@@ -845,8 +871,7 @@ and its content."
 (defun org-export-latex-subcontent (subcontent num)
   "Export each cell of SUBCONTENT to LaTeX.
 If NUM, export sections as numerical sections."
-  (let* ((heading (org-export-latex-fontify-headline
-		   (cdr (assoc 'heading subcontent))))
+  (let* ((heading (cdr (assoc 'heading subcontent)))
 	 (level (- (cdr (assoc 'level subcontent))
 		   org-export-latex-add-level))
 	 (occur (number-to-string (cdr (assoc 'occur subcontent))))
@@ -854,17 +879,37 @@ If NUM, export sections as numerical sections."
 	 (subcontent (cadr (assoc 'subcontent subcontent)))
 	 (label (org-get-text-property-any 0 'target heading))
 	 (label-list (cons label (cdr (assoc label
-					     org-export-target-aliases)))))
+					     org-export-target-aliases))))
+	 (sectioning org-export-latex-sectioning)
+	 (depth org-export-latex-sectioning-depth)
+	 main-heading sub-heading)
+    (when (symbolp (car sectioning))
+      (setq sectioning (funcall (car sectioning) level heading))
+      (when sectioning
+	(setq heading (car sectioning)
+	      sectioning (cdr sectioning)))
+      (if sectioning (setq sectioning (make-list 10 sectioning)))
+      (setq depth (if sectioning 10000 0)))
+    (if (string-match "[ \t]*\\\\\\\\[ \t]*" heading)
+	(setq main-heading (substring heading 0 (match-beginning 0))
+	      sub-heading (substring heading (match-end 0))))
+    (setq heading (org-export-latex-fontify-headline heading)
+	  sub-heading (and sub-heading
+			   (org-export-latex-fontify-headline sub-heading))
+	  main-heading (and main-heading
+			    (org-export-latex-fontify-headline main-heading)))
     (cond
      ;; Normal conversion
-     ((<= level org-export-latex-sectioning-depth)
-      (let* ((sec (nth (1- level) org-export-latex-sectioning))
+     ((<= level depth)
+      (let* ((sec (nth (1- level) sectioning))
 	     start end)
 	(if (consp (cdr sec))
 	    (setq start (nth (if num 0 2) sec)
 		  end (nth (if num 1 3) sec))
 	  (setq start (if num (car sec) (cdr sec))))
-	(insert (format start heading) "\n")
+	(insert (format start (if main-heading main-heading heading)
+			(or sub-heading "")))
+	(insert	"\n")
 	(when label
 	  (insert (mapconcat (lambda (l) (format "\\label{%s}" l))
 			     label-list "\n") "\n"))
@@ -873,9 +918,12 @@ If NUM, export sections as numerical sections."
 	      ((listp subcontent)
 	       (while (org-looking-back "\n\n") (backward-delete-char 1))
 	       (org-export-latex-sub subcontent)))
-	(if end (insert end "\n"))))
+	(when (and end (string-match "[^ \t]" end))
+	  (let ((hook (org-get-text-property-any 0 'org-insert-hook end)))
+	    (and (functionp hook) (funcall hook)))
+	  (insert end "\n"))))
      ;; At a level under the hl option: we can drop this subsection
-     ((> level org-export-latex-sectioning-depth)
+     ((> level depth)
       (cond ((eq org-export-latex-low-levels 'description)
 	     (if (string-match "% ends low level$"
 			       (buffer-substring (point-at-bol 0) (point)))
@@ -1008,12 +1056,14 @@ OPT-PLIST is the options plist for current buffer."
      "\n"
      ;; insert information on LaTeX packages
      (when org-export-latex-packages-alist
-       (mapconcat (lambda(p)
-		    (if (equal "" (car p))
-			(format "\\usepackage{%s}" (cadr p))
-		      (format "\\usepackage[%s]{%s}"
-			      (car p) (cadr p))))
-		  org-export-latex-packages-alist "\n"))
+       (concat
+	(mapconcat (lambda(p)
+		     (if (equal "" (car p))
+			 (format "\\usepackage{%s}" (cadr p))
+		       (format "\\usepackage[%s]{%s}"
+			       (car p) (cadr p))))
+		   org-export-latex-packages-alist "\n")
+	"\n"))
      ;; insert additional commands in the header
      (org-export-apply-macros-in-string
       (plist-get opt-plist :latex-header-extra))
