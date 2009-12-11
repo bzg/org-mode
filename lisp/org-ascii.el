@@ -156,6 +156,7 @@ resulting ASCII as a string.  When BODY-ONLY is set, don't produce
 the file header and footer.  When PUB-DIR is set, use this as the
 publishing directory."
   (interactive "P")
+  (run-hooks 'org-export-first-hook)
   (setq-default org-todo-line-regexp org-todo-line-regexp)
   (let* ((opt-plist (org-combine-plists (org-default-export-plist)
 					ext-plist

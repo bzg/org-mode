@@ -43,6 +43,7 @@
   "Export the org buffer as XOXO.
 The XOXO buffer is named *xoxo-<source buffer name>*"
   (interactive (list (current-buffer)))
+  (run-hooks 'org-export-first-hook)
   ;; A quickie abstraction
 
   ;; Output everything as XOXO

@@ -539,6 +539,7 @@ the file header and footer, simply return the content of
 <body>...</body>, without even the body tags themselves.  When
 PUB-DIR is set, use this as the publishing directory."
   (interactive "P")
+  (run-hooks 'org-export-first-hook)
 
   ;; Make sure we have a file name when we need it.
   (when (and (not (or to-buffer body-only))

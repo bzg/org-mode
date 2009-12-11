@@ -357,6 +357,10 @@ drawer names to export."
 	  (repeat :tag "Selected drawers"
 		  (string :tag "Drawer name"))))
 
+(defvar org-export-first-hook nil
+  "Hook called as the first thing in each exporter.
+Good for general initialization")
+
 (defvar org-export-preprocess-hook nil
   "Hook for preprocessing an export buffer.
 Pretty much the first thing when exporting is running this hook.")

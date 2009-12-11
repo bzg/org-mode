@@ -1,3 +1,19 @@
+2009-12-11  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-xoxo.el (org-export-as-xoxo): Run `org-export-first-hook'.
+
+	* org-latex.el (org-export-region-as-latex): Run
+	`org-export-first-hook'.
+
+	* org-html.el (org-export-as-html): Run `org-export-first-hook'.
+
+	* org-docbook.el (org-export-as-docbook): Run
+	`org-export-first-hook'.
+
+	* org-ascii.el (org-export-as-ascii): Run `org-export-first-hook'.
+
+	* org-exp.el (org-export-first-hook): New hook.
+
 2009-12-10  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-list.el (org-previous-item): Exit at the beginning of the
