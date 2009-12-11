@@ -63,6 +63,7 @@ LISPF      = 	org.el			\
 	     	org-attach.el		\
 	     	org-archive.el		\
 		org-bbdb.el		\
+		org-beamer.el		\
 		org-bibtex.el		\
 	     	org-clock.el		\
 	     	org-colview.el		\
@@ -333,6 +334,7 @@ lisp/org-ascii.elc:	lisp/org-exp.el
 lisp/org-attach.elc:	lisp/org.el lisp/org-id.el
 lisp/org-archive.elc:	lisp/org.el
 lisp/org-bbdb.elc:	lisp/org.el
+lisp/org-beamer.elc:	lisp/org.el
 lisp/org-bibtex.elc:	lisp/org.el
 lisp/org-clock.elc:	lisp/org.el
 lisp/org-colview.elc:	lisp/org.el
@@ -343,7 +345,7 @@ lisp/org-datetree.elc:	lisp/org.el
 lisp/org-docview.elc:	lisp/org.el
 lisp/org-exp.elc:	lisp/org.el lisp/org-agenda.el
 lisp/org-exp-blocks.elc: lisp/org.el
-lisp/org-latex.elc:	lisp/org.el lisp/org-exp.el
+lisp/org-latex.elc:	lisp/org.el lisp/org-exp.el lisp/org-beamer.el
 lisp/org-docbook.elc:	lisp/org.el lisp/org-exp.el
 lisp/org-faces.elc:	lisp/org-macs.el lisp/org-compat.el
 lisp/org-feed.elc:	lisp/org.el

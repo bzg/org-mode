@@ -1,5 +1,9 @@
 2009-12-11  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-beamer.el
+	(org-export-preprocess-before-selecting-backend-code-hook): New
+	file.
+
 	* org-latex.el (org-export-latex-after-initial-vars-hook): New hook.
 	(org-export-as-latex): Run
 	`org-export-latex-after-initial-vars-hook'.
