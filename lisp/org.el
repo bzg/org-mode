@@ -12564,6 +12564,11 @@ is set.")
 	  (cdr (assoc property org-global-properties))
 	  (cdr (assoc property org-global-properties-fixed))))))
 
+(defvar org-property-changed-functions nil
+  "Hook called when the value of a property has changed.
+Each hook function should accept two arguments, the name of the property
+and the new value.")
+
 (defun org-entry-put (pom property value)
   "Set PROPERTY to VALUE for entry at point-or-marker POM."
   (org-with-point-at pom
@@ -12616,7 +12621,8 @@ is set.")
 	    (org-indent-line-function)
 	    (insert ":" property ":"))
 	  (and value (insert " " value))
-	  (org-indent-line-function)))))))
+	  (org-indent-line-function)))))
+    (run-hook-with-args 'org-property-changed-functions property value)))
 
 (defun org-buffer-property-keys (&optional include-specials include-defaults include-columns)
   "Get all property keys in the current buffer.
@@ -12799,6 +12805,15 @@ then applies it to the property in the column format's scope."
       (error "No operator defined for property %s" prop))
     (org-columns-compute prop)))
 
+(defvar org-property-allowed-value-functions nil
+  "Hook for functions supplying allowed values for specific.
+The functions must take a single argument, the name of the property, and
+return a flat list of allowed values.  If \":ETC\" is one of
+the values, this means that these values are intended as defaults for
+completion, but that other values should be allowed too.
+The functions must return nil if they are now responsible for this
+prioerty.")
+
 (defun org-property-get-allowed-values (pom property &optional table)
   "Get allowed values for the property PROPERTY.
 When TABLE is non-nil, return an alist that can directly be used for
@@ -12814,9 +12829,10 @@ completion."
 	  (push (char-to-string n) vals)
 	  (setq n (1- n)))))
      ((member property org-special-properties))
+     ((setq vals (run-hook-with-args-until-success
+		  'org-property-allowed-value-functions property)))
      (t
       (setq vals (org-entry-get pom (concat property "_ALL") 'inherit))
-
       (when (and vals (string-match "\\S-" vals))
 	(setq vals (car (read-from-string (concat "(" vals ")"))))
 	(setq vals (mapcar (lambda (x)
@@ -12858,7 +12874,8 @@ completion."
     (replace-match (concat " :" key ": " nval) t t)
     (org-indent-line-function)
     (beginning-of-line 1)
-    (skip-chars-forward " \t")))
+    (skip-chars-forward " \t")
+    (run-hook-with-args 'org-property-changed-functions key nval)))
 
 (defun org-find-entry-with-id (ident)
   "Locate the entry that contains the ID property with exact value IDENT.

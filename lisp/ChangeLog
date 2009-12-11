@@ -1,6 +1,11 @@
 2009-12-11  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-startup-with-beamer-mode): New option.
+	(org-property-changed-functions)
+	(org-property-allowed-value-functions): New hooks.
+	(org-entry-put, org-property-get-allowed-values): Run the new
+	hooks.
+	(org-property-next-allowed-value): Run the new hooks.
 
 	* org-exp.el (org-export-select-backend-specific-text): Add the
 	special beamer tags.
