@@ -415,6 +415,11 @@ These are the .aux, .log, .out, and .toc files."
 
 ;;; Hooks
 
+(defvar org-export-latex-after-initial-vars-hook nil
+  "Hook run before LaTeX export.
+The exact moment is after the initial variables like org-export-latex-class
+have been determined from the environment.")
+
 (defvar org-export-latex-after-blockquotes-hook nil
   "Hook run during LaTeX export, after blockquote, verse, center are done.")
 
@@ -538,6 +543,7 @@ when PUB-DIR is set, use this as the publishing directory."
 			   '(:org-license-to-kill nil)))
   (org-update-radio-target-regexp)
   (org-export-latex-set-initial-vars ext-plist arg)
+  (run-hooks 'org-export-latex-after-initial-vars-hook)
   (let* ((wcf (current-window-configuration))
 	 (opt-plist org-export-latex-options-plist)
 	 (region-p (org-region-active-p))

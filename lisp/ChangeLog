@@ -1,5 +1,9 @@
 2009-12-11  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-latex.el (org-export-latex-after-initial-vars-hook): New hook.
+	(org-export-as-latex): Run
+	`org-export-latex-after-initial-vars-hook'.
+
 	* org.el (org-fill-template): Make template searches case sensitive.
 
 	* org-exp.el (org-export): Use "1" as a sign to export only the
