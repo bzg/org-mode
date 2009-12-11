@@ -12710,7 +12710,9 @@ in the current file."
 	  (allowed (org-property-get-allowed-values nil prop 'table))
 	  (existing (mapcar 'list (org-property-values prop)))
 	  (val (if allowed
-		   (org-completing-read "Value: " allowed nil 'req-match)
+		   (org-completing-read "Value: " allowed nil
+		      (not (get-text-property 0 'org-unrestricted
+					      (caar allowed))))
 		 (let (org-completion-use-ido org-completion-use-iswitchb)
 		   (org-completing-read
 		    (concat "Value " (if (and cur (string-match "\\S-" cur))
@@ -12794,6 +12796,9 @@ completion."
 				   ((symbolp x) (symbol-name x))
 				   (t "???")))
 			   vals)))))
+    (when (member ":ETC" vals)
+      (setq vals (remove ":ETC" vals))
+      (org-add-props (car vals) '(org-unrestricted t)))
     (if table (mapcar 'list vals) vals)))
 
 (defun org-property-previous-allowed-value (&optional previous)

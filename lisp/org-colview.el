@@ -459,10 +459,16 @@ Where possible, use the standard interface for changing this line."
      ((equal key "SCHEDULED")
       (setq eval '(org-with-point-at pom
 		    (call-interactively 'org-schedule))))
+     ((equal key "BEAMER_env")
+      (setq eval '(org-with-point-at pom
+		    (call-interactively 'org-beamer-set-environment-tag))))
      (t
       (setq allowed (org-property-get-allowed-values pom key 'table))
       (if allowed
-	  (setq nval (org-icompleting-read "Value: " allowed nil t))
+	  (setq nval (org-icompleting-read
+		      "Value: " allowed nil
+		      (not (get-text-property 0 'org-unrestricted
+					      (caar allowed)))))
 	(setq nval (read-string "Edit: " value)))
       (setq nval (org-trim nval))
       (when (not (equal nval value))

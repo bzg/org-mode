@@ -1,5 +1,16 @@
 2009-12-11  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-colview-xemacs.el (org-columns-edit-value): Use
+	org-unrestricted property.
+
+	* org-colview.el (org-columns-edit-value):  Use
+	org-unrestricted property.
+
+	* org.el (org-compute-property-at-point): Set org-unrestricted
+	text property if the list contains ":ETC".
+	(org-insert-property-drawer):  Use
+	org-unrestricted property.
+
 	* org-exp.el
 	(org-export-preprocess-before-selecting-backend-code-hook): New hook.
 	(org-export-preprocess-string): Run
