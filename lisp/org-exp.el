@@ -843,8 +843,10 @@ ARG is a double universal prefix `C-u C-u', that means to inverse the
 value of `org-export-run-in-background'."
   (interactive "P")
   (let* ((bg (org-xor (equal arg '(16)) org-export-run-in-background))
+	 subtree-p
 	 (help "[t]   insert the export option template
 \[v]   limit export to visible part of outline tree
+\[1]   only export the current subtree
 
 \[a] export as ASCII   [A] to temporary buffer
 
@@ -903,7 +905,11 @@ value of `org-export-run-in-background'."
 	(org-fit-window-to-buffer (get-buffer-window
 				   "*Org Export/Publishing Help*"))
 	(message "Select command: ")
-	(setq r1 (read-char-exclusive))))
+	(setq r1 (read-char-exclusive))
+	(when (eq r1 ?1)
+	  (setq subtree-p t)
+	  (message "Select command (for subtree): ")
+	  (setq r1 (read-char-exclusive)))))
     (setq r2 (if (< r1 27) (+ r1 96) r1))
     (unless (setq ass (assq r2 cmds))
       (error "No command associated with key %c" r1))
@@ -924,6 +930,7 @@ value of `org-export-run-in-background'."
 	  (set-process-sentinel p 'org-export-process-sentinel)
 	  (message "Background process \"%s\": started" p))
       ;; background processing not requested, or not possible
+      (if subtree-p (outline-mark-subtree))
       (call-interactively (nth 1 ass)))))
 
 (defun org-export-process-sentinel (process status)
