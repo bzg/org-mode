@@ -3291,16 +3291,27 @@ If TABLE-TYPE is non-nil, also check for table.el-type tables."
 		'(org-export-as-ascii org-export-ascii-preprocess
 		  org-export-as-ascii-to-buffer org-replace-region-by-ascii
 		  org-export-region-as-ascii))
+  (org-autoload "org-latex"
+		'(org-export-as-latex-batch org-export-as-latex-to-buffer
+                  org-replace-region-by-latex org-export-region-as-latex
+		  org-export-as-latex org-export-as-pdf
+		  org-export-as-pdf-and-open))
   (org-autoload "org-html"
 		'(org-export-as-html-and-open
 		  org-export-as-html-batch org-export-as-html-to-buffer
 		  org-replace-region-by-html org-export-region-as-html
 		  org-export-as-html))
+  (org-autoload "org-docbook"
+		'(org-export-as-docbook-batch org-export-as-docbook-to-buffer
+		  org-replace-region-by-docbook org-export-region-as-docbook
+		  org-export-as-docbook-pdf org-export-as-docbook-pdf-and-open
+		  org-export-as-docbook))
   (org-autoload "org-icalendar"
 		'(org-export-icalendar-this-file
 		  org-export-icalendar-all-agenda-files
 		  org-export-icalendar-combine-agenda-files))
-  (org-autoload "org-xoxo" '(org-export-as-xoxo)))
+  (org-autoload "org-xoxo" '(org-export-as-xoxo))
+  (org-autoload "org-beamer" '(org-beamer-mode org-beamer-sectioning)))
 
 ;; Declare and autoload functions from org-agenda.el
 
