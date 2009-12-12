@@ -32,7 +32,6 @@
 (defvar org-export-latex-header)
 (defvar org-export-latex-options-plist)
 (defvar org-export-opt-plist)
-(defvar org-export-latex-options-plist)
 
 (defgroup org-beamer nil
   "Options specific for using the beamer class in LaTeX export."
@@ -438,7 +437,7 @@ The effect is that these values will be accessible during export."
      '(put-text-property (point-at-bol) (point-at-eol) 'org-props
 			 (org-entry-properties nil 'standard)))
     (setq org-export-latex-options-plist
-	  (plist-put org-export-opt-plist :tags nil))
+	  (plist-put org-export-latex-options-plist :tags nil))
     (remove-text-properties (point-min) (point-max) '(org-props nil))
     (org-map-entries
      '(put-text-property (point-at-bol) (point-at-eol) 'org-props
@@ -469,11 +468,11 @@ This funcion will run in the final LaTeX document."
   
 (defun org-beamer-fix-toc ()
   "Fix the table of contents by removing the vspace line."
-  (save-excursion
-    (goto-char (point-min))
-    (when (re-search-forward "\\\\setcounter{tocdepth.*\n\\\\tableofcontents.*\n\\(\\\\vspace\\*.*\\)" nil t)
-      (delete-region (match-beginning 1) (match-end 1)))))
-      
+  (when org-beamer-export-is-beamer-p
+    (save-excursion
+      (goto-char (point-min))
+      (when (re-search-forward "\\\\setcounter{tocdepth.*\n\\\\tableofcontents.*\n\\(\\\\vspace\\*.*\\)" nil t)
+	(delete-region (match-beginning 1) (match-end 1))))))
 
 (defun org-beamer-property-changed (property value)
   "Track the BEAMER_env property with tags."
@@ -563,7 +562,6 @@ This funcion will run in the final LaTeX document."
 
 (add-hook 'org-property-allowed-value-functions
 	  'org-beamer-allowed-property-values)
-
 
 (provide 'org-beamer)
 

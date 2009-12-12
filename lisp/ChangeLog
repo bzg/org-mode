@@ -1,3 +1,8 @@
+2009-12-12  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-beamer.el (org-beamer-after-initial-vars): Do not overwrite
+	the options plist.
+
 2009-12-11  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-startup-with-beamer-mode): New option.
