@@ -1,3 +1,7 @@
+2009-12-13  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-make-link-regexps): Capture link path into a group.
+
 2009-12-12  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-beamer.el (org-beamer-after-initial-vars): Do not overwrite
