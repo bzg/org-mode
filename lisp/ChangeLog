@@ -2,6 +2,9 @@
 
 	* org.el (org-inhibit-startup-visibility-stuff): New variable.
 	(org-mode): Don't do startup visibility if inhibited.
+	(org-outline-overlay-data, org-set-outline-overlay-data): New
+	functions.
+	(org-save-outline-visibility): New macro.
 
 2009-12-13  Carsten Dominik  <carsten.dominik@gmail.com>
 

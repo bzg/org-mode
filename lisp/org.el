@@ -5631,6 +5631,62 @@ Optional argument N means, put the headline into the Nth line of the window."
     (beginning-of-line)
     (recenter (prefix-numeric-value N))))
 
+;;; Saving and restoring visibility
+
+(defun org-outline-overlay-data (&optional use-markers)
+  "Return a list of the locations of all outline overlays.
+The are overlays with the `invisible' property value `outline'.
+The return valus is a list of cons cells, with start and stop
+positions for each overlay.
+If USE-MARKERS is set, return the positions as markers."
+  (let (beg end)
+    (save-excursion
+      (save-restriction
+	(widen)
+	(delq nil
+	      (mapcar (lambda (o) 
+			(when (eq (org-overlay-get o 'invisible) 'outline)
+			  (setq beg (org-overlay-start o)
+				end (org-overlay-end o))
+			  (and beg end (> end beg)
+			       (if use-markers
+				   (cons (move-marker (make-marker) beg)
+					 (move-marker (make-marker) end))
+				 (cons beg end)))))
+		      (org-overlays-in (point-min) (point-max))))))))
+
+(defun org-set-outline-overlay-data (data)
+  "Create visibility overlays for all positions in DATA.
+DATA should have been made by `org-outline-overlay-data'."
+  (let (o)
+    (save-excursion
+      (save-restriction
+	(widen)
+	(show-all)
+	(mapc (lambda (c)
+		(setq o (org-make-overlay (car c) (cdr c)))
+		(org-overlay-put o 'invisible 'outline))
+	      data)))))
+
+(defmacro org-save-outline-visibility (use-markers &rest body)
+  "Save and restore outline visibility around BODY.
+If USE-MARKERS is non-nil, use markers for the positions.
+This means that the buffer may change while running BODY,
+but it also means that the buffer should stay alive
+during the operation, because otherwise all these markers will
+point nowhere."
+  `(let ((data (org-outline-overlay-data ,use-markers)))
+     (unwind-protect
+	 (progn
+	   ,@body
+	   (org-set-outline-overlay-data data))
+       (when ,use-markers
+	 (mapc (lambda (c)
+		 (and (markerp (car c)) (move-marker (car c) nil))
+		 (and (markerp (cdr c)) (move-marker (cdr c) nil)))
+	       data)))))
+
+
 ;;; Folding of blocks
 
 (defconst org-block-regexp
@@ -15760,7 +15816,7 @@ This command does many different things, depending on context:
        (t
 	(let ((org-inhibit-startup-visibility-stuff t)
 	      (org-startup-align-all-tables nil))
-	  (org-mode-restart))
+	  (org-save-outline-visibility 'use-markers (org-mode-restart)))
 	(message "Local setup has been refreshed"))))
      ((org-clock-update-time-maybe))
      (t (error "C-c C-c can do nothing useful at this location")))))
