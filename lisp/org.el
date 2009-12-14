@@ -2070,7 +2070,10 @@ empty string.
 %s will be replaced by the new TODO state, in double quotes.
 %S will be replaced by the old TODO state, in double quotes.
 %u will be replaced by the user name.
-%U will be replaced by the full user name."
+%U will be replaced by the full user name.
+
+In fact, it is not a good idea to change the `state' entry, because
+because agenda log mode depends on the format of these entries."
   :group  'org-todo
   :group  'org-progress
   :type '(list :greedy t

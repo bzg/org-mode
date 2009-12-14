@@ -5,6 +5,8 @@
 	(org-outline-overlay-data, org-set-outline-overlay-data): New
 	functions.
 	(org-save-outline-visibility): New macro.
+	(org-log-note-headings): Document that one should not change the
+	`state' note format.
 
 2009-12-13  Carsten Dominik  <carsten.dominik@gmail.com>
 
