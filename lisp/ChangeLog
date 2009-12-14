@@ -1,3 +1,8 @@
+2009-12-14  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-inhibit-startup-visibility-stuff): New variable.
+	(org-mode): Don't do startup visibility if inhibited.
+
 2009-12-13  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-make-link-regexps): Capture link path into a group.

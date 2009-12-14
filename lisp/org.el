@@ -4177,6 +4177,7 @@ This variable is set by `org-before-change-function'.
   (setq org-table-may-need-update t))
 (defvar org-mode-map)
 (defvar org-inhibit-startup nil)        ; Dynamically-scoped param.
+(defvar org-inhibit-startup-visibility-stuff nil) ; Dynamically-scoped param.
 (defvar org-agenda-keep-modes nil)      ; Dynamically-scoped param.
 (defvar org-inhibit-logging nil)        ; Dynamically-scoped param.
 (defvar org-inhibit-blocking nil)       ; Dynamically-scoped param.
@@ -4306,7 +4307,6 @@ The following commands are available:
 	   (interactive-p)
 	   (= (point-min) (point-max)))
       (insert "#    -*- mode: org -*-\n\n"))
-
   (unless org-inhibit-startup
     (when org-startup-align-all-tables
       (let ((bmp (buffer-modified-p)))
@@ -4315,7 +4315,8 @@ The following commands are available:
     (when org-startup-indented
       (require 'org-indent)
       (org-indent-mode 1))
-    (org-set-startup-visibility)))
+    (unless org-inhibit-startup-visibility-stuff
+      (org-set-startup-visibility))))
 
 (when (fboundp 'abbrev-table-put)
   (abbrev-table-put org-mode-abbrev-table
@@ -15757,9 +15758,9 @@ This command does many different things, depending on context:
 	  (if (org-at-table-p)
 	      (org-call-with-arg 'org-table-recalculate (or arg t)))))
        (t
-;	(org-set-regexps-and-options)
-;	(org-restart-font-lock)
-	(let ((org-inhibit-startup t)) (org-mode-restart))
+	(let ((org-inhibit-startup-visibility-stuff t)
+	      (org-startup-align-all-tables nil))
+	  (org-mode-restart))
 	(message "Local setup has been refreshed"))))
      ((org-clock-update-time-maybe))
      (t (error "C-c C-c can do nothing useful at this location")))))
