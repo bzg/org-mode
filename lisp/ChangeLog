@@ -1,5 +1,8 @@
 2009-12-14  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-agenda.el (org-agenda-date-prompt): Allow inactive time
+	stamps as well.
+
 	* org.el (org-inhibit-startup-visibility-stuff): New variable.
 	(org-mode): Don't do startup visibility if inhibited.
 	(org-outline-overlay-data, org-set-outline-overlay-data): New

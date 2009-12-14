@@ -6536,9 +6536,9 @@ be used to request time specification in the time stamp."
       (with-current-buffer buffer
 	(widen)
 	(goto-char pos)
-	(if (not (org-at-timestamp-p))
+	(if (not (org-at-timestamp-p t))
 	    (error "Cannot find time stamp"))
-	(org-time-stamp arg))
+	(org-time-stamp arg (equal (char-after (match-beginning 0)) ?\[)))
       (org-agenda-show-new-time marker org-last-changed-timestamp))
     (message "Time stamp changed to %s" org-last-changed-timestamp)))
 

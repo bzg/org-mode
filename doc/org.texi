@@ -7598,9 +7598,8 @@ into the past.
 @c
 @kindex >
 @item >
-Change the timestamp associated with the current line to today.
-The key @kbd{>} has been chosen, because it is the same as @kbd{S-.}
-on my keyboard.
+Change the timestamp associated with the current line.  The key @kbd{>} has
+been chosen, because it is the same as @kbd{S-.}  on my keyboard.
 @c
 @kindex I
 @item I

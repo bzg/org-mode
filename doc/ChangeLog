@@ -1,3 +1,8 @@
+2009-12-14  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Agenda commands): Document that `>' prompts for a
+	date.
+
 2009-11-30  Tassilo Horn  <tassilo@member.fsf.org>
 
 	* org.texi (Setting tags): Document variable
