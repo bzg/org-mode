@@ -2073,7 +2073,7 @@ empty string.
 %U will be replaced by the full user name.
 
 In fact, it is not a good idea to change the `state' entry, because
-because agenda log mode depends on the format of these entries."
+agenda log mode depends on the format of these entries."
   :group  'org-todo
   :group  'org-progress
   :type '(list :greedy t
@@ -8207,6 +8207,23 @@ from."
 
 (defvar org-link-search-failed nil)
 
+(defvar org-open-link-functions nil
+  "Hook for functions finding a plain text link.
+These functions must take a single argument, the link content.
+They will be called for links that look like [[link text][description]]
+when LINK TEXT does not have a protocol like \"http:\" and does not look
+like a filename (e.g. \"./blue.png\").
+
+These functions will be called *before* Org attempts to resolve the
+link by doing text searches in the current buffer - so if you want a
+link \"[[target]]\" to still find \"<<target>>\", your function should
+handle this as a special case.
+
+When the function does handle the link, it must return a non-nil value.
+If it decides that it is not responsible for this link, it must return
+nil to indicate that that Org-mode can continue with other options
+like exact and fuzzy text search.")
+
 (defun org-next-link ()
   "Move forward to the next link.
 If the link is in hidden text, expose it."
@@ -8440,19 +8457,6 @@ application the system uses for this file type."
 
 	 ((string= type "tags")
 	  (org-tags-view in-emacs path))
-	 ((string= type "thisfile")
-	  (if in-emacs
-	      (switch-to-buffer-other-window
-	       (org-get-buffer-for-internal-link (current-buffer)))
-	    (org-mark-ring-push))
-	  (let ((cmd `(org-link-search
-		       ,path
-		       ,(cond ((equal in-emacs '(4)) 'occur)
-			      ((equal in-emacs '(16)) 'org-occur)
-			      (t nil))
-		       ,pos)))
-	    (condition-case nil (eval cmd)
-	      (error (progn (widen) (eval cmd))))))
 
 	 ((string= type "tree-match")
 	  (org-occur (concat "\\[" (regexp-quote path) "\\]")))
@@ -8496,6 +8500,24 @@ application the system uses for this file type."
 			     (eval (read cmd))
 			   (call-interactively (read cmd))))
 	      (error "Abort"))))
+
+	 ((and (string= type "thisfile")
+	       (run-hook-with-args-until-success
+		'org-open-link-functions path)))
+
+	 ((string= type "thisfile")
+	  (if in-emacs
+	      (switch-to-buffer-other-window
+	       (org-get-buffer-for-internal-link (current-buffer)))
+	    (org-mark-ring-push))
+	  (let ((cmd `(org-link-search
+		       ,path
+		       ,(cond ((equal in-emacs '(4)) 'occur)
+			      ((equal in-emacs '(16)) 'org-occur)
+			      (t nil))
+		       ,pos)))
+	    (condition-case nil (eval cmd)
+	      (error (progn (widen) (eval cmd))))))
 
 	 (t
 	  (browse-url-at-point)))))))

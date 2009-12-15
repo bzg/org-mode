@@ -1,3 +1,8 @@
+2009-12-15  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-open-link-functions): New hook.
+	(org-open-at-point): Run `org-open-link-functions'.
+
 2009-12-14  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-agenda.el (org-agenda-date-prompt): Allow inactive time
