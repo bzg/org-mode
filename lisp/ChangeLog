@@ -1,5 +1,8 @@
 2009-12-16  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-latex.el (org-export-latex-tables): Only add a caption when
+	macro in in longtable environments if one has been defined.
+
 	* org-html.el (org-export-as-html): Only take title from buffer if
 	not exporting body-only.
 

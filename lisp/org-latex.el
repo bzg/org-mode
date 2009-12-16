@@ -1533,7 +1533,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
                         (if longtblp
                             (concat "\\begin{longtable}{" align "}\n")
                           (if floatp "\\begin{table}[htb]\n"))
-                        (if (or floatp longtblp)
+                        (if floatp
                             (format
                              "\\caption{%s%s}"
                              (if label (concat "\\\label{" label "}") "")
