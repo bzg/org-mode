@@ -1,5 +1,8 @@
 2009-12-16  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp.el (org-export-target-internal-links): Check for
+	protectedness earlier in the string.
+
 	* org-agenda.el (org-agenda-highlight-todo): Match TODO keywords
 	case sensitively.
 
