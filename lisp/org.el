@@ -6180,7 +6180,7 @@ This is a list with the following elements:
 - the tags string, or nil."
   (save-excursion
     (org-back-to-heading t)
-    (if (looking-at org-complex-heading-regexp)
+    (if (let (case-fold-search) (looking-at org-complex-heading-regexp))
 	(list (length (match-string 1))
 	      (org-reduced-level (length (match-string 1)))
 	      (org-match-string-no-properties 2)
@@ -9157,7 +9157,7 @@ avoiding backtracing."
 	(prog1
 	    (delq nil (append org-olpa nil))
 	  (aset org-olpa level heading)))
-    (let (rtn)
+    (let (rtn case-fold-search)
       (save-excursion
 	(save-restriction
 	  (widen)
@@ -9207,8 +9207,9 @@ such as the file name."
 (defun org-display-outline-path (&optional file current)
   "Display the current outline path in the echo area."
   (interactive "P")
-  (let ((bfn (buffer-file-name (buffer-base-buffer)))
-	(path (and (org-mode-p) (org-get-outline-path))))
+  (let* ((bfn (buffer-file-name (buffer-base-buffer)))
+	 (case-fold-search nil)
+	 (path (and (org-mode-p) (org-get-outline-path))))
     (if current (setq path (append path
 				   (save-excursion
 				     (org-back-to-heading t)

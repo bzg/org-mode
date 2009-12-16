@@ -1,5 +1,14 @@
 2009-12-16  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-agenda.el (org-agenda-highlight-todo): Match TODO keywords
+	case sensitively.
+
+	* org-id.el (org-id-store-link): Match TODO keywords case
+	sensitively.
+
+	* org.el (org-heading-components, org-get-outline-path)
+	(org-display-outline-path): Match TODO keywords case sensitively.
+
 	* org-latex.el (org-export-as-latex): Ignore read-only
 	properties.
 

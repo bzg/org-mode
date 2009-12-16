@@ -4832,6 +4832,7 @@ HH:MM."
 
 (defun org-agenda-highlight-todo (x)
   (let ((org-done-keywords org-done-keywords-for-agenda)
+	(case-fold-search nil)
 	 re pl)
     (if (eq x 'line)
 	(save-excursion

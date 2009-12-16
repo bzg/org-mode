@@ -576,6 +576,7 @@ optional argument MARKERP, return the position as a new marker."
   "Store a link to the current entry, using its ID."
   (interactive)
   (let* ((link (org-make-link "id:" (org-id-get-create)))
+	 (case-fold-search nil)
 	 (desc (save-excursion
 		 (org-back-to-heading t)
 		 (or (and (looking-at org-complex-heading-regexp)
