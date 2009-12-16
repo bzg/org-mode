@@ -708,12 +708,18 @@ when PUB-DIR is set, use this as the publishing directory."
       (and (re-search-forward "\\[TABLE-OF-CONTENTS\\]" nil t)
 	   (replace-match "\\tableofcontents" t t)))
 
-    ;; Cleanup forced line ends in itmes where they are not needed
+    ;; Cleanup forced line ends in items where they are not needed
     (goto-char (point-min))
     (while (re-search-forward
-	    "^[ \t]*\\\\item\\>.*\\(\\\\\\\\\\)[ \t]*\\(\n\\\\label.*\\)?\n\\\\begin"
+	    "^[ \t]*\\\\item\\>.*\\(\\\\\\\\\\)[ \t]*\\(\n\\\\label.*\\)*\n\\\\begin"
 	    nil t)
       (delete-region (match-beginning 1) (match-end 1)))
+    (goto-char (point-min))
+    (while (re-search-forward
+	    "^[ \t]*\\\\item\\>.*\\(\\\\\\\\\\)[ \t]*\\(\n\\\\label.*\\)*"
+	    nil t)
+      (if (looking-at "[\n \t]+")
+	  (replace-match "\n")))
 
     (run-hooks 'org-export-latex-final-hook)
     (or to-buffer (save-buffer))
