@@ -1278,6 +1278,10 @@ on this string to produce the exported version."
       (insert string)
       (setq case-fold-search t)
 
+      (let ((inhibit-read-only t))
+	(remove-text-properties (point-min) (point-max)
+				'(read-only t)))
+
       ;; Remove license-to-kill stuff
       ;; The caller marks some stuff for killing, stuff that has been
       ;; used to create the page title, for example.

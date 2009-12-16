@@ -432,16 +432,18 @@ The effect is that these values will be accessible during export."
 		       (match-string 1))))
 	      (plist-get org-export-latex-options-plist
 			 :beamer-header-extra)))
-    (remove-text-properties (point-min) (point-max) '(org-props nil))
-    (org-map-entries
-     '(put-text-property (point-at-bol) (point-at-eol) 'org-props
-			 (org-entry-properties nil 'standard)))
-    (setq org-export-latex-options-plist
-	  (plist-put org-export-latex-options-plist :tags nil))
-    (remove-text-properties (point-min) (point-max) '(org-props nil))
-    (org-map-entries
-     '(put-text-property (point-at-bol) (point-at-eol) 'org-props
-			 (org-entry-properties nil 'standard)))))
+    (let ((inhibit-read-only t))
+      (org-unmodified
+       (remove-text-properties (point-min) (point-max) '(org-props nil))
+       (org-map-entries
+	'(put-text-property (point-at-bol) (point-at-eol) 'org-props
+			    (org-entry-properties nil 'standard)))
+       (setq org-export-latex-options-plist
+	     (plist-put org-export-latex-options-plist :tags nil))
+       (remove-text-properties (point-min) (point-max) '(org-props nil))
+       (org-map-entries
+	'(put-text-property (point-at-bol) (point-at-eol) 'org-props
+			    (org-entry-properties nil 'standard)))))))
 
 (defun org-beamer-auto-fragile-frames ()
   "Mark any frames containing verbatim environments as fragile.

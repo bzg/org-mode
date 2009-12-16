@@ -1,5 +1,11 @@
 2009-12-16  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-latex.el (org-export-as-latex): Ignore read-only
+	properties.
+
+	* org-exp.el (org-export-preprocess-string): Remove any
+	`read-only' properties.
+
 	* org-agenda.el (org-agenda-inactive-leader): New option.
 	(org-agenda-get-timestamps): Use `org-agenda-inactive-leader'.
 	(org-tags-view): Prompt for matcher if MATCH is an empty string.

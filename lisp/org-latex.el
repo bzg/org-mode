@@ -560,8 +560,9 @@ when PUB-DIR is set, use this as the publishing directory."
 
   (message "Exporting to LaTeX...")
   (org-unmodified
-   (remove-text-properties (point-min) (point-max)
-			   '(:org-license-to-kill nil)))
+   (let ((inhibit-read-only t))
+     (remove-text-properties (point-min) (point-max)
+			     '(:org-license-to-kill nil))))
   (org-update-radio-target-regexp)
   (org-export-latex-set-initial-vars ext-plist arg)
   (run-hooks 'org-export-latex-after-initial-vars-hook)
@@ -1129,8 +1130,9 @@ If END is non-nil, it is the end of the region."
 	    :timestamps (plist-get opt-plist :timestamps)
 	    :footnotes (plist-get opt-plist :footnotes)))
 	(org-unmodified
-	 (add-text-properties pt (max pt (1- end))
-			      '(:org-license-to-kill t)))))))
+	 (let ((inhibit-read-only t))
+	   (add-text-properties pt (max pt (1- end))
+				'(:org-license-to-kill t))))))))
 
 (defvar org-export-latex-header-defs nil
   "The header definitions that might be used in the LaTeX body.")
