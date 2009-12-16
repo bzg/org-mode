@@ -1163,6 +1163,14 @@ that passed since this item was scheduled first."
 	  (string :tag "Scheduled today     ")
 	  (string :tag "Scheduled previously")))
 
+(defcustom org-agenda-inactive-leader "["
+  "Text preceeding item pulled into the agenda by inactive time stamps.
+These entries are added to the agenda when pressing \"[\"."
+  :group 'org-agenda-line-format
+  :type '(list
+	  (string :tag "Scheduled today     ")
+	  (string :tag "Scheduled previously")))
+
 (defcustom org-agenda-deadline-leaders '("Deadline:  " "In %3d d.: ")
   "Text preceeding deadline items in the agenda view.
 This is a list with two strings.  The first applies when the item has its
@@ -4086,7 +4094,7 @@ the documentation of `org-diary'."
 	    (looking-at "\\*+[ \t]+\\([^\r\n]+\\)")
 	    (setq head (match-string 1))
 	    (setq txt (org-format-agenda-item
-		       (if inactivep "[" nil)
+		       (if inactivep org-agenda-inactive-leader nil)
 		       head category tags timestr nil
 		       remove-re)))
 	  (setq priority (org-get-priority txt))
