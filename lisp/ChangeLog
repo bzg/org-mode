@@ -1,5 +1,10 @@
 2009-12-16  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-latex.el (org-export-latex-preprocess): Better version of
+	the regular expression for protecting LaTeX macros.
+	(org-export-latex-preprocess): Start searching for macros to
+	protect from beginning of buffer.
+
 	* org-exp.el (org-export-target-internal-links): Check for
 	protectedness earlier in the string.
 

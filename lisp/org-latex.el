@@ -1877,11 +1877,11 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
      (replace-match (org-export-latex-protect-string "\\hrule") t t)))
 
   ;; Protect LaTeX commands like \command[...]{...} or \command{...}
-  (let ((re (concat "\\\\[a-zA-Z]+\\(?:"
-		    "\\[.*\\]"
-		    "\\)?"
-		    "\\(" (org-create-multibrace-regexp "{" "}" 3)
-		    "\\)\\{1,3\\}")))
+  (goto-char (point-min))
+  (let ((re (concat
+	     "\\\\[a-zA-Z]+"
+	     "\\(?:\\[[^][\n]*?\\]\\)*"
+	     "\\(" (org-create-multibrace-regexp "{" "}" 3) "\\)\\{1,3\\}")))
     (while (re-search-forward re nil t)
       (unless (save-excursion (goto-char (match-beginning 0))
 			      (equal (char-after (point-at-bol)) ?#))
