@@ -1197,7 +1197,11 @@ value of `org-export-run-in-background'."
     ("lsaquo")
     ("rsaquo")
     ("euro")
-
+    ("EUR"."&euro;")
+    ("EURdig"."&euro;")
+    ("EURhv"."&euro;")
+    ("EURcr"."&euro;")
+    ("EURtm"."&euro;")
     ("arccos"."arccos")
     ("arcsin"."arcsin")
     ("arctan"."arctan")

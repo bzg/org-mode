@@ -1,5 +1,8 @@
 2009-12-16  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp.el (org-html-entities): Add Euro symbols from Marvosym
+	package.
+
 	* org-latex.el (org-export-latex-tables): Only add a caption when
 	macro in in longtable environments if one has been defined.
 
