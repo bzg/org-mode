@@ -3418,6 +3418,7 @@ for a keyword.  A numeric prefix directly selects the Nth keyword in
   (org-compile-prefix-format 'todo)
   (org-set-sorting-strategy 'todo)
   (org-prepare-agenda "TODO")
+  (if (and (stringp arg) (not (string-match "\\S-" arg))) (setq arg nil))
   (let* ((today (time-to-days (current-time)))
 	 (date (calendar-gregorian-from-absolute today))
 	 (kwds org-todo-keywords-for-agenda)
@@ -3486,11 +3487,12 @@ The prefix arg TODO-ONLY limits the search to TODO entries."
   (org-compile-prefix-format 'tags)
   (org-set-sorting-strategy 'tags)
   (let* ((org-tags-match-list-sublevels
-;??????	  (if todo-only t org-tags-match-list-sublevels))
 	  org-tags-match-list-sublevels)
 	 (completion-ignore-case t)
 	 rtn rtnall files file pos matcher
 	 buffer)
+    (when (and (stringp match) (not (string-match "\\S-" match)))
+      (setq match nil))
     (setq matcher (org-make-tags-matcher match)
 	  match (car matcher) matcher (cdr matcher))
     (org-prepare-agenda (concat "TAGS " match))

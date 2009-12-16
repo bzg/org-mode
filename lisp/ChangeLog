@@ -2,6 +2,8 @@
 
 	* org-agenda.el (org-agenda-inactive-leader): New option.
 	(org-agenda-get-timestamps): Use `org-agenda-inactive-leader'.
+	(org-tags-view): Prompt for matcher if MATCH is an empty string.
+	(org-todo-list): Prompt for matcher if ARG is an empty string.
 
 2009-12-15  Carsten Dominik  <carsten.dominik@gmail.com>
 
