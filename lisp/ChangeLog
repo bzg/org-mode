@@ -1,5 +1,8 @@
 2009-12-16  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-html.el (org-export-as-html): Only take title from buffer if
+	not exporting body-only.
+
 	* org-latex.el (org-export-latex-preprocess): Better version of
 	the regular expression for protecting LaTeX macros.
 	(org-export-latex-preprocess): Start searching for macros to

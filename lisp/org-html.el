@@ -625,7 +625,8 @@ PUB-DIR is set, use this as the publishing directory."
 	 (author      (plist-get opt-plist :author))
 	 (title       (or (and subtree-p (org-export-get-title-from-subtree))
 			  (plist-get opt-plist :title)
-			  (and (not
+			  (and (not body-only)
+			       (not
 				(plist-get opt-plist :skip-before-1st-heading))
 			       (org-export-grab-title-from-buffer))
 			  (and buffer-file-name
