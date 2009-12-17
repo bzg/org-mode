@@ -1538,7 +1538,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
                              "\\caption{%s%s}"
                              (if label (concat "\\\label{" label "}") "")
                              (or caption "")))
-                        (if longtblp "\\\\\n" "\n")
+                        (if (and longtblp caption) "\\\\\n" "\n")
                         (if (and org-export-latex-tables-centered (not longtblp))
                             "\\begin{center}\n")
                         (if (not longtblp) (concat "\\begin{tabular}{" align "}\n"))
