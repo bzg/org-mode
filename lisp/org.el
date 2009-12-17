@@ -3702,6 +3702,9 @@ Also put tags into group 4 if tags are present.")
 (defvar org-planning-or-clock-line-re nil
   "Matches a line with planning or clock info.")
 (make-variable-buffer-local 'org-planning-or-clock-line-re)
+(defvar org-all-time-keywords nil
+  "List of time keywords.")
+(make-variable-buffer-local 'org-all-time-keywords)
 
 (defconst org-plain-time-of-day-regexp
   (concat
@@ -4074,6 +4077,10 @@ means to push this value onto the list in the variable.")
 		    "\\|" org-deadline-string
 		    "\\|" org-closed-string "\\|" org-clock-string
 		    "\\)\\>\\)")
+	    org-all-time-keywords
+	    (mapcar (lambda (w) (substring w 0 -1))
+		    (list org-scheduled-string org-deadline-string
+			  org-clock-string org-closed-string))
 	    )
       (org-compute-latex-and-specials-regexp)
       (org-set-font-lock-defaults))))
@@ -10230,6 +10237,18 @@ changes because there are unchecked boxes in this entry."
 	      (throw 'dont-block nil)))))
     t)) ; do not block
 
+(defun org-entry-blocked-p ()
+  "Is the current entry blocked?"
+  (if (org-entry-get nil "NOBLOCKING")
+      nil ;; Never block this entry
+    (not
+     (run-hook-with-args-until-failure
+      'org-blocker-hook
+      (list :type 'todo-state-change
+	    :position (point)
+	    :from 'todo
+	    :to 'done)))))
+
 (defun org-update-statistics-cookies (all)
   "Update the statistics cookie, either from TODO or from checkboxes.
 This should be called with the cursor in a line with a statistics cookie."
@@ -12298,7 +12317,7 @@ a *different* entry, you cannot use these techniques."
 
 (defconst org-special-properties
   '("TODO" "TAGS" "ALLTAGS" "DEADLINE" "SCHEDULED" "CLOCK" "CLOSED" "PRIORITY"
-    "TIMESTAMP" "TIMESTAMP_IA")
+    "TIMESTAMP" "TIMESTAMP_IA" "BLOCKED")
   "The special properties valid in Org-mode.
 
 These are properties that are not defined in the property drawer,
@@ -12432,7 +12451,7 @@ If the drawer does not exist and FORCE is non-nil, create the drawer."
 	  (insert ":END:\n"))
 	(cons beg end)))))
 
-(defun org-entry-properties (&optional pom which)
+(defun org-entry-properties (&optional pom which specific)
   "Get all properties of the entry at point-or-marker POM.
 This includes the TODO keyword, the tags, time strings for deadline,
 scheduled, and clocking, and any additional properties defined in the
@@ -12440,7 +12459,10 @@ entry.  The return value is an alist, keys may occur multiple times
 if the property key was used several times.
 POM may also be nil, in which case the current entry is used.
 If WHICH is nil or `all', get all properties.  If WHICH is
-`special' or `standard', only get that subclass."
+`special' or `standard', only get that subclass.  If WHICH
+is a string only get exactly this property.  Specific can be a sting, the
+specific property we are interested in.  Specifying it can speed
+things up because then unnecessary parsing is avoided."
   (setq which (or which 'all))
   (org-with-point-at pom
     (let ((clockstr (substring org-clock-string 0 -1))
@@ -12458,30 +12480,38 @@ If WHICH is nil or `all', get all properties.  If WHICH is
 	  (when (memq which '(all special))
 	    ;; Get the special properties, like TODO and tags
 	    (goto-char beg)
-	    (when (and (looking-at org-todo-line-regexp) (match-end 2))
+	    (when (and (or (not specific) (string= specific "TODO"))
+		       (looking-at org-todo-line-regexp) (match-end 2))
 	      (push (cons "TODO" (org-match-string-no-properties 2)) props))
-	    (when (looking-at org-priority-regexp)
+	    (when (and (or (not specific) (string= specific "PRIORITY"))
+		       (looking-at org-priority-regexp))
 	      (push (cons "PRIORITY" (org-match-string-no-properties 2)) props))
-	    (when (and (setq value (org-get-tags-string))
+	    (when (and (or (not specific) (string= specific "TAGS"))
+		       (setq value (org-get-tags-string))
 		       (string-match "\\S-" value))
 	      (push (cons "TAGS" value) props))
-	    (when (setq value (org-get-tags-at))
-	      (push (cons "ALLTAGS" (concat ":" (mapconcat 'identity value ":") ":"))
+	    (when (and (or (not specific) (string= specific "TAGS"))
+		       (setq value (org-get-tags-at)))
+	      (push (cons "ALLTAGS" (concat ":" (mapconcat 'identity value ":")
+					    ":"))
 		    props))
-	    (while (re-search-forward org-maybe-keyword-time-regexp end t)
-	      (setq key (if (match-end 1) (substring (org-match-string-no-properties 1) 0 -1))
-		    string (if (equal key clockstr)
-			       (org-no-properties
-				(org-trim
+	    (when (or (not specific) (string= specific "TAGS"))
+	      (push (cons "BLOCKED" (if (org-entry-blocked-p) "t" "")) props))
+	    (when (or (not specific) (member specific org-all-time-keywords)) 
+	      (while (re-search-forward org-maybe-keyword-time-regexp end t)
+		(setq key (if (match-end 1) (substring (org-match-string-no-properties 1) 0 -1))
+		      string (if (equal key clockstr)
+				 (org-no-properties
+				  (org-trim
 				 (buffer-substring
 				  (match-beginning 3) (goto-char (point-at-eol)))))
-			     (substring (org-match-string-no-properties 3) 1 -1)))
-	      (unless key
-		(if (= (char-after (match-beginning 3)) ?\[)
-		    (setq key "TIMESTAMP_IA")
-		  (setq key "TIMESTAMP")))
-	      (when (or (equal key clockstr) (not (assoc key props)))
-		(push (cons key string) props)))
+			       (substring (org-match-string-no-properties 3) 1 -1)))
+		(unless key
+		  (if (= (char-after (match-beginning 3)) ?\[)
+		      (setq key "TIMESTAMP_IA")
+		    (setq key "TIMESTAMP")))
+		(when (or (equal key clockstr) (not (assoc key props)))
+		  (push (cons key string) props))))
 
 	    )
 
@@ -12523,8 +12553,9 @@ If the property is not present at all, nil is returned."
 		       t))
 	(org-entry-get-with-inheritance property)
       (if (member property org-special-properties)
-	  ;; We need a special property.  Use brute force, get all properties.
-	  (cdr (assoc property (org-entry-properties nil 'special)))
+	  ;; We need a special property.  Use `org-entry-properties' to
+	  ;; retrieve it, but specify the wanted property
+	  (cdr (assoc property (org-entry-properties nil 'special property)))
 	(let ((range (org-get-property-block)))
 	  (if (and range
 		   (goto-char (car range))
