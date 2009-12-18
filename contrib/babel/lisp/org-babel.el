@@ -888,10 +888,14 @@ parameters when merging lists."
   "This function expands Noweb style references in the body of
 the current source-code block.  For example the following
 reference would be replaced with the body of the source-code
-block named 'example-block' (assuming the '#' character starts a
-comment) .
+block named 'example-block'.
 
-# <<example-block>>
+<<example-block>>
+
+Note that any text preceding the <<foo>> construct on a line will
+be interposed between the lines of the replacement text.  So for
+example if <<foo>> is placed behind a comment, then the entire
+replacement text will also be commented.
 
 This function must be called from inside of the buffer containing
 the source-code block which holds BODY.
@@ -899,21 +903,22 @@ the source-code block which holds BODY.
 In addition the following syntax can be used to insert the
 results of evaluating the source-code block named 'example-block'.
 
-# <<example-block()>>
+<<example-block()>>
 
 Any optional arguments can be passed to example-block by placing
 the arguments inside the parenthesis following the convention
 defined by `org-babel-lob'.  For example
 
-# <<example-block(a=9)>>
+<<example-block(a=9)>>
 
 would set the value of argument \"a\" equal to \"9\".  Note that
-these arguments are not evaluated in the current source-code block but are passed literally to the \"example-block\"."
+these arguments are not evaluated in the current source-code
+block but are passed literally to the \"example-block\"."
   (let* ((parent-buffer (or parent-buffer (current-buffer)))
          (info (or info (org-babel-get-src-block-info)))
          (lang (first info))
          (body (second info))
-         (new-body "") index source-name evaluate)
+         (new-body "") index source-name evaluate prefix)
     (flet ((nb-add (text)
                    (setq new-body (concat new-body text))))
       (with-temp-buffer
@@ -926,6 +931,10 @@ these arguments are not evaluated in the current source-code block but are passe
         (while (and (re-search-forward "<<\\(.+?\\)>>" nil t))
           (save-match-data (setf source-name (match-string 1)))
           (save-match-data (setq evaluate (string-match "\(.*\)" source-name)))
+          (save-match-data
+            (setq prefix (buffer-substring (match-beginning 0)
+                                           (save-excursion
+                                             (move-beginning-of-line 1) (point)))))
           ;; add interval to new-body (removing noweb reference)
           (goto-char (match-beginning 0))
           (nb-add (buffer-substring index (point)))
@@ -933,22 +942,26 @@ these arguments are not evaluated in the current source-code block but are passe
           (setq index (point))
           (nb-add (save-excursion
                     (set-buffer parent-buffer)
-                    (if evaluate
-                        (let ((raw (org-babel-ref-resolve-reference
-                                    source-name nil)))
-                          (if (stringp raw) raw (format "%S" raw)))
-                      (let ((point (org-babel-find-named-block source-name)))
-                        (if point
-                            (save-excursion
-                              (goto-char point)
-                              (org-babel-trim (org-babel-expand-noweb-references
-                                               (org-babel-get-src-block-info))))
-                          ;; optionally raise an error if named source-block doesn't exist
-                          (if (member lang org-babel-noweb-error-langs)
-                              (error
-                               "<<%s>> could not be resolved (see `org-babel-noweb-error-langs')"
-                               source-name)
-                            "")))))))
+                    (mapconcat ;; interpose `prefix' between every line
+                     #'identity
+                     (split-string
+                      (if evaluate
+                          (let ((raw (org-babel-ref-resolve-reference
+                                      source-name nil)))
+                            (if (stringp raw) raw (format "%S" raw)))
+                        (let ((point (org-babel-find-named-block source-name)))
+                          (if point
+                              (save-excursion
+                                (goto-char point)
+                                (org-babel-trim (org-babel-expand-noweb-references
+                                                 (org-babel-get-src-block-info))))
+                            ;; optionally raise an error if named
+                            ;; source-block doesn't exist
+                            (if (member lang org-babel-noweb-error-langs)
+                                (error
+                                 "<<%s>> could not be resolved (see `org-babel-noweb-error-langs')"
+                                 source-name)
+                              "")))) "[\n\r]") (concat "\n" prefix)))))
         (nb-add (buffer-substring index (point-max)))))
     new-body))
 
