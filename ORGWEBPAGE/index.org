@@ -40,12 +40,13 @@
       <td>
       <h3 style="text-align:center;">Shirts and Donations</h3>
       <a href="http://orgmode.spreadshirt.com">
+      </br>&nbsp;</br>
       <img src="http://orgmode.org/img/shirts.jpg" 
              style="border:1px solid black; width:200px" 
              alt="http://orgmode.org/img/shirts.jpg" /></a>
              <span style="font-size: 80%;"></br>
-	     Promote Org-mode and support it's development by
-	     getting your Org-mode T-Shirt, bag, or cup in our stores 
+	     Promote Org-mode and support its development by
+	     getting your Org-mode T-shirt, bag, or cup in our stores 
          (<a href="http://orgmode.spreadshirt.com">US-Shop</a> or
          <a href="http://orgmode.spreadshirt.de">EU-Shop</a>)
 	 </span>
@@ -54,7 +55,7 @@
       </tr>
       <tr>
      
-      <td style="vertical-align:bottom;">
+      <td style="vertical-align:top;">
         <div style="float:bottom; border:0px solid black; 
                     padding:3px; vertical-align:bottom;">
             <form  style="float:right;padding:3px; name="_xclick" 
