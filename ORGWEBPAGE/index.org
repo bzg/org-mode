@@ -31,22 +31,24 @@
 #+begin_html
   <table width="750px">
     <tr>
-      <td>
-      <img src="http://orgmode.org/img/tasks.png" 
+      <td><br><img src="http://orgmode.org/img/tasks.png" 
            style="border:1px solid black; width:500px" 
            alt="http://orgmode.org/img/tasks.png"/>
       </td>
       
       <td>
         <table width="220px">
-          <tr><td><h3 style="text-align:center;vertical-align:bottom">Shirts and Donations</h3></td></tr>
+          <tr><td><h3 style="text-align:center;vertical-align:bottom;">Shirts and Donations</h3></td></tr>
           <tr>
             <td><a href="http://orgmode.spreadshirt.com">
                 <img src="http://orgmode.org/img/shirts.jpg" 
                      style="border:1px solid black; width:200px" 
                      alt="http://orgmode.org/img/shirts.jpg" /></a>
               <span style="font-size: 90%;"></br>
-                Promote Org-mode and support its development by
+              <div style="margin-top:10px;">
+ 
+
+               Promote Org-mode and support its development by
                 getting your Org-mode T-shirt, bag, or cup in our stores 
               (<a href="http://orgmode.spreadshirt.com">US-Shop</a> or
                 <a href="http://orgmode.spreadshirt.de">EU-Shop</a>)
@@ -55,10 +57,10 @@
           </tr>
      
           <tr>
-            <td style="vertical-align:top;">
-              <div style="float:bottom; border:0px solid black; 
-                          padding:3px; vertical-align:bottom;">
-                <form  style="float:right;padding:3px;" name="_xclick" 
+            <td style="vertical-align:bottom;">
+              <div style="float:bottom; border:0px solid black;
+                          padding:0px; vertical-align:bottom; margin-top:5px;">
+                <form  style="float:right;padding:5px;" name="_xclick" 
                        action="https://www.paypal.com/cgi-bin/webscr" method="post">
                   <div>
                     <input type="hidden" name="cmd" value="_xclick" />
@@ -73,8 +75,8 @@
                            alt="Make payments with PayPal - it's fast, free and secure!" />
                   </div>
                 </form>
-                <span style="font-size: 90%;">
-                  ... or by making a direct donation.</span>
+                <span style="font-size: 90%;margin-top:10px;">
+                 ... or by making a direct donation.</span>
               </div>
             </td>
           </tr>
