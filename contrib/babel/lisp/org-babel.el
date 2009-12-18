@@ -739,7 +739,7 @@ code ---- the results are extracted in the syntax of the source
 			     (if (and (listp (car result))
                                       (listp (cdr (car result))))
 				 result (list result))
-			     '(:fmt (lambda (cell) (format "%S" cell)))) "\n"))
+			     '(:fmt (lambda (cell) (format "%s" cell)))) "\n"))
 	    (forward-line -1) (org-cycle))
 	   ((member "file" result-params)
 	    (insert result))
