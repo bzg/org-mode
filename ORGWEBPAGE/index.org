@@ -39,13 +39,13 @@
       
       <td>
         <table width="220px">
-          <tr><td><h3 style="text-align:center;vertical-align:top">Shirts and Donations</h3></td></tr>
+          <tr><td><h3 style="text-align:center;vertical-align:bottom">Shirts and Donations</h3></td></tr>
           <tr>
             <td><a href="http://orgmode.spreadshirt.com">
                 <img src="http://orgmode.org/img/shirts.jpg" 
                      style="border:1px solid black; width:200px" 
                      alt="http://orgmode.org/img/shirts.jpg" /></a>
-              <span style="font-size: 80%;"></br>
+              <span style="font-size: 90%;"></br>
                 Promote Org-mode and support its development by
                 getting your Org-mode T-shirt, bag, or cup in our stores 
               (<a href="http://orgmode.spreadshirt.com">US-Shop</a> or
@@ -73,7 +73,7 @@
                            alt="Make payments with PayPal - it's fast, free and secure!" />
                   </div>
                 </form>
-                <span style="font-size: 80%;">
+                <span style="font-size: 90%;">
                   ... or by making a direct donation.</span>
               </div>
             </td>
