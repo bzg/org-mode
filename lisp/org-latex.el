@@ -639,6 +639,23 @@ when PUB-DIR is set, use this as the publishing directory."
 	 (region (buffer-substring
 		  (if region-p (region-beginning) (point-min))
 		  (if region-p (region-end) (point-max))))
+	 (text
+	  (org-export-preprocess-string
+	   text
+	   :emph-multiline t
+	   :for-LaTeX t
+	   :comments nil
+	   :tags (plist-get opt-plist :tags)
+	   :priority (plist-get opt-plist :priority)
+	   :footnotes (plist-get opt-plist :footnotes)
+	   :drawers (plist-get opt-plist :drawers)
+	   :timestamps (plist-get opt-plist :timestamps)
+	   :todo-keywords (plist-get opt-plist :todo-keywords)
+	   :add-text nil
+	   :skip-before-1st-heading skip
+	   :select-tags nil
+	   :exclude-tags nil
+	   :LaTeX-fragments nil))
 	 (string-for-export
 	  (org-export-preprocess-string
 	   region
