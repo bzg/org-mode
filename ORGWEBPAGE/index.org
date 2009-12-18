@@ -43,11 +43,11 @@
       <img src="http://orgmode.org/img/shirts.jpg" 
              style="border:1px solid black; width:200px" 
              alt="http://orgmode.org/img/shirts.jpg" /></a>
-             <span style="font-size: 80%;">
-         Get your Org-mode T-Shirt, bag or cup in our
-         <a href="http://orgmode.spreadshirt.com">T-shirt shop</a>
-         (for Europe, use <a href="http://orgmode.spreadshirt.de">this
-      shop</a>), to support Org-mode in this way.</span>
+             <span style="font-size: 80%;"></br>
+             Get your Org-mode T-Shirt, bag or cup in our stores 
+         (<a href="http://orgmode.spreadshirt.com">US-Shop</a> or
+         <a href="http://orgmode.spreadshirt.de">EU-Shop</a>), to
+      support Org-mode in this way ...</span>
                 
       </td>
       </tr>
@@ -56,8 +56,7 @@
       <td style="vertical-align:bottom;">
         <div style="float:bottom; border:0px solid black; 
                     padding:3px; vertical-align:bottom;">
-          <h3 style="text-align:center;">Donations
-            <form  style="float:right;" name="_xclick" 
+            <form  style="float:left;padding:3px; name="_xclick" 
                    action="https://www.paypal.com/cgi-bin/webscr" method="post">
               <div>
                 <input type="hidden" name="cmd" value="_xclick" />
@@ -72,11 +71,9 @@
                        alt="Make payments with PayPal - it's fast, free and secure!" />
             </div>
           </form>
-          </h3>
           <span style="font-size: 80%;">
-            To <a href="http://thread.gmane.org/gmane.emacs.orgmode/14209">support
-            Org-mode development</a> with a donation, use the Paypal
-            button above.</span>
+            ... or <a href="http://thread.gmane.org/gmane.emacs.orgmode/14209">support
+            Org-mode development</a> with a direct donation.</span>
         </div>
       </td>
     </tr>
