@@ -38,7 +38,7 @@
       </td>
       
       <td>
-      <h3 style="text-align:center;">T-Shirts and more</h3>
+      <h3 style="text-align:center;">Shirts and Donations</h3>
       <a href="http://orgmode.spreadshirt.com">
       <img src="http://orgmode.org/img/shirts.jpg" 
              style="border:1px solid black; width:200px" 
@@ -47,7 +47,7 @@
              Get your Org-mode T-Shirt, bag or cup in our stores 
          (<a href="http://orgmode.spreadshirt.com">US-Shop</a> or
          <a href="http://orgmode.spreadshirt.de">EU-Shop</a>), to
-      support Org-mode in this way ...</span>
+      support Org-mode development in this way ...</span>
                 
       </td>
       </tr>
@@ -56,7 +56,7 @@
       <td style="vertical-align:bottom;">
         <div style="float:bottom; border:0px solid black; 
                     padding:3px; vertical-align:bottom;">
-            <form  style="float:left;padding:3px; name="_xclick" 
+            <form  style="float:right;padding:3px; name="_xclick" 
                    action="https://www.paypal.com/cgi-bin/webscr" method="post">
               <div>
                 <input type="hidden" name="cmd" value="_xclick" />
@@ -72,8 +72,7 @@
             </div>
           </form>
           <span style="font-size: 80%;">
-            ... or <a href="http://thread.gmane.org/gmane.emacs.orgmode/14209">support
-            Org-mode development</a> with a direct donation.</span>
+            ... or with a direct donation.</span>
         </div>
       </td>
     </tr>
