@@ -49,7 +49,7 @@
  
 
                Promote Org-mode and support its development by
-                getting your Org-mode T-shirt, bag, or cup in our stores 
+                getting your Org-mode T-shirt, bag, or mug in our stores 
               (<a href="http://orgmode.spreadshirt.com">US-Shop</a> or
                 <a href="http://orgmode.spreadshirt.de">EU-Shop</a>)
               </span>
