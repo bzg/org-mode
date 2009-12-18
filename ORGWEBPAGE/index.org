@@ -44,10 +44,11 @@
              style="border:1px solid black; width:200px" 
              alt="http://orgmode.org/img/shirts.jpg" /></a>
              <span style="font-size: 80%;"></br>
-             Get your Org-mode T-Shirt, bag or cup in our stores 
+	     Promote Org-mode and support it's development by
+	     getting your Org-mode T-Shirt, bag, or cup in our stores 
          (<a href="http://orgmode.spreadshirt.com">US-Shop</a> or
-         <a href="http://orgmode.spreadshirt.de">EU-Shop</a>), to
-      support Org-mode development in this way ...</span>
+         <a href="http://orgmode.spreadshirt.de">EU-Shop</a>)
+	 </span>
                 
       </td>
       </tr>
@@ -72,7 +73,7 @@
             </div>
           </form>
           <span style="font-size: 80%;">
-            ... or with a direct donation.</span>
+            ... or by making a direct donation.</span>
         </div>
       </td>
     </tr>
