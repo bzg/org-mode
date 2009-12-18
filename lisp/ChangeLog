@@ -1,5 +1,14 @@
 2009-12-18  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-all-time-keywords): New variable.
+	(org-set-regexps-and-options): Set `org-all-time-keywords'.
+	(org-entry-blocked-p): New function.
+	(org-special-properties): Add BLOCKED as a new special property.
+	(org-entry-properties): New optional argument SPECIFIC, only parse
+	for this property when it is specified.
+	(org-entry-get): Pass a SPECIFIC argument to
+	`org-entry-properties'.
+
 	* org-latex.el (org-export-as-latex): Preprocess TEXT as well.
 
 2009-12-17  Carsten Dominik  <carsten.dominik@gmail.com>
