@@ -33,36 +33,49 @@
       <td rowspan="2">
         <img src="http://orgmode.org/img/tasks.png" 
              style="border:1px solid black; width:500px" 
-             alt="http://orgmode.org/img/tasks.png" />
+             alt="http://orgmode.org/img/tasks.png"/>
       </td>
       
+      <td>
+      <h3 style="text-align:center;">T-Shirts and more</h3>
+      <a href="http://orgmode.spreadshirt.com">
+      <img src="http://orgmode.org/img/shirts.jpg" 
+             style="border:1px solid black; width:200px" 
+             alt="http://orgmode.org/img/shirts.jpg" /></a>
+             <span style="font-size: 80%;">
+         Get your Org-mode T-Shirt, bag or cup in our
+         <a href="http://orgmode.spreadshirt.com">T-shirt shop</a>
+         (for Europe, use <a href="http://orgmode.spreadshirt.de">this
+      shop</a>), to support Org-mode in this way.</span>
+                
+      </td>
+      </tr>
+      <tr>
+     
       <td style="vertical-align:bottom;">
         <div style="float:bottom; border:0px solid black; 
                     padding:3px; vertical-align:bottom;">
-          <h3 style="text-align:center;">Donations</h3>
-          <span style="font-size: 80%;">
-            If you are looking for 
-            <a href="http://thread.gmane.org/gmane.emacs.orgmode/14209">
-            a way to say "thank you"</a>, or if you'd like to support the 
-            future development of Org-mode with a donation, use the button 
-            below.</span>
-          <br />
-          <hr />
-          <form  style="float:right;" name="_xclick" 
-                 action="https://www.paypal.com/cgi-bin/webscr" method="post">
-            <div>
-              <input type="hidden" name="cmd" value="_xclick" />
-              <input type="hidden" name="business" value="carsten.dominik@gmail.com" />
-              <input type="hidden" name="item_name" value="Donate to Org-mode" />
-              <input type="hidden" name="currency_code" value="USD" />
-              <input type="hidden" name="lc" value="US"/>
-              <input type="hidden" name="amount" />
-              <input type="image" style="text-align:right;margin-left:auto;margin-right:0px;border-style:none;"
-                     src="http://www.paypal.com/en_US/i/btn/x-click-but04.gif" 
-                     name="submit" 
-                     alt="Make payments with PayPal - it's fast, free and secure!" />
+          <h3 style="text-align:center;">Donations
+            <form  style="float:right;" name="_xclick" 
+                   action="https://www.paypal.com/cgi-bin/webscr" method="post">
+              <div>
+                <input type="hidden" name="cmd" value="_xclick" />
+                <input type="hidden" name="business" value="carsten.dominik@gmail.com" />
+                <input type="hidden" name="item_name" value="Donate to Org-mode" />
+                <input type="hidden" name="currency_code" value="USD" />
+                <input type="hidden" name="lc" value="US"/>
+                <input type="hidden" name="amount" />
+                <input type="image" style="text-align:right;margin-left:auto;margin-right:0px;border-style:none;"
+                       src="http://www.paypal.com/en_US/i/btn/x-click-but04.gif" 
+                       name="submit" 
+                       alt="Make payments with PayPal - it's fast, free and secure!" />
             </div>
           </form>
+          </h3>
+          <span style="font-size: 80%;">
+            To <a href="http://thread.gmane.org/gmane.emacs.orgmode/14209">support
+            Org-mode development</a> with a donation, use the Paypal
+            button above.</span>
         </div>
       </td>
     </tr>
