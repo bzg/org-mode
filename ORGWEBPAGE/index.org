@@ -31,6 +31,7 @@
   <table width="100%">
     <tr>
       <td rowspan="2">
+      </br>&nbsp;</br>
         <img src="http://orgmode.org/img/tasks.png" 
              style="border:1px solid black; width:500px" 
              alt="http://orgmode.org/img/tasks.png"/>
