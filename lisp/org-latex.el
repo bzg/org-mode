@@ -548,6 +548,7 @@ without even the \begin{document} and \end{document} commands.
 when PUB-DIR is set, use this as the publishing directory."
   (interactive "P")
   (run-hooks 'org-export-first-hook)
+  (org-install-letbind)
 
   ;; Make sure we have a file name when we need it.
   (when (and (not (or to-buffer body-only))
