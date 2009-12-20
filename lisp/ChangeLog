@@ -1,3 +1,8 @@
+2009-12-20  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-entry-properties): Add TIMESTAMP properties back
+	in.
+
 2009-12-18  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-all-time-keywords): New variable.
