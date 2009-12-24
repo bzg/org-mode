@@ -80,7 +80,7 @@ then run `org-babel-pop-to-session'."
 (add-hook 'org-metadown-hook 'org-babel-pop-to-session-maybe)
 
 (defvar org-babel-default-header-args
-  '((:session . "none") (:results . "replace") (:exports . "code") (:nocache) (:noweb . "no"))
+  '((:session . "none") (:results . "replace") (:exports . "code") (:cache . "no") (:noweb . "no"))
   "Default arguments to use when evaluating a source block.")
 
 (defvar org-babel-default-inline-header-args
@@ -195,7 +195,8 @@ block."
                        (sort (org-babel-merge-params (third info) params)
                              (lambda (el1 el2) (string< (symbol-name (car el1))
                                                    (symbol-name (car el2)))))))
-         (new-hash (unless (assoc :nocache params) (org-babel-sha1-hash info)))
+         (new-hash (if (and (cdr (assoc :cache params))
+                            (string= "yes" (cdr (assoc :cache params)))) (org-babel-sha1-hash info)))
          (old-hash (org-babel-result-hash info))
          (body (setf (second info)
 		     (if (and (cdr (assoc :noweb params))
@@ -875,14 +876,16 @@ parameters when merging lists."
                         (:noweb
                          (setq noweb (e-merge '(("yes" "no"))
                                                noweb (split-string (or (cdr pair) "")))))
-                        (:cache (setq cache t)) (:nocache (setq cache nil))
+                        (:cache
+                         (setq cache (e-merge '(("yes" "no"))
+                                              cache (split-string (or (cdr pair) "")))))
                         (t ;; replace: this covers e.g. :session
                          (setq params (cons pair (assq-delete-all (car pair) params))))))
                     plist))
             plists))
     (setq vars (mapcar (lambda (pair) (format "%s=%s" (car pair) (cdr pair))) vars))
     (while vars (setq params (cons (cons :var (pop vars)) params)))
-    (cons (if cache (list :cache) (list :nocache))
+    (cons (cons :cache (mapconcat 'identity cache " "))
           (cons (cons :noweb (mapconcat 'identity noweb " "))
                 (cons (cons :tangle (mapconcat 'identity tangle " "))
                       (cons (cons :exports (mapconcat 'identity exports " "))
