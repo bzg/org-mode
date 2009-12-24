@@ -1924,10 +1924,12 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 		  ">>>?\\((INVISIBLE)\\)?") nil t)
     (org-if-unprotected-at (+ (match-beginning 0) 2)
      (replace-match
-      (org-export-latex-protect-string
-       (format "\\label{%s}%s" (save-match-data (org-solidify-link-text
-						 (match-string 1)))
-	       (if (match-string 2) "" (match-string 1)))) t t)))
+      (concat
+       (org-export-latex-protect-string
+	(format "\\label{%s}" (save-match-data (org-solidify-link-text
+						(match-string 1)))))
+       (if (match-string 2) "" (match-string 1)))
+      t t)))
 
   ;; Delete @<...> constructs
   ;; Thanks to Daniel Clemente for this regexp

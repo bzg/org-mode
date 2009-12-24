@@ -1,3 +1,8 @@
+2009-12-24  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-latex.el (org-export-latex-preprocess): Do process the text
+	of a radio target.
+
 2009-12-20  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-entry-properties): Add TIMESTAMP properties back
