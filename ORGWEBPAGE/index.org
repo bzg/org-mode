@@ -40,7 +40,7 @@
         <table width="220px">
           <tr><td><h3 style="text-align:center;vertical-align:bottom;">Shirts and Donations</h3></td></tr>
           <tr>
-            <td><a href="http://orgmode.spreadshirt.com">
+            <td><a href="http://orgmode.org/img/shirts.jpg">
                 <img src="http://orgmode.org/img/shirts.jpg" 
                      style="border:1px solid black; width:200px" 
                      alt="http://orgmode.org/img/shirts.jpg" /></a>
