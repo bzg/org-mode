@@ -706,12 +706,14 @@ was started."
 		      (message (concat (funcall prompt-fn clock)
 				       " [(kK)eep (sS)ubtract (C)ancel]? "))
 		      (setq char-pressed (read-char-exclusive)))
-		  (while (null char-pressed)
-		    (setq char-pressed
-			  (read-char (concat (funcall prompt-fn clock)
-					     " [(kK)eep (sS)ubtract (C)ancel]? ")
-				     nil 45)))
-		  char-pressed)))))
+		(while (or (null char-pressed)
+			   (and (not (memq char-pressed '(?k ?K ?s ?S ?C ?i)))
+				(or (ding) t)))
+		  (setq char-pressed
+			(read-char (concat (funcall prompt-fn clock)
+					   " [(kK)p (sS)ub (C)ncl (i)gn]? ")
+				   nil 45)))
+		(and (not (eq char-pressed ?i)) char-pressed))))))
 	 (default (floor (/ (org-float-time
 			     (time-subtract (current-time) last-valid)) 60)))
 	 (keep (and (memq ch '(?k ?K))
@@ -786,17 +788,13 @@ non-dangling (i.e., currently open and valid) clocks."
 (defun org-user-idle-seconds ()
   "Return the number of seconds the user has been idle for.
 This routine returns a floating point number."
-  (if (or (eq system-type 'darwin) (eq window-system 'x))
-      (let ((emacs-idle (org-emacs-idle-seconds)))
-	;; If Emacs has been idle for longer than the user's
-	;; `org-clock-idle-time' value, check whether the whole system has
-	;; really been idle for that long.
-	(if (> emacs-idle (* 60 org-clock-idle-time))
-	    (min emacs-idle (if (eq system-type 'darwin)
-				(org-mac-idle-seconds)
-			      (org-x11-idle-seconds)))
-	  emacs-idle))
-    (org-emacs-idle-seconds)))
+  (cond
+   ((eq system-type 'darwin)
+    (org-mac-idle-seconds))
+   ((eq window-system 'x)
+    (org-x11-idle-seconds))
+   (t
+    (org-emacs-idle-seconds))))
 
 (defvar org-clock-user-idle-seconds)
 
@@ -807,11 +805,11 @@ if the user really wants to stay clocked in after being idle for
 so long."
   (when (and org-clock-idle-time (not org-clock-resolving-clocks)
 	     org-clock-marker)
-    (let ((org-clock-user-idle-seconds (org-user-idle-seconds))
-	  (org-clock-user-idle-start
-	   (time-subtract (current-time)
-			  (seconds-to-time org-clock-user-idle-seconds)))
-	  (org-clock-resolving-clocks-due-to-idleness t))
+    (let* ((org-clock-user-idle-seconds (org-user-idle-seconds))
+	   (org-clock-user-idle-start
+	    (time-subtract (current-time)
+			   (seconds-to-time org-clock-user-idle-seconds)))
+	   (org-clock-resolving-clocks-due-to-idleness t))
       (if (> org-clock-user-idle-seconds (* 60 org-clock-idle-time))
 	  (org-clock-resolve
 	   (cons org-clock-marker
