@@ -4154,6 +4154,33 @@ the documentation of `org-diary'."
 	  (push txt ee))))
     (nreverse ee)))
 
+(defun org-diary-class (m1 d1 y1 m2 d2 y2 dayname &rest skip-weeks)
+  "Entry applies if date is between dates on DAYNAME, but skips SKIP-WEEKS.
+Order of the parameters is M1, D1, Y1, M2, D2, Y2 if
+`european-calendar-style' is nil, and D1, M1, Y1, D2, M2, Y2 if
+`european-calendar-style' is t.  
+DAYNAME is a number between 0 (Sunday) and 6 (Saturday).  SKIP-WEEKS
+is any number of ISO weeks in the block period for which the item should
+be skipped."
+  (let* ((date1 (calendar-absolute-from-gregorian
+		 (if european-calendar-style
+		     (list d1 m1 y1)
+		   (list m1 d1 y1))))
+	 (date2 (calendar-absolute-from-gregorian
+		 (if european-calendar-style
+		     (list d2 m2 y2)
+		   (list m2 d2 y2))))
+	 (d (calendar-absolute-from-gregorian date)))
+    (and
+     (<= date1 d)
+     (<= d date2)
+     (= (calendar-day-of-week date) dayname)
+     (or (not skip-weeks)
+	 (progn
+	   (require 'cal-iso)
+	   (not (member (car (calendar-iso-from-absolute d)) skip-weeks))))
+     entry)))
+
 (defalias 'org-get-closed 'org-agenda-get-progress)
 (defun org-agenda-get-progress ()
   "Return the logged TODO entries for agenda display."
