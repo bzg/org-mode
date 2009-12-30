@@ -497,13 +497,14 @@ may be specified in the properties of the current outline entry."
           (mapcar
            (lambda (header-arg)
              (let ((val (or (condition-case nil
-                                (org-entry-get (point) header-arg 'selective)
+                                (org-entry-get (point) header-arg t)
                               (error nil))
-			    (cdr (assoc header-arg org-file-properties)))))
+                            (cdr (assoc header-arg org-file-properties)))))
                (when val
-                 ;; (message "param-from-property %s=%s" header-arg val) ;; debugging statement
+                 ;; (message "prop %s=%s" header-arg val) ;; debugging
                  (cons (intern (concat ":" header-arg)) val))))
-           '("exports" "results" "session" "tangle" "var")))))
+           '("cache" "cmdline" "exports" "file" "noweb" "results"
+             "session" "tangle" "var")))))
 
 (defun org-babel-parse-src-block-match ()
   (let* ((lang (org-babel-clean-text-properties (match-string 1)))
