@@ -6640,8 +6640,8 @@ will be made in the agenda:
 #+CATEGORY: Holiday
 %%(org-calendar-holiday)   ; special function for holiday names
 #+CATEGORY: Ann
-%%(diary-anniversary 14  5 1956) Arthur Dent is %d years old
-%%(diary-anniversary  2 10 1869) Mahatma Gandhi would be %d years old
+%%(diary-anniversary  5 14 1956)@footnote{Note that the order of the arguments (month, day, year) depends on the setting of @code{calendar-date-style}.} Arthur Dent is %d years old
+%%(diary-anniversary 10  2 1869) Mahatma Gandhi would be %d years old
 @end example
 
 @subsubheading Anniversaries from BBDB
