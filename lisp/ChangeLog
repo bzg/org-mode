@@ -1,3 +1,9 @@
+2010-01-02  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-beamer.el (org-beamer-sectioning): Leave columns environment
+	by specifying 0 or 1 for column width.
+	(org-beamer-column-widths): Make 0 stand for 0.0.
+
 2010-01-01  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-exp.el (org-export-mark-radio-links): Don't match inside

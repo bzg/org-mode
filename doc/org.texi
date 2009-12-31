@@ -9623,7 +9623,13 @@ set an options argument for the implied @code{columns} environment.
 @item BEAMER_col
 The width of a column that should start with this entry.  If this property is
 set, the entry will also get a @code{:BMCOL:} property to make this visible.
-Also this tag is only a visual aid.
+Also this tag is only a visual aid.  When his is a plain number, it will be
+interpreted as a fraction of @code{\textwidth}.  Otherwise it will be assumed
+that you have specified the units, like @samp{3cm}.
+The first such property in a frame will start a @code{columns} environment to
+surround the columns.  This environment is closed when an entry has a
+@code{BEAMER_col} property with value 0, or automatically at the end of the
+frame.
 @item BEAMER_extra
 Additional commands that should be inserted after the environment has been
 opened.  For example, when creating a frame, this can be used to specify

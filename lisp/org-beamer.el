@@ -70,7 +70,7 @@ BEAMER_HEADER_EXTRA, which will be inserted just before \\begin{document}."
 
 
 (defconst org-beamer-column-widths
-  "0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 :ETC"
+  "0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 0.0 :ETC"
 "The column widths that should be installed as allowed property values.")
 
 (defconst org-beamer-transitions
@@ -158,11 +158,6 @@ close   The closing string of the environment."
   (when org-beamer-column-open
     (setq org-beamer-column-open nil)
     (insert "\\end{column}\n")))
-(defun org-beamer-close-column-maybe-1 ()
-  (when org-beamer-column-open
-    (setq org-beamer-column-open nil)
-    (insert "\\end{column}\n"))
-  (setq org-beamer-columns-open nil))
 (defun org-beamer-open-columns-maybe (&optional opts)
   (unless org-beamer-columns-open
     (setq org-beamer-columns-open t)
@@ -229,16 +224,21 @@ in org-export-latex-classes."
 	       (<= level org-beamer-inside-frame-at-level))
       (setq org-beamer-inside-frame-at-level nil))
     (when (setq tmp (org-beamer-assoc-not-empty "BEAMER_col" props))
-      (when (setq ass (assoc "BEAMER_envargs" props))
-	(let (case-fold-search)
-	  (when (string-match "C\\(\\[[^][]*\\]\\)" (cdr ass))
-	    (setq columns-option (match-string 1 (cdr ass)))
-	    (setcdr ass (replace-match "" t t (cdr ass))))
-	  (when (string-match "c\\(\\[[^][]*\\]\\)" (cdr ass))
-	    (setq column-option (match-string 1 (cdr ass)))
-	    (setcdr ass (replace-match "" t t (cdr ass))))))
-      (org-beamer-open-columns-maybe columns-option)
-      (org-beamer-open-column tmp column-option))
+      (if (and (string-match "\\`[0-9.]+\\'" tmp)
+	       (or (= (string-to-number tmp) 1.0)
+		   (= (string-to-number tmp) 0.0)))
+	  ;; column width 1 means cloase columns, go back to full width
+	  (org-beamer-close-columns-maybe)
+	(when (setq ass (assoc "BEAMER_envargs" props))
+	  (let (case-fold-search)
+	    (when (string-match "C\\(\\[[^][]*\\]\\)" (cdr ass))
+	      (setq columns-option (match-string 1 (cdr ass)))
+	      (setcdr ass (replace-match "" t t (cdr ass))))
+	    (when (string-match "c\\(\\[[^][]*\\]\\)" (cdr ass))
+	      (setq column-option (match-string 1 (cdr ass)))
+	      (setcdr ass (replace-match "" t t (cdr ass))))))
+	(org-beamer-open-columns-maybe columns-option)
+	(org-beamer-open-column tmp column-option)))
     (cond
      ((or (equal (cdr (assoc "BEAMER_env" props)) "frame")
 	  (and frame-level (= level frame-level)))
