@@ -53,6 +53,7 @@
   (require 'org-babel-comint)
   (require 'org-babel-lob)
   (require 'org-babel-tangle)
+  (require 'org-babel-keys)
 
   ;; org-babel languages
   (require 'org-babel-emacs-lisp)

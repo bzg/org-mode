@@ -871,9 +871,8 @@ parameters when merging lists."
                         (:exports
                          (setq exports (e-merge exports-exclusive-groups
                                                 exports (split-string (cdr pair)))))
-                        (:tangle
-                         (setq tangle (e-merge '(("yes" "no"))
-                                               tangle (split-string (or (cdr pair) "")))))
+                        (:tangle ;; take the latest -- always overwrite
+                         (setq tangle (or (list (cdr pair)) tangle)))
                         (:noweb
                          (setq noweb (e-merge '(("yes" "no"))
                                                noweb (split-string (or (cdr pair) "")))))
