@@ -2571,10 +2571,10 @@ continue to use it.  The prefix arg ARG is passed through to the exporting
 command."
   (interactive
    (list (progn
-	   (message "Export visible: [a]SCII  [h]tml  [b]rowse HTML [H/R]uffer with HTML  [D]ocBook  [x]OXO  [ ]keep buffer")
+	   (message "Export visible: [a]SCII  [h]tml  [b]rowse HTML [H/R]buffer with HTML  [D]ocBook  [l]atex  [p]df  [d]view pdf  [L]atex buffer  [x]OXO  [ ]keep buffer")
 	   (read-char-exclusive))
 	 current-prefix-arg))
-  (if (not (member type '(?a ?\C-a ?b ?\C-b ?h ?D ?x ?\ )))
+  (if (not (member type '(?a ?\C-a ?b ?\C-b ?h ?D ?x ?\ ?l ?p ?d ?L)))
       (error "Invalid export key"))
   (let* ((binding (cdr (assoc type
 			      '((?a . org-export-as-ascii)
@@ -2586,6 +2586,12 @@ command."
 				(?H . org-export-as-html-to-buffer)
 				(?R . org-export-region-as-html)
 				(?D . org-export-as-docbook)
+
+				(?l . org-export-as-latex)
+				(?p . org-export-as-pdf)
+				(?d . org-export-as-pdf-and-open)
+				(?L . org-export-as-latex-to-buffer)
+
 				(?x . org-export-as-xoxo)))))
 	 (keepp (equal type ?\ ))
 	 (file buffer-file-name)

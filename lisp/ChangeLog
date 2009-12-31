@@ -1,3 +1,7 @@
+2009-12-31  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-exp.el (org-export-visible): Add LaTeX/pdf export.
+
 2009-12-28  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-agenda.el (org-diary-class): New function.
