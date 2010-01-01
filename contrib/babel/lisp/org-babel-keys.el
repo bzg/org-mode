@@ -42,7 +42,7 @@ interactive babel functions which are assigned key bindings.")
 (defvar org-babel-key-bindings
   '(("t" . org-babel-tangle)
     ("T" . org-babel-tangle-file)
-    ("e" . org-babel-execute)
+    ("e" . org-babel-execute-src-block)
     ("s" . org-babel-execute-subtree)
     ("b" . org-babel-execute-buffer)
     ("h" . org-babel-sha1-hash)
