@@ -420,7 +420,7 @@ This may also be a function, building and inserting the postamble.")
   "Hook run during HTML export, after blockquote, verse, center are done.")
 
 (defvar org-export-html-final-hook nil
-  "Hook run during HTML export, after blockquote, verse, center are done.")
+  "Hook run at the end of HTML export, in the new buffer.")
 
 ;;; HTML export
 

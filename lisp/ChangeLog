@@ -1,5 +1,13 @@
 2010-01-01  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-format-latex-header-extra): New variable.
+	(org-format-latex): Set org-format-latex-header-extra from
+	in-buffer stuff.
+	(org-format-latex): Add org-format-latex-header-extra to the
+	variables on which image creation depends.
+	(org-create-formula-image): Add the header stuff from in-buffer
+	settings.
+
 	* org-inlinetask.el (org-inlinetask-export-handler): Add CSS class
 	for TODO keyword in inline tasks.
 

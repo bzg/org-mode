@@ -2889,6 +2889,8 @@ appears on the page."
   :group 'org-latex
   :type 'string)
 
+(defvar org-format-latex-header-extra nil)
+
 ;; The following variable is defined here because is it also used
 ;; when formatting latex fragments.  Originally it was part of the
 ;; LaTeX exporter, which is why the name includes "export".
@@ -14798,6 +14800,8 @@ Some of the options can be changed using the variable
 	 (opt org-format-latex-options)
 	 (matchers (plist-get opt :matchers))
 	 (re-list org-latex-regexps)
+	 (org-format-latex-header-extra
+	  (plist-get (org-infile-export-plist) :latex-header-extra))
 	 (cnt 0) txt hash link beg end re e checkdir
 	 executables-checked
 	 m n block linkfile movefile ov)
@@ -14821,6 +14825,7 @@ Some of the options can be changed using the variable
 	    (let (print-length print-level) ; make sure full list is printed
 	      (setq hash (sha1 (prin1-to-string
 				(list org-format-latex-header
+				      org-format-latex-header-extra
 				      org-export-latex-packages-alist
 				      org-format-latex-options
 				      forbuffer txt)))
@@ -14899,6 +14904,9 @@ Some of the options can be changed using the variable
 					 (format "\\usepackage[%s]{%s}"
 						 (car p) (cadr p))))
 				     org-export-latex-packages-alist "\n"))
+		"")
+	      (if org-format-latex-header-extra
+		  (concat "\n" org-format-latex-header-extra)
 		"")
 	      "\n\\begin{document}\n" string "\n\\end{document}\n"))
     (let ((dir default-directory))
