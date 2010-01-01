@@ -1,5 +1,8 @@
 2010-01-01  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-inlinetask.el (org-inlinetask-export-handler): Add CSS class
+	for TODO keyword in inline tasks.
+
 	* org.el (org-log-note-headings): New headings for removing
 	deadline or scheduling date.
 	(org-deadline, org-schedule): Arrange for logging when removing a

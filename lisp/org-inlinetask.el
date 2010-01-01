@@ -149,7 +149,17 @@ Either remove headline and meta data, or do special formatting."
 	(when (string-match org-complex-heading-regexp headline)
 	  (setq headline (concat
 			  (if (match-end 2)
-			      (concat (match-string 2 headline) " ") "")
+			      (concat
+			       (org-add-props
+				   (format
+				    "@<span class=\"%s %s\"> %s@</span>"
+				    (if (member (match-string 2 headline)
+						org-done-keywords)
+					"done" "todo")
+				    (match-string 2 headline)
+				    (match-string 2 headline))
+				   nil 'org-protected t)
+			       " ") "")
 			  (match-string 4 headline)))
 	  (when content
 	    (if (not (string-match "\\S-" content))
