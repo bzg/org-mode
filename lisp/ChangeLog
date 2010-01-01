@@ -1,3 +1,11 @@
+2010-01-01  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-log-note-headings): New headings for removing
+	deadline or scheduling date.
+	(org-deadline, org-schedule): Arrange for logging when removing a
+	date.
+	(org-add-log-note): Handle deadline and scheduling removal.
+
 2009-12-31  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-exp.el (org-export-visible): Add LaTeX/pdf export.

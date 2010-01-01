@@ -2060,7 +2060,9 @@ When nil, only the date will be recorded."
     (state . "State %-12s from %-12S %t")
     (note .  "Note taken on %t")
     (reschedule .  "Rescheduled from %S on %t")
+    (delschedule .  "Not scheduled, was %S on %t")
     (redeadline .  "New deadline from %S on %t")
+    (deldeadline .  "Removed deadline, was %S on %t")
     (clock-out . ""))
   "Headings for notes added to entries.
 The value is an alist, with the car being a symbol indicating the note
@@ -2083,8 +2085,10 @@ agenda log mode depends on the format of these entries."
 		       state) string)
 	  (cons (const :tag "Heading when just taking a note" note) string)
 	  (cons (const :tag "Heading when clocking out" clock-out) string)
+	  (cons (const :tag "Heading when an item is no longer scheduled" delschedule) string)
 	  (cons (const :tag "Heading when rescheduling" reschedule) string)
-	  (cons (const :tag "Heading when changing deadline" redeadline) string)))
+	  (cons (const :tag "Heading when changing deadline"  redeadline) string
+		(cons (const :tag "Heading when deleting a deadline" deldeadline) string))))
 
 (unless (assq 'note org-log-note-headings)
   (push '(note . "%t") org-log-note-headings))
@@ -10644,6 +10648,9 @@ scheduling will use the corresponding date."
   (let ((old-date (org-entry-get nil "DEADLINE")))
     (if remove
 	(progn
+	  (when (and old-date org-log-redeadline)
+	    (org-add-log-setup 'deldeadline nil old-date 'findpos
+			       org-log-redeadline))
 	  (org-remove-timestamp-with-keyword org-deadline-string)
 	  (message "Item no longer has a deadline."))
       (if (org-get-repeat)
@@ -10665,6 +10672,9 @@ scheduling will use the corresponding date."
   (let ((old-date (org-entry-get nil "SCHEDULED")))
     (if remove
 	(progn
+	  (when (and old-date org-log-reschedule)
+	    (org-add-log-setup 'delschedule nil old-date 'findpos
+			       org-log-reschedule))
 	  (org-remove-timestamp-with-keyword org-scheduled-string)
 	  (message "Item is no longer scheduled."))
       (if (org-get-repeat)
@@ -10919,8 +10929,12 @@ EXTRA is additional text that will be inserted into the notes buffer."
 			      (or org-log-note-state "")))
 		     ((eq org-log-note-purpose 'reschedule)
 		      "rescheduling")
+		     ((eq org-log-note-purpose 'delschedule)
+		      "no longer scheduled")
 		     ((eq org-log-note-purpose 'redeadline)
 		      "changing deadline")
+		     ((eq org-log-note-purpose 'deldeadline)
+		      "removing deadline")
 		     ((eq org-log-note-purpose 'note)
 		      "this entry")
 		     (t (error "This should not happen")))))
