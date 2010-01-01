@@ -1902,7 +1902,8 @@ When it is nil, all comments will be removed."
 	(unless
 	    (save-match-data
 	      (or (org-in-regexp org-bracket-link-regexp)
-		  (org-in-regexp org-plain-link-re)))
+		  (org-in-regexp org-plain-link-re)
+		  (org-in-regexp "<<[^<>]+>>")))
 	  (org-if-unprotected
 	   (replace-match "\\1[[\\2]]")))))))
 

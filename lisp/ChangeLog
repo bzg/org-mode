@@ -1,5 +1,8 @@
 2010-01-01  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp.el (org-export-mark-radio-links): Don't match inside
+	<<target>>.
+
 	* org.el (org-format-latex-header-extra): New variable.
 	(org-format-latex): Set org-format-latex-header-extra from
 	in-buffer stuff.
