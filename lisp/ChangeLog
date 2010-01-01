@@ -7,6 +7,8 @@
 	variables on which image creation depends.
 	(org-create-formula-image): Add the header stuff from in-buffer
 	settings.
+	(org-read-date-analyze): Base the analysis for future preference
+	on NOW, not on the default date.
 
 	* org-inlinetask.el (org-inlinetask-export-handler): Add CSS class
 	for TODO keyword in inline tasks.

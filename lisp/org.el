@@ -13342,9 +13342,10 @@ user."
 (defun org-read-date-analyze (ans def defdecode)
   "Analyse the combined answer of the date prompt."
   ;; FIXME: cleanup and comment
-  (let (delta deltan deltaw deltadef year month day
-	      hour minute second wday pm h2 m2 tl wday1
-	      iso-year iso-weekday iso-week iso-year iso-date futurep)
+  (let ((nowdecode (decode-time (current-time)))
+	delta deltan deltaw deltadef year month day
+	hour minute second wday pm h2 m2 tl wday1
+	iso-year iso-weekday iso-week iso-year iso-date futurep)
     (setq org-read-date-analyze-futurep nil)
     (when (string-match "\\`[ \t]*\\.[ \t]*\\'" ans)
       (setq ans "+0"))
@@ -13417,13 +13418,13 @@ user."
 	  day (or (nth 3 tl) (nth 3 defdecode))
 	  month (or (nth 4 tl)
 		    (if (and org-read-date-prefer-future
-			     (nth 3 tl) (< (nth 3 tl) (nth 3 defdecode)))
-			(prog1 (1+ (nth 4 defdecode)) (setq futurep t))
+			     (nth 3 tl) (< (nth 3 tl) (nth 3 nowdecode)))
+			(prog1 (1+ (nth 4 nowdecode)) (setq futurep t))
 		      (nth 4 defdecode)))
 	  year (or (nth 5 tl)
 		   (if (and org-read-date-prefer-future
-			    (nth 4 tl) (< (nth 4 tl) (nth 4 defdecode)))
-		       (prog1 (1+ (nth 5 defdecode)) (setq futurep t))
+			    (nth 4 tl) (< (nth 4 tl) (nth 4 nowdecode)))
+		       (prog1 (1+ (nth 5 nowdecode)) (setq futurep t))
 		     (nth 5 defdecode)))
 	  hour (or (nth 2 tl) (nth 2 defdecode))
 	  minute (or (nth 1 tl) (nth 1 defdecode))
@@ -13432,14 +13433,14 @@ user."
 
     (when (and (eq org-read-date-prefer-future 'time)
 	       (not (nth 3 tl)) (not (nth 4 tl)) (not (nth 5 tl))
-	       (equal day (nth 3 defdecode))
-	       (equal month (nth 4 defdecode))
-	       (equal year (nth 5 defdecode))
+	       (equal day (nth 3 nowdecode))
+	       (equal month (nth 4 nowdecode))
+	       (equal year (nth 5 nowdecode))
 	       (nth 2 tl)
-	       (or (< (nth 2 tl) (nth 2 defdecode))
-		   (and (= (nth 2 tl) (nth 2 defdecode))
+	       (or (< (nth 2 tl) (nth 2 nowdecode))
+		   (and (= (nth 2 tl) (nth 2 nowdecode))
 			(nth 1 tl)
-			(< (nth 1 tl) (nth 1 defdecode)))))
+			(< (nth 1 tl) (nth 1 nowdecode)))))
       (setq day (1+ day)
 	    futurep t))
 
