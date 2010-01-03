@@ -1,5 +1,8 @@
 2010-01-03  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-remember.el (org-select-remember-template): Use C letter to
+	customize remember templates.
+
 	* org-agenda.el (org-agenda-bulk-mark, org-agenda-bulk-unmark):
 	Move cursor to next visible line.
 

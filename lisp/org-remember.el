@@ -351,7 +351,7 @@ RET at beg-of-buf -> Append to file as level 2 headline
 			 org-force-remember-template-char))
 		      (t
 		       (setq msg (format
-				  "Select template: %s"
+				  "Select template: %s%s"
 				  (mapconcat
 				   (lambda (x)
 				     (cond
@@ -362,13 +362,17 @@ RET at beg-of-buf -> Append to file as level 2 headline
 				       (format "[%c]%s" (car x)
 					       (substring (nth 1 x) 1)))
 				      (t (format "[%c]%s" (car x) (nth 1 x)))))
-				   templates " ")))
+				   templates " ")
+				  (if (assoc ?C templates)
+				      ""
+				    " [C]customize templates")))
 		       (let ((inhibit-quit t) char0)
 			 (while (not char0)
 			   (message msg)
 			   (setq char0 (read-char-exclusive))
 			   (when (and (not (assoc char0 templates))
-				      (not (equal char0 ?\C-g)))
+				      (not (equal char0 ?\C-g))
+				      (not (equal char0 ?C)))
 			     (message "No such template \"%c\"" char0)
 			     (ding) (sit-for 1)
 			     (setq char0 nil)))
@@ -376,6 +380,11 @@ RET at beg-of-buf -> Append to file as level 2 headline
 			   (jump-to-register remember-register)
 			   (kill-buffer remember-buffer)
 			   (error "Abort"))
+			 (when (not (assoc char0 templates))
+			   (jump-to-register remember-register)
+			   (kill-buffer remember-buffer)
+			   (customize-variable 'org-remember-templates)
+			   (error "Customize templates"))
 			 char0))))))
       (cddr (assoc char templates)))))
 
