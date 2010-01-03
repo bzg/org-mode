@@ -12337,7 +12337,7 @@ Org-mode website.
 @item
 @i{Alex Bochannek} provided a patch for rounding timestamps.
 @item
-@i{Jan Böcker} wrote @fiel{org-docview.el}.
+@i{Jan Böcker} wrote @file{org-docview.el}.
 @item
 @i{Brad Bozarth} showed how to pull RSS feed data into Org-mode files.
 @item
