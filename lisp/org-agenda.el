@@ -7058,6 +7058,8 @@ This is a command that has to be installed in `calendar-mode-map'."
 			   'evaporate)
       (org-overlay-put ov 'type 'org-marked-entry-overlay))
     (beginning-of-line 2)
+    (while (and (get-char-property (point) 'invisible) (not (eobp)))
+      (beginning-of-line 2))
     (message "%d entries marked for bulk action"
 	     (length org-agenda-bulk-marked-entries))))
 
@@ -7071,6 +7073,8 @@ This is a command that has to be installed in `calendar-mode-map'."
 	  (delete (org-get-at-bol 'org-hd-marker)
 		  org-agenda-bulk-marked-entries)))
   (beginning-of-line 2)
+  (while (and (get-char-property (point) 'invisible) (not (eobp)))
+    (beginning-of-line 2))
   (message "%d entries marked for bulk action"
 	   (length org-agenda-bulk-marked-entries)))
 

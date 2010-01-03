@@ -1,3 +1,8 @@
+2010-01-03  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-agenda.el (org-agenda-bulk-mark, org-agenda-bulk-unmark):
+	Move cursor to next visible line.
+
 2010-01-02  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-beamer.el (org-beamer-sectioning): Leave columns environment
