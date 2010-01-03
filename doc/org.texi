@@ -12337,6 +12337,8 @@ Org-mode website.
 @item
 @i{Alex Bochannek} provided a patch for rounding timestamps.
 @item
+@i{Jan Böcker} wrote @fiel{org-docview.el}.
+@item
 @i{Brad Bozarth} showed how to pull RSS feed data into Org-mode files.
 @item
 @i{Tom Breton} wrote @file{org-choose.el}.
@@ -12478,6 +12480,8 @@ other things.
 @i{Eric Schulte} wrote @file{org-plot.el} and (together with @i{Dan Davison})
 Org Babel, and contributed various patches, small features and modules.
 @item
+@i{Paul Sexton} wrote @file{org-ctags.el}.
+@item
 Linking to VM/BBDB/Gnus was first inspired by @i{Tom Shannon}'s
 @file{organizer-mode.el}.
 @item
@@ -12521,7 +12525,7 @@ learned a lot from it.  John has also contributed a number of great ideas and
 patches directly to Org, including the attachment system
 (@file{org-attach.el}), integration with Apple Mail
 (@file{org-mac-message.el}), hierarchical dependencies of TODO items, habit
-tracking (@file{org-habits.el}) and support for pcomplete.
+tracking (@file{org-habits.el}).
 @item
 @i{Carsten Wimmer} suggested some changes and helped fix a bug in
 linking to Gnus.
