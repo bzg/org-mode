@@ -49,9 +49,11 @@
  
 
                Promote Org-mode and support its development by
-                getting your Org-mode T-shirt, bag, or mug in our stores 
-              (<a href="http://orgmode.spreadshirt.com">US-Shop</a> or
-                <a href="http://orgmode.spreadshirt.de">EU-Shop</a>)
+                getting your Org-mode T-shirt, bag, or mug in either
+                the  
+		<a href="http://orgmode.spreadshirt.com">US-Shop</a>
+		or the
+                <a href="http://orgmode.spreadshirt.de">EU-Shop</a>
               </span>
             </td>
           </tr>
