@@ -270,8 +270,8 @@ create all custom agenda views, for upload to the mobile phone."
   
 (defvar org-mobile-before-process-capture-hook nil
   "Hook that is run after content was moved to `org-mobile-inbox-for-pull'.
-The inbox file is in the current buffer, and the buffer is arrowed to the
-new captured data.")
+The inbox file is visited by the current buffer, and the buffer is
+narrowed to the newly captured data.")
 
 ;;;###autoload
 (defun org-mobile-pull ()
