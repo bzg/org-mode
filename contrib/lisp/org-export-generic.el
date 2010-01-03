@@ -824,7 +824,7 @@ underlined headlines.  The default is 3."
 	    (if org-export-generic-links-to-notes
 		(push (cons desc0 link) link-buffer)
 	      (setq rpl (concat rpl " (" link ")")
-		    wrap (+ (length line) (- (length (match-string 0)))
+		    wrap (+ (length line) (- (length (match-string 0) line))
 			    (length desc)))))
 	  (setq line (replace-match rpl t t line))))
       (when custom-times
