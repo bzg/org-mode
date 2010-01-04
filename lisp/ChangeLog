@@ -1,5 +1,10 @@
 2010-01-04  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-agenda.el (org-get-entries-from-diary): Add the new face to
+	these entries.
+
+	* org-faces.el (org-agenda-diary): New face.
+
 	* org.el (org-make-link-regexps): Allow regexp-special characters
 	in link types.
 	(org-open-file): When in-emacs is `system', also force system

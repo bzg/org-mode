@@ -3757,7 +3757,7 @@ MATCH is being ignored."
 	       (setq x (org-format-agenda-item "" x "Diary" nil 'time))
 	       ;; Extend the text properties to the beginning of the line
 	       (org-add-props x (text-properties-at (1- (length x)) x)
-		 'type "diary" 'date date))
+		 'type "diary" 'date date 'face 'org-agenda-diary))
 	     entries)))))
 
 (defvar org-agenda-cleanup-fancy-diary-hook nil
