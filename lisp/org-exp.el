@@ -384,6 +384,10 @@ This is run just before backend-specific blocks get selected.")
 This is run after blockquote/quote/verse/center have been marked
 with cookies.")
 
+(defvar org-export-preprocess-before-normalizing-links-hook nil
+  "Hook for preprocessing an export buffer.
+This hook is run before links are normalized.")
+
 (defvar org-export-preprocess-before-backend-specifics-hook nil
   "Hook run before backend-specific functions are called during preprocessing.")
 
@@ -1388,6 +1392,7 @@ on this string to produce the exported version."
 
       ;; Normalize links: Convert angle and plain links into bracket links
       ;; and expand link abbreviations
+      (run-hooks 'org-export-preprocess-before-normalizing-links-hook)
       (org-export-normalize-links)
 
       ;; Find all internal links.  If they have a fuzzy match (i.e. not

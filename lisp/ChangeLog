@@ -1,5 +1,16 @@
 2010-01-04  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-make-link-regexps): Allow regexp-special characters
+	in link types.
+	(org-open-file): When in-emacs is `system', also force system
+	opening, like when the value was `(16)'.
+
+	* org-exp.el
+	(org-export-preprocess-before-normalizing-links-hook): New hook.
+	(org-export-preprocess-string): Run the new hook.
+
+	* org.el (org-offer-links-in-entry): Make RET open all links.
+
 	* org-html.el (org-export-as-html): Remove any left-over display
 	properties in the html file.
 

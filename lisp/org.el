@@ -4401,33 +4401,33 @@ Here is what the match groups contain after a match:
 This should be called after the variable `org-link-types' has changed."
   (setq org-link-types-re
 	(concat
-	 "\\`\\(" (mapconcat 'identity org-link-types "\\|") "\\):")
+	 "\\`\\(" (mapconcat 'regexp-quote org-link-types "\\|") "\\):")
 	org-link-re-with-space
 	(concat
-	 "<?\\(" (mapconcat 'identity org-link-types "\\|") "\\):"
+	 "<?\\(" (mapconcat 'regexp-quote org-link-types "\\|") "\\):"
 	 "\\([^" org-non-link-chars " ]"
 	 "[^" org-non-link-chars "]*"
 	 "[^" org-non-link-chars " ]\\)>?")
 	org-link-re-with-space2
 	(concat
-	 "<?\\(" (mapconcat 'identity org-link-types "\\|") "\\):"
+	 "<?\\(" (mapconcat 'regexp-quote org-link-types "\\|") "\\):"
 	 "\\([^" org-non-link-chars " ]"
 	 "[^\t\n\r]*"
 	 "[^" org-non-link-chars " ]\\)>?")
 	org-link-re-with-space3
 	(concat
-	 "<?\\(" (mapconcat 'identity org-link-types "\\|") "\\):"
+	 "<?\\(" (mapconcat 'regexp-quote org-link-types "\\|") "\\):"
 	 "\\([^" org-non-link-chars " ]"
 	 "[^\t\n\r]*\\)")
 	org-angle-link-re
 	(concat
-	 "<\\(" (mapconcat 'identity org-link-types "\\|") "\\):"
+	 "<\\(" (mapconcat 'regexp-quote org-link-types "\\|") "\\):"
 	 "\\([^" org-non-link-chars " ]"
 	 "[^" org-non-link-chars "]*"
 	 "\\)>")
 	org-plain-link-re
 	(concat
-	 "\\<\\(" (mapconcat 'identity org-link-types "\\|") "\\):"
+	 "\\<\\(" (mapconcat 'regexp-quote org-link-types "\\|") "\\):"
 	 (org-re "\\([^ \t\n()<>]+\\(?:([[:word:]0-9]+)\\|\\([^[:punct:] \t\n]\\|/\\)\\)\\)"))
 	;;	 "\\([^]\t\n\r<>() ]+[^]\t\n\r<>,.;() ]\\)")
 	org-bracket-link-regexp
@@ -4435,7 +4435,7 @@ This should be called after the variable `org-link-types' has changed."
 	org-bracket-link-analytic-regexp
 	(concat
 	 "\\[\\["
-	 "\\(\\(" (mapconcat 'identity org-link-types "\\|") "\\):\\)?"
+	 "\\(\\(" (mapconcat 'regexp-quote org-link-types "\\|") "\\):\\)?"
 	 "\\([^]]+\\)"
 	 "\\]"
 	 "\\(\\[" "\\([^]]+\\)" "\\]\\)?"
@@ -4443,7 +4443,7 @@ This should be called after the variable `org-link-types' has changed."
 	org-bracket-link-analytic-regexp++
 	(concat
 	 "\\[\\["
-	 "\\(\\(" (mapconcat 'identity (cons "coderef" org-link-types) "\\|") "\\):\\)?"
+	 "\\(\\(" (mapconcat 'regexp-quote (cons "coderef" org-link-types) "\\|") "\\):\\)?"
 	 "\\([^]]+\\)"
 	 "\\]"
 	 "\\(\\[" "\\([^]]+\\)" "\\]\\)?"
@@ -8583,18 +8583,43 @@ there is one, offer it as link number zero."
 				       (match-string 1 l))))))
 		  links))
 	  (org-fit-window-to-buffer (get-buffer-window "*Select Link*"))
-	  (message "Select link to open:")
+	  (message "Select link to open, RET to open all:")
 	  (setq c (read-char-exclusive))
 	  (and (get-buffer "*Select Link*") (kill-buffer "*Select Link*"))))
       (when (equal c ?q) (error "Abort"))
-      (setq nth (- c ?0))
-      (if have-zero (setq nth (1+ nth)))
-      (unless (and (integerp nth) (>= (length links) nth))
-	(error "Invalid link selection"))
-      (setq link (nth (1- nth) links))))
+      (if (equal c ?\C-m)
+	  (setq link links)
+	(setq nth (- c ?0))
+	(if have-zero (setq nth (1+ nth)))
+	(unless (and (integerp nth) (>= (length links) nth))
+	  (error "Invalid link selection"))
+	(setq link (list (nth (1- nth) links))))))
     (if link
-	(progn (org-open-link-from-string link in-emacs (current-buffer)) t)
+	(let ((buf (current-buffer)))
+	  (dolist (l link)
+	    (org-open-link-from-string l in-emacs buf))
+	  t)
       nil)))
+
+;; Add special file links that specify the way of opening
+
+(org-add-link-type "file+sys" 'org-open-file-with-system)
+(org-add-link-type "file+emacs" 'org-open-file-with-emacs)
+(defun org-open-file-with-system (path)
+  "Open file at PATH using the system way of opeing it."
+  (org-open-file path 'system))
+(defun org-open-file-with-emacs (path)
+  "Open file at PATH in emacs."
+  (org-open-file path 'emacs))
+(defun org-remove-file-link-modifiers ()
+  "Remove the file link modifiers in `file+sys:' and `file+emacs:' links."
+  (goto-char (point-min))
+  (while (re-search-forward "\\<file\\+\\(sys\\|emacs\\):" nil t)
+    (org-if-unprotected
+     (replace-match "file:" t t))))
+(eval-after-load "org-exp"
+  '(add-hook 'org-export-preprocess-before-normalizing-links-hook
+	     'org-remove-file-link-modifiers))
 
 ;;;; Time estimates
 
@@ -8906,7 +8931,7 @@ If no application is found, Emacs simply visits the file.
 
 With optional prefix argument IN-EMACS, Emacs will visit the file.
 With a double C-c C-u prefix arg, Org tries to avoid opening in Emacs
-and o use an external application to visit the file.
+and to use an external application to visit the file.
 
 Optional LINE specifies a line to go to, optional SEARCH a string to
 search for.  If LINE or SEARCH is given, the file will always be
@@ -8933,7 +8958,7 @@ If the file does not exist, an error is thrown."
       (if (string-match "^.*\\.\\([a-zA-Z0-9]+\\)$" dfile)
 	  (setq ext (match-string 1 dfile))))
     (cond
-     ((equal in-emacs '(16))
+     ((member in-emacs '((16) system))
       (setq cmd (cdr (assoc 'system apps))))
      (in-emacs (setq cmd 'emacs))
      (t
@@ -18075,4 +18100,3 @@ Still experimental, may disappear in the future."
 ;; arch-tag: e77da1a7-acc7-4336-b19e-efa25af3f9fd
 
 ;;; org.el ends here
-
