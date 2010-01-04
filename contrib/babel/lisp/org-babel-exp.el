@@ -135,22 +135,10 @@ options are taken from `org-babel-default-header-args'."
     (case type
       ('inline (format "=%s=" (second info)))
       ('block
-	  (when args
-	    (unless (string-match "-i\\>" switches)
-	      (setq switches (concat switches " -i")))
-	    (setq body (with-temp-buffer
-			 (insert body)
-			 (indent-code-rigidly (point-min) (point-max) org-babel-function-def-export-indent)
-			 (buffer-string)))
-	    (setq args (mapconcat #'identity
-				  (delq nil (mapcar (lambda (el) (and (length (cdr el)) (cdr el))) args))
-				  ", "))
-	    (setq function-def-line
-		  (format "#+BEGIN_SRC org-babel-lob\n%s %s(%s):\n#+END_SRC\n"
-			  org-babel-function-def-export-keyword name args)))
-        (concat function-def-line
-                (format "#+BEGIN_SRC %s %s\n%s%s#+END_SRC" lang switches body
+          (let ((str (format "#+BEGIN_SRC %s %s\n%s%s#+END_SRC\n" lang switches body
                         (if (string-match "\n$" body) "" "\n"))))
+            (add-text-properties 0 (length str) (list 'org-caption name) str)
+            str))
       ('lob (save-excursion
 	      (re-search-backward org-babel-lob-one-liner-regexp)
 	      (format "#+BEGIN_SRC org-babel-lob\n%s\n#+END_SRC"

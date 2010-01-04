@@ -2295,7 +2295,7 @@ in the list) and remove property and value from the list in LISTVAR."
   "Replace source code segments with special code for export."
   (setq org-export-last-code-line-counter-value 0)
   (let ((case-fold-search t)
-	lang code trans opts indent)
+	lang code trans opts indent caption)
     (goto-char (point-min))
     (while (re-search-forward
 	    "\\(^\\([ \t]*\\)#\\+BEGIN_SRC:?[ \t]+\\([^ \t\n]+\\)\\(.*\\)\n\\([^\000]+?\n\\)[ \t]*#\\+END_SRC.*\n?\\)\\|\\(^\\([ \t]*\\)#\\+BEGIN_EXAMPLE:?\\(?:[ \t]+\\(.*\\)\\)?\n\\([^\000]+?\n\\)[ \t]*#\\+END_EXAMPLE.*\n?\\)"
@@ -2305,14 +2305,16 @@ in the list) and remove property and value from the list in LISTVAR."
 	  (setq lang (match-string 3)
 		opts (match-string 4)
 		code (match-string 5)
-		indent (length (match-string 2)))
+		indent (length (match-string 2))
+                caption (get-text-property 0 'org-caption (match-string 0)))
 	(setq lang nil
 	      opts (match-string 8)
 	      code (match-string 9)
-	      indent (length (match-string 7))))
+	      indent (length (match-string 7))
+              caption (get-text-property 0 'org-caption (match-string 0))))
 
       (setq trans (org-export-format-source-code-or-example
-		   backend lang code opts indent))
+		   backend lang code opts indent caption))
       (replace-match trans t t))))
 
 (defvar htmlp)  ;; dynamically scoped
@@ -2322,7 +2324,7 @@ in the list) and remove property and value from the list in LISTVAR."
 (defvar org-export-latex-listings-langs) ;; defined in org-latex.el
 
 (defun org-export-format-source-code-or-example
-  (backend lang code &optional opts indent)
+  (backend lang code &optional opts indent caption)
   "Format CODE from language LANG and return it formatted for export.
 If LANG is nil, do not add any fontification.
 OPTS contains formatting options, like `-n' for triggering numbering lines,
@@ -2410,9 +2412,14 @@ INDENT was the original indentation of the block."
 			    (org-export-htmlize-region-for-paste
 			     (point-min) (point-max))))
 		    (if (string-match "<pre\\([^>]*\\)>\n*" rtn)
-			(setq rtn (replace-match
+			(setq rtn
+                              (concat
+                               (if caption
+                                   (format "<label class=\"org-src-name\">%s</label>\n" caption)
+                                 "")
+                               (replace-match
 				   (format "<pre class=\"src src-%s\">\n" lang)
-				   t t rtn))))
+                                t t rtn)))))
 		(if textareap
 		    (setq rtn (concat
 			       (format "<p>\n<textarea cols=\"%d\" rows=\"%d\" overflow-x:scroll >\n"
@@ -2448,9 +2455,10 @@ INDENT was the original indentation of the block."
 					       lang-sym
 					       org-export-latex-listings-langs))
 					     lang)))
-                                     (format "\\lstset{language=%s}\n" lstlang))
+                                     (format "\\lstset{language=%s}" lstlang))
                                  "")
-                               "\\begin{lstlisting}\n"
+                               "\\begin{lstlisting}"
+                               (if caption (format "[title={%s}]\n" caption) "\n")
                                rtn "\\end{lstlisting}\n")
                             (concat (car org-export-latex-verbatim-wrap)
                                     rtn (cdr org-export-latex-verbatim-wrap)))
@@ -2459,7 +2467,8 @@ INDENT was the original indentation of the block."
 	     ((eq backend 'ascii)
 	      ;; This is not HTML or LaTeX, so just make it an example.
 	      (setq rtn (org-export-number-lines rtn 'ascii 0 0 num cont rpllbl fmt))
-	      (concat "#+BEGIN_ASCII\n"
+	      (concat caption "\n"
+                      "#+BEGIN_ASCII\n"
 		      (org-add-props
 			  (concat
 			   (mapconcat
