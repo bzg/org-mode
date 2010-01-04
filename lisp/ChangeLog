@@ -1,3 +1,8 @@
+2010-01-04  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-habit.el (org-habit-insert-consistency-graphs): Turn off
+	invisibility while adding the graphs.
+
 2010-01-03  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-remember.el (org-select-remember-template): Use C letter to
