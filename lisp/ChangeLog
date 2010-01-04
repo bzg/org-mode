@@ -1,5 +1,8 @@
 2010-01-04  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-html.el (org-export-as-html): Remove any left-over display
+	properties in the html file.
+
 	* org-wl.el (org-wl-store-link): Work-around for format bug with
 	text properties.
 

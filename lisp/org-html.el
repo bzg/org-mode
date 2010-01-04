@@ -1474,6 +1474,8 @@ lang=\"%s\" xml:lang=\"%s\">
       ;; Remove empty lines at the beginning of the file.
       (goto-char (point-min))
       (when (looking-at "\\s-+\n") (replace-match ""))
+      ;; Remove display properties
+      (remove-text-properties (point-min) (point-max) '(display t))
       ;; Run the hook
       (run-hooks 'org-export-html-final-hook)
       (or to-buffer (save-buffer))
