@@ -548,7 +548,6 @@ without even the \begin{document} and \end{document} commands.
 when PUB-DIR is set, use this as the publishing directory."
   (interactive "P")
   (run-hooks 'org-export-first-hook)
-  (org-install-letbind)
 
   ;; Make sure we have a file name when we need it.
   (when (and (not (or to-buffer body-only))
@@ -566,6 +565,8 @@ when PUB-DIR is set, use this as the publishing directory."
 			     '(:org-license-to-kill nil))))
   (org-update-radio-target-regexp)
   (org-export-latex-set-initial-vars ext-plist arg)
+  (setq org-export-opt-plist org-export-latex-options-plist)
+  (org-install-letbind)
   (run-hooks 'org-export-latex-after-initial-vars-hook)
   (let* ((wcf (current-window-configuration))
 	 (opt-plist org-export-latex-options-plist)
@@ -585,7 +586,7 @@ when PUB-DIR is set, use this as the publishing directory."
 			      (org-export-add-subtree-options opt-plist rbeg)
 			    opt-plist)))
 	 ;; Make sure the variable contains the updated values.
-	 (org-export-latex-options-plist opt-plist)
+	 (org-export-latex-options-plist (setq org-export-opt-plist opt-plist))
 	 (title (or (and subtree-p (org-export-get-title-from-subtree))
 		    (plist-get opt-plist :title)
 		    (and (not

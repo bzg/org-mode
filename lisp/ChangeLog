@@ -1,5 +1,8 @@
 2010-01-04  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-latex.el (org-export-as-latex): Do the first letbind in the
+	right moment.
+
 	* org-agenda.el (org-get-entries-from-diary): Add the new face to
 	these entries.
 

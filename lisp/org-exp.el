@@ -784,9 +784,10 @@ security risks."
 
 (defun org-install-letbind ()
   "Install the values from #+BIND lines as local variables."
-  (let ((letbind (plist-get org-export-opt-plist :let-bind)))
-    (while letbind
-      (org-set-local (caar letbind) (nth 1 (pop letbind))))))
+  (let ((letbind (plist-get org-export-opt-plist :let-bind))
+	pair)
+    (while (setq pair (pop letbind))
+      (org-set-local (car pair) (nth 1 pair)))))
 
 (defun org-export-add-options-to-plist (p options)
   "Parse an OPTIONS line and set values in the property list P."
