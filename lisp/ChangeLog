@@ -1,3 +1,12 @@
+2010-01-05  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-agenda.el (org-agenda-search-view-always-boolean): New option.
+	(org-agenda-search-view-search-words-only): Obsolete variable, is
+	now an alias for `org-agenda-search-view-always-boolean'.
+	(org-agenda-search-view-force-full-words): New option.
+	(org-search-view): Improve docstring, and implement a better logic
+	for Boolean and phrase searches.
+
 2010-01-04  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-latex.el (org-export-as-latex): Do the first letbind in the

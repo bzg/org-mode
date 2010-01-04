@@ -1,3 +1,8 @@
+2010-01-05  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Search view): Point to the docstring of
+	`org-search-view' for more details.
+
 2009-12-14  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Agenda commands): Document that `>' prompts for a

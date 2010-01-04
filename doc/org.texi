@@ -6958,7 +6958,9 @@ logic.  The search string @samp{+computer +wifi -ethernet -@{8\.11[bg]@}}
 will search for note entries that contain the keywords @code{computer}
 and @code{wifi}, but not the keyword @code{ethernet}, and which are also
 not matched by the regular expression @code{8\.11[bg]}, meaning to
-exclude both 8.11b and 8.11g.
+exclude both 8.11b and 8.11g.  The first @samp{+} is necessary to turn on
+word search, other @samp{+} characters are optional.  For more details, see
+the docstring of the command @code{org-search-view}.
 
 @vindex org-agenda-text-search-extra-files
 Note that in addition to the agenda files, this command will also search
