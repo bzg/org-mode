@@ -4,6 +4,7 @@
 	in link types.
 	(org-open-file): When in-emacs is `system', also force system
 	opening, like when the value was `(16)'.
+	(org-update-statistics-cookies): Handle entries without children.
 
 	* org-exp.el
 	(org-export-preprocess-before-normalizing-links-hook): New hook.

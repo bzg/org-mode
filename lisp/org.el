@@ -10310,7 +10310,12 @@ This should be called with the cursor in a line with a statistics cookie."
 		(progn
 		  (goto-char end)
 		  (org-update-parent-todo-statistics))
-	      (error "No data for statistics cookie"))))
+	      (goto-char pos)
+	      (beginning-of-line 1)
+	      (while (re-search-forward 
+		      "\\(\\(\\[[0-9]*%\\]\\)\\|\\(\\[[0-9]*/[0-9]*\\]\\)\\)"
+		      (point-at-eol) t)
+		(replace-match (if (match-end 2) "[100%]" "[0/0]") t t)))))
 	(goto-char pos)
 	(move-marker pos nil)))))
 
