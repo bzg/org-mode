@@ -104,6 +104,10 @@
 	   (subject (let (wl-thr-indent-string wl-parent-message-entity)
 		      (wl-summary-line-subject)))
 	   desc link)
+     ;; remove text properties of subject string to avoid possible bug
+     ;; when formatting the subject
+     (set-text-properties 0 (length subject) nil subject)
+
      (org-store-link-props :type "wl" :from from :to to
 			    :subject subject :message-id message-id)
      (setq message-id (org-remove-angle-brackets message-id))

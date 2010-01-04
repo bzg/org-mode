@@ -1,5 +1,8 @@
 2010-01-04  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-wl.el (org-wl-store-link): Work-around for format bug with
+	text properties.
+
 	* org-habit.el (org-habit-insert-consistency-graphs): Turn off
 	invisibility while adding the graphs.
 
