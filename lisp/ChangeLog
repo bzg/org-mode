@@ -1,5 +1,8 @@
 2010-01-05  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-offer-links-in-entry): Fix bug when there is a
+	single link.
+
 	* org-exp.el (org-export): Make sure the mark is activated, also
 	when `transient-mark-mode' is off.
 
