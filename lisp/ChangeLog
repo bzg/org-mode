@@ -6,6 +6,9 @@
 	(org-agenda-search-view-force-full-words): New option.
 	(org-search-view): Improve docstring, and implement a better logic
 	for Boolean and phrase searches.
+	(org-agenda-last-search-view-search-was-boolean): New variable.
+	(org-agenda-manipulate-query): Consider the type of the last
+	search when modifying the search string.
 
 2010-01-04  Carsten Dominik  <carsten.dominik@gmail.com>
 

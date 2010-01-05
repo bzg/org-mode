@@ -3231,9 +3231,11 @@ that when \"+Ameli\" is searched as a work, it will also match \"Ameli's\"")
     (modify-syntax-entry ?` "." org-search-syntax-table))
   org-search-syntax-table)
 
+(defvar org-agenda-last-search-view-search-was-boolean nil)
+
 ;;;###autoload
 (defun org-search-view (&optional todo-only string edit-at)
-  "Show all entries that contain words or regular expressions.
+  "Show all entries that contain a phrase or words or regular expressions.
 
 With optional prefix argument TODO-ONLY, only consider entries that are
 TODO entries.  The argument STRING can be used to pass a default search
@@ -3269,8 +3271,8 @@ match in the entry.
   exclamation mark, this also means to look at TODO entries only, an effect
   that can also be achieved with a prefix argument.
 - If (possibly after star and exclamation mark) the seatch string starts
-  with a colon, this will mean that the snippets of the boolean search
-  must match as full words. 
+  with a colon, this will mean that the (non-regexp) snippets of the
+  Boolean search must match as full words. 
 
 This command searches the agenda files, and in addition the files listed
 in `org-agenda-text-search-extra-files'."
@@ -3320,6 +3322,7 @@ in `org-agenda-text-search-extra-files'."
 	    (member (string-to-char string) '(?- ?+ ?\{)))
 	(setq boolean t))
     (setq words (org-split-string words))
+    (setq org-agenda-last-search-view-search-was-boolean boolean)
     (when boolean
       (let (wds w)
 	(while (setq w (pop words))
@@ -5416,8 +5419,10 @@ Negative selection means, regexp must not match for selection of an entry."
    ((eq org-agenda-type 'search)
     (org-add-to-string
      'org-agenda-query-string
-     (cdr (assoc char '((?\[ . " +") (?\] . " -")
-			(?\{ . " +{}") (?\} . " -{}")))))
+     (if org-agenda-last-search-view-search-was-boolean
+	 (cdr (assoc char '((?\[ . " +") (?\] . " -")
+			    (?\{ . " +{}") (?\} . " -{}"))))
+       " "))
     (setq org-agenda-redo-command
 	  (list 'org-search-view
 		org-todo-only
