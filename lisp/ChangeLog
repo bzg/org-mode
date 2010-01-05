@@ -1,5 +1,8 @@
 2010-01-05  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp.el (org-export): Make sure the mark is activated, also
+	when `transient-mark-mode' is off.
+
 	* org-agenda.el (org-agenda-search-view-always-boolean): New option.
 	(org-agenda-search-view-search-words-only): Obsolete variable, is
 	now an alias for `org-agenda-search-view-always-boolean'.

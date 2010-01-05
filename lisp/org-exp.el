@@ -935,7 +935,7 @@ value of `org-export-run-in-background'."
 	  (set-process-sentinel p 'org-export-process-sentinel)
 	  (message "Background process \"%s\": started" p))
       ;; background processing not requested, or not possible
-      (if subtree-p (outline-mark-subtree))
+      (if subtree-p (progn (outline-mark-subtree) (activate-mark)))
       (call-interactively (nth 1 ass)))))
 
 (defun org-export-process-sentinel (process status)
