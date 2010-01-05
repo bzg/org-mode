@@ -9587,13 +9587,13 @@ If you need references to a label created in this way, write
 @subsection Beamer class export
 
 The LaTeX class @file{beamer} allows to produce high quality presentations
-using LaTeX can pdf processing.  Org-mode has special support for turning an
+using LaTeX and pdf processing.  Org-mode has special support for turning an
 Org-mode file or tree into a @file{beamer} presentation.
 
 When the LaTeX class for the current buffer (as set with @code{#+LaTeX_CLASS:
 beamer}) or subtree (set with a @code{LaTeX_CLASS} property) is
 @code{beamer}, a special export mode will turn the file or tree into a beamer
-presentation.  Any tree with not to deep level nesting should in principle be
+presentation.  Any tree with not-to-deep level nesting should in principle be
 exportable as a beamer presentation.  By default, the top-level entries (or
 the first level below the selected subtree heading) will be turned into
 frames, and the outline structure below this level will become itemize lists.
@@ -9627,11 +9627,10 @@ The width of a column that should start with this entry.  If this property is
 set, the entry will also get a @code{:BMCOL:} property to make this visible.
 Also this tag is only a visual aid.  When his is a plain number, it will be
 interpreted as a fraction of @code{\textwidth}.  Otherwise it will be assumed
-that you have specified the units, like @samp{3cm}.
-The first such property in a frame will start a @code{columns} environment to
-surround the columns.  This environment is closed when an entry has a
-@code{BEAMER_col} property with value 0, or automatically at the end of the
-frame.
+that you have specified the units, like @samp{3cm}.  The first such property
+in a frame will start a @code{columns} environment to surround the columns.
+This environment is closed when an entry has a @code{BEAMER_col} property
+with value 0 or 1, or automatically at the end of the frame.
 @item BEAMER_extra
 Additional commands that should be inserted after the environment has been
 opened.  For example, when creating a frame, this can be used to specify
@@ -9644,6 +9643,14 @@ specific code can be inserted using @code{#+BEAMER:} and
 @code{#+BEGIN_beamer...#+end_beamer} constructs, similar to other export
 backends, but with the difference that @code{#+LaTeX:} stuff will be included
 in the presentation as well.
+
+Outline nodes with @code{BEAMER_env} property value @samp{note} or
+@samp{noteNH} will be formatted as beamer notes, i,e, they will be wrapped
+into @code{\note@{...@}}.  The former will include the heading as part of the
+note text, the latter will ignore the heading of that node.  To simplify note
+generation, it is actually enough to mark the note with a @emph{tag} (either
+@code{:B_note:} or @code{:B_noteNH:}) instead of creating the
+@code{BEAMER_env} property.
 
 You can turn on a special minor mode @code{org-beamer-mode} for editing
 support with
@@ -9664,7 +9671,7 @@ important parameters.  Make sure you are using a COLUMN format that is geared
 toward this special purpose.  The command @kbd{M-x
 org-beamer-settings-template} does define such a format.
 
-Here is a simple) example Org document that is intended for beamer export.
+Here is a simple example Org document that is intended for beamer export.
 
 @smallexample
 #+LaTeX_CLASS: beamer
@@ -9692,8 +9699,9 @@ Here is a simple) example Org document that is intended for beamer export.
     :BEAMER_envargs: <2->
     :END:
     for contributing to the discussion
+**** This will be formatted as a beamer note                  :B_note:
 ** Frame 2 \\ where we will not use columns
-*** Request                                                         :B_block:
+*** Request                                                   :B_block:
     Please test this stuff!
 @end smallexample
 

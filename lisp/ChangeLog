@@ -1,5 +1,12 @@
 2010-01-05  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-beamer.el (org-beamer-environments-default): Add the note
+	environments.
+	(org-beamer-after-initial-vars): Allow several BEAMER_HEADER_EXTRA
+	lines and collect and combine the content.
+	(org-beamer-after-initial-vars): Check for note tags and make sure
+	they will be seen like a property.
+
 	* org.el (org-offer-links-in-entry): Fix bug when there is a
 	single link.
 

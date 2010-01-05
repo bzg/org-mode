@@ -93,14 +93,17 @@ These are just a completion help.")
     ("example"        "e" "\\begin{example}%a%U%x"             "\\end{example}")
     ("proof"          "p" "\\begin{proof}%a%U%x"               "\\end{proof}")
     ("beamercolorbox" "o" "\\begin{beamercolorbox}%o{%h}%x"    "\\end{beamercolorbox}")
-    ("normal"         "n" "%h" "")
+    ("normal"         "h" "%h" "") ; Emit the heading as normal text
+    ("note"           "n" "\\note%o%a{%h"                      "}")
+    ("noteNH"         "N" "\\note%o%a{"                        "}") ; note, ignore heading
     ("ignoreheading"  "i" "%%%% %h" ""))
   "Environments triggered by properties in Beamer export.
 These are the defaults - for user definitions, see
 `org-beamer-environments-extra'.
-\"normal\" is a special fake environment.  It is needed when an environment
-should be surrounded by normal text.  Since beamer export converts sections
-into environments, you need to have a headline to end the environment.
+\"normal\" is a special fake environment, which emite the heading as
+normal text. It is needed when an environment should be surrounded
+by normal text.  Since beamer export converts nodes into environments,
+you need to have a node to end the environment.
 For example
 
    ** a frame
@@ -266,6 +269,10 @@ in org-export-latex-classes."
       ;; A beamer environment selected by the BEAMER_env property
       (if (string-match "[ \t]+:[ \t]*$" text)
 	  (setq text (replace-match "" t t text)))
+      (if (member env '("note" "noteNH"))
+	  ;; There should be no labels in a note, so we remove the targets
+	  ;; FIXME???
+	  (remove-text-properties 0 (length text) '(target nil) text))
       (org-beamer-get-special props)
       (setq text (org-trim text))
       (setq have-text (string-match "\\S-" text))
@@ -350,7 +357,9 @@ The need to be after the begin statement of the environment."
       (goto-char (point-min))
       (while (re-search-forward
 	      "^[ \t]*\\\\begin{\\(itemize\\|enumerate\\|desctiption\\)}[ \t\n]*\\\\item\\>\\( ?\\(<[^<>\n]*>\\|\\[[^][\n*]\\]\\)\\)?[ \t]*\\S-" nil t)
-	(if (setq dovl (cdr (assoc "BEAMER_dovl" (get-text-property (match-end 0) 'org-props))))
+	(if (setq dovl (cdr (assoc "BEAMER_dovl"
+				   (get-text-property (match-end 0)
+						      'org-props))))
 	    (save-excursion
 	      (goto-char (1+ (match-end 1)))
 	      (insert dovl)))))))
@@ -426,24 +435,29 @@ The effect is that these values will be accessible during export."
 	      (save-excursion
 		(save-restriction
 		  (widen)
-		  (goto-char (point-min))
-		  (and (re-search-forward
-			"^#\\+BEAMER_HEADER_EXTRA:[ \t]*\\(.*?\\)[ \t]*$" nil t)
-		       (match-string 1))))
+		  (let ((txt ""))
+		    (goto-char (point-min))
+		    (while (re-search-forward
+			    "^#\\+BEAMER_HEADER_EXTRA:[ \t]*\\(.*?\\)[ \t]*$"
+			    nil t)
+		      (setq txt (concat txt "\n" (match-string 1))))
+		    (if (> (length txt) 0) (substring txt 1)))))
 	      (plist-get org-export-latex-options-plist
 			 :beamer-header-extra)))
-    (let ((inhibit-read-only t))
+    (let ((inhibit-read-only t)
+	  (case-fold-search nil)
+	  props)
       (org-unmodified
        (remove-text-properties (point-min) (point-max) '(org-props nil))
        (org-map-entries
-	'(put-text-property (point-at-bol) (point-at-eol) 'org-props
-			    (org-entry-properties nil 'standard)))
+	'(progn
+	   (setq props (org-entry-properties nil 'standard))
+	   (if (and (not (assoc "BEAMER_env" props))
+		    (looking-at ".*?:B_\\(note\\(NH\\)?\\):"))
+	       (push (cons "BEAMER_env" (match-string 1)) props))
+	   (put-text-property (point-at-bol) (point-at-eol) 'org-props props)))
        (setq org-export-latex-options-plist
-	     (plist-put org-export-latex-options-plist :tags nil))
-       (remove-text-properties (point-min) (point-max) '(org-props nil))
-       (org-map-entries
-	'(put-text-property (point-at-bol) (point-at-eol) 'org-props
-			    (org-entry-properties nil 'standard)))))))
+	     (plist-put org-export-latex-options-plist :tags nil))))))
 
 (defun org-beamer-auto-fragile-frames ()
   "Mark any frames containing verbatim environments as fragile.

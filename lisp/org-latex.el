@@ -914,7 +914,11 @@ If NUM, export sections as numerical sections."
       (setq sectioning (funcall (car sectioning) level heading))
       (when sectioning
 	(setq heading (car sectioning)
-	      sectioning (cdr sectioning)))
+	      sectioning (cdr sectioning)
+	      ;; target property migh have changed...
+	      label (org-get-text-property-any 0 'target heading)
+	      label-list (cons label (cdr (assoc label
+						 org-export-target-aliases)))))
       (if sectioning (setq sectioning (make-list 10 sectioning)))
       (setq depth (if sectioning 10000 0)))
     (if (string-match "[ \t]*\\\\\\\\[ \t]*" heading)
