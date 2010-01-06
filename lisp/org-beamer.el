@@ -54,6 +54,12 @@ You can se this to 4 as well, if you at the same time set
 	  (const :tag "Frames need a BEAMER_env property" nil)
 	  (integer :tag "Specific level makes a frame")))
 
+(defcustom org-beamer-frame-default-options ""
+  "Default options string to use for frames, should contains the [brackets].
+And example for this is \"[allowframebreaks]\"."
+  :group 'org-beamer
+  :type '(string :tag "[options]"))
+
 (defcustom org-beamer-column-view-format
   "%45ITEM %10BEAMER_env(Env) %10BEAMER_envargs(Env Args) %4BEAMER_col(Col) %8BEAMER_extra(Extra)"
   "Default column view format that should be used to fill the template."
@@ -67,7 +73,6 @@ When a beamer template is filled, this will be the default for
 BEAMER_HEADER_EXTRA, which will be inserted just before \\begin{document}."
   :group 'org-beamer
   :type '(string :tag "Beamer column view format"))
-
 
 (defconst org-beamer-column-widths
   "0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 0.0 :ETC"
@@ -252,7 +257,7 @@ in org-export-latex-classes."
 		"\\begin{frame}%a%A%o%T%S%x"
 		(list (cons "a" (or action ""))
 		      (cons "A" (or defaction ""))
-		      (cons "o" (or option ""))
+		      (cons "o" (or option org-beamer-frame-default-options ""))
 		      (cons "x" (if extra (concat "\n" extra) ""))
 		      (cons "h" "%s")
 		      (cons "T" (if (string-match "\\S-" text)

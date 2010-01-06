@@ -1,5 +1,9 @@
 2010-01-06  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-beamer.el (org-beamer-frame-default-options): New option.
+	(org-beamer-sectioning): Use default options if the user does not
+	have defined any.
+
 	* org-exp.el (org-export-remove-comment-blocks-and-subtrees): Make
 	sure case-folding works well when processing comment stuff.
 
