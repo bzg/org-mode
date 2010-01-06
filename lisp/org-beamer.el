@@ -492,8 +492,11 @@ This funcion will run in the final LaTeX document."
   (when org-beamer-export-is-beamer-p
     (save-excursion
       (goto-char (point-min))
-      (when (re-search-forward "\\\\setcounter{tocdepth.*\n\\\\tableofcontents.*\n\\(\\\\vspace\\*.*\\)" nil t)
-	(delete-region (match-beginning 1) (match-end 1))))))
+      (when (re-search-forward "\\(\\\\setcounter{tocdepth.*\n\\\\tableofcontents.*\n\\)\\(\\\\vspace\\*.*\\)"
+			       nil t)
+	(replace-match
+	 "\\\\begin{frame}\n\\\\frametitle{Outline}\n\\1\\\\end{frame}"
+	 t nil)))))
 
 (defun org-beamer-property-changed (property value)
   "Track the BEAMER_env property with tags."

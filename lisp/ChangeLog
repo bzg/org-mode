@@ -3,6 +3,7 @@
 	* org-beamer.el (org-beamer-frame-default-options): New option.
 	(org-beamer-sectioning): Use default options if the user does not
 	have defined any.
+	(org-beamer-fix-toc): Put a frame around the table of contents.
 
 	* org-exp.el (org-export-remove-comment-blocks-and-subtrees): Make
 	sure case-folding works well when processing comment stuff.
