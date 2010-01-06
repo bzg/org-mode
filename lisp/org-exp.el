@@ -1866,14 +1866,16 @@ table line.  If it is a link, add it to the line containing the link."
 (defun org-export-remove-comment-blocks-and-subtrees ()
   "Remove the comment environment, and also commented subtrees."
   (let ((re-commented (concat "^\\*+[ \t]+" org-comment-string "\\>"))
-	(case-fold-search nil))
+	case-fold-search)
     ;; Remove comment environment
     (goto-char (point-min))
+    (setq case-fold-search t)
     (while (re-search-forward
-	    "^#\\+BEGIN_COMMENT[ \t]*\n[^\000]*?^#\\+END_COMMENT\\>.*" nil t)
+	    "^#\\+begin_comment[ \t]*\n[^\000]*?^#\\+end_comment\\>.*" nil t)
       (replace-match "" t t))
     ;; Remove subtrees that are commented
     (goto-char (point-min))
+    (setq case-fold-search nil)
     (while (re-search-forward re-commented nil t)
       (goto-char (match-beginning 0))
       (delete-region (point) (org-end-of-subtree t)))))

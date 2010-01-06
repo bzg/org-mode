@@ -1,5 +1,8 @@
 2010-01-06  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp.el (org-export-remove-comment-blocks-and-subtrees): Make
+	sure case-folding works well when processing comment stuff.
+
 	* org-latex.el (org-export-latex-after-save-hook): New hook.
 	(org-export-as-latex): Run the new hook.
 
