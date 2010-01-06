@@ -447,6 +447,9 @@ have been determined from the environment.")
 (defvar org-export-latex-final-hook nil
   "Hook run in the finalized LaTeX buffer.")
 
+(defvar org-export-latex-after-save-hook nil
+  "Hook run in the finalized LaTeX buffer, after it has been saved.")
+
 ;;; Autoload functions:
 
 ;;;###autoload
@@ -743,6 +746,7 @@ when PUB-DIR is set, use this as the publishing directory."
 
     (run-hooks 'org-export-latex-final-hook)
     (or to-buffer (save-buffer))
+    (run-hooks 'org-export-latex-after-save-hook)
     (goto-char (point-min))
     (or (org-export-push-to-kill-ring "LaTeX")
 	(message "Exporting to LaTeX...done"))
