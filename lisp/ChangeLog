@@ -1,3 +1,8 @@
+2010-01-07  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-compute-latex-and-specials-regexp): Don't do BIND
+	just for computing this regexp.
+
 2010-01-06  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-beamer.el (org-beamer-frame-default-options): New option.

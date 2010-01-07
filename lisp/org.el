@@ -4802,6 +4802,7 @@ will be prompted for."
 	((matchers (plist-get org-format-latex-options :matchers))
 	 (latexs (delq nil (mapcar (lambda (x) (if (member (car x) matchers) x))
 				   org-latex-regexps)))
+	 (org-export-confirm-letbind nil)
 	 (options (org-combine-plists (org-default-export-plist)
 				      (org-infile-export-plist)))
 	 (org-export-with-sub-superscripts (plist-get options :sub-superscript))
