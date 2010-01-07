@@ -370,13 +370,21 @@ The need to be after the begin statement of the environment."
 	      (insert dovl)))))))
 
 (defun org-beamer-amend-header ()
+  "Add `org-beamer-header-extra' to the LaTeX herder.
+If the file contains the string BEAMER-HEADER-EXTRA-HERE on a line
+by itself, it will be replaced with `org-beamer-header-extra'.  If not,
+the value will be inserted right after the documentclass statement."
   (when (and org-beamer-export-is-beamer-p
 	     org-beamer-header-extra)
     (goto-char (point-min))
-    (when (re-search-forward "^[ \t]*\\\\begin{document}" nil t)
-      (goto-char (match-beginning 0))
+    (cond
+     ((re-search-forward "^[ \t]*BEAMER-HEADER-EXTRA-HERE[ \t]*$" nil t)
+      (replace-match org-beamer-header-extra t t)
+      (or (bolp) (insert "\n")))
+     ((re-search-forward "^[ \t]*\\\\documentclass\\>" nil t)
+      (beginning-of-line 2)
       (insert org-beamer-header-extra)
-      (or (bolp) (insert "\n")))))
+      (or (bolp) (insert "\n"))))))
 
 (defcustom org-beamer-fragile-re "^[ \t]*\\\\begin{verbatim}"
   "If this regexp matches in a frame, the frame is marked as fragile."

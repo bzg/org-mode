@@ -1,5 +1,8 @@
 2010-01-07  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-beamer.el (org-beamer-amend-header): Change the location
+	where `org-beamer-header-extra' is inserted.
+
 	* org.el (org-compute-latex-and-specials-regexp): Don't do BIND
 	just for computing this regexp.
 
