@@ -5516,6 +5516,7 @@ With prefix ARG, go backward that many times the current span."
       (?m (call-interactively 'org-agenda-month-view))
       (?y (call-interactively 'org-agenda-year-view))
       (?l (call-interactively 'org-agenda-log-mode))
+      (?L (org-agenda-log-mode '(4)))
       ((?F ?f) (call-interactively 'org-agenda-follow-mode))
       (?a (call-interactively 'org-agenda-archives-mode))
       (?A (org-agenda-archives-mode 'files))

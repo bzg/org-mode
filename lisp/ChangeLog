@@ -1,5 +1,8 @@
 2010-01-07  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-agenda.el (org-agenda-view-mode-dispatch): Define the `L'
+	key.
+
 	* org-beamer.el (org-beamer-amend-header): Change the location
 	where `org-beamer-header-extra' is inserted.
 

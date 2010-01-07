@@ -7269,6 +7269,7 @@ Prompt for a date and go there.
 Toggle the inclusion of diary entries.  See @ref{Weekly/daily agenda}.
 @c
 @kindex v l
+@kindex v L
 @kindex l
 @item v l @ @r{or short} @ l
 @vindex org-log-done
@@ -7280,6 +7281,7 @@ types that should be included in log mode using the variable
 @code{org-agenda-log-mode-items}.  When called with a @kbd{C-u} prefix, show
 all possible logbook entries, including state changes.  When called with two
 prefix args @kbd{C-u C-u}, show only logging information, nothing else.
+@kbd{v L} is equivalent to @kbd{C-u v l}.
 @c
 @kindex v [
 @kindex [
