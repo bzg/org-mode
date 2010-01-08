@@ -1,5 +1,8 @@
 2010-01-08  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-ascii.el (org-export-ascii-preprocess): Protect targets in
+	verbatim code for ASCII export.
+
 	* org.el (org-update-statistics-cookies): Also see checkboxes in
 	ordered lists.
 

@@ -494,7 +494,8 @@ publishing directory."
   ;; Remove target markers
   (goto-char (point-min))
   (while (re-search-forward  "<<<?\\([^<>]*\\)>>>?\\([ \t]*\\)" nil t)
-    (replace-match "\\1\\2")))
+    (org-if-unprotected-at (match-beginning 1)
+      (replace-match "\\1\\2"))))
 
 (defun org-html-expand-for-ascii (line)
   "Handle quoted HTML for ASCII export."
