@@ -1,3 +1,8 @@
+2010-01-08  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-update-statistics-cookies): Also see checkboxes in
+	ordered lists.
+
 2010-01-07  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-agenda.el (org-agenda-view-mode-dispatch): Define the `L'

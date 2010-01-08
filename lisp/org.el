@@ -10302,8 +10302,9 @@ This should be called with the cursor in a line with a statistics cookie."
 		      (outline-next-heading)
 		      (if (org-on-heading-p) (setq l2 (org-outline-level)))
 		      (point)))
-	  (if (and (save-excursion (re-search-forward
-				    "^[ \t]*[-+*] \\[[- X]\\]" end t))
+	  (if (and (save-excursion
+		     (re-search-forward
+		      "^[ \t]*\\([-+*]\\|[0-9]+[.)]\\) \\[[- X]\\]" end t))
 		   (not (save-excursion (re-search-forward
 					 ":COOKIE_DATA:.*\\<todo\\>" end t))))
 	      (org-update-checkbox-count)
