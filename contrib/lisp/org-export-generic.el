@@ -949,6 +949,15 @@ underlined headlines.  The default is 3."
 		      (org-export-generic-wrap line bodylinewrap))
 	      (setq line line)))
 	(insert (format bodylineform line)))))
+
+    ;; if we're at a level > 0; insert the closing body level stuff
+    (let ((counter 0))
+      (while (> (- level counter) 0)
+	(insert
+	 (org-export-generic-format export-plist :body-section-suffix 0
+				    (- level counter)))
+	(setq counter (1+ counter))))
+
     (org-export-generic-check-section "bottom")
 
     (org-export-generic-push-links (nreverse link-buffer))
