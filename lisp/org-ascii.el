@@ -486,11 +486,12 @@ publishing directory."
   ;; Put quotes around verbatim text
   (goto-char (point-min))
   (while (re-search-forward org-verbatim-re nil t)
-    (goto-char (match-end 2))
-    (backward-delete-char 1) (insert "'")
-    (goto-char (match-beginning 2))
-    (delete-char 1) (insert "`")
-    (goto-char (match-end 2)))
+    (org-if-unprotected-at (match-beginning 4)
+      (goto-char (match-end 2))
+      (backward-delete-char 1) (insert "'")
+      (goto-char (match-beginning 2))
+      (delete-char 1) (insert "`")
+      (goto-char (match-end 2))))
   ;; Remove target markers
   (goto-char (point-min))
   (while (re-search-forward  "<<<?\\([^<>]*\\)>>>?\\([ \t]*\\)" nil t)
