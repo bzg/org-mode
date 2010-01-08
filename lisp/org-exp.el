@@ -1020,6 +1020,7 @@ value of `org-export-run-in-background'."
     ("aring")
     ("aelig")
     ("ccedil")
+    ("checkmark" . "&#10003;")
     ("egrave")
     ("eacute")
     ("ecirc")
