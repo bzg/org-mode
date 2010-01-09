@@ -1,3 +1,8 @@
+2010-01-09  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-indent.el (org-indent-add-properties): Catch case when there
+	is no headline in the buffer.
+
 2010-01-08  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-exp.el (org-html-entities): Add checkmark symbol.

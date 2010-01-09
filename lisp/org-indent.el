@@ -227,7 +227,7 @@ Assumes that BEG is at the beginning of a line."
 	      b  e (list 'line-prefix (aref org-indent-strings n)
 			 'wrap-prefix (aref org-indent-strings n))))
 	   (setq b (1+ (point-at-eol))
-		 n (* level org-indent-indentation-per-level))))))))
+		 n (* (or level 0) org-indent-indentation-per-level))))))))
 
 (defun org-indent-refresh-section ()
   "Refresh indentation properties in the current outline section.
