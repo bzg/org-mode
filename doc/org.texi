@@ -3,8 +3,8 @@
 @setfilename ../../info/org
 @settitle The Org Manual
 
-@set VERSION 6.33trans
-@set DATE November 2009
+@set VERSION 3.34
+@set DATE January 2010
 
 @c Version and Contact Info
 @set MAINTAINERSITE @uref{http://orgmode.org,maintainers webpage}
