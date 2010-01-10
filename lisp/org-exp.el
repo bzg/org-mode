@@ -852,27 +852,24 @@ value of `org-export-run-in-background'."
 	 (help "[t]   insert the export option template
 \[v]   limit export to visible part of outline tree
 \[1]   only export the current subtree
+\[SPC] publish enclosing subtree (with LaTeX_CLASS or EXPORT_FILE_NAME prop)
 
-\[a] export as ASCII   [A] to temporary buffer
+\[a] export as ASCII     [A] to temporary buffer
 
-\[h] export as HTML    [H] to temporary buffer   [R] export region
+\[h] export as HTML      [H] to temporary buffer   [R] export region
 \[b] export as HTML and open in browser
 
-\[l] export as LaTeX   [L] to temporary buffer
-\[p] export as LaTeX and process to PDF
-\[d] export as LaTeX, process to PDF, and open the resulting PDF document
+\[l] export as LaTeX     [L] to temporary buffer
+\[p] export as LaTeX and process to PDF            [d] ... and open PDF file
 
-\[D] export as DocBook
-\[V] export as DocBook, process to PDF, and open the resulting PDF document
+\[D] export as DocBook   [V] export as DocBook, process to PDF, and open
 
 \[m] export as Freemind mind map
-
 \[x] export as XOXO
 \[g] export using Wes Hardaker's generic exporter
 
 \[i] export current file as iCalendar file
-\[I] export all agenda files as iCalendar files
-\[c] export agenda files into combined iCalendar file
+\[I] export all agenda files as iCalendar files   [c] ...as one combined file
 
 \[F] publish current file          [P] publish current project
 \[X] publish a project...          [E] publish every projects")
@@ -901,7 +898,8 @@ value of `org-export-run-in-background'."
 	    (?P org-publish-current-project t)
 	    (?X org-publish t)
 	    (?E org-publish-all t)))
-	 r1 r2 ass)
+	 r1 r2 ass
+	 (cpos (point)) (cbuf (current-buffer)) bpos)
     (save-excursion
       (save-window-excursion
 	(delete-other-windows)
@@ -914,7 +912,21 @@ value of `org-export-run-in-background'."
 	(when (eq r1 ?1)
 	  (setq subtree-p t)
 	  (message "Select command (for subtree): ")
-	  (setq r1 (read-char-exclusive)))))
+	  (setq r1 (read-char-exclusive)))
+	(when (eq r1 ?\ )
+	  (let ((case-fold-search t))
+	    (if (re-search-backward
+		 "^[ \t]+\\(:latex_class:\\|:export_title:\\)[ \t]+\\S-"
+		 nil t)
+		(progn
+		  (org-back-to-heading t)
+		  (setq subtree-p t)
+		  (setq bpos (point))
+		  (message "Select command (for subtree): ")
+		  (setq r1 (read-char-exclusive)))
+	      (error "No enclosing node with LaTeX_CLASS or EXPORT_FILE_NAME")
+	      )))))
+    (and bpos (goto-char bpos))
     (setq r2 (if (< r1 27) (+ r1 96) r1))
     (unless (setq ass (assq r2 cmds))
       (error "No command associated with key %c" r1))
@@ -936,7 +948,13 @@ value of `org-export-run-in-background'."
 	  (message "Background process \"%s\": started" p))
       ;; background processing not requested, or not possible
       (if subtree-p (progn (outline-mark-subtree) (activate-mark)))
-      (call-interactively (nth 1 ass)))))
+      (call-interactively (nth 1 ass))
+      (when (and bpos (get-buffer-window cbuf))
+	(let ((cw (selected-window)))
+	  (select-window (get-buffer-window cbuf))
+	  (goto-char cpos)
+	  (deactivate-mark)
+	  (select-window cw))))))
 
 (defun org-export-process-sentinel (process status)
   (if (string-match "\n+\\'" status)

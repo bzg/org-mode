@@ -1,3 +1,8 @@
+2010-01-10  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-exp.el (org-export): New key SPC to publish enclosing
+	subtree.
+
 2010-01-09  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-indent.el (org-indent-add-properties): Catch case when there
