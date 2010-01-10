@@ -1,5 +1,8 @@
 2010-01-10  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-latex.el (org-export-latex-fix-inputenc): New function.
+	(org-export-latex-inputenc-alist): New option.
+
 	* org-exp.el (org-export): New key SPC to publish enclosing
 	subtree.
 

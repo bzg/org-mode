@@ -197,6 +197,21 @@ sectioning list in the cdr."
 			       (string :tag "Closing (unnumbered)"))
 			 (function :tag "Hook computing sectioning"))))))
 
+(defcustom org-export-latex-inputenc-alist nil
+  "Alist of inputenc coding system names, and what should really be used.
+For example, adding an entry
+
+      (\"utf8\" . \"utf8x\")
+
+will cause \\usepackage[utf8x]{inputenc} to be used for buffers that
+are written as utf8 files."
+  :group 'org-export-latex
+  :type '(repeat
+	  (cons
+	   (string :tag "Derived from buffer")
+	   (string :tag "Use this instead"))))
+
+
 (defcustom org-export-latex-emphasis-alist
   '(("*" "\\textbf{%s}" nil)
     ("/" "\\emph{%s}" nil)
@@ -746,6 +761,7 @@ when PUB-DIR is set, use this as the publishing directory."
 
     (run-hooks 'org-export-latex-final-hook)
     (or to-buffer (save-buffer))
+    (org-export-latex-fix-inputenc)
     (run-hooks 'org-export-latex-after-save-hook)
     (goto-char (point-min))
     (or (org-export-push-to-kill-ring "LaTeX")
@@ -1991,6 +2007,22 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
       (org-if-unprotected
        (replace-match "")))))
 
+(defun org-export-latex-fix-inputenc ()
+  "Set the codingsystem in inputenc to what the buffer is."
+  (let* ((cs buffer-file-coding-system)
+	 (opt (latexenc-coding-system-to-inputenc cs)))
+    (when opt
+      ;; Translate if that is requested
+      (setq opt (or (cdr (assoc opt org-export-latex-inputenc-alist)) opt))
+      ;; find the \usepackage statement and replace the option
+      (goto-char (point-min))
+      (while (re-search-forward "\\\\usepackage\\[\\(.*?\\)\\]{inputenc}"
+				nil t)
+	(goto-char (match-beginning 1))
+	(delete-region (match-beginning 1) (match-end 1))
+	(insert opt))
+      (save-buffer))))
+
 ;;; List handling:
 
 (defun org-export-latex-lists ()
@@ -2200,3 +2232,19 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 ;; arch-tag: 23c2b87d-da04-4c2d-ad2d-1eb6487bc3ad
 
 ;;; org-latex.el ends here
+
+(defun org-export-latex-fix-inputenc ()
+  "Set the codingsystem in inputenc to what the buffer is."
+  (let* ((cs buffer-file-coding-system)
+	 (opt (latexenc-coding-system-to-inputenc cs)))
+    (when opt
+      ;; Translate if that is requested
+      (setq opt (or (cdr (assoc opt org-export-latex-inputenc-alist) opt)))
+      ;; find the \usepackage statement and replace the option
+      (goto-char (point-min))
+      (while (re-search-forward "\\\\usepackage\\[\\(.*?\\)\\]{inputenc}"
+				nil t)
+	(goto-char (match-beginning 1))
+	(delete-region (match-beginning 1) (match-end 1))
+	(insert opt))
+      (save-buffer))))
