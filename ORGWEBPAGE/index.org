@@ -117,7 +117,7 @@ a look at our [[http://orgmode.org/worg/org-quotes.php][collected quotes about O
 #+ATTR_HTML: style="float:right;"
   [[http://mobileorg.ncogni.to/][http://mobileorg.ncogni.to/images/screenshot-browse.png]]
 
-- <2010-01-10 Sun>: Release 6.33
+- <2010-01-10 Sun>: Release 6.34
 - <2009-12-15 Tue>: iPhone App [[http://mobileorg.ncogni.to/][MobileOrg]] version 1.1 available
 - <2009-11-13 Fri>: Release 6.33
 - <2009-11-03 Tue>: iPhone App [[http://mobileorg.ncogni.to/][MobileOrg]] available in the AppStore
