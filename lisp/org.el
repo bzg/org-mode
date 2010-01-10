@@ -12976,8 +12976,8 @@ The functions must take a single argument, the name of the property, and
 return a flat list of allowed values.  If \":ETC\" is one of
 the values, this means that these values are intended as defaults for
 completion, but that other values should be allowed too.
-The functions must return nil if they are now responsible for this
-prioerty.")
+The functions must return nil if they are not responsible for this
+property.")
 
 (defun org-property-get-allowed-values (pom property &optional table)
   "Get allowed values for the property PROPERTY.

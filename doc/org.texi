@@ -12054,6 +12054,15 @@ Treat the value of the property PROPERTY as a whitespace-separated list of
 values and check if VALUE is in this list.
 @end defun
 
+@defopt org-property-allowed-value-functions
+Hook for functions supplying allowed values for specific.
+The functions must take a single argument, the name of the property, and
+return a flat list of allowed values.  If @samp{:ETC} is one of
+the values, use the values as completion help, but allow also other values
+to be entered.  The functions must return @code{nil} if they are not
+responsible for this property.
+@end defopt
+
 @node Using the mapping API,  , Using the property API, Hacking
 @section Using the mapping API
 @cindex API, for mapping
