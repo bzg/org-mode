@@ -184,7 +184,10 @@ or nil if \"none\" is specified"
   "Finish setting up the bindings of org-babel session to a slime-clojure repl"
   (let ((pending-session (pop org-babel-clojure-pending-sessions)))
     (when pending-session
-      (org-babel-clojure-bind-session-to-repl-buffer pending-session (slime-output-buffer)))))
+      (save-excursion
+        (switch-to-buffer (slime-output-buffer))
+        (rename-buffer (if (stringp pending-session) pending-session (symbol-name pending-session)))
+        (org-babel-clojure-bind-session-to-repl-buffer pending-session (slime-output-buffer))))))
 
 (add-hook 'slime-connected-hook 'org-babel-clojure-session-connected-hook)
 

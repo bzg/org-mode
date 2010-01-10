@@ -865,7 +865,9 @@ parameters when merging lists."
 			(:file
 			 (when (cdr pair)
 			   (setq results (e-merge results-exclusive-groups results '("file")))
-			   (unless (or (member "both" exports) (member "none" exports))
+			   (unless (or (member "both" exports)
+                                       (member "none" exports)
+                                       (member "code" exports))
 			     (setq exports (e-merge exports-exclusive-groups exports '("results"))))
 			   (setq params (cons pair (assq-delete-all (car pair) params)))))
                         (:exports
