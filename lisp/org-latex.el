@@ -2232,19 +2232,3 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 ;; arch-tag: 23c2b87d-da04-4c2d-ad2d-1eb6487bc3ad
 
 ;;; org-latex.el ends here
-
-(defun org-export-latex-fix-inputenc ()
-  "Set the codingsystem in inputenc to what the buffer is."
-  (let* ((cs buffer-file-coding-system)
-	 (opt (latexenc-coding-system-to-inputenc cs)))
-    (when opt
-      ;; Translate if that is requested
-      (setq opt (or (cdr (assoc opt org-export-latex-inputenc-alist) opt)))
-      ;; find the \usepackage statement and replace the option
-      (goto-char (point-min))
-      (while (re-search-forward "\\\\usepackage\\[\\(.*?\\)\\]{inputenc}"
-				nil t)
-	(goto-char (match-beginning 1))
-	(delete-region (match-beginning 1) (match-end 1))
-	(insert opt))
-      (save-buffer))))
