@@ -294,7 +294,8 @@ results already exist."
       t)))
 
 (defun org-babel-execute-buffer (&optional arg)
-  "Replace EVAL snippets in the entire buffer."
+  "Call `org-babel-execute-src-block' on every source block in
+the current buffer."
   (interactive "P")
   (save-excursion
     (goto-char (point-min))
@@ -304,7 +305,8 @@ results already exist."
       (goto-char (match-end 0)))))
 
 (defun org-babel-execute-subtree (&optional arg)
-  "Replace EVAL snippets in the entire subtree."
+  "Call `org-babel-execute-src-block' on every source block in
+the current subtree."
   (interactive "P")
   (save-excursion
     (org-narrow-to-subtree)
