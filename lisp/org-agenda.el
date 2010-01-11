@@ -4762,16 +4762,16 @@ The modified list may contain inherited tags, and tags matched by
   (when (or add-inherited hide-re)
     (if (string-match (org-re "\\([ \t]+\\)\\(:[[:alnum:]_@:]+:\\)[ \t]*$") txt)
 	(setq txt (substring txt 0 (match-beginning 0))))
+    (setq tags
+	  (delq nil
+		(mapcar (lambda (tg)
+			  (if (or (and hide-re (string-match hide-re tg))
+				  (and (not add-inherited)
+				       (get-text-property 0 'inherited tg)))
+			      nil
+			    tg))
+			tags)))
     (when tags
-      (setq tags
-	    (delq nil
-		  (mapcar (lambda (tg)
-			    (if (or (and hide-re (string-match hide-re tg))
-				    (and (not add-inherited)
-					 (get-text-property 0 'inherited tg)))
-				nil
-			      tg))
-			  tags)))
       (let ((have-i (get-text-property 0 'inherited (car tags)))
 	    i)
 	(setq txt (concat txt " :"
