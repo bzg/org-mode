@@ -28,7 +28,7 @@ originally.
 Org-mode documents or subtrees can now be converted directly in
 to BEAMER presentation.  Turning a tree into a simple
 presentations is straight forward, and there is also quite some
-support to make richer presentations as well.  See the [[http://orgmode.org/manual/Beamer-class-export#Beamer-class-export][BEAMER
+support to make richer presentations as well.  See the [[http://orgmode.org/manual/Beamer-class-export.html#Beamer-class-export][BEAMER
 section]] in the manual for more details.
 
 Thanks to everyone who has contributed to the discussion about
