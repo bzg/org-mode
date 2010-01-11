@@ -76,13 +76,22 @@ called by `org-babel-execute-src-block'."
                                (car pair)
                                (org-babel-ruby-var-to-ruby (cdr pair))))
                      vars)))
-    ;; (message "vars=%S" vars) ;; debugging
     (org-babel-comint-in-buffer session
       (sit-for .5) (goto-char (point-max))
       (mapc (lambda (var)
               (insert var) (comint-send-input nil t)
               (org-babel-comint-wait-for-output session)
-              (sit-for .1) (goto-char (point-max))) var-lines))))
+              (sit-for .1) (goto-char (point-max))) var-lines))
+    session))
+
+(defun org-babel-load-session:ruby (session body params)
+  "Load BODY into SESSION."
+  (save-window-excursion
+    (let ((buffer (org-babel-prep-session:ruby session params)))
+      (with-current-buffer buffer
+        (goto-char (process-mark (get-buffer-process (current-buffer))))
+        (insert (org-babel-chomp body)))
+      buffer)))
 
 ;; helper functions
 

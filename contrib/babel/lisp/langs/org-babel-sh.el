@@ -66,7 +66,17 @@ function is called by `org-babel-execute-src-block'."
     (org-babel-comint-in-buffer session
       (mapc (lambda (var)
               (insert var) (comint-send-input nil t)
-              (org-babel-comint-wait-for-output session)) var-lines))))
+              (org-babel-comint-wait-for-output session)) var-lines))
+    session))
+
+(defun org-babel-load-session:sh (session body params)
+  "Load BODY into SESSION."
+  (save-window-excursion
+    (let ((buffer (org-babel-prep-session:sh session params)))
+      (with-current-buffer buffer
+        (goto-char (process-mark (get-buffer-process (current-buffer))))
+        (insert (org-babel-chomp body)))
+      buffer)))
 
 ;; helper functions
 

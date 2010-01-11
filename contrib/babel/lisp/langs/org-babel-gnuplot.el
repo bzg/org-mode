@@ -143,14 +143,25 @@ called by `org-babel-execute-src-block'."
   "Prepare SESSION according to the header arguments specified in PARAMS."
   (let* ((session (org-babel-gnuplot-initiate-session session))
          (vars (org-babel-ref-variables params))
-         (var-lines (mapconc
+         (var-lines (mapcar
                      (lambda (pair) (format "%s = \"%s\"" (car pair) (cdr pair)))
                      vars)))
+    (message "%S" session)
     (org-babel-comint-in-buffer session
       (mapc (lambda (var-line)
               (insert var-line) (comint-send-input nil t)
               (org-babel-comint-wait-for-output session)
-              (sit-for .1) (goto-char (point-max))) var-lines))))
+              (sit-for .1) (goto-char (point-max))) var-lines))
+    session))
+
+(defun org-babel-load-session:gnuplot (session body params)
+  "Load BODY into SESSION."
+  (save-window-excursion
+    (let ((buffer (org-babel-prep-session:gnuplot session params)))
+      (with-current-buffer buffer
+        (goto-char (process-mark (get-buffer-process (current-buffer))))
+        (insert (org-babel-chomp body)))
+      buffer)))
 
 (defun org-babel-gnuplot-initiate-session (&optional session)
   "If there is not a current inferior-process-buffer in SESSION
@@ -158,7 +169,7 @@ then create.  Return the initialized session.  The current
 `gnuplot-mode' doesn't provide support for multiple sessions."
   (unless (string= session "none")
     (save-window-excursion (gnuplot-send-string-to-gnuplot "" "line")
-                           (current-buffer))))
+                           gnuplot-buffer)))
 
 (defun org-babel-gnuplot-quote-timestamp-field (s)
   "Convert field S from timestamp to Unix time and export to gnuplot."

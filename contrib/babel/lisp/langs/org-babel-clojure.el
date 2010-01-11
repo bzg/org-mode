@@ -140,6 +140,15 @@ specifying a var of the same value."
                      vars)))
     session-buf))
 
+(defun org-babel-load-session:clojure (session body params)
+  "Load BODY into SESSION."
+  (save-window-excursion
+    (let ((buffer (org-babel-prep-session:clojure session params)))
+      (with-current-buffer buffer
+        (goto-char (point-max))
+        (insert (org-babel-chomp body)))
+      buffer)))
+
 (defvar org-babel-clojure-buffers '())
 (defvar org-babel-clojure-pending-sessions '())
 
