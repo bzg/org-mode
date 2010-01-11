@@ -2436,7 +2436,8 @@ INDENT was the original indentation of the block."
 			(setq rtn
                               (concat
                                (if caption
-                                   (format "<label class=\"org-src-name\">%s</label>\n" caption)
+                                   (format "<label class=\"org-src-name\">%s  &equiv</label>\n"
+                                           caption)
                                  "")
                                (replace-match
 				   (format "<pre class=\"src src-%s\">\n" lang)
@@ -2476,10 +2477,11 @@ INDENT was the original indentation of the block."
 					       lang-sym
 					       org-export-latex-listings-langs))
 					     lang)))
-                                     (format "\\lstset{language=%s}" lstlang))
-                                 "")
-                               "\\begin{lstlisting}"
-                               (if caption (format "[title={%s}]\n" caption) "\n")
+                                     (format "\\lstset{language=%s}\n" lstlang))
+                                 "\n")
+                               (when caption
+                                 (format "%s $\\equiv$ \n" caption))
+                               "\\begin{lstlisting}\n"
                                rtn "\\end{lstlisting}\n")
                             (concat (car org-export-latex-verbatim-wrap)
                                     rtn (cdr org-export-latex-verbatim-wrap)))
