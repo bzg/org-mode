@@ -900,10 +900,12 @@ strings.
 
 When this is non-nil, the string will be split on whitespace, and each
 snippet will be searched individually, and all must match in order to
-select an entry.  If a snippet is preceeded by \"-\", the snippet
-must *not* match.  \"+\" is syntactic sugar for positive selection.
-Each snippet may be found as a full word or a partial word, but see
-the variable `org-agenda-search-view-force-full-words'.
+select an entry.  A snippet is then a single string of non-white
+characters, or a string in double quotes, or a regexp in {} braces.
+If a snippet is preceeded by \"-\", the snippet must *not* match.
+\"+\" is syntactic sugar for positive selection.  Each snippet may
+be found as a full word or a partial word, but see the variable
+`org-agenda-search-view-force-full-words'.
 
 When this is nil, search will look for the entire search phrase as one,
 with each space character matching any amount of whitespace, including
@@ -3264,7 +3266,8 @@ match whole words, not parts of a word) if
 
 Boolean search snippets enclosed by curly braces are interpreted as
 regular expressions that must or (when preceeded with \"-\") must not
-match in the entry.
+match in the entry.  Snippets enclosed into double quotes will be taken
+as a whole, to incude whitespace.
 
 - If the search string starts with an asterisk, search only in headlines.
 - If (possibly after the leading star) the search string starts with an
