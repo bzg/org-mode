@@ -902,7 +902,7 @@ When this is non-nil, the string will be split on whitespace, and each
 snippet will be searched individually, and all must match in order to
 select an entry.  If a snippet is preceeded by \"-\", the snippet
 must *not* match.  \"+\" is syntactic sugar for positive selection.
-Each snipped may be found as a full word or a partial word, but see
+Each snippet may be found as a full word or a partial word, but see
 the variable `org-agenda-search-view-force-full-words'.
 
 When this is nil, search will look for the entire search phrase as one,
@@ -3255,7 +3255,7 @@ the search string can expand to an arbitrary amount of whitespace,
 including newlines.
 
 If using a Boolean search, the search string is split on whitespace and
-each snipped is search separately, with logical AND to select an entry.
+each snippet is searched separately, with logical AND to select an entry.
 Words prefixed with a minus must *not* occur in the entry.  Words without
 a prefix or prefixed with a plus must occur in the entry.  Matching is
 case-insensitive.  Words are enclosed by word delimiters (i.e. they must
@@ -3270,7 +3270,7 @@ match in the entry.
 - If (possibly after the leading star) the search string starts with an
   exclamation mark, this also means to look at TODO entries only, an effect
   that can also be achieved with a prefix argument.
-- If (possibly after star and exclamation mark) the seatch string starts
+- If (possibly after star and exclamation mark) the search string starts
   with a colon, this will mean that the (non-regexp) snippets of the
   Boolean search must match as full words. 
 
