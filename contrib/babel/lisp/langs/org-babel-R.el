@@ -59,7 +59,17 @@ called by `org-babel-execute-src-block'."
   "Prepare SESSION according to the header arguments specified in PARAMS."
   (let* ((session (org-babel-R-initiate-session session))
          (vars (org-babel-ref-variables params)))
-    (mapc (lambda (pair) (org-babel-R-assign-elisp session (car pair) (cdr pair))) vars)))
+    (mapc (lambda (pair) (org-babel-R-assign-elisp session (car pair) (cdr pair))) vars)
+    session))
+
+(defun org-babel-load-session:R (session body params)
+  "Load BODY into SESSION."
+  (save-window-excursion
+    (let ((buffer (org-babel-prep-session:R session params)))
+      (with-current-buffer buffer
+        (goto-char (process-mark (get-buffer-process (current-buffer))))
+        (insert (org-babel-chomp body)))
+      buffer)))
 
 ;; helper functions
 
