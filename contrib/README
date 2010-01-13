@@ -36,6 +36,7 @@ org-R.el                 --- Computation using the R language
 org-registry.el          --- A registry for Org links
 org2rem.el               --- Convert org appointments into reminders
 org-screen.el            --- Visit screen sessions through Org-mode links
+org-secretary.el         --- Team management with org-mode
 org-special-blocks.el    --- Turn blocks into LaTeX envs and HTML divs
 org-track.el             --- Keep up with Org development
 org-toc.el 	         --- Table of contents for Org-mode buffer
