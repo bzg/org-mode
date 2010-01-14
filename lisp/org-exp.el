@@ -2480,7 +2480,7 @@ INDENT was the original indentation of the block."
                                      (format "\\lstset{language=%s}\n" lstlang))
                                  "\n")
                                (when caption
-                                 (format "%s $\\equiv$ \n" caption))
+                                 (format "\n%s $\\equiv$ \n" caption))
                                "\\begin{lstlisting}\n"
                                rtn "\\end{lstlisting}\n")
                             (concat (car org-export-latex-verbatim-wrap)
