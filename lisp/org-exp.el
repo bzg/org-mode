@@ -1537,7 +1537,7 @@ This function also handles the id links, if they have a match in
 the current file."
   (goto-char (point-min))
   (while (re-search-forward org-bracket-link-regexp nil t)
-    (org-if-unprotected-at (match-beginning 1)
+    (org-if-unprotected-at (1+ (match-beginning 0))
      (let* ((md (match-data))
 	    (desc (match-end 2))
 	    (link (org-link-unescape (match-string 1)))

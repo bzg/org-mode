@@ -1,5 +1,8 @@
 2010-01-14  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp.el (org-export-target-internal-links): Check for
+	protectedness after the first bracket.
+
 	* org.el (org-entry-properties): Don't match wrong-case TODO
 	keywords.
 
