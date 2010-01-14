@@ -4216,20 +4216,17 @@ the documentation of `org-diary'."
 
 (defun org-diary-class (m1 d1 y1 m2 d2 y2 dayname &rest skip-weeks)
   "Entry applies if date is between dates on DAYNAME, but skips SKIP-WEEKS.
-Order of the parameters is M1, D1, Y1, M2, D2, Y2 if
-`european-calendar-style' is nil, and D1, M1, Y1, D2, M2, Y2 if
-`european-calendar-style' is t.  
+The order of the first 2 times 3 arguments depends on the variable
+`calendar-date-style' or, if that is not defined, on `european-calendar-style'.
+So for american calendars, give this as MONTH DAY YEAR, for european as
+DAY MONTH YEAR, and for ISO as YEAR MONTH DAY.
 DAYNAME is a number between 0 (Sunday) and 6 (Saturday).  SKIP-WEEKS
 is any number of ISO weeks in the block period for which the item should
 be skipped."
   (let* ((date1 (calendar-absolute-from-gregorian
-		 (if european-calendar-style
-		     (list d1 m1 y1)
-		   (list m1 d1 y1))))
+		 (org-order-calendar-date-args m1 d1 y1)))
 	 (date2 (calendar-absolute-from-gregorian
-		 (if european-calendar-style
-		     (list d2 m2 y2)
-		   (list m2 d2 y2))))
+		 (org-order-calendar-date-args m2 d2 y2)))
 	 (d (calendar-absolute-from-gregorian date)))
     (and
      (<= date1 d)
@@ -6877,7 +6874,7 @@ the resulting entry will not be shown.  When TEXT is empty, switch to
       (let ((calendar-date-display-form
 	     (if (if (boundp 'calendar-date-style)
 		     (eq calendar-date-style 'european)
-		   european-calendar-style) ; Emacs 22
+		   (org-bound-and-true-p european-calendar-style)) ; Emacs 22
 		 '(day " " month " " year)
 	       '(month " " day " " year))))
 

@@ -13561,6 +13561,23 @@ DEF-FLAG   is t when a double ++ or -- indicates shift relative to
 	    (list delta "d" rel))
 	(list (* n (if (= dir ?-) -1 1)) what rel)))))
 
+(defun org-order-calendar-date-args (arg1 arg2 arg3)
+  "Turn a user-specified date into the internal representation.
+The internal representation needed by the calendar is (month day year).
+This is a wrapper to handle the brain-dead convention in calendar that
+user function argument order change dependent on argument order."
+  (if (boundp 'calendar-date-style)
+      (cond
+       ((eq calendar-date-style 'american)
+	(list arg1 arg2 arg3))
+       ((eq calendar-date-style 'european)
+	(list arg2 arg1 arg3))
+       ((eq calendar-date-style 'iso)
+	(list arg2 arg3 arg1)))
+    (if (org-bound-and-true-p european-calendar-style)
+	(list arg2 arg1 arg3)
+      (list arg1 arg2 arg3))))
+
 (defun org-eval-in-calendar (form &optional keepdate)
   "Eval FORM in the calendar window and return to current window.
 Also, store the cursor date in variable org-ans2."

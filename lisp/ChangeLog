@@ -1,5 +1,10 @@
 2010-01-14  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-agenda.el (org-diary-class): Use
+	`org-order-calendar-date-args'.
+
+	* org.el (org-order-calendar-date-args): New function.
+
 	* org-exp.el (org-export-target-internal-links): Check for
 	protectedness after the first bracket.
 
