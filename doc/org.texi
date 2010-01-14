@@ -7562,11 +7562,11 @@ Dispatcher for all command related to attachments.
 @c
 @kindex C-c C-s
 @item C-c C-s
-Schedule this item
+Schedule this item, with prefix arg remove the scheduling timestamp
 @c
 @kindex C-c C-d
 @item C-c C-d
-Set a deadline for this item.
+Set a deadline for this item, with prefix arg remove the deadline.
 @c
 @kindex k
 @item k
@@ -7640,7 +7640,9 @@ Unmark all marked entries for bulk action.
 @kindex B
 @item B
 Bulk action: act on all marked entries in the agenda.  This will prompt for
-another key to select the action to be applied:
+another key to select the action to be applied.  The prefix arg to @kbd{B}
+will be passed through to the @kbd{s} and @kbd{d} commands, to bulk-remove
+these special timestamps.
 @example
 r  @r{Prompt for a single refile target and move all entries.  The entries}
    @r{will no longer be in the agenda, refresh (@kbd{g}) to bring them back.}

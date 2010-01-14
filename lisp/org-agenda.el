@@ -6644,7 +6644,8 @@ be used to request time specification in the time stamp."
     (message "Time stamp changed to %s" org-last-changed-timestamp)))
 
 (defun org-agenda-schedule (arg)
-  "Schedule the item at point."
+  "Schedule the item at point.
+Arg is passed through to `org-schedule'."
   (interactive "P")
   (org-agenda-check-type t 'agenda 'timeline 'todo 'tags 'search)
   (org-agenda-check-no-diary)
@@ -6665,7 +6666,8 @@ be used to request time specification in the time stamp."
     (message "Item scheduled for %s" ts)))
 
 (defun org-agenda-deadline (arg)
-  "Schedule the item at point."
+  "Schedule the item at point.
+Arg is passed through to `org-deadline'."
   (interactive "P")
   (org-agenda-check-type t 'agenda 'timeline 'todo 'tags 'search)
   (org-agenda-check-no-diary)
@@ -7168,9 +7170,10 @@ This will remove the markers, and the overlays."
   (setq org-agenda-bulk-marked-entries nil)
   (org-agenda-bulk-remove-overlays (point-min) (point-max)))
 
-(defun org-agenda-bulk-action ()
-  "Execute an remote-editing action on all marked entries."
-  (interactive)
+(defun org-agenda-bulk-action (&optional arg)
+  "Execute an remote-editing action on all marked entries.
+The prefix arg is passed through to the command if possible."
+  (interactive "P")
   (unless org-agenda-bulk-marked-entries
     (error "No entries are marked"))
   (message "Bulk: [r]efile [$]archive [A]rch->sib [t]odo [+/-]tag [s]chedule [d]eadline")
@@ -7216,17 +7219,18 @@ This will remove the markers, and the overlays."
       (setq cmd `(org-agenda-set-tags ,tag ,(if (eq action ?+) ''on ''off))))
 
      ((memq action '(?s ?d))
-      (let* ((date (org-read-date
-		    nil nil nil
-		    (if (eq action ?s) "(Re)Schedule to" "Set Deadline to")))
-	     (ans org-read-date-final-answer)
+      (let* ((date (unless arg
+		     (org-read-date
+		      nil nil nil
+		      (if (eq action ?s) "(Re)Schedule to" "Set Deadline to"))))
+	     (ans (if arg nil org-read-date-final-answer))
 	     (c1 (if (eq action ?s) 'org-agenda-schedule 'org-agenda-deadline)))
 	(setq cmd `(let* ((bound (fboundp 'read-string))
 			  (old (and bound (symbol-function 'read-string))))
 		     (unwind-protect
 			 (progn
 			   (fset 'read-string (lambda (&rest ignore) ,ans))
-			   (call-interactively ',c1))
+			   (eval '(,c1 arg)))
 		       (if bound
 			   (fset 'read-string old)
 			 (fmakunbound 'read-string)))))))

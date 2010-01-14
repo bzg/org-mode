@@ -1,3 +1,8 @@
+2010-01-14  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Agenda commands): Add information about prefix args to
+	scheduling and deadline commands.
+
 2010-01-05  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Search view): Point to the docstring of
