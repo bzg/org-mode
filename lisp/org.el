@@ -12516,6 +12516,7 @@ things up because then unnecessary parsing is avoided."
   (org-with-point-at pom
     (let ((clockstr (substring org-clock-string 0 -1))
 	  (excluded '("TODO" "TAGS" "ALLTAGS" "PRIORITY"))
+	  (case-fold-search nil)
 	  beg end range props sum-props key value string clocksum)
       (save-excursion
 	(when (condition-case nil

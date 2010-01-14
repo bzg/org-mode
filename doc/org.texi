@@ -12534,6 +12534,8 @@ chapter about publishing.
 @i{J@"urgen Vollmer} contributed code generating the table of contents
 in HTML output.
 @item
+@i{Samuel Wales} has provided important feedback and bug reports.
+@item
 @i{Chris Wallace} provided a patch implementing the @samp{QUOTE}
 keyword.
 @item

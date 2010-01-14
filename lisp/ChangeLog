@@ -1,5 +1,8 @@
 2010-01-14  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-entry-properties): Don't match wrong-case TODO
+	keywords.
+
 	* org-agenda.el (org-agenda-schedule, org-agenda-deadline):
 	Document that ARG is passed through to remove the date.
 	(org-agenda-bulk-action): Accept prefix arg and pass it on.  Do
