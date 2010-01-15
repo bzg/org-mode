@@ -1,3 +1,8 @@
+2010-01-15  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Clean view): Mention that `wrap-prefix' is also set by
+	org-indent-mode.
+
 2010-01-14  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Agenda commands): Add information about prefix args to
