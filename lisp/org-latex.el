@@ -1441,14 +1441,15 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 	((and (not (string-match "^[ \n\t]" string-after))
 	      (not (string-match "[ \t]\\'\\|^" string-before)))
 	 ;; backslash is inside a word
-	 (org-export-latex-protect-string
-	  (concat string-before "\\textbackslash{}" string-after)))
+	 (concat string-before
+		 (org-export-latex-protect-string
+		  (concat "\\textbackslash{}" string-after))))
 	((not (or (equal string-after "")
 		  (string-match "^[ \t\n]" string-after)))
 	 ;; backslash might escape a character (like \#) or a user TeX
 	 ;; macro (like \setcounter)
-	 (org-export-latex-protect-string
-	  (concat string-before "\\" string-after)))
+	 (concat string-before
+		 (org-export-latex-protect-string (concat "\\" string-after))))
 	((and (string-match "^[ \t\n]" string-after)
 	      (string-match "[ \t\n]\\'" string-before))
 	 ;; backslash is alone, convert it to $\backslash$

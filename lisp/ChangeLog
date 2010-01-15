@@ -1,3 +1,8 @@
+2010-01-15  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-latex.el (org-export-latex-treat-backslash-char): Do not by
+	accident protect a character that is before a backslash.
+
 2010-01-14  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-agenda.el (org-diary-class): Use
