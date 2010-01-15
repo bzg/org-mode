@@ -63,10 +63,17 @@ which see."
 
 (defcustom org-clock-out-when-done t
   "When non-nil, clock will be stopped when the clocked entry is marked DONE.
+DONE here means any DONE-like state.
 A nil value means, clock will keep running until stopped explicitly with
-`C-c C-x C-o', or until the clock is started in a different item."
+`C-c C-x C-o', or until the clock is started in a different item.
+Instead of t, this can also be a list of TODO states that should trigger
+clocking out."
   :group 'org-clock
-  :type 'boolean)
+  :type '(choice
+	  (const :tag "No" nil)
+	  (const :tag "Yes, when done" t)
+	  (repeat :tag "State list"
+		  (string :tag "TODO keyword"))))
 
 (defcustom org-clock-out-remove-zero-time-clocks nil
   "Non-nil means, remove the clock line when the resulting time is zero."
@@ -1170,7 +1177,8 @@ If there is no running clock, throw an error, unless FAIL-QUIETLY is set."
 	  (when org-clock-out-switch-to-state
 	    (save-excursion
 	      (org-back-to-heading t)
-	      (let ((org-inhibit-logging t))
+	      (let ((org-inhibit-logging t)
+		    (org-clock-out-when-done nil))
 		(cond
 		 ((functionp org-clock-out-switch-to-state)
 		  (looking-at org-complex-heading-regexp)
@@ -1384,7 +1392,10 @@ from the `before-change-functions' in the current buffer."
 This is used to stop the clock after a TODO entry is marked DONE,
 and is only done if the variable `org-clock-out-when-done' is not nil."
   (when (and org-clock-out-when-done
-	     (member state org-done-keywords)
+	     (or (and (eq t org-clock-out-when-done)
+		      (member state org-done-keywords))
+		 (and (listp org-clock-out-when-done)
+		      (member state org-clock-out-when-done)))
 	     (equal (or (buffer-base-buffer (marker-buffer org-clock-marker))
 			(marker-buffer org-clock-marker))
 		    (or (buffer-base-buffer (current-buffer))
@@ -1393,7 +1404,8 @@ and is only done if the variable `org-clock-out-when-done' is not nil."
 	     (> (save-excursion (outline-next-heading) (point))
 		org-clock-marker))
     ;; Clock out, but don't accept a logging message for this.
-    (let ((org-log-note-clock-out nil))
+    (let ((org-log-note-clock-out nil)
+	  (org-clock-out-switch-to-state nil))
       (org-clock-out))))
 
 (add-hook 'org-after-todo-state-change-hook

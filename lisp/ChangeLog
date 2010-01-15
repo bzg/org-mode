@@ -1,5 +1,12 @@
 2010-01-15  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-clock.el (org-clock-out-when-done): Allow a list of keywords
+	as value.
+	(org-clock-out-if-current): Work with the new list value of
+	`org-clock-out-when-done'.
+	(org-clock-out, org-clock-out-if-current): Avoid circular logic
+	between clocking out and state changes.
+
 	* org-ctags.el (org-ctags-path-to-ctags): Better system-type test.
 
 	* org-latex.el (org-export-latex-treat-backslash-char): Do not by
