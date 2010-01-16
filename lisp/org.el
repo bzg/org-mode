@@ -7893,7 +7893,7 @@ This is the list that is used before handing over to the browser.")
 
 (defun org-link-escape (text &optional table)
   "Escape characters in TEXT that are problematic for links."
-  (if org-url-encoding-use-url-hexify
+  (if (and org-url-encoding-use-url-hexify (not table))
       (url-hexify-string text)
     (setq table (or table org-link-escape-chars))
     (when text
@@ -7910,7 +7910,7 @@ This is the list that is used before handing over to the browser.")
 
 (defun org-link-unescape (text &optional table)
   "Reverse the action of `org-link-escape'."
-  (if org-url-encoding-use-url-hexify
+  (if (and org-url-encoding-use-url-hexify (not table))
       (url-unhex-string text)
     (setq table (or table org-link-escape-chars))
     (when text

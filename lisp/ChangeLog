@@ -1,3 +1,8 @@
+2010-01-16  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-link-unescape, org-link-escape): Only use hexlify if
+	the table is not explicitly given.
+
 2010-01-15  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-clock.el (org-clock-out-when-done): Allow a list of keywords
