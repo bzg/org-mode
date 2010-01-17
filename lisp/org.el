@@ -12509,13 +12509,13 @@ if the property key was used several times.
 POM may also be nil, in which case the current entry is used.
 If WHICH is nil or `all', get all properties.  If WHICH is
 `special' or `standard', only get that subclass.  If WHICH
-is a string only get exactly this property.  Specific can be a sting, the
+is a string only get exactly this property.  Specific can be a string, the
 specific property we are interested in.  Specifying it can speed
 things up because then unnecessary parsing is avoided."
   (setq which (or which 'all))
   (org-with-point-at pom
     (let ((clockstr (substring org-clock-string 0 -1))
-	  (excluded '("TODO" "TAGS" "ALLTAGS" "PRIORITY"))
+	  (excluded '("TODO" "TAGS" "ALLTAGS" "PRIORITY" "BLOCKED"))
 	  (case-fold-search nil)
 	  beg end range props sum-props key value string clocksum)
       (save-excursion
@@ -12540,12 +12540,12 @@ things up because then unnecessary parsing is avoided."
 		       (setq value (org-get-tags-string))
 		       (string-match "\\S-" value))
 	      (push (cons "TAGS" value) props))
-	    (when (and (or (not specific) (string= specific "TAGS"))
+	    (when (and (or (not specific) (string= specific "ALLTAGS"))
 		       (setq value (org-get-tags-at)))
 	      (push (cons "ALLTAGS" (concat ":" (mapconcat 'identity value ":")
 					    ":"))
 		    props))
-	    (when (or (not specific) (string= specific "TAGS"))
+	    (when (or (not specific) (string= specific "BLOCKED"))
 	      (push (cons "BLOCKED" (if (org-entry-blocked-p) "t" "")) props))
 	    (when (or (not specific)
 		      (member specific org-all-time-keywords)
