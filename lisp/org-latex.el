@@ -4,7 +4,7 @@
 ;;
 ;; Emacs Lisp Archive Entry
 ;; Filename: org-latex.el
-;; Version: 6.34b
+;; Version: 6.34c
 ;; Author: Bastien Guerry <bzg AT altern DOT org>
 ;; Maintainer: Carsten Dominik <carsten.dominik AT gmail DOT com>
 ;; Keywords: org, wp, tex

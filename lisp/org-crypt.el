@@ -4,7 +4,7 @@
 
 ;; Emacs Lisp Archive Entry
 ;; Filename: org-crypt.el
-;; Version: 6.34b
+;; Version: 6.34c
 ;; Keywords: org-mode
 ;; Author: John Wiegley <johnw@gnu.org>
 ;; Maintainer: Peter Jones <pjones@pmade.com>
