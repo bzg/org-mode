@@ -194,8 +194,8 @@ The following patterns are replaced in the string:
 (defun org-ctags-enable ()
   (put 'org-mode 'find-tag-default-function 'org-ctags-find-tag-at-point)
   (setq org-ctags-enabled-p t)
-  (dolist (fn (reverse org-ctags-open-link-functions))
-    (add-hook 'org-open-link-functions fn)))
+  (dolist (fn org-ctags-open-link-functions)
+    (add-hook 'org-open-link-functions fn t)))
   
 
 ;;; General utility functions. ===============================================
@@ -472,7 +472,7 @@ subdirectories contain large numbers of taggable files."
                      org-ctags-path-to-ctags
                      org-ctags-tag-regexp
                      (expand-file-name (concat dir-name "/TAGS"))
-                     (expand-file-name (concat dir-name "/")))))
+                     (expand-file-name (concat dir-name "/*")))))
       (cond
        ((eql 0 exitcode)
         (set (make-local-variable 'org-ctags-tag-list)
