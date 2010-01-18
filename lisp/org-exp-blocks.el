@@ -166,7 +166,7 @@ specified in BLOCKS which default to the value of
   (save-window-excursion
     (let ((case-fold-search t)
 	  (types '())
-	  indentation type func start body headers preserve-indent)
+	  indentation type func start body headers preserve-indent progress-marker)
       (flet ((interblock (start end)
 			 (mapcar (lambda (pair) (funcall (second pair) start end))
 				 org-export-interblocks)))
