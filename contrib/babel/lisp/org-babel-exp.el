@@ -56,6 +56,8 @@ will be indented by this many characters. See
 `org-babel-function-def-export-name' for the definition of a
 source block function.")
 
+(defvar obe-marker nil)
+
 (defun org-babel-exp-src-blocks (body &rest headers)
   "Process src block for export.  Depending on the 'export'
 headers argument in replace the source code block with...
@@ -71,9 +73,16 @@ results - just like none only the block is run on export ensuring
 none ----- do not display either code or results upon export"
   (interactive)
   (message "org-babel-exp processing...")
-  (or (and (re-search-backward org-babel-src-block-regexp nil t)
+  (or (and (re-search-backward org-babel-src-block-regexp progress-marker t)
+           (setq progress-marker (match-end 0))
            (org-babel-exp-do-export (org-babel-get-src-block-info) 'block))
-      (and (re-search-backward org-block-regexp nil t)
+      (save-excursion
+        (forward-line 0)
+        (and (org-babel-where-is-src-block-head)
+             (goto-char (org-babel-where-is-src-block-head))
+             (org-babel-exp-do-export (org-babel-get-src-block-info) 'block)))
+      (and (re-search-backward org-block-regexp progress-marker t)
+           (setq progress-marker (match-end 0))
            (match-string 0))
       (error "Unmatched block [bug in `org-babel-exp-src-blocks'].")))
 
