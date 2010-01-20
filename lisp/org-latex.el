@@ -277,6 +277,13 @@ markup defined, the first one in the association list will be used."
   :group 'org-export-latex
   :type 'string)
 
+(defcustom org-export-latex-hyperref-format "\\href{%s}{%s}"
+  "A printf format string to be applied to hyperref links.
+The format must contain two %s instances.  The first will be filled with
+the link, the second with the link description."
+  :group 'org-export-latex
+  :type 'string)
+
 (defcustom org-export-latex-tables-verbatim nil
   "When non-nil, tables are exported verbatim."
   :group 'org-export-latex
@@ -1750,7 +1757,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 		;; a LaTeX issue, but we here implement a work-around anyway.
 		(setq path (org-export-latex-protect-amp path)
 		      desc (org-export-latex-protect-amp desc)))
-	      (insert (format "\\href{%s}{%s}" path desc)))
+	      (insert (format org-export-latex-hyperref-format path desc)))
 	     (t (insert "\\texttt{" desc "}")))))))
 
 
