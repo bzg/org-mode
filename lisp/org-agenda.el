@@ -6832,6 +6832,7 @@ The cursor may be at a date in the calendar, or in the Org agenda."
      ((equal char ?j)
       (org-switch-to-buffer-other-window
        (find-file-noselect org-agenda-diary-file))
+      (require 'org-datetree)
       (org-datetree-find-date-create d1)
       (org-reveal t))
      (t (error "Invalid selection character `%c'" char)))))

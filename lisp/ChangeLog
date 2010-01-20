@@ -1,5 +1,10 @@
 2010-01-20  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-agenda.el (org-agenda-diary-entry-in-org-file): Make sure
+	org-datetree.el is loaded.
+
+	* org-datetree.el: autoload `org-datetree-find-day-create'
+
 	* org-latex.el (org-export-latex-hyperref-format): New option.
 	(org-export-latex-links): Use `org-export-latex-hyperref-format'.
 
