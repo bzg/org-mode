@@ -91,7 +91,7 @@ of the file, followed by the collected and normalized footnotes."
   :type 'string)
 
 (defcustom org-footnote-define-inline nil
-  "Non-nil means, define footnotes inline, at reference location.
+  "Non-nil means define footnotes inline, at reference location.
 When nil, footnotes will be defined in a special section near
 the end of the document.  When t, the [fn:label:definition] notation
 will be used to define the footnote at the reference position."
@@ -99,7 +99,7 @@ will be used to define the footnote at the reference position."
   :type 'boolean)
 
 (defcustom org-footnote-auto-label t
-  "Non-nil means, define automatically new labels for footnotes.
+  "Non-nil means define automatically new labels for footnotes.
 Possible values are:
 
 nil        prompt the user for each label
@@ -116,7 +116,7 @@ plain      Automatically create plain number labels like [1]"
 	  (const :tag "Create automatic [N]" plain)))
 
 (defcustom org-footnote-auto-adjust nil
-  "Non-nil means, automatically adjust footnotes after insert/delete.
+  "Non-nil means automatically adjust footnotes after insert/delete.
 When this is t, after each insertion or deletion of a footnote,
 simple fn:N footnotes will be renumbered, and all footnotes will be sorted.
 If you want to have just sorting or just renumbering, set this variable
@@ -133,7 +133,7 @@ The main values of this variable can be set with in-buffer options:
 	  (const :tag "Renumber and Sort" t)))
 
 (defcustom org-footnote-fill-after-inline-note-extraction nil
-  "Non-nil means, fill paragraphs after extracting footnotes.
+  "Non-nil means fill paragraphs after extracting footnotes.
 When extracting inline footnotes, the lengths of lines can change a lot.
 When this option is set, paragraphs from which an inline footnote has been
 extracted will be filled again."

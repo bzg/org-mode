@@ -47,7 +47,7 @@ directly.  Directories will be search for files with the extension `.org'.
 In addition to this, the list may also contain the following symbols:
 
 org-agenda-files
-     This means, include the complete, unrestricted list of files given in
+     This means include the complete, unrestricted list of files given in
      the variable `org-agenda-files'.
 org-agenda-text-search-extra-files
      Include the files given in the variable
@@ -107,7 +107,7 @@ list     a list of selection key(s) as string."
   :type 'boolean)
 
 (defcustom org-mobile-force-mobile-change nil
-  "Non-nil means, force the change made on the mobile device.
+  "Non-nil means force the change made on the mobile device.
 So even if there have been changes to the computer version of the entry,
 force the new value set on the mobile.
 When nil, mark the entry from the mobile with an error message.

@@ -177,7 +177,7 @@ When nil, do no timestamp checking and always publish all files."
   :type 'directory)
 
 (defcustom org-publish-list-skipped-files t
-  "Non-nil means, show message about files *not* published."
+  "Non-nil means show message about files *not* published."
   :group 'org-publish
   :type 'boolean)
 

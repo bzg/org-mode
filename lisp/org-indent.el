@@ -67,13 +67,13 @@ it may be prettier to customize the org-indent face."
   :type 'character)
 
 (defcustom org-indent-mode-turns-off-org-adapt-indentation t
-  "Non-nil means, turning on org-indent-mode turns off indentation adaptation.
+  "Non-nil means turning on `org-indent-mode' turns off indentation adaptation.
 For details see the variable `org-adapt-indentation'."
   :group 'org-indent
   :type 'boolean)
 
 (defcustom org-indent-mode-turns-on-hiding-stars t
-  "Non-nil means, turning on org-indent-mode turns on `org-hide-leading-stars'."
+  "Non-nil means turning on `org-indent-mode' turns on `org-hide-leading-stars'."
   :group 'org-indent
   :type 'boolean)
 

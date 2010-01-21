@@ -49,7 +49,7 @@
 (defvar constants-unit-system)
 
 (defcustom orgtbl-optimized (eq org-enable-table-editor 'optimized)
-  "Non-nil means, use the optimized table editor version for `orgtbl-mode'.
+  "Non-nil means use the optimized table editor version for `orgtbl-mode'.
 In the optimized version, the table editor takes over all simple keys that
 normally just insert a character.  In tables, the characters are inserted
 in a way to minimize disturbing the table structure (i.e. in overwrite mode
@@ -142,14 +142,14 @@ alignment to the right border applies."
   :group 'org-table)
 
 (defcustom org-table-automatic-realign t
-  "Non-nil means, automatically re-align table when pressing TAB or RETURN.
+  "Non-nil means automatically re-align table when pressing TAB or RETURN.
 When nil, aligning is only done with \\[org-table-align], or after column
 removal/insertion."
   :group 'org-table-editing
   :type 'boolean)
 
 (defcustom org-table-auto-blank-field t
-  "Non-nil means, automatically blank table field when starting to type into it.
+  "Non-nil means automatically blank table field when starting to type into it.
 This only happens when typing immediately after a field motion
 command (TAB, S-TAB or RET).
 Only relevant when `org-enable-table-editor' is equal to `optimized'."
@@ -157,7 +157,7 @@ Only relevant when `org-enable-table-editor' is equal to `optimized'."
   :type 'boolean)
 
 (defcustom org-table-tab-jumps-over-hlines t
-  "Non-nil means, tab in the last column of a table with jump over a hline.
+  "Non-nil means tab in the last column of a table with jump over a hline.
 If a horizontal separator line is following the current line,
 `org-table-next-field' can either create a new row before that line, or jump
 over the line.  When this option is nil, a new line will be created before
@@ -183,7 +183,7 @@ t:      accept as input and present for editing"
 	  (const :tag "Convert user input, don't offer during editing" 'from)))
 
 (defcustom org-table-copy-increment t
-  "Non-nil means, increment when copying current field with \\[org-table-copy-down]."
+  "Non-nil means increment when copying current field with \\[org-table-copy-down]."
   :group 'org-table-calculation
   :type 'boolean)
 
@@ -204,7 +204,7 @@ relies on the variables to be present in the list."
   :type 'plist)
 
 (defcustom org-table-formula-evaluate-inline t
-  "Non-nil means, TAB and RET evaluate a formula in current table field.
+  "Non-nil means TAB and RET evaluate a formula in current table field.
 If the current field starts with an equal sign, it is assumed to be a formula
 which should be evaluated as described in the manual and in the documentation
 string of the command `org-table-eval-formula'.  This feature requires the
@@ -215,7 +215,7 @@ the command \\[org-table-eval-formula]."
   :type 'boolean)
 
 (defcustom org-table-formula-use-constants t
-  "Non-nil means, interpret constants in formulas in tables.
+  "Non-nil means interpret constants in formulas in tables.
 A constant looks like `$c' or `$Grav' and will be replaced before evaluation
 by the value given in `org-table-formula-constants', or by a value obtained
 from the `constants.el' package."
@@ -241,8 +241,8 @@ Constants can also be defined on a per-file basis using a line like
 		(string :tag "value"))))
 
 (defcustom org-table-allow-automatic-line-recalculation t
-  "Non-nil means, lines marked with |#| or |*| will be recomputed automatically.
-Automatically means, when TAB or RET or C-c C-c are pressed in the line."
+  "Non-nil means lines marked with |#| or |*| will be recomputed automatically.
+Automatically means when TAB or RET or C-c C-c are pressed in the line."
   :group 'org-table-calculation
   :type 'boolean)
 
@@ -252,7 +252,7 @@ Automatically means, when TAB or RET or C-c C-c are pressed in the line."
   :type 'boolean)
 
 (defcustom org-table-relative-ref-may-cross-hline t
-  "Non-nil means, relative formula references may cross hlines.
+  "Non-nil means relative formula references may cross hlines.
 Here are the allowed values:
 
 nil    Relative references may not cross hlines.  They will reference the
@@ -567,7 +567,7 @@ This is being used to correctly align a single field after TAB or RET.")
   "List of max width of fields in each column.
 This is being used to correctly align a single field after TAB or RET.")
 (defvar org-table-formula-debug nil
-  "Non-nil means, debug table formulas.
+  "Non-nil means debug table formulas.
 When nil, simply write \"#ERROR\" in corrupted fields.")
 (make-variable-buffer-local 'org-table-formula-debug)
 (defvar org-table-overlay-coordinates nil
@@ -2340,7 +2340,7 @@ $1->    %s\n" orig formula form0 form))
   "Get a calc vector from a column, according to descriptor DESC.
 Optional arguments TBEG and COL can give the beginning of the table and
 the current column, to avoid unnecessary parsing.
-HIGHLIGHT means, just highlight the range."
+HIGHLIGHT means just highlight the range."
   (if (not (equal (string-to-char desc) ?@))
       (setq desc (concat "@" desc)))
   (save-excursion

@@ -125,7 +125,7 @@ the bullet in each item of he list."
 	  (regexp)))
 
 (defcustom org-empty-line-terminates-plain-lists nil
-  "Non-nil means, an empty line ends all plain list levels.
+  "Non-nil means an empty line ends all plain list levels.
 This is currently effective only during export.  It should also have
 an effect for indentation and plain list folding, but it does not.
 When nil, empty lines are part of the preceding item."
@@ -133,7 +133,7 @@ When nil, empty lines are part of the preceding item."
   :type 'boolean)
 
 (defcustom org-auto-renumber-ordered-lists t
-  "Non-nil means, automatically renumber ordered plain lists.
+  "Non-nil means automatically renumber ordered plain lists.
 Renumbering happens when the sequence have been changed with
 \\[org-shiftmetaup] or \\[org-shiftmetadown].  After other editing commands,
 use \\[org-ctrl-c-ctrl-c] to trigger renumbering."
@@ -141,7 +141,7 @@ use \\[org-ctrl-c-ctrl-c] to trigger renumbering."
   :type 'boolean)
 
 (defcustom org-provide-checkbox-statistics t
-  "Non-nil means, update checkbox statistics after insert and toggle.
+  "Non-nil means update checkbox statistics after insert and toggle.
 When this is set, checkbox statistics is updated each time you
 either insert a new checkbox with \\[org-insert-todo-heading] or
 toggle a checkbox with \\[org-ctrl-c-ctrl-c]."
@@ -149,7 +149,7 @@ toggle a checkbox with \\[org-ctrl-c-ctrl-c]."
   :type 'boolean)
 
 (defcustom org-hierarchical-checkbox-statistics t
-  "Non-nil means, checkbox statistics counts only the state of direct children.
+  "Non-nil means checkbox statistics counts only the state of direct children.
 When nil, all boxes below the cookie are counted.
 This can be set to nil on a per-node basis using a COOKIE_DATA property
 with the word \"recursive\" in the value."

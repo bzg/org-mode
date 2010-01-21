@@ -104,7 +104,7 @@
   :group 'org-export)
 
 (defcustom org-export-generic-links-to-notes t
-  "Non-nil means, convert links to notes before the next headline.
+  "Non-nil means convert links to notes before the next headline.
 When nil, the link will be exported in place.  If the line becomes long
 in this way, it will be wrapped."
   :group 'org-export-generic

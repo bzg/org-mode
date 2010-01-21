@@ -134,7 +134,7 @@ Pass PARAMS through to `orgtbl-to-generic' when exporting TABLE."
 
 (defun org-plot/gnuplot-to-grid-data (table data-file params)
   "Export the data in TABLE to DATA-FILE for gnuplot.
-This means, in a format appropriate for grid plotting by gnuplot.
+This means in a format appropriate for grid plotting by gnuplot.
 PARAMS specifies which columns of TABLE should be plotted as independent
 and dependant variables."
   (interactive)

@@ -50,7 +50,7 @@ See `org-archive-to-archive-sibling' for more information."
   :type 'string)
 
 (defcustom org-archive-mark-done nil
-  "Non-nil means, mark entries as DONE when they are moved to the archive file.
+  "Non-nil means mark entries as DONE when they are moved to the archive file.
 This can be a string to set the keyword to use.  When t, Org-mode will
 use the first keyword in its list that means done."
   :group 'org-archive
@@ -60,7 +60,7 @@ use the first keyword in its list that means done."
 	  (string :tag "Use this keyword")))
 
 (defcustom org-archive-stamp-time t
-  "Non-nil means, add a time stamp to entries moved to an archive file.
+  "Non-nil means add a time stamp to entries moved to an archive file.
 This variable is obsolete and has no effect anymore, instead add or remove
 `time' from the variable `org-archive-save-context-info'."
   :group 'org-archive

@@ -54,7 +54,7 @@
   :group 'org-export)
 
 (defcustom org-export-allow-BIND 'confirm
-  "Non-nil means, allow #+BIND to define local variable values for export.
+  "Non-nil means allow #+BIND to define local variable values for export.
 This is a potential security risk, which is why the user must confirm the
 use of these lines."
   :group 'org-export-general
@@ -67,7 +67,7 @@ use of these lines."
 (defvar org-export-publishing-directory nil)
 
 (defcustom org-export-show-temporary-export-buffer t
-  "Non-nil means, show buffer after exporting to temp buffer.
+  "Non-nil means show buffer after exporting to temp buffer.
 When Org exports to a file, the buffer visiting that file is ever
 shown, but remains buried.  However, when exporting to a temporary
 buffer, that buffer is popped up in a second window.  When this variable
@@ -76,7 +76,7 @@ is nil, the buffer remains buried also in these cases."
   :type 'boolean)
 
 (defcustom org-export-copy-to-kill-ring t
-  "Non-nil means, exported stuff will also be pushed onto the kill ring."
+  "Non-nil means exported stuff will also be pushed onto the kill ring."
   :group 'org-export-general
   :type 'boolean)
 
@@ -114,7 +114,7 @@ This is without condition, so even subtrees inside that carry one of the
 
 ;; FIXME: rename, this is a general variable
 (defcustom org-export-html-expand t
-  "Non-nil means, for HTML export, treat @<...> as HTML tag.
+  "Non-nil means for HTML export, treat @<...> as HTML tag.
 When nil, these tags will be exported as plain text and therefore
 not be interpreted by a browser.
 
@@ -124,7 +124,7 @@ This option can also be set with the +OPTIONS line, e.g. \"@:nil\"."
   :type 'boolean)
 
 (defcustom org-export-with-special-strings t
-  "Non-nil means, interpret \"\-\", \"--\" and \"---\" for export.
+  "Non-nil means interpret \"\-\", \"--\" and \"---\" for export.
 When this option is turned on, these strings will be exported as:
 
   Org   HTML       LaTeX
@@ -198,7 +198,7 @@ This is best set with the #+KEYWORDS line in a file, it does not make
 sense to set this globally.")
 
 (defcustom org-export-skip-text-before-1st-heading nil
-  "Non-nil means, skip all text before the first headline when exporting.
+  "Non-nil means skip all text before the first headline when exporting.
 When nil, that text is exported as well."
   :group 'org-export-general
   :type 'boolean)
@@ -214,7 +214,7 @@ This option can also be set with the +OPTIONS line, e.g. \"H:2\"."
   :type 'integer)
 
 (defcustom org-export-with-section-numbers t
-  "Non-nil means, add section numbers to headlines when exporting.
+  "Non-nil means add section numbers to headlines when exporting.
 
 This option can also be set with the +OPTIONS line, e.g. \"num:t\"."
   :group 'org-export-general
@@ -241,7 +241,7 @@ The variable has two components.
 	  (string :tag "Terminator")))
 
 (defcustom org-export-with-toc t
-  "Non-nil means, create a table of contents in exported files.
+  "Non-nil means create a table of contents in exported files.
 The TOC contains headlines with levels up to`org-export-headline-levels'.
 When an integer, include levels up to N in the toc, this may then be
 different from `org-export-headline-levels', but it will not be allowed
@@ -263,24 +263,24 @@ or \"toc:3\"."
 	  (integer :tag "TOC to level")))
 
 (defcustom org-export-mark-todo-in-toc nil
-  "Non-nil means, mark TOC lines that contain any open TODO items."
+  "Non-nil means mark TOC lines that contain any open TODO items."
   :group 'org-export-general
   :type 'boolean)
 
 (defcustom org-export-with-todo-keywords t
-  "Non-nil means, include TODO keywords in export.
+  "Non-nil means include TODO keywords in export.
 When nil, remove all these keywords from the export."
   :group 'org-export-general
   :type 'boolean)
 
 (defcustom org-export-with-priority nil
-  "Non-nil means, include priority cookies in export.
+  "Non-nil means include priority cookies in export.
 When nil, remove priority cookies for export."
   :group 'org-export-general
   :type 'boolean)
 
 (defcustom org-export-preserve-breaks nil
-  "Non-nil means, preserve all line breaks when exporting.
+  "Non-nil means preserve all line breaks when exporting.
 Normally, in HTML output paragraphs will be reformatted.  In ASCII
 export, line breaks will always be preserved, regardless of this variable.
 
@@ -302,7 +302,7 @@ headline  Only export the headline, but skip the tree below it."
 	  (const :tag "entirely" t)))
 
 (defcustom org-export-author-info t
-  "Non-nil means, insert author name and email into the exported file.
+  "Non-nil means insert author name and email into the exported file.
 
 This option can also be set with the +OPTIONS line,
 e.g. \"author-info:nil\"."
@@ -310,13 +310,13 @@ e.g. \"author-info:nil\"."
   :type 'boolean)
 
 (defcustom org-export-creator-info t
-  "Non-nil means, the postamble should contain a creator sentence.
+  "Non-nil means the postamble should contain a creator sentence.
 This sentence is \"HTML generated by org-mode XX in emacs XXX\"."
   :group 'org-export-general
   :type 'boolean)
 
 (defcustom org-export-time-stamp-file t
-  "Non-nil means, insert a time stamp into the exported file.
+  "Non-nil means insert a time stamp into the exported file.
 The time stamp shows when the file was created.
 
 This option can also be set with the +OPTIONS line,
@@ -347,7 +347,7 @@ This option can also be set with the +OPTIONS line, e.g. \"tags:nil\"."
 	  (const :tag "On" t)))
 
 (defcustom org-export-with-drawers nil
-  "Non-nil means, export with drawers like the property drawer.
+  "Non-nil means export with drawers like the property drawer.
 When t, all drawers are exported.  This may also be a list of
 drawer names to export."
   :group 'org-export-general
@@ -402,7 +402,7 @@ returning the buffer string to the backend.")
   :group 'org-export)
 
 (defcustom org-export-with-emphasize t
-  "Non-nil means, interpret *word*, /word/, and _word_ as emphasized text.
+  "Non-nil means interpret *word*, /word/, and _word_ as emphasized text.
 If the export target supports emphasizing text, the word will be
 typeset in bold, italic, or underlined, respectively.  Works only for
 single words, but you can say: I *really* *mean* *this*.
@@ -421,7 +421,7 @@ This option can also be set with the +OPTIONS line, e.g. \"f:nil\"."
   :type 'boolean)
 
 (defcustom org-export-with-sub-superscripts t
-  "Non-nil means, interpret \"_\" and \"^\" for export.
+  "Non-nil means interpret \"_\" and \"^\" for export.
 When this option is turned on, you can use TeX-like syntax for sub- and
 superscripts.  Several characters after \"_\" or \"^\" will be
 considered as a single item - so grouping with {} is normally not
@@ -450,7 +450,7 @@ This option can also be set with the +OPTIONS line, e.g. \"^:nil\"."
 	  (const :tag "Never interpret" nil)))
 
 (defcustom org-export-with-TeX-macros t
-  "Non-nil means, interpret simple TeX-like macros when exporting.
+  "Non-nil means interpret simple TeX-like macros when exporting.
 For example, HTML export converts \\alpha to &alpha; and \\AA to &Aring;.
 Not only real TeX macros will work here, but the standard HTML entities
 for math can be used as macro names as well.  For a list of supported
@@ -463,7 +463,7 @@ This option can also be set with the +OPTIONS line, e.g. \"TeX:nil\"."
   :type 'boolean)
 
 (defcustom org-export-with-LaTeX-fragments nil
-  "Non-nil means, convert LaTeX fragments to images when exporting to HTML.
+  "Non-nil means convert LaTeX fragments to images when exporting to HTML.
 When set, the exporter will find LaTeX environments if the \\begin line is
 the first non-white thing on a line.  It will also find the math delimiters
 like $a=b$ and \\( a=b \\) for inline math,  $$a=b$$ and \\[ a=b \\] for
@@ -478,7 +478,7 @@ is not available on all systems."
   :type 'boolean)
 
 (defcustom org-export-with-fixed-width t
-  "Non-nil means, lines starting with \":\" will be in fixed width font.
+  "Non-nil means lines starting with \":\" will be in fixed width font.
 This can be used to have pre-formatted text, fragments of code etc.  For
 example:
   : ;; Some Lisp examples
@@ -517,7 +517,7 @@ This option can also be set with the +OPTIONS line, e.g. \"|:nil\"."
   :type 'boolean)
 
 (defcustom org-export-highlight-first-table-line t
-  "Non-nil means, highlight the first table line.
+  "Non-nil means highlight the first table line.
 In HTML export, this means use <th> instead of <td>.
 In tables created with table.el, this applies to the first table line.
 In Org-mode tables, all lines before the first horizontal separator
@@ -535,8 +535,8 @@ the values of constants may be useful to have."
   :type 'boolean)
 
 (defcustom org-export-prefer-native-exporter-for-tables nil
-  "Non-nil means, always export tables created with table.el natively.
-Natively means, use the HTML code generator in table.el.
+  "Non-nil means always export tables created with table.el natively.
+Natively means use the HTML code generator in table.el.
 When nil, Org-mode's own HTML generator is used when possible (i.e. if
 the table does not use row- or column-spanning).  This has the
 advantage, that the automatic HTML conversions for math symbols and

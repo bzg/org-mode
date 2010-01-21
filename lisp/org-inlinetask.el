@@ -94,7 +94,7 @@ the value of this variable."
   :type 'boolean)
 
 (defcustom org-inlinetask-export t
-  "Non-nil means, export inline tasks.
+  "Non-nil means export inline tasks.
 When nil, they will not be exported."
   :group 'org-inlinetask
   :type 'boolean)

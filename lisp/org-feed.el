@@ -234,7 +234,7 @@ following special escapes are valid as well:
   :type '(string :tag "Template"))
 
 (defcustom org-feed-save-after-adding t
-  "Non-nil means, save buffer after adding new feed items."
+  "Non-nil means save buffer after adding new feed items."
   :group 'org-feed
   :type 'boolean)
 

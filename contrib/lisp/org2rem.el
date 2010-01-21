@@ -115,7 +115,7 @@ all-tags    All tags, including inherited ones."
 	   (const :tag "All tags, including inherited ones" all-tags))))
 
 (defcustom org-remind-include-todo nil
-  "Non-nil means, export to remind files should also cover TODO items."
+  "Non-nil means export to remind files should also cover TODO items."
   :group 'org2rem
   :type '(choice
 	  (const :tag "None" nil)
@@ -123,19 +123,19 @@ all-tags    All tags, including inherited ones."
 	  (const :tag "All" all)))
 
 (defcustom org-remind-include-sexps t
-  "Non-nil means, export to Remind files should also cover sexp entries.
+  "Non-nil means export to Remind files should also cover sexp entries.
 These are entries like in the diary, but directly in an Org-mode file."
   :group 'org2rem
   :type 'boolean)
 
 (defcustom org-remind-deadline-over-scheduled t
-  "Non-nil means, use deadline as target when both deadline and
+  "Non-nil means use deadline as target when both deadline and
 scheduled present, vice-versa. Default is Non-nil."
   :group 'org2rem
   :type 'boolean)
 
 (defcustom org-remind-escape-percentage t
-  "Non-nil means, % will be escaped, vice-versa. Default is Non-nil."
+  "Non-nil means % will be escaped, vice-versa. Default is Non-nil."
   :group 'org2rem
   :type 'boolean)
 
@@ -150,7 +150,7 @@ scheduled present, vice-versa. Default is Non-nil."
   :type 'number)
 
 (defcustom org-remind-suppress-last-newline nil
-  "Non-nil means, suppress last newline REM body. Default is nil."
+  "Non-nil means suppress last newline REM body. Default is nil."
   :group 'org2rem
   :type 'boolean)
 
@@ -166,7 +166,7 @@ The text will be inserted into the DESCRIPTION field."
 	  (integer :tag "Max characters")))
 
 (defcustom org-remind-store-UID nil
-  "Non-nil means, store any created UIDs in properties.
+  "Non-nil means store any created UIDs in properties.
 The Remind standard requires that all entries have a unique identifyer.
 Org will create these identifiers as needed.  When this variable is non-nil,
 the created UIDs will be stored in the ID property of the entry.  Then the

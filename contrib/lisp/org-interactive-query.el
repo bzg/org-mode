@@ -41,7 +41,7 @@
 ;;; Agenda interactive query manipulation
 
 (defcustom org-agenda-query-selection-single-key t
-  "Non-nil means, query manipulation exits after first change.
+  "Non-nil means query manipulation exits after first change.
 When nil, you have to press RET to exit it.
 During query selection, you can toggle this flag with `C-c'.
 This variable can also have the value `expert'.  In this case, the window

@@ -48,7 +48,7 @@
   (defvaralias 'org-usenet-links-prefer-google 'org-gnus-prefer-web-links))
 
 (defcustom org-gnus-prefer-web-links nil
-  "Non-nil means, `org-store-link' will create web links to Google groups.
+  "Non-nil means `org-store-link' will create web links to Google groups.
 When nil, Gnus will be used for such links.
 Using a prefix arg to the command \\[org-store-link] (`org-store-link')
 negates this setting for the duration of the command."

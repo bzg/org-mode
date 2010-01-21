@@ -52,14 +52,14 @@ Org-mode file."
   :type '(repeat character))
 
 (defcustom org-export-ascii-links-to-notes t
-  "Non-nil means, convert links to notes before the next headline.
+  "Non-nil means convert links to notes before the next headline.
 When nil, the link will be exported in place.  If the line becomes long
 in this way, it will be wrapped."
   :group 'org-export-ascii
   :type 'boolean)
 
 (defcustom org-export-ascii-table-keep-all-vertical-lines nil
-  "Non-nil means, keep all vertical lines in ASCII tables.
+  "Non-nil means keep all vertical lines in ASCII tables.
 When nil, vertical lines will be removed except for those needed
 for column grouping."
   :group 'org-export-ascii

@@ -64,7 +64,7 @@ which see."
 (defcustom org-clock-out-when-done t
   "When non-nil, clock will be stopped when the clocked entry is marked DONE.
 DONE here means any DONE-like state.
-A nil value means, clock will keep running until stopped explicitly with
+A nil value means clock will keep running until stopped explicitly with
 `C-c C-x C-o', or until the clock is started in a different item.
 Instead of t, this can also be a list of TODO states that should trigger
 clocking out."
@@ -76,7 +76,7 @@ clocking out."
 		  (string :tag "TODO keyword"))))
 
 (defcustom org-clock-out-remove-zero-time-clocks nil
-  "Non-nil means, remove the clock line when the resulting time is zero."
+  "Non-nil means remove the clock line when the resulting time is zero."
   :group 'org-clock
   :type 'boolean)
 
@@ -112,7 +112,7 @@ state to switch it to."
   :type 'integer)
 
 (defcustom org-clock-goto-may-find-recent-task t
-  "Non-nil means, `org-clock-goto' can go to recent task if no active clock."
+  "Non-nil means `org-clock-goto' can go to recent task if no active clock."
   :group 'org-clock
   :type 'boolean)
 

@@ -243,7 +243,7 @@ to add the symbol `xyz', and the package must have a call to
 	(repeat :tag "External packages" :inline t (symbol :tag "Package"))))
 
 (defcustom org-support-shift-select nil
-  "Non-nil means, make shift-cursor commands select text when possible.
+  "Non-nil means make shift-cursor commands select text when possible.
 
 In Emacs 23, when `shift-select-mode' is on, shifted cursor keys start
 selecting a region, or enlarge thusly regions started in this way.
@@ -291,7 +291,7 @@ is Emacs 23 only."
   :group 'org)
 
 (defcustom org-startup-folded t
-  "Non-nil means, entering Org-mode will switch to OVERVIEW.
+  "Non-nil means entering Org-mode will switch to OVERVIEW.
 This can also be configured on a per-file basis by adding one of
 the following lines anywhere in the buffer:
 
@@ -307,14 +307,14 @@ the following lines anywhere in the buffer:
 	  (const :tag "show everything, even drawers" showeverything)))
 
 (defcustom org-startup-truncated t
-  "Non-nil means, entering Org-mode will set `truncate-lines'.
+  "Non-nil means entering Org-mode will set `truncate-lines'.
 This is useful since some lines containing links can be very long and
 uninteresting.  Also tables look terrible when wrapped."
   :group 'org-startup
   :type 'boolean)
 
 (defcustom org-startup-indented nil
-  "Non-nil means, turn on `org-indent-mode' on startup.
+  "Non-nil means turn on `org-indent-mode' on startup.
 This can also be configured on a per-file basis by adding one of
 the following lines anywhere in the buffer:
 
@@ -326,7 +326,7 @@ the following lines anywhere in the buffer:
 	  (const :tag "Globally (slow on startup in large files)" t)))
 
 (defcustom org-startup-with-beamer-mode nil
-  "Non-nil means, turn on `org-beamer-mode' on startup.
+  "Non-nil means turn on `org-beamer-mode' on startup.
 This can also be configured on a per-file basis by adding one of
 the following lines anywhere in the buffer:
 
@@ -335,7 +335,7 @@ the following lines anywhere in the buffer:
   :type 'boolean)
 
 (defcustom org-startup-align-all-tables nil
-  "Non-nil means, align all tables when visiting a file.
+  "Non-nil means align all tables when visiting a file.
 This is useful when the column width in tables is forced with <N> cookies
 in table fields.  Such tables will look correct only after the first re-align.
 This can also be configured on a per-file basis by adding one of
@@ -526,7 +526,7 @@ After a match, group 1 contains the repeat expression.")
   "Contexts for the reveal options.")
 
 (defcustom org-show-hierarchy-above '((default . t))
-  "Non-nil means, show full hierarchy when revealing a location.
+  "Non-nil means show full hierarchy when revealing a location.
 Org-mode often shows locations in an org-mode file which might have
 been invisible before.  When this is set, the hierarchy of headings
 above the exposed location is shown.
@@ -546,7 +546,7 @@ contexts.  Valid contexts are
   :type org-context-choice)
 
 (defcustom org-show-following-heading '((default . nil))
-  "Non-nil means, show following heading when revealing a location.
+  "Non-nil means show following heading when revealing a location.
 Org-mode often shows locations in an org-mode file which might have
 been invisible before.  When this is set, the heading following the
 match is shown.
@@ -559,7 +559,7 @@ contexts.  See `org-show-hierarchy-above' for valid contexts."
   :type org-context-choice)
 
 (defcustom org-show-siblings '((default . nil) (isearch t))
-  "Non-nil means, show all sibling heading when revealing a location.
+  "Non-nil means show all sibling heading when revealing a location.
 Org-mode often shows locations in an org-mode file which might have
 been invisible before.  When this is set, the sibling of the current entry
 heading are all made visible.  If `org-show-hierarchy-above' is t,
@@ -575,7 +575,7 @@ contexts.  See `org-show-hierarchy-above' for valid contexts."
   :type org-context-choice)
 
 (defcustom org-show-entry-below '((default . nil))
-  "Non-nil means, show the entry below a headline when revealing a location.
+  "Non-nil means show the entry below a headline when revealing a location.
 Org-mode often shows locations in an org-mode file which might have
 been invisible before.  When this is set, the text below the headline that is
 exposed is also shown.
@@ -606,7 +606,7 @@ new-frame        Make a new frame each time.  Note that in this case
 	  (const :tag "One dedicated frame" dedicated-frame)))
 
 (defcustom org-use-speed-commands nil
-  "Non-nil means, activate single letter commands at beginning of a headline.
+  "Non-nil means activate single letter commands at beginning of a headline.
 This may also be a function to test for appropriate locations where speed
 commands should be active."
   :group 'org-structure
@@ -643,7 +643,7 @@ copmmands in the Help buffer using the `?' speed command."
   :group 'org-structure)
 
 (defcustom org-cycle-skip-children-state-if-no-children t
-  "Non-nil means, skip CHILDREN state in entries that don't have any."
+  "Non-nil means skip CHILDREN state in entries that don't have any."
   :group 'org-cycle
   :type 'boolean)
 
@@ -680,7 +680,7 @@ Drawers can be defined on the per-file basis with a line like:
   :type '(repeat (string :tag "Drawer Name")))
 
 (defcustom org-hide-block-startup nil
-  "Non-nil means, , entering Org-mode will fold all blocks.
+  "Non-nil means entering Org-mode will fold all blocks.
 This can also be set in on a per-file basis with
 
 #+STARTUP: hideblocks
@@ -702,7 +702,7 @@ of the buffer."
   :type 'boolean)
 
 (defcustom org-cycle-level-after-item/entry-creation t
-  "Non-nil means, cycle entry level or item indentation in new empty entries.
+  "Non-nil means cycle entry level or item indentation in new empty entries.
 
 When the cursor is at the end of an empty headline, i.e with only stars
 and maybe a TODO keyword, TAB will then switch the entry to become a child,
@@ -739,7 +739,7 @@ If you leave an empty line between the end of a subtree and the following
 headline, this empty line is hidden when the subtree is folded.
 Org-mode will leave (exactly) one empty line visible if the number of
 empty lines is equal or larger to the number given in this variable.
-So the default 2 means, at least 2 empty lines after the end of a subtree
+So the default 2 means at least 2 empty lines after the end of a subtree
 are needed to produce free space between a collapsed subtree and the
 following headline.
 
@@ -780,7 +780,7 @@ the values `folded', `children', or `subtree'."
   :group 'org-structure)
 
 (defcustom org-odd-levels-only nil
-  "Non-nil means, skip even levels and only use odd levels for the outline.
+  "Non-nil means skip even levels and only use odd levels for the outline.
 This has the effect that two stars are being added/taken away in
 promotion/demotion commands.  It also influences how levels are
 handled by the exporters.
@@ -796,7 +796,7 @@ lines to the buffer:
   :type 'boolean)
 
 (defcustom org-adapt-indentation t
-  "Non-nil means, adapt indentation to outline node level.
+  "Non-nil means adapt indentation to outline node level.
 
 When this variable is set, Org assumes that you write outlines by
 indenting text in each node to align with the headline (after the stars).
@@ -870,7 +870,7 @@ When t, the following will happen while the cursor is in the headline:
   :type 'boolean)
 
 (defcustom org-yank-folded-subtrees t
-  "Non-nil means, when yanking subtrees, fold them.
+  "Non-nil means when yanking subtrees, fold them.
 If the kill is a single subtree, or a sequence of subtrees, i.e. if
 it starts with a heading and all other headings in it are either children
 or siblings, then fold all the subtrees.  However, do this only if no
@@ -879,14 +879,14 @@ text after the yank would be swallowed into a folded tree by this action."
   :type 'boolean)
 
 (defcustom org-yank-adjusted-subtrees nil
-  "Non-nil means, when yanking subtrees, adjust the level.
+  "Non-nil means when yanking subtrees, adjust the level.
 With this setting, `org-paste-subtree' is used to insert the subtree, see
 this function for details."
   :group 'org-edit-structure
   :type 'boolean)
 
 (defcustom org-M-RET-may-split-line '((default . t))
-  "Non-nil means, M-RET will split the line at the cursor position.
+  "Non-nil means M-RET will split the line at the cursor position.
 When nil, it will go to the end of the line before making a
 new line.
 You may also set this option in a different way for different
@@ -913,7 +913,7 @@ default   the value to be used for all contexts not explicitly
 
 
 (defcustom org-insert-heading-respect-content nil
-  "Non-nil means, insert new headings after the current subtree.
+  "Non-nil means insert new headings after the current subtree.
 When nil, the new heading is created directly after the current line.
 The commands \\[org-insert-heading-respect-content] and
 \\[org-insert-todo-heading-respect-content] turn this variable on
@@ -945,8 +945,8 @@ is ignored and no empty line is inserted, to keep the list in tact."
   :type 'hook)
 
 (defcustom org-enable-fixed-width-editor t
-  "Non-nil means, lines starting with \":\" are treated as fixed-width.
-This currently only means, they are never auto-wrapped.
+  "Non-nil means lines starting with \":\" are treated as fixed-width.
+This currently only means they are never auto-wrapped.
 When nil, such lines will be treated like ordinary lines.
 See also the QUOTE keyword."
   :group 'org-edit-structure
@@ -954,7 +954,7 @@ See also the QUOTE keyword."
 
 
 (defcustom org-goto-auto-isearch t
-  "Non-nil means, typing characters in org-goto starts incremental search."
+  "Non-nil means typing characters in org-goto starts incremental search."
   :group 'org-edit-structure
   :type 'boolean)
 
@@ -964,14 +964,14 @@ See also the QUOTE keyword."
   :group 'org-structure)
 
 (defcustom org-highlight-sparse-tree-matches t
-  "Non-nil means, highlight all matches that define a sparse tree.
+  "Non-nil means highlight all matches that define a sparse tree.
 The highlights will automatically disappear the next time the buffer is
 changed by an edit command."
   :group 'org-sparse-trees
   :type 'boolean)
 
 (defcustom org-remove-highlights-with-change t
-  "Non-nil means, any change to the buffer will remove temporary highlights.
+  "Non-nil means any change to the buffer will remove temporary highlights.
 Such highlights are created by `org-occur' and `org-clock-display'.
 When nil, `C-c C-c needs to be used to get rid of the highlights.
 The highlights created by `org-preview-latex-fragment' always need
@@ -1005,7 +1005,7 @@ This also applied for speedbar access."
   :group 'org)
 
 (defcustom org-enable-table-editor 'optimized
-  "Non-nil means, lines starting with \"|\" are handled by the table editor.
+  "Non-nil means lines starting with \"|\" are handled by the table editor.
 When nil, such lines will be treated like ordinary lines.
 
 When equal to the symbol `optimized', the table editor will be optimized to
@@ -1044,7 +1044,7 @@ This is configurable, because there is some impact on typing performance."
   :type 'boolean)
 
 (defcustom org-table-tab-recognizes-table.el t
-  "Non-nil means, TAB will automatically notice a table.el table.
+  "Non-nil means TAB will automatically notice a table.el table.
 When it sees such a table, it moves point into it and - if necessary -
 calls `table-recognize-table'."
   :group 'org-table-editing
@@ -1089,7 +1089,7 @@ See the manual for examples."
 	    (function)))))
 
 (defcustom org-descriptive-links t
-  "Non-nil means, hide link part and only show description of bracket links.
+  "Non-nil means hide link part and only show description of bracket links.
 Bracket links are like [[link][description]].  This variable sets the initial
 state in new org-mode buffers.  The setting can then be toggled on a
 per-buffer basis from the Org->Hyperlinks menu."
@@ -1186,7 +1186,7 @@ It should match if the message is from the user him/herself."
   :type 'regexp)
 
 (defcustom org-link-to-org-use-id 'create-if-interactive-and-no-custom-id
-  "Non-nil means, storing a link to an Org file will use entry IDs.
+  "Non-nil means storing a link to an Org file will use entry IDs.
 
 Note that before this variable is even considered, org-id must be loaded,
 so please customize `org-modules' and turn it on.
@@ -1226,7 +1226,7 @@ nil   Never use an ID to make a link, instead link using a text search for
 	  (const :tag "Do not use ID to create link" nil)))
 
 (defcustom org-context-in-file-links t
-  "Non-nil means, file links from `org-store-link' contain context.
+  "Non-nil means file links from `org-store-link' contain context.
 A search string will be added to the file name with :: as separator and
 used to find the context when the link is activated by the command
 `org-open-at-point'.
@@ -1236,7 +1236,7 @@ negates this setting for the duration of the command."
   :type 'boolean)
 
 (defcustom org-keep-stored-link-after-insertion nil
-  "Non-nil means, keep link in list for entire session.
+  "Non-nil means keep link in list for entire session.
 
 The command `org-store-link' adds a link pointing to the current
 location to an internal list.  These links accumulate during a session.
@@ -1273,7 +1273,7 @@ links created by planner."
   :type 'hook)
 
 (defcustom org-tab-follows-link nil
-  "Non-nil means, on links TAB will follow the link.
+  "Non-nil means on links TAB will follow the link.
 Needs to be set before org.el is loaded.
 This really should not be used, it does not make sense, and the
 implementation is bad."
@@ -1281,14 +1281,14 @@ implementation is bad."
   :type 'boolean)
 
 (defcustom org-return-follows-link nil
-  "Non-nil means, on links RET will follow the link.
+  "Non-nil means on links RET will follow the link.
 Needs to be set before org.el is loaded."
   :group 'org-link-follow
   :type 'boolean)
 
 (defcustom org-mouse-1-follows-link
   (if (boundp 'mouse-1-click-follows-link) mouse-1-click-follows-link t)
-  "Non-nil means, mouse-1 on a link will follow the link.
+  "Non-nil means mouse-1 on a link will follow the link.
 A longer mouse click will still set point.  Does not work on XEmacs.
 Needs to be set before org.el is loaded."
   :group 'org-link-follow
@@ -1341,7 +1341,7 @@ another window."
 		 (const find-file-other-frame)))))
 
 (defcustom org-display-internal-link-with-indirect-buffer nil
-  "Non-nil means, use indirect buffer to display infile links.
+  "Non-nil means use indirect buffer to display infile links.
 Activating internal links (from one location in a file to another location
 in the same file) normally just jumps to the location.  When the link is
 activated with a C-u prefix (or with mouse-3), the link is displayed in
@@ -1352,7 +1352,7 @@ changes to the current buffer."
   :type 'boolean)
 
 (defcustom org-open-non-existing-files nil
-  "Non-nil means, `org-open-file' will open non-existing files.
+  "Non-nil means `org-open-file' will open non-existing files.
 When nil, an error will be generated.
 This variable applies only to external applications because they
 might choke on non-existing files.  If the link is to a file that
@@ -1361,7 +1361,7 @@ will be opened in Emacs, the variable is ignored."
   :type 'boolean)
 
 (defcustom org-open-directory-means-index-dot-org nil
-  "Non-nil means, a link to a directory really means to index.org.
+  "Non-nil means a link to a directory really means to index.org.
 When nil, following a directory link will run dired or open a finder/explorer
 window on that directory."
   :group 'org-link-follow
@@ -1381,7 +1381,7 @@ if one was given like in <mailto:arthur@galaxy.org::this subject>."
 	  (cons :tag "other" (function) (repeat :tag "argument" sexp))))
 
 (defcustom org-confirm-shell-link-function 'yes-or-no-p
-  "Non-nil means, ask for confirmation before executing shell links.
+  "Non-nil means ask for confirmation before executing shell links.
 Shell links can be dangerous: just think about a link
 
      [[shell:rm -rf ~/*][Google Search]]
@@ -1398,7 +1398,7 @@ single keystroke rather than having to type \"yes\"."
 	  (const :tag "no confirmation (dangerous)" nil)))
 
 (defcustom org-confirm-elisp-link-function 'yes-or-no-p
-  "Non-nil means, ask for confirmation before executing Emacs Lisp links.
+  "Non-nil means ask for confirmation before executing Emacs Lisp links.
 Elisp links can be dangerous: just think about a link
 
      [[elisp:(shell-command \"rm -rf ~/*\")][Google Search]]
@@ -1572,7 +1572,7 @@ outline-path-completion  Headlines in the current buffer are offered via
   :type 'integer)
 
 (defcustom org-reverse-note-order nil
-  "Non-nil means, store new notes at the beginning of a file or entry.
+  "Non-nil means store new notes at the beginning of a file or entry.
 When nil, new notes will be filed to the end of a file or entry.
 This can also be a list with cons cells of regular expressions that
 are matched against file names, and values."
@@ -1590,7 +1590,7 @@ This is list of cons cells.  Each cell contains:
 - a specification of the files to be considered, either a list of files,
   or a symbol whose function or variable value will be used to retrieve
   a file name or a list of file names.  If you use `org-agenda-files' for
-  that, all agenda files will be scanned for targets.  Nil means, consider
+  that, all agenda files will be scanned for targets.  Nil means consider
   headings in the current buffer.
 - A specification of how to find candidate refile targets.  This may be
   any of:
@@ -1642,7 +1642,7 @@ of the subtree."
   :type 'function)
 
 (defcustom org-refile-use-outline-path nil
-  "Non-nil means, provide refile targets as paths.
+  "Non-nil means provide refile targets as paths.
 So a level 3 headline will be available as level1/level2/level3.
 
 When the value is `file', also include the file name (without directory)
@@ -1658,7 +1658,7 @@ the file name, to get entries inserted as top level in the file.
 	  (const :tag "Start with full file path" full-file-path)))
 
 (defcustom org-outline-path-complete-in-steps t
-  "Non-nil means, complete the outline path in hierarchical steps.
+  "Non-nil means complete the outline path in hierarchical steps.
 When Org-mode uses the refile interface to select an outline path
 \(see variable `org-refile-use-outline-path'), the completion of
 the path can be done is a single go, or if can be done in steps down
@@ -1670,7 +1670,7 @@ fast, while still showing the whole path to the entry."
   :type 'boolean)
 
 (defcustom org-refile-allow-creating-parent-nodes nil
-  "Non-nil means, allow to create new nodes as refile targets.
+  "Non-nil means allow to create new nodes as refile targets.
 New nodes are then created by adding \"/new node name\" to the completion
 of an existing node.  When the value of this variable is `confirm',
 new node creation must be confirmed by the user (recommended)
@@ -1806,7 +1806,7 @@ more information."
 		 (const type)))
 
 (defcustom org-use-fast-todo-selection t
-  "Non-nil means, use the fast todo selection scheme with C-c C-t.
+  "Non-nil means use the fast todo selection scheme with C-c C-t.
 This variable describes if and under what circumstances the cycling
 mechanism for TODO keywords will be replaced by a single-key, direct
 selection scheme.
@@ -1830,7 +1830,7 @@ by a letter in parenthesis, like TODO(t)."
 	  (const :tag "Only with C-u C-c C-t" prefix)))
 
 (defcustom org-provide-todo-statistics t
-  "Non-nil means, update todo statistics after insert and toggle.
+  "Non-nil means update todo statistics after insert and toggle.
 ALL-HEADLINES means update todo statistics by including headlines
 with no TODO keyword as well, counting them as not done.
 A list of TODO keywords means the same, but skip keywords that are
@@ -1847,7 +1847,7 @@ current entry each time a todo state is changed."
 	  (other :tag "No TODO statistics" nil)))
 
 (defcustom org-hierarchical-todo-statistics t
-  "Non-nil means, TODO statistics covers just direct children.
+  "Non-nil means TODO statistics covers just direct children.
 When nil, all entries in the subtree are considered.
 This has only an effect if `org-provide-todo-statistics' is set.
 To set this to nil for only a single subtree, use a COOKIE_DATA
@@ -1892,7 +1892,7 @@ TODO state changes
 :to    new state, like in :from")
 
 (defcustom org-enforce-todo-dependencies nil
-  "Non-nil means, undone TODO entries will block switching the parent to DONE.
+  "Non-nil means undone TODO entries will block switching the parent to DONE.
 Also, if a parent has an :ORDERED: property, switching an entry to DONE will
 be blocked if any prior sibling is not yet done.
 Finally, if the parent is blocked because of ordered siblings of its own,
@@ -1911,7 +1911,7 @@ to change is while Emacs is running is through the customize interface."
   :type 'boolean)
 
 (defcustom org-enforce-todo-checkbox-dependencies nil
-  "Non-nil means, unchecked boxes will block switching the parent to DONE.
+  "Non-nil means unchecked boxes will block switching the parent to DONE.
 When this is nil, checkboxes have no influence on switching TODO states.
 When non-nil, you first need to check off all check boxes before the TODO
 entry can be switched to DONE.
@@ -1929,7 +1929,7 @@ to change is while Emacs is running is through the customize interface."
   :type 'boolean)
 
 (defcustom org-treat-insert-todo-heading-as-state-change nil
-  "Non-nil means, inserting a TODO heading is treated as state change.
+  "Non-nil means inserting a TODO heading is treated as state change.
 So when the command \\[org-insert-todo-heading] is used, state change
 logging will apply if appropriate.  When nil, the new TODO item will
 be inserted directly, and no logging will take place."
@@ -1937,7 +1937,7 @@ be inserted directly, and no logging will take place."
   :type 'boolean)
 
 (defcustom org-treat-S-cursor-todo-selection-as-state-change t
-  "Non-nil means, switching TODO states with S-cursor counts as state change.
+  "Non-nil means switching TODO states with S-cursor counts as state change.
 This is the default behavior.  However, setting this to nil allows a
 convenient way to select a TODO state and bypass any logging associated
 with that."
@@ -2041,7 +2041,7 @@ property to one or more of these keywords."
 	  (const :tag "Record timestamp with note." note)))
 
 (defcustom org-log-note-clock-out nil
-  "Non-nil means, record a note when clocking out of an item.
+  "Non-nil means record a note when clocking out of an item.
 This can also be configured on a per-file basis by adding one of
 the following lines anywhere in the buffer:
 
@@ -2052,7 +2052,7 @@ the following lines anywhere in the buffer:
   :type 'boolean)
 
 (defcustom org-log-done-with-time t
-  "Non-nil means, the CLOSED time stamp will contain date and time.
+  "Non-nil means the CLOSED time stamp will contain date and time.
 When nil, only the date will be recorded."
   :group 'org-progress
   :type 'boolean)
@@ -2096,7 +2096,7 @@ agenda log mode depends on the format of these entries."
   (push '(note . "%t") org-log-note-headings))
 
 (defcustom org-log-into-drawer nil
-  "Non-nil means, insert state change notes and time stamps into a drawer.
+  "Non-nil means insert state change notes and time stamps into a drawer.
 When nil, state changes notes will be inserted after the headline and
 any scheduling and clock lines, but not inside a drawer.
 
@@ -2132,7 +2132,7 @@ used instead of the default value."
      (t p))))
 
 (defcustom org-log-state-notes-insert-after-drawers nil
-  "Non-nil means, insert state change notes after any drawers in entry.
+  "Non-nil means insert state change notes after any drawers in entry.
 Only the drawers that *immediately* follow the headline and the
 deadline/scheduled line are skipped.
 When nil, insert notes right after the heading and perhaps the line
@@ -2145,14 +2145,14 @@ set."
   :type 'boolean)
 
 (defcustom org-log-states-order-reversed t
-  "Non-nil means, the latest state change note will be directly after heading.
+  "Non-nil means the latest state change note will be directly after heading.
 When nil, the notes will be orderer according to time."
   :group 'org-todo
   :group 'org-progress
   :type 'boolean)
 
 (defcustom org-log-repeat 'time
-  "Non-nil means, record moving through the DONE state when triggering repeat.
+  "Non-nil means record moving through the DONE state when triggering repeat.
 An auto-repeating task is immediately switched back to TODO when
 marked DONE. If you are not logging state changes (by adding \"@\"
 or \"!\" to the TODO keyword definition), or set `org-log-done' to
@@ -2185,7 +2185,7 @@ property to one or more of these keywords."
   :group 'org-todo)
 
 (defcustom org-enable-priority-commands t
-  "Non-nil means, priority commands are active.
+  "Non-nil means priority commands are active.
 When nil, these commands will be disabled, so that you never accidentally
 set a priority."
   :group 'org-priorities
@@ -2210,7 +2210,7 @@ This is the priority an item get if no explicit priority is given."
   :type 'character)
 
 (defcustom org-priority-start-cycle-with-default t
-  "Non-nil means, start with default priority when starting to cycle.
+  "Non-nil means start with default priority when starting to cycle.
 When this is nil, the first step in the cycle will be (depending on the
 command used) one higher or lower that the default priority."
   :group 'org-priorities
@@ -2222,7 +2222,7 @@ command used) one higher or lower that the default priority."
   :group 'org)
 
 (defcustom org-insert-labeled-timestamps-at-point nil
-  "Non-nil means, SCHEDULED and DEADLINE timestamps are inserted at point.
+  "Non-nil means SCHEDULED and DEADLINE timestamps are inserted at point.
 When nil, these labeled time stamps are forces into the second line of an
 entry, just after the headline.  When scheduling from the global TODO list,
 the time stamp will always be forced into the second line."
@@ -2263,7 +2263,7 @@ of minutes to shift."
 	      org-time-stamp-rounding-minutes)))
 
 (defcustom org-display-custom-times nil
-  "Non-nil means, overlay custom formats over all time stamps.
+  "Non-nil means overlay custom formats over all time stamps.
 The formats are defined through the variable `org-time-stamp-custom-formats'.
 To turn this on on a per-file basis, insert anywhere in the file:
    #+STARTUP: customtime"
@@ -2320,7 +2320,7 @@ Custom commands can set this variable in the options section."
   :type 'integer)
 
 (defcustom org-read-date-prefer-future t
-  "Non-nil means, assume future for incomplete date input from user.
+  "Non-nil means assume future for incomplete date input from user.
 This affects the following situations:
 1. The user gives a month but not a year.
    For example, if it is april and you enter \"feb 2\", this will be read
@@ -2347,13 +2347,13 @@ used as defaults."
 	  (const :tag "Check month, day, and time" time)))
 
 (defcustom org-read-date-display-live t
-  "Non-nil means, display current interpretation of date prompt live.
+  "Non-nil means display current interpretation of date prompt live.
 This display will be in an overlay, in the minibuffer."
   :group 'org-time
   :type 'boolean)
 
 (defcustom org-read-date-popup-calendar t
-  "Non-nil means, pop up a calendar when prompting for a date.
+  "Non-nil means pop up a calendar when prompting for a date.
 In the calendar, the date can be selected with mouse-1.  However, the
 minibuffer will also be active, and you can simply enter the date as well.
 When nil, only the minibuffer will be available."
@@ -2386,13 +2386,13 @@ be the favorite working time of John Wiegley :-)"
   :type 'integer)
 
 (defcustom org-edit-timestamp-down-means-later nil
-  "Non-nil means, S-down will increase the time in a time stamp.
+  "Non-nil means S-down will increase the time in a time stamp.
 When nil, S-up will increase."
   :group 'org-time
   :type 'boolean)
 
 (defcustom org-calendar-follow-timestamp-change t
-  "Non-nil means, make the calendar window follow timestamp changes.
+  "Non-nil means make the calendar window follow timestamp changes.
 When a timestamp is modified and the calendar window is visible, it will be
 moved to the new date."
   :group 'org-time
@@ -2465,7 +2465,7 @@ says they should be.
 This variable is populated from #+FILETAGS lines.")
 
 (defcustom org-use-fast-tag-selection 'auto
-  "Non-nil means, use fast tag selection scheme.
+  "Non-nil means use fast tag selection scheme.
 This is a special interface to select and deselect tags with single keys.
 When nil, fast selection is never used.
 When the symbol `auto', fast selection is used if and only if selection
@@ -2480,7 +2480,7 @@ automatically if necessary."
 	  (const :tag "When selection characters are configured" 'auto)))
 
 (defcustom org-fast-tag-selection-single-key nil
-  "Non-nil means, fast tag selection exits after first change.
+  "Non-nil means fast tag selection exits after first change.
 When nil, you have to press RET to exit it.
 During fast tag selection, you can toggle this flag with `C-c'.
 This variable can also have the value `expert'.  In this case, the window
@@ -2492,7 +2492,7 @@ displaying the tags menu is not even shown, until you press C-c again."
 	  (const :tag "Expert" expert)))
 
 (defvar org-fast-tag-selection-include-todo nil
-  "Non-nil means, fast tags selection interface will also offer TODO states.
+  "Non-nil means fast tags selection interface will also offer TODO states.
 This is an undocumented feature, you should not rely on it.")
 
 (defcustom org-tags-column (if (featurep 'xemacs) -76 -77)
@@ -2504,7 +2504,7 @@ it means that the tags should be flushright to that column.  For example,
   :type 'integer)
 
 (defcustom org-auto-align-tags t
-  "Non-nil means, realign tags after pro/demotion of TODO state change.
+  "Non-nil means realign tags after pro/demotion of TODO state change.
 These operations change the length of a headline and therefore shift
 the tags around.  With this options turned on, after each such operation
 the tags are again aligned to `org-tags-column'."
@@ -2512,7 +2512,7 @@ the tags are again aligned to `org-tags-column'."
   :type 'boolean)
 
 (defcustom org-use-tag-inheritance t
-  "Non-nil means, tags in levels apply also for sublevels.
+  "Non-nil means tags in levels apply also for sublevels.
 When nil, only the tags directly given in a specific line apply there.
 This may also be a list of tags that should be inherited, or a regexp that
 matches tags that should be inherited.  Additional control is possible
@@ -2603,7 +2603,7 @@ lined-up with respect to each other."
   :type 'string)
 
 (defcustom org-use-property-inheritance nil
-  "Non-nil means, properties apply also for sublevels.
+  "Non-nil means properties apply also for sublevels.
 
 This setting is chiefly used during property searches. Turning it on can
 cause significant overhead when doing a search, which is why it is not
@@ -2919,7 +2919,7 @@ also in regions already fontified."
   :type 'boolean)
 
 (defcustom org-hide-leading-stars nil
-  "Non-nil means, hide the first N-1 stars in a headline.
+  "Non-nil means hide the first N-1 stars in a headline.
 This works by using the face `org-hide' for these stars.  This
 face is white for a light background, and black for a dark
 background.  You may have to customize the face `org-hide' to
@@ -2935,7 +2935,7 @@ lines to the buffer:
   :type 'boolean)
 
 (defcustom org-fontify-done-headline nil
-  "Non-nil means, change the face of a headline if it is marked DONE.
+  "Non-nil means change the face of a headline if it is marked DONE.
 Normally, only the TODO/DONE keyword indicates the state of a headline.
 When this is non-nil, the headline after the keyword is set to the
 `org-headline-done' as an additional indication."
@@ -2956,7 +2956,7 @@ org-level-* faces."
   :type 'boolean)
 
 (defcustom org-highlight-latex-fragments-and-specials nil
-  "Non-nil means, fontify what is treated specially by the exporters."
+  "Non-nil means fontify what is treated specially by the exporters."
   :group 'org-font-lock
   :type 'boolean)
 
@@ -3094,7 +3094,7 @@ This is needed for font-lock setup.")
   :group 'org)
 
 (defcustom org-completion-use-ido nil
-  "Non-nil means, use ido completion wherever possible.
+  "Non-nil means use ido completion wherever possible.
 Note that `ido-mode' must be active for this variable to be relevant.
 If you decide to turn this variable on, you might well want to turn off
 `org-outline-path-complete-in-steps'.
@@ -3103,7 +3103,7 @@ See also `org-completion-use-iswitchb'."
   :type 'boolean)
 
 (defcustom org-completion-use-iswitchb nil
-  "Non-nil means, use iswitchb completion wherever possible.
+  "Non-nil means use iswitchb completion wherever possible.
 Note that `iswitchb-mode' must be active for this variable to be relevant.
 If you decide to turn this variable on, you might well want to turn off
 `org-outline-path-complete-in-steps'.
@@ -3113,7 +3113,7 @@ Note that this variable has only an effect if `org-completion-use-ido' is nil."
 
 (defcustom org-completion-fallback-command 'hippie-expand
   "The expansion command called by \\[org-complete] in normal context.
-Normal means, no org-mode-specific context."
+Normal means no org-mode-specific context."
   :group 'org-completion
   :type 'function)
 
@@ -3533,7 +3533,7 @@ get the proper fontification."
   :type 'string)
 
 (defcustom org-agenda-skip-archived-trees t
-  "Non-nil means, the agenda will skip any items located in archived trees.
+  "Non-nil means the agenda will skip any items located in archived trees.
 An archived tree is a tree marked with the tag ARCHIVE.  The use of this
 variable is no longer recommended, you should leave it at the value t.
 Instead, use the key `v' to cycle the archives-mode in the agenda."
@@ -3542,13 +3542,13 @@ Instead, use the key `v' to cycle the archives-mode in the agenda."
   :type 'boolean)
 
 (defcustom org-columns-skip-archived-trees t
-  "Non-nil means, ignore archived trees when creating column view."
+  "Non-nil means ignore archived trees when creating column view."
   :group 'org-archive
   :group 'org-properties
   :type 'boolean)
 
 (defcustom org-cycle-open-archived-trees nil
-  "Non-nil means, `org-cycle' will open archived trees.
+  "Non-nil means `org-cycle' will open archived trees.
 An archived tree is a tree marked with the tag ARCHIVE.
 When nil, archived trees will stay folded.  You can still open them with
 normal outline commands like `show-all', but not with the cycling commands."
@@ -5644,7 +5644,7 @@ open and agenda-wise Org files."
 
 (defun org-first-headline-recenter (&optional N)
   "Move cursor to the first headline and recenter the headline.
-Optional argument N means, put the headline into the Nth line of the window."
+Optional argument N means put the headline into the Nth line of the window."
   (goto-char (point-min))
   (when (re-search-forward (concat "^\\(" outline-regexp "\\)") nil t)
     (beginning-of-line)
@@ -13606,7 +13606,7 @@ This is used by `org-read-date' in a temporary keymap for the calendar buffer."
 
 (defun org-insert-time-stamp (time &optional with-hm inactive pre post extra)
   "Insert a date stamp for the date given by the internal TIME.
-WITH-HM means, use the stamp format that includes the time of the day.
+WITH-HM means use the stamp format that includes the time of the day.
 INACTIVE means use square brackets instead of angular ones, so that the
 stamp will not contribute to the agenda.
 PRE and POST are optional strings to be inserted before and after the
@@ -14543,7 +14543,7 @@ end of the list."
 (defun org-remove-file (&optional file)
   "Remove current file from the list of files in variable `org-agenda-files'.
 These are the files which are being checked for agenda entries.
-Optional argument FILE means, use this file instead of the current."
+Optional argument FILE means use this file instead of the current."
   (interactive)
   (let* ((org-agenda-skip-unavailable-files nil)
 	 (file (or file buffer-file-name))

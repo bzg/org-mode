@@ -123,7 +123,7 @@ to have no space characters in them."
 	  (string :tag "Prefix")))
 
 (defcustom org-id-include-domain nil
-  "Non-nil means, add the domain name to new IDs.
+  "Non-nil means add the domain name to new IDs.
 This ensures global uniqueness of IDs, and is also suggested by
 RFC 2445 in combination with RFC 822.  This is only relevant if
 `org-id-method' is `org'.  When uuidgen is used, the domain will never
@@ -135,7 +135,7 @@ people to make this necessary."
   :type 'boolean)
 
 (defcustom org-id-track-globally t
-  "Non-nil means, track IDs through files, so that links work globally.
+  "Non-nil means track IDs through files, so that links work globally.
 This work by maintaining a hash table for IDs and writing this table
 to disk when exiting Emacs.  Because of this, it works best if you use
 a single Emacs process, not many.
@@ -178,7 +178,7 @@ This variable is only relevant when `org-id-track-globally' is set."
 	    (file))))
 
 (defcustom org-id-search-archives t
-  "Non-nil means, search also the archive files of agenda files for entries.
+  "Non-nil means search also the archive files of agenda files for entries.
 This is a possibility to reduce overhead, but it means that entries moved
 to the archives can no longer be found by ID.
 This variable is only relevant when `org-id-track-globally' is set."

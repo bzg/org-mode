@@ -57,7 +57,7 @@
 ;;
 ;; 3) If the TRIGGER property contains any other words like
 ;;    XYZ(KEYWORD), these are treated as entry id's with keywords.  That
-;;    means, Org-mode will search for an entry with the ID property XYZ
+;;    means Org-mode will search for an entry with the ID property XYZ
 ;;    and switch that entry to KEYWORD as well.
 ;;
 ;; Blocking
@@ -69,7 +69,7 @@
 ;;    state, the current state change is blocked.
 ;;
 ;; 2) If the BLOCKER property contains any other words, these are
-;;    treated as entry id's.  That means, Org-mode will search for an
+;;    treated as entry id's.  That means Org-mode will search for an
 ;;    entry with the ID property exactly equal to this word.  If any
 ;;    of these entries is not yet marked DONE, the current state change
 ;;    will be blocked.

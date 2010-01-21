@@ -349,7 +349,7 @@ Defaults to \\begin{verbatim} and \\end{verbatim}."
 	       (string :tag "Close")))
 
 (defcustom org-export-latex-listings nil
-  "Non-nil means, export source code using the listings package.
+  "Non-nil means export source code using the listings package.
 This package will fontify source code, possibly even with color.
 If you want to use this, you also need to make LaTeX use the
 listings package, and if you want to have color, the color
@@ -451,7 +451,7 @@ This function should accept the file name as its single argument."
   :type '(repeat (string :tag "Extension")))
 
 (defcustom org-export-pdf-remove-logfiles t
-  "Non-nil means, remove the logfiles produced by PDF production.
+  "Non-nil means remove the logfiles produced by PDF production.
 These are the .aux, .log, .out, and .toc files."
   :group 'org-export-pdf
   :type 'boolean)

@@ -54,7 +54,7 @@
   :group 'org)
 
 (defcustom org-remember-store-without-prompt t
-  "Non-nil means, `C-c C-c' stores remember note without further prompts.
+  "Non-nil means `C-c C-c' stores remember note without further prompts.
 It then uses the file and headline specified by the template or (if the
 template does not specify them) by the variables `org-default-notes-file'
 and `org-remember-default-headline'.  To force prompting anyway, use
@@ -225,7 +225,7 @@ for a Remember buffer.")
 (define-key org-remember-mode-map "\C-c\C-k" 'org-remember-kill)
 
 (defcustom org-remember-clock-out-on-exit 'query
-  "Non-nil means, stop the clock when exiting a clocking remember buffer.
+  "Non-nil means stop the clock when exiting a clocking remember buffer.
 This only applies if the clock is running in the remember buffer.  If the
 clock is not stopped, it continues to run in the storage location.
 Instead of nil or t, this may also be the symbol `query' to prompt the
@@ -248,7 +248,7 @@ See also `org-remember-auto-remove-backup-files'."
 	  (directory :tag "Directory")))
 
 (defcustom org-remember-auto-remove-backup-files t
-  "Non-nil means, remove remember backup files after successfully storage.
+  "Non-nil means remove remember backup files after successfully storage.
 When remember is finished successfully, with storing the note at the
 desired target, remove the backup files related to this remember process
 and show a message about remaining backup files, from previous, unfinished
