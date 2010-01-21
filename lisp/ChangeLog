@@ -1,3 +1,9 @@
+2010-01-20  Stephen Eglen  <stephen@gnu.org>
+
+	* org-agenda.el (org-get-time-of-day): Use
+	org-agenda-time-leading-zero to allow leading zero (rather than
+	space) for times.
+
 2010-01-20  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-agenda.el (org-agenda-diary-entry-in-org-file): Make sure

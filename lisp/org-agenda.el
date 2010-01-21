@@ -805,6 +805,12 @@ This function makes sure that dates are aligned for easy reading."
     (format "%-10s %2d %s %4d%s"
 	    dayname day monthname year weekstring)))
 
+(defcustom org-agenda-time-leading-zero nil 
+  "Non-nil means use leading zero for military times in agenda.
+For example, 9:30am would become 09:30 rather than  9:30."
+  :group 'org-agenda-daily/weekly
+  :type 'boolean)
+ 
 (defcustom org-agenda-weekend-days '(6 0)
   "Which days are weekend?
 These days get the special face `org-agenda-date-weekend' in the agenda
@@ -4902,6 +4908,8 @@ HH:MM."
 		    (mod h1 24) h1))
 	    (t0 (+ (* 100 h2) m))
 	    (t1 (concat (if (>= h1 24) "+" " ")
+ 			(if (and org-agenda-time-leading-zero
+ 				 (< t0 1000)) "0" "")
 			(if (< t0 100) "0" "")
 			(if (< t0 10)  "0" "")
 			(int-to-string t0))))
