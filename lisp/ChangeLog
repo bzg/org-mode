@@ -1,3 +1,9 @@
+2010-01-18  Jan Böcker  <jan.boecker@jboecker.de>
+
+	* org.el (org-narrow-to-subtree): Position the end of the narrowed
+	region before the line with the next heading, to prevent the user
+	from prepending text to the next headline.
+
 2010-01-20  Stephen Eglen  <stephen@gnu.org>
 
 	* org-agenda.el (org-get-time-of-day): Use
