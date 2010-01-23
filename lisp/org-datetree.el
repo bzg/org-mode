@@ -43,7 +43,7 @@ base level will be properly adjusted.")
 (defun org-datetree-find-date-create (date &optional keep-restriction)
   "Find or create an entry for DATE.
 If KEEP-RESTRICTION is non-nil, do not widen the buffer.
-When it is nit, the buffer will be widened to make sure an existing date
+When it is nil, the buffer will be widened to make sure an existing date
 tree can be found."
   (let ((year (nth 2 date))
 	(month (car date))
