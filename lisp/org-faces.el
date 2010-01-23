@@ -378,10 +378,10 @@ list of attributes, like (:foreground \"blue\" :weight bold :underline t)."
 
 
 (org-copy-face 'org-todo 'org-checkbox-statistics-todo
-	       "Face used for unfinished checkbox statistics.")
+  "Face used for unfinished checkbox statistics.")
 
 (org-copy-face 'org-done 'org-checkbox-statistics-done
-	       "Face used for finished checkbox statistics.")
+  "Face used for finished checkbox statistics.")
 
 (defcustom org-tag-faces nil
   "Faces for specific tags.
@@ -502,17 +502,17 @@ changes."
   :group 'org-faces)
 
 (org-copy-face 'org-agenda-structure 'org-agenda-date
-	       "Face used in agenda for normal days.")
+  "Face used in agenda for normal days.")
 
 (org-copy-face 'org-agenda-date 'org-agenda-date-today
-	       "Face used in agenda for today."
-	       :weight 'bold :italic 't)
+  "Face used in agenda for today."
+  :weight 'bold :italic 't)
 
 (org-copy-face 'secondary-selection 'org-agenda-clocking
-	       "Face marking the current clock item in the agenda.")
+  "Face marking the current clock item in the agenda.")
 
 (org-copy-face 'org-agenda-date 'org-agenda-date-weekend
-	       "Face used in agenda for weekend days.
+  "Face used in agenda for weekend days.
 See the variable `org-agenda-weekend-days' for a definition of which days
 belong to the weekend."
 	       :weight 'bold)
@@ -640,7 +640,10 @@ If it is less than 8, the level-1 face gets re-used for level N+1 etc."
   :group 'org-faces)
 
 (org-copy-face 'modeline 'org-mode-line-clock
-	       "Face used for clock display in mode line.")
+  "Face used for clock display in mode line.")
+(org-copy-face 'modeline 'org-mode-line-clock-overrun 
+  "Face used for clock display for overrun tasks in mode line."
+  :background "red")
 
 (provide 'org-faces)
 

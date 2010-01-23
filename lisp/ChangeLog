@@ -1,3 +1,13 @@
+2010-01-23  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-clock.el (org-task-overrun-text): New option.
+	(org-task-overrun, org-clock-update-period): New variables.
+	(org-clock-get-clock-string, org-clock-update-mode-line): Mark
+	overrun clock.
+	(org-clock-notify-once-if-expired): Check if clock is overrun.
+
+	* org-faces.el: New face `org-mode-line-clock-overrun'.
+
 2010-01-18  Jan Böcker  <jan.boecker@jboecker.de>
 
 	* org.el (org-narrow-to-subtree): Position the end of the narrowed
