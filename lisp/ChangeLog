@@ -1,3 +1,11 @@
+2010-01-24  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-latex.el (org-export-latex-classes): Use AUTO as the place
+	holder string for the coding system.  And improve the
+	documentation.
+	(org-export-latex-fix-inputenc): Only modify the coding system if
+	it is given by the placeholder AUTO.
+
 2010-01-23  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-clock.el (org-task-overrun-text): New option.

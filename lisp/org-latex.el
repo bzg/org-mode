@@ -92,7 +92,7 @@
 (defcustom org-export-latex-classes
   '(("article"
      "\\documentclass[11pt]{article}
-\\usepackage[utf8]{inputenc}
+\\usepackage[AUTO]{inputenc}
 \\usepackage[T1]{fontenc}
 \\usepackage{graphicx}
 \\usepackage{longtable}
@@ -108,7 +108,7 @@
      ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))
     ("report"
      "\\documentclass[11pt]{report}
-\\usepackage[utf8]{inputenc}
+\\usepackage[AUTO]{inputenc}
 \\usepackage[T1]{fontenc}
 \\usepackage{graphicx}
 \\usepackage{longtable}
@@ -124,7 +124,7 @@
      ("\\subsubsection{%s}" . "\\subsubsection*{%s}"))
     ("book"
      "\\documentclass[11pt]{book}
-\\usepackage[utf8]{inputenc}
+\\usepackage[AUTO]{inputenc}
 \\usepackage[T1]{fontenc}
 \\usepackage{graphicx}
 \\usepackage{longtable}
@@ -140,7 +140,7 @@
      ("\\subsubsection{%s}" . "\\subsubsection*{%s}"))
     ("beamer"
      "\\documentclass{beamer}
-\\usepackage[utf8]{inputenc}
+\\usepackage[AUTO]{inputenc}
 \\usepackage[T1]{fontenc}
 \\usepackage{graphicx}
 \\usepackage{longtable}
@@ -160,11 +160,31 @@ associated information.  Here is the structure of each cell:
     (numbered-section . unnumbered-section\)
     ...\)
 
-A %s formatter is mandatory in each section string and will be
-replaced by the title of the section.
+The header string
+-----------------
+
+The HEADER-STRING is the header that will be inserted into the LaTeX file.
+It should contain the \\documentclass macro, package call via \\usepackage
+and anything else you would always like to have in the header.  Note that
+the header will be augmented with additional usepackage statements
+according to the variable `org-export-latex-packages-alist', and also with
+lines specified via \"#+LaTeX_HEADER:\".
+If the header definition contains \"\\usepackage[AUTO]{inputenc}\", AUTO
+will automatically be replaced with a coding system derived from
+`buffer-file-coding-system'.  See also the variable
+`org-export-latex-inputenc-alist' for a way to influence this mechanism.
+
+
+The sectioning structure
+------------------------
+
+The sectioning structure of the class is given by the elements following
+the header string.  For ech sectioning level, a number of strings is
+specified.  A %s formatter is mandatory in each section string and will
+be replaced by the title of the section.
 
 Instead of a cons cell (numbered . unnumbered), you can also provide a list
-of 2-4 elements,
+of 2 or 4 elements,
 
   (numbered-open numbered-close)
 
@@ -177,7 +197,7 @@ represent the document section.  The opening clause should have a %s
 to represent the section title.
 
 Instead of a list of sectioning commands, you can also specify a
-function name.  that function will be called with two parameters,
+function name.  That function will be called with two parameters,
 the (reduced) level of the headline, and the headline text.  The functions
 returns a cons cell with the (possibly modified) headline text, and the
 sectioning list in the cdr."
@@ -2024,7 +2044,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
       (setq opt (or (cdr (assoc opt org-export-latex-inputenc-alist)) opt))
       ;; find the \usepackage statement and replace the option
       (goto-char (point-min))
-      (while (re-search-forward "\\\\usepackage\\[\\(.*?\\)\\]{inputenc}"
+      (while (re-search-forward "\\\\usepackage\\[\\(AUTO\\)\\]{inputenc}"
 				nil t)
 	(goto-char (match-beginning 1))
 	(delete-region (match-beginning 1) (match-end 1))
