@@ -964,7 +964,9 @@ the clocking selection, associated with the letter `d'."
 			      (functionp org-clock-heading-function))
 			 (funcall org-clock-heading-function))
 			((looking-at org-complex-heading-regexp)
-			 (match-string 4))
+			 (replace-regexp-in-string
+			  "\\[\\[.*?\\]\\[\\(.*?\\)\\]\\]" "\\1"
+			  (match-string 4)))
 			(t "???")))
 	    (setq org-clock-heading (org-propertize org-clock-heading
 						    'face nil))
