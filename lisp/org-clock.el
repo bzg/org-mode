@@ -203,9 +203,9 @@ auto     Automatically, either `all', or `repeat' for repeating tasks"
 (defcustom org-task-overrun-text nil
   "The extra modeline text that should indicate that the clock is overrun.
 The can be nil to indicate that instead of adding text, the clock time
-should get a different face (`org-mode-ling-clock-overrun').
+should get a different face (`org-mode-line-clock-overrun').
 When this is a string, it is prepended to the clock string as an indication,
-also using the face `org-mode-ling-clock-overrun'."
+also using the face `org-mode-line-clock-overrun'."
   :group 'org-clock
   :type '(choice
 	  (const :tag "Just mark the time string" nil)
