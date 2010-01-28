@@ -1307,9 +1307,10 @@ links, keywords, lists, tables, fixed-width"
     ;; the beginning of the buffer - inserting "\n" is safe here though.
     (insert "\n" string)
     (goto-char (point-min))
-    (let ((re (concat "\\\\[a-zA-Z]+\\(?:"
-		      "\\[.*\\]"
-		      "\\)?"
+    (let ((re (concat "\\\\[a-zA-Z]+"
+		      "\\(?:<[^<>\n]*>\\)*"
+		      "\\(?:\\[[^][\n]*?\\]\\)*"
+		      "\\(?:<[^<>\n]*>\\)*"
 		      (org-create-multibrace-regexp "{" "}" 3))))
       (while (re-search-forward re nil t)
 	(unless (save-excursion (goto-char (match-beginning 0))
@@ -1954,7 +1955,9 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
   (goto-char (point-min))
   (let ((re (concat
 	     "\\\\[a-zA-Z]+"
+	     "\\(?:<[^<>\n]*>\\)*"
 	     "\\(?:\\[[^][\n]*?\\]\\)*"
+	     "\\(?:<[^<>\n]*>\\)*"
 	     "\\(" (org-create-multibrace-regexp "{" "}" 3) "\\)\\{1,3\\}")))
     (while (re-search-forward re nil t)
       (unless (save-excursion (goto-char (match-beginning 0))
