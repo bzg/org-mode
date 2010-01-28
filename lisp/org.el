@@ -4129,30 +4129,24 @@ This will extract info from a string like \"WAIT(w@/!)\"."
 	      x))
 	  list))
 
-;; FIXME: this could be done much better, using second characters etc.
 (defun org-assign-fast-keys (alist)
   "Assign fast keys to a keyword-key alist.
 Respect keys that are already there."
-  (let (new e k c c1 c2 (char ?a))
+  (let (new e (alt ?0))
     (while (setq e (pop alist))
-      (cond
-       ((equal e '(:startgroup)) (push e new))
-       ((equal e '(:endgroup)) (push e new))
-       ((equal e '(:newline)) (push e new))
-       (t
-	(setq k (car e) c2 nil)
-	(if (cdr e)
-	    (setq c (cdr e))
-	  ;; automatically assign a character.
-	  (setq c1 (string-to-char
-		    (downcase (substring
-			       k (if (= (string-to-char k) ?@) 1 0)))))
-	  (if (or (rassoc c1 new) (rassoc c1 alist))
-	      (while (or (rassoc char new) (rassoc char alist))
-		(setq char (1+ char)))
-	    (setq c2 c1))
-	  (setq c (or c2 char)))
-	(push (cons k c) new))))
+      (if (or (memq (car e) '(:newline :endgroup :startgroup))
+	      (cdr e)) ;; Key already assigned.
+	  (push e new)
+	(let ((clist (string-to-list (downcase (car e))))
+	      (used (append new alist)))
+	  (when (= (car clist) ?@)
+	    (pop clist))
+	  (while (and clist (rassoc (car clist) used))
+	    (pop clist))
+	  (unless clist
+	    (while (rassoc alt used)
+	      (incf alt)))
+	  (push (cons (car e) (or (car clist) alt)) new))))
     (nreverse new)))
 
 ;;; Some variables used in various places

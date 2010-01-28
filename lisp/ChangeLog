@@ -1,3 +1,10 @@
+2010-01-28  Mikael Fornius  <mfo@abc.se>
+
+	* org.el (org-assign-fast-keys): Prefer keys used in keyword name
+	when assigning. Begin using numerical characters when all in name
+	is used up. This is to spare alphanumeric characters for better
+	match with other keywords.
+
 2010-01-28  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-exp.el (org-export-preprocess-hook): Improve documentation.
