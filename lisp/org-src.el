@@ -525,7 +525,7 @@ the language, a switch telling if the content should be in a single line."
 			   org-edit-src-content-indentation))
 	 (preserve-indentation org-src-preserve-indentation)
 	 (delta 0) code line col indent)
-    (untabify (point-min) (point-max))
+    (unless preserve-indentation (untabify (point-min) (point-max)))
     (save-excursion
       (goto-char (point-min))
       (if (looking-at "[ \t\n]*\n") (replace-match ""))
