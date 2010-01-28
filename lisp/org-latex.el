@@ -1895,13 +1895,15 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 	  (setq beg (+ (match-beginning 0) off) end (- (match-end 0) 0))
 	  (add-text-properties beg end '(org-protected t org-latex-math t))))))
 
-  ;; Convert LaTeX to \LaTeX{}
+  ;; Convert LaTeX to \LaTeX{} and TeX to \TeX{}
   (goto-char (point-min))
   (let ((case-fold-search nil))
-    (while (re-search-forward "\\([^+_]\\)LaTeX" nil t)
-      (org-if-unprotected
-       (replace-match (org-export-latex-protect-string
-		       (concat (match-string 1) "\\LaTeX{}")) t t))))
+    (while (re-search-forward "\\<\\(\\(La\\)?TeX\\)\\>" nil t)
+      (unless (eq (char-before (match-beginning 1)) ?\\)
+	(org-if-unprotected-1
+	 (replace-match (org-export-latex-protect-string
+			 (concat "\\" (match-string 1)
+				 "{}")) t t)))))
 
   ;; Convert blockquotes
   (goto-char (point-min))
