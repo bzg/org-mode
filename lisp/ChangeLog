@@ -1,5 +1,7 @@
 2010-01-28  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp.el (org-export-preprocess-hook): Improve documentation.
+
 	* org-latex.el (org-export-latex-preprocess): More consistent
 	conversion and protection of the words LaTeX and TeX.
 	(org-export-latex-fontify-headline, org-export-latex-preprocess):

@@ -359,11 +359,17 @@ drawer names to export."
 
 (defvar org-export-first-hook nil
   "Hook called as the first thing in each exporter.
+Point will be still in the original buffer.
 Good for general initialization")
 
 (defvar org-export-preprocess-hook nil
   "Hook for preprocessing an export buffer.
-Pretty much the first thing when exporting is running this hook.")
+Pretty much the first thing when exporting is running this hook.
+Point will be in a temporary buffer that contains a copy of
+the original buffer, or of the section that is being export.
+All the other hooks in the org-export-preprocess... category
+also work in that temporary buffer, already modified by various
+stages of the processing.")
 
 (defvar org-export-preprocess-after-include-files-hook nil
   "Hook for preprocessing an export buffer.
