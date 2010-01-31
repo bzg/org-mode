@@ -56,7 +56,8 @@
 ;; 2) creates a foo.html and foo_bib.html
 ;; 3) includes the contents of foo.html in the exported html file
 
-
+(require 'org)
+(require 'org-exp)
 (defun org-export-bibtex-preprocess ()
   "Export all BibTeX."
   (interactive)
