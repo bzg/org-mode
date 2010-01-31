@@ -1,3 +1,8 @@
+2010-01-31  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-habit.el (org-habit-insert-consistency-graphs): Fix a
+	problem with mis-aligned graphs when showing habits.
+
 2010-01-28  Mikael Fornius  <mfo@abc.se>
 
 	* org.el (org-assign-fast-keys): Prefer keys used in keyword name
