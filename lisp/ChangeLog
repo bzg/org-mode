@@ -1,5 +1,8 @@
 2010-02-01  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-latex.el (org-export-latex-make-header): Define the align
+	macro if it is not yet defined.
+
 	* org-agenda.el (org-agenda-insert-diary-make-new-entry): Call
 	`org-insert-heading' with the INVISIBLE-OK argument.
 

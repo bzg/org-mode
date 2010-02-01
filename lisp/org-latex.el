@@ -1146,6 +1146,8 @@ OPT-PLIST is the options plist for current buffer."
      (org-export-apply-macros-in-string
       (plist-get opt-plist :latex-header-extra))
      (org-export-apply-macros-in-string org-export-latex-append-header)
+     ;; define align if not yet defined
+     "\\ifx\\alert\\undefined\\let\\alert\\textbf\\fi"
      ;; insert the title
      (format
       "\n\n\\title{%s}\n"
