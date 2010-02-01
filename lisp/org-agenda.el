@@ -5515,8 +5515,9 @@ With prefix ARG, go backward that many times the current span."
 (defun org-agenda-view-mode-dispatch ()
   "Call one of the view mode commands."
   (interactive)
-  (message "View: [d]ay [w]eek [m]onth [y]ear [l]og [L]og-all [a]rch-trees [A]rch-files
-       clock[R]eport   time[G]rid   [[]inactive  [E]ntryText   include[D]iary")
+  (message "View: [d]ay [w]eek [m]onth [y]ear                         [q]uit/abort
+      time[G]rid     [[]inactive [f]ollow [l]og [L]og-all   [E]ntryText
+      [a]rch-trees   [A]rch-files    clock[R]eport   include[D]iary")
   (let ((a (read-char-exclusive)))
     (case a
       (?d (call-interactively 'org-agenda-day-view))

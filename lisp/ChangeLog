@@ -1,5 +1,8 @@
 2010-02-01  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-agenda.el (org-agenda-view-mode-dispatch): Improve the
+	prompt message.
+
 	* org-html.el (org-html-level-start): Use the
 	`html-container-class' text property to set an additional class
 	for an outline container.
