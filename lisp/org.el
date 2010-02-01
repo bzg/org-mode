@@ -10161,54 +10161,56 @@ changes.  Such blocking occurs when:
   3. The parent of the task is blocked because it has siblings that should
      be done first, or is child of a block grandparent TODO entry."
 
-  (catch 'dont-block
-    ;; If this is not a todo state change, or if this entry is already DONE,
-    ;; do not block
-    (when (or (not (eq (plist-get change-plist :type) 'todo-state-change))
-	      (member (plist-get change-plist :from)
-		      (cons 'done org-done-keywords))
-	      (member (plist-get change-plist :to)
-		      (cons 'todo org-not-done-keywords))
-	      (not (plist-get change-plist :to)))
-      (throw 'dont-block t))
-    ;; If this task has children, and any are undone, it's blocked
-    (save-excursion
-      (org-back-to-heading t)
-      (let ((this-level (funcall outline-level)))
-	(outline-next-heading)
-	(let ((child-level (funcall outline-level)))
-	  (while (and (not (eobp))
-		      (> child-level this-level))
-	    ;; this todo has children, check whether they are all
-	    ;; completed
-	    (if (and (not (org-entry-is-done-p))
-		     (org-entry-is-todo-p))
-		(throw 'dont-block nil))
-	    (outline-next-heading)
-	    (setq child-level (funcall outline-level))))))
-    ;; Otherwise, if the task's parent has the :ORDERED: property, and
-    ;; any previous siblings are undone, it's blocked
-    (save-excursion
-      (org-back-to-heading t)
-      (let* ((pos (point))
-	     (parent-pos (and (org-up-heading-safe) (point))))
-	(if (not parent-pos) (throw 'dont-block t)) ; no parent
-	(when (and (org-entry-get (point) "ORDERED")
-		   (forward-line 1)
-		   (re-search-forward org-not-done-heading-regexp pos t))
-	  (throw 'dont-block nil)) ; block, there is an older sibling not done.
-	;; Search further up the hierarchy, to see if an anchestor is blocked
-	(while t
-	  (goto-char parent-pos)
-	  (if (not (looking-at org-not-done-heading-regexp))
-	      (throw 'dont-block t)) ; do not block, parent is not a TODO
-	  (setq pos (point))
-	  (setq parent-pos (and (org-up-heading-safe) (point)))
+  (if (not org-enforce-todo-dependencies)
+      t ; if locally turned off don't block
+    (catch 'dont-block
+      ;; If this is not a todo state change, or if this entry is already DONE,
+      ;; do not block
+      (when (or (not (eq (plist-get change-plist :type) 'todo-state-change))
+		(member (plist-get change-plist :from)
+			(cons 'done org-done-keywords))
+		(member (plist-get change-plist :to)
+			(cons 'todo org-not-done-keywords))
+		(not (plist-get change-plist :to)))
+	(throw 'dont-block t))
+      ;; If this task has children, and any are undone, it's blocked
+      (save-excursion
+	(org-back-to-heading t)
+	(let ((this-level (funcall outline-level)))
+	  (outline-next-heading)
+	  (let ((child-level (funcall outline-level)))
+	    (while (and (not (eobp))
+			(> child-level this-level))
+	      ;; this todo has children, check whether they are all
+	      ;; completed
+	      (if (and (not (org-entry-is-done-p))
+		       (org-entry-is-todo-p))
+		  (throw 'dont-block nil))
+	      (outline-next-heading)
+	      (setq child-level (funcall outline-level))))))
+      ;; Otherwise, if the task's parent has the :ORDERED: property, and
+      ;; any previous siblings are undone, it's blocked
+      (save-excursion
+	(org-back-to-heading t)
+	(let* ((pos (point))
+	       (parent-pos (and (org-up-heading-safe) (point))))
 	  (if (not parent-pos) (throw 'dont-block t)) ; no parent
 	  (when (and (org-entry-get (point) "ORDERED")
 		     (forward-line 1)
 		     (re-search-forward org-not-done-heading-regexp pos t))
-	    (throw 'dont-block nil))))))) ; block, older sibling not done.
+	    (throw 'dont-block nil))  ; block, there is an older sibling not done.
+	  ;; Search further up the hierarchy, to see if an anchestor is blocked
+	  (while t
+	    (goto-char parent-pos)
+	    (if (not (looking-at org-not-done-heading-regexp))
+		(throw 'dont-block t))	; do not block, parent is not a TODO
+	    (setq pos (point))
+	    (setq parent-pos (and (org-up-heading-safe) (point)))
+	    (if (not parent-pos) (throw 'dont-block t)) ; no parent
+	    (when (and (org-entry-get (point) "ORDERED")
+		       (forward-line 1)
+		       (re-search-forward org-not-done-heading-regexp pos t))
+	      (throw 'dont-block nil)))))))) ; block, older sibling not done.
 
 (defcustom org-track-ordered-property-with-tag nil
   "Should the ORDERED property also be shown as a tag?
@@ -10252,30 +10254,32 @@ See variable `org-track-ordered-property-with-tag'."
   "Block turning an entry into a TODO, using checkboxes.
 This checks whether the current task should be blocked from state
 changes because there are unchecked boxes in this entry."
-  (catch 'dont-block
-    ;; If this is not a todo state change, or if this entry is already DONE,
-    ;; do not block
-    (when (or (not (eq (plist-get change-plist :type) 'todo-state-change))
-	      (member (plist-get change-plist :from)
-		      (cons 'done org-done-keywords))
-	      (member (plist-get change-plist :to)
-		      (cons 'todo org-not-done-keywords))
-	      (not (plist-get change-plist :to)))
-      (throw 'dont-block t))
-    ;; If this task has checkboxes that are not checked, it's blocked
-    (save-excursion
-      (org-back-to-heading t)
-      (let ((beg (point)) end)
-	(outline-next-heading)
-	(setq end (point))
-	(goto-char beg)
-	(if (re-search-forward "^[ \t]*\\([-+*]\\|[0-9]+[.)]\\)[ \t]+\\[[- ]\\]"
-			       end t)
-	    (progn
-	      (if (boundp 'org-blocked-by-checkboxes)
-		  (setq org-blocked-by-checkboxes t))
-	      (throw 'dont-block nil)))))
-    t)) ; do not block
+  (if (not org-enforce-todo-checkbox-dependencies)
+      t ; if locally turned off don't block
+    (catch 'dont-block
+      ;; If this is not a todo state change, or if this entry is already DONE,
+      ;; do not block
+      (when (or (not (eq (plist-get change-plist :type) 'todo-state-change))
+		(member (plist-get change-plist :from)
+			(cons 'done org-done-keywords))
+		(member (plist-get change-plist :to)
+			(cons 'todo org-not-done-keywords))
+		(not (plist-get change-plist :to)))
+	(throw 'dont-block t))
+      ;; If this task has checkboxes that are not checked, it's blocked
+      (save-excursion
+	(org-back-to-heading t)
+	(let ((beg (point)) end)
+	  (outline-next-heading)
+	  (setq end (point))
+	  (goto-char beg)
+	  (if (re-search-forward "^[ \t]*\\([-+*]\\|[0-9]+[.)]\\)[ \t]+\\[[- ]\\]"
+				 end t)
+	      (progn
+		(if (boundp 'org-blocked-by-checkboxes)
+		    (setq org-blocked-by-checkboxes t))
+		(throw 'dont-block nil)))))
+      t))) ; do not block
 
 (defun org-entry-blocked-p ()
   "Is the current entry blocked?"

@@ -1,5 +1,9 @@
 2010-02-01  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-block-todo-from-children-or-siblings-or-parent)
+	(org-block-todo-from-checkboxes): Respect the local variable
+	value when deciding if blocking should be active.
+
 	* org-latex.el (org-export-latex-make-header): Define the align
 	macro if it is not yet defined.
 
