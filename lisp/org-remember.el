@@ -488,21 +488,6 @@ to be run from that hook to function properly."
 		  (or (cdr org-remember-previous-location) "???")
 		  (if org-remember-store-without-prompt "C-1 C-c C-c" "        C-c C-c"))))
 	(insert tpl)
-	(goto-char (point-min))
-
-	;; Simple %-escapes
-	(while (re-search-forward "%\\([tTuUaiAcxkKI]\\)" nil t)
-	  (unless (org-remember-escaped-%)
-	    (when (and initial (equal (match-string 0) "%i"))
-	      (save-match-data
-		(let* ((lead (buffer-substring
-			      (point-at-bol) (match-beginning 0))))
-		  (setq v-i (mapconcat 'identity
-				       (org-split-string initial "\n")
-				       (concat "\n" lead))))))
-	    (replace-match
-	     (or (eval (intern (concat "v-" (match-string 1)))) "")
-	     t t)))
 
 	;; %[] Insert contents of a file.
 	(goto-char (point-min))
@@ -517,6 +502,21 @@ to be run from that hook to function properly."
 		  (insert-file-contents filename)
 		(error (insert (format "%%![Couldn't insert %s: %s]"
 				       filename error)))))))
+	;; Simple %-escapes
+	(goto-char (point-min))
+	(while (re-search-forward "%\\([tTuUaiAcxkKI]\\)" nil t)
+	  (unless (org-remember-escaped-%)
+	    (when (and initial (equal (match-string 0) "%i"))
+	      (save-match-data
+		(let* ((lead (buffer-substring
+			      (point-at-bol) (match-beginning 0))))
+		  (setq v-i (mapconcat 'identity
+				       (org-split-string initial "\n")
+				       (concat "\n" lead))))))
+	    (replace-match
+	     (or (eval (intern (concat "v-" (match-string 1)))) "")
+	     t t)))
+
 	;; %() embedded elisp
 	(goto-char (point-min))
 	(while (re-search-forward "%\\((.+)\\)" nil t)
