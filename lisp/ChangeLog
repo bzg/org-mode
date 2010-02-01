@@ -1,6 +1,16 @@
 2010-02-01  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-html.el (org-html-level-start): Use the
+	`html-container-class' text property to set an additional class
+	for an outline container.
+
+	* org-exp.el (org-export-remember-html-container-classes): New
+	function.
+	(org-export-preprocess-string): Call
+	`org-export-remember-html-container-classes'.
+
 	* org.el (org-cycle): Mention level cycling in the docstring.
+	(org-default-properties): Add new property HTML_CONTAINER_CLASS.
 
 	* org-remember.el (org-remember-apply-template): Do file insertion
 	first.

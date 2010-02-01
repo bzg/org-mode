@@ -2003,6 +2003,7 @@ When TITLE is nil, just close all open levels."
   (org-close-par-maybe)
   (let* ((target (and title (org-get-text-property-any 0 'target title)))
 	 (extra-targets (assoc target org-export-target-aliases))
+	 (extra-class (and title (org-get-text-property-any 0 'html-container-class title)))
 	 (preferred (cdr (assoc target org-export-preferred-target-alist)))
 	 (remove (or preferred target))
 	 (l org-level-max)
@@ -2066,8 +2067,9 @@ When TITLE is nil, just close all open levels."
 	(setq href (cdr (assoc (concat "sec-" snumber) org-export-preferred-target-alist)))
 	(setq suffix (or href snumber))
 	(setq href (or href (concat "sec-" snumber)))
-	(insert (format "\n<div id=\"outline-container-%s\" class=\"outline-%d\">\n<h%d id=\"%s\">%s%s</h%d>\n<div class=\"outline-text-%d\" id=\"text-%s\">\n"
-			suffix level level href
+	(insert (format "\n<div id=\"outline-container-%s\" class=\"outline-%d%s\">\n<h%d id=\"%s\">%s%s</h%d>\n<div class=\"outline-text-%d\" id=\"text-%s\">\n"
+			suffix level (if extra-class (concat " " extra-class) "")
+			level href
 			extra-targets
 			title level level suffix))
 	(org-open-par)))))

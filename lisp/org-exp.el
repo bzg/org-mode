@@ -1362,6 +1362,9 @@ on this string to produce the exported version."
       ;; Find all headings and compute the targets for them
       (setq target-alist (org-export-define-heading-targets target-alist))
 
+      ;; Find HTML special classes for headlines
+      (org-export-remember-html-container-classes)
+
       ;; Get rid of drawers
       (org-export-remove-or-extract-drawers
        drawers (plist-get parameters :drawers) backend)
@@ -1589,6 +1592,17 @@ the current file."
 	 (insert target)
 	 (unless desc (insert "][" link))
 	 (add-text-properties pos (point) props))))))
+
+(defun org-export-remember-html-container-classes ()
+  "Store the HTML_CONTAINER_CLASS properties in a text property."
+  (goto-char (point-min))
+  (let (class)
+    (while (re-search-forward
+	    "^[ \t]*:HTML_CONTAINER_CLASS:[ \t]+\\(\\S-+\\)" nil t)
+      (setq class (match-string 1))
+      (save-excursion
+	(org-back-to-heading t)
+	(put-text-property (point-at-bol) (point-at-eol) 'html-container-class class)))))
 
 (defvar org-export-format-drawer-function nil
   "Function to be called to format the contents of a drawer.
