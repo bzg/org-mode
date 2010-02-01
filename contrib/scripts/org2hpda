@@ -1,7 +1,7 @@
 # org2hpda - a small utility to generate hipster pda style printouts from org mode 
 # Copyright (C) 2007  Christian Egli
 # 
-# Version: 0.5
+# Version: 0.6
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,15 +17,32 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Commentary:
-# 
+# ===========
+#
 # set cal-tex-diary to true so that diary entries show up in the calendar 
+#
+# Usage:
+# ======
+#
+# run this makefile with 
+#
+#  make -f org2hpda
+#
+# The makfile will take the entries from your diary file and generate
+# two PDFs containing nicely printed weekly and monthly calendars. One
+# is done in the style of a pocketMod (http://www.pocketmod.com/) and
+# the other is done in the style of the Hipster PDA
+# (http://en.wikipedia.org/wiki/Hipster_PDA). 
+#
+# Requirements:
+# =============
 #
 # the pdf* commands are part of the pdfjam package which can be found
 # at http://www.warwick.ac.uk/go/pdfjam
 
 EMACS = emacs -batch -l ~/.emacs
 LATEX = latex
-DIARY = ~/diary
+DIARY = $($(EMACS) -eval "diary-file")
 
 hipsterFiles =  weekCalendar.pdf yearCalendar.pdf monthCalendar3.pdf monthCalendar2.pdf monthCalendar1.pdf
 pocketModFiles =  weekCalendar.pdf yearCalendar-rotated.pdf \
