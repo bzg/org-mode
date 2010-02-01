@@ -209,7 +209,7 @@ list of message:// links to flagged mail after heading."
 	    (insert "\n" (org-mac-message-get-links "f")))
 	(goto-char (point-max))
 	(insert "\n")
-	(org-insert-heading)
+	(org-insert-heading nil t)
 	(insert org-heading "\n" (org-mac-message-get-links "f"))))))
 
 (provide 'org-mac-message)

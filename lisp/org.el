@@ -6087,15 +6087,17 @@ frame is not changed."
 	 (save-match-data
 	   (looking-at "[ \t]*$")))))
 
-(defun org-insert-heading (&optional force-heading)
+(defun org-insert-heading (&optional force-heading invisible-ok)
   "Insert a new heading or item with same depth at point.
 If point is in a plain list and FORCE-HEADING is nil, create a new list item.
 If point is at the beginning of a headline, insert a sibling before the
 current headline.  If point is not at the beginning, do not split the line,
-but create the new headline after the current line."
+but create the new headline after the current line.
+When INVISIBLE-OK is set, stop at invisible headlines when going back.
+This is important for non-interactive uses of the command."
   (interactive "P")
   (if (or (= (buffer-size) 0)
-	  (and (not (save-excursion (and (ignore-errors (org-back-to-heading))
+	  (and (not (save-excursion (and (ignore-errors (org-back-to-heading invisible-ok))
 					 (org-on-heading-p))))
 	       (not (org-in-item-p))))
       (insert "\n* ")
@@ -6104,7 +6106,7 @@ but create the new headline after the current line."
 	     (head (save-excursion
 		     (condition-case nil
 			 (progn
-			   (org-back-to-heading)
+			   (org-back-to-heading invisible-ok)
 			   (setq empty-line-p (org-previous-line-empty-p))
 			   (match-string 0))
 		       (error "*"))))

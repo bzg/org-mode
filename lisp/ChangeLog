@@ -1,5 +1,13 @@
 2010-02-01  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-agenda.el (org-agenda-insert-diary-make-new-entry): Call
+	`org-insert-heading' with the INVISIBLE-OK argument.
+
+	* org-mac-message.el (org-mac-message-insert-flagged): Call
+	`org-insert-heading' with the INVISIBLE-OK argument.
+
+	* org.el (org-insert-heading):  New argument INVISIBLE-OK.
+
 	* org-agenda.el (org-agenda-view-mode-dispatch): Improve the
 	prompt message.
 

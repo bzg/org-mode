@@ -6946,7 +6946,7 @@ a timestamp can be added there."
     (org-back-over-empty-lines)
     (or (looking-at "[ \t]*$")
 	(progn (insert "\n") (backward-char 1)))
-    (org-insert-heading)
+    (org-insert-heading nil t)
     (org-do-demote)
     (setq col (current-column))
     (insert text "\n")
