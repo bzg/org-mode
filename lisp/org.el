@@ -5142,6 +5142,12 @@ in special contexts.
   3. SUBTREE:  Show the entire subtree, including body text.
   If there is no subtree, switch directly from CHILDREN to FOLDED.
 
+- When point is at the beginning of an empty headline and the variable
+  `org-cycle-level-after-item/entry-creation' is set, cycle the level
+  of the headline by demoting and promoting it to likely levels.  This
+  speeds up creation document structure by presing TAB once or several
+  times right after creating a new headline.
+
 - When there is a numeric prefix, go up to a heading with level ARG, do
   a `show-subtree' and return to the previous cursor position.  If ARG
   is negative, go up that many levels.

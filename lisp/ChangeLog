@@ -1,5 +1,7 @@
 2010-02-01  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-cycle): Mention level cycling in the docstring.
+
 	* org-remember.el (org-remember-apply-template): Do file insertion
 	first.
 
