@@ -7669,11 +7669,14 @@ For file links, arg negates `org-context-in-file-links'."
 
      ((eq major-mode 'dired-mode)
       ;; link to the file in the current line
-      (setq cpltxt (concat "file:"
-			   (abbreviate-file-name
-			    (expand-file-name
-			     (dired-get-filename nil t))))
-	    link (org-make-link cpltxt)))
+      (let ((file (dired-get-filename nil t)))
+ 	(setq file (if file
+ 		       (abbreviate-file-name
+ 			(expand-file-name (dired-get-filename nil t)))
+ 		     ;; otherwise, no file so use current directory.
+ 		     default-directory))
+ 	(setq cpltxt (concat "file:" file)
+ 	      link (org-make-link cpltxt))))
 
      ((and buffer-file-name (org-mode-p))
       (setq custom-id (ignore-errors (org-entry-get nil "CUSTOM_ID")))

@@ -1,3 +1,9 @@
+2010-02-02  Stephen Eglen  <stephen@gnu.org>
+
+	* org.el (org-store-link): For dired buffers, use
+	default-directory as link name if dired-get-filename returns
+	nil.
+
 2010-02-02  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-exp.el (org-export-concatenate-multiline-links): The for
