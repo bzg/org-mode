@@ -1,5 +1,8 @@
 2010-02-02  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp.el (org-export-concatenate-multiline-links): The for
+	protectedness at beginning of match.
+
 	* org-latex.el (org-export-latex-fix-inputenc): Never leave the
 	AUTO as a coding system, instead default to utf8.
 

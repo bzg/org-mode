@@ -2035,7 +2035,7 @@ This is to make sure that the line-processing export backends
 can work correctly."
   (goto-char (point-min))
   (while (re-search-forward "\\(\\(\\[\\|\\]\\)\\[[^]]*?\\)[ \t]*\n[ \t]*\\([^]]*\\]\\(\\[\\|\\]\\)\\)" nil t)
-    (org-if-unprotected
+    (org-if-unprotected-at (match-beginning 1)
      (replace-match "\\1 \\3")
      (goto-char (match-beginning 0)))))
 
