@@ -1,3 +1,8 @@
+2010-02-02  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-latex.el (org-export-latex-fix-inputenc): Never leave the
+	AUTO as a coding system, instead default to utf8.
+
 2010-02-01  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-block-todo-from-children-or-siblings-or-parent)
