@@ -6891,13 +6891,29 @@ the resulting entry will not be shown.  When TEXT is empty, switch to
 	(insert (format "%%%%(diary-anniversary %s) %s"
 			(calendar-date-string d1 nil t) text))))
      ((eq type 'day)
-      (if (eq org-agenda-insert-diary-strategy 'top-level)
-	  (org-agenda-insert-diary-as-top-level text)
-	(require 'org-datetree)
-	(org-datetree-find-date-create d1)
-	(org-agenda-insert-diary-make-new-entry text))
-      (org-insert-time-stamp (org-time-from-absolute
-			      (calendar-absolute-from-gregorian d1)))
+      (let*
+	  (fmt time time2
+	       (org-agenda-time-leading-zero t))
+	(if org-agenda-search-headline-for-time
+	    ;; Use org-format-agenda-item to parse text for a time-range and
+	    ;; remove it.  
+	    (setq fmt (org-format-agenda-item nil text nil nil t)
+		  time (get-text-property 0 'time fmt)
+		  time2 (if (> (length time) 0)
+			    ;; split-string removes trailing ...... if
+			    ;; no end time given.  First space
+			    ;; separates time from date.
+			    (concat " " (car (split-string time "\\.")))
+			  nil)
+		  text (get-text-property 0 'txt fmt)))
+	(if (eq org-agenda-insert-diary-strategy 'top-level)
+	    (org-agenda-insert-diary-as-top-level text)
+	  (require 'org-datetree)
+	  (org-datetree-find-date-create d1)
+	  (org-agenda-insert-diary-make-new-entry text))
+	(org-insert-time-stamp (org-time-from-absolute
+				(calendar-absolute-from-gregorian d1))
+			       nil nil nil nil time2))
       (end-of-line 0))
      ((eq type 'block)
       (if (> (calendar-absolute-from-gregorian d1)
