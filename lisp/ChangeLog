@@ -1,5 +1,7 @@
 2010-02-03  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp.el (org-html-entities): Fix typo.
+
 	* org-latex.el (org-export-latex-make-header): Use \providecommand
 	to make sure the \alert macro is defined.
 

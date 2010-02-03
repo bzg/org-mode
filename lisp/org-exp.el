@@ -1192,7 +1192,7 @@ value of `org-export-run-in-background'."
     ("loz") ("Diamond"."&loz;")
     ("spades") ("spadesuit"."&spades;")
     ("clubs") ("clubsuit"."&clubs;")
-    ("hearts") ("diamondsuit"."&hearts;")
+    ("hearts")
     ("diams") ("diamondsuit"."&diams;")
     ("smile"."&#9786;") ("blacksmile"."&#9787;") ("sad"."&#9785;")
     ("quot")
