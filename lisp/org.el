@@ -2865,6 +2865,12 @@ This is a property list with the following properties:
   :group 'org-latex
   :type 'plist)
 
+(defcustom org-format-latex-signal-error t
+  "Non-nil means signal an error when image creation of LaTeX snippets fails.
+When nil, just push out a message."
+  :group 'org-latex
+  :type 'boolean)
+
 (defcustom org-format-latex-header "\\documentclass{article}
 \\usepackage{amssymb}
 \\usepackage[usenames]{color}
@@ -14994,7 +15000,10 @@ Some of the options can be changed using the variable
 			dvifile)
 	(error nil))
       (if (not (file-exists-p pngfile))
-	  (progn (message "Failed to create png file from %s" texfile) nil)
+	  (if org-format-latex-signal-error
+	      (error "Failed to create png file from %s" texfile)
+	    (message "Failed to create png file from %s" texfile)
+	    nil)
 	;; Use the requested file name and clean up
 	(copy-file pngfile tofile 'replace)
 	(loop for e in '(".dvi" ".tex" ".aux" ".log" ".png") do
