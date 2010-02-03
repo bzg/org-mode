@@ -1,5 +1,8 @@
 2010-02-03  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-latex.el (org-export-latex-make-header): Use \providecommand
+	to make sure the \alert macro is defined.
+
 	* org.el (org-format-latex-signal-error)
 	(org-create-formula-image): Use `org-format-latex-signal-error'.
 
