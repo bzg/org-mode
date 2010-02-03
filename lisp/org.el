@@ -8388,7 +8388,8 @@ application the system uses for this file type."
 	       (concat org-plain-link-re "\\|"
 		       org-bracket-link-regexp "\\|"
 		       org-angle-link-re "\\|"
-		       "[ \t]:[^ \t\n]+:[ \t]*$"))))
+		       "[ \t]:[^ \t\n]+:[ \t]*$")))
+	 (not (get-text-property (point) 'org-linked-text)))
     (or (org-offer-links-in-entry in-emacs)
 	(progn (require 'org-attach) (org-attach-reveal 'if-exists))))
    ((org-at-timestamp-p t) (org-follow-timestamp-link))

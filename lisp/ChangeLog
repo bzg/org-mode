@@ -1,3 +1,8 @@
+2010-02-03  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-open-at-point): Also check for text property
+	org-linked-text before offering collected links.
+
 2010-02-03  Stephen Eglen  <stephen@gnu.org>
 
 	* org-agenda.el (org-agenda-add-entry-to-org-agenda-diary-file):
