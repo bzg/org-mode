@@ -2456,7 +2456,7 @@ INDENT was the original indentation of the block."
 			(setq rtn
                               (concat
                                (if caption
-                                   (format "<label class=\"org-src-name\">%s  &equiv</label>\n"
+                                   (format "<label class=\"org-src-name\">%s  &equiv</label>"
                                            caption)
                                  "")
                                (replace-match
