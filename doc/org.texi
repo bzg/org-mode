@@ -11100,7 +11100,7 @@ the option @code{org-imenu-depth}.
 @cindex @file{remember.el}
 @cindex Wiegley, John
 Org cooperates with remember, see @ref{Remember}.
-@file{Remember.el} is not part of Emacs, find it on the web.
+As of Emacs 23, @file{Remember.el} is part of the Emacs distribution.
 @item @file{speedbar.el} by Eric M. Ludlam
 @cindex @file{speedbar.el}
 @cindex Ludlam, Eric M.

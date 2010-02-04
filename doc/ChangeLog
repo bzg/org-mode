@@ -1,3 +1,7 @@
+2010-02-04  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Cooperation): Remember.el is part of Emacs.
+
 2010-01-15  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Clean view): Mention that `wrap-prefix' is also set by
