@@ -1,3 +1,7 @@
+2010-02-04  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* lisp/org-export-generic.el (org-export-generic): Provide.
+
 2010-01-08  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* lisp/org-export-generic.el (org-export-generic): Close body

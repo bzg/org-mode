@@ -1238,5 +1238,6 @@ REVERSE means to reverse the list if the plist match is a list
     vl))
 
 (provide 'org-generic)
+(provide 'org-export-generic)
 
 ;;; org-export-generic.el ends here
