@@ -7626,7 +7626,7 @@ Jump to the running clock in another window.
 @cindex remote editing, bulk, from agenda
 
 @kindex m
-@item s
+@item m
 Mark the entry at point for bulk action.
 
 @kindex u
