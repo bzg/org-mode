@@ -48,7 +48,8 @@ file using `load-file'."
   (flet ((age (file)
               (time-to-seconds
                (time-subtract (current-time)
-                              (sixth (file-attributes file))))))
+                              (sixth (file-attributes
+                                      (file-truename file)))))))
     (let* ((base-name (file-name-sans-extension file))
            (exported-file (concat base-name ".el")))
       ;; tangle if the org-mode file is newer than the elisp file
