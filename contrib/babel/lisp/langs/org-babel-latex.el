@@ -28,9 +28,9 @@
 
 ;; Org-Babel support for evaluating LaTeX source code.
 ;;
-;; Currently on evaluation this returns raw LaTeX code, however at
-;; some point it *may* (it may not) make sense to have LaTeX blocks
-;; compile small pdfs on evaluation.
+;; Currently on evaluation this returns raw LaTeX code, unless a :file
+;; header argument is given in which case small png or pdf files will
+;; be created directly form the latex source code.
 
 ;;; Code:
 (require 'org-babel)
@@ -54,7 +54,82 @@ called by `org-babel-execute-src-block'."
                  (if (stringp (cdr pair))
                      (cdr pair) (format "%S" (cdr pair)))
                  body))) (second (org-babel-process-params params)))
-  body)
+  (if (cdr (assoc :file params))
+      (let ((out-file (cdr (assoc :file params)))
+            (tex-file (make-temp-file "org-babel-latex" nil ".tex"))
+            (pdfheight (cdr (assoc :pdfheight params)))
+            (pdfwidth (cdr (assoc :pdfwidth params)))
+            (in-buffer (not (string= "no" (cdr (assoc :buffer params)))))
+            (org-export-latex-packages-alist
+             (append (cdr (assoc :packages params))
+                     org-export-latex-packages-alist)))
+        (cond
+         ((string-match "\\.png$" out-file)
+          (org-create-formula-image
+           body out-file org-format-latex-options in-buffer))
+         ((string-match "\\.pdf$" out-file)
+          (org-babel-latex-body-to-tex-file tex-file body pdfheight pdfwidth)
+          (delete-file out-file)
+          (rename-file (org-babel-latex-tex-to-pdf tex-file) out-file))
+         ((string-match "\\.\\([^\\.]+\\)$" out-file)
+          (error
+           (message "can not create %s files, please specify a .png or .pdf file"
+                    (match-string 1 out-file)))))
+        out-file)
+    body))
+
+(defun org-babel-latex-body-to-tex-file (tex-file body &optional height width)
+  "Extracted from `org-create-formula-image' in org.el."
+  (with-temp-file tex-file
+    (insert org-format-latex-header
+            (if org-export-latex-packages-alist
+                (concat "\n"
+                        (mapconcat (lambda(p)
+                                     (if (equal "" (car p))
+                                         (format "\\usepackage{%s}" (cadr p))
+                                       (format "\\usepackage[%s]{%s}"
+                                               (car p) (cadr p))))
+                                   org-export-latex-packages-alist "\n"))
+              "")
+            (if height (concat "\n" (format "\\pdfpageheight %s" height)) "")
+            (if width (concat "\n" (format "\\pdfpagewidth %s" width)) "")
+            (if org-format-latex-header-extra
+                (concat "\n" org-format-latex-header-extra)
+              "")
+            "\n\\begin{document}\n" body "\n\\end{document}\n")))
+
+(defun org-babel-latex-tex-to-pdf (tex-file)
+  "Extracted from `org-export-as-pdf' in org-latex.el."
+  (let* ((wconfig (current-window-configuration))
+         (default-directory (file-name-directory tex-file))
+         (base (file-name-sans-extension tex-file))
+         (pdffile (concat base ".pdf"))
+         (cmds org-latex-to-pdf-process)
+         (outbuf (get-buffer-create "*Org PDF LaTeX Output*"))
+         cmd)
+    (if (and cmds (symbolp cmds))
+        (funcall cmds tex-file)
+      (while cmds
+        (setq cmd (pop cmds))
+        (while (string-match "%b" cmd)
+          (setq cmd (replace-match
+                     (save-match-data
+                       (shell-quote-argument base))
+                     t t cmd)))
+        (while (string-match "%s" cmd)
+          (setq cmd (replace-match
+                     (save-match-data
+                       (shell-quote-argument tex-file))
+                     t t cmd)))
+        (shell-command cmd outbuf outbuf)))
+    (if (not (file-exists-p pdffile))
+        (error "PDF file was not produced from %s" tex-file)
+      (set-window-configuration wconfig)
+      (when org-export-pdf-remove-logfiles
+        (dolist (ext org-export-pdf-logfiles)
+          (setq tex-file (concat base "." ext))
+          (and (file-exists-p tex-file) (delete-file tex-file))))
+      pdffile)))
 
 (defun org-babel-prep-session:latex (session params)
   (error "Latex does not support sessions"))
