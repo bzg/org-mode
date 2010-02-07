@@ -48,12 +48,13 @@ function is called by `org-babel-execute-src-block'."
          (session (org-babel-sh-initiate-session (first processed-params)))
          (vars (second processed-params))
          (result-type (fourth processed-params))
+         (sep (cdr (assoc :separator params)))
          (full-body (concat
                      (mapconcat ;; define any variables
                       (lambda (pair)
                         (format "%s=%s"
                                 (car pair)
-                                (org-babel-sh-var-to-sh (cdr pair))))
+                                (org-babel-sh-var-to-sh (cdr pair) sep)))
                       vars "\n") "\n" body "\n\n"))) ;; then the source block body
     (org-babel-sh-evaluate session full-body result-type)))
 
@@ -61,11 +62,12 @@ function is called by `org-babel-execute-src-block'."
   "Prepare SESSION according to the header arguments specified in PARAMS."
   (let* ((session (org-babel-sh-initiate-session session))
          (vars (org-babel-ref-variables params))
+         (sep (cdr (assoc :separator params)))
          (var-lines (mapcar ;; define any variables
                      (lambda (pair)
                        (format "%s=%s"
                                (car pair)
-                               (org-babel-sh-var-to-sh (cdr pair))))
+                               (org-babel-sh-var-to-sh (cdr pair) sep)))
                      vars)))
     (org-babel-comint-in-buffer session
       (mapc (lambda (var)
@@ -84,11 +86,16 @@ function is called by `org-babel-execute-src-block'."
 
 ;; helper functions
 
-(defun org-babel-sh-var-to-sh (var)
+(defun org-babel-sh-var-to-sh (var &optional sep)
   "Convert an elisp var into a string of shell commands
 specifying a var of the same value."
   (if (listp var)
-      (concat "[" (mapconcat #'org-babel-sh-var-to-sh var ", ") "]")
+      (flet ((deep-string (el)
+                          (if (listp el)
+                              (mapcar #'deep-string el)
+                            (format "%S" el))))
+        (format "$(cat <<BABEL_TABLE\n%s\nBABEL_TABLE\n)"
+                (orgtbl-to-generic (deep-string var) (list :sep (or sep "\t")))))
     (format "%S" var)))
 
 (defun org-babel-sh-table-or-results (results)
