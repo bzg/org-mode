@@ -36,6 +36,10 @@
 
 (add-to-list 'org-babel-tangle-langs '("sh" "sh" "#!/usr/bin/env sh"))
 
+(defvar org-babel-sh-command "sh"
+  "Command used to invoke a shell.  This will be passed to
+  `shell-command-on-region'")
+
 (defun org-babel-execute:sh (body params)
   "Execute a block of Shell commands with org-babel.  This
 function is called by `org-babel-execute-src-block'."
@@ -122,7 +126,7 @@ last statement in BODY."
         (with-temp-buffer
           (insert body)
           ;; (message "buffer=%s" (buffer-string)) ;; debugging
-          (shell-command-on-region (point-min) (point-max) "sh" 'replace)
+          (shell-command-on-region (point-min) (point-max) org-babel-sh-command 'replace)
 	  (case result-type
 	    (output (buffer-string))
 	    (value ;; TODO: figure out how to return non-output values from shell scripts
