@@ -108,9 +108,8 @@ exported source code blocks by language."
                                        ((> (length tangle) 0) tangle))
                                       target-file))
                        (file-name (when base-name
-                                    (if (and ext
-                                             (string= base-name
-                                                      (file-name-sans-extension base-name)))
+                                    ;; decide if we want to add ext to base-name
+                                    (if (and ext (not (string= (file-name-extension base-name) ext)))
                                         (concat base-name "." ext) base-name))))
                   ;; ;; debugging
                   ;; (message
