@@ -119,7 +119,7 @@ Emacs-lisp table, otherwise return the results as a string."
 specifying a var of the same value."
   (if (listp var)
       (format "'%s" var)
-    (format "%s" var)))
+    (format "%S" var)))
 
 (defun org-babel-clojure-build-full-form (body vars)
   "Construct a clojure let form with vars as the let vars"
