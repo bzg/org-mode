@@ -835,7 +835,7 @@ parameters when merging lists."
 	   ("output" "value")))
 	(exports-exclusive-groups
 	 '(("code" "results" "both" "none")))
-	params results exports tangle noweb cache vars var ref)
+	params results exports tangle noweb cache vars var ref shebang comments)
     (flet ((e-merge (exclusive-groups &rest result-params)
                     ;; maintain exclusivity of mutually exclusive parameters
                     (let (output)
@@ -879,22 +879,29 @@ parameters when merging lists."
                          (setq tangle (or (list (cdr pair)) tangle)))
                         (:noweb
                          (setq noweb (e-merge '(("yes" "no"))
-                                               noweb (split-string (or (cdr pair) "")))))
+                                              noweb (split-string (or (cdr pair) "")))))
                         (:cache
                          (setq cache (e-merge '(("yes" "no"))
                                               cache (split-string (or (cdr pair) "")))))
+                        (:shebang ;; take the latest -- always overwrite
+                         (setq shebang (or (list (cdr pair)) shebang)))
+                        (:comments
+                         (setq comments (e-merge '(("yes" "no"))
+                                                 comments (split-string (or (cdr pair) "")))))
                         (t ;; replace: this covers e.g. :session
                          (setq params (cons pair (assq-delete-all (car pair) params))))))
                     plist))
             plists))
     (setq vars (mapcar (lambda (pair) (format "%s=%s" (car pair) (cdr pair))) vars))
     (while vars (setq params (cons (cons :var (pop vars)) params)))
-    (cons (cons :cache (mapconcat 'identity cache " "))
-          (cons (cons :noweb (mapconcat 'identity noweb " "))
-                (cons (cons :tangle (mapconcat 'identity tangle " "))
-                      (cons (cons :exports (mapconcat 'identity exports " "))
-                            (cons (cons :results (mapconcat 'identity results " "))
-                                  params)))))))
+    (cons (cons :comments (mapconcat 'identity comments " "))
+          (cons (cons :shebang (mapconcat 'identity shebang " "))
+                (cons (cons :cache (mapconcat 'identity cache " "))
+                      (cons (cons :noweb (mapconcat 'identity noweb " "))
+                            (cons (cons :tangle (mapconcat 'identity tangle " "))
+                                  (cons (cons :exports (mapconcat 'identity exports " "))
+                                        (cons (cons :results (mapconcat 'identity results " "))
+                                              params)))))))))
 
 (defun org-babel-expand-noweb-references (&optional info parent-buffer)
   "This function expands Noweb style references in the body of
