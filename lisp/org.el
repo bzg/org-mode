@@ -4635,6 +4635,7 @@ will be prompted for."
 	      (cond
 	       (quoting
 		(add-text-properties beg1 end1 '(face org-block)))
+	       ((not org-fontify-quote-and-verse-blocks))
 	       ((string= block-type "quote")
 		(add-text-properties beg1 end1 '(face org-quote)))
 	       ((string= block-type "verse")

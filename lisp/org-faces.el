@@ -474,6 +474,13 @@ changes."
 (org-copy-face 'org-block 'org-verse
    "Face for #+BEGIN_VERSE ... #+END_VERSE blocks.")
 
+(defcustom org-fontify-quote-and-verse-blocks nil
+  "Non-nil means, add a special face to #+begin_quote and #+begin_verse block.
+When nil, format these as normal Org.  This is the default, because the
+content of these blocks will still be treated as Org syntax."
+  :group 'org-faces
+  :type 'boolean)
+
 (defface org-clock-overlay ;; copied from secondary-selection
   (org-compatible-face nil
     '((((class color) (min-colors 88) (background light))

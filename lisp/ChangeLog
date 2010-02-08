@@ -1,3 +1,10 @@
+2010-02-08  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-fontify-meta-lines-and-blocks): Honor
+	`org-fontify-quote-and-verse-blocks'.
+
+	* org-faces.el (org-fontify-quote-and-verse-blocks): New option.
+
 2010-02-03  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-open-at-point): Also check for text property
