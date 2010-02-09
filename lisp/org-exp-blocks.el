@@ -183,13 +183,15 @@ specified in BLOCKS which default to the value of
 	    (setq body (save-match-data (org-remove-indentation body))))
 	  (unless (memq type types) (setq types (cons type types)))
 	  (save-match-data (interblock start (match-beginning 0)))
-	  (if (setq func (cadr (assoc type org-export-blocks)))
-	      (progn
-                (replace-match (save-match-data
+	  (when (setq func (cadr (assoc type org-export-blocks)))
+            (let ((replacement (save-match-data
                                  (if (memq type org-export-blocks-witheld) ""
-                                   (apply func body headers))) t t)
+                                   (apply func body headers)))))
+              (when replacement
+                (replace-match replacement t t)
                 (unless preserve-indent
-		  (indent-code-rigidly (match-beginning 0) (match-end 0) indentation))))
+                  (indent-code-rigidly
+                   (match-beginning 0) (match-end 0) indentation)))))
 	  (setq start (match-end 0)))
 	(interblock start (point-max))))))
 

@@ -73,20 +73,10 @@ results - just like none only the block is run on export ensuring
 none ----- do not display either code or results upon export"
   (interactive)
   (message "org-babel-exp processing...")
-  (flet ((cond-progress-marker () (when (and progress-marker (< progress-marker (point)))
-                                   progress-marker)))
-    (or (and (re-search-backward org-babel-src-block-regexp (cond-progress-marker) t)
-             (setq progress-marker (match-end 0))
-             (org-babel-exp-do-export (org-babel-get-src-block-info) 'block))
-        (save-excursion
-          (forward-line 0)
-          (and (org-babel-where-is-src-block-head)
-               (goto-char (org-babel-where-is-src-block-head))
-               (org-babel-exp-do-export (org-babel-get-src-block-info) 'block)))
-        (and (re-search-backward org-block-regexp (cond-progress-marker) t)
-             (setq progress-marker (match-end 0))
-             (match-string 0))
-        (error "Unmatched block [bug in `org-babel-exp-src-blocks']."))))
+  (when (member (first headers) org-babel-interpreters)
+    (save-excursion
+      (goto-char (match-beginning 0))
+      (org-babel-exp-do-export (org-babel-get-src-block-info) 'block))))
 
 (defun org-babel-exp-inline-src-blocks (start end)
   "Process inline src blocks between START and END for export.
