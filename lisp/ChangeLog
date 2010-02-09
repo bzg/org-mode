@@ -1,3 +1,7 @@
+2010-02-09  Dan Davison  <davison@stats.ox.ac.uk>
+
+	* org-src.el (org-edit-src-exit): Widen before exiting edit buffers
+
 2010-02-08  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-fontify-meta-lines-and-blocks): Honor

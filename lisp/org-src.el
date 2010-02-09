@@ -515,6 +515,7 @@ the language, a switch telling if the content should be in a single line."
   (interactive)
   (unless org-edit-src-from-org-mode
     (error "This is not a sub-editing buffer, something is wrong..."))
+  (widen)
   (let* ((beg org-edit-src-beg-marker)
 	 (end org-edit-src-end-marker)
 	 (ovl org-edit-src-overlay)
