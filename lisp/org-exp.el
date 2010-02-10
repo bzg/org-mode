@@ -2456,12 +2456,16 @@ INDENT was the original indentation of the block."
 			(setq rtn
                               (concat
                                (if caption
-                                   (format "<label class=\"org-src-name\">%s  &equiv</label>"
-                                           caption)
+                                   (concat
+                                    "<div class=\"org-src-container\">"
+                                    (format
+                                     "<label class=\"org-src-name\">%s</label>"
+                                     caption))
                                  "")
                                (replace-match
-				   (format "<pre class=\"src src-%s\">\n" lang)
-                                t t rtn)))))
+                                (format "<pre class=\"src src-%s\">\n" lang)
+                                t t rtn)
+                               (if caption "</div>" "")))))
 		(if textareap
 		    (setq rtn (concat
 			       (format "<p>\n<textarea cols=\"%d\" rows=\"%d\" overflow-x:scroll >\n"

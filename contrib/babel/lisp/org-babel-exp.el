@@ -128,22 +128,28 @@ options are taken from `org-babel-default-header-args'."
 
 (defun org-babel-exp-code (info type)
   (let ((lang (first info))
-	(body (second info))
-	(switches (fourth info))
-	(name (fifth info))
-	(args (sixth info))
-	(function-def-line ""))
+        (body (second info))
+        (switches (fourth info))
+        (name (fifth info))
+        (args (mapcar #'cdr
+                      (remove-if-not (lambda (el) (eq :var (car el))) (third info)))))
     (case type
-      ('inline (format "=%s=" (second info)))
+      ('inline (format "=%s=" body))
       ('block
           (let ((str (format "#+BEGIN_SRC %s %s\n%s%s#+END_SRC\n" lang switches body
-                        (if (string-match "\n$" body) "" "\n"))))
-            (add-text-properties 0 (length str) (list 'org-caption name) str)
-            str))
-      ('lob (save-excursion
-	      (re-search-backward org-babel-lob-one-liner-regexp)
-	      (format "#+BEGIN_SRC org-babel-lob\n%s\n#+END_SRC"
-                      (first (org-babel-lob-get-info))))))))
+                             (if (string-match "\n$" body) "" "\n"))))
+            (add-text-properties 0 (length str)
+                                 (list 'org-caption
+                                       (format "%s(%s)"
+                                               name (mapconcat #'identity args ", ")))
+                                 str) str))
+      ('lob
+       (let ((call-line (and (string-match "results=" (car args))
+                             (substring (car args) (match-end 0)))))
+         (cond
+          ((eq backend 'html)
+           (format "\n#+HTML: <label class=\"org-src-name\">%s</label>\n" call-line))
+          ((t (format ": %s\n" call-line)))))))))
 
 (defun org-babel-exp-results (info type)
   (let ((lang (first info))
