@@ -876,14 +876,21 @@ underlined headlines.  The default is 3."
 
 	(insert (format bodyfixedform line)))
 
-       ((string-match "^\\([ \t]+\\)\\([-+*][ \t]*\\)" line)
+       ((or (string-match "^\\([ \t]*\\)\\([\-\+][ \t]*\\)" line)
+            ;; if the bullet list item is an asterisk, the leading space is /mandatory/
+            ;; [2010/02/02:rpg]
+            (string-match "^\\([ \t]+\\)\\(\\*[ \t]*\\)" line))
 	;;
 	;; plain list item
 	;;
 	;; TODO: nested lists
 	;;
+        ;; I believe this gets rid of leading whitespace.
 	(setq line (replace-match "" nil nil line))
 
+        ;; won't this insert the suffix /before/ the last line of the list?
+        ;; also isn't it spoofed by bulleted lists that have a line skip between the list items
+        ;; unless 'org-empty-line-terminates-plain-lists' is true?
 	(org-export-generic-check-section "liststart" listprefix listsuffix)
 
 	;; deal with checkboxes
