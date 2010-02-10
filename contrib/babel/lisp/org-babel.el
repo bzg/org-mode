@@ -657,6 +657,7 @@ following the source block."
   (let ((case-fold-search t) result-string)
     (cond
      ((org-at-table-p) (org-babel-read-table))
+     ((looking-at org-bracket-link-regexp) (org-babel-read-link))
      ((looking-at org-block-regexp) (org-babel-trim (match-string 4)))
      ((looking-at ": ")
       (setq result-string
@@ -678,6 +679,21 @@ following the source block."
             (if (and (symbolp row) (equal row 'hline)) row
               (mapcar #'org-babel-read row)))
           (org-table-to-lisp)))
+
+(defun org-babel-read-link ()
+  "Read the link at `point' into emacs-lisp.  If the path of the
+link is a file path it is expanded using `expand-file-name'."
+  (let* ((case-fold-search t)
+         (raw (and (looking-at org-bracket-link-regexp)
+                   (org-babel-clean-text-properties (match-string 1))))
+         (type (and (string-match org-link-types-re raw)
+                    (match-string 1 raw))))
+    (cond
+     ((not type) (expand-file-name raw))
+     ((string= type "file")
+      (and (string-match "file\\(.*\\):\\(.+\\)" raw)
+           (expand-file-name (match-string 2 raw))))
+     (t raw))))
 
 (defun org-babel-insert-result (result &optional result-params info hash)
   "Insert RESULT into the current buffer after the end of the

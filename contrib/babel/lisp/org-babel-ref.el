@@ -150,6 +150,7 @@ return nil."
 	    (case type
 	      ('results-line (org-babel-read-result))
 	      ('table (org-babel-read-table))
+              ('file (org-babel-read-file))
 	      ('source-block (org-babel-execute-src-block nil nil params))
 	      ('lob (org-babel-execute-src-block nil lob-info params))))
       (if (symbolp result)
@@ -202,6 +203,7 @@ of the supported reference types are found.  Supported reference
 types are tables and source blocks."
   (cond ((org-at-table-p) 'table)
         ((looking-at "^#\\+BEGIN_SRC") 'source-block)
+        ((looking-at org-bracket-link-regexp) 'file)
         ((looking-at org-babel-result-regexp) 'results-line)))
 
 (provide 'org-babel-ref)
