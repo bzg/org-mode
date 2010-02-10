@@ -543,7 +543,7 @@ See also the variable `org-agenda-tags-todo-honor-ignore-options'."
 
 (defcustom org-agenda-todo-ignore-deadlines nil
   "Non-nil means don't show near deadline entries in the global todo list.
-Near means closer than `org-deadline-warning-days' days.
+A deadline is near when it is closer than `org-deadline-warning-days' days.
 The idea behind this is that such items will appear in the agenda anyway.
 See also `org-agenda-todo-ignore-with-date'.
 See also the variable `org-agenda-tags-todo-honor-ignore-options'."
