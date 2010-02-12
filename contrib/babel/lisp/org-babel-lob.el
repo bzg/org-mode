@@ -104,9 +104,5 @@ the word 'call'."
 		   (concat ":var results=" (mapconcat #'identity info " ")))))))
     (org-babel-execute-src-block nil (list "emacs-lisp" "results" params))))
 
-(define-generic-mode org-babel-lob-mode
-  '("#") (list org-babel-function-def-export-keyword) nil nil nil
-  "Major mode for fontification of library of babel lines on export")
-
 (provide 'org-babel-lob)
 ;;; org-babel-lob.el ends here
