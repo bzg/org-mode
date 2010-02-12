@@ -1,3 +1,13 @@
+2010-02-14  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-agenda.el (org-agenda-todo-ignore-scheduled): More allowed
+	values.
+	(org-agenda-todo-ignore-scheduled)
+	(org-agenda-todo-ignore-deadlines): More control with different
+	allowed values.
+	(org-agenda-check-for-timestamp-as-reason-to-ignore-todo-item):
+	Honor the new option settings.
+
 2010-02-12  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-get-location): Make sure the selection buffer is

@@ -532,24 +532,59 @@ See also the variable `org-agenda-tags-todo-honor-ignore-options'."
   :type 'boolean)
 
 (defcustom org-agenda-todo-ignore-scheduled nil
-  "Non-nil means don't show scheduled entries in the global todo list.
-The idea behind this is that by scheduling it, you have already taken care
-of this item.
+  "Non-nil means, ignore some scheduled TODO items when making TODO list.
+This applie when creating the global todo list.
+Valid values are:
+
+past     Don't show entries scheduled today or in the past.
+
+future   Don't show entries scheduled in the future.
+         The idea behind this is that by scheduling it, you don't want to
+         think about it until the scheduled date.
+
+t        Don't show any scheduled entries in the global todo list.
+         The idea behind this is that by scheduling it, you have already
+         \"taken care\" of this item.
+
 See also `org-agenda-todo-ignore-with-date'.
-See also the variable `org-agenda-tags-todo-honor-ignore-options'."
+See also the variable `org-agenda-tags-todo-honor-ignore-options' if you want
+to make his option also apply to the tags-todo list."
   :group 'org-agenda-skip
   :group 'org-agenda-todo-list
-  :type 'boolean)
+  :type '(choice
+	  (const :tag "Ignore future-scheduled todos" future)
+	  (const :tag "Ignore past- or present-scheduled todos" past)
+	  (const :tag "Ignore all scheduled todos" all)
+	  (const :tag "Ignore all scheduled todos (compatibility)" t)
+	  (const :tag "Show scheduled todos" nil)))
 
 (defcustom org-agenda-todo-ignore-deadlines nil
-  "Non-nil means don't show near deadline entries in the global todo list.
-A deadline is near when it is closer than `org-deadline-warning-days' days.
-The idea behind this is that such items will appear in the agenda anyway.
+  "Non-nil means ignore some deadlined TODO items when making TODO list.
+
+This applie when creating the global todo list.
+Valid values are:
+
+near    Don't show near deadline entries.  A deadline is near when it is
+        closer than `org-deadline-warning-days' days.  The idea behind this
+        is that such items will appear in the agenda anyway.
+
+t       For backward compatibility, this means the same as `near'.
+
+far     Don't show far deadline entries.  This is useful if you don't want
+        to use the todo list to figure out what to do now.
+
+all     Ignore all TODO entries that do have a deadline.       
+
 See also `org-agenda-todo-ignore-with-date'.
 See also the variable `org-agenda-tags-todo-honor-ignore-options'."
   :group 'org-agenda-skip
   :group 'org-agenda-todo-list
-  :type 'boolean)
+  :type '(choice
+	  (const :tag "Ignore near deadlines" near)
+	  (const :tag "Ignore far deadlines" far)
+	  (const :tag "Ignore near deadlines (compatibility)" t)
+	  (const :tag "Ignore all TODOs with a deadlines" all)
+	  (const :tag "Show all TODOs, even if they have a deadline" nil)))
 
 (defcustom org-agenda-tags-todo-honor-ignore-options nil
   "Non-nil means honor todo-list ...ignore options also in tags-todo search.
@@ -4065,7 +4100,8 @@ the documentation of `org-diary'."
     (nreverse ee)))
 
 ;;;###autoload
-(defun org-agenda-check-for-timestamp-as-reason-to-ignore-todo-item (&optional end)
+(defun org-agenda-check-for-timestamp-as-reason-to-ignore-todo-item
+  (&optional end)
   "Do we have a reason to ignore this todo entry because it has a time stamp?"
   (when (or org-agenda-todo-ignore-with-date
 	    org-agenda-todo-ignore-scheduled
@@ -4075,10 +4111,20 @@ the documentation of `org-diary'."
       (or (and org-agenda-todo-ignore-with-date
 	       (re-search-forward org-ts-regexp end t))
 	  (and org-agenda-todo-ignore-scheduled
-	       (re-search-forward org-scheduled-time-regexp end t))
+	       (re-search-forward org-scheduled-time-regexp end t)
+	       (cond
+		((eq org-agenda-todo-ignore-scheduled 'future)
+		 (> (org-days-to-time (match-string 1)) 0))
+		((eq org-agenda-todo-ignore-scheduled 'past)
+		 (<= (org-days-to-time (match-string 1)) 0))
+		(t)))
 	  (and org-agenda-todo-ignore-deadlines
 	       (re-search-forward org-deadline-time-regexp end t)
-	       (org-deadline-close (match-string 1)))))))
+	       (cond
+		((memq org-agenda-todo-ignore-deadlines '(t all)) t)
+		((eq org-agenda-todo-ignore-deadlines 'far)
+		 (not (org-deadline-close (match-string 1))))
+		(t (org-deadline-close (match-string 1)))))))))
 
 (defconst org-agenda-no-heading-message
   "No heading for this item in buffer or region.")
