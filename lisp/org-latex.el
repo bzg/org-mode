@@ -637,21 +637,29 @@ when PUB-DIR is set, use this as the publishing directory."
 		    (and (not
 			  (plist-get opt-plist :skip-before-1st-heading))
 			 (org-export-grab-title-from-buffer))
-		    (file-name-sans-extension
-		     (file-name-nondirectory buffer-file-name))))
-	 (filename (concat (file-name-as-directory
-			    (or pub-dir
-				(org-export-directory :LaTeX ext-plist)))
-			   (file-name-sans-extension
-			    (or (and subtree-p
-				     (org-entry-get rbeg "EXPORT_FILE_NAME" t))
-				(file-name-nondirectory ;sans-extension
-				 buffer-file-name)))
-			   ".tex"))
-	 (filename (if (equal (file-truename filename)
-			      (file-truename buffer-file-name))
-		       (concat filename ".tex")
-		     filename))
+		    (and buffer-file-name
+			 (file-name-sans-extension
+			  (file-name-nondirectory buffer-file-name)))
+		    "No Title"))
+	 (filename 
+	  (and (not to-buffer)
+	       (concat
+		(file-name-as-directory
+		 (or pub-dir
+		     (org-export-directory :LaTeX ext-plist)))
+		(file-name-sans-extension
+		 (or (and subtree-p
+			  (org-entry-get rbeg "EXPORT_FILE_NAME" t))
+		     (file-name-nondirectory ;sans-extension
+		      (or buffer-file-name
+			  (error "Don't know which export file to use.")))))
+		".tex")))
+	 (filename
+	  (and filename
+	       (if (equal (file-truename filename)
+			  (file-truename (or buffer-file-name "dummy.org")))
+		   (concat filename ".tex")
+		 filename)))
 	 (buffer (if to-buffer
 		     (cond
 		      ((eq to-buffer 'string) (get-buffer-create
@@ -2056,7 +2064,8 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 	(goto-char (match-beginning 1))
 	(delete-region (match-beginning 1) (match-end 1))
 	(insert opt))
-      (save-buffer))))
+      (and buffer-file-name
+	   (save-buffer)))))
 
 ;;; List handling:
 

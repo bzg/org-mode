@@ -1,3 +1,10 @@
+2010-02-12  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-latex.el (org-export-as-latex): Do nit require the buffer to
+	be visiting a file when only exporting to a buffer or string.
+	(org-export-latex-fix-inputenc): Only save the buffer is there is
+	a file name attached to it.
+
 2010-02-09  Dan Davison  <davison@stats.ox.ac.uk>
 
 	* org-src.el (org-edit-src-exit): Widen before exiting edit buffers
