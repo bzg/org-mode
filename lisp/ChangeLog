@@ -1,5 +1,13 @@
 2010-02-12  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-ascii.el (org-export-ascii-table-widen-columns): New
+	option.
+	(org-export-ascii-preprocess): Realign tables to remove narrowing
+	if `org-export-ascii-table-widen-columns' is set.
+
+	* org-table.el (org-table-do-narrow): New variable.
+	(org-table-align): Narrow only if `org-table-do-narrow' is t.
+
 	* org.el (org-deadline, org-schedule): Allow updating if the
 	relevant time stamp does not have a repeater, i.e. do not require
 	that no time stamp has a repeater.

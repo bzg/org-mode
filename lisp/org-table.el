@@ -575,6 +575,7 @@ When nil, simply write \"#ERROR\" in corrupted fields.")
 (make-variable-buffer-local 'org-table-overlay-coordinates)
 
 (defvar org-last-recalc-line nil)
+(defvar org-table-do-narrow t)   ; for dynamic scoping
 (defconst org-narrow-column-arrow "=>"
   "Used as display property in narrowed table columns.")
 
@@ -621,7 +622,8 @@ When nil, simply write \"#ERROR\" in corrupted fields.")
 
     ;; Check if we are narrowing any columns
     (goto-char beg)
-    (setq narrow (and org-format-transports-properties-p
+    (setq narrow (and org-table-do-narrow
+		      org-format-transports-properties-p
 		      (re-search-forward "<[rl]?[0-9]+>" end t)))
     (goto-char beg)
     (setq falign (re-search-forward "<[rl][0-9]*>" end t))
@@ -666,7 +668,7 @@ When nil, simply write \"#ERROR\" in corrupted fields.")
 	  (setq e (pop c))
 	  (when (and (stringp e) (string-match "^<\\([rl]\\)?\\([0-9]+\\)?>$" e))
 	    (if (match-end 1) (setq falign1 (match-string 1 e)))
-	    (if (match-end 2)
+	    (if (and org-table-do-narrow (match-end 2))
 		(setq fmax (string-to-number (match-string 2 e)) c nil))))
 	;; Find fields that are wider than fmax, and shorten them
 	(when fmax

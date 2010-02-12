@@ -65,6 +65,13 @@ for column grouping."
   :group 'org-export-ascii
   :type 'boolean)
 
+(defcustom org-export-ascii-table-widen-columns t
+  "Non-nil means widen narrowed columns for export.
+When nil, narrowed columns will look in ASCII export just like in org-mode,
+i.e. with \"=>\" as ellipsis."
+  :group 'org-export-ascii
+  :type 'boolean)
+
 ;;; Hooks
 
 (defvar org-export-ascii-final-hook nil
@@ -483,6 +490,15 @@ publishing directory."
 
 (defun org-export-ascii-preprocess (parameters)
   "Do extra work for ASCII export"
+  ;;
+  ;; Realign tables to get rid of narrowing
+  (when org-export-ascii-table-widen-columns
+    (let ((org-table-do-narrow nil))
+      (goto-char (point-min))
+      (org-table-map-tables
+       (lambda ()
+	 (org-if-unprotected
+	  (org-table-align))))))
   ;; Put quotes around verbatim text
   (goto-char (point-min))
   (while (re-search-forward org-verbatim-re nil t)
