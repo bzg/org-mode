@@ -1,5 +1,8 @@
 2010-02-12  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-get-location): Make sure the selection buffer is
+	shown in the current frame.
+
 	* org-ascii.el (org-export-ascii-table-widen-columns): New
 	option.
 	(org-export-ascii-preprocess): Realign tables to remove narrowing

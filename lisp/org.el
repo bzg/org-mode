@@ -5903,7 +5903,11 @@ or nil."
 	(isearch-hide-immediately nil)
 	(isearch-search-fun-function
 	 (lambda () 'org-goto-local-search-headings))
-	(org-goto-selected-point org-goto-exit-command))
+	(org-goto-selected-point org-goto-exit-command)
+	(pop-up-frames nil)
+	(special-display-buffer-names nil)
+	(special-display-regexps nil)
+	(special-display-function nil))
     (save-excursion
       (save-window-excursion
 	(delete-other-windows)
