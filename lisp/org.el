@@ -10710,7 +10710,7 @@ scheduling will use the corresponding date."
 			       org-log-redeadline))
 	  (org-remove-timestamp-with-keyword org-deadline-string)
 	  (message "Item no longer has a deadline."))
-      (if (org-get-repeat)
+      (if (org-get-repeat org-deadline-string)
 	  (error "Cannot change deadline on task with repeater, please do that by hand")
 	(org-add-planning-info 'deadline time 'closed)
 	(when (and old-date org-log-redeadline
@@ -10734,7 +10734,7 @@ scheduling will use the corresponding date."
 			       org-log-reschedule))
 	  (org-remove-timestamp-with-keyword org-scheduled-string)
 	  (message "Item is no longer scheduled."))
-      (if (org-get-repeat)
+      (if (org-get-repeat org-scheduled-string)
 	  (error "Cannot reschedule task with repeater, please do that by hand")
 	(org-add-planning-info 'scheduled time 'closed)
 	(when (and old-date org-log-reschedule

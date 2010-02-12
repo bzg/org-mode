@@ -1,5 +1,9 @@
 2010-02-12  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-deadline, org-schedule): Allow updating if the
+	relevant time stamp does not have a repeater, i.e. do not require
+	that no time stamp has a repeater.
+
 	* org-agenda.el (org-agenda-align-tags): Don't add a face to the
 	new white space before the tags.
 
