@@ -1,5 +1,8 @@
 2010-02-12  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-agenda.el (org-agenda-align-tags): Don't add a face to the
+	new white space before the tags.
+
 	* org-latex.el (org-export-as-latex): Do nit require the buffer to
 	be visiting a file when only exporting to a buffer or string.
 	(org-export-latex-fix-inputenc): Only save the buffer is there is
