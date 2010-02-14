@@ -542,9 +542,11 @@ future   Don't show entries scheduled in the future.
          The idea behind this is that by scheduling it, you don't want to
          think about it until the scheduled date.
 
-t        Don't show any scheduled entries in the global todo list.
+all      Don't show any scheduled entries in the global todo list.
          The idea behind this is that by scheduling it, you have already
          \"taken care\" of this item.
+
+t        Same as all, for backward compatibility.
 
 See also `org-agenda-todo-ignore-with-date'.
 See also the variable `org-agenda-tags-todo-honor-ignore-options' if you want
@@ -568,21 +570,22 @@ near    Don't show near deadline entries.  A deadline is near when it is
         closer than `org-deadline-warning-days' days.  The idea behind this
         is that such items will appear in the agenda anyway.
 
-t       For backward compatibility, this means the same as `near'.
-
 far     Don't show far deadline entries.  This is useful if you don't want
         to use the todo list to figure out what to do now.
 
 all     Ignore all TODO entries that do have a deadline.       
 
+t       Same as `near', for backward compatibility.
+
 See also `org-agenda-todo-ignore-with-date'.
-See also the variable `org-agenda-tags-todo-honor-ignore-options'."
+See also the variable `org-agenda-tags-todo-honor-ignore-options' if you want
+to make his option also apply to the tags-todo list."
   :group 'org-agenda-skip
   :group 'org-agenda-todo-list
   :type '(choice
 	  (const :tag "Ignore near deadlines" near)
-	  (const :tag "Ignore far deadlines" far)
 	  (const :tag "Ignore near deadlines (compatibility)" t)
+	  (const :tag "Ignore far deadlines" far)
 	  (const :tag "Ignore all TODOs with a deadlines" all)
 	  (const :tag "Show all TODOs, even if they have a deadline" nil)))
 
@@ -4102,7 +4105,7 @@ the documentation of `org-diary'."
 ;;;###autoload
 (defun org-agenda-check-for-timestamp-as-reason-to-ignore-todo-item
   (&optional end)
-  "Do we have a reason to ignore this todo entry because it has a time stamp?"
+  "Do we have a reason to ignore this TODO entry because it has a time stamp?"
   (when (or org-agenda-todo-ignore-with-date
 	    org-agenda-todo-ignore-scheduled
 	    org-agenda-todo-ignore-deadlines)
