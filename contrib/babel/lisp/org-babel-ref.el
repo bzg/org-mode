@@ -193,8 +193,8 @@ which case the entire range is returned."
         (when (= depth 0)
           (setq return (reverse (cons (substring buffer 0 -1) return)))
           (setq buffer "")))
-       ((string= holder "(") (setq depth (+ depth 1)))
-       ((string= holder ")") (setq depth (- depth 1)))))
+       ((or (string= holder "(") (string= holder "[")) (setq depth (+ depth 1)))
+       ((or (string= holder ")") (string= holder "]")) (setq depth (- depth 1)))))
     (mapcar #'org-babel-trim (reverse (cons buffer return)))))
 
 (defun org-babel-ref-at-ref-p ()
