@@ -533,7 +533,7 @@ See also the variable `org-agenda-tags-todo-honor-ignore-options'."
 
 (defcustom org-agenda-todo-ignore-scheduled nil
   "Non-nil means, ignore some scheduled TODO items when making TODO list.
-This applie when creating the global todo list.
+This applies when creating the global todo list.
 Valid values are:
 
 past     Don't show entries scheduled today or in the past.
@@ -546,7 +546,7 @@ all      Don't show any scheduled entries in the global todo list.
          The idea behind this is that by scheduling it, you have already
          \"taken care\" of this item.
 
-t        Same as all, for backward compatibility.
+t        Same as `all', for backward compatibility.
 
 See also `org-agenda-todo-ignore-with-date'.
 See also the variable `org-agenda-tags-todo-honor-ignore-options' if you want
