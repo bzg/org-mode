@@ -69,7 +69,7 @@ called by `org-babel-execute-src-block'."
            body out-file org-format-latex-options in-buffer))
          ((string-match "\\.pdf$" out-file)
           (org-babel-latex-body-to-tex-file tex-file body pdfheight pdfwidth)
-          (delete-file out-file)
+          (when (file-exists-p out-file) (delete-file out-file))
           (rename-file (org-babel-latex-tex-to-pdf tex-file) out-file))
          ((string-match "\\.\\([^\\.]+\\)$" out-file)
           (error
