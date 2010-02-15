@@ -138,11 +138,11 @@ options are taken from `org-babel-default-header-args'."
       ('block
           (let ((str (format "#+BEGIN_SRC %s %s\n%s%s#+END_SRC\n" lang switches body
                              (if (string-match "\n$" body) "" "\n"))))
-            (add-text-properties 0 (length str)
-                                 (list 'org-caption
-                                       (format "%s(%s)"
-                                               name (mapconcat #'identity args ", ")))
-                                 str) str))
+            (when name (add-text-properties 0 (length str)
+                                           (list 'org-caption
+                                                 (format "%s(%s)"
+                                                         name (mapconcat #'identity args ", ")))
+                                           str) str)))
       ('lob
        (let ((call-line (and (string-match "results=" (car args))
                              (substring (car args) (match-end 0)))))
