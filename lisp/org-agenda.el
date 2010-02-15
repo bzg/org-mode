@@ -6425,7 +6425,8 @@ If FORCE-TAGS is non nil, the car of it returns the new tags."
 	(goto-char (match-beginning 1))
 	(insert (org-add-props
 		    (make-string (max 1 (- c (current-column))) ?\ )
-		    (plist-put (text-properties-at (point)) 'face nil))))
+		    (plist-put (copy-sequence (text-properties-at (point)))
+			       'face nil))))
       (goto-char (point-min))
       (org-font-lock-add-tag-faces (point-max)))))
 

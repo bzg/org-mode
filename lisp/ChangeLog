@@ -1,3 +1,8 @@
+2010-02-15  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-agenda.el (org-agenda-align-tags): Avoid side effects on
+	text properties.
+
 2010-02-14  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-agenda.el (org-agenda-todo-ignore-scheduled): More allowed
