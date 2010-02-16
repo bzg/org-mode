@@ -14770,7 +14770,11 @@ looks only before point, not after."
   "Is point inside a LaTeX macro or its arguments?"
   (save-match-data
     (org-in-regexp
-     "\\\\[a-zA-Z]+\\*?\\(\\[[^][\n{}]*\\]\\)?\\({[^{}\n]*}\\)?")))
+     "\\\\[a-zA-Z]+\\*?\\(\\(\\[[^][\n{}]*\\]\\)\\|\\({[^{}\n]*}\\)\\)*")))
+
+(defun test ()
+  (interactive)
+  (message "%s" (org-inside-latex-macro-p)))
 
 (defun org-try-cdlatex-tab ()
   "Check if it makes sense to execute `cdlatex-tab', and do it if yes.
