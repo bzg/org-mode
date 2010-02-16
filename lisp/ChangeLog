@@ -3,6 +3,7 @@
 	* org.el (org-hide-archived-subtrees): Don't jump to end of
 	subtree if the match was not in a headline.
 	(org-inside-latex-macro-p): Allow more complex arguments.
+	(org-emphasize): Protect against use at end of buffer.
 
 2010-02-15  Carsten Dominik  <carsten.dominik@gmail.com>
 
