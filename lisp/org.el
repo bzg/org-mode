@@ -3597,8 +3597,9 @@ collapsed state."
     (let* ((re (concat ":" org-archive-tag ":")))
       (goto-char beg)
       (while (re-search-forward re end t)
-	(and (org-on-heading-p) (org-flag-subtree t))
-	(org-end-of-subtree t)))))
+	(when (org-on-heading-p)
+	  (org-flag-subtree t)
+	  (org-end-of-subtree t))))))
 
 (defun org-flag-subtree (flag)
   (save-excursion

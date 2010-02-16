@@ -1,3 +1,8 @@
+2010-02-16  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-hide-archived-subtrees): Don't jump to end of
+	subtree if the match was not in a headline.
+
 2010-02-15  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-agenda.el (org-agenda-align-tags): Avoid side effects on
