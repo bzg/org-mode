@@ -2,6 +2,9 @@
 
 	* org-agenda.el (org-search-view): Fix bug with searching full
 	words in headlines in search view.
+	(org-agenda-skip-deadline-prewarning-if-scheduled): New option.
+	(org-agenda-get-deadlines): Suppress pre-warning if the entry is
+	scheduled (if the user configures it so.
 
 2010-02-16  Carsten Dominik  <carsten.dominik@gmail.com>
 

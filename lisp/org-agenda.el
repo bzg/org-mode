@@ -641,6 +641,24 @@ deadlines are always turned off when the item is DONE."
   :group 'org-agenda-daily/weekly
   :type 'boolean)
 
+(defcustom org-agenda-skip-deadline-prewarning-if-scheduled nil
+  "Non-nil means skip deadline prewarning when entry is also scheduled.
+This will apply on all days where a prewarning for the deadline would
+be shown, but not at the day when the entry is actually due.  On that day,
+the deadline will be shown anyway.
+This variable may be set to nil, t, or a number which will then give
+the number of days before the actual deadline when the prewarnings
+should resume.
+This can be used in a workflow where the first showing of the deadline will
+trigger you to schedule it, and then you don't want to be reminded of it
+because you will take care of it on the day when scheduled."
+  :group 'org-agenda-skip
+  :group 'org-agenda-daily/weekly
+  :type '(choice
+	  (const :tag "Alwas show prewarning" nil)
+	  (const :tag "Remove prewarning if entry is scheduled" t)
+	  (integer :tag "Restart prewarning N days before deadline")))
+
 (defcustom org-agenda-skip-additional-timestamps-same-entry t
   "When nil, multiple same-day timestamps in entry make multiple agenda lines.
 When non-nil, after the search for timestamps has matched once in an
@@ -4400,11 +4418,22 @@ be skipped."
 	 (todayp (org-agenda-todayp date)) ; DATE bound by calendar
 	 (d1 (calendar-absolute-from-gregorian date))  ; DATE bound by calendar
 	 d2 diff dfrac wdays pos pos1 category tags
+	 suppress-prewarning
 	 ee txt head face s todo-state upcomingp donep timestr)
     (goto-char (point-min))
     (while (re-search-forward regexp nil t)
+      (setq suppress-prewarning nil)
       (catch :skip
 	(org-agenda-skip)
+	(when (and org-agenda-skip-deadline-prewarning-if-scheduled
+		   (save-match-data
+		     (string-match org-scheduled-time-regexp
+				   (buffer-substring (point-at-bol)
+						     (point-at-eol)))))
+	  (setq suppress-prewarning
+		(if (integerp org-agenda-skip-deadline-prewarning-if-scheduled)
+		    org-agenda-skip-deadline-prewarning-if-scheduled
+		  0)))
 	(setq s (match-string 1)
 	      txt nil
 	      pos (1- (match-beginning 1))
@@ -4412,7 +4441,10 @@ be skipped."
 		  (match-string 1) d1 'past
 		  org-agenda-repeating-timestamp-show-all)
 	      diff (- d2 d1)
-	      wdays (org-get-wdays s)
+	      wdays (if suppress-prewarning
+			(let ((org-deadline-warning-days suppress-prewarning))
+			  (org-get-wdays s))
+		      (org-get-wdays s))
 	      dfrac (/ (* 1.0 (- wdays diff)) (max wdays 1))
 	      upcomingp (and todayp (> diff 0)))
 	;; When to show a deadline in the calendar:
