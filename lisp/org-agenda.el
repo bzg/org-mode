@@ -3366,7 +3366,7 @@ in `org-agenda-text-search-extra-files'."
       (setq full-words t
 	    words (substring words 1)))
     (if (or org-agenda-search-view-always-boolean
-	    (member (string-to-char string) '(?- ?+ ?\{)))
+	    (member (string-to-char words) '(?- ?+ ?\{)))
 	(setq boolean t))
     (setq words (org-split-string words))
     (setq org-agenda-last-search-view-search-was-boolean boolean)
