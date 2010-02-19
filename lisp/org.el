@@ -11209,12 +11209,19 @@ not t for the search context.
 
 With optional argument SIBLINGS, on each level of the hierarchy all
 siblings are shown.  This repairs the tree structure to what it would
-look like when opened with hierarchical calls to `org-cycle'."
+look like when opened with hierarchical calls to `org-cycle'.
+With double optional argument `C-u C-u', go to the parent and show the
+entire tree."
   (interactive "P")
   (let ((org-show-hierarchy-above t)
 	(org-show-following-heading t)
 	(org-show-siblings (if siblings t org-show-siblings)))
-    (org-show-context nil)))
+    (org-show-context nil))
+  (when (equal siblings '(16))
+    (save-excursion
+      (when (org-up-heading-safe)
+	(org-show-subtree)
+	(run-hook-with-args 'org-cycle-hook 'subtree)))))
 
 (defun org-highlight-new-match (beg end)
   "Highlight from BEG to END and mark the highlight is an occur headline."

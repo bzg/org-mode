@@ -1,3 +1,8 @@
+2010-02-19  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Visibility cycling): Document the new double prefix
+	arg for `org-reveal'.
+
 2010-02-04  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Cooperation): Remember.el is part of Emacs.
