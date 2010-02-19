@@ -208,8 +208,8 @@ last statement in BODY, as elisp."
              (org-babel-python-table-or-string (org-babel-trim (car results))))))))))
 
 (defun org-babel-python-read-string (string)
-  "Strip 's from around ruby string"
-  (if (string-match "'\\([^\000]+\\)'" string)
+  "Strip 's from around python string"
+  (if (string-match "^'\\([^\000]+\\)'$" string)
       (match-string 1 string)
     string))
 
