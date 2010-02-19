@@ -91,10 +91,11 @@ specifying a var of the same value."
     (format "%S" var)))
 
 (defun org-babel-python-table-or-string (results)
-  "If the results look like a table, then convert them into an
+  "If the results look like a list or tuple, then convert them into an
 Emacs-lisp table, otherwise return the results as a string."
   (org-babel-read
-   (if (string-match "^\\[.+\\]$" results)
+   (if (or (string-match "^\\[.+\\]$" results)
+	   (string-match "^(.+)$" results))
        (org-babel-read
         (replace-regexp-in-string
          "\\[" "(" (replace-regexp-in-string
