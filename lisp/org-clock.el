@@ -405,8 +405,8 @@ pointing to it."
   "Number of seconds between mode line clock string updates.")
 
 (defun org-clock-get-clock-string ()
-  "Form a clock-string, that will be show in the mode line.
-If an effort estimate was defined for current item, use
+  "Form a clock-string, that will be shown in the mode line.
+If an effort estimate was defined for the current item, use
 01:30/01:50 format (clocked/estimated).
 If not, show simply the clocked time like 01:50."
   (let* ((clocked-time (org-clock-get-clocked-time))
@@ -425,7 +425,7 @@ If not, show simply the clocked time like 01:50."
 	       (effort-str (format org-time-clocksum-format effort-h effort-m))
 	       (clockstr (org-propertize
 			  (concat  "[%s/" effort-str
-				   "] (" org-clock-heading ")")
+				   "] (" (replace-regexp-in-string "%" "%%" org-clock-heading) ")")
 			  'face 'org-mode-line-clock)))
 	  (format clockstr work-done-str))
       (org-propertize (format
