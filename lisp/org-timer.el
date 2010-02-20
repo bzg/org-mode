@@ -336,8 +336,6 @@ VALUE can be `on', `off', or `pause'."
 		  (setq org-timer-last-timer
 			(run-with-timer
 			 secs nil 'org-notify (format "%s: time out" hl) t))
-;                  (setq org-timer-mode-line-timer
-;                        (run-with-timer 1 1 'org-timer-update-mode-line))
 		  (set timer org-timer-last-timer)
                   (run-hooks 'org-timer-set-hook)))
 	      '(org-timer-timer1
