@@ -60,6 +60,9 @@ the value of the relative timer."
 (defvar org-timer-set-hook nil
   "Hook run after countdown timer is set.")
 
+(defvar org-timer-done-hook nil
+  "Hook run after countdown timer reaches zero.")
+
 (defvar org-timer-cancel-hook nil
   "Hook run before countdown timer is canceled.")
 
@@ -335,7 +338,9 @@ VALUE can be `on', `off', or `pause'."
 		  (setq timer-set t)
 		  (setq org-timer-last-timer
 			(run-with-timer
-			 secs nil 'org-notify (format "%s: time out" hl) t))
+			 secs nil '(lambda ()
+                                     (org-notify (format "%s: time out" hl) t)
+                                     (run-hooks 'org-timer-done-hook))))
 		  (set timer org-timer-last-timer)
                   (run-hooks 'org-timer-set-hook)))
 	      '(org-timer-timer1
