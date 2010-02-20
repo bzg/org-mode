@@ -48,6 +48,21 @@ the value of the relative timer."
   :group 'org-time
   :type 'string)
 
+(defvar org-timer-start-hook nil
+  "Hook run after relative timer is started.")
+
+(defvar org-timer-stop-hook nil
+  "Hook run before relative timer is stopped.")
+
+(defvar org-timer-pause-hook nil
+  "Hook run before relative timer is paused.")
+
+(defvar org-timer-set-hook nil
+  "Hook run after countdown timer is set.")
+
+(defvar org-timer-cancel-hook nil
+  "Hook run before countdown timer is canceled.")
+
 ;;;###autoload
 (defun org-timer-start (&optional offset)
   "Set the starting time for the relative timer to now.
@@ -82,7 +97,8 @@ the region 0:00:00."
       (org-timer-set-mode-line 'on)
       (message "Timer start time set to %s, current value is %s"
 	       (format-time-string "%T" org-timer-start-time)
-	       (org-timer-secs-to-hms (or delta 0))))))
+	       (org-timer-secs-to-hms (or delta 0)))
+      (run-hooks 'org-timer-start-hook))))
 
 (defun org-timer-pause-or-continue (&optional stop)
   "Pause or continue the relative timer.  With prefix arg, stop it entirely."
@@ -103,6 +119,7 @@ the region 0:00:00."
     (message "Timer continues at %s" (org-timer-value-string)))
    (t
     ;; pause timer
+    (run-hooks 'org-timer-pause-hook)
     (setq org-timer-pause-time (current-time))
     (org-timer-set-mode-line 'pause)
     (message "Timer paused at %s" (org-timer-value-string)))))
@@ -110,6 +127,7 @@ the region 0:00:00."
 (defun org-timer-stop ()
   "Stop the relative timer."
   (interactive)
+  (run-hooks 'org-timer-stop-hook)
   (setq org-timer-start-time nil
 	org-timer-pause-time nil)
   (org-timer-set-mode-line 'off))
@@ -264,6 +282,7 @@ VALUE can be `on', `off', or `pause'."
   (interactive)
   (mapc (lambda(timer)
 	  (when (eval timer)
+            (run-hooks 'org-timer-cancel-hook)
 	    (cancel-timer timer)
 	    (setq timer nil)))
 	'(org-timer-timer1
@@ -316,8 +335,11 @@ VALUE can be `on', `off', or `pause'."
 		  (setq timer-set t)
 		  (setq org-timer-last-timer
 			(run-with-timer
-			secs nil 'org-notify (format "%s: time out" hl) t))
-		  (set timer org-timer-last-timer)))
+			 secs nil 'org-notify (format "%s: time out" hl) t))
+;                  (setq org-timer-mode-line-timer
+;                        (run-with-timer 1 1 'org-timer-update-mode-line))
+		  (set timer org-timer-last-timer)
+                  (run-hooks 'org-timer-set-hook)))
 	      '(org-timer-timer1
 		org-timer-timer2
 		org-timer-timer3)))))

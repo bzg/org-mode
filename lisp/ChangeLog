@@ -1,3 +1,13 @@
+2010-02-20  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-timer.el (org-timer-start-hook, org-timer-stop-hook)
+	(org-timer-pause-hook, org-timer-set-hook)
+	(org-timer-cancel-hook): New hooks.
+	(org-timer-start): Run `org-timer-start-hook'.
+	(org-timer-pause-or-continue): Run `org-timer-pause-hook'.
+	(org-timer-stop): Run `org-timer-stop-hook'.
+	(org-timer-cancel-timers): Run `org-timer-cancel-hook'.
+
 2010-02-19  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-reveal): Double prefix arg shows the subtree of the
