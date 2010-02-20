@@ -9399,8 +9399,9 @@ See also `org-refile-use-outline-path' and `org-completion-use-ido'"
 		    (goto-char (point-min))
 		    (or (outline-next-heading) (goto-char (point-max)))))
 		(if (not (bolp)) (newline))
-		(bookmark-set "org-refile-last-stored")
 		(org-paste-subtree level)
+		(and org-auto-align-tags (org-set-tags nil t))
+		(bookmark-set "org-refile-last-stored")
 		(if (fboundp 'deactivate-mark) (deactivate-mark))
 		(run-hooks 'org-after-refile-insert-hook))))
 	  (if regionp
