@@ -141,19 +141,18 @@ BODY, if RESULT-TYPE equals 'value then return the value of the
 last statement in BODY, as elisp."
   (if (not session)
       ;; external process evaluation
-      (let ((in-tmp-file (make-temp-file "R-in-functional-results"))
-            (out-tmp-file (make-temp-file "R-out-functional-results")))
+      (let ((tmp-file (make-temp-file "R-out-functional-results")))
         (case result-type
           (output
-           (with-temp-file in-tmp-file (insert body))
-           (shell-command-to-string (format "R --slave --no-save < '%s' > '%s'"
-					    in-tmp-file out-tmp-file))
-	   (with-temp-buffer (insert-file-contents out-tmp-file) (buffer-string)))
+	   (with-temp-buffer
+             (insert body)
+             (shell-command-on-region (point-min) (point-max) "R --slave --no-save" 'replace)
+             (buffer-string)))
           (value
-           (with-temp-file in-tmp-file
+	   (with-temp-buffer
              (insert (format org-babel-R-wrapper-method
-			     body out-tmp-file (if column-names-p "TRUE" "FALSE"))))
-           (shell-command (format "R --no-save < '%s'" in-tmp-file))
+			     body tmp-file (if column-names-p "TRUE" "FALSE")))
+	     (shell-command-on-region (point-min) (point-max) "R --no-save" 'replace))
 	   (org-babel-R-process-value-result
 	    (org-babel-import-elisp-from-file out-tmp-file) column-names-p))))
     ;; comint session evaluation
