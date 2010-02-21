@@ -42,6 +42,7 @@ called by `org-babel-execute-src-block'."
   (save-excursion
     (let* ((processed-params (org-babel-process-params params))
            (result-type (fourth processed-params))
+	   (ess-ask-for-ess-directory (not (cdr (assoc :dir params))))
            (session (org-babel-R-initiate-session (first processed-params)))
            (vars (second processed-params))
 	   (column-names-p (and (cdr (assoc :colnames params))

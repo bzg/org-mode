@@ -214,6 +214,9 @@ block."
 			    ((member "value" result-params) 'value)
 			    (t 'value)))
          (cmd (intern (concat "org-babel-execute:" lang)))
+	 (dir (cdr (assoc :dir params)))
+	 (default-directory
+	   (or (and dir (if (string-match "/$" dir) dir (concat dir "/"))) default-directory))
          result)
     ;; (message "params=%S" params) ;; debugging
     (unless (member lang org-babel-interpreters)
