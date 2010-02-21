@@ -861,7 +861,12 @@ when PUB-DIR is set, use this as the publishing directory."
   (interactive "P")
   (let ((pdffile (org-export-as-pdf arg)))
     (if pdffile
-	(org-open-file pdffile)
+	(progn
+	  (org-open-file pdffile)
+	  (when org-export-kill-product-buffer-when-displayed
+	    (kill-buffer (find-buffer-visiting
+			  (concat (file-name-sans-extension (buffer-file-name))
+				  ".tex")))))
       (error "PDF file was not produced"))))
 
 ;;; Parsing functions:

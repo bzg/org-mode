@@ -1,5 +1,14 @@
 2010-02-21  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-html.el (org-export-as-html-and-open): Kill product buffer
+	if the user wants that.
+
+	* org-latex.el (org-export-as-pdf-and-open): Kill product buffer
+	if the user wants that.
+
+	* org-exp.el (org-export-kill-product-buffer-when-displayed): New
+	option.
+
 	* org-agenda.el (org-batch-agenda-csv): Use the time property
 	instead of the `time-of-day' property.
 

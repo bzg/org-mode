@@ -443,7 +443,9 @@ The prefix ARG specifies how many levels of the outline should become
 headlines.  The default is 3.  Lower levels will become bulleted lists."
   (interactive "P")
   (org-export-as-html arg 'hidden)
-  (org-open-file buffer-file-name))
+  (org-open-file buffer-file-name)
+  (when org-export-kill-product-buffer-when-displayed
+    (kill-buffer)))
 
 ;;;###autoload
 (defun org-export-as-html-batch ()

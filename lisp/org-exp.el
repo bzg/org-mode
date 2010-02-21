@@ -80,6 +80,13 @@ is nil, the buffer remains buried also in these cases."
   :group 'org-export-general
   :type 'boolean)
 
+(defcustom org-export-kill-product-buffer-when-displayed nil
+  "Non-nil means kill the product buffer if it is displayed immediately.
+This applied to the commands `org-export-html-and-open' and
+`org-export-as-pdf-and-open'."
+  :group 'org-export-general
+  :type 'boolean)
+
 (defcustom org-export-run-in-background nil
   "Non-nil means export and publishing commands will run in background.
 This works by starting up a separate Emacs process visiting the same file
