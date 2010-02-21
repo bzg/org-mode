@@ -1,3 +1,8 @@
+2010-02-21  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-agenda.el (org-batch-agenda-csv): Use the time property
+	instead of the `time-of-day' property.
+
 2010-02-20  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-timer.el (org-timer-start-hook, org-timer-stop-hook)

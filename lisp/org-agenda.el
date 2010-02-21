@@ -2286,7 +2286,7 @@ agenda-day   The day in the agenda where this is listed"
 	  (princ
 	   (org-encode-for-stdout
 	    (mapconcat 'org-agenda-export-csv-mapper
-		       '(org-category txt type todo tags date time-of-day extra
+		       '(org-category txt type todo tags date time extra
 				      priority-letter priority agenda-day)
 		      ",")))
 	  (princ "\n"))))))
