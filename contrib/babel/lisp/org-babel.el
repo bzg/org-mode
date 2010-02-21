@@ -1102,5 +1102,12 @@ Fixes a bug in `tramp-handle-call-process-region'."
     ;; call-process-region-original is the original emacs definition. It
     ;; is in scope from the let binding in org-babel-execute-src-block
     (apply call-process-region-original start end program delete buffer display args)))
+
+(defun org-babel-make-remote-file-name (file)
+  (let* ((vec (tramp-dissect-file-name default-directory))
+	 (user (tramp-file-name-user vec))
+	 (host (tramp-file-name-host vec)))
+    (concat "/" user (when user "@") host ":" file)))
+
 (provide 'org-babel)
 ;;; org-babel.el ends here

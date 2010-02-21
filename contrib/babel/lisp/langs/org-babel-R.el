@@ -155,7 +155,9 @@ last statement in BODY, as elisp."
 			     body tmp-file (if column-names-p "TRUE" "FALSE")))
 	     (shell-command-on-region (point-min) (point-max) "R --no-save" 'replace))
 	   (org-babel-R-process-value-result
-	    (org-babel-import-elisp-from-file out-tmp-file) column-names-p))))
+	    (org-babel-import-elisp-from-file
+	     (if (file-remote-p default-directory) (org-babel-make-remote-file-name tmp-file) tmp-file))
+	    column-names-p))))
     ;; comint session evaluation
     (org-babel-comint-in-buffer session
       (let* ((tmp-file (make-temp-file "org-babel-R"))
@@ -178,7 +180,9 @@ last statement in BODY, as elisp."
 	     broke results)
         (case result-type
           (value (org-babel-R-process-value-result
-		  (org-babel-import-elisp-from-file tmp-file) column-names-p))
+		  (org-babel-import-elisp-from-file
+		   (if (file-remote-p default-directory) (org-babel-make-remote-file-name tmp-file) tmp-file))
+		  column-names-p))
           (output
 	   (flet ((extractor
 		   (el)

@@ -178,7 +178,10 @@ last statement in BODY, as elisp."
 		 tmp-file))
                ;; (message "buffer=%s" (buffer-string)) ;; debugging
                (shell-command-on-region (point-min) (point-max) "python"))
-             (let ((raw (with-temp-buffer (insert-file-contents tmp-file) (buffer-string))))
+             (let ((raw (with-temp-buffer
+			  (insert-file-contents
+			   (if (file-remote-p default-directory) (org-babel-make-remote-file-name tmp-file) tmp-file))
+			  (buffer-string))))
                (if (or (member "code" result-params) (member "pp" result-params))
                    raw
                  (org-babel-python-table-or-string raw)))))))
