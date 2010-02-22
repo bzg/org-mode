@@ -39,7 +39,7 @@
   "Execute a block of R code with org-babel.  This function is
 called by `org-babel-execute-src-block'."
   (message "executing R source code block...")
-  (save-window-excursion
+  (save-excursion
     (let* ((processed-params (org-babel-process-params params))
            (result-type (fourth processed-params))
            (session (org-babel-R-initiate-session (first processed-params)))
