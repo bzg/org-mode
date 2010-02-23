@@ -650,7 +650,7 @@ directory and force publishing all files."
   (interactive "P")
   (when force
     (org-publish-remove-all-timestamps))
-  (org-publish-initialize-files-alist)
+  (org-publish-initialize-files-alist force)
   (save-window-excursion
     (let ((org-publish-use-timestamps-flag
 	   (if force nil org-publish-use-timestamps-flag)))
@@ -661,7 +661,7 @@ directory and force publishing all files."
   "Publish the current file.
 With prefix argument, force publish the file."
   (interactive "P")
-  (org-publish-initialize-files-alist)
+  (org-publish-initialize-files-alist force)
   (save-window-excursion
     (let ((org-publish-use-timestamps-flag
 	   (if force nil org-publish-use-timestamps-flag)))
@@ -673,7 +673,7 @@ With prefix argument, force publish the file."
 With a prefix argument, force publishing of all files in
 the project."
   (interactive "P")
-  (org-publish-initialize-files-alist)
+  (org-publish-initialize-files-alist force)
   (save-window-excursion
     (let ((project (org-publish-get-project-from-filename (buffer-file-name) 'up))
 	  (org-publish-use-timestamps-flag
