@@ -1103,11 +1103,13 @@ Fixes a bug in `tramp-handle-call-process-region'."
     ;; is in scope from the let binding in org-babel-execute-src-block
     (apply call-process-region-original start end program delete buffer display args)))
 
-(defun org-babel-make-remote-file-name (file)
-  (let* ((vec (tramp-dissect-file-name default-directory))
-	 (user (tramp-file-name-user vec))
-	 (host (tramp-file-name-host vec)))
-    (concat "/" user (when user "@") host ":" file)))
+(defun org-babel-maybe-remote-file (file)
+  (if (file-remote-p default-directory)
+      (let* ((vec (tramp-dissect-file-name default-directory))
+             (user (tramp-file-name-user vec))
+             (host (tramp-file-name-host vec)))
+        (concat "/" user (when user "@") host ":" file))
+    file))
 
 (provide 'org-babel)
 ;;; org-babel.el ends here
