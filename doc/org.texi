@@ -5968,13 +5968,13 @@ now@footnote{To avoid this query, configure the variable
 will continue to run after the note was filed away.
 
 The handler will then store the note in the file and under the headline
-specified in the template, or it will use the default file and headline.
-The window configuration will be restored, sending you back to the working
-context before the call to Remember.  To re-use the location found
-during the last call to Remember, exit the Remember buffer with
-@kbd{C-0 C-c C-c}, i.e. specify a zero prefix argument to @kbd{C-c C-c}.
-Another special case is @kbd{C-2 C-c C-c} which files the note as a child of
-the currently clocked item.
+specified in the template, or it will use the default file and headline.  The
+window configuration will be restored, sending you back to the working
+context before the call to Remember.  To re-use the location found during the
+last call to Remember, exit the Remember buffer with @kbd{C-0 C-c C-c},
+i.e. specify a zero prefix argument to @kbd{C-c C-c}.  Another special case
+is @kbd{C-2 C-c C-c} which files the note as a child of the currently clocked
+item, and @kbd{C-3 C-c C-c} files as a sibling of the currently clocked item.
 
 @vindex org-remember-store-without-prompt
 If you want to store the note directly to a different place, use

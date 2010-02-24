@@ -1,3 +1,8 @@
+2010-02-24  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-remember.el (org-remember-apply-template): Extend comment.
+	(org-remember-handler): Implement clock sibling filing.
+
 2010-02-23  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-publish.el (org-publish-all, org-publish-current-file)

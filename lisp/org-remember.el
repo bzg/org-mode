@@ -479,7 +479,7 @@ to be run from that hook to function properly."
 ## C-u C-c C-c  like C-c C-c, and immediately visit note at target location
 ## C-0 C-c C-c  \"%s\" -> \"* %s\"
 ## %s  to select file and header location interactively.
-## C-2 C-c C-c  as child of the currently clocked item
+## C-2 C-c C-c  as child (C-3: as sibling) of the currently clocked item
 ## To switch templates, use `\\[org-remember]'.  To abort use `C-c C-k'.\n\n"
 		  (if org-remember-store-without-prompt "    C-c C-c" "    C-1 C-c C-c")
 		  (abbreviate-file-name (or file org-default-notes-file))
@@ -869,6 +869,7 @@ See also the variable `org-reverse-note-order'."
 	   (previousp (and (member current-prefix-arg '((16) 0))
 			   org-remember-previous-location))
 	   (clockp (equal current-prefix-arg 2))
+	   (clocksp (equal current-prefix-arg 3))
 	   (fastp (org-xor (equal current-prefix-arg 1)
 			   org-remember-store-without-prompt))
 	   (file (cond
@@ -891,7 +892,7 @@ See also the variable `org-reverse-note-order'."
 	      visiting (and file (org-find-base-buffer-visiting file))
 	      heading (cdr org-remember-previous-location)
 	      fastp t))
-      (when clockp
+      (when (or clockp clocksp)
 	(setq file (buffer-file-name (marker-buffer org-clock-marker))
 	      visiting (and file (org-find-base-buffer-visiting file))
 	      heading org-clock-heading-for-remember
@@ -1024,7 +1025,9 @@ See also the variable `org-reverse-note-order'."
 			       (beginning-of-line 2)
 			     (end-of-line 1)
 			     (insert "\n"))))
-		     (org-paste-subtree (org-get-valid-level level 1) txt)
+		     (org-paste-subtree (if clocksp 
+					    level
+					  (org-get-valid-level level 1)) txt)
 		     (and org-auto-align-tags (org-set-tags nil t))
 		     (bookmark-set "org-remember-last-stored")
 		     (move-marker org-remember-last-stored-marker (point)))
