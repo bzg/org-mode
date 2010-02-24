@@ -944,6 +944,7 @@ the clocking selection, associated with the letter `d'."
 	    (org-back-to-heading t)
 	    (or interrupting (move-marker org-clock-interrupted-task nil))
 	    (org-clock-history-push)
+	    (org-clock-set-current)
 	    (cond ((functionp org-clock-in-switch-to-state)
 		   (looking-at org-complex-heading-regexp)
 		   (let ((newstate (funcall org-clock-in-switch-to-state
@@ -1041,6 +1042,15 @@ the clocking selection, associated with the letter `d'."
 		  (run-with-timer 60 60 'org-resolve-clocks-if-idle))
 	    (message "Clock starts at %s - %s" ts msg-extra)
 	    (run-hooks 'org-clock-in-hook)))))))
+
+(defvar org-clock-current-task nil
+  "Task currently clocked in.")
+(defun org-clock-set-current ()
+  "Set `org-clock-current-task' to the task currently clocked in."
+  (setq org-clock-current-task (org-get-heading)))
+(defun org-clock-delete-current ()
+  "Reset `org-clock-current-task' to nil."
+  (setq org-clock-current-task nil))
 
 (defun org-clock-mark-default-task ()
   "Mark current task as default task."
@@ -1237,7 +1247,8 @@ If there is no running clock, throw an error, unless FAIL-QUIETLY is set."
 	  (force-mode-line-update)
 	  (message (concat "Clock stopped at %s after HH:MM = " org-time-clocksum-format "%s") te h m
 		   (if remove " => LINE REMOVED" ""))
-          (run-hooks 'org-clock-out-hook))))))
+          (run-hooks 'org-clock-out-hook)
+	  (org-clock-delete-current))))))
 
 (defun org-clock-cancel ()
   "Cancel the running clock be removing the start timestamp."
