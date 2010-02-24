@@ -87,7 +87,9 @@ called by `org-babel-execute-src-block'."
            (y-labels (plist-get params :ylabels))
            (timefmt (plist-get params :timefmt))
            (time-ind (or (plist-get params :timeind)
-                         (when timefmt 1))))
+                         (when timefmt 1)))
+           (result-type (cdr (assoc :results params)))
+           output)
       (flet ((add-to-body (text)
                           (setq body (concat text "\n" body))))
         ;; append header argument settings to body
@@ -132,12 +134,16 @@ called by `org-babel-execute-src-block'."
               (with-temp-file script-file
                 (insert (concat body "\n")))
               (message "gnuplot \"%s\"" script-file)
-              (message (shell-command-to-string (format "gnuplot \"%s\"" script-file))))
+              (setq output
+                    (shell-command-to-string (format "gnuplot \"%s\"" script-file)))
+              (message output))
           (with-temp-buffer
             (insert (concat body "\n"))
             (gnuplot-mode)
             (gnuplot-send-buffer-to-gnuplot)))
-        out-file))))
+        (if (member "output" (split-string result-type))
+            output
+          out-file)))))
 
 (defun org-babel-prep-session:gnuplot (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."

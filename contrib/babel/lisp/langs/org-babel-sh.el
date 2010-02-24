@@ -93,10 +93,10 @@ specifying a var of the same value."
       (flet ((deep-string (el)
                           (if (listp el)
                               (mapcar #'deep-string el)
-                            (format "%S" el))))
-        (format "$(cat <<BABEL_TABLE\n%s\nBABEL_TABLE\n)"
+                           (org-babel-sh-var-to-sh el sep))))
+       (format "$(cat <<BABEL_TABLE\n%s\nBABEL_TABLE\n)"
                 (orgtbl-to-generic (deep-string var) (list :sep (or sep "\t")))))
-    (format "%S" var)))
+    (if (stringp var) (format "%s" var) (format "%S" var))))
 
 (defun org-babel-sh-table-or-results (results)
   "If the results look like a table, then convert them into an
