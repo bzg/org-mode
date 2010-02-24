@@ -79,7 +79,6 @@ called by `org-babel-execute-src-block'."
            (term (or (cdr (assoc :term params))
                      (when out-file (file-name-extension out-file))))
            (cmdline (cdr (assoc :cmdline params)))
-           (in-file (make-temp-file "org-babel-ditaa"))
            (title (plist-get params :title))
            (lines (plist-get params :line))
            (sets (plist-get params :set))
