@@ -79,6 +79,10 @@ then run `org-babel-pop-to-session'."
 
 (add-hook 'org-metadown-hook 'org-babel-pop-to-session-maybe)
 
+(defconst org-babel-header-arg-names
+  '(cache cmdline colnames dir exports file noweb results session tangle var)
+  "All header arguments used by org-babel")
+
 (defvar org-babel-default-header-args
   '((:session . "none") (:results . "replace") (:exports . "code") (:cache . "no") (:noweb . "no"))
   "Default arguments to use when evaluating a source block.")
@@ -507,8 +511,7 @@ may be specified in the properties of the current outline entry."
                (when val
                  ;; (message "prop %s=%s" header-arg val) ;; debugging
                  (cons (intern (concat ":" header-arg)) val))))
-           '("cache" "cmdline" "exports" "file" "noweb" "results"
-             "session" "tangle" "var")))))
+           (mapcar 'symbol-name org-babel-header-arg-names)))))
 
 (defun org-babel-parse-src-block-match ()
   (let* ((lang (org-babel-clean-text-properties (match-string 1)))
