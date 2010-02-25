@@ -142,7 +142,8 @@ options are taken from `org-babel-default-header-args'."
                                            (list 'org-caption
                                                  (format "%s(%s)"
                                                          name (mapconcat #'identity args ", ")))
-                                           str) str)))
+                                           str))
+           str))
       ('lob
        (let ((call-line (and (string-match "results=" (car args))
                              (substring (car args) (match-end 0)))))
