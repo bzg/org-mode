@@ -2475,7 +2475,7 @@ INDENT was the original indentation of the block."
                                (if caption "</div>" "")))))
 		(if textareap
 		    (setq rtn (concat
-			       (format "<p>\n<textarea cols=\"%d\" rows=\"%d\" overflow-x:scroll >\n"
+			       (format "<p>\n<textarea cols=\"%d\" rows=\"%d\">"
 				       cols rows)
 			       rtn "</textarea>\n</p>\n"))
 		  (with-temp-buffer

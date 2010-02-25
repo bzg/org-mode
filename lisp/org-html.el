@@ -137,6 +137,7 @@ not be modified."
   dt { font-weight: bold; }
   div.figure { padding: 0.5em; }
   div.figure p { text-align: center; }
+  textarea { overflow-x: scroll; }
   .linenr { font-size:smaller }
   .code-highlighted {background-color:#ffff00;}
   .org-info-js_info-navigation { border-style:none; }

@@ -1,3 +1,11 @@
+2010-02-25  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-html.el (org-export-html-style-default): Add a default style
+	for textareas.
+
+	* org-exp.el (org-export-format-source-code-or-example): Fix
+	textarea tag.
+
 2010-02-24  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-remember.el (org-remember-apply-template): Extend comment.
