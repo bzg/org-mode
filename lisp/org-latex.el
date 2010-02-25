@@ -636,6 +636,11 @@ when PUB-DIR is set, use this as the publishing directory."
 			    opt-plist)))
 	 ;; Make sure the variable contains the updated values.
 	 (org-export-latex-options-plist (setq org-export-opt-plist opt-plist))
+	 ;; The following two are dynamically scoped into other
+	 ;; routines below.
+	 (org-current-export-dir
+	  (or pub-dir (org-export-directory :html opt-plist)))
+	 (org-current-export-file buffer-file-name)
 	 (title (or (and subtree-p (org-export-get-title-from-subtree))
 		    (plist-get opt-plist :title)
 		    (and (not

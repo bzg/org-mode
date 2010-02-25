@@ -304,6 +304,7 @@ Markup for rich export
 * Images and tables::           Tables and Images will be included
 * Literal examples::            Source code examples with special formatting
 * Include files::               Include additional files into a document
+* Index entries::               
 * Macro replacement::           Use macros to create complex output
 * Embedded LaTeX::              LaTeX can be freely used inside Org documents
 
@@ -385,7 +386,8 @@ Configuration
 * Publishing action::           Setting the function doing the publishing
 * Publishing options::          Tweaking HTML export
 * Publishing links::            Which links keep working after publishing?
-* Project page index::          Publishing a list of project files
+* Sitemap::                     Generating a list of all pages
+* Generating an index::         An index that reaches across pages
 
 Sample configuration
 
@@ -8199,6 +8201,7 @@ summarizes the markup rules used in an Org-mode buffer.
 * Images and tables::           Tables and Images will be included
 * Literal examples::            Source code examples with special formatting
 * Include files::               Include additional files into a document
+* Index entries::               
 * Macro replacement::           Use macros to create complex output
 * Embedded LaTeX::              LaTeX can be freely used inside Org documents
 @end menu
@@ -8550,7 +8553,7 @@ label is stored as a link @samp{(label)}, for retrieval with @kbd{C-c C-l}.
 @end table
 
 
-@node Include files, Macro replacement, Literal examples, Markup
+@node Include files, Index entries, Literal examples, Markup
 @section Include files
 @cindex include files, markup rules
 
@@ -8581,8 +8584,25 @@ the selected markup.  For example, to include a file as an item, use
 Visit the include file at point.
 @end table
 
+@node Index entries, Macro replacement, Include files, Markup
+@section Index enries
+@cindex index entries, for publishing
 
-@node Macro replacement, Embedded LaTeX, Include files, Markup
+You can specify entries that will be used for generating an index during
+publishing.  This is done by lines starting with @code{#+INDEX}.  An entry
+the contains an exclamation mark will create a sub item.  See @ref{Generating
+an index} for more information.
+
+@example
+* Curriculum Vitae 
+#+INDEX: CV
+#+INDEX: Application!CV
+@end example
+
+
+
+
+@node Macro replacement, Embedded LaTeX, Index entries, Markup
 @section Macro replacement
 @cindex macro replacement, during export
 @cindex #+MACRO
@@ -10098,7 +10118,8 @@ and many other properties of a project.
 * Publishing action::           Setting the function doing the publishing
 * Publishing options::          Tweaking HTML export
 * Publishing links::            Which links keep working after publishing?
-* Project page index::          Publishing a list of project files
+* Sitemap::                     Generating a list of all pages
+* Generating an index::         An index that reaches across pages
 @end menu
 
 @node Project alist, Sources and destinations, Configuration, Configuration
@@ -10144,13 +10165,15 @@ publish to a webserver using a file name syntax appropriate for
 the Emacs @file{tramp} package.  Or you can publish to a local directory and
 use external tools to upload your website (@pxref{Uploading files}).
 @item @code{:preparation-function}
-@tab Function called before starting the publishing process, for example, to
-run @code{make} for updating files to be published.  The project property
-list is scoped into this call as the variable @code{project-plist}.
+@tab Function or list of functions to be called before starting the
+publishing process, for example, to run @code{make} for updating files to be
+published.  The project property list is scoped into this call as the
+variable @code{project-plist}.
 @item @code{:completion-function}
-@tab Function called after finishing the publishing process, for example, to
-change permissions of the resulting files.  The project property list is
-scoped into this call as the variable @code{project-plist}.
+@tab Function or list of functions called after finishing the publishing
+process, for example, to change permissions of the resulting files.  The
+project property list is scoped into this call as the variable
+@code{project-plist}.
 @end multitable
 @noindent
 
@@ -10337,7 +10360,7 @@ its setting overrides the value of the corresponding user variable (if
 any) during publishing.  Options set within a file (@pxref{Export
 options}), however, override everything.
 
-@node Publishing links, Project page index, Publishing options, Configuration
+@node Publishing links, Sitemap, Publishing options, Configuration
 @subsection Links between published files
 @cindex links, publishing
 
@@ -10374,30 +10397,47 @@ description into the HTML file, but no link.  One option for this
 function is @code{org-publish-validate-link} which checks if the given
 file is part of any project in @code{org-publish-project-alist}.
 
-@node Project page index,  , Publishing links, Configuration
-@subsection Project page index
-@cindex index, of published pages
+@node Sitemap, Generating an index, Publishing links, Configuration
+@subsection Generating a sitemap
+@cindex sitemap, of published pages
 
-The following properties may be used to control publishing of an
-index of files or a summary page for a given project.
+The following properties may be used to control publishing of 
+a map of files for a given project.
 
 @multitable @columnfractions 0.25 0.75
-@item @code{:auto-index}
-@tab When non-nil, publish an index during @code{org-publish-current-project}
+@item @code{:auto-sitemap}
+@tab When non-nil, publish a sitemap during @code{org-publish-current-project}
 or @code{org-publish-all}.
 
-@item @code{:index-filename}
-@tab Filename for output of index. Defaults to @file{sitemap.org} (which
+@item @code{:sitemap-filename}
+@tab Filename for output of sitemap. Defaults to @file{sitemap.org} (which
 becomes @file{sitemap.html}).
 
-@item @code{:index-title}
-@tab Title of index page. Defaults to name of file.
+@item @code{:sitemap-title}
+@tab Title of sitemap page. Defaults to name of file.
 
-@item @code{:index-function}
-@tab Plug-in function to use for generation of index.
-Defaults to @code{org-publish-org-index}, which generates a plain list
+@item @code{:sitemap-function}
+@tab Plug-in function to use for generation of the sitemap.
+Defaults to @code{org-publish-org-sitemap}, which generates a plain list
 of links to all files in the project.
 @end multitable
+
+@node Generating an index,  , Sitemap, Configuration
+@subsection Generating an index
+@cindex index, in a publishing project
+
+Org-mode can generate an index across the files of a publishing project.
+
+@multitable @columnfractions 0.25 0.75
+@item @code{:makeindex}
+@tab When non-nil, generate in index in the file @file{theindex.org} and
+publish it as @file{theindex.html}.
+@end multitable
+
+The file will be create when first publishing a project with the
+@code{:makeindex} set.  The file only contains a statement @code{#+include:
+"theindex.inc"}.  You can then built around this include statement by adding
+a title, style information etc.
 
 @node Uploading files, Sample configuration, Configuration, Publishing
 @section Uploading files
