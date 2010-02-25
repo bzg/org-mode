@@ -1,5 +1,11 @@
 2010-02-25  Bastien Guerry  <bzg@altern.org>
 
+	* org-timer.el (org-timer-current-timer): Renamed from
+	`org-timer-last-timer'.
+	(org-timer-timer1, org-timer-timer2, org-timer-timer3): Removed.
+	(org-timer-cancel-timer, org-timer-show-remaining-time)
+	(org-timer-set-timer): Update to use only one timer.
+
 	* org.el (org-set-property): Remove useless space in the prompt.
 
 2010-02-25  Carsten Dominik  <carsten.dominik@gmail.com>
