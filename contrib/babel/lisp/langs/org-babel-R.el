@@ -87,7 +87,7 @@ called by `org-babel-execute-src-block'."
       (let ((transition-file (make-temp-file "org-babel-R-import")))
         ;; ensure VALUE has an orgtbl structure (depth of at least 2)
         (unless (listp (car value)) (setq value (list value)))
-        (with-temp-file transition-file
+        (with-temp-file (org-babel-maybe-remote-file transition-file)
           (insert (orgtbl-to-tsv value '(:fmt org-babel-R-quote-tsv-field)))
           (insert "\n"))
         (format "%s <- read.table(\"%s\", header=%s, sep=\"\\t\", as.is=TRUE)"
