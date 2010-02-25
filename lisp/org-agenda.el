@@ -5865,6 +5865,7 @@ When called with a prefix argument, include all archive files as well."
   "Set the mode name to indicate all the small mode settings."
   (setq mode-name
 	(concat "Org-Agenda"
+		(if (get 'org-agenda-files 'org-restrict) " []" "")
 		(if (equal org-agenda-ndays 1) " Day"    "")
 		(if (equal org-agenda-ndays 7) " Week"   "")
 		(if org-agenda-follow-mode     " Follow" "")

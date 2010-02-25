@@ -1,3 +1,8 @@
+2010-02-25  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-agenda.el (org-agenda-set-mode-name): Show if the agenda is
+	restricted, as an agenda mode.
+
 2010-02-25  Bastien Guerry  <bzg@altern.org>
 
 	* org.el (org-set-property): Remove useless space in the prompt.
