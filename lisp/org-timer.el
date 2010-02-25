@@ -275,38 +275,28 @@ VALUE can be `on', `off', or `pause'."
 	  (concat " <" (substring (org-timer-value-string) 0 -1) ">"))
     (force-mode-line-update)))
 
-(defvar org-timer-timer1 nil)
-(defvar org-timer-timer2 nil)
-(defvar org-timer-timer3 nil)
-(defvar org-timer-last-timer nil)
-
-(defun org-timer-cancel-timers ()
-  "Reset all timers."
+(defvar org-timer-current-timer nil)
+(defun org-timer-cancel-timer ()
+  "Cancel the current timer."
   (interactive)
-  (mapc (lambda(timer)
-	  (when (eval timer)
-            (run-hooks 'org-timer-cancel-hook)
-	    (cancel-timer timer)
-	    (setq timer nil)))
-	'(org-timer-timer1
-	  org-timer-timer2
-	  org-timer-timer3))
-  (message "All timers reset"))
+  (when (eval org-timer-current-timer)
+    (run-hooks 'org-timer-cancel-hook)
+    (cancel-timer org-timer-current-timer)
+    (setq org-timer-current-timer nil))
+  (message "Last timer canceled"))
 
 (defun org-timer-show-remaining-time ()
   "Display the remaining time before the timer ends."
   (interactive)
   (require 'time)
-  (if (and (not org-timer-timer1)
-	   (not org-timer-timer2)
-	   (not org-timer-timer3))
+  (if (not org-timer-current-timer)
       (message "No timer set")
     (let* ((rtime (decode-time
-		   (time-subtract (timer--time org-timer-last-timer)
+		   (time-subtract (timer--time org-timer-current-timer)
 				  (current-time))))
 	   (rsecs (nth 0 rtime))
 	   (rmins (nth 1 rtime)))
-      (message "%d minutes %d seconds left before next time out"
+      (message "%d minute(s) %d seconds left before next time out"
 	       rmins rsecs))))
 
 ;;;###autoload
@@ -333,19 +323,15 @@ VALUE can be `on', `off', or `pause'."
 		 (org-get-heading))
 		(t (error "Not in an Org buffer"))))
 	   timer-set)
-      (mapcar (lambda(timer)
-		(when (not (or (eval timer) timer-set))
-		  (setq timer-set t)
-		  (setq org-timer-last-timer
-			(run-with-timer
-			 secs nil '(lambda ()
-                                     (org-notify (format "%s: time out" hl) t)
-                                     (run-hooks 'org-timer-done-hook))))
-		  (set timer org-timer-last-timer)
-                  (run-hooks 'org-timer-set-hook)))
-	      '(org-timer-timer1
-		org-timer-timer2
-		org-timer-timer3)))))
+      (if org-timer-current-timer
+	  (error "You cannot run several timers at the same time")
+	(setq org-timer-current-timer
+	      (run-with-timer
+	       secs nil `(lambda ()
+			   (setq org-timer-current-timer nil)
+			   (org-notify ,(format "%s: time out" hl) t)
+			   (run-hooks 'org-timer-done-hook))))
+	(run-hooks 'org-timer-set-hook)))))
 
 (provide 'org-timer)
 
