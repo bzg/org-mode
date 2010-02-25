@@ -6,6 +6,12 @@
 	* org-exp.el (org-export-format-source-code-or-example): Fix
 	textarea tag.
 
+2010-02-24  Bastien Guerry  <bzg@altern.org>
+
+	* org-clock.el (org-clock-current-task): New variable to store
+	last clocked in task.
+	(org-clock-set-current, org-clock-delete-current): New functions.
+
 2010-02-24  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-remember.el (org-remember-apply-template): Extend comment.
