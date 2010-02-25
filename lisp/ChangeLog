@@ -1,3 +1,7 @@
+2010-02-25  Bastien Guerry  <bzg@altern.org>
+
+	* org.el (org-set-property): Remove useless space in the prompt.
+
 2010-02-25  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-html.el (org-export-html-style-default): Add a default style

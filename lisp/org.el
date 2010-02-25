@@ -12952,8 +12952,8 @@ in the current file."
 					      (caar allowed))))
 		 (let (org-completion-use-ido org-completion-use-iswitchb)
 		   (org-completing-read
-		    (concat "Value " (if (and cur (string-match "\\S-" cur))
-					(concat "[" cur "]") "")
+		    (concat "Value" (if (and cur (string-match "\\S-" cur))
+					(concat " [" cur "]") "")
 			    ": ")
 		    existing nil nil "" nil cur)))))
      (list prop (if (equal val "") cur val))))
