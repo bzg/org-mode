@@ -94,13 +94,13 @@ then run `org-babel-pop-to-session'."
   "Regexp used to test when on an inline org-babel src-block")
 
 (defvar org-babel-result-regexp
-  "#\\+res\\(ults\\|name\\)\\(\\[\\([[:alnum:]]+\\)\\]\\)?\\:"
+  "^[ \t]*#\\+res\\(ults\\|name\\)\\(\\[\\([[:alnum:]]+\\)\\]\\)?\\:"
   "Regular expression used to match result lines.  If the
 results are associated with a hash key then the hash will be
 saved in the second match data.")
 
 (defvar org-babel-source-name-regexp
-  "#\\+\\(srcname\\|source\\|function\\):[ \t]*"
+  "^[ \t]*#\\+\\(srcname\\|source\\|function\\):[ \t]*"
   "Regular expression used to match a source name line.")
 
 (defvar org-babel-min-lines-for-block-output 10
@@ -202,6 +202,7 @@ block."
 		     (if (and (cdr (assoc :noweb params))
                               (string= "yes" (cdr (assoc :noweb params))))
 			 (org-babel-expand-noweb-references info) (second info))))
+
          (result-params (split-string (or (cdr (assoc :results params)) "")))
          (result-type (cond ((member "output" result-params) 'output)
 			    ((member "value" result-params) 'value)

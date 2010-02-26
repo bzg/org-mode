@@ -91,10 +91,11 @@ specifying a var of the same value."
     (format "%S" var)))
 
 (defun org-babel-python-table-or-string (results)
-  "If the results look like a table, then convert them into an
+  "If the results look like a list or tuple, then convert them into an
 Emacs-lisp table, otherwise return the results as a string."
   (org-babel-read
-   (if (string-match "^\\[.+\\]$" results)
+   (if (or (string-match "^\\[.+\\]$" results)
+	   (string-match "^(.+)$" results))
        (org-babel-read
         (replace-regexp-in-string
          "\\[" "(" (replace-regexp-in-string
@@ -208,8 +209,8 @@ last statement in BODY, as elisp."
              (org-babel-python-table-or-string (org-babel-trim (car results))))))))))
 
 (defun org-babel-python-read-string (string)
-  "Strip 's from around ruby string"
-  (if (string-match "'\\([^\000]+\\)'" string)
+  "Strip 's from around python string"
+  (if (string-match "^'\\([^\000]+\\)'$" string)
       (match-string 1 string)
     string))
 

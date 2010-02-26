@@ -44,7 +44,8 @@ called by `org-babel-execute-src-block'."
            (result-type (fourth processed-params))
            (session (org-babel-R-initiate-session (first processed-params)))
            (vars (second processed-params))
-	   (column-names-p (cdr (assoc :colnames params)))
+	   (column-names-p (and (cdr (assoc :colnames params))
+				(string= "yes" (cdr (assoc :colnames params)))))
 	   (out-file (cdr (assoc :file params)))
 	   (augmented-body
 	    (concat

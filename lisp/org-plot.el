@@ -250,8 +250,10 @@ manner suitable for prepending to a user-specified script."
 		 (setf plot-lines
 		       (cons
 			(format plot-str data-file
-				(or (and (not text-ind) ind
-					 (> ind 0) (format "%d:" ind)) "")
+				(or (and ind (> ind 0)
+                                         (not (or (equal 'histograms (plist-get params :with))
+                                                  (equal 'hist (plist-get params :with))))
+                                         (format "%d:" ind)) "")
 				(+ 1 col)
 				(if text-ind (format ":xticlabel(%d)" ind) "")
 				with
@@ -320,7 +322,6 @@ line directly before or after the table."
 			   (mapcar (lambda (row) (nth ind row)) table)))) 0)
 	      (plist-put params :timeind t)
 	    ;; check for text ind column
-
 	    (if (or (string= (plist-get params :with) "hist")
 		    (> (length
 			(delq 0 (mapcar

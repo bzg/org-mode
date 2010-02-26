@@ -81,7 +81,7 @@
 
 (defun org-babel-haskell-read-string (string)
   "Strip \\\"s from around haskell string"
-  (if (string-match "\"\\([^\000]+\\)\"" string)
+  (if (string-match "^\"\\([^\000]+\\)\"$" string)
       (match-string 1 string)
     string))
 
