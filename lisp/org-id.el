@@ -545,7 +545,9 @@ When CHECK is given, prepare detailed information about duplicate IDs."
 (defun org-id-find-id-file (id)
   "Query the id database for the file in which this ID is located."
   (unless org-id-locations (org-id-locations-load))
-  (or (gethash id org-id-locations)
+  (or (and org-id-locations
+	   (hash-table-p org-id-locations)
+	   (gethash id org-id-locations))
       ;; ball back on current buffer
       (buffer-file-name (or (buffer-base-buffer (current-buffer))
 			    (current-buffer)))))

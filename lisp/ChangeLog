@@ -1,5 +1,8 @@
 2010-02-26  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-id.el (org-id-find-id-file): Fix bug when there is no hash
+	table for the id locations.
+
 	* org.el (org-read-date-analyze): Match American-style dates, like
 	5/30 or 5/13/7.  Make sure cal-iso.el is loaded.  Don't force he
 	current year when reading ISO and American dates.
