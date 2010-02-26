@@ -13428,7 +13428,7 @@ user."
   (let ((nowdecode (decode-time (current-time)))
 	delta deltan deltaw deltadef year month day
 	hour minute second wday pm h2 m2 tl wday1
-	iso-year iso-weekday iso-week iso-year iso-date futurep)
+	iso-year iso-weekday iso-week iso-year iso-date futurep kill-year)
     (setq org-read-date-analyze-futurep nil)
     (when (string-match "\\`[ \t]*\\.[ \t]*\\'" ans)
       (setq ans "+0"))
@@ -13443,19 +13443,35 @@ user."
     ;; If yes, store the info and postpone interpreting it until the rest
     ;; of the parsing is done
     (when (string-match "\\<\\(?:\\([0-9]+\\)-\\)?[wW]\\([0-9]\\{1,2\\}\\)\\(?:-\\([0-6]\\)\\)?\\([ \t]\\|$\\)" ans)
-      (setq iso-year (if (match-end 1) (org-small-year-to-year (string-to-number (match-string 1 ans))))
-	    iso-weekday (if (match-end 3) (string-to-number (match-string 3 ans)))
+      (setq iso-year (if (match-end 1)
+			 (org-small-year-to-year
+			  (string-to-number (match-string 1 ans))))
+	    iso-weekday (if (match-end 3)
+			    (string-to-number (match-string 3 ans)))
 	    iso-week (string-to-number (match-string 2 ans)))
       (setq ans (replace-match "" t t ans)))
 
-    ;; Help matching ISO dates with single digit month ot day, like 2006-8-11.
+    ;; Help matching ISO dates with single digit month or day, like 2006-8-11.
     (when (string-match
 	   "^ *\\(\\([0-9]+\\)-\\)?\\([0-1]?[0-9]\\)-\\([0-3]?[0-9]\\)\\([^-0-9]\\|$\\)" ans)
       (setq year (if (match-end 2)
 		     (string-to-number (match-string 2 ans))
-		   (string-to-number (format-time-string "%Y")))
+		   (progn (setq kill-year t)
+			  (string-to-number (format-time-string "%Y"))))
 	    month (string-to-number (match-string 3 ans))
 	    day (string-to-number (match-string 4 ans)))
+      (if (< year 100) (setq year (+ 2000 year)))
+      (setq ans (replace-match (format "%04d-%02d-%02d\\5" year month day)
+			       t nil ans)))
+    ;; Help matching american dates, like 5/30 or 5/30/7
+    (when (string-match
+	   "^ *\\([0-3]?[0-9]\\)/\\([0-1]?[0-9]\\)\\(/\\([0-9]+\\)\\)?\\([^/0-9]\\|$\\)" ans)
+      (setq year (if (match-end 4)
+		     (string-to-number (match-string 4 ans))
+		   (progn (setq kill-year t)
+			  (string-to-number (format-time-string "%Y"))))
+	    month (string-to-number (match-string 1 ans))
+	    day (string-to-number (match-string 2 ans)))
       (if (< year 100) (setq year (+ 2000 year)))
       (setq ans (replace-match (format "%04d-%02d-%02d\\5" year month day)
 			       t nil ans)))
@@ -13504,7 +13520,7 @@ user."
 			     (nth 3 tl) (< (nth 3 tl) (nth 3 nowdecode)))
 			(prog1 (1+ (nth 4 nowdecode)) (setq futurep t))
 		      (nth 4 defdecode)))
-	  year (or (nth 5 tl)
+	  year (or (and (not kill-year) (nth 5 tl))
 		   (if (and org-read-date-prefer-future
 			    (nth 4 tl) (< (nth 4 tl) (nth 4 nowdecode)))
 		       (prog1 (1+ (nth 5 nowdecode)) (setq futurep t))
@@ -13531,6 +13547,7 @@ user."
     (cond
      (iso-week
       ;; There was an iso week
+      (require 'cal-iso)
       (setq futurep nil)
       (setq year (or iso-year year)
 	    day (or iso-weekday wday 1)

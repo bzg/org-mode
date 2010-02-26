@@ -1,3 +1,8 @@
+2010-02-26  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (The date/time prompt): Document that we accept dates
+	like month/day/year.
+
 2010-02-25  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Faces for TODO keywords, Faces for TODO keywords)
