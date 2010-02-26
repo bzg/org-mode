@@ -2045,10 +2045,10 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 		 (add-text-properties (1- (length footnote-rpl))
 				      (length footnote-rpl)
 				      '(org-protected t) footnote-rpl)
-		 (if org-on-heading-p)
-		 (setq footnote-rpl
-		       (concat (org-export-latex-protect-string "\\protect")
-			       footnote-rpl))
+		 (if (org-on-heading-p)
+                     (setq footnote-rpl
+                           (concat (org-export-latex-protect-string "\\protect")
+                                   footnote-rpl)))
 		 (insert footnote-rpl)))
 	     )))))
 

@@ -1,5 +1,8 @@
 2010-02-26  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-latex.el (org-export-latex-preprocess): Protect footnotes in
+	headings.
+
 	* org-id.el (org-id-find-id-file): Fix bug when there is no hash
 	table for the id locations.
 
