@@ -1537,6 +1537,13 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 (declare-function orgtbl-to-latex "org-table" (table params) t)
 (defun org-export-latex-tables (insert)
   "Convert tables to LaTeX and INSERT it."
+  ;; First, get the table.el tables
+  (goto-char (point-min))
+  (while (re-search-forward "^[ \t]*\\(\\+-[-+]*\\+\\)[ \t]*\n[ \t]*|" nil t)
+    (require 'table)
+    (org-export-latex-convert-table.el-table))
+
+  ;; And now the Org-mode tables
   (goto-char (point-min))
   (while (re-search-forward "^\\([ \t]*\\)|" nil t)
     (org-if-unprotected-at (1- (point))
@@ -1648,6 +1655,56 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
                             "\\end{longtable}"
                           (if floatp "\\end{table}"))))
                       "\n\n"))))))))
+
+(defun org-export-latex-convert-table.el-table ()
+  "Replace table.el table at point with LaTeX code."
+  (let (tbl caption label line floatp attr align rmlines)
+    (setq line (buffer-substring (point-at-bol) (point-at-eol))
+	  label (org-get-text-property-any 0 'org-label line)
+	  caption (org-get-text-property-any 0 'org-caption line)
+	  attr (org-get-text-property-any 0 'org-attributes line)
+	  align (and attr (stringp attr)
+		     (string-match "\\<align=\\([^ \t\n\r,]+\\)" attr)
+		     (match-string 1 attr))
+	  rmlines (and attr (stringp attr)
+		       (string-match "\\<rmlines\\>" attr))
+	  floatp (or label caption))
+    (and (get-buffer "*org-export-table*")
+	 (kill-buffer (get-buffer "*org-export-table*")))
+    (table-generate-source 'latex "*org-export-table*" "caption")
+    (setq tbl (with-current-buffer "*org-export-table*"
+		(buffer-string)))
+    (while (string-match "^%.*\n" tbl)
+      (setq tbl (replace-match "" t t tbl)))
+    ;; fix the hlines
+    (when rmlines
+      (let ((n 0) lines)
+	(setq lines (mapcar (lambda (x)
+			      (if (string-match "^\\\\hline$" x)
+				  (progn
+				    (setq n (1+ n))
+				    (if (= n 2) x nil))
+				x))
+			    (org-split-string tbl "\n")))
+	(setq tbl (mapconcat 'identity (delq nil lines) "\n"))))
+    (when (and align (string-match "\\\\begin{tabular}{.*}" tbl))
+      (setq tbl (replace-match (concat "\\begin{tabular}{" align "}")
+			       t t tbl)))      
+    (and (get-buffer "*org-export-table*")
+	 (kill-buffer (get-buffer "*org-export-table*")))
+    (beginning-of-line 0)
+    (while (looking-at "[ \t]*\\(|\\|\\+-\\)")
+      (delete-region (point) (1+ (point-at-eol))))
+    (when org-export-latex-tables-centered
+      (setq tbl (concat "\\begin{center}\n" tbl "\\end{center}")))
+    (when floatp
+      (setq tbl (concat "\\begin{table}\n"
+			(format "\\caption{%s%s}\n"
+				(if label (format "\\label{%s}" label) "")
+				(or caption ""))
+			tbl
+			"\n\\end{table}\n")))
+    (insert (org-export-latex-protect-string tbl))))
 
 (defun org-export-latex-fontify ()
   "Convert fontification to LaTeX."

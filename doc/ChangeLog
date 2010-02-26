@@ -2,6 +2,7 @@
 
 	* org.texi (The date/time prompt): Document that we accept dates
 	like month/day/year.
+	(Cooperation): Document the changes in table.el support.
 
 2010-02-25  Carsten Dominik  <carsten.dominik@gmail.com>
 

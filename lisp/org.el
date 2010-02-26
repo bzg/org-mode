@@ -5230,11 +5230,11 @@ in special contexts.
 
        ((org-at-table-p 'any)
 	;; Enter the table or move to the next field in the table
-	(or (org-table-recognize-table.el)
-	    (progn
-	      (if arg (org-table-edit-field t)
-		(org-table-justify-field-maybe)
-		(call-interactively 'org-table-next-field)))))
+	(if (org-at-table.el-p)
+	    (message "Use C-c ' to edit table.el tables")
+	  (if arg (org-table-edit-field t)
+	    (org-table-justify-field-maybe)
+	    (call-interactively 'org-table-next-field))))
 
        ((run-hook-with-args-until-success
 	 'org-tab-after-check-for-table-hook))
@@ -15908,6 +15908,8 @@ When in an #+include line, visit the include file.  Otherwise call
 `ffap' to visit the file at point."
   (interactive)
   (cond
+   ((org-at-table.el-p)
+    (org-edit-src-code))
    ((org-at-table-p)
     (call-interactively 'org-table-edit-formulas))
    ((save-excursion
@@ -15948,9 +15950,6 @@ This command does many different things, depending on context:
 
 - If the cursor is a the beginning of a dynamic block, update it.
 
-- If the cursor is inside a table created by the table.el package,
-  activate that table.
-
 - If the current buffer is a remember buffer, close note and file
   it.  A prefix argument of 1 files to the default location
   without further interaction.  A prefix argument of 2 files to
@@ -15985,10 +15984,7 @@ This command does many different things, depending on context:
       (call-interactively 'org-update-statistics-cookies))
      ((org-on-heading-p) (call-interactively 'org-set-tags))
      ((org-at-table.el-p)
-      (require 'table)
-      (beginning-of-line 1)
-      (re-search-forward "|" (save-excursion (end-of-line 2) (point)))
-      (call-interactively 'table-recognize-table))
+      (message "Use C-c ' to edit table.el tables"))
      ((org-at-table-p)
       (org-table-maybe-eval-formula)
       (if arg

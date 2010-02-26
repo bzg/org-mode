@@ -10857,9 +10857,6 @@ works even if the automatic table editor has been turned off.
 If the cursor is on a @code{#+TBLFM} line, re-apply the formulas to
 the entire table.
 @item
-If the cursor is inside a table created by the @file{table.el} package,
-activate that table.
-@item
 If the current buffer is a Remember buffer, close the note and file it.
 With a prefix argument, file it, without further interaction, to the
 default location.
@@ -11122,20 +11119,18 @@ the command @kbd{<} in the Speedbar frame.
 @cindex @file{table.el}
 @cindex Ota, Takaaki
 
-Complex ASCII tables with automatic line wrapping, column- and
-row-spanning, and alignment can be created using the Emacs table
-package by Takaaki Ota (@uref{http://sourceforge.net/projects/table},
-and also part of Emacs 22).
-When @key{TAB} or @kbd{C-c C-c} is pressed in such a table, Org mode
-will call @command{table-recognize-table} and move the cursor into the
-table.  Inside a table, the keymap of Org mode is inactive.  In order
-to execute Org mode-related commands, leave the table.
+Complex ASCII tables with automatic line wrapping, column- and row-spanning,
+and alignment can be created using the Emacs table package by Takaaki Ota
+(@uref{http://sourceforge.net/projects/table}, and also part of Emacs 22).
+Org-mode will recognize these tables and export them properly.  Because of
+interference with other Org-mode functionality, you unfortunately cannot edit
+these tables directly in the buffer.  Instead, you need to use the command
+@kbd{C-c '} to edit them, similar to source code snippets.
 
 @table @kbd
-@kindex C-c C-c
-@item C-c C-c
-Recognize @file{table.el} table.  Works when the cursor is in a
-table.el table.
+@kindex C-c '
+@item C-c '
+Edit a @file{table.el} table.  Works when the cursor is in a table.el table.
 @c
 @kindex C-c ~
 @item C-c ~
@@ -11145,7 +11140,7 @@ format.  See the documentation string of the command
 @code{org-convert-table} for the restrictions under which this is
 possible.
 @end table
-@file{table.el} is part of Emacs 22.
+@file{table.el} is part of Emacs since Emacs 22.
 @item @file{footnote.el} by Steven L. Baur
 @cindex @file{footnote.el}
 @cindex Baur, Steven L.

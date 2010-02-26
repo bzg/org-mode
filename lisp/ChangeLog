@@ -1,5 +1,20 @@
 2010-02-26  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-cycle): Print a message when in a table.el table.
+	(org-edit-special): Recognize the table.el context.
+	(org-ctrl-c-ctrl-c): Print a message when in a table.el table.
+
+	* org-src.el (org-at-table.el-p): Declare.
+	(org-edit-src-code): Handle a special case for table.el editing.
+	(org-edit-src-find-region-and-lang): Recognize the table.el
+	context.
+
+	* org-latex.el (org-export-latex-tables): Convert table.el
+	tables.
+	(org-export-latex-convert-table.el-table): New function.
+
+	* org-html.el (org-html-expand): Fix table.el export.
+
 	* org-latex.el (org-export-latex-preprocess): Protect footnotes in
 	headings.
 
