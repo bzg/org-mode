@@ -217,7 +217,9 @@ block."
 	 (dir (cdr (assoc :dir params)))
 	 (default-directory
 	   (or (and dir (if (string-match "/$" dir) dir (concat dir "/"))) default-directory))
-	 (call-process-region-original (symbol-function 'call-process-region))
+	 (call-process-region-original
+	  (if (boundp 'call-process-region-original) call-process-region-original
+	    (symbol-function 'call-process-region)))
          result)
     ;; (message "params=%S" params) ;; debugging
     (flet ((call-process-region (&rest args)
