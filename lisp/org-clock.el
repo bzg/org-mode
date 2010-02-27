@@ -240,6 +240,11 @@ string as argument."
 	  (const :tag "Always" t)
 	  (const :tag "When no clock is running" when-no-clock-is-running)))
 
+(defcustom org-clock-report-include-clocking-task nil
+  "When non-nil, include the current clocking task time in clock reports."
+  :group 'org-clock
+  :type 'boolean)
+
 (defvar org-clock-in-prepare-hook nil
   "Hook run when preparing the clock.
 This hook is run before anything happens to the task that
@@ -1341,6 +1346,13 @@ TSTART and TEND can mark a time range to be considered."
 	  (setq t1 (+ t1 (string-to-number (match-string 5))
 		      (* 60 (string-to-number (match-string 4))))))
 	 (t ;; A headline
+	  ;; Add the currently clocking item time to the total
+	  (when (and org-clock-report-include-clocking-task
+		     (equal (org-clocking-buffer) (current-buffer))
+		     (equal (marker-position org-clock-hd-marker) (point)))
+	      (let ((time (floor (- (org-float-time)
+				    (org-float-time org-clock-start-time)) 60)))
+		(setq t1 (+ t1 time))))
 	  (setq level (- (match-end 1) (match-beginning 1)))
 	  (when (or (> t1 0) (> (aref ltimes level) 0))
 	    (loop for l from 0 to level do

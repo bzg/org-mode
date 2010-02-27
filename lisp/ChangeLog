@@ -1,3 +1,9 @@
+2010-02-27  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-clock.el (org-clock-report-include-clocking-task): New
+	option.
+	(org-clock-sum): Add the current clocking task.
+
 2010-02-26  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-cycle): Print a message when in a table.el table.
