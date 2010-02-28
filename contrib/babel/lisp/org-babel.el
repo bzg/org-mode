@@ -79,6 +79,12 @@ then run `org-babel-pop-to-session'."
 
 (add-hook 'org-metadown-hook 'org-babel-pop-to-session-maybe)
 
+(defconst org-babel-header-arg-names
+  '(cache cmdline colnames dir exports file noweb results session tangle var)
+  "Common header arguments used by org-babel.  Note that
+individual languages may define their own language specific
+header arguments as well.")
+
 (defvar org-babel-default-header-args
   '((:session . "none") (:results . "replace") (:exports . "code") (:cache . "no") (:noweb . "no"))
   "Default arguments to use when evaluating a source block.")
@@ -208,25 +214,33 @@ block."
 			    ((member "value" result-params) 'value)
 			    (t 'value)))
          (cmd (intern (concat "org-babel-execute:" lang)))
+	 (dir (cdr (assoc :dir params)))
+	 (default-directory
+	   (or (and dir (if (string-match "/$" dir) dir (concat dir "/"))) default-directory))
+	 (call-process-region-original
+	  (if (boundp 'call-process-region-original) call-process-region-original
+	    (symbol-function 'call-process-region)))
          result)
     ;; (message "params=%S" params) ;; debugging
-    (unless (member lang org-babel-interpreters)
-      (error "Language is not in `org-babel-interpreters': %s" lang))
-    (if (and (not arg) new-hash (equal new-hash old-hash))
-        (save-excursion ;; return cached result
-          (goto-char (org-babel-where-is-src-block-result nil info))
-          (move-end-of-line 1) (forward-char 1)
-          (setq result (org-babel-read-result))
-          (message (replace-regexp-in-string "%" "%%" (format "%S" result))) result)
-      (setq result (funcall cmd body params))
-      (if (eq result-type 'value)
-          (setq result (if (and (or (member "vector" result-params)
-                                    (member "table" result-params))
-                                (not (listp result)))
-                           (list (list result))
-                         result)))
-      (org-babel-insert-result result result-params info new-hash)
-      result)))
+    (flet ((call-process-region (&rest args)
+				(apply 'org-babel-tramp-handle-call-process-region args)))
+      (unless (member lang org-babel-interpreters)
+	(error "Language is not in `org-babel-interpreters': %s" lang))
+      (if (and (not arg) new-hash (equal new-hash old-hash))
+	  (save-excursion ;; return cached result
+	    (goto-char (org-babel-where-is-src-block-result nil info))
+	    (move-end-of-line 1) (forward-char 1)
+	    (setq result (org-babel-read-result))
+	    (message (replace-regexp-in-string "%" "%%" (format "%S" result))) result)
+	(setq result (funcall cmd body params))
+	(if (eq result-type 'value)
+	    (setq result (if (and (or (member "vector" result-params)
+				      (member "table" result-params))
+				  (not (listp result)))
+			     (list (list result))
+			   result)))
+	(org-babel-insert-result result result-params info new-hash)
+	result))))
 
 (defun org-babel-load-in-session (&optional arg info)
   "Load the body of the current source-code block.  Evaluate the
@@ -507,8 +521,7 @@ may be specified in the properties of the current outline entry."
                (when val
                  ;; (message "prop %s=%s" header-arg val) ;; debugging
                  (cons (intern (concat ":" header-arg)) val))))
-           '("cache" "cmdline" "exports" "file" "noweb" "results"
-             "session" "tangle" "var")))))
+           (mapcar 'symbol-name org-babel-header-arg-names)))))
 
 (defun org-babel-parse-src-block-match ()
   (let* ((lang (org-babel-clean-text-properties (match-string 1)))
@@ -1075,6 +1088,30 @@ overwritten by specifying a regexp as a second argument."
   "Like `org-babel-chomp' only it runs on both the front and back of the string"
   (org-babel-chomp (org-babel-reverse-string
                     (org-babel-chomp (org-babel-reverse-string string) regexp)) regexp))
+
+(defun org-babel-tramp-handle-call-process-region
+  (start end program &optional delete buffer display &rest args)
+  "Use tramp to handle call-process-region.
+Fixes a bug in `tramp-handle-call-process-region'."
+  (if (and (featurep 'tramp) (file-remote-p default-directory))
+      (let ((tmpfile (tramp-compat-make-temp-file "")))
+	(write-region start end tmpfile)
+	(when delete (delete-region start end))
+	(unwind-protect
+	    ;;	(apply 'call-process program tmpfile buffer display args) ;; bug in tramp
+	    (apply 'process-file program tmpfile buffer display args)
+	  (delete-file tmpfile)))
+    ;; call-process-region-original is the original emacs definition. It
+    ;; is in scope from the let binding in org-babel-execute-src-block
+    (apply call-process-region-original start end program delete buffer display args)))
+
+(defun org-babel-maybe-remote-file (file)
+  (if (file-remote-p default-directory)
+      (let* ((vec (tramp-dissect-file-name default-directory))
+             (user (tramp-file-name-user vec))
+             (host (tramp-file-name-host vec)))
+        (concat "/" user (when user "@") host ":" file))
+    file))
 
 (provide 'org-babel)
 ;;; org-babel.el ends here

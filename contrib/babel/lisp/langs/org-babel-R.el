@@ -39,9 +39,10 @@
   "Execute a block of R code with org-babel.  This function is
 called by `org-babel-execute-src-block'."
   (message "executing R source code block...")
-  (save-window-excursion
+  (save-excursion
     (let* ((processed-params (org-babel-process-params params))
            (result-type (fourth processed-params))
+	   (ess-ask-for-ess-directory (not (cdr (assoc :dir params))))
            (session (org-babel-R-initiate-session (first processed-params)))
            (vars (second processed-params))
 	   (column-names-p (and (cdr (assoc :colnames params))
@@ -86,7 +87,7 @@ called by `org-babel-execute-src-block'."
       (let ((transition-file (make-temp-file "org-babel-R-import")))
         ;; ensure VALUE has an orgtbl structure (depth of at least 2)
         (unless (listp (car value)) (setq value (list value)))
-        (with-temp-file transition-file
+        (with-temp-file (org-babel-maybe-remote-file transition-file)
           (insert (orgtbl-to-tsv value '(:fmt org-babel-R-quote-tsv-field)))
           (insert "\n"))
         (format "%s <- read.table(\"%s\", header=%s, sep=\"\\t\", as.is=TRUE)"
@@ -141,21 +142,21 @@ BODY, if RESULT-TYPE equals 'value then return the value of the
 last statement in BODY, as elisp."
   (if (not session)
       ;; external process evaluation
-      (let ((in-tmp-file (make-temp-file "R-in-functional-results"))
-            (out-tmp-file (make-temp-file "R-out-functional-results")))
+      (let ((tmp-file (make-temp-file "R-out-functional-results")))
         (case result-type
           (output
-           (with-temp-file in-tmp-file (insert body))
-           (shell-command-to-string (format "R --slave --no-save < '%s' > '%s'"
-					    in-tmp-file out-tmp-file))
-	   (with-temp-buffer (insert-file-contents out-tmp-file) (buffer-string)))
+	   (with-temp-buffer
+             (insert body)
+             (shell-command-on-region (point-min) (point-max) "R --slave --no-save" 'replace)
+             (buffer-string)))
           (value
-           (with-temp-file in-tmp-file
+	   (with-temp-buffer
              (insert (format org-babel-R-wrapper-method
-			     body out-tmp-file (if column-names-p "TRUE" "FALSE"))))
-           (shell-command (format "R --no-save < '%s'" in-tmp-file))
+			     body tmp-file (if column-names-p "TRUE" "FALSE")))
+	     (shell-command-on-region (point-min) (point-max) "R --no-save" 'replace))
 	   (org-babel-R-process-value-result
-	    (org-babel-import-elisp-from-file out-tmp-file) column-names-p))))
+	    (org-babel-import-elisp-from-file (org-babel-maybe-remote-file tmp-file))
+	    column-names-p))))
     ;; comint session evaluation
     (org-babel-comint-in-buffer session
       (let* ((tmp-file (make-temp-file "org-babel-R"))
@@ -178,7 +179,9 @@ last statement in BODY, as elisp."
 	     broke results)
         (case result-type
           (value (org-babel-R-process-value-result
-		  (org-babel-import-elisp-from-file tmp-file) column-names-p))
+		  (org-babel-import-elisp-from-file
+		   (org-babel-maybe-remote-file tmp-file))
+		  column-names-p))
           (output
 	   (flet ((extractor
 		   (el)
