@@ -216,7 +216,7 @@ block."
          (cmd (intern (concat "org-babel-execute:" lang)))
 	 (dir (cdr (assoc :dir params)))
 	 (default-directory
-	   (or (and dir (if (string-match "/$" dir) dir (concat dir "/"))) default-directory))
+	   (or (and dir (file-name-as-directory dir)) default-directory))
 	 (call-process-region-original
 	  (if (boundp 'call-process-region-original) call-process-region-original
 	    (symbol-function 'call-process-region)))
