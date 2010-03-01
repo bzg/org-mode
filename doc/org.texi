@@ -10156,10 +10156,11 @@ list of functions, which will all be called in turn.
 @tab Non-nil means, publish htmlized source.
 @end multitable
 
-The function must accept two arguments: a property list containing at least a
-@code{:publishing-directory} property, and the name of the file to be
-published.  It should take the specified file, make the necessary
-transformation (if any) and place the result into the destination folder.
+The function must accept three arguments: a property list containing at least
+a @code{:publishing-directory} property, the name of the file to be
+published, and the path to the publishing directory of the output file.  It
+should take the specified file, make the necessary transformation (if any)
+and place the result into the destination folder.
 
 @node Publishing options, Publishing links, Publishing action, Configuration
 @subsection Options for the HTML/La@TeX{} exporters
