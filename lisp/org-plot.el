@@ -251,8 +251,7 @@ manner suitable for prepending to a user-specified script."
 		       (cons
 			(format plot-str data-file
 				(or (and ind (> ind 0)
-                                         (not (or (equal 'histograms (plist-get params :with))
-                                                  (equal 'hist (plist-get params :with))))
+                                         (not text-ind)
                                          (format "%d:" ind)) "")
 				(+ 1 col)
 				(if text-ind (format ":xticlabel(%d)" ind) "")
