@@ -830,10 +830,17 @@ relies on `org-babel-insert-result'."
       (point))))
 
 (defun org-babel-result-to-file (result)
-  "Return an `org-mode' link with the path being the value or
-RESULT, and the display being the `file-name-nondirectory' if
-non-nil."
-  (concat "[[file:" result "]]"))
+  "Convert RESULT into an `org-mode' link.  If the
+`default-directory' is different from the containing file's
+directory then expand relative links."
+  (format
+   "[[file:%s]]"
+   (if (and default-directory
+            buffer-file-name
+            (not (string= (expand-file-name default-directory)
+                          (expand-file-name (file-name-directory buffer-file-name)))))
+       (expand-file-name result default-directory)
+     result)))
 
 (defun org-babel-examplize-region (beg end &optional results-switches)
   "Comment out region using the ': ' org example quote."
