@@ -10092,10 +10092,12 @@ the Emacs @file{tramp} package.  Or you can publish to a local directory and
 use external tools to upload your website (@pxref{Uploading files}).
 @item @code{:preparation-function}
 @tab Function called before starting the publishing process, for example, to
-run @code{make} for updating files to be published.
+run @code{make} for updating files to be published.  The project property
+list is scoped into this call as the variable @code{project-plist}.
 @item @code{:completion-function}
 @tab Function called after finishing the publishing process, for example, to
-change permissions of the resulting files.
+change permissions of the resulting files.  The project property list is
+scoped into this call as the variable @code{project-plist}.
 @end multitable
 @noindent
 
