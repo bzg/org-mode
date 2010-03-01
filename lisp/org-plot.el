@@ -301,7 +301,7 @@ line directly before or after the table."
 	(setf table (delq 'hline (cdr table)))) ;; clean non-data from table
       ;; collect options
       (save-excursion (while (and (equal 0 (forward-line -1))
-				  (looking-at "#\\+"))
+				  (looking-at "[[:space:]]*#\\+"))
 			(setf params (org-plot/collect-options params))))
       ;; dump table to datafile (very different for grid)
       (case (plist-get params :plot-type)
