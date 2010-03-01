@@ -434,7 +434,9 @@ the whole buffer."
 	  (recursive
 	   (or (not org-hierarchical-checkbox-statistics)
 	       (string-match "\\<recursive\\>"
-			     (or (org-entry-get nil "COOKIE_DATA") ""))))
+			     (or (ignore-errors
+				   (org-entry-get nil "COOKIE_DATA"))
+				 ""))))
 	  (cstat 0)
 	  )
      (when all

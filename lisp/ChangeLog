@@ -1,3 +1,8 @@
+2010-03-01  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-list.el (org-toggle-checkbox): No errors when updating
+	checkbox count fails because there is no heading.
+
 2010-02-27  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-clock.el (org-clock-report-include-clocking-task): New
