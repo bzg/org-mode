@@ -809,7 +809,8 @@ lang=\"%s\" xml:lang=\"%s\">
 	    (push "<ul>\n<li>" thetoc)
 	    (setq lines
 		  (mapcar '(lambda (line)
-		    (if (string-match org-todo-line-regexp line)
+		    (if (and (string-match org-todo-line-regexp line)
+			     (not (get-text-property 0 'org-protected line)))
 			;; This is a headline
 			(progn
 			  (setq have-headings t)

@@ -1,5 +1,8 @@
 2010-03-03  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-html.el (org-export-as-html): Do not allow protected lines
+	into the table of contents.
+
 	* org-latex.el (org-export-latex-special-chars): Find subsequent
 	occurrences of special characters.
 	(org-export-latex-tables): Do not convert table-like stuff that is
