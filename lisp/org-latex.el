@@ -1541,8 +1541,9 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
   ;; First, get the table.el tables
   (goto-char (point-min))
   (while (re-search-forward "^[ \t]*\\(\\+-[-+]*\\+\\)[ \t]*\n[ \t]*|" nil t)
-    (require 'table)
-    (org-export-latex-convert-table.el-table))
+    (org-if-unprotected
+     (require 'table)
+     (org-export-latex-convert-table.el-table)))
 
   ;; And now the Org-mode tables
   (goto-char (point-min))

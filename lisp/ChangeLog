@@ -2,6 +2,8 @@
 
 	* org-latex.el (org-export-latex-special-chars): Find subsequent
 	occurrences of special characters.
+	(org-export-latex-tables): Do not convert table-like stuff that is
+	protected.
 
 2010-03-01  Carsten Dominik  <carsten.dominik@gmail.com>
 
