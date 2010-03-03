@@ -1388,7 +1388,8 @@ See the `org-export-latex.el' code for a complete conversion table."
 		     (if (equal (match-string 1) "\\")
 			 (replace-match (match-string 2) t t)
 		       (replace-match (concat (match-string 1) "\\"
-					      (match-string 2)) t t)))
+					      (match-string 2)) t t)
+		       (backward-char 1)))
 		    ((equal (match-string 2) "...")
 		     (replace-match
 		      (concat (match-string 1)
