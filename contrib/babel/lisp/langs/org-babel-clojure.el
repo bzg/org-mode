@@ -236,7 +236,7 @@ or nil if \"none\" is specified"
 	   (shell-command-on-region (point-min) (point-max)
 				    (mapconcat #'identity (org-babel-clojure-babel-clojure-cmd) " ")))
          (org-babel-clojure-table-or-string
-          (with-temp-buffer (insert-file-contents tmp-results-file) (buffer-string))))))))
+          (with-temp-buffer (insert-file-contents (org-babel-maybe-remote-file tmp-results-file)) (buffer-string))))))))
 
 (defun org-babel-clojure-evaluate-session (buffer body &optional result-type)
   "Evaluate the body in the context of a clojure session"
