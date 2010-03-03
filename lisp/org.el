@@ -2145,8 +2145,8 @@ set."
   :type 'boolean)
 
 (defcustom org-log-states-order-reversed t
-  "Non-nil means the latest state change note will be directly after heading.
-When nil, the notes will be orderer according to time."
+  "Non-nil means the latest state note will be directly after heading.
+When nil, the state change notes will be ordered according to time."
   :group 'org-todo
   :group 'org-progress
   :type 'boolean)
