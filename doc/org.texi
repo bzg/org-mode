@@ -2129,8 +2129,11 @@ compact.  The default settings can be configured using the variable
 @code{org-calc-default-modes}.
 
 @example
-p20           @r{switch the internal precision to 20 digits}
-n3 s3 e2 f4   @r{normal, scientific, engineering, or fixed display format}
+p20           @r{set the internal Calc calculation precision to 20 digits}
+n3 s3 e2 f4   @r{Normal, scientific, engineering, or fixed}
+              @r{format of the result of Calc passed back to Org.}
+              @r{Calc formatting is unlimited in precision as}
+              @r{long as the Calc calculation precision is greater.}
 D R           @r{angle modes: degrees, radians}
 F S           @r{fraction and symbolic modes}
 N             @r{interpret all fields as numbers, use 0 for non-numbers}
@@ -2140,8 +2143,16 @@ L             @r{literal}
 @end example
 
 @noindent
-In addition, you may provide a @code{printf} format specifier to
-reformat the final result.  A few examples:
+Unless you use large integer numbers or high-precision-calculation
+and -display for floating point numbers you may alternatively provide a
+@code{printf} format specifier to reformat the Calc result after it has been
+passed back to Org instead of letting Calc already do the
+formatting@footnote{The @code{printf} reformatting is limited in precision
+because the value passed to it is converted into an @code{integer} or
+@code{double}.  The @code{integer} is limited in size by truncating the
+signed value to 32 bits.  The @code{double} is limited in precision to 64
+bits overall which leaves approximately 16 significant decimal digits.}.
+A few examples:
 
 @example
 $1+$2                @r{Sum of first and second field}
