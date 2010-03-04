@@ -115,10 +115,7 @@ last statement in BODY, as elisp."
 		 tmp-file))
                ;; (message "buffer=%s" (buffer-string)) ;; debugging
                (shell-command-on-region (point-min) (point-max) "perl"))
-             (let ((raw (with-temp-buffer (insert-file-contents tmp-file) (buffer-string))))
-               (if (or (member "code" result-params) (member "pp" result-params))
-                   raw
-                 (org-babel-import-elisp-from-file tmp-file)))))))
+	     (org-babel-import-elisp-from-file (org-babel-maybe-remote-file tmp-file))))))
     ;; comint session evaluation
     (error "Sessions are not supported for Perl.")))
 
