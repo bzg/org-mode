@@ -494,7 +494,13 @@ This funcion will run in the final LaTeX document."
 	      (setq opts (org-split-string opts ","))
 	      (add-to-list 'opts "fragile")
 	      (insert "[" (mapconcat 'identity opts ",") "]"))))))))
-  
+
+(defcustom org-beamer-outline-frame-title "Outline"
+  "Default title of a frame containing an outline."
+  :group 'org-beamer
+  :type '(string :tag "Outline frame title")
+)
+
 (defun org-beamer-fix-toc ()
   "Fix the table of contents by removing the vspace line."
   (when org-beamer-export-is-beamer-p
@@ -503,7 +509,9 @@ This funcion will run in the final LaTeX document."
       (when (re-search-forward "\\(\\\\setcounter{tocdepth.*\n\\\\tableofcontents.*\n\\)\\(\\\\vspace\\*.*\\)"
 			       nil t)
 	(replace-match
-	 "\\\\begin{frame}\n\\\\frametitle{Outline}\n\\1\\\\end{frame}"
+	 (concat "\\\\begin{frame}\n\\\\frametitle{"
+		 org-beamer-outline-frame-title
+		 "}\n\\1\\\\end{frame}")
 	 t nil)))))
 
 (defun org-beamer-property-changed (property value)
