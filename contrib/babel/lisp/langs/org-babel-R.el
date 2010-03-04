@@ -147,13 +147,13 @@ last statement in BODY, as elisp."
           (output
 	   (with-temp-buffer
              (insert body)
-             (shell-command-on-region (point-min) (point-max) "R --slave --no-save" 'replace)
+             (org-babel-shell-command-on-region (point-min) (point-max) "R --slave --no-save" 'current-buffer 'replace)
              (buffer-string)))
           (value
 	   (with-temp-buffer
              (insert (format org-babel-R-wrapper-method
 			     body tmp-file (if column-names-p "TRUE" "FALSE")))
-	     (shell-command-on-region (point-min) (point-max) "R --no-save" 'replace))
+	     (org-babel-shell-command-on-region (point-min) (point-max) "R --no-save"))
 	   (org-babel-R-process-value-result
 	    (org-babel-import-elisp-from-file (org-babel-maybe-remote-file tmp-file))
 	    column-names-p))))

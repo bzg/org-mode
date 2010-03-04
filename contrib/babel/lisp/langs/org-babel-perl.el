@@ -98,7 +98,7 @@ last statement in BODY, as elisp."
            (with-temp-buffer
              (insert body)
              ;; (message "buffer=%s" (buffer-string)) ;; debugging
-             (shell-command-on-region (point-min) (point-max) "perl" 'replace)
+             (org-babel-shell-command-on-region (point-min) (point-max) "perl" 'current-buffer 'replace)
              (buffer-string)))
           (value
            (let ((tmp-file (make-temp-file "perl-functional-results")))
@@ -114,7 +114,7 @@ last statement in BODY, as elisp."
 		   (org-remove-indentation (org-babel-trim body)) "[\r\n]") "\n")
 		 tmp-file))
                ;; (message "buffer=%s" (buffer-string)) ;; debugging
-               (shell-command-on-region (point-min) (point-max) "perl"))
+               (org-babel-shell-command-on-region (point-min) (point-max) "perl"))
 	     (org-babel-import-elisp-from-file (org-babel-maybe-remote-file tmp-file))))))
     ;; comint session evaluation
     (error "Sessions are not supported for Perl.")))

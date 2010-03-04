@@ -165,7 +165,7 @@ last statement in BODY, as elisp."
            (with-temp-buffer
              (insert body)
              ;; (message "buffer=%s" (buffer-string)) ;; debugging
-             (shell-command-on-region (point-min) (point-max) "ruby" 'replace)
+             (org-babel-shell-command-on-region (point-min) (point-max) "ruby" 'current-buffer 'replace)
              (buffer-string)))
           (value
            (let ((tmp-file (make-temp-file "ruby-functional-results")))
@@ -174,7 +174,7 @@ last statement in BODY, as elisp."
                                    org-babel-ruby-pp-wrapper-method
                                  org-babel-ruby-wrapper-method) body tmp-file))
                ;; (message "buffer=%s" (buffer-string)) ;; debugging
-               (shell-command-on-region (point-min) (point-max) "ruby"))
+               (org-babel-shell-command-on-region (point-min) (point-max) "ruby"))
              (let ((raw (with-temp-buffer
 			  (insert-file-contents (org-babel-maybe-remote-file tmp-file))
 			  (buffer-string))))

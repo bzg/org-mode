@@ -161,7 +161,7 @@ last statement in BODY, as elisp."
            (with-temp-buffer
              (insert body)
              ;; (message "buffer=%s" (buffer-string)) ;; debugging
-             (shell-command-on-region (point-min) (point-max) "python" 'replace)
+             (org-babel-shell-command-on-region (point-min) (point-max) "python" 'current-buffer 'replace)
              (buffer-string)))
           (value
            (let ((tmp-file (make-temp-file "python-functional-results")))
@@ -177,7 +177,7 @@ last statement in BODY, as elisp."
 		   (org-remove-indentation (org-babel-trim body)) "[\r\n]") "\n")
 		 tmp-file))
                ;; (message "buffer=%s" (buffer-string)) ;; debugging
-               (shell-command-on-region (point-min) (point-max) "python"))
+               (org-babel-shell-command-on-region (point-min) (point-max) "python"))
              (let ((raw (with-temp-buffer
 			  (insert-file-contents (org-babel-maybe-remote-file tmp-file))
 			  (buffer-string))))
