@@ -99,6 +99,7 @@
 \\usepackage{float}
 \\usepackage{wrapfig}
 \\usepackage{soul}
+\\usepackage{latexsym}
 \\usepackage{amssymb}
 \\usepackage{hyperref}"
      ("\\section{%s}" . "\\section*{%s}")
@@ -115,6 +116,7 @@
 \\usepackage{float}
 \\usepackage{wrapfig}
 \\usepackage{soul}
+\\usepackage{latexsym}
 \\usepackage{amssymb}
 \\usepackage{hyperref}"
      ("\\part{%s}" . "\\part*{%s}")
@@ -131,6 +133,7 @@
 \\usepackage{float}
 \\usepackage{wrapfig}
 \\usepackage{soul}
+\\usepackage{latexsym}
 \\usepackage{amssymb}
 \\usepackage{hyperref}"
      ("\\part{%s}" . "\\part*{%s}")
@@ -147,6 +150,7 @@
 \\usepackage{float}
 \\usepackage{wrapfig}
 \\usepackage{soul}
+\\usepackage{latexsym}
 \\usepackage{amssymb}
 \\usepackage{hyperref}"
      org-beamer-sectioning
