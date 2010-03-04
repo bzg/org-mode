@@ -426,8 +426,8 @@ PUB-DIR is the publishing directory."
 		   (buffer-live-p export-buf-or-file))
 	  (set-buffer export-buf-or-file)
 	  ;; run hooks after export and save export
-	  (and (run-hooks 'org-publish-after-export-hook)
-	       (if (buffer-modified-p) (save-buffer)))
+	  (progn (run-hooks 'org-publish-after-export-hook)
+		 (if (buffer-modified-p) (save-buffer)))
 	  (kill-buffer export-buf-or-file))
 	;; maybe restore buffer's content
 	(set-buffer init-buf)
