@@ -1125,7 +1125,7 @@ Fixes a bug in `tramp-handle-call-process-region'."
 				      error-buffer display-error-buffer)
   "Execute string COMMAND in inferior shell with region as input.
 
-A copy of the emacs 23.1.1 function.
+Fixes bugs in the emacs 23.1.1 version of `shell-command-on-region'
 
 Normally display output (if any) in temp buffer `*Shell Command Output*';
 Prefix arg means replace the region with it.  Return the exit code of
@@ -1209,7 +1209,7 @@ specifies the value of ERROR-BUFFER."
 	  (setq exit-status
 		(call-process-region start end shell-file-name t
 				     (if error-file
-					 (list t error-file)
+					 (list output-buffer error-file)
 				       t)
 				     nil shell-command-switch command))
 	  ;; It is rude to delete a buffer which the command is not using.
