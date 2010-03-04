@@ -501,6 +501,14 @@ This funcion will run in the final LaTeX document."
   :type '(string :tag "Outline frame title")
 )
 
+(defcustom org-beamer-outline-frame-options nil
+  "Outline frame options appended after \\begin{frame}.  You might
+want to put e.g. [allowframebreaks=0.9] here.  Remember to include
+square brackets."
+  :group 'org-beamer
+  :type '(string :tag "Outline frame options")
+)
+
 (defun org-beamer-fix-toc ()
   "Fix the table of contents by removing the vspace line."
   (when org-beamer-export-is-beamer-p
@@ -509,7 +517,8 @@ This funcion will run in the final LaTeX document."
       (when (re-search-forward "\\(\\\\setcounter{tocdepth.*\n\\\\tableofcontents.*\n\\)\\(\\\\vspace\\*.*\\)"
 			       nil t)
 	(replace-match
-	 (concat "\\\\begin{frame}\n\\\\frametitle{"
+	 (concat "\\\\begin{frame}" org-beamer-outline-frame-options
+		 "\n\\\\frametitle{"
 		 org-beamer-outline-frame-title
 		 "}\n\\1\\\\end{frame}")
 	 t nil)))))
