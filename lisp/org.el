@@ -7950,12 +7950,14 @@ This is the list that is used before handing over to the browser.")
       (url-unhex-string text)
     (setq table (or table org-link-escape-chars))
     (when text
-      (let ((re (mapconcat (lambda (x) (regexp-quote (cdr x)))
+      (let ((case-fold-search t)
+	    (re (mapconcat (lambda (x) (regexp-quote (downcase (cdr x))))
 			   table "\\|")))
 	(while (string-match re text)
 	  (setq text
 		(replace-match
-		 (char-to-string (car (rassoc (match-string 0 text) table)))
+		 (char-to-string (car (rassoc (upcase (match-string 0 text))
+					      table)))
 		 t t text)))
 	text))))
 

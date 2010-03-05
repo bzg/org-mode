@@ -1,3 +1,7 @@
+2010-03-05  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-link-unescape): Solve issue with lower-case escapes.
+
 2010-03-04  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-latex.el (org-export-latex-classes): Add
