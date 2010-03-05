@@ -1,3 +1,7 @@
+2010-03-05  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* pdflayout.sty: New file.
+
 2010-03-01  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Publishing action): Correct the documentation for the

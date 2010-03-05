@@ -149,9 +149,6 @@ doc: doc/org.html doc/org.pdf doc/orgcard.pdf doc/orgcard_letter.pdf
 p:
 	${MAKE} pdf && open doc/org.pdf
 
-c:
-	${MAKE} card && gv doc/orgcard.ps
-
 install-lisp: $(LISPFILES) $(ELCFILES)
 	if [ ! -d $(lispdir) ]; then $(MKDIR) $(lispdir); else true; fi ;
 	$(CP) $(LISPFILES) $(lispdir)
@@ -192,24 +189,15 @@ doc/org.html: doc/org.texi
 	(cd doc; $(TEXI2HTML) --no-split -o org.html org.texi)
 	UTILITIES/manfull.pl doc/org.html
 
-doc/orgcard.dvi: doc/orgcard.tex
-	(cd doc; tex orgcard.tex)
+doc/orgcard.pdf: doc/orgcard.tex
+	(cd doc; pdftex orgcard.tex)
 
-doc/orgcard.pdf: doc/orgcard.dvi
-	dvips -q -f -t landscape doc/orgcard.dvi | gs -q -dNOPAUSE -dBATCH -sDEVICE=pdfwrite -sOutputFile=doc/orgcard.pdf -c .setpdfwrite -
+doc/orgcard_letter.tex: doc/orgcard.tex
+	perl -pe 's/\\pdflayout=\(0l\)/\\pdflayout=(1l)/' \
+                   doc/orgcard.tex > doc/orgcard_letter.tex
 
-doc/orgcard.ps: doc/orgcard.dvi
-	dvips -t landscape -o doc/orgcard.ps doc/orgcard.dvi 
-
-doc/orgcard_letter.dvi: doc/orgcard.tex
-	perl -pe 's/letterpaper=0/letterpaper=1/' doc/orgcard.tex > doc/orgcard_letter.tex
-	(cd doc; tex orgcard_letter.tex)
-
-doc/orgcard_letter.pdf: doc/orgcard_letter.dvi
-	dvips -q -f -t landscape doc/orgcard_letter.dvi | gs -q -dNOPAUSE -dBATCH -sDEVICE=pdfwrite -sOutputFile=doc/orgcard_letter.pdf -c .setpdfwrite -
-
-doc/orgcard_letter.ps: doc/orgcard_letter.dvi
-	dvips -t landscape -o doc/orgcard_letter.ps doc/orgcard_letter.dvi 
+doc/orgcard_letter.pdf: doc/orgcard_letter.tex
+	(cd doc; pdftex orgcard_letter.tex)
 
 # Below here are special targets for maintenance only
 
@@ -228,7 +216,7 @@ info:	doc/org
 
 pdf:	doc/org.pdf
 
-card:	doc/orgcard.pdf doc/orgcard.ps doc/orgcard_letter.pdf doc/orgcard_letter.ps
+card:	doc/orgcard.pdf doc/orgcard_letter.pdf
 
 distfile:
 	@if [ "X$(TAG)" = "X" ]; then echo "*** No tag ***"; exit 1; fi
@@ -288,7 +276,7 @@ cleancontrib:
 cleanelc:
 	rm -f $(ELCFILES)
 cleandoc:
-	(cd doc; rm -f org.pdf org org.html orgcard.pdf orgcard.ps)
+	(cd doc; rm -f org.pdf org org.html orgcard.pdf)
 	(cd doc; rm -f *.aux *.cp *.cps *.dvi *.fn *.fns *.ky *.kys *.pg *.pgs)
 	(cd doc; rm -f *.toc *.tp *.tps *.vr *.vrs *.log *.html *.ps)
 	(cd doc; rm -f orgcard_letter.tex orgcard_letter.pdf)
