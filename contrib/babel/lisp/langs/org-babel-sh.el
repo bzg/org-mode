@@ -133,7 +133,7 @@ last statement in BODY."
         (with-temp-buffer
           (insert body)
           ;; (message "buffer=%s" (buffer-string)) ;; debugging
-          (shell-command-on-region (point-min) (point-max) org-babel-sh-command 'replace)
+          (org-babel-shell-command-on-region (point-min) (point-max) org-babel-sh-command 'current-buffer 'replace)
 	  (case result-type
 	    (output (buffer-string))
 	    (value ;; TODO: figure out how to return non-output values from shell scripts

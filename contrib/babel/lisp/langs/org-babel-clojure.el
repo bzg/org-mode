@@ -219,24 +219,27 @@ or nil if \"none\" is specified"
 
 (defun org-babel-clojure-evaluate-external-process (buffer body &optional result-type)
   "Evaluate the body in an external process."
-  (save-window-excursion
-    (case result-type
-      (output
-       (with-temp-buffer
-         (insert body)
-         (shell-command-on-region
-          (point-min) (point-max)
-          (format "%s - " (mapconcat #'identity (org-babel-clojure-babel-clojure-cmd) " "))
-          'replace)
-         (buffer-string)))
-      (value
-       (let ((tmp-results-file (make-temp-file "clojure_babel_results_")))
-         (with-temp-buffer
-           (insert (format org-babel-clojure-wrapper-method body tmp-results-file tmp-results-file))
-	   (shell-command-on-region (point-min) (point-max)
-				    (mapconcat #'identity (org-babel-clojure-babel-clojure-cmd) " ")))
-         (org-babel-clojure-table-or-string
-          (with-temp-buffer (insert-file-contents (org-babel-maybe-remote-file tmp-results-file)) (buffer-string))))))))
+  (save-excursion
+    (let ((cmd (format "%s -" (mapconcat #'identity (org-babel-clojure-babel-clojure-cmd) " "))))
+      (case result-type
+	(output
+	 (with-temp-buffer
+	   (insert body)
+	   (org-babel-shell-command-on-region cmd (point-min) (point-max) 'current-buffer 'replace)
+	   (buffer-string)))
+	(value
+	 (let* ((tmp-file (make-temp-file "org-babel-clojure-results-")) exit-code
+		(stderr
+		 (with-temp-buffer
+		   (insert
+		    (format org-babel-clojure-wrapper-method body tmp-file tmp-file))
+		   (setq exit-code
+			 (org-babel-shell-command-on-region (point-min) (point-max) cmd nil 'replace (current-buffer)))
+		   (buffer-string))))
+	   (if (> exit-code 0) (org-babel-error-notify exit-code stderr))
+	   (org-babel-clojure-table-or-string
+	    (with-temp-buffer
+	      (insert-file-contents (org-babel-maybe-remote-file tmp-file)) (buffer-string)))))))))
 
 (defun org-babel-clojure-evaluate-session (buffer body &optional result-type)
   "Evaluate the body in the context of a clojure session"

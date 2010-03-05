@@ -142,18 +142,22 @@ BODY, if RESULT-TYPE equals 'value then return the value of the
 last statement in BODY, as elisp."
   (if (not session)
       ;; external process evaluation
-      (let ((tmp-file (make-temp-file "R-out-functional-results")))
-        (case result-type
-          (output
-	   (with-temp-buffer
-             (insert body)
-             (shell-command-on-region (point-min) (point-max) "R --slave --no-save" 'replace)
-             (buffer-string)))
-          (value
-	   (with-temp-buffer
-             (insert (format org-babel-R-wrapper-method
-			     body tmp-file (if column-names-p "TRUE" "FALSE")))
-	     (shell-command-on-region (point-min) (point-max) "R --no-save" 'replace))
+      (case result-type
+	(output
+	 (with-temp-buffer
+	   (insert body)
+	   (org-babel-shell-command-on-region (point-min) (point-max) "R --slave --no-save" 'current-buffer 'replace)
+	   (buffer-string)))
+	(value
+	 (let* ((tmp-file (make-temp-file "R-out-functional-results")) exit-code
+		(stderr
+		 (with-temp-buffer
+		   (insert (format org-babel-R-wrapper-method
+				   body tmp-file (if column-names-p "TRUE" "FALSE")))
+		   (setq exit-code (org-babel-shell-command-on-region
+				    (point-min) (point-max) "R --no-save" nil 'replace (current-buffer)))
+		   (buffer-string))))
+	   (if (> exit-code 0) (org-babel-error-notify exit-code stderr))
 	   (org-babel-R-process-value-result
 	    (org-babel-import-elisp-from-file (org-babel-maybe-remote-file tmp-file))
 	    column-names-p))))

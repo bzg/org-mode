@@ -2769,6 +2769,8 @@ file:/home/dominik/images/jupiter.jpg     @r{file, absolute path}
 /home/dominik/images/jupiter.jpg          @r{same as above}
 file:papers/last.pdf                      @r{file, relative path}
 ./papers/last.pdf                         @r{same as above}
+file:/myself@@some.where:papers/last.pdf   @r{file, path on remote machine}
+/myself@@some.where:papers/last.pdf        @r{same as above}
 file:sometextfile::NNN                    @r{file with line number to jump to}
 file:projects.org                         @r{another Org file}
 file:projects.org::some words             @r{text search in Org file}
