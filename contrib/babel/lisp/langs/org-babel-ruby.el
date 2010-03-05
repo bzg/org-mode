@@ -159,7 +159,7 @@ BODY, if RESULT-TYPE equals 'value then return the value of the
 last statement in BODY, as elisp."
   (if (not session)
       ;; external process evaluation
-      (save-window-excursion
+      (save-excursion
         (case result-type
           (output
            (with-temp-buffer
@@ -168,13 +168,17 @@ last statement in BODY, as elisp."
              (org-babel-shell-command-on-region (point-min) (point-max) "ruby" 'current-buffer 'replace)
              (buffer-string)))
           (value
-           (let ((tmp-file (make-temp-file "ruby-functional-results")))
-             (with-temp-buffer
-               (insert (format (if (member "pp" result-params)
-                                   org-babel-ruby-pp-wrapper-method
-                                 org-babel-ruby-wrapper-method) body tmp-file))
-               ;; (message "buffer=%s" (buffer-string)) ;; debugging
-               (org-babel-shell-command-on-region (point-min) (point-max) "ruby"))
+           (let* ((tmp-file (make-temp-file "ruby-functional-results")) exit-code
+		  (stderr
+		   (with-temp-buffer
+		     (insert (format (if (member "pp" result-params)
+					 org-babel-ruby-pp-wrapper-method
+				       org-babel-ruby-wrapper-method) body tmp-file))
+		     ;; (message "buffer=%s" (buffer-string)) ;; debugging
+		     (setq exit-code
+			   (org-babel-shell-command-on-region (point-min) (point-max) "ruby" nil 'replace (current-buffer)))
+		     (buffer-string))))
+	     (if (> exit-code 0) (org-babel-error-notify exit-code stderr))
              (let ((raw (with-temp-buffer
 			  (insert-file-contents (org-babel-maybe-remote-file tmp-file))
 			  (buffer-string))))

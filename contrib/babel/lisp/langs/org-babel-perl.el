@@ -92,7 +92,7 @@ BODY, if RESULT-TYPE equals 'value then return the value of the
 last statement in BODY, as elisp."
   (if (not session)
       ;; external process evaluation
-      (save-window-excursion
+      (save-excursion
         (case result-type
           (output
            (with-temp-buffer
@@ -101,20 +101,25 @@ last statement in BODY, as elisp."
              (org-babel-shell-command-on-region (point-min) (point-max) "perl" 'current-buffer 'replace)
              (buffer-string)))
           (value
-           (let ((tmp-file (make-temp-file "perl-functional-results")))
-             (with-temp-buffer
-               (insert
-		(format
-		 (if (member "pp" result-params)
-                     (error "Pretty-printing not implemented for perl")
-                   org-babel-perl-wrapper-method)
-		 (mapconcat
-		  (lambda (line) (format "\t%s" line))
-		  (split-string
-		   (org-remove-indentation (org-babel-trim body)) "[\r\n]") "\n")
-		 tmp-file))
-               ;; (message "buffer=%s" (buffer-string)) ;; debugging
-               (org-babel-shell-command-on-region (point-min) (point-max) "perl"))
+           (let* ((tmp-file (make-temp-file "perl-functional-results")) exit-code
+		 (stderr
+		  (with-temp-buffer
+		    (insert
+		     (format
+		      (if (member "pp" result-params)
+			  (error "Pretty-printing not implemented for perl")
+			org-babel-perl-wrapper-method)
+		      (mapconcat
+		       (lambda (line) (format "\t%s" line))
+		       (split-string
+			(org-remove-indentation (org-babel-trim body)) "[\r\n]") "\n")
+		      tmp-file))
+		    ;; (message "buffer=%s" (buffer-string)) ;; debugging
+		    (setq exit-code
+			  (org-babel-shell-command-on-region
+			   (point-min) (point-max) "perl" nil 'replace (current-buffer)))
+		    (buffer-string))))
+	     (if (> exit-code 0) (org-babel-error-notify exit-code stderr))
 	     (org-babel-import-elisp-from-file (org-babel-maybe-remote-file tmp-file))))))
     ;; comint session evaluation
     (error "Sessions are not supported for Perl.")))

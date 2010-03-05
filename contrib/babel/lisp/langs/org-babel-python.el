@@ -155,7 +155,7 @@ BODY, if RESULT-TYPE equals 'value then return the value of the
 last statement in BODY, as elisp."
   (if (not session)
       ;; external process evaluation
-      (save-window-excursion
+      (save-excursion
         (case result-type
           (output
            (with-temp-buffer
@@ -164,20 +164,24 @@ last statement in BODY, as elisp."
              (org-babel-shell-command-on-region (point-min) (point-max) "python" 'current-buffer 'replace)
              (buffer-string)))
           (value
-           (let ((tmp-file (make-temp-file "python-functional-results")))
-             (with-temp-buffer
-               (insert
-		(format
-		 (if (member "pp" result-params)
-                     org-babel-python-pp-wrapper-method
-                   org-babel-python-wrapper-method)
-		 (mapconcat
-		  (lambda (line) (format "\t%s" line))
-		  (split-string
-		   (org-remove-indentation (org-babel-trim body)) "[\r\n]") "\n")
-		 tmp-file))
-               ;; (message "buffer=%s" (buffer-string)) ;; debugging
-               (org-babel-shell-command-on-region (point-min) (point-max) "python"))
+           (let* ((tmp-file (make-temp-file "org-babel-python-results-")) exit-code
+		  (stderr
+		   (with-temp-buffer
+		     (insert
+		      (format
+		       (if (member "pp" result-params)
+			   org-babel-python-pp-wrapper-method
+			 org-babel-python-wrapper-method)
+		       (mapconcat
+			(lambda (line) (format "\t%s" line))
+			(split-string
+			 (org-remove-indentation (org-babel-trim body)) "[\r\n]") "\n")
+		       tmp-file))
+		     ;; (message "buffer=%s" (buffer-string)) ;; debugging
+		     (setq exit-code (org-babel-shell-command-on-region
+				      (point-min) (point-max) "python" nil 'replace (current-buffer)))
+		     (buffer-string))))
+	     (if (> exit-code 0) (org-babel-error-notify exit-code stderr))
              (let ((raw (with-temp-buffer
 			  (insert-file-contents (org-babel-maybe-remote-file tmp-file))
 			  (buffer-string))))

@@ -1022,6 +1022,14 @@ block but are passed literally to the \"example-block\"."
         (nb-add (buffer-substring index (point-max)))))
     new-body))
 
+(defun org-babel-error-notify (exit-code stderr)
+  (message (format "Shell command exited with code %d" exit-code))
+  (let ((buf (get-buffer-create "*Org-Babel Error Output*")))
+    (with-current-buffer buf
+      (goto-char (point-max))
+      (save-excursion (insert stderr)))
+    (display-buffer buf)))
+
 (defun org-babel-clean-text-properties (text)
   "Strip all properties from text return."
   (set-text-properties 0 (length text) nil text) text)
@@ -1055,22 +1063,23 @@ This is taken almost directly from `org-read-prop'."
   "Read the results located at FILE-NAME into an elisp table.  If
 the table is trivial, then return it as a scalar."
   (let (result)
-    (with-temp-buffer
-      (condition-case nil
-          (progn
-            (org-table-import file-name nil)
-            (delete-file file-name)
-            (setq result (mapcar (lambda (row)
-                                   (mapcar #'org-babel-string-read row))
-                                 (org-table-to-lisp))))
-        (error nil)))
-    (if (null (cdr result)) ;; if result is trivial vector, then scalarize it
-	(if (consp (car result))
-	    (if (null (cdr (car result)))
-		(caar result)
-	      result)
-	  (car result))
-      result)))
+    (save-window-excursion
+      (with-temp-buffer
+	(condition-case nil
+	    (progn
+	      (org-table-import file-name nil)
+	      (delete-file file-name)
+	      (setq result (mapcar (lambda (row)
+				     (mapcar #'org-babel-string-read row))
+				   (org-table-to-lisp))))
+	  (error nil)))
+      (if (null (cdr result)) ;; if result is trivial vector, then scalarize it
+	  (if (consp (car result))
+	      (if (null (cdr (car result)))
+		  (caar result)
+		result)
+	    (car result))
+	result))))
 
 (defun org-babel-string-read (cell)
   "Strip nested \"s from around strings in exported R values."
