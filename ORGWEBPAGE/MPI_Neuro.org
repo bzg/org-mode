@@ -1,0 +1,19 @@
+#+Title:     Google Tech Talk about Emacs Org-mode
+#+AUTHOR:    Carsten Dominik
+#+EMAIL:     carsten.dominik@gmail.com
+#+DATE:      July 15, 2008
+#+LANGUAGE:  en
+#+OPTIONS:   H:3 num:nil toc:t \n:nil @:t ::t |:t ^:{} -:t f:t *:t TeX:t LaTeX:t skip:nil d:nil tags:not-in-toc
+
+* Org-mode talk at the Max-Planck Institute for Neurology
+
+There a video of the Org-mode talk at the Max-Planck Institute for
+Neurological Research about [[http://orgmode.org][Org-mode]] that I (Carsten Dominik) gave on
+February 8, 2010.  Thanks to Stefan Vollmar for his invitation and
+hospitality during the visit.  The video is available for download [[http://www.nf.mpg.de/orgmode/guest-talk-dominik.html][here]].
+
+For projection purposes you can also download the slides as a [[file:MPI-Neurology-Talk-Org-mode.pdf][PDF
+file]].  If you'd like to prepare your own talk about Org-mode and want
+to use some of my slides, here is the [[file:MPI-Neurology-Talk-Org-mode-keynote.zip][Apple keynote]] version of the
+talk.  I am making all these files available under the [[http://creativecommons.org/licenses/by/3.0/][creative
+commons license]] (attribution).

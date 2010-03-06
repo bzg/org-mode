@@ -5,7 +5,8 @@
 #+LANGUAGE:  en
 #+OPTIONS:   H:3 num:nil toc:t \n:nil @:t ::t |:t ^:{} -:t f:t *:t TeX:t LaTeX:t skip:nil d:nil tags:not-in-toc
 
-* Google Tech Talk about Org-mode
+* Talks by Carsten Dominik about Org-mode
+** Google Tech Talk
 
 Here it the video of the [[http://research.google.com/video.html][Google Tech Talk]] about [[http://orgmode.org][Org-mode]] that I
 (Carsten Dominik) gave on July 15th, 2008 on the Google campus in
@@ -26,3 +27,16 @@ about Org-mode and want to use some of my slides, here are the [[file:Google-Tec
 keynote]] and [[file:Google-Tech-Talk-Org-mode.ppt][Microsoft Powerpoint]] versions of the talk.  I am making
 all these files available under the [[http://creativecommons.org/licenses/by/3.0/][creative commons license]]
 (attribution).
+
+** Talk at the Max-Planck Institute for Neurology in Cologne
+
+There a video of the Org-mode talk at the Max-Planck Institute for
+Neurological Research about [[http://orgmode.org][Org-mode]] that I (Carsten Dominik) gave on
+February 8, 2010.  Thanks to Stefan Vollmar for his invitation and
+hospitality during the visit.  The video is available for download [[http://www.nf.mpg.de/orgmode/guest-talk-dominik.html][here]].
+
+For projection purposes you can also download the slides as a [[file:MPI-Neurology-Talk-Org-mode.pdf][PDF
+file]].  If you'd like to prepare your own talk about Org-mode and want
+to use some of my slides, here is the [[file:MPI-Neurology-Talk-Org-mode-keynote.zip][Apple keynote]] version of the
+talk.  I am making all these files available under the [[http://creativecommons.org/licenses/by/3.0/][creative
+commons license]] (attribution).
