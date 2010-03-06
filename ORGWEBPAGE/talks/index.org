@@ -27,7 +27,7 @@ keynote]] and [[file:Google-Tech-Talk-Org-mode.ppt][Microsoft Powerpoint]] versi
 all these files available under the [[http://creativecommons.org/licenses/by/3.0/][creative commons license]]
 (attribution).
 
-* Talk at the Max-Planck Institute for Neurology in Cologne
+* Talk at MPI Cologne
 
 There a video of the Org-mode talk at the Max-Planck Institute for
 Neurological Research about [[http://orgmode.org][Org-mode]] that I (Carsten Dominik) gave on
