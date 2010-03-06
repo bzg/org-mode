@@ -194,8 +194,8 @@ and corresponding to the latest git version.
 
 
 ** Talks about Org-mode
-   [[file:talks/index.org#sec-1][Google Tech Talk]] about Org-mode
-   at the [[file:talks/index.org#sec-2][Max Planck Institute for Neurological Research]]
+   [[file:talks/index.html#sec-1][Google Tech Talk]] about Org-mode
+   at the [[file:talks/index.html#sec-2][Max Planck Institute for Neurological Research]]
 ** Mailing list
    :PROPERTIES:
    :ID:       0B280B26-A3AB-4E5C-B4EE-B7FFC52C4D26
