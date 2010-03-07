@@ -1,3 +1,8 @@
+2010-03-07  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-table.el (org-table-convert-refs-to-rc): Do not read arctan2
+	as a reference.
+
 2010-03-05  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-link-unescape): Solve issue with lower-case escapes.

@@ -2799,6 +2799,9 @@ full TBLFM line."
 	     (not (equal ?. (aref s (max (- (match-beginning 0) 2) 0)))))
 	;; 3.e5 or something like this.
 	(setq start (match-end 0)))
+       ((member (match-string 1 s) '("arctan"))
+	;; function name, just advance
+	(setq start (match-end 0)))
        (t
 	(setq start (match-beginning 0)
 	      s (replace-match
