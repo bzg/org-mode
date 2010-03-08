@@ -10728,7 +10728,10 @@ With argument REMOVE, remove any deadline from the item.
 When TIME is set, it should be an internal time specification, and the
 scheduling will use the corresponding date."
   (interactive "P")
-  (let ((old-date (org-entry-get nil "DEADLINE")))
+  (let* ((old-date (org-entry-get nil "DEADLINE"))
+	 (repeater (and old-date
+			(string-match "\\([.+]+[0-9]+[dwmy]\\) ?" old-date)
+			(match-string 1 old-date))))
     (if remove
 	(progn
 	  (when (and old-date org-log-redeadline)
@@ -10736,15 +10739,26 @@ scheduling will use the corresponding date."
 			       org-log-redeadline))
 	  (org-remove-timestamp-with-keyword org-deadline-string)
 	  (message "Item no longer has a deadline."))
-      (if (org-get-repeat org-deadline-string)
-	  (error "Cannot change deadline on task with repeater, please do that by hand")
-	(org-add-planning-info 'deadline time 'closed)
-	(when (and old-date org-log-redeadline
-		   (not (equal old-date
-			       (substring org-last-inserted-timestamp 1 -1))))
-	  (org-add-log-setup 'redeadline nil old-date 'findpos
-			     org-log-redeadline))
-	(message "Deadline on %s" org-last-inserted-timestamp)))))
+      (org-add-planning-info 'deadline time 'closed)
+      (when (and old-date org-log-redeadline
+		 (not (equal old-date
+			     (substring org-last-inserted-timestamp 1 -1))))
+	(org-add-log-setup 'redeadline nil old-date 'findpos
+			   org-log-redeadline))
+      (when repeater
+	(save-excursion
+	  (org-back-to-heading t)
+	  (when (re-search-forward (concat org-deadline-string " "
+					   org-last-inserted-timestamp)
+				   (save-excursion
+				     (outline-next-heading) (point)) t)
+	    (goto-char (1- (match-end 0)))
+	    (insert " " repeater)
+	    (setq org-last-inserted-timestamp
+		  (concat (substring org-last-inserted-timestamp 0 -1)
+			  " " repeater
+			  (substring org-last-inserted-timestamp -1))))))
+      (message "Deadline on %s" org-last-inserted-timestamp))))
 
 (defun org-schedule (&optional remove time)
   "Insert the SCHEDULED: string with a timestamp to schedule a TODO item.
@@ -10752,7 +10766,10 @@ With argument REMOVE, remove any scheduling date from the item.
 When TIME is set, it should be an internal time specification, and the
 scheduling will use the corresponding date."
   (interactive "P")
-  (let ((old-date (org-entry-get nil "SCHEDULED")))
+  (let* ((old-date (org-entry-get nil "SCHEDULED"))
+	 (repeater (and old-date
+			(string-match "\\([.+]+[0-9]+[dwmy]\\) ?" old-date)
+			(match-string 1 old-date))))
     (if remove
 	(progn
 	  (when (and old-date org-log-reschedule)
@@ -10760,15 +10777,26 @@ scheduling will use the corresponding date."
 			       org-log-reschedule))
 	  (org-remove-timestamp-with-keyword org-scheduled-string)
 	  (message "Item is no longer scheduled."))
-      (if (org-get-repeat org-scheduled-string)
-	  (error "Cannot reschedule task with repeater, please do that by hand")
-	(org-add-planning-info 'scheduled time 'closed)
-	(when (and old-date org-log-reschedule
-		   (not (equal old-date
-			       (substring org-last-inserted-timestamp 1 -1))))
-	  (org-add-log-setup 'reschedule nil old-date 'findpos
-			     org-log-reschedule))
-	(message "Scheduled to %s" org-last-inserted-timestamp)))))
+      (org-add-planning-info 'scheduled time 'closed)
+      (when (and old-date org-log-reschedule
+		 (not (equal old-date
+			     (substring org-last-inserted-timestamp 1 -1))))
+	(org-add-log-setup 'reschedule nil old-date 'findpos
+			   org-log-reschedule))
+      (when repeater
+	(save-excursion
+	  (org-back-to-heading t)
+	  (when (re-search-forward (concat org-scheduled-string " "
+					   org-last-inserted-timestamp)
+				   (save-excursion
+				     (outline-next-heading) (point)) t)
+	    (goto-char (1- (match-end 0)))
+	    (insert " " repeater)
+	    (setq org-last-inserted-timestamp
+		  (concat (substring org-last-inserted-timestamp 0 -1)
+			  " " repeater
+			  (substring org-last-inserted-timestamp -1))))))
+      (message "Scheduled to %s" org-last-inserted-timestamp))))
 
 (defun org-get-scheduled-time (pom &optional inherit)
   "Get the scheduled time as a time tuple, of a format suitable

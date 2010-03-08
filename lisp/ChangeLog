@@ -1,5 +1,8 @@
 2010-03-08  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-deadline, org-schedule): Allow rescheduling entries
+	with repeaters.
+
 	* org-table.el (org-table-convert-refs-to-rc): Better way to catch
 	function calls that look like references.
 
