@@ -624,7 +624,7 @@ publishing directory."
 
 	  ;; End of quote section?
 	  (when (and inquote (string-match "^\\*+ " line))
-	    (insert "]]>\n</programlisting>\n")
+	    (insert "]]></programlisting>\n")
 	    (org-export-docbook-open-para)
 	    (setq inquote nil))
 	  ;; Inside a quote section?
@@ -644,7 +644,7 @@ publishing directory."
 		      (not (string-match "^[ \t]*\\(:.*\\)"
 					 (car lines))))
 	      (setq infixed nil)
-	      (insert "]]>\n</programlisting>\n")
+	      (insert "]]></programlisting>\n")
 	      (org-export-docbook-open-para))
 	    (throw 'nextline nil))
 
@@ -912,7 +912,8 @@ publishing directory."
 	    (while (string-match "\\([^* \t].*?\\)\\[\\([0-9]+\\)\\]" line start)
 	      (if (get-text-property (match-beginning 2) 'org-protected line)
 		  (setq start (match-end 2))
-		(let ((num (match-string 2 line)))
+		(let* ((num (match-string 2 line))
+		       (footnote-def (assoc num footnote-list)))
 		  (if (assoc num footref-seen)
 		      (setq line (replace-match
 				  (format "%s<footnoteref linkend=\"%s%s\"/>"
@@ -924,9 +925,10 @@ publishing directory."
 					(match-string 1 line)
 					org-export-docbook-footnote-id-prefix
 					num
-					(save-match-data
-					  (org-docbook-expand
-					   (cdr (assoc num footnote-list)))))
+					(if footnote-def
+					    (save-match-data
+					      (org-docbook-expand (cdr footnote-def)))
+					  (format "FOOTNOTE DEFINITION NOT FOUND: %s" num)))
 				t t line))
 		    (push (cons num 1) footref-seen))))))
 
@@ -1092,7 +1094,7 @@ publishing directory."
 
       ;; Properly close all local lists and other lists
       (when inquote
-	(insert "]]>\n</programlisting>\n")
+	(insert "]]></programlisting>\n")
 	(org-export-docbook-open-para))
       (when in-local-list
 	;; Close any local lists before inserting a new header line
@@ -1121,6 +1123,13 @@ publishing directory."
 	      "[ \r\n\t]*\\(<para>\\)[ \r\n\t]*</para>[ \r\n\t]*" nil t)
 	(when (not (get-text-property (match-beginning 1) 'org-protected))
 	  (replace-match "\n")
+	  ;; Avoid empty <listitem></listitem> caused by inline tasks.
+	  ;; We should add an empty para to make everything valid.
+	  (when (and (looking-at "</listitem>")
+		     (save-excursion
+		       (backward-char (length "<listitem>\n"))
+		       (looking-at "<listitem>")))
+	    (insert "<para></para>"))
 	  (backward-char 1)))
       ;; Fill empty sections with <para></para>.  This is to make sure
       ;; that the DocBook document generated is valid and well-formed.

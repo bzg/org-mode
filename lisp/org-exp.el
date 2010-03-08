@@ -2423,7 +2423,7 @@ INDENT was the original indentation of the block."
 	      (concat "\n#+BEGIN_DOCBOOK\n"
 		      (org-add-props (concat "<programlisting><![CDATA["
 					     rtn
-					     "]]>\n</programlisting>\n")
+					     "]]></programlisting>\n")
 			  '(org-protected t))
 		      "#+END_DOCBOOK\n"))
 	     ((eq backend 'html)

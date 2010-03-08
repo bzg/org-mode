@@ -1,5 +1,14 @@
 2010-03-08  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-docbook.el (org-export-as-docbook): Remove unnecessary
+	newline.
+	(org-export-as-docbook): Remove unnecessary newline.
+	(org-export-as-docbook): Fix problem with double footnote
+	reference in one place.
+
+	* org-exp.el (org-export-format-source-code-or-example): Remove
+	unnecessary newline.
+
 	* org.el (org-deadline, org-schedule): Allow rescheduling entries
 	with repeaters.
 
