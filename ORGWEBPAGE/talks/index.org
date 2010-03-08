@@ -7,10 +7,10 @@
 
 * Google Tech Talk
 
-Here it the video of the [[http://research.google.com/video.html][Google Tech Talk]] about [[http://orgmode.org][Org-mode]] that I
-(Carsten Dominik) gave on July 15th, 2008 on the Google campus in
-Mountain View, California.  Thanks to [[http://emacspeak.sourceforge.net/raman/][T.V. Raman]] and [[http://technical-dresese.blogspot.com/][Andrew Hyatt]] for
-being my hosts during my stay.
+Here it the video of the [[http://research.google.com/video.html][Google Tech Talk]] about [[http://orgmode.org][Org-mode]] that I gave
+on July 15th, 2008 on the Google campus in Mountain View, California.
+Thanks to [[http://emacspeak.sourceforge.net/raman/][T.V. Raman]] and [[http://technical-dresese.blogspot.com/][Andrew Hyatt]] for being my hosts during my
+stay.
 
 If you'd like to see the video in higher quality, you can do so at the
 [[http://youtube.com/watch%3Fv%3DoJTwQvgfgMM][youtube page]].  Click the "watch in high resolution" linkt directly
@@ -29,13 +29,17 @@ all these files available under the [[http://creativecommons.org/licenses/by/3.0
 
 * Talk at MPI Cologne
 
-There a video of the Org-mode talk at the Max-Planck Institute for
-Neurological Research about [[http://orgmode.org][Org-mode]] that I (Carsten Dominik) gave on
-February 8, 2010.  Thanks to Stefan Vollmar for his invitation and
-hospitality during the visit.  The video is available for download [[http://www.nf.mpg.de/orgmode/guest-talk-dominik.html][here]].
+On February 8, 2010, I gave a talk about Org-mode at the Max-Planck
+Institute for Neurological Research in Cologne.  The Max-Planck
+Gesellschaft kindly makes available a [[http://www.nf.mpg.de/orgmode/guest-talk-dominik.html][video recording]] of the talk.
+Thanks to Stefan Vollmar for his invitation and hospitality during the
+visit, and for an insane amount of work that was needed to get the
+audio recording to a state where it at least can be understood!  So if
+you think the audio is bad - be grateful that is there at all.
 
 For projection purposes you can also download the slides as a [[file:MPI-Neurology-Talk-Org-mode.pdf][PDF
 file]].  If you'd like to prepare your own talk about Org-mode and want
-to use some of my slides, here is the [[file:MPI-Neurology-Talk-Org-mode-keynote.zip][Apple keynote]] version of the
-talk.  I am making all these files available under the [[http://creativecommons.org/licenses/by/3.0/][creative
+to use (some of) my slides, here is the [[file:MPI-Neurology-Talk-Org-mode-keynote.zip][Apple keynote]] version of the
+talk.  The [[file:MPI-Neurology-Talk-Org-mode-ppt.zip][PowerPoint version]] was exported from Keynote and mostly
+works. I am making all these files available under the [[http://creativecommons.org/licenses/by/3.0/][creative
 commons license]] (attribution).
