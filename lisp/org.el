@@ -8389,6 +8389,10 @@ Org-mode syntax."
 	(org-mode)
 	(insert s)
 	(goto-char (point-min))
+	(when reference-buffer
+	  (setq org-link-abbrev-alist-local
+		(with-current-buffer reference-buffer
+		  org-link-abbrev-alist-local)))
 	(org-open-at-point arg reference-buffer)))))
 
 (defun org-open-at-point (&optional in-emacs reference-buffer)

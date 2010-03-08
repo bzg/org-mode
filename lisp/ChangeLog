@@ -1,3 +1,8 @@
+2010-03-08  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-open-at-point): Get link abbreviations from
+	reference buffer.
+
 2010-03-07  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-table.el (org-table-convert-refs-to-rc): Do not read arctan2
