@@ -2799,7 +2799,10 @@ full TBLFM line."
 	     (not (equal ?. (aref s (max (- (match-beginning 0) 2) 0)))))
 	;; 3.e5 or something like this.
 	(setq start (match-end 0)))
-       ((member (match-string 1 s) '("arctan"))
+       ((or (> (- (match-end 1) (match-beginning 1)) 2)
+	    ;; (member (match-string 1 s)
+	    ;;	    '("arctan" "exp" "expm" "lnp" "log" "stir"))
+	    )
 	;; function name, just advance
 	(setq start (match-end 0)))
        (t
