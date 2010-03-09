@@ -1,3 +1,10 @@
+2010-03-09  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-clock.el (org-clocking-buffer, org-clocking-p): New function.
+	(org-clock-select-task, org-clock-notify-once-if-expired)
+	(org-clock-in, org-clock-out, org-clock-cancel, org-clock-goto)
+	(org-clock-out-if-current, org-clock-save): Use the new functions.
+
 2010-03-08  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-docbook.el (org-export-as-docbook): Remove unnecessary

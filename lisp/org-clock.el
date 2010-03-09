@@ -333,6 +333,14 @@ of a different task.")
   (mapc (lambda (m) (org-check-and-save-marker m beg end))
 	org-clock-history))
 
+(defun org-clocking-buffer ()
+  "Returns clocking buffer if we are currently clocking a task or nil"
+  (marker-buffer org-clock-marker))
+
+(defun org-clocking-p ()
+  "Returns t when clocking a task"
+  (not (equal (org-clocking-buffer) nil)))
+
 (defun org-clock-select-task (&optional prompt)
   "Select a task that recently was associated with clocking."
   (interactive)
@@ -349,7 +357,7 @@ of a different task.")
 	(insert (org-add-props "The task interrupted by starting the last one\n" nil 'face 'bold))
 	(setq s (org-clock-insert-selection-line ?i org-clock-interrupted-task))
 	(push s sel-list))
-      (when (marker-buffer org-clock-marker)
+      (when (org-clocking-p)
 	(insert (org-add-props "Current Clocking Task\n" nil 'face 'bold))
 	(setq s (org-clock-insert-selection-line ?c org-clock-marker))
 	(push s sel-list))
@@ -512,7 +520,7 @@ the mode line."
 (defun org-clock-notify-once-if-expired ()
   "Show notification if we spent more time than we estimated before.
 Notification is shown only once."
-  (when (marker-buffer org-clock-marker)
+  (when (org-clocking-p)
     (let ((effort-in-minutes (org-hh:mm-string-to-minutes org-clock-effort))
 	  (clocked-time (org-clock-get-clocked-time)))
       (if (setq org-task-overrun 
@@ -886,7 +894,7 @@ the clocking selection, associated with the letter `d'."
   (setq org-clock-notification-was-shown nil)
   (catch 'abort
     (let ((interrupting (and (not org-clock-resolving-clocks-due-to-idleness)
-			     (marker-buffer org-clock-marker)))
+			     (org-clocking-p)))
 	  ts selected-task target-pos (msg-extra "")
 	  (left-over (and (not org-clock-resolving-clocks)
 			  org-clock-left-over-time)))
@@ -922,7 +930,7 @@ the clocking selection, associated with the letter `d'."
 	  (progn
 	    (move-marker org-clock-interrupted-task
 			 (marker-position org-clock-marker)
-			 (marker-buffer org-clock-marker))
+			 (org-clocking-buffer))
 	    (org-clock-out t))))
 
       (when (equal select '(16))
@@ -1189,11 +1197,11 @@ line and position cursor in that line."
 If there is no running clock, throw an error, unless FAIL-QUIETLY is set."
   (interactive)
   (catch 'exit
-    (if (not (marker-buffer org-clock-marker))
+    (if (not (org-clocking-p))
 	(if fail-quietly (throw 'exit t) (error "No active clock")))
     (let (ts te s h m remove)
       (save-excursion
-	(set-buffer (marker-buffer org-clock-marker))
+	(set-buffer (org-clocking-buffer))
 	(save-restriction
 	  (widen)
 	  (goto-char org-clock-marker)
@@ -1258,10 +1266,10 @@ If there is no running clock, throw an error, unless FAIL-QUIETLY is set."
 (defun org-clock-cancel ()
   "Cancel the running clock be removing the start timestamp."
   (interactive)
-  (if (not (marker-buffer org-clock-marker))
+  (if (not (org-clocking-p))
       (error "No active clock"))
   (save-excursion
-    (set-buffer (marker-buffer org-clock-marker))
+    (set-buffer (org-clocking-buffer))
     (goto-char org-clock-marker)
     (delete-region (1- (point-at-bol)) (point-at-eol))
     ;; Just in case, remove any empty LOGBOOK left over
@@ -1283,7 +1291,7 @@ With prefix arg SELECT, offer recently clocked tasks for selection."
 	     (select
 	      (or (org-clock-select-task "Select task to go to: ")
 		  (error "No task selected")))
-	     ((marker-buffer org-clock-marker) org-clock-marker)
+	     ((org-clocking-p) org-clock-marker)
 	     ((and org-clock-goto-may-find-recent-task
 		   (car org-clock-history)
 		   (marker-buffer (car org-clock-history)))
@@ -1463,8 +1471,8 @@ and is only done if the variable `org-clock-out-when-done' is not nil."
 		      (member state org-done-keywords))
 		 (and (listp org-clock-out-when-done)
 		      (member state org-clock-out-when-done)))
-	     (equal (or (buffer-base-buffer (marker-buffer org-clock-marker))
-			(marker-buffer org-clock-marker))
+	     (equal (or (buffer-base-buffer (org-clocking-buffer))
+			(org-clocking-buffer))
 		    (or (buffer-base-buffer (current-buffer))
 			(current-buffer)))
 	     (< (point) org-clock-marker)
@@ -1955,7 +1963,7 @@ The details of what will be saved are regulated by the variable
 			  system-name (format-time-string
 				       (cdr org-time-stamp-formats))))
 	  (if (and (memq org-clock-persist '(t clock))
-		   (setq b (marker-buffer org-clock-marker))
+		   (setq b (org-clocking-buffer))
 		   (setq b (or (buffer-base-buffer b) b))
 		   (buffer-live-p b)
 		   (buffer-file-name b)
@@ -1964,7 +1972,7 @@ The details of what will be saved are regulated by the variable
 					 (substring-no-properties org-clock-heading)
 					 ") "))))
 	      (insert "(setq resume-clock '(\""
-		      (buffer-file-name (marker-buffer org-clock-marker))
+		      (buffer-file-name (org-clocking-buffer))
 		      "\" . " (int-to-string (marker-position org-clock-marker))
 		      "))\n"))
 	  ;; Store clocked task history. Tasks are stored reversed to make
