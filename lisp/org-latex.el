@@ -1142,7 +1142,8 @@ The function mus take one parameter, the depth of the table of contents.")
 TITLE is the current title from the buffer or region.
 OPT-PLIST is the options plist for current buffer."
   (let ((toc (plist-get opt-plist :table-of-contents))
-	(author (plist-get opt-plist :author)))
+	(author (org-export-apply-macros-in-string
+		 (plist-get opt-plist :author))))
     (concat
      (if (plist-get opt-plist :time-stamp-file)
 	 (format-time-string "%% Created %Y-%m-%d %a %H:%M\n"))

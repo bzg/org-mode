@@ -1,5 +1,8 @@
 2010-03-09  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-latex.el (org-export-latex-make-header): Apply macros in
+	author field.
+
 	* org-clock.el (org-clocking-buffer, org-clocking-p): New function.
 	(org-clock-select-task, org-clock-notify-once-if-expired)
 	(org-clock-in, org-clock-out, org-clock-cancel, org-clock-goto)
