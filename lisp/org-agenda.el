@@ -258,6 +258,13 @@ you can \"misuse\" it to also add other text to the header.  However,
 		   (const :format "" quote)
 		   (repeat
 		    (string :tag "+tag or -tag"))))
+	    (list :tag "Set daily/weekly entry types"
+		  (const org-agenda-entry-types)
+		  (set :greedy t :value (:deadline :scheduled :timestamp :sexp)
+		       (const :deadline)
+		       (const :scheduled)
+		       (const :timestamp)
+		       (const :sexp)))
 	    (list :tag "Standard skipping condition"
 		  :value (org-agenda-skip-function '(org-agenda-skip-entry-if))
 		  (const org-agenda-skip-function)
@@ -3089,6 +3096,39 @@ When EMPTY is non-nil, also include days without any entries."
 (defvar org-agenda-span nil) ; local variable in the agenda buffer
 (defvar org-include-all-loc nil) ; local variable
 
+(defvar org-agenda-entry-types '(:deadline :scheduled :timestamp :sexp)
+  "List of types searched for when creating the daily/weekly agenda.
+This variable is a list of symbols that controls the types of
+items that appear in the daily/weekly agenda.  Allowed symbols in this
+list are are
+
+   :timestamp    List items containing a date stamp or date range matching
+                 the selected date.  This includes sexp entries in
+                 angular brackets.
+
+   :sexp         List entries resulting from plain diary-like sexps.
+
+   :deadline     List deadline due on that date.  When the date is today,
+                 also list any deadlines past due, or due within
+		 `org-deadline-warning-days'.  `:deadline' must appear before
+                 `:scheduled' if the setting of
+                 `org-agenda-skip-scheduled-if-deadline-is-shown' is to have
+                 any effect.
+
+   :scheduled    List all items which are scheduled for the given date.
+		 The diary for *today* also contains items which were
+		 scheduled earlier and are not yet marked DONE.
+
+By default, all four types are turned on.
+
+Never set this variable globally using `setq', because then it
+will apply to all future agenda commands.  Instead, bind it with
+`let' to scope it dynamically into the the agenda-constructing
+command.  A good way to set it is through options in
+`org-agenda-custom-commands'.  For a more flexible (though
+somewhat less efficient) way of determining what is included in
+the daily/weekly agenda, see `org-agenda-skip-function'.")
+
 ;;;###autoload
 (defun org-agenda-list (&optional include-all start-day ndays)
   "Produce a daily/weekly view from all files in variable `org-agenda-files'.
@@ -3217,13 +3257,13 @@ given in `org-agenda-start-on-weekday'."
 	    (setq rtn (org-agenda-get-day-entries
 		       file date :closed)))
 	   (org-agenda-show-log
-	    (setq rtn (org-agenda-get-day-entries
-		       file date
-		       :deadline :scheduled :timestamp :sexp :closed)))
+	    (setq rtn (apply 'org-agenda-get-day-entries
+			     file date
+			     (append '(:closed) org-agenda-entry-types))))
 	   (t
-	    (setq rtn (org-agenda-get-day-entries
-		       file date
-		       :deadline :scheduled :sexp :timestamp))))
+	    (setq rtn (apply 'org-agenda-get-day-entries
+			     file date
+			     org-agenda-entry-types))))
 	  (setq rtnall (append rtnall rtn))))
       (if org-agenda-include-diary
 	  (let ((org-agenda-search-headline-for-time t))
@@ -3960,27 +4000,8 @@ Needed to avoid empty dates which mess up holiday display."
 This function can be used in a \"sexp\" diary entry in the Emacs calendar.
 It accesses org files and extracts information from those files to be
 listed in the diary.  The function accepts arguments specifying what
-items should be listed.  The following arguments are allowed:
-
-   :timestamp    List the headlines of items containing a date stamp or
-		 date range matching the selected date.  Deadlines will
-		 also be listed, on the expiration day.
-
-   :sexp         List entries resulting from diary-like sexps.
-
-   :deadline     List any deadlines past due, or due within
-		 `org-deadline-warning-days'.  The listing occurs only
-		 in the diary for *today*, not at any other date.  If
-		 an entry is marked DONE, it is no longer listed.
-
-   :scheduled    List all items which are scheduled for the given date.
-		 The diary for *today* also contains items which were
-		 scheduled earlier and are not yet marked DONE.
-
-   :todo         List all TODO items from the org-file.  This may be a
-		 long list - so this is not turned on by default.
-		 Like deadlines, these entries only show up in the
-		 diary for *today*, not at any other date.
+items should be listed.  For a list of arguments allowed here, see the
+variable `org-agenda-entry-types'.
 
 The call in the diary file should look like this:
 
