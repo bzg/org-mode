@@ -42,6 +42,11 @@
 	  (const org-archive-to-archive-sibling)
 	  (const org-archive-set-tag)))  
 
+(defcustom org-archive-reversed-order nil
+  "Non-nil means make the tree first child under the archive heading, not last."
+  :group 'org-archive
+  :type 'boolean)
+
 (defcustom org-archive-sibling-heading "Archive"
   "Name of the local archive sibling that is used to archive entries locally.
 Locally means: in the tree, under a sibling.
@@ -273,7 +278,11 @@ this heading."
 		  (end-of-line 0))
 		;; Make the subtree visible
 		(show-subtree)
-		(org-end-of-subtree t)
+		(if org-archive-reversed-order
+		    (progn
+		      (org-back-to-heading t)
+		      (outline-next-heading))
+		  (org-end-of-subtree t))
 		(skip-chars-backward " \t\r\n")
 		(and (looking-at "[ \t\r\n]*")
 		     (replace-match "\n\n")))
@@ -355,7 +364,9 @@ sibling does not exist, it will be created at the end of the subtree."
 	(beginning-of-line 0)
 	(org-toggle-tag org-archive-tag 'on))
       (beginning-of-line 1)
-      (org-end-of-subtree t t)
+      (if org-archive-reversed-order
+	  (outline-next-heading)
+	(org-end-of-subtree t t))
       (save-excursion
 	(goto-char pos)
 	(let ((this-command this-command)) (org-cut-subtree)))

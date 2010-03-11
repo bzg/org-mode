@@ -1,3 +1,9 @@
+2010-03-11  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-archive.el (org-archive-reversed-order): New option.
+	(org-archive-subtree, org-archive-to-archive-sibling): Use the new
+	option `org-archive-reversed-order'.
+
 2010-03-10  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-agenda.el (org-agenda-entry-types): New variable.
