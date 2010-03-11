@@ -12469,7 +12469,7 @@ Being in this list makes sure that they are offered for completion.")
   "Regular expression matching the first line of a property drawer.")
 
 (defconst org-property-end-re "^[ \t]*:END:[ \t]*$"
-  "Regular expression matching the first line of a property drawer.")
+  "Regular expression matching the last line of a property drawer.")
 
 (defconst org-clock-drawer-start-re "^[ \t]*:CLOCK:[ \t]*$"
   "Regular expression matching the first line of a property drawer.")
@@ -12546,13 +12546,16 @@ allowed value."
     (message "%s is now %s" prop val)))
 
 (defun org-at-property-p ()
-  "Is the cursor in a property line?"
-  ;; FIXME: Does not check if we are actually in the drawer.
-  ;; FIXME: also returns true on any drawers.....
-  ;; This is used by C-c C-c for property action.
+  "Is cursor inside a property drawer?"
   (save-excursion
     (beginning-of-line 1)
-    (looking-at (org-re "^[ \t]*\\(:\\([[:alpha:]][[:alnum:]_-]*\\):\\)[ \t]*\\(.*\\)"))))
+    (when (looking-at (org-re "^[ \t]*\\(:\\([[:alpha:]][[:alnum:]_-]*\\):\\)[ \t]*\\(.*\\)"))
+     (let ((match (match-data)) ;; Keep match-data for use by calling
+	   (p (point))          ;; procedures.
+	   (range (unless (org-before-first-heading-p)
+		    (org-get-property-block))))
+       (prog1 (and range (<= (car range) p) (< p (cdr range)))
+	 (set-match-data match))))))
 
 (defun org-get-property-block (&optional beg end force)
   "Return the (beg . end) range of the body of the property drawer.
@@ -12983,7 +12986,8 @@ in the current file."
   (interactive
    (let* ((completion-ignore-case t)
 	  (keys (org-buffer-property-keys nil t t))
-	  (prop0 (org-icompleting-read "Property: " (mapcar 'list keys)))
+	  (prop0 (or (progn (org-at-property-p) (org-match-string-no-properties 2))
+		     (org-icompleting-read "Property: " (mapcar 'list keys))))
 	  (prop (if (member prop0 keys)
 		    prop0
 		  (or (cdr (assoc (downcase prop0)
@@ -12991,18 +12995,17 @@ in the current file."
 					  keys)))
 		      prop0)))
 	  (cur (org-entry-get nil prop))
+	  (prompt (concat prop " value"
+			  (if (and cur (string-match "\\S-" cur))
+			      (concat " [" cur "]") "") ": "))
 	  (allowed (org-property-get-allowed-values nil prop 'table))
 	  (existing (mapcar 'list (org-property-values prop)))
 	  (val (if allowed
-		   (org-completing-read "Value: " allowed nil
+		   (org-completing-read prompt allowed nil
 		      (not (get-text-property 0 'org-unrestricted
 					      (caar allowed))))
 		 (let (org-completion-use-ido org-completion-use-iswitchb)
-		   (org-completing-read
-		    (concat "Value" (if (and cur (string-match "\\S-" cur))
-					(concat " [" cur "]") "")
-			    ": ")
-		    existing nil nil "" nil cur)))))
+		   (org-completing-read prompt existing nil nil "" nil cur)))))
      (list prop (if (equal val "") cur val))))
   (unless (equal (org-entry-get nil property) value)
     (org-entry-put nil property value)))
@@ -13011,8 +13014,9 @@ in the current file."
   "In the current entry, delete PROPERTY."
   (interactive
    (let* ((completion-ignore-case t)
-	  (prop (org-icompleting-read
-		 "Property: " (org-entry-properties nil 'standard))))
+	  (prop (or (progn (org-at-property-p) (org-match-string-no-properties 2))
+		    (org-icompleting-read
+		     "Property: " (org-entry-properties nil 'standard)))))
      (list prop)))
   (message "Property %s %s" property
 	   (if (org-entry-delete nil property)
@@ -16010,7 +16014,8 @@ This command does many different things, depending on context:
 	   (fboundp org-finish-function))
       (funcall org-finish-function))
      ((run-hook-with-args-until-success 'org-ctrl-c-ctrl-c-hook))
-     ((org-at-property-p)
+     ((or (looking-at (org-re org-property-start-re))
+	  (org-at-property-p))
       (call-interactively 'org-property-action))
      ((org-on-target-p) (call-interactively 'org-update-radio-target-regexp))
      ((and (org-in-regexp "\\[\\([0-9]*%\\|[0-9]*/[0-9]*\\)\\]")

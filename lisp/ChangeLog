@@ -1,3 +1,14 @@
+2010-03-11  Mikael Fornius  <mfo@abc.se>
+
+	* org.el (org-at-property-p): Check if we are inside a property
+	drawer not just any drawer.
+	(org-set-property, org-delete-property): When cursor is on a
+	property key value pair do not prompt for property name instead
+	use name at cursor.
+	(org-ctrl-c-ctrl-c): Still do org-property-action when cursor is
+	on the first line of a property drawer.
+	(org-property-end-re): Spell check.
+
 2010-03-11  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-exp.el (org-export-attach-captions-and-attributes): Add the
