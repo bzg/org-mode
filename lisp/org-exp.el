@@ -1888,10 +1888,10 @@ table line.  If it is a link, add it to the line containing the link."
 		    "\\|"
 		    "^[ \t]*#\\+label:[ \t]+\\(.*\\)"
 		    "\\|"
-		    "^[ \t]*|[^-]"
+		    "^[ \t]*\\(|[^-]\\)"
 		    "\\|"
 		    "^[ \t]*\\[\\[.*\\]\\][ \t]*$"))
-	cap attr label)
+	cap attr label end)
     (while (re-search-forward re nil t)
       (cond
        ((match-end 1)
@@ -1901,11 +1901,16 @@ table line.  If it is a link, add it to the line containing the link."
        ((match-end 3)
 	(setq label (org-trim (match-string 3))))
        (t
-	(add-text-properties (point-at-bol) (point-at-eol)
+	(setq end (if (match-end 4)
+		      (let ((ee (org-table-end)))
+			(prog1 (1- (marker-position ee)) (move-marker ee nil)))
+		    (point-at-eol)))
+	(add-text-properties (point-at-bol) end
 			     (list 'org-caption cap
 				   'org-attributes attr
 				   'org-label label))
 	(if label (push (cons label label) target-alist))
+	(goto-char end)
 	(setq cap nil attr nil label nil)))))
   target-alist)
 
