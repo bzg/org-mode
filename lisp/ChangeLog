@@ -1,3 +1,9 @@
+2010-03-12  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-agenda.el (org-agenda-skip-if-todo): New function.
+	(org-agenda-skip-if): Add conditions for TODO keywords.
+	(org-agenda-skip-if): Document the new todo conditions.
+
 2010-03-11  Mikael Fornius  <mfo@abc.se>
 
 	* org.el (org-at-property-p): Check if we are inside a property

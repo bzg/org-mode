@@ -11883,6 +11883,10 @@ Skip current entry if it has not been scheduled.
 Skip current entry if it has a deadline.
 @item '(org-agenda-skip-entry-if 'scheduled 'deadline)
 Skip current entry if it has a deadline, or if it is scheduled.
+@item '(org-agenda-skip-entry-if 'todo '("TODO" "WAITING"))
+Skip current entry if the TODO keyword is TODO or WAITING.
+@item '(org-agenda-skip-entry-if 'todo 'done)
+Skip current entry if the TODO keyword marks a DONE state.
 @item '(org-agenda-skip-entry-if 'timestamp)
 Skip current entry if it has any timestamp, may also be deadline or scheduled.
 @item '(org-agenda-skip-entry 'regexp "regular expression")
