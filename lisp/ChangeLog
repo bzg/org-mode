@@ -4,6 +4,8 @@
 	author line.
 	(org-export-latex-fontify-headline): Allow several arguments, not
 	just one.
+	(org-export-latex-fix-inputenc): Catch the error when
+	`latexenc-coding-system-to-inputenc' is not defined.
 
 	* org-agenda.el (org-agenda-skip-if-todo): New function.
 	(org-agenda-skip-if): Add conditions for TODO keywords.

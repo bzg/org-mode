@@ -2128,7 +2128,8 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 (defun org-export-latex-fix-inputenc ()
   "Set the codingsystem in inputenc to what the buffer is."
   (let* ((cs buffer-file-coding-system)
-	 (opt (or (latexenc-coding-system-to-inputenc cs) "utf8")))
+	 (opt (or (ignore-errors (latexenc-coding-system-to-inputenc cs))
+		  "utf8")))
     (when opt
       ;; Translate if that is requested
       (setq opt (or (cdr (assoc opt org-export-latex-inputenc-alist)) opt))
