@@ -1,5 +1,10 @@
 2010-03-12  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-latex.el (org-export-latex-make-header): Fully process
+	author line.
+	(org-export-latex-fontify-headline): Allow several arguments, not
+	just one.
+
 	* org-agenda.el (org-agenda-skip-if-todo): New function.
 	(org-agenda-skip-if): Add conditions for TODO keywords.
 	(org-agenda-skip-if): Document the new todo conditions.

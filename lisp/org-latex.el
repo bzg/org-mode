@@ -1177,7 +1177,7 @@ OPT-PLIST is the options plist for current buffer."
 	 (format "\\author{%s}\n"
 		 (org-export-latex-fontify-headline (or author user-full-name)))
        (format "%%\\author{%s}\n"
-	       (or author user-full-name)))
+	       (org-export-latex-fontify-headline (or author user-full-name))))
      ;; insert the date
      (format "\\date{%s}\n"
 	     (format-time-string
@@ -1331,7 +1331,9 @@ links, keywords, lists, tables, fixed-width"
 		      "\\(?:<[^<>\n]*>\\)*"
 		      "\\(?:\\[[^][\n]*?\\]\\)*"
 		      "\\(?:<[^<>\n]*>\\)*"
-		      (org-create-multibrace-regexp "{" "}" 3))))
+		      "\\("
+		      (org-create-multibrace-regexp "{" "}" 3)
+		      "\\)\\{1,3\\}")))
       (while (re-search-forward re nil t)
 	(unless (save-excursion (goto-char (match-beginning 0))
 				(equal (char-after (point-at-bol)) ?#))
