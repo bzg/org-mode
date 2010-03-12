@@ -1,5 +1,8 @@
 2010-03-12  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-set-property, org-delete-property): Go back to
+	prompting for the property.
+
 	* org-latex.el (org-export-latex-make-header): Fully process
 	author line.
 	(org-export-latex-fontify-headline): Allow several arguments, not

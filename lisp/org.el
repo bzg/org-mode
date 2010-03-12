@@ -12986,8 +12986,7 @@ in the current file."
   (interactive
    (let* ((completion-ignore-case t)
 	  (keys (org-buffer-property-keys nil t t))
-	  (prop0 (or (when (org-at-property-p) (org-match-string-no-properties 2))
-		     (org-icompleting-read "Property: " (mapcar 'list keys))))
+	  (prop0 (org-icompleting-read "Property: " (mapcar 'list keys)))
 	  (prop (if (member prop0 keys)
 		    prop0
 		  (or (cdr (assoc (downcase prop0)
@@ -13014,9 +13013,7 @@ in the current file."
   "In the current entry, delete PROPERTY."
   (interactive
    (let* ((completion-ignore-case t)
-	  (prop (or (when (org-at-property-p) (org-match-string-no-properties 2))
-		    (org-icompleting-read
-		     "Property: " (org-entry-properties nil 'standard)))))
+	  (prop (org-icompleting-read "Property: " (org-entry-properties nil 'standard))))
      (list prop)))
   (message "Property %s %s" property
 	   (if (org-entry-delete nil property)
