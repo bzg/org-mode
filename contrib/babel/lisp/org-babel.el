@@ -124,6 +124,8 @@ can not be resolved.")
 (defvar org-babel-hash-show 4
   "Number of initial characters to show of a hidden results hash.")
 
+(defvar org-babel-after-execute-hook nil
+  "Hook for functions to be called after `org-babel-execute-src-block'")
 (defun org-babel-named-src-block-regexp-for-name (name)
   "Regexp used to match named src block."
   (concat org-babel-source-name-regexp (regexp-quote name) "[ \t\n]*"
@@ -240,6 +242,7 @@ block."
 			     (list (list result))
 			   result)))
 	(org-babel-insert-result result result-params info new-hash)
+	(run-hooks 'org-babel-after-execute-hook)
 	result))))
 
 (defun org-babel-load-in-session (&optional arg info)
