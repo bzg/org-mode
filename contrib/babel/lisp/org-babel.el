@@ -271,7 +271,10 @@ of the source block to the kill ring."
          (lang (first info))
          (body (second info))
          (params (third info))
-         (session (cdr (assoc :session params))))
+         (session (cdr (assoc :session params)))
+	 (dir (cdr (assoc :dir params)))
+	 (default-directory
+	   (or (and dir (file-name-as-directory dir)) default-directory)))
     (unless (member lang org-babel-interpreters)
       (error "Language is not in `org-babel-interpreters': %s" lang))
     ;; copy body to the kill ring
