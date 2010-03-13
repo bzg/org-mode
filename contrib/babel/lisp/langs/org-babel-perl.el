@@ -69,7 +69,7 @@ specifying a var of the same value."
 
 (defvar org-babel-perl-buffers '(:default . nil))
 
-(defun org-babel-perl-initiate-session (&optional session)
+(defun org-babel-perl-initiate-session (&optional session params)
   "Simply return nil, as sessions are not supported by perl"
 nil)
 

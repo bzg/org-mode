@@ -183,7 +183,7 @@ then create.  Return the initialized session."
         (setq clojure-buffer (org-babel-clojure-session-buffer session)))
       session)))
 
-(defun org-babel-clojure-initiate-session (&optional session)
+(defun org-babel-clojure-initiate-session (&optional session params)
   "Return the slime-clojure repl buffer bound to this session
 or nil if \"none\" is specified"
   (unless (and (stringp session) (string= session "none"))

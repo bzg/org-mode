@@ -120,7 +120,7 @@ then create.  Return the initialized session."
 					   (assq-delete-all session org-babel-python-buffers)))
       session)))
 
-(defun org-babel-python-initiate-session (&optional session)
+(defun org-babel-python-initiate-session (&optional session params)
   (unless (string= session "none")
     (org-babel-python-session-buffer (org-babel-python-initiate-session-by-key session))))
 

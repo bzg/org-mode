@@ -115,7 +115,7 @@ Emacs-lisp table, otherwise return the results as a string."
                                          "'" "\"" results)))))
      results)))
 
-(defun org-babel-ruby-initiate-session (&optional session)
+(defun org-babel-ruby-initiate-session (&optional session params)
   "If there is not a current inferior-process-buffer in SESSION
 then create.  Return the initialized session."
   (unless (string= session "none")
