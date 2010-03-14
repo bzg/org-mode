@@ -1928,11 +1928,13 @@ Orgtbl mode, including spreadsheet capabilities.  For details, see
 
 The table editor makes use of the Emacs @file{calc} package to implement
 spreadsheet-like capabilities.  It can also evaluate Emacs Lisp forms to
-derive fields from other fields.  While fully featured, Org's
-implementation is not identical to other spreadsheets.  For example,
-Org knows the concept of a @emph{column formula} that will be
-applied to all non-header fields in a column without having to copy the
-formula to each relevant field.
+derive fields from other fields.  While fully featured, Org's implementation
+is not identical to other spreadsheets.  For example, Org knows the concept
+of a @emph{column formula} that will be applied to all non-header fields in a
+column without having to copy the formula to each relevant field.  There is
+also a formula debugger, and a formula editor with features for highlighting
+fields in the table corresponding to the references at the point in the
+formula, moving these references by arrow keys
 
 @menu
 * References::                  How to refer to another field or range
@@ -2039,6 +2041,21 @@ into Calc vector functions.  Empty fields in ranges are normally
 suppressed, so that the vector contains only the non-empty fields (but
 see the @samp{E} mode switch below).  If there are no non-empty fields,
 @samp{[0]} is returned to avoid syntax errors in formulas.
+
+@subsubheading Field coordinates
+@cindex field coordinates
+@cindex coordinates, of field
+@cindex row, of field coordinates
+@cindex column, of field coordinates
+
+For Calc formulas and Lisp formulas @code{@@#} and @code{$#} can be used to
+get the row or column number of the field where the formula result goes.
+The traditional Lisp formula equivalents are @code{org-table-current-dline}
+and @code{org-table-current-column}.  Example:
+
+@example
+if(@@# % 2, $#, string(""))      @r{column number on odd lines only}
+@end example
 
 @subsubheading Named references
 @cindex named references

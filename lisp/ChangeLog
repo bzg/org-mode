@@ -1,3 +1,8 @@
+2010-03-14  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-table.el (org-table-eval-formula): Replace $# and @# by
+	current column and row number.
+
 2010-03-12  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-set-property, org-delete-property): Go back to

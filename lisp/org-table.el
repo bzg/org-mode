@@ -2245,6 +2245,20 @@ not overwrite the stored one."
 	(setq form (copy-sequence formula)
 	      lispp (and (> (length form) 2)(equal (substring form 0 2) "'(")))
 	(if (and lispp literal) (setq lispp 'literal))
+
+	;; Insert row and column number of formula result field
+	(while (string-match "[@$]#" form)
+	  (setq form
+		(replace-match
+		 (format "%d"
+			 (save-match-data
+			   (if (equal (substring form (match-beginning 0)
+						 (1+ (match-beginning 0)))
+				      "@")
+			       (org-table-current-dline)
+			     (org-table-current-column))))
+		 t t form)))
+
 	;; Check for old vertical references
 	(setq form (org-table-rewrite-old-row-references form))
 	;; Insert remote references

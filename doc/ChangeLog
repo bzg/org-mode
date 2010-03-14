@@ -1,3 +1,8 @@
+2010-03-14  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (The spreadsheet): Mention the formula editor.
+	(References): Document field coordinates.
+
 2010-03-05  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* pdflayout.sty: New file.
