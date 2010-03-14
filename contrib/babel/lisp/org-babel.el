@@ -124,6 +124,8 @@ can not be resolved.")
 (defvar org-babel-hash-show 4
   "Number of initial characters to show of a hidden results hash.")
 
+(defvar org-babel-after-execute-hook nil
+  "Hook for functions to be called after `org-babel-execute-src-block'")
 (defun org-babel-named-src-block-regexp-for-name (name)
   "Regexp used to match named src block."
   (concat org-babel-source-name-regexp (regexp-quote name) "[ \t\n]*"
@@ -240,6 +242,7 @@ block."
 			     (list (list result))
 			   result)))
 	(org-babel-insert-result result result-params info new-hash)
+	(run-hooks 'org-babel-after-execute-hook)
 	result))))
 
 (defun org-babel-load-in-session (&optional arg info)
@@ -268,7 +271,10 @@ of the source block to the kill ring."
          (lang (first info))
          (body (second info))
          (params (third info))
-         (session (cdr (assoc :session params))))
+         (session (cdr (assoc :session params)))
+	 (dir (cdr (assoc :dir params)))
+	 (default-directory
+	   (or (and dir (file-name-as-directory dir)) default-directory)))
     (unless (member lang org-babel-interpreters)
       (error "Language is not in `org-babel-interpreters': %s" lang))
     ;; copy body to the kill ring
@@ -276,7 +282,7 @@ of the source block to the kill ring."
     ;; if called with a prefix argument, then process header arguments
     (if arg (funcall (intern (concat "org-babel-prep-session:" lang)) session params))
     ;; just to the session using pop-to-buffer
-    (pop-to-buffer (funcall (intern (format "org-babel-%s-initiate-session" lang)) session))
+    (pop-to-buffer (funcall (intern (format "org-babel-%s-initiate-session" lang)) session params))
     (move-end-of-line 1)))
 
 (defun org-babel-open-src-block-result (&optional re-run)

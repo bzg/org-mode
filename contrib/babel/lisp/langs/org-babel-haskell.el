@@ -85,7 +85,7 @@
       (match-string 1 string)
     string))
 
-(defun org-babel-haskell-initiate-session (&optional session)
+(defun org-babel-haskell-initiate-session (&optional session params)
   "If there is not a current inferior-process-buffer in SESSION
 then create.  Return the initialized session."
   ;; TODO: make it possible to have multiple sessions

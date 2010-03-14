@@ -279,7 +279,7 @@ called by `org-babel-execute-src-block' via multiple-value-bind."
 ;;
 ;; BUG: does not work yet. Error: ad-Orig-error: buffer none doesn't exist or has no process 
 ;; UNUSED DEF
-(defun org-babel-oz-initiate-session (&optional session)
+(defun org-babel-oz-initiate-session (&optional session params)
   "If there is not a current inferior-process-buffer in SESSION
 then create.  Return the initialized session."
   (unless (string= session "none")

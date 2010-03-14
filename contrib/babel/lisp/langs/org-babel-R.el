@@ -42,8 +42,7 @@ called by `org-babel-execute-src-block'."
   (save-excursion
     (let* ((processed-params (org-babel-process-params params))
            (result-type (fourth processed-params))
-	   (ess-ask-for-ess-directory (not (cdr (assoc :dir params))))
-           (session (org-babel-R-initiate-session (first processed-params)))
+           (session (org-babel-R-initiate-session (first processed-params) params))
            (vars (second processed-params))
 	   (column-names-p (and (cdr (assoc :colnames params))
 				(string= "yes" (cdr (assoc :colnames params)))))
@@ -59,7 +58,7 @@ called by `org-babel-execute-src-block'."
 
 (defun org-babel-prep-session:R (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."
-  (let* ((session (org-babel-R-initiate-session session))
+  (let* ((session (org-babel-R-initiate-session session params))
          (vars (org-babel-ref-variables params)))
     (mapc (lambda (pair) (org-babel-R-assign-elisp session (car pair) (cdr pair))) vars)
     session))
@@ -94,16 +93,17 @@ called by `org-babel-execute-src-block'."
                 name transition-file (if (eq (second value) 'hline) "TRUE" "FALSE")))
     (format "%s <- %s" name (org-babel-R-quote-tsv-field value))))
 
-(defun org-babel-R-initiate-session (session)
+(defun org-babel-R-initiate-session (session params)
   "If there is not a current R process then create one."
   (unless (string= session "none")
-    (setq session (or session "*R*"))
-    (if (org-babel-comint-buffer-livep session)
-        session
-      (save-window-excursion
-	(R)
-	(rename-buffer (if (bufferp session) (buffer-name session)
-			 (if (stringp session) session (buffer-name)))) (current-buffer)))))
+    (let ((session (or session "*R*"))
+	  (ess-ask-for-ess-directory (not (cdr (assoc :dir params)))))
+      (if (org-babel-comint-buffer-livep session)
+	  session
+	(save-window-excursion
+	  (R)
+	  (rename-buffer (if (bufferp session) (buffer-name session)
+			   (if (stringp session) session (buffer-name)))) (current-buffer))))))
 
 (defun org-babel-R-construct-graphics-device-call (out-file params)
   "Construct the call to the graphics device"

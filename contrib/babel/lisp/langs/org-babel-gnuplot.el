@@ -168,7 +168,7 @@ called by `org-babel-execute-src-block'."
         (insert (org-babel-chomp body)))
       buffer)))
 
-(defun org-babel-gnuplot-initiate-session (&optional session)
+(defun org-babel-gnuplot-initiate-session (&optional session params)
   "If there is not a current inferior-process-buffer in SESSION
 then create.  Return the initialized session.  The current
 `gnuplot-mode' doesn't provide support for multiple sessions."

@@ -111,7 +111,7 @@ Emacs-lisp table, otherwise return the results as a string."
                                          "'" "\"" results)))))
      results)))
 
-(defun org-babel-sh-initiate-session (&optional session)
+(defun org-babel-sh-initiate-session (&optional session params)
   (unless (string= session "none")
     (save-window-excursion
       (or (org-babel-comint-buffer-livep session)
