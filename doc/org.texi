@@ -2042,7 +2042,7 @@ suppressed, so that the vector contains only the non-empty fields (but
 see the @samp{E} mode switch below).  If there are no non-empty fields,
 @samp{[0]} is returned to avoid syntax errors in formulas.
 
-@subsubheading Field coordinates
+@subsubheading Field coordinates in formulas
 @cindex field coordinates
 @cindex coordinates, of field
 @cindex row, of field coordinates
