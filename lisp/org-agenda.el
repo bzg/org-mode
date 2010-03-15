@@ -5996,7 +5996,7 @@ When called with a prefix argument, include all archive files as well."
 		(if org-agenda-follow-mode     " Follow" "")
 		(if org-agenda-entry-text-mode " ETxt"   "")
 		(if org-agenda-include-diary   " Diary"  "")
-		(if org-agenda-include-deadlines " Deadlines"  "")
+		(if org-agenda-include-deadlines " Ddl"  "")
 		(if org-agenda-use-time-grid   " Grid"   "")
 		(if (and (boundp 'org-habit-show-habits)
 			 org-habit-show-habits) " Habit"   "")
