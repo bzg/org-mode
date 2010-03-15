@@ -912,6 +912,12 @@ Custom commands can set this variable in the options section."
   :group 'org-agenda-daily/weekly
   :type 'boolean)
 
+(defcustom org-agenda-include-deadlines t
+  "If non-nil, include entries within their deadline warning period.
+Custom commands can set this variable in the options section."
+  :group 'org-agenda-daily/weekly
+  :type 'boolean)
+
 (defcustom org-agenda-include-all-todo nil
   "Set  means weekly/daily agenda will always contain all TODO entries.
 The TODO entries will be listed at the top of the agenda, before
@@ -1585,6 +1591,7 @@ The following commands are available:
 (org-defkey org-agenda-mode-map "l" 'org-agenda-log-mode)
 (org-defkey org-agenda-mode-map "v" 'org-agenda-view-mode-dispatch)
 (org-defkey org-agenda-mode-map "D" 'org-agenda-toggle-diary)
+(org-defkey org-agenda-mode-map "!" 'org-agenda-toggle-deadlines)
 (org-defkey org-agenda-mode-map "G" 'org-agenda-toggle-time-grid)
 (org-defkey org-agenda-mode-map "r" 'org-agenda-redo)
 (org-defkey org-agenda-mode-map "g" 'org-agenda-redo)
@@ -1684,6 +1691,9 @@ The following commands are available:
      "--"
      ["Include Diary" org-agenda-toggle-diary
       :style toggle :selected org-agenda-include-diary
+      :active (org-agenda-check-type nil 'agenda)]
+     ["Include Deadlines" org-agenda-toggle-deadlines
+      :style toggle :selected org-agenda-include-deadlines
       :active (org-agenda-check-type nil 'agenda)]
      ["Use Time Grid" org-agenda-toggle-time-grid
       :style toggle :selected org-agenda-use-time-grid
@@ -3270,18 +3280,23 @@ given in `org-agenda-start-on-weekday'."
       (while (setq file (pop files))
 	(catch 'nextfile
 	  (org-check-agenda-file file)
-	  (cond
-	   ((eq org-agenda-show-log 'only)
-	    (setq rtn (org-agenda-get-day-entries
-		       file date :closed)))
-	   (org-agenda-show-log
-	    (setq rtn (apply 'org-agenda-get-day-entries
-			     file date
-			     (append '(:closed) org-agenda-entry-types))))
-	   (t
-	    (setq rtn (apply 'org-agenda-get-day-entries
-			     file date
-			     org-agenda-entry-types))))
+	  (let ((org-agenda-entry-types org-agenda-entry-types))
+	    (if org-agenda-include-deadlines
+		(add-to-list 'org-agenda-entry-types :deadline)
+	      (setq org-agenda-entry-types
+		    (delq :deadline org-agenda-entry-types)))
+	    (cond
+	     ((eq org-agenda-show-log 'only)
+	      (setq rtn (org-agenda-get-day-entries
+			 file date :closed)))
+	     (org-agenda-show-log
+	      (setq rtn (apply 'org-agenda-get-day-entries
+			       file date
+			       (append '(:closed) org-agenda-entry-types))))
+	     (t
+	      (setq rtn (apply 'org-agenda-get-day-entries
+			       file date
+			       org-agenda-entry-types)))))
 	  (setq rtnall (append rtnall rtn))))
       (if org-agenda-include-diary
 	  (let ((org-agenda-search-headline-for-time t))
@@ -5713,6 +5728,7 @@ With prefix ARG, go backward that many times the current span."
       ((?E ?e) (call-interactively 'org-agenda-entry-text-mode))
       (?G (call-interactively 'org-agenda-toggle-time-grid))
       (?D (call-interactively 'org-agenda-toggle-diary))
+      (?\! (call-interactively 'org-agenda-toggle-deadlines))
       (?\[ (let ((org-agenda-include-inactive-timestamps t))
 	     (org-agenda-check-type t 'timeline 'agenda)
 	     (org-agenda-redo))
@@ -5950,6 +5966,16 @@ When called with a prefix argument, include all archive files as well."
   (message "Diary inclusion turned %s"
 	   (if org-agenda-include-diary "on" "off")))
 
+(defun org-agenda-toggle-deadlines ()
+  "Toggle diary inclusion in an agenda buffer."
+  (interactive)
+  (org-agenda-check-type t 'agenda)
+  (setq org-agenda-include-deadlines (not org-agenda-include-deadlines))
+  (org-agenda-redo)
+  (org-agenda-set-mode-name)
+  (message "Deadlines inclusion turned %s"
+	   (if org-agenda-include-deadlines "on" "off")))
+
 (defun org-agenda-toggle-time-grid ()
   "Toggle time grid in an agenda buffer."
   (interactive)
@@ -5970,6 +5996,7 @@ When called with a prefix argument, include all archive files as well."
 		(if org-agenda-follow-mode     " Follow" "")
 		(if org-agenda-entry-text-mode " ETxt"   "")
 		(if org-agenda-include-diary   " Diary"  "")
+		(if org-agenda-include-deadlines " Deadlines"  "")
 		(if org-agenda-use-time-grid   " Grid"   "")
 		(if (and (boundp 'org-habit-show-habits)
 			 org-habit-show-habits) " Habit"   "")

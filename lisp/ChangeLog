@@ -1,3 +1,21 @@
+2010-03-15  John Wiegley  <jwiegley@gmail.com>
+
+	* org-agenda.el (org-agenda-include-deadlines): Added new
+	customization variable to determine whether unscheduled tasks
+	should appear in the agenda solely because of their deadline.
+	Default to true, which was the previous behavior (it just wasn't
+	configurable).
+	(org-agenda-mode-map, org-agenda-view-mode-dispatch): Bind ! in
+	the agenda to show/hide deadline tasks.
+	(org-agenda-menu): Added menu option for show/hide deadlines.
+	(org-agenda-list): Make the agenda list sensitive to the value of
+	`org-agenda-include-deadlines'.
+	(org-agenda-toggle-deadlines): New function to toggle the value of
+	`org-agenda-include-deadlines' and repaint the modeline
+	indicators.
+	(org-agenda-set-mode-name): Show "Deadlines" in the agenda
+	modeline if deadline tasks are being displayed.
+
 2010-03-14  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-table.el (org-table-eval-formula): Replace $# and @# by
