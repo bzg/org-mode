@@ -17350,6 +17350,12 @@ which make use of the date at the cursor."
 		       t t))
     (org-move-to-column column)))
 
+(defvar org-adaptive-fill-regexp-backup adaptive-fill-regexp
+  "Variable to store copy of `adaptive-fill-regexp'.
+Since `adaptive-fill-regexp' is set to never match, we need to
+store a backup of its value before entering `org-mode' so that
+the functionality can be provided as a fall-back.")
+
 (defun org-set-autofill-regexps ()
   (interactive)
   ;; In the paragraph separator we include headlines, because filling
@@ -17385,8 +17391,11 @@ which make use of the date at the cursor."
   ;; and fixed-width regions are not wrapped.  That function will pass
   ;; through to `fill-paragraph' when appropriate.
   (org-set-local 'fill-paragraph-function 'org-fill-paragraph)
-  ; Adaptive filling: To get full control, first make sure that
+  ;; Adaptive filling: To get full control, first make sure that
   ;; `adaptive-fill-regexp' never matches.  Then install our own matcher.
+  (unless (local-variable-p 'adaptive-fill-regexp)
+    (org-set-local 'org-adaptive-fill-regexp-backup
+                   adaptive-fill-regexp))
   (org-set-local 'adaptive-fill-regexp "\000")
   (org-set-local 'adaptive-fill-function
 		 'org-adaptive-fill-function)
@@ -17415,8 +17424,11 @@ which make use of the date at the cursor."
   "Return a fill prefix for org-mode files.
 In particular, this makes sure hanging paragraphs for hand-formatted lists
 work correctly."
-  (cond ((looking-at "#[ \t]+")
-	 (match-string 0))
+  (cond
+   ;; Comment line
+   ((looking-at "#[ \t]+")
+    (match-string-no-properties 0))
+   ;; Description list
 	((looking-at "[ \t]*\\([-*+] .*? :: \\)")
 	 (save-excursion
 	   (if (> (match-end 1) (+ (match-beginning 1)
@@ -17424,11 +17436,14 @@ work correctly."
 	       (goto-char (+ (match-beginning 1) 5))
 	     (goto-char (match-end 0)))
 	   (make-string (current-column) ?\ )))
-	((looking-at "[ \t]*\\([-*+] \\|[0-9]+[.)]  ?\\)?")
+    ;; Ordered or unordered list
+	((looking-at "[ \t]*\\([-*+] \\|[0-9]+[.)]  ?\\)")
 	 (save-excursion
 	   (goto-char (match-end 0))
 	   (make-string (current-column) ?\ )))
-	(t nil)))
+    ;; Other text
+    ((looking-at org-adaptive-fill-regexp-backup)
+     (match-string-no-properties 0))))
 
 ;;; Other stuff.
 

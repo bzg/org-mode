@@ -1,3 +1,11 @@
+2010-03-15  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-adaptive-fill-regexp-backup): New variable.
+	(org-set-autofill-regexps): Store a backup of
+	`adaptive-fill-regexp'.
+	(org-adaptive-fill-function): Fix filling of comments and ordered
+	lists. If there is no other match, till try adaptive fill.
+
 2010-03-15  John Wiegley  <jwiegley@gmail.com>
 
 	* org-agenda.el (org-agenda-include-deadlines): Added new
