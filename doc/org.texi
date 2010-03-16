@@ -4479,7 +4479,7 @@ TIMESTAMP    @r{The first keyword-less timestamp in the entry.}
 TIMESTAMP_IA @r{The first inactive timestamp in the entry.}
 CLOCKSUM     @r{The sum of CLOCK intervals in the subtree.  @code{org-clock-sum}}
              @r{must be run first to compute the values.}
-BLOCKED      @r{Set if task is currently blocked by children or siblings}
+BLOCKED      @r{"t" if task is currently blocked by children or siblings}
 ITEM         @r{The content of the entry.}
 @end example
 
