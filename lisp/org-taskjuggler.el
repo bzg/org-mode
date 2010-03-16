@@ -199,7 +199,7 @@
 (defun org-taskjuggler-open-task (task)
   (let ((id (org-taskjuggler-clean-id (cdr (assoc "ID" task))))
 	(headline (cdr (assoc "headline" task)))
-	(effort (org-taskjuggler-clean-effort(cdr (assoc org-effort-property task))))
+	(effort (org-taskjuggler-clean-effort (cdr (assoc org-effort-property task))))
 	(depends (cdr (assoc "depends" task)))
 	(allocate (cdr (assoc "allocate" task)))
 	(account (cdr (assoc "account" task)))
@@ -210,7 +210,7 @@
     (insert
      (concat 
       "task " 
-      (or id (concat "id" (number-to-string (setq current-id (1+ current-id))))) 
+      (or id (concat "id" (number-to-string (incf current-id)))) 
       " \"" headline "\" {" 
       (and effort (concat "\n effort " effort))
       (and depends (concat "\n depends " depends))
