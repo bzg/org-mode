@@ -175,7 +175,19 @@
 	  (org-taskjuggler-open-task task)
 	  (setq old-level level)))
       (org-taskjuggler-close-maybe 1)
-      (org-taskjuggler-insert-reports))))
+      (org-taskjuggler-insert-reports)
+      (save-buffer)
+      (or (org-export-push-to-kill-ring "TaskJuggler")
+	  (message "Exporting... done"))
+      (current-buffer))))
+
+;;;###autoload
+(defun org-export-as-taskjuggler-and-open ()
+  "Export the current buffer as a TaskJuggler file and open it with the TaskJuggler GUI."
+  (interactive)
+  (let ((file-name (buffer-file-name (org-export-as-taskjuggler)))
+	(command "TaskJugglerUI"))
+    (start-process-shell-command command nil command file-name)))
 
 (defun org-taskjuggler-components ()
   (let* ((props (org-entry-properties))
