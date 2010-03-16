@@ -79,10 +79,27 @@
   :group 'org-export-taskjuggler
   :type 'string)
 
-(defcustom org-export-taskjuggler-default-project-duration 365
+(defcustom org-export-taskjuggler-default-project-duration 180
   "."
   :group 'org-export-taskjuggler
   :type 'integer)
+
+(defcustom org-export-taskjuggler-default-reports 
+  '("taskreport \"Gantt Chart\" {
+  headline \"Project Gantt Chart\"
+  columns hierarchindex, name, start, end, effort, duration, completed, chart
+  timeformat \"%a %Y-%m-%d\"
+  loadunit days
+}"
+"resourcereport \"Resource Graph\" {
+  headline \"Resource Allocation Graph\"
+  columns no, name, rate, utilization, freeload, chart
+  loadunit days
+  hidetask 1
+}")
+  ""
+  :group 'org-export-taskjuggler
+  :type '(repeat (string :tag "Report")))
 
 ;;; Hooks
 
@@ -145,19 +162,20 @@
     (with-current-buffer buffer
       (erase-buffer)
       (org-taskjuggler-open-project (car tasks))
-      (dolist (resource resources nil)
+      (dolist (resource resources)
 	(let ((level (cdr (assoc "level" resource))))
 	  (org-taskjuggler-close-maybe level)
 	  (org-taskjuggler-open-resource resource)
 	  (setq old-level level)))
       (org-taskjuggler-close-maybe 1)
       (setq old-level 0)
-      (dolist (task tasks nil)
+      (dolist (task tasks)
 	(let ((level (cdr (assoc "level" task))))
 	  (org-taskjuggler-close-maybe level)
 	  (org-taskjuggler-open-task task)
 	  (setq old-level level)))
-      (org-taskjuggler-close-maybe 1))))
+      (org-taskjuggler-close-maybe 1)
+      (org-taskjuggler-insert-reports))))
 
 (defun org-taskjuggler-components ()
   (let* ((props (org-entry-properties))
@@ -229,6 +247,10 @@
   (when (= old-level level)
     (insert "}\n")))
 
+(defun org-taskjuggler-insert-reports ()
+  (let (report)
+    (dolist (report org-export-taskjuggler-default-reports)
+      (insert report "\n"))))
 
 (provide 'org-taskjuggler)
 
