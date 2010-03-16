@@ -118,10 +118,11 @@
 	    `((("ID" . ,(user-login-name)) 
 	       ("headline" . ,user-full-name) 
 	       ("level" . 1)))))
-    ;; add a default allocation if none was given
+    ;; add a default allocation to the first task if none was given
     (unless (assoc "allocate" (car tasks))
-      (let ((task (car tasks)))
-	(setcar tasks (push (cons "allocate" (user-login-name)) task))))
+      (let ((task (car tasks))
+	    (resource-id (cdr (assoc "ID" (car resources)))))
+	(setcar tasks (push (cons "allocate" resource-id) task))))
     ;; add a default start date to the first task if none was given
     (unless (assoc "start" (car tasks))
       (let ((task (car tasks))
@@ -159,7 +160,6 @@
       (org-taskjuggler-close-maybe 1))))
 
 (defun org-taskjuggler-components ()
-  ""
   (let* ((props (org-entry-properties))
 	 (components (org-heading-components))
 	 (level (car components))
