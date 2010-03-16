@@ -65,6 +65,34 @@ org-agenda-text-search-extra-files
   :group 'org-mobile
   :type 'directory)
 
+(defcustom org-mobile-use-encryption nil
+  "Non-nil means keep only encrypted files on the webdav server.
+Encryption uses AES-256, with a password given in
+`org-mobile-encryption-password'.
+When nil, plain files are kept on the server.
+Turning on encryption requires to set the same password in the MobileOrg
+application."
+  :group 'org-mobile
+  :type 'boolean)
+
+(defcustom org-mobile-encryption-tempfile "~/orgtmpcrypt"
+  "File that is being used as a temporary file for encryption.
+This must be local file on your local machine (not on the webdav server).
+You might want to put this file into a directory where only you have access."
+  :group 'org-mobile
+  :type 'directory)
+
+(defcustom org-mobile-encryption-password ""
+  "Password for encrypting files uploaded to the server.
+This is a single password which is used for AES-256 encryption.  The same
+password must also be set in the MobileOrg application.  All Org files,
+including mobileorg.org will be encrypted using this password.
+Note that, whe Org runs the encryption commands, the password could
+be visible on your system with the `ps' command.  So this method is only
+intended to keep the files secure on the server, not on your own machine."
+  :group 'org-mobile
+  :type '(string :tag "Password"))
+
 (defcustom org-mobile-inbox-for-pull "~/org/from-mobile.org"
   "The file where captured notes and flags will be appended to.
 During the execution of `org-mobile-pull', the file
@@ -320,7 +348,16 @@ agenda view showing the flagged items."
 	       (file-exists-p
 		(file-name-directory org-mobile-inbox-for-pull)))
     (error
-     "Variable `org-mobile-inbox-for-pull' must point to a file in an existing directory")))
+     "Variable `org-mobile-inbox-for-pull' must point to a file in an existing directory"))
+  (when org-mobile-use-encryption
+    (unless (string-match "\\S-" org-mobile-encryption-password)
+      (error
+       "To use encryption, you must set `org-mobile-encryption-password'"))
+    (unless (file-writable-p org-mobile-encryption-tempfile)
+      (error "Cannot write to entryption tempfile %s"
+	     org-mobile-encryption-tempfile))
+    (unless (executable-find "openssl")
+      (error "openssl is needed to encrypt files."))))
 
 (defun org-mobile-create-index-file ()
   "Write the index file in the WebDAV directory."
@@ -400,7 +437,9 @@ agenda view showing the flagged items."
 	      target-dir (file-name-directory target-path))
 	(unless (file-directory-p target-dir)
 	  (make-directory target-dir 'parents))
-	(copy-file file target-path 'ok-if-exists)
+	(if org-mobile-use-encryption
+	    (org-mobile-encrypt-and-move file target-path)
+	  (copy-file file target-path 'ok-if-exists))
 	(setq check (shell-command-to-string
 		     (concat org-mobile-checksum-binary " "
 			     (shell-quote-argument (expand-file-name file)))))
@@ -466,6 +505,11 @@ The table of checksums is written to the file mobile-checksums."
 	)
        ((memq (nth 2 e) '(todo-tree tags-tree occur-tree))
 	;; These are trees, not really agenda commands
+	)
+       ((and (memq (nth 2 e) '(todo tags tags-todo))
+	     (or (null (nth 3 e))
+		 (not (string-match "\\S-" (nth 3 e)))))
+	;; These would be interactive because the match string is empty
 	)
        ((memq (nth 2 e) '(agenda alltodo todo tags tags-todo))
 	;; a normal command
@@ -570,26 +614,66 @@ The table of checksums is written to the file mobile-checksums."
   (interactive)
   (let* ((file (expand-file-name "agendas.org"
 				 org-mobile-directory))
+	 (file1 (if org-mobile-use-encryption
+		    org-mobile-encryption-tempfile
+		  file))
 	 (sumo (org-mobile-sumo-agenda-command))
 	 (org-agenda-custom-commands
-	  (list (append sumo (list (list file)))))
+	  (list (append sumo (list (list file1)))))
 	 (org-mobile-creating-agendas t))
-    (unless (file-writable-p file)
-      (error "Cannot write to file %s" file))
+    (unless (file-writable-p file1)
+      (error "Cannot write to file %s" file1))
     (when sumo
-      (org-store-agenda-views))))
+      (org-store-agenda-views))
+    (when org-mobile-use-encryption
+      (org-mobile-encrypt-file file1 file)
+      (delete-file file1))))
+
+(defun org-mobile-encrypt-and-move (infile outfile)
+  "Encrypt INFILE locally to INFILE_enc, then move it to OUTFILE.
+We do this in two steps so that remote paths will work, even if the
+encryption program does not understand them."
+  (let ((encfile (concat infile "_enc")))
+    (org-mobile-encrypt-file infile encfile)
+    (when outfile
+      (copy-file encfile outfile 'ok-if-exists)
+      (delete-file encfile))))
+
+(defun org-mobile-encrypt-file (infile outfile)
+  "Encrypt INFILE to OUTFILE, using `org-mobile-encryption-password'."
+  (shell-command
+   (format "openssl enc -aes-256-cbc -salt -pass %s -in %s -out %s"
+	   (shell-quote-argument (concat "pass:" org-mobile-encryption-password))
+	   (shell-quote-argument (expand-file-name infile))
+	   (shell-quote-argument (expand-file-name outfile)))))
+
+(defun org-mobile-decrypt-file (infile outfile)
+  "Decrypt INFILE to OUTFILE, using `org-mobile-encryption-password'."
+  (shell-command
+   (format "openssl enc -d -aes-256-cbc -salt -pass %s -in %s -out %s"
+	   (shell-quote-argument (concat "pass:" org-mobile-encryption-password))
+	   (shell-quote-argument (expand-file-name infile))
+	   (shell-quote-argument (expand-file-name outfile)))))
 
 (defun org-mobile-move-capture ()
   "Move the contents of the capture file to the inbox file.
 Return a marker to the location where the new content has been added.
 If nothing new has been added, return nil."
   (interactive)
-  (let ((inbox-buffer (find-file-noselect org-mobile-inbox-for-pull))
-	(capture-buffer (find-file-noselect
-			 (expand-file-name org-mobile-capture-file
-					   org-mobile-directory)))
-	(insertion-point (make-marker))
-	not-empty content)
+  (let* ((encfile nil)
+	 (capture-file (expand-file-name org-mobile-capture-file
+					 org-mobile-directory))
+	 (inbox-buffer (find-file-noselect org-mobile-inbox-for-pull))
+	 (capture-buffer
+	  (if (not org-mobile-use-encryption)
+	      (find-file-noselect capture-file)
+	    (delete-file org-mobile-encryption-tempfile)
+	    (setq encfile (concat org-mobile-encryption-tempfile "_enc"))
+	    (copy-file capture-file encfile)
+	    (org-mobile-decrypt-file encfile org-mobile-encryption-tempfile)
+	    (find-file-noselect org-mobile-encryption-tempfile)))
+	 (insertion-point (make-marker))
+	 not-empty content)
     (with-current-buffer capture-buffer
       (setq content (buffer-string))
       (setq not-empty (string-match "\\S-" content))
@@ -606,9 +690,13 @@ If nothing new has been added, return nil."
 	(save-buffer)
 	(org-mobile-update-checksum-for-capture-file (buffer-string))))
     (kill-buffer capture-buffer)
+    (when org-mobile-use-encryption
+      (org-mobile-encrypt-and-move org-mobile-encryption-tempfile
+				   capture-file))
     (if not-empty insertion-point)))
 
 (defun org-mobile-update-checksum-for-capture-file (buffer-string)
+  "Find the checksum line and modify it to match BUFFER-STRING."
   (let* ((file (expand-file-name "checksums.dat" org-mobile-directory))
 	 (buffer (find-file-noselect file)))
     (when buffer

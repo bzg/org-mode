@@ -1,5 +1,16 @@
 2010-04-01  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-mobile.el (org-mobile-use-encryption)
+	(org-mobile-encryption-tempfile, org-mobile-encryption-password):
+	New options.
+	(org-mobile-check-setup): CHeck the encryption setup.
+	(org-mobile-copy-agenda-files, org-mobile-sumo-agenda-command)
+	(org-mobile-create-sumo-agenda): Use encryption code.
+	(org-mobile-encrypt-and-move): New function.
+	(org-mobile-encrypt-file, org-mobile-decrypt-file): New
+	functions.
+	(org-mobile-move-capture): Decrypt the capture file.
+
 	* org.el (org-entities): Require the new file.
 	(org-export-latex-default-packages-alist): New variable.
 	(org-complete): Use new entity code for completion.

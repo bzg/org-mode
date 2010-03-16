@@ -12335,11 +12335,14 @@ in-buffer settings, but it will understand the logistics of todo state
 
 Org-mode has commands to prepare a directory with files for @i{MobileOrg},
 and to read captured notes from there.  If Emacs can directly write to the
-WebDAV directory accessed by @i{MobileOrg}, just point to this directory
-using the variable @code{org-mobile-directory}.  Using the @file{tramp}
-method, @code{org-mobile-directory} may point to a remote directory
-accessible through, for example, 
-@file{ssh/scp}:
+WebDAV directory@footnote{If you are using a public server, you might prefer
+to encrypt the files on the server.  This can be done with Org-mode 6.35 and
+MobileOrg 1.2.  On the Emacs side, configure the variables
+@code{org-mobile-use-encryption} and @code{org-mobile-encryption-password}.}
+accessed by @i{MobileOrg}, just point to this directory using the variable
+@code{org-mobile-directory}.  Using the @file{tramp} method,
+@code{org-mobile-directory} may point to a remote directory accessible
+through, for example, @file{ssh/scp}:
 
 @smallexample
 (setq org-mobile-directory "/scpc:user@@remote.host:org/webdav/")

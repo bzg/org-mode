@@ -1,6 +1,8 @@
 2010-04-01  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (The export dispatcher): Renamed from ASCII export.
+	(Setting up the staging area): Document the availability of
+	encryption for MobileOrg.
 
 2010-03-29  Carsten Dominik  <carsten.dominik@gmail.com>
 
