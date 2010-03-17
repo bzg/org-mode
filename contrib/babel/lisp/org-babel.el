@@ -261,10 +261,10 @@ session.  After loading the body this pops open the session."
     (pop-to-buffer (funcall (intern (concat "org-babel-load-session:" lang)) session body params))
     (move-end-of-line 1)))
 
-(defun org-babel-pop-to-session (&optional arg info)
-  "Pop to the session of the current source-code block.  If
-called with a prefix argument then evaluate the header arguments
-for the source block before entering the session.  Copy the body
+(defun org-babel-switch-to-session (&optional arg info)
+  "Switch to the session of the current source-code block.
+If called with a prefix argument then evaluate the header arguments
+for the source block before entering the session. Copy the body
 of the source block to the kill ring."
   (interactive)
   (let* ((info (or info (org-babel-get-src-block-info)))
@@ -284,6 +284,8 @@ of the source block to the kill ring."
     ;; just to the session using pop-to-buffer
     (pop-to-buffer (funcall (intern (format "org-babel-%s-initiate-session" lang)) session params))
     (move-end-of-line 1)))
+
+(defalias 'org-babel-pop-to-session 'org-babel-switch-to-session)
 
 (defun org-babel-open-src-block-result (&optional re-run)
   "If `point' is on a src block then open the results of the
