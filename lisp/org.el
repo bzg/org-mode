@@ -7912,7 +7912,7 @@ according to FMT (default from `org-email-link-description-format')."
     (?\371 . "%F9")  ; `u
     (?\373 . "%FB")  ; ^u
     (?\;   . "%3B")
-    (??    . "%3F")
+;;  (??    . "%3F")
     (?=    . "%3D")
     (?+    . "%2B")
     )
