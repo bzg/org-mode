@@ -266,15 +266,14 @@
   (and id (replace-regexp-in-string "[^a-zA-Z0-9_]" "_" id)))
 
 (defun org-taskjuggler-open-project (project)
-  (let ((id (org-taskjuggler-clean-id (cdr (assoc "ID" project))))
+  (let ((unique-id (cdr (assoc "unique-id" project)))
 	(headline (cdr (assoc "headline" project)))
 	(version (cdr (assoc "version" project)))
 	(start (cdr (assoc "start" project)))
 	(end (cdr (assoc "end" project))))
     (insert 
      (concat 
-      "project " 
-      (or id "FIXME") 
+      "project " unique-id
       " \"" headline "\" \"" version "\" " start " - " end " {\n " "}\n"))))
 
 (defun org-taskjuggler-open-resource (resource)
