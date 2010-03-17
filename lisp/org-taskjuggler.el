@@ -285,14 +285,18 @@
     (insert 
      (concat 
       "project " unique-id
-      " \"" headline "\" \"" version "\" " start " - " end " {\n " "}\n"))))
+      " \"" headline "\" \"" version "\" " start " - " end " {\n }\n"))))
 
 (defun org-taskjuggler-open-resource (resource)
   (let ((id (org-taskjuggler-clean-id (cdr (assoc "ID" resource))))
 	(unique-id (org-taskjuggler-clean-id (cdr (assoc "unique-id" resource))))
-	(headline (cdr (assoc "headline" resource))))
+	(headline (cdr (assoc "headline" resource)))
+	(limits (cdr (assoc "limits" resource)))
+	(vacation (cdr (assoc "vacation" resource))))
     (insert 
-     (concat "resource " (or id unique-id) " \"" headline "\" {\n "))))
+     (concat "resource " (or id unique-id) " \"" headline "\" {\n "
+	     (and limits (concat "\n limits { " limits " }\n"))
+	     (and vacation (concat "\n vacation " vacation "\n"))))))
 
 (defun org-taskjuggler-clean-effort (effort)
   (cond 
