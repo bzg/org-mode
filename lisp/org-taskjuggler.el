@@ -108,12 +108,13 @@
   (message "Exporting...")
   (let* ((tasks
 	  (org-taskjuggler-resolve-dependencies
-	   (org-taskjuggler-assign-ids 
+	   (org-taskjuggler-assign-task-ids 
 	    (org-map-entries '(org-taskjuggler-components) 
 			     org-export-taskjuggler-project-tag nil 'archive 'comment))))
 	 (resources
-	  (org-map-entries '(org-taskjuggler-components) 
-			   org-export-taskjuggler-resource-tag nil 'archive 'comment))
+	  (org-taskjuggler-assign-resource-ids
+	   (org-map-entries '(org-taskjuggler-components) 
+			    org-export-taskjuggler-resource-tag nil 'archive 'comment)))
 	 (filename (expand-file-name
 		    (concat
 		     (file-name-sans-extension
@@ -196,7 +197,7 @@
     (push (cons "headline" headline) props)
     (push (cons "parent-ordered" parent-ordered) props)))
 
-(defun org-taskjuggler-assign-ids (tasks)
+(defun org-taskjuggler-assign-task-ids (tasks)
   (let ((previous-level 0)
 	unique-ids
 	path
@@ -221,6 +222,16 @@
 	(push (cons "path" (mapconcat 'identity (reverse path) ".")) task)
 	(setq previous-level level)
 	(setq resolved-tasks (append resolved-tasks (list task)))))))
+
+(defun org-taskjuggler-assign-resource-ids (resources)
+  (let (unique-ids
+	unique-id
+	resource resolved-resources)
+    (dolist (resource resources resolved-resources)
+      (setq unique-id (org-taskjuggler-get-unique-id resource unique-ids))
+      (push unique-id unique-ids)
+      (push (cons "unique-id" unique-id) resource)
+      (setq resolved-resources (append resolved-resources (list resource))))))
 
 (defun org-taskjuggler-resolve-dependencies (tasks)
   (let ((previous-level 0)
@@ -278,9 +289,10 @@
 
 (defun org-taskjuggler-open-resource (resource)
   (let ((id (org-taskjuggler-clean-id (cdr (assoc "ID" resource))))
+	(unique-id (org-taskjuggler-clean-id (cdr (assoc "unique-id" resource))))
 	(headline (cdr (assoc "headline" resource))))
     (insert 
-     (concat "resource " id " \"" headline "\" {\n "))))
+     (concat "resource " (or id unique-id) " \"" headline "\" {\n "))))
 
 (defun org-taskjuggler-clean-effort (effort)
   (cond 
