@@ -1390,7 +1390,15 @@ look inside the drawer, you need to move the cursor to the drawer line and
 press @key{TAB} there.  Org mode uses the @code{PROPERTIES} drawer for
 storing properties (@pxref{Properties and Columns}), and you can also arrange
 for state change notes (@pxref{Tracking TODO state changes}) and clock times
-(@pxref{Clocking work time}) to be stored in a drawer @code{LOGBOOK}.
+(@pxref{Clocking work time}) to be stored in a drawer @code{LOGBOOK}.  If you
+want to store a quick note in the LOGBOOK drawer, in a similar way as this is
+done by state changes, use
+
+@table @kbd
+@kindex C-c C-z
+@item C-c C-z
+Add a time-stamped note to the LOGBOOK drawer.
+@end table
 
 @node Blocks, Footnotes, Drawers, Document Structure
 @section Blocks
@@ -7587,8 +7595,9 @@ key for this.
 @itemx S-@key{down}
 Decrease the priority of the current item.
 @c
+@kindex C-c C-z
 @kindex z
-@item z
+@item z @ @r{or also} @ C-c C-z
 @vindex org-log-into-drawer
 Add a note to the entry.  This note will be recorded, and then files to the
 same location where state change notes are put.  Depending on
