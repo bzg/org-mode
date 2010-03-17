@@ -852,7 +852,7 @@ Also, fix the indentation."
   (interactive)
   (unless (org-at-item-p) (error "This is not a list"))
   (let ((line (org-current-line))
-	(col (current-column))
+	(chars-from-eol (- (point-at-eol) (point)))
 	(ind (current-indentation))
 	ind1 bullet oldbullet)
     ;; find where this list begins
@@ -883,7 +883,7 @@ Also, fix the indentation."
 	  (org-shift-item-indentation (- (length bullet)
 					 (length oldbullet))))))
     (org-goto-line line)
-    (org-move-to-column col)
+    (goto-char (max (point-at-bol) (- (point-at-eol) chars-from-eol)))
     (if (string-match "[0-9]" bullet)
 	(org-renumber-ordered-list 1))))
 

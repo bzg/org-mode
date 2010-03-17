@@ -1,3 +1,7 @@
+2010-03-17  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-list.el (org-fix-bullet-type): Improve cursor positioning.
+
 2010-03-15  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-adaptive-fill-regexp-backup): New variable.
