@@ -1,3 +1,10 @@
+2010-03-17  Stephen Eglen  <stephen@gnu.org>
+
+	* org-agenda.el (org-agenda-insert-diary-extract-time): New
+	variable.
+	(org-agenda-add-entry-to-org-agenda-diary-file): Use this new
+	variable rather than `org-agenda-search-headline-for-time'.
+
 2010-03-17  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-list.el (org-fix-bullet-type): Improve cursor positioning.

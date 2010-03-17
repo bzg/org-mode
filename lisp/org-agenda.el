@@ -7066,6 +7066,11 @@ top-level    as top-level entries at the end of the file."
 	  (const :tag "in a date tree" date-tree)
 	  (const :tag "as top level at end of file" top-level)))
 
+(defcustom org-agenda-insert-diary-extract-time nil
+  "Non-nil means extract any time specification from the diary entry."
+  :group 'org-agenda
+  :type 'boolean)
+
 (defun org-agenda-add-entry-to-org-agenda-diary-file (type text &optional d1 d2)
   "Add a diary entry with TYPE to `org-agenda-diary-file'.
 If TEXT is not empty, it will become the headline of the new entry, and
@@ -7103,7 +7108,7 @@ the resulting entry will not be shown.  When TEXT is empty, switch to
       (let*
 	  (fmt time time2
 	       (org-agenda-time-leading-zero t))
-	(if org-agenda-search-headline-for-time
+	(if org-agenda-insert-diary-extract-time
 	    ;; Use org-format-agenda-item to parse text for a time-range and
 	    ;; remove it.  
 	    (setq fmt (org-format-agenda-item nil text nil nil t)
