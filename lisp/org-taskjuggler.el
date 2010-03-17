@@ -35,10 +35,6 @@
 ;;
 ;; M-x `org-export-as-taskjuggler'
 ;; M-x `org-export-as-taskjuggler-and-open'
-;; M-x `org-export-as-taskjuggler-batch'
-;; M-x `org-export-as-taskjuggler-to-buffer'
-;; M-x `org-export-region-as-taskjuggler'
-;; M-x `org-replace-region-by-taskjuggler'
 ;;
 ;;; Code:
 
@@ -47,10 +43,6 @@
 
 (require 'org)
 (require 'org-exp)
-
-;;; Variables:
-
-(declare-function org-id-find-id-file "org-id" (id))
 
 ;;; User variables:
 
@@ -115,8 +107,10 @@
 
   (message "Exporting...")
   (let* ((tasks
-	  (org-map-entries '(org-taskjuggler-components) 
-			   org-export-taskjuggler-project-tag nil 'archive 'comment))
+	  (org-taskjuggler-resolve-dependencies
+	   (org-taskjuggler-assign-ids 
+	    (org-map-entries '(org-taskjuggler-components) 
+			     org-export-taskjuggler-project-tag nil 'archive 'comment))))
 	 (resources
 	  (org-map-entries '(org-taskjuggler-components) 
 			   org-export-taskjuggler-resource-tag nil 'archive 'comment))
@@ -127,7 +121,6 @@
 		     org-export-taskjuggler-extension)))
 	 (buffer (find-file-noselect filename))
 	 (old-level 0)
-	 (current-id 0)
 	 task resource)
     ;; add a default resource
     (unless resources
@@ -189,14 +182,84 @@
 	(command "TaskJugglerUI"))
     (start-process-shell-command command nil command file-name)))
 
+(defun org-taskjuggler-parent-is-ordered-p ()
+  (save-excursion
+    (and (org-up-heading-safe) (org-entry-get (point) "ORDERED"))))
+
 (defun org-taskjuggler-components ()
   (let* ((props (org-entry-properties))
 	 (components (org-heading-components))
 	 (level (car components))
-	 (headline (nth 4 components)))
+	 (headline (nth 4 components))
+	 (parent-ordered (org-taskjuggler-parent-is-ordered-p)))
     (push (cons "level" level) props)
-    (push (cons "headline" headline) props)))
+    (push (cons "headline" headline) props)
+    (push (cons "parent-ordered" parent-ordered) props)))
 
+(defun org-taskjuggler-assign-ids (tasks)
+  (let ((previous-level 0)
+	unique-ids
+	path
+	task resolved-tasks tmp)
+    (dolist (task tasks resolved-tasks)
+      (let ((level (cdr (assoc "level" task)))
+	    (unique-id (org-taskjuggler-get-unique-id task (car unique-ids))))
+	(cond
+	 ((< previous-level level) 
+	  (dotimes (tmp (- level previous-level))
+	    (push (list unique-id) unique-ids)
+	    (push unique-id path)))
+	 ((= previous-level level) 
+	  (push unique-id (car unique-ids)))
+	 ((> previous-level level) 
+	  (dotimes (tmp (- previous-level level))
+	    (pop unique-ids)
+	    (pop path))))
+	(push (cons "unique-id" unique-id) task)
+	(push (cons "path" (mapconcat 'identity (reverse path) ".")) task)
+	(setq previous-level level)
+	(setq resolved-tasks (append resolved-tasks (list task)))))))
+
+(defun org-taskjuggler-resolve-dependencies (tasks)
+  (let ((previous-level 0)
+	siblings
+	task resolved-tasks)
+    (dolist (task tasks resolved-tasks)
+      (let ((level (cdr (assoc "level" task)))
+	    (depends (cdr (assoc "depends" task)))
+	    (parent-ordered (cdr (assoc "parent-ordered" task)))
+	    previous-sibling)
+	(cond
+	 ((< previous-level level) 
+	  (dotimes (tmp (- level previous-level))
+	    (push task siblings)))
+	 ((= previous-level level)
+	  (setq previous-sibling (car siblings))
+	  (setcar siblings task))
+	 ((> previous-level level) 
+	  (dotimes (tmp (- previous-level level))
+	    (pop siblings))
+	  (setq previous-sibling (car siblings))
+	  (setcar siblings task)))
+	(when (and previous-sibling parent-ordered)
+	  (push 
+	   (cons "depends" 
+		 (format "!%s" (cdr (assoc "unique-id" previous-sibling)))) task))
+	(setq previous-level level)
+	(setq resolved-tasks (append resolved-tasks (list task)))))))
+
+(defun org-taskjuggler-get-unique-id (task unique-ids)
+  (let* ((headline (cdr (assoc "headline" task)))
+	 (parts (split-string headline))
+	 (id (downcase (pop parts))))
+    ; try to add more parts of the headline to make it unique
+    (while (member id unique-ids)
+      (setq id (concat id "_" (downcase (pop parts)))))
+    ; if its still not unique add "_"
+    (while (member id unique-ids)
+      (setq id (concat id "_")))
+    (org-taskjuggler-clean-id id)))
+	
 (defun org-taskjuggler-clean-id (id)
   (and id (replace-regexp-in-string "[^a-zA-Z0-9_]" "_" id)))
 
@@ -227,7 +290,7 @@
    (t (error "Not a valid effort (%s)" effort))))
 
 (defun org-taskjuggler-open-task (task)
-  (let ((id (org-taskjuggler-clean-id (cdr (assoc "ID" task))))
+  (let ((unique-id (cdr (assoc "unique-id" task)))
 	(headline (cdr (assoc "headline" task)))
 	(effort (org-taskjuggler-clean-effort (cdr (assoc org-effort-property task))))
 	(depends (cdr (assoc "depends" task)))
@@ -236,14 +299,16 @@
 	(start (cdr (assoc "start" task)))
 	(complete (cdr (assoc "complete" task)))
 	(note (cdr (assoc "note" task)))
-	(priority (cdr (assoc "priority" task))))
+	(priority (cdr (assoc "priority" task)))
+	(parent-ordered (cdr (assoc "parent-ordered" task)))
+	(previous-sibling (cdr (assoc "previous-sibling" task))))
     (insert
      (concat 
-      "task " 
-      (or id (concat "id" (number-to-string (incf current-id)))) 
-      " \"" headline "\" {" 
+      "task " unique-id " \"" headline "\" {" 
       (and effort (concat "\n effort " effort))
-      (and depends (concat "\n depends " depends))
+      (if (and parent-ordered previous-sibling)
+	  (concat "\n depends " previous-sibling)
+	(and depends (concat "\n depends " depends)))
       (and allocate (concat "\n purge allocations\n allocate " allocate))
       (and account (concat "\n account " account))
       (and start (concat "\n start " start))
