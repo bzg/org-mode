@@ -37,7 +37,6 @@
 ;; M-x `org-export-as-taskjuggler-and-open'
 ;;
 ;;; TODO:
-;;    * derive completeness info from TODO state
 ;;    * Handle explicit dependencies such as BLOCKER and depends attribute
 ;;    * Code cleanup
 ;;    * Add documentation
@@ -113,6 +112,7 @@
   (interactive)
 
   (message "Exporting...")
+  (setq-default org-done-keywords org-done-keywords)
   (let* ((tasks
 	  (org-taskjuggler-resolve-dependencies
 	   (org-taskjuggler-assign-task-ids 
@@ -315,14 +315,16 @@
    (t (error "Not a valid effort (%s)" effort))))
 
 (defun org-taskjuggler-open-task (task)
-  (let ((unique-id (cdr (assoc "unique-id" task)))
+  (let* ((unique-id (cdr (assoc "unique-id" task)))
 	(headline (cdr (assoc "headline" task)))
 	(effort (org-taskjuggler-clean-effort (cdr (assoc org-effort-property task))))
 	(depends (cdr (assoc "depends" task)))
 	(allocate (cdr (assoc "allocate" task)))
 	(account (cdr (assoc "account" task)))
 	(start (cdr (assoc "start" task)))
-	(complete (cdr (assoc "complete" task)))
+	(state (cdr (assoc "TODO" task)))
+	(complete (or (and (member state org-done-keywords) "100") 
+		      (cdr (assoc "complete" task))))
 	(note (cdr (assoc "note" task)))
 	(priority (cdr (assoc "priority" task)))
 	(parent-ordered (cdr (assoc "parent-ordered" task)))
