@@ -36,6 +36,13 @@
 ;; M-x `org-export-as-taskjuggler'
 ;; M-x `org-export-as-taskjuggler-and-open'
 ;;
+;;; TODO:
+;;    * derive completeness info from TODO state
+;;    * Handle explicit dependencies such as BLOCKER and depends attribute
+;;    * Code cleanup
+;;    * Add documentation
+;;    * Try using plists instead of alists
+;;
 ;;; Code:
 
 (eval-when-compile
@@ -217,7 +224,8 @@
 	  (dotimes (tmp (- previous-level level))
 	    (pop unique-ids)
 	    (pop path))
-	  (setq unique-id (org-taskjuggler-get-unique-id task (car unique-ids)))))
+	  (setq unique-id (org-taskjuggler-get-unique-id task (car unique-ids)))
+	  (push unique-id (car unique-ids))))
 	(push (cons "unique-id" unique-id) task)
 	(push (cons "path" (mapconcat 'identity (reverse path) ".")) task)
 	(setq previous-level level)
@@ -348,5 +356,4 @@
 
 (provide 'org-taskjuggler)
 
-;; arch-tag: a24a127c-d365-4c2a-9e9b-f7dcb0ebfdc3
 ;;; org-taskjuggler.el ends here
