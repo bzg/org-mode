@@ -109,7 +109,7 @@ exported source code blocks by language."
                                       target-file))
                        (file-name (when base-name
                                     ;; decide if we want to add ext to base-name
-                                    (if (and ext (not (string= (file-name-extension base-name) ext)))
+                                    (if (and ext (string= "yes" tangle))
                                         (concat base-name "." ext) base-name))))
                   ;; ;; debugging
                   ;; (message
@@ -127,7 +127,14 @@ exported source code blocks by language."
                         (insert (concat she-bang "\n"))
                         (setq she-banged (cons file-name she-banged)))
                       (org-babel-spec-to-string spec)
-                      (append-to-file nil nil file-name))
+		      ;; We avoid append-to-file as it does not work with tramp.
+		      (let ((content (buffer-string)))
+			(with-temp-buffer
+			  (if (file-exists-p file-name)
+			      (insert-file-contents file-name))
+			  (goto-char (point-max))
+			  (insert content)
+			  (write-region nil nil file-name))))
                     ;; update counter
                     (setq block-counter (+ 1 block-counter))
                     (add-to-list 'path-collector file-name)))))
