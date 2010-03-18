@@ -242,7 +242,8 @@ a path to the current task."
 	    (push unique-id path)))
 	 ((= previous-level level) 
 	  (setq unique-id (org-taskjuggler-get-unique-id task (car unique-ids)))
-	  (push unique-id (car unique-ids)))
+	  (push unique-id (car unique-ids))
+	  (setcar path unique-id))
 	 ((> previous-level level) 
 	  (dotimes (tmp (- previous-level level))
 	    (pop unique-ids)
@@ -271,10 +272,18 @@ unique id to each resource."
 	siblings
 	task resolved-tasks)
     (dolist (task tasks resolved-tasks)
-      (let ((level (cdr (assoc "level" task)))
-	    (depends (cdr (assoc "depends" task)))
-	    (parent-ordered (cdr (assoc "parent-ordered" task)))
-	    previous-sibling)
+      (let* ((level (cdr (assoc "level" task)))
+	     (depends (cdr (assoc "depends" task)))
+	     (parent-ordered (cdr (assoc "parent-ordered" task)))
+	     (blocker (cdr (assoc "BLOCKER" task)))
+	     (blocked-on-previous (and blocker (string-match "previous-sibling" blocker)))
+	     (dependencies
+	      (org-taskjuggler-resolve-explicit-dependencies
+	       (append 
+		(and depends (split-string depends "[, \f\t\n\r\v]+" t))
+		(and blocker (split-string blocker "[, \f\t\n\r\v]+" t))) tasks))
+	      previous-sibling)
+	; update previous sibling info
 	(cond
 	 ((< previous-level level) 
 	  (dotimes (tmp (- level previous-level))
@@ -287,12 +296,36 @@ unique id to each resource."
 	    (pop siblings))
 	  (setq previous-sibling (car siblings))
 	  (setcar siblings task)))
-	(when (and previous-sibling parent-ordered)
-	  (push 
-	   (cons "depends" 
-		 (format "!%s" (cdr (assoc "unique-id" previous-sibling)))) task))
+	; insert a dependency on previous sibling if the parent is
+	; ordered or if the tasks has a BLOCKER attribute with value "previous-sibling"
+	(when (or (and previous-sibling parent-ordered) blocked-on-previous)
+	  (push (format "!%s" (cdr (assoc "unique-id" previous-sibling))) dependencies))
+	; store dependency information
+	(when dependencies 
+	  (push (cons "depends" (mapconcat 'identity dependencies ", ")) task))
 	(setq previous-level level)
 	(setq resolved-tasks (append resolved-tasks (list task)))))))
+
+(defun org-taskjuggler-resolve-explicit-dependencies (dependencies tasks)
+  (let (path)
+    (cond 
+     ((null dependencies) nil)
+     ; ignore previous sibling dependencies
+     ((equal (car dependencies) "previous-sibling")
+      (org-taskjuggler-resolve-explicit-dependencies (cdr dependencies) tasks))
+     ; if the id is found in another task use its path
+     ((setq path (org-taskjuggler-find-task-with-id (car dependencies) tasks))
+      (cons path (org-taskjuggler-resolve-explicit-dependencies (cdr dependencies) tasks)))
+     ; silently ignore all other dependencies
+     (t (org-taskjuggler-resolve-explicit-dependencies (cdr dependencies) tasks)))))
+
+(defun org-taskjuggler-find-task-with-id (id tasks)
+  "Find ID in tasks. If found return the path of task. Otherwise return nil."
+  (cond 
+   ((null tasks) nil)
+   ((equal (cdr (assoc "ID" (car tasks))) id)
+    (cdr (assoc "path" (car tasks))))
+   (t (org-taskjuggler-find-task-with-id id (cdr tasks)))))
 
 (defun org-taskjuggler-get-unique-id (item unique-ids)
   "Return a unique id for an ITEM which can be a task or a resource.
