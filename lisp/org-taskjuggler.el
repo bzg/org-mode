@@ -205,10 +205,15 @@ defined in `org-export-taskjuggler-default-reports'."
     (start-process-shell-command command nil command file-name)))
 
 (defun org-taskjuggler-parent-is-ordered-p ()
+  "Return true if the parent of the current node has a property
+\"ORDERED\". Return nil otherwise."
   (save-excursion
     (and (org-up-heading-safe) (org-entry-get (point) "ORDERED"))))
 
 (defun org-taskjuggler-components ()
+  "Return an alist containing all the pertinent information for
+the current node such as the headline, the level, todo state
+information, all the properties, etc."
   (let* ((props (org-entry-properties))
 	 (components (org-heading-components))
 	 (level (car components))
@@ -219,6 +224,10 @@ defined in `org-export-taskjuggler-default-reports'."
     (push (cons "parent-ordered" parent-ordered) props)))
 
 (defun org-taskjuggler-assign-task-ids (tasks)
+  "Given a list of tasks return the same list assigning a unique id
+and the full path to each task. Taskjuggler takes hierarchical ids.
+For that reason we have to make ids locally unique and we have to keep
+a path to the current task."
   (let ((previous-level 0)
 	unique-ids
 	path
@@ -246,6 +255,8 @@ defined in `org-export-taskjuggler-default-reports'."
 	(setq resolved-tasks (append resolved-tasks (list task)))))))
 
 (defun org-taskjuggler-assign-resource-ids (resources)
+  "Given a list of resources return the same list, assigning a
+unique id to each resource."
   (let (unique-ids
 	unique-id
 	resource resolved-resources)
@@ -283,8 +294,12 @@ defined in `org-export-taskjuggler-default-reports'."
 	(setq previous-level level)
 	(setq resolved-tasks (append resolved-tasks (list task)))))))
 
-(defun org-taskjuggler-get-unique-id (task unique-ids)
-  (let* ((headline (cdr (assoc "headline" task)))
+(defun org-taskjuggler-get-unique-id (item unique-ids)
+  "Return a unique id for an ITEM which can be a task or a resource.
+The id is derived from the headline and made unique against
+UNIQUE-IDS. If the first part of the headline is not unique try to add
+more parts of the headline or finally add more underscore characters (\"_\")."
+  (let* ((headline (cdr (assoc "headline" item)))
 	 (parts (split-string headline))
 	 (id (downcase (pop parts))))
     ; try to add more parts of the headline to make it unique
@@ -296,6 +311,7 @@ defined in `org-export-taskjuggler-default-reports'."
     (org-taskjuggler-clean-id id)))
 	
 (defun org-taskjuggler-clean-id (id)
+  "Clean and return ID to make it acceptable for taskjuggler."
   (and id (replace-regexp-in-string "[^a-zA-Z0-9_]" "_" id)))
 
 (defun org-taskjuggler-open-project (project)
