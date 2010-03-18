@@ -63,22 +63,26 @@
   :type 'string)
 
 (defcustom org-export-taskjuggler-project-tag "project"
-  "."
+  "Tag, property or todo used to find the tree containing all
+the tasks for the project."
   :group 'org-export-taskjuggler
   :type 'string)
 
 (defcustom org-export-taskjuggler-resource-tag "resource"
-  "."
+  "Tag, property or todo used to find the tree containing all the
+resources for the project."
   :group 'org-export-taskjuggler
   :type 'string)
 
 (defcustom org-export-taskjuggler-default-project-version "1.0"
-  "."
+  "Default version string for the project."
   :group 'org-export-taskjuggler
   :type 'string)
 
 (defcustom org-export-taskjuggler-default-project-duration 180
-  "."
+  "Default project duration if no start and end date have been defined
+in the root node of the task tree, i.e. the tree that has been marked
+with `org-export-taskjuggler-project-tag'"
   :group 'org-export-taskjuggler
   :type 'integer)
 
@@ -95,7 +99,7 @@
   loadunit days
   hidetask 1
 }")
-  ""
+  "Default reports for the project."
   :group 'org-export-taskjuggler
   :type '(repeat (string :tag "Report")))
 
@@ -108,7 +112,17 @@
 
 ;;;###autoload
 (defun org-export-as-taskjuggler ()
-  "Export the current buffer as a TaskJuggler file."
+  "Export parts of the current buffer as a TaskJuggler file.
+The exporter looks for a tree with tag, property or todo that
+matches `org-export-taskjuggler-project-tag' and takes this as
+the tasks for this project. The first node of this tree defines
+the project properties such as project name and project period.
+If there is a tree with tag, property or todo that matches
+`org-export-taskjuggler-resource-tag' this three is taken as
+resources for the project. If no resources are specified, a
+default resource is created and allocated to the project. Also
+the taskjuggler project will be created with default reports as
+defined in `org-export-taskjuggler-default-reports'."
   (interactive)
 
   (message "Exporting...")
@@ -307,9 +321,16 @@
 	     (and vacation (concat "\n vacation " vacation "\n"))))))
 
 (defun org-taskjuggler-clean-effort (effort)
+  "Translate effort strings into a format acceptable to taskjuggler,
+i.e. REAL UNIT. If the effort string is something like 5:00 it
+will be assumed to be hours and will be translated into 5.0h.
+Otherwise if it contains something like 3.0 it is assumed to be
+days and will be translated into 3.0d. Other formats that taskjuggler
+supports (like weeks, months and years) are currently not supported."
   (cond 
    ((null effort) effort)
    ((string-match "\\([0-9]+\\):\\([0-9]+\\)" effort) 
+    ; FIXME: translate the minutes to a decimal
     (concat (match-string 1 effort) "." (match-string 2 effort) "h"))
    ((string-match "\\([0-9]+\\).\\([0-9]+\\)" effort) (concat effort "d"))
    (t (error "Not a valid effort (%s)" effort))))
