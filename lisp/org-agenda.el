@@ -7105,12 +7105,13 @@ the resulting entry will not be shown.  When TEXT is empty, switch to
 	(insert (format "%%%%(diary-anniversary %s) %s"
 			(calendar-date-string d1 nil t) text))))
      ((eq type 'day)
-      (let*
-	  (fmt time time2
-	       (org-agenda-time-leading-zero t))
+      (let ((org-prefix-has-time t)
+	    (org-agenda-time-leading-zero t)
+	    fmt time time2)
 	(if org-agenda-insert-diary-extract-time
 	    ;; Use org-format-agenda-item to parse text for a time-range and
-	    ;; remove it.  
+	    ;; remove it.  FIXME: This is a hack, we should refactor
+	    ;; that function to make time extraction available separately
 	    (setq fmt (org-format-agenda-item nil text nil nil t)
 		  time (get-text-property 0 'time fmt)
 		  time2 (if (> (length time) 0)

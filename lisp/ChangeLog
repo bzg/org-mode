@@ -1,3 +1,9 @@
+2010-03-18  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-agenda.el (org-agenda-add-entry-to-org-agenda-diary-file):
+	Make sure the behavior regarding to extracting time is
+	consistent.
+
 2010-03-17  Stephen Eglen  <stephen@gnu.org>
 
 	* org-agenda.el (org-agenda-insert-diary-extract-time): New
