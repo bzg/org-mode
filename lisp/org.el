@@ -9481,15 +9481,19 @@ See also `org-refile-use-outline-path' and `org-completion-use-ido'"
 	    (if (equal (car org-refile-history) (nth 1 org-refile-history))
 		(pop org-refile-history)))
 	  pa)
-      (when (string-match "\\`\\(.*\\)/\\([^/]+\\)\\'" answ)
-	(setq parent (match-string 1 answ)
-	      child (match-string 2 answ))
-	(setq parent-target (or (assoc parent tbl) (assoc (concat parent "/") tbl)))
-	(when (and parent-target
-		   (or (eq new-nodes t)
-		       (and (eq new-nodes 'confirm)
-			    (y-or-n-p (format "Create new node \"%s\"? " child)))))
-	  (org-refile-new-child parent-target child))))))
+      (if (string-match "\\`\\(.*\\)/\\([^/]+\\)\\'" answ)
+	  (progn
+	    (setq parent (match-string 1 answ)
+		  child (match-string 2 answ))
+	    (setq parent-target (or (assoc parent tbl)
+				    (assoc (concat parent "/") tbl)))
+	    (when (and parent-target
+		       (or (eq new-nodes t)
+			   (and (eq new-nodes 'confirm)
+				(y-or-n-p (format "Create new node \"%s\"? "
+						  child)))))
+	      (org-refile-new-child parent-target child)))
+	(error "Invalid target location")))))
 
 (defun org-refile-new-child (parent-target child)
   "Use refile target PARENT-TARGET to add new CHILD below it."

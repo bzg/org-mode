@@ -1,3 +1,8 @@
+2010-03-19  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-refile-get-location): Catch an invalid target
+	specification.
+
 2010-03-18  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-agenda.el (org-agenda-add-entry-to-org-agenda-diary-file):
