@@ -97,7 +97,8 @@ with `org-export-taskjuggler-project-tag'"
   headline \"Resource Allocation Graph\"
   columns no, name, utilization, freeload, chart
   loadunit days
-  hidetask 1
+  sorttasks startup
+  hidetask ~isleaf()
 }")
   "Default reports for the project."
   :group 'org-export-taskjuggler
