@@ -175,7 +175,7 @@ options are taken from `org-babel-default-header-args'."
            ((member "file" result-params)
             (org-babel-result-to-file raw))
            ((or (member "raw" result-params) (member "org" result-params))
-            raw)
+            (format "%s" raw))
            ((member "code" result-params)
             (format "src_%s{%s}" lang raw))
            (t
