@@ -257,17 +257,17 @@ a path to the current task."
 	(setq previous-level level)
 	(setq resolved-tasks (append resolved-tasks (list task)))))))
 
-(defun org-taskjuggler-assign-resource-ids (resources)
+(defun org-taskjuggler-assign-resource-ids (resources &optional unique-ids)
   "Given a list of resources return the same list, assigning a
 unique id to each resource."
-  (let (unique-ids
-	unique-id
-	resource resolved-resources)
-    (dolist (resource resources resolved-resources)
-      (setq unique-id (org-taskjuggler-get-unique-id resource unique-ids))
-      (push unique-id unique-ids)
+  (cond
+   ((null resources) nil)
+   (t 
+    (let* ((resource (car resources))
+	   (unique-id (org-taskjuggler-get-unique-id resource unique-ids)))
       (push (cons "unique-id" unique-id) resource)
-      (setq resolved-resources (append resolved-resources (list resource))))))
+      (cons resource (org-taskjuggler-assign-resource-ids (cdr resources) 
+							  (cons unique-id unique-ids)))))))
 
 (defun org-taskjuggler-resolve-dependencies (tasks)
   (let ((previous-level 0)
@@ -323,11 +323,12 @@ unique id to each resource."
 
 (defun org-taskjuggler-find-task-with-id (id tasks)
   "Find ID in tasks. If found return the path of task. Otherwise return nil."
-  (cond 
-   ((null tasks) nil)
-   ((equal (cdr (assoc "ID" (car tasks))) id)
-    (cdr (assoc "path" (car tasks))))
-   (t (org-taskjuggler-find-task-with-id id (cdr tasks)))))
+  (let ((task-id (cdr (assoc "ID" (car tasks))))
+	(path (cdr (assoc "path" (car tasks)))))
+    (cond 
+     ((null tasks) nil)
+     ((equal task-id id) path)
+     (t (org-taskjuggler-find-task-with-id id (cdr tasks))))))
 
 (defun org-taskjuggler-get-unique-id (item unique-ids)
   "Return a unique id for an ITEM which can be a task or a resource.
