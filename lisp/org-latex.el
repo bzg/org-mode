@@ -1517,9 +1517,9 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 			   (match-string 0)) t t)
     (save-excursion
       (beginning-of-line 1)
-      (unless (looking-at ".*\\\\newline[ \t]*$")
+      (unless (looking-at ".*\n[ \t]*\n")
 	(end-of-line 1)
-	(insert "\\newline")))))
+	(insert "\n")))))
 
 (defun org-export-latex-fixed-width (opt)
   "When OPT is non-nil convert fixed-width sections to LaTeX."

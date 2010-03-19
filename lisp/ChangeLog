@@ -1,5 +1,8 @@
 2010-03-19  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-latex.el (org-export-latex-keywords): Start a new paragraph
+	after time keywords, do not add "\newline".
+
 	* org-html.el (org-export-as-html): Avoid double # in href.
 
 	* org.el (org-refile-get-location): Catch an invalid target
