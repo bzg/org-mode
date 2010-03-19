@@ -54,7 +54,7 @@ file using `load-file'."
            (exported-file (concat base-name ".el")))
       ;; tangle if the org-mode file is newer than the elisp file
       (unless (and (file-exists-p exported-file) (> (age file) (age exported-file)))
-        (org-babel-tangle-file file base-name "emacs-lisp"))
+        (org-babel-tangle-file file exported-file "emacs-lisp"))
       (load-file exported-file)
       (message "loaded %s" exported-file))))
 
