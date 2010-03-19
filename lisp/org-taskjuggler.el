@@ -90,12 +90,13 @@ with `org-export-taskjuggler-project-tag'"
   '("taskreport \"Gantt Chart\" {
   headline \"Project Gantt Chart\"
   columns hierarchindex, name, start, end, effort, duration, completed, chart
-  timeformat \"%a %Y-%m-%d\"
+  timeformat \"%Y-%m-%d\"
+  hideresource 1
   loadunit days
 }"
 "resourcereport \"Resource Graph\" {
   headline \"Resource Allocation Graph\"
-  columns no, name, rate, utilization, freeload, chart
+  columns no, name, utilization, freeload, chart
   loadunit days
   hidetask 1
 }")
