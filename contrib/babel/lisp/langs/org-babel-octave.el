@@ -164,9 +164,18 @@ value of the last statement in BODY, as elisp."
 	     (mapconcat
 	      #'org-babel-chomp
 	      (list (format org-babel-octave-wrapper-method body tmp-file tmp-file) org-babel-octave-eoe-indicator) "\n"))))
-	 (raw (org-babel-comint-with-output session
-		  (if matlabp org-babel-octave-eoe-indicator org-babel-octave-eoe-output) t
-		(insert full-body) (comint-send-input nil t))) results)
+	 (raw (if (and matlabp org-babel-matlab-with-emacs-link)
+		  (save-window-excursion
+		    (with-temp-buffer
+		      (insert full-body)
+		      (matlab-shell-run-region (point-min) (point-max))
+		      "")) ;; matlab-shell-run-region doesn't seem to
+			   ;; make *matlab* buffer contents easily
+			   ;; available, so :results output currently
+			   ;; won't work
+		(org-babel-comint-with-output session
+		    (if matlabp org-babel-octave-eoe-indicator org-babel-octave-eoe-output) t
+		  (insert full-body) (comint-send-input nil t)))) results)
     (case result-type
       (value
        (org-babel-octave-import-elisp-from-file (org-babel-maybe-remote-file tmp-file)))
