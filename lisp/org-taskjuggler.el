@@ -37,7 +37,6 @@
 ;; M-x `org-export-as-taskjuggler-and-open'
 ;;
 ;;; TODO:
-;;    * Handle explicit dependencies such as BLOCKER and depends attribute
 ;;    * Code cleanup
 ;;    * Add documentation
 ;;    * Try using plists instead of alists
