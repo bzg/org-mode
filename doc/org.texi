@@ -3116,6 +3116,7 @@ link, together with an explanation:
 [[file:~/code/main.c::255]]
 [[file:~/xx.org::My Target]]
 [[file:~/xx.org::*My Target]]
+[[file:~/xx.org::#my-custom-id]]
 [[file:~/xx.org::/regexp/]]
 @end example
 
@@ -3130,6 +3131,8 @@ link will become an HTML reference to the corresponding named anchor in
 the linked file.
 @item *My Target
 In an Org file, restrict search to headlines.
+@item #my-custom-id
+Link to a heading with a @code{CUSTOM_ID} property
 @item /regexp/
 Do a regular expression search for @code{regexp}.  This uses the Emacs
 command @code{occur} to list all matches in a separate window.  If the

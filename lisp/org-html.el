@@ -1131,9 +1131,11 @@ lang=\"%s\" xml:lang=\"%s\">
 			     (not (string-match "^[0-9]*$" search))
 			     (not (string-match "^\\*" search))
 			     (not (string-match "^/.*/$" search)))
-			(setq thefile (concat thefile "#"
-					      (org-solidify-link-text
-					       (org-link-unescape search)))))
+			(setq thefile
+			      (concat thefile
+				      (if (= (string-to-char search) ?#) "" "#")
+				      (org-solidify-link-text
+				       (org-link-unescape search)))))
 		    (when (string-match "^file:" desc)
 		      (setq desc (replace-match "" t t desc))
 		      (if (string-match "\\.org$" desc)

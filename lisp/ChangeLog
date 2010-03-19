@@ -1,5 +1,7 @@
 2010-03-19  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-html.el (org-export-as-html): Avoid double # in href.
+
 	* org.el (org-refile-get-location): Catch an invalid target
 	specification.
 
