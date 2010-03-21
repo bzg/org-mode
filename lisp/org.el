@@ -11282,6 +11282,9 @@ How much context is shown depends upon the variables
 	    (org-flag-heading nil)
 	    (when siblings-p (org-show-siblings))))))))
 
+(defvar org-reveal-start-hook nil
+  "Hook run before revealing a location.")
+
 (defun org-reveal (&optional siblings)
   "Show current entry, hierarchy above it, and the following headline.
 This can be used to show a consistent set of context around locations
@@ -11294,6 +11297,7 @@ look like when opened with hierarchical calls to `org-cycle'.
 With double optional argument `C-u C-u', go to the parent and show the
 entire tree."
   (interactive "P")
+  (run-hooks 'org-reveal-start-hook)
   (let ((org-show-hierarchy-above t)
 	(org-show-following-heading t)
 	(org-show-siblings (if siblings t org-show-siblings)))
@@ -17077,6 +17081,17 @@ really on, so that the block visually is on the match."
 		   (>= (match-end 0) pos))
 	      (throw 'exit t)))
 	nil))))
+
+(defun org-in-regexps-block-p (start-re end-re)
+  "Returns t if the current point is between matches of START-RE and END-RE.
+This will also return to if point is on one of the two matches."
+  (interactive)
+  (let ((p (point)))
+    (save-excursion
+      (and (or (org-at-regexp-p start-re)
+	       (re-search-backward start-re nil t))
+	   (re-search-forward end-re nil t)
+	   (>= (point) p)))))
 
 (defun org-occur-in-agenda-files (regexp &optional nlines)
   "Call `multi-occur' with buffers for all agenda files."

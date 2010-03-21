@@ -129,6 +129,7 @@ heading.  This can also be overridden in the CRYPTKEY property."
         nil))))
 
 (defun org-decrypt-entry ()
+  "Decrypt the content of the current headline."
   (interactive)
   (require 'epg)
   (save-excursion
@@ -152,12 +153,14 @@ heading.  This can also be overridden in the CRYPTKEY property."
         nil))))
 
 (defun org-encrypt-entries ()
+  "Encrypt all top-level entries in the current buffer."
   (interactive)
   (org-scan-tags
    'org-encrypt-entry
    (cdr (org-make-tags-matcher org-crypt-tag-matcher))))
 
 (defun org-decrypt-entries ()
+  "Decrypt all entries in the current buffer."
   (interactive)
   (org-scan-tags 
    'org-decrypt-entry
@@ -169,6 +172,8 @@ file is saved to disk."
   (add-hook 
    'org-mode-hook 
    (lambda () (add-hook 'before-save-hook 'org-encrypt-entries nil t))))
+
+(add-hook 'org-reveal-start-hook 'org-decrypt-entry)
   
 (provide 'org-crypt)
 

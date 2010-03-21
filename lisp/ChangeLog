@@ -1,9 +1,17 @@
 2010-03-21  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-crypt.el (org-reveal-start-hook): Add a decryption function
+	to this hook.
+	(org-decrypt-entries, org-encrypt-entries, org-decrypt-entry): Add
+	docstrings.
+
 	* org.el (org-point-at-end-of-empty-headline)
 	(org-level-increment, org-get-previous-line-level): New function.
 	(org-cycle-level): Rewritten to be independent of when this
 	function is called.
+	(org-in-regexps-block-p): New function.
+	(org-reveal-start-hook): New hook.
+	(org-reveal): Run new hook.
 
 2010-03-19  Carsten Dominik  <carsten.dominik@gmail.com>
 
