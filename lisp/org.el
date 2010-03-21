@@ -6378,10 +6378,29 @@ The level is the number of stars at the beginning of the headline."
 	  (funcall outline-level))
       (error nil))))
 
+(defun org-get-previous-line-level ()
+  "Return the outline depth of the last headline before the current line.
+Returns 0 for the first headline in the buffer, and nil if before the
+first headline."
+  (let ((current-level (org-current-level))
+	(prev-level (when (> (line-number-at-pos) 1)
+		      (save-excursion
+			(previous-line)
+			(org-current-level)))))
+    (cond ((null current-level) nil) ; Before first headline
+	  ((null prev-level) 0)      ; At first headline
+	  (prev-level))))
+
 (defun org-reduced-level (l)
   "Compute the effective level of a heading.
 This takes into account the setting of `org-odd-levels-only'."
   (if org-odd-levels-only (1+ (floor (/ l 2))) l))
+
+(defun org-level-increment ()
+  "Return the number of stars that will be added or removed at a
+time to headlines when structure editing, based on the value of
+`org-odd-levels-only'."
+  (if org-odd-levels-only 2 1))
 
 (defun org-get-valid-level (level &optional change)
   "Rectify a level change under the influence of `org-odd-levels-only'
@@ -6430,30 +6449,41 @@ in the region."
     (if org-adapt-indentation (org-fixup-indentation diff))
     (run-hooks 'org-after-demote-entry-hook)))
 
-(defvar org-tab-ind-state nil)
-
 (defun org-cycle-level ()
+  "Cycle the level of an empty headline through possible states.
+This goes first to child, then to parent, level, then up the hierarchy.
+After top level, it switches back to sibling level."
+  (interactive)
   (let ((org-adapt-indentation nil))
-    (when (and (looking-at "[ \t]*$")
-	       (org-looking-back
-		(concat "^\\(\\*+\\)[ \t]+\\(" org-todo-regexp "\\)?[ \t]*")))
-      (setq this-command 'org-cycle-level)
-      (if (eq last-command 'org-cycle-level)
-	  (condition-case nil
-	      (progn (org-do-promote)
-		     (if (equal org-tab-ind-state (org-current-level))
-			 (org-do-promote)))
-	    (error
-	     (progn
-	       (save-excursion
-		 (beginning-of-line 1)
-		 (and (looking-at "\\*+")
-		      (replace-match
-		       (make-string org-tab-ind-state ?*))))
-	       (setq this-command 'org-cycle))))
-	(setq org-tab-ind-state (- (match-end 1) (match-beginning 1)))
-	(org-do-demote))
-      t)))
+    (when (org-point-at-end-of-empty-headline)
+      (setq this-command 'org-cycle-level) ; Only needed for caching
+      (let ((cur-level (org-current-level))
+            (prev-level (org-get-previous-line-level)))
+        (cond
+         ;; If first headline in file, promote to top-level.
+         ((= prev-level 0)
+          (loop repeat (/ (- cur-level 1) (org-level-increment))
+                do (org-do-promote)))
+         ;; If same level as prev, demote one.
+         ((= prev-level cur-level)
+          (org-do-demote))
+         ;; If parent is top-level, promote to top level if not already.
+         ((= prev-level 1)
+          (loop repeat (/ (- cur-level 1) (org-level-increment))
+                do (org-do-promote)))
+         ;; If top-level, return to prev-level.
+         ((= cur-level 1)
+          (loop repeat (/ (- prev-level 1) (org-level-increment))
+                do (org-do-demote)))
+         ;; If less than prev-level, promote one.
+         ((< cur-level prev-level)
+          (org-do-promote))
+         ;; If deeper than prev-level, promote until higher than
+         ;; prev-level.
+         ((> cur-level prev-level)
+          (loop repeat (+ 1 (/ (- cur-level prev-level) (org-level-increment)))
+                do (org-do-promote))))
+        t))))
 
 (defun org-map-tree (fun)
   "Call FUN for every heading underneath the current one."
@@ -17788,6 +17818,15 @@ interactive command with similar behavior."
 (defun org-at-heading-p (&optional ignored)
   (outline-on-heading-p t))
 
+(defun org-point-at-end-of-empty-headline ()
+  "If point is at the end of an empty headline, return t, else nil.
+If the heading only contains a TODO keyword, it is still still considered
+empty."
+  (and (looking-at "[ \t]*$")
+       (save-excursion
+         (beginning-of-line 1)
+         (looking-at (concat "^\\(\\*+\\)[ \t]+\\(" org-todo-regexp
+			     "\\)?[ \t]*$")))))
 (defun org-at-heading-or-item-p ()
   (or (org-on-heading-p) (org-at-item-p)))
 

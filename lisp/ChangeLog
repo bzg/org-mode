@@ -1,3 +1,10 @@
+2010-03-21  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-point-at-end-of-empty-headline)
+	(org-level-increment, org-get-previous-line-level): New function.
+	(org-cycle-level): Rewritten to be independent of when this
+	function is called.
+
 2010-03-19  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-latex.el (org-export-latex-keywords): Start a new paragraph
