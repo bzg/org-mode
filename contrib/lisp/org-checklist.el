@@ -44,6 +44,8 @@
 (require 'org)
 (load "a2ps-print" 'no-error)
 
+(setq org-default-properties (cons "RESET_CHECK_BOXES" (cons "LIST_EXPORT_BASENAME" org-default-properties)))
+
 (defgroup org-checklist nil
   "Extended checklist handling for org"
   :tag "Org-checklist"
