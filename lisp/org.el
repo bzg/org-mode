@@ -6385,7 +6385,7 @@ first headline."
   (let ((current-level (org-current-level))
 	(prev-level (when (> (line-number-at-pos) 1)
 		      (save-excursion
-			(previous-line)
+			(beginning-of-line 0)
 			(org-current-level)))))
     (cond ((null current-level) nil) ; Before first headline
 	  ((null prev-level) 0)      ; At first headline
