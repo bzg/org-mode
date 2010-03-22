@@ -104,6 +104,22 @@ with `org-export-taskjuggler-project-tag'"
   :group 'org-export-taskjuggler
   :type '(repeat (string :tag "Report")))
 
+(defcustom org-export-taskjuggler-default-global-properties 
+  "shift s40 \"Part time shift\" {
+  workinghours wed, thu, fri off
+}
+"
+  "Default global properties for the project. Here you typically
+define global properties such as shifts, accounts, rates,
+vacation, macros and flags. Any property that is allowed within
+the TaskJuggler file can be inserted. You could for example
+include another TaskJuggler file. 
+
+The global properties are inserted after the project declaration
+but before any resource and task declarations."
+  :group 'org-export-taskjuggler
+  :type '(string :tag "Preamble"))
+
 ;;; Hooks
 
 (defvar org-export-taskjuggler-final-hook nil
@@ -178,6 +194,7 @@ defined in `org-export-taskjuggler-default-reports'."
     (with-current-buffer buffer
       (erase-buffer)
       (org-taskjuggler-open-project (car tasks))
+      (insert org-export-taskjuggler-default-global-properties)
       (dolist (resource resources)
 	(let ((level (cdr (assoc "level" resource))))
 	  (org-taskjuggler-close-maybe level)
@@ -230,7 +247,7 @@ and the full path to each task. Taskjuggler takes hierarchical ids.
 For that reason we have to make ids locally unique and we have to keep
 a path to the current task."
   (let ((previous-level 0)
-	unique-ids
+	unique-ids unique-id
 	path
 	task resolved-tasks tmp)
     (dolist (task tasks resolved-tasks)
