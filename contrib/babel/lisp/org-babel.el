@@ -1057,7 +1057,7 @@ This is taken almost directly from `org-read-prop'."
       (or (org-babel-number-p cell)
           (if (or (equal "(" (substring cell 0 1))
                   (equal "'" (substring cell 0 1)))
-              (read cell)
+              (eval (read cell))
             (progn (set-text-properties 0 (length cell) nil cell) cell)))
     cell))
 
