@@ -592,8 +592,15 @@ the language, a switch telling if the content should be in a single line."
     (insert code)
     (goto-char beg)
     (if single (just-one-space))
-    (org-goto-line (1- (+ (org-current-line) line)))
-    (org-move-to-column (if preserve-indentation col (+ col total-nindent delta)))
+    (if (memq t (mapcar (lambda (overlay)
+			  (eq (org-overlay-get overlay 'invisible)
+			      'org-hide-block))
+			(org-overlays-at (point))))
+	;; Block is hidden; put point at start of block
+	(beginning-of-line 0)
+      ;; Block is visible, put point where it was in the code buffer
+      (org-goto-line (1- (+ (org-current-line) line)))
+      (org-move-to-column (if preserve-indentation col (+ col total-nindent delta))))
     (move-marker beg nil)
     (move-marker end nil))
   (unless (eq context 'save)

@@ -1,3 +1,9 @@
+2010-03-23  Dan Davison  <davison@stats.ox.ac.uk>
+
+	* org-src.el (org-edit-src-exit): When returning from code edit
+	buffer, if code block is hidden, leave point at start of
+	#+begin_src line
+
 2010-03-23  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-insert-heading): Do not remove all spaces if the
