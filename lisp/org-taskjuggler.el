@@ -354,14 +354,14 @@ UNIQUE-IDS. If the first part of the headline is not unique try to add
 more parts of the headline or finally add more underscore characters (\"_\")."
   (let* ((headline (cdr (assoc "headline" item)))
 	 (parts (split-string headline))
-	 (id (downcase (pop parts))))
+	 (id (org-taskjuggler-clean-id (downcase (pop parts)))))
     ; try to add more parts of the headline to make it unique
     (while (member id unique-ids)
-      (setq id (concat id "_" (downcase (pop parts)))))
+      (setq id (concat id "_" (org-taskjuggler-clean-id (downcase (pop parts))))))
     ; if its still not unique add "_"
     (while (member id unique-ids)
       (setq id (concat id "_")))
-    (org-taskjuggler-clean-id id)))
+    id))
 	
 (defun org-taskjuggler-clean-id (id)
   "Clean and return ID to make it acceptable for taskjuggler."
