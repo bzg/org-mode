@@ -139,7 +139,7 @@ can not be resolved.")
 		"\\)[ \t]*"
 		"\\([^\":\n]*\"[^\"\n*]*\"[^\":\n]*\\|[^\":\n]*\\)" ;; (2)   switches
 		"\\([^\n]*\\)\n"                      ;; (3)   header arguments
-                "\\([^\000]+?\\)#\\+end_src"))        ;; (4)   body
+                "\\([^\000]+?\n\\)[ \t]*#\\+end_src"));; (4)   body
   (setq org-babel-inline-src-block-regexp
 	(concat "[ \f\t\n\r\v]\\(src_"                ;; (1)   replacement target
 		"\\("                                 ;; (2)   lang
@@ -605,8 +605,8 @@ If the point is not on a source block then return nil."
             (point)))
      (save-excursion ;; inside a src block
        (and
-        (re-search-backward "#\\+begin_src" nil t) (setq top (point))
-        (re-search-forward "#\\+end_src" nil t) (setq bottom (point))
+        (re-search-backward "^[ \t]*#\\+begin_src" nil t) (setq top (point))
+        (re-search-forward "^[ \t]*#\\+end_src" nil t) (setq bottom (point))
         (< top initial) (< initial bottom)
         (goto-char top) (move-beginning-of-line 1)
         (looking-at org-babel-src-block-regexp)
@@ -656,7 +656,7 @@ following the source block."
 	   (head (unless on-lob-line (org-babel-where-is-src-block-head))) end)
       (when head (goto-char head))
       (or (and name (org-babel-find-named-result name))
-          (and (or on-lob-line (re-search-forward "#\\+end_src" nil t))
+          (and (or on-lob-line (re-search-forward "^[ \t]*#\\+end_src" nil t))
                (progn (move-end-of-line 1)
 		      (if (eobp) (insert "\n") (forward-char 1))
 		      (setq end (point))
@@ -1057,7 +1057,7 @@ This is taken almost directly from `org-read-prop'."
       (or (org-babel-number-p cell)
           (if (or (equal "(" (substring cell 0 1))
                   (equal "'" (substring cell 0 1)))
-              (read cell)
+              (eval (read cell))
             (progn (set-text-properties 0 (length cell) nil cell) cell)))
     cell))
 
