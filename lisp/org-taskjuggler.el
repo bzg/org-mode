@@ -382,12 +382,22 @@ more parts of the headline or finally add more underscore characters (\"_\")."
   (let ((id (org-taskjuggler-clean-id (cdr (assoc "ID" resource))))
 	(unique-id (org-taskjuggler-clean-id (cdr (assoc "unique-id" resource))))
 	(headline (cdr (assoc "headline" resource)))
-	(limits (cdr (assoc "limits" resource)))
-	(vacation (cdr (assoc "vacation" resource))))
+	(attributes '(limits vacation shift booking efficiency journalentry rate)))
     (insert 
-     (concat "resource " (or id unique-id) " \"" headline "\" {\n "
-	     (and limits (concat "\n limits { " limits " }\n"))
-	     (and vacation (concat "\n vacation " vacation "\n"))))))
+     (concat 
+      "resource " (or id unique-id) " \"" headline "\" {\n "
+      (mapconcat
+       'identity
+       (remq
+	nil 
+	(mapcar
+	 (lambda (attribute)
+	   (let ((value (cdr (assoc (symbol-name attribute) resource))))
+	     (and value 
+		  (if (equal attribute 'limits)
+		      (format "%s { %s }" (symbol-name attribute) value)
+		    (format "%s %s" (symbol-name attribute) value)))))
+	 attributes)) "\n") "\n"))))
 
 (defun org-taskjuggler-clean-effort (effort)
   "Translate effort strings into a format acceptable to taskjuggler,
