@@ -177,15 +177,6 @@ defined in `org-export-taskjuggler-default-reports'."
       (let ((task (car tasks))
 	    (time-string (format-time-string "%Y-%m-%d")))
 	(setcar tasks (push (cons "start" time-string) task))))
-    ;; add a default end date to the first task if none was given
-    (unless (assoc "end" (car tasks))
-      (let* ((task (car tasks))
-	    (now (current-time))
-	    (duration 
-	     (days-to-time org-export-taskjuggler-default-project-duration))
-	    (time-string 
-	     (format-time-string "%Y-%m-%d" (time-add now duration))))
-	(setcar tasks (push (cons "end" time-string) task))))
     ;; add a default version if none was given
     (unless (assoc "version" (car tasks))
       (let ((task (car tasks))
@@ -368,15 +359,43 @@ more parts of the headline or finally add more underscore characters (\"_\")."
   (and id (replace-regexp-in-string "[^a-zA-Z0-9_]" "_" id)))
 
 (defun org-taskjuggler-open-project (project)
-  (let ((unique-id (cdr (assoc "unique-id" project)))
+  "Insert a the beginning of project declaration. All valid
+attributes from the PROJECT alist are inserted. If no end date is
+specified it is calculated
+`org-export-taskjuggler-default-project-duration' days from now."
+  (let* ((unique-id (cdr (assoc "unique-id" project)))
 	(headline (cdr (assoc "headline" project)))
 	(version (cdr (assoc "version" project)))
 	(start (cdr (assoc "start" project)))
-	(end (cdr (assoc "end" project))))
+	(end (cdr (assoc "end" project)))
+	(now (current-time))
+	(duration 
+	 (days-to-time org-export-taskjuggler-default-project-duration))
+	(time-string 
+	 (format-time-string "%Y-%m-%d" (time-add now duration))))
     (insert 
      (concat 
       "project " unique-id
-      " \"" headline "\" \"" version "\" " start " - " end " {\n }\n"))))
+      " \"" headline "\" \"" version "\" " start " - "
+      (or end time-string)" {\n }\n"))))
+
+(defun org-taskjuggler-get-attributes (item attributes)
+  "Return all attribute as a single formated string. ITEM is an alist
+representing either a resource or a task. ATTRIBUTES is a list of
+symbols. Only entries from ITEM are considered that are listed in
+ATTRIBUTES."
+  (mapconcat
+   'identity
+   (remq
+    nil 
+    (mapcar
+     (lambda (attribute)
+       (let ((value (cdr (assoc (symbol-name attribute) item))))
+	 (and value 
+	      (if (equal attribute 'limits)
+		  (format "%s { %s }" (symbol-name attribute) value)
+		(format "%s %s" (symbol-name attribute) value)))))
+     attributes)) "\n"))
 
 (defun org-taskjuggler-open-resource (resource)
   (let ((id (org-taskjuggler-clean-id (cdr (assoc "ID" resource))))
@@ -386,18 +405,7 @@ more parts of the headline or finally add more underscore characters (\"_\")."
     (insert 
      (concat 
       "resource " (or id unique-id) " \"" headline "\" {\n "
-      (mapconcat
-       'identity
-       (remq
-	nil 
-	(mapcar
-	 (lambda (attribute)
-	   (let ((value (cdr (assoc (symbol-name attribute) resource))))
-	     (and value 
-		  (if (equal attribute 'limits)
-		      (format "%s { %s }" (symbol-name attribute) value)
-		    (format "%s %s" (symbol-name attribute) value)))))
-	 attributes)) "\n") "\n"))))
+      (org-taskjuggler-get-attributes resource attributes) "\n"))))
 
 (defun org-taskjuggler-clean-effort (effort)
   "Translate effort strings into a format acceptable to taskjuggler,
@@ -420,28 +428,30 @@ supports (like weeks, months and years) are currently not supported."
 	(effort (org-taskjuggler-clean-effort (cdr (assoc org-effort-property task))))
 	(depends (cdr (assoc "depends" task)))
 	(allocate (cdr (assoc "allocate" task)))
-	(account (cdr (assoc "account" task)))
-	(start (cdr (assoc "start" task)))
+	(priority (and (cdr (assoc "PRIORITY" task)) 
+		      (org-get-priority (cdr (assoc "PRIORITY" task)))))
 	(state (cdr (assoc "TODO" task)))
 	(complete (or (and (member state org-done-keywords) "100") 
 		      (cdr (assoc "complete" task))))
-	(note (cdr (assoc "note" task)))
-	(priority (cdr (assoc "priority" task)))
 	(parent-ordered (cdr (assoc "parent-ordered" task)))
-	(previous-sibling (cdr (assoc "previous-sibling" task))))
+	(previous-sibling (cdr (assoc "previous-sibling" task)))
+	(attributes 
+	 '(account start note duration endbuffer endcredit end
+	   flags journalentry, length maxend maxstart milestone
+	   minend minstart period reference responsible
+	   scheduling startbuffer startcredit statusnote)))
     (insert
      (concat 
-      "task " unique-id " \"" headline "\" {" 
-      (and effort (concat "\n effort " effort))
+      "task " unique-id " \"" headline "\" {\n" 
       (if (and parent-ordered previous-sibling)
-	  (concat "\n depends " previous-sibling)
-	(and depends (concat "\n depends " depends)))
-      (and allocate (concat "\n purge allocations\n allocate " allocate))
-      (and account (concat "\n account " account))
-      (and start (concat "\n start " start))
-      (and complete (concat "\n complete " complete))
-      (and note (concat "\n note " note))
-      (and priority (concat "\n priority " priority))
+	  (format " depends %s\n" previous-sibling)
+	(and depends (format " depends %s\n" depends)))
+      (and allocate (format " purge allocations\n allocate %s\n" allocate))
+      (and complete (format " complete %s\n" complete))
+      (and effort (format " effort %s\n" effort))
+      (and priority (format " priority %s\n" priority))
+      
+      (org-taskjuggler-get-attributes task attributes)
       "\n"))))
 
 (defun org-taskjuggler-close-maybe (level)
