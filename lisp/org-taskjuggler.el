@@ -186,6 +186,7 @@ defined in `org-export-taskjuggler-default-reports'."
       (erase-buffer)
       (org-taskjuggler-open-project (car tasks))
       (insert org-export-taskjuggler-default-global-properties)
+      (insert "\n")
       (dolist (resource resources)
 	(let ((level (cdr (assoc "level" resource))))
 	  (org-taskjuggler-close-maybe level)
@@ -373,23 +374,34 @@ specified it is calculated
 	     unique-id headline version start
 	     org-export-taskjuggler-default-project-duration))))
 
+(defun org-taskjuggler-filter-and-join (items)
+  (and (remq nil items) (mapconcat 'identity (remq nil items) "\n")))
+  
 (defun org-taskjuggler-get-attributes (item attributes)
   "Return all attribute as a single formated string. ITEM is an alist
 representing either a resource or a task. ATTRIBUTES is a list of
 symbols. Only entries from ITEM are considered that are listed in
 ATTRIBUTES."
-  (mapconcat
-   'identity
-   (remq
-    nil 
-    (mapcar
-     (lambda (attribute)
-       (let ((value (cdr (assoc (symbol-name attribute) item))))
-	 (and value 
-	      (if (equal attribute 'limits)
-		  (format "%s { %s }" (symbol-name attribute) value)
-		(format "%s %s" (symbol-name attribute) value)))))
-     attributes)) "\n"))
+  (org-taskjuggler-filter-and-join 
+   (mapcar
+    (lambda (attribute) 
+      (org-taskjuggler-filter-and-join 
+       (org-taskjuggler-get-attribute item attribute)))
+    attributes)))
+
+(defun org-taskjuggler-get-attribute (item attribute)
+  "Return a list of strings containing the properly formatted
+taskjuggler declaration for a given ATTRIBUTE in ITEM (an alist).
+If the ATTRIBUTE is not in ITEM return nil."
+  (cond 
+   ((null item) nil)
+   ((equal (symbol-name attribute) (car (car item)))
+    (cons (or 
+	   (and (equal attribute 'limits)
+		(format "%s { %s }" (symbol-name attribute) (cdr (car item))))
+	   (format "%s %s" (symbol-name attribute) (cdr (car item))))
+	  (org-taskjuggler-get-attribute (cdr item) attribute)))
+   (t (org-taskjuggler-get-attribute (cdr item) attribute))))
 
 (defun org-taskjuggler-open-resource (resource)
   (let ((id (org-taskjuggler-clean-id (cdr (assoc "ID" resource))))
