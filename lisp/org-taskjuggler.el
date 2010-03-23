@@ -416,14 +416,20 @@ supports (like weeks, months and years) are currently not supported."
    ((string-match "\\([0-9]+\\).\\([0-9]+\\)" effort) (concat effort "d"))
    (t (error "Not a valid effort (%s)" effort))))
 
+(defun org-taskjuggler-get-priority (priority)
+  "Return a priority between 1 and 1000 based on PRIORITY, an
+org-mode priority string."
+  (max 1 (/ (* 1000 (- org-lowest-priority (string-to-char priority))) 
+	    (- org-lowest-priority org-highest-priority))))
+
 (defun org-taskjuggler-open-task (task)
   (let* ((unique-id (cdr (assoc "unique-id" task)))
 	(headline (cdr (assoc "headline" task)))
 	(effort (org-taskjuggler-clean-effort (cdr (assoc org-effort-property task))))
 	(depends (cdr (assoc "depends" task)))
 	(allocate (cdr (assoc "allocate" task)))
-	(priority (and (cdr (assoc "PRIORITY" task)) 
-		      (org-get-priority (cdr (assoc "PRIORITY" task)))))
+	(priority-raw (cdr (assoc "PRIORITY" task)))
+	(priority (and priority-raw (org-taskjuggler-get-priority priority-raw)))
 	(state (cdr (assoc "TODO" task)))
 	(complete (or (and (member state org-done-keywords) "100") 
 		      (cdr (assoc "complete" task))))
