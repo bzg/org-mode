@@ -1,5 +1,8 @@
 2010-03-23  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-insert-heading): Do not remove all spaces if the
+	headline is empty.
+
 	* org-indent.el (org-indent): Fix group name.
 
 2010-03-21  Carsten Dominik  <carsten.dominik@gmail.com>

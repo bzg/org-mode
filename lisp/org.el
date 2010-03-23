@@ -6189,6 +6189,9 @@ This is important for non-interactive uses of the command."
 	      (setq pos (point-at-bol))
 	      (or split (end-of-line 1))
 	      (delete-horizontal-space)
+	      (if (string-match "\\`\\*+\\'"
+				(buffer-substring (point-at-bol) (point)))
+		  (insert " "))
 	      (newline (if blank 2 1))
 	      (when tags
 		(save-excursion
