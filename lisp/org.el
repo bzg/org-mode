@@ -259,6 +259,7 @@ to add the symbol `xyz', and the package must have a call to
 	(const :tag "C  sqlinsert:         Convert Org-mode tables to SQL insertions" orgtbl-sqlinsert)
 	(const :tag "C  toc:               Table of contents for Org-mode buffer" org-toc)
 	(const :tag "C  track:             Keep up with Org-mode development" org-track)
+	(const :tag "C  TaskJuggler:       Export tasks to a TaskJuggler project" org-taskjuggler)
 	(repeat :tag "External packages" :inline t (symbol :tag "Package"))))
 
 (defcustom org-support-shift-select nil
