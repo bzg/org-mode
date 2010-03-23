@@ -1,3 +1,7 @@
+2010-03-23  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-indent.el (org-indent): Fix group name.
+
 2010-03-21  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-table.el (org-table-goto-column): Fix forcing a non-existing

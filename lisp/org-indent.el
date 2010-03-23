@@ -38,7 +38,7 @@
 
 (defgroup org-indent nil
   "Options concerning dynamic virtual outline indentation."
-  :tag "Org Structure"
+  :tag "Org Indent"
   :group 'org)
 
 (defconst org-indent-max 40
