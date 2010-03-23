@@ -367,17 +367,11 @@ specified it is calculated
 	(headline (cdr (assoc "headline" project)))
 	(version (cdr (assoc "version" project)))
 	(start (cdr (assoc "start" project)))
-	(end (cdr (assoc "end" project)))
-	(now (current-time))
-	(duration 
-	 (days-to-time org-export-taskjuggler-default-project-duration))
-	(time-string 
-	 (format-time-string "%Y-%m-%d" (time-add now duration))))
+	(end (cdr (assoc "end" project))))
     (insert 
-     (concat 
-      "project " unique-id
-      " \"" headline "\" \"" version "\" " start " - "
-      (or end time-string)" {\n }\n"))))
+     (format "project %s \"%s\" \"%s\" %s +%sd {\n }\n"
+	     unique-id headline version start
+	     org-export-taskjuggler-default-project-duration))))
 
 (defun org-taskjuggler-get-attributes (item attributes)
   "Return all attribute as a single formated string. ITEM is an alist
