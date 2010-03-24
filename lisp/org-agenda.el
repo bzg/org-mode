@@ -587,6 +587,8 @@ to make his option also apply to the tags-todo list."
 
 (defcustom org-agenda-todo-ignore-deadlines nil
   "Non-nil means ignore some deadlined TODO items when making TODO list.
+There are different motivations for using different values, please think
+carefully when configuring this variable.
 
 This applie when creating the global todo list.
 Valid values are:
@@ -595,8 +597,14 @@ near    Don't show near deadline entries.  A deadline is near when it is
         closer than `org-deadline-warning-days' days.  The idea behind this
         is that such items will appear in the agenda anyway.
 
-far     Don't show far deadline entries.  This is useful if you don't want
-        to use the todo list to figure out what to do now.
+far     Don't show TODO entries where a deadline has been defined, but
+        the deadline is not near.  This is useful if you don't want to
+        use the todo list to figure out what to do now.
+
+past    Don't show entries with a deadline timestamp for today or in the past.
+
+future  Don't show entries with a deadline timestamp in the future, not even
+        when they become `near' ones.  Use it with caution.
 
 all     Ignore all TODO entries that do have a deadline.       
 
@@ -4258,6 +4266,10 @@ the documentation of `org-diary'."
 		((memq org-agenda-todo-ignore-deadlines '(t all)) t)
 		((eq org-agenda-todo-ignore-deadlines 'far)
 		 (not (org-deadline-close (match-string 1))))
+		((eq org-agenda-todo-ignore-deadlines 'future)
+		 (> (org-days-to-time (match-string 1)) 0))
+		((eq org-agenda-todo-ignore-deadlines 'past)
+		 (<= (org-days-to-time (match-string 1)) 0))
 		(t (org-deadline-close (match-string 1)))))))))
 
 (defconst org-agenda-no-heading-message

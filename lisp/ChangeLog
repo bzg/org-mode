@@ -1,5 +1,10 @@
 2010-03-24  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-agenda.el (org-agenda-todo-ignore-deadlines): Document `past'
+	and `future' values.
+	(org-agenda-check-for-timestamp-as-reason-to-ignore-todo-item):
+	Handle `past' and `future' values.
+
 	* org.el (org-read-agenda-file-list): Interpret file names
 	relative to org-directory and allow environment variables and
 	"~".
