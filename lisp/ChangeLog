@@ -1,5 +1,8 @@
 2010-03-24  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-latex.el (org-export-latex-fontify): Do not mistake table.el
+	borders for strike-through emphasis.
+
 	* org-freemind.el (org-freemind-write-mm-buffer): Simplify the
 	handling of odd levels.
 

@@ -1736,7 +1736,10 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 		    (save-match-data
 		      (and (org-at-table-p)
 			   (string-match
-			    "[|\n]" (buffer-substring beg end))))))
+			    "[|\n]" (buffer-substring beg end)))))
+		  (and (equal (match-string 3) "+")
+		       (save-match-data
+			 (string-match "\\`-+\\'" (match-string 4)))))
 	(setq s (match-string 4))
 	(setq rpl (concat (match-string 1)
 			  (org-export-latex-emph-format (cadr emph)

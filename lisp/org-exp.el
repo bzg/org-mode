@@ -554,7 +554,8 @@ When nil, Org-mode's own HTML generator is used when possible (i.e. if
 the table does not use row- or column-spanning).  This has the
 advantage, that the automatic HTML conversions for math symbols and
 sub/superscripts can be applied.  Org-mode's HTML generator is also
-much faster."
+much faster.  The LaTeX exporter always use the native exporter for
+table.el tables."
   :group 'org-export-tables
   :type 'boolean)
 
