@@ -1,5 +1,9 @@
 2010-03-24  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-read-agenda-file-list): Interpret file names
+	relative to org-directory and allow environment variables and
+	"~".
+
 	* org-latex.el (org-export-latex-special-chars): Allow a
 	parenthesis before an exponent or subscript.
 

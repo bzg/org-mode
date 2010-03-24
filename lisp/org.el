@@ -14672,8 +14672,11 @@ the buffer and restores the previous window configuration."
   (when (stringp org-agenda-files)
     (with-temp-buffer
       (insert-file-contents org-agenda-files)
-      (org-split-string (buffer-string) "[ \t\r\n]*?[\r\n][ \t\r\n]*"))))
-
+      (mapcar
+       (lambda (f)
+	 (expand-file-name (substitute-in-file-name f)
+			   (file-name-directory org-agenda-files)))
+       (org-split-string (buffer-string) "[ \t\r\n]*?[\r\n][ \t\r\n]*")))))
 
 ;;;###autoload
 (defun org-cycle-agenda-files ()
