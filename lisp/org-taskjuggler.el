@@ -375,7 +375,10 @@ specified it is calculated
 	     org-export-taskjuggler-default-project-duration))))
 
 (defun org-taskjuggler-filter-and-join (items)
-  (and (remq nil items) (mapconcat 'identity (remq nil items) "\n")))
+  "Filter all nil elements from ITEMS and join the remaining ones
+with separator \"\n\"."
+  (let ((filtered-items (remq nil items)))
+    (and filtered-items (mapconcat 'identity filtered-items "\n"))))
   
 (defun org-taskjuggler-get-attributes (item attributes)
   "Return all attribute as a single formated string. ITEM is an alist
