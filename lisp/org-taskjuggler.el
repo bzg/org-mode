@@ -417,16 +417,17 @@ If the ATTRIBUTE is not in ITEM return nil."
 
 (defun org-taskjuggler-clean-effort (effort)
   "Translate effort strings into a format acceptable to taskjuggler,
-i.e. REAL UNIT. If the effort string is something like 5:00 it
-will be assumed to be hours and will be translated into 5.0h.
+i.e. REAL UNIT. If the effort string is something like 5:30 it
+will be assumed to be hours and will be translated into 5.5h.
 Otherwise if it contains something like 3.0 it is assumed to be
 days and will be translated into 3.0d. Other formats that taskjuggler
 supports (like weeks, months and years) are currently not supported."
   (cond 
    ((null effort) effort)
    ((string-match "\\([0-9]+\\):\\([0-9]+\\)" effort) 
-    ; FIXME: translate the minutes to a decimal
-    (concat (match-string 1 effort) "." (match-string 2 effort) "h"))
+    (let ((hours (string-to-number (match-string 1 effort)))
+	  (minutes (string-to-number (match-string 2 effort))))
+      (format "%dh" (+ hours (/ minutes 60.0)))))
    ((string-match "\\([0-9]+\\).\\([0-9]+\\)" effort) (concat effort "d"))
    (t (error "Not a valid effort (%s)" effort))))
 
