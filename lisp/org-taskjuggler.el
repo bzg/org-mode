@@ -28,7 +28,23 @@
 
 ;; Commentary:
 ;;
-;; This library implements a TaskJuggler exporter for org-mode.
+;; This library implements a TaskJuggler exporter for org-mode. It is
+;; a bit different from other exporters, such as the HTML and LaTeX
+;; exporters for example, in that it does not export all the nodes of
+;; a document or strictly follow the order of the nodes in the
+;; document.
+;;
+;; Instead the TaskJuggler exporter looks for a tree that defines the
+;; tasks and a optionally tree that defines the resources for this
+;; project. It then creates a TaskJuggler file based on these trees
+;; and the attributes defined in all the nodes.
+;;
+;; * Installation
+;;
+;; Put this file into your load-path and the following line into your
+;; ~/.emacs:
+;;
+;;   (require 'org-taskjuggler)
 ;;
 ;; The interactive functions are similar to those of the HTML and LaTeX
 ;; exporters:
@@ -36,9 +52,59 @@
 ;; M-x `org-export-as-taskjuggler'
 ;; M-x `org-export-as-taskjuggler-and-open'
 ;;
-;;; TODO:
-;;    * Code cleanup
-;;    * Add documentation
+;; * Tasks
+;;
+;; Let's illustrate this with a small example. Create your tasks as
+;; you usually do. Assign efforts to each task using properties (it's
+;; easiest to do this in the column view). You should end up with
+;; something similar to the example by Peter Jones in
+;; http://www.contextualdevelopment.com/static/artifacts/articles/2008/project-planning/project-planning.org.
+;; Now mark the top node of your tasks with a tag named
+;; "taskjuggler_project" (or whatever you customized
+;; `org-export-taskjuggler-project-tag' to). You are now ready to
+;; export the project plan with `org-export-as-taskjuggler-and-open'
+;; which will export the project plan and open a gant chart in
+;; TaskJugglerUI. 
+;;
+;; * Resources
+;; 
+;; Next you can define resources and assign these to work on specific
+;; tasks. You can group your resources hierarchically. Tag the top
+;; node of the resources with "taskjuggler_resource" (or whatever you
+;; customized `org-export-taskjuggler-resource-tag' to). You can
+;; optionally assign an ID to the resources (using the standard org
+;; properties commands) or you can let the exporter generate IDs
+;; automatically (the exporter picks the first word of the headline as
+;; the ID as long as it is unique). Using that ID you can then
+;; allocate resources to tasks. This is again done with the "allocate"
+;; property on the tasks. Do this in column view or when on the task
+;; type
+;;
+;;  C-c C-x p allocate RET <ID> RET
+;;
+;; Once the allocations are done you can again export to TaskJuggler
+;; and check in the Resource Allocation Graph which person is working
+;; on what task at what time.
+;;
+;; * Export of properties
+;;
+;; The exporter also takes TODO state information into consideration,
+;; i.e. if a task is marked as done it will have the corresponding
+;; attribute in TaskJuggler (complete 100). Also it will export any
+;; property on a task resource or resource node which is known to
+;; TaskJuggler, such as limits, vacation, shift, booking, efficiency,
+;; journalentry, rate for resources or account, start, note, duration,
+;; end, journalentry, milestone, reference, responsible, scheduling,
+;; etc for tasks.
+;;
+;; * Dependecies
+;; 
+;; The exporter will handle dependencies that are defined in the tasks
+;; either with the ORDERED attribute (see TODO dependencies in the Org
+;; mode manual) or with the BLOCKER attribute (see org-depend.el) or
+;; alternatively with a depends attribute. Both the BLOCKER and the
+;; depends attribute can be either "previous-sibling" or a reference
+;; to an ID which is defined for another task in the project.
 ;;
 ;;; Code:
 
