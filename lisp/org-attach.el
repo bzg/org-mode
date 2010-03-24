@@ -241,12 +241,17 @@ the ATTACH_DIR property) their own attachment directory."
   "Commit changes to git if `org-attach-directory' is properly initialized.
 This checks for the existence of a \".git\" directory in that directory."
   (let ((dir (expand-file-name org-attach-directory)))
-    (if (file-exists-p (expand-file-name ".git" dir))
-	(shell-command
-	 (concat "(cd " dir "; "
-		 " git add .; "
-		 " git ls-files --deleted -z | xargs -0 git rm; "
-		 " git commit -m 'Synchronized attachments')")))))
+    (when (file-exists-p (expand-file-name ".git" dir))
+      (with-temp-buffer
+	(cd dir)
+	(shell-command "git add .")
+	(shell-command "git ls-files --deleted -z" t)
+	(mapc '(lambda (file)
+		 (unless (string= file "")
+		   (shell-command
+		    (concat "git rm \"" file "\""))))
+	      (split-string (buffer-string) ""))
+	(shell-command "git commit -m 'Synchronized attachments'")))))
 
 (defun org-attach-tag (&optional off)
   "Turn the autotag on or (if OFF is set) off."

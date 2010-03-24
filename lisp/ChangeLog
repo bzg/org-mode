@@ -1,5 +1,7 @@
 2010-03-24  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-attach.el (org-attach-commit): Remove dependence on xargs.
+
 	* org-latex.el (org-export-latex-fontify): Do not mistake table.el
 	borders for strike-through emphasis.
 
