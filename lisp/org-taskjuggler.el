@@ -90,12 +90,12 @@ with `org-export-taskjuggler-project-tag'"
   columns hierarchindex, name, start, end, effort, duration, completed, chart
   timeformat \"%Y-%m-%d\"
   hideresource 1
-  loadunit days
+  loadunit shortauto
 }"
 "resourcereport \"Resource Graph\" {
   headline \"Resource Allocation Graph\"
   columns no, name, utilization, freeload, chart
-  loadunit days
+  loadunit shortauto
   sorttasks startup
   hidetask ~isleaf()
 }")
