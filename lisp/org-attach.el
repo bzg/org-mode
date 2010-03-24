@@ -327,7 +327,8 @@ The attachment is created as an Emacs buffer."
     (setq file (expand-file-name file attach-dir))
     (unless (file-exists-p file)
       (error "No such attachment: %s" file))
-    (delete-file file)))
+    (delete-file file)
+    (org-attach-commit)))
 
 (defun org-attach-delete-all (&optional force)
   "Delete all attachments from the current task.
