@@ -1,5 +1,8 @@
 2010-03-24  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-map-dblocks): Use save-excursion to remember the
+	position.
+
 	* org-attach.el (org-attach-commit): Remove dependence on xargs.
 	(org-attach-delete-one): Commit after deleting a file.
 

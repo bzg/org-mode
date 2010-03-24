@@ -9689,16 +9689,15 @@ the property list including an extra property :name with the block name."
 (defun org-map-dblocks (&optional command)
   "Apply COMMAND to all dynamic blocks in the current buffer.
 If COMMAND is not given, use `org-update-dblock'."
-  (let ((cmd (or command 'org-update-dblock))
-	pos)
+  (let ((cmd (or command 'org-update-dblock)))
     (save-excursion
       (goto-char (point-min))
       (while (re-search-forward org-dblock-start-re nil t)
-	(goto-char (setq pos (match-beginning 0)))
-	(condition-case nil
-	    (funcall cmd)
-	  (error (message "Error during update of dynamic block")))
-	(goto-char pos)
+	(goto-char (match-beginning 0))
+        (save-excursion
+          (condition-case nil
+              (funcall cmd)
+            (error (message "Error during update of dynamic block"))))
 	(unless (re-search-forward org-dblock-end-re nil t)
 	  (error "Dynamic block not terminated"))))))
 
