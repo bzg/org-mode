@@ -39,7 +39,6 @@
 ;;; TODO:
 ;;    * Code cleanup
 ;;    * Add documentation
-;;    * Try using plists instead of alists
 ;;
 ;;; Code:
 
@@ -61,13 +60,13 @@
   :group 'org-export-taskjuggler
   :type 'string)
 
-(defcustom org-export-taskjuggler-project-tag "project"
+(defcustom org-export-taskjuggler-project-tag "taskjuggler-project"
   "Tag, property or todo used to find the tree containing all
 the tasks for the project."
   :group 'org-export-taskjuggler
   :type 'string)
 
-(defcustom org-export-taskjuggler-resource-tag "resource"
+(defcustom org-export-taskjuggler-resource-tag "taskjuggler-resource"
   "Tag, property or todo used to find the tree containing all the
 resources for the project."
   :group 'org-export-taskjuggler
