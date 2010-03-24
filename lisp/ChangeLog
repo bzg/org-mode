@@ -1,5 +1,8 @@
 2010-03-24  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-freemind.el (org-freemind-write-mm-buffer): Simplify the
+	handling of odd levels.
+
 	* org-agenda.el (org-agenda-todo-ignore-deadlines): Document `past'
 	and `future' values.
 	(org-agenda-check-for-timestamp-as-reason-to-ignore-todo-item):
