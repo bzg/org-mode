@@ -3281,8 +3281,7 @@ given in `org-agenda-start-on-weekday'."
 	(catch 'nextfile
 	  (org-check-agenda-file file)
 	  (let ((org-agenda-entry-types org-agenda-entry-types))
-	    (if org-agenda-include-deadlines
-		(add-to-list 'org-agenda-entry-types :deadline)
+	    (unless org-agenda-include-deadlines
 	      (setq org-agenda-entry-types
 		    (delq :deadline org-agenda-entry-types)))
 	    (cond
