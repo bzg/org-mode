@@ -60,13 +60,13 @@
   :group 'org-export-taskjuggler
   :type 'string)
 
-(defcustom org-export-taskjuggler-project-tag "taskjuggler-project"
+(defcustom org-export-taskjuggler-project-tag "taskjuggler_project"
   "Tag, property or todo used to find the tree containing all
 the tasks for the project."
   :group 'org-export-taskjuggler
   :type 'string)
 
-(defcustom org-export-taskjuggler-resource-tag "taskjuggler-resource"
+(defcustom org-export-taskjuggler-resource-tag "taskjuggler_resource"
   "Tag, property or todo used to find the tree containing all the
 resources for the project."
   :group 'org-export-taskjuggler
