@@ -1,5 +1,8 @@
 2010-03-25  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-ascii.el (org-export-as-ascii): Catch the case of exporting
+	a buffer with no file name attached.
+
 	* org.el (org-log-refile): New option.
 	(org-log-note-headings): Add a heading for refiling.
 	(org-startup-options): Add keywords for logging of the refile

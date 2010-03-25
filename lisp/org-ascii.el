@@ -227,8 +227,10 @@ publishing directory."
 		    (and (not
 			  (plist-get opt-plist :skip-before-1st-heading))
 			 (org-export-grab-title-from-buffer))
-		    (file-name-sans-extension
-		     (file-name-nondirectory bfname))))
+		    (and (buffer-file-name)
+			 (file-name-sans-extension
+			  (file-name-nondirectory bfname)))
+		    "UNTITLED"))
 	 (email (plist-get opt-plist :email))
 	 (language (plist-get opt-plist :language))
 	 (quote-re0 (concat "^[ \t]*" org-quote-string "\\>"))
