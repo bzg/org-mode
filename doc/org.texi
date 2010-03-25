@@ -6241,6 +6241,7 @@ process, you can use the following special command:
 @vindex org-refile-use-outline-path
 @vindex org-outline-path-complete-in-steps
 @vindex org-refile-allow-creating-parent-nodes
+@vindex org-log-refile
 Refile the entry or region at point.  This command offers possible locations
 for refiling the entry and lets you select one with completion.  The item (or
 all items in the region) is filed below the target heading as a subitem.
@@ -6254,6 +6255,10 @@ the variables @code{org-refile-use-outline-path} and
 @code{org-outline-path-complete-in-steps}.  If you would like to be able to
 create new nodes as new parents for refiling on the fly, check the
 variable @code{org-refile-allow-creating-parent-nodes}.
+When the variable @code{org-log-refile}@footnote{with corresponding
+@code{#+STARTUP} keywords @code{logrefile}, @code{lognoterefile},
+and @code{nologrefile}} is set, a time stamp or a note will be
+recorded when an entry has been refiled.
 @kindex C-u C-c C-w
 @item C-u C-c C-w
 Use the refile interface to jump to a heading.
@@ -10770,6 +10775,9 @@ configured using these options (see variables @code{org-log-done},
 @cindex @code{logredeadline}, STARTUP keyword
 @cindex @code{lognoteredeadline}, STARTUP keyword
 @cindex @code{nologredeadline}, STARTUP keyword
+@cindex @code{logrefile}, STARTUP keyword
+@cindex @code{lognoterefile}, STARTUP keyword
+@cindex @code{nologrefile}, STARTUP keyword
 @example
 logdone            @r{record a timestamp when an item is marked DONE}
 lognotedone        @r{record timestamp and a note when DONE}
@@ -10785,6 +10793,9 @@ nologreschedule    @r{do not record when a scheduling date changes}
 logredeadline      @r{record a timestamp when deadline changes}
 lognoteredeadline  @r{record a note when deadline changes}
 nologredeadline    @r{do not record when a deadline date changes}
+logrefile          @r{record a timestamp when refiling}
+lognoterefile      @r{record a note when refiling}
+nologrefile        @r{do not record when refiling}
 @end example
 @vindex org-hide-leading-stars
 @vindex org-odd-levels-only

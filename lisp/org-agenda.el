@@ -7427,6 +7427,7 @@ The prefix arg is passed through to the command if possible."
     (error "No entries are marked"))
   (message "Bulk: [r]efile [$]archive [A]rch->sib [t]odo [+/-]tag [s]chedule [d]eadline")
   (let* ((action (read-char-exclusive))
+	 (org-log-refile (if org-log-refile 'time nil))
 	 (entries (reverse org-agenda-bulk-marked-entries))
 	 cmd rfloc state e tag pos (cnt 0) (cntskip 0))
     (cond

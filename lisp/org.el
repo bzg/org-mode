@@ -1588,6 +1588,33 @@ are matched against file names, and values."
 	  (repeat :tag "By file name regexp"
 		  (cons regexp boolean))))
 
+(defcustom org-log-refile nil
+  "Information to record when a task is refiled.
+
+Possible values are:
+
+nil     Don't add anything
+time    Add a time stamp to the task
+note    Prompt for a note and add it with template `org-log-note-headings'
+
+This option can also be set with on a per-file-basis with
+
+   #+STARTUP: nologrefile
+   #+STARTUP: logrefile
+   #+STARTUP: lognoterefile
+
+You can have local logging settings for a subtree by setting the LOGGING
+property to one or more of these keywords.
+
+When bulk-refiling from the agenda, the value `note' is forbidden and
+will temporarily be changed to `time'."
+  :group 'org-refile
+  :group 'org-progress
+  :type '(choice
+	  (const :tag "No logging" nil)
+	  (const :tag "Record timestamp" time)
+	  (const :tag "Record timestamp with note." note)))
+
 (defcustom org-refile-targets nil
   "Targets for refiling entries with \\[org-refile].
 This is list of cons cells.  Each cell contains:
@@ -2069,6 +2096,7 @@ When nil, only the date will be recorded."
     (delschedule .  "Not scheduled, was %S on %t")
     (redeadline .  "New deadline from %S on %t")
     (deldeadline .  "Removed deadline, was %S on %t")
+    (refile . "Refiled on %t")
     (clock-out . ""))
   "Headings for notes added to entries.
 The value is an alist, with the car being a symbol indicating the note
@@ -2093,8 +2121,9 @@ agenda log mode depends on the format of these entries."
 	  (cons (const :tag "Heading when clocking out" clock-out) string)
 	  (cons (const :tag "Heading when an item is no longer scheduled" delschedule) string)
 	  (cons (const :tag "Heading when rescheduling" reschedule) string)
-	  (cons (const :tag "Heading when changing deadline"  redeadline) string
-		(cons (const :tag "Heading when deleting a deadline" deldeadline) string))))
+	  (cons (const :tag "Heading when changing deadline"  redeadline) string)
+	  (cons (const :tag "Heading when deleting a deadline" deldeadline) string)
+	  (cons (const :tag "Heading when refiling" refile) string)))
 
 (unless (assq 'note org-log-note-headings)
   (push '(note . "%t") org-log-note-headings))
@@ -3795,6 +3824,9 @@ After a match, the following groups carry important information:
     ("logredeadline" org-log-redeadline time)
     ("lognoteredeadline" org-log-redeadline note)
     ("nologredeadline" org-log-redeadline nil)
+    ("logrefile" org-log-refile time)
+    ("lognoterefile" org-log-refile note)
+    ("nologrefile" org-log-refile nil)
     ("fninline" org-footnote-define-inline t)
     ("nofninline" org-footnote-define-inline nil)
     ("fnlocal" org-footnote-section nil)
@@ -9489,6 +9521,11 @@ See also `org-refile-use-outline-path' and `org-completion-use-ido'"
 		    (or (outline-next-heading) (goto-char (point-max)))))
 		(if (not (bolp)) (newline))
 		(org-paste-subtree level)
+		(when org-log-refile
+		  (org-add-log-setup 'refile nil nil 'findpos
+				     org-log-refile)
+		  (unless (eq org-log-refile 'note)
+		    (save-excursion (org-add-log-note))))
 		(and org-auto-align-tags (org-set-tags nil t))
 		(bookmark-set "org-refile-last-stored")
 		(if (fboundp 'deactivate-mark) (deactivate-mark))
@@ -11119,6 +11156,8 @@ EXTRA is additional text that will be inserted into the notes buffer."
 		      "changing deadline")
 		     ((eq org-log-note-purpose 'deldeadline)
 		      "removing deadline")
+		     ((eq org-log-note-purpose 'refile)
+		      "refiling")
 		     ((eq org-log-note-purpose 'note)
 		      "this entry")
 		     (t (error "This should not happen")))))

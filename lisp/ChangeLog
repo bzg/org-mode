@@ -1,3 +1,15 @@
+2010-03-25  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-log-refile): New option.
+	(org-log-note-headings): Add a heading for refiling.
+	(org-startup-options): Add keywords for logging of the refile
+	action.
+	(org-refile): Add logging action.
+	(org-add-log-note): Allow for refiling action.
+
+	* org-agenda.el (org-agenda-bulk-action): Make sure
+	`org-log-refile' is not `note' during a bulk action.
+
 2010-03-24  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-map-dblocks): Use save-excursion to remember the
