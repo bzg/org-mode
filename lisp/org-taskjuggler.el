@@ -106,6 +106,11 @@
 ;; depends attribute can be either "previous-sibling" or a reference
 ;; to an ID which is defined for another task in the project.
 ;;
+;; * TODO
+;;   - Look at org-file-properties, org-global-properties and org-global-properties-fixed
+;;   - What about property inheritance and org-property-inherit-p?
+;;   - Use TYPE_TODO as an way to assign resources
+;;
 ;;; Code:
 
 (eval-when-compile
