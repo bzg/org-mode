@@ -1,3 +1,7 @@
+2010-03-25  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-table.el (org-table-goto-line): Fix typo.
+
 2010-03-25  Mikael Fornius  <mfo@abc.se>
 
 	* org.el (org-agenda-files): Typo.

@@ -1043,7 +1043,7 @@ Return t when the line exists, nil if it does not exist."
   (goto-char (org-table-begin))
   (let ((end (org-table-end)) (cnt 0))
     (while (and (re-search-forward org-table-dataline-regexp end t)
-		(< (setq cnt (1+ cnt)) line)))
+		(< (setq cnt (1+ cnt)) N)))
     (= cnt line)))
 
 (defun org-table-blank-field ()
