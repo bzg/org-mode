@@ -1,3 +1,13 @@
+2010-03-25  Mikael Fornius  <mfo@abc.se>
+
+	* org.el (org-agenda-files): Typo.
+	(org-read-agenda-file-list): Add optional argument to help
+	`org-store-new-agenda-file-list' to remember un-expanded file
+	names.  Expand file names relative to `org-directory'.
+	(org-store-new-agenda-file-list): Keep un-expanded file names when
+	saving, if available.
+	(org-agenda-files): Update documentation.
+
 2010-03-25  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-ascii.el (org-export-as-ascii): Catch the case of exporting

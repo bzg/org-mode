@@ -2780,7 +2780,9 @@ If an entry is a directory, all files in that directory that are matched by
 
 If the value of the variable is not a list but a single file name, then
 the list of agenda files is actually stored and maintained in that file, one
-agenda file per line."
+agenda file per line.  In this file paths can be given relative to
+`org-directory'.  Tilde expansion and environment variable substitution
+are also made."
   :group 'org-agenda
   :type '(choice
 	  (repeat :tag "List of files and directories" file)
@@ -14641,7 +14643,7 @@ If EXCLUDE-TMP is non-nil, ignore temporary buffers."
   "Get the list of agenda files.
 Optional UNRESTRICTED means return the full list even if a restriction
 is currently in place.
-When ARCHIVES is t, include all archive files hat are really being
+When ARCHIVES is t, include all archive files that are really being
 used by the agenda files.  If ARCHIVE is `ifmode', do this only if
 `org-agenda-archives-mode' is t."
   (let ((files
@@ -14694,17 +14696,28 @@ the buffer and restores the previous window configuration."
 (defun org-store-new-agenda-file-list (list)
   "Set new value for the agenda file list and save it correctly."
   (if (stringp org-agenda-files)
-      (let ((f org-agenda-files) b)
-	(while (setq b (find-buffer-visiting f)) (kill-buffer b))
-	(with-temp-file f
-	  (insert (mapconcat 'identity list "\n") "\n")))
+      (let ((fe (org-read-agenda-file-list t)) b u)
+	(while (setq b (find-buffer-visiting org-agenda-files))
+	  (kill-buffer b))
+	(with-temp-file org-agenda-files
+	  (insert
+	   (mapconcat
+	    (lambda (f) ;; Keep un-expanded entries.
+	      (if (setq u (assoc f fe)) 
+		  (cdr u)
+		f))
+	    list "\n")
+	   "\n")))
     (let ((org-mode-hook nil) (org-inhibit-startup t)
 	  (org-insert-mode-line-in-empty-file nil))
       (setq org-agenda-files list)
       (customize-save-variable 'org-agenda-files org-agenda-files))))
 
-(defun org-read-agenda-file-list ()
-  "Read the list of agenda files from a file."
+(defun org-read-agenda-file-list (&optional pair-with-expansion)
+  "Read the list of agenda files from a file.
+If PAIR-WITH-EXPANSION is t return pairs with un-expanded
+filenames, used by `org-store-new-agenda-file-list' to write back
+un-expanded file names."
   (when (file-directory-p org-agenda-files)
     (error "`org-agenda-files' cannot be a single directory"))
   (when (stringp org-agenda-files)
@@ -14712,8 +14725,11 @@ the buffer and restores the previous window configuration."
       (insert-file-contents org-agenda-files)
       (mapcar
        (lambda (f)
-	 (expand-file-name (substitute-in-file-name f)
-			   (file-name-directory org-agenda-files)))
+	 (let ((e (expand-file-name (substitute-in-file-name f)
+				    org-directory)))
+	   (if pair-with-expansion
+	       (cons e f)
+	     e)))
        (org-split-string (buffer-string) "[ \t\r\n]*?[\r\n][ \t\r\n]*")))))
 
 ;;;###autoload
