@@ -615,7 +615,7 @@ table.el tables."
     (:fixed-width	      ":"	  org-export-with-fixed-width)
     (:timestamps	      "<"	  org-export-with-timestamps)
     (:author-info	      "author"	  org-export-author-info)
-    (:email-info	      "email"	  org-export-email)
+    (:email-info	      "email"	  org-export-email-info)
     (:creator-info	      "creator"	  org-export-creator-info)
     (:time-stamp-file	      "timestamp" org-export-time-stamp-file)
     (:tables		      "|"	  org-export-with-tables)
