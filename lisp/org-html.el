@@ -1410,7 +1410,7 @@ lang=\"%s\" xml:lang=\"%s\">
 	  (when (and org-export-author-info author)
 	    (insert "<p class=\"author\"> "
 		    (nth 1 lang-words) ": " author "\n")
-	    (when email
+	    (when (and org-export-email-info email (string-match "\\S-" email))
 	      (if (listp (split-string email ",+ *"))
 		  (mapc (lambda(e)
 			  (insert "<a href=\"mailto:" e "\">&lt;"

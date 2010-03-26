@@ -1,3 +1,17 @@
+2010-03-26  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-ascii.el (org-export-as-ascii): Export email only if the
+	author wants it.
+
+	* org-docbook.el (org-export-as-docbook): Export email only if the
+	author wants it.
+
+	* org-html.el (org-export-as-html): Export email only if the
+	author wants it.
+
+	* org-exp.el (org-export-email-info): New option.
+	(org-export-plist-vars): Add entry for `org-export-email'.
+
 2010-03-25  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-table.el (org-table-goto-line): Fix typo.

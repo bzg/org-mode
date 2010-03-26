@@ -297,7 +297,9 @@ publishing directory."
       (if (and (or author email)
 	       org-export-author-info)
 	  (insert(concat (nth 1 lang-words) ": " (or author "")
-			  (if email (concat " <" email ">") "")
+			  (if (and org-export-email-info
+				   email (string-match "\\S-" email))
+			      (concat " <" email ">") "")
 			  "\n")))
 
       (cond

@@ -611,7 +611,9 @@ publishing directory."
   </info>\n"
 		 (org-docbook-expand title)
 		 firstname othername surname
-		 (if email (concat "<email>" email "</email>") "")
+		 (if (and org-export-email-info
+			  email (string-match "\\S-" email))
+		     (concat "<email>" email "</email>") "")
 		 )))
 
       (org-init-section-numbers)
