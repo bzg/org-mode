@@ -1090,7 +1090,7 @@ the table is trivial, then return it as a scalar."
 	result))))
 
 (defun org-babel-string-read (cell)
-  "Strip nested \"s from around strings in exported R values."
+  "Strip nested \"s from around strings."
   (org-babel-read (or (and (stringp cell)
                            (string-match "\\\"\\(.+\\)\\\"" cell)
                            (match-string 1 cell))
