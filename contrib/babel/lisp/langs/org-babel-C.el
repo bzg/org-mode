@@ -79,16 +79,35 @@ function is called by `org-babel-execute-src-block'."
                      ;; variables
                      (mapconcat 'org-babel-C-var-to-C vars "\n")
                      ;; body
-                     "\n" body "\n\n"))
-         (bin (progn
-                (with-temp-file tmp-src-file (insert full-body))
-                (shell-command
-                 (format "%s -o %s %s %s"
-                         org-babel-C-compiler tmp-bin-file
-                         (mapconcat 'identity (if (listp flags) flags (list flags)) " ")
-                         tmp-src-file))
-                tmp-bin-file)))
-    (org-babel-read (org-babel-trim (shell-command-to-string bin)))))
+                     "\n" (org-babel-C-ensure-main-wrap body) "\n\n"))
+         (error-buf (get-buffer-create "*Org-Babel Error Output*"))
+         (compile
+          (progn
+            (with-temp-file tmp-src-file (insert full-body))
+            (with-temp-buffer
+              (org-babel-shell-command-on-region
+               (point-min) (point-max)
+               (format "%s -o %s %s %s"
+                       org-babel-C-compiler
+                       tmp-bin-file
+                       (mapconcat 'identity
+                                  (if (listp flags) flags (list flags)) " ")
+                       tmp-src-file)
+               (current-buffer) 'replace error-buf)))))
+    (if (= compile 0)
+        (org-babel-read
+         (org-babel-trim
+          (with-temp-buffer
+            (org-babel-shell-command-on-region
+             (point-min) (point-max) tmp-bin-file (current-buffer) 'replace)
+            (buffer-string))))
+      (progn (display-buffer error-buf) nil))))
+
+(defun org-babel-C-ensure-main-wrap (body)
+  "Wrap body in a \"main\" function call if none exists."
+  (if (string-match "^[ \t]*[intvoid][ \t]*main[ \t]*(.*)" body)
+      body
+    (format "int main() {\n%s\n}\n" body)))
 
 (defun org-babel-prep-session:C (session params)
   "C is a compiled languages -- no support for sessions"
