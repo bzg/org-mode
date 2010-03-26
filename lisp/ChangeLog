@@ -1,5 +1,8 @@
 2010-03-26  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp.el (org-export-author-info, org-export-email-info): Fix
+	docstrings.
+
 	* org-beamer.el (org-beamer-select-environment): Renamed from
 	`org-beamer-set-environment-tag'.  Improve docstring.
 
