@@ -9762,6 +9762,9 @@ Here is a simple example Org document that is intended for beamer export.
 ** Frame 2 \\ where we will not use columns
 *** Request                                                   :B_block:
     Please test this stuff!
+    :PROPERTIES:
+    :BEAMER_env: block
+    :END:
 @end smallexample
 
 For more information, see the documentation on Worg.

@@ -1,5 +1,8 @@
 2010-03-26  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-beamer.el (org-beamer-select-environment): Renamed from
+	`org-beamer-set-environment-tag'.  Improve docstring.
+
 	* org-freemind.el (org-freemind-write-mm-buffer): Fix another
 	problem with odd levels.
 

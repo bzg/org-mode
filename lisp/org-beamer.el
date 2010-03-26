@@ -124,7 +124,7 @@ For example
 Each entry has 4 elements:
 
 name    Name of the environment
-key     Selection key for `org-beamer-set-environment-tag'
+key     Selection key for `org-beamer-select-environment'
 open    The opening template for the environment, with the following excapes
         %a   the action/overlay specification
         %A   the default action/overlay specification
@@ -176,9 +176,13 @@ close   The closing string of the environment."
     (setq org-beamer-columns-open nil)
     (insert "\\end{columns}\n")))
 
-(defun org-beamer-set-environment-tag ()
-  "Set an environment tag, to determine the beamer environment to be used.
-This makes use of the fast tag selection interface."
+(defun org-beamer-select-environment ()
+  "Select the environment to be used by beamer for this entry.
+While this uses (for convenince) a tag selection interface, the result
+of this command will be that the BEAMER_env *property* of the entry is set.
+
+In addition to this, the command will also set a tag as a visual aid, but
+the tag does not have any semantic meaning."
   (interactive)
   (let* ((envs (append org-beamer-environments-extra
 		       org-beamer-environments-default))
@@ -344,7 +348,7 @@ this function dynamically."
 
 (defvar org-beamer-mode-map (make-sparse-keymap)
   "The keymap for `org-beamer-mode'.")
-(define-key org-beamer-mode-map "\C-c\C-b" 'org-beamer-set-environment-tag)
+(define-key org-beamer-mode-map "\C-c\C-b" 'org-beamer-select-environment)
 
 (define-minor-mode org-beamer-mode
   "Special support for editing Org-mode files made to export to beamer."
