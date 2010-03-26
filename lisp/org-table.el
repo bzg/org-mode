@@ -1044,7 +1044,7 @@ Return t when the line exists, nil if it does not exist."
   (let ((end (org-table-end)) (cnt 0))
     (while (and (re-search-forward org-table-dataline-regexp end t)
 		(< (setq cnt (1+ cnt)) N)))
-    (= cnt line)))
+    (= cnt N)))
 
 (defun org-table-blank-field ()
   "Blank the current table field or active region."
