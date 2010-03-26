@@ -67,27 +67,39 @@ element list, whose first element is the name of the variable and
 second element is a string of its value.  The following call to
 `sbe' would be equivalent to the following source code block.
 
- (sbe 'source-block (n 2) (m 3))
+ (sbe 'source-block (n $2) (m 3))
 
-#+begin_src emacs-lisp :var results=source-block(n=2, m=3) :results silent
+#+begin_src emacs-lisp :var results=source-block(n=val_at_col_2, m=3) :results silent
 results
-#+end_src"
-  (unless (stringp source-block) (setq source-block (symbol-name source-block)))
-  (org-babel-table-truncate-at-newline ;; org-table cells can't be multi-line
-   (if (and source-block (> (length source-block) 0))
-       (let ((params
-	      (eval `(org-babel-parse-header-arguments
-		      (concat ":var results="
-			      ,source-block
-			      "("
-			      (mapconcat (lambda (var-spec)
-					   (format "%S=%s" (first var-spec) (second var-spec)))
-					 ',variables ", ")
-			      ")")))))
-         (org-babel-execute-src-block
-          nil (list "emacs-lisp" "results"
-                    (org-babel-merge-params '((:results . "silent")) params))))
-     "")))
+#+end_src
+
+NOTE: by default string variable names are interpreted as
+references to source-code blocks, to force interpretation of a
+cell's value as a string, prefix the identifier with two \"$\"s
+rather than a single \"$\" (i.e. \"$$2\" instead of \"$2\" in the
+example above."
+  (let ((variables (mapcar
+                    (lambda (var)
+                      (if (and (= 3 (length var)) (eq (second var) '$))
+                          (list (car var) (format "\"%s\"" (last var)))
+                        var))
+                    variables)))
+    (unless (stringp source-block) (setq source-block (symbol-name source-block)))
+    (org-babel-table-truncate-at-newline ;; org-table cells can't be multi-line
+     (if (and source-block (> (length source-block) 0))
+         (let ((params
+                (eval `(org-babel-parse-header-arguments
+                        (concat ":var results="
+                                ,source-block
+                                "("
+                                (mapconcat (lambda (var-spec)
+                                             (format "%S=%s" (first var-spec) (second var-spec)))
+                                           ',variables ", ")
+                                ")")))))
+           (org-babel-execute-src-block
+            nil (list "emacs-lisp" "results"
+                      (org-babel-merge-params '((:results . "silent")) params))))
+       ""))))
 
 (provide 'org-babel-table)
 ;;; org-babel-table.el ends here
