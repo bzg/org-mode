@@ -706,7 +706,8 @@ Otherwise give an error say the file exists."
           (with-current-buffer mm-buffer
             (while (> current-level base-level)
               (insert "</node>\n")
-              (setq current-level (1- current-level))
+	      (setq current-level 
+		    (- current-level (if odd-only 2 1)))
               ))
           (with-current-buffer mm-buffer
             (insert "</map>")

@@ -1,5 +1,8 @@
 2010-03-26  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-freemind.el (org-freemind-write-mm-buffer): Fix another
+	problem with odd levels.
+
 	* org-ascii.el (org-export-as-ascii): Export email only if the
 	author wants it.
 
