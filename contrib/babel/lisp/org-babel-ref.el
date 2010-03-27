@@ -61,12 +61,12 @@ names, and the emacs-lisp representation of the related value."
 	 (delq nil (mapcar (lambda (pair) (if (eq (car pair) :var) (cdr pair))) params)))
 	(others
          (delq nil (mapcar (lambda (pair) (unless (eq :var (car pair)) pair)) params))))
-    (mapcar (lambda (assignment) (org-babel-ref-parse assignment others)) assignments)))
+    (mapcar (lambda (assignment) (org-babel-ref-parse assignment)) assignments)))
 
 (defvar org-babel-ref-split-regexp
   "[ \f\t\n\r\v]*\\(.+?\\)[ \f\t\n\r\v]*=[ \f\t\n\r\v]*\\(.+\\)[ \f\t\n\r\v]*")
 
-(defun org-babel-ref-parse (assignment params)
+(defun org-babel-ref-parse (assignment &optional params)
   "Parse a variable ASSIGNMENT in a header argument.  If the
 right hand side of the assignment has a literal value return that
 value, otherwise interpret as a reference to an external resource
@@ -92,7 +92,7 @@ return nil."
             (read ref))
       out)))
 
-(defun org-babel-ref-resolve-reference (ref params)
+(defun org-babel-ref-resolve-reference (ref &optional params)
   "Resolve the reference and return its value"
   (save-excursion
     (let ((case-fold-search t)
