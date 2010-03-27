@@ -91,7 +91,7 @@ exported source code blocks by language."
                 (lang-specs (cdr (assoc lang org-babel-tangle-langs)))
                 (ext (first lang-specs))
                 (she-bang (second lang-specs))
-                (commentable (not (third lang-specs)))
+                (commentable (and (fboundp lang-f) (not (third lang-specs))))
                 she-banged)
            (mapc
             (lambda (spec)
@@ -122,7 +122,7 @@ exported source code blocks by language."
                       (delete-file file-name))
                     ;; drop source-block to file
                     (with-temp-buffer
-                      (funcall lang-f)
+                      (if (fboundp lang-f) (funcall lang-f))
                       (when (and she-bang (not (member file-name she-banged)))
                         (insert (concat she-bang "\n"))
                         (setq she-banged (cons file-name she-banged)))
