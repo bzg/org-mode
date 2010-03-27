@@ -1,3 +1,8 @@
+2010-03-27  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-table.el (org-table-align): Interpret <N> at fixed width,
+	not as maximum width.
+
 2010-03-26  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-exp.el (org-export-author-info, org-export-email-info): Fix

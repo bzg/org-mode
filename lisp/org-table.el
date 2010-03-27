@@ -662,6 +662,7 @@ When nil, simply write \"#ERROR\" in corrupted fields.")
     (while (< (setq i (1+ i)) maxfields)   ;; Loop over all columns
       (setq column (mapcar (lambda (x) (or (nth i x) "")) fields))
       ;; Check if there is an explicit width specified
+      (setq fmax nil)
       (when (or narrow falign)
 	(setq c column fmax nil falign1 nil)
 	(while c
@@ -687,7 +688,8 @@ When nil, simply write \"#ERROR\" in corrupted fields.")
 				       (list 'display org-narrow-column-arrow)
 				       xx)))))
       ;; Get the maximum width for each column
-      (push (apply 'max 1 (mapcar 'org-string-width column)) lengths)
+      (push (apply 'max (or fmax 1) 1 (mapcar 'org-string-width column))
+	    lengths)
       ;; Get the fraction of numbers, to decide about alignment of the column
       (if falign1
 	  (push (equal (downcase falign1) "r") typenums)
