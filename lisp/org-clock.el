@@ -273,7 +273,7 @@ to add an effort property.")
 (defvar org-clock-heading-for-remember "")
 (defvar org-clock-start-time "")
 
-(defvar org-clock-left-over-time nil
+(defvar org-clock-leftover-time nil
   "If non-nil, user cancelled a clock; this is when leftover time started.")
 
 (defvar org-clock-effort ""
@@ -713,7 +713,7 @@ This routine can do one of many things:
       (org-clock-clock-out clock fail-quietly resolve-to)
       (unless org-clock-clocking-in
 	(if close-p
-	    (setq org-clock-left-over-time resolve-to)
+	    (setq org-clock-leftover-time resolve-to)
 	  (org-clock-clock-in clock)))))))
 
 (defun org-clock-resolve (clock &optional prompt-fn last-valid fail-quietly)
@@ -896,14 +896,14 @@ the clocking selection, associated with the letter `d'."
     (let ((interrupting (and (not org-clock-resolving-clocks-due-to-idleness)
 			     (org-clocking-p)))
 	  ts selected-task target-pos (msg-extra "")
-	  (left-over (and (not org-clock-resolving-clocks)
-			  org-clock-left-over-time)))
+	  (leftover (and (not org-clock-resolving-clocks)
+			  org-clock-leftover-time)))
       (when (and org-clock-auto-clock-resolution
 		 (or (not interrupting)
 		     (eq t org-clock-auto-clock-resolution))
 		 (not org-clock-clocking-in)
 		 (not org-clock-resolving-clocks))
-	(setq org-clock-left-over-time nil)
+	(setq org-clock-leftover-time nil)
 	(let ((org-clock-clocking-in t))
 	  (org-resolve-clocks)))	; check if any clocks are dangling
       (when (equal select '(4))
@@ -1021,13 +1021,13 @@ the clocking selection, associated with the letter `d'."
 	      (setq org-clock-total-time (org-clock-sum-current-item
 					  (org-clock-get-sum-start)))
 	      (setq org-clock-start-time
-		    (or (and left-over
+		    (or (and leftover
 			     (y-or-n-p
 			      (format
 			       "You stopped another clock %d mins ago; start this one from then? "
 			       (/ (- (org-float-time (current-time))
-				     (org-float-time left-over)) 60)))
-			     left-over)
+				     (org-float-time leftover)) 60)))
+			     leftover)
 			(current-time)))
 	      (setq ts (org-insert-time-stamp org-clock-start-time
 					      'with-hm 'inactive))))

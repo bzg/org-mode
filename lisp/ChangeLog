@@ -773,7 +773,7 @@
 
 	* org.el (org-offer-links-in-entry): Make RET open all links.
 
-	* org-html.el (org-export-as-html): Remove any left-over display
+	* org-html.el (org-export-as-html): Remove any leftover display
 	properties in the html file.
 
 	* org-wl.el (org-wl-store-link): Work-around for format bug with
