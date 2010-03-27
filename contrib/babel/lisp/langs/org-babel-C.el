@@ -39,9 +39,6 @@
 (org-babel-add-interpreter "C")
 (add-to-list 'org-babel-tangle-langs '("C" "c" nil))
 
-(org-babel-add-interpreter "cpp")
-(add-to-list 'org-babel-tangle-langs '("cpp" "cpp" nil))
-
 (org-babel-add-interpreter "c++")
 (add-to-list 'org-babel-tangle-langs '("c++" "cpp" nil))
 
@@ -49,37 +46,56 @@
   "Command used to compile a C source code file into an
   executable.")
 
+(defvar org-babel-c++-compiler "g++"
+  "Command used to compile a c++ source code file into an
+  executable.")
+
 (defun org-babel-execute:cpp (body params)
   (org-babel-execute:C body params))
 
 (defun org-babel-execute:c++ (body params)
-  (org-babel-execute:C body params))
+    "Execute a block of C++ code with org-babel.  This function is
+called by `org-babel-execute-src-block'."
+  (let ((c-variant 'cpp)) (org-babel-C-execute body params)))
 
 (defun org-babel-execute:C (body params)
-  "Execute a block of C commands with org-babel.  This
-function is called by `org-babel-execute-src-block'."
+  "Execute a block of C code with org-babel.  This function is
+called by `org-babel-execute-src-block'."
+  (let ((c-variant 'c)) (org-babel-C-execute body params)))
+
+(defun org-babel-C-execute (body params)
+  "This should only be called by `org-babel-execute:C' or
+`org-babel-execute:c++'."
   (message "executing C source code block")
   (let* ((processed-params (org-babel-process-params params))
-         (tmp-src-file (make-temp-file "org-babel-C-src" nil ".c"))
+         (tmp-src-file (make-temp-file "org-babel-C-src" nil
+                                       (case c-variant
+                                         ('c ".c")
+                                         ('cpp ".cpp"))))
          (tmp-bin-file (make-temp-file "org-babel-C-bin"))
          (tmp-out-file (make-temp-file "org-babel-C-out"))
          (flags (cdr (assoc :flags params)))
          (vars (second processed-params))
-         (includes (cdr (assoc :includes params)))
-         (defines (cdr (assoc :defines params)))
-         (full-body (concat
-                     ;; includes
-                     (mapconcat
-                      (lambda (inc) (format "#include %s" inc))
-                      (if (listp includes) includes (list includes)) "\n")
-                     ;; defines
-                     (mapconcat
-                      (lambda (inc) (format "#define %s" inc))
-                      (if (listp defines) defines (list defines)) "\n")
-                     ;; variables
-                     (mapconcat 'org-babel-C-var-to-C vars "\n")
-                     ;; body
-                     "\n" (org-babel-C-ensure-main-wrap body) "\n\n"))
+         (includes (org-babel-read
+                    (or (cdr (assoc :includes params))
+                        (org-entry-get nil "includes" t))))
+         (defines (org-babel-read
+                   (or (cdr (assoc :includes params))
+                       (org-entry-get nil "defines" t))))
+         (full-body (mapconcat 'identity
+                     (list
+                      ;; includes
+                      (mapconcat
+                       (lambda (inc) (format "#include %s" inc))
+                       (if (listp includes) includes (list includes)) "\n")
+                      ;; defines
+                      (mapconcat
+                       (lambda (inc) (format "#define %s" inc))
+                       (if (listp defines) defines (list defines)) "\n")
+                      ;; variables
+                      (mapconcat 'org-babel-C-var-to-C vars "\n")
+                      ;; body
+                      "\n" (org-babel-C-ensure-main-wrap body) "\n") "\n"))
          (error-buf (get-buffer-create "*Org-Babel Error Output*"))
          (compile
           (progn
@@ -88,7 +104,9 @@ function is called by `org-babel-execute-src-block'."
               (org-babel-shell-command-on-region
                (point-min) (point-max)
                (format "%s -o %s %s %s"
-                       org-babel-C-compiler
+                       (case c-variant
+                         ('c org-babel-C-compiler)
+                         ('cpp org-babel-c++-compiler))
                        tmp-bin-file
                        (mapconcat 'identity
                                   (if (listp flags) flags (list flags)) " ")
@@ -101,11 +119,15 @@ function is called by `org-babel-execute-src-block'."
             (org-babel-shell-command-on-region
              (point-min) (point-max) tmp-bin-file (current-buffer) 'replace)
             (buffer-string))))
-      (progn (display-buffer error-buf) nil))))
+      (progn
+        (with-current-buffer error-buf
+          (goto-char (point-max))
+          (insert (concat "\n\n--body--\n" full-body)))
+        (display-buffer error-buf) nil))))
 
 (defun org-babel-C-ensure-main-wrap (body)
   "Wrap body in a \"main\" function call if none exists."
-  (if (string-match "^[ \t]*[intvoid][ \t]*main[ \t]*(.*)" body)
+  (if (string-match "^[ \t]*[intvod]+[ \t]*main[ \t]*(.*)" body)
       body
     (format "int main() {\n%s\n}\n" body)))
 
