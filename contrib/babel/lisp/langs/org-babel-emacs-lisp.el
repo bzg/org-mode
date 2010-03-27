@@ -41,7 +41,7 @@
   (save-window-excursion
     (let* ((processed-params (org-babel-process-params params))
            (result-params (third processed-params))
-           (vars (second (org-babel-process-params params)))
+           (vars (second processed-params))
            (print-level nil) (print-length nil))
       (eval `(let ,(mapcar (lambda (var) `(,(car var) ',(cdr var)))
                            vars)
