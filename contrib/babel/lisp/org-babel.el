@@ -153,7 +153,10 @@ can not be resolved.")
   "Add INTERPRETER to `org-babel-interpreters' and update
 `org-babel-src-block-regexp' appropriately."
   (unless (member interpreter org-babel-interpreters)
-    (setq org-babel-interpreters (cons interpreter org-babel-interpreters))
+    (setq org-babel-interpreters
+          (sort (cons interpreter org-babel-interpreters)
+		(lambda (left right)
+		  (> (length left) (length right)))))
     (org-babel-set-interpreters 'org-babel-interpreters org-babel-interpreters)))
 
 (defcustom org-babel-interpreters '()
@@ -1090,7 +1093,7 @@ the table is trivial, then return it as a scalar."
 	result))))
 
 (defun org-babel-string-read (cell)
-  "Strip nested \"s from around strings in exported R values."
+  "Strip nested \"s from around strings."
   (org-babel-read (or (and (stringp cell)
                            (string-match "\\\"\\(.+\\)\\\"" cell)
                            (match-string 1 cell))
