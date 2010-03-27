@@ -991,10 +991,6 @@ block but are passed literally to the \"example-block\"."
                    (setq new-body (concat new-body text))))
       (with-temp-buffer
         (insert body) (goto-char (point-min))
-        (funcall (intern (concat (or (and (cdr (assoc lang org-src-lang-modes))
-                                          (symbol-name
-                                           (cdr (assoc lang org-src-lang-modes))))
-                                     lang) "-mode")))
         (setq index (point))
         (while (and (re-search-forward "<<\\(.+?\\)>>" nil t))
           (save-match-data (setf source-name (match-string 1)))
