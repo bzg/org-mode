@@ -153,7 +153,10 @@ can not be resolved.")
   "Add INTERPRETER to `org-babel-interpreters' and update
 `org-babel-src-block-regexp' appropriately."
   (unless (member interpreter org-babel-interpreters)
-    (setq org-babel-interpreters (cons interpreter org-babel-interpreters))
+    (setq org-babel-interpreters
+          (sort (cons interpreter org-babel-interpreters)
+		(lambda (left right)
+		  (> (length left) (length right)))))
     (org-babel-set-interpreters 'org-babel-interpreters org-babel-interpreters)))
 
 (defcustom org-babel-interpreters '()
