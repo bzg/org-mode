@@ -122,7 +122,8 @@ called by `org-babel-execute-src-block'."
       (progn
         (with-current-buffer error-buf
           (goto-char (point-max))
-          (insert (concat "\n\n--body--\n" full-body)))
+          (insert (concat "\n\n--body--\n" full-body))
+          (goto-char (point-min)))
         (display-buffer error-buf) nil))))
 
 (defun org-babel-C-ensure-main-wrap (body)
@@ -144,15 +145,25 @@ called by `org-babel-execute-src-block'."
 (defun org-babel-C-var-to-C (pair)
   "Convert an elisp val into a string of C code specifying a var
 of the same value.  TODO list support."
-  (let* ((var (car pair))
-         (val (cdr pair))
-         (type (cond
-                ((integerp val) "int")
-                ((floatp val) "double")
-                ((characterp val) "char")
-                ((stringp val) (format "char[%d]" (length val)))
-                (t "u32"))))
-    (format "%s %S = %S;" type var val)))
+  (let ((var (car pair))
+        (val (cdr pair)))
+    (when (symbolp val)
+      (setq val (symbol-name val))
+      (when (= (length val) 1)
+        (setq val (string-to-char val))))
+    (cond
+     ((integerp val)
+      (format "int %S = %S;" var val))
+     ((floatp val)
+      (format "double %S = %S;" var val))
+     ((or (characterp val))
+      (format "char %S = '%S';" var val))
+     ((stringp val)
+      (format "char %S[%d] = \"%s\";"
+              var (+ 1 (length val)) val))
+     (t
+      (format "u32 %S = %S;" var val)))))
+
 
 (provide 'org-babel-C)
 ;;; org-babel-C.el ends here
