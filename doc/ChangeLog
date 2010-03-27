@@ -1,3 +1,8 @@
+2010-03-27  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Column width and alignment): Document that <N> now
+	means a fixed width, not a maximum width.
+
 2010-03-26  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Publishing options): Document the :email option.

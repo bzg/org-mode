@@ -312,7 +312,7 @@ headline  Only export the headline, but skip the tree below it."
   "Non-nil means insert author name and email into the exported file.
 
 This option can also be set with the +OPTIONS line,
-e.g. \"author-info:nil\"."
+e.g. \"author:nil\"."
   :group 'org-export-general
   :type 'boolean)
 
@@ -320,7 +320,7 @@ e.g. \"author-info:nil\"."
   "Non-nil means insert author name and email into the exported file.
 
 This option can also be set with the +OPTIONS line,
-e.g. \"email-info:t\"."
+e.g. \"email:t\"."
   :group 'org-export-general
   :type 'boolean)
 

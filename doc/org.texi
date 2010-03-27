@@ -1825,13 +1825,13 @@ The width of columns is automatically determined by the table editor.  And
 also the alignment of a column is determined automatically from the fraction
 of number-like versus non-number fields in the column.
 
-Sometimes a single field or a few fields need to carry more text,
-leading to inconveniently wide columns.  To limit@footnote{This feature
-does not work on XEmacs.} the width of a column, one field anywhere in
-the column may contain just the string @samp{<N>} where @samp{N} is an
-integer specifying the width of the column in characters.  The next
-re-align will then set the width of this column to no more than this
-value.
+Sometimes a single field or a few fields need to carry more text, leading to
+inconveniently wide columns.  Or maybe you want to make a table with several
+columns having a fixed width, regardless of content.  To set@footnote{This
+feature does not work on XEmacs.} the width of a column, one field anywhere
+in the column may contain just the string @samp{<N>} where @samp{N} is an
+integer specifying the width of the column in characters.  The next re-align
+will then set the width of this column to this value.
 
 @example
 @group
