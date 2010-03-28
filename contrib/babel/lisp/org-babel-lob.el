@@ -99,9 +99,11 @@ the word 'call'."
 (defun org-babel-lob-execute (info)
   (let ((params (org-babel-merge-params
 		 org-babel-default-header-args
+                 (org-babel-params-from-properties)
 		 (org-babel-parse-header-arguments
 		  (org-babel-clean-text-properties
 		   (concat ":var results=" (mapconcat #'identity info " ")))))))
+    ;; (message "lob-params=%S" params) ;; debugging
     (org-babel-execute-src-block nil (list "emacs-lisp" "results" params))))
 
 (provide 'org-babel-lob)
