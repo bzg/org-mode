@@ -1,3 +1,8 @@
+2010-03-28  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Index entries): New section.
+	(Generating an index): New section.
+
 2010-03-27  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Column width and alignment): Document that <N> now

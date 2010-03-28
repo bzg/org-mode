@@ -1,3 +1,14 @@
+2010-03-28  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-publish.el (org-publish-sanitize-plist): New function to
+	rename "index" properties to "sitemap".  Do this renaming
+	globally.
+	(org-publish-with-aux-preprocess-maybe): New macro.
+	(org-publish-org-to-pdf, org-publish-org-to-html): Use the new
+	macro.
+	(org-publish-aux-preprocess)
+	(org-publish-index-generate-theindex.inc): New function.
+
 2010-03-27  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-table.el (org-table-align): Interpret <N> at fixed width,

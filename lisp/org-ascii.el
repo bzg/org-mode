@@ -189,6 +189,11 @@ publishing directory."
 			  (if subtree-p
 			      (org-export-add-subtree-options opt-plist rbeg)
 			    opt-plist)))
+	 ;; The following two are dynamically scoped into other
+	 ;; routines below.
+	 (org-current-export-dir
+	  (or pub-dir (org-export-directory :html opt-plist)))
+	 (org-current-export-file buffer-file-name)
 	 (custom-times org-display-custom-times)
 	 (org-ascii-current-indentation '(0 . 0))
 	 (level 0) line txt

@@ -396,6 +396,11 @@ This is run after selection of trees to be exported has happened.
 This selection includes tags-based selection, as well as removal
 of commented and archived trees.")
 
+(defvar org-export-preprocess-after-headline-targets-hook nil
+  "Hook for preprocessing export buffer.
+This is run just after the headline targets have been defined and
+the target-alist has been set up.")
+
 (defvar org-export-preprocess-before-selecting-backend-code-hook nil
   "Hook for preprocessing an export buffer.
 This is run just before backend-specific blocks get selected.")
@@ -1296,6 +1301,8 @@ translations.  There is currently no way for users to extend this.")
   "Alist of targets with invisible aliases.")
 (defvar org-export-preferred-target-alist nil
   "Alist of section id's with preferred aliases.")
+(defvar org-export-id-target-alist nil
+  "Alist of section id's with preferred aliases.")
 (defvar org-export-code-refs nil
   "Alist of code references and line numbers")
 
@@ -1320,9 +1327,10 @@ on this string to produce the exported version."
 	 (outline-regexp "\\*+ ")
 	 target-alist rtn)
 
-    (setq org-export-target-aliases nil)
-    (setq org-export-preferred-target-alist nil)
-    (setq org-export-code-refs nil)
+    (setq org-export-target-aliases nil
+	  org-export-preferred-target-alist nil
+	  org-export-id-target-alist nil
+	  org-export-code-refs nil)
 
     (with-current-buffer (get-buffer-create " org-mode-tmp")
       (erase-buffer)
@@ -1378,6 +1386,8 @@ on this string to produce the exported version."
 
       ;; Find all headings and compute the targets for them
       (setq target-alist (org-export-define-heading-targets target-alist))
+
+      (run-hooks 'org-export-preprocess-after-headline-targets-hook)
 
       ;; Find HTML special classes for headlines
       (org-export-remember-html-container-classes)
@@ -1517,7 +1527,12 @@ The new targets are added to TARGET-ALIST, which is also returned."
 	      (if (not (assoc last-section-target
 			      org-export-preferred-target-alist))
 		  (push (cons last-section-target id)
-			org-export-preferred-target-alist))))
+			org-export-preferred-target-alist)))
+	    (when (equal (match-string 1) "ID")
+	      (if (not (assoc last-section-target
+			      org-export-id-target-alist))
+		  (push (cons last-section-target (concat "ID-" id))
+			org-export-id-target-alist))))
 	(setq level (org-reduced-level
 		     (save-excursion (goto-char (point-at-bol))
 				     (org-outline-level))))
