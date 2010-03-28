@@ -468,6 +468,34 @@ changes."
   :group 'org-faces
   :version "22.1")
 
+(defface org-document-title
+  '((((class color) (background light)) (:foreground "midnight blue" :weight bold :height 1.44))
+    (((class color) (background dark)) (:foreground "pale turquoise" :weight bold :height 1.44))
+    (t (:weight bold :height 1.44)))
+  "Face for document title, i.e. that which follows the #+TITLE: keyword."
+  :group 'org-faces)
+
+(defface org-document-info
+  '((((class color) (background light)) (:foreground "midnight blue"))
+    (((class color) (background dark)) (:foreground "pale turquoise"))
+    (t nil))
+  "Face for document date, author and email; i.e. that which
+follows a #+DATE:, #+AUTHOR: or #+EMAIL: keyword."
+  :group 'org-faces)
+
+(defface org-document-info-keyword
+  (org-compatible-face 'shadow
+    '((((class color grayscale) (min-colors 88) (background light))
+       (:foreground "grey50"))
+      (((class color grayscale) (min-colors 88) (background dark))
+       (:foreground "grey70"))
+      (((class color) (min-colors 8) (background light))
+       (:foreground "green"))
+      (((class color) (min-colors 8) (background dark))
+       (:foreground "yellow"))))
+  "Face for #+TITLE:, #+AUTHOR:, #+EMAIL: and #+DATE: keywords."
+  :group 'org-faces)
+
 (defface org-block
   (org-compatible-face 'shadow
     '((((class color grayscale) (min-colors 88) (background light))

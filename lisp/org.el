@@ -2975,6 +2975,17 @@ lines to the buffer:
   :group 'org-font-lock
   :type 'boolean)
 
+(defcustom org-hidden-keywords nil
+  "List of keywords that should be hidden when typed in the org buffer.
+For example, add #+TITLE to this list in order to make the
+document title appear in the buffer without the initial #+TITLE:
+keyword."
+  :group 'org-font-lock
+  :type '(set (const :tag "#+AUTHOR" author)
+	      (const :tag "#+DATE" date)
+	      (const :tag "#+EMAIL" email)
+	      (const :tag "#+TITLE"  title)))
+
 (defcustom org-fontify-done-headline nil
   "Non-nil means change the face of a headline if it is marked DONE.
 Normally, only the TODO/DONE keyword indicates the state of a headline.
@@ -4681,6 +4692,17 @@ will be prompted for."
 	       ((string= block-type "verse")
 		(add-text-properties beg1 end1 '(face org-verse))))
 	      t))
+	   ((member dc1 '("title:" "author:" "email:" "date:"))
+	    (add-text-properties
+	     beg (match-end 3)
+	     (if (member (intern (substring dc1 0 -1)) org-hidden-keywords)
+		 '(font-lock-fontified t invisible t)
+	       '(font-lock-fontified t face org-document-info-keyword)))
+	    (add-text-properties
+	     (match-beginning 6) (match-end 6)
+	     (if (string-equal dc1 "title:")
+		 '(font-lock-fontified t face org-document-title)
+	       '(font-lock-fontified t face org-document-info))))
 	   ((not (member (char-after beg) '(?\  ?\t)))
 	    ;; just any other in-buffer setting, but not indented
 	    (add-text-properties

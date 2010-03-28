@@ -1,3 +1,15 @@
+2010-03-28  Dan Davison  <davison@stats.ox.ac.uk>
+
+	* org.el (org-hidden-keywords): New customizable variable. This is
+	a list of symbols specifying which of the special keywords #+DATE,
+	#+AUTHOR, #+EMAIL and #+TITLE should be hidden by font lock.
+	(org-fontify-meta-lines-and-blocks): Changes to font-lock code
+	implementing new faces and hiding behaviour.
+
+	* org-faces.el (org-document-title): New face for #+TITLE lines
+	(org-document-info): New face for #+DATE, #+AUTHOR, #+EMAIL lines
+	(org-document-info-keyword): New face for #+DATE, #+AUTHOR, #+EMAIL keywords
+
 2010-03-28  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-publish.el (org-publish-sanitize-plist): New function to
