@@ -47,7 +47,8 @@
 				(:index-function . :sitemap-function)
 				(:index-style . :sitemap-style)
 				(:auto-index . :auto-sitemap))))
-		x))))
+		x))
+	  plist))
 
 (eval-when-compile
   (require 'cl))
@@ -318,6 +319,7 @@ This is a compatibility function for Emacsen without `delete-dups'."
     list))
 
 (declare-function org-publish-delete-dups "org-publish" (list))
+(declare-function find-lisp-find-files "find-lisp" (directory regexp))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Getting project information out of org-publish-project-alist
@@ -460,6 +462,7 @@ PUB-DIR is the publishing directory."
 	   org-export-preprocess-after-headline-targets-hook)))
      ,@body))
 
+(defvar project-plist)
 (defun org-publish-org-to-latex (plist filename pub-dir)
   "Publish an org file to LaTeX.
 See `org-publish-org-to' to the list of arguments."
@@ -718,9 +721,10 @@ the project."
 
 ;;; Index generation
 
+(defvar backend) ; dynamically scoped
 (defun org-publish-aux-preprocess ()
   "Find index entries and write them to an .orgx file."
-  (let (entry index)
+  (let (entry index target)
     (goto-char (point-min))
     (while
 	(and
@@ -754,7 +758,7 @@ the project."
 			full-files))
 	 (default-directory directory)
 	 index origfile buf target entry ibuffer
-	 main last-main letter last-letter)
+	 main last-main letter last-letter file sub link)
     ;; `files' contains the list of relative file names
     (dolist (file files)
       (setq origfile (substring file 0 -1))
