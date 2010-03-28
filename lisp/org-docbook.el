@@ -1259,7 +1259,7 @@ string, don't modify these."
   (if org-export-with-sub-superscripts
       (setq s (org-export-docbook-convert-sub-super s)))
   (if org-export-with-TeX-macros
-      (let ((start 0) wd rep)
+      (let ((start 0) wd rep ass)
 	(while (setq start (string-match "\\\\\\([a-zA-Z]+\\)\\({}\\)?"
 					 s start))
 	  (if (get-text-property (match-beginning 0) 'org-protected s)
