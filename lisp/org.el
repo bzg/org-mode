@@ -85,6 +85,7 @@
 (require 'easymenu)
 
 (require 'org-macs)
+(require 'org-entities)
 (require 'org-compat)
 (require 'org-faces)
 (require 'org-list)
@@ -4222,7 +4223,7 @@ This is for getting out of special buffers like remember.")
 (defvar date)
 
 ;; Defined somewhere in this file, but used before definition.
-(defvar org-html-entities)
+(defvar org-entities)     ;; defined in org-entities.el
 (defvar org-struct-menu)
 (defvar org-org-menu)
 (defvar org-tbl-menu)
@@ -4887,7 +4888,8 @@ will be prompted for."
 	  (if org-export-with-TeX-macros
 	      (list (concat "\\\\"
 			    (regexp-opt
-			     (append (mapcar 'car org-html-entities)
+			     (append (mapcar 'car (append org-entities-user
+							  org-entities))
 				     (if (boundp 'org-latex-entities)
 					 (mapcar (lambda (x)
 						   (or (car-safe x) x))
@@ -9987,7 +9989,7 @@ At all other locations, this simply calls the value of
 				  org-link-abbrev-alist))
 		    (texp
 		     (setq type :tex)
-		     org-html-entities)
+		     (append org-entities-user org-entities))
 		    ((string-match "\\`\\*+[ \t]+\\'"
 				   (buffer-substring (point-at-bol) beg))
 		     (setq type :todo)

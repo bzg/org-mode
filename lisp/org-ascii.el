@@ -72,6 +72,21 @@ i.e. with \"=>\" as ellipsis."
   :group 'org-export-ascii
   :type 'boolean)
 
+(defcustom org-export-ascii-entities 'ascii
+  "The ascii representation to be used during ascii export.
+Possible values are:
+
+ascii          Only use plain ASCII characters
+latin1         Include Latin-1 character
+utf8           Use all UTF-8 characters
+coding-system  Automatically adapt to the coding system of the output file
+               This setting is not yet implemented."
+  :group 'org-export-ascii
+  :type '(choice
+	  (const :tag "Use what the file coding system supports (not yet implemented)" coding-system)
+	  (const :tag "Plain ASCII only" ascii)
+	  (const :tag "Add Latin-1 characters" latin1)
+	  (const :tag "Use utf8 representations" utf8)))
 ;;; Hooks
 
 (defvar org-export-ascii-final-hook nil
@@ -504,6 +519,8 @@ publishing directory."
   (when org-export-ascii-table-widen-columns
     (let ((org-table-do-narrow nil))
       (goto-char (point-min))
+      (org-ascii-replace-entities)
+      (goto-char (point-min))
       (org-table-map-tables
        (lambda ()
 	 (org-if-unprotected
@@ -530,6 +547,15 @@ publishing directory."
 	;; We just remove the tags for now.
 	(setq line (replace-match "" nil nil line))))
   line)
+
+(defun org-ascii-replace-entities ()
+  "Replace entities with the ASCII representation."
+  (let (e)
+    (while (re-search-forward "\\\\\\([a-zA-Z]+[0-9]*\\)" nil t)
+      (org-if-unprotected-at (match-beginning 1)
+	(setq e (org-entity-get-representation (match-string 1 line)
+					       org-export-ascii-entities))
+	(and e (replace-match e t t))))))
 
 (defun org-export-ascii-wrap (line where)
   "Wrap LINE at or before WHERE."

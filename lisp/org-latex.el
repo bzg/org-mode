@@ -99,6 +99,10 @@
 \\usepackage{float}
 \\usepackage{wrapfig}
 \\usepackage{soul}
+\\usepackage{t1enc}
+\\usepackage{textcomp}
+\\usepackage{marvosym}
+\\usepackage{wasysym}
 \\usepackage{latexsym}
 \\usepackage{amssymb}
 \\usepackage{hyperref}"
@@ -116,6 +120,10 @@
 \\usepackage{float}
 \\usepackage{wrapfig}
 \\usepackage{soul}
+\\usepackage{t1enc}
+\\usepackage{textcomp}
+\\usepackage{marvosym}
+\\usepackage{wasysym}
 \\usepackage{latexsym}
 \\usepackage{amssymb}
 \\usepackage{hyperref}"
@@ -133,6 +141,10 @@
 \\usepackage{float}
 \\usepackage{wrapfig}
 \\usepackage{soul}
+\\usepackage{t1enc}
+\\usepackage{textcomp}
+\\usepackage{marvosym}
+\\usepackage{wasysym}
 \\usepackage{latexsym}
 \\usepackage{amssymb}
 \\usepackage{hyperref}"
@@ -150,6 +162,10 @@
 \\usepackage{float}
 \\usepackage{wrapfig}
 \\usepackage{soul}
+\\usepackage{t1enc}
+\\usepackage{textcomp}
+\\usepackage{marvosym}
+\\usepackage{wasysym}
 \\usepackage{latexsym}
 \\usepackage{amssymb}
 \\usepackage{hyperref}"
@@ -1489,31 +1505,31 @@ Convert CHAR depending on STRING-BEFORE and STRING-AFTER."
 (defun org-export-latex-treat-backslash-char (string-before string-after)
   "Convert the \"$\" special character to LaTeX.
 The conversion is made depending of STRING-BEFORE and STRING-AFTER."
-  (cond ((member (list string-after) org-html-entities)
-	 ;; backslash is part of a special entity (like "\alpha")
-	 (concat string-before "$\\"
-		 (or (cdar (member (list string-after) org-html-entities))
-		     string-after) "$"))
-	((and (not (string-match "^[ \n\t]" string-after))
-	      (not (string-match "[ \t]\\'\\|^" string-before)))
-	 ;; backslash is inside a word
-	 (concat string-before
-		 (org-export-latex-protect-string
-		  (concat "\\textbackslash{}" string-after))))
-	((not (or (equal string-after "")
-		  (string-match "^[ \t\n]" string-after)))
-	 ;; backslash might escape a character (like \#) or a user TeX
-	 ;; macro (like \setcounter)
-	 (concat string-before
-		 (org-export-latex-protect-string (concat "\\" string-after))))
-	((and (string-match "^[ \t\n]" string-after)
-	      (string-match "[ \t\n]\\'" string-before))
-	 ;; backslash is alone, convert it to $\backslash$
-	 (org-export-latex-protect-string
-	  (concat string-before "\\textbackslash{}" string-after)))
-	(t (org-export-latex-protect-string
-	    (concat string-before "\\textbackslash{}" string-after)))))
-
+  (let  ((ass (org-entity-get string-after)))
+    (cond
+     (ass (if (nth 2 ass)
+	      (concat string-before "$" (nth 1 ass) "$")
+	    (concat "\\" string-after)))
+     ((and (not (string-match "^[ \n\t]" string-after))
+	   (not (string-match "[ \t]\\'\\|^" string-before)))
+      ;; backslash is inside a word
+      (concat string-before
+	      (org-export-latex-protect-string
+	       (concat "\\textbackslash{}" string-after))))
+     ((not (or (equal string-after "")
+	       (string-match "^[ \t\n]" string-after)))
+      ;; backslash might escape a character (like \#) or a user TeX
+      ;; macro (like \setcounter)
+      (concat string-before
+	      (org-export-latex-protect-string (concat "\\" string-after))))
+     ((and (string-match "^[ \t\n]" string-after)
+	   (string-match "[ \t\n]\\'" string-before))
+      ;; backslash is alone, convert it to $\backslash$
+      (org-export-latex-protect-string
+       (concat string-before "\\textbackslash{}" string-after)))
+     (t (org-export-latex-protect-string
+	 (concat string-before "\\textbackslash{}" string-after))))))
+  
 (defun org-export-latex-keywords ()
   "Convert special keywords to LaTeX."
   (goto-char (point-min))
