@@ -93,7 +93,7 @@ utf-8 replacement    Use special character available in utf-8."
     ("plusmn" "\\textpm" nil "&plusmn;" "+-" "±" "±")
     ("sup2" "\\texttwosuperior" nil "&sup2;" "^2" "²" "²")
     ("sup3" "\\textthreesuperior" nil "&sup3;" "^3" "³" "³")
-    ("acute x" "\\acute x" t "&acute x;" "'x" "'x" "𝑥́")
+    ("acutex" "\\acute x" t "&acute x;" "'x" "'x" "𝑥́")
     ("micro" "\\textmu" nil "&micro;" "micro" "µ" "µ")
     ("para" "\\P" nil "&para;" "[pilcrow]" "¶" "¶")
     ("middot" "\\textperiodcentered" nil "&middot;" "." "·" "·")

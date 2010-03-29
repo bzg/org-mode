@@ -1441,7 +1441,8 @@ See the `org-export-latex.el' code for a complete conversion table."
 					    (org-export-latex-treat-backslash-char
 					     (match-string 1)
 					     (or (match-string 3) "")))
-					  "") t t))
+					  "") t t)
+		       (backward-char 1))
 		      ((member (match-string 2) '("_" "^"))
 		       (replace-match (or (save-match-data
 					    (org-export-latex-treat-sub-super-char
@@ -1508,8 +1509,11 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
   (let  ((ass (org-entity-get string-after)))
     (cond
      (ass (if (nth 2 ass)
-	      (concat string-before "$" (nth 1 ass) "$")
-	    (concat "\\" string-after)))
+	      (concat string-before 
+		      (org-export-latex-protect-string
+		       (concat "$" (nth 1 ass) "$")))
+	    (concat string-before (org-export-latex-protect-string
+				   (nth 1 ass)))))
      ((and (not (string-match "^[ \n\t]" string-after))
 	   (not (string-match "[ \t]\\'\\|^" string-before)))
       ;; backslash is inside a word
