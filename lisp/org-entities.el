@@ -439,6 +439,45 @@ Kind can be any of `latex', `html', `ascii', `latin1', or `utf8'."
   "Does entity NAME require math mode in LaTeX?"
   (nth 2 (org-entity-get name)))
 
+;; Helpfunctions to create a table for orgmode.org/worg/org-symbols.org
+
+(defun org-entities-create-table ()
+  "Create an org-mode table with all entities."
+  (interactive)
+  (let ((ll org-entities)
+	(pos (point))
+	e latex mathp html latin utf8)
+    (insert "|Name|LaTeX code|LaTeX|HTML code |HTML|ASCII|Latin1|UTF-8\n|-\n")
+    (while ll
+      (setq e (pop ll))
+      (setq name (car e)
+	    latex (nth 1 e)
+	    mathp (nth 2 e)
+	    html (nth 3 e)
+	    ascii (nth 4 e)
+	    latin (nth 5 e)
+	    utf8 (nth 6 e))
+      (if (equal ascii "|") (setq ascii "\\vert"))
+      (if (equal latin "|") (setq latin "\\vert"))
+      (if (equal utf8  "|") (setq utf8  "\\vert"))
+      (if (equal ascii "=>") (setq ascii "= >"))
+      (if (equal latin "=>") (setq latin "= >"))
+      (insert "|" name
+	      "|" (format "=%s=" latex)
+	      "|" (format (if mathp "$%s$" "$\\mbox{%s}$")
+			  latex)
+	      "|" (format "=%s=" html) "|" html
+	      "|" ascii "|" latin "|" utf8
+	      "|\n"))
+    (goto-char pos)
+    (org-table-align)))
+
+(defun replace-amp ()
+  "Postprocess HTML file to unescape the ampersant."
+  (interactive)
+  (while (re-search-forward "<td>&amp;\\([^<;]+;\\)" nil t)
+    (replace-match (concat "<td>&" (match-string 1)) t t)))
+
 (provide 'org-entities)
 
 ;; arch-tag: e6bd163f-7419-4009-9c93-a74623016424
