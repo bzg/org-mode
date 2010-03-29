@@ -4086,6 +4086,8 @@ Needed to avoid empty dates which mess up holiday display."
       (apply 'diary-add-to-list args)
     (apply 'add-to-diary-list args)))
 
+(defvar org-diary-last-run-time nil)
+
 ;;;###autoload
 (defun org-diary (&rest args)
   "Return diary information from org-files.
@@ -4123,8 +4125,14 @@ function from a program - use `org-agenda-get-day-entries' instead."
   (let* ((files (if (and entry (stringp entry) (string-match "\\S-" entry))
 		    (list entry)
 		  (org-agenda-files t)))
+	 (time (org-float-time))
 	 file rtn results)
-    (org-prepare-agenda-buffers files)
+    (when (or (not org-diary-last-run-time)
+	      (> (- time
+		    org-diary-last-run-time)
+		 3))
+      (org-prepare-agenda-buffers files))
+    (setq org-diary-last-run-time time)
     ;; If this is called during org-agenda, don't return any entries to
     ;; the calendar.  Org Agenda will list these entries itself.
     (if org-disable-agenda-to-diary (setq files nil))
