@@ -9074,12 +9074,15 @@ Call an the exporter, but reverse the setting of
 not set, or force processing in the current Emacs process if set.
 @end table
 
-@node ASCII export, HTML export, The export dispatcher, Exporting
-@section ASCII export
+@node ASCII/Latin-1/UTF-8 export, HTML export, The export dispatcher, Exporting
+@section ASCII/Latin-1/UTF-8 export
 @cindex ASCII export
+@cindex Latin-1 export
+@cindex UTF-8 export
 
 ASCII export produces a simple and very readable version of an Org-mode
-file.
+file, containing only plain ASCII.  Latin-1 and UTF-8 export augment the file
+with special characters and symbols available in these encodings.
 
 @cindex region, active
 @cindex active region
@@ -9100,8 +9103,18 @@ export.
 @kindex C-c C-e A
 @item C-c C-e A
 Export to a temporary buffer, do not create a file.
+@kindex C-c C-e n
+@kindex C-c C-e N
+@item C-c C-e n @ @ @r{and} @ @ C-c C-e N
+Like the above commands, but use Latin-1 encoding.
+@kindex C-c C-e u
+@kindex C-c C-e U
+@item C-c C-e u @ @ @r{and} @ @ C-c C-e U
+Like the above commands, but use UTF-8 encoding.
 @kindex C-c C-e v a
-@item C-c C-e v a
+@kindex C-c C-e v n
+@kindex C-c C-e v u
+@item C-c C-e v a @ @ @r{and} @ @ C-c C-e v n @ @ @r{and} @ @ C-c C-e v u
 Export only the visible part of the document.
 @end table
 

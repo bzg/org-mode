@@ -72,21 +72,14 @@ i.e. with \"=>\" as ellipsis."
   :group 'org-export-ascii
   :type 'boolean)
 
-(defcustom org-export-ascii-entities 'ascii
+(defvar org-export-ascii-entities 'ascii
   "The ascii representation to be used during ascii export.
 Possible values are:
 
-ascii          Only use plain ASCII characters
-latin1         Include Latin-1 character
-utf8           Use all UTF-8 characters
-coding-system  Automatically adapt to the coding system of the output file
-               This setting is not yet implemented."
-  :group 'org-export-ascii
-  :type '(choice
-	  (const :tag "Use what the file coding system supports (not yet implemented)" coding-system)
-	  (const :tag "Plain ASCII only" ascii)
-	  (const :tag "Add Latin-1 characters" latin1)
-	  (const :tag "Use utf8 representations" utf8)))
+ascii     Only use plain ASCII characters
+latin1    Include Latin-1 character
+utf8      Use all UTF-8 characters")
+
 ;;; Hooks
 
 (defvar org-export-ascii-final-hook nil
@@ -95,6 +88,42 @@ coding-system  Automatically adapt to the coding system of the output file
 ;;; ASCII export
 
 (defvar org-ascii-current-indentation nil) ; For communication
+
+;;;###autoload
+(defun org-export-as-latin1 (&rest args)
+  "Like `org-export-as-ascii', use latin1 encoding for special symbols."
+  (interactive)
+  (org-export-as-encoding 'org-export-as-ascii (interactive-p)
+			  'latin1 args))
+
+;;;###autoload
+(defun org-export-as-latin1-to-buffer (&rest args)
+  "Like `org-export-as-ascii-to-buffer', use latin1 encoding for symbols."
+  (interactive)
+  (org-export-as-encoding 'org-export-as-ascii-to-buffer (interactive-p)
+			  'latin1 args))
+
+;;;###autoload
+(defun org-export-as-utf8 (&rest args)
+  "Like `org-export-as-ascii', use use encoding for special symbols."
+  (interactive)
+  (org-export-as-encoding 'org-export-as-ascii (interactive-p)
+			  'utf8 args))
+
+;;;###autoload
+(defun org-export-as-utf8-to-buffer (&rest args)
+  "Like `org-export-as-ascii-to-buffer', use utf8 encoding for symbols."
+  (interactive)
+  (org-export-as-encoding 'org-export-as-ascii-to-buffer (interactive-p)
+			  'utf8 args))
+
+(defun org-export-as-encoding (command interactivep encoding &rest args)
+  (debug)
+  (let ((org-export-ascii-entities encoding))
+    (if interactivep
+	(call-interactively command)
+      (apply command args))))
+  
 
 ;;;###autoload
 (defun org-export-as-ascii-to-buffer (arg)

@@ -883,7 +883,7 @@ value of `org-export-run-in-background'."
 \[1]   only export the current subtree
 \[SPC] publish enclosing subtree (with LaTeX_CLASS or EXPORT_FILE_NAME prop)
 
-\[a] export as ASCII     [A] to temporary buffer
+\[a/n/u] export as ASCII/Latin-1/UFT-8         [A/N/U] to temporary buffer
 
 \[h] export as HTML      [H] to temporary buffer   [R] export region
 \[b] export as HTML and open in browser
@@ -907,6 +907,10 @@ value of `org-export-run-in-background'."
 	    (?v org-export-visible nil)
 	    (?a org-export-as-ascii t)
 	    (?A org-export-as-ascii-to-buffer t)
+	    (?n org-export-as-latin1 t)
+	    (?N org-export-as-latin1-to-buffer t)
+	    (?u org-export-as-utf8 t)
+	    (?U org-export-as-utf8-to-buffer t)
 	    (?h org-export-as-html t)
 	    (?b org-export-as-html-and-open t)
 	    (?H org-export-as-html-to-buffer nil)
@@ -2369,11 +2373,16 @@ command."
 	   (message "Export visible: [a]SCII  [h]tml  [b]rowse HTML [H/R]buffer with HTML  [D]ocBook  [l]atex  [p]df  [d]view pdf  [L]atex buffer  [x]OXO  [ ]keep buffer")
 	   (read-char-exclusive))
 	 current-prefix-arg))
-  (if (not (member type '(?a ?\C-a ?b ?\C-b ?h ?D ?x ?\ ?l ?p ?d ?L)))
+  (if (not (member type '(?a ?n ?u ?\C-a ?b ?\C-b ?h ?D ?x ?\ ?l ?p ?d ?L)))
       (error "Invalid export key"))
   (let* ((binding (cdr (assoc type
-			      '((?a . org-export-as-ascii)
+			      '(
+				(?a . org-export-as-ascii)
 				(?A . org-export-as-ascii-to-buffer)
+				(?n . org-export-as-latin1)
+				(?N . org-export-as-latin1-to-buffer)
+				(?u . org-export-as-utf8)
+				(?U . org-export-as-utf8-to-buffer)
 				(?\C-a . org-export-as-ascii)
 				(?b . org-export-as-html-and-open)
 				(?\C-b . org-export-as-html-and-open)
