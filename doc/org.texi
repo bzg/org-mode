@@ -8418,7 +8418,8 @@ Both the native Org mode tables (@pxref{Tables}) and tables formatted with
 the @file{table.el} package will be exported properly.  For Org mode tables,
 the lines before the first horizontal separator line will become table header
 lines.  You can use the following lines somewhere before the table to assign
-a caption and a label for cross references:
+a caption and a label for cross references, and in the text you can refer to
+the object with @code{\ref@{tab:basic-data@}}:
 
 @example
 #+CAPTION: This is the caption for the next table (or link)

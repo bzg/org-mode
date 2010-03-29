@@ -434,7 +434,16 @@ This may also be a function, building and inserting the postamble.")
 			(file-name-nondirectory
 			 org-current-export-file)))
      org-current-export-dir nil "Creating LaTeX image %s"))
-  (message "Exporting..."))
+  (goto-char (point-min))
+  (let (label l1)
+    (while (re-search-forward "\\\\ref{\\([^{}\n]+\\)}" nil t)
+      (org-if-unprotected-at (match-beginning 1)
+	(setq label (match-string 1))
+	(save-match-data
+	  (if (string-match "\\`[a-z]\\{1,10\\}:\\(.+\\)" label)
+	      (setq l1 (substring label (match-beginning 1)))
+	    (setq l1 label)))
+	(replace-match (format "[[#%s][l1]]" label l1) t t)))))
 
 ;;;###autoload
 (defun org-export-as-html-and-open (arg)
@@ -1600,16 +1609,10 @@ lang=\"%s\" xml:lang=\"%s\">
     ;; column and the special lines
     (setq lines (org-table-clean-before-export lines)))
 
-  (let* ((caption (or (get-text-property 0 'org-caption (car lines))
-		      (get-text-property (or (next-single-property-change
-					      0 'org-caption (car lines))
-					     0)
-					 'org-caption (car lines))))
-	 (attributes (or (get-text-property 0 'org-attributes (car lines))
-			 (get-text-property (or (next-single-property-change
-						 0 'org-attributes (car lines))
-						0)
-					    'org-attributes (car lines))))
+  (let* ((caption (org-find-text-property-in-string 'org-caption (car lines)))
+	 (label (org-find-text-property-in-string 'org-label (car lines)))
+	 (attributes (org-find-text-property-in-string 'org-attributes
+						       (car lines)))
 	 (html-table-tag (org-export-splice-attributes
 			  html-table-tag attributes))
 	 (head (and org-export-highlight-first-table-line
@@ -1692,6 +1695,8 @@ lang=\"%s\" xml:lang=\"%s\">
       ;; DocBook document, we want to always include the caption to make
       ;; DocBook XML file valid.
       (push (format "<caption>%s</caption>" (or caption "")) html)
+      (when label (push (format "<a name=\"%s\" id=\"%s\"></a>" label label)
+			html))
       (push html-table-tag html))
     (concat (mapconcat 'identity html "\n") "\n")))
 

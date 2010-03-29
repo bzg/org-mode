@@ -1,5 +1,9 @@
 2010-03-29  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-html.el (org-export-html-preprocess): Replace \ref macros
+	with a link.
+	(org-format-org-table-html): Add the label as an anchor.
+
 	* org-docbook.el (org-export-docbook-format-image): Do some
 	formatting on captions.
 
