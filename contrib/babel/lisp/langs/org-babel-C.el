@@ -74,6 +74,7 @@ called by `org-babel-execute-src-block'."
                                          ('cpp ".cpp"))))
          (tmp-bin-file (make-temp-file "org-babel-C-bin"))
          (tmp-out-file (make-temp-file "org-babel-C-out"))
+         (cmdline (cdr (assoc :cmdline params)))
          (flags (cdr (assoc :flags params)))
          (vars (second processed-params))
          (includes (org-babel-read
@@ -117,7 +118,9 @@ called by `org-babel-execute-src-block'."
          (org-babel-trim
           (with-temp-buffer
             (org-babel-shell-command-on-region
-             (point-min) (point-max) tmp-bin-file (current-buffer) 'replace)
+             (point-min) (point-max)
+             (concat tmp-bin-file (if cmdline (concat " " cmdline) ""))
+             (current-buffer) 'replace)
             (buffer-string))))
       (progn
         (with-current-buffer error-buf
