@@ -1588,6 +1588,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
                              (string-match "\\<align=\\([^ \t\n\r,]+\\)" attr)
                              (match-string 1 attr))
                   floatp (or caption label))
+	    (setq caption (and caption (org-export-latex-content caption)))
             (setq lines (org-split-string raw-table "\n"))
             (apply 'delete-region (list beg end))
             (when org-export-table-remove-special-lines
@@ -1844,6 +1845,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 				       raw-path))))))))
        ;; process with link inserting
        (apply 'delete-region remove)
+       (setq caption (and caption (org-export-latex-content caption)))
        (cond ((and imgp
 		   (plist-get org-export-latex-options-plist :inline-images))
 	      ;; OK, we need to inline an image

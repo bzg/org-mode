@@ -1524,6 +1524,7 @@ lang=\"%s\" xml:lang=\"%s\">
       (let* ((caption (org-find-text-property-in-string 'org-caption src))
 	     (attr (org-find-text-property-in-string 'org-attributes src))
 	     (label (org-find-text-property-in-string 'org-label src)))
+	(setq caption (and caption (org-html-do-expand caption)))
 	(concat
 	(if caption
 	    (format "%s<div %sclass=\"figure\">
@@ -1618,6 +1619,7 @@ lang=\"%s\" xml:lang=\"%s\">
 
 	 (nline 0) fnum i
 	 tbopen line fields html gr colgropen rowstart rowend)
+    (setq caption (and caption (org-html-do-expand caption)))
     (if splice (setq head nil))
     (unless splice (push (if head "<thead>" "<tbody>") html))
     (setq tbopen t)

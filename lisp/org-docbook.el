@@ -1325,6 +1325,7 @@ string, don't modify these."
 	   (label (org-find-text-property-in-string 'org-label src))
 	   (default-attr org-export-docbook-default-image-attributes)
 	   tmp)
+      (setq caption (and caption (org-html-do-expand caption)))
       (while (setq tmp (pop default-attr))
 	(if (not (string-match (concat (car tmp) "=") attr))
 	    (setq attr (concat attr " " (car tmp) "=" (cdr tmp)))))
