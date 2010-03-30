@@ -98,8 +98,8 @@ the the Emacs diary"
 
   ;; for each calendar, concatenate individual events into a single ics file
   (with-temp-buffer
-    (shell-command "sw_vers" " *temp*")
-    (when (re-search-backward "10.5" nil t)
+    (shell-command "sw_vers" (current-buffer))
+    (when (re-search-backward "10\\.[56]" nil t)
       (omi-concat-leopard-ics all-calendars)))
   
   ;; move all caldav ics files to the same place as local ics files

@@ -1,3 +1,8 @@
+2010-03-31  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* lisp/org-mac-iCal.el (org-mac-iCal): Snow Leopard
+	compatibility.
+
 2010-02-20  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* lisp/org-git-link.el (org-git-store-link): Check if there is a
