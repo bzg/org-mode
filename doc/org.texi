@@ -334,7 +334,7 @@ Exporting
 * Selective export::            Using tags to select and exclude trees
 * Export options::              Per-file export settings
 * The export dispatcher::       How to access exporter commands
-* ASCII export::                Exporting to plain ASCII
+* ASCII/Latin-1/UTF-8 export::  Exporting to flat files with encoding
 * HTML export::                 Exporting to HTML
 * LaTeX and PDF export::        Exporting to La@TeX{}, and processing to PDF
 * DocBook export::              Exporting to DocBook
@@ -8894,7 +8894,7 @@ enabled (default in Emacs 23).
 * Selective export::            Using tags to select and exclude trees
 * Export options::              Per-file export settings
 * The export dispatcher::       How to access exporter commands
-* ASCII export::                Exporting to plain ASCII
+* ASCII/Latin-1/UTF-8 export::  Exporting to flat files with encoding
 * HTML export::                 Exporting to HTML
 * LaTeX and PDF export::        Exporting to La@TeX{}, and processing to PDF
 * DocBook export::              Exporting to DocBook
@@ -9042,7 +9042,7 @@ settings with properties @code{EXPORT_FILE_NAME}, @code{EXPORT_TITLE},
 @code{EXPORT_TEXT}, @code{EXPORT_AUTHOR}, @code{EXPORT_DATE}, and
 @code{EXPORT_OPTIONS}.
 
-@node The export dispatcher, ASCII export, Export options, Exporting
+@node The export dispatcher, ASCII/Latin-1/UTF-8 export, Export options, Exporting
 @section The export dispatcher
 @cindex dispatcher, for export commands
 
@@ -9142,7 +9142,7 @@ Links will be exported in a footnote-like style, with the descriptive part in
 the text and the link in a note before the next heading.  See the variable
 @code{org-export-ascii-links-to-notes} for details and other options.
 
-@node HTML export, LaTeX and PDF export, ASCII export, Exporting
+@node HTML export, LaTeX and PDF export, ASCII/Latin-1/UTF-8 export, Exporting
 @section HTML export
 @cindex HTML export
 

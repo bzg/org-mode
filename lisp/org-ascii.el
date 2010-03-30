@@ -118,7 +118,6 @@ utf8      Use all UTF-8 characters")
 			  'utf8 args))
 
 (defun org-export-as-encoding (command interactivep encoding &rest args)
-  (debug)
   (let ((org-export-ascii-entities encoding))
     (if interactivep
 	(call-interactively command)
