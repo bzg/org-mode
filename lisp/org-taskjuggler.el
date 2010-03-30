@@ -110,6 +110,8 @@
 ;;   - Look at org-file-properties, org-global-properties and org-global-properties-fixed
 ;;   - What about property inheritance and org-property-inherit-p?
 ;;   - Use TYPE_TODO as an way to assign resources
+;;   - Make sure multiple dependency definitions (i.e. BLOCKER on
+;;     previous-sibling and on a specific ID) in multiple attributes are properly exported.
 ;;
 ;;; Code:
 
@@ -469,10 +471,7 @@ If the ATTRIBUTE is not in ITEM return nil."
   (cond 
    ((null item) nil)
    ((equal (symbol-name attribute) (car (car item)))
-    (cons (or 
-	   (and (equal attribute 'limits)
-		(format "%s { %s }" (symbol-name attribute) (cdr (car item))))
-	   (format "%s %s" (symbol-name attribute) (cdr (car item))))
+    (cons (format "%s %s" (symbol-name attribute) (cdr (car item)))
 	  (org-taskjuggler-get-attribute (cdr item) attribute)))
    (t (org-taskjuggler-get-attribute (cdr item) attribute))))
 
