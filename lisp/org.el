@@ -2907,10 +2907,8 @@ When nil, just push out a message."
   :type 'boolean)
 
 (defcustom org-format-latex-header "\\documentclass{article}
-\\usepackage{amssymb}
 \\usepackage[usenames]{color}
 \\usepackage{amsmath}
-\\usepackage{latexsym}
 \\usepackage[mathscr]{eucal}
 \\pagestyle{empty}             % do not remove
 % The settings below are copied from fullpage.sty
@@ -2934,16 +2932,45 @@ appears on the page."
 
 (defvar org-format-latex-header-extra nil)
 
-;; The following variable is defined here because is it also used
+;; The following variables are defined here because is it also used
 ;; when formatting latex fragments.  Originally it was part of the
 ;; LaTeX exporter, which is why the name includes "export".
-(defcustom org-export-latex-packages-alist nil
-  "Alist of packages to be inserted in the header.
-Each cell is of the format \( \"option\" . \"package\" \)."
+(defcustom org-export-latex-default-packages-alist
+  '(("AUTO" . "inputenc")
+    ("T1"   . "fontenc")
+    (""     . "graphicx")
+    (""     . "longtable")
+    (""     . "float")
+    (""     . "wrapfig")
+    (""     . "soul")
+    (""     . "t1enc")
+    (""     . "textcomp")
+    (""     . "marvosym")
+    (""     . "wasysym")
+    (""     . "latexsym")
+    (""     . "amssymb")
+    (""     . "hyperref"))
+  "Alist of default packages to be inserted in the header. DON'T CHANGE THIS.
+Unless abslutely necessary that is.
+All the packages in this list are needed by one part or another of Org-mode
+to function properly.  Therefore you should, not modify this variable unless
+you know what you are doing.  The one reason to change it anyway is that
+you might be loading some other package that conflicts with one of the default
+packages.
+Each cell is of the format \( \"options\" . \"package\" \)."
   :group 'org-export-latex
   :type '(repeat
 	  (list
-	   (string :tag "option")
+	   (string :tag "options")
+	   (string :tag "package"))))
+
+(defcustom org-export-latex-packages-alist nil
+  "Alist of packages to be inserted in the header.
+Each cell is of the format \( \"options\" . \"package\" \)."
+  :group 'org-export-latex
+  :type '(repeat
+	  (list
+	   (string :tag "options")
 	   (string :tag "package"))))
 
 (defgroup org-appearance nil
@@ -15141,6 +15168,7 @@ Some of the options can be changed using the variable
 	      (setq hash (sha1 (prin1-to-string
 				(list org-format-latex-header
 				      org-format-latex-header-extra
+				      org-export-latex-default-packages-alist
 				      org-export-latex-packages-alist
 				      org-format-latex-options
 				      forbuffer txt)))
@@ -15213,14 +15241,18 @@ Some of the options can be changed using the variable
     (if (eq bg 'default) (setq bg (org-dvipng-color :background)))
     (with-temp-file texfile
       (insert org-format-latex-header
-	      (if org-export-latex-packages-alist
+	      (if (or org-export-latex-default-packages-alist
+		      org-export-latex-packages-alist)
 		  (concat "\n"
 			  (mapconcat (lambda(p)
 				       (if (equal "" (car p))
 					   (format "\\usepackage{%s}" (cadr p))
 					 (format "\\usepackage[%s]{%s}"
 						 (car p) (cadr p))))
-				     org-export-latex-packages-alist "\n"))
+				     (append
+				      org-export-latex-default-packages-alist
+				      org-export-latex-packages-alist)
+				     "\n"))
 		"")
 	      (if org-format-latex-header-extra
 		  (concat "\n" org-format-latex-header-extra)

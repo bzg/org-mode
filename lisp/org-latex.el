@@ -91,86 +91,30 @@
 
 (defcustom org-export-latex-classes
   '(("article"
-     "\\documentclass[11pt]{article}
-\\usepackage[AUTO]{inputenc}
-\\usepackage[T1]{fontenc}
-\\usepackage{graphicx}
-\\usepackage{longtable}
-\\usepackage{float}
-\\usepackage{wrapfig}
-\\usepackage{soul}
-\\usepackage{t1enc}
-\\usepackage{textcomp}
-\\usepackage{marvosym}
-\\usepackage{wasysym}
-\\usepackage{latexsym}
-\\usepackage{amssymb}
-\\usepackage{hyperref}"
+     "\\documentclass[11pt]{article}"
      ("\\section{%s}" . "\\section*{%s}")
      ("\\subsection{%s}" . "\\subsection*{%s}")
      ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
      ("\\paragraph{%s}" . "\\paragraph*{%s}")
      ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))
     ("report"
-     "\\documentclass[11pt]{report}
-\\usepackage[AUTO]{inputenc}
-\\usepackage[T1]{fontenc}
-\\usepackage{graphicx}
-\\usepackage{longtable}
-\\usepackage{float}
-\\usepackage{wrapfig}
-\\usepackage{soul}
-\\usepackage{t1enc}
-\\usepackage{textcomp}
-\\usepackage{marvosym}
-\\usepackage{wasysym}
-\\usepackage{latexsym}
-\\usepackage{amssymb}
-\\usepackage{hyperref}"
+     "\\documentclass[11pt]{report}"
      ("\\part{%s}" . "\\part*{%s}")
      ("\\chapter{%s}" . "\\chapter*{%s}")
      ("\\section{%s}" . "\\section*{%s}")
      ("\\subsection{%s}" . "\\subsection*{%s}")
      ("\\subsubsection{%s}" . "\\subsubsection*{%s}"))
     ("book"
-     "\\documentclass[11pt]{book}
-\\usepackage[AUTO]{inputenc}
-\\usepackage[T1]{fontenc}
-\\usepackage{graphicx}
-\\usepackage{longtable}
-\\usepackage{float}
-\\usepackage{wrapfig}
-\\usepackage{soul}
-\\usepackage{t1enc}
-\\usepackage{textcomp}
-\\usepackage{marvosym}
-\\usepackage{wasysym}
-\\usepackage{latexsym}
-\\usepackage{amssymb}
-\\usepackage{hyperref}"
+     "\\documentclass[11pt]{book}"
      ("\\part{%s}" . "\\part*{%s}")
      ("\\chapter{%s}" . "\\chapter*{%s}")
      ("\\section{%s}" . "\\section*{%s}")
      ("\\subsection{%s}" . "\\subsection*{%s}")
      ("\\subsubsection{%s}" . "\\subsubsection*{%s}"))
     ("beamer"
-     "\\documentclass{beamer}
-\\usepackage[AUTO]{inputenc}
-\\usepackage[T1]{fontenc}
-\\usepackage{graphicx}
-\\usepackage{longtable}
-\\usepackage{float}
-\\usepackage{wrapfig}
-\\usepackage{soul}
-\\usepackage{t1enc}
-\\usepackage{textcomp}
-\\usepackage{marvosym}
-\\usepackage{wasysym}
-\\usepackage{latexsym}
-\\usepackage{amssymb}
-\\usepackage{hyperref}"
+     "\\documentclass{beamer}"
      org-beamer-sectioning
-))
+     ))
   "Alist of LaTeX classes and associated header and structure.
 If #+LaTeX_CLASS is set in the buffer, use its value and the
 associated information.  Here is the structure of each cell:
@@ -184,16 +128,17 @@ The header string
 -----------------
 
 The HEADER-STRING is the header that will be inserted into the LaTeX file.
-It should contain the \\documentclass macro, package call via \\usepackage
-and anything else you would always like to have in the header.  Note that
-the header will be augmented with additional usepackage statements
-according to the variable `org-export-latex-packages-alist', and also with
-lines specified via \"#+LaTeX_HEADER:\".
-If the header definition contains \"\\usepackage[AUTO]{inputenc}\", AUTO
-will automatically be replaced with a coding system derived from
-`buffer-file-coding-system'.  See also the variable
-`org-export-latex-inputenc-alist' for a way to influence this mechanism.
-
+It should really only contain the contain the \\documentclass macro.
+If can also contain package calls via \\usepackage, but it should only
+do so if any packages absolutely must be loaded before the packages given
+in `org-export-latex-default-packages-alist' and
+`org-export-latex-packages-alist'.  Lines specified via \"#+LaTeX_HEADER:\"
+are also added.
+`org-export-latex-default-packages-alist' contains
+\"\\usepackage[AUTO]{inputenc}\", AUTO will automatically be replaced with
+a coding system derived from `buffer-file-coding-system'.  See also the
+variable `org-export-latex-inputenc-alist' for a way to influence this
+mechanism.
 
 The sectioning structure
 ------------------------
@@ -1172,14 +1117,17 @@ OPT-PLIST is the options plist for current buffer."
      (org-export-apply-macros-in-string org-export-latex-header)
      "\n"
      ;; insert information on LaTeX packages
-     (when org-export-latex-packages-alist
+     (when (or org-export-latex-default-packages-alist
+	       org-export-latex-packages-alist)
        (concat
 	(mapconcat (lambda(p)
 		     (if (equal "" (car p))
 			 (format "\\usepackage{%s}" (cadr p))
 		       (format "\\usepackage[%s]{%s}"
 			       (car p) (cadr p))))
-		   org-export-latex-packages-alist "\n")
+		   (append org-export-latex-default-packages-alist
+			   org-export-latex-packages-alist)
+		   "\n")
 	"\n"))
      ;; insert additional commands in the header
      (org-export-apply-macros-in-string
