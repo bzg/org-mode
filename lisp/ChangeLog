@@ -825,6 +825,11 @@
 
 	* org-faces.el (org-faces): Change Customize group variable name
 
+2010-03-30  Christian Egli  <christian.egli@sbszh.ch>
+
+	* org-taskjuggler.el: Added a new exporter to export org-mode
+	projects to taskjuggler files.
+
 2010-03-29  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-agenda.el (org-diary-last-run-time): New variable.
