@@ -2017,9 +2017,11 @@ If there are links in the string, don't modify these."
 When TITLE is nil, just close all open levels."
   (org-close-par-maybe)
   (let* ((target (and title (org-get-text-property-any 0 'target title)))
-	 (extra-targets (assoc target org-export-target-aliases))
+	 (extra-targets (and target
+			     (assoc target org-export-target-aliases)))
 	 (extra-class (and title (org-get-text-property-any 0 'html-container-class title)))
-	 (preferred (cdr (assoc target org-export-preferred-target-alist)))
+	 (preferred (and target
+			 (cdr (assoc target org-export-preferred-target-alist))))
 	 (remove (or preferred target))
 	 (l org-level-max)
 	 snumber href suffix)
