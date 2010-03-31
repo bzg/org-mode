@@ -49,7 +49,7 @@
 (defgroup org-faces nil
   "Faces in Org-mode."
   :tag "Org Faces"
-  :group 'org-font-lock)
+  :group 'org-appearance)
 
 (defface org-hide
   '((((background light)) (:foreground "white"))

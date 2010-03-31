@@ -791,7 +791,7 @@ lines to the buffer:
    #+STARTUP: odd
    #+STARTUP: oddeven"
   :group 'org-edit-structure
-  :group 'org-font-lock
+  :group 'org-appearance
   :type 'boolean)
 
 (defcustom org-adapt-indentation t
@@ -2946,9 +2946,9 @@ Each cell is of the format \( \"option\" . \"package\" \)."
 	   (string :tag "option")
 	   (string :tag "package"))))
 
-(defgroup org-font-lock nil
-  "Font-lock settings for highlighting in Org-mode."
-  :tag "Org Font Lock"
+(defgroup org-appearance nil
+  "Settings for Org-mode appearance."
+  :tag "Org Appearance"
   :group 'org)
 
 (defcustom org-level-color-stars-only nil
@@ -2956,7 +2956,7 @@ Each cell is of the format \( \"option\" . \"package\" \)."
 When nil, the entire headline is fontified.
 Changing it requires restart of `font-lock-mode' to become effective
 also in regions already fontified."
-  :group 'org-font-lock
+  :group 'org-appearance
   :type 'boolean)
 
 (defcustom org-hide-leading-stars nil
@@ -2972,7 +2972,7 @@ lines to the buffer:
 
    #+STARTUP: hidestars
    #+STARTUP: showstars"
-  :group 'org-font-lock
+  :group 'org-appearance
   :type 'boolean)
 
 (defcustom org-hidden-keywords nil
@@ -2980,7 +2980,7 @@ lines to the buffer:
 For example, add #+TITLE to this list in order to make the
 document title appear in the buffer without the initial #+TITLE:
 keyword."
-  :group 'org-font-lock
+  :group 'org-appearance
   :type '(set (const :tag "#+AUTHOR" author)
 	      (const :tag "#+DATE" date)
 	      (const :tag "#+EMAIL" email)
@@ -2991,30 +2991,30 @@ keyword."
 Normally, only the TODO/DONE keyword indicates the state of a headline.
 When this is non-nil, the headline after the keyword is set to the
 `org-headline-done' as an additional indication."
-  :group 'org-font-lock
+  :group 'org-appearance
   :type 'boolean)
 
 (defcustom org-fontify-emphasized-text t
   "Non-nil means fontify *bold*, /italic/ and _underlined_ text.
 Changing this variable requires a restart of Emacs to take effect."
-  :group 'org-font-lock
+  :group 'org-appearance
   :type 'boolean)
 
 (defcustom org-fontify-whole-heading-line nil
   "Non-nil means fontify the whole line for headings.
 This is useful when setting a background color for the
 org-level-* faces."
-  :group 'org-font-lock
+  :group 'org-appearance
   :type 'boolean)
 
 (defcustom org-highlight-latex-fragments-and-specials nil
   "Non-nil means fontify what is treated specially by the exporters."
-  :group 'org-font-lock
+  :group 'org-appearance
   :type 'boolean)
 
 (defcustom org-hide-emphasis-markers nil
   "Non-nil mean font-lock should hide the emphasis marker characters."
-  :group 'org-font-lock
+  :group 'org-appearance
   :type 'boolean)
 
 (defvar org-emph-re nil
@@ -3095,7 +3095,7 @@ body-regexp  A regexp like \".\" to match a body character.  Don't use
 newline      The maximum number of newlines allowed in an emphasis exp.
 
 Use customize to modify this, or restart Emacs after changing it."
-  :group 'org-font-lock
+  :group 'org-appearance
   :set 'org-set-emph-re
   :type '(list
 	  (sexp    :tag "Allowed chars in pre      ")
@@ -3121,7 +3121,7 @@ characters, the face to be used by font-lock for highlighting in Org-mode
 Emacs buffers, and the HTML tags to be used for this.
 For LaTeX export, see the variable `org-export-latex-emphasis-alist'.
 Use customize to modify this, or restart Emacs after changing it."
-  :group 'org-font-lock
+  :group 'org-appearance
   :set 'org-set-emph-re
   :type '(repeat
 	  (list
