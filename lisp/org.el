@@ -15183,7 +15183,9 @@ Some of the options can be changed using the variable
 		  (push ov org-latex-fragment-image-overlays)
 		  (goto-char end))
 	      (delete-region beg end)
-	      (insert link))))))))
+              (insert (org-add-props link
+                          (list 'org-latex-src
+                                (replace-regexp-in-string "\"" "" txt)))))))))))
 
 ;; This function borrows from Ganesh Swami's latex2png.el
 (defun org-create-formula-image (string tofile options buffer)
