@@ -14,6 +14,7 @@
 	(org-hide-emphasis-markers): Change Customize group variable name
 	(org-emphasis-alist): Change Customize group variable name
 	(org-emphasis-regexp-components): Change Customize group variable name
+	(org-modules): Remove mention of org-R
 
 	* org-faces.el (org-faces): Change Customize group variable name
 
