@@ -3,6 +3,28 @@
 	* org-html.el (org-html-level-start): Catch the case that target
 	might be nil.
 
+2010-03-31  Dan Davison  <davison@stats.ox.ac.uk>
+
+	* org.el (org-appearance): Change Customize group variable name
+	from org-font-lock to org-appearance, and change tag from "Org
+	Font Lock" to "Org Appearance"
+	(org-odd-levels-only): Change Customize group variable name
+	(org-level-color-stars-only): Change Customize group variable name
+	(org-hide-leading-stars): Change Customize group variable name
+	(org-hidden-keywords): Change Customize group variable name
+	(org-fontify-done-headline): Change Customize group variable name
+	(org-fontify-emphasized-text): Change Customize group variable name
+	(org-fontify-whole-heading-line): Change Customize group variable name
+	(org-highlight-latex-fragments-and-specials): Change Customize
+	group variable name
+	(org-hide-emphasis-markers): Change Customize group variable name
+	(org-emphasis-alist): Change Customize group variable name
+	(org-emphasis-regexp-components): Change Customize group variable
+	name
+	(org-modules): Remove mention of org-R
+
+	* org-faces.el (org-faces): Change Customize group variable name
+
 2010-03-29  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-agenda.el (org-diary-last-run-time): New variable.
