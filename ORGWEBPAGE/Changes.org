@@ -6,9 +6,532 @@
 
 #+STARTUP: indent hidestars
 
-* Version 6.34
+* Version 6.35 (in preparation)
  :PROPERTIES:
  :VISIBILITY: content
+ :CUSTOM_ID: v6.35
+ :END:
+
+** Incompatible Changes
+
+*** Changes to the intended use of =org-export-latex-classes=
+
+So far this variable has been used to specify the
+=\documentclass= macro as well as all the =\usepackage= calls
+necessary for the document.  This setup makes it difficult to
+maintain the list of packages that Org itself would like to call,
+for example for the special symbol support it needs.
+
+There are now two variables that should be used to list the LaTeX
+packages that need to be included in all classes.  The header
+definition in =org-export-latex-classes= should then only contain
+the =\documentclass= macro, and packages for this specific class
+definition.
+
+The two variables are:
+
+1. =org-export-latex-default-packages-alist= :: This is the
+     variable where Org-mode itself puts the packages it needs.
+     If possible, you should not change this variable - in fact,
+     I have considered to make this a constant and to not allow
+     it customized.  However, there is one exception when it
+     might be necessary to change it: if one of the packages
+     causes a conflict with another package you want to use.
+
+2. =org-export-latex-packages-alist= :: This is the variable
+     where you should put the packages that you'd like to use
+     across all classes.  For example, I am putting =amsmath= and
+     =tikz= here, because I always want to have them.
+
+The sequence how these customizations will show up in the LaTeX
+document are:
+1. Header from =org-export-latex-classes=
+2. =org-export-latex-default-packages-alist=
+3. =org-export-latex-packages-alist=
+4. Buffer-specific things set with =#+LaTeX_HEADER:=
+
+If you have currently customized =org-export-latex-classes=, you
+should revise that customization and remove any package call that
+are covered by =org-export-latex-default-packages-alist=, and you
+should consider to move packages that you use in all classes to
+=org-export-latex-packages-alist=.
+
+
+*** The constant =org-html-entities= is obsolete
+
+Its content is now part of the new constant =org-entities=, which
+is defined in the file org-entities.el.  =org-html-entities= was
+an internal variable, but it is possible that some users did
+write code using it - this is why I am mentioning it here.
+
+** Editing Convenience and Appearance
+
+*** New faces for title, date, author and email address lines.
+    
+The keywords in these lines are now dimmed out, and the title is
+displayed in a larger font, and a special font is also used for
+author, date, and email information.  This is implemented by the
+following new faces:
+    
+org-document-title
+org-document-info
+org-document-info-keyword
+    
+In addition, the variable org-hidden-keywords can be used to make the
+corresponding keywords disappear.
+
+Patch by Dan Davison
+
+*** Implement a simpler way to specify faces for tags and todo keywords
+    
+The variables =org-todo-keyword-faces=, =org-tag-faces=, and
+=org-priority-faces= now accept simple color names as
+specifications.  The colors will be used as either foreground or
+background color for the corresponding keyword.  See also the
+variable =org-faces-easy-properties=, which governs which face
+property is affected by this setting.
+
+This is really a great simplification for setting keyword faces.
+The change is based on an idea and patch by Ryan Thompson.
+
+*** <N> in tables now means fixed width, not maximum width
+    
+Requested by Michael Brand
+
+*** Improve level cycling function
+
+=TAB= in an empty headline cycles the level of that headline
+through likely states.  Ryan Thompson implemented an improved
+version of this function, which does not depend upon when exactly
+this command is used.  Thanks to Ryan for this improvement.
+
+*** Improve adaptive filling
+    
+For paragraph text, =org-adaptive-fill-function= did not handle the
+base case of regular text which needed to be filled.  This is now
+fixed.  Among other things, it allows email-style ">" comments
+to be filled correctly.
+
+Thanks to Dan Hackney for this patch.    
+
+*** Make `org-reveal' (=C-c C-r=) also decrypt encrypted entries
+    
+Thanks to Richard Riley for triggering this change.
+
+*** Improve automatic letter selection for TODO keywords
+    
+When all first letters of keywords have been used, Org no assigns
+more meaningful characters based on the keywords.
+
+Thanks to Mikael Fornius for this patch.
+
+** Export
+
+*** Much better handling of entities for LaTeX export
+
+Special entities like =\therefore= and =\alpha= now know if
+they need to be in LaTeX math mode and are formatted accordingly.
+
+Thanks to Ulf Stegemann for the tedious work to make this
+possible.
+    
+*** LaTeX export: Set coding system automatically
+
+The coding system of the LaTeX class will now be set to the value
+corresponding to the buffer's file coding system.  This happens
+if your setup sets up the file to have a line
+=\usepackage[AUTO]{inputenc}=.
+
+*** New exporters to Latin-1 and UTF-8
+
+While Ulf was going through the entities list to improve the
+LaTeX export, he had the great idea to provide representations for
+many of the entities in Latin-1, and for all of them in UTF-8.
+This means that we can now export files rich in special symbols
+to Latin-1 and to UTF-8 files.  These new exporters can be
+reached with the commands =C-c C-e n= and =C-c C-e u=,
+respectively.
+
+When there is no representation for a given symbol in the
+targeted coding system, you can choose to keep the TeX-macro-like
+representation, or to get an "explanatory" representation.  For
+example, =\simeq= could be represented as "[approx. equal to]".
+Please use the variable `org-entities-ascii-explanatory' to state
+your preference.
+
+*** Full label/reference support in HTML, Docbook, and LaTeX backends
+
+=#+LABEL= definitions for tables and figures are now fully
+implemented in the LaTeX, Docbook, and HTML interfaces.
+=\ref{xxx}= is expanded to a valid link in all backends.
+
+*** BEAMER export: Title of the outline frame is now customizable
+    
+The new option =org-outline-frame-title= allows to set the 
+title for outline frames in Beamer presentations.
+
+Patch by Lukasz Stelmach.
+    
+*** BEAMER export: fragile frames are better recognized
+
+A =lstlisting= environment now also triggers the fragile option in
+a beamer frame, just like =verbatim= environments do.
+
+Thanks to Eric Schulte for this patch.
+
+*** BEAMER export: Protect <...> macro arguments
+
+Macros for the BEAMER package can have arguments in angular
+brackets.  These are now protected just like normal arguments.
+
+Requested by Bill Jackson.
+
+*** HTML export: Add class to outline containers using property
+    
+The =HTML_CONTAINER_CLASS= property can now be used to add a
+class name to the outline container of a node in HTML export.
+
+*** New option =org-export-email-info= to turn off export of the email address
+    
+Default is actually off now.
+
+*** Throw an error when creating an image from a LaTeX snippet fails
+
+This behavior can be configured with the new option variable
+=org-format-latex-signal-error=.
+
+** Index generation
+    
+Org-mode can now produce a 2-level subject index spanning an
+entire publishing project.  Write index entries in your files as
+
+#+begin_src org
+,* What is org-mode?
+#+index: Org-mode
+#+index: Definitions!Org-mode
+#+end_src
+
+where the first line will produce an index entry /Org-mode/,
+while the second line will create /Definitions/ with a sub-item
+/Org-mode/.  Three-level entries are not supported.
+
+To produce the index, set
+
+#+begin_src emacs-lisp
+:makeindex t
+#+end_src
+
+in the project definition in =org-publish-project-alist=.  You
+may have to force re-export of all files to get the index by
+using a =C-u= prefix to the publishing command:
+
+#+begin_example
+C-u M-x org-publish-all
+#+end_example
+
+Whenever an Org file is published in this project, a new file
+with the extension "orgx" will be written.  It contains the index
+entries.  When all project files are published, Org will produce
+a new file "theindex.inc" containing the index as a to-level
+tree.  This file can be included into any project file using
+
+#+begin_src org
+#+include: "theindex.inc"
+#+end_src
+
+Org-mode will also create a file "theindex.org" with this include
+statement, and you can build a more complex structure (for
+example style definitions, top and home links, etc) around this
+statement.  When this file already exists, it will not be
+overwritten by Org.
+
+Thanks to Stefan Vollmar for initiating and driving this feature.
+
+FIXME: Still need to do the LaTeX portion
+
+** MobileOrg
+
+*** Encrypting stage files for MobileOrg
+
+Since the use of (often pubic) servers is needed for MobileOrg,
+it is now possible to encrypt the files to be staged for
+MobileOrg.  Version 1.2 of MobileOrg will be needed for this
+feature, and Richard Moreland will show instructions on his
+website once that is available.  Basically, on the Org-side this
+will require the following settings:
+
+#+begin_src emacs-lisp
+  (setq org-mobile-use-encryption t
+        org-mobile-encryption-password "My_MobileOrg_Password")
+#+end_src
+
+So the password will be visible in your local setup, but since
+the encryption is only for the public server, this seems
+acceptable.
+
+** Agenda
+
+*** Specify entry types as an option
+    
+Custom Agenda commands can now limit the sets of entry types
+considered for this command by binding =org-agenda-entry-types=
+temporarily in the options section of the command.  This can lead
+to significant speedups, because instead of laboriously finding
+entries and then rejecting them, a whole search cycle is skipped.
+For more information see the new section in [[http://orgmode.org/worg/org-tutorials/org-custom-agenda-commands.php#sec-5][Matt Lundin's agenda
+custom command tutorial]].
+
+Thanks to Matt Lundin for this feature.
+
+*** Speed up multiple calls to org-diary by only doing buffer prep once
+    
+Also a patch by Matt Lundin.
+
+*** Show and hide deadlines in the agenda
+
+You can now hide all deadline entries in the agenda by pressing
+=!=.
+
+Thanks to John Wiegley for this feature.
+
+*** Agenda: Allow to suppress deadline warnings for entries also scheduled
+
+The the docstring of the variable
+=org-agenda-skip-deadline-prewarning-if-scheduled=.
+
+*** Expand file names in org-agenda-files (external file case)
+    
+If you are using a file to manage the list of agenda files, the
+names in this file can now contain environment variables and "~"
+to write them more compactly and portable.
+
+Thanks to Mikael Fornius for a patch to this effect.
+
+*** Agenda: Allow TODO conditions in the skip functions
+
+The agenda skip function has now special support for skipping
+based on the TODO state.  Here are just two examples, see the
+manual for more information.
+
+#+begin_src emacs-lisp
+(org-agenda-skip-entry-if 'todo '(\"TODO\" \"WAITING\"))
+(org-agenda-skip-entry-if 'nottodo 'done)
+#+end_src
+
+Thanks to Lukasz Stelmach for this patch.
+
+*** Extracting the time-of-day when adding diary entries
+
+The time of day can now be extracted from new diary entries made
+from the agenda with (for example) =i d=.  When
+=org-agenda-insert-diary-extract-time= is set, this is done, and
+the time is moved into the time stamp.
+
+Thanks to Stephen Eglen for this feature.
+
+*** The TODO list: Allow skipping scheduled or deadlined entries
+
+Skipping TODO entries in the global TODO list based on whether
+they are scheduled or have a deadline can now be controlled in
+more detail.  Please see the docstrings of
+=org-agenda-todo-ignore-scheduled= and
+=org-agenda-todo-ignore-deadline=.
+
+Thanks to Lukasz Stelmach for patches to this effect.
+
+** Hyperlinks
+
+*** Make =org-store-link= point to directory in a dired buffer
+    
+When, in a dired buffer, the cursor is not in a line listing a
+file, `org-store-link' will store a link to the directory.
+
+Patch by Stephen Eglen.
+
+*** Allow regexps in =org-file-apps= to capture link parameters
+    
+The way extension regexps in =org-file-apps= are handled has
+changed.  Instead of matching against the file name, the regexps
+are now matched against the whole link, and you can use grouping
+to extract link parameters which you can then use in a command
+string to be executed.
+
+For example, to allow linking to PDF files using the syntax
+=file:/doc.pdf::<page number>=, you can add the following entry to
+org-file-apps:
+
+#+begin_example
+Extension: \.pdf::\([0-9]+\)\'
+Command:   evince "%s" -p %1
+#+end_example
+
+Thanks to Jan Böker for a patch to this effect.
+
+** Clocking
+
+*** Show clock overruns in mode line
+
+When clocking an item with a planned effort, overrunning the
+planned time is now made visible in the mode line, for example
+using the new face =org-mode-line-clock-overrun=, or by adding an
+extra string given by =org-task-overrun-text=.
+
+Thanks to Richard Riley for a patch to this effect.
+
+** Tables
+
+*** Repair the broken support for table.el tables again.
+    
+Tables created with the table.el package now finally work again
+in Org-mode.  While you cannot edit the table directly in the
+buffer, you can use  =C-c '= to edit it nicely in a temporary
+buffer.
+
+Export of these tables to HTML seem to work without problems.
+Export to LaTeX is imperfect.  If fails if the table contains
+special characters that will be replaced by the exporter before
+formatting the table.  The replacement operation changes the
+length of some lines, breaking the alignment of the table fields.
+Unfortunately this is not easy to fix.  It is also not an option
+to not do these replacements.  The table.el LaTeX exporter will
+for example not escape "&" in table fields, causing the exported
+tables to be broken.
+
+** Misc
+
+*** Add logging support for refiling
+
+Whenever you refile an item, a time stamp and even a note can be
+added to this entry.  For details, see the new option
+=org-log-refile=.
+    
+Thanks to Charles Cave for this idea.
+
+*** New helper functions in org-table.el
+
+There are new functions to access and write to a specific table
+field.  This is for hackers, and maybe for the org-babel people.
+
+#+begin_example
+org-table-get
+org-table-put
+org-table-current-line
+org-table-goto-line
+#+end_example
+
+*** Tables: Introduce field coordinates for formulas, improve docs
+    
+Calc and Emacs-Lisp formulas for tables can access the current
+field coordinates with =@#= and =$#= for row and column,
+respectively.  These can be useful in some formulas.  For
+example, to sequentially number the fields in a column, use
+~=@#~ as column equation.
+
+Thanks to Michael Brand for this feature.
+
+*** Archiving: Allow to reverse order in target node
+    
+The new option =org-archive-reversed-order= allows to have
+archived entries inserted in a last-on-top fashion in the target
+node.
+    
+Requested by Tom.
+
+*** Better documentation on calc accuracy in tables
+    
+Thanks to Michael Brand for this fix.
+
+*** Clock reports can now include the running, incomplete clock
+
+If you have a clock running, and the entry being clocked falls
+into the scope when creating a clock table, the time so far spent
+can be added to the total.  This behavior depends on the setting
+of =org-clock-report-include-clocking-task=.  The default is
+=nil=.
+    
+Thanks to Bernt Hansen for this useful addition.
+
+*** American-style dates are now understood by =org-read-date=
+
+So when you are prompted for a date, you can now answer like this
+
+#+begin_example
+2/5/3         --> 2003-02-05
+2/5           --> <CURRENT-YEAR>-02-05
+#+end_example    
+
+*** Update org-timer.el so that we only allow one timer.
+
+There is now only a single free timer supported by org-timer.el.
+Thanks to Bastien for cleaning this up, after a bug report in
+this area by Frederic Couchet.
+
+*** Remember: Allow to file as sibling of current clock
+    
+=C-3 C-c C-c= will file the remember entry as a sibling of the
+last filed entry.
+
+Patch by Lukasz Stelmach.
+
+*** Org-reveal: Double prefix arg show the entire subtree of the parent
+    
+This can help to get out of an inconsistent state produced for
+example by viewing from the agenda.
+
+This was a request my Matt Lundin.
+
+*** Add org-secretary.el by Juan Reyero to the contrib directory
+
+Org-secretary is a possible setup for group work using Org-mode.
+
+Thanks to Juan Reyero for this contribution.
+
+** Babel
+Eric has compiled the following list of changes in and around
+org-babel.
+
+- added support for Matlab and Octave
+- added support for C and C++ code blocks
+- added support for the Oz programming language
+- can now force literal interpretation of table cell contents
+  with extra "$" in table formula
+- variable references which look like lisp forms are now
+  evaluated
+- inline source blocks will always return string output
+- no longer adding extension during tangling when filename is
+  provided
+- code block parameters are now available when initializing a
+  session
+- added `org-babel-execute-hook' which runs after code block
+  execution
+- working directories and remote execution
+
+  This introduces a new header argument :dir. For the duration of
+  source block execution, default-directory is set to the value
+  of this header argument. Consequences include:
+
+  - external interpreter processes run in that directory
+  - new session processes run in that directory (but existing
+    ones are unaffected)
+  - relative paths for file output are relative to that directory
+
+  The name of a directory on a remote machine may be specified
+  with tramp syntax (/user@host:path), in which case the
+  interpreter executable will be sought in tramp-remote-path, and
+  if found will execute on the remote machine in the specified
+  remote directory.
+- Remove org-R from contrib
+- gnuplot can now return it's string output -- when session is
+  set to "none"
+- prevent quoting of strings in shell variables
+- now including source code block arguments w/source name on
+  export
+- now able to reference file links as results
+- allow pdf/png generation directly from latex source blocks
+
+
+* Version 6.34
+ :PROPERTIES:
  :CUSTOM_ID: v6.34
  :END:
 
@@ -50,7 +573,7 @@ call function to do something special with text links.
 
 Thanks to Paul Sexton for this contribution.
 
-**** Add Jan BÃ¶ker's org-docview.el
+**** Add Jan Böker's org-docview.el
 
 This new module allows links to various file types using docview,
 where Emacs displays images of document pages.  Docview link
@@ -59,7 +582,7 @@ page 131 of the Org-mode manual:
 
 : [[docview:~/.elisp/org/doc/org.pdf::131][Org-Mode Manual]]
 
-Thanks to Jan BÃ¶ker for this contribution.
+Thanks to Jan Böker for this contribution.
     
 **** New link types that force special ways of opening the file
     
