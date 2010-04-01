@@ -1,5 +1,8 @@
 2010-04-01  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-entities.el (org-entity-get-representation): Catch the case
+	that there is not entry in the list.
+
 	* org-mobile.el (org-mobile-use-encryption)
 	(org-mobile-encryption-tempfile, org-mobile-encryption-password):
 	New options.

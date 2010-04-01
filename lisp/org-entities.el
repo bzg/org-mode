@@ -429,7 +429,8 @@ Kind can be any of `latex', `html', `ascii', `latin1', or `utf8'."
 	 (n (cdr (assq kind '((latex . 1) (html . 3) (ascii . 4)
 			      (latin1 . 5) (utf8 . 6)))))
 	 (r (and e n (nth n e))))
-    (if (and (not org-entities-ascii-explanatory)
+    (if (and e r
+	     (not org-entities-ascii-explanatory)
 	     (memq kind '(ascii latin1 utf8))
 	     (= (string-to-char r) ?\[))
 	(concat "\\" name)
