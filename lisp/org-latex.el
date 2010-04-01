@@ -128,10 +128,10 @@ The header string
 -----------------
 
 The HEADER-STRING is the header that will be inserted into the LaTeX file.
-It should really only contain the contain the \\documentclass macro.
-If can also contain package calls via \\usepackage, but it should only
-do so if any packages absolutely must be loaded before the packages given
-in `org-export-latex-default-packages-alist' and
+It should really only contain the contain the \\documentclass macro, and
+setup code that is specific to this class.  This will be augmented by
+call to \\usepackage for all packages mentioned in the variables
+`org-export-latex-default-packages-alist' and
 `org-export-latex-packages-alist'.  Lines specified via \"#+LaTeX_HEADER:\"
 are also added.
 `org-export-latex-default-packages-alist' contains

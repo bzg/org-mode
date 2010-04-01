@@ -2966,6 +2966,7 @@ Each cell is of the format \( \"options\" . \"package\" \)."
 
 (defcustom org-export-latex-packages-alist nil
   "Alist of packages to be inserted in the header.
+These will be inserted after `org-export-latex-default-packages-alist'.
 Each cell is of the format \( \"options\" . \"package\" \)."
   :group 'org-export-latex
   :type '(repeat

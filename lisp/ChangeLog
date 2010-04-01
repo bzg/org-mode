@@ -1,3 +1,34 @@
+2010-04-01  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-entities): Require the new file.
+	(org-export-latex-default-packages-alist): New variable.
+	(org-complete): Use new entity code for completion.
+	(org-create-formula-image): Use the new packages variable.
+
+	* org-latex.el (org-export-latex-classes): Remove the standard
+	packages from the class headers.
+	(org-export-latex-make-header): Use the new package variable.
+	(org-export-latex-special-chars): Better regexp for entities, to
+	support entity name that contain numbers.
+	(org-export-latex-treat-backslash-char): Use the new entity code.
+
+	* org-html.el (org-html-do-expand): Use the new entity code.
+
+	* org-exp.el (org-export): Add the new export commands.
+	(org-html-entities): Constant removed.
+	(org-export-visible): Add the new export commands.
+
+	* org-entities.el: New file.
+
+	* org-docbook.el (org-docbook-do-expand): Use new entity code.
+
+	* org-ascii.el (org-export-ascii-entities): New variable.
+	(org-export-as-latin1, org-export-as-latin1-to-buffer)
+	(org-export-as-utf8, org-export-as-utf8-to-buffer): New commands.
+	(org-export-as-encoding): New function.
+	(org-export-ascii-preprocess): Call `org-ascii-replace-entities'.
+	(org-ascii-replace-entities): New function.
+
 2010-03-31  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-html.el (org-html-level-start): Catch the case that target
