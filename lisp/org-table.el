@@ -1028,10 +1028,10 @@ When ALIGN is set, als realign the table."
 		(progn (org-table-goto-column column nil 'force) t)
 		(org-table-get-field column value)))
     (and align (org-table-align))))
-  
+
 (defun org-table-current-line ()
   "Return the index of the current data line."
-  (let ((pos (point)) (end (org-table-end)) (cnt 0)) 
+  (let ((pos (point)) (end (org-table-end)) (cnt 0))
     (save-excursion
       (goto-char (org-table-begin))
       (while (and (re-search-forward org-table-dataline-regexp end t)

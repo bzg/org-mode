@@ -703,7 +703,7 @@ If it is less than 8, the level-1 face gets re-used for level N+1 etc."
 
 (org-copy-face 'modeline 'org-mode-line-clock
   "Face used for clock display in mode line.")
-(org-copy-face 'modeline 'org-mode-line-clock-overrun 
+(org-copy-face 'modeline 'org-mode-line-clock-overrun
   "Face used for clock display for overrun tasks in mode line."
   :background "red")
 

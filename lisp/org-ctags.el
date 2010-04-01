@@ -131,7 +131,7 @@ tag destinations in org-mode files.
 Format is: /REGEXP/TAGNAME/FLAGS,TAGTYPE/
 See the ctags documentation for more information.")
 
-(defcustom org-ctags-path-to-ctags 
+(defcustom org-ctags-path-to-ctags
   (case system-type
     (windows-nt "ctags.exe")
     (darwin "ctags-exuberant")
@@ -141,14 +141,14 @@ See the ctags documentation for more information.")
   :type 'file)
 
 (defcustom org-ctags-open-link-functions
-  '(org-ctags-find-tag 
+  '(org-ctags-find-tag
     org-ctags-ask-rebuild-tags-file-then-find-tag
     org-ctags-ask-append-topic)
   "List of functions to be prepended to ORG-OPEN-LINK-FUNCTIONS when
 ORG-CTAGS is active."
   :group 'org-ctags
   :type 'hook
-  :options '(org-ctags-find-tag 
+  :options '(org-ctags-find-tag
              org-ctags-ask-rebuild-tags-file-then-find-tag
              org-ctags-rebuild-tags-file-then-find-tag
              org-ctags-ask-append-topic
@@ -196,7 +196,7 @@ The following patterns are replaced in the string:
   (setq org-ctags-enabled-p t)
   (dolist (fn org-ctags-open-link-functions)
     (add-hook 'org-open-link-functions fn t)))
-  
+
 
 ;;; General utility functions. ===============================================
 ;;; These work outside org-ctags mode.

@@ -682,7 +682,7 @@ Otherwise give an error say the file exists."
                   (while (>= current-level next-level)
                     (with-current-buffer mm-buffer
                       (insert "</node>\n")
-                      (setq current-level 
+                      (setq current-level
 			    (- current-level (if odd-only 2 1))))))
                 (setq this-node-end (1+ next-node-end))
                 (setq this-m2 next-m2)
@@ -706,7 +706,7 @@ Otherwise give an error say the file exists."
           (with-current-buffer mm-buffer
             (while (> current-level base-level)
               (insert "</node>\n")
-	      (setq current-level 
+	      (setq current-level
 		    (- current-level (if odd-only 2 1)))
               ))
           (with-current-buffer mm-buffer

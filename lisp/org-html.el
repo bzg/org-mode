@@ -443,7 +443,7 @@ This may also be a function, building and inserting the postamble.")
 	  (if (string-match "\\`[a-z]\\{1,10\\}:\\(.+\\)" label)
 	      (setq l1 (substring label (match-beginning 1)))
 	    (setq l1 label)))
-	(replace-match (format "[[#%s][l1]]" label l1) t t)))))
+	(replace-match (format "[[#%s][%s]]" label l1) t t)))))
 
 ;;;###autoload
 (defun org-export-as-html-and-open (arg)
@@ -1014,7 +1014,7 @@ lang=\"%s\" xml:lang=\"%s\">
 				  "\" class=\"target\">" (match-string 1 line)
 				  "@</a> ")
 			  t t line)))))
-	    
+
 	  (setq line (org-html-handle-time-stamps line))
 
 	  ;; replace "&" by "&amp;", "<" and ">" by "&lt;" and "&gt;"
@@ -1897,7 +1897,7 @@ If there are links in the string, don't modify these."
 	(push l res))
       (push (org-html-do-expand string) res)
       (apply 'concat (nreverse res)))))
-  
+
 (defun org-html-do-expand (s)
   "Apply all active conversions to translate special ASCII to HTML."
   (setq s (org-html-protect s))

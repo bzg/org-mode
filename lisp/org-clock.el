@@ -468,7 +468,6 @@ If not, show simply the clocked time like 01:50."
 	    (concat (org-propertize
 		     org-task-overrun-text
 		     'face 'org-mode-line-clock-overrun) org-mode-line-string)))
- 
   (force-mode-line-update))
 
 (defun org-clock-get-clocked-time ()
@@ -523,7 +522,7 @@ Notification is shown only once."
   (when (org-clocking-p)
     (let ((effort-in-minutes (org-hh:mm-string-to-minutes org-clock-effort))
 	  (clocked-time (org-clock-get-clocked-time)))
-      (if (setq org-task-overrun 
+      (if (setq org-task-overrun
 		(if (or (null effort-in-minutes) (zerop effort-in-minutes))
 		    nil
 		  (>= clocked-time effort-in-minutes)))

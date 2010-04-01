@@ -405,7 +405,7 @@ referenced sequence."
 		  (fill-paragraph)))
 	   (if (not a) (push (list ref marker def (if idef t nil))
 			     ref-table)))))
-      
+
       ;; First find and remove the footnote section
       (goto-char (point-min))
       (cond

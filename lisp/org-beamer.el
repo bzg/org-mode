@@ -256,7 +256,7 @@ in org-export-latex-classes."
 	  (and frame-level (= level frame-level)))
       ;; A frame
       (org-beamer-get-special props)
-      
+
       (setq in (org-fill-template
 		"\\begin{frame}%a%A%o%T%S%x"
 		(list (cons "a" (or action ""))

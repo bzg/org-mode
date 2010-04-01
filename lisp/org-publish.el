@@ -42,11 +42,11 @@
 
 (defun org-publish-sanitize-plist (plist)
   (mapcar (lambda (x)
-	    (or (cdr (assoq x '((:index-filename . :sitemap-filename)
-				(:index-title . :sitemap-title)
-				(:index-function . :sitemap-function)
-				(:index-style . :sitemap-style)
-				(:auto-index . :auto-sitemap))))
+	    (or (cdr (assq x '((:index-filename . :sitemap-filename)
+			       (:index-title . :sitemap-title)
+			       (:index-function . :sitemap-function)
+			       (:index-style . :sitemap-style)
+			       (:auto-index . :auto-sitemap))))
 		x))
 	  plist))
 
@@ -740,7 +740,7 @@ the project."
 			 (cdr (assoc target org-export-id-target-alist))
 			 target))
 	(push (cons entry target) index)))
-    (with-temp-file 
+    (with-temp-file
 	(concat (file-name-sans-extension org-current-export-file) ".orgx")
       (dolist (entry (nreverse index))
 	(insert (format "INDEX: (%s) %s\n" (cdr entry) (car entry)))))))

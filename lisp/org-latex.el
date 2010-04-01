@@ -611,7 +611,7 @@ when PUB-DIR is set, use this as the publishing directory."
 			 (file-name-sans-extension
 			  (file-name-nondirectory buffer-file-name)))
 		    "No Title"))
-	 (filename 
+	 (filename
 	  (and (not to-buffer)
 	       (concat
 		(file-name-as-directory
@@ -1457,7 +1457,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
   (let  ((ass (org-entity-get string-after)))
     (cond
      (ass (if (nth 2 ass)
-	      (concat string-before 
+	      (concat string-before
 		      (org-export-latex-protect-string
 		       (concat "$" (nth 1 ass) "$")))
 	    (concat string-before (org-export-latex-protect-string
@@ -1481,7 +1481,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
        (concat string-before "\\textbackslash{}" string-after)))
      (t (org-export-latex-protect-string
 	 (concat string-before "\\textbackslash{}" string-after))))))
-  
+
 (defun org-export-latex-keywords ()
   "Convert special keywords to LaTeX."
   (goto-char (point-min))
@@ -1672,7 +1672,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 	(setq tbl (mapconcat 'identity (delq nil lines) "\n"))))
     (when (and align (string-match "\\\\begin{tabular}{.*}" tbl))
       (setq tbl (replace-match (concat "\\begin{tabular}{" align "}")
-			       t t tbl)))      
+			       t t tbl)))
     (and (get-buffer "*org-export-table*")
 	 (kill-buffer (get-buffer "*org-export-table*")))
     (beginning-of-line 0)
@@ -1830,7 +1830,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 			      (org-remove-initial-hash
 			       (org-solidify-link-text raw-path))
 			      desc)))
-	     (path 
+	     (path
 	      (when (org-at-table-p)
 		;; There is a strange problem when we have a link in a table,
 		;; ampersands then cause a problem.  I think this must be
@@ -1851,7 +1851,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 	  (setq wrapp t floatp nil attr (replace-match "" t t attr)))
       (if (string-match "[ \t]*\\<float\\>" attr)
 	  (setq wrapp nil floatp t attr (replace-match "" t t attr))))
-    
+
     (setq placement
 	  (cond
 	   (wrapp "{l}{0.5\\textwidth}")

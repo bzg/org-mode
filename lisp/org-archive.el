@@ -40,7 +40,7 @@
   :type '(choice
 	  (const org-archive-subtree)
 	  (const org-archive-to-archive-sibling)
-	  (const org-archive-set-tag)))  
+	  (const org-archive-set-tag)))
 
 (defcustom org-archive-reversed-order nil
   "Non-nil means make the tree first child under the archive heading, not last."

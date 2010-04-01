@@ -263,11 +263,10 @@ create all custom agenda views, for upload to the mobile phone."
 	  (kill-buffer a-buffer)
 	(let ((cw (selected-window)))
 	  (select-window (get-buffer-window a-buffer))
-	  
 	  (org-agenda-redo)
 	  (select-window cw)))))
   (message "Files for mobile viewer staged"))
-  
+
 (defvar org-mobile-before-process-capture-hook nil
   "Hook that is run after content was moved to `org-mobile-inbox-for-pull'.
 The inbox file is visited by the current buffer, and the buffer is
@@ -330,7 +329,7 @@ agenda view showing the flagged items."
 	(def-todo (default-value 'org-todo-keywords))
 	(def-tags (default-value 'org-tag-alist))
 	file link-name todo-kwds done-kwds tags drawers entry kwds dwds twds)
-    
+
     (org-prepare-agenda-buffers (mapcar 'car files-alist))
     (setq done-kwds (org-uniquify org-done-keywords-for-agenda))
     (setq todo-kwds (org-delete-all
@@ -886,7 +885,7 @@ be returned that indicates what went wrong."
 	(org-todo (or new 'none)) t)
        (t (error "State before change was expected as \"%s\", but is \"%s\""
 		 old current))))
-      
+
      ((eq what 'tags)
       (setq current (org-get-tags)
 	    new1 (and new (org-split-string new ":+"))
@@ -899,7 +898,7 @@ be returned that indicates what went wrong."
 	(org-set-tags-to new1) t)
        (t (error "Tags before change were expected as \"%s\", but are \"%s\""
 		 (or old "") (or current "")))))
-     
+
      ((eq what 'priority)
       (when (looking-at org-complex-heading-regexp)
 	(setq current (and (match-end 3) (substring (match-string 3) 2 3)))
@@ -925,7 +924,7 @@ be returned that indicates what went wrong."
 	  (delete-region (point) (+ (point) (length current)))
 	  (org-set-tags nil 'align))
 	 (t (error "Heading changed in MobileOrg and on the computer")))))
-     
+
      ((eq what 'body)
       (setq current (buffer-substring (min (1+ (point-at-eol)) (point-max))
 				      (save-excursion (outline-next-heading)
@@ -945,7 +944,7 @@ be returned that indicates what went wrong."
 					(point))))
 	t)
        (t (error "Body was changed in MobileOrg and on the computer")))))))
-       
+
 
 (defun org-mobile-tags-same-p (list1 list2)
   "Are the two tag lists the same?"

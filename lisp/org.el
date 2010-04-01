@@ -5774,7 +5774,7 @@ If USE-MARKERS is set, return the positions as markers."
       (save-restriction
 	(widen)
 	(delq nil
-	      (mapcar (lambda (o) 
+	      (mapcar (lambda (o)
 			(when (eq (org-overlay-get o 'invisible) 'outline)
 			  (setq beg (org-overlay-start o)
 				end (org-overlay-end o))
@@ -9102,7 +9102,7 @@ and to use an external application to visit the file.
 Optional LINE specifies a line to go to, optional SEARCH a string to
 search for.  If LINE or SEARCH is given, but IN-EMACS is nil, it will
 be assumed that org-open-file was called to open a file: link, and the
-original link to match against org-file-apps will be reconstructed 
+original link to match against org-file-apps will be reconstructed
 from PATH and whichever of LINE or SEARCH is given.
 
 If the file does not exist, an error is thrown."
@@ -10525,7 +10525,7 @@ This should be called with the cursor in a line with a statistics cookie."
 		  (org-update-parent-todo-statistics))
 	      (goto-char pos)
 	      (beginning-of-line 1)
-	      (while (re-search-forward 
+	      (while (re-search-forward
 		      "\\(\\(\\[[0-9]*%\\]\\)\\|\\(\\[[0-9]*/[0-9]*\\]\\)\\)"
 		      (point-at-eol) t)
 		(replace-match (if (match-end 2) "[100%]" "[0/0]") t t)))))
@@ -14754,7 +14754,7 @@ the buffer and restores the previous window configuration."
 	  (insert
 	   (mapconcat
 	    (lambda (f) ;; Keep un-expanded entries.
-	      (if (setq u (assoc f fe)) 
+	      (if (setq u (assoc f fe))
 		  (cdr u)
 		f))
 	    list "\n")

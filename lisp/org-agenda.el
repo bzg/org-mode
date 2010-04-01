@@ -606,7 +606,7 @@ past    Don't show entries with a deadline timestamp for today or in the past.
 future  Don't show entries with a deadline timestamp in the future, not even
         when they become `near' ones.  Use it with caution.
 
-all     Ignore all TODO entries that do have a deadline.       
+all     Ignore all TODO entries that do have a deadline.
 
 t       Same as `near', for backward compatibility.
 
@@ -894,12 +894,12 @@ This function makes sure that dates are aligned for easy reading."
     (format "%-10s %2d %s %4d%s"
 	    dayname day monthname year weekstring)))
 
-(defcustom org-agenda-time-leading-zero nil 
+(defcustom org-agenda-time-leading-zero nil
   "Non-nil means use leading zero for military times in agenda.
 For example, 9:30am would become 09:30 rather than  9:30."
   :group 'org-agenda-daily/weekly
   :type 'boolean)
- 
+
 (defcustom org-agenda-weekend-days '(6 0)
   "Which days are weekend?
 These days get the special face `org-agenda-date-weekend' in the agenda
@@ -3425,7 +3425,7 @@ as a whole, to incude whitespace.
   that can also be achieved with a prefix argument.
 - If (possibly after star and exclamation mark) the search string starts
   with a colon, this will mean that the (non-regexp) snippets of the
-  Boolean search must match as full words. 
+  Boolean search must match as full words.
 
 This command searches the agenda files, and in addition the files listed
 in `org-agenda-text-search-extra-files'."

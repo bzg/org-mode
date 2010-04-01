@@ -122,7 +122,7 @@ utf8      Use all UTF-8 characters")
     (if interactivep
 	(call-interactively command)
       (apply command args))))
-  
+
 
 ;;;###autoload
 (defun org-export-as-ascii-to-buffer (arg)

@@ -192,7 +192,7 @@ There is a mode hook, and keybindings for `org-edit-src-exit' and
 The example is copied to a separate buffer, and that buffer is switched
 to the correct language mode.  When done, exit with \\[org-edit-src-exit].
 This will remove the original code in the Org buffer, and replace it with
-the edited version. Optional argument CONTEXT is used by 
+the edited version. Optional argument CONTEXT is used by
 \\[org-edit-src-save] when calling this function."
   (interactive)
   (unless (eq context 'save)

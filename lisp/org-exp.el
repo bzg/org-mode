@@ -1696,7 +1696,7 @@ When it is nil, all comments will be removed."
   (while (re-search-forward "^[ \t]*|" nil t)
     (beginning-of-line 1)
     (if (or (looking-at "[ \t]*| *[!_^] *|")
-	    (not 
+	    (not
 	     (memq
 	      nil
 	      (mapcar
