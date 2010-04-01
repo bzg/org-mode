@@ -329,6 +329,11 @@ the time is moved into the time stamp.
 
 Thanks to Stephen Eglen for this feature.
 
+*** The customization group org-font-lock has been renamed
+The new name is `org-appearance'.
+
+Thanks to Dan Davison for a patch to this effect.
+
 *** The TODO list: Allow skipping scheduled or deadlined entries
 
 Skipping TODO entries in the global TODO list based on whether
