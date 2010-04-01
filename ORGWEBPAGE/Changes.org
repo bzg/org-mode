@@ -487,24 +487,27 @@ Org-secretary is a possible setup for group work using Org-mode.
 Thanks to Juan Reyero for this contribution.
 
 ** Babel
-Eric has compiled the following list of changes in and around
-org-babel.
+Eric and Dan have compiled the following list of changes in and
+around org-babel.
 
-- added support for Matlab and Octave
-- added support for C and C++ code blocks
-- added support for the Oz programming language
-- can now force literal interpretation of table cell contents
+- Added support for Matlab and Octave
+- Added support for C and C++ code blocks
+- Added support for the Oz programming language
+  Thanks to Torsten Anders for this contribution
+- Can now force literal interpretation of table cell contents
   with extra "$" in table formula
-- variable references which look like lisp forms are now
+  Thanks to Maurizio Vitale for this suggestion.
+- Variable references which look like lisp forms are now
   evaluated
-- inline source blocks will always return string output
-- no longer adding extension during tangling when filename is
+- Inline source blocks will always return string output
+- No longer adding extension during tangling when filename is
   provided
-- code block parameters are now available when initializing a
+  Thanks to Martin G. Skjæveland and Nicolas Girard for prompting this.
+- Code block parameters are now available when initializing a
   session
-- added `org-babel-execute-hook' which runs after code block
+- Added `org-babel-execute-hook' which runs after code block
   execution
-- working directories and remote execution
+- Working directories and remote execution
 
   This introduces a new header argument :dir. For the duration of
   source block execution, default-directory is set to the value
@@ -520,14 +523,17 @@ org-babel.
   interpreter executable will be sought in tramp-remote-path, and
   if found will execute on the remote machine in the specified
   remote directory.
-- Remove org-R from contrib
+- Tramp syntax can be used to tangle to remote files.
+  Thanks to Maurizio Vitale and Rémi Vanicat.
+- org-R removed from contrib
 - gnuplot can now return it's string output -- when session is
   set to "none"
-- prevent quoting of strings in shell variables
-- now including source code block arguments w/source name on
+- Prevent quoting of strings in shell variables
+- Now including source code block arguments w/source name on
   export
-- now able to reference file links as results
-- allow pdf/png generation directly from latex source blocks
+- Now able to reference file links as results
+- Allow pdf/png generation directly from latex source blocks
+  with :file header argument.
 
 
 * Version 6.34
