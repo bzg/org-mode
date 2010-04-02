@@ -172,11 +172,15 @@ which case the entire range is returned."
         (flet ((wrap (num) (if (< num 0) (+ length num) num)))
           (mapcar
            (lambda (sub-lis) (org-babel-ref-index-list remainder sub-lis))
-           (if (string-match "\\([-[:digit:]]+\\):\\([-[:digit:]]+\\)" portion)
+           (if (string-match "\\(\\([-[:digit:]]+\\):\\([-[:digit:]]+\\)\\|\*\\)"
+                             portion)
                (mapcar (lambda (n) (nth n lis))
-                       (number-sequence
-                        (wrap (string-to-number (match-string 1 portion)))
-                        (wrap (string-to-number (match-string 2 portion)))))
+                       (apply 'number-sequence
+                              (if (match-string 2 portion)
+                                  (list
+                                   (wrap (string-to-number (match-string 2 portion)))
+                                   (wrap (string-to-number (match-string 3 portion))))
+                                (list (wrap 0) (wrap -1)))))
              (list (nth (wrap (string-to-number portion)) lis))))))
     lis))
 
