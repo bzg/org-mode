@@ -1,5 +1,7 @@
 2010-04-02  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-attach.el (org-attach-commit): Split on newlines.
+
 	* org.el (org-export-latex-default-packages-alist): Use list
 	instead of cons for the entries.
 
