@@ -73,6 +73,7 @@ LISPF      = 	org.el			\
 	     	org-ctags.el		\
 	     	org-datetree.el		\
 	     	org-docview.el		\
+	     	org-entities.el		\
 		org-exp.el		\
 		org-exp-blocks.el	\
 		org-docbook.el		\
@@ -333,6 +334,7 @@ lisp/org-crypt.elc:	lisp/org-crypt.el lisp/org.el
 lisp/org-ctags.elc:	lisp/org.el
 lisp/org-datetree.elc:	lisp/org.el
 lisp/org-docview.elc:	lisp/org.el
+lisp/org-entities.elc:	
 lisp/org-exp.elc:	lisp/org.el lisp/org-agenda.el
 lisp/org-exp-blocks.elc: lisp/org.el
 lisp/org-latex.elc:	lisp/org.el lisp/org-exp.el lisp/org-beamer.el
