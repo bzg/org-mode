@@ -469,7 +469,7 @@ So when you are prompted for a date, you can now answer like this
 
 There is now only a single free timer supported by org-timer.el.
 Thanks to Bastien for cleaning this up, after a bug report in
-this area by Frederic Couchet.
+this area by Frédéric Couchet.
 
 *** Remember: Allow to file as sibling of current clock
     
