@@ -2936,20 +2936,20 @@ appears on the page."
 ;; when formatting latex fragments.  Originally it was part of the
 ;; LaTeX exporter, which is why the name includes "export".
 (defcustom org-export-latex-default-packages-alist
-  '(("AUTO" . "inputenc")
-    ("T1"   . "fontenc")
-    (""     . "graphicx")
-    (""     . "longtable")
-    (""     . "float")
-    (""     . "wrapfig")
-    (""     . "soul")
-    (""     . "t1enc")
-    (""     . "textcomp")
-    (""     . "marvosym")
-    (""     . "wasysym")
-    (""     . "latexsym")
-    (""     . "amssymb")
-    (""     . "hyperref"))
+  '(("AUTO" "inputenc")
+    ("T1"   "fontenc")
+    (""     "graphicx")
+    (""     "longtable")
+    (""     "float")
+    (""     "wrapfig")
+    (""     "soul")
+    (""     "t1enc")
+    (""     "textcomp")
+    (""     "marvosym")
+    (""     "wasysym")
+    (""     "latexsym")
+    (""     "amssymb")
+    (""     "hyperref"))
   "Alist of default packages to be inserted in the header. DON'T CHANGE THIS.
 Unless abslutely necessary that is.
 All the packages in this list are needed by one part or another of Org-mode
