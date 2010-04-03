@@ -483,7 +483,7 @@ Patch by Lukasz Stelmach.
 This can help to get out of an inconsistent state produced for
 example by viewing from the agenda.
 
-This was a request my Matt Lundin.
+This was a request by Matt Lundin.
 
 *** Add org-secretary.el by Juan Reyero to the contrib directory
 
@@ -495,23 +495,23 @@ Thanks to Juan Reyero for this contribution.
 Eric and Dan have compiled the following list of changes in and
 around org-babel.
 
-- Added support for Matlab and Octave
-- Added support for C and C++ code blocks
-- Added support for the Oz programming language
+- Added support for Matlab and Octave.
+- Added support for C and C++ code blocks.
+- Added support for the Oz programming language.
   Thanks to Torsten Anders for this contribution
 - Can now force literal interpretation of table cell contents
-  with extra "$" in table formula
+  with extra "$" in table formula.
   Thanks to Maurizio Vitale for this suggestion.
 - Variable references which look like lisp forms are now
-  evaluated
-- Inline source blocks will always return string output
+  evaluated.
+- Inline source blocks will always return string output.
 - No longer adding extension during tangling when filename is
-  provided
+  provided.
   Thanks to Martin G. Skjæveland and Nicolas Girard for prompting this.
 - Code block parameters are now available when initializing a
-  session
+  session.
 - Added `org-babel-execute-hook' which runs after code block
-  execution
+  execution.
 - Working directories and remote execution
 
   This introduces a new header argument :dir. For the duration of
@@ -530,13 +530,13 @@ around org-babel.
   remote directory.
 - Tramp syntax can be used to tangle to remote files.
   Thanks to Maurizio Vitale and Rémi Vanicat.
-- org-R removed from contrib
+- org-R removed from contrib.
 - gnuplot can now return it's string output -- when session is
-  set to "none"
-- Prevent quoting of strings in shell variables
+  set to "none".
+- Prevent quoting of strings in shell variables.
 - Now including source code block arguments w/source name on
-  export
-- Now able to reference file links as results
+  export.
+- Now able to reference file links as results.
 - Allow pdf/png generation directly from latex source blocks
   with :file header argument.
 
