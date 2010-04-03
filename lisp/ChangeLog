@@ -1,5 +1,9 @@
 2010-04-03  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-export-latex-packages-alist)
+	(org-export-latex-default-packages-alist): Fix docstring to
+	reflect the expected structure.
+
 	* org-docbook.el (org-docbook-do-expand): Fix bug with variable names.
 	(org-export-docbook-finalize-table): Make use of label for tables.
 
