@@ -1,3 +1,8 @@
+2010-04-03  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-docbook.el (org-docbook-do-expand): Fix bug with variable names.
+	(org-export-docbook-finalize-table): Make use of label for tables.
+
 2010-04-02  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-attach.el (org-attach-commit): Split on newlines.
