@@ -15258,7 +15258,8 @@ Some of the options can be changed using the variable
 	      (if org-format-latex-header-extra
 		  (concat "\n" org-format-latex-header-extra)
 		"")
-	      "\n\\begin{document}\n" string "\n\\end{document}\n"))
+	      "\n\\begin{document}\n" string "\n\\end{document}\n")
+      (org-export-latex-fix-inputenc))
     (let ((dir default-directory))
       (condition-case nil
 	  (progn
