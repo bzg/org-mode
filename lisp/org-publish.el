@@ -724,7 +724,8 @@ the project."
 (defvar backend) ; dynamically scoped
 (defun org-publish-aux-preprocess ()
   "Find index entries and write them to an .orgx file."
-  (let (entry index target)
+  (let ((case-fold-search t)
+	entry index target)
     (goto-char (point-min))
     (while
 	(and
