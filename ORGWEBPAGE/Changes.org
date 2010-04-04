@@ -24,24 +24,23 @@ for example for the special symbol support it needs.
 
 There are now two variables that should be used to list the LaTeX
 packages that need to be included in all classes.  The header
-definition in =org-export-latex-classes= should then only contain
-the =\documentclass= macro, and packages for this specific class
+definition in =org-export-latex-classes= should then contain
+the =\documentclass= macro and packages for this specific class
 definition.
 
 The two variables are:
 
 1. =org-export-latex-default-packages-alist= :: This is the
      variable where Org-mode itself puts the packages it needs.
-     If possible, you should not change this variable - in fact,
-     I have considered to make this a constant and to not allow
-     it customized.  However, there is one exception when it
-     might be necessary to change it: if one of the packages
+     The only reason to change it is when one of these packages
      causes a conflict with another package you want to use.
+     Then you can remove that packages and hope that you are not
+     using Org-mode functionality that needs it.
 
 2. =org-export-latex-packages-alist= :: This is the variable
-     where you should put the packages that you'd like to use
-     across all classes.  For example, I am putting =amsmath= and
-     =tikz= here, because I always want to have them.
+     where you can put the packages that you'd like to use across
+     all classes.  For example, I am putting =amsmath= and =tikz=
+     here, because I always want to have them.
 
 The sequence how these customizations will show up in the LaTeX
 document are:
@@ -52,8 +51,8 @@ document are:
 
 If you have currently customized =org-export-latex-classes=, you
 should revise that customization and remove any package call that
-are covered by =org-export-latex-default-packages-alist=, and you
-should consider to move packages that you use in all classes to
+are covered by =org-export-latex-default-packages-alist=.  You
+can also consider moving packages that you use in all classes to
 =org-export-latex-packages-alist=.
 
 

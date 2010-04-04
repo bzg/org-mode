@@ -2950,13 +2950,24 @@ appears on the page."
     (""     "latexsym")
     (""     "amssymb")
     (""     "hyperref"))
-  "Alist of default packages to be inserted in the header. DON'T CHANGE THIS.
-Unless abslutely necessary that is.
-All the packages in this list are needed by one part or another of Org-mode
-to function properly.  Therefore you should, not modify this variable unless
-you know what you are doing.  The one reason to change it anyway is that
-you might be loading some other package that conflicts with one of the default
-packages.
+  "Alist of default packages to be inserted in the header.
+Change this only if one of the packages here causes an incompatibility
+with another package you are using.
+The packages in this list are needed by one part or another of Org-mode
+to function properly.  
+
+- inputenc, fontenc, t1enc: for basic font and character selection
+- textcomp, marvosymb, wasysym, latexsym, amssym: for various symbols used
+  for interpreting the entities in `org-entities'.  You can skip some of these
+  packages if you don't use any of the symbols in it.
+- graphicx: for including images
+- float, wrapfig: for figure placement
+- longtable: for long tables
+- hyperref: for cross references
+
+Therefore you should not modify this variable unless you know what you
+are doing.  The one reason to change it anyway is that you might be loading
+some other package that conflicts with one of the default packages.
 Each cell is of the format \( \"options\" \"package\" \)."
   :group 'org-export-latex
   :type '(repeat
