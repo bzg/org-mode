@@ -6,7 +6,7 @@
 
 #+STARTUP: indent hidestars
 
-* Version 6.35 (in preparation)
+* Version 6.35
  :PROPERTIES:
  :VISIBILITY: content
  :CUSTOM_ID: v6.35
@@ -24,9 +24,9 @@ for example for the special symbol support it needs.
 
 There are now two variables that should be used to list the LaTeX
 packages that need to be included in all classes.  The header
-definition in =org-export-latex-classes= should then contain
-the =\documentclass= macro and packages for this specific class
-definition.
+definition in =org-export-latex-classes= should then contain the
+=\documentclass= macro and packages and macro definitions for
+this specific class definition.
 
 The two variables are:
 
@@ -48,6 +48,10 @@ document are:
 2. =org-export-latex-default-packages-alist=
 3. =org-export-latex-packages-alist=
 4. Buffer-specific things set with =#+LaTeX_HEADER:=
+
+You can change the location where the two packages variables put
+their =\usepackage= statements by inserting a placeholder
+=[PACkAGES]= into the header in =org-export-latex-classes=.
 
 If you have currently customized =org-export-latex-classes=, you
 should revise that customization and remove any package call that
@@ -76,12 +80,12 @@ org-document-title
 org-document-info
 org-document-info-keyword
     
-In addition, the variable org-hidden-keywords can be used to make the
-corresponding keywords disappear.
+In addition, the variable =org-hidden-keywords= can be used to
+make the corresponding keywords disappear.
 
-Patch by Dan Davison
+Thanks to Dan Davison for this feature.
 
-*** Implement a simpler way to specify faces for tags and todo keywords
+*** Simpler way to specify faces for tags and todo keywords
     
 The variables =org-todo-keyword-faces=, =org-tag-faces=, and
 =org-priority-faces= now accept simple color names as
@@ -95,16 +99,16 @@ The change is based on an idea and patch by Ryan Thompson.
 
 *** <N> in tables now means fixed width, not maximum width
     
-Requested by Michael Brand
+Requested by Michael Brand.
 
-*** Improve level cycling function
+*** Better level cycling function
 
 =TAB= in an empty headline cycles the level of that headline
 through likely states.  Ryan Thompson implemented an improved
 version of this function, which does not depend upon when exactly
 this command is used.  Thanks to Ryan for this improvement.
 
-*** Improve adaptive filling
+*** Adaptive filling
     
 For paragraph text, =org-adaptive-fill-function= did not handle the
 base case of regular text which needed to be filled.  This is now
@@ -113,13 +117,13 @@ to be filled correctly.
 
 Thanks to Dan Hackney for this patch.    
 
-*** Make `org-reveal' (=C-c C-r=) also decrypt encrypted entries
+*** `org-reveal' (=C-c C-r=) also decrypts encrypted entries (org-crypt.el)
     
 Thanks to Richard Riley for triggering this change.
 
-*** Improve automatic letter selection for TODO keywords
+*** Better automatic letter selection for TODO keywords
     
-When all first letters of keywords have been used, Org no assigns
+When all first letters of keywords have been used, Org now assigns
 more meaningful characters based on the keywords.
 
 Thanks to Mikael Fornius for this patch.
@@ -139,23 +143,23 @@ possible.
 The coding system of the LaTeX class will now be set to the value
 corresponding to the buffer's file coding system.  This happens
 if your setup sets up the file to have a line
-=\usepackage[AUTO]{inputenc}=.
+=\usepackage[AUTO]{inputenc}= (the default setup does this).
 
 *** New exporters to Latin-1 and UTF-8
 
-While Ulf was going through the entities list to improve the
-LaTeX export, he had the great idea to provide representations for
-many of the entities in Latin-1, and for all of them in UTF-8.
-This means that we can now export files rich in special symbols
-to Latin-1 and to UTF-8 files.  These new exporters can be
-reached with the commands =C-c C-e n= and =C-c C-e u=,
-respectively.
+While Ulf Stegemann was going through the entities list to
+improve the LaTeX export, he had the great idea to provide
+representations for many of the entities in Latin-1, and for all
+of them in UTF-8.  This means that we can now export files rich
+in special symbols to Latin-1 and to UTF-8 files.  These new
+exporters can be reached with the commands =C-c C-e n= and =C-c
+C-e u=, respectively.
 
 When there is no representation for a given symbol in the
 targeted coding system, you can choose to keep the TeX-macro-like
 representation, or to get an "explanatory" representation.  For
 example, =\simeq= could be represented as "[approx. equal to]".
-Please use the variable `org-entities-ascii-explanatory' to state
+Please use the variable =org-entities-ascii-explanatory= to state
 your preference.
 
 *** Full label/reference support in HTML, Docbook, and LaTeX backends
@@ -230,9 +234,10 @@ C-u M-x org-publish-all
 
 Whenever an Org file is published in this project, a new file
 with the extension "orgx" will be written.  It contains the index
-entries.  When all project files are published, Org will produce
-a new file "theindex.inc" containing the index as a to-level
-tree.  This file can be included into any project file using
+entries and corresponding jump target names.  When all project
+files are published, Org will produce a new file "theindex.inc"
+containing the index as a to-level tree.  This file can be
+included into any project file using
 
 #+begin_src org
 #+include: "theindex.inc"
@@ -246,7 +251,7 @@ overwritten by Org.
 
 Thanks to Stefan Vollmar for initiating and driving this feature.
 
-FIXME: Still need to do the LaTeX portion
+*** TODO Still need to do the LaTeX portion
 
 ** MobileOrg
 
@@ -277,8 +282,8 @@ considered for this command by binding =org-agenda-entry-types=
 temporarily in the options section of the command.  This can lead
 to significant speedups, because instead of laboriously finding
 entries and then rejecting them, a whole search cycle is skipped.
-For more information see the new section in [[http://orgmode.org/worg/org-tutorials/org-custom-agenda-commands.php#sec-5][Matt Lundin's agenda
-custom command tutorial]].
+For more information see the new section in
+[[http://orgmode.org/worg/org-tutorials/org-custom-agenda-commands.php#sec-5][Matt Lundin's agenda custom command tutorial]].
 
 Thanks to Matt Lundin for this feature.
 
@@ -329,6 +334,7 @@ the time is moved into the time stamp.
 Thanks to Stephen Eglen for this feature.
 
 *** The customization group org-font-lock has been renamed
+
 The new name is `org-appearance'.
 
 Thanks to Dan Davison for a patch to this effect.
@@ -403,7 +409,7 @@ tables to be broken.
 
 ** Misc
 
-*** Add logging support for refiling
+*** New logging support for refiling
 
 Whenever you refile an item, a time stamp and even a note can be
 added to this entry.  For details, see the new option
@@ -423,13 +429,16 @@ org-table-current-line
 org-table-goto-line
 #+end_example
 
-*** Tables: Introduce field coordinates for formulas, improve docs
+*** Tables: Field coordinates for formulas, and improved docs
     
 Calc and Emacs-Lisp formulas for tables can access the current
 field coordinates with =@#= and =$#= for row and column,
 respectively.  These can be useful in some formulas.  For
 example, to sequentially number the fields in a column, use
 ~=@#~ as column equation.
+
+One application is to copy a copy from a different table.  See
+the manual for details.
 
 Thanks to Michael Brand for this feature.
 
@@ -464,7 +473,7 @@ So when you are prompted for a date, you can now answer like this
 2/5           --> <CURRENT-YEAR>-02-05
 #+end_example    
 
-*** Update org-timer.el so that we only allow one timer.
+*** org-timer.el now allows just one timer
 
 There is now only a single free timer supported by org-timer.el.
 Thanks to Bastien for cleaning this up, after a bug report in
@@ -477,7 +486,7 @@ last filed entry.
 
 Patch by Lukasz Stelmach.
 
-*** Org-reveal: Double prefix arg show the entire subtree of the parent
+*** Org-reveal: Double prefix arg shows the entire subtree of the parent
     
 This can help to get out of an inconsistent state produced for
 example by viewing from the agenda.
@@ -486,11 +495,13 @@ This was a request by Matt Lundin.
 
 *** Add org-secretary.el by Juan Reyero to the contrib directory
 
-Org-secretary is a possible setup for group work using Org-mode.
+org-secretary.el is a possible setup for group work using
+Org-mode.
 
 Thanks to Juan Reyero for this contribution.
 
 ** Babel
+
 Eric and Dan have compiled the following list of changes in and
 around org-babel.
 
