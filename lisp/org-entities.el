@@ -26,6 +26,8 @@
 ;;
 ;;; Commentary:
 
+(declare-function org-table-align "org-table" ())
+
 (eval-when-compile
   (require 'cl))
 
@@ -447,7 +449,7 @@ Kind can be any of `latex', `html', `ascii', `latin1', or `utf8'."
   (interactive)
   (let ((ll org-entities)
 	(pos (point))
-	e latex mathp html latin utf8)
+	e latex mathp html latin utf8 name ascii)
     (insert "|Name|LaTeX code|LaTeX|HTML code |HTML|ASCII|Latin1|UTF-8\n|-\n")
     (while ll
       (setq e (pop ll))

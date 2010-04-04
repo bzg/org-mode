@@ -581,7 +581,7 @@ publishing directory."
   (let (e)
     (while (re-search-forward "\\\\\\([a-zA-Z]+[0-9]*\\)" nil t)
       (org-if-unprotected-at (match-beginning 1)
-	(setq e (org-entity-get-representation (match-string 1 line)
+	(setq e (org-entity-get-representation (match-string 1)
 					       org-export-ascii-entities))
 	(and e (replace-match e t t))))))
 

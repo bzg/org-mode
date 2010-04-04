@@ -15266,6 +15266,7 @@ Some of the options can be changed using the variable
 	       org-export-latex-packages-alist
 	       org-format-latex-header-extra))
       (insert "\n\\begin{document}\n" string "\n\\end{document}\n")
+      (require 'org-latex)
       (org-export-latex-fix-inputenc))
     (let ((dir default-directory))
       (condition-case nil
