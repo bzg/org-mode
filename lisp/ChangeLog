@@ -1,3 +1,7 @@
+2010-04-04  Bastien Guerry  <bzg@altern.org>
+
+	* org.el (org-splice-latex-header): Fix typo.
+
 2010-04-04  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-latex.el (org-export-latex-make-header): Use
