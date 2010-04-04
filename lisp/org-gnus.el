@@ -169,19 +169,28 @@ If `org-store-link' was called with a prefix arg the meaning of
   (cond ((and group article)
 	 (gnus-activate-group group t)
 	 (condition-case nil
-	     (let ((articles 1)
-		   group-opened)
-	       (while (and (not group-opened)
-			   ;; stop on integer overflows
-			   (> articles 0))
-		 (setq group-opened (gnus-group-read-group articles nil group)
-		       articles (if (< articles 16)
-				    (1+ articles)
-				  (* articles 2))))
-	       (if group-opened
-		   (gnus-summary-goto-article article nil t)
-		 (message "Couldn't follow gnus link.  %s"
-			  "The summary couldn't be opened.")))
+	     (let ((backend (car (gnus-find-method-for-group group))))
+	       (cond
+		((eq backend 'nndoc)
+		 (if (gnus-group-read-group t nil group)
+		     (gnus-summary-goto-article article nil t)
+		   (message "Couldn't follow gnus link.  %s"
+			    "The summary couldn't be opened.")))
+		(t
+		 (let ((articles 1)
+		       group-opened)
+		   (while (and (not group-opened)
+			       ;; stop on integer overflows
+			       (> articles 0))
+		     (setq group-opened (gnus-group-read-group
+					 articles nil group)
+			   articles (if (< articles 16)
+					(1+ articles)
+				      (* articles 2))))
+		   (if group-opened
+		       (gnus-summary-goto-article article nil t)
+		     (message "Couldn't follow gnus link.  %s"
+			      "The summary couldn't be opened."))))))
 	   (quit (message "Couldn't follow gnus link.  %s"
 			  "The linked group is empty."))))
 	(group (gnus-group-jump-to-group group))))

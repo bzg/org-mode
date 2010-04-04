@@ -1,3 +1,7 @@
+2010-04-04  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-gnus.el (org-gnus-follow-link): Handle nndoc backend.
+
 2010-04-03  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-export-latex-packages-alist)
