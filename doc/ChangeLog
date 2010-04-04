@@ -1,6 +1,7 @@
 2010-04-04  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Sectioning structure): Update.
+	(References): New use case for field coordinates.
 
 2010-04-01  Carsten Dominik  <carsten.dominik@gmail.com>
 
