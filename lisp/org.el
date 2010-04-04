@@ -15313,7 +15313,7 @@ at the end.  If EXTRA is a string, it is also appended."
     (if (string-match "\\[PACKAGES\\]" template)
 	(setq template (replace-match (or packages "") t t template))
       (setq template (concat template "\n" packages)))
-    (if (and extra (sring-match "\\S-" extra))
+    (if (and extra (string-match "\\S-" extra))
 	(concat template "\n" extra)
       template)))
 
