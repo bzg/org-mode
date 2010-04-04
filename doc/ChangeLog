@@ -1,3 +1,7 @@
+2010-04-04  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Sectioning structure): Update.
+
 2010-04-01  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (The export dispatcher): Renamed from ASCII export.

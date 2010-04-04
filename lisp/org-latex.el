@@ -132,9 +132,12 @@ It should really only contain the contain the \\documentclass macro, and
 setup code that is specific to this class.  This will be augmented by
 call to \\usepackage for all packages mentioned in the variables
 `org-export-latex-default-packages-alist' and
-`org-export-latex-packages-alist'.  Lines specified via \"#+LaTeX_HEADER:\"
-are also added.
-`org-export-latex-default-packages-alist' contains
+`org-export-latex-packages-alist'.  Normally these package definitions will
+appear at the end of HEADER-STRING, but if HEADER-STRING contains the
+string \"[PACKAGES]\", it will be replaced by the usepackage definitions.
+Lines specified via \"#+LaTeX_HEADER:\" are also added, at the end.
+
+If `org-export-latex-default-packages-alist' contains
 \"\\usepackage[AUTO]{inputenc}\", AUTO will automatically be replaced with
 a coding system derived from `buffer-file-coding-system'.  See also the
 variable `org-export-latex-inputenc-alist' for a way to influence this
@@ -1113,28 +1116,17 @@ OPT-PLIST is the options plist for current buffer."
     (concat
      (if (plist-get opt-plist :time-stamp-file)
 	 (format-time-string "%% Created %Y-%m-%d %a %H:%M\n"))
-     ;; insert LaTeX custom header
-     (org-export-apply-macros-in-string org-export-latex-header)
-     "\n"
-     ;; insert information on LaTeX packages
-     (when (or org-export-latex-default-packages-alist
-	       org-export-latex-packages-alist)
-       (concat
-	(mapconcat (lambda(p)
-		     (if (equal "" (car p))
-			 (format "\\usepackage{%s}" (cadr p))
-		       (format "\\usepackage[%s]{%s}"
-			       (car p) (cadr p))))
-		   (append org-export-latex-default-packages-alist
-			   org-export-latex-packages-alist)
-		   "\n")
-	"\n"))
-     ;; insert additional commands in the header
-     (org-export-apply-macros-in-string
-      (plist-get opt-plist :latex-header-extra))
+     ;; insert LaTeX custom header and packages from the list
+     (org-splice-latex-header
+      (org-export-apply-macros-in-string org-export-latex-header)
+      org-export-latex-default-packages-alist
+      org-export-latex-packages-alist
+      (org-export-apply-macros-in-string
+       (plist-get opt-plist :latex-header-extra)))
+     ;; append another special variable
      (org-export-apply-macros-in-string org-export-latex-append-header)
      ;; define align if not yet defined
-     "\\providecommand{\\alert}[1]{\\textbf{#1}}"
+     "\n\\providecommand{\\alert}[1]{\\textbf{#1}}"
      ;; insert the title
      (format
       "\n\n\\title{%s}\n"

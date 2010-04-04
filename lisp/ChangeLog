@@ -1,5 +1,13 @@
 2010-04-04  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-latex.el (org-export-latex-make-header): Use
+	`org-splice-latex-header' to build the header.
+	(org-export-latex-classes): Update docstring.
+
+	* org.el (org-splice-latex-header): New function.
+	(org-create-formula-image): Use `org-splice-latex-header' to build
+	the header.
+
 	* org-gnus.el (org-gnus-follow-link): Handle nndoc backend.
 
 2010-04-03  Carsten Dominik  <carsten.dominik@gmail.com>

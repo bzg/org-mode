@@ -2926,7 +2926,10 @@ When nil, just push out a message."
 \\addtolength{\\topmargin}{-2.54cm}"
   "The document header used for processing LaTeX fragments.
 It is imperative that this header make sure that no page number
-appears on the page."
+appears on the page.  The package defined in the variables
+`org-export-latex-default-packages-alist' and `org-export-latex-packages-alist'
+will either replace the placeholder \"[PACKAGES]\" in this header, or they
+will be appended."
   :group 'org-latex
   :type 'string)
 
@@ -2976,9 +2979,14 @@ Each cell is of the format \( \"options\" \"package\" \)."
 	   (string :tag "package"))))
 
 (defcustom org-export-latex-packages-alist nil
-  "Alist of packages to be inserted in the header.
+  "Alist of packages to be inserted in every LaTeX the header.
 These will be inserted after `org-export-latex-default-packages-alist'.
-Each cell is of the format \( \"options\" \"package\" \)."
+Each cell is of the format \( \"options\" \"package\" \).
+Make sure that you only lis packages here which:
+- you want in every file
+- do not conflict with the default packages in
+  `org-export-latex-default-packages-alist'
+- do not conflict with the setup in `org-format-latex-header'."
   :group 'org-export-latex
   :type '(repeat
 	  (list
@@ -15252,24 +15260,12 @@ Some of the options can be changed using the variable
     (if (eq fg 'default) (setq fg (org-dvipng-color :foreground)))
     (if (eq bg 'default) (setq bg (org-dvipng-color :background)))
     (with-temp-file texfile
-      (insert org-format-latex-header
-	      (if (or org-export-latex-default-packages-alist
-		      org-export-latex-packages-alist)
-		  (concat "\n"
-			  (mapconcat (lambda(p)
-				       (if (equal "" (car p))
-					   (format "\\usepackage{%s}" (cadr p))
-					 (format "\\usepackage[%s]{%s}"
-						 (car p) (cadr p))))
-				     (append
-				      org-export-latex-default-packages-alist
-				      org-export-latex-packages-alist)
-				     "\n"))
-		"")
-	      (if org-format-latex-header-extra
-		  (concat "\n" org-format-latex-header-extra)
-		"")
-	      "\n\\begin{document}\n" string "\n\\end{document}\n")
+      (insert (org-splice-latex-header
+	       org-format-latex-header
+	       org-export-latex-default-packages-alist
+	       org-export-latex-packages-alist
+	       org-format-latex-header-extra))
+      (insert "\n\\begin{document}\n" string "\n\\end{document}\n")
       (org-export-latex-fix-inputenc))
     (let ((dir default-directory))
       (condition-case nil
@@ -15299,6 +15295,27 @@ Some of the options can be changed using the variable
 	(loop for e in '(".dvi" ".tex" ".aux" ".log" ".png") do
 	      (delete-file (concat texfilebase e)))
 	pngfile))))
+
+(defun org-splice-latex-header (template packages-1 packages-2 &optional extra)
+  "Fill a LaTeX header template.
+If TEMPLATE contains the string \"[PACKAGES]\", this is where the packages
+in the lists PACKAGES-1 and PACKAGES-2 will be inserted, otherwise the come
+at the end.  If EXTRA is a string, it is also appended."
+  (let ((packages
+	 (and (or packages-1 packages-2)
+	      (mapconcat (lambda(p)
+			   (if (equal "" (car p))
+			       (format "\\usepackage{%s}" (cadr p))
+			     (format "\\usepackage[%s]{%s}"
+				     (car p) (cadr p))))
+			 (append packages-1 packages-2)
+			 "\n"))))
+    (if (string-match "\\[PACKAGES\\]" template)
+	(setq template (replace-match (or packages "") t t template))
+      (setq template (concat template "\n" packages)))
+    (if (and extra (sring-match "\\S-" extra))
+	(concat template "\n" extra)
+      template)))
 
 (defun org-dvipng-color (attr)
   "Return an rgb color specification for dvipng."
