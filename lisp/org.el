@@ -2911,6 +2911,8 @@ When nil, just push out a message."
 \\usepackage{amsmath}
 \\usepackage[mathscr]{eucal}
 \\pagestyle{empty}             % do not remove
+\[PACKAGES]
+\[DEFAULT-PACKAGES]
 % The settings below are copied from fullpage.sty
 \\setlength{\\textwidth}{\\paperwidth}
 \\addtolength{\\textwidth}{-3cm}
@@ -15297,26 +15299,55 @@ Some of the options can be changed using the variable
 	      (delete-file (concat texfilebase e)))
 	pngfile))))
 
-(defun org-splice-latex-header (template packages-1 packages-2 &optional extra)
-  "Fill a LaTeX header template.
-If TEMPLATE contains the string \"[PACKAGES]\", this is where the packages
-in the lists PACKAGES-1 and PACKAGES-2 will be inserted, otherwise the come
-at the end.  If EXTRA is a string, it is also appended."
-  (let ((packages
-	 (and (or packages-1 packages-2)
-	      (mapconcat (lambda(p)
-			   (if (equal "" (car p))
-			       (format "\\usepackage{%s}" (cadr p))
-			     (format "\\usepackage[%s]{%s}"
-				     (car p) (cadr p))))
-			 (append packages-1 packages-2)
-			 "\n"))))
-    (if (string-match "\\[PACKAGES\\]" template)
-	(setq template (replace-match (or packages "") t t template))
-      (setq template (concat template "\n" packages)))
-    (if (and extra (string-match "\\S-" extra))
-	(concat template "\n" extra)
-      template)))
+(defun org-splice-latex-header (tpl def-pkg pkg &optional extra)
+  "Fill a LaTeX header template TPL.
+In the template, the following place holders will be recognized:
+
+ [DEFAULT-PACKAGES]      \\usepackage statements for DEF-PKG
+ [NO-DEFAULT-PACKAGES]   do not include DEF-PKG
+ [PACKAGES]              \\usepackage statements for PKG 
+ [NO-PACKAGES]           do not include PKG
+ [EXTRA]                 the string EXTRA
+ [NO-EXTRA]              do not include EXTRA
+
+For backward compatibility, if both the positive and the negative place
+holder is missing, the positive one (without the \"NO-\") will be
+assumed to be present at the end of the template.
+DEF-PKG and PKG are assumed to be alists of options/packagename lists.
+EXTRA is a string."
+  (let (rpl (end ""))
+    (if (string-match "^[ \t]*\\[\\(NO-\\)?DEFAULT-PACKAGES\\][ \t]*\n?" tpl)
+	(setq rpl (if (or (match-end 1) (not def-pkg))
+		      "" (org-latex-packages-to-string def-pkg t))
+	      tpl (replace-match rpl t t tpl))
+      (if def-pkg (setq end (org-latex-packages-to-string def-pkg))))
+    
+    (if (string-match "\\[\\(NO-\\)?PACKAGES\\][ \t]*\n?" tpl)
+	(setq rpl (if (or (match-end 1) (not pkg))
+		      "" (org-latex-packages-to-string pkg t))
+	      tpl (replace-match rpl t t tpl))
+      (if pkg (setq end (concat end "\n" (org-latex-packages-to-string pkg)))))
+    
+    (if (string-match "\\[\\(NO-\\)?EXTRA\\][ \t]*\n?" tpl)
+	(setq rpl (if (or (match-end 1) (not extra))
+		      "" (concat extra "\n"))
+	      tpl (replace-match rpl t t tpl))
+      (if pkg (setq end (org-latex-packages-to-string pkg))))
+
+    (if (string-match "\\S-" end)
+	(concat tpl "\n" end)
+      tpl)))
+
+(defun org-latex-packages-to-string (pkg &optional newline)
+  "Turn an alist of packages into a string with the \\usepackage macros."
+  (setq pkg (mapconcat (lambda(p)
+			 (if (equal "" (car p))
+			     (format "\\usepackage{%s}" (cadr p))
+			   (format "\\usepackage[%s]{%s}"
+				   (car p) (cadr p))))
+		       pkg
+		       "\n"))
+  (if newline (concat pkg "\n") pkg))
 
 (defun org-dvipng-color (attr)
   "Return an rgb color specification for dvipng."

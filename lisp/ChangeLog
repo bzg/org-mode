@@ -1,3 +1,11 @@
+2010-04-05  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-latex.el (org-export-latex-classes): Update docstring.
+
+	* org.el (org-format-latex-header): Add cookies to the header.
+	(org-splice-latex-header): Implement placement according to
+	cookies.
+
 2010-04-04  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-publish.el (org-publish-aux-preprocess): Control case

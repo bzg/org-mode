@@ -16,23 +16,41 @@
 
 *** Changes to the intended use of =org-export-latex-classes=
 
-So far this variable has been used to specify the
-=\documentclass= macro as well as all the =\usepackage= calls
+So far this variable has been used to specify the complete header
+of the LaTeX document, including all the =\usepackage= calls
 necessary for the document.  This setup makes it difficult to
 maintain the list of packages that Org itself would like to call,
-for example for the special symbol support it needs.
+for example for the special symbol support it needs.  Each time I
+have to add a package, I have to ask people to revise the
+configuration of this variable.  In this release, I have tried to
+fix this.
+
+First of all, you can *opt out of this change* in the following
+way: You can say: /I want to have full control over headers, and
+I will take responsibility to include the packages Org needs/.
+If that is what you want, add this to your configuration and skip
+the rest of this section (except maybe for the description of the
+=[EXTRA]= place holder):
+
+#+begin_src emacs-lisp
+  (setq org-export-latex-default-packages-alist nil
+        org-export-latex-packages-alist nil)
+#+end_src
+
+/Continue to read here if you want to go along with the modified
+setup./
 
 There are now two variables that should be used to list the LaTeX
 packages that need to be included in all classes.  The header
-definition in =org-export-latex-classes= should then contain the
-=\documentclass= macro and packages and macro definitions for
-this specific class definition.
+definition in =org-export-latex-classes= should then not contain
+the corresponding =\usepackage= calls (see below).
 
-The two variables are:
+The two new variables are:
 
 1. =org-export-latex-default-packages-alist= :: This is the
      variable where Org-mode itself puts the packages it needs.
-     The only reason to change it is when one of these packages
+     Normally you should not change this variable.  The only
+     reason to change it anyway is when one of these packages
      causes a conflict with another package you want to use.
      Then you can remove that packages and hope that you are not
      using Org-mode functionality that needs it.
@@ -49,16 +67,55 @@ document are:
 3. =org-export-latex-packages-alist=
 4. Buffer-specific things set with =#+LaTeX_HEADER:=
 
-You can change the location where the two packages variables put
-their =\usepackage= statements by inserting a placeholder
-=[PACkAGES]= into the header in =org-export-latex-classes=.
+If you want more control about which segment is placed where, or
+if you want, for a specific class, have full control over the
+header and exclude some of the automatic building blocks, you can
+put the following macro-like place holders into the header:
+
+#+begin_example
+[DEFAULT-PACKAGES]      \usepackage statements for default packages
+[NO-DEFAULT-PACKAGES]   do not include any of the default packages
+[PACKAGES]              \usepackage statements for packages 
+[NO-PACKAGES]           do not include the packages
+[EXTRA]                 the stuff from #+LaTeX_HEADER
+[NO-EXTRA]              do not include #+LaTeX_HEADER stuff
+#+end_example
 
 If you have currently customized =org-export-latex-classes=, you
-should revise that customization and remove any package call that
-are covered by =org-export-latex-default-packages-alist=.  You
-can also consider moving packages that you use in all classes to
-=org-export-latex-packages-alist=.
+should revise that customization and remove any package calls that
+are covered by =org-export-latex-default-packages-alist=.  This
+applies to the following packages:
 
+- inputenc
+- fontenc
+- graphicx
+- longtable
+- float
+- wrapfig
+- soul
+- t1enc
+- textcomp
+- marvosym
+- wasysym
+- latexsym
+- amssymb
+- hyperref
+
+If one of these packages creates a conflict with another package
+you are using, you can remove it from
+=org-export-latex-default-packages-alist=.  But then you risk
+that some of the advertised export features of Org will not work
+properly.
+
+You can also consider moving packages that you use in all classes
+to =org-export-latex-packages-alist=.  If necessary, put the
+place holders so that the packages get loaded in the right
+sequence.  As said above, for backward compatibility, if you omit
+the place holders, all the variables will dump their content at
+the end of the header.
+
+Damn, this has become more complex than I wanted it to be.  I
+hope that in practice, this will not be complicated at all.
 
 *** The constant =org-html-entities= is obsolete
 

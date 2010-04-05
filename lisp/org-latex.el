@@ -128,16 +128,40 @@ The header string
 -----------------
 
 The HEADER-STRING is the header that will be inserted into the LaTeX file.
-It should really only contain the contain the \\documentclass macro, and
-setup code that is specific to this class.  This will be augmented by
-call to \\usepackage for all packages mentioned in the variables
-`org-export-latex-default-packages-alist' and
-`org-export-latex-packages-alist'.  Normally these package definitions will
-appear at the end of HEADER-STRING, but if HEADER-STRING contains the
-string \"[PACKAGES]\", it will be replaced by the usepackage definitions.
-Lines specified via \"#+LaTeX_HEADER:\" are also added, at the end.
+It should contain the \\documentclass macro, and anything else that is needed
+for this setup.  To this header, the following commands will be added:
 
-If `org-export-latex-default-packages-alist' contains
+- Calls to \\usepackage for all packages mentioned in the variables
+  `org-export-latex-default-packages-alist' and
+  `org-export-latex-packages-alist'.  Thus, your header definitions should
+  avoid to also request these packages.
+
+- Lines specified via \"#+LaTeX_HEADER:\"
+
+If you need more control about the sequence in which the header is built
+up, or if you want to exclude one of these building blocks for a particular
+class, you can use the following macro-like placeholders.
+
+ [DEFAULT-PACKAGES]      \usepackage statements for default packages
+ [NO-DEFAULT-PACKAGES]   do not include any of the default packages
+ [PACKAGES]              \\usepackage statements for packages 
+ [NO-PACKAGES]           do not include the packages
+ [EXTRA]                 the stuff from #+LaTeX_HEADER
+ [NO-EXTRA]              do not include #+LaTeX_HEADER stuff
+
+So a header like
+
+  \\documentclass{article}
+  [NO-DEFAULT-PACKAGES]
+  [EXTRA]
+  \\providecommand{\\alert}[1]{\\textbf{#1}}
+  [PACKAGES]
+
+will omit the default packages, and will include the #+LaTeX_HEADER lines,
+then have a call to \\providecommand, and then place \\usepackage commands
+based on the content of `org-export-latex-packages-alist'.
+
+If your header or `org-export-latex-default-packages-alist' inserts
 \"\\usepackage[AUTO]{inputenc}\", AUTO will automatically be replaced with
 a coding system derived from `buffer-file-coding-system'.  See also the
 variable `org-export-latex-inputenc-alist' for a way to influence this
@@ -147,7 +171,7 @@ The sectioning structure
 ------------------------
 
 The sectioning structure of the class is given by the elements following
-the header string.  For ech sectioning level, a number of strings is
+the header string.  For each sectioning level, a number of strings is
 specified.  A %s formatter is mandatory in each section string and will
 be replaced by the title of the section.
 
@@ -160,14 +184,14 @@ or
 
   (numbered-open numbered-close unnumbered-open unnumbered-close)
 
-providing opening and closing strings for an environment that should
+providing opening and closing strings for a LaTeX environment that should
 represent the document section.  The opening clause should have a %s
 to represent the section title.
 
 Instead of a list of sectioning commands, you can also specify a
 function name.  That function will be called with two parameters,
-the (reduced) level of the headline, and the headline text.  The functions
-returns a cons cell with the (possibly modified) headline text, and the
+the (reduced) level of the headline, and the headline text.  The function
+must return a cons cell with the (possibly modified) headline text, and the
 sectioning list in the cdr."
   :group 'org-export-latex
   :type '(repeat
