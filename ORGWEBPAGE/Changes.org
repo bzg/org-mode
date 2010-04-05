@@ -437,7 +437,7 @@ respectively.  These can be useful in some formulas.  For
 example, to sequentially number the fields in a column, use
 ~=@#~ as column equation.
 
-One application is to copy a copy from a different table.  See
+One application is to copy a column from a different table.  See
 the manual for details.
 
 Thanks to Michael Brand for this feature.
