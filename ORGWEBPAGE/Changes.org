@@ -514,12 +514,9 @@ around org-babel.
   Thanks to Maurizio Vitale for this suggestion.
 - Variable references which look like lisp forms are now
   evaluated.
-- Inline source blocks will always return string output.
 - No longer adding extension during tangling when filename is
   provided.
   Thanks to Martin G. Skjæveland and Nicolas Girard for prompting this.
-- Code block parameters are now available when initializing a
-  session.
 - Added `org-babel-execute-hook' which runs after code block
   execution.
 - Working directories and remote execution
@@ -543,7 +540,6 @@ around org-babel.
 - org-R removed from contrib.
 - gnuplot can now return it's string output -- when session is
   set to "none".
-- Prevent quoting of strings in shell variables.
 - Now including source code block arguments w/source name on
   export.
 - Now able to reference file links as results.
