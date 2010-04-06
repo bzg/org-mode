@@ -117,18 +117,14 @@ a look at our [[http://orgmode.org/worg/org-quotes.php][collected quotes about O
 #+ATTR_HTML: style="float:right;"
   [[http://mobileorg.ncogni.to/][http://mobileorg.ncogni.to/images/screenshot-browse.png]]
 
+- <2010-04-06 Tue>: Release 6.35
 - <2010-01-10 Sun>: Release 6.34
 - <2009-12-15 Tue>: iPhone App [[http://mobileorg.ncogni.to/][MobileOrg]] version 1.1 available
 - <2009-11-13 Fri>: Release 6.33
-- <2009-11-03 Tue>: iPhone App [[http://mobileorg.ncogni.to/][MobileOrg]] available in the AppStore
-- <2009-10-26 Mon>: Release 6.32
-- <2009-09-30 Wed>: Release 6.31
-- <2009-09-01 Tue>: Release 6.30
-- <2009-08-04 Tue>: Release 6.29
 
-* Current Version (6.34c)
+* Current Version (6.35)
 
-The current version is 6.34c.  To see what has changed in recent
+The current version is 6.35.  To see what has changed in recent
 releases, check this detailed list of [[file:Changes.html][user-visible changes]].
 
 This package works on Emacs 23 and 22, and (with minor restrictions)
@@ -140,7 +136,7 @@ recent version, but may lag a bit behind the website release.
 
 ** The standard distribution
 
-Download as [[file:org-6.34c.zip][zip file]] or [[file:org-6.34c.tar.gz][gzipped tar archive]].  These archives contain
+Download as [[file:org-6.35.zip][zip file]] or [[file:org-6.35.tar.gz][gzipped tar archive]].  These archives contain
 both the Lisp file org.el and the documentation in PDF and (TeX)Info
 formats.  Follow the instructions for [[http://orgmode.org/manual/Installation.html#Installation][Installation]] and [[http://orgmode.org/manual/Activation.html#Activation][Activation]].
 
