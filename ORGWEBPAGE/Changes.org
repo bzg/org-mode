@@ -297,7 +297,7 @@ containing the index as a to-level tree.  This file can be
 included into any project file using
 
 #+begin_src org
-#+include: "theindex.inc"
+  ,#+include: "theindex.inc"
 #+end_src
 
 Org-mode will also create a file "theindex.org" with this include
