@@ -142,7 +142,7 @@ If you need more control about the sequence in which the header is built
 up, or if you want to exclude one of these building blocks for a particular
 class, you can use the following macro-like placeholders.
 
- [DEFAULT-PACKAGES]      \usepackage statements for default packages
+ [DEFAULT-PACKAGES]      \\usepackage statements for default packages
  [NO-DEFAULT-PACKAGES]   do not include any of the default packages
  [PACKAGES]              \\usepackage statements for packages 
  [NO-PACKAGES]           do not include the packages
