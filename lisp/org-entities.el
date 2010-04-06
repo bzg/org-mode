@@ -26,6 +26,8 @@
 ;;
 ;;; Commentary:
 
+(require 'org-macs)
+
 (declare-function org-table-align "org-table" ())
 
 (eval-when-compile
