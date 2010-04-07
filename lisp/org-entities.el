@@ -62,8 +62,11 @@ ASCII replacement    Plain ASCII, no extensions.  Symbols that cannot be
                      represented will be written out as an explanatory text.
                      But see the variable `org-entities-ascii-keep-macro-form'.
 Latin1 replacement   Use the special characters available in latin1.
-utf-8 replacement    Use special character available in utf-8."
-  :group 'org-entities
+utf-8 replacement    Use special character available in utf-8.
+
+If you define new entities here that require specific LaTeX packages to be
+loaded, add these packages to `org-export-latex-packages-alist'."
+  :Group 'org-entities
   :type '(repeat
 	  (list
 	   (string :tag "name  ")
