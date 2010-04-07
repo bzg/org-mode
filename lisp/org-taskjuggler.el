@@ -374,12 +374,14 @@ unique id to each resource."
 	     (depends (cdr (assoc "depends" task)))
 	     (parent-ordered (cdr (assoc "parent-ordered" task)))
 	     (blocker (cdr (assoc "BLOCKER" task)))
-	     (blocked-on-previous (and blocker (string-match "previous-sibling" blocker)))
+	     (blocked-on-previous 
+	      (and blocker (string-match "previous-sibling" blocker)))
 	     (dependencies
 	      (org-taskjuggler-resolve-explicit-dependencies
 	       (append 
-		(and depends (split-string depends "[, \f\t\n\r\v]+" t))
-		(and blocker (split-string blocker "[, \f\t\n\r\v]+" t))) tasks))
+		(and depends (org-taskjuggler-tokenize-dependencies depends))
+		(and blocker (org-taskjuggler-tokenize-dependencies blocker))) 
+	       tasks))
 	      previous-sibling)
 	; update previous sibling info
 	(cond
@@ -404,21 +406,44 @@ unique id to each resource."
 	(setq previous-level level)
 	(setq resolved-tasks (append resolved-tasks (list task)))))))
 
+(defun org-taskjuggler-tokenize-dependencies (dependencies)
+  "Split a dependency property value DEPENDENCIES into the
+individual dependencies and return them as a list while keeping
+the optional arguments (such as gapduration) for the
+dependencies. A dependency will have to match `[-a-zA-Z0-9_]+'."
+  (cond 
+   ((string-match "^ *$" dependencies) nil)
+   ((string-match "^[ \t]*\\([-a-zA-Z0-9_]+\\([ \t]*{[^}]+}\\)?\\)[ \t,]*" dependencies)
+    (cons 
+     (substring dependencies (match-beginning 1) (match-end 1))
+     (org-taskjuggler-tokenize-dependencies (substring dependencies (match-end 0)))))
+   (t (error (format "invalid dependency id %s" dependencies)))))
+
 (defun org-taskjuggler-resolve-explicit-dependencies (dependencies tasks)
-  (let (path)
-    (cond 
-     ((null dependencies) nil)
-     ; ignore previous sibling dependencies
-     ((equal (car dependencies) "previous-sibling")
-      (org-taskjuggler-resolve-explicit-dependencies (cdr dependencies) tasks))
-     ; if the id is found in another task use its path
-     ((setq path (org-taskjuggler-find-task-with-id (car dependencies) tasks))
-      (cons path (org-taskjuggler-resolve-explicit-dependencies (cdr dependencies) tasks)))
-     ; silently ignore all other dependencies
-     (t (org-taskjuggler-resolve-explicit-dependencies (cdr dependencies) tasks)))))
+  (unless (null dependencies)
+    (let* 
+	;; the dependency might have optional attributes such as "{
+	;; gapduration 5d }", so only use the first string as id for the
+	;; dependency
+	((id (car (split-string (car dependencies))))
+	 (optional-attributes 
+	  (mapconcat 'identity (cdr (split-string (car dependencies))) " "))
+	 (path (org-taskjuggler-find-task-with-id id tasks)))
+      (cond 
+       ;; ignore previous sibling dependencies
+       ((equal (car dependencies) "previous-sibling")
+	(org-taskjuggler-resolve-explicit-dependencies (cdr dependencies) tasks))
+       ;; if the id is found in another task use its path
+       ((not (null path)) 
+	(cons (mapconcat 'identity (list path optional-attributes) " ")
+	      (org-taskjuggler-resolve-explicit-dependencies 
+	       (cdr dependencies) tasks)))
+       ;; silently ignore all other dependencies
+       (t (org-taskjuggler-resolve-explicit-dependencies (cdr dependencies) tasks))))))
 
 (defun org-taskjuggler-find-task-with-id (id tasks)
-  "Find ID in tasks. If found return the path of task. Otherwise return nil."
+  "Find ID in tasks. If found return the path of task. Otherwise
+return nil."
   (let ((task-id (cdr (assoc "ID" (car tasks))))
 	(path (cdr (assoc "path" (car tasks)))))
     (cond 
