@@ -4,7 +4,7 @@
 ;;
 ;; Author: Piotr Zielinski <piotr dot zielinski at gmail dot com>
 ;; Maintainer: Carsten Dominik <carsten at orgmode dot org>
-;; Version: 6.35c
+;; Version: 6.35d
 ;;
 ;; This file is part of GNU Emacs.
 ;;
