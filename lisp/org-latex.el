@@ -1312,7 +1312,7 @@ links, keywords, lists, tables, fixed-width"
     ;; the beginning of the buffer - inserting "\n" is safe here though.
     (insert "\n" string)
     (goto-char (point-min))
-    (let ((re (concat "\\\\[a-zA-Z]+"
+    (let ((re (concat "\\\\\\([a-zA-Z]+\\)"
 		      "\\(?:<[^<>\n]*>\\)*"
 		      "\\(?:\\[[^][\n]*?\\]\\)*"
 		      "\\(?:<[^<>\n]*>\\)*"
@@ -1320,8 +1320,12 @@ links, keywords, lists, tables, fixed-width"
 		      (org-create-multibrace-regexp "{" "}" 3)
 		      "\\)\\{1,3\\}")))
       (while (re-search-forward re nil t)
-	(unless (save-excursion (goto-char (match-beginning 0))
-				(equal (char-after (point-at-bol)) ?#))
+	(unless (or
+		 ;; check for comment line
+		 (save-excursion (goto-char (match-beginning 0))
+				 (equal (char-after (point-at-bol)) ?#))
+		 ;; Check if this is a defined entity, so that is may need conversion
+		 (org-entity-get (match-string 1)))
 	  (add-text-properties (match-beginning 0) (match-end 0)
 			       '(org-protected t)))))
     (when (plist-get org-export-latex-options-plist :emphasize)
@@ -1406,6 +1410,17 @@ See the `org-export-latex.el' code for a complete conversion table."
 					     (match-string 1)
 					     (or (match-string 3) "")))
 					  "") t t)
+		       (when (and (get-text-property (1- (point)) 'org-entity)
+				  (looking-at "{}"))
+			 ;; OK, this was an entity replacement, and the user
+			 ;; had terminated the entity with {}.  Make sure
+			 ;; {} is protected as well, and remove the extra {}
+			 ;; inserted by the conversion.
+			 (put-text-property (point) (+ 2 (point)) 'org-protected t)
+			 (if (save-excursion (goto-char (max (- (point) 2) (point-min)))
+					     (looking-at "{}"))
+			     (replace-match ""))
+			 (forward-char 2))
 		       (backward-char 1))
 		      ((member (match-string 2) '("_" "^"))
 		       (replace-match (or (save-match-data
@@ -1472,12 +1487,14 @@ Convert CHAR depending on STRING-BEFORE and STRING-AFTER."
 The conversion is made depending of STRING-BEFORE and STRING-AFTER."
   (let  ((ass (org-entity-get string-after)))
     (cond
-     (ass (if (nth 2 ass)
-	      (concat string-before
-		      (org-export-latex-protect-string
-		       (concat "$" (nth 1 ass) "$")))
-	    (concat string-before (org-export-latex-protect-string
-				   (nth 1 ass)))))
+     (ass (org-add-props
+	      (if (nth 2 ass)
+		  (concat string-before
+			  (org-export-latex-protect-string
+			   (concat "$" (nth 1 ass) "$")))
+		(concat string-before (org-export-latex-protect-string
+				       (nth 1 ass))))
+	      nil 'org-entity t))
      ((and (not (string-match "^[ \n\t]" string-after))
 	   (not (string-match "[ \t]\\'\\|^" string-before)))
       ;; backslash is inside a word
@@ -2029,14 +2046,19 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
   ;; Protect LaTeX commands like \command[...]{...} or \command{...}
   (goto-char (point-min))
   (let ((re (concat
-	     "\\\\[a-zA-Z]+"
+	     "\\\\\\([a-zA-Z]+\\)"
 	     "\\(?:<[^<>\n]*>\\)*"
 	     "\\(?:\\[[^][\n]*?\\]\\)*"
 	     "\\(?:<[^<>\n]*>\\)*"
 	     "\\(" (org-create-multibrace-regexp "{" "}" 3) "\\)\\{1,3\\}")))
     (while (re-search-forward re nil t)
-      (unless (save-excursion (goto-char (match-beginning 0))
-			      (equal (char-after (point-at-bol)) ?#))
+      (unless (or 
+	       ;; check for comment line
+	       (save-excursion (goto-char (match-beginning 0))
+			       (equal (char-after (point-at-bol)) ?#))
+	       ;; Check if this is a defined entity, so that is may need conversion
+	       (org-entity-get (match-string 1))
+	       )
 	(add-text-properties (match-beginning 0) (match-end 0)
 			     '(org-protected t)))))
 

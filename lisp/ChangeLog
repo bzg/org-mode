@@ -1,5 +1,11 @@
 2010-04-07  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-latex.el (org-export-latex-preprocess): Do not yet protect
+	defined entities - these will be taken care of later.
+	(org-export-latex-special-chars): Post-process entity replacement.
+	(org-export-latex-fontify-headline): Do not yet protect defined
+	entities - these will be taken care of later.
+
 	* org-entities.el (org-entities-user): Fix typo.
 
 	* org.el (org-prepare-agenda-buffers): Uniquify TODO keywords
