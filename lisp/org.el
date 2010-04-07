@@ -2943,7 +2943,6 @@ will be appended."
 (defcustom org-export-latex-default-packages-alist
   '(("AUTO" "inputenc")
     ("T1"   "fontenc")
-    (""     "textcomp")
     (""     "fixltx2e")
     (""     "graphicx")
     (""     "longtable")
