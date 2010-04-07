@@ -100,9 +100,9 @@ then create. Return the initialized session."
 	  (rename-buffer (if (bufferp session) (buffer-name session)
 			   (if (stringp session) session (buffer-name)))) (current-buffer))))))
 
- (defvar org-babel-octave-wrapper-method
+(defvar org-babel-octave-wrapper-method
    "%s
-save -ascii %s ans")
+save -text %s ans")
 
 (defvar org-babel-octave-eoe-indicator "\'org_babel_eoe\'")
 
@@ -130,12 +130,13 @@ value of the last statement in BODY, as elisp."
 	 (let* ((tmp-file (make-temp-file "org-babel-results-")) exit-code
 		(stderr
 		 (with-temp-buffer
-		   (insert (format org-babel-octave-wrapper-method body tmp-file))
+		   (insert (format (if matlabp org-babel-matlab-wrapper-method org-babel-octave-wrapper-method)
+				   body tmp-file))
 		   (setq exit-code (org-babel-shell-command-on-region
 				    (point-min) (point-max) cmd nil 'replace (current-buffer)))
 		   (buffer-string))))
 	   (if (> exit-code 0) (org-babel-error-notify exit-code stderr))
-	   (org-babel-import-elisp-from-file (org-babel-maybe-remote-file tmp-file))))))))
+	   (org-babel-octave-import-elisp-from-file (org-babel-maybe-remote-file tmp-file))))))))
 
 (defun org-babel-octave-evaluate-session (session body result-type &optional matlabp)
   (let* ((tmp-file (make-temp-file "org-babel-results-"))
@@ -148,13 +149,14 @@ value of the last statement in BODY, as elisp."
 	    (value
 	     (mapconcat
 	      #'org-babel-chomp
-	      (list (format org-babel-octave-wrapper-method body tmp-file) org-babel-octave-eoe-indicator) "\n"))))
+	      (list (format (if matlabp org-babel-matlab-wrapper-method org-babel-octave-wrapper-method)
+			    body tmp-file) org-babel-octave-eoe-indicator) "\n"))))
 	 (raw (org-babel-comint-with-output session
 		  (if matlabp org-babel-octave-eoe-indicator org-babel-octave-eoe-output) t
 		(insert full-body) (comint-send-input nil t))) results)
     (case result-type
       (value
-       (org-babel-import-elisp-from-file (org-babel-maybe-remote-file tmp-file)))
+       (org-babel-octave-import-elisp-from-file (org-babel-maybe-remote-file tmp-file)))
       (output
        (progn
 	 (setq results
@@ -165,6 +167,17 @@ value of the last statement in BODY, as elisp."
 			      (reverse (mapcar #'org-babel-octave-read-string
 					       (mapcar #'org-babel-trim raw)))))))
 	 (mapconcat #'identity (reverse results) "\n"))))))
+
+(defun org-babel-octave-import-elisp-from-file (file-name)
+  "Import data written to file by octave.
+This removes initial blank and comment lines and then calls
+`org-babel-import-elisp-from-file'."
+  (let ((temp-file (make-temp-file "org-babel-results-")))
+    (with-temp-file temp-file
+      (insert-file-contents file-name)
+      (re-search-forward "^[ \t]*[^# \t]" nil t)
+      (delete-region (point-min) (point-at-bol)))
+    (org-babel-import-elisp-from-file temp-file)))
 
 (defun org-babel-octave-read-string (string)
   "Strip \\\"s from around octave string"

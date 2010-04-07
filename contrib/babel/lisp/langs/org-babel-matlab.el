@@ -48,6 +48,10 @@
 (defvar org-babel-matlab-shell-command "matlab -nosplash"
   "Shell command to use to run matlab as an external process.")
 
+(defvar org-babel-matlab-wrapper-method
+   "%s
+save -ascii %s ans")
+
 (defun org-babel-execute:matlab (body params)
   "Execute a block of matlab code with org-babel."
   (org-babel-execute:octave body params 'matlab))
