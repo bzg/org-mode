@@ -5,6 +5,8 @@
 	(org-export-latex-special-chars): Post-process entity replacement.
 	(org-export-latex-fontify-headline): Do not yet protect defined
 	entities - these will be taken care of later.
+	(org-export-latex-tables, org-export-latex-links): Format the
+	caption properly.
 
 	* org-entities.el (org-entities-user): Fix typo.
 
