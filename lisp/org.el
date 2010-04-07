@@ -2956,7 +2956,7 @@ will be appended."
     (""     "latexsym")
     (""     "amssymb")
     (""     "hyperref")
-;    (""     "microtype")
+    (""     "microtype")
     "\\tolerance=1000"
     )
   "Alist of default packages to be inserted in the header.
