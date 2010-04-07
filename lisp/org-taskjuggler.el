@@ -230,12 +230,14 @@ defined in `org-export-taskjuggler-default-reports'."
   (let* ((tasks
 	  (org-taskjuggler-resolve-dependencies
 	   (org-taskjuggler-assign-task-ids 
-	    (org-map-entries '(org-taskjuggler-components) 
-			     org-export-taskjuggler-project-tag nil 'archive 'comment))))
+	    (org-map-entries 
+	     '(org-taskjuggler-components) 
+	     org-export-taskjuggler-project-tag nil 'archive 'comment))))
 	 (resources
 	  (org-taskjuggler-assign-resource-ids
-	   (org-map-entries '(org-taskjuggler-components) 
-			    org-export-taskjuggler-resource-tag nil 'archive 'comment)))
+	   (org-map-entries 
+	    '(org-taskjuggler-components) 
+	    org-export-taskjuggler-resource-tag nil 'archive 'comment)))
 	 (filename (expand-file-name
 		    (concat
 		     (file-name-sans-extension
@@ -291,7 +293,8 @@ defined in `org-export-taskjuggler-default-reports'."
 
 ;;;###autoload
 (defun org-export-as-taskjuggler-and-open ()
-  "Export the current buffer as a TaskJuggler file and open it with the TaskJuggler GUI."
+  "Export the current buffer as a TaskJuggler file and open it
+with the TaskJuggler GUI."
   (interactive)
   (let ((file-name (buffer-file-name (org-export-as-taskjuggler)))
 	(command "TaskJugglerUI"))
@@ -358,8 +361,9 @@ unique id to each resource."
     (let* ((resource (car resources))
 	   (unique-id (org-taskjuggler-get-unique-id resource unique-ids)))
       (push (cons "unique-id" unique-id) resource)
-      (cons resource (org-taskjuggler-assign-resource-ids (cdr resources) 
-							  (cons unique-id unique-ids)))))))
+      (cons resource 
+	    (org-taskjuggler-assign-resource-ids (cdr resources) 
+						 (cons unique-id unique-ids)))))))
 
 (defun org-taskjuggler-resolve-dependencies (tasks)
   (let ((previous-level 0)
@@ -425,8 +429,9 @@ unique id to each resource."
 (defun org-taskjuggler-get-unique-id (item unique-ids)
   "Return a unique id for an ITEM which can be a task or a resource.
 The id is derived from the headline and made unique against
-UNIQUE-IDS. If the first part of the headline is not unique try to add
-more parts of the headline or finally add more underscore characters (\"_\")."
+UNIQUE-IDS. If the first part of the headline is not unique try
+to add more parts of the headline or finally add more underscore
+characters (\"_\")."
   (let* ((headline (cdr (assoc "headline" item)))
 	 (parts (split-string headline))
 	 (id (org-taskjuggler-clean-id (downcase (pop parts)))))
@@ -464,10 +469,10 @@ with separator \"\n\"."
     (and filtered-items (mapconcat 'identity filtered-items "\n"))))
   
 (defun org-taskjuggler-get-attributes (item attributes)
-  "Return all attribute as a single formated string. ITEM is an alist
-representing either a resource or a task. ATTRIBUTES is a list of
-symbols. Only entries from ITEM are considered that are listed in
-ATTRIBUTES."
+  "Return all attribute as a single formated string. ITEM is an
+alist representing either a resource or a task. ATTRIBUTES is a
+list of symbols. Only entries from ITEM are considered that are
+listed in ATTRIBUTES."
   (org-taskjuggler-filter-and-join 
    (mapcar
     (lambda (attribute) 
@@ -501,8 +506,9 @@ If the ATTRIBUTE is not in ITEM return nil."
 i.e. REAL UNIT. If the effort string is something like 5:30 it
 will be assumed to be hours and will be translated into 5.5h.
 Otherwise if it contains something like 3.0 it is assumed to be
-days and will be translated into 3.0d. Other formats that taskjuggler
-supports (like weeks, months and years) are currently not supported."
+days and will be translated into 3.0d. Other formats that
+taskjuggler supports (like weeks, months and years) are currently
+not supported."
   (cond 
    ((null effort) effort)
    ((string-match "\\([0-9]+\\):\\([0-9]+\\)" effort) 
