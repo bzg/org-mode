@@ -9502,9 +9502,14 @@ pages, configure the variable @code{org-export-html-use-infojs}.
 @cindex Guerry, Bastien
 
 Org mode contains a La@TeX{} exporter written by Bastien Guerry.  With
-further processing, this backend is also used to produce PDF output.  Since
-the La@TeX{} output uses @file{hyperref} to implement links and cross
-references, the PDF output file will be fully linked.
+further processing@footnote{The default LaTeX output is designed for
+processing with pdftex or latex.  It includes packages that are not
+compatible with xetex and possibly luatex.  See the variables
+@code{org-export-latex-default-packages-alist} and
+@code{org-export-latex-packages-alist}.}, this backend is also used to
+produce PDF output.  Since the La@TeX{} output uses @file{hyperref} to
+implement links and cross references, the PDF output file will be fully
+linked.
 
 @menu
 * LaTeX/PDF export commands::   Which key invokes which commands

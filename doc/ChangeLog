@@ -1,3 +1,7 @@
+2010-04-07  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (LaTeX and PDF export): Add a footnote about xetex.
+
 2010-04-05  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (LaTeX/PDF export commands): Section renamed and
