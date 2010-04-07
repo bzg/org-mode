@@ -2943,6 +2943,8 @@ will be appended."
 (defcustom org-export-latex-default-packages-alist
   '(("AUTO" "inputenc")
     ("T1"   "fontenc")
+    (""     "textcomp")
+    (""     "fixltx2e")
     (""     "graphicx")
     (""     "longtable")
     (""     "float")
@@ -2954,7 +2956,10 @@ will be appended."
     (""     "wasysym")
     (""     "latexsym")
     (""     "amssymb")
-    (""     "hyperref"))
+    (""     "hyperref")
+;    (""     "microtype")
+    "\\tolerance=1000"
+    )
   "Alist of default packages to be inserted in the header.
 Change this only if one of the packages here causes an incompatibility
 with another package you are using.
@@ -2976,9 +2981,11 @@ some other package that conflicts with one of the default packages.
 Each cell is of the format \( \"options\" \"package\" \)."
   :group 'org-export-latex
   :type '(repeat
-	  (list
-	   (string :tag "options")
-	   (string :tag "package"))))
+	  (choice 
+	   (string :tag "A line of LaTeX")
+	   (list :tag "options/package pair"
+		 (string :tag "options")
+		 (string :tag "package")))))
 
 (defcustom org-export-latex-packages-alist nil
   "Alist of packages to be inserted in every LaTeX the header.
@@ -2991,9 +2998,11 @@ Make sure that you only lis packages here which:
 - do not conflict with the setup in `org-format-latex-header'."
   :group 'org-export-latex
   :type '(repeat
-	  (list
-	   (string :tag "options")
-	   (string :tag "package"))))
+	  (choice 
+	   (string :tag "A line of LaTeX")
+	   (list :tag "options/package pair"
+		 (string :tag "options")
+		 (string :tag "package")))))
 
 (defgroup org-appearance nil
   "Settings for Org-mode appearance."
@@ -15332,7 +15341,7 @@ EXTRA is a string."
 	(setq rpl (if (or (match-end 1) (not extra))
 		      "" (concat extra "\n"))
 	      tpl (replace-match rpl t t tpl))
-      (if pkg (setq end (org-latex-packages-to-string pkg))))
+      (if pkg (setq end (concat end "\n" (org-latex-packages-to-string pkg)))))
 
     (if (string-match "\\S-" end)
 	(concat tpl "\n" end)
@@ -15341,10 +15350,13 @@ EXTRA is a string."
 (defun org-latex-packages-to-string (pkg &optional newline)
   "Turn an alist of packages into a string with the \\usepackage macros."
   (setq pkg (mapconcat (lambda(p)
-			 (if (equal "" (car p))
-			     (format "\\usepackage{%s}" (cadr p))
+			 (cond
+			  ((stringp p) p)
+			  ((equal "" (car p))
+			   (format "\\usepackage{%s}" (cadr p)))
+			  (t
 			   (format "\\usepackage[%s]{%s}"
-				   (car p) (cadr p))))
+				   (car p) (cadr p)))))
 		       pkg
 		       "\n"))
   (if newline (concat pkg "\n") pkg))
