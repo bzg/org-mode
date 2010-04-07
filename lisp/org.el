@@ -15336,12 +15336,13 @@ EXTRA is a string."
 		      "" (org-latex-packages-to-string pkg t))
 	      tpl (replace-match rpl t t tpl))
       (if pkg (setq end (concat end "\n" (org-latex-packages-to-string pkg)))))
-    
+
     (if (string-match "\\[\\(NO-\\)?EXTRA\\][ \t]*\n?" tpl)
 	(setq rpl (if (or (match-end 1) (not extra))
 		      "" (concat extra "\n"))
 	      tpl (replace-match rpl t t tpl))
-      (if pkg (setq end (concat end "\n" (org-latex-packages-to-string pkg)))))
+      (if (and extra (string-match "\\S-" extra))
+	  (setq end (concat end "\n" extra))))
 
     (if (string-match "\\S-" end)
 	(concat tpl "\n" end)
