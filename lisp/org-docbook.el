@@ -4,7 +4,7 @@
 ;;
 ;; Emacs Lisp Archive Entry
 ;; Filename: org-docbook.el
-;; Version: 6.35b
+;; Version: TAG=6.35c
 ;; Author: Baoqiu Cui <cbaoqiu AT yahoo DOT com>
 ;; Maintainer: Baoqiu Cui <cbaoqiu AT yahoo DOT com>
 ;; Keywords: org, wp, docbook
