@@ -1,5 +1,9 @@
 2010-04-07  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-entities.el (org-entities-user): Fix typo.
+
+	* org.el (org-prepare-agenda-buffers): Uniquify TODO keywords
+
 	* org-entities.el (org-entities-user): Improve docstring.
 
 2010-04-06  Carsten Dominik  <carsten.dominik@gmail.com>

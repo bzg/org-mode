@@ -66,7 +66,7 @@ utf-8 replacement    Use special character available in utf-8.
 
 If you define new entities here that require specific LaTeX packages to be
 loaded, add these packages to `org-export-latex-packages-alist'."
-  :Group 'org-entities
+  :group 'org-entities
   :type '(repeat
 	  (list
 	   (string :tag "name  ")
