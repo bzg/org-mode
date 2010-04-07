@@ -102,7 +102,14 @@ then create. Return the initialized session."
 
 (defvar org-babel-octave-wrapper-method
    "%s
-save -text %s ans")
+if ischar(ans)
+   fid = fopen('%s', 'w')
+   fprintf(fid, ans)
+   fprintf(fid, '\\n')
+   fclose(fid)
+else
+   save -ascii %s ans
+end")
 
 (defvar org-babel-octave-eoe-indicator "\'org_babel_eoe\'")
 
@@ -130,8 +137,7 @@ value of the last statement in BODY, as elisp."
 	 (let* ((tmp-file (make-temp-file "org-babel-results-")) exit-code
 		(stderr
 		 (with-temp-buffer
-		   (insert (format (if matlabp org-babel-matlab-wrapper-method org-babel-octave-wrapper-method)
-				   body tmp-file))
+		   (insert (format org-babel-octave-wrapper-method body tmp-file tmp-file))
 		   (setq exit-code (org-babel-shell-command-on-region
 				    (point-min) (point-max) cmd nil 'replace (current-buffer)))
 		   (buffer-string))))
@@ -149,8 +155,7 @@ value of the last statement in BODY, as elisp."
 	    (value
 	     (mapconcat
 	      #'org-babel-chomp
-	      (list (format (if matlabp org-babel-matlab-wrapper-method org-babel-octave-wrapper-method)
-			    body tmp-file) org-babel-octave-eoe-indicator) "\n"))))
+	      (list (format org-babel-octave-wrapper-method body tmp-file tmp-file) org-babel-octave-eoe-indicator) "\n"))))
 	 (raw (org-babel-comint-with-output session
 		  (if matlabp org-babel-octave-eoe-indicator org-babel-octave-eoe-output) t
 		(insert full-body) (comint-send-input nil t))) results)
@@ -172,11 +177,13 @@ value of the last statement in BODY, as elisp."
   "Import data written to file by octave.
 This removes initial blank and comment lines and then calls
 `org-babel-import-elisp-from-file'."
-  (let ((temp-file (make-temp-file "org-babel-results-")))
+  (let ((temp-file (make-temp-file "org-babel-results-")) beg end)
     (with-temp-file temp-file
       (insert-file-contents file-name)
       (re-search-forward "^[ \t]*[^# \t]" nil t)
-      (delete-region (point-min) (point-at-bol)))
+      (if (< (setq beg (point-min))
+	     (setq end (point-at-bol)))
+	  (delete-region beg end)))
     (org-babel-import-elisp-from-file temp-file)))
 
 (defun org-babel-octave-read-string (string)
