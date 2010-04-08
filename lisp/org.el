@@ -2955,8 +2955,8 @@ will be appended."
     (""     "wasysym")
     (""     "latexsym")
     (""     "amssymb")
-    (""     "hyperref")
     (""     "microtype")
+    (""     "hyperref")
     "\\tolerance=1000"
     )
   "Alist of default packages to be inserted in the header.

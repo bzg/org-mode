@@ -2,6 +2,8 @@
 
 	* org.el (org-insert-link): Find the link buffer on visible
 	frames.
+	(org-export-latex-default-packages-alist): hyperref must be loaded
+	late.
 
 2010-04-07  Carsten Dominik  <carsten.dominik@gmail.com>
 
