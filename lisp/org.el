@@ -9172,13 +9172,19 @@ If the file does not exist, an error is thrown."
 		    (and dirp (cdr (assoc 'directory apps)))
 		    ;; if we find a match in org-file-apps, store the match
 		    ;; data for later
-		    (let ((match (assoc-default dlink (org-apps-regexp-alist
-						       apps a-m-a-p)
-						'string-match)))
-		      (if match
+		    (let* ((re-list1 (org-apps-regexp-alist apps nil))
+			   (re-list2 
+			    (if a-m-a-p
+				(org-apps-regexp-alist apps a-m-a-p)
+			      re-list1))
+			   (private-match
+			    (assoc-default dlink re-list1 'string-match))
+			   (general-match
+			    (assoc-default dfile re-list2 'string-match)))
+		      (if private-match
 			  (progn (setq link-match-data (match-data))
-				 match)
-			nil))
+				 private-match)
+			general-match))
 		    (cdr (assoc ext apps))
 		    (cdr (assoc t apps))))))
     (when (eq cmd 'system)
