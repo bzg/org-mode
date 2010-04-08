@@ -1,3 +1,8 @@
+2010-04-08  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-insert-link): Find the link buffer on visible
+	frames.
+
 2010-04-07  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-latex.el (org-export-latex-preprocess): Do not yet protect

@@ -8210,7 +8210,7 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
 		    (if (nth 1 x) (concat (car x) " (" (nth 1 x) ")") (car x)))
 		  (reverse org-stored-links) "\n"))))
       (let ((cw (selected-window)))
-	(select-window (get-buffer-window "*Org Links*"))
+	(select-window (get-buffer-window "*Org Links*" 'visible))
 	(setq truncate-lines t)
 	(unless (pos-visible-in-window-p (point-max))
 	  (org-fit-window-to-buffer))
