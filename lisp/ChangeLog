@@ -293,16 +293,6 @@
 	(org-table-get, org-table-put, org-table-goto-line)
 	(org-table-current-line): New functions.
 
-2010-03-21  Jan Böcker  <jan.boecker@jboecker.de>
-
-	* org.el (org-open-file): Allow regular expressions in
-	org-file-apps to capture link parameters using groups.  In a
-	command string to be executed, the parameters can be referenced
-	using %1, %2, etc.  Lisp forms can access them using
-	(match-string n link).
-	(org-apps-regexp-alist): Adopt the created regexp, as this is now
-	matched against a file: link instead of the file name.
-
 2010-03-21  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-crypt.el (org-reveal-start-hook): Add a decryption function
