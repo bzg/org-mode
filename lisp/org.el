@@ -9206,9 +9206,9 @@ If the file does not exist, an error is thrown."
 			  (progn (setq link-match-data (match-data))
 				 match)
 			(progn (setq in-emacs (or in-emacs line search))
-			       nil)) ; if we have no match in org-file-apps-ex,
-		                     ; always open the file in emacs if line or search
-		                     ; is given (for backwards compatibility)
+			       nil))) ; if we have no match in org-file-apps-ex,
+		                      ; always open the file in emacs if line or search
+		                      ; is given (for backwards compatibility)
 		    (assoc-default dfile (org-apps-regexp-alist apps a-m-a-p)
 				   'string-match)
 		    (cdr (assoc ext apps))
