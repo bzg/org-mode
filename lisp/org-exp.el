@@ -2490,7 +2490,8 @@ directory."
 			  filename)))
 	 (backup-inhibited t)
 	 (buffer (find-file-noselect filename))
-	 (region (buffer-string)))
+	 (region (buffer-string))
+         str-ret)
     (save-excursion
       (switch-to-buffer buffer)
       (erase-buffer)
@@ -2536,7 +2537,11 @@ directory."
 	    (write-file (concat filename ".html")))
 	  (kill-buffer newbuf)))
       (set-buffer-modified-p nil)
-      (kill-buffer (current-buffer)))))
+      (if (equal to-buffer 'string)
+          (progn (setq str-ret (buffer-string))
+                 (kill-buffer (current-buffer))
+                 str-ret)
+        (kill-buffer (current-buffer))))))
 
 (defvar org-archive-location)  ;; gets loaded with the org-archive require.
 (defun org-get-current-options ()
