@@ -1,3 +1,8 @@
+2010-04-09  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-mobile.el (org-mobile-check-setup): Make sure that there is
+	a binary to compute checksums.
+
 2010-04-08  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-insert-link): Find the link buffer on visible
