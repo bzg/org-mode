@@ -172,8 +172,10 @@ code blocks by language."
              (source-name (intern (or (fifth info)
                                       (format "block-%d" block-counter))))
              (src-lang (first info))
-             (body (org-babel-expand-noweb-references info))
              (params (third info))
+	     (body (if (equal "no" (cdr (assoc :noweb params)))
+		       (second info)
+		     (org-babel-expand-noweb-references info)))
              (spec (list link source-name params body (third (cdr (assoc src-lang org-babel-tangle-langs)))))
              by-lang)
         (unless (string= (cdr (assoc :tangle params)) "no") ;; maybe skip
