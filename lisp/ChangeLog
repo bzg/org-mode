@@ -9,7 +9,6 @@
 	frames.
 	(org-export-latex-default-packages-alist): hyperref must be loaded
 	late.
-	(org-open-file): More care with the new matching for file links.
 
 2010-04-07  Carsten Dominik  <carsten.dominik@gmail.com>
 
