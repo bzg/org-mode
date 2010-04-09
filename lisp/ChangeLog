@@ -1,3 +1,10 @@
+2010-04-09  Jan Böcker  <jan.boecker@jboecker.de>
+
+	* org.el (org-file-apps-ex): new variable.
+	(org-open-file): Before considering org-file-apps, first match the
+	regexps from org-file-apps-ex against the whole link. See
+	docstring of org-file-apps-ex.
+
 2010-04-09  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-mobile.el (org-mobile-check-setup): Make sure that there is
