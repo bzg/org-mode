@@ -784,8 +784,9 @@ code ---- the results are extracted in the syntax of the source
 	   ;; assume the result is a table if it's not a string
 	   ((not (stringp result))
 	    (insert (concat (orgtbl-to-orgtbl
-			     (if (and (listp (car result))
-                                      (listp (cdr (car result))))
+			     (if (or (eq 'hline (car result))
+				     (and (listp (car result))
+					  (listp (cdr (car result)))))
 				 result (list result))
 			     '(:fmt (lambda (cell) (format "%s" cell)))) "\n"))
 	    (forward-line -1) (org-cycle))
