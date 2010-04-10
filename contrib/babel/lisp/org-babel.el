@@ -776,20 +776,21 @@ code ---- the results are extracted in the syntax of the source
         (setq result (concat result "\n")))
       (save-excursion
 	(let ((existing-result (org-babel-where-is-src-block-result t info hash))
-	      (results-switches (cdr (assoc :results_switches (third info)))))
+	      (results-switches (cdr (assoc :results_switches (third info)))) beg)
 	  (when existing-result (goto-char existing-result) (forward-line 1))
 	  (setq results-switches
                 (if results-switches (concat " " results-switches) ""))
 	  (cond
 	   ;; assume the result is a table if it's not a string
 	   ((not (stringp result))
+	    (setq beg (point))
 	    (insert (concat (orgtbl-to-orgtbl
 			     (if (or (eq 'hline (car result))
 				     (and (listp (car result))
 					  (listp (cdr (car result)))))
 				 result (list result))
 			     '(:fmt (lambda (cell) (format "%s" cell)))) "\n"))
-	    (forward-line -1) (org-cycle))
+	    (goto-char beg) (org-cycle))
 	   ((member "file" result-params)
 	    (insert result))
 	   ((member "html" result-params)
