@@ -77,11 +77,10 @@ called by `org-babel-execute-src-block'."
          (cmdline (cdr (assoc :cmdline params)))
          (flags (cdr (assoc :flags params)))
          (vars (second processed-params))
-         (includes (org-babel-read
-                    (or (cdr (assoc :includes params))
-                        (org-entry-get nil "includes" t))))
+         (includes (or (cdr (assoc :includes params))
+                       (org-entry-get nil "includes" t)))
          (defines (org-babel-read
-                   (or (cdr (assoc :includes params))
+                   (or (cdr (assoc :defines params))
                        (org-entry-get nil "defines" t))))
          (full-body (mapconcat 'identity
                      (list
