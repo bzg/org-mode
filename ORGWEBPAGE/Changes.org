@@ -434,7 +434,7 @@ Extension: \.pdf::\([0-9]+\)\'
 Command:   evince "%s" -p %1
 #+end_example
 
-Thanks to Jan Böker for a patch to this effect.
+Thanks to Jan Böcker for a patch to this effect.
 
 ** Clocking
 
@@ -649,7 +649,7 @@ call function to do something special with text links.
 
 Thanks to Paul Sexton for this contribution.
 
-**** Add Jan Böker's org-docview.el
+**** Add Jan Böcker's org-docview.el
 
 This new module allows links to various file types using docview,
 where Emacs displays images of document pages.  Docview link
@@ -658,7 +658,7 @@ page 131 of the Org-mode manual:
 
 : [[docview:~/.elisp/org/doc/org.pdf::131][Org-Mode Manual]]
 
-Thanks to Jan Böker for this contribution.
+Thanks to Jan Böcker for this contribution.
     
 **** New link types that force special ways of opening the file
     
