@@ -1520,40 +1520,6 @@ For more examples, see the system specific constants
 
 
 
-(defcustom org-file-apps-ex
-  '()
-  "This variable is like org-file-apps, except that the regular
-expressions are matched against the whole link, and you can use
-subexpressions to capture parts of the matched link to use as
-command line arguments or in a custom lisp form.
-
-In a command string to be executed, access the subexpression
-matches with %1, %2, etc. In a custom lisp form, you can access
-them with (match-string n link).
-
-Example:
-To allow linking to page 5 in a PDF using the following syntax:
-
-file:document.pdf::5
-
-use the following entry:
-
-Regular Expression:      \.pdf::\([0-9]+\)\'
-Command:                 evince %s -p %1
-
-The first (and only) subexpression captures the page number,
-which is passed to evince as the -p argument."
-  :group 'org-link-follow
-  :type '(repeat
-	  (cons (choice :value ""
-			(string :tag "Regular Expression"))
-		(choice :value ""
-			(const :tag "Visit with Emacs" emacs)
-			(string :tag "Command")
-			(sexp :tag "Lisp form")))))
-
-
-
 (defgroup org-refile nil
   "Options concerning refiling entries in Org-mode."
   :tag "Org Refile"
@@ -9159,14 +9125,17 @@ With optional prefix argument IN-EMACS, Emacs will visit the file.
 With a double C-c C-u prefix arg, Org tries to avoid opening in Emacs
 and to use an external application to visit the file.
 
-Optional LINE specifies a line to go to, optional SEARCH a string to
-search for.  If LINE or SEARCH is given, the file will be
-opened in Emacs, unless one of the entries in org-file-apps-ex matches.
+Optional LINE specifies a line to go to, optional SEARCH a string
+to search for.  If LINE or SEARCH is given, the file will be
+opened in Emacs, unless an entry from org-file-apps that makes
+use of groups in a regexp matches.  
 If the file does not exist, an error is thrown."
   (let* ((file (if (equal path "")
 		   buffer-file-name
 		 (substitute-in-file-name (expand-file-name path))))
-	 (apps (append org-file-apps (org-default-apps)))
+	 (file-apps (append org-file-apps (org-default-apps)))
+	 (apps (remove-if 'org-file-apps-entry-uses-grouping-p file-apps))
+	 (apps-dlink (remove-if-not 'org-file-apps-entry-uses-grouping-p file-apps))
 	 (remp (and (assq 'remote apps) (org-file-remote-p file)))
 	 (dirp (if remp nil (file-directory-p file)))
 	 (file (if (and dirp org-open-directory-means-index-dot-org)
@@ -9198,15 +9167,15 @@ If the file does not exist, an error is thrown."
      (t
       (setq cmd (or (and remp (cdr (assoc 'remote apps)))
 		    (and dirp (cdr (assoc 'directory apps)))
-		    ; first, try matching against org-file-apps-ex
+		    ; first, try matching against apps-dlink
 		    ; if we get a match here, store the match data for later
-		    (let ((match (assoc-default dlink org-file-apps-ex
+		    (let ((match (assoc-default dlink apps-dlink
 						'string-match)))
 		      (if match
 			  (progn (setq link-match-data (match-data))
 				 match)
 			(progn (setq in-emacs (or in-emacs line search))
-			       nil))) ; if we have no match in org-file-apps-ex,
+			       nil))) ; if we have no match in apps-dlink,
 		                      ; always open the file in emacs if line or search
 		                      ; is given (for backwards compatibility)
 		    (assoc-default dfile (org-apps-regexp-alist apps a-m-a-p)
@@ -9273,6 +9242,16 @@ If the file does not exist, an error is thrown."
 	 (or (not (equal old-buffer (current-buffer)))
 	     (not (equal old-pos (point))))
 	 (org-mark-ring-push old-pos old-buffer))))
+
+(defun org-file-apps-entry-uses-grouping-p (entry)
+  "This function returns non-nil if `entry' uses a regular
+  expression that has subexpressions, and which org-open-file
+  should therefore match against the whole link instead of the
+  filename."
+  (let ((selector (car entry)))
+    (if (stringp selector)
+	(> (regexp-opt-depth selector) 0)
+      nil)))
 
 (defun org-default-apps ()
   "Return the default applications for this operating system."
