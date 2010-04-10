@@ -576,7 +576,7 @@ may be specified in the properties of the current outline entry."
 	       (if (string-match "\\([^ \f\t\n\r\v]+\\)[ \f\t\n\r\v]+\\([^ \f\t\n\r\v]+.*\\)" arg)
 		   (cons (intern (concat ":" (match-string 1 arg)))
                          (let ((raw (org-babel-chomp (match-string 2 arg))))
-                           (if (org-babel-number-p raw) raw (eval (org-babel-read raw)))))
+                           (if (org-babel-number-p raw) raw (org-babel-read raw))))
 		 (cons (intern (concat ":" arg)) nil)))
 	     (split-string (concat " " arg-string) "[ \f\t\n\r\v]+:" t)))))
 
