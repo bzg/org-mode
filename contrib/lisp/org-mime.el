@@ -54,7 +54,7 @@
 
 ;;; Code:
 (defcustom org-mime-default-header
-  "#+TITLE: NONE\n#+OPTIONS: latex:t\n"
+  "#+OPTIONS: latex:t\n"
   "Default header to control html export options, and ensure
   first line isn't assumed to be a title line."
   :group 'org-mime
@@ -188,11 +188,12 @@ TMP-FILE during export."
       (insert org-mime-default-header)
       (insert body)
       (write-file tmp-file)
-      ;; convert to fmt -- mimicing `org-run-like-in-org-mode'
-      (eval
-       (list 'let org-local-vars
-             (list (intern (concat "org-export-as-" fmt))
-                   nil nil nil ''string t))))))
+      (substring
+       (eval ;; convert to fmt -- mimicing `org-run-like-in-org-mode'
+        (list 'let org-local-vars
+              (list (intern (concat "org-export-as-" fmt))
+                    nil nil nil ''string t)))
+       (if (string= fmt "org") (length org-mime-default-header) 0)))))
 
 (defun org-mime-apply-html-hook (html)
   (when org-mime-html-hook
