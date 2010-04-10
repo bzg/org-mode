@@ -107,11 +107,12 @@ Emacs-lisp table, otherwise return the results as a string."
   (org-babel-read
    (if (string-match "^\\[.+\\]$" results)
        (org-babel-read
-        (replace-regexp-in-string
-         "\\[" "(" (replace-regexp-in-string
-                    "\\]" ")" (replace-regexp-in-string
-                               ", " " " (replace-regexp-in-string
-                                         "'" "\"" results)))))
+        (concat "'"
+                (replace-regexp-in-string
+                 "\\[" "(" (replace-regexp-in-string
+                            "\\]" ")" (replace-regexp-in-string
+                                       ", " " " (replace-regexp-in-string
+                                                 "'" "\"" results))))))
      results)))
 
 (defun org-babel-clojure-var-to-clojure (var)
