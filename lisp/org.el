@@ -9134,8 +9134,8 @@ If the file does not exist, an error is thrown."
 		   buffer-file-name
 		 (substitute-in-file-name (expand-file-name path))))
 	 (file-apps (append org-file-apps (org-default-apps)))
-	 (apps (remove-if 'org-file-apps-entry-uses-grouping-p file-apps))
-	 (apps-dlink (remove-if-not 'org-file-apps-entry-uses-grouping-p file-apps))
+	 (apps (remove-if 'org-file-apps-entry-match-against-dlink-p file-apps))
+	 (apps-dlink (remove-if-not 'org-file-apps-entry-match-against-dlink-p file-apps))
 	 (remp (and (assq 'remote apps) (org-file-remote-p file)))
 	 (dirp (if remp nil (file-directory-p file)))
 	 (file (if (and dirp org-open-directory-means-index-dot-org)
@@ -9243,14 +9243,23 @@ If the file does not exist, an error is thrown."
 	     (not (equal old-pos (point))))
 	 (org-mark-ring-push old-pos old-buffer))))
 
-(defun org-file-apps-entry-uses-grouping-p (entry)
+(defun org-file-apps-entry-match-against-dlink-p (entry)
   "This function returns non-nil if `entry' uses a regular
-  expression that has subexpressions, and which org-open-file
-  should therefore match against the whole link instead of the
-  filename."
-  (let ((selector (car entry)))
+  expression which should be matched against the whole link by
+  org-open-file.
+
+ It assumes that is the case when the entry uses a regular
+ expression which has at least one grouping construct and the
+ action is either a lisp form or a command string containing
+ '%1', i.e. using at least one subexpression match as a
+ parameter."
+  (let ((selector (car entry))
+	(action (cdr entry)))
     (if (stringp selector)
-	(> (regexp-opt-depth selector) 0)
+	(and (> (regexp-opt-depth selector) 0)
+	     (or (and (stringp action)
+		      (string-match "%1" action))
+		 (consp action)))
       nil)))
 
 (defun org-default-apps ()

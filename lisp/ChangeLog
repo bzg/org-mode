@@ -1,6 +1,6 @@
 2010-04-10  Jan Böcker  <jan.boecker@jboecker.de>
 
-	* org.el (org-file-apps-entry-uses-grouping-p): new function.
+	* org.el (org-file-apps-entry-match-against-dlink-p): new function.
 	(org-file-apps-ex): remove variable.
 	(org-open-file): Integrate org-file-apps-ex functionality back
 	into org-file-apps, and decide whether to match a regexp against
