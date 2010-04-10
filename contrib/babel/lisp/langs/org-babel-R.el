@@ -46,6 +46,8 @@ called by `org-babel-execute-src-block'."
            (vars (second processed-params))
 	   (column-names-p (and (cdr (assoc :colnames params))
 				(string= "yes" (cdr (assoc :colnames params)))))
+	   (row-names-p (and (cdr (assoc :rownames params))
+				(string= "yes" (cdr (assoc :rownames params)))))
 	   (out-file (cdr (assoc :file params)))
 	   (augmented-body
 	    (concat
@@ -53,7 +55,7 @@ called by `org-babel-execute-src-block'."
 	     (mapconcat ;; define any variables
 	      (lambda (pair) (org-babel-R-assign-elisp (car pair) (cdr pair))) vars "\n")
 	     "\n" body "\n" (if out-file "dev.off()\n" "")))
-	   (result (org-babel-R-evaluate session augmented-body result-type column-names-p)))
+	   (result (org-babel-R-evaluate session augmented-body result-type column-names-p row-names-p)))
       (or out-file result))))
 
 (defun org-babel-prep-session:R (session params)
@@ -140,9 +142,9 @@ called by `org-babel-execute-src-block'."
 (defvar org-babel-R-eoe-indicator "'org_babel_R_eoe'")
 (defvar org-babel-R-eoe-output "[1] \"org_babel_R_eoe\"")
 (defvar org-babel-R-wrapper-method "main <- function ()\n{\n%s\n}
-write.table(main(), file=\"%s\", sep=\"\\t\", na=\"nil\",row.names=FALSE, col.names=%s, quote=FALSE)")
+write.table(main(), file=\"%s\", sep=\"\\t\", na=\"nil\",row.names=%s, col.names=%s, quote=FALSE)")
 
-(defun org-babel-R-evaluate (session body result-type column-names-p)
+(defun org-babel-R-evaluate (session body result-type column-names-p row-names-p)
   "Pass BODY to the R process in SESSION.  If RESULT-TYPE equals
 'output then return a list of the outputs of the statements in
 BODY, if RESULT-TYPE equals 'value then return the value of the
@@ -160,7 +162,7 @@ last statement in BODY, as elisp."
 		(stderr
 		 (with-temp-buffer
 		   (insert (format org-babel-R-wrapper-method
-				   body tmp-file (if column-names-p "TRUE" "FALSE")))
+				   body tmp-file (if row-names-p "TRUE" "FALSE") (if column-names-p (if row-names-p "NA" "TRUE") "FALSE")))
 		   (setq exit-code (org-babel-shell-command-on-region
 				    (point-min) (point-max) "R --no-save" nil 'replace (current-buffer)))
 		   (buffer-string))))
@@ -175,7 +177,7 @@ last statement in BODY, as elisp."
 	      (case result-type
 		(value
 		 (mapconcat #'org-babel-chomp (list body
-						    (format "write.table(.Last.value, file=\"%s\", sep=\"\\t\", na=\"nil\",row.names=FALSE, col.names=%s, quote=FALSE)" tmp-file (if column-names-p "TRUE" "FALSE"))
+						    (format "write.table(.Last.value, file=\"%s\", sep=\"\\t\", na=\"nil\",row.names=%s, col.names=%s, quote=FALSE)" tmp-file (if row-names-p "TRUE" "FALSE") (if column-names-p  (if row-names-p "NA" "TRUE") "FALSE"))
 						    org-babel-R-eoe-indicator) "\n"))
 		(output
 		 (mapconcat #'org-babel-chomp (list body org-babel-R-eoe-indicator) "\n"))))
