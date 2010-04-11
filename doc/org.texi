@@ -10842,6 +10842,8 @@ above, or by customizing the variable @code{org-publish-use-timestamps-flag}.
 This may be necessary in particular if files include other files via
 @code{#+SETUPFILE:} or @code{#+INCLUDE:}.
 
+@include source-code-chapter.texi
+
 @node Miscellaneous, Hacking, Publishing, Top
 @chapter Miscellaneous
 
