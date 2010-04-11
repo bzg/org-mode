@@ -8,10 +8,11 @@
 @subsection Source Code Block
 The basic syntax of source code blocks in Org-babel is as follows:
 
-: #+begin_src language header-arguments
-: body
-: #+end_src
-
+@example
+#+begin_src language header-arguments
+body
+#+end_src
+@end example
 - language :: The language of the code in the source code block. Valid
      values must be members of =org-babel-interpreters=.
 - header-arguments :: Header arguments control many facets of the
@@ -26,10 +27,12 @@ The basic syntax of source code blocks in Org-babel is as follows:
 
 This syntax can be expanded by naming the source code block.
 
-: #+source: name
-: #+begin_src language header-arguments
-:
-: #+end_src
+@example
+#+sourcename
+#+begin_src language header-arguments
+body
+#+end_src
+@end example
 
 - name :: This name is associated with the source code block.  This is
      similar to the =#+tblname= lines that can be used to name tables
@@ -42,33 +45,35 @@ This syntax can be expanded by naming the source code block.
 @subsection Library of Babel
 [[file:library-of-babel.org][Library of Babel]] functions can be called using the following syntax.
 
-: #+lob: R-plot(data=R-plot-example-data)
+@example
+#+lob: R-plot(data=R-plot-example-data)
+@end example
 
 @subsection Aliases
    Keyword aliases are intended to make Org-babel feel natural to
    programmers fluent in a variety of languages.  For example,
-   #+begin_example
-     ,#+srcname: alias-example
-     ,#+begin_src emacs-lisp
+   @example
+     #+srcname: alias-example
+     #+begin_src emacs-lisp
        '((call lob)
          (source function srcname)
          (results resname))
-     ,#+end_src
+     #+end_src
 
-     ,#+results: alias-example
+     #+results: alias-example
      | call    | lob      |         |
      | source  | function | srcname |
      | results | resname  |         |
-   #+end_example
+   @end example
      - =#+srcname:= can be replaced with either of two aliases,  =#+source:= or =#+function:=.
      - =#+results:= can be replaced with its alias, =#+resname:=.
 
    When calling Library of Babel functions, as in the following
    example, there are two acceptable keywords.  The =#+lob= call in
    the example could be replaced with its alias, =#+call=.
-   #+begin_example
-     ,#+lob: R-plot(data=R-plot-example-data)
-   #+end_example
+   @example
+     #+lob: R-plot(data=R-plot-example-data)
+   @end example
 
 @section Languages
   :PROPERTIES:
@@ -107,9 +112,9 @@ This syntax can be expanded by naming the source code block.
   are met, then add a line like the following to your Emacs
   configuration, (replace "identifier" with one of the
   entries in the Identifier column of the table).
-  #+begin_src emacs-lisp
+  @example
     (require 'org-babel-identifier)
-  #+end_src
+  @end example
 
 @section Header Arguments
     :PROPERTIES:
@@ -133,7 +138,7 @@ each more specific than the last.
 
  System-wide values of header arguments can be specified by
  customizing the =org-babel-default-header-args= variable:
- #+begin_example
+ @example
    org-babel-default-header-args is a variable defined in `org-babel.el'.
    Its value is
    ((:session . "none")
@@ -145,16 +150,16 @@ each more specific than the last.
 
    Documentation:
    Default arguments to use when evaluating a source block.
- #+end_example
+ @end example
  [[#default-noweb]]
  For example, the following example could be used to set the default value
  of =:noweb= header arguments to =yes=.  This would have the effect of
  expanding =:noweb= references by default when evaluating source code blocks.
- #+begin_src emacs-lisp :results silent :exports code
+ @example
    (setq org-babel-default-header-args
          (cons '(:noweb . "yes")
                (assq-delete-all :noweb org-babel-default-header-args)))
- #+end_src
+ @end example
 
 *** Org-mode Properties
 
@@ -162,13 +167,13 @@ each more specific than the last.
  means they can be set on the outline header level.  For example, the
  value of the =:cache= header argument will default to true in all
  source code blocks under the following example of an Org-mode outline header:
- #+begin_example
-   ,* outline header
+ @example
+   * outline header
      :PROPERTIES:
      :cache:    yes
      :CUSTOM_ID: property-set-header-arguments
      :END:
- #+end_example
+ @end example
  Properties defined in this way override the properties set in
  =org-babel-default-header-args=.  It is convenient to use the
  =org-set-property= function bound to =C-c C-x p= to set properties
@@ -189,13 +194,13 @@ each more specific than the last.
  header argument is set to =code=, meaning only the body of the
  source code block
  will be preserved on export to HTML or LaTeX.
- #+begin_example
-   ,#+source: factorial
-   ,#+begin_src haskell :results silent :exports code
+ @example
+   #+source: factorial
+   #+begin_src haskell :results silent :exports code
      fac 0 = 1
      fac n = n * fac (n-1)
-   ,#+end_src
- #+end_example
+   #+end_src
+ @end example
 
 @subsection Specific Header Arguments
     :PROPERTIES:
@@ -223,64 +228,64 @@ each more specific than the last.
     The following syntax is used to pass arguments to source code
     blocks using the =:var= header argument.
 
-    #+begin_example
+    @example
       :var name=assign
-    #+end_example
+    @end example
 
     where =assign= can take one of the following forms
 
     - literal value :: either a string ="string"= or a number =9=.
     - reference :: a table name:
 
-         #+begin_example
-           ,#+tblname: example-table
+         @example
+           #+tblname: example-table
            | 1 |
            | 2 |
            | 3 |
            | 4 |
 
-           ,#+source: table-length
-           ,#+begin_src emacs-lisp :var table=example-table
+           #+source: table-length
+           #+begin_src emacs-lisp :var table=example-table
              (length table)
-           ,#+end_src
+           #+end_src
 
-           ,#+results: table-length
+           #+results: table-length
            : 4
-         #+end_example
+         @end example
 
          a source code block name, as assigned by =#+srcname:=,
          followed by parentheses:
 
-         #+begin_example
-           ,#+begin_src emacs-lisp :var length=table-length()
+         @example
+           #+begin_src emacs-lisp :var length=table-length()
              (* 2 length)
-           ,#+end_src
+           #+end_src
 
-           ,#+results:
+           #+results:
            : 8
-         #+end_example
+         @end example
 
          In addition, an argument can be passed to the source code
          block referenced by =:var=.  The argument is passed within
          the parentheses following the source code block name:
 
-         #+begin_example
-           ,#+source: double
-           ,#+begin_src emacs-lisp :var input=8
+         @example
+           #+source: double
+           #+begin_src emacs-lisp :var input=8
              (* 2 input)
-           ,#+end_src
+           #+end_src
 
-           ,#+results: double
+           #+results: double
            : 16
 
-           ,#+source: squared
-           ,#+begin_src emacs-lisp :var input=double(input=1)
+           #+source: squared
+           #+begin_src emacs-lisp :var input=double(input=1)
              (* input input)
-           ,#+end_src
+           #+end_src
 
-           ,#+results: squared
+           #+results: squared
            : 4
-         #+end_example
+         @end example
 
 **** alternate argument syntax
      :PROPERTIES:
@@ -291,12 +296,12 @@ each more specific than the last.
      natural way using the =#+source:= line of a source code block.
      As in the following example arguments can be packed inside of
      parenthesis following the source name.
-     #+begin_example
-       ,#+source: double(input=0)
-       ,#+begin_src emacs-lisp
+     @example
+       #+source: double(input=0)
+       #+begin_src emacs-lisp
          (* 2 input)
-       ,#+end_src
-     #+end_example
+       #+end_src
+     @end example
 
 **** indexable variable values
      :PROPERTIES:
@@ -308,9 +313,9 @@ each more specific than the last.
      assigns the second and third rows of the table
      =example-table= to the variable =data=:
 
-     #+begin_example
+     @example
        :var data=example-table[1:2]
-     #+end_example
+     @end example
 
      *Note:* ranges are indexed using the =:= operator.
 
@@ -319,9 +324,9 @@ each more specific than the last.
      The following example assigns the second column of the
      first row of =example-table= to =data=:
 
-     #+begin_example
+     @example
        :var data=example-table[0,1]
-     #+end_example
+     @end example
 
      It is possible to index into the results of source code blocks
      as well as tables.  Any number of dimensions can be indexed.
@@ -330,7 +335,7 @@ each more specific than the last.
      For more information on indexing behavior see the documentation
      for the =org-babel-ref-index-list= function -- provided below.
 
-     #+begin_example
+     @example
        org-babel-ref-index-list is a Lisp function in `org-babel-ref.el'.
 
        (org-babel-ref-index-list INDEX LIS)
@@ -340,7 +345,7 @@ each more specific than the last.
        next deepest nesting or dimension.  A valid PORTION can consist
        of either an integer index, or two integers separated by a : in
        which case the entire range is returned.
-     #+end_example
+     @end example
 
      *Note:* In Emacs, the documentation for any function or variable
      can be read using the =describe-function= (M-x describe
@@ -468,22 +473,22 @@ each more specific than the last.
     In other words, if you want your plot to go into a folder called
     Work in your home directory, you could use
 
-#+begin_example 
-  ,#+begin_src R :file myplot.png :dir ~/Work
+@example 
+  #+begin_src R :file myplot.png :dir ~/Work
   matplot(matrix(rnorm(100), 10), type="l")
-  ,#+end_src
-#+end_example
+  #+end_src
+@end example
 
 **** Remote execution
      A directory on a remote machine can be specified using [[http://www.gnu.org/software/tramp/#Filename-Syntax][tramp
      filename syntax]], in which case the code will be executed on the
      remote machine[fn:2]. An example is
 
-#+begin_example 
-,#+begin_src R :file plot.png :dir /dand@@yakuba.princeton.edu:
+@example 
+#+begin_src R :file plot.png :dir /dand@@yakuba.princeton.edu:
   plot(1:10, main=system("hostname", intern=TRUE))
-,#+end_src
-#+end_example
+#+end_src
+@end example
 
 Text results will be returned to the local org buffer as normal, and
 file output will be created on the remote machine with relative paths
@@ -493,9 +498,9 @@ remote file will be created.
 So in the above example a plot will be created on the remote machine,
 and a link of the following form will be inserted in the org buffer:
 
-#+begin_example 
+@example 
 [[file:/scp:dand@@yakuba.princeton.edu:/home/dand/plot.png][plot.png]]
-#+end_example
+@end example
 
 Most of this functionality follows immediately from the fact that
 =:dir= sets the value of the emacs variable =default-directory=,
@@ -591,17 +596,17 @@ above features to work correctly.
 
      This source code block:
 
-     #+begin_example
+     @example
        -- <<example>>
-     #+end_example
+     @end example
 
 
      expands to:
 
-     #+begin_example
+     @example
        -- this is the
        -- multi-line body of example
-     #+end_example
+     @end example
 
      Note that noweb replacement text that does *not* contain any
      newlines will not be affected by this change, so it is still
@@ -683,6 +688,7 @@ above features to work correctly.
        non-interactive interpreter running as an external process. For
        example, compare the following two blocks:
 
+@example
 #+begin_src python :results output
        print "hello"
        2
@@ -692,9 +698,10 @@ above features to work correctly.
 #+resname:
        : hello
        : bye
+@end example
 
        In non-session mode, the '2' is not printed and does not appear.
-
+@example
 #+begin_src python :results output :session
        print "hello"
        2
@@ -705,6 +712,7 @@ above features to work correctly.
        : hello
        : 2
        : bye
+@end example
 
        But in =:session= mode, the interactive interpreter receives input '2'
        and prints out its value, '2'. (Indeed, the other print statements are
@@ -776,7 +784,7 @@ above features to work correctly.
     :CUSTOM_ID: function-org-babel-execute-src-block
     :END:
 
-#+begin_example
+@example
   org-babel-execute-src-block is an interactive Lisp function in
   `org-babel.el'.
 
@@ -793,14 +801,14 @@ above features to work correctly.
   Optionally supply a value for PARAMS which will be merged with
   the header arguments specified at the front of the source code
   block.
-#+end_example
+@end example
 
 *** org-babel-open-src-block-result
     :PROPERTIES:
     :CUSTOM_ID: function-org-babel-open-src-block-result
     :END:
 
-#+begin_example
+@example
   org-babel-open-src-block-result is an interactive Lisp function in
   `org-babel.el'.
 
@@ -810,14 +818,14 @@ above features to work correctly.
   source code block, otherwise return nil.  With optional prefix
   argument RE-RUN the source-code block is evaluated even if
   results already exist.
-#+end_example
+@end example
 
 *** org-babel-load-in-session
     :PROPERTIES:
     :CUSTOM_ID: function-org-babel-load-in-session
     :END:
 
-#+begin_example
+@example
   org-babel-load-in-session is an interactive Lisp function in
   `org-babel.el'.
 
@@ -828,14 +836,14 @@ above features to work correctly.
   session.  After loading the body this pops open the session.
 
   [back]
-#+end_example
+@end example
 
 *** org-babel-pop-to-session
     :PROPERTIES:
     :CUSTOM_ID: function-org-babel-pop-to-session
     :END:
 
-#+begin_example
+@example
   org-babel-pop-to-session is an interactive Lisp function in
   `org-babel.el'.
 
@@ -847,14 +855,14 @@ above features to work correctly.
   of the source block to the kill ring.
 
   [back]
-#+end_example
+@end example
 
 *** org-babel-tangle
     :PROPERTIES:
     :CUSTOM_ID: function-org-babel-tangle
     :END:
 
-#+begin_example
+@example
   org-babel-tangle is an interactive Lisp function in
   `org-babel-tangle.el'.
 
@@ -867,14 +875,14 @@ above features to work correctly.
   TARGET-FILE can be used to specify a default export file for all
   source blocks.  Optional argument LANG can be used to limit the
   exported source code blocks by language.
-#+end_example
+@end example
 
 *** org-babel-execute-subtree
     :PROPERTIES:
     :CUSTOM_ID: function-org-babel-execute-subtree
     :END:
 
-#+begin_example
+@example
   org-babel-execute-subtree is an interactive Lisp function in
   `org-babel.el'.
 
@@ -883,14 +891,14 @@ above features to work correctly.
   (org-babel-execute-subtree &optional ARG)
 
   Replace EVAL snippets in the entire subtree.
-#+end_example
+@end example
 
 *** org-babel-execute-buffer
     :PROPERTIES:
     :CUSTOM_ID: function-org-babel-execute-buffer
     :END:
 
-#+begin_example
+@example
   org-babel-execute-buffer is an interactive Lisp function in
   `org-babel.el'.
 
@@ -899,14 +907,14 @@ above features to work correctly.
   (org-babel-execute-buffer &optional ARG)
 
   Replace EVAL snippets in the entire buffer.
-#+end_example
+@end example
 
 *** org-babel-sha1-hash
     :PROPERTIES:
     :CUSTOM_ID: function-org-babel-sha1-hash
     :END:
 
-#+begin_example
+@example
   org-babel-sha1-hash is an interactive Lisp function in `org-babel.el'.
 
   It is bound to C-c M-b h.
@@ -914,14 +922,14 @@ above features to work correctly.
   (org-babel-sha1-hash &optional INFO)
 
   Not documented.
-#+end_example
+@end example
 
 *** org-babel-goto-named-source-block
     :PROPERTIES:
     :CUSTOM_ID: function-org-babel-goto-named-source-block
     :END:
 
-#+begin_example
+@example
   org-babel-goto-named-source-block is an interactive Lisp function in
   `org-babel.el'.
 
@@ -930,14 +938,14 @@ above features to work correctly.
   (org-babel-goto-named-source-block &optional NAME)
 
   Go to a named source-code block.
-#+end_example
+@end example
 
 *** org-babel-lob-ingest
     :PROPERTIES:
     :CUSTOM_ID: function-org-babel-lob-ingest
     :END:
 
-#+begin_example
+@example
   org-babel-lob-ingest is an interactive Lisp function in
   `org-babel-lob.el'.
 
@@ -946,7 +954,7 @@ above features to work correctly.
   (org-babel-lob-ingest &optional FILE)
 
   Add all source-blocks defined in FILE to `org-babel-library-of-babel'.
-#+end_example
+@end example
 
 @section Batch Execution
 It is possible to call Org-babel functions from the command line.
@@ -954,7 +962,7 @@ This shell script calls [[function-org-babel-tangle][org-babel-tangle]] on every
 arguments.
 
 Be sure to adjust the paths to fit your system.
-#+begin_src sh
+@example
   #!/bin/sh
   # -*- mode: shell-script -*-
   #
@@ -977,7 +985,7 @@ Be sure to adjust the paths to fit your system.
          (find-file (expand-file-name file \"$DIR\"))
          (org-babel-tangle)
          (kill-buffer)) '($FILES)))"
-#+end_src
+@end example
 
 @section Footnotes
 
