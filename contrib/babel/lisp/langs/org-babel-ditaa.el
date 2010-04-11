@@ -49,6 +49,8 @@
   '((:results . "file") (:exports . "results"))
   "Default arguments to use when evaluating a ditaa source block.")
 
+(defun org-babel-expand-body:ditaa (body params &optional processed-params) body)
+
 (defun org-babel-execute:ditaa (body params)
   "Execute a block of Ditaa code with org-babel.  This function is
 called by `org-babel-execute-src-block'."
