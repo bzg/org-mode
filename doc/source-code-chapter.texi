@@ -287,7 +287,7 @@ each more specific than the last.
            : 4
          @end example
 
-**** alternate argument syntax
+@subsubheading alternate argument syntax
      :PROPERTIES:
      :CUSTOM_ID: alternate-argument-syntax
      :END:
@@ -369,7 +369,7 @@ each more specific than the last.
      *Note:* only one option from each type may be supplied per source code
        block.
 
-**** collection
+@subsubheading collection
     :PROPERTIES:
     :CUSTOM_ID: header-argument-results-collection
     :END:
@@ -388,7 +388,7 @@ each more specific than the last.
                 block.  This header argument places Org-babel in scripting
                 mode.  E.g., =:results output=.
 
-**** type
+@subsubheading type
      The following options are mutually exclusive and specify what
      type of results the code block will return.  By default, results
      are inserted as either a *table* or *scalar* depending on their
@@ -419,7 +419,7 @@ each more specific than the last.
              enclosed in a code block.  This option currently supports
              Emacs Lisp, python, and ruby.  E.g., =:results value pp=.
 
-**** handling
+@subsubheading handling
      The following results options indicate what Org-babel should do
      with the results once they are collected.
 
@@ -479,7 +479,7 @@ each more specific than the last.
   #+end_src
 @end example
 
-**** Remote execution
+@subsubheading Remote execution
      A directory on a remote machine can be specified using [[http://www.gnu.org/software/tramp/#Filename-Syntax][tramp
      filename syntax]], in which case the code will be executed on the
      remote machine[fn:2]. An example is
@@ -508,7 +508,7 @@ thanks to [[http://www.gnu.org/software/tramp/][tramp]]. Those using XEmacs, or 
 version 23 may need to install tramp separately in order for the
 above features to work correctly.
 
-**** Further points
+@subsubheading Further points
      - If =:dir= is used in conjunction with =:session=, although it
        will determine the starting directory for a new session as
        expected, no attempt is currently made to alter the directory
@@ -584,7 +584,7 @@ above features to work correctly.
     - =yes= :: all [[noweb-reference-syntax][noweb syntax]] references in the body of the source
                code block will be expanded before the block is evaluated.
 
-**** Noweb Prefix Lines
+@subsubheading Noweb Prefix Lines
 
      Noweb insertions are now placed behind the line prefix of the
      =<<reference>>=.
@@ -652,8 +652,8 @@ above features to work correctly.
     non-session is returned to Org-mode as a table (a one- or
     two-dimensional vector of strings or numbers) when appropriate.
 
-**** Non-session
-***** =:results value=
+@subsection Non-session
+@subsubsection =:results value=
       This is the default. Internally, the value is obtained by
       wrapping the code in a function definition in the external
       language, and evaluating that function. Therefore, code should be
@@ -665,21 +665,21 @@ above features to work correctly.
       This is the only one of the four evaluation contexts in which the
       code is automatically wrapped in a function definition.
 
-***** =:results output=
+@subsubsection =:results output=
       The code is passed to the interpreter as an external process, and
       the contents of the standard output stream are returned as
       text. (In certain languages this also contains the error output
       stream; this is an area for future work.)
 
-**** =:session=
-***** =:results value=
+@subsection =:session=
+@subsubsection =:results value=
       The code is passed to the interpreter running as an interactive
       Emacs inferior process. The result returned is the result of the
       last evaluation performed by the interpreter. (This is obtained in
       a language-specific manner: the value of the variable =_= in
       python and ruby, and the value of =.Last.value= in R).
 
-***** =:results output=
+@subsubsection =:results output=
        The code is passed to the interpreter running as an interactive
        Emacs inferior process. The result returned is the concatenation
        of the sequence of (text) output from the interactive
@@ -687,6 +687,7 @@ above features to work correctly.
        would be sent to stdout if the same code were passed to a
        non-interactive interpreter running as an external process. For
        example, compare the following two blocks:
+
 
 @example
 #+begin_src python :results output
