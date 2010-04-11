@@ -480,7 +480,7 @@ each more specific than the last.
      remote machine[fn:2]. An example is
 
 #+begin_example 
-,#+begin_src R :file plot.png :dir /dand@yakuba.princeton.edu:
+,#+begin_src R :file plot.png :dir /dand@@yakuba.princeton.edu:
   plot(1:10, main=system("hostname", intern=TRUE))
 ,#+end_src
 #+end_example
@@ -494,7 +494,7 @@ So in the above example a plot will be created on the remote machine,
 and a link of the following form will be inserted in the org buffer:
 
 #+begin_example 
-[[file:/scp:dand@yakuba.princeton.edu:/home/dand/plot.png][plot.png]]
+[[file:/scp:dand@@yakuba.princeton.edu:/home/dand/plot.png][plot.png]]
 #+end_example
 
 Most of this functionality follows immediately from the fact that
@@ -964,7 +964,7 @@ Be sure to adjust the paths to fit your system.
   FILES=""
 
   # wrap each argument in the code required to call tangle on it
-  for i in $@; do
+  for i in $@@; do
   FILES="$FILES \"$i\""
   done
 
@@ -985,22 +985,3 @@ Be sure to adjust the paths to fit your system.
 
 [fn:2] As long as the interpreter executable is found on the remote
 machine: see the variable =tramp-remote-path=
-
-
-@section HTML 1                                                           :noexport:
-
-#+begin_html
-  <style type="text/css">
-   <!--/*--><![CDATA[/*><!--*/
-  #table-of-contents {
-    max-width: 100%;
-    margin: 0;
-  }
-    /*]]>*/-->
-  </style>
-#+end_html
-
-@subsection Note
-   - HTML 1 was keeping the babelfish code from exporting.  Not sure
-     why or if the code itself is necessary, but moving it here gets
-     the fish on the page.
