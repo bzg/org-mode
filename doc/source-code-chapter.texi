@@ -131,7 +131,7 @@ language-specific header arguments.
 The values of header arguments can be set in three different ways,
 each more specific than the last.
 
-*** System-wide
+@subsubsection System-wide
     :PROPERTIES:
     :CUSTOM_ID: system-wide-header-argument
     :END:
@@ -161,7 +161,7 @@ each more specific than the last.
                (assq-delete-all :noweb org-babel-default-header-args)))
  @end example
 
-*** Org-mode Properties
+@subsubsection Org-mode Properties
 
  Header arguments are also read from [[http://orgmode.org/manual/Properties-and-Columns.html#Properties-and-Columns][Org-mode properties]], which
  means they can be set on the outline header level.  For example, the
@@ -179,7 +179,7 @@ each more specific than the last.
  =org-set-property= function bound to =C-c C-x p= to set properties
  in Org-mode documents.
 
-*** Source Code Block
+@subsubsection Source Code Block
     :PROPERTIES:
     :CUSTOM_ID: single-block-header-arguments
     :END:
@@ -207,7 +207,7 @@ each more specific than the last.
     :CUSTOM_ID: header-argument-specific-documentation
     :END:
 
-*** =:var=
+@subsubsection =:var=
     :PROPERTIES:
     :CUSTOM_ID: header-argument-var
     :END:
@@ -352,7 +352,7 @@ each more specific than the last.
      function) and =describe-variable= (M-x describe variable)
      functions, respectively.
 
-*** =:results=
+@subsubsection =:results=
     :PROPERTIES:
     :CUSTOM_ID: header-argument-results
     :END:
@@ -430,7 +430,7 @@ each more specific than the last.
                   into the Org-mode buffer.  E.g., =:results output
                   replace=.
 
-*** =:file=
+@subsubsection =:file=
     :PROPERTIES:
     :CUSTOM_ID: header-argument-file
     :END:
@@ -453,7 +453,7 @@ each more specific than the last.
     While the =:file= header argument can be used to specify the path
     to the output file,
 
-*** =:dir= and remote execution
+@subsubsection =:dir= and remote execution
     :PROPERTIES:
     :CUSTOM_ID: header-argument-dir
     :END:
@@ -521,7 +521,7 @@ above features to work correctly.
        default-directory is altered using =:dir=, it it probable that
        the file will be created in a location to which the link does
        not point.
-*** =:exports=
+@subsubsection =:exports=
     :PROPERTIES:
     :CUSTOM_ID: header-argument-exports
     :END:
@@ -538,7 +538,7 @@ above features to work correctly.
     - none :: nothing is included in the exported file.  E.g.,
                =:exports none=.
 
-*** =:tangle=
+@subsubsection =:tangle=
     :PROPERTIES:
     :CUSTOM_ID: tangle-header-arguments
     :END:
@@ -555,7 +555,7 @@ above features to work correctly.
                 is interpreted as a file basename to which the block will
                 be exported.  E.g., =:tangle basename=.
 
-*** =:session=
+@subsubsection =:session=
     :PROPERTIES:
     :CUSTOM_ID: header-argument-session
     :END:
@@ -570,7 +570,7 @@ above features to work correctly.
     session a name.  This makes it possible to run concurrent
     sessions for each interpreted language.
 
-*** =:noweb=
+@subsubsection =:noweb=
     :PROPERTIES:
     :CUSTOM_ID: header-argument-noweb
     :END:
@@ -614,7 +614,7 @@ above features to work correctly.
 
      Thanks to Sébastien Vauban for this idea.
 
-*** =:cache=
+@subsubsection =:cache=
     :PROPERTIES:
     :CUSTOM_ID: header-argument-cache
     :END:
@@ -779,7 +779,7 @@ above features to work correctly.
 
 
 @subsection Functions
-*** org-babel-execute-src-block
+@subsubsection org-babel-execute-src-block
     :PROPERTIES:
     :CUSTOM_ID: function-org-babel-execute-src-block
     :END:
@@ -803,7 +803,7 @@ above features to work correctly.
   block.
 @end example
 
-*** org-babel-open-src-block-result
+@subsubsection org-babel-open-src-block-result
     :PROPERTIES:
     :CUSTOM_ID: function-org-babel-open-src-block-result
     :END:
@@ -820,7 +820,7 @@ above features to work correctly.
   results already exist.
 @end example
 
-*** org-babel-load-in-session
+@subsubsection org-babel-load-in-session
     :PROPERTIES:
     :CUSTOM_ID: function-org-babel-load-in-session
     :END:
@@ -838,7 +838,7 @@ above features to work correctly.
   [back]
 @end example
 
-*** org-babel-pop-to-session
+@subsubsection org-babel-pop-to-session
     :PROPERTIES:
     :CUSTOM_ID: function-org-babel-pop-to-session
     :END:
@@ -857,7 +857,7 @@ above features to work correctly.
   [back]
 @end example
 
-*** org-babel-tangle
+@subsubsection org-babel-tangle
     :PROPERTIES:
     :CUSTOM_ID: function-org-babel-tangle
     :END:
@@ -877,7 +877,7 @@ above features to work correctly.
   exported source code blocks by language.
 @end example
 
-*** org-babel-execute-subtree
+@subsubsection org-babel-execute-subtree
     :PROPERTIES:
     :CUSTOM_ID: function-org-babel-execute-subtree
     :END:
@@ -893,7 +893,7 @@ above features to work correctly.
   Replace EVAL snippets in the entire subtree.
 @end example
 
-*** org-babel-execute-buffer
+@subsubsection org-babel-execute-buffer
     :PROPERTIES:
     :CUSTOM_ID: function-org-babel-execute-buffer
     :END:
@@ -909,7 +909,7 @@ above features to work correctly.
   Replace EVAL snippets in the entire buffer.
 @end example
 
-*** org-babel-sha1-hash
+@subsubsection org-babel-sha1-hash
     :PROPERTIES:
     :CUSTOM_ID: function-org-babel-sha1-hash
     :END:
@@ -924,7 +924,7 @@ above features to work correctly.
   Not documented.
 @end example
 
-*** org-babel-goto-named-source-block
+@subsubsection org-babel-goto-named-source-block
     :PROPERTIES:
     :CUSTOM_ID: function-org-babel-goto-named-source-block
     :END:
@@ -940,7 +940,7 @@ above features to work correctly.
   Go to a named source-code block.
 @end example
 
-*** org-babel-lob-ingest
+@subsubsection org-babel-lob-ingest
     :PROPERTIES:
     :CUSTOM_ID: function-org-babel-lob-ingest
     :END:
