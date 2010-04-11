@@ -760,6 +760,7 @@ above features to work correctly.
 
   Org-babel also exposes a number of functions behind the common
   =org-babel-key-prefix= of =C-c M-b=:
+@example
   #+begin_src emacs-lisp :exports none
      (lambda (binding
        (list (format "\\C-c \\M-b %s"
@@ -768,6 +769,8 @@ above features to work correctly.
                      (cdr binding) (cdr binding))))
      org-babel-key-bindings)
   #+end_src
+@end example
+
   | =C-c M-b t= | [[function-org-babel-tangle][org-babel-tangle]]                  |
   | =C-c M-b T= | [[function-org-babel-tangle-file][org-babel-tangle-file]]             |
   | =C-c M-b e= | [[function-org-babel-execute-src-block][org-babel-execute-src-block]]       |
@@ -776,7 +779,6 @@ above features to work correctly.
   | =C-c M-b h= | [[function-org-babel-sha1-hash][org-babel-sha1-hash]]               |
   | =C-c M-b g= | [[function-org-babel-goto-named-source-block][org-babel-goto-named-source-block]] |
   | =C-c M-b l= | [[function-org-babel-lob-ingest][org-babel-lob-ingest]]              |
-
 
 @subsection Functions
 @subsubsection org-babel-execute-src-block
