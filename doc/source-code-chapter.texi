@@ -36,27 +36,32 @@ Using code blocks in table formulas
 The basic syntax of source code blocks in Org-babel is as follows:
 
 @example
-#+begin_src language header-arguments
+#+begin_src language header-arguments switches
 body
 #+end_src
 @end example
-- language :: The language of the code in the source code block. Valid
-     values must be members of =org-babel-interpreters=.
-- header-arguments :: Header arguments control many facets of the
-     evaluation and output of source code blocks.  See the [[header-arguments][Header
-     Arguments]] section for a complete review of available header
-     arguments.
-- body :: The source code to be evaluated.  An important key-binding
-     is C-c '.  This calls =org-edit-src-code=, a function that brings
-     up an edit buffer containing the code using the Emacs major mode
-     appropriate to the language.  You can edit your source code block
-     as you regularly would in Emacs.
-
+@table
+@item language
+The language of the code in the source code block. Valid values must
+be members of =org-babel-interpreters=.
+@item header-arguments
+Header arguments control many facets of the evaluation and output of
+source code blocks.  See the [[header-arguments][Header Arguments]]
+section for a complete review of available header arguments.
+@item switches
+FIXME link/relocate switches discussion in ``Literal examples'' section
+@item body
+The source code to be evaluated.  An important key-binding is C-c '.
+This calls =org-edit-src-code=, a function that brings up an edit
+buffer containing the code using the Emacs major mode appropriate to
+the language.  You can edit your source code block as you regularly
+would in Emacs.
+@end table
 This syntax can be expanded by naming the source code block.
 
 @example
 #+sourcename
-#+begin_src language header-arguments
+#+begin_src language header-arguments switches
 body
 #+end_src
 @end example
