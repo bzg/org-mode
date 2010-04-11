@@ -1,4 +1,31 @@
-@chapter Working with source code or Embedded Source Code
+@chapter Working With Source Code or Embedded Source Code
+
+Source code can be included in Org-mode documents using a @samp{src} block:
+
+FIXME: This example is also in the Literal Examples section.
+@example
+#+BEGIN_SRC emacs-lisp
+(defun org-xor (a b)
+   "Exclusive or."
+   (if a (not b) b))
+#+END_SRC
+@end example
+
+Org supports the following ways of working with such code blocks:
+
+@itemize @bullet
+@item
+Editing in the appropriate Emacs major-mode (@kbd{C-c '})
+@item
+Export with appropriate markup
+@item
+Extraction (``tangling'') into pure code files.
+@item
+Execution, with results captured in the Org buffer
+@item
+Using code blocks in table formulas
+@end itemize
+
 
 @section Syntax
   :PROPERTIES:
