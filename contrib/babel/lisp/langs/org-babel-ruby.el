@@ -105,14 +105,16 @@ specifying a var of the same value."
 (defun org-babel-ruby-table-or-string (results)
   "If the results look like a table, then convert them into an
 Emacs-lisp table, otherwise return the results as a string."
+  (message "converting %S" results)
   (org-babel-read
    (if (and (stringp results) (string-match "^\\[.+\\]$" results))
        (org-babel-read
-        (replace-regexp-in-string
-         "\\[" "(" (replace-regexp-in-string
-                    "\\]" ")" (replace-regexp-in-string
-                               ", " " " (replace-regexp-in-string
-                                         "'" "\"" results)))))
+        (concat "'"
+                (replace-regexp-in-string
+                 "\\[" "(" (replace-regexp-in-string
+                            "\\]" ")" (replace-regexp-in-string
+                                       ", " " " (replace-regexp-in-string
+                                                 "'" "\"" results))))))
      results)))
 
 (defun org-babel-ruby-initiate-session (&optional session params)

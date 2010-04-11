@@ -1,11 +1,11 @@
 ;;; org-footnote.el --- Footnote support in Org and elsewhere
 ;;
-;; Copyright (C) 2009 Free Software Foundation, Inc.
+;; Copyright (C) 2009, 2010 Free Software Foundation, Inc.
 ;;
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 6.34trans
+;; Version: 6.35g
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -183,7 +183,7 @@ with start and label of the footnote if there is a definition at point."
       (message "Edit definition and go back with `C-c &' or, if unique, with `C-c C-c'."))))
 
 (defun org-footnote-goto-next-reference (label)
-  "Find the definition of the footnote with label LABEL."
+  "Find the next reference of the footnote with label LABEL."
   (interactive "sLabel: ")
   (org-mark-ring-push)
   (setq label (org-footnote-normalize-label label))

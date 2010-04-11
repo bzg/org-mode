@@ -125,11 +125,12 @@ Emacs-lisp table, otherwise return the results as a string."
   (org-babel-read
    (if (and (stringp results) (string-match "^\\[.+\\]$" results))
        (org-babel-read
-        (replace-regexp-in-string
-         "\\[" "(" (replace-regexp-in-string
-                    "\\]" ")" (replace-regexp-in-string
-                               "," " " (replace-regexp-in-string
-                                         "'" "\"" results)))))
+        (concat "'"
+                (replace-regexp-in-string
+                 "\\[" "(" (replace-regexp-in-string
+                            "\\]" ")" (replace-regexp-in-string
+                                       "," " " (replace-regexp-in-string
+                                                "'" "\"" results))))))
      results)))
 
 (defun org-babel-haskell-export-to-lhs (&optional arg)

@@ -6,7 +6,7 @@
 ;;         Ulf Stegemann <ulf at zeitform dot de>
 ;; Keywords: outlines, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 6.34trans
+;; Version: 6.35g
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -25,6 +25,10 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;; Commentary:
+
+(require 'org-macs)
+
+(declare-function org-table-align "org-table" ())
 
 (eval-when-compile
   (require 'cl))
@@ -58,7 +62,10 @@ ASCII replacement    Plain ASCII, no extensions.  Symbols that cannot be
                      represented will be written out as an explanatory text.
                      But see the variable `org-entities-ascii-keep-macro-form'.
 Latin1 replacement   Use the special characters available in latin1.
-utf-8 replacement    Use special character available in utf-8."
+utf-8 replacement    Use special character available in utf-8.
+
+If you define new entities here that require specific LaTeX packages to be
+loaded, add these packages to `org-export-latex-packages-alist'."
   :group 'org-entities
   :type '(repeat
 	  (list
@@ -429,7 +436,8 @@ Kind can be any of `latex', `html', `ascii', `latin1', or `utf8'."
 	 (n (cdr (assq kind '((latex . 1) (html . 3) (ascii . 4)
 			      (latin1 . 5) (utf8 . 6)))))
 	 (r (and e n (nth n e))))
-    (if (and (not org-entities-ascii-explanatory)
+    (if (and e r
+	     (not org-entities-ascii-explanatory)
 	     (memq kind '(ascii latin1 utf8))
 	     (= (string-to-char r) ?\[))
 	(concat "\\" name)
@@ -446,7 +454,7 @@ Kind can be any of `latex', `html', `ascii', `latin1', or `utf8'."
   (interactive)
   (let ((ll org-entities)
 	(pos (point))
-	e latex mathp html latin utf8)
+	e latex mathp html latin utf8 name ascii)
     (insert "|Name|LaTeX code|LaTeX|HTML code |HTML|ASCII|Latin1|UTF-8\n|-\n")
     (while ll
       (setq e (pop ll))

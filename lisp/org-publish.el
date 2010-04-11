@@ -1,10 +1,11 @@
 ;;; org-publish.el --- publish related org-mode files as a website
-;; Copyright (C) 2006, 2007, 2008, 2009  Free Software Foundation, Inc.
+;; Copyright (C) 2006, 2007, 2008, 2009, 2010
+;;          Free Software Foundation, Inc.
 
 ;; Author: David O'Toole <dto@gnu.org>
 ;; Maintainer: Carsten Dominik <carsten DOT dominik AT gmail DOT com>
 ;; Keywords: hypermedia, outlines, wp
-;; Version: 6.34trans
+;; Version: 6.35g
 
 ;; This file is part of GNU Emacs.
 ;;
@@ -724,7 +725,8 @@ the project."
 (defvar backend) ; dynamically scoped
 (defun org-publish-aux-preprocess ()
   "Find index entries and write them to an .orgx file."
-  (let (entry index target)
+  (let ((case-fold-search t)
+	entry index target)
     (goto-char (point-min))
     (while
 	(and

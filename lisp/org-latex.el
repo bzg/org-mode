@@ -1,10 +1,10 @@
 ;;; org-latex.el --- LaTeX exporter for org-mode
 ;;
-;; Copyright (C) 2007, 2008, 2009 Free Software Foundation, Inc.
+;; Copyright (C) 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 ;;
 ;; Emacs Lisp Archive Entry
 ;; Filename: org-latex.el
-;; Version: 6.34trans
+;; Version: 6.35g
 ;; Author: Bastien Guerry <bzg AT altern DOT org>
 ;; Maintainer: Carsten Dominik <carsten.dominik AT gmail DOT com>
 ;; Keywords: org, wp, tex
@@ -128,13 +128,40 @@ The header string
 -----------------
 
 The HEADER-STRING is the header that will be inserted into the LaTeX file.
-It should really only contain the contain the \\documentclass macro, and
-setup code that is specific to this class.  This will be augmented by
-call to \\usepackage for all packages mentioned in the variables
-`org-export-latex-default-packages-alist' and
-`org-export-latex-packages-alist'.  Lines specified via \"#+LaTeX_HEADER:\"
-are also added.
-`org-export-latex-default-packages-alist' contains
+It should contain the \\documentclass macro, and anything else that is needed
+for this setup.  To this header, the following commands will be added:
+
+- Calls to \\usepackage for all packages mentioned in the variables
+  `org-export-latex-default-packages-alist' and
+  `org-export-latex-packages-alist'.  Thus, your header definitions should
+  avoid to also request these packages.
+
+- Lines specified via \"#+LaTeX_HEADER:\"
+
+If you need more control about the sequence in which the header is built
+up, or if you want to exclude one of these building blocks for a particular
+class, you can use the following macro-like placeholders.
+
+ [DEFAULT-PACKAGES]      \\usepackage statements for default packages
+ [NO-DEFAULT-PACKAGES]   do not include any of the default packages
+ [PACKAGES]              \\usepackage statements for packages 
+ [NO-PACKAGES]           do not include the packages
+ [EXTRA]                 the stuff from #+LaTeX_HEADER
+ [NO-EXTRA]              do not include #+LaTeX_HEADER stuff
+
+So a header like
+
+  \\documentclass{article}
+  [NO-DEFAULT-PACKAGES]
+  [EXTRA]
+  \\providecommand{\\alert}[1]{\\textbf{#1}}
+  [PACKAGES]
+
+will omit the default packages, and will include the #+LaTeX_HEADER lines,
+then have a call to \\providecommand, and then place \\usepackage commands
+based on the content of `org-export-latex-packages-alist'.
+
+If your header or `org-export-latex-default-packages-alist' inserts
 \"\\usepackage[AUTO]{inputenc}\", AUTO will automatically be replaced with
 a coding system derived from `buffer-file-coding-system'.  See also the
 variable `org-export-latex-inputenc-alist' for a way to influence this
@@ -144,7 +171,7 @@ The sectioning structure
 ------------------------
 
 The sectioning structure of the class is given by the elements following
-the header string.  For ech sectioning level, a number of strings is
+the header string.  For each sectioning level, a number of strings is
 specified.  A %s formatter is mandatory in each section string and will
 be replaced by the title of the section.
 
@@ -157,14 +184,14 @@ or
 
   (numbered-open numbered-close unnumbered-open unnumbered-close)
 
-providing opening and closing strings for an environment that should
+providing opening and closing strings for a LaTeX environment that should
 represent the document section.  The opening clause should have a %s
 to represent the section title.
 
 Instead of a list of sectioning commands, you can also specify a
 function name.  That function will be called with two parameters,
-the (reduced) level of the headline, and the headline text.  The functions
-returns a cons cell with the (possibly modified) headline text, and the
+the (reduced) level of the headline, and the headline text.  The function
+must return a cons cell with the (possibly modified) headline text, and the
 sectioning list in the cdr."
   :group 'org-export-latex
   :type '(repeat
@@ -557,6 +584,7 @@ simply return the content of \begin{document}...\end{document},
 without even the \begin{document} and \end{document} commands.
 when PUB-DIR is set, use this as the publishing directory."
   (interactive "P")
+  (when (and (not body-only) (listp arg)) (setq body-only t))
   (run-hooks 'org-export-first-hook)
 
   ;; Make sure we have a file name when we need it.
@@ -1113,28 +1141,17 @@ OPT-PLIST is the options plist for current buffer."
     (concat
      (if (plist-get opt-plist :time-stamp-file)
 	 (format-time-string "%% Created %Y-%m-%d %a %H:%M\n"))
-     ;; insert LaTeX custom header
-     (org-export-apply-macros-in-string org-export-latex-header)
-     "\n"
-     ;; insert information on LaTeX packages
-     (when (or org-export-latex-default-packages-alist
-	       org-export-latex-packages-alist)
-       (concat
-	(mapconcat (lambda(p)
-		     (if (equal "" (car p))
-			 (format "\\usepackage{%s}" (cadr p))
-		       (format "\\usepackage[%s]{%s}"
-			       (car p) (cadr p))))
-		   (append org-export-latex-default-packages-alist
-			   org-export-latex-packages-alist)
-		   "\n")
-	"\n"))
-     ;; insert additional commands in the header
-     (org-export-apply-macros-in-string
-      (plist-get opt-plist :latex-header-extra))
+     ;; insert LaTeX custom header and packages from the list
+     (org-splice-latex-header
+      (org-export-apply-macros-in-string org-export-latex-header)
+      org-export-latex-default-packages-alist
+      org-export-latex-packages-alist
+      (org-export-apply-macros-in-string
+       (plist-get opt-plist :latex-header-extra)))
+     ;; append another special variable
      (org-export-apply-macros-in-string org-export-latex-append-header)
      ;; define align if not yet defined
-     "\\providecommand{\\alert}[1]{\\textbf{#1}}"
+     "\n\\providecommand{\\alert}[1]{\\textbf{#1}}"
      ;; insert the title
      (format
       "\n\n\\title{%s}\n"
@@ -1296,7 +1313,7 @@ links, keywords, lists, tables, fixed-width"
     ;; the beginning of the buffer - inserting "\n" is safe here though.
     (insert "\n" string)
     (goto-char (point-min))
-    (let ((re (concat "\\\\[a-zA-Z]+"
+    (let ((re (concat "\\\\\\([a-zA-Z]+\\)"
 		      "\\(?:<[^<>\n]*>\\)*"
 		      "\\(?:\\[[^][\n]*?\\]\\)*"
 		      "\\(?:<[^<>\n]*>\\)*"
@@ -1304,8 +1321,12 @@ links, keywords, lists, tables, fixed-width"
 		      (org-create-multibrace-regexp "{" "}" 3)
 		      "\\)\\{1,3\\}")))
       (while (re-search-forward re nil t)
-	(unless (save-excursion (goto-char (match-beginning 0))
-				(equal (char-after (point-at-bol)) ?#))
+	(unless (or
+		 ;; check for comment line
+		 (save-excursion (goto-char (match-beginning 0))
+				 (equal (char-after (point-at-bol)) ?#))
+		 ;; Check if this is a defined entity, so that is may need conversion
+		 (org-entity-get (match-string 1)))
 	  (add-text-properties (match-beginning 0) (match-end 0)
 			       '(org-protected t)))))
     (when (plist-get org-export-latex-options-plist :emphasize)
@@ -1390,6 +1411,17 @@ See the `org-export-latex.el' code for a complete conversion table."
 					     (match-string 1)
 					     (or (match-string 3) "")))
 					  "") t t)
+		       (when (and (get-text-property (1- (point)) 'org-entity)
+				  (looking-at "{}"))
+			 ;; OK, this was an entity replacement, and the user
+			 ;; had terminated the entity with {}.  Make sure
+			 ;; {} is protected as well, and remove the extra {}
+			 ;; inserted by the conversion.
+			 (put-text-property (point) (+ 2 (point)) 'org-protected t)
+			 (if (save-excursion (goto-char (max (- (point) 2) (point-min)))
+					     (looking-at "{}"))
+			     (replace-match ""))
+			 (forward-char 2))
 		       (backward-char 1))
 		      ((member (match-string 2) '("_" "^"))
 		       (replace-match (or (save-match-data
@@ -1456,12 +1488,14 @@ Convert CHAR depending on STRING-BEFORE and STRING-AFTER."
 The conversion is made depending of STRING-BEFORE and STRING-AFTER."
   (let  ((ass (org-entity-get string-after)))
     (cond
-     (ass (if (nth 2 ass)
-	      (concat string-before
-		      (org-export-latex-protect-string
-		       (concat "$" (nth 1 ass) "$")))
-	    (concat string-before (org-export-latex-protect-string
-				   (nth 1 ass)))))
+     (ass (org-add-props
+	      (if (nth 2 ass)
+		  (concat string-before
+			  (org-export-latex-protect-string
+			   (concat "$" (nth 1 ass) "$")))
+		(concat string-before (org-export-latex-protect-string
+				       (nth 1 ass))))
+	      nil 'org-entity t))
      ((and (not (string-match "^[ \n\t]" string-after))
 	   (not (string-match "[ \t]\\'\\|^" string-before)))
       ;; backslash is inside a word
@@ -1556,7 +1590,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
                              (string-match "\\<align=\\([^ \t\n\r,]+\\)" attr)
                              (match-string 1 attr))
                   floatp (or caption label))
-	    (setq caption (and caption (org-export-latex-content caption)))
+	    (setq caption (and caption (org-export-latex-fontify-headline caption)))
             (setq lines (org-split-string raw-table "\n"))
             (apply 'delete-region (list beg end))
             (when org-export-table-remove-special-lines
@@ -1813,7 +1847,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 				       raw-path))))))))
        ;; process with link inserting
        (apply 'delete-region remove)
-       (setq caption (and caption (org-export-latex-content caption)))
+       (setq caption (and caption (org-export-latex-fontify-headline caption)))
        (cond ((and imgp
 		   (plist-get org-export-latex-options-plist :inline-images))
 	      ;; OK, we need to inline an image
@@ -2013,14 +2047,19 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
   ;; Protect LaTeX commands like \command[...]{...} or \command{...}
   (goto-char (point-min))
   (let ((re (concat
-	     "\\\\[a-zA-Z]+"
+	     "\\\\\\([a-zA-Z]+\\)"
 	     "\\(?:<[^<>\n]*>\\)*"
 	     "\\(?:\\[[^][\n]*?\\]\\)*"
 	     "\\(?:<[^<>\n]*>\\)*"
 	     "\\(" (org-create-multibrace-regexp "{" "}" 3) "\\)\\{1,3\\}")))
     (while (re-search-forward re nil t)
-      (unless (save-excursion (goto-char (match-beginning 0))
-			      (equal (char-after (point-at-bol)) ?#))
+      (unless (or 
+	       ;; check for comment line
+	       (save-excursion (goto-char (match-beginning 0))
+			       (equal (char-after (point-at-bol)) ?#))
+	       ;; Check if this is a defined entity, so that is may need conversion
+	       (org-entity-get (match-string 1))
+	       )
 	(add-text-properties (match-beginning 0) (match-end 0)
 			     '(org-protected t)))))
 

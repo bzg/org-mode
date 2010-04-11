@@ -1,10 +1,10 @@
 ;;; org-crypt.el --- Public key encryption for org-mode entries
 
-;; Copyright (C) 2007, 2009  Free Software Foundation, Inc.
+;; Copyright (C) 2007, 2009, 2010  Free Software Foundation, Inc.
 
 ;; Emacs Lisp Archive Entry
 ;; Filename: org-crypt.el
-;; Version: 6.34trans
+;; Version: 6.35g
 ;; Keywords: org-mode
 ;; Author: John Wiegley <johnw@gnu.org>
 ;; Maintainer: Peter Jones <pjones@pmade.com>

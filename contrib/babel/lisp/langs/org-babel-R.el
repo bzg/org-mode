@@ -59,8 +59,14 @@ called by `org-babel-execute-src-block'."
 (defun org-babel-prep-session:R (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."
   (let* ((session (org-babel-R-initiate-session session params))
-         (vars (org-babel-ref-variables params)))
-    (mapc (lambda (pair) (org-babel-R-assign-elisp session (car pair) (cdr pair))) vars)
+	 (vars (org-babel-ref-variables params))
+	 (var-lines
+	  (mapcar
+	   (lambda (pair) (org-babel-R-assign-elisp (car pair) (cdr pair))) vars)))
+    (org-babel-comint-in-buffer session
+      (mapc (lambda (var)
+              (move-end-of-line 1) (insert var) (comint-send-input nil t)
+              (org-babel-comint-wait-for-output session)) var-lines))
     session))
 
 (defun org-babel-load-session:R (session body params)
@@ -81,7 +87,7 @@ called by `org-babel-execute-src-block'."
     (format "%S" s)))
 
 (defun org-babel-R-assign-elisp (name value)
-  "Read the elisp VALUE into a variable named NAME."
+  "Construct R code assigning the elisp VALUE to a variable named NAME."
   (if (listp value)
       (let ((transition-file (make-temp-file "org-babel-R-import")))
         ;; ensure VALUE has an orgtbl structure (depth of at least 2)
@@ -113,6 +119,7 @@ called by `org-babel-execute-src-block'."
 	   (:jpeg . "jpeg")
 	   (:tiff . "tiff")
 	   (:png . "png")
+	   (:svg . "svg")
 	   (:pdf . "pdf")
 	   (:ps . "postscript")
 	   (:postscript . "postscript")))
@@ -123,7 +130,7 @@ called by `org-babel-execute-src-block'."
 	(device (and (string-match ".+\\.\\([^.]+\\)" out-file) (match-string 1 out-file)))
 	(extra-args (cdr (assq :R-dev-args params))) filearg args)
     (setq device (or (and device (cdr (assq (intern (concat ":" device)) devices))) "png"))
-    (setq filearg (if (member device '("pdf" "postscript")) "file" "filename"))
+    (setq filearg (if (member device '("pdf" "postscript" "svg")) "file" "filename"))
     (setq args (mapconcat (lambda (pair)
 			    (if (member (car pair) allowed-args)
 				(format ",%s=%s" (substring (symbol-name (car pair)) 1) (cdr pair)) ""))

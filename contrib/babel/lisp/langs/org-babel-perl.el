@@ -108,13 +108,7 @@ last statement in BODY, as elisp."
 		     (format
 		      (if (member "pp" result-params)
 			  (error "Pretty-printing not implemented for perl")
-			org-babel-perl-wrapper-method)
-		      (mapconcat
-		       (lambda (line) (format "\t%s" line))
-		       (split-string
-			(org-remove-indentation (org-babel-trim body)) "[\r\n]") "\n")
-		      tmp-file))
-		    ;; (message "buffer=%s" (buffer-string)) ;; debugging
+			org-babel-perl-wrapper-method) body tmp-file))
 		    (setq exit-code
 			  (org-babel-shell-command-on-region
 			   (point-min) (point-max) "perl" nil 'replace (current-buffer)))

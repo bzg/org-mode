@@ -1,9 +1,10 @@
 ;;; org-exp-blocks.el --- pre-process blocks when exporting org files
 
-;; Copyright (C) 2009
+;; Copyright (C) 2009, 2010
 ;;   Free Software Foundation, Inc.
 
 ;; Author: Eric Schulte
+;; Version: 6.35g
 
 ;; This file is part of GNU Emacs.
 ;;

@@ -1,4 +1,86 @@
+2010-04-09  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-mobile.el (org-mobile-check-setup): Make sure that there is
+	a binary to compute checksums.
+
+2010-04-08  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-insert-link): Find the link buffer on visible
+	frames.
+	(org-export-latex-default-packages-alist): hyperref must be loaded
+	late.
+	(org-open-file): More care with the new matching for file links.
+
+2010-04-07  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-latex.el (org-export-latex-preprocess): Do not yet protect
+	defined entities - these will be taken care of later.
+	(org-export-latex-special-chars): Post-process entity replacement.
+	(org-export-latex-fontify-headline): Do not yet protect defined
+	entities - these will be taken care of later.
+	(org-export-latex-tables, org-export-latex-links): Format the
+	caption properly.
+
+	* org-entities.el (org-entities-user): Fix typo.
+
+	* org.el (org-prepare-agenda-buffers): Uniquify TODO keywords
+
+	* org-entities.el (org-entities-user): Improve docstring.
+
+2010-04-06  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-entities.el (org-macs): Require org-macs, to be sure that we
+	have `declare-function' defined.
+
+2010-04-05  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-latex.el (org-export-latex-classes): Update docstring.
+
+	* org.el (org-format-latex-header): Add cookies to the header.
+	(org-splice-latex-header): Implement placement according to
+	cookies.
+
+2010-04-04  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-publish.el (org-publish-aux-preprocess): Control case
+	sensitivity.
+
+2010-04-04  Bastien Guerry  <bzg@altern.org>
+
+	* org.el (org-splice-latex-header): Fix typo.
+
+2010-04-04  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-latex.el (org-export-latex-make-header): Use
+	`org-splice-latex-header' to build the header.
+	(org-export-latex-classes): Update docstring.
+
+	* org.el (org-splice-latex-header): New function.
+	(org-create-formula-image): Use `org-splice-latex-header' to build
+	the header.
+
+	* org-gnus.el (org-gnus-follow-link): Handle nndoc backend.
+
+2010-04-03  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-export-latex-packages-alist)
+	(org-export-latex-default-packages-alist): Fix docstring to
+	reflect the expected structure.
+
+	* org-docbook.el (org-docbook-do-expand): Fix bug with variable names.
+	(org-export-docbook-finalize-table): Make use of label for tables.
+
+2010-04-02  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-attach.el (org-attach-commit): Split on newlines.
+
+	* org.el (org-export-latex-default-packages-alist): Use list
+	instead of cons for the entries.
+
 2010-04-01  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-entities.el (org-entity-get-representation): Catch the case
+	that there is not entry in the list.
 
 	* org-mobile.el (org-mobile-use-encryption)
 	(org-mobile-encryption-tempfile, org-mobile-encryption-password):

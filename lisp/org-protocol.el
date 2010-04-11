@@ -1,6 +1,6 @@
 ;;; org-protocol.el --- Intercept calls from emacsclient to trigger custom actions.
 ;;
-;; Copyright (C) 2008, 2009
+;; Copyright (C) 2008, 2009, 2010
 ;;          Free Software Foundation, Inc.
 ;;
 ;; Author: Bastien Guerry <bzg AT altern DOT org>
@@ -9,7 +9,7 @@
 ;; Author: Ross Patterson <me AT rpatterson DOT net>
 ;; Maintainer: Sebastian Rose <sebastian_rose AT gmx DOT de>
 ;; Keywords: org, emacsclient, wp
-;; Version: 6.34trans
+;; Version: 6.35g
 
 ;; This file is part of GNU Emacs.
 ;;

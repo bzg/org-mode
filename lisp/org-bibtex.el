@@ -1,11 +1,11 @@
 ;;; org-bibtex.el --- Org links to BibTeX entries
 ;;
-;; Copyright (C) 2007, 2008, 2009 Free Software Foundation, Inc.
+;; Copyright (C) 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 ;;
 ;; Author: Bastien Guerry <bzg at altern dot org>
 ;;         Carsten Dominik <carsten dot dominik at gmail dot com>
 ;; Keywords: org, wp, remember
-;; Version: 6.34trans
+;; Version: 6.35g
 ;;
 ;; This file is part of GNU Emacs.
 ;;

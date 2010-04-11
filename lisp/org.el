@@ -1,12 +1,12 @@
 ;;; org.el --- Outline-based notes management and organizer
 ;; Carstens outline-mode for keeping track of everything.
-;; Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009
+;; Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009, 2010
 ;;   Free Software Foundation, Inc.
 ;;
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 6.34trans
+;; Version: 6.35g
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -96,7 +96,7 @@
 
 ;;; Version
 
-(defconst org-version "6.34trans"
+(defconst org-version "6.35g"
   "The version number of the file org.el.")
 
 (defun org-version (&optional here)
@@ -2911,6 +2911,8 @@ When nil, just push out a message."
 \\usepackage{amsmath}
 \\usepackage[mathscr]{eucal}
 \\pagestyle{empty}             % do not remove
+\[PACKAGES]
+\[DEFAULT-PACKAGES]
 % The settings below are copied from fullpage.sty
 \\setlength{\\textwidth}{\\paperwidth}
 \\addtolength{\\textwidth}{-3cm}
@@ -2926,7 +2928,10 @@ When nil, just push out a message."
 \\addtolength{\\topmargin}{-2.54cm}"
   "The document header used for processing LaTeX fragments.
 It is imperative that this header make sure that no page number
-appears on the page."
+appears on the page.  The package defined in the variables
+`org-export-latex-default-packages-alist' and `org-export-latex-packages-alist'
+will either replace the placeholder \"[PACKAGES]\" in this header, or they
+will be appended."
   :group 'org-latex
   :type 'string)
 
@@ -2936,43 +2941,67 @@ appears on the page."
 ;; when formatting latex fragments.  Originally it was part of the
 ;; LaTeX exporter, which is why the name includes "export".
 (defcustom org-export-latex-default-packages-alist
-  '(("AUTO" . "inputenc")
-    ("T1"   . "fontenc")
-    (""     . "graphicx")
-    (""     . "longtable")
-    (""     . "float")
-    (""     . "wrapfig")
-    (""     . "soul")
-    (""     . "t1enc")
-    (""     . "textcomp")
-    (""     . "marvosym")
-    (""     . "wasysym")
-    (""     . "latexsym")
-    (""     . "amssymb")
-    (""     . "hyperref"))
-  "Alist of default packages to be inserted in the header. DON'T CHANGE THIS.
-Unless abslutely necessary that is.
-All the packages in this list are needed by one part or another of Org-mode
-to function properly.  Therefore you should, not modify this variable unless
-you know what you are doing.  The one reason to change it anyway is that
-you might be loading some other package that conflicts with one of the default
-packages.
-Each cell is of the format \( \"options\" . \"package\" \)."
+  '(("AUTO" "inputenc")
+    ("T1"   "fontenc")
+    (""     "fixltx2e")
+    (""     "graphicx")
+    (""     "longtable")
+    (""     "float")
+    (""     "wrapfig")
+    (""     "soul")
+    (""     "t1enc")
+    (""     "textcomp")
+    (""     "marvosym")
+    (""     "wasysym")
+    (""     "latexsym")
+    (""     "amssymb")
+    (""     "microtype")
+    (""     "hyperref")
+    "\\tolerance=1000"
+    )
+  "Alist of default packages to be inserted in the header.
+Change this only if one of the packages here causes an incompatibility
+with another package you are using.
+The packages in this list are needed by one part or another of Org-mode
+to function properly.  
+
+- inputenc, fontenc, t1enc: for basic font and character selection
+- textcomp, marvosymb, wasysym, latexsym, amssym: for various symbols used
+  for interpreting the entities in `org-entities'.  You can skip some of these
+  packages if you don't use any of the symbols in it.
+- graphicx: for including images
+- float, wrapfig: for figure placement
+- longtable: for long tables
+- hyperref: for cross references
+
+Therefore you should not modify this variable unless you know what you
+are doing.  The one reason to change it anyway is that you might be loading
+some other package that conflicts with one of the default packages.
+Each cell is of the format \( \"options\" \"package\" \)."
   :group 'org-export-latex
   :type '(repeat
-	  (list
-	   (string :tag "options")
-	   (string :tag "package"))))
+	  (choice 
+	   (string :tag "A line of LaTeX")
+	   (list :tag "options/package pair"
+		 (string :tag "options")
+		 (string :tag "package")))))
 
 (defcustom org-export-latex-packages-alist nil
-  "Alist of packages to be inserted in the header.
+  "Alist of packages to be inserted in every LaTeX the header.
 These will be inserted after `org-export-latex-default-packages-alist'.
-Each cell is of the format \( \"options\" . \"package\" \)."
+Each cell is of the format \( \"options\" \"package\" \).
+Make sure that you only lis packages here which:
+- you want in every file
+- do not conflict with the default packages in
+  `org-export-latex-default-packages-alist'
+- do not conflict with the setup in `org-format-latex-header'."
   :group 'org-export-latex
   :type '(repeat
-	  (list
-	   (string :tag "options")
-	   (string :tag "package"))))
+	  (choice 
+	   (string :tag "A line of LaTeX")
+	   (list :tag "options/package pair"
+		 (string :tag "options")
+		 (string :tag "package")))))
 
 (defgroup org-appearance nil
   "Settings for Org-mode appearance."
@@ -8181,7 +8210,7 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
 		    (if (nth 1 x) (concat (car x) " (" (nth 1 x) ")") (car x)))
 		  (reverse org-stored-links) "\n"))))
       (let ((cw (selected-window)))
-	(select-window (get-buffer-window "*Org Links*"))
+	(select-window (get-buffer-window "*Org Links*" 'visible))
 	(setq truncate-lines t)
 	(unless (pos-visible-in-window-p (point-max))
 	  (org-fit-window-to-buffer))
@@ -9143,13 +9172,19 @@ If the file does not exist, an error is thrown."
 		    (and dirp (cdr (assoc 'directory apps)))
 		    ;; if we find a match in org-file-apps, store the match
 		    ;; data for later
-		    (let ((match (assoc-default dlink (org-apps-regexp-alist
-						       apps a-m-a-p)
-						'string-match)))
-		      (if match
+		    (let* ((re-list1 (org-apps-regexp-alist apps nil))
+			   (re-list2 
+			    (if a-m-a-p
+				(org-apps-regexp-alist apps a-m-a-p)
+			      re-list1))
+			   (private-match
+			    (assoc-default dlink re-list1 'string-match))
+			   (general-match
+			    (assoc-default dfile re-list2 'string-match)))
+		      (if private-match
 			  (progn (setq link-match-data (match-data))
-				 match)
-			nil))
+				 private-match)
+			general-match))
 		    (cdr (assoc ext apps))
 		    (cdr (assoc t apps))))))
     (when (eq cmd 'system)
@@ -14931,6 +14966,8 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
 		(add-text-properties
 		 (match-beginning 0) (org-end-of-subtree t) pc)))
 	    (set-buffer-modified-p bmp)))))
+    (setq org-todo-keywords-for-agenda
+          (org-uniquify org-todo-keywords-for-agenda))
     (setq org-todo-keyword-alist-for-agenda
 	  (org-uniquify org-todo-keyword-alist-for-agenda)
 	  org-tag-alist-for-agenda (org-uniquify org-tag-alist-for-agenda))))
@@ -15241,24 +15278,14 @@ Some of the options can be changed using the variable
     (if (eq fg 'default) (setq fg (org-dvipng-color :foreground)))
     (if (eq bg 'default) (setq bg (org-dvipng-color :background)))
     (with-temp-file texfile
-      (insert org-format-latex-header
-	      (if (or org-export-latex-default-packages-alist
-		      org-export-latex-packages-alist)
-		  (concat "\n"
-			  (mapconcat (lambda(p)
-				       (if (equal "" (car p))
-					   (format "\\usepackage{%s}" (cadr p))
-					 (format "\\usepackage[%s]{%s}"
-						 (car p) (cadr p))))
-				     (append
-				      org-export-latex-default-packages-alist
-				      org-export-latex-packages-alist)
-				     "\n"))
-		"")
-	      (if org-format-latex-header-extra
-		  (concat "\n" org-format-latex-header-extra)
-		"")
-	      "\n\\begin{document}\n" string "\n\\end{document}\n"))
+      (insert (org-splice-latex-header
+	       org-format-latex-header
+	       org-export-latex-default-packages-alist
+	       org-export-latex-packages-alist
+	       org-format-latex-header-extra))
+      (insert "\n\\begin{document}\n" string "\n\\end{document}\n")
+      (require 'org-latex)
+      (org-export-latex-fix-inputenc))
     (let ((dir default-directory))
       (condition-case nil
 	  (progn
@@ -15287,6 +15314,60 @@ Some of the options can be changed using the variable
 	(loop for e in '(".dvi" ".tex" ".aux" ".log" ".png") do
 	      (delete-file (concat texfilebase e)))
 	pngfile))))
+
+(defun org-splice-latex-header (tpl def-pkg pkg &optional extra)
+  "Fill a LaTeX header template TPL.
+In the template, the following place holders will be recognized:
+
+ [DEFAULT-PACKAGES]      \\usepackage statements for DEF-PKG
+ [NO-DEFAULT-PACKAGES]   do not include DEF-PKG
+ [PACKAGES]              \\usepackage statements for PKG 
+ [NO-PACKAGES]           do not include PKG
+ [EXTRA]                 the string EXTRA
+ [NO-EXTRA]              do not include EXTRA
+
+For backward compatibility, if both the positive and the negative place
+holder is missing, the positive one (without the \"NO-\") will be
+assumed to be present at the end of the template.
+DEF-PKG and PKG are assumed to be alists of options/packagename lists.
+EXTRA is a string."
+  (let (rpl (end ""))
+    (if (string-match "^[ \t]*\\[\\(NO-\\)?DEFAULT-PACKAGES\\][ \t]*\n?" tpl)
+	(setq rpl (if (or (match-end 1) (not def-pkg))
+		      "" (org-latex-packages-to-string def-pkg t))
+	      tpl (replace-match rpl t t tpl))
+      (if def-pkg (setq end (org-latex-packages-to-string def-pkg))))
+    
+    (if (string-match "\\[\\(NO-\\)?PACKAGES\\][ \t]*\n?" tpl)
+	(setq rpl (if (or (match-end 1) (not pkg))
+		      "" (org-latex-packages-to-string pkg t))
+	      tpl (replace-match rpl t t tpl))
+      (if pkg (setq end (concat end "\n" (org-latex-packages-to-string pkg)))))
+
+    (if (string-match "\\[\\(NO-\\)?EXTRA\\][ \t]*\n?" tpl)
+	(setq rpl (if (or (match-end 1) (not extra))
+		      "" (concat extra "\n"))
+	      tpl (replace-match rpl t t tpl))
+      (if (and extra (string-match "\\S-" extra))
+	  (setq end (concat end "\n" extra))))
+
+    (if (string-match "\\S-" end)
+	(concat tpl "\n" end)
+      tpl)))
+
+(defun org-latex-packages-to-string (pkg &optional newline)
+  "Turn an alist of packages into a string with the \\usepackage macros."
+  (setq pkg (mapconcat (lambda(p)
+			 (cond
+			  ((stringp p) p)
+			  ((equal "" (car p))
+			   (format "\\usepackage{%s}" (cadr p)))
+			  (t
+			   (format "\\usepackage[%s]{%s}"
+				   (car p) (cadr p)))))
+		       pkg
+		       "\n"))
+  (if newline (concat pkg "\n") pkg))
 
 (defun org-dvipng-color (attr)
   "Return an rgb color specification for dvipng."

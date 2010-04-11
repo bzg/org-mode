@@ -97,11 +97,12 @@ Emacs-lisp table, otherwise return the results as a string."
    (if (or (string-match "^\\[.+\\]$" results)
 	   (string-match "^(.+)$" results))
        (org-babel-read
-        (replace-regexp-in-string
-         "\\[" "(" (replace-regexp-in-string
-                    "\\]" ")" (replace-regexp-in-string
-                               ", " " " (replace-regexp-in-string
-                                         "'" "\"" results)))))
+        (concat "'"
+                (replace-regexp-in-string
+                 "\\[" "(" (replace-regexp-in-string
+                            "\\]" ")" (replace-regexp-in-string
+                                       ", " " " (replace-regexp-in-string
+                                                 "'" "\"" results))))))
      results)))
 
 (defvar org-babel-python-buffers '(:default . nil))

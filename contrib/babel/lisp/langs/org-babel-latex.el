@@ -81,16 +81,13 @@ called by `org-babel-execute-src-block'."
 (defun org-babel-latex-body-to-tex-file (tex-file body &optional height width)
   "Extracted from `org-create-formula-image' in org.el."
   (with-temp-file tex-file
-    (insert org-format-latex-header
-            (if org-export-latex-packages-alist
-                (concat "\n"
-                        (mapconcat (lambda(p)
-                                     (if (equal "" (car p))
-                                         (format "\\usepackage{%s}" (cadr p))
-                                       (format "\\usepackage[%s]{%s}"
-                                               (car p) (cadr p))))
-                                   org-export-latex-packages-alist "\n"))
-              "")
+    (insert (org-splice-latex-header
+	       org-format-latex-header
+	       (remove-if
+                (lambda (el) (and (listp el) (string= "hyperref" (cadr el))))
+                org-export-latex-default-packages-alist)
+	       org-export-latex-packages-alist
+	       org-format-latex-header-extra)
             (if height (concat "\n" (format "\\pdfpageheight %s" height)) "")
             (if width (concat "\n" (format "\\pdfpagewidth %s" width)) "")
             (if org-format-latex-header-extra

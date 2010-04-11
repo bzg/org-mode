@@ -77,11 +77,11 @@ called by `org-babel-execute-src-block'."
          (cmdline (cdr (assoc :cmdline params)))
          (flags (cdr (assoc :flags params)))
          (vars (second processed-params))
-         (includes (org-babel-read
-                    (or (cdr (assoc :includes params))
-                        (org-entry-get nil "includes" t))))
+         (main-p (not (string= (cdr (assoc :main params)) "no")))
+         (includes (or (cdr (assoc :includes params))
+                       (org-entry-get nil "includes" t)))
          (defines (org-babel-read
-                   (or (cdr (assoc :includes params))
+                   (or (cdr (assoc :defines params))
                        (org-entry-get nil "defines" t))))
          (full-body (mapconcat 'identity
                      (list
@@ -96,7 +96,9 @@ called by `org-babel-execute-src-block'."
                       ;; variables
                       (mapconcat 'org-babel-C-var-to-C vars "\n")
                       ;; body
-                      "\n" (org-babel-C-ensure-main-wrap body) "\n") "\n"))
+                      "\n" (if main-p
+                               (org-babel-C-ensure-main-wrap body)
+                             body) "\n") "\n"))
          (error-buf (get-buffer-create "*Org-Babel Error Output*"))
          (compile
           (progn
