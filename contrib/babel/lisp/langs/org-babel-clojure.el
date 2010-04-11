@@ -263,11 +263,14 @@ last statement in BODY, as elisp."
       (org-babel-clojure-evaluate-session buffer body result-type)
     (org-babel-clojure-evaluate-external-process buffer body result-type)))
 
+(defun org-babel-expand-body:clojure (body params &optional processed-params)
+  (org-babel-clojure-build-full-form
+   body (second (or processed-params (org-babel-process-params params)))))
+
 (defun org-babel-execute:clojure (body params)
   "Execute a block of Clojure code with org-babel."
   (let* ((processed-params (org-babel-process-params params))
-         (vars (second processed-params))
-         (body (org-babel-clojure-build-full-form body vars))
+         (body (org-babel-expand-body:clojure body params processed-params))
          (session (org-babel-clojure-initiate-session (first processed-params))))
     (org-babel-reassemble-table
      (org-babel-clojure-evaluate session body (fourth processed-params))
