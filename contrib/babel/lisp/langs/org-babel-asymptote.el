@@ -56,6 +56,8 @@
 (defvar org-babel-default-header-args:asymptote '((:results . "file") (:exports . "results"))
   "Default arguments to use when evaluating a asymptote source block.")
 
+(defun org-babel-expand-body:asymptote (body params &optional processed-params) body)
+
 (defun org-babel-execute:asymptote (body params)
   "Execute a block of Asymptote code with org-babel.  This function is
 called by `org-babel-execute-src-block'."
