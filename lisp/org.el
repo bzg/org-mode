@@ -16284,7 +16284,7 @@ This command does many different things, depending on context:
 	   (fboundp org-finish-function))
       (funcall org-finish-function))
      ((run-hook-with-args-until-success 'org-ctrl-c-ctrl-c-hook))
-     ((or (looking-at (org-re org-property-start-re))
+     ((or (looking-at org-property-start-re)
 	  (org-at-property-p))
       (call-interactively 'org-property-action))
      ((org-on-target-p) (call-interactively 'org-update-radio-target-regexp))
