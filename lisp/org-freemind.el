@@ -81,6 +81,7 @@
 
 (require 'xml)
 (require 'org)
+(require 'rx)
 (require 'org-exp)
 (eval-when-compile (require 'cl))
 
