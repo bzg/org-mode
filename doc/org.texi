@@ -10890,23 +10890,23 @@ Using code blocks in table formulas
 The basic structure of code blocks is as follows:
 
 @example
-#+srcname: name
-#+begin_src language header-arguments switches
-body
+#+srcname: <name>
+#+begin_src <language> <header arguments> <switches>
+<body>
 #+end_src
 @end example
 
 @table @code
-@item name
+@item <name>
 The initial name line is optional. If present it is used during code evaluation.
-@item language
+@item <language>
 The language of the code in the block.
-@item header-arguments
+@item <header arguments>
 Header arguments control evaluation, export and tangling of source
 code blocks. See the [[header-arguments][Header Arguments]] section.
-@item switches
+@item <switches>
 FIXME link/relocate switches discussion in ``Literal examples'' section
-@item body
+@item <body>
 The code
 @end table
 
