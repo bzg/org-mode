@@ -2968,7 +2968,7 @@ will be appended."
 Change this only if one of the packages here causes an incompatibility
 with another package you are using.
 The packages in this list are needed by one part or another of Org-mode
-to function properly.  
+to function properly.
 
 - inputenc, fontenc, t1enc: for basic font and character selection
 - textcomp, marvosymb, wasysym, latexsym, amssym: for various symbols used
@@ -2985,7 +2985,7 @@ some other package that conflicts with one of the default packages.
 Each cell is of the format \( \"options\" \"package\" \)."
   :group 'org-export-latex
   :type '(repeat
-	  (choice 
+	  (choice
 	   (string :tag "A line of LaTeX")
 	   (list :tag "options/package pair"
 		 (string :tag "options")
@@ -3002,7 +3002,7 @@ Make sure that you only lis packages here which:
 - do not conflict with the setup in `org-format-latex-header'."
   :group 'org-export-latex
   :type '(repeat
-	  (choice 
+	  (choice
 	   (string :tag "A line of LaTeX")
 	   (list :tag "options/package pair"
 		 (string :tag "options")
@@ -9136,14 +9136,16 @@ and to use an external application to visit the file.
 Optional LINE specifies a line to go to, optional SEARCH a string
 to search for.  If LINE or SEARCH is given, the file will be
 opened in Emacs, unless an entry from org-file-apps that makes
-use of groups in a regexp matches.  
+use of groups in a regexp matches.
 If the file does not exist, an error is thrown."
   (let* ((file (if (equal path "")
 		   buffer-file-name
 		 (substitute-in-file-name (expand-file-name path))))
 	 (file-apps (append org-file-apps (org-default-apps)))
-	 (apps (remove-if 'org-file-apps-entry-match-against-dlink-p file-apps))
-	 (apps-dlink (remove-if-not 'org-file-apps-entry-match-against-dlink-p file-apps))
+	 (apps (org-remove-if
+		'org-file-apps-entry-match-against-dlink-p file-apps))
+	 (apps-dlink (org-remove-if-not
+		      'org-file-apps-entry-match-against-dlink-p file-apps))
 	 (remp (and (assq 'remote apps) (org-file-remote-p file)))
 	 (dirp (if remp nil (file-directory-p file)))
 	 (file (if (and dirp org-open-directory-means-index-dot-org)
@@ -9229,7 +9231,7 @@ If the file does not exist, an error is thrown."
 	      (while (string-match regex cmd)
 		(setq cmd (replace-match replace-with t t cmd))))
 	    (setq match-index (+ match-index 1)))))
-      
+
       (save-window-excursion
 	(start-process-shell-command cmd nil cmd)
 	(and (boundp 'org-wait) (numberp org-wait) (sit-for org-wait))
@@ -9244,7 +9246,7 @@ If the file does not exist, an error is thrown."
       (let ((file (convert-standard-filename file)))
 	(save-match-data
 	  (set-match-data link-match-data)
-	  (eval cmd))))	
+	  (eval cmd))))
      (t (funcall (cdr (assq 'file org-link-frame-setup)) file)))
     (and (org-mode-p) (eq old-mode 'org-mode)
 	 (or (not (equal old-buffer (current-buffer)))
@@ -15347,7 +15349,7 @@ In the template, the following place holders will be recognized:
 
  [DEFAULT-PACKAGES]      \\usepackage statements for DEF-PKG
  [NO-DEFAULT-PACKAGES]   do not include DEF-PKG
- [PACKAGES]              \\usepackage statements for PKG 
+ [PACKAGES]              \\usepackage statements for PKG
  [NO-PACKAGES]           do not include PKG
  [EXTRA]                 the string EXTRA
  [NO-EXTRA]              do not include EXTRA
@@ -15363,7 +15365,7 @@ EXTRA is a string."
 		      "" (org-latex-packages-to-string def-pkg t))
 	      tpl (replace-match rpl t t tpl))
       (if def-pkg (setq end (org-latex-packages-to-string def-pkg))))
-    
+
     (if (string-match "\\[\\(NO-\\)?PACKAGES\\][ \t]*\n?" tpl)
 	(setq rpl (if (or (match-end 1) (not pkg))
 		      "" (org-latex-packages-to-string pkg t))
@@ -17422,6 +17424,22 @@ for the search purpose."
   (while elts
     (setq list (delete (pop elts) list)))
   list)
+
+(defun org-remove-if (predicate seq)
+  "Remove everything from SEQ that fulfills PREDICATE."
+  (let (res e)
+    (while seq
+      (setq e (pop seq))
+      (if (not (funcall predicate e)) (push e res)))
+    (nreverse res)))
+
+(defun org-remove-if-not (predicate seq)
+  "Remove everything from SEQ that does not fulfill PREDICATE."
+  (let (res e)
+    (while seq
+      (setq e (pop seq))
+      (if (funcall predicate e) (push e res)))
+    (nreverse res)))
 
 (defun org-back-over-empty-lines ()
   "Move backwards over whitespace, to the beginning of the first empty line.

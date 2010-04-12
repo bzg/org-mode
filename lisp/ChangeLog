@@ -1,3 +1,8 @@
+2010-04-12  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-remove-if, org-remove-if-not): New functions.
+	(org-open-file): Use internal remove-if functions.
+
 2010-04-10  Jan Böcker  <jan.boecker@jboecker.de>
 
 	* org.el (org-file-apps-entry-match-against-dlink-p): new function.
