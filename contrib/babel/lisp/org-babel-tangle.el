@@ -67,6 +67,10 @@ blocks by language."
   (interactive "fFile to tangle: \nP")
   (save-window-excursion (find-file file) (org-babel-tangle target-file lang)))
 
+(defun org-babel-tangle-publish (_ filename pub-dir)
+  "Tangle FILENAME and place the results in PUB-DIR."
+  (mapc (lambda (el) (copy-file el pub-dir t)) (org-babel-tangle-file filename)))
+
 (defun org-babel-tangle (&optional target-file lang)
   "Extract the bodies of all source code blocks from the current
 file into their own source-specific files.  Optional argument
