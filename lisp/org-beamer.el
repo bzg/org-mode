@@ -353,10 +353,11 @@ this function dynamically."
 (define-minor-mode org-beamer-mode
   "Special support for editing Org-mode files made to export to beamer."
   nil " Bm" nil)
-(font-lock-add-keywords
- 'org-mode
- '((":\\(B_[a-z]+\\|BMCOL\\):" 1 'org-beamer-tag prepend))
- 'prepent)
+(when (fboundp 'font-lock-add-keywords)
+  (font-lock-add-keywords
+   'org-mode
+   '((":\\(B_[a-z]+\\|BMCOL\\):" 1 'org-beamer-tag prepend))
+   'prepent))
 
 (defun org-beamer-place-default-actions-for-lists ()
   "Find default overlay specifications in items, and move them.
