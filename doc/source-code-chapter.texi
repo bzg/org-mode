@@ -1,3 +1,6 @@
+@node Working With Source Code, Miscellaneous, Publishing, Top
+@comment  node-name,  next,  previous,  up
+@comment Working With Source Code, Miscellaneous, Publishing, Top
 @chapter ``Working With Source Code'' or ``Embedded Source Code''
 
 Source code can be included in Org-mode documents using a @samp{src} block:
@@ -25,8 +28,18 @@ Code execution, with results captured in the Org buffer (@ref{Evaluating Code Bl
 Using code blocks in table formulas
 @end itemize
 
+@menu
+* Structure of Code Blocks::
+* Editing Source Code::         
+* Exporting Code Blocks::       
+* Extracting Source Code::      
+* Evaluating Code Blocks::      
+@end menu
 
 
+@node Structure of Code Blocks, Editing Source Code, Working With Source Code, Working With Source Code
+@comment  node-name,  next,  previous,  up
+@comment  Structure of Code Blocks, Editing Source Code, Working With Source Code, Working With Source Code
 @section Structure of Code Blocks
 
 The basic structure of code blocks is as follows:
@@ -52,6 +65,9 @@ FIXME link/relocate switches discussion in ``Literal examples'' section
 The code
 @end table
 
+@node Editing Source Code, Exporting Code Blocks, Structure of Code Blocks, Working With Source Code
+@comment  node-name,  next,  previous,  up
+@comment  Editing Source Code, Exporting Code Blocks, Structure of Code Blocks, Working With Source Code
 @section Editing Source Code
 
 Use @kbd{C-c '} to edit the code block at point. This brings up a
@@ -80,10 +96,19 @@ By default, Org will ask before returning to an open edit buffer. Set
 to a non-nil value to switch without asking.
 @end table
 
+@node Exporting Code Blocks, Extracting Source Code, Editing Source Code, Working With Source Code
+@comment  node-name,  next,  previous,  up
+@comment  Exporting Code Blocks, Extracting Source Code, Editing Source Code, Working With Source Code
 @section Exporting Code Blocks
 
+@node Extracting Source Code, Evaluating Code Blocks, Exporting Code Blocks, Working With Source Code
+@comment  node-name,  next,  previous,  up
+@comment  Extracting Source Code, Evaluating Code Blocks, Exporting Code Blocks, Working With Source Code
 @section Extracting Source Code
 
+@node Evaluating Code Blocks,  , Extracting Source Code, Working With Source Code
+@comment  node-name,  next,  previous,  up
+@comment  Evaluating Code Blocks,  , Extracting Source Code, Working With Source Code
 @section Evaluating Code Blocks
 
 This syntax can be expanded by naming the source code block.
