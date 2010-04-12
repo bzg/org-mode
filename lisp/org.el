@@ -1463,10 +1463,9 @@ you can use this variable to set the application for a given file
 extension.  The entries in this list are cons cells where the car identifies
 files and the cdr the corresponding command.  Possible values for the
 file identifier are
- \"regex\"       Regular expression matched against the file: link.  For
-               backward compatibility, this can also be a string with only
-               alphanumeric characters, which is then interpreted as an
-               extension.
+ \"regex\"     Regular expression matched against the file name.  For backward
+               compatibility, this can also be a string with only alphanumeric
+               characters, which is then interpreted as an extension.
  `directory'   Matches a directory
  `remote'      Matches a remote file, accessible through tramp or efs.
                Remote files most likely should be visited through Emacs
@@ -1495,13 +1494,9 @@ Possible values for the command are:
                does define this command, but you can overrule/replace it
                here.
  string        A command to be executed by a shell; %s will be replaced
-               by the path to the file.  If the file identifier is a regex,
-               %n will be replaced by the match of the nth match group.
+               by the path to the file.
  sexp          A Lisp form which will be evaluated.  The file path will
-               be available in the Lisp variable `file', the link itself
-               in the Lisp variable `link'. If the file identifier is a regex,
-               the original match data will be restored, so subexpression
-               matches are accessible using (match-string n link).
+               be available in the Lisp variable `file'.
 For more examples, see the system specific constants
 `org-file-apps-defaults-macosx'
 `org-file-apps-defaults-windowsnt'
@@ -1522,6 +1517,8 @@ For more examples, see the system specific constants
 			(const :tag "Use the system command" system)
 			(string :tag "Command")
 			(sexp :tag "Lisp form")))))
+
+
 
 (defgroup org-refile nil
   "Options concerning refiling entries in Org-mode."
@@ -9136,17 +9133,17 @@ With optional prefix argument IN-EMACS, Emacs will visit the file.
 With a double C-c C-u prefix arg, Org tries to avoid opening in Emacs
 and to use an external application to visit the file.
 
-Optional LINE specifies a line to go to, optional SEARCH a string to
-search for.  If LINE or SEARCH is given, but IN-EMACS is nil, it will
-be assumed that org-open-file was called to open a file: link, and the
-original link to match against org-file-apps will be reconstructed
-from PATH and whichever of LINE or SEARCH is given.
-
+Optional LINE specifies a line to go to, optional SEARCH a string
+to search for.  If LINE or SEARCH is given, the file will be
+opened in Emacs, unless an entry from org-file-apps that makes
+use of groups in a regexp matches.  
 If the file does not exist, an error is thrown."
   (let* ((file (if (equal path "")
 		   buffer-file-name
 		 (substitute-in-file-name (expand-file-name path))))
-	 (apps (append org-file-apps (org-default-apps)))
+	 (file-apps (append org-file-apps (org-default-apps)))
+	 (apps (remove-if 'org-file-apps-entry-match-against-dlink-p file-apps))
+	 (apps-dlink (remove-if-not 'org-file-apps-entry-match-against-dlink-p file-apps))
 	 (remp (and (assq 'remote apps) (org-file-remote-p file)))
 	 (dirp (if remp nil (file-directory-p file)))
 	 (file (if (and dirp org-open-directory-means-index-dot-org)
@@ -9178,21 +9175,19 @@ If the file does not exist, an error is thrown."
      (t
       (setq cmd (or (and remp (cdr (assoc 'remote apps)))
 		    (and dirp (cdr (assoc 'directory apps)))
-		    ;; if we find a match in org-file-apps, store the match
-		    ;; data for later
-		    (let* ((re-list1 (org-apps-regexp-alist apps nil))
-			   (re-list2 
-			    (if a-m-a-p
-				(org-apps-regexp-alist apps a-m-a-p)
-			      re-list1))
-			   (private-match
-			    (assoc-default dlink re-list1 'string-match))
-			   (general-match
-			    (assoc-default dfile re-list2 'string-match)))
-		      (if private-match
+		    ; first, try matching against apps-dlink
+		    ; if we get a match here, store the match data for later
+		    (let ((match (assoc-default dlink apps-dlink
+						'string-match)))
+		      (if match
 			  (progn (setq link-match-data (match-data))
-				 private-match)
-			general-match))
+				 match)
+			(progn (setq in-emacs (or in-emacs line search))
+			       nil))) ; if we have no match in apps-dlink,
+		                      ; always open the file in emacs if line or search
+		                      ; is given (for backwards compatibility)
+		    (assoc-default dfile (org-apps-regexp-alist apps a-m-a-p)
+				   'string-match)
 		    (cdr (assoc ext apps))
 		    (cdr (assoc t apps))))))
     (when (eq cmd 'system)
@@ -9222,6 +9217,7 @@ If the file does not exist, an error is thrown."
 		     (shell-quote-argument
 		      (convert-standard-filename file)))
 		   t t cmd)))
+
       ;; Replace "%1", "%2" etc. in command with group matches from regex
       (save-match-data
 	(let ((match-index 1)
@@ -9233,7 +9229,7 @@ If the file does not exist, an error is thrown."
 	      (while (string-match regex cmd)
 		(setq cmd (replace-match replace-with t t cmd))))
 	    (setq match-index (+ match-index 1)))))
-
+      
       (save-window-excursion
 	(start-process-shell-command cmd nil cmd)
 	(and (boundp 'org-wait) (numberp org-wait) (sit-for org-wait))
@@ -9248,12 +9244,31 @@ If the file does not exist, an error is thrown."
       (let ((file (convert-standard-filename file)))
 	(save-match-data
 	  (set-match-data link-match-data)
-	  (eval cmd))))
+	  (eval cmd))))	
      (t (funcall (cdr (assq 'file org-link-frame-setup)) file)))
     (and (org-mode-p) (eq old-mode 'org-mode)
 	 (or (not (equal old-buffer (current-buffer)))
 	     (not (equal old-pos (point))))
 	 (org-mark-ring-push old-pos old-buffer))))
+
+(defun org-file-apps-entry-match-against-dlink-p (entry)
+  "This function returns non-nil if `entry' uses a regular
+  expression which should be matched against the whole link by
+  org-open-file.
+
+ It assumes that is the case when the entry uses a regular
+ expression which has at least one grouping construct and the
+ action is either a lisp form or a command string containing
+ '%1', i.e. using at least one subexpression match as a
+ parameter."
+  (let ((selector (car entry))
+	(action (cdr entry)))
+    (if (stringp selector)
+	(and (> (regexp-opt-depth selector) 0)
+	     (or (and (stringp action)
+		      (string-match "%1" action))
+		 (consp action)))
+      nil)))
 
 (defun org-default-apps ()
   "Return the default applications for this operating system."
@@ -9278,8 +9293,7 @@ be opened in Emacs."
 		       nil
 		     (if (string-match "\\W" (car x))
 			 x
-		       (cons (concat "\\." (car x) "\\(::.*\\)?\\'")
-			     (cdr x)))))
+		       (cons (concat "\\." (car x) "\\'") (cdr x)))))
 		 list))
    (if add-auto-mode
        (mapcar (lambda (x) (cons (car x) 'emacs)) auto-mode-alist))))

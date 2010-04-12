@@ -1,3 +1,18 @@
+2010-04-10  Jan Böcker  <jan.boecker@jboecker.de>
+
+	* org.el (org-file-apps-entry-match-against-dlink-p): new function.
+	(org-file-apps-ex): remove variable.
+	(org-open-file): Integrate org-file-apps-ex functionality back
+	into org-file-apps, and decide whether to match a regexp against
+	the link or the filename using org-file-apps-entry-uses-grouping-p.
+
+2010-04-09  Jan Böcker  <jan.boecker@jboecker.de>
+
+	* org.el (org-file-apps-ex): new variable.
+	(org-open-file): Before considering org-file-apps, first match the
+	regexps from org-file-apps-ex against the whole link. See
+	docstring of org-file-apps-ex.
+
 2010-04-12  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-export-latex-default-packages-alist): Remove
@@ -17,7 +32,6 @@
 	frames.
 	(org-export-latex-default-packages-alist): hyperref must be loaded
 	late.
-	(org-open-file): More care with the new matching for file links.
 
 2010-04-07  Carsten Dominik  <carsten.dominik@gmail.com>
 
@@ -301,16 +315,6 @@
 	column.
 	(org-table-get, org-table-put, org-table-goto-line)
 	(org-table-current-line): New functions.
-
-2010-03-21  Jan Böcker  <jan.boecker@jboecker.de>
-
-	* org.el (org-open-file): Allow regular expressions in
-	org-file-apps to capture link parameters using groups.  In a
-	command string to be executed, the parameters can be referenced
-	using %1, %2, etc.  Lisp forms can access them using
-	(match-string n link).
-	(org-apps-regexp-alist): Adopt the created regexp, as this is now
-	matched against a file: link instead of the file name.
 
 2010-03-21  Carsten Dominik  <carsten.dominik@gmail.com>
 
