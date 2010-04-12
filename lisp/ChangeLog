@@ -1,3 +1,8 @@
+2010-04-12  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-export-latex-default-packages-alist): Remove
+	microtype package.
+
 2010-04-09  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-mobile.el (org-mobile-check-setup): Make sure that there is
