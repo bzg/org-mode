@@ -2,6 +2,9 @@
 
 	* org.el (org-export-latex-default-packages-alist): Remove
 	microtype package.
+	(org-todo-repeat-to-state): New variable.
+	(org-auto-repeat-maybe): Allow user-selected target states.
+	(org-default-properties): Add the new property REPEAT_TO_STATE.
 
 2010-04-09  Carsten Dominik  <carsten.dominik@gmail.com>
 

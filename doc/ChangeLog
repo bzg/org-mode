@@ -1,3 +1,8 @@
+2010-04-12  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Repeated tasks): Document that the user can determine
+	the target state.
+
 2010-04-07  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (LaTeX and PDF export): Add a footnote about xetex.

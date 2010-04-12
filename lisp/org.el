@@ -2184,6 +2184,15 @@ When nil, the state change notes will be ordered according to time."
   :group 'org-progress
   :type 'boolean)
 
+(defcustom org-todo-repeat-to-state nil
+  "The TODO state to which a repeater should return the repeating task.
+By default this is the first task in a TODO sequence, or the previous state
+in a TODO_TYP set.  But you can specify another task here.
+alternatively, set the :REPEAT_TO_STATE: property of the entry."
+  :group 'org-todo
+  :type '(choice (const :tag "Head of sequence" nil)
+		 (string :tag "Specific state")))
+
 (defcustom org-log-repeat 'time
   "Non-nil means record moving through the DONE state when triggering repeat.
 An auto-repeating task is immediately switched back to TODO when
@@ -10835,10 +10844,14 @@ This function is run automatically after each state change to a DONE state."
 	 (org-log-done nil)
 	 (org-todo-log-states nil)
 	 (nshiftmax 10) (nshift 0)
-	 re type n what ts time)
+	 re type n what ts time to-state)
     (when repeat
       (if (eq org-log-repeat t) (setq org-log-repeat 'state))
-      (org-todo (if (eq interpret 'type) last-state head))
+      (setq to-state (or (org-entry-get nil "REPEAT_TO_STATE")
+			 org-todo-repeat-to-state))
+      (unless (and to-state (member to-state org-todo-keywords-1))
+	(setq to-state (if (eq interpret 'type) last-state head)))
+      (org-todo to-state)
       (org-entry-put nil "LAST_REPEAT" (format-time-string
 					(org-time-stamp-format t t)))
       (when org-log-repeat
@@ -12663,7 +12676,7 @@ but in some other way.")
     "LOCATION" "LOGGING" "COLUMNS" "VISIBILITY"
     "TABLE_EXPORT_FORMAT" "TABLE_EXPORT_FILE"
     "EXPORT_FILE_NAME" "EXPORT_TITLE" "EXPORT_AUTHOR" "EXPORT_DATE"
-    "ORDERED" "NOBLOCKING" "COOKIE_DATA" "LOG_INTO_DRAWER"
+    "ORDERED" "NOBLOCKING" "COOKIE_DATA" "LOG_INTO_DRAWER" "REPEAT_TO_STATE"
     "CLOCK_MODELINE_TOTAL" "STYLE" "HTML_CONTAINER_CLASS")
   "Some properties that are used by Org-mode for various purposes.
 Being in this list makes sure that they are offered for completion.")
