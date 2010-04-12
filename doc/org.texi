@@ -108,6 +108,7 @@ license to the document, as described in section 6 of the license.
 * Markup::                      Prepare text for rich export
 * Exporting::                   Sharing and publishing of notes
 * Publishing::                  Create a web site of linked Org files
+* Working With Source Code::    Using Org for literate programming, reproducible research and code evaluation.
 * Miscellaneous::               All the rest which did not fit elsewhere
 * Hacking::                     How to hack your way around
 * MobileOrg::                   Viewing and capture on a mobile device
@@ -10330,7 +10331,7 @@ and the description from the body (limited to
 How this calendar is best read and updated, depends on the application
 you are using.  The FAQ covers this issue.
 
-@node Publishing, Miscellaneous, Exporting, Top
+@node Publishing, Working With Source Code, Exporting, Top
 @chapter Publishing
 @cindex publishing
 @cindex O'Toole, David
@@ -10844,7 +10845,7 @@ This may be necessary in particular if files include other files via
 
 @include source-code-chapter.texi
 
-@node Miscellaneous, Hacking, Publishing, Top
+@node Miscellaneous, Hacking, Working With Source Code, Top
 @chapter Miscellaneous
 
 @menu
