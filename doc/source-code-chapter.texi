@@ -1,8 +1,7 @@
-@chapter Working With Source Code or Embedded Source Code
+@chapter ``Working With Source Code'' or ``Embedded Source Code''
 
 Source code can be included in Org-mode documents using a @samp{src} block:
 
-FIXME: This example is also in the Literal Examples section.
 @example
 #+BEGIN_SRC emacs-lisp
 (defun org-xor (a b)
@@ -11,52 +10,82 @@ FIXME: This example is also in the Literal Examples section.
 #+END_SRC
 @end example
 
-Org supports the following ways of working with such code blocks:
+Org provides the following features for working with such code blocks:
 
 @itemize @bullet
 @item
-Editing in the appropriate Emacs major-mode (@kbd{C-c '})
+Editing in the appropriate Emacs major-mode (@ref{Editing Source Code})
 @item
-Export with appropriate markup
+Export with appropriate markup (@ref{Exporting Code Blocks})
 @item
-Extraction (``tangling'') into pure code files.
+Extraction (``tangling'') into pure code files. (@ref{Extracting Source Code})
 @item
-Execution, with results captured in the Org buffer
+Code execution, with results captured in the Org buffer (@ref{Evaluating Code Blocks})
 @item
 Using code blocks in table formulas
 @end itemize
 
 
-@section Syntax
-  :PROPERTIES:
-  :CUSTOM_ID: syntax
-  :END:
 
-@subsection Source Code Block
-The basic syntax of source code blocks in Org-babel is as follows:
+@section Structure of Code Blocks
+
+The basic structure of code blocks is as follows:
 
 @example
+#+srcname: name
 #+begin_src language header-arguments switches
 body
 #+end_src
 @end example
-@table
+
+@table @code
+@item name
+The initial name line is optional. If present it is used during code evaluation.
 @item language
-The language of the code in the source code block. Valid values must
-be members of =org-babel-interpreters=.
+The language of the code in the block.
 @item header-arguments
-Header arguments control many facets of the evaluation and output of
-source code blocks.  See the [[header-arguments][Header Arguments]]
-section for a complete review of available header arguments.
+Header arguments control evaluation, export and tangling of source
+code blocks. See the [[header-arguments][Header Arguments]] section.
 @item switches
 FIXME link/relocate switches discussion in ``Literal examples'' section
 @item body
-The source code to be evaluated.  An important key-binding is C-c '.
-This calls =org-edit-src-code=, a function that brings up an edit
-buffer containing the code using the Emacs major mode appropriate to
-the language.  You can edit your source code block as you regularly
-would in Emacs.
+The code
 @end table
+
+@section Editing Source Code
+
+Use @kbd{C-c '} to edit the code block at point. This brings up a
+language major-mode buffer containing the body of the code
+block. Saving this buffer will write the new contents back to the Org
+buffer. Use @kbd{C-c '} again to exit.
+
+The edit buffer has a minor mode active called
+@code{org-src-mode}. The following variables can be used to configure
+the behavior of the edit buffer. See also the customization group
+@code{org-edit-structure} for futher configuration options.
+
+@table @code
+@item org-src-lang-modes
+If an emacs major-mode named @code{<lang>-mode} exists, where
+@code{<lang>} is the language named in header line of the code block,
+then the edit buffer will be placed in that major-mode. This variable
+can be used to map arbitrary language names to existing major modes.
+@item org-src-window-setup
+Controls the way Emacs windows are rearranged when the edit buffer is created.
+@item org-src-preserve-indentation
+This variable is expecially useful for tangling languages such as
+python, where whitespace the indentation in the output is critical.
+@item org-src-ask-before-returning-to-edit-buffer
+By default, Org will ask before returning to an open edit buffer. Set
+to a non-nil value to switch without asking.
+@end table
+
+@section Exporting Code Blocks
+
+@section Extracting Source Code
+
+@section Evaluating Code Blocks
+
 This syntax can be expanded by naming the source code block.
 
 @example
@@ -107,7 +136,7 @@ body
      #+lob: R-plot(data=R-plot-example-data)
    @end example
 
-@section Languages
+@subsection Languages
   :PROPERTIES:
   :CUSTOM_ID: languages
   :END:
