@@ -2955,7 +2955,6 @@ will be appended."
     (""     "wasysym")
     (""     "latexsym")
     (""     "amssymb")
-    (""     "microtype")
     (""     "hyperref")
     "\\tolerance=1000"
     )
