@@ -10915,27 +10915,27 @@ The code
 @comment  Editing Source Code, Exporting Code Blocks, Structure of Code Blocks, Working With Source Code
 @section Editing Source Code
 
-Use @kbd{C-c '} to edit the code block at point. This brings up a
-language major-mode buffer containing the body of the code
-block. Saving this buffer will write the new contents back to the Org
-buffer. Use @kbd{C-c '} again to exit.
+Use @kbd{C-c '} to edit the code block at point. This brings up a language
+major-mode edit buffer containing the body of the code block. Saving this
+buffer will write the new contents back to the Org buffer. Use @kbd{C-c '}
+again to exit.
 
-The edit buffer has a minor mode active called
-@code{org-src-mode}. The following variables can be used to configure
-the behavior of the edit buffer. See also the customization group
-@code{org-edit-structure} for futher configuration options.
+The edit buffer has a minor mode active called @code{org-src-mode}. The
+following variables can be used to configure the behavior of the edit
+buffer. See also the customization group @code{org-edit-structure} for futher
+configuration options.
 
 @table @code
 @item org-src-lang-modes
 If an emacs major-mode named @code{<lang>-mode} exists, where
-@code{<lang>} is the language named in header line of the code block,
+@code{<lang>} is the language named in the header line of the code block,
 then the edit buffer will be placed in that major-mode. This variable
 can be used to map arbitrary language names to existing major modes.
 @item org-src-window-setup
 Controls the way Emacs windows are rearranged when the edit buffer is created.
 @item org-src-preserve-indentation
 This variable is expecially useful for tangling languages such as
-python, where whitespace the indentation in the output is critical.
+python, in which whitespace indentation in the output is critical.
 @item org-src-ask-before-returning-to-edit-buffer
 By default, Org will ask before returning to an open edit buffer. Set
 to a non-nil value to switch without asking.
