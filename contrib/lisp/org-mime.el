@@ -188,9 +188,12 @@ TMP-FILE during export."
       (insert org-mime-default-header)
       (insert body)
       (write-file tmp-file)
+      (org-load-modules-maybe)
+      (unless org-local-vars
+        (setq org-local-vars (org-get-local-variables)))
       (substring
        (eval ;; convert to fmt -- mimicing `org-run-like-in-org-mode'
-        (list 'let org-local-vars
+        (list 'let org-local-vars 
               (list (intern (concat "org-export-as-" fmt))
                     nil nil nil ''string t)))
        (if (string= fmt "org") (length org-mime-default-header) 0)))))
