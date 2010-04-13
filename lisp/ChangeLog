@@ -687,6 +687,11 @@
 	(org-export-latex-default-packages-alist): hyperref must be loaded
 	late.
 
+2010-04-07  Christian Egli  <christian.egli@sbszh.ch>
+
+	* org-taskjuggler.el (org-taskjuggler-tokenize-dependencies): Add
+	support for optional attributes on dependencies.
+
 2010-04-07  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-latex.el (org-export-latex-preprocess): Do not yet protect

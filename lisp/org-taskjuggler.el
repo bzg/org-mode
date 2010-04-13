@@ -111,9 +111,32 @@
 ;; mode manual) or with the BLOCKER attribute (see org-depend.el) or
 ;; alternatively with a depends attribute. Both the BLOCKER and the
 ;; depends attribute can be either "previous-sibling" or a reference
-;; to an ID which is defined for another task in the project.
+;; to an ID which is defined for another task in the project. BLOCKER
+;; and the depends attribute can define multiple dependencies
+;; separated by either space or comma. You can also specify optional
+;; attributes on the dependency by simply appending it. The following
+;; examples should illustrate this:
 ;;
-;; * TODO
+;; * Training material
+;;   :PROPERTIES:
+;;   :ID:       training_material
+;;   :ORDERED:  t
+;;   :END:
+;; ** Markup Guidelines
+;;    :PROPERTIES:
+;;    :Effort:   2.0
+;;    :END:
+;; ** Workflow Guidelines
+;;    :PROPERTIES:
+;;    :Effort:   2.0
+;;    :END:
+;; * Presentation
+;;   :PROPERTIES:
+;;   :Effort:   2.0
+;;   :BLOCKER:  training_material { gapduration 1d } some_other_task
+;;   :END:
+;; 
+;;;; * TODO
 ;;   - Look at org-file-properties, org-global-properties and
 ;;     org-global-properties-fixed
 ;;   - What about property inheritance and org-property-inherit-p?
@@ -420,14 +443,22 @@ dependencies. A dependency will have to match `[-a-zA-Z0-9_]+'."
    (t (error (format "invalid dependency id %s" dependencies)))))
 
 (defun org-taskjuggler-resolve-explicit-dependencies (dependencies tasks)
+  "For each dependency in DEPENDENCIES try to find a
+corresponding task with a matching ID in TASKS. Return a list
+containing the resolved links for all DEPENDENCIES where a
+matching tasks was found. If the dependency is
+\"previous-sibling\" it is ignored (as this is dealt with in
+`org-taskjuggler-resolve-dependencies'). If there is no matching
+task the dependency is silently ignored."
   (unless (null dependencies)
     (let* 
 	;; the dependency might have optional attributes such as "{
 	;; gapduration 5d }", so only use the first string as id for the
 	;; dependency
-	((id (car (split-string (car dependencies))))
+	((dependency (car dependencies))
+	 (id (car (split-string dependency)))
 	 (optional-attributes 
-	  (mapconcat 'identity (cdr (split-string (car dependencies))) " "))
+	  (mapconcat 'identity (cdr (split-string dependency)) " "))
 	 (path (org-taskjuggler-find-task-with-id id tasks)))
       (cond 
        ;; ignore previous sibling dependencies
