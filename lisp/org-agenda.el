@@ -1321,7 +1321,7 @@ placed into the prefix.  If this option is non-nil, the original specification
 11:30-4pm) will be removed for agenda display.  This makes the agenda less
 cluttered.
 The option can be t or nil.  It may also be the symbol `beg', indicating
-that the time should only be removed what it is located at the beginning of
+that the time should only be removed when it is located at the beginning of
 the headline/diary entry."
   :group 'org-agenda-line-format
   :type '(choice
