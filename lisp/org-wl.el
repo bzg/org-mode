@@ -4,6 +4,7 @@
 ;;   Free Software Foundation, Inc.
 
 ;; Author: Tokuya Kameshima <kames at fa2 dot so-net dot ne dot jp>
+;;         David Maus <dmaus at ictsoc dot de>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
 ;; Version: 6.35g
@@ -40,9 +41,31 @@
  :group 'org-link)
 
 (defcustom org-wl-link-to-refile-destination t
- "Create a link to the refile destination if the message is marked as refile."
- :group 'org-wl
- :type 'boolean)
+  "Create a link to the refile destination if the message is marked as refile."
+  :group 'org-wl
+  :type 'boolean)
+
+(defcustom org-wl-link-remove-filter nil
+  "Remove filter condition if message is filter folder."
+  :group 'org-wl
+  :type 'boolean)
+
+(defcustom org-wl-shimbun-prefer-web-links nil
+  "If non-nil create web links for shimbun messages."
+  :group 'org-wl
+  :type 'boolean)
+
+(defcustom org-wl-nntp-prefer-web-links nil
+  "If non-nil create web links for nntp messages.
+When folder name contains string \"gmane\" link to gmane,
+googlegroups otherwise."
+  :type 'boolean
+  :group 'org-wl)
+
+(defcustom org-wl-namazu-default-index nil
+  "Default namazu search index."
+  :type 'directory
+  :group 'org-wl)
 
 ;; Declare external functions and variables
 (declare-function elmo-folder-exists-p "ext:elmo" (folder) t)
@@ -67,11 +90,39 @@
 (defvar wl-summary-buffer-elmo-folder)
 (defvar wl-summary-buffer-folder-name)
 
+(defconst org-wl-folder-types
+  '(("%" . imap) ("-" . nntp) ("+" . mh) ("=" . spool)
+    ("$" . archive) ("&" . pop) ("@" . shimbun) ("[" . search)
+    ("*" . multi) ("/" . filter) ("|" . pipe) ("'" . internal))
+  "List of folder indicators. See Wanderlust manual, section 3.")
+
+
 ;; Install the link type
 (org-add-link-type "wl" 'org-wl-open)
 (add-hook 'org-store-link-functions 'org-wl-store-link)
 
 ;; Implementation
+
+(defun org-wl-folder-type (folder)
+  "Return symbol that indicicates the type of FOLDER.
+FOLDER is the wanderlust folder name. The first character of the
+folder name determines the the folder type."
+  (let* ((indicator (substring folder 0 1))
+	 (type (cdr (assoc indicator org-wl-folder-types))))
+    ;; maybe access or file folder
+    (when (not type)
+      (setq type
+	    (cond
+	     ((and (>= (length folder) 5)
+		   (string= (substring folder 0 5) "file:"))
+	      'file)
+	     ((and (>= (length folder) 7)
+		   (string= (substring folder 0 7) "access:"))
+	      'access)
+	     (t
+	      nil))))
+    type))
+
 (defun org-wl-store-link ()
  "Store a link to a WL folder or message."
  (when (eq major-mode 'wl-summary-mode)
@@ -83,6 +134,7 @@
 		     (equal (nth 1 mark-info) "o")) ; marked as refile
 		(nth 2 mark-info)
 	      wl-summary-buffer-folder-name))
+	   (folder-type (org-wl-folder-type folder-name))
 	   (message-id (elmo-message-field wl-summary-buffer-elmo-folder
 					   msgnum 'message-id))
 	   (wl-message-entity
@@ -101,36 +153,75 @@
 		 (if (listp to-field)
 		     (car to-field)
 		   to-field)))
+	   (xref (let ((xref-field (elmo-message-entity-field wl-message-entity
+							      'xref)))
+		   (if (listp xref-field)
+		       (car xref-field)
+		     xref-field)))
 	   (subject (let (wl-thr-indent-string wl-parent-message-entity)
 		      (wl-summary-line-subject)))
 	   desc link)
+
      ;; remove text properties of subject string to avoid possible bug
      ;; when formatting the subject
+     ;; (Emacs bug #5306, fixed)
      (set-text-properties 0 (length subject) nil subject)
 
-     (org-store-link-props :type "wl" :from from :to to
-			    :subject subject :message-id message-id)
-     (setq message-id (org-remove-angle-brackets message-id))
-     (setq desc (org-email-link-description))
-     (setq link (org-make-link "wl:" folder-name
-				"#" message-id))
-     (org-add-link-props :link link :description desc)
-     link)))
+     ;; maybe remove filter condition
+     (when (and (eq folder-type 'filter) org-wl-link-remove-filter)
+       (while (eq (org-wl-folder-type folder-name) 'filter)
+	 (setq folder-name
+	       (replace-regexp-in-string "^/[^/]+/" "" folder-name))))
+
+     ;; maybe create http link
+     (cond
+      ((and (eq folder-type 'shimbun) org-wl-shimbun-prefer-web-links xref)
+       (org-store-link-props :type "http" :link xref :description subject
+			     :from from :to to :message-id message-id
+			     :subject subject))
+      ((and (eq folder-type 'nntp) org-wl-nntp-prefer-web-links)
+       (setq link (format
+		   (if (string-match "gmane\\." folder-name)
+		       "http://mid.gmane.org/%s"
+		     "http://groups.google.com/groups/search?as_umsgid=%s")
+		   (org-fixup-message-id-for-http message-id)))
+       (org-store-link-props :type "http" :link link :description subject
+			     :from from :to to :message-id message-id
+			     :subject subject))
+      (t
+       (org-store-link-props :type "wl" :from from :to to
+			     :subject subject :message-id message-id)
+       (setq message-id (org-remove-angle-brackets message-id))
+       (setq desc (org-email-link-description))
+       (setq link (org-make-link "wl:" folder-name "#" message-id))
+       (org-add-link-props :link link :description desc)))
+     (or link xref))))
 
 (defun org-wl-open (path)
- "Follow the WL message link specified by PATH."
+  "Follow the WL message link specified by PATH.
+When called with one prefix, open message in namazu search folder
+with `org-wl-namazu-default-index' as search index.  When called
+with two prefixes or `org-wl-namazu-default-index' is nil, ask
+for namazu index."
  (require 'wl)
  (unless wl-init (wl))
  ;; XXX: The imap-uw's MH folder names start with "%#".
  (if (not (string-match "\\`\\(\\(?:%#\\)?[^#]+\\)\\(#\\(.*\\)\\)?" path))
      (error "Error in Wanderlust link"))
  (let ((folder (match-string 1 path))
-	(article (match-string 3 path)))
+       (article (match-string 3 path)))
+   ;; maybe open message in namazu search folder
+   (when current-prefix-arg
+     (setq folder (concat "[" article "]"
+			  (if (and (equal current-prefix-arg '(4))
+				   org-wl-namazu-default-index)
+			      org-wl-namazu-default-index
+			    (read-directory-name "Namazu index: ")))))
    (if (not (elmo-folder-exists-p (org-no-warnings
 				   (wl-folder-get-elmo-folder folder))))
-	(error "No such folder: %s" folder))
+       (error "No such folder: %s" folder))
    (let ((old-buf (current-buffer))
-	  (old-point (point-marker)))
+	 (old-point (point-marker)))
      (wl-folder-goto-folder-subr folder)
      (save-excursion
 	;; XXX: `wl-folder-goto-folder-subr' moves point to the

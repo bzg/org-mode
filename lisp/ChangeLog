@@ -1,3 +1,26 @@
+2010-04-13  David Maus  <dmaus@ictsoc.de>
+
+	* org-wl.el (org-wl-link-remove-filter): New customizable
+	variable.  If non-nil, filter conditions are stripped when storing
+	link to message in filter folder.
+	(org-wl-shimbun-prefer-web-links): New customizable variable.  If
+	non-nil, links to shimbun messages are created as web links to
+	message source.
+	(org-wl-nntp-prefer-web-links): New customizable variable.  If
+	non-nil, links to nntp message are created as web links to gmane
+	or googlegroups.
+	(org-wl-namazu-default-index): New customizable variable.
+	Directory of namazu search index that should be used as default
+	when opening a link in a search folder.
+	(org-wl-folder-types): New constant.  Wanderlust folder type
+	indicators.
+	(org-wl-folder-type): New function.  Return type of Wanderlust
+	folder.
+	(org-wl-store-link): Create web links for shimbun or nntp messages
+	and strip filter conditions depending on customizable variables.
+	(org-wl-open): Open namazu search folder for message when called
+	with prefix.
+
 2010-04-12  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-remove-if, org-remove-if-not): New functions.
