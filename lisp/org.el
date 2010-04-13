@@ -9255,20 +9255,20 @@ If the file does not exist, an error is thrown."
 
 (defun org-file-apps-entry-match-against-dlink-p (entry)
   "This function returns non-nil if `entry' uses a regular
-  expression which should be matched against the whole link by
-  org-open-file.
+expression which should be matched against the whole link by
+org-open-file.
 
- It assumes that is the case when the entry uses a regular
- expression which has at least one grouping construct and the
- action is either a lisp form or a command string containing
- '%1', i.e. using at least one subexpression match as a
- parameter."
+It assumes that is the case when the entry uses a regular
+expression which has at least one grouping construct and the
+action is either a lisp form or a command string containing
+'%1', i.e. using at least one subexpression match as a
+parameter."
   (let ((selector (car entry))
 	(action (cdr entry)))
     (if (stringp selector)
 	(and (> (regexp-opt-depth selector) 0)
 	     (or (and (stringp action)
-		      (string-match "%1" action))
+		      (string-match "%[0-9]" action))
 		 (consp action)))
       nil)))
 
