@@ -1,3 +1,7 @@
+2010-04-13  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-align-all-tags): New command.
+
 2010-04-13  David Maus  <dmaus@ictsoc.de>
 
 	* org-wl.el (org-wl-link-remove-filter): New customizable

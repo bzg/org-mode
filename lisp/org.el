@@ -12171,6 +12171,16 @@ If DATA is nil or the empty string, any tags will be removed."
       (if (looking-at ".*?\\([ \t]+\\)$")
 	  (delete-region (match-beginning 1) (match-end 1))))))
 
+(defun org-align-all-tags ()
+  "Align the tags i all headings."
+  (interactive)
+  (save-excursion
+    (or (ignore-errors (org-back-to-heading t))
+	(outline-next-heading))
+    (if (org-on-heading-p)
+	(org-set-tags t)
+      (message "No headings"))))
+
 (defun org-set-tags (&optional arg just-align)
   "Set the tags for the current headline.
 With prefix ARG, realign all tags in headings in the current buffer."
