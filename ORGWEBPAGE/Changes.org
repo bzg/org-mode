@@ -101,7 +101,6 @@ applies to the following packages:
 - latexsym
 - amssymb
 - hyperref
-- microtype
 
 If one of these packages creates a conflict with another package
 you are using, you can remove it from
