@@ -1,5 +1,9 @@
 2010-04-14  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-auto-repeat-maybe): Only record LAST_REPEAT if
+	org-log-repeat is non-nil, or if there is clocking data in the
+	entry.
+
 	* org-crypt.el (org-encrypt-entry): Improve mapping behavior.
 
 2010-04-13  Carsten Dominik  <carsten.dominik@gmail.com>

@@ -10868,8 +10868,9 @@ This function is run automatically after each state change to a DONE state."
       (unless (and to-state (member to-state org-todo-keywords-1))
 	(setq to-state (if (eq interpret 'type) last-state head)))
       (org-todo to-state)
-      (org-entry-put nil "LAST_REPEAT" (format-time-string
-					(org-time-stamp-format t t)))
+      (when (or org-log-repeat (org-entry-get nil "CLOCK"))
+	(org-entry-put nil "LAST_REPEAT" (format-time-string
+					  (org-time-stamp-format t t))))
       (when org-log-repeat
 	(if (or (memq 'org-add-log-note (default-value 'post-command-hook))
 		(memq 'org-add-log-note post-command-hook))
