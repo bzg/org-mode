@@ -53,6 +53,8 @@
 ;;               (local-set-key "\C-c\M-o" 'org-mime-org-buffer-htmlize)))
 
 ;;; Code:
+(require 'cl)
+
 (defcustom org-mime-default-header
   "#+OPTIONS: latex:t\n"
   "Default header to control html export options, and ensure
@@ -199,12 +201,13 @@ TMP-FILE during export."
        (if (string= fmt "org") (length org-mime-default-header) 0)))))
 
 (defun org-mime-apply-html-hook (html)
-  (when org-mime-html-hook
-    (with-temp-buffer
-      (insert html)
-      (goto-char (point-min))
-      (run-hooks 'org-mime-html-hook)
-      (buffer-string))))
+  (if org-mime-html-hook
+      (with-temp-buffer
+        (insert html)
+        (goto-char (point-min))
+        (run-hooks 'org-mime-html-hook)
+        (buffer-string))
+    html))
 
 (defun org-mime-org-buffer-htmlize ()
   "Export the current org-mode buffer to HTML using
