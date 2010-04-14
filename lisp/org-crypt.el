@@ -105,28 +105,29 @@ heading.  This can also be overridden in the CRYPTKEY property."
   (require 'epg)
   (save-excursion
     (org-back-to-heading t)
-    (forward-line)
-    (when (not (looking-at "-----BEGIN PGP MESSAGE-----"))
-      (let ((folded (org-invisible-p))
-	    (epg-context (epg-make-context nil t t))
-	    (crypt-key (org-crypt-key-for-heading))
-	    (beg (point))
-	    end encrypted-text)
-	(org-end-of-subtree t t)
-	(org-back-over-empty-lines)
-        (setq end (point)
-              encrypted-text
-              (epg-encrypt-string
-               epg-context
-               (buffer-substring-no-properties beg end)
-               (epg-list-keys epg-context crypt-key)))
-        (delete-region beg end)
-        (insert encrypted-text)
-	(when folded
-	  (save-excursion
-	    (org-back-to-heading t)
-	    (hide-subtree)))
-        nil))))
+    (let ((start-heading (point)))
+      (forward-line)
+      (when (not (looking-at "-----BEGIN PGP MESSAGE-----"))
+        (let ((folded (org-invisible-p))
+              (epg-context (epg-make-context nil t t))
+              (crypt-key (org-crypt-key-for-heading))
+              (beg (point))
+              end encrypted-text)
+          (goto-char start-heading)
+          (org-end-of-subtree t t)
+          (org-back-over-empty-lines)
+          (setq end (point)
+                encrypted-text
+                (epg-encrypt-string
+                 epg-context
+                 (buffer-substring-no-properties beg end)
+                 (epg-list-keys epg-context crypt-key)))
+          (delete-region beg end)
+          (insert encrypted-text)
+          (when folded
+            (goto-char start-heading)
+            (hide-subtree))
+          nil)))))
 
 (defun org-decrypt-entry ()
   "Decrypt the content of the current headline."

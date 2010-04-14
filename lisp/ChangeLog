@@ -1,3 +1,7 @@
+2010-04-14  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-crypt.el (org-encrypt-entry): Improve mapping behavior.
+
 2010-04-13  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-align-all-tags): New command.
