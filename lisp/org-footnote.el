@@ -182,25 +182,25 @@ with start and label of the footnote if there is a definition at point."
       (org-show-context 'link-search)
       (message "Edit definition and go back with `C-c &' or, if unique, with `C-c C-c'."))))
 
-(defun org-footnote-goto-next-reference (label)
-  "Find the next reference of the footnote with label LABEL."
+(defun org-footnote-goto-previous-reference (label)
+  "Find the next previous of the footnote with label LABEL."
   (interactive "sLabel: ")
   (org-mark-ring-push)
   (setq label (org-footnote-normalize-label label))
   (let ((re (format ".\\[%s[]:]" label))
 	(p0 (point)) pos)
     (save-excursion
-      (setq pos (or (re-search-forward re nil t)
-		    (and (goto-char (point-min))
-			 (re-search-forward re nil t))
+      (setq pos (or (re-search-backward re nil t)
+		    (and (goto-char (point-max))
+			 (re-search-backward re nil t))
 		    (and (progn (widen) t)
 			 (goto-char p0)
-			 (re-search-forward re nil t))
-		    (and (goto-char (point-min))
+			 (re-search-backward re nil t))
+		    (and (goto-char (point-max))
 			 (re-search-forward re nil t)))))
     (if pos
 	(progn
-	  (goto-char pos)
+	  (goto-char (match-end 0))
 	  (org-show-context 'link-search))
       (error "Cannot find reference of footnote %s" label))))
 
@@ -339,7 +339,7 @@ With prefix arg SPECIAL, offer additional commands in a menu."
 	  (org-footnote-goto-definition (nth 1 tmp))
 	(goto-char (match-beginning 4))))
      ((setq tmp (org-footnote-at-definition-p))
-      (org-footnote-goto-next-reference (nth 1 tmp)))
+      (org-footnote-goto-previous-reference (nth 1 tmp)))
      (t (org-footnote-new)))))
 
 ;;;###autoload
