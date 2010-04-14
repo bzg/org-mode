@@ -502,6 +502,7 @@ example as:
 @r{@bullet{} a basic database application}
 @r{@bullet{} a simple hypertext system, with HTML and La@TeX{} export}
 @r{@bullet{} a publishing tool to create a set of interlinked webpages}
+@r{@bullet{} an environment for literate programming}
 @end example
 
 Org's automatic, context-sensitive table editor with spreadsheet
