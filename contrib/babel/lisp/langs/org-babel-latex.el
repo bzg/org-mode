@@ -43,10 +43,7 @@
   '((:results . "latex") (:exports . "results"))
   "Default arguments to use when evaluating a latex source block.")
 
-(defun org-babel-execute:latex (body params)
-  "Execute a block of Latex code with org-babel.  This function is
-called by `org-babel-execute-src-block'."
-  (message "executing Latex source code block")
+(defun org-babel-expand-body:latex (body params &optional processed-params)
   (mapc (lambda (pair) ;; replace variables
           (setq body
                 (replace-regexp-in-string
@@ -54,6 +51,13 @@ called by `org-babel-execute-src-block'."
                  (if (stringp (cdr pair))
                      (cdr pair) (format "%S" (cdr pair)))
                  body))) (second (org-babel-process-params params)))
+  body)
+
+(defun org-babel-execute:latex (body params)
+  "Execute a block of Latex code with org-babel.  This function is
+called by `org-babel-execute-src-block'."
+  (message "executing Latex source code block")
+  (setq body (org-babel-expand-body:latex body params))
   (if (cdr (assoc :file params))
       (let ((out-file (cdr (assoc :file params)))
             (tex-file (make-temp-file "org-babel-latex" nil ".tex"))
