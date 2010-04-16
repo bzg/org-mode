@@ -107,7 +107,7 @@
            ext path id))
     ('semi (concat
             (format
-             "-- xx [[%s\nContent-Disposition: inline;\nContent-ID: <%s>][base64]]\n"
+             "--[[%s\nContent-Disposition: inline;\nContent-ID: <%s>][base64]]\n"
              ext id)
             (base64-encode-string
              (with-temp-buffer
