@@ -128,7 +128,7 @@ Furthermore, the following %-escapes will be replaced with content:
   %T          time stamp with date and time
   %u, %U      like the above, but inactive time stamps
   %^t         like %t, but prompt for date.  Similarly %^T, %^u, %^U.
-              You may define a prompt like %^{Please specify birthday
+              You may define a prompt like %^{Please specify birthday}t
   %n          user name (taken from `user-full-name')
   %a          annotation, normally the link created with org-store-link
   %i          initial content, copied from the active region.  If %i is
