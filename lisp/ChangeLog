@@ -1,3 +1,8 @@
+2010-04-16  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-exp.el (org-export-define-heading-targets): Fix bug in
+	regexp finding ID and CUSTOM_ID properties.
+
 2010-04-14  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-footnote.el (org-footnote-goto-previous-reference): Renamed

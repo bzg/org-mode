@@ -1205,43 +1205,46 @@ on this string to produce the exported version."
 
 (defun org-export-define-heading-targets (target-alist)
   "Find all headings and define the targets for them.
-The new targets are added to TARGET-ALIST, which is also returned."
+The new targets are added to TARGET-ALIST, which is also returned.
+Also find all ID and CUSTOM_ID propertiess and store them."
   (goto-char (point-min))
   (org-init-section-numbers)
   (let ((re (concat "^" org-outline-regexp
-		    "\\| [ \t]*:\\(ID\\|CUSTOM_ID\\):[ \t]*\\([^ \t\r\n]+\\)"))
+		    "\\|"
+		    "^[ \t]*:\\(ID\\|CUSTOM_ID\\):[ \t]*\\([^ \t\r\n]+\\)"))
 	level target last-section-target a id)
     (while (re-search-forward re nil t)
-      (if (match-end 2)
-	  (progn
-	    (setq id (org-match-string-no-properties 2))
-	    (push (cons id target) target-alist)
-	    (setq a (or (assoc last-section-target org-export-target-aliases)
-			(progn
-			  (push (list last-section-target)
-				org-export-target-aliases)
-			  (car org-export-target-aliases))))
-	    (push (caar target-alist) (cdr a))
-	    (when (equal (match-string 1) "CUSTOM_ID")
-	      (if (not (assoc last-section-target
-			      org-export-preferred-target-alist))
-		  (push (cons last-section-target id)
-			org-export-preferred-target-alist)))
-	    (when (equal (match-string 1) "ID")
-	      (if (not (assoc last-section-target
-			      org-export-id-target-alist))
-		  (push (cons last-section-target (concat "ID-" id))
-			org-export-id-target-alist))))
-	(setq level (org-reduced-level
-		     (save-excursion (goto-char (point-at-bol))
-				     (org-outline-level))))
-	(setq target (org-solidify-link-text
-		      (format "sec-%s" (org-section-number level))))
-	(setq last-section-target target)
-	(push (cons target target) target-alist)
-	(add-text-properties
-	 (point-at-bol) (point-at-eol)
-	 (list 'target target)))))
+      (org-if-unprotected-at (match-beginning 0)
+	(if (match-end 2)
+	    (progn
+	      (setq id (org-match-string-no-properties 2))
+	      (push (cons id target) target-alist)
+	      (setq a (or (assoc last-section-target org-export-target-aliases)
+			  (progn
+			    (push (list last-section-target)
+				  org-export-target-aliases)
+			    (car org-export-target-aliases))))
+	      (push (caar target-alist) (cdr a))
+	      (when (equal (match-string 1) "CUSTOM_ID")
+		(if (not (assoc last-section-target
+				org-export-preferred-target-alist))
+		    (push (cons last-section-target id)
+			  org-export-preferred-target-alist)))
+	      (when (equal (match-string 1) "ID")
+		(if (not (assoc last-section-target
+				org-export-id-target-alist))
+		    (push (cons last-section-target (concat "ID-" id))
+			  org-export-id-target-alist))))
+	  (setq level (org-reduced-level
+		       (save-excursion (goto-char (point-at-bol))
+				       (org-outline-level))))
+	  (setq target (org-solidify-link-text
+			(format "sec-%s" (org-section-number level))))
+	  (setq last-section-target target)
+	  (push (cons target target) target-alist)
+	  (add-text-properties
+	   (point-at-bol) (point-at-eol)
+	   (list 'target target))))))
   target-alist)
 
 (defun org-export-handle-invisible-targets (target-alist)
