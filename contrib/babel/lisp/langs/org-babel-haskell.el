@@ -54,6 +54,13 @@
 
 (defvar org-babel-haskell-eoe "\"org-babel-haskell-eoe\"")
 
+(defun org-babel-expand-body:haskell (body params &optional processed-params)
+  (let (vars (second (or processed-params (org-babel-process-params params))))
+    (concat
+     (mapconcat
+      (lambda (pair) (format "let %s = %s;" (car pair) (cdr pair)))
+      vars "\n") "\n" body "\n")))
+
 (defun org-babel-execute:haskell (body params)
   "Execute a block of Haskell code with org-babel."
   (message "executing haskell source code block")
@@ -61,10 +68,7 @@
          (session (first processed-params))
          (vars (second processed-params))
          (result-type (fourth processed-params))
-         (full-body (concat
-                     (mapconcat
-                      (lambda (pair) (format "let %s = %s;" (car pair) (cdr pair)))
-                      vars "\n") "\n" body "\n"))
+         (full-body (org-babel-expand-body:haskell body params processed-params))
          (session (org-babel-prep-session:haskell session params))
          (raw (org-babel-comint-with-output session org-babel-haskell-eoe t
                 (insert (org-babel-trim full-body))
