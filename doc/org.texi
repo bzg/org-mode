@@ -3808,10 +3808,9 @@ which should only be done in certain contexts, for example.
 @section Priorities
 @cindex priorities
 
-If you use Org mode extensively, you may end up enough TODO items that
+If you use Org mode extensively, you may end up with enough TODO items that
 it starts to make sense to prioritize them.  Prioritizing can be done by
-placing a @emph{priority cookie} into the headline of a TODO item, like
-this
+placing a @emph{priority cookie} into the headline of a TODO item, like this
 
 @example
 *** TODO [#A] Write letter to Sam Fortune
@@ -3877,7 +3876,7 @@ with detailed subtasks on the tree@footnote{To keep subtasks out of the
 global TODO list, see the @code{org-agenda-todo-list-sublevels}.}.  To keep
 the overview over the fraction of subtasks that are already completed, insert
 either @samp{[/]} or @samp{[%]} anywhere in the headline.  These cookies will
-be updates each time the todo status of a child changes, or when pressing
+be updated each time the TODO status of a child changes, or when pressing
 @kbd{C-c C-c} on the cookie.  For example:
 
 @example
@@ -5871,7 +5870,7 @@ remember note was stored.
 The Remember buffer will actually use @code{org-mode} as its major mode, so
 that all editing features of Org mode are available.  In addition to this, a
 minor mode @code{org-remember-mode} is turned on, for the single purpose that
-you can use its keymap @code{org-remember-mode-map} to overwrite some of
+you can use its keymap @code{org-remember-mode-map} to override some of
 Org mode's key bindings.
 
 You can also call @code{org-remember} in a special way from the agenda,
@@ -5910,10 +5909,10 @@ path, it will be interpreted relative to @code{org-directory}.
 The heading can also be the symbols @code{top} or @code{bottom} to send notes
 as level 1 entries to the beginning or end of the file, respectively.  It may
 also be the symbol @code{date-tree}.  Then, a tree with year on level 1,
-month on level 2 and day on level three will be build in the file, and the
+month on level 2 and day on level three will be built in the file, and the
 entry will be filed into the tree under the current date@footnote{If the file
 contains an entry with a @code{DATE_TREE} property, the entire date tree will
-be build under that entry.}
+be built under that entry.}
 
 An optional sixth element specifies the contexts in which the user can select
 the template.  This element can be a list of major modes or a function.
@@ -5934,7 +5933,7 @@ So for example:
 
 @noindent
 The first template will only be available when invoking @code{org-remember}
-from an buffer in @code{emacs-lisp-mode}.  The second template will only be
+from a buffer in @code{emacs-lisp-mode}.  The second template will only be
 available when the function @code{my-check} returns @code{t}.  The third
 template will be proposed in any context.
 
@@ -5969,9 +5968,9 @@ allow dynamic insertion of content:
 %x          @r{Content of the X clipboard.}
 %^C         @r{Interactive selection of which kill or clip to use.}
 %^L         @r{Like @code{%^C}, but insert as link.}
+%k          @r{title of the currently clocked task}
+%K          @r{link to the currently clocked task}
 %^g         @r{prompt for tags, with completion on tags in target file.}
-%k          @r{title of currently clocked task}
-%K          @r{link to currently clocked task}
 %^G         @r{prompt for tags, with completion all tags in all agenda files.}
 %^@{@var{prop}@}p   @r{Prompt the user for a value for property @var{prop}}
 %:keyword   @r{specific information for certain link types, see below}
@@ -7753,7 +7752,7 @@ If you configure @code{org-agenda-diary-file} to point to an Org-mode file,
 Org will create entries (in org-mode syntax) in that file instead.  Most
 entries will be stored in a date-based outline tree that will later make it
 easy to archive appointments from previous months/years.  The tree will be
-build under an entry with a @code{DATE_TREE} property, or else with years as
+built under an entry with a @code{DATE_TREE} property, or else with years as
 top-level entries.  Emacs will prompt you for the entry text - if you specify
 it, the entry will be created in @code{org-agenda-diary-file} without further
 interaction.  If you directly press @key{RET} at the prompt without typing
@@ -9968,14 +9967,14 @@ or @code{width}, can be specified in two ways: you can either customize
 variable @code{org-export-docbook-default-image-attributes} or use the
 @code{#+ATTR_DOCBOOK:} line.  Attributes specified in variable
 @code{org-export-docbook-default-image-attributes} are applied to all inline
-images in the Org file to be exported (unless they are overwritten by image
+images in the Org file to be exported (unless they are overridden by image
 attributes specified in @code{#+ATTR_DOCBOOK:} lines).
 
 The @code{#+ATTR_DOCBOOK:} line can be used to specify additional image
-attributes or overwrite default image attributes for individual images.  If
+attributes or override default image attributes for individual images.  If
 the same attribute appears in both the @code{#+ATTR_DOCBOOK:} line and
 variable @code{org-export-docbook-default-image-attributes}, the former
-overwrites the latter.  Here is an example about how image attributes can be
+takes precedence.  Here is an example about how image attributes can be
 set:
 
 @cindex #+CAPTION
@@ -12344,9 +12343,9 @@ captured and changes made by @i{MobileOrg} into the main system.
 
 For changing tags and TODO states in MobileOrg, you should have set up the
 customization variables @code{org-todo-keywords} and @code{org-tags-alist} to
-cover all important tags and todo keywords, even if individual files use only
+cover all important tags and TODO keywords, even if individual files use only
 part of these.  MobileOrg will also offer you states and tags set up with
-in-buffer settings, but it will understand the logistics of todo state
+in-buffer settings, but it will understand the logistics of TODO state
 @i{sets} (@pxref{Per-file keywords}) and @i{mutually exclusive} tags
 (@pxref{Setting tags}) only for those set in these variables.
 

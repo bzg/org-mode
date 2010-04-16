@@ -94,10 +94,10 @@ You can set this on a per-template basis with the variable
 (defcustom org-remember-templates nil
   "Templates for the creation of remember buffers.
 When nil, just let remember make the buffer.
-When non-nil, this is a list of 5-element lists.  In each entry, the first
-element is the name of the template, which should be a single short word.
-The second element is a character, a unique key to select this template.
-The third element is the template.
+When non-nil, this is a list of (up to) 6-element lists.  In each entry,
+the first element is the name of the template, which should be a single
+short word.  The second element is a character, a unique key to select
+this template.  The third element is the template.
 
 The fourth element is optional and can specify a destination file for
 remember items created with this template.  The default file is given
@@ -114,39 +114,43 @@ An optional sixth element specifies the contexts in which the template
 will be offered to the user.  This element can be a list of major modes
 or a function, and the template will only be offered if `org-remember'
 is called from a mode in the list, or if the function returns t.
-Templates that specify t or nil for the context will be always be added
+Templates that specify t or nil for the context will always be added
 to the list of selectable templates.
 
 The template specifies the structure of the remember buffer.  It should have
 a first line starting with a star, to act as the org-mode headline.
 Furthermore, the following %-escapes will be replaced with content:
 
-  %^{prompt}  Prompt the user for a string and replace this sequence with it.
-              A default value and a completion table ca be specified like this:
+  %^{PROMPT}  Prompt the user for a string and replace this sequence with it.
+              A default value and a completion table can be specified like this:
               %^{prompt|default|completion2|completion3|...}
+              The arrow keys access a prompt-specific history.
+  %a          annotation, normally the link created with `org-store-link'
+  %A          like %a, but prompt for the description part
+  %i          Initial content, copied from the active region.  If %i is
+              indented, the entire inserted text will be indented as well.
+
   %t          time stamp, date only
   %T          time stamp with date and time
   %u, %U      like the above, but inactive time stamps
   %^t         like %t, but prompt for date.  Similarly %^T, %^u, %^U.
               You may define a prompt like %^{Please specify birthday}t
   %n          user name (taken from `user-full-name')
-  %a          annotation, normally the link created with org-store-link
-  %i          initial content, copied from the active region.  If %i is
-              indented, the entire inserted text will be indented as well.
   %c          current kill ring head
   %x          content of the X clipboard
-  %^C         Interactive selection of which kill or clip to use
-  %^L         Like %^C, but insert as link
-  %k          title of currently clocked task
-  %K          link to currently clocked task
-  %^g         prompt for tags, with completion on tags in target file
-  %^G         prompt for tags, with completion all tags in all agenda files
-  %^{prop}p   Prompt the user for a value for property `prop'
   %:keyword   specific information for certain link types, see below
-  %[pathname] insert the contents of the file given by `pathname'
-  %(sexp)     evaluate elisp `(sexp)' and replace with the result
-  %!          Store this note immediately after filling the template
-  %&          Visit note immediately after storing it
+  %^C         interactive selection of which kill or clip to use
+  %^L         like %^C, but insert as link
+  %k          title of the currently clocked task
+  %K          link to the currently clocked task
+  %^g         prompt for tags, completing tags in the target file
+  %^G         prompt for tags, completing all tags in all agenda files
+  %^{PROP}p   Prompt the user for a value for property PROP
+  %[PATHNAME] insert the contents of the file given by PATHNAME
+  %(SEXP)     evaluate elisp `(SEXP)' and replace with the result
+  %!          store this note immediately after completing the template
+              (skipping the `C-c C-c' that normally triggers storing)
+  %&          jump to target location immediately after storing note
 
   %?          After completing the template, position cursor here.
 
