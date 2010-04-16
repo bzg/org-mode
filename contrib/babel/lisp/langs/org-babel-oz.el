@@ -204,6 +204,23 @@ StartOzServer.oz is located.")
 	    (setq org-babel-oz-collected-result nil))))
     result))
 
+(defun org-babel-expand-body:oz (body params &optional processed-params)
+  (let ((vars (second (or processed-params (org-babel-process-params params))))))
+  (if vars
+      ;; only add var declarations if any variables are there
+      (concat
+       ;; prepend code to define all arguments passed to the code block
+       "local\n"
+       (mapconcat
+        (lambda (pair)
+          (format "%s=%s"
+                  (car pair)
+                  (org-babel-oz-var-to-oz (cdr pair))))
+        vars "\n") "\n" 
+        "in\n"
+        body 
+        "end\n")
+    body))
 
 (defun org-babel-execute:oz (body params)
   "Execute a block of Oz code with org-babel.  This function is
@@ -213,21 +230,7 @@ called by `org-babel-execute-src-block' via multiple-value-bind."
 	(vars (second processed-params))
 ;; 	(result-params (third processed-params))
 	(result-type (fourth processed-params))
-	(full-body (if vars
-		       ;; only add var declarations if any variables are there
-		     (concat
-		      ;; prepend code to define all arguments passed to the code block
-		      "local\n"
-		      (mapconcat
-		       (lambda (pair)
-			 (format "%s=%s"
-				 (car pair)
-				 (org-babel-oz-var-to-oz (cdr pair))))
-		       vars "\n") "\n" 
-		       "in\n"
-		       body 
-		       "end\n")
-		     body))
+	(full-body (org-babel-expand-body:oz body params processed-params))
 	(wait-time (plist-get params :wait-time))
         ;; set the session if the session variable is non-nil
 ;; 	(session-buffer (org-babel-oz-initiate-session session))
