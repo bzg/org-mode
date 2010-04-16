@@ -51,6 +51,8 @@
 
 (add-to-list 'org-babel-tangle-langs '("sql" "sql"))
 
+(defun org-babel-expand-body:sql (body params &optional processed-params) body)
+
 (defun org-babel-execute:sql (body params)
   "Execute a block of Sql code with org-babel.  This function is
 called by `org-babel-execute-src-block'."
@@ -65,7 +67,8 @@ called by `org-babel-execute-src-block'."
                     ('mysql (format "mysql %s -e \"source %s\" > %s"
                                     (or cmdline "") in-file out-file))
                     (t (error "no support for the %s sql engine")))))
-    (with-temp-file in-file (insert body))
+    (with-temp-file in-file
+      (insert (org-babel-expand-body:sql body params)))
     (message command)
     (shell-command command)
     (with-temp-buffer
