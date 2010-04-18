@@ -270,7 +270,6 @@ This is in contrast to merely setting it to 0."
       (setq plist (cddr plist)))
     p))
 
-
 (defun org-replace-match-keep-properties (newtext &optional fixedcase
 						  literal string)
   "Like `replace-match', but add the text properties found original text."

@@ -1,5 +1,10 @@
 2010-04-18  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-compat.el (org-xemacs-without-invisibility): New macro.
+	(org-xemacs-without-invisibility): New macro.
+	(org-indent-to-column, org-indent-line-to, org-move-to-column):
+	Redefine using the macro `org-xemacs-without-invisibility'.
+
 	* org.el (org-mode, org-org-menu): Use `add-to-invisibility-spec'.
 
 	* org-table.el (orgtbl-mode): Use `add-to-invisibility-spec'.
