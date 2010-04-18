@@ -10888,7 +10888,7 @@ Using code blocks in table formulas
 @comment  Structure of Code Blocks, Editing Source Code, Working With Source Code, Working With Source Code
 @section Structure of Code Blocks
 
-The basic structure of code blocks is as follows:
+The structure of code blocks is as follows:
 
 @example
 #+srcname: <name>
@@ -10905,8 +10905,10 @@ The language of the code in the block.
 @item <switches>
 Optional links FIXME link/relocate switches discussion in @ref{Literal examples}
 @item <header arguments>
-Optional header arguments control many aspects of evaluation, export and tangling of
-source code blocks. See the [[header-arguments][Header Arguments]] section.
+Optional header arguments control many aspects of evaluation, export and
+tangling of source code blocks. See the [[header-arguments][Header
+Arguments]] section. Header arguments can also be set on a per-buffer or
+per-subtree basis using properties.
 @item <body>
 The code
 @end table
@@ -10948,10 +10950,14 @@ to a non-nil value to switch without asking.
 @section Exporting Code Blocks
 
 By default, code blocks export to HTML with the appearance of the fontified
-language major-mode Emacs buffer. A similar effect is possible with LaTeX if
-you turn on the option @code{org-export-latex-listings} and make sure that
-the listings package is included by the LaTeX header FIXME: be more specific
-about latex config.
+language major-mode Emacs buffer
+
+FIXME: say something more knowledgable about the HTML/CSS output.
+
+A similar effect is possible with LaTeX if you turn on
+the option @code{org-export-latex-listings} and make sure that the listings
+package is included by the LaTeX header FIXME: be more specific about latex
+config.
 
 FIXME: This duplicated discussion in @ref{Literal examples}. Add
 documentation of relevant switches.
@@ -11010,6 +11016,11 @@ FIXME: This variable may have been changed recently
 @comment  Evaluating Code Blocks,  , Extracting Source Code, Working With Source Code
 @section Evaluating Code Blocks
 
+For many languages, blocks of code can be evaluated, with the results being
+returned to the org buffer (or linked to from the org buffer).
+
+FIXME: Are we going to use ``evaluate'' or ``execute''
+
 This syntax can be expanded by naming the source code block.
 
 @example
@@ -11065,39 +11076,69 @@ body
   :CUSTOM_ID: languages
   :END:
 
-  Org-babel has support for the following languages.
+Org-babel can evaluate/execute/compile the following languages. See the
+language specific documentation on Worg for details.
 
-@c BEGIN RECEIVE ORGTBL org_babel_lang-table
-@multitable @columnfractions 0.036 0.205 0.026 0.733
-@item Language @tab Documentation @tab Identifier @tab Requirements
-@item Asymptote @tab org-babel-doc-asymptote @tab asymptote @tab [[http://asymptote.sourceforge.net/][asymptote]], [[http://asymptote.sourceforge.net/doc/Editing-modes.html][asy-mode]]
-@item C @tab [[file:languages/org-babel-doc-C.org][org-babel-doc-C]] @tab C @tab none
-@item Clojure @tab [[file:languages/org-babel-doc-clojure.org][org-babel-doc-clojure]] @tab clojure @tab [[http://clojure.org/][clojure]], [[http://www.emacswiki.org/emacs/clojure-mode.el][clojure-mode]], [[http://common-lisp.net/project/slime/][slime]], [[http://clojure.codestuffs.com/][swank-clojure]]
-@item css @tab org-babel-doc-css @tab css @tab none
-@item ditaa @tab org-babel-doc-ditaa @tab ditaa @tab [[http://ditaa.org/ditaa/][ditaa]] (bundled with Org-mode)
-@item Graphviz @tab org-babel-doc-dot @tab dot @tab [[http://www.graphviz.org/][dot]]
-@item Emacs Lisp @tab org-babel-doc-emacs-lisp @tab emacs-lisp @tab none
-@item gnuplot @tab org-babel-doc-gnuplot @tab gnuplot @tab [[http://www.gnuplot.info/][gnuplot]], [[http://cars9.uchicago.edu/~ravel/software/gnuplot-mode.html][gnuplot-mode]]
-@item Haskell @tab org-babel-doc-haskell @tab haskell @tab [[http://www.haskell.org/][haskell]], [[http://projects.haskell.org/haskellmode-emacs/][haskell-mode]], [[http://www.haskell.org/haskellwiki/Haskell_mode_for_Emacs#inf-haskell.el:_the_best_thing_since_the_breadknife][inf-haskell]], [[http://people.cs.uu.nl/andres/lhs2tex/][lhs2tex]]
-@item Matlab @tab [[file:languages/org-babel-doc-octave-matlab.org][org-babel-doc-octave-matlab]] @tab matlab @tab matlab, [[http://sourceforge.net/projects/matlab-emacs/][matlab.el]]
-@item LaTeX @tab [[file:languages/org-babel-doc-LaTeX.org][org-babel-doc-latex]] @tab latex @tab [[http://www.latex-project.org/][latex]], [[http://www.gnu.org/software/auctex/][auctex]], [[http://www.gnu.org/software/auctex/reftex.html][reftex]]
-@item Objective Caml @tab org-babel-doc-ocaml @tab ocaml @tab [[http://caml.inria.fr/][ocaml]], [[http://www-rocq.inria.fr/~acohen/tuareg/][tuareg-mode]]
-@item Octave @tab [[file:languages/org-babel-doc-octave-matlab.org][org-babel-doc-octave-matlab]] @tab octave @tab octave
-@item OZ @tab [[file:languages/org-babel-doc-oz.org][org-babel-doc-oz]] @tab oz @tab [[http://www.mozart-oz.org/][Mozart]] which includes a major mode
-@item Perl @tab org-babel-doc-perl @tab perl @tab [[http://www.perl.org/][perl]], [[http://www.emacswiki.org/emacs/CPerlMode][cperl-mode]] (optional)
-@item Python @tab org-babel-doc-python @tab python @tab [[http://www.python.org/][python]], [[https://launchpad.net/python-mode][python-mode]] (optional)
-@item R @tab [[file:languages/org-babel-doc-R.org][org-babel-doc-R]] @tab R @tab [[http://www.r-project.org/][R]], [[http://ess.r-project.org/][ess-mode]]
-@item Ruby @tab org-babel-doc-ruby @tab ruby @tab [[http://www.ruby-lang.org/][ruby]], [[http://www.ruby-lang.org/][irb]], [[http://github.com/eschulte/rinari/raw/master/util/ruby-mode.el][ruby-mode]], [[http://github.com/eschulte/rinari/raw/master/util/inf-ruby.el][inf-ruby mode]]
-@item Sass @tab org-babel-doc-sass @tab sass @tab [[http://sass-lang.com/][sass]], [[http://github.com/nex3/haml/blob/master/extra/sass-mode.el][sass-mode]]
-@item GNU Screen @tab [[file:languages/org-babel-doc-screen.org][org-babel-doc-screen]] @tab screen @tab [[http://www.gnu.org/software/screen/][screen]], a terminal
-@item shell @tab org-babel-doc-sh @tab sh[fn:1] @tab a shell
-@item SQL @tab org-babel-doc-sql @tab sql @tab none
+FIXME: How are we going to refer to the external documentation?
+
+@c BEGIN RECEIVE ORGTBL org-babel-lang-table
+@multitable @columnfractions 0.583 0.417
+@item Language @tab Identifier
+@item Asymptote @tab asymptote
+@item C @tab C
+@item Clojure @tab clojure
+@item css @tab css
+@item ditaa @tab ditaa
+@item Graphviz @tab dot
+@item Emacs Lisp @tab emacs-lisp
+@item gnuplot @tab gnuplot
+@item Haskell @tab haskell
+@item Matlab @tab matlab
+@item LaTeX @tab latex
+@item Objective Caml @tab ocaml
+@item Octave @tab octave
+@item OZ @tab oz
+@item Perl @tab perl
+@item Python @tab python
+@item R @tab R
+@item Ruby @tab ruby
+@item Sass @tab sass
+@item GNU Screen @tab screen
+@item shell @tab sh[fn:1]
+@item SQL @tab sql
 @end multitable
-@c END RECEIVE ORGTBL org_babel_lang-table
+@c END RECEIVE ORGTBL org-babel-lang-table
 
 @ignore
+The original table from reference.org is below; I'm just using the first column for now.
 
-#+ORGTBL: SEND org-babel-lang-table orgtbl-to-texinfo :splice t :skip 2
+#+ORGTBL: SEND org-babel-lang-table orgtbl-to-texinfo
+  | Language       | Identifier |
+  |----------------+------------|
+  | Asymptote      | asymptote  |
+  | C              | C          |
+  | Clojure        | clojure    |
+  | css            | css        |
+  | ditaa          | ditaa      |
+  | Graphviz       | dot        |
+  | Emacs Lisp     | emacs-lisp |
+  | gnuplot        | gnuplot    |
+  | Haskell        | haskell    |
+  | Matlab         | matlab     |
+  | LaTeX          | latex      |
+  | Objective Caml | ocaml      |
+  | Octave         | octave     |
+  | OZ             | oz         |
+  | Perl           | perl       |
+  | Python         | python     |
+  | R              | R          |
+  | Ruby           | ruby       |
+  | Sass           | sass       |
+  | GNU Screen     | screen     |
+  | shell          | sh[fn:1]   |
+  | SQL            | sql        |
+
+
   | Language       | Documentation                                                                   | Identifier | Requirements                                                                                                                                                                                                                                                                                |
   |----------------+---------------------------------------------------------------------------------+------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
   | Asymptote      | org-babel-doc-asymptote                                                         | asymptote  | [[http://asymptote.sourceforge.net/][asymptote]], [[http://asymptote.sourceforge.net/doc/Editing-modes.html][asy-mode]]                                                                                                                                                                     |
@@ -11122,31 +11163,34 @@ body
   | GNU Screen     | [[file:languages/org-babel-doc-screen.org][org-babel-doc-screen]]               | screen     | [[http://www.gnu.org/software/screen/][screen]], a terminal                                                                                                                                                                                                                                 |
   | shell          | org-babel-doc-sh                                                                | sh[fn:1]   | a shell                                                                                                                                                                                                                                                                                     |
   | SQL            | org-babel-doc-sql                                                               | sql        | none                                                                                                                                                                                                                                                                                        |
+
+
 @end ignore
 
-  To add support for a particular language to your Org-babel
-  installation first make sure that the requirements of the language
-  are met, then add a line like the following to your Emacs
-  configuration, (replace "identifier" with one of the
-  entries in the Identifier column of the table).
-  @example
-    (require 'org-babel-identifier)
-  @end example
+To add support for a particular language to your Org-babel installation
+first make sure that the requirements of the language are met, then add a
+line like the following to your Emacs configuration, (replace "identifier"
+with one of the entries in the Identifier column of the table).
+
+@example
+(require 'org-babel-identifier)
+@end example
 
 @section Header Arguments
     :PROPERTIES:
     :CUSTOM_ID: header-arguments
     :END:
 
-Definitions of all Org-babel header arguments are given [[header-argument-specific-documentation][below]].  In
-addition, some languages may add their own header arguments.  Please
-see the language-specific documentation for information on
-language-specific header arguments.
+Definitions of all Org-babel header arguments are given
+[[header-argument-specific-documentation][below]].  In addition, some
+languages may add their own header arguments.  Please see the
+language-specific documentation for information on language-specific header
+arguments.
 
 @subsection Using Header Arguments
 
-The values of header arguments can be set in three different ways,
-each more specific than the last.
+The values of header arguments can be set in four different ways, each
+more specific (and having higher priority) than the last.
 
 @subsubsection System-wide
     :PROPERTIES:
@@ -11180,10 +11224,20 @@ each more specific than the last.
 
 @subsubsection Org-mode Properties
 
- Header arguments are also read from [[http://orgmode.org/manual/Properties-and-Columns.html#Properties-and-Columns][Org-mode properties]], which
- means they can be set on the outline header level.  For example, the
- value of the =:cache= header argument will default to true in all
- source code blocks under the following example of an Org-mode outline header:
+Header arguments are also read from
+[[http://orgmode.org/manual/Properties-and-Columns.html#Properties-and-Columns][Org-mode
+properties]], which can be set on a buffer-wide or per-heading basis. An
+example of setting a header argument for all code blocks in a buffer is
+
+#+begin_example 
+#+property: tangle yes
+#+end_example
+
+When properties are used to set default header arguments, they are looked up
+with inheritance, so the value of the =:cache= header argument will default
+to true in all source code blocks in the subtree rooted at the following
+heading:
+
  @example
    * outline header
      :PROPERTIES:
