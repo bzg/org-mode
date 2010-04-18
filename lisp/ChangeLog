@@ -1,5 +1,15 @@
 2010-04-18  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-mode, org-org-menu): Use `add-to-invisibility-spec'.
+
+	* org-table.el (orgtbl-mode): Use `add-to-invisibility-spec'.
+
+	* org-compat.el (org-make-overlay, org-delete-overlay)
+	(org-overlay-start, org-overlay-end, org-overlay-put)
+	(org-overlay-get, org-overlay-move, org-overlay-buffer): Functions
+	removed.
+	(org-add-to-invisibility-spec): Function removed.
+
 	* org-html.el (org-export-as-html-and-open): Add argument to
 	kill-buffer.
 

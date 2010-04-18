@@ -4365,9 +4365,9 @@ The following commands are available:
   (easy-menu-add org-org-menu)
   (easy-menu-add org-tbl-menu)
   (org-install-agenda-files-menu)
-  (if org-descriptive-links (org-add-to-invisibility-spec '(org-link)))
-  (org-add-to-invisibility-spec '(org-cwidth))
-  (org-add-to-invisibility-spec '(org-hide-block . t))
+  (if org-descriptive-links (add-to-invisibility-spec '(org-link)))
+  (add-to-invisibility-spec '(org-cwidth))
+  (add-to-invisibility-spec '(org-hide-block . t))
   (when (featurep 'xemacs)
     (org-set-local 'line-move-ignore-invisible t))
   (org-set-local 'outline-regexp org-outline-regexp)
@@ -16687,7 +16687,7 @@ See the individual commands for more information."
      ["Previous link" org-previous-link t]
      "--"
      ["Descriptive Links"
-      (progn (org-add-to-invisibility-spec '(org-link)) (org-restart-font-lock))
+      (progn (add-to-invisibility-spec '(org-link)) (org-restart-font-lock))
       :style radio
       :selected (member '(org-link) buffer-invisibility-spec)]
      ["Literal Links"
