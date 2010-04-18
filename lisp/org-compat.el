@@ -182,19 +182,6 @@ Works on both Emacs and XEmacs."
 
 ;; Invisibility compatibility
 
-(defun org-add-to-invisibility-spec (arg)
-  "Add elements to `buffer-invisibility-spec'.
-See documentation for `buffer-invisibility-spec' for the kind of elements
-that can be added."
-  (cond
-   ((fboundp 'add-to-invisibility-spec)
-    (add-to-invisibility-spec arg))
-   ((or (null buffer-invisibility-spec) (eq buffer-invisibility-spec t))
-    (setq buffer-invisibility-spec (list arg)))
-   (t
-    (setq buffer-invisibility-spec
-	  (cons arg buffer-invisibility-spec)))))
-
 (defun org-remove-from-invisibility-spec (arg)
   "Remove elements from `buffer-invisibility-spec'."
   (if (fboundp 'remove-from-invisibility-spec)
