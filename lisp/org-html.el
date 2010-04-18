@@ -455,7 +455,7 @@ headlines.  The default is 3.  Lower levels will become bulleted lists."
   (org-export-as-html arg 'hidden)
   (org-open-file buffer-file-name)
   (when org-export-kill-product-buffer-when-displayed
-    (kill-buffer)))
+    (kill-buffer (current-buffer))))
 
 ;;;###autoload
 (defun org-export-as-html-batch ()

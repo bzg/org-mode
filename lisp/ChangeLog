@@ -1,3 +1,8 @@
+2010-04-18  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-html.el (org-export-as-html-and-open): Add argument to
+	kill-buffer.
+
 2010-04-16  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-exp.el (org-export-define-heading-targets): Fix bug in
