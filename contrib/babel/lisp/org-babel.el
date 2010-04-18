@@ -403,10 +403,10 @@ visible."
              (end (match-end 3))
              (hash (match-string 3))
              ov1 ov2)
-        (setq ov1 (org-make-overlay start hide-start))
-        (setq ov2 (org-make-overlay hide-start end))
-        (org-overlay-put ov2 'invisible 'org-babel-hide-hash)
-        (org-overlay-put ov1 'babel-hash hash)))))
+        (setq ov1 (make-overlay start hide-start))
+        (setq ov2 (make-overlay hide-start end))
+        (overlay-put ov2 'invisible 'org-babel-hide-hash)
+        (overlay-put ov1 'babel-hash hash)))))
 
 (defun org-babel-hide-all-hashes ()
   "Hide the hash in the current buffer.  Only the initial
@@ -426,7 +426,7 @@ added as the last element of the kill ring.  This can be called
 with C-c C-c."
   (interactive)
   (let ((hash (car (delq nil (mapcar
-                               (lambda (ol) (org-overlay-get ol 'babel-hash))
+                               (lambda (ol) (overlay-get ol 'babel-hash))
                               (org-overlays-at (or point (point))))))))
     (when hash (kill-new hash) (message hash))))
 (add-hook 'org-ctrl-c-ctrl-c-hook 'org-babel-hash-at-point)
@@ -449,7 +449,7 @@ with C-c C-c."
 
 (defun org-babel-show-result-all ()
   "Unfold all results in the current buffer."
-  (mapc 'org-delete-overlay org-babel-hide-result-overlays)
+  (mapc 'delete-overlay org-babel-hide-result-overlays)
   (setq org-babel-hide-result-overlays nil))
 
 (defun org-babel-hide-result-toggle-maybe ()
@@ -473,7 +473,7 @@ with C-c C-c."
               (end (progn (goto-char (- (org-babel-result-end) 1)) (point)))
               ov)
           (if (memq t (mapcar (lambda (overlay)
-                                (eq (org-overlay-get overlay 'invisible)
+                                (eq (overlay-get overlay 'invisible)
 				    'org-babel-hide-result))
                               (org-overlays-at start)))
               (if (or (not force) (eq force 'off))
@@ -481,22 +481,22 @@ with C-c C-c."
                           (when (member ov org-babel-hide-result-overlays)
                             (setq org-babel-hide-result-overlays
                                   (delq ov org-babel-hide-result-overlays)))
-                          (when (eq (org-overlay-get ov 'invisible)
+                          (when (eq (overlay-get ov 'invisible)
                                     'org-babel-hide-result)
-                            (org-delete-overlay ov)))
+                            (delete-overlay ov)))
                         (org-overlays-at start)))
-            (setq ov (org-make-overlay start end))
-            (org-overlay-put ov 'invisible 'org-babel-hide-result)
+            (setq ov (make-overlay start end))
+            (overlay-put ov 'invisible 'org-babel-hide-result)
             ;; make the block accessible to isearch
-            (org-overlay-put
+            (overlay-put
              ov 'isearch-open-invisible
              (lambda (ov)
                (when (member ov org-babel-hide-result-overlays)
                  (setq org-babel-hide-result-overlays
                        (delq ov org-babel-hide-result-overlays)))
-               (when (eq (org-overlay-get ov 'invisible)
+               (when (eq (overlay-get ov 'invisible)
                          'org-babel-hide-result)
-                 (org-delete-overlay ov))))
+                 (delete-overlay ov))))
             (push ov org-babel-hide-result-overlays)))
       (error "Not looking at a result line"))))
 

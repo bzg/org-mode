@@ -1430,7 +1430,7 @@ will be easy to remove."
     (org-move-to-column c)
     (unless (eolp) (skip-chars-backward "^ \t"))
     (skip-chars-backward " \t")
-    (setq ov (org-make-overlay (1- (point)) (point-at-eol))
+    (setq ov (make-overlay (1- (point)) (point-at-eol))
 	  tx (concat (buffer-substring (1- (point)) (point))
 		     (make-string (+ off (max 0 (- c (current-column)))) ?.)
 		     (org-add-props (if org-time-clocksum-use-fractional
@@ -1444,9 +1444,9 @@ will be easy to remove."
 			 (list 'face 'org-clock-overlay))
 		     ""))
     (if (not (featurep 'xemacs))
-	(org-overlay-put ov 'display tx)
-      (org-overlay-put ov 'invisible t)
-      (org-overlay-put ov 'end-glyph (make-glyph tx)))
+	(overlay-put ov 'display tx)
+      (overlay-put ov 'invisible t)
+      (overlay-put ov 'end-glyph (make-glyph tx)))
     (push ov org-clock-overlays)))
 
 (defun org-clock-remove-overlays (&optional beg end noremove)
@@ -1455,7 +1455,7 @@ BEG and END are ignored.  If NOREMOVE is nil, remove this function
 from the `before-change-functions' in the current buffer."
   (interactive)
   (unless org-inhibit-highlight-removal
-    (mapc 'org-delete-overlay org-clock-overlays)
+    (mapc 'delete-overlay org-clock-overlays)
     (setq org-clock-overlays nil)
     (unless noremove
       (remove-hook 'before-change-functions

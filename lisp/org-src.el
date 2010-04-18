@@ -238,20 +238,20 @@ the edited version. Optional argument CONTEXT is used by
 	(when buffer
 	  (with-current-buffer buffer
 	    (if (boundp 'org-edit-src-overlay)
-		(org-delete-overlay org-edit-src-overlay)))
+		(delete-overlay org-edit-src-overlay)))
 	  (kill-buffer buffer))
 	(setq buffer (generate-new-buffer
 		      (org-src-construct-edit-buffer-name (buffer-name) lang)))
-	(setq ovl (org-make-overlay beg end))
-	(org-overlay-put ovl 'edit-buffer buffer)
-	(org-overlay-put ovl 'help-echo "Click with mouse-1 to switch to buffer editing this segment")
-	(org-overlay-put ovl 'face 'secondary-selection)
-	(org-overlay-put ovl
+	(setq ovl (make-overlay beg end))
+	(overlay-put ovl 'edit-buffer buffer)
+	(overlay-put ovl 'help-echo "Click with mouse-1 to switch to buffer editing this segment")
+	(overlay-put ovl 'face 'secondary-selection)
+	(overlay-put ovl
 			 'keymap
 			 (let ((map (make-sparse-keymap)))
 			   (define-key map [mouse-1] 'org-edit-src-continue)
 			   map))
-	(org-overlay-put ovl :read-only "Leave me alone")
+	(overlay-put ovl :read-only "Leave me alone")
 	(org-src-switch-to-buffer buffer 'edit)
 	(if (eq single 'macro-definition)
 	    (setq code (replace-regexp-in-string "\\\\n" "\n" code t t)))
@@ -381,22 +381,22 @@ the fragment in the Org-mode buffer."
 	(when buffer
 	  (with-current-buffer buffer
 	    (if (boundp 'org-edit-src-overlay)
-		(org-delete-overlay org-edit-src-overlay)))
+		(delete-overlay org-edit-src-overlay)))
 	  (kill-buffer buffer))
 	(setq buffer (generate-new-buffer
 		      (org-src-construct-edit-buffer-name
 		       (buffer-name) "Fixed Width")))
-	(setq ovl (org-make-overlay beg end))
-	(org-overlay-put ovl 'face 'secondary-selection)
-	(org-overlay-put ovl 'edit-buffer buffer)
-	(org-overlay-put ovl 'help-echo "Click with mouse-1 to switch to buffer editing this segment")
-	(org-overlay-put ovl 'face 'secondary-selection)
-	(org-overlay-put ovl
+	(setq ovl (make-overlay beg end))
+	(overlay-put ovl 'face 'secondary-selection)
+	(overlay-put ovl 'edit-buffer buffer)
+	(overlay-put ovl 'help-echo "Click with mouse-1 to switch to buffer editing this segment")
+	(overlay-put ovl 'face 'secondary-selection)
+	(overlay-put ovl
 			 'keymap
 			 (let ((map (make-sparse-keymap)))
 			   (define-key map [mouse-1] 'org-edit-src-continue)
 			   map))
-	(org-overlay-put ovl :read-only "Leave me alone")
+	(overlay-put ovl :read-only "Leave me alone")
 	(switch-to-buffer buffer)
 	(insert code)
 	(remove-text-properties (point-min) (point-max)
@@ -593,7 +593,7 @@ the language, a switch telling if the content should be in a single line."
     (goto-char beg)
     (if single (just-one-space))
     (if (memq t (mapcar (lambda (overlay)
-			  (eq (org-overlay-get overlay 'invisible)
+			  (eq (overlay-get overlay 'invisible)
 			      'org-hide-block))
 			(org-overlays-at (point))))
 	;; Block is hidden; put point at start of block
@@ -633,7 +633,7 @@ the language, a switch telling if the content should be in a single line."
     (set (if (featurep 'xemacs) 'write-contents-hooks 'write-contents-functions)
 	 '(org-edit-src-save))
     (org-add-hook 'kill-buffer-hook
-		  '(lambda () (org-delete-overlay org-edit-src-overlay)) nil 'local)))
+		  '(lambda () (delete-overlay org-edit-src-overlay)) nil 'local)))
 
 (org-add-hook 'org-src-mode-hook 'org-src-mode-configure-edit-buffer)
 

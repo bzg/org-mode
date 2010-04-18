@@ -1,3 +1,15 @@
+2010-04-18  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* lisp/org-toc.el (org-toc-cycle-subtree, org-toc-show)
+	(org-toc-restore-config): Use the normal overlay API.
+
+	* lisp/org-expiry.el (org-expiry-process-entry): Use the normal
+	overlay API.
+
+	* babel/lisp/org-babel.el (org-babel-hide-hash)
+	(org-babel-hash-at-point, org-babel-show-result-all)
+	(org-babel-hide-result-toggle): Use the normal overlay API.
+
 2010-03-31  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* lisp/org-mac-iCal.el (org-mac-iCal): Snow Leopard

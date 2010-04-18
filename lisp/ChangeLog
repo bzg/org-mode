@@ -1,5 +1,46 @@
 2010-04-18  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (overlay, org-remove-empty-overlays-at)
+	(org-outline-overlay-data, org-set-outline-overlay-data)
+	(org-show-block-all, org-hide-block-toggle)
+	(org-highlight-new-match, org-remove-occur-highlights)
+	(org-tags-overlay, org-fast-tag-selection, org-date-ovl)
+	(org-read-date, org-read-date-display, org-eval-in-calendar)
+	(org-format-latex, org-context)
+	(org-speedbar-restriction-lock-overlay)
+	(org-speedbar-set-agenda-restriction): Use the normal overlay API.
+
+	* org-table.el (org-table-add-rectangle-overlay)
+	(org-table-remove-rectangle-highlight)
+	(org-table-overlay-coordinates)
+	(org-table-toggle-coordinate-overlays): Use the normal overlay
+	API.
+
+	* org-src.el (org-edit-src-code, org-edit-fixed-width-region)
+	(org-edit-src-exit, org-src-mode-configure-edit-buffer): Use the
+	normal overlay API.
+
+	* org-colview.el (org-columns-new-overlay)
+	(org-columns-display-here, org-columns-remove-overlays)
+	(org-columns-edit-value, org-columns-next-allowed-value)
+	(org-columns-update): Use the normal overlay API.
+
+	* org-clock.el (org-clock-out, org-clock-cancel)
+	(org-clock-put-overlay, org-clock-remove-overlays): Use the normal
+	overlay API.
+
+	* org-agenda.el (org-agenda-mark-filtered-text)
+	(org-agenda-mark-clocking-task, org-agenda-fontify-priorities)
+	(org-agenda-dim-blocked-tasks, org-agenda-entry-text-show-here)
+	(org-agenda-entry-text-hide)
+	(org-agenda-restriction-lock-overlay)
+	(org-agenda-set-restriction-lock)
+	(org-agenda-filter-by-tag-hide-line)
+	(org-agenda-fix-tags-filter-overlays-at)
+	(org-agenda-filter-by-tag-show-all, org-hl)
+	(org-agenda-goto-calendar, org-agenda-bulk-mark)
+	(org-agenda-bulk-remove-overlays): Use the normal overlay API.
+
 	* org-freemind.el (org-freemind-from-org-mode-node)
 	(org-freemind-from-org-mode, )
 	(org-freemind-from-org-sparse-tree, org-freemind-to-org-mode): Use
