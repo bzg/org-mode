@@ -394,7 +394,7 @@ added to the header-arguments-alist."
   "Hide the hash in the current results line.  Only the initial
 `org-babel-hash-show' characters of the hash will remain
 visible."
-  (add-to-invisibility-spec '(org-babel-hide-hash . t))
+  (org-add-to-invisibility-spec '(org-babel-hide-hash . t))
   (save-excursion
     (when (and (re-search-forward org-babel-result-regexp nil t)
                (match-string 3))
@@ -432,7 +432,7 @@ with C-c C-c."
 (add-hook 'org-ctrl-c-ctrl-c-hook 'org-babel-hash-at-point)
 
 (defun org-babel-result-hide-spec ()
-  (add-to-invisibility-spec '(org-babel-hide-result . t)))
+  (org-add-to-invisibility-spec '(org-babel-hide-result . t)))
 (add-hook 'org-mode-hook 'org-babel-result-hide-spec)
 
 (defvar org-babel-hide-result-overlays nil
