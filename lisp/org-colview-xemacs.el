@@ -284,14 +284,14 @@ This is the compiled version of the format.")
 
 (defun org-columns-new-overlay (beg end &optional string face)
   "Create a new column overlay and add it to the list."
-  (let ((ov (org-make-overlay beg end)))
+  (let ((ov (make-overlay beg end)))
     (if (featurep 'xemacs)
         (progn
-          (org-overlay-put ov 'face (or face 'org-columns-space1))
-          (org-overlay-put ov 'start-open t)
+          (overlay-put ov 'face (or face 'org-columns-space1))
+          (overlay-put ov 'start-open t)
           (if string
               (org-overlay-display ov string (or face 'org-columns-space1))))
-      (org-overlay-put ov 'face (or face 'secondary-selection))
+      (overlay-put ov 'face (or face 'secondary-selection))
       (org-overlay-display ov string face))
     (push ov org-columns-overlays)
     ov))
@@ -370,12 +370,12 @@ This is the compiled version of the format.")
       (org-unmodified
        (setq ov (org-columns-new-overlay
 		 beg (setq beg (1+ beg)) string face))
-       (org-overlay-put ov 'keymap org-columns-map)
-       (org-overlay-put ov 'org-columns-key property)
-       (org-overlay-put ov 'org-columns-value (cdr ass))
-       (org-overlay-put ov 'org-columns-value-modified modval)
-       (org-overlay-put ov 'org-columns-pom pom)
-       (org-overlay-put ov 'org-columns-format f)
+       (overlay-put ov 'keymap org-columns-map)
+       (overlay-put ov 'org-columns-key property)
+       (overlay-put ov 'org-columns-value (cdr ass))
+       (overlay-put ov 'org-columns-value-modified modval)
+       (overlay-put ov 'org-columns-pom pom)
+       (overlay-put ov 'org-columns-format f)
        (when (featurep 'xemacs)
 	 (if (or (not (char-after beg))
 		 (equal (char-after beg) ?\n))
@@ -400,12 +400,12 @@ This is the compiled version of the format.")
     ;; Make the rest of the line disappear.
     (org-unmodified
      (setq ov (org-columns-new-overlay beg (point-at-eol)))
-     (org-overlay-put ov 'invisible t)
-     (org-overlay-put ov 'keymap org-columns-map)
-     (org-overlay-put ov 'intangible t)
+     (overlay-put ov 'invisible t)
+     (overlay-put ov 'keymap org-columns-map)
+     (overlay-put ov 'intangible t)
      (push ov org-columns-overlays)
-     (setq ov (org-make-overlay (1- (point-at-eol)) (1+ (point-at-eol))))
-     (org-overlay-put ov 'keymap org-columns-map)
+     (setq ov (make-overlay (1- (point-at-eol)) (1+ (point-at-eol))))
+     (overlay-put ov 'keymap org-columns-map)
      (push ov org-columns-overlays)
      (let ((inhibit-read-only t))
        (put-text-property (max (point-min) (1- (point-at-bol)))
@@ -497,7 +497,7 @@ This is the compiled version of the format.")
       (move-marker org-columns-begin-marker nil)
       (move-marker org-columns-top-level-marker nil)
       (org-unmodified
-       (mapc 'org-delete-overlay org-columns-overlays)
+       (mapc 'delete-overlay org-columns-overlays)
        (setq org-columns-overlays nil)
        (let ((inhibit-read-only t))
 	 (remove-text-properties (point-min) (point-max) '(read-only t))))
@@ -601,9 +601,9 @@ Where possible, use the standard interface for changing this line."
 		  (point))) ; keep despite of compiler warning
 	 (line-overlays
 	  (delq nil (mapcar (lambda (x)
-			      (and (eq (org-overlay-buffer x) (current-buffer))
-				   (>= (org-overlay-start x) bol)
-				   (<= (org-overlay-start x) eol)
+			      (and (eq (overlay-buffer x) (current-buffer))
+				   (>= (overlay-start x) bol)
+				   (<= (overlay-start x) eol)
 				   x))
 			    org-columns-overlays)))
 	 (org-columns-time (time-to-number-of-days (current-time)))
@@ -668,7 +668,7 @@ Where possible, use the standard interface for changing this line."
 	      (progn
 		(setq org-columns-overlays
 		      (org-delete-all line-overlays org-columns-overlays))
-		(mapc 'org-delete-overlay line-overlays)
+		(mapc 'delete-overlay line-overlays)
 		(org-columns-eval eval))
 	    (org-columns-display-here)))
 	(org-move-to-column col)
@@ -745,9 +745,9 @@ an integer, select that value."
 		  (point))) ; keep despite of compiler waring
 	 (line-overlays
 	  (delq nil (mapcar (lambda (x)
-			      (and (eq (org-overlay-buffer x) (current-buffer))
-				   (>= (org-overlay-start x) bol)
-				   (<= (org-overlay-start x) eol)
+			      (and (eq (overlay-buffer x) (current-buffer))
+				   (>= (overlay-start x) bol)
+				   (<= (overlay-start x) eol)
 				   x))
 			    org-columns-overlays)))
 	 (allowed (or (org-property-get-allowed-values pom key)
@@ -797,7 +797,7 @@ an integer, select that value."
 	    (progn
 	      (setq org-columns-overlays
 		    (org-delete-all line-overlays org-columns-overlays))
-	      (mapc 'org-delete-overlay line-overlays)
+	      (mapc 'delete-overlay line-overlays)
 	      (org-columns-eval '(org-entry-put pom key nval)))
 	  (org-columns-display-here)))
       (org-move-to-column col)
@@ -1092,14 +1092,14 @@ Don't set this, this is meant for dynamic scoping.")
   (let (fmt val pos face)
     (save-excursion
       (mapc (lambda (ov)
-	      (when (equal (org-overlay-get ov 'org-columns-key) property)
-		(setq pos (org-overlay-start ov))
+	      (when (equal (overlay-get ov 'org-columns-key) property)
+		(setq pos (overlay-start ov))
 		(goto-char pos)
 		(when (setq val (cdr (assoc property
 					    (get-text-property
 					     (point-at-bol) 'org-summaries))))
-		  (setq fmt (org-overlay-get ov 'org-columns-format))
-		  (org-overlay-put ov 'org-columns-value val)
+		  (setq fmt (overlay-get ov 'org-columns-format))
+		  (overlay-put ov 'org-columns-value val)
                   (if (featurep 'xemacs)
                       (progn
                         (setq face (glyph-face (extent-end-glyph ov)))
