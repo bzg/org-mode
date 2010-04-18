@@ -1,3 +1,7 @@
+2010-04-18  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* Makefile (BATCH): Write the BATCH command a bit more compact.
+
 2010-04-05  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* ORGWEBPAGE/Changes.org: More details on LaTeX headers.
