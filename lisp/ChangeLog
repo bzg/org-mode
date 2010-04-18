@@ -1,5 +1,11 @@
 2010-04-18  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-clock.el (org-clock-out, org-clock-cancel): Get rid of
+	compilation warning, add comment that this cannot be done with
+	`with-current-buffer'.
+
+	* org-wl.el (org-wl-open): Use `with-current-buffer'.
+
 	* org.el (overlay, org-remove-empty-overlays-at)
 	(org-outline-overlay-data, org-set-outline-overlay-data)
 	(org-show-block-all, org-hide-block-toggle)

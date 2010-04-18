@@ -223,11 +223,10 @@ for namazu index."
    (let ((old-buf (current-buffer))
 	 (old-point (point-marker)))
      (wl-folder-goto-folder-subr folder)
-     (save-excursion
+     (with-current-buffer old-buf
 	;; XXX: `wl-folder-goto-folder-subr' moves point to the
 	;; beginning of the current line.  So, restore the point
 	;; in the old buffer.
-	(set-buffer old-buf)
 	(goto-char old-point))
      (and (wl-summary-jump-to-msg-by-message-id (org-add-angle-brackets
 						  article))

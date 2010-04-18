@@ -1199,8 +1199,8 @@ If there is no running clock, throw an error, unless FAIL-QUIETLY is set."
     (if (not (org-clocking-p))
 	(if fail-quietly (throw 'exit t) (error "No active clock")))
     (let (ts te s h m remove)
-      (save-excursion
-	(set-buffer (org-clocking-buffer))
+      (save-excursion ; Do not replace this with `with-current-buffer'.
+	(with-no-warnings (set-buffer (org-clocking-buffer)))
 	(save-restriction
 	  (widen)
 	  (goto-char org-clock-marker)
@@ -1267,8 +1267,8 @@ If there is no running clock, throw an error, unless FAIL-QUIETLY is set."
   (interactive)
   (if (not (org-clocking-p))
       (error "No active clock"))
-  (save-excursion
-    (set-buffer (org-clocking-buffer))
+  (save-excursion ; Do not replace this with `with-current-buffer'.
+    (with-no-warnings (set-buffer (org-clocking-buffer)))
     (goto-char org-clock-marker)
     (delete-region (1- (point-at-bol)) (point-at-eol))
     ;; Just in case, remove any empty LOGBOOK left over
