@@ -29,7 +29,7 @@ infodir = $(prefix)/share/info
 # Using emacs in batch mode.
 
 BATCH=$(EMACS) -batch -q -no-site-file -eval                             \
-  "(progn (add-to-list (quote load-path) \"$(lispdir)\") (add-to-list (quote load-path) (expand-file-name \"./lisp/\")))"
+  "(setq load-path (cons (expand-file-name \"./lisp/\") (cons \"$(lispdir)\" load-path)))"
 
 # Specify the byte-compiler for compiling org-mode files
 ELC= $(BATCH) -f batch-byte-compile

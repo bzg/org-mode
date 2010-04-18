@@ -237,10 +237,10 @@ Otherwise rely on `org-expiry-confirm-flag' to decide."
     (when (org-expiry-expired-p)
       (org-back-to-heading)
       (looking-at org-complex-heading-regexp)
-      (let* ((ov (org-make-overlay (point) (match-end 0)))
+      (let* ((ov (make-overlay (point) (match-end 0)))
 	     (e (org-expiry-expired-p))
 	     (d (time-to-number-of-days e)))
-	(org-overlay-put ov 'face 'secondary-selection)
+	(overlay-put ov 'face 'secondary-selection)
 	(if (or force
 		(null org-expiry-confirm-flag)
 		(and (eq org-expiry-confirm-flag 'interactive)
@@ -248,7 +248,7 @@ Otherwise rely on `org-expiry-confirm-flag' to decide."
 		(and org-expiry-confirm-flag
 		     (y-or-n-p (format "Entry expired by %d days.  Process? " d))))
 	  (funcall 'org-expiry-handler-function))
-	(org-delete-overlay ov)))))
+	(delete-overlay ov)))))
 
 (defun org-expiry-process-entries (beg end)
   "Process all expired entries between BEG and END.

@@ -3282,8 +3282,8 @@ Use COMMAND to do the motion, repeat if necessary to end up in a data line."
 
 (defun org-table-add-rectangle-overlay (beg end &optional face)
   "Add a new overlay."
-  (let ((ov (org-make-overlay beg end)))
-    (org-overlay-put ov 'face (or face 'secondary-selection))
+  (let ((ov (make-overlay beg end)))
+    (overlay-put ov 'face (or face 'secondary-selection))
     (push ov org-table-rectangle-overlays)))
 
 (defun org-table-highlight-rectangle (&optional beg end face)
@@ -3318,7 +3318,7 @@ Use COMMAND to do the motion, repeat if necessary to end up in a data line."
   "Remove the rectangle overlays."
   (unless org-inhibit-highlight-removal
     (remove-hook 'before-change-functions 'org-table-remove-rectangle-highlight)
-    (mapc 'org-delete-overlay org-table-rectangle-overlays)
+    (mapc 'delete-overlay org-table-rectangle-overlays)
     (setq org-table-rectangle-overlays nil)))
 
 (defvar org-table-coordinate-overlays nil
@@ -3328,14 +3328,14 @@ Use COMMAND to do the motion, repeat if necessary to end up in a data line."
 (defun org-table-overlay-coordinates ()
   "Add overlays to the table at point, to show row/column coordinates."
   (interactive)
-  (mapc 'org-delete-overlay org-table-coordinate-overlays)
+  (mapc 'delete-overlay org-table-coordinate-overlays)
   (setq org-table-coordinate-overlays nil)
   (save-excursion
     (let ((id 0) (ih 0) hline eol s1 s2 str ic ov beg)
       (goto-char (org-table-begin))
       (while (org-at-table-p)
 	(setq eol (point-at-eol))
-	(setq ov (org-make-overlay (point-at-bol) (1+ (point-at-bol))))
+	(setq ov (make-overlay (point-at-bol) (1+ (point-at-bol))))
 	(push ov org-table-coordinate-overlays)
 	(setq hline (looking-at org-table-hline-regexp))
 	(setq str (if hline (format "I*%-2d" (setq ih (1+ ih)))
@@ -3349,7 +3349,7 @@ Use COMMAND to do the motion, repeat if necessary to end up in a data line."
 		  s1 (concat "$" (int-to-string ic))
 		  s2 (org-number-to-letters ic)
 		  str (if (eq org-table-use-standard-references t) s2 s1))
-	    (setq ov (org-make-overlay beg (+ beg (length str))))
+	    (setq ov (make-overlay beg (+ beg (length str))))
 	    (push ov org-table-coordinate-overlays)
 	    (org-overlay-display ov str 'org-special-keyword 'evaporate)))
 	(beginning-of-line 2)))))
@@ -3363,7 +3363,7 @@ Use COMMAND to do the motion, repeat if necessary to end up in a data line."
   (if (and (org-at-table-p) org-table-overlay-coordinates)
       (org-table-align))
   (unless org-table-overlay-coordinates
-    (mapc 'org-delete-overlay org-table-coordinate-overlays)
+    (mapc 'delete-overlay org-table-coordinate-overlays)
     (setq org-table-coordinate-overlays nil)))
 
 (defun org-table-toggle-formula-debugger ()

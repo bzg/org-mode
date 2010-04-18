@@ -32,8 +32,7 @@
 
 (require 'org)
 (eval-when-compile
-  (require 'cl)
-  (require 'calendar))
+  (require 'cl))
 
 (declare-function diary-add-to-list "diary-lib"
                   (date string specifier &optional marker globcolor literal))
@@ -1967,7 +1966,6 @@ Pressing `<' twice means to restrict to the current subtree or region
 	    (move-marker org-agenda-restrict-end
 			 (progn (org-end-of-subtree t)))))))
 
-      (require 'calendar)  ; FIXME: can we avoid this for some commands?
       ;; For example the todo list should not need it (but does...)
       (cond
        ((setq entry (assoc keys org-agenda-custom-commands))
@@ -2518,9 +2516,9 @@ higher priority settings."
   (let ((inhibit-read-only t))
     (mapc
      (lambda (o)
-       (when (equal (org-overlay-buffer o) (current-buffer))
+       (when (equal (overlay-buffer o) (current-buffer))
 	 (put-text-property
-	  (org-overlay-start o) (org-overlay-end o)
+	  (overlay-start o) (overlay-end o)
 	  'org-filtered t)))
      org-agenda-filter-overlays)))
 
@@ -2797,8 +2795,8 @@ bind it in the options section.")
 (defun org-agenda-mark-clocking-task ()
   "Mark the current clock entry in the agenda if it is present."
   (mapc (lambda (o)
-	  (if (eq (org-overlay-get o 'type) 'org-agenda-clocking)
-	      (org-delete-overlay o)))
+	  (if (eq (overlay-get o 'type) 'org-agenda-clocking)
+	      (delete-overlay o)))
 	(org-overlays-in (point-min) (point-max)))
   (when (marker-buffer org-clock-hd-marker)
     (save-excursion
@@ -2808,17 +2806,17 @@ bind it in the options section.")
 	  (goto-char s)
 	  (when (equal (org-get-at-bol 'org-hd-marker)
 		       org-clock-hd-marker)
-	    (setq ov (org-make-overlay (point-at-bol) (1+ (point-at-eol))))
-	    (org-overlay-put ov 'type 'org-agenda-clocking)
-	    (org-overlay-put ov 'face 'org-agenda-clocking)
-	    (org-overlay-put ov 'help-echo
+	    (setq ov (make-overlay (point-at-bol) (1+ (point-at-eol))))
+	    (overlay-put ov 'type 'org-agenda-clocking)
+	    (overlay-put ov 'face 'org-agenda-clocking)
+	    (overlay-put ov 'help-echo
 			     "The clock is running in this item")))))))
 
 (defun org-agenda-fontify-priorities ()
   "Make highest priority lines bold, and lowest italic."
   (interactive)
-  (mapc (lambda (o) (if (eq (org-overlay-get o 'org-type) 'org-priority)
-			(org-delete-overlay o)))
+  (mapc (lambda (o) (if (eq (overlay-get o 'org-type) 'org-priority)
+			(delete-overlay o)))
 	(org-overlays-in (point-min) (point-max)))
   (save-excursion
     (let ((inhibit-read-only t)
@@ -2834,8 +2832,8 @@ bind it in the options section.")
 	      e (if (eq org-agenda-fontify-priorities 'cookies)
 		    (match-end 0)
 		  (point-at-eol))
-	      ov (org-make-overlay b e))
-	(org-overlay-put
+	      ov (make-overlay b e))
+	(overlay-put
 	 ov 'face
 	 (cond ((org-face-from-face-or-color
 		 'priority nil
@@ -2846,12 +2844,12 @@ bind it in the options section.")
 		      (cdr (assoc p org-agenda-fontify-priorities)))))
 	       ((equal p l) 'italic)
 	       ((equal p h) 'bold)))
-	(org-overlay-put ov 'org-type 'org-priority)))))
+	(overlay-put ov 'org-type 'org-priority)))))
 
 (defun org-agenda-dim-blocked-tasks ()
   "Dim currently blocked TODO's in the agenda display."
-  (mapc (lambda (o) (if (eq (org-overlay-get o 'org-type) 'org-blocked-todo)
-			(org-delete-overlay o)))
+  (mapc (lambda (o) (if (eq (overlay-get o 'org-type) 'org-blocked-todo)
+			(delete-overlay o)))
 	(org-overlays-in (point-min) (point-max)))
   (save-excursion
     (let ((inhibit-read-only t)
@@ -2881,11 +2879,11 @@ bind it in the options section.")
 			(max (point-min) (1- (point-at-bol)))
 		      (point-at-bol))
 		  e (point-at-eol)
-		  ov (org-make-overlay b e))
+		  ov (make-overlay b e))
 	    (if invis1
-		(org-overlay-put ov 'invisible t)
-	      (org-overlay-put ov 'face 'org-agenda-dimmed-todo-face))
-	    (org-overlay-put ov 'org-type 'org-blocked-todo)))))))
+		(overlay-put ov 'invisible t)
+	      (overlay-put ov 'face 'org-agenda-dimmed-todo-face))
+	    (overlay-put ov 'org-type 'org-blocked-todo)))))))
 
 (defvar org-agenda-skip-function nil
   "Function to be called at each match during agenda construction.
@@ -2958,10 +2956,10 @@ no longer in use."
 			    (org-agenda-get-some-entry-text
 			     m org-agenda-entry-text-maxlines "    > "))))
     (when (string-match "\\S-" txt)
-      (setq o (org-make-overlay (point-at-bol) (point-at-eol)))
-      (org-overlay-put o 'evaporate t)
-      (org-overlay-put o 'org-overlay-type 'agenda-entry-content)
-      (org-overlay-put o 'after-string txt))))
+      (setq o (make-overlay (point-at-bol) (point-at-eol)))
+      (overlay-put o 'evaporate t)
+      (overlay-put o 'org-overlay-type 'agenda-entry-content)
+      (overlay-put o 'after-string txt))))
 
 (defun org-agenda-entry-text-show ()
   "Add entry context for all agenda lines."
@@ -2978,9 +2976,9 @@ no longer in use."
   "Remove any shown entry context."
   (delq nil
 	(mapcar (lambda (o)
-		  (if (eq (org-overlay-get o 'org-overlay-type)
+		  (if (eq (overlay-get o 'org-overlay-type)
 			  'agenda-entry-content)
-		      (progn (org-delete-overlay o) t)))
+		      (progn (delete-overlay o) t)))
 		(org-overlays-in (point-min) (point-max)))))
 
 ;;; Agenda timeline
@@ -2995,7 +2993,6 @@ under the current date.
 If the buffer contains an active region, only check the region for
 dates."
   (interactive "P")
-  (require 'calendar)
   (org-compile-prefix-format 'timeline)
   (org-set-sorting-strategy 'timeline)
   (let* ((dopast t)
@@ -3197,7 +3194,6 @@ given in `org-agenda-start-on-weekday'."
   (setq org-agenda-last-arguments (list include-all start-day ndays))
   (org-compile-prefix-format 'agenda)
   (org-set-sorting-strategy 'agenda)
-  (require 'calendar)
   (let* ((org-agenda-start-on-weekday
 	  (if (or (equal ndays 7) (and (null ndays) (equal 7 org-agenda-ndays)))
 	      org-agenda-start-on-weekday nil))
@@ -3624,7 +3620,6 @@ the list to these.  When using \\[universal-argument], you will be prompted
 for a keyword.  A numeric prefix directly selects the Nth keyword in
 `org-todo-keywords-1'."
   (interactive "P")
-  (require 'calendar)
   (org-compile-prefix-format 'todo)
   (org-set-sorting-strategy 'todo)
   (org-prepare-agenda "TODO")
@@ -3981,7 +3976,6 @@ MATCH is being ignored."
   "Get the (Emacs Calendar) diary entries for DATE."
   (require 'diary-lib)
   (let* ((diary-fancy-buffer "*temporary-fancy-diary-buffer*")
-	 (fancy-diary-buffer diary-fancy-buffer)
 	 (diary-display-hook '(fancy-diary-display))
 	 (diary-display-function 'fancy-diary-display)
 	 (pop-up-frames nil)
@@ -5274,12 +5268,12 @@ HH:MM."
 
 ;;; Agenda restriction lock
 
-(defvar org-agenda-restriction-lock-overlay (org-make-overlay 1 1)
+(defvar org-agenda-restriction-lock-overlay (make-overlay 1 1)
   "Overlay to mark the headline to which agenda commands are restricted.")
-(org-overlay-put org-agenda-restriction-lock-overlay
-		 'face 'org-agenda-restriction-lock)
-(org-overlay-put org-agenda-restriction-lock-overlay
-		 'help-echo "Agendas are currently limited to this subtree.")
+(overlay-put org-agenda-restriction-lock-overlay
+	     'face 'org-agenda-restriction-lock)
+(overlay-put org-agenda-restriction-lock-overlay
+	     'help-echo "Agendas are currently limited to this subtree.")
 (org-detach-overlay org-agenda-restriction-lock-overlay)
 
 (defun org-agenda-set-restriction-lock (&optional type)
@@ -5302,7 +5296,7 @@ in the file.  Otherwise, restriction will be to the current subtree."
 	(put 'org-agenda-files 'org-restrict
 	     (list (buffer-file-name (buffer-base-buffer))))
 	(org-back-to-heading t)
-	(org-move-overlay org-agenda-restriction-lock-overlay (point) (point-at-eol))
+	(move-overlay org-agenda-restriction-lock-overlay (point) (point-at-eol))
 	(move-marker org-agenda-restrict-begin (point))
 	(move-marker org-agenda-restrict-end
 		     (save-excursion (org-end-of-subtree t)))
@@ -5588,25 +5582,25 @@ If the line does not have an effort defined, return nil."
 
 (defun org-agenda-filter-by-tag-hide-line ()
   (let (ov)
-    (setq ov (org-make-overlay (max (point-min) (1- (point-at-bol)))
+    (setq ov (make-overlay (max (point-min) (1- (point-at-bol)))
 			       (point-at-eol)))
-    (org-overlay-put ov 'invisible t)
-    (org-overlay-put ov 'type 'tags-filter)
+    (overlay-put ov 'invisible t)
+    (overlay-put ov 'type 'tags-filter)
     (push ov org-agenda-filter-overlays)))
 
 (defun org-agenda-fix-tags-filter-overlays-at (&optional pos)
   (setq pos (or pos (point)))
   (save-excursion
     (dolist (ov (org-overlays-at pos))
-      (when (and (org-overlay-get ov 'invisible)
-		 (eq (org-overlay-get ov 'type) 'tags-filter))
+      (when (and (overlay-get ov 'invisible)
+		 (eq (overlay-get ov 'type) 'tags-filter))
 	(goto-char pos)
-	(if (< (org-overlay-start ov) (point-at-eol))
-	    (org-move-overlay ov (point-at-eol)
-			      (org-overlay-end ov)))))))
+	(if (< (overlay-start ov) (point-at-eol))
+	    (move-overlay ov (point-at-eol)
+			      (overlay-end ov)))))))
 
 (defun org-agenda-filter-by-tag-show-all ()
-  (mapc 'org-delete-overlay org-agenda-filter-overlays)
+  (mapc 'delete-overlay org-agenda-filter-overlays)
   (setq org-agenda-filter-overlays nil)
   (setq org-agenda-filter nil)
   (setq org-agenda-filter-form nil)
@@ -5881,8 +5875,8 @@ so that the date SD will be in that range."
       (error "No previous date before this line in this buffer")))
 
 ;; Initialize the highlight
-(defvar org-hl (org-make-overlay 1 1))
-(org-overlay-put org-hl 'face 'highlight)
+(defvar org-hl (make-overlay 1 1))
+(overlay-put org-hl 'face 'highlight)
 
 (defun org-highlight (begin end &optional buffer)
   "Highlight a region with overlay."
@@ -7313,9 +7307,7 @@ argument, latitude and longitude will be prompted for."
 	 (date (calendar-gregorian-from-absolute day))
 	 (calendar-move-hook nil)
 	 (calendar-view-holidays-initially-flag nil)
-	 (calendar-view-diary-initially-flag nil)
-	 (view-calendar-holidays-initially nil)
-	 (view-diary-entries-initially nil))
+	 (calendar-view-diary-initially-flag nil))
     (calendar)
     (calendar-goto-date date)))
 
@@ -7374,11 +7366,11 @@ This is a command that has to be installed in `calendar-mode-map'."
     (unless (org-agenda-bulk-marked-p)
       (unless m (error "Nothing to mark at point"))
       (push m org-agenda-bulk-marked-entries)
-      (setq ov (org-make-overlay (point-at-bol) (+ 2 (point-at-bol))))
+      (setq ov (make-overlay (point-at-bol) (+ 2 (point-at-bol))))
       (org-overlay-display ov "> "
 			   (org-get-todo-face "TODO")
 			   'evaporate)
-      (org-overlay-put ov 'type 'org-marked-entry-overlay))
+      (overlay-put ov 'type 'org-marked-entry-overlay))
     (beginning-of-line 2)
     (while (and (get-char-property (point) 'invisible) (not (eobp)))
       (beginning-of-line 2))
@@ -7415,8 +7407,8 @@ This only removes the overlays, it does not remove the markers
 from the list in `org-agenda-bulk-marked-entries'."
   (interactive)
   (mapc (lambda (ov)
-	  (and (eq (org-overlay-get ov 'type) 'org-marked-entry-overlay)
-	       (org-delete-overlay ov)))
+	  (and (eq (overlay-get ov 'type) 'org-marked-entry-overlay)
+	       (delete-overlay ov)))
 	(org-overlays-in (or beg (point-min)) (or end (point-max)))))
 
 (defun org-agenda-bulk-remove-all-marks ()
@@ -7596,7 +7588,6 @@ either 'headline or 'category.  For example:
 will only add headlines containing IMPORTANT or headlines
 belonging to the \"Work\" category."
   (interactive "P")
-  (require 'calendar)
   (if refresh (setq appt-time-msg-list nil))
   (if (eq filter t)
       (setq filter (read-from-minibuffer "Regexp filter: ")))
