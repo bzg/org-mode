@@ -3800,7 +3800,7 @@ a radio table."
     (goto-char (org-table-begin))
     (let (rtn)
       (beginning-of-line 0)
-      (while (looking-at "[ \t]*#\\+ORGTBL[: \t][ \t]*SEND +\\([a-zA-Z0-9_]+\\) +\\([^ \t\r\n]+\\)\\( +.*\\)?")
+      (while (looking-at "[ \t]*#\\+ORGTBL[: \t][ \t]*SEND[ \t]+\\([^ \t\r\n]+\\)[ \t]+\\([^ \t\r\n]+\\)\\([ \t]+.*\\)?")
 	(let ((name (org-no-properties (match-string 1)))
 	      (transform (intern (match-string 2)))
 	      (params (if (match-end 3)
