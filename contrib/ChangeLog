@@ -1,5 +1,8 @@
 2010-04-18  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* lisp/org-learn.el (require): `calendar' is now required already
+	by org.el on top level.
+
 	* lisp/org-toc.el (org-toc-cycle-subtree, org-toc-show)
 	(org-toc-restore-config): Use the normal overlay API.
 

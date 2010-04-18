@@ -30,8 +30,7 @@
 
 (require 'org)
 (eval-when-compile
-  (require 'cl)
-  (require 'calendar))
+  (require 'cl))
 
 (declare-function calendar-absolute-from-iso    "cal-iso"    (&optional date))
 (defvar org-time-stamp-formats)

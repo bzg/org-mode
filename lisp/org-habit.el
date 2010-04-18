@@ -30,8 +30,7 @@
 (require 'org)
 (require 'org-agenda)
 (eval-when-compile
-  (require 'cl)
-  (require 'calendar))
+  (require 'cl))
 
 (defgroup org-habit nil
   "Options concerning habit tracking in Org-mode."

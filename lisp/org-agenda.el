@@ -32,8 +32,7 @@
 
 (require 'org)
 (eval-when-compile
-  (require 'cl)
-  (require 'calendar))
+  (require 'cl))
 
 (declare-function diary-add-to-list "diary-lib"
                   (date string specifier &optional marker globcolor literal))
@@ -1967,7 +1966,6 @@ Pressing `<' twice means to restrict to the current subtree or region
 	    (move-marker org-agenda-restrict-end
 			 (progn (org-end-of-subtree t)))))))
 
-      (require 'calendar)  ; FIXME: can we avoid this for some commands?
       ;; For example the todo list should not need it (but does...)
       (cond
        ((setq entry (assoc keys org-agenda-custom-commands))
@@ -2995,7 +2993,6 @@ under the current date.
 If the buffer contains an active region, only check the region for
 dates."
   (interactive "P")
-  (require 'calendar)
   (org-compile-prefix-format 'timeline)
   (org-set-sorting-strategy 'timeline)
   (let* ((dopast t)
@@ -3197,7 +3194,6 @@ given in `org-agenda-start-on-weekday'."
   (setq org-agenda-last-arguments (list include-all start-day ndays))
   (org-compile-prefix-format 'agenda)
   (org-set-sorting-strategy 'agenda)
-  (require 'calendar)
   (let* ((org-agenda-start-on-weekday
 	  (if (or (equal ndays 7) (and (null ndays) (equal 7 org-agenda-ndays)))
 	      org-agenda-start-on-weekday nil))
@@ -3624,7 +3620,6 @@ the list to these.  When using \\[universal-argument], you will be prompted
 for a keyword.  A numeric prefix directly selects the Nth keyword in
 `org-todo-keywords-1'."
   (interactive "P")
-  (require 'calendar)
   (org-compile-prefix-format 'todo)
   (org-set-sorting-strategy 'todo)
   (org-prepare-agenda "TODO")
@@ -7593,7 +7588,6 @@ either 'headline or 'category.  For example:
 will only add headlines containing IMPORTANT or headlines
 belonging to the \"Work\" category."
   (interactive "P")
-  (require 'calendar)
   (if refresh (setq appt-time-msg-list nil))
   (if (eq filter t)
       (setq filter (read-from-minibuffer "Regexp filter: ")))

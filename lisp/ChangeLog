@@ -1,5 +1,15 @@
 2010-04-18  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-habit.el (require): `calendar' is now required already by
+	org.el on top level.
+
+	* org-clock.el (require): `calendar' is now required already by
+	org.el on top level.
+
+	* org-agenda.el (require, org-timeline, org-agenda-list)
+	(org-todo-list, org-agenda-to-appt): `calendar' is now required
+	already by org.el on top level.
+
 	* org.el (org-export-latex-fix-inputenc): Declare function.
 
 	* org-agenda.el (org-agenda-goto-calendar): Do not bind obsolete

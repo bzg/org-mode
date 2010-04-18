@@ -36,8 +36,7 @@
 
 (require 'org)
 (eval-when-compile
-  (require 'cl)
-  (require 'calendar))
+  (require 'cl))
 
 (defgroup org-learn nil
   "Options concerning the learning code in Org-mode."
