@@ -73,6 +73,18 @@
 (eval-when-compile
   (require 'cl)
   (require 'gnus-sum))
+
+(require 'calendar)
+;; Emacs 22 calendar compatibility:  Make sure the new variables are available
+(unless (boundp 'calendar-view-holidays-initially-flag)
+  (defvaralias 'calendar-view-holidays-initially-flag
+    'view-calendar-holidays-initially))
+(unless (boundp 'calendar-view-diary-initially-flag)
+  (defvaralias 'calendar-view-diary-initially-flag
+    'view-diary-entries-initially))
+(unless (boundp 'diary-fancy-buffer)
+  (defvaralias 'diary-fancy-buffer 'fancy-diary-buffer))
+
 ;; For XEmacs, noutline is not yet provided by outline.el, so arrange for
 ;; the file noutline.el being loaded.
 (if (featurep 'xemacs) (condition-case nil (require 'noutline)))
@@ -13556,9 +13568,7 @@ user."
 	 (calendar-frame-setup nil)
 	 (calendar-move-hook nil)
 	 (calendar-view-diary-initially-flag nil)
-	 (view-diary-entries-initially nil)
 	 (calendar-view-holidays-initially-flag nil)
-	 (view-calendar-holidays-initially nil)
 	 (timestr (format-time-string
 		   (if with-time "%Y-%m-%d %H:%M" "%Y-%m-%d") def))
 	 (prompt (concat (if prompt (concat prompt " ") "")
@@ -14618,9 +14628,7 @@ A prefix ARG can be used to force the current date."
   (let ((tsr org-ts-regexp) diff
 	(calendar-move-hook nil)
 	(calendar-view-holidays-initially-flag nil)
-	(view-calendar-holidays-initially nil)
-	(calendar-view-diary-initially-flag nil)
-	(view-diary-entries-initially nil))
+	(calendar-view-diary-initially-flag nil))
     (if (or (org-at-timestamp-p)
 	    (save-excursion
 	      (beginning-of-line 1)

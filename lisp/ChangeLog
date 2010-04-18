@@ -1,5 +1,13 @@
 2010-04-18  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-agenda.el (org-agenda-goto-calendar): Do not bind obsolete
+	variables.
+
+	* org.el (calendar): Require calendar now on top level in org.el
+	and define aliases to new variables when needed.
+	(org-read-date, org-goto-calendar): Do not bind obsolete
+	variables.
+
 	* org-clock.el (org-clock-out, org-clock-cancel): Get rid of
 	compilation warning, add comment that this cannot be done with
 	`with-current-buffer'.
