@@ -1,3 +1,11 @@
+2010-04-18  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-freemind.el (org-freemind-from-org-mode-node)
+	(org-freemind-from-org-mode, )
+	(org-freemind-from-org-sparse-tree, org-freemind-to-org-mode): Use
+	interactive-p instead of called-interactively, because this is
+	backward compatible with older Emacsen I still support..
+
 2010-04-16  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-exp.el (org-export-define-heading-targets): Fix bug in
