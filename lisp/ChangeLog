@@ -1,5 +1,7 @@
 2010-04-18  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-export-latex-fix-inputenc): Declare function.
+
 	* org-agenda.el (org-agenda-goto-calendar): Do not bind obsolete
 	variables.
 
