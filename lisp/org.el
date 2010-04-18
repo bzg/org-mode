@@ -72,8 +72,7 @@
 
 (eval-when-compile
   (require 'cl)
-  (require 'gnus-sum)
-  (require 'calendar))
+  (require 'gnus-sum))
 ;; For XEmacs, noutline is not yet provided by outline.el, so arrange for
 ;; the file noutline.el being loaded.
 (if (featurep 'xemacs) (condition-case nil (require 'noutline)))
@@ -83,6 +82,7 @@
 (require 'time-date)
 (unless (fboundp 'time-subtract) (defalias 'time-subtract 'subtract-time))
 (require 'easymenu)
+(require 'calendar)
 
 (require 'org-macs)
 (require 'org-entities)
