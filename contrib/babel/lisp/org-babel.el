@@ -632,7 +632,7 @@ Return a list (session vars result-params result-type colnames rownames)."
         column names"
   (if (equal 'hline (second table))
       (cons (cddr table) (car table))
-    table))
+    (list table)))
 
 (defun org-babel-get-rownames (table)
   "Return a cons cell, the `car' of which contains the TABLE less
