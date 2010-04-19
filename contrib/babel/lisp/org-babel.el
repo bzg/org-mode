@@ -89,7 +89,7 @@ header arguments as well.")
 
 (defvar org-babel-default-header-args
   '((:session . "none") (:results . "replace") (:exports . "code")
-    (:cache . "no") (:noweb . "no"))
+    (:cache . "no") (:noweb . "no") (:hlines . "yes"))
   "Default arguments to use when evaluating a source block.")
 
 (defvar org-babel-default-inline-header-args
@@ -605,14 +605,107 @@ may be specified in the properties of the current outline entry."
 (defun org-babel-process-params (params)
   "Parse params and resolve references.
 
-Return a list (session vars result-params result-type)."
+Return a list (session vars result-params result-type colnames rownames)."
   (let* ((session (cdr (assoc :session params)))
-	 (vars (org-babel-ref-variables params))
+         (vars-and-names (org-babel-manicure-tables
+                          (org-babel-ref-variables params)
+                          (cdr (assoc :hlines params))
+                          (cdr (assoc :colnames params))
+                          (cdr (assoc :rownames params))))
+         (vars     (car   vars-and-names))
+         (colnames (cadr  vars-and-names))
+         (rownames (caddr vars-and-names))
 	 (result-params (split-string (or (cdr (assoc :results params)) "")))
 	 (result-type (cond ((member "output" result-params) 'output)
 			    ((member "value" result-params) 'value)
 			    (t 'value))))
-    (list session vars result-params result-type)))
+    (list session vars result-params result-type colnames rownames)))
+
+;; row and column names
+(defun org-babel-del-hlines (table)
+  "Remove all 'hlines from TABLE."
+  (remove 'hline table))
+
+(defun org-babel-get-colnames (table)
+  "Return a cons cell, the `car' of which contains the TABLE
+        less colnames, and the `cdr' of which contains a list of the
+        column names"
+  (if (equal 'hline (second table))
+      (cons (cddr table) (car table))
+    table))
+
+(defun org-babel-get-rownames (table)
+  "Return a cons cell, the `car' of which contains the TABLE less
+     colnames, and the `cdr' of which contains a list of the column
+     names.  Note: this function removes any hlines in TABLE"
+  (flet ((trans (table) (apply #'mapcar* #'list table)))
+    (let* ((width (apply 'max (mapcar (lambda (el) (if (listp el) (length el) 0)) table)))
+           (table (trans (mapcar (lambda (row)
+                                   (if (not (equal row 'hline))
+                                       row
+                                     (setq row '())
+                                     (dotimes (n width) (setq row (cons 'hline row)))
+                                     row))
+                                 tab))))
+      (cons (mapcar (lambda (row) (if (equal (car row) 'hline) 'hline row))
+                    (trans (cdr table)))
+            (remove 'hline (car table))))))
+
+(defun org-babel-put-colnames (table colnames)
+  "Add COLNAMES to TABLE if they exist."
+  (if colnames (apply 'list colnames 'hline table) table))
+
+(defun org-babel-put-rownames (table rownames)
+  "Add ROWNAMES to TABLE if they exist."
+  (if rownames
+      (mapcar (lambda (row)
+                (if (listp row)
+                    (cons (or (pop rownames) "") row)
+                  row)) table)
+    table))
+
+(defun org-babel-manicure-tables (vars hlines colnames rownames)
+  "Process the variables in VARS according to the HLINES,
+ROWNAMES and COLNAMES header arguments.  Return a list consisting
+of the vars, cnames and rnames."
+  (flet ((pick (names sel)
+           (when names
+             (if (and sel (symbolp sel) (not (equal t sel)))
+                 (cdr (assoc sel names))
+               (if (integerp sel)
+                   (nth (- sel 1) names)
+                 (cdr (car (last names))))))))
+    (let (cnames rnames)
+      (list
+       (mapcar
+        (lambda (var)
+          (when (listp (cdr var))
+            (when (and (not (equal colnames "no"))
+                       (or colnames (and (equal (second (cdr var)) 'hline)
+                                         (not (member 'hline (cddr (cdr var)))))))
+              (let ((both (org-babel-get-colnames (cdr var))))
+                (setq cnames (cons (cons (car var) (cdr both))
+                                   cnames))
+                (setq var (cons (car var) (car both)))))
+            (when (and rownames (not (equal rownames "no")))
+              (let ((both (org-babel-get-rownames (cdr var))))
+                (setq rnames (cons (cons (car var) (cdr both))
+                                   rnames))
+                (setq var (cons (car var) (car both)))))
+            (when (and hlines (not (equal hlines "yes")))
+              (setq var (cons (car var) (org-babel-del-hlines (cdr var))))))
+          var)
+        vars)
+       (pick cnames colnames) (pick rnames rownames)))))
+
+(defun org-babel-reassemble-table (table colnames rownames)
+  "Given a TABLE and set of COLNAMES and ROWNAMES add the names
+to the table for reinsertion to org-mode."
+  (if (listp table)
+      ((lambda (table)
+         (if colnames (org-babel-put-colnames table colnames) table))
+       (if rownames (org-babel-put-rownames table rownames) table))
+    table))
 
 (defun org-babel-where-is-src-block-head ()
   "Return the point at the beginning of the current source
