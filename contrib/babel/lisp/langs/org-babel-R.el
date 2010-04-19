@@ -43,19 +43,24 @@ called by `org-babel-execute-src-block'."
     (let* ((processed-params (org-babel-process-params params))
            (result-type (fourth processed-params))
            (session (org-babel-R-initiate-session (first processed-params) params))
-           (vars (second processed-params))
-	   (column-names-p (and (cdr (assoc :colnames params))
+           (vars (mapcar (lambda (i) (cons (car (nth i (second processed-params)))
+					   (org-babel-reassemble-table
+					    (cdr (nth i (second processed-params)))
+					    (cdr (nth i (fifth processed-params)))
+					    (cdr (nth i (sixth processed-params))))))
+			 (number-sequence 0 (1- (length (second processed-params))))))
+	   (colnames-p (and (cdr (assoc :colnames params))
 				(string= "yes" (cdr (assoc :colnames params)))))
-	   (row-names-p (and (cdr (assoc :rownames params))
+	   (rownames-p (and (cdr (assoc :rownames params))
 				(string= "yes" (cdr (assoc :rownames params)))))
 	   (out-file (cdr (assoc :file params)))
 	   (augmented-body
 	    (concat
 	     (if out-file (concat (org-babel-R-construct-graphics-device-call out-file params) "\n") "")
 	     (mapconcat ;; define any variables
-	      (lambda (pair) (org-babel-R-assign-elisp (car pair) (cdr pair))) vars "\n")
+	      (lambda (pair) (org-babel-R-assign-elisp (car pair) (cdr pair) colnames-p rownames-p)) vars "\n")
 	     "\n" body "\n" (if out-file "dev.off()\n" "")))
-	   (result (org-babel-R-evaluate session augmented-body result-type column-names-p row-names-p)))
+	   (result (org-babel-R-evaluate session augmented-body result-type colnames-p rownames-p)))
       (or out-file result))))
 
 (defun org-babel-prep-session:R (session params)
@@ -64,7 +69,11 @@ called by `org-babel-execute-src-block'."
 	 (vars (org-babel-ref-variables params))
 	 (var-lines
 	  (mapcar
-	   (lambda (pair) (org-babel-R-assign-elisp (car pair) (cdr pair))) vars)))
+	   (lambda (pair) (org-babel-R-assign-elisp
+			   (car pair) (cdr pair)
+			   (equal (cdr (assoc :colnames params)) "yes")
+			   (equal (cdr (assoc :rownames params)) "yes")))
+	   vars)))
     (org-babel-comint-in-buffer session
       (mapc (lambda (var)
               (move-end-of-line 1) (insert var) (comint-send-input nil t)
@@ -88,7 +97,7 @@ called by `org-babel-execute-src-block'."
       (concat "\"" (mapconcat 'identity (split-string s "\"") "\"\"") "\"")
     (format "%S" s)))
 
-(defun org-babel-R-assign-elisp (name value)
+(defun org-babel-R-assign-elisp (name value colnames-p rownames-p)
   "Construct R code assigning the elisp VALUE to a variable named NAME."
   (if (listp value)
       (let ((transition-file (make-temp-file "org-babel-R-import")))
@@ -97,8 +106,10 @@ called by `org-babel-execute-src-block'."
         (with-temp-file (org-babel-maybe-remote-file transition-file)
           (insert (orgtbl-to-tsv value '(:fmt org-babel-R-quote-tsv-field)))
           (insert "\n"))
-        (format "%s <- read.table(\"%s\", header=%s, sep=\"\\t\", as.is=TRUE)"
-                name transition-file (if (eq (second value) 'hline) "TRUE" "FALSE")))
+        (format "%s <- read.table(\"%s\", header=%s, row.names=%s, sep=\"\\t\", as.is=TRUE)"
+                name transition-file
+		(if (and (eq (second value) 'hline) colnames-p) "TRUE" "FALSE")
+		(if rownames-p "1" "NULL")))
     (format "%s <- %s" name (org-babel-R-quote-tsv-field value))))
 
 (defun org-babel-R-initiate-session (session params)
