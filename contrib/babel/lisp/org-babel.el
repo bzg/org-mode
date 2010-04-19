@@ -646,7 +646,7 @@ Return a list (session vars result-params result-type colnames rownames)."
                                      (setq row '())
                                      (dotimes (n width) (setq row (cons 'hline row)))
                                      row))
-                                 tab))))
+                                 table))))
       (cons (mapcar (lambda (row) (if (equal (car row) 'hline) 'hline row))
                     (trans (cdr table)))
             (remove 'hline (car table))))))
