@@ -63,7 +63,9 @@ called by `org-babel-execute-src-block'."
 			       (org-babel-ruby-var-to-ruby (cdr pair))))
 		     vars "\n") "\n" body "\n")) ;; then the source block body
          (result (org-babel-ruby-evaluate session full-body result-type)))
-    (or (cdr (assoc :file params)) result)))
+    (or (cdr (assoc :file params))
+        (org-babel-reassemble-table
+         result (nth 4 processed-params) (nth 5 processed-params)))))
 
 (defun org-babel-prep-session:ruby (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."

@@ -35,6 +35,10 @@
 
 (add-to-list 'org-babel-tangle-langs '("emacs-lisp" "el"))
 
+(defvar org-babel-default-header-args:emacs-lisp
+  '((:hlines . "no") (:colnames . "no"))
+  "Default arguments to use when evaluating an emacs-lisp source block.")
+
 (defun org-babel-execute:emacs-lisp (body params)
   "Execute a block of emacs-lisp code with org-babel."
   (message "executing emacs-lisp code block...")
@@ -43,13 +47,15 @@
            (result-params (third processed-params))
            (vars (second processed-params))
            (print-level nil) (print-length nil))
-      (eval `(let ,(mapcar (lambda (var) `(,(car var) ',(cdr var)))
-                           vars)
-	       ,(read (concat "(progn "
-			      (if (or (member "code" result-params)
-				      (member "pp" result-params))
-				  (concat "(pp " body ")") body)
-			      ")")))))))
+      (org-babel-reassemble-table
+       (eval `(let ,(mapcar (lambda (var) `(,(car var) ',(cdr var)))
+                            vars)
+                ,(read (concat "(progn "
+                               (if (or (member "code" result-params)
+                                       (member "pp" result-params))
+                                   (concat "(pp " body ")") body)
+                               ")"))))
+       (nth 4 processed-params) (nth 5 processed-params)))))
 
 (provide 'org-babel-emacs-lisp)
 ;;; org-babel-emacs-lisp.el ends here

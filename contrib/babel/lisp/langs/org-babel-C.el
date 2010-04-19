@@ -116,14 +116,16 @@ called by `org-babel-execute-src-block'."
                        tmp-src-file)
                (current-buffer) 'replace error-buf)))))
     (if (= compile 0)
-        (org-babel-read
-         (org-babel-trim
-          (with-temp-buffer
-            (org-babel-shell-command-on-region
-             (point-min) (point-max)
-             (concat tmp-bin-file (if cmdline (concat " " cmdline) ""))
-             (current-buffer) 'replace)
-            (buffer-string))))
+        (org-babel-reassemble-table
+         (org-babel-read
+          (org-babel-trim
+           (with-temp-buffer
+             (org-babel-shell-command-on-region
+              (point-min) (point-max)
+              (concat tmp-bin-file (if cmdline (concat " " cmdline) ""))
+              (current-buffer) 'replace)
+             (buffer-string))))
+         (nth 4 processed-params) (nth 5 processed-params))
       (progn
         (with-current-buffer error-buf
           (goto-char (point-max))

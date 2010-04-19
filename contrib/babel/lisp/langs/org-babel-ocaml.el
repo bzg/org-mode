@@ -63,7 +63,9 @@
                 (comint-send-input nil t)
                 (insert org-babel-ocaml-eoe-indicator)
                 (comint-send-input nil t))))
-    (org-babel-ocaml-parse-output (org-babel-trim (car raw)))))
+    (org-babel-reassemble-table
+     (org-babel-ocaml-parse-output (org-babel-trim (car raw)))
+     (nth 4 processed-params) (nth 5 processed-params))))
 
 (defun org-babel-prep-session:ocaml (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."

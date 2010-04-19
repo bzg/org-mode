@@ -52,7 +52,9 @@ called by `org-babel-execute-src-block'."
 			       (org-babel-perl-var-to-perl (cdr pair))))
 		     vars "\n") "\n" (org-babel-trim body) "\n")) ;; then the source block body
 	(session (org-babel-perl-initiate-session session)))
-    (org-babel-perl-evaluate session full-body result-type)))
+    (org-babel-reassemble-table
+     (org-babel-perl-evaluate session full-body result-type)
+     (nth 4 processed-params) (nth 5 processed-params))))
 
 (defun org-babel-prep-session:perl (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."

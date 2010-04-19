@@ -70,7 +70,10 @@ called by `org-babel-execute-src-block'."
     (shell-command command)
     (with-temp-buffer
       (org-table-import out-file nil)
-      (org-table-to-lisp))))
+      (org-babel-reassemble-table
+       (org-table-to-lisp)
+       (nth 4 processed-params) (nth 5 processed-params)))))
+
 
 (defun org-babel-prep-session:sql (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."

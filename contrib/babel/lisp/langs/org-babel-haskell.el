@@ -75,9 +75,11 @@
                    #'org-babel-haskell-read-string
                    (cdr (member org-babel-haskell-eoe
                                 (reverse (mapcar #'org-babel-trim raw)))))))
-    (case result-type
-      (output (mapconcat #'identity (reverse (cdr results)) "\n"))
-      (value (org-babel-haskell-table-or-string (car results))))))
+    (org-babel-reassemble-table
+     (case result-type
+       (output (mapconcat #'identity (reverse (cdr results)) "\n"))
+       (value (org-babel-haskell-table-or-string (car results))))
+     (nth 4 processed-params) (nth 5 processed-params))))
 
 (defun org-babel-haskell-read-string (string)
   "Strip \\\"s from around haskell string"

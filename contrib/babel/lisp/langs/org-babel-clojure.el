@@ -269,6 +269,8 @@ last statement in BODY, as elisp."
          (vars (second processed-params))
          (body (org-babel-clojure-build-full-form body vars))
          (session (org-babel-clojure-initiate-session (first processed-params))))
-    (org-babel-clojure-evaluate session body (fourth processed-params))))
+    (org-babel-reassemble-table
+     (org-babel-clojure-evaluate session body (fourth processed-params))
+     (nth 4 processed-params) (nth 5 processed-params))))
 
 (provide 'org-babel-clojure)

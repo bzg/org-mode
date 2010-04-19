@@ -54,7 +54,9 @@ called by `org-babel-execute-src-block'."
                       vars "\n") "\n" (org-babel-trim body) "\n")) ;; then the source block body
          
          (result (org-babel-python-evaluate session full-body result-type)))
-    (or (cdr (assoc :file params)) result)))
+    (or (cdr (assoc :file params))
+        (org-babel-reassemble-table
+         result (nth 4 processed-params) (nth 5 processed-params)))))
 
 (defun org-babel-prep-session:python (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."

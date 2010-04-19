@@ -233,7 +233,8 @@ called by `org-babel-execute-src-block' via multiple-value-bind."
 ;; 	(session-buffer (org-babel-oz-initiate-session session))
 ;; 	(session (org-babel-prep-session:oz session params))
 	)
-    ;; actually execute the source-code block 
+    ;; actually execute the source-code block
+    (org-babel-reassemble-table
      (case result-type
        (output
 	(progn 
@@ -245,7 +246,7 @@ called by `org-babel-execute-src-block' via multiple-value-bind."
 	  (oz-send-string-expression full-body (if wait-time
 						   wait-time
 						 1)))))
-    ))
+     (nth 4 processed-params) (nth 5 processed-params))))
 
 ;; This function should be used to assign any variables in params in
 ;; the context of the session environment.

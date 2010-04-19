@@ -62,7 +62,9 @@
 				     (org-babel-octave-var-to-octave (cdr pair))))
 			   vars "\n") "\n" body "\n"))
 	 (result (org-babel-octave-evaluate session augmented-body result-type matlabp)))
-    (or out-file result)))
+    (or out-file
+        (org-babel-reassemble-table
+         result (nth 4 processed-params) (nth 5 processed-params)))))
 
 (defun org-babel-octave-var-to-octave (var)
   "Convert an emacs-lisp variable into an octave variable.
