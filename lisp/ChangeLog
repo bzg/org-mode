@@ -1,3 +1,8 @@
+2010-04-19  Bastien Guerry  <bzg@altern.org>
+
+	* org-clock.el (org-clock-set-current): Just return the headline
+	itself, strip the TODO keyword, the priority cookie and the tags.
+
 2010-04-18  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-html.el (org-export-as-html-and-open): Add argument to
