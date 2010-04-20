@@ -37,14 +37,14 @@
 (add-to-list 'org-babel-tangle-langs '("python" "py" "#!/usr/bin/env python"))
 
 (defun org-babel-expand-body:python (body params &optional processed-params)
-  (let (vars (second (or processed-params (org-babel-process-params params))))
-    (concat
-     (mapconcat ;; define any variables
-      (lambda (pair)
-        (format "%s=%s"
-                (car pair)
-                (org-babel-python-var-to-python (cdr pair))))
-      vars "\n") "\n" (org-babel-trim body) "\n")))
+  (concat
+   (mapconcat ;; define any variables
+    (lambda (pair)
+      (format "%s=%s"
+              (car pair)
+              (org-babel-python-var-to-python (cdr pair))))
+    (second (or processed-params (org-babel-process-params params))) "\n")
+   "\n" (org-babel-trim body) "\n"))
 
 (defun org-babel-execute:python (body params)
   "Execute a block of Python code with org-babel.  This function is
