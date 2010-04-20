@@ -269,6 +269,8 @@ defined in `org-export-taskjuggler-default-reports'."
 	 (buffer (find-file-noselect filename))
 	 (old-level 0)
 	 task resource)
+    (unless tasks
+      (error "No tasks specified"))
     ;; add a default resource
     (unless resources
       (setq resources 
