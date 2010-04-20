@@ -1058,7 +1058,7 @@ the clocking selection, associated with the letter `d'."
   "Task currently clocked in.")
 (defun org-clock-set-current ()
   "Set `org-clock-current-task' to the task currently clocked in."
-  (setq org-clock-current-task (org-get-heading)))
+  (setq org-clock-current-task (nth 4 (org-heading-components))))
 (defun org-clock-delete-current ()
   "Reset `org-clock-current-task' to nil."
   (setq org-clock-current-task nil))

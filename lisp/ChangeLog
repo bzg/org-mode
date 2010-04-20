@@ -17,6 +17,11 @@
 	* org-compat.el (org-overlays-at): Function removed.
 	(org-overlays-in): Function removed.
 
+2010-04-19  Bastien Guerry  <bzg@altern.org>
+
+	* org-clock.el (org-clock-set-current): Just return the headline
+	itself, strip the TODO keyword, the priority cookie and the tags.
+
 2010-04-18  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-compat.el (org-xemacs-without-invisibility): New macro.
