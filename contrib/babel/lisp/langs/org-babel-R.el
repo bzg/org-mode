@@ -35,6 +35,22 @@
 
 (add-to-list 'org-babel-tangle-langs '("R" "R" "#!/usr/bin/env Rscript"))
 
+(defun org-babel-expand-body:R (body params &optional processed-params)
+  (let* ((processed-params (or processed-params
+                               (org-babel-process-params params)))
+	 (vars (mapcar (lambda (i) (cons (car (nth i (second processed-params)))
+					 (org-babel-reassemble-table
+					  (cdr (nth i (second processed-params)))
+					  (cdr (nth i (fifth processed-params)))
+					  (cdr (nth i (sixth processed-params))))))
+		       (number-sequence 0 (1- (length (second processed-params))))))
+         (out-file (cdr (assoc :file params))))
+    (concat
+     (if out-file (concat (org-babel-R-construct-graphics-device-call out-file params) "\n") "")
+     (mapconcat ;; define any variables
+      (lambda (pair) (org-babel-R-assign-elisp (car pair) (cdr pair))) vars "\n")
+     "\n" body "\n" (if out-file "dev.off()\n" ""))))
+
 (defun org-babel-execute:R (body params)
   "Execute a block of R code with org-babel.  This function is
 called by `org-babel-execute-src-block'."
@@ -43,24 +59,13 @@ called by `org-babel-execute-src-block'."
     (let* ((processed-params (org-babel-process-params params))
            (result-type (fourth processed-params))
            (session (org-babel-R-initiate-session (first processed-params) params))
-           (vars (mapcar (lambda (i) (cons (car (nth i (second processed-params)))
-					   (org-babel-reassemble-table
-					    (cdr (nth i (second processed-params)))
-					    (cdr (nth i (fifth processed-params)))
-					    (cdr (nth i (sixth processed-params))))))
-			 (number-sequence 0 (1- (length (second processed-params))))))
 	   (colnames-p (and (cdr (assoc :colnames params))
-				(string= "yes" (cdr (assoc :colnames params)))))
+			    (string= "yes" (cdr (assoc :colnames params)))))
 	   (rownames-p (and (cdr (assoc :rownames params))
-				(string= "yes" (cdr (assoc :rownames params)))))
+			    (string= "yes" (cdr (assoc :rownames params)))))
 	   (out-file (cdr (assoc :file params)))
-	   (augmented-body
-	    (concat
-	     (if out-file (concat (org-babel-R-construct-graphics-device-call out-file params) "\n") "")
-	     (mapconcat ;; define any variables
-	      (lambda (pair) (org-babel-R-assign-elisp (car pair) (cdr pair) colnames-p rownames-p)) vars "\n")
-	     "\n" body "\n" (if out-file "dev.off()\n" "")))
-	   (result (org-babel-R-evaluate session augmented-body result-type colnames-p rownames-p)))
+	   (full-body (org-babel-expand-body:R body params processed-params))
+	   (result (org-babel-R-evaluate session full-body result-type column-names-p)))
       (or out-file result))))
 
 (defun org-babel-prep-session:R (session params)
