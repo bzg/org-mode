@@ -337,7 +337,7 @@ the current node such as the headline, the level, todo state
 information, all the properties, etc."
   (let* ((props (org-entry-properties))
 	 (components (org-heading-components))
-	 (level (car components))
+	 (level (nth 1 components))
 	 (headline (nth 4 components))
 	 (parent-ordered (org-taskjuggler-parent-is-ordered-p)))
     (push (cons "level" level) props)
