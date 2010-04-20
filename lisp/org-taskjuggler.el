@@ -597,7 +597,7 @@ org-mode priority string."
 	(previous-sibling (cdr (assoc "previous-sibling" task)))
 	(attributes 
 	 '(account start note duration endbuffer endcredit end
-	   flags journalentry, length maxend maxstart milestone
+	   flags journalentry length maxend maxstart milestone
 	   minend minstart period reference responsible
 	   scheduling startbuffer startcredit statusnote)))
     (insert
