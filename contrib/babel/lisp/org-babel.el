@@ -41,6 +41,13 @@ then run `org-babel-execute-src-block'."
 
 (add-hook 'org-ctrl-c-ctrl-c-hook 'org-babel-execute-src-block-maybe)
 
+(defun org-babel-expand-src-block-maybe ()
+  "Detect if this is context for a org-babel src-block and if so
+then run `org-babel-expand-src-block'."
+  (interactive)
+  (let ((info (org-babel-get-src-block-info)))
+    (if info (progn (org-babel-expand-src-block current-prefix-arg info) t) nil)))
+
 (defadvice org-edit-special (around org-babel-prep-session-for-edit activate)
   "Prepare the current source block's session according to it's
 header arguments before editing in an org-src buffer.  This
@@ -254,6 +261,29 @@ block."
             (run-hooks 'org-babel-after-execute-hook)
             result))
       (setq call-process-region 'call-process-region-original))))
+
+(defun org-babel-expand-src-block (&optional arg info params)
+  "Expand the current source code block according to it's header
+arguments, and pop open the results in a preview buffer."
+  (interactive)
+  ;; (message "supplied params=%S" params) ;; debugging
+  (let* ((info (or info (org-babel-get-src-block-info)))
+         (lang (first info))
+	 (params (setf (third info)
+                       (sort (org-babel-merge-params (third info) params)
+                             (lambda (el1 el2) (string< (symbol-name (car el1))
+                                                   (symbol-name (car el2)))))))
+         (body (setf (second info)
+		     (if (and (cdr (assoc :noweb params))
+                              (string= "yes" (cdr (assoc :noweb params))))
+			 (org-babel-expand-noweb-references info) (second info))))
+         (cmd (intern (concat "org-babel-expand-body:" lang)))
+         (expanded (funcall cmd body params))
+         (buf (get-buffer-create "*Org-Babel Code Body Preview*")))
+    (with-current-buffer buf
+      (insert expanded)
+      (funcall (intern (concat lang "-mode"))))
+    (pop-to-buffer buf)))
 
 (defun org-babel-load-in-session (&optional arg info)
   "Load the body of the current source-code block.  Evaluate the
@@ -533,7 +563,7 @@ with C-c C-c."
          (goto-char (match-beginning 0))
          (save-match-data ,@body)
          (goto-char (match-end 0))))
-     (unless visited-p (kill-buffer (file-name-nondirectory file)))))
+     (unless visited-p (kill-buffer (file-name-nondirectory ,file)))))
 
 (defun org-babel-params-from-properties ()
   "Return an association list of any source block params which
