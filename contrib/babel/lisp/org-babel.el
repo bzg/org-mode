@@ -281,6 +281,7 @@ arguments, and pop open the results in a preview buffer."
          (expanded (funcall cmd body params))
          (buf (get-buffer-create "*Org-Babel Code Body Preview*")))
     (with-current-buffer buf
+      (erase-buffer)
       (insert expanded)
       (funcall (intern (concat lang "-mode"))))
     (pop-to-buffer buf)))
