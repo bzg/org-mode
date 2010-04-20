@@ -595,7 +595,7 @@ the language, a switch telling if the content should be in a single line."
     (if (memq t (mapcar (lambda (overlay)
 			  (eq (overlay-get overlay 'invisible)
 			      'org-hide-block))
-			(org-overlays-at (point))))
+			(overlays-at (point))))
 	;; Block is hidden; put point at start of block
 	(beginning-of-line 0)
       ;; Block is visible, put point where it was in the code buffer

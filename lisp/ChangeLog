@@ -1,9 +1,47 @@
+2010-04-20  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-inlinetask.el (org-inlinetask-defaut-state): New option.
+	(org-inlinetask-insert-task): Use `org-inlinetask-defaut-state'.
+	Obey `org-odd-levels-only'.
+
+	* org-compat.el (org-find-overlays): Use overlays-in/at.
+
+	* org.el (org-remove-empty-overlays-at)
+	(org-outline-overlay-data, org-hide-block-toggle)
+	(org-format-latex, org-context): Use overlays-in/at.
+
+	* org-src.el (org-edit-src-exit): Use overlays-in/at.
+
+	* org-agenda.el (org-agenda-mark-clocking-task)
+	(org-agenda-fontify-priorities, org-agenda-dim-blocked-tasks)
+	(org-agenda-entry-text-hide)
+	(org-agenda-fix-tags-filter-overlays-at)
+	(org-agenda-bulk-remove-overlays): Use overlays-in/at.
+
+	* org-compat.el (org-overlays-at): Function removed.
+	(org-overlays-in): Function removed.
+
 2010-04-19  Bastien Guerry  <bzg@altern.org>
 
 	* org-clock.el (org-clock-set-current): Just return the headline
 	itself, strip the TODO keyword, the priority cookie and the tags.
 
 2010-04-18  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-compat.el (org-xemacs-without-invisibility): New macro.
+	(org-xemacs-without-invisibility): New macro.
+	(org-indent-to-column, org-indent-line-to, org-move-to-column):
+	Redefine using the macro `org-xemacs-without-invisibility'.
+
+	* org.el (org-mode, org-org-menu): Use `add-to-invisibility-spec'.
+
+	* org-table.el (orgtbl-mode): Use `add-to-invisibility-spec'.
+
+	* org-compat.el (org-make-overlay, org-delete-overlay)
+	(org-overlay-start, org-overlay-end, org-overlay-put)
+	(org-overlay-get, org-overlay-move, org-overlay-buffer): Functions
+	removed.
+	(org-add-to-invisibility-spec): Function removed.
 
 	* org-html.el (org-export-as-html-and-open): Add argument to
 	kill-buffer.

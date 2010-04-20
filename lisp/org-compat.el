@@ -110,21 +110,17 @@ any other entries, and any resulting duplicates will be removed entirely."
     (if face (org-add-props text nil 'face face))
     (overlay-put ovl 'before-string text)
     (if evap (overlay-put ovl 'evaporate t))))
-(defun org-overlays-at (pos)
-  (if (featurep 'xemacs) (extents-at pos) (overlays-at pos)))
-(defun org-overlays-in (&optional start end)
-  (if (featurep 'xemacs)
-      (extent-list nil start end)
-    (overlays-in start end)))
 (defun org-find-overlays (prop &optional pos delete)
   "Find all overlays specifying PROP at POS or point.
 If DELETE is non-nil, delete all those overlays."
-  (let ((overlays (org-overlays-at (or pos (point))))
+  (let ((overlays (overlays-at (or pos (point))))
 	ov found)
     (while (setq ov (pop overlays))
       (if (overlay-get ov prop)
           (if delete (delete-overlay ov) (push ov found))))
     found))
+
+;; Miscellaneous functions
 
 (defun org-add-hook (hook function &optional append local)
   "Add-hook, compatible with both Emacsen."
@@ -182,19 +178,6 @@ Works on both Emacs and XEmacs."
 
 ;; Invisibility compatibility
 
-(defun org-add-to-invisibility-spec (arg)
-  "Add elements to `buffer-invisibility-spec'.
-See documentation for `buffer-invisibility-spec' for the kind of elements
-that can be added."
-  (cond
-   ((fboundp 'add-to-invisibility-spec)
-    (add-to-invisibility-spec arg))
-   ((or (null buffer-invisibility-spec) (eq buffer-invisibility-spec t))
-    (setq buffer-invisibility-spec (list arg)))
-   (t
-    (setq buffer-invisibility-spec
-	  (cons arg buffer-invisibility-spec)))))
-
 (defun org-remove-from-invisibility-spec (arg)
   "Remove elements from `buffer-invisibility-spec'."
   (if (fboundp 'remove-from-invisibility-spec)
@@ -209,57 +192,36 @@ that can be added."
       (member arg buffer-invisibility-spec)
     nil))
 
+(defmacro org-xemacs-without-invisibility (&rest body)
+  "Turn off exents with invisibility while executing BODY."
+  `(let ((ext-inv (extent-list nil (point-at-bol) (point-at-eol)
+			       'all-extents-closed-open 'invisible))
+	 ext-inv-specs)
+     (dolist (ext ext-inv)
+       (when (extent-property ext 'invisible)
+	 (add-to-list 'ext-inv-specs (list ext (extent-property
+						ext 'invisible)))
+	 (set-extent-property ext 'invisible nil)))
+     ,@body
+     (dolist (ext-inv-spec ext-inv-specs)
+       (set-extent-property (car ext-inv-spec) 'invisible
+			    (cadr ext-inv-spec)))))
+
 (defun org-indent-to-column (column &optional minimum buffer)
   "Work around a bug with extents with invisibility in XEmacs."
   (if (featurep 'xemacs)
-      (let ((ext-inv (extent-list
-		      nil (point-at-bol) (point-at-eol)
-		      'all-extents-closed-open 'invisible))
-	    ext-inv-specs)
-	(dolist (ext ext-inv)
-	  (when (extent-property ext 'invisible)
-	    (add-to-list 'ext-inv-specs (list ext (extent-property
-						   ext 'invisible)))
-	    (set-extent-property ext 'invisible nil)))
-	(indent-to-column column minimum buffer)
-	(dolist (ext-inv-spec ext-inv-specs)
-	  (set-extent-property (car ext-inv-spec) 'invisible
-			       (cadr ext-inv-spec))))
+      (org-xemacs-without-invisibility (indent-to-column column minimum buffer))
     (indent-to-column column minimum)))
 
 (defun org-indent-line-to (column)
   "Work around a bug with extents with invisibility in XEmacs."
   (if (featurep 'xemacs)
-      (let ((ext-inv (extent-list
-		      nil (point-at-bol) (point-at-eol)
-		      'all-extents-closed-open 'invisible))
-	    ext-inv-specs)
-	(dolist (ext ext-inv)
-	  (when (extent-property ext 'invisible)
-	    (add-to-list 'ext-inv-specs (list ext (extent-property
-						   ext 'invisible)))
-	    (set-extent-property ext 'invisible nil)))
-	(indent-line-to column)
-	(dolist (ext-inv-spec ext-inv-specs)
-	  (set-extent-property (car ext-inv-spec) 'invisible
-			       (cadr ext-inv-spec))))
+      (org-xemacs-without-invisibility (indent-line-to column))
     (indent-line-to column)))
 
 (defun org-move-to-column (column &optional force buffer)
   (if (featurep 'xemacs)
-      (let ((ext-inv (extent-list
-		      nil (point-at-bol) (point-at-eol)
-		      'all-extents-closed-open 'invisible))
-	    ext-inv-specs)
-	(dolist (ext ext-inv)
-	  (when (extent-property ext 'invisible)
-	    (add-to-list 'ext-inv-specs (list ext (extent-property ext
-								   'invisible)))
-	    (set-extent-property ext 'invisible nil)))
-	(move-to-column column force buffer)
-	(dolist (ext-inv-spec ext-inv-specs)
-	  (set-extent-property (car ext-inv-spec) 'invisible
-			       (cadr ext-inv-spec))))
+      (org-xemacs-without-invisibility (move-to-column column force buffer))
     (move-to-column column force)))
 
 (defun org-get-x-clipboard-compat (value)

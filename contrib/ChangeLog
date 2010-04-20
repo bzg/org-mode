@@ -1,4 +1,16 @@
+2010-04-20  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* lisp/org-toc.el (org-toc-cycle-subtree)
+	(org-toc-restore-config): Use overlays-in/at.
+
+	* babel/lisp/org-babel.el (org-babel-hash-at-point)
+	(org-babel-hide-result-toggle): Use overlays-in/at.
+
 2010-04-18  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* babel/lisp/org-babel.el (org-babel-hide-hash): Use
+	`add-to-invisibility-spec'.
+	(org-babel-result-hide-spec): Use `add-to-invisibility-spec'.
 
 	* lisp/org-learn.el (require): `calendar' is now required already
 	by org.el on top level.

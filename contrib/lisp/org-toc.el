@@ -188,7 +188,7 @@ specified, then make `org-toc-recenter' use this value."
   (interactive)
   (let ((beg (point))
 	(end (save-excursion (end-of-line) (point)))
-	(ov (car (org-overlays-at (point))))
+	(ov (car (overlays-at (point))))
 	status)
     (if ov (setq status (overlay-get ov 'status))
       (setq ov (make-overlay beg end)))
@@ -416,7 +416,7 @@ current table of contents to it."
       (save-excursion
 	(goto-char (point-min))
 	(when (search-forward (car hlcfg0) nil t)
-	  (unless (org-overlays-at (match-beginning 0))
+	  (unless (overlays-at (match-beginning 0))
 	    (setq ov (make-overlay (match-beginning 0)
 				   (match-end 0))))
 	  (cond ((eq (cdr hlcfg0) 'children)

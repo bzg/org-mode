@@ -394,7 +394,7 @@ added to the header-arguments-alist."
   "Hide the hash in the current results line.  Only the initial
 `org-babel-hash-show' characters of the hash will remain
 visible."
-  (org-add-to-invisibility-spec '(org-babel-hide-hash . t))
+  (add-to-invisibility-spec '(org-babel-hide-hash . t))
   (save-excursion
     (when (and (re-search-forward org-babel-result-regexp nil t)
                (match-string 3))
@@ -427,12 +427,12 @@ with C-c C-c."
   (interactive)
   (let ((hash (car (delq nil (mapcar
                                (lambda (ol) (overlay-get ol 'babel-hash))
-                              (org-overlays-at (or point (point))))))))
+                              (overlays-at (or point (point))))))))
     (when hash (kill-new hash) (message hash))))
 (add-hook 'org-ctrl-c-ctrl-c-hook 'org-babel-hash-at-point)
 
 (defun org-babel-result-hide-spec ()
-  (org-add-to-invisibility-spec '(org-babel-hide-result . t)))
+  (add-to-invisibility-spec '(org-babel-hide-result . t)))
 (add-hook 'org-mode-hook 'org-babel-result-hide-spec)
 
 (defvar org-babel-hide-result-overlays nil
@@ -475,7 +475,7 @@ with C-c C-c."
           (if (memq t (mapcar (lambda (overlay)
                                 (eq (overlay-get overlay 'invisible)
 				    'org-babel-hide-result))
-                              (org-overlays-at start)))
+                              (overlays-at start)))
               (if (or (not force) (eq force 'off))
                   (mapc (lambda (ov)
                           (when (member ov org-babel-hide-result-overlays)
@@ -484,7 +484,7 @@ with C-c C-c."
                           (when (eq (overlay-get ov 'invisible)
                                     'org-babel-hide-result)
                             (delete-overlay ov)))
-                        (org-overlays-at start)))
+                        (overlays-at start)))
             (setq ov (make-overlay start end))
             (overlay-put ov 'invisible 'org-babel-hide-result)
             ;; make the block accessible to isearch
