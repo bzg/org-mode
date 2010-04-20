@@ -48,7 +48,11 @@
     (concat
      (if out-file (concat (org-babel-R-construct-graphics-device-call out-file params) "\n") "")
      (mapconcat ;; define any variables
-      (lambda (pair) (org-babel-R-assign-elisp (car pair) (cdr pair))) vars "\n")
+      (lambda (pair)
+	(org-babel-R-assign-elisp (car pair) (cdr pair)
+				  (equal "yes" (cdr (assoc :colnames params)))
+				  (equal "yes" (cdr (assoc :rownames params)))))
+      vars "\n")
      "\n" body "\n" (if out-file "dev.off()\n" ""))))
 
 (defun org-babel-execute:R (body params)
@@ -59,13 +63,11 @@ called by `org-babel-execute-src-block'."
     (let* ((processed-params (org-babel-process-params params))
            (result-type (fourth processed-params))
            (session (org-babel-R-initiate-session (first processed-params) params))
-	   (colnames-p (and (cdr (assoc :colnames params))
-			    (string= "yes" (cdr (assoc :colnames params)))))
-	   (rownames-p (and (cdr (assoc :rownames params))
-			    (string= "yes" (cdr (assoc :rownames params)))))
+	   (colnames-p (equal "yes" (cdr (assoc :colnames params))))
+	   (rownames-p (equal "yes" (cdr (assoc :rownames params))))
 	   (out-file (cdr (assoc :file params)))
 	   (full-body (org-babel-expand-body:R body params processed-params))
-	   (result (org-babel-R-evaluate session full-body result-type column-names-p)))
+	   (result (org-babel-R-evaluate session full-body result-type colnames-p rownames-p)))
       (or out-file result))))
 
 (defun org-babel-prep-session:R (session params)
