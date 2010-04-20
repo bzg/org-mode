@@ -96,7 +96,7 @@ header arguments as well.")
 
 (defvar org-babel-default-header-args
   '((:session . "none") (:results . "replace") (:exports . "code")
-    (:cache . "no") (:noweb . "no") (:hlines . "yes"))
+    (:cache . "no") (:noweb . "no") (:hlines . "no"))
   "Default arguments to use when evaluating a source block.")
 
 (defvar org-babel-default-inline-header-args

@@ -36,7 +36,7 @@
 (add-to-list 'org-babel-tangle-langs '("emacs-lisp" "el"))
 
 (defvar org-babel-default-header-args:emacs-lisp
-  '((:hlines . "no") (:colnames . "no"))
+  '((:hlines . "yes") (:colnames . "no"))
   "Default arguments to use when evaluating an emacs-lisp source block.")
 
 (defun org-babel-expand-body:emacs-lisp (body params &optional processed-params)
