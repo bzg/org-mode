@@ -1,5 +1,9 @@
 2010-04-20  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-inlinetask.el (org-inlinetask-defaut-state): New option.
+	(org-inlinetask-insert-task): Use `org-inlinetask-defaut-state'.
+	Obey `org-odd-levels-only'.
+
 	* org-compat.el (org-find-overlays): Use overlays-in/at.
 
 	* org.el (org-remove-empty-overlays-at)
