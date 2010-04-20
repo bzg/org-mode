@@ -65,7 +65,8 @@
                 (comint-send-input nil t))))
     (org-babel-reassemble-table
      (org-babel-ocaml-parse-output (org-babel-trim (car raw)))
-     (nth 4 processed-params) (nth 5 processed-params))))
+     (org-babel-pick-name (nth 4 processed-params) (cdr (assoc :colnames params)))
+     (org-babel-pick-name (nth 5 processed-params) (cdr (assoc :rownames params))))))
 
 (defun org-babel-prep-session:ocaml (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."

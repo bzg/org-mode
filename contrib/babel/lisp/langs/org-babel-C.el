@@ -125,7 +125,8 @@ called by `org-babel-execute-src-block'."
               (concat tmp-bin-file (if cmdline (concat " " cmdline) ""))
               (current-buffer) 'replace)
              (buffer-string))))
-         (nth 4 processed-params) (nth 5 processed-params))
+         (org-babel-pick-name (nth 4 processed-params) (cdr (assoc :colnames params)))
+         (org-babel-pick-name (nth 5 processed-params) (cdr (assoc :rownames params))))
       (progn
         (with-current-buffer error-buf
           (goto-char (point-max))

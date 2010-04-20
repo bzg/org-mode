@@ -246,7 +246,8 @@ called by `org-babel-execute-src-block' via multiple-value-bind."
 	  (oz-send-string-expression full-body (if wait-time
 						   wait-time
 						 1)))))
-     (nth 4 processed-params) (nth 5 processed-params))))
+     (org-babel-pick-name (nth 4 processed-params) (cdr (assoc :colnames params)))
+     (org-babel-pick-name (nth 5 processed-params) (cdr (assoc :rownames params))))))
 
 ;; This function should be used to assign any variables in params in
 ;; the context of the session environment.

@@ -58,7 +58,8 @@ function is called by `org-babel-execute-src-block'."
                       vars "\n") "\n" body "\n\n"))) ;; then the source block body
     (org-babel-reassemble-table
      (org-babel-sh-evaluate session full-body result-type)
-     (nth 4 processed-params) (nth 5 processed-params))))
+     (org-babel-pick-name (nth 4 processed-params) (cdr (assoc :colnames params)))
+     (org-babel-pick-name (nth 5 processed-params) (cdr (assoc :rownames params))))))
 
 (defun org-babel-prep-session:sh (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."

@@ -607,7 +607,7 @@ may be specified in the properties of the current outline entry."
 
 Return a list (session vars result-params result-type colnames rownames)."
   (let* ((session (cdr (assoc :session params)))
-         (vars-and-names (org-babel-manicure-tables
+         (vars-and-names (org-babel-disassemble-tables
                           (org-babel-ref-variables params)
                           (cdr (assoc :hlines params))
                           (cdr (assoc :colnames params))
@@ -664,39 +664,41 @@ Return a list (session vars result-params result-type colnames rownames)."
                   row)) table)
     table))
 
-(defun org-babel-manicure-tables (vars hlines colnames rownames)
+(defun org-babel-pick-name (names selector)
+  "Select one out of an alist of row or column names."
+  (when names
+    (if (and selector (symbolp selector) (not (equal t selector)))
+        (cdr (assoc selector names))
+      (if (integerp selector)
+          (nth (- selector 1) names)
+        (cdr (car (last names)))))))
+
+(defun org-babel-disassemble-tables (vars hlines colnames rownames)
   "Process the variables in VARS according to the HLINES,
 ROWNAMES and COLNAMES header arguments.  Return a list consisting
 of the vars, cnames and rnames."
-  (flet ((pick (names sel)
-           (when names
-             (if (and sel (symbolp sel) (not (equal t sel)))
-                 (cdr (assoc sel names))
-               (if (integerp sel)
-                   (nth (- sel 1) names)
-                 (cdr (car (last names))))))))
-    (let (cnames rnames)
-      (list
-       (mapcar
-        (lambda (var)
-          (when (listp (cdr var))
-            (when (and (not (equal colnames "no"))
-                       (or colnames (and (equal (second (cdr var)) 'hline)
-                                         (not (member 'hline (cddr (cdr var)))))))
-              (let ((both (org-babel-get-colnames (cdr var))))
-                (setq cnames (cons (cons (car var) (cdr both))
-                                   cnames))
-                (setq var (cons (car var) (car both)))))
-            (when (and rownames (not (equal rownames "no")))
-              (let ((both (org-babel-get-rownames (cdr var))))
-                (setq rnames (cons (cons (car var) (cdr both))
-                                   rnames))
-                (setq var (cons (car var) (car both)))))
-            (when (and hlines (not (equal hlines "yes")))
-              (setq var (cons (car var) (org-babel-del-hlines (cdr var))))))
-          var)
-        vars)
-       (pick cnames colnames) (pick rnames rownames)))))
+  (let (cnames rnames)
+    (list
+     (mapcar
+      (lambda (var)
+        (when (listp (cdr var))
+          (when (and (not (equal colnames "no"))
+                     (or colnames (and (equal (second (cdr var)) 'hline)
+                                       (not (member 'hline (cddr (cdr var)))))))
+            (let ((both (org-babel-get-colnames (cdr var))))
+              (setq cnames (cons (cons (car var) (cdr both))
+                                 cnames))
+              (setq var (cons (car var) (car both)))))
+          (when (and rownames (not (equal rownames "no")))
+            (let ((both (org-babel-get-rownames (cdr var))))
+              (setq rnames (cons (cons (car var) (cdr both))
+                                 rnames))
+              (setq var (cons (car var) (car both)))))
+          (when (and hlines (not (equal hlines "yes")))
+            (setq var (cons (car var) (org-babel-del-hlines (cdr var))))))
+        var)
+      vars)
+     cnames rnames)))
 
 (defun org-babel-reassemble-table (table colnames rownames)
   "Given a TABLE and set of COLNAMES and ROWNAMES add the names

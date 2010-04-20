@@ -79,7 +79,8 @@
      (case result-type
        (output (mapconcat #'identity (reverse (cdr results)) "\n"))
        (value (org-babel-haskell-table-or-string (car results))))
-     (nth 4 processed-params) (nth 5 processed-params))))
+     (org-babel-pick-name (nth 4 processed-params) (cdr (assoc :colnames params)))
+     (org-babel-pick-name (nth 5 processed-params) (cdr (assoc :rownames params))))))
 
 (defun org-babel-haskell-read-string (string)
   "Strip \\\"s from around haskell string"

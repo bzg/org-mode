@@ -72,7 +72,8 @@ called by `org-babel-execute-src-block'."
       (org-table-import out-file nil)
       (org-babel-reassemble-table
        (org-table-to-lisp)
-       (nth 4 processed-params) (nth 5 processed-params)))))
+       (org-babel-pick-name (nth 4 processed-params) (cdr (assoc :colnames params)))
+       (org-babel-pick-name (nth 5 processed-params) (cdr (assoc :rownames params)))))))
 
 
 (defun org-babel-prep-session:sql (session params)

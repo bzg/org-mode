@@ -271,6 +271,7 @@ last statement in BODY, as elisp."
          (session (org-babel-clojure-initiate-session (first processed-params))))
     (org-babel-reassemble-table
      (org-babel-clojure-evaluate session body (fourth processed-params))
-     (nth 4 processed-params) (nth 5 processed-params))))
+     (org-babel-pick-name (nth 4 processed-params) (cdr (assoc :colnames params)))
+     (org-babel-pick-name (nth 5 processed-params) (cdr (assoc :rownames params))))))
 
 (provide 'org-babel-clojure)

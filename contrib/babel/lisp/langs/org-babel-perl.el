@@ -54,7 +54,8 @@ called by `org-babel-execute-src-block'."
 	(session (org-babel-perl-initiate-session session)))
     (org-babel-reassemble-table
      (org-babel-perl-evaluate session full-body result-type)
-     (nth 4 processed-params) (nth 5 processed-params))))
+     (org-babel-pick-name (nth 4 processed-params) (cdr (assoc :colnames params)))
+     (org-babel-pick-name (nth 5 processed-params) (cdr (assoc :rownames params))))))
 
 (defun org-babel-prep-session:perl (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."
