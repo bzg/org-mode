@@ -9661,8 +9661,7 @@ See also `org-refile-use-outline-path' and `org-completion-use-ido'"
 	  (when (featurep 'org-inlinetask)
 	    (org-inlinetask-remove-END-maybe))
 	  (setq org-markers-to-move nil)
-	  (message "Refiled to \"%s\"" (car it))))))
-  (org-reveal))
+	  (message "Refiled to \"%s\"" (car it)))))))
 
 (defun org-refile-goto-last-stored ()
   "Go to the location where the last refile was stored."
