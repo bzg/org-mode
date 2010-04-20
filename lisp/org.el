@@ -5660,7 +5660,7 @@ This function is the default value of the hook `org-cycle-hook'."
 	  (not (string-match "\\S-" (buffer-substring (overlay-start o)
 						      (overlay-end o))))
 	  (delete-overlay o)))
-   (org-overlays-at pos)))
+   (overlays-at pos)))
 
 (defun org-clean-visibility-after-subtree-move ()
   "Fix visibility issues after moving a subtree."
@@ -5830,7 +5830,7 @@ If USE-MARKERS is set, return the positions as markers."
 				   (cons (move-marker (make-marker) beg)
 					 (move-marker (make-marker) end))
 				 (cons beg end)))))
-		      (org-overlays-in (point-min) (point-max))))))))
+		      (overlays-in (point-min) (point-max))))))))
 
 (defun org-set-outline-overlay-data (data)
   "Create visibility overlays for all positions in DATA.
@@ -5927,7 +5927,7 @@ the range."
           (if (memq t (mapcar (lambda (overlay)
                                 (eq (overlay-get overlay 'invisible)
 				    'org-hide-block))
-                              (org-overlays-at start)))
+                              (overlays-at start)))
               (if (or (not force) (eq force 'off))
                   (mapc (lambda (ov)
                           (when (member ov org-hide-block-overlays)
@@ -5936,7 +5936,7 @@ the range."
                           (when (eq (overlay-get ov 'invisible)
                                     'org-hide-block)
                             (delete-overlay ov)))
-                        (org-overlays-at start)))
+                        (overlays-at start)))
             (setq ov (make-overlay start end))
             (overlay-put ov 'invisible 'org-hide-block)
             ;; make the block accessible to isearch
@@ -15283,7 +15283,7 @@ Some of the options can be changed using the variable
 			  (if (eq (overlay-get o 'org-overlay-type)
 				  'org-latex-overlay)
 			      (delete-overlay o)))
-			(org-overlays-in beg end))
+			(overlays-in beg end))
 		  (setq ov (make-overlay beg end))
 		  (overlay-put ov 'org-overlay-type 'org-latex-overlay)
 		  (if (featurep 'xemacs)
@@ -17325,7 +17325,7 @@ and :keyword."
 			 (mapcar
 			  (lambda (x)
 			    (if (memq x org-latex-fragment-image-overlays) x))
-			  (org-overlays-at (point))))))
+			  (overlays-at (point))))))
       (push (list :latex-fragment
 		  (overlay-start o) (overlay-end o)) clist)
       (push (list :latex-preview

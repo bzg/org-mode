@@ -2797,7 +2797,7 @@ bind it in the options section.")
   (mapc (lambda (o)
 	  (if (eq (overlay-get o 'type) 'org-agenda-clocking)
 	      (delete-overlay o)))
-	(org-overlays-in (point-min) (point-max)))
+	(overlays-in (point-min) (point-max)))
   (when (marker-buffer org-clock-hd-marker)
     (save-excursion
       (goto-char (point-min))
@@ -2817,7 +2817,7 @@ bind it in the options section.")
   (interactive)
   (mapc (lambda (o) (if (eq (overlay-get o 'org-type) 'org-priority)
 			(delete-overlay o)))
-	(org-overlays-in (point-min) (point-max)))
+	(overlays-in (point-min) (point-max)))
   (save-excursion
     (let ((inhibit-read-only t)
 	  b e p ov h l)
@@ -2850,7 +2850,7 @@ bind it in the options section.")
   "Dim currently blocked TODO's in the agenda display."
   (mapc (lambda (o) (if (eq (overlay-get o 'org-type) 'org-blocked-todo)
 			(delete-overlay o)))
-	(org-overlays-in (point-min) (point-max)))
+	(overlays-in (point-min) (point-max)))
   (save-excursion
     (let ((inhibit-read-only t)
 	  (org-depend-tag-blocked nil)
@@ -2979,7 +2979,7 @@ no longer in use."
 		  (if (eq (overlay-get o 'org-overlay-type)
 			  'agenda-entry-content)
 		      (progn (delete-overlay o) t)))
-		(org-overlays-in (point-min) (point-max)))))
+		(overlays-in (point-min) (point-max)))))
 
 ;;; Agenda timeline
 
@@ -5591,7 +5591,7 @@ If the line does not have an effort defined, return nil."
 (defun org-agenda-fix-tags-filter-overlays-at (&optional pos)
   (setq pos (or pos (point)))
   (save-excursion
-    (dolist (ov (org-overlays-at pos))
+    (dolist (ov (overlays-at pos))
       (when (and (overlay-get ov 'invisible)
 		 (eq (overlay-get ov 'type) 'tags-filter))
 	(goto-char pos)
@@ -7409,7 +7409,7 @@ from the list in `org-agenda-bulk-marked-entries'."
   (mapc (lambda (ov)
 	  (and (eq (overlay-get ov 'type) 'org-marked-entry-overlay)
 	       (delete-overlay ov)))
-	(org-overlays-in (or beg (point-min)) (or end (point-max)))))
+	(overlays-in (or beg (point-min)) (or end (point-max)))))
 
 (defun org-agenda-bulk-remove-all-marks ()
   "Remove all marks in the agenda buffer.

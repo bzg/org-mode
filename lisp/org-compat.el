@@ -110,16 +110,10 @@ any other entries, and any resulting duplicates will be removed entirely."
     (if face (org-add-props text nil 'face face))
     (overlay-put ovl 'before-string text)
     (if evap (overlay-put ovl 'evaporate t))))
-(defun org-overlays-at (pos)
-  (if (featurep 'xemacs) (extents-at pos) (overlays-at pos)))
-(defun org-overlays-in (&optional start end)
-  (if (featurep 'xemacs)
-      (extent-list nil start end)
-    (overlays-in start end)))
 (defun org-find-overlays (prop &optional pos delete)
   "Find all overlays specifying PROP at POS or point.
 If DELETE is non-nil, delete all those overlays."
-  (let ((overlays (org-overlays-at (or pos (point))))
+  (let ((overlays (overlays-at (or pos (point))))
 	ov found)
     (while (setq ov (pop overlays))
       (if (overlay-get ov prop)

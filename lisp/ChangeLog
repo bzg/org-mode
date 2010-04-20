@@ -1,3 +1,22 @@
+2010-04-20  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-compat.el (org-find-overlays): Use overlays-in/at.
+
+	* org.el (org-remove-empty-overlays-at)
+	(org-outline-overlay-data, org-hide-block-toggle)
+	(org-format-latex, org-context): Use overlays-in/at.
+
+	* org-src.el (org-edit-src-exit): Use overlays-in/at.
+
+	* org-agenda.el (org-agenda-mark-clocking-task)
+	(org-agenda-fontify-priorities, org-agenda-dim-blocked-tasks)
+	(org-agenda-entry-text-hide)
+	(org-agenda-fix-tags-filter-overlays-at)
+	(org-agenda-bulk-remove-overlays): Use overlays-in/at.
+
+	* org-compat.el (org-overlays-at): Function removed.
+	(org-overlays-in): Function removed.
+
 2010-04-18  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-compat.el (org-xemacs-without-invisibility): New macro.
