@@ -61,7 +61,7 @@ called by `org-babel-execute-src-block'."
          (in-file (make-temp-file "org-babel-sass-in"))
          (cmd (concat "sass " (or cmdline "") in-file " " out-file)))
     (with-temp-file in-file
-      (insert (org-babel-expand-body:sass body))) (shell-command cmd)
+      (insert (org-babel-expand-body:sass body params))) (shell-command cmd)
     (or file (with-temp-buffer (insert-file-contents out-file) (buffer-string)))))
 
 (defun org-babel-prep-session:sass (session params)
