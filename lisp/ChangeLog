@@ -1,5 +1,22 @@
 2010-04-23  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-shiftmetaleft, org-shiftmetaright): Call the subtree
+	indentation commands.
+	(org-hidden-tree-error): New defsubst.
+	(org-metaleft, org-metaright): Check for hidden stuff and throw an
+	error.
+	(org-check-for-hidden): New function.
+
+	* org-list.el (org-item-re): New function.
+	(org-at-item-p): Use `org-item-re'.
+	(org-end-of-item-text-before-children): New function.
+	(org-outdent-item, org-indent-item): Arrange for leaving the
+	subtree alone.
+	(org-outdent-item-tree, org-indent-item-tree): New argument
+	NO-SUBTREE.
+	(org-indent-item-tree): Use `org-end-of-item-text-before-children'
+	to find the end for processing while ignoring the subtree.
+
 	* org-publish.el (org-publish-sitemap-sort-alphabetically)
 	(org-publish-sitemap-sort-folders)
 	(org-publish-sitemap-sort-ignore-case): New options.

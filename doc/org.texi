@@ -1321,6 +1321,11 @@ similar effect.
 Move the item including subitems up/down (swap with previous/next item
 of same indentation).  If the list is ordered, renumbering is
 automatic.
+@kindex M-@key{left}
+@kindex M-@key{right}
+@item M-@key{left}
+@itemx M-@key{right}
+Decrease/increase the indentation of an item, leaving children alone.
 @kindex M-S-@key{left}
 @kindex M-S-@key{right}
 @item M-S-@key{left}
