@@ -285,13 +285,9 @@ arguments, and pop open the results in a preview buffer."
 			 (org-babel-expand-noweb-references info) (second info))))
          (cmd (intern (concat "org-babel-expand-body:" lang)))
          (expanded (funcall (if (fboundp cmd) cmd 'org-babel-expand-body:generic)
-                            body params))
-         (buf (get-buffer-create "*Org-Babel Code Body Preview*")))
-    (with-current-buffer buf
-      (erase-buffer)
-      (insert expanded)
-      (funcall (intern (concat lang "-mode"))))
-    (pop-to-buffer buf)))
+                            body params)))
+    (org-edit-src-code
+     nil expanded (concat "*Org-Babel Preview " (buffer-name) "[ " lang " ]*"))))
 
 (defun org-babel-load-in-session (&optional arg info)
   "Load the body of the current source-code block.  Evaluate the
