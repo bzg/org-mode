@@ -145,9 +145,9 @@ it's header arguments."
                 ;; variables
                 (mapconcat 'org-babel-C-var-to-C vars "\n")
                 ;; body
-                "\n" (if main-p
-                         (org-babel-C-ensure-main-wrap body)
-                       body) "\n") "\n")))
+                (if main-p
+                    (org-babel-C-ensure-main-wrap body)
+                  body) "\n") "\n")))
 
 (defun org-babel-C-ensure-main-wrap (body)
   "Wrap body in a \"main\" function call if none exists."
