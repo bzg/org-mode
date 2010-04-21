@@ -1,5 +1,8 @@
 2010-04-21  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-src.el (org-edit-src-find-region-and-lang): Test for
+	table.el as late as possible.
+
 	* org-colview-xemacs.el: Make sure this file is never loaded into
 	Emacs.  Remove all tests for XEmacs.
 
