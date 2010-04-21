@@ -417,14 +417,17 @@ therefore you'll have to restart Emacs to apply it after changing."
 
 (defun org-key (key)
   "Select key according to `org-replace-disputed-keys' and `org-disputed-keys'.
-Or return the original if not disputed."
-  (if org-replace-disputed-keys
-      (let* ((nkey (key-description key))
-	     (x (org-find-if (lambda (x)
-			       (equal (key-description (car x)) nkey))
-			     org-disputed-keys)))
-	(if x (cdr x) key))
-    key))
+Or return the original if not disputed.
+Also apply the trnaslations defined in `org-xemacs-key-equivalents'."
+  (when org-replace-disputed-keys
+    (let* ((nkey (key-description key))
+	   (x (org-find-if (lambda (x)
+			     (equal (key-description (car x)) nkey))
+			   org-disputed-keys)))
+      (setq key (if x (cdr x) key))))
+  (when (featurep 'xemacs)
+    (setq key (or (cdr (assoc key org-xemacs-key-equivalents)) key)))
+  key)
 
 (defun org-find-if (predicate seq)
   (catch 'exit
@@ -4353,7 +4356,7 @@ The following commands are available:
   ;; we switch another buffer into org-mode.
   (if (featurep 'xemacs)
       (when (boundp 'outline-mode-menu-heading)
-	;; Assume this is Greg's port, it used easymenu
+	;; Assume this is Greg's port, it uses easymenu
 	(easy-menu-remove outline-mode-menu-heading)
 	(easy-menu-remove outline-mode-menu-show)
 	(easy-menu-remove outline-mode-menu-hide))
@@ -4480,10 +4483,8 @@ The following commands are available:
 ;;;; Font-Lock stuff, including the activators
 
 (defvar org-mouse-map (make-sparse-keymap))
-(org-defkey org-mouse-map
-  (if (featurep 'xemacs) [button2] [mouse-2]) 'org-open-at-mouse)
-(org-defkey org-mouse-map
-  (if (featurep 'xemacs) [button3] [mouse-3]) 'org-find-file-at-mouse)
+(org-defkey org-mouse-map [mouse-2] 'org-open-at-mouse)
+(org-defkey org-mouse-map [mouse-3] 'org-find-file-at-mouse)
 (when org-mouse-1-follows-link
   (org-defkey org-mouse-map [follow-link] 'mouse-face))
 (when org-tab-follows-link
@@ -5481,7 +5482,6 @@ in special contexts.
 	  (while (and (not (eobp)) ;; this is like `next-line'
 		      (get-char-property (1- (point)) 'invisible))
 	    (goto-char (next-single-char-property-change (point) 'invisible))
-;;;???	    (or (bolp) (beginning-of-line 2))))
 	    (and (eolp) (beginning-of-line 2))))
 	(setq eol (point)))
       (outline-end-of-heading)   (setq eoh (point))
@@ -13589,10 +13589,8 @@ user."
 		 (map (copy-keymap calendar-mode-map))
 		 (minibuffer-local-map (copy-keymap minibuffer-local-map)))
 	    (org-defkey map (kbd "RET") 'org-calendar-select)
-	    (org-defkey map (if (featurep 'xemacs) [button1] [mouse-1])
-			'org-calendar-select-mouse)
-	    (org-defkey map (if (featurep 'xemacs) [button2] [mouse-2])
-			'org-calendar-select-mouse)
+	    (org-defkey map [mouse-1] 'org-calendar-select-mouse)
+	    (org-defkey map [mouse-2] 'org-calendar-select-mouse)
 	    (org-defkey minibuffer-local-map [(meta shift left)]
 			(lambda () (interactive)
 			  (org-eval-in-calendar '(calendar-backward-month 1))))
@@ -17001,9 +16999,7 @@ With prefix arg UNCOMPILED, load the uncompiled versions."
   "Display the given MESSAGE as a warning."
   (if (fboundp 'display-warning)
       (display-warning 'org message
-                       (if (featurep 'xemacs)
-                           'warning
-                         :warning))
+                       (if (featurep 'xemacs) 'warning :warning))
     (let ((buf (get-buffer-create "*Org warnings*")))
       (with-current-buffer buf
         (goto-char (point-max))

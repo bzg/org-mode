@@ -1,3 +1,23 @@
+2010-04-21  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-src.el (org-edit-src-find-region-and-lang): Test for
+	table.el as late as possible.
+
+	* org-colview-xemacs.el: Make sure this file is never loaded into
+	Emacs.  Remove all tests for XEmacs.
+
+	* org-colview.el: Make sure this file is never loaded into XEmacs.
+
+	* org-agenda.el (org-highlight, org-unhighlight): Use direct
+	overlay calls.
+
+	* org.el (org-key): Apply the translations defined in
+	`org-xemacs-key-equivalents'.
+
+	* org-mouse.el (org-mode-hook): Use `org-defkey'.
+
+	* org-compat.el (org-xemacs-key-equivalents): New constant.
+
 2010-04-20  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-inlinetask.el (org-inlinetask-defaut-state): New option.

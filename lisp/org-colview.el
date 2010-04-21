@@ -36,6 +36,9 @@
 (declare-function org-agenda-redo "org-agenda" ())
 (declare-function org-agenda-do-context-action "org-agenda" ())
 
+(when (featurep 'xemacs)
+  (error "Do not load this file into XEmacs, use 'org-colview-xemacs.el'."))
+
 ;;; Column View
 
 (defvar org-columns-overlays nil

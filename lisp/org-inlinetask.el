@@ -110,9 +110,9 @@ When nil, they will not be exported."
 This should be the state `org-inlinetask-insert-task' should use by
 default, or nil of no state should be assigned."
   :group 'org-inlinetask
-  :type (choice
-	 (const :tag "No state" nil)
-	 (string :tag "Specific state")))
+  :type '(choice
+	  (const :tag "No state" nil)
+	  (string :tag "Specific state")))
 
 (defun org-inlinetask-insert-task (&optional no-state)
   "Insert an inline task.

@@ -88,6 +88,15 @@ any other entries, and any resulting duplicates will be removed entirely."
 
 ;;;; Emacs/XEmacs compatibility
 
+;; Keys
+(defconst org-xemacs-key-equivalents
+  '(([mouse-1] . [button1])
+    ([mouse-2] . [button2])
+    ([mouse-3] . [button3])
+    ([C-mouse-4] . [(control mouse-4)])
+    ([C-mouse-5] . [(control mouse-5)]))
+  "Translation alist for a couple of keys")
+
 ;; Overlay compatibility functions
 (defun org-detach-overlay (ovl)
   (if (featurep 'xemacs) (detach-extent ovl) (delete-overlay ovl)))
