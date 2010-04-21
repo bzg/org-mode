@@ -82,7 +82,8 @@
 ;; optionally assign an ID to the resources (using the standard org
 ;; properties commands) or you can let the exporter generate IDs
 ;; automatically (the exporter picks the first word of the headline as
-;; the ID as long as it is unique). Using that ID you can then
+;; the ID as long as it is unique, see the documentation of
+;; `org-taskjuggler-get-unique-id'). Using that ID you can then
 ;; allocate resources to tasks. This is again done with the "allocate"
 ;; property on the tasks. Do this in column view or when on the task
 ;; type
@@ -184,7 +185,7 @@ resources for the project."
   :group 'org-export-taskjuggler
   :type 'string)
 
-(defcustom org-export-taskjuggler-default-project-duration 180
+(defcustom org-export-taskjuggler-default-project-duration 280
   "Default project duration if no start and end date have been defined
 in the root node of the task tree, i.e. the tree that has been marked
 with `org-export-taskjuggler-project-tag'"
@@ -487,9 +488,9 @@ return nil."
 (defun org-taskjuggler-get-unique-id (item unique-ids)
   "Return a unique id for an ITEM which can be a task or a resource.
 The id is derived from the headline and made unique against
-UNIQUE-IDS. If the first part of the headline is not unique try
-to add more parts of the headline or finally add more underscore
-characters (\"_\")."
+UNIQUE-IDS. If the (downcased) first token of the headline is not
+unique try to add more (downcased) tokens of the headline or
+finally add more underscore characters (\"_\")."
   (let* ((headline (cdr (assoc "headline" item)))
 	 (parts (split-string headline))
 	 (id (org-taskjuggler-clean-id (downcase (pop parts)))))
