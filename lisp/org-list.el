@@ -119,7 +119,7 @@ When a string, it will be used as a regular expression.	 When the bullet
 type of a list is changed, the new bullet type will be matched against this
 regexp.	 If it matches, there will be two spaces instead of one after
 the bullet in each item of he list."
-  :group 'org-plain-list
+  :group 'org-plain-lists
   :type '(choice
 	  (const :tag "never" nil)
 	  (regexp)))
