@@ -1,5 +1,13 @@
 2010-04-21  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-colview-xemacs.el: Make sure this file is never loaded into
+	Emacs.  Remove all tests for XEmacs.
+
+	* org-colview.el: Make sure this file is never loaded into XEmacs.
+
+	* org-agenda.el (org-highlight, org-unhighlight): Use direct
+	overlay calls.
+
 	* org.el (org-key): Apply the translations defined in
 	`org-xemacs-key-equivalents'.
 

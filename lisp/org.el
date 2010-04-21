@@ -4356,7 +4356,7 @@ The following commands are available:
   ;; we switch another buffer into org-mode.
   (if (featurep 'xemacs)
       (when (boundp 'outline-mode-menu-heading)
-	;; Assume this is Greg's port, it used easymenu
+	;; Assume this is Greg's port, it uses easymenu
 	(easy-menu-remove outline-mode-menu-heading)
 	(easy-menu-remove outline-mode-menu-show)
 	(easy-menu-remove outline-mode-menu-hide))
@@ -16999,9 +16999,7 @@ With prefix arg UNCOMPILED, load the uncompiled versions."
   "Display the given MESSAGE as a warning."
   (if (fboundp 'display-warning)
       (display-warning 'org message
-                       (if (featurep 'xemacs)
-                           'warning
-                         :warning))
+                       (if (featurep 'xemacs) 'warning :warning))
     (let ((buf (get-buffer-create "*Org warnings*")))
       (with-current-buffer buf
         (goto-char (point-max))
