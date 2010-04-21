@@ -130,6 +130,7 @@ called by `org-babel-execute-src-block'."
   (message "executing Gnuplot source code block")
   (let ((session (cdr (assoc :session params)))
         (result-type (cdr (assoc :results params)))
+        (out-file (cdr (assoc :file params)))
         (body (org-babel-expand-body:gnuplot body params)))
     (save-window-excursion
       ;; evaluate the code body with gnuplot
