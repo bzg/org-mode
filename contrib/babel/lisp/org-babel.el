@@ -262,6 +262,12 @@ block."
             result))
       (setq call-process-region 'call-process-region-original))))
 
+(defun org-babel-expand-body:generic (body params &optional processed-params)
+  "Expand a block of code with org-babel according to it's header
+arguments.  This generic implementation of body expansion is
+called for languages which have not defined their own specific
+org-babel-expand-body:lang function." body)
+
 (defun org-babel-expand-src-block (&optional arg info params)
   "Expand the current source code block according to it's header
 arguments, and pop open the results in a preview buffer."
@@ -278,7 +284,8 @@ arguments, and pop open the results in a preview buffer."
                               (string= "yes" (cdr (assoc :noweb params))))
 			 (org-babel-expand-noweb-references info) (second info))))
          (cmd (intern (concat "org-babel-expand-body:" lang)))
-         (expanded (funcall cmd body params))
+         (expanded (funcall (if (fboundp cmd) cmd 'org-babel-expand-body:generic)
+                            body params))
          (buf (get-buffer-create "*Org-Babel Code Body Preview*")))
     (with-current-buffer buf
       (erase-buffer)
