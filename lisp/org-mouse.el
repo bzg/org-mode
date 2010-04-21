@@ -909,18 +909,18 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
      (setq org-mouse-context-menu-function 'org-mouse-context-menu)
 
      (when (memq 'context-menu org-mouse-features)
-       (define-key org-mouse-map (if (featurep 'xemacs) [button3] [mouse-3]) nil)
-       (define-key org-mode-map [mouse-3] 'org-mouse-show-context-menu))
-     (define-key org-mode-map [down-mouse-1] 'org-mouse-down-mouse)
+       (org-defkey org-mouse-map [mouse-3] nil)
+       (org-defkey org-mode-map [mouse-3] 'org-mouse-show-context-menu))
+     (org-defkey org-mode-map [down-mouse-1] 'org-mouse-down-mouse)
      (when (memq 'context-menu org-mouse-features)
-       (define-key org-mouse-map [C-drag-mouse-1] 'org-mouse-move-tree)
-       (define-key org-mouse-map [C-down-mouse-1] 'org-mouse-move-tree-start))
+       (org-defkey org-mouse-map [C-drag-mouse-1] 'org-mouse-move-tree)
+       (org-defkey org-mouse-map [C-down-mouse-1] 'org-mouse-move-tree-start))
      (when (memq 'yank-link org-mouse-features)
-       (define-key org-mode-map [S-mouse-2] 'org-mouse-yank-link)
-       (define-key org-mode-map [drag-mouse-3] 'org-mouse-yank-link))
+       (org-defkey org-mode-map [S-mouse-2] 'org-mouse-yank-link)
+       (org-defkey org-mode-map [drag-mouse-3] 'org-mouse-yank-link))
      (when (memq 'move-tree org-mouse-features)
-       (define-key org-mouse-map [drag-mouse-3] 'org-mouse-move-tree)
-       (define-key org-mouse-map [down-mouse-3] 'org-mouse-move-tree-start))
+       (org-defkey org-mouse-map [drag-mouse-3] 'org-mouse-move-tree)
+       (org-defkey org-mouse-map [down-mouse-3] 'org-mouse-move-tree-start))
 
      (when (memq 'activate-stars org-mouse-features)
        (font-lock-add-keywords
@@ -1131,13 +1131,11 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
 (add-hook 'org-agenda-mode-hook
    '(lambda ()
      (setq org-mouse-context-menu-function 'org-mouse-agenda-context-menu)
-     (define-key org-agenda-mode-map
-       (if (featurep 'xemacs) [button3] [mouse-3])
-       'org-mouse-show-context-menu)
-     (define-key org-agenda-mode-map [down-mouse-3] 'org-mouse-move-tree-start)
-     (define-key org-agenda-mode-map (if (featurep 'xemacs) [(control mouse-4)] [C-mouse-4]) 'org-agenda-earlier)
-     (define-key org-agenda-mode-map (if (featurep 'xemacs) [(control mouse-5)] [C-mouse-5]) 'org-agenda-later)
-     (define-key org-agenda-mode-map [drag-mouse-3]
+     (org-defkey org-agenda-mode-map [mouse-3] 'org-mouse-show-context-menu)
+     (org-defkey org-agenda-mode-map [down-mouse-3] 'org-mouse-move-tree-start)
+     (org-defkey org-agenda-mode-map [C-mouse-4] 'org-agenda-earlier)
+     (org-defkey org-agenda-mode-map [C-mouse-5] 'org-agenda-later)
+     (org-defkey org-agenda-mode-map [drag-mouse-3]
        '(lambda (event) (interactive "e")
 	  (case (org-mouse-get-gesture event)
 	    (:left (org-agenda-earlier 1))
