@@ -1,5 +1,15 @@
 2010-04-22  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-publish.el (org-publish-project-alist): Update docstring.
+	(org-publish-file-title-cache): New variable.
+	(org-publish-initialize-files-alist): Initialize
+	`org-publish-initialize-files-alist' to nil.
+	(org-publish-sort-directory-files): New function.
+	(org-publish-projects): Access the new properties.
+	(org-publish-find-title): Use the file title cache.
+	(org-publish-find-title): Build the file title cache.
+	(org-publish-get-base-files-1): Sort files.
+
 	* org-html.el (org-export-as-html): Treat verse as open/close
 	paragraph.
 	(org-export-html-close-lists-maybe): Allow to splice raw HTML into

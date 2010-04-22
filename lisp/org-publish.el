@@ -174,7 +174,21 @@ sitemap of files or summary page for a given project.
                          of the titles of the files involved) or
                          `tree' (the directory structure of the source
                          files is reflected in the sitemap).  Defaults to
-                         `tree'."
+                         `tree'.
+
+  If you create a sitemap file, adjust the sorting like this:
+
+  :sitemap-sort-folders    Where folders should appear in the sitemap.
+                           Set this to `first' (default) or `last' to
+                           display folders first or last, respectively.
+                           Any other value will mix files and folders.
+  :sitemap-alphabetically  The site map is normally sorted alphabetically.
+                           Set this explicitly to nil to turn off sorting.
+  :sitemap-ignore-case     Should sorting be case-sensitively?  Default nil.
+
+The following properties control the creation of a concept index.
+
+  :makeindex             Create a concept index."
   :group 'org-publish
   :type 'alist)
 
@@ -287,11 +301,16 @@ Each element of this alist is of the form:
 (defvar org-publish-temp-files nil
   "Temporary list of files to be published.")
 
+;; Here, so you find the variable right before it's used the first time:
+(defvar org-publish-file-title-cache nil
+  "List of absolute filenames and titles.")
+
 (defun org-publish-initialize-files-alist (&optional refresh)
   "Set `org-publish-files-alist' if it is not set.
 Also set it if the optional argument REFRESH is non-nil."
   (interactive "P")
   (when (or refresh (not org-publish-files-alist))
+    (setq org-publish-file-title-cache nil)
     (setq org-publish-files-alist
 	  (org-publish-get-files org-publish-project-alist))))
 
@@ -355,6 +374,35 @@ This splices all the components into the list."
 	(push p rtn)))
     (nreverse (org-publish-delete-dups (delq nil rtn)))))
 
+(defvar sitemap-alphabetically)
+(defvar sitemap-sort-folders)
+(defvar sitemap-ignore-case)
+(defun org-publish-compare-directory-files (a b)
+  "Predicate for `sort', that sorts folders-first/last and
+eventually alphabetically."
+  (let ((retval t))
+    (when (or sitemap-alphabetically sitemap-sort-folders)
+      ;; First we sort alphabetically:
+      (when sitemap-alphabetically
+        (let ((aorg (and (string-match "\\.org$" a) (not (file-directory-p a))))
+              (borg (and (string-match "\\.org$" b) (not (file-directory-p b)))))
+          (setq retval
+                (if sitemap-ignore-case
+                    (string-lessp (if borg (upcase (org-publish-find-title a)) (upcase a))
+                                  (if aorg (upcase (org-publish-find-title b)) (upcase b)))
+                  (string-lessp (if borg (org-publish-find-title a) a)
+                                (if aorg (org-publish-find-title b) b))))))
+      ;; Directory-wise wins:
+      (when sitemap-sort-folders
+        ;; a is directory, b not:
+        (cond
+         ((and (file-directory-p a) (not (file-directory-p b)))
+          (setq retval (eq sitemap-sort-folders 'first)))
+          ;; a is not a directory, but b is:
+         ((and (not (file-directory-p a)) (file-directory-p b))
+          (setq retval (eq sitemap-sort-folders 'last))))))
+      retval))
+
 (defun org-publish-get-base-files-1 (base-dir &optional recurse match skip-file skip-dir)
   "Set `org-publish-temp-files' with files from BASE-DIR directory.
 If RECURSE is non-nil, check BASE-DIR recursively.  If MATCH is
@@ -374,7 +422,8 @@ matching the regexp SKIP-DIR when recursing through BASE-DIR."
 			  (not (file-exists-p (file-truename f)))
 			  (not (string-match match fnd)))
 		(pushnew f org-publish-temp-files)))))
-	(directory-files base-dir t (unless recurse match))))
+	(sort (directory-files base-dir t (unless recurse match))
+	      'org-publish-compare-directory-files)))
 
 (defun org-publish-get-base-files (project &optional exclude-regexp)
   "Return a list of all files in PROJECT.
@@ -558,9 +607,21 @@ If :makeindex is set, also produce a file theindex.org."
 				"sitemap.org"))
 	  (sitemap-function (or (plist-get project-plist :sitemap-function)
 				'org-publish-org-sitemap))
+	  (sitemap-sort-folders
+	   (if (plist-member project-plist :sitemap-sort-folders)
+	       (plist-get project-plist :sitemap-sort-folders)
+	     'first))
+	  (sitemap-alphabetically
+	   (if (plist-member project-plist :sitemap-alphabetically)
+	       (plist-get project-plist :sitemap-alphabetically) t))
+	  (sitemap-ignore-case (plist-get project-plist :sitemap-ignore-case))
 	  (preparation-function (plist-get project-plist :preparation-function))
 	  (completion-function (plist-get project-plist :completion-function))
 	  (files (org-publish-get-base-files project exclude-regexp)) file)
+      (when (and (not (stringp sitemap-sort-folders))
+                 (not (string= sitemap-sort-folders "first"))
+                 (not (string= sitemap-sort-folders "last")))
+       (setq sitemap-sort-folders nil))
        (when preparation-function (run-hooks 'preparation-function))
        (if sitemap-p (funcall sitemap-function project sitemap-filename))
        (while (setq file (pop files))
@@ -640,6 +701,8 @@ Default for SITEMAP-FILENAME is 'sitemap.org'."
 
 (defun org-publish-find-title (file)
   "Find the title of file in project."
+  (if (member file org-publish-file-title-cache)
+      (cadr (member file org-publish-file-title-cache))
   (let* ((visiting (find-buffer-visiting file))
 	 (buffer (or visiting (find-file-noselect file)))
 	 title)
@@ -654,7 +717,9 @@ Default for SITEMAP-FILENAME is 'sitemap.org'."
 		  (file-name-nondirectory (file-name-sans-extension file))))))
     (unless visiting
       (kill-buffer buffer))
-    title))
+    (setq org-publish-file-title-cache
+          (append org-publish-file-title-cache (list file title)))
+    title)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Interactive publishing functions

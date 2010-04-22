@@ -1,3 +1,7 @@
+2010-04-22  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Sitemap): Document sitemap sorting.
+
 2010-04-12  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Repeated tasks): Document that the user can determine
