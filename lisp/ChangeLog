@@ -1,5 +1,7 @@
 2010-04-22  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-compat.el (org-get-x-clipboard-compat): Use (featurep 'xemacs).
+
 	* org-publish.el (org-publish-project-alist): Update docstring.
 	(org-publish-file-title-cache): New variable.
 	(org-publish-initialize-files-alist): Initialize

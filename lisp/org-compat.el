@@ -39,7 +39,10 @@
 (declare-function find-library-name "find-func"  (library))
 (declare-function w32-focus-frame "term/w32-win" (frame))
 
-(defconst org-xemacs-p (featurep 'xemacs)) ; not used by org.el itself
+;; The following constant is for backward compatibility.  We do not use
+;; it in org-mode, because the Byte compiler evaluates (featurep 'xemacs)
+;; at compilation time and can therefore optimize code better.
+(defconst org-xemacs-p (featurep 'xemacs))
 (defconst org-format-transports-properties-p
   (let ((x "a"))
     (add-text-properties 0 1 '(test t) x)
@@ -235,7 +238,8 @@ Works on both Emacs and XEmacs."
 
 (defun org-get-x-clipboard-compat (value)
   "Get the clipboard value on XEmacs or Emacs 21"
-  (cond (org-xemacs-p (org-no-warnings (get-selection-no-error value)))
+  (cond ((featurep 'xemacs)
+	 (org-no-warnings (get-selection-no-error value)))
 	((fboundp 'x-get-selection)
 	 (condition-case nil
 	     (or (x-get-selection value 'UTF8_STRING)
