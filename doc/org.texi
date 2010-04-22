@@ -12654,7 +12654,7 @@ also acted as mailing list moderator for some time.
 @item
 @i{Sebastian Rose} wrote @file{org-info.js}, a Java script for displaying
 webpages derived from Org using an Info-like or a folding interface with
-single-key navigation.
+single-key navigation, and make lots of improvements to the HTML exporter.
 @item
 @i{Frank Ruell} solved the mystery of the @code{keymapp nil} bug, a
 conflict with @file{allout.el}.
@@ -12693,11 +12693,18 @@ tweaks and features.
 @i{Adam Spiers} asked for global linking commands, inspired the link
 extension system, added support for mairix, and proposed the mapping API.
 @item
+@i{Ulf Stegemann} created the table to translate special symbols to HTML,
+LaTeX, UTF-8, Latin-1 and ASCII.
+@item
 @i{Andy Stewart} contributed code to @file{org-w3m.el}, to copy HTML content
 with links transformation to Org syntax.
 @item
 @i{David O'Toole} wrote @file{org-publish.el} and drafted the manual
 chapter about publishing.
+@item
+@i{Stefan Vollmar} organized a video-recorded talk at the
+Max-PLanck-Institute for Neurology.  He also inspired the creation of a
+concept index for HTML export.
 @item
 @i{J@"urgen Vollmer} contributed code generating the table of contents
 in HTML output.
