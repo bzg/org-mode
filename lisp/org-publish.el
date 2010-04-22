@@ -801,11 +801,11 @@ the project."
       (when (eq backend 'latex)
 	(replace-match (format "\\index{%s}" entry) t t))
       (save-excursion
-	(org-back-to-heading t)
+	(ignore-errors (org-back-to-heading t))
 	(setq target (get-text-property (point) 'target))
 	(setq target (or (cdr (assoc target org-export-preferred-target-alist))
 			 (cdr (assoc target org-export-id-target-alist))
-			 target))
+			 target ""))
 	(push (cons entry target) index)))
     (with-temp-file
 	(concat (file-name-sans-extension org-current-export-file) ".orgx")
@@ -825,7 +825,7 @@ the project."
 			full-files))
 	 (default-directory directory)
 	 index origfile buf target entry ibuffer
-	 main last-main letter last-letter file sub link)
+	 main last-main letter last-letter file sub link tgext)
     ;; `files' contains the list of relative file names
     (dolist (file files)
       (setq origfile (substring file 0 -1))
@@ -846,6 +846,9 @@ the project."
       (setq last-letter nil)
       (dolist (idx index)
 	(setq entry (car idx) file (nth 1 idx) target (nth 2 idx))
+	(if (and (stringp target) (string-match "\\S-" target))
+	    (setq tgext (concat "::#" target))
+	  (setq tgext ""))
 	(setq letter (upcase (substring entry 0 1)))
 	(when (not (equal letter last-letter))
 	  (insert "** " letter "\n")
@@ -857,7 +860,7 @@ the project."
 	(when (and main (not (equal main last-main)))
 	  (insert "   - " main "\n")
 	  (setq last-main main))
-	(setq link (concat "[[file:" file "::#" target "]"
+	(setq link (concat "[[file:" file tgext "]"
 			   "[" (or sub entry) "]]"))
 	(if (and main sub)
 	    (insert "     - " link "\n")

@@ -9,6 +9,11 @@
 	(org-publish-find-title): Use the file title cache.
 	(org-publish-find-title): Build the file title cache.
 	(org-publish-get-base-files-1): Sort files.
+	(org-publish-aux-preprocess): Do not throw an error when before
+	the first headline.  Allow an empty target, meaning to link just
+	to the file.
+	(org-publish-index-generate-theindex.inc): Check if there is
+	actually a target and only then add it to the link.
 
 	* org-html.el (org-export-as-html): Treat verse as open/close
 	paragraph.
