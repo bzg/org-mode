@@ -200,19 +200,21 @@ the edited version. Optional argument CONTEXT is used by
   (let ((line (org-current-line))
 	(col (current-column))
 	(case-fold-search t)
-	(msg (substitute-command-keys
-	      "Edit, then exit with C-c ' (C-c and single quote)"))
 	(info (org-edit-src-find-region-and-lang))
 	(org-mode-p (eq major-mode 'org-mode))
 	(beg (make-marker))
 	(end (make-marker))
 	(preserve-indentation org-src-preserve-indentation)
-	block-nindent total-nindent ovl lang lang-f single lfmt begline buffer)
+	block-nindent total-nindent ovl lang lang-f single lfmt begline buffer msg)
     (if (not info)
 	nil
       (setq beg (move-marker beg (nth 0 info))
 	    end (move-marker end (nth 1 info))
 	    allow-write-back-p (null code)
+	    msg (if allow-write-back-p
+		    (substitute-command-keys
+		     "Edit, then exit with C-c ' (C-c and single quote)")
+		  "Exit with C-c ' (C-c and single quote)")
 	    code (or code (buffer-substring-no-properties beg end))
 	    lang (or (cdr (assoc (nth 2 info) org-src-lang-modes))
                      (nth 2 info))

@@ -55,6 +55,7 @@
 
 	* org-src.el (org-edit-src-code): Allow the org-src edit buffer to
 	be used in a read-only mode.
+	(org-edit-src-code): Different message in read-only mode
 
 2010-04-21  Carsten Dominik  <carsten.dominik@gmail.com>
 
