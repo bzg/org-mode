@@ -51,6 +51,11 @@
 	(org-export-html-close-lists-maybe): Allow to splice raw HTML into
 	and out of lists.
 
+2010-04-22  Dan Davison  <davison@stats.ox.ac.uk>
+
+	* org-src.el (org-edit-src-code): Allow the org-src edit buffer to
+	be used in a read-only mode.
+
 2010-04-21  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-src.el (org-edit-src-find-region-and-lang): Test for
