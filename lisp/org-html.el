@@ -959,10 +959,12 @@ lang=\"%s\" xml:lang=\"%s\">
 	  (when (equal "ORG-VERSE-START" line)
 	    (org-close-par-maybe)
 	    (insert "\n<p class=\"verse\">\n")
+	    (setq org-par-open t)
 	    (setq inverse t)
 	    (throw 'nextline nil))
 	  (when (equal "ORG-VERSE-END" line)
 	    (insert "</p>\n")
+	    (setq org-par-open nil)
 	    (org-open-par)
 	    (setq inverse nil)
 	    (throw 'nextline nil))
@@ -1996,10 +1998,12 @@ If there are links in the string, don't modify these."
 (defvar local-list-indent)
 (defvar local-list-type)
 (defun org-export-html-close-lists-maybe (line)
-  (let ((ind (or (get-text-property 0 'original-indentation line)))
-;		 (and (string-match "\\S-" line)
-;		      (org-get-indentation line))))
-	didclose)
+  (let* ((rawhtml (and in-local-list
+		       (get-text-property 0 'org-protected line)))
+         (ind (if rawhtml
+		  (org-get-indentation line)
+		(or (get-text-property 0 'original-indentation line))))
+	 didclose)
     (when ind
       (while (and in-local-list
 		  (<= ind (car local-list-indent)))
