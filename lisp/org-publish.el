@@ -388,18 +388,15 @@ eventually alphabetically."
                (aorg (and (string-match "\\.org$" a) (not adir)))
                (bdir (file-directory-p b))
                (borg (and (string-match "\\.org$" b) (not bdir)))
-               (A (if aorg (org-publish-find-title a) a))
-               (B (if borg (org-publish-find-title b) b)))
-          ;; If we have a directory and an Org file, we need to combine
-          ;; directory and title as filename of the Org file:
-          (when (and adir borg)
-            (setq B (concat (file-name-directory b) B)))
-          (when (and bdir aorg)
-            (setq A (concat (file-name-directory a) A)))
-          ;;
+               (A (if aorg
+                      (concat (file-name-directory a)
+                              (org-publish-find-title a)) a))
+               (B (if borg
+                      (concat (file-name-directory b)
+                              (org-publish-find-title b)) b)))
           (setq retval (if sitemap-ignore-case
-			   (string-lessp (upcase A) (upcase B))
-			 (string-lessp A B)))))
+			   (not (string-lessp (upcase B) (upcase A)))
+			 (not (string-lessp B A))))))
 
       ;; Directory-wise wins:
       (when sitemap-sort-folders
