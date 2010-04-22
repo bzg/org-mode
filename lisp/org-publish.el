@@ -618,10 +618,9 @@ If :makeindex is set, also produce a file theindex.org."
 	  (preparation-function (plist-get project-plist :preparation-function))
 	  (completion-function (plist-get project-plist :completion-function))
 	  (files (org-publish-get-base-files project exclude-regexp)) file)
-      (when (and (not (stringp sitemap-sort-folders))
-                 (not (string= sitemap-sort-folders "first"))
-                 (not (string= sitemap-sort-folders "last")))
-       (setq sitemap-sort-folders nil))
+       ;; Make sure sitemap-sort-folders' has an accepted value
+       (unless (memq sitemap-sort-folders '(first last))
+	 (setq sitemap-sort-folders nil))
        (when preparation-function (run-hooks 'preparation-function))
        (if sitemap-p (funcall sitemap-function project sitemap-filename))
        (while (setq file (pop files))

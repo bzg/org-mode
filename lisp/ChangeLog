@@ -14,6 +14,7 @@
 	to the file.
 	(org-publish-index-generate-theindex.inc): Check if there is
 	actually a target and only then add it to the link.
+	(org-publish-projects): Fix a remaining issue with the last commit
 
 	* org-html.el (org-export-as-html): Treat verse as open/close
 	paragraph.
