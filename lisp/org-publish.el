@@ -384,24 +384,33 @@ eventually alphabetically."
     (when (or sitemap-alphabetically sitemap-sort-folders)
       ;; First we sort alphabetically:
       (when sitemap-alphabetically
-        (let ((aorg (and (string-match "\\.org$" a) (not (file-directory-p a))))
-              (borg (and (string-match "\\.org$" b) (not (file-directory-p b)))))
-          (setq retval
-                (if sitemap-ignore-case
-                    (string-lessp (if borg (upcase (org-publish-find-title a)) (upcase a))
-                                  (if aorg (upcase (org-publish-find-title b)) (upcase b)))
-                  (string-lessp (if borg (org-publish-find-title a) a)
-                                (if aorg (org-publish-find-title b) b))))))
+        (let* ((adir (file-directory-p a))
+               (aorg (and (string-match "\\.org$" a) (not adir)))
+               (bdir (file-directory-p b))
+               (borg (and (string-match "\\.org$" b) (not bdir)))
+               (A (if aorg (org-publish-find-title a) a))
+               (B (if borg (org-publish-find-title b) b)))
+          ;; If we have a directory and an Org file, we need to combine
+          ;; directory and title as filename of the Org file:
+          (when (and adir borg)
+            (setq B (concat (file-name-directory b) B)))
+          (when (and bdir aorg)
+            (setq A (concat (file-name-directory a) A)))
+          ;;
+          (setq retval (if sitemap-ignore-case
+			   (string-lessp (upcase A) (upcase B))
+			 (string-lessp A B)))))
+
       ;; Directory-wise wins:
       (when sitemap-sort-folders
         ;; a is directory, b not:
         (cond
          ((and (file-directory-p a) (not (file-directory-p b)))
-          (setq retval (eq sitemap-sort-folders 'first)))
+          (setq retval (equal sitemap-sort-folders 'first)))
           ;; a is not a directory, but b is:
          ((and (not (file-directory-p a)) (file-directory-p b))
-          (setq retval (eq sitemap-sort-folders 'last))))))
-      retval))
+          (setq retval (equal sitemap-sort-folders 'last))))))
+    retval))
 
 (defun org-publish-get-base-files-1 (base-dir &optional recurse match skip-file skip-dir)
   "Set `org-publish-temp-files' with files from BASE-DIR directory.

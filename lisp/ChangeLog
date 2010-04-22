@@ -1,5 +1,7 @@
 2010-04-22  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-publish.el (org-publish-compare-directory-files): Fix sorting.
+
 	* org-compat.el (org-get-x-clipboard-compat): Use (featurep 'xemacs).
 
 	* org-publish.el (org-publish-project-alist): Update docstring.
