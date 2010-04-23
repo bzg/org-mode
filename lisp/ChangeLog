@@ -1,5 +1,7 @@
 2010-04-23  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-set-autofill-regexps): XEmacs compatibility.
+
 	* org-latex.el (org-export-latex-set-initial-vars): Allow "-"
 	in latex class definitions
 

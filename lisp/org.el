@@ -17790,7 +17790,7 @@ the functionality can be provided as a fall-back.")
   (org-set-local 'fill-paragraph-function 'org-fill-paragraph)
   ;; Adaptive filling: To get full control, first make sure that
   ;; `adaptive-fill-regexp' never matches.  Then install our own matcher.
-  (unless (local-variable-p 'adaptive-fill-regexp)
+  (unless (local-variable-p 'adaptive-fill-regexp (current-buffer))
     (org-set-local 'org-adaptive-fill-regexp-backup
                    adaptive-fill-regexp))
   (org-set-local 'adaptive-fill-regexp "\000")
