@@ -1,5 +1,8 @@
 2010-04-23  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-entities.el (org-entities): Use \land and \lor for logical
+	operators.
+
 	* org.el (org-shiftmetaleft, org-shiftmetaright): Call the subtree
 	indentation commands.
 	(org-hidden-tree-error): New defsubst.
