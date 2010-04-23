@@ -1,3 +1,12 @@
+2010-04-23  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Plain lists): Document the commands to promote/demote
+	an item without affecting children.
+
+2010-04-22  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Sitemap): Document sitemap sorting.
+
 2010-04-12  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Repeated tasks): Document that the user can determine

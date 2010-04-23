@@ -1,3 +1,53 @@
+2010-04-23  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-shiftmetaleft, org-shiftmetaright): Call the subtree
+	indentation commands.
+	(org-hidden-tree-error): New defsubst.
+	(org-metaleft, org-metaright): Check for hidden stuff and throw an
+	error.
+	(org-check-for-hidden): New function.
+
+	* org-list.el (org-item-re): New function.
+	(org-at-item-p): Use `org-item-re'.
+	(org-end-of-item-text-before-children): New function.
+	(org-outdent-item, org-indent-item): Arrange for leaving the
+	subtree alone.
+	(org-outdent-item-tree, org-indent-item-tree): New argument
+	NO-SUBTREE.
+	(org-indent-item-tree): Use `org-end-of-item-text-before-children'
+	to find the end for processing while ignoring the subtree.
+
+	* org-publish.el (org-publish-sitemap-sort-alphabetically)
+	(org-publish-sitemap-sort-folders)
+	(org-publish-sitemap-sort-ignore-case): New options.
+
+2010-04-22  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-publish.el (org-publish-compare-directory-files): Fix sorting.
+
+	* org-compat.el (org-get-x-clipboard-compat): Use (featurep 'xemacs).
+
+	* org-publish.el (org-publish-project-alist): Update docstring.
+	(org-publish-file-title-cache): New variable.
+	(org-publish-initialize-files-alist): Initialize
+	`org-publish-initialize-files-alist' to nil.
+	(org-publish-sort-directory-files): New function.
+	(org-publish-projects): Access the new properties.
+	(org-publish-find-title): Use the file title cache.
+	(org-publish-find-title): Build the file title cache.
+	(org-publish-get-base-files-1): Sort files.
+	(org-publish-aux-preprocess): Do not throw an error when before
+	the first headline.  Allow an empty target, meaning to link just
+	to the file.
+	(org-publish-index-generate-theindex.inc): Check if there is
+	actually a target and only then add it to the link.
+	(org-publish-projects): Fix a remaining issue with the last commit
+
+	* org-html.el (org-export-as-html): Treat verse as open/close
+	paragraph.
+	(org-export-html-close-lists-maybe): Allow to splice raw HTML into
+	and out of lists.
+
 2010-04-21  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-src.el (org-edit-src-find-region-and-lang): Test for

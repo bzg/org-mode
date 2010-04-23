@@ -15970,7 +15970,7 @@ See the individual commands for more information."
    ((run-hook-with-args-until-success 'org-shiftmetaleft-hook))
    ((org-at-table-p) (call-interactively 'org-table-delete-column))
    ((org-on-heading-p) (call-interactively 'org-promote-subtree))
-   ((org-at-item-p) (call-interactively 'org-outdent-item))
+   ((org-at-item-p) (call-interactively 'org-outdent-item-tree))
    (t (org-modifier-cursor-error))))
 
 (defun org-shiftmetaright ()
@@ -15983,7 +15983,7 @@ See the individual commands for more information."
    ((run-hook-with-args-until-success 'org-shiftmetaright-hook))
    ((org-at-table-p) (call-interactively 'org-table-insert-column))
    ((org-on-heading-p) (call-interactively 'org-demote-subtree))
-   ((org-at-item-p) (call-interactively 'org-indent-item))
+   ((org-at-item-p) (call-interactively 'org-indent-item-tree))
    (t (org-modifier-cursor-error))))
 
 (defun org-shiftmetaup (&optional arg)
@@ -16012,6 +16012,10 @@ commands for more information."
    ((org-at-item-p) (call-interactively 'org-move-item-down))
    (t (org-modifier-cursor-error))))
 
+(defsubst org-hidden-tree-error ()
+  (error
+   "Hidden subtree, open with TAB or use subtree command M-S-<left>/<right>"))
+
 (defun org-metaleft (&optional arg)
   "Promote heading or move table column to left.
 Calls `org-do-promote' or `org-table-move-column', depending on context.
@@ -16026,12 +16030,14 @@ See the individual commands for more information."
 	     (save-excursion
 	       (goto-char (region-beginning))
 	       (org-on-heading-p))))
+    (when (org-check-for-hidden 'headlines) (org-hidden-tree-error))
     (call-interactively 'org-do-promote))
    ((or (org-at-item-p)
 	(and (org-region-active-p)
 	     (save-excursion
 	       (goto-char (region-beginning))
 	       (org-at-item-p))))
+    (when (org-check-for-hidden 'items) (org-hidden-tree-error))
     (call-interactively 'org-outdent-item))
    (t (call-interactively 'backward-word))))
 
@@ -16049,14 +16055,44 @@ See the individual commands for more information."
 	     (save-excursion
 	       (goto-char (region-beginning))
 	       (org-on-heading-p))))
+    (when (org-check-for-hidden 'headlines) (org-hidden-tree-error))
     (call-interactively 'org-do-demote))
    ((or (org-at-item-p)
 	(and (org-region-active-p)
 	     (save-excursion
 	       (goto-char (region-beginning))
 	       (org-at-item-p))))
+    (when (org-check-for-hidden 'items) (org-hidden-tree-error))
     (call-interactively 'org-indent-item))
    (t (call-interactively 'forward-word))))
+
+(defun org-check-for-hidden (what)
+  "Check if there are hidden headlines/items in the current visual line.
+WHAT can be either `headlines' or `items'.  If the current line is
+an outline or item heading and it has a folded subtree below it,
+this fucntion returns t, nil otherwise."
+  (let ((re (cond
+	     ((eq what 'headlines) (concat "^" org-outline-regexp))
+	     ((eq what 'items) (concat "^" (org-item-re t)))
+	     (t (error "This should not happen"))))
+	beg end)
+    (save-excursion
+      (catch 'exit
+	(if (org-region-active-p)
+	    (setq beg (region-beginning) end (region-end))
+	  (setq beg (point-at-bol))
+	  (beginning-of-line 2)
+	  (while (and (not (eobp)) ;; this is like `next-line'
+		      (get-char-property (1- (point)) 'invisible))
+	    (beginning-of-line 2))
+	  (setq end (point)))
+	(goto-char beg)
+	(goto-char (point-at-eol))
+	(setq end (max end (point)))
+	(while (re-search-forward re end t)
+	  (if (get-char-property (match-beginning 0) 'invisible)
+	      (throw 'exit t)))
+	nil))))
 
 (defun org-metaup (&optional arg)
   "Move subtree up or move table row up.
