@@ -129,10 +129,10 @@ it's header arguments."
                           (org-babel-process-params params))))
         (main-p (not (string= (cdr (assoc :main params)) "no")))
         (includes (or (cdr (assoc :includes params))
-                      (org-entry-get nil "includes" t)))
+                      (org-babel-read (org-entry-get nil "includes" t))))
         (defines (org-babel-read
                   (or (cdr (assoc :defines params))
-                      (org-entry-get nil "defines" t)))))
+                      (org-babel-read (org-entry-get nil "defines" t))))))
     (mapconcat 'identity
                (list
                 ;; includes
