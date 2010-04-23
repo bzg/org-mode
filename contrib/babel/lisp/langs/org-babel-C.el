@@ -61,7 +61,7 @@ called by `org-babel-execute-src-block'."
 (defun org-babel-expand-body:c++ (body params &optional processed-params)
   "Expand a block of C++ code with org-babel according to it's
 header arguments (calls `org-babel-C-expand')."
-  (let ((c-variant 'cpp)) (org-babel-C-expand body params)))
+  (let ((c-variant 'cpp)) (org-babel-C-expand body params processed-params)))
 
 (defun org-babel-execute:C (body params)
   "Execute a block of C code with org-babel.  This function is
@@ -71,13 +71,14 @@ called by `org-babel-execute-src-block'."
 (defun org-babel-expand-body:c (body params &optional processed-params)
   "Expand a block of C code with org-babel according to it's
 header arguments (calls `org-babel-C-expand')."
-  (let ((c-variant 'c)) (org-babel-C-expand body params)))
+  (let ((c-variant 'c)) (org-babel-C-expand body params processed-params)))
 
 (defun org-babel-C-execute (body params)
   "This should only be called by `org-babel-execute:C' or
 `org-babel-execute:c++'."
   (message "executing C source code block")
-  (let* ((tmp-src-file (make-temp-file "org-babel-C-src" nil
+  (let* ((processed-params (org-babel-process-params params))
+         (tmp-src-file (make-temp-file "org-babel-C-src" nil
                                        (case c-variant
                                          ('c ".c")
                                          ('cpp ".cpp"))))
