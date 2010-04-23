@@ -1,3 +1,9 @@
+2010-04-23  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-publish.el (org-publish-sitemap-sort-alphabetically)
+	(org-publish-sitemap-sort-folders)
+	(org-publish-sitemap-sort-ignore-case): New options.
+
 2010-04-22  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-publish.el (org-publish-compare-directory-files): Fix sorting.

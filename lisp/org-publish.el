@@ -222,6 +222,34 @@ Any changes made by this hook will be saved."
   :group 'org-publish
   :type 'hook)
 
+(defcustom org-publish-sitemap-sort-alphabetically t
+  "Should sitemaps be sorted alphabetically by default?
+
+You can overwrite this default per project in your
+`org-publish-project-alist', using `:sitemap-alphabetically'."
+  :group 'org-publish
+  :type 'boolean)
+
+(defcustom org-publish-sitemap-sort-folders 'first
+  "A symbol, denoting if folders are sorted first in sitemaps.
+Possible values are `first', `last', and nil.
+If `first', folders will be sorted before files.
+If `last', folders are sorted to the end after the files.
+Any other value will not mix files and folders.
+
+You can overwrite this default per project in your
+`org-publish-project-alist', using `:sitemap-sort-folders'."
+  :group 'org-publish
+  :type 'symbol)
+
+(defcustom org-publish-sitemap-sort-ignore-case nil
+  "Sort sitemaps case insensitively by default?
+
+You can overwrite this default per project in your
+`org-publish-project-alist', using `:sitemap-ignore-case'."
+  :group 'org-publish
+  :type 'boolean)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Timestamp-related functions
 
@@ -374,9 +402,6 @@ This splices all the components into the list."
 	(push p rtn)))
     (nreverse (org-publish-delete-dups (delq nil rtn)))))
 
-(defvar sitemap-alphabetically)
-(defvar sitemap-sort-folders)
-(defvar sitemap-ignore-case)
 (defun org-publish-compare-directory-files (a b)
   "Predicate for `sort', that sorts folders-first/last and
 eventually alphabetically."
@@ -441,9 +466,27 @@ matching filenames."
 	 (include-list (plist-get project-plist :include))
 	 (recurse (plist-get project-plist :recursive))
 	 (extension (or (plist-get project-plist :base-extension) "org"))
+     ;; sitemap-... variables are dynamically scoped for
+     ;; org-publish-compare-directory-files:
+     (sitemap-sort-folders
+	   (if (plist-member project-plist :sitemap-sort-folders)
+	       (plist-get project-plist :sitemap-sort-folders)
+	     org-publish-sitemap-sort-folders))
+     (sitemap-alphabetically
+      (if (plist-member project-plist :sitemap-alphabetically)
+          (plist-get project-plist :sitemap-alphabetically)
+        org-publish-sitemap-sort-alphabetically))
+	  (sitemap-ignore-case
+       (if (plist-member project-plist :sitemap-ignore-case)
+           (plist-get project-plist :sitemap-ignore-case)
+         org-publish-sitemap-sort-ignore-case))
 	 (match (if (eq extension 'any)
                     "^[^\\.]"
 		  (concat "^[^\\.].*\\.\\(" extension "\\)$"))))
+    ;; Make sure sitemap-sort-folders' has an accepted value
+    (unless (memq sitemap-sort-folders '(first last))
+      (setq sitemap-sort-folders nil))
+
     (setq org-publish-temp-files nil)
     (org-publish-get-base-files-1 base-dir recurse match
 				  ;; FIXME distinguish exclude regexp
@@ -613,20 +656,9 @@ If :makeindex is set, also produce a file theindex.org."
 				"sitemap.org"))
 	  (sitemap-function (or (plist-get project-plist :sitemap-function)
 				'org-publish-org-sitemap))
-	  (sitemap-sort-folders
-	   (if (plist-member project-plist :sitemap-sort-folders)
-	       (plist-get project-plist :sitemap-sort-folders)
-	     'first))
-	  (sitemap-alphabetically
-	   (if (plist-member project-plist :sitemap-alphabetically)
-	       (plist-get project-plist :sitemap-alphabetically) t))
-	  (sitemap-ignore-case (plist-get project-plist :sitemap-ignore-case))
 	  (preparation-function (plist-get project-plist :preparation-function))
 	  (completion-function (plist-get project-plist :completion-function))
 	  (files (org-publish-get-base-files project exclude-regexp)) file)
-       ;; Make sure sitemap-sort-folders' has an accepted value
-       (unless (memq sitemap-sort-folders '(first last))
-	 (setq sitemap-sort-folders nil))
        (when preparation-function (run-hooks 'preparation-function))
        (if sitemap-p (funcall sitemap-function project sitemap-filename))
        (while (setq file (pop files))
