@@ -1,5 +1,9 @@
 2010-04-23  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-clock.el (org-clock-sum): New argument HEADLINE-FILTER.
+	(org-clock-sum): Add property to selected headlines.
+	(org-dblock-write:clocktable): Make tags matcher.
+
 	* org.el (org-set-autofill-regexps): XEmacs compatibility.
 
 	* org-latex.el (org-export-latex-set-initial-vars): Allow "-"

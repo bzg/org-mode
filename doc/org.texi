@@ -5582,6 +5582,7 @@ new table.  The @samp{BEGIN} line can specify options:
 :tend        @r{A time string specifying when to stop considering times.}
 :step        @r{@code{week} or @code{day}, to split the table into chunks.}
              @r{To use this, @code{:block} or @code{:tstart}, @code{:tend} are needed.}
+:tags        @r{A tags match to select entries that should contribute}
 :link        @r{Link the item headlines in the table to their origins.}
 :formula     @r{Content of a @code{#+TBLFM} line to be added and evaluated.}
              @r{As a special case, @samp{:formula %} adds a column with % time.}
