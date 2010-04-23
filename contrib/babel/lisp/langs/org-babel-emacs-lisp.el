@@ -35,21 +35,35 @@
 
 (add-to-list 'org-babel-tangle-langs '("emacs-lisp" "el"))
 
+(defvar org-babel-default-header-args:emacs-lisp
+  '((:hlines . "yes") (:colnames . "no"))
+  "Default arguments to use when evaluating an emacs-lisp source block.")
+
+(defun org-babel-expand-body:emacs-lisp (body params &optional processed-params)
+  (let* ((processed-params (or processed-params (org-babel-process-params params)))
+         (vars (second processed-params))
+         (processed-params (org-babel-process-params params))
+         (result-params (third processed-params))
+         (print-level nil) (print-length nil)
+         (body (concat "(let ("
+                       (mapconcat
+                        (lambda (var) (format "%S" (print `(,(car var) ',(cdr var)))))
+                        vars "\n      ")
+                       ")\n"
+                       (if (or (member "code" result-params)
+                               (member "pp" result-params))
+                           (concat "(pp " body ")") body) ")")))
+    body))
+
 (defun org-babel-execute:emacs-lisp (body params)
   "Execute a block of emacs-lisp code with org-babel."
   (message "executing emacs-lisp code block...")
   (save-window-excursion
-    (let* ((processed-params (org-babel-process-params params))
-           (result-params (third processed-params))
-           (vars (second processed-params))
-           (print-level nil) (print-length nil))
-      (eval `(let ,(mapcar (lambda (var) `(,(car var) ',(cdr var)))
-                           vars)
-	       ,(read (concat "(progn "
-			      (if (or (member "code" result-params)
-				      (member "pp" result-params))
-				  (concat "(pp " body ")") body)
-			      ")")))))))
+    (let ((processed-params (org-babel-process-params params)))
+      (org-babel-reassemble-table
+       (eval (read (org-babel-expand-body:emacs-lisp body params)))
+       (org-babel-pick-name (nth 4 processed-params) (cdr (assoc :colnames params)))
+       (org-babel-pick-name (nth 5 processed-params) (cdr (assoc :rownames params)))))))
 
 (provide 'org-babel-emacs-lisp)
 ;;; org-babel-emacs-lisp.el ends here

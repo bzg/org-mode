@@ -36,25 +36,32 @@
 
 (add-to-list 'org-babel-tangle-langs '("python" "py" "#!/usr/bin/env python"))
 
+(defun org-babel-expand-body:python (body params &optional processed-params)
+  (concat
+   (mapconcat ;; define any variables
+    (lambda (pair)
+      (format "%s=%s"
+              (car pair)
+              (org-babel-python-var-to-python (cdr pair))))
+    (second (or processed-params (org-babel-process-params params))) "\n")
+   "\n" (org-babel-trim body) "\n"))
+
 (defun org-babel-execute:python (body params)
   "Execute a block of Python code with org-babel.  This function is
 called by `org-babel-execute-src-block'."
   (message "executing Python source code block")
   (let* ((processed-params (org-babel-process-params params))
          (session (org-babel-python-initiate-session (first processed-params)))
-         (vars (second processed-params))
          (result-params (third processed-params))
          (result-type (fourth processed-params))
-         (full-body (concat
-                     (mapconcat ;; define any variables
-                      (lambda (pair)
-                        (format "%s=%s"
-                                (car pair)
-                                (org-babel-python-var-to-python (cdr pair))))
-                      vars "\n") "\n" (org-babel-trim body) "\n")) ;; then the source block body
-         
+         (full-body (org-babel-expand-body:python
+                     body params processed-params)) ;; then the source block body
          (result (org-babel-python-evaluate session full-body result-type)))
-    (or (cdr (assoc :file params)) result)))
+    (or (cdr (assoc :file params))
+        (org-babel-reassemble-table
+         result
+         (org-babel-pick-name (nth 4 processed-params) (cdr (assoc :colnames params)))
+         (org-babel-pick-name (nth 5 processed-params) (cdr (assoc :rownames params)))))))
 
 (defun org-babel-prep-session:python (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."

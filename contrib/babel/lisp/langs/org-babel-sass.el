@@ -48,6 +48,8 @@
 
 (add-to-list 'org-babel-tangle-langs '("sass" "sass"))
 
+(defun org-babel-expand-body:sass (body params &optional processed-params) body)
+
 (defun org-babel-execute:sass (body params)
   "Execute a block of Sass code with org-babel.  This function is
 called by `org-babel-execute-src-block'."
@@ -58,7 +60,8 @@ called by `org-babel-execute-src-block'."
          (cmdline (cdr (assoc :cmdline params)))
          (in-file (make-temp-file "org-babel-sass-in"))
          (cmd (concat "sass " (or cmdline "") in-file " " out-file)))
-    (with-temp-file in-file (insert body)) (shell-command cmd)
+    (with-temp-file in-file
+      (insert (org-babel-expand-body:sass body params))) (shell-command cmd)
     (or file (with-temp-buffer (insert-file-contents out-file) (buffer-string)))))
 
 (defun org-babel-prep-session:sass (session params)

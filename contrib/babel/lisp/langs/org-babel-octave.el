@@ -41,6 +41,18 @@
 (defvar org-babel-octave-shell-command "octave -q"
   "Shell command to use to run octave as an external process.")
 
+(defun org-babel-expand-body:octave (org-babel-process-params params)
+  (let ((vars (second (or processed-params (org-babel-process-params params)))))
+    (concat
+     ;; prepend code to define all arguments passed to the code block
+     ;; (may not be appropriate for all languages)
+     (mapconcat
+      (lambda (pair)
+        (format "%s=%s"
+                (car pair)
+                (org-babel-octave-var-to-octave (cdr pair))))
+      vars "\n") "\n" body "\n")))
+
 (defun org-babel-execute:octave (body params &optional matlabp)
   "Execute a block of octave code with org-babel."
   (message (format "executing %s source code block" (if matlabp "matlab" "octave")))
@@ -52,17 +64,13 @@
          (result-params (third processed-params))
          (result-type (fourth processed-params))
 	 (out-file (cdr (assoc :file params)))
-	 (augmented-body (concat
-			  ;; prepend code to define all arguments passed to the code block
-			  ;; (may not be appropriate for all languages)
-			  (mapconcat
-			   (lambda (pair)
-			     (format "%s=%s"
-				     (car pair)
-				     (org-babel-octave-var-to-octave (cdr pair))))
-			   vars "\n") "\n" body "\n"))
+	 (augmented-body (org-babel-expand-body:octave body params processed-params))
 	 (result (org-babel-octave-evaluate session augmented-body result-type matlabp)))
-    (or out-file result)))
+    (or out-file
+        (org-babel-reassemble-table
+         result
+         (org-babel-pick-name (nth 4 processed-params) (cdr (assoc :colnames params)))
+         (org-babel-pick-name (nth 5 processed-params) (cdr (assoc :rownames params)))))))
 
 (defun org-babel-octave-var-to-octave (var)
   "Convert an emacs-lisp variable into an octave variable.

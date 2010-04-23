@@ -48,22 +48,29 @@
 (defvar org-babel-ocaml-eoe-indicator "\"org-babel-ocaml-eoe\";;")
 (defvar org-babel-ocaml-eoe-output "org-babel-ocaml-eoe")
 
+(defun org-babel-expand-body:ocaml (body params &optional processed-params)
+  (let ((vars (second (or processed-params (org-babel-process-params params)))))
+    (concat
+     (mapconcat
+      (lambda (pair) (format "let %s = %s;" (car pair) (cdr pair)))
+      vars "\n") "\n" body "\n")))
+
 (defun org-babel-execute:ocaml (body params)
   "Execute a block of Ocaml code with org-babel."
   (message "executing ocaml source code block")
   (let* ((processed-params (org-babel-process-params params))
          (vars (second processed-params))
-         (full-body (concat
-                     (mapconcat
-                      (lambda (pair) (format "let %s = %s;" (car pair) (cdr pair)))
-                      vars "\n") "\n" body "\n"))
+         (full-body (org-babel-expand-body:ocaml body params processed-params))
          (session (org-babel-prep-session:ocaml session params))
          (raw (org-babel-comint-with-output session org-babel-ocaml-eoe-output t
                 (insert (concat (org-babel-chomp full-body) " ;;"))
                 (comint-send-input nil t)
                 (insert org-babel-ocaml-eoe-indicator)
                 (comint-send-input nil t))))
-    (org-babel-ocaml-parse-output (org-babel-trim (car raw)))))
+    (org-babel-reassemble-table
+     (org-babel-ocaml-parse-output (org-babel-trim (car raw)))
+     (org-babel-pick-name (nth 4 processed-params) (cdr (assoc :colnames params)))
+     (org-babel-pick-name (nth 5 processed-params) (cdr (assoc :rownames params))))))
 
 (defun org-babel-prep-session:ocaml (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."

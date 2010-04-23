@@ -36,9 +36,17 @@
 then run `org-babel-execute-src-block'."
   (interactive)
   (let ((info (org-babel-get-src-block-info)))
-    (if info (progn (org-babel-execute-src-block current-prefix-arg info) t) nil)))
+    (if info
+        (progn (org-babel-execute-src-block current-prefix-arg info) t) nil)))
 
 (add-hook 'org-ctrl-c-ctrl-c-hook 'org-babel-execute-src-block-maybe)
+
+(defun org-babel-expand-src-block-maybe ()
+  "Detect if this is context for a org-babel src-block and if so
+then run `org-babel-expand-src-block'."
+  (interactive)
+  (let ((info (org-babel-get-src-block-info)))
+    (if info (progn (org-babel-expand-src-block current-prefix-arg info) t) nil)))
 
 (defadvice org-edit-special (around org-babel-prep-session-for-edit activate)
   "Prepare the current source block's session according to it's
@@ -50,8 +58,9 @@ prefix argument from inside of a source-code block."
            (lang (first info))
            (params (third info))
            (session (cdr (assoc :session params))))
-      (when (and info session) ;; if we are in a source-code block which has a session
-        (funcall (intern (concat "org-babel-prep-session:" lang)) session params))))
+      (when (and info session) ;; we are in a source-code block with a session
+        (funcall
+         (intern (concat "org-babel-prep-session:" lang)) session params))))
   ad-do-it)
 
 (defadvice org-open-at-point (around org-babel-open-at-point activate)
@@ -86,7 +95,8 @@ individual languages may define their own language specific
 header arguments as well.")
 
 (defvar org-babel-default-header-args
-  '((:session . "none") (:results . "replace") (:exports . "code") (:cache . "no") (:noweb . "no"))
+  '((:session . "none") (:results . "replace") (:exports . "code")
+    (:cache . "no") (:noweb . "no") (:hlines . "no"))
   "Default arguments to use when evaluating a source block.")
 
 (defvar org-babel-default-inline-header-args
@@ -133,13 +143,14 @@ can not be resolved.")
 
 (defun org-babel-set-interpreters (var value)
   (set-default var value)
-  (setq org-babel-src-block-regexp
-	(concat "^[ \t]*#\\+begin_src[ \t]+\\("       ;; (1)   lang
-		(mapconcat 'regexp-quote value "\\|")
-		"\\)[ \t]*"
-		"\\([^\":\n]*\"[^\"\n*]*\"[^\":\n]*\\|[^\":\n]*\\)" ;; (2)   switches
-		"\\([^\n]*\\)\n"                      ;; (3)   header arguments
-                "\\([^\000]+?\n\\)[ \t]*#\\+end_src"));; (4)   body
+  (setq
+   org-babel-src-block-regexp
+   (concat "^[ \t]*#\\+begin_src[ \t]+\\("       ;; (1)   lang
+           (mapconcat 'regexp-quote value "\\|")
+           "\\)[ \t]*"
+           "\\([^\":\n]*\"[^\"\n*]*\"[^\":\n]*\\|[^\":\n]*\\)" ;; (2)   switches
+           "\\([^\n]*\\)\n"                      ;; (3)   header arguments
+           "\\([^\000]+?\n\\)[ \t]*#\\+end_src"));; (4)   body
   (setq org-babel-inline-src-block-regexp
 	(concat "[ \f\t\n\r\v]\\(src_"                ;; (1)   replacement target
 		"\\("                                 ;; (2)   lang
@@ -206,14 +217,15 @@ block."
                        (sort (org-babel-merge-params (third info) params)
                              (lambda (el1 el2) (string< (symbol-name (car el1))
                                                    (symbol-name (car el2)))))))
-         (new-hash (if (and (cdr (assoc :cache params))
-                            (string= "yes" (cdr (assoc :cache params)))) (org-babel-sha1-hash info)))
+         (new-hash
+          (if (and (cdr (assoc :cache params))
+                   (string= "yes" (cdr (assoc :cache params))))
+              (org-babel-sha1-hash info)))
          (old-hash (org-babel-result-hash info))
          (body (setf (second info)
 		     (if (and (cdr (assoc :noweb params))
                               (string= "yes" (cdr (assoc :noweb params))))
-			 (org-babel-expand-noweb-references info) (second info))))
-
+                         (org-babel-expand-noweb-references info) (second info))))
          (result-params (split-string (or (cdr (assoc :results params)) "")))
          (result-type (cond ((member "output" result-params) 'output)
 			    ((member "value" result-params) 'value)
@@ -228,7 +240,7 @@ block."
          result)
     (unwind-protect
         (flet ((call-process-region (&rest args)
-                                    (apply 'org-babel-tramp-handle-call-process-region args)))
+                 (apply 'org-babel-tramp-handle-call-process-region args)))
           (unless (member lang org-babel-interpreters)
             (error "Language is not in `org-babel-interpreters': %s" lang))
           (if (and (not arg) new-hash (equal new-hash old-hash))
@@ -236,7 +248,8 @@ block."
                 (goto-char (org-babel-where-is-src-block-result nil info))
                 (move-end-of-line 1) (forward-char 1)
                 (setq result (org-babel-read-result))
-                (message (replace-regexp-in-string "%" "%%" (format "%S" result))) result)
+                (message (replace-regexp-in-string "%" "%%"
+                                                   (format "%S" result))) result)
             (setq result (funcall cmd body params))
             (if (eq result-type 'value)
                 (setq result (if (and (or (member "vector" result-params)
@@ -248,6 +261,33 @@ block."
             (run-hooks 'org-babel-after-execute-hook)
             result))
       (setq call-process-region 'call-process-region-original))))
+
+(defun org-babel-expand-body:generic (body params &optional processed-params)
+  "Expand a block of code with org-babel according to it's header
+arguments.  This generic implementation of body expansion is
+called for languages which have not defined their own specific
+org-babel-expand-body:lang function." body)
+
+(defun org-babel-expand-src-block (&optional arg info params)
+  "Expand the current source code block according to it's header
+arguments, and pop open the results in a preview buffer."
+  (interactive)
+  ;; (message "supplied params=%S" params) ;; debugging
+  (let* ((info (or info (org-babel-get-src-block-info)))
+         (lang (first info))
+	 (params (setf (third info)
+                       (sort (org-babel-merge-params (third info) params)
+                             (lambda (el1 el2) (string< (symbol-name (car el1))
+                                                   (symbol-name (car el2)))))))
+         (body (setf (second info)
+		     (if (and (cdr (assoc :noweb params))
+                              (string= "yes" (cdr (assoc :noweb params))))
+			 (org-babel-expand-noweb-references info) (second info))))
+         (cmd (intern (concat "org-babel-expand-body:" lang)))
+         (expanded (funcall (if (fboundp cmd) cmd 'org-babel-expand-body:generic)
+                            body params)))
+    (org-edit-src-code
+     nil expanded (concat "*Org-Babel Preview " (buffer-name) "[ " lang " ]*"))))
 
 (defun org-babel-load-in-session (&optional arg info)
   "Load the body of the current source-code block.  Evaluate the
@@ -262,7 +302,9 @@ session.  After loading the body this pops open the session."
     (unless (member lang org-babel-interpreters)
       (error "Language is not in `org-babel-interpreters': %s" lang))
     ;; if called with a prefix argument, then process header arguments
-    (pop-to-buffer (funcall (intern (concat "org-babel-load-session:" lang)) session body params))
+    (pop-to-buffer
+     (funcall (intern (concat "org-babel-load-session:" lang))
+              session body params))
     (move-end-of-line 1)))
 
 (defun org-babel-switch-to-session (&optional arg info)
@@ -282,11 +324,15 @@ of the source block to the kill ring."
     (unless (member lang org-babel-interpreters)
       (error "Language is not in `org-babel-interpreters': %s" lang))
     ;; copy body to the kill ring
-    (with-temp-buffer (insert (org-babel-trim body)) (copy-region-as-kill (point-min) (point-max)))
+    (with-temp-buffer (insert (org-babel-trim body))
+                      (copy-region-as-kill (point-min) (point-max)))
     ;; if called with a prefix argument, then process header arguments
-    (if arg (funcall (intern (concat "org-babel-prep-session:" lang)) session params))
+    (when arg
+      (funcall (intern (concat "org-babel-prep-session:" lang)) session params))
     ;; just to the session using pop-to-buffer
-    (pop-to-buffer (funcall (intern (format "org-babel-%s-initiate-session" lang)) session params))
+    (pop-to-buffer
+     (funcall (intern (format "org-babel-%s-initiate-session" lang))
+              session params))
     (move-end-of-line 1)))
 
 (defalias 'org-babel-pop-to-session 'org-babel-switch-to-session)
@@ -355,18 +401,22 @@ added to the header-arguments-alist."
 	  (goto-char head)
 	  (setq info (org-babel-parse-src-block-match))
 	  (forward-line -1)
-	  (when (looking-at (concat org-babel-source-name-regexp
-                                    "\\([^ ()\f\t\n\r\v]+\\)\\(\(\\(.*\\)\)\\|\\)"))
-	    (setq info (append info (list (org-babel-clean-text-properties (match-string 2)))))
+	  (when (looking-at
+                 (concat org-babel-source-name-regexp
+                         "\\([^ ()\f\t\n\r\v]+\\)\\(\(\\(.*\\)\)\\|\\)"))
+	    (setq info (append info (list (org-babel-clean-text-properties
+                                           (match-string 2)))))
 	    ;; Note that e.g. "name()" and "name( )" result in ((:var . "")).
 	    ;; We maintain that behaviour, and the resulting non-nil sixth
-	    ;; element is relied upon in org-babel-exp-code to detect a functional-style
-	    ;; block in those cases. However, "name" without any
-	    ;; parentheses would result in the same thing, so we
-	    ;; explicitly avoid that.
+	    ;; element is relied upon in org-babel-exp-code to detect
+	    ;; a functional-style block in those cases. However,
+	    ;; "name" without any parentheses would result in the same
+	    ;; thing, so we explicitly avoid that.
 	    (if (setq args (match-string 4))
-		(setq info (append info (list (mapcar (lambda (ref) (cons :var ref))
-						      (org-babel-ref-split-args args))))))
+                (setq info
+                      (append info (list
+                                    (mapcar (lambda (ref) (cons :var ref))
+                                            (org-babel-ref-split-args args))))))
 	    (unless header-vars-only
 	      (setf (third info)
 		    (org-babel-merge-params (sixth info) (third info)))))
@@ -517,7 +567,7 @@ with C-c C-c."
          (goto-char (match-beginning 0))
          (save-match-data ,@body)
          (goto-char (match-end 0))))
-     (unless visited-p (kill-buffer (file-name-nondirectory file)))))
+     (unless visited-p (kill-buffer (file-name-nondirectory ,file)))))
 
 (defun org-babel-params-from-properties ()
   "Return an association list of any source block params which
@@ -543,7 +593,7 @@ may be specified in the properties of the current outline entry."
 	 (preserve-indentation (or org-src-preserve-indentation
 				   (string-match "-i\\>" switches))))
     (list lang
-          ;; get src block body removing properties, protective commas, and indentation
+          ;; get block body less properties, protective commas, and indentation
           (with-temp-buffer
             (save-match-data
               (insert (org-babel-strip-protective-commas body))
@@ -553,19 +603,22 @@ may be specified in the properties of the current outline entry."
 	   org-babel-default-header-args
            (org-babel-params-from-properties)
 	   (if (boundp lang-headers) (eval lang-headers) nil)
-	   (org-babel-parse-header-arguments (org-babel-clean-text-properties (or (match-string 3) ""))))
+	   (org-babel-parse-header-arguments
+            (org-babel-clean-text-properties (or (match-string 3) ""))))
 	  switches)))
 
 (defun org-babel-parse-inline-src-block-match ()
   (let* ((lang (org-babel-clean-text-properties (match-string 2)))
          (lang-headers (intern (concat "org-babel-default-header-args:" lang))))
     (list lang
-          (org-babel-strip-protective-commas (org-babel-clean-text-properties (match-string 5)))
+          (org-babel-strip-protective-commas
+           (org-babel-clean-text-properties (match-string 5)))
           (org-babel-merge-params
            org-babel-default-inline-header-args
            (org-babel-params-from-properties)
            (if (boundp lang-headers) (eval lang-headers) nil)
-           (org-babel-parse-header-arguments (org-babel-clean-text-properties (or (match-string 4) "")))))))
+           (org-babel-parse-header-arguments
+            (org-babel-clean-text-properties (or (match-string 4) "")))))))
 
 (defun org-babel-parse-header-arguments (arg-string)
   "Parse a string of header arguments returning an alist."
@@ -573,24 +626,125 @@ may be specified in the properties of the current outline entry."
       (delq nil
 	    (mapcar
 	     (lambda (arg)
-	       (if (string-match "\\([^ \f\t\n\r\v]+\\)[ \f\t\n\r\v]+\\([^ \f\t\n\r\v]+.*\\)" arg)
+	       (if (string-match
+                    "\\([^ \f\t\n\r\v]+\\)[ \f\t\n\r\v]+\\([^ \f\t\n\r\v]+.*\\)"
+                    arg)
 		   (cons (intern (concat ":" (match-string 1 arg)))
                          (let ((raw (org-babel-chomp (match-string 2 arg))))
-                           (if (org-babel-number-p raw) raw (org-babel-read raw))))
+                           (if (org-babel-number-p raw)
+                               raw (org-babel-read raw))))
 		 (cons (intern (concat ":" arg)) nil)))
 	     (split-string (concat " " arg-string) "[ \f\t\n\r\v]+:" t)))))
 
 (defun org-babel-process-params (params)
   "Parse params and resolve references.
 
-Return a list (session vars result-params result-type)."
+Return a list (session vars result-params result-type colnames rownames)."
   (let* ((session (cdr (assoc :session params)))
-	 (vars (org-babel-ref-variables params))
+         (vars-and-names (org-babel-disassemble-tables
+                          (org-babel-ref-variables params)
+                          (cdr (assoc :hlines params))
+                          (cdr (assoc :colnames params))
+                          (cdr (assoc :rownames params))))
+         (vars     (car   vars-and-names))
+         (colnames (cadr  vars-and-names))
+         (rownames (caddr vars-and-names))
 	 (result-params (split-string (or (cdr (assoc :results params)) "")))
 	 (result-type (cond ((member "output" result-params) 'output)
 			    ((member "value" result-params) 'value)
 			    (t 'value))))
-    (list session vars result-params result-type)))
+    (list session vars result-params result-type colnames rownames)))
+
+;; row and column names
+(defun org-babel-del-hlines (table)
+  "Remove all 'hlines from TABLE."
+  (remove 'hline table))
+
+(defun org-babel-get-colnames (table)
+  "Return a cons cell, the `car' of which contains the TABLE
+        less colnames, and the `cdr' of which contains a list of the
+        column names"
+  (if (equal 'hline (second table))
+      (cons (cddr table) (car table))
+    (list table)))
+
+(defun org-babel-get-rownames (table)
+  "Return a cons cell, the `car' of which contains the TABLE less
+     colnames, and the `cdr' of which contains a list of the column
+     names.  Note: this function removes any hlines in TABLE"
+  (flet ((trans (table) (apply #'mapcar* #'list table)))
+    (let* ((width (apply 'max (mapcar (lambda (el) (if (listp el) (length el) 0)) table)))
+           (table (trans (mapcar (lambda (row)
+                                   (if (not (equal row 'hline))
+                                       row
+                                     (setq row '())
+                                     (dotimes (n width) (setq row (cons 'hline row)))
+                                     row))
+                                 table))))
+      (cons (mapcar (lambda (row) (if (equal (car row) 'hline) 'hline row))
+                    (trans (cdr table)))
+            (remove 'hline (car table))))))
+
+(defun org-babel-put-colnames (table colnames)
+  "Add COLNAMES to TABLE if they exist."
+  (if colnames (apply 'list colnames 'hline table) table))
+
+(defun org-babel-put-rownames (table rownames)
+  "Add ROWNAMES to TABLE if they exist."
+  (if rownames
+      (mapcar (lambda (row)
+                (if (listp row)
+                    (cons (or (pop rownames) "") row)
+                  row)) table)
+    table))
+
+(defun org-babel-pick-name (names selector)
+  "Select one out of an alist of row or column names."
+  (when names
+    (if (and selector (symbolp selector) (not (equal t selector)))
+        (cdr (assoc selector names))
+      (if (integerp selector)
+          (nth (- selector 1) names)
+        (cdr (car (last names)))))))
+
+(defun org-babel-disassemble-tables (vars hlines colnames rownames)
+  "Process the variables in VARS according to the HLINES,
+ROWNAMES and COLNAMES header arguments.  Return a list consisting
+of the vars, cnames and rnames."
+  (let (cnames rnames)
+    (list
+     (mapcar
+      (lambda (var)
+        (when (listp (cdr var))
+          (when (and (not (equal colnames "no"))
+                     (or colnames (and (equal (second (cdr var)) 'hline)
+                                       (not (member 'hline (cddr (cdr var)))))))
+            (let ((both (org-babel-get-colnames (cdr var))))
+              (setq cnames (cons (cons (car var) (cdr both))
+                                 cnames))
+              (setq var (cons (car var) (car both)))))
+          (when (and rownames (not (equal rownames "no")))
+            (let ((both (org-babel-get-rownames (cdr var))))
+              (setq rnames (cons (cons (car var) (cdr both))
+                                 rnames))
+              (setq var (cons (car var) (car both)))))
+          (when (and hlines (not (equal hlines "yes")))
+            (setq var (cons (car var) (org-babel-del-hlines (cdr var))))))
+        var)
+      vars)
+     cnames rnames)))
+
+(defun org-babel-reassemble-table (table colnames rownames)
+  "Given a TABLE and set of COLNAMES and ROWNAMES add the names
+to the table for reinsertion to org-mode."
+  (if (listp table)
+      ((lambda (table)
+         (if (and colnames (listp (car table)) (= (length (car table))
+                                                  (length colnames)))
+             (org-babel-put-colnames table colnames) table))
+       (if (and rownames (= (length table) (length rownames)))
+           (org-babel-put-rownames table rownames) table))
+    table))
 
 (defun org-babel-where-is-src-block-head ()
   "Return the point at the beginning of the current source
@@ -644,7 +798,8 @@ buffer or nil if no such result exists."
   (save-excursion
     (goto-char (point-min))
     (when (re-search-forward
-           (concat org-babel-result-regexp "[ \t]" (regexp-quote name) "[ \t\n\f\v\r]") nil t)
+           (concat org-babel-result-regexp
+                   "[ \t]" (regexp-quote name) "[ \t\n\f\v\r]") nil t)
       (move-beginning-of-line 0) (point))))
 
 (defun org-babel-where-is-src-block-result (&optional insert info hash)
@@ -668,13 +823,18 @@ following the source block."
 			       (progn ;; unnamed results line already exists
 				 (re-search-forward "[^ \f\t\n\r\v]" nil t)
 				 (move-beginning-of-line 1)
-                                 (looking-at (concat org-babel-result-regexp "\n"))))
-			  ;; or (with optional insert) back up and make one ourselves
+                                 (looking-at
+                                  (concat org-babel-result-regexp "\n"))))
+			  ;; or (with optional insert) back up and
+			  ;; make one ourselves
                           (when insert
                             (goto-char end)
-			    (if (looking-at "[\n\r]") (forward-char 1) (insert "\n"))
-                            (insert (concat "#+results" (if hash (concat "["hash"]"))
-                                            ":"(if name (concat " " name)) "\n"))
+			    (if (looking-at "[\n\r]")
+                                (forward-char 1) (insert "\n"))
+                            (insert (concat "#+results"
+                                            (when hash (concat "["hash"]"))
+                                            ":"
+                                            (when name (concat " " name)) "\n"))
                             (move-beginning-of-line 0)
                             (if hash (org-babel-hide-hash)) t)))
                (point))))))
@@ -689,12 +849,14 @@ following the source block."
      ((looking-at ": ")
       (setq result-string
 	    (org-babel-trim
-	     (mapconcat (lambda (line) (if (and (> (length line) 1)
-						(string= ": " (substring line 0 2)))
-					   (substring line 2)
-					 line))
+	     (mapconcat (lambda (line)
+                          (if (and (> (length line) 1)
+                                   (string= ": " (substring line 0 2)))
+                              (substring line 2)
+                            line))
 			(split-string
-			 (buffer-substring (point) (org-babel-result-end)) "[\r\n]+")
+			 (buffer-substring
+                          (point) (org-babel-result-end)) "[\r\n]+")
 			"\n")))
       (or (org-babel-number-p result-string) result-string))
      ((looking-at org-babel-result-regexp)
@@ -776,7 +938,8 @@ code ---- the results are extracted in the syntax of the source
         (setq result (concat result "\n")))
       (save-excursion
 	(let ((existing-result (org-babel-where-is-src-block-result t info hash))
-	      (results-switches (cdr (assoc :results_switches (third info)))) beg)
+	      (results-switches
+               (cdr (assoc :results_switches (third info)))) beg)
 	  (when existing-result (goto-char existing-result) (forward-line 1))
 	  (setq results-switches
                 (if results-switches (concat " " results-switches) ""))
@@ -794,11 +957,14 @@ code ---- the results are extracted in the syntax of the source
 	   ((member "file" result-params)
 	    (insert result))
 	   ((member "html" result-params)
-	    (insert (format "#+BEGIN_HTML%s\n%s#+END_HTML\n" results-switches result)))
+	    (insert (format "#+BEGIN_HTML%s\n%s#+END_HTML\n"
+                            results-switches result)))
 	   ((member "latex" result-params)
-	    (insert (format "#+BEGIN_LaTeX%s\n%s#+END_LaTeX\n" results-switches result)))
+	    (insert (format "#+BEGIN_LaTeX%s\n%s#+END_LaTeX\n"
+                            results-switches result)))
 	   ((member "code" result-params)
-	    (insert (format "#+BEGIN_SRC %s%s\n%s#+END_SRC\n" lang results-switches result)))
+	    (insert (format "#+BEGIN_SRC %s%s\n%s#+END_SRC\n"
+                            lang results-switches result)))
 	   ((or (member "raw" result-params) (member "org" result-params))
 	    (save-excursion (insert result)) (if (org-at-table-p) (org-cycle)))
 	   (t
@@ -852,7 +1018,8 @@ directory then expand relative links."
    (if (and default-directory
             buffer-file-name
             (not (string= (expand-file-name default-directory)
-                          (expand-file-name (file-name-directory buffer-file-name)))))
+                          (expand-file-name
+                           (file-name-directory buffer-file-name)))))
        (expand-file-name result default-directory)
      result)))
 
@@ -863,7 +1030,8 @@ directory then expand relative links."
 		      (line-number-at-pos beg)))))
     (save-excursion
       (cond ((= size 0)
-	     (error "This should be impossible: a newline was appended to result if missing"))
+	     (error (concat "This should be impossible:"
+                            "a newline was appended to result if missing")))
 	    ((< size org-babel-min-lines-for-block-output)
 	     (goto-char beg)
 	     (dotimes (n size)
@@ -882,66 +1050,85 @@ elements of PLISTS override the values of previous element.  This
 takes into account some special considerations for certain
 parameters when merging lists."
   (let ((results-exclusive-groups
-	 '(("file" "vector" "table" "scalar" "raw" "org" "html" "latex" "code" "pp")
+	 '(("file" "vector" "table" "scalar" "raw" "org"
+            "html" "latex" "code" "pp")
 	   ("replace" "silent")
 	   ("output" "value")))
 	(exports-exclusive-groups
 	 '(("code" "results" "both" "none")))
 	params results exports tangle noweb cache vars var ref shebang comments)
     (flet ((e-merge (exclusive-groups &rest result-params)
-                    ;; maintain exclusivity of mutually exclusive parameters
-                    (let (output)
-                      (mapc (lambda (new-params)
-                              (mapc (lambda (new-param)
-                                      (mapc (lambda (exclusive-group)
-                                              (when (member new-param exclusive-group)
-                                                (mapcar (lambda (excluded-param)
-                                                          (setq output (delete excluded-param output)))
-                                                        exclusive-group)))
-                                            exclusive-groups)
-                                      (setq output (org-uniquify (cons new-param output))))
-                                    new-params))
-                            result-params)
-                      output)))
+             ;; maintain exclusivity of mutually exclusive parameters
+             (let (output)
+               (mapc (lambda (new-params)
+                       (mapc (lambda (new-param)
+                               (mapc (lambda (exclusive-group)
+                                       (when (member new-param exclusive-group)
+                                         (mapcar (lambda (excluded-param)
+                                                   (setq output
+                                                         (delete
+                                                          excluded-param
+                                                          output)))
+                                                 exclusive-group)))
+                                     exclusive-groups)
+                               (setq output (org-uniquify
+                                             (cons new-param output))))
+                             new-params))
+                     result-params)
+               output)))
       (mapc (lambda (plist)
               (mapc (lambda (pair)
                       (case (car pair)
                         (:var
                          ;; we want only one specification per variable
-                         (when (string-match "^\\([^= \f\t\n\r\v]+\\)[ \t]*=[ \t]*\\([^\f\n\r\v]+\\)$" (cdr pair))
+                         (when (string-match
+                                (concat "^\\([^= \f\t\n\r\v]+\\)[ \t]*="
+                                        "[ \t]*\\([^\f\n\r\v]+\\)$") (cdr pair))
                            ;; TODO: When is this not true?
                            (setq var (intern (match-string 1 (cdr pair)))
                                  ref (match-string 2 (cdr pair))
-                                 vars (cons (cons var ref) (assq-delete-all var vars)))))
+                                 vars (cons (cons var ref)
+                                            (assq-delete-all var vars)))))
                         (:results
                          (setq results
-			       (e-merge results-exclusive-groups results (split-string (cdr pair)))))
+			       (e-merge results-exclusive-groups
+                                        results (split-string (cdr pair)))))
 			(:file
 			 (when (cdr pair)
-			   (setq results (e-merge results-exclusive-groups results '("file")))
+			   (setq results (e-merge results-exclusive-groups
+                                                  results '("file")))
 			   (unless (or (member "both" exports)
                                        (member "none" exports)
                                        (member "code" exports))
-			     (setq exports (e-merge exports-exclusive-groups exports '("results"))))
-			   (setq params (cons pair (assq-delete-all (car pair) params)))))
+			     (setq exports (e-merge exports-exclusive-groups
+                                                    exports '("results"))))
+			   (setq params
+                                 (cons pair
+                                       (assq-delete-all (car pair) params)))))
                         (:exports
-                         (setq exports (e-merge exports-exclusive-groups
-                                                exports (split-string (cdr pair)))))
+                         (setq exports
+                               (e-merge exports-exclusive-groups
+                                        exports (split-string (cdr pair)))))
                         (:tangle ;; take the latest -- always overwrite
                          (setq tangle (or (list (cdr pair)) tangle)))
                         (:noweb
-                         (setq noweb (e-merge '(("yes" "no"))
-                                              noweb (split-string (or (cdr pair) "")))))
+                         (setq noweb
+                               (e-merge '(("yes" "no")) noweb
+                                        (split-string (or (cdr pair) "")))))
                         (:cache
-                         (setq cache (e-merge '(("yes" "no"))
-                                              cache (split-string (or (cdr pair) "")))))
+                         (setq cache
+                               (e-merge '(("yes" "no")) cache
+                                        (split-string (or (cdr pair) "")))))
                         (:shebang ;; take the latest -- always overwrite
                          (setq shebang (or (list (cdr pair)) shebang)))
                         (:comments
-                         (setq comments (e-merge '(("yes" "no"))
-                                                 comments (split-string (or (cdr pair) "")))))
+                         (setq comments
+                               (e-merge '(("yes" "no")) comments
+                                        (split-string (or (cdr pair) "")))))
                         (t ;; replace: this covers e.g. :session
-                         (setq params (cons pair (assq-delete-all (car pair) params))))))
+                         (setq params
+                               (cons pair
+                                     (assq-delete-all (car pair) params))))))
                     plist))
             plists))
     (setq vars (mapcar (lambda (pair) (format "%s=%s" (car pair) (cdr pair))) vars))
@@ -951,9 +1138,12 @@ parameters when merging lists."
                 (cons (cons :cache (mapconcat 'identity cache " "))
                       (cons (cons :noweb (mapconcat 'identity noweb " "))
                             (cons (cons :tangle (mapconcat 'identity tangle " "))
-                                  (cons (cons :exports (mapconcat 'identity exports " "))
-                                        (cons (cons :results (mapconcat 'identity results " "))
-                                              params)))))))))
+                                  (cons (cons :exports
+                                              (mapconcat 'identity exports " "))
+                                        (cons
+                                         (cons :results
+                                               (mapconcat 'identity results " "))
+                                         params)))))))))
 
 (defun org-babel-expand-noweb-references (&optional info parent-buffer)
   "This function expands Noweb style references in the body of
@@ -999,9 +1189,10 @@ block but are passed literally to the \"example-block\"."
           (save-match-data (setf source-name (match-string 1)))
           (save-match-data (setq evaluate (string-match "\(.*\)" source-name)))
           (save-match-data
-            (setq prefix (buffer-substring (match-beginning 0)
-                                           (save-excursion
-                                             (move-beginning-of-line 1) (point)))))
+            (setq prefix
+                  (buffer-substring (match-beginning 0)
+                                    (save-excursion
+                                      (move-beginning-of-line 1) (point)))))
           ;; add interval to new-body (removing noweb reference)
           (goto-char (match-beginning 0))
           (nb-add (buffer-substring index (point)))
@@ -1020,13 +1211,15 @@ block but are passed literally to the \"example-block\"."
                           (if point
                               (save-excursion
                                 (goto-char point)
-                                (org-babel-trim (org-babel-expand-noweb-references
-                                                 (org-babel-get-src-block-info))))
+                                (org-babel-trim
+                                 (org-babel-expand-noweb-references
+                                  (org-babel-get-src-block-info))))
                             ;; optionally raise an error if named
                             ;; source-block doesn't exist
                             (if (member lang org-babel-noweb-error-langs)
                                 (error
-                                 "<<%s>> could not be resolved (see `org-babel-noweb-error-langs')"
+                                 (concat "<<%s>> could not be resolved "
+                                         "(see `org-babel-noweb-error-langs')")
                                  source-name)
                               "")))) "[\n\r]") (concat "\n" prefix)))))
         (nb-add (buffer-substring index (point-max)))))
@@ -1107,14 +1300,16 @@ the table is trivial, then return it as a scalar."
 STRING.  Default regexp used is \"[ \f\t\n\r\v]\" but can be
 overwritten by specifying a regexp as a second argument."
   (let ((regexp (or regexp "[ \f\t\n\r\v]")))
-    (while (and (> (length string) 0) (string-match regexp (substring string -1)))
+    (while (and (> (length string) 0)
+                (string-match regexp (substring string -1)))
       (setq string (substring string 0 -1)))
     string))
 
 (defun org-babel-trim (string &optional regexp)
   "Like `org-babel-chomp' only it runs on both the front and back of the string"
   (org-babel-chomp (org-babel-reverse-string
-                    (org-babel-chomp (org-babel-reverse-string string) regexp)) regexp))
+                    (org-babel-chomp (org-babel-reverse-string string) regexp))
+                   regexp))
 
 (defun org-babel-tramp-handle-call-process-region
   (start end program &optional delete buffer display &rest args)
@@ -1125,12 +1320,14 @@ Fixes a bug in `tramp-handle-call-process-region'."
 	(write-region start end tmpfile)
 	(when delete (delete-region start end))
 	(unwind-protect
-	    ;;	(apply 'call-process program tmpfile buffer display args) ;; bug in tramp
+	    ;;	(apply 'call-process program tmpfile buffer display args)
+            ;; bug in tramp
 	    (apply 'process-file program tmpfile buffer display args)
 	  (delete-file tmpfile)))
     ;; call-process-region-original is the original emacs definition. It
     ;; is in scope from the let binding in org-babel-execute-src-block
-    (apply call-process-region-original start end program delete buffer display args)))
+    (apply call-process-region-original
+           start end program delete buffer display args)))
 
 (defun org-babel-maybe-remote-file (file)
   (if (file-remote-p default-directory)
@@ -1151,12 +1348,13 @@ Normally display output (if any) in temp buffer `*Shell Command Output*';
 Prefix arg means replace the region with it.  Return the exit code of
 COMMAND.
 
-To specify a coding system for converting non-ASCII characters
-in the input and output to the shell command, use \\[universal-coding-system-argument]
-before this command.  By default, the input (from the current buffer)
-is encoded in the same coding system that will be used to save the file,
-`buffer-file-coding-system'.  If the output is going to replace the region,
-then it is decoded from that same coding system.
+To specify a coding system for converting non-ASCII characters in
+the input and output to the shell command, use
+\\[universal-coding-system-argument] before this command.  By
+default, the input (from the current buffer) is encoded in the
+same coding system that will be used to save the file,
+`buffer-file-coding-system'.  If the output is going to replace
+the region, then it is decoded from that same coding system.
 
 The noninteractive arguments are START, END, COMMAND,
 OUTPUT-BUFFER, REPLACE, ERROR-BUFFER, and DISPLAY-ERROR-BUFFER.
@@ -1322,7 +1520,6 @@ specifies the value of ERROR-BUFFER."
 		 (display-buffer (current-buffer)))))
       (delete-file error-file))
     exit-status))
-
 
 (provide 'org-babel)
 ;;; org-babel.el ends here

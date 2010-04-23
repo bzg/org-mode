@@ -40,23 +40,30 @@
   "Command used to invoke a shell.  This will be passed to
   `shell-command-on-region'")
 
+(defun org-babel-expand-body:sh (body params &optional processed-params)
+  (let ((vars (second (or processed-params (org-babel-process-params params))))
+        (sep (cdr (assoc :separator params))))
+    (concat
+   (mapconcat ;; define any variables
+    (lambda (pair)
+      (format "%s=%s"
+              (car pair)
+              (org-babel-sh-var-to-sh (cdr pair) sep)))
+    vars "\n") "\n" body "\n\n")))
+
 (defun org-babel-execute:sh (body params)
   "Execute a block of Shell commands with org-babel.  This
 function is called by `org-babel-execute-src-block'."
   (message "executing Shell source code block")
   (let* ((processed-params (org-babel-process-params params))
          (session (org-babel-sh-initiate-session (first processed-params)))
-         (vars (second processed-params))
          (result-type (fourth processed-params))
-         (sep (cdr (assoc :separator params)))
-         (full-body (concat
-                     (mapconcat ;; define any variables
-                      (lambda (pair)
-                        (format "%s=%s"
-                                (car pair)
-                                (org-babel-sh-var-to-sh (cdr pair) sep)))
-                      vars "\n") "\n" body "\n\n"))) ;; then the source block body
-    (org-babel-sh-evaluate session full-body result-type)))
+         (full-body (org-babel-expand-body:sh
+                     body params processed-params))) ;; then the source block body
+    (org-babel-reassemble-table
+     (org-babel-sh-evaluate session full-body result-type)
+     (org-babel-pick-name (nth 4 processed-params) (cdr (assoc :colnames params)))
+     (org-babel-pick-name (nth 5 processed-params) (cdr (assoc :rownames params))))))
 
 (defun org-babel-prep-session:sh (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."
