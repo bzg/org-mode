@@ -46,24 +46,32 @@
 
 (add-to-list 'org-babel-tangle-langs '("ruby" "rb" "#!/usr/bin/env ruby"))
 
+(defun org-babel-expand-body:ruby (body params &optional processed-params)
+  (let ((vars (second (or processed-params (org-babel-process-params params)))))
+    (concat
+     (mapconcat ;; define any variables
+      (lambda (pair)
+        (format "%s=%s"
+                (car pair)
+                (org-babel-ruby-var-to-ruby (cdr pair))))
+      vars "\n") "\n" body "\n")))
+
 (defun org-babel-execute:ruby (body params)
   "Execute a block of Ruby code with org-babel.  This function is
 called by `org-babel-execute-src-block'."
   (message "executing Ruby source code block")
   (let* ((processed-params (org-babel-process-params params))
          (session (org-babel-ruby-initiate-session (first processed-params)))
-         (vars (second processed-params))
          (result-params (third processed-params))
          (result-type (fourth processed-params))
-         (full-body (concat
-		    (mapconcat ;; define any variables
-		     (lambda (pair)
-		       (format "%s=%s"
-			       (car pair)
-			       (org-babel-ruby-var-to-ruby (cdr pair))))
-		     vars "\n") "\n" body "\n")) ;; then the source block body
+         (full-body (org-babel-expand-body:ruby
+                     body params processed-params)) ;; then the source block body
          (result (org-babel-ruby-evaluate session full-body result-type)))
-    (or (cdr (assoc :file params)) result)))
+    (or (cdr (assoc :file params))
+        (org-babel-reassemble-table
+         result
+         (org-babel-pick-name (nth 4 processed-params) (cdr (assoc :colnames params)))
+         (org-babel-pick-name (nth 5 processed-params) (cdr (assoc :rownames params)))))))
 
 (defun org-babel-prep-session:ruby (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."

@@ -48,7 +48,8 @@ interactive babel functions which are assigned key bindings.")
     ("h" . org-babel-sha1-hash)
     ("g" . org-babel-goto-named-source-block)
     ("l" . org-babel-lob-ingest)
-    ("z" . org-babel-switch-to-session))
+    ("z" . org-babel-switch-to-session)
+    ("p" . org-babel-expand-src-block))
   "Org-babel keybindings.  This list associates interactive
 org-babel functions with keys.  Each element of this list will
 add an entry to the `org-mode-map' using the letter key which is

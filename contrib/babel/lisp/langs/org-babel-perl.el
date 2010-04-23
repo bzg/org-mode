@@ -35,6 +35,16 @@
 
 (add-to-list 'org-babel-tangle-langs '("perl" "pl" "#!/usr/bin/env perl"))
 
+(defun org-babel-expand-body:perl (body params &optional processed-params)
+  (let ((vars (second (or processed-params (org-babel-process-params params)))))
+    (concat
+     (mapconcat ;; define any variables
+      (lambda (pair)
+        (format "$%s=%s;"
+                (car pair)
+                (org-babel-perl-var-to-perl (cdr pair))))
+      vars "\n") "\n" (org-babel-trim body) "\n")))
+
 (defun org-babel-execute:perl (body params)
   "Execute a block of Perl code with org-babel.  This function is
 called by `org-babel-execute-src-block'."
@@ -44,15 +54,13 @@ called by `org-babel-execute-src-block'."
          (vars (second processed-params))
          (result-params (third processed-params))
          (result-type (fourth processed-params))
-         (full-body (concat
-		    (mapconcat ;; define any variables
-		     (lambda (pair)
-		       (format "$%s=%s;"
-			       (car pair)
-			       (org-babel-perl-var-to-perl (cdr pair))))
-		     vars "\n") "\n" (org-babel-trim body) "\n")) ;; then the source block body
+         (full-body (org-babel-expand-body:perl
+                     body params processed-params)) ;; then the source block body
 	(session (org-babel-perl-initiate-session session)))
-    (org-babel-perl-evaluate session full-body result-type)))
+    (org-babel-reassemble-table
+     (org-babel-perl-evaluate session full-body result-type)
+     (org-babel-pick-name (nth 4 processed-params) (cdr (assoc :colnames params)))
+     (org-babel-pick-name (nth 5 processed-params) (cdr (assoc :rownames params))))))
 
 (defun org-babel-prep-session:perl (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."

@@ -68,13 +68,9 @@ variable names and the value to be used in the gnuplot code."
         (cdr pair))))
    (org-babel-ref-variables params)))
 
-(defun org-babel-execute:gnuplot (body params)
-  "Execute a block of Gnuplot code with org-babel.  This function is
-called by `org-babel-execute-src-block'."
-  (message "executing Gnuplot source code block")
+(defun org-babel-expand-body:gnuplot (body params &optional processed-params)
   (save-window-excursion
     (let* ((vars (org-babel-gnuplot-process-vars params))
-           (session (cdr (assoc :session params)))
            (out-file (cdr (assoc :file params)))
            (term (or (cdr (assoc :term params))
                      (when out-file (file-name-extension out-file))))
@@ -87,7 +83,6 @@ called by `org-babel-execute-src-block'."
            (timefmt (plist-get params :timefmt))
            (time-ind (or (plist-get params :timeind)
                          (when timefmt 1)))
-           (result-type (cdr (assoc :results params)))
            output)
       (flet ((add-to-body (text)
                           (setq body (concat text "\n" body))))
@@ -126,23 +121,34 @@ called by `org-babel-execute-src-block'."
         (mapc (lambda (pair)
                 (setq body (replace-regexp-in-string
                             (format "\\$%s" (car pair)) (cdr pair) body)))
-              vars)
-        ;; evaluate the code body with gnuplot
-        (if (string= session "none")
-            (let ((script-file (make-temp-file "org-babel-gnuplot-script")))
-              (with-temp-file script-file
-                (insert (concat body "\n")))
-              (message "gnuplot \"%s\"" script-file)
-              (setq output
-                    (shell-command-to-string (format "gnuplot \"%s\"" script-file)))
-              (message output))
-          (with-temp-buffer
-            (insert (concat body "\n"))
-            (gnuplot-mode)
-            (gnuplot-send-buffer-to-gnuplot)))
-        (if (member "output" (split-string result-type))
-            output
-          out-file)))))
+              vars))
+      body)))
+
+(defun org-babel-execute:gnuplot (body params)
+  "Execute a block of Gnuplot code with org-babel.  This function is
+called by `org-babel-execute-src-block'."
+  (message "executing Gnuplot source code block")
+  (let ((session (cdr (assoc :session params)))
+        (result-type (cdr (assoc :results params)))
+        (out-file (cdr (assoc :file params)))
+        (body (org-babel-expand-body:gnuplot body params)))
+    (save-window-excursion
+      ;; evaluate the code body with gnuplot
+      (if (string= session "none")
+          (let ((script-file (make-temp-file "org-babel-gnuplot-script")))
+            (with-temp-file script-file
+              (insert (concat body "\n")))
+            (message "gnuplot \"%s\"" script-file)
+            (setq output
+                  (shell-command-to-string (format "gnuplot \"%s\"" script-file)))
+            (message output))
+        (with-temp-buffer
+          (insert (concat body "\n"))
+          (gnuplot-mode)
+          (gnuplot-send-buffer-to-gnuplot)))
+      (if (member "output" (split-string result-type))
+          output
+        out-file))))
 
 (defun org-babel-prep-session:gnuplot (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."
