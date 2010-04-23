@@ -739,8 +739,11 @@ of the vars, cnames and rnames."
 to the table for reinsertion to org-mode."
   (if (listp table)
       ((lambda (table)
-         (if colnames (org-babel-put-colnames table colnames) table))
-       (if rownames (org-babel-put-rownames table rownames) table))
+         (if (and colnames (listp (car table)) (= (length (car table))
+                                                  (length colnames)))
+             (org-babel-put-colnames table colnames) table))
+       (if (and rownames (= (length table) (length rownames)))
+           (org-babel-put-rownames table rownames) table))
     table))
 
 (defun org-babel-where-is-src-block-head ()
