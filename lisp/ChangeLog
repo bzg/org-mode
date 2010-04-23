@@ -1,5 +1,8 @@
 2010-04-23  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-latex.el (org-export-latex-set-initial-vars): Allow "-"
+	in latex class definitions
+
 	* org.el (org-shiftup-hook, org-shiftdown-hook)
 	(org-shiftleft-hook, org-shiftright-hook): New hooks.
 
