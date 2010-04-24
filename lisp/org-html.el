@@ -871,9 +871,7 @@ lang=\"%s\" xml:lang=\"%s\">
 					      t t line)))
 				(while (string-match "&lt;\\(&lt;\\)+\\|&gt;\\(&gt;\\)+" txt)
 				  (setq txt (replace-match "" t t txt)))
-				(setq href
-				      (replace-regexp-in-string
-				       "\\." "_" (format "sec-%s" snumber)))
+				(setq href (format "sec-%s" snumber))
 				(setq href (or (cdr (assoc href org-export-preferred-target-alist)) href))
 				(push
 				 (format
@@ -2087,11 +2085,8 @@ When TITLE is nil, just close all open levels."
 			 " " title)))
 	(unless (= head-count 1) (insert "\n</div>\n"))
 	(setq href (cdr (assoc (concat "sec-" snumber) org-export-preferred-target-alist)))
-	(setq suffix (or href
-			 (replace-regexp-in-string "\\." "_" snumber)))
-	(setq href (or href
-		       (replace-regexp-in-string
-			"\\." "_" (concat "sec-" snumber))))
+	(setq suffix (or href snumber))
+	(setq href (or href (concat "sec-" snumber)))
 	(insert (format "\n<div id=\"outline-container-%s\" class=\"outline-%d%s\">\n<h%d id=\"%s\">%s%s</h%d>\n<div class=\"outline-text-%d\" id=\"text-%s\">\n"
 			suffix level (if extra-class (concat " " extra-class) "")
 			level href

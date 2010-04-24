@@ -1,9 +1,5 @@
 2010-04-24  Carsten Dominik  <carsten.dominik@gmail.com>
 
-	* org-html.el (org-export-as-html, org-html-level-start):
-	Change the dot in section numbers to underscore, to get valid
-	CSS class names.
-
 	* org-table.el (org-table-justify-field-maybe): Make sure that
 	inserting a value does not turn a line into a hline.
 
