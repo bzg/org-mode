@@ -1,5 +1,14 @@
 2010-04-25  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-html.el (org-export-as-html, org-html-level-start): Change
+	XHTML IDs to not use dots.
+
+	* org-exp.el (org-export-define-heading-targets): Change
+	XHTML IDs to not use dots.
+
+	* org-docbook.el (org-export-docbook-level-start): Change
+	XHTML IDs to not use dots.
+
 	* org-latex.el (org-export-as-latex): Make sure that the
 	result buffer is in latex-mode.
 

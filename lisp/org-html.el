@@ -871,7 +871,9 @@ lang=\"%s\" xml:lang=\"%s\">
 					      t t line)))
 				(while (string-match "&lt;\\(&lt;\\)+\\|&gt;\\(&gt;\\)+" txt)
 				  (setq txt (replace-match "" t t txt)))
-				(setq href (format "sec-%s" snumber))
+				(setq href
+				      (replace-regexp-in-string
+				       "\\." "_" (format "sec-%s" snumber)))
 				(setq href (or (cdr (assoc href org-export-preferred-target-alist)) href))
 				(push
 				 (format
@@ -2027,7 +2029,7 @@ When TITLE is nil, just close all open levels."
 			 (cdr (assoc target org-export-preferred-target-alist))))
 	 (remove (or preferred target))
 	 (l org-level-max)
-	 snumber href suffix)
+	 snumber snu href suffix)
     (setq extra-targets (remove remove extra-targets))
     (setq extra-targets
 	  (mapconcat (lambda (x)
@@ -2076,7 +2078,8 @@ When TITLE is nil, just close all open levels."
 			  extra-targets title "<br/>\n")
 		(insert "<ul>\n<li>" title "<br/>\n"))))
 	(aset org-levels-open (1- level) t)
-	(setq snumber (org-section-number level))
+	(setq snumber (org-section-number level)
+	      snu (replace-regexp-in-string "\\." "_" snumber))
 	(setq level (+ level org-export-html-toplevel-hlevel -1))
 	(if (and org-export-with-section-numbers (not body-only))
 	    (setq title (concat
@@ -2084,9 +2087,9 @@ When TITLE is nil, just close all open levels."
 				 level snumber)
 			 " " title)))
 	(unless (= head-count 1) (insert "\n</div>\n"))
-	(setq href (cdr (assoc (concat "sec-" snumber) org-export-preferred-target-alist)))
-	(setq suffix (or href snumber))
-	(setq href (or href (concat "sec-" snumber)))
+	(setq href (cdr (assoc (concat "sec-" snu) org-export-preferred-target-alist)))
+	(setq suffix (or href snu))
+	(setq href (or href (concat "sec-" snu)))
 	(insert (format "\n<div id=\"outline-container-%s\" class=\"outline-%d%s\">\n<h%d id=\"%s\">%s%s</h%d>\n<div class=\"outline-text-%d\" id=\"text-%s\">\n"
 			suffix level (if extra-class (concat " " extra-class) "")
 			level href

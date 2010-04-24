@@ -1228,7 +1228,8 @@ When TITLE is nil, just close all open levels."
       (setq section-number (org-section-number level))
       (insert (format "\n<section xml:id=\"%s%s\">\n<title>%s</title>"
 		      org-export-docbook-section-id-prefix
-		      section-number title))
+		      (replace-regexp-in-string "\\." "_" section-number)
+		      title))
       (org-export-docbook-open-para))))
 
 (defun org-docbook-expand (string)
