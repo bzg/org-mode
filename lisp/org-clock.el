@@ -1311,10 +1311,13 @@ With prefix arg SELECT, offer recently clocked tasks for selection."
   "Holds the file total time in minutes, after a call to `org-clock-sum'.")
 (make-variable-buffer-local 'org-clock-file-total-minutes)
 
-(defun org-clock-sum (&optional tstart tend)
+(defun org-clock-sum (&optional tstart tend headline-filter)
   "Sum the times for each subtree.
 Puts the resulting times in minutes as a text property on each headline.
-TSTART and TEND can mark a time range to be considered."
+TSTART and TEND can mark a time range to be considered.  HEADLINE-FILTER is a
+zero-arg function that, if specified, is called for each headline in the time 
+range with point at the headline.  Headlines for which HEADLINE-FILTER returns
+nil are excluded from the clock summation."
   (interactive)
   (let* ((bmp (buffer-modified-p))
 	 (re (concat "^\\(\\*+\\)[ \t]\\|^[ \t]*"
@@ -1330,7 +1333,9 @@ TSTART and TEND can mark a time range to be considered."
     (if (stringp tend) (setq tend (org-time-string-to-seconds tend)))
     (if (consp tstart) (setq tstart (org-float-time tstart)))
     (if (consp tend) (setq tend (org-float-time tend)))
-    (remove-text-properties (point-min) (point-max) '(:org-clock-minutes t))
+    (remove-text-properties (point-min) (point-max)
+                            '(:org-clock-minutes t
+                              :org-clock-force-headline-inclusion t))
     (save-excursion
       (goto-char (point-max))
       (while (re-search-backward re nil t)
@@ -1359,15 +1364,34 @@ TSTART and TEND can mark a time range to be considered."
 	      (let ((time (floor (- (org-float-time)
 				    (org-float-time org-clock-start-time)) 60)))
 		(setq t1 (+ t1 time))))
-	  (setq level (- (match-end 1) (match-beginning 1)))
-	  (when (or (> t1 0) (> (aref ltimes level) 0))
-	    (loop for l from 0 to level do
-		  (aset ltimes l (+ (aref ltimes l) t1)))
-	    (setq t1 0 time (aref ltimes level))
-	    (loop for l from level to (1- lmax) do
-		  (aset ltimes l 0))
-	    (goto-char (match-beginning 0))
-	    (put-text-property (point) (point-at-eol) :org-clock-minutes time)))))
+	  (let* ((headline-forced
+                  (get-text-property (point)
+                                     :org-clock-force-headline-inclusion))
+                 (headline-included
+                  (or (null headline-filter)
+                      (save-excursion
+                        (save-match-data (funcall headline-filter))))))
+	    (setq level (- (match-end 1) (match-beginning 1)))
+	    (when (or (> t1 0) (> (aref ltimes level) 0))
+	      (when (or headline-included headline-forced)
+                (if headline-included
+                    (loop for l from 0 to level do
+                          (aset ltimes l (+ (aref ltimes l) t1))))
+		(setq time (aref ltimes level))
+		(goto-char (match-beginning 0))
+		(put-text-property (point) (point-at-eol) :org-clock-minutes time)
+                (if headline-filter
+                    (save-excursion
+                      (save-match-data
+                        (while
+                            (> (funcall outline-level) 1)
+                          (outline-up-heading 1 t)
+                          (put-text-property
+                           (point) (point-at-eol)
+                           :org-clock-force-headline-inclusion t))))))
+	      (setq t1 0)
+	      (loop for l from level to (1- lmax) do
+		    (aset ltimes l 0)))))))
       (setq org-clock-file-total-minutes (aref ltimes 0)))
     (set-buffer-modified-p bmp)))
 
@@ -1687,6 +1711,8 @@ the currently selected interval size."
 	   (te (plist-get params :tend))
 	   (block (plist-get params :block))
 	   (link (plist-get params :link))
+	   (tags (plist-get params :tags))
+	   (matcher (if tags (cdr (org-make-tags-matcher tags))))
 	   ipos time p level hlc hdl tsp props content recalc formula pcol
 	   cc beg end pos tbl tbl1 range-text rm-file-column scope-is-list st)
       (setq org-clock-file-total-minutes nil)
@@ -1768,7 +1794,14 @@ the currently selected interval size."
 	(goto-char pos)
 
 	(unless scope-is-list
-	  (org-clock-sum ts te)
+	  (org-clock-sum ts te
+			 (unless (null matcher)
+			   (lambda ()
+			     (let ((tags-list
+				    (org-split-string
+				     (or (org-entry-get (point) "ALLTAGS") "")
+				     ":")))
+			       (eval matcher)))))
 	  (goto-char (point-min))
 	  (setq st t)
 	  (while (or (and (bobp) (prog1 st (setq st nil))

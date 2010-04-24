@@ -184,7 +184,7 @@ sitemap of files or summary page for a given project.
                            Any other value will mix files and folders.
   :sitemap-alphabetically  The site map is normally sorted alphabetically.
                            Set this explicitly to nil to turn off sorting.
-  :sitemap-ignore-case     Should sorting be case-sensitively?  Default nil.
+  :sitemap-ignore-case     Should sorting be case-sensitive?  Default nil.
 
 The following properties control the creation of a concept index.
 

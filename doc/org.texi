@@ -5582,6 +5582,7 @@ new table.  The @samp{BEGIN} line can specify options:
 :tend        @r{A time string specifying when to stop considering times.}
 :step        @r{@code{week} or @code{day}, to split the table into chunks.}
              @r{To use this, @code{:block} or @code{:tstart}, @code{:tend} are needed.}
+:tags        @r{A tags match to select entries that should contribute}
 :link        @r{Link the item headlines in the table to their origins.}
 :formula     @r{Content of a @code{#+TBLFM} line to be added and evaluated.}
              @r{As a special case, @samp{:formula %} adds a column with % time.}
@@ -10476,7 +10477,7 @@ respectively.  Any other value will mix files and folders.
 @code{nil} to turn off sorting.
 
 @item @code{:sitemap-ignore-case}
-@tab Should sorting be case-sensitively?  Default @code{nil}.
+@tab Should sorting be case-sensitive?  Default @code{nil}.
 
 @end multitable
 
@@ -12708,7 +12709,7 @@ with links transformation to Org syntax.
 chapter about publishing.
 @item
 @i{Stefan Vollmar} organized a video-recorded talk at the
-Max-PLanck-Institute for Neurology.  He also inspired the creation of a
+Max-Planck-Institute for Neurology.  He also inspired the creation of a
 concept index for HTML export.
 @item
 @i{J@"urgen Vollmer} contributed code generating the table of contents

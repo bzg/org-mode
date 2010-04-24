@@ -1,4 +1,21 @@
+2010-04-24  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-table.el (org-table-justify-field-maybe): Make sure that
+	inserting a value does not turn a line into a hline.
+
 2010-04-23  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-clock.el (org-clock-sum): New argument HEADLINE-FILTER.
+	(org-clock-sum): Add property to selected headlines.
+	(org-dblock-write:clocktable): Make tags matcher.
+
+	* org.el (org-set-autofill-regexps): XEmacs compatibility.
+
+	* org-latex.el (org-export-latex-set-initial-vars): Allow "-"
+	in latex class definitions
+
+	* org.el (org-shiftup-hook, org-shiftdown-hook)
+	(org-shiftleft-hook, org-shiftright-hook): New hooks.
 
 	* org-entities.el (org-entities): Use \land and \lor for logical
 	operators.

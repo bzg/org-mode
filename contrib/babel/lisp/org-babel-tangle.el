@@ -187,13 +187,16 @@ code blocks by language."
                   (cons
                    (cons src-lang
                          (cons (list link source-name params
-                                     (funcall
-                                      (intern
-                                       (concat "org-babel-expand-body:" src-lang))
+                                     ((lambda (body)
+                                        (if (assoc :no-expand params)
+                                            body
+                                          (funcall
+                                           (intern (concat "org-babel-expand-body:" src-lang))
+                                           body
+                                           params)))
                                       (if (and (cdr (assoc :noweb params))
                                                (string= "yes" (cdr (assoc :noweb params))))
-                                          (org-babel-expand-noweb-references info) (second info))
-                                      params)
+                                          (org-babel-expand-noweb-references info) (second info)))
                                      (third (cdr (assoc
                                                   src-lang org-babel-tangle-langs))))
                                by-lang)) blocks))))))
