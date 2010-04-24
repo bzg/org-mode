@@ -127,8 +127,9 @@ specifying a var of the same value."
   (let ((vars-forms (mapconcat ;; define any variables
                       (lambda (pair)
                         (format "%s %s" (car pair) (org-babel-clojure-var-to-clojure (cdr pair))))
-                      vars "\n      ")))
-    (format "(let [%s]\n  %s)" vars-forms (org-babel-trim body))))
+                      vars "\n      "))
+	(body (org-babel-trim body)))
+    (if (> (length vars-forms) 0) (format "(let [%s]\n  %s)" vars-forms body) body)))
 
 (defun org-babel-prep-session:clojure (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."

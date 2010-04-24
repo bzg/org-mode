@@ -45,15 +45,16 @@
          (processed-params (org-babel-process-params params))
          (result-params (third processed-params))
          (print-level nil) (print-length nil)
-         (body (concat "(let ("
-                       (mapconcat
-                        (lambda (var) (format "%S" (print `(,(car var) ',(cdr var)))))
-                        vars "\n      ")
-                       ")\n"
-                       (if (or (member "code" result-params)
-                               (member "pp" result-params))
-                           (concat "(pp " body ")") body) ")")))
-    body))
+         (body (if (> (length vars) 0)
+		   (concat "(let ("
+			 (mapconcat
+			  (lambda (var) (format "%S" (print `(,(car var) ',(cdr var)))))
+			  vars "\n      ")
+			 ")\n" body ")")
+		 body)))
+    (if (or (member "code" result-params)
+	    (member "pp" result-params))
+	(concat "(pp " body ")") body)))
 
 (defun org-babel-execute:emacs-lisp (body params)
   "Execute a block of emacs-lisp code with org-babel."
