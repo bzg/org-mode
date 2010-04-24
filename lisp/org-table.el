@@ -830,6 +830,7 @@ Optional argument NEW may specify text to replace the current field content."
 		  (if (<= (length new) l)      ;; FIXME: length -> str-width?
 		      (setq n (format f new))
 		    (setq n (concat new "|") org-table-may-need-update t)))
+	      (if (equal (string-to-char n) ?-) (setq n (concat " " n)))
 	      (or (equal n o)
 		  (let (org-table-may-need-update)
 		    (replace-match n t t))))
