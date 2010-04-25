@@ -1,5 +1,8 @@
 2010-04-25  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp.el (org-export-format-drawer-function): Fix
+	docstring.
+
 	* org-agenda.el (org-agenda-refile): New optional argument
 	NO-UPDATE.
 	(org-agenda-refile): Call `org-agenda-redo' unless NO-UPDATE
