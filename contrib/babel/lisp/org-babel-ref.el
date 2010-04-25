@@ -98,8 +98,10 @@ return nil."
     (let ((case-fold-search t)
           type args new-refere new-referent result lob-info split-file split-ref
           index index-row index-col)
-      ;; if ref is indexed grab the indices
-      (when (string-match "\\[\\(.+\\)\\]" ref)
+      ;; if ref is indexed grab the indices -- beware nested indicies
+      (when (and (string-match "\\[\\(.+\\)\\]" ref)
+		 (let ((str (substring ref 0 (match-beginning 0))))
+		   (= (count ?( str) (count ?) str))))
         (setq index (match-string 1 ref))
         (setq ref (substring ref 0 (match-beginning 0))))
       ;; assign any arguments to pass to source block
