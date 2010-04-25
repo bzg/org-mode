@@ -1,5 +1,8 @@
 2010-04-25  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-latex.el (org-export-as-latex): Make sure that the
+	result buffer is in latex-mode.
+
 	* org.el (org-shiftup-final-hook, org-shiftdown-final-hook)
 	(org-shiftleft-final-hook, org-shiftright-final-hook): New
 	hooks.
