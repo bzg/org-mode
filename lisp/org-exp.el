@@ -1239,7 +1239,9 @@ Also find all ID and CUSTOM_ID propertiess and store them."
 		       (save-excursion (goto-char (point-at-bol))
 				       (org-outline-level))))
 	  (setq target (org-solidify-link-text
-			(format "sec-%s" (org-section-number level))))
+			(format "sec-%s" (replace-regexp-in-string
+					  "\\." "_"
+					  (org-section-number level)))))
 	  (setq last-section-target target)
 	  (push (cons target target) target-alist)
 	  (add-text-properties

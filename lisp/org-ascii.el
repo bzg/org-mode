@@ -550,9 +550,8 @@ publishing directory."
       (org-ascii-replace-entities)
       (goto-char (point-min))
       (org-table-map-tables
-       (lambda ()
-	 (org-if-unprotected
-	  (org-table-align))))))
+       (lambda () (org-if-unprotected (org-table-align)))
+       'quietly)))
   ;; Put quotes around verbatim text
   (goto-char (point-min))
   (while (re-search-forward org-verbatim-re nil t)

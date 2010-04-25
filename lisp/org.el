@@ -3402,21 +3402,22 @@ If TABLE-TYPE is non-nil, also check for table.el-type tables."
 
 (defvar org-table-clean-did-remove-column nil)
 
-(defun org-table-map-tables (function)
+(defun org-table-map-tables (function &optional quietly)
   "Apply FUNCTION to the start of all tables in the buffer."
   (save-excursion
     (save-restriction
       (widen)
       (goto-char (point-min))
       (while (re-search-forward org-table-any-line-regexp nil t)
-	(message "Mapping tables: %d%%" (/ (* 100.0 (point)) (buffer-size)))
+	(unless quietly
+	  (message "Mapping tables: %d%%" (/ (* 100.0 (point)) (buffer-size))))
 	(beginning-of-line 1)
 	(when (looking-at org-table-line-regexp)
 	  (save-excursion (funcall function))
 	  (or (looking-at org-table-line-regexp)
 	      (forward-char 1)))
 	(re-search-forward org-table-any-border-regexp nil 1))))
-  (message "Mapping tables: done"))
+  (unless quietly (message "Mapping tables: done")))
 
 ;; Declare and autoload functions from org-exp.el  & Co
 
@@ -4456,7 +4457,7 @@ The following commands are available:
   (unless org-inhibit-startup
     (when org-startup-align-all-tables
       (let ((bmp (buffer-modified-p)))
-	(org-table-map-tables 'org-table-align)
+	(org-table-map-tables 'org-table-align 'quietly)
 	(set-buffer-modified-p bmp)))
     (when org-startup-indented
       (require 'org-indent)
@@ -15933,14 +15934,30 @@ See `org-ctrl-c-ctrl-c-hook' for more information.")
 (defvar org-shiftup-hook nil
   "Hook for functions attaching themselves to `S-up'.
 See `org-ctrl-c-ctrl-c-hook' for more information.")
+(defvar org-shiftup-final-hook nil
+  "Hook for functions attaching themselves to `S-up'.
+This one runs after all other options except shift-select have been excluded.
+See `org-ctrl-c-ctrl-c-hook' for more information.")
 (defvar org-shiftdown-hook nil
   "Hook for functions attaching themselves to `S-down'.
+See `org-ctrl-c-ctrl-c-hook' for more information.")
+(defvar org-shiftdown-final-hook nil
+  "Hook for functions attaching themselves to `S-down'.
+This one runs after all other options except shift-select have been excluded.
 See `org-ctrl-c-ctrl-c-hook' for more information.")
 (defvar org-shiftleft-hook nil
   "Hook for functions attaching themselves to `S-left'.
 See `org-ctrl-c-ctrl-c-hook' for more information.")
+(defvar org-shiftleft-final-hook nil
+  "Hook for functions attaching themselves to `S-left'.
+This one runs after all other options except shift-select have been excluded.
+See `org-ctrl-c-ctrl-c-hook' for more information.")
 (defvar org-shiftright-hook nil
   "Hook for functions attaching themselves to `S-right'.
+See `org-ctrl-c-ctrl-c-hook' for more information.")
+(defvar org-shiftright-final-hook nil
+  "Hook for functions attaching themselves to `S-right'.
+This one runs after all other options except shift-select have been excluded.
 See `org-ctrl-c-ctrl-c-hook' for more information.")
 
 (defun org-modifier-cursor-error ()
@@ -16151,6 +16168,7 @@ depending on context.  See the individual commands for more information."
    ((and (not org-support-shift-select) (org-at-item-p))
     (call-interactively 'org-previous-item))
    ((org-clocktable-try-shift 'up arg))
+   ((run-hook-with-args-until-success 'org-shiftup-final-hook))
    (org-support-shift-select
     (org-call-for-shift-select 'previous-line))
    (t (org-shiftselect-error))))
@@ -16174,6 +16192,7 @@ depending on context.  See the individual commands for more information."
    ((and (not org-support-shift-select) (org-at-item-p))
     (call-interactively 'org-next-item))
    ((org-clocktable-try-shift 'down arg))
+   ((run-hook-with-args-until-success 'org-shiftdown-final-hook))
    (org-support-shift-select
     (org-call-for-shift-select 'next-line))
    (t (org-shiftselect-error))))
@@ -16209,6 +16228,7 @@ Depending on context, this does one of the following:
 	 (org-at-property-p))
     (call-interactively 'org-property-next-allowed-value))
    ((org-clocktable-try-shift 'right arg))
+   ((run-hook-with-args-until-success 'org-shiftright-final-hook))
    (org-support-shift-select
     (org-call-for-shift-select 'forward-char))
    (t (org-shiftselect-error))))
@@ -16244,6 +16264,7 @@ Depending on context, this does one of the following:
 	 (org-at-property-p))
     (call-interactively 'org-property-previous-allowed-value))
    ((org-clocktable-try-shift 'left arg))
+   ((run-hook-with-args-until-success 'org-shiftleft-final-hook))
    (org-support-shift-select
     (org-call-for-shift-select 'backward-char))
    (t (org-shiftselect-error))))

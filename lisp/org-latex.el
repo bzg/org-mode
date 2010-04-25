@@ -793,7 +793,9 @@ when PUB-DIR is set, use this as the publishing directory."
 	  (replace-match "\n")))
 
     (run-hooks 'org-export-latex-final-hook)
-    (or to-buffer (save-buffer))
+    (if to-buffer
+	(unless (eq major-mode 'latex-mode) (latex-mode))
+      (save-buffer))
     (org-export-latex-fix-inputenc)
     (run-hooks 'org-export-latex-after-save-hook)
     (goto-char (point-min))
