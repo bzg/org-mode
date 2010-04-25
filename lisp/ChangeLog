@@ -1,5 +1,8 @@
 2010-04-25  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-clock.el (org-clock-cancel, org-clock-out): Make sure
+	the modeline display is removed.
+
 	* org-exp.el (org-export-format-drawer-function): Fix
 	docstring.
 
