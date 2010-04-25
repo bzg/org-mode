@@ -1,5 +1,11 @@
 2010-04-25  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-mode): Make table mapping quiet.
+	(org-table-map-tables): New optional argument QUIETLY.
+
+	* org-ascii.el (org-export-ascii-preprocess): Make table
+	mapping quiet.
+
 	* org-html.el (org-export-as-html, org-html-level-start): Change
 	XHTML IDs to not use dots.
 
