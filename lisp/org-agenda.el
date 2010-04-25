@@ -6198,7 +6198,7 @@ If this information is not given, the function uses the tree at point."
 	      (delete-region (point-at-bol) (1+ (point-at-eol)))))
 	  (beginning-of-line 0))))))
 
-(defun org-agenda-refile (&optional goto rfloc)
+(defun org-agenda-refile (&optional goto rfloc no-update)
   "Refile the item at point."
   (interactive "P")
   (if (equal goto '(16))
@@ -6217,7 +6217,8 @@ If this information is not given, the function uses the tree at point."
 	    (widen)
 	    (goto-char marker)
 	    (org-remove-subtree-entries-from-agenda)
-	    (org-refile goto buffer rfloc)))))))
+	    (org-refile goto buffer rfloc)))))
+    (unless no-update (org-agenda-redo))))
 
 (defun org-agenda-open-link (&optional arg)
   "Follow the link in the current line, if any.
@@ -7426,6 +7427,7 @@ The prefix arg is passed through to the command if possible."
   (let* ((action (read-char-exclusive))
 	 (org-log-refile (if org-log-refile 'time nil))
 	 (entries (reverse org-agenda-bulk-marked-entries))
+	 redo-at-end
 	 cmd rfloc state e tag pos (cnt 0) (cntskip 0))
     (cond
      ((equal action ?$)
@@ -7445,7 +7447,8 @@ The prefix arg is passed through to the command if possible."
 			       (find-buffer-visiting (nth 1 rfloc))
 			       (error "This should not happen"))))
 
-      (setq cmd (list 'org-agenda-refile nil (list 'quote rfloc))))
+      (setq cmd (list 'org-agenda-refile nil (list 'quote rfloc) t)
+	    redo-at-end t))
 
      ((equal action ?t)
       (setq state (org-icompleting-read
@@ -7506,6 +7509,7 @@ The prefix arg is passed through to the command if possible."
 	(setq cnt (1+ cnt))))
     (setq org-agenda-bulk-marked-entries nil)
     (org-agenda-bulk-remove-all-marks)
+    (when redo-at-end (org-agenda-redo))
     (message "Acted on %d entries%s"
 	     cnt
 	     (if (= cntskip 0)
