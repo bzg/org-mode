@@ -1,3 +1,9 @@
+2010-04-25  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-shiftup-final-hook, org-shiftdown-final-hook)
+	(org-shiftleft-final-hook, org-shiftright-final-hook): New
+	hooks.
+
 2010-04-24  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-table.el (org-table-justify-field-maybe): Make sure that

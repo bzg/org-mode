@@ -15933,14 +15933,30 @@ See `org-ctrl-c-ctrl-c-hook' for more information.")
 (defvar org-shiftup-hook nil
   "Hook for functions attaching themselves to `S-up'.
 See `org-ctrl-c-ctrl-c-hook' for more information.")
+(defvar org-shiftup-final-hook nil
+  "Hook for functions attaching themselves to `S-up'.
+This one runs after all other options except shift-select have been excluded.
+See `org-ctrl-c-ctrl-c-hook' for more information.")
 (defvar org-shiftdown-hook nil
   "Hook for functions attaching themselves to `S-down'.
+See `org-ctrl-c-ctrl-c-hook' for more information.")
+(defvar org-shiftdown-final-hook nil
+  "Hook for functions attaching themselves to `S-down'.
+This one runs after all other options except shift-select have been excluded.
 See `org-ctrl-c-ctrl-c-hook' for more information.")
 (defvar org-shiftleft-hook nil
   "Hook for functions attaching themselves to `S-left'.
 See `org-ctrl-c-ctrl-c-hook' for more information.")
+(defvar org-shiftleft-final-hook nil
+  "Hook for functions attaching themselves to `S-left'.
+This one runs after all other options except shift-select have been excluded.
+See `org-ctrl-c-ctrl-c-hook' for more information.")
 (defvar org-shiftright-hook nil
   "Hook for functions attaching themselves to `S-right'.
+See `org-ctrl-c-ctrl-c-hook' for more information.")
+(defvar org-shiftright-final-hook nil
+  "Hook for functions attaching themselves to `S-right'.
+This one runs after all other options except shift-select have been excluded.
 See `org-ctrl-c-ctrl-c-hook' for more information.")
 
 (defun org-modifier-cursor-error ()
@@ -16151,6 +16167,7 @@ depending on context.  See the individual commands for more information."
    ((and (not org-support-shift-select) (org-at-item-p))
     (call-interactively 'org-previous-item))
    ((org-clocktable-try-shift 'up arg))
+   ((run-hook-with-args-until-success 'org-shiftup-final-hook))
    (org-support-shift-select
     (org-call-for-shift-select 'previous-line))
    (t (org-shiftselect-error))))
@@ -16174,6 +16191,7 @@ depending on context.  See the individual commands for more information."
    ((and (not org-support-shift-select) (org-at-item-p))
     (call-interactively 'org-next-item))
    ((org-clocktable-try-shift 'down arg))
+   ((run-hook-with-args-until-success 'org-shiftdown-final-hook))
    (org-support-shift-select
     (org-call-for-shift-select 'next-line))
    (t (org-shiftselect-error))))
@@ -16209,6 +16227,7 @@ Depending on context, this does one of the following:
 	 (org-at-property-p))
     (call-interactively 'org-property-next-allowed-value))
    ((org-clocktable-try-shift 'right arg))
+   ((run-hook-with-args-until-success 'org-shiftright-final-hook))
    (org-support-shift-select
     (org-call-for-shift-select 'forward-char))
    (t (org-shiftselect-error))))
@@ -16244,6 +16263,7 @@ Depending on context, this does one of the following:
 	 (org-at-property-p))
     (call-interactively 'org-property-previous-allowed-value))
    ((org-clocktable-try-shift 'left arg))
+   ((run-hook-with-args-until-success 'org-shiftleft-final-hook))
    (org-support-shift-select
     (org-call-for-shift-select 'backward-char))
    (t (org-shiftselect-error))))
