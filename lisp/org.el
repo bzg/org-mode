@@ -2302,7 +2302,7 @@ a double prefix argument to a time-stamp command like `C-c .' or `C-c !',
 and by using a prefix arg to `S-up/down' to specify the exact number
 of minutes to shift."
   :group 'org-time
-  :get '(lambda (var) ; Make sure all entries have 5 elements
+  :get '(lambda (var) ; Make sure both elements are there
 	  (if (integerp (default-value var))
 	      (list (default-value var) 5)
 	    (default-value var)))
@@ -2958,25 +2958,42 @@ will be appended."
 
 (defvar org-format-latex-header-extra nil)
 
+(defun org-set-packages-alist (var val)
+  "Set the packages alist and make sure it has 3 elements per entry."
+  (set var (mapcar (lambda (x)
+		     (if (and (consp x) (= (length x) 2))
+			 (list (car x) (nth 1 x) t)
+		       x))
+		   val)))
+
+(defun org-get-packages-alist (var)
+
+  "Get the packages alist and make sure it has 3 elements per entry."
+  (mapcar (lambda (x)
+	    (if (and (consp x) (= (length x) 2))
+		(list (car x) (nth 1 x) t)
+	      x))
+	  (default-value var)))
+
 ;; The following variables are defined here because is it also used
 ;; when formatting latex fragments.  Originally it was part of the
 ;; LaTeX exporter, which is why the name includes "export".
 (defcustom org-export-latex-default-packages-alist
-  '(("AUTO" "inputenc")
-    ("T1"   "fontenc")
-    (""     "fixltx2e")
-    (""     "graphicx")
-    (""     "longtable")
-    (""     "float")
-    (""     "wrapfig")
-    (""     "soul")
-    (""     "t1enc")
-    (""     "textcomp")
-    (""     "marvosym")
-    (""     "wasysym")
-    (""     "latexsym")
-    (""     "amssymb")
-    (""     "hyperref")
+  '(("AUTO" "inputenc"  t)
+    ("T1"   "fontenc"   t)
+    (""     "fixltx2e"  nil)
+    (""     "graphicx"  t)
+    (""     "longtable" nil)
+    (""     "float"     nil)
+    (""     "wrapfig"   nil)
+    (""     "soul"      t)
+    (""     "t1enc"     t)
+    (""     "textcomp"  t)
+    (""     "marvosym"  t)
+    (""     "wasysym"   t)
+    (""     "latexsym"  t)
+    (""     "amssymb"   t)
+    (""     "hyperref"  nil)
     "\\tolerance=1000"
     )
   "Alist of default packages to be inserted in the header.
@@ -2997,31 +3014,42 @@ to function properly.
 Therefore you should not modify this variable unless you know what you
 are doing.  The one reason to change it anyway is that you might be loading
 some other package that conflicts with one of the default packages.
-Each cell is of the format \( \"options\" \"package\" \)."
+Each cell is of the format \( \"options\" \"package\" snippet-flag\).
+If SNIPPET-FLAG is t, the package also needs to be included when
+compiling LaTeX snippets into images for inclusion into HTML."
   :group 'org-export-latex
+  :set 'org-set-packages-alist
+  :get 'org-get-packages-alist
   :type '(repeat
 	  (choice
-	   (string :tag "A line of LaTeX")
 	   (list :tag "options/package pair"
 		 (string :tag "options")
-		 (string :tag "package")))))
+		 (string :tag "package")
+		 (boolean :tag "Snippet"))
+	   (string :tag "A line of LaTeX"))))
 
 (defcustom org-export-latex-packages-alist nil
   "Alist of packages to be inserted in every LaTeX the header.
 These will be inserted after `org-export-latex-default-packages-alist'.
-Each cell is of the format \( \"options\" \"package\" \).
-Make sure that you only lis packages here which:
+Each cell is of the format \( \"options\" \"package\" snippet-flag \).
+SNIPPET-FLAG, when t, indicates that this package is also needed when
+turning LaTeX snippets into images for inclusion into HTML.
+Make sure that you only list packages here which:
 - you want in every file
 - do not conflict with the default packages in
   `org-export-latex-default-packages-alist'
 - do not conflict with the setup in `org-format-latex-header'."
   :group 'org-export-latex
+  :set 'org-set-packages-alist
+  :get 'org-get-packages-alist
   :type '(repeat
 	  (choice
-	   (string :tag "A line of LaTeX")
 	   (list :tag "options/package pair"
 		 (string :tag "options")
-		 (string :tag "package")))))
+		 (string :tag "package")
+		 (boolean :tag "Snippet"))
+	   (string :tag "A line of LaTeX"))))
+
 
 (defgroup org-appearance nil
   "Settings for Org-mode appearance."
@@ -15332,7 +15360,7 @@ Some of the options can be changed using the variable
       (insert (org-splice-latex-header
 	       org-format-latex-header
 	       org-export-latex-default-packages-alist
-	       org-export-latex-packages-alist
+	       org-export-latex-packages-alist t
 	       org-format-latex-header-extra))
       (insert "\n\\begin{document}\n" string "\n\\end{document}\n")
       (require 'org-latex)
@@ -15366,7 +15394,7 @@ Some of the options can be changed using the variable
 	      (delete-file (concat texfilebase e)))
 	pngfile))))
 
-(defun org-splice-latex-header (tpl def-pkg pkg &optional extra)
+(defun org-splice-latex-header (tpl def-pkg pkg snippets-p &optional extra)
   "Fill a LaTeX header template TPL.
 In the template, the following place holders will be recognized:
 
@@ -15381,19 +15409,22 @@ For backward compatibility, if both the positive and the negative place
 holder is missing, the positive one (without the \"NO-\") will be
 assumed to be present at the end of the template.
 DEF-PKG and PKG are assumed to be alists of options/packagename lists.
-EXTRA is a string."
+EXTRA is a string.
+SNIPPETS-P indicates if this is run to create snippet images for HTML."
   (let (rpl (end ""))
     (if (string-match "^[ \t]*\\[\\(NO-\\)?DEFAULT-PACKAGES\\][ \t]*\n?" tpl)
 	(setq rpl (if (or (match-end 1) (not def-pkg))
-		      "" (org-latex-packages-to-string def-pkg t))
+		      "" (org-latex-packages-to-string def-pkg snippets-p t))
 	      tpl (replace-match rpl t t tpl))
-      (if def-pkg (setq end (org-latex-packages-to-string def-pkg))))
+      (if def-pkg (setq end (org-latex-packages-to-string def-pkg snippets-p))))
 
     (if (string-match "\\[\\(NO-\\)?PACKAGES\\][ \t]*\n?" tpl)
 	(setq rpl (if (or (match-end 1) (not pkg))
-		      "" (org-latex-packages-to-string pkg t))
+		      "" (org-latex-packages-to-string pkg snippets-p t))
 	      tpl (replace-match rpl t t tpl))
-      (if pkg (setq end (concat end "\n" (org-latex-packages-to-string pkg)))))
+      (if pkg (setq end
+		    (concat end "\n"
+			    (org-latex-packages-to-string pkg snippets-p)))))
 
     (if (string-match "\\[\\(NO-\\)?EXTRA\\][ \t]*\n?" tpl)
 	(setq rpl (if (or (match-end 1) (not extra))
@@ -15406,11 +15437,13 @@ EXTRA is a string."
 	(concat tpl "\n" end)
       tpl)))
 
-(defun org-latex-packages-to-string (pkg &optional newline)
+(defun org-latex-packages-to-string (pkg &optional snippets-p newline)
   "Turn an alist of packages into a string with the \\usepackage macros."
   (setq pkg (mapconcat (lambda(p)
 			 (cond
 			  ((stringp p) p)
+			  ((and snippets-p (>= (length p) 3) (not (nth 2 p)))
+			   (format "%% Package %s omitted" (cadr p)))
 			  ((equal "" (car p))
 			   (format "\\usepackage{%s}" (cadr p)))
 			  (t
