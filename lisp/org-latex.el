@@ -2166,13 +2166,23 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 
 (defun org-export-latex-lists ()
   "Convert plain text lists in current buffer into LaTeX lists."
-  (goto-char (point-min))
-  (while (re-search-forward org-list-beginning-re nil t)
-    (org-if-unprotected
-     (beginning-of-line)
-     (insert (org-list-to-latex (org-list-parse-list t)
-				org-export-latex-list-parameters))
-     "\n")))
+  (let (res)
+    (goto-char (point-min))
+    (while (re-search-forward org-list-beginning-re nil t)
+      (org-if-unprotected
+       (beginning-of-line)
+       (setq res (org-list-to-latex (org-list-parse-list t)
+				    org-export-latex-list-parameters))
+       (while (string-match "^\\(\\\\item[ \t]+\\)\\[@start:\\([0-9]+\\)\\]"
+			    res)
+	 (setq res (replace-match
+		    (concat (format "\\setcounter{enumi}{%d}"
+				    (1- (string-to-number
+					 (match-string 2 res))))
+			    "\n"
+			    (match-string 1 res))
+		    t t res)))
+       (insert res "\n")))))
 
 (defconst org-latex-entities
  '("\\!"

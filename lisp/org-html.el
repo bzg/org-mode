@@ -710,7 +710,7 @@ PUB-DIR is set, use this as the publishing directory."
 	 table-buffer table-orig-buffer
 	 ind item-type starter didclose
 	 rpl path attr desc descp desc1 desc2 link
-	 snumber fnc item-tag
+	 snumber fnc item-tag initial-number
 	 footnotes footref-seen
 	 id-file href
 	 )
@@ -1284,7 +1284,11 @@ lang=\"%s\" xml:lang=\"%s\">
 		    starter (if (match-beginning 2)
 				(substring (match-string 2 line) 0 -1))
 		    line (substring line (match-beginning 5))
+		    initial-number nil
 		    item-tag nil)
+	      (if (string-match "\\`\\[@start:\\([0-9]+\\)\\][ \t]?" line)
+		  (setq initial-number (match-string 1 line)
+			line (replace-match "" t t line)))
 	      (if (and starter (string-match "\\(.*?\\) ::[ \t]*" line))
 		  (setq item-type "d"
 			item-tag (match-string 1 line)
@@ -1309,11 +1313,15 @@ lang=\"%s\" xml:lang=\"%s\">
 	       ((and starter
 		     (or (not in-local-list)
 			 (> ind (car local-list-indent))))
+		;; check for a specified start number
 		;; Start new (level of) list
 		(org-close-par-maybe)
 		(insert (cond
 			 ((equal item-type "u") "<ul>\n<li>\n")
-			 ((equal item-type "o") "<ol>\n<li>\n")
+			 ((equal item-type "o")
+			  (if initial-number
+			      (format "<ol start=%s>\n<li>\n" initial-number)
+			    "<ol>\n<li>\n"))
 			 ((equal item-type "d")
 			  (format "<dl>\n<dt>%s</dt><dd>\n" item-tag))))
 		(push item-type local-list-type)

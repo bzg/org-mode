@@ -1,5 +1,11 @@
 2010-04-26  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-latex.el (org-export-latex-lists): Accept ordered list
+	item offset cookie.
+
+	* org-html.el (org-export-as-html): Accept ordered list
+	item offset cookie.
+
 	* org-indent.el (org-indent-mode): Turn off `indent-tabs-mode'
 	which messes up alignment of tags.
 
