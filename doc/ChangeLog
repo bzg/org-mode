@@ -1,3 +1,7 @@
+2010-04-26  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Conflicts): Document new work-around for windmove.el.
+
 2010-04-23  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Plain lists): Document the commands to promote/demote
