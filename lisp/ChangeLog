@@ -1,5 +1,7 @@
 2010-04-26  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-link-types, org-open-at-point): Add doi links.
+
 	* org-ascii.el (org-export-ascii-preprocess): Remove list
 	startcounter cookies.
 

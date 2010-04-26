@@ -2,6 +2,7 @@
 
 	* org.texi (Conflicts): Document new work-around for windmove.el.
 	(Plain lists): Describe counter start cookies.
+	(External links): Add example for a doi link.
 
 2010-04-23  Carsten Dominik  <carsten.dominik@gmail.com>
 
