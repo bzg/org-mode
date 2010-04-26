@@ -224,7 +224,7 @@ of `org-plain-list-ordered-item-terminator'."
        (< (point) (match-end 0))))
 
 (defun org-in-item-p ()
-  "It the cursor inside a plain list item.
+  "Is the cursor inside a plain list item.
 Does not have to be the first line."
   (save-excursion
     (condition-case nil
