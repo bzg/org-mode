@@ -1,5 +1,11 @@
 2010-04-26  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-ascii.el (org-export-ascii-preprocess): Remove list
+	startcounter cookies.
+
+	* org-list.el (org-renumber-ordered-list): Respect counter
+	start values.
+
 	* org-latex.el (org-export-latex-lists): Accept ordered list
 	item offset cookie.
 
