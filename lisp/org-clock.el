@@ -1194,8 +1194,11 @@ line and position cursor in that line."
 If there is no running clock, throw an error, unless FAIL-QUIETLY is set."
   (interactive)
   (catch 'exit
-    (if (not (org-clocking-p))
-	(if fail-quietly (throw 'exit t) (error "No active clock")))
+    (when (not (org-clocking-p))
+      (setq global-mode-string
+	    (delq 'org-mode-line-string global-mode-string))
+      (force-mode-line-update)
+      (if fail-quietly (throw 'exit t) (error "No active clock")))
     (let (ts te s h m remove)
       (save-excursion ; Do not replace this with `with-current-buffer'.
 	(with-no-warnings (set-buffer (org-clocking-buffer)))
@@ -1263,8 +1266,11 @@ If there is no running clock, throw an error, unless FAIL-QUIETLY is set."
 (defun org-clock-cancel ()
   "Cancel the running clock be removing the start timestamp."
   (interactive)
-  (if (not (org-clocking-p))
-      (error "No active clock"))
+  (when (not (org-clocking-p))
+    (setq global-mode-string
+         (delq 'org-mode-line-string global-mode-string))
+    (force-mode-line-update)
+    (error "No active clock"))
   (save-excursion ; Do not replace this with `with-current-buffer'.
     (with-no-warnings (set-buffer (org-clocking-buffer)))
     (goto-char org-clock-marker)

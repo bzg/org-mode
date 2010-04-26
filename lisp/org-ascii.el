@@ -565,7 +565,12 @@ publishing directory."
   (goto-char (point-min))
   (while (re-search-forward  "<<<?\\([^<>]*\\)>>>?\\([ \t]*\\)" nil t)
     (org-if-unprotected-at (match-beginning 1)
-      (replace-match "\\1\\2"))))
+      (replace-match "\\1\\2")))
+  ;; Remove list start counters
+  (goto-char (point-min))
+  (while (re-search-forward  "\\[@start:[0-9]+\\] ?" nil t)
+    (org-if-unprotected
+     (replace-match ""))))
 
 (defun org-html-expand-for-ascii (line)
   "Handle quoted HTML for ASCII export."

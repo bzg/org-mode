@@ -1222,7 +1222,9 @@ visually indistinguishable from true headlines.  In short: even though
 as bullets.
 @item
 @emph{Ordered} list items start with a numeral followed by either a period or
-a right parenthesis, such as @samp{1.} or @samp{1)}.
+a right parenthesis, such as @samp{1.} or @samp{1)}.  If you want a list to
+start a different value (e.g. 20), start the text of the item with
+@code{[@@start:20]}. 
 @item
 @emph{Description} list items are unordered list items, and contain the
 separator @samp{ :: } to separate the description @emph{term} from the
@@ -2804,6 +2806,7 @@ the colon.  The following list shows examples for each link type.
 
 @example
 http://www.astro.uva.nl/~dominik          @r{on the web}
+doi:10.1000/182                           @r{DOI for an electronic resource}
 file:/home/dominik/images/jupiter.jpg     @r{file, absolute path}
 /home/dominik/images/jupiter.jpg          @r{same as above}
 file:papers/last.pdf                      @r{file, relative path}
@@ -11371,7 +11374,18 @@ fixed this problem:
 @item @file{windmove.el} by Hovav Shacham
 @cindex @file{windmove.el}
 This package also uses the @kbd{S-<cursor>} keys, so everything written
-in the paragraph above about CUA mode also applies here.
+in the paragraph above about CUA mode also applies here.  If you want make
+the windmove function active in locations where Org-mode does not have
+special functionality on @kbd{S-@key{cursor}}, add this to your
+configuration:
+
+@lisp
+;; Make windmove work in org-mode:
+(add-hook 'org-shiftup-final-hook 'windmove-up)
+(add-hook 'org-shiftleft-final-hook 'windmove-left)
+(add-hook 'org-shiftdown-final-hook 'windmove-down)
+(add-hook 'org-shiftright-final-hook 'windmove-right)
+@end lisp
 
 @item @file{viper.el} by Michael Kifer
 @cindex @file{viper.el}

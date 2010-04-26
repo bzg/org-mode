@@ -1343,9 +1343,9 @@ the current file."
 (defvar org-export-format-drawer-function nil
   "Function to be called to format the contents of a drawer.
 The function must accept three parameters:
-  BACKEND  one of the symbols html, docbook, latex, ascii, xoxo
   NAME     the drawer name, like \"PROPERTIES\"
   CONTENT  the content of the drawer.
+  BACKEND  one of the symbols html, docbook, latex, ascii, xoxo
 The function should return the text to be inserted into the buffer.
 If this is nil, `org-export-format-drawer' is used as a default.")
 

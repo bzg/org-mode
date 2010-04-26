@@ -4496,7 +4496,7 @@ The following commands are available:
 
 (defconst org-non-link-chars "]\t\n\r<>")
 (defvar org-link-types '("http" "https" "ftp" "mailto" "file" "news"
-			   "shell" "elisp"))
+			   "shell" "elisp" "doi"))
 (defvar org-link-types-re nil
    "Matches a link that has a url-like prefix like \"http:\"")
 (defvar org-link-re-with-space nil
@@ -8679,6 +8679,11 @@ application the system uses for this file type."
 	 ((member type '("http" "https" "ftp" "news"))
 	  (browse-url (concat type ":" (org-link-escape
 					path org-link-escape-chars-browser))))
+
+	 ((string= type "doi")
+	  (browse-url (concat "http://dx.doi.org/"
+                              (org-link-escape
+                               path org-link-escape-chars-browser))))
 
 	 ((member type '("message"))
 	  (browse-url (concat type ":" path)))

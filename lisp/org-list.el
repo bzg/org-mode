@@ -224,7 +224,7 @@ of `org-plain-list-ordered-item-terminator'."
        (< (point) (match-end 0))))
 
 (defun org-in-item-p ()
-  "It the cursor inside a plain list item.
+  "Is the cursor inside a plain list item.
 Does not have to be the first line."
   (save-excursion
     (condition-case nil
@@ -841,6 +841,10 @@ with something like \"1.\" or \"2)\"."
     (setq bobp (bobp))
     (looking-at "[ \t]*[0-9]+\\([.)]\\)")
     (setq fmt (concat "%d" (or (match-string 1) ".")))
+    (save-excursion
+      (goto-char (match-end 0))
+      (if (looking-at "[ \t]*\\[@start:\\([0-9]+\\)")
+	  (setq n (1- (string-to-number (match-string 1))))))
     (beginning-of-line 0)
     ;; walk forward and replace these numbers
     (catch 'exit

@@ -1,4 +1,37 @@
+2010-04-26  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-link-types, org-open-at-point): Add doi links.
+
+	* org-ascii.el (org-export-ascii-preprocess): Remove list
+	startcounter cookies.
+
+	* org-list.el (org-renumber-ordered-list): Respect counter
+	start values.
+
+	* org-latex.el (org-export-latex-lists): Accept ordered list
+	item offset cookie.
+
+	* org-html.el (org-export-as-html): Accept ordered list
+	item offset cookie.
+
+	* org-indent.el (org-indent-mode): Turn off `indent-tabs-mode'
+	which messes up alignment of tags.
+
 2010-04-25  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-clock.el (org-clock-cancel, org-clock-out): Make sure
+	the modeline display is removed.
+
+	* org-exp.el (org-export-format-drawer-function): Fix
+	docstring.
+
+	* org-agenda.el (org-agenda-refile): New optional argument
+	NO-UPDATE.
+	(org-agenda-refile): Call `org-agenda-redo' unless NO-UPDATE
+	is set.
+	(org-agenda-bulk-action): Call the refile command with updates
+	suppressed - but arrange for `org-agenda-redo' to be called at
+	the end.
 
 	* org.el (org-mode): Make table mapping quiet.
 	(org-table-map-tables): New optional argument QUIETLY.
