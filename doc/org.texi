@@ -1222,7 +1222,9 @@ visually indistinguishable from true headlines.  In short: even though
 as bullets.
 @item
 @emph{Ordered} list items start with a numeral followed by either a period or
-a right parenthesis, such as @samp{1.} or @samp{1)}.
+a right parenthesis, such as @samp{1.} or @samp{1)}.  If you want a list to
+start a different value (e.g. 20), start the text of the item with
+@code{[@@start:20]}. 
 @item
 @emph{Description} list items are unordered list items, and contain the
 separator @samp{ :: } to separate the description @emph{term} from the
