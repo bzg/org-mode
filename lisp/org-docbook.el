@@ -533,7 +533,7 @@ publishing directory."
 	 table-buffer table-orig-buffer
 	 ind item-type starter didclose
 	 rpl path attr caption label desc descp desc1 desc2 link
-	 fnc item-tag
+	 fnc item-tag initial-number
 	 footref-seen footnote-list
 	 id-file
 	 )
@@ -998,7 +998,11 @@ publishing directory."
 		    starter (if (match-beginning 2)
 				(substring (match-string 2 line) 0 -1))
 		    line (substring line (match-beginning 5))
-		    item-tag nil)
+		    item-tag nil
+		    initial-number nil)
+	      (if (string-match "\\`\\[@start:\\([0-9]+\\)\\][ \t]?" line)
+		  (setq initial-number (match-string 1 line)
+			line (replace-match "" t t line)))
 	      (if (and starter (string-match "\\(.*?\\) ::[ \t]*" line))
 		  (setq item-type "d"
 			item-tag (match-string 1 line)
@@ -1031,7 +1035,18 @@ publishing directory."
 		(org-export-docbook-close-para-maybe)
 		(insert (cond
 			 ((equal item-type "u") "<itemizedlist>\n<listitem>\n")
-			 ((equal item-type "o") "<orderedlist>\n<listitem>\n")
+			 ((equal item-type "o")
+			  ;; Check for a specific start number.  If it
+			  ;; is specified, we use the ``override''
+			  ;; attribute of element <listitem> to pass the
+			  ;; info to DocBook.  We could also use the
+			  ;; ``startingnumber'' attribute of element
+			  ;; <orderedlist>, but the former works on both
+			  ;; DocBook 5.0 and prior versions.
+			  (if initial-number
+			      (format "<orderedlist>\n<listitem override=\"%s\">\n"
+				      initial-number)
+			    "<orderedlist>\n<listitem>\n"))
 			 ((equal item-type "d")
 			  (format "<variablelist>\n<varlistentry><term>%s</term><listitem>\n" item-tag))))
 		;; For DocBook, we need to open a para right after tag

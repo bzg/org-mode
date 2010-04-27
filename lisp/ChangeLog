@@ -1,3 +1,31 @@
+2010-04-27  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-agenda.el (org-agenda-goto): Push a mark before changing
+	the position.
+
+	* org-footnote.el (org-footnote): New group.
+	(org-footnote-section)
+	(org-footnote-tag-for-non-org-mode-files): Fix typos.
+
+	* org-list.el (org-end-of-item-text-before-children): Also do
+	the right thing at the end of a file.
+
+	* org.el (org-set-packages-alist, org-get-packages-alist): New
+	function.
+	(org-export-latex-default-packages-alist)
+	(org-export-latex-packages-alist): Add extra flag to
+	each package, indicating if it should be used for snippets.
+	(org-create-formula-image): Add the snippet argument.
+	(org-splice-latex-header): New argument SNIPPET-P, pass it
+	through to `org-latex-packages-to-string'.
+	(org-latex-packages-to-string): New argument SNIPPET-P.
+
+	* org-latex.el (org-export-latex-make-header): Add the snippet
+	argument.
+
+	* org-docbook.el (org-export-as-docbook): Implement ordered
+	lists starting at some offset.
+
 2010-04-26  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-link-types, org-open-at-point): Add doi links.

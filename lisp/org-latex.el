@@ -1147,7 +1147,7 @@ OPT-PLIST is the options plist for current buffer."
      (org-splice-latex-header
       (org-export-apply-macros-in-string org-export-latex-header)
       org-export-latex-default-packages-alist
-      org-export-latex-packages-alist
+      org-export-latex-packages-alist nil
       (org-export-apply-macros-in-string
        (plist-get opt-plist :latex-header-extra)))
      ;; append another special variable

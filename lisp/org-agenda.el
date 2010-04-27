@@ -6082,6 +6082,7 @@ and by additional input from the age of a schedules or deadline entry."
 	 (pos (marker-position marker)))
     (switch-to-buffer-other-window buffer)
     (widen)
+    (push-mark)
     (goto-char pos)
     (when (org-mode-p)
       (org-show-context 'agenda)

@@ -605,8 +605,9 @@ Assumes that the cursor is in the first ine of an item."
    (min (save-excursion (org-end-of-item) (point))
 	(save-excursion
 	  (goto-char (point-at-eol))
-	  (re-search-forward (concat "^" (org-item-re t)) nil t)
-	  (match-beginning 0)))))
+	  (if (re-search-forward (concat "^" (org-item-re t)) nil 'move)
+	      (match-beginning 0)
+	    (point-max))))))
 
 (defun org-next-item ()
   "Move to the beginning of the next item in the current plain list.
