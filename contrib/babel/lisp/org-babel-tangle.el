@@ -176,6 +176,7 @@ code blocks by language."
              (source-name (intern (or (fifth info)
                                       (format "block-%d" block-counter))))
              (src-lang (first info))
+	     (expand-cmd (intern (concat "org-babel-expand-body:" src-lang)))
              (params (third info))
              by-lang)
         (unless (string= (cdr (assoc :tangle params)) "no") ;; maybe skip
@@ -191,7 +192,7 @@ code blocks by language."
                                         (if (assoc :no-expand params)
                                             body
                                           (funcall
-                                           (intern (concat "org-babel-expand-body:" src-lang))
+					   (if (fboundp expand-cmd) expand-cmd 'org-babel-expand-body:generic)
                                            body
                                            params)))
                                       (if (and (cdr (assoc :noweb params))
