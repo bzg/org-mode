@@ -1,5 +1,8 @@
 2010-04-27  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-list.el (org-end-of-item-text-before-children): Also do
+	the right thing at the end of a file.
+
 	* org.el (org-set-packages-alist, org-get-packages-alist): New
 	function.
 	(org-export-latex-default-packages-alist)
