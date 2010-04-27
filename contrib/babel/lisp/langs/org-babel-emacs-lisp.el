@@ -62,7 +62,8 @@
   (save-window-excursion
     (let ((processed-params (org-babel-process-params params)))
       (org-babel-reassemble-table
-       (eval (read (org-babel-expand-body:emacs-lisp body params)))
+       (eval (read (format "(progn %s)"
+			   (org-babel-expand-body:emacs-lisp body params))))
        (org-babel-pick-name (nth 4 processed-params) (cdr (assoc :colnames params)))
        (org-babel-pick-name (nth 5 processed-params) (cdr (assoc :rownames params)))))))
 
