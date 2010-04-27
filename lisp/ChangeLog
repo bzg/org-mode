@@ -1,3 +1,8 @@
+2010-04-27  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-docbook.el (org-export-as-docbook): Implement ordered
+	lists starting at some offset.
+
 2010-04-26  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-link-types, org-open-at-point): Add doi links.
