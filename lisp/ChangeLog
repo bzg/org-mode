@@ -1,5 +1,8 @@
 2010-04-27  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-agenda.el (org-agenda-goto): Push a mark before changing
+	the position.
+
 	* org-footnote.el (org-footnote): New group.
 	(org-footnote-section)
 	(org-footnote-tag-for-non-org-mode-files): Fix typos.
