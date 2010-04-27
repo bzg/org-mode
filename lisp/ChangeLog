@@ -1,3 +1,11 @@
+2010-04-28  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-table.el (org-table-colgroup-line-p)
+	(org-table-cookie-line-p): New functions.
+
+	* org-exp.el (org-table-clean-before-export): Better tests for
+	colgroup and cookie lines.
+
 2010-04-27  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-agenda.el (org-agenda-goto): Push a mark before changing

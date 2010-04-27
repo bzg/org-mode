@@ -327,6 +327,33 @@ outside the table.")
    "\\(" "@?[-0-9I$&]+" "\\|" "[a-zA-Z]\\{1,2\\}\\([0-9]+\\|&\\)" "\\|" "\\$[a-zA-Z0-9]+" "\\)")
   "Match a range for reference display.")
 
+(defun org-table-colgroup-line-p (line)
+  "Is this a table line colgroup information?"
+  (save-match-data
+    (and (string-match "[<>]\\|&[lg]t;" line)
+	 (string-match "\\`[ \t]*|[ \t]*/[ \t]*\\(|[ \t<>0-9|lgt&;]+\\)\\'"
+		       line)
+	 (not (delq
+	       nil
+	       (mapcar
+		(lambda (s)
+		  (not (member s '("" "<" ">" "<>" "&lt;" "&gt;" "&lt;&gt;"))))
+		(org-split-string (match-string 1 line) "[ \t]*|[ \t]*")))))))
+
+(defun org-table-cookie-line-p (line)
+  "Is this a table line with only alignment/width cookies?"
+
+  (save-match-data
+    (and (string-match "[<>]\\|&[lg]t;" line)
+	 (or (string-match "\\`[ \t]*|[ \t]*/[ \t]*\\(|[ \t<>0-9|lgt&;]+\\)\\'" line)
+	     (string-match "\\(\\`[ \t<>lr0-9|gt&;]+\\'\\)" line))
+	 (not (delq nil (mapcar
+			 (lambda (s)
+			   (not (or (equal s "")
+				    (string-match "\\`<\\([lr]?[0-9]+\\|[lr]\\)>\\'" s)
+				    (string-match "\\`&lt;\\([lr]?[0-9]+\\|[lr]\\)&gt;\\'" s))))
+			 (org-split-string (match-string 1 line) "[ \t]*|[ \t]*")))))))
+
 (defconst org-table-translate-regexp
   (concat "\\(" "@[-0-9I$]+" "\\|" "[a-zA-Z]\\{1,2\\}\\([0-9]+\\|&\\)" "\\)")
   "Match a reference that needs translation, for reference display.")
@@ -763,14 +790,6 @@ When nil, simply write \"#ERROR\" in corrupted fields.")
     (and org-table-overlay-coordinates (org-table-overlay-coordinates))
     (setq org-table-may-need-update nil)
     ))
-
-
-
-
-
-
-
-
 
 (defun org-table-begin (&optional table-type)
   "Find the beginning of the table and return its position.
@@ -1729,23 +1748,6 @@ the table and kill the editing buffer."
     (org-table-get-field nil text)
     (org-table-align)
     (message "New field value inserted")))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 (defvar org-timecnt) ; dynamically scoped parameter
 

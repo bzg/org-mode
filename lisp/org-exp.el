@@ -42,6 +42,8 @@
 (declare-function org-export-htmlize-region-for-paste "org-html" (beg end))
 (declare-function htmlize-buffer "ext:htmlize" (&optional buffer))
 (declare-function org-inlinetask-remove-END-maybe "org-inlinetask" ())
+(declare-function org-table-cookie-line-p "org-table" (line))
+(declare-function org-table-colgroup-line-p "org-table" (line))
 (autoload 'org-export-generic "org-export-generic" "Export using the generic exporter" t)
 (defgroup org-export nil
   "Options for exporting org-listings."
@@ -2660,13 +2662,16 @@ If yes remove the column and the special lines."
 				"^[ \t]*| *\\([\#!$*_^ /]\\) *|")
 			      x)))
 	     lines))
+      ;; No special marking column
       (progn
 	(setq org-table-clean-did-remove-column nil)
 	(delq nil
 	      (mapcar
 	       (lambda (x)
 		 (cond
-		  ((string-match  "^[ \t]*| */ *|" x)
+		  ((org-table-colgroup-line-p x)
+		   ;; This line contains colgroup info, extract it
+		   ;; and then discard the line
 		   (setq org-table-colgroup-info
 			 (mapcar (lambda (x)
 				   (cond ((member x '("<" "&lt;")) :start)
@@ -2675,14 +2680,20 @@ If yes remove the column and the special lines."
 					 (t nil)))
 				 (org-split-string x "[ \t]*|[ \t]*")))
 		   nil)
+		  ((org-table-cookie-line-p x)
+		   ;; This line contains formatting cookies, discard it
+		   nil)
 		  (t x)))
 	       lines)))
+    ;; there is a special marking column
     (setq org-table-clean-did-remove-column t)
     (delq nil
 	  (mapcar
 	   (lambda (x)
 	     (cond
-	      ((string-match  "^[ \t]*| */ *|" x)
+	      ((org-table-colgroup-line-p x)
+	       ;; This line contains colgroup info, extract it
+	       ;; and then discard the line
 	       (setq org-table-colgroup-info
 		     (mapcar (lambda (x)
 			       (cond ((member x '("<" "&lt;")) :start)
@@ -2691,8 +2702,12 @@ If yes remove the column and the special lines."
 				     (t nil)))
 			     (cdr (org-split-string x "[ \t]*|[ \t]*"))))
 	       nil)
+	      ((org-table-cookie-line-p x)
+	       ;; This line contains formatting cookies, discard it
+	       nil)
 	      ((string-match "^[ \t]*| *[!_^/] *|" x)
-	       nil) ; ignore this line
+	       ;; ignore this line
+	       nil)
 	      ((or (string-match "^\\([ \t]*\\)|-+\\+" x)
 		   (string-match "^\\([ \t]*\\)|[^|]*|" x))
 	       ;; remove the first column

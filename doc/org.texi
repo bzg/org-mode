@@ -1881,6 +1881,9 @@ to the right and of string-rich column to the left, you and use @samp{<r>} or
 @samp{<l>} in a similar fashion.  You may also combine alignment and field
 width like this: @samp{<l10>}.
 
+Lines which only contain these formatting cookies will be removed
+automatically.
+
 @node Column groups, Orgtbl mode, Column width and alignment, Tables
 @section Column groups
 @cindex grouping columns in tables
@@ -1897,14 +1900,14 @@ a group of its own.  Boundaries between column groups will upon export be
 marked with vertical lines.  Here is an example:
 
 @example
-|   |  N | N^2 | N^3 | N^4 | sqrt(n) | sqrt[4](N) |
-|---+----+-----+-----+-----+---------+------------|
-| / | <> |   < |     |   > |       < |          > |
-| # |  1 |   1 |   1 |   1 |       1 |          1 |
-| # |  2 |   4 |   8 |  16 |  1.4142 |     1.1892 |
-| # |  3 |   9 |  27 |  81 |  1.7321 |     1.3161 |
-|---+----+-----+-----+-----+---------+------------|
-#+TBLFM: $3=$2^2::$4=$2^3::$5=$2^4::$6=sqrt($2)::$7=sqrt(sqrt(($2)))
+| N | N^2 | N^3 | N^4 | sqrt(n) | sqrt[4](N) |
+|---+-----+-----+-----+---------+------------|
+| / |   < |     |   > |       < |          > |
+| 1 |   1 |   1 |   1 |       1 |          1 |
+| 2 |   4 |   8 |  16 |  1.4142 |     1.1892 |
+| 3 |   9 |  27 |  81 |  1.7321 |     1.3161 |
+|---+-----+-----+-----+---------+------------|
+#+TBLFM: $2=$1^2::$3=$1^3::$4=$1^4::$5=sqrt($1)::$6=sqrt(sqrt(($1)))
 @end example
 
 It is also sufficient to just insert the column group starters after

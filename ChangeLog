@@ -1,3 +1,8 @@
+2010-04-28  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* Document that lines with formatting cookies will be removed
+	automatically.
+
 2010-04-18  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* Makefile (BATCH): Write the BATCH command a bit more compact.
