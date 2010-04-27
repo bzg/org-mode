@@ -1,5 +1,9 @@
 2010-04-27  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-footnote.el (org-footnote): New group.
+	(org-footnote-section)
+	(org-footnote-tag-for-non-org-mode-files): Fix typos.
+
 	* org-list.el (org-end-of-item-text-before-children): Also do
 	the right thing at the end of a file.
 

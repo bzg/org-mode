@@ -65,6 +65,11 @@
   (org-re "^\\(\\[\\([0-9]+\\|fn:[-_[:word:]]+\\)\\]\\)")
   "Regular expression matching the definition of a footnote.")
 
+(defgroup org-footnote nil
+  "Footnotes in Org-mode."
+  :tag "Org Footnote"
+  :group 'org)
+
 (defcustom org-footnote-section "Footnotes"
   "Outline heading containing footnote definitions before export.
 This can be nil, to place footnotes locally at the end of the current
@@ -75,7 +80,7 @@ automatically, i.e. when creating the footnote, and when sorting the notes.
 However, by hand you may place definitions *anywhere*.
 If this is a string, during export, all subtrees starting with this
 heading will be removed after extracting footnote definitions."
-  :group 'org-footnotes
+  :group 'org-footnote
   :type '(choice
 	  (string :tag "Collect footnotes under heading")
 	  (const :tag "Define footnotes locally" nil)))
@@ -87,7 +92,7 @@ as in Org-mode.  Outside Org-mode, new footnotes are always placed at
 the end of the file.  When you normalize the notes, any line containing
 only this tag will be removed, a new one will be inserted at the end
 of the file, followed by the collected and normalized footnotes."
-  :group 'org-footnotes
+  :group 'org-footnote
   :type 'string)
 
 (defcustom org-footnote-define-inline nil
