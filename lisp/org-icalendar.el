@@ -47,6 +47,11 @@ The file name should be absolute, the file will be overwritten without warning."
   :group 'org-export-icalendar
   :type 'string)
 
+(defcustom org-icalendar-combined-description nil
+  "Calendar description for the combined iCalendar representing all agenda files."
+  :group 'org-export-icalendar
+  :type 'string)
+
 (defcustom org-icalendar-use-plain-timestamp t
   "Non-nil means make an event from every plain time stamp."
   :group 'org-export-icalendar
@@ -563,14 +568,16 @@ not used right now."
 	(name (or name "unknown"))
 	(timezone (if (> (length org-icalendar-timezone) 0)
 		      org-icalendar-timezone
-		    (cadr (current-time-zone)))))
+		    (cadr (current-time-zone))))
+	(description org-icalendar-combined-description))
     (princ
      (format "BEGIN:VCALENDAR
 VERSION:2.0
 X-WR-CALNAME:%s
 PRODID:-//%s//Emacs with Org-mode//EN
 X-WR-TIMEZONE:%s
-CALSCALE:GREGORIAN\n" name user timezone))))
+X-WR-CALDESC:%s
+CALSCALE:GREGORIAN\n" name user timezone description))))
 
 (defun org-finish-icalendar-file ()
   "Finish an iCalendar file by inserting the END statement."
