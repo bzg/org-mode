@@ -1,5 +1,8 @@
 2010-04-28  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-latex.el (org-export-latex-treat-sub-super-char): Make
+	sure parenthesis matching is consistent.
+
 	* org-table.el (org-table-colgroup-line-p)
 	(org-table-cookie-line-p): New functions.
 

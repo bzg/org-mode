@@ -1472,7 +1472,9 @@ Convert CHAR depending on STRING-BEFORE and STRING-AFTER."
 	       ((and (> (length string-after) 1)
 		     (or (eq subsup t)
 			 (and (equal subsup '{}) (eq (string-to-char string-after) ?\{)))
-		     (string-match "[({]?\\([^)}]+\\)[)}]?" string-after))
+		     (or (string-match "[{]?\\([^}]+\\)[}]?" string-after)
+			 (string-match "[(]?\\([^)]+\\)[)]?" string-after)))
+
 		(org-export-latex-protect-string
 		 (format "%s$%s{%s}$" string-before char
 			 (if (and (> (match-end 1) (1+ (match-beginning 1)))
