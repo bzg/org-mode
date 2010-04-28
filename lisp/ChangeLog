@@ -291,6 +291,14 @@
 	* org-html.el (org-format-org-table-html): Test all columns
 	for number content.
 
+2010-04-28  Christian Egli  <christian.egli@sbszh.ch>
+
+	* org-taskjuggler.el (org-taskjuggler-find-task-with-id): Do not
+	use the ID property frivolously, i.e. use a property named
+	"task_id" instead as we do not search for ids across files.
+	(org-taskjuggler-resolve-explicit-dependencies): Issue a warning
+	if a dependency cannot be resolved.
+
 2010-04-28  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-latex.el (org-export-latex-treat-sub-super-char): Make

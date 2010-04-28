@@ -79,16 +79,17 @@
 ;; tasks. You can group your resources hierarchically. Tag the top
 ;; node of the resources with "taskjuggler_resource" (or whatever you
 ;; customized `org-export-taskjuggler-resource-tag' to). You can
-;; optionally assign an ID to the resources (using the standard org
-;; properties commands) or you can let the exporter generate IDs
-;; automatically (the exporter picks the first word of the headline as
-;; the ID as long as it is unique, see the documentation of
-;; `org-taskjuggler-get-unique-id'). Using that ID you can then
-;; allocate resources to tasks. This is again done with the "allocate"
-;; property on the tasks. Do this in column view or when on the task
-;; type
+;; optionally assign an identifier (named "resource_id") to the
+;; resources (using the standard org properties commands) or you can
+;; let the exporter generate identifiers automatically (the exporter
+;; picks the first word of the headline as the identifier as long as
+;; it is unique, see the documentation of
+;; `org-taskjuggler-get-unique-id'). Using that identifier you can
+;; then allocate resources to tasks. This is again done with the
+;; "allocate" property on the tasks. Do this in column view or when on
+;; the task type
 ;;
-;;  C-c C-x p allocate RET <ID> RET
+;;  C-c C-x p allocate RET <resource_id> RET
 ;;
 ;; Once the allocations are done you can again export to TaskJuggler
 ;; and check in the Resource Allocation Graph which person is working
@@ -112,15 +113,15 @@
 ;; mode manual) or with the BLOCKER attribute (see org-depend.el) or
 ;; alternatively with a depends attribute. Both the BLOCKER and the
 ;; depends attribute can be either "previous-sibling" or a reference
-;; to an ID which is defined for another task in the project. BLOCKER
-;; and the depends attribute can define multiple dependencies
-;; separated by either space or comma. You can also specify optional
-;; attributes on the dependency by simply appending it. The following
-;; examples should illustrate this:
+;; to an identifier (named "task_id") which is defined for another
+;; task in the project. BLOCKER and the depends attribute can define
+;; multiple dependencies separated by either space or comma. You can
+;; also specify optional attributes on the dependency by simply
+;; appending it. The following examples should illustrate this:
 ;;
 ;; * Training material
 ;;   :PROPERTIES:
-;;   :ID:       training_material
+;;   :task_id:  training_material
 ;;   :ORDERED:  t
 ;;   :END:
 ;; ** Markup Guidelines
@@ -143,8 +144,8 @@
 ;;   - What about property inheritance and org-property-inherit-p?
 ;;   - Use TYPE_TODO as an way to assign resources
 ;;   - Make sure multiple dependency definitions (i.e. BLOCKER on
-;;     previous-sibling and on a specific ID) in multiple attributes
-;;     are properly exported.
+;;     previous-sibling and on a specific task_id) in multiple
+;;     attributes are properly exported. 
 ;;   - Fix compiler warnings about reference and assignment to free
 ;;     variable `old-level' in org-taskjuggler-close-maybe
 ;;
@@ -275,13 +276,13 @@ defined in `org-export-taskjuggler-default-reports'."
     ;; add a default resource
     (unless resources
       (setq resources 
-	    `((("ID" . ,(user-login-name)) 
+	    `((("resource_id" . ,(user-login-name)) 
 	       ("headline" . ,user-full-name) 
 	       ("level" . 1)))))
     ;; add a default allocation to the first task if none was given
     (unless (assoc "allocate" (car tasks))
       (let ((task (car tasks))
-	    (resource-id (cdr (assoc "ID" (car resources)))))
+	    (resource-id (cdr (assoc "resource_id" (car resources)))))
 	(setcar tasks (push (cons "allocate" resource-id) task))))
     ;; add a default start date to the first task if none was given
     (unless (assoc "start" (car tasks))
@@ -447,12 +448,12 @@ dependencies. A dependency will have to match `[-a-zA-Z0-9_]+'."
 
 (defun org-taskjuggler-resolve-explicit-dependencies (dependencies tasks)
   "For each dependency in DEPENDENCIES try to find a
-corresponding task with a matching ID in TASKS. Return a list
-containing the resolved links for all DEPENDENCIES where a
-matching tasks was found. If the dependency is
+corresponding task with a matching property \"task_id\" in TASKS.
+Return a list containing the resolved links for all DEPENDENCIES
+where a matching tasks was found. If the dependency is
 \"previous-sibling\" it is ignored (as this is dealt with in
 `org-taskjuggler-resolve-dependencies'). If there is no matching
-task the dependency is silently ignored."
+task the dependency is ignored and a warning is displayed ."
   (unless (null dependencies)
     (let* 
 	;; the dependency might have optional attributes such as "{
@@ -472,13 +473,16 @@ task the dependency is silently ignored."
 	(cons (mapconcat 'identity (list path optional-attributes) " ")
 	      (org-taskjuggler-resolve-explicit-dependencies 
 	       (cdr dependencies) tasks)))
-       ;; silently ignore all other dependencies
-       (t (org-taskjuggler-resolve-explicit-dependencies (cdr dependencies) tasks))))))
+       ;; warn about dangling dependency but otherwise ignore it
+       (t (display-warning 
+	   'org-export-taskjuggler 
+	   (format "No task with matching property \"task_id\" found for id %s" id))
+	  (org-taskjuggler-resolve-explicit-dependencies (cdr dependencies) tasks))))))
 
 (defun org-taskjuggler-find-task-with-id (id tasks)
   "Find ID in tasks. If found return the path of task. Otherwise
 return nil."
-  (let ((task-id (cdr (assoc "ID" (car tasks))))
+  (let ((task-id (cdr (assoc "task_id" (car tasks))))
 	(path (cdr (assoc "path" (car tasks)))))
     (cond 
      ((null tasks) nil)
@@ -551,13 +555,15 @@ If the ATTRIBUTE is not in ITEM return nil."
    (t (org-taskjuggler-get-attribute (cdr item) attribute))))
 
 (defun org-taskjuggler-open-resource (resource)
-  (let ((id (org-taskjuggler-clean-id (cdr (assoc "ID" resource))))
-	(unique-id (org-taskjuggler-clean-id (cdr (assoc "unique-id" resource))))
+  (let ((id (org-taskjuggler-clean-id 
+	     (or (cdr (assoc "resource_id" resource)) 
+		 (cdr (assoc "ID" resource)) 
+		 (cdr (assoc "unique-id" resource)))))
 	(headline (cdr (assoc "headline" resource)))
 	(attributes '(limits vacation shift booking efficiency journalentry rate)))
     (insert 
      (concat 
-      "resource " (or id unique-id) " \"" headline "\" {\n "
+      "resource " id " \"" headline "\" {\n "
       (org-taskjuggler-get-attributes resource attributes) "\n"))))
 
 (defun org-taskjuggler-clean-effort (effort)
