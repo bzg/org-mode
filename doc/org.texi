@@ -1882,7 +1882,7 @@ to the right and of string-rich column to the left, you and use @samp{<r>} or
 width like this: @samp{<l10>}.
 
 Lines which only contain these formatting cookies will be removed
-automatically.
+automatically when exporting the document.
 
 @node Column groups, Orgtbl mode, Column width and alignment, Tables
 @section Column groups
