@@ -298,6 +298,7 @@
 	"task_id" instead as we do not search for ids across files.
 	(org-taskjuggler-resolve-explicit-dependencies): Issue a warning
 	if a dependency cannot be resolved.
+	(org-taskjuggler-open-resource): Add documentation.
 
 2010-04-28  Carsten Dominik  <carsten.dominik@gmail.com>
 

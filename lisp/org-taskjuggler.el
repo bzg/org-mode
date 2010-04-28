@@ -511,7 +511,7 @@ finally add more underscore characters (\"_\")."
   (and id (replace-regexp-in-string "[^a-zA-Z0-9_]" "_" id)))
 
 (defun org-taskjuggler-open-project (project)
-  "Insert a the beginning of project declaration. All valid
+  "Insert the beginning of a project declaration. All valid
 attributes from the PROJECT alist are inserted. If no end date is
 specified it is calculated
 `org-export-taskjuggler-default-project-duration' days from now."
@@ -555,6 +555,12 @@ If the ATTRIBUTE is not in ITEM return nil."
    (t (org-taskjuggler-get-attribute (cdr item) attribute))))
 
 (defun org-taskjuggler-open-resource (resource)
+  "Insert the beginning of a resource declaration. All valid
+attributes from the RESOURCE alist are inserted. If the RESOURCE
+defines a property \"resource_id\" it will be used as the id for
+this resource. Otherwise it will use the ID property. If neither
+is defined it will calculate a unique id for the resource using
+`org-taskjuggler-get-unique-id'."
   (let ((id (org-taskjuggler-clean-id 
 	     (or (cdr (assoc "resource_id" resource)) 
 		 (cdr (assoc "ID" resource)) 
