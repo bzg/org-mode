@@ -1633,7 +1633,7 @@ lang=\"%s\" xml:lang=\"%s\">
 			       (lambda (x) (string-match "^[ \t]*|-" x))
 			       (cdr lines)))))
 
-	 (nline 0) fnum i
+	 (nline 0) fnum nfields i
 	 tbopen line fields html gr colgropen rowstart rowend)
     (setq caption (and caption (org-html-do-expand caption)))
     (if splice (setq head nil))
@@ -1651,7 +1651,8 @@ lang=\"%s\" xml:lang=\"%s\">
 	      (throw 'next-line t)))
 	;; Break the line into fields
 	(setq fields (org-split-string line "[ \t]*|[ \t]*"))
-	(unless fnum (setq fnum (make-vector (length fields) 0)))
+	(unless fnum (setq fnum (make-vector (length fields) 0)
+			   nfields (length fnum)))
 	(setq nline (1+ nline) i -1
 	      rowstart (eval (car org-export-table-row-tags))
 	      rowend (eval (cdr org-export-table-row-tags)))
@@ -1659,7 +1660,7 @@ lang=\"%s\" xml:lang=\"%s\">
 		      (mapconcat
 		       (lambda (x)
 			 (setq i (1+ i))
-			 (if (and (< i nline)
+			 (if (and (< i nfields) ; make sure no rogue line causes an error here
 				  (string-match org-table-number-regexp x))
 			     (incf (aref fnum i)))
 			 (cond
