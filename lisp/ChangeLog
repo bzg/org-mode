@@ -2,6 +2,8 @@
 
 	* org-agenda.el (org-sorting-choice): New sorting type alpha.
 	(org-cmp-alpha): New defsubst.
+	(org-em): New defsubst.
+	(org-entries-lessp): Only compute needed comparisons.
 
 2010-04-29  Carsten Dominik  <carsten.dominik@gmail.com>
 
