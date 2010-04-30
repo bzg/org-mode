@@ -104,7 +104,8 @@ then create. Return the initialized session."
     (let ((session (or session (if matlabp "*Inferior Matlab*" "*Inferior Octave*"))))
       (if (org-babel-comint-buffer-livep session) session
 	(save-window-excursion
-	  (if matlabp (matlab-shell) (run-octave))
+	  (if matlabp (unless org-babel-matlab-with-emacs-link (matlab-shell))
+	    (run-octave))
 	  (rename-buffer (if (bufferp session) (buffer-name session)
 			   (if (stringp session) session (buffer-name)))) (current-buffer))))))
 
