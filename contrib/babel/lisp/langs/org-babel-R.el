@@ -121,7 +121,7 @@ called by `org-babel-execute-src-block'."
           (insert "\n"))
         (format "%s <- read.table(\"%s\", header=%s, row.names=%s, sep=\"\\t\", as.is=TRUE)"
                 name transition-file
-		(if (and (eq (second value) 'hline) colnames-p) "TRUE" "FALSE")
+		(if (or (eq (second value) 'hline) colnames-p) "TRUE" "FALSE")
 		(if rownames-p "1" "NULL")))
     (format "%s <- %s" name (org-babel-R-quote-tsv-field value))))
 
