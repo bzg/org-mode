@@ -496,7 +496,6 @@ the mode line."
 		      (if current
 			  (format ", prefix + to add to %s" org-clock-effort)
 			"")))))
-     (debug)
      (when (stringp value)
        ;; A string.  See if it is a delta
        (setq sign (string-to-char value))
