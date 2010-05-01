@@ -244,10 +244,11 @@ Miscellaneous
 @node Preface, Installation, Introduction, Introduction
 @section Preface
 
-Org is a mode for keeping notes, maintaining TODO lists, and doing
-project planning with a fast and effective plain-text system.
+Org is a mode for keeping notes, maintaining TODO lists, and doing project
+planning with a fast and effective plain-text system.  It is also an
+authoring and publishing system.
 
-@i{This document is an extract from the
+@i{This document is a much compressed derivative of the
 @uref{http://orgmode.org/index.html#sec-4_1, comprehensive Org-mode manual}.
 It contains all basic features and commands, along with important hints for
 customization.  It is intended for beginners who would shy back from a 200
@@ -262,8 +263,8 @@ to @ref{Activation}.}
 
 If you have downloaded Org from the Web, either as a distribution @file{.zip}
 or @file{.tar} file, or as a Git archive, it is best to run it directly from
-the distribution directory.  You need to add @file{lisp} subdirectory to the
-Emacs load path.  To do this, add the following line to @file{.emacs}:
+the distribution directory.  You need to add the @file{lisp} subdirectories
+to the Emacs load path.  To do this, add the following line to @file{.emacs}:
 
 @smallexample
 (setq load-path (cons "~/path/to/orgdir/lisp" load-path))
@@ -284,20 +285,17 @@ when Org-mode starts.
 (require 'org-install)
 @end smalllisp
 
-Do not forget to activate Org as described in the following section.
-
 @node Activation, Feedback, Installation, Introduction
 @section Activation
 
 Add the following lines to your @file{.emacs} file.  The last three lines
-define @emph{global} keys for the commands @command{org-store-link},
-@command{org-agenda}, and @command{org-iswitchb}---please choose suitable
-keys yourself.
+define @emph{global} keys for some commands --- please choose suitable keys
+yourself.
 
 @smalllisp
 ;; The following lines are always needed.  Choose your own keys.
 (add-to-list 'auto-mode-alist '("\\.org\\'" . org-mode))
-(global-font-lock-mode 1)                     ; for all buffers
+(add-hook 'org-mode-hook 'turn-on-font-lock) ; not needed when global-font-lock-mode is on
 (global-set-key "\C-cl" 'org-store-link)
 (global-set-key "\C-ca" 'org-agenda)
 (global-set-key "\C-cb" 'org-iswitchb)
@@ -311,9 +309,7 @@ into Org mode.
 
 If you find problems with Org, or if you have questions, remarks, or ideas
 about it, please mail to the Org mailing list @email{emacs-orgmode@@gnu.org}.
-If you are not a member of the mailing list, your mail will be passed to the
-list after a moderator has approved it.  For information on how to submit bug
-reports, see the main manual.
+For information on how to submit bug reports, see the main manual.
 
 @node Document Structure, Tables, Introduction, Top
 @chapter Document Structure
@@ -2518,7 +2514,7 @@ Org supports in-buffer completion with @kbd{M-@key{TAB}}.  This type of
 completion does not make use of the minibuffer.  You simply type a few
 letters into the buffer and use the key to complete text right there.  For
 example, this command will complete @TeX{} symbols after @samp{\}, TODO
-keywords at the beginning of a headline, and ags after @samp{:} in a
+keywords at the beginning of a headline, and tags after @samp{:} in a
 headline.
 
 @node Clean view, MobileOrg, Completion, Miscellaneous
