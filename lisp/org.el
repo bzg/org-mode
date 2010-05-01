@@ -3029,7 +3029,7 @@ compiling LaTeX snippets into images for inclusion into HTML."
 	   (string :tag "A line of LaTeX"))))
 
 (defcustom org-export-latex-packages-alist nil
-  "Alist of packages to be inserted in every LaTeX the header.
+  "Alist of packages to be inserted in every LaTeX header.
 These will be inserted after `org-export-latex-default-packages-alist'.
 Each cell is of the format \( \"options\" \"package\" snippet-flag \).
 SNIPPET-FLAG, when t, indicates that this package is also needed when
@@ -4773,7 +4773,7 @@ will be prompted for."
 				 '(font-lock-fontified t face org-block))
 	    t)
 	   ((and (match-end 4) (equal dc3 "begin"))
-	    ;; Truely a block
+	    ;; Truly a block
 	    (setq block-type (downcase (match-string 5))
 		  quoting (member block-type org-protecting-blocks))
 	    (when (re-search-forward
@@ -7174,7 +7174,7 @@ Sorting can be alphabetically, numerically, by date/time as given by
 a time stamp, by a property or by priority.
 
 The command prompts for the sorting type unless it has been given to the
-function through the SORTING-TYPE argument, which needs to a character,
+function through the SORTING-TYPE argument, which needs to be a character,
 \(?n ?N ?a ?A ?t ?T ?s ?S ?d ?D ?p ?P ?r ?R ?f ?F).  Here is the
 precise meaning of each character:
 
@@ -7471,11 +7471,11 @@ If WITH-CASE is non-nil, the sorting will be case-sensitive."
 
 ;;;###autoload
 (define-minor-mode orgstruct-mode
-  "Toggle the minor more `orgstruct-mode'.
-This mode is for using Org-mode structure commands in other modes.
-The following key behave as if Org-mode was active, if the cursor
-is on a headline, or on a plain list item (both in the definition
-of Org-mode).
+  "Toggle the minor mode `orgstruct-mode'.
+This mode is for using Org-mode structure commands in other
+modes.  The following keys behave as if Org-mode were active, if
+the cursor is on a headline, or on a plain list item (both as
+defined by Org-mode).
 
 M-up        Move entry/item up
 M-down	    Move entry/item down
@@ -15917,8 +15917,9 @@ See `org-ctrl-c-ctrl-c-hook' for more information.
 This hook runs as the first action when TAB is pressed, even before
 `org-cycle' messes around with the `outline-regexp' to cater for
 inline tasks and plain list item folding.
-If any function in this hook returns t, not other actions like table
-field motion visibility cycling will be done.")
+If any function in this hook returns t, any other actions that
+would have been caused by TAB (such as table field motion or visibility
+cycling) will not occur.")
 
 (defvar org-tab-after-check-for-table-hook nil
   "Hook for functions to attach themselves to TAB.

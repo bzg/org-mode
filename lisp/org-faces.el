@@ -458,7 +458,7 @@ changes."
        (:foreground "green"))
       (((class color) (min-colors 8) (background dark))
        (:foreground "yellow"))))
-  "Face for fixed-with text like code snippets."
+  "Face for fixed-width text like code snippets."
   :group 'org-faces
   :version "22.1")
 
@@ -600,7 +600,7 @@ belong to the weekend."
 (defface org-agenda-dimmed-todo-face
   '((((background light)) (:foreground "grey50"))
     (((background dark)) (:foreground "grey50")))
-  "Face used to dimm blocked tasks in the agenda."
+  "Face used to dim blocked tasks in the agenda."
   :group 'org-faces)
 
 (defface org-scheduled-previously
