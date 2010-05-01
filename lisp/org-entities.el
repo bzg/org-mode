@@ -59,8 +59,8 @@ LaTeX mathp          A Boolean, either t or nil.  t if this entity needs
 HTML replacement     In ready HTML, no further processing will take place.
                      Usually this will be an &...; entity.
 ASCII replacement    Plain ASCII, no extensions.  Symbols that cannot be
-                     represented will be written out as an explanatory text.
-                     But see the variable `org-entities-ascii-keep-macro-form'.
+                     represented will be left as they are, but see the.
+                     variable `org-entities-ascii-explanatory'.
 Latin1 replacement   Use the special characters available in latin1.
 utf-8 replacement    Use the special characters available in utf-8.
 

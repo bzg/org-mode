@@ -8458,8 +8458,8 @@ Some backends (HTML, La@TeX{}, and DocBook) allow you to directly include
 images into the exported document.  Org does this, if a link to an image
 files does not have a description part, for example @code{[[./img/a.jpg]]}.
 If you wish to define a caption for the image and maybe a label for internal
-cross references, you sure that the link is on a line by itself precede it
-with:
+cross references, make sure that the link is on a line by itself and precede
+it with @code{#+CAPTION} and @code{#+LABEL} as follows:
 
 @example
 #+CAPTION: This is the caption for the next figure link (or table)
@@ -8700,7 +8700,7 @@ delimiters, for example:
 Angles are written as Greek letters \alpha, \beta and \gamma.
 @end example
 
-@vindex org-html-entities
+@vindex org-entities
 During export, these symbols will be transformed into the native format of
 the exporter backend.  Strings like @code{\alpha} will be exported as
 @code{&alpha;} in the HTML output, and as @code{$\alpha$} in the La@TeX{}
@@ -8709,7 +8709,7 @@ output.  Similarly, @code{\nbsp} will become @code{&nbsp;} in HTML and
 like this: @samp{\Aacute@{@}stor}.
 
 A large number of entities is provided, with names taken from both HTML and
-La@TeX{}, see the variable @code{org-html-entities} for the complete list.
+La@TeX{}, see the variable @code{org-entities} for the complete list.
 @samp{\-} is treated as a shy hyphen, and @samp{--}, @samp{---}, and
 @samp{...} are all converted into special commands creating hyphens of
 different lengths or a compact set of dots.
@@ -10013,12 +10013,12 @@ more types to this list as long as DocBook supports them.
 @cindex Special characters in DocBook export
 
 @vindex org-export-docbook-doctype
-@vindex org-html-entities
+@vindex org-entities
 Special characters that are written in @TeX{}-like syntax, such as @code{\alpha},
 @code{\Gamma}, and @code{\Zeta}, are supported by DocBook exporter.  These
 characters are rewritten to XML entities, like @code{&alpha;},
 @code{&Gamma;}, and @code{&Zeta;}, based on the list saved in variable
-@code{org-html-entities}.  As long as the generated DocBook file includes the
+@code{org-entities}.  As long as the generated DocBook file includes the
 corresponding entities, these special characters are recognized.
 
 You can customize variable @code{org-export-docbook-doctype} to include the
