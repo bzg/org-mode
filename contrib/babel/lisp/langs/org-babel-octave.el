@@ -113,7 +113,7 @@ then create. Return the initialized session."
    "%s
 if ischar(ans)
    fid = fopen('%s', 'w')
-   fprintf(fid, ans)
+   fprintf(fid, '%%s', ans)
    fprintf(fid, '\\n')
    fclose(fid)
 else
