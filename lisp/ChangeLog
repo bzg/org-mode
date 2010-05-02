@@ -1,3 +1,8 @@
+2010-05-02  Dan Davison  <davison@stats.ox.ac.uk>
+
+	* org-src.el (org-edit-src-code): allow-write-back-p had
+	erroneously been omitted from let binding
+
 2010-04-30  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-agenda.el (org-sorting-choice): New sorting type alpha.
