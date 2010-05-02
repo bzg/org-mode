@@ -41,7 +41,7 @@
 (defvar org-babel-octave-shell-command "octave -q"
   "Shell command to use to run octave as an external process.")
 
-(defun org-babel-expand-body:octave (org-babel-process-params params)
+(defun org-babel-expand-body:octave (body params &optional processed-params)
   (let ((vars (second (or processed-params (org-babel-process-params params)))))
     (concat
      ;; prepend code to define all arguments passed to the code block
