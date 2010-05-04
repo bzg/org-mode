@@ -50,6 +50,19 @@
 
 (defun org-babel-expand-body:matlab (body params &optional processed-params) body)
 
+(defvar org-babel-matlab-with-emacs-link nil
+  "If non-nil use matlab-shell-run-region for session
+  evaluation. This will use EmacsLink if (matlab-with-emacs-link)
+  evaluates to a non-nil value.")
+
+(defvar org-babel-matlab-emacs-link-wrapper-method
+   "%s
+if ischar(ans), fid = fopen('%s', 'w'); fprintf(fid, '%%s\\n', ans); fclose(fid);
+else, save -ascii %s ans
+end
+delete('%s')
+")
+
 (defun org-babel-execute:matlab (body params)
   "Execute a block of matlab code with org-babel."
   (org-babel-execute:octave body params 'matlab))

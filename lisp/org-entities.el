@@ -46,11 +46,11 @@ in backends where the corresponding character is not available."
   :type 'boolean)
 
 (defcustom org-entities-user nil
-  "User-defined entities used in Org-mode to preduce special characters.
-Each entry in this list is a list of strings.  It associate the name
+  "User-defined entities used in Org-mode to produce special characters.
+Each entry in this list is a list of strings.  It associates the name
 of the entity that can be inserted into an Org file as \\name with the
 appropriate replacements for the different export backends.  The order
-of the fields is he following
+of the fields is the following
 
 name                 As a string, without the leading backslash
 LaTeX replacement    In ready LaTeX, no further processing will take place
@@ -59,10 +59,10 @@ LaTeX mathp          A Boolean, either t or nil.  t if this entity needs
 HTML replacement     In ready HTML, no further processing will take place.
                      Usually this will be an &...; entity.
 ASCII replacement    Plain ASCII, no extensions.  Symbols that cannot be
-                     represented will be written out as an explanatory text.
-                     But see the variable `org-entities-ascii-keep-macro-form'.
+                     represented will be left as they are, but see the.
+                     variable `org-entities-ascii-explanatory'.
 Latin1 replacement   Use the special characters available in latin1.
-utf-8 replacement    Use special character available in utf-8.
+utf-8 replacement    Use the special characters available in utf-8.
 
 If you define new entities here that require specific LaTeX packages to be
 loaded, add these packages to `org-export-latex-packages-alist'."

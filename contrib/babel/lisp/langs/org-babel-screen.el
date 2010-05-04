@@ -62,7 +62,7 @@ In case you want to use a different screen than one selected by your $PATH")
            (socket (org-babel-screen-session-socketname session)))
       (unless socket (org-babel-prep-session:screen session params))
       (org-babel-screen-session-execute-string
-       session (org-babel-expand-body:screen body)))))
+       session (org-babel-expand-body:screen body params)))))
 
 (defun org-babel-prep-session:screen (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."

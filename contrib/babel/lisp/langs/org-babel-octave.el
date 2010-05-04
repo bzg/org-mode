@@ -41,7 +41,7 @@
 (defvar org-babel-octave-shell-command "octave -q"
   "Shell command to use to run octave as an external process.")
 
-(defun org-babel-expand-body:octave (org-babel-process-params params)
+(defun org-babel-expand-body:octave (body params &optional processed-params)
   (let ((vars (second (or processed-params (org-babel-process-params params)))))
     (concat
      ;; prepend code to define all arguments passed to the code block
@@ -104,19 +104,15 @@ then create. Return the initialized session."
     (let ((session (or session (if matlabp "*Inferior Matlab*" "*Inferior Octave*"))))
       (if (org-babel-comint-buffer-livep session) session
 	(save-window-excursion
-	  (if matlabp (matlab-shell) (run-octave))
+	  (if matlabp (unless org-babel-matlab-with-emacs-link (matlab-shell))
+	    (run-octave))
 	  (rename-buffer (if (bufferp session) (buffer-name session)
 			   (if (stringp session) session (buffer-name)))) (current-buffer))))))
 
 (defvar org-babel-octave-wrapper-method
    "%s
-if ischar(ans)
-   fid = fopen('%s', 'w')
-   fprintf(fid, ans)
-   fprintf(fid, '\\n')
-   fclose(fid)
-else
-   save -ascii %s ans
+if ischar(ans), fid = fopen('%s', 'w'); fprintf(fid, '%%s\\n', ans); fclose(fid);
+else, save -ascii %s ans
 end")
 
 (defvar org-babel-octave-eoe-indicator "\'org_babel_eoe\'")
@@ -154,6 +150,7 @@ value of the last statement in BODY, as elisp."
 
 (defun org-babel-octave-evaluate-session (session body result-type &optional matlabp)
   (let* ((tmp-file (make-temp-file "org-babel-results-"))
+	 (wait-file (make-temp-file "org-babel-matlab-emacs-link-wait-signal-"))
 	 (full-body
 	  (case result-type
 	    (output
@@ -161,12 +158,29 @@ value of the last statement in BODY, as elisp."
 	      #'org-babel-chomp
 	      (list body org-babel-octave-eoe-indicator) "\n"))
 	    (value
-	     (mapconcat
-	      #'org-babel-chomp
-	      (list (format org-babel-octave-wrapper-method body tmp-file tmp-file) org-babel-octave-eoe-indicator) "\n"))))
-	 (raw (org-babel-comint-with-output session
-		  (if matlabp org-babel-octave-eoe-indicator org-babel-octave-eoe-output) t
-		(insert full-body) (comint-send-input nil t))) results)
+	     (if (and matlabp org-babel-matlab-with-emacs-link)
+		 (concat
+		  (format org-babel-matlab-emacs-link-wrapper-method
+			  body tmp-file tmp-file wait-file) "\n")
+	       (mapconcat
+		#'org-babel-chomp
+		(list (format org-babel-octave-wrapper-method body tmp-file tmp-file)
+		      org-babel-octave-eoe-indicator) "\n")))))
+	 (raw (if (and matlabp org-babel-matlab-with-emacs-link)
+		  (save-window-excursion
+		    (with-temp-buffer
+		      (insert full-body)
+		      (write-region "" 'ignored wait-file nil nil nil 'excl)
+		      (matlab-shell-run-region (point-min) (point-max))
+		      (message "Waiting for Matlab Emacs Link")
+		      (while (file-exists-p wait-file) (sit-for 0.01))
+		      "")) ;; matlab-shell-run-region doesn't seem to
+			   ;; make *matlab* buffer contents easily
+			   ;; available, so :results output currently
+			   ;; won't work
+		(org-babel-comint-with-output session
+		    (if matlabp org-babel-octave-eoe-indicator org-babel-octave-eoe-output) t
+		  (insert full-body) (comint-send-input nil t)))) results)
     (case result-type
       (value
        (org-babel-octave-import-elisp-from-file (org-babel-maybe-remote-file tmp-file)))

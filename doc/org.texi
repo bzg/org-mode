@@ -495,7 +495,7 @@ example as:
 @r{@bullet{} a TODO list editor}
 @r{@bullet{} a full agenda and planner with deadlines and work scheduling}
 @pindex GTD, Getting Things Done
-@r{@bullet{} an environment to implement David Allen's GTD system}
+@r{@bullet{} an environment in which to implement David Allen's GTD system}
 @r{@bullet{} a basic database application}
 @r{@bullet{} a simple hypertext system, with HTML and La@TeX{} export}
 @r{@bullet{} a publishing tool to create a set of interlinked webpages}
@@ -8456,8 +8456,8 @@ Some backends (HTML, La@TeX{}, and DocBook) allow you to directly include
 images into the exported document.  Org does this, if a link to an image
 files does not have a description part, for example @code{[[./img/a.jpg]]}.
 If you wish to define a caption for the image and maybe a label for internal
-cross references, you sure that the link is on a line by itself precede it
-with:
+cross references, make sure that the link is on a line by itself and precede
+it with @code{#+CAPTION} and @code{#+LABEL} as follows:
 
 @example
 #+CAPTION: This is the caption for the next figure link (or table)
@@ -8559,7 +8559,7 @@ Edit the source code example at point in its native mode.  This works by
 switching to a temporary buffer with the source code.  You need to exit by
 pressing @kbd{C-c '} again@footnote{Upon exit, lines starting with @samp{*}
 or @samp{#} will get a comma prepended, to keep them from being interpreted
-by Org as outline nodes or special comments.  These commas will be striped
+by Org as outline nodes or special comments.  These commas will be stripped
 for editing with @kbd{C-c '}, and also for export.}, the edited version will
 then replace the old version in the Org buffer.  Fixed-width regions
 (where each line starts with a colon followed by a space) will be edited
@@ -8698,7 +8698,7 @@ delimiters, for example:
 Angles are written as Greek letters \alpha, \beta and \gamma.
 @end example
 
-@vindex org-html-entities
+@vindex org-entities
 During export, these symbols will be transformed into the native format of
 the exporter backend.  Strings like @code{\alpha} will be exported as
 @code{&alpha;} in the HTML output, and as @code{$\alpha$} in the La@TeX{}
@@ -8707,7 +8707,7 @@ output.  Similarly, @code{\nbsp} will become @code{&nbsp;} in HTML and
 like this: @samp{\Aacute@{@}stor}.
 
 A large number of entities is provided, with names taken from both HTML and
-La@TeX{}, see the variable @code{org-html-entities} for the complete list.
+La@TeX{}, see the variable @code{org-entities} for the complete list.
 @samp{\-} is treated as a shy hyphen, and @samp{--}, @samp{---}, and
 @samp{...} are all converted into special commands creating hyphens of
 different lengths or a compact set of dots.
@@ -9718,14 +9718,14 @@ If you need references to a label created in this way, write
 @node Beamer class export,  , Images in LaTeX export, LaTeX and PDF export
 @subsection Beamer class export
 
-The LaTeX class @file{beamer} allows to produce high quality presentations
+The LaTeX class @file{beamer} allows production of high quality presentations
 using LaTeX and pdf processing.  Org-mode has special support for turning an
 Org-mode file or tree into a @file{beamer} presentation.
 
 When the LaTeX class for the current buffer (as set with @code{#+LaTeX_CLASS:
 beamer}) or subtree (set with a @code{LaTeX_CLASS} property) is
 @code{beamer}, a special export mode will turn the file or tree into a beamer
-presentation.  Any tree with not-to-deep level nesting should in principle be
+presentation.  Any tree with not-too-deep level nesting should in principle be
 exportable as a beamer presentation.  By default, the top-level entries (or
 the first level below the selected subtree heading) will be turned into
 frames, and the outline structure below this level will become itemize lists.
@@ -9757,7 +9757,7 @@ set an options argument for the implied @code{columns} environment.
 @item BEAMER_col
 The width of a column that should start with this entry.  If this property is
 set, the entry will also get a @code{:BMCOL:} property to make this visible.
-Also this tag is only a visual aid.  When his is a plain number, it will be
+Also this tag is only a visual aid.  When this is a plain number, it will be
 interpreted as a fraction of @code{\textwidth}.  Otherwise it will be assumed
 that you have specified the units, like @samp{3cm}.  The first such property
 in a frame will start a @code{columns} environment to surround the columns.
@@ -9801,7 +9801,7 @@ environment or the @code{BEAMER_col} property.
 Column view provides a great way to set the environment of a node and other
 important parameters.  Make sure you are using a COLUMN format that is geared
 toward this special purpose.  The command @kbd{M-x
-org-beamer-settings-template} does define such a format.
+org-beamer-settings-template} defines such a format.
 
 Here is a simple example Org document that is intended for beamer export.
 
@@ -10011,12 +10011,12 @@ more types to this list as long as DocBook supports them.
 @cindex Special characters in DocBook export
 
 @vindex org-export-docbook-doctype
-@vindex org-html-entities
+@vindex org-entities
 Special characters that are written in @TeX{}-like syntax, such as @code{\alpha},
 @code{\Gamma}, and @code{\Zeta}, are supported by DocBook exporter.  These
 characters are rewritten to XML entities, like @code{&alpha;},
 @code{&Gamma;}, and @code{&Zeta;}, based on the list saved in variable
-@code{org-html-entities}.  As long as the generated DocBook file includes the
+@code{org-entities}.  As long as the generated DocBook file includes the
 corresponding entities, these special characters are recognized.
 
 You can customize variable @code{org-export-docbook-doctype} to include the

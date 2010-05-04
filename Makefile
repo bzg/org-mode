@@ -45,6 +45,7 @@ MAKEINFO = makeinfo
 
 # How to create the HTML file
 TEXI2HTML = makeinfo --html --number-sections
+TEXI2HTMLNOPSLIT = makeinfo --html --no-split --number-sections
 
 # How to copy the lisp files and elc files to their distination.
 CP = cp -p
@@ -116,7 +117,8 @@ LISPFILES0 = $(LISPF:%=lisp/%)
 LISPFILES  = $(LISPFILES0) lisp/org-install.el
 ELCFILES0  = $(LISPFILES0:.el=.elc)
 ELCFILES   = $(LISPFILES:.el=.elc)
-DOCFILES   = doc/org.texi doc/org.pdf doc/org doc/dir doc/.nosearch
+DOCFILES   = doc/org.texi doc/org.pdf doc/org doc/dir doc/.nosearch \
+             doc/orgguide.texi doc/orgguide.pdf
 CARDFILES  = doc/orgcard.tex doc/orgcard.pdf doc/orgcard_letter.pdf
 TEXIFILES  = doc/org.texi
 INFOFILES  = doc/org
@@ -145,10 +147,13 @@ compile: $(ELCFILES0)
 
 install: install-lisp
 
-doc: doc/org.html doc/org.pdf doc/orgcard.pdf doc/orgcard_letter.pdf
+doc: doc/org.html doc/org.pdf doc/orgcard.pdf doc/orgcard_letter.pdf doc/orgguide.pdf
 
 p:
 	${MAKE} pdf && open doc/org.pdf
+
+g:
+	${MAKE} pdf && open doc/orgguide.pdf
 
 install-lisp: $(LISPFILES) $(ELCFILES)
 	if [ ! -d $(lispdir) ]; then $(MKDIR) $(lispdir); else true; fi ;
@@ -186,6 +191,9 @@ doc/org: doc/org.texi
 doc/org.pdf: doc/org.texi
 	(cd doc; $(TEXI2PDF) org.texi)
 
+doc/orgguide.pdf: doc/orgguide.texi
+	(cd doc; $(TEXI2PDF) orgguide.texi)
+
 doc/org.html: doc/org.texi
 	(cd doc; $(TEXI2HTML) --no-split -o org.html org.texi)
 	UTILITIES/manfull.pl doc/org.html
@@ -213,9 +221,15 @@ html_manual: doc/org.texi
 	$(TEXI2HTML) -o doc/manual doc/org.texi
 	UTILITIES/mansplit.pl doc/manual/*.html
 
+html_guide: doc/orgguide.texi
+	rm -rf doc/guide
+	mkdir doc/guide
+	$(TEXI2HTML) -o doc/guide doc/orgguide.texi
+	UTILITIES/guidesplit.pl doc/guide/*.html
+
 info:	doc/org
 
-pdf:	doc/org.pdf
+pdf:	doc/org.pdf doc/orgguide.pdf
 
 card:	doc/orgcard.pdf doc/orgcard_letter.pdf
 
@@ -246,10 +260,12 @@ release:
 	${MAKE} doc
 	UTILITIES/gplmanual.pl
 	${MAKE} html_manual
+	${MAKE} html_guide
 	rm -rf RELEASEDIR
 	$(MKDIR) RELEASEDIR
 	cp org-$(TAG).zip org-$(TAG).tar.gz RELEASEDIR
 	cp doc/org.pdf doc/orgcard.pdf doc/org.texi doc/org.html RELEASEDIR
+	cp doc/orgguide.pdf RELEASEDIR
 	cp RELEASEDIR/org-$(TAG).zip    RELEASEDIR/org.zip
 	cp RELEASEDIR/org-$(TAG).tar.gz RELEASEDIR/org.tar.gz
 
@@ -258,6 +274,7 @@ upload_release:
 
 upload_manual:
 	rsync -avuz --delete doc/manual/ cdominik@orgmode.org:orgmode.org/manual/
+	rsync -avuz --delete doc/guide/ cdominik@orgmode.org:orgmode.org/guide/
 
 relup0:
 	${MAKE} release

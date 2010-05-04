@@ -63,7 +63,7 @@ there are kept outside the narrowed region."
   "The default coderef format.
 This format string will be used to search for coderef labels in literal
 examples (EXAMPLE and SRC blocks).  The format can be overwritten in
-an individual literal example with the -f option, like
+an individual literal example with the -l option, like
 
 #+BEGIN_SRC pascal +n -r -l \"((%s))\"
 ...
@@ -205,12 +205,12 @@ the edited version. Optional argument CONTEXT is used by
 	(beg (make-marker))
 	(end (make-marker))
 	(preserve-indentation org-src-preserve-indentation)
+	(allow-write-back-p (null code))
 	block-nindent total-nindent ovl lang lang-f single lfmt begline buffer msg)
     (if (not info)
 	nil
       (setq beg (move-marker beg (nth 0 info))
 	    end (move-marker end (nth 1 info))
-	    allow-write-back-p (null code)
 	    msg (if allow-write-back-p
 		    (substitute-command-keys
 		     "Edit, then exit with C-c ' (C-c and single quote)")

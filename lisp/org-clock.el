@@ -500,7 +500,8 @@ the mode line."
        ;; A string.  See if it is a delta
        (setq sign (string-to-char value))
        (if (member sign '(?- ?+))
-	   (setq current (org-hh:mm-string-to-minutes (substring current 1)))
+	   (setq current (org-hh:mm-string-to-minutes current)
+		 value (substring value 1))
 	 (setq current 0))
        (setq value (org-hh:mm-string-to-minutes value))
        (if (equal ?- sign)
