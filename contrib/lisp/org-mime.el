@@ -166,7 +166,7 @@ export that region, otherwise export the entire body."
                        ;; TODO: should catch signature...
                        (point-max)))
          (raw-body (buffer-substring html-start html-end))
-         (tmp-file (make-temp-name (expand-file-name "mail" "/tmp/")))
+         (tmp-file (make-temp-name (expand-file-name "mail" temporary-file-directory)))
          (body (org-mime-org-export "org" raw-body tmp-file))
          ;; because we probably don't want to skip part of our mail
          (org-export-skip-text-before-1st-heading nil)
