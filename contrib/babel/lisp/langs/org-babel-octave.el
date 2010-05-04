@@ -111,13 +111,8 @@ then create. Return the initialized session."
 
 (defvar org-babel-octave-wrapper-method
    "%s
-if ischar(ans)
-   fid = fopen('%s', 'w')
-   fprintf(fid, '%%s', ans)
-   fprintf(fid, '\\n')
-   fclose(fid)
-else
-   save -ascii %s ans
+if ischar(ans), fid = fopen('%s', 'w'); fprintf(fid, '%%s\\n', ans); fclose(fid);
+else, save -ascii %s ans
 end")
 
 (defvar org-babel-octave-eoe-indicator "\'org_babel_eoe\'")
