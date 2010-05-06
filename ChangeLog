@@ -1,3 +1,7 @@
+2010-05-06  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* Makefile (DOCFILES): Add pdflayout.sty
+
 2010-04-28  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* Document that lines with formatting cookies will be removed
