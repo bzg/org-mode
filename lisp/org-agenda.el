@@ -197,6 +197,11 @@ you can \"misuse\" it to also add other text to the header.  However,
   :group 'org-export-html
   :type 'string)
 
+(defcustom org-agenda-persistent-filter nil
+  "When set, keep filters from one agenda view to the next."
+  :group 'org-agenda
+  :type 'boolean)
+
 (defgroup org-agenda-custom-commands nil
  "Options concerning agenda views in Org-mode."
  :tag "Org Agenda Custom Commands"
@@ -2714,7 +2719,8 @@ bind it in the options section.")
   (setq org-todo-keywords-for-agenda nil)
   (setq org-done-keywords-for-agenda nil)
   (setq org-drawers-for-agenda nil)
-  (setq org-agenda-filter nil)
+  (unless org-agenda-persistent-filter
+    (setq org-agenda-filter nil))
   (put 'org-agenda-filter :preset-filter org-agenda-filter-preset)
   (if org-agenda-multi
       (progn
@@ -2789,7 +2795,7 @@ bind it in the options section.")
 	  (org-habit-insert-consistency-graphs))
       (run-hooks 'org-finalize-agenda-hook)
       (setq org-agenda-type (org-get-at-bol 'org-agenda-type))
-      (when (get 'org-agenda-filter :preset-filter)
+      (when (or org-agenda-filter (get 'org-agenda-filter :preset-filter))
 	(org-agenda-filter-apply org-agenda-filter))
       )))
 
