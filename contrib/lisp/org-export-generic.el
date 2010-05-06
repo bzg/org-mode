@@ -444,6 +444,31 @@ in this way, it will be wrapped."
 export definitions."
   (aput 'org-generic-alist type definition))
 
+;;; helper functions for org-set-generic-type
+(defvar org-export-generic-keywords nil)
+(defmacro* def-org-export-generic-keyword (keyword
+                                           &key documentation
+                                                type)
+  "Define KEYWORD as a legitimate element for inclusion in
+the body of an org-set-generic-type definition."
+  `(progn
+     (pushnew ,keyword org-export-generic-keywords)
+     ;; TODO: push the documentation and type information
+     ;; somewhere where it will do us some good.
+     ))
+
+(def-org-export-generic-keyword :body-newline-paragraph
+    :documentation "Bound either to NIL or to a pattern to be 
+inserted in the output for every blank line in the input.
+  The intention is to handle formats where text is flowed, and
+newlines are interpreted as significant \(e.g., as indicating
+preformatted text\).  A common non-nil value for this keyword
+is \"\\n\".  Should typically be combined with a value for 
+:body-line-format that does NOT end with a newline."
+    :type string))
+    
+  
+
 (defun org-export-generic-remember-section (type suffix &optional prefix)
   (setq org-export-generic-section-type type)
   (setq org-export-generic-section-suffix suffix)
@@ -946,7 +971,7 @@ underlined headlines.  The default is 3."
        ((string-match "^\\s-*$" line)
         ;; blank line
         (if bodynewline-paragraph
-            (insert "\n")))
+            (insert bodynewline-paragraph)))
        (t
 	;;
 	;; body
