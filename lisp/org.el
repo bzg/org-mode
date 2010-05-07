@@ -16146,20 +16146,19 @@ this fucntion returns t, nil otherwise."
 	beg end)
     (save-excursion
       (catch 'exit
-	(if (org-region-active-p)
-	    (setq beg (region-beginning) end (region-end))
+	(unless (org-region-active-p)
 	  (setq beg (point-at-bol))
 	  (beginning-of-line 2)
 	  (while (and (not (eobp)) ;; this is like `next-line'
 		      (get-char-property (1- (point)) 'invisible))
 	    (beginning-of-line 2))
-	  (setq end (point)))
-	(goto-char beg)
-	(goto-char (point-at-eol))
-	(setq end (max end (point)))
-	(while (re-search-forward re end t)
-	  (if (get-char-property (match-beginning 0) 'invisible)
-	      (throw 'exit t)))
+	  (setq end (point))
+	  (goto-char beg)
+	  (goto-char (point-at-eol))
+	  (setq end (max end (point)))
+	  (while (re-search-forward re end t)
+	    (if (get-char-property (match-beginning 0) 'invisible)
+		(throw 'exit t))))
 	nil))))
 
 (defun org-metaup (&optional arg)
