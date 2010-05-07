@@ -2685,6 +2685,36 @@ known that the table will be realigned a little later anyway."
 	  (throw 'exit t)))
       (error "No convergence after %d iterations" i))))
 
+(defun org-table-recalculate-buffer-tables ()
+  "Recalculate all tables in the current buffer."
+  (interactive)
+  (save-excursion
+    (save-restriction
+      (widen)
+      (org-table-map-tables (lambda () (org-table-recalculate t)) t))))
+
+(defun org-table-iterate-buffer-tables ()
+  "Iterate all tables in the buffer, to converge inter-table dependencies."
+ (interactive)
+ (let* ((imax 10)
+        (checksum (md5 (buffer-string)))
+
+        c1
+        (i imax))
+   (save-excursion
+     (save-restriction
+       (widen)
+       (catch 'exit
+	 (while (> i 0)
+	   (setq i (1- i))
+	   (org-table-map-tables (lambda () (org-table-recalculate t)) t)
+	   (if (equal checksum (setq c1 (md5 (buffer-string))))
+	       (progn
+		 (message "Convergence after %d iterations" (- imax i))
+		 (throw 'exit t))
+	     (setq checksum c1)))
+	 (error "No convergence after %d iterations" imax))))))
+
 (defun org-table-formula-substitute-names (f)
   "Replace $const with values in string F."
   (let ((start 0) a (f1 f) (pp (/= (string-to-char f) ?')))

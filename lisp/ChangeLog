@@ -1,5 +1,8 @@
 2010-05-07  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-table.el (org-table-recalculate-buffer-tables)
+	(org-table-iterate-buffer-tables): New commands.
+
 	* org.el (org-check-for-hidden): When there is a region, skip
 	the check.
 
