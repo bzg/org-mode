@@ -1295,8 +1295,7 @@ implementation is bad."
   :type 'boolean)
 
 (defcustom org-return-follows-link nil
-  "Non-nil means on links RET will follow the link.
-Needs to be set before org.el is loaded."
+  "Non-nil means on links RET will follow the link."
   :group 'org-link-follow
   :type 'boolean)
 
@@ -15463,6 +15462,52 @@ SNIPPETS-P indicates if this is run to create snippet images for HTML."
   "Return string to be used as color value for an RGB component."
   (format "%g" (/ value 65535.0)))
 
+;; Image display
+
+
+(defvar org-inline-image-overlays nil)
+(make-variable-buffer-local 'org-inline-image-overlays)
+
+(defun org-toggle-inline-images (&optional include-linked)
+  "Toggle the display of inline images.
+INCLUDE-LINKED is passed to `org-display-inline-images'."
+  (interactive "P")
+  (if org-inline-image-overlays
+      (progn
+	(org-remove-inline-images)
+	(message "Inline image display turned off"))
+    (org-display-inline-images arg)
+    (if org-inline-image-overlays
+	(message "%d images displayed inline"
+		 (length org-inline-image-overlays))
+      (message "No images to display inline"))))
+
+(defun org-display-inline-images (&optional include-linked)
+  "Display inline images.
+Normally only links without a description part are inlined, because this
+is how it will work for export.  When INCLUDE-LINKED is set, also links
+with a description part will be inlined."
+  (interactive "P")
+  (org-remove-inline-images)
+  (goto-char (point-min))
+  (let ((re (concat "\\[\\[\\(file:\\|\\./\\)\\(~?" "[-+./_0-9a-zA-Z]+"
+		    (substring (org-image-file-name-regexp) 0 -2)
+		    "\\)\\]" (if include-linked "" "\\]")))
+	file ov)
+  (while (re-search-forward re nil t)
+    (setq file (expand-file-name (match-string 2)))
+    (when (file-exists-p file)
+      (setq ov (make-overlay (match-beginning 0) (match-end 0)))
+      (overlay-put ov 'display (create-image file))
+      (overlay-put ov 'face 'default)
+      (push ov org-inline-image-overlays)))))
+
+(defun org-remove-inline-images ()
+  "Remove inline display of images."
+  (interactive)
+  (mapc 'delete-overlay org-inline-image-overlays)
+  (setq org-inline-image-overlays nil))
+
 ;;;; Key bindings
 
 ;; Make `C-c C-x' a prefix key
@@ -15632,6 +15677,7 @@ SNIPPETS-P indicates if this is run to create snippet images for HTML."
 (org-defkey org-mode-map "\C-c\C-x\C-r" 'org-clock-report)
 (org-defkey org-mode-map "\C-c\C-x\C-u" 'org-dblock-update)
 (org-defkey org-mode-map "\C-c\C-x\C-l" 'org-preview-latex-fragment)
+(org-defkey org-mode-map "\C-c\C-x\C-v" 'org-toggle-inline-images)
 (org-defkey org-mode-map "\C-c\C-x\C-b" 'org-toggle-checkbox)
 (org-defkey org-mode-map "\C-c\C-xp"    'org-set-property)
 (org-defkey org-mode-map "\C-c\C-xe"    'org-set-effort)
@@ -18635,7 +18681,6 @@ To get rid of the restriction, use \\[org-agenda-remove-restriction-lock]."
      (define-key speedbar-file-key-map "\C-c\C-x>" 'org-agenda-remove-restriction-lock)
      (add-hook 'speedbar-visiting-tag-hook
 	       (lambda () (and (org-mode-p) (org-show-context 'org-goto))))))
-
 
 ;;; Fixes and Hacks for problems with other packages
 

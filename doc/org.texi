@@ -2983,14 +2983,14 @@ to the current directory using @samp{../}.  Otherwise an absolute path
 is used, if possible with @samp{~/} for your home directory.  You can
 force an absolute path with two @kbd{C-u} prefixes.
 @c
-@item C-c C-l @r{(with cursor on existing link)}
+@item C-c C-l @ @r{(with cursor on existing link)}
 When the cursor is on an existing link, @kbd{C-c C-l} allows you to edit the
 link and description parts of the link.
 @c
 @cindex following links
 @kindex C-c C-o
-@kindex RET
-@item C-c C-o @r{or} @key{RET}
+@kindex @key{RET}
+@item C-c C-o @ @r{(or, if @code{org-return-follows-link} is set, also} @key{RET}
 @vindex org-file-apps
 Open link at point.  This will launch a web browser for URLs (using
 @command{browse-url-at-point}), run VM/MH-E/Wanderlust/Rmail/Gnus/BBDB for
@@ -3021,6 +3021,14 @@ Like @kbd{mouse-2}, but force file links to be opened with Emacs, and
 internal links to be displayed in another window@footnote{See the
 variable @code{org-display-internal-link-with-indirect-buffer}}.
 @c
+@cindex inlining images
+@cindex images, inlining
+@kindex C-c C-x C-v
+@item C-c C-x C-v
+Toggle the inline display of linked images.  Normally this will only inline
+images that have no description part in the link, i.e. images that will also
+be inlined during export.  When called with a prefix argument, also display
+images that do have a link description.
 @cindex mark ring
 @kindex C-c %
 @item C-c %
