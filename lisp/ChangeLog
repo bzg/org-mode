@@ -1,5 +1,8 @@
 2010-05-08  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-src.el (org-edit-src-allow-write-back-p): Define
+	variable.
+
 	* org.el (org-inline-image-overlays): New variable.
 	(org-toggle-inline-images, org-display-inline-images)
 	(org-remove-inline-images): New commands.
