@@ -17644,16 +17644,26 @@ TABLE is an association list with keys like \"%a\" and string values.
 The sequences in STRING may contain normal field width and padding information,
 for example \"%-5s\".  Replacements happen in the sequence given by TABLE,
 so values can contain further %-escapes if they are define later in TABLE."
-  (let ((case-fold-search nil)
-	e re rpl)
-    (while (setq e (pop table))
+  (let ((tbl (copy-alist table))
+	(case-fold-search nil)
+        (pchg 0)
+        e re rpl)
+    (while (setq e (pop tbl))
       (setq re (concat "%-?[0-9.]*" (substring (car e) 1)))
+      (when (string-match re (cdr e))
+        (let ((sref (substring (cdr e) (match-beginning 0) (match-end 0)))
+              (safe "SREF"))
+          (add-text-properties 0 3 (list 'sref sref) safe)
+          (setcdr e (replace-match safe t t (cdr e)))))
       (while (string-match re string)
-	(setq rpl (format (concat (substring (match-string 0 string) 0 -1) "s")
-			  (cdr e)))
-	(setq string (replace-match rpl t t string))))
+        (setq rpl (format (concat (substring (match-string 0 string) 0 -1) "s")
+                          (cdr e)))
+        (setq string (replace-match rpl t t string))))
+    (while (setq pchg (next-property-change pchg string))
+      (let ((sref (get-text-property pchg 'sref string)))
+	(when (and sref (string-match "SREF" string pchg))
+	  (setq string (replace-match sref t t string)))))
     string))
-
 
 (defun org-sublist (list start end)
   "Return a section of LIST, from START to END.

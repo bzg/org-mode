@@ -1,3 +1,8 @@
+2010-05-08  David Maus  <dmaus@ictsoc.de>
+
+	* org.el (org-replace-escapes): Avoid infinite loop when
+	replace string contains escape sequence it replaces.
+
 2010-05-08  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-crypt.el (org-crypt-key-for-heading): Use symmetric
