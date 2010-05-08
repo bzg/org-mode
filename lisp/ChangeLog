@@ -1,5 +1,7 @@
 2010-05-08  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-mode): Fix comment syntax settings.
+
 	* org-src.el (org-edit-src-allow-write-back-p): Define
 	variable.
 

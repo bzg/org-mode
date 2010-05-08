@@ -4421,7 +4421,6 @@ The following commands are available:
     (org-set-tag-faces 'org-tag-faces org-tag-faces))
   ;; Calc embedded
   (org-set-local 'calc-embedded-open-mode "# ")
-  (modify-syntax-entry ?# "<")
   (modify-syntax-entry ?@ "w")
   (if org-startup-truncated (setq truncate-lines t))
   (org-set-local 'font-lock-unfontify-region-function
@@ -4450,8 +4449,10 @@ The following commands are available:
 		 'org-block-todo-from-checkboxes))
 
   ;; Comment characters
-;  (org-set-local 'comment-start "#") ;; FIXME: this breaks wrapping
+  (org-set-local 'comment-start "#")
   (org-set-local 'comment-padding " ")
+  (modify-syntax-entry ?# "<")
+  (modify-syntax-entry ?\n ">")
 
   ;; Align options lines
   (org-set-local
