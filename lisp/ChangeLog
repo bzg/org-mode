@@ -1,5 +1,20 @@
 2010-05-08  David Maus  <dmaus@ictsoc.de>
 
+	* org-wl.el (org-wl-message-field): New function.  Return
+	content of header field in message entity.
+	(org-wl-store-link): Call `org-wl-store-link-folder' or
+	`org-wl-store-link-message' depending on major-mode.
+	(org-wl-store-link-folder): New function.  Store link to
+	Wanderlust folder.
+	(org-wl-store-link-message): New function.  Store link to
+	Wanderlust message.
+	(org-wl-store-link-message): Store link to message while
+	visiting message.
+	(org-wl-open): Don't try to jump to message when opening a
+	folder link.
+
+2010-05-08  David Maus  <dmaus@ictsoc.de>
+
 	* org.el (org-replace-escapes): Avoid infinite loop when
 	replace string contains escape sequence it replaces.
 
