@@ -8,7 +8,7 @@
 ;;         Dan Davison <davison at stats dot ox dot ac dot uk>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 6.35trans
+;; Version: 6.36trans
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -166,6 +166,7 @@ For example, there is no ocaml-mode in Emacs, but the mode to use is
 (define-key org-src-mode-map "\C-c'" 'org-edit-src-exit)
 (defvar org-edit-src-force-single-line nil)
 (defvar org-edit-src-from-org-mode nil)
+(defvar org-edit-src-allow-write-back-p nil)
 (defvar org-edit-src-picture nil)
 (defvar org-edit-src-beg-marker nil)
 (defvar org-edit-src-end-marker nil)

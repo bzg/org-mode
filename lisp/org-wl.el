@@ -7,7 +7,7 @@
 ;;         David Maus <dmaus at ictsoc dot de>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 6.35trans
+;; Version: 6.36trans
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -86,16 +86,20 @@ googlegroups otherwise."
 (declare-function wl-summary-registered-temp-mark "ext:wl-action" (number))
 (declare-function wl-folder-goto-folder-subr "ext:wl-folder"
 		  (&optional folder sticky))
+(declare-function wl-folder-get-petname "ext:wl-folder" (name))
+(declare-function wl-folder-get-entity-from-buffer "ext:wl-folder"
+		  (&optional getid))
+(declare-function wl-folder-buffer-group-p "ext:wl-folder")
 (defvar wl-init)
 (defvar wl-summary-buffer-elmo-folder)
 (defvar wl-summary-buffer-folder-name)
+(defvar wl-folder-group-regexp)
 
 (defconst org-wl-folder-types
   '(("%" . imap) ("-" . nntp) ("+" . mh) ("=" . spool)
     ("$" . archive) ("&" . pop) ("@" . shimbun) ("[" . search)
     ("*" . multi) ("/" . filter) ("|" . pipe) ("'" . internal))
   "List of folder indicators. See Wanderlust manual, section 3.")
-
 
 ;; Install the link type
 (org-add-link-type "wl" 'org-wl-open)
@@ -123,79 +127,102 @@ folder name determines the the folder type."
 	      nil))))
     type))
 
+(defun org-wl-message-field (field entity)
+  "Return content of FIELD in ENTITY.
+FIELD is a symbol of a rfc822 message header field.
+ENTITY is a message entity."
+  (let ((content (elmo-message-entity-field entity field)))
+    (if (listp content) (car content) content)))
+
 (defun org-wl-store-link ()
- "Store a link to a WL folder or message."
- (when (eq major-mode 'wl-summary-mode)
-   (let* ((msgnum (wl-summary-message-number))
-	   (mark-info (wl-summary-registered-temp-mark msgnum))
-	   (folder-name
-	    (if (and org-wl-link-to-refile-destination
-		     mark-info
-		     (equal (nth 1 mark-info) "o")) ; marked as refile
-		(nth 2 mark-info)
-	      wl-summary-buffer-folder-name))
-	   (folder-type (org-wl-folder-type folder-name))
-	   (message-id (elmo-message-field wl-summary-buffer-elmo-folder
-					   msgnum 'message-id))
-	   (wl-message-entity
-	    (if (fboundp 'elmo-message-entity)
-		(elmo-message-entity
-		 wl-summary-buffer-elmo-folder msgnum)
-	      (elmo-msgdb-overview-get-entity
-	       msgnum (wl-summary-buffer-msgdb))))
-	   (from (let ((from-field (elmo-message-entity-field wl-message-entity
-							      'from)))
-		   (if (listp from-field)
-		       (car from-field)
-		     from-field)))
-	   (to (let ((to-field (elmo-message-entity-field wl-message-entity
-							  'to)))
-		 (if (listp to-field)
-		     (car to-field)
-		   to-field)))
-	   (xref (let ((xref-field (elmo-message-entity-field wl-message-entity
-							      'xref)))
-		   (if (listp xref-field)
-		       (car xref-field)
-		     xref-field)))
-	   (subject (let (wl-thr-indent-string wl-parent-message-entity)
-		      (wl-summary-line-subject)))
-	   desc link)
+  "Store a link to a WL message or folder."
+  (cond
+   ((memq major-mode '(wl-summary-mode mime-view-mode))
+    (org-wl-store-link-message))
+   ((eq major-mode 'wl-folder-mode)
+    (org-wl-store-link-folder))
+   (t
+    nil)))
 
-     ;; remove text properties of subject string to avoid possible bug
-     ;; when formatting the subject
-     ;; (Emacs bug #5306, fixed)
-     (set-text-properties 0 (length subject) nil subject)
+(defun org-wl-store-link-folder ()
+  "Store a link to a WL folder."
+  (let* ((folder (wl-folder-get-entity-from-buffer))
+	 (petname (wl-folder-get-petname folder))
+	 (link (org-make-link "wl:" folder)))
+    (save-excursion
+      (beginning-of-line)
+      (if (and (wl-folder-buffer-group-p)
+	       (looking-at wl-folder-group-regexp))
+	  (error "Cannot store link to folder group: %s" folder))
+      (org-store-link-props :type "wl" :description petname
+			    :link link)
+      link)))
 
-     ;; maybe remove filter condition
-     (when (and (eq folder-type 'filter) org-wl-link-remove-filter)
-       (while (eq (org-wl-folder-type folder-name) 'filter)
-	 (setq folder-name
-	       (replace-regexp-in-string "^/[^/]+/" "" folder-name))))
+(defun org-wl-store-link-message ()
+  "Store a link to a WL message."
+  (save-excursion
+    (let ((buf (if (eq major-mode 'wl-summary-mode)
+		   (current-buffer)
+		 (and (boundp 'wl-message-buffer-cur-summary-buffer)
+		      wl-message-buffer-cur-summary-buffer))))
+      (when buf
+	(with-current-buffer buf
+	  (let* ((msgnum (wl-summary-message-number))
+		 (mark-info (wl-summary-registered-temp-mark msgnum))
+		 (folder-name
+		  (if (and org-wl-link-to-refile-destination
+			   mark-info
+			   (equal (nth 1 mark-info) "o")) ; marked as refile
+		      (nth 2 mark-info)
+		    wl-summary-buffer-folder-name))
+		 (folder-type (org-wl-folder-type folder-name))
+		 (wl-message-entity
+		  (if (fboundp 'elmo-message-entity)
+		      (elmo-message-entity
+		       wl-summary-buffer-elmo-folder msgnum)
+		    (elmo-msgdb-overview-get-entity
+		     msgnum (wl-summary-buffer-msgdb))))
+		 (message-id (org-wl-message-field 'message-id wl-message-entity))
+		 (from (org-wl-message-field 'from wl-message-entity))
+		 (to (org-wl-message-field 'to wl-message-entity))
+		 (xref (org-wl-message-field 'xref wl-message-entity))
+		 (subject (org-wl-message-field 'subject wl-message-entity))
+		 desc link)
 
-     ;; maybe create http link
-     (cond
-      ((and (eq folder-type 'shimbun) org-wl-shimbun-prefer-web-links xref)
-       (org-store-link-props :type "http" :link xref :description subject
-			     :from from :to to :message-id message-id
-			     :subject subject))
-      ((and (eq folder-type 'nntp) org-wl-nntp-prefer-web-links)
-       (setq link (format
-		   (if (string-match "gmane\\." folder-name)
-		       "http://mid.gmane.org/%s"
-		     "http://groups.google.com/groups/search?as_umsgid=%s")
-		   (org-fixup-message-id-for-http message-id)))
-       (org-store-link-props :type "http" :link link :description subject
-			     :from from :to to :message-id message-id
-			     :subject subject))
-      (t
-       (org-store-link-props :type "wl" :from from :to to
-			     :subject subject :message-id message-id)
-       (setq message-id (org-remove-angle-brackets message-id))
-       (setq desc (org-email-link-description))
-       (setq link (org-make-link "wl:" folder-name "#" message-id))
-       (org-add-link-props :link link :description desc)))
-     (or link xref))))
+	    ;; remove text properties of subject string to avoid possible bug
+	    ;; when formatting the subject
+	    ;; (Emacs bug #5306, fixed)
+	    (set-text-properties 0 (length subject) nil subject)
+
+	    ;; maybe remove filter condition
+	    (when (and (eq folder-type 'filter) org-wl-link-remove-filter)
+	      (while (eq (org-wl-folder-type folder-name) 'filter)
+		(setq folder-name
+		      (replace-regexp-in-string "^/[^/]+/" "" folder-name))))
+
+	    ;; maybe create http link
+	    (cond
+	     ((and (eq folder-type 'shimbun) org-wl-shimbun-prefer-web-links xref)
+	      (org-store-link-props :type "http" :link xref :description subject
+				    :from from :to to :message-id message-id
+				    :subject subject))
+	     ((and (eq folder-type 'nntp) org-wl-nntp-prefer-web-links)
+	      (setq link (format
+			  (if (string-match "gmane\\." folder-name)
+			      "http://mid.gmane.org/%s"
+			    "http://groups.google.com/groups/search?as_umsgid=%s")
+			  (org-fixup-message-id-for-http message-id)))
+	      (org-store-link-props :type "http" :link link :description subject
+				    :from from :to to :message-id message-id
+				    :subject subject))
+	     (t
+	      (org-store-link-props :type "wl" :from from :to to
+				    :subject subject :message-id message-id)
+	      (setq message-id (org-remove-angle-brackets message-id))
+	      (setq desc (org-email-link-description))
+	      (setq link (org-make-link "wl:" folder-name "#" message-id))
+	      (org-add-link-props :link link :description desc)))
+	    (or link xref)))))))
 
 (defun org-wl-open (path)
   "Follow the WL message link specified by PATH.
@@ -228,9 +255,9 @@ for namazu index."
 	;; beginning of the current line.  So, restore the point
 	;; in the old buffer.
 	(goto-char old-point))
-     (and (wl-summary-jump-to-msg-by-message-id (org-add-angle-brackets
-						  article))
-	   (wl-summary-redisplay)))))
+     (and article (wl-summary-jump-to-msg-by-message-id (org-add-angle-brackets
+							 article))
+	  (wl-summary-redisplay)))))
 
 (provide 'org-wl)
 

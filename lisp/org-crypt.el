@@ -4,7 +4,7 @@
 
 ;; Emacs Lisp Archive Entry
 ;; Filename: org-crypt.el
-;; Version: 6.35trans
+;; Version: 6.36trans
 ;; Keywords: org-mode
 ;; Author: John Wiegley <johnw@gnu.org>
 ;; Maintainer: Peter Jones <pjones@pmade.com>
@@ -45,6 +45,7 @@
 ;;    decrypt it.  This makes it possible to leave secure notes that
 ;;    only the intended recipient can read in a shared-org-mode-files
 ;;    scenario.
+;;    If the key is not set, org-crypt will default to symmetric encryption.
 ;;
 ;; 3. To later decrypt an entry, use `org-decrypt-entries' or
 ;;    `org-decrypt-entry'.  It might be useful to bind this to a key,
@@ -97,7 +98,7 @@ heading.  This can also be overridden in the CRYPTKEY property."
     (or (org-entry-get nil "CRYPTKEY" 'selective)
         org-crypt-key
         (and (boundp 'epa-file-encrypt-to) epa-file-encrypt-to)
-        (error "No crypt key set"))))
+        (message "No crypt key set, using symmetric encryption."))))
 
 (defun org-encrypt-entry ()
   "Encrypt the content of the current headline."

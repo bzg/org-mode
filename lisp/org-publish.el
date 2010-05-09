@@ -5,7 +5,7 @@
 ;; Author: David O'Toole <dto@gnu.org>
 ;; Maintainer: Carsten Dominik <carsten DOT dominik AT gmail DOT com>
 ;; Keywords: hypermedia, outlines, wp
-;; Version: 6.35trans
+;; Version: 6.36trans
 
 ;; This file is part of GNU Emacs.
 ;;
@@ -402,6 +402,10 @@ This splices all the components into the list."
 	(push p rtn)))
     (nreverse (org-publish-delete-dups (delq nil rtn)))))
 
+
+(defvar sitemap-alphabetically)
+(defvar sitemap-sort-folders)
+(defvar sitemap-ignore-case)
 (defun org-publish-compare-directory-files (a b)
   "Predicate for `sort', that sorts folders-first/last and
 eventually alphabetically."

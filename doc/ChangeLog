@@ -1,3 +1,14 @@
+2010-05-08  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* orgcard.tex: Document inline image toggling.
+
+	* org.texi (Handling links): Document inline image toggling.
+
+2010-05-07  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Updating the table): Document new buffer-wide
+	table commands.
+
 2010-04-26  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Conflicts): Document new work-around for windmove.el.

@@ -1,3 +1,53 @@
+2010-05-09  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-sparse-tree): Make `C-c / t' search for all TODO
+	keywords, and `C-c / T' for a specific one.
+
+2010-05-08  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-mode): Fix comment syntax settings.
+
+	* org-src.el (org-edit-src-allow-write-back-p): Define
+	variable.
+
+	* org.el (org-inline-image-overlays): New variable.
+	(org-toggle-inline-images, org-display-inline-images)
+	(org-remove-inline-images): New commands.
+	(org-mode-map): Define a key for `org-toggle-inline-images'.
+
+2010-05-08  David Maus  <dmaus@ictsoc.de>
+
+	* org-wl.el (org-wl-message-field): New function.  Return
+	content of header field in message entity.
+	(org-wl-store-link): Call `org-wl-store-link-folder' or
+	`org-wl-store-link-message' depending on major-mode.
+	(org-wl-store-link-folder): New function.  Store link to
+	Wanderlust folder.
+	(org-wl-store-link-message): New function.  Store link to
+	Wanderlust message.
+	(org-wl-store-link-message): Store link to message while
+	visiting message.
+	(org-wl-open): Don't try to jump to message when opening a
+	folder link.
+
+2010-05-08  David Maus  <dmaus@ictsoc.de>
+
+	* org.el (org-replace-escapes): Avoid infinite loop when
+	replace string contains escape sequence it replaces.
+
+2010-05-08  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-crypt.el (org-crypt-key-for-heading): Use symmetric
+	encryption when now key is set.
+
+2010-05-07  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-table.el (org-table-recalculate-buffer-tables)
+	(org-table-iterate-buffer-tables): New commands.
+
+	* org.el (org-check-for-hidden): When there is a region, skip
+	the check.
+
 2010-05-02  Dan Davison  <davison@stats.ox.ac.uk>
 
 	* org-src.el (org-edit-src-code): allow-write-back-p had

@@ -6,7 +6,7 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 6.35trans
+;; Version: 6.36trans
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -108,7 +108,7 @@
 
 ;;; Version
 
-(defconst org-version "6.35trans"
+(defconst org-version "6.36trans"
   "The version number of the file org.el.")
 
 (defun org-version (&optional here)
@@ -1295,8 +1295,7 @@ implementation is bad."
   :type 'boolean)
 
 (defcustom org-return-follows-link nil
-  "Non-nil means on links RET will follow the link.
-Needs to be set before org.el is loaded."
+  "Non-nil means on links RET will follow the link."
   :group 'org-link-follow
   :type 'boolean)
 
@@ -4422,7 +4421,6 @@ The following commands are available:
     (org-set-tag-faces 'org-tag-faces org-tag-faces))
   ;; Calc embedded
   (org-set-local 'calc-embedded-open-mode "# ")
-  (modify-syntax-entry ?# "<")
   (modify-syntax-entry ?@ "w")
   (if org-startup-truncated (setq truncate-lines t))
   (org-set-local 'font-lock-unfontify-region-function
@@ -4451,8 +4449,10 @@ The following commands are available:
 		 'org-block-todo-from-checkboxes))
 
   ;; Comment characters
-;  (org-set-local 'comment-start "#") ;; FIXME: this breaks wrapping
+  (org-set-local 'comment-start "#")
   (org-set-local 'comment-padding " ")
+  (modify-syntax-entry ?# "<")
+  (modify-syntax-entry ?\n ">")
 
   ;; Align options lines
   (org-set-local
@@ -11402,7 +11402,8 @@ POS may also be a marker."
 This command can create sparse trees.  You first need to select the type
 of match used to create the tree:
 
-t      Show entries with a specific TODO keyword.
+t      Show all TODO entries.
+T      Show entries with a specific TODO keyword.
 m      Show entries selected by a tags/property match.
 p      Enter a property name and its value (both with completion on existing
        names/values) and show entries with that property.
@@ -11412,7 +11413,7 @@ b      Show deadlines and scheduled items before a date.
 a      Show deadlines and scheduled items after a date."
   (interactive "P")
   (let (ans kwd value)
-    (message "Sparse tree: [/]regexp [t]odo-kwd [m]atch [p]roperty [d]eadlines [b]efore-date [a]fter-date")
+    (message "Sparse tree: [/]regexp [t]odo [T]odo-kwd [m]atch [p]roperty [d]eadlines\n             [b]efore-date [a]fter-date")
     (setq ans (read-char-exclusive))
     (cond
      ((equal ans ?d)
@@ -11422,6 +11423,8 @@ a      Show deadlines and scheduled items after a date."
      ((equal ans ?a)
       (call-interactively 'org-check-after-date))
      ((equal ans ?t)
+      (org-show-todo-tree nil))
+     ((equal ans ?T)
       (org-show-todo-tree '(4)))
      ((member ans '(?T ?m))
       (call-interactively 'org-match-sparse-tree))
@@ -15463,6 +15466,52 @@ SNIPPETS-P indicates if this is run to create snippet images for HTML."
   "Return string to be used as color value for an RGB component."
   (format "%g" (/ value 65535.0)))
 
+;; Image display
+
+
+(defvar org-inline-image-overlays nil)
+(make-variable-buffer-local 'org-inline-image-overlays)
+
+(defun org-toggle-inline-images (&optional include-linked)
+  "Toggle the display of inline images.
+INCLUDE-LINKED is passed to `org-display-inline-images'."
+  (interactive "P")
+  (if org-inline-image-overlays
+      (progn
+	(org-remove-inline-images)
+	(message "Inline image display turned off"))
+    (org-display-inline-images include-linked)
+    (if org-inline-image-overlays
+	(message "%d images displayed inline"
+		 (length org-inline-image-overlays))
+      (message "No images to display inline"))))
+
+(defun org-display-inline-images (&optional include-linked)
+  "Display inline images.
+Normally only links without a description part are inlined, because this
+is how it will work for export.  When INCLUDE-LINKED is set, also links
+with a description part will be inlined."
+  (interactive "P")
+  (org-remove-inline-images)
+  (goto-char (point-min))
+  (let ((re (concat "\\[\\[\\(file:\\|\\./\\)\\(~?" "[-+./_0-9a-zA-Z]+"
+		    (substring (org-image-file-name-regexp) 0 -2)
+		    "\\)\\]" (if include-linked "" "\\]")))
+	file ov)
+  (while (re-search-forward re nil t)
+    (setq file (expand-file-name (match-string 2)))
+    (when (file-exists-p file)
+      (setq ov (make-overlay (match-beginning 0) (match-end 0)))
+      (overlay-put ov 'display (create-image file))
+      (overlay-put ov 'face 'default)
+      (push ov org-inline-image-overlays)))))
+
+(defun org-remove-inline-images ()
+  "Remove inline display of images."
+  (interactive)
+  (mapc 'delete-overlay org-inline-image-overlays)
+  (setq org-inline-image-overlays nil))
+
 ;;;; Key bindings
 
 ;; Make `C-c C-x' a prefix key
@@ -15632,6 +15681,7 @@ SNIPPETS-P indicates if this is run to create snippet images for HTML."
 (org-defkey org-mode-map "\C-c\C-x\C-r" 'org-clock-report)
 (org-defkey org-mode-map "\C-c\C-x\C-u" 'org-dblock-update)
 (org-defkey org-mode-map "\C-c\C-x\C-l" 'org-preview-latex-fragment)
+(org-defkey org-mode-map "\C-c\C-x\C-v" 'org-toggle-inline-images)
 (org-defkey org-mode-map "\C-c\C-x\C-b" 'org-toggle-checkbox)
 (org-defkey org-mode-map "\C-c\C-xp"    'org-set-property)
 (org-defkey org-mode-map "\C-c\C-xe"    'org-set-effort)
@@ -16146,20 +16196,19 @@ this fucntion returns t, nil otherwise."
 	beg end)
     (save-excursion
       (catch 'exit
-	(if (org-region-active-p)
-	    (setq beg (region-beginning) end (region-end))
+	(unless (org-region-active-p)
 	  (setq beg (point-at-bol))
 	  (beginning-of-line 2)
 	  (while (and (not (eobp)) ;; this is like `next-line'
 		      (get-char-property (1- (point)) 'invisible))
 	    (beginning-of-line 2))
-	  (setq end (point)))
-	(goto-char beg)
-	(goto-char (point-at-eol))
-	(setq end (max end (point)))
-	(while (re-search-forward re end t)
-	  (if (get-char-property (match-beginning 0) 'invisible)
-	      (throw 'exit t)))
+	  (setq end (point))
+	  (goto-char beg)
+	  (goto-char (point-at-eol))
+	  (setq end (max end (point)))
+	  (while (re-search-forward re end t)
+	    (if (get-char-property (match-beginning 0) 'invisible)
+		(throw 'exit t))))
 	nil))))
 
 (defun org-metaup (&optional arg)
@@ -17645,16 +17694,26 @@ TABLE is an association list with keys like \"%a\" and string values.
 The sequences in STRING may contain normal field width and padding information,
 for example \"%-5s\".  Replacements happen in the sequence given by TABLE,
 so values can contain further %-escapes if they are define later in TABLE."
-  (let ((case-fold-search nil)
-	e re rpl)
-    (while (setq e (pop table))
+  (let ((tbl (copy-alist table))
+	(case-fold-search nil)
+        (pchg 0)
+        e re rpl)
+    (while (setq e (pop tbl))
       (setq re (concat "%-?[0-9.]*" (substring (car e) 1)))
+      (when (string-match re (cdr e))
+        (let ((sref (substring (cdr e) (match-beginning 0) (match-end 0)))
+              (safe "SREF"))
+          (add-text-properties 0 3 (list 'sref sref) safe)
+          (setcdr e (replace-match safe t t (cdr e)))))
       (while (string-match re string)
-	(setq rpl (format (concat (substring (match-string 0 string) 0 -1) "s")
-			  (cdr e)))
-	(setq string (replace-match rpl t t string))))
+        (setq rpl (format (concat (substring (match-string 0 string) 0 -1) "s")
+                          (cdr e)))
+        (setq string (replace-match rpl t t string))))
+    (while (setq pchg (next-property-change pchg string))
+      (let ((sref (get-text-property pchg 'sref string)))
+	(when (and sref (string-match "SREF" string pchg))
+	  (setq string (replace-match sref t t string)))))
     string))
-
 
 (defun org-sublist (list start end)
   "Return a section of LIST, from START to END.
@@ -18626,7 +18685,6 @@ To get rid of the restriction, use \\[org-agenda-remove-restriction-lock]."
      (define-key speedbar-file-key-map "\C-c\C-x>" 'org-agenda-remove-restriction-lock)
      (add-hook 'speedbar-visiting-tag-hook
 	       (lambda () (and (org-mode-p) (org-show-context 'org-goto))))))
-
 
 ;;; Fixes and Hacks for problems with other packages
 

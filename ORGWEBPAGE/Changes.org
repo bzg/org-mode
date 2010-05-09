@@ -6,9 +6,89 @@
 
 #+STARTUP: indent hidestars
 
-* Version 6.35
+
+* Version 6.36
+
  :PROPERTIES:
  :VISIBILITY: content
+ :CUSTOM_ID: v6.36
+ :END:
+
+** Details
+*** Inline display of linked images
+
+Images can now be displayed inline.  The key C-c C-x C-v does
+toggle the display of such images.  Note that only image links
+that have no description part will be inlined.
+
+*** Implement offsets for ordered lists
+
+If you want to start an ordered plain list with a number
+different from 1, you can now do it like this:
+    
+: 1. [@start:12] will star a lit a number 12
+
+*** Extensions to storing and opening links to Wanderlust messages
+    
+- Remove filter conditions for messages in a filter folder
+    
+  If customization variable `org-wl-link-remove-filter' is non-nil,
+  filter conditions are stripped of the folder name.
+    
+- Create web links for messages in a Shimbun folder
+
+  If customization variable `org-wl-shimbun-prefer-web-links' is
+  non-nil, calling `org-store-link' on a Shimbun message creates a
+  web link to the messages source, indicated in the Xref: header
+  field.
+
+- Create web links for messages in a nntp folder
+
+  If customization variable `org-wl-nntp-prefer-web-links' is
+  non-nil, calling `org-store-link' on a nntp message creates a web
+  link either to gmane.org if the group can be read trough gmane or
+  to googlegroups otherwise. In both cases the message-id is used as
+  reference.
+
+- Open links in namazu search folder
+
+  If `org-wl-open' is called with one prefix, WL opens a namazu
+  search folder for message's message-id using
+  `org-wl-namazu-default-index' as search index.  If this variable is
+  nil or `org-wl-open' is called with two prefixes Org asks for the
+  search index to use.
+
+Thanks to David Maus for these changes.
+
+*** Org-babel: code block body expansion for table and preview
+
+In org-babel, code is "expanded" prior to evaluation. I.e. the
+code that is actually evaluated comprises the code block
+contents, augmented with the extra code which assigns the
+referenced data to variables. It is now possible to preview
+expanded contents, and also to expand code during during
+tangling. This expansion takes into account all header arguments,
+and variables.
+
+A new key-binding C-c M-b p bound to
+`org-babel-expand-src-block' can be used from inside of a
+source code block to preview its expanded contents (which can
+be very useful for debugging).  tangling
+
+The expanded body can now be tangled, this includes variable
+values which may be the results of other source-code blocks, or
+stored in headline properties or tables. One possible use for
+this is to allow those using org-babel for their emacs
+initialization to store values (e.g. usernames, passwords,
+etcâ€¦) in headline properties or in tables.
+
+Org-babel now supports three new header arguments, and new
+default behavior for handling horizontal lines in tables
+(hlines), column names, and rownames across all languages.
+
+
+* Version 6.35
+ :PROPERTIES:
  :CUSTOM_ID: v6.35
  :END:
 
@@ -433,7 +513,7 @@ Extension: \.pdf::\([0-9]+\)\'
 Command:   evince "%s" -p %1
 #+end_example
 
-Thanks to Jan Böcker for a patch to this effect.
+Thanks to Jan BÃ¶cker for a patch to this effect.
 
 ** Clocking
 
@@ -535,7 +615,7 @@ So when you are prompted for a date, you can now answer like this
 
 There is now only a single free timer supported by org-timer.el.
 Thanks to Bastien for cleaning this up, after a bug report in
-this area by Frédéric Couchet.
+this area by FrÃ©dÃ©ric Couchet.
 
 *** Remember: Allow to file as sibling of current clock
     
@@ -574,7 +654,7 @@ around org-babel.
   evaluated.
 - No longer adding extension during tangling when filename is
   provided.
-  Thanks to Martin G. Skjæveland and Nicolas Girard for prompting this.
+  Thanks to Martin G. SkjÃ¦veland and Nicolas Girard for prompting this.
 - Added `org-babel-execute-hook' which runs after code block
   execution.
 - Working directories and remote execution
@@ -594,7 +674,7 @@ around org-babel.
   if found will execute on the remote machine in the specified
   remote directory.
 - Tramp syntax can be used to tangle to remote files.
-  Thanks to Maurizio Vitale and Rémi Vanicat.
+  Thanks to Maurizio Vitale and RÃ©mi Vanicat.
 - org-R removed from contrib.
 - gnuplot can now return it's string output -- when session is
   set to "none".
@@ -648,7 +728,7 @@ call function to do something special with text links.
 
 Thanks to Paul Sexton for this contribution.
 
-**** Add Jan Böcker's org-docview.el
+**** Add Jan BÃ¶cker's org-docview.el
 
 This new module allows links to various file types using docview,
 where Emacs displays images of document pages.  Docview link
@@ -657,7 +737,7 @@ page 131 of the Org-mode manual:
 
 : [[docview:~/.elisp/org/doc/org.pdf::131][Org-Mode Manual]]
 
-Thanks to Jan Böcker for this contribution.
+Thanks to Jan BÃ¶cker for this contribution.
     
 **** New link types that force special ways of opening the file
     

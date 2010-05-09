@@ -6,7 +6,7 @@
 ;;; Version: 1.0
 
 ;; Keywords: org, wp
-;; Version: 6.35trans
+;; Version: 6.36trans
 ;;
 ;; This file is part of GNU Emacs.
 ;;
