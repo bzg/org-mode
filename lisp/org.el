@@ -11402,7 +11402,8 @@ POS may also be a marker."
 This command can create sparse trees.  You first need to select the type
 of match used to create the tree:
 
-t      Show entries with a specific TODO keyword.
+t      Show all TODO entries.
+T      Show entries with a specific TODO keyword.
 m      Show entries selected by a tags/property match.
 p      Enter a property name and its value (both with completion on existing
        names/values) and show entries with that property.
@@ -11412,7 +11413,7 @@ b      Show deadlines and scheduled items before a date.
 a      Show deadlines and scheduled items after a date."
   (interactive "P")
   (let (ans kwd value)
-    (message "Sparse tree: [/]regexp [t]odo-kwd [m]atch [p]roperty [d]eadlines [b]efore-date [a]fter-date")
+    (message "Sparse tree: [/]regexp [t]odo [T]odo-kwd [m]atch [p]roperty [d]eadlines\n             [b]efore-date [a]fter-date")
     (setq ans (read-char-exclusive))
     (cond
      ((equal ans ?d)
@@ -11422,6 +11423,8 @@ a      Show deadlines and scheduled items after a date."
      ((equal ans ?a)
       (call-interactively 'org-check-after-date))
      ((equal ans ?t)
+      (org-show-todo-tree nil))
+     ((equal ans ?T)
       (org-show-todo-tree '(4)))
      ((member ans '(?T ?m))
       (call-interactively 'org-match-sparse-tree))
