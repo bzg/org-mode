@@ -580,8 +580,8 @@ non-nil, create a buffer with that name and export to that
 buffer.  If TO-BUFFER is the symbol `string', don't leave any
 buffer behind but just return the resulting LaTeX as a string.
 When BODY-ONLY is set, don't produce the file header and footer,
-simply return the content of \begin{document}...\end{document},
-without even the \begin{document} and \end{document} commands.
+simply return the content of \\begin{document}...\\end{document},
+without even the \\begin{document} and \\end{document} commands.
 when PUB-DIR is set, use this as the publishing directory."
   (interactive "P")
   (when (and (not body-only) arg (listp arg)) (setq body-only t))
