@@ -402,6 +402,10 @@ This splices all the components into the list."
 	(push p rtn)))
     (nreverse (org-publish-delete-dups (delq nil rtn)))))
 
+
+(defvar sitemap-alphabetically)
+(defvar sitemap-sort-folders)
+(defvar sitemap-ignore-case)
 (defun org-publish-compare-directory-files (a b)
   "Predicate for `sort', that sorts folders-first/last and
 eventually alphabetically."
