@@ -465,7 +465,7 @@ newlines are interpreted as significant \(e.g., as indicating
 preformatted text\).  A common non-nil value for this keyword
 is \"\\n\".  Should typically be combined with a value for 
 :body-line-format that does NOT end with a newline."
-    :type string))
+    :type string)
     
   
 
