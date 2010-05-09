@@ -15,10 +15,18 @@
  :END:
 
 ** Details
-*** Implement inline display of linked images
+*** Inline display of linked images
+
+Images can now be displayed inline.  The key C-c C-x C-v does
+toggle the display of such images.  Note that only image links
+that have no description part will be inlined.
+
 *** Implement offsets for ordered lists
+
+If you want to start an ordered plain list with a number
+different from 1, you can now do it like this:
     
-       1. [@start:12] will star a lit a number 12
+: 1. [@start:12] will star a lit a number 12
 
 *** Extensions to storing and opening links to Wanderlust messages
     
@@ -50,6 +58,8 @@
   nil or `org-wl-open' is called with two prefixes Org asks for the
   search index to use.
 
+Thanks to David Maus for these changes.
+
 *** Org-babel: code block body expansion for table and preview
 
 In org-babel, code is "expanded" prior to evaluation. I.e. the
@@ -75,6 +85,7 @@ etc…) in headline properties or in tables.
 Org-babel now supports three new header arguments, and new
 default behavior for handling horizontal lines in tables
 (hlines), column names, and rownames across all languages.
+
 
 * Version 6.35
  :PROPERTIES:
