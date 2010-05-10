@@ -13670,6 +13670,14 @@ user."
 	    (org-defkey minibuffer-local-map "<"
 			(lambda () (interactive)
 			  (org-eval-in-calendar '(scroll-calendar-right 1))))
+	    (org-defkey minibuffer-local-map "\C-v"
+			(lambda () (interactive)
+			  (org-eval-in-calendar
+			   '(calendar-scroll-left-three-months 1))))
+	    (org-defkey minibuffer-local-map "\M-v"
+			(lambda () (interactive)
+			  (org-eval-in-calendar
+			   '(calendar-scroll-right-three-months 1))))
 	    (run-hooks 'org-read-date-minibuffer-setup-hook)
 	    (unwind-protect
 		(progn
