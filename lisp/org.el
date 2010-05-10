@@ -4449,10 +4449,10 @@ The following commands are available:
 		 'org-block-todo-from-checkboxes))
 
   ;; Comment characters
-  (org-set-local 'comment-start "#")
+  ;; (org-set-local 'comment-start "#")
   (org-set-local 'comment-padding " ")
   (modify-syntax-entry ?# "<")
-  (modify-syntax-entry ?\n ">")
+  ;; (modify-syntax-entry ?\n ">")
 
   ;; Align options lines
   (org-set-local
@@ -13670,6 +13670,14 @@ user."
 	    (org-defkey minibuffer-local-map "<"
 			(lambda () (interactive)
 			  (org-eval-in-calendar '(scroll-calendar-right 1))))
+	    (org-defkey minibuffer-local-map "\C-v"
+			(lambda () (interactive)
+			  (org-eval-in-calendar
+			   '(calendar-scroll-left-three-months 1))))
+	    (org-defkey minibuffer-local-map "\M-v"
+			(lambda () (interactive)
+			  (org-eval-in-calendar
+			   '(calendar-scroll-right-three-months 1))))
 	    (run-hooks 'org-read-date-minibuffer-setup-hook)
 	    (unwind-protect
 		(progn
@@ -17700,7 +17708,7 @@ so values can contain further %-escapes if they are define later in TABLE."
         e re rpl)
     (while (setq e (pop tbl))
       (setq re (concat "%-?[0-9.]*" (substring (car e) 1)))
-      (when (string-match re (cdr e))
+      (when (and (cdr e) (string-match re (cdr e)))
         (let ((sref (substring (cdr e) (match-beginning 0) (match-end 0)))
               (safe "SREF"))
           (add-text-properties 0 3 (list 'sref sref) safe)

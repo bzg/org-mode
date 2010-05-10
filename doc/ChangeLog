@@ -1,3 +1,8 @@
+2010-05-10  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (The date/time prompt): Document the new keys `C-v'
+	and `M-v'.
+
 2010-05-08  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* orgcard.tex: Document inline image toggling.
