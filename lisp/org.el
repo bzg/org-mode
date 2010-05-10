@@ -17700,7 +17700,7 @@ so values can contain further %-escapes if they are define later in TABLE."
         e re rpl)
     (while (setq e (pop tbl))
       (setq re (concat "%-?[0-9.]*" (substring (car e) 1)))
-      (when (string-match re (cdr e))
+      (when (and (cdr e) (string-match re (cdr e)))
         (let ((sref (substring (cdr e) (match-beginning 0) (match-end 0)))
               (safe "SREF"))
           (add-text-properties 0 3 (list 'sref sref) safe)
