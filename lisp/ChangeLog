@@ -2,6 +2,7 @@
 
 	* org.el (org-replace-escapes): Make sure the cdr is not nil.
 	(org-read-date): Make `M-v' and `C-v' scroll the popup calendar.
+	(org-mode): Revert comment syntax changes.
 
 2010-05-09  Carsten Dominik  <carsten.dominik@gmail.com>
 

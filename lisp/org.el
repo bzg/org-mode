@@ -4449,10 +4449,10 @@ The following commands are available:
 		 'org-block-todo-from-checkboxes))
 
   ;; Comment characters
-  (org-set-local 'comment-start "#")
+  ;; (org-set-local 'comment-start "#")
   (org-set-local 'comment-padding " ")
   (modify-syntax-entry ?# "<")
-  (modify-syntax-entry ?\n ">")
+  ;; (modify-syntax-entry ?\n ">")
 
   ;; Align options lines
   (org-set-local
