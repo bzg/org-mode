@@ -96,7 +96,7 @@
   (let* ((strlist (org-git-split-string str))
          (filepath (first strlist))
          (commit (second strlist))
-         (dirlist (org-git-find-gitdir filepath))
+         (dirlist (org-git-find-gitdir (file-truename filepath)))
          (gitdir (first dirlist))
          (relpath (second dirlist)))
     (org-git-open-file-internal gitdir (concat commit ":" relpath))))
@@ -168,7 +168,7 @@
 (defun org-git-create-git-link (file)
   "Create git link part to file at specific time"
   (interactive "FFile: ")
-  (let* ((gitdir (first (org-git-find-gitdir file)))
+  (let* ((gitdir (first (org-git-find-gitdir (file-truename file))))
          (branchname (org-git-get-current-branch gitdir))
          (timestring (format-time-string "%Y-%m-%d" (current-time))))
     (org-make-link "git:" file "::" (org-git-create-searchstring branchname timestring))))

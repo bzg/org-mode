@@ -1,3 +1,8 @@
+2010-05-11  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* lisp/org-git-link.el (org-git-open)
+	(org-git-create-git-link): expand file name.
+
 2010-04-20  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* lisp/org-toc.el (org-toc-cycle-subtree)
