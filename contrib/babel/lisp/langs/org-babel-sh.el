@@ -57,11 +57,11 @@ function is called by `org-babel-execute-src-block'."
   (message "executing Shell source code block")
   (let* ((processed-params (org-babel-process-params params))
          (session (org-babel-sh-initiate-session (first processed-params)))
-         (result-type (fourth processed-params))
+         (result-params (third processed-params)) 
          (full-body (org-babel-expand-body:sh
                      body params processed-params))) ;; then the source block body
     (org-babel-reassemble-table
-     (org-babel-sh-evaluate session full-body result-type)
+     (org-babel-sh-evaluate session full-body result-params)
      (org-babel-pick-name (nth 4 processed-params) (cdr (assoc :colnames params)))
      (org-babel-pick-name (nth 5 processed-params) (cdr (assoc :rownames params))))))
 
@@ -130,7 +130,7 @@ Emacs-lisp table, otherwise return the results as a string."
 (defvar org-babel-sh-eoe-output "org_babel_sh_eoe"
   "Used to indicate that evaluation is has completed.")
 
-(defun org-babel-sh-evaluate (session body &optional result-type)
+(defun org-babel-sh-evaluate (session body &optional result-params)
   "Pass BODY to the Shell process in BUFFER.  If RESULT-TYPE equals
 'output then return a list of the outputs of the statements in
 BODY, if RESULT-TYPE equals 'value then return the value of the
@@ -142,13 +142,16 @@ last statement in BODY."
           (insert body)
           ;; (message "buffer=%s" (buffer-string)) ;; debugging
           (org-babel-shell-command-on-region (point-min) (point-max) org-babel-sh-command 'current-buffer 'replace)
-	  (case result-type
-	    (output (buffer-string))
-	    (value ;; TODO: figure out how to return non-output values from shell scripts
-	     (let ((tmp-file (make-temp-file "org-babel-sh"))
-		   (results (buffer-string)))
-	       (with-temp-file tmp-file (insert results))
-	       (org-babel-import-elisp-from-file tmp-file))))))
+	  (cond
+	   ((member "output" result-params) (buffer-string))
+	   ;; TODO: figure out how to return non-output values from shell scripts
+	   (t ;; if not "output" then treat as "value"
+	    (if (member "scalar" result-params)
+		(buffer-string)
+	      (let ((tmp-file (make-temp-file "org-babel-sh"))
+		    (results (buffer-string)))
+		(with-temp-file tmp-file (insert results))
+		(org-babel-import-elisp-from-file tmp-file)))))))
     ;; comint session evaluation
     (flet ((strip-empty (lst)
                         (delq nil (mapcar (lambda (el) (unless (= (length el) 0) el)) lst))))
@@ -169,12 +172,14 @@ last statement in BODY."
         ;; (message (replace-regexp-in-string
         ;;           "%" "%%" (format "processed-results=%S" results))) ;; debugging
         (or (and results
-                 (case result-type
-                   (output (org-babel-trim (mapconcat #'org-babel-trim
-                                                      (reverse results) "\n")))
-                   (value (with-temp-file tmp-file
-                            (insert (car results)) (insert "\n"))
-                          (org-babel-import-elisp-from-file tmp-file))))
+                 (cond
+		  ((member "output" result-params)
+		   (org-babel-trim (mapconcat #'org-babel-trim
+					      (reverse results) "\n")))
+		  (t ;; if not "output" then treat as "value"
+		   (with-temp-file tmp-file
+		     (insert (car results)) (insert "\n"))
+		   (org-babel-import-elisp-from-file tmp-file))))
             "")))))
 
 (defun org-babel-sh-strip-weird-long-prompt (string)
