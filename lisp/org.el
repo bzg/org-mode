@@ -2143,6 +2143,7 @@ The value is an alist, with the car being a symbol indicating the note
 context, and the cdr is the heading to be used.  The heading may also be the
 empty string.
 %t in the heading will be replaced by a time stamp.
+%T will be an acive time stamp instead the default inacive one
 %s will be replaced by the new TODO state, in double quotes.
 %S will be replaced by the old TODO state, in double quotes.
 %u will be replaced by the user name.
@@ -11376,6 +11377,9 @@ EXTRA is additional text that will be inserted into the notes buffer."
 		   (cons "%U" user-full-name)
 		   (cons "%t" (format-time-string
 			       (org-time-stamp-format 'long 'inactive)
+			       (current-time)))
+		   (cons "%T" (format-time-string
+			       (org-time-stamp-format 'long nil)
 			       (current-time)))
 		   (cons "%s" (if org-log-note-state
 				  (concat "\"" org-log-note-state "\"")

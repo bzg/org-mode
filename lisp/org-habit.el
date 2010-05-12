@@ -280,9 +280,16 @@ current time."
 		       donep)))
 	     markedp face)
 	(if donep
-	    (progn
+	    (let ((done-time (time-add
+			      starting
+			      (days-to-time
+			       (- start (time-to-days starting))))))
+
 	      (aset graph index ?*)
 	      (setq markedp t)
+	      (put-text-property
+	       index (1+ index) 'help-echo
+	       (format-time-string (org-time-stamp-format) done-time) graph)
 	      (while (and done-dates
 			  (= start (car done-dates)))
 		(setq last-done-date (car done-dates)
