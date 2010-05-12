@@ -4343,23 +4343,23 @@ list of the fields in the rectangle ."
 	      (setq buffer (marker-buffer id-loc)
 		    loc (marker-position id-loc))
 	      (move-marker id-loc nil)))
-	  (switch-to-buffer buffer)
-	  (save-excursion
-	    (save-restriction
-	      (widen)
-	      (goto-char loc)
-	      (forward-char 1)
-	      (unless (and (re-search-forward "^\\(\\*+ \\)\\|[ \t]*|" nil t)
-			   (not (match-beginning 1)))
-		(error "Cannot find a table at NAME or ID %s" name-or-id))
-	      (setq tbeg (point-at-bol))
-	      (org-table-get-specials)
-	      (setq form (org-table-formula-substitute-names form))
-	      (if (and (string-match org-table-range-regexp form)
-		       (> (length (match-string 0 form)) 1))
-		  (save-match-data
-		    (org-table-get-range (match-string 0 form) tbeg 1))
-		form))))))))
+	  (with-current-buffer buffer
+	    (save-excursion
+	      (save-restriction
+		(widen)
+		(goto-char loc)
+		(forward-char 1)
+		(unless (and (re-search-forward "^\\(\\*+ \\)\\|[ \t]*|" nil t)
+			     (not (match-beginning 1)))
+		  (error "Cannot find a table at NAME or ID %s" name-or-id))
+		(setq tbeg (point-at-bol))
+		(org-table-get-specials)
+		(setq form (org-table-formula-substitute-names form))
+		(if (and (string-match org-table-range-regexp form)
+			 (> (length (match-string 0 form)) 1))
+		    (save-match-data
+		      (org-table-get-range (match-string 0 form) tbeg 1))
+		  form)))))))))
 
 (provide 'org-table)
 

@@ -1,5 +1,8 @@
 2010-05-12  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-table.el (org-table-get-remote-range): Return to
+	original buffer when retrieving remote reference.
+
 	* org.el (org-display-inline-images): Do the entire buffer,
 	not just the narrowed region.  Clear the cache.
 	(org-display-inline-images): Match mode file paths.
