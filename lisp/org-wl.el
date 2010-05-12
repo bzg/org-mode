@@ -151,12 +151,11 @@ ENTITY is a message entity."
 	 (link (org-make-link "wl:" folder)))
     (save-excursion
       (beginning-of-line)
-      (if (and (wl-folder-buffer-group-p)
-	       (looking-at wl-folder-group-regexp))
-	  (error "Cannot store link to folder group: %s" folder))
-      (org-store-link-props :type "wl" :description petname
-			    :link link)
-      link)))
+      (unless (and (wl-folder-buffer-group-p)
+		   (looking-at wl-folder-group-regexp))
+	(org-store-link-props :type "wl" :description petname
+			      :link link)
+	link))))
 
 (defun org-wl-store-link-message ()
   "Store a link to a WL message."
@@ -182,7 +181,8 @@ ENTITY is a message entity."
 		       wl-summary-buffer-elmo-folder msgnum)
 		    (elmo-msgdb-overview-get-entity
 		     msgnum (wl-summary-buffer-msgdb))))
-		 (message-id (org-wl-message-field 'message-id wl-message-entity))
+		 (message-id
+		  (org-wl-message-field 'message-id wl-message-entity))
 		 (from (org-wl-message-field 'from wl-message-entity))
 		 (to (org-wl-message-field 'to wl-message-entity))
 		 (xref (org-wl-message-field 'xref wl-message-entity))
@@ -202,16 +202,18 @@ ENTITY is a message entity."
 
 	    ;; maybe create http link
 	    (cond
-	     ((and (eq folder-type 'shimbun) org-wl-shimbun-prefer-web-links xref)
+	     ((and (eq folder-type 'shimbun)
+		   org-wl-shimbun-prefer-web-links xref)
 	      (org-store-link-props :type "http" :link xref :description subject
 				    :from from :to to :message-id message-id
 				    :subject subject))
 	     ((and (eq folder-type 'nntp) org-wl-nntp-prefer-web-links)
-	      (setq link (format
-			  (if (string-match "gmane\\." folder-name)
-			      "http://mid.gmane.org/%s"
-			    "http://groups.google.com/groups/search?as_umsgid=%s")
-			  (org-fixup-message-id-for-http message-id)))
+	      (setq link
+		    (format
+		     (if (string-match "gmane\\." folder-name)
+			 "http://mid.gmane.org/%s"
+		       "http://groups.google.com/groups/search?as_umsgid=%s")
+		     (org-fixup-message-id-for-http message-id)))
 	      (org-store-link-props :type "http" :link link :description subject
 				    :from from :to to :message-id message-id
 				    :subject subject))
@@ -230,34 +232,34 @@ When called with one prefix, open message in namazu search folder
 with `org-wl-namazu-default-index' as search index.  When called
 with two prefixes or `org-wl-namazu-default-index' is nil, ask
 for namazu index."
- (require 'wl)
- (unless wl-init (wl))
- ;; XXX: The imap-uw's MH folder names start with "%#".
- (if (not (string-match "\\`\\(\\(?:%#\\)?[^#]+\\)\\(#\\(.*\\)\\)?" path))
-     (error "Error in Wanderlust link"))
- (let ((folder (match-string 1 path))
-       (article (match-string 3 path)))
-   ;; maybe open message in namazu search folder
-   (when current-prefix-arg
-     (setq folder (concat "[" article "]"
-			  (if (and (equal current-prefix-arg '(4))
-				   org-wl-namazu-default-index)
-			      org-wl-namazu-default-index
-			    (read-directory-name "Namazu index: ")))))
-   (if (not (elmo-folder-exists-p (org-no-warnings
-				   (wl-folder-get-elmo-folder folder))))
-       (error "No such folder: %s" folder))
-   (let ((old-buf (current-buffer))
-	 (old-point (point-marker)))
-     (wl-folder-goto-folder-subr folder)
-     (with-current-buffer old-buf
+  (require 'wl)
+  (unless wl-init (wl))
+  ;; XXX: The imap-uw's MH folder names start with "%#".
+  (if (not (string-match "\\`\\(\\(?:%#\\)?[^#]+\\)\\(#\\(.*\\)\\)?" path))
+      (error "Error in Wanderlust link"))
+  (let ((folder (match-string 1 path))
+	(article (match-string 3 path)))
+    ;; maybe open message in namazu search folder
+    (when current-prefix-arg
+      (setq folder (concat "[" article "]"
+			   (if (and (equal current-prefix-arg '(4))
+				    org-wl-namazu-default-index)
+			       org-wl-namazu-default-index
+			     (read-directory-name "Namazu index: ")))))
+    (if (not (elmo-folder-exists-p (org-no-warnings
+				    (wl-folder-get-elmo-folder folder))))
+	(error "No such folder: %s" folder))
+    (let ((old-buf (current-buffer))
+	  (old-point (point-marker)))
+      (wl-folder-goto-folder-subr folder)
+      (with-current-buffer old-buf
 	;; XXX: `wl-folder-goto-folder-subr' moves point to the
 	;; beginning of the current line.  So, restore the point
 	;; in the old buffer.
 	(goto-char old-point))
-     (and article (wl-summary-jump-to-msg-by-message-id (org-add-angle-brackets
-							 article))
-	  (wl-summary-redisplay)))))
+      (and article (wl-summary-jump-to-msg-by-message-id (org-add-angle-brackets
+							  article))
+	   (wl-summary-redisplay)))))
 
 (provide 'org-wl)
 
