@@ -3280,12 +3280,12 @@ with @code{shift-selection-mode}.  See also the variable
 @vindex org-todo-keywords
 View TODO items in a @emph{sparse tree} (@pxref{Sparse trees}).  Folds the
 entire buffer, but shows all TODO items and the headings hierarchy above
-them.  With a prefix argument, search for a specific TODO.  You will be
-prompted for the keyword, and you can also give a list of keywords like
-@code{KWD1|KWD2|...} to list entries that match any one of these keywords.
-With numeric prefix argument N, show the tree for the Nth keyword in the
-variable @code{org-todo-keywords}.  With two prefix arguments, find all TODO
-and DONE entries.
+them.  With a prefix argument (or by using @kbd{C-c / T}), search for a
+specific TODO.  You will be prompted for the keyword, and you can also give a
+list of keywords like @code{KWD1|KWD2|...} to list entries that match any one
+of these keywords.  With numeric prefix argument N, show the tree for the Nth
+keyword in the variable @code{org-todo-keywords}.  With two prefix arguments,
+find all TODO and DONE entries.
 @kindex C-c a t
 @item C-c a t
 Show the global TODO list.  Collects the TODO items from all agenda
