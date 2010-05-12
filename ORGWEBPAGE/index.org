@@ -178,8 +178,8 @@ and corresponding to the latest git version.
 
 ** Reference card
    - Download the [[file:orgcard.pdf][Refcard]] for org-mode
-   - Kyle Sherman has created a [[file:orgcard.txt][text version]] of the reference card
-     (Org version 6.07).
+   - There is also a [[file:orgcard.txt][text version]] of the
+     reference card.
 ** The FAQ
    - The [[http://orgmode.org/worg/org-faq.php][Org Mode FAQ]] is user-editable and is maintained by the [[http://orgmode.org/worg/][Worg
      project]]. 

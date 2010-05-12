@@ -26,6 +26,7 @@
 *.dvi
 *.ps
 orgcard_letter.tex
+orgcard.txt
 org
 org-install.el
 org-*.tar.gz

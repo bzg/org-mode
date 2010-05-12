@@ -202,6 +202,9 @@ doc/org.html: doc/org.texi
 doc/orgcard.pdf: doc/orgcard.tex
 	(cd doc; pdftex orgcard.tex)
 
+doc/orgcard.txt: doc/orgcard.tex
+	(cd doc; perl ../UTILITIES/orgcard2txt.pl orgcard.tex > orgcard.txt)
+
 doc/orgcard_letter.tex: doc/orgcard.tex
 	perl -pe 's/\\pdflayout=\(0l\)/\\pdflayout=(1l)/' \
                    doc/orgcard.tex > doc/orgcard_letter.tex
@@ -232,7 +235,7 @@ info:	doc/org
 
 pdf:	doc/org.pdf doc/orgguide.pdf
 
-card:	doc/orgcard.pdf doc/orgcard_letter.pdf
+card:	doc/orgcard.pdf doc/orgcard_letter.pdf doc/orgcard.txt
 
 distfile:
 	@if [ "X$(TAG)" = "X" ]; then echo "*** No tag ***"; exit 1; fi
@@ -266,7 +269,7 @@ release:
 	$(MKDIR) RELEASEDIR
 	cp org-$(TAG).zip org-$(TAG).tar.gz RELEASEDIR
 	cp doc/org.pdf doc/orgcard.pdf doc/org.texi doc/org.html RELEASEDIR
-	cp doc/orgguide.pdf RELEASEDIR
+	cp doc/orgguide.pdf doc/orgcard.txt RELEASEDIR
 	cp RELEASEDIR/org-$(TAG).zip    RELEASEDIR/org.zip
 	cp RELEASEDIR/org-$(TAG).tar.gz RELEASEDIR/org.tar.gz
 

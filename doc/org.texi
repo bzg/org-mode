@@ -12665,6 +12665,9 @@ and being able to quickly restrict the agenda to a subtree.
 @i{Tim O'Callaghan} suggested in-file links, search options for general
 file links, and TAGS.
 @item
+@i{Osamu Okano} wrote @file{orgcard2ref.pl}, a perl program to create a text
+version of the reference card.
+@item
 @i{Takeshi Okano} translated the manual and David O'Toole's tutorial
 into Japanese.
 @item
