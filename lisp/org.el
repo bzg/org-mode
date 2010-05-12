@@ -5601,7 +5601,7 @@ With a numeric prefix, show all headlines up to that level."
     (org-set-visibility-according-to-property 'no-cleanup)
     (org-cycle-hide-archived-subtrees 'all)
     (org-cycle-hide-drawers 'all)
-    (org-cycle-show-empty-lines 'all)))
+    (org-cycle-show-empty-lines t)))
 
 (defun org-set-visibility-according-to-property (&optional no-cleanup)
   "Switch subtree visibilities according to :VISIBILITY: property."

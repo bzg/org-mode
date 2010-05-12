@@ -1,5 +1,7 @@
 2010-05-12  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-set-startup-visibility): Fix empty line display.
+
 	* org-latex.el (org-export-latex-links): Use the formatting
 	function of the link type, if it is available.
 
