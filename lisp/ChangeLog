@@ -1,3 +1,8 @@
+2010-05-12  David Maus  <dmaus@ictsoc.de>
+
+	* org-wl.el (org-wl-store-link-folder): Don't throw error when
+	called on WL folder group.
+
 2010-05-10  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-replace-escapes): Make sure the cdr is not nil.

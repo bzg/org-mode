@@ -151,12 +151,11 @@ ENTITY is a message entity."
 	 (link (org-make-link "wl:" folder)))
     (save-excursion
       (beginning-of-line)
-      (if (and (wl-folder-buffer-group-p)
-	       (looking-at wl-folder-group-regexp))
-	  (error "Cannot store link to folder group: %s" folder))
-      (org-store-link-props :type "wl" :description petname
-			    :link link)
-      link)))
+      (unless (and (wl-folder-buffer-group-p)
+		   (looking-at wl-folder-group-regexp))
+	(org-store-link-props :type "wl" :description petname
+			      :link link)
+	link))))
 
 (defun org-wl-store-link-message ()
   "Store a link to a WL message."
