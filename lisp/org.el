@@ -15618,7 +15618,6 @@ with a description part will be inlined."
 (org-defkey org-mode-map "\C-c\C-s" 'org-schedule)
 (org-defkey org-mode-map "\C-c\C-d" 'org-deadline)
 (org-defkey org-mode-map "\C-c;"    'org-toggle-comment)
-(org-defkey org-mode-map "\C-c\C-v" 'org-show-todo-tree)
 (org-defkey org-mode-map "\C-c\C-w" 'org-refile)
 (org-defkey org-mode-map "\C-c/"    'org-sparse-tree)   ; Minor-mode reserved
 (org-defkey org-mode-map "\C-c\\"   'org-match-sparse-tree) ; Minor-mode res.
@@ -16870,8 +16869,8 @@ See the individual commands for more information."
       ["Complete Keyword" org-complete (assq :todo-keyword (org-context))]
       ["Next keyword set" org-shiftcontrolright (and (> (length org-todo-sets) 1) (org-on-heading-p))]
       ["Previous keyword set" org-shiftcontrolright (and (> (length org-todo-sets) 1) (org-on-heading-p))])
-     ["Show TODO Tree" org-show-todo-tree t]
-     ["Global TODO list" org-todo-list t]
+     ["Show TODO Tree" org-show-todo-tree :active t :keys "C-c / t"]
+     ["Global TODO list" org-todo-list :active t :keys "C-c a t"]
      "--"
      ["Enforce dependencies" (customize-variable 'org-enforce-todo-dependencies)
       :selected org-enforce-todo-dependencies :style toggle :active t]

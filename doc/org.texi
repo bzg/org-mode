@@ -3274,10 +3274,8 @@ mostly if more than two TODO states are possible (@pxref{TODO
 extensions}).  See also @ref{Conflicts}, for a discussion of the interaction
 with @code{shift-selection-mode}.  See also the variable
 @code{org-treat-S-cursor-todo-selection-as-state-change}.
-@kindex C-c C-v
 @kindex C-c / t
 @cindex sparse tree, for TODO
-@item C-c C-v
 @itemx C-c / t
 @vindex org-todo-keywords
 View TODO items in a @emph{sparse tree} (@pxref{Sparse trees}).  Folds the
@@ -3387,10 +3385,10 @@ select the right type for a task.  But when you return to the item after some
 time and execute @kbd{C-c C-t} again, it will switch from any name directly
 to DONE.  Use prefix arguments or completion to quickly select a specific
 name.  You can also review the items of a specific TODO type in a sparse tree
-by using a numeric prefix to @kbd{C-c C-v}.  For example, to see all things
-Lucy has to do, you would use @kbd{C-3 C-c C-v}.  To collect Lucy's items
+by using a numeric prefix to @kbd{C-c / t}.  For example, to see all things
+Lucy has to do, you would use @kbd{C-3 C-c / t}.  To collect Lucy's items
 from all agenda files into a single buffer, you would use the numeric prefix
-argument as well when creating the global TODO list: @kbd{C-3 C-c t}.
+argument as well when creating the global TODO list: @kbd{C-3 C-c a t}.
 
 @node Multiple sets in one file, Fast access to TODO states, TODO types, TODO extensions
 @subsection Multiple keyword sets in one file

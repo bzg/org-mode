@@ -142,8 +142,8 @@ Hyperlinks
 
 TODO Items
 
-* Using TODO states::		
-* Multi-state workflows::	
+* Using TODO states::		Setting and switching states
+* Multi-state workflows::	More than just on/off
 * Progress logging::		Dates and notes for progress
 * Priorities::			Some things are more important than others
 * Breaking down tasks::		Splitting a task into manageable pieces
@@ -860,8 +860,8 @@ throughout your notes file.  Org mode compensates for this by providing
 methods to give you an overview of all the things that you have to do.
 
 @menu
-* Using TODO states::		
-* Multi-state workflows::	
+* Using TODO states::		Setting and switching states
+* Multi-state workflows::	More than just on/off
 * Progress logging::		Dates and notes for progress
 * Priorities::			Some things are more important than others
 * Breaking down tasks::		Splitting a task into manageable pieces
