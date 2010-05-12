@@ -15513,14 +15513,15 @@ BEG and END default to the buffer boundaries."
       (widen)
       (setq beg (or beg (point-min)) end (or end (point-max)))
       (goto-char (point-min))
-      (let ((re (concat "\\[\\[\\(file:\\|\\./\\)\\(~?" "[-+./_0-9a-zA-Z]+"
+      (let ((re (concat "\\[\\[\\(\\(file:\\)\\|\\([./~]\\)\\)\\([-+~./_0-9a-zA-Z]+"
 			(substring (org-image-file-name-regexp) 0 -2)
 			"\\)\\]" (if include-linked "" "\\]")))
 	    file ov img)
 	(while (re-search-forward re end t)
 	  (setq old (get-char-property-and-overlay (match-beginning 1)
 						   'org-image-overlay))
-	  (setq file (expand-file-name (match-string 2)))
+	  (setq file (expand-file-name
+		      (concat (or (match-string 3) "") (match-string 4))))
 	  (when (file-exists-p file)
 	    (if (and (car-safe old) refresh)
 		(image-refresh (overlay-get (cdr old) 'display))
