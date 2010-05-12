@@ -1,3 +1,8 @@
+2010-05-12  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-display-inline-images): Do the entire buffer,
+	not just the narrowed region.  Clear the cache.
+
 2010-05-10  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-replace-escapes): Make sure the cdr is not nil.

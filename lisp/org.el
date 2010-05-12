@@ -15494,25 +15494,43 @@ INCLUDE-LINKED is passed to `org-display-inline-images'."
 		 (length org-inline-image-overlays))
       (message "No images to display inline"))))
 
-(defun org-display-inline-images (&optional include-linked)
+(defun org-display-inline-images (&optional include-linked refresh beg end)
   "Display inline images.
 Normally only links without a description part are inlined, because this
 is how it will work for export.  When INCLUDE-LINKED is set, also links
-with a description part will be inlined."
+with a description part will be inlined.  This can be nice for a quick
+look at those images, but it does not reflect whatexported files will look
+like.
+When REFRESH is set, refresh existing images between BEG and END.
+This will create new image displays only if necessary.
+BEG and END default to the buffer boundaries."
   (interactive "P")
-  (org-remove-inline-images)
-  (goto-char (point-min))
-  (let ((re (concat "\\[\\[\\(file:\\|\\./\\)\\(~?" "[-+./_0-9a-zA-Z]+"
-		    (substring (org-image-file-name-regexp) 0 -2)
-		    "\\)\\]" (if include-linked "" "\\]")))
-	file ov)
-  (while (re-search-forward re nil t)
-    (setq file (expand-file-name (match-string 2)))
-    (when (file-exists-p file)
-      (setq ov (make-overlay (match-beginning 0) (match-end 0)))
-      (overlay-put ov 'display (create-image file))
-      (overlay-put ov 'face 'default)
-      (push ov org-inline-image-overlays)))))
+  (unless refresh
+    (org-remove-inline-images)
+    (clear-image-cache))
+  (save-excursion
+    (save-restriction
+      (widen)
+      (setq beg (or beg (point-min)) end (or end (point-max)))
+      (goto-char (point-min))
+      (let ((re (concat "\\[\\[\\(file:\\|\\./\\)\\(~?" "[-+./_0-9a-zA-Z]+"
+			(substring (org-image-file-name-regexp) 0 -2)
+			"\\)\\]" (if include-linked "" "\\]")))
+	    file ov img)
+	(while (re-search-forward re end t)
+	  (setq old (get-char-property-and-overlay (match-beginning 1)
+						   'org-image-overlay))
+	  (setq file (expand-file-name (match-string 2)))
+	  (when (file-exists-p file)
+	    (if (and (car-safe old) refresh)
+		(image-refresh (overlay-get (cdr old) 'display))
+	      (setq img (create-image file))
+	      (when img
+		(setq ov (make-overlay (match-beginning 0) (match-end 0)))
+		(overlay-put ov 'display img)
+		(overlay-put ov 'face 'default)
+		(overlay-put ov 'org-image-overlay t)
+		(push ov org-inline-image-overlays)))))))))
 
 (defun org-remove-inline-images ()
   "Remove inline display of images."
