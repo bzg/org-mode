@@ -1,5 +1,8 @@
 2010-05-12  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-latex.el (org-export-latex-links): Use the formatting
+	function of the link type, if it is available.
+
 	* org-table.el (org-table-get-remote-range): Return to
 	original buffer when retrieving remote reference.
 

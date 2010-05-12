@@ -1822,7 +1822,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 	    (attr (or (org-find-text-property-in-string 'org-attributes raw-path)
 		      (plist-get org-export-latex-options-plist :latex-image-options)))
 	    (label (org-find-text-property-in-string 'org-label raw-path))
-	    imgp radiop
+	    imgp radiop fnc
 	    ;; define the path of the link
 	    (path (cond
 		   ((member type '("coderef"))
@@ -1876,6 +1876,13 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 		(setq path (org-export-latex-protect-amp path)
 		      desc (org-export-latex-protect-amp desc)))
 	      (insert (format org-export-latex-hyperref-format path desc)))
+
+	     ((functionp (setq fnc (nth 2 (assoc type org-link-protocols))))
+	      ;; The link protocol has a function for formatting the link
+	      (insert
+	       (save-match-data
+		 (funcall fnc (org-link-unescape raw-path) desc 'latex))))
+
 	     (t (insert "\\texttt{" desc "}")))))))
 
 
