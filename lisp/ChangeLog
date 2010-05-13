@@ -1,3 +1,8 @@
+2010-05-13  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-latex.el (org-export-latex-keywords-maybe): Protect the
+	TODO markup.
+
 2010-05-13  Mikael Fornius  <mfo@abc.se>
 
 	* org-habit.el (org-habit-build-graph): Help-echo date when

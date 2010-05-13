@@ -1289,7 +1289,8 @@ links, keywords, lists, tables, fixed-width"
 			(cdr todo-markup) (car todo-markup)))
 		   (t (cdr (or (assoc (match-string 1) todo-markup)
 			       (car todo-markup))))))
-	(replace-match (format fmt (match-string 1)) t t)))
+	(replace-match (org-export-latex-protect-string
+			(format fmt (match-string 1))) t t)))
     ;; convert priority string
     (when (re-search-forward "\\[\\\\#.\\]" nil t)
       (if (plist-get remove-list :priority)
