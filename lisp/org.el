@@ -4465,6 +4465,9 @@ The following commands are available:
   (org-set-autofill-regexps)
   (setq indent-line-function 'org-indent-line-function)
   (org-update-radio-target-regexp)
+  ;; Beginning/end of defun
+  (org-set-local 'beginning-of-defun-function 'org-beginning-of-defun)
+  (org-set-local 'end-of-defun-function 'org-end-of-defun)
   ;; Make sure dependence stuff works reliably, even for users who set it
   ;; too late :-(
   (if org-enforce-todo-dependencies
@@ -18348,6 +18351,13 @@ interactive command with similar behavior."
       (outline-back-to-heading invisible-ok)
     (error (error "Before first headline at position %d in buffer %s"
 		  (point) (current-buffer)))))
+
+(defun org-beginning-of-defun ()
+  "Go to the beginning of the subtree, i.e. back to the heading."
+  (org-back-to-heading))
+(defun org-end-of-defun ()
+  "Go to the end of the subtree."
+  (org-end-of-subtree nil t))
 
 (defun org-before-first-heading-p ()
   "Before first heading?"

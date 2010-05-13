@@ -1,5 +1,10 @@
 2010-05-13  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-beginning-of-defun, org-end-of-defun): New
+	functions.
+	(org-mode): Install the `org-beginning-of-defun' and
+	`org-end-of-defun' functions.
+
 	* org-latex.el (org-export-latex-keywords-maybe): Protect the
 	TODO markup.
 
