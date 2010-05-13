@@ -1,3 +1,8 @@
+2010-05-13  Mikael Fornius  <mfo@abc.se>
+
+	* org-habit.el (org-habit-build-graph): Help-echo date when
+	mouse is over stars.
+
 2010-05-13  Jan Böker  <jan.boecker@jboecker.de>
 
 	* org.el (org-file-apps): Improve docstring to reflect
