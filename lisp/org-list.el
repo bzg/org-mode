@@ -7,7 +7,7 @@
 ;;	   Bastien Guerry <bzg AT altern DOT org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 6.36
+;; Version: 6.36c
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -31,6 +31,8 @@
 
 ;;; Code:
 
+(eval-when-compile
+  (require 'cl))
 (require 'org-macs)
 (require 'org-compat)
 
