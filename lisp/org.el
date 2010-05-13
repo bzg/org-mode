@@ -3151,6 +3151,12 @@ org-level-* faces."
   :group 'org-appearance
   :type 'boolean)
 
+(defcustom org-pretty-entities nil
+  "Non-nil means show entities as UTF8 characters.
+When nil, the \\name form remains in the buffer."
+  :group 'org-appearance
+  :type 'boolean)
+
 (defvar org-emph-re nil
   "Regular expression for matching emphasis.")
 (defvar org-verbatim-re nil
@@ -3990,7 +3996,9 @@ After a match, the following groups carry important information:
     ("noptag" org-tag-persistent-alist nil)
     ("hideblocks" org-hide-block-startup t)
     ("nohideblocks" org-hide-block-startup nil)
-    ("beamer" org-startup-with-beamer-mode t))
+    ("beamer" org-startup-with-beamer-mode t)
+    ("entitiespretty" org-pretty-entities t)
+    ("entitiesplain" org-pretty-entities nil))
   "Variable associated with STARTUP options for org-mode.
 Each element is a list of three items: The startup options as written
 in the #+STARTUP line, the corresponding variable, and the value to
@@ -5176,6 +5184,7 @@ For plain list items, if they are matched by `outline-regexp', this returns
 				     (2 'org-footnote t)))
 	   '("^&?%%(.*\\|<%%([^>\n]*?>" (0 'org-sexp-date t))
 	   '(org-hide-wide-columns (0 nil append))
+	   '(org-fontify-entities)
 	   ;; TODO lines
 	   (list (concat "^\\*+[ \t]+" org-todo-regexp "\\([ \t]\\|$\\)")
 		 '(1 (org-get-todo-face 1) t))
@@ -5230,6 +5239,37 @@ For plain list items, if they are matched by `outline-regexp', this returns
     (org-set-local 'font-lock-defaults
 		   '(org-font-lock-keywords t nil nil backward-paragraph))
     (kill-local-variable 'font-lock-keywords) nil))
+
+(defun org-toggle-pretty-entities ()
+  "Toggle the compostion display of entities as UTF8 characters."
+  (interactive)
+  (org-set-local 'org-pretty-entities (not org-pretty-entities))
+  (org-restart-font-lock)
+  (if org-pretty-entities
+      (message "Entities are displayed as UTF8 characers")
+    (save-restriction
+      (widen)
+      (decompose-region (point-min) (point-max))
+      (message "Entities are displayed plain"))))
+
+(defun org-fontify-entities (limit)
+  "Find an entity to fontify."
+  (let (ee)
+    (when org-pretty-entities
+      (catch 'match
+	(while (re-search-forward "\\\\\\([a-zA-Z][a-zA-Z0-9]*\\)[^[:alnum:]]"
+				  limit t)
+	  (if (and (setq ee (org-entity-get (match-string 1)))
+		   (= (length (nth 6 ee)) 1))
+	      (progn
+		(add-text-properties
+		 (match-beginning 0) (match-end 1)
+		 (list 'font-lock-fontified t))
+		(compose-region (match-beginning 0) (match-end 1)
+				(nth 6 ee) nil)
+		(backward-char 1)
+		(throw 'match t))))
+	nil))))
 
 (defun org-fontify-like-in-org-mode (s &optional odd-levels)
   "Fontify string S like in Org-mode"
@@ -15748,6 +15788,7 @@ BEG and END default to the buffer boundaries."
 (org-defkey org-mode-map "\C-c\C-x\C-u" 'org-dblock-update)
 (org-defkey org-mode-map "\C-c\C-x\C-l" 'org-preview-latex-fragment)
 (org-defkey org-mode-map "\C-c\C-x\C-v" 'org-toggle-inline-images)
+(org-defkey org-mode-map "\C-c\C-x\\"   'org-toggle-pretty-entities)
 (org-defkey org-mode-map "\C-c\C-x\C-b" 'org-toggle-checkbox)
 (org-defkey org-mode-map "\C-c\C-xp"    'org-set-property)
 (org-defkey org-mode-map "\C-c\C-xe"    'org-set-effort)

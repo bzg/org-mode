@@ -704,6 +704,7 @@ some other place.
 \key{export visible part only}{C-c C-e v}
 \key{insert template of export options}{C-c C-e t}
 \key{toggle fixed width for entry or region}{C-c :}
+\key{toggle display of entities as UTF8 chars}{C-c C-x {\tt\char`\\}}
 
 %{\bf HTML formatting}
 
@@ -744,10 +745,8 @@ some other place.
 
 {\bf Comments: Text not being exported}
 
-Text before the first headline is not considered part of the document
-and is therefore never exported.
-Lines starting with \kbd{\#} are comments and are not exported.
-Subtrees whose header starts with COMMENT are never exported.
+Lines starting with \kbd{\#} and subtrees starting with COMMENT are
+never exported.
 
 \key{toggle COMMENT keyword on entry}{C-c ;}
 

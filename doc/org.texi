@@ -8726,6 +8726,19 @@ La@TeX{}, see the variable @code{org-entities} for the complete list.
 @samp{...} are all converted into special commands creating hyphens of
 different lengths or a compact set of dots.
 
+If you'd like to see entities displayed as utf8 characters, use the following
+command@footnote{You can urn this on by default bu setting the variable
+@code{prg-pretty-entities}, or on a per-file base with the @code{#+STARTUP}
+option @code{entitiespretty}.}:
+
+@table @kbd
+@kindex C-c C-x \
+@item C-c C-x \
+Toggle display of entities as UTF8 characters.  This does not change the
+buffer content which remains plain ASCII, but it overlays the UTF8 character
+for display purposes only.
+@end table
+
 @node Subscripts and superscripts, LaTeX fragments, Special symbols, Embedded LaTeX
 @subsection Subscripts and superscripts
 @cindex subscript
@@ -11003,6 +11016,15 @@ To hide blocks on startup, use these keywords. The corresponding variable is
 @example
 hideblocks   @r{Hide all begin/end blocks on startup}
 nohideblocks @r{Do not hide blocks on startup}
+@end example
+@cindex org-pretty-entities
+The the display of entities as UTF8 characters is governed by the variable
+@code{org-pretty-entities} and the keywords
+@cindex @code{entitiespretty}, STARTUP keyword
+@cindex @code{entitiesplain}, STARTUP keyword
+@example
+entitiespretty  @r{Show entities as UTF8 characters where possible}
+entitiesplain   @r{Leave entities plain}
 @end example
 @item #+TAGS:  TAG1(c1) TAG2(c2)
 @vindex org-tag-alist

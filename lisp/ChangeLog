@@ -83,6 +83,12 @@
 	functions.
 	(org-mode): Install the `org-beginning-of-defun' and
 	`org-end-of-defun' functions.
+	(org-pretty-entities): New option.
+	(org-toggle-pretty-entities): New command.
+	(org-fontify-entities): New function.
+	(org-startup-options): New keywords for pretty entities.
+	(org-set-font-lock-defaults): Call the pretty entities
+	function.
 
 	* org-latex.el (org-export-latex-keywords-maybe): Protect the
 	TODO markup.
