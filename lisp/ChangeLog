@@ -1,3 +1,48 @@
+2010-05-13  Sebastian Rose  <sebastian_rose@gmx.de>
+
+	* org-publish.el (org-publish-cache): Use one big hashmap for
+	each project defined in `org-publish-project-alist'. The
+	hashmap will hold pairs of our timestamp-filenames and
+	timestamps, as well as pairs of source-paths and associated
+	plists for arbitrary values. Currently only the files title is
+	stored there.
+
+	The caching feature writes the information gathered during
+	publishing to disk and re-loads it from there the next time we
+	publish the same project.  All this information will hence
+	survive a restart of emacs.
+
+	One cache file per publishing project is used.  The contents of
+	that file is the elisp that fills the new variable
+	`org-publish-cache'.  The cache file is named according to the
+	project with `.cache' added and lives in
+	`org-timestamp-directory'.
+
+	* org-publish.el (initialize-files-alist): This function and
+	the variable `org-publish-files-alist' are not used anymore in
+	favour of the reloadable cache and the functions for handling
+	it.  Removed.
+
+	* org-publish.el (org-publish-validate-link) was not used
+	anywhere.  Removed.
+
+	* org-publish.el (org-publish-get-base-files): Added the
+	variable `sitemap-requested' to avoid sorting where possible.
+	See also end of `org-publish-get-base-files-1'.
+
+	* org-publish.el (org-publish-get-files): This function is
+	not called anymore. Removed.
+
+	* org-publish.el (org-publish-get-project-from-filename): does
+	not depend on a list of files anymore. Instead of laoding all
+	files of all, we walk `org-publish-project-alist' until we
+	find a project, where the properties :base-directory, :recursive,
+	:base-extension, :include and :exclude match.
+
+	* org-publish.el (org-publish-file): takes an additional
+	parameter to avoid superfloues loading and writing of the
+	cache file when used to publish a part of a project.
+
 2010-05-13  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-beginning-of-defun, org-end-of-defun): New
