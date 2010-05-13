@@ -1,3 +1,8 @@
+2010-05-13  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-docbook.el (org-export-as-docbook-pdf): Improve
+	formatting of the xslt command.
+
 2010-05-13  Sebastian Rose  <sebastian_rose@gmx.de>
 
 	* org-publish.el (org-publish-cache): Use one big hashmap for

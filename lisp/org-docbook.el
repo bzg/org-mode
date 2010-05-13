@@ -76,6 +76,7 @@
 (require 'org)
 (require 'org-exp)
 (require 'org-html)
+(require 'format-spec)
 
 ;;; Variables:
 
@@ -333,10 +334,10 @@ in a window.  A non-interactive call will only return the buffer."
   "Export as DocBook XML file, and generate PDF file."
   (interactive "P")
   (if (or (not org-export-docbook-xslt-proc-command)
-	  (not (string-match "%s.+%s" org-export-docbook-xslt-proc-command)))
+	  (not (string-match "%[io].+%[io]" org-export-docbook-xslt-proc-command)))
       (error "XSLT processor command is not set correctly"))
   (if (or (not org-export-docbook-xsl-fo-proc-command)
-	  (not (string-match "%s.+%s" org-export-docbook-xsl-fo-proc-command)))
+	  (not (string-match "%[io].+%[io]" org-export-docbook-xsl-fo-proc-command)))
       (error "XSL-FO processor command is not set correctly"))
   (message "Exporting to PDF...")
   (let* ((wconfig (current-window-configuration))
@@ -348,10 +349,10 @@ in a window.  A non-interactive call will only return the buffer."
 	 (pdffile (concat base ".pdf")))
     (and (file-exists-p pdffile) (delete-file pdffile))
     (message "Processing DocBook XML file...")
-    (shell-command (format org-export-docbook-xslt-proc-command
-			   fofile (shell-quote-argument filename)))
-    (shell-command (format org-export-docbook-xsl-fo-proc-command
-			   fofile pdffile))
+    (shell-command (format-spec org-export-docbook-xslt-proc-command
+				(format-spec-make ?o fofile ?i (shell-quote-argument filename))))
+    (shell-command (format-spec org-export-docbook-xsl-fo-proc-command
+				(format-spec-make ?i fofile ?o pdffile)))
     (message "Processing DocBook file...done")
     (if (not (file-exists-p pdffile))
 	(error "PDF file was not produced")
