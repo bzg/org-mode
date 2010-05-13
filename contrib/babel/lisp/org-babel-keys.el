@@ -34,33 +34,34 @@
 ;;; Code:
 (require 'org-babel)
 
-(defvar org-babel-key-prefix "\C-c\M-b"
+(defvar org-babel-key-prefix "\C-c\C-v"
   "Prefix behind which all org-babel interactive key-binding will
 be placed.  See `org-babel-key-bindings' for the list of
-interactive babel functions which are assigned key bindings.")
+interactive babel functions which are assigned key bindings, and
+see `org-babel-map' for the actual babel keymap.")
+
+(defvar org-babel-map (make-sparse-keymap) "The org-babel keymap.")
+
+(define-key org-mode-map org-babel-key-prefix org-babel-map)
 
 (defvar org-babel-key-bindings
-  '(("t" . org-babel-tangle)
-    ("T" . org-babel-tangle-file)
-    ("e" . org-babel-execute-src-block)
-    ("s" . org-babel-execute-subtree)
-    ("b" . org-babel-execute-buffer)
-    ("h" . org-babel-sha1-hash)
-    ("g" . org-babel-goto-named-source-block)
-    ("l" . org-babel-lob-ingest)
-    ("z" . org-babel-switch-to-session)
-    ("p" . org-babel-expand-src-block))
+  '(("\C-p" . org-babel-expand-src-block)
+    ("\C-g" . org-babel-goto-named-source-block)
+    ("\C-b" . org-babel-execute-buffer)
+    ("\C-s" . org-babel-execute-subtree)
+    ("\C-t" . org-babel-tangle)
+    ("\C-T" . org-babel-tangle-file)
+    ("\C-l" . org-babel-lob-ingest)
+    ("\C-z" . org-babel-switch-to-session)
+    ("\C-h" . org-babel-sha1-hash))
   "Org-babel keybindings.  This list associates interactive
 org-babel functions with keys.  Each element of this list will
-add an entry to the `org-mode-map' using the letter key which is
+add an entry to the `org-babel-map' using the letter key which is
 the `car' of the a-list placed behind the generic
 `org-babel-key-prefix'.")
 
 (mapc (lambda (pair)
-        (message "%S" pair)
-        (define-key org-mode-map
-          (concat org-babel-key-prefix (car pair))
-          (cdr pair)))
+        (define-key org-babel-map (car pair) (cdr pair)))
       org-babel-key-bindings)
 
 (provide 'org-babel-keys)
