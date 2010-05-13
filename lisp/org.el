@@ -1477,9 +1477,38 @@ you can use this variable to set the application for a given file
 extension.  The entries in this list are cons cells where the car identifies
 files and the cdr the corresponding command.  Possible values for the
 file identifier are
- \"regex\"     Regular expression matched against the file name.  For backward
-               compatibility, this can also be a string with only alphanumeric
-               characters, which is then interpreted as an extension.
+ \"string\"    A string as a file identifier can be interpreted in different 
+               ways, depending on its contents:
+               
+               - Alphanumeric characters only:
+                 Match links with this file extension.
+                 Example: (\"pdf\" . \"evince %s\")
+                          to open PDFs with evince.
+
+               - Regular expression: Match links where the
+                 filename matches the regexp.  If you want to
+                 use groups here, use shy groups.
+
+                 Example: (\"\\.x?html\\'\" . \"firefox %s\")
+                          (\"\\(?:xhtml\\|html\\)\" . \"firefox %s\")
+                          to open *.html and *.xhtml with firefox.
+
+               - Regular expression which contains (non-shy) groups:
+                 Match links where the whole link, including \"::\", and
+                 anything after that, matches the regexp.
+                 In a custom command string, %1, %2, etc. are replaced with
+                 the parts of the link that were matched by the groups.
+                 For backwards compatibility, if a command string is given
+                 that does not use any of the group matches, this case is
+                 handled identically to the second one (i.e. match against
+                 file name only).
+
+                 In a custom lisp form, you can access the group matches with
+                 (match-string n link).
+
+                 Example: (\"\\.pdf::\\(\\d+\\)\\'\" . \"evince -p %1 %s\")
+                     to open [[file:document.pdf::5]] with evince at page 5.
+
  `directory'   Matches a directory
  `remote'      Matches a remote file, accessible through tramp or efs.
                Remote files most likely should be visited through Emacs

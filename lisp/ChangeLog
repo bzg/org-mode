@@ -1,3 +1,8 @@
+2010-05-13  Jan Böker  <jan.boecker@jboecker.de>
+
+	* org.el (org-file-apps): Improve docstring to reflect
+	grouping matches
+
 2010-05-12  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-set-startup-visibility): Fix empty line display.
