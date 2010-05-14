@@ -1,3 +1,8 @@
+2010-05-14  David Maus  <dmaus@ictsoc.de>
+
+	* org.el (org-clone-subtree-with-time-shift): Remove ID
+	property of original subtree in cloned subtrees.
+
 2010-05-14  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-exp.el (org-export-format-source-code-or-example):

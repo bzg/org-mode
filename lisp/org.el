@@ -7097,14 +7097,15 @@ If yes, remember the marker and the distance to BEG."
   "Clone the task (subtree) at point N times.
 The clones will be inserted as siblings.
 
-In interactive use, the user will be prompted for the number of clones
-to be produced, and for a time SHIFT, which may be a repeater as used
-in time stamps, for example `+3d'.
+In interactive use, the user will be prompted for the number of
+clones to be produced, and for a time SHIFT, which may be a
+repeater as used in time stamps, for example `+3d'.
 
-When a valid repeater is given and the entry contains any time stamps,
-the clones will become a sequence in time, with time stamps in the
-subtree shifted for each clone produced.  If SHIFT is nil or the
-empty string, time stamps will be left alone.
+When a valid repeater is given and the entry contains any time
+stamps, the clones will become a sequence in time, with time
+stamps in the subtree shifted for each clone produced.  If SHIFT
+is nil or the empty string, time stamps will be left alone.  The
+ID property of the original subtree is removed.
 
 If the original subtree did contain time stamps with a repeater,
 the following will happen:
@@ -7138,7 +7139,12 @@ and still retain the repeater to cover future instances of the task."
     (org-end-of-subtree t t)
     (or (bolp) (insert "\n"))
     (setq end (point))
-    (setq template (buffer-substring beg end))
+    (setq template (let ((tmpl (buffer-substring beg end)))
+		     (with-temp-buffer
+		       (insert tmpl)
+		       (org-mode)
+		       (org-entry-delete nil "ID")
+		       (buffer-string))))
     (when (and doshift
 	       (string-match "<[^<>\n]+ \\+[0-9]+[dwmy][^<>\n]*>" template))
       (delete-region beg end)
