@@ -4030,7 +4030,7 @@ means to push this value onto the list in the variable.")
 			  (re-search-forward re nil t)))
 	    (setq key (upcase (match-string 1 ext-setup-or-nil))
 		  value (org-match-string-no-properties 2 ext-setup-or-nil))
-	    (if stringp value (setq value (org-trim value)))
+	    (if (stringp value) (setq value (org-trim value)))
 	    (cond
 	     ((equal key "CATEGORY")
 	      (setq cat value))
