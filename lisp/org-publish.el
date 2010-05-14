@@ -939,7 +939,7 @@ and return it."
 	(setq org-publish-cache
 	      (make-hash-table :test 'equal :weakness nil :size 100))
 	(org-publish-cache-set ":project:" project-name)
-	(org-publish-cache-set ":cache-file:" cache-file org-publish-cache))
+	(org-publish-cache-set ":cache-file:" cache-file))
       (unless cexists (org-publish-write-cache-file nil))))
   org-publish-cache)
 
