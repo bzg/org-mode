@@ -704,7 +704,7 @@ modified) list.")
 		    "LINK_UP" "LINK_HOME" "SETUPFILE" "STYLE"
 		    "LATEX_HEADER" "LATEX_CLASS"
 		    "EXPORT_SELECT_TAGS" "EXPORT_EXCLUDE_TAGS"
-		    "KEYWORDS" "DESCRIPTION" "MACRO" "BIND")
+		    "KEYWORDS" "DESCRIPTION" "MACRO" "BIND" "XSLT")
 		  (mapcar 'car org-export-inbuffer-options-extra))))
 	    p key val text options a pr style
 	    latex-header latex-class macros letbind
@@ -740,6 +740,8 @@ modified) list.")
 	    (setq options (concat val " " options)))
 	   ((string-equal key "BIND")
 	    (push (read (concat "(" val ")")) letbind))
+	   ((string-equal key "XSLT")
+	    (setq p (plist-put p :xslt val)))
 	   ((string-equal key "LINK_UP")
 	    (setq p (plist-put p :link-up val)))
 	   ((string-equal key "LINK_HOME")

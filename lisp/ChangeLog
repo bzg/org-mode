@@ -1,5 +1,13 @@
 2010-05-14  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-docbook.el (org-export-docbook-xslt-stylesheet): New option.
+	(org-export-docbook-xslt-proc-command): Fix docstring.
+	(org-export-docbook-xsl-fo-proc-command): Fix docstring.
+	(org-export-as-docbook-pdf): Improve
+	formatting of the xslt command.
+
+	* org-exp.el (org-infile-export-plist): Check for XSLT setting.
+
 	* org.el (org-file-contents): Improve error message.
 	(org-set-regexps-and-options): Remove spaces at both ends.
 

@@ -184,32 +184,39 @@ default, but users can override them using `#+ATTR_DocBook:'."
   :group 'org-export-docbook
   :type 'coding-system)
 
+(defcustom org-export-docbook-xslt-stylesheet nil
+  "File name of the XSLT stylesheet used by DocBook exporter.
+This XSLT stylesheet is used by
+`org-export-docbook-xslt-proc-command' to generate the Formatting
+Object (FO) files.  You can use either `fo/docbook.xsl' that
+comes with DocBook, or any customization layer you may have."
+  :group 'org-export-docbook
+  :type 'string)
+
 (defcustom org-export-docbook-xslt-proc-command nil
-  "XSLT processor command used by DocBook exporter.
-This is the command used to process a DocBook XML file to
-generate the formatting object (FO) file.
+  "Format of XSLT processor command used by DocBook exporter.
+This command is used to process a DocBook XML file to generate
+the Formatting Object (FO) file.
 
 The value of this variable should be a format control string that
-includes two `%s' arguments: the first one is for the output FO
-file name, and the second one is for the input DocBook XML file
-name.
+includes three arguments: `%i', `%o', and `%s'.  During exporting
+time, `%i' is replaced by the input DocBook XML file name, `%o'
+is replaced by the output FO file name, and `%s' is replaced by
+`org-export-docbook-xslt-stylesheet' (or the #+XSLT option if it
+is specified in the Org file).
 
 For example, if you use Saxon as the XSLT processor, you may want
 to set the variable to
 
-  \"java com.icl.saxon.StyleSheet -o %s %s /path/to/docbook.xsl\"
+  \"java com.icl.saxon.StyleSheet -o %o %i %s\"
 
 If you use Xalan, you can set it to
 
-  \"java org.apache.xalan.xslt.Process -out %s -in %s -xsl /path/to/docbook.xsl\"
+  \"java org.apache.xalan.xslt.Process -out %o -in %i -xsl %s\"
 
 For xsltproc, the following string should work:
 
-  \"xsltproc --output %s /path/to/docbook.xsl %s\"
-
-You need to replace \"/path/to/docbook.xsl\" with the actual path
-to the DocBook stylesheet file on your machine.  You can also
-replace it with your own customization layer if you have one.
+  \"xsltproc --output %o %s %i\"
 
 You can include additional stylesheet parameters in this command.
 Just make sure that they meet the syntax requirement of each
@@ -218,18 +225,19 @@ processor."
   :type 'string)
 
 (defcustom org-export-docbook-xsl-fo-proc-command nil
-  "XSL-FO processor command used by DocBook exporter.
-This is the command used to process a formatting object (FO) file
-to generate the PDF file.
+  "Format of XSL-FO processor command used by DocBook exporter.
+This command is used to process a Formatting Object (FO) file to
+generate the PDF file.
 
 The value of this variable should be a format control string that
-includes two `%s' arguments: the first one is for the input FO
-file name, and the second one is for the output PDF file name.
+includes two arguments: `%i' and `%o'.  During exporting time,
+`%i' is replaced by the input FO file name, and `%o' is replaced
+by the output PDF file name.
 
 For example, if you use FOP as the XSL-FO processor, you can set
 the variable to
 
-  \"fop %s %s\""
+  \"fop %i %o\""
   :group 'org-export-docbook
   :type 'string)
 
@@ -334,13 +342,18 @@ in a window.  A non-interactive call will only return the buffer."
   "Export as DocBook XML file, and generate PDF file."
   (interactive "P")
   (if (or (not org-export-docbook-xslt-proc-command)
-	  (not (string-match "%[io].+%[io]" org-export-docbook-xslt-proc-command)))
+	  (not (string-match "%[ios].+%[ios].+%[ios]" org-export-docbook-xslt-proc-command)))
       (error "XSLT processor command is not set correctly"))
   (if (or (not org-export-docbook-xsl-fo-proc-command)
 	  (not (string-match "%[io].+%[io]" org-export-docbook-xsl-fo-proc-command)))
       (error "XSL-FO processor command is not set correctly"))
   (message "Exporting to PDF...")
   (let* ((wconfig (current-window-configuration))
+	 (opt-plist
+	  (org-export-process-option-filters
+	   (org-combine-plists (org-default-export-plist)
+			       ext-plist
+			       (org-infile-export-plist))))
 	 (docbook-buf (org-export-as-docbook hidden ext-plist
 					     to-buffer body-only pub-dir))
 	 (filename (buffer-file-name docbook-buf))
@@ -350,9 +363,16 @@ in a window.  A non-interactive call will only return the buffer."
     (and (file-exists-p pdffile) (delete-file pdffile))
     (message "Processing DocBook XML file...")
     (shell-command (format-spec org-export-docbook-xslt-proc-command
-				(format-spec-make ?o fofile ?i (shell-quote-argument filename))))
+				(format-spec-make
+				 ?i (shell-quote-argument filename)
+				 ?o (shell-quote-argument fofile)
+				 ?s (shell-quote-argument
+				     (or (plist-get opt-plist :xslt)
+					 org-export-docbook-xslt-stylesheet)))))
     (shell-command (format-spec org-export-docbook-xsl-fo-proc-command
-				(format-spec-make ?i fofile ?o pdffile)))
+				(format-spec-make
+				 ?i (shell-quote-argument fofile)
+				 ?o (shell-quote-argument pdffile))))
     (message "Processing DocBook file...done")
     (if (not (file-exists-p pdffile))
 	(error "PDF file was not produced")
