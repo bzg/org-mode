@@ -1327,7 +1327,7 @@ links, keywords, lists, tables, fixed-width"
 	(unless (or
 		 ;; check for comment line
 		 (save-excursion (goto-char (match-beginning 0))
-				 (equal (char-after (point-at-bol)) ?#))
+				 (org-in-indented-comment-line))
 		 ;; Check if this is a defined entity, so that is may need conversion
 		 (org-entity-get (match-string 1)))
 	  (add-text-properties (match-beginning 0) (match-end 0)
@@ -1592,7 +1592,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
                   longtblp (and attr (stringp attr)
                                 (string-match "\\<longtable\\>" attr))
                   align (and attr (stringp attr)
-                             (string-match "\\<align=\\([^ \t\n\r,]+\\)" attr)
+                             (string-match "\\<align=\\([^ \t\n\r]+\\)" attr)
                              (match-string 1 attr))
                   floatp (or caption label))
 	    (setq caption (and caption (org-export-latex-fontify-headline caption)))
@@ -2068,7 +2068,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
       (unless (or 
 	       ;; check for comment line
 	       (save-excursion (goto-char (match-beginning 0))
-			       (equal (char-after (point-at-bol)) ?#))
+			       (org-in-indented-comment-line))
 	       ;; Check if this is a defined entity, so that is may need conversion
 	       (org-entity-get (match-string 1))
 	       )

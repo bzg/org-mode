@@ -17234,6 +17234,13 @@ With prefix arg UNCOMPILED, load the uncompiled versions."
   "Is point in a line starting with `#'?"
   (equal (char-after (point-at-bol)) ?#))
 
+(defun org-in-indented-comment-line ()
+  "Is point in a line starting with `#' after some white space?"
+  (save-excursion
+    (save-match-data
+      (goto-char (point-at-bol))
+      (looking-at "[ \t]*#"))))
+
 (defun org-in-verbatim-emphasis ()
   (save-match-data
     (and (org-in-regexp org-emph-re 2) (member (match-string 3) '("=" "~")))))
