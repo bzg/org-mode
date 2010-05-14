@@ -1,5 +1,8 @@
 2010-05-14  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp.el (org-export-format-source-code-or-example):
+	XEmacs compatibility.
+
 	* org-latex.el (org-export-latex-tables): Accept comma in
 	align string.
 

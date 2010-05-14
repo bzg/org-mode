@@ -2167,7 +2167,9 @@ INDENT was the original indentation of the block."
 	     ((eq backend 'html)
 	      ;; We are exporting to HTML
 	      (when lang
-		(require 'htmlize nil t)
+		(if (featurep 'xemacs)
+		    (require 'htmlize)
+		  (require 'htmlize nil t))
 		(when (not (fboundp 'htmlize-region-for-paste))
 		  ;; we do not have htmlize.el, or an old version of it
 		  (setq lang nil)

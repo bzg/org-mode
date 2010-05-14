@@ -30,7 +30,7 @@
 
 ;;; Code:
 (require 'org-babel)
-(require 'python)
+(require (if (featurep 'xemacs) 'python-mode 'python))
 
 (org-babel-add-interpreter "python")
 
