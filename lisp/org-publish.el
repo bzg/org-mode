@@ -937,7 +937,7 @@ and return it."
       (if cexists (load-file cache-file))
       (unless org-publish-cache
 	(setq org-publish-cache
-	      #s(hash-table test equal weakness nil size 100 data ()))
+	      (make-hash-table :test 'equal :weakness nil :size 100))
 	(org-publish-cache-set ":project:" project-name)
 	(org-publish-cache-set ":cache-file:" cache-file org-publish-cache))
       (unless cexists (org-publish-write-cache-file nil))))
