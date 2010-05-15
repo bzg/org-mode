@@ -2574,6 +2574,7 @@ Does include HTML export options as well as TODO and CATEGORY stuff."
 #+EXPORT_EXCLUDE_TAGS: %s
 #+LINK_UP:   %s
 #+LINK_HOME: %s
+#+XSLT: 
 #+CATEGORY:  %s
 #+SEQ_TODO:  %s
 #+TYP_TODO:  %s

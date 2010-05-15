@@ -8998,6 +8998,7 @@ Insert template with export options, see example below.
 @cindex #+LINK_HOME
 @cindex #+EXPORT_SELECT_TAGS
 @cindex #+EXPORT_EXCLUDE_TAGS
+@cindex #+XSLT
 @cindex #+LATEX_HEADER
 @vindex user-full-name
 @vindex user-mail-address
@@ -9020,6 +9021,7 @@ Insert template with export options, see example below.
 #+LATEX_HEADER: extra line(s) for the LaTeX header, like \usepackage@{xyz@}
 #+EXPORT_SELECT_TAGS:   Tags that select a tree for export
 #+EXPORT_EXCLUDE_TAGS:  Tags that exclude a tree from export
+#+XSLT:        the XSLT stylesheet used by DocBook exporter to generate FO file
 @end example
 
 @noindent
@@ -9860,7 +9862,7 @@ For more information, see the documentation on Worg.
 @section DocBook export
 @cindex DocBook export
 @cindex PDF export
-@cindex Cui, Baoqui
+@cindex Cui, Baoqiu
 
 Org contains a DocBook exporter written by Baoqiu Cui.  Once an Org file is
 exported to DocBook format, it can be further processed to produce other
@@ -9906,6 +9908,13 @@ Note that, in order to produce PDF output based on exported DocBook file, you
 need to have XSLT processor and XSL-FO processor software installed on your
 system.  Check variables @code{org-export-docbook-xslt-proc-command} and
 @code{org-export-docbook-xsl-fo-proc-command}.
+
+@vindex org-export-docbook-xslt-stylesheet
+The stylesheet argument @code{%s} in variable
+@code{org-export-docbook-xslt-proc-command} is replaced by the value of
+variable @code{org-export-docbook-xslt-stylesheet}, which needs to be set by
+the user.  You can also overrule this global setting on a per-file bases by
+adding an in-buffer setting @code{#+XSLT:} to the Org file.
 
 @kindex C-c C-e v D
 @item C-c C-e v D
@@ -11001,8 +11010,8 @@ keys.  The corresponding variable is @code{org-tag-alist}.
 @item #+TBLFM:
 This line contains the formulas for the table directly above the line.
 @item #+TITLE:, #+AUTHOR:, #+EMAIL:, #+LANGUAGE:, #+TEXT:, #+DATE:,
-@itemx #+OPTIONS:, #+BIND:
-@itemx #+DESCRIPTION:, #+KEYWORDS:
+@itemx #+OPTIONS:, #+BIND:, #+XSLT:,
+@itemx #+DESCRIPTION:, #+KEYWORDS:,
 @itemx #+LATEX_HEADER:, #+STYLE:, #+LINK_UP:, #+LINK_HOME:,
 @itemx #+EXPORT_SELECT_TAGS:, #+EXPORT_EXCLUDE_TAGS:
 These lines provide settings for exporting files.  For more details see
