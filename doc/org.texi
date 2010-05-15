@@ -9676,8 +9676,10 @@ All lines between these markers are exported literally
 
 For La@TeX{} export of a table, you can specify a label and a caption
 (@pxref{Images and tables}).  You can also use the @code{ATTR_LaTeX} line to
-request a longtable environment for the table, so that it may span several
-pages.  Finally, you can set the alignment string:
+request a @code{longtable} environment for the table, so that it may span
+several pages, or provide the @code{multicolumn} keyword that will make the
+table span the page in a multicolumn environment (@code{table*} environment).
+Finally, you can set the alignment string:
 
 @cindex #+CAPTION
 @cindex #+LABEL

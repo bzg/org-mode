@@ -1889,15 +1889,17 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 
 (defun org-export-latex-format-image (path caption label attr)
   "Format the image element, depending on user settings."
-  (let (ind floatp wrapp placement figenv)
+  (let (ind floatp wrapp multicolumnp placement figenv)
     (setq floatp (or caption label))
     (setq ind (org-get-text-property-any 0 'original-indentation path))
     (when (and attr (stringp attr))
       (if (string-match "[ \t]*\\<wrap\\>" attr)
 	  (setq wrapp t floatp nil attr (replace-match "" t t attr)))
       (if (string-match "[ \t]*\\<float\\>" attr)
-	  (setq wrapp nil floatp t attr (replace-match "" t t attr))))
-
+	  (setq wrapp nil floatp t attr (replace-match "" t t attr)))
+      (if (string-match "[ \t]*\\<multicolumn\\>" attr)
+	  (setq multicolumnp t attr (replace-match "" t t attr))))
+    
     (setq placement
 	  (cond
 	   (wrapp "{l}{0.5\\textwidth}")
@@ -1920,6 +1922,11 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 \\includegraphics[%attr]{%path}
 \\caption{%labelcmd%caption}
 \\end{wrapfigure}")
+	   (multicolumnp "\\begin{figure*}%placement
+\\centering
+\\includegraphics[%attr]{%path}
+\\caption{%labelcmd%caption}
+\\end{figure*}")
 	   (floatp "\\begin{figure}%placement
 \\centering
 \\includegraphics[%attr]{%path}
