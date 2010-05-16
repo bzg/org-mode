@@ -318,6 +318,30 @@ So a typical ID could look like \"Org:4nd91V40HI\"."
      (t (error "Invalid `org-id-method'")))
     (concat prefix unique)))
 
+(defun org-id-uuid ()
+  "Return string with random (version 4) UUID."
+  (let ((rnd (md5 (format "%s%s%s%s%s%s%s"
+			  (random t)
+			  (current-time)
+			  (user-uid)
+			  (emacs-pid)
+			  (user-full-name)
+			  user-mail-address
+			  (recent-keys)))))
+    (format "%s-%s-4%s-%s%s-%s"
+	    (substring rnd 0 8)
+	    (substring rnd 8 12)
+	    (substring rnd 13 16)
+	    (format "%x"
+		    (logior
+		     #B10000000
+		     (logand
+		      #B10111111
+		      (string-to-number
+		       (substring rnd 16 18) 16))))
+	    (substring rnd 18 20)
+	    (substring rnd 20 32))))
+
 (defun org-id-reverse-string (s)
   (mapconcat 'char-to-string (nreverse (string-to-list s)) ""))
 
