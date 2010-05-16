@@ -43,6 +43,7 @@ ORGWEBPAGE/Changes.txt
 # allow tmp and test directories that will not be tracked
 
 test
+t
 auto
 tmp
 TODO
