@@ -832,10 +832,10 @@ to be CLOCKED OUT.")))
 	    (not (memq ch '(?K ?G ?S ?C))))
        fail-quietly)))))
 
-(defun org-resolve-clocks (&optional also-non-dangling-p prompt-fn last-valid)
+(defun org-resolve-clocks (&optional only-dangling-p prompt-fn last-valid)
   "Resolve all currently open org-mode clocks.
-If `also-non-dangling-p' is non-nil, also ask to resolve
-non-dangling (i.e., currently open and valid) clocks."
+If `only-dangling-p' is non-nil, only ask to resolve dangling
+\(i.e., not currently open and valid) clocks."
   (interactive "P")
   (unless org-clock-resolving-clocks
     (let ((org-clock-resolving-clocks t))
@@ -844,7 +844,7 @@ non-dangling (i.e., currently open and valid) clocks."
 	  (dolist (clock clocks)
 	    (let ((dangling (or (not (org-clock-is-active))
 				(/= (car clock) org-clock-marker))))
-	      (unless (and (not dangling) (not also-non-dangling-p))
+	      (if (or (not only-dangling-p) dangling)
 		(org-clock-resolve
 		 clock
 		 (or prompt-fn

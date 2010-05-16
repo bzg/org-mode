@@ -13,6 +13,9 @@
 	(org-clock-resolve-expert): New customization variable.
 	(org-find-open-clocks): Fixed a bug that caused discovered
 	clocks not to match up with the currently active clock.
+	(org-resolve-clocks): Changed the argument
+	`also-non-dangling-p' to `only-dangling-p', since due to a bug
+	this was the default behavior all along.
 
 2010-05-15  Carsten Dominik  <carsten.dominik@gmail.com>
 
