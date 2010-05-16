@@ -1,3 +1,17 @@
+2010-05-16  John Wiegley  <jwiegley@gmail.com>
+
+	* org-clock.el (org-clock-clock-in, org-clock-in): Added
+	parameter `start-time'.
+	(org-clock-resolve-clock): Added parameter `clock-out-time'.
+	If set, and resolve-to is a past time, then the clock out
+	event occurs at `clock-out-time' rather than at `resolve-to'.
+	In this case, `resolve-to' becomes the clock in time.
+	(org-clock-jump-to-current-clock): Created new global command
+	to reveal the current clock.
+	(org-clock-resolve): Added new commands g/G and j/J, and a
+	help window describing all commands and their meaning.
+	(org-clock-resolve-expert): New customization variable.
+
 2010-05-15  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-latex.el (org-export-latex-format-image): Add support
