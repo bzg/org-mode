@@ -11,6 +11,8 @@
 	(org-clock-resolve): Added new commands g/G and j/J, and a
 	help window describing all commands and their meaning.
 	(org-clock-resolve-expert): New customization variable.
+	(org-find-open-clocks): Fixed a bug that caused discovered
+	clocks not to match up with the currently active clock.
 
 2010-05-15  Carsten Dominik  <carsten.dominik@gmail.com>
 

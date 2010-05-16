@@ -592,7 +592,7 @@ Use alsa's aplay tool if available."
       (save-excursion
 	(goto-char (point-min))
 	(while (re-search-forward "CLOCK: \\(\\[.*?\\]\\)$" nil t)
-	  (push (cons (copy-marker (1- (match-end 1)) t)
+	  (push (cons (copy-marker (match-end 1) t)
 		      (org-time-string-to-time (match-string 1))) clocks))))
     clocks))
 
@@ -1296,7 +1296,7 @@ If there is no running clock, throw an error, unless FAIL-QUIETLY is set."
 	  (org-clock-delete-current))))))
 
 (defun org-clock-cancel ()
-  "Cancel the running clock be removing the start timestamp."
+  "Cancel the running clock by removing the start timestamp."
   (interactive)
   (when (not (org-clocking-p))
     (setq global-mode-string
