@@ -3486,7 +3486,7 @@ Use COMMAND to do the motion, repeat if necessary to end up in a data line."
                        (concat orgtbl-line-start-regexp "\\|"
                                auto-fill-inhibit-regexp)
                      orgtbl-line-start-regexp))
-    (org-add-to-invisibility-spec '(org-cwidth))
+    (add-to-invisibility-spec '(org-cwidth))
     (when (fboundp 'font-lock-add-keywords)
       (font-lock-add-keywords nil orgtbl-extra-font-lock-keywords)
       (org-restart-font-lock))
