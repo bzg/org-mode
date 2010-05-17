@@ -5184,7 +5184,6 @@ For plain list items, if they are matched by `outline-regexp', this returns
 				     (2 'org-footnote t)))
 	   '("^&?%%(.*\\|<%%([^>\n]*?>" (0 'org-sexp-date t))
 	   '(org-hide-wide-columns (0 nil append))
-	   '(org-fontify-entities)
 	   ;; TODO lines
 	   (list (concat "^\\*+[ \t]+" org-todo-regexp "\\([ \t]\\|$\\)")
 		 '(1 (org-get-todo-face 1) t))
@@ -5223,6 +5222,7 @@ For plain list items, if they are matched by `outline-regexp', this returns
 		 '(1 'org-archived prepend))
 	   ;; Specials
 	   '(org-do-latex-and-special-faces)
+	   '(org-fontify-entities)
 	   ;; Code
 	   '(org-activate-code (1 'org-code t))
 	   ;; COMMENT
