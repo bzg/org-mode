@@ -1,3 +1,8 @@
+2010-05-17  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-clock.el (org-clock-sum): Don't include running clock if
+	the time block is wrong.
+
 2010-05-16  John Wiegley  <jwiegley@gmail.com>
 
 	* org-clock.el (org-clock-clock-in, org-clock-in): Added
