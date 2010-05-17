@@ -1,3 +1,27 @@
+2010-05-17  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-clock.el (org-clock-sum): Don't include running clock if
+	the time block is wrong.
+
+2010-05-16  John Wiegley  <jwiegley@gmail.com>
+
+	* org-clock.el (org-clock-clock-in, org-clock-in): Added
+	parameter `start-time'.
+	(org-clock-resolve-clock): Added parameter `clock-out-time'.
+	If set, and resolve-to is a past time, then the clock out
+	event occurs at `clock-out-time' rather than at `resolve-to'.
+	In this case, `resolve-to' becomes the clock in time.
+	(org-clock-jump-to-current-clock): Created new global command
+	to reveal the current clock.
+	(org-clock-resolve): Added new commands g/G and j/J, and a
+	help window describing all commands and their meaning.
+	(org-clock-resolve-expert): New customization variable.
+	(org-find-open-clocks): Fixed a bug that caused discovered
+	clocks not to match up with the currently active clock.
+	(org-resolve-clocks): Changed the argument
+	`also-non-dangling-p' to `only-dangling-p', since due to a bug
+	this was the default behavior all along.
+
 2010-05-16  David Maus  <dmaus@ictsoc.de>
 
 	* org-id.el (org-id-uuid): New function.  Return string with

@@ -1911,7 +1911,7 @@ marked with vertical lines.  Here is an example:
 @end example
 
 It is also sufficient to just insert the column group starters after
-every vertical line you'd like to have:
+every vertical line you would like to have:
 
 @example
 |  N | N^2 | N^3 | N^4 | sqrt(n) | sqrt[4](N) |
@@ -8726,10 +8726,10 @@ La@TeX{}, see the variable @code{org-entities} for the complete list.
 @samp{...} are all converted into special commands creating hyphens of
 different lengths or a compact set of dots.
 
-If you'd like to see entities displayed as utf8 characters, use the following
-command@footnote{You can urn this on by default bu setting the variable
-@code{prg-pretty-entities}, or on a per-file base with the @code{#+STARTUP}
-option @code{entitiespretty}.}:
+If you would like to see entities displayed as utf8 characters, use the
+following command@footnote{You can turn this on by default by setting the
+variable @code{org-pretty-entities}, or on a per-file base with the
+@code{#+STARTUP} option @code{entitiespretty}.}:
 
 @table @kbd
 @kindex C-c C-x \
@@ -9723,12 +9723,12 @@ options that can be used in the optional argument of the
 @code{figure} environment, add something like @samp{placement=[h!]} to the
 Attributes.
 
-If you'd like to let text flow around the image, add the word @samp{wrap} to
-the @code{#+ATTR_LaTeX:} line, which will make the figure occupy the left
-half of the page.  To fine-tune, the @code{placement} field will be the
-set of additional arguments needed by the @code{wrapfigure} environment.
-Note that if you change the size of the image, you need to use compatible
-settings for @code{\includegraphics} and @code{wrapfigure}.
+If you would like to let text flow around the image, add the word @samp{wrap}
+to the @code{#+ATTR_LaTeX:} line, which will make the figure occupy the left
+half of the page.  To fine-tune, the @code{placement} field will be the set
+of additional arguments needed by the @code{wrapfigure} environment.  Note
+that if you change the size of the image, you need to use compatible settings
+for @code{\includegraphics} and @code{wrapfigure}.
 
 @cindex #+CAPTION
 @cindex #+LABEL
@@ -9928,7 +9928,7 @@ system.  Check variables @code{org-export-docbook-xslt-proc-command} and
 The stylesheet argument @code{%s} in variable
 @code{org-export-docbook-xslt-proc-command} is replaced by the value of
 variable @code{org-export-docbook-xslt-stylesheet}, which needs to be set by
-the user.  You can also overrule this global setting on a per-file bases by
+the user.  You can also overrule this global setting on a per-file basis by
 adding an in-buffer setting @code{#+XSLT:} to the Org file.
 
 @kindex C-c C-e v D
@@ -10616,7 +10616,7 @@ excluded.
 To ensure that links are preserved, care should be taken to replicate
 your directory structure on the web server, and to use relative file
 paths. For example, if your Org files are kept in @file{~/org} and your
-publishable images in @file{~/images}, you'd link to an image with
+publishable images in @file{~/images}, you would link to an image with
 @c
 @example
 file:../images/myimage.png
