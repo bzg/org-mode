@@ -1396,17 +1396,18 @@ nil are excluded from the clock summation."
 		      (* 60 (string-to-number (match-string 4))))))
 	 (t ;; A headline
 	  ;; Add the currently clocking item time to the total
-	  (let ((org-clock-start-time-as-float (org-float-time org-clock-start-time)))
-	    (when (and org-clock-report-include-clocking-task
-		       (equal (org-clocking-buffer) (current-buffer))
-		       (equal (marker-position org-clock-hd-marker) (point))
-		       (>= org-clock-start-time-as-float tstart)
-		       (<= org-clock-start-time-as-float tend))
-	      (let ((time (floor (- (org-float-time)
-				    org-clock-start-time-as-float) 60)))
-		(setq t1 (+ t1 time)))))
+	  (when (and org-clock-report-include-clocking-task
+		     (equal (org-clocking-buffer) (current-buffer))
+		     (equal (marker-position org-clock-hd-marker) (point))
+		     tstart
+		     tend
+		     (>= (org-float-time org-clock-start-time) tstart)
+		     (<= (org-float-time org-clock-start-time) tend))
+	    (let ((time (floor (- (org-float-time)
+				  (org-float-time org-clock-start-time)) 60)))
+	      (setq t1 (+ t1 time))))
 	  (let* ((headline-forced
-                  (get-text-property (point)
+		  (get-text-property (point)
                                      :org-clock-force-headline-inclusion))
                  (headline-included
                   (or (null headline-filter)
