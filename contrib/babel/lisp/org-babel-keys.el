@@ -35,30 +35,49 @@
 (require 'org-babel)
 
 (defvar org-babel-key-prefix "\C-c\C-v"
-  "Prefix behind which all org-babel interactive key-binding will
-be placed.  See `org-babel-key-bindings' for the list of
-interactive babel functions which are assigned key bindings, and
-see `org-babel-map' for the actual babel keymap.")
+  "The `org-babel-key-prefix' variable holds the key prefix
+behind which all org-babel interactive key-binding are placed.
+See `org-babel-key-bindings' for the list of interactive babel
+functions which are assigned key bindings, and see
+`org-babel-map' for the actual babel keymap.")
 
-(defvar org-babel-map (make-sparse-keymap) "The org-babel keymap.")
+(defvar org-babel-map (make-sparse-keymap)
+  "The keymap holding key bindings for interactive org-babel
+functions.")
 
 (define-key org-mode-map org-babel-key-prefix org-babel-map)
 
+(defun org-babel-describe-bindings ()
+  "Describe all key binding placed behind the
+`org-babel-key-prefix' prefix."
+  (interactive)
+  (describe-bindings org-babel-key-prefix))
+
 (defvar org-babel-key-bindings
   '(("\C-p" . org-babel-expand-src-block)
+    ("p" . org-babel-expand-src-block)
     ("\C-g" . org-babel-goto-named-source-block)
+    ("g" . org-babel-goto-named-source-block)
     ("\C-b" . org-babel-execute-buffer)
+    ("b" . org-babel-execute-buffer)
     ("\C-s" . org-babel-execute-subtree)
+    ("s" . org-babel-execute-subtree)
     ("\C-t" . org-babel-tangle)
-    ("\C-T" . org-babel-tangle-file)
+    ("t" . org-babel-tangle)
+    ("\C-f" . org-babel-tangle-file)
+    ("f" . org-babel-tangle-file)
     ("\C-l" . org-babel-lob-ingest)
+    ("l" . org-babel-lob-ingest)
     ("\C-z" . org-babel-switch-to-session)
-    ("\C-h" . org-babel-sha1-hash))
-  "Org-babel keybindings.  This list associates interactive
-org-babel functions with keys.  Each element of this list will
-add an entry to the `org-babel-map' using the letter key which is
-the `car' of the a-list placed behind the generic
-`org-babel-key-prefix'.")
+    ("z" . org-babel-switch-to-session)
+    ("\C-a" . org-babel-sha1-hash)
+    ("a" . org-babel-sha1-hash)
+    ("h" . org-babel-describe-bindings))
+  "Alist associating key bindings with interactive Org-babel
+functions.  This list associates interactive org-babel functions
+with keys.  Each element of this list will add an entry to the
+`org-babel-map' using the letter key which is the `car' of the
+a-list placed behind the generic `org-babel-key-prefix'.")
 
 (mapc (lambda (pair)
         (define-key org-babel-map (car pair) (cdr pair)))
