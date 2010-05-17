@@ -1,5 +1,12 @@
 2010-05-17  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-refile-use-cache): New option.
+	(org-refile-cache, org-refile-markers): New variable.
+	(org-refile-marker, org-refile-cache-clear)
+	(org-refile-cache-check-set, org-refile-cache-put)
+	(org-refile-cache-get): New function.
+	(org-get-refile-targets): Use the refile cache.
+
 	* org-clock.el (org-clock-sum): Don't include running clock if
 	the time block is wrong.
 

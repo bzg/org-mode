@@ -1712,6 +1712,17 @@ of the subtree."
   :group 'org-refile
   :type 'function)
 
+(defcustom org-refile-use-cache nil
+  "Non-nil means cache refile targets to speed up the process.
+The cache for a particular file will be updated automatically when
+the buffer has been killed, or when any of the marker used for flagging
+refile targets no longer points at a live buffer.
+If you have added new entries to a buffer that might themselves be targets,
+you need to clear the cache manually by pressing `C-0 C-c C-w' or, if you
+find that easier, `C-u C-u C-u C-c C-w'."
+  :group 'org-refile
+  :type 'boolean)
+
 (defcustom org-refile-use-outline-path nil
   "Non-nil means provide refile targets as paths.
 So a level 3 headline will be available as level1/level2/level3.
@@ -9470,12 +9481,63 @@ on the system \"/user@host:\"."
 (defvar org-agenda-new-buffers nil
   "Buffers created to visit agenda files.")
 
+(defvar org-refile-cache nil
+  "Cache for refile targets.")
+
+
+(defvar org-refile-markers nil
+  "All the markers used for caching refile locations.")
+
+(defun org-refile-marker (pos)
+  "Get a new refile marker, but only if caching is in use."
+  (if (not org-refile-use-cache)
+      pos
+    (let ((m (make-marker)))
+      (move-marker m pos)
+      (push m org-refile-markers)
+      m)))
+
+(defun org-refile-cache-clear ()
+  "Clear the refile cache and disable all the markers."
+  (mapc (lambda (m) (move-marker m nil)) org-refile-markers)
+  (setq org-refile-markers nil)
+  (setq org-refile-cache nil)
+  (message "Refile cache has been cleared"))
+
+(defun org-refile-cache-check-set (set)
+  "Check if all the markers in the cache still have live buffers."
+  (catch 'exit
+    (while set
+      (if (not (marker-buffer (nth 3 (pop set))))
+	  (progn
+	    (message "not found") (sit-for 3)
+	    (throw 'exit nil))))
+    t))
+
+(defun org-refile-cache-put (set &rest identifiers)
+  "Push the refile targets SET into the cache, under IDENTIFIERS."
+  (let* ((key (sha1 (prin1-to-string identifiers)))
+	 (entry (assoc key org-refile-cache)))
+    (if entry
+	(setcdr entry set)
+      (push (cons key set) org-refile-cache))))
+
+(defun org-refile-cache-get (&rest identifiers)
+  "Retrieve the cached value for refile targets given by IDENTIFIERS."
+  (cond
+   ((not org-refile-cache) nil)
+   ((not org-refile-use-cache) (org-refile-cache-clear))
+   (t
+    (let ((set (cdr (assoc (sha1 (prin1-to-string identifiers))
+			   org-refile-cache))))
+      (and set (org-refile-cache-check-set set) set)))))
+
 (defun org-get-refile-targets (&optional default-buffer)
   "Produce a table with refile targets."
   (let ((case-fold-search nil)
 	;; otherwise org confuses "TODO" as a kw and "Todo" as a word
 	(entries (or org-refile-targets '((nil . (:level . 1)))))
-	targets txt re files f desc descre fast-path-p level pos0)
+	targets tgs txt re files f desc descre fast-path-p level pos0)
     (message "Getting targets...")
     (with-current-buffer (or default-buffer (current-buffer))
       (while (setq entry (pop entries))
@@ -9514,46 +9576,63 @@ on the system \"/user@host:\"."
 	(while (setq f (pop files))
 	  (with-current-buffer
 	      (if (bufferp f) f (org-get-agenda-file-buffer f))
-	    (if (bufferp f) (setq f (buffer-file-name (buffer-base-buffer f))))
-	    (setq f (and f (expand-file-name f)))
-	    (if (eq org-refile-use-outline-path 'file)
-		(push (list (file-name-nondirectory f) f nil nil) targets))
-	    (save-excursion
-	      (save-restriction
-		(widen)
-		(goto-char (point-min))
-		(while (re-search-forward descre nil t)
-		  (goto-char (setq pos0 (point-at-bol)))
-		  (catch 'next
-		    (when org-refile-target-verify-function
-		      (save-match-data
-			(or (funcall org-refile-target-verify-function)
-			    (throw 'next t))))
-		    (when (looking-at org-complex-heading-regexp)
-		      (setq level (org-reduced-level (- (match-end 1) (match-beginning 1)))
-			    txt (org-link-display-format (match-string 4))
-			    re (concat "^" (regexp-quote
-					    (buffer-substring (match-beginning 1)
-							      (match-end 4)))))
-		      (if (match-end 5) (setq re (concat re "[ \t]+"
-							 (regexp-quote
-							  (match-string 5)))))
-		      (setq re (concat re "[ \t]*$"))
-		      (when org-refile-use-outline-path
-			(setq txt (mapconcat 'org-protect-slash
-					     (append
-					      (if (eq org-refile-use-outline-path 'file)
-						  (list (file-name-nondirectory
-							 (buffer-file-name (buffer-base-buffer))))
-						(if (eq org-refile-use-outline-path 'full-file-path)
-						    (list (buffer-file-name (buffer-base-buffer)))))
-					      (org-get-outline-path fast-path-p level txt)
-					      (list txt))
-					     "/")))
-		      (push (list txt f re (point)) targets)))
-		  (when (= (point) pos0)
-		    ;; verification function has not moved point
-		    (goto-char (point-at-eol))))))))))
+	    (or
+	     (setq tgs (org-refile-cache-get (buffer-file-name) descre))
+	     (progn
+	       (if (bufferp f) (setq f (buffer-file-name
+					(buffer-base-buffer f))))
+	       (setq f (and f (expand-file-name f)))
+	       (if (eq org-refile-use-outline-path 'file)
+		   (push (list (file-name-nondirectory f) f nil nil) tgs))
+	       (save-excursion
+		 (save-restriction
+		   (widen)
+		   (goto-char (point-min))
+		   (while (re-search-forward descre nil t)
+		     (goto-char (setq pos0 (point-at-bol)))
+		     (catch 'next
+		       (when org-refile-target-verify-function
+			 (save-match-data
+			   (or (funcall org-refile-target-verify-function)
+			       (throw 'next t))))
+		       (when (looking-at org-complex-heading-regexp)
+			 (setq level (org-reduced-level
+				      (- (match-end 1) (match-beginning 1)))
+			       txt (org-link-display-format (match-string 4))
+			       re (concat "^" (regexp-quote
+					       (buffer-substring
+						(match-beginning 1)
+						(match-end 4)))))
+			 (if (match-end 5) (setq re (concat
+						     re "[ \t]+"
+						     (regexp-quote
+						      (match-string 5)))))
+			 (setq re (concat re "[ \t]*$"))
+			 (when org-refile-use-outline-path
+			   (setq txt (mapconcat
+				      'org-protect-slash
+				      (append
+				       (if (eq org-refile-use-outline-path
+					       'file)
+					   (list (file-name-nondirectory
+						  (buffer-file-name
+						   (buffer-base-buffer))))
+					 (if (eq org-refile-use-outline-path
+						 'full-file-path)
+					     (list (buffer-file-name
+						    (buffer-base-buffer)))))
+				       (org-get-outline-path fast-path-p
+							     level txt)
+				       (list txt))
+				      "/")))
+			 (push (list txt f re (org-refile-marker (point)))
+			       tgs)))
+		     (when (= (point) pos0)
+		       ;; verification function has not moved point
+		       (goto-char (point-at-eol))))))))
+	    (org-refile-cache-put tgs (buffer-file-name) descre)
+	    (setq targets (append tgs targets))
+	    ))))
     (message "Getting targets...done")
     (nreverse targets)))
 
@@ -9673,106 +9752,112 @@ With a prefix argument of `2', refile to the running clock.
 
 RFLOC can be a refile location obtained in a different way.
 
-See also `org-refile-use-outline-path' and `org-completion-use-ido'"
-  (interactive "P")
-  (let* ((cbuf (current-buffer))
-	 (regionp (org-region-active-p))
-	 (region-start (and regionp (region-beginning)))
-	 (region-end (and regionp (region-end)))
-	 (region-length (and regionp (- region-end region-start)))
-	 (filename (buffer-file-name (buffer-base-buffer cbuf)))
-	 pos it nbuf file re level reversed)
-    (setq last-command nil)
-    (when regionp
-      (goto-char region-start)
-      (or (bolp) (goto-char (point-at-bol)))
-      (setq region-start (point))
-      (unless (org-kill-is-subtree-p
-	       (buffer-substring region-start region-end))
-	(error "The region is not a (sequence of) subtree(s)")))
-    (if (equal goto '(16))
-	(org-refile-goto-last-stored)
-      (when (or
-	     (and (equal goto 2)
-		  org-clock-hd-marker (marker-buffer org-clock-hd-marker)
-		  (prog1
-		      (setq it (list (or org-clock-heading "running clock")
-				     (buffer-file-name
-				      (marker-buffer org-clock-hd-marker))
-				     ""
-				     (marker-position org-clock-hd-marker)))
-		    (setq goto nil)))
-	     (setq it (or rfloc
-			  (save-excursion
-			    (org-refile-get-location
-			     (if goto "Goto: " "Refile to: ") default-buffer
-			     org-refile-allow-creating-parent-nodes)))))
-	(setq file (nth 1 it)
-	      re (nth 2 it)
-	      pos (nth 3 it))
-	(if (and (not goto)
-		 pos
-		 (equal (buffer-file-name) file)
-		 (if regionp
-		     (and (>= pos region-start)
-			  (<= pos region-end))
-		   (and (>= pos (point))
-			(< pos (save-excursion
-				 (org-end-of-subtree t t))))))
-	    (error "Cannot refile to position inside the tree or region"))
+See also `org-refile-use-outline-path' and `org-completion-use-ido'.
 
-	(setq nbuf (or (find-buffer-visiting file)
-		       (find-file-noselect file)))
-	(if goto
-	    (progn
-	      (switch-to-buffer nbuf)
-	      (goto-char pos)
-	      (org-show-context 'org-goto))
-	  (if regionp
+If you are using target caching (see `org-refile-use-cache'),
+You have to clear the target cache in order to find new targets.
+This can be done with a 0 prefix: `C-0 C-c C-w'"
+  (interactive "P")
+  (if (member goto '(0 (64)))
+      (org-refile-cache-clear)
+    (let* ((cbuf (current-buffer))
+	   (regionp (org-region-active-p))
+	   (region-start (and regionp (region-beginning)))
+	   (region-end (and regionp (region-end)))
+	   (region-length (and regionp (- region-end region-start)))
+	   (filename (buffer-file-name (buffer-base-buffer cbuf)))
+	   pos it nbuf file re level reversed)
+      (setq last-command nil)
+      (when regionp
+	(goto-char region-start)
+	(or (bolp) (goto-char (point-at-bol)))
+	(setq region-start (point))
+	(unless (org-kill-is-subtree-p
+		 (buffer-substring region-start region-end))
+	  (error "The region is not a (sequence of) subtree(s)")))
+      (if (equal goto '(16))
+	  (org-refile-goto-last-stored)
+	(when (or
+	       (and (equal goto 2)
+		    org-clock-hd-marker (marker-buffer org-clock-hd-marker)
+		    (prog1
+			(setq it (list (or org-clock-heading "running clock")
+				       (buffer-file-name
+					(marker-buffer org-clock-hd-marker))
+				       ""
+				       (marker-position org-clock-hd-marker)))
+		      (setq goto nil)))
+	       (setq it (or rfloc
+			    (save-excursion
+			      (org-refile-get-location
+			       (if goto "Goto: " "Refile to: ") default-buffer
+			       org-refile-allow-creating-parent-nodes)))))
+	  (setq file (nth 1 it)
+		re (nth 2 it)
+		pos (nth 3 it))
+	  (if (and (not goto)
+		   pos
+		   (equal (buffer-file-name) file)
+		   (if regionp
+		       (and (>= pos region-start)
+			    (<= pos region-end))
+		     (and (>= pos (point))
+			  (< pos (save-excursion
+				   (org-end-of-subtree t t))))))
+	      (error "Cannot refile to position inside the tree or region"))
+	  
+	  (setq nbuf (or (find-buffer-visiting file)
+			 (find-file-noselect file)))
+	  (if goto
 	      (progn
-		(org-kill-new (buffer-substring region-start region-end))
-		(org-save-markers-in-region region-start region-end))
-	    (org-copy-subtree 1 nil t))
-	  (with-current-buffer (setq nbuf (or (find-buffer-visiting file)
-					      (find-file-noselect file)))
-	    (setq reversed (org-notes-order-reversed-p))
-	    (save-excursion
-	      (save-restriction
-		(widen)
-		(if pos
-		    (progn
-		      (goto-char pos)
-		      (looking-at outline-regexp)
-		      (setq level (org-get-valid-level (funcall outline-level) 1))
-		      (goto-char
-		       (if reversed
-			   (or (outline-next-heading) (point-max))
-			 (or (save-excursion (org-get-next-sibling))
-			     (org-end-of-subtree t t)
-			     (point-max)))))
-		  (setq level 1)
-		  (if (not reversed)
-		      (goto-char (point-max))
-		    (goto-char (point-min))
-		    (or (outline-next-heading) (goto-char (point-max)))))
-		(if (not (bolp)) (newline))
-		(org-paste-subtree level)
-		(when org-log-refile
-		  (org-add-log-setup 'refile nil nil 'findpos
-				     org-log-refile)
-		  (unless (eq org-log-refile 'note)
-		    (save-excursion (org-add-log-note))))
-		(and org-auto-align-tags (org-set-tags nil t))
-		(bookmark-set "org-refile-last-stored")
-		(if (fboundp 'deactivate-mark) (deactivate-mark))
-		(run-hooks 'org-after-refile-insert-hook))))
-	  (if regionp
-	      (delete-region (point) (+ (point) region-length))
-	    (org-cut-subtree))
-	  (when (featurep 'org-inlinetask)
-	    (org-inlinetask-remove-END-maybe))
-	  (setq org-markers-to-move nil)
-	  (message "Refiled to \"%s\"" (car it)))))))
+		(switch-to-buffer nbuf)
+		(goto-char pos)
+		(org-show-context 'org-goto))
+	    (if regionp
+		(progn
+		  (org-kill-new (buffer-substring region-start region-end))
+		  (org-save-markers-in-region region-start region-end))
+	      (org-copy-subtree 1 nil t))
+	    (with-current-buffer (setq nbuf (or (find-buffer-visiting file)
+						(find-file-noselect file)))
+	      (setq reversed (org-notes-order-reversed-p))
+	      (save-excursion
+		(save-restriction
+		  (widen)
+		  (if pos
+		      (progn
+			(goto-char pos)
+			(looking-at outline-regexp)
+			(setq level (org-get-valid-level (funcall outline-level) 1))
+			(goto-char
+			 (if reversed
+			     (or (outline-next-heading) (point-max))
+			   (or (save-excursion (org-get-next-sibling))
+			       (org-end-of-subtree t t)
+			       (point-max)))))
+		    (setq level 1)
+		    (if (not reversed)
+			(goto-char (point-max))
+		      (goto-char (point-min))
+		      (or (outline-next-heading) (goto-char (point-max)))))
+		  (if (not (bolp)) (newline))
+		  (org-paste-subtree level)
+		  (when org-log-refile
+		    (org-add-log-setup 'refile nil nil 'findpos
+				       org-log-refile)
+		    (unless (eq org-log-refile 'note)
+		      (save-excursion (org-add-log-note))))
+		  (and org-auto-align-tags (org-set-tags nil t))
+		  (bookmark-set "org-refile-last-stored")
+		  (if (fboundp 'deactivate-mark) (deactivate-mark))
+		  (run-hooks 'org-after-refile-insert-hook))))
+	    (if regionp
+		(delete-region (point) (+ (point) region-length))
+	      (org-cut-subtree))
+	    (when (featurep 'org-inlinetask)
+	      (org-inlinetask-remove-END-maybe))
+	    (setq org-markers-to-move nil)
+	    (message "Refiled to \"%s\" in file %s" (car it) file)))))))
 
 (defun org-refile-goto-last-stored ()
   "Go to the location where the last refile was stored."

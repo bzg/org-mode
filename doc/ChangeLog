@@ -1,3 +1,7 @@
+2010-05-17  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Refiling notes): Document the refile cache.
+
 2010-05-16  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Special symbols): Document the key to dislpay

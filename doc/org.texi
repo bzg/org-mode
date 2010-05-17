@@ -6281,6 +6281,7 @@ process, you can use the following special command:
 @vindex org-outline-path-complete-in-steps
 @vindex org-refile-allow-creating-parent-nodes
 @vindex org-log-refile
+@vindex org-refile-use-cache
 Refile the entry or region at point.  This command offers possible locations
 for refiling the entry and lets you select one with completion.  The item (or
 all items in the region) is filed below the target heading as a subitem.
@@ -6306,6 +6307,10 @@ Use the refile interface to jump to a heading.
 Jump to the location where @code{org-refile} last moved a tree to.
 @item C-2 C-c C-w
 Refile as the child of the item currently being clocked.
+@item C-0 C-c C-w @ @r{or} @ C-u C-u C-u C-c C-w
+Clear the target cache.  Caching of refile targets can be turned on by
+setting @code{org-refile-use-cache}.  To make the command seen new possible
+targets, you have to clear the cache with this command.
 @end table
 
 @node Archiving,  , Refiling notes, Capture - Refile - Archive
