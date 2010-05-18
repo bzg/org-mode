@@ -29,6 +29,14 @@
 	`also-non-dangling-p' to `only-dangling-p', since due to a bug
 	this was the default behavior all along.
 
+2010-05-16  David Maus  <dmaus@ictsoc.de>
+
+	* org-id.el (org-id-uuid): New function.  Return string with
+	random (version 4) UUID.
+	(org-id-method): Make 'uuid the new default value.
+	(org-id-new): Use `org-id-uuid' if call to uuidgen program
+	does not return a UUID.
+
 2010-05-15  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-latex.el (org-export-latex-format-image): Add support
