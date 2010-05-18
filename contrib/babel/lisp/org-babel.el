@@ -1235,7 +1235,8 @@ block but are passed literally to the \"example-block\"."
 
 (defun org-babel-clean-text-properties (text)
   "Strip all properties from text return."
-  (set-text-properties 0 (length text) nil text) text)
+  (when text
+    (set-text-properties 0 (length text) nil text) text))
 
 (defun org-babel-strip-protective-commas (body)
   "Strip protective commas from bodies of source blocks."
