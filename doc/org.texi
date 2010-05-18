@@ -3088,8 +3088,9 @@ abbreviated link looks like this
 
 @noindent
 @vindex org-link-abbrev-alist
-where the tag is optional.  The @i{linkword} must be a word; letter, numbers,
-@samp{-}, and @samp{_} are allowed here.  Abbreviations are resolved
+where the tag is optional.
+The @i{linkword} must be a word, starting with a letter, followed by
+letters, numbers, @samp{-}, and @samp{_}.  Abbreviations are resolved
 according to the information in the variable @code{org-link-abbrev-alist}
 that relates the linkwords to replacement text.  Here is an example:
 
