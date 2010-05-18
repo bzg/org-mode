@@ -516,11 +516,12 @@ whitespace, newlines, drawers, and timestamps, and cut it down to MAXLENGTH
 characters."
   (if (not s)
       nil
-    (when is-body
+    (if is-body
       (let ((re (concat "\\(" org-drawer-regexp "\\)[^\000]*?:END:.*\n?"))
 	    (re2 (concat "^[ \t]*" org-keyword-time-regexp ".*\n?")))
 	(while (string-match re s) (setq s (replace-match "" t t s)))
-	(while (string-match re2 s) (setq s (replace-match "" t t s)))))
+	(while (string-match re2 s) (setq s (replace-match "" t t s))))
+      (setq s (replace-regexp-in-string "[[:space:]]+" " " s)))
     (let ((start 0))
       (while (string-match "\\([,;]\\)" s start)
 	(setq start (+ (match-beginning 0) 2)
