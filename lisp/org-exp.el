@@ -887,7 +887,7 @@ value of `org-export-run-in-background'."
 \[1]   only export the current subtree
 \[SPC] publish enclosing subtree (with LaTeX_CLASS or EXPORT_FILE_NAME prop)
 
-\[a/n/u] export as ASCII/Latin-1/UFT-8         [A/N/U] to temporary buffer
+\[a/n/u] export as ASCII/Latin-1/UTF-8         [A/N/U] to temporary buffer
 
 \[h] export as HTML      [H] to temporary buffer   [R] export region
 \[b] export as HTML and open in browser
