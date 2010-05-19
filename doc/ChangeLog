@@ -1,3 +1,8 @@
+2010-05-19  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Column attributes): Document that the ":" operator
+	only adds hours and minutes, not seconds.
+
 2010-05-17  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Refiling notes): Document the refile cache.

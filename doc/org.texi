@@ -4700,7 +4700,7 @@ optional.  The individual parts have the following meaning:
                 @{+@}       @r{Sum numbers in this column.}
                 @{+;%.1f@}  @r{Like @samp{+}, but format result with @samp{%.1f}.}
                 @{$@}       @r{Currency, short for @samp{+;%.2f}.}
-                @{:@}       @r{Sum times, HH:MM:SS, plain numbers are hours.}
+                @{:@}       @r{Sum times, HH:MM, plain numbers are hours.}
                 @{X@}       @r{Checkbox status, @samp{[X]} if all children are @samp{[X]}.}
                 @{X/@}      @r{Checkbox status, @samp{[n/m]}.}
                 @{X%@}      @r{Checkbox status, @samp{[n%]}.}
