@@ -629,7 +629,8 @@ When nil, simply write \"#ERROR\" in corrupted fields.")
 		 (make-string sp2 ?\ ) "%%%s%ds" (make-string sp1 ?\ ) "|"))
 	 (hfmt1 (concat
 		 (make-string sp2 ?-) "%s" (make-string sp1 ?-) "+"))
-	 emptystrings links dates emph narrow falign falign1 fmax f1 len c e)
+	 emptystrings links dates emph narrow
+	 falign falign1 fmax f1 len c e space)
     (untabify beg end)
     (remove-text-properties beg end '(org-cwidth t org-dwidth t display t))
     ;; Check if we have links or dates
@@ -745,7 +746,11 @@ When nil, simply write \"#ERROR\" in corrupted fields.")
 			   (text-property-any 0 (length (car c)) 'invisible 'org-link (car c))
 ;			   (string-match org-bracket-link-regexp (car c))
 			   (< (org-string-width (car c)) len))
-		      (setcar c (concat (car c) (make-string (- len (org-string-width (car c))) ?\ )))))))
+		      (progn
+			(setq space (make-string (- len (org-string-width (car c))) ?\ ))
+			(setcar c (if (nth i typenums)
+				      (concat space (car c))
+				    (concat (car c) space))))))))
 
     ;; Compute the formats needed for output of the table
     (setq rfmt (concat indent "|") hfmt (concat indent "|"))
