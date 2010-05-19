@@ -11360,7 +11360,7 @@ be removed."
 	      (end-of-line 1))
 	    (goto-char (point-min))
 	    (widen)
-	    (if (and (looking-at "[ \t]+\n")
+	    (if (and (looking-at "[ \t]*\n")
 		     (equal (char-before) ?\n))
 		(delete-region (1- (point)) (point-at-eol)))
 	    ts))))))
