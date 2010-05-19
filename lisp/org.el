@@ -7216,6 +7216,10 @@ and still retain the repeater to cover future instances of the task."
 			     (if org-clone-delete-id
 				 (org-entry-delete nil "ID")
 			       (org-id-get-create t))
+			     (while (re-search-forward
+				     org-property-drawer-re nil t)
+			       (org-remove-empty-drawer-at
+				"PROPERTIES" (point)))
 			     (buffer-string))))
 	    (with-temp-buffer
 	      (insert template)
@@ -7224,6 +7228,9 @@ and still retain the repeater to cover future instances of the task."
 	      (and idprop (if org-clone-delete-id
 			      (org-entry-delete nil "ID")
 			    (org-id-get-create t)))
+	      (while (re-search-forward org-property-drawer-re nil t)
+		(org-remove-empty-drawer-at "PROPERTIES" (point)))
+	      (goto-char (point-min))
 	      (while (re-search-forward org-ts-regexp-both nil t)
 		(org-timestamp-change (* n shift-n) shift-what))
 	      (unless (= n n-no-remove)
