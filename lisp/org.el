@@ -7171,7 +7171,7 @@ the following will happen:
 I this way you can spell out a number of instances of a repeating task,
 and still retain the repeater to cover future instances of the task."
   (interactive "nNumber of clones to produce: \nsDate shift per clone (e.g. +1w, empty to copy unchanged): ")
-  (let (beg end template task
+  (let (beg end template task idprop
 	    shift-n shift-what doshift nmin nmax (n-no-remove -1))
     (if (not (and (integerp n) (> n 0)))
 	(error "Invalid number of replications %s" n))
@@ -7188,15 +7188,11 @@ and still retain the repeater to cover future instances of the task."
     (setq nmin 1 nmax n)
     (org-back-to-heading t)
     (setq beg (point))
+    (setq idprop (org-entry-get nil "ID"))
     (org-end-of-subtree t t)
     (or (bolp) (insert "\n"))
     (setq end (point))
-    (setq template (let ((tmpl (buffer-substring beg end)))
-		     (with-temp-buffer
-		       (insert tmpl)
-		       (org-mode)
-		       (org-entry-delete nil "ID")
-		       (buffer-string))))
+    (setq template (buffer-substring beg end))
     (when (and doshift
 	       (string-match "<[^<>\n]+ \\+[0-9]+[dwmy][^<>\n]*>" template))
       (delete-region beg end)
@@ -7205,11 +7201,17 @@ and still retain the repeater to cover future instances of the task."
     (goto-char end)
     (loop for n from nmin to nmax do
 	  (if (not doshift)
-	      (setq task template)
+	      (setq task (if (not idprop) template
+			   (with-temp-buffer
+			     (insert template)
+			     (org-mode)
+			     (org-id-get-create t)
+			     (buffer-string))))
 	    (with-temp-buffer
 	      (insert template)
 	      (org-mode)
 	      (goto-char (point-min))
+	      (if idprop (org-id-get-create t))
 	      (while (re-search-forward org-ts-regexp-both nil t)
 		(org-timestamp-change (* n shift-n) shift-what))
 	      (unless (= n n-no-remove)

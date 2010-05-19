@@ -10,6 +10,8 @@
 
 	* org.el (org-refile-cache-get): Return empty list of targets
 	when cache was cleared.
+	(org-clone-subtree-with-time-shift): Maybe create ID property
+	in cloned subtrees.
 
 2010-05-17  Carsten Dominik  <carsten.dominik@gmail.com>
 
