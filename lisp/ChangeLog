@@ -1,3 +1,8 @@
+2010-05-19  David Maus  <dmaus@ictsoc.de>
+
+	* org.el (org-refile-cache-get): Return empty list of targets
+	when cache was cleared.
+
 2010-05-17  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-refile-use-cache): New option.
