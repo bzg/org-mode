@@ -12,6 +12,9 @@
 	when cache was cleared.
 	(org-clone-subtree-with-time-shift): Maybe create ID property
 	in cloned subtrees.
+	(org-clone-delete-id): New customization variable.
+	(org-clone-subtree-with-time-shift): Use customization
+	variable `org-clone-delete-id'.
 
 2010-05-17  Carsten Dominik  <carsten.dominik@gmail.com>
 

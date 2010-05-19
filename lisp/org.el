@@ -105,6 +105,13 @@
 (require 'org-footnote)
 
 ;;;; Customization variables
+(defcustom org-clone-delete-id nil
+  "Remove ID property of clones of a subtree.
+When non-nil, clones of a subtree don't inherit the ID property.
+Otherwise they inherit the ID property with a new unique
+identifier."
+  :type 'boolean
+  :group 'org-id)
 
 ;;; Version
 
@@ -7205,13 +7212,18 @@ and still retain the repeater to cover future instances of the task."
 			   (with-temp-buffer
 			     (insert template)
 			     (org-mode)
-			     (org-id-get-create t)
+			     (goto-char (point-min))
+			     (if org-clone-delete-id
+				 (org-entry-delete nil "ID")
+			       (org-id-get-create t))
 			     (buffer-string))))
 	    (with-temp-buffer
 	      (insert template)
 	      (org-mode)
 	      (goto-char (point-min))
-	      (if idprop (org-id-get-create t))
+	      (and idprop (if org-clone-delete-id
+			      (org-entry-delete nil "ID")
+			    (org-id-get-create t)))
 	      (while (re-search-forward org-ts-regexp-both nil t)
 		(org-timestamp-change (* n shift-n) shift-what))
 	      (unless (= n n-no-remove)
