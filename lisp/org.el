@@ -9526,7 +9526,7 @@ on the system \"/user@host:\"."
   "Retrieve the cached value for refile targets given by IDENTIFIERS."
   (cond
    ((not org-refile-cache) nil)
-   ((not org-refile-use-cache) (org-refile-cache-clear))
+   ((not org-refile-use-cache) (org-refile-cache-clear) nil)
    (t
     (let ((set (cdr (assoc (sha1 (prin1-to-string identifiers))
 			   org-refile-cache))))
