@@ -1,3 +1,9 @@
+2010-05-20  Bastien Guerry  <bzg@altern.org>
+
+	* org-timer.el (org-timer-default-timer): New variable.
+	(org-timer-set-timer): Use the new variable.  Also offer the
+	possibility to replace the current timer by a new one.
+
 2010-05-20  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-kill-note-or-show-branches): Hide subtree before
