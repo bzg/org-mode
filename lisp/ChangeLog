@@ -1,3 +1,8 @@
+2010-05-20  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-kill-note-or-show-branches): Hide subtree before
+	exposing the headings.
+
 2010-05-19  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-add-planning-info): Remove the empty line also

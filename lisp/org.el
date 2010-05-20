@@ -16764,7 +16764,9 @@ Also updates the keyword regular expressions."
   "If this is a Note buffer, abort storing the note.  Else call `show-branches'."
   (interactive)
   (if (not org-finish-function)
-      (call-interactively 'show-branches)
+      (progn
+	(hide-subtree)
+	(call-interactively 'show-branches))
     (let ((org-note-abort t))
       (funcall org-finish-function))))
 

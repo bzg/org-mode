@@ -1,3 +1,4 @@
+
 \input texinfo
 @c %**start of header
 @setfilename ../../info/org
@@ -881,6 +882,9 @@ exposed by a sparse tree command (@pxref{Sparse trees}) or an agenda command
 (@pxref{Agenda commands}).  With a prefix argument show, on each
 level, all sibling headings.  With double prefix arg, also show the entire
 subtree of the parent.
+@kindex C-c C-k
+@item C-c C-k
+Expose all the headings of the subtree, CONTENT view for just one subtree.
 @kindex C-c C-x b
 @item C-c C-x b
 Show the current subtree in an indirect buffer@footnote{The indirect
