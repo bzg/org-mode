@@ -152,7 +152,7 @@ applications and inserting them in org documents"
 				(call-interactively grab-function))))
 		  descriptors)))
   
-(defalias 'omlg-grab-link 'omlg-grab-link
+(defalias 'omgl-grab-link 'omlg-grab-link
   "Renamed, and this alias will be obsolete next revision.")
 
 (defun org-mac-paste-applescript-links (as-link-list)
