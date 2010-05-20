@@ -48,11 +48,11 @@ the value of the relative timer."
   :group 'org-time
   :type 'string)
 
-(defcustom org-timer-default-timer nil
+(defcustom org-timer-default-timer 0
   "The default timer when a timer is set.
-When nil, the user is prompted for a value."
+When 0, the user is prompted for a value."
   :group 'org-time
-  :type 'string)
+  :type 'number)
 
 (defvar org-timer-start-hook nil
   "Hook run after relative timer is started.")
@@ -312,7 +312,7 @@ VALUE can be `on', `off', or `pause'."
   (let ((minutes 
 	 (read-from-minibuffer 
 	  "How many minutes left? "
-	  (if org-timer-default-timer
+	  (if (not (eq org-timer-default-timer 0))
 	      (number-to-string org-timer-default-timer)))))
     (if (not (string-match "[0-9]+" minutes))
 	(org-timer-show-remaining-time)
