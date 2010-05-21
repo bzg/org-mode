@@ -3177,7 +3177,13 @@ When nil, the \\name form remains in the buffer."
   :type 'boolean)
 
 (defvar org-emph-re nil
-  "Regular expression for matching emphasis.")
+  "Regular expression for matching emphasis.
+After a match, the match groups contain these elements:
+1  The character before the proper match, or empty at beginning of line
+2  The proper match, including the leading and trailing markers
+3  The leading marker like * or /, indicating the type of highlighting
+4  The text between the emphasis markers, not including the markers
+5  The character after the match, empty at the end of a line")
 (defvar org-verbatim-re nil
   "Regular expression for matching verbatim text.")
 (defvar org-emphasis-regexp-components) ; defined just below

@@ -1,3 +1,7 @@
+2010-05-21  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-emph-re): Document the match groups.
+
 2010-05-20  Bernt Hansen <bernt@norang.ca>
 
 	* org-clock.el (org-clock-in): Set `org-clock-clocking-in' to
