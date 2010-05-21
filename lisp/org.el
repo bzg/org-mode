@@ -15723,6 +15723,7 @@ BEG and END default to the buffer boundaries."
 (defun org-remove-inline-images ()
   "Remove inline display of images."
   (interactive)
+  (clear-image-cache)
   (mapc 'delete-overlay org-inline-image-overlays)
   (setq org-inline-image-overlays nil))
 
