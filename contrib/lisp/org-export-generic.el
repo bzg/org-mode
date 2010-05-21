@@ -1338,35 +1338,29 @@ conversions.")
   "Convert fontification according to generic rules."
   (if (string-match org-emph-re string)
         ;; The match goes one char after the *string*, except at the end of a line
-
-        ;; as far as I can tell from cargo-culting the code from
-        ;; the latex translation, we have the following:
-        ;; (match-string 1) is the material BEFORE the match
-        ;;          -- should be unchanged
-        ;; (match-string 3) is the actual markup character
-        ;; (match-string 4) is the material that is to be
-        ;;          marked up
-        ;; (match-string 5) is the remainder
         (let ((emph (assoc (match-string 3 string)
                            org-export-generic-emphasis-alist))
-              (beg (match-beginning 0)))
+              (beg (match-beginning 0))
+              (end (match-end 0)))
           (unless emph
             (message "`org-export-generic-emphasis-alist' has no entry for formatting triggered by \"%s\""
                      (match-string 3 string)))
           ;; now we need to determine whether we have strikethrough or
           ;; a list, which is a bit nasty
-          (if (and (equal (match-string 3 str) "+")
+          (if (and (equal (match-string 3 string) "+")
                    (save-match-data
-                     (string-match "\\`-+\\'" (match-string 4 str))))
-              ;; a list --- skip this match and recurse
-              (concat (substring str 0 (match-beginning 3))
-                      (org-export-generic-fontify (substring str (match-beginning 3))))
-              (concat (substring str 0 beg)
+                     (string-match "\\`-+\\'" (match-string 4 string))))
+              ;; a list --- skip this match and recurse on the point after the
+              ;; first emph char...
+              (concat (substring string 0 (1+ (match-beginning 3)))
+                      (org-export-generic-fontify (substring string (match-beginning 3))))
+              (concat (substring string 0 beg) ;; part before the match
                       (match-string 1 string)
                       (org-export-generic-emph-format (second emph)
                                                       (match-string 4 string)
                                                       (third emph))
-                      (org-export-generic-fontify (match-string 5 string)))))
+                      (or (match-string 5 string) "")
+                      (org-export-generic-fontify (substring string end)))))
         string))
 
 (defun org-export-generic-emph-format (format-varname string protect)
