@@ -913,7 +913,7 @@ lang=\"%s\" xml:lang=\"%s\">
 		      "")
 		  (or charset "iso-8859-1"))
 		 language language
-		 (org-html-expand title)
+		 title
 		 (or charset "iso-8859-1")
 		 date author description keywords
 		 style
