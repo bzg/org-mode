@@ -1,3 +1,9 @@
+2010-05-20  Bernt Hansen <bernt@norang.ca>
+
+	* org-clock.el (org-clock-in): Set `org-clock-clocking-in' to
+	t before calling `org-clock-out', so that that function can
+	know its call context.
+
 2010-05-20  Russell Adams <RLAdams@AdamsInfoServ.Com>
 
 	* org.el (org-remove-inline-images): Call `clear-image-cache'.
