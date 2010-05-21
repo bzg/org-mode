@@ -8,10 +8,6 @@
 	t before calling `org-clock-out', so that that function can
 	know its call context.
 
-2010-05-20  Russell Adams <RLAdams@AdamsInfoServ.Com>
-
-	* org.el (org-remove-inline-images): Call `clear-image-cache'.
-
 2010-05-20  Bastien Guerry  <bzg@altern.org>
 
 	* org-timer.el (org-timer-default-timer): New variable.
