@@ -86,7 +86,7 @@ heading will be exposed in a children' view."
 (defcustom org-list-demote-modify-bullet nil
   "Default bullet type installed when demoting an item.
 This is an association list, for each bullet type, this alist will point
-to the bulled that should be used when this item is demoted."
+to the bullet that should be used when this item is demoted."
   :group 'org-plain-lists
   :type '(repeat
 	  (cons
