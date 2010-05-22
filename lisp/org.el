@@ -9537,13 +9537,14 @@ on the system \"/user@host:\"."
 
 (defun org-refile-cache-check-set (set)
   "Check if all the markers in the cache still have live buffers."
-  (catch 'exit
-    (while set
-      (if (not (marker-buffer (nth 3 (pop set))))
-	  (progn
-	    (message "not found") (sit-for 3)
-	    (throw 'exit nil))))
-    t))
+  (let (marker)
+    (catch 'exit
+      (while (and set (setq marker (nth 3 (pop set))))
+	;; if org-refile-use-outline-path is 'file, marker may be nil
+	(when (and marker (null (marker-buffer marker)))
+	  (message "not found") (sit-for 3)
+	  (throw 'exit nil)))
+      t)))
 
 (defun org-refile-cache-put (set &rest identifiers)
   "Push the refile targets SET into the cache, under IDENTIFIERS."
