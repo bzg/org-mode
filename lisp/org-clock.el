@@ -1948,7 +1948,8 @@ the currently selected interval size."
 	    (org-table-recalculate 'all))
 	  (when rm-file-column
 	    (forward-char 1)
-	    (org-table-delete-column)))))))
+	    (org-table-delete-column))
+	  total-time)))))
 
 (defun org-clocktable-steps (params)
   (let* ((p1 (copy-sequence params))
@@ -1956,8 +1957,9 @@ the currently selected interval size."
 	 (te (plist-get p1 :tend))
 	 (step0 (plist-get p1 :step))
 	 (step (cdr (assoc step0 '((day . 86400) (week . 604800)))))
+	 (stepskip0 (plist-get p1 :stepskip0))
 	 (block (plist-get p1 :block))
-	 cc range-text)
+	 cc range-text step-time)
     (when block
       (setq cc (org-clock-special-range block nil t)
 	    ts (car cc) te (nth 1 cc) range-text (nth 2 cc)))
@@ -1978,8 +1980,14 @@ the currently selected interval size."
 				    (seconds-to-time (setq ts (+ ts step))))))
       (insert "\n" (if (eq step0 'day) "Daily report: " "Weekly report starting on: ")
 	      (plist-get p1 :tstart) "\n")
-      (org-dblock-write:clocktable p1)
+      (setq step-time (org-dblock-write:clocktable p1))
       (re-search-forward "#\\+END:")
+      (when (and (equal step-time 0) stepskip0)
+	;; Remove the empty table
+	(delete-region (point-at-bol)
+		       (save-excursion
+			 (re-search-backward "^\\(Daily\\|Weekly\\) report" nil t)
+			 (point))))
       (end-of-line 0))))
 
 (defun org-clocktable-add-file (file table)
