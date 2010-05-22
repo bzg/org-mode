@@ -10997,7 +10997,7 @@ Include block in tangled output to file @samp{filename}
 
 Functions:
 @table @code
-@item org-babel-tangle @key{C-c M-b t}
+@item org-babel-tangle @key{C-c C-v t}
 Tangle the current file
 @item org-babel-tangle-file
 Choose a file to tangle
@@ -11831,7 +11831,7 @@ above features to work correctly.
   | =M-down=  | [[function-org-babel-pop-to-session][org-babel-pop-to-session]]        |
 
   Org-babel also exposes a number of functions behind the common
-  =org-babel-key-prefix= of =C-c M-b=:
+  =org-babel-key-prefix= of =C-c C-v=:
 @example
   #+begin_src emacs-lisp :exports none
      (lambda (binding
@@ -11843,14 +11843,14 @@ above features to work correctly.
   #+end_src
 @end example
 
-  | =C-c M-b t= | [[function-org-babel-tangle][org-babel-tangle]]                  |
-  | =C-c M-b T= | [[function-org-babel-tangle-file][org-babel-tangle-file]]             |
-  | =C-c M-b e= | [[function-org-babel-execute-src-block][org-babel-execute-src-block]]       |
-  | =C-c M-b s= | [[function-org-babel-execute-subtree][org-babel-execute-subtree]]         |
-  | =C-c M-b b= | [[function-org-babel-execute-buffer][org-babel-execute-buffer]]          |
-  | =C-c M-b h= | [[function-org-babel-sha1-hash][org-babel-sha1-hash]]               |
-  | =C-c M-b g= | [[function-org-babel-goto-named-source-block][org-babel-goto-named-source-block]] |
-  | =C-c M-b l= | [[function-org-babel-lob-ingest][org-babel-lob-ingest]]              |
+  | =C-c C-v t= | [[function-org-babel-tangle][org-babel-tangle]]                  |
+  | =C-c C-v T= | [[function-org-babel-tangle-file][org-babel-tangle-file]]             |
+  | =C-c C-v e= | [[function-org-babel-execute-src-block][org-babel-execute-src-block]]       |
+  | =C-c C-v s= | [[function-org-babel-execute-subtree][org-babel-execute-subtree]]         |
+  | =C-c C-v b= | [[function-org-babel-execute-buffer][org-babel-execute-buffer]]          |
+  | =C-c C-v h= | [[function-org-babel-sha1-hash][org-babel-sha1-hash]]               |
+  | =C-c C-v g= | [[function-org-babel-goto-named-source-block][org-babel-goto-named-source-block]] |
+  | =C-c C-v l= | [[function-org-babel-lob-ingest][org-babel-lob-ingest]]              |
 
 @subsection Functions
 @subsubsection org-babel-execute-src-block
@@ -11940,7 +11940,7 @@ above features to work correctly.
   org-babel-tangle is an interactive Lisp function in
   `org-babel-tangle.el'.
 
-  It is bound to C-c M-b t.
+  It is bound to C-c C-v t.
 
   (org-babel-tangle &optional TARGET-FILE LANG)
 
@@ -11960,7 +11960,7 @@ above features to work correctly.
   org-babel-execute-subtree is an interactive Lisp function in
   `org-babel.el'.
 
-  It is bound to C-c M-b s.
+  It is bound to C-c C-v s.
 
   (org-babel-execute-subtree &optional ARG)
 
@@ -11976,7 +11976,7 @@ above features to work correctly.
   org-babel-execute-buffer is an interactive Lisp function in
   `org-babel.el'.
 
-  It is bound to C-c M-b b.
+  It is bound to C-c C-v b.
 
   (org-babel-execute-buffer &optional ARG)
 
@@ -11991,7 +11991,7 @@ above features to work correctly.
 @example
   org-babel-sha1-hash is an interactive Lisp function in `org-babel.el'.
 
-  It is bound to C-c M-b h.
+  It is bound to C-c C-v h.
 
   (org-babel-sha1-hash &optional INFO)
 
@@ -12007,7 +12007,7 @@ above features to work correctly.
   org-babel-goto-named-source-block is an interactive Lisp function in
   `org-babel.el'.
 
-  It is bound to C-c M-b g.
+  It is bound to C-c C-v g.
 
   (org-babel-goto-named-source-block &optional NAME)
 
@@ -12023,7 +12023,7 @@ above features to work correctly.
   org-babel-lob-ingest is an interactive Lisp function in
   `org-babel-lob.el'.
 
-  It is bound to C-c M-b l.
+  It is bound to C-c C-v l.
 
   (org-babel-lob-ingest &optional FILE)
 
