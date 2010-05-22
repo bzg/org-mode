@@ -7217,30 +7217,18 @@ and still retain the repeater to cover future instances of the task."
       (setq nmin 0 nmax (1+ nmax) n-no-remove nmax))
     (goto-char end)
     (loop for n from nmin to nmax do
-	  (if (not doshift)
-	      (setq task (if (not idprop) template
-			   (with-temp-buffer
-			     (insert template)
-			     (org-mode)
-			     (goto-char (point-min))
-			     (if org-clone-delete-id
-				 (org-entry-delete nil "ID")
-			       (org-id-get-create t))
-			     (while (re-search-forward
-				     org-property-drawer-re nil t)
-			       (org-remove-empty-drawer-at
-				"PROPERTIES" (point)))
-			     (buffer-string))))
-	    (with-temp-buffer
-	      (insert template)
-	      (org-mode)
-	      (goto-char (point-min))
-	      (and idprop (if org-clone-delete-id
-			      (org-entry-delete nil "ID")
-			    (org-id-get-create t)))
-	      (while (re-search-forward org-property-drawer-re nil t)
-		(org-remove-empty-drawer-at "PROPERTIES" (point)))
-	      (goto-char (point-min))
+	  ;; prepare clone
+	  (with-temp-buffer
+	    (insert template)
+	    (org-mode)
+	    (goto-char (point-min))
+	    (and idprop (if org-clone-delete-id
+			    (org-entry-delete nil "ID")
+			  (org-id-get-create t)))
+	    (while (re-search-forward org-property-drawer-re nil t)
+	      (org-remove-empty-drawer-at "PROPERTIES" (point)))
+	    (goto-char (point-min))
+	    (when doshift
 	      (while (re-search-forward org-ts-regexp-both nil t)
 		(org-timestamp-change (* n shift-n) shift-what))
 	      (unless (= n n-no-remove)
@@ -7249,8 +7237,8 @@ and still retain the repeater to cover future instances of the task."
 		  (save-excursion
 		    (goto-char (match-beginning 0))
 		    (if (looking-at "<[^<>\n]+\\( +\\+[0-9]+[dwmy]\\)")
-			(delete-region (match-beginning 1) (match-end 1))))))
-	      (setq task (buffer-string))))
+			(delete-region (match-beginning 1) (match-end 1)))))))
+	    (setq task (buffer-string)))
 	  (insert task))
     (goto-char beg)))
 
