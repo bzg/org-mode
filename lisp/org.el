@@ -9661,7 +9661,8 @@ on the system \"/user@host:\"."
 		     (when (= (point) pos0)
 		       ;; verification function has not moved point
 		       (goto-char (point-at-eol))))))))
-	    (org-refile-cache-put tgs (buffer-file-name) descre)
+	    (when org-refile-use-cache
+	      (org-refile-cache-put tgs (buffer-file-name) descre))
 	    (setq targets (append tgs targets))
 	    ))))
     (message "Getting targets...done")
