@@ -902,15 +902,19 @@ If FREE-CACHE, empty the cache."
 
   (let ((cache-file (org-publish-cache-get ":cache-file:")))
     (unless cache-file
-      (error "%s" "Cannot find cache-file name in `org-publish-write-cache-file'"))
+      (error
+       "%s" "Cannot find cache-file name in `org-publish-write-cache-file'"))
     (with-temp-file cache-file
       (let ((print-level nil)
-            (print-length nil))
-        (insert
-         "(setq org-publish-cache\n  "
-	 (replace-regexp-in-string "\\([^\\ \t]\"\\) \\([^ \t]\\)" "\\1\n\\2"
-				   (format "%S" org-publish-cache))
-         ")\n")))
+	    (print-length nil))
+	(insert "(setq org-publish-cache (make-hash-table :test 'equal :weakness nil :size 100))\n")
+	(maphash (lambda (k v)
+		   (insert
+		    (format (concat "(puthash %S "
+				    (if (or (listp v) (symbolp v))
+					"'" "")
+				    "%S org-publish-cache)\n") k v)))
+		 org-publish-cache)))
     (when free-cache (org-publish-reset-cache))))
 
 (defun org-publish-initialize-cache (project-name)
@@ -929,14 +933,17 @@ and return it."
 
   (unless (and org-publish-cache
 	       (string= (org-publish-cache-get ":project:") project-name))
-    (when org-publish-cache (org-publish-reset-cache))
     (let* ((cache-file (concat
 			(expand-file-name org-publish-timestamp-directory)
 			project-name
 			".cache"))
 	   (cexists (file-exists-p cache-file)))
-      (if cexists (load-file cache-file))
-      (unless org-publish-cache
+
+      (when org-publish-cache
+	(org-publish-reset-cache))
+
+      (if cexists
+	  (load-file cache-file)
 	(setq org-publish-cache
 	      (make-hash-table :test 'equal :weakness nil :size 100))
 	(org-publish-cache-set ":project:" project-name)
