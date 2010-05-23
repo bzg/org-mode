@@ -1273,6 +1273,11 @@ properly (@pxref{Exporting}).  Since indentation is what governs the
 structure of these lists, many structural constructs like @code{#+BEGIN_...}
 blocks can be indented to signal that they should be part of a list item.
 
+@vindex org-list-demote-modify-bullet
+If you find that using a different bullet for a sub-list (than that used for
+the current list-level) improves readability, customize the variable
+@code{org-list-demote-modify-bullet}.
+
 The following commands act on items when the cursor is in the first line
 of an item (the line with the bullet or number).
 

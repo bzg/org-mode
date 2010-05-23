@@ -86,7 +86,29 @@ heading will be exposed in a children' view."
 (defcustom org-list-demote-modify-bullet nil
   "Default bullet type installed when demoting an item.
 This is an association list, for each bullet type, this alist will point
-to the bullet that should be used when this item is demoted."
+to the bullet that should be used when this item is demoted.
+For example,
+
+ (setq org-list-demote-modify-bullet
+       '((\"+\" . \"-\") (\"-\" . \"+\") (\"*\" . \"+\")))
+
+will make
+
+  + Movies
+    + Silence of the Lambs
+    + My Cousin Vinny
+  + Books
+    + The Hunt for Red October
+    + The Road to Omaha
+
+into
+
+  + Movies
+    - Silence of the Lambs
+    - My Cousin Vinny
+  + Books
+    - The Hunt for Red October
+    - The Road to Omaha"
   :group 'org-plain-lists
   :type '(repeat
 	  (cons
