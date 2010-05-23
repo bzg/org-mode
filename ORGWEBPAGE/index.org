@@ -190,7 +190,6 @@ and corresponding to the latest git version.
 
 * Links
 
-
 ** Talks about Org-mode
    Check out the [[file:talks/index.html#sec-1][Google Tech Talk]] about Org-mode, or another talk
    given at the [[file:talks/index.html#sec-2][Max Planck Institute for Neurological Research]]
@@ -216,6 +215,13 @@ and corresponding to the latest git version.
 </div></form>
 #+END_HTML
 
+** MobileOrg
+   [[http://mobileorg.ncogni.to/][MobileOrg]] is an excellent open source application to read and
+   change Org-files on the road, using an iPhone, and then sync the
+   changes back to your computer.  Check out Richard's [[http://mobileorg.ncogni.to/][page]].
+
+   Matt Jones is currently developing a compatible application for
+   Android, and this project is [[http://wiki.github.com/matburt/mobileorg-android/][hosted here]].
 ** Worg
 
 [[http://orgmode.org/worg/][Worg]], created by [[http://www.cognition.ens.fr/~guerry/][Bastien Guerry]], is a setup to allow users to jointly
