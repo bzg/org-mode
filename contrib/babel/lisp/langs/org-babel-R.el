@@ -89,7 +89,7 @@ called by `org-babel-execute-src-block'."
 	   vars)))
     (org-babel-comint-in-buffer session
       (mapc (lambda (var)
-              (move-end-of-line 1) (insert var) (comint-send-input nil t)
+              (end-of-line 1) (insert var) (comint-send-input nil t)
               (org-babel-comint-wait-for-output session)) var-lines))
     session))
 

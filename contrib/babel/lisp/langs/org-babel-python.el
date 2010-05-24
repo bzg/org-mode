@@ -30,6 +30,8 @@
 
 ;;; Code:
 (require 'org-babel)
+(require 'org-babel-tangle)
+(require 'org-babel-comint)
 (require (if (featurep 'xemacs) 'python-mode 'python))
 
 (org-babel-add-interpreter "python")
@@ -75,7 +77,7 @@ called by `org-babel-execute-src-block'."
                      vars)))
     (org-babel-comint-in-buffer session
       (mapc (lambda (var)
-              (move-end-of-line 1) (insert var) (comint-send-input nil t)
+              (end-of-line 1) (insert var) (comint-send-input)
               (org-babel-comint-wait-for-output session)) var-lines))
     session))
 
@@ -123,7 +125,21 @@ then create.  Return the initialized session."
   (save-window-excursion
     (let* ((session (if session (intern session) :default))
            (python-buffer (org-babel-python-session-buffer session)))
-      (run-python)
+      (cond
+       ((fboundp 'run-python) ; python.el
+	(run-python))
+       ((fboundp 'py-shell) ; python-mode.el
+	;; `py-shell' creates a buffer whose name is the value of
+	;; `py-which-bufname' with '*'s at the beginning and end
+	(let* ((bufname (if python-buffer
+			    (replace-regexp-in-string "^\\*\\([^*]+\\)\\*$" "\\1" python-buffer) ; zap surrounding *
+			  (concat "Python-" (symbol-name session))))
+	       (py-which-bufname bufname)) ; avoid making a mess with buffer-local
+	  (py-shell)
+	  (setq python-buffer (concat "*" bufname "*"))))
+       (t
+	(error "No function available for running an inferior python.")))
+	
       (setq org-babel-python-buffers (cons (cons session python-buffer)
 					   (assq-delete-all session org-babel-python-buffers)))
       session)))
@@ -200,19 +216,24 @@ last statement in BODY, as elisp."
     (org-babel-comint-in-buffer buffer
       (let* ((raw (org-babel-comint-with-output buffer org-babel-python-eoe-indicator t
                     ;; for some reason python is fussy, and likes enters after every input
-                    (mapc (lambda (statement) (insert statement) (comint-send-input nil t))
-                          (split-string (org-babel-trim full-body) "[\r\n]+"))
-                    (comint-send-input nil t) (comint-send-input nil t)
-                    (if (member "pp" result-params)
-                        (mapc (lambda (statement) (insert statement) (comint-send-input nil t))
-                              org-babel-python-pp-last-value-eval)
-                      (insert org-babel-python-last-value-eval))
-                    (comint-send-input nil t) (comint-send-input nil t)
-                    (insert org-babel-python-eoe-indicator)
-                    (comint-send-input nil t)))
+		    (let ((comint-process-echoes nil))
+		      (mapc (lambda (statement) (insert statement) (comint-send-input))
+			    (split-string (org-babel-trim body) "[\r\n]+"))
+		      (comint-send-input) (comint-send-input)
+		      (if (member "pp" result-params)
+			  (mapc (lambda (statement) (insert statement) (comint-send-input))
+				org-babel-python-pp-last-value-eval)
+			(insert org-babel-python-last-value-eval))
+		      (comint-send-input) (comint-send-input)
+		      (insert org-babel-python-eoe-indicator)
+		      (comint-send-input))))
+	     (raw (apply #'append ; split further
+			 (mapcar #'(lambda (r)
+				     (split-string r "[\r\n]+"))
+				 raw)))
              (results (delete org-babel-python-eoe-indicator
                               (cdr (member org-babel-python-eoe-indicator
-                                           (reverse (mapcar #'org-babel-trim raw)))))))
+                                           (mapcar #'org-babel-trim raw))))))
         (unless (or (member "code" result-params) (member "pp" result-params))
           (setq results (mapcar #'org-babel-python-read-string results)))
         (case result-type

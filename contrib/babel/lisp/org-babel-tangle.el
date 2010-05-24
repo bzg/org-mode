@@ -160,8 +160,8 @@ references."
   (goto-char (point-min))
   (while (or (re-search-forward "\\[\\[file:.*\\]\\[.*\\]\\]" nil t)
              (re-search-forward "<<[^[:space:]]*>>" nil t))
-    (delete-region (save-excursion (move-beginning-of-line 1) (point))
-                   (save-excursion (move-end-of-line 1) (forward-char 1) (point)))))
+    (delete-region (save-excursion (beginning-of-line 1) (point))
+                   (save-excursion (end-of-line 1) (forward-char 1) (point)))))
 
 (defun org-babel-tangle-collect-blocks (&optional lang)
   "Collect all source blocks in the current org-mode file.
@@ -221,7 +221,7 @@ form
                          (when commentable
                            (insert "\n")
                            (comment-region (point) (progn (insert text) (point)))
-                           (move-end-of-line nil)
+                           (end-of-line nil)
                            (insert "\n"))))
     (let ((link (first spec))
           (source-name (second spec))
