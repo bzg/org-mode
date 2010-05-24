@@ -330,9 +330,9 @@ So a typical ID could look like \"Org:4nd91V40HI\"."
 	    (substring rnd 13 16)
 	    (format "%x"
 		    (logior
-		     #B10000000
+		     #b10000000
 		     (logand
-		      #B10111111
+		      #b10111111
 		      (string-to-number
 		       (substring rnd 16 18) 16))))
 	    (substring rnd 18 20)
