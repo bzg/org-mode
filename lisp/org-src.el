@@ -644,8 +644,11 @@ the language, a switch telling if the content should be in a single line."
 	  (setq buffer-file-name
 		(concat (buffer-file-name (marker-buffer org-edit-src-beg-marker))
 			"[" (buffer-name) "]"))
-	  (set (if (featurep 'xemacs) 'write-contents-hooks 'write-contents-functions)
-	       '(org-edit-src-save)))
+	  (if (featurep 'xemacs)
+	      (progn
+		(make-variable-buffer-local 'write-contents-hooks) ; needed only for 21.4
+		(setq write-contents-hooks '(org-edit-src-save)))
+	    (setq write-contents-functions '(org-edit-src-save))))
       (setq buffer-read-only t))))
 
 (org-add-hook 'org-src-mode-hook 'org-src-mode-configure-edit-buffer)
