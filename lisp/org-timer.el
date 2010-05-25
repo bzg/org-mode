@@ -338,7 +338,8 @@ VALUE can be `on', `off', or `pause'."
 		     (y-or-n-p "Replace current timer? "))
 		(not org-timer-current-timer))
 	  (progn
-	    (cancel-timer org-timer-current-timer)
+	    (when org-timer-current-timer
+	      (cancel-timer org-timer-current-timer))
 	    (setq org-timer-current-timer
 		  (run-with-timer
 		   secs nil `(lambda ()
