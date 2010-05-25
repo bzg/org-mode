@@ -1413,7 +1413,8 @@ specifies the value of ERROR-BUFFER."
 	 (if error-buffer
 	     (make-temp-file
 	      (expand-file-name "scor"
-				(or small-temporary-file-directory
+				(or (unless (featurep 'xemacs)
+				      small-temporary-file-directory)
 				    temporary-file-directory)))
 	   nil))
 	exit-status)
