@@ -56,7 +56,6 @@ functions.")
 (defvar org-babel-key-bindings
   '(("\C-p" . org-babel-expand-src-block)
     ("p" . org-babel-expand-src-block)
-    ("\C-g" . org-babel-goto-named-source-block)
     ("g" . org-babel-goto-named-source-block)
     ("\C-b" . org-babel-execute-buffer)
     ("b" . org-babel-execute-buffer)
