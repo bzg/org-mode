@@ -15045,6 +15045,13 @@ used by the agenda files.  If ARCHIVE is `ifmode', do this only if
       (setq files (org-add-archive-files files)))
     files))
 
+(defun org-agenda-file-p (&optional file)
+  "Return non-nil, if FILE is an agenda file.
+If FILE is omitted, use the file associated with the current
+buffer."
+  (member (or file (buffer-file-name))
+          (org-agenda-files t)))
+
 (defun org-edit-agenda-file-list ()
   "Edit the list of agenda files.
 Depending on setup, this either uses customize to edit the variable
