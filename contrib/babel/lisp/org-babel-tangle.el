@@ -139,6 +139,8 @@ exported source code blocks by language."
 			  (goto-char (point-max))
 			  (insert content)
 			  (write-region nil nil file-name))))
+		    ;; if files contain she-bangs, then make the executable
+		    (when she-bang (set-file-modes file-name ?\755))
                     ;; update counter
                     (setq block-counter (+ 1 block-counter))
                     (add-to-list 'path-collector file-name)))))
