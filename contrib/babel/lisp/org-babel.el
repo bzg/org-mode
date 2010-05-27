@@ -371,12 +371,14 @@ results already exist."
 the current buffer."
   (interactive "P")
   (save-excursion
-    (goto-char (point-min))
-    (while (re-search-forward org-babel-src-block-regexp nil t)
-      (let ((pos-end (match-end 0)))
-	(goto-char (match-beginning 0))
-	(org-babel-execute-src-block arg)
-	(goto-char pos-end)))))
+    (org-save-outline-visibility t
+      (goto-char (point-min))
+      (show-all)
+      (while (re-search-forward org-babel-src-block-regexp nil t)
+	(let ((pos-end (match-end 0)))
+	  (goto-char (match-beginning 0))
+	  (org-babel-execute-src-block arg)
+	  (goto-char pos-end))))))
 
 (defun org-babel-execute-subtree (&optional arg)
   "Call `org-babel-execute-src-block' on every source block in
