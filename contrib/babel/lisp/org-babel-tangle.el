@@ -40,6 +40,11 @@ to use when writing out the language to file, and an optional
 fourth element is a flag which when true indicates that the
 language does not support comments.")
 
+(defvar org-babel-tangle-w-comments nil
+  "Control the insertion of comments into tangled code.  Non-nil
+value will result in the insertion of comments for those
+languages with comment support.")
+
 (defun org-babel-load-file (file)
   "Load the contents of the Emacs Lisp source code blocks in the
 org-mode formatted FILE.  This function will first export the
@@ -218,7 +223,8 @@ form
 
   (link source-name params body)"
   (flet ((insert-comment (text)
-                         (when commentable
+                         (when (and commentable
+				    org-babel-tangle-w-comments)
                            (insert "\n")
                            (comment-region (point) (progn (insert text) (point)))
                            (end-of-line nil)
