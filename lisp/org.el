@@ -5977,6 +5977,7 @@ This means that the buffer may change while running BODY,
 but it also means that the buffer should stay alive
 during the operation, because otherwise all these markers will
 point nowhere."
+  (declare (indent 1))
   `(let ((data (org-outline-overlay-data ,use-markers)))
      (unwind-protect
 	 (progn
