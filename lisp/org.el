@@ -7973,7 +7973,9 @@ For file links, arg negates `org-context-in-file-links'."
 		   (get-text-property (point) 'org-marker))))
 	(when m
 	  (org-with-point-at m
-	    (call-interactively 'org-store-link)))))
+	    (if (interactive-p)
+		(call-interactively 'org-store-link)
+	      (org-store-link nil))))))
 
      ((eq major-mode 'calendar-mode)
       (let ((cd (calendar-cursor-to-date)))
