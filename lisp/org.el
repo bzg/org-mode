@@ -11694,7 +11694,7 @@ that the match should indeed be shown."
     cnt))
 
 (defun org-show-context (&optional key)
-  "Make sure point and context and visible.
+  "Make sure point and context are visible.
 How much context is shown depends upon the variables
 `org-show-hierarchy-above', `org-show-following-heading'. and
 `org-show-siblings'."
