@@ -1,3 +1,8 @@
+2010-05-28  Bastien Guerry  <bzg@altern.org>
+
+	* org-timer.el (org-timer-set-timer): Use a prefix argument.
+	See the docstring of the function.
+
 2010-05-24  Bastien Guerry  <bzg@altern.org>
 
 	* org-timer.el (org-timer-set-timer): Fix bug about cancelling

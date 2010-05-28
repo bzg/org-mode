@@ -7962,7 +7962,9 @@ For file links, arg negates `org-context-in-file-links'."
 		   (get-text-property (point) 'org-marker))))
 	(when m
 	  (org-with-point-at m
-	    (call-interactively 'org-store-link)))))
+	    (if (interactive-p)
+		(call-interactively 'org-store-link)
+	      (org-store-link nil))))))
 
      ((eq major-mode 'calendar-mode)
       (let ((cd (calendar-cursor-to-date)))
@@ -11683,7 +11685,7 @@ that the match should indeed be shown."
     cnt))
 
 (defun org-show-context (&optional key)
-  "Make sure point and context and visible.
+  "Make sure point and context are visible.
 How much context is shown depends upon the variables
 `org-show-hierarchy-above', `org-show-following-heading'. and
 `org-show-siblings'."
