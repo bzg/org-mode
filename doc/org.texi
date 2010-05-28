@@ -11140,14 +11140,17 @@ more text                        |          more text
 @end example
 
 @noindent
-If you are using at least Emacs 23.1.50.3 and version 6.29 of Org, this kind
-of view can be achieved dynamically at display time using
-@code{org-indent-mode}.  In this minor mode, all lines are prefixed for
-display with the necessary amount of space@footnote{@code{org-indent-mode}
-also sets the @code{wrap-prefix} property, such that @code{visual-line-mode}
-(or purely setting @code{word-wrap}) wraps long lines (including headlines)
-correctly indented.  }.  Also headlines are prefixed with additional stars,
-so that the amount of indentation shifts by two@footnote{See the variable
+
+If you are using at least Emacs 23.2 and version 6.29 of Org, this kind of
+view can be achieved dynamically at display time using
+@code{org-indent-mode}.  @i{Using this with earlier versions of Emacs can
+lead to crashes.} In this minor
+mode, all lines are prefixed for display with the necessary amount of
+space@footnote{@code{org-indent-mode} also sets the @code{wrap-prefix}
+property, such that @code{visual-line-mode} (or purely setting
+@code{word-wrap}) wraps long lines (including headlines) correctly indented.
+}.  Also headlines are prefixed with additional stars, so that the amount of
+indentation shifts by two@footnote{See the variable
 @code{org-indent-indentation-per-level}.}  spaces per level.  All headline
 stars but the last one are made invisible using the @code{org-hide}
 face@footnote{Turning on @code{org-indent-mode} sets
