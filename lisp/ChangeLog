@@ -3,6 +3,12 @@
 	* org-timer.el (org-timer-set-timer): Fix bug about cancelling
 	timers.
 
+2010-05-22  David Maus  <dmaus@ictsoc.de>
+
+	* org-w3m.el (org-w3m-copy-for-org-mode)
+	(org-w3m-get-next-link-start, org-w3m-get-prev-link-start):
+	Get text property directly, not using macro `w3m-anchor'.
+
 2010-05-21  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-emph-re): Document the match groups.

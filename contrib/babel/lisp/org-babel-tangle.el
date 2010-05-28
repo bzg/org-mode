@@ -139,6 +139,8 @@ exported source code blocks by language."
 			  (goto-char (point-max))
 			  (insert content)
 			  (write-region nil nil file-name))))
+		    ;; if files contain she-bangs, then make the executable
+		    (when she-bang (set-file-modes file-name ?\755))
                     ;; update counter
                     (setq block-counter (+ 1 block-counter))
                     (add-to-list 'path-collector file-name)))))
@@ -158,8 +160,8 @@ references."
   (goto-char (point-min))
   (while (or (re-search-forward "\\[\\[file:.*\\]\\[.*\\]\\]" nil t)
              (re-search-forward "<<[^[:space:]]*>>" nil t))
-    (delete-region (save-excursion (move-beginning-of-line 1) (point))
-                   (save-excursion (move-end-of-line 1) (forward-char 1) (point)))))
+    (delete-region (save-excursion (beginning-of-line 1) (point))
+                   (save-excursion (end-of-line 1) (forward-char 1) (point)))))
 
 (defun org-babel-tangle-collect-blocks (&optional lang)
   "Collect all source blocks in the current org-mode file.
@@ -219,7 +221,7 @@ form
                          (when commentable
                            (insert "\n")
                            (comment-region (point) (progn (insert text) (point)))
-                           (move-end-of-line nil)
+                           (end-of-line nil)
                            (insert "\n"))))
     (let ((link (first spec))
           (source-name (second spec))

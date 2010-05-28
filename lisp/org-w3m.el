@@ -41,7 +41,6 @@
 ;;
 
 (require 'org)
-(declare-function w3m-anchor "ext:w3m-util" (position))
 
 (defun org-w3m-copy-for-org-mode ()
   "Copy current buffer content or active region with `org-mode' style links.
@@ -68,7 +67,7 @@ so that it can be yanked into an Org-mode buffer with links working correctly."
         ;; store current point before jump next anchor
         (setq temp-position (point))
         ;; move to next anchor when current point is not at anchor
-        (or (w3m-anchor (point)) (org-w3m-get-next-link-start))
+        (or (get-text-property (point) 'w3m-href-anchor) (org-w3m-get-next-link-start))
         (if (<= (point) transform-end)  ; if point is inside transform bound
             (progn
               ;; get content between two links.
@@ -77,7 +76,7 @@ so that it can be yanked into an Org-mode buffer with links working correctly."
                                                (buffer-substring
                                                 temp-position (point)))))
               ;; get link location at current point.
-              (setq link-location (w3m-anchor (point)))
+              (setq link-location (get-text-property (point) 'w3m-href-anchor))
               ;; get link title at current point.
               (setq link-title (buffer-substring (point)
                                                  (org-w3m-get-anchor-end)))
@@ -115,7 +114,7 @@ so that it can be yanked into an Org-mode buffer with links working correctly."
     (while (next-single-property-change (point) 'w3m-anchor-sequence)
       ;; jump to next anchor
       (goto-char (next-single-property-change (point) 'w3m-anchor-sequence))
-      (when (w3m-anchor (point))
+      (when (get-text-property (point) 'w3m-href-anchor)
         ;; return point when current is valid link
         (throw 'reach nil))))
   (point))
@@ -126,7 +125,7 @@ so that it can be yanked into an Org-mode buffer with links working correctly."
     (while (previous-single-property-change (point) 'w3m-anchor-sequence)
       ;; jump to previous anchor
       (goto-char (previous-single-property-change (point) 'w3m-anchor-sequence))
-      (when (w3m-anchor (point))
+      (when (get-text-property (point) 'w3m-href-anchor)
         ;; return point when current is valid link
         (throw 'reach nil))))
   (point))

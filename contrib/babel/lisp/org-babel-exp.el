@@ -137,7 +137,8 @@ options are taken from `org-babel-default-header-args'."
       ('inline (format "=%s=" body))
       ('block
           (let ((str (format "#+BEGIN_SRC %s %s\n%s%s#+END_SRC\n" lang switches body
-                             (if (string-match "\n$" body) "" "\n"))))
+                             (if (and body (string-match "\n$" body))
+				 "" "\n"))))
             (when name (add-text-properties 0 (length str)
                                            (list 'org-caption
                                                  (format "%s(%s)"

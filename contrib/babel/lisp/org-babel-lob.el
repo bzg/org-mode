@@ -90,7 +90,7 @@ should be renamed to bring out this similarity, perhaps involving
 the word 'call'."
   (let ((case-fold-search t))
     (save-excursion
-      (move-beginning-of-line 1)
+      (beginning-of-line 1)
       (if (looking-at org-babel-lob-one-liner-regexp)
           (mapcar #'org-babel-clean-text-properties 
 		  (list (format "%s(%s)" (match-string 1) (match-string 2))
