@@ -17184,7 +17184,7 @@ See the individual commands for more information."
       :style toggle :selected (and (boundp 'org-export-with-LaTeX-fragments)
 				   org-export-with-LaTeX-fragments)]
      "--"
-     ["Template for BEAMER" org-beamer-settings-template t])
+     ["Template for BEAMER" org-insert-beamer-options-template t])
     "--"
     ("MobileOrg"
      ["Push Files and Views" org-mobile-push t]
