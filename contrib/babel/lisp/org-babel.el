@@ -571,21 +571,27 @@ with C-c C-c."
          (goto-char (match-end 0))))
      (unless visited-p (kill-buffer (file-name-nondirectory ,file)))))
 
-(defun org-babel-params-from-properties ()
+(defun org-babel-params-from-properties (&optional lang)
   "Return an association list of any source block params which
 may be specified in the properties of the current outline entry."
   (save-match-data
-    (delq nil
-          (mapcar
-           (lambda (header-arg)
-             (let ((val (or (condition-case nil
-                                (org-entry-get (point) header-arg t)
-                              (error nil))
-                            (cdr (assoc header-arg org-file-properties)))))
-               (when val
-                 ;; (message "prop %s=%s" header-arg val) ;; debugging
-                 (cons (intern (concat ":" header-arg)) val))))
-           (mapcar 'symbol-name org-babel-header-arg-names)))))
+    (let (val sym)
+      (delq nil
+	    (mapcar
+	     (lambda (header-arg)
+	       (and (setq val
+			  (or (condition-case nil
+				  (org-entry-get (point) header-arg t)
+				(error nil))
+			      (cdr (assoc header-arg org-file-properties))))
+		    (cons (intern (concat ":" header-arg)) val)))
+	     (mapcar
+	      'symbol-name
+	      (append
+	       org-babel-header-arg-names
+	       (progn
+		 (setq sym (intern (concat "org-babel-header-arg-names:" lang)))
+		 (and (boundp sym) (eval sym))))))))))
 
 (defun org-babel-parse-src-block-match ()
   (let* ((lang (org-babel-clean-text-properties (match-string 1)))
@@ -603,7 +609,7 @@ may be specified in the properties of the current outline entry."
               (buffer-string)))
 	  (org-babel-merge-params
 	   org-babel-default-header-args
-           (org-babel-params-from-properties)
+           (org-babel-params-from-properties lang)
 	   (if (boundp lang-headers) (eval lang-headers) nil)
 	   (org-babel-parse-header-arguments
             (org-babel-clean-text-properties (or (match-string 3) ""))))
@@ -617,7 +623,7 @@ may be specified in the properties of the current outline entry."
            (org-babel-clean-text-properties (match-string 5)))
           (org-babel-merge-params
            org-babel-default-inline-header-args
-           (org-babel-params-from-properties)
+           (org-babel-params-from-properties lang)
            (if (boundp lang-headers) (eval lang-headers) nil)
            (org-babel-parse-header-arguments
             (org-babel-clean-text-properties (or (match-string 4) "")))))))

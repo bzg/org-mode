@@ -305,15 +305,35 @@ VALUE can be `on', `off', or `pause'."
       (message "%d minute(s) %d seconds left before next time out"
 	       rmins rsecs))))
 
+(defun bzg-test (&optional test)
+  (interactive "P")
+  test)
+
 ;;;###autoload
-(defun org-timer-set-timer ()
-  "Set a timer."
-  (interactive)
-  (let ((minutes 
-	 (read-from-minibuffer 
-	  "How many minutes left? "
-	  (if (not (eq org-timer-default-timer 0))
-	      (number-to-string org-timer-default-timer)))))
+(defun org-timer-set-timer (&optional opt)
+  "Prompt for a duration and set a timer.
+
+If `org-timer-default-timer' is not zero, suggest this value as
+the default duration for the timer.  If a timer is already set,
+prompt the use if she wants to replace it.
+
+Called with a numeric prefix argument, use this numeric value as
+the duration of the timer.
+
+Called with a `C-u' prefix argument, use `org-timer-default-timer' 
+without prompting the user for a duration.
+
+With two `C-u' prefix argument, use `org-timer-default-timer'
+without prompting the user for a duration and automatically
+replace any running timer."
+  (interactive "P")
+  (let ((minutes (or (and (numberp opt) (number-to-string opt))
+		     (and (listp opt) (not (null opt))
+			  (number-to-string org-timer-default-timer))
+		     (read-from-minibuffer 
+		      "How many minutes left? "
+		      (if (not (eq org-timer-default-timer 0))
+			  (number-to-string org-timer-default-timer))))))
     (if (not (string-match "[0-9]+" minutes))
 	(org-timer-show-remaining-time)
     (let* ((mins (string-to-number (match-string 0 minutes)))
@@ -335,8 +355,9 @@ VALUE can be `on', `off', or `pause'."
 		(t (error "Not in an Org buffer"))))
 	   timer-set)
       (if (or (and org-timer-current-timer
-		     (y-or-n-p "Replace current timer? "))
-		(not org-timer-current-timer))
+		   (or (equal opt '(16))
+		       (y-or-n-p "Replace current timer? ")))
+	      (not org-timer-current-timer))
 	  (progn
 	    (when org-timer-current-timer
 	      (cancel-timer org-timer-current-timer))
