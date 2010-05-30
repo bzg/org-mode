@@ -64,7 +64,9 @@ And example for this is \"[allowframebreaks]\"."
   "%45ITEM %10BEAMER_env(Env) %10BEAMER_envargs(Env Args) %4BEAMER_col(Col) %8BEAMER_extra(Extra)"
   "Default column view format that should be used to fill the template."
   :group 'org-beamer
-  :type '(string :tag "Beamer column view format"))
+  :type '(choice
+	  (const  :tag "Do not insert Beamer column view format" nil)
+	  (string :tag "Beamer column view format")))
 
 (defcustom org-beamer-themes
   "\\usetheme{default}\\usecolortheme{default}"
@@ -72,7 +74,9 @@ And example for this is \"[allowframebreaks]\"."
 When a beamer template is filled, this will be the default for
 BEAMER_HEADER_EXTRA, which will be inserted just before \\begin{document}."
   :group 'org-beamer
-  :type '(string :tag "Beamer column view format"))
+  :type '(choice
+	  (const  :tag "Do not insert Beamer themes" nil)
+	  (string :tag "Beamer themes")))
 
 (defconst org-beamer-column-widths
   "0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 0.0 :ETC"
@@ -587,14 +591,18 @@ square brackets."
 	(org-entry-put nil "EXPORT_FILE_NAME" "presentation.pdf")
 	(org-entry-put nil "BEAMER_FRAME_LEVEL" (number-to-string
 						 org-beamer-frame-level))
-	(org-entry-put nil "BEAMER_HEADER_EXTRA" org-beamer-themes)
-	(org-entry-put nil "COLUMNS" org-beamer-column-view-format)
+	(when org-beamer-themes
+	  (org-entry-put nil "BEAMER_HEADER_EXTRA" org-beamer-themes))
+	(when org-beamer-column-view-format
+	  (org-entry-put nil "COLUMNS" org-beamer-column-view-format))
 	(org-entry-put nil "BEAMER_col_ALL" "0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 :ETC"))
     (insert "#+LaTeX_CLASS: beamer\n")
     (insert "#+LaTeX_CLASS_OPTIONS: [presentation]\n")
     (insert (format "#+BEAMER_FRAME_LEVEL: %d\n" org-beamer-frame-level) "\n")
-    (insert "#+BEAMER_HEADER_EXTRA: " org-beamer-themes "\n")
-    (insert "#+COLUMNS: " org-beamer-column-view-format "\n")
+    (when org-beamer-themes
+      (insert "#+BEAMER_HEADER_EXTRA: " org-beamer-themes "\n"))
+    (when org-beamer-column-view-format
+      (insert "#+COLUMNS: " org-beamer-column-view-format "\n"))
     (insert "#+PROPERTY: BEAMER_col_ALL 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 :ETC\n")))
 
 
