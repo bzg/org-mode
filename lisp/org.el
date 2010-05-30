@@ -8275,6 +8275,12 @@ This is the list that is used before handing over to the browser.")
 
 (defun org-fixup-message-id-for-http (s)
   "Replace special characters in a message id, so it can be used in an http query."
+  (when (string-match "%" s)
+    (setq s (mapconcat (lambda (c)
+			 (if (eq c ?%)
+			     "%25"
+			   (char-to-string c)))
+		       s "")))
   (while (string-match "<" s)
     (setq s (replace-match "%3C" t t s)))
   (while (string-match ">" s)
