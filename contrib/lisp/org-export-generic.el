@@ -932,9 +932,13 @@ underlined headlines.  The default is 3."
             (string-match "^\\([ \t]+\\)\\(\\*[ \t]*\\)" line))
 	;;
 	;; plain list item
-	;;
 	;; TODO: nested lists
 	;;
+        ;; first add a line break between any previous paragraph or line item and this
+        ;; one
+        (when bodynewline-paragraph
+          (insert bodynewline-paragraph))
+
         ;; I believe this gets rid of leading whitespace.
 	(setq line (replace-match "" nil nil line))
 
