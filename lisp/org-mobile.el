@@ -902,42 +902,6 @@ FIXME: Hmmm, not sure if we can make his work against the
 auto-correction feature.  Needs a bit more thinking.  So this function
 is currently a noop.")
 
-
-(defun org-find-olp (path)
-  "Return  a marker pointing to the entry at outline path OLP.
-If anything goes wrong, the return value will instead an error message,
-as a string."
-  (let* ((file (pop path))
-	 (buffer (find-file-noselect file))
-	 (level 1)
-	 (lmin 1)
-	 (lmax 1)
-	 limit re end found pos heading cnt)
-    (unless buffer (error "File not found :%s" file))
-    (with-current-buffer buffer
-      (save-excursion
-	(save-restriction
-	  (widen)
-	  (setq limit (point-max))
-	  (goto-char (point-min))
-	  (while (setq heading (pop path))
-	    (setq re (format org-complex-heading-regexp-format
-			     (regexp-quote heading)))
-	    (setq cnt 0 pos (point))
-	    (while (re-search-forward re end t)
-	      (setq level (- (match-end 1) (match-beginning 1)))
-	      (if (and (>= level lmin) (<= level lmax))
-		  (setq found (match-beginning 0) cnt (1+ cnt))))
-	    (when (= cnt 0) (error "Heading not found on level %d: %s"
-				   lmax heading))
-	    (when (> cnt 1) (error "Heading not unique on level %d: %s"
-				   lmax heading))
-	    (goto-char found)
-	    (setq lmin (1+ level) lmax (+ lmin (if org-odd-levels-only 1 0)))
-	    (setq end (save-excursion (org-end-of-subtree t t))))
-	  (when (org-on-heading-p)
-	    (move-marker (make-marker) (point))))))))
-
 (defun org-mobile-locate-entry (link)
   (if (string-match "\\`id:\\(.*\\)$" link)
       (org-id-find (match-string 1 link) 'marker)
@@ -1036,7 +1000,6 @@ be returned that indicates what went wrong."
 					(point))))
 	t)
        (t (error "Body was changed in MobileOrg and on the computer")))))))
-
 
 (defun org-mobile-tags-same-p (list1 list2)
   "Are the two tag lists the same?"

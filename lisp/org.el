@@ -9675,9 +9675,10 @@ on the system \"/user@host:\"."
 
 (defun org-get-outline-path (&optional fastp level heading)
   "Return the outline path to the current entry, as a list.
-The parameters FASTP, LEVEL, and HEADING are for use be a scanner
+
+The parameters FASTP, LEVEL, and HEADING are for use by a scanner
 routine which makes outline path derivations for an entire file,
-avoiding backtracing."
+avoiding backtracing.  Refile target collection makes use of that."
   (if fastp
       (progn
 	(if (> level 19)
@@ -13500,7 +13501,8 @@ in the current file."
   "In the current entry, delete PROPERTY."
   (interactive
    (let* ((completion-ignore-case t)
-	  (prop (org-icompleting-read "Property: " (org-entry-properties nil 'standard))))
+	  (prop (org-icompleting-read "Property: "
+				      (org-entry-properties nil 'standard))))
      (list prop)))
   (message "Property %s %s" property
 	   (if (org-entry-delete nil property)
@@ -13613,6 +13615,48 @@ completion."
     (beginning-of-line 1)
     (skip-chars-forward " \t")
     (run-hook-with-args 'org-property-changed-functions key nval)))
+
+(defun org-find-olp (path)
+  "Return a marker pointing to the entry at outline path OLP.
+If anything goes wrong, throw an error.
+You can wrap this call to cathc the error like this:
+
+  (condition-case msg
+      (org-mobile-locate-entry (match-string 4))
+    (error (nth 1 msg)))
+
+The return value will then be either a string with the error message,
+or a marker if everyhing is OK."
+  (let* ((file (pop path))
+	 (buffer (find-file-noselect file))
+	 (level 1)
+	 (lmin 1)
+	 (lmax 1)
+	 limit re end found pos heading cnt)
+    (unless buffer (error "File not found :%s" file))
+    (with-current-buffer buffer
+      (save-excursion
+	(save-restriction
+	  (widen)
+	  (setq limit (point-max))
+	  (goto-char (point-min))
+	  (while (setq heading (pop path))
+	    (setq re (format org-complex-heading-regexp-format
+			     (regexp-quote heading)))
+	    (setq cnt 0 pos (point))
+	    (while (re-search-forward re end t)
+	      (setq level (- (match-end 1) (match-beginning 1)))
+	      (if (and (>= level lmin) (<= level lmax))
+		  (setq found (match-beginning 0) cnt (1+ cnt))))
+	    (when (= cnt 0) (error "Heading not found on level %d: %s"
+				   lmax heading))
+	    (when (> cnt 1) (error "Heading not unique on level %d: %s"
+				   lmax heading))
+	    (goto-char found)
+	    (setq lmin (1+ level) lmax (+ lmin (if org-odd-levels-only 1 0)))
+	    (setq end (save-excursion (org-end-of-subtree t t))))
+	  (when (org-on-heading-p)
+	    (move-marker (make-marker) (point))))))))
 
 (defun org-find-entry-with-id (ident)
   "Locate the entry that contains the ID property with exact value IDENT.
