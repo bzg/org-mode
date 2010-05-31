@@ -71,7 +71,8 @@ Encryption uses AES-256, with a password given in
 `org-mobile-encryption-password'.
 When nil, plain files are kept on the server.
 Turning on encryption requires to set the same password in the MobileOrg
-application."
+application.  Before turning this on, check of MobileOrg does already
+support it - at the time of this writing it did not yet."
   :group 'org-mobile
   :type 'boolean)
 

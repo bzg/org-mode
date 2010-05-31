@@ -12434,11 +12434,13 @@ The following example counts the number of entries with TODO keyword
 @cindex iPhone
 @cindex MobileOrg
 
-@i{MobileOrg} is an application for the @i{iPhone/iPod Touch} series of
-devices, developed by Richard Moreland.  @i{MobileOrg} offers offline viewing
-and capture support for an Org-mode system rooted on a ``real'' computer.  It
-does also allow you to record changes to existing entries.  For information
-about @i{MobileOrg}, see @uref{http://mobileorg.ncogni.to/}).
+@uref{http://mobileorg.ncogni.to/, MobileOrg} is an application for the
+@i{iPhone/iPod Touch} series of devices, developed by Richard Moreland.
+@i{MobileOrg} offers offline viewing and capture support for an Org-mode
+system rooted on a ``real'' computer.  It does also allow you to record
+changes to existing entries.  Android users should check out
+@uref{http://wiki.github.com/matburt/mobileorg-android/, MobileOrg Android}
+by Matt Jones.
 
 This appendix describes the support Org has for creating agenda views in a
 format that can be displayed by @i{MobileOrg}, and for integrating notes
@@ -12461,37 +12463,23 @@ in-buffer settings, but it will understand the logistics of TODO state
 @node Setting up the staging area, Pushing to MobileOrg, MobileOrg, MobileOrg
 @section Setting up the staging area
 
-Org-mode has commands to prepare a directory with files for @i{MobileOrg},
-and to read captured notes from there.  If Emacs can directly write to the
-WebDAV directory@footnote{If you are using a public server, you might prefer
-to encrypt the files on the server.  This can be done with Org-mode 6.35 and
-MobileOrg 1.2.  On the Emacs side, configure the variables
-@code{org-mobile-use-encryption} and @code{org-mobile-encryption-password}.}
-accessed by @i{MobileOrg}, just point to this directory using the variable
-@code{org-mobile-directory}.  Using the @file{tramp} method,
-@code{org-mobile-directory} may point to a remote directory accessible
-through, for example, @file{ssh/scp}:
+MobileOrg needs to interact with Emacs through directory on a
+server@footnote{If you are using a public server, you might prefer to encrypt
+the files on the server.  This can be done with Org-mode 6.35 and, hopefully,
+with MobileOrg 1.4 (please check before trying to use this).  On the Emacs
+side, configure the variables @code{org-mobile-use-encryption} and
+@code{org-mobile-encryption-password}.}.  The easiest way to create that
+directory is to use a free @uref{http://dropbox.com,Dropbox.com} account.
+When MobileOrg first connects to your Dropbox, it will create a directory
+@i{MobileOrg} inside the Dropbox.  After the directory has been created, tell
+Emacs about it:
 
-@smallexample
-(setq org-mobile-directory "/scpc:user@@remote.host:org/webdav/")
-@end smallexample
+@lisp
+(setq org-mobile-directory "~/Dropbox/MobileOrg")
+@end lisp
 
-If Emacs cannot access the WebDAV directory directly using a @file{tramp}
-method, or you prefer to maintain a local copy, you can use a local directory
-for staging.  Other means must then be used to keep this directory in sync
-with the WebDAV directory.  In the following example, files are staged in
-@file{~/stage}, and Org-mode hooks take care of moving files to and from the
-WebDAV directory using @file{scp}.
-
-@smallexample
-(setq org-mobile-directory "~/stage/")
-(add-hook 'org-mobile-post-push-hook
-  (lambda () (shell-command "scp -r ~/stage/* user@@wdhost:mobile/")))
-(add-hook 'org-mobile-pre-pull-hook
-  (lambda () (shell-command "scp user@@wdhost:mobile/mobileorg.org ~/stage/ ")))
-(add-hook 'org-mobile-post-pull-hook
-  (lambda () (shell-command "scp ~/stage/mobileorg.org user@@wdhost:mobile/")))
-@end smallexample
+Org-mode has commands to put files for @i{MobileOrg} into that directory,
+and to read captured notes from there. 
 
 @node Pushing to MobileOrg, Pulling from MobileOrg, Setting up the staging area, MobileOrg
 @section Pushing to MobileOrg
@@ -12501,28 +12489,26 @@ to the directory @code{org-mobile-directory}.  By default this list contains
 all agenda files (as listed in @code{org-agenda-files}), but additional files
 can be included by customizing @code{org-mobiles-files}.  File names will be
 staged with path relative to @code{org-directory}, so all files should be
-inside this directory.  The push operation also creates (in the same
-directory) a special Org file @file{agendas.org}.  This file is an Org-mode
-style outline, containing every custom agenda view defined by the user.
-While creating the agendas, Org-mode will force@footnote{See the variable
-@code{org-mobile-force-id-on-agenda-items}.}  an ID property on all entries
-referenced by the agendas, so that these entries can be uniquely identified
-if @i{MobileOrg} flags them for further action.  Finally, Org writes the file
-@file{index.org}, containing links to all other files.  If @i{MobileOrg} is
-configured to request this file from the WebDAV server, all agendas and Org
-files will be downloaded to the device.  To speed up the download, MobileOrg
-will only read files whose checksums@footnote{stored automatically in the
-file @file{checksums.dat}} have changed.
+inside this directory.  The push operation also creates a special Org file
+@file{agendas.org} with all custom agenda view defined by the
+user@footnote{While creating the agendas, Org-mode will force (see the
+variable @code{org-mobile-force-id-on-agenda-items}) ID properties on all
+referenced entries, so that these entries can be uniquely
+identified if @i{MobileOrg} flags them for further action.}.  Finally, Org
+writes the file @file{index.org}, containing links to all other files.
+@i{MobileOrg} first reads this file from the server, and then downloads all
+agendas and Org files listed in it.  To speed up the download, MobileOrg will
+only read files whose checksums@footnote{stored automatically in the file
+@file{checksums.dat}} have changed.
 
 @node Pulling from MobileOrg,  , Pushing to MobileOrg, MobileOrg
 @section Pulling from MobileOrg
 
-When @i{MobileOrg} synchronizes with the WebDAV server, it not only pulls the
-Org files for viewing.  It also appends captured entries and pointers to
-flagged and changed entries to the file @file{mobileorg.org} on the server.
-Org has a @emph{pull} operation that integrates this information into an
-inbox file and operates on the pointers to flagged entries.  Here is how it
-works:
+When @i{MobileOrg} synchronizes with the server, it not only pulls the Org
+files for viewing.  It also appends captured entries and pointers to flagged
+and changed entries to the file @file{mobileorg.org} on the server.  Org has
+a @emph{pull} operation that integrates this information into an inbox file
+and operates on the pointers to flagged entries.  Here is how it works:
 
 @enumerate
 @item
@@ -12686,6 +12672,8 @@ patches.
 @item
 @i{Scott Jaderholm} proposed footnotes, control over whitespace between
 folded entries, and column view for properties.
+@item
+@i{Matt Jones} wrote @i{MobileOrg Android}.
 @item
 @i{Tokuya Kameshima} wrote @file{org-wl.el} and @file{org-mew.el}.
 @item
