@@ -1744,6 +1744,8 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
       (unless (or (and (get-text-property (- (point) 2) 'org-protected)
 		       (not (get-text-property
 			     (- (point) 2) 'org-verbatim-emph)))
+		  (equal (char-after (match-beginning 3))
+			 (char-after (1+ (match-beginning 3))))
 		  (save-excursion
 		    (goto-char (match-beginning 1))
 		    (save-match-data
