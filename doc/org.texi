@@ -12469,7 +12469,11 @@ the files on the server.  This can be done with Org-mode 6.35 and, hopefully,
 with MobileOrg 1.4 (please check before trying to use this).  On the Emacs
 side, configure the variables @code{org-mobile-use-encryption} and
 @code{org-mobile-encryption-password}.}.  The easiest way to create that
-directory is to use a free @uref{http://dropbox.com,Dropbox.com} account.
+directory is to use a free @uref{http://dropbox.com,Dropbox.com}
+account@footnote{If you cannot use Dropbox, or if your version of MobileOrg
+does not support it, you can use a webdav server.  For more information,
+check out the the documentation of MobileOrg and also this
+@uref{http://orgmode.org/worg/org-faq.php#mobileorg_webdav, FAQ entry}.}.
 When MobileOrg first connects to your Dropbox, it will create a directory
 @i{MobileOrg} inside the Dropbox.  After the directory has been created, tell
 Emacs about it:
