@@ -177,7 +177,8 @@ suitable for exportation by org-mode.  This function is called by
 	  (lambda (pair)
 	    (if (and org-current-export-file
 		     (eq (car pair) :var)
-		     (string-match org-babel-ref-split-regexp (cdr pair)))
+		     (string-match org-babel-ref-split-regexp (cdr pair))
+		     (null (org-babel-ref-literal (match-string 2 (cdr pair)))))
 		`(:var . ,(concat (match-string 1 (cdr pair))
 				  "=" org-current-export-file
 				  ":" (match-string 2 (cdr pair))))
