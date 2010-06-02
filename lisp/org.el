@@ -344,6 +344,39 @@ the following lines anywhere in the buffer:
 	  (const :tag "Not" nil)
 	  (const :tag "Globally (slow on startup in large files)" t)))
 
+(defcustom org-use-sub-superscripts t
+  "Non-nil means interpret \"_\" and \"^\" for export.
+When this option is turned on, you can use TeX-like syntax for sub- and
+superscripts.  Several characters after \"_\" or \"^\" will be
+considered as a single item - so grouping with {} is normally not
+needed.  For example, the following things will be parsed as single
+sub- or superscripts.
+
+ 10^24   or   10^tau     several digits will be considered 1 item.
+ 10^-12  or   10^-tau    a leading sign with digits or a word
+ x^2-y^3                 will be read as x^2 - y^3, because items are
+			 terminated by almost any nonword/nondigit char.
+ x_{i^2} or   x^(2-i)    braces or parenthesis do grouping.
+
+Still, ambiguity is possible - so when in doubt use {} to enclose the
+sub/superscript.  If you set this variable to the symbol `{}',
+the braces are *required* in order to trigger interpretations as
+sub/superscript.  This can be helpful in documents that need \"_\"
+frequently in plain text.
+
+Not all export backends support this, but HTML does.
+
+This option can also be set with the +OPTIONS line, e.g. \"^:nil\"."
+  :group 'org-startup
+  :group 'org-export-translation
+  :type '(choice
+	  (const :tag "Always interpret" t)
+	  (const :tag "Only with braces" {})
+	  (const :tag "Never interpret" nil)))
+
+(defvaralias 'org-export-with-sub-superscripts 'org-use-sub-superscripts)
+
+
 (defcustom org-startup-with-beamer-mode nil
   "Non-nil means turn on `org-beamer-mode' on startup.
 This can also be configured on a per-file basis by adding one of
@@ -3176,6 +3209,11 @@ When nil, the \\name form remains in the buffer."
   :group 'org-appearance
   :type 'boolean)
 
+(defcustom org-pretty-entities-include-sub-superscripts t
+  "Non-nil means, pretty entity display includes formatting sub/superscripts."
+  :group 'org-appearance
+  :type 'boolean)
+
 (defvar org-emph-re nil
   "Regular expression for matching emphasis.
 After a match, the match groups contain these elements:
@@ -4047,9 +4085,11 @@ means to push this value onto the list in the variable.")
     (let ((re (org-make-options-regexp
 	       '("CATEGORY" "TODO" "COLUMNS"
 		 "STARTUP" "ARCHIVE" "FILETAGS" "TAGS" "LINK" "PRIORITIES"
-		 "CONSTANTS" "PROPERTY" "DRAWERS" "SETUPFILE" "LATEX_CLASS")
+		 "CONSTANTS" "PROPERTY" "DRAWERS" "SETUPFILE" "LATEX_CLASS"
+		 "OPTIONS")
 	       "\\(?:[a-zA-Z][0-9a-zA-Z_]*_TODO\\)"))
 	  (splitre "[ \t]+")
+	  (scripts org-use-sub-superscripts)
 	  kwds kws0 kwsa key log value cat arch tags const links hw dws
 	  tail sep kws1 prio props ftags drawers beamer-p
 	  ext-setup-or-nil setup-contents (start 0))
@@ -4122,6 +4162,9 @@ means to push this value onto the list in the variable.")
 				      '(face t fontified t) arch))
 	     ((equal key "LATEX_CLASS")
 	      (setq beamer-p (equal value "beamer")))
+	     ((equal key "OPTIONS")
+	      (if (string-match "\\([ \t]\\|\\`\\)\\^:\\(t\\|nil\\|{}\\)" value)
+		  (setq scripts (read (match-string 2 value)))))
 	     ((equal key "SETUPFILE")
 	      (setq setup-contents (org-file-contents
 				    (expand-file-name
@@ -4134,6 +4177,7 @@ means to push this value onto the list in the variable.")
 			      "\n" setup-contents "\n"
 			      (substring ext-setup-or-nil start)))))
 	     ))))
+      (org-set-local 'org-use-sub-superscripts scripts)
       (when cat
 	(org-set-local 'org-category (intern cat))
 	(push (cons "CATEGORY" cat) props))
@@ -4616,6 +4660,47 @@ Here is what the match groups contain after a match:
   "Like org-bracket-link-analytic-regexp, but include coderef internal type.")
 (defvar org-any-link-re nil
   "Regular expression matching any link.")
+
+(defcustom org-match-sexp-depth 3
+  "Number of stacked braces for sub/superscript matching.
+This has to be set before loading org.el to be effective."
+  :group 'org-export-translation ; ??????????????????????????/
+  :type 'integer)
+
+(defun org-create-multibrace-regexp (left right n)
+  "Create a regular expression which will match a balanced sexp.
+Opening delimiter is LEFT, and closing delimiter is RIGHT, both given
+as single character strings.
+The regexp returned will match the entire expression including the
+delimiters.  It will also define a single group which contains the
+match except for the outermost delimiters.  The maximum depth of
+stacked delimiters is N.  Escaping delimiters is not possible."
+  (let* ((nothing (concat "[^" left right "]*?"))
+	 (or "\\|")
+	 (re nothing)
+	 (next (concat "\\(?:" nothing left nothing right "\\)+" nothing)))
+    (while (> n 1)
+      (setq n (1- n)
+	    re (concat re or next)
+	    next (concat "\\(?:" nothing left next right "\\)+" nothing)))
+    (concat left "\\(" re "\\)" right)))
+
+(defvar org-match-substring-regexp
+  (concat
+   "\\([^\\]\\)\\([_^]\\)\\("
+   "\\(" (org-create-multibrace-regexp "{" "}" org-match-sexp-depth) "\\)"
+   "\\|"
+   "\\(" (org-create-multibrace-regexp "(" ")" org-match-sexp-depth) "\\)"
+   "\\|"
+   "\\(\\(?:\\*\\|[-+]?[^-+*!@#$%^_ \t\r\n,:\"?<>~;./{}=()]+\\)\\)\\)")
+  "The regular expression matching a sub- or superscript.")
+
+(defvar org-match-substring-with-braces-regexp
+  (concat
+   "\\([^\\]\\)\\([_^]\\)\\("
+   "\\(" (org-create-multibrace-regexp "{" "}" org-match-sexp-depth) "\\)"
+   "\\)")
+  "The regular expression matching a sub- or superscript, forcing braces.")
 
 (defun org-make-link-regexps ()
   "Update the link regular expressions.
@@ -5249,6 +5334,7 @@ For plain list items, if they are matched by `outline-regexp', this returns
 	   ;; Specials
 	   '(org-do-latex-and-special-faces)
 	   '(org-fontify-entities)
+	   '(org-raise-scripts)
 	   ;; Code
 	   '(org-activate-code (1 'org-code t))
 	   ;; COMMENT
@@ -5383,7 +5469,49 @@ If KWD is a number, get the corresponding match group."
 		      org-no-flyspell t)
        '(mouse-face t keymap t org-linked-text t
 		    invisible t intangible t
-		    org-no-flyspell t)))))
+		    org-no-flyspell t)))
+    (org-remove-font-lock-display-properties beg end)))
+
+(defun org-remove-font-lock-display-properties (beg end)
+  "Remove specific display properties that have been added by font lock.
+The will remove the raise properties that are used to show superscripts
+and subscriipts."
+  (let (next prop)
+    (while (< beg end)
+      (setq next (next-single-property-change beg 'display nil end)
+	    prop (get-text-property beg 'display))
+      (if (member prop org-script-display)
+	  (put-text-property beg next 'display nil))
+      (setq beg next))))
+
+(defconst org-script-display  '(((raise -0.3) (height 0.7))
+				((raise 0.3)  (height 0.7)))
+  "Display properties for showing superscripts and subscripts.")
+
+(defun org-raise-scripts (limit)
+  "Add raise properties to sub/superscripts."
+  (when (and org-pretty-entities org-pretty-entities-include-sub-superscripts)
+    (if (re-search-forward
+	 (if (eq org-use-sub-superscripts t)
+	     org-match-substring-regexp
+	   org-match-substring-with-braces-regexp)
+	 limit t)
+	(progn
+	  (put-text-property (match-beginning 3) (match-end 0)
+			     'display
+			     (if (equal (char-after (match-beginning 2)) ?^)
+				 (nth 1 org-script-display)
+			       (car org-script-display)))
+	  (put-text-property (match-beginning 2) (match-end 2)
+			     'invisible t)
+	  (if (and (eq (char-after (match-beginning 3)) ?{)
+		   (eq (char-before (match-end 3)) ?}))
+	      (progn
+		(put-text-property (match-beginning 3) (1+ (match-beginning 3))
+				   'invisible t)
+		(put-text-property (1- (match-end 3)) (match-end 3)
+				   'invisible t)))
+	  t))))
 
 ;;;; Visibility cycling, including org-goto and indirect buffer
 

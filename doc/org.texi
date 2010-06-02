@@ -8783,6 +8783,12 @@ convention, or use, on a per-file basis:
 #+OPTIONS: ^:@{@}
 @end example
 
+@table @kbd
+@kindex C-c C-x \
+@item C-c C-x \
+In addition to showing entities as UTF8 characters, this command will also
+format sub- and superscripts in a WYSIWYM way.
+@end table
 
 @node LaTeX fragments, Previewing LaTeX fragments, Subscripts and superscripts, Embedded LaTeX
 @subsection La@TeX{} fragments

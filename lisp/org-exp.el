@@ -448,35 +448,6 @@ This option can also be set with the +OPTIONS line, e.g. \"f:nil\"."
   :group 'org-export-translation
   :type 'boolean)
 
-(defcustom org-export-with-sub-superscripts t
-  "Non-nil means interpret \"_\" and \"^\" for export.
-When this option is turned on, you can use TeX-like syntax for sub- and
-superscripts.  Several characters after \"_\" or \"^\" will be
-considered as a single item - so grouping with {} is normally not
-needed.  For example, the following things will be parsed as single
-sub- or superscripts.
-
- 10^24   or   10^tau     several digits will be considered 1 item.
- 10^-12  or   10^-tau    a leading sign with digits or a word
- x^2-y^3                 will be read as x^2 - y^3, because items are
-			 terminated by almost any nonword/nondigit char.
- x_{i^2} or   x^(2-i)    braces or parenthesis do grouping.
-
-Still, ambiguity is possible - so when in doubt use {} to enclose the
-sub/superscript.  If you set this variable to the symbol `{}',
-the braces are *required* in order to trigger interpretations as
-sub/superscript.  This can be helpful in documents that need \"_\"
-frequently in plain text.
-
-Not all export backends support this, but HTML does.
-
-This option can also be set with the +OPTIONS line, e.g. \"^:nil\"."
-  :group 'org-export-translation
-  :type '(choice
-	  (const :tag "Always interpret" t)
-	  (const :tag "Only with braces" {})
-	  (const :tag "Never interpret" nil)))
-
 (defcustom org-export-with-TeX-macros t
   "Non-nil means interpret simple TeX-like macros when exporting.
 For example, HTML export converts \\alpha to &alpha; and \\AA to &Aring;.
@@ -519,12 +490,6 @@ Not all export backends support this.
 This option can also be set with the +OPTIONS line, e.g. \"::nil\"."
   :group 'org-export-translation
   :type 'boolean)
-
-(defcustom org-match-sexp-depth 3
-  "Number of stacked braces for sub/superscript matching.
-This has to be set before loading org.el to be effective."
-  :group 'org-export-translation
-  :type 'integer)
 
 (defgroup org-export-tables nil
   "Options for exporting tables in Org-mode."
@@ -2733,41 +2698,6 @@ If yes remove the column and the special lines."
   (while (string-match "\\[\\([0-9]\\|fn:[^]]*\\)\\]" s)
     (setq s (replace-match "" t t s)))
   s)
-
-(defun org-create-multibrace-regexp (left right n)
-  "Create a regular expression which will match a balanced sexp.
-Opening delimiter is LEFT, and closing delimiter is RIGHT, both given
-as single character strings.
-The regexp returned will match the entire expression including the
-delimiters.  It will also define a single group which contains the
-match except for the outermost delimiters.  The maximum depth of
-stacked delimiters is N.  Escaping delimiters is not possible."
-  (let* ((nothing (concat "[^" left right "]*?"))
-	 (or "\\|")
-	 (re nothing)
-	 (next (concat "\\(?:" nothing left nothing right "\\)+" nothing)))
-    (while (> n 1)
-      (setq n (1- n)
-	    re (concat re or next)
-	    next (concat "\\(?:" nothing left next right "\\)+" nothing)))
-    (concat left "\\(" re "\\)" right)))
-
-(defvar org-match-substring-regexp
-  (concat
-   "\\([^\\]\\)\\([_^]\\)\\("
-   "\\(" (org-create-multibrace-regexp "{" "}" org-match-sexp-depth) "\\)"
-   "\\|"
-   "\\(" (org-create-multibrace-regexp "(" ")" org-match-sexp-depth) "\\)"
-   "\\|"
-   "\\(\\(?:\\*\\|[-+]?[^-+*!@#$%^_ \t\r\n,:\"?<>~;./{}=()]+\\)\\)\\)")
-  "The regular expression matching a sub- or superscript.")
-
-(defvar org-match-substring-with-braces-regexp
-  (concat
-   "\\([^\\]\\)\\([_^]\\)\\("
-   "\\(" (org-create-multibrace-regexp "{" "}" org-match-sexp-depth) "\\)"
-   "\\)")
-  "The regular expression matching a sub- or superscript, forcing braces.")
 
 
 (defun org-get-text-property-any (pos prop &optional object)
