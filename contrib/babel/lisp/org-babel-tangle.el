@@ -58,7 +58,8 @@ file using `load-file'."
     (let* ((base-name (file-name-sans-extension file))
            (exported-file (concat base-name ".el")))
       ;; tangle if the org-mode file is newer than the elisp file
-      (unless (and (file-exists-p exported-file) (> (age file) (age exported-file)))
+      (unless (and (file-exists-p exported-file)
+		   (> (age file) (age exported-file)))
         (org-babel-tangle-file file exported-file "emacs-lisp"))
       (load-file exported-file)
       (message "loaded %s" exported-file))))
@@ -91,12 +92,13 @@ exported source code blocks by language."
        (lambda (by-lang)
          (let* ((lang (car by-lang))
                 (specs (cdr by-lang))
-                (lang-f (intern (concat
-                                 (or (and (cdr (assoc lang org-src-lang-modes))
-                                          (symbol-name
-                                           (cdr (assoc lang org-src-lang-modes))))
-                                     lang)
-                                 "-mode")))
+                (lang-f (intern
+			 (concat
+			  (or (and (cdr (assoc lang org-src-lang-modes))
+				   (symbol-name
+				    (cdr (assoc lang org-src-lang-modes))))
+			      lang)
+			  "-mode")))
                 (lang-specs (cdr (assoc lang org-babel-tangle-langs)))
                 (ext (first lang-specs))
                 (she-bang (second lang-specs))
@@ -112,7 +114,8 @@ exported source code blocks by language."
                                    she-bang))
                        (base-name (or (cond
                                        ((string= "yes" tangle)
-                                        (file-name-sans-extension (buffer-file-name)))
+                                        (file-name-sans-extension
+					 (buffer-file-name)))
                                        ((string= "no" tangle) nil)
                                        ((> (length tangle) 0) tangle))
                                       target-file))
@@ -120,10 +123,6 @@ exported source code blocks by language."
                                     ;; decide if we want to add ext to base-name
                                     (if (and ext (string= "yes" tangle))
                                         (concat base-name "." ext) base-name))))
-                  ;; ;; debugging
-                  ;; (message
-                  ;;  "tangle=%S base-name=%S file-name=%S she-bang=%S commentable=%s"
-                  ;;  tangle base-name file-name she-bang commentable)
                   (when file-name
                     ;; delete any old versions of file
                     (when (and (file-exists-p file-name)
@@ -178,7 +177,8 @@ code blocks by language."
     (org-babel-map-source-blocks (buffer-file-name)
       (setq block-counter (+ 1 block-counter))
       (let* ((link (progn (call-interactively 'org-store-link)
-                          (org-babel-clean-text-properties (car (pop org-stored-links)))))
+                          (org-babel-clean-text-properties
+			   (car (pop org-stored-links)))))
              (info (org-babel-get-src-block-info))
              (source-name (intern (or (fifth info)
                                       (format "block-%d" block-counter))))
@@ -186,8 +186,8 @@ code blocks by language."
 	     (expand-cmd (intern (concat "org-babel-expand-body:" src-lang)))
              (params (third info))
              by-lang)
-        (unless (string= (cdr (assoc :tangle params)) "no") ;; maybe skip
-          (unless (and lang (not (string= lang src-lang))) ;; maybe limit by language
+        (unless (string= (cdr (assoc :tangle params)) "no") ;; skip
+          (unless (and lang (not (string= lang src-lang))) ;; limit by language
             ;; add the spec for this block to blocks under it's language
             (setq by-lang (cdr (assoc src-lang blocks)))
             (setq blocks (delq (assoc src-lang blocks) blocks))
@@ -199,18 +199,27 @@ code blocks by language."
                                         (if (assoc :no-expand params)
                                             body
                                           (funcall
-					   (if (fboundp expand-cmd) expand-cmd 'org-babel-expand-body:generic)
+					   (if (fboundp expand-cmd)
+					       expand-cmd
+					     'org-babel-expand-body:generic)
                                            body
                                            params)))
                                       (if (and (cdr (assoc :noweb params))
-                                               (string= "yes" (cdr (assoc :noweb params))))
-                                          (org-babel-expand-noweb-references info) (second info)))
-                                     (third (cdr (assoc
-                                                  src-lang org-babel-tangle-langs))))
+                                               (string=
+						"yes"
+						(cdr (assoc :noweb params))))
+                                          (org-babel-expand-noweb-references
+					   info)
+					(second info)))
+                                     (third
+				      (cdr (assoc src-lang
+						  org-babel-tangle-langs))))
                                by-lang)) blocks))))))
     ;; ensure blocks in the correct order
     (setq blocks
-          (mapcar (lambda (by-lang) (cons (car by-lang) (reverse (cdr by-lang)))) blocks))
+          (mapcar
+	   (lambda (by-lang) (cons (car by-lang) (reverse (cdr by-lang))))
+	   blocks))
     ;; blocks should contain all source-blocks organized by language
     ;; (message "blocks=%S" blocks) ;; debugging
     blocks))
@@ -226,14 +235,17 @@ form
                          (when (and commentable
 				    org-babel-tangle-w-comments)
                            (insert "\n")
-                           (comment-region (point) (progn (insert text) (point)))
+                           (comment-region (point)
+					   (progn (insert text) (point)))
                            (end-of-line nil)
                            (insert "\n"))))
     (let ((link (first spec))
           (source-name (second spec))
           (body (fourth spec))
-          (commentable (not (if (> (length (cdr (assoc :comments (third spec)))) 0)
-                                (string= (cdr (assoc :comments (third spec))) "no")
+          (commentable (not (if (> (length (cdr (assoc :comments (third spec))))
+				   0)
+                                (string= (cdr (assoc :comments (third spec)))
+					 "no")
                               (fifth spec)))))
       (insert-comment (format "[[%s][%s]]" (org-link-escape link) source-name))
       (insert (format "%s" (org-babel-chomp body)))
