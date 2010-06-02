@@ -15943,7 +15943,16 @@ BEG and END default to the buffer boundaries."
 		(overlay-put ov 'display img)
 		(overlay-put ov 'face 'default)
 		(overlay-put ov 'org-image-overlay t)
+		(overlay-put ov 'modification-hooks
+			     (list 'org-display-inline-modification-hook))
 		(push ov org-inline-image-overlays)))))))))
+
+(defun org-display-inline-modification-hook (ov after beg end &optional len)
+  "Remove inline-display overlay if a corresponding region is modified."
+  (let ((inhibit-modification-hooks t))
+    (when (and ov after)
+      (delete ov org-inline-image-overlays)
+      (delete-overlay ov))))
 
 (defun org-remove-inline-images ()
   "Remove inline display of images."
