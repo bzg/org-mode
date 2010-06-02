@@ -255,7 +255,7 @@ form
 					 "no")
                               (fifth spec)))))
       (insert-comment (format "[[%s][%s]]" (org-link-escape link) source-name))
-      (insert (format "%s" (org-babel-chomp body)))
+      (insert (format "\n%s\n" (org-babel-chomp body)))
       (insert-comment (format "%s ends here" source-name)))))
 
 (provide 'org-babel-tangle)
