@@ -71,7 +71,14 @@ specify a default export file for all source blocks.  Optional
 argument LANG can be used to limit the exported source code
 blocks by language."
   (interactive "fFile to tangle: \nP")
-  (save-window-excursion (find-file file) (org-babel-tangle target-file lang)))
+  (let ((visited-p (get-file-buffer (expand-file-name file)))
+	to-be-removed)
+    (save-window-excursion
+      (find-file file)
+      (setq to-be-removed (current-buffer))
+      (org-babel-tangle target-file lang))
+    (unless visited-p
+      (kill-buffer to-be-removed))))
 
 (defun org-babel-tangle-publish (_ filename pub-dir)
   "Tangle FILENAME and place the results in PUB-DIR."
