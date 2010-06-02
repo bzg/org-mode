@@ -924,6 +924,18 @@ When t, the following will happen while the cursor is in the headline:
   :group 'org-edit-structure
   :type 'boolean)
 
+(defcustom org-ctrl-k-protect-subtree nil
+  "Non-nil means, do not delete a hidden subtree with C-k.
+When set to the symbol `error', simply throw an error when C-k is
+used to kill (part-of) a headline that has hidden text behind it.
+Any other non-nil value will result in a query to the user, if it is
+OK to kill that hidden subtree.  When nil, kill without remorse."
+  :group 'org-edit-structure
+  :type '(choice
+	  (const :tag "Do not protect hidden subtrees" nil)
+	  (const :tag "Protect hidden subtrees with a security query" t)
+	  (const :tag "Never kill a hidden subtree with C-k" error)))
+
 (defcustom org-yank-folded-subtrees t
   "Non-nil means when yanking subtrees, fold them.
 If the kill is a single subtree, or a sequence of subtrees, i.e. if
@@ -18568,6 +18580,11 @@ depending on context."
    ((or (not org-special-ctrl-k)
 	(bolp)
 	(not (org-on-heading-p)))
+    (if (and (get-char-property (min (point-max) (point-at-eol)) 'invisible)
+	     org-ctrl-k-protect-subtree)
+	(if (or (eq org-ctrl-k-protect-subtree 'error)
+		(not (y-or-n-p "Kill hidden subtree along with headline? ")))
+	    (error "C-k aborted - would kill hidden subtree")))
     (call-interactively 'kill-line))
    ((looking-at (org-re ".*?\\S-\\([ \t]+\\(:[[:alnum:]_@:]+:\\)\\)[ \t]*$"))
     (kill-region (point) (match-beginning 1))
