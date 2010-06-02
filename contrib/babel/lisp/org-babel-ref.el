@@ -84,7 +84,8 @@ emacs-lisp representation of the value of the variable."
 (defun org-babel-ref-literal (ref)
   "Determine if the right side of a header argument variable
 assignment is a literal value or is a reference to some external
-resource.  If REF is literal then return it's value, otherwise
+resource.  REF should be a string of the right hand side of the
+assignment.  If REF is literal then return it's value, otherwise
 return nil."
   (let ((out (org-babel-read ref)))
     (if (equal out ref)

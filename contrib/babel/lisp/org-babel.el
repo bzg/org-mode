@@ -562,14 +562,18 @@ with C-c C-c."
 (defmacro org-babel-map-source-blocks (file &rest body)
   "Evaluate BODY forms on each source-block in FILE."
   (declare (indent 1))
-  `(let ((visited-p (get-buffer (file-name-nondirectory ,file))))
+  `(let ((visited-p (get-file-buffer (expand-file-name ,file)))
+	 to-be-removed)
      (save-window-excursion
-       (find-file ,file) (goto-char (point-min))
+       (find-file ,file)
+       (setq to-be-removed (current-buffer))
+       (goto-char (point-min))
        (while (re-search-forward org-babel-src-block-regexp nil t)
          (goto-char (match-beginning 0))
          (save-match-data ,@body)
          (goto-char (match-end 0))))
-     (unless visited-p (kill-buffer (file-name-nondirectory ,file)))))
+     (unless visited-p
+       (kill-buffer to-be-removed))))
 
 (defun org-babel-params-from-properties (&optional lang)
   "Return an association list of any source block params which

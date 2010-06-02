@@ -112,12 +112,15 @@ options are taken from `org-babel-default-header-args'."
 			(org-babel-parse-header-arguments
 			 (org-babel-clean-text-properties
 			  (concat ":var results="
-				  (mapconcat #'identity (org-babel-lob-get-info) " "))))))
+				  (mapconcat #'identity
+					     (org-babel-lob-get-info) " "))))))
 		 'lob)))
 	(setq end (+ end (- (length replacement) (length (match-string 0)))))
 	(replace-match replacement t t)))))
 
 (defun org-babel-exp-do-export (info type)
+  "Return a string containing the exported content of the current
+code block respecting the value of the :exports header argument."
   (case (intern (or (cdr (assoc :exports (third info))) "code"))
     ('none "")
     ('code (org-babel-exp-code info type))
@@ -127,46 +130,60 @@ options are taken from `org-babel-default-header-args'."
                    (org-babel-exp-results info type)))))
 
 (defun org-babel-exp-code (info type)
+  "Return the code the current code block in a manner suitable
+for exportation by org-mode.  This function is called by
+`org-babel-exp-do-export'."
   (let ((lang (first info))
         (body (second info))
         (switches (fourth info))
         (name (fifth info))
-        (args (mapcar #'cdr
-                      (remove-if-not (lambda (el) (eq :var (car el))) (third info)))))
+        (args (mapcar
+	       #'cdr
+	       (remove-if-not (lambda (el) (eq :var (car el))) (third info)))))
     (case type
       ('inline (format "=%s=" body))
       ('block
-          (let ((str (format "#+BEGIN_SRC %s %s\n%s%s#+END_SRC\n" lang switches body
-                             (if (and body (string-match "\n$" body))
-				 "" "\n"))))
-            (when name (add-text-properties 0 (length str)
-                                           (list 'org-caption
-                                                 (format "%s(%s)"
-                                                         name (mapconcat #'identity args ", ")))
-                                           str))
-           str))
+          (let ((str
+		 (format "#+BEGIN_SRC %s %s\n%s%s#+END_SRC\n" lang switches body
+			 (if (and body (string-match "\n$" body))
+			     "" "\n"))))
+            (when name
+	      (add-text-properties
+	       0 (length str)
+	       (list 'org-caption
+		     (format "%s(%s)"
+			     name
+			     (mapconcat #'identity args ", ")))
+	       str))
+	    str))
       ('lob
        (let ((call-line (and (string-match "results=" (car args))
                              (substring (car args) (match-end 0)))))
          (cond
           ((eq backend 'html)
-           (format "\n#+HTML: <label class=\"org-src-name\">%s</label>\n" call-line))
+           (format "\n#+HTML: <label class=\"org-src-name\">%s</label>\n"
+		   call-line))
           ((t (format ": %s\n" call-line)))))))))
 
 (defun org-babel-exp-results (info type)
+  "Return the results of the current code block in a manner
+suitable for exportation by org-mode.  This function is called by
+`org-babel-exp-do-export'."
   (let ((lang (first info))
 	(body (second info))
 	(params
-         ;; lets ensure that we lookup references in the original file
-         (mapcar (lambda (pair)
-                   (if (and org-current-export-file
-                            (eq (car pair) :var)
-                            (string-match org-babel-ref-split-regexp (cdr pair)))
-                       `(:var . ,(concat (match-string 1 (cdr pair))
-                                         "=" org-current-export-file
-                                         ":" (match-string 2 (cdr pair))))
-                     pair))
-		 (third info))))
+	 ;; lets ensure that we lookup references in the original file
+	 (mapcar
+	  (lambda (pair)
+	    (if (and org-current-export-file
+		     (eq (car pair) :var)
+		     (string-match org-babel-ref-split-regexp (cdr pair))
+		     (null (org-babel-ref-literal (match-string 2 (cdr pair)))))
+		`(:var . ,(concat (match-string 1 (cdr pair))
+				  "=" org-current-export-file
+				  ":" (match-string 2 (cdr pair))))
+	      pair))
+	  (third info))))
     (case type
       ('inline
         (let ((raw (org-babel-execute-src-block
@@ -189,10 +206,11 @@ options are taken from `org-babel-default-header-args'."
            nil nil (org-babel-merge-params params '((:results . "replace"))))
         "")
       ('lob
-          (save-excursion
-            (re-search-backward org-babel-lob-one-liner-regexp nil t)
-            (org-babel-execute-src-block
-             nil (list lang body (org-babel-merge-params params '((:results . "replace"))))) "")))))
+       (save-excursion
+	 (re-search-backward org-babel-lob-one-liner-regexp nil t)
+	 (org-babel-execute-src-block
+	  nil (list lang body (org-babel-merge-params
+			       params '((:results . "replace"))))) "")))))
 
 (provide 'org-babel-exp)
 ;;; org-babel-exp.el ends here
