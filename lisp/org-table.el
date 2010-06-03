@@ -629,7 +629,7 @@ When nil, simply write \"#ERROR\" in corrupted fields.")
 		 (make-string sp2 ?\ ) "%%%s%ds" (make-string sp1 ?\ ) "|"))
 	 (hfmt1 (concat
 		 (make-string sp2 ?-) "%s" (make-string sp1 ?-) "+"))
-	 emptystrings links dates emph narrow
+	 emptystrings links dates emph raise narrow
 	 falign falign1 fmax f1 len c e space)
     (untabify beg end)
     (remove-text-properties beg end '(org-cwidth t org-dwidth t display t))
@@ -640,6 +640,9 @@ When nil, simply write \"#ERROR\" in corrupted fields.")
     (setq emph (and org-hide-emphasis-markers
 		    (re-search-forward org-emph-re end t)))
     (goto-char beg)
+    (setq raise (and org-use-sub-superscripts
+		    (re-search-forward org-match-substring-regexp end t)))
+    (goto-char beg)
     (setq dates (and org-display-custom-times
 		     (re-search-forward org-ts-regexp-both end t)))
     ;; Make sure the link properties are right
@@ -647,6 +650,7 @@ When nil, simply write \"#ERROR\" in corrupted fields.")
     ;; Make sure the date properties are right
     (when dates (goto-char beg) (while (org-activate-dates end)))
     (when emph (goto-char beg) (while (org-do-emphasis-faces end)))
+    (when raise (goto-char beg) (while (org-raise-scripts end)))
 
     ;; Check if we are narrowing any columns
     (goto-char beg)
@@ -737,14 +741,16 @@ When nil, simply write \"#ERROR\" in corrupted fields.")
 
     ;; With invisible characters, `format' does not get the field width right
     ;; So we need to make these fields wide by hand.
-    (when (or links emph)
+    (when (or links emph raise)
       (loop for i from 0 upto (1- maxfields) do
 	    (setq len (nth i lengths))
 	    (loop for j from 0 upto (1- (length fields)) do
 		  (setq c (nthcdr i (car (nthcdr j fields))))
 		  (if (and (stringp (car c))
-			   (text-property-any 0 (length (car c)) 'invisible 'org-link (car c))
-;			   (string-match org-bracket-link-regexp (car c))
+			   (or (text-property-any 0 (length (car c))
+						  'invisible 'org-link (car c))
+			       (text-property-any 0 (length (car c))
+						  'org-dwidth t (car c)))
 			   (< (org-string-width (car c)) len))
 		      (progn
 			(setq space (make-string (- len (org-string-width (car c))) ?\ ))

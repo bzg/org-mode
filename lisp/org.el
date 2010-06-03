@@ -5484,6 +5484,12 @@ If KWD is a number, get the corresponding match group."
 		    org-no-flyspell t)))
     (org-remove-font-lock-display-properties beg end)))
 
+(defconst org-script-display  '(((raise -0.3) (height 0.7))
+				((raise 0.3)  (height 0.7))
+				((raise -0.5))
+				((raise 0.5)))
+  "Display properties for showing superscripts and subscripts.")
+
 (defun org-remove-font-lock-display-properties (beg end)
   "Remove specific display properties that have been added by font lock.
 The will remove the raise properties that are used to show superscripts
@@ -5496,10 +5502,6 @@ and subscriipts."
 	  (put-text-property beg next 'display nil))
       (setq beg next))))
 
-(defconst org-script-display  '(((raise -0.3) (height 0.7))
-				((raise 0.3)  (height 0.7)))
-  "Display properties for showing superscripts and subscripts.")
-
 (defun org-raise-scripts (limit)
   "Add raise properties to sub/superscripts."
   (when (and org-pretty-entities org-pretty-entities-include-sub-superscripts)
@@ -5508,21 +5510,28 @@ and subscriipts."
 	     org-match-substring-regexp
 	   org-match-substring-with-braces-regexp)
 	 limit t)
-	(progn
+	(let* ((pos (point))
+	       (table-p (progn (goto-char (point-at-bol))
+			       (prog1 (org-looking-at-p
+				       org-table-dataline-regexp)
+				 (goto-char pos)))))
 	  (put-text-property (match-beginning 3) (match-end 0)
 			     'display
 			     (if (equal (char-after (match-beginning 2)) ?^)
-				 (nth 1 org-script-display)
-			       (car org-script-display)))
-	  (put-text-property (match-beginning 2) (match-end 2)
-			     'invisible t)
+				 (nth (if table-p 3 1) org-script-display)
+			       (nth (if table-p 2 0) org-script-display)))
+	  (add-text-properties (match-beginning 2) (match-end 2)
+			       (list 'invisible t
+				     'org-dwidth t 'org-dwidth-n 1))
 	  (if (and (eq (char-after (match-beginning 3)) ?{)
 		   (eq (char-before (match-end 3)) ?}))
 	      (progn
-		(put-text-property (match-beginning 3) (1+ (match-beginning 3))
-				   'invisible t)
-		(put-text-property (1- (match-end 3)) (match-end 3)
-				   'invisible t)))
+		(add-text-properties
+		 (match-beginning 3) (1+ (match-beginning 3))
+		 (list 'invisible t 'org-dwidth t 'org-dwidth-n 1))
+		(add-text-properties
+		 (1- (match-end 3)) (match-end 3)
+		 (list 'invisible t 'org-dwidth t 'org-dwidth-n 1))))
 	  t))))
 
 ;;;; Visibility cycling, including org-goto and indirect buffer
