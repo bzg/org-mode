@@ -552,7 +552,7 @@ Otherwise give an error say the file exists."
 (defun org-freemind-write-mm-buffer (org-buffer mm-buffer node-at-line)
   (with-current-buffer org-buffer
     (dolist (node-style org-freemind-node-styles)
-      (when (string-match-p (car node-style) buffer-file-name)
+      (when (org-string-match-p (car node-style) buffer-file-name)
         (setq org-freemind-node-style (cadr node-style))))
     ;;(message "org-freemind-node-style =%s" org-freemind-node-style)
     (save-match-data
@@ -725,7 +725,7 @@ Otherwise give an error say the file exists."
     (dolist (style-list org-freemind-node-style)
       (let ((node-regexp (car style-list)))
         (message "node-regexp=%s node-name=%s" node-regexp node-name)
-        (when (string-match-p node-regexp node-name)
+        (when (org-string-match-p node-regexp node-name)
           ;;(setq node-style (org-freemind-do-apply-node-style style-list))
           (setq node-style (cadr style-list))
           (when node-style

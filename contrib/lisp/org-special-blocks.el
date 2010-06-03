@@ -51,7 +51,7 @@ seen.  This is run after a few special cases are taken care of."
   (when (or htmlp latexp)
     (goto-char (point-min))
     (while (re-search-forward "^#\\+\\(begin\\|end\\)_\\(.*\\)$" nil t)
-      (unless (string-match-p org-special-blocks-ignore-regexp (match-string 2))
+      (unless (org-string-match-p org-special-blocks-ignore-regexp (match-string 2))
 	(replace-match
 	 (if (equal (downcase (match-string 1)) "begin")
 	     (concat "ORG-" (match-string 2) "-START")
