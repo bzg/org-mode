@@ -4818,7 +4818,7 @@ The time stamps may be either active or inactive.")
 		 (org-remove-flyspell-overlays-in
 		  (match-beginning 0) (match-end 0)))
 	    (add-text-properties (match-beginning 2) (match-end 2)
-				 '(font-lock-multiline t))
+				 '(font-lock-multiline t org-emphasis t))
 	    (when org-hide-emphasis-markers
 	      (add-text-properties (match-end 4) (match-beginning 5)
 				   '(invisible org-link))
@@ -5381,9 +5381,11 @@ For plain list items, if they are matched by `outline-regexp', this returns
   (let (ee)
     (when org-pretty-entities
       (catch 'match
-	(while (re-search-forward "\\\\\\([a-zA-Z][a-zA-Z0-9]*\\)[^[:alnum:]]"
-				  limit t)
-	  (if (and (setq ee (org-entity-get (match-string 1)))
+	(while (re-search-forward
+		"\\\\\\([a-zA-Z][a-zA-Z0-9]*\\)\\($\\|[^[:alnum:]\n]\\)"
+		limit t)
+	  (if (and (not (org-in-indented-comment-line))
+		   (setq ee (org-entity-get (match-string 1)))
 		   (= (length (nth 6 ee)) 1))
 	      (progn
 		(add-text-properties
@@ -5471,6 +5473,7 @@ If KWD is a number, get the corresponding match group."
 	 (inhibit-read-only t) (inhibit-point-motion-hooks t)
 	 (inhibit-modification-hooks t)
 	 deactivate-mark buffer-file-name buffer-file-truename)
+    (decompose-region beg end)
     (remove-text-properties
      beg end
      (if org-indent-mode
@@ -5478,10 +5481,10 @@ If KWD is a number, get the corresponding match group."
 	 '(mouse-face t keymap t org-linked-text t
 		      invisible t intangible t
 		      line-prefix t wrap-prefix t
-		      org-no-flyspell t)
+		      org-no-flyspell t org-emphasis t)
        '(mouse-face t keymap t org-linked-text t
 		    invisible t intangible t
-		    org-no-flyspell t)))
+		    org-no-flyspell t org-emphasis t)))
     (org-remove-font-lock-display-properties beg end)))
 
 (defconst org-script-display  '(((raise -0.3) (height 0.7))
@@ -5510,29 +5513,32 @@ and subscriipts."
 	     org-match-substring-regexp
 	   org-match-substring-with-braces-regexp)
 	 limit t)
-	(let* ((pos (point))
-	       (table-p (progn (goto-char (point-at-bol))
-			       (prog1 (org-looking-at-p
-				       org-table-dataline-regexp)
-				 (goto-char pos)))))
-	  (put-text-property (match-beginning 3) (match-end 0)
-			     'display
-			     (if (equal (char-after (match-beginning 2)) ?^)
-				 (nth (if table-p 3 1) org-script-display)
-			       (nth (if table-p 2 0) org-script-display)))
-	  (add-text-properties (match-beginning 2) (match-end 2)
-			       (list 'invisible t
-				     'org-dwidth t 'org-dwidth-n 1))
-	  (if (and (eq (char-after (match-beginning 3)) ?{)
-		   (eq (char-before (match-end 3)) ?}))
-	      (progn
-		(add-text-properties
-		 (match-beginning 3) (1+ (match-beginning 3))
-		 (list 'invisible t 'org-dwidth t 'org-dwidth-n 1))
-		(add-text-properties
-		 (1- (match-end 3)) (match-end 3)
-		 (list 'invisible t 'org-dwidth t 'org-dwidth-n 1))))
-	  t))))
+	(let* ((pos (point)) table-p comment-p emph-p)
+	  (setq emph-p (get-text-property (match-beginning 3) 'org-emphasis))
+	  (goto-char (point-at-bol))
+	  (setq table-p (org-looking-at-p org-table-dataline-regexp)
+		comment-p (org-looking-at-p "[ \t]*#"))
+	  (goto-char pos)
+	  (if (or comment-p emph-p)
+	      t
+	    (put-text-property (match-beginning 3) (match-end 0)
+			       'display
+			       (if (equal (char-after (match-beginning 2)) ?^)
+				   (nth (if table-p 3 1) org-script-display)
+				 (nth (if table-p 2 0) org-script-display)))
+	    (add-text-properties (match-beginning 2) (match-end 2)
+				 (list 'invisible t
+				       'org-dwidth t 'org-dwidth-n 1))
+	    (if (and (eq (char-after (match-beginning 3)) ?{)
+		     (eq (char-before (match-end 3)) ?}))
+		(progn
+		  (add-text-properties
+		   (match-beginning 3) (1+ (match-beginning 3))
+		   (list 'invisible t 'org-dwidth t 'org-dwidth-n 1))
+		  (add-text-properties
+		   (1- (match-end 3)) (match-end 3)
+		   (list 'invisible t 'org-dwidth t 'org-dwidth-n 1))))
+	    t)))))
 
 ;;;; Visibility cycling, including org-goto and indirect buffer
 
