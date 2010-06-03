@@ -1171,6 +1171,15 @@ lang=\"%s\" xml:lang=\"%s\">
 		  desc2 (if (match-end 2) (concat type ":" path) path)
 		  descp (and desc1 (not (equal desc1 desc2)))
 		  desc (or desc1 desc2))
+	     ;; Make an image out of the description if that is so wanted
+	    (when (and descp (org-file-image-p
+				desc org-export-html-inline-image-extensions))
+	       (save-match-data
+		  (if (string-match "^file:" desc)
+		     (setq desc (substring desc (match-end 0)))))
+	       (setq desc (org-add-props
+			     (concat "<img src=\"" desc "\"/>")
+			     '(org-protected t))))
 	    (cond
 	     ((equal type "internal")
 		(let 
