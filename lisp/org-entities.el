@@ -480,6 +480,24 @@ Kind can be any of `latex', `html', `ascii', `latin1', or `utf8'."
     (goto-char pos)
     (org-table-align)))
 
+(defun org-entities-help ()
+  "Create a Help buffer with all available entities"
+  (interactive)
+  (with-output-to-temp-buffer "*Help*"
+    (princ "Org-mode entities\n=================\n\n")
+    (let ((ll (append org-entities-user org-entities))
+	  e latex mathp html latin utf8 name ascii)
+      (princ "Symbol   Org entity        LaTeX code             HTML code\n")
+      (princ "-----------------------------------------------------------\n")
+      (while ll
+	(setq e (pop ll))
+	(setq name (car e)
+	      latex (nth 1 e)
+	      html (nth 3 e)
+	      utf8 (nth 6 e))
+	(princ (format "%-8s \\%-16s %-22s %-13s\n"
+		       utf8 name latex html))))))
+
 (defun replace-amp ()
   "Postprocess HTML file to unescape the ampersant."
   (interactive)
