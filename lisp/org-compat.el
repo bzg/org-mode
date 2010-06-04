@@ -313,6 +313,18 @@ TIME defaults to the current time."
       (time-to-seconds (or time (current-time)))
     (float-time time)))
 
+(defun org-string-match-p (&rest args)
+  (if (fboundp 'string-match-p)
+      (apply 'string-match-p args)
+    (save-match-data
+      (apply 'string-match args))))
+
+(defun org-looking-at-p (&rest args)
+  (if (fboundp 'looking-at-p)
+      (apply 'looking-at-p args)
+    (save-match-data
+      (apply 'looking-at-p args))))
+
 ; XEmacs does not have `looking-back'.
 (if (fboundp 'looking-back)
     (defalias 'org-looking-back 'looking-back)

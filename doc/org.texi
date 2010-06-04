@@ -787,11 +787,14 @@ command, @command{org-cycle}, which is bound to the @key{TAB} key.
 @cindex headlines
 @cindex outline tree
 @vindex org-special-ctrl-a/e
+@vindex org-special-ctrl-k
+@vindex org-ctrl-k-protect-subtree
 
-Headlines define the structure of an outline tree.  The headlines in
-Org start with one or more stars, on the left margin@footnote{See
-the variable @code{org-special-ctrl-a/e} to configure special behavior
-of @kbd{C-a} and @kbd{C-e} in headlines.}.  For example:
+Headlines define the structure of an outline tree.  The headlines in Org
+start with one or more stars, on the left margin@footnote{See the variables
+@code{org-special-ctrl-a/e}, @code{org-special-ctrl-k}, and
+@code{org-ctrl-k-protect-subtree} to configure special behavior of @kbd{C-a},
+@kbd{C-e}, and @kbd{C-k} in headlines.}.  For example:
 
 @example
 * Top level headline
@@ -8783,6 +8786,12 @@ convention, or use, on a per-file basis:
 #+OPTIONS: ^:@{@}
 @end example
 
+@table @kbd
+@kindex C-c C-x \
+@item C-c C-x \
+In addition to showing entities as UTF8 characters, this command will also
+format sub- and superscripts in a WYSIWYM way.
+@end table
 
 @node LaTeX fragments, Previewing LaTeX fragments, Subscripts and superscripts, Embedded LaTeX
 @subsection La@TeX{} fragments

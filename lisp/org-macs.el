@@ -162,7 +162,8 @@ We use a macro so that the test can happen at compilation time."
   `(let ((inhibit-read-only t)) ,@body))
 
 (defconst org-rm-props '(invisible t face t keymap t intangible t mouse-face t
-				   rear-nonsticky t mouse-map t fontified t)
+				   rear-nonsticky t mouse-map t fontified t
+				   org-emphasis t)
   "Properties to remove when a string without properties is wanted.")
 
 (defsubst org-match-string-no-properties (num &optional string)

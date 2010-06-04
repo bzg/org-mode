@@ -7811,7 +7811,7 @@ installed as 5.12
 	(org-paste-subtree): Fix the level at which a tree is pasted.
 	(org-fit-agenda-window): Limitations on window size removed.
 	(org-agenda-find-same-or-today-or-agenda): Renamed from
-	`org-agenda-find-today-or-agenda'. 
+	`org-agenda-find-today-or-agenda'.
 	(org-scheduled-past-days): New option.
 	(org-agenda-scheduled-leaders)
 	(org-agenda-deadline-leaders): New options.
@@ -7825,7 +7825,7 @@ installed as 5.12
 
 ----------------------------------------------------------------------
 Installed as 5.11
-	
+
 
 2007-10-05  Carsten Dominik  <dominik@science.uva.nl>
 
@@ -7840,7 +7840,7 @@ Installed as 5.11
 	new one.
 	(org-clock-goto): New function.
 	(org-open-file): Use `start-process-shell-command' instead of
-	`shell-command' with an ampersand. 
+	`shell-command' with an ampersand.
 	(org-deadline, org-schedule): New argument REMOVE to remove the
 	date from the entry.
 	(org-agenda-schedule, org-agenda-deadline): Pass the prefix
@@ -7851,7 +7851,7 @@ Installed as 5.11
 	(org-clock-find-position): New function.
 	(org-clock-into-drawer): New option.
 	(org-agenda-tags-column): Renamed from
-	`org-agenda-align-tags-to-column'. 
+	`org-agenda-align-tags-to-column'.
 	(org-agenda-align-tags): Allow negative values for
 	`org-agenda-tags-column'.
 	(org-insert-labeled-timestamps-before-properties-drawer): Variable
@@ -7884,13 +7884,13 @@ Installed as 5.11
 
 2007-10-05  Bastien Guerry  <Bastien.Guerry@ens.fr>
 
-	* org-export-latex.el (org-export-latex-protect-string): 
+	* org-export-latex.el (org-export-latex-protect-string):
         Renaming of `org-latex-protect'.
-	(org-export-latex-emphasis-alist): By default, don't protect 
+	(org-export-latex-emphasis-alist): By default, don't protect
         any emphasis formatter from further conversion.
 	(org-export-latex-tables): honor column grouping for tables.
 	(org-export-latex-title-command): New option.
-        (org-export-latex-treat-backslash-char): Use \textbackslash{} to 
+        (org-export-latex-treat-backslash-char): Use \textbackslash{} to
         export backslash character.
 
 ------------------------------------------------------------
@@ -7928,17 +7928,17 @@ Installed as 5.10
 
 2007-09-26  Bastien Guerry  <Bastien.Guerry@ens.fr>
 
-	* org-export-latex.el (org-export-latex-emphasis-alist): 
+	* org-export-latex.el (org-export-latex-emphasis-alist):
 	Each list of the alist now requires three elements.
 -----------------------------------------------------------------
 Installed as 5.09
-	
+
 	2007-09-14  Bastien Guerry  <bzg@altern.org>
 
 	* org-export-latex.el (org-export-latex-tables-verbatim): New
 	function.
 	(org-export-latex-remove-from-headlines): Name changed because of
-	typo. 
+	typo.
 	(org-export-latex-quotation-marks-convention): Option removed.
 	(org-export-latex-make-preamble): Handle the DATE option.
 	(org-export-latex-cleaned-string): Now the only cleaning function,
@@ -8081,7 +8081,7 @@ installed in Emacs as 5.08
 	(org-get-todo-face): New function.
 	(org-todo-keyword-faces): New option.
 
--------------------------------------------------------------------------	
+-------------------------------------------------------------------------
 
 2007-08-21  Carsten Dominik  <dominik@science.uva.nl>
 
@@ -8131,7 +8131,7 @@ installed in Emacs as 5.08
 	(org-agenda-align-tags, org-agenda-priority)
 	(org-agenda-set-tags, org-agenda-toggle-archive-tag)
 	(org-agenda-show-new-time, org-cleaned-string-for-export)
-	(org-export-grab-title-from-buffer): 
+	(org-export-grab-title-from-buffer):
 	(org-export-as-ascii, org-export-as-html): Use `inhibit-read-only'
 	instead of `buffer-read-only'.
 	(org-export-as-html): Set `coding-system-for-write'.
@@ -8205,17 +8205,17 @@ installed in Emacs as 5.08
 	`org-current-columns-maxwidths'.
 	(org-columns-begin-marker, org-columns-current-fmt-compiled)
 	(org-previous-header-line-format)
-	(org-columns-inhibit-recalculation) 
+	(org-columns-inhibit-recalculation)
 	(org-columns-top-level-marker): New variables.
 	(org-columns-default-format): Renamed from
 	`org-default-columns-format'.
 	(org-property-re): New constant.
 
-	
+
 
 =====================================================================
 
-Installed as 5.01b	
+Installed as 5.01b
 
 2007-07-02  Carsten Dominik  <dominik@science.uva.nl>
 
@@ -8248,7 +8248,7 @@ Installed as 5.01b
 
 2007-06-28  Carsten Dominik  <dominik@science.uva.nl>
 
-	* org.el (org-priority): Realign tags after changing priority. 
+	* org.el (org-priority): Realign tags after changing priority.
 	(org-preserve-lc): New macro.
 	(org-update-checkbox-count): Catch case when there is no headline.
 	(org-agenda-quit): Remove any column overlays.
@@ -8314,7 +8314,7 @@ Installed as 5.01b
 
 
 ======================================================================
-	
+
 2007-06-06  Carsten Dominik  <dominik@science.uva.nl>
 
 	* textmodes/org.el:
@@ -8427,12 +8427,12 @@ Installed as 5.01b
 -------------------------------------------------------------------------
 
 installed as 4.67
-	
+
 2007-02-25  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.texi (The spreadsheet): Renamed from "Table calculations".
 	Completely reorganized and rewritten.
-	(CamelCase links): Section removed. 
+	(CamelCase links): Section removed.
 	(Repeating items): New section.
 	(Tracking TODO state changes): New section.
 	(Agenda views): Chapter reorganized and rewritten.
@@ -8462,7 +8462,7 @@ installed as 4.67
 	(org-table-formula-numbers-only): Option removed.
 	(org-link-style, org-link-format): Options removed.
 	(org-select-agenda-window, org-fit-agenda-window): Options
-	removed. 
+	removed.
 	(org-export-ascii-show-new-buffer)
 	(org-export-html-show-new-buffer): Options removed.
 	(org-activate-links): Camel option removed.
@@ -8489,7 +8489,7 @@ installed as 4.67
 	(orgtbl-to-latex, orgtbl-insert-radio-table)
 	(orgtbl-toggle-comment, orgtbl-send-table): New functions.
 	(orgtbl-radio-table-templates): New option.
-	(org-store-link-props): 
+	(org-store-link-props):
 	(org-remember-templates): More possibilities to insert
 	info into templates.
 	(org-remember-apply-template): Make use of the extended template
@@ -8502,7 +8502,7 @@ installed as 4.67
 	(org-table-remove-rectangle-highlight)
 	(org-time-stamp-format, org-toggle-log-option)
 	(org-table-highlight-rectangle)
-	(org-table-iterate, org-table-make-reference): 
+	(org-table-iterate, org-table-make-reference):
 	(org-translate-time, org-tree-to-indirect-buffer)
 	(org-table-field-info, org-table-fix-formulas)
 	(org-table-force-dataline, org-table-get-descriptor-line)
@@ -8523,7 +8523,7 @@ installed as 4.67
 	(org-do-sort, org-file-image-p, org-find-overlays)
 	(org-find-row-type, org-get-indirect-buffer, org-get-repeat)
 	(org-highlight-until-next-command, org-isearch-end)
-	(org-match-any-p, org-next-link, org-previous-link): 
+	(org-match-any-p, org-next-link, org-previous-link):
 	(org-remove-subtree-entries-from-agenda, org-replace-escapes)
 	(org-rewrite-old-row-references)
 	(org-isearch-post-command)
@@ -8531,12 +8531,12 @@ installed as 4.67
 	(org-table-edit-scroll, org-table-edit-scroll-down)
 	(org-set-frame-title, org-show-reference)
 	(org-unhighlight-once, org-verify-change-for-undo): New
-	functions. 
+	functions.
 	(org-show-variable): Command removed.
 	(org-add-log-maybe): New arguments STATE, FINDPOS
 	(org-table-sort-lines): Rewritten from scratch.
 	(org-link-search): New argument AVOID-POS.
-	(org-print-icalendar-entries): Argument CATEGORY removed. 
+	(org-print-icalendar-entries): Argument CATEGORY removed.
 	(org-run-agenda-series): Argument WONDOW removed.
 	(org-next-link, org-previous-link): New commands.
 	(org-agenda-date-format): New option.
@@ -8603,7 +8603,7 @@ installed as 4.56
 	(org-agenda-change-all-lines): Make sure TODO are highlighted.
 
 ----------------------------------------------------------------------------
-Installed as 4.54	
+Installed as 4.54
 
 2006-11-10  Carsten Dominik  <dominik@science.uva.nl>
 
@@ -8738,7 +8738,7 @@ Installed as 4.54
 
 ----------------------------------------------------------------------
 installed as 4.44
-	
+
 
 2006-08-15  Carsten Dominik  <dominik@science.uva.nl>
 
@@ -8767,7 +8767,7 @@ installed as 4.44
 	(org-set-autofill-regexps): Use `org-set-local'.
 	(org-table-eval-formula): Fixed bug with parsing of display flags.
 
-	
+
 ----------------------------------------------------------------------
 installed as 4.43
 
@@ -8811,12 +8811,12 @@ installed as 4.41
 	* org.texi (Checkboxes): New section.
 
 	* orgcard.tex (section{Structure Editing}): Document checkbox
-	toggling. 
+	toggling.
 
 	* org.el (org-prepare-agenda-buffers): Use `invisible-OK' argument
 	for `org-end-of-subtree'.
 	(org-export-cleanup-toc-line): Renamed from
-	`org-html-cleanup-toc-line'. 
+	`org-html-cleanup-toc-line'.
 	(org-beginning-of-item): Fixed bug in regular expression for white
 	line.
 	(org-export-as-html): Enforce space after bullet in plain list
@@ -8839,7 +8839,7 @@ installed as 4.40
 2006-06-28  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-context): New contexts :item-bullet, :latex-fragment,
-	:latex-preview. 
+	:latex-preview.
 	(org-overlays-at, org-overlay-start, org-overlay-end): New
 	compatibility functions.
 
@@ -8860,7 +8860,7 @@ installed as 4.39
 	(org-cdlatex-texmathp-advice-is-done): New variables.
 	(org-cdlatex-mode): New minor mode.
 	(org-inside-LaTeX-fragment-p, org-try-cdlatex-tab): New
-	functions. 
+	functions.
 	(org-cdlatex-underscore-caret, org-cdlatex-math-modify): New
 	commands.
 	(org-export-with-archived-trees): New option.
@@ -8871,11 +8871,11 @@ installed as 4.39
 	(org-sparse-tree-open-archived-trees): New options.
 	(org-cycle-hide-archived-subtrees, org-hide-archived-subtrees)
 	(org-toggle-tag, org-prepare-agenda-buffers, org-agenda-skip): New
-	functions. 
+	functions.
 	(org-agenda-toggle-archive-tag, org-toggle-archive-tag): New
 	commands.
 	(org-agenda-mode-map): Add binding of
-	`org-agenda-toggle-archive-tag'. 
+	`org-agenda-toggle-archive-tag'.
 	(org-mode-map): Add binding for `org-toggle-archive-tag'.
 	(org-timeline, org-agenda-list, org-todo-list, org-tags-view):
 	Call `org-prepare-agenda-buffers'.
@@ -8894,7 +8894,7 @@ installed as 4.39
 
 ----------------------------------------------------------------------
 installed as 4.38
-	
+
 
 2006-06-18  Carsten Dominik  <dominik@science.uva.nl>
 
@@ -8968,7 +8968,7 @@ installed as 4.37
 
 ----------------------------------------------------------------------
 installed as 4.36
-	
+
 
 2006-06-02  Carsten Dominik  <dominik@science.uva.nl>
 
@@ -9126,11 +9126,11 @@ installed as 4.33
 	(Publishing): New chapter.
 	(HTML export): Include a list of supported CSS classes.
 	(Setting tags): Describe the fast-tag-setting interface.
-	
+
 ----------------------------------------------------------------------
 
 installed as 4.26
-	
+
 2006-04-21  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.texi Many small fixes.
@@ -9172,7 +9172,7 @@ installed as 4.25
 ----------------------------------------------------------------------
 installed as 4.24
 
-	
+
 	* org.texi (Formula syntax): Fixed link to Calc Manual.
 
 	* org.el (org-insert-heading): Insert heading before current if at
@@ -9185,7 +9185,7 @@ installed as 4.24
 ----------------------------------------------------------------------
 installed as 4.23
 
-	
+
 	* org.texi (Visibility cycling): Better names for the startup
 	folding options.
 	(Exporting): Completely restructured.
@@ -9276,7 +9276,7 @@ installes as 4.13
 
 -------------------------------------------------------------------
 installed as 4.10
-	
+
 2006-03-14  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-insert-centered): Use `string-width' to make
@@ -9335,15 +9335,15 @@ installed as 4.08
 	--------------------------------------------------------------
 installed as 4.07
 
-	
+
 2006-02-28  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-get-legal-level, org-tr-level): New functions.
 	(org-odd-levels-only): New option.
 	(org-level-faces, org-paste-subtree, org-convert-to-odd-levels,
-	org-demote, org-promote):  Deal with double-star levels. 
+	org-demote, org-promote):  Deal with double-star levels.
 	(org-convert-to-odd-levels): New command.
-	(org-tr-level): 
+	(org-tr-level):
 
 	* org.el (org-export-as-html): Fixed bugs in HTML
 	formatting (removed nested achors).
@@ -9365,7 +9365,7 @@ installed as 4.07
 
 --------------------------------------------------------------------------
 installed as 4.06
-	
+
 2006-02-23  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-cleaned-string-for-export, org-solidify-link-text):
@@ -9375,7 +9375,7 @@ installed as 4.06
 	(org-export-as-ascii, org-export-as-html-and-open): Use
 	`org-cleaned-string-for-export' and create internal links.
 	(org-follow-mhe-link): Require mh-e, use folder.
-	(org-read-date): 
+	(org-read-date):
 
 --------------------------------------------------------------------------
 	Installed as 4.05
@@ -9397,10 +9397,10 @@ installed as 4.06
 	directory link.
 	(org-file-apps): Fixed bugs in customize type, added setting for
 	directories.
-	(org-activate-tags, org-format-agenda-item, org-complete) 
-	(org-get-tags-at, org-scan-tags, org-make-tags-matcher) 
-	(org-get-tags, org-get-buffer-tags, org-open-at-point) 
-	(org-link-search, org-make-org-heading-search-string) 
+	(org-activate-tags, org-format-agenda-item, org-complete)
+	(org-get-tags-at, org-scan-tags, org-make-tags-matcher)
+	(org-get-tags, org-get-buffer-tags, org-open-at-point)
+	(org-link-search, org-make-org-heading-search-string)
 	(org-make-org-heading-camel): Allow @ and 0-9 as tags characters.
 	(org-radio-targets, org-file-link-context-use-camel-case)
 	(org-activate-camels): New options.
@@ -9500,8 +9500,8 @@ installed as 4.02
 	(org-calendar-select-mouse): New command.
 
 	* org.texi (Agenda Views): Chapter reorganized.
-	
-	
+
+
 ------------------------------------------------------------------------
 installed as 4.01
 
@@ -9557,7 +9557,7 @@ installed as 3.24
 
 ------------------------------------------------------------------------
 installed as 3.23
-	
+
 2005-12-06  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-insert-heading): Try to do items before headings.
@@ -9568,7 +9568,7 @@ installed as 3.23
 ----------------------------------------------------------------------
 
 installed as 3.22
-	
+
 2005-12-05  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-occur-highlights): New variable.
@@ -9603,11 +9603,11 @@ installed as 3.22
 
 	* org.texi (TODO basics): Document the global todo list.
 	(TODO items): Documents sparse tree for specific TODO
-	keywords. 
+	keywords.
 
 ----------------------------------------------------------------------
 installed as 3.21
-	
+
 2005-11-23  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-export-plain-list-max-depth): Renamed from
@@ -9632,7 +9632,7 @@ installed as 3.21
 
 ----------------------------------------------------------------------
 installed as 3.20
-	
+
 2005-11-16  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-table-sort-lines): New command.
@@ -9670,7 +9670,7 @@ installed as 3.19
 
 ------------------------------------------------------------------------
 
-installed as 3.18	
+installed as 3.18
 
 2005-10-19  Carsten Dominik  <dominik@science.uva.nl>
 
@@ -9696,8 +9696,8 @@ installed as 3.18
 	* orgcard.tex: Add iCalendar export keys.
 
 ------------------------------------------------------------------------
-installed as 3.17	
-	
+installed as 3.17
+
 2005-10-10  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-mode-map): Explicit definition of `C-c C-x' as a
@@ -9710,9 +9710,9 @@ installed as 3.17
 	* org.texi (Workflow states): Documented that change in keywords
 	becomes active only after restart of Emacs.
 
---------------------------------------------------------------------------	
+--------------------------------------------------------------------------
 Installed as 3.16
-	
+
 2005-09-21  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-mode-map, orgtbl-mode-map): Move keybindings with
@@ -9795,7 +9795,7 @@ installed as 3.14
 ----------------------------------------------------------------------------
 
 installed as version 3.12
-	
+
 2005-06-28  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (orgtbl-setup): New function, for delayed setup for the
@@ -9840,7 +9840,7 @@ installed as version 3.12
 
 installed as 3.11
 
-	
+
 2005-06-13  Carsten Dominik  <dominik@science.uva.nl>
 
 	* textmodes/org.el (org-CUA-compatible): New option.
@@ -9872,7 +9872,7 @@ installed as 3.11
 --------------------------------------------------------------------------
 
 installed as 3.10
-	
+
 2005-05-30  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-agenda-mode): Use `run-mode-hooks' if available.
@@ -9881,7 +9881,7 @@ installed as 3.10
 
 
  installed as 3.09
-	
+
 2005-05-19  Carsten Dominik  <dominik@science.uva.nl>
 
 	* textmodes/org.el (org-agenda-toggle-time-grid): New command.
@@ -9900,10 +9900,10 @@ installed as 3.10
 	specifications and move these into the prefix if possible.
 	(org-agenda-priority): Get current heading, not previous heading
 	during agenda remote editing.
-	
+
 ======================================================================
 	Intsalled as 3.08
-	
+
 2005-04-28  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el Many small changes to keep the byte compiler happy.
@@ -9979,10 +9979,10 @@ installed as 3.10
 
 ======================================================================
 	Installed as version 3.05
-	
+
 2005-03-29  Carsten Dominik  <dominik@science.uva.nl>
 
-	* org.el (org-agenda-phases-of-moon, org-agenda-sunrise-sunset) 
+	* org.el (org-agenda-phases-of-moon, org-agenda-sunrise-sunset)
 	(org-agenda-convert-date, org-agenda-goto-calendar): New commands.
 
 2005-03-28  Carsten Dominik  <dominik@science.uva.nl>
