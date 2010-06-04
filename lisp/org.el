@@ -13942,10 +13942,15 @@ The prompt will suggest to enter an ISO date, but you can also enter anything
 which will at least partially be understood by `parse-time-string'.
 Unrecognized parts of the date will default to the current day, month, year,
 hour and minute.  If this command is called to replace a timestamp at point,
-of to enter the second timestamp of a range, the default time is taken from the
-existing stamp.  For example,
+of to enter the second timestamp of a range, the default time is taken
+from the existing stamp.  Furthermore, the command prefers the future,
+so if you are giving a date where the year is not given, and the day-month
+combination is already past in the current year, it will assume you
+mean next year.  For details, see the manual.  A few examples:
+
   3-2-5         --> 2003-02-05
   feb 15        --> currentyear-02-15
+  2/15          --> currentyear-02-15
   sep 12 9      --> 2009-09-12
   12:45         --> today 12:45
   22 sept 0:34  --> currentyear-09-22 0:34
@@ -14191,7 +14196,7 @@ user."
 			       t nil ans)))
     ;; Help matching american dates, like 5/30 or 5/30/7
     (when (string-match
-	   "^ *\\([0-3]?[0-9]\\)/\\([0-1]?[0-9]\\)\\(/\\([0-9]+\\)\\)?\\([^/0-9]\\|$\\)" ans)
+	   "^ *\\(0?[1-9]\\|1[012]\\)/\\(0?[1-9]\\|[12][0-9]\\|3[01]\\)\\(/\\([0-9]+\\)\\)?\\([^/0-9]\\|$\\)" ans)
       (setq year (if (match-end 4)
 		     (string-to-number (match-string 4 ans))
 		   (progn (setq kill-year t)
