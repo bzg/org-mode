@@ -89,15 +89,23 @@
 (defun org-mime-change-element-style (element style)
   "Set new default htlm style for <ELEMENT> elements in exported html."
   (while (re-search-forward (format "<%s" element) nil t)
-    (replace-match (format "<%s style=\"%s;\"" element style))))
+    (replace-match (format "<%s style=\"%s\"" element style))))
+
+(defun org-mime-change-class-style (class style)
+  "Set new default htlm style for objects with classs=CLASS in
+exported html."
+  (while (re-search-forward (format "class=\"%s\"" class) nil t)
+    (replace-match (format "class=\"%s\" style=\"%s\"" class style))))
 
 ;; ;; example addition to `org-mime-html-hook' adding a dark background
 ;; ;; color to <pre> elements
 ;; (add-hook 'org-mime-html-hook
 ;;           (lambda ()
 ;;             (org-mime-change-element-style
-;;              "pre" (format "color: %s; background-color: %s"
-;;                            "#E6E1DC" "#232323"))))
+;;              "pre" (format "color: %s; background-color: %s;"
+;;                            "#E6E1DC" "#232323"))
+;; 	    (org-mime-change-class-style
+;;              "verse" "border-left: 2px solid gray; padding-left: 4px;")))
 
 (defun org-mime-file (ext path id)
   "Markup a file for attachment."
