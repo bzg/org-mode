@@ -1,3 +1,8 @@
+2010-06-03  Christian Egli  <christian.egli@sbszh.ch>
+
+	* org.texi (TaskJuggler export): Added documentation for the
+	TaskJuggler exporter.
+
 2010-05-19  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Column attributes): Document that the ":" operator
