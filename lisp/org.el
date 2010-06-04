@@ -14003,6 +14003,7 @@ user."
 		    (setq def (apply 'encode-time defdecode)
 			  defdecode (decode-time def)))))
 	 (calendar-frame-setup nil)
+	 (calendar-setup nil)
 	 (calendar-move-hook nil)
 	 (calendar-view-diary-initially-flag nil)
 	 (calendar-view-holidays-initially-flag nil)
