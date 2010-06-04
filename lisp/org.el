@@ -6183,6 +6183,7 @@ the range."
 
 (defun org-show-block-all ()
   "Unfold all blocks in the current buffer."
+  (interactive)
   (mapc 'delete-overlay org-hide-block-overlays)
   (setq org-hide-block-overlays nil))
 
