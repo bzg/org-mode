@@ -27,6 +27,8 @@
 ;;; Commentary:
 
 (require 'org-exp)
+(eval-when-compile
+  (require 'cl))
 
 (declare-function org-bbdb-anniv-export-ical "org-bbdb" nil)
 
@@ -589,22 +591,24 @@ CALSCALE:GREGORIAN\n" name user timezone description))))
 KEYWORD is added in front, to make a complete line like DTSTART....
 When INC is non-nil, increase the hour by two (if time string contains
 a time), or the day by one (if it does not contain a time)."
-  (let ((t1 (org-parse-time-string s 'nodefault))
+  (let ((t1 (ignore-errors (org-parse-time-string s 'nodefault)))
 	t2 fmt have-time time)
-    (if (and (car t1) (nth 1 t1) (nth 2 t1))
-	(setq t2 t1 have-time t)
-      (setq t2 (org-parse-time-string s)))
-    (let ((s (car t2))   (mi (nth 1 t2)) (h (nth 2 t2))
-	  (d (nth 3 t2)) (m  (nth 4 t2)) (y (nth 5 t2)))
-      (when inc
-	(if have-time
-	    (if org-agenda-default-appointment-duration
-		(setq mi (+ org-agenda-default-appointment-duration mi))
-	      (setq h (+ 2 h)))
-	  (setq d (1+ d))))
-      (setq time (encode-time s mi h d m y)))
-    (setq fmt (if have-time ":%Y%m%dT%H%M%S" ";VALUE=DATE:%Y%m%d"))
-    (concat keyword (format-time-string fmt time))))
+    (if (not t1)
+	""
+      (if (and (car t1) (nth 1 t1) (nth 2 t1))
+	  (setq t2 t1 have-time t)
+	(setq t2 (org-parse-time-string s)))
+      (let ((s (car t2))   (mi (nth 1 t2)) (h (nth 2 t2))
+	    (d (nth 3 t2)) (m  (nth 4 t2)) (y (nth 5 t2)))
+	(when inc
+	  (if have-time
+	      (if org-agenda-default-appointment-duration
+		  (setq mi (+ org-agenda-default-appointment-duration mi))
+		(setq h (+ 2 h)))
+	    (setq d (1+ d))))
+	(setq time (encode-time s mi h d m y)))
+      (setq fmt (if have-time ":%Y%m%dT%H%M%S" ";VALUE=DATE:%Y%m%d"))
+      (concat keyword (format-time-string fmt time)))))
 
 (provide 'org-icalendar)
 
