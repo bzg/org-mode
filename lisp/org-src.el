@@ -166,7 +166,7 @@ For example, there is no ocaml-mode in Emacs, but the mode to use is
 (define-key org-src-mode-map "\C-c'" 'org-edit-src-exit)
 (defvar org-edit-src-force-single-line nil)
 (defvar org-edit-src-from-org-mode nil)
-(defvar org-edit-src-allow-write-back-p nil)
+(defvar org-edit-src-allow-write-back-p t)
 (defvar org-edit-src-picture nil)
 (defvar org-edit-src-beg-marker nil)
 (defvar org-edit-src-end-marker nil)
