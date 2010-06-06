@@ -2764,6 +2764,7 @@ Parameters get priority."
     (org-defkey map "\C-x\C-s"      'org-table-fedit-finish)
     (org-defkey map "\C-c\C-s"      'org-table-fedit-finish)
     (org-defkey map "\C-c\C-c"      'org-table-fedit-finish)
+    (org-defkey map "\C-c'"         'org-table-fedit-finish)
     (org-defkey map "\C-c\C-q"      'org-table-fedit-abort)
     (org-defkey map "\C-c?"	    'org-table-show-reference)
     (org-defkey map [(meta shift up)]    'org-table-fedit-line-up)
@@ -2860,7 +2861,7 @@ Parameters get priority."
     (if (eq org-table-use-standard-references t)
 	(org-table-fedit-toggle-ref-type))
     (org-goto-line startline)
-    (message "Edit formulas and finish with `C-c C-c'.  See menu for more commands.")))
+    (message "Edit formulas, finish with `C-c C-c' or `C-c ' '.  See menu for more commands.")))
 
 (defun org-table-fedit-post-command ()
   (when (not (memq this-command '(lisp-complete-symbol)))

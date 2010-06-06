@@ -16859,16 +16859,16 @@ When in an #+include line, visit the include file.  Otherwise call
 `ffap' to visit the file at point."
   (interactive)
   (cond
-   ((org-at-table.el-p)
-    (org-edit-src-code))
-   ((org-at-table-p)
-    (call-interactively 'org-table-edit-formulas))
    ((save-excursion
       (beginning-of-line 1)
       (looking-at "\\(?:#\\+\\(?:setupfile\\|include\\):?[ \t]+\"?\\|[ \t]*<include\\>.*?file=\"\\)\\([^\"\n>]+\\)"))
     (find-file (org-trim (match-string 1))))
    ((org-edit-src-code))
    ((org-edit-fixed-width-region))
+   ((org-at-table.el-p)
+    (org-edit-src-code))
+   ((org-at-table-p)
+    (call-interactively 'org-table-edit-formulas))
    (t (call-interactively 'ffap))))
 
 
