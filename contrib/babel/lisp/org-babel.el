@@ -384,10 +384,11 @@ the current buffer."
   "Call `org-babel-execute-src-block' on every source block in
 the current subtree."
   (interactive "P")
-  (save-excursion
-    (org-narrow-to-subtree)
-    (org-babel-execute-buffer)
-    (widen)))
+  (save-restriction
+    (save-excursion
+      (org-narrow-to-subtree)
+      (org-babel-execute-buffer)
+      (widen))))
 
 (defun org-babel-get-src-block-info (&optional header-vars-only)
   "Get information of the current source block.
