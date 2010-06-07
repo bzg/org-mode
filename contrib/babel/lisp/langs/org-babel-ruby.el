@@ -129,9 +129,10 @@ Emacs-lisp table, otherwise return the results as a string."
   "If there is not a current inferior-process-buffer in SESSION
 then create.  Return the initialized session."
   (unless (string= session "none")
-    (let ((session-buffer (save-window-excursion (run-ruby nil session) (current-buffer))))
+    (let ((session-buffer (save-window-excursion
+			    (run-ruby nil session) (current-buffer))))
       (if (org-babel-comint-buffer-livep session-buffer)
-          session-buffer
+	  (progn (sit-for .25) session-buffer)
         (sit-for .5)
         (org-babel-ruby-initiate-session session)))))
 
