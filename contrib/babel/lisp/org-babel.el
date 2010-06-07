@@ -46,7 +46,9 @@ then run `org-babel-execute-src-block'."
 then run `org-babel-expand-src-block'."
   (interactive)
   (let ((info (org-babel-get-src-block-info)))
-    (if info (progn (org-babel-expand-src-block current-prefix-arg info) t) nil)))
+    (if info
+	(progn (org-babel-expand-src-block current-prefix-arg info) t)
+      nil)))
 
 (defadvice org-edit-special (around org-babel-prep-session-for-edit activate)
   "Prepare the current source block's session according to it's
@@ -75,7 +77,9 @@ to `org-open-at-point'."
 then run `org-babel-load-in-session'."
   (interactive)
   (let ((info (org-babel-get-src-block-info)))
-    (if info (progn (org-babel-load-in-session current-prefix-arg info) t) nil)))
+    (if info
+	(progn (org-babel-load-in-session current-prefix-arg info) t)
+      nil)))
 
 (add-hook 'org-metaup-hook 'org-babel-load-in-session-maybe)
 
