@@ -121,8 +121,9 @@ options are taken from `org-babel-default-header-args'."
 (defun org-babel-exp-do-export (info type)
   "Return a string containing the exported content of the current
 code block respecting the value of the :exports header argument."
-  (flet ((silently () (when (cdr (assoc :session (third info)))
-			(org-babel-exp-results info type 'silent)))
+  (flet ((silently () (let ((session (cdr (assoc :session (third info)))))
+			(when (and session (not (equal "none" session)))
+			  (org-babel-exp-results info type 'silent))))
 	 (clean () (org-babel-remove-result info)))
     (case (intern (or (cdr (assoc :exports (third info))) "code"))
       ('none (silently) (clean) "")
