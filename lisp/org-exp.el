@@ -862,6 +862,8 @@ value of `org-export-run-in-background'."
 
 \[D] export as DocBook   [V] export as DocBook, process to PDF, and open
 
+\[j] export as TaskJuggler                         [J] ... and open
+
 \[m] export as Freemind mind map
 \[x] export as XOXO
 \[g] export using Wes Hardaker's generic exporter
@@ -888,6 +890,8 @@ value of `org-export-run-in-background'."
 	    (?g org-export-generic t)
 	    (?D org-export-as-docbook t)
 	    (?V org-export-as-docbook-pdf-and-open t)
+	    (?j org-export-as-taskjuggler t)
+	    (?J org-export-as-taskjuggler-and-open t)
 	    (?m org-export-as-freemind t)
 	    (?l org-export-as-latex t)
 	    (?p org-export-as-pdf t)
