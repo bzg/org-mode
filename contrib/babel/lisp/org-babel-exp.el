@@ -122,10 +122,11 @@ options are taken from `org-babel-default-header-args'."
   "Return a string containing the exported content of the current
 code block respecting the value of the :exports header argument."
   (flet ((silently () (when (cdr (assoc :session (third info)))
-			(org-babel-exp-results info type 'silent))))
+			(org-babel-exp-results info type 'silent)))
+	 (clean () (org-babel-remove-result info)))
     (case (intern (or (cdr (assoc :exports (third info))) "code"))
-      ('none (silently) "")
-      ('code (silently) (org-babel-exp-code info type))
+      ('none (silently) (clean) "")
+      ('code (silently) (clean) (org-babel-exp-code info type))
       ('results (org-babel-exp-results info type))
       ('both (concat (org-babel-exp-code info type)
 		     "\n\n"
