@@ -35,6 +35,32 @@
   The raw Org-mode text of this file can be downloaded at
   [[repofile:contrib/babel/library-of-babel.org][library-of-babel.org]]
 
+* File I/O
+** reading and writing files
+Read the contents of the file at =path= into a string.
+#+srcname: read
+#+begin_src emacs-lisp :var path=""
+  (with-temp-filebuffer path
+    (buffer-substring (point-min) (point-max)))
+#+end_src
+
+Read the lines of the file at =path= into a list.
+#+srcname: read-lines
+#+begin_src emacs-lisp :var path=""
+  (split-string
+   (with-temp-filebuffer path
+     (buffer-substring (point-min) (point-max))))
+#+end_src
+
+Write =data= to a file at =path=.  If =data= is a list, then write it
+as a table in traditional Org-mode table syntax.
+#+srcname: write
+#+begin_src emacs-lisp :var data="" :var path=""
+  (with-temp-file path
+    (org-babel-insert-result data))
+  nil
+#+end_src
+
 * Plotting code
 
 ** R

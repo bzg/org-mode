@@ -121,18 +121,25 @@ options are taken from `org-babel-default-header-args'."
 (defun org-babel-exp-do-export (info type)
   "Return a string containing the exported content of the current
 code block respecting the value of the :exports header argument."
-  (case (intern (or (cdr (assoc :exports (third info))) "code"))
-    ('none "")
-    ('code (org-babel-exp-code info type))
-    ('results (org-babel-exp-results info type))
-    ('both (concat (org-babel-exp-code info type)
-                   "\n\n"
-                   (org-babel-exp-results info type)))))
+  (flet ((silently () (let ((session (cdr (assoc :session (third info)))))
+			(when (and session
+				   (not (equal "none" session))
+				   (not (assoc :noeval (third info))))
+			  (org-babel-exp-results info type 'silent))))
+	 (clean () (org-babel-remove-result info)))
+    (case (intern (or (cdr (assoc :exports (third info))) "code"))
+      ('none (silently) (clean) "")
+      ('code (silently) (clean) (org-babel-exp-code info type))
+      ('results (org-babel-exp-results info type))
+      ('both (concat (org-babel-exp-code info type)
+		     "\n\n"
+		     (org-babel-exp-results info type))))))
 
 (defun org-babel-exp-code (info type)
   "Return the code the current code block in a manner suitable
 for exportation by org-mode.  This function is called by
-`org-babel-exp-do-export'."
+`org-babel-exp-do-export'.  The code block will not be
+evaluated."
   (let ((lang (first info))
         (body (second info))
         (switches (fourth info))
@@ -165,10 +172,12 @@ for exportation by org-mode.  This function is called by
 		   call-line))
           ((t (format ": %s\n" call-line)))))))))
 
-(defun org-babel-exp-results (info type)
+(defun org-babel-exp-results (info type &optional silent)
   "Return the results of the current code block in a manner
 suitable for exportation by org-mode.  This function is called by
-`org-babel-exp-do-export'."
+`org-babel-exp-do-export'.  The code block will be evaluated.
+Optional argument SILENT can be used to inhibit insertion of
+results into the buffer."
   (let ((lang (first info))
 	(body (second info))
 	(params
@@ -189,28 +198,31 @@ suitable for exportation by org-mode.  This function is called by
         (let ((raw (org-babel-execute-src-block
                     nil info '((:results . "silent"))))
               (result-params (split-string (cdr (assoc :results params)))))
-          (cond ;; respect the value of the :results header argument
-           ((member "file" result-params)
-            (org-babel-result-to-file raw))
-           ((or (member "raw" result-params) (member "org" result-params))
-            (format "%s" raw))
-           ((member "code" result-params)
-            (format "src_%s{%s}" lang raw))
-           (t
-            (if (stringp raw)
-		(if (= 0 (length raw)) "=(no results)="
-		  (format "=%s=" raw))
-	      (format "=%S=" raw))))))
+          (unless silent
+	    (cond ;; respect the value of the :results header argument
+	     ((member "file" result-params)
+	      (org-babel-result-to-file raw))
+	     ((or (member "raw" result-params) (member "org" result-params))
+	      (format "%s" raw))
+	     ((member "code" result-params)
+	      (format "src_%s{%s}" lang raw))
+	     (t
+	      (if (stringp raw)
+		  (if (= 0 (length raw)) "=(no results)="
+		    (format "=%s=" raw))
+		(format "=%S=" raw)))))))
       ('block
           (org-babel-execute-src-block
-           nil nil (org-babel-merge-params params '((:results . "replace"))))
+           nil nil (org-babel-merge-params
+		    params `((:results . ,(if silent "silent" "replace")))))
         "")
       ('lob
        (save-excursion
 	 (re-search-backward org-babel-lob-one-liner-regexp nil t)
 	 (org-babel-execute-src-block
-	  nil (list lang body (org-babel-merge-params
-			       params '((:results . "replace"))))) "")))))
+	  nil (list lang body
+		    (org-babel-merge-params
+		     params `((:results . ,(if silent "silent" "replace")))))) "")))))
 
 (provide 'org-babel-exp)
 ;;; org-babel-exp.el ends here

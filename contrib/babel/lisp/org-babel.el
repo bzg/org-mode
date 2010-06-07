@@ -46,7 +46,9 @@ then run `org-babel-execute-src-block'."
 then run `org-babel-expand-src-block'."
   (interactive)
   (let ((info (org-babel-get-src-block-info)))
-    (if info (progn (org-babel-expand-src-block current-prefix-arg info) t) nil)))
+    (if info
+	(progn (org-babel-expand-src-block current-prefix-arg info) t)
+      nil)))
 
 (defadvice org-edit-special (around org-babel-prep-session-for-edit activate)
   "Prepare the current source block's session according to it's
@@ -75,7 +77,9 @@ to `org-open-at-point'."
 then run `org-babel-load-in-session'."
   (interactive)
   (let ((info (org-babel-get-src-block-info)))
-    (if info (progn (org-babel-load-in-session current-prefix-arg info) t) nil)))
+    (if info
+	(progn (org-babel-load-in-session current-prefix-arg info) t)
+      nil)))
 
 (add-hook 'org-metaup-hook 'org-babel-load-in-session-maybe)
 
@@ -89,7 +93,8 @@ then run `org-babel-pop-to-session'."
 (add-hook 'org-metadown-hook 'org-babel-pop-to-session-maybe)
 
 (defconst org-babel-header-arg-names
-  '(cache cmdline colnames dir exports file noweb results session tangle var)
+  '(cache cmdline colnames dir exports file noweb results
+	  session tangle var noeval)
   "Common header arguments used by org-babel.  Note that
 individual languages may define their own language specific
 header arguments as well.")
@@ -384,10 +389,11 @@ the current buffer."
   "Call `org-babel-execute-src-block' on every source block in
 the current subtree."
   (interactive "P")
-  (save-excursion
-    (org-narrow-to-subtree)
-    (org-babel-execute-buffer)
-    (widen)))
+  (save-restriction
+    (save-excursion
+      (org-narrow-to-subtree)
+      (org-babel-execute-buffer)
+      (widen))))
 
 (defun org-babel-get-src-block-info (&optional header-vars-only)
   "Get information of the current source block.
@@ -965,7 +971,7 @@ code ---- the results are extracted in the syntax of the source
 					  (listp (cdr (car result)))))
 				 result (list result))
 			     '(:fmt (lambda (cell) (format "%s" cell)))) "\n"))
-	    (goto-char beg) (org-cycle))
+	    (goto-char beg) (org-table-align))
 	   ((member "file" result-params)
 	    (insert result))
 	   ((member "html" result-params)
