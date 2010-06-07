@@ -940,25 +940,33 @@ code ---- the results are extracted in the syntax of the source
         (when (member "file" result-params)
           (setq result (org-babel-result-to-file result))))
     (unless (listp result) (setq result (format "%S" result))))
-  (if (and result-params (member "replace" result-params)
-           (not (member "silent" result-params)))
-      (org-babel-remove-result info))
   (if (= (length result) 0)
       (if (member "value" result-params)
 	  (message "No result returned by source block")
 	(message "Source block produced no output"))
     (if (and result-params (member "silent" result-params))
-        (progn (message (replace-regexp-in-string "%" "%%" (format "%S" result)))
-               result)
+        (progn
+	  (message (replace-regexp-in-string "%" "%%" (format "%S" result)))
+	  result)
       (when (and (stringp result) ;; ensure results end in a newline
                  (not (or (string-equal (substring result -1) "\n")
                           (string-equal (substring result -1) "\r"))))
         (setq result (concat result "\n")))
       (save-excursion
-	(let ((existing-result (org-babel-where-is-src-block-result t info hash))
+	(let ((existing-result (org-babel-where-is-src-block-result
+				t info hash))
 	      (results-switches
                (cdr (assoc :results_switches (third info)))) beg)
-	  (when existing-result (goto-char existing-result) (forward-line 1))
+	  (when existing-result
+	    (goto-char existing-result)
+	    (forward-line 1)
+	    (cond
+	     ((member "replace" result-params)
+	      (delete-region (point) (org-babel-result-end)))
+	     ((member "append" result-params)
+	      (goto-char (org-babel-result-end)))
+	     ((member "prepend" result-params) ;; already there
+	      )))
 	  (setq results-switches
                 (if results-switches (concat " " results-switches) ""))
 	  (cond
@@ -1069,7 +1077,7 @@ parameters when merging lists."
   (let ((results-exclusive-groups
 	 '(("file" "vector" "table" "scalar" "raw" "org"
             "html" "latex" "code" "pp")
-	   ("replace" "silent")
+	   ("replace" "silent" "append" "prepend")
 	   ("output" "value")))
 	(exports-exclusive-groups
 	 '(("code" "results" "both" "none")))
