@@ -535,7 +535,7 @@ in a window.  A non-interactive call will only return the buffer."
 (defvar org-par-open nil)
 
 ;;; org-html-cvt-link-fn
-(defconst org-html-cvt-link-fn 
+(defconst org-html-cvt-link-fn
    nil
    "Function to convert link URLs to exportable URLs.
 Takes two arguments, TYPE and PATH.
@@ -549,16 +549,16 @@ If TYPE is not file, just return `nil'.
 See variable `org-export-html-link-org-files-as-html'"
 
    (save-match-data
-      (and 
+      (and
 	 org-export-html-link-org-files-as-html
 	 (string= type "file")
 	 (string-match "\\.org$" path)
 	 (progn
 	    (list
 	       "http"
-	       (concat 
+	       (concat
 		  (substring path 0 (match-beginning 0))
-		  "." 
+		  "."
 		  (plist-get opt-plist :html-extension)))))))
 
 
@@ -569,12 +569,12 @@ current settings.
 DESCP is the boolean of whether there was a link description.
 See variables `org-export-html-inline-images' and
 `org-export-html-inline-image-extensions'."
-   (declare (special 
-	     org-export-html-inline-images 
+   (declare (special
+	     org-export-html-inline-images
 	     org-export-html-inline-image-extensions))
-   (or 
+   (or
       (eq t org-export-html-inline-images)
-      (and 
+      (and
 	 org-export-html-inline-images
 	 (not descp)))
    (org-file-image-p
@@ -582,7 +582,7 @@ See variables `org-export-html-inline-images' and
 
 ;;; org-html-make-link
 (defun org-html-make-link (opt-plist type path fragment desc attr
-			     may-inline-p) 
+			     may-inline-p)
    "Make an HTML link.
 OPT-PLIST is an options list.
 TYPE is the device-type of the link (THIS://foo.html)
@@ -603,8 +603,8 @@ MAY-INLINE-P allows inlining it as an image."
 			   type
 			   ;;Substitute just if original path was absolute.
 			   ;;(Otherwise path must remain relative)
-			   (if (file-name-absolute-p path) 
-			      (expand-file-name path) 
+			   (if (file-name-absolute-p path)
+			      (expand-file-name path)
 			      path)))
 		     ((string= type "")
 			(list nil path))
@@ -615,9 +615,9 @@ MAY-INLINE-P allows inlining it as an image."
 	       (components-2
 		  (or
 		     (and org-html-cvt-link-fn
-			(apply org-html-cvt-link-fn 
+			(apply org-html-cvt-link-fn
 			   opt-plist components-1))
-		     (apply #'org-html-cvt-org-as-html 
+		     (apply #'org-html-cvt-org-as-html
 			opt-plist components-1)
 		     components-1))
 	       (type    (first  components-2))
@@ -633,11 +633,11 @@ MAY-INLINE-P allows inlining it as an image."
 		(string= type "https"))
 	       (if fragment
 		  (setq thefile (concat thefile "#" fragment))))
-	       
+
 	    (t))
-	    
+
 	 ;;Final URL-build, for all types.
-	 (setq thefile 
+	 (setq thefile
 	    (let
 	       ((str (org-export-html-format-href thefile)))
 	      (if (and type (not (string= "file" type))
@@ -645,14 +645,14 @@ MAY-INLINE-P allows inlining it as an image."
 		  (concat type ":" str)
 		  str)))
 
-	 (if (and 
+	 (if (and
 		may-inline-p
 		;;Can't inline a URL with a fragment.
 		(not fragment))
 	    (progn
 	       (message "image %s %s" thefile org-par-open)
 	       (org-export-html-format-image thefile org-par-open))
-	    (concat 
+	    (concat
 	       "<a href=\"" thefile "\"" attr ">"
 	       (org-export-html-format-desc desc)
 	       "</a>")))))
@@ -1182,12 +1182,12 @@ lang=\"%s\" xml:lang=\"%s\">
 			     '(org-protected t))))
 	    (cond
 	     ((equal type "internal")
-		(let 
+		(let
 		   ((frag-0
-		       (if (= (string-to-char path) ?#) 
-			  (substring path 1) 
+		       (if (= (string-to-char path) ?#)
+			  (substring path 1)
 			  path)))
-		   (setq rpl 
+		   (setq rpl
 		      (org-html-make-link
 			 opt-plist
 			 ""
@@ -1202,11 +1202,11 @@ lang=\"%s\" xml:lang=\"%s\">
 	      ;; it would have become an internal link...)
 	      (save-match-data
 		(setq id-file (file-relative-name
-				 id-file 
+				 id-file
 				 (file-name-directory org-current-export-file)))
-		(setq rpl 
+		(setq rpl
 		   (org-html-make-link opt-plist
-		      "file" id-file 
+		      "file" id-file
 		      (concat (if (org-uuidgen-p path) "ID-") path)
 		       desc
 		      attr
@@ -1237,14 +1237,14 @@ lang=\"%s\" xml:lang=\"%s\">
 		   (setq rpl
 		      (org-html-make-link opt-plist
 			 type "" coderef-str
-			 (format 
-			    (org-export-get-coderef-format 
-			       path 
+			 (format
+			    (org-export-get-coderef-format
+			       path
 			       (and descp desc))
 			    (cdr (assoc path org-export-code-refs)))
 			 attr-1
 			 nil))))
-	       
+
 	     ((functionp (setq fnc (nth 2 (assoc type org-link-protocols))))
 	      ;; The link protocol has a function for format the link
 	      (setq rpl
@@ -1258,15 +1258,15 @@ lang=\"%s\" xml:lang=\"%s\">
 		      ((components
 			  (if
 			     (string-match "::\\(.*\\)" path)
-			     (list 
+			     (list
 				(replace-match "" t nil path)
 				(match-string 1 path))
 			     (list path nil)))
-			 
+
 			 ;;The proper path, without a fragment
 			 (path-1
 			    (first components))
-			 
+
 			 ;;The raw fragment
 			 (fragment-0
 			    (second components))
@@ -1291,7 +1291,7 @@ lang=\"%s\" xml:lang=\"%s\">
 				     (replace-match "" t t desc-1)
 				     desc-1))
 			       desc)))
-		      
+
 		      (setq rpl
 			 (if
 			    (and
@@ -1299,9 +1299,9 @@ lang=\"%s\" xml:lang=\"%s\">
 			       (not (funcall link-validate path-1 current-dir)))
 			    desc
 			    (org-html-make-link opt-plist
-			       "file" path-1 fragment-1 desc-2 attr 
+			       "file" path-1 fragment-1 desc-2 attr
 			       (org-html-should-inline-p path-1 descp)))))))
-	       
+
 	     (t
 	      ;; just publish the path, as default
 	      (setq rpl (concat "<i>&lt;" type ":"

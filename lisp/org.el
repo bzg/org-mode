@@ -1530,9 +1530,9 @@ you can use this variable to set the application for a given file
 extension.  The entries in this list are cons cells where the car identifies
 files and the cdr the corresponding command.  Possible values for the
 file identifier are
- \"string\"    A string as a file identifier can be interpreted in different 
+ \"string\"    A string as a file identifier can be interpreted in different
                ways, depending on its contents:
-               
+
                - Alphanumeric characters only:
                  Match links with this file extension.
                  Example: (\"pdf\" . \"evince %s\")
@@ -9994,7 +9994,7 @@ This can be done with a 0 prefix: `C-0 C-c C-w'"
 			  (< pos (save-excursion
 				   (org-end-of-subtree t t))))))
 	      (error "Cannot refile to position inside the tree or region"))
-	  
+
 	  (setq nbuf (or (find-buffer-visiting file)
 			 (find-file-noselect file)))
 	  (if goto

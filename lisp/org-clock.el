@@ -1354,7 +1354,7 @@ With prefix arg SELECT, offer recently clocked tasks for selection."
   "Sum the times for each subtree.
 Puts the resulting times in minutes as a text property on each headline.
 TSTART and TEND can mark a time range to be considered.  HEADLINE-FILTER is a
-zero-arg function that, if specified, is called for each headline in the time 
+zero-arg function that, if specified, is called for each headline in the time
 range with point at the headline.  Headlines for which HEADLINE-FILTER returns
 nil are excluded from the clock summation."
   (interactive)
