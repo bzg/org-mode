@@ -229,8 +229,8 @@ results into the buffer."
 	     (t
 	      (if (stringp raw)
 		  (if (= 0 (length raw)) "=(no results)="
-		    (format "=%s=" raw))
-		(format "=%S=" raw)))))))
+		    (format "%s" raw))
+		(format "%S" raw)))))))
       ('block
           (org-babel-execute-src-block
 	   nil info (org-babel-merge-params
