@@ -389,7 +389,7 @@ lisp/org-remember.elc:	lisp/org.el
 lisp/org-rmail.elc:	lisp/org.el
 lisp/org-src.elc:	lisp/org-macs.el lisp/org-compat.el
 lisp/org-table.elc:	lisp/org.el
-lisp/org-taskjuggler.elc: lisp/org.el
+lisp/org-taskjuggler.elc: lisp/org.el lisp/org-exp.el
 lisp/org-timer.elc:	lisp/org.el
 lisp/org-vm.elc:	lisp/org.el
 lisp/org-w3m.elc:	lisp/org.el
