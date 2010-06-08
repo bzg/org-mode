@@ -1,3 +1,17 @@
+2010-06-08  Christian Egli  <christian.egli@sbszh.ch>
+
+	* org-taskjuggler.el (org-export-taskjuggler-old-level):
+	define local variable to avoid compiler warning.
+
+2010-06-07  Christian Egli  <christian.egli@sbszh.ch>
+
+	* org-exp.el (org-export): Added taskjuggler export to the export
+	dispatcher.
+
+2010-06-08  Bastien Guerry  <bzg@altern.org>
+
+	* org-timer.el (org-timer-set-timer): Fix typo in the docstring.
+
 2010-05-28  Bastien Guerry  <bzg@altern.org>
 
 	* org-timer.el (org-timer-set-timer): Use a prefix argument.
@@ -290,6 +304,15 @@
 
 	* org-html.el (org-format-org-table-html): Test all columns
 	for number content.
+
+2010-04-28  Christian Egli  <christian.egli@sbszh.ch>
+
+	* org-taskjuggler.el (org-taskjuggler-find-task-with-id): Do not
+	use the ID property frivolously, i.e. use a property named
+	"task_id" instead as we do not search for ids across files.
+	(org-taskjuggler-resolve-explicit-dependencies): Issue a warning
+	if a dependency cannot be resolved.
+	(org-taskjuggler-open-resource): Add documentation.
 
 2010-04-28  Carsten Dominik  <carsten.dominik@gmail.com>
 
@@ -687,6 +710,11 @@
 	(org-export-latex-default-packages-alist): hyperref must be loaded
 	late.
 
+2010-04-07  Christian Egli  <christian.egli@sbszh.ch>
+
+	* org-taskjuggler.el (org-taskjuggler-tokenize-dependencies): Add
+	support for optional attributes on dependencies.
+
 2010-04-07  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-latex.el (org-export-latex-preprocess): Do not yet protect
@@ -824,6 +852,11 @@
 	(org-modules): Remove mention of org-R
 
 	* org-faces.el (org-faces): Change Customize group variable name
+
+2010-03-30  Christian Egli  <christian.egli@sbszh.ch>
+
+	* org-taskjuggler.el: Added a new exporter to export org-mode
+	projects to taskjuggler files.
 
 2010-03-29  Carsten Dominik  <carsten.dominik@gmail.com>
 

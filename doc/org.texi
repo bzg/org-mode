@@ -339,6 +339,7 @@ Exporting
 * HTML export::                 Exporting to HTML
 * LaTeX and PDF export::        Exporting to La@TeX{}, and processing to PDF
 * DocBook export::              Exporting to DocBook
+* TaskJuggler export::          Exporting to TaskJuggler
 * Freemind export::             Exporting to Freemind mind maps
 * XOXO export::                 Exporting to XOXO
 * iCalendar export::            Exporting in iCalendar format
@@ -8957,10 +8958,11 @@ the web, while the XOXO format provides a solid base for exchange with a
 broad range of other applications. La@TeX{} export lets you use Org mode and
 its structured editing functions to easily create La@TeX{} files.  DocBook
 export makes it possible to convert Org files to many other formats using
-DocBook tools.  To incorporate entries with associated times like deadlines
-or appointments into a desktop calendar program like iCal, Org mode can also
-produce extracts in the iCalendar format.  Currently Org mode only supports
-export, not import of these different formats.
+DocBook tools.  For project management you can create gantt and resource
+charts by using TaskJuggler export.  To incorporate entries with associated
+times like deadlines or appointments into a desktop calendar program like
+iCal, Org mode can also produce extracts in the iCalendar format.  Currently
+Org mode only supports export, not import of these different formats.
 
 Org supports export of selected regions when @code{transient-mark-mode} is
 enabled (default in Emacs 23).
@@ -8973,6 +8975,7 @@ enabled (default in Emacs 23).
 * HTML export::                 Exporting to HTML
 * LaTeX and PDF export::        Exporting to La@TeX{}, and processing to PDF
 * DocBook export::              Exporting to DocBook
+* TaskJuggler export::          Exporting to TaskJuggler
 * Freemind export::             Exporting to Freemind mind maps
 * XOXO export::                 Exporting to XOXO
 * iCalendar export::            Exporting in iCalendar format
@@ -9898,7 +9901,7 @@ Here is a simple example Org document that is intended for beamer export.
 
 For more information, see the documentation on Worg.
 
-@node DocBook export, Freemind export, LaTeX and PDF export, Exporting
+@node DocBook export, TaskJuggler export, LaTeX and PDF export, Exporting
 @section DocBook export
 @cindex DocBook export
 @cindex PDF export
@@ -10098,7 +10101,137 @@ special characters included in XHTML entities:
 "
 @end example
 
-@node Freemind export, XOXO export, DocBook export, Exporting
+@node  TaskJuggler export, Freemind export, DocBook export, Exporting
+@section TaskJuggler export
+@cindex TaskJuggler export
+@cindex Project management
+
+@uref{http://www.taskjuggler.org/, TaskJuggler} is a project management tool.
+It provides an optimizing scheduler that computes your project time lines and
+resource assignments based on the project outline and the constraints that
+you have provided.
+
+The TaskJuggler exporter is a bit different from other exporters, such as the
+HTML and LaTeX exporters for example, in that it does not export all the
+nodes of a document or strictly follow the order of the nodes in the
+document.
+
+Instead the TaskJuggler exporter looks for a tree that defines the tasks and
+a optionally tree that defines the resources for this project. It then
+creates a TaskJuggler file based on these trees and the attributes defined in
+all the nodes.
+
+@subsection TaskJuggler export commands
+
+@table @kbd
+@kindex C-c C-e j
+@item C-c C-e j
+Export as TaskJuggler file.
+
+@kindex C-c C-e J
+@item C-c C-e J
+Export as TaskJuggler file and then open the file with TaskJugglerUI.
+@end table
+
+@subsection Tasks
+
+@vindex org-export-taskjuggler-project-tag
+Create your tasks as you usually do with Org-mode. Assign efforts to each
+task using properties (it's easiest to do this in the column view). You
+should end up with something similar to the example by Peter Jones in
+@url{http://www.contextualdevelopment.com/static/artifacts/articles/2008/project-planning/project-planning.org}.
+Now mark the top node of your tasks with a tag named
+@code{:taskjuggler_project:} (or whatever you customized
+@code{org-export-taskjuggler-project-tag} to). You are now ready to export
+the project plan with @kbd{C-c C-e J} which will export the project plan and
+open a gantt chart in TaskJugglerUI.
+
+@subsection Resources
+
+@vindex org-export-taskjuggler-resource-tag
+Next you can define resources and assign those to work on specific tasks. You
+can group your resources hierarchically. Tag the top node of the resources
+with @code{:taskjuggler_resource:} (or whatever you customized
+@code{org-export-taskjuggler-resource-tag} to). You can optionally assign an
+identifier (named @samp{resource_id}) to the resources (using the standard
+Org properties commands, @pxref{Property syntax}) or you can let the exporter
+generate identifiers automatically (the exporter picks the first word of the
+headline as the identifier as long as it is unique, see the documentation of
+@code{org-taskjuggler-get-unique-id}). Using that identifier you can then
+allocate resources to tasks. This is again done with the @samp{allocate}
+property on the tasks. Do this in column view or when on the task type
+@kbd{C-c C-x p allocate @key{RET} <resource_id> @key{RET}}.
+
+Once the allocations are done you can again export to TaskJuggler and check
+in the Resource Allocation Graph which person is working on what task at what
+time.
+
+@subsection Export of properties
+
+The exporter also takes TODO state information into consideration, i.e. if a
+task is marked as done it will have the corresponding attribute in
+TaskJuggler (@samp{complete 100}). Also it will export any property on a task
+resource or resource node which is known to TaskJuggler, such as
+@samp{limits}, @samp{vacation}, @samp{shift}, @samp{booking},
+@samp{efficiency}, @samp{journalentry}, @samp{rate} for resources or
+@samp{account}, @samp{start}, @samp{note}, @samp{duration}, @samp{end},
+@samp{journalentry}, @samp{milestone}, @samp{reference}, @samp{responsible},
+@samp{scheduling}, etc for tasks.
+
+@subsection Dependencies
+
+The exporter will handle dependencies that are defined in the tasks either
+with the @samp{ORDERED} attribute (@pxref{TODO dependencies}), with the
+@samp{BLOCKER} attribute (see org-depend.el) or alternatively with a
+@samp{depends} attribute. Both the @samp{BLOCKER} and the @samp{depends}
+attribute can be either @samp{previous-sibling} or a reference to an
+identifier (named @samp{task_id}) which is defined for another task in the
+project. @samp{BLOCKER} and the @samp{depends} attribute can define multiple
+dependencies separated by either space or comma. You can also specify
+optional attributes on the dependency by simply appending it. The following
+examples should illustrate this:
+
+@example
+* Preparation
+  :PROPERTIES:
+  :task_id:  preparation
+  :ORDERED:  t
+  :END:
+* Training material
+  :PROPERTIES:
+  :task_id:  training_material
+  :ORDERED:  t
+  :END:
+** Markup Guidelines
+   :PROPERTIES:
+   :Effort:   2.0
+   :END:
+** Workflow Guidelines
+   :PROPERTIES:
+   :Effort:   2.0
+   :END:
+* Presentation
+  :PROPERTIES:
+  :Effort:   2.0
+  :BLOCKER:  training_material @{ gapduration 1d @} preparation
+  :END:
+@end example
+
+@subsection Reports
+
+@vindex org-export-taskjuggler-default-reports
+TaskJuggler can produce many kinds of reports (e.g. gantt chart, resource
+allocation, etc). The user defines what kind of reports should be generated
+for a project in the TaskJuggler file. The exporter will automatically insert
+some default reports in the file. These defaults are defined in
+@code{org-export-taskjuggler-default-reports}. They can be modified using
+customize along with a number of other options. For a more complete list, see
+@kbd{M-x customize-group @key{RET} org-export-taskjuggler @key{RET}}.
+
+For more information and examples see the Org-taskjuggler tutorial at
+@uref{http://orgmode.org/worg/org-tutorials/org-taskjuggler.php}.
+
+@node Freemind export, XOXO export, TaskJuggler export, Exporting
 @section Freemind export
 @cindex Freemind export
 @cindex mind map
