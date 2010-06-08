@@ -148,8 +148,6 @@
 ;;   - Make sure multiple dependency definitions (i.e. BLOCKER on
 ;;     previous-sibling and on a specific task_id) in multiple
 ;;     attributes are properly exported.
-;;   - Fix compiler warnings about reference and assignment to free
-;;     variable `old-level' in org-taskjuggler-close-maybe
 ;;
 ;;; Code:
 
@@ -237,6 +235,9 @@ but before any resource and task declarations."
 
 ;;; Autoload functions:
 
+;; avoid compiler warning about free variable
+(defvar org-export-taskjuggler-old-level)
+
 ;;;###autoload
 (defun org-export-as-taskjuggler ()
   "Export parts of the current buffer as a TaskJuggler file.
@@ -271,7 +272,7 @@ defined in `org-export-taskjuggler-default-reports'."
 		      (file-name-nondirectory buffer-file-name))
 		     org-export-taskjuggler-extension)))
 	 (buffer (find-file-noselect filename))
-	 (old-level 0)
+	 (org-export-taskjuggler-old-level 0)
 	 task resource)
     (unless tasks
       (error "No tasks specified"))
@@ -305,14 +306,14 @@ defined in `org-export-taskjuggler-default-reports'."
 	(let ((level (cdr (assoc "level" resource))))
 	  (org-taskjuggler-close-maybe level)
 	  (org-taskjuggler-open-resource resource)
-	  (setq old-level level)))
+	  (setq org-export-taskjuggler-old-level level)))
       (org-taskjuggler-close-maybe 1)
-      (setq old-level 0)
+      (setq org-export-taskjuggler-old-level 0)
       (dolist (task tasks)
 	(let ((level (cdr (assoc "level" task))))
 	  (org-taskjuggler-close-maybe level)
 	  (org-taskjuggler-open-task task)
-	  (setq old-level level)))
+	  (setq org-export-taskjuggler-old-level level)))
       (org-taskjuggler-close-maybe 1)
       (org-taskjuggler-insert-reports)
       (save-buffer)
@@ -630,10 +631,10 @@ org-mode priority string."
       "\n"))))
 
 (defun org-taskjuggler-close-maybe (level)
-  (while (> old-level level) 
+  (while (> org-export-taskjuggler-old-level level) 
     (insert "}\n")
-    (setq old-level (1- old-level)))
-  (when (= old-level level)
+    (setq org-export-taskjuggler-old-level (1- org-export-taskjuggler-old-level)))
+  (when (= org-export-taskjuggler-old-level level)
     (insert "}\n")))
 
 (defun org-taskjuggler-insert-reports ()

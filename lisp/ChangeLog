@@ -1,3 +1,8 @@
+2010-06-08  Christian Egli  <christian.egli@sbszh.ch>
+
+	* org-taskjuggler.el (org-export-taskjuggler-old-level):
+	define local variable to avoid compiler warning.
+
 2010-06-07  Christian Egli  <christian.egli@sbszh.ch>
 
 	* org-exp.el (org-export): Added taskjuggler export to the export
