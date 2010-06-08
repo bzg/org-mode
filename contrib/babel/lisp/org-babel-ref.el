@@ -120,47 +120,49 @@ return nil."
         (setq split-file (match-string 1 ref))
         (setq split-ref (match-string 2 ref))
         (find-file split-file) (setq ref split-ref))
-      (goto-char (point-min))
-      (if (let ((result_regexp (concat "^#\\+\\(TBLNAME\\|RESNAME\\|RESULTS\\):[ \t]*"
-                                       (regexp-quote ref) "[ \t]*$"))
-                (regexp (concat org-babel-source-name-regexp
-                                (regexp-quote ref) "\\(\(.*\)\\)?" "[ \t]*$")))
-            ;; goto ref in the current buffer
-            (or (and (not args)
-                     (or (re-search-forward result_regexp nil t)
-                         (re-search-backward result_regexp nil t)))
-                (re-search-forward regexp nil t)
-                (re-search-backward regexp nil t)
-                ;; check the Library of Babel
-                (setq lob-info (cdr (assoc (intern ref) org-babel-library-of-babel)))))
-          (unless lob-info (goto-char (match-beginning 0)))
-        ;; ;; TODO: allow searching for names in other buffers
-        ;; (setq id-loc (org-id-find ref 'marker)
-        ;;       buffer (marker-buffer id-loc)
-        ;;       loc (marker-position id-loc))
-        ;; (move-marker id-loc nil)
-        (progn (message (format "reference '%s' not found in this buffer" ref))
-               (error (format "reference '%s' not found in this buffer" ref))))
-      (if lob-info
-          (setq type 'lob)
-        (while (not (setq type (org-babel-ref-at-ref-p)))
-          (forward-line 1)
-          (beginning-of-line)
-          (if (or (= (point) (point-min)) (= (point) (point-max)))
-              (error "reference not found"))))
-      (setq params (org-babel-merge-params params args '((:results . "silent"))))
-      (setq result
-	    (case type
-	      ('results-line (org-babel-read-result))
-	      ('table (org-babel-read-table))
-              ('file (org-babel-read-file))
-	      ('source-block (org-babel-execute-src-block nil nil params))
-	      ('lob (org-babel-execute-src-block nil lob-info params))))
-      (if (symbolp result)
-          (format "%S" result)
-        (if (and index (listp result))
-            (org-babel-ref-index-list index result)
-          result)))))
+      (save-restriction
+	(widen)
+	(goto-char (point-min))
+	(if (let ((result_regexp (concat "^#\\+\\(TBLNAME\\|RESNAME\\|RESULTS\\):[ \t]*"
+					 (regexp-quote ref) "[ \t]*$"))
+		  (regexp (concat org-babel-source-name-regexp
+				  (regexp-quote ref) "\\(\(.*\)\\)?" "[ \t]*$")))
+	      ;; goto ref in the current buffer
+	      (or (and (not args)
+		       (or (re-search-forward result_regexp nil t)
+			   (re-search-backward result_regexp nil t)))
+		  (re-search-forward regexp nil t)
+		  (re-search-backward regexp nil t)
+		  ;; check the Library of Babel
+		  (setq lob-info (cdr (assoc (intern ref) org-babel-library-of-babel)))))
+	    (unless lob-info (goto-char (match-beginning 0)))
+	  ;; ;; TODO: allow searching for names in other buffers
+	  ;; (setq id-loc (org-id-find ref 'marker)
+	  ;;       buffer (marker-buffer id-loc)
+	  ;;       loc (marker-position id-loc))
+	  ;; (move-marker id-loc nil)
+	  (progn (message (format "reference '%s' not found in this buffer" ref))
+		 (error (format "reference '%s' not found in this buffer" ref))))
+	(if lob-info
+	    (setq type 'lob)
+	  (while (not (setq type (org-babel-ref-at-ref-p)))
+	    (forward-line 1)
+	    (beginning-of-line)
+	    (if (or (= (point) (point-min)) (= (point) (point-max)))
+		(error "reference not found"))))
+	(setq params (org-babel-merge-params params args '((:results . "silent"))))
+	(setq result
+	      (case type
+		('results-line (org-babel-read-result))
+		('table (org-babel-read-table))
+		('file (org-babel-read-file))
+		('source-block (org-babel-execute-src-block nil nil params))
+		('lob (org-babel-execute-src-block nil lob-info params))))
+	(if (symbolp result)
+	    (format "%S" result)
+	  (if (and index (listp result))
+	      (org-babel-ref-index-list index result)
+	    result))))))
 
 (defun org-babel-ref-index-list (index lis)
   "Return the subset of LIS indexed by INDEX.  If INDEX is

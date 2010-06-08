@@ -1232,21 +1232,24 @@ block but are passed literally to the \"example-block\"."
                           (let ((raw (org-babel-ref-resolve-reference
                                       source-name nil)))
                             (if (stringp raw) raw (format "%S" raw)))
-                        (let ((point (org-babel-find-named-block source-name)))
-                          (if point
-                              (save-excursion
-                                (goto-char point)
-                                (org-babel-trim
-                                 (org-babel-expand-noweb-references
-                                  (org-babel-get-src-block-info))))
-                            ;; optionally raise an error if named
-                            ;; source-block doesn't exist
-                            (if (member lang org-babel-noweb-error-langs)
-                                (error
-                                 (concat "<<%s>> could not be resolved "
-                                         "(see `org-babel-noweb-error-langs')")
-                                 source-name)
-                              "")))) "[\n\r]") (concat "\n" prefix)))))
+			(save-restriction
+			  (widen)
+			  (let ((point (org-babel-find-named-block source-name)))
+			    (if point
+				(save-excursion
+				  (goto-char point)
+				  (org-babel-trim
+				   (org-babel-expand-noweb-references
+				    (org-babel-get-src-block-info))))
+			      ;; optionally raise an error if named
+			      ;; source-block doesn't exist
+			      (if (member lang org-babel-noweb-error-langs)
+				  (error
+				   (concat "<<%s>> could not be resolved "
+					   "(see `org-babel-noweb-error-langs')")
+				   source-name)
+				"")))))
+		      "[\n\r]") (concat "\n" prefix)))))
         (nb-add (buffer-substring index (point-max)))))
     new-body))
 
