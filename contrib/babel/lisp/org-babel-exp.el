@@ -97,11 +97,12 @@ options and are taken from `org-babel-defualt-inline-header-args'."
     (goto-char start)
     (while (and (< (point) end)
                 (re-search-forward org-babel-inline-src-block-regexp end t))
-      (unless (org-babel-in-example-or-verbatim)
-	(let* ((info (save-match-data (org-babel-parse-inline-src-block-match)))
-	       (params (third info))
-	       (replacement
-		(save-match-data
+      (let* ((info (save-match-data (org-babel-parse-inline-src-block-match)))
+	     (params (third info))
+	     (replacement
+	      (save-match-data
+		(if (org-babel-in-example-or-verbatim)
+		    (buffer-substring (match-beginning 0) (match-end 0))
 		  ;; expand noweb references in the original file
 		  (setf (second info)
 			(if (and (cdr (assoc :noweb params))
@@ -109,10 +110,9 @@ options and are taken from `org-babel-defualt-inline-header-args'."
 			    (org-babel-expand-noweb-references
 			     info (get-file-buffer org-current-export-file))
 			  (second info)))
-		  (message "info:%S" info)
-		  (org-babel-exp-do-export info 'inline))))
-	  (setq end (+ end (- (length replacement) (length (match-string 1)))))
-	  (replace-match replacement t t nil 1))))))
+		  (org-babel-exp-do-export info 'inline)))))
+	(setq end (+ end (- (length replacement) (length (match-string 1)))))
+	(replace-match replacement t t nil 1)))))
 
 (defun org-babel-in-example-or-verbatim ()
   "Return true if the point is currently in an escaped portion of
