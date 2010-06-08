@@ -76,7 +76,17 @@ none ----- do not display either code or results upon export"
   (when (member (first headers) org-babel-interpreters)
     (save-excursion
       (goto-char (match-beginning 0))
-      (org-babel-exp-do-export (org-babel-get-src-block-info) 'block))))
+      (let* ((info (org-babel-get-src-block-info))
+	     (params (third info)))
+	(message "info:%S" info)
+	;; expand noweb references in the original file
+	(setf (second info)
+	      (if (and (cdr (assoc :noweb params))
+		       (string= "yes" (cdr (assoc :noweb params))))
+		  (org-babel-expand-noweb-references
+		   info (get-file-buffer org-current-export-file))
+		(second info)))
+	(org-babel-exp-do-export info 'block)))))
 
 (defun org-babel-exp-inline-src-blocks (start end)
   "Process inline src blocks between START and END for export.
@@ -88,8 +98,18 @@ options and are taken from `org-babel-defualt-inline-header-args'."
     (while (and (< (point) end)
                 (re-search-forward org-babel-inline-src-block-regexp end t))
       (let* ((info (save-match-data (org-babel-parse-inline-src-block-match)))
-             (replacement (save-match-data
-                            (org-babel-exp-do-export info 'inline))))
+	     (params (third info))
+             (replacement
+	      (save-match-data
+		;; expand noweb references in the original file
+		(setf (second info)
+		      (if (and (cdr (assoc :noweb params))
+			       (string= "yes" (cdr (assoc :noweb params))))
+			  (org-babel-expand-noweb-references
+			   info (get-file-buffer org-current-export-file))
+			(second info)))
+		(message "info:%S" info)
+		(org-babel-exp-do-export info 'inline))))
         (setq end (+ end (- (length replacement) (length (match-string 1)))))
         (replace-match replacement t t nil 1)))))
 
@@ -213,16 +233,16 @@ results into the buffer."
 		(format "=%S=" raw)))))))
       ('block
           (org-babel-execute-src-block
-           nil nil (org-babel-merge-params
-		    params `((:results . ,(if silent "silent" "replace")))))
+	   nil info (org-babel-merge-params
+		     params `((:results . ,(if silent "silent" "replace")))))
         "")
       ('lob
        (save-excursion
 	 (re-search-backward org-babel-lob-one-liner-regexp nil t)
 	 (org-babel-execute-src-block
-	  nil (list lang body
-		    (org-babel-merge-params
-		     params `((:results . ,(if silent "silent" "replace")))))) "")))))
+	  nil info (org-babel-merge-params
+		    params `((:results . ,(if silent "silent" "replace")))))
+	 "")))))
 
 (provide 'org-babel-exp)
 ;;; org-babel-exp.el ends here
