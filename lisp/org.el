@@ -4977,7 +4977,8 @@ will be prompted for."
 	     '(font-lock-fontified t face org-meta-line))
 	    t)
 	   ((or (member dc1 '("begin:" "end:" "caption:" "label:"
-			      "orgtbl:" "tblfm:" "tblname:"))
+			      "orgtbl:" "tblfm:" "tblname:" "result:"
+			      "results:" "source:" "srcname:" "call:"))
 		(and (match-end 4) (equal dc3 "attr")))
 	    (add-text-properties
 	     beg (match-end 0)
