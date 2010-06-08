@@ -1289,7 +1289,9 @@ This is taken almost directly from `org-read-prop'."
 (defun org-babel-number-p (string)
   "Return t if STRING represents a number"
   (if (and (string-match "^-?[0-9]*\\.?[0-9]*$" string)
-           (= (match-end 0) (length string)))
+           (= (length (substring string (match-beginning 0)
+				 (match-end 0)))
+	      (length string)))
       (string-to-number string)))
 
 (defun org-babel-import-elisp-from-file (file-name)
