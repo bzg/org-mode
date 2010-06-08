@@ -97,21 +97,33 @@ options and are taken from `org-babel-defualt-inline-header-args'."
     (goto-char start)
     (while (and (< (point) end)
                 (re-search-forward org-babel-inline-src-block-regexp end t))
-      (let* ((info (save-match-data (org-babel-parse-inline-src-block-match)))
-	     (params (third info))
-             (replacement
-	      (save-match-data
-		;; expand noweb references in the original file
-		(setf (second info)
-		      (if (and (cdr (assoc :noweb params))
-			       (string= "yes" (cdr (assoc :noweb params))))
-			  (org-babel-expand-noweb-references
-			   info (get-file-buffer org-current-export-file))
-			(second info)))
-		(message "info:%S" info)
-		(org-babel-exp-do-export info 'inline))))
-        (setq end (+ end (- (length replacement) (length (match-string 1)))))
-        (replace-match replacement t t nil 1)))))
+      (unless (org-babel-in-example-or-verbatim)
+	(let* ((info (save-match-data (org-babel-parse-inline-src-block-match)))
+	       (params (third info))
+	       (replacement
+		(save-match-data
+		  ;; expand noweb references in the original file
+		  (setf (second info)
+			(if (and (cdr (assoc :noweb params))
+				 (string= "yes" (cdr (assoc :noweb params))))
+			    (org-babel-expand-noweb-references
+			     info (get-file-buffer org-current-export-file))
+			  (second info)))
+		  (message "info:%S" info)
+		  (org-babel-exp-do-export info 'inline))))
+	  (setq end (+ end (- (length replacement) (length (match-string 1)))))
+	  (replace-match replacement t t nil 1))))))
+
+(defun org-babel-in-example-or-verbatim ()
+  "Return true if the point is currently in an escaped portion of
+an org-mode buffer code which should be treated as normal
+org-mode text."
+  (or (org-in-indented-comment-line) 
+      (save-excursion
+	(save-match-data
+	  (goto-char (point-at-bol))
+	  (looking-at "[ \t]*:[ \t]")))
+      (org-in-regexps-block-p "^[ \t]*#\\+begin_src" "^[ \t]*#\\+end_src")))
 
 (defun org-babel-exp-lob-one-liners (start end)
   "Process #+lob (Library of Babel) calls between START and END for export.
