@@ -320,10 +320,10 @@ prompt the use if she wants to replace it.
 Called with a numeric prefix argument, use this numeric value as
 the duration of the timer.
 
-Called with a `C-u' prefix argument, use `org-timer-default-timer'
+Called with a `C-u' prefix arguments, use `org-timer-default-timer'
 without prompting the user for a duration.
 
-With two `C-u' prefix argument, use `org-timer-default-timer'
+With two `C-u' prefix arguments, use `org-timer-default-timer'
 without prompting the user for a duration and automatically
 replace any running timer."
   (interactive "P")

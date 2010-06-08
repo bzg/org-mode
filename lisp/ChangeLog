@@ -1,3 +1,7 @@
+2010-06-08  Bastien Guerry  <bzg@altern.org>
+
+	* org-timer.el (org-timer-set-timer): Fix typo in the docstring.
+
 2010-05-28  Bastien Guerry  <bzg@altern.org>
 
 	* org-timer.el (org-timer-set-timer): Use a prefix argument.
