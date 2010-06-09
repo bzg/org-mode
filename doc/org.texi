@@ -10883,6 +10883,7 @@ Using code blocks in table formulas
 * Library of Babel::
 * Languages::
 * Header Arguments::
+* Results::
 * Noweb Reference Syntax::
 * Key Bindings & Useful Functions::
 @end menu
@@ -11150,11 +11151,11 @@ The original table from reference.org is below; I'm just using the first column 
   | Haskell        | org-babel-doc-haskell                                                           | haskell    | [[http://www.haskell.org/][haskell]], [[http://projects.haskell.org/haskellmode-emacs/][haskell-mode]], [[http://www.haskell.org/haskellwiki/Haskell_mode_for_Emacs#inf-haskell.el:_the_best_thing_since_the_breadknife][inf-haskell]], [[http://people.cs.uu.nl/andres/lhs2tex/][lhs2tex]] |
   | Matlab         | [[file:languages/org-babel-doc-octave-matlab.org][org-babel-doc-octave-matlab]] | matlab     | matlab, [[http://sourceforge.net/projects/matlab-emacs/][matlab.el]]                                                                                                                                                                                                                        |
   | LaTeX          | [[file:languages/org-babel-doc-LaTeX.org][org-babel-doc-latex]]                 | latex      | [[http://www.latex-project.org/][latex]], [[http://www.gnu.org/software/auctex/][auctex]], [[http://www.gnu.org/software/auctex/reftex.html][reftex]]                                                                                                                                       |
-  | Objective Caml | org-babel-doc-ocaml                                                             | ocaml      | [[http://caml.inria.fr/][ocaml]], [[http://www-rocq.inria.fr/~acohen/tuareg/][tuareg-mode]]                                                                                                                                                                                                 |
+  | Objective Caml | org-babel-doc-ocaml                                                             | ocaml      | [[http://caml.inria.fr/][ocaml]], [[http://www-rock.inria.fr/~acohen/tuareg/][tuareg-mode]]                                                                                                                                                                                                 |
   | Octave         | [[file:languages/org-babel-doc-octave-matlab.org][org-babel-doc-octave-matlab]] | octave     | octave                                                                                                                                                                                                                                                                                      |
   | OZ             | [[file:languages/org-babel-doc-oz.org][org-babel-doc-oz]]                       | oz         | [[http://www.mozart-oz.org/][Mozart]] which includes a major mode                                                                                                                                                                                                                           |
   | Perl           | org-babel-doc-perl                                                              | perl       | [[http://www.perl.org/][perl]], [[http://www.emacswiki.org/emacs/CPerlMode][cperl-mode]] (optional)                                                                                                                                                                                         |
-  | Python         | org-babel-doc-python                                                            | python     | [[http://www.python.org/][python]], [[https://launchpad.net/python-mode][python-mode]] (optional)                                                                                                                                                                                           |
+  | Python         | org-babel-doc-python                                                            | python     | [[http://www.python.org/][python]], [[https://launch pad.net/python-mode][python-mode]] (optional)                                                                                                                                                                                           |
   | R              | [[file:languages/org-babel-doc-R.org][org-babel-doc-R]]                         | R          | [[http://www.r-project.org/][R]], [[http://ess.r-project.org/][ess-mode]]                                                                                                                                                                                                                   |
   | Ruby           | org-babel-doc-ruby                                                              | ruby       | [[http://www.ruby-lang.org/][ruby]], [[http://www.ruby-lang.org/][irb]], [[http://github.com/eschulte/rinari/raw/master/util/ruby-mode.el][ruby-mode]], [[http://github.com/eschulte/rinari/raw/master/util/inf-ruby.el][inf-ruby mode]]                                                    |
   | Sass           | org-babel-doc-sass                                                              | sass       | [[http://sass-lang.com/][sass]], [[http://github.com/nex3/haml/blob/master/extra/sass-mode.el][sass-mode]]                                                                                                                                                                                  |
@@ -11175,209 +11176,227 @@ of the language names from the above table).
 @end example
 
 
-@node Header Arguments, Noweb Reference Syntax, Languages, Working With Source Code
+@node Header Arguments, Results, Languages, Working With Source Code
 @section Header Arguments
-    :PROPERTIES:
-    :CUSTOM_ID: header-arguments
-    :END:
 
-Definitions of all Org-babel header arguments are given
-[[header-argument-specific-documentation][below]].  In addition, some
-languages may add their own header arguments.  Please see the
-language-specific documentation for information on language-specific header
-arguments.
+Definitions of all Org-babel header arguments are given (see @ref{Specific
+Header Arguments}).  In addition, some languages may add their own header
+arguments.  Please see the language-specific documentation (available at
+@uref{http://orgmode.org/worg/org-contrib/babel/reference.php#languages}.)
+for information on language-specific header arguments.
 
+@menu
+* Using Header Arguments::
+* System-wide Header Arguments::
+* Language Specific Header Arguments::
+* Header Arguments in Org-mode Properties::
+* Header Arguments in Source Code Blocks::
+* Specific Header Arguments::
+* Using Header Arguments::
+@end menu
+
+@node Using Header Arguments, System-wide Header Arguments, , Header Arguments
 @subsection Using Header Arguments
 
-The values of header arguments can be set in four different ways, each
-more specific (and having higher priority) than the last.
+The values of header arguments can be set in four different ways, each more
+specific (and having higher priority) than the last.
 
-@subsubsection System-wide
-    :PROPERTIES:
-    :CUSTOM_ID: system-wide-header-argument
-    :END:
+@node System-wide Header Arguments, Language Specific Header Arguments, Using Header Arguments, Header Arguments
+@subsubsection System-wide Header Arguments
+System-wide values of header arguments can be specified by customizing the
+@code{org-babel-default-header-args} variable:
 
- System-wide values of header arguments can be specified by
- customizing the =org-babel-default-header-args= variable:
- @example
-   org-babel-default-header-args is a variable defined in `org-babel.el'.
-   Its value is
-   ((:session . "none")
-    (:results . "replace")
-    (:exports . "code")
-    (:cache . "no")
-    (:noweb . "no"))
+@example
+  org-babel-default-header-args is a variable defined in `org-babel.el'.
+  Its value is
+  ((:session . "none")
+   (:results . "replace")
+   (:exports . "code")
+   (:cache . "no")
+   (:noweb . "no"))
 
 
-   Documentation:
-   Default arguments to use when evaluating a source block.
- @end example
- [[#default-noweb]]
- For example, the following example could be used to set the default value
- of =:noweb= header arguments to =yes=.  This would have the effect of
- expanding =:noweb= references by default when evaluating source code blocks.
- @example
-   (setq org-babel-default-header-args
-         (cons '(:noweb . "yes")
-               (assq-delete-all :noweb org-babel-default-header-args)))
- @end example
+  Documentation:
+  Default arguments to use when evaluating a source block.
+@end example
 
-@subsubsection Org-mode Properties
+For example, the following example could be used to set the default value of
+@code{:noweb} header arguments to =yes=.  This would have the effect of
+expanding @code{:noweb} references by default when evaluating source code
+blocks.
 
-Header arguments are also read from
-[[http://orgmode.org/manual/Properties-and-Columns.html#Properties-and-Columns][Org-mode
-properties]], which can be set on a buffer-wide or per-heading basis. An
-example of setting a header argument for all code blocks in a buffer is
+@example
+  (setq org-babel-default-header-args
+	(cons '(:noweb . "yes")
+	      (assq-delete-all :noweb org-babel-default-header-args)))
+@end example
 
-#+begin_example 
+
+@node Language Specific Header Arguments, Header Arguments in Org-mode Properties, System-wide Header Arguments, Header Arguments
+@subsubsection Header Arguments in Org-mode Properties
+Each language can define it's own set of default header arguments.
+
+@node Header Arguments in Org-mode Properties, Header Arguments in Source Code Blocks, Language Specific Header Arguments, Header Arguments
+@subsubsection Header Arguments in Org-mode Properties
+
+Header arguments are also read from Org-mode properties (see @ref{Property
+syntax}), which can be set on a buffer-wide or per-heading basis. An example
+of setting a header argument for all code blocks in a buffer is
+
+@example
 #+property: tangle yes
-#+end_example
+@end example
 
 When properties are used to set default header arguments, they are looked up
 with inheritance, so the value of the =:cache= header argument will default
 to true in all source code blocks in the subtree rooted at the following
 heading:
 
- @example
-   * outline header
-     :PROPERTIES:
-     :cache:    yes
-     :CUSTOM_ID: property-set-header-arguments
-     :END:
- @end example
- Properties defined in this way override the properties set in
- =org-babel-default-header-args=.  It is convenient to use the
- =org-set-property= function bound to =C-c C-x p= to set properties
- in Org-mode documents.
-
-@subsubsection Source Code Block
+@example
+  * outline header
     :PROPERTIES:
-    :CUSTOM_ID: single-block-header-arguments
+    :cache:    yes
+    :CUSTOM_ID: property-set-header-arguments
     :END:
- The most common way to assign values to header arguments is at the
- source code block level.  This can be done by listing a sequence of
- header arguments and their values as part of the =#+begin_src=
- line.  Properties set in this way override both the values of
- =org-babel-default-header-args= and header argument specified as
- properties.  In the following example, the
- =:results= header argument is set to =silent=, meaning the results
- of execution will not be inserted in the buffer, and the =:exports=
- header argument is set to =code=, meaning only the body of the
- source code block
- will be preserved on export to HTML or LaTeX.
- @example
-   #+source: factorial
-   #+begin_src haskell :results silent :exports code
-     fac 0 = 1
-     fac n = n * fac (n-1)
-   #+end_src
- @end example
+@end example
 
+Properties defined in this way override the properties set in
+@code{org-babel-default-header-args}.  It is convenient to use the
+@code{org-set-property} function bound to @key{C-c C-x p} to set properties
+in Org-mode documents.
+
+
+@node Header Arguments in Source Code Blocks, Specific Header Arguments, Header Arguments in Org-mode Properties, Header Arguments
+@subsubsection Header Arguments in Source Code Block
+
+The most common way to assign values to header arguments is at the source
+code block level.  This can be done by listing a sequence of header
+arguments and their values as part of the @code{#+begin_src} line.
+Properties set in this way override both the values of
+@code{org-babel-default-header-args} and header argument specified as
+properties.  In the following example, the @code{:results} header argument
+is set to @code{silent}, meaning the results of execution will not be
+inserted in the buffer, and the @code{:exports} header argument is set to
+@code{code}, meaning only the body of the source code block will be
+preserved on export to HTML or LaTeX.
+
+@example
+  #+source: factorial
+  #+begin_src haskell :results silent :exports code
+    fac 0 = 1
+    fac n = n * fac (n-1)
+  #+end_src
+@end example
+
+
+@node Specific Header Arguments, , Header Arguments in Source Code Blocks, Header Arguments
 @subsection Specific Header Arguments
-    :PROPERTIES:
-    :CUSTOM_ID: header-argument-specific-documentation
-    :END:
+Description of every standard (non language-specific) Org-babel header
+argument.
 
-@subsubsection =:var=
-    :PROPERTIES:
-    :CUSTOM_ID: header-argument-var
-    :END:
+@menu
+* @code{var}::
+* @code{results}::
+* @code{file}::
+* @code{dir} and remote execution::
+* @code{exports}::
+* @code{tangle}::
+* @code{session}::
+* @code{noweb}::
+* @code{cache}::
+@end menu
 
-    The =:var= header argument is used to pass arguments to
-    source code blocks.  The specifics of how arguments are included
-    in a source code block are language specific and are
-    addressed in the language-specific documentation. However, the
-    syntax used to specify arguments is the same across all
-    languages.  The values passed to arguments can be or
-    - literal values
-    - values from org-mode tables
-    - the results of other source code blocks
+@node @code{var}, @code{results}, , Specific Header Arguments
+@subsubsection @code{var}
+The @code{:var} header argument is used to pass arguments to
+source code blocks.  The specifics of how arguments are included
+in a source code block are language specific and are
+addressed in the language-specific documentation. However, the
+syntax used to specify arguments is the same across all
+languages.  The values passed to arguments can be or
+- literal values
+- values from org-mode tables
+- the results of other source code blocks
 
-    These values can be indexed in a manner similar to arrays -- see
-    [[var-argument-indexing][argument indexing]].
+These values can be indexed in a manner similar to arrays -- see argument
+indexing FIXME/need section on argument indexing.
 
-    The following syntax is used to pass arguments to source code
-    blocks using the =:var= header argument.
+The following syntax is used to pass arguments to source code
+blocks using the @code{:var} header argument.
 
-    @example
-      :var name=assign
-    @end example
+@example
+  :var name=assign
+@end example
 
-    where =assign= can take one of the following forms
+where @code{assign} can take one of the following forms
 
-    - literal value :: either a string ="string"= or a number =9=.
-    - reference :: a table name:
+- literal value :: either a string @code{"string"} or a number @code{9}.
+- reference :: a table name:
 
-         @example
-           #+tblname: example-table
-           | 1 |
-           | 2 |
-           | 3 |
-           | 4 |
+ @example
+   #+tblname: example-table
+   | 1 |
+   | 2 |
+   | 3 |
+   | 4 |
 
-           #+source: table-length
-           #+begin_src emacs-lisp :var table=example-table
-             (length table)
-           #+end_src
+   #+source: table-length
+   #+begin_src emacs-lisp :var table=example-table
+     (length table)
+   #+end_src
 
-           #+results: table-length
-           : 4
-         @end example
+   #+results: table-length
+   : 4
+ @end example
 
-         a source code block name, as assigned by =#+srcname:=,
-         followed by parentheses:
+ a source code block name, as assigned by =#+srcname:=,
+ followed by parentheses:
 
-         @example
-           #+begin_src emacs-lisp :var length=table-length()
-             (* 2 length)
-           #+end_src
+ @example
+   #+begin_src emacs-lisp :var length=table-length()
+     (* 2 length)
+   #+end_src
 
-           #+results:
-           : 8
-         @end example
+   #+results:
+   : 8
+ @end example
 
-         In addition, an argument can be passed to the source code
-         block referenced by =:var=.  The argument is passed within
-         the parentheses following the source code block name:
+ In addition, an argument can be passed to the source code
+ block referenced by =:var=.  The argument is passed within
+ the parentheses following the source code block name:
 
-         @example
-           #+source: double
-           #+begin_src emacs-lisp :var input=8
-             (* 2 input)
-           #+end_src
+ @example
+   #+source: double
+   #+begin_src emacs-lisp :var input=8
+     (* 2 input)
+   #+end_src
 
-           #+results: double
-           : 16
+   #+results: double
+   : 16
 
-           #+source: squared
-           #+begin_src emacs-lisp :var input=double(input=1)
-             (* input input)
-           #+end_src
+   #+source: squared
+   #+begin_src emacs-lisp :var input=double(input=1)
+     (* input input)
+   #+end_src
 
-           #+results: squared
-           : 4
-         @end example
+   #+results: squared
+   : 4
+ @end example
 
 @subsubheading alternate argument syntax
-     :PROPERTIES:
-     :CUSTOM_ID: alternate-argument-syntax
-     :END:
+It is also possible to specify arguments in a potentially more
+natural way using the =#+source:= line of a source code block.
+As in the following example arguments can be packed inside of
+parenthesis following the source name.
 
-     It is also possible to specify arguments in a potentially more
-     natural way using the =#+source:= line of a source code block.
-     As in the following example arguments can be packed inside of
-     parenthesis following the source name.
-     @example
-       #+source: double(input=0)
-       #+begin_src emacs-lisp
-         (* 2 input)
-       #+end_src
-     @end example
+@example
+  #+source: double(input=0)
+  #+begin_src emacs-lisp
+    (* 2 input)
+  #+end_src
+@end example
 
 **** indexable variable values
-     :PROPERTIES:
-     :CUSTOM_ID: var-argument-indexing
-     :END:
 
      It is possible to assign a portion of a value to a
      variable in a source block.  The following example
@@ -11423,10 +11442,8 @@ heading:
      function) and =describe-variable= (M-x describe variable)
      functions, respectively.
 
-@subsubsection =:results=
-    :PROPERTIES:
-    :CUSTOM_ID: header-argument-results
-    :END:
+@node @code{results}, @code{file}, @code{var}, Specific Header Arguments
+@subsubsection @code{results}
 
     There are three types of results header argument:
     - *collection* header arguments specify how the results should be collected from
@@ -11451,13 +11468,13 @@ heading:
                 of the last statement in the source code block.
                 This header argument places Org-babel in functional
                 mode.  Note that in some languages, e.g., python,
-                use of this result type requires that a =return=
+                use of this result type requires that a @code{return}
                 statement be included in the body of the source code
-                block. E.g., =:results value=.
+                block. E.g., @code{:results value}.
     - output :: The result is the collection of everything printed
                 to stdout during the execution of the source code
                 block.  This header argument places Org-babel in scripting
-                mode.  E.g., =:results output=.
+                mode.  E.g., @code{:results output}.
 
 @subsubheading type
      The following options are mutually exclusive and specify what
@@ -11467,28 +11484,28 @@ heading:
 
      - table, vector :: The results should be interpreted as an Org-mode table.
                         If a single value is returned, Org-babel will convert it
-                        into a table with one row and one column.  E.g., =:results
-                        value table=.
+                        into a table with one row and one column.  E.g., @code{:results
+                        value table}.
      - scalar, verbatim :: The results should be interpreted
           literally -- meaning they will not be converted into a table.
           The results will be inserted into the Org-mode buffer as
-          quoted text.  E.g., =:results value verbatim=.
+          quoted text.  E.g., @code{:results value verbatim}.
      - file :: The results will be interpreted as the path to a file,
                and will be inserted into the Org-mode buffer as a file
-               link.  E.g., =:results value file=.
+               link.  E.g., @code{:results value file}.
      - raw, org :: The results are interpreted as raw Org-mode code and
                    are inserted directly into the buffer.  If the results look
                    like a table they will be aligned as such by Org-mode.
-                   E.g., =:results value raw=.
+                   E.g., @code{:results value raw}.
      - html :: Results are assumed to be HTML and will be enclosed in
-               a =begin_html= block.  E.g., =:results value html=.
+               a @code{begin_html} block.  E.g., @code{:results value html}.
      - latex :: Results assumed to be LaTeX and are enclosed in a
-                =begin_latex= block.  E.g., =:results value latex=.
+                @code{begin_latex} block.  E.g., @code{:results value latex}.
      - code :: Result are assumed to be parseable code and are
-               enclosed in a code block.  E.g., =:results value code=.
+               enclosed in a code block.  E.g., @code{:results value code}.
      - pp :: The result is converted to pretty-printed code and is
              enclosed in a code block.  This option currently supports
-             Emacs Lisp, python, and ruby.  E.g., =:results value pp=.
+             Emacs Lisp, python, and ruby.  E.g., @code{:results value pp}.
 
 @subsubheading handling
      The following results options indicate what Org-babel should do
@@ -11496,48 +11513,40 @@ heading:
 
      - silent :: The results will be echoed in the minibuffer but
                  will not be inserted into the Org-mode buffer.  E.g.,
-                 =:results output silent=.
+                 @code{:results output silent}.
      - replace :: The default value.  The results will be inserted
-                  into the Org-mode buffer.  E.g., =:results output
-                  replace=.
+                  into the Org-mode buffer.  E.g., @code{:results output
+                  replace}.
 
-@subsubsection =:file=
-    :PROPERTIES:
-    :CUSTOM_ID: header-argument-file
-    :END:
+@node @code{file}, @code{dir} and remote execution, @code{results}, Specific Header Arguments
+@subsubsection @code{file}
+    @code{:file} is used to specify a path for file output in which case an
+    Org-mode style link (see @ref{Link format}) @code{file:} link is inserted
+    into the buffer as the result. Common examples are graphical output from
+    R, gnuplot, ditaa and LaTeX blocks.
 
-    =:file= is used to specify a path for file output in which case an
-    [[http://orgmode.org/manual/Link-format.html#Link-format][org style]] =file:= link is inserted into the buffer as the
-    result. Common examples are graphical output from [[file:languages/org-babel-doc-R.org][R]], gnuplot,
-    ditaa and [[file:languages/org-babel-doc-LaTeX.org][latex]] blocks.
+    Note that for some languages, including R, gnuplot, LaTeX and ditaa,
+    graphical output is sent to the specified file without the file being
+    referenced explicitly in the code block. See the documentation for the
+    individual languages for details. In contrast, general purpose languages
+    such as python and ruby require that the code explicitly create output
+    corresponding to the path indicated by @code{:file}.
 
-    See the [[#header-argument-dir][=:dir= and remote execution]] section for examples.
+    While the @code{:file} header argument can be used to specify the path to
+    the output file,
 
-    Note that for some languages, including [[file:languages/org-babel-doc-R.org][R]], gnuplot, [[file:languages/org-babel-doc-LaTeX.org][latex]] and
-    ditaa, graphical output is sent to the specified file without the
-    file being referenced explicitly in the code block. See the
-    documentation for the individual languages for details. In
-    contrast, general purpose languages such as python and ruby
-    require that the code explicitly create output corresponding to
-    the path indicated by =:file=.
-
-    While the =:file= header argument can be used to specify the path
-    to the output file,
-
-@subsubsection =:dir= and remote execution
-    :PROPERTIES:
-    :CUSTOM_ID: header-argument-dir
-    :END:
-    =:dir= specifies the /default directory/ during code block
+@node @code{dir} and remote execution, @code{exports}, @code{file}, Specific Header Arguments
+@subsubsection @code{dir} and remote execution
+    @code{:dir} specifies the /default directory/ during code block
     execution. If it is absent, then the directory associated with the
-    current buffer is used. In other words, supplying =:dir path=
-    temporarily has the same effect as changing the current directory
-    with =M-x cd path=, and then not supplying =:dir=. Under the
-    surface, =:dir= simply sets the value of the emacs variable
-    =default-directory=.
+    current buffer is used. In other words, supplying @code{:dir path}
+    temporarily has the same effect as changing the current directory with
+    @key{M-x cd path}, and then not supplying @code{:dir}. Under the surface,
+    @code{:dir} simply sets the value of the emacs variable
+    @code{default-directory}.
 
-    When using =:dir=, you should supply a relative path for [[#header-argument-file][file
-    output]] (e.g. =:file myfile.jpg= or =:file results/myfile.jpg=) in
+    When using @code{:dir}, you should supply a relative path for file output
+    (e.g. @code{:file myfile.jpg} or @code{:file results/myfile.jpg}) in
     which case that path will be interpreted relative to the default
     directory.
 
@@ -11551,9 +11560,9 @@ heading:
 @end example
 
 @subsubheading Remote execution
-     A directory on a remote machine can be specified using [[http://www.gnu.org/software/tramp/#Filename-Syntax][tramp
-     filename syntax]], in which case the code will be evaluated on the
-     remote machine[fn:2]. An example is
+     A directory on a remote machine can be specified using tramp file
+     syntax, in which case the code will be evaluated on the remote
+     machine. An example is
 
 @example 
 #+begin_src R :file plot.png :dir /dand@@yakuba.princeton.edu:
@@ -11573,95 +11582,82 @@ and a link of the following form will be inserted in the org buffer:
 [[file:/scp:dand@@yakuba.princeton.edu:/home/dand/plot.png][plot.png]]
 @end example
 
-Most of this functionality follows immediately from the fact that
-=:dir= sets the value of the emacs variable =default-directory=,
-thanks to [[http://www.gnu.org/software/tramp/][tramp]]. Those using XEmacs, or GNU Emacs prior to
-version 23 may need to install tramp separately in order for the
-above features to work correctly.
+Most of this functionality follows immediately from the fact that @code{:dir}
+sets the value of the emacs variable @code{default-directory}, thanks to
+tramp. Those using XEmacs, or GNU Emacs prior to version 23 may need to
+install tramp separately in order for the above features to work correctly.
 
 @subsubheading Further points
-     - If =:dir= is used in conjunction with =:session=, although it
+     - If @code{:dir} is used in conjunction with @code{:session}, although it
        will determine the starting directory for a new session as
        expected, no attempt is currently made to alter the directory
        associated with an existing session.
-     - =:dir= should typically not be used to create files during
-       export with =:exports results= or =:exports both=. The reason
+     - @code{:dir} should typically not be used to create files during
+       export with @code{:exports results} or @code{:exports both}. The reason
        is that, in order to retain portability of exported material
        between machines, during export, links inserted into the buffer
        will *not* be expanded against default directory. Therefore, if
-       default-directory is altered using =:dir=, it it probable that
+       default-directory is altered using @code{:dir}, it it probable that
        the file will be created in a location to which the link does
        not point.
-@subsubsection =:exports=
-    :PROPERTIES:
-    :CUSTOM_ID: header-argument-exports
-    :END:
 
+@node @code{exports}, @code{tangle}, @code{dir} and remote execution, Specific Header Arguments
+@subsubsection @code{exports}
     Specify what should be included in HTML or LaTeX exports of the
     Org-mode file.
 
     - code :: the default.  The body of code is included
-              into the exported file.  E.g., =:exports code=.
+              into the exported file.  E.g., @code{:exports code}.
     - results :: the result of evaluating the code is included in the
-                  exported file. E.g., =:exports results=.
+                  exported file. E.g., @code{:exports results}.
     - both :: both the code and results are included in the exported
-               file. E.g., =:exports both=.
+               file. E.g., @code{:exports both}.
     - none :: nothing is included in the exported file.  E.g.,
-               =:exports none=.
+               @code{:exports none}.
 
-@subsubsection =:tangle=
-    :PROPERTIES:
-    :CUSTOM_ID: tangle-header-arguments
-    :END:
-
+@node @code{tangle}, @code{session}, @code{exports}, Specific Header Arguments
+@subsubsection @code{tangle}
     Specify whether or not the source code block should be included
     in tangled extraction of source code files.
 
     - yes :: the source code block is exported to a source code file
              named after the basename (name w/o extension) of the
-             Org-mode file.  E.g., =:tangle yes=.
+             Org-mode file.  E.g., @code{:tangle yes}.
     - no :: the default.  The source code block is not
-          exported to a source code file.  E.g., =:tangle no=.
-    - other :: Any other string passed to the =:tangle= header argument
+          exported to a source code file.  E.g., @code{:tangle no}.
+    - other :: Any other string passed to the @code{:tangle} header argument
                 is interpreted as a file basename to which the block will
-                be exported.  E.g., =:tangle basename=.
+                be exported.  E.g., @code{:tangle basename}.
 
-@subsubsection =:session=
-    :PROPERTIES:
-    :CUSTOM_ID: header-argument-session
-    :END:
-
+@node @code{session}, @code{noweb}, @code{tangle}, Specific Header Arguments
+@subsubsection @code{session}
     Start a session for an interpreted language where state is
     preserved.  This applies particularly to the supported languages
     python, R and ruby.
 
     By default, a session is not started.
 
-    A string passed to the =:session= header argument will give the
+    A string passed to the @code{:session} header argument will give the
     session a name.  This makes it possible to run concurrent
     sessions for each interpreted language.
 
-@subsubsection =:noweb=
-    :PROPERTIES:
-    :CUSTOM_ID: header-argument-noweb
-    :END:
-
+@node @code{noweb}, @code{cache}, @code{session}, Specific Header Arguments
+@subsubsection @code{noweb}
     Controls the expansion of [[noweb-reference-syntax][noweb syntax]] references in a
     source code block.  This header argument can have one of two
-    values: =yes= or =no=.
-    - =no= :: the default.  No [[noweb-reference-syntax][noweb syntax]] specific action is taken
+    values: @code{yes} or @code{no}.
+    - @code{no} :: the default.  No [[noweb-reference-syntax][noweb syntax]] specific action is taken
          on evaluating source code blocks/  However, noweb references
          will still be expanded during tangling.
-    - =yes= :: all [[noweb-reference-syntax][noweb syntax]] references in the body of the source
+    - @code{yes} :: all [[noweb-reference-syntax][noweb syntax]] references in the body of the source
                code block will be expanded before the block is evaluated.
 
 @subsubheading Noweb Prefix Lines
-
      Noweb insertions are now placed behind the line prefix of the
-     =<<reference>>=.
+     @code{<<reference>>}.
 
      This behavior is illustrated in the following example.  Because
-     the =<<example>>= noweb reference appears behind the SQL
+     the @code{<<example>>} noweb reference appears behind the SQL
      comment syntax, each line of the expanded noweb reference will
      be commented.
 
@@ -11685,80 +11681,72 @@ above features to work correctly.
 
      Thanks to Sébastien Vauban for this idea.
 
-@subsubsection =:cache=
-    :PROPERTIES:
-    :CUSTOM_ID: header-argument-cache
-    :END:
-
+@node @code{cache}, , @code{noweb}, Specific Header Arguments
+@subsubsection @code{cache}
     Controls the use of in-buffer caching of source code block
     results to avoid re-running unchanged source code blocks.  This
-    header argument can have one of two values: =yes= or =no=.
-    - =no= :: The default.  No caching takes place and the source
+    header argument can have one of two values: @code{yes} or @code{no}.
+    - @code{no} :: The default.  No caching takes place and the source
          code block will be run every time it is evaluated.
-    - =yes= :: every time the source code block is run a sha1 hash of
+    - @code{yes} :: every time the source code block is run a sha1 hash of
          the code and arguments passed to the block will be
-         generated.  This hash is packed into the =#+results:= line
+         generated.  This hash is packed into the @code{#+results:} line
          of the results and will be checked on subsequent executions
          of the source code block.  If the source code block has not
          changed since the last time it was evaluated, it will not be
          re-evaluated.
 
+@node Results, Noweb Reference Syntax, Header Arguments, Working With Source Code
 @section Results
-    :PROPERTIES:
-    :CUSTOM_ID: results-specification
-    :END:
-
-    The way in which results are handled depends on whether a [[header-argument-session][session]]
-    is invoked, as well as on whether
-    [[header-argument-results-collection][=:results value=] or
-    [[header-argument-results-collection][=:results output=]] is used. The following table shows the
-    possibilities:
+    The way in which results are handled depends on whether a
+    [[header-argument-session][session]] is invoked, as well as on whether
+    @code{:results value} or @code{:results output} is used. The following
+    table shows the possibilities:
 
     |                   | non-session (default)    | =:session=                          |
     |-------------------+--------------------------+-------------------------------------|
     | =:results value=  | value of last expression | value of last expression            |
     | =:results output= | contents of stdout       | concatenation of interpreter output |
 
-    *Note:*  With =:results value=, the result in both =:session= and
+    *Note:*  With @code{:results value}, the result in both @code{:session} and
     non-session is returned to Org-mode as a table (a one- or
     two-dimensional vector of strings or numbers) when appropriate.
 
 @subsection Non-session
-@subsubsection =:results value=
+@subsubsection @code{:results value}
       This is the default. Internally, the value is obtained by
       wrapping the code in a function definition in the external
       language, and evaluating that function. Therefore, code should be
       written as if it were the body of such a function. In particular,
       note that python does not automatically return a value from a
-      function unless a =return= statement is present, and so a
+      function unless a @code{return} statement is present, and so a
       'return' statement will usually be required in python.
 
       This is the only one of the four evaluation contexts in which the
       code is automatically wrapped in a function definition.
 
-@subsubsection =:results output=
+@subsubsection @code{:results output}
       The code is passed to the interpreter as an external process, and
       the contents of the standard output stream are returned as
       text. (In certain languages this also contains the error output
       stream; this is an area for future work.)
 
-@subsection =:session=
-@subsubsection =:results value=
-      The code is passed to the interpreter running as an interactive
-      Emacs inferior process. The result returned is the result of the
-      last evaluation performed by the interpreter. (This is obtained in
-      a language-specific manner: the value of the variable =_= in
-      python and ruby, and the value of =.Last.value= in R).
+@subsection @code{:session}
+@subsubsection @code{:results value}
+      The code is passed to the interpreter running as an interactive Emacs
+      inferior process. The result returned is the result of the last
+      evaluation performed by the interpreter. (This is obtained in a
+      language-specific manner: the value of the variable @code{_} in python
+      and ruby, and the value of @code{.Last.value} in R).
 
-@subsubsection =:results output=
-       The code is passed to the interpreter running as an interactive
-       Emacs inferior process. The result returned is the concatenation
-       of the sequence of (text) output from the interactive
-       interpreter. Notice that this is not necessarily the same as what
-       would be sent to stdout if the same code were passed to a
-       non-interactive interpreter running as an external process. For
-       example, compare the following two blocks:
-
+@subsubsection @code{:results output}
+       The code is passed to the interpreter running as an interactive Emacs
+       inferior process. The result returned is the concatenation of the
+       sequence of (text) output from the interactive interpreter. Notice
+       that this is not necessarily the same as what would be sent to
+       @code{STDOUT} if the same code were passed to a non-interactive
+       interpreter running as an external process. For example, compare the
+       following two blocks:
 
 @example
 #+begin_src python :results output
@@ -11791,7 +11779,7 @@ above features to work correctly.
        unnecessary here).
 
 
-@node Noweb Reference Syntax, Key Bindings & Useful Functions, Header Arguments, Working With Source Code
+@node Noweb Reference Syntax, Key Bindings & Useful Functions, Results, Working With Source Code
 @section Noweb Reference Syntax
   The [[http://www.cs.tufts.edu/~nr/noweb/][Noweb]] Literate Programming system allows named blocks of code to
   be referenced by using the familiar Noweb syntax:
