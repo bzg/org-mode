@@ -10847,7 +10847,7 @@ This may be necessary in particular if files include other files via
 @node Working With Source Code, Miscellaneous, Publishing, Top
 @comment  node-name,  next,  previous,  up
 @comment Working With Source Code, Miscellaneous, Publishing, Top
-@chapter ``Working With Source Code'' or ``Embedded Source Code''
+@chapter Working With Source Code
 
 Source code can be included in Org-mode documents using a @samp{src} block:
 
@@ -10880,6 +10880,11 @@ Using code blocks in table formulas
 * Exporting Code Blocks::       
 * Extracting Source Code::      
 * Evaluating Code Blocks::      
+* Library of Babel::
+* Languages::
+* Header Arguments::
+* Noweb Reference Syntax::
+* Key Bindings & Useful Functions::
 @end menu
 
 
@@ -10899,16 +10904,21 @@ The structure of code blocks is as follows:
 
 @table @code
 @item <name>
-An optional name for the block (see @ref{Evaluating Code Blocks})
+This name is associated with the source code block.  This is similar to the
+@samp{#+tblname} lines that can be used to name tables in Org-mode files.
+Referencing the name of a source code block makes it possible to evaluate the
+block from other places in the file, other files, or from inside of Org-mode
+tables.
 @item <language>
 The language of the code in the block.
 @item <switches>
-Optional links FIXME link/relocate switches discussion in @ref{Literal examples}
+Switches controling exportation of the code block (see switches discussion in
+@ref{Literal examples})
 @item <header arguments>
 Optional header arguments control many aspects of evaluation, export and
-tangling of source code blocks. See the [[header-arguments][Header
-Arguments]] section. Header arguments can also be set on a per-buffer or
-per-subtree basis using properties.
+tangling of source code blocks. See the @ref{Header Arguments}
+section. Header arguments can also be set on a per-buffer or per-subtree
+basis using properties.
 @item <body>
 The code
 @end table
@@ -10923,10 +10933,10 @@ major-mode edit buffer containing the body of the code block. Saving this
 buffer will write the new contents back to the Org buffer. Use @kbd{C-c '}
 again to exit.
 
-The edit buffer has a minor mode active called @code{org-src-mode}. The
+The @code{org-src-mode} minor mode will be active in the edit buffer. The
 following variables can be used to configure the behavior of the edit
-buffer. See also the customization group @code{org-edit-structure} for futher
-configuration options.
+buffer. See also the customization group @code{org-edit-structure} for
+further configuration options.
 
 @table @code
 @item org-src-lang-modes
@@ -10937,7 +10947,7 @@ can be used to map arbitrary language names to existing major modes.
 @item org-src-window-setup
 Controls the way Emacs windows are rearranged when the edit buffer is created.
 @item org-src-preserve-indentation
-This variable is expecially useful for tangling languages such as
+This variable is especially useful for tangling languages such as
 python, in which whitespace indentation in the output is critical.
 @item org-src-ask-before-returning-to-edit-buffer
 By default, Org will ask before returning to an open edit buffer. Set
@@ -10949,31 +10959,31 @@ to a non-nil value to switch without asking.
 @comment  Exporting Code Blocks, Extracting Source Code, Editing Source Code, Working With Source Code
 @section Exporting Code Blocks
 
-By default, code blocks export to HTML with the appearance of the fontified
-language major-mode Emacs buffer
+It is possible to export the contents of code blocks, the results of code
+block evaluation, or neither or both.  For most languages by default only
+body of a code blocks will be exported, however some languages
+(e.g. @code{ditaa}) default to exporting the results of the code block.  For
+information on the exportation of code blocks bodies see @ref{Literal
+examples}.
 
-FIXME: say something more knowledgable about the HTML/CSS output.
+The @code{:exports} header argument can be used to specify non-default export
+behavior:
 
-A similar effect is possible with LaTeX if you turn on
-the option @code{org-export-latex-listings} and make sure that the listings
-package is included by the LaTeX header FIXME: be more specific about latex
-config.
-
-FIXME: This duplicated discussion in @ref{Literal examples}. Add
-documentation of relevant switches.
-
-The @code{:exports} header argument can be used to specify non-default export behavior:
-
+Header arguments:
 @table @code
 @item :exports results
-On export, the code block will be executed and the block will be replaced by
-the results of the code block (as determined by the values of other header
-arguments such as @code{results} and @code{file}.
+On export, the code block will be evaluated and the results will be placed in
+the org-mode buffer (either updating previous results of the code block
+located anywhere in the buffer, or if no previous results exist placing the
+new results immediately after the code block).  The actual body of the code
+block will not be exported.
 @item :exports both
-On export, the code block will be executed and the exported material will
-contain the code, followed by the results.
+On export, the code block will be evaluated and the results inserted into the
+buffer as described above, however the body of the code block will be
+exported as well.
 @item :exports code
-The default. The body of the code block is exported as described above.
+The default (in most languages). Only the body of the code block is exported
+as described in @ref{Literal examples}.
 @end table
 
 @node Extracting Source Code, Evaluating Code Blocks, Exporting Code Blocks, Working With Source Code
@@ -10981,8 +10991,11 @@ The default. The body of the code block is exported as described above.
 @comment  Extracting Source Code, Evaluating Code Blocks, Exporting Code Blocks, Working With Source Code
 @section Extracting Source Code
 
-Creating monolingual code files by extracting code from source blocks is
-referred to as ``tangling''.
+Creating pure source code files by extracting code from source blocks is
+referred to as ``tangling'' -- a term adopted from the literate programming
+community.  During ``tangling'' of code blocks their bodies are expanded
+using @code{org-babel-expand-src-block} which can expand both variable and
+``noweb'' (see @ref{Noweb Reference Syntax}) style references.
 
 Header arguments:
 @table @code
@@ -10990,7 +11003,8 @@ Header arguments:
 The default.
 @item :tangle yes
 Include block in tangled output. The output file name is the name of the org
-file with the extension @samp{.org} replaced by the extension for the block language.
+file with the extension @samp{.org} replaced by the extension for the block
+language.
 @item :tangle filename
 Include block in tangled output to file @samp{filename}
 @end table
@@ -11010,76 +11024,60 @@ FIXME: This variable may have been changed recently
 @end table
 
 
-
-@node Evaluating Code Blocks,  , Extracting Source Code, Working With Source Code
+@node Evaluating Code Blocks, Library of Babel, Extracting Source Code, Working With Source Code
 @comment  node-name,  next,  previous,  up
 @comment  Evaluating Code Blocks,  , Extracting Source Code, Working With Source Code
 @section Evaluating Code Blocks
 
-For many languages, blocks of code can be evaluated, with the results being
-returned to the org buffer (or linked to from the org buffer).
+For many language, blocks of code can be evaluated and the results
+incorporated into the org-mode buffer.  Check the value of the
+@code{org-babel-interpreters} for a list of evaluable languages on your
+system, also see @ref{Languages}.  See @ref{Structure of Code Blocks} for
+information on the syntax used to define a code block.
 
-FIXME: Are we going to use ``evaluate'' or ``execute''
+There are a number of ways of evaluating code blocks.  The simplest is to
+press @key{C-c C-c} with the point on a code block.  This will call the
+@code{org-babel-execute-src-block} function evaluating the block and
+inserting its results into the Org-mode buffer.
 
-This syntax can be expanded by naming the source code block.
-
-@example
-#+sourcename
-#+begin_src language header-arguments switches
-body
-#+end_src
-@end example
-
-- name :: This name is associated with the source code block.  This is
-     similar to the =#+tblname= lines that can be used to name tables
-     in Org-mode files.  Referencing the name of a source code
-     block makes it possible to evaluate the block from other places in
-     the file, other files, or inside Org-mode tables.  It
-     is also possible to pass arguments to a source code block through
-     this =#+source:= line (see [[alternate-argument-syntax][Alternate argument syntax]]).
-
-@subsection Library of Babel
-[[file:library-of-babel.org][Library of Babel]] functions can be called using the following syntax.
+It is also possible to evaluate named code blocks from anywhere in an
+Org-mode buffer or an Org-mode table.  @code{#+call} (or synonymously
+@code{#+function} or @code{#+lob}) lines can be used to remotely execute code
+blocks located in the current Org-mode buffer or in the ``Library of Babel''
+(see @ref{Library of Babel}).  Both of these lines use the following syntax.
 
 @example
-#+lob: R-plot(data=R-plot-example-data)
+#+call: <name>(<arguments>) <header arguments>
 @end example
 
-@subsection Aliases
-   Keyword aliases are intended to make Org-babel feel natural to
-   programmers fluent in a variety of languages.  For example,
-   @example
-     #+srcname: alias-example
-     #+begin_src emacs-lisp
-       '((call lob)
-         (source function srcname)
-         (results resname))
-     #+end_src
+@table @code
+@item <name>
+This name is associated with the source code block to be evaluated.
+@item <arguments>
+Arguments specified in this section will be passed to the code block.
+@item <header arguments>
+Header arguments can be placed after the function invocation.  See
+@ref{Header Arguments} for more information on header arguments.
+@end table
 
-     #+results: alias-example
-     | call    | lob      |         |
-     | source  | function | srcname |
-     | results | resname  |         |
-   @end example
-     - =#+srcname:= can be replaced with either of two aliases,  =#+source:= or =#+function:=.
-     - =#+results:= can be replaced with its alias, =#+resname:=.
 
-   When calling Library of Babel functions, as in the following
-   example, there are two acceptable keywords.  The =#+lob= call in
-   the example could be replaced with its alias, =#+call=.
-   @example
-     #+lob: R-plot(data=R-plot-example-data)
-   @end example
+@node Library of Babel, Languages, Evaluating Code Blocks, Working With Source Code
+@section Library of Babel
+The ``Library of Babel'' is two things.  First it is a library of code blocks
+which can be called from any Org-mode file, and second it is an actual
+Org-mode file located in the @samp{contrib} directory of Org-mode in which
+Org-mode users may deposit contributed functions which they believe to be
+generally useful.  Code blocks defined in the``Library of Babel'' can be
+called remotely as if they were in the current Org-mode buffer (see
+@ref{Evaluating Code Blocks} for information on the syntax of remote code
+block evaluation).
 
-@subsection Languages
-  :PROPERTIES:
-  :CUSTOM_ID: languages
-  :END:
 
-Org-babel can evaluate/execute/compile the following languages. See the
-language specific documentation on Worg for details.
-
-FIXME: How are we going to refer to the external documentation?
+@node Languages, Header Arguments, Library of Babel, Working With Source Code
+@section Languages
+Org-babel provides support for the following languages. See the language
+specific documentation and an up to date list of languages is available at
+@uref{http://orgmode.org/worg/org-contrib/babel/reference.php#languages}.
 
 @c BEGIN RECEIVE ORGTBL org-babel-lang-table
 @multitable @columnfractions 0.583 0.417
@@ -11135,7 +11133,7 @@ The original table from reference.org is below; I'm just using the first column 
   | Ruby           | ruby       |
   | Sass           | sass       |
   | GNU Screen     | screen     |
-  | shell          | sh[fn:1]   |
+  | shell          | sh         |
   | SQL            | sql        |
 
 
@@ -11167,15 +11165,17 @@ The original table from reference.org is below; I'm just using the first column 
 
 @end ignore
 
-To add support for a particular language to your Org-babel installation
-first make sure that the requirements of the language are met, then add a
-line like the following to your Emacs configuration, (replace "identifier"
-with one of the entries in the Identifier column of the table).
+To add support for a particular language to your Org-babel installation first
+make sure that the requirements of the language are met, then add a line like
+the following to your Emacs configuration, (replace ``identifier'' with one
+of the language names from the above table).
 
 @example
 (require 'org-babel-identifier)
 @end example
 
+
+@node Header Arguments, Noweb Reference Syntax, Languages, Working With Source Code
 @section Header Arguments
     :PROPERTIES:
     :CUSTOM_ID: header-arguments
@@ -11552,7 +11552,7 @@ heading:
 
 @subsubheading Remote execution
      A directory on a remote machine can be specified using [[http://www.gnu.org/software/tramp/#Filename-Syntax][tramp
-     filename syntax]], in which case the code will be executed on the
+     filename syntax]], in which case the code will be evaluated on the
      remote machine[fn:2]. An example is
 
 @example 
@@ -11694,7 +11694,7 @@ above features to work correctly.
     results to avoid re-running unchanged source code blocks.  This
     header argument can have one of two values: =yes= or =no=.
     - =no= :: The default.  No caching takes place and the source
-         code block will be run every time it is executed.
+         code block will be run every time it is evaluated.
     - =yes= :: every time the source code block is run a sha1 hash of
          the code and arguments passed to the block will be
          generated.  This hash is packed into the =#+results:= line
@@ -11790,11 +11790,9 @@ above features to work correctly.
        and prints out its value, '2'. (Indeed, the other print statements are
        unnecessary here).
 
-@section Noweb Reference Syntax
-  :PROPERTIES:
-  :CUSTOM_ID: noweb-reference-syntax
-  :END:
 
+@node Noweb Reference Syntax, Key Bindings & Useful Functions, Header Arguments, Working With Source Code
+@section Noweb Reference Syntax
   The [[http://www.cs.tufts.edu/~nr/noweb/][Noweb]] Literate Programming system allows named blocks of code to
   be referenced by using the familiar Noweb syntax:
   : <<code-block-name>>
@@ -11820,6 +11818,8 @@ above features to work correctly.
   An example that uses the Noweb reference syntax is provided in the
   [[literate programming example]].
 
+
+@node Key Bindings & Useful Functions, , Noweb Reference Syntax, Working With Source Code
 @section Key Bindings & Useful Functions
 
   Org-babel re-binds many common Org-mode key sequences depending on
@@ -11864,7 +11864,7 @@ above features to work correctly.
 
   (org-babel-execute-src-block &optional ARG INFO PARAMS)
 
-  Execute the current source code block, and insert the results
+  Evaluate the current source code block, and insert the results
   into the buffer.  Source code execution and the collection and
   formatting of results can be controlled through a variety of
   header arguments.
@@ -14216,8 +14216,6 @@ org-customize @key{RET}} and then click yourself through the tree.
 @end ignore
 
 @c Local variables:
-@c ispell-local-dictionary: "en_US-w_accents"
-@c ispell-local-pdict: "./.aspell.org.pws"
 @c fill-column: 77
 @c End:
 
