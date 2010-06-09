@@ -11295,18 +11295,18 @@ Description of every standard (non language-specific) Org-babel header
 argument.
 
 @menu
-* @code{var}::
-* @code{results}::
-* @code{file}::
-* @code{dir} and remote execution::
-* @code{exports}::
-* @code{tangle}::
-* @code{session}::
-* @code{noweb}::
-* @code{cache}::
+* var::
+* results::
+* file::
+* dir and remote execution::
+* exports::
+* tangle::
+* session::
+* noweb::
+* cache::
 @end menu
 
-@node @code{var}, @code{results}, , Specific Header Arguments
+@node var, results, , Specific Header Arguments
 @subsubsection @code{var}
 The @code{:var} header argument is used to pass arguments to
 source code blocks.  The specifics of how arguments are included
@@ -11442,8 +11442,8 @@ parenthesis following the source name.
      function) and =describe-variable= (M-x describe variable)
      functions, respectively.
 
-@node @code{results}, @code{file}, @code{var}, Specific Header Arguments
-@subsubsection @code{results}
+@node results, file, var, Specific Header Arguments
+@subsubsection results
 
     There are three types of results header argument:
     - *collection* header arguments specify how the results should be collected from
@@ -11518,8 +11518,8 @@ parenthesis following the source name.
                   into the Org-mode buffer.  E.g., @code{:results output
                   replace}.
 
-@node @code{file}, @code{dir} and remote execution, @code{results}, Specific Header Arguments
-@subsubsection @code{file}
+@node file, dir and remote execution, results, Specific Header Arguments
+@subsubsection file
     @code{:file} is used to specify a path for file output in which case an
     Org-mode style link (see @ref{Link format}) @code{file:} link is inserted
     into the buffer as the result. Common examples are graphical output from
@@ -11535,8 +11535,8 @@ parenthesis following the source name.
     While the @code{:file} header argument can be used to specify the path to
     the output file,
 
-@node @code{dir} and remote execution, @code{exports}, @code{file}, Specific Header Arguments
-@subsubsection @code{dir} and remote execution
+@node dir and remote execution, exports, file, Specific Header Arguments
+@subsubsection dir and remote execution
     @code{:dir} specifies the /default directory/ during code block
     execution. If it is absent, then the directory associated with the
     current buffer is used. In other words, supplying @code{:dir path}
@@ -11601,8 +11601,8 @@ install tramp separately in order for the above features to work correctly.
        the file will be created in a location to which the link does
        not point.
 
-@node @code{exports}, @code{tangle}, @code{dir} and remote execution, Specific Header Arguments
-@subsubsection @code{exports}
+@node exports, tangle, dir and remote execution, Specific Header Arguments
+@subsubsection exports
     Specify what should be included in HTML or LaTeX exports of the
     Org-mode file.
 
@@ -11615,8 +11615,8 @@ install tramp separately in order for the above features to work correctly.
     - none :: nothing is included in the exported file.  E.g.,
                @code{:exports none}.
 
-@node @code{tangle}, @code{session}, @code{exports}, Specific Header Arguments
-@subsubsection @code{tangle}
+@node tangle, session, exports, Specific Header Arguments
+@subsubsection tangle
     Specify whether or not the source code block should be included
     in tangled extraction of source code files.
 
@@ -11629,8 +11629,8 @@ install tramp separately in order for the above features to work correctly.
                 is interpreted as a file basename to which the block will
                 be exported.  E.g., @code{:tangle basename}.
 
-@node @code{session}, @code{noweb}, @code{tangle}, Specific Header Arguments
-@subsubsection @code{session}
+@node session, noweb, tangle, Specific Header Arguments
+@subsubsection session
     Start a session for an interpreted language where state is
     preserved.  This applies particularly to the supported languages
     python, R and ruby.
@@ -11641,8 +11641,8 @@ install tramp separately in order for the above features to work correctly.
     session a name.  This makes it possible to run concurrent
     sessions for each interpreted language.
 
-@node @code{noweb}, @code{cache}, @code{session}, Specific Header Arguments
-@subsubsection @code{noweb}
+@node noweb, cache, session, Specific Header Arguments
+@subsubsection noweb
     Controls the expansion of [[noweb-reference-syntax][noweb syntax]] references in a
     source code block.  This header argument can have one of two
     values: @code{yes} or @code{no}.
@@ -11681,8 +11681,8 @@ install tramp separately in order for the above features to work correctly.
 
      Thanks to Sébastien Vauban for this idea.
 
-@node @code{cache}, , @code{noweb}, Specific Header Arguments
-@subsubsection @code{cache}
+@node cache, , noweb, Specific Header Arguments
+@subsubsection cache
     Controls the use of in-buffer caching of source code block
     results to avoid re-running unchanged source code blocks.  This
     header argument can have one of two values: @code{yes} or @code{no}.
