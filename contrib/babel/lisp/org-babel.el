@@ -398,7 +398,7 @@ the current subtree."
 (defun org-babel-get-src-block-info (&optional header-vars-only)
   "Get information of the current source block.
 Returns a list
- (language body header-arguments-alist switches name function-args).
+ (language body header-arguments-alist switches name function-args indent).
 Unless HEADER-VARS-ONLY is non-nil, any variable
 references provided in 'function call style' (i.e. in a
 parenthesised argument list following the src block name) are
@@ -411,25 +411,29 @@ added to the header-arguments-alist."
 	  (setq indent (car (last info)))
 	  (setq info (butlast info))
 	  (forward-line -1)
-	  (when (looking-at
-                 (concat org-babel-source-name-regexp
-                         "\\([^ ()\f\t\n\r\v]+\\)\\(\(\\(.*\\)\)\\|\\)"))
-	    (setq info (append info (list (org-babel-clean-text-properties
-					   (match-string 2)))))
-	    ;; Note that e.g. "name()" and "name( )" result in ((:var . "")).
-	    ;; We maintain that behaviour, and the resulting non-nil sixth
-	    ;; element is relied upon in org-babel-exp-code to detect
-	    ;; a functional-style block in those cases. However,
-	    ;; "name" without any parentheses would result in the same
-	    ;; thing, so we explicitly avoid that.
-	    (if (setq args (match-string 4))
-                (setq info
-                      (append info (list
-                                    (mapcar (lambda (ref) (cons :var ref))
-                                            (org-babel-ref-split-args args))))))
-	    (unless header-vars-only
-	      (setf (third info)
-		    (org-babel-merge-params (sixth info) (third info)))))
+	  (if (looking-at
+	       (concat org-babel-source-name-regexp
+		       "\\([^ ()\f\t\n\r\v]+\\)\\(\(\\(.*\\)\)\\|\\)"))
+	      (progn
+		(setq info (append info (list (org-babel-clean-text-properties
+					       (match-string 2)))))
+		;; Note that e.g. "name()" and "name( )" result in
+		;; ((:var . "")).  We maintain that behaviour, and the
+		;; resulting non-nil sixth element is relied upon in
+		;; org-babel-exp-code to detect a functional-style
+		;; block in those cases. However, "name" without any
+		;; parentheses would result in the same thing, so we
+		;; explicitly avoid that.
+		(if (setq args (match-string 4))
+		    (setq info
+			  (append info (list
+					(mapcar
+					 (lambda (ref) (cons :var ref))
+					 (org-babel-ref-split-args args))))))
+		(unless header-vars-only
+		  (setf (third info)
+			(org-babel-merge-params (sixth info) (third info)))))
+	    (setq info (append info (list nil nil))))
 	  (append info (list indent)))
       (if (save-excursion ;; inline source block
             (re-search-backward "[ \f\t\n\r\v]" nil t)
