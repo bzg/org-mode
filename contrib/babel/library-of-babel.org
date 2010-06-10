@@ -35,6 +35,14 @@
   The raw Org-mode text of this file can be downloaded at
   [[repofile:contrib/babel/library-of-babel.org][library-of-babel.org]]
 
+* Simple
+A collection of simple utility functions
+
+#+srcname: echo
+#+begin_src emacs-lisp :var input="echo'd"
+  input
+#+end_src
+
 * File I/O
 ** reading and writing files
 Read the contents of the file at =path= into a string.
