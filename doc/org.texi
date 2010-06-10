@@ -11303,13 +11303,13 @@ Description of every standard (non language-specific) Org-babel header
 argument.
 
 @menu
-* no-expand::
 * var::
 * results::
 * file::
 * dir and remote execution::
 * exports::
 * tangle::
+* no-expand::
 * session::
 * noweb::
 * cache::
@@ -11318,15 +11318,7 @@ argument.
 * rownames::
 @end menu
 
-@node no-expand, var, , Specific Header arguments
-@subsubsection no-expand
-By default, code blocks are expanded with @code{org-babel-expand-src-block}
-during tangling.  This has the effect of assigning values to variables
-specified with @code{:var} (see @ref{var}), and of replacing ``noweb''
-references (see @ref{Noweb reference syntax}) with their targets.  The
-@code{:no-expand} header argument can be used to turn off this behavior.
-
-@node var, results, no-expand, Specific Header arguments
+@node var, results, , Specific Header arguments
 @subsubsection var
 The @code{:var} header argument is used to pass arguments to
 source code blocks.  The specifics of how arguments are included
@@ -11663,7 +11655,7 @@ both the code and results are included in the exported file. E.g.,
 nothing is included in the exported file.  E.g., @code{:exports none}.
 @end itemize
 
-@node tangle, session, exports, Specific Header arguments
+@node tangle, no-expand, exports, Specific Header arguments
 @subsubsection tangle
 Specify whether or not the source code block should be included in tangled
 extraction of source code files.
@@ -11682,7 +11674,15 @@ as a file basename to which the block will be exported.  E.g., @code{:tangle
 basename}.
 @end itemize
 
-@node session, noweb, tangle, Specific Header arguments
+@node no-expand, session, tangle, Specific Header arguments
+@subsubsection no-expand
+By default, code blocks are expanded with @code{org-babel-expand-src-block}
+during tangling.  This has the effect of assigning values to variables
+specified with @code{:var} (see @ref{var}), and of replacing ``noweb''
+references (see @ref{Noweb reference syntax}) with their targets.  The
+@code{:no-expand} header argument can be used to turn off this behavior.
+
+@node session, noweb, no-expand, Specific Header arguments
 @subsubsection session
 Start a session for an interpreted language where state is preserved.  This
 applies particularly to the supported languages python, R and ruby.
