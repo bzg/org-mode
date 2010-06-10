@@ -150,12 +150,12 @@ can not be resolved.")
   (set-default var value)
   (setq
    org-babel-src-block-regexp
-   (concat "^[ \t]*#\\+begin_src[ \t]+\\("       ;; (1)   lang
+   (concat "^\\([ \t]*\\)#\\+begin_src[ \t]+\\(" ;; (1) indentation (2)   lang
            (mapconcat 'regexp-quote value "\\|")
            "\\)[ \t]*"
-           "\\([^\":\n]*\"[^\"\n*]*\"[^\":\n]*\\|[^\":\n]*\\)" ;; (2)   switches
-           "\\([^\n]*\\)\n"                      ;; (3)   header arguments
-           "\\([^\000]+?\n\\)[ \t]*#\\+end_src"));; (4)   body
+           "\\([^\":\n]*\"[^\"\n*]*\"[^\":\n]*\\|[^\":\n]*\\)" ;; (3)   switches
+           "\\([^\n]*\\)\n"                      ;; (4)   header arguments
+           "\\([^\000]+?\n\\)[ \t]*#\\+end_src"));; (5)   body
   (setq org-babel-inline-src-block-regexp
 	(concat "[ \f\t\n\r\v]\\(src_"                ;; (1)   replacement target
 		"\\("                                 ;; (2)   lang
@@ -215,7 +215,6 @@ Optionally supply a value for PARAMS which will be merged with
 the header arguments specified at the front of the source code
 block."
   (interactive)
-  ;; (message "supplied params=%S" params) ;; debugging
   (let* ((info (or info (org-babel-get-src-block-info)))
          (lang (first info))
 	 (params (setf (third info)
@@ -230,7 +229,8 @@ block."
          (body (setf (second info)
 		     (if (and (cdr (assoc :noweb params))
                               (string= "yes" (cdr (assoc :noweb params))))
-                         (org-babel-expand-noweb-references info) (second info))))
+                         (org-babel-expand-noweb-references info)
+		       (second info))))
          (result-params (split-string (or (cdr (assoc :results params)) "")))
          (result-type (cond ((member "output" result-params) 'output)
 			    ((member "value" result-params) 'value)
@@ -242,6 +242,7 @@ block."
 	 (call-process-region-original
 	  (if (boundp 'call-process-region-original) call-process-region-original
 	    (symbol-function 'call-process-region)))
+	 (indent (car (last info)))
          result)
     (unwind-protect
         (flet ((call-process-region (&rest args)
@@ -262,7 +263,7 @@ block."
                                       (not (listp result)))
                                  (list (list result))
                                result)))
-            (org-babel-insert-result result result-params info new-hash)
+            (org-babel-insert-result result result-params info new-hash indent)
             (run-hooks 'org-babel-after-execute-hook)
             result))
       (setq call-process-region 'call-process-region-original))))
@@ -277,7 +278,6 @@ org-babel-expand-body:lang function." body)
   "Expand the current source code block according to it's header
 arguments, and pop open the results in a preview buffer."
   (interactive)
-  ;; (message "supplied params=%S" params) ;; debugging
   (let* ((info (or info (org-babel-get-src-block-info)))
          (lang (first info))
 	 (params (setf (third info)
@@ -403,17 +403,19 @@ Unless HEADER-VARS-ONLY is non-nil, any variable
 references provided in 'function call style' (i.e. in a
 parenthesised argument list following the src block name) are
 added to the header-arguments-alist."
-  (let ((case-fold-search t) head info args)
+  (let ((case-fold-search t) head info args indent)
     (if (setq head (org-babel-where-is-src-block-head))
         (save-excursion
 	  (goto-char head)
 	  (setq info (org-babel-parse-src-block-match))
+	  (setq indent (car (last info)))
+	  (setq info (butlast info))
 	  (forward-line -1)
 	  (when (looking-at
                  (concat org-babel-source-name-regexp
                          "\\([^ ()\f\t\n\r\v]+\\)\\(\(\\(.*\\)\)\\|\\)"))
 	    (setq info (append info (list (org-babel-clean-text-properties
-                                           (match-string 2)))))
+					   (match-string 2)))))
 	    ;; Note that e.g. "name()" and "name( )" result in ((:var . "")).
 	    ;; We maintain that behaviour, and the resulting non-nil sixth
 	    ;; element is relied upon in org-babel-exp-code to detect
@@ -428,7 +430,7 @@ added to the header-arguments-alist."
 	    (unless header-vars-only
 	      (setf (third info)
 		    (org-babel-merge-params (sixth info) (third info)))))
-	  info)
+	  (append info (list indent)))
       (if (save-excursion ;; inline source block
             (re-search-backward "[ \f\t\n\r\v]" nil t)
             (looking-at org-babel-inline-src-block-regexp))
@@ -484,7 +486,7 @@ added as the last element of the kill ring.  This can be called
 with C-c C-c."
   (interactive)
   (let ((hash (car (delq nil (mapcar
-                               (lambda (ol) (overlay-get ol 'babel-hash))
+			      (lambda (ol) (overlay-get ol 'babel-hash))
                               (overlays-at (or point (point))))))))
     (when hash (kill-new hash) (message hash))))
 (add-hook 'org-ctrl-c-ctrl-c-hook 'org-babel-hash-at-point)
@@ -563,7 +565,7 @@ with C-c C-c."
 ;; Remove overlays when changing major mode
 (add-hook 'org-mode-hook
 	  (lambda () (org-add-hook 'change-major-mode-hook
-				   'org-babel-show-result-all 'append 'local)))
+			      'org-babel-show-result-all 'append 'local)))
 
 (defmacro org-babel-map-source-blocks (file &rest body)
   "Evaluate BODY forms on each source-block in FILE."
@@ -604,10 +606,11 @@ may be specified in the properties of the current outline entry."
 		 (and (boundp sym) (eval sym))))))))))
 
 (defun org-babel-parse-src-block-match ()
-  (let* ((lang (org-babel-clean-text-properties (match-string 1)))
+  (let* ((block-indentation (length (match-string 1)))
+	 (lang (org-babel-clean-text-properties (match-string 2)))
          (lang-headers (intern (concat "org-babel-default-header-args:" lang)))
-	 (switches (match-string 2))
-         (body (org-babel-clean-text-properties (match-string 4)))
+	 (switches (match-string 3))
+         (body (org-babel-clean-text-properties (match-string 5)))
 	 (preserve-indentation (or org-src-preserve-indentation
 				   (string-match "-i\\>" switches))))
     (list lang
@@ -622,8 +625,9 @@ may be specified in the properties of the current outline entry."
            (org-babel-params-from-properties lang)
 	   (if (boundp lang-headers) (eval lang-headers) nil)
 	   (org-babel-parse-header-arguments
-            (org-babel-clean-text-properties (or (match-string 3) ""))))
-	  switches)))
+            (org-babel-clean-text-properties (or (match-string 4) ""))))
+	  switches
+	  block-indentation)))
 
 (defun org-babel-parse-inline-src-block-match ()
   (let* ((lang (org-babel-clean-text-properties (match-string 2)))
@@ -820,7 +824,7 @@ buffer or nil if no such result exists."
                    "[ \t]" (regexp-quote name) "[ \t\n\f\v\r]") nil t)
       (beginning-of-line 0) (point))))
 
-(defun org-babel-where-is-src-block-result (&optional insert info hash)
+(defun org-babel-where-is-src-block-result (&optional insert info hash indent)
   "Return the point at the beginning of the result of the current
 source block.  Specifically at the beginning of the results line.
 If no result exists for this block then create a results line
@@ -828,7 +832,8 @@ following the source block."
   (save-excursion
     (let* ((on-lob-line (progn (beginning-of-line 1)
 			       (looking-at org-babel-lob-one-liner-regexp)))
-	   (name (if on-lob-line (first (org-babel-lob-get-info))
+	   (name (if on-lob-line
+		     (first (org-babel-lob-get-info))
 		   (fifth (or info (org-babel-get-src-block-info)))))
 	   (head (unless on-lob-line (org-babel-where-is-src-block-head))) end)
       (when head (goto-char head))
@@ -849,10 +854,16 @@ following the source block."
                             (goto-char end)
 			    (if (looking-at "[\n\r]")
                                 (forward-char 1) (insert "\n"))
-                            (insert (concat "#+results"
-                                            (when hash (concat "["hash"]"))
-                                            ":"
-                                            (when name (concat " " name)) "\n"))
+                            (insert (concat
+				     (if indent
+					 (mapconcat
+					  (lambda (el) " ")
+					  (number-sequence 1 indent) "")
+				       "")
+				     "#+results"
+				     (when hash (concat "["hash"]"))
+				     ":"
+				     (when name (concat " " name)) "\n"))
                             (beginning-of-line 0)
                             (if hash (org-babel-hide-hash)) t)))
                (point))))))
@@ -864,13 +875,13 @@ following the source block."
      ((org-at-table-p) (org-babel-read-table))
      ((looking-at org-bracket-link-regexp) (org-babel-read-link))
      ((looking-at org-block-regexp) (org-babel-trim (match-string 4)))
-     ((looking-at ": ")
+     ((looking-at "^[ \t]*: ")
       (setq result-string
 	    (org-babel-trim
 	     (mapconcat (lambda (line)
                           (if (and (> (length line) 1)
-                                   (string= ": " (substring line 0 2)))
-                              (substring line 2)
+                                   (string-match "^[ \t]*: \\(.+\\)" line))
+                              (match-string 1 line)
                             line))
 			(split-string
 			 (buffer-substring
@@ -902,7 +913,7 @@ link is a file path it is expanded using `expand-file-name'."
            (expand-file-name (match-string 2 raw))))
      (t raw))))
 
-(defun org-babel-insert-result (result &optional result-params info hash)
+(defun org-babel-insert-result (result &optional result-params info hash indent)
   "Insert RESULT into the current buffer after the end of the
 current source block.  With optional argument RESULT-PARAMS
 controls insertion of results in the org-mode file.
@@ -954,22 +965,22 @@ code ---- the results are extracted in the syntax of the source
         (setq result (concat result "\n")))
       (save-excursion
 	(let ((existing-result (org-babel-where-is-src-block-result
-				t info hash))
+				t info hash indent))
 	      (results-switches
                (cdr (assoc :results_switches (third info))))
-	      indent-level beg)
+	      beg end)
 	  (when existing-result
 	    (goto-char existing-result)
 	    (save-excursion
 	      (re-search-forward "#" nil t)
-	      (setq indent-level (- (current-column) 1)))
-	    (message "%d:%d" (point) indent-level)
+	      (setq indent (- (current-column) 1)))
 	    (forward-line 1)
+	    (setq beg (point))
 	    (cond
 	     ((member "replace" result-params)
 	      (delete-region (point) (org-babel-result-end)))
 	     ((member "append" result-params)
-	      (goto-char (org-babel-result-end)))
+	      (goto-char (org-babel-result-end)) (setq beg (point)))
 	     ((member "prepend" result-params) ;; already there
 	      )))
 	  (setq results-switches
@@ -977,7 +988,6 @@ code ---- the results are extracted in the syntax of the source
 	  (cond
 	   ;; assume the result is a table if it's not a string
 	   ((not (stringp result))
-	    (setq beg (point))
 	    (insert (concat (orgtbl-to-orgtbl
 			     (if (or (eq 'hline (car result))
 				     (and (listp (car result))
@@ -1000,10 +1010,14 @@ code ---- the results are extracted in the syntax of the source
 	    (save-excursion (insert result)) (if (org-at-table-p) (org-cycle)))
 	   (t
 	    (org-babel-examplize-region
-             (point) (progn (insert result) (point)) results-switches)))
+	     (point) (progn (insert result) (point)) results-switches)))
 	  ;; possibly indent the results to match the #+results line
-	  (when (and indent-level (> indent-level 0))
-	    (indent-rigidly beg (org-babel-result-end) indent-level))))
+	  (setq end (if (listp result) (org-table-end) (point)))
+	  (when (and indent (> indent 0)
+		     ;; in this case `table-align' does the work for us
+		     (not (and (listp result)
+			       (member "append" result-params))))
+	    (indent-rigidly beg end indent))))
       (message "finished"))))
 
 (defun org-babel-result-to-org-string (result)
@@ -1027,19 +1041,19 @@ relies on `org-babel-insert-result'."
         (progn (goto-char (org-table-end)) (point))
       (let ((case-fold-search t))
         (cond
-         ((looking-at "#\\+begin_latex")
-          (search-forward "#+end_latex" nil t)
+         ((looking-at "[ \t]*#\\+begin_latex")
+          (search-forward "[ \t]*#\\+end_latex" nil t)
           (forward-line 1))
-         ((looking-at "#\\+begin_html")
-          (search-forward "#+end_html" nil t)
+         ((looking-at "[ \t]*#\\+begin_html")
+          (search-forward "[ \t]*#\\+end_html" nil t)
           (forward-line 1))
-         ((looking-at "#\\+begin_example")
-          (search-forward "#+end_example" nil t)
+         ((looking-at "[ \t]*#\\+begin_example")
+          (search-forward "[ \t]*#\\+end_example" nil t)
           (forward-line 1))
-         ((looking-at "#\\+begin_src")
-          (search-forward "#+end_src" nil t)
+         ((looking-at "[ \t]*#\\+begin_src")
+          (search-forward "[ \t]*#\\+end_src" nil t)
           (forward-line 1))
-         (t (progn (while (looking-at "\\(: \\|\\[\\[\\)")
+         (t (progn (while (looking-at "[ \t]*\\(: \\|\\[\\[\\)")
                      (forward-line 1))))))
       (point))))
 
