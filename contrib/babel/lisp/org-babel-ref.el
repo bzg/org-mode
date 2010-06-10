@@ -123,7 +123,7 @@ return nil."
       (save-restriction
 	(widen)
 	(goto-char (point-min))
-	(if (let ((result_regexp (concat "^#\\+\\(TBLNAME\\|RESNAME\\|RESULTS\\):[ \t]*"
+	(if (let ((result_regexp (concat "^[ \t]*#\\+\\(TBLNAME\\|RESNAME\\|RESULTS\\):[ \t]*"
 					 (regexp-quote ref) "[ \t]*$"))
 		  (regexp (concat org-babel-source-name-regexp
 				  (regexp-quote ref) "\\(\(.*\)\\)?" "[ \t]*$")))
