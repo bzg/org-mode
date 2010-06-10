@@ -15571,10 +15571,6 @@ looks only before point, not after."
     (org-in-regexp
      "\\\\[a-zA-Z]+\\*?\\(\\(\\[[^][\n{}]*\\]\\)\\|\\({[^{}\n]*}\\)\\)*")))
 
-(defun test ()
-  (interactive)
-  (message "%s" (org-inside-latex-macro-p)))
-
 (defun org-try-cdlatex-tab ()
   "Check if it makes sense to execute `cdlatex-tab', and do it if yes.
 It makes sense to do so if `org-cdlatex-mode' is active and if the cursor is
