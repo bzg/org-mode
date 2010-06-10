@@ -5515,14 +5515,16 @@ and subscriipts."
 	     org-match-substring-regexp
 	   org-match-substring-with-braces-regexp)
 	 limit t)
-	(let* ((pos (point)) table-p comment-p emph-p link-p)
-	  (setq emph-p (get-text-property (match-beginning 3) 'org-emphasis))
-	  (setq link-p (get-text-property (match-beginning 3) 'mouse-face))
+	(let* ((pos (point)) table-p comment-p
+	       (mpos (match-beginning 3))
+	       (emph-p (get-text-property mpos 'org-emphasis))
+	       (link-p (get-text-property mpos 'mouse-face))
+	       (keyw-p (eq 'org-special-keyword (get-text-property mpos 'face))))
 	  (goto-char (point-at-bol))
 	  (setq table-p (org-looking-at-p org-table-dataline-regexp)
 		comment-p (org-looking-at-p "[ \t]*#"))
 	  (goto-char pos)
-	  (if (or comment-p emph-p link-p)
+	  (if (or comment-p emph-p link-p keyw-p)
 	      t
 	    (put-text-property (match-beginning 3) (match-end 0)
 			       'display
