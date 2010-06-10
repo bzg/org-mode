@@ -10892,7 +10892,7 @@ The structure of code blocks is as follows:
 @example
 #+srcname: <name>
 #+begin_src <language> <switches> <header arguments>
-<body>
+  <body>
 #+end_src
 @end example
 
