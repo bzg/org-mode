@@ -10878,6 +10878,7 @@ thorough tour of Org-mode's sophisticated code block handling facilities.
 * Results::
 * Noweb Reference Syntax::
 * Key Bindings & Useful Functions::
+* Batch Execution::
 @end menu
 
 
@@ -10962,7 +10963,7 @@ see @ref{Literal examples}.
 The @code{:exports} header argument can be used to specify non-default export
 behavior:
 
-Header arguments:
+@subsubheading Header arguments:
 @table @code
 @item :exports code
 The default (in most languages). Only the body of the code block is exported
@@ -10992,8 +10993,7 @@ community.  During ``tangling'' of code blocks their bodies are expanded
 using @code{org-babel-expand-src-block} which can expand both variable and
 ``noweb'' (see @ref{Noweb Reference Syntax}) style references.
 
-Relevant header arguments:
-
+@subsubheading header arguments:
 @table @code
 @item :tangle no
 The default.
@@ -11005,8 +11005,7 @@ language.
 Include block in tangled output to file @samp{filename}
 @end table
 
-Relevant functions:
-
+@subsubheading functions:
 @table @code
 @item org-babel-tangle @key{C-c C-v t}
 Tangle the current file
@@ -11843,7 +11842,7 @@ Org-babel does not break correct code in a language, such as Ruby, where
 syntactically valid in languages that you use, then please consider setting
 the default value.
 
-@node Key Bindings & Useful Functions, , Noweb Reference Syntax, Working With Source Code
+@node Key Bindings & Useful Functions, Batch Execution, Noweb Reference Syntax, Working With Source Code
 @section Key Bindings & Useful Functions
 
 Org-babel re-binds many common Org-mode key sequences depending on
@@ -12031,6 +12030,7 @@ Org-babel also exposes a number of functions behind the common
 @end example
 @end itemize
 
+@node Batch Execution, , Key Bindings & Useful Functions, Working With Source Code
 @section Batch Execution
 It is possible to call Org-babel functions from the command line.  This shell
 script calls @code{org-babel-tangle} on every one of its arguments.
