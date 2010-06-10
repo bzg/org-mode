@@ -11836,7 +11836,7 @@ No column name pre-processing takes place
 
 @item @code{yes}
 Column names are removed and reapplied as with @code{nil} even if the table
-does not /look like/ it has column names (i.e. the second row is not an
+does not ``look like'' it has column names (i.e. the second row is not an
 hline)
 @end itemize
 
