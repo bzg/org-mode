@@ -11303,6 +11303,7 @@ Description of every standard (non language-specific) Org-babel header
 argument.
 
 @menu
+* no-expand::
 * var::
 * results::
 * file::
@@ -11317,7 +11318,15 @@ argument.
 * rownames::
 @end menu
 
-@node var, results, , Specific Header arguments
+@node no-expand, var, , Specific Header arguments
+@subsubsection no-expand
+By default, code blocks are expanded with @code{org-babel-expand-src-block}
+during tangling.  This has the effect of assigning values to variables
+specified with @code{:var} (see @ref{var}), and of replacing ``noweb''
+references (see @ref{Noweb reference syntax}) with their targets.  The
+@code{:no-expand} header argument can be used to turn off this behavior.
+
+@node var, results, no-expand, Specific Header arguments
 @subsubsection var
 The @code{:var} header argument is used to pass arguments to
 source code blocks.  The specifics of how arguments are included
