@@ -221,7 +221,7 @@ block."
 	 (params (setf (third info)
                        (sort (org-babel-merge-params (third info) params)
                              (lambda (el1 el2) (string< (symbol-name (car el1))
-						   (symbol-name (car el2)))))))
+                                                   (symbol-name (car el2)))))))
          (new-hash
           (if (and (cdr (assoc :cache params))
                    (string= "yes" (cdr (assoc :cache params))))
@@ -484,7 +484,7 @@ added as the last element of the kill ring.  This can be called
 with C-c C-c."
   (interactive)
   (let ((hash (car (delq nil (mapcar
-			      (lambda (ol) (overlay-get ol 'babel-hash))
+                               (lambda (ol) (overlay-get ol 'babel-hash))
                               (overlays-at (or point (point))))))))
     (when hash (kill-new hash) (message hash))))
 (add-hook 'org-ctrl-c-ctrl-c-hook 'org-babel-hash-at-point)
