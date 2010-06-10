@@ -13198,12 +13198,11 @@ allowed value."
   (save-excursion
     (beginning-of-line 1)
     (when (looking-at (org-re "^[ \t]*\\(:\\([[:alpha:]][[:alnum:]_-]*\\):\\)[ \t]*\\(.*\\)"))
-     (let ((match (match-data)) ;; Keep match-data for use by calling
-	   (p (point))          ;; procedures.
-	   (range (unless (org-before-first-heading-p)
-		    (org-get-property-block))))
-       (prog1 (and range (<= (car range) p) (< p (cdr range)))
-	 (set-match-data match))))))
+      (save-match-data ;; Used by calling procedures
+	(let ((p (point))
+	      (range (unless (org-before-first-heading-p)
+		       (org-get-property-block))))
+	  (and range (<= (car range) p) (< p (cdr range))))))))
 
 (defun org-get-property-block (&optional beg end force)
   "Return the (beg . end) range of the body of the property drawer.
