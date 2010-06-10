@@ -11312,6 +11312,9 @@ argument.
 * session::
 * noweb::
 * cache::
+* hlines::
+* colnames::
+* rownames::
 @end menu
 
 @node var, results, , Specific Header arguments
@@ -11722,7 +11725,7 @@ Note that noweb replacement text that does not contain any newlines will not
 be affected by this change, so it is still possible to use inline noweb
 references.
 
-@node cache, , noweb, Specific Header arguments
+@node cache, hlines, noweb, Specific Header arguments
 @subsubsection cache
 Controls the use of in-buffer caching of source code block results to avoid
 re-running unchanged source code blocks.  This header argument can have one
@@ -11738,6 +11741,133 @@ passed to the block will be generated.  This hash is packed into the
 @code{#+results:} line of the results and will be checked on subsequent
 executions of the source code block.  If the source code block has not
 changed since the last time it was evaluated, it will not be re-evaluated.
+@end itemize
+
+@node hlines, colnames, cache, Specific Header arguments
+@subsubsection hlines
+Tables are frequently represented with one or more horizontal lines, or
+hlines.  The @code{:hlines} argument to an Org-babel code block accepts the
+values @code{yes} or @code{no}, with a default value of @code{no}.
+
+@itemize @bullet
+@item @code{no}
+Strips horizontal lines from the input table.  In most languages this is the
+desired effect because an @code{hline} symbol is interpreted as an unbound
+variable and raises an error.  Setting @code{:hlines no} or relying on the
+default value yields the following results.
+
+@example
+#+tblname: many-cols
+| a | b | c |
+|---+---+---|
+| d | e | f |
+|---+---+---|
+| g | h | i |
+
+#+source: echo-table
+#+begin_src python :var tab=many-cols
+  return tab
+#+end_src
+
+#+results: echo-table
+| a | b | c |
+| d | e | f |
+| g | h | i |
+@end example
+
+@item @code{yes}
+Leaves hlines in the table. Setting @code{:hlines yes} has this effect.
+
+@example
+#+tblname: many-cols
+| a | b | c |
+|---+---+---|
+| d | e | f |
+|---+---+---|
+| g | h | i |
+
+#+source: echo-table
+#+begin_src python :var tab=many-cols :hlines yes
+  return tab
+#+end_src
+
+#+results: echo-table
+| a | b | c |
+|---+---+---|
+| d | e | f |
+|---+---+---|
+| g | h | i |
+@end example
+@end itemize
+
+@node colnames, rownames, hlines, Specific Header arguments
+@subsubsection colnames
+The @code{:colnames} header argument accepts the values @code{yes},
+@code{no}, or @code{nil} for unassigned.  The default value is @code{nil}.
+
+@itemize @bullet
+@item @code{nil}
+If an input table /looks like/ it has column names
+(because its second row is an hline), then the column
+names will be removed from the table by Org-babel before
+processing, then reapplied to the results.
+
+@example
+#+tblname: less-cols
+| a |
+|---|
+| b |
+| c |
+  
+#+srcname: echo-table-again
+#+begin_src python :var tab=less-cols
+  return [[val + '*' for val in row] for row in tab]
+#+end_src
+
+#+results: echo-table-again
+| a  |
+|----|
+| b* |
+| c* |
+@end example
+
+@item @code{no}
+No column name pre-processing takes place
+
+@item @code{yes}
+Column names are removed and reapplied as with @code{nil} even if the table
+does not /look like/ it has column names (i.e. the second row is not an
+hline)
+@end itemize
+
+@node rownames, , colnames, Specific Header arguments
+@subsubsection rownames
+The @code{:rownames} header argument can take on the values @code{yes}
+or @code{no}, with a default value of @code{no}.
+
+@itemize @bullet
+@item @code{no}
+No row name pre-processing will take place.
+
+@item @code{yes}
+The first column of the table is removed from the
+table by Org-babel before processing, and is then reapplied
+to the results.
+
+@example
+#+tblname: with-rownames
+| one | 1 | 2 | 3 | 4 |  5 |
+| two | 6 | 7 | 8 | 9 | 10 | 
+
+#+srcname: echo-table-once-again
+#+begin_src python :var tab=with-rownames :rownames yes
+  return [[val + 10 for val in row] for row in tab]            
+#+end_src
+
+#+results: echo-table-once-again
+| one | 11 | 12 | 13 | 14 | 15 |
+| two | 16 | 17 | 18 | 19 | 20 |
+@end example
 @end itemize
 
 @node Results, Noweb reference syntax, Header arguments, Working With Source Code
