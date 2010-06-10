@@ -221,7 +221,7 @@ block."
 	 (params (setf (third info)
                        (sort (org-babel-merge-params (third info) params)
                              (lambda (el1 el2) (string< (symbol-name (car el1))
-                                                   (symbol-name (car el2)))))))
+						   (symbol-name (car el2)))))))
          (new-hash
           (if (and (cdr (assoc :cache params))
                    (string= "yes" (cdr (assoc :cache params))))
@@ -484,7 +484,7 @@ added as the last element of the kill ring.  This can be called
 with C-c C-c."
   (interactive)
   (let ((hash (car (delq nil (mapcar
-                               (lambda (ol) (overlay-get ol 'babel-hash))
+			      (lambda (ol) (overlay-get ol 'babel-hash))
                               (overlays-at (or point (point))))))))
     (when hash (kill-new hash) (message hash))))
 (add-hook 'org-ctrl-c-ctrl-c-hook 'org-babel-hash-at-point)
@@ -956,9 +956,14 @@ code ---- the results are extracted in the syntax of the source
 	(let ((existing-result (org-babel-where-is-src-block-result
 				t info hash))
 	      (results-switches
-               (cdr (assoc :results_switches (third info)))) beg)
+               (cdr (assoc :results_switches (third info))))
+	      indent-level beg)
 	  (when existing-result
 	    (goto-char existing-result)
+	    (save-excursion
+	      (re-search-forward "#" nil t)
+	      (setq indent-level (- (current-column) 1)))
+	    (message "%d:%d" (point) indent-level)
 	    (forward-line 1)
 	    (cond
 	     ((member "replace" result-params)
@@ -995,7 +1000,10 @@ code ---- the results are extracted in the syntax of the source
 	    (save-excursion (insert result)) (if (org-at-table-p) (org-cycle)))
 	   (t
 	    (org-babel-examplize-region
-             (point) (progn (insert result) (point)) results-switches)))))
+             (point) (progn (insert result) (point)) results-switches)))
+	  ;; possibly indent the results to match the #+results line
+	  (when (and indent-level (> indent-level 0))
+	    (indent-rigidly beg (org-babel-result-end) indent-level))))
       (message "finished"))))
 
 (defun org-babel-result-to-org-string (result)
