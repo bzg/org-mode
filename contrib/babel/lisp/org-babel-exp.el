@@ -78,7 +78,6 @@ none ----- do not display either code or results upon export"
       (goto-char (match-beginning 0))
       (let* ((info (org-babel-get-src-block-info))
 	     (params (third info)))
-	(message "info:%S" info)
 	;; expand noweb references in the original file
 	(setf (second info)
 	      (if (and (cdr (assoc :noweb params))
