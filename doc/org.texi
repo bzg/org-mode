@@ -8547,9 +8547,9 @@ be used to fontify the example:
 
 @example
 #+BEGIN_SRC emacs-lisp
-(defun org-xor (a b)
-   "Exclusive or."
-   (if a (not b) b))
+  (defun org-xor (a b)
+     "Exclusive or."
+     (if a (not b) b))
 #+END_SRC
 @end example
 
@@ -9425,9 +9425,9 @@ respectively.  For example
 
 @example
 #+BEGIN_EXAMPLE -t -w 40
-(defun org-xor (a b)
-   "Exclusive or."
-   (if a (not b) b))
+  (defun org-xor (a b)
+     "Exclusive or."
+     (if a (not b) b))
 #+END_EXAMPLE
 @end example
 
@@ -10854,9 +10854,9 @@ e.g.
 
 @example
 #+BEGIN_SRC emacs-lisp
-(defun org-xor (a b)
-   "Exclusive or."
-   (if a (not b) b))
+  (defun org-xor (a b)
+     "Exclusive or."
+     (if a (not b) b))
 #+END_SRC
 @end example
 
@@ -10867,25 +10867,25 @@ their results to a number of formats.  The following sections provide a
 thorough tour of Org-mode's sophisticated code block handling facilities.
 
 @menu
-* Structure of Code Blocks::
-* Editing Source Code::         
-* Exporting Code Blocks::       
-* Extracting Source Code::      
-* Evaluating Code Blocks::      
+* Structure of code blocks::
+* Editing source code::
+* Exporting code blocks::
+* Extracting source code::
+* Evaluating code blocks::
 * Library of Babel::
 * Languages::
-* Header Arguments::
+* Header arguments::
 * Results::
-* Noweb Reference Syntax::
-* Key Bindings & Useful Functions::
-* Batch Execution::
+* Noweb reference syntax::
+* Key bindings & useful functions::
+* Batch execution::
 @end menu
 
 
-@node Structure of Code Blocks, Editing Source Code, Working With Source Code, Working With Source Code
+@node Structure of code blocks, Editing source code, Working With Source Code, Working With Source Code
 @comment  node-name,  next,  previous,  up
-@comment  Structure of Code Blocks, Editing Source Code, Working With Source Code, Working With Source Code
-@section Structure of Code Blocks
+@comment  Structure of code blocks, Editing source code, Working With Source Code, Working With Source Code
+@section Structure of code blocks
 
 The structure of code blocks is as follows:
 
@@ -10910,17 +10910,17 @@ Switches controling exportation of the code block (see switches discussion in
 @ref{Literal examples})
 @item <header arguments>
 Optional header arguments control many aspects of evaluation, export and
-tangling of source code blocks. See the @ref{Header Arguments}
+tangling of source code blocks. See the @ref{Header arguments}
 section. Header arguments can also be set on a per-buffer or per-subtree
 basis using properties.
 @item <body>
 The code
 @end table
 
-@node Editing Source Code, Exporting Code Blocks, Structure of Code Blocks, Working With Source Code
+@node Editing source code, Exporting code blocks, Structure of code blocks, Working With Source Code
 @comment  node-name,  next,  previous,  up
-@comment  Editing Source Code, Exporting Code Blocks, Structure of Code Blocks, Working With Source Code
-@section Editing Source Code
+@comment  Editing source code, Exporting code blocks, Structure of code blocks, Working With Source Code
+@section Editing source code
 
 Use @kbd{C-c '} to edit the current code block. This brings up a language
 major-mode edit buffer containing the body of the code block. Saving this
@@ -10948,10 +10948,10 @@ By default, Org will ask before returning to an open edit buffer. Set
 to a non-nil value to switch without asking.
 @end table
 
-@node Exporting Code Blocks, Extracting Source Code, Editing Source Code, Working With Source Code
+@node Exporting code blocks, Extracting source code, Editing source code, Working With Source Code
 @comment  node-name,  next,  previous,  up
-@comment  Exporting Code Blocks, Extracting Source Code, Editing Source Code, Working With Source Code
-@section Exporting Code Blocks
+@comment  Exporting code blocks, Extracting source code, Editing source code, Working With Source Code
+@section Exporting code blocks
 
 It is possible to export the @emph{contents} of code blocks, the
 @emph{results} of code block evaluation, or @emph{neither} or @emph{both}.
@@ -10982,16 +10982,16 @@ exported as well.
 No part of the code block or it's results will be exported.
 @end table
 
-@node Extracting Source Code, Evaluating Code Blocks, Exporting Code Blocks, Working With Source Code
+@node Extracting source code, Evaluating code blocks, Exporting code blocks, Working With Source Code
 @comment  node-name,  next,  previous,  up
-@comment  Extracting Source Code, Evaluating Code Blocks, Exporting Code Blocks, Working With Source Code
-@section Extracting Source Code
+@comment  Extracting source code, Evaluating code blocks, Exporting code blocks, Working With Source Code
+@section Extracting source code
 
 Creating pure source code files by extracting code from source blocks is
 referred to as ``tangling'' -- a term adopted from the literate programming
 community.  During ``tangling'' of code blocks their bodies are expanded
 using @code{org-babel-expand-src-block} which can expand both variable and
-``noweb'' (see @ref{Noweb Reference Syntax}) style references.
+``noweb'' (see @ref{Noweb reference syntax}) style references.
 
 @subsubheading header arguments:
 @table @code
@@ -11013,15 +11013,15 @@ Tangle the current file
 Choose a file to tangle
 @end table
 
-@node Evaluating Code Blocks, Library of Babel, Extracting Source Code, Working With Source Code
+@node Evaluating code blocks, Library of Babel, Extracting source code, Working With Source Code
 @comment  node-name,  next,  previous,  up
-@comment  Evaluating Code Blocks,  , Extracting Source Code, Working With Source Code
-@section Evaluating Code Blocks
+@comment  Evaluating code blocks,  , Extracting source code, Working With Source Code
+@section Evaluating code blocks
 
 Blocks of code can be evaluated and the results incorporated into the
 org-mode buffer.  Check the value of the @code{org-babel-interpreters} for a
 list of evaluable languages on your system, also see @ref{Languages} for a
-list of supported languages.  See @ref{Structure of Code Blocks} for
+list of supported languages.  See @ref{Structure of code blocks} for
 information on the syntax used to define a code block.
 
 There are a number of ways of evaluating code blocks.  The simplest is to
@@ -11046,11 +11046,11 @@ This name is associated with the source code block to be evaluated.
 Arguments specified in this section will be passed to the code block.
 @item <header arguments>
 Header arguments can be placed after the function invocation.  See
-@ref{Header Arguments} for more information on header arguments.
+@ref{Header arguments} for more information on header arguments.
 @end table
 
 
-@node Library of Babel, Languages, Evaluating Code Blocks, Working With Source Code
+@node Library of Babel, Languages, Evaluating code blocks, Working With Source Code
 @section Library of Babel
 The ``Library of Babel'' is two things.  First it is a library of code blocks
 which can be called from any Org-mode file, and second it is an actual
@@ -11059,14 +11059,14 @@ Org-mode users may deposit functions which they believe to be generally
 useful.
 
 Code blocks defined in the``Library of Babel'' can be called remotely as if
-they were in the current Org-mode buffer (see @ref{Evaluating Code Blocks}
+they were in the current Org-mode buffer (see @ref{Evaluating code blocks}
 for information on the syntax of remote code block evaluation).
 
 Code blocks located in any Org-mode file can be loaded into the ``Library of
 Babel'' with the @code{org-babel-lob-ingest} function, bound to @key{C-c C-v
 l}.
 
-@node Languages, Header Arguments, Library of Babel, Working With Source Code
+@node Languages, Header arguments, Library of Babel, Working With Source Code
 @section Languages
 Org-babel provides support for the following languages. See the language
 specific documentation and an up to date list of languages is available at
@@ -11168,20 +11168,20 @@ of the language names from the above table).
 @end example
 
 
-@node Header Arguments, Results, Languages, Working With Source Code
-@section Header Arguments
+@node Header arguments, Results, Languages, Working With Source Code
+@section Header arguments
 
 Most code block functionality is configurable using header arguments.  This
 section provides an overview of the use of header arguments, and then
 exhaustively covers all header arguments.
 
 @menu
-* Using Header Arguments::
-* Specific Header Arguments::
+* Using Header arguments::
+* Specific Header arguments::
 @end menu
 
-@node Using Header Arguments, Specific Header Arguments, , Header Arguments
-@subsection Using Header Arguments
+@node Using Header arguments, Specific Header arguments, , Header arguments
+@subsection Using Header arguments
 
 The values of header arguments can be set in five different ways, each more
 specific (and having higher priority) than the last.
@@ -11193,7 +11193,7 @@ specific (and having higher priority) than the last.
 * Source Code Block specific header arguments::
 @end menu
 
-@node System-wide header arguments, Language Specific header arguments, , Using Header Arguments
+@node System-wide header arguments, Language Specific header arguments, , Using Header arguments
 @subsubheading System-wide header arguments
 System-wide values of header arguments can be specified by customizing the
 @code{org-babel-default-header-args} variable:
@@ -11223,18 +11223,18 @@ blocks.
 	      (assq-delete-all :noweb org-babel-default-header-args)))
 @end example
 
-@node Language Specific header arguments, Buffer Wide header arguments, System-wide header arguments, Using Header Arguments
+@node Language Specific header arguments, Buffer Wide header arguments, System-wide header arguments, Using Header arguments
 @subsubheading Language Specific header arguments
 Each language can define it's own set of default header arguments.  See the
 language-specific documentation available at
 @uref{http://orgmode.org/worg/org-contrib/babel/reference.php#languages}.
 for information on language-specific header arguments.
 
-@node Buffer Wide header arguments, header arguments in Org-mode Properties, Language Specific header arguments, Using Header Arguments
+@node Buffer Wide header arguments, header arguments in Org-mode Properties, Language Specific header arguments, Using Header arguments
 @subsubheading Buffer Wide header arguments
 FIXME
 
-@node header arguments in Org-mode Properties, Source Code Block specific header arguments, Buffer Wide header arguments, Using Header Arguments
+@node header arguments in Org-mode Properties, Source Code Block specific header arguments, Buffer Wide header arguments, Using Header arguments
 @subsubheading header arguments in Org-mode Properties
 
 Header arguments are also read from Org-mode properties (see @ref{Property
@@ -11262,7 +11262,7 @@ Properties defined in this way override the properties set in
 @code{org-set-property} function bound to @key{C-c C-x p} to set properties
 in Org-mode documents.
 
-@node Source Code Block specific header arguments, , header arguments in Org-mode Properties, Using Header Arguments
+@node Source Code Block specific header arguments, , header arguments in Org-mode Properties, Using Header arguments
 @subsubheading Source Code Block specific header arguments
 
 The most common way to assign values to header arguments is at the source
@@ -11297,8 +11297,8 @@ and for ``Library of Babel'' or function call lines as shown below.
 #+call: factorial(n=5) :exports results
 @end example
 
-@node Specific Header Arguments, , Using Header Arguments, Header Arguments
-@subsection Specific Header Arguments
+@node Specific Header arguments, , Using Header arguments, Header arguments
+@subsection Specific Header arguments
 Description of every standard (non language-specific) Org-babel header
 argument.
 
@@ -11314,7 +11314,7 @@ argument.
 * cache::
 @end menu
 
-@node var, results, , Specific Header Arguments
+@node var, results, , Specific Header arguments
 @subsubsection var
 The @code{:var} header argument is used to pass arguments to
 source code blocks.  The specifics of how arguments are included
@@ -11453,7 +11453,7 @@ Note: In Emacs, the documentation for any function or variable can be read
 using the @code{describe-function} (M-x describe function) and
 @code{describe-variable} (M-x describe variable) functions, respectively.
 
-@node results, file, var, Specific Header Arguments
+@node results, file, var, Specific Header arguments
 @subsubsection results
 
 There are three types of results header argument:
@@ -11549,7 +11549,7 @@ be prepended to the existing results.  Otherwise the new results will be
 inserted as with @code{replace}.
 @end itemize
 
-@node file, dir and remote execution, results, Specific Header Arguments
+@node file, dir and remote execution, results, Specific Header arguments
 @subsubsection file
 @code{:file} is used to specify a path for file output in which case an
 Org-mode style link (see @ref{Link format}) @code{file:} link is inserted
@@ -11566,7 +11566,7 @@ corresponding to the path indicated by @code{:file}.
 While the @code{:file} header argument can be used to specify the path to the
 output file,
 
-@node dir and remote execution, exports, file, Specific Header Arguments
+@node dir and remote execution, exports, file, Specific Header arguments
 @subsubsection dir and remote execution
 @code{:dir} specifies the /default directory/ during code block execution. If
 it is absent, then the directory associated with the current buffer is
@@ -11632,7 +11632,7 @@ it probable that the file will be created in a location to which the link
 does not point.
 @end itemize
 
-@node exports, tangle, dir and remote execution, Specific Header Arguments
+@node exports, tangle, dir and remote execution, Specific Header arguments
 @subsubsection exports
 Specify what should be included in HTML or LaTeX exports of the Org-mode
 file.
@@ -11651,7 +11651,7 @@ both the code and results are included in the exported file. E.g.,
 nothing is included in the exported file.  E.g., @code{:exports none}.
 @end itemize
 
-@node tangle, session, exports, Specific Header Arguments
+@node tangle, session, exports, Specific Header arguments
 @subsubsection tangle
 Specify whether or not the source code block should be included in tangled
 extraction of source code files.
@@ -11670,7 +11670,7 @@ as a file basename to which the block will be exported.  E.g., @code{:tangle
 basename}.
 @end itemize
 
-@node session, noweb, tangle, Specific Header Arguments
+@node session, noweb, tangle, Specific Header arguments
 @subsubsection session
 Start a session for an interpreted language where state is preserved.  This
 applies particularly to the supported languages python, R and ruby.
@@ -11681,9 +11681,9 @@ A string passed to the @code{:session} header argument will give the session
 a name.  This makes it possible to run concurrent sessions for each
 interpreted language.
 
-@node noweb, cache, session, Specific Header Arguments
+@node noweb, cache, session, Specific Header arguments
 @subsubsection noweb
-Controls the expansion of ``noweb'' style (see @ref{Noweb Reference Syntax})
+Controls the expansion of ``noweb'' style (see @ref{Noweb reference syntax})
 references in a source code block.  This header argument can have one of two
 values: @code{yes} or @code{no}.
 
@@ -11722,7 +11722,7 @@ Note that noweb replacement text that does not contain any newlines will not
 be affected by this change, so it is still possible to use inline noweb
 references.
 
-@node cache, , noweb, Specific Header Arguments
+@node cache, , noweb, Specific Header arguments
 @subsubsection cache
 Controls the use of in-buffer caching of source code block results to avoid
 re-running unchanged source code blocks.  This header argument can have one
@@ -11740,7 +11740,7 @@ executions of the source code block.  If the source code block has not
 changed since the last time it was evaluated, it will not be re-evaluated.
 @end itemize
 
-@node Results, Noweb Reference Syntax, Header Arguments, Working With Source Code
+@node Results, Noweb reference syntax, Header arguments, Working With Source Code
 @section Results
 The way in which results are handled depends on whether a session is invoked,
 as well as on whether @code{:results value} or @code{:results output} is
@@ -11820,8 +11820,8 @@ But in @code{:session} mode, the interactive interpreter receives input '2'
 and prints out its value, '2'. (Indeed, the other print statements are
 unnecessary here).
 
-@node Noweb Reference Syntax, Key Bindings & Useful Functions, Results, Working With Source Code
-@section Noweb Reference Syntax
+@node Noweb reference syntax, Key bindings & useful functions, Results, Working With Source Code
+@section Noweb reference syntax
 The ``noweb'' (see @uref{http://www.cs.tufts.edu/~nr/noweb/}) Literate
 Programming system allows named blocks of code to be referenced by using the
 familiar Noweb syntax:
@@ -11842,8 +11842,8 @@ Org-babel does not break correct code in a language, such as Ruby, where
 syntactically valid in languages that you use, then please consider setting
 the default value.
 
-@node Key Bindings & Useful Functions, Batch Execution, Noweb Reference Syntax, Working With Source Code
-@section Key Bindings & Useful Functions
+@node Key bindings & useful functions, Batch execution, Noweb reference syntax, Working With Source Code
+@section Key bindings & useful functions
 
 Org-babel re-binds many common Org-mode key sequences depending on
 the context.  Within a source-code block the following sequences
@@ -11852,213 +11852,67 @@ are rebound:
 @multitable @columnfractions 0.25 0.75
 @item @key{C-c C-c} @tab org-babel-execute-src-block
 @item @key{C-c C-o} @tab org-babel-open-src-block-result
-@item @key{C-up} @tab org-babel-load-in-session
-@item @key{M-down} @tab org-babel-pop-to-session
+@item @key{C-up}    @tab org-babel-load-in-session
+@item @key{M-down}  @tab org-babel-pop-to-session
 @end multitable
-
-Org-babel also exposes a number of functions behind the common
-=org-babel-key-prefix= of =C-c C-v=:
-@example
-#+begin_src emacs-lisp :exports none
-   (lambda (binding
-     (list (format "\\C-c \\M-b %s"
-		   (car binding))
-	   (format "[[function-%s][%s]]"
-		   (cdr binding) (cdr binding))))
-   org-babel-key-bindings)
-#+end_src
-@end example
 
 @multitable @columnfractions 0.25 0.75
-@item @key{C-c C-v t} @tab org-babel-tangle
-@item @key{C-c C-v T} @tab org-babel-tangle-file
-@item @key{C-c C-v e} @tab org-babel-execute-src-block
-@item @key{C-c C-v s} @tab org-babel-execute-subtree
+@item @key{C-c C-v a} @tab org-babel-sha1-hash
 @item @key{C-c C-v b} @tab org-babel-execute-buffer
-@item @key{C-c C-v h} @tab org-babel-sha1-hash
+@item @key{C-c C-v f} @tab org-babel-tangle-file
 @item @key{C-c C-v g} @tab org-babel-goto-named-source-block
+@item @key{C-c C-v h} @tab org-babel-describe-bindings
 @item @key{C-c C-v l} @tab org-babel-lob-ingest
+@item @key{C-c C-v p} @tab org-babel-expand-src-block
+@item @key{C-c C-v s} @tab org-babel-execute-subtree
+@item @key{C-c C-v t} @tab org-babel-tangle
+@item @key{C-c C-v z} @tab org-babel-switch-to-session
 @end multitable
 
-@subsection Functions
-@itemize @bullet
-@item org-babel-execute-src-block
+When possible these keybindings were extended to work when the control key is
+kept pressed, resulting in the following additional keybindings.
 
-@example
-  org-babel-execute-src-block is an interactive Lisp function in
-  `org-babel.el'.
+@multitable @columnfractions 0.25 0.75
+@item @key{C-c C-v C-a} @tab org-babel-sha1-hash
+@item @key{C-c C-v C-b} @tab org-babel-execute-buffer
+@item @key{C-c C-v C-f} @tab org-babel-tangle-file
+@item @key{C-c C-v C-l} @tab org-babel-lob-ingest
+@item @key{C-c C-v C-p} @tab org-babel-expand-src-block
+@item @key{C-c C-v C-s} @tab org-babel-execute-subtree
+@item @key{C-c C-v C-t} @tab org-babel-tangle
+@item @key{C-c C-v C-z} @tab org-babel-switch-to-session
+@end multitable
 
-  (org-babel-execute-src-block &optional ARG INFO PARAMS)
-
-  Evaluate the current source code block, and insert the results
-  into the buffer.  Source code execution and the collection and
-  formatting of results can be controlled through a variety of
-  header arguments.
-
-  Optionally supply a value for INFO in the form returned by
-  `org-babel-get-src-block-info'.
-
-  Optionally supply a value for PARAMS which will be merged with
-  the header arguments specified at the front of the source code
-  block.
-@end example
-
-@item org-babel-open-src-block-result
-
-@example
-  org-babel-open-src-block-result is an interactive Lisp function in
-  `org-babel.el'.
-
-  (org-babel-open-src-block-result &optional RE-RUN)
-
-  If `point' is on a src block then open the results of the
-  source code block, otherwise return nil.  With optional prefix
-  argument RE-RUN the source-code block is evaluated even if
-  results already exist.
-@end example
-
-@item org-babel-load-in-session
-
-@example
-  org-babel-load-in-session is an interactive Lisp function in
-  `org-babel.el'.
-
-  (org-babel-load-in-session &optional ARG INFO)
-
-  Load the body of the current source-code block.  Evaluate the
-  header arguments for the source block before entering the
-  session.  After loading the body this pops open the session.
-
-  [back]
-@end example
-
-@item org-babel-pop-to-session
-
-@example
-  org-babel-pop-to-session is an interactive Lisp function in
-  `org-babel.el'.
-
-  (org-babel-pop-to-session &optional ARG INFO)
-
-  Pop to the session of the current source-code block.  If
-  called with a prefix argument then evaluate the header arguments
-  for the source block before entering the session.  Copy the body
-  of the source block to the kill ring.
-
-  [back]
-@end example
-
-@item org-babel-tangle
-
-@example
-  org-babel-tangle is an interactive Lisp function in
-  `org-babel-tangle.el'.
-
-  It is bound to C-c C-v t.
-
-  (org-babel-tangle &optional TARGET-FILE LANG)
-
-  Extract the bodies of all source code blocks from the current
-  file into their own source-specific files.  Optional argument
-  TARGET-FILE can be used to specify a default export file for all
-  source blocks.  Optional argument LANG can be used to limit the
-  exported source code blocks by language.
-@end example
-
-@item org-babel-execute-subtree
-
-@example
-  org-babel-execute-subtree is an interactive Lisp function in
-  `org-babel.el'.
-
-  It is bound to C-c C-v s.
-
-  (org-babel-execute-subtree &optional ARG)
-
-  Replace EVAL snippets in the entire subtree.
-@end example
-
-@item org-babel-execute-buffer
-
-@example
-  org-babel-execute-buffer is an interactive Lisp function in
-  `org-babel.el'.
-
-  It is bound to C-c C-v b.
-
-  (org-babel-execute-buffer &optional ARG)
-
-  Replace EVAL snippets in the entire buffer.
-@end example
-
-@item org-babel-sha1-hash
-
-@example
-  org-babel-sha1-hash is an interactive Lisp function in `org-babel.el'.
-
-  It is bound to C-c C-v h.
-
-  (org-babel-sha1-hash &optional INFO)
-
-  Not documented.
-@end example
-
-@item org-babel-goto-named-source-block
-
-@example
-  org-babel-goto-named-source-block is an interactive Lisp function in
-  `org-babel.el'.
-
-  It is bound to C-c C-v g.
-
-  (org-babel-goto-named-source-block &optional NAME)
-
-  Go to a named source-code block.
-@end example
-
-@item org-babel-lob-ingest
-
-@example
-  org-babel-lob-ingest is an interactive Lisp function in
-  `org-babel-lob.el'.
-
-  It is bound to C-c C-v l.
-
-  (org-babel-lob-ingest &optional FILE)
-
-  Add all source-blocks defined in FILE to `org-babel-library-of-babel'.
-@end example
-@end itemize
-
-@node Batch Execution, , Key Bindings & Useful Functions, Working With Source Code
-@section Batch Execution
+@node Batch execution, , Key bindings & useful functions, Working With Source Code
+@section Batch execution
 It is possible to call Org-babel functions from the command line.  This shell
 script calls @code{org-babel-tangle} on every one of its arguments.
 
 Be sure to adjust the paths to fit your system.
+
 @example
-  #!/bin/sh
-  # -*- mode: shell-script -*-
-  #
-  # tangle a file with org-babel
-  #
-  DIR=`pwd`
-  FILES=""
+#!/bin/sh
+# -*- mode: shell-script -*-
+#
+# tangle a file with org-babel
+#
+DIR=`pwd`
+FILES=""
 
-  # wrap each argument in the code required to call tangle on it
-  for i in $@@; do
-  FILES="$FILES \"$i\""
-  done
+# wrap each argument in the code required to call tangle on it
+for i in $@@; do
+FILES="$FILES \"$i\""
+done
 
-  emacsclient \
-  --eval "(progn
-  (add-to-list 'load-path (expand-file-name \"~/src/org/lisp/\"))
-  (add-to-list 'load-path (expand-file-name \"~/src/org/contrib/lisp/\"))
-  (require 'org)(require 'org-exp)(require 'org-babel)
-  (mapc (lambda (file)
-         (find-file (expand-file-name file \"$DIR\"))
-         (org-babel-tangle)
-         (kill-buffer)) '($FILES)))"
+emacsclient \
+--eval "(progn
+(add-to-list 'load-path (expand-file-name \"~/src/org/lisp/\"))
+(add-to-list 'load-path (expand-file-name \"~/src/org/contrib/lisp/\"))
+(require 'org)(require 'org-exp)(require 'org-babel)
+(mapc (lambda (file)
+       (find-file (expand-file-name file \"$DIR\"))
+       (org-babel-tangle)
+       (kill-buffer)) '($FILES)))"
 @end example
 
 @node Miscellaneous, Hacking, Working With Source Code, Top
