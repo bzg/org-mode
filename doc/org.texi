@@ -10954,11 +10954,11 @@ to a non-nil value to switch without asking.
 @section Exporting code blocks
 
 It is possible to export the @emph{contents} of code blocks, the
-@emph{results} of code block evaluation, or @emph{neither} or @emph{both}.
-For most languages by default only body of a code blocks will be exported,
-however some languages (e.g. @code{ditaa}) default to exporting the results
-of the code block.  For information on the exportation of code blocks bodies
-see @ref{Literal examples}.
+@emph{results} of code block evaluation, @emph{neither}, or @emph{both}.  For
+most languages, the default exports the contents of code blocks. However, for
+some languages (e.g. @code{ditaa}) the default exports the results of code
+block evaluation.  For information on exporting code block bodies, see
+@ref{Literal examples}.
 
 The @code{:exports} header argument can be used to specify non-default export
 behavior:
@@ -10966,20 +10966,20 @@ behavior:
 @subsubheading Header arguments:
 @table @code
 @item :exports code
-The default (in most languages). Only the body of the code block is exported
-as described in @ref{Literal examples}.
+The default in most languages. The body of the code block is exported, as
+described in @ref{Literal examples}.
 @item :exports results
 On export, the code block will be evaluated and the results will be placed in
-the org-mode buffer (either updating previous results of the code block
-located anywhere in the buffer, or if no previous results exist placing the
-new results immediately after the code block).  The actual body of the code
-block will not be exported.
+the Org-mode buffer, either updating previous results of the code block
+located anywhere in the buffer or, if no previous results exist, placing the
+results immediately after the code block.  The body of the code block will
+not be exported.
 @item :exports both
 On export, the code block will be evaluated and the results inserted into the
 buffer as described above, however the body of the code block will be
 exported as well.
 @item :exports none
-No part of the code block or it's results will be exported.
+Neither the code block nor its results will be exported.
 @end table
 
 @node Extracting source code, Evaluating code blocks, Exporting code blocks, Working With Source Code
