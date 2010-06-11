@@ -354,7 +354,8 @@ results already exist."
       (goto-char (or (and (not re-run) (org-babel-where-is-src-block-result))
                      (progn (org-babel-execute-src-block)
                             (org-babel-where-is-src-block-result))))
-      (end-of-line 1) (forward-char 1)
+      (end-of-line 1)
+      (while (looking-at "[\n\r\t\f ]") (forward-char 1))
       ;; open the results
       (if (looking-at org-bracket-link-regexp)
           ;; file results
