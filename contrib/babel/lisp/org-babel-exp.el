@@ -135,17 +135,19 @@ options are taken from `org-babel-default-header-args'."
       (while (and (< (point) end)
 		  (re-search-forward org-babel-lob-one-liner-regexp nil t))
 	(setq replacement
-	      (save-match-data
-		(org-babel-exp-do-export
-		 (list "emacs-lisp" "results"
-		       (org-babel-merge-params
-			org-babel-default-header-args
-			(org-babel-parse-header-arguments
-			 (org-babel-clean-text-properties
-			  (concat ":var results="
-				  (mapconcat #'identity
-					     (org-babel-lob-get-info) " "))))))
-		 'lob)))
+	      (let ((lob-info (org-babel-lob-get-info)))
+		(save-match-data
+		  (org-babel-exp-do-export
+		   (list "emacs-lisp" "results"
+			 (org-babel-merge-params
+			  org-babel-default-header-args
+			  (org-babel-parse-header-arguments
+			   (org-babel-clean-text-properties
+			    (concat ":var results="
+				    (mapconcat #'identity
+					       (butlast lob-info) " ")))))
+			 (car (last lob-info)))
+		   'lob))))
 	(setq end (+ end (- (length replacement) (length (match-string 0)))))
 	(replace-match replacement t t)))))
 
