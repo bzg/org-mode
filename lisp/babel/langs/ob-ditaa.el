@@ -1,4 +1,4 @@
-;;; org-babel-ditaa.el --- org-babel functions for ditaa evaluation
+;;; ob-ditaa.el --- org-babel functions for ditaa evaluation
 
 ;; Copyright (C) 2009 Eric Schulte
 
@@ -39,7 +39,7 @@
 ;; 4) there are no variables (at least for now)
 
 ;;; Code:
-(require 'org-babel)
+(require 'ob)
 
 (org-babel-add-interpreter "ditaa")
 
@@ -69,5 +69,5 @@ called by `org-babel-execute-src-block'."
 (defun org-babel-prep-session:ditaa (session params)
   (error "Ditaa does not support sessions"))
 
-(provide 'org-babel-ditaa)
-;;; org-babel-ditaa.el ends here
+(provide 'ob-ditaa)
+;;; ob-ditaa.el ends here

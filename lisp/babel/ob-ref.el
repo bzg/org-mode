@@ -1,4 +1,4 @@
-;;; org-babel-ref.el --- org-babel functions for referencing external data
+;;; ob-ref.el --- org-babel functions for referencing external data
 
 ;; Copyright (C) 2009 Eric Schulte, Dan Davison
 
@@ -52,7 +52,7 @@
 ;;
 
 ;;; Code:
-(require 'org-babel)
+(require 'ob)
 
 (defun org-babel-ref-variables (params)
   "Takes a parameter alist, and return an alist of variable
@@ -217,5 +217,5 @@ types are tables and source blocks."
         ((looking-at org-bracket-link-regexp) 'file)
         ((looking-at org-babel-result-regexp) 'results-line)))
 
-(provide 'org-babel-ref)
-;;; org-babel-ref.el ends here
+(provide 'ob-ref)
+;;; ob-ref.el ends here

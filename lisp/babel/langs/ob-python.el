@@ -1,4 +1,4 @@
-;;; org-babel-python.el --- org-babel functions for python evaluation
+;;; ob-python.el --- org-babel functions for python evaluation
 
 ;; Copyright (C) 2009 Eric Schulte
 
@@ -29,9 +29,9 @@
 ;; Org-Babel support for evaluating python source code.
 
 ;;; Code:
-(require 'org-babel)
-(require 'org-babel-tangle)
-(require 'org-babel-comint)
+(require 'ob)
+(require 'ob-tangle)
+(require 'ob-comint)
 (require (if (featurep 'xemacs) 'python-mode 'python))
 
 (org-babel-add-interpreter "python")
@@ -249,5 +249,5 @@ last statement in BODY, as elisp."
       (match-string 1 string)
     string))
 
-(provide 'org-babel-python)
-;;; org-babel-python.el ends here
+(provide 'ob-python)
+;;; ob-python.el ends here

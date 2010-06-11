@@ -1,4 +1,4 @@
-;;; org-babel-exp.el --- Exportation of org-babel source blocks
+;;; ob-exp.el --- Exportation of org-babel source blocks
 
 ;; Copyright (C) 2009 Eric Schulte, Dan Davison
 
@@ -29,7 +29,7 @@
 ;; for more information see the comments in org-babel.el
 
 ;;; Code:
-(require 'org-babel)
+(require 'ob)
 (require 'org-exp-blocks)
 (org-export-blocks-add-block '(src org-babel-exp-src-blocks nil))
 (add-to-list 'org-export-interblocks '(src org-babel-exp-inline-src-blocks))
@@ -273,5 +273,5 @@ results into the buffer."
 		    params `((:results . ,(if silent "silent" "replace")))))
 	 "")))))
 
-(provide 'org-babel-exp)
-;;; org-babel-exp.el ends here
+(provide 'ob-exp)
+;;; ob-exp.el ends here

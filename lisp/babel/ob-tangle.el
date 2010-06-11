@@ -1,4 +1,4 @@
-;;; org-babel-tangle.el --- Extract source code from org-mode files
+;;; ob-tangle.el --- Extract source code from org-mode files
 
 ;; Copyright (C) 2009 Eric Schulte
 
@@ -29,7 +29,7 @@
 ;; Extract the code from source blocks out into raw source-code files.
 
 ;;; Code:
-(require 'org-babel)
+(require 'ob)
 
 (defvar org-babel-tangle-langs nil
   "List of languages supported by `org-babel-tangle'.  The first
@@ -259,5 +259,5 @@ form
 				"^," "" (org-babel-chomp body))))
       (insert-comment (format "%s ends here" source-name)))))
 
-(provide 'org-babel-tangle)
-;;; org-babel-tangle.el ends here
+(provide 'ob-tangle)
+;;; ob-tangle.el ends here

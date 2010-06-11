@@ -1,4 +1,4 @@
-;;; org-babel-ruby.el --- org-babel functions for ruby evaluation
+;;; ob-ruby.el --- org-babel functions for ruby evaluation
 
 ;; Copyright (C) 2009 Eric Schulte
 
@@ -39,7 +39,7 @@
 ;;   http://github.com/eschulte/rinari/raw/master/util/inf-ruby.el
 
 ;;; Code:
-(require 'org-babel)
+(require 'ob)
 (require 'inf-ruby)
 
 (org-babel-add-interpreter "ruby")
@@ -232,5 +232,5 @@ last statement in BODY, as elisp."
       (match-string 1 string)
     string))
 
-(provide 'org-babel-ruby)
-;;; org-babel-ruby.el ends here
+(provide 'ob-ruby)
+;;; ob-ruby.el ends here

@@ -1,4 +1,4 @@
-;;; org-babel-perl.el --- org-babel functions for perl evaluation
+;;; ob-perl.el --- org-babel functions for perl evaluation
 
 ;; Copyright (C) 2009 Dan Davison, Eric Schulte
 
@@ -29,7 +29,7 @@
 ;; Org-Babel support for evaluating perl source code.
 
 ;;; Code:
-(require 'org-babel)
+(require 'ob)
 
 (org-babel-add-interpreter "perl")
 
@@ -126,5 +126,5 @@ last statement in BODY, as elisp."
     ;; comint session evaluation
     (error "Sessions are not supported for Perl.")))
 
-(provide 'org-babel-perl)
-;;; org-babel-perl.el ends here
+(provide 'ob-perl)
+;;; ob-perl.el ends here

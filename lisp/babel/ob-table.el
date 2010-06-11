@@ -1,4 +1,4 @@
-;;; org-babel-table.el --- integration for calling org-babel functions from tables
+;;; ob-table.el --- integration for calling org-babel functions from tables
 
 ;; Copyright (C) 2009 Eric Schulte
 
@@ -53,7 +53,7 @@
 ;; #+TBLFM: $2='(sbe 'fibbd (n $1))
 
 ;;; Code:
-(require 'org-babel)
+(require 'ob)
 
 (defun org-babel-table-truncate-at-newline (string)
   (if (and (stringp string) (string-match "[\n\r]" string))
@@ -101,5 +101,5 @@ example above."
                       (org-babel-merge-params '((:results . "silent")) params))))
        ""))))
 
-(provide 'org-babel-table)
-;;; org-babel-table.el ends here
+(provide 'ob-table)
+;;; ob-table.el ends here

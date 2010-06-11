@@ -1,4 +1,4 @@
-;;; org-babel-haskell.el --- org-babel functions for haskell evaluation
+;;; ob-haskell.el --- org-babel functions for haskell evaluation
 
 ;; Copyright (C) 2009 Eric Schulte
 
@@ -42,7 +42,7 @@
 ;; - (optionally) lhs2tex :: http://people.cs.uu.nl/andres/lhs2tex/
 
 ;;; Code:
-(require 'org-babel)
+(require 'ob)
 (require 'haskell-mode)
 (require 'inf-haskell)
 
@@ -201,5 +201,5 @@ constructs (header arguments, no-web syntax etc...) are ignored."
       ;; process .lhs file with lhs2tex
       (message "running %s" command) (shell-command command) (find-file tex-file))))
 
-(provide 'org-babel-haskell)
-;;; org-babel-haskell.el ends here
+(provide 'ob-haskell)
+;;; ob-haskell.el ends here

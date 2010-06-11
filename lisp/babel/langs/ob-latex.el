@@ -1,4 +1,4 @@
-;;; org-babel-latex.el --- org-babel functions for latex "evaluation"
+;;; ob-latex.el --- org-babel functions for latex "evaluation"
 
 ;; Copyright (C) 2009 Eric Schulte
 
@@ -33,7 +33,7 @@
 ;; be created directly form the latex source code.
 
 ;;; Code:
-(require 'org-babel)
+(require 'ob)
 
 (org-babel-add-interpreter "latex")
 
@@ -136,5 +136,5 @@ called by `org-babel-execute-src-block'."
 (defun org-babel-prep-session:latex (session params)
   (error "Latex does not support sessions"))
 
-(provide 'org-babel-latex)
-;;; org-babel-latex.el ends here
+(provide 'ob-latex)
+;;; ob-latex.el ends here

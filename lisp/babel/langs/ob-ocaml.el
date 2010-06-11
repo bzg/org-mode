@@ -1,4 +1,4 @@
-;;; org-babel-ocaml.el --- org-babel functions for ocaml evaluation
+;;; ob-ocaml.el --- org-babel functions for ocaml evaluation
 
 ;; Copyright (C) 2009 Eric Schulte
 
@@ -38,7 +38,7 @@
 ;; - tuareg-mode :: http://www-rocq.inria.fr/~acohen/tuareg/
 
 ;;; Code:
-(require 'org-babel)
+(require 'ob)
 (require 'tuareg)
 
 (org-babel-add-interpreter "ocaml")
@@ -122,5 +122,5 @@ Emacs-lisp table, otherwise return the results as a string."
                                          "'" "\"" results)))))
      results)))
 
-(provide 'org-babel-ocaml)
-;;; org-babel-ocaml.el ends here
+(provide 'ob-ocaml)
+;;; ob-ocaml.el ends here

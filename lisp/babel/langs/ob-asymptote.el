@@ -1,4 +1,4 @@
-;;; org-babel-asymptote.el --- org-babel functions for asymptote evaluation
+;;; ob-asymptote.el --- org-babel functions for asymptote evaluation
 
 ;; Copyright (C) 2009 Eric Schulte
 
@@ -45,7 +45,7 @@
 ;; - asy-mode :: Major mode for editing asymptote files
 
 ;;; Code:
-(require 'org-babel)
+(require 'ob)
 
 (org-babel-add-interpreter "asymptote")
 
@@ -151,5 +151,5 @@ every cell must be of int type."
                                    (anything-but-int (cdr el)))))))
     (or (anything-but-int data) 'int)))
 
-(provide 'org-babel-asymptote)
-;;; org-babel-asymptote.el ends here
+(provide 'ob-asymptote)
+;;; ob-asymptote.el ends here

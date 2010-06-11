@@ -1,4 +1,4 @@
-;;; org-babel-matlab.el --- org-babel support for matlab evaluation
+;;; ob-matlab.el --- org-babel support for matlab evaluation
 
 ;; Copyright (C) Dan Davison
 
@@ -39,7 +39,7 @@
 
 ;;; Code:
 (require 'matlab)
-(require 'org-babel-octave)
+(require 'ob-octave)
 
 (org-babel-add-interpreter "matlab")
 (add-to-list 'org-babel-tangle-langs '("matlab" "m" "#!/usr/bin/env matlab"))
@@ -76,5 +76,5 @@ If there is not a current inferior-process-buffer in SESSION
 then create. Return the initialized session."
   (org-babel-octave-initiate-session session params 'matlab))
 
-(provide 'org-babel-matlab)
-;;; org-babel-matlab.el ends here
+(provide 'ob-matlab)
+;;; ob-matlab.el ends here

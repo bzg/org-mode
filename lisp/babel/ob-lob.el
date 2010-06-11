@@ -1,4 +1,4 @@
-;;; org-babel-lob.el --- The Library of Babel: off-the-shelf functions for data analysis and plotting using org-babel
+;;; ob-lob.el --- The Library of Babel: off-the-shelf functions for data analysis and plotting using org-babel
 
 ;; Copyright (C) 2009 Eric Schulte, Dan Davison
 
@@ -29,9 +29,9 @@
 ;; See org-babel.org in the parent directory for more information
 
 ;;; Code:
-(require 'org-babel)
-(require 'org-babel-table)
-(require 'org-babel-exp)
+(require 'ob)
+(require 'ob-table)
+(require 'ob-exp)
 
 (defvar org-babel-library-of-babel nil
   "Library of source-code blocks.  This is an association list.
@@ -108,5 +108,5 @@ the word 'call'."
     (org-babel-execute-src-block
      nil (list "emacs-lisp" "results" params nil nil (third info)))))
 
-(provide 'org-babel-lob)
-;;; org-babel-lob.el ends here
+(provide 'ob-lob)
+;;; ob-lob.el ends here

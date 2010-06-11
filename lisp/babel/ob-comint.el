@@ -1,4 +1,4 @@
-;;; org-babel-comint.el --- org-babel functions for interaction with comint buffers
+;;; ob-comint.el --- org-babel functions for interaction with comint buffers
 
 ;; Copyright (C) 2009 Eric Schulte
 
@@ -33,7 +33,7 @@
 ;; org-babel at large.
 
 ;;; Code:
-(require 'org-babel)
+(require 'ob)
 (require 'comint)
 
 (defun org-babel-comint-buffer-livep (buffer)
@@ -123,5 +123,5 @@ code)."
                                 "comint-highlight-prompt"))))
       (accept-process-output (get-buffer-process buffer)))))
 
-(provide 'org-babel-comint)
-;;; org-babel-comint.el ends here
+(provide 'ob-comint)
+;;; ob-comint.el ends here

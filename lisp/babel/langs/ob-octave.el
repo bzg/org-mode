@@ -1,4 +1,4 @@
-;;; org-babel-octave.el --- org-babel functions for octave and matlab evaluation
+;;; ob-octave.el --- org-babel functions for octave and matlab evaluation
 
 ;; Copyright (C) Dan Davison
 
@@ -32,7 +32,7 @@
 ;; octave-mode.el and octave-inf.el come with GNU emacs
 
 ;;; Code:
-(require 'org-babel)
+(require 'ob)
 (require 'octave-inf)
 
 (org-babel-add-interpreter "octave")
@@ -214,5 +214,5 @@ This removes initial blank and comment lines and then calls
       (match-string 1 string)
     string))
 
-(provide 'org-babel-octave)
-;;; org-babel-octave.el ends here
+(provide 'ob-octave)
+;;; ob-octave.el ends here

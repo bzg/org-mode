@@ -1,4 +1,4 @@
-;;; org-babel.el --- working with code blocks in org-mode
+;;; ob.el --- working with code blocks in org-mode
 
 ;; Copyright (C) 2009 Eric Schulte, Dan Davison
 
@@ -29,6 +29,7 @@
 ;; See org-babel.org in the parent directory for more information
 
 ;;; Code:
+(eval-when-compile (require 'cl))
 (require 'org)
 
 ;; add the langs/ directory to the load path
@@ -1606,5 +1607,5 @@ specifies the value of ERROR-BUFFER."
       (delete-file error-file))
     exit-status))
 
-(provide 'org-babel)
-;;; org-babel.el ends here
+(provide 'ob)
+;;; ob.el ends here

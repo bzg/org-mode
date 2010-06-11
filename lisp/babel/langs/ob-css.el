@@ -1,4 +1,4 @@
-;;; org-babel-css.el --- org-babel functions for css evaluation
+;;; ob-css.el --- org-babel functions for css evaluation
 
 ;; Copyright (C) 2009 Eric Schulte
 
@@ -30,7 +30,7 @@
 ;; CSS from org-mode files.
 
 ;;; Code:
-(require 'org-babel)
+(require 'ob)
 
 (org-babel-add-interpreter "css")
 
@@ -48,5 +48,5 @@ called by `org-babel-execute-src-block'."
   "Prepare SESSION according to the header arguments specified in PARAMS."
   (error "CSS sessions are nonsensical"))
 
-(provide 'org-babel-css)
-;;; org-babel-css.el ends here
+(provide 'ob-css)
+;;; ob-css.el ends here

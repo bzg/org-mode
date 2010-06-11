@@ -1,4 +1,4 @@
-;;; org-babel-sh.el --- org-babel functions for shell evaluation
+;;; ob-sh.el --- org-babel functions for shell evaluation
 
 ;; Copyright (C) 2009 Eric Schulte
 
@@ -29,7 +29,7 @@
 ;; Org-Babel support for evaluating shell source code.
 
 ;;; Code:
-(require 'org-babel)
+(require 'ob)
 (require 'shell)
 
 (org-babel-add-interpreter "sh")
@@ -187,5 +187,5 @@ last statement in BODY."
     (setq string (substring string (match-end 0))))
   string)
 
-(provide 'org-babel-sh)
-;;; org-babel-sh.el ends here
+(provide 'ob-sh)
+;;; ob-sh.el ends here

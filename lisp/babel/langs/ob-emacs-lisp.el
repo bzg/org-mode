@@ -1,4 +1,4 @@
-;;; org-babel-emacs-lisp.el --- org-babel functions for emacs-lisp code evaluation
+;;; ob-emacs-lisp.el --- org-babel functions for emacs-lisp code evaluation
 
 ;; Copyright (C) 2009 Eric Schulte
 
@@ -29,7 +29,7 @@
 ;; Org-Babel support for evaluating emacs-lisp code
 
 ;;; Code:
-(require 'org-babel)
+(require 'ob)
 
 (org-babel-add-interpreter "emacs-lisp")
 
@@ -67,5 +67,5 @@
        (org-babel-pick-name (nth 4 processed-params) (cdr (assoc :colnames params)))
        (org-babel-pick-name (nth 5 processed-params) (cdr (assoc :rownames params)))))))
 
-(provide 'org-babel-emacs-lisp)
-;;; org-babel-emacs-lisp.el ends here
+(provide 'obemacs-lisp)
+;;; ob-emacs-lisp.el ends here

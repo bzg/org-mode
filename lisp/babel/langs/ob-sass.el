@@ -1,4 +1,4 @@
-;;; org-babel-sass.el --- org-babel functions for the sass css generation language
+;;; ob-sass.el --- org-babel functions for the sass css generation language
 
 ;; Copyright (C) 2009 Eric Schulte
 
@@ -41,7 +41,7 @@
 ;; - sass-mode :: http://github.com/nex3/haml/blob/master/extra/sass-mode.el
 
 ;;; Code:
-(require 'org-babel)
+(require 'ob)
 (require 'sass-mode)
 
 (org-babel-add-interpreter "sass")
@@ -67,5 +67,5 @@ called by `org-babel-execute-src-block'."
 (defun org-babel-prep-session:sass (session params)
   (error "Sass does not support sessions"))
 
-(provide 'org-babel-sass)
-;;; org-babel-sass.el ends here
+(provide 'ob-sass)
+;;; ob-sass.el ends here

@@ -1,4 +1,4 @@
-;;; org-babel-screen.el --- org-babel support for interactive terminal
+;;; ob-screen.el --- org-babel support for interactive terminal
 
 ;; Copyright (C) 2009 Benjamin Andresen
 
@@ -36,7 +36,7 @@
 ;; M-x org-babel-screen-test RET
 
 ;;; Code:
-(require 'org-babel)
+(require 'ob)
 
 (org-babel-add-interpreter "screen")
 
@@ -143,5 +143,5 @@ The terminal should shortly flicker."
                          "WORKS."
                          "DOESN'T work.")))))
 
-(provide 'org-babel-screen)
-;;; org-babel-screen.el ends here
+(provide 'ob-screen)
+;;; ob-screen.el ends here

@@ -1,4 +1,4 @@
-;;; org-babel-sql.el --- org-babel functions for sql evaluation
+;;; ob-sql.el --- org-babel functions for sql evaluation
 
 ;; Copyright (C) 2009 Eric Schulte
 
@@ -45,7 +45,7 @@
 ;; 
 
 ;;; Code:
-(require 'org-babel)
+(require 'ob)
 
 (org-babel-add-interpreter "sql")
 
@@ -83,5 +83,5 @@ called by `org-babel-execute-src-block'."
   "Prepare SESSION according to the header arguments specified in PARAMS."
   (error "sql sessions not yet implemented"))
 
-(provide 'org-babel-sql)
-;;; org-babel-sql.el ends here
+(provide 'ob-sql)
+;;; ob-sql.el ends here

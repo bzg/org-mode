@@ -1,4 +1,4 @@
-;;; org-babel-keys.el --- key bindings for org-babel
+;;; ob-keys.el --- key bindings for org-babel
 
 ;; Copyright (C) 2009 Eric Schulte
 
@@ -32,7 +32,7 @@
 ;; interactive functions and their associated keys.
 
 ;;; Code:
-(require 'org-babel)
+(require 'ob)
 
 (defvar org-babel-key-prefix "\C-c\C-v"
   "The `org-babel-key-prefix' variable holds the key prefix
@@ -82,5 +82,5 @@ a-list placed behind the generic `org-babel-key-prefix'.")
         (define-key org-babel-map (car pair) (cdr pair)))
       org-babel-key-bindings)
 
-(provide 'org-babel-keys)
-;;; org-babel-keys.el ends here
+(provide 'ob-keys)
+;;; ob-keys.el ends here

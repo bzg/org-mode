@@ -1,4 +1,4 @@
-;;; org-babel-clojure.el --- org-babel functions for clojure evaluation
+;;; ob-clojure.el --- org-babel functions for clojure evaluation
 
 ;; Copyright (C) 2009 Joel Boehland
 
@@ -26,7 +26,7 @@
 
 ;;; Commentary:
 
-;;; Org-Babel support for evaluating clojure code
+;;; ob support for evaluating clojure code
 
 ;;; Requirements:
 
@@ -40,7 +40,7 @@
 ;;; web page: http://technomancy.us/126
 
 ;;; Code:
-(require 'org-babel)
+(require 'ob)
 (require 'cl)
 (require 'slime)
 (require 'swank-clojure)
@@ -278,4 +278,5 @@ last statement in BODY, as elisp."
      (org-babel-pick-name (nth 4 processed-params) (cdr (assoc :colnames params)))
      (org-babel-pick-name (nth 5 processed-params) (cdr (assoc :rownames params))))))
 
-(provide 'org-babel-clojure)
+(provide 'ob-clojure)
+;;; ob-clojure.el ends here

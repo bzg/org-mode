@@ -1,4 +1,4 @@
-;;; org-babel-R.el --- org-babel functions for R code evaluation
+;;; ob-R.el --- org-babel functions for R code evaluation
 
 ;; Copyright (C) 2009 Eric Schulte
 
@@ -29,7 +29,7 @@
 ;; Org-Babel support for evaluating R code
 
 ;;; Code:
-(require 'org-babel)
+(require 'ob)
 
 (org-babel-add-interpreter "R")
 
@@ -250,5 +250,5 @@ Currently, insert hline if column names in output have been requested."
     result))
   
 
-(provide 'org-babel-R)
-;;; org-babel-R.el ends here
+(provide 'ob-R)
+;;; ob-R.el ends here

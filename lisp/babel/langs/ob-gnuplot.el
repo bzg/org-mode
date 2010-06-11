@@ -1,4 +1,4 @@
-;;; org-babel-gnuplot.el --- org-babel functions for gnuplot evaluation
+;;; ob-gnuplot.el --- org-babel functions for gnuplot evaluation
 
 ;; Copyright (C) 2009 Eric Schulte
 
@@ -41,7 +41,7 @@
 ;; - gnuplot-mode :: http://cars9.uchicago.edu/~ravel/software/gnuplot-mode.html
 
 ;;; Code:
-(require 'org-babel)
+(require 'ob)
 (require 'gnuplot)
 
 (org-babel-add-interpreter "gnuplot")
@@ -210,5 +210,5 @@ Pass PARAMS through to `orgtbl-to-generic' when exporting TABLE."
 	      params))))
   data-file)
 
-(provide 'org-babel-gnuplot)
-;;; org-babel-gnuplot.el ends here
+(provide 'ob-gnuplot)
+;;; ob-gnuplot.el ends here

@@ -1,4 +1,4 @@
-;;; org-babel-C.el --- org-babel functions for C and similar languages
+;;; ob-C.el --- org-babel functions for C and similar languages
 
 ;; Copyright (C) 2010 Eric Schulte
 
@@ -33,7 +33,7 @@
 ;; - not much in the way of error feedback
 
 ;;; Code:
-(require 'org-babel)
+(require 'ob)
 (require 'cc-mode)
 
 (org-babel-add-interpreter "C")
@@ -189,5 +189,5 @@ of the same value.  TODO list support."
       (format "u32 %S = %S;" var val)))))
 
 
-(provide 'org-babel-C)
-;;; org-babel-C.el ends here
+(provide 'ob-C)
+;;; ob-C.el ends here

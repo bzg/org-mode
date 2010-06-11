@@ -1,4 +1,4 @@
-;;; org-babel-dot.el --- org-babel functions for dot evaluation
+;;; ob-dot.el --- org-babel functions for dot evaluation
 
 ;; Copyright (C) 2009 Eric Schulte
 
@@ -41,7 +41,7 @@
 ;; 4) there are no variables (at least for now)
 
 ;;; Code:
-(require 'org-babel)
+(require 'ob)
 
 (org-babel-add-interpreter "dot")
 
@@ -69,5 +69,5 @@ called by `org-babel-execute-src-block'."
 (defun org-babel-prep-session:dot (session params)
   (error "Dot does not support sessions"))
 
-(provide 'org-babel-dot)
-;;; org-babel-dot.el ends here
+(provide 'ob-dot)
+;;; ob-dot.el ends here
