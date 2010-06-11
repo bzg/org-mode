@@ -1,4 +1,4 @@
-;;; org-babel.el --- facilitating communication between programming languages and people
+;;; org-babel.el --- working with code blocks in org-mode
 
 ;; Copyright (C) 2009 Eric Schulte, Dan Davison
 
