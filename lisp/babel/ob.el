@@ -31,6 +31,12 @@
 ;;; Code:
 (require 'org)
 
+;; add the langs/ directory to the load path
+(add-to-list 'load-path (expand-file-name
+			 "langs"
+			 (file-name-directory (or (buffer-file-name)
+						  load-file-name))))
+
 (defun org-babel-execute-src-block-maybe ()
   "Detect if this is context for a org-babel src-block and if so
 then run `org-babel-execute-src-block'."
