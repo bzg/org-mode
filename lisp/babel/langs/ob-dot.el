@@ -50,7 +50,8 @@
 (defvar org-babel-default-header-args:dot '((:results . "file") (:exports . "results"))
   "Default arguments to use when evaluating a dot source block.")
 
-(defun org-babel-expand-body:dot (body params &optional processed-params) body)
+(defun org-babel-expand-body:dot (body params &optional processed-params)
+  "Expand BODY according to PARAMS, return the expanded body." body)
 
 (defun org-babel-execute:dot (body params)
   "Execute a block of Dot code with org-babel.  This function is
@@ -67,6 +68,7 @@ called by `org-babel-execute-src-block'."
     out-file))
 
 (defun org-babel-prep-session:dot (session params)
+  "Prepare SESSION according to the contents of PARAMS."
   (error "Dot does not support sessions"))
 
 (provide 'ob-dot)

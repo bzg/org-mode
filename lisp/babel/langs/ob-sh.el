@@ -41,6 +41,7 @@
   `shell-command-on-region'")
 
 (defun org-babel-expand-body:sh (body params &optional processed-params)
+  "Expand BODY according to PARAMS, return the expanded body."
   (let ((vars (second (or processed-params (org-babel-process-params params))))
         (sep (cdr (assoc :separator params))))
     (concat
@@ -120,6 +121,7 @@ Emacs-lisp table, otherwise return the results as a string."
      results)))
 
 (defun org-babel-sh-initiate-session (&optional session params)
+  "Initiate a session named SESSION according to PARAMS."
   (unless (string= session "none")
     (save-window-excursion
       (or (org-babel-comint-buffer-livep session)
@@ -183,6 +185,7 @@ last statement in BODY."
             "")))))
 
 (defun org-babel-sh-strip-weird-long-prompt (string)
+  "Remove prompt cruft from a string of shell output."
   (while (string-match "^% +[\r\n$]+ *" string)
     (setq string (substring string (match-end 0))))
   string)

@@ -36,7 +36,8 @@
 
 (add-to-list 'org-babel-tangle-langs '("css" "css" nil t))
 
-(defun org-babel-expand-body:css (body params &optional processed-params) body)
+(defun org-babel-expand-body:css (body params &optional processed-params)
+  "Expand BODY according to PARAMS, return the expanded body." body)
 
 (defun org-babel-execute:css (body params)
   "Execute a block of CSS code with org-babel.  This function is

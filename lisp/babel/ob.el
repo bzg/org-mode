@@ -152,11 +152,13 @@ can not be resolved.")
 (defvar org-babel-after-execute-hook nil
   "Hook for functions to be called after `org-babel-execute-src-block'")
 (defun org-babel-named-src-block-regexp-for-name (name)
-  "Regexp used to match named src block."
+  "This generates a regexp used to match a src block named NAME."
   (concat org-babel-source-name-regexp (regexp-quote name) "[ \t\n]*"
 	  (substring org-babel-src-block-regexp 1)))
 
 (defun org-babel-set-interpreters (var value)
+  "Update the regular expressions used to match block and inline
+code."
   (set-default var value)
   (setq
    org-babel-src-block-regexp
@@ -453,6 +455,7 @@ added to the header-arguments-alist."
         nil)))) ;; indicate that no source block was found
 
 (defun org-babel-sha1-hash (&optional info)
+  "Generate an sha1 hash based on the value of info."
   (interactive)
   (let* ((info (or info (org-babel-get-src-block-info)))
          (hash (sha1 (format "%s-%s" (mapconcat (lambda (arg) (format "%S" arg))
@@ -462,6 +465,8 @@ added to the header-arguments-alist."
     hash))
 
 (defun org-babel-result-hash (&optional info)
+  "Return the in-buffer hash associated with the results
+specified in INFO."
   (org-babel-where-is-src-block-result nil info)
   (org-babel-clean-text-properties (match-string 3)))
 
@@ -507,6 +512,8 @@ with C-c C-c."
 (add-hook 'org-ctrl-c-ctrl-c-hook 'org-babel-hash-at-point)
 
 (defun org-babel-result-hide-spec ()
+  "Add `org-babel-hide-result' as an invisibility spec for hiding
+portions of results lines."
   (add-to-invisibility-spec '(org-babel-hide-result . t)))
 (add-hook 'org-mode-hook 'org-babel-result-hide-spec)
 
@@ -635,6 +642,8 @@ may be specified at the top of the current buffer."
 		   (org-match-string-no-properties 2))))))))
 
 (defun org-babel-parse-src-block-match ()
+  "Parse the match data resulting from a match of the
+`org-babel-src-block-regexp'."
   (let* ((block-indentation (length (match-string 1)))
 	 (lang (org-babel-clean-text-properties (match-string 2)))
          (lang-headers (intern (concat "org-babel-default-header-args:" lang)))
@@ -660,6 +669,8 @@ may be specified at the top of the current buffer."
 	  block-indentation)))
 
 (defun org-babel-parse-inline-src-block-match ()
+  "Parse the match data resulting from a match of the
+`org-babel-inline-src-block-regexp'."
   (let* ((lang (org-babel-clean-text-properties (match-string 2)))
          (lang-headers (intern (concat "org-babel-default-header-args:" lang))))
     (list lang
@@ -714,17 +725,17 @@ Return a list (session vars result-params result-type colnames rownames)."
   (remove 'hline table))
 
 (defun org-babel-get-colnames (table)
-  "Return a cons cell, the `car' of which contains the TABLE
-        less colnames, and the `cdr' of which contains a list of the
-        column names"
+  "Return a cons cell, the `car' of which contains the TABLE less
+colnames, and the `cdr' of which contains a list of the column
+names."
   (if (equal 'hline (second table))
       (cons (cddr table) (car table))
     (cons (cdr table) (car table))))
 
 (defun org-babel-get-rownames (table)
   "Return a cons cell, the `car' of which contains the TABLE less
-     colnames, and the `cdr' of which contains a list of the column
-     names.  Note: this function removes any hlines in TABLE"
+colnames, and the `cdr' of which contains a list of the column
+names.  Note: this function removes any hlines in TABLE."
   (flet ((trans (table) (apply #'mapcar* #'list table)))
     (let* ((width (apply 'max (mapcar (lambda (el) (if (listp el) (length el) 0)) table)))
            (table (trans (mapcar (lambda (row)
@@ -1308,6 +1319,8 @@ block but are passed literally to the \"example-block\"."
     new-body))
 
 (defun org-babel-error-notify (exit-code stderr)
+  "Open a buffer containing information from STDERR with a
+message about the value of EXIT-CODE."
   (message (format "Shell command exited with code %d" exit-code))
   (let ((buf (get-buffer-create "*Org-Babel Error Output*")))
     (with-current-buffer buf
@@ -1341,7 +1354,7 @@ This is taken almost directly from `org-read-prop'."
     cell))
 
 (defun org-babel-number-p (string)
-  "Return t if STRING represents a number"
+  "Return t if STRING represents a number."
   (if (and (string-match "^-?[0-9]*\\.?[0-9]*$" string)
            (= (length (substring string (match-beginning 0)
 				 (match-end 0)))
@@ -1378,6 +1391,7 @@ the table is trivial, then return it as a scalar."
                       cell)))
 
 (defun org-babel-reverse-string (string)
+  "Return the reverse of STRING."
   (apply 'string (reverse (string-to-list string))))
 
 (defun org-babel-chomp (string &optional regexp)
@@ -1391,15 +1405,16 @@ overwritten by specifying a regexp as a second argument."
     string))
 
 (defun org-babel-trim (string &optional regexp)
-  "Like `org-babel-chomp' only it runs on both the front and back of the string"
+  "Like `org-babel-chomp' only it runs on both the front and back
+of the string."
   (org-babel-chomp (org-babel-reverse-string
                     (org-babel-chomp (org-babel-reverse-string string) regexp))
                    regexp))
 
 (defun org-babel-tramp-handle-call-process-region
   (start end program &optional delete buffer display &rest args)
-  "Use tramp to handle call-process-region.
-Fixes a bug in `tramp-handle-call-process-region'."
+  "Use tramp to handle call-process-region.  Fixes a bug in
+`tramp-handle-call-process-region'."
   (if (and (featurep 'tramp) (file-remote-p default-directory))
       (let ((tmpfile (tramp-compat-make-temp-file "")))
 	(write-region start end tmpfile)
@@ -1415,6 +1430,8 @@ Fixes a bug in `tramp-handle-call-process-region'."
            start end program delete buffer display args)))
 
 (defun org-babel-maybe-remote-file (file)
+  "If FILE specifies a remove file, then parse the information on
+the remote connection."
   (if (file-remote-p default-directory)
       (let* ((vec (tramp-dissect-file-name default-directory))
              (user (tramp-file-name-user vec))

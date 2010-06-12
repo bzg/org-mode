@@ -98,6 +98,7 @@ the word 'call'."
 		  (list (length (match-string 1))))))))
   
 (defun org-babel-lob-execute (info)
+  "Execute the lob call specified by INFO."
   (let ((params (org-babel-merge-params
 		 org-babel-default-header-args
 		 (org-babel-params-from-buffer)

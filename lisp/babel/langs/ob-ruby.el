@@ -47,6 +47,7 @@
 (add-to-list 'org-babel-tangle-langs '("ruby" "rb" "#!/usr/bin/env ruby"))
 
 (defun org-babel-expand-body:ruby (body params &optional processed-params)
+  "Expand BODY according to PARAMS, return the expanded body."
   (let ((vars (second (or processed-params (org-babel-process-params params)))))
     (concat
      (mapconcat ;; define any variables
@@ -113,7 +114,7 @@ specifying a var of the same value."
     (format "%S" var)))
 
 (defun org-babel-ruby-table-or-string (results)
-  "If the results look like a table, then convert them into an
+  "If RESULTS look like a table, then convert them into an
 Emacs-lisp table, otherwise return the results as a string."
   (message "converting %S" results)
   (org-babel-read
@@ -129,7 +130,7 @@ Emacs-lisp table, otherwise return the results as a string."
 
 (defun org-babel-ruby-initiate-session (&optional session params)
   "If there is not a current inferior-process-buffer in SESSION
-then create.  Return the initialized session."
+then create one.  Return the initialized session."
   (unless (string= session "none")
     (let ((session-buffer (save-window-excursion
 			    (run-ruby nil session) (current-buffer))))
@@ -227,7 +228,7 @@ last statement in BODY, as elisp."
            (org-babel-ruby-table-or-string (car results))))))))
 
 (defun org-babel-ruby-read-string (string)
-  "Strip \\\"s from around ruby string"
+  "Strip \\\"s from around a ruby string."
   (if (string-match "^\"\\([^\000]+\\)\"$" string)
       (match-string 1 string)
     string))

@@ -51,7 +51,8 @@
 
 (add-to-list 'org-babel-tangle-langs '("sql" "sql"))
 
-(defun org-babel-expand-body:sql (body params &optional processed-params) body)
+(defun org-babel-expand-body:sql (body params &optional processed-params)
+  "Expand BODY according to PARAMS, return the expanded body." body)
 
 (defun org-babel-execute:sql (body params)
   "Execute a block of Sql code with org-babel.  This function is

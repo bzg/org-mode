@@ -70,10 +70,12 @@
 
 ;;taken mostly from clojure-test-mode.el
 (defun org-babel-clojure-clojure-slime-eval (string &optional handler)
+  "Evaluate a STRING of clojure code using `slime-eval-async'."
   (slime-eval-async `(swank:eval-and-grab-output ,string)
                     (or handler #'identity)))
 
 (defun org-babel-clojure-slime-eval-sync (string)
+  "Evaluate a STRING of clojure code using `slime-eval'."
   (slime-eval `(swank:eval-and-grab-output ,string)))
 
 ;;taken from swank-clojure.el
@@ -102,7 +104,7 @@
          "clojure.main"))))))
 
 (defun org-babel-clojure-table-or-string (results)
-  "If the results look like a table, then convert them into an
+  "If RESULTS looks like a table, then convert them into an
 Emacs-lisp table, otherwise return the results as a string."
   (org-babel-read
    (if (string-match "^\\[.+\\]$" results)
@@ -123,7 +125,7 @@ specifying a var of the same value."
     (format "%S" var)))
 
 (defun org-babel-clojure-build-full-form (body vars)
-  "Construct a clojure let form with vars as the let vars"
+  "Construct a clojure let form with vars as the let vars."
   (let ((vars-forms (mapconcat ;; define any variables
                       (lambda (pair)
                         (format "%s %s" (car pair) (org-babel-clojure-var-to-clojure (cdr pair))))
@@ -155,11 +157,12 @@ specifying a var of the same value."
 (defvar org-babel-clojure-pending-sessions '())
 
 (defun org-babel-clojure-session-buffer (session)
+  "Return the buffer associated with SESSION."
   (cdr (assoc session org-babel-clojure-buffers)))
 
 (defun org-babel-clojure-initiate-session-by-key (&optional session)
   "If there is not a current inferior-process-buffer in SESSION
-then create.  Return the initialized session."
+then create one.  Return the initialized session."
   (save-window-excursion
     (let* ((session (if session
                         (if (stringp session) (intern session)
@@ -187,12 +190,12 @@ then create.  Return the initialized session."
 
 (defun org-babel-clojure-initiate-session (&optional session params)
   "Return the slime-clojure repl buffer bound to this session
-or nil if \"none\" is specified"
+or nil if \"none\" is specified."
   (unless (and (stringp session) (string= session "none"))
     (org-babel-clojure-session-buffer (org-babel-clojure-initiate-session-by-key session))))
 
 (defun org-babel-clojure-session-connected-hook ()
-  "Finish setting up the bindings of org-babel session to a slime-clojure repl"
+  "Finish setting up the bindings of org-babel session to a slime-clojure repl."
   (let ((pending-session (pop org-babel-clojure-pending-sessions)))
     (when pending-session
       (save-excursion
@@ -203,16 +206,19 @@ or nil if \"none\" is specified"
 (add-hook 'slime-connected-hook 'org-babel-clojure-session-connected-hook)
 
 (defun org-babel-clojure-bind-session-to-repl-buffer (session repl-buffer)
+  "Associate SESSION with REPL-BUFFER."
   (when (stringp session) (setq session (intern session)))
   (setq org-babel-clojure-buffers
         (cons (cons session repl-buffer)
               (assq-delete-all session org-babel-clojure-buffers))))
 
 (defun org-babel-clojure-repl-buffer-pred ()
-  "Predicate used to test whether the passed in buffer is an active slime-clojure repl buffer"
+  "Test whether the current buffer is an active slime-clojure
+repl buffer."
   (and (buffer-live-p (current-buffer)) (eq major-mode 'slime-repl-mode)))
 
 (defun org-babel-clojure-bind-session-to-repl (session)
+  "Bind SESSION to a clojure repl."
   (interactive "sEnter session name: ")
   (let ((repl-bufs (slime-filter-buffers 'org-babel-clojure-repl-buffer-pred)))
     (unless repl-bufs (error "No existing slime-clojure repl buffers exist"))
@@ -244,7 +250,7 @@ or nil if \"none\" is specified"
 	      (insert-file-contents (org-babel-maybe-remote-file tmp-file)) (buffer-string)))))))))
 
 (defun org-babel-clojure-evaluate-session (buffer body &optional result-type)
-  "Evaluate the body in the context of a clojure session"
+  "Evaluate the body in the context of a clojure session."
   (let ((raw nil)
         (results nil))
     (save-window-excursion
@@ -265,6 +271,7 @@ last statement in BODY, as elisp."
     (org-babel-clojure-evaluate-external-process buffer body result-type)))
 
 (defun org-babel-expand-body:clojure (body params &optional processed-params)
+  "Expand BODY according to PARAMS, return the expanded body."
   (org-babel-clojure-build-full-form
    body (second (or processed-params (org-babel-process-params params)))))
 

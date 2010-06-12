@@ -50,7 +50,8 @@ In case you want to use a different screen than one selected by your $PATH")
   '((:results . "silent") (:session . "default") (:cmd . "sh") (:terminal . "xterm"))
   "Default arguments to use when running screen source blocks.")
 
-(defun org-babel-expand-body:screen (body params &optional processed-params) body)
+(defun org-babel-expand-body:screen (body params &optional processed-params)
+  "Expand BODY according to PARAMS, return the expanded body." body)
 
 (defun org-babel-execute:screen (body params)
   "Send a block of code via screen to a terminal using org-babel.
@@ -121,8 +122,8 @@ In case you want to use a different screen than one selected by your $PATH")
     tmpfile))
 
 (defun org-babel-screen-test ()
-  "Command that tests if the default setup works. 
-The terminal should shortly flicker."
+  "Test if the default setup works.  The terminal should shortly
+flicker."
   (interactive)
   (let* ((session "org-babel-testing")
          (random-string (format "%s" (random 99999)))

@@ -56,8 +56,9 @@
 
 (defun org-babel-gnuplot-process-vars (params)
   "Extract variables from PARAMS and process the variables
-dumping all vectors into files returning an association list of
-variable names and the value to be used in the gnuplot code."
+dumping all vectors into files and returning an association list
+of variable names and the related value to be used in the gnuplot
+code."
   (mapcar
    (lambda (pair)
      (cons
@@ -69,6 +70,7 @@ variable names and the value to be used in the gnuplot code."
    (org-babel-ref-variables params)))
 
 (defun org-babel-expand-body:gnuplot (body params &optional processed-params)
+  "Expand BODY according to PARAMS, return the expanded body."
   (save-window-excursion
     (let* ((vars (org-babel-gnuplot-process-vars params))
            (out-file (cdr (assoc :file params)))
@@ -176,7 +178,7 @@ called by `org-babel-execute-src-block'."
 
 (defun org-babel-gnuplot-initiate-session (&optional session params)
   "If there is not a current inferior-process-buffer in SESSION
-then create.  Return the initialized session.  The current
+then create one.  Return the initialized session.  The current
 `gnuplot-mode' doesn't provide support for multiple sessions."
   (unless (string= session "none")
     (save-window-excursion (gnuplot-send-string-to-gnuplot "" "line")

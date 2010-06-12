@@ -48,7 +48,8 @@
 
 (add-to-list 'org-babel-tangle-langs '("sass" "sass"))
 
-(defun org-babel-expand-body:sass (body params &optional processed-params) body)
+(defun org-babel-expand-body:sass (body params &optional processed-params)
+  "Expand BODY according to PARAMS, return the expanded body." body)
 
 (defun org-babel-execute:sass (body params)
   "Execute a block of Sass code with org-babel.  This function is
@@ -65,6 +66,7 @@ called by `org-babel-execute-src-block'."
     (or file (with-temp-buffer (insert-file-contents out-file) (buffer-string)))))
 
 (defun org-babel-prep-session:sass (session params)
+  "This function does nothing as sass does not support sessions."
   (error "Sass does not support sessions"))
 
 (provide 'ob-sass)

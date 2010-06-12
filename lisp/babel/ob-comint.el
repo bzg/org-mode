@@ -37,6 +37,7 @@
 (require 'comint)
 
 (defun org-babel-comint-buffer-livep (buffer)
+  "Check if BUFFER is a comint buffer with a live process."
   (let ((buffer (if buffer (get-buffer buffer))))
     (and buffer (buffer-live-p buffer) (get-buffer-process buffer) buffer)))
 
@@ -111,9 +112,9 @@ during execution of body."
     (org-babel-comint-wait-for-output buffer)))
 
 (defun org-babel-comint-wait-for-output (buffer)
-  "Wait until output arrives.  Note: this is only safe when
-waiting for the result of a single statement (not large blocks of
-code)."
+  "Wait until output arrives from BUFFER.  Note: this is only
+safe when waiting for the result of a single statement (not large
+blocks of code)."
   (org-babel-comint-in-buffer buffer
     (while (progn
              (goto-char comint-last-input-end)

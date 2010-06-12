@@ -36,6 +36,7 @@
 (add-to-list 'org-babel-tangle-langs '("perl" "pl" "#!/usr/bin/env perl"))
 
 (defun org-babel-expand-body:perl (body params &optional processed-params)
+  "Expand BODY according to PARAMS, return the expanded body."
   (let ((vars (second (or processed-params (org-babel-process-params params)))))
     (concat
      (mapconcat ;; define any variables

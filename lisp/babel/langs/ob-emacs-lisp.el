@@ -40,6 +40,7 @@
   "Default arguments to use when evaluating an emacs-lisp source block.")
 
 (defun org-babel-expand-body:emacs-lisp (body params &optional processed-params)
+  "Expand BODY according to PARAMS, return the expanded body."
   (let* ((processed-params (or processed-params (org-babel-process-params params)))
          (vars (second processed-params))
          (processed-params (org-babel-process-params params))

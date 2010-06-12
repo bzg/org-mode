@@ -42,6 +42,7 @@
   "R-specific header arguments.")
 
 (defun org-babel-expand-body:R (body params &optional processed-params)
+  "Expand BODY according to PARAMS, return the expanded body."
   (let* ((processed-params (or processed-params
                                (org-babel-process-params params)))
 	 (vars (mapcar (lambda (i) (cons (car (nth i (second processed-params)))
@@ -144,7 +145,7 @@ called by `org-babel-execute-src-block'."
 			   (if (stringp session) session (buffer-name)))) (current-buffer))))))
 
 (defun org-babel-R-construct-graphics-device-call (out-file params)
-  "Construct the call to the graphics device"
+  "Construct the call to the graphics device."
   (let ((devices
 	 '((:bmp . "bmp")
 	   (:jpg . "jpeg")
@@ -242,9 +243,9 @@ last statement in BODY, as elisp."
 	      (delete nil (mapcar #'extractor (mapcar #'org-babel-chomp raw))) "\n"))))))))
 
 (defun org-babel-R-process-value-result (result column-names-p)
-  "R-specific processing of return value prior to return to org-babel.
-
-Currently, insert hline if column names in output have been requested."
+  "R-specific processing of return value prior to return to
+org-babel.  Insert hline if column names in output have been
+requested."
   (if column-names-p
       (cons (car result) (cons 'hline (cdr result)))
     result))

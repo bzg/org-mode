@@ -42,6 +42,7 @@
   "Shell command to use to run octave as an external process.")
 
 (defun org-babel-expand-body:octave (body params &optional processed-params)
+  "Expand BODY according to PARAMS, return the expanded body."
   (let ((vars (second (or processed-params (org-babel-process-params params)))))
     (concat
      ;; prepend code to define all arguments passed to the code block
@@ -97,9 +98,9 @@ specifying a variable of the same value."
     session))
 
 (defun org-babel-octave-initiate-session (&optional session params matlabp)
-  "Create octave inferior process buffer.
-If there is not a current inferior-process-buffer in SESSION
-then create. Return the initialized session."
+  "Create an octave inferior process buffer.  If there is not a
+current inferior-process-buffer in SESSION then create. Return
+the initialized session."
   (unless (string= session "none")
     (let ((session (or session (if matlabp "*Inferior Matlab*" "*Inferior Octave*"))))
       (if (org-babel-comint-buffer-livep session) session
@@ -120,15 +121,16 @@ end")
 (defvar org-babel-octave-eoe-output "ans = org_babel_eoe")
 
 (defun org-babel-octave-evaluate (session body result-type lang)
-  "Pass BODY to the octave process.
-If RESULT-TYPE equals 'output then return the outputs of the
-statements in BODY, if RESULT-TYPE equals 'value then return the
-value of the last statement in BODY, as elisp."
+  "Pass BODY to the octave process in SESSION.  If RESULT-TYPE
+equals 'output then return the outputs of the statements in BODY,
+if RESULT-TYPE equals 'value then return the value of the last
+statement in BODY, as elisp."
   (if session
     (org-babel-octave-evaluate-session session body result-type matlabp)
     (org-babel-octave-evaluate-external-process body result-type matlabp)))
 
 (defun org-babel-octave-evaluate-external-process (body result-type matlabp)
+  "Evaluate BODY in an external octave process."
   (let ((cmd (if matlabp org-babel-matlab-shell-command org-babel-octave-shell-command)))
     (save-excursion
       (case result-type
@@ -149,6 +151,7 @@ value of the last statement in BODY, as elisp."
 	   (org-babel-octave-import-elisp-from-file (org-babel-maybe-remote-file tmp-file))))))))
 
 (defun org-babel-octave-evaluate-session (session body result-type &optional matlabp)
+  "Evaluate BODY in SESSION."
   (let* ((tmp-file (make-temp-file "org-babel-results-"))
 	 (wait-file (make-temp-file "org-babel-matlab-emacs-link-wait-signal-"))
 	 (full-body
@@ -196,9 +199,8 @@ value of the last statement in BODY, as elisp."
 	 (mapconcat #'identity (reverse results) "\n"))))))
 
 (defun org-babel-octave-import-elisp-from-file (file-name)
-  "Import data written to file by octave.
-This removes initial blank and comment lines and then calls
-`org-babel-import-elisp-from-file'."
+  "Import data from FILE-NAME.  This removes initial blank and
+comment lines and then calls `org-babel-import-elisp-from-file'."
   (let ((temp-file (make-temp-file "org-babel-results-")) beg end)
     (with-temp-file temp-file
       (insert-file-contents file-name)

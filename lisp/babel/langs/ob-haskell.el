@@ -55,6 +55,7 @@
 (defvar org-babel-haskell-eoe "\"org-babel-haskell-eoe\"")
 
 (defun org-babel-expand-body:haskell (body params &optional processed-params)
+  "Expand BODY according to PARAMS, return the expanded body."
   (let (vars (second (or processed-params (org-babel-process-params params))))
     (concat
      (mapconcat
@@ -87,14 +88,14 @@
      (org-babel-pick-name (nth 5 processed-params) (cdr (assoc :rownames params))))))
 
 (defun org-babel-haskell-read-string (string)
-  "Strip \\\"s from around haskell string"
+  "Strip \\\"s from around a haskell string."
   (if (string-match "^\"\\([^\000]+\\)\"$" string)
       (match-string 1 string)
     string))
 
 (defun org-babel-haskell-initiate-session (&optional session params)
   "If there is not a current inferior-process-buffer in SESSION
-then create.  Return the initialized session."
+then create one.  Return the initialized session."
   ;; TODO: make it possible to have multiple sessions
   (run-haskell) (current-buffer))
 
@@ -141,7 +142,7 @@ Emacs-lisp table, otherwise return the results as a string."
      results)))
 
 (defun org-babel-haskell-export-to-lhs (&optional arg)
-  "Export to a .lhs with all haskell code blocks escaped
+  "Export to a .lhs file with all haskell code blocks escaped
 appropriately.  When called with a prefix argument the resulting
 .lhs file will be exported to a .tex file.  This function will
 create two new files, base-name.lhs and base-name.tex where

@@ -51,6 +51,8 @@
   executable.")
 
 (defun org-babel-execute:cpp (body params)
+  "Execute BODY according to PARAMS.  This function calls
+`org-babel-execute:C'."
   (org-babel-execute:C body params))
 
 (defun org-babel-execute:c++ (body params)
@@ -74,8 +76,8 @@ header arguments (calls `org-babel-C-expand')."
   (let ((c-variant 'c)) (org-babel-C-expand body params processed-params)))
 
 (defun org-babel-C-execute (body params)
-  "This should only be called by `org-babel-execute:C' or
-`org-babel-execute:c++'."
+  "This function should only be called by `org-babel-execute:C'
+or `org-babel-execute:c++'."
   (message "executing C source code block")
   (let* ((processed-params (org-babel-process-params params))
          (tmp-src-file (make-temp-file "org-babel-C-src" nil
@@ -157,18 +159,21 @@ it's header arguments."
     (format "int main() {\n%s\n}\n" body)))
 
 (defun org-babel-prep-session:C (session params)
-  "C is a compiled languages -- no support for sessions"
+  "This function does nothing as C is a compiled language with no
+support for sessions"
   (error "C is a compiled languages -- no support for sessions"))
 
 (defun org-babel-load-session:C (session body params)
-  "C is a compiled languages -- no support for sessions"
+  "This function does nothing as C is a compiled language with no
+support for sessions"
   (error "C is a compiled languages -- no support for sessions"))
 
 ;; helper functions
 
 (defun org-babel-C-var-to-C (pair)
   "Convert an elisp val into a string of C code specifying a var
-of the same value.  TODO list support."
+of the same value."
+  ;; TODO list support
   (let ((var (car pair))
         (val (cdr pair)))
     (when (symbolp val)

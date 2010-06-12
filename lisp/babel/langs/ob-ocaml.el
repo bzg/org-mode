@@ -49,6 +49,7 @@
 (defvar org-babel-ocaml-eoe-output "org-babel-ocaml-eoe")
 
 (defun org-babel-expand-body:ocaml (body params &optional processed-params)
+  "Expand BODY according to PARAMS, return the expanded body."
   (let ((vars (second (or processed-params (org-babel-process-params params)))))
     (concat
      (mapconcat
@@ -83,6 +84,8 @@
                            (get-buffer tuareg-interactive-buffer-name))))
 
 (defun org-babel-ocaml-parse-output (output)
+  "Parse OUTPUT where OUTPUT is string output from an ocaml
+process."
   (let ((regexp "%s = \\(.+\\)$"))
     (cond
      ((string-match (format regexp "string") output)

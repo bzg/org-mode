@@ -56,6 +56,7 @@
   "Default arguments to use when evaluating a asymptote source block.")
 
 (defun org-babel-expand-body:asymptote (body params &optional processed-params)
+  "Expand BODY according to PARAMS, return the expanded body."
   (let ((vars (second (or processed-params
                           (org-babel-process-params params)))))
     (concat (mapconcat 'org-babel-asymptote-var-to-asymptote vars "\n")
@@ -85,6 +86,7 @@ called by `org-babel-execute-src-block'."
     out-file))
 
 (defun org-babel-prep-session:asymptote (session params)
+  "Prepare a session named SESSION according to PARAMS."
   (error "Asymptote does not support sessions"))
 
 (defun org-babel-asymptote-var-to-asymptote (pair)
@@ -133,10 +135,10 @@ Empty cells are ignored."
      (org-combine-plists '(:hline nil :sep "," :tstart "{" :tend "}") params))))
 
 (defun org-babel-asymptote-define-type (data)
-  "Determine type of DATA. DATA is a list.
-Type symbol is returned as 'symbol. The type is usually the type
-of the first atom encountered, except for arrays of int where
-every cell must be of int type."
+  "Determine type of DATA. DATA is a list. Type symbol is
+returned as 'symbol. The type is usually the type of the first
+atom encountered, except for arrays of int where every cell must
+be of int type."
   (labels ((anything-but-int (el)
                              (cond
                               ((null el) nil)

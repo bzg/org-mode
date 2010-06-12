@@ -39,6 +39,7 @@
 (add-to-list 'org-babel-tangle-langs '("python" "py" "#!/usr/bin/env python"))
 
 (defun org-babel-expand-body:python (body params &optional processed-params)
+  "Expand BODY according to PARAMS, return the expanded body."
   (concat
    (mapconcat ;; define any variables
     (lambda (pair)
@@ -117,6 +118,7 @@ Emacs-lisp table, otherwise return the results as a string."
 (defvar org-babel-python-buffers '(:default . nil))
 
 (defun org-babel-python-session-buffer (session)
+  "Return the buffer associated with SESSION."
   (cdr (assoc session org-babel-python-buffers)))
 
 (defun org-babel-python-initiate-session-by-key (&optional session)
@@ -145,6 +147,7 @@ then create.  Return the initialized session."
       session)))
 
 (defun org-babel-python-initiate-session (&optional session params)
+  "Create a session named SESSION according to PARAMS."
   (unless (string= session "none")
     (org-babel-python-session-buffer (org-babel-python-initiate-session-by-key session))))
 

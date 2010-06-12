@@ -94,7 +94,7 @@ return nil."
       out)))
 
 (defun org-babel-ref-resolve-reference (ref &optional params)
-  "Resolve the reference and return its value"
+  "Resolve the reference REF and return its value."
   (save-excursion
     (let ((case-fold-search t)
           type args new-refere new-referent result lob-info split-file split-ref

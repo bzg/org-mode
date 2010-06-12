@@ -44,6 +44,7 @@
   "Default arguments to use when evaluating a latex source block.")
 
 (defun org-babel-expand-body:latex (body params &optional processed-params)
+  "Expand BODY according to PARAMS, return the expanded body."
   (mapc (lambda (pair) ;; replace variables
           (setq body
                 (replace-regexp-in-string
@@ -83,7 +84,8 @@ called by `org-babel-execute-src-block'."
     body))
 
 (defun org-babel-latex-body-to-tex-file (tex-file body &optional height width)
-  "Extracted from `org-create-formula-image' in org.el."
+  "Place the contents of BODY into TEX-FILE. Extracted from
+`org-create-formula-image' in org.el."
   (with-temp-file tex-file
     (insert (org-splice-latex-header
 	       org-format-latex-header
@@ -101,7 +103,8 @@ called by `org-babel-execute-src-block'."
     (org-export-latex-fix-inputenc)))
 
 (defun org-babel-latex-tex-to-pdf (tex-file)
-  "Extracted from `org-export-as-pdf' in org-latex.el."
+  "Generate a pdf according to the contents TEX-FILE.  Extracted
+from `org-export-as-pdf' in org-latex.el."
   (let* ((wconfig (current-window-configuration))
          (default-directory (file-name-directory tex-file))
          (base (file-name-sans-extension tex-file))
@@ -134,6 +137,7 @@ called by `org-babel-execute-src-block'."
       pdffile)))
 
 (defun org-babel-prep-session:latex (session params)
+  "Create a session named SESSION according to PARAMS."
   (error "Latex does not support sessions"))
 
 (provide 'ob-latex)

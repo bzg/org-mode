@@ -48,7 +48,8 @@
 (defvar org-babel-matlab-shell-command "matlab -nosplash"
   "Shell command to use to run matlab as an external process.")
 
-(defun org-babel-expand-body:matlab (body params &optional processed-params) body)
+(defun org-babel-expand-body:matlab (body params &optional processed-params)
+  "Expand BODY according to PARAMS, return the expanded body." body)
 
 (defvar org-babel-matlab-with-emacs-link nil
   "If non-nil use matlab-shell-run-region for session
@@ -68,12 +69,13 @@ delete('%s')
   (org-babel-execute:octave body params 'matlab))
 
 (defun org-babel-prep-session:matlab (session params)
+  "Prepare SESSION according to PARAMS."
   (org-babel-prep-session:octave session params 'matlab))
 
 (defun org-babel-matlab-initiate-session (&optional session params)
-  "Create matlab inferior process buffer.
-If there is not a current inferior-process-buffer in SESSION
-then create. Return the initialized session."
+  "Create a matlab inferior process buffer.  If there is not a
+current inferior-process-buffer in SESSION then create. Return
+the initialized session."
   (org-babel-octave-initiate-session session params 'matlab))
 
 (provide 'ob-matlab)

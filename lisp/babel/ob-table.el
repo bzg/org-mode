@@ -56,6 +56,8 @@
 (require 'ob)
 
 (defun org-babel-table-truncate-at-newline (string)
+  "If STRING ends in a newline character, then remove the newline
+character and replace it with ellipses."
   (if (and (stringp string) (string-match "[\n\r]" string))
       (concat (substring string 0 (match-beginning 0)) "...")
     string))
