@@ -275,7 +275,8 @@ block."
                                       (not (listp result)))
                                  (list (list result))
                                result)))
-            (org-babel-insert-result result result-params info new-hash indent)
+            (org-babel-insert-result
+	     result result-params info new-hash indent lang)
             (run-hooks 'org-babel-after-execute-hook)
             result))
       (setq call-process-region 'call-process-region-original))))
@@ -956,7 +957,8 @@ link is a file path it is expanded using `expand-file-name'."
            (expand-file-name (match-string 2 raw))))
      (t raw))))
 
-(defun org-babel-insert-result (result &optional result-params info hash indent)
+(defun org-babel-insert-result
+  (result &optional result-params info hash indent lang)
   "Insert RESULT into the current buffer after the end of the
 current source block.  With optional argument RESULT-PARAMS
 controls insertion of results in the org-mode file.
@@ -987,7 +989,8 @@ latex --- results are added inside of a #+BEGIN_LATEX block.
 code ---- the results are extracted in the syntax of the source
           code of the language being evaluated and are added
           inside of a #+BEGIN_SRC block with the source-code
-          language set appropriately."
+          language set appropriately.  Note this relies on the
+          optional LANG argument."
   (if (stringp result)
       (progn
         (setq result (org-babel-clean-text-properties result))
@@ -1048,7 +1051,7 @@ code ---- the results are extracted in the syntax of the source
                             results-switches result)))
 	   ((member "code" result-params)
 	    (insert (format "#+BEGIN_SRC %s%s\n%s#+END_SRC\n"
-                            lang results-switches result)))
+                            (or lang "none") results-switches result)))
 	   ((or (member "raw" result-params) (member "org" result-params))
 	    (save-excursion (insert result)) (if (org-at-table-p) (org-cycle)))
 	   (t
@@ -1062,11 +1065,6 @@ code ---- the results are extracted in the syntax of the source
 			       (member "append" result-params))))
 	    (indent-rigidly beg end indent))))
       (message "finished"))))
-
-(defun org-babel-result-to-org-string (result)
-  "Return RESULT as a string in org-mode format.  This function
-relies on `org-babel-insert-result'."
-  (with-temp-buffer (org-babel-insert-result result) (buffer-string)))
 
 (defun org-babel-remove-result (&optional info)
   "Remove the result of the current source block."
