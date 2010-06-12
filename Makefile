@@ -124,27 +124,8 @@ LISPF      = 	org.el				\
 		babel/ob-ref.el			\
 		babel/ob-table.el		\
 		babel/ob-tangle.el		\
-		babel/langs/ob-asymptote.el	\
-		babel/langs/ob-C.el		\
-		babel/langs/ob-clojure.el	\
-		babel/langs/ob-css.el		\
-		babel/langs/ob-ditaa.el		\
-		babel/langs/ob-dot.el		\
 		babel/langs/ob-emacs-lisp.el	\
-		babel/langs/ob-gnuplot.el	\
-		babel/langs/ob-haskell.el	\
-		babel/langs/ob-latex.el		\
-		babel/langs/ob-matlab.el	\
-		babel/langs/ob-ocaml.el		\
-		babel/langs/ob-octave.el	\
-		babel/langs/ob-perl.el		\
-		babel/langs/ob-python.el	\
-		babel/langs/ob-R.el		\
-		babel/langs/ob-ruby.el		\
-		babel/langs/ob-sass.el		\
-		babel/langs/ob-screen.el	\
-		babel/langs/ob-sh.el		\
-		babel/langs/ob-sql.el
+		babel/langs/ob-sh.el
 
 LISPFILES0 = $(LISPF:%=lisp/%)
 LISPFILES  = $(LISPFILES0) lisp/org-install.el
