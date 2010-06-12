@@ -156,6 +156,16 @@ can not be resolved.")
   (concat org-babel-source-name-regexp (regexp-quote name) "[ \t\n]*"
 	  (substring org-babel-src-block-regexp 1)))
 
+(defun org-babel-add-interpreter (interpreter)
+  "Add INTERPRETER to `org-babel-interpreters' and update
+`org-babel-src-block-regexp' appropriately."
+  (unless (member interpreter org-babel-interpreters)
+    (setq org-babel-interpreters
+          (sort (cons interpreter org-babel-interpreters)
+		(lambda (left right)
+		  (> (length left) (length right)))))
+    (org-babel-set-interpreters 'org-babel-interpreters org-babel-interpreters)))
+
 (defun org-babel-set-interpreters (var value)
   "Update the regular expressions used to match block and inline
 code."
@@ -176,16 +186,6 @@ code."
                 "\\(\\|\\[\\(.*?\\)\\]\\)"            ;; (3,4) (unused, headers)
                 "{\\([^\f\n\r\v]+?\\)}"               ;; (5)   body
 		"\\)")))
-
-(defun org-babel-add-interpreter (interpreter)
-  "Add INTERPRETER to `org-babel-interpreters' and update
-`org-babel-src-block-regexp' appropriately."
-  (unless (member interpreter org-babel-interpreters)
-    (setq org-babel-interpreters
-          (sort (cons interpreter org-babel-interpreters)
-		(lambda (left right)
-		  (> (length left) (length right)))))
-    (org-babel-set-interpreters 'org-babel-interpreters org-babel-interpreters)))
 
 (defcustom org-babel-interpreters '()
   "Interpreters allows for evaluation tags.
