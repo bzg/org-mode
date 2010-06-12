@@ -214,7 +214,7 @@ last statement in BODY, as elisp."
                           org-babel-ruby-last-value-eval)
                    org-babel-ruby-eoe-indicator) "\n"))
            (raw (org-babel-comint-with-output
-		    buffer org-babel-ruby-eoe-indicator t
+		    (list buffer org-babel-ruby-eoe-indicator t full-body)
                   (insert full-body) (comint-send-input nil t)))
            (results (cdr (member
 			  org-babel-ruby-eoe-indicator

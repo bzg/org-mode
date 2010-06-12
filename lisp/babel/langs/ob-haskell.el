@@ -71,7 +71,8 @@
          (result-type (fourth processed-params))
          (full-body (org-babel-expand-body:haskell body params processed-params))
          (session (org-babel-prep-session:haskell session params))
-         (raw (org-babel-comint-with-output session org-babel-haskell-eoe t
+         (raw (org-babel-comint-with-output
+		  (list session org-babel-haskell-eoe t full-body)
                 (insert (org-babel-trim full-body))
                 (comint-send-input nil t)
                 (insert org-babel-haskell-eoe)

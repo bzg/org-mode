@@ -181,8 +181,12 @@ statement in BODY, as elisp."
 			   ;; make *matlab* buffer contents easily
 			   ;; available, so :results output currently
 			   ;; won't work
-		(org-babel-comint-with-output session
-		    (if matlabp org-babel-octave-eoe-indicator org-babel-octave-eoe-output) t
+		(org-babel-comint-with-output
+		    (list session
+			  (if matlabp
+			      org-babel-octave-eoe-indicator
+			    org-babel-octave-eoe-output)
+			  t full-body)
 		  (insert full-body) (comint-send-input nil t)))) results)
     (case result-type
       (value

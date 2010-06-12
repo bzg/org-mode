@@ -217,7 +217,8 @@ last statement in BODY, as elisp."
                  (org-babel-python-table-or-string raw)))))))
     ;; comint session evaluation
     (org-babel-comint-in-buffer buffer
-      (let* ((raw (org-babel-comint-with-output buffer org-babel-python-eoe-indicator t
+      (let* ((raw (org-babel-comint-with-output
+		      (list buffer org-babel-python-eoe-indicator t full-body)
                     ;; for some reason python is fussy, and likes enters after every input
 		    (let ((comint-process-echoes nil))
 		      (mapc (lambda (statement) (insert statement) (comint-send-input))
