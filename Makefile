@@ -28,8 +28,11 @@ infodir = $(prefix)/share/info
 
 # Using emacs in batch mode.
 
-BATCH=$(EMACS) -batch -q -no-site-file -eval                             \
-  "(setq load-path (cons (expand-file-name \"./lisp/\") (cons \"$(lispdir)\" load-path)))"
+BATCH=$(EMACS) -batch -q -no-site-file -eval                             			\
+  "(setq load-path (cons (expand-file-name\
+			 \"babel\"\
+			 (expand-file-name \"./lisp/\"))\
+			(cons (expand-file-name \"./lisp/\") (cons \"$(lispdir)\" load-path))))"
 
 # Specify the byte-compiler for compiling org-mode files
 ELC= $(BATCH) -f batch-byte-compile
@@ -58,61 +61,90 @@ INSTALL_INFO=install-info
 ##----------------------------------------------------------------------
 
 # The following variables need to be defined by the maintainer
-LISPF      = 	org.el			\
-		org-agenda.el		\
-		org-ascii.el		\
-	     	org-attach.el		\
-	     	org-archive.el		\
-		org-bbdb.el		\
-		org-beamer.el		\
-		org-bibtex.el		\
-	     	org-clock.el		\
-	     	org-colview.el		\
-	     	org-colview-xemacs.el	\
-	     	org-compat.el		\
-	     	org-crypt.el		\
-	     	org-ctags.el		\
-	     	org-datetree.el		\
-	     	org-docview.el		\
-	     	org-entities.el		\
-		org-exp.el		\
-		org-exp-blocks.el	\
-		org-docbook.el		\
-		org-faces.el		\
-		org-feed.el		\
-		org-footnote.el		\
-		org-freemind.el		\
-		org-gnus.el		\
-		org-habit.el		\
-		org-html.el		\
-		org-icalendar.el	\
-		org-id.el		\
-		org-indent.el		\
-		org-info.el		\
-		org-inlinetask.el	\
-		org-jsinfo.el		\
-		org-irc.el		\
-		org-latex.el		\
-		org-list.el		\
-		org-mac-message.el	\
-	     	org-macs.el		\
-		org-mew.el              \
-		org-mhe.el		\
-		org-mobile.el		\
-		org-mouse.el		\
-		org-publish.el		\
-		org-plot.el		\
-		org-protocol.el		\
-		org-remember.el		\
-		org-rmail.el		\
-		org-src.el		\
-		org-table.el		\
-		org-taskjuggler.el	\
-		org-timer.el		\
-		org-vm.el		\
-		org-w3m.el              \
-		org-wl.el		\
-		org-xoxo.el
+LISPF      = 	org.el				\
+		org-agenda.el			\
+		org-ascii.el			\
+	     	org-attach.el			\
+	     	org-archive.el			\
+		org-bbdb.el			\
+		org-beamer.el			\
+		org-bibtex.el			\
+	     	org-clock.el			\
+	     	org-colview.el			\
+	     	org-colview-xemacs.el		\
+	     	org-compat.el			\
+	     	org-crypt.el			\
+	     	org-ctags.el			\
+	     	org-datetree.el			\
+	     	org-docview.el			\
+	     	org-entities.el			\
+		org-exp.el			\
+		org-exp-blocks.el		\
+		org-docbook.el			\
+		org-faces.el			\
+		org-feed.el			\
+		org-footnote.el			\
+		org-freemind.el			\
+		org-gnus.el			\
+		org-habit.el			\
+		org-html.el			\
+		org-icalendar.el		\
+		org-id.el			\
+		org-indent.el			\
+		org-info.el			\
+		org-inlinetask.el		\
+		org-jsinfo.el			\
+		org-irc.el			\
+		org-latex.el			\
+		org-list.el			\
+		org-mac-message.el		\
+	     	org-macs.el			\
+		org-mew.el              	\
+		org-mhe.el			\
+		org-mobile.el			\
+		org-mouse.el			\
+		org-publish.el			\
+		org-plot.el			\
+		org-protocol.el			\
+		org-remember.el			\
+		org-rmail.el			\
+		org-src.el			\
+		org-table.el			\
+		org-taskjuggler.el		\
+		org-timer.el			\
+		org-vm.el			\
+		org-w3m.el              	\
+		org-wl.el			\
+		org-xoxo.el			\
+		babel/ob-comint.el		\
+		babel/ob.el			\
+		babel/ob-exp.el			\
+		babel/ob-keys.el		\
+		babel/ob-lob.el			\
+		babel/ob-ref.el			\
+		babel/ob-table.el		\
+		babel/ob-tangle.el		\
+		babel/langs/ob-asymptote.el	\
+		babel/langs/ob-C.el		\
+		babel/langs/ob-clojure.el	\
+		babel/langs/ob-css.el		\
+		babel/langs/ob-ditaa.el		\
+		babel/langs/ob-dot.el		\
+		babel/langs/ob-emacs-lisp.el	\
+		babel/langs/ob-gnuplot.el	\
+		babel/langs/ob-haskell.el	\
+		babel/langs/ob-latex.el		\
+		babel/langs/ob-matlab.el	\
+		babel/langs/ob-ocaml.el		\
+		babel/langs/ob-octave.el	\
+		babel/langs/ob-perl.el		\
+		babel/langs/ob-python.el	\
+		babel/langs/ob-R.el		\
+		babel/langs/ob-ruby.el		\
+		babel/langs/ob-sass.el		\
+		babel/langs/ob-screen.el	\
+		babel/langs/ob-sh.el		\
+		babel/langs/ob-sql.el
 
 LISPFILES0 = $(LISPF:%=lisp/%)
 LISPFILES  = $(LISPFILES0) lisp/org-install.el
