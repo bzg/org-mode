@@ -6440,9 +6440,9 @@ Archived trees are not exported (@pxref{Exporting}), only the headline
 is.  Configure the details using the variable
 @code{org-export-with-archived-trees}.
 @item
-@vindex org-columns-skip-arrchived-trees
+@vindex org-columns-skip-archived-trees
 Archived trees are excluded from column view unless the variable
-@code{org-columns-skip-arrchived-trees} is configured to @code{nil}.
+@code{org-columns-skip-archived-trees} is configured to @code{nil}.
 @end itemize
 
 The following commands help managing the ARCHIVE tag:

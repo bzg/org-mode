@@ -3343,7 +3343,7 @@
 	`truncate-lines'.
 	(org-columns): Remember the value of `truncate-lines'.
 
-	* org.el (org-columns-skip-arrchived-trees): New option.
+	* org.el (org-columns-skip-archived-trees): New option.
 
 	* org-agenda.el (org-agenda-export-html-style): Define color for
 	org-agenda-done face.
