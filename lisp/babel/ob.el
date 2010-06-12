@@ -1286,7 +1286,7 @@ block but are passed literally to the \"example-block\"."
           (nb-add (buffer-substring index (point)))
           (goto-char (match-end 0))
           (setq index (point))
-          (nb-add (save-excursion
+          (nb-add (save-current-buffer
                     (set-buffer parent-buffer)
                     (mapconcat ;; interpose `prefix' between every line
                      #'identity
