@@ -156,6 +156,9 @@ can not be resolved.")
   (concat org-babel-source-name-regexp (regexp-quote name) "[ \t\n]*"
 	  (substring org-babel-src-block-regexp 1)))
 
+(defvar org-babel-interpreters nil)
+(defvar org-babel-call-process-region-original nil)
+
 (defun org-babel-add-interpreter (interpreter)
   "Add INTERPRETER to `org-babel-interpreters' and update
 `org-babel-src-block-regexp' appropriately."
