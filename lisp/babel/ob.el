@@ -251,8 +251,8 @@ block."
 	 (dir (cdr (assoc :dir params)))
 	 (default-directory
 	   (or (and dir (file-name-as-directory dir)) default-directory))
-	 (call-process-region-original
-	  (if (boundp 'call-process-region-original) call-process-region-original
+	 (org-babel-call-process-region-original
+	  (if (boundp 'org-babel-call-process-region-original) org-babel-call-process-region-original
 	    (symbol-function 'call-process-region)))
 	 (indent (car (last info)))
          result)
@@ -279,7 +279,7 @@ block."
 	     result result-params info new-hash indent lang)
             (run-hooks 'org-babel-after-execute-hook)
             result))
-      (setq call-process-region 'call-process-region-original))))
+      (setq call-process-region 'org-babel-call-process-region-original))))
 
 (defun org-babel-expand-body:generic (body params &optional processed-params)
   "Expand a block of code with org-babel according to it's header
@@ -1409,6 +1409,7 @@ of the string."
                     (org-babel-chomp (org-babel-reverse-string string) regexp))
                    regexp))
 
+(defvar org-babel-org-babel-call-process-region-original nil)
 (defun org-babel-tramp-handle-call-process-region
   (start end program &optional delete buffer display &rest args)
   "Use tramp to handle call-process-region.  Fixes a bug in
@@ -1422,9 +1423,9 @@ of the string."
             ;; bug in tramp
 	    (apply 'process-file program tmpfile buffer display args)
 	  (delete-file tmpfile)))
-    ;; call-process-region-original is the original emacs definition. It
+    ;; org-babel-call-process-region-original is the original emacs definition. It
     ;; is in scope from the let binding in org-babel-execute-src-block
-    (apply call-process-region-original
+    (apply org-babel-call-process-region-original
            start end program delete buffer display args)))
 
 (defun org-babel-maybe-remote-file (file)
