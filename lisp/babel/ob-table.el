@@ -82,7 +82,7 @@ rather than a single \"$\" (i.e. \"$$2\" instead of \"$2\" in the
 example above."
   (let ((variables (mapcar
                     (lambda (var)
-                      (if (and (= 3 (length var)) (eq (second var) '$))
+                      (if (and (= 3 (length var)) (eq (nth 1 var) '$))
                           (list (car var) (format "\"%s\"" (last var)))
                         var))
                     variables)))
@@ -95,7 +95,7 @@ example above."
                                 ,source-block
                                 "("
                                 (mapconcat (lambda (var-spec)
-                                             (format "%S=%s" (first var-spec) (second var-spec)))
+                                             (format "%S=%s" (nth 0 var-spec) (nth 1 var-spec)))
                                            ',variables ", ")
                                 ")")))))
            (org-babel-execute-src-block

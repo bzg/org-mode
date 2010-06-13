@@ -55,7 +55,7 @@ file using `load-file'."
   (flet ((age (file)
               (time-to-seconds
                (time-subtract (current-time)
-                              (sixth (or (file-attributes (file-truename file))
+                              (nth 5 (or (file-attributes (file-truename file))
                                          (file-attributes file)))))))
     (let* ((base-name (file-name-sans-extension file))
            (exported-file (concat base-name ".el")))
@@ -109,14 +109,14 @@ exported source code blocks by language."
 			      lang)
 			  "-mode")))
                 (lang-specs (cdr (assoc lang org-babel-tangle-langs)))
-                (ext (first lang-specs))
-                (she-bang (second lang-specs))
-                (commentable (and (fboundp lang-f) (not (third lang-specs))))
+                (ext (nth 0 lang-specs))
+                (she-bang (nth 1 lang-specs))
+                (commentable (and (fboundp lang-f) (not (nth 2 lang-specs))))
                 she-banged)
            (mapc
             (lambda (spec)
               (flet ((get-spec (name)
-                               (cdr (assoc name (third spec)))))
+                               (cdr (assoc name (nth 2 spec)))))
                 (let* ((tangle (get-spec :tangle))
                        (she-bang (if (> (length (get-spec :shebang)) 0)
                                      (get-spec :shebang)
@@ -189,11 +189,11 @@ code blocks by language."
                           (org-babel-clean-text-properties
 			   (car (pop org-stored-links)))))
              (info (org-babel-get-src-block-info))
-             (source-name (intern (or (fifth info)
+             (source-name (intern (or (nth 4 info)
                                       (format "block-%d" block-counter))))
-             (src-lang (first info))
+             (src-lang (nth 0 info))
 	     (expand-cmd (intern (concat "org-babel-expand-body:" src-lang)))
-             (params (third info))
+             (params (nth 2 info))
              by-lang)
         (unless (string= (cdr (assoc :tangle params)) "no") ;; skip
           (unless (and lang (not (string= lang src-lang))) ;; limit by language
@@ -219,8 +219,8 @@ code blocks by language."
 						(cdr (assoc :noweb params))))
                                           (org-babel-expand-noweb-references
 					   info)
-					(second info)))
-                                     (third
+					(nth 1 info)))
+                                     (nth 2
 				      (cdr (assoc src-lang
 						  org-babel-tangle-langs))))
                                by-lang)) blocks))))))
@@ -248,14 +248,14 @@ form
 					   (progn (insert text) (point)))
                            (end-of-line nil)
                            (insert "\n"))))
-    (let ((link (first spec))
-          (source-name (second spec))
-          (body (fourth spec))
-          (commentable (not (if (> (length (cdr (assoc :comments (third spec))))
+    (let ((link (nth 0 spec))
+          (source-name (nth 1 spec))
+          (body (nth 3 spec))
+          (commentable (not (if (> (length (cdr (assoc :comments (nth 2 spec))))
 				   0)
-                                (string= (cdr (assoc :comments (third spec)))
+                                (string= (cdr (assoc :comments (nth 2 spec)))
 					 "no")
-                              (fifth spec)))))
+                              (nth 4 spec)))))
       (insert-comment (format "[[%s][%s]]" (org-link-escape link) source-name))
       (insert (format "\n%s\n" (replace-regexp-in-string
 				"^," "" (org-babel-chomp body))))

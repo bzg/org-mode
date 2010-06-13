@@ -80,18 +80,18 @@ results - just like none only the block is run on export ensuring
 none ----- do not display either code or results upon export"
   (interactive)
   (message "org-babel-exp processing...")
-  (when (member (first headers) org-babel-interpreters)
+  (when (member (nth 0 headers) org-babel-interpreters)
     (save-excursion
       (goto-char (match-beginning 0))
       (let* ((info (org-babel-get-src-block-info))
-	     (params (third info)))
+	     (params (nth 2 info)))
 	;; expand noweb references in the original file
-	(setf (second info)
+	(setf (nth 1 info)
 	      (if (and (cdr (assoc :noweb params))
 		       (string= "yes" (cdr (assoc :noweb params))))
 		  (org-babel-expand-noweb-references
 		   info (get-file-buffer org-current-export-file))
-		(second info)))
+		(nth 1 info)))
 	(org-babel-exp-do-export info 'block)))))
 
 (defun org-babel-exp-inline-src-blocks (start end)
@@ -104,18 +104,18 @@ options and are taken from `org-babel-defualt-inline-header-args'."
     (while (and (< (point) end)
                 (re-search-forward org-babel-inline-src-block-regexp end t))
       (let* ((info (save-match-data (org-babel-parse-inline-src-block-match)))
-	     (params (third info))
+	     (params (nth 2 info))
 	     (replacement
 	      (save-match-data
 		(if (org-babel-in-example-or-verbatim)
 		    (buffer-substring (match-beginning 0) (match-end 0))
 		  ;; expand noweb references in the original file
-		  (setf (second info)
+		  (setf (nth 1 info)
 			(if (and (cdr (assoc :noweb params))
 				 (string= "yes" (cdr (assoc :noweb params))))
 			    (org-babel-expand-noweb-references
 			     info (get-file-buffer org-current-export-file))
-			  (second info)))
+			  (nth 1 info)))
 		  (org-babel-exp-do-export info 'inline)))))
 	(setq end (+ end (- (length replacement) (length (match-string 1)))))
 	(replace-match replacement t t nil 1)))))
@@ -176,13 +176,13 @@ options are taken from `org-babel-default-header-args'."
 (defun org-babel-exp-do-export (info type)
   "Return a string containing the exported content of the current
 code block respecting the value of the :exports header argument."
-  (flet ((silently () (let ((session (cdr (assoc :session (third info)))))
+  (flet ((silently () (let ((session (cdr (assoc :session (nth 2 info)))))
 			(when (and session
 				   (not (equal "none" session))
-				   (not (assoc :noeval (third info))))
+				   (not (assoc :noeval (nth 2 info))))
 			  (org-babel-exp-results info type 'silent))))
 	 (clean () (org-babel-remove-result info)))
-    (case (intern (or (cdr (assoc :exports (third info))) "code"))
+    (case (intern (or (cdr (assoc :exports (nth 2 info))) "code"))
       ('none (silently) (clean) "")
       ('code (silently) (clean) (org-babel-exp-code info type))
       ('results (org-babel-exp-results info type))
@@ -195,13 +195,13 @@ code block respecting the value of the :exports header argument."
 for exportation by org-mode.  This function is called by
 `org-babel-exp-do-export'.  The code block will not be
 evaluated."
-  (let ((lang (first info))
-        (body (second info))
-        (switches (fourth info))
-        (name (fifth info))
+  (let ((lang (nth 0 info))
+        (body (nth 1 info))
+        (switches (nth 3 info))
+        (name (nth 4 info))
         (args (mapcar
 	       #'cdr
-	       (remove-if-not (lambda (el) (eq :var (car el))) (third info)))))
+	       (remove-if-not (lambda (el) (eq :var (car el))) (nth 2 info)))))
     (case type
       ('inline (format "=%s=" body))
       ('block
@@ -233,8 +233,8 @@ suitable for exportation by org-mode.  This function is called by
 `org-babel-exp-do-export'.  The code block will be evaluated.
 Optional argument SILENT can be used to inhibit insertion of
 results into the buffer."
-  (let ((lang (first info))
-	(body (second info))
+  (let ((lang (nth 0 info))
+	(body (nth 1 info))
 	(params
 	 ;; lets ensure that we lookup references in the original file
 	 (mapcar
@@ -247,7 +247,7 @@ results into the buffer."
 				  "=" org-current-export-file
 				  ":" (match-string 2 (cdr pair))))
 	      pair))
-	  (third info))))
+	  (nth 2 info))))
     (case type
       ('inline
         (let ((raw (org-babel-execute-src-block

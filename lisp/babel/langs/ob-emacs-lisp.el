@@ -48,9 +48,9 @@
 (defun org-babel-expand-body:emacs-lisp (body params &optional processed-params)
   "Expand BODY according to PARAMS, return the expanded body."
   (let* ((processed-params (or processed-params (org-babel-process-params params)))
-         (vars (second processed-params))
+         (vars (nth 1 processed-params))
          (processed-params (org-babel-process-params params))
-         (result-params (third processed-params))
+         (result-params (nth 2 processed-params))
          (print-level nil) (print-length nil)
          (body (if (> (length vars) 0)
 		   (concat "(let ("

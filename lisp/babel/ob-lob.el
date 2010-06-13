@@ -50,7 +50,7 @@ add files to this list use the `org-babel-lob-ingest' command."
   (interactive "f")
   (org-babel-map-source-blocks file
     (let* ((info (org-babel-get-src-block-info))
-	   (source-name (intern (fifth info))))
+	   (source-name (intern (nth 4 info))))
       (when source-name
         (setq org-babel-library-of-babel
               (cons (cons source-name info)
@@ -76,7 +76,7 @@ src-block and if so then run the appropriate source block from
 the Library."
   (interactive)
   (let ((info (org-babel-lob-get-info)))
-    (if (first info) (progn (org-babel-lob-execute info) t) nil)))
+    (if (nth 0 info) (progn (org-babel-lob-execute info) t) nil)))
 
 (add-hook 'org-ctrl-c-ctrl-c-hook 'org-babel-lob-execute-maybe)
 
@@ -109,7 +109,7 @@ the word 'call'."
 		  (org-babel-clean-text-properties
 		   (concat ":var results=" (mapconcat #'identity (butlast info) " ")))))))
     (org-babel-execute-src-block
-     nil (list "emacs-lisp" "results" params nil nil (third info)))))
+     nil (list "emacs-lisp" "results" params nil nil (nth 2 info)))))
 
 (provide 'ob-lob)
 ;;; ob-lob.el ends here

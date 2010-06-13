@@ -82,8 +82,8 @@ function is called when `org-edit-special' is called with a
 prefix argument from inside of a source-code block."
   (when current-prefix-arg
     (let* ((info (org-babel-get-src-block-info))
-           (lang (first info))
-           (params (third info))
+           (lang (nth 0 info))
+           (params (nth 2 info))
            (session (cdr (assoc :session params))))
       (when (and info session) ;; we are in a source-code block with a session
         (funcall
@@ -246,9 +246,9 @@ the header arguments specified at the front of the source code
 block."
   (interactive)
   (let* ((info (or info (org-babel-get-src-block-info)))
-         (lang (first info))
-	 (params (setf (third info)
-                       (sort (org-babel-merge-params (third info) params)
+         (lang (nth 0 info))
+	 (params (setf (nth 2 info)
+                       (sort (org-babel-merge-params (nth 2 info) params)
                              (lambda (el1 el2) (string< (symbol-name (car el1))
                                                    (symbol-name (car el2)))))))
          (new-hash
@@ -256,11 +256,11 @@ block."
                    (string= "yes" (cdr (assoc :cache params))))
               (org-babel-sha1-hash info)))
          (old-hash (org-babel-result-hash info))
-         (body (setf (second info)
+         (body (setf (nth 1 info)
 		     (if (and (cdr (assoc :noweb params))
                               (string= "yes" (cdr (assoc :noweb params))))
                          (org-babel-expand-noweb-references info)
-		       (second info))))
+		       (nth 1 info))))
          (result-params (split-string (or (cdr (assoc :results params)) "")))
          (result-type (cond ((member "output" result-params) 'output)
 			    ((member "value" result-params) 'value)
@@ -310,15 +310,15 @@ org-babel-expand-body:lang function." body)
 arguments, and pop open the results in a preview buffer."
   (interactive)
   (let* ((info (or info (org-babel-get-src-block-info)))
-         (lang (first info))
-	 (params (setf (third info)
-                       (sort (org-babel-merge-params (third info) params)
+         (lang (nth 0 info))
+	 (params (setf (nth 2 info)
+                       (sort (org-babel-merge-params (nth 2 info) params)
                              (lambda (el1 el2) (string< (symbol-name (car el1))
                                                    (symbol-name (car el2)))))))
-         (body (setf (second info)
+         (body (setf (nth 1 info)
 		     (if (and (cdr (assoc :noweb params))
                               (string= "yes" (cdr (assoc :noweb params))))
-			 (org-babel-expand-noweb-references info) (second info))))
+			 (org-babel-expand-noweb-references info) (nth 1 info))))
          (cmd (intern (concat "org-babel-expand-body:" lang)))
          (expanded (funcall (if (fboundp cmd) cmd 'org-babel-expand-body:generic)
                             body params)))
@@ -331,9 +331,9 @@ header arguments for the source block before entering the
 session.  After loading the body this pops open the session."
   (interactive)
   (let* ((info (or info (org-babel-get-src-block-info)))
-         (lang (first info))
-         (body (second info))
-         (params (third info))
+         (lang (nth 0 info))
+         (body (nth 1 info))
+         (params (nth 2 info))
          (session (cdr (assoc :session params))))
     (unless (member lang org-babel-interpreters)
       (error "Language is not in `org-babel-interpreters': %s" lang))
@@ -350,9 +350,9 @@ for the source block before entering the session. Copy the body
 of the source block to the kill ring."
   (interactive)
   (let* ((info (or info (org-babel-get-src-block-info)))
-         (lang (first info))
-         (body (second info))
-         (params (third info))
+         (lang (nth 0 info))
+         (body (nth 1 info))
+         (params (nth 2 info))
          (session (cdr (assoc :session params)))
 	 (dir (cdr (assoc :dir params)))
 	 (default-directory
@@ -463,8 +463,8 @@ added to the header-arguments-alist."
 					 (lambda (ref) (cons :var ref))
 					 (org-babel-ref-split-args args))))))
 		(unless header-vars-only
-		  (setf (third info)
-			(org-babel-merge-params (sixth info) (third info)))))
+		  (setf (nth 2 info)
+			(org-babel-merge-params (nth 5 info) (nth 2 info)))))
 	    (setq info (append info (list nil nil))))
 	  (append info (list indent)))
       (if (save-excursion ;; inline source block
@@ -478,8 +478,8 @@ added to the header-arguments-alist."
   (interactive)
   (let* ((info (or info (org-babel-get-src-block-info)))
          (hash (sha1 (format "%s-%s" (mapconcat (lambda (arg) (format "%S" arg))
-                                                (third info) ":")
-                             (second info)))))
+                                                (nth 2 info) ":")
+                             (nth 1 info)))))
     (when (interactive-p) (message hash))
     hash))
 
@@ -747,7 +747,7 @@ Return a list (session vars result-params result-type colnames rownames)."
   "Return a cons cell, the `car' of which contains the TABLE less
 colnames, and the `cdr' of which contains a list of the column
 names."
-  (if (equal 'hline (second table))
+  (if (equal 'hline (nth 1 table))
       (cons (cddr table) (car table))
     (cons (cdr table) (car table))))
 
@@ -800,7 +800,7 @@ of the vars, cnames and rnames."
       (lambda (var)
         (when (listp (cdr var))
           (when (and (not (equal colnames "no"))
-                     (or colnames (and (equal (second (cdr var)) 'hline)
+                     (or colnames (and (equal (nth 1 (cdr var)) 'hline)
                                        (not (member 'hline (cddr (cdr var)))))))
             (let ((both (org-babel-get-colnames (cdr var))))
               (setq cnames (cons (cons (car var) (cdr both))
@@ -894,8 +894,8 @@ following the source block."
     (let* ((on-lob-line (progn (beginning-of-line 1)
 			       (looking-at org-babel-lob-one-liner-regexp)))
 	   (name (if on-lob-line
-		     (first (org-babel-lob-get-info))
-		   (fifth (or info (org-babel-get-src-block-info)))))
+		     (nth 0 (org-babel-lob-get-info))
+		   (nth 4 (or info (org-babel-get-src-block-info)))))
 	   (head (unless on-lob-line (org-babel-where-is-src-block-head))) end)
       (when head (goto-char head))
       (or (and name (org-babel-find-named-result name))
@@ -1031,7 +1031,7 @@ code ---- the results are extracted in the syntax of the source
 	(let ((existing-result (org-babel-where-is-src-block-result
 				t info hash indent))
 	      (results-switches
-               (cdr (assoc :results_switches (third info))))
+               (cdr (assoc :results_switches (nth 2 info))))
 	      beg end)
 	  (when existing-result
 	    (goto-char existing-result)
@@ -1283,8 +1283,8 @@ these arguments are not evaluated in the current source-code
 block but are passed literally to the \"example-block\"."
   (let* ((parent-buffer (or parent-buffer (current-buffer)))
          (info (or info (org-babel-get-src-block-info)))
-         (lang (first info))
-         (body (second info))
+         (lang (nth 0 info))
+         (body (nth 1 info))
          (new-body "") index source-name evaluate prefix)
     (flet ((nb-add (text)
                    (setq new-body (concat new-body text))))

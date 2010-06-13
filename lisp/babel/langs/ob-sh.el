@@ -42,7 +42,7 @@
 
 (defun org-babel-expand-body:sh (body params &optional processed-params)
   "Expand BODY according to PARAMS, return the expanded body."
-  (let ((vars (second (or processed-params (org-babel-process-params params))))
+  (let ((vars (nth 1 (or processed-params (org-babel-process-params params))))
         (sep (cdr (assoc :separator params))))
     (concat
    (mapconcat ;; define any variables
@@ -57,8 +57,8 @@
 function is called by `org-babel-execute-src-block'."
   (message "executing Shell source code block")
   (let* ((processed-params (org-babel-process-params params))
-         (session (org-babel-sh-initiate-session (first processed-params)))
-         (result-params (third processed-params)) 
+         (session (org-babel-sh-initiate-session (nth 0 processed-params)))
+         (result-params (nth 2 processed-params)) 
          (full-body (org-babel-expand-body:sh
                      body params processed-params))) ;; then the source block body
     (org-babel-reassemble-table
