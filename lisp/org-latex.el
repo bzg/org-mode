@@ -1984,7 +1984,8 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
   ;; Preserve latex environments
   (goto-char (point-min))
   (while (re-search-forward "^[ \t]*\\\\begin{\\([a-zA-Z]+\\*?\\)}" nil t)
-    (let* ((start (progn (beginning-of-line) (point)))
+    (org-if-unprotected
+     (let* ((start (progn (beginning-of-line) (point)))
 	   (end (and (re-search-forward
 		      (concat "^[ \t]*\\\\end{"
 			      (regexp-quote (match-string 1))
@@ -1992,7 +1993,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 		     (point-at-eol))))
       (if end
 	  (add-text-properties start end '(org-protected t))
-	(goto-char (point-at-eol)))))
+	(goto-char (point-at-eol))))))
 
   ;; Preserve math snippets
 
