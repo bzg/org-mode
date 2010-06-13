@@ -194,6 +194,7 @@ code block respecting the value of the :exports header argument."
 		     "\n\n"
 		     (org-babel-exp-results info type))))))
 
+(defvar backend)
 (defun org-babel-exp-code (info type)
   "Return the code the current code block in a manner suitable
 for exportation by org-mode.  This function is called by
@@ -229,7 +230,7 @@ evaluated."
           ((eq backend 'html)
            (format "\n#+HTML: <label class=\"org-src-name\">%s</label>\n"
 		   call-line))
-          ((t (format ": %s\n" call-line)))))))))
+          ((format ": %s\n" call-line))))))))
 
 (defun org-babel-exp-results (info type &optional silent)
   "Return the results of the current code block in a manner

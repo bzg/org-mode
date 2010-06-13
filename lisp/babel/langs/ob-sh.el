@@ -31,6 +31,15 @@
 ;;; Code:
 (require 'ob)
 (require 'shell)
+(eval-when-compile
+  (require 'cl))
+
+(defun-function org-babel-ref-variables "ob-ref" (params))
+(defun-function org-babel-comint-in-buffer "ob-comint" (buffer &rest body))
+(defun-function org-babel-comint-wait-for-output "ob-comint" (buffer))
+(defun-function org-babel-comint-buffer-livep "ob-comint" (buffer))
+(defun-function org-babel-comint-with-output "ob-comint" (meta &rest body))
+(defun-function orgtbl-to-generic "org-table" (table params))
 
 (org-babel-add-interpreter "sh")
 

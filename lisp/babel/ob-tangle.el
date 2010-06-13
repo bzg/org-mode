@@ -55,7 +55,7 @@ org-mode formatted FILE.  This function will first export the
 source code using `org-babel-tangle' and then load the resulting
 file using `load-file'."
   (flet ((age (file)
-              (time-to-seconds
+              (float-time
                (time-subtract (current-time)
                               (nth 5 (or (file-attributes (file-truename file))
                                          (file-attributes file)))))))

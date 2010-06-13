@@ -105,7 +105,10 @@ return nil."
       ;; if ref is indexed grab the indices -- beware nested indicies
       (when (and (string-match "\\[\\(.+\\)\\]" ref)
 		 (let ((str (substring ref 0 (match-beginning 0))))
-		   (= (count ?( str) (count ?) str))))
+		   (= (length (org-remove-if-not
+			       (lambda (el) (equal ?( el)) (string-to-list "((eric))")))
+		      (length (org-remove-if-not
+			       (lambda (el) (equal ?) el)) (string-to-list "((eric))"))))))
         (setq index (match-string 1 ref))
         (setq ref (substring ref 0 (match-beginning 0))))
       ;; assign any arguments to pass to source block
