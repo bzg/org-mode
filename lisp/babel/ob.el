@@ -32,6 +32,24 @@
 (eval-when-compile (require 'cl))
 (require 'org)
 
+(defvar org-babel-interpreters nil)
+(defvar org-babel-call-process-region-original nil)
+(defvar call-process-region)
+(defvar org-babel-lob-one-liner-regexp)
+(declare-function orgtbl-to-generic "org-table" (table params))
+(declare-function org-babel-ref-split-args "ob-ref" (arg-string))
+(declare-function org-babel-ref-variables "ob-ref" (params))
+(declare-function org-babel-lob-get-info "ob-lob" nil)
+(declare-function orgtbl-to-orgtbl "org-table" (table params))
+(declare-function org-babel-ref-resolve-reference
+		  "ob-ref" (ref &optional params))
+(declare-function tramp-compat-make-temp-file
+		  "tramp" (filename &optional dir-flag))
+(declare-function tramp-dissect-file-name
+		  "tramp" (name &optional nodefault))
+(declare-function tramp-file-name-user "tramp" (vec))
+(declare-function tramp-file-name-host "tramp" (vec))
+
 ;; add the langs/ directory to the load path
 (add-to-list 'load-path (expand-file-name
 			 "langs"
@@ -155,9 +173,6 @@ can not be resolved.")
   "This generates a regexp used to match a src block named NAME."
   (concat org-babel-source-name-regexp (regexp-quote name) "[ \t\n]*"
 	  (substring org-babel-src-block-regexp 1)))
-
-(defvar org-babel-interpreters nil)
-(defvar org-babel-call-process-region-original nil)
 
 (defun org-babel-add-interpreter (interpreter)
   "Add INTERPRETER to `org-babel-interpreters' and update
@@ -1564,7 +1579,7 @@ specifies the value of ERROR-BUFFER."
 	      ;; Clear the output buffer, then run the command with
 	      ;; output there.
 	      (let ((directory default-directory))
-		(save-excursion
+		(save-current-buffer
 		  (set-buffer buffer)
 		  (setq buffer-read-only nil)
 		  (if (not output-buffer)

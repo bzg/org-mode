@@ -58,6 +58,12 @@ will be indented by this many characters. See
 source block function.")
 
 (defvar obe-marker nil)
+(defvar org-current-export-file)
+(defvar org-babel-lob-one-liner-regexp)
+(defvar org-babel-ref-split-regexp)
+(declare-function org-babel-get-src-block-info "ob" (&optional header-vars-only))
+(declare-function org-babel-lob-get-info "ob-lob" ())
+(declare-function org-babel-ref-literal "ob-ref" (ref))
 
 (defun org-babel-exp-src-blocks (body &rest headers)
   "Process src block for export.  Depending on the 'export'

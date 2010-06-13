@@ -31,6 +31,8 @@
 ;;; Code:
 (require 'ob)
 
+(declare-function org-babel-get-src-block-info "ob" (&optional header-vars-only))
+
 (defvar org-babel-tangle-langs nil
   "List of languages supported by `org-babel-tangle'.  The first
 element of each language's list is a string indicating the name
