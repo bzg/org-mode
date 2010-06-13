@@ -53,6 +53,8 @@
 
 ;;; Code:
 (require 'ob)
+(eval-when-compile
+  (require 'cl))
 
 (defun org-babel-ref-variables (params)
   "Takes a parameter alist, and return an alist of variable

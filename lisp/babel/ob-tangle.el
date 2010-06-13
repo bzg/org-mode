@@ -30,6 +30,8 @@
 
 ;;; Code:
 (require 'ob)
+(eval-when-compile
+  (require 'cl))
 
 (declare-function org-babel-get-src-block-info "ob" (&optional header-vars-only))
 

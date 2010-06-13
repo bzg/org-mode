@@ -31,10 +31,14 @@
 ;;; Code:
 (require 'ob)
 (require 'org-exp-blocks)
-(org-export-blocks-add-block '(src org-babel-exp-src-blocks nil))
+(eval-when-compile
+  (require 'cl))
+
 (add-to-list 'org-export-interblocks '(src org-babel-exp-inline-src-blocks))
 (add-to-list 'org-export-interblocks '(lob org-babel-exp-lob-one-liners))
 (add-hook 'org-export-blocks-postblock-hook 'org-exp-res/src-name-cleanup)
+
+(org-export-blocks-add-block '(src org-babel-exp-src-blocks nil))
 
 (defvar org-babel-function-def-export-keyword "function"
   "When exporting a source block function, this keyword will
@@ -201,7 +205,7 @@ evaluated."
         (name (nth 4 info))
         (args (mapcar
 	       #'cdr
-	       (remove-if-not (lambda (el) (eq :var (car el))) (nth 2 info)))))
+	       (org-remove-if-not (lambda (el) (eq :var (car el))) (nth 2 info)))))
     (case type
       ('inline (format "=%s=" body))
       ('block
