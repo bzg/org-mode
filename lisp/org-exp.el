@@ -2013,7 +2013,7 @@ take care of the block they are in."
       (goto-char (point-min))
       (while (not (eobp))
 	(insert (or prefix1 prefix))
-	(setq prefix1 nil)
+	(setq prefix1 "")
 	(beginning-of-line 2)))
     (buffer-string)
     (when (member markup '("src" "example"))
