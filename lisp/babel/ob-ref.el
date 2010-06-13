@@ -95,6 +95,7 @@ return nil."
             (read ref))
       out)))
 
+(defvar org-babel-library-of-babel)
 (defun org-babel-ref-resolve-reference (ref &optional params)
   "Resolve the reference REF and return its value."
   (save-excursion
