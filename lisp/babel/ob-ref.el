@@ -54,6 +54,8 @@
 ;;; Code:
 (require 'ob)
 
+(declare-function org-babel-get-src-block-info "ob" (header-vars-only))
+
 (defun org-babel-ref-variables (params)
   "Takes a parameter alist, and return an alist of variable
 names, and the emacs-lisp representation of the related value."
@@ -155,7 +157,7 @@ return nil."
 	      (case type
 		('results-line (org-babel-read-result))
 		('table (org-babel-read-table))
-		('file (org-babel-read-file))
+		('file (org-babel-read-link))
 		('source-block (org-babel-execute-src-block nil nil params))
 		('lob (org-babel-execute-src-block nil lob-info params))))
 	(if (symbolp result)
