@@ -97,7 +97,8 @@ called by `org-babel-execute-src-block'."
             (if org-format-latex-header-extra
                 (concat "\n" org-format-latex-header-extra)
               "")
-            "\n\\begin{document}\n" body "\n\\end{document}\n")))
+            "\n\\begin{document}\n" body "\n\\end{document}\n")
+    (org-export-latex-fix-inputenc)))
 
 (defun org-babel-latex-tex-to-pdf (tex-file)
   "Extracted from `org-export-as-pdf' in org-latex.el."
