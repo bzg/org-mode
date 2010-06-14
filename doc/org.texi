@@ -10934,7 +10934,7 @@ further configuration options.
 
 @table @code
 @item org-src-lang-modes
-If an emacs major-mode named @code{<lang>-mode} exists, where
+If an Emacs major-mode named @code{<lang>-mode} exists, where
 @code{<lang>} is the language named in the header line of the code block,
 then the edit buffer will be placed in that major-mode. This variable
 can be used to map arbitrary language names to existing major modes.
@@ -10946,7 +10946,7 @@ python, in which whitespace indentation in the output is critical.
 @item org-src-ask-before-returning-to-edit-buffer
 By default, Org will ask before returning to an open edit buffer. Set
 to a non-nil value to switch without asking.
-@end table
+@End table
 
 @node Exporting code blocks, Extracting source code, Editing source code, Working With Source Code
 @comment  node-name,  next,  previous,  up
@@ -10969,15 +10969,13 @@ behavior:
 The default in most languages. The body of the code block is exported, as
 described in @ref{Literal examples}.
 @item :exports results
-On export, the code block will be evaluated and the results will be placed in
-the Org-mode buffer, either updating previous results of the code block
-located anywhere in the buffer or, if no previous results exist, placing the
-results immediately after the code block.  The body of the code block will
-not be exported.
+The code block will be evaluated and the results will be placed in the
+Org-mode buffer for export, either updating previous results of the code
+block located anywhere in the buffer or, if no previous results exist,
+placing the results immediately after the code block.  The body of the code
+block will not be exported.
 @item :exports both
-On export, the code block will be evaluated and the results inserted into the
-buffer as described above, however the body of the code block will be
-exported as well.
+Both the code block and its results will be exported.
 @item :exports none
 Neither the code block nor its results will be exported.
 @end table
@@ -10988,29 +10986,29 @@ Neither the code block nor its results will be exported.
 @section Extracting source code
 
 Creating pure source code files by extracting code from source blocks is
-referred to as ``tangling'' -- a term adopted from the literate programming
+referred to as ``tangling''---a term adopted from the literate programming
 community.  During ``tangling'' of code blocks their bodies are expanded
 using @code{org-babel-expand-src-block} which can expand both variable and
-``noweb'' (see @ref{Noweb reference syntax}) style references.
+``noweb'' style references  (see @ref{Noweb reference syntax}).
 
 @subsubheading header arguments:
 @table @code
 @item :tangle no
-The default.
+The default.  The code block is not included in the tangled output.
 @item :tangle yes
-Include block in tangled output. The output file name is the name of the org
-file with the extension @samp{.org} replaced by the extension for the block
-language.
+Include the code block in the tangled output. The output file name is the
+name of the org file with the extension @samp{.org} replaced by the extension
+for the block language.
 @item :tangle filename
-Include block in tangled output to file @samp{filename}
+Include the code block in the tangled output to file @samp{filename}.
 @end table
 
 @subsubheading functions:
 @table @code
 @item org-babel-tangle @key{C-c C-v t}
-Tangle the current file
+Tangle the current file.
 @item org-babel-tangle-file
-Choose a file to tangle
+Choose a file to tangle.
 @end table
 
 @node Evaluating code blocks, Library of Babel, Extracting source code, Working With Source Code
@@ -11018,22 +11016,22 @@ Choose a file to tangle
 @comment  Evaluating code blocks,  , Extracting source code, Working With Source Code
 @section Evaluating code blocks
 
-Blocks of code can be evaluated and the results incorporated into the
-org-mode buffer.  Check the value of the @code{org-babel-interpreters} for a
-list of evaluable languages on your system, also see @ref{Languages} for a
-list of supported languages.  See @ref{Structure of code blocks} for
-information on the syntax used to define a code block.
+Code blocks can be evaluated and the results placed in the Org-mode buffer.
+Check the value of the @code{org-babel-interpreters} for a list of languages
+that can be evaluated on your system. See also @ref{Languages} for a list of
+supported languages.  See @ref{Structure of code blocks} for information on
+the syntax used to define a code block.
 
-There are a number of ways of evaluating code blocks.  The simplest is to
+There are a number of ways to evaluate code blocks.  The simplest is to
 press @key{C-c C-c} with the point on a code block.  This will call the
-@code{org-babel-execute-src-block} function evaluating the block and
-inserting its results into the Org-mode buffer.
+@code{org-babel-execute-src-block} function to evaluate the block and
+insert its results into the Org-mode buffer.
 
 It is also possible to evaluate named code blocks from anywhere in an
 Org-mode buffer or an Org-mode table.  @code{#+call} (or synonymously
 @code{#+function} or @code{#+lob}) lines can be used to remotely execute code
 blocks located in the current Org-mode buffer or in the ``Library of Babel''
-(see @ref{Library of Babel}).  Both of these lines use the following syntax.
+(see @ref{Library of Babel}).  These lines use the following syntax.
 
 @example
 #+call: <name>(<arguments>) <header arguments>
@@ -11041,7 +11039,7 @@ blocks located in the current Org-mode buffer or in the ``Library of Babel''
 
 @table @code
 @item <name>
-This name is associated with the source code block to be evaluated.
+The name of the source code block to be evaluated.
 @item <arguments>
 Arguments specified in this section will be passed to the code block.
 @item <header arguments>
@@ -11052,10 +11050,10 @@ Header arguments can be placed after the function invocation.  See
 
 @node Library of Babel, Languages, Evaluating code blocks, Working With Source Code
 @section Library of Babel
-The ``Library of Babel'' is two things.  First it is a library of code blocks
-which can be called from any Org-mode file, and second it is an actual
+The ``Library of Babel'' is two things.  First, it is a library of code blocks
+that can be called from any Org-mode file, and second it is an actual
 Org-mode file located in the @samp{contrib} directory of Org-mode in which
-Org-mode users may deposit functions which they believe to be generally
+Org-mode users may deposit functions they believe to be generally
 useful.
 
 Code blocks defined in the``Library of Babel'' can be called remotely as if
@@ -11577,7 +11575,7 @@ it is absent, then the directory associated with the current buffer is
 used. In other words, supplying @code{:dir path} temporarily has the same
 effect as changing the current directory with @key{M-x cd path}, and then not
 supplying @code{:dir}. Under the surface, @code{:dir} simply sets the value
-of the emacs variable @code{default-directory}.
+of the Emacs variable @code{default-directory}.
 
 When using @code{:dir}, you should supply a relative path for file output
 (e.g. @code{:file myfile.jpg} or @code{:file results/myfile.jpg}) in which
@@ -11615,7 +11613,7 @@ and a link of the following form will be inserted in the org buffer:
 @end example
 
 Most of this functionality follows immediately from the fact that @code{:dir}
-sets the value of the emacs variable @code{default-directory}, thanks to
+sets the value of the Emacs variable @code{default-directory}, thanks to
 tramp. Those using XEmacs, or GNU Emacs prior to version 23 may need to
 install tramp separately in order for the above features to work correctly.
 
