@@ -164,8 +164,8 @@ can not be resolved.")
 		"\\("                                 ;; (2)   lang
 		(mapconcat 'regexp-quote value "\\|")
 		"\\)"
-                "\\(\\|\\[\\(.*\\)\\]\\)"             ;; (3,4) (unused, headers)
-                "{\\([^\f\n\r\v]+\\)}"                ;; (5)   body
+                "\\(\\|\\[\\(.*?\\)\\]\\)"            ;; (3,4) (unused, headers)
+                "{\\([^\f\n\r\v]+?\\)}"               ;; (5)   body
 		"\\)")))
 
 (defun org-babel-add-interpreter (interpreter)
