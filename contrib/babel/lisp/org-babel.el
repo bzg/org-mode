@@ -108,6 +108,9 @@ header arguments as well.")
   '((:session . "none") (:results . "silent") (:exports . "results"))
   "Default arguments to use when evaluating an inline source block.")
 
+(defvar org-babel-current-buffer-properties)
+(make-variable-buffer-local 'org-babel-current-buffer-properties)
+
 (defvar org-babel-src-block-regexp nil
   "Regexp used to test when inside of a org-babel src-block")
 
@@ -610,6 +613,20 @@ may be specified in the properties of the current outline entry."
 		 (setq sym (intern (concat "org-babel-header-arg-names:" lang)))
 		 (and (boundp sym) (eval sym))))))))))
 
+(defun org-babel-params-from-buffer ()
+  "Return an association list of any source block params which
+may be specified at the top of the current buffer."
+  (or org-babel-current-buffer-properties
+      (setq org-babel-current-buffer-properties
+	    (save-excursion
+	      (save-restriction
+		(widen)
+		(goto-char (point-min))
+		(when (re-search-forward
+		       (org-make-options-regexp (list "BABEL")) nil t)
+		  (org-babel-parse-header-arguments
+		   (org-match-string-no-properties 2))))))))
+
 (defun org-babel-parse-src-block-match ()
   (let* ((block-indentation (length (match-string 1)))
 	 (lang (org-babel-clean-text-properties (match-string 2)))
@@ -627,6 +644,7 @@ may be specified in the properties of the current outline entry."
               (buffer-string)))
 	  (org-babel-merge-params
 	   org-babel-default-header-args
+	   (org-babel-params-from-buffer)
            (org-babel-params-from-properties lang)
 	   (if (boundp lang-headers) (eval lang-headers) nil)
 	   (org-babel-parse-header-arguments
@@ -642,6 +660,7 @@ may be specified in the properties of the current outline entry."
            (org-babel-clean-text-properties (match-string 5)))
           (org-babel-merge-params
            org-babel-default-inline-header-args
+	   (org-babel-params-from-buffer)
            (org-babel-params-from-properties lang)
            (if (boundp lang-headers) (eval lang-headers) nil)
            (org-babel-parse-header-arguments
