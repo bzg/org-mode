@@ -320,17 +320,17 @@ prompt the use if she wants to replace it.
 Called with a numeric prefix argument, use this numeric value as
 the duration of the timer.
 
-Called with a `C-u' prefix argument, use `org-timer-default-timer' 
+Called with a `C-u' prefix arguments, use `org-timer-default-timer'
 without prompting the user for a duration.
 
-With two `C-u' prefix argument, use `org-timer-default-timer'
+With two `C-u' prefix arguments, use `org-timer-default-timer'
 without prompting the user for a duration and automatically
 replace any running timer."
   (interactive "P")
   (let ((minutes (or (and (numberp opt) (number-to-string opt))
 		     (and (listp opt) (not (null opt))
 			  (number-to-string org-timer-default-timer))
-		     (read-from-minibuffer 
+		     (read-from-minibuffer
 		      "How many minutes left? "
 		      (if (not (eq org-timer-default-timer 0))
 			  (number-to-string org-timer-default-timer))))))

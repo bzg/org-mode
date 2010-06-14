@@ -144,7 +144,7 @@ class, you can use the following macro-like placeholders.
 
  [DEFAULT-PACKAGES]      \\usepackage statements for default packages
  [NO-DEFAULT-PACKAGES]   do not include any of the default packages
- [PACKAGES]              \\usepackage statements for packages 
+ [PACKAGES]              \\usepackage statements for packages
  [NO-PACKAGES]           do not include the packages
  [EXTRA]                 the stuff from #+LaTeX_HEADER
  [NO-EXTRA]              do not include #+LaTeX_HEADER stuff
@@ -1901,7 +1901,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 	  (setq wrapp nil floatp t attr (replace-match "" t t attr)))
       (if (string-match "[ \t]*\\<multicolumn\\>" attr)
 	  (setq multicolumnp t attr (replace-match "" t t attr))))
-    
+
     (setq placement
 	  (cond
 	   (wrapp "{l}{0.5\\textwidth}")
@@ -1984,7 +1984,8 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
   ;; Preserve latex environments
   (goto-char (point-min))
   (while (re-search-forward "^[ \t]*\\\\begin{\\([a-zA-Z]+\\*?\\)}" nil t)
-    (let* ((start (progn (beginning-of-line) (point)))
+    (org-if-unprotected
+     (let* ((start (progn (beginning-of-line) (point)))
 	   (end (and (re-search-forward
 		      (concat "^[ \t]*\\\\end{"
 			      (regexp-quote (match-string 1))
@@ -1992,7 +1993,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 		     (point-at-eol))))
       (if end
 	  (add-text-properties start end '(org-protected t))
-	(goto-char (point-at-eol)))))
+	(goto-char (point-at-eol))))))
 
   ;; Preserve math snippets
 
@@ -2074,7 +2075,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 	     "\\(?:<[^<>\n]*>\\)*"
 	     "\\(" (org-create-multibrace-regexp "{" "}" 3) "\\)\\{1,3\\}")))
     (while (re-search-forward re nil t)
-      (unless (or 
+      (unless (or
 	       ;; check for comment line
 	       (save-excursion (goto-char (match-beginning 0))
 			       (org-in-indented-comment-line))

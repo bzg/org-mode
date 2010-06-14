@@ -52,38 +52,53 @@ body inside the protection of `save-window-excursion' and
        (set-buffer ,buffer)
        ,@body)))
 
-(defmacro org-babel-comint-with-output (buffer eoe-indicator remove-echo &rest body)
+(defmacro org-babel-comint-with-output
+  (buffer eoe-indicator remove-echo &rest body)
   "Evaluate BODY in BUFFER, wait until EOE-INDICATOR appears in
 output, then return all process output.  This ensures that the
 filter is removed in case of an error or user `keyboard-quit'
 during execution of body."
   (declare (indent 3))
   `(org-babel-comint-in-buffer ,buffer
-     (let ((string-buffer ""))
+     (let ((string-buffer "") dangling-text)
        (flet ((my-filt (text) (setq string-buffer (concat string-buffer text))))
          ;; setup filter
          (add-hook 'comint-output-filter-functions 'my-filt)
          (unwind-protect
              (progn
-               ;; pass FULL-BODY to process
+               ;; got located, and save dangling text
                (goto-char (process-mark (get-buffer-process (current-buffer))))
+	       (let ((start (point))
+		     (end (point-max)))
+		 (setq dangling-text (buffer-substring start end))
+		 (delete-region start end))
+	       ;; pass FULL-BODY to process
                ,@body
                ;; wait for end-of-evaluation indicator
                (while (progn
                         (goto-char comint-last-input-end)
                         (not (save-excursion
-			       (and (re-search-forward comint-prompt-regexp nil t)
-				    (re-search-forward (regexp-quote ,eoe-indicator) nil t)))))
+			       (and (re-search-forward
+				     comint-prompt-regexp nil t)
+				    (re-search-forward
+				     (regexp-quote ,eoe-indicator) nil t)))))
                  (accept-process-output (get-buffer-process (current-buffer)))
-                 ;; ;; thought this would allow async background running, but I was wrong...
-                 ;; (run-with-timer .5 .5 'accept-process-output (get-buffer-process (current-buffer)))
-                 ))
+                 ;; thought the following this would allow async
+                 ;; background running, but I was wrong...
+                 ;; (run-with-timer .5 .5 'accept-process-output
+		 ;; 		 (get-buffer-process (current-buffer)))
+                 )
+	       ;; replace cut dangling text
+	       (goto-char (process-mark (get-buffer-process (current-buffer))))
+	       (insert dangling-text))
            ;; remove filter
            (remove-hook 'comint-output-filter-functions 'my-filt)))
        ;; remove echo'd FULL-BODY from input
        (if (and ,remove-echo
 		(string-match
-		 (replace-regexp-in-string "\n" "\r\n" (regexp-quote ,full-body)) string-buffer))
+		 (replace-regexp-in-string
+		  "\n" "[\r\n]+" (regexp-quote ,full-body))
+		 string-buffer))
            (setq raw (substring string-buffer (match-end 0))))
        (split-string string-buffer comint-prompt-regexp))))
 

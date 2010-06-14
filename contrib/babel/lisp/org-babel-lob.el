@@ -59,9 +59,9 @@ add files to this list use the `org-babel-lob-ingest' command."
   function. If you change the value of this variable then your
   files may become unusable by other org-babel users, and vice
   versa.")
-  
+
 (defconst org-babel-lob-one-liner-regexp
-  (concat "^[ \t]*#\\+\\(?:"
+  (concat "^\\([ \t]*\\)#\\+\\(?:"
 	  (mapconcat #'regexp-quote org-babel-lob-call-aliases "\\|")
 	  "\\):[ \t]+\\([^\(\)\n]+\\)\(\\([^\n]*\\)\)[ \t]*\\([^\n]*\\)")
   "Regexp to match calls to predefined source block functions")
@@ -92,19 +92,21 @@ the word 'call'."
     (save-excursion
       (beginning-of-line 1)
       (if (looking-at org-babel-lob-one-liner-regexp)
-          (mapcar #'org-babel-clean-text-properties 
-		  (list (format "%s(%s)" (match-string 1) (match-string 2))
-			(match-string 3)))))))
+          (append (mapcar #'org-babel-clean-text-properties 
+			  (list (format "%s(%s)" (match-string 2) (match-string 3))
+				(match-string 4)))
+		  (list (length (match-string 1))))))))
   
 (defun org-babel-lob-execute (info)
   (let ((params (org-babel-merge-params
 		 org-babel-default-header-args
+		 (org-babel-params-from-buffer)
                  (org-babel-params-from-properties)
 		 (org-babel-parse-header-arguments
 		  (org-babel-clean-text-properties
-		   (concat ":var results=" (mapconcat #'identity info " ")))))))
-    ;; (message "lob-params=%S" params) ;; debugging
-    (org-babel-execute-src-block nil (list "emacs-lisp" "results" params))))
+		   (concat ":var results=" (mapconcat #'identity (butlast info) " ")))))))
+    (org-babel-execute-src-block
+     nil (list "emacs-lisp" "results" params nil nil (third info)))))
 
 (provide 'org-babel-lob)
 ;;; org-babel-lob.el ends here

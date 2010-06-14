@@ -862,6 +862,8 @@ value of `org-export-run-in-background'."
 
 \[D] export as DocBook   [V] export as DocBook, process to PDF, and open
 
+\[j] export as TaskJuggler                         [J] ... and open
+
 \[m] export as Freemind mind map
 \[x] export as XOXO
 \[g] export using Wes Hardaker's generic exporter
@@ -888,6 +890,8 @@ value of `org-export-run-in-background'."
 	    (?g org-export-generic t)
 	    (?D org-export-as-docbook t)
 	    (?V org-export-as-docbook-pdf-and-open t)
+	    (?j org-export-as-taskjuggler t)
+	    (?J org-export-as-taskjuggler-and-open t)
 	    (?m org-export-as-freemind t)
 	    (?l org-export-as-latex t)
 	    (?p org-export-as-pdf t)
@@ -1668,22 +1672,23 @@ When it is nil, all comments will be removed."
   "Remove tables lines that are used for internal purposes."
   (goto-char (point-min))
   (while (re-search-forward "^[ \t]*|" nil t)
-    (beginning-of-line 1)
-    (if (or (looking-at "[ \t]*| *[!_^] *|")
-	    (not
-	     (memq
-	      nil
-	      (mapcar
-	       (lambda (f)
-		 (or (= (length f) 0)
-		     (string-match
-		      "\\`<\\([0-9]\\|[rl]\\|[rl][0-9]+\\)>\\'" f)))
-	       (org-split-string ;; FIXME, can't we do this without splitting???
-		(buffer-substring (point-at-bol) (point-at-eol))
-		"[ \t]*|[ \t]*")))))
-	(delete-region (max (point-min) (1- (point-at-bol)))
-		       (point-at-eol))
-      (end-of-line 1))))
+    (org-if-unprotected-at (1- (point))
+      (beginning-of-line 1)
+      (if (or (looking-at "[ \t]*| *[!_^] *|")
+	      (not
+	       (memq
+		nil
+		(mapcar
+		 (lambda (f)
+		   (or (= (length f) 0)
+		       (string-match
+			"\\`<\\([0-9]\\|[rl]\\|[rl][0-9]+\\)>\\'" f)))
+		 (org-split-string ;; FIXME, can't we do without splitting???
+		  (buffer-substring (point-at-bol) (point-at-eol))
+		  "[ \t]*|[ \t]*")))))
+	  (delete-region (max (point-min) (1- (point-at-bol)))
+			 (point-at-eol))
+	(end-of-line 1)))))
 
 (defun org-export-protect-sub-super (s)
   (save-match-data
@@ -2008,7 +2013,7 @@ take care of the block they are in."
       (goto-char (point-min))
       (while (not (eobp))
 	(insert (or prefix1 prefix))
-	(setq prefix1 nil)
+	(setq prefix1 "")
 	(beginning-of-line 2)))
     (buffer-string)
     (when (member markup '("src" "example"))

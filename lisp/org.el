@@ -259,6 +259,7 @@ to add the symbol `xyz', and the package must have a call to
 	(const :tag "C  sqlinsert:         Convert Org-mode tables to SQL insertions" orgtbl-sqlinsert)
 	(const :tag "C  toc:               Table of contents for Org-mode buffer" org-toc)
 	(const :tag "C  track:             Keep up with Org-mode development" org-track)
+	(const :tag "C  TaskJuggler:       Export tasks to a TaskJuggler project" org-taskjuggler)
 	(repeat :tag "External packages" :inline t (symbol :tag "Package"))))
 
 (defcustom org-support-shift-select nil
@@ -1530,9 +1531,9 @@ you can use this variable to set the application for a given file
 extension.  The entries in this list are cons cells where the car identifies
 files and the cdr the corresponding command.  Possible values for the
 file identifier are
- \"string\"    A string as a file identifier can be interpreted in different 
+ \"string\"    A string as a file identifier can be interpreted in different
                ways, depending on its contents:
-               
+
                - Alphanumeric characters only:
                  Match links with this file extension.
                  Example: (\"pdf\" . \"evince %s\")
@@ -4977,7 +4978,8 @@ will be prompted for."
 	     '(font-lock-fontified t face org-meta-line))
 	    t)
 	   ((or (member dc1 '("begin:" "end:" "caption:" "label:"
-			      "orgtbl:" "tblfm:" "tblname:"))
+			      "orgtbl:" "tblfm:" "tblname:" "result:"
+			      "results:" "source:" "srcname:" "call:"))
 		(and (match-end 4) (equal dc3 "attr")))
 	    (add-text-properties
 	     beg (match-end 0)
@@ -5513,13 +5515,14 @@ and subscriipts."
 	     org-match-substring-regexp
 	   org-match-substring-with-braces-regexp)
 	 limit t)
-	(let* ((pos (point)) table-p comment-p emph-p)
+	(let* ((pos (point)) table-p comment-p emph-p link-p)
 	  (setq emph-p (get-text-property (match-beginning 3) 'org-emphasis))
+	  (setq link-p (get-text-property (match-beginning 3) 'mouse-face))
 	  (goto-char (point-at-bol))
 	  (setq table-p (org-looking-at-p org-table-dataline-regexp)
 		comment-p (org-looking-at-p "[ \t]*#"))
 	  (goto-char pos)
-	  (if (or comment-p emph-p)
+	  (if (or comment-p emph-p link-p)
 	      t
 	    (put-text-property (match-beginning 3) (match-end 0)
 			       'display
@@ -9993,7 +9996,7 @@ This can be done with a 0 prefix: `C-0 C-c C-w'"
 			  (< pos (save-excursion
 				   (org-end-of-subtree t t))))))
 	      (error "Cannot refile to position inside the tree or region"))
-	  
+
 	  (setq nbuf (or (find-buffer-visiting file)
 			 (find-file-noselect file)))
 	  (if goto
@@ -16859,16 +16862,16 @@ When in an #+include line, visit the include file.  Otherwise call
 `ffap' to visit the file at point."
   (interactive)
   (cond
-   ((org-at-table.el-p)
-    (org-edit-src-code))
-   ((org-at-table-p)
-    (call-interactively 'org-table-edit-formulas))
    ((save-excursion
       (beginning-of-line 1)
       (looking-at "\\(?:#\\+\\(?:setupfile\\|include\\):?[ \t]+\"?\\|[ \t]*<include\\>.*?file=\"\\)\\([^\"\n>]+\\)"))
     (find-file (org-trim (match-string 1))))
    ((org-edit-src-code))
    ((org-edit-fixed-width-region))
+   ((org-at-table.el-p)
+    (org-edit-src-code))
+   ((org-at-table-p)
+    (call-interactively 'org-table-edit-formulas))
    (t (call-interactively 'ffap))))
 
 

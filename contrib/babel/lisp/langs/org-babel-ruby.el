@@ -65,13 +65,15 @@ called by `org-babel-execute-src-block'."
          (result-params (third processed-params))
          (result-type (fourth processed-params))
          (full-body (org-babel-expand-body:ruby
-                     body params processed-params)) ;; then the source block body
+                     body params processed-params))
          (result (org-babel-ruby-evaluate session full-body result-type)))
     (or (cdr (assoc :file params))
         (org-babel-reassemble-table
          result
-         (org-babel-pick-name (nth 4 processed-params) (cdr (assoc :colnames params)))
-         (org-babel-pick-name (nth 5 processed-params) (cdr (assoc :rownames params)))))))
+         (org-babel-pick-name (nth 4 processed-params)
+			      (cdr (assoc :colnames params)))
+         (org-babel-pick-name (nth 5 processed-params)
+			      (cdr (assoc :rownames params)))))))
 
 (defun org-babel-prep-session:ruby (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."
@@ -129,9 +131,10 @@ Emacs-lisp table, otherwise return the results as a string."
   "If there is not a current inferior-process-buffer in SESSION
 then create.  Return the initialized session."
   (unless (string= session "none")
-    (let ((session-buffer (save-window-excursion (run-ruby nil session) (current-buffer))))
+    (let ((session-buffer (save-window-excursion
+			    (run-ruby nil session) (current-buffer))))
       (if (org-babel-comint-buffer-livep session-buffer)
-          session-buffer
+	  (progn (sit-for .25) session-buffer)
         (sit-for .5)
         (org-babel-ruby-initiate-session session)))))
 
@@ -175,24 +178,30 @@ last statement in BODY, as elisp."
            (with-temp-buffer
              (insert body)
              ;; (message "buffer=%s" (buffer-string)) ;; debugging
-             (org-babel-shell-command-on-region (point-min) (point-max) "ruby" 'current-buffer 'replace)
+             (org-babel-shell-command-on-region
+	      (point-min) (point-max) "ruby" 'current-buffer 'replace)
              (buffer-string)))
           (value
-           (let* ((tmp-file (make-temp-file "ruby-functional-results")) exit-code
+           (let* ((tmp-file (make-temp-file "ruby-functional-results"))
+		  exit-code
 		  (stderr
 		   (with-temp-buffer
 		     (insert (format (if (member "pp" result-params)
 					 org-babel-ruby-pp-wrapper-method
-				       org-babel-ruby-wrapper-method) body tmp-file))
-		     ;; (message "buffer=%s" (buffer-string)) ;; debugging
+				       org-babel-ruby-wrapper-method)
+				     body tmp-file))
 		     (setq exit-code
-			   (org-babel-shell-command-on-region (point-min) (point-max) "ruby" nil 'replace (current-buffer)))
+			   (org-babel-shell-command-on-region
+			    (point-min) (point-max) "ruby"
+			    nil 'replace (current-buffer)))
 		     (buffer-string))))
 	     (if (> exit-code 0) (org-babel-error-notify exit-code stderr))
              (let ((raw (with-temp-buffer
-			  (insert-file-contents (org-babel-maybe-remote-file tmp-file))
+			  (insert-file-contents
+			   (org-babel-maybe-remote-file tmp-file))
 			  (buffer-string))))
-               (if (or (member "code" result-params) (member "pp" result-params))
+               (if (or (member "code" result-params)
+		       (member "pp" result-params))
                    raw
                  (org-babel-ruby-table-or-string raw)))))))
     ;; comint session evaluation
@@ -203,11 +212,13 @@ last statement in BODY, as elisp."
                             org-babel-ruby-pp-last-value-eval
                           org-babel-ruby-last-value-eval)
                    org-babel-ruby-eoe-indicator) "\n"))
-           (raw (org-babel-comint-with-output buffer org-babel-ruby-eoe-indicator t
+           (raw (org-babel-comint-with-output
+		    buffer org-babel-ruby-eoe-indicator t
                   (insert full-body) (comint-send-input nil t)))
-           (results (cdr (member org-babel-ruby-eoe-indicator
-                                 (reverse (mapcar #'org-babel-ruby-read-string
-                                                  (mapcar #'org-babel-trim raw)))))))
+           (results (cdr (member
+			  org-babel-ruby-eoe-indicator
+			  (reverse (mapcar #'org-babel-ruby-read-string
+					   (mapcar #'org-babel-trim raw)))))))
       (case result-type
         (output (mapconcat #'identity (reverse (cdr results)) "\n"))
         (value

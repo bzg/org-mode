@@ -117,7 +117,8 @@ a look at our [[http://orgmode.org/worg/org-quotes.php][collected quotes about O
 #+ATTR_HTML: style="float:right;"
   [[http://mobileorg.ncogni.to/][http://mobileorg.ncogni.to/images/screenshot-browse.png]]
 
-- <2010-05-21 Fri>: iPhone App [[http://mobileorg.ncogni.to/][MobileOrg]] version 1.2 available
+- <2010-06-06 Sun>: iPhone App [[http://mobileorg.ncogni.to/][MobileOrg]] version 1.3 introduces
+  DropBox support, for vastly easier setup.
 - <2010-04-06 Tue>: Release 6.35
 - <2010-01-10 Sun>: Release 6.34
 

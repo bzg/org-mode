@@ -41,25 +41,19 @@ something.
 
 ** Structure
 *** TODO Get rid of all the \r instances, which were used only for XEmacs.
-*** TODO proper visibility cycling for items
+*** WISH proper visibility cycling for items
     Make them not hide the text after the final list item.
     This is not trivial, we cannot usenormal outline stuff,
-    needs a separate implementaiton.
-*** WISH Inline TODO entries
-    A way to put a TODO entry without starting a new section.
+    needs a separate implementation.
 
 ** Agenda issues
-*** WISH Make more modes changeable from the agenda
-    These could be made available for toggling, just like
-    follow-mode. Examples:
-    - org-agenda-todo-list-sublevels
-    - org-tags-match-list-sublevels
-    - org-agenda-todo-ignore-scheduled
 
 ** Links
 *** WISH Variable of standard links for completion with C-c C-l
     Or something like that, to make standard links fast.
+
 *** IDEA Find all links to a specific file
+
 *** IDEA Make info HTML links work for links to Info files
     Info links of course only work inside Emacs.  However, many info
     documents are on the web, so the HTML exporter could try to be
@@ -69,11 +63,6 @@ something.
     http://www.gnu.org/software/emacs/manual/html_node/ Another
     question is, is this URL going to be stable so that it makes sense
     to actually put this into org.el?
-
-*** TODO Remove irretrievable links from /published/ HTML output
-    This is on David's table, and he will hopefully integrate a
-    mechanism for this into org-publish.el.  The discussion about this
-    was started by [[http://thread.gmane.org/gmane.emacs.orgmode/281][Austin Frank]]
 
 *** TODO Document the character protection in links
     I don't think this is really covered anywhere.
@@ -90,80 +79,18 @@ something.
     @4=.....
 
 *** WISH Make a variable that current line should be recomputed always
-    in each table, skipping headers of course.
+    In each table.  Skipping headers of course.
 
-*** BUG When computing in a narrowed column, aligning may go wrong.
-    Computing changes fields and does not yet see correctly if the column
-    width has changed, in the case of a narrowed column.
-
-** Compatibility issues
-*** Emacs 21 compatibility
-    This is being phased out.  Almost everything works under Emacs 21,
-    but in the future I will make little effort to support it.
-
-*** XEmacs compatibility
 
 ** Exporting
-*** IDEA Convert links to footnotes for ASCII export.
-    But the question is:  where should these footnotes be placed?
 
 ** Publishing
 
-We need to simplify the publishing options.  Here are some of the
-options for publishing projects
 
-*** Publishing options
-
-:`:base-directory'       Directory containing publishing source files
-:
-:`:publishing-directory' Directory (possibly remote) where output files
-:                        will be published.
-:
-:`:preparation-function' Function called before starting publishing
-:                        process, for example to run `make' for updating
-:                        files to be published.
-:
-:`:base-extension'  Extension (without the dot!) of source files.  This
-:                   actually is a regular expression.
-:
-:`:exclude'         Regular expression to match file names that should
-:                   not be published, even though they have been selected
-:                   on the basis of their extension.
-:
-:`:include'         List of files to be included regardless of
-:                   `:base-extension' and `:exclude'.
-:
-:`:publishing-function' Function executing the publication of a file.
-:                       This may also be a list of functions, which will
-:                       all be called in turn.
-:
-:`:link-validation-function'   Function to validate links
-:
-:`:auto-index'      When non-nil, publish an index during
-:                   org-publish-current-project or org-publish-all.
-:
-:`:index-filename'  Filename for output of index. Defaults to `index.org'
-:                   (which becomes `index.html').
-:
-:`:index-title'     Title of index page. Defaults to name of file.
-:
-:`:index-function'  Plug-in function to use for generation of index.
-:                   Defaults to `org-publish-org-index', which generates
-:                   a plain list of links to all files in the project.
-
-*** TODO Document the :recursive option
-*** QUESTION Does anyone use the index related options
-*** QUESTION Remove :base-extension and only use :include
-*** WISH Simple interaction between :include :exclude :recursive
-*** QUESTION Use an export-directory option per file?
-
-For now we use publishing-directory but this is not consistent with the
-convention of using "publishing" when there is a /project/ to publish.
+*** TODO Document the :recursive option for org-publish
 
 ** Miscellaneous Stuff
 *** BUG Comments cannot be filled
-*** WISH Inlining of images in Org-mode files
-*** TODO Fixup outline-magic.el, so that it can be used.
     
 *** TODO Use the new argument of bibtex-url
     Roland Winkler was kind enough to implement a new argument to the
@@ -180,6 +107,7 @@ convention of using "publishing" when there is a /project/ to publish.
 *** Priorities
     Here is some information about priorities, which is not yet
     documented.  Actually, I am not sur if the list here is correct
+    either
 **** QUOTE Priorities
     TODO entries: 1 or 1,2,...
     DEADLINE is 10-ddays, i.e. it is 10 on the due day
@@ -195,22 +123,10 @@ convention of using "publishing" when there is a /project/ to publish.
 
     Priority * 1000
 
-*** INCONSISTENCY: items don't grow/shrink due to promotion.
-    In plain lists, multiple demote/promote commands executed directly
-    after each other don't change the scope of the command - the
-    initially selected text continues to be selected.  This is
-    inconsistent with the behavior of outline sections, were the subtree
-    for promotion/demotion is newly defined after each command.  Which
-    convention is better?  Should this be consistent between trees and
-    plain lists?
-
 *** QUESTION grep on directory does not yet work.
     I am actually not sure, I might have addressed this already, but
     my memory is failing me.  Needs some checking.
 
-
-* Archive
-** Archived Tasks
 * COMMENT HTML style specifications
 
 # Local Variables: 
