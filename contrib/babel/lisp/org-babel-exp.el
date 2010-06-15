@@ -34,6 +34,7 @@
 (org-export-blocks-add-block '(src org-babel-exp-src-blocks nil))
 (add-to-list 'org-export-interblocks '(src org-babel-exp-inline-src-blocks))
 (add-to-list 'org-export-interblocks '(lob org-babel-exp-lob-one-liners))
+(add-hook 'org-export-blocks-postblock-hook 'org-exp-res/src-name-cleanup)
 
 (defvar org-babel-function-def-export-keyword "function"
   "When exporting a source block function, this keyword will
@@ -112,6 +113,21 @@ options and are taken from `org-babel-defualt-inline-header-args'."
 		  (org-babel-exp-do-export info 'inline)))))
 	(setq end (+ end (- (length replacement) (length (match-string 1)))))
 	(replace-match replacement t t nil 1)))))
+
+(defun org-exp-res/src-name-cleanup ()
+  "Cleanup leftover #+results and #+srcname lines as part of the
+org export cycle.  This should only be called after all block
+processing has taken place."
+  (interactive)
+  (save-excursion
+    (goto-char (point-min))
+    (while (re-search-forward
+	    (concat
+	     "\\("org-babel-source-name-regexp"\\|"org-babel-result-regexp"\\)")
+	    nil t)
+      (delete-region
+       (progn (beginning-of-line) (point))
+       (progn (end-of-line) (point))))))
 
 (defun org-babel-in-example-or-verbatim ()
   "Return true if the point is currently in an escaped portion of
