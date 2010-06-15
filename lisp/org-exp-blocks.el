@@ -199,7 +199,7 @@ specified in BLOCKS which default to the value of
                    (match-beginning 0) (match-end 0) indentation)))))
 	  (setq start (match-end 0)))
 	(interblock start (point-max))
-	(run-hooks org-export-blocks-postblock-hooks)))))
+	(run-hooks 'org-export-blocks-postblock-hook)))))
 
 (add-hook 'org-export-preprocess-hook 'org-export-blocks-preprocess)
 
