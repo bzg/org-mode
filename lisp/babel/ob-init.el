@@ -7,6 +7,8 @@
 (require 'ob-comint)
 (require 'ob-table)
 (require 'ob-keys)
+(require 'ob-sh)
+(require 'ob-emacs-lisp)
 
 (provide 'ob-init)
 ;;; ob-init.el ends here
