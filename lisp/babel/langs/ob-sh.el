@@ -131,7 +131,7 @@ Emacs-lisp table, otherwise return the results as a string."
 
 (defun org-babel-sh-initiate-session (&optional session params)
   "Initiate a session named SESSION according to PARAMS."
-  (unless (string= session "none")
+  (when (and session (not (string= session "none")))
     (save-window-excursion
       (or (org-babel-comint-buffer-livep session)
           (progn (shell session) (get-buffer (current-buffer)))))))
