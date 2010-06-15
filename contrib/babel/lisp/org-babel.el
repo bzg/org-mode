@@ -887,7 +887,8 @@ following the source block."
 				     "#+results"
 				     (when hash (concat "["hash"]"))
 				     ":"
-				     (when name (concat " " name)) "\n"))
+				     (when name (concat " " name)) "\n\n"))
+			    (backward-char)
                             (beginning-of-line 0)
                             (if hash (org-babel-hide-hash)) t)))
                (point))))))
