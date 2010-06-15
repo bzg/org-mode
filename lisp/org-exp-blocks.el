@@ -136,7 +136,11 @@ be exported."
   :group 'org-export-general
   :type 'list)
 
-(defvar org-export-blocks-postblock-hooks nil "")
+(defcustom org-export-blocks-postblock-hook nil
+  "Run after blocks have been processed with
+`org-export-blocks-preprocess'."
+  :group 'org-export-general
+  :type 'hook)
 
 (defun org-export-blocks-html-quote (body &optional open close)
   "Protext BODY from org html export.  The optional OPEN and
@@ -194,7 +198,8 @@ specified in BLOCKS which default to the value of
                   (indent-code-rigidly
                    (match-beginning 0) (match-end 0) indentation)))))
 	  (setq start (match-end 0)))
-	(interblock start (point-max))))))
+	(interblock start (point-max))
+	(run-hooks org-export-blocks-postblock-hooks)))))
 
 (add-hook 'org-export-preprocess-hook 'org-export-blocks-preprocess)
 
