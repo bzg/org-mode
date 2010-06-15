@@ -34,6 +34,14 @@
 (eval-when-compile
   (require 'cl))
 
+(defvar obe-marker nil)
+(defvar org-current-export-file)
+(defvar org-babel-lob-one-liner-regexp)
+(defvar org-babel-ref-split-regexp)
+(declare-function org-babel-get-src-block-info "ob" (&optional hvo))
+(declare-function org-babel-lob-get-info "ob-lob" ())
+(declare-function org-babel-ref-literal "ob-ref" (ref))
+
 (add-to-list 'org-export-interblocks '(src org-babel-exp-inline-src-blocks))
 (add-to-list 'org-export-interblocks '(lob org-babel-exp-lob-one-liners))
 (add-hook 'org-export-blocks-postblock-hook 'org-exp-res/src-name-cleanup)
@@ -60,14 +68,6 @@ whitespace. An example is the following which generates n random
 will be indented by this many characters. See
 `org-babel-function-def-export-name' for the definition of a
 source block function.")
-
-(defvar obe-marker nil)
-(defvar org-current-export-file)
-(defvar org-babel-lob-one-liner-regexp)
-(defvar org-babel-ref-split-regexp)
-(declare-function org-babel-get-src-block-info "ob" (&optional header-vars-only))
-(declare-function org-babel-lob-get-info "ob-lob" ())
-(declare-function org-babel-ref-literal "ob-ref" (ref))
 
 (defun org-babel-exp-src-blocks (body &rest headers)
   "Process src block for export.  Depending on the 'export'

@@ -33,7 +33,7 @@
 (require 'ob-table)
 (require 'ob-exp)
 
-(declare-function org-babel-get-src-block-info "ob" (&optional header-vars-only))
+(declare-function org-babel-get-src-block-info "ob" (&optional hvo))
 
 (defvar org-babel-library-of-babel nil
   "Library of source-code blocks.  This is an association list.

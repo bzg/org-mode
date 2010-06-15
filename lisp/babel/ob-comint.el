@@ -36,6 +36,8 @@
 (require 'ob)
 (require 'comint)
 
+(declare-function org-babel-get-src-block-info "ob" (&optional hvo))
+
 (defun org-babel-comint-buffer-livep (buffer)
   "Check if BUFFER is a comint buffer with a live process."
   (let ((buffer (if buffer (get-buffer buffer))))
