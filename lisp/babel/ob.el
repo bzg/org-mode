@@ -33,8 +33,7 @@
 (require 'org)
 
 (defvar org-babel-interpreters nil)
-(defvar org-babel-call-process-region-original nil)
-(defvar call-process-region)
+(defvar org-babel-call-process-region-original)
 (defvar org-babel-lob-one-liner-regexp)
 (declare-function orgtbl-to-generic "org-table" (table params))
 (declare-function org-babel-ref-split-args "ob-ref" (arg-string))
