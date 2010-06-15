@@ -175,7 +175,7 @@ last statement in BODY."
                      (mapcar #'org-babel-sh-strip-weird-long-prompt
                              (mapcar #'org-babel-trim
                                      (org-babel-comint-with-output
-                                         (list session org-babel-sh-eoe-output t full-body)
+                                         (session org-babel-sh-eoe-output t full-body)
                                        (mapc (lambda (line) (insert line) (comint-send-input))
                                              (strip-empty (split-string body "\n")))
                                        (insert org-babel-sh-eoe-indicator)

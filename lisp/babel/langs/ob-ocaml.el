@@ -64,7 +64,7 @@
          (full-body (org-babel-expand-body:ocaml body params processed-params))
          (session (org-babel-prep-session:ocaml session params))
          (raw (org-babel-comint-with-output
-		  (list session org-babel-ocaml-eoe-output t full-body)
+		  (session org-babel-ocaml-eoe-output t full-body)
                 (insert (concat (org-babel-chomp full-body) " ;;"))
                 (comint-send-input nil t)
                 (insert org-babel-ocaml-eoe-indicator)

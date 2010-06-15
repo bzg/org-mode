@@ -213,7 +213,7 @@ last statement in BODY, as elisp."
 		(output
 		 (mapconcat #'org-babel-chomp (list body org-babel-R-eoe-indicator) "\n"))))
 	     (raw
-	      (org-babel-comint-with-output (list session org-babel-R-eoe-output)
+	      (org-babel-comint-with-output (session org-babel-R-eoe-output)
 		(insert full-body) (inferior-ess-send-input)))
 	     (comint-prompt-regexp
 	      (concat "^\\("
