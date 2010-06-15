@@ -231,6 +231,7 @@ lisp code use the `org-babel-add-interpreter' function."
 	      (const "ruby")))
 
 ;;; functions
+(defvar call-process-region)
 (defun org-babel-execute-src-block (&optional arg info params)
   "Execute the current source code block, and insert the results
 into the buffer.  Source code execution and the collection and
