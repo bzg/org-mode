@@ -10946,7 +10946,7 @@ python, in which whitespace indentation in the output is critical.
 @item org-src-ask-before-returning-to-edit-buffer
 By default, Org will ask before returning to an open edit buffer. Set
 to a non-nil value to switch without asking.
-@End table
+@end table
 
 @node Exporting code blocks, Extracting source code, Editing source code, Working With Source Code
 @comment  node-name,  next,  previous,  up
