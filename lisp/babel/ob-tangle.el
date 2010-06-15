@@ -242,22 +242,22 @@ assumes that the appropriate major-mode is set.  SPEC has the
 form
 
   (link source-name params body)"
-  (flet ((insert-comment (text)
-                         (when (and commentable
-				    org-babel-tangle-w-comments)
-                           (insert "\n")
-                           (comment-region (point)
-					   (progn (insert text) (point)))
-                           (end-of-line nil)
-                           (insert "\n"))))
-    (let ((link (nth 0 spec))
-          (source-name (nth 1 spec))
-          (body (nth 3 spec))
-          (commentable (not (if (> (length (cdr (assoc :comments (nth 2 spec))))
-				   0)
-                                (string= (cdr (assoc :comments (nth 2 spec)))
-					 "no")
-                              (nth 4 spec)))))
+  (let ((link (nth 0 spec))
+	(source-name (nth 1 spec))
+	(body (nth 3 spec))
+	(commentable (not (if (> (length (cdr (assoc :comments (nth 2 spec))))
+				 0)
+			      (string= (cdr (assoc :comments (nth 2 spec)))
+				       "no")
+			    (nth 4 spec)))))
+    (flet ((insert-comment (text)
+			   (when (and commentable
+				      org-babel-tangle-w-comments)
+			     (insert "\n")
+			     (comment-region (point)
+					     (progn (insert text) (point)))
+			     (end-of-line nil)
+			     (insert "\n"))))
       (insert-comment (format "[[%s][%s]]" (org-link-escape link) source-name))
       (insert (format "\n%s\n" (replace-regexp-in-string
 				"^," "" (org-babel-chomp body))))
