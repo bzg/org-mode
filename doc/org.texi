@@ -265,7 +265,7 @@ Remember
 Archiving
 
 * Moving subtrees::             Moving a tree to an archive file
-* Internal archiving::          Switch off a tree but keep i in the file
+* Internal archiving::          Switch off a tree but keep it in the file
 
 Agenda Views
 
@@ -6347,7 +6347,7 @@ Archive the current entry using the command specified in the variable
 
 @menu
 * Moving subtrees::             Moving a tree to an archive file
-* Internal archiving::          Switch off a tree but keep i in the file
+* Internal archiving::          Switch off a tree but keep it in the file
 @end menu
 
 @node Moving subtrees, Internal archiving, Archiving, Archiving
