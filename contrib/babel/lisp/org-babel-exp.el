@@ -127,7 +127,7 @@ processing has taken place."
 	    nil t)
       (delete-region
        (progn (beginning-of-line) (point))
-       (progn (end-of-line) (point))))))
+       (progn (end-of-line) (+ 1 (point)))))))
 
 (defun org-babel-in-example-or-verbatim ()
   "Return true if the point is currently in an escaped portion of
