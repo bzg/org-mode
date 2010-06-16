@@ -1032,7 +1032,7 @@ on this string to produce the exported version."
       (untabify (point-min) (point-max))
 
       ;; Handle include files, and call a hook
-      (org-export-handle-include-files)
+      (org-export-handle-include-files-recurse)
       (run-hooks 'org-export-preprocess-after-include-files-hook)
 
       ;; Get rid of archived trees
@@ -1969,7 +1969,7 @@ TYPE must be a string, any of:
 (defun org-export-handle-include-files ()
   "Include the contents of include files, with proper formatting."
   (let ((case-fold-search t)
-	params file markup lang start end prefix prefix1 switches)
+	params file markup lang start end prefix prefix1 switches all)
     (goto-char (point-min))
     (while (re-search-forward "^#\\+INCLUDE:?[ \t]+\\(.*\\)" nil t)
       (setq params (read (concat "(" (match-string 1) ")"))
@@ -1986,6 +1986,7 @@ TYPE must be a string, any of:
 	      (not (file-exists-p file))
 	      (not (file-readable-p file)))
 	  (insert (format "CANNOT INCLUDE FILE %s" file))
+	(setq all (cons file all))
 	(when markup
 	  (if (equal (downcase markup) "src")
 	      (setq start (format "#+begin_src %s %s\n"
@@ -1998,7 +1999,22 @@ TYPE must be a string, any of:
 	(insert (org-get-file-contents (expand-file-name file)
 				       prefix prefix1 markup))
 	(or (bolp) (newline))
-	(insert (or end ""))))))
+	(insert (or end ""))))
+    all))
+
+(defun org-export-handle-include-files-recurse ()
+  "Recursively include files aborting on circular inclusion."
+  (let ((now (list org-current-export-file)) all)
+    (while now
+      (setq all (remove-duplicates (append now all)))
+      (setq now (org-export-handle-include-files))
+      (let ((intersection
+	     (delq nil
+		   (mapcar
+		    (lambda (el) (when (member el all) el))
+		    now))))
+	(when (intersection now all)
+	  (error "recursive #+INCLUDE: %S" intersection))))))
 
 (defun org-get-file-contents (file &optional prefix prefix1 markup)
   "Get the contents of FILE and return them as a string.
