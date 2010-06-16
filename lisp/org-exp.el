@@ -1637,7 +1637,7 @@ table line.  If it is a link, add it to the line containing the link."
   "Remove comments, or convert to backend-specific format.
 COMMENTSP can be a format string for publishing comments.
 When it is nil, all comments will be removed."
-  (let ((re "^\\(#\\|[ \t]*#\\+\\)\\(.*\n?\\)")
+  (let ((re "^\\(#\\|[ \t]*#\\+ \\)\\(.*\n?\\)")
 	pos)
     (goto-char (point-min))
     (while (or (looking-at re)
@@ -1649,9 +1649,8 @@ When it is nil, all comments will be removed."
 		  (match-beginning 0) (match-end 0) '(org-protected t))
 		 (replace-match (format commentsp (match-string 2)) t t))
 	(goto-char (1+ pos))
-	(org-if-unprotected
-	 (replace-match "")
-	 (goto-char (max (point-min) (1- pos))))))))
+	(replace-match "")
+	(goto-char (max (point-min) (1- pos)))))))
 
 (defun org-export-mark-radio-links ()
   "Find all matches for radio targets and turn them into internal links."
