@@ -11187,10 +11187,10 @@ The values of header arguments can be set in five different ways, each more
 specific (and having higher priority) than the last.
 @menu
 * System-wide header arguments::
-* Language-specific header arguments::
+* Language Specific header arguments::
 * Buffer-wide header arguments::
-* Header arguments in Org-mode properties::
-* Code block specific header arguments::
+* Header arguments in Org-mode Properties::
+* Code Block specific header arguments::
 @end menu
 
 @node System-wide header arguments, Language Specific header arguments, , Using Header arguments
@@ -11223,21 +11223,21 @@ blocks.
 	      (assq-delete-all :noweb org-babel-default-header-args)))
 @end example
 
-@node Language Specific header arguments, Buffer Wide header arguments, System-wide header arguments, Using Header arguments
-@subsubheading Language-specific header arguments
+@node Language Specific header arguments, Buffer-wide header arguments, System-wide header arguments, Using Header arguments
+@subsubheading Language Specific header arguments
 Each language can define its own set of default header arguments.  See the
 language-specific documentation available at
 @uref{http://orgmode.org/worg/org-contrib/babel/reference.php#languages}.
 for information on language-specific header arguments.
 
-@node Buffer Wide header arguments, header arguments in Org-mode Properties, Language Specific header arguments, Using Header arguments
+@node Buffer-wide header arguments, Header arguments in Org-mode Properties, Language Specific header arguments, Using Header arguments
 @subsubheading Buffer-wide header arguments
 FIXME
 
-@node header arguments in Org-mode Properties, Source Code Block specific header arguments, Buffer Wide header arguments, Using Header arguments
+@node Header arguments in Org-mode Properties, Code Block specific header arguments, Buffer-wide header arguments, Using Header arguments
 @subsubheading header arguments in Org-mode Properties
 
-Header arguments are also read from Org-mode properties (see @ref{Property
+Header arguments are also read from Org-mode Properties (see @ref{Property
 syntax}), which can be set on a buffer-wide or per-heading basis. An example
 of setting a header argument for all code blocks in a buffer is
 
@@ -11262,8 +11262,8 @@ Properties defined in this way override the properties set in
 @code{org-set-property} function bound to @key{C-c C-x p} to set properties
 in Org-mode documents.
 
-@node Source Code Block specific header arguments, , header arguments in Org-mode Properties, Using Header arguments
-@subsubheading Code block specific header arguments
+@node Code Block specific header arguments, , Header arguments in Org-mode Properties, Using Header arguments
+@subsubheading Code Block specific header arguments
 
 The most common way to assign values to header arguments is at the
 code block level.  This can be done by listing a sequence of header
