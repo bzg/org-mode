@@ -10945,7 +10945,7 @@ This variable is especially useful for tangling languages such as
 python, in which whitespace indentation in the output is critical.
 @item org-src-ask-before-returning-to-edit-buffer
 By default, Org will ask before returning to an open edit buffer. Set
-to a non-nil value to switch without asking.
+this variable to nil to switch without asking.
 @end table
 
 @node Exporting code blocks, Extracting source code, Editing source code, Working With Source Code
