@@ -1567,7 +1567,7 @@ These special cookies will later be interpreted by the backend."
       (setq beg (match-beginning 0)
 	    beg1 (1+ (match-end 0)))
       (when (re-search-forward (concat "^[ \t]*#\\+end_" type "\\>.*") nil t)
-	(setq end (1+ (point-at-eol))
+	(setq end (+ (point-at-eol) (if (looking-at "\n$") 1 0))
 	      end1 (1- (match-beginning 0)))
 	(setq content (org-remove-indentation (buffer-substring beg1 end1)))
 	(setq content (concat "ORG-" (upcase t1) "-START\n"
