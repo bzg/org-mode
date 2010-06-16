@@ -15924,7 +15924,7 @@ BEG and END default to the buffer boundaries."
       (widen)
       (setq beg (or beg (point-min)) end (or end (point-max)))
       (goto-char (point-min))
-      (let ((re (concat "\\[\\[\\(\\(file:\\)\\|\\([./~]\\)\\)\\([-+~./_0-9a-zA-Z]+"
+      (let ((re (concat "\\[\\[\\(\\(file:\\)\\|\\([./~]\\)\\)\\([-+~.:/\\_0-9a-zA-Z ]+"
 			(substring (org-image-file-name-regexp) 0 -2)
 			"\\)\\]" (if include-linked "" "\\]")))
 	    old file ov img)
