@@ -186,7 +186,7 @@ last statement in BODY, as elisp."
 	 (with-temp-buffer
 	   (insert body)
 	   (org-babel-shell-command-on-region (point-min) (point-max) "R --slave --no-save" 'current-buffer 'replace)
-	   (buffer-string)))
+	   (org-babel-trim (buffer-string))))
 	(value
 	 (let* ((tmp-file (make-temp-file "R-out-functional-results")) exit-code
 		(stderr
@@ -235,7 +235,7 @@ last statement in BODY, as elisp."
 		     (if (= (length el) 0)
 			 nil
 		       (if (string-match comint-prompt-regexp el)
-			   (substring el (match-end 0))
+			   (org-babel-trim (substring el (match-end 0)))
 			 el)))))
 	     (mapconcat
 	      #'identity
