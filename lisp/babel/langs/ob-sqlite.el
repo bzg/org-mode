@@ -45,19 +45,23 @@
 called by `org-babel-execute-src-block'."
   (message "executing Sqlite source code block")
   (let ((result-params (split-string (or (cdr (assoc :results params)) "")))
-	(vars (org-babel-ref-variables params)))
+	(vars (org-babel-ref-variables params))
+	(headers-p (equal "yes" (cdr (assoc :colnames params)))))
     (with-temp-buffer
       (insert
        (shell-command-to-string
-	(format "%s -csv %s %S"
+	(format "%s %s -csv %s %S"
 		org-babel-sqlite3-command
+		(if headers-p "-header" "")
 		(cdr (assoc :db params))
 		(org-babel-sqlite-expand-vars body vars))))
       (if (or (member "scalar" result-params)
 	      (member "code" result-params))
 	  (buffer-string)
 	(org-table-convert-region (point-min) (point-max))
-	(org-babel-sqlite-table-or-scalar (org-table-to-lisp))))))
+	(org-babel-sqlite-table-or-scalar
+	 (org-babel-sqlite-offset-colnames
+	  (org-table-to-lisp) headers-p))))))
 
 (defun org-babel-sqlite-expand-vars (body vars)
   "Expand the variables held in VARS in BODY."
@@ -76,6 +80,12 @@ called by `org-babel-execute-src-block'."
 	   (equal 1 (length (car result))))
       (caar result)
     result))
+
+(defun org-babel-sqlite-offset-colnames (table headers-p)
+  "If HEADERS-P is non-nil then offset the first row as column names."
+  (if headers-p
+      (cons (car table) (cons 'hline (cdr table)))
+    table))
 
 (defun org-babel-prep-session:sqlite (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."
