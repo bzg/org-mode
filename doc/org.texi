@@ -11133,11 +11133,11 @@ l}.
 @section Languages
 Code blocks in the following languages are supported.
 
-@c BEGIN RECEIVE ORGTBL org-babel-lang-table
 @multitable @columnfractions 0.583 0.417
 @item Language @tab Identifier
 @item Asymptote @tab asymptote
 @item C @tab C
+@item C @tab C++
 @item Clojure @tab clojure
 @item css @tab css
 @item ditaa @tab ditaa
@@ -11158,66 +11158,9 @@ Code blocks in the following languages are supported.
 @item GNU Screen @tab screen
 @item shell @tab sh
 @item SQL @tab sql
+@item Sqlite @tab sqlite
 @end multitable
-@c END RECEIVE ORGTBL org-babel-lang-table
 
-@ignore
-The original table from reference.org is below; I'm just using the first column for now.
-
-#+ORGTBL: SEND org-babel-lang-table orgtbl-to-texinfo
-  | Language       | Identifier |
-  |----------------+------------|
-  | Asymptote      | asymptote  |
-  | C              | C          |
-  | Clojure        | clojure    |
-  | css            | css        |
-  | ditaa          | ditaa      |
-  | Graphviz       | dot        |
-  | Emacs Lisp     | emacs-lisp |
-  | gnuplot        | gnuplot    |
-  | Haskell        | haskell    |
-  | Matlab         | matlab     |
-  | LaTeX          | latex      |
-  | Objective Caml | ocaml      |
-  | Octave         | octave     |
-  | OZ             | oz         |
-  | Perl           | perl       |
-  | Python         | python     |
-  | R              | R          |
-  | Ruby           | ruby       |
-  | Sass           | sass       |
-  | GNU Screen     | screen     |
-  | shell          | sh         |
-  | SQL            | sql        |
-
-
-  | Language       | Documentation                                                                   | Identifier | Requirements                                                                                                                                                                                                                                                                                |
-  |----------------+---------------------------------------------------------------------------------+------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-  | Asymptote      | org-babel-doc-asymptote                                                         | asymptote  | [[http://asymptote.sourceforge.net/][asymptote]], [[http://asymptote.sourceforge.net/doc/Editing-modes.html][asy-mode]]                                                                                                                                                                     |
-  | C              | [[file:languages/org-babel-doc-C.org][org-babel-doc-C]]                         | C          | none                                                                                                                                                                                                                                                                                        |
-  | Clojure        | [[file:languages/org-babel-doc-clojure.org][org-babel-doc-clojure]]             | clojure    | [[http://clojure.org/][clojure]], [[http://www.emacswiki.org/emacs/clojure-mode.el][clojure-mode]], [[http://common-lisp.net/project/slime/][slime]], [[http://clojure.codestuffs.com/][swank-clojure]]                                                                                     |
-  | css            | org-babel-doc-css                                                               | css        | none                                                                                                                                                                                                                                                                                        |
-  | ditaa          | org-babel-doc-ditaa                                                             | ditaa      | [[http://ditaa.org/ditaa/][ditaa]] (bundled with Org-mode)                                                                                                                                                                                                                                  |
-  | Graphviz       | org-babel-doc-dot                                                               | dot        | [[http://www.graphviz.org/][dot]]                                                                                                                                                                                                                                                           |
-  | Emacs Lisp     | org-babel-doc-emacs-lisp                                                        | emacs-lisp | none                                                                                                                                                                                                                                                                                        |
-  | gnuplot        | org-babel-doc-gnuplot                                                           | gnuplot    | [[http://www.gnuplot.info/][gnuplot]], [[http://cars9.uchicago.edu/~ravel/software/gnuplot-mode.html][gnuplot-mode]]                                                                                                                                                                        |
-  | Haskell        | org-babel-doc-haskell                                                           | haskell    | [[http://www.haskell.org/][haskell]], [[http://projects.haskell.org/haskellmode-emacs/][haskell-mode]], [[http://www.haskell.org/haskellwiki/Haskell_mode_for_Emacs#inf-haskell.el:_the_best_thing_since_the_breadknife][inf-haskell]], [[http://people.cs.uu.nl/andres/lhs2tex/][lhs2tex]] |
-  | Matlab         | [[file:languages/org-babel-doc-octave-matlab.org][org-babel-doc-octave-matlab]] | matlab     | matlab, [[http://sourceforge.net/projects/matlab-emacs/][matlab.el]]                                                                                                                                                                                                                        |
-  | LaTeX          | [[file:languages/org-babel-doc-LaTeX.org][org-babel-doc-latex]]                 | latex      | [[http://www.latex-project.org/][latex]], [[http://www.gnu.org/software/auctex/][auctex]], [[http://www.gnu.org/software/auctex/reftex.html][reftex]]                                                                                                                                       |
-  | Objective Caml | org-babel-doc-ocaml                                                             | ocaml      | [[http://caml.inria.fr/][ocaml]], [[http://www-rock.inria.fr/~acohen/tuareg/][tuareg-mode]]                                                                                                                                                                                                 |
-  | Octave         | [[file:languages/org-babel-doc-octave-matlab.org][org-babel-doc-octave-matlab]] | octave     | octave                                                                                                                                                                                                                                                                                      |
-  | OZ             | [[file:languages/org-babel-doc-oz.org][org-babel-doc-oz]]                       | oz         | [[http://www.mozart-oz.org/][Mozart]] which includes a major mode                                                                                                                                                                                                                           |
-  | Perl           | org-babel-doc-perl                                                              | perl       | [[http://www.perl.org/][perl]], [[http://www.emacswiki.org/emacs/CPerlMode][cperl-mode]] (optional)                                                                                                                                                                                         |
-  | Python         | org-babel-doc-python                                                            | python     | [[http://www.python.org/][python]], [[https://launch pad.net/python-mode][python-mode]] (optional)                                                                                                                                                                                           |
-  | R              | [[file:languages/org-babel-doc-R.org][org-babel-doc-R]]                         | R          | [[http://www.r-project.org/][R]], [[http://ess.r-project.org/][ess-mode]]                                                                                                                                                                                                                   |
-  | Ruby           | org-babel-doc-ruby                                                              | ruby       | [[http://www.ruby-lang.org/][ruby]], [[http://www.ruby-lang.org/][irb]], [[http://github.com/eschulte/rinari/raw/master/util/ruby-mode.el][ruby-mode]], [[http://github.com/eschulte/rinari/raw/master/util/inf-ruby.el][inf-ruby mode]]                                                    |
-  | Sass           | org-babel-doc-sass                                                              | sass       | [[http://sass-lang.com/][sass]], [[http://github.com/nex3/haml/blob/master/extra/sass-mode.el][sass-mode]]                                                                                                                                                                                  |
-  | GNU Screen     | [[file:languages/org-babel-doc-screen.org][org-babel-doc-screen]]               | screen     | [[http://www.gnu.org/software/screen/][screen]], a terminal                                                                                                                                                                                                                                 |
-  | shell          | org-babel-doc-sh                                                                | sh         | a shell                                                                                                                                                                                                                                                                                     |
-  | SQL            | org-babel-doc-sql                                                               | sql        | none                                                                                                                                                                                                                                                                                        |
-
-
-@end ignore
  See the language specific documentation and an up to date list of languages
 that is available at
 @uref{http://orgmode.org/worg/org-contrib/babel/reference.php#languages}.
