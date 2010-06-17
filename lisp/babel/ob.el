@@ -836,6 +836,7 @@ buffer or nil if no such result exists."
                    "[ \t]" (regexp-quote name) "[ \t\n\f\v\r]") nil t)
       (beginning-of-line 0) (point))))
 
+(defvar org-babel-lob-one-liner-regexp)
 (defun org-babel-where-is-src-block-result (&optional insert info hash indent)
   "Return the point at the beginning of the result of the current
 source block.  Specifically at the beginning of the results line.
