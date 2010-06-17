@@ -11291,13 +11291,24 @@ blocks.
 @node Language-specific header arguments, Buffer-wide header arguments, System-wide header arguments, Using header arguments
 @subsubheading Language-specific header arguments
 Each language can define its own set of default header arguments.  See the
-language-specific documentation available at
-@uref{http://orgmode.org/worg/org-contrib/babel/reference.php#languages}
-for information on language-specific header arguments.
+language-specific documentation available online at
+@uref{http://orgmode.org/worg/org-contrib/babel}.
 
 @node Buffer-wide header arguments, Header arguments in Org-mode properties, Language-specific header arguments, Using header arguments
 @subsubheading Buffer-wide header arguments
-FIXME
+Buffer-wide header arguments may be specified through the use of a special
+line placed anywhere in an Org-mode file.  The line consists of the
+@code{#+BABEL:} keyword followed by a series of header arguments which may be
+specified using the standard header argument syntax.
+
+For example the following would set @code{session} to @code{*R*}, and
+@code{results} to @code{silent} for every code block in the buffer, ensuring
+that all execution took place in the same session, and no results would be
+inserted into the buffer.
+
+@example
+#+BABEL: :session *R* :results silent
+@end example
 
 @node Header arguments in Org-mode properties, Code block specific header arguments, Buffer-wide header arguments, Using header arguments
 @subsubheading Header arguments in Org-mode properties
