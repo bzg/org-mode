@@ -42,10 +42,6 @@
 (require 'ob)
 (require 'inf-ruby)
 
-(org-babel-add-interpreter "ruby")
-
-(add-to-list 'org-babel-tangle-langs '("ruby" "rb" "#!/usr/bin/env ruby"))
-
 (defun org-babel-expand-body:ruby (body params &optional processed-params)
   "Expand BODY according to PARAMS, return the expanded body."
   (let ((vars (second (or processed-params (org-babel-process-params params)))))

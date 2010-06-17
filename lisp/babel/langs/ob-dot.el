@@ -43,10 +43,6 @@
 ;;; Code:
 (require 'ob)
 
-(org-babel-add-interpreter "dot")
-
-(add-to-list 'org-babel-tangle-langs '("dot" "dot"))
-
 (defvar org-babel-default-header-args:dot '((:results . "file") (:exports . "results"))
   "Default arguments to use when evaluating a dot source block.")
 

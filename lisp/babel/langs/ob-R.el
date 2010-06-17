@@ -31,10 +31,6 @@
 ;;; Code:
 (require 'ob)
 
-(org-babel-add-interpreter "R")
-
-(add-to-list 'org-babel-tangle-langs '("R" "R" "#!/usr/bin/env Rscript"))
-
 (defconst org-babel-header-arg-names:R
   '(width height bg units pointsize antialias quality compression
 	  res type family title fonts version paper encoding

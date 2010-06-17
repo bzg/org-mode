@@ -31,10 +31,6 @@
 ;;; Code:
 (require 'ob)
 
-(org-babel-add-interpreter "sqlite")
-
-(add-to-list 'org-babel-tangle-langs '("sqlite" "sqlite"))
-
 (defun org-babel-expand-body:sqlite
   (body params &optional processed-params) body)
 

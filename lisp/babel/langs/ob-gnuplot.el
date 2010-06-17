@@ -44,10 +44,6 @@
 (require 'ob)
 (require 'gnuplot)
 
-(org-babel-add-interpreter "gnuplot")
-
-(add-to-list 'org-babel-tangle-langs '("gnuplot" "gnuplot"))
-
 (defvar org-babel-default-header-args:gnuplot
   '((:results . "file") (:exports . "results") (:session . nil))
   "Default arguments to use when evaluating a gnuplot source block.")

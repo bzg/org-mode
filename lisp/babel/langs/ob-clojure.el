@@ -45,11 +45,6 @@
 (require 'slime)
 (require 'swank-clojure)
 
-
-(org-babel-add-interpreter "clojure")
-
-(add-to-list 'org-babel-tangle-langs '("clojure" "clj"))
-
 (defvar org-babel-clojure-wrapper-method
   "
 (defn spit

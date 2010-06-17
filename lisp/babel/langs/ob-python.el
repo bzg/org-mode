@@ -34,10 +34,6 @@
 (require 'ob-comint)
 (require (if (featurep 'xemacs) 'python-mode 'python))
 
-(org-babel-add-interpreter "python")
-
-(add-to-list 'org-babel-tangle-langs '("python" "py" "#!/usr/bin/env python"))
-
 (defun org-babel-expand-body:python (body params &optional processed-params)
   "Expand BODY according to PARAMS, return the expanded body."
   (concat

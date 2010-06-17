@@ -41,10 +41,6 @@
 (declare-function org-babel-comint-with-output "ob-comint" (meta &rest body))
 (declare-function orgtbl-to-generic "org-table" (table params))
 
-(org-babel-add-interpreter "sh")
-
-(add-to-list 'org-babel-tangle-langs '("sh" "sh" "#!/usr/bin/env sh"))
-
 (defvar org-babel-sh-command "sh"
   "Command used to invoke a shell.  This will be passed to
   `shell-command-on-region'")

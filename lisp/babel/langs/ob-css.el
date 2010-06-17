@@ -32,10 +32,6 @@
 ;;; Code:
 (require 'ob)
 
-(org-babel-add-interpreter "css")
-
-(add-to-list 'org-babel-tangle-langs '("css" "css" nil t))
-
 (defun org-babel-expand-body:css (body params &optional processed-params)
   "Expand BODY according to PARAMS, return the expanded body." body)
 

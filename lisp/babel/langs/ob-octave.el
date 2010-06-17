@@ -35,9 +35,6 @@
 (require 'ob)
 (require 'octave-inf)
 
-(org-babel-add-interpreter "octave")
-(add-to-list 'org-babel-tangle-langs '("octave" "m" "#!/usr/bin/env octave"))
-
 (defvar org-babel-octave-shell-command "octave -q"
   "Shell command to use to run octave as an external process.")
 

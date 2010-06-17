@@ -47,10 +47,6 @@
 ;;; Code:
 (require 'ob)
 
-(org-babel-add-interpreter "sql")
-
-(add-to-list 'org-babel-tangle-langs '("sql" "sql"))
-
 (defun org-babel-expand-body:sql (body params &optional processed-params)
   "Expand BODY according to PARAMS, return the expanded body." body)
 

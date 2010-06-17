@@ -31,10 +31,6 @@
 ;;; Code:
 (require 'ob)
 
-(org-babel-add-interpreter "emacs-lisp")
-
-(add-to-list 'org-babel-tangle-langs '("emacs-lisp" "el"))
-
 (defvar org-babel-default-header-args:emacs-lisp
   '((:hlines . "yes") (:colnames . "no"))
   "Default arguments to use when evaluating an emacs-lisp source block.")

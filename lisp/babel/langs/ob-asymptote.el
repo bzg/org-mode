@@ -47,10 +47,6 @@
 ;;; Code:
 (require 'ob)
 
-(org-babel-add-interpreter "asymptote")
-
-(add-to-list 'org-babel-tangle-langs '("asymptote" "asymptote"))
-
 (defvar org-babel-default-header-args:asymptote
   '((:results . "file") (:exports . "results"))
   "Default arguments to use when evaluating a asymptote source block.")

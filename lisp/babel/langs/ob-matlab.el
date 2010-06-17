@@ -41,10 +41,6 @@
 (require 'matlab)
 (require 'ob-octave)
 
-(org-babel-add-interpreter "matlab")
-(add-to-list 'org-babel-tangle-langs '("matlab" "m" "#!/usr/bin/env matlab"))
-
-
 (defvar org-babel-matlab-shell-command "matlab -nosplash"
   "Shell command to use to run matlab as an external process.")
 

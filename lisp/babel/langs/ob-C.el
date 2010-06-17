@@ -36,12 +36,6 @@
 (require 'ob)
 (require 'cc-mode)
 
-(org-babel-add-interpreter "C")
-(add-to-list 'org-babel-tangle-langs '("C" "c" nil))
-
-(org-babel-add-interpreter "c++")
-(add-to-list 'org-babel-tangle-langs '("c++" "cpp" nil))
-
 (defvar org-babel-C-compiler "gcc"
   "Command used to compile a C source code file into an
   executable.")

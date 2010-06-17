@@ -92,14 +92,6 @@
 ;;; major mode for editing Oz programs
 (require 'mozart)
 
-;; Add Oz to the list of supported languages.  Org-babel will match
-;; the string below against the declared language of the source-code
-;; block.
-(org-babel-add-interpreter "oz")
-
-;; specify the name and file extension for Oz
-(add-to-list 'org-babel-tangle-langs '("oz" "oz" nil nil))
-
 ;;
 ;; Interface to communicate with Oz.
 ;; (1) For statements without any results: oz-send-string 

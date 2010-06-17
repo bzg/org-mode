@@ -44,10 +44,6 @@
 (require 'ob)
 (require 'sass-mode)
 
-(org-babel-add-interpreter "sass")
-
-(add-to-list 'org-babel-tangle-langs '("sass" "sass"))
-
 (defun org-babel-expand-body:sass (body params &optional processed-params)
   "Expand BODY according to PARAMS, return the expanded body." body)
 
