@@ -1,3 +1,9 @@
+2010-06-17  Christian Egli  <christian.egli@sbszh.ch>
+
+	* org-taskjuggler.el (org-export-as-taskjuggler-and-open): Fix
+	the invocation of start-process-shell-command to avoid
+	warnings in newer Emacsen
+
 2010-06-08  Christian Egli  <christian.egli@sbszh.ch>
 
 	* org-taskjuggler.el (org-export-taskjuggler-old-level):
