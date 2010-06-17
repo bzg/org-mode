@@ -36,6 +36,8 @@
 (require 'ob)
 (require 'cc-mode)
 
+(add-to-list 'org-babel-tangle-lang-exts '("c++" . "cpp"))
+
 (defvar org-babel-C-compiler "gcc"
   "Command used to compile a C source code file into an
   executable.")

@@ -35,6 +35,8 @@
 ;;; Code:
 (require 'ob)
 
+(add-to-list 'org-babel-tangle-lang-exts '("latex" . "tex"))
+
 (defvar org-babel-default-header-args:latex
   '((:results . "latex") (:exports . "results"))
   "Default arguments to use when evaluating a latex source block.")

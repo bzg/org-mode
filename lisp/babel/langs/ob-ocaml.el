@@ -41,6 +41,8 @@
 (require 'ob)
 (require 'tuareg)
 
+(add-to-list 'org-babel-tangle-lang-exts '("ocaml" . "ml"))
+
 (defvar org-babel-ocaml-eoe-indicator "\"org-babel-ocaml-eoe\";;")
 (defvar org-babel-ocaml-eoe-output "org-babel-ocaml-eoe")
 

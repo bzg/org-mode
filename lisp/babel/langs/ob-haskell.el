@@ -46,6 +46,8 @@
 (require 'haskell-mode)
 (require 'inf-haskell)
 
+(add-to-list 'org-babel-tangle-lang-exts '("haskell" . "hs"))
+
 (defvar org-babel-haskell-lhs2tex-command "lhs2tex")
 
 (defvar org-babel-haskell-eoe "\"org-babel-haskell-eoe\"")
