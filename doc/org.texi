@@ -1,7 +1,7 @@
 
 \input texinfo
 @c %**start of header
-@setfilename ../../info/org
+@setfilename info/org
 @settitle The Org Manual
 
 @set VERSION 6.36trans
@@ -95,349 +95,400 @@ license to the document, as described in section 6 of the license.
 @end ifnottex
 
 @menu
-* Introduction::                Getting started
-* Document Structure::          A tree works like your brain
-* Tables::                      Pure magic for quick formatting
-* Hyperlinks::                  Notes in context
-* TODO Items::                  Every tree branch can be a TODO item
-* Tags::                        Tagging headlines and matching sets of tags
-* Properties and Columns::      Storing information about an entry
-* Dates and Times::             Making items useful for planning
-* Capture - Refile - Archive::  The ins and outs for projects
-* Agenda Views::                Collecting information into views
-* Markup::                      Prepare text for rich export
-* Exporting::                   Sharing and publishing of notes
-* Publishing::                  Create a web site of linked Org files
-* Working With Source Code::    Code evaluation inside Org-mode
-* Miscellaneous::               All the rest which did not fit elsewhere
-* Hacking::                     How to hack your way around
-* MobileOrg::                   Viewing and capture on a mobile device
-* History and Acknowledgments::  How Org came into being
-* Main Index::                  An index of Org's concepts and features
-* Key Index::                   Key bindings and where they are described
-* Variable Index::              Variables mentioned in the manual
+* Introduction::		Getting started
+* Document Structure::		A tree works like your brain
+* Tables::			Pure magic for quick formatting
+* Hyperlinks::			Notes in context
+* TODO Items::			Every tree branch can be a TODO item
+* Tags::			Tagging headlines and matching sets of tags
+* Properties and Columns::	Storing information about an entry
+* Dates and Times::		Making items useful for planning
+* Capture - Refile - Archive::	The ins and outs for projects
+* Agenda Views::		Collecting information into views
+* Markup::			Prepare text for rich export
+* Exporting::			Sharing and publishing of notes
+* Publishing::			Create a web site of linked Org files
+* Working With Source Code::    Export, evaluate, and tangle code blocks 
+* Miscellaneous::		All the rest which did not fit elsewhere
+* Hacking::			How to hack your way around
+* MobileOrg::			Viewing and capture on a mobile device
+* History and Acknowledgments::	 How Org came into being
+* Main Index::			An index of Org's concepts and features
+* Key Index::			Key bindings and where they are described
+* Variable Index::		Variables mentioned in the manual
 
 @detailmenu
  --- The Detailed Node Listing ---
 
 Introduction
 
-* Summary::                     Brief summary of what Org does
-* Installation::                How to install a downloaded version of Org
-* Activation::                  How to activate Org for certain buffers
-* Feedback::                    Bug reports, ideas, patches etc.
-* Conventions::                 Type-setting conventions in the manual
+* Summary::			Brief summary of what Org does
+* Installation::		How to install a downloaded version of Org
+* Activation::			How to activate Org for certain buffers
+* Feedback::			Bug reports, ideas, patches etc.
+* Conventions::			Type-setting conventions in the manual
 
 Document Structure
 
-* Outlines::                    Org is based on Outline mode
-* Headlines::                   How to typeset Org tree headlines
-* Visibility cycling::          Show and hide, much simplified
-* Motion::                      Jumping to other headlines
-* Structure editing::           Changing sequence and level of headlines
-* Sparse trees::                Matches embedded in context
-* Plain lists::                 Additional structure within an entry
-* Drawers::                     Tucking stuff away
-* Blocks::                      Folding blocks
-* Footnotes::                   How footnotes are defined in Org's syntax
-* Orgstruct mode::              Structure editing outside Org
+* Outlines::			Org is based on Outline mode
+* Headlines::			How to typeset Org tree headlines
+* Visibility cycling::		Show and hide, much simplified
+* Motion::			Jumping to other headlines
+* Structure editing::		Changing sequence and level of headlines
+* Sparse trees::		Matches embedded in context
+* Plain lists::			Additional structure within an entry
+* Drawers::			Tucking stuff away
+* Blocks::			Folding blocks
+* Footnotes::			How footnotes are defined in Org's syntax
+* Orgstruct mode::		Structure editing outside Org
 
 Tables
 
-* Built-in table editor::       Simple tables
-* Column width and alignment::  Overrule the automatic settings
-* Column groups::               Grouping to trigger vertical lines
-* Orgtbl mode::                 The table editor as minor mode
-* The spreadsheet::             The table editor has spreadsheet capabilities
-* Org-Plot::                    Plotting from org tables
+* Built-in table editor::	Simple tables
+* Column width and alignment::	Overrule the automatic settings
+* Column groups::		Grouping to trigger vertical lines
+* Orgtbl mode::			The table editor as minor mode
+* The spreadsheet::		The table editor has spreadsheet capabilities
+* Org-Plot::			Plotting from org tables
 
 The spreadsheet
 
-* References::                  How to refer to another field or range
-* Formula syntax for Calc::     Using Calc to compute stuff
-* Formula syntax for Lisp::     Writing formulas in Emacs Lisp
-* Field formulas::              Formulas valid for a single field
-* Column formulas::             Formulas valid for an entire column
+* References::			How to refer to another field or range
+* Formula syntax for Calc::	Using Calc to compute stuff
+* Formula syntax for Lisp::	Writing formulas in Emacs Lisp
+* Field formulas::		Formulas valid for a single field
+* Column formulas::		Formulas valid for an entire column
 * Editing and debugging formulas::  Fixing formulas
-* Updating the table::          Recomputing all dependent fields
-* Advanced features::           Field names, parameters and automatic recalc
+* Updating the table::		Recomputing all dependent fields
+* Advanced features::		Field names, parameters and automatic recalc
 
 Hyperlinks
 
-* Link format::                 How links in Org are formatted
-* Internal links::              Links to other places in the current file
-* External links::              URL-like links to the world
-* Handling links::              Creating, inserting and following
-* Using links outside Org::     Linking from my C source code?
-* Link abbreviations::          Shortcuts for writing complex links
-* Search options::              Linking to a specific location
-* Custom searches::             When the default search is not enough
+* Link format::			How links in Org are formatted
+* Internal links::		Links to other places in the current file
+* External links::		URL-like links to the world
+* Handling links::		Creating, inserting and following
+* Using links outside Org::	Linking from my C source code?
+* Link abbreviations::		Shortcuts for writing complex links
+* Search options::		Linking to a specific location
+* Custom searches::		When the default search is not enough
 
 Internal links
 
-* Radio targets::               Make targets trigger links in plain text
+* Radio targets::		Make targets trigger links in plain text
 
 TODO Items
 
-* TODO basics::                 Marking and displaying TODO entries
-* TODO extensions::             Workflow and assignments
-* Progress logging::            Dates and notes for progress
-* Priorities::                  Some things are more important than others
-* Breaking down tasks::         Splitting a task into manageable pieces
-* Checkboxes::                  Tick-off lists
+* TODO basics::			Marking and displaying TODO entries
+* TODO extensions::		Workflow and assignments
+* Progress logging::		Dates and notes for progress
+* Priorities::			Some things are more important than others
+* Breaking down tasks::		Splitting a task into manageable pieces
+* Checkboxes::			Tick-off lists
 
 Extended use of TODO keywords
 
-* Workflow states::             From TODO to DONE in steps
-* TODO types::                  I do this, Fred does the rest
-* Multiple sets in one file::   Mixing it all, and still finding your way
-* Fast access to TODO states::  Single letter selection of a state
-* Per-file keywords::           Different files, different requirements
-* Faces for TODO keywords::     Highlighting states
-* TODO dependencies::           When one task needs to wait for others
+* Workflow states::		From TODO to DONE in steps
+* TODO types::			I do this, Fred does the rest
+* Multiple sets in one file::	Mixing it all, and still finding your way
+* Fast access to TODO states::	Single letter selection of a state
+* Per-file keywords::		Different files, different requirements
+* Faces for TODO keywords::	Highlighting states
+* TODO dependencies::		When one task needs to wait for others
 
 Progress logging
 
-* Closing items::               When was this entry marked DONE?
-* Tracking TODO state changes::  When did the status change?
-* Tracking your habits::        How consistent have you been?
+* Closing items::		When was this entry marked DONE?
+* Tracking TODO state changes::	 When did the status change?
+* Tracking your habits::	How consistent have you been?
 
 Tags
 
-* Tag inheritance::             Tags use the tree structure of the outline
-* Setting tags::                How to assign tags to a headline
-* Tag searches::                Searching for combinations of tags
+* Tag inheritance::		Tags use the tree structure of the outline
+* Setting tags::		How to assign tags to a headline
+* Tag searches::		Searching for combinations of tags
 
 Properties and Columns
 
-* Property syntax::             How properties are spelled out
-* Special properties::          Access to other Org mode features
-* Property searches::           Matching property values
-* Property inheritance::        Passing values down the tree
-* Column view::                 Tabular viewing and editing
-* Property API::                Properties for Lisp programmers
+* Property syntax::		How properties are spelled out
+* Special properties::		Access to other Org mode features
+* Property searches::		Matching property values
+* Property inheritance::	Passing values down the tree
+* Column view::			Tabular viewing and editing
+* Property API::		Properties for Lisp programmers
 
 Column view
 
-* Defining columns::            The COLUMNS format property
-* Using column view::           How to create and use column view
-* Capturing column view::       A dynamic block for column view
+* Defining columns::		The COLUMNS format property
+* Using column view::		How to create and use column view
+* Capturing column view::	A dynamic block for column view
 
 Defining columns
 
-* Scope of column definitions::  Where defined, where valid?
-* Column attributes::           Appearance and content of a column
+* Scope of column definitions::	 Where defined, where valid?
+* Column attributes::		Appearance and content of a column
 
 Dates and Times
 
-* Timestamps::                  Assigning a time to a tree entry
-* Creating timestamps::         Commands which insert timestamps
-* Deadlines and scheduling::    Planning your work
-* Clocking work time::          Tracking how long you spend on a task
-* Resolving idle time::         Resolving time if you've been idle
-* Effort estimates::            Planning work effort in advance
-* Relative timer::              Notes with a running timer
+* Timestamps::			Assigning a time to a tree entry
+* Creating timestamps::		Commands which insert timestamps
+* Deadlines and scheduling::	Planning your work
+* Clocking work time::		Tracking how long you spend on a task
+* Resolving idle time::		Resolving time if you've been idle
+* Effort estimates::		Planning work effort in advance
+* Relative timer::		Notes with a running timer
 
 Creating timestamps
 
-* The date/time prompt::        How Org mode helps you entering date and time
-* Custom time format::          Making dates look different
+* The date/time prompt::	How Org mode helps you entering date and time
+* Custom time format::		Making dates look different
 
 Deadlines and scheduling
 
-* Inserting deadline/schedule::  Planning items
-* Repeated tasks::              Items that show up again and again
+* Inserting deadline/schedule::	 Planning items
+* Repeated tasks::		Items that show up again and again
 
 Capture - Refile - Archive
 
-* Remember::                    Capture new tasks/ideas with little interruption
-* Attachments::                 Add files to tasks.
-* RSS Feeds::                   Getting input from RSS feeds
-* Protocols::                   External (e.g. Browser) access to Emacs and Org
-* Refiling notes::              Moving a tree from one place to another
-* Archiving::                   What to do with finished projects
+* Remember::			Capture new tasks/ideas with little interruption
+* Attachments::			Add files to tasks.
+* RSS Feeds::			Getting input from RSS feeds
+* Protocols::			External (e.g. Browser) access to Emacs and Org
+* Refiling notes::		Moving a tree from one place to another
+* Archiving::			What to do with finished projects
 
 Remember
 
-* Setting up Remember for Org::  Some code for .emacs to get things going
-* Remember templates::          Define the outline of different note types
-* Storing notes::               Directly get the note to where it belongs
+* Setting up Remember for Org::	 Some code for .emacs to get things going
+* Remember templates::		Define the outline of different note types
+* Storing notes::		Directly get the note to where it belongs
 
 Archiving
 
-* Moving subtrees::             Moving a tree to an archive file
-* Internal archiving::          Switch off a tree but keep it in the file
+* Moving subtrees::		Moving a tree to an archive file
+* Internal archiving::		Switch off a tree but keep it in the file
 
 Agenda Views
 
-* Agenda files::                Files being searched for agenda information
-* Agenda dispatcher::           Keyboard access to agenda views
-* Built-in agenda views::       What is available out of the box?
-* Presentation and sorting::    How agenda items are prepared for display
-* Agenda commands::             Remote editing of Org trees
-* Custom agenda views::         Defining special searches and views
-* Exporting Agenda Views::      Writing a view to a file
-* Agenda column view::          Using column view for collected entries
+* Agenda files::		Files being searched for agenda information
+* Agenda dispatcher::		Keyboard access to agenda views
+* Built-in agenda views::	What is available out of the box?
+* Presentation and sorting::	How agenda items are prepared for display
+* Agenda commands::		Remote editing of Org trees
+* Custom agenda views::		Defining special searches and views
+* Exporting Agenda Views::	Writing a view to a file
+* Agenda column view::		Using column view for collected entries
 
 The built-in agenda views
 
-* Weekly/daily agenda::         The calendar page with current tasks
-* Global TODO list::            All unfinished action items
+* Weekly/daily agenda::		The calendar page with current tasks
+* Global TODO list::		All unfinished action items
 * Matching tags and properties::  Structured information with fine-tuned search
-* Timeline::                    Time-sorted view for single file
-* Search view::                 Find entries by searching for text
-* Stuck projects::              Find projects you need to review
+* Timeline::			Time-sorted view for single file
+* Search view::			Find entries by searching for text
+* Stuck projects::		Find projects you need to review
 
 Presentation and sorting
 
-* Categories::                  Not all tasks are equal
-* Time-of-day specifications::  How the agenda knows the time
-* Sorting of agenda items::     The order of things
+* Categories::			Not all tasks are equal
+* Time-of-day specifications::	How the agenda knows the time
+* Sorting of agenda items::	The order of things
 
 Custom agenda views
 
-* Storing searches::            Type once, use often
-* Block agenda::                All the stuff you need in a single buffer
-* Setting Options::             Changing the rules
+* Storing searches::		Type once, use often
+* Block agenda::		All the stuff you need in a single buffer
+* Setting Options::		Changing the rules
 
 Markup for rich export
 
-* Structural markup elements::  The basic structure as seen by the exporter
-* Images and tables::           Tables and Images will be included
-* Literal examples::            Source code examples with special formatting
-* Include files::               Include additional files into a document
-* Index entries::               
-* Macro replacement::           Use macros to create complex output
-* Embedded LaTeX::              LaTeX can be freely used inside Org documents
+* Structural markup elements::	The basic structure as seen by the exporter
+* Images and tables::		Tables and Images will be included
+* Literal examples::		Source code examples with special formatting
+* Include files::		Include additional files into a document
+* Index entries::		
+* Macro replacement::		Use macros to create complex output
+* Embedded LaTeX::		LaTeX can be freely used inside Org documents
 
 Structural markup elements
 
-* Document title::              Where the title is taken from
-* Headings and sections::       The document structure as seen by the exporter
-* Table of contents::           The if and where of the table of contents
-* Initial text::                Text before the first heading?
-* Lists::                       Lists
-* Paragraphs::                  Paragraphs
-* Footnote markup::             Footnotes
-* Emphasis and monospace::      Bold, italic, etc.
-* Horizontal rules::            Make a line
-* Comment lines::               What will *not* be exported
+* Document title::		Where the title is taken from
+* Headings and sections::	The document structure as seen by the exporter
+* Table of contents::		The if and where of the table of contents
+* Initial text::		Text before the first heading?
+* Lists::			Lists
+* Paragraphs::			Paragraphs
+* Footnote markup::		Footnotes
+* Emphasis and monospace::	Bold, italic, etc.
+* Horizontal rules::		Make a line
+* Comment lines::		What will *not* be exported
 
 Embedded La@TeX{}
 
-* Special symbols::             Greek letters and other symbols
-* Subscripts and superscripts::  Simple syntax for raising/lowering text
-* LaTeX fragments::             Complex formulas made easy
-* Previewing LaTeX fragments::  What will this snippet look like?
-* CDLaTeX mode::                Speed up entering of formulas
+* Special symbols::		Greek letters and other symbols
+* Subscripts and superscripts::	 Simple syntax for raising/lowering text
+* LaTeX fragments::		Complex formulas made easy
+* Previewing LaTeX fragments::	What will this snippet look like?
+* CDLaTeX mode::		Speed up entering of formulas
 
 Exporting
 
-* Selective export::            Using tags to select and exclude trees
-* Export options::              Per-file export settings
-* The export dispatcher::       How to access exporter commands
-* ASCII/Latin-1/UTF-8 export::  Exporting to flat files with encoding
-* HTML export::                 Exporting to HTML
-* LaTeX and PDF export::        Exporting to La@TeX{}, and processing to PDF
-* DocBook export::              Exporting to DocBook
-* TaskJuggler export::          Exporting to TaskJuggler
-* Freemind export::             Exporting to Freemind mind maps
-* XOXO export::                 Exporting to XOXO
-* iCalendar export::            Exporting in iCalendar format
+* Selective export::		Using tags to select and exclude trees
+* Export options::		Per-file export settings
+* The export dispatcher::	How to access exporter commands
+* ASCII/Latin-1/UTF-8 export::	Exporting to flat files with encoding
+* HTML export::			Exporting to HTML
+* LaTeX and PDF export::	Exporting to La@TeX{}, and processing to PDF
+* DocBook export::		Exporting to DocBook
+* TaskJuggler export::		Exporting to TaskJuggler
+* Freemind export::		Exporting to Freemind mind maps
+* XOXO export::			Exporting to XOXO
+* iCalendar export::		Exporting in iCalendar format
 
 HTML export
 
-* HTML Export commands::        How to invoke HTML export
-* Quoting HTML tags::           Using direct HTML in Org mode
-* Links in HTML export::        How links will be interpreted and formatted
-* Tables in HTML export::       How to modify the formatting of tables
-* Images in HTML export::       How to insert figures into HTML output
-* Text areas in HTML export::   An alternative way to show an example
-* CSS support::                 Changing the appearance of the output
-* Javascript support::          Info and Folding in a web browser
+* HTML Export commands::	How to invoke HTML export
+* Quoting HTML tags::		Using direct HTML in Org mode
+* Links in HTML export::	How links will be interpreted and formatted
+* Tables in HTML export::	How to modify the formatting of tables
+* Images in HTML export::	How to insert figures into HTML output
+* Text areas in HTML export::	An alternative way to show an example
+* CSS support::			Changing the appearance of the output
+* Javascript support::		Info and Folding in a web browser
 
 La@TeX{} and PDF export
 
-* LaTeX/PDF export commands::   Which key invokes which commands
-* Header and sectioning::       Setting up the export file structure
-* Quoting LaTeX code::          Incorporating literal La@TeX{} code
-* Tables in LaTeX export::      Options for exporting tables to La@TeX{}
-* Images in LaTeX export::      How to insert figures into La@TeX{} output
-* Beamer class export::         Turning the file into a presentation
+* LaTeX/PDF export commands::	Which key invokes which commands
+* Header and sectioning::	Setting up the export file structure
+* Quoting LaTeX code::		Incorporating literal La@TeX{} code
+* Tables in LaTeX export::	Options for exporting tables to La@TeX{}
+* Images in LaTeX export::	How to insert figures into La@TeX{} output
+* Beamer class export::		Turning the file into a presentation
 
 DocBook export
 
-* DocBook export commands::     How to invoke DocBook export
-* Quoting DocBook code::        Incorporating DocBook code in Org files
-* Recursive sections::          Recursive sections in DocBook
-* Tables in DocBook export::    Tables are exported as HTML tables
-* Images in DocBook export::    How to insert figures into DocBook output
-* Special characters::          How to handle special characters
+* DocBook export commands::	How to invoke DocBook export
+* Quoting DocBook code::	Incorporating DocBook code in Org files
+* Recursive sections::		Recursive sections in DocBook
+* Tables in DocBook export::	Tables are exported as HTML tables
+* Images in DocBook export::	How to insert figures into DocBook output
+* Special characters::		How to handle special characters
 
 Publishing
 
-* Configuration::               Defining projects
-* Uploading files::             How to get files up on the server
-* Sample configuration::        Example projects
-* Triggering publication::      Publication commands
+* Configuration::		Defining projects
+* Uploading files::		How to get files up on the server
+* Sample configuration::	Example projects
+* Triggering publication::	Publication commands
+* Library of Babel::		
+* Languages::			
+* Header arguments::		
+* Results::			
+* Noweb reference syntax::	
+* Key bindings & useful functions::  
+* Batch execution::		
 
 Configuration
 
-* Project alist::               The central configuration variable
-* Sources and destinations::    From here to there
-* Selecting files::             What files are part of the project?
-* Publishing action::           Setting the function doing the publishing
-* Publishing options::          Tweaking HTML export
-* Publishing links::            Which links keep working after publishing?
-* Sitemap::                     Generating a list of all pages
-* Generating an index::         An index that reaches across pages
+* Project alist::		The central configuration variable
+* Sources and destinations::	From here to there
+* Selecting files::		What files are part of the project?
+* Publishing action::		Setting the function doing the publishing
+* Publishing options::		Tweaking HTML export
+* Publishing links::		Which links keep working after publishing?
+* Sitemap::			Generating a list of all pages
+* Generating an index::		An index that reaches across pages
 
 Sample configuration
 
-* Simple example::              One-component publishing
-* Complex example::             A multi-component publishing example
+* Simple example::		One-component publishing
+* Complex example::		A multi-component publishing example
+
+Working With Source Code
+
+* Structure of code blocks::
+* Editing source code::
+* Exporting code blocks::
+* Extracting source code::
+* Evaluating code blocks::
+* Library of Babel::
+* Languages::
+* Header arguments::
+* Results::
+* Noweb reference syntax::
+* Key bindings & useful functions::
+* Batch execution::
+
+Header arguments
+
+* Using header arguments::	
+* Specific header arguments::	
+
+Using header arguments
+
+* System-wide header arguments::  
+* Language-specific header arguments::	
+* Buffer-wide header arguments::  
+* Header arguments in Org-mode properties::  
+* Code block specific header arguments::  
+
+Specific header arguments
+
+* var argument::		
+* results argument::		
+* file argument::		
+* dir and remote execution::	
+* exports argument::		
+* tangle argument::		
+* no-expand argument::		
+* session argument::		
+* noweb argument::		
+* cache argument::		
+* hlines argument::		
+* colnames argument::		
+* rownames argument::		
 
 Miscellaneous
 
-* Completion::                  M-TAB knows what you need
-* Speed keys::                  Electic commands at the beginning of a headline
-* Customization::               Adapting Org to your taste
-* In-buffer settings::          Overview of the #+KEYWORDS
-* The very busy C-c C-c key::   When in doubt, press C-c C-c
-* Clean view::                  Getting rid of leading stars in the outline
-* TTY keys::                    Using Org on a tty
-* Interaction::                 Other Emacs packages
+* Completion::			M-TAB knows what you need
+* Speed keys::			Electic commands at the beginning of a headline
+* Customization::		Adapting Org to your taste
+* In-buffer settings::		Overview of the #+KEYWORDS
+* The very busy C-c C-c key::	When in doubt, press C-c C-c
+* Clean view::			Getting rid of leading stars in the outline
+* TTY keys::			Using Org on a tty
+* Interaction::			Other Emacs packages
 
 Interaction with other packages
 
-* Cooperation::                 Packages Org cooperates with
-* Conflicts::                   Packages that lead to conflicts
+* Cooperation::			Packages Org cooperates with
+* Conflicts::			Packages that lead to conflicts
 
 Hacking
 
-* Hooks::                       Who to reach into Org's internals
-* Add-on packages::             Available extensions
-* Adding hyperlink types::      New custom link types
-* Context-sensitive commands::  How to add functionality to such commands
-* Tables in arbitrary syntax::  Orgtbl for La@TeX{} and other programs
-* Dynamic blocks::              Automatically filled blocks
-* Special agenda views::        Customized views
+* Hooks::			Who to reach into Org's internals
+* Add-on packages::		Available extensions
+* Adding hyperlink types::	New custom link types
+* Context-sensitive commands::	How to add functionality to such commands
+* Tables in arbitrary syntax::	Orgtbl for La@TeX{} and other programs
+* Dynamic blocks::		Automatically filled blocks
+* Special agenda views::	Customized views
 * Extracting agenda information::  Postprocessing of agenda information
-* Using the property API::      Writing programs that use entry properties
-* Using the mapping API::       Mapping over all or selected entries
+* Using the property API::	Writing programs that use entry properties
+* Using the mapping API::	Mapping over all or selected entries
 
 Tables and lists in arbitrary syntax
 
-* Radio tables::                Sending and receiving radio tables
-* A LaTeX example::             Step by step, almost a tutorial
-* Translator functions::        Copy and modify
-* Radio lists::                 Doing the same for lists
+* Radio tables::		Sending and receiving radio tables
+* A LaTeX example::		Step by step, almost a tutorial
+* Translator functions::	Copy and modify
+* Radio lists::			Doing the same for lists
 
 MobileOrg
 
-* Setting up the staging area::  Where to interact with the mobile device
-* Pushing to MobileOrg::        Uploading Org files and agendas
-* Pulling from MobileOrg::      Integrating captured and flagged items
+* Setting up the staging area::	 Where to interact with the mobile device
+* Pushing to MobileOrg::	Uploading Org files and agendas
+* Pulling from MobileOrg::	Integrating captured and flagged items
 
 @end detailmenu
 @end menu
@@ -447,11 +498,11 @@ MobileOrg
 @cindex introduction
 
 @menu
-* Summary::                     Brief summary of what Org does
-* Installation::                How to install a downloaded version of Org
-* Activation::                  How to activate Org for certain buffers
-* Feedback::                    Bug reports, ideas, patches etc.
-* Conventions::                 Type-setting conventions in the manual
+* Summary::			Brief summary of what Org does
+* Installation::		How to install a downloaded version of Org
+* Activation::			How to activate Org for certain buffers
+* Feedback::			Bug reports, ideas, patches etc.
+* Conventions::			Type-setting conventions in the manual
 @end menu
 
 @node Summary, Installation, Introduction, Introduction
@@ -758,17 +809,17 @@ Org is based on Outline mode and provides flexible commands to
 edit the structure of the document.
 
 @menu
-* Outlines::                    Org is based on Outline mode
-* Headlines::                   How to typeset Org tree headlines
-* Visibility cycling::          Show and hide, much simplified
-* Motion::                      Jumping to other headlines
-* Structure editing::           Changing sequence and level of headlines
-* Sparse trees::                Matches embedded in context
-* Plain lists::                 Additional structure within an entry
-* Drawers::                     Tucking stuff away
-* Blocks::                      Folding blocks
-* Footnotes::                   How footnotes are defined in Org's syntax
-* Orgstruct mode::              Structure editing outside Org
+* Outlines::			Org is based on Outline mode
+* Headlines::			How to typeset Org tree headlines
+* Visibility cycling::		Show and hide, much simplified
+* Motion::			Jumping to other headlines
+* Structure editing::		Changing sequence and level of headlines
+* Sparse trees::		Matches embedded in context
+* Plain lists::			Additional structure within an entry
+* Drawers::			Tucking stuff away
+* Blocks::			Folding blocks
+* Footnotes::			How footnotes are defined in Org's syntax
+* Orgstruct mode::		Structure editing outside Org
 @end menu
 
 @node Outlines, Headlines, Document Structure, Document Structure
@@ -1593,12 +1644,12 @@ calculator).
 @end ifnotinfo
 
 @menu
-* Built-in table editor::       Simple tables
-* Column width and alignment::  Overrule the automatic settings
-* Column groups::               Grouping to trigger vertical lines
-* Orgtbl mode::                 The table editor as minor mode
-* The spreadsheet::             The table editor has spreadsheet capabilities
-* Org-Plot::                    Plotting from org tables
+* Built-in table editor::	Simple tables
+* Column width and alignment::	Overrule the automatic settings
+* Column groups::		Grouping to trigger vertical lines
+* Orgtbl mode::			The table editor as minor mode
+* The spreadsheet::		The table editor has spreadsheet capabilities
+* Org-Plot::			Plotting from org tables
 @end menu
 
 @node Built-in table editor, Column width and alignment, Tables, Tables
@@ -1972,14 +2023,14 @@ fields in the table corresponding to the references at the point in the
 formula, moving these references by arrow keys
 
 @menu
-* References::                  How to refer to another field or range
-* Formula syntax for Calc::     Using Calc to compute stuff
-* Formula syntax for Lisp::     Writing formulas in Emacs Lisp
-* Field formulas::              Formulas valid for a single field
-* Column formulas::             Formulas valid for an entire column
+* References::			How to refer to another field or range
+* Formula syntax for Calc::	Using Calc to compute stuff
+* Formula syntax for Lisp::	Writing formulas in Emacs Lisp
+* Field formulas::		Formulas valid for a single field
+* Column formulas::		Formulas valid for an entire column
 * Editing and debugging formulas::  Fixing formulas
-* Updating the table::          Recomputing all dependent fields
-* Advanced features::           Field names, parameters and automatic recalc
+* Updating the table::		Recomputing all dependent fields
+* Advanced features::		Field names, parameters and automatic recalc
 @end menu
 
 @node References, Formula syntax for Calc, The spreadsheet, The spreadsheet
@@ -2683,14 +2734,14 @@ Like HTML, Org provides links inside a file, external links to
 other files, Usenet articles, emails, and much more.
 
 @menu
-* Link format::                 How links in Org are formatted
-* Internal links::              Links to other places in the current file
-* External links::              URL-like links to the world
-* Handling links::              Creating, inserting and following
-* Using links outside Org::     Linking from my C source code?
-* Link abbreviations::          Shortcuts for writing complex links
-* Search options::              Linking to a specific location
-* Custom searches::             When the default search is not enough
+* Link format::			How links in Org are formatted
+* Internal links::		Links to other places in the current file
+* External links::		URL-like links to the world
+* Handling links::		Creating, inserting and following
+* Using links outside Org::	Linking from my C source code?
+* Link abbreviations::		Shortcuts for writing complex links
+* Search options::		Linking to a specific location
+* Custom searches::		When the default search is not enough
 @end menu
 
 @node Link format, Internal links, Hyperlinks, Hyperlinks
@@ -2783,7 +2834,7 @@ several times in direct succession goes back to positions recorded
 earlier.
 
 @menu
-* Radio targets::               Make targets trigger links in plain text
+* Radio targets::		Make targets trigger links in plain text
 @end menu
 
 @node Radio targets,  , Internal links, Internal links
@@ -3238,12 +3289,12 @@ throughout your notes file.  Org mode compensates for this by providing
 methods to give you an overview of all the things that you have to do.
 
 @menu
-* TODO basics::                 Marking and displaying TODO entries
-* TODO extensions::             Workflow and assignments
-* Progress logging::            Dates and notes for progress
-* Priorities::                  Some things are more important than others
-* Breaking down tasks::         Splitting a task into manageable pieces
-* Checkboxes::                  Tick-off lists
+* TODO basics::			Marking and displaying TODO entries
+* TODO extensions::		Workflow and assignments
+* Progress logging::		Dates and notes for progress
+* Priorities::			Some things are more important than others
+* Breaking down tasks::		Splitting a task into manageable pieces
+* Checkboxes::			Tick-off lists
 @end menu
 
 @node TODO basics, TODO extensions, TODO Items, TODO Items
@@ -3334,13 +3385,13 @@ Note that @i{tags} are another way to classify headlines in general and
 TODO items in particular (@pxref{Tags}).
 
 @menu
-* Workflow states::             From TODO to DONE in steps
-* TODO types::                  I do this, Fred does the rest
-* Multiple sets in one file::   Mixing it all, and still finding your way
-* Fast access to TODO states::  Single letter selection of a state
-* Per-file keywords::           Different files, different requirements
-* Faces for TODO keywords::     Highlighting states
-* TODO dependencies::           When one task needs to wait for others
+* Workflow states::		From TODO to DONE in steps
+* TODO types::			I do this, Fred does the rest
+* Multiple sets in one file::	Mixing it all, and still finding your way
+* Fast access to TODO states::	Single letter selection of a state
+* Per-file keywords::		Different files, different requirements
+* Faces for TODO keywords::	Highlighting states
+* TODO dependencies::		When one task needs to wait for others
 @end menu
 
 @node Workflow states, TODO types, TODO extensions, TODO extensions
@@ -3631,9 +3682,9 @@ information on how to clock working time for a task, see @ref{Clocking
 work time}.
 
 @menu
-* Closing items::               When was this entry marked DONE?
-* Tracking TODO state changes::  When did the status change?
-* Tracking your habits::        How consistent have you been?
+* Closing items::		When was this entry marked DONE?
+* Tracking TODO state changes::	 When did the status change?
+* Tracking your habits::	How consistent have you been?
 @end menu
 
 @node Closing items, Tracking TODO state changes, Progress logging, Progress logging
@@ -4095,9 +4146,9 @@ You may specify special faces for specific tags using the variable
 (@pxref{Faces for TODO keywords}).
 
 @menu
-* Tag inheritance::             Tags use the tree structure of the outline
-* Setting tags::                How to assign tags to a headline
-* Tag searches::                Searching for combinations of tags
+* Tag inheritance::		Tags use the tree structure of the outline
+* Setting tags::		How to assign tags to a headline
+* Tag searches::		Searching for combinations of tags
 @end menu
 
 @node Tag inheritance, Setting tags, Tags, Tags
@@ -4404,12 +4455,12 @@ Properties can be conveniently edited and viewed in column view
 (@pxref{Column view}).
 
 @menu
-* Property syntax::             How properties are spelled out
-* Special properties::          Access to other Org mode features
-* Property searches::           Matching property values
-* Property inheritance::        Passing values down the tree
-* Column view::                 Tabular viewing and editing
-* Property API::                Properties for Lisp programmers
+* Property syntax::		How properties are spelled out
+* Special properties::		Access to other Org mode features
+* Property searches::		Matching property values
+* Property inheritance::	Passing values down the tree
+* Column view::			Tabular viewing and editing
+* Property API::		Properties for Lisp programmers
 @end menu
 
 @node Property syntax, Special properties, Properties and Columns, Properties and Columns
@@ -4643,9 +4694,9 @@ Column view also works in agenda buffers (@pxref{Agenda Views}) where
 queries have collected selected items, possibly from a number of files.
 
 @menu
-* Defining columns::            The COLUMNS format property
-* Using column view::           How to create and use column view
-* Capturing column view::       A dynamic block for column view
+* Defining columns::		The COLUMNS format property
+* Using column view::		How to create and use column view
+* Capturing column view::	A dynamic block for column view
 @end menu
 
 @node Defining columns, Using column view, Column view, Column view
@@ -4657,8 +4708,8 @@ Setting up a column view first requires defining the columns.  This is
 done by defining a column format line.
 
 @menu
-* Scope of column definitions::  Where defined, where valid?
-* Column attributes::           Appearance and content of a column
+* Scope of column definitions::	 Where defined, where valid?
+* Column attributes::		Appearance and content of a column
 @end menu
 
 @node Scope of column definitions, Column attributes, Defining columns, Defining columns
@@ -4940,13 +4991,13 @@ something was created or last changed.  However, in Org mode this term
 is used in a much wider sense.
 
 @menu
-* Timestamps::                  Assigning a time to a tree entry
-* Creating timestamps::         Commands which insert timestamps
-* Deadlines and scheduling::    Planning your work
-* Clocking work time::          Tracking how long you spend on a task
-* Resolving idle time::         Resolving time if you've been idle
-* Effort estimates::            Planning work effort in advance
-* Relative timer::              Notes with a running timer
+* Timestamps::			Assigning a time to a tree entry
+* Creating timestamps::		Commands which insert timestamps
+* Deadlines and scheduling::	Planning your work
+* Clocking work time::		Tracking how long you spend on a task
+* Resolving idle time::		Resolving time if you've been idle
+* Effort estimates::		Planning work effort in advance
+* Relative timer::		Notes with a running timer
 @end menu
 
 
@@ -5102,8 +5153,8 @@ the following column).
 
 
 @menu
-* The date/time prompt::        How Org mode helps you entering date and time
-* Custom time format::          Making dates look different
+* The date/time prompt::	How Org mode helps you entering date and time
+* Custom time format::		Making dates look different
 @end menu
 
 @node The date/time prompt, Custom time format, Creating timestamps, Creating timestamps
@@ -5335,8 +5386,8 @@ late warnings.  However, it will show the item on each day where the
 sexp entry matches.
 
 @menu
-* Inserting deadline/schedule::  Planning items
-* Repeated tasks::              Items that show up again and again
+* Inserting deadline/schedule::	 Planning items
+* Repeated tasks::		Items that show up again and again
 @end menu
 
 @node Inserting deadline/schedule, Repeated tasks, Deadlines and scheduling, Deadlines and scheduling
@@ -5858,12 +5909,12 @@ system, tasks and projects need to be moved around.  Moving completed project
 trees to an archive file keeps the system compact and fast.
 
 @menu
-* Remember::                    Capture new tasks/ideas with little interruption
-* Attachments::                 Add files to tasks.
-* RSS Feeds::                   Getting input from RSS feeds
-* Protocols::                   External (e.g. Browser) access to Emacs and Org
-* Refiling notes::              Moving a tree from one place to another
-* Archiving::                   What to do with finished projects
+* Remember::			Capture new tasks/ideas with little interruption
+* Attachments::			Add files to tasks.
+* RSS Feeds::			Getting input from RSS feeds
+* Protocols::			External (e.g. Browser) access to Emacs and Org
+* Refiling notes::		Moving a tree from one place to another
+* Archiving::			What to do with finished projects
 @end menu
 
 @node Remember, Attachments, Capture - Refile - Archive, Capture - Refile - Archive
@@ -5882,9 +5933,9 @@ with specific templates.  It also allows you to select the location where a
 note should be stored interactively, on the fly.
 
 @menu
-* Setting up Remember for Org::  Some code for .emacs to get things going
-* Remember templates::          Define the outline of different note types
-* Storing notes::               Directly get the note to where it belongs
+* Setting up Remember for Org::	 Some code for .emacs to get things going
+* Remember templates::		Define the outline of different note types
+* Storing notes::		Directly get the note to where it belongs
 @end menu
 
 @node Setting up Remember for Org, Remember templates, Remember, Remember
@@ -6348,8 +6399,8 @@ Archive the current entry using the command specified in the variable
 @end table
 
 @menu
-* Moving subtrees::             Moving a tree to an archive file
-* Internal archiving::          Switch off a tree but keep it in the file
+* Moving subtrees::		Moving a tree to an archive file
+* Internal archiving::		Switch off a tree but keep it in the file
 @end menu
 
 @node Moving subtrees, Internal archiving, Archiving, Archiving
@@ -6526,14 +6577,14 @@ window configuration is restored when the agenda exits:
 @code{org-agenda-restore-windows-after-quit}.
 
 @menu
-* Agenda files::                Files being searched for agenda information
-* Agenda dispatcher::           Keyboard access to agenda views
-* Built-in agenda views::       What is available out of the box?
-* Presentation and sorting::    How agenda items are prepared for display
-* Agenda commands::             Remote editing of Org trees
-* Custom agenda views::         Defining special searches and views
-* Exporting Agenda Views::      Writing a view to a file
-* Agenda column view::          Using column view for collected entries
+* Agenda files::		Files being searched for agenda information
+* Agenda dispatcher::		Keyboard access to agenda views
+* Built-in agenda views::	What is available out of the box?
+* Presentation and sorting::	How agenda items are prepared for display
+* Agenda commands::		Remote editing of Org trees
+* Custom agenda views::		Defining special searches and views
+* Exporting Agenda Views::	Writing a view to a file
+* Agenda column view::		Using column view for collected entries
 @end menu
 
 @node Agenda files, Agenda dispatcher, Agenda Views, Agenda Views
@@ -6675,12 +6726,12 @@ a number of special tags matches.  @xref{Custom agenda views}.
 In this section we describe the built-in views.
 
 @menu
-* Weekly/daily agenda::         The calendar page with current tasks
-* Global TODO list::            All unfinished action items
+* Weekly/daily agenda::		The calendar page with current tasks
+* Global TODO list::		All unfinished action items
 * Matching tags and properties::  Structured information with fine-tuned search
-* Timeline::                    Time-sorted view for single file
-* Search view::                 Find entries by searching for text
-* Stuck projects::              Find projects you need to review
+* Timeline::			Time-sorted view for single file
+* Search view::			Find entries by searching for text
+* Stuck projects::		Find projects you need to review
 @end menu
 
 @node Weekly/daily agenda, Global TODO list, Built-in agenda views, Built-in agenda views
@@ -7143,9 +7194,9 @@ The prefix is followed by a cleaned-up version of the outline headline
 associated with the item.
 
 @menu
-* Categories::                  Not all tasks are equal
-* Time-of-day specifications::  How the agenda knows the time
-* Sorting of agenda items::     The order of things
+* Categories::			Not all tasks are equal
+* Time-of-day specifications::	How the agenda knows the time
+* Sorting of agenda items::	The order of things
 @end menu
 
 @node Categories, Time-of-day specifications, Presentation and sorting, Presentation and sorting
@@ -7869,9 +7920,9 @@ agenda buffers.  Custom agenda commands will be accessible through the
 dispatcher (@pxref{Agenda dispatcher}), just like the default commands.
 
 @menu
-* Storing searches::            Type once, use often
-* Block agenda::                All the stuff you need in a single buffer
-* Setting Options::             Changing the rules
+* Storing searches::		Type once, use often
+* Block agenda::		All the stuff you need in a single buffer
+* Setting Options::		Changing the rules
 @end menu
 
 @node Storing searches, Block agenda, Custom agenda views, Custom agenda views
@@ -8256,29 +8307,29 @@ Org mode has rules on how to prepare text for rich export.  This section
 summarizes the markup rules used in an Org-mode buffer.
 
 @menu
-* Structural markup elements::  The basic structure as seen by the exporter
-* Images and tables::           Tables and Images will be included
-* Literal examples::            Source code examples with special formatting
-* Include files::               Include additional files into a document
-* Index entries::               
-* Macro replacement::           Use macros to create complex output
-* Embedded LaTeX::              LaTeX can be freely used inside Org documents
+* Structural markup elements::	The basic structure as seen by the exporter
+* Images and tables::		Tables and Images will be included
+* Literal examples::		Source code examples with special formatting
+* Include files::		Include additional files into a document
+* Index entries::		
+* Macro replacement::		Use macros to create complex output
+* Embedded LaTeX::		LaTeX can be freely used inside Org documents
 @end menu
 
 @node Structural markup elements, Images and tables, Markup, Markup
 @section Structural markup elements
 
 @menu
-* Document title::              Where the title is taken from
-* Headings and sections::       The document structure as seen by the exporter
-* Table of contents::           The if and where of the table of contents
-* Initial text::                Text before the first heading?
-* Lists::                       Lists
-* Paragraphs::                  Paragraphs
-* Footnote markup::             Footnotes
-* Emphasis and monospace::      Bold, italic, etc.
-* Horizontal rules::            Make a line
-* Comment lines::               What will *not* be exported
+* Document title::		Where the title is taken from
+* Headings and sections::	The document structure as seen by the exporter
+* Table of contents::		The if and where of the table of contents
+* Initial text::		Text before the first heading?
+* Lists::			Lists
+* Paragraphs::			Paragraphs
+* Footnote markup::		Footnotes
+* Emphasis and monospace::	Bold, italic, etc.
+* Horizontal rules::		Make a line
+* Comment lines::		What will *not* be exported
 @end menu
 
 @node Document title, Headings and sections, Structural markup elements, Structural markup elements
@@ -8707,11 +8758,11 @@ If you observe a few conventions, Org mode knows how to find it and what
 to do with it.
 
 @menu
-* Special symbols::             Greek letters and other symbols
-* Subscripts and superscripts::  Simple syntax for raising/lowering text
-* LaTeX fragments::             Complex formulas made easy
-* Previewing LaTeX fragments::  What will this snippet look like?
-* CDLaTeX mode::                Speed up entering of formulas
+* Special symbols::		Greek letters and other symbols
+* Subscripts and superscripts::	 Simple syntax for raising/lowering text
+* LaTeX fragments::		Complex formulas made easy
+* Previewing LaTeX fragments::	What will this snippet look like?
+* CDLaTeX mode::		Speed up entering of formulas
 @end menu
 
 @node Special symbols, Subscripts and superscripts, Embedded LaTeX, Embedded LaTeX
@@ -8970,17 +9021,17 @@ Org supports export of selected regions when @code{transient-mark-mode} is
 enabled (default in Emacs 23).
 
 @menu
-* Selective export::            Using tags to select and exclude trees
-* Export options::              Per-file export settings
-* The export dispatcher::       How to access exporter commands
-* ASCII/Latin-1/UTF-8 export::  Exporting to flat files with encoding
-* HTML export::                 Exporting to HTML
-* LaTeX and PDF export::        Exporting to La@TeX{}, and processing to PDF
-* DocBook export::              Exporting to DocBook
-* TaskJuggler export::          Exporting to TaskJuggler
-* Freemind export::             Exporting to Freemind mind maps
-* XOXO export::                 Exporting to XOXO
-* iCalendar export::            Exporting in iCalendar format
+* Selective export::		Using tags to select and exclude trees
+* Export options::		Per-file export settings
+* The export dispatcher::	How to access exporter commands
+* ASCII/Latin-1/UTF-8 export::	Exporting to flat files with encoding
+* HTML export::			Exporting to HTML
+* LaTeX and PDF export::	Exporting to La@TeX{}, and processing to PDF
+* DocBook export::		Exporting to DocBook
+* TaskJuggler export::		Exporting to TaskJuggler
+* Freemind export::		Exporting to Freemind mind maps
+* XOXO export::			Exporting to XOXO
+* iCalendar export::		Exporting in iCalendar format
 @end menu
 
 @node Selective export, Export options, Exporting, Exporting
@@ -9233,14 +9284,14 @@ HTML formatting, in ways similar to John Gruber's @emph{markdown}
 language, but with additional support for tables.
 
 @menu
-* HTML Export commands::        How to invoke HTML export
-* Quoting HTML tags::           Using direct HTML in Org mode
-* Links in HTML export::        How links will be interpreted and formatted
-* Tables in HTML export::       How to modify the formatting of tables
-* Images in HTML export::       How to insert figures into HTML output
-* Text areas in HTML export::   An alternative way to show an example
-* CSS support::                 Changing the appearance of the output
-* Javascript support::          Info and Folding in a web browser
+* HTML Export commands::	How to invoke HTML export
+* Quoting HTML tags::		Using direct HTML in Org mode
+* Links in HTML export::	How links will be interpreted and formatted
+* Tables in HTML export::	How to modify the formatting of tables
+* Images in HTML export::	How to insert figures into HTML output
+* Text areas in HTML export::	An alternative way to show an example
+* CSS support::			Changing the appearance of the output
+* Javascript support::		Info and Folding in a web browser
 @end menu
 
 @node HTML Export commands, Quoting HTML tags, HTML export, HTML export
@@ -9587,12 +9638,12 @@ implement links and cross references, the PDF output file will be fully
 linked.
 
 @menu
-* LaTeX/PDF export commands::   Which key invokes which commands
-* Header and sectioning::       Setting up the export file structure
-* Quoting LaTeX code::          Incorporating literal La@TeX{} code
-* Tables in LaTeX export::      Options for exporting tables to La@TeX{}
-* Images in LaTeX export::      How to insert figures into La@TeX{} output
-* Beamer class export::         Turning the file into a presentation
+* LaTeX/PDF export commands::	Which key invokes which commands
+* Header and sectioning::	Setting up the export file structure
+* Quoting LaTeX code::		Incorporating literal La@TeX{} code
+* Tables in LaTeX export::	Options for exporting tables to La@TeX{}
+* Images in LaTeX export::	How to insert figures into La@TeX{} output
+* Beamer class export::		Turning the file into a presentation
 @end menu
 
 @node LaTeX/PDF export commands, Header and sectioning, LaTeX and PDF export, LaTeX and PDF export
@@ -9917,12 +9968,12 @@ tools and stylesheets.
 Currently DocBook exporter only supports DocBook V5.0.
 
 @menu
-* DocBook export commands::     How to invoke DocBook export
-* Quoting DocBook code::        Incorporating DocBook code in Org files
-* Recursive sections::          Recursive sections in DocBook
-* Tables in DocBook export::    Tables are exported as HTML tables
-* Images in DocBook export::    How to insert figures into DocBook output
-* Special characters::          How to handle special characters
+* DocBook export commands::	How to invoke DocBook export
+* Quoting DocBook code::	Incorporating DocBook code in Org files
+* Recursive sections::		Recursive sections in DocBook
+* Tables in DocBook export::	Tables are exported as HTML tables
+* Images in DocBook export::	How to insert figures into DocBook output
+* Special characters::		How to handle special characters
 @end menu
 
 @node DocBook export commands, Quoting DocBook code, DocBook export, DocBook export
@@ -10349,10 +10400,17 @@ conversion so that files are available in both formats on the server.
 Publishing has been contributed to Org by David O'Toole.
 
 @menu
-* Configuration::               Defining projects
-* Uploading files::             How to get files up on the server
-* Sample configuration::        Example projects
-* Triggering publication::      Publication commands
+* Configuration::		Defining projects
+* Uploading files::		How to get files up on the server
+* Sample configuration::	Example projects
+* Triggering publication::	Publication commands
+* Library of Babel::		
+* Languages::			
+* Header arguments::		
+* Results::			
+* Noweb reference syntax::	
+* Key bindings & useful functions::  
+* Batch execution::		
 @end menu
 
 @node Configuration, Uploading files, Publishing, Publishing
@@ -10362,14 +10420,14 @@ Publishing needs significant configuration to specify files, destination
 and many other properties of a project.
 
 @menu
-* Project alist::               The central configuration variable
-* Sources and destinations::    From here to there
-* Selecting files::             What files are part of the project?
-* Publishing action::           Setting the function doing the publishing
-* Publishing options::          Tweaking HTML export
-* Publishing links::            Which links keep working after publishing?
-* Sitemap::                     Generating a list of all pages
-* Generating an index::         An index that reaches across pages
+* Project alist::		The central configuration variable
+* Sources and destinations::	From here to there
+* Selecting files::		What files are part of the project?
+* Publishing action::		Setting the function doing the publishing
+* Publishing options::		Tweaking HTML export
+* Publishing links::		Which links keep working after publishing?
+* Sitemap::			Generating a list of all pages
+* Generating an index::		An index that reaches across pages
 @end menu
 
 @node Project alist, Sources and destinations, Configuration, Configuration
@@ -10743,8 +10801,8 @@ project publishing only a set of Org files.  The second example is
 more complex, with a multi-component project.
 
 @menu
-* Simple example::              One-component publishing
-* Complex example::             A multi-component publishing example
+* Simple example::		One-component publishing
+* Complex example::		A multi-component publishing example
 @end menu
 
 @node Simple example, Complex example, Sample configuration, Sample configuration
@@ -10844,10 +10902,14 @@ above, or by customizing the variable @code{org-publish-use-timestamps-flag}.
 This may be necessary in particular if files include other files via
 @code{#+SETUPFILE:} or @code{#+INCLUDE:}.
 
-@node Working With Source Code, Miscellaneous, Publishing, Top
 @comment  node-name,  next,  previous,  up
 @comment Working With Source Code, Miscellaneous, Publishing, Top
+
+@node Working With Source Code, Miscellaneous, Publishing, Top
 @chapter Working With Source Code
+@cindex Schulte, Eric
+@cindex Davison, Dan
+@cindex source code, working with
 
 Source code can be included in Org-mode documents using a @samp{src} block,
 e.g.
@@ -10860,11 +10922,11 @@ e.g.
 #+END_SRC
 @end example
 
-Org provides a number of features for working with live source code,
+Org-mode provides a number of features for working with live source code,
 including editing of code blocks in their native major-mode, evaluation of
 code blocks, tangling of code blocks, and exportation of code blocks and
-their results to a number of formats.  The following sections provide a
-thorough tour of Org-mode's sophisticated code block handling facilities.
+their results to a number of formats.  The following sections describe
+Org-mode's code block handling facilities.
 
 @menu
 * Structure of code blocks::
@@ -10898,9 +10960,9 @@ The structure of code blocks is as follows:
 
 @table @code
 @item <name>
-This name is associated with the source code block.  This is similar to the
+This name is associated with the code block.  This is similar to the
 @samp{#+tblname} lines that can be used to name tables in Org-mode files.
-Referencing the name of a source code block makes it possible to evaluate the
+Referencing the name of a code block makes it possible to evaluate the
 block from other places in the file, other files, or from Org-mode table
 formulas (see @ref{The spreadsheet}).
 @item <language>
@@ -10914,7 +10976,7 @@ tangling of source code blocks. See the @ref{Header arguments}
 section. Header arguments can also be set on a per-buffer or per-subtree
 basis using properties.
 @item <body>
-The code
+The source code.
 @end table
 
 @node Editing source code, Exporting code blocks, Structure of code blocks, Working With Source Code
@@ -10960,7 +11022,7 @@ some languages (e.g. @code{ditaa}) the default exports the results of code
 block evaluation.  For information on exporting code block bodies, see
 @ref{Literal examples}.
 
-The @code{:exports} header argument can be used to specify non-default export
+The @code{:exports} header argument can be used to specify export
 behavior:
 
 @subsubheading Header arguments:
@@ -10980,9 +11042,9 @@ Both the code block and its results will be exported.
 Neither the code block nor its results will be exported.
 @end table
 
-@node Extracting source code, Evaluating code blocks, Exporting code blocks, Working With Source Code
 @comment  node-name,  next,  previous,  up
 @comment  Extracting source code, Evaluating code blocks, Exporting code blocks, Working With Source Code
+@node Extracting source code, Evaluating code blocks, Exporting code blocks, Working With Source Code
 @section Extracting source code
 
 Creating pure source code files by extracting code from source blocks is
@@ -11011,13 +11073,14 @@ Tangle the current file.
 Choose a file to tangle.
 @end table
 
-@node Evaluating code blocks, Library of Babel, Extracting source code, Working With Source Code
 @comment  node-name,  next,  previous,  up
 @comment  Evaluating code blocks,  , Extracting source code, Working With Source Code
+
+@node Evaluating code blocks, Library of Babel, Extracting source code, Working With Source Code
 @section Evaluating code blocks
 
 Code blocks can be evaluated and the results placed in the Org-mode buffer.
-Check the value of the @code{org-babel-interpreters} for a list of languages
+Check the value of the variable @code{org-babel-interpreters} for a list of languages
 that can be evaluated on your system. See also @ref{Languages} for a list of
 supported languages.  See @ref{Structure of code blocks} for information on
 the syntax used to define a code block.
@@ -11035,6 +11098,8 @@ blocks located in the current Org-mode buffer or in the ``Library of Babel''
 
 @example
 #+call: <name>(<arguments>) <header arguments>
+#+function: <name>(<arguments>) <header arguments>
+#+lob: <name>(<arguments>) <header arguments>
 @end example
 
 @table @code
@@ -11171,29 +11236,29 @@ of the language names from the above table).
 @node Header arguments, Results, Languages, Working With Source Code
 @section Header arguments
 
-Most code block functionality is configurable using header arguments.  This
+Code block functionality can be configured with header arguments.  This
 section provides an overview of the use of header arguments, and then
-exhaustively covers all header arguments.
+describes each header argument in detail.
 
 @menu
-* Using Header arguments::
-* Specific Header arguments::
+* Using header arguments::	
+* Specific header arguments::	
 @end menu
 
-@node Using Header arguments, Specific Header arguments, , Header arguments
-@subsection Using Header arguments
+@node Using header arguments, Specific header arguments, Header arguments, Header arguments
+@subsection Using header arguments
 
 The values of header arguments can be set in five different ways, each more
 specific (and having higher priority) than the last.
 @menu
-* System-wide header arguments::
-* Language Specific header arguments::
-* Buffer-wide header arguments::
-* Header arguments in Org-mode Properties::
-* Code Block specific header arguments::
+* System-wide header arguments::  
+* Language-specific header arguments::	
+* Buffer-wide header arguments::  
+* Header arguments in Org-mode properties::  
+* Code block specific header arguments::  
 @end menu
 
-@node System-wide header arguments, Language Specific header arguments, , Using Header arguments
+@node System-wide header arguments, Language-specific header arguments, Using header arguments, Using header arguments
 @subsubheading System-wide header arguments
 System-wide values of header arguments can be specified by customizing the
 @code{org-babel-default-header-args} variable:
@@ -11223,21 +11288,21 @@ blocks.
 	      (assq-delete-all :noweb org-babel-default-header-args)))
 @end example
 
-@node Language Specific header arguments, Buffer-wide header arguments, System-wide header arguments, Using Header arguments
-@subsubheading Language Specific header arguments
+@node Language-specific header arguments, Buffer-wide header arguments, System-wide header arguments, Using header arguments
+@subsubheading Language-specific header arguments
 Each language can define its own set of default header arguments.  See the
 language-specific documentation available at
-@uref{http://orgmode.org/worg/org-contrib/babel/reference.php#languages}.
+@uref{http://orgmode.org/worg/org-contrib/babel/reference.php#languages}
 for information on language-specific header arguments.
 
-@node Buffer-wide header arguments, Header arguments in Org-mode Properties, Language Specific header arguments, Using Header arguments
+@node Buffer-wide header arguments, Header arguments in Org-mode properties, Language-specific header arguments, Using header arguments
 @subsubheading Buffer-wide header arguments
 FIXME
 
-@node Header arguments in Org-mode Properties, Code Block specific header arguments, Buffer-wide header arguments, Using Header arguments
-@subsubheading header arguments in Org-mode Properties
+@node Header arguments in Org-mode properties, Code block specific header arguments, Buffer-wide header arguments, Using header arguments
+@subsubheading Header arguments in Org-mode properties
 
-Header arguments are also read from Org-mode Properties (see @ref{Property
+Header arguments are also read from Org-mode properties (see @ref{Property
 syntax}), which can be set on a buffer-wide or per-heading basis. An example
 of setting a header argument for all code blocks in a buffer is
 
@@ -11262,8 +11327,8 @@ Properties defined in this way override the properties set in
 @code{org-set-property} function bound to @key{C-c C-x p} to set properties
 in Org-mode documents.
 
-@node Code Block specific header arguments, , Header arguments in Org-mode Properties, Using Header arguments
-@subsubheading Code Block specific header arguments
+@node Code block specific header arguments,  , Header arguments in Org-mode properties, Using header arguments
+@subsubheading Code block specific header arguments
 
 The most common way to assign values to header arguments is at the
 code block level.  This can be done by listing a sequence of header
@@ -11296,28 +11361,28 @@ Header arguments for ``Library of Babel'' or function call lines can be set as s
 #+call: factorial(n=5) :exports results
 @end example
 
-@node Specific Header arguments, , Using Header arguments, Header arguments
-@subsection Specific Header arguments
+@node Specific header arguments,  , Using header arguments, Header arguments
+@subsection Specific header arguments
 The following header arguments are defined:
 
 @menu
-* var::
-* results::
-* file::
-* dir and remote execution::
-* exports::
-* tangle::
-* no-expand::
-* session::
-* noweb::
-* cache::
-* hlines::
-* colnames::
-* rownames::
+* var argument::		
+* results argument::		
+* file argument::		
+* dir and remote execution::	
+* exports argument::		
+* tangle argument::		
+* no-expand argument::		
+* session argument::		
+* noweb argument::		
+* cache argument::		
+* hlines argument::		
+* colnames argument::		
+* rownames argument::		
 @end menu
 
-@node var, results, , Specific Header arguments
-@subsubsection var
+@node var argument, results argument, Specific header arguments, Specific header arguments
+@subsubsection var argument
 The @code{:var} header argument is used to pass arguments to
 code blocks.  The specifics of how arguments are included
 in a code block vary by language; these are
@@ -11412,7 +11477,7 @@ following the source name.
   #+end_src
 @end example
 
-@subsubheading indexable variable values
+@subsubheading Indexable variable values
 It is possible to assign a portion of a value to a variable in a source
 block.  The following example assigns the second and third rows of the table
 @code{example-table} to the variable @code{data}:
@@ -11451,8 +11516,8 @@ For more information on indexing behavior see the documentation for the
   which case the entire range is returned.
 @end example
 
-@node results, file, var, Specific Header arguments
-@subsubsection results
+@node results argument, file argument, var argument, Specific header arguments
+@subsubsection results argument
 
 There are three types of results header argument.  Only one option of each
 type may be supplied per code block.
@@ -11546,8 +11611,8 @@ be prepended to the existing results.  Otherwise the new results will be
 inserted as with @code{replace}.
 @end itemize
 
-@node file, dir and remote execution, results, Specific Header arguments
-@subsubsection file
+@node file argument, dir and remote execution, results argument, Specific header arguments
+@subsubsection file argument
 @code{:file} is used to specify a path for file output in which case an
 Org-mode style link (see @ref{Link format}) @code{file:} link is inserted
 into the buffer as the result. Common examples are graphical output from R,
@@ -11561,7 +11626,7 @@ as python and ruby require that the code explicitly create output
 corresponding to the path indicated by @code{:file}.
 
 
-@node dir and remote execution, exports, file, Specific Header arguments
+@node dir and remote execution, exports argument, file argument, Specific header arguments
 @subsubsection dir and remote execution
 While the @code{:file} header argument can be used to specify the path to the
 output file, @code{:dir} specifies the default directory during code block
@@ -11628,8 +11693,8 @@ directory}. Therefore, if @code{default-directory} is altered using
 which the link does not point.
 @end itemize
 
-@node exports, tangle, dir and remote execution, Specific Header arguments
-@subsubsection exports
+@node exports argument, tangle argument, dir and remote execution, Specific header arguments
+@subsubsection exports argument
 Specify what should be included in HTML or LaTeX exports of the Org-mode
 file.
 
@@ -11647,8 +11712,8 @@ both the code and results are included in the exported file. E.g.,
 nothing is included in the exported file.  E.g., @code{:exports none}.
 @end itemize
 
-@node tangle, no-expand, exports, Specific Header arguments
-@subsubsection tangle
+@node tangle argument, no-expand argument, exports argument, Specific header arguments
+@subsubsection tangle argument
 Specify whether or not the source code block should be included in tangled
 extraction of source code files.
 
@@ -11666,16 +11731,16 @@ as a file basename to which the block will be exported.  E.g., @code{:tangle
 basename}.
 @end itemize
 
-@node no-expand, session, tangle, Specific Header arguments
-@subsubsection no-expand
+@node no-expand argument, session argument, tangle argument, Specific header arguments
+@subsubsection no-expand argument
 By default, code blocks are expanded with @code{org-babel-expand-src-block}
 during tangling.  This has the effect of assigning values to variables
-specified with @code{:var} (see @ref{var}), and of replacing ``noweb''
+specified with @code{:var} (see @ref{var argument}), and of replacing ``noweb''
 references (see @ref{Noweb reference syntax}) with their targets.  The
 @code{:no-expand} header argument can be used to turn off this behavior.
 
-@node session, noweb, no-expand, Specific Header arguments
-@subsubsection session
+@node session argument, noweb argument, no-expand argument, Specific header arguments
+@subsubsection session argument
 Start a session for an interpreted language where state is preserved.  This
 applies particularly to the supported languages python, R and ruby.
 
@@ -11685,8 +11750,8 @@ A string passed to the @code{:session} header argument will give the session
 a name.  This makes it possible to run concurrent sessions for each
 interpreted language.
 
-@node noweb, cache, session, Specific Header arguments
-@subsubsection noweb
+@node noweb argument, cache argument, session argument, Specific header arguments
+@subsubsection noweb argument
 Controls the expansion of ``noweb'' style (see @ref{Noweb reference syntax})
 references in a source code block.  This header argument can have one of two
 values: @code{yes} or @code{no}.
@@ -11726,8 +11791,8 @@ Note that noweb replacement text that does not contain any newlines will not
 be affected by this change, so it is still possible to use inline noweb
 references.
 
-@node cache, hlines, noweb, Specific Header arguments
-@subsubsection cache
+@node cache argument, hlines argument, noweb argument, Specific header arguments
+@subsubsection cache argument
 Controls the use of in-buffer caching of source code block results to avoid
 re-running unchanged source code blocks.  This header argument can have one
 of two values: @code{yes} or @code{no}.
@@ -11744,8 +11809,8 @@ executions of the source code block.  If the source code block has not
 changed since the last time it was evaluated, it will not be re-evaluated.
 @end itemize
 
-@node hlines, colnames, cache, Specific Header arguments
-@subsubsection hlines
+@node hlines argument, colnames argument, cache argument, Specific header arguments
+@subsubsection hlines argument
 Tables are frequently represented with one or more horizontal lines, or
 hlines.  The @code{:hlines} argument to a code block accepts the
 values @code{yes} or @code{no}, with a default value of @code{no}.
@@ -11801,8 +11866,8 @@ Leaves hlines in the table. Setting @code{:hlines yes} has this effect.
 @end example
 @end itemize
 
-@node colnames, rownames, hlines, Specific Header arguments
-@subsubsection colnames
+@node colnames argument, rownames argument, hlines argument, Specific header arguments
+@subsubsection colnames argument
 The @code{:colnames} header argument accepts the values @code{yes},
 @code{no}, or @code{nil} for unassigned.  The default value is @code{nil}.
 
@@ -11841,8 +11906,8 @@ does not ``look like'' it has column names (i.e. the second row is not an
 hline)
 @end itemize
 
-@node rownames, , colnames, Specific Header arguments
-@subsubsection rownames
+@node rownames argument,  , colnames argument, Specific header arguments
+@subsubsection rownames argument
 The @code{:rownames} header argument can take on the values @code{yes}
 or @code{no}, with a default value of @code{no}.
 
@@ -12013,7 +12078,7 @@ kept pressed, resulting in the following additional keybindings.
 @item @key{C-c C-v C-z} @tab org-babel-switch-to-session
 @end multitable
 
-@node Batch execution, , Key bindings & useful functions, Working With Source Code
+@node Batch execution,  , Key bindings & useful functions, Working With Source Code
 @section Batch execution
 It is possible to call functions from the command line.  This shell
 script calls @code{org-babel-tangle} on every one of its arguments.
@@ -12049,14 +12114,14 @@ emacsclient \
 @chapter Miscellaneous
 
 @menu
-* Completion::                  M-TAB knows what you need
-* Speed keys::                  Electic commands at the beginning of a headline
-* Customization::               Adapting Org to your taste
-* In-buffer settings::          Overview of the #+KEYWORDS
-* The very busy C-c C-c key::   When in doubt, press C-c C-c
-* Clean view::                  Getting rid of leading stars in the outline
-* TTY keys::                    Using Org on a tty
-* Interaction::                 Other Emacs packages
+* Completion::			M-TAB knows what you need
+* Speed keys::			Electic commands at the beginning of a headline
+* Customization::		Adapting Org to your taste
+* In-buffer settings::		Overview of the #+KEYWORDS
+* The very busy C-c C-c key::	When in doubt, press C-c C-c
+* Clean view::			Getting rid of leading stars in the outline
+* TTY keys::			Using Org on a tty
+* Interaction::			Other Emacs packages
 @end menu
 
 
@@ -12630,8 +12695,8 @@ Org lives in the world of GNU Emacs and interacts in various ways
 with other code out there.
 
 @menu
-* Cooperation::                 Packages Org cooperates with
-* Conflicts::                   Packages that lead to conflicts
+* Cooperation::			Packages Org cooperates with
+* Conflicts::			Packages that lead to conflicts
 @end menu
 
 @node Cooperation, Conflicts, Interaction, Interaction
@@ -12824,16 +12889,16 @@ This appendix covers some aspects where users can extend the functionality of
 Org.
 
 @menu
-* Hooks::                       Who to reach into Org's internals
-* Add-on packages::             Available extensions
-* Adding hyperlink types::      New custom link types
-* Context-sensitive commands::  How to add functionality to such commands
-* Tables in arbitrary syntax::  Orgtbl for La@TeX{} and other programs
-* Dynamic blocks::              Automatically filled blocks
-* Special agenda views::        Customized views
+* Hooks::			Who to reach into Org's internals
+* Add-on packages::		Available extensions
+* Adding hyperlink types::	New custom link types
+* Context-sensitive commands::	How to add functionality to such commands
+* Tables in arbitrary syntax::	Orgtbl for La@TeX{} and other programs
+* Dynamic blocks::		Automatically filled blocks
+* Special agenda views::	Customized views
 * Extracting agenda information::  Postprocessing of agenda information
-* Using the property API::      Writing programs that use entry properties
-* Using the mapping API::       Mapping over all or selected entries
+* Using the property API::	Writing programs that use entry properties
+* Using the mapping API::	Mapping over all or selected entries
 @end menu
 
 @node Hooks, Add-on packages, Hacking, Hacking
@@ -13026,10 +13091,10 @@ or Texinfo.)
 
 
 @menu
-* Radio tables::                Sending and receiving radio tables
-* A LaTeX example::             Step by step, almost a tutorial
-* Translator functions::        Copy and modify
-* Radio lists::                 Doing the same for lists
+* Radio tables::		Sending and receiving radio tables
+* A LaTeX example::		Step by step, almost a tutorial
+* Translator functions::	Copy and modify
+* Radio lists::			Doing the same for lists
 @end menu
 
 @node Radio tables, A LaTeX example, Tables in arbitrary syntax, Tables in arbitrary syntax
@@ -13800,9 +13865,9 @@ in-buffer settings, but it will understand the logistics of TODO state
 (@pxref{Setting tags}) only for those set in these variables.
 
 @menu
-* Setting up the staging area::  Where to interact with the mobile device
-* Pushing to MobileOrg::        Uploading Org files and agendas
-* Pulling from MobileOrg::      Integrating captured and flagged items
+* Setting up the staging area::	 Where to interact with the mobile device
+* Pushing to MobileOrg::	Uploading Org files and agendas
+* Pulling from MobileOrg::	Integrating captured and flagged items
 @end menu
 
 @node Setting up the staging area, Pushing to MobileOrg, MobileOrg, MobileOrg
