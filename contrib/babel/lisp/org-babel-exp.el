@@ -121,7 +121,7 @@ processing has taken place."
   (interactive)
   (save-excursion
     (goto-char (point-min))
-    (while (re-search-forward
+    (while (org-re-search-forward-unprotected
 	    (concat
 	     "\\("org-babel-source-name-regexp"\\|"org-babel-result-regexp"\\)")
 	    nil t)
