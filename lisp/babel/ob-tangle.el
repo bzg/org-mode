@@ -33,19 +33,25 @@
 (eval-when-compile
   (require 'cl))
 
-(defvar org-babel-tangle-langs nil
-  "List of languages supported by `org-babel-tangle'.  The first
-element of each language's list is a string indicating the name
-of the language, the second element should be the file extension
-of the language, an optional third element the shebang(#!)  line
-to use when writing out the language to file, and an optional
-fourth element is a flag which when true indicates that the
-language does not support comments.")
-
-(defvar org-babel-tangle-w-comments nil
+(defcustom org-babel-tangle-w-comments nil
   "Control the insertion of comments into tangled code.  Non-nil
 value will result in the insertion of comments for those
-languages with comment support.")
+languages with comment support."
+  :group 'org-babel-tangle
+  :type 'boolean)
+
+(defcustom org-babel-tangle-lang-exts
+  '(("emacs-lisp" . "el"))
+  "Alist mapping languages to their file extensions.
+The key is the language name, the value is the string that should
+be inserted as the extension commonly used to identify files
+written in this language.  If no entry is found in this list,
+then the name of the language is used."
+  :group 'org-babel-tangle
+  :type '(repeat
+	  (cons
+	   (string "Language name")
+	   (string "File Extension"))))
 
 (defun org-babel-load-file (file)
   "Load the contents of the Emacs Lisp source code blocks in the
@@ -101,6 +107,7 @@ exported source code blocks by language."
        (lambda (by-lang)
          (let* ((lang (car by-lang))
                 (specs (cdr by-lang))
+		(ext (or (cdr (assoc lang org-babel-tangle-lang-exts)) lang))
                 (lang-f (intern
 			 (concat
 			  (or (and (cdr (assoc lang org-src-lang-modes))
@@ -108,19 +115,14 @@ exported source code blocks by language."
 				    (cdr (assoc lang org-src-lang-modes))))
 			      lang)
 			  "-mode")))
-                (lang-specs (cdr (assoc lang org-babel-tangle-langs)))
-                (ext (nth 0 lang-specs))
-                (she-bang (nth 1 lang-specs))
-                (commentable (and (fboundp lang-f) (not (nth 2 lang-specs))))
                 she-banged)
            (mapc
             (lambda (spec)
               (flet ((get-spec (name)
                                (cdr (assoc name (nth 2 spec)))))
                 (let* ((tangle (get-spec :tangle))
-                       (she-bang (if (> (length (get-spec :shebang)) 0)
-                                     (get-spec :shebang)
-                                   she-bang))
+                       (she-bang ((lambda (sheb) (when (> (length sheb) 0) sheb))
+				  (get-spec :shebang)))
                        (base-name (or (cond
                                        ((string= "yes" tangle)
                                         (file-name-sans-extension
@@ -219,18 +221,13 @@ code blocks by language."
 						(cdr (assoc :noweb params))))
                                           (org-babel-expand-noweb-references
 					   info)
-					(nth 1 info)))
-                                     (nth 2
-				      (cdr (assoc src-lang
-						  org-babel-tangle-langs))))
+					(nth 1 info))))
                                by-lang)) blocks))))))
     ;; ensure blocks in the correct order
     (setq blocks
           (mapcar
 	   (lambda (by-lang) (cons (car by-lang) (reverse (cdr by-lang))))
 	   blocks))
-    ;; blocks should contain all source-blocks organized by language
-    ;; (message "blocks=%S" blocks) ;; debugging
     blocks))
 
 (defun org-babel-spec-to-string (spec)
@@ -243,11 +240,7 @@ form
   (let ((link (nth 0 spec))
 	(source-name (nth 1 spec))
 	(body (nth 3 spec))
-	(commentable (not (if (> (length (cdr (assoc :comments (nth 2 spec))))
-				 0)
-			      (string= (cdr (assoc :comments (nth 2 spec)))
-				       "no")
-			    (nth 4 spec)))))
+	(commentable (string= (cdr (assoc :comments (nth 2 spec))) "yes")))
     (flet ((insert-comment (text)
 			   (when (and commentable
 				      org-babel-tangle-w-comments)
