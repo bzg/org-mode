@@ -53,23 +53,23 @@
 
 (defvar org-babel-src-block-regexp
   (concat
-   ;; (1) indentation (2)   lang
-   "^\\([ \t]*\\)#\\+begin_src[ \t]+\\([^ \t]+\\)[ \t]*"
-   ;; (3)   switches
+   ;; (1) indentation                     (2) lang
+   "^\\([ \t]*\\)#\\+begin_src[ \t]+\\([^ \f\t\n\r\v]+\\)[ \t]*"
+   ;; (3) switches
    "\\([^\":\n]*\"[^\"\n*]*\"[^\":\n]*\\|[^\":\n]*\\)"
-   ;; (4)   header arguments
+   ;; (4) header arguments
    "\\([^\n]*\\)\n"
-   ;; (5)   body
+   ;; (5) body
    "\\([^\000]+?\n\\)[ \t]*#\\+end_src")
   "Regexp used to identify code blocks.")
 
 (defvar org-babel-inline-src-block-regexp
   (concat
-   ;; (1)   replacement target (2)   lang
-   "[ \f\t\n\r\v]\\(src_\\([^ \t]+\\)"
+   ;; (1) replacement target (2) lang
+   "[ \f\t\n\r\v]\\(src_\\([^ \f\t\n\r\v]+\\)"
    ;; (3,4) (unused, headers)
    "\\(\\|\\[\\(.*?\\)\\]\\)"
-   ;; (5)   body
+   ;; (5) body
    "{\\([^\f\n\r\v]+?\\)}\\)")
   "Regexp used to identify inline src-blocks.")
 
