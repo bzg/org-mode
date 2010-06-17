@@ -124,8 +124,7 @@ LISPF      = 	org.el				\
 		babel/ob-tangle.el		\
 		babel/ob-comint.el		\
 		babel/ob-keys.el		\
-		babel/langs/ob-emacs-lisp.el	\
-		babel/langs/ob-sh.el
+		babel/langs/ob-emacs-lisp.el
 
 LISPFILES0 = $(LISPF:%=lisp/%)
 LISPFILES  = $(LISPFILES0) lisp/org-install.el
