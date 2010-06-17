@@ -108,7 +108,7 @@ license to the document, as described in section 6 of the license.
 * Markup::			Prepare text for rich export
 * Exporting::			Sharing and publishing of notes
 * Publishing::			Create a web site of linked Org files
-* Working With Source Code::    Export, evaluate, and tangle code blocks 
+* Working With Source Code::    Export, evaluate, and tangle code blocks
 * Miscellaneous::		All the rest which did not fit elsewhere
 * Hacking::			How to hack your way around
 * MobileOrg::			Viewing and capture on a mobile device
@@ -306,7 +306,7 @@ Markup for rich export
 * Images and tables::		Tables and Images will be included
 * Literal examples::		Source code examples with special formatting
 * Include files::		Include additional files into a document
-* Index entries::		
+* Index entries::
 * Macro replacement::		Use macros to create complex output
 * Embedded LaTeX::		LaTeX can be freely used inside Org documents
 
@@ -380,13 +380,13 @@ Publishing
 * Uploading files::		How to get files up on the server
 * Sample configuration::	Example projects
 * Triggering publication::	Publication commands
-* Library of Babel::		
-* Languages::			
-* Header arguments::		
-* Results::			
-* Noweb reference syntax::	
-* Key bindings & useful functions::  
-* Batch execution::		
+* Library of Babel::
+* Languages::
+* Header arguments::
+* Results::
+* Noweb reference syntax::
+* Key bindings & useful functions::
+* Batch execution::
 
 Configuration
 
@@ -421,32 +421,32 @@ Working With Source Code
 
 Header arguments
 
-* Using header arguments::	
-* Specific header arguments::	
+* Using header arguments::
+* Specific header arguments::
 
 Using header arguments
 
-* System-wide header arguments::  
-* Language-specific header arguments::	
-* Buffer-wide header arguments::  
-* Header arguments in Org-mode properties::  
-* Code block specific header arguments::  
+* System-wide header arguments::
+* Language-specific header arguments::
+* Buffer-wide header arguments::
+* Header arguments in Org-mode properties::
+* Code block specific header arguments::
 
 Specific header arguments
 
-* var argument::		
-* results argument::		
-* file argument::		
-* dir and remote execution::	
-* exports argument::		
-* tangle argument::		
-* no-expand argument::		
-* session argument::		
-* noweb argument::		
-* cache argument::		
-* hlines argument::		
-* colnames argument::		
-* rownames argument::		
+* var argument::
+* results argument::
+* file argument::
+* dir and remote execution::
+* exports argument::
+* tangle argument::
+* no-expand argument::
+* session argument::
+* noweb argument::
+* cache argument::
+* hlines argument::
+* colnames argument::
+* rownames argument::
 
 Miscellaneous
 
@@ -1285,7 +1285,7 @@ as bullets.
 @emph{Ordered} list items start with a numeral followed by either a period or
 a right parenthesis, such as @samp{1.} or @samp{1)}.  If you want a list to
 start a different value (e.g. 20), start the text of the item with
-@code{[@@start:20]}. 
+@code{[@@start:20]}.
 @item
 @emph{Description} list items are unordered list items, and contain the
 separator @samp{ :: } to separate the description @emph{term} from the
@@ -8311,7 +8311,7 @@ summarizes the markup rules used in an Org-mode buffer.
 * Images and tables::		Tables and Images will be included
 * Literal examples::		Source code examples with special formatting
 * Include files::		Include additional files into a document
-* Index entries::		
+* Index entries::
 * Macro replacement::		Use macros to create complex output
 * Embedded LaTeX::		LaTeX can be freely used inside Org documents
 @end menu
@@ -8705,7 +8705,7 @@ the contains an exclamation mark will create a sub item.  See @ref{Generating
 an index} for more information.
 
 @example
-* Curriculum Vitae 
+* Curriculum Vitae
 #+INDEX: CV
 #+INDEX: Application!CV
 @end example
@@ -9927,7 +9927,7 @@ Here is a simple example Org document that is intended for beamer export.
 #+COLUMNS: %35ITEM %10BEAMER_env(Env) %10BEAMER_envargs(Args) %4BEAMER_col(Col) %8BEAMER_extra(Ex)
 
 * This is the first structural section
- 
+
 ** Frame 1 \\ with a subtitle
 *** Thanks to Eric Fraga                                      :BMCOL:B_block:
     :PROPERTIES:
@@ -10404,13 +10404,13 @@ Publishing has been contributed to Org by David O'Toole.
 * Uploading files::		How to get files up on the server
 * Sample configuration::	Example projects
 * Triggering publication::	Publication commands
-* Library of Babel::		
-* Languages::			
-* Header arguments::		
-* Results::			
-* Noweb reference syntax::	
-* Key bindings & useful functions::  
-* Batch execution::		
+* Library of Babel::
+* Languages::
+* Header arguments::
+* Results::
+* Noweb reference syntax::
+* Key bindings & useful functions::
+* Batch execution::
 @end menu
 
 @node Configuration, Uploading files, Publishing, Publishing
@@ -10709,7 +10709,7 @@ file is part of any project in @code{org-publish-project-alist}.
 @subsection Generating a sitemap
 @cindex sitemap, of published pages
 
-The following properties may be used to control publishing of 
+The following properties may be used to control publishing of
 a map of files for a given project.
 
 @multitable @columnfractions 0.35 0.65
@@ -11241,8 +11241,8 @@ section provides an overview of the use of header arguments, and then
 describes each header argument in detail.
 
 @menu
-* Using header arguments::	
-* Specific header arguments::	
+* Using header arguments::
+* Specific header arguments::
 @end menu
 
 @node Using header arguments, Specific header arguments, Header arguments, Header arguments
@@ -11251,11 +11251,11 @@ describes each header argument in detail.
 The values of header arguments can be set in five different ways, each more
 specific (and having higher priority) than the last.
 @menu
-* System-wide header arguments::  
-* Language-specific header arguments::	
-* Buffer-wide header arguments::  
-* Header arguments in Org-mode properties::  
-* Code block specific header arguments::  
+* System-wide header arguments::
+* Language-specific header arguments::
+* Buffer-wide header arguments::
+* Header arguments in Org-mode properties::
+* Code block specific header arguments::
 @end menu
 
 @node System-wide header arguments, Language-specific header arguments, Using header arguments, Using header arguments
@@ -11366,19 +11366,19 @@ Header arguments for ``Library of Babel'' or function call lines can be set as s
 The following header arguments are defined:
 
 @menu
-* var argument::		
-* results argument::		
-* file argument::		
-* dir and remote execution::	
-* exports argument::		
-* tangle argument::		
-* no-expand argument::		
-* session argument::		
-* noweb argument::		
-* cache argument::		
-* hlines argument::		
-* colnames argument::		
-* rownames argument::		
+* var argument::
+* results argument::
+* file argument::
+* dir and remote execution::
+* exports argument::
+* tangle argument::
+* no-expand argument::
+* session argument::
+* noweb argument::
+* cache argument::
+* hlines argument::
+* colnames argument::
+* rownames argument::
 @end menu
 
 @node var argument, results argument, Specific header arguments, Specific header arguments
@@ -11643,7 +11643,7 @@ case that path will be interpreted relative to the default directory.
 In other words, if you want your plot to go into a folder called Work in your
 home directory, you could use
 
-@example 
+@example
   #+begin_src R :file myplot.png :dir ~/Work
     matplot(matrix(rnorm(100), 10), type="l")
   #+end_src
@@ -11653,7 +11653,7 @@ home directory, you could use
 A directory on a remote machine can be specified using tramp file syntax, in
 which case the code will be evaluated on the remote machine. An example is
 
-@example 
+@example
 #+begin_src R :file plot.png :dir /dand@@yakuba.princeton.edu:
   plot(1:10, main=system("hostname", intern=TRUE))
 #+end_src
@@ -11667,7 +11667,7 @@ created.
 So, in the above example a plot will be created on the remote machine,
 and a link of the following form will be inserted in the org buffer:
 
-@example 
+@example
 [[file:/scp:dand@@yakuba.princeton.edu:/home/dand/plot.png][plot.png]]
 @end example
 
@@ -11884,7 +11884,7 @@ processing, then reapplied to the results.
 |---|
 | b |
 | c |
-  
+
 #+srcname: echo-table-again
 #+begin_src python :var tab=less-cols
   return [[val + '*' for val in row] for row in tab]
@@ -11922,11 +11922,11 @@ and is then reapplied to the results.
 @example
 #+tblname: with-rownames
 | one | 1 | 2 | 3 | 4 |  5 |
-| two | 6 | 7 | 8 | 9 | 10 | 
+| two | 6 | 7 | 8 | 9 | 10 |
 
 #+srcname: echo-table-once-again
 #+begin_src python :var tab=with-rownames :rownames yes
-  return [[val + 10 for val in row] for row in tab]            
+  return [[val + 10 for val in row] for row in tab]
 #+end_src
 
 #+results: echo-table-once-again
@@ -12666,16 +12666,16 @@ is really only fun with @kbd{S-@key{cursor}} keys, whereas on a
 tty you would rather use @kbd{C-c .} to re-insert the timestamp.
 
 @multitable @columnfractions 0.15 0.2 0.1 0.2
-@item @b{Default} @tab @b{Alternative 1} @tab @b{Speed key} @tab @b{Alternative 2} 
-@item @kbd{S-@key{TAB}}     @tab @kbd{C-u @key{TAB}}       @tab @kbd{C} @tab                            
-@item @kbd{M-@key{left}}    @tab @kbd{C-c C-x l}           @tab @kbd{l} @tab @kbd{@key{Esc} @key{left}} 
-@item @kbd{M-S-@key{left}}  @tab @kbd{C-c C-x L}           @tab @kbd{L} @tab                            
+@item @b{Default} @tab @b{Alternative 1} @tab @b{Speed key} @tab @b{Alternative 2}
+@item @kbd{S-@key{TAB}}     @tab @kbd{C-u @key{TAB}}       @tab @kbd{C} @tab
+@item @kbd{M-@key{left}}    @tab @kbd{C-c C-x l}           @tab @kbd{l} @tab @kbd{@key{Esc} @key{left}}
+@item @kbd{M-S-@key{left}}  @tab @kbd{C-c C-x L}           @tab @kbd{L} @tab
 @item @kbd{M-@key{right}}   @tab @kbd{C-c C-x r}           @tab @kbd{r} @tab @kbd{@key{Esc} @key{right}}
-@item @kbd{M-S-@key{right}} @tab @kbd{C-c C-x R}           @tab @kbd{R} @tab                           
-@item @kbd{M-@key{up}}      @tab @kbd{C-c C-x u}           @tab @kbd{ } @tab @kbd{@key{Esc} @key{up}}  
-@item @kbd{M-S-@key{up}}    @tab @kbd{C-c C-x U}           @tab @kbd{U} @tab                           
+@item @kbd{M-S-@key{right}} @tab @kbd{C-c C-x R}           @tab @kbd{R} @tab
+@item @kbd{M-@key{up}}      @tab @kbd{C-c C-x u}           @tab @kbd{ } @tab @kbd{@key{Esc} @key{up}}
+@item @kbd{M-S-@key{up}}    @tab @kbd{C-c C-x U}           @tab @kbd{U} @tab
 @item @kbd{M-@key{down}}    @tab @kbd{C-c C-x d}           @tab @kbd{ } @tab @kbd{@key{Esc} @key{down}}
-@item @kbd{M-S-@key{down}}  @tab @kbd{C-c C-x D}           @tab @kbd{D} @tab                            
+@item @kbd{M-S-@key{down}}  @tab @kbd{C-c C-x D}           @tab @kbd{D} @tab
 @item @kbd{S-@key{RET}}     @tab @kbd{C-c C-x c}           @tab @kbd{ } @tab
 @item @kbd{M-@key{RET}}     @tab @kbd{C-c C-x m}           @tab @kbd{ } @tab @kbd{@key{Esc} @key{RET}}
 @item @kbd{M-S-@key{RET}}   @tab @kbd{C-c C-x M}           @tab @kbd{ } @tab
@@ -13893,7 +13893,7 @@ Emacs about it:
 @end lisp
 
 Org-mode has commands to put files for @i{MobileOrg} into that directory,
-and to read captured notes from there. 
+and to read captured notes from there.
 
 @node Pushing to MobileOrg, Pulling from MobileOrg, Setting up the staging area, MobileOrg
 @section Pushing to MobileOrg
