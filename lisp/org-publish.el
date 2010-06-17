@@ -756,7 +756,12 @@ Default for SITEMAP-FILENAME is 'sitemap.org'."
   (save-window-excursion
     (let* ((org-publish-use-timestamps-flag
 	    (if force nil org-publish-use-timestamps-flag)))
-      (org-publish-projects (list project)))))
+      (org-publish-projects
+       (if (stringp project)
+	   ;; If this function is called in batch mode,
+	   ;; project is still a string here.
+	   (list (assoc project org-publish-project-alist))
+	   (list project))))))
 
 ;;;###autoload
 (defun org-publish-all (&optional force)

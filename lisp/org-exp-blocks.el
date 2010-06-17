@@ -136,7 +136,11 @@ be exported."
   :group 'org-export-general
   :type 'list)
 
-(defvar org-export-blocks-postblock-hooks nil "")
+(defcustom org-export-blocks-postblock-hook nil
+  "Run after blocks have been processed with
+`org-export-blocks-preprocess'."
+  :group 'org-export-general
+  :type 'hook)
 
 (defun org-export-blocks-html-quote (body &optional open close)
   "Protext BODY from org html export.  The optional OPEN and
@@ -174,7 +178,7 @@ specified in BLOCKS which default to the value of
 	(goto-char (point-min))
 	(setq start (point))
 	(while (re-search-forward
-		"^\\([ \t]*\\)#\\+begin_\\(\\S-+\\)[ \t]*\\(.*\\)?[\r\n]\\([^\000]*?\\)[\r\n][ \t]*#\\+end_\\S-+.*" nil t)
+		"^\\([ \t]*\\)#\\+begin_\\(\\S-+\\)[ \t]*\\(.*\\)?[\r\n]\\([^\000]*?\\)[\r\n][ \t]*#\\+end_\\S-+.*[\r\n]?" nil t)
           (setq indentation (length (match-string 1)))
 	  (setq type (intern (downcase (match-string 2))))
 	  (setq headers (save-match-data (org-split-string (match-string 3) "[ \t]+")))
@@ -194,7 +198,8 @@ specified in BLOCKS which default to the value of
                   (indent-code-rigidly
                    (match-beginning 0) (match-end 0) indentation)))))
 	  (setq start (match-end 0)))
-	(interblock start (point-max))))))
+	(interblock start (point-max))
+	(run-hooks 'org-export-blocks-postblock-hook)))))
 
 (add-hook 'org-export-preprocess-hook 'org-export-blocks-preprocess)
 

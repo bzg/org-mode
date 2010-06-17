@@ -5515,14 +5515,16 @@ and subscriipts."
 	     org-match-substring-regexp
 	   org-match-substring-with-braces-regexp)
 	 limit t)
-	(let* ((pos (point)) table-p comment-p emph-p link-p)
-	  (setq emph-p (get-text-property (match-beginning 3) 'org-emphasis))
-	  (setq link-p (get-text-property (match-beginning 3) 'mouse-face))
+	(let* ((pos (point)) table-p comment-p
+	       (mpos (match-beginning 3))
+	       (emph-p (get-text-property mpos 'org-emphasis))
+	       (link-p (get-text-property mpos 'mouse-face))
+	       (keyw-p (eq 'org-special-keyword (get-text-property mpos 'face))))
 	  (goto-char (point-at-bol))
 	  (setq table-p (org-looking-at-p org-table-dataline-regexp)
 		comment-p (org-looking-at-p "[ \t]*#"))
 	  (goto-char pos)
-	  (if (or comment-p emph-p link-p)
+	  (if (or comment-p emph-p link-p keyw-p)
 	      t
 	    (put-text-property (match-beginning 3) (match-end 0)
 			       'display
@@ -13198,12 +13200,11 @@ allowed value."
   (save-excursion
     (beginning-of-line 1)
     (when (looking-at (org-re "^[ \t]*\\(:\\([[:alpha:]][[:alnum:]_-]*\\):\\)[ \t]*\\(.*\\)"))
-     (let ((match (match-data)) ;; Keep match-data for use by calling
-	   (p (point))          ;; procedures.
-	   (range (unless (org-before-first-heading-p)
-		    (org-get-property-block))))
-       (prog1 (and range (<= (car range) p) (< p (cdr range)))
-	 (set-match-data match))))))
+      (save-match-data ;; Used by calling procedures
+	(let ((p (point))
+	      (range (unless (org-before-first-heading-p)
+		       (org-get-property-block))))
+	  (and range (<= (car range) p) (< p (cdr range))))))))
 
 (defun org-get-property-block (&optional beg end force)
   "Return the (beg . end) range of the body of the property drawer.
@@ -14683,18 +14684,20 @@ days in order to avoid rounding problems."
 (defun org-time-string-to-seconds (s)
   (org-float-time (org-time-string-to-time s)))
 
-(defun org-time-string-to-absolute (s &optional daynr prefer show-all)
+(defun org-time-string-to-absolute (s &optional daynr prefer show-all ignore-cyclic)
   "Convert a time stamp to an absolute day number.
-If there is a specifyer for a cyclic time stamp, get the closest date to
+If there is a specifier for a cyclic time stamp, get the closest date to
 DAYNR.
 PREFER and SHOW-ALL are passed through to `org-closest-date'.
-the variable date is bound by the calendar when this is called."
+the variable date is bound by the calendar when this is called.
+IGNORE-CYCLIC ignores cyclic repeaters so the returned absolute date
+is based on the original date."
   (cond
    ((and daynr (string-match "\\`%%\\((.*)\\)" s))
     (if (org-diary-sexp-entry (match-string 1 s) "" date)
 	daynr
       (+ daynr 1000)))
-   ((and daynr (string-match "\\+[0-9]+[dwmy]" s))
+   ((and (not ignore-cyclic) daynr (string-match "\\+[0-9]+[dwmy]" s))
     (org-closest-date s (if (and (boundp 'daynr) (integerp daynr)) daynr
 			  (time-to-days (current-time))) (match-string 0 s)
 			  prefer show-all))
@@ -15571,10 +15574,6 @@ looks only before point, not after."
     (org-in-regexp
      "\\\\[a-zA-Z]+\\*?\\(\\(\\[[^][\n{}]*\\]\\)\\|\\({[^{}\n]*}\\)\\)*")))
 
-(defun test ()
-  (interactive)
-  (message "%s" (org-inside-latex-macro-p)))
-
 (defun org-try-cdlatex-tab ()
   "Check if it makes sense to execute `cdlatex-tab', and do it if yes.
 It makes sense to do so if `org-cdlatex-mode' is active and if the cursor is
@@ -15925,7 +15924,7 @@ BEG and END default to the buffer boundaries."
       (widen)
       (setq beg (or beg (point-min)) end (or end (point-max)))
       (goto-char (point-min))
-      (let ((re (concat "\\[\\[\\(\\(file:\\)\\|\\([./~]\\)\\)\\([-+~./_0-9a-zA-Z]+"
+      (let ((re (concat "\\[\\[\\(\\(file:\\)\\|\\([./~]\\)\\)\\([-+~.:/\\_0-9a-zA-Z ]+"
 			(substring (org-image-file-name-regexp) 0 -2)
 			"\\)\\]" (if include-linked "" "\\]")))
 	    old file ov img)
@@ -15943,7 +15942,16 @@ BEG and END default to the buffer boundaries."
 		(overlay-put ov 'display img)
 		(overlay-put ov 'face 'default)
 		(overlay-put ov 'org-image-overlay t)
+		(overlay-put ov 'modification-hooks
+			     (list 'org-display-inline-modification-hook))
 		(push ov org-inline-image-overlays)))))))))
+
+(defun org-display-inline-modification-hook (ov after beg end &optional len)
+  "Remove inline-display overlay if a corresponding region is modified."
+  (let ((inhibit-modification-hooks t))
+    (when (and ov after)
+      (delete ov org-inline-image-overlays)
+      (delete-overlay ov))))
 
 (defun org-remove-inline-images ()
   "Remove inline display of images."

@@ -1170,7 +1170,7 @@ sublevels as a list of strings."
 				    (match-beginning 0)) end))))
 	     (item (buffer-substring
 		    (point)
-		    (or (and (re-search-forward
+		    (or (and (org-re-search-forward-unprotected
 			      org-list-beginning-re end t)
 			     (goto-char (match-beginning 0)))
 			(goto-char end))))

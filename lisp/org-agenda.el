@@ -4573,7 +4573,7 @@ be skipped."
 	      pos (1- (match-beginning 1))
 	      d2 (org-time-string-to-absolute
 		  (match-string 1) d1 'past
-		  org-agenda-repeating-timestamp-show-all)
+		  org-agenda-repeating-timestamp-show-all t)
 	      diff (- d2 d1)
 	      wdays (if suppress-prewarning
 			(let ((org-deadline-warning-days suppress-prewarning))
@@ -4675,7 +4675,7 @@ FRACTION is what fraction of the head-warning time has passed."
 	      pos (1- (match-beginning 1))
 	      d2 (org-time-string-to-absolute
 		  (match-string 1) d1 'past
-		  org-agenda-repeating-timestamp-show-all)
+		  org-agenda-repeating-timestamp-show-all t)
 	      diff (- d2 d1))
 	(setq pastschedp (and todayp (< diff 0)))
 	;; When to show a scheduled item in the calendar:
