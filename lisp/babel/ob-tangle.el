@@ -33,8 +33,6 @@
 (eval-when-compile
   (require 'cl))
 
-(declare-function org-babel-get-src-block-info "ob" (&optional hvo))
-
 (defvar org-babel-tangle-langs nil
   "List of languages supported by `org-babel-tangle'.  The first
 element of each language's list is a string indicating the name

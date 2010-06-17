@@ -49,6 +49,16 @@
 (declare-function tramp-file-name-user "tramp" (vec))
 (declare-function tramp-file-name-host "tramp" (vec))
 
+(defvar org-babel-source-name-regexp
+  "^[ \t]*#\\+\\(srcname\\|source\\|function\\):[ \t]*"
+  "Regular expression used to match a source name line.")
+
+(defvar org-babel-src-block-regexp nil
+  "Regexp used to test when inside of a org-babel src-block")
+
+(defvar org-babel-inline-src-block-regexp nil
+  "Regexp used to test when on an inline org-babel src-block")
+
 (defun org-babel-get-src-block-info (&optional header-vars-only)
   "Get information of the current source block.
 
@@ -176,21 +186,11 @@ header arguments as well.")
 (defvar org-babel-current-buffer-properties)
 (make-variable-buffer-local 'org-babel-current-buffer-properties)
 
-(defvar org-babel-src-block-regexp nil
-  "Regexp used to test when inside of a org-babel src-block")
-
-(defvar org-babel-inline-src-block-regexp nil
-  "Regexp used to test when on an inline org-babel src-block")
-
 (defvar org-babel-result-regexp
   "^[ \t]*#\\+res\\(ults\\|name\\)\\(\\[\\([[:alnum:]]+\\)\\]\\)?\\:"
   "Regular expression used to match result lines.  If the
 results are associated with a hash key then the hash will be
 saved in the second match data.")
-
-(defvar org-babel-source-name-regexp
-  "^[ \t]*#\\+\\(srcname\\|source\\|function\\):[ \t]*"
-  "Regular expression used to match a source name line.")
 
 (defvar org-babel-min-lines-for-block-output 10
   "If number of lines of output is equal to or exceeds this

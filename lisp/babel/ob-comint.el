@@ -36,8 +36,6 @@
 (require 'ob)
 (require 'comint)
 
-(declare-function org-babel-get-src-block-info "ob" (&optional hvo))
-
 (defun org-babel-comint-buffer-livep (buffer)
   "Check if BUFFER is a comint buffer with a live process."
   (let ((buffer (if buffer (get-buffer buffer))))
@@ -69,8 +67,8 @@ or user `keyboard-quit' during execution of body."
   (declare (indent 1))
   (let ((buffer (car meta))
 	(eoe-indicator (cadr meta))
-	(remove-echo (caddr meta))
-	(full-body (cadddr meta)))
+	(remove-echo (cadr (cdr meta)))
+	(full-body (cadr (cdr (cdr meta)))))
     `(org-babel-comint-in-buffer ,buffer
        (let ((string-buffer "") dangling-text)
 	 (flet ((my-filt (text)

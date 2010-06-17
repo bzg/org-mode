@@ -34,8 +34,6 @@
 (eval-when-compile
   (require 'cl))
 
-(declare-function org-babel-get-src-block-info "ob" (&optional hvo))
-
 (defvar obe-marker nil)
 (defvar org-current-export-file)
 (defvar org-babel-lob-one-liner-regexp)

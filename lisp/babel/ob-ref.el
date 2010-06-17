@@ -56,8 +56,6 @@
 (eval-when-compile
   (require 'cl))
 
-(declare-function org-babel-get-src-block-info "ob" (&optional hvo))
-
 (defun org-babel-ref-variables (params)
   "Takes a parameter alist, and return an alist of variable
 names, and the emacs-lisp representation of the related value."
