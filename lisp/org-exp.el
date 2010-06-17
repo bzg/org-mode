@@ -2005,14 +2005,12 @@ TYPE must be a string, any of:
   "Recursively include files aborting on circular inclusion."
   (let ((now (list org-current-export-file)) all)
     (while now
-      (setq all (remove-duplicates (append now all)))
+      (setq all (append now all))
       (setq now (org-export-handle-include-files))
       (let ((intersection
 	     (delq nil
-		   (mapcar
-		    (lambda (el) (when (member el all) el))
-		    now))))
-	(when (intersection now all)
+		   (mapcar (lambda (el) (when (member el all) el)) now))))
+	(when intersection
 	  (error "recursive #+INCLUDE: %S" intersection))))))
 
 (defun org-get-file-contents (file &optional prefix prefix1 markup)
