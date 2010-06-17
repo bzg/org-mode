@@ -116,14 +116,14 @@ LISPF      = 	org.el				\
 		org-w3m.el              	\
 		org-wl.el			\
 		org-xoxo.el			\
-		babel/ob-comint.el		\
 		babel/ob.el			\
-		babel/ob-exp.el			\
-		babel/ob-keys.el		\
+		babel/ob-table.el		\
 		babel/ob-lob.el			\
 		babel/ob-ref.el			\
-		babel/ob-table.el		\
+		babel/ob-exp.el			\
 		babel/ob-tangle.el		\
+		babel/ob-comint.el		\
+		babel/ob-keys.el		\
 		babel/langs/ob-emacs-lisp.el	\
 		babel/langs/ob-sh.el
 

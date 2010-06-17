@@ -34,6 +34,8 @@
 ;;; Code:
 (require 'ob)
 
+(declare-function org-babel-get-src-block-info "ob" (&optional hvo))
+
 (defvar org-babel-key-prefix "\C-c\C-v"
   "The `org-babel-key-prefix' variable holds the key prefix
 behind which all org-babel interactive key-binding are placed.

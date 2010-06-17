@@ -49,11 +49,52 @@
 (declare-function tramp-file-name-user "tramp" (vec))
 (declare-function tramp-file-name-host "tramp" (vec))
 
-;; add the langs/ directory to the load path
-(add-to-list 'load-path (expand-file-name
-			 "langs"
-			 (file-name-directory (or (buffer-file-name)
-						  load-file-name))))
+(defun org-babel-get-src-block-info (&optional header-vars-only)
+  "Get information of the current source block.
+
+Returns a list
+ (language body header-arguments-alist switches name function-args indent).
+Unless HEADER-VARS-ONLY is non-nil, any variable
+references provided in 'function call style' (i.e. in a
+parenthesised argument list following the src block name) are
+added to the header-arguments-alist."
+  (let ((case-fold-search t) head info args indent)
+    (if (setq head (org-babel-where-is-src-block-head))
+        (save-excursion
+	  (goto-char head)
+	  (setq info (org-babel-parse-src-block-match))
+	  (setq indent (car (last info)))
+	  (setq info (butlast info))
+	  (forward-line -1)
+	  (if (looking-at
+	       (concat org-babel-source-name-regexp
+		       "\\([^ ()\f\t\n\r\v]+\\)\\(\(\\(.*\\)\)\\|\\)"))
+	      (progn
+		(setq info (append info (list (org-babel-clean-text-properties
+					       (match-string 2)))))
+		;; Note that e.g. "name()" and "name( )" result in
+		;; ((:var . "")).  We maintain that behaviour, and the
+		;; resulting non-nil sixth element is relied upon in
+		;; org-babel-exp-code to detect a functional-style
+		;; block in those cases. However, "name" without any
+		;; parentheses would result in the same thing, so we
+		;; explicitly avoid that.
+		(if (setq args (match-string 4))
+		    (setq info
+			  (append info (list
+					(mapcar
+					 (lambda (ref) (cons :var ref))
+					 (org-babel-ref-split-args args))))))
+		(unless header-vars-only
+		  (setf (nth 2 info)
+			(org-babel-merge-params (nth 5 info) (nth 2 info)))))
+	    (setq info (append info (list nil nil))))
+	  (append info (list indent)))
+      (if (save-excursion ;; inline source block
+            (re-search-backward "[ \f\t\n\r\v]" nil t)
+            (looking-at org-babel-inline-src-block-regexp))
+          (org-babel-parse-inline-src-block-match)
+        nil))))
 
 (defun org-babel-execute-src-block-maybe ()
   "Detect if this is context for a org-babel src-block and if so
@@ -426,52 +467,6 @@ the current subtree."
       (org-narrow-to-subtree)
       (org-babel-execute-buffer)
       (widen))))
-
-(defun org-babel-get-src-block-info (&optional header-vars-only)
-  "Get information of the current source block.
-Returns a list
- (language body header-arguments-alist switches name function-args indent).
-Unless HEADER-VARS-ONLY is non-nil, any variable
-references provided in 'function call style' (i.e. in a
-parenthesised argument list following the src block name) are
-added to the header-arguments-alist."
-  (let ((case-fold-search t) head info args indent)
-    (if (setq head (org-babel-where-is-src-block-head))
-        (save-excursion
-	  (goto-char head)
-	  (setq info (org-babel-parse-src-block-match))
-	  (setq indent (car (last info)))
-	  (setq info (butlast info))
-	  (forward-line -1)
-	  (if (looking-at
-	       (concat org-babel-source-name-regexp
-		       "\\([^ ()\f\t\n\r\v]+\\)\\(\(\\(.*\\)\)\\|\\)"))
-	      (progn
-		(setq info (append info (list (org-babel-clean-text-properties
-					       (match-string 2)))))
-		;; Note that e.g. "name()" and "name( )" result in
-		;; ((:var . "")).  We maintain that behaviour, and the
-		;; resulting non-nil sixth element is relied upon in
-		;; org-babel-exp-code to detect a functional-style
-		;; block in those cases. However, "name" without any
-		;; parentheses would result in the same thing, so we
-		;; explicitly avoid that.
-		(if (setq args (match-string 4))
-		    (setq info
-			  (append info (list
-					(mapcar
-					 (lambda (ref) (cons :var ref))
-					 (org-babel-ref-split-args args))))))
-		(unless header-vars-only
-		  (setf (nth 2 info)
-			(org-babel-merge-params (nth 5 info) (nth 2 info)))))
-	    (setq info (append info (list nil nil))))
-	  (append info (list indent)))
-      (if (save-excursion ;; inline source block
-            (re-search-backward "[ \f\t\n\r\v]" nil t)
-            (looking-at org-babel-inline-src-block-regexp))
-          (org-babel-parse-inline-src-block-match)
-        nil)))) ;; indicate that no source block was found
 
 (defun org-babel-sha1-hash (&optional info)
   "Generate an sha1 hash based on the value of info."

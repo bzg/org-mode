@@ -55,6 +55,8 @@
 ;;; Code:
 (require 'ob)
 
+(declare-function org-babel-get-src-block-info "ob" (&optional hvo))
+
 (defun org-babel-table-truncate-at-newline (string)
   "If STRING ends in a newline character, then remove the newline
 character and replace it with ellipses."

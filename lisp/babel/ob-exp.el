@@ -34,11 +34,12 @@
 (eval-when-compile
   (require 'cl))
 
+(declare-function org-babel-get-src-block-info "ob" (&optional hvo))
+
 (defvar obe-marker nil)
 (defvar org-current-export-file)
 (defvar org-babel-lob-one-liner-regexp)
 (defvar org-babel-ref-split-regexp)
-(declare-function org-babel-get-src-block-info "ob" (&optional hvo))
 (declare-function org-babel-lob-get-info "ob-lob" ())
 (declare-function org-babel-ref-literal "ob-ref" (ref))
 
