@@ -83,19 +83,18 @@ results - just like none only the block is run on export ensuring
 none ----- do not display either code or results upon export"
   (interactive)
   (message "org-babel-exp processing...")
-  (when (member (nth 0 headers) org-babel-interpreters)
-    (save-excursion
-      (goto-char (match-beginning 0))
-      (let* ((info (org-babel-get-src-block-info))
-	     (params (nth 2 info)))
-	;; expand noweb references in the original file
-	(setf (nth 1 info)
-	      (if (and (cdr (assoc :noweb params))
-		       (string= "yes" (cdr (assoc :noweb params))))
-		  (org-babel-expand-noweb-references
-		   info (get-file-buffer org-current-export-file))
-		(nth 1 info)))
-	(org-babel-exp-do-export info 'block)))))
+  (save-excursion
+    (goto-char (match-beginning 0))
+    (let* ((info (org-babel-get-src-block-info))
+	   (params (nth 2 info)))
+      ;; expand noweb references in the original file
+      (setf (nth 1 info)
+	    (if (and (cdr (assoc :noweb params))
+		     (string= "yes" (cdr (assoc :noweb params))))
+		(org-babel-expand-noweb-references
+		 info (get-file-buffer org-current-export-file))
+	      (nth 1 info)))
+      (org-babel-exp-do-export info 'block))))
 
 (defun org-babel-exp-inline-src-blocks (start end)
   "Process inline src blocks between START and END for export.
@@ -209,11 +208,11 @@ evaluated."
     (case type
       ('inline (format "=%s=" body))
       ('block
-          (let ((str
+	  (let ((str
 		 (format "#+BEGIN_SRC %s %s\n%s%s#+END_SRC\n" lang switches body
 			 (if (and body (string-match "\n$" body))
 			     "" "\n"))))
-            (when name
+	    (when name
 	      (add-text-properties
 	       0 (length str)
 	       (list 'org-caption
@@ -224,12 +223,12 @@ evaluated."
 	    str))
       ('lob
        (let ((call-line (and (string-match "results=" (car args))
-                             (substring (car args) (match-end 0)))))
-         (cond
-          ((eq backend 'html)
-           (format "\n#+HTML: <label class=\"org-src-name\">%s</label>\n"
+			     (substring (car args) (match-end 0)))))
+	 (cond
+	  ((eq backend 'html)
+	   (format "\n#+HTML: <label class=\"org-src-name\">%s</label>\n"
 		   call-line))
-          ((format ": %s\n" call-line))))))))
+	  ((format ": %s\n" call-line))))))))
 
 (defun org-babel-exp-results (info type &optional silent)
   "Return the results of the current code block in a manner
@@ -252,36 +251,38 @@ results into the buffer."
 				  ":" (match-string 2 (cdr pair))))
 	      pair))
 	  (nth 2 info))))
-    (case type
-      ('inline
-        (let ((raw (org-babel-execute-src-block
-                    nil info '((:results . "silent"))))
-              (result-params (split-string (cdr (assoc :results params)))))
-          (unless silent
-	    (cond ;; respect the value of the :results header argument
-	     ((member "file" result-params)
-	      (org-babel-result-to-file raw))
-	     ((or (member "raw" result-params) (member "org" result-params))
-	      (format "%s" raw))
-	     ((member "code" result-params)
-	      (format "src_%s{%s}" lang raw))
-	     (t
-	      (if (stringp raw)
-		  (if (= 0 (length raw)) "=(no results)="
-		    (format "%s" raw))
-		(format "%S" raw)))))))
-      ('block
-          (org-babel-execute-src-block
-	   nil info (org-babel-merge-params
-		     params `((:results . ,(if silent "silent" "replace")))))
-        "")
-      ('lob
-       (save-excursion
-	 (re-search-backward org-babel-lob-one-liner-regexp nil t)
-	 (org-babel-execute-src-block
-	  nil info (org-babel-merge-params
-		    params `((:results . ,(if silent "silent" "replace")))))
-	 "")))))
+    ;; skip code blocks which we can't evaluate
+    (when (fboundp (intern (concat "org-babel-execute:" lang)))
+      (case type
+	('inline
+	  (let ((raw (org-babel-execute-src-block
+		      nil info '((:results . "silent"))))
+		(result-params (split-string (cdr (assoc :results params)))))
+	    (unless silent
+	      (cond ;; respect the value of the :results header argument
+	       ((member "file" result-params)
+		(org-babel-result-to-file raw))
+	       ((or (member "raw" result-params) (member "org" result-params))
+		(format "%s" raw))
+	       ((member "code" result-params)
+		(format "src_%s{%s}" lang raw))
+	       (t
+		(if (stringp raw)
+		    (if (= 0 (length raw)) "=(no results)="
+		      (format "%s" raw))
+		  (format "%S" raw)))))))
+	('block
+	    (org-babel-execute-src-block
+	     nil info (org-babel-merge-params
+		       params `((:results . ,(if silent "silent" "replace")))))
+	  "")
+	('lob
+	 (save-excursion
+	   (re-search-backward org-babel-lob-one-liner-regexp nil t)
+	   (org-babel-execute-src-block
+	    nil info (org-babel-merge-params
+		      params `((:results . ,(if silent "silent" "replace")))))
+	   ""))))))
 
 (provide 'ob-exp)
 ;;; ob-exp.el ends here

@@ -32,9 +32,7 @@
 (eval-when-compile (require 'cl))
 (require 'org)
 
-(defvar org-babel-interpreters nil)
 (defvar org-babel-call-process-region-original)
-(defvar org-babel-lob-one-liner-regexp)
 (declare-function orgtbl-to-generic "org-table" (table params))
 (declare-function org-babel-ref-split-args "ob-ref" (arg-string))
 (declare-function org-babel-ref-variables "ob-ref" (params))
@@ -53,11 +51,27 @@
   "^[ \t]*#\\+\\(srcname\\|source\\|function\\):[ \t]*"
   "Regular expression used to match a source name line.")
 
-(defvar org-babel-src-block-regexp nil
-  "Regexp used to test when inside of a org-babel src-block")
+(defvar org-babel-src-block-regexp
+  (concat
+   ;; (1) indentation (2)   lang
+   "^\\([ \t]*\\)#\\+begin_src[ \t]+\\([^ \t]+\\)[ \t]*"
+   ;; (3)   switches
+   "\\([^\":\n]*\"[^\"\n*]*\"[^\":\n]*\\|[^\":\n]*\\)"
+   ;; (4)   header arguments
+   "\\([^\n]*\\)\n"
+   ;; (5)   body
+   "\\([^\000]+?\n\\)[ \t]*#\\+end_src")
+  "Regexp used to identify code blocks.")
 
-(defvar org-babel-inline-src-block-regexp nil
-  "Regexp used to test when on an inline org-babel src-block")
+(defvar org-babel-inline-src-block-regexp
+  (concat
+   ;; (1)   replacement target (2)   lang
+   "[ \f\t\n\r\v]\\(src_\\([^ \t]+\\)"
+   ;; (3,4) (unused, headers)
+   "\\(\\|\\[\\(.*?\\)\\]\\)"
+   ;; (5)   body
+   "{\\([^\f\n\r\v]+?\\)}\\)")
+  "Regexp used to identify inline src-blocks.")
 
 (defun org-babel-get-src-block-info (&optional header-vars-only)
   "Get information of the current source block.
@@ -214,63 +228,6 @@ can not be resolved.")
   (concat org-babel-source-name-regexp (regexp-quote name) "[ \t\n]*"
 	  (substring org-babel-src-block-regexp 1)))
 
-(defun org-babel-add-interpreter (interpreter)
-  "Add INTERPRETER to `org-babel-interpreters' and update
-`org-babel-src-block-regexp' appropriately."
-  (unless (member interpreter org-babel-interpreters)
-    (setq org-babel-interpreters
-          (sort (cons interpreter org-babel-interpreters)
-		(lambda (left right)
-		  (> (length left) (length right)))))
-    (org-babel-set-interpreters 'org-babel-interpreters org-babel-interpreters)))
-
-(defun org-babel-set-interpreters (var value)
-  "Update the regular expressions used to match block and inline
-code."
-  (set-default var value)
-  (setq
-   org-babel-src-block-regexp
-   (concat "^\\([ \t]*\\)#\\+begin_src[ \t]+\\(" ;; (1) indentation (2)   lang
-           (mapconcat 'regexp-quote value "\\|")
-           "\\)[ \t]*"
-           "\\([^\":\n]*\"[^\"\n*]*\"[^\":\n]*\\|[^\":\n]*\\)" ;; (3)   switches
-           "\\([^\n]*\\)\n"                      ;; (4)   header arguments
-           "\\([^\000]+?\n\\)[ \t]*#\\+end_src"));; (5)   body
-  (setq org-babel-inline-src-block-regexp
-	(concat "[ \f\t\n\r\v]\\(src_"                ;; (1)   replacement target
-		"\\("                                 ;; (2)   lang
-		(mapconcat 'regexp-quote value "\\|")
-		"\\)"
-                "\\(\\|\\[\\(.*?\\)\\]\\)"            ;; (3,4) (unused, headers)
-                "{\\([^\f\n\r\v]+?\\)}"               ;; (5)   body
-		"\\)")))
-
-(defcustom org-babel-interpreters '()
-  "Interpreters allows for evaluation tags.
-This is a list of program names (as strings) that can evaluate code and
-insert the output into an Org-mode buffer.  Valid choices are
-
-R          Evaluate R code
-emacs-lisp Evaluate Emacs Lisp code and display the result
-sh         Pass command to the shell and display the result
-perl       The perl interpreter
-python     The python interpreter
-ruby       The ruby interpreter
-
-The source block regexp `org-babel-src-block-regexp' is updated
-when a new interpreter is added to this list through the
-customize interface.  To add interpreters to this variable from
-lisp code use the `org-babel-add-interpreter' function."
-  :group 'org-babel
-  :set 'org-babel-set-interpreters
-  :type '(set :greedy t
-              (const "R")
-	      (const "emacs-lisp")
-              (const "sh")
-	      (const "perl")
-	      (const "python")
-	      (const "ruby")))
-
 ;;; functions
 (defvar call-process-region)
 (defun org-babel-execute-src-block (&optional arg info params)
@@ -318,8 +275,8 @@ block."
     (unwind-protect
         (flet ((call-process-region (&rest args)
                  (apply 'org-babel-tramp-handle-call-process-region args)))
-          (unless (member lang org-babel-interpreters)
-            (error "Language is not in `org-babel-interpreters': %s" lang))
+          (unless (fboundp cmd)
+            (error "No org-babel-execute function for %s!" lang))
           (if (and (not arg) new-hash (equal new-hash old-hash))
               (save-excursion ;; return cached result
                 (goto-char (org-babel-where-is-src-block-result nil info))
@@ -375,13 +332,11 @@ session.  After loading the body this pops open the session."
          (lang (nth 0 info))
          (body (nth 1 info))
          (params (nth 2 info))
-         (session (cdr (assoc :session params))))
-    (unless (member lang org-babel-interpreters)
-      (error "Language is not in `org-babel-interpreters': %s" lang))
-    ;; if called with a prefix argument, then process header arguments
-    (pop-to-buffer
-     (funcall (intern (concat "org-babel-load-session:" lang))
-              session body params))
+         (session (cdr (assoc :session params)))
+	 (cmd (intern (concat "org-babel-load-session:" lang))))
+    (unless (fboundp cmd)
+      (error "No org-babel-load-session function for %s!" lang))
+    (pop-to-buffer (funcall cmd session body params))
     (end-of-line 1)))
 
 (defun org-babel-switch-to-session (&optional arg info)
@@ -397,19 +352,20 @@ of the source block to the kill ring."
          (session (cdr (assoc :session params)))
 	 (dir (cdr (assoc :dir params)))
 	 (default-directory
-	   (or (and dir (file-name-as-directory dir)) default-directory)))
-    (unless (member lang org-babel-interpreters)
-      (error "Language is not in `org-babel-interpreters': %s" lang))
+	   (or (and dir (file-name-as-directory dir)) default-directory))
+	 (cmd (intern (format "org-babel-%s-initiate-session" lang)))
+	 (cmd2 (intern (concat "org-babel-prep-session:" lang))))
+    (unless (fboundp cmd)
+      (error "No org-babel-initiate-session function for %s!" lang))
     ;; copy body to the kill ring
     (with-temp-buffer (insert (org-babel-trim body))
                       (copy-region-as-kill (point-min) (point-max)))
     ;; if called with a prefix argument, then process header arguments
-    (when arg
-      (funcall (intern (concat "org-babel-prep-session:" lang)) session params))
+    (unless (fboundp cmd2)
+      (error "No org-babel-prep-session function for %s!" lang))
+    (when arg (funcall cmd2 session params))
     ;; just to the session using pop-to-buffer
-    (pop-to-buffer
-     (funcall (intern (format "org-babel-%s-initiate-session" lang))
-              session params))
+    (pop-to-buffer (funcall cmd session params))
     (end-of-line 1)))
 
 (defalias 'org-babel-pop-to-session 'org-babel-switch-to-session)
