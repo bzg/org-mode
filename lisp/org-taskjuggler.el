@@ -326,9 +326,10 @@ defined in `org-export-taskjuggler-default-reports'."
   "Export the current buffer as a TaskJuggler file and open it
 with the TaskJuggler GUI."
   (interactive)
-  (let ((file-name (buffer-file-name (org-export-as-taskjuggler)))
-	(command "TaskJugglerUI"))
-    (start-process-shell-command command nil command file-name)))
+  (let* ((file-name (buffer-file-name (org-export-as-taskjuggler)))
+	 (process-name "TaskJugglerUI")
+	 (command (concat process-name " " file-name)))
+    (start-process-shell-command process-name nil command)))
 
 (defun org-taskjuggler-parent-is-ordered-p ()
   "Return true if the parent of the current node has a property
