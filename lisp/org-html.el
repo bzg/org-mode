@@ -2146,11 +2146,17 @@ If there are links in the string, don't modify these."
 (defvar local-list-indent)
 (defvar local-list-type)
 (defun org-export-html-close-lists-maybe (line)
+  "Close local lists based on the original indentation of the line."
   (let* ((rawhtml (and in-local-list
-		       (get-text-property 0 'org-protected line)))
+		       (get-text-property 0 'org-protected line)
+		       (not (get-text-property 0 'org-example line))))
+	 ;; rawhtml means: This was between #+begin_html..#+end_html
+	 ;; originally, thus it excludes stuff that was a source code example
+	 ;; Actually, this code seems wrong, I don't know why it works, but
+	 ;; it seems to work.... So keep it like this for now.
          (ind (if rawhtml
 		  (org-get-indentation line)
-		(or (get-text-property 0 'original-indentation line))))
+		(get-text-property 0 'original-indentation line)))
 	 didclose)
     (when ind
       (while (and in-local-list
