@@ -579,7 +579,8 @@ Assumes headers are indeed present!"
   "Parse BUFFER for RSS feed entries.
 Returns a list of entries, with each entry a property list,
 containing the properties `:guid' and `:item-full-text'."
-  (let (entries beg end item guid entry)
+  (let ((case-fold-search t)
+	entries beg end item guid entry)
     (with-current-buffer buffer
       (widen)
       (goto-char (point-min))
