@@ -4119,6 +4119,7 @@ directly by `orgtbl-send-table'.  See manual."
   (let* ((splicep (plist-get params :splice))
 	 (hline (plist-get params :hline))
 	 (remove-nil-linesp (plist-get params :remove-nil-lines))
+	 (remove-newlines (plist-get params :remove-newlines))
 	 (*orgtbl-hline* hline)
 	 (*orgtbl-table* table)
 	 (*orgtbl-sep* (plist-get params :sep))
@@ -4173,9 +4174,13 @@ directly by `orgtbl-send-table'.  See manual."
 	(let ((tend (orgtbl-eval-str (plist-get params :tend))))
 	  (if tend (push tend *orgtbl-rtn*)))))
 
-    (mapconcat 'identity (nreverse (if remove-nil-linesp
-				       (remq nil *orgtbl-rtn*)
-				     *orgtbl-rtn*)) "\n")))
+    (mapconcat (if remove-newlines
+		   (lambda (tend)
+		     (replace-regexp-in-string "[\n\r\t\f]" "\\\\n" tend))
+		 'identity)
+	       (nreverse (if remove-nil-linesp
+			     (remq nil *orgtbl-rtn*)
+			   *orgtbl-rtn*)) "\n")))
 
 (defun orgtbl-to-tsv (table params)
   "Convert the orgtbl-mode table to TAB separated material."
@@ -4301,6 +4306,7 @@ and :tend suppress strings without splicing; they can be set to
 provide ORGTBL directives for the generated table."
   (let* ((params2
 	  (list
+	   :remove-newlines t
 	   :tstart nil :tend nil
 	   :hline "|---"
 	   :sep " | "
