@@ -605,7 +605,7 @@ containing the properties `:guid' and `:item-full-text'."
 			      nil t)
       (setq entry (plist-put entry
 			     (intern (concat ":" (match-string 1)))
-			     (match-string 2))))
+			     (org-feed-unescape (match-string 2)))))
     (goto-char (point-min))
     (unless (re-search-forward "isPermaLink[ \t]*=[ \t]*\"false\"" nil t)
       (setq entry (plist-put entry :guid-permalink t))))
@@ -638,8 +638,8 @@ formatted as a string, not the original XML data."
                             'href)))
     ;; Add <title/> as :title.
     (setq entry (plist-put entry :title
-                           (car (xml-node-children
-                                 (car (xml-get-children xml 'title))))))
+			   (org-feed-unescape (car (xml-node-children
+						    (car (xml-get-children xml 'title)))))))
     (let* ((content (car (xml-get-children xml 'content)))
            (type (xml-get-attribute-or-nil content 'type)))
       (when content
