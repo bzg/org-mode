@@ -6825,7 +6825,7 @@ following to one your your agenda files:
 * Anniversaries
   :PROPERTIES:
   :CATEGORY: Anniv
-  :END
+  :END:
 %%(org-bbdb-anniversaries)
 @end example
 
