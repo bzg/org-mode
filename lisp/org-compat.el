@@ -132,6 +132,12 @@ If DELETE is non-nil, delete all those overlays."
           (if delete (delete-overlay ov) (push ov found))))
     found))
 
+(defun org-get-x-clipboard (value)
+  "Get the value of the x clipboard, compatible with XEmacs, and GNU Emacs 21."
+  (if (eq window-system 'x)
+      (let ((x (org-get-x-clipboard-compat value)))
+	(if x (org-no-properties x)))))
+
 ;; Miscellaneous functions
 
 (defun org-add-hook (hook function &optional append local)

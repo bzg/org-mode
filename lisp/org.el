@@ -3611,6 +3611,11 @@ If TABLE-TYPE is non-nil, also check for table.el-type tables."
 		'(org-remember-insinuate org-remember-annotation
    org-remember-apply-template org-remember org-remember-handler)))
 
+(eval-and-compile
+  (org-autoload "org-capture"
+		'(org-capture org-capture-insert-template-here
+                  org-capture-import-remember-templates)))
+
 ;; Autoload org-clock.el
 
 
@@ -4317,7 +4322,11 @@ means to push this value onto the list in the variable.")
 	    org-complex-heading-regexp-format
 	    (concat "^\\(\\*+\\)[ \t]+\\(?:\\("
 		    (mapconcat 'regexp-quote org-todo-keywords-1 "\\|")
-		    "\\)\\>\\)?\\(?:[ \t]*\\(\\[#.\\]\\)\\)?[ \t]*\\(%s\\)"
+		    "\\)\\>\\)?"
+		    "\\(?:[ \t]*\\(\\[#.\\]\\)\\)?"
+		    "\\(?:[ \t]*\\(?:\\[[0-9%%/]+\\]\\)\\)?" ;; stats cookie
+		    "[ \t]*\\(%s\\)"
+		    "\\(?:[ \t]*\\(?:\\[[0-9%%/]+\\]\\)\\)?" ;; stats cookie
 		    "\\(?:[ \t]+\\(:[[:alnum:]_@:]+:\\)\\)?[ \t]*$")
 	    org-nl-done-regexp
 	    (concat "\n\\*+[ \t]+"
@@ -4571,10 +4580,8 @@ The following commands are available:
 		 'org-block-todo-from-checkboxes))
 
   ;; Comment characters
-  ;; (org-set-local 'comment-start "#")
+  (org-set-local 'comment-start "#")
   (org-set-local 'comment-padding " ")
-  (modify-syntax-entry ?# "<")
-  ;; (modify-syntax-entry ?\n ">")
 
   ;; Align options lines
   (org-set-local
@@ -13777,7 +13784,7 @@ completion."
     (skip-chars-forward " \t")
     (run-hook-with-args 'org-property-changed-functions key nval)))
 
-(defun org-find-olp (path)
+(defun org-find-olp (path &optional this-buffer)
   "Return a marker pointing to the entry at outline path OLP.
 If anything goes wrong, throw an error.
 You can wrap this call to cathc the error like this:
@@ -13787,9 +13794,12 @@ You can wrap this call to cathc the error like this:
     (error (nth 1 msg)))
 
 The return value will then be either a string with the error message,
-or a marker if everyhing is OK."
-  (let* ((file (pop path))
-	 (buffer (find-file-noselect file))
+or a marker if everyhing is OK.
+
+If THIS-BUFFER is set, the putline path does not contain a file,
+only headings."
+  (let* ((file (if this-buffer buffer-file-name (pop path)))
+	 (buffer (if this-buffer (current-buffer) (find-file-noselect file)))
 	 (level 1)
 	 (lmin 1)
 	 (lmax 1)
@@ -14684,20 +14694,18 @@ days in order to avoid rounding problems."
 (defun org-time-string-to-seconds (s)
   (org-float-time (org-time-string-to-time s)))
 
-(defun org-time-string-to-absolute (s &optional daynr prefer show-all ignore-cyclic)
+(defun org-time-string-to-absolute (s &optional daynr prefer show-all)
   "Convert a time stamp to an absolute day number.
-If there is a specifier for a cyclic time stamp, get the closest date to
+If there is a specifyer for a cyclic time stamp, get the closest date to
 DAYNR.
 PREFER and SHOW-ALL are passed through to `org-closest-date'.
-the variable date is bound by the calendar when this is called.
-IGNORE-CYCLIC ignores cyclic repeaters so the returned absolute date
-is based on the original date."
+the variable date is bound by the calendar when this is called."
   (cond
    ((and daynr (string-match "\\`%%\\((.*)\\)" s))
     (if (org-diary-sexp-entry (match-string 1 s) "" date)
 	daynr
       (+ daynr 1000)))
-   ((and (not ignore-cyclic) daynr (string-match "\\+[0-9]+[dwmy]" s))
+   ((and daynr (string-match "\\+[0-9]+[dwmy]" s))
     (org-closest-date s (if (and (boundp 'daynr) (integerp daynr)) daynr
 			  (time-to-days (current-time))) (match-string 0 s)
 			  prefer show-all))
@@ -14879,7 +14887,7 @@ If the cursor is on the year, change the year.  If it is on the month or
 the day, change that.
 With prefix ARG, change by that many units."
   (interactive "p")
-  (org-timestamp-change (prefix-numeric-value arg)))
+  (org-timestamp-change (prefix-numeric-value arg) nil 'updown))
 
 (defun org-timestamp-down (&optional arg)
   "Decrease the date item at the cursor by one.
@@ -14887,7 +14895,7 @@ If the cursor is on the year, change the year.  If it is on the month or
 the day, change that.
 With prefix ARG, change by that many units."
   (interactive "p")
-  (org-timestamp-change (- (prefix-numeric-value arg))))
+  (org-timestamp-change (- (prefix-numeric-value arg)) nil 'updown))
 
 (defun org-timestamp-up-day (&optional arg)
   "Increase the date in the time stamp by one day.
@@ -14896,7 +14904,7 @@ With prefix ARG, change that many days."
   (if (and (not (org-at-timestamp-p t))
 	   (org-on-heading-p))
       (org-todo 'up)
-    (org-timestamp-change (prefix-numeric-value arg) 'day)))
+    (org-timestamp-change (prefix-numeric-value arg) 'day 'updown)))
 
 (defun org-timestamp-down-day (&optional arg)
   "Decrease the date in the time stamp by one day.
@@ -14905,7 +14913,7 @@ With prefix ARG, change that many days."
   (if (and (not (org-at-timestamp-p t))
 	   (org-on-heading-p))
       (org-todo 'down)
-    (org-timestamp-change (- (prefix-numeric-value arg)) 'day)))
+    (org-timestamp-change (- (prefix-numeric-value arg)) 'day) 'updown))
 
 (defun org-at-timestamp-p (&optional inactive-ok)
   "Determine if the cursor is in or at a timestamp."
@@ -14950,7 +14958,7 @@ With prefix ARG, change that many days."
       (message "Timestamp is now %sactive"
 	       (if (equal (char-after beg) ?<) "" "in")))))
 
-(defun org-timestamp-change (n &optional what)
+(defun org-timestamp-change (n &optional what updown)
   "Change the date in the time stamp at point.
 The date will be changed by N times WHAT.  WHAT can be `day', `month',
 `year', `minute', `second'.  If WHAT is not given, the cursor position
@@ -14981,8 +14989,10 @@ in the timestamp determines what will be changed."
       (if (string-match "^.\\{10\\}.*?[0-9]+:[0-9][0-9]" ts)
 	  (setq with-hm t))
       (setq time0 (org-parse-time-string ts))
-      (when (and (eq org-ts-what 'minute)
-		 (eq current-prefix-arg nil))
+      (when (and updown
+		 (eq org-ts-what 'minute)
+		 (not current-prefix-arg))
+	;; This looks like s-up and s-down.  Change by one rounding step.
 	(setq n (* dm (cond ((> n 0) 1) ((< n 0) -1) (t 0))))
 	(when (not (= 0 (setq rem (% (nth 1 time0) dm))))
 	  (setcar (cdr time0) (+ (nth 1 time0)
