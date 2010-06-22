@@ -602,14 +602,15 @@ may be specified in the properties of the current outline entry."
 may be specified at the top of the current buffer."
   (or org-babel-current-buffer-properties
       (setq org-babel-current-buffer-properties
-	    (save-excursion
-	      (save-restriction
-		(widen)
-		(goto-char (point-min))
-		(when (re-search-forward
-		       (org-make-options-regexp (list "BABEL")) nil t)
-		  (org-babel-parse-header-arguments
-		   (org-match-string-no-properties 2))))))))
+	    (save-match-data
+	      (save-excursion
+		(save-restriction
+		  (widen)
+		  (goto-char (point-min))
+		  (when (re-search-forward
+			 (org-make-options-regexp (list "BABEL")) nil t)
+		    (org-babel-parse-header-arguments
+		     (org-match-string-no-properties 2)))))))))
 
 (defun org-babel-parse-src-block-match ()
   "Parse the match data resulting from a match of the
