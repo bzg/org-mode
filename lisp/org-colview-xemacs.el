@@ -917,7 +917,8 @@ around it."
     ("@max" max_age max (lambda (x) (- org-columns-time x)))
     ("@mean" mean_age
      (lambda (&rest x) (/ (apply '+ x) (float (length x))))
-     (lambda (x) (- org-columns-time x))))
+     (lambda (x) (- org-columns-time x)))
+    ("est+" estimate org-estimate-combine))
   "Operator <-> format,function,calc  map.
 Used to compile/uncompile columns format and completing read in
 interactive function `org-columns-new'.
@@ -1206,6 +1207,7 @@ Don't set this, this is meant for dynamic scoping.")
 (defun org-columns-number-to-string (n fmt &optional printf)
   "Convert a computed column number to a string value, according to FMT."
   (cond
+   ((memq fmt '(estimate)) (org-estimate-print n printf))
    ((not (numberp n)) "")
    ((memq fmt '(add_times max_times min_times mean_times))
     (let* ((h (floor n)) (m (floor (+ 0.5 (* 60 (- n h))))))
@@ -1250,9 +1252,9 @@ Don't set this, this is meant for dynamic scoping.")
 	    (setq sum (+ (string-to-number (pop l)) (/ sum 60))))
 	  sum))
        ((memq fmt '(checkbox checkbox-n-of-m checkbox-percent))
-	(if (equal s "[X]") 1. 0.000001))
-       (t (string-to-number s)))
-    0))
+        (if (equal s "[X]") 1. 0.000001))
+       ((memq fmt '(estimate)) (org-string-to-estimate s))
+       (t (string-to-number s)))))
 
 (defun org-columns-uncompile-format (cfmt)
   "Turn the compiled columns format back into a string representation."
@@ -1691,6 +1693,42 @@ This will add overlays to the date lines, to show the summary for each day."
 	   (seconds (floor (* 60 (- (* 60 (- frac-hours hours)) minutes)))))
       (format "%dd %02dh %02dm %02ds" days hours minutes seconds))
     ""))
+
+(defun org-estimate-mean-and-var (v)
+  "Return the mean and variance of an estimate."
+  (let* ((low (float (car v)))
+         (high (float (cadr v)))
+         (mean (/ (+ low high) 2.0))
+         (var (/ (+ (expt (- mean low) 2.0) (expt (- high mean) 2.0)) 2.0)))
+    (list  mean var)
+    ))
+
+(defun org-estimate-combine (&rest el)
+  "Combine a list of estimates, using mean and variance.
+The mean and variance of the result will be the sum of the means
+and variances (respectively) of the individual estimates."
+  (let ((mean 0)
+        (var 0))
+    (mapc (lambda (e)
+	    (let ((stats (org-estimate-mean-and-var e)))
+	      (setq mean (+ mean (car stats)))
+	      (setq var (+ var (cadr stats)))))
+	  el)
+    (let ((stdev (sqrt var)))
+      (list (- mean stdev) (+ mean stdev)))
+    ))
+
+(defun org-estimate-print (e &optional fmt)
+  "Prepare a string representation of an estimate, as two numbers with a '-' in between them."
+  (if (null fmt) (set 'fmt "%.0f"))
+  (format "%s" (mapconcat (lambda (n) (format fmt n))  e "-")))
+
+(defun org-string-to-estimate (s)
+  "Convert a string to an estimate. The string should be two numbers joined with a '-'."
+  (if (string-match "\\(.*\\)-\\(.*\\)" s)
+      (list (string-to-number (match-string 1 s)) (string-to-number(match-string 2 s)))
+    (list (string-to-number s) (string-to-number s))
+    ))
 
 
 (provide 'org-colview)
