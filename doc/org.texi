@@ -1232,7 +1232,7 @@ as bullets.
 @emph{Ordered} list items start with a numeral followed by either a period or
 a right parenthesis, such as @samp{1.} or @samp{1)}.  If you want a list to
 start a different value (e.g. 20), start the text of the item with
-@code{[@@start:20]}. 
+@code{[@@start:20]}.
 @item
 @emph{Description} list items are unordered list items, and contain the
 separator @samp{ :: } to separate the description @emph{term} from the
@@ -3293,20 +3293,21 @@ with @code{shift-selection-mode}.  See also the variable
 @itemx C-c / t
 @vindex org-todo-keywords
 View TODO items in a @emph{sparse tree} (@pxref{Sparse trees}).  Folds the
-entire buffer, but shows all TODO items and the headings hierarchy above
-them.  With a prefix argument (or by using @kbd{C-c / T}), search for a
-specific TODO.  You will be prompted for the keyword, and you can also give a
-list of keywords like @code{KWD1|KWD2|...} to list entries that match any one
-of these keywords.  With numeric prefix argument N, show the tree for the Nth
-keyword in the variable @code{org-todo-keywords}.  With two prefix arguments,
-find all TODO and DONE entries.
+entire buffer, but shows all TODO items (with not-DONE state) and the
+headings hierarchy above them.  With a prefix argument (or by using @kbd{C-c
+/ T}), search for a specific TODO.  You will be prompted for the keyword, and
+you can also give a list of keywords like @code{KWD1|KWD2|...} to list
+entries that match any one of these keywords.  With numeric prefix argument
+N, show the tree for the Nth keyword in the variable
+@code{org-todo-keywords}.  With two prefix arguments, find all TODO states,
+both un-done and done.
 @kindex C-c a t
 @item C-c a t
-Show the global TODO list.  Collects the TODO items from all agenda
-files (@pxref{Agenda Views}) into a single buffer.  The new buffer will
-be in @code{agenda-mode}, which provides commands to examine and
-manipulate the TODO entries from the new buffer (@pxref{Agenda
-commands}).  @xref{Global TODO list}, for more information.
+Show the global TODO list.  Collects the TODO items (with not-DONE states)
+from all agenda files (@pxref{Agenda Views}) into a single buffer.  The new
+buffer will be in @code{agenda-mode}, which provides commands to examine and
+manipulate the TODO entries from the new buffer (@pxref{Agenda commands}).
+@xref{Global TODO list}, for more information.
 @kindex S-M-@key{RET}
 @item S-M-@key{RET}
 Insert a new TODO entry below the current one.
@@ -6816,20 +6817,20 @@ collected into a single place.
 @table @kbd
 @kindex C-c a t
 @item C-c a t
-Show the global TODO list.  This collects the TODO items from all
-agenda files (@pxref{Agenda Views}) into a single buffer.  The buffer is in
-@code{agenda-mode}, so there are commands to examine and manipulate
-the TODO entries directly from that buffer (@pxref{Agenda commands}).
+Show the global TODO list.  This collects the TODO items from all agenda
+files (@pxref{Agenda Views}) into a single buffer.  By default, this lists
+items with a state the is not a DONE state.  The buffer is in
+@code{agenda-mode}, so there are commands to examine and manipulate the TODO
+entries directly from that buffer (@pxref{Agenda commands}).
 @kindex C-c a T
 @item C-c a T
 @cindex TODO keyword matching
 @vindex org-todo-keywords
-Like the above, but allows selection of a specific TODO keyword.  You
-can also do this by specifying a prefix argument to @kbd{C-c a t}.  With
-a @kbd{C-u} prefix you are prompted for a keyword, and you may also
-specify several keywords by separating them with @samp{|} as the boolean OR
-operator.  With a numeric prefix, the nth keyword in
-@code{org-todo-keywords} is selected.
+Like the above, but allows selection of a specific TODO keyword.  You can
+also do this by specifying a prefix argument to @kbd{C-c a t}.  You are
+prompted for a keyword, and you may also specify several keywords by
+separating them with @samp{|} as the boolean OR operator.  With a numeric
+prefix, the nth keyword in @code{org-todo-keywords} is selected.
 @kindex r
 The @kbd{r} key in the agenda buffer regenerates it, and you can give
 a prefix argument to this command to change the selected TODO keyword,
@@ -6891,11 +6892,12 @@ define a custom command for it (@pxref{Agenda dispatcher}).
 @item C-c a M
 @vindex org-tags-match-list-sublevels
 @vindex org-agenda-tags-todo-honor-ignore-options
-Like @kbd{C-c a m}, but only select headlines that are also TODO items and
-force checking subitems (see variable @code{org-tags-match-list-sublevels}).
-To exclude scheduled/deadline items, see the variable
-@code{org-agenda-tags-todo-honor-ignore-options}.  Matching specific TODO
-keywords together with a tags match is also possible, see @ref{Tag searches}.
+Like @kbd{C-c a m}, but only select headlines that are also TODO items in a
+not-DONE state and force checking subitems (see variable
+@code{org-tags-match-list-sublevels}).  To exclude scheduled/deadline items,
+see the variable @code{org-agenda-tags-todo-honor-ignore-options}.  Matching
+specific TODO keywords together with a tags match is also possible, see
+@ref{Tag searches}.
 @end table
 
 The commands available in the tags list are described in @ref{Agenda
@@ -7009,12 +7011,13 @@ different way to test TODO states in a search.  For this, terminate the
 tags/property part of the search string (which may include several terms
 connected with @samp{|}) with a @samp{/} and then specify a Boolean
 expression just for TODO keywords.  The syntax is then similar to that for
-tags, but should be applied with care: for example, a positive
-selection on several TODO keywords cannot meaningfully be combined with
-boolean AND.  However, @emph{negative selection} combined with AND can be
-meaningful.  To make sure that only lines are checked that actually have any
-TODO keyword (resulting in a speed-up), use @kbd{C-c a M}, or equivalently
-start the TODO part after the slash with @samp{!}.  Examples:
+tags, but should be applied with care: for example, a positive selection on
+several TODO keywords cannot meaningfully be combined with boolean AND.
+However, @emph{negative selection} combined with AND can be meaningful.  To
+make sure that only lines are checked that actually have any TODO keyword
+(resulting in a speed-up), use @kbd{C-c a M}, or equivalently start the TODO
+part after the slash with @samp{!}.  Using @kbd{C-c a M} or @samp{/!} will
+not match TODO keywords in a DONE state.  Examples:
 
 @table @samp
 @item work/WAITING
@@ -8258,7 +8261,7 @@ summarizes the markup rules used in an Org-mode buffer.
 * Images and tables::           Tables and Images will be included
 * Literal examples::            Source code examples with special formatting
 * Include files::               Include additional files into a document
-* Index entries::               
+* Index entries::               Making an index
 * Macro replacement::           Use macros to create complex output
 * Embedded LaTeX::              LaTeX can be freely used inside Org documents
 @end menu
@@ -8652,7 +8655,7 @@ the contains an exclamation mark will create a sub item.  See @ref{Generating
 an index} for more information.
 
 @example
-* Curriculum Vitae 
+* Curriculum Vitae
 #+INDEX: CV
 #+INDEX: Application!CV
 @end example
@@ -10649,7 +10652,7 @@ file is part of any project in @code{org-publish-project-alist}.
 @subsection Generating a sitemap
 @cindex sitemap, of published pages
 
-The following properties may be used to control publishing of 
+The following properties may be used to control publishing of
 a map of files for a given project.
 
 @multitable @columnfractions 0.35 0.65
@@ -12625,7 +12628,7 @@ Emacs about it:
 @end lisp
 
 Org-mode has commands to put files for @i{MobileOrg} into that directory,
-and to read captured notes from there. 
+and to read captured notes from there.
 
 @node Pushing to MobileOrg, Pulling from MobileOrg, Setting up the staging area, MobileOrg
 @section Pushing to MobileOrg
