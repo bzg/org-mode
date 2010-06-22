@@ -3611,6 +3611,11 @@ If TABLE-TYPE is non-nil, also check for table.el-type tables."
 		'(org-remember-insinuate org-remember-annotation
    org-remember-apply-template org-remember org-remember-handler)))
 
+(eval-and-compile
+  (org-autoload "org-capture"
+		'(org-capture org-capture-insert-template-here
+                  org-capture-import-remember-templates)))
+
 ;; Autoload org-clock.el
 
 

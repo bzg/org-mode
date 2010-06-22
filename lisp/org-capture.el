@@ -314,6 +314,7 @@ for a Remember buffer.")
 
 ;;; The main commands
 
+;;;###autoload
 (defun org-capture (&optional goto keys)
   "Capture something.
 
@@ -470,7 +471,7 @@ already gone."
   (interactive)
   (org-goto-marker-or-bmk org-capture-last-stored-marker
 			  "org-capture-last-stored")
-  (message "This is the last note stored by in a capture process"))
+  (message "This is the last note stored by a capture process"))
 
 ;;; Supporting functions for handling the process
 
