@@ -583,7 +583,7 @@ containing the properties `:guid' and `:item-full-text'."
     (with-current-buffer buffer
       (widen)
       (goto-char (point-min))
-      (while (re-search-forward "<item>" nil t)
+      (while (re-search-forward "<item\\>.*?>" nil t)
 	(setq beg (point)
 	      end (and (re-search-forward "</item>" nil t)
 		       (match-beginning 0)))
