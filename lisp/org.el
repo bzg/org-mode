@@ -14887,7 +14887,7 @@ If the cursor is on the year, change the year.  If it is on the month or
 the day, change that.
 With prefix ARG, change by that many units."
   (interactive "p")
-  (org-timestamp-change (prefix-numeric-value arg)))
+  (org-timestamp-change (prefix-numeric-value arg) nil 'updown))
 
 (defun org-timestamp-down (&optional arg)
   "Decrease the date item at the cursor by one.
@@ -14895,7 +14895,7 @@ If the cursor is on the year, change the year.  If it is on the month or
 the day, change that.
 With prefix ARG, change by that many units."
   (interactive "p")
-  (org-timestamp-change (- (prefix-numeric-value arg))))
+  (org-timestamp-change (- (prefix-numeric-value arg)) nil 'updown))
 
 (defun org-timestamp-up-day (&optional arg)
   "Increase the date in the time stamp by one day.
@@ -14904,7 +14904,7 @@ With prefix ARG, change that many days."
   (if (and (not (org-at-timestamp-p t))
 	   (org-on-heading-p))
       (org-todo 'up)
-    (org-timestamp-change (prefix-numeric-value arg) 'day)))
+    (org-timestamp-change (prefix-numeric-value arg) 'day 'updown)))
 
 (defun org-timestamp-down-day (&optional arg)
   "Decrease the date in the time stamp by one day.
@@ -14913,7 +14913,7 @@ With prefix ARG, change that many days."
   (if (and (not (org-at-timestamp-p t))
 	   (org-on-heading-p))
       (org-todo 'down)
-    (org-timestamp-change (- (prefix-numeric-value arg)) 'day)))
+    (org-timestamp-change (- (prefix-numeric-value arg)) 'day) 'updown))
 
 (defun org-at-timestamp-p (&optional inactive-ok)
   "Determine if the cursor is in or at a timestamp."
@@ -14958,7 +14958,7 @@ With prefix ARG, change that many days."
       (message "Timestamp is now %sactive"
 	       (if (equal (char-after beg) ?<) "" "in")))))
 
-(defun org-timestamp-change (n &optional what)
+(defun org-timestamp-change (n &optional what updown)
   "Change the date in the time stamp at point.
 The date will be changed by N times WHAT.  WHAT can be `day', `month',
 `year', `minute', `second'.  If WHAT is not given, the cursor position
@@ -14989,8 +14989,10 @@ in the timestamp determines what will be changed."
       (if (string-match "^.\\{10\\}.*?[0-9]+:[0-9][0-9]" ts)
 	  (setq with-hm t))
       (setq time0 (org-parse-time-string ts))
-      (when (and (eq org-ts-what 'minute)
-		 (eq current-prefix-arg nil))
+      (when (and updown
+		 (eq org-ts-what 'minute)
+		 (not current-prefix-arg))
+	;; This looks like s-up and s-down.  Change by one rounding step.
 	(setq n (* dm (cond ((> n 0) 1) ((< n 0) -1) (t 0))))
 	(when (not (= 0 (setq rem (% (nth 1 time0) dm))))
 	  (setcar (cdr time0) (+ (nth 1 time0)
