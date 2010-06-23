@@ -1,4 +1,4 @@
-;;; org-babel-oz.el --- org-babel functions for Oz evaluation
+;;; ob-oz.el --- org-babel functions for Oz evaluation
 
 ;; Copyright (C) 2009 Torsten Anders and Eric Schulte 
 
@@ -88,7 +88,7 @@
 ;;
 
 
-(require 'org-babel)
+(require 'ob)
 ;;; major mode for editing Oz programs
 (require 'mozart)
 
@@ -302,5 +302,5 @@ Emacs-lisp table, otherwise return the results as a string."
   (error "org-babel-oz-table-or-string unimplemented"))
 
 
-(provide 'org-babel-oz)
+(provide 'ob-oz)
 ;;; org-babel-oz.el ends here
