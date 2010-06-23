@@ -1100,7 +1100,7 @@ The template may still contain \"%?\" for cursor positioning."
 		   (key (char-to-string (nth 1 entry)))
 		   (template (nth 2 entry))
 		   (file (or (nth 3 entry) org-default-notes-file))
-		   (position (nth 4 entry))
+		   (position (or (nth 4 entry) org-remember-default-headline))
 		   (type 'entry)
 		   (prepend org-reverse-note-order)
 		   immediate target)
@@ -1111,9 +1111,7 @@ The template may still contain \"%?\" for cursor positioning."
 		((eq position 'date-tree)
 		 (setq target (list 'file+datetree file)
 		       prepend nil))
-		(t (setq target
-			 (list 'file+headline file
-			       (or position org-remember-default-headline)))))
+		(t (setq target (list 'file+headline file position))))
 
 	       (when (string-match "%!" template)
 		 (setq template (replace-match "" t t template)
