@@ -53,6 +53,11 @@
 (require 'org)
 (require 'org-mks)
 
+(declare-function org-datetree-find-date-create "org-datetree"
+		  (DATE &optional KEEP-RESTRICTION))
+(defvar org-remember-default-headline)
+(defvar org-remember-templates)
+
 (defvar org-capture-clock-was-started nil
   "Internal flag, noting if the clock was started.")
 
@@ -451,8 +456,7 @@ already gone."
   (let ((pos (point)) (base (buffer-base-buffer (current-buffer))))
     (org-capture-finalize)
     (save-window-excursion
-      (save-excursion
-	(set-buffer (or base (current-buffer)))
+      (with-current-buffer (or base (current-buffer))
 	(save-excursion
 	  (save-restriction
 	    (widen)
@@ -522,6 +526,7 @@ already gone."
 	  (error "No match for target regexp in file %s" (nth 1 target))))
 
        ((eq (car target) 'file+datetree)
+	(require 'org-datetree)
 	(set-buffer (org-capture-target-buffer (nth 1 target)))
 	;; Make a date tree entry, with the current date (or yesterday,
 	;; if we are extending dates for a couple of hours)
@@ -839,7 +844,7 @@ Lisp programs can force the template by setting KEYS to a string."
   (when org-capture-templates
     (if keys
 	(or (assoc keys org-capture-templates)
-	    (error "No capture template referred to by \"%s\" keys"))
+	    (error "No capture template referred to by \"%s\" keys" keys))
       (org-mks org-capture-templates
 	       "Select a capture template\n========================="
 	       "Template key: "
@@ -1087,6 +1092,7 @@ The template may still contain \"%?\" for cursor positioning."
 	      "Import old remember templates into org-capture-templates? ")
 	     (yes-or-no-p
 	      "Note that this will remove any templates currently defined in `org-capture-templates'.  Do you still want to go ahead? "))
+    (require 'org-remember)
     (setq org-capture-templates
 	  (mapcar
 	   (lambda (entry)
