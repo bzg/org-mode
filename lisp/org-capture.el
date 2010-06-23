@@ -78,8 +78,9 @@ keys         The keys that will select the template, as a string, characters
 
                      (\"b\" \"Templates for marking stuff to buy\")
 
-             Do not use \"C\" as a key, it is reserved for customizing the
-             template variable.
+             The \"C\" key is used by default for quick access to the
+             customization of the template variable.  But if you want to use
+             that key for a template, you can.
 
 description  A short string describing the template, will be shown during
              selection.
@@ -801,7 +802,7 @@ Point will remain at the first line after the inserted text."
        ((eq type 'item) (setq txt "- %?"))
        ((eq type 'checkitem) (setq txt "- [ ] %?"))
        ((eq type 'table-line) (setq txt "| %? |"))
-       ((member type '(nil entry)) (setq txt "* %?"))))
+       ((member type '(nil entry)) (setq txt "* %?\n  %a"))))
     (org-capture-put :template txt :type type)))
 
 (defun org-capture-goto-target (&optional template-key)
