@@ -387,72 +387,94 @@ bypassed."
 	       (buffer-base-buffer (current-buffer)))
     (error "This does not seem to be a capture buffer for Org-mode"))
 
+  ;; Did we start the clock in this capture buffer?
+  (when (and org-capture-clock-was-started
+	     org-clock-marker (marker-buffer org-clock-marker)
+	     (equal (marker-buffer org-clock-marker) (buffer-base-buffer))
+	     (> org-clock-marker (point-min))
+	     (< org-clock-marker (point-max)))
+    ;; Looks like the clock we started is still running.  Clock out.
+    (let (org-log-note-clock-out) (org-clock-out))
+    (when (and (org-capture-get :clock-resume 'local)
+	       (markerp (org-capture-get :interrupted-clock 'local))
+	       (buffer-live-p (marker-buffer
+			       (org-capture-get :interrupted-clock 'local))))
+      (org-with-point-at (org-capture-get :interrupted-clock 'local)
+	(org-clock-in))
+      (message "Interrupted clock has been resumed")))
+
   (let ((beg (point-min))
-	(end (point-max)))
+	(end (point-max))
+	(abort-note nil))
     (widen)
-    ;; Make sure that the empty lines after are correct
-    (when (and (> (point-max) end) ; indeed, the buffer was still narrowed
-	       (member (org-capture-get :type 'local)
-		       '(entry item checkitem plain)))
-      (save-excursion
-	(goto-char end)
-	(org-capture-empty-lines-after
-	 (or (org-capture-get :empty-lines 'local) 0))))
-    ;; Postprocessing:  Update Statistics cookies, do the sorting
-    (when (org-mode-p)
-      (save-excursion
-	(when (ignore-errors (org-back-to-heading))
-	  (org-update-parent-todo-statistics)
-	  (org-update-checkbox-count)))
-      ;; FIXME Here we should do the sorting
-      ;; If we have added a table line, maybe recompute?
-      (when (and (eq (org-capture-get :type 'local) 'table-line)
-		 (org-at-table-p))
-	(if (org-table-get-stored-formulas)
-	    (org-table-recalculate 'all) ;; FIXME: Should we iterate???
-	  (org-table-align)))
-      )
-    ;; Store this place as the last one where we stored something
-    ;; Do the marking in the base buffer, so that it makes sense after
-    ;; the indirect buffer has been killed.
-    (let ((pos (point)))
-      (with-current-buffer (buffer-base-buffer (current-buffer))
+
+    (if org-note-abort
+	(let ((m1 (org-capture-get :begin-marker 'local))
+	      (m2 (org-capture-get :end-marker 'local)))
+	  (if (and m1 m2 (= m1 beg) (= m2 end))
+	      (progn
+		(setq abort-note 'clean)
+		(kill-region m1 m2))
+	    (setq abort-note 'dirty)))
+
+      ;; Make sure that the empty lines after are correct
+      (when (and (> (point-max) end) ; indeed, the buffer was still narrowed
+		 (member (org-capture-get :type 'local)
+			 '(entry item checkitem plain)))
 	(save-excursion
-	  (save-restriction
-	    (widen)
-	    (goto-char pos)
-	    (bookmark-set "org-capture-last-stored")
-	    (move-marker org-capture-last-stored-marker (point))))))
-    ;; Run the hook
-    (run-hooks 'org-capture-before-finalize-hook)
-    ;; Did we start the clock in this capture buffer?
-    (when (and org-capture-clock-was-started
-	       org-clock-marker (marker-buffer org-clock-marker)
-	       (equal (marker-buffer org-clock-marker) (buffer-base-buffer))
-	       (> org-clock-marker (point-min))
-	       (< org-clock-marker (point-max)))
-      ;; Looks like the clock we started is still running.  Clock out.
-      (let (org-log-note-clock-out) (org-clock-out))
-      (when (and (org-capture-get :clock-resume 'local)
-		 (markerp (org-capture-get :interrupted-clock 'local))
-		 (buffer-live-p (marker-buffer
-				 (org-capture-get :interrupted-clock 'local))))
-	(org-with-point-at (org-capture-get :interrupted-clock 'local)
-	  (org-clock-in))
-	(message "Interrupted clock has been resumed")))
+	  (goto-char end)
+	  (org-capture-empty-lines-after
+	   (or (org-capture-get :empty-lines 'local) 0))))
+      ;; Postprocessing:  Update Statistics cookies, do the sorting
+      (when (org-mode-p)
+	(save-excursion
+	  (when (ignore-errors (org-back-to-heading))
+	    (org-update-parent-todo-statistics)
+	    (org-update-checkbox-count)))
+	;; FIXME Here we should do the sorting
+	;; If we have added a table line, maybe recompute?
+	(when (and (eq (org-capture-get :type 'local) 'table-line)
+		   (org-at-table-p))
+	  (if (org-table-get-stored-formulas)
+	      (org-table-recalculate 'all) ;; FIXME: Should we iterate???
+	    (org-table-align)))
+	)
+      ;; Store this place as the last one where we stored something
+      ;; Do the marking in the base buffer, so that it makes sense after
+      ;; the indirect buffer has been killed.
+      (let ((pos (point)))
+	(with-current-buffer (buffer-base-buffer (current-buffer))
+	  (save-excursion
+	    (save-restriction
+	      (widen)
+	      (goto-char pos)
+	      (bookmark-set "org-capture-last-stored")
+	      (move-marker org-capture-last-stored-marker (point))))))
+      ;; Run the hook
+      (run-hooks 'org-capture-before-finalize-hook)
+      )
 
     ;; Kill the indirect buffer
     (save-buffer)
     (let ((return-wconf (org-capture-get :return-to-wconf 'local)))
       (kill-buffer (current-buffer))
       ;; Restore the window configuration before capture
-      (set-window-configuration return-wconf))))
+      (set-window-configuration return-wconf))
+    (when abort-note
+      (cond
+       ((equal abort-note 'clean)
+	(message "Capture process aborted and target file cleaned up"))
+       ((equal abort-note 'dirty)
+	(error "Capture process aborted, but target buffer could not be cleaned up correctly"))))))
 
 (defun org-capture-refile ()
   "Finalize the current capture and then refile the entry.
 Refiling is done from the base buffer, because the indirect buffer is then
 already gone."
   (interactive)
+  (unless (eq (org-capture-get :type 'local) 'entry)
+    (error
+     "Refiling from a capture buffer makes only sense for `entry'-type templates"))
   (let ((pos (point)) (base (buffer-base-buffer (current-buffer))))
     (org-capture-finalize)
     (save-window-excursion
@@ -466,9 +488,10 @@ already gone."
 (defun org-capture-kill ()
   "Abort the current capture process."
   (interactive)
+  (debug)
   ;; FIXME: This does not do the right thing, we need to remove the new stuff
   ;; By hand it is easy: undo, then kill the buffer
-  (let ((org-note-abort t))
+  (let ((org-note-abort t) (org-capture-before-finalize-hook nil))
     (org-capture-finalize)))
 
 (defun org-capture-goto-last-stored ()
@@ -617,6 +640,7 @@ already gone."
     (org-capture-empty-lines-after 1)
     (outline-next-heading)
     (setq end (point))
+    (org-capture-mark-kill-region beg (1- end))
     (org-capture-narrow beg (1- end))
     (if (re-search-forward "%\\?" end t) (replace-match ""))))
 
@@ -658,13 +682,17 @@ already gone."
     (setq ind (make-string ind ?\ ))
     (setq txt (concat ind
 		      (mapconcat 'identity (split-string txt "\n")
-				 (concat "\n" ind))))
+				 (concat "\n" ind))
+		      "\n"))
     ;; Insert, with surrounding empty lines
     (org-capture-empty-lines-before)
     (setq beg (point))
     (insert txt)
+    (or (bolp) (insert "\n"))
     (org-capture-empty-lines-after 1)
+    (forward-char 1)
     (setq end (point))
+    (org-capture-mark-kill-region beg (1- end))
     (org-capture-narrow beg (1- end))
     (if (re-search-forward "%\\?" end t) (replace-match ""))))
 
@@ -731,8 +759,15 @@ already gone."
     (insert txt)
     (org-capture-empty-lines-after 1)
     (setq end (point))
+    (org-capture-mark-kill-region beg (1- end))
     (org-capture-narrow beg (1- end))
     (if (re-search-forward "%\\?" end t) (replace-match ""))))
+
+(defun org-capture-mark-kill-region (bed end)
+  (let ((m1 (move-marker (make-marker) beg))
+	(m2 (move-marker (make-marker) end)))
+    (org-capture-put :begin-marker m1)
+    (org-capture-put :end-marker m2)))
 
 (defun org-capture-narrow (beg end)
   "Narrow, unless configuraion says not to narrow."
