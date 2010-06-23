@@ -23,6 +23,10 @@
 ;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(require 'org)
+(eval-when-compile
+  (require 'cl))
+
 (defun org-mks (table title &optional prompt specials)
   "Select a member of an alist with multiple keys.
 TABLE is the alist which should contain entries where the car is a string.
@@ -49,7 +53,8 @@ also (\"key\" \"description\") entries.  When they are selected,
 
 "
   (setq prompt (or prompt "Select: "))
-  (let (tbl orig-table dkey ddesc des-keys allowed-keys current prefix rtn)
+  (let (tbl orig-table dkey ddesc des-keys allowed-keys
+	    current prefix rtn re pressed)
     (save-window-excursion
       (org-switch-to-buffer-other-window "*Org Select*")
       (setq orig-table table)
@@ -100,7 +105,10 @@ also (\"key\" \"description\") entries.  When they are selected,
 	    (message prompt)
 	    (setq pressed (char-to-string (read-char-exclusive))))
 	  (if (equal pressed "\C-g") (error "Abort"))
-	  (if (assoc pressed specials) (throw 'exit (setq rtn pressed)))
+	  (when (and (not (assoc pressed table))
+		     (not (member pressed des-keys))
+		     (assoc pressed specials))
+	    (throw 'exit (setq rtn pressed)))
 	  (unless (member pressed des-keys)
 	    (throw 'exit (setq rtn (rassoc (cdr (assoc pressed table))
 					   orig-table))))
