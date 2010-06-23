@@ -762,7 +762,8 @@ already gone."
     (org-capture-narrow beg (1- end))
     (if (re-search-forward "%\\?" end t) (replace-match ""))))
 
-(defun org-capture-mark-kill-region (bed end)
+(defun org-capture-mark-kill-region (beg end)
+  "Mark the region that will have to be killed when aborting capture."
   (let ((m1 (move-marker (make-marker) beg))
 	(m2 (move-marker (make-marker) end)))
     (org-capture-put :begin-marker m1)
