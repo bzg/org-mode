@@ -66,6 +66,7 @@ LISPF      = 	org.el			\
 		org-bbdb.el		\
 		org-beamer.el		\
 		org-bibtex.el		\
+	     	org-capture.el		\
 	     	org-clock.el		\
 	     	org-colview.el		\
 	     	org-colview-xemacs.el	\
@@ -98,6 +99,7 @@ LISPF      = 	org.el			\
 	     	org-macs.el		\
 		org-mew.el              \
 		org-mhe.el		\
+		org-mks.el		\
 		org-mobile.el		\
 		org-mouse.el		\
 		org-publish.el		\
@@ -348,6 +350,7 @@ lisp/org-archive.elc:	lisp/org.el
 lisp/org-bbdb.elc:	lisp/org.el
 lisp/org-beamer.elc:	lisp/org.el
 lisp/org-bibtex.elc:	lisp/org.el
+lisp/org-capture.elc:	lisp/org.el lisp/org-mks.el
 lisp/org-clock.elc:	lisp/org.el
 lisp/org-colview.elc:	lisp/org.el
 lisp/org-colview-xemacs.elc:	lisp/org.el
@@ -380,6 +383,7 @@ lisp/org-mac-message.elc:	lisp/org.el
 lisp/org-macs.elc:
 lisp/org-mew.elc:	lisp/org.el
 lisp/org-mhe.elc:	lisp/org.el
+lisp/org-mks.elc:	
 lisp/org-mobile.elc:	lisp/org.el
 lisp/org-mouse.elc:	lisp/org.el
 lisp/org-plot.elc:	lisp/org.el lisp/org-exp.el lisp/org-table.el
