@@ -169,6 +169,11 @@ properties are:
                      full buffer.  Default is to narrow it so that you
                      only see the new stuff.
 
+ :table-line-pos     Specification of the location in the table where the
+                     new line should be inserted.  It looks like \"II-3\"
+                     which means that the new line should become the third
+                     line before the second horizontal separaor line.
+
 The template defined the text to be inserted.  Often then this is an org-mode
 entry (so the first line should start with a star) that will be filed as a
 child of the target headline.  It can also be freely formatted text.
@@ -358,8 +363,12 @@ bypassed."
 	   (initial (and (org-region-active-p)
 			 (buffer-substring (point) (mark))))
 	   (entry (org-capture-select-template keys)))
-      (if (equal entry "C")
-	  (customize-variable 'org-capture-templates)
+      (cond
+       ((equal entry "C")
+	(customize-variable 'org-capture-templates))
+       ((equal entry "q")
+	(error "Abort"))
+       (t
 	(org-capture-set-plist entry)
 	(org-capture-put :original-buffer orig-buf :annotation annotation
 			 :initial initial)
@@ -384,7 +393,7 @@ bypassed."
 		      (org-clock-in)
 		      (org-set-local 'org-capture-clock-was-started t))
 		  (error
-		   "Could not start the clock in this capture buffer"))))))))))
+		   "Could not start the clock in this capture buffer")))))))))))
 
 (defun org-capture-finalize ()
   "Finalize the capture process."
@@ -560,9 +569,11 @@ already gone."
 	;; if we are extending dates for a couple of hours)
 	(org-datetree-find-date-create
 	 (calendar-gregorian-from-absolute
-	  (time-to-days
-	   (time-subtract (current-time)
-			  (list 0 (* 3600 org-extend-today-until) 0))))))
+	  (if org-overriding-default-time
+	      (time-to-days org-overriding-default-time)
+	    (time-to-days
+	     (time-subtract (current-time)
+			    (list 0 (* 3600 org-extend-today-until) 0)))))))
 
        ((eq (car target) 'file+function)
 	(set-buffer (org-capture-target-buffer (nth 1 target)))
@@ -705,6 +716,7 @@ already gone."
   "Place the template as a table line."
   (let* ((txt (org-capture-get :template))
 	 (target-entry-p (org-capture-get :target-entry-p))
+	 (table-line-pos (org-capture-get :table-line-pos))
 	 ind beg end)
     (cond
      ((not target-entry-p)
@@ -726,20 +738,39 @@ already gone."
     ;; Check if the template is good
     (if (not (string-match org-table-dataline-regexp txt))
 	(setq txt "| %?Bad template |\n"))
-
-    (if (org-capture-get :prepend)
-	(progn
-	  (goto-char (point-min))
-	  (re-search-forward org-table-hline-regexp nil t)
-	  (beginning-of-line 1)
-	  (re-search-forward org-table-dataline-regexp nil t)
-	  (beginning-of-line 1)
-	  (setq beg (point))
-	  (org-table-insert-row)
-	  (beginning-of-line 1)
-	  (delete-region (point) (1+ (point-at-eol)))
-	  (insert txt)
-	  (setq end (point)))
+    (cond
+     ((and table-line-pos
+	   (string-match "\\(I+\\)\\([-+][0-9]\\)" table-line-pos))
+      (goto-char (point-min))
+      (let ((nh (- (match-end 1) (match-beginning 1)))
+	    (delta (string-to-number (match-string 2 table-line-pos)))
+	    ll)
+	;; The user wants a special position in the table
+	(org-table-get-specials)
+	(setq ll (aref org-table-hlines nh))
+	(unless ll (error "Invalid table line specification \"%s\""
+			  table-line-pos))
+	(setq ll (+ ll delta (if (< delta 0) 0 -1)))
+	(org-goto-line ll)
+	(org-table-insert-row 'below)
+	(beginning-of-line 1)
+	(delete-region (point) (1+ (point-at-eol)))
+	(setq beg (point))
+	(insert txt)
+	(setq end (point))))
+     ((org-capture-get :prepend)
+      (goto-char (point-min))
+      (re-search-forward org-table-hline-regexp nil t)
+      (beginning-of-line 1)
+      (re-search-forward org-table-dataline-regexp nil t)
+      (beginning-of-line 1)
+      (setq beg (point))
+      (org-table-insert-row)
+      (beginning-of-line 1)
+      (delete-region (point) (1+ (point-at-eol)))
+      (insert txt)
+      (setq end (point)))
+     (t
       (goto-char (point-max))
       (re-search-backward org-table-dataline-regexp nil t)
       (beginning-of-line 1)
@@ -748,7 +779,7 @@ already gone."
       (delete-region (point) (1+ (point-at-eol)))
       (setq beg (point))
       (insert txt)
-      (setq end (point)))
+      (setq end (point))))
     (goto-char beg)
     (if (re-search-forward "%\\?" end t) (replace-match ""))
     (org-table-align)))
@@ -889,7 +920,8 @@ Lisp programs can force the template by setting KEYS to a string."
       (org-mks org-capture-templates
 	       "Select a capture template\n========================="
 	       "Template key: "
-	       '(("C" "Customize org-capture-templates"))))))
+	       '(("C" "Customize org-capture-templates")
+		 ("q" "Abort"))))))
 
 (defun org-capture-fill-template (&optional template initial annotation)
   "Fill a template and return the filled template as a string.
