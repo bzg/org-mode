@@ -55,8 +55,10 @@
 
 (declare-function org-datetree-find-date-create "org-datetree"
 		  (DATE &optional KEEP-RESTRICTION))
+(declare-function org-table-get-specials "org-table" ())
 (defvar org-remember-default-headline)
 (defvar org-remember-templates)
+(defvar org-table-hlines)
 
 (defvar org-capture-clock-was-started nil
   "Internal flag, noting if the clock was started.")
@@ -714,14 +716,17 @@ already gone."
 
 (defun org-capture-place-table-line ()
   "Place the template as a table line."
+  (require 'org-table)
   (let* ((txt (org-capture-get :template))
 	 (target-entry-p (org-capture-get :target-entry-p))
 	 (table-line-pos (org-capture-get :table-line-pos))
 	 ind beg end)
     (cond
      ((not target-entry-p)
+      ;; Table is not necessarily under a heading
       (setq beg (point-min) end (point-max)))
      (t
+      ;; WE are at a heading, limit search to the body
       (setq beg (1+ (point-at-eol))
 	    end (save-excursion (outline-next-heading) (point)))))
     (if (re-search-forward org-table-dataline-regexp end t)
@@ -741,6 +746,7 @@ already gone."
     (cond
      ((and table-line-pos
 	   (string-match "\\(I+\\)\\([-+][0-9]\\)" table-line-pos))
+      ;; we have a complex line specification
       (goto-char (point-min))
       (let ((nh (- (match-end 1) (match-beginning 1)))
 	    (delta (string-to-number (match-string 2 table-line-pos)))
