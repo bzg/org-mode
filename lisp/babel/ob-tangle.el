@@ -30,8 +30,11 @@
 
 ;;; Code:
 (require 'ob)
+(require 'org-src)
 (eval-when-compile
   (require 'cl))
+
+(declare-function org-link-escape "org" (text &optional table))
 
 (defcustom org-babel-tangle-w-comments nil
   "Control the insertion of comments into tangled code.  Non-nil
@@ -53,6 +56,7 @@ then the name of the language is used."
 	   (string "Language name")
 	   (string "File Extension"))))
 
+;;;###autoload
 (defun org-babel-load-file (file)
   "Load the contents of the Emacs Lisp source code blocks in the
 org-mode formatted FILE.  This function will first export the
@@ -72,6 +76,7 @@ file using `load-file'."
       (load-file exported-file)
       (message "loaded %s" exported-file))))
 
+;;;###autoload
 (defun org-babel-tangle-file (file &optional target-file lang)
   "Extract the bodies of all source code blocks in FILE with
 `org-babel-tangle'.  Optional argument TARGET-FILE can be used to
@@ -92,6 +97,7 @@ blocks by language."
   "Tangle FILENAME and place the results in PUB-DIR."
   (mapc (lambda (el) (copy-file el pub-dir t)) (org-babel-tangle-file filename)))
 
+;;;###autoload
 (defun org-babel-tangle (&optional target-file lang)
   "Extract the bodies of all source code blocks from the current
 file into their own source-specific files.  Optional argument
@@ -178,6 +184,7 @@ references."
     (delete-region (save-excursion (beginning-of-line 1) (point))
                    (save-excursion (end-of-line 1) (forward-char 1) (point)))))
 
+(defvar org-stored-links)
 (defun org-babel-tangle-collect-blocks (&optional lang)
   "Collect all source blocks in the current org-mode file.
 Return an association list of source-code block specifications of

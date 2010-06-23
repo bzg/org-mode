@@ -31,7 +31,6 @@
 ;;; Code:
 (require 'ob)
 (require 'ob-table)
-(require 'ob-exp)
 
 (defvar org-babel-library-of-babel nil
   "Library of source-code blocks.  This is an association list.
@@ -43,6 +42,7 @@ add files to this list use the `org-babel-lob-ingest' command."
   :group 'org-babel
   :type 'list)
 
+;;;###autoload
 (defun org-babel-lob-ingest (&optional file)
   "Add all source-blocks defined in FILE to `org-babel-library-of-babel'."
   (interactive "f")
@@ -67,7 +67,7 @@ add files to this list use the `org-babel-lob-ingest' command."
   "Regexp to match calls to predefined source block functions")
 
 ;; functions for executing lob one-liners
-
+;;;###autoload
 (defun org-babel-lob-execute-maybe ()
   "Detect if this is context for a org-babel Library Of Babel
 src-block and if so then run the appropriate source block from
@@ -78,6 +78,7 @@ the Library."
 
 (add-hook 'org-ctrl-c-ctrl-c-hook 'org-babel-lob-execute-maybe)
 
+;;;###autoload
 (defun org-babel-lob-get-info ()
   "Return the function call supplied on the current Library of
 Babel line as a string.

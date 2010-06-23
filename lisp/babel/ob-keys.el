@@ -45,8 +45,7 @@ functions which are assigned key bindings, and see
   "The keymap holding key bindings for interactive org-babel
 functions.")
 
-(define-key org-mode-map org-babel-key-prefix org-babel-map)
-
+;;;###autoload
 (defun org-babel-describe-bindings ()
   "Describe all key binding placed behind the
 `org-babel-key-prefix' prefix."
@@ -77,10 +76,6 @@ functions.  This list associates interactive org-babel functions
 with keys.  Each element of this list will add an entry to the
 `org-babel-map' using the letter key which is the `car' of the
 a-list placed behind the generic `org-babel-key-prefix'.")
-
-(mapc (lambda (pair)
-        (define-key org-babel-map (car pair) (cdr pair)))
-      org-babel-key-bindings)
 
 (provide 'ob-keys)
 ;;; ob-keys.el ends here

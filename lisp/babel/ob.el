@@ -30,22 +30,35 @@
 
 ;;; Code:
 (eval-when-compile (require 'cl))
-(require 'org)
 
 (defvar org-babel-call-process-region-original)
-(declare-function orgtbl-to-generic "org-table" (table params))
-(declare-function org-babel-ref-split-args "ob-ref" (arg-string))
-(declare-function org-babel-ref-variables "ob-ref" (params))
-(declare-function org-babel-lob-get-info "ob-lob" nil)
-(declare-function orgtbl-to-orgtbl "org-table" (table params))
-(declare-function org-babel-ref-resolve-reference
-		  "ob-ref" (ref &optional params))
-(declare-function tramp-compat-make-temp-file
-		  "tramp" (filename &optional dir-flag))
-(declare-function tramp-dissect-file-name
-		  "tramp" (name &optional nodefault))
+(declare-function show-all "outline" ())
+(declare-function tramp-compat-make-temp-file "tramp" (filename &optional dir-flag))
+(declare-function tramp-dissect-file-name "tramp" (name &optional nodefault))
 (declare-function tramp-file-name-user "tramp" (vec))
 (declare-function tramp-file-name-host "tramp" (vec))
+(declare-function org-edit-src-code "org" (context code edit-buffer-name))
+(declare-function org-open-at-point "org" (&optional in-emacs reference-buffer))
+(declare-function org-save-outline-visibility "org" (use-markers &rest body))
+(declare-function org-narrow-to-subtree "org" ())
+(declare-function org-entry-get "org" (pom property &optional inherit))
+(declare-function org-make-options-regexp "org" (kwds &optional extra))
+(declare-function org-match-string-no-properties "org" (num &optional string))
+(declare-function org-do-remove-indentation "org" (&optional n))
+(declare-function org-show-context "org" (&optional key))
+(declare-function org-at-table-p "org" (&optional table-type))
+(declare-function org-cycle "org" (&optional arg))
+(declare-function org-uniquify "org" (list))
+(declare-function org-table-import "org" (file arg))
+(declare-function org-add-hook "org-compat" (hook function &optional append local))
+(declare-function org-table-align "org-table" ())
+(declare-function org-table-end "org-table" (&optional table-type))
+(declare-function orgtbl-to-generic "org-table" (table params))
+(declare-function orgtbl-to-orgtbl "org-table" (table params))
+(declare-function org-babel-lob-get-info "ob-lob" nil)
+(declare-function org-babel-ref-split-args "ob-ref" (arg-string))
+(declare-function org-babel-ref-variables "ob-ref" (params))
+(declare-function org-babel-ref-resolve-reference "ob-ref" (ref &optional params))
 
 (defvar org-babel-source-name-regexp
   "^[ \t]*#\\+\\(srcname\\|source\\|function\\):[ \t]*"
@@ -120,6 +133,7 @@ added to the header-arguments-alist."
           (org-babel-parse-inline-src-block-match)
         nil))))
 
+;;;###autoload
 (defun org-babel-execute-src-block-maybe ()
   "Detect if this is context for a org-babel src-block and if so
 then run `org-babel-execute-src-block'."
@@ -130,6 +144,7 @@ then run `org-babel-execute-src-block'."
 
 (add-hook 'org-ctrl-c-ctrl-c-hook 'org-babel-execute-src-block-maybe)
 
+;;;###autoload
 (defun org-babel-expand-src-block-maybe ()
   "Detect if this is context for a org-babel src-block and if so
 then run `org-babel-expand-src-block'."
@@ -139,28 +154,7 @@ then run `org-babel-expand-src-block'."
 	(progn (org-babel-expand-src-block current-prefix-arg info) t)
       nil)))
 
-(defadvice org-edit-special (around org-babel-prep-session-for-edit activate)
-  "Prepare the current source block's session according to it's
-header arguments before editing in an org-src buffer.  This
-function is called when `org-edit-special' is called with a
-prefix argument from inside of a source-code block."
-  (when current-prefix-arg
-    (let* ((info (org-babel-get-src-block-info))
-           (lang (nth 0 info))
-           (params (nth 2 info))
-           (session (cdr (assoc :session params))))
-      (when (and info session) ;; we are in a source-code block with a session
-        (funcall
-         (intern (concat "org-babel-prep-session:" lang)) session params))))
-  ad-do-it)
-
-(defadvice org-open-at-point (around org-babel-open-at-point activate)
-  "If `point' is on a source code block, then open that block's
-results with `org-babel-open-src-block-results', otherwise defer
-to `org-open-at-point'."
-  (interactive "P")
-  (or (call-interactively #'org-babel-open-src-block-result) ad-do-it))
-
+;;;###autoload
 (defun org-babel-load-in-session-maybe ()
   "Detect if this is context for a org-babel src-block and if so
 then run `org-babel-load-in-session'."
@@ -172,6 +166,7 @@ then run `org-babel-load-in-session'."
 
 (add-hook 'org-metaup-hook 'org-babel-load-in-session-maybe)
 
+;;;###autoload
 (defun org-babel-pop-to-session-maybe ()
   "Detect if this is context for a org-babel src-block and if so
 then run `org-babel-pop-to-session'."
@@ -230,6 +225,7 @@ can not be resolved.")
 
 ;;; functions
 (defvar call-process-region)
+;;;###autoload
 (defun org-babel-execute-src-block (&optional arg info params)
   "Execute the current source code block, and insert the results
 into the buffer.  Source code execution and the collection and
@@ -303,6 +299,7 @@ arguments.  This generic implementation of body expansion is
 called for languages which have not defined their own specific
 org-babel-expand-body:lang function." body)
 
+;;;###autoload
 (defun org-babel-expand-src-block (&optional arg info params)
   "Expand the current source code block according to it's header
 arguments, and pop open the results in a preview buffer."
@@ -323,6 +320,7 @@ arguments, and pop open the results in a preview buffer."
     (org-edit-src-code
      nil expanded (concat "*Org-Babel Preview " (buffer-name) "[ " lang " ]*"))))
 
+;;;###autoload
 (defun org-babel-load-in-session (&optional arg info)
   "Load the body of the current source-code block.  Evaluate the
 header arguments for the source block before entering the
@@ -339,6 +337,7 @@ session.  After loading the body this pops open the session."
     (pop-to-buffer (funcall cmd session body params))
     (end-of-line 1)))
 
+;;;###autoload
 (defun org-babel-switch-to-session (&optional arg info)
   "Switch to the session of the current source-code block.
 If called with a prefix argument then evaluate the header arguments
@@ -370,6 +369,8 @@ of the source block to the kill ring."
 
 (defalias 'org-babel-pop-to-session 'org-babel-switch-to-session)
 
+(defvar org-bracket-link-regexp)
+;;;###autoload
 (defun org-babel-open-src-block-result (&optional re-run)
   "If `point' is on a src block then open the results of the
 source code block, otherwise return nil.  With optional prefix
@@ -400,6 +401,7 @@ results already exist."
               (insert (echo-res results))))))
       t)))
 
+;;;###autoload
 (defun org-babel-execute-buffer (&optional arg)
   "Call `org-babel-execute-src-block' on every source block in
 the current buffer."
@@ -414,6 +416,7 @@ the current buffer."
 	  (org-babel-execute-src-block arg)
 	  (goto-char pos-end))))))
 
+;;;###autoload
 (defun org-babel-execute-subtree (&optional arg)
   "Call `org-babel-execute-src-block' on every source block in
 the current subtree."
@@ -424,6 +427,7 @@ the current subtree."
       (org-babel-execute-buffer)
       (widen))))
 
+;;;###autoload
 (defun org-babel-sha1-hash (&optional info)
   "Generate an sha1 hash based on the value of info."
   (interactive)
@@ -504,6 +508,7 @@ portions of results lines."
   (mapc 'delete-overlay org-babel-hide-result-overlays)
   (setq org-babel-hide-result-overlays nil))
 
+;;;###autoload
 (defun org-babel-hide-result-toggle-maybe ()
   "Toggle visibility of result at point."
   (interactive)
@@ -575,6 +580,7 @@ portions of results lines."
      (unless visited-p
        (kill-buffer to-be-removed))))
 
+(defvar org-file-properties)
 (defun org-babel-params-from-properties (&optional lang)
   "Return an association list of any source block params which
 may be specified in the properties of the current outline entry."
@@ -612,6 +618,7 @@ may be specified at the top of the current buffer."
 		    (org-babel-parse-header-arguments
 		     (org-match-string-no-properties 2)))))))))
 
+(defvar org-src-preserve-indentation)
 (defun org-babel-parse-src-block-match ()
   "Parse the match data resulting from a match of the
 `org-babel-src-block-regexp'."
@@ -805,6 +812,7 @@ If the point is not on a source block then return nil."
 	       (looking-at org-babel-src-block-regexp))
         (point))))))
 
+;;;###autoload
 (defun org-babel-goto-named-source-block (&optional name)
   "Go to a named source-code block."
   (interactive "ssource-block name: ")
@@ -883,6 +891,7 @@ following the source block."
                             (if hash (org-babel-hide-hash)) t)))
                (point))))))
 
+(defvar org-block-regexp)
 (defun org-babel-read-result ()
   "Read the result at `point' into emacs-lisp."
   (let ((case-fold-search t) result-string)
@@ -913,6 +922,7 @@ following the source block."
               (mapcar #'org-babel-read row)))
           (org-table-to-lisp)))
 
+(defvar org-link-types-re)
 (defun org-babel-read-link ()
   "Read the link at `point' into emacs-lisp.  If the path of the
 link is a file path it is expanded using `expand-file-name'."

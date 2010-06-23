@@ -30,9 +30,10 @@ infodir = $(prefix)/share/info
 
 BATCH=$(EMACS) -batch -q -no-site-file -eval                             			\
   "(setq load-path (cons (expand-file-name\
-			 \"babel\"\
-			 (expand-file-name \"./lisp/\"))\
-			(cons (expand-file-name \"./lisp/\") (cons \"$(lispdir)\" load-path))))"
+                       \"langs\"\
+                       (expand-file-name \"babel\" (expand-file-name \"./lisp/\")))\
+                 (cons (expand-file-name \"babel\" (expand-file-name \"./lisp/\"))\
+                        (cons (expand-file-name \"./lisp/\") (cons \"$(lispdir)\" load-path)))))"
 
 # Specify the byte-compiler for compiling org-mode files
 ELC= $(BATCH) -f batch-byte-compile
@@ -195,6 +196,8 @@ lisp/org-install.el: $(LISPFILES0) Makefile
 		--eval '(find-file "org-install.el")'  \
 		--eval '(erase-buffer)' \
 		--eval '(mapc (lambda (x) (generate-file-autoloads (symbol-name x))) (quote ($(LISPFILES0))))' \
+		--eval "(insert \"(add-to-list 'load-path (expand-file-name \\\"babel\\\" (file-name-directory (or (buffer-file-name) load-file-name))))\")" \
+		--eval "(insert \"\n(add-to-list 'load-path (expand-file-name \\\"langs\\\" (expand-file-name \\\"babel\\\" (file-name-directory (or (buffer-file-name) load-file-name)))))\")\n" \
 		--eval '(insert "\n(provide (quote org-install))\n")' \
 		--eval '(save-buffer)'
 	mv org-install.el lisp

@@ -56,6 +56,9 @@
 (eval-when-compile
   (require 'cl))
 
+(declare-function org-remove-if-not "org" (predicate seq))
+(declare-function org-at-table-p "org" (&optional table-type))
+
 (defun org-babel-ref-variables (params)
   "Takes a parameter alist, and return an alist of variable
 names, and the emacs-lisp representation of the related value."
@@ -214,6 +217,7 @@ which case the entire range is returned."
        ((or (string= holder ")") (string= holder "]")) (setq depth (- depth 1)))))
     (mapcar #'org-babel-trim (reverse (cons buffer return)))))
 
+(defvar org-bracket-link-regexp)
 (defun org-babel-ref-at-ref-p ()
   "Return the type of reference located at point or nil if none
 of the supported reference types are found.  Supported reference

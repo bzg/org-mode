@@ -104,6 +104,23 @@
 (require 'org-src)
 (require 'org-footnote)
 
+;; babel
+(let* ((babel-path (expand-file-name
+		    "babel"
+		    (file-name-directory (or (buffer-file-name)
+					     load-file-name))))
+       (babel-langs-path (expand-file-name "langs" babel-path)))
+  (add-to-list 'load-path babel-path)
+  (add-to-list 'load-path babel-langs-path))
+(require 'ob)
+(require 'ob-table)
+(require 'ob-lob)
+(require 'ob-ref)
+(require 'ob-tangle)
+(require 'ob-comint)
+(require 'ob-keys)
+(require 'ob-emacs-lisp)
+
 ;;;; Customization variables
 (defcustom org-clone-delete-id nil
   "Remove ID property of clones of a subtree.
@@ -8887,6 +8904,8 @@ optional argument IN-EMACS is non-nil, Emacs will visit the file.
 With a double prefix argument, try to open outside of Emacs, in the
 application the system uses for this file type."
   (interactive "P")
+  ;; if in a code block, then open the block's results
+  (unless (call-interactively #'org-babel-open-src-block-result)
   (org-load-modules-maybe)
   (move-marker org-open-link-marker (point))
   (setq org-window-config-before-follow-link (current-window-configuration))
@@ -9068,7 +9087,7 @@ application the system uses for this file type."
 	 (t
 	  (browse-url-at-point)))))))
   (move-marker org-open-link-marker nil)
-  (run-hook-with-args 'org-follow-link-hook))
+  (run-hook-with-args 'org-follow-link-hook)))
 
 (defun org-offer-links-in-entry (&optional nth zero)
   "Offer links in the current entry and follow the selected link.
@@ -16010,6 +16029,12 @@ BEG and END default to the buffer boundaries."
 (org-defkey org-mode-map [(control shift right)] 'org-shiftcontrolright)
 (org-defkey org-mode-map [(control shift left)]  'org-shiftcontrolleft)
 
+;; Babel keys
+(define-key org-mode-map org-babel-key-prefix org-babel-map)
+(mapc (lambda (pair)
+        (define-key org-babel-map (car pair) (cdr pair)))
+      org-babel-key-bindings)
+
 ;;; Extra keys for tty access.
 ;;  We only set them when really needed because otherwise the
 ;;  menus don't show the simple keys
@@ -16872,14 +16897,23 @@ See the individual commands for more information."
       (org-table-paste-rectangle)
     (org-paste-subtree arg)))
 
-(defun org-edit-special ()
+(defun org-edit-special (&optional arg)
   "Call a special editor for the stuff at point.
 When at a table, call the formula editor with `org-table-edit-formulas'.
 When at the first line of an src example, call `org-edit-src-code'.
 When in an #+include line, visit the include file.  Otherwise call
 `ffap' to visit the file at point."
   (interactive)
-  (cond
+  ;; possibly prep session before editing source
+  (when arg
+    (let* ((info (org-babel-get-src-block-info))
+           (lang (nth 0 info))
+           (params (nth 2 info))
+           (session (cdr (assoc :session params))))
+      (when (and info session) ;; we are in a source-code block with a session
+        (funcall
+         (intern (concat "org-babel-prep-session:" lang)) session params))))
+  (cond ;; proceed with `org-edit-special'
    ((save-excursion
       (beginning-of-line 1)
       (looking-at "\\(?:#\\+\\(?:setupfile\\|include\\):?[ \t]+\"?\\|[ \t]*<include\\>.*?file=\"\\)\\([^\"\n>]+\\)"))
