@@ -488,7 +488,6 @@ already gone."
 (defun org-capture-kill ()
   "Abort the current capture process."
   (interactive)
-  (debug)
   ;; FIXME: This does not do the right thing, we need to remove the new stuff
   ;; By hand it is easy: undo, then kill the buffer
   (let ((org-note-abort t) (org-capture-before-finalize-hook nil))
