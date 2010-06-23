@@ -64,6 +64,10 @@
 (defvar org-capture-last-stored-marker (make-marker)
   "Marker pointing to the entry most recently stored with `org-capture'.")
 
+;; The following variable is scoped dynamically by org-protocol
+;; to indicate that the link properties have already been stored
+(defvar org-capture-link-is-already-stored nil)
+
 (defgroup org-capture nil
   "Options concerning capturing new entries."
   :tag "Org Capture"
@@ -348,7 +352,9 @@ bypassed."
     ;; set temporary variables that will be needed in
     ;; `org-select-remember-template'
     (let* ((orig-buf (current-buffer))
-	   (annotation (org-store-link nil))
+	   (annotation (if org-capture-link-is-already-stored
+			   (plist-get org-store-link-plist :annotation)
+			 (org-store-link nil)))
 	   (initial (and (org-region-active-p)
 			 (buffer-substring (point) (mark))))
 	   (entry (org-capture-select-template keys)))

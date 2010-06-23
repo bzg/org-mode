@@ -503,6 +503,7 @@ CAPTURE-FUNC is either the symbol `org-remember' or `org-capture'."
 	 (region (or (caddr parts) ""))
 	 (orglink (org-make-link-string
 		   url (if (string-match "[^[:space:]]" title) title url)))
+	 (org-capture-link-is-already-stored t) ;; avoid call to org-store-link
 	 remember-annotation-functions)
     (setq org-stored-links
 	  (cons (list url title) org-stored-links))
@@ -510,6 +511,7 @@ CAPTURE-FUNC is either the symbol `org-remember' or `org-capture'."
     (org-store-link-props :type type
 			  :link url
 			  :description title
+			  :annotation orglink
 			  :initial region)
     (raise-frame)
     (funcall capture-func nil template)))
