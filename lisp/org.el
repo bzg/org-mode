@@ -14756,16 +14756,17 @@ If there is a specifyer for a cyclic time stamp, get the closest date to
 DAYNR.
 PREFER and SHOW-ALL are passed through to `org-closest-date'.
 the variable date is bound by the calendar when this is called."
-  (cond
-   ((and daynr (string-match "\\`%%\\((.*)\\)" s))
-    (if (org-diary-sexp-entry (match-string 1 s) "" date)
-	daynr
-      (+ daynr 1000)))
-   ((and daynr (string-match "\\+[0-9]+[dwmy]" s))
-    (org-closest-date s (if (and (boundp 'daynr) (integerp daynr)) daynr
-			  (time-to-days (current-time))) (match-string 0 s)
-			  prefer show-all))
-   (t (time-to-days (apply 'encode-time (org-parse-time-string s))))))
+  (let ((today (calendar-absolute-from-gregorian (calendar-current-date))))
+    (cond
+     ((and daynr (string-match "\\`%%\\((.*)\\)" s))
+      (if (org-diary-sexp-entry (match-string 1 s) "" date)
+	  daynr
+	(+ daynr 1000)))
+     ((and daynr (not (eq daynr today)) (string-match "\\+[0-9]+[dwmy]" s))
+	   (org-closest-date s (if (and (boundp 'daynr) (integerp daynr)) daynr
+				 (time-to-days (current-time))) (match-string 0 s)
+				 prefer show-all))
+      (t (time-to-days (apply 'encode-time (org-parse-time-string s)))))))
 
 (defun org-days-to-iso-week (days)
   "Return the iso week number."
