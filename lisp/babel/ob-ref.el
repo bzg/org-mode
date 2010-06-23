@@ -83,8 +83,10 @@ emacs-lisp representation of the value of the variable."
       (let ((var (match-string 1 assignment))
             (ref (match-string 2 assignment)))
         (cons (intern var)
-              (or (org-babel-ref-literal ref)
-                  (org-babel-ref-resolve-reference ref params))))))
+	      ((lambda (val)
+		 (if (equal :ob-must-be-reference val)
+		     (org-babel-ref-resolve-reference ref params)
+		   val)) (org-babel-ref-literal ref))))))
 
 (defun org-babel-ref-literal (ref)
   "Determine if the right side of a header argument variable
@@ -95,7 +97,8 @@ return nil."
   (let ((out (org-babel-read ref)))
     (if (equal out ref)
         (if (string-match "^\".+\"$" ref)
-            (read ref))
+            (read ref)
+	  :ob-must-be-reference)
       out)))
 
 (defvar org-babel-library-of-babel)
