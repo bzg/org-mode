@@ -356,8 +356,7 @@ bypassed."
    ((equal goto '(4)) (org-capture-goto-target))
    ((equal goto '(16)) (org-capture-goto-last-stored))
    (t
-    ;; set temporary variables that will be needed in
-    ;; `org-select-remember-template'
+    ;; FIXME: Are these needed?
     (let* ((orig-buf (current-buffer))
 	   (annotation (if org-capture-link-is-already-stored
 			   (plist-get org-store-link-plist :annotation)
@@ -923,11 +922,13 @@ Lisp programs can force the template by setting KEYS to a string."
     (if keys
 	(or (assoc keys org-capture-templates)
 	    (error "No capture template referred to by \"%s\" keys" keys))
-      (org-mks org-capture-templates
-	       "Select a capture template\n========================="
-	       "Template key: "
-	       '(("C" "Customize org-capture-templates")
-		 ("q" "Abort"))))))
+      (if (= 1 (length org-capture-templates))
+	  (car org-capture-templates)
+	(org-mks org-capture-templates
+		 "Select a capture template\n========================="
+		 "Template key: "
+		 '(("C" "Customize org-capture-templates")
+		   ("q" "Abort")))))))
 
 (defun org-capture-fill-template (&optional template initial annotation)
   "Fill a template and return the filled template as a string.
