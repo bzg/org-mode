@@ -4344,7 +4344,7 @@ the documentation of `org-diary'."
 	      clockp (and org-agenda-include-inactive-timestamps
 			  (or (string-match org-clock-string tmp)
 			      (string-match "]-+\\'" tmp)))
-	      todo-state (org-get-todo-state)
+	      todo-state (ignore-errors (org-get-todo-state))
 	      donep (member todo-state org-done-keywords))
 	(if (or scheduledp deadlinep closedp clockp
 		(and donep org-agenda-skip-timestamp-if-done))
@@ -5162,11 +5162,12 @@ HH:MM."
 	 (or (match-end 1) (match-end 0)) (match-end 0)
 	 (list 'face (org-get-todo-face (match-string 2 x)))
 	 x)
-	(setq x (concat (substring x 0 (match-end 1))
-			(format org-agenda-todo-keyword-format
-				(match-string 2 x))
-			(org-add-props " " (text-properties-at 0 x))
-			(substring x (match-end 3)))))
+	(when (match-end 1)
+	  (setq x (concat (substring x 0 (match-end 1))
+			  (format org-agenda-todo-keyword-format
+				  (match-string 2 x))
+			  (org-add-props " " (text-properties-at 0 x))
+			  (substring x (match-end 3))))))
       x)))
 
 (defsubst org-cmp-priority (a b)
