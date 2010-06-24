@@ -11175,7 +11175,7 @@ the following to your Emacs configuration, (replace ``identifier'' with one
 of the language names from the above table).
 
 @example
-(require 'org-babel-identifier)
+(require 'ob-identifier)
 @end example
 
 
@@ -12060,7 +12060,7 @@ emacsclient \
 --eval "(progn
 (add-to-list 'load-path (expand-file-name \"~/src/org/lisp/\"))
 (add-to-list 'load-path (expand-file-name \"~/src/org/contrib/lisp/\"))
-(require 'org)(require 'org-exp)(require 'org-babel)
+(require 'org)(require 'org-exp)(require 'ob)(require 'ob-tangle)
 (mapc (lambda (file)
        (find-file (expand-file-name file \"$DIR\"))
        (org-babel-tangle)
