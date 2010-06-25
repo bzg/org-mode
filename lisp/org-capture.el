@@ -556,7 +556,7 @@ already gone."
        ((eq (car target) 'file+regexp)
 	(set-buffer (org-capture-target-buffer (nth 1 target)))
 	(goto-char (point-min))
-	(if (re-search-forward (nth 1 target) nil t)
+	(if (re-search-forward (nth 2 target) nil t)
 	    (progn
 	      (goto-char (match-beginning 0))
 	      (setq target-entry-p (and (org-mode-p) (org-at-heading-p))))
