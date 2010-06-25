@@ -44,7 +44,7 @@
       (format "%s=%s"
               (car pair)
               (org-babel-python-var-to-python (cdr pair))))
-    (second (or processed-params (org-babel-process-params params))) "\n")
+    (nth 1 (or processed-params (org-babel-process-params params))) "\n")
    "\n" (org-babel-trim body) "\n"))
 
 (defun org-babel-execute:python (body params)
@@ -53,8 +53,8 @@ called by `org-babel-execute-src-block'."
   (message "executing Python source code block")
   (let* ((processed-params (org-babel-process-params params))
          (session (org-babel-python-initiate-session (first processed-params)))
-         (result-params (third processed-params))
-         (result-type (fourth processed-params))
+         (result-params (nth 2 processed-params))
+         (result-type (nth 3 processed-params))
          (full-body (org-babel-expand-body:python
                      body params processed-params)) ;; then the source block body
          (result (org-babel-python-evaluate session full-body result-type)))

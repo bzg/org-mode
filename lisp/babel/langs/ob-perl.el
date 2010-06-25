@@ -35,7 +35,7 @@
 
 (defun org-babel-expand-body:perl (body params &optional processed-params)
   "Expand BODY according to PARAMS, return the expanded body."
-  (let ((vars (second (or processed-params (org-babel-process-params params)))))
+  (let ((vars (nth 1 (or processed-params (org-babel-process-params params)))))
     (concat
      (mapconcat ;; define any variables
       (lambda (pair)
@@ -50,9 +50,9 @@ called by `org-babel-execute-src-block'."
   (message "executing Perl source code block")
   (let* ((processed-params (org-babel-process-params params))
          (session (first processed-params))
-         (vars (second processed-params))
-         (result-params (third processed-params))
-         (result-type (fourth processed-params))
+         (vars (nth 1 processed-params))
+         (result-params (nth 2 processed-params))
+         (result-type (nth 3 processed-params))
          (full-body (org-babel-expand-body:perl
                      body params processed-params)) ;; then the source block body
 	(session (org-babel-perl-initiate-session session)))

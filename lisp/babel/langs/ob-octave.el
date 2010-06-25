@@ -40,7 +40,7 @@
 
 (defun org-babel-expand-body:octave (body params &optional processed-params)
   "Expand BODY according to PARAMS, return the expanded body."
-  (let ((vars (second (or processed-params (org-babel-process-params params)))))
+  (let ((vars (nth 1 (or processed-params (org-babel-process-params params)))))
     (concat
      ;; prepend code to define all arguments passed to the code block
      ;; (may not be appropriate for all languages)
@@ -58,9 +58,9 @@
          ;; set the session if the session variable is non-nil
          (session (funcall (intern (format "org-babel-%s-initiate-session" lang))
 			   (first processed-params) params))
-         (vars (second processed-params))
-         (result-params (third processed-params))
-         (result-type (fourth processed-params))
+         (vars (nth 1 processed-params))
+         (result-params (nth 2 processed-params))
+         (result-type (nth 3 processed-params))
 	 (out-file (cdr (assoc :file params)))
 	 (augmented-body (org-babel-expand-body:octave body params processed-params))
 	 (result (org-babel-octave-evaluate session augmented-body result-type matlabp)))

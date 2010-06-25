@@ -270,7 +270,7 @@ last statement in BODY, as elisp."
 (defun org-babel-expand-body:clojure (body params &optional processed-params)
   "Expand BODY according to PARAMS, return the expanded body."
   (org-babel-clojure-build-full-form
-   body (second (or processed-params (org-babel-process-params params)))))
+   body (nth 1 (or processed-params (org-babel-process-params params)))))
 
 (defun org-babel-execute:clojure (body params)
   "Execute a block of Clojure code with org-babel."
@@ -278,7 +278,7 @@ last statement in BODY, as elisp."
          (body (org-babel-expand-body:clojure body params processed-params))
          (session (org-babel-clojure-initiate-session (first processed-params))))
     (org-babel-reassemble-table
-     (org-babel-clojure-evaluate session body (fourth processed-params))
+     (org-babel-clojure-evaluate session body (nth 3 processed-params))
      (org-babel-pick-name (nth 4 processed-params) (cdr (assoc :colnames params)))
      (org-babel-pick-name (nth 5 processed-params) (cdr (assoc :rownames params))))))
 

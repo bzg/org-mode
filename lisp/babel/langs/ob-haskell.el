@@ -54,7 +54,7 @@
 
 (defun org-babel-expand-body:haskell (body params &optional processed-params)
   "Expand BODY according to PARAMS, return the expanded body."
-  (let (vars (second (or processed-params (org-babel-process-params params))))
+  (let (vars (nth 1 (or processed-params (org-babel-process-params params))))
     (concat
      (mapconcat
       (lambda (pair) (format "let %s = %s;" (car pair) (cdr pair)))
@@ -65,8 +65,8 @@
   (message "executing haskell source code block")
   (let* ((processed-params (org-babel-process-params params))
          (session (first processed-params))
-         (vars (second processed-params))
-         (result-type (fourth processed-params))
+         (vars (nth 1 processed-params))
+         (result-type (nth 3 processed-params))
          (full-body (org-babel-expand-body:haskell body params processed-params))
          (session (org-babel-prep-session:haskell session params))
          (raw (org-babel-comint-with-output

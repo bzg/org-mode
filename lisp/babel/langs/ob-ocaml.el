@@ -48,7 +48,7 @@
 
 (defun org-babel-expand-body:ocaml (body params &optional processed-params)
   "Expand BODY according to PARAMS, return the expanded body."
-  (let ((vars (second (or processed-params (org-babel-process-params params)))))
+  (let ((vars (nth 1 (or processed-params (org-babel-process-params params)))))
     (concat
      (mapconcat
       (lambda (pair) (format "let %s = %s;" (car pair) (cdr pair)))
@@ -58,7 +58,7 @@
   "Execute a block of Ocaml code with org-babel."
   (message "executing ocaml source code block")
   (let* ((processed-params (org-babel-process-params params))
-         (vars (second processed-params))
+         (vars (nth 1 processed-params))
          (full-body (org-babel-expand-body:ocaml body params processed-params))
          (session (org-babel-prep-session:ocaml session params))
          (raw (org-babel-comint-with-output

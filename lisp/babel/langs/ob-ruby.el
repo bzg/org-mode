@@ -46,7 +46,7 @@
 
 (defun org-babel-expand-body:ruby (body params &optional processed-params)
   "Expand BODY according to PARAMS, return the expanded body."
-  (let ((vars (second (or processed-params (org-babel-process-params params)))))
+  (let ((vars (nth 1 (or processed-params (org-babel-process-params params)))))
     (concat
      (mapconcat ;; define any variables
       (lambda (pair)
@@ -61,8 +61,8 @@ called by `org-babel-execute-src-block'."
   (message "executing Ruby source code block")
   (let* ((processed-params (org-babel-process-params params))
          (session (org-babel-ruby-initiate-session (first processed-params)))
-         (result-params (third processed-params))
-         (result-type (fourth processed-params))
+         (result-params (nth 2 processed-params))
+         (result-type (nth 3 processed-params))
          (full-body (org-babel-expand-body:ruby
                      body params processed-params))
          (result (org-babel-ruby-evaluate session full-body result-type)))
