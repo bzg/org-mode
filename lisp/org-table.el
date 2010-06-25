@@ -4226,7 +4226,7 @@ this function is called."
     (orgtbl-to-generic table (org-combine-plists params2 params))))
 
 (defun orgtbl-to-html (table params)
-  "Convert the orgtbl-mode TABLE to LaTeX.
+  "Convert the orgtbl-mode TABLE to HTML.
 TABLE is a list, each entry either the symbol `hline' for a horizontal
 separator line, or a list of fields for that line.
 PARAMS is a property list of parameters that can influence the conversion.
