@@ -5905,7 +5905,9 @@ Org's method for capturing new items is heavily inspired by John Wiegley
 excellent remember package@footnote{Up to version 6.36 Org actually did use a
 special setup for @file{remember.el}.  @file{org-remember.el} is still part
 of Org-mode for backward compatibility with existing setups.  But the new
-capturing setup described here is preferred and should be used by new users.}
+capturing setup described here is preferred and should be used by new users.
+You can find the documentation for org-remember at
+@url{http://orgmode.org/org-remember.pdf}.}
 which lets you store quick notes with little interruption of your work flow.
 The basic process of capturing is very similar to remember, but Org does
 enhance it with templates and more.
