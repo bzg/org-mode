@@ -5902,15 +5902,25 @@ trees to an archive file keeps the system compact and fast.
 @cindex capture
 
 Org's method for capturing new items is heavily inspired by John Wiegley
-excellent remember package@footnote{Up to version 6.36 Org actually did use a
+excellent remember package.  Up to version 6.36 Org did actually use a
 special setup for @file{remember.el}.  @file{org-remember.el} is still part
-of Org-mode for backward compatibility with existing setups.  But the new
-capturing setup described here is preferred and should be used by new users.
-You can find the documentation for org-remember at
-@url{http://orgmode.org/org-remember.pdf}.}
-which lets you store quick notes with little interruption of your work flow.
-The basic process of capturing is very similar to remember, but Org does
-enhance it with templates and more.
+of Org-mode for backward compatibility with existing setups.  You can find
+the documentation for org-remember at
+@url{http://orgmode.org/org-remember.pdf}.
+
+The new capturing setup described here is preferred and should be used by new
+users.  To convert your @code{org-remember-templates}, run the command
+@example
+@kbd M-x org-capture-import-remember-templates RET
+@end example
+@noindent and then customize the new variable with @kbd{M-x
+customize-variable org-capture-templates}, check the result, and save the
+customization.  You will then be able to use both remember and capture until
+you have gotten used to the new mechanism.
+
+Capture lets you store quick notes with little interruption of your work
+flow.  The basic process of capturing is very similar to remember, but Org
+does enhance it with templates and more.
 
 @menu
 * Setting up a capture location::  Where notes will be stored
@@ -5921,11 +5931,9 @@ enhance it with templates and more.
 @node Setting up a capture location, Using capture, Capture, Capture
 @subsection Setting up a capture location
 
-The following customization sets a default target@footnote{Using capture
-templates, you can define more fine-grained capture locations, see
-@ref{Capture templates}.} file for notes, and defines a global
-key@footnote{Please select your own key, @kbd{C-c c} is only a suggestion.}
-for capturing new stuff.
+The following customization sets a default target file for notes, and defines
+a global key@footnote{Please select your own key, @kbd{C-c c} is only a
+suggestion.}  for capturing new stuff.
 
 @example
 (setq org-default-notes-file (concat org-directory "/notes.org"))
@@ -5960,10 +5968,10 @@ process by refiling (@pxref{Refiling notes}) the note to a different place.
 Abort the capture process and return to the previous state.
 @end table
 
-You can also call @code{org-capture} in a special way from the agenda,
-using the @kbd{k c} key combination.  With this access, any timestamps
-inserted by the selected capture template (see below) will default to
-the cursor date in the agenda, rather than to the current date.
+You can also call @code{org-capture} in a special way from the agenda, using
+the @kbd{k c} key combination.  With this access, any timestamps inserted by
+the selected capture template will default to the cursor date in the agenda,
+rather than to the current date.
 
 @node Capture templates,  , Using capture, Capture
 @subsection Capture templates
@@ -6080,6 +6088,7 @@ Fast configuration if the target heading is unique in the file
 For non-unique headings, the full path is safer.
 
 @item (file+regexp  "path/to/file" "regexp to find location")
+Use a regular expression to position the cursor.
 
 @item (file+datetree "path/to/file")
 Will create a heading in a date tree.
