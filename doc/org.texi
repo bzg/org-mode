@@ -77,6 +77,7 @@ license to the document, as described in section 6 of the license.
 
 @subtitle Release @value{VERSION}
 @author by Carsten Dominik
+with contributions by David O'Toole, Dan Davison, Eric Schulte and Thomas Dye
 
 @c The following two commands start the copyright page.
 @page
@@ -13992,27 +13993,21 @@ the view, only the current agenda files will be searched.
 @cindex history
 @cindex thanks
 
-Org was born in 2003, out of frustration over the user interface
-of the Emacs Outline mode.  I was trying to organize my notes and
-projects, and using Emacs seemed to be the natural way to go.  However,
-having to remember eleven different commands with two or three keys per
-command, only to hide and show parts of the outline tree, that seemed
-entirely unacceptable to me.  Also, when using outlines to take notes, I
-constantly wanted to restructure the tree, organizing it parallel to my
-thoughts and plans.  @emph{Visibility cycling} and @emph{structure
-editing} were originally implemented in the package
-@file{outline-magic.el}, but quickly moved to the more general
-@file{org.el}.  As this environment became comfortable for project
-planning, the next step was adding @emph{TODO entries}, basic
-@emph{timestamps}, and @emph{table support}.  These areas highlighted the two main
-goals that Org still has today: to be a new, outline-based,
-plain text mode with innovative and intuitive editing features, and to
-incorporate project planning functionality directly into a notes file.
-
-A special thanks goes to @i{Bastien Guerry} who has not only written a large
-number of extensions to Org (most of them integrated into the core by now),
-but who has also helped in the development and maintenance of Org so much that he
-should be considered the main co-contributor to this package.
+Org was born in 2003, out of frustration over the user interface of the Emacs
+Outline mode.  I was trying to organize my notes and projects, and using
+Emacs seemed to be the natural way to go.  However, having to remember eleven
+different commands with two or three keys per command, only to hide and show
+parts of the outline tree, that seemed entirely unacceptable to me.  Also,
+when using outlines to take notes, I constantly wanted to restructure the
+tree, organizing it parallel to my thoughts and plans.  @emph{Visibility
+cycling} and @emph{structure editing} were originally implemented in the
+package @file{outline-magic.el}, but quickly moved to the more general
+@file{org.el}.  As this environment became comfortable for project planning,
+the next step was adding @emph{TODO entries}, basic @emph{timestamps}, and
+@emph{table support}.  These areas highlighted the two main goals that Org
+still has today: to be a new, outline-based, plain text mode with innovative
+and intuitive editing features, and to incorporate project planning
+functionality directly into a notes file.
 
 Since the first release, literally thousands of emails to me or to
 @email{emacs-orgmode@@gnu.org} have provided a constant stream of bug
@@ -14022,6 +14017,38 @@ trying to keep here a list of the people who had significant influence
 in shaping one or more aspects of Org.  The list may not be
 complete, if I have forgotten someone, please accept my apologies and
 let me know.
+
+Before I get to this list, a few special mentions are in order:
+
+@table @i
+@item Bastien Guerry
+Bastien has written a large number of extensions to Org (most of them
+integrated into the core by now), including the LaTeX exporter and the plain
+list parser.  More importantly, maybe, was his help and support when Org got
+first started, he was very important during this phase.  Also, he invented
+Worg, helped establishing the Web presence of Org, and sponsors hosting costs
+for the orgmode.org website.
+@item Eric Schulte and Dan Davison
+Eric and Dan are jointly responsible for the Org-babel system, which turns
+Org into a multi-language environment for evaluating code and doing literate
+programming and reproducible research.
+@item John Wiegley
+John has also contributed a number of great ideas and patches
+directly to Org, including the attachment system (@file{org-attach.el}),
+integration with Apple Mail (@file{org-mac-message.el}), hierarchical
+dependencies of TODO items, habit tracking (@file{org-habits.el}), and
+encryption (@file{org-crypt.el}).  Also, the capture system is really an
+extended copy of his great @file{remember.el}.
+@item Sebastian Rose
+Without Sebastian, the HTML/XHTML publishing of Org would be the pitiful work
+of an ignorant amateur.  Sebastian has pushed this part of Org onto a much
+higher level.  He also wrote @file{org-info.js}, a Java script for displaying
+webpages derived from Org using an Info-like or a folding interface with
+single-key navigation.
+@end table
+
+@noindent OK, now to the full list of contributions!  Again, please let me
+know what I am missing here!
 
 @itemize @bullet
 
@@ -14055,8 +14082,6 @@ calculations and improved XEmacs compatibility, in particular by porting
 @item
 @i{Baoqiu Cui} contributed the DocBook exporter.
 @item
-@i{Dan Davison} wrote (together with @i{Eric Schulte}) Org Babel.
-@item
 @i{Eddward DeVilla} proposed and tested checkbox statistics.  He also
 came up with the idea of properties, and that there should be an API for
 them.
@@ -14066,6 +14091,8 @@ them.
 @i{Kees Dullemond} used to edit projects lists directly in HTML and so
 inspired some of the early development, including HTML export.  He also
 asked for a way to narrow wide table columns.
+@i{Thomas S. Dye} contributed documentation on Worg and helped integrating
+the Org-Babel documentation into the manual.
 @item
 @i{Christian Egli} converted the documentation into Texinfo format,
 patched CSS formatting into the HTML exporter, and inspired the agenda.
@@ -14087,9 +14114,6 @@ around a match in a hidden outline tree.
 @i{Austin Frank} works as a mailing list moderator.
 @item
 @i{Niels Giesen} had the idea to automatically archive DONE trees.
-@item
-@i{Bastien Guerry} wrote the La@TeX{} exporter and @file{org-bibtex.el}, and
-has been prolific with patches, ideas, and bug reports.
 @item
 @i{Kai Grossjohann} pointed out key-binding conflicts with other packages.
 @item
@@ -14164,10 +14188,6 @@ also acted as mailing list moderator for some time.
 @item
 @i{Kevin Rogers} contributed code to access VM files on remote hosts.
 @item
-@i{Sebastian Rose} wrote @file{org-info.js}, a Java script for displaying
-webpages derived from Org using an Info-like or a folding interface with
-single-key navigation, and make lots of improvements to the HTML exporter.
-@item
 @i{Frank Ruell} solved the mystery of the @code{keymapp nil} bug, a
 conflict with @file{allout.el}.
 @item
@@ -14179,9 +14199,6 @@ of feedback, developed and applied standards to the Org documentation.
 @item
 @i{Christian Schlauer} proposed angular brackets around links, among
 other things.
-@item
-@i{Eric Schulte} wrote @file{org-plot.el} and (together with @i{Dan Davison})
-Org Babel, and contributed various patches, small features and modules.
 @item
 @i{Paul Sexton} wrote @file{org-ctags.el}.
 @item
@@ -14228,16 +14245,6 @@ keyword.
 @item
 @i{David Wainberg} suggested archiving, and improvements to the linking
 system.
-@item
-@i{John Wiegley} wrote @file{emacs-wiki.el}, @file{planner.el}, and
-@file{muse.el}, which have some overlap with Org.  Initially the development
-of Org was fully independent because I was not aware of the existence of
-these packages.  But with time I have occasionally looked at John's code and
-learned a lot from it.  John has also contributed a number of great ideas and
-patches directly to Org, including the attachment system
-(@file{org-attach.el}), integration with Apple Mail
-(@file{org-mac-message.el}), hierarchical dependencies of TODO items, habit
-tracking (@file{org-habits.el}).
 @item
 @i{Carsten Wimmer} suggested some changes and helped fix a bug in
 linking to Gnus.
