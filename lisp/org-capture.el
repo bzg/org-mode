@@ -584,8 +584,7 @@ already gone."
        ((eq (car target) 'clock)
 	(if (and (markerp org-clock-hd-marker)
 		 (marker-buffer org-clock-hd-marker))
-	    (progn (set-buffer (org-capture-target-buffer
-				(marker-buffer org-clock-hd-marker)))
+	    (progn (set-buffer (marker-buffer org-clock-hd-marker))
 		   (goto-char org-clock-hd-marker))
 	  (error "No running clock that could be used as capture target")))
 
