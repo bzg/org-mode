@@ -5911,7 +5911,7 @@ the documentation for org-remember at
 The new capturing setup described here is preferred and should be used by new
 users.  To convert your @code{org-remember-templates}, run the command
 @example
-@kbd M-x org-capture-import-remember-templates RET
+@kbd{M-x org-capture-import-remember-templates RET}
 @end example
 @noindent and then customize the new variable with @kbd{M-x
 customize-variable org-capture-templates}, check the result, and save the
