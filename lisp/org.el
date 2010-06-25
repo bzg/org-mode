@@ -10881,7 +10881,7 @@ changes.  Such blocking occurs when:
 	(let* ((pos (point))
 	       (parent-pos (and (org-up-heading-safe) (point))))
 	  (if (not parent-pos) (throw 'dont-block t)) ; no parent
-	  (when (and (org-entry-get (point) "ORDERED")
+	  (when (and (org-not-nil (org-entry-get (point) "ORDERED"))
 		     (forward-line 1)
 		     (re-search-forward org-not-done-heading-regexp pos t))
 	    (throw 'dont-block nil))  ; block, there is an older sibling not done.
@@ -10893,7 +10893,7 @@ changes.  Such blocking occurs when:
 	    (setq pos (point))
 	    (setq parent-pos (and (org-up-heading-safe) (point)))
 	    (if (not parent-pos) (throw 'dont-block t)) ; no parent
-	    (when (and (org-entry-get (point) "ORDERED")
+	    (when (and (org-not-nil (org-entry-get (point) "ORDERED"))
 		       (forward-line 1)
 		       (re-search-forward org-not-done-heading-regexp pos t))
 	      (throw 'dont-block nil)))))))) ; block, older sibling not done.
