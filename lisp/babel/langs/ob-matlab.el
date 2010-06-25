@@ -39,6 +39,8 @@
 (require 'matlab)
 (require 'ob-octave)
 
+(defvar org-babel-default-header-args:matlab '())
+
 (defvar org-babel-matlab-shell-command "matlab -nosplash"
   "Shell command to use to run matlab as an external process.")
 

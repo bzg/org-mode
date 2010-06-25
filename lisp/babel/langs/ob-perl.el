@@ -31,6 +31,8 @@
 
 (add-to-list 'org-babel-tangle-lang-exts '("perl" . "pl"))
 
+(defvar org-babel-default-header-args:perl '())
+
 (defun org-babel-expand-body:perl (body params &optional processed-params)
   "Expand BODY according to PARAMS, return the expanded body."
   (let ((vars (second (or processed-params (org-babel-process-params params)))))

@@ -34,6 +34,8 @@
 
 (add-to-list 'org-babel-tangle-lang-exts '("python" . "py"))
 
+(defvar org-babel-default-header-args:python '())
+
 (defun org-babel-expand-body:python (body params &optional processed-params)
   "Expand BODY according to PARAMS, return the expanded body."
   (concat

@@ -41,6 +41,8 @@
 (declare-function org-babel-comint-with-output "ob-comint" (meta &rest body))
 (declare-function orgtbl-to-generic "org-table" (table params))
 
+(defvar org-babel-default-header-args:sh '())
+
 (defvar org-babel-sh-command "sh"
   "Command used to invoke a shell.  This will be passed to
   `shell-command-on-region'")

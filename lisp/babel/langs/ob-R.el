@@ -35,6 +35,8 @@
 	  pagecentre colormodel useDingbats horizontal)
   "R-specific header arguments.")
 
+(defvar org-babel-default-header-args:R '())
+
 (defun org-babel-expand-body:R (body params &optional processed-params)
   "Expand BODY according to PARAMS, return the expanded body."
   (let* ((processed-params (or processed-params

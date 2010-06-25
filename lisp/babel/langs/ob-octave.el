@@ -33,6 +33,8 @@
 (require 'ob)
 (require 'octave-inf)
 
+(defvar org-babel-default-header-args:octave '())
+
 (defvar org-babel-octave-shell-command "octave -q"
   "Shell command to use to run octave as an external process.")
 
