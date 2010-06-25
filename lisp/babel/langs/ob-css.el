@@ -30,6 +30,8 @@
 ;;; Code:
 (require 'ob)
 
+(defvar org-babel-default-header-args:css '())
+
 (defun org-babel-expand-body:css (body params &optional processed-params)
   "Expand BODY according to PARAMS, return the expanded body." body)
 

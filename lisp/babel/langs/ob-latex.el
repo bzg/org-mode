@@ -47,7 +47,7 @@
                  (regexp-quote (format "%S" (car pair)))
                  (if (stringp (cdr pair))
                      (cdr pair) (format "%S" (cdr pair)))
-                 body))) (second (org-babel-process-params params)))
+                 body))) (nth 1 (org-babel-process-params params)))
   body)
 
 (defun org-babel-execute:latex (body params)

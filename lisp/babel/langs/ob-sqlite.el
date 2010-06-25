@@ -29,6 +29,8 @@
 ;;; Code:
 (require 'ob)
 
+(defvar org-babel-default-header-args:sqlite '())
+
 (defun org-babel-expand-body:sqlite
   (body params &optional processed-params) body)
 

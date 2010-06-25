@@ -42,6 +42,8 @@
 (require 'ob)
 (require 'sass-mode)
 
+(defvar org-babel-default-header-args:sass '())
+
 (defun org-babel-expand-body:sass (body params &optional processed-params)
   "Expand BODY according to PARAMS, return the expanded body." body)
 

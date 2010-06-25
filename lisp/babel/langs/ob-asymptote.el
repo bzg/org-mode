@@ -44,6 +44,7 @@
 
 ;;; Code:
 (require 'ob)
+(eval-when-compile (require 'cl))
 
 (add-to-list 'org-babel-tangle-lang-exts '("asymptote" . "asy"))
 
@@ -53,7 +54,7 @@
 
 (defun org-babel-expand-body:asymptote (body params &optional processed-params)
   "Expand BODY according to PARAMS, return the expanded body."
-  (let ((vars (second (or processed-params
+  (let ((vars (nth 1 (or processed-params
                           (org-babel-process-params params)))))
     (concat (mapconcat 'org-babel-asymptote-var-to-asymptote vars "\n")
 	    "\n" body "\n")))

@@ -32,9 +32,14 @@
 
 ;;; Code:
 (require 'ob)
+(require 'org)
 (require 'cc-mode)
 
+(declare-function org-entry-get "org" (&optional inherit))
+
 (add-to-list 'org-babel-tangle-lang-exts '("c++" . "cpp"))
+
+(defvar org-babel-default-header-args:C '())
 
 (defvar org-babel-C-compiler "gcc"
   "Command used to compile a C source code file into an
@@ -44,6 +49,10 @@
   "Command used to compile a c++ source code file into an
   executable.")
 
+(defvar org-babel-c-variant nil
+  "Internal variable used to hold which type of C (e.g. C or C++)
+is currently being evaluated.")
+
 (defun org-babel-execute:cpp (body params)
   "Execute BODY according to PARAMS.  This function calls
 `org-babel-execute:C'."
@@ -52,22 +61,22 @@
 (defun org-babel-execute:c++ (body params)
     "Execute a block of C++ code with org-babel.  This function is
 called by `org-babel-execute-src-block'."
-  (let ((c-variant 'cpp)) (org-babel-C-execute body params)))
+  (let ((org-babel-c-variant 'cpp)) (org-babel-C-execute body params)))
 
 (defun org-babel-expand-body:c++ (body params &optional processed-params)
   "Expand a block of C++ code with org-babel according to it's
 header arguments (calls `org-babel-C-expand')."
-  (let ((c-variant 'cpp)) (org-babel-C-expand body params processed-params)))
+  (let ((org-babel-c-variant 'cpp)) (org-babel-C-expand body params processed-params)))
 
 (defun org-babel-execute:C (body params)
   "Execute a block of C code with org-babel.  This function is
 called by `org-babel-execute-src-block'."
-  (let ((c-variant 'c)) (org-babel-C-execute body params)))
+  (let ((org-babel-c-variant 'c)) (org-babel-C-execute body params)))
 
 (defun org-babel-expand-body:c (body params &optional processed-params)
   "Expand a block of C code with org-babel according to it's
 header arguments (calls `org-babel-C-expand')."
-  (let ((c-variant 'c)) (org-babel-C-expand body params processed-params)))
+  (let ((org-babel-c-variant 'c)) (org-babel-C-expand body params processed-params)))
 
 (defun org-babel-C-execute (body params)
   "This function should only be called by `org-babel-execute:C'
@@ -75,9 +84,9 @@ or `org-babel-execute:c++'."
   (message "executing C source code block")
   (let* ((processed-params (org-babel-process-params params))
          (tmp-src-file (make-temp-file "org-babel-C-src" nil
-                                       (case c-variant
-                                         ('c ".c")
-                                         ('cpp ".cpp"))))
+                                       (cond
+                                         ((equal org-babel-c-variant 'c) ".c")
+                                         ((equal org-babel-c-variant 'cpp) ".cpp"))))
          (tmp-bin-file (make-temp-file "org-babel-C-bin"))
          (tmp-out-file (make-temp-file "org-babel-C-out"))
          (cmdline (cdr (assoc :cmdline params)))
@@ -91,9 +100,9 @@ or `org-babel-execute:c++'."
               (org-babel-shell-command-on-region
                (point-min) (point-max)
                (format "%s -o %s %s %s"
-                       (case c-variant
-                         ('c org-babel-C-compiler)
-                         ('cpp org-babel-c++-compiler))
+		       (cond
+			((equal org-babel-c-variant 'c) org-babel-C-compiler)
+			((equal org-babel-c-variant 'cpp) org-babel-c++-compiler))
                        tmp-bin-file
                        (mapconcat 'identity
                                   (if (listp flags) flags (list flags)) " ")
@@ -121,7 +130,7 @@ or `org-babel-execute:c++'."
 (defun org-babel-C-expand (body params &optional processed-params)
   "Expand a block of C or C++ code with org-babel according to
 it's header arguments."
-  (let ((vars (second (or processed-params
+  (let ((vars (nth 1 (or processed-params
                           (org-babel-process-params params))))
         (main-p (not (string= (cdr (assoc :main params)) "no")))
         (includes (or (cdr (assoc :includes params))

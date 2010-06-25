@@ -35,16 +35,18 @@
 	  pagecentre colormodel useDingbats horizontal)
   "R-specific header arguments.")
 
+(defvar org-babel-default-header-args:R '())
+
 (defun org-babel-expand-body:R (body params &optional processed-params)
   "Expand BODY according to PARAMS, return the expanded body."
   (let* ((processed-params (or processed-params
                                (org-babel-process-params params)))
-	 (vars (mapcar (lambda (i) (cons (car (nth i (second processed-params)))
+	 (vars (mapcar (lambda (i) (cons (car (nth i (nth 1 processed-params)))
 					 (org-babel-reassemble-table
-					  (cdr (nth i (second processed-params)))
-					  (cdr (nth i (fifth processed-params)))
-					  (cdr (nth i (sixth processed-params))))))
-		       (number-sequence 0 (1- (length (second processed-params))))))
+					  (cdr (nth i (nth 1 processed-params)))
+					  (cdr (nth i (nth 4 processed-params)))
+					  (cdr (nth i (nth 5 processed-params))))))
+		       (number-sequence 0 (1- (length (nth 1 processed-params))))))
          (out-file (cdr (assoc :file params))))
     (concat
      (if out-file (concat (org-babel-R-construct-graphics-device-call out-file params) "\n") "")
@@ -62,7 +64,7 @@ called by `org-babel-execute-src-block'."
   (message "executing R source code block...")
   (save-excursion
     (let* ((processed-params (org-babel-process-params params))
-           (result-type (fourth processed-params))
+           (result-type (nth 3 processed-params))
            (session (org-babel-R-initiate-session (first processed-params) params))
 	   (colnames-p (cdr (assoc :colnames params)))
 	   (rownames-p (cdr (assoc :rownames params)))
@@ -122,7 +124,7 @@ called by `org-babel-execute-src-block'."
           (insert "\n"))
         (format "%s <- read.table(\"%s\", header=%s, row.names=%s, sep=\"\\t\", as.is=TRUE)"
                 name transition-file
-		(if (or (eq (second value) 'hline) colnames-p) "TRUE" "FALSE")
+		(if (or (eq (nth 1 value) 'hline) colnames-p) "TRUE" "FALSE")
 		(if rownames-p "1" "NULL")))
     (format "%s <- %s" name (org-babel-R-quote-tsv-field value))))
 

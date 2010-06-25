@@ -63,7 +63,7 @@ In case you want to use a different screen than one selected by your $PATH")
   "Prepare SESSION according to the header arguments specified in PARAMS."
   (let* ((processed-params (org-babel-process-params params))
          (session (first processed-params))
-         (vars (second processed-params))
+         (vars (nth 1 processed-params))
          (socket (org-babel-screen-session-socketname session))
          (vars (org-babel-ref-variables params))
          (cmd (cdr (assoc :cmd params)))
