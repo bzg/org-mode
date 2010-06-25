@@ -1,35 +1,33 @@
 ;;; ob-keys.el --- key bindings for org-babel
 
-;; Copyright (C) 2009 Eric Schulte
+;; Copyright (C) 2009, 2010  Free Software Foundation, Inc.
 
 ;; Author: Eric Schulte
 ;; Keywords: literate programming, reproducible research
 ;; Homepage: http://orgmode.org
 ;; Version: 0.01
 
-;;; License:
+;; This file is part of GNU Emacs.
 
-;; This program is free software; you can redistribute it and/or modify
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 3, or (at your option)
-;; any later version.
-;;
-;; This program is distributed in the hope that it will be useful,
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
-;;
+
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 
-;; Add some org-babel keybindings to the org-mode keymap for exposing
-;; org-babel functions.  These will all share the common C-c M-b
-;; prefix.  See the value of `org-babel-key-bindings' for a list of
-;; interactive functions and their associated keys.
+;; Add org-babel keybindings to the org-mode keymap for exposing
+;; org-babel functions.  These will all share a common prefix.  See
+;; the value of `org-babel-key-bindings' for a list of interactive
+;; functions and their associated keys.
 
 ;;; Code:
 (require 'ob)
@@ -78,4 +76,7 @@ with keys.  Each element of this list will add an entry to the
 a-list placed behind the generic `org-babel-key-prefix'.")
 
 (provide 'ob-keys)
+
+;; arch-tag: 01e348ee-4906-46fa-839a-6b7b6f989048
+
 ;;; ob-keys.el ends here
