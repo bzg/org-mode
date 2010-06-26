@@ -13352,14 +13352,18 @@ things up because then unnecessary parsing is avoided."
 	    (push (cons "CATEGORY" value) props))
 	  (append sum-props (nreverse props)))))))
 
-(defun org-entry-get (pom property &optional inherit)
+(defun org-entry-get (pom property &optional inherit literal-nil)
   "Get value of PROPERTY for entry at point-or-marker POM.
 If INHERIT is non-nil and the entry does not have the property,
 then also check higher levels of the hierarchy.
 If INHERIT is the symbol `selective', use inheritance only if the setting
 in `org-use-property-inheritance' selects PROPERTY for inheritance.
 If the property is present but empty, the return value is the empty string.
-If the property is not present at all, nil is returned."
+If the property is not present at all, nil is returned.
+
+If LITERAL-NIL is set, return the string value \"nil\" as a string,
+do not interpret it as the list atom nil.  This is used for inheritance
+when a \"nil\" value can supercede a non-nil value higher up the hierarchy."
   (org-with-point-at pom
     (if (and inherit (if (eq inherit 'selective)
 			 (org-property-inherit-p property)
@@ -13377,7 +13381,9 @@ If the property is not present at all, nil is returned."
 		    (cdr range) t))
 	      ;; Found the property, return it.
 	      (if (match-end 1)
-		  (org-match-string-no-properties 1)
+		  (if literal-nil
+		      (org-match-string-no-properties 1)
+		    (org-not-nil (org-match-string-no-properties 1)))
 		"")))))))
 
 (defun org-property-or-variable-value (var &optional inherit)
@@ -13481,15 +13487,16 @@ is set.")
 	(widen)
 	(catch 'ex
 	  (while t
-	    (when (setq tmp (org-entry-get nil property))
+	    (when (setq tmp (org-entry-get nil property nil 'literal-nil))
 	      (org-back-to-heading t)
 	      (move-marker org-entry-property-inherited-from (point))
 	      (throw 'ex tmp))
 	    (or (org-up-heading-safe) (throw 'ex nil)))))
-      (or tmp
-	  (cdr (assoc property org-file-properties))
-	  (cdr (assoc property org-global-properties))
-	  (cdr (assoc property org-global-properties-fixed))))))
+      (org-not-nil
+       (or tmp
+	   (cdr (assoc property org-file-properties))
+	   (cdr (assoc property org-global-properties))
+	   (cdr (assoc property org-global-properties-fixed)))))))
 
 (defvar org-property-changed-functions nil
   "Hook called when the value of a property has changed.
