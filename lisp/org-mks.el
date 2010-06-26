@@ -48,15 +48,13 @@ under this key will be shown and offered for selection.
 
 TITLE will be placed over the selection in the temporary buffer,
 PROMPT will be used when prompting for a key.  SPECIAL is an alist with
-also (\"key\" \"description\") entries.  When they are selected, 
-
-
-"
+also (\"key\" \"description\") entries.  When one of these is selection,
+only the bare key is returned."
   (setq prompt (or prompt "Select: "))
   (let (tbl orig-table dkey ddesc des-keys allowed-keys
-	    current prefix rtn re pressed)
+	    current prefix rtn re pressed buffer (inhibit-quit t))
     (save-window-excursion
-      (org-switch-to-buffer-other-window "*Org Select*")
+      (setq buffer (org-switch-to-buffer-other-window "*Org Select*"))
       (setq orig-table table)
       (catch 'exit
 	(while t
@@ -104,7 +102,9 @@ also (\"key\" \"description\") entries.  When they are selected,
 	    (message "Invalid key `%s'" pressed) (sit-for 1)
 	    (message prompt)
 	    (setq pressed (char-to-string (read-char-exclusive))))
-	  (if (equal pressed "\C-g") (error "Abort"))
+	  (when (equal pressed "\C-g")
+	    (kill-buffer buffer)
+	    (error "Abort"))
 	  (when (and (not (assoc pressed table))
 		     (not (member pressed des-keys))
 		     (assoc pressed specials))
@@ -121,7 +121,7 @@ also (\"key\" \"description\") entries.  When they are selected,
 			   nil))
 		       table))
 	  (setq table (remove nil table)))))
-    (kill-buffer "*Org Select*")
+    (when buffer (kill-buffer buffer))
     rtn))
 
 (provide 'org-mks)

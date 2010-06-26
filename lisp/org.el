@@ -18143,7 +18143,8 @@ return nil."
 
 (defun org-switch-to-buffer-other-window (&rest args)
   "Switch to buffer in a second window on the current frame.
-In particular, do not allow pop-up frames."
+In particular, do not allow pop-up frames.
+Returns the newly created buffer."
   (let (pop-up-frames special-display-buffer-names special-display-regexps
 		      special-display-function)
     (apply 'switch-to-buffer-other-window args)))
