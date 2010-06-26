@@ -8635,7 +8635,7 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
 	  (save-match-data
 	    (if (string-match (concat "^" (regexp-quote
 					   (file-name-as-directory
-					    (expand-file-name "."))))
+					    default-directory)))
 			      (expand-file-name path))
 		;; We are linking a file with relative path name.
 		(setq path (substring (expand-file-name path)
