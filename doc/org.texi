@@ -129,7 +129,7 @@ Introduction
 * Feedback::			Bug reports, ideas, patches etc.
 * Conventions::			Type-setting conventions in the manual
 
-Document Structure
+Document structure
 
 * Outlines::			Org is based on Outline mode
 * Headlines::			How to typeset Org tree headlines
@@ -178,7 +178,7 @@ Internal links
 
 * Radio targets::		Make targets trigger links in plain text
 
-TODO Items
+TODO items
 
 * TODO basics::			Marking and displaying TODO entries
 * TODO extensions::		Workflow and assignments
@@ -209,10 +209,10 @@ Tags
 * Setting tags::		How to assign tags to a headline
 * Tag searches::		Searching for combinations of tags
 
-Properties and Columns
+Properties and columns
 
 * Property syntax::		How properties are spelled out
-* Special properties::		Access to other Org mode features
+* Special properties::		Access to other Org-mode features
 * Property searches::		Matching property values
 * Property inheritance::	Passing values down the tree
 * Column view::			Tabular viewing and editing
@@ -229,7 +229,7 @@ Defining columns
 * Scope of column definitions::	 Where defined, where valid?
 * Column attributes::		Appearance and content of a column
 
-Dates and Times
+Dates and times
 
 * Timestamps::			Assigning a time to a tree entry
 * Creating timestamps::		Commands which insert timestamps
@@ -241,7 +241,7 @@ Dates and Times
 
 Creating timestamps
 
-* The date/time prompt::	How Org mode helps you entering date and time
+* The date/time prompt::	How Org-mode helps you entering date and time
 * Custom time format::		Making dates look different
 
 Deadlines and scheduling
@@ -274,7 +274,7 @@ Archiving
 * Moving subtrees::		Moving a tree to an archive file
 * Internal archiving::		Switch off a tree but keep it in the file
 
-Agenda Views
+Agenda views
 
 * Agenda files::		Files being searched for agenda information
 * Agenda dispatcher::		Keyboard access to agenda views
@@ -354,7 +354,7 @@ Exporting
 HTML export
 
 * HTML Export commands::	How to invoke HTML export
-* Quoting HTML tags::		Using direct HTML in Org mode
+* Quoting HTML tags::		Using direct HTML in Org-mode
 * Links in HTML export::	How links will be interpreted and formatted
 * Tables in HTML export::	How to modify the formatting of tables
 * Images in HTML export::	How to insert figures into HTML output
@@ -403,7 +403,7 @@ Sample configuration
 * Simple example::		One-component publishing
 * Complex example::		A multi-component publishing example
 
-Working With Source Code
+Working with source code
 
 * Structure of code blocks::	Code block syntax described
 * Editing source code::		Language major-mode editing
@@ -446,6 +446,7 @@ Specific header arguments
 * hlines::			Handle horizontal lines in tables
 * colnames::			Handle column names in tables
 * rownames::			Handle row names in tables
+* shebang::			Make tangled files executable
 
 Miscellaneous
 
@@ -687,9 +688,9 @@ active.  You can do this with either one of the following two lines
 (add-hook 'org-mode-hook 'turn-on-font-lock)  ; Org buffers only
 @end lisp
 
-@cindex Org mode, turning on
+@cindex Org-mode, turning on
 With this setup, all files with extension @samp{.org} will be put
-into Org mode.  As an alternative, make the first line of a file look
+into Org-mode.  As an alternative, make the first line of a file look
 like this:
 
 @example
@@ -697,7 +698,7 @@ MY PROJECTS    -*- mode: org; -*-
 @end example
 
 @vindex org-insert-mode-line-in-empty-file
-@noindent which will select Org mode for this buffer no matter what
+@noindent which will select Org-mode for this buffer no matter what
 the file's name is.  See also the variable
 @code{org-insert-mode-line-in-empty-file}.
 
@@ -800,7 +801,7 @@ special meaning are written with all capitals.
 @end table
 
 @node Document Structure, Tables, Introduction, Top
-@chapter Document Structure
+@chapter Document structure
 @cindex document structure
 @cindex structure of document
 
@@ -1198,7 +1199,7 @@ functionality.
 @vindex org-show-following-heading
 @vindex org-show-siblings
 @vindex org-show-entry-below
-An important feature of Org mode is the ability to construct @emph{sparse
+An important feature of Org-mode is the ability to construct @emph{sparse
 trees} for selected information in an outline tree, so that the entire
 document is folded as much as possible, but the selected information is made
 visible along with the headline structure above it@footnote{See also the
@@ -1207,7 +1208,7 @@ variables @code{org-show-hierarchy-above}, @code{org-show-following-heading},
 control on how much context is shown around each match.}.  Just try it out
 and you will see immediately how it works.
 
-Org mode contains several commands creating such trees, all these
+Org-mode contains several commands creating such trees, all these
 commands can be accessed through a dispatcher:
 
 @table @kbd
@@ -1443,7 +1444,7 @@ numerically, alphabetically, by time, or by custom function.
 
 @vindex org-drawers
 Sometimes you want to keep information associated with an entry, but you
-normally don't want to see it.  For this, Org mode has @emph{drawers}.
+normally don't want to see it.  For this, Org-mode has @emph{drawers}.
 Drawers need to be configured with the variable
 @code{org-drawers}@footnote{You can define drawers on a per-file basis
 with a line like @code{#+DRAWERS: HIDDEN PROPERTIES STATE}}.  Drawers
@@ -1461,7 +1462,7 @@ look like this:
 Visibility cycling (@pxref{Visibility cycling}) on the headline will hide and
 show the entry, but keep the drawer collapsed to a single line.  In order to
 look inside the drawer, you need to move the cursor to the drawer line and
-press @key{TAB} there.  Org mode uses the @code{PROPERTIES} drawer for
+press @key{TAB} there.  Org-mode uses the @code{PROPERTIES} drawer for
 storing properties (@pxref{Properties and Columns}), and you can also arrange
 for state change notes (@pxref{Tracking TODO state changes}) and clock times
 (@pxref{Clocking work time}) to be stored in a drawer @code{LOGBOOK}.  If you
@@ -1497,8 +1498,8 @@ or on a per-file basis by using
 @section Footnotes
 @cindex footnotes
 
-Org mode supports the creation of footnotes.  In contrast to the
-@file{footnote.el} package, Org mode's footnotes are designed for work on a
+Org-mode supports the creation of footnotes.  In contrast to the
+@file{footnote.el} package, Org-mode's footnotes are designed for work on a
 larger document, not only for one-off documents like emails.  The basic
 syntax is similar to the one used by @file{footnote.el}, i.e. a footnote is
 defined in a paragraph that is started by a footnote marker in square
@@ -1512,7 +1513,7 @@ The Org homepage[fn:1] now looks a lot better than it used to.
 [fn:1] The link is: http://orgmode.org
 @end example
 
-Org mode extends the number-based syntax to @emph{named} footnotes and
+Org-mode extends the number-based syntax to @emph{named} footnotes and
 optional inline definition.  Using plain numbers as markers (as
 @file{footnote.el} does) is supported for backward compatibility, but not
 encouraged because of possible conflicts with La@TeX{} snippets (@pxref{Embedded
@@ -1606,7 +1607,7 @@ you can use the usual commands to follow these links.
 @cindex Orgstruct mode
 @cindex minor mode for structure editing
 
-If you like the intuitive way the Org mode structure editing and list
+If you like the intuitive way the Org-mode structure editing and list
 formatting works, you might want to use these commands in other modes like
 Text mode or Mail mode as well.  The minor mode @code{orgstruct-mode} makes
 this possible.   Toggle the mode with @kbd{M-x orgstruct-mode}, or
@@ -2816,7 +2817,7 @@ headlines@footnote{To insert a link targeting a headline, in-buffer
 completion can be used.  Just type a star followed by a few optional letters
 into the buffer and press @kbd{M-@key{TAB}}.  All headlines in the current
 buffer will be offered as completions.  @xref{Handling links}, for more
-commands creating links.}.  When searching, Org mode will first try an
+commands creating links.}.  When searching, Org-mode will first try an
 exact match, but then move on to more and more lenient searches.  For
 example, the link @samp{[[*My Targets]]} will find any of the following:
 
@@ -3236,7 +3237,7 @@ Link to a heading with a @code{CUSTOM_ID} property
 @item /regexp/
 Do a regular expression search for @code{regexp}.  This uses the Emacs
 command @code{occur} to list all matches in a separate window.  If the
-target file is in Org mode, @code{org-occur} is used to create a
+target file is in Org-mode, @code{org-occur} is used to create a
 sparse tree with the matches.
 @c If the target file is a directory,
 @c @code{grep} will be used to search all files in the directory.
@@ -3272,10 +3273,10 @@ for Bib@TeX{} database files, and you can use the corresponding code as
 an implementation example.  See the file @file{org-bibtex.el}.
 
 @node TODO Items, Tags, Hyperlinks, Top
-@chapter TODO Items
+@chapter TODO items
 @cindex TODO items
 
-Org mode does not maintain TODO lists as separate documents@footnote{Of
+Org-mode does not maintain TODO lists as separate documents@footnote{Of
 course, you can make a document that contains only long lists of TODO items,
 but this is not required.}.  Instead, TODO items are an integral part of the
 notes file, because TODO items usually come up while taking notes!  With Org
@@ -3284,7 +3285,7 @@ information is not duplicated, and the entire context from which the TODO
 item emerged is always present.
 
 Of course, this technique for managing TODO items scatters them
-throughout your notes file.  Org mode compensates for this by providing
+throughout your notes file.  Org-mode compensates for this by providing
 methods to give you an overview of all the things that you have to do.
 
 @menu
@@ -3376,7 +3377,7 @@ option @code{org-todo-state-tags-triggers} for details.
 
 @vindex org-todo-keywords
 By default, marked TODO entries have one of only two states: TODO and
-DONE.  Org mode allows you to classify TODO items in more complex ways
+DONE.  Org-mode allows you to classify TODO items in more complex ways
 with @emph{TODO keywords} (stored in @code{org-todo-keywords}).  With
 special setup, the TODO keyword system can work differently in different
 files.
@@ -3401,7 +3402,7 @@ TODO items in particular (@pxref{Tags}).
 
 You can use TODO keywords to indicate different @emph{sequential} states
 in the process of working on an item, for example@footnote{Changing
-this variable only becomes effective after restarting Org mode in a
+this variable only becomes effective after restarting Org-mode in a
 buffer.}:
 
 @lisp
@@ -3444,7 +3445,7 @@ be set up like this:
 
 In this case, different keywords do not indicate a sequence, but rather
 different types.  So the normal work flow would be to assign a task to a
-person, and later to mark it DONE.  Org mode supports this style by adapting
+person, and later to mark it DONE.  Org-mode supports this style by adapting
 the workings of the command @kbd{C-c C-t}@footnote{This is also true for the
 @kbd{t} command in the timeline and agenda buffers.}.  When used several
 times in succession, it will still cycle through all names, in order to first
@@ -3475,7 +3476,7 @@ like this:
         (sequence "|" "CANCELED")))
 @end lisp
 
-The keywords should all be different, this helps Org mode to keep track
+The keywords should all be different, this helps Org-mode to keep track
 of which subsequence should be used for a given entry.  In this setup,
 @kbd{C-c C-t} only operates within a subsequence, so it switches from
 @code{DONE} to (nothing) to @code{TODO}, and from @code{FIXED} to
@@ -3572,9 +3573,9 @@ Remember that the keywords after the vertical bar (or the last keyword
 if no bar is there) must always mean that the item is DONE (although you
 may use a different word).  After changing one of these lines, use
 @kbd{C-c C-c} with the cursor still in the line to make the changes
-known to Org mode@footnote{Org mode parses these lines only when
-Org mode is activated after visiting a file.  @kbd{C-c C-c} with the
-cursor in a line starting with @samp{#+} is simply restarting Org mode
+known to Org-mode@footnote{Org-mode parses these lines only when
+Org-mode is activated after visiting a file.  @kbd{C-c C-c} with the
+cursor in a line starting with @samp{#+} is simply restarting Org-mode
 for the current buffer.}.
 
 @node Faces for TODO keywords, TODO dependencies, Per-file keywords, TODO extensions
@@ -3584,7 +3585,7 @@ for the current buffer.}.
 @vindex org-todo @r{(face)}
 @vindex org-done @r{(face)}
 @vindex org-todo-keyword-faces
-Org mode highlights TODO keywords with special faces: @code{org-todo}
+Org-mode highlights TODO keywords with special faces: @code{org-todo}
 for keywords indicating that an item still has to be acted upon, and
 @code{org-done} for keywords indicating that an item is finished.  If
 you are using more than 2 different states, you might want to use
@@ -3674,7 +3675,7 @@ module @file{org-depend.el}.
 @cindex progress logging
 @cindex logging, of progress
 
-Org mode can automatically record a timestamp and possibly a note when
+Org-mode can automatically record a timestamp and possibly a note when
 you mark a TODO item as DONE, or even each time you change the state of
 a TODO item.  This system is highly configurable, settings can be on a
 per-keyword basis and can be localized to a file or even a subtree.  For
@@ -3738,7 +3739,7 @@ behavior---the recommended drawer for this is called @code{LOGBOOK}.  You can
 also overrule the setting of this variable for a subtree by setting a
 @code{LOG_INTO_DRAWER} property.
 
-Since it is normally too much to record a note for every state, Org mode
+Since it is normally too much to record a note for every state, Org-mode
 expects configuration on a per-keyword basis for this.  This is achieved by
 adding special markers @samp{!} (for a timestamp) and @samp{@@} (for a note)
 in parentheses after each keyword.  For example, with the setting
@@ -3752,7 +3753,7 @@ in parentheses after each keyword.  For example, with the setting
 @vindex org-log-done
 you not only define global TODO keywords and fast access keys, but also
 request that a time is recorded when the entry is set to
-DONE@footnote{It is possible that Org mode will record two timestamps
+DONE@footnote{It is possible that Org-mode will record two timestamps
 when you are using both @code{org-log-done} and state change logging.
 However, it will never prompt for two notes---if you have configured
 both, the state change recording note will take precedence and cancel
@@ -3898,7 +3899,7 @@ which should only be done in certain contexts, for example.
 @section Priorities
 @cindex priorities
 
-If you use Org mode extensively, you may end up with enough TODO items that
+If you use Org-mode extensively, you may end up with enough TODO items that
 it starts to make sense to prioritize them.  Prioritizing can be done by
 placing a @emph{priority cookie} into the headline of a TODO item, like this
 
@@ -3908,11 +3909,11 @@ placing a @emph{priority cookie} into the headline of a TODO item, like this
 
 @noindent
 @vindex org-priority-faces
-By default, Org mode supports three priorities: @samp{A}, @samp{B}, and
+By default, Org-mode supports three priorities: @samp{A}, @samp{B}, and
 @samp{C}.  @samp{A} is the highest priority.  An entry without a cookie is
 treated as priority @samp{B}.  Priorities make a difference only in the
 agenda (@pxref{Weekly/daily agenda}); outside the agenda, they have no
-inherent meaning to Org mode.  The cookies can be highlighted with special
+inherent meaning to Org-mode.  The cookies can be highlighted with special
 faces by customizing the variable @code{org-priority-faces}.
 
 Priorities can be attached to any outline tree entries; they do not need
@@ -4132,7 +4133,7 @@ entry twice (checkboxes with @kbd{C-c C-c}).
 @cindex sparse tree, tag based
 
 An excellent way to implement labels and contexts for cross-correlating
-information is to assign @i{tags} to headlines.  Org mode has extensive
+information is to assign @i{tags} to headlines.  Org-mode has extensive
 support for tags.
 
 @vindex org-tag-faces
@@ -4212,7 +4213,7 @@ also a special command for inserting tags:
 @item C-c C-q
 @cindex completion, of tags
 @vindex org-tags-column
-Enter new tags for the current headline.  Org mode will either offer
+Enter new tags for the current headline.  Org-mode will either offer
 completion or a special single-key interface for setting tags, see
 below.  After pressing @key{RET}, the tags will be inserted and aligned
 to @code{org-tags-column}.  When called with a @kbd{C-u} prefix, all
@@ -4256,7 +4257,7 @@ by adding a STARTUP option line to that file:
 #+STARTUP: noptag
 @end example
 
-By default Org mode uses the standard minibuffer completion facilities for
+By default Org-mode uses the standard minibuffer completion facilities for
 entering tags.  However, it also implements another, quicker, tag selection
 method called @emph{fast tag selection}.  This allows you to select and
 deselect tags with just a single key press.  For this to work well you should
@@ -4415,11 +4416,11 @@ and properties.  For a complete description with many examples, see
 
 
 @node Properties and Columns, Dates and Times, Tags, Top
-@chapter Properties and Columns
+@chapter Properties and columns
 @cindex properties
 
 Properties are a set of key-value pairs associated with an entry.  There
-are two main applications for properties in Org mode.  First, properties
+are two main applications for properties in Org-mode.  First, properties
 are like tags, but with a value.  Second, you can use properties to
 implement (very basic) database capabilities in an Org buffer.  For
 an example of the first application, imagine maintaining a file where
@@ -4436,7 +4437,7 @@ Properties can be conveniently edited and viewed in column view
 
 @menu
 * Property syntax::		How properties are spelled out
-* Special properties::		Access to other Org mode features
+* Special properties::		Access to other Org-mode features
 * Property searches::		Matching property values
 * Property inheritance::	Passing values down the tree
 * Column view::			Tabular viewing and editing
@@ -4534,7 +4535,7 @@ nearest column format definition.
 @section Special properties
 @cindex properties, special
 
-Special properties provide an alternative access method to Org mode
+Special properties provide an alternative access method to Org-mode
 features, like the TODO state or the priority of an entry, discussed in the
 previous chapters.  This interface exists so that you can include
 these states in a column view (@pxref{Column view}), or to use them in
@@ -4622,7 +4623,7 @@ a regular expression and matched against the property values.
 @vindex org-use-property-inheritance
 The outline structure of Org-mode documents lends itself for an
 inheritance model of properties: if the parent in a tree has a certain
-property, the children can inherit this property.  Org mode does not
+property, the children can inherit this property.  Org-mode does not
 turn this on by default, because it can slow down property searches
 significantly and is often not needed.  However, if you find inheritance
 useful, you can turn it on by setting the variable
@@ -4633,7 +4634,7 @@ inherited properties.  If a property has the value @samp{nil}, this is
 interpreted as an explicit undefine of he property, so that inheritance
 search will stop at this value and return @code{nil}.
 
-Org mode has a few properties for which inheritance is hard-coded, at
+Org-mode has a few properties for which inheritance is hard-coded, at
 least for the special applications for which they are used:
 
 @cindex property, COLUMNS
@@ -4664,7 +4665,7 @@ subtree (@pxref{Tracking TODO state changes}).
 A great way to view and edit properties in an outline tree is
 @emph{column view}.  In column view, each outline node is turned into a
 table row.  Columns in this table provide access to properties of the
-entries.  Org mode implements columns by overlaying a tabular structure
+entries.  Org-mode implements columns by overlaying a tabular structure
 over the headline of each item.  While the headlines have been turned
 into a table row, you can still change the visibility of the outline
 tree.  For example, you get a compact table by switching to CONTENTS
@@ -4959,7 +4960,7 @@ features based on them.  For more information see @ref{Using the
 property API}.
 
 @node Dates and Times, Capture - Refile - Archive, Properties and Columns, Top
-@chapter Dates and Times
+@chapter Dates and times
 @cindex dates
 @cindex times
 @cindex timestamp
@@ -4967,9 +4968,9 @@ property API}.
 
 To assist project planning, TODO items can be labeled with a date and/or
 a time.  The specially formatted string carrying the date and time
-information is called a @emph{timestamp} in Org mode.  This may be a
+information is called a @emph{timestamp} in Org-mode.  This may be a
 little confusing because timestamp is often used as indicating when
-something was created or last changed.  However, in Org mode this term
+something was created or last changed.  However, in Org-mode this term
 is used in a much wider sense.
 
 @menu
@@ -5025,7 +5026,7 @@ following will show up in the agenda every Wednesday:
 @end example
 
 @item Diary-style sexp entries
-For more complex date specifications, Org mode supports using the
+For more complex date specifications, Org-mode supports using the
 special sexp diary entries implemented in the Emacs calendar/diary
 package.  For example
 
@@ -5064,7 +5065,7 @@ angular ones.  These timestamps are inactive in the sense that they do
 @cindex creating timestamps
 @cindex timestamps, creating
 
-For Org mode to recognize timestamps, they need to be in the specific
+For Org-mode to recognize timestamps, they need to be in the specific
 format.  All commands listed below produce timestamps in the correct
 format.
 
@@ -5135,7 +5136,7 @@ the following column).
 
 
 @menu
-* The date/time prompt::	How Org mode helps you entering date and time
+* The date/time prompt::	How Org-mode helps you entering date and time
 * Custom time format::		Making dates look different
 @end menu
 
@@ -5145,17 +5146,17 @@ the following column).
 @cindex time, reading in minibuffer
 
 @vindex org-read-date-prefer-future
-When Org mode prompts for a date/time, the default is shown in default
+When Org-mode prompts for a date/time, the default is shown in default
 date/time format, and the prompt therefore seems to ask for a specific
 format.  But it will in fact accept any string containing some date and/or
 time information, and it is really smart about interpreting your input.  You
 can, for example, use @kbd{C-y} to paste a (possibly multi-line) string
-copied from an email message.  Org mode will find whatever information is in
+copied from an email message.  Org-mode will find whatever information is in
 there and derive anything you have not specified from the @emph{default date
 and time}.  The default is usually the current date and time, but when
 modifying an existing timestamp, or when entering the second stamp of a
 range, it is taken from the stamp in the buffer.  When filling in
-information, Org mode assumes that most of the time you will want to enter a
+information, Org-mode assumes that most of the time you will want to enter a
 date in the future: if you omit the month/year and the given day/month is
 @i{before} today, it will assume that you mean a future date@footnote{See the
 variable @code{org-read-date-prefer-future}.  You may set that variable to
@@ -5164,7 +5165,7 @@ tomorrow.}.  If the date has been automatically shifted into the future, the
 time prompt will show this with @samp{(=>F).}
 
 For example, let's assume that today is @b{June 13, 2006}.  Here is how
-various inputs will be interpreted, the items filled in by Org mode are
+various inputs will be interpreted, the items filled in by Org-mode are
 in @b{bold}.
 
 @example
@@ -5256,7 +5257,7 @@ minibuffer@footnote{If you find this distracting, turn the display of with
 
 @vindex org-display-custom-times
 @vindex org-time-stamp-custom-formats
-Org mode uses the standard ISO notation for dates and times as it is
+Org-mode uses the standard ISO notation for dates and times as it is
 defined in ISO 8601.  If you cannot get used to this and require another
 representation of date and time to keep you happy, you can get it by
 customizing the variables @code{org-display-custom-times} and
@@ -5269,7 +5270,7 @@ Toggle the display of custom formats for dates and times.
 @end table
 
 @noindent
-Org mode needs the default format for scanning, so the custom date/time
+Org-mode needs the default format for scanning, so the custom date/time
 format does not @emph{replace} the default format---instead it is put
 @emph{over} the default format using text properties.  This has the
 following consequences:
@@ -5346,23 +5347,23 @@ I.e. the task will automatically be forwarded until completed.
 @end example
 
 @noindent
-@b{Important:} Scheduling an item in Org mode should @i{not} be
+@b{Important:} Scheduling an item in Org-mode should @i{not} be
 understood in the same way that we understand @i{scheduling a meeting}.
 Setting a date for a meeting is just a simple appointment, you should
 mark this entry with a simple plain timestamp, to get this item shown
 on the date where it applies.  This is a frequent misunderstanding by
-Org users.  In Org mode, @i{scheduling} means setting a date when you
+Org users.  In Org-mode, @i{scheduling} means setting a date when you
 want to start working on an action item.
 @end table
 
 You may use timestamps with repeaters in scheduling and deadline
-entries.  Org mode will issue early and late warnings based on the
+entries.  Org-mode will issue early and late warnings based on the
 assumption that the timestamp represents the @i{nearest instance} of
 the repeater.  However, the use of diary sexp entries like
 @c
 @code{<%%(diary-float t 42)>}
 @c
-in scheduling and deadline timestamps is limited.  Org mode does not
+in scheduling and deadline timestamps is limited.  Org-mode does not
 know enough about the internals of each sexp function to issue early and
 late warnings.  However, it will show the item on each day where the
 sexp entry matches.
@@ -5435,7 +5436,7 @@ Sparse tree for deadlines and scheduled items after a given date.
 @cindex tasks, repeated
 @cindex repeated tasks
 
-Some tasks need to be repeated again and again.  Org mode helps to
+Some tasks need to be repeated again and again.  Org-mode helps to
 organize such tasks using a so-called repeater in a DEADLINE, SCHEDULED,
 or plain timestamp.  In the following example
 @example
@@ -5455,7 +5456,7 @@ over-due, so it is important to be able to mark such an entry as completed
 once you have done so.  When you mark a DEADLINE or a SCHEDULE with the TODO
 keyword DONE, it will no longer produce entries in the agenda.  The problem
 with this is, however, that then also the @emph{next} instance of the
-repeated entry will not be active.  Org mode deals with this in the following
+repeated entry will not be active.  Org-mode deals with this in the following
 way: When you try to mark such an entry DONE (using @kbd{C-c C-t}), it will
 shift the base date of the repeating timestamp by the repeater interval, and
 immediately set the entry state back to TODO@footnote{In fact, the target
@@ -5488,7 +5489,7 @@ task, this may not be the best way to handle it.  For example, if you
 forgot to call you father for 3 weeks, it does not make sense to call
 him 3 times in a single day to make up for it.  Finally, there are tasks
 like changing batteries which should always repeat a certain time
-@i{after} the last time you did it.  For these tasks, Org mode has
+@i{after} the last time you did it.  For these tasks, Org-mode has
 special repeaters markers with @samp{++} and @samp{.+}.  For example:
 
 @example
@@ -5515,7 +5516,7 @@ created for this purpose, it is described in @ref{Structure editing}.
 @node Clocking work time, Resolving idle time, Deadlines and scheduling, Dates and Times
 @section Clocking work time
 
-Org mode allows you to clock the time you spend on specific tasks in a
+Org-mode allows you to clock the time you spend on specific tasks in a
 project.  When you start working on an item, you can start the clock.
 When you stop working on that task, or when you mark the task done, the
 clock is stopped and the corresponding time interval is recorded.  It
@@ -5913,7 +5914,7 @@ the documentation for org-remember at
 The new capturing setup described here is preferred and should be used by new
 users.  To convert your @code{org-remember-templates}, run the command
 @example
-@kbd{M-x org-capture-import-remember-templates RET}
+@kbd{M-x org-capture-import-remember-templates @key{RET}}
 @end example
 @noindent and then customize the new variable with @kbd{M-x
 customize-variable org-capture-templates}, check the result, and save the
@@ -6567,7 +6568,7 @@ outline.
 
 
 @node Agenda Views, Markup, Capture - Refile - Archive, Top
-@chapter Agenda Views
+@chapter Agenda views
 @cindex agenda views
 
 Due to the way Org works, TODO items, time-stamped items, and
@@ -6814,7 +6815,7 @@ anniversaries, lunar phases, sunrise/set, recurrent appointments
 Org.  It can be very useful to combine output from Org with
 the diary.
 
-In order to include entries from the Emacs diary into Org mode's
+In order to include entries from the Emacs diary into Org-mode's
 agenda, you only need to customize the variable
 
 @lisp
@@ -6823,7 +6824,7 @@ agenda, you only need to customize the variable
 
 @noindent After that, everything will happen automatically.  All diary
 entries including holidays, anniversaries, etc., will be included in the
-agenda buffer created by Org mode.  @key{SPC}, @key{TAB}, and
+agenda buffer created by Org-mode.  @key{SPC}, @key{TAB}, and
 @key{RET} can be used from the agenda buffer to jump to the diary
 file in order to edit existing diary entries.  The @kbd{i} command to
 insert new entries for the current date works in the agenda buffer, as
@@ -6834,7 +6835,7 @@ between calendar and agenda.
 
 If you are using the diary only for sexp entries and holidays, it is
 faster to not use the above setting, but instead to copy or even move
-the entries into an Org file. Org mode evaluates diary-style sexp
+the entries into an Org file. Org-mode evaluates diary-style sexp
 entries, and does it faster because there is no overhead for first
 creating the diary display.  Note that the sexp entries must start at
 the left margin, no whitespace is allowed before them.  For example,
@@ -7094,7 +7095,7 @@ other properties will slow down the search.  However, once you have paid the
 price by accessing one property, testing additional properties is cheap
 again.
 
-You can configure Org mode to use property inheritance during a search, but
+You can configure Org-mode to use property inheritance during a search, but
 beware that this can slow down searches considerably.  See @ref{Property
 inheritance}, for details.
 
@@ -7127,7 +7128,7 @@ Select @samp{:work:}-tagged TODO lines that are either @samp{WAITING} or
 @cindex timeline, single file
 @cindex time-sorted view
 
-The timeline summarizes all time-stamped items from a single Org mode
+The timeline summarizes all time-stamped items from a single Org-mode
 file in a @emph{time-sorted view}.  The main purpose of this command is
 to give an overview over events in a project.
 
@@ -7149,7 +7150,7 @@ The commands available in the timeline buffer are listed in
 @cindex text search
 @cindex searching, for text
 
-This agenda view is a general text search facility for Org mode entries.
+This agenda view is a general text search facility for Org-mode entries.
 It is particularly useful to find notes.
 
 @table @kbd
@@ -7181,7 +7182,7 @@ If you are following a system like David Allen's GTD to organize your
 work, one of the ``duties'' you have is a regular review to make sure
 that all projects move along.  A @emph{stuck} project is a project that
 has no defined next actions, so it will never show up in the TODO lists
-Org mode produces.  During the review, you need to identify such
+Org-mode produces.  During the review, you need to identify such
 projects and define next actions for them.
 
 @table @kbd
@@ -7200,7 +7201,7 @@ work for you.  The built-in default assumes that all your projects are
 level-2 headlines, and that a project is not stuck if it has at least
 one entry marked with a TODO keyword TODO or NEXT or NEXTACTION.
 
-Let's assume that you, in your own way of using Org mode, identify
+Let's assume that you, in your own way of using Org-mode, identify
 projects with a tag PROJECT, and that you use a TODO keyword MAYBE to
 indicate a project that should not be considered yet.  Let's further
 assume that the TODO keyword DONE marks finished projects, and that NEXT
@@ -7227,7 +7228,7 @@ will still be searched for stuck projects.
 @cindex presentation, of agenda items
 
 @vindex org-agenda-prefix-format
-Before displaying items in an agenda view, Org mode visually prepares
+Before displaying items in an agenda view, Org-mode visually prepares
 the items and sorts them.  Each item occupies a single line.  The line
 starts with a @emph{prefix} that contains the @emph{category}
 (@pxref{Categories}) of the item and other important information.  You can
@@ -7274,7 +7275,7 @@ longer than 10 characters.
 @subsection Time-of-day specifications
 @cindex time-of-day specification
 
-Org mode checks each agenda item for a time-of-day specification.  The
+Org-mode checks each agenda item for a time-of-day specification.  The
 time can be part of the timestamp that triggered inclusion into the
 agenda, for example as in @w{@samp{<2005-05-10 Tue 19:00>}}.  Time
 ranges can be specified with two timestamps, like
@@ -7286,7 +7287,7 @@ plain text (like @samp{12:45} or a @samp{8:30-1pm}).  If the agenda
 integrates the Emacs diary (@pxref{Weekly/daily agenda}), time
 specifications in diary entries are recognized as well.
 
-For agenda display, Org mode extracts the time and displays it in a
+For agenda display, Org-mode extracts the time and displays it in a
 standard 24 hour format as part of the prefix.  The example times in
 the previous paragraphs would end up in the agenda like this:
 
@@ -7735,7 +7736,7 @@ agenda, change a tag for all headings in the region.
 @c
 @kindex ,
 @item ,
-Set the priority for the current item.  Org mode prompts for the
+Set the priority for the current item.  Org-mode prompts for the
 priority character. If you reply with @key{SPC}, the priority cookie
 is removed from the entry.
 @c
@@ -7876,7 +7877,7 @@ d  @r{Set deadline to a specific date.}
 Open the Emacs calendar and move to the date at the agenda cursor.
 @c
 @item c
-When in the calendar, compute and show the Org mode agenda for the
+When in the calendar, compute and show the Org-mode agenda for the
 date at the cursor.
 @c
 @cindex diary entries, creating from agenda
@@ -8074,7 +8075,7 @@ command @kbd{C-c a o} provides a similar view for office tasks.
 @cindex options, for custom agenda views
 
 @vindex org-agenda-custom-commands
-Org mode contains a number of variables regulating agenda construction
+Org-mode contains a number of variables regulating agenda construction
 and display.  The global variables define the behavior for all agenda
 commands, including the custom commands.  However, if you want to change
 some settings just for a single custom view, you can do so.  Setting
@@ -8146,7 +8147,7 @@ yourself.
 @cindex agenda views, exporting
 
 If you are away from your computer, it can be very useful to have a printed
-version of some agenda views to carry around.  Org mode can export custom
+version of some agenda views to carry around.  Org-mode can export custom
 agenda views as plain text, HTML@footnote{You need to install Hrvoje Niksic's
 @file{htmlize.el}.}, Postscript, PDF@footnote{To create PDF output, the
 ghostscript @file{ps2pdf} utility must be installed on the system.  Selecting
@@ -8211,7 +8212,7 @@ or absolute.
 @end lisp
 
 The extension of the file name determines the type of export.  If it is
-@file{.html}, Org mode will use the @file{htmlize.el} package to convert
+@file{.html}, Org-mode will use the @file{htmlize.el} package to convert
 the buffer to HTML and save it to this file name.  If the extension is
 @file{.ps}, @code{ps-print-buffer-with-faces} is used to produce
 Postscript output.  If the extension is @file{.ics}, iCalendar export is
@@ -8345,7 +8346,7 @@ the agenda).
 When exporting Org-mode documents, the exporter tries to reflect the
 structure of the document as accurately as possible in the backend.  Since
 export targets like HTML, La@TeX{}, or DocBook allow much richer formatting,
-Org mode has rules on how to prepare text for rich export.  This section
+Org-mode has rules on how to prepare text for rich export.  This section
 summarizes the markup rules used in an Org-mode buffer.
 
 @menu
@@ -8438,7 +8439,7 @@ the table of contents entirely, by configuring the variable
 @cindex text before first headline, markup rules
 @cindex #+TEXT
 
-Org mode normally exports the text before the first headline, and even uses
+Org-mode normally exports the text before the first headline, and even uses
 the first line as the document title.  The text will be fully marked up.  If
 you need to include literal HTML, La@TeX{}, or DocBook code, use the special
 constructs described below in the sections for the individual exporters.
@@ -8566,8 +8567,8 @@ Toggle the COMMENT keyword at the beginning of an entry.
 @cindex tables, markup rules
 @cindex #+CAPTION
 @cindex #+LABEL
-Both the native Org mode tables (@pxref{Tables}) and tables formatted with
-the @file{table.el} package will be exported properly.  For Org mode tables,
+Both the native Org-mode tables (@pxref{Tables}) and tables formatted with
+the @file{table.el} package will be exported properly.  For Org-mode tables,
 the lines before the first horizontal separator line will become table header
 lines.  You can use the following lines somewhere before the table to assign
 a caption and a label for cross references, and in the text you can refer to
@@ -8721,7 +8722,7 @@ include your @file{.emacs} file, you could use:
 The optional second and third parameter are the markup (e.g. @samp{quote},
 @samp{example}, or @samp{src}), and, if the markup is @samp{src}, the
 language for formatting the contents.  The markup is optional, if it is not
-given, the text will be assumed to be in Org mode format and will be
+given, the text will be assumed to be in Org-mode format and will be
 processed normally.  The include line will also allow additional keyword
 parameters @code{:prefix1} and @code{:prefix} to specify prefixes for the
 first line and for each following line, as well as any options accepted by
@@ -8791,12 +8792,12 @@ mathematical symbols and the occasional formula.  La@TeX{}@footnote{La@TeX{}
 is a macro system based on Donald E. Knuth's @TeX{} system.  Many of the
 features described here as ``La@TeX{}'' are really from @TeX{}, but for
 simplicity I am blurring this distinction.}  is widely used to typeset
-scientific documents. Org mode supports embedding La@TeX{} code into its
+scientific documents. Org-mode supports embedding La@TeX{} code into its
 files, because many academics are used to reading La@TeX{} source code, and
 because it can be readily processed into images for HTML production.
 
 It is not necessary to mark La@TeX{} macros and code in any special way.
-If you observe a few conventions, Org mode knows how to find it and what
+If you observe a few conventions, Org-mode knows how to find it and what
 to do with it.
 
 @menu
@@ -8820,7 +8821,7 @@ You can use La@TeX{} macros to insert special symbols like @samp{\alpha} to
 indicate the Greek letter, or @samp{\to} to indicate an arrow.  Completion
 for these macros is available, just type @samp{\} and maybe a few letters,
 and press @kbd{M-@key{TAB}} to see possible completions.  Unlike La@TeX{}
-code, Org mode allows these macros to be present without surrounding math
+code, Org-mode allows these macros to be present without surrounding math
 delimiters, for example:
 
 @example
@@ -8900,7 +8901,7 @@ MathML, but that is not yet fully supported by many browsers, and there
 is no decent converter for turning La@TeX{} or ASCII representations of
 formulas into MathML. So for the time being, converting formulas into
 images seems the way to go.}. More complex expressions need a dedicated
-formula processor. To this end, Org mode can contain arbitrary La@TeX{}
+formula processor. To this end, Org-mode can contain arbitrary La@TeX{}
 fragments. It provides commands to preview the typeset result of these
 fragments, and upon export to HTML, all fragments will be converted to
 images and inlined into the HTML document@footnote{The La@TeX{} export
@@ -8987,12 +8988,12 @@ setting is active:
 
 CDLa@TeX{} mode is a minor mode that is normally used in combination with a
 major La@TeX{} mode like AUC@TeX{} in order to speed-up insertion of
-environments and math templates.  Inside Org mode, you can make use of
+environments and math templates.  Inside Org-mode, you can make use of
 some of the features of CDLa@TeX{} mode.  You need to install
 @file{cdlatex.el} and @file{texmathp.el} (the latter comes also with
 AUC@TeX{}) from @url{http://www.astro.uva.nl/~dominik/Tools/cdlatex}.
-Don't use CDLa@TeX{} mode itself under Org mode, but use the light
-version @code{org-cdlatex-mode} that comes as part of Org mode.  Turn it
+Don't use CDLa@TeX{} mode itself under Org-mode, but use the light
+version @code{org-cdlatex-mode} that comes as part of Org-mode.  Turn it
 on for the current buffer with @code{M-x org-cdlatex-mode}, or for all
 Org files with
 
@@ -9009,7 +9010,7 @@ Environment templates can be inserted with @kbd{C-c @{}.
 @item
 @kindex @key{TAB}
 The @key{TAB} key will do template expansion if the cursor is inside a
-La@TeX{} fragment@footnote{Org mode has a method to test if the cursor is
+La@TeX{} fragment@footnote{Org-mode has a method to test if the cursor is
 inside such a fragment, see the documentation of the function
 @code{org-inside-LaTeX-fragment-p}.}.  For example, @key{TAB} will
 expand @code{fr} to @code{\frac@{@}@{@}} and position the cursor
@@ -9050,14 +9051,14 @@ Org-mode documents can be exported into a variety of other formats.  For
 printing and sharing of notes, ASCII export produces a readable and simple
 version of an Org file.  HTML export allows you to publish a notes file on
 the web, while the XOXO format provides a solid base for exchange with a
-broad range of other applications. La@TeX{} export lets you use Org mode and
+broad range of other applications. La@TeX{} export lets you use Org-mode and
 its structured editing functions to easily create La@TeX{} files.  DocBook
 export makes it possible to convert Org files to many other formats using
 DocBook tools.  For project management you can create gantt and resource
 charts by using TaskJuggler export.  To incorporate entries with associated
 times like deadlines or appointments into a desktop calendar program like
-iCal, Org mode can also produce extracts in the iCalendar format.  Currently
-Org mode only supports export, not import of these different formats.
+iCal, Org-mode can also produce extracts in the iCalendar format.  Currently
+Org-mode only supports export, not import of these different formats.
 
 Org supports export of selected regions when @code{transient-mark-mode} is
 enabled (default in Emacs 23).
@@ -9321,13 +9322,13 @@ the text and the link in a note before the next heading.  See the variable
 @section HTML export
 @cindex HTML export
 
-Org mode contains an HTML (XHTML 1.0 strict) exporter with extensive
+Org-mode contains an HTML (XHTML 1.0 strict) exporter with extensive
 HTML formatting, in ways similar to John Gruber's @emph{markdown}
 language, but with additional support for tables.
 
 @menu
 * HTML Export commands::	How to invoke HTML export
-* Quoting HTML tags::		Using direct HTML in Org mode
+* Quoting HTML tags::		Using direct HTML in Org-mode
 * Links in HTML export::	How links will be interpreted and formatted
 * Tables in HTML export::	How to modify the formatting of tables
 * Images in HTML export::	How to insert figures into HTML output
@@ -9669,7 +9670,7 @@ pages, configure the variable @code{org-export-html-use-infojs}.
 @cindex PDF export
 @cindex Guerry, Bastien
 
-Org mode contains a La@TeX{} exporter written by Bastien Guerry.  With
+Org-mode contains a La@TeX{} exporter written by Bastien Guerry.  With
 further processing@footnote{The default LaTeX output is designed for
 processing with pdftex or latex.  It includes packages that are not
 compatible with xetex and possibly luatex.  See the variables
@@ -9715,11 +9716,11 @@ Export to a temporary buffer, do not create a file.
 @item C-c C-e v L
 Export only the visible part of the document.
 @item M-x org-export-region-as-latex
-Convert the region to La@TeX{} under the assumption that it was Org mode
+Convert the region to La@TeX{} under the assumption that it was Org-mode
 syntax before.  This is a global command that can be invoked in any
 buffer.
 @item M-x org-replace-region-by-latex
-Replace the active region (assumed to be in Org mode syntax) by La@TeX{}
+Replace the active region (assumed to be in Org-mode syntax) by La@TeX{}
 code.
 @kindex C-c C-e p
 @item C-c C-e p
@@ -10155,7 +10156,7 @@ set:
 @cindex #+LABEL
 @cindex #+ATTR_DOCBOOK
 @example
-#+CAPTION:    The logo of Org mode
+#+CAPTION:    The logo of Org-mode
 #+LABEL:      unicorn-svg
 #+ATTR_DOCBOOK: scalefit="1" width="100%" depth="100%"
 [[./img/org-mode-unicorn.svg]]
@@ -10343,7 +10344,7 @@ Export as Freemind mind map @file{myfile.mm}.
 @section XOXO export
 @cindex XOXO export
 
-Org mode contains an exporter that produces XOXO-style output.
+Org-mode contains an exporter that produces XOXO-style output.
 Currently, this exporter only handles the general outline structure and
 does not interpret any additional Org-mode features.
 
@@ -10364,10 +10365,10 @@ Export only the visible part of the document.
 @vindex org-icalendar-use-deadline
 @vindex org-icalendar-use-scheduled
 @vindex org-icalendar-categories
-Some people use Org mode for keeping track of projects, but still prefer a
+Some people use Org-mode for keeping track of projects, but still prefer a
 standard calendar application for anniversaries and appointments.  In this
 case it can be useful to show deadlines and other time-stamped items in Org
-files in the calendar application.  Org mode can export calendar information
+files in the calendar application.  Org-mode can export calendar information
 in the standard iCalendar format.  If you also want to have TODO entries
 included in the export, configure the variable
 @code{org-icalendar-include-todo}.  Plain timestamps are exported as VEVENT,
@@ -10802,7 +10803,7 @@ a title, style information etc.
 
 For those people already utilizing third party sync tools such as
 @command{rsync} or @command{unison}, it might be preferable not to use the built in
-@i{remote} publishing facilities of Org mode which rely heavily on
+@i{remote} publishing facilities of Org-mode which rely heavily on
 Tramp.  Tramp, while very useful and powerful, tends not to be
 so efficient for multiple file transfer and has been known to cause problems
 under heavy usage.
@@ -10941,7 +10942,7 @@ This may be necessary in particular if files include other files via
 @comment Working With Source Code, Miscellaneous, Publishing, Top
 
 @node Working With Source Code, Miscellaneous, Publishing, Top
-@chapter Working With Source Code
+@chapter Working with source code
 @cindex Schulte, Eric
 @cindex Davison, Dan
 @cindex source code, working with
@@ -10960,7 +10961,8 @@ e.g.
 Org-mode provides a number of features for working with live source code,
 including editing of code blocks in their native major-mode, evaluation of
 code blocks, tangling of code blocks, and exporting code blocks and
-their results in several formats.
+their results in several formats.  This functionality was contributed by Dan
+Davison and Eric Schulte, and was originally named Org-babel.
 
 The following sections describe Org-mode's code block handling facilities.
 
@@ -11194,7 +11196,7 @@ l}.
 Code blocks in the following languages are supported.
 
 @multitable @columnfractions 0.28 0.3 0.22 0.2
-@item Language @tab Identifier @tab Language @tab Identifier
+@item @b{Language} @tab @b{Identifier} @tab @b{Language} @tab @b{Identifier}
 @item Asymptote @tab asymptote @tab C @tab C
 @item C @tab C++ @tab Clojure @tab clojure
 @item css @tab css @tab ditaa @tab ditaa
@@ -11221,13 +11223,13 @@ To add support for a particular language to your installation:
 ensure that the language-specific requirements are met, then
 @item
 add a line to your Emacs configuration like
-@example
+@lisp
 (require 'ob-identifier)
-@end example
+@end lisp
 where ``identifier'' is taken from the table above, e.g.,
-@example
+@lisp
 (require 'ob-sass)
-@end example
+@end lisp
 @end enumerate
 
 @node Header arguments, Results of evaluation, Languages, Working With Source Code
@@ -11265,29 +11267,37 @@ System-wide values of header arguments can be specified by customizing the
 @code{org-babel-default-header-args} variable:
 
 @example
-  org-babel-default-header-args is a variable defined in `org-babel.el'.
-  Its value is
-  ((:session . "none")
-   (:results . "replace")
-   (:exports . "code")
-   (:cache . "no")
-   (:noweb . "no"))
-
-
-  Documentation:
-  Default arguments to use when evaluating a code block.
+:session    => "none"
+:results    => "replace"
+:exports    => "code"
+:cache      => "no"
+:noweb      => "no"
 @end example
+
+@c @example
+@c   org-babel-default-header-args is a variable defined in `org-babel.el'.
+@c   Its value is
+@c   ((:session . "none")
+@c    (:results . "replace")
+@c    (:exports . "code")
+@c    (:cache . "no")
+@c    (:noweb . "no"))
+
+
+@c   Documentation:
+@c   Default arguments to use when evaluating a code block.
+@c @end example
 
 For example, the following example could be used to set the default value of
 @code{:noweb} header arguments to @code{yes}.  This would have the effect of
 expanding @code{:noweb} references by default when evaluating source code
 blocks.
 
-@example
-  (setq org-babel-default-header-args
-	(cons '(:noweb . "yes")
-	      (assq-delete-all :noweb org-babel-default-header-args)))
-@end example
+@lisp
+(setq org-babel-default-header-args
+(cons '(:noweb . "yes")
+(assq-delete-all :noweb org-babel-default-header-args)))
+@end lisp
 
 @node Language-specific header arguments, Buffer-wide header arguments, System-wide header arguments, Using header arguments
 @subsubheading Language-specific header arguments
@@ -11328,10 +11338,10 @@ to @code{yes} in all code blocks in the subtree rooted at the following
 heading:
 
 @example
-  * outline header
-    :PROPERTIES:
-    :cache:    yes
-    :END:
+* outline header
+:PROPERTIES:
+:cache:    yes
+:END:
 @end example
 
 @kindex C-c C-x p
@@ -11356,11 +11366,11 @@ inserted in the buffer, and the @code{:exports} header argument is set to
 preserved on export to HTML or LaTeX.
 
 @example
-  #+source: factorial
-  #+begin_src haskell :results silent :exports code :var n=0
-    fac 0 = 1
-    fac n = n * fac (n-1)
-  #+end_src
+#+source: factorial
+#+begin_src haskell :results silent :exports code :var n=0
+fac 0 = 1
+fac n = n * fac (n-1)
+#+end_src
 @end example
 
 Similarly, it is possible to set header arguments for inline code blocks:
@@ -11393,6 +11403,7 @@ The following header arguments are defined:
 * hlines::			Handle horizontal lines in tables
 * colnames::			Handle column names in tables
 * rownames::			Handle row names in tables
+* shebang::			Make tangled files executable
 @end menu
 
 @node var, results, Specific header arguments, Specific header arguments
@@ -11416,7 +11427,7 @@ The following syntax is used to pass arguments to code blocks using the
 @code{:var} header argument.
 
 @example
-  :var name=assign
+:var name=assign
 @end example
 
 where @code{assign} can take one of the following forms
@@ -11428,31 +11439,31 @@ either a string @code{"string"} or a number @code{9}.
 a table name:
 
 @example
-  #+tblname: example-table
-  | 1 |
-  | 2 |
-  | 3 |
-  | 4 |
+#+tblname: example-table
+| 1 |
+| 2 |
+| 3 |
+| 4 |
 
-  #+source: table-length
-  #+begin_src emacs-lisp :var table=example-table
-    (length table)
-  #+end_src
+#+source: table-length
+#+begin_src emacs-lisp :var table=example-table
+(length table)
+#+end_src
 
-  #+results: table-length
-  : 4
+#+results: table-length
+: 4
 @end example
 
 a code block name, as assigned by @code{#+srcname:}, followed by
 parentheses:
 
 @example
-  #+begin_src emacs-lisp :var length=table-length()
-    (* 2 length)
-  #+end_src
+#+begin_src emacs-lisp :var length=table-length()
+(* 2 length)
+#+end_src
 
-  #+results:
-  : 8
+#+results:
+: 8
 @end example
 
 In addition, an argument can be passed to the code block referenced
@@ -11460,21 +11471,21 @@ by @code{:var}.  The argument is passed within the parentheses following the
 code block name:
 
 @example
-  #+source: double
-  #+begin_src emacs-lisp :var input=8
-    (* 2 input)
-  #+end_src
+#+source: double
+#+begin_src emacs-lisp :var input=8
+(* 2 input)
+#+end_src
 
-  #+results: double
-  : 16
+#+results: double
+: 16
 
-  #+source: squared
-  #+begin_src emacs-lisp :var input=double(input=1)
-    (* input input)
-  #+end_src
+#+source: squared
+#+begin_src emacs-lisp :var input=double(input=1)
+(* input input)
+#+end_src
 
-  #+results: squared
-  : 4
+#+results: squared
+: 4
 @end example
 @end itemize
 
@@ -11485,10 +11496,10 @@ example arguments can be packed inside of parenthesis, separated by commas,
 following the source name.
 
 @example
-  #+source: double(input=0, x=2)
-  #+begin_src emacs-lisp
-    (* 2 (+ input x))
-  #+end_src
+#+source: double(input=0, x=2)
+#+begin_src emacs-lisp
+(* 2 (+ input x))
+#+end_src
 @end example
 
 @subsubheading Indexable variable values
@@ -11497,7 +11508,7 @@ block.  The following example assigns the second and third rows of the table
 @code{example-table} to the variable @code{data}:
 
 @example
-  :var data=example-table[1:2]
+:var data=example-table[1:2]
 @end example
 
 Note: ranges are indexed using the @code{:} operator.
@@ -11508,7 +11519,7 @@ The following example assigns the second column of the first row of
 @code{example-table} to @code{data}:
 
 @example
-  :var data=example-table[0,1]
+:var data=example-table[0,1]
 @end example
 
 It is possible to index into the results of code blocks as well as
@@ -11518,17 +11529,17 @@ from one another by commas.
 For more information on indexing behavior see the documentation for the
 @code{org-babel-ref-index-list} function, provided below.
 
-@example
-  org-babel-ref-index-list is a Lisp function in `org-babel-ref.el'.
+@deffn
+org-babel-ref-index-list is a Lisp function in `org-babel-ref.el'.
 
-  (org-babel-ref-index-list INDEX LIS)
+(org-babel-ref-index-list index lis)
 
-  Return the subset of LIS indexed by INDEX.  If INDEX is
-  separated by ,s then each PORTION is assumed to index into the
-  next deepest nesting or dimension.  A valid PORTION can consist
-  of either an integer index, or two integers separated by a : in
-  which case the entire range is returned.
-@end example
+Return the subset of LIS indexed by INDEX.  If INDEX is
+separated by ,s then each PORTION is assumed to index into the
+next deepest nesting or dimension.  A valid PORTION can consist
+of either an integer index, or two integers separated by a : in
+which case the entire range is returned.
+@end deffn
 
 @node results, file, var, Specific header arguments
 @subsubsection @code{:results}
@@ -11549,7 +11560,7 @@ Org-mode buffer
 block should be handled.
 @end itemize
 
-@subsubheading collection
+@subsubheading Collection
 The following options are mutually exclusive, and specify how the results
 should be collected from the code block.
 
@@ -11566,7 +11577,7 @@ execution of the code block.  This header argument places the
 evaluation in scripting mode.  E.g., @code{:results output}.
 @end itemize
 
-@subsubheading type
+@subsubheading Type
 
 The following options are mutually exclusive and specify what type of results
 the code block will return.  By default, results are inserted as either a
@@ -11603,7 +11614,7 @@ block.  This option currently supports Emacs Lisp, python, and ruby.  E.g.,
 @code{:results value pp}.
 @end itemize
 
-@subsubheading handling
+@subsubheading Handling
 The following results options indicate what happens with the
 results once they are collected.
 
@@ -11660,9 +11671,9 @@ In other words, if you want your plot to go into a folder called Work in your
 home directory, you could use
 
 @example
-  #+begin_src R :file myplot.png :dir ~/Work
-    matplot(matrix(rnorm(100), 10), type="l")
-  #+end_src
+#+begin_src R :file myplot.png :dir ~/Work
+matplot(matrix(rnorm(100), 10), type="l")
+#+end_src
 @end example
 
 @subsubheading Remote execution
@@ -11671,7 +11682,7 @@ which case the code will be evaluated on the remote machine. An example is
 
 @example
 #+begin_src R :file plot.png :dir /dand@@yakuba.princeton.edu:
-  plot(1:10, main=system("hostname", intern=TRUE))
+plot(1:10, main=system("hostname", intern=TRUE))
 #+end_src
 @end example
 
@@ -11788,7 +11799,7 @@ All ``noweb'' syntax references in the body of the code block will be
 expanded before the block is evaluated.
 @end itemize
 
-@subsubheading Noweb Prefix Lines
+@subsubheading Noweb prefix lines
 Noweb insertions are now placed behind the line prefix of the
 @code{<<reference>>}.
 This behavior is illustrated in the following example.  Because the
@@ -11798,15 +11809,15 @@ each line of the expanded noweb reference will be commented.
 This code block:
 
 @example
-  -- <<example>>
+-- <<example>>
 @end example
 
 
 expands to:
 
 @example
-  -- this is the
-  -- multi-line body of example
+-- this is the
+-- multi-line body of example
 @end example
 
 Note that noweb replacement text that does not contain any newlines will not
@@ -11932,7 +11943,7 @@ does not ``look like'' it has column names (i.e. the second row is not an
 hline)
 @end itemize
 
-@node rownames,  , colnames, Specific header arguments
+@node rownames, shebang, colnames, Specific header arguments
 @subsubsection @code{:rownames}
 
 The @code{:rownames} header argument can take on the values @code{yes}
@@ -11962,6 +11973,14 @@ and is then reapplied to the results.
 @end example
 @end itemize
 
+@node shebang,  , rownames, Specific header arguments
+@subsubsection @code{:shebang}
+
+Setting the @code{:shebang} header argument to a string value
+(e.g. @code{:shebang "#!/bin/bash"}) causes the string to be inserted as the
+first line of any tangled file holding the code block, and the file
+permissions of the tangled file are set to make it executable.
+
 @node Results of evaluation, Noweb reference syntax, Header arguments, Working With Source Code
 @section Results of evaluation
 @cindex code block, results of evaluation
@@ -11971,10 +11990,10 @@ The way in which results are handled depends on whether a session is invoked,
 as well as on whether @code{:results value} or @code{:results output} is
 used. The following table shows the possibilities:
 
-@multitable @columnfractions 0.32 0.32 0.32
-@item @tab non-session @tab session
-@item @code{results :value} @tab value of last expression @tab value of last expression
-@item @code{results :output} @tab contents of STDOUT @tab concatenation of interpreter output
+@multitable @columnfractions 0.26 0.33 0.41
+@item @tab @b{Non-session} @tab @b{Session}
+@item @code{:results value} @tab value of last expression @tab value of last expression
+@item @code{:results output} @tab contents of STDOUT @tab concatenation of interpreter output
 @end multitable
 
 Note: With @code{:results value}, the result in both @code{:session} and
@@ -12240,7 +12259,7 @@ buffer.
 After @samp{[}, complete link abbreviations (@pxref{Link abbreviations}).
 @item
 After @samp{#+}, complete the special keywords like @samp{TYP_TODO} or
-@samp{OPTIONS} which set file-specific options for Org mode.  When the
+@samp{OPTIONS} which set file-specific options for Org-mode.  When the
 option keyword is already complete, pressing @kbd{M-@key{TAB}} again
 will insert example settings for this keyword.
 @item
@@ -12288,7 +12307,7 @@ lines into the buffer (@pxref{In-buffer settings}).
 @cindex in-buffer settings
 @cindex special keywords
 
-Org mode uses special lines in the buffer to define settings on a
+Org-mode uses special lines in the buffer to define settings on a
 per-file basis.  These lines start with a @samp{#+} followed by a
 keyword, a colon, and then individual words defining a setting.  Several
 setting words can be in the same line, but you can also have multiple
@@ -12347,14 +12366,14 @@ buffer, most useful for specifying the allowed values of a property.
 @item #+SETUPFILE: file
 This line defines a file that holds more in-buffer setup.  Normally this is
 entirely ignored.  Only when the buffer is parsed for option-setting lines
-(i.e. when starting Org mode for a file, when pressing @kbd{C-c C-c} in a
+(i.e. when starting Org-mode for a file, when pressing @kbd{C-c C-c} in a
 settings line, or when exporting), then the contents of this file are parsed
 as if they had been included in the buffer.  In particular, the file can be
-any other Org mode file with internal setup.  You can visit the file the
+any other Org-mode file with internal setup.  You can visit the file the
 cursor is in the line with @kbd{C-c '}.
 @item #+STARTUP:
 @cindex #+STARTUP:
-This line sets options to be used at startup of Org mode, when an
+This line sets options to be used at startup of Org-mode, when an
 Org file is being visited.
 
 The first set of options deals with the initial visibility of the outline
@@ -12795,11 +12814,11 @@ setup.  See the installation instructions in the file
 @item @file{cdlatex.el} by Carsten Dominik
 @cindex @file{cdlatex.el}
 @cindex Dominik, Carsten
-Org mode can make use of the CDLa@TeX{} package to efficiently enter
+Org-mode can make use of the CDLa@TeX{} package to efficiently enter
 La@TeX{} fragments into Org files.  See @ref{CDLaTeX mode}.
 @item @file{imenu.el} by Ake Stenhoff and Lars Lindberg
 @cindex @file{imenu.el}
-Imenu allows menu access to an index of items in a file.  Org mode
+Imenu allows menu access to an index of items in a file.  Org-mode
 supports Imenu---all you need to do to get the index is the following:
 @lisp
 (add-hook 'org-mode-hook
@@ -12816,7 +12835,7 @@ Org used to use this package for capture, but no longer does.
 @cindex @file{speedbar.el}
 @cindex Ludlam, Eric M.
 Speedbar is a package that creates a special frame displaying files and
-index items in files.  Org mode supports Speedbar and allows you to
+index items in files.  Org-mode supports Speedbar and allows you to
 drill into Org files directly from the Speedbar.  It also allows you to
 restrict the scope of agenda commands to a file or a subtree by using
 the command @kbd{<} in the Speedbar frame.
@@ -12852,13 +12871,13 @@ possible.
 @item @file{footnote.el} by Steven L. Baur
 @cindex @file{footnote.el}
 @cindex Baur, Steven L.
-Org mode recognizes numerical footnotes as provided by this package.
-However, Org mode also has its own footnote support (@pxref{Footnotes}),
+Org-mode recognizes numerical footnotes as provided by this package.
+However, Org-mode also has its own footnote support (@pxref{Footnotes}),
 which makes using @file{footnote.el} unnecessary.
 @end table
 
 @node Conflicts,  , Cooperation, Interaction
-@subsection Packages that lead to conflicts with Org mode
+@subsection Packages that lead to conflicts with Org-mode
 
 @table @asis
 
@@ -12870,7 +12889,7 @@ This conflicts with the use of @kbd{S-@key{cursor}} commands in Org to change
 timestamps, TODO keywords, priorities, and item bullet types if the cursor is
 at such a location.  By default, @kbd{S-@key{cursor}} commands outside
 special contexts don't do anything, but you can customize the variable
-@code{org-support-shift-select}.  Org mode then tries to accommodate shift
+@code{org-support-shift-select}.  Org-mode then tries to accommodate shift
 selection by (i) using it outside of the special contexts where special
 commands apply, and by (ii) extending an existing active region even if the
 cursor moves across a special context.
@@ -12885,7 +12904,7 @@ region.  In fact, Emacs 23 has this built-in in the form of
 @code{shift-selection-mode}, see previous paragraph.  If you are using Emacs
 23, you probably don't want to use another package for this purpose.  However,
 if you prefer to leave these keys to a different package while working in
-Org mode, configure the variable @code{org-replace-disputed-keys}.  When set,
+Org-mode, configure the variable @code{org-replace-disputed-keys}.  When set,
 Org will move the following key bindings in Org files, and in the agenda
 buffer (but not during date selection).
 
@@ -12980,7 +12999,7 @@ maintained by the Worg project and can be found at
 
 A large number of add-on packages have been written by various authors.
 These packages are not part of Emacs, but they are distributed as contributed
-packages with the separate release available at the Org mode home page at
+packages with the separate release available at the Org-mode home page at
 @uref{http://orgmode.org}.  The list of contributed packages, along with
 documentation about each package, is maintained by the Worg project at
 @uref{http://orgmode.org/worg/org-contrib/}.
@@ -14026,13 +14045,13 @@ this flagged entry is finished.
 If you are not able to process all flagged entries directly, you can always
 return to this agenda view using @kbd{C-c a ?}.  Note, however, that there is
 a subtle difference.  The view created automatically by @kbd{M-x
-org-mobile-pull RET} is guaranteed to search all files that have been
+org-mobile-pull @key{RET}} is guaranteed to search all files that have been
 addressed by the last pull.  This might include a file that is not currently
 in your list of agenda files.  If you later use @kbd{C-c a ?} to regenerate
 the view, only the current agenda files will be searched.
 
 @node History and Acknowledgments, Main Index, MobileOrg, Top
-@appendix History and Acknowledgments
+@appendix History and acknowledgments
 @cindex acknowledgements
 @cindex history
 @cindex thanks
@@ -14135,6 +14154,7 @@ them.
 @i{Kees Dullemond} used to edit projects lists directly in HTML and so
 inspired some of the early development, including HTML export.  He also
 asked for a way to narrow wide table columns.
+@item
 @i{Thomas S. Dye} contributed documentation on Worg and helped integrating
 the Org-Babel documentation into the manual.
 @item
@@ -14302,17 +14322,17 @@ and contributed various ideas and code snippets.
 
 
 @node Main Index, Key Index, History and Acknowledgments, Top
-@unnumbered Concept Index
+@unnumbered Concept index
 
 @printindex cp
 
 @node Key Index, Variable Index, Main Index, Top
-@unnumbered Key Index
+@unnumbered Key index
 
 @printindex ky
 
 @node Variable Index,  , Key Index, Top
-@unnumbered Variable Index
+@unnumbered Variable index
 
 This is not a complete index of variables and faces, only the ones that are
 mentioned in the manual.  For a more complete list, use @kbd{M-x
