@@ -1,28 +1,26 @@
 ;;; ob-haskell.el --- org-babel functions for haskell evaluation
 
-;; Copyright (C) 2009 Eric Schulte
+;; Copyright (C) 2009, 2010  Free Software Foundation, Inc.
 
 ;; Author: Eric Schulte
 ;; Keywords: literate programming, reproducible research
 ;; Homepage: http://orgmode.org
 ;; Version: 0.01
 
-;;; License:
+;; This file is part of GNU Emacs.
 
-;; This program is free software; you can redistribute it and/or modify
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 3, or (at your option)
-;; any later version.
-;;
-;; This program is distributed in the hope that it will be useful,
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
-;;
+
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 
@@ -48,13 +46,15 @@
 
 (add-to-list 'org-babel-tangle-lang-exts '("haskell" . "hs"))
 
+(defvar org-babel-default-header-args:haskell '())
+
 (defvar org-babel-haskell-lhs2tex-command "lhs2tex")
 
 (defvar org-babel-haskell-eoe "\"org-babel-haskell-eoe\"")
 
 (defun org-babel-expand-body:haskell (body params &optional processed-params)
   "Expand BODY according to PARAMS, return the expanded body."
-  (let (vars (second (or processed-params (org-babel-process-params params))))
+  (let (vars (nth 1 (or processed-params (org-babel-process-params params))))
     (concat
      (mapconcat
       (lambda (pair) (format "let %s = %s;" (car pair) (cdr pair)))
@@ -65,8 +65,8 @@
   (message "executing haskell source code block")
   (let* ((processed-params (org-babel-process-params params))
          (session (first processed-params))
-         (vars (second processed-params))
-         (result-type (fourth processed-params))
+         (vars (nth 1 processed-params))
+         (result-type (nth 3 processed-params))
          (full-body (org-babel-expand-body:haskell body params processed-params))
          (session (org-babel-prep-session:haskell session params))
          (raw (org-babel-comint-with-output
@@ -202,4 +202,7 @@ constructs (header arguments, no-web syntax etc...) are ignored."
       (message "running %s" command) (shell-command command) (find-file tex-file))))
 
 (provide 'ob-haskell)
+
+;; arch-tag: b53f75f3-ba1a-4b05-82d9-a2a0d4e70804
+
 ;;; ob-haskell.el ends here

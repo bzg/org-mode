@@ -1,28 +1,26 @@
 ;;; ob-R.el --- org-babel functions for R code evaluation
 
-;; Copyright (C) 2009 Eric Schulte
+;; Copyright (C) 2009, 2010  Free Software Foundation, Inc.
 
-;; Author: Eric Schulte
+;; Author: Eric Schulte, Dan Davison
 ;; Keywords: literate programming, reproducible research, R, statistics
 ;; Homepage: http://orgmode.org
 ;; Version: 0.01
 
-;;; License:
+;; This file is part of GNU Emacs.
 
-;; This program is free software; you can redistribute it and/or modify
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 3, or (at your option)
-;; any later version.
-;;
-;; This program is distributed in the hope that it will be useful,
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
-;;
+
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 
@@ -37,16 +35,18 @@
 	  pagecentre colormodel useDingbats horizontal)
   "R-specific header arguments.")
 
+(defvar org-babel-default-header-args:R '())
+
 (defun org-babel-expand-body:R (body params &optional processed-params)
   "Expand BODY according to PARAMS, return the expanded body."
   (let* ((processed-params (or processed-params
                                (org-babel-process-params params)))
-	 (vars (mapcar (lambda (i) (cons (car (nth i (second processed-params)))
+	 (vars (mapcar (lambda (i) (cons (car (nth i (nth 1 processed-params)))
 					 (org-babel-reassemble-table
-					  (cdr (nth i (second processed-params)))
-					  (cdr (nth i (fifth processed-params)))
-					  (cdr (nth i (sixth processed-params))))))
-		       (number-sequence 0 (1- (length (second processed-params))))))
+					  (cdr (nth i (nth 1 processed-params)))
+					  (cdr (nth i (nth 4 processed-params)))
+					  (cdr (nth i (nth 5 processed-params))))))
+		       (number-sequence 0 (1- (length (nth 1 processed-params))))))
          (out-file (cdr (assoc :file params))))
     (concat
      (if out-file (concat (org-babel-R-construct-graphics-device-call out-file params) "\n") "")
@@ -64,7 +64,7 @@ called by `org-babel-execute-src-block'."
   (message "executing R source code block...")
   (save-excursion
     (let* ((processed-params (org-babel-process-params params))
-           (result-type (fourth processed-params))
+           (result-type (nth 3 processed-params))
            (session (org-babel-R-initiate-session (first processed-params) params))
 	   (colnames-p (cdr (assoc :colnames params)))
 	   (rownames-p (cdr (assoc :rownames params)))
@@ -124,7 +124,7 @@ called by `org-babel-execute-src-block'."
           (insert "\n"))
         (format "%s <- read.table(\"%s\", header=%s, row.names=%s, sep=\"\\t\", as.is=TRUE)"
                 name transition-file
-		(if (or (eq (second value) 'hline) colnames-p) "TRUE" "FALSE")
+		(if (or (eq (nth 1 value) 'hline) colnames-p) "TRUE" "FALSE")
 		(if rownames-p "1" "NULL")))
     (format "%s <- %s" name (org-babel-R-quote-tsv-field value))))
 
@@ -249,4 +249,7 @@ requested."
   
 
 (provide 'ob-R)
+
+;; arch-tag: cd4c7298-503b-450f-a3c2-f3e74b630237
+
 ;;; ob-R.el ends here

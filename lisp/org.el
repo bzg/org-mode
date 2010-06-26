@@ -10881,7 +10881,7 @@ changes.  Such blocking occurs when:
 	(let* ((pos (point))
 	       (parent-pos (and (org-up-heading-safe) (point))))
 	  (if (not parent-pos) (throw 'dont-block t)) ; no parent
-	  (when (and (org-entry-get (point) "ORDERED")
+	  (when (and (org-not-nil (org-entry-get (point) "ORDERED"))
 		     (forward-line 1)
 		     (re-search-forward org-not-done-heading-regexp pos t))
 	    (throw 'dont-block nil))  ; block, there is an older sibling not done.
@@ -10893,7 +10893,7 @@ changes.  Such blocking occurs when:
 	    (setq pos (point))
 	    (setq parent-pos (and (org-up-heading-safe) (point)))
 	    (if (not parent-pos) (throw 'dont-block t)) ; no parent
-	    (when (and (org-entry-get (point) "ORDERED")
+	    (when (and (org-not-nil (org-entry-get (point) "ORDERED"))
 		       (forward-line 1)
 		       (re-search-forward org-not-done-heading-regexp pos t))
 	      (throw 'dont-block nil)))))))) ; block, older sibling not done.
@@ -18560,8 +18560,8 @@ beyond the end of the headline."
       (if (bobp)
 	  nil
 	(backward-char 1)
-	(if (org-invisible-p)
-	    (while (and (not (bobp)) (org-invisible-p))
+	(if (org-truely-invisible-p)
+	    (while (and (not (bobp)) (org-truely-invisible-p))
 	      (backward-char 1)
 	      (beginning-of-line 1))
 	  (forward-char 1))))
@@ -18778,6 +18778,17 @@ interactive command with similar behavior."
   (if (fboundp 'outline-invisible-p)
       (outline-invisible-p)
     (get-char-property (point) 'invisible)))
+
+(defun org-truely-invisible-p ()
+  "Check if point is at a character currently not visible.
+This version does not only check the character property, but also
+`visible-mode'."
+  ;; Early versions of noutline don't have `outline-invisible-p'.
+  (if (org-bound-and-true-p visible-mode)
+      nil
+    (if (fboundp 'outline-invisible-p)
+	(outline-invisible-p)
+      (get-char-property (point) 'invisible))))
 
 (defun org-invisible-p2 ()
   "Check if point is at a character currently not visible."

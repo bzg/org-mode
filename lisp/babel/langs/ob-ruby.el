@@ -1,28 +1,26 @@
 ;;; ob-ruby.el --- org-babel functions for ruby evaluation
 
-;; Copyright (C) 2009 Eric Schulte
+;; Copyright (C) 2009, 2010  Free Software Foundation
 
 ;; Author: Eric Schulte
 ;; Keywords: literate programming, reproducible research
 ;; Homepage: http://orgmode.org
 ;; Version: 0.01
 
-;;; License:
+;; This file is part of GNU Emacs.
 
-;; This program is free software; you can redistribute it and/or modify
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 3, or (at your option)
-;; any later version.
-;;
-;; This program is distributed in the hope that it will be useful,
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
-;;
+
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 
@@ -44,9 +42,11 @@
 
 (add-to-list 'org-babel-tangle-lang-exts '("ruby" . "rb"))
 
+(defvar org-babel-default-header-args:ruby '())
+
 (defun org-babel-expand-body:ruby (body params &optional processed-params)
   "Expand BODY according to PARAMS, return the expanded body."
-  (let ((vars (second (or processed-params (org-babel-process-params params)))))
+  (let ((vars (nth 1 (or processed-params (org-babel-process-params params)))))
     (concat
      (mapconcat ;; define any variables
       (lambda (pair)
@@ -61,8 +61,8 @@ called by `org-babel-execute-src-block'."
   (message "executing Ruby source code block")
   (let* ((processed-params (org-babel-process-params params))
          (session (org-babel-ruby-initiate-session (first processed-params)))
-         (result-params (third processed-params))
-         (result-type (fourth processed-params))
+         (result-params (nth 2 processed-params))
+         (result-type (nth 3 processed-params))
          (full-body (org-babel-expand-body:ruby
                      body params processed-params))
          (result (org-babel-ruby-evaluate session full-body result-type)))
@@ -232,4 +232,7 @@ last statement in BODY, as elisp."
     string))
 
 (provide 'ob-ruby)
+
+;; arch-tag: 3e9726db-4520-49e2-b263-e8f571ac88f5
+
 ;;; ob-ruby.el ends here

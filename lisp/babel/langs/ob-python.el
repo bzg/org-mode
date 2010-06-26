@@ -1,28 +1,26 @@
 ;;; ob-python.el --- org-babel functions for python evaluation
 
-;; Copyright (C) 2009 Eric Schulte
+;; Copyright (C) 2009, 2010  Free Software Foundation
 
-;; Author: Eric Schulte
+;; Author: Eric Schulte, Dan Davison
 ;; Keywords: literate programming, reproducible research
 ;; Homepage: http://orgmode.org
 ;; Version: 0.01
 
-;;; License:
+;; This file is part of GNU Emacs.
 
-;; This program is free software; you can redistribute it and/or modify
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 3, or (at your option)
-;; any later version.
-;;
-;; This program is distributed in the hope that it will be useful,
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
-;;
+
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 
@@ -36,6 +34,8 @@
 
 (add-to-list 'org-babel-tangle-lang-exts '("python" . "py"))
 
+(defvar org-babel-default-header-args:python '())
+
 (defun org-babel-expand-body:python (body params &optional processed-params)
   "Expand BODY according to PARAMS, return the expanded body."
   (concat
@@ -44,7 +44,7 @@
       (format "%s=%s"
               (car pair)
               (org-babel-python-var-to-python (cdr pair))))
-    (second (or processed-params (org-babel-process-params params))) "\n")
+    (nth 1 (or processed-params (org-babel-process-params params))) "\n")
    "\n" (org-babel-trim body) "\n"))
 
 (defun org-babel-execute:python (body params)
@@ -53,8 +53,8 @@ called by `org-babel-execute-src-block'."
   (message "executing Python source code block")
   (let* ((processed-params (org-babel-process-params params))
          (session (org-babel-python-initiate-session (first processed-params)))
-         (result-params (third processed-params))
-         (result-type (fourth processed-params))
+         (result-params (nth 2 processed-params))
+         (result-type (nth 3 processed-params))
          (full-body (org-babel-expand-body:python
                      body params processed-params)) ;; then the source block body
          (result (org-babel-python-evaluate session full-body result-type)))
@@ -252,4 +252,7 @@ last statement in BODY, as elisp."
     string))
 
 (provide 'ob-python)
+
+;; arch-tag: f19b6c3d-dfcb-4a1a-9ce0-45ade1ebc212
+
 ;;; ob-python.el ends here

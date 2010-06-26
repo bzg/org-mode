@@ -556,7 +556,7 @@ already gone."
        ((eq (car target) 'file+regexp)
 	(set-buffer (org-capture-target-buffer (nth 1 target)))
 	(goto-char (point-min))
-	(if (re-search-forward (nth 1 target) nil t)
+	(if (re-search-forward (nth 2 target) nil t)
 	    (progn
 	      (goto-char (match-beginning 0))
 	      (setq target-entry-p (and (org-mode-p) (org-at-heading-p))))
@@ -584,8 +584,7 @@ already gone."
        ((eq (car target) 'clock)
 	(if (and (markerp org-clock-hd-marker)
 		 (marker-buffer org-clock-hd-marker))
-	    (progn (set-buffer (org-capture-target-buffer
-				(marker-buffer org-clock-hd-marker)))
+	    (progn (set-buffer (marker-buffer org-clock-hd-marker))
 		   (goto-char org-clock-hd-marker))
 	  (error "No running clock that could be used as capture target")))
 

@@ -1,28 +1,26 @@
 ;;; ob-octave.el --- org-babel functions for octave and matlab evaluation
 
-;; Copyright (C) Dan Davison
+;; Copyright (C) 2010  Free Software Foundation, Inc.
 
 ;; Author: Dan Davison
 ;; Keywords: literate programming, reproducible research
 ;; Homepage: http://orgmode.org
 ;; Version: 0.01
 
-;;; License:
+;; This file is part of GNU Emacs.
 
-;; This program is free software; you can redistribute it and/or modify
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 3, or (at your option)
-;; any later version.
-;;
-;; This program is distributed in the hope that it will be useful,
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
-;;
+
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 
@@ -35,12 +33,14 @@
 (require 'ob)
 (require 'octave-inf)
 
+(defvar org-babel-default-header-args:octave '())
+
 (defvar org-babel-octave-shell-command "octave -q"
   "Shell command to use to run octave as an external process.")
 
 (defun org-babel-expand-body:octave (body params &optional processed-params)
   "Expand BODY according to PARAMS, return the expanded body."
-  (let ((vars (second (or processed-params (org-babel-process-params params)))))
+  (let ((vars (nth 1 (or processed-params (org-babel-process-params params)))))
     (concat
      ;; prepend code to define all arguments passed to the code block
      ;; (may not be appropriate for all languages)
@@ -58,9 +58,9 @@
          ;; set the session if the session variable is non-nil
          (session (funcall (intern (format "org-babel-%s-initiate-session" lang))
 			   (first processed-params) params))
-         (vars (second processed-params))
-         (result-params (third processed-params))
-         (result-type (fourth processed-params))
+         (vars (nth 1 processed-params))
+         (result-params (nth 2 processed-params))
+         (result-type (nth 3 processed-params))
 	 (out-file (cdr (assoc :file params)))
 	 (augmented-body (org-babel-expand-body:octave body params processed-params))
 	 (result (org-babel-octave-evaluate session augmented-body result-type matlabp)))
@@ -218,4 +218,7 @@ comment lines and then calls `org-babel-import-elisp-from-file'."
     string))
 
 (provide 'ob-octave)
+
+;; arch-tag: d8e5f68b-ba13-440a-a495-b653e989e704
+
 ;;; ob-octave.el ends here

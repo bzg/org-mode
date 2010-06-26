@@ -1,55 +1,52 @@
 ;;; ob-ref.el --- org-babel functions for referencing external data
 
-;; Copyright (C) 2009 Eric Schulte, Dan Davison
+;; Copyright (C) 2009, 2010  Free Software Foundation, Inc.
 
 ;; Author: Eric Schulte, Dan Davison
 ;; Keywords: literate programming, reproducible research
 ;; Homepage: http://orgmode.org
 ;; Version: 0.01
 
-;;; License:
+;; This file is part of GNU Emacs.
 
-;; This program is free software; you can redistribute it and/or modify
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 3, or (at your option)
-;; any later version.
-;;
-;; This program is distributed in the hope that it will be useful,
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
-;;
+
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 
 ;; Functions for referencing data from the header arguments of a
 ;; org-babel block.  The syntax of such a reference should be
-;;
+
 ;;   #+VAR: variable-name=file:resource-id
-;;
+
 ;; - variable-name :: the name of the variable to which the value
 ;;                    will be assigned
-;;                    
+
 ;; - file :: path to the file containing the resource, or omitted if
 ;;           resource is in the current file
-;;
+
 ;; - resource-id :: the id or name of the resource
-;;
+
 ;; So an example of a simple src block referencing table data in the
 ;; same file would be
-;;
+
 ;;  #+TBLNAME: sandbox
 ;;  | 1 |       2 | 3 |
 ;;  | 4 | org-babel | 6 |
 ;;
 ;;  #+begin_src emacs-lisp :var table=sandbox
-;;  (message table)
+;;    (message table)
 ;;  #+end_src
-;;
 
 ;;; Code:
 (require 'ob)
@@ -231,4 +228,7 @@ types are tables and source blocks."
         ((looking-at org-babel-result-regexp) 'results-line)))
 
 (provide 'ob-ref)
+
+;; arch-tag: ace4a4f4-ea38-4dac-8fe6-6f52fcc43b6d
+
 ;;; ob-ref.el ends here

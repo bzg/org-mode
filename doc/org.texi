@@ -77,6 +77,7 @@ license to the document, as described in section 6 of the license.
 
 @subtitle Release @value{VERSION}
 @author by Carsten Dominik
+with contributions by David O'Toole, Dan Davison, Eric Schulte and Thomas Dye
 
 @c The following two commands start the copyright page.
 @page
@@ -108,7 +109,7 @@ license to the document, as described in section 6 of the license.
 * Markup::			Prepare text for rich export
 * Exporting::			Sharing and publishing of notes
 * Publishing::			Create a web site of linked Org files
-* Working With Source Code::    Export, evaluate, and tangle code blocks
+* Working With Source Code::	Export, evaluate, and tangle code blocks
 * Miscellaneous::		All the rest which did not fit elsewhere
 * Hacking::			How to hack your way around
 * MobileOrg::			Viewing and capture on a mobile device
@@ -250,18 +251,23 @@ Deadlines and scheduling
 
 Capture - Refile - Archive
 
-* Remember::			Capture new tasks/ideas with little interruption
-* Attachments::			Add files to tasks.
+* Capture::			Capturing new stuff
+* Attachments::			Add files to tasks
 * RSS Feeds::			Getting input from RSS feeds
 * Protocols::			External (e.g. Browser) access to Emacs and Org
 * Refiling notes::		Moving a tree from one place to another
 * Archiving::			What to do with finished projects
 
-Remember
+Capture
 
-* Setting up Remember for Org::	 Some code for .emacs to get things going
-* Remember templates::		Define the outline of different note types
-* Storing notes::		Directly get the note to where it belongs
+* Setting up a capture location::  Where notes will be stored
+* Using capture::		Commands to invoke and terminate capture
+* Capture templates::		Define the outline of different note types
+
+Capture templates
+
+* Template elements::		What is needed for a complete template entry
+* Template expansion::		Filling in information about time and context
 
 Archiving
 
@@ -306,7 +312,7 @@ Markup for rich export
 * Images and tables::		Tables and Images will be included
 * Literal examples::		Source code examples with special formatting
 * Include files::		Include additional files into a document
-* Index entries::
+* Index entries::		Making an index
 * Macro replacement::		Use macros to create complex output
 * Embedded LaTeX::		LaTeX can be freely used inside Org documents
 
@@ -380,13 +386,6 @@ Publishing
 * Uploading files::		How to get files up on the server
 * Sample configuration::	Example projects
 * Triggering publication::	Publication commands
-* Library of Babel::
-* Languages::
-* Header arguments::
-* Results::
-* Noweb reference syntax::
-* Key bindings & useful functions::
-* Batch execution::
 
 Configuration
 
@@ -406,47 +405,47 @@ Sample configuration
 
 Working With Source Code
 
-* Structure of code blocks::
-* Editing source code::
-* Exporting code blocks::
-* Extracting source code::
-* Evaluating code blocks::
-* Library of Babel::
-* Languages::
-* Header arguments::
-* Results::
-* Noweb reference syntax::
-* Key bindings & useful functions::
-* Batch execution::
+* Structure of code blocks::	Code block syntax described
+* Editing source code::		Language major-mode editing
+* Exporting code blocks::	Export contents and/or results
+* Extracting source code::	Create pure source code files
+* Evaluating code blocks::	Place results of evaluation in the Org-mode buffer
+* Library of Babel::		Use and contribute to a library of useful code blocks
+* Languages::			List of supported code block languages
+* Header arguments::		Configure code block functionality
+* Results of evaluation::	How evaluation results are handled
+* Noweb reference syntax::	Literate programming in Org-mode
+* Key bindings and useful functions::  Work quickly with code blocks
+* Batch execution::		Call functions from the command line
 
 Header arguments
 
-* Using header arguments::
-* Specific header arguments::
+* Using header arguments::	Different ways to set header arguments
+* Specific header arguments::	List of header arguments
 
 Using header arguments
 
-* System-wide header arguments::
-* Language-specific header arguments::
-* Buffer-wide header arguments::
-* Header arguments in Org-mode properties::
-* Code block specific header arguments::
+* System-wide header arguments::  Set global default values
+* Language-specific header arguments::	Set default values by language
+* Buffer-wide header arguments::  Set default values for a specific buffer
+* Header arguments in Org-mode properties::  Set default values for a buffer or heading
+* Code block specific header arguments::  The most common way to set values
 
 Specific header arguments
 
-* var argument::
-* results argument::
-* file argument::
-* dir and remote execution::
-* exports argument::
-* tangle argument::
-* no-expand argument::
-* session argument::
-* noweb argument::
-* cache argument::
-* hlines argument::
-* colnames argument::
-* rownames argument::
+* var::				Pass arguments to code blocks
+* results::			Specify the type of results and how they will be collectd and handled
+* file::			Specify a path for file output
+* dir and remote execution::	Specify the default directory for code block execution
+* exports::			Export code and/or results
+* tangle::			Toggle tangling and specify file name
+* no-expand::			Turn off variable assignment and noweb expansion during tangling
+* session::			Preserve the state of code evaluation
+* noweb::			Toggle expansion of noweb references
+* cache::			Avoid re-evaluating unchanged code blocks
+* hlines::			Handle horizontal lines in tables
+* colnames::			Handle column names in tables
+* rownames::			Handle row names in tables
 
 Miscellaneous
 
@@ -4379,26 +4378,6 @@ C-c}).  If you set the variable to the value @code{expert}, the special
 window is not even shown for single-key tag selection, it comes up only
 when you press an extra @kbd{C-c}.
 
-@vindex org-complete-tags-always-offer-all-agenda-tags
-As said before, when setting tags and @code{org-tag-alist} is nil, then the
-list of tags in the current buffer is used.  Normally, this behavior is very
-convenient, except in org remember buffers (@pxref{Remember}), because there
-are no tags that can be calculated dynamically.  Here, you most probably want
-to have completion for all tags in all agenda files.  This can be done by
-setting @code{org-complete-tags-always-offer-all-agenda-tags} to non-nil in
-those buffers.
-
-@lisp
-(add-hook 'org-remember-mode-hook
-          (lambda ()
-            (set (make-local-variable
-                  'org-complete-tags-always-offer-all-agenda-tags)
-                 t)))
-@end lisp
-
-Of course, you can also set it to @code{t} globally if you always want to
-have completion of all tags in all agenda files.
-
 @node Tag searches,  , Setting tags, Tags
 @section Tag searches
 @cindex tag searches
@@ -5904,155 +5883,279 @@ not started at exactly the right moment.
 
 An important part of any organization system is the ability to quickly
 capture new ideas and tasks, and to associate reference material with them.
-Org uses the @file{remember.el} package to create tasks, and stores files
+Org does this using a process called @i{capture}.  It also can store files
 related to a task (@i{attachments}) in a special directory.  Once in the
 system, tasks and projects need to be moved around.  Moving completed project
 trees to an archive file keeps the system compact and fast.
 
 @menu
-* Remember::			Capture new tasks/ideas with little interruption
-* Attachments::			Add files to tasks.
+* Capture::			Capturing new stuff
+* Attachments::			Add files to tasks
 * RSS Feeds::			Getting input from RSS feeds
 * Protocols::			External (e.g. Browser) access to Emacs and Org
 * Refiling notes::		Moving a tree from one place to another
 * Archiving::			What to do with finished projects
 @end menu
 
-@node Remember, Attachments, Capture - Refile - Archive, Capture - Refile - Archive
-@section Remember
-@cindex @file{remember.el}
+@node Capture, Attachments, Capture - Refile - Archive, Capture - Refile - Archive
+@section Capture
+@cindex capture
 
-The Remember package by John Wiegley lets you store quick notes with little
-interruption of your work flow.  It is an excellent way to add new notes and
-tasks to Org files.  The @code{remember.el} package is part of Emacs 23, not
-Emacs 22.  See @uref{http://www.emacswiki.org/cgi-bin/wiki/RememberMode} for
-more information.
+Org's method for capturing new items is heavily inspired by John Wiegley
+excellent remember package.  Up to version 6.36 Org did actually use a
+special setup for @file{remember.el}.  @file{org-remember.el} is still part
+of Org-mode for backward compatibility with existing setups.  You can find
+the documentation for org-remember at
+@url{http://orgmode.org/org-remember.pdf}.
 
-Org significantly expands the possibilities of Remember: you may define
-templates for different note types, and associate target files and headlines
-with specific templates.  It also allows you to select the location where a
-note should be stored interactively, on the fly.
+The new capturing setup described here is preferred and should be used by new
+users.  To convert your @code{org-remember-templates}, run the command
+@example
+@kbd{M-x org-capture-import-remember-templates RET}
+@end example
+@noindent and then customize the new variable with @kbd{M-x
+customize-variable org-capture-templates}, check the result, and save the
+customization.  You will then be able to use both remember and capture until
+you have gotten used to the new mechanism.
+
+Capture lets you store quick notes with little interruption of your work
+flow.  The basic process of capturing is very similar to remember, but Org
+does enhance it with templates and more.
 
 @menu
-* Setting up Remember for Org::	 Some code for .emacs to get things going
-* Remember templates::		Define the outline of different note types
-* Storing notes::		Directly get the note to where it belongs
+* Setting up a capture location::  Where notes will be stored
+* Using capture::		Commands to invoke and terminate capture
+* Capture templates::		Define the outline of different note types
 @end menu
 
-@node Setting up Remember for Org, Remember templates, Remember, Remember
-@subsection Setting up Remember for Org
+@node Setting up a capture location, Using capture, Capture, Capture
+@subsection Setting up a capture location
 
-The following customization will tell Remember to use Org files as
-target, and to create annotations compatible with Org links.
+The following customization sets a default target file for notes, and defines
+a global key@footnote{Please select your own key, @kbd{C-c c} is only a
+suggestion.}  for capturing new stuff.
 
 @example
-(org-remember-insinuate)
-(setq org-directory "~/path/to/my/orgfiles/")
 (setq org-default-notes-file (concat org-directory "/notes.org"))
-(define-key global-map "\C-cr" 'org-remember)
+(define-key global-map "\C-cc" 'org-capture)
 @end example
 
-@noindent
-The last line binds the command @code{org-remember} to a global
-key@footnote{Please select your own key, @kbd{C-c r} is only a
-suggestion.}.  @code{org-remember} basically just calls Remember,
-but it makes a few things easier: if there is an active region, it will
-automatically copy the region into the Remember buffer.  It also allows
-to jump to the buffer and location where Remember notes are being
-stored: just call @code{org-remember} with a prefix argument.  If you
-use two prefix arguments, Org jumps to the location where the last
-remember note was stored.
+@node Using capture, Capture templates, Setting up a capture location, Capture
+@subsection Using capture
 
-The Remember buffer will actually use @code{org-mode} as its major mode, so
-that all editing features of Org mode are available.  In addition to this, a
-minor mode @code{org-remember-mode} is turned on, for the single purpose that
-you can use its keymap @code{org-remember-mode-map} to override some of
-Org mode's key bindings.
+@table @kbd
+@kindex C-c c
+@item C-c c
+Call the command @code{org-capture}.  If you have templates defined
+@pxref{Capture templates}, it will offer these templates for selection or use
+a new Org outline node as the default template.  It will insert the template
+into the target file and switch to an indirect buffer narrowed to this new
+node.  You may then insert the information you want.
 
-You can also call @code{org-remember} in a special way from the agenda,
-using the @kbd{k r} key combination.  With this access, any timestamps
-inserted by the selected Remember template (see below) will default to
-the cursor date in the agenda, rather than to the current date.
+@kindex C-c C-c
+@item C-c C-c
+Once you are done entering information into the capture buffer, 
+@kbd{C-c C-c} will return you to the window configuration before the capture
+process, so that you can resume your work without further distraction.
 
-@node Remember templates, Storing notes, Setting up Remember for Org, Remember
-@subsection Remember templates
-@cindex templates, for Remember
+@kindex C-c C-w
+@item C-c C-w
+When this command is used in the capture buffer, it will finalize the capture
+process by refiling (@pxref{Refiling notes}) the note to a different place.
 
-In combination with Org, you can use templates to generate
-different types of Remember notes.  For example, if you would like
-to use one template to create general TODO entries, another one for
-journal entries, and a third one for collecting random ideas, you could
-use:
+@kindex C-c C-k
+@item C-c C-k
+Abort the capture process and return to the previous state.
+@end table
+
+You can also call @code{org-capture} in a special way from the agenda, using
+the @kbd{k c} key combination.  With this access, any timestamps inserted by
+the selected capture template will default to the cursor date in the agenda,
+rather than to the current date.
+
+@node Capture templates,  , Using capture, Capture
+@subsection Capture templates
+@cindex templates, for Capture
+
+You can use templates to arrange for different types of capture items, and
+for different target locations.  The easiest way to set up such templates is
+through the customize interface.
+
+@table @kbd
+@kindex C-c c C
+@item C-c c C
+Customize the variable @code{org-capture-templates}.
+@end table
+
+Before we give the formal description of template definitions, let's look at
+an example.  Say you would like to use one template to create general TODO
+entries, and you want to put these entries under the heading @samp{Tasks} in
+your file @file{~/org/gtd.org}.  Also, a date tree in the file
+@file{journal.org} should capture journal entries.  A possible configuration
+would then look like this:
 
 @example
-(setq org-remember-templates
- '(("Todo" ?t "* TODO %?\n  %i\n  %a" "~/org/TODO.org" "Tasks")
-   ("Journal" ?j "* %U %?\n\n  %i\n  %a" "~/org/JOURNAL.org")
-   ("Idea" ?i "* %^@{Title@}\n  %i\n  %a" "~/org/JOURNAL.org" "New Ideas")))
+(setq org-capture-templates
+ '(("t" "Todo" entry (file+headline "~/org/gtd.org" "Tasks")
+        "* TODO %?\n  %i\n  %a")
+   ("j" "Journal" entry (file+datetree "~/org/journal.org")
+        "* %?\nEntered on %U\n  %i\n  %a")))
 @end example
 
-@vindex org-remember-default-headline
-@vindex org-directory
-@noindent In these entries, the first string is just a name, and the
-character specifies how to select the template.  It is useful if the
-character is also the first letter of the name.  The next string specifies
-the template.  Two more (optional) strings give the file in which, and the
-headline under which, the new note should be stored.  The file (if not
-present or @code{nil}) defaults to @code{org-default-notes-file}, the heading
-to @code{org-remember-default-headline}.  If the file name is not an absolute
-path, it will be interpreted relative to @code{org-directory}.
-
-The heading can also be the symbols @code{top} or @code{bottom} to send notes
-as level 1 entries to the beginning or end of the file, respectively.  It may
-also be the symbol @code{date-tree}.  Then, a tree with year on level 1,
-month on level 2 and day on level three will be built in the file, and the
-entry will be filed into the tree under the current date@footnote{If the file
-contains an entry with a @code{DATE_TREE} property (arbitrary value), the
-entire date tree will be built under that entry.}
-
-An optional sixth element specifies the contexts in which the user can select
-the template.  This element can be a list of major modes or a function.
-@code{org-remember} will first check whether the function returns @code{t} or
-if we are in any of the listed major modes, and exclude templates for which
-this condition is not fulfilled.  Templates that do not specify this element
-at all, or that use @code{nil} or @code{t} as a value will always be
-selectable.
-
-So for example:
-
-@example
-(setq org-remember-templates
- '(("Bug" ?b "* BUG %?\n  %i\n  %a" "~/org/BUGS.org" "Bugs" (emacs-lisp-mode))
-   ("Journal" ?j "* %U %?\n\n  %i\n  %a" "~/org/JOURNAL.org" "X" my-check)
-   ("Idea" ?i "* %^@{Title@}\n  %i\n  %a" "~/org/JOURNAL.org" "New Ideas")))
-@end example
-
-@noindent
-The first template will only be available when invoking @code{org-remember}
-from a buffer in @code{emacs-lisp-mode}.  The second template will only be
-available when the function @code{my-check} returns @code{t}.  The third
-template will be proposed in any context.
-
-When you call @kbd{M-x org-remember} (or @kbd{M-x remember}) to remember
-something, Org will prompt for a key to select the template (if you have
-more than one template) and then prepare the buffer like
+@noindent If you then press @kbd{C-c c t}, Org will prepare the template
+for you like this:
 @example
 * TODO
-  [[file:@var{link to where you called remember}]]
+  [[file:@var{link to where you initiated capture}]]
 @end example
 
 @noindent
-During expansion of the template, special @kbd{%}-escapes@footnote{If you
-need one of these sequences literally, escape the @kbd{%} with a backslash.}
-allow dynamic insertion of content:
+During expansion of the template, @code{%a} has been replaced by a link to
+the location from where you called the capture command.  This can be
+extremely useful for deriving tasks from emails, for example.  You fill in
+the task definition, press @code{C-c C-c} and Org puts you back into the same
+place where you started the capture process.
+
+
+@menu
+* Template elements::		What is needed for a complete template entry
+* Template expansion::		Filling in information about time and context
+@end menu
+
+@node Template elements, Template expansion, Capture templates, Capture templates
+@subsubsection Template elements
+
+Now lets look at the elements of a template defintion.  Each entry in
+@code{org-capture-templates} is a list with the following items: 
+
+@table @var
+@item keys
+The keys that will select the template, as a string, characters
+only, for example @code{"a"} for a template to be selected with a
+single key, or @code{"bt"} for selection with two keys.  When using
+several keys, keys using the same prefix key must be sequential 
+in the list and preceded by a 2-element entry explaining the
+prefix key, for example
 @example
+         ("b" "Templates for marking stuff to buy")
+@end example
+@noindent If you do not define a template for the @kbd{C} key, this key will
+be used to open the customize buffer for this complex variable.
+
+@item description
+A short string describing the template, which will be shown during
+selection.
+
+@item type
+The type of entry, a symbol.  Valid values are:
+@table @code
+@item entry
+An Org-mode node, with a headline. Will be filed as the child of the
+target entry or as a top-level entry.  The target file should be an Org-mode
+file.
+@item item
+A plain list item, placed in the first plain  list a the target
+location.  Again the target file should be an Org file.
+@item checkitem
+A checkbox item.  This only differs from the plain lis item by the
+default template.
+@item table-line
+a new line in the first table at target location.  Where exactly the
+line will be inserted depends on the properties @code{:prepend} and
+@code{:table-line-pos} (see below)
+@item plain
+Text to be inserted as it is.
+@end table
+
+@item target
+Specification of where the captured item should be placed.
+In Org-mode files, targets usually define a node.  Entries will become
+children of this node, other types will be added to the table or list in the
+body of this node.
+
+Valid values are:
+@table @code
+@item (file "path/to/file")
+Text will be placed at the beginning or end of that file
+
+@item (id "id of existing org entry")
+Filing as child of this entry, or in the body of the entry
+
+@item (file+headline "path/to/file" "node headline")
+Fast configuration if the target heading is unique in the file
+
+@item (file+olp "path/to/file" "Level 1 heading" "Level 2" ...)
+For non-unique headings, the full path is safer.
+
+@item (file+regexp  "path/to/file" "regexp to find location")
+Use a regular expression to position the cursor.
+
+@item (file+datetree "path/to/file")
+Will create a heading in a date tree.
+
+@item (file+function "path/to/file" function-finding-location)
+A function to find the right location in the file.
+
+@item (clock)
+File to the entry that is currently being clocked.
+
+@item (function function-finding-location)
+Most general way, write your own function to find both
+file and location.
+@end table
+
+@item template
+The template for creating the capture item.  If you leave this
+empty, an appropriate default template will be used.  Otherwise this is a
+string with a number of escape code, which will be replaced depending on time
+and context of the capture call.  See below for more details.
+
+@item properties
+The rest of the entry is a property list of additional options.
+Recognized properties are:
+@table @code
+@item :prepend
+Normally new captured information will be appended at
+the target location (last child, last table line, last list item...).
+Setting this property will change that.
+
+@item :immediate-finish
+When set, do not offer to edit the information, just
+file it away immediately.  This makes sense if the template only needs
+information that can be added automatically.
+
+@item :empty-lines
+Set this to the number of lines the should be inserted
+before and after the new item.  Default 0, only common other value is 1.
+
+@item :clock-in
+Start the clock in this item.
+
+@item :clock-resume
+If Starting the capture interrupted a clock, restart that clock when done
+with the capture.
+
+@item :unnarrowed
+Do not narrow the target buffer, simply show the full buffer.  Default is to
+narrow it so that you only see the new stuff.
+@end table
+@end table
+
+@node Template expansion,  , Template elements, Capture templates
+@subsubsection Template expansion
+
+In the template itself, special @kbd{%}-escapes@footnote{If you need one of
+these sequences literally, escape the @kbd{%} with a backslash.}  allow
+dynamic insertion of content:
+@smallexample
 %^@{@var{prompt}@}  @r{prompt the user for a string and replace this sequence with it.}
             @r{You may specify a default value and a completion table with}
             @r{%^@{prompt|default|completion2|completion3...@}}
             @r{The arrow keys access a prompt-specific history.}
 %a          @r{annotation, normally the link created with @code{org-store-link}}
 %A          @r{like @code{%a}, but prompt for the description part}
-%i          @r{initial content, the region when remember is called with C-u.}
+%i          @r{initial content, the region when capture is called while the}
+            @r{region is active.}
             @r{The entire text will be indented like @code{%i} itself.}
 %t          @r{timestamp, date only}
 %T          @r{timestamp with date and time}
@@ -6075,17 +6178,17 @@ allow dynamic insertion of content:
 %!          @r{immediately store note after completing the template}
             @r{(skipping the @kbd{C-c C-c} that normally triggers storing)}
 %&          @r{jump to target location immediately after storing note}
-@end example
+@end smallexample
 
 @noindent
 For specific link types, the following keywords will be
 defined@footnote{If you define your own link types (@pxref{Adding
 hyperlink types}), any property you store with
-@code{org-store-link-props} can be accessed in remember templates in a
+@code{org-store-link-props} can be accessed in capture templates in a
 similar way.}:
 
 @vindex org-from-is-user-regexp
-@example
+@smallexample
 Link type          |  Available keywords
 -------------------+----------------------------------------------
 bbdb               |  %:name %:company
@@ -6098,83 +6201,17 @@ gnus               |  %:group, @r{for messages also all email fields}
 w3, w3m            |  %:url
 info               |  %:file %:node
 calendar           |  %:date"
-@end example
+@end smallexample
 
 @noindent
 To place the cursor after template expansion use:
 
-@example
+@smallexample
 %?          @r{After completing the template, position cursor here.}
-@end example
-
-@noindent
-If you change your mind about which template to use, call
-@code{org-remember} in the remember buffer.  You may then select a new
-template that will be filled with the previous context information.
-
-@node Storing notes,  , Remember templates, Remember
-@subsection Storing notes
-
-@vindex org-remember-clock-out-on-exit
-When you are finished preparing a note with Remember, you have to press
-@kbd{C-c C-c} to file the note away.  If you have started the clock in the
-Remember buffer, you will first be asked if you want to clock out
-now@footnote{To avoid this query, configure the variable
-@code{org-remember-clock-out-on-exit}.}.  If you answer @kbd{n}, the clock
-will continue to run after the note was filed away.
-
-The handler will then store the note in the file and under the headline
-specified in the template, or it will use the default file and headline.  The
-window configuration will be restored, sending you back to the working
-context before the call to Remember.  To re-use the location found during the
-last call to Remember, exit the Remember buffer with @kbd{C-0 C-c C-c},
-i.e. specify a zero prefix argument to @kbd{C-c C-c}.  Another special case
-is @kbd{C-2 C-c C-c} which files the note as a child of the currently clocked
-item, and @kbd{C-3 C-c C-c} files as a sibling of the currently clocked item.
-
-@vindex org-remember-store-without-prompt
-If you want to store the note directly to a different place, use
-@kbd{C-1 C-c C-c} instead to exit Remember@footnote{Configure the
-variable @code{org-remember-store-without-prompt} to make this behavior
-the default.}.  The handler will then first prompt for a target file---if
-you press @key{RET}, the value specified for the template is used.
-Then the command offers the headings tree of the selected file, with the
-cursor position at the default headline (if you specified one in the
-template).  You can either immediately press @key{RET} to get the note
-placed there.  Or you can use the following keys to find a different
-location:
-@example
-@key{TAB}         @r{Cycle visibility.}
-@key{down} / @key{up}   @r{Next/previous visible headline.}
-n / p        @r{Next/previous visible headline.}
-f / b        @r{Next/previous headline same level.}
-u            @r{One level up.}
-@c 0-9          @r{Digit argument.}
-@end example
-@noindent
-Pressing @key{RET} or @key{left} or @key{right}
-then leads to the following result.
-
-@vindex org-reverse-note-order
-@multitable @columnfractions 0.2 0.15 0.65
-@item @b{Cursor position} @tab @b{Key} @tab @b{Note gets inserted}
-@item on headline     @tab @key{RET}              @tab as sublevel of the heading at cursor, first or last
-@item                 @tab                        @tab depending on @code{org-reverse-note-order}.
-@item                 @tab @key{left}/@key{right} @tab as same level, before/after current heading
-@item buffer-start    @tab @key{RET} @tab as level 2 heading at end of file or level 1 at beginning
-@item                 @tab @tab depending on @code{org-reverse-note-order}.
-@item not on headline @tab @key{RET}
-      @tab at cursor position, level taken from context.
-@end multitable
-
-Before inserting the text into a tree, the function ensures that the text has
-a headline, i.e. a first line that starts with a @samp{*}.  If not, a
-headline is constructed from the current date.  If you have indented the text
-of the note below the headline, the indentation will be adapted if inserting
-the note into the tree requires demotion from level 1.
+@end smallexample
 
 
-@node Attachments, RSS Feeds, Remember, Capture - Refile - Archive
+@node Attachments, RSS Feeds, Capture, Capture - Refile - Archive
 @section Attachments
 @cindex attachments
 
@@ -6326,7 +6363,7 @@ For more information, see @file{org-feed.el} and the docstring of
 You can set up Org for handling protocol calls from outside applications that
 are passed to Emacs through the @file{emacsserver}.  For example, you can
 configure bookmarks in your web browser to send a link to the current page to
-Org and create a note from it using Remember (@pxref{Remember}).  Or you
+Org and create a note from it using capture (@pxref{Capture}).  Or you
 could create a bookmark that will tell Emacs to open the local source file of
 a remote website you are looking at with the browser.  See
 @uref{http://orgmode.org/worg/org-contrib/org-protocol.php} for detailed
@@ -7748,7 +7785,7 @@ m   @r{Mark the entry at point for action.  You can also make entries}
     @r{in Org files with @kbd{C-c C-x C-k}.}
 d   @r{Set the deadline of the marked entry to the date at point.}
 s   @r{Schedule the marked entry at the date at point.}
-r   @r{Call @code{org-remember} with the cursor date as default date.}
+r   @r{Call @code{org-capture} with the cursor date as default date.}
 @end example
 @noindent
 Press @kbd{r} afterward to refresh the agenda and see the effect of the
@@ -8310,13 +8347,13 @@ Org mode has rules on how to prepare text for rich export.  This section
 summarizes the markup rules used in an Org-mode buffer.
 
 @menu
-* Structural markup elements::  The basic structure as seen by the exporter
-* Images and tables::           Tables and Images will be included
-* Literal examples::            Source code examples with special formatting
-* Include files::               Include additional files into a document
-* Index entries::               Making an index
-* Macro replacement::           Use macros to create complex output
-* Embedded LaTeX::              LaTeX can be freely used inside Org documents
+* Structural markup elements::	The basic structure as seen by the exporter
+* Images and tables::		Tables and Images will be included
+* Literal examples::		Source code examples with special formatting
+* Include files::		Include additional files into a document
+* Index entries::		Making an index
+* Macro replacement::		Use macros to create complex output
+* Embedded LaTeX::		LaTeX can be freely used inside Org documents
 @end menu
 
 @node Structural markup elements, Images and tables, Markup, Markup
@@ -10407,13 +10444,6 @@ Publishing has been contributed to Org by David O'Toole.
 * Uploading files::		How to get files up on the server
 * Sample configuration::	Example projects
 * Triggering publication::	Publication commands
-* Library of Babel::
-* Languages::
-* Header arguments::
-* Results::
-* Noweb reference syntax::
-* Key bindings & useful functions::
-* Batch execution::
 @end menu
 
 @node Configuration, Uploading files, Publishing, Publishing
@@ -10927,30 +10957,33 @@ e.g.
 
 Org-mode provides a number of features for working with live source code,
 including editing of code blocks in their native major-mode, evaluation of
-code blocks, tangling of code blocks, and exportation of code blocks and
-their results to a number of formats.  The following sections describe
-Org-mode's code block handling facilities.
+code blocks, tangling of code blocks, and exporting code blocks and
+their results in several formats.
+
+The following sections describe Org-mode's code block handling facilities.
 
 @menu
-* Structure of code blocks::
-* Editing source code::
-* Exporting code blocks::
-* Extracting source code::
-* Evaluating code blocks::
-* Library of Babel::
-* Languages::
-* Header arguments::
-* Results::
-* Noweb reference syntax::
-* Key bindings & useful functions::
-* Batch execution::
+* Structure of code blocks::	Code block syntax described
+* Editing source code::		Language major-mode editing
+* Exporting code blocks::	Export contents and/or results
+* Extracting source code::	Create pure source code files
+* Evaluating code blocks::	Place results of evaluation in the Org-mode buffer
+* Library of Babel::		Use and contribute to a library of useful code blocks
+* Languages::			List of supported code block languages
+* Header arguments::		Configure code block functionality
+* Results of evaluation::	How evaluation results are handled
+* Noweb reference syntax::	Literate programming in Org-mode
+* Key bindings and useful functions::  Work quickly with code blocks
+* Batch execution::		Call functions from the command line
 @end menu
 
-
-@node Structure of code blocks, Editing source code, Working With Source Code, Working With Source Code
 @comment  node-name,  next,  previous,  up
 @comment  Structure of code blocks, Editing source code, Working With Source Code, Working With Source Code
+
+@node Structure of code blocks, Editing source code, Working With Source Code, Working With Source Code
 @section Structure of code blocks
+@cindex code block, structure
+@cindex source code, block structure
 
 The structure of code blocks is as follows:
 
@@ -10975,22 +11008,26 @@ Switches controling exportation of the code block (see switches discussion in
 @ref{Literal examples})
 @item <header arguments>
 Optional header arguments control many aspects of evaluation, export and
-tangling of source code blocks. See the @ref{Header arguments}
+tangling of code blocks. See the @ref{Header arguments}
 section. Header arguments can also be set on a per-buffer or per-subtree
 basis using properties.
 @item <body>
 The source code.
 @end table
 
-@node Editing source code, Exporting code blocks, Structure of code blocks, Working With Source Code
 @comment  node-name,  next,  previous,  up
 @comment  Editing source code, Exporting code blocks, Structure of code blocks, Working With Source Code
-@section Editing source code
 
-Use @kbd{C-c '} to edit the current code block. This brings up a language
-major-mode edit buffer containing the body of the code block. Saving this
-buffer will write the new contents back to the Org buffer. Use @kbd{C-c '}
-again to exit.
+@node Editing source code, Exporting code blocks, Structure of code blocks, Working With Source Code
+@section Editing source code
+@cindex code block, editing
+@cindex source code, editing
+
+@kindex C-c '
+Use @kbd{C-c '} to edit the current code block. This brings up
+a language major-mode edit buffer containing the body of the code
+block. Saving this buffer will write the new contents back to the Org
+buffer. Use @kbd{C-c '} again to exit.
 
 The @code{org-src-mode} minor mode will be active in the edit buffer. The
 following variables can be used to configure the behavior of the edit
@@ -11013,10 +11050,13 @@ By default, Org will ask before returning to an open edit buffer. Set
 this variable to nil to switch without asking.
 @end table
 
-@node Exporting code blocks, Extracting source code, Editing source code, Working With Source Code
 @comment  node-name,  next,  previous,  up
 @comment  Exporting code blocks, Extracting source code, Editing source code, Working With Source Code
+
+@node Exporting code blocks, Extracting source code, Editing source code, Working With Source Code
 @section Exporting code blocks
+@cindex code block, exporting
+@cindex source code, exporting
 
 It is possible to export the @emph{contents} of code blocks, the
 @emph{results} of code block evaluation, @emph{neither}, or @emph{both}.  For
@@ -11049,6 +11089,8 @@ Neither the code block nor its results will be exported.
 @comment  Extracting source code, Evaluating code blocks, Exporting code blocks, Working With Source Code
 @node Extracting source code, Evaluating code blocks, Exporting code blocks, Working With Source Code
 @section Extracting source code
+@cindex source code, extracting
+@cindex code block, extracting source code
 
 Creating pure source code files by extracting code from source blocks is
 referred to as ``tangling''---a term adopted from the literate programming
@@ -11056,7 +11098,7 @@ community.  During ``tangling'' of code blocks their bodies are expanded
 using @code{org-babel-expand-src-block} which can expand both variable and
 ``noweb'' style references  (see @ref{Noweb reference syntax}).
 
-@subsubheading header arguments:
+@subsubheading Header arguments
 @table @code
 @item :tangle no
 The default.  The code block is not included in the tangled output.
@@ -11068,9 +11110,10 @@ for the block language.
 Include the code block in the tangled output to file @samp{filename}.
 @end table
 
-@subsubheading functions:
+@kindex  C-c C-v t
+@subsubheading Functions
 @table @code
-@item org-babel-tangle @key{C-c C-v t}
+@item org-babel-tangle @kbd{C-c C-v t}
 Tangle the current file.
 @item org-babel-tangle-file
 Choose a file to tangle.
@@ -11081,15 +11124,18 @@ Choose a file to tangle.
 
 @node Evaluating code blocks, Library of Babel, Extracting source code, Working With Source Code
 @section Evaluating code blocks
+@cindex code block, evaluating
+@cindex source code, evaluating
 
 Code blocks can be evaluated and the results placed in the Org-mode buffer.
-Check the value of the variable @code{org-babel-interpreters} for a list of languages
-that can be evaluated on your system. See also @ref{Languages} for a list of
-supported languages.  See @ref{Structure of code blocks} for information on
-the syntax used to define a code block.
+By default, evaluation is only turned on for @code{emacs-lisp} code blocks,
+however support exists for evaluating blocks in many languages.  See
+@ref{Languages} for a list of supported languages.  See @ref{Structure of
+code blocks} for information on the syntax used to define a code block.
 
+@kindex C-c C-c
 There are a number of ways to evaluate code blocks.  The simplest is to
-press @key{C-c C-c} with the point on a code block.  This will call the
+press @kbd{C-c C-c} with the point on a code block.  This will call the
 @code{org-babel-execute-src-block} function to evaluate the block and
 insert its results into the Org-mode buffer.
 
@@ -11107,7 +11153,7 @@ blocks located in the current Org-mode buffer or in the ``Library of Babel''
 
 @table @code
 @item <name>
-The name of the source code block to be evaluated.
+The name of the code block to be evaluated.
 @item <arguments>
 Arguments specified in this section will be passed to the code block.
 @item <header arguments>
@@ -11118,6 +11164,10 @@ Header arguments can be placed after the function invocation.  See
 
 @node Library of Babel, Languages, Evaluating code blocks, Working With Source Code
 @section Library of Babel
+@cindex babel, library of
+@cindex source code, library
+@cindex code block, library
+
 The ``Library of Babel'' is a library of code blocks
 that can be called from any Org-mode file.  The library is housed in an
 Org-mode file located in the @samp{contrib} directory of Org-mode.
@@ -11128,67 +11178,68 @@ Code blocks defined in the ``Library of Babel'' can be called remotely as if
 they were in the current Org-mode buffer (see @ref{Evaluating code blocks}
 for information on the syntax of remote code block evaluation).
 
+@kindex C-c C-v l
 Code blocks located in any Org-mode file can be loaded into the ``Library of
-Babel'' with the @code{org-babel-lob-ingest} function, bound to @key{C-c C-v
+Babel'' with the @code{org-babel-lob-ingest} function, bound to @kbd{C-c C-v
 l}.
 
 @node Languages, Header arguments, Library of Babel, Working With Source Code
 @section Languages
+@cindex babel, languages
+@cindex source code, languages
+@cindex code block, languages
+
 Code blocks in the following languages are supported.
 
-@multitable @columnfractions 0.583 0.417
-@item Language @tab Identifier
-@item Asymptote @tab asymptote
-@item C @tab C
-@item C @tab C++
-@item Clojure @tab clojure
-@item css @tab css
-@item ditaa @tab ditaa
-@item Graphviz @tab dot
-@item Emacs Lisp @tab emacs-lisp
-@item gnuplot @tab gnuplot
-@item Haskell @tab haskell
-@item Matlab @tab matlab
-@item LaTeX @tab latex
-@item Objective Caml @tab ocaml
-@item Octave @tab octave
-@item OZ @tab oz
-@item Perl @tab perl
-@item Python @tab python
-@item R @tab R
-@item Ruby @tab ruby
-@item Sass @tab sass
-@item GNU Screen @tab screen
-@item shell @tab sh
-@item SQL @tab sql
-@item Sqlite @tab sqlite
+@multitable @columnfractions 0.28 0.3 0.22 0.2
+@item Language @tab Identifier @tab Language @tab Identifier
+@item Asymptote @tab asymptote @tab C @tab C
+@item C @tab C++ @tab Clojure @tab clojure
+@item css @tab css @tab ditaa @tab ditaa
+@item Graphviz @tab dot @tab Emacs Lisp @tab emacs-lisp
+@item gnuplot @tab gnuplot @tab Haskell @tab haskell
+@item Matlab @tab matlab @tab LaTeX @tab latex
+@item Objective Caml @tab ocaml @tab Octave @tab octave
+@item OZ @tab oz @tab Perl @tab perl
+@item Python @tab python @tab R @tab R
+@item Ruby @tab ruby @tab Sass @tab sass
+@item GNU Screen @tab screen @tab shell @tab sh
+@item SQL @tab sql @tab Sqlite @tab sqlite
 @end multitable
 
- See the language specific documentation and an up to date list of languages
-that is available at
-@uref{http://orgmode.org/worg/org-contrib/babel/reference.php#languages}.
+Language specific documentation is available for some languages.  If
+available, it can be found at
+@uref{http://orgmode.org/worg/org-contrib/babel/languages}.
 
 
-To add support for a particular language to your installation, first
-make sure that the requirements of the language are met, then add a line like
-the following to your Emacs configuration, (replace ``identifier'' with one
-of the language names from the above table).
+To add support for a particular language to your installation:
 
+@enumerate
+@item
+ensure that the language-specific requirements are met, then
+@item
+add a line to your Emacs configuration like
 @example
 (require 'ob-identifier)
 @end example
+where ``identifier'' is taken from the table above, e.g.,
+@example
+(require 'ob-sass)
+@end example
+@end enumerate
 
-
-@node Header arguments, Results, Languages, Working With Source Code
+@node Header arguments, Results of evaluation, Languages, Working With Source Code
 @section Header arguments
+@cindex code block, header arguments
+@cindex source code, block header arguments
 
 Code block functionality can be configured with header arguments.  This
 section provides an overview of the use of header arguments, and then
 describes each header argument in detail.
 
 @menu
-* Using header arguments::
-* Specific header arguments::
+* Using header arguments::	Different ways to set header arguments
+* Specific header arguments::	List of header arguments
 @end menu
 
 @node Using header arguments, Specific header arguments, Header arguments, Header arguments
@@ -11197,15 +11248,17 @@ describes each header argument in detail.
 The values of header arguments can be set in five different ways, each more
 specific (and having higher priority) than the last.
 @menu
-* System-wide header arguments::
-* Language-specific header arguments::
-* Buffer-wide header arguments::
-* Header arguments in Org-mode properties::
-* Code block specific header arguments::
+* System-wide header arguments::  Set global default values
+* Language-specific header arguments::	Set default values by language
+* Buffer-wide header arguments::  Set default values for a specific buffer
+* Header arguments in Org-mode properties::  Set default values for a buffer or heading
+* Code block specific header arguments::  The most common way to set values
 @end menu
+
 
 @node System-wide header arguments, Language-specific header arguments, Using header arguments, Using header arguments
 @subsubheading System-wide header arguments
+@vindex org-babel-default-header-args
 System-wide values of header arguments can be specified by customizing the
 @code{org-babel-default-header-args} variable:
 
@@ -11269,7 +11322,7 @@ of setting a header argument for all code blocks in a buffer is
 
 When properties are used to set default header arguments, they are looked up
 with inheritance, so the value of the @code{:cache} header argument will default
-to @code{yes} in all source code blocks in the subtree rooted at the following
+to @code{yes} in all code blocks in the subtree rooted at the following
 heading:
 
 @example
@@ -11279,9 +11332,11 @@ heading:
     :END:
 @end example
 
+@kindex C-c C-x p
+@vindex org-babel-default-header-args
 Properties defined in this way override the properties set in
 @code{org-babel-default-header-args}.  It is convenient to use the
-@code{org-set-property} function bound to @key{C-c C-x p} to set properties
+@code{org-set-property} function bound to @kbd{C-c C-x p} to set properties
 in Org-mode documents.
 
 @node Code block specific header arguments,  , Header arguments in Org-mode properties, Using header arguments
@@ -11291,11 +11346,11 @@ The most common way to assign values to header arguments is at the
 code block level.  This can be done by listing a sequence of header
 arguments and their values as part of the @code{#+begin_src} line.
 Properties set in this way override both the values of
-@code{org-babel-default-header-args} and header argument specified as
+@code{org-babel-default-header-args} and header arguments specified as
 properties.  In the following example, the @code{:results} header argument
 is set to @code{silent}, meaning the results of execution will not be
 inserted in the buffer, and the @code{:exports} header argument is set to
-@code{code}, meaning only the body of the source code block will be
+@code{code}, meaning only the body of the code block will be
 preserved on export to HTML or LaTeX.
 
 @example
@@ -11323,23 +11378,23 @@ Header arguments for ``Library of Babel'' or function call lines can be set as s
 The following header arguments are defined:
 
 @menu
-* var argument::
-* results argument::
-* file argument::
-* dir and remote execution::
-* exports argument::
-* tangle argument::
-* no-expand argument::
-* session argument::
-* noweb argument::
-* cache argument::
-* hlines argument::
-* colnames argument::
-* rownames argument::
+* var::				Pass arguments to code blocks
+* results::			Specify the type of results and how they will be collectd and handled
+* file::			Specify a path for file output
+* dir and remote execution::	Specify the default directory for code block execution
+* exports::			Export code and/or results
+* tangle::			Toggle tangling and specify file name
+* no-expand::			Turn off variable assignment and noweb expansion during tangling
+* session::			Preserve the state of code evaluation
+* noweb::			Toggle expansion of noweb references
+* cache::			Avoid re-evaluating unchanged code blocks
+* hlines::			Handle horizontal lines in tables
+* colnames::			Handle column names in tables
+* rownames::			Handle row names in tables
 @end menu
 
-@node var argument, results argument, Specific header arguments, Specific header arguments
-@subsubsection var argument
+@node var, results, Specific header arguments, Specific header arguments
+@subsubsection @code{:var}
 The @code{:var} header argument is used to pass arguments to
 code blocks.  The specifics of how arguments are included
 in a code block vary by language; these are
@@ -11349,7 +11404,7 @@ languages.  The values passed to arguments can be
 @itemize @bullet
 @item literal values
 @item values from org-mode tables
-@item the results of other source code blocks
+@item the results of other code blocks
 @end itemize
 
 These values can be indexed in a manner similar to arrays---see the argument
@@ -11386,7 +11441,7 @@ a table name:
   : 4
 @end example
 
-a source code block name, as assigned by @code{#+srcname:}, followed by
+a code block name, as assigned by @code{#+srcname:}, followed by
 parentheses:
 
 @example
@@ -11400,7 +11455,7 @@ parentheses:
 
 In addition, an argument can be passed to the code block referenced
 by @code{:var}.  The argument is passed within the parentheses following the
-source code block name:
+code block name:
 
 @example
   #+source: double
@@ -11423,7 +11478,7 @@ source code block name:
 
 @subsubheading Alternate argument syntax
 It is also possible to specify arguments in a potentially more natural way
-using the @code{#+source:} line of a source code block.  As in the following
+using the @code{#+source:} line of a code block.  As in the following
 example arguments can be packed inside of parenthesis, separated by commas,
 following the source name.
 
@@ -11473,39 +11528,39 @@ For more information on indexing behavior see the documentation for the
   which case the entire range is returned.
 @end example
 
-@node results argument, file argument, var argument, Specific header arguments
-@subsubsection results argument
+@node results, file, var, Specific header arguments
+@subsubsection @code{:results}
 
-There are three types of results header argument.  Only one option of each
-type may be supplied per code block.
+There are three classes of @code{:results} header argument.  Only one option of
+each type may be supplied per code block.
 
 @itemize @bullet
-@item collection
-arguments specify how the results should be collected from the source code
-block
-@item type
-header arguments specify what type of result the source code block will
+@item
+@b{collection} header arguments specify how the results should be collected
+from the code block
+@item
+@b{type} header arguments specify what type of result the code block will
 return---which has implications for how they will be inserted into the
 Org-mode buffer
-@item handling
-header arguments specify how the results of evaluating the source code block
-should be handled.
+@item
+@b{handling} header arguments specify how the results of evaluating the code
+block should be handled.
 @end itemize
 
 @subsubheading collection
 The following options are mutually exclusive, and specify how the results
-should be collected from the source code block.
+should be collected from the code block.
 
 @itemize @bullet
-@item value
+@item @code{value}
 This is the default.  The result is the value of the last statement in the
-source code block.  This header argument places the evaluation in functional
+code block.  This header argument places the evaluation in functional
 mode.  Note that in some languages, e.g., python, use of this result type
 requires that a @code{return} statement be included in the body of the source
 code block. E.g., @code{:results value}.
-@item output
+@item @code{output}
 The result is the collection of everything printed to STDOUT during the
-execution of the source code block.  This header argument places the
+execution of the code block.  This header argument places the
 evaluation in scripting mode.  E.g., @code{:results output}.
 @end itemize
 
@@ -11516,64 +11571,65 @@ the code block will return.  By default, results are inserted as either a
 table or scalar depending on their value.
 
 @itemize @bullet
-@item table, vector
+@item @code{table}, @code{vector}
 The results should be interpreted as an Org-mode table.  If a single value is
 returned, it will be converted into a table with one row and one column.
 E.g., @code{:results value table}.
-@item scalar, verbatim
+@item @code{scalar}, @code{verbatim}
 The results should be interpreted literally---they will not be
 converted into a table.  The results will be inserted into the Org-mode
 buffer as quoted text.  E.g., @code{:results value verbatim}.
-@item file
+@item @code{file}
 The results will be interpreted as the path to a file, and will be inserted
 into the Org-mode buffer as a file link.  E.g., @code{:results value file}.
-@item raw, org
+@item @code{raw}, @code{org}
 The results are interpreted as raw Org-mode code and are inserted directly
 into the buffer.  If the results look like a table they will be aligned as
 such by Org-mode.  E.g., @code{:results value raw}.
-@item html
+@item @code{html}
 Results are assumed to be HTML and will be enclosed in a @code{begin_html}
 block.  E.g., @code{:results value html}.
-@item latex
+@item @code{latex}
 Results assumed to be LaTeX and are enclosed in a @code{begin_latex} block.
 E.g., @code{:results value latex}.
-@item code
+@item @code{code}
 Result are assumed to be parseable code and are enclosed in a code block.
 E.g., @code{:results value code}.
-@item pp
+@item @code{pp}
 The result is converted to pretty-printed code and is enclosed in a code
 block.  This option currently supports Emacs Lisp, python, and ruby.  E.g.,
 @code{:results value pp}.
 @end itemize
 
 @subsubheading handling
-The following results options indicate what Org-babel should do with the
+The following results options indicate what happens with the
 results once they are collected.
 
 @itemize @bullet
-@item silent
+@item @code{silent}
 The results will be echoed in the minibuffer but will not be inserted into
 the Org-mode buffer.  E.g., @code{:results output silent}.
-@item replace
+@item @code{replace}
 The default value.  Any existing results will be removed, and the new results
 will be inserted into the Org-mode buffer in their place.  E.g.,
 @code{:results output replace}.
-@item append
+@item @code{append}
 If there are pre-existing results of the code block then the new results will
 be appended to the existing results.  Otherwise the new results will be
 inserted as with @code{replace}.
-@item prepend
+@item @code{prepend}
 If there are pre-existing results of the code block then the new results will
 be prepended to the existing results.  Otherwise the new results will be
 inserted as with @code{replace}.
 @end itemize
 
-@node file argument, dir and remote execution, results argument, Specific header arguments
-@subsubsection file argument
-@code{:file} is used to specify a path for file output in which case an
-Org-mode style link (see @ref{Link format}) @code{file:} link is inserted
-into the buffer as the result. Common examples are graphical output from R,
-gnuplot, ditaa and LaTeX blocks.
+@node file, dir and remote execution, results, Specific header arguments
+@subsubsection @code{:file}
+
+The header argument @code{:file} is used to specify a path for file output.
+An Org-mode style @code{file:} link is inserted into the buffer as the result
+(see @ref{Link format}). Common examples are graphical output from R,
+gnuplot, ditaa and LaTeX code blocks.
 
 Note that for some languages, including R, gnuplot, LaTeX and ditaa,
 graphical output is sent to the specified file without the file being
@@ -11583,13 +11639,14 @@ as python and ruby require that the code explicitly create output
 corresponding to the path indicated by @code{:file}.
 
 
-@node dir and remote execution, exports argument, file argument, Specific header arguments
-@subsubsection dir and remote execution
+@node dir and remote execution, exports, file, Specific header arguments
+@subsubsection @code{:dir} and remote execution
+
 While the @code{:file} header argument can be used to specify the path to the
 output file, @code{:dir} specifies the default directory during code block
 execution. If it is absent, then the directory associated with the current
 buffer is used. In other words, supplying @code{:dir path} temporarily has
-the same effect as changing the current directory with @key{M-x cd path}, and
+the same effect as changing the current directory with @kbd{M-x cd path}, and
 then not supplying @code{:dir}. Under the surface, @code{:dir} simply sets
 the value of the Emacs variable @code{default-directory}.
 
@@ -11650,37 +11707,39 @@ directory}. Therefore, if @code{default-directory} is altered using
 which the link does not point.
 @end itemize
 
-@node exports argument, tangle argument, dir and remote execution, Specific header arguments
-@subsubsection exports argument
-Specify what should be included in HTML or LaTeX exports of the Org-mode
-file.
+@node exports, tangle, dir and remote execution, Specific header arguments
+@subsubsection @code{:exports}
+
+The @code{:exports} header argument specifies what should be included in HTML
+or LaTeX exports of the Org-mode file.
 
 @itemize @bullet
-@item code
-the default.  The body of code is included into the exported file.  E.g.,
+@item @code{code}
+The default.  The body of code is included into the exported file.  E.g.,
 @code{:exports code}.
-@item results
-the result of evaluating the code is included in the exported file. E.g.,
+@item @code{results}
+The result of evaluating the code is included in the exported file. E.g.,
 @code{:exports results}.
-@item both
-both the code and results are included in the exported file. E.g.,
+@item @code{both}
+Both the code and results are included in the exported file. E.g.,
 @code{:exports both}.
-@item none
-nothing is included in the exported file.  E.g., @code{:exports none}.
+@item @code{none}
+Nothing is included in the exported file.  E.g., @code{:exports none}.
 @end itemize
 
-@node tangle argument, no-expand argument, exports argument, Specific header arguments
-@subsubsection tangle argument
-Specify whether or not the source code block should be included in tangled
-extraction of source code files.
+@node tangle, no-expand, exports, Specific header arguments
+@subsubsection @code{:tangle}
+
+The @code{:tangle} header argument specifies whether or not the code
+block should be included in tangled extraction of source code files.
 
 @itemize @bullet
-@item yes
-the source code block is exported to a source code file named after the
+@item @code{yes}
+The code block is exported to a source code file named after the
 basename (name w/o extension) of the Org-mode file.  E.g., @code{:tangle
 yes}.
-@item no
-the default.  The source code block is not exported to a source code file.
+@item @code{no}
+The default.  The code block is not exported to a source code file.
 E.g., @code{:tangle no}.
 @item other
 Any other string passed to the @code{:tangle} header argument is interpreted
@@ -11688,18 +11747,21 @@ as a file basename to which the block will be exported.  E.g., @code{:tangle
 basename}.
 @end itemize
 
-@node no-expand argument, session argument, tangle argument, Specific header arguments
-@subsubsection no-expand argument
+@node no-expand, session, tangle, Specific header arguments
+@subsubsection @code{:no-expand}
+
 By default, code blocks are expanded with @code{org-babel-expand-src-block}
 during tangling.  This has the effect of assigning values to variables
-specified with @code{:var} (see @ref{var argument}), and of replacing ``noweb''
+specified with @code{:var} (see @ref{var}), and of replacing ``noweb''
 references (see @ref{Noweb reference syntax}) with their targets.  The
 @code{:no-expand} header argument can be used to turn off this behavior.
 
-@node session argument, noweb argument, no-expand argument, Specific header arguments
-@subsubsection session argument
-Start a session for an interpreted language where state is preserved.  This
-applies particularly to the supported languages python, R and ruby.
+@node session, noweb, no-expand, Specific header arguments
+@subsubsection @code{:session}
+
+The @code{:session} header argument starts a session for an interpreted
+language where state is preserved.  This applies particularly to the
+supported languages python, R and ruby.
 
 By default, a session is not started.
 
@@ -11707,19 +11769,20 @@ A string passed to the @code{:session} header argument will give the session
 a name.  This makes it possible to run concurrent sessions for each
 interpreted language.
 
-@node noweb argument, cache argument, session argument, Specific header arguments
-@subsubsection noweb argument
-Controls the expansion of ``noweb'' style (see @ref{Noweb reference syntax})
-references in a source code block.  This header argument can have one of two
-values: @code{yes} or @code{no}.
+@node noweb, cache, session, Specific header arguments
+@subsubsection @code{:noweb}
+
+The @code{:noweb} header argument controls expansion of ``noweb'' style (see
+@ref{Noweb reference syntax}) references in a code block.  This header
+argument can have one of two values: @code{yes} or @code{no}.
 
 @itemize @bullet
 @item @code{no}
-the default.  No ``noweb'' syntax specific action is taken on evaluating
-source code blocks, However, noweb references will still be expanded during
+The default.  No ``noweb'' syntax specific action is taken on evaluating
+code blocks, However, noweb references will still be expanded during
 tangling.
 @item @code{yes}
-all ``noweb'' syntax references in the body of the source code block will be
+All ``noweb'' syntax references in the body of the code block will be
 expanded before the block is evaluated.
 @end itemize
 
@@ -11730,7 +11793,7 @@ This behavior is illustrated in the following example.  Because the
 @code{<<example>>} noweb reference appears behind the SQL comment syntax,
 each line of the expanded noweb reference will be commented.
 
-This source code block:
+This code block:
 
 @example
   -- <<example>>
@@ -11748,26 +11811,29 @@ Note that noweb replacement text that does not contain any newlines will not
 be affected by this change, so it is still possible to use inline noweb
 references.
 
-@node cache argument, hlines argument, noweb argument, Specific header arguments
-@subsubsection cache argument
-Controls the use of in-buffer caching of source code block results to avoid
-re-running unchanged source code blocks.  This header argument can have one
-of two values: @code{yes} or @code{no}.
+@node cache, hlines, noweb, Specific header arguments
+@subsubsection @code{:cache}
+
+The @code{:cache} header argument controls the use of in-buffer caching of
+the results of evaluating code blocks.  It can be used to avoid re-evaluating
+unchanged code blocks.  This header argument can have one of two
+values: @code{yes} or @code{no}.
 
 @itemize @bullet
 @item @code{no}
-The default.  No caching takes place and the source code block will be run
-every time it is evaluated.
+The default.  No caching takes place, and the code block will be evaluated
+every time it is called.
 @item @code{yes}
-every time the source code block is run a sha1 hash of the code and arguments
+Every time the code block is run a sha1 hash of the code and arguments
 passed to the block will be generated.  This hash is packed into the
-@code{#+results:} line of the results and will be checked on subsequent
-executions of the source code block.  If the source code block has not
+@code{#+results:} line and will be checked on subsequent
+executions of the code block.  If the code block has not
 changed since the last time it was evaluated, it will not be re-evaluated.
 @end itemize
 
-@node hlines argument, colnames argument, cache argument, Specific header arguments
-@subsubsection hlines argument
+@node hlines, colnames, cache, Specific header arguments
+@subsubsection @code{:hlines}
+
 Tables are frequently represented with one or more horizontal lines, or
 hlines.  The @code{:hlines} argument to a code block accepts the
 values @code{yes} or @code{no}, with a default value of @code{no}.
@@ -11823,8 +11889,9 @@ Leaves hlines in the table. Setting @code{:hlines yes} has this effect.
 @end example
 @end itemize
 
-@node colnames argument, rownames argument, hlines argument, Specific header arguments
-@subsubsection colnames argument
+@node colnames, rownames, hlines, Specific header arguments
+@subsubsection @code{:colnames}
+
 The @code{:colnames} header argument accepts the values @code{yes},
 @code{no}, or @code{nil} for unassigned.  The default value is @code{nil}.
 
@@ -11863,8 +11930,9 @@ does not ``look like'' it has column names (i.e. the second row is not an
 hline)
 @end itemize
 
-@node rownames argument,  , colnames argument, Specific header arguments
-@subsubsection rownames argument
+@node rownames,  , colnames, Specific header arguments
+@subsubsection @code{:rownames}
+
 The @code{:rownames} header argument can take on the values @code{yes}
 or @code{no}, with a default value of @code{no}.
 
@@ -11892,8 +11960,11 @@ and is then reapplied to the results.
 @end example
 @end itemize
 
-@node Results, Noweb reference syntax, Header arguments, Working With Source Code
-@section Results
+@node Results of evaluation, Noweb reference syntax, Header arguments, Working With Source Code
+@section Results of evaluation
+@cindex code block, results of evaluation
+@cindex source code, results of evaluation
+
 The way in which results are handled depends on whether a session is invoked,
 as well as on whether @code{:results value} or @code{:results output} is
 used. The following table shows the possibilities:
@@ -11972,8 +12043,12 @@ But in @code{:session} mode, the interactive interpreter receives input '2'
 and prints out its value, '2'. (Indeed, the other print statements are
 unnecessary here).
 
-@node Noweb reference syntax, Key bindings & useful functions, Results, Working With Source Code
+@node Noweb reference syntax, Key bindings and useful functions, Results of evaluation, Working With Source Code
 @section Noweb reference syntax
+@cindex code block, noweb reference
+@cindex syntax, noweb
+@cindex source code, noweb reference
+
 The ``noweb'' (see @uref{http://www.cs.tufts.edu/~nr/noweb/}) Literate
 Programming system allows named blocks of code to be referenced by using the
 familiar Noweb syntax:
@@ -11982,61 +12057,91 @@ familiar Noweb syntax:
 <<code-block-name>>
 @end example
 
-When a source code block is tangled or evaluated, whether or not ``noweb''
+When a code block is tangled or evaluated, whether or not ``noweb''
 references are expanded depends upon the value of the @code{:noweb} header
 argument.  If @code{:noweb yes}, then a Noweb reference is expanded before
 evaluation.  If @code{:noweb no}, the default, then the reference is not
 expanded before evaluation.
 
 Note: the default value, @code{:noweb no}, was chosen to ensure that
-Org-babel does not break correct code in a language, such as Ruby, where
+correct code is not broken in a language, such as Ruby, where
 @code{<<arg>>} is a syntactically valid construct.  If @code{<<arg>>} is not
 syntactically valid in languages that you use, then please consider setting
 the default value.
 
-@node Key bindings & useful functions, Batch execution, Noweb reference syntax, Working With Source Code
-@section Key bindings & useful functions
+@node Key bindings and useful functions, Batch execution, Noweb reference syntax, Working With Source Code
+@section Key bindings and useful functions
+@cindex code block, key bindings
 
 Many common Org-mode key sequences are re-bound depending on
-the context.  Within a code block the following sequences
-are rebound:
+the context.
+
+Within a code block, the following key bindings
+are active:
 
 @multitable @columnfractions 0.25 0.75
-@item @key{C-c C-c} @tab org-babel-execute-src-block
-@item @key{C-c C-o} @tab org-babel-open-src-block-result
-@item @key{C-up}    @tab org-babel-load-in-session
-@item @key{M-down}  @tab org-babel-pop-to-session
+@kindex C-c C-c
+@item @kbd{C-c C-c} @tab org-babel-execute-src-block
+@kindex C-c C-o
+@item @kbd{C-c C-o} @tab org-babel-open-src-block-result
+@kindex C-up
+@item @kbd{C-@key{up}}    @tab org-babel-load-in-session
+@kindex M-down
+@item @kbd{M-@key{down}}  @tab org-babel-pop-to-session
 @end multitable
 
-@multitable @columnfractions 0.25 0.75
-@item @key{C-c C-v a} @tab org-babel-sha1-hash
-@item @key{C-c C-v b} @tab org-babel-execute-buffer
-@item @key{C-c C-v f} @tab org-babel-tangle-file
-@item @key{C-c C-v g} @tab org-babel-goto-named-source-block
-@item @key{C-c C-v h} @tab org-babel-describe-bindings
-@item @key{C-c C-v l} @tab org-babel-lob-ingest
-@item @key{C-c C-v p} @tab org-babel-expand-src-block
-@item @key{C-c C-v s} @tab org-babel-execute-subtree
-@item @key{C-c C-v t} @tab org-babel-tangle
-@item @key{C-c C-v z} @tab org-babel-switch-to-session
+In an Org-mode buffer, the following key bindings are active:
+
+@multitable @columnfractions 0.45 0.55
+@kindex C-c C-v a
+@kindex C-c C-v C-a
+@item @kbd{C-c C-v a} @r{or} @kbd{C-c C-v C-a} @tab org-babel-sha1-hash
+@kindex C-c C-v b
+@kindex C-c C-v C-b
+@item @kbd{C-c C-v b} @r{or} @kbd{C-c C-v C-b} @tab org-babel-execute-buffer
+@kindex C-c C-v f
+@kindex C-c C-v C-f
+@item @kbd{C-c C-v f} @r{or} @kbd{C-c C-v C-f} @tab org-babel-tangle-file
+@kindex C-c C-v g
+@item @kbd{C-c C-v g} @tab org-babel-goto-named-source-block
+@kindex C-c C-v h
+@item @kbd{C-c C-v h} @tab org-babel-describe-bindings
+@kindex C-c C-v l
+@kindex C-c C-v C-l
+@item @kbd{C-c C-v l} @r{or} @kbd{C-c C-v C-l} @tab org-babel-lob-ingest
+@kindex C-c C-v p
+@kindex C-c C-v C-p
+@item @kbd{C-c C-v p} @r{or} @kbd{C-c C-v C-p} @tab org-babel-expand-src-block
+@kindex C-c C-v s
+@kindex C-c C-v C-s
+@item @kbd{C-c C-v s} @r{or} @kbd{C-c C-v C-s} @tab org-babel-execute-subtree
+@kindex C-c C-v t
+@kindex C-c C-v C-t
+@item @kbd{C-c C-v t} @r{or} @kbd{C-c C-v C-t} @tab org-babel-tangle
+@kindex C-c C-v z
+@kindex C-c C-v C-z
+@item @kbd{C-c C-v z} @r{or} @kbd{C-c C-v C-z} @tab org-babel-switch-to-session
 @end multitable
 
-When possible these keybindings were extended to work when the control key is
-kept pressed, resulting in the following additional keybindings.
+@c When possible these keybindings were extended to work when the control key is
+@c kept pressed, resulting in the following additional keybindings.
 
-@multitable @columnfractions 0.25 0.75
-@item @key{C-c C-v C-a} @tab org-babel-sha1-hash
-@item @key{C-c C-v C-b} @tab org-babel-execute-buffer
-@item @key{C-c C-v C-f} @tab org-babel-tangle-file
-@item @key{C-c C-v C-l} @tab org-babel-lob-ingest
-@item @key{C-c C-v C-p} @tab org-babel-expand-src-block
-@item @key{C-c C-v C-s} @tab org-babel-execute-subtree
-@item @key{C-c C-v C-t} @tab org-babel-tangle
-@item @key{C-c C-v C-z} @tab org-babel-switch-to-session
-@end multitable
+@c @multitable @columnfractions 0.25 0.75
+@c @item @kbd{C-c C-v C-a} @tab org-babel-sha1-hash
+@c @item @kbd{C-c C-v C-b} @tab org-babel-execute-buffer
+@c @item @kbd{C-c C-v C-f} @tab org-babel-tangle-file
+@c @item @kbd{C-c C-v C-l} @tab org-babel-lob-ingest
+@c @item @kbd{C-c C-v C-p} @tab org-babel-expand-src-block
+@c @item @kbd{C-c C-v C-s} @tab org-babel-execute-subtree
+@c @item @kbd{C-c C-v C-t} @tab org-babel-tangle
+@c @item @kbd{C-c C-v C-z} @tab org-babel-switch-to-session
+@c @end multitable
 
-@node Batch execution,  , Key bindings & useful functions, Working With Source Code
+@node Batch execution,  , Key bindings and useful functions, Working With Source Code
 @section Batch execution
+@cindex code block, batch execution
+@cindex source code, batch execution
+
 It is possible to call functions from the command line.  This shell
 script calls @code{org-babel-tangle} on every one of its arguments.
 
@@ -12046,7 +12151,7 @@ Be sure to adjust the paths to fit your system.
 #!/bin/sh
 # -*- mode: shell-script -*-
 #
-# tangle a file with org-babel
+# tangle a file with org-mode
 #
 DIR=`pwd`
 FILES=""
@@ -12456,7 +12561,7 @@ works even if the automatic table editor has been turned off.
 If the cursor is on a @code{#+TBLFM} line, re-apply the formulas to
 the entire table.
 @item
-If the current buffer is a Remember buffer, close the note and file it.
+If the current buffer is a capture buffer, close the note and file it.
 With a prefix argument, file it, without further interaction, to the
 default location.
 @item
@@ -12704,8 +12809,7 @@ the option @code{org-imenu-depth}.
 @item @file{remember.el} by John Wiegley
 @cindex @file{remember.el}
 @cindex Wiegley, John
-Org cooperates with remember, see @ref{Remember}.
-As of Emacs 23, @file{Remember.el} is part of the Emacs distribution.
+Org used to use this package for capture, but no longer does.
 @item @file{speedbar.el} by Eric M. Ludlam
 @cindex @file{speedbar.el}
 @cindex Ludlam, Eric M.
@@ -13931,27 +14035,21 @@ the view, only the current agenda files will be searched.
 @cindex history
 @cindex thanks
 
-Org was born in 2003, out of frustration over the user interface
-of the Emacs Outline mode.  I was trying to organize my notes and
-projects, and using Emacs seemed to be the natural way to go.  However,
-having to remember eleven different commands with two or three keys per
-command, only to hide and show parts of the outline tree, that seemed
-entirely unacceptable to me.  Also, when using outlines to take notes, I
-constantly wanted to restructure the tree, organizing it parallel to my
-thoughts and plans.  @emph{Visibility cycling} and @emph{structure
-editing} were originally implemented in the package
-@file{outline-magic.el}, but quickly moved to the more general
-@file{org.el}.  As this environment became comfortable for project
-planning, the next step was adding @emph{TODO entries}, basic
-@emph{timestamps}, and @emph{table support}.  These areas highlighted the two main
-goals that Org still has today: to be a new, outline-based,
-plain text mode with innovative and intuitive editing features, and to
-incorporate project planning functionality directly into a notes file.
-
-A special thanks goes to @i{Bastien Guerry} who has not only written a large
-number of extensions to Org (most of them integrated into the core by now),
-but who has also helped in the development and maintenance of Org so much that he
-should be considered the main co-contributor to this package.
+Org was born in 2003, out of frustration over the user interface of the Emacs
+Outline mode.  I was trying to organize my notes and projects, and using
+Emacs seemed to be the natural way to go.  However, having to remember eleven
+different commands with two or three keys per command, only to hide and show
+parts of the outline tree, that seemed entirely unacceptable to me.  Also,
+when using outlines to take notes, I constantly wanted to restructure the
+tree, organizing it parallel to my thoughts and plans.  @emph{Visibility
+cycling} and @emph{structure editing} were originally implemented in the
+package @file{outline-magic.el}, but quickly moved to the more general
+@file{org.el}.  As this environment became comfortable for project planning,
+the next step was adding @emph{TODO entries}, basic @emph{timestamps}, and
+@emph{table support}.  These areas highlighted the two main goals that Org
+still has today: to be a new, outline-based, plain text mode with innovative
+and intuitive editing features, and to incorporate project planning
+functionality directly into a notes file.
 
 Since the first release, literally thousands of emails to me or to
 @email{emacs-orgmode@@gnu.org} have provided a constant stream of bug
@@ -13961,6 +14059,38 @@ trying to keep here a list of the people who had significant influence
 in shaping one or more aspects of Org.  The list may not be
 complete, if I have forgotten someone, please accept my apologies and
 let me know.
+
+Before I get to this list, a few special mentions are in order:
+
+@table @i
+@item Bastien Guerry
+Bastien has written a large number of extensions to Org (most of them
+integrated into the core by now), including the LaTeX exporter and the plain
+list parser.  More importantly, maybe, was his help and support when Org got
+first started, he was very important during this phase.  Also, he invented
+Worg, helped establishing the Web presence of Org, and sponsors hosting costs
+for the orgmode.org website.
+@item Eric Schulte and Dan Davison
+Eric and Dan are jointly responsible for the Org-babel system, which turns
+Org into a multi-language environment for evaluating code and doing literate
+programming and reproducible research.
+@item John Wiegley
+John has also contributed a number of great ideas and patches
+directly to Org, including the attachment system (@file{org-attach.el}),
+integration with Apple Mail (@file{org-mac-message.el}), hierarchical
+dependencies of TODO items, habit tracking (@file{org-habits.el}), and
+encryption (@file{org-crypt.el}).  Also, the capture system is really an
+extended copy of his great @file{remember.el}.
+@item Sebastian Rose
+Without Sebastian, the HTML/XHTML publishing of Org would be the pitiful work
+of an ignorant amateur.  Sebastian has pushed this part of Org onto a much
+higher level.  He also wrote @file{org-info.js}, a Java script for displaying
+webpages derived from Org using an Info-like or a folding interface with
+single-key navigation.
+@end table
+
+@noindent OK, now to the full list of contributions!  Again, please let me
+know what I am missing here!
 
 @itemize @bullet
 
@@ -13981,7 +14111,7 @@ Org-mode website.
 @i{Tom Breton} wrote @file{org-choose.el}.
 @item
 @i{Charles Cave}'s suggestion sparked the implementation of templates
-for Remember.
+for Remember, which are now templates for capture.
 @item
 @i{Pavel Chalmoviansky} influenced the agenda treatment of items with
 specified time.
@@ -13994,8 +14124,6 @@ calculations and improved XEmacs compatibility, in particular by porting
 @item
 @i{Baoqiu Cui} contributed the DocBook exporter.
 @item
-@i{Dan Davison} wrote (together with @i{Eric Schulte}) Org Babel.
-@item
 @i{Eddward DeVilla} proposed and tested checkbox statistics.  He also
 came up with the idea of properties, and that there should be an API for
 them.
@@ -14005,6 +14133,8 @@ them.
 @i{Kees Dullemond} used to edit projects lists directly in HTML and so
 inspired some of the early development, including HTML export.  He also
 asked for a way to narrow wide table columns.
+@i{Thomas S. Dye} contributed documentation on Worg and helped integrating
+the Org-Babel documentation into the manual.
 @item
 @i{Christian Egli} converted the documentation into Texinfo format,
 patched CSS formatting into the HTML exporter, and inspired the agenda.
@@ -14026,9 +14156,6 @@ around a match in a hidden outline tree.
 @i{Austin Frank} works as a mailing list moderator.
 @item
 @i{Niels Giesen} had the idea to automatically archive DONE trees.
-@item
-@i{Bastien Guerry} wrote the La@TeX{} exporter and @file{org-bibtex.el}, and
-has been prolific with patches, ideas, and bug reports.
 @item
 @i{Kai Grossjohann} pointed out key-binding conflicts with other packages.
 @item
@@ -14103,10 +14230,6 @@ also acted as mailing list moderator for some time.
 @item
 @i{Kevin Rogers} contributed code to access VM files on remote hosts.
 @item
-@i{Sebastian Rose} wrote @file{org-info.js}, a Java script for displaying
-webpages derived from Org using an Info-like or a folding interface with
-single-key navigation, and make lots of improvements to the HTML exporter.
-@item
 @i{Frank Ruell} solved the mystery of the @code{keymapp nil} bug, a
 conflict with @file{allout.el}.
 @item
@@ -14118,9 +14241,6 @@ of feedback, developed and applied standards to the Org documentation.
 @item
 @i{Christian Schlauer} proposed angular brackets around links, among
 other things.
-@item
-@i{Eric Schulte} wrote @file{org-plot.el} and (together with @i{Dan Davison})
-Org Babel, and contributed various patches, small features and modules.
 @item
 @i{Paul Sexton} wrote @file{org-ctags.el}.
 @item
@@ -14167,16 +14287,6 @@ keyword.
 @item
 @i{David Wainberg} suggested archiving, and improvements to the linking
 system.
-@item
-@i{John Wiegley} wrote @file{emacs-wiki.el}, @file{planner.el}, and
-@file{muse.el}, which have some overlap with Org.  Initially the development
-of Org was fully independent because I was not aware of the existence of
-these packages.  But with time I have occasionally looked at John's code and
-learned a lot from it.  John has also contributed a number of great ideas and
-patches directly to Org, including the attachment system
-(@file{org-attach.el}), integration with Apple Mail
-(@file{org-mac-message.el}), hierarchical dependencies of TODO items, habit
-tracking (@file{org-habits.el}).
 @item
 @i{Carsten Wimmer} suggested some changes and helped fix a bug in
 linking to Gnus.
