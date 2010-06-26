@@ -4629,7 +4629,9 @@ useful, you can turn it on by setting the variable
 @code{org-use-property-inheritance}.  It may be set to @code{t} to make
 all properties inherited from the parent, to a list of properties
 that should be inherited, or to a regular expression that matches
-inherited properties.
+inherited properties.  If a property has the value @samp{nil}, this is
+interpreted as an explicit undefine of he property, so that inheritance
+search will stop at this value and return @code{nil}.
 
 Org mode has a few properties for which inheritance is hard-coded, at
 least for the special applications for which they are used:
