@@ -377,7 +377,12 @@ bypassed."
 			 (or org-overriding-default-time
 			     (org-current-time)))
 	(org-capture-set-target-location)
-	(org-capture-put :template (org-capture-fill-template))
+	(condition-case error
+	    (org-capture-put :template (org-capture-fill-template))
+	  ((error quit)
+	   (if (get-buffer "*Capture*") (kill-buffer "*Capture*"))
+	   (error "Capture abort: %s" error)))
+
 	(if (equal goto 0)
 	    ;;insert at point
 	    (org-capture-insert-template-here)
@@ -998,6 +1003,7 @@ The template may still contain \"%?\" for cursor positioning."
     (save-window-excursion
       (delete-other-windows)
       (switch-to-buffer (get-buffer-create "*Capture*"))
+      (erase-buffer)
       (insert template)
       (goto-char (point-min))
       (org-capture-steal-local-variables buffer)
