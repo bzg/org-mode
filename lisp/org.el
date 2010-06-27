@@ -13278,7 +13278,7 @@ things up because then unnecessary parsing is avoided."
     (let ((clockstr (substring org-clock-string 0 -1))
 	  (excluded '("TODO" "TAGS" "ALLTAGS" "PRIORITY" "BLOCKED"))
 	  (case-fold-search nil)
-	  beg end range props sum-props key value string clocksum)
+	  beg end range props sum-props key key1 value string clocksum)
       (save-excursion
 	(when (condition-case nil
 		  (and (org-mode-p) (org-back-to-heading t))
@@ -13309,23 +13309,35 @@ things up because then unnecessary parsing is avoided."
 	    (when (or (not specific) (string= specific "BLOCKED"))
 	      (push (cons "BLOCKED" (if (org-entry-blocked-p) "t" "")) props))
 	    (when (or (not specific)
-		      (member specific org-all-time-keywords)
-		      (member specific '("TIMESTAMP" "TIMESTAMP_IA")))
+		      (member specific
+			      '("SCHEDULED" "DEADLINE" "CLOCK" "CLOSED"
+				"TIMESTAMP" "TIMESTAMP_IA")))
 	      (while (re-search-forward org-maybe-keyword-time-regexp end t)
-		(setq key (if (match-end 1) (substring (org-match-string-no-properties 1) 0 -1))
+		(setq key (if (match-end 1)
+			      (substring (org-match-string-no-properties 1)
+					 0 -1))
 		      string (if (equal key clockstr)
 				 (org-no-properties
 				  (org-trim
-				 (buffer-substring
-				  (match-beginning 3) (goto-char (point-at-eol)))))
-			       (substring (org-match-string-no-properties 3) 1 -1)))
-		(unless key
-		  (if (= (char-after (match-beginning 3)) ?\[)
-		      (setq key "TIMESTAMP_IA")
-		    (setq key "TIMESTAMP")))
-		(when (or (equal key clockstr) (not (assoc key props)))
+				   (buffer-substring
+				    (match-beginning 3) (goto-char
+							 (point-at-eol)))))
+			       (substring (org-match-string-no-properties 3)
+					  1 -1)))
+		;; Get the correct property name from the key.  This is
+		;; necessary if the user has configured time keywords.
+		(setq key1 (concat key ":"))
+		(cond
+		 ((not key)
+		  (setq key
+			(if (= (char-after (match-beginning 3)) ?\[)
+			    "TIMESTAMP_IA" "TIMESTAMP")))
+		 ((equal key1 org-scheduled-string) (setq key "SCHEDULED"))
+		 ((equal key1 org-deadline-string)  (setq key "DEADLINE"))
+		 ((equal key1 org-closed-string)    (setq key "CLOSED"))
+		 ((equal key1 org-clock-string)     (setq key "CLOCK")))
+		(when (or (equal key "CLOCK") (not (assoc key props)))
 		  (push (cons key string) props))))
-
 	    )
 
 	  (when (memq which '(all standard))
