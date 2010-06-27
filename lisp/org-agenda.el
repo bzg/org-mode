@@ -2450,7 +2450,7 @@ higher priority settings."
    ((string-match "\\.html?\\'" file) (require 'htmlize))
    ((string-match "\\.ps\\'" file) (require 'ps-print)))
   (org-let (if nosettings nil org-agenda-exporter-settings)
-    '(save-excursion
+    `(save-excursion
        (save-window-excursion
 	 (org-agenda-mark-filtered-text)
 	 (let ((bs (copy-sequence (buffer-string))) beg)
@@ -2482,14 +2482,14 @@ higher priority settings."
 	       (message "HTML written to %s" file))
 	      ((string-match "\\.ps\\'" file)
 	       (require 'ps-print)
-	       (flet ((ps-get-buffer-name () "Agenda View"))
-		 (ps-print-buffer-with-faces file))
+	       ,(flet ((ps-get-buffer-name () "Agenda View"))
+		  (ps-print-buffer-with-faces file))
 	       (message "Postscript written to %s" file))
 	      ((string-match "\\.pdf\\'" file)
 	       (require 'ps-print)
-	       (flet ((ps-get-buffer-name () "Agenda View"))
-		 (ps-print-buffer-with-faces
-		  (concat (file-name-sans-extension file) ".ps")))
+	       ,(flet ((ps-get-buffer-name () "Agenda View"))
+		  (ps-print-buffer-with-faces
+		   (concat (file-name-sans-extension file) ".ps")))
 	       (call-process "ps2pdf" nil nil nil
 			     (expand-file-name
 			      (concat (file-name-sans-extension file) ".ps"))
