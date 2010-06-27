@@ -1,22 +1,6 @@
 #+title:    The Library of Babel
-#+SEQ_TODO: TODO PROPOSED | DONE DEFERRED REJECTED
-#+OPTIONS:  H:3 num:nil toc:2 \n:nil @:t ::t |:t ^:t -:t f:t *:t TeX:t LaTeX:t skip:nil d:(HIDE) tags:not-in-toc
+#+author:     Org-mode People
 #+STARTUP:  odd hideblocks
-#+STYLE:    <style type="text/css">#outline-container-1 { clear:both; }</style>
-
-#+begin_html
-  <div id="logo" style="float: left; text-align: center; max-width: 340px; font-size: 8pt; margin-left: 1em;">
-    <p>
-      <img src="../../images/babel/library-of-babel.png" alt="Library of Babel"/>
-      <div id="attr">
-        The Library of Babel, by Pierre Clayette
-        <p>
-        <a href="http://downlode.org/Etext/library_of_babel.html">Full text of the Borges short story</a>
-        </p>
-      </div>
-    </p>  
-  </div>
-#+end_html
 
 * Introduction
   The Library of Babel is an extensible collection of ready-made and
@@ -67,6 +51,25 @@ as a table in traditional Org-mode table syntax.
   (with-temp-file path
     (org-babel-insert-result data))
   nil
+#+end_src
+
+** remote files
+
+Read local or remote file in [[http://www.json.org/][json]] format into emacs-lisp objects.
+#+srcname: json
+#+begin_src emacs-lisp :var file='() :var url='()
+  (require 'json)
+  (cond
+   (file
+    (with-temp-filebuffer file
+      (goto-char (point-min))
+      (json-read)))
+   (url
+    (require 'w3m)
+    (with-temp-buffer
+      (w3m-retrieve url)
+      (goto-char (point-min))
+      (json-read))))
 #+end_src
 
 * Plotting code
