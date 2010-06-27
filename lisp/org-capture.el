@@ -1001,6 +1001,7 @@ The template may still contain \"%?\" for cursor positioning."
       (insert template)
       (goto-char (point-min))
       (org-capture-steal-local-variables buffer)
+      (setq buffer-file-name nil)
       ;; Simple %-escapes
       (while (re-search-forward "%\\([tTuUaiAcxkKI]\\)" nil t)
 	(unless (org-capture-escaped-%)
