@@ -96,7 +96,7 @@ called by `org-babel-execute-src-block'."
 specifying a var of the same value."
   (if (listp var)
       (concat "[" (mapconcat #'org-babel-python-var-to-python var ", ") "]")
-    (format "%S" var)))
+    (if (equal var 'hline) "None" (format "%S" var))))
 
 (defun org-babel-python-table-or-string (results)
   "If the results look like a list or tuple, then convert them into an
@@ -110,7 +110,9 @@ Emacs-lisp table, otherwise return the results as a string."
                  "\\[" "(" (replace-regexp-in-string
                             "\\]" ")" (replace-regexp-in-string
                                        ", " " " (replace-regexp-in-string
-                                                 "'" "\"" results))))))
+                                                 "'" "\""
+						 (replace-regexp-in-string
+						  "None" "hline" results t)))))))
      results)))
 
 (defvar org-babel-python-buffers '(:default . nil))
