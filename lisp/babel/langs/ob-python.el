@@ -101,7 +101,11 @@ specifying a var of the same value."
 (defun org-babel-python-table-or-string (results)
   "If the results look like a list or tuple, then convert them into an
 Emacs-lisp table, otherwise return the results as a string."
-  (org-babel-read
+  ((lambda (res)
+     (if (listp res)
+	 (mapcar (lambda (el) (if (equal el 'None) 'hline el)) res)
+       res))
+   (org-babel-read
    (if (or (string-match "^\\[.+\\]$" results)
 	   (string-match "^(.+)$" results))
        (org-babel-read
@@ -110,10 +114,8 @@ Emacs-lisp table, otherwise return the results as a string."
                  "\\[" "(" (replace-regexp-in-string
                             "\\]" ")" (replace-regexp-in-string
                                        ", " " " (replace-regexp-in-string
-                                                 "'" "\""
-						 (replace-regexp-in-string
-						  "None" "hline" results t)))))))
-     results)))
+                                                 "'" "\"" results t))))))
+     results))))
 
 (defvar org-babel-python-buffers '(:default . nil))
 
