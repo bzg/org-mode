@@ -30,7 +30,9 @@
 
 ;;; Code:
 (eval-when-compile (require 'cl))
-(require 'outline)
+(eval-and-compile
+  (unless (fboundp 'declare-function)
+    (defmacro declare-function (fn file &optional arglist fileonly))))
 
 (defvar org-babel-call-process-region-original)
 (declare-function show-all "outline" ())
