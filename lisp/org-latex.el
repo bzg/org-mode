@@ -1537,7 +1537,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
   "When OPT is non-nil convert fixed-width sections to LaTeX."
   (goto-char (point-min))
   (while (re-search-forward "^[ \t]*:\\([ \t]\\|$\\)" nil t)
-    (org-if-unprotected
+    (unless (get-text-property (point) 'org-example)
      (if opt
 	 (progn (goto-char (match-beginning 0))
 		(insert "\\begin{verbatim}\n")
