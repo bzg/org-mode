@@ -54,10 +54,12 @@
 
 (defun org-babel-expand-body:haskell (body params &optional processed-params)
   "Expand BODY according to PARAMS, return the expanded body."
-  (let (vars (nth 1 (or processed-params (org-babel-process-params params))))
+  (let ((vars (nth 1 (or processed-params (org-babel-process-params params)))))
     (concat
      (mapconcat
-      (lambda (pair) (format "let %s = %s;" (car pair) (cdr pair)))
+      (lambda (pair) (format "let %s = %s"
+			(car pair)
+			(org-babel-haskell-var-to-haskell (cdr pair))))
       vars "\n") "\n" body "\n")))
 
 (defun org-babel-execute:haskell (body params)
@@ -68,7 +70,7 @@
          (vars (nth 1 processed-params))
          (result-type (nth 3 processed-params))
          (full-body (org-babel-expand-body:haskell body params processed-params))
-         (session (org-babel-prep-session:haskell session params))
+         (session (org-babel-haskell-initiate-session session params))
          (raw (org-babel-comint-with-output
 		  (session org-babel-haskell-eoe t full-body)
                 (insert (org-babel-trim full-body))
@@ -96,34 +98,35 @@
   "If there is not a current inferior-process-buffer in SESSION
 then create one.  Return the initialized session."
   ;; TODO: make it possible to have multiple sessions
-  (run-haskell) (current-buffer))
+  (or (get-buffer "*haskell*")
+      (save-window-excursion (run-haskell) (sleep-for 0.25) (current-buffer))))
 
-(defun org-babel-load-session:haskell (session body params)
+(defun org-babel-load-session:haskell
+  (session body params &optional processed-params)
   "Load BODY into SESSION."
   (save-window-excursion
-    (let* ((buffer (org-babel-prep-session:haskell session params))
+    (let* ((buffer (org-babel-prep-session:haskell
+		    session params processed-params))
            (load-file (concat (make-temp-file "org-babel-haskell-load") ".hs")))
       (with-temp-buffer
         (insert body) (write-file load-file)
         (haskell-mode) (inferior-haskell-load-file))
       buffer)))
 
-(defun org-babel-prep-session:haskell (session params)
+(defun org-babel-prep-session:haskell
+  (session params &optional processesed-params)
   "Prepare SESSION according to the header arguments specified in PARAMS."
   (save-window-excursion
-    (org-babel-haskell-initiate-session session)
-    (let* ((vars (org-babel-ref-variables params))
-           (var-lines (mapconcat ;; define any variables
-                       (lambda (pair)
-                         (format "%s=%s"
-                                 (car pair)
-                                 (org-babel-ruby-var-to-ruby (cdr pair))))
-                       vars "\n"))
-           (vars-file (concat (make-temp-file "org-babel-haskell-vars") ".hs")))
-      (when vars
-        (with-temp-buffer
-          (insert var-lines) (write-file vars-file)
-          (haskell-mode) (inferior-haskell-load-file)))
+    (let ((pp (or processed-params (org-babel-process-params params)))
+	  (buffer (org-babel-haskell-initiate-session session)))
+      (org-babel-comint-in-buffer buffer
+      	(mapcar
+      	 (lambda (pair)
+      	   (insert (format "let %s = %s"
+      			   (car pair)
+      			   (org-babel-haskell-var-to-haskell (cdr pair))))
+      	   (comint-send-input nil t))
+      	 (nth 1 pp)))
       (current-buffer))))
 
 (defun org-babel-haskell-table-or-string (results)
@@ -139,6 +142,13 @@ Emacs-lisp table, otherwise return the results as a string."
                                        "," " " (replace-regexp-in-string
                                                 "'" "\"" results))))))
      results)))
+
+(defun org-babel-haskell-var-to-haskell (var)
+  "Convert an elisp var into a string of haskell source code
+specifying a var of the same value."
+  (if (listp var)
+      (concat "[" (mapconcat #'org-babel-haskell-var-to-haskell var ", ") "]")
+    (format "%S" var)))
 
 (defun org-babel-haskell-export-to-lhs (&optional arg)
   "Export to a .lhs file with all haskell code blocks escaped
