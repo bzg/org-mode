@@ -99,12 +99,11 @@ plot(data)
 * Tables
 ** LaTeX Table export
 This block can be used to wrap a table in the latex =longtable=
-environment, it takes the following arguments -- all but the first
-three are optional.
+environment, it takes the following arguments -- all but the first two
+are optional.
 | arg       | description                                                 |
 |-----------+-------------------------------------------------------------|
 | table     | a reference to the table                                    |
-| env       | table environment, e.g. longtable, tablex, etc...           |
 | align     | optional alignment string                                   |
 | width     | optional width specification string                         |
 | hline     | the string to use as hline separator, defaults to "\\hline" |
@@ -113,20 +112,19 @@ three are optional.
 | foot      | optional "foot" string                                      |
 | lastfoot  | optional "lastfoot" string                                  |
 
-#+srcname: table
+#+srcname: longtable
 #+begin_src emacs-lisp :var table='((:table)) :var env="table" :var align='() :var width='() :var hline="\\hline" :var firsthead='() :var head='() :var foot='() :var lastfoot='() :noweb yes :results latex
   (org-fill-template
    "
-  \\begin{%env}%width%align
+  \\begin{longtable}%width%align
   %firsthead
   %head
   %foot
   %lastfoot
   
   %table
-  \\end{%env}\n"
+  \\end{longtable}\n"
    (list
-    (cons "env"       env)
     (cons "width"     (if width (format "{%s}" width) ""))
     (cons "align"     (if align (format "{%s}" align) ""))
     (cons "firsthead" (if firsthead (concat firsthead "\n\\endfirsthead\n") ""))
