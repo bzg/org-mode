@@ -43,6 +43,11 @@
   "Return the value of symbol VAR if it is bound, else nil."
   `(and (boundp (quote ,var)) ,var))
 
+(defun org-not-nil (v)
+  "If V not nil, and also not the string \"nil\", then return V.
+Otherwise return nil."
+  (and v (not (equal v "nil")) v))
+
 (defmacro org-unmodified (&rest body)
   "Execute body without changing `buffer-modified-p'.
 Also, do not record undo information."

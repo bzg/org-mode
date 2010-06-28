@@ -28,8 +28,12 @@ infodir = $(prefix)/share/info
 
 # Using emacs in batch mode.
 
-BATCH=$(EMACS) -batch -q -no-site-file -eval                             \
-  "(setq load-path (cons (expand-file-name \"./lisp/\") (cons \"$(lispdir)\" load-path)))"
+BATCH=$(EMACS) -batch -q -no-site-file -eval                             			\
+  "(setq load-path (cons (expand-file-name\
+                       \"langs\"\
+                       (expand-file-name \"babel\" (expand-file-name \"./lisp/\")))\
+                 (cons (expand-file-name \"babel\" (expand-file-name \"./lisp/\"))\
+                        (cons (expand-file-name \"./lisp/\") (cons \"$(lispdir)\" load-path)))))"
 
 # Specify the byte-compiler for compiling org-mode files
 ELC= $(BATCH) -f batch-byte-compile
@@ -58,61 +62,72 @@ INSTALL_INFO=install-info
 ##----------------------------------------------------------------------
 
 # The following variables need to be defined by the maintainer
-LISPF      = 	org.el			\
-		org-agenda.el		\
-		org-ascii.el		\
-	     	org-attach.el		\
-	     	org-archive.el		\
-		org-bbdb.el		\
-		org-beamer.el		\
-		org-bibtex.el		\
-	     	org-clock.el		\
-	     	org-colview.el		\
-	     	org-colview-xemacs.el	\
-	     	org-compat.el		\
-	     	org-crypt.el		\
-	     	org-ctags.el		\
-	     	org-datetree.el		\
-	     	org-docview.el		\
-	     	org-entities.el		\
-		org-exp.el		\
-		org-exp-blocks.el	\
-		org-docbook.el		\
-		org-faces.el		\
-		org-feed.el		\
-		org-footnote.el		\
-		org-freemind.el		\
-		org-gnus.el		\
-		org-habit.el		\
-		org-html.el		\
-		org-icalendar.el	\
-		org-id.el		\
-		org-indent.el		\
-		org-info.el		\
-		org-inlinetask.el	\
-		org-jsinfo.el		\
-		org-irc.el		\
-		org-latex.el		\
-		org-list.el		\
-		org-mac-message.el	\
-	     	org-macs.el		\
-		org-mew.el              \
-		org-mhe.el		\
-		org-mobile.el		\
-		org-mouse.el		\
-		org-publish.el		\
-		org-plot.el		\
-		org-protocol.el		\
-		org-remember.el		\
-		org-rmail.el		\
-		org-src.el		\
-		org-table.el		\
-		org-taskjuggler.el	\
-		org-timer.el		\
-		org-vm.el		\
-		org-w3m.el              \
-		org-wl.el		\
-		org-xoxo.el
+LISPF      = 	org.el				\
+		org-agenda.el			\
+		org-ascii.el			\
+	     	org-attach.el			\
+	     	org-archive.el			\
+		org-bbdb.el			\
+		org-beamer.el			\
+		org-bibtex.el			\
+	     	org-capture.el			\
+	     	org-clock.el			\
+	     	org-colview.el			\
+	     	org-colview-xemacs.el		\
+	     	org-compat.el			\
+	     	org-crypt.el			\
+	     	org-ctags.el			\
+	     	org-datetree.el			\
+	     	org-docview.el			\
+	     	org-entities.el			\
+		org-exp.el			\
+		org-exp-blocks.el		\
+		org-docbook.el			\
+		org-faces.el			\
+		org-feed.el			\
+		org-footnote.el			\
+		org-freemind.el			\
+		org-gnus.el			\
+		org-habit.el			\
+		org-html.el			\
+		org-icalendar.el		\
+		org-id.el			\
+		org-indent.el			\
+		org-info.el			\
+		org-inlinetask.el		\
+		org-jsinfo.el			\
+		org-irc.el			\
+		org-latex.el			\
+		org-list.el			\
+		org-mac-message.el		\
+	     	org-macs.el			\
+		org-mew.el              	\
+		org-mhe.el			\
+		org-mks.el			\
+		org-mobile.el			\
+		org-mouse.el			\
+		org-publish.el			\
+		org-plot.el			\
+		org-protocol.el			\
+		org-remember.el			\
+		org-rmail.el			\
+		org-src.el			\
+		org-table.el			\
+		org-taskjuggler.el		\
+		org-timer.el			\
+		org-vm.el			\
+		org-w3m.el              	\
+		org-wl.el			\
+		org-xoxo.el			\
+		babel/ob.el			\
+		babel/ob-table.el		\
+		babel/ob-lob.el			\
+		babel/ob-ref.el			\
+		babel/ob-exp.el			\
+		babel/ob-tangle.el		\
+		babel/ob-comint.el		\
+		babel/ob-keys.el		\
+		babel/langs/ob-emacs-lisp.el
 
 LISPFILES0 = $(LISPF:%=lisp/%)
 LISPFILES  = $(LISPFILES0) lisp/org-install.el
@@ -181,6 +196,8 @@ lisp/org-install.el: $(LISPFILES0) Makefile
 		--eval '(find-file "org-install.el")'  \
 		--eval '(erase-buffer)' \
 		--eval '(mapc (lambda (x) (generate-file-autoloads (symbol-name x))) (quote ($(LISPFILES0))))' \
+		--eval "(insert \"(add-to-list 'load-path (expand-file-name \\\"babel\\\" (file-name-directory (or (buffer-file-name) load-file-name))))\")" \
+		--eval "(insert \"\n(add-to-list 'load-path (expand-file-name \\\"langs\\\" (expand-file-name \\\"babel\\\" (file-name-directory (or (buffer-file-name) load-file-name)))))\")\n" \
 		--eval '(insert "\n(provide (quote org-install))\n")' \
 		--eval '(save-buffer)'
 	mv org-install.el lisp
@@ -348,6 +365,7 @@ lisp/org-archive.elc:	lisp/org.el
 lisp/org-bbdb.elc:	lisp/org.el
 lisp/org-beamer.elc:	lisp/org.el
 lisp/org-bibtex.elc:	lisp/org.el
+lisp/org-capture.elc:	lisp/org.el lisp/org-mks.el
 lisp/org-clock.elc:	lisp/org.el
 lisp/org-colview.elc:	lisp/org.el
 lisp/org-colview-xemacs.elc:	lisp/org.el
@@ -380,6 +398,7 @@ lisp/org-mac-message.elc:	lisp/org.el
 lisp/org-macs.elc:
 lisp/org-mew.elc:	lisp/org.el
 lisp/org-mhe.elc:	lisp/org.el
+lisp/org-mks.elc:	
 lisp/org-mobile.elc:	lisp/org.el
 lisp/org-mouse.elc:	lisp/org.el
 lisp/org-plot.elc:	lisp/org.el lisp/org-exp.el lisp/org-table.el

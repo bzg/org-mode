@@ -169,15 +169,15 @@ Dates and Times
 
 Capture - Refile - Archive
 
-* Remember::			Capture new tasks/ideas with little interruption
+* Capture::			
 * Refiling notes::		Moving a tree from one place to another
 * Archiving::			What to do with finished projects
 
-Remember
+Capture
 
-* Setting up Remember for Org::	 Some code for .emacs to get things going
-* Remember templates::		Define the outline of different note types
-* Storing notes::		Directly get the note to where it belongs
+* Setting up a capture location::  Where notes will be stored
+* Using capture::		Commands to invoke and terminate capture
+* Capture templates::		Define the outline of different note types
 
 Agenda Views
 
@@ -1525,89 +1525,90 @@ Cave's Date and Time tutorial}@*
 
 An important part of any organization system is the ability to quickly
 capture new ideas and tasks, and to associate reference material with them.
-Org uses the @file{remember.el} package to create tasks, and stores files
-related to a task (@i{attachments}) in a special directory.  Once in the
-system, tasks and projects need to be moved around.  Moving completed project
-trees to an archive file keeps the system compact and fast.
+Org defines a capture process to create tasks.  It stores files related to a
+task (@i{attachments}) in a special directory.  Once in the system, tasks and
+projects need to be moved around.  Moving completed project trees to an
+archive file keeps the system compact and fast.
 
 @menu
-* Remember::			Capture new tasks/ideas with little interruption
+* Capture::			
 * Refiling notes::		Moving a tree from one place to another
 * Archiving::			What to do with finished projects
 @end menu
 
-@node Remember, Refiling notes, Capture - Refile - Archive, Capture - Refile - Archive
-@section Remember
+@node Capture, Refiling notes, Capture - Refile - Archive, Capture - Refile - Archive
+@section Capture
 
-The Remember package by John Wiegley lets you store quick notes with little
-interruption of your work flow.  It is an excellent way to add new notes and
-tasks to Org files.  The @code{remember.el} package is part of Emacs 23, not
-Emacs 22.  See @uref{http://www.emacswiki.org/cgi-bin/wiki/RememberMode} for
-more information.
-
-Org significantly expands the possibilities of Remember: you may define
-templates for different note types, and associate target files and headlines
-with specific templates.  It also allows you to select the location where a
-note should be stored interactively, on the fly.
+Org's method for capturing new items is heavily inspired by John Wiegley
+excellent remember package.  It lets you store quick notes with little
+interruption of your work flow.  Org lets you define templates for new
+entries and associate them with different targets for storing notes.
 
 @menu
-* Setting up Remember for Org::	 Some code for .emacs to get things going
-* Remember templates::		Define the outline of different note types
-* Storing notes::		Directly get the note to where it belongs
+* Setting up a capture location::  Where notes will be stored
+* Using capture::		Commands to invoke and terminate capture
+* Capture templates::		Define the outline of different note types
 @end menu
 
-@node Setting up Remember for Org, Remember templates, Remember, Remember
-@unnumberedsubsec Setting up Remember for Org
+@node Setting up a capture location, Using capture, Capture, Capture
+@unnumberedsubsec Setting up a capture location
 
-The following customization will tell Remember to use Org files as
-target, and to create annotations compatible with Org links.
+The following customization sets a default target@footnote{Using capture
+templates, you can define more fine-grained capture locations, see
+@ref{Capture templates}.} file for notes, and defines a global
+key@footnote{Please select your own key, @kbd{C-c c} is only a suggestion.}
+for capturing new stuff.
 
-@smallexample
-(org-remember-insinuate)
-(setq org-directory "~/path/to/my/orgfiles/")
+@example
 (setq org-default-notes-file (concat org-directory "/notes.org"))
-(define-key global-map "\C-cr" 'org-remember)
-@end smallexample
+(define-key global-map "\C-cc" 'org-capture)
+@end example
 
-@noindent
-The last line binds the command @code{org-remember} to a global
-key@footnote{Please select your own key, @kbd{C-c r} is only a
-suggestion.}.  @code{org-remember} basically just calls Remember,
-but it makes a few things easier: if there is an active region, it will
-automatically copy the region into the Remember buffer.  It also allows
-to jump to the buffer and location where Remember notes are being
-stored: just call @code{org-remember} with a prefix argument.  If you
-use two prefix arguments, Org jumps to the location where the last
-remember note was stored.
+@node Using capture, Capture templates, Setting up a capture location, Capture
+@unnumberedsubsec Using capture
 
-@node Remember templates, Storing notes, Setting up Remember for Org, Remember
-@unnumberedsubsec Remember templates
+@table @kbd
+@item C-c c
+Start a capture process.  You will be placed into a narrowed indirect buffer
+to edit the item.
+@item C-c C-c
+Once you are done entering information into the capture buffer, 
+@kbd{C-c C-c} will return you to the window configuration before the capture
+process, so that you can resume your work without further distraction.
+@item C-c C-w
+Finalize by moving the entry to a refile location (@pxref{Refiling notes}).
+@item C-c C-k
+Abort the capture process and return to the previous state.
+@end table
 
-In combination with Org, you can use templates to generate
-different types of Remember notes.  For example, if you would like
-to use one template to create general TODO entries, another one for
-journal entries, and a third one for collecting random ideas, you could
+@node Capture templates,  , Using capture, Capture
+@unnumberedsubsec Capture templates
+
+You can use templates to generate different types of capture notes, and to
+store them in different places.  For example, if you would like
+to store new tasks under a heading @samp{Tasks} in file @file{TODO.org}, and
+journal entries in a date tree in @file{journal.org} you could
 use:
 
 @smallexample
-(setq org-remember-templates
- '(("Todo" ?t "* TODO %?\n  %i\n  %a" "~/org/TODO.org" "Tasks")
-   ("Journal" ?j "* %U %?\n\n  %i\n  %a" "~/org/JOURNAL.org")
-   ("Idea" ?i "* %^@{Title@}\n  %i\n  %a" "~/org/JOURNAL.org" "New Ideas")))
+(setq org-capture-templates
+ '(("t" "Todo" entry (file+headline "~/org/gtd.org" "Tasks")
+        "* TODO %?\n  %i\n  %a")
+   ("j" "Journal" entry (file+datetree "~/org/journal.org")
+        "* %?\nEntered on %U\n  %i\n  %a")))
 @end smallexample
 
-@noindent In these entries, the first string is just a name, and the
-character specifies how to select the template.  It is useful if the
-character is also the first letter of the name.  The next string specifies
-the template.  Two more (optional) strings give the file in which, and the
-headline under which, the new note should be stored.
+@noindent In these entries, the first string is the key to reach the
+template, the second is a short description.  Then follows the type of the
+entry and a definition of the target location for storing the note.  Finally,
+the template itself, a string with %-escapes to fill in information based on
+time and context.
 
-When you call @kbd{M-x org-remember} (or @kbd{M-x remember}) to remember
-something, Org will prompt for a key to select the template (if you have
-more than one template) and then prepare the buffer like
+When you call @kbd{M-x org-capture}, Org will prompt for a key to select the
+template (if you have more than one template) and then prepare the buffer like
 @smallexample
 * TODO
-  [[file:@var{link to where you called remember}]]
+  [[file:@var{link to where you were when initiating capture}]]
 @end smallexample
 
 @noindent
@@ -1623,18 +1624,7 @@ possibilities, consult the manual for more.
 %u, %U      @r{like the above, but inactive timestamps}
 @end smallexample
 
-@node Storing notes,  , Remember templates, Remember
-@unnumberedsubsec Storing notes
-
-When you are finished preparing a note with Remember, you have to press
-@kbd{C-c C-c} to file the note away. 
-
-The handler will store the note in the file and under the headline
-specified in the template, or it will use the default file and headline.  The
-window configuration will be restored, sending you back to the working
-context before the call to Remember.
-
-@node Refiling notes, Archiving, Remember, Capture - Refile - Archive
+@node Refiling notes, Archiving, Capture, Capture - Refile - Archive
 @section Refiling notes
 
 When reviewing the captured data, you may want to refile some of the entries
@@ -2432,10 +2422,8 @@ code.
 @section iCalendar export
 
 @table @kbd
-@kindex C-c C-e i
 @item C-c C-e i
 Create iCalendar entries for the current file in a @file{.ics} file.
-@kindex C-c C-e c
 @item C-c C-e c
 Create a single large iCalendar file from all files in
 @code{org-agenda-files} and write it to the file given by

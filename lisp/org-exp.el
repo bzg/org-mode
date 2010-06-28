@@ -30,6 +30,7 @@
 (require 'org-macs)
 (require 'org-agenda)
 (require 'org-exp-blocks)
+(require 'ob-exp)
 (require 'org-src)
 (eval-when-compile
   (require 'cl))
@@ -2145,7 +2146,7 @@ INDENT was the original indentation of the block."
 		      (org-add-props (concat "<programlisting><![CDATA["
 					     rtn
 					     "]]></programlisting>\n")
-			  '(org-protected t))
+			  '(org-protected t org-example t))
 		      "#+END_DOCBOOK\n"))
 	     ((eq backend 'html)
 	      ;; We are exporting to HTML
@@ -2215,7 +2216,7 @@ INDENT was the original indentation of the block."
 						   cont rpllbl fmt)))
 	      (if (string-match "\\(\\`<[^>]*>\\)\n" rtn)
 		  (setq rtn (replace-match "\\1" t nil rtn)))
-	      (concat "\n#+BEGIN_HTML\n" (org-add-props rtn '(org-protected t)) "\n#+END_HTML\n\n"))
+	      (concat "\n#+BEGIN_HTML\n" (org-add-props rtn '(org-protected t org-example t)) "\n#+END_HTML\n\n"))
 	     ((eq backend 'latex)
 	      (setq rtn (org-export-number-lines rtn 'latex 0 0 num cont rpllbl fmt))
 	      (concat "#+BEGIN_LaTeX\n"
@@ -2239,7 +2240,7 @@ INDENT was the original indentation of the block."
                                rtn "\\end{lstlisting}\n")
                             (concat (car org-export-latex-verbatim-wrap)
                                     rtn (cdr org-export-latex-verbatim-wrap)))
-			  '(org-protected t))
+			  '(org-protected t org-example t))
 		      "#+END_LaTeX\n"))
 	     ((eq backend 'ascii)
 	      ;; This is not HTML or LaTeX, so just make it an example.
@@ -2253,7 +2254,7 @@ INDENT was the original indentation of the block."
 			    (org-split-string rtn "\n")
 			    "\n")
 			   "\n")
-			  '(org-protected t))
+			  '(org-protected t org-example t))
 		      "#+END_ASCII\n"))))
       (org-add-props rtn nil 'original-indentation indent))))
 

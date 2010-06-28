@@ -314,7 +314,10 @@ of a different task.")
 (defun org-clock-history-push (&optional pos buffer)
   "Push a marker to the clock history."
   (setq org-clock-history-length (max 1 (min 35 org-clock-history-length)))
-  (let ((m (move-marker (make-marker) (or pos (point)) buffer)) n l)
+  (let ((m (move-marker (make-marker)
+			(or pos (point)) (org-base-buffer
+					  (or buffer (current-buffer)))))
+	n l)
     (while (setq n (member m org-clock-history))
       (move-marker (car n) nil))
     (setq org-clock-history

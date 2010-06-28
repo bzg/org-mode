@@ -87,11 +87,16 @@
 ;;     pushes the browsers URL to the `kill-ring' for yanking. This handler is
 ;;     triggered through the sub-protocol \"store-link\".
 ;;
-;;   * Call `org-protocol-remember' by using the sub-protocol \"remember\".  If
-;;     Org-mode is loaded, emacs will pop-up a remember buffer and fill the
+;;   * Call `org-protocol-capture' by using the sub-protocol \"capture\".  If
+;;     Org-mode is loaded, emacs will pop-up a capture buffer and fill the
 ;;     template with the data provided. I.e. the browser's URL is inserted as an
 ;;     Org-link of which the page title will be the description part. If text
 ;;     was select in the browser, that text will be the body of the entry.
+;;
+;;   * Call `org-protocol-remember' by using the sub-protocol \"remember\".
+;;     This is provided for backward compatibility.
+;;     You may read `org-capture' as `org-remember' throughout this file if
+;;     you still use `org-remember'.
 ;;
 ;; You may use the same bookmark URL for all those standard handlers and just
 ;; adjust the sub-protocol used:
@@ -101,7 +106,7 @@
 ;;           encodeURIComponent(document.title)+'/'+
 ;;           encodeURIComponent(window.getSelection())
 ;;
-;; The handler for the sub-protocol \"remember\" detects an optional template
+;; The handler for the sub-protocol \"capture\" detects an optional template
 ;; char that, if present, triggers the use of a special template.
 ;; Example:
 ;;
@@ -143,6 +148,7 @@ for `org-protocol-the-protocol' and sub-procols defined in
 
 (defconst org-protocol-protocol-alist-default
   '(("org-remember"    :protocol "remember"    :function org-protocol-remember :kill-client t)
+    ("org-capture"     :protocol "capture"     :function org-protocol-capture  :kill-client t)
     ("org-store-link"  :protocol "store-link"  :function org-protocol-store-link)
     ("org-open-source" :protocol "open-source" :function org-protocol-open-source))
   "Default protocols to use.
@@ -259,7 +265,6 @@ Here is an example:
   "The default org-remember-templates key to use."
   :group 'org-protocol
   :type 'string)
-
 
 ;;; Helper functions:
 
@@ -443,10 +448,6 @@ The sub-protocol used to reach this function is set in
 (defun org-protocol-remember  (info)
   "Process an org-protocol://remember:// style url.
 
-The sub-protocol used to reach this function is set in
-`org-protocol-protocol-alist'.
-
-This function detects an URL, title and optional text, separated by '/'
 The location for a browser's bookmark has to look like this:
 
   javascript:location.href='org-protocol://remember://'+ \\
@@ -454,39 +455,67 @@ The location for a browser's bookmark has to look like this:
         encodeURIComponent(document.title)+'/'+ \\
         encodeURIComponent(window.getSelection())
 
-By default, it uses the character `org-protocol-default-template-key',
-which should be associated with a template in `org-remember-templates'.
-But you may prepend the encoded URL with a character and a slash like so:
-
-  javascript:location.href='org-protocol://org-store-link://b/'+ ...
-
-Now template ?b will be used."
+See the docs for `org-protocol-capture' for more information."
 
   (if (and (boundp 'org-stored-links)
-           (fboundp 'org-remember))
-      (let* ((parts (org-protocol-split-data info t))
-             (template (or (and (= 1 (length (car parts))) (pop parts))
-			   org-protocol-default-template-key))
-             (url (org-protocol-sanitize-uri (car parts)))
-             (type (if (string-match "^\\([a-z]+\\):" url)
-                       (match-string 1 url)))
-             (title (or (cadr parts) ""))
-             (region (or (caddr parts) ""))
-             (orglink (org-make-link-string
-		       url (if (string-match "[^[:space:]]" title) title url)))
-             remember-annotation-functions)
-        (setq org-stored-links
-              (cons (list url title) org-stored-links))
-        (kill-new orglink)
-        (org-store-link-props :type type
-                              :link url
-                              :description title
-                              :initial region)
-        (raise-frame)
-        (org-remember nil (string-to-char template)))
-
-    (message "Org-mode not loaded."))
+           (or (fboundp 'org-capture))
+	   (org-protocol-do-capture info 'org-remember))
+      (message "Org-mode not loaded."))
   nil)
+
+(defun org-protocol-capture  (info)
+  "Process an org-protocol://capture:// style url.
+
+The sub-protocol used to reach this function is set in
+`org-protocol-protocol-alist'.
+
+This function detects an URL, title and optional text, separated by '/'
+The location for a browser's bookmark has to look like this:
+
+  javascript:location.href='org-protocol://capture://'+ \\
+        encodeURIComponent(location.href)+'/' \\
+        encodeURIComponent(document.title)+'/'+ \\
+        encodeURIComponent(window.getSelection())
+
+By default, it uses the character `org-protocol-default-template-key',
+which should be associated with a template in `org-capture-templates'.
+But you may prepend the encoded URL with a character and a slash like so:
+
+  javascript:location.href='org-protocol://capture://b/'+ ...
+
+Now template ?b will be used."
+  (if (and (boundp 'org-stored-links)
+           (or (fboundp 'org-capture))
+	   (org-protocol-do-capture info 'org-capture))
+      (message "Org-mode not loaded."))
+  nil)
+
+(defun org-protocol-do-capture (info capture-func)
+  "Support `org-capture' and `org-remember' alike.
+CAPTURE-FUNC is either the symbol `org-remember' or `org-capture'."
+  (let* ((parts (org-protocol-split-data info t))
+	 (template (or (and (= 1 (length (car parts))) (pop parts))
+		       org-protocol-default-template-key))
+	 (url (org-protocol-sanitize-uri (car parts)))
+	 (type (if (string-match "^\\([a-z]+\\):" url)
+		   (match-string 1 url)))
+	 (title(or (cadr parts) ""))
+	 (region (or (caddr parts) ""))
+	 (orglink (org-make-link-string
+		   url (if (string-match "[^[:space:]]" title) title url)))
+	 (org-capture-link-is-already-stored t) ;; avoid call to org-store-link
+	 remember-annotation-functions)
+    (setq org-stored-links
+	  (cons (list url title) org-stored-links))
+    (kill-new orglink)
+    (org-store-link-props :type type
+			  :link url
+			  :description title
+			  :annotation orglink
+			  :initial region)
+    (raise-frame)
+    (funcall capture-func nil template)))
+
 
 (defun org-protocol-open-source (fname)
   "Process an org-protocol://open-source:// style url.

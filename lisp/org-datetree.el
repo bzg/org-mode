@@ -36,8 +36,8 @@
 (defvar org-datetree-base-level 1
   "The level at which years should be placed in the date tree.
 This is normally one, but if the buffer has an entry with a DATE_TREE
-property, the date tree will become a subtree under that entry, so the
-base level will be properly adjusted.")
+property (any value), the date tree will become a subtree under that entry,
+so the base level will be properly adjusted.")
 
 ;;;###autoload
 (defun org-datetree-find-date-create (date &optional keep-restriction)

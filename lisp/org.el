@@ -104,6 +104,23 @@
 (require 'org-src)
 (require 'org-footnote)
 
+;; babel
+(let* ((babel-path (expand-file-name
+		    "babel"
+		    (file-name-directory (or (buffer-file-name)
+					     load-file-name))))
+       (babel-langs-path (expand-file-name "langs" babel-path)))
+  (add-to-list 'load-path babel-path)
+  (add-to-list 'load-path babel-langs-path))
+(require 'ob)
+(require 'ob-table)
+(require 'ob-lob)
+(require 'ob-ref)
+(require 'ob-tangle)
+(require 'ob-comint)
+(require 'ob-keys)
+(require 'ob-emacs-lisp)
+
 ;;;; Customization variables
 (defcustom org-clone-delete-id nil
   "Remove ID property of clones of a subtree.
@@ -3611,6 +3628,11 @@ If TABLE-TYPE is non-nil, also check for table.el-type tables."
 		'(org-remember-insinuate org-remember-annotation
    org-remember-apply-template org-remember org-remember-handler)))
 
+(eval-and-compile
+  (org-autoload "org-capture"
+		'(org-capture org-capture-insert-template-here
+                  org-capture-import-remember-templates)))
+
 ;; Autoload org-clock.el
 
 
@@ -4317,7 +4339,11 @@ means to push this value onto the list in the variable.")
 	    org-complex-heading-regexp-format
 	    (concat "^\\(\\*+\\)[ \t]+\\(?:\\("
 		    (mapconcat 'regexp-quote org-todo-keywords-1 "\\|")
-		    "\\)\\>\\)?\\(?:[ \t]*\\(\\[#.\\]\\)\\)?[ \t]*\\(%s\\)"
+		    "\\)\\>\\)?"
+		    "\\(?:[ \t]*\\(\\[#.\\]\\)\\)?"
+		    "\\(?:[ \t]*\\(?:\\[[0-9%%/]+\\]\\)\\)?" ;; stats cookie
+		    "[ \t]*\\(%s\\)"
+		    "\\(?:[ \t]*\\(?:\\[[0-9%%/]+\\]\\)\\)?" ;; stats cookie
 		    "\\(?:[ \t]+\\(:[[:alnum:]_@:]+:\\)\\)?[ \t]*$")
 	    org-nl-done-regexp
 	    (concat "\n\\*+[ \t]+"
@@ -4571,10 +4597,8 @@ The following commands are available:
 		 'org-block-todo-from-checkboxes))
 
   ;; Comment characters
-  ;; (org-set-local 'comment-start "#")
+  (org-set-local 'comment-start "#")
   (org-set-local 'comment-padding " ")
-  (modify-syntax-entry ?# "<")
-  ;; (modify-syntax-entry ?\n ">")
 
   ;; Align options lines
   (org-set-local
@@ -8611,7 +8635,7 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
 	  (save-match-data
 	    (if (string-match (concat "^" (regexp-quote
 					   (file-name-as-directory
-					    (expand-file-name "."))))
+					    default-directory)))
 			      (expand-file-name path))
 		;; We are linking a file with relative path name.
 		(setq path (substring (expand-file-name path)
@@ -8880,6 +8904,8 @@ optional argument IN-EMACS is non-nil, Emacs will visit the file.
 With a double prefix argument, try to open outside of Emacs, in the
 application the system uses for this file type."
   (interactive "P")
+  ;; if in a code block, then open the block's results
+  (unless (call-interactively #'org-babel-open-src-block-result)
   (org-load-modules-maybe)
   (move-marker org-open-link-marker (point))
   (setq org-window-config-before-follow-link (current-window-configuration))
@@ -9061,7 +9087,7 @@ application the system uses for this file type."
 	 (t
 	  (browse-url-at-point)))))))
   (move-marker org-open-link-marker nil)
-  (run-hook-with-args 'org-follow-link-hook))
+  (run-hook-with-args 'org-follow-link-hook)))
 
 (defun org-offer-links-in-entry (&optional nth zero)
   "Offer links in the current entry and follow the selected link.
@@ -10855,7 +10881,7 @@ changes.  Such blocking occurs when:
 	(let* ((pos (point))
 	       (parent-pos (and (org-up-heading-safe) (point))))
 	  (if (not parent-pos) (throw 'dont-block t)) ; no parent
-	  (when (and (org-entry-get (point) "ORDERED")
+	  (when (and (org-not-nil (org-entry-get (point) "ORDERED"))
 		     (forward-line 1)
 		     (re-search-forward org-not-done-heading-regexp pos t))
 	    (throw 'dont-block nil))  ; block, there is an older sibling not done.
@@ -10867,7 +10893,7 @@ changes.  Such blocking occurs when:
 	    (setq pos (point))
 	    (setq parent-pos (and (org-up-heading-safe) (point)))
 	    (if (not parent-pos) (throw 'dont-block t)) ; no parent
-	    (when (and (org-entry-get (point) "ORDERED")
+	    (when (and (org-not-nil (org-entry-get (point) "ORDERED"))
 		       (forward-line 1)
 		       (re-search-forward org-not-done-heading-regexp pos t))
 	      (throw 'dont-block nil)))))))) ; block, older sibling not done.
@@ -13252,7 +13278,7 @@ things up because then unnecessary parsing is avoided."
     (let ((clockstr (substring org-clock-string 0 -1))
 	  (excluded '("TODO" "TAGS" "ALLTAGS" "PRIORITY" "BLOCKED"))
 	  (case-fold-search nil)
-	  beg end range props sum-props key value string clocksum)
+	  beg end range props sum-props key key1 value string clocksum)
       (save-excursion
 	(when (condition-case nil
 		  (and (org-mode-p) (org-back-to-heading t))
@@ -13283,23 +13309,35 @@ things up because then unnecessary parsing is avoided."
 	    (when (or (not specific) (string= specific "BLOCKED"))
 	      (push (cons "BLOCKED" (if (org-entry-blocked-p) "t" "")) props))
 	    (when (or (not specific)
-		      (member specific org-all-time-keywords)
-		      (member specific '("TIMESTAMP" "TIMESTAMP_IA")))
+		      (member specific
+			      '("SCHEDULED" "DEADLINE" "CLOCK" "CLOSED"
+				"TIMESTAMP" "TIMESTAMP_IA")))
 	      (while (re-search-forward org-maybe-keyword-time-regexp end t)
-		(setq key (if (match-end 1) (substring (org-match-string-no-properties 1) 0 -1))
+		(setq key (if (match-end 1)
+			      (substring (org-match-string-no-properties 1)
+					 0 -1))
 		      string (if (equal key clockstr)
 				 (org-no-properties
 				  (org-trim
-				 (buffer-substring
-				  (match-beginning 3) (goto-char (point-at-eol)))))
-			       (substring (org-match-string-no-properties 3) 1 -1)))
-		(unless key
-		  (if (= (char-after (match-beginning 3)) ?\[)
-		      (setq key "TIMESTAMP_IA")
-		    (setq key "TIMESTAMP")))
-		(when (or (equal key clockstr) (not (assoc key props)))
+				   (buffer-substring
+				    (match-beginning 3) (goto-char
+							 (point-at-eol)))))
+			       (substring (org-match-string-no-properties 3)
+					  1 -1)))
+		;; Get the correct property name from the key.  This is
+		;; necessary if the user has configured time keywords.
+		(setq key1 (concat key ":"))
+		(cond
+		 ((not key)
+		  (setq key
+			(if (= (char-after (match-beginning 3)) ?\[)
+			    "TIMESTAMP_IA" "TIMESTAMP")))
+		 ((equal key1 org-scheduled-string) (setq key "SCHEDULED"))
+		 ((equal key1 org-deadline-string)  (setq key "DEADLINE"))
+		 ((equal key1 org-closed-string)    (setq key "CLOSED"))
+		 ((equal key1 org-clock-string)     (setq key "CLOCK")))
+		(when (or (equal key "CLOCK") (not (assoc key props)))
 		  (push (cons key string) props))))
-
 	    )
 
 	  (when (memq which '(all standard))
@@ -13326,14 +13364,18 @@ things up because then unnecessary parsing is avoided."
 	    (push (cons "CATEGORY" value) props))
 	  (append sum-props (nreverse props)))))))
 
-(defun org-entry-get (pom property &optional inherit)
+(defun org-entry-get (pom property &optional inherit literal-nil)
   "Get value of PROPERTY for entry at point-or-marker POM.
 If INHERIT is non-nil and the entry does not have the property,
 then also check higher levels of the hierarchy.
 If INHERIT is the symbol `selective', use inheritance only if the setting
 in `org-use-property-inheritance' selects PROPERTY for inheritance.
 If the property is present but empty, the return value is the empty string.
-If the property is not present at all, nil is returned."
+If the property is not present at all, nil is returned.
+
+If LITERAL-NIL is set, return the string value \"nil\" as a string,
+do not interpret it as the list atom nil.  This is used for inheritance
+when a \"nil\" value can supercede a non-nil value higher up the hierarchy."
   (org-with-point-at pom
     (if (and inherit (if (eq inherit 'selective)
 			 (org-property-inherit-p property)
@@ -13351,7 +13393,9 @@ If the property is not present at all, nil is returned."
 		    (cdr range) t))
 	      ;; Found the property, return it.
 	      (if (match-end 1)
-		  (org-match-string-no-properties 1)
+		  (if literal-nil
+		      (org-match-string-no-properties 1)
+		    (org-not-nil (org-match-string-no-properties 1)))
 		"")))))))
 
 (defun org-property-or-variable-value (var &optional inherit)
@@ -13455,15 +13499,16 @@ is set.")
 	(widen)
 	(catch 'ex
 	  (while t
-	    (when (setq tmp (org-entry-get nil property))
+	    (when (setq tmp (org-entry-get nil property nil 'literal-nil))
 	      (org-back-to-heading t)
 	      (move-marker org-entry-property-inherited-from (point))
 	      (throw 'ex tmp))
 	    (or (org-up-heading-safe) (throw 'ex nil)))))
-      (or tmp
-	  (cdr (assoc property org-file-properties))
-	  (cdr (assoc property org-global-properties))
-	  (cdr (assoc property org-global-properties-fixed))))))
+      (org-not-nil
+       (or tmp
+	   (cdr (assoc property org-file-properties))
+	   (cdr (assoc property org-global-properties))
+	   (cdr (assoc property org-global-properties-fixed)))))))
 
 (defvar org-property-changed-functions nil
   "Hook called when the value of a property has changed.
@@ -13777,7 +13822,7 @@ completion."
     (skip-chars-forward " \t")
     (run-hook-with-args 'org-property-changed-functions key nval)))
 
-(defun org-find-olp (path)
+(defun org-find-olp (path &optional this-buffer)
   "Return a marker pointing to the entry at outline path OLP.
 If anything goes wrong, throw an error.
 You can wrap this call to cathc the error like this:
@@ -13787,9 +13832,12 @@ You can wrap this call to cathc the error like this:
     (error (nth 1 msg)))
 
 The return value will then be either a string with the error message,
-or a marker if everyhing is OK."
-  (let* ((file (pop path))
-	 (buffer (find-file-noselect file))
+or a marker if everyhing is OK.
+
+If THIS-BUFFER is set, the putline path does not contain a file,
+only headings."
+  (let* ((file (if this-buffer buffer-file-name (pop path)))
+	 (buffer (if this-buffer (current-buffer) (find-file-noselect file)))
 	 (level 1)
 	 (lmin 1)
 	 (lmax 1)
@@ -14684,20 +14732,18 @@ days in order to avoid rounding problems."
 (defun org-time-string-to-seconds (s)
   (org-float-time (org-time-string-to-time s)))
 
-(defun org-time-string-to-absolute (s &optional daynr prefer show-all ignore-cyclic)
+(defun org-time-string-to-absolute (s &optional daynr prefer show-all)
   "Convert a time stamp to an absolute day number.
-If there is a specifier for a cyclic time stamp, get the closest date to
+If there is a specifyer for a cyclic time stamp, get the closest date to
 DAYNR.
 PREFER and SHOW-ALL are passed through to `org-closest-date'.
-the variable date is bound by the calendar when this is called.
-IGNORE-CYCLIC ignores cyclic repeaters so the returned absolute date
-is based on the original date."
+the variable date is bound by the calendar when this is called."
   (cond
    ((and daynr (string-match "\\`%%\\((.*)\\)" s))
     (if (org-diary-sexp-entry (match-string 1 s) "" date)
 	daynr
       (+ daynr 1000)))
-   ((and (not ignore-cyclic) daynr (string-match "\\+[0-9]+[dwmy]" s))
+   ((and daynr (string-match "\\+[0-9]+[dwmy]" s))
     (org-closest-date s (if (and (boundp 'daynr) (integerp daynr)) daynr
 			  (time-to-days (current-time))) (match-string 0 s)
 			  prefer show-all))
@@ -14879,7 +14925,7 @@ If the cursor is on the year, change the year.  If it is on the month or
 the day, change that.
 With prefix ARG, change by that many units."
   (interactive "p")
-  (org-timestamp-change (prefix-numeric-value arg)))
+  (org-timestamp-change (prefix-numeric-value arg) nil 'updown))
 
 (defun org-timestamp-down (&optional arg)
   "Decrease the date item at the cursor by one.
@@ -14887,7 +14933,7 @@ If the cursor is on the year, change the year.  If it is on the month or
 the day, change that.
 With prefix ARG, change by that many units."
   (interactive "p")
-  (org-timestamp-change (- (prefix-numeric-value arg))))
+  (org-timestamp-change (- (prefix-numeric-value arg)) nil 'updown))
 
 (defun org-timestamp-up-day (&optional arg)
   "Increase the date in the time stamp by one day.
@@ -14896,7 +14942,7 @@ With prefix ARG, change that many days."
   (if (and (not (org-at-timestamp-p t))
 	   (org-on-heading-p))
       (org-todo 'up)
-    (org-timestamp-change (prefix-numeric-value arg) 'day)))
+    (org-timestamp-change (prefix-numeric-value arg) 'day 'updown)))
 
 (defun org-timestamp-down-day (&optional arg)
   "Decrease the date in the time stamp by one day.
@@ -14905,7 +14951,7 @@ With prefix ARG, change that many days."
   (if (and (not (org-at-timestamp-p t))
 	   (org-on-heading-p))
       (org-todo 'down)
-    (org-timestamp-change (- (prefix-numeric-value arg)) 'day)))
+    (org-timestamp-change (- (prefix-numeric-value arg)) 'day) 'updown))
 
 (defun org-at-timestamp-p (&optional inactive-ok)
   "Determine if the cursor is in or at a timestamp."
@@ -14950,7 +14996,7 @@ With prefix ARG, change that many days."
       (message "Timestamp is now %sactive"
 	       (if (equal (char-after beg) ?<) "" "in")))))
 
-(defun org-timestamp-change (n &optional what)
+(defun org-timestamp-change (n &optional what updown)
   "Change the date in the time stamp at point.
 The date will be changed by N times WHAT.  WHAT can be `day', `month',
 `year', `minute', `second'.  If WHAT is not given, the cursor position
@@ -14981,8 +15027,10 @@ in the timestamp determines what will be changed."
       (if (string-match "^.\\{10\\}.*?[0-9]+:[0-9][0-9]" ts)
 	  (setq with-hm t))
       (setq time0 (org-parse-time-string ts))
-      (when (and (eq org-ts-what 'minute)
-		 (eq current-prefix-arg nil))
+      (when (and updown
+		 (eq org-ts-what 'minute)
+		 (not current-prefix-arg))
+	;; This looks like s-up and s-down.  Change by one rounding step.
 	(setq n (* dm (cond ((> n 0) 1) ((< n 0) -1) (t 0))))
 	(when (not (= 0 (setq rem (% (nth 1 time0) dm))))
 	  (setcar (cdr time0) (+ (nth 1 time0)
@@ -16000,6 +16048,12 @@ BEG and END default to the buffer boundaries."
 (org-defkey org-mode-map [(control shift right)] 'org-shiftcontrolright)
 (org-defkey org-mode-map [(control shift left)]  'org-shiftcontrolleft)
 
+;; Babel keys
+(define-key org-mode-map org-babel-key-prefix org-babel-map)
+(mapc (lambda (pair)
+        (define-key org-babel-map (car pair) (cdr pair)))
+      org-babel-key-bindings)
+
 ;;; Extra keys for tty access.
 ;;  We only set them when really needed because otherwise the
 ;;  menus don't show the simple keys
@@ -16862,14 +16916,23 @@ See the individual commands for more information."
       (org-table-paste-rectangle)
     (org-paste-subtree arg)))
 
-(defun org-edit-special ()
+(defun org-edit-special (&optional arg)
   "Call a special editor for the stuff at point.
 When at a table, call the formula editor with `org-table-edit-formulas'.
 When at the first line of an src example, call `org-edit-src-code'.
 When in an #+include line, visit the include file.  Otherwise call
 `ffap' to visit the file at point."
   (interactive)
-  (cond
+  ;; possibly prep session before editing source
+  (when arg
+    (let* ((info (org-babel-get-src-block-info))
+           (lang (nth 0 info))
+           (params (nth 2 info))
+           (session (cdr (assoc :session params))))
+      (when (and info session) ;; we are in a source-code block with a session
+        (funcall
+         (intern (concat "org-babel-prep-session:" lang)) session params))))
+  (cond ;; proceed with `org-edit-special'
    ((save-excursion
       (beginning-of-line 1)
       (looking-at "\\(?:#\\+\\(?:setupfile\\|include\\):?[ \t]+\"?\\|[ \t]*<include\\>.*?file=\"\\)\\([^\"\n>]+\\)"))
@@ -18099,7 +18162,8 @@ return nil."
 
 (defun org-switch-to-buffer-other-window (&rest args)
   "Switch to buffer in a second window on the current frame.
-In particular, do not allow pop-up frames."
+In particular, do not allow pop-up frames.
+Returns the newly created buffer."
   (let (pop-up-frames special-display-buffer-names special-display-regexps
 		      special-display-function)
     (apply 'switch-to-buffer-other-window args)))
@@ -18516,8 +18580,8 @@ beyond the end of the headline."
       (if (bobp)
 	  nil
 	(backward-char 1)
-	(if (org-invisible-p)
-	    (while (and (not (bobp)) (org-invisible-p))
+	(if (org-truely-invisible-p)
+	    (while (and (not (bobp)) (org-truely-invisible-p))
 	      (backward-char 1)
 	      (beginning-of-line 1))
 	  (forward-char 1))))
@@ -18734,6 +18798,17 @@ interactive command with similar behavior."
   (if (fboundp 'outline-invisible-p)
       (outline-invisible-p)
     (get-char-property (point) 'invisible)))
+
+(defun org-truely-invisible-p ()
+  "Check if point is at a character currently not visible.
+This version does not only check the character property, but also
+`visible-mode'."
+  ;; Early versions of noutline don't have `outline-invisible-p'.
+  (if (org-bound-and-true-p visible-mode)
+      nil
+    (if (fboundp 'outline-invisible-p)
+	(outline-invisible-p)
+      (get-char-property (point) 'invisible))))
 
 (defun org-invisible-p2 ()
   "Check if point is at a character currently not visible."
