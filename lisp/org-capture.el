@@ -386,7 +386,16 @@ bypassed."
 	(if (equal goto 0)
 	    ;;insert at point
 	    (org-capture-insert-template-here)
-	  (org-capture-place-template)
+	  (condition-case error
+	      (org-capture-place-template)
+	    ((error quit)
+	     (if (and (buffer-base-buffer (current-buffer))
+		      (string-match "\\`CAPTURE-" (buffer-name)))
+		 (kill-buffer (current-buffer)))
+	     (set-window-configuration (org-capture-get :return-to-wconf))
+	     (error "Capture template `%s': %s"
+		    (org-capture-get :key)
+		    (nth 1 error))))
 	  (if (org-capture-get :immediate-finish)
 	      (org-capture-finalize)
 	    (if (and (org-mode-p)
@@ -463,14 +472,8 @@ bypassed."
       ;; Store this place as the last one where we stored something
       ;; Do the marking in the base buffer, so that it makes sense after
       ;; the indirect buffer has been killed.
-      (let ((pos (point)))
-	(with-current-buffer (buffer-base-buffer (current-buffer))
-	  (save-excursion
-	    (save-restriction
-	      (widen)
-	      (goto-char pos)
-	      (bookmark-set "org-capture-last-stored")
-	      (move-marker org-capture-last-stored-marker (point))))))
+      (org-capture-bookmark-last-stored-position)
+
       ;; Run the hook
       (run-hooks 'org-capture-before-finalize-hook)
       )
@@ -659,6 +662,7 @@ already gone."
     (setq beg (point))
     (org-paste-subtree level txt 'for-yank)
     (org-capture-empty-lines-after 1)
+    (org-capture-position-for-last-stored beg)
     (outline-next-heading)
     (setq end (point))
     (org-capture-mark-kill-region beg (1- end))
@@ -711,6 +715,7 @@ already gone."
     (insert txt)
     (or (bolp) (insert "\n"))
     (org-capture-empty-lines-after 1)
+    (org-capture-position-for-last-stored beg)
     (forward-char 1)
     (setq end (point))
     (org-capture-mark-kill-region beg (1- end))
@@ -739,8 +744,8 @@ already gone."
 	      (forward-line 1))
 	  (narrow-to-region b (point)))
       (goto-char end)
-      (insert "\n\n")
-      (narrow-to-region (1- (point)) (point)))
+      (insert "\n|   |\n|----|\n|    |\n")
+      (narrow-to-region (1+ end) (point)))
     ;; We are narrowed to the table, or to an empty line if there was no table
 
     ;; Check if the template is good
@@ -756,7 +761,7 @@ already gone."
 	    ll)
 	;; The user wants a special position in the table
 	(org-table-get-specials)
-	(setq ll (aref org-table-hlines nh))
+	(setq ll (ignore-errors (aref org-table-hlines nh)))
 	(unless ll (error "Invalid table line specification \"%s\""
 			  table-line-pos))
 	(setq ll (+ ll delta (if (< delta 0) 0 -1)))
@@ -790,6 +795,7 @@ already gone."
       (insert txt)
       (setq end (point))))
     (goto-char beg)
+    (org-capture-position-for-last-stored 'table-line)
     (if (re-search-forward "%\\?" end t) (replace-match ""))
     (org-table-align)))
 
@@ -803,6 +809,7 @@ already gone."
     (setq beg (point))
     (insert txt)
     (org-capture-empty-lines-after 1)
+    (org-capture-position-for-last-stored beg)
     (setq end (point))
     (org-capture-mark-kill-region beg (1- end))
     (org-capture-narrow beg (1- end))
@@ -814,6 +821,41 @@ already gone."
 	(m2 (move-marker (make-marker) end)))
     (org-capture-put :begin-marker m1)
     (org-capture-put :end-marker m2)))
+
+(defun org-capture-position-for-last-stored (where)
+  "Memorize the position that should later become the position of last capture."
+  (cond
+   ((integerp where)
+    (org-capture-put :position-for-last-stored
+		     (move-marker (make-marker) where
+				  (or (buffer-base-buffer (current-buffer))
+				      (current-buffer)))))
+   ((eq where 'table-line)
+    (org-capture-put :position-for-last-stored
+		     (list 'table-line
+			   (org-table-current-dline))))
+   (t (error "This should not happen"))))
+
+(defun org-capture-bookmark-last-stored-position ()
+  "Bookmark the last-captured position."
+  (let* ((where (org-capture-get :position-for-last-stored 'local))
+	 (pos (cond
+	       ((markerp where)
+		(prog1 (marker-position where)
+		  (move-marker where nil)))
+	       ((and (listp where) (eq (car where) 'table-line))
+		(if (org-at-table-p)
+		    (save-excursion
+		      (org-table-goto-line (nth 1 where))
+		      (point-at-bol))
+		  (point))))))
+    (with-current-buffer (buffer-base-buffer (current-buffer))
+      (save-excursion
+	(save-restriction
+	  (widen)
+	  (goto-char pos)
+	  (bookmark-set "org-capture-last-stored")
+	  (move-marker org-capture-last-stored-marker (point)))))))
 
 (defun org-capture-narrow (beg end)
   "Narrow, unless configuraion says not to narrow."
