@@ -55,6 +55,9 @@ basis.  This setting overrides
 =org-export-docbook-xslt-stylesheet=.
 
 *** Org-babel configuration changes
+:PROPERTIES:
+:CUSTOM_ID: ob-configuration-changes
+:END:
 Babel took the integration into Org-mode as an opportunity to do
 some much needed house cleaning.  Most importantly we have
 cleared out unnecessary configuration variables -- which is great
@@ -181,7 +184,16 @@ Christian Egli's org-taskjuggler.el module is now part of Org
 He also wrote a [[http://orgmode.org/worg/org-tutorials/org-taskjuggler.php][tutorial]] for it.
 
 *** Org Babel is now part of the Org core
-HERE WE NEED SOME HINTS ON HOW TO SWITCH OVER OLD CODE
+See [[#ob-configuration-changes][Org-babel configuration changes]] for instructions on how to
+update your babel configuration.
+
+The most significant result of this change is that Babel now has
+documentation!  It is part of Org-mode's documentation see
+Chapter 14 _Working With Source Code_ also, the Babel keybindings
+are now listed in the refcard, and can be viewed from any
+Org-mode buffer by pressing =C-c C-v h=.  In addition this
+integration has included a number of bug fixes, and a significant
+amount of internal code cleanup.
 
 *** A property value of "nil" now means to unset a property
 
