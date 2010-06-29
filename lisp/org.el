@@ -5189,13 +5189,17 @@ will be prompted for."
 	  (if org-export-with-TeX-macros
 	      (list (concat "\\\\"
 			    (regexp-opt
-			     (append (mapcar 'car (append org-entities-user
-							  org-entities))
-				     (if (boundp 'org-latex-entities)
-					 (mapcar (lambda (x)
-						   (or (car-safe x) x))
-						 org-latex-entities)
-				       nil))
+			     (append
+
+			      (delq nil
+				    (mapcar 'car-safe
+					    (append org-entities-user
+						    org-entities)))
+			      (if (boundp 'org-latex-entities)
+				  (mapcar (lambda (x)
+					    (or (car-safe x) x))
+					  org-latex-entities)
+				nil))
 			     'words))) ; FIXME
 	    ))
     ;;			(list "\\\\\\(?:[a-zA-Z]+\\)")))
