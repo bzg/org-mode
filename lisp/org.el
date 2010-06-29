@@ -15228,11 +15228,20 @@ changes from another.  I believe the procedure must be like this:
 (defun org-iswitchb (&optional arg)
   "Use `org-icompleting-read' to prompt for an Org buffer to switch to.
 With a prefix argument, restrict available to files.
-With two prefix arguments, restrict available buffers to agenda files."
+With two prefix arguments, restrict available buffers to agenda files.
+
+This will either use ido or iswitchb for buffer name completion,
+depending on the variables `org-completion-use-iswitchb' and
+`org-completion-use-ido'.  If both are nil, we will still use iswitchb
+for this special application."
   (interactive "P")
   (let ((blist (cond ((equal arg '(4))  (org-buffer-list 'files))
                      ((equal arg '(16)) (org-buffer-list 'agenda))
-                     (t                 (org-buffer-list)))))
+                     (t                 (org-buffer-list))))
+	(org-completion-use-iswitchb org-completion-use-iswitchb)
+	(org-completion-use-ido org-completion-use-ido))
+    (unless (or org-completion-use-ido org-completion-use-iswitchb)
+      (setq org-completion-use-iswitchb t))
     (switch-to-buffer
      (org-icompleting-read "Org buffer: "
                               (mapcar 'list (mapcar 'buffer-name blist))
