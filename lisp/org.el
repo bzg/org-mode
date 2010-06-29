@@ -15230,10 +15230,8 @@ changes from another.  I believe the procedure must be like this:
 With a prefix argument, restrict available to files.
 With two prefix arguments, restrict available buffers to agenda files.
 
-This will either use ido or iswitchb for buffer name completion,
-depending on the variables `org-completion-use-iswitchb' and
-`org-completion-use-ido'.  If both are nil, we will still use iswitchb
-for this special application."
+This will use iswitchb for buffer name completion, unless
+`org-completion-use-ido' is non-nil, to select ido completion."
   (interactive "P")
   (let ((blist (cond ((equal arg '(4))  (org-buffer-list 'files))
                      ((equal arg '(16)) (org-buffer-list 'agenda))
