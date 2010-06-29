@@ -1387,7 +1387,8 @@ Changing this requires a restart of Emacs to work correctly."
 (defcustom org-link-frame-setup
   '((vm . vm-visit-folder-other-frame)
     (gnus . gnus-other-frame)
-    (file . find-file-other-window))
+    (file . find-file-other-window)
+    (wl . wl-other-frame))
   "Setup the frame configuration for following links.
 When following a link with Emacs, it may often be useful to display
 this link in another window or frame.  This variable can be used to
@@ -1403,6 +1404,9 @@ For FILE, use any of
     `find-file'
     `find-file-other-window'
     `find-file-other-frame'
+For Wanderlust use any of
+    `wl'
+    `wl-other-frame'
 For the calendar, use the variable `calendar-setup'.
 For BBDB, it is currently only possible to display the matches in
 another window."
@@ -1422,7 +1426,11 @@ another window."
 		(choice
 		 (const find-file)
 		 (const find-file-other-window)
-		 (const find-file-other-frame)))))
+		 (const find-file-other-frame)))
+	  (cons (const wl)
+		(choice
+		 (const wl)
+		 (const wl-other-frame)))))
 
 (defcustom org-display-internal-link-with-indirect-buffer nil
   "Non-nil means use indirect buffer to display infile links.
