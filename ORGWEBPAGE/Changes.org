@@ -54,7 +54,77 @@ specify the XSLT stylesheet that you want to use on a per-file
 basis.  This setting overrides
 =org-export-docbook-xslt-stylesheet=.
 
-*** SOME STUFF ABOUT ORG BAMEL NEEDS TO BE HERE
+*** Org-babel configuration changes
+Babel took the integration into Org-mode as an opportunity to do
+some much needed house cleaning.  Most importantly we have
+cleared out unnecessary configuration variables -- which is great
+unless you already have these variables set.
+
+We have eliminated the two main internal lists of languages,
+namely
+- =org-babel-interpreters= and
+- =org-babel-tangle-langs=
+
+so any config lines which mention those variables, can/should be
+stripped out in their entirety.  This includes any calls to the
+=org-babl-add-interpreter= function, whose sole purpose was to
+add languages to the =org-babel-interpreters= variable.
+
+With those calls stripped out, we may still in some cases want to
+associate a file name extension with certain languages, for
+example we want all of our emacs-lisp files to end in a =.el=, we
+can do this will the =org-babel-tangle-lang-exts= variable.  In
+general you shouldn't need to touch this as it already has
+defaults for most common languages, and if a language is not
+present in org-babel-tangle-langs, then babel will just use the
+language name, so for example a file of =c= code will have a =.c=
+extension by default, shell-scripts (identified with =sh=) will
+have a =.sh= extension etc...
+
+The configuration of /shebang/ lines now lives in header
+arguments.  So the shebang for a single file can be set at the
+code block level, e.g.
+
+#+begin_src org
+  ,#+begin_src clojure :shebang #!/usr/bin/env clj
+  ,  (println "with a shebang line, I can be run as a script!")
+  ,#+end_src  
+#+end_src
+
+Note that whenever a file is tangled which includes a /shebang/
+line, Babel will make the file executable, so there is good
+reason to only add /shebangs/ at the source-code block level.
+However if you're sure that you want all of your code in some
+language (say shell scripts) to tangle out with shebang lines,
+then you can customize the default header arguments for that
+language, e.g.
+
+#+begin_src emacs-lisp
+  ;; ensure this variable is defined defined
+  (unless (boundp 'org-babel-default-header-args:sh)
+    (setq org-babel-default-header-args:sh '()))
+  
+  ;; add a default shebang header argument
+  (add-to-list 'org-babel-default-header-args:sh
+               '(:shebang . "#!/bin/bash"))  
+#+end_src
+
+The final and most important change, is that to conform to Emacs
+guidelines, the prefix =org-babel-*= in all require lines, has
+been changed to =ob-*=, this means that *every language-specific
+require* will need to be changed.  Also, since Babel now loads by
+default with Org-mode you should remove any
+#+begin_src emacs-lisp
+  (require 'org-babel)
+#+end_src
+or
+#+begin_src emacs-lisp
+  (require 'org-babel-init)
+#+end_src
+that may by lying around in your configuration.
+
+Whew! that seems like a lot of effort for a /simplification/ of
+configuration.
 
 ** Details
 
