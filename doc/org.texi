@@ -12116,32 +12116,32 @@ In an Org-mode buffer, the following key bindings are active:
 @multitable @columnfractions 0.45 0.55
 @kindex C-c C-v a
 @kindex C-c C-v C-a
-@item @kbd{C-c C-v a} @r{or} @kbd{C-c C-v C-a} @tab org-babel-sha1-hash
+@item @kbd{C-c C-v a} @ @ @r{or} @ @ @kbd{C-c C-v C-a} @tab org-babel-sha1-hash
 @kindex C-c C-v b
 @kindex C-c C-v C-b
-@item @kbd{C-c C-v b} @r{or} @kbd{C-c C-v C-b} @tab org-babel-execute-buffer
+@item @kbd{C-c C-v b} @ @ @r{or} @ @ @kbd{C-c C-v C-b} @tab org-babel-execute-buffer
 @kindex C-c C-v f
 @kindex C-c C-v C-f
-@item @kbd{C-c C-v f} @r{or} @kbd{C-c C-v C-f} @tab org-babel-tangle-file
+@item @kbd{C-c C-v f} @ @ @r{or} @ @ @kbd{C-c C-v C-f} @tab org-babel-tangle-file
 @kindex C-c C-v g
 @item @kbd{C-c C-v g} @tab org-babel-goto-named-source-block
 @kindex C-c C-v h
 @item @kbd{C-c C-v h} @tab org-babel-describe-bindings
 @kindex C-c C-v l
 @kindex C-c C-v C-l
-@item @kbd{C-c C-v l} @r{or} @kbd{C-c C-v C-l} @tab org-babel-lob-ingest
+@item @kbd{C-c C-v l} @ @ @r{or} @ @ @kbd{C-c C-v C-l} @tab org-babel-lob-ingest
 @kindex C-c C-v p
 @kindex C-c C-v C-p
-@item @kbd{C-c C-v p} @r{or} @kbd{C-c C-v C-p} @tab org-babel-expand-src-block
+@item @kbd{C-c C-v p} @ @ @r{or} @ @ @kbd{C-c C-v C-p} @tab org-babel-expand-src-block
 @kindex C-c C-v s
 @kindex C-c C-v C-s
-@item @kbd{C-c C-v s} @r{or} @kbd{C-c C-v C-s} @tab org-babel-execute-subtree
+@item @kbd{C-c C-v s} @ @ @r{or} @ @ @kbd{C-c C-v C-s} @tab org-babel-execute-subtree
 @kindex C-c C-v t
 @kindex C-c C-v C-t
-@item @kbd{C-c C-v t} @r{or} @kbd{C-c C-v C-t} @tab org-babel-tangle
+@item @kbd{C-c C-v t} @ @ @r{or} @ @ @kbd{C-c C-v C-t} @tab org-babel-tangle
 @kindex C-c C-v z
 @kindex C-c C-v C-z
-@item @kbd{C-c C-v z} @r{or} @kbd{C-c C-v C-z} @tab org-babel-switch-to-session
+@item @kbd{C-c C-v z} @ @ @r{or} @ @ @kbd{C-c C-v C-z} @tab org-babel-switch-to-session
 @end multitable
 
 @c When possible these keybindings were extended to work when the control key is
