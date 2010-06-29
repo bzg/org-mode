@@ -1537,20 +1537,20 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
   "When OPT is non-nil convert fixed-width sections to LaTeX."
   (goto-char (point-min))
   (while (re-search-forward "^[ \t]*:\\([ \t]\\|$\\)" nil t)
-    (if opt
-	(progn (goto-char (match-beginning 0))
-	       (insert "\\begin{verbatim}\n")
-	       (while (looking-at "^\\([ \t]*\\):\\(\\([ \t]\\|$\\).*\\)$")
-		 (replace-match (concat (match-string 1)
-					(match-string 2)) t t)
-		 (forward-line))
-	       (insert "\\end{verbatim}\n\n"))
-      (progn (goto-char (match-beginning 0))
-	     (while (looking-at "^\\([ \t]*\\):\\(\\([ \t]\\|$\\).*\\)$")
-	       (replace-match (concat "%" (match-string 1)
-				      (match-string 2)) t t)
-	       (forward-line))))))
-
+    (unless (get-text-property (point) 'org-example)
+     (if opt
+	 (progn (goto-char (match-beginning 0))
+		(insert "\\begin{verbatim}\n")
+		(while (looking-at "^\\([ \t]*\\):\\(\\([ \t]\\|$\\).*\\)$")
+		  (replace-match (concat (match-string 1)
+					 (match-string 2)) t t)
+		  (forward-line))
+		(insert "\\end{verbatim}\n\n"))
+       (progn (goto-char (match-beginning 0))
+	      (while (looking-at "^\\([ \t]*\\):\\(\\([ \t]\\|$\\).*\\)$")
+		(replace-match (concat "%" (match-string 1)
+				       (match-string 2)) t t)
+		(forward-line)))))))
 
 (defvar org-table-last-alignment) ; defined in org-table.el
 (defvar org-table-last-column-widths) ; defined in org-table.el

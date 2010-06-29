@@ -96,9 +96,53 @@ plot(data)
 
 ** Gnuplot
 
-* Table/Matrix manipulation
+* Tables
+** LaTeX Table export
+This block can be used to wrap a table in the latex =longtable=
+environment, it takes the following arguments -- all but the first two
+are optional.
+| arg       | description                                                 |
+|-----------+-------------------------------------------------------------|
+| table     | a reference to the table                                    |
+| align     | optional alignment string                                   |
+| width     | optional width specification string                         |
+| hline     | the string to use as hline separator, defaults to "\\hline" |
+| head      | optional "head" string                                      |
+| firsthead | optional "firsthead" string                                 |
+| foot      | optional "foot" string                                      |
+| lastfoot  | optional "lastfoot" string                                  |
 
-Elegant lisp code for transposing a matrix.
+#+srcname: longtable
+#+begin_src emacs-lisp :var table='((:table)) :var env="table" :var align='() :var width='() :var hline="\\hline" :var firsthead='() :var head='() :var foot='() :var lastfoot='() :noweb yes :results latex
+  (org-fill-template
+   "
+  \\begin{longtable}%width%align
+  %firsthead
+  %head
+  %foot
+  %lastfoot
+  
+  %table
+  \\end{longtable}\n"
+   (list
+    (cons "width"     (if width (format "{%s}" width) ""))
+    (cons "align"     (if align (format "{%s}" align) ""))
+    (cons "firsthead" (if firsthead (concat firsthead "\n\\endfirsthead\n") ""))
+    (cons "head"      (if head (concat head "\n\\endhead\n") ""))
+    (cons "foot"      (if foot (concat foot "\n\\endfoot\n") ""))
+    (cons "lastfoot"  (if lastfoot (concat lastfoot "\n\\endlastfoot\n") ""))
+    (cons "table" (orgtbl-to-generic
+                   (mapcar (lambda (lis)
+                             (if (listp lis)
+                                 (mapcar (lambda (el)
+                                           (if (stringp el)
+                                               el
+                                             (format "%S" el))) lis)
+                               lis)) table)
+                   (list :lend " \\\\" :sep " & " :hline hline)))))
+#+end_src
+
+** Elegant lisp for transposing a matrix.
 
 #+tblname: transpose-example
 | 1 | 2 | 3 |
