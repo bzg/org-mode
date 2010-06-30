@@ -1526,15 +1526,25 @@ from the buffer."
 
     (while formatters
       (setq fmt (pop formatters))
-      (when (eq (car fmt) backend)
-	;; This is selected code, put it into the file for real
-	(goto-char (point-min))
-	(while (re-search-forward (concat "^\\([ \t]*\\)#\\+" (cadr fmt)
-					  ":[ \t]*\\(.*\\)") nil t)
+      ;; Handle #+Backend: stuff
+      (goto-char (point-min))
+      (while (re-search-forward (concat "^\\([ \t]*\\)#\\+" (cadr fmt)
+					":[ \t]*\\(.*\\)") nil t)
+	(if (not (eq (car fmt) backend))
+	    (delete-region (point-at-bol) (min (1+ (point-at-eol)) (point-max)))
 	  (replace-match "\\1\\2" t)
 	  (add-text-properties
 	   (point-at-bol) (min (1+ (point-at-eol)) (point-max))
 	   '(org-protected t))))
+      ;; Delete #+attr_Backend: stuff of another backend. Those
+      ;; matching the current backend will be taken care of by
+      ;; `org-export-attach-captions-and-attributes'
+      (goto-char (point-min))
+      (while (re-search-forward (concat "^\\([ \t]*\\)#\\+attr_" (cadr fmt)
+					":[ \t]*\\(.*\\)") nil t)
+	(when (not (eq (car fmt) backend))
+	  (delete-region (point-at-bol) (min (1+ (point-at-eol)) (point-max)))))
+      ;; Handle #+begin_Backend and #+end_Backend stuff
       (goto-char (point-min))
       (while (re-search-forward (concat "^[ \t]*#\\+" (caddr fmt) "\\>.*\n?")
 				nil t)
@@ -1598,11 +1608,17 @@ table line.  If it is a link, add it to the line containing the link."
     (while (re-search-forward re nil t)
       (cond
        ((match-end 1)
-	(setq cap (concat cap (if cap " " "") (org-trim (match-string 1)))))
+	(progn
+	  (setq cap (concat cap (if cap " " "") (org-trim (match-string 1))))
+	  (delete-region (point-at-bol) (min (1+ (point-at-eol)) (point-max)))))
        ((match-end 2)
-	(setq attr (concat attr (if attr " " "") (org-trim (match-string 2)))))
+	(progn
+	  (setq attr (concat attr (if attr " " "") (org-trim (match-string 2))))
+	  (delete-region (point-at-bol) (min (1+ (point-at-eol)) (point-max)))))
        ((match-end 3)
-	(setq label (org-trim (match-string 3))))
+	(progn
+	  (setq label (org-trim (match-string 3)))
+	  (delete-region (point-at-bol) (min (1+ (point-at-eol)) (point-max)))))
        (t
 	(setq end (if (match-end 4)
 		      (let ((ee (org-table-end)))
