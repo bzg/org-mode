@@ -318,7 +318,7 @@ applications and inserting them in org documents"
 
 (defun org-mac-together-item-open (uid)
   "Open the given uid, which is a reference to an item in Together"
-  (shell-command (concat "open \"x-together-item:" uid "\"")))
+  (shell-command (concat "open -a Together \"x-together-item:" uid "\"")))
 
 (defun as-get-selected-together-items ()
   (do-applescript
@@ -378,9 +378,9 @@ applications and inserting them in org documents"
 ;;
 ;;
 
-(org-add-link-type "addressbook" 'org-mac-together-item-open)
+(org-add-link-type "addressbook" 'org-mac-addressbook-item-open)
 
-(defun org-mac-together-item-open (uid)
+(defun org-mac-addressbook-item-open (uid)
   "Open the given uid, which is a reference to an item in Together"
   (shell-command (concat "open \"addressbook:" uid "\"")))
 
