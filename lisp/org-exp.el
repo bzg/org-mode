@@ -1161,6 +1161,9 @@ on this string to produce the exported version."
       ;; Remove or replace comments
       (org-export-handle-comments (plist-get parameters :comments))
 
+      ;; Remove #+TBLFM and #+TBLNAME lines
+      (org-export-handle-table-metalines)
+      
       ;; Run the final hook
       (run-hooks 'org-export-preprocess-final-hook)
 
@@ -1671,6 +1674,19 @@ When it is nil, all comments will be removed."
 	  (replace-match "")
 	  (goto-char (max (point-min) (1- pos))))))))
 
+(defun org-export-handle-table-metalines ()
+  "Remove table specific metalines #+TBLNAME: and #+TBLFM:."
+  (let ((re "^[ \t]*#\\+TBL\\(NAME\\|FM\\):\\(.*\n?\\)")
+	pos)
+    (goto-char (point-min))
+    (while (or (looking-at re)
+	       (re-search-forward re nil t))
+      (setq pos (match-beginning 0))
+      (if (get-text-property (point) 'org-protected)
+	  (goto-char (1+ pos))
+	(goto-char (1+ pos))
+	(replace-match "")
+	(goto-char (max (point-min) (1- pos)))))))
 
 (defun org-export-mark-radio-links ()
   "Find all matches for radio targets and turn them into internal links."
