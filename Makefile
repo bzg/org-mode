@@ -7,7 +7,7 @@
 # To create the PDF and HTML documentation files, type `make doc'.
 
 ##----------------------------------------------------------------------
-##  YOU MUST EDIT THE FOLLOWING LINES 
+##  YOU MUST EDIT THE FOLLOWING LINES
 ##----------------------------------------------------------------------
 
 # Name of your emacs binary
@@ -17,7 +17,9 @@ EMACS=emacs
 prefix=/usr/local
 
 # Where local lisp files go.
-lispdir = $(prefix)/share/emacs/site-lisp
+lispdir   = $(prefix)/share/emacs/site-lisp
+lispbdir  = $(lispdir)/babel
+lispbldir = $(lispbdir)/langs
 
 # Where info files go.
 infodir = $(prefix)/share/info
@@ -62,83 +64,109 @@ INSTALL_INFO=install-info
 ##----------------------------------------------------------------------
 
 # The following variables need to be defined by the maintainer
-LISPF      = 	org.el				\
-		org-agenda.el			\
-		org-ascii.el			\
-	     	org-attach.el			\
-	     	org-archive.el			\
-		org-bbdb.el			\
-		org-beamer.el			\
-		org-bibtex.el			\
-	     	org-capture.el			\
-	     	org-clock.el			\
-	     	org-colview.el			\
-	     	org-colview-xemacs.el		\
-	     	org-compat.el			\
-	     	org-crypt.el			\
-	     	org-ctags.el			\
-	     	org-datetree.el			\
-	     	org-docview.el			\
-	     	org-entities.el			\
-		org-exp.el			\
-		org-exp-blocks.el		\
-		org-docbook.el			\
-		org-faces.el			\
-		org-feed.el			\
-		org-footnote.el			\
-		org-freemind.el			\
-		org-gnus.el			\
-		org-habit.el			\
-		org-html.el			\
-		org-icalendar.el		\
-		org-id.el			\
-		org-indent.el			\
-		org-info.el			\
-		org-inlinetask.el		\
-		org-jsinfo.el			\
-		org-irc.el			\
-		org-latex.el			\
-		org-list.el			\
-		org-mac-message.el		\
-	     	org-macs.el			\
-		org-mew.el              	\
-		org-mhe.el			\
-		org-mks.el			\
-		org-mobile.el			\
-		org-mouse.el			\
-		org-publish.el			\
-		org-plot.el			\
-		org-protocol.el			\
-		org-remember.el			\
-		org-rmail.el			\
-		org-src.el			\
-		org-table.el			\
-		org-taskjuggler.el		\
-		org-timer.el			\
-		org-vm.el			\
-		org-w3m.el              	\
-		org-wl.el			\
-		org-xoxo.el			\
-		babel/ob.el			\
-		babel/ob-table.el		\
-		babel/ob-lob.el			\
-		babel/ob-ref.el			\
-		babel/ob-exp.el			\
-		babel/ob-tangle.el		\
-		babel/ob-comint.el		\
-		babel/ob-keys.el		\
-		babel/langs/ob-emacs-lisp.el
+LISPF      = 	org.el			\
+		org-agenda.el		\
+		org-ascii.el		\
+	     	org-attach.el		\
+	     	org-archive.el		\
+		org-bbdb.el		\
+		org-beamer.el		\
+		org-bibtex.el		\
+	     	org-capture.el		\
+	     	org-clock.el		\
+	     	org-colview.el		\
+	     	org-colview-xemacs.el	\
+	     	org-compat.el		\
+	     	org-crypt.el		\
+	     	org-ctags.el		\
+	     	org-datetree.el		\
+	     	org-docview.el		\
+	     	org-entities.el		\
+		org-exp.el		\
+		org-exp-blocks.el	\
+		org-docbook.el		\
+		org-faces.el		\
+		org-feed.el		\
+		org-footnote.el		\
+		org-freemind.el		\
+		org-gnus.el		\
+		org-habit.el		\
+		org-html.el		\
+		org-icalendar.el	\
+		org-id.el		\
+		org-indent.el		\
+		org-info.el		\
+		org-inlinetask.el	\
+		org-jsinfo.el		\
+		org-irc.el		\
+		org-latex.el		\
+		org-list.el		\
+		org-mac-message.el	\
+	     	org-macs.el		\
+		org-mew.el              \
+		org-mhe.el		\
+		org-mks.el		\
+		org-mobile.el		\
+		org-mouse.el		\
+		org-publish.el		\
+		org-plot.el		\
+		org-protocol.el		\
+		org-remember.el		\
+		org-rmail.el		\
+		org-src.el		\
+		org-table.el		\
+		org-taskjuggler.el	\
+		org-timer.el		\
+		org-vm.el		\
+		org-w3m.el              \
+		org-wl.el		\
+		org-xoxo.el
 
-LISPFILES0 = $(LISPF:%=lisp/%)
-LISPFILES  = $(LISPFILES0) lisp/org-install.el
-ELCFILES0  = $(LISPFILES0:.el=.elc)
-ELCFILES   = $(LISPFILES:.el=.elc)
-DOCFILES   = doc/org.texi doc/org.pdf doc/org doc/dir \
-             doc/pdflayout.sty doc/.nosearch \
-             doc/orgguide.texi doc/orgguide.pdf
-CARDFILES  = doc/orgcard.tex doc/orgcard.pdf doc/orgcard_letter.pdf
-TEXIFILES  = doc/org.texi
-INFOFILES  = doc/org
+LISPBF     = 	ob.el			\
+		ob-table.el		\
+		ob-lob.el		\
+		ob-ref.el		\
+		ob-exp.el		\
+		ob-tangle.el		\
+		ob-comint.el		\
+		ob-keys.el
+
+LISPBLF   =	ob-C.el			\
+		ob-ditaa.el		\
+		ob-haskell.el		\
+		ob-perl.el		\
+		ob-sh.el		\
+		ob-R.el			\
+		ob-dot.el		\
+		ob-latex.el		\
+		ob-python.el		\
+		ob-sql.el		\
+		ob-asymptote.el		\
+		ob-emacs-lisp.el	\
+		ob-matlab.el		\
+		ob-ruby.el		\
+		ob-sqlite.el		\
+		ob-clojure.el		\
+		ob-ocaml.el		\
+		ob-sass.el		\
+		ob-css.el		\
+		ob-gnuplot.el		\
+		ob-octave.el		\
+		ob-screen.el
+
+LISPFILES0  = $(LISPF:%=lisp/%)
+LISPFILES   = $(LISPFILES0) lisp/org-install.el
+LISPBFILES  = $(LISPBF:%=lisp/babel/%)
+LISPBLFILES = $(LISPBLF:%=lisp/babel/langs/%)
+ELCFILES0   = $(LISPFILES0:.el=.elc)
+ELCFILES    = $(LISPFILES:.el=.elc)
+ELCBFILES   = $(LISPBFILES:.el=.elc)
+DOCFILES    = doc/org.texi doc/org.pdf doc/org doc/dir \
+              doc/pdflayout.sty doc/.nosearch \
+              doc/orgguide.texi doc/orgguide.pdf
+CARDFILES   = doc/orgcard.tex doc/orgcard.pdf doc/orgcard_letter.pdf
+TEXIFILES   = doc/org.texi
+INFOFILES   = doc/org
 
 
 .SUFFIXES: .el .elc .texi
@@ -148,9 +176,9 @@ SHELL = /bin/sh
 DISTFILES_extra=  Makefile ChangeLog request-assign-future.txt contrib
 DISTFILES_xemacs=  xemacs/noutline.el xemacs/ps-print-invisible.el xemacs/README
 
-default: $(ELCFILES)
+default: $(ELCFILES) $(ELCBFILES)
 
-all:	$(ELCFILES) $(INFOFILES)
+all:	$(ELCFILES) $(ELCBFILES) $(INFOFILES)
 
 up2:	update
 	sudo ${MAKE} install
@@ -160,7 +188,7 @@ update:
 	${MAKE} clean
 	${MAKE} all
 
-compile: $(ELCFILES0)
+compile: $(ELCFILES0) $(ELCBFILES)
 
 install: install-lisp
 
@@ -172,10 +200,15 @@ p:
 g:
 	${MAKE} pdf && open doc/orgguide.pdf
 
-install-lisp: $(LISPFILES) $(ELCFILES)
+install-lisp: $(LISPFILES) $(LISPBFILES) $(ELCFILES)
 	if [ ! -d $(lispdir) ]; then $(MKDIR) $(lispdir); else true; fi ;
-	$(CP) $(LISPFILES) $(lispdir)
-	$(CP) $(ELCFILES)  $(lispdir)
+	if [ ! -d $(lispbdir) ]; then $(MKDIR) $(lispbdir); else true; fi ;
+	if [ ! -d $(lispbldir) ]; then $(MKDIR) $(lispbldir); else true; fi ;
+	$(CP) $(LISPFILES)  $(lispdir)
+	$(CP) $(ELCFILES)   $(lispdir)
+	$(CP) $(LISPBFILES) $(lispbdir)
+	$(CP) $(ELCBFILES)  $(lispbdir)
+	$(CP) $(LISPBLFILES) $(lispbldir)
 
 install-info: $(INFOFILES)
 	if [ ! -d $(infodir) ]; then $(MKDIR) $(infodir); else true; fi ;
@@ -191,7 +224,7 @@ install-noutline: xemacs/noutline.elc
 
 autoloads: lisp/org-install.el
 
-lisp/org-install.el: $(LISPFILES0) Makefile
+lisp/org-install.el: $(LISPFILES0) $(LISPBFILES) Makefile
 	$(BATCH) --eval "(require 'autoload)" \
 		--eval '(find-file "org-install.el")'  \
 		--eval '(erase-buffer)' \
@@ -268,6 +301,7 @@ distfile:
 	$(MKDIR) org-$(TAG)/doc
 	$(MKDIR) org-$(TAG)/lisp
 	cp -r $(LISPFILES) org-$(TAG)/lisp
+	cp -r $(LISPBFILES) org-$(TAG)/lisp/babel
 	cp -r $(DOCFILES) $(CARDFILES) org-$(TAG)/doc
 	cp -r $(DISTFILES_extra) org-$(TAG)/
 	cp -r README_DIST org-$(TAG)/README
@@ -374,7 +408,7 @@ lisp/org-crypt.elc:	lisp/org-crypt.el lisp/org.el
 lisp/org-ctags.elc:	lisp/org.el
 lisp/org-datetree.elc:	lisp/org.el
 lisp/org-docview.elc:	lisp/org.el
-lisp/org-entities.elc:	
+lisp/org-entities.elc:
 lisp/org-exp.elc:	lisp/org.el lisp/org-agenda.el
 lisp/org-exp-blocks.elc: lisp/org.el
 lisp/org-latex.elc:	lisp/org.el lisp/org-exp.el lisp/org-beamer.el
@@ -398,7 +432,7 @@ lisp/org-mac-message.elc:	lisp/org.el
 lisp/org-macs.elc:
 lisp/org-mew.elc:	lisp/org.el
 lisp/org-mhe.elc:	lisp/org.el
-lisp/org-mks.elc:	
+lisp/org-mks.elc:
 lisp/org-mobile.elc:	lisp/org.el
 lisp/org-mouse.elc:	lisp/org.el
 lisp/org-plot.elc:	lisp/org.el lisp/org-exp.el lisp/org-table.el
