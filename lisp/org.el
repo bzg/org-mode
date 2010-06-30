@@ -1488,6 +1488,9 @@ single keystroke rather than having to type \"yes\"."
 	  (const :tag "with yes-or-no (safer)" yes-or-no-p)
 	  (const :tag "with y-or-n (faster)" y-or-n-p)
 	  (const :tag "no confirmation (dangerous)" nil)))
+(put 'org-confirm-shell-link-function
+     'safe-local-variable
+     '(lambda (x) (member x '(yes-or-no-p y-or-n-p))))
 
 (defcustom org-confirm-elisp-link-function 'yes-or-no-p
   "Non-nil means ask for confirmation before executing Emacs Lisp links.
@@ -1505,6 +1508,9 @@ single keystroke rather than having to type \"yes\"."
 	  (const :tag "with yes-or-no (safer)" yes-or-no-p)
 	  (const :tag "with y-or-n (faster)" y-or-n-p)
 	  (const :tag "no confirmation (dangerous)" nil)))
+(put 'org-confirm-shell-link-function
+     'safe-local-variable
+     '(lambda (x) (member x '(yes-or-no-p y-or-n-p))))
 
 (defconst org-file-apps-defaults-gnu
   '((remote . emacs)
