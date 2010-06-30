@@ -178,8 +178,10 @@ This list represents a \"habit\" for the rest of this module."
 (defsubst org-habit-deadline (habit)
   (let ((deadline (nth 2 habit)))
     (or deadline
-	(+ (org-habit-scheduled habit)
-	   (1- (org-habit-scheduled-repeat habit))))))
+	(if (nth 3 habit)
+	    (+ (org-habit-scheduled habit)
+	       (1- (org-habit-scheduled-repeat habit)))
+	  (org-habit-scheduled habit)))))
 (defsubst org-habit-deadline-repeat (habit)
   (or (nth 3 habit)
       (org-habit-scheduled-repeat habit)))
