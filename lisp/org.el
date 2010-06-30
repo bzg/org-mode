@@ -17021,7 +17021,13 @@ This command does many different things, depending on context:
 - If the cursor is on a numbered item in a plain list, renumber the
   ordered list.
 
-- If the cursor is on a checkbox, toggle it."
+- If the cursor is on a checkbox, toggle it.
+
+- If the cursor is on a code block, evaluate it.  The variable
+  `org-confirm-babel-evaluate' can be used to control prompting
+  before code block evaluation, by default every code block
+  evaluation requires confirmation.  Code block evaluation can be
+  inhibited by setting `org-babel-no-eval-on-ctrl-c-ctrl-c'."
   (interactive "P")
   (let  ((org-enable-table-editor t))
     (cond

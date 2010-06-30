@@ -51,7 +51,11 @@ functions.")
   (describe-bindings org-babel-key-prefix))
 
 (defvar org-babel-key-bindings
-  '(("\C-p" . org-babel-expand-src-block)
+  '(("e" . org-babel-execute-src-block)
+    ("\C-e" . org-babel-execute-src-block)
+    ("o" . org-babel-open-src-block-result)
+    ("\C-o" . org-babel-open-src-block-result)
+    ("\C-p" . org-babel-expand-src-block)
     ("p" . org-babel-expand-src-block)
     ("g" . org-babel-goto-named-source-block)
     ("\C-b" . org-babel-execute-buffer)

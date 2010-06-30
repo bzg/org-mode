@@ -61,6 +61,34 @@
 (declare-function org-babel-ref-variables "ob-ref" (params))
 (declare-function org-babel-ref-resolve-reference "ob-ref" (ref &optional params))
 
+(defcustom org-confirm-babel-evaluate t
+  "Require confirmation before interactively evaluating code
+blocks in Org-mode buffers.  The default value of this variable
+is t, meaning confirmation is required for any code block
+evaluation.  This variable can be set to nil to inhibit any
+future confirmation requests.  This variable can also be set to a
+function which takes two arguments the language of the code block
+and the body of the code block.  Such a function should then
+return a non-nil value if the user should be prompted for
+execution or nil if no prompt is required.
+
+Warning: Disabling confirmation may result in accidental
+evaluation of potentially harmful code.  It may be advisable
+remove code block execution from C-c C-c as further protection
+against accidental code block evaluation.  The
+`org-babel-no-eval-on-ctrl-c-ctrl-c' variable can be used to
+remove code block execution from the C-c C-c keybinding."
+  :group 'org-babel
+  :type '(choice boolean function))
+;; don't allow this variable to be changed through file settings
+(put 'org-confirm-babel-evaluate 'safe-local-variable (lambda (x) (eq x t)))
+
+(defcustom org-babel-no-eval-on-ctrl-c-ctrl-c nil
+  "This variable can be set to remove code block evaluation from
+the C-c C-c key binding."
+  :group 'org-babel
+  :type 'boolean)
+
 (defvar org-babel-source-name-regexp
   "^[ \t]*#\\+\\(srcname\\|source\\|function\\):[ \t]*"
   "Regular expression used to match a source name line.")
@@ -134,15 +162,34 @@ added to the header-arguments-alist."
           (org-babel-parse-inline-src-block-match)
         nil))))
 
+(defun org-babel-confirm-evaluate (info)
+  "Confirm that the user wishes to evaluate the code block
+defined by INFO.  This behavior can be suppressed by setting the
+value of `org-confirm-babel-evaluate' to nil, in which case all
+future interactive code block evaluations will proceed without
+any confirmation from the user.
+
+Note disabling confirmation may result in accidental evaluation
+of potentially harmful code."
+  (unless (or (not (if (functionp org-confirm-babel-evaluate)
+		       (funcall org-confirm-babel-evaluate
+				(nth 0 info) (nth 1 info))
+		     org-confirm-babel-evaluate))
+	      (yes-or-no-p
+	       (format "Evaluate this%scode on your system?"
+		       (if info (format " %s " (nth 0 info)) " "))))
+    (error "evaluation aborted")))
+
 ;;;###autoload
 (defun org-babel-execute-src-block-maybe ()
   "Detect if this is context for a org-babel src-block and if so
 then run `org-babel-execute-src-block'."
   (interactive)
-  (let ((info (org-babel-get-src-block-info)))
-    (if info
-        (progn (org-babel-execute-src-block current-prefix-arg info) t) nil)))
-
+  (if (not org-babel-no-eval-on-ctrl-c-ctrl-c)
+      (let ((info (org-babel-get-src-block-info)))
+	(if info
+	    (progn (org-babel-execute-src-block current-prefix-arg info) t) nil))
+    nil))
 (add-hook 'org-ctrl-c-ctrl-c-hook 'org-babel-execute-src-block-maybe)
 
 ;;;###autoload
@@ -241,6 +288,10 @@ the header arguments specified at the front of the source code
 block."
   (interactive)
   (let* ((info (or info (org-babel-get-src-block-info)))
+	 ;; note the `evaluation-confirmed' variable is currently not
+	 ;; used, but could be used later to avoid the need for
+	 ;; chaining confirmations
+	 (evaluation-confirmed (org-babel-confirm-evaluate info))
          (lang (nth 0 info))
 	 (params (setf (nth 2 info)
                        (sort (org-babel-merge-params (nth 2 info) params)
