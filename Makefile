@@ -228,7 +228,7 @@ lisp/org-install.el: $(LISPFILES0) $(LISPBFILES) Makefile
 	$(BATCH) --eval "(require 'autoload)" \
 		--eval '(find-file "org-install.el")'  \
 		--eval '(erase-buffer)' \
-		--eval '(mapc (lambda (x) (generate-file-autoloads (symbol-name x))) (quote ($(LISPFILES0))))' \
+		--eval '(mapc (lambda (x) (generate-file-autoloads (symbol-name x))) (quote ($(LISPFILES0) $(LISPBFILES))))' \
 		--eval "(insert \"(add-to-list 'load-path (expand-file-name \\\"babel\\\" (file-name-directory (or load-file-name (buffer-file-name)))))\")" \
 		--eval "(insert \"\n(add-to-list 'load-path (expand-file-name \\\"langs\\\" (expand-file-name \\\"babel\\\" (file-name-directory (or load-file-name (buffer-file-name))))))\")\n" \
 		--eval '(insert "\n(provide (quote org-install))\n")' \
