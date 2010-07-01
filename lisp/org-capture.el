@@ -586,7 +586,7 @@ already gone."
 
        ((eq (car target) 'file+function)
 	(set-buffer (org-capture-target-buffer (nth 1 target)))
-	(funcall (nth 1 target))
+	(funcall (nth 2 target))
 	(setq target-entry-p (and (org-mode-p) (org-at-heading-p))))
 
        ((eq (car target) 'clock)
