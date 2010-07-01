@@ -271,8 +271,7 @@ have been saved."
 (defun org-feed-unescape (s)
   "Unescape protected entities in S."
   (let ((re (concat "&\\("
-		    (mapconcat (lambda (e)
-				 (car e)) xml-entity-alist "\\|")
+		    (mapconcat 'car xml-entity-alist "\\|")
 		    "\\);")))
     (while (string-match re s)
       (setq s (replace-match
