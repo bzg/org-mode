@@ -99,6 +99,7 @@ googlegroups otherwise."
 (defvar wl-summary-buffer-elmo-folder)
 (defvar wl-summary-buffer-folder-name)
 (defvar wl-folder-group-regexp)
+(defvar wl-auto-check-folder-name)
 
 (defconst org-wl-folder-types
   '(("%" . imap) ("-" . nntp) ("+" . mh) ("=" . spool)

@@ -56,6 +56,7 @@
 (declare-function org-datetree-find-date-create "org-datetree"
 		  (DATE &optional KEEP-RESTRICTION))
 (declare-function org-table-get-specials "org-table" ())
+(declare-function org-table-goto-line "org-table" (N))
 (defvar org-remember-default-headline)
 (defvar org-remember-templates)
 (defvar org-table-hlines)
