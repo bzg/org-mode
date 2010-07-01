@@ -99,6 +99,7 @@
 (declare-function xml-get-children "xml" (node child-name))
 (declare-function xml-get-attribute "xml" (node attribute))
 (declare-function xml-get-attribute-or-nil "xml" (node attribute))
+(defvar xml-entity-alist)
 
 (defgroup org-feed  nil
   "Options concerning RSS feeds as inputs for Org files."
