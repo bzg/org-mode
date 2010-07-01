@@ -15743,7 +15743,8 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
     ("$$" "\\$\\$[^\000]*?\\$\\$" 0 nil))
   "Regular expressions for matching embedded LaTeX.")
 
-(defun org-format-latex (prefix &optional dir overlays msg at forbuffer)
+(defun org-format-latex (prefix &optional dir overlays msg at
+				forbuffer protect-only)
   "Replace LaTeX fragments with links to an image, and produce images.
 Some of the options can be changed using the variable
 `org-format-latex-options'."
@@ -15773,60 +15774,63 @@ Some of the options can be changed using the variable
 			 (not (eq (get-char-property (match-beginning n)
 						     'org-overlay-type)
 				  'org-latex-overlay))))
-	    (setq txt (match-string n)
-		  beg (match-beginning n) end (match-end n)
-		  cnt (1+ cnt))
-	    (let (print-length print-level) ; make sure full list is printed
-	      (setq hash (sha1 (prin1-to-string
-				(list org-format-latex-header
-				      org-format-latex-header-extra
-				      org-export-latex-default-packages-alist
-				      org-export-latex-packages-alist
-				      org-format-latex-options
-				      forbuffer txt)))
-		    linkfile (format "%s_%s.png" prefix hash)
-		    movefile (format "%s_%s.png" absprefix hash)))
-            (setq link (concat block "[[file:" linkfile "]]" block))
-	    (if msg (message msg cnt))
-	    (goto-char beg)
-	    (unless checkdir ; make sure the directory exists
-	      (setq checkdir t)
-	      (or (file-directory-p todir) (make-directory todir)))
-
-	    (unless executables-checked
-	      (org-check-external-command
-	       "latex" "needed to convert LaTeX fragments to images")
-	      (org-check-external-command
-	       "dvipng" "needed to convert LaTeX fragments to images")
-	      (setq executables-checked t))
-
-            (unless (file-exists-p movefile)
-              (org-create-formula-image
-               txt movefile opt forbuffer))
-	    (if overlays
-		(progn
-		  (mapc (lambda (o)
-			  (if (eq (overlay-get o 'org-overlay-type)
-				  'org-latex-overlay)
-			      (delete-overlay o)))
-			(overlays-in beg end))
-		  (setq ov (make-overlay beg end))
-		  (overlay-put ov 'org-overlay-type 'org-latex-overlay)
-		  (if (featurep 'xemacs)
-		      (progn
-			(overlay-put ov 'invisible t)
-			(overlay-put
-			 ov 'end-glyph
-			 (make-glyph (vector 'png :file movefile))))
-		    (overlay-put
-		     ov 'display
-		     (list 'image :type 'png :file movefile :ascent 'center)))
-		  (push ov org-latex-fragment-image-overlays)
-		  (goto-char end))
-	      (delete-region beg end)
-              (insert (org-add-props link
-                          (list 'org-latex-src
-                                (replace-regexp-in-string "\"" "" txt)))))))))))
+	    (if protect-only
+		(add-text-properties (match-beginning n) (match-end n)
+				     '(org-protected t))
+	      (setq txt (match-string n)
+		    beg (match-beginning n) end (match-end n)
+		    cnt (1+ cnt))
+	      (let (print-length print-level) ; make sure full list is printed
+		(setq hash (sha1 (prin1-to-string
+				  (list org-format-latex-header
+					org-format-latex-header-extra
+					org-export-latex-default-packages-alist
+					org-export-latex-packages-alist
+					org-format-latex-options
+					forbuffer txt)))
+		      linkfile (format "%s_%s.png" prefix hash)
+		      movefile (format "%s_%s.png" absprefix hash)))
+	      (setq link (concat block "[[file:" linkfile "]]" block))
+	      (if msg (message msg cnt))
+	      (goto-char beg)
+	      (unless checkdir ; make sure the directory exists
+		(setq checkdir t)
+		(or (file-directory-p todir) (make-directory todir)))
+	      
+	      (unless executables-checked
+		(org-check-external-command
+		 "latex" "needed to convert LaTeX fragments to images")
+		(org-check-external-command
+		 "dvipng" "needed to convert LaTeX fragments to images")
+		(setq executables-checked t))
+	      
+	      (unless (file-exists-p movefile)
+		(org-create-formula-image
+		 txt movefile opt forbuffer))
+	      (if overlays
+		  (progn
+		    (mapc (lambda (o)
+			    (if (eq (overlay-get o 'org-overlay-type)
+				    'org-latex-overlay)
+				(delete-overlay o)))
+			  (overlays-in beg end))
+		    (setq ov (make-overlay beg end))
+		    (overlay-put ov 'org-overlay-type 'org-latex-overlay)
+		    (if (featurep 'xemacs)
+			(progn
+			  (overlay-put ov 'invisible t)
+			  (overlay-put
+			   ov 'end-glyph
+			   (make-glyph (vector 'png :file movefile))))
+		      (overlay-put
+		       ov 'display
+		       (list 'image :type 'png :file movefile :ascent 'center)))
+		    (push ov org-latex-fragment-image-overlays)
+		    (goto-char end))
+		(delete-region beg end)
+		(insert (org-add-props link
+			    (list 'org-latex-src
+				  (replace-regexp-in-string "\"" "" txt))))))))))))
 
 ;; This function borrows from Ganesh Swami's latex2png.el
 (defun org-create-formula-image (string tofile options buffer)
