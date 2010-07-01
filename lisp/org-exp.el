@@ -1663,7 +1663,7 @@ When it is nil, all comments will be removed."
     (while (or (looking-at re)
 	       (re-search-forward re nil t))
       (setq pos (match-beginning 0))
-      (if (get-text-property (point) 'org-protected)
+      (if (get-text-property pos 'org-protected)
 	  (goto-char (1+ pos))
 	(if (and commentsp
 		 (not (equal (char-before (match-end 1)) ?+)))
