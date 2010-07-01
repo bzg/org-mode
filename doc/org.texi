@@ -452,6 +452,7 @@ Miscellaneous
 
 * Completion::			M-TAB knows what you need
 * Speed keys::			Electic commands at the beginning of a headline
+* Code evaluation security::	Org mode files evaluate inline code
 * Customization::		Adapting Org to your taste
 * In-buffer settings::		Overview of the #+KEYWORDS
 * The very busy C-c C-c key::	When in doubt, press C-c C-c
@@ -527,34 +528,13 @@ structured ASCII file, as HTML, or (TODO and agenda items only) as an
 iCalendar file.  It can also serve as a publishing tool for a set of
 linked web pages.
 
-An important design aspect that distinguishes Org from, for example,
-Planner/Muse is that it encourages you to store every piece of information
-only once.  In Planner, you have project pages, day pages and possibly
-other files, duplicating some information such as tasks.  In Org,
-you only have notes files.  In your notes you mark entries as tasks, and
-label them with tags and timestamps.  All necessary lists, like a
-schedule for the day, the agenda for a meeting, tasks lists selected by
-tags, etc., are created dynamically when you need them.
+As a project planning environment, Org works by adding metadata to outline
+nodes.  Based on this data, specific entries can be extracted in queries and
+create dynamic @i{agenda views}.
 
-Org keeps simple things simple.  When first fired up, it should
-feel like a straightforward, easy to use outliner.  Complexity is not
-imposed, but a large amount of functionality is available when you need
-it.  Org is a toolbox and can be used in different ways, for
-example as:
-
-@example
-@r{@bullet{} an outline extension with visibility cycling and structure editing}
-@r{@bullet{} an ASCII system and table editor for taking structured notes}
-@r{@bullet{} an ASCII table editor with spreadsheet-like capabilities}
-@r{@bullet{} a TODO list editor}
-@r{@bullet{} a full agenda and planner with deadlines and work scheduling}
-@pindex GTD, Getting Things Done
-@r{@bullet{} an environment in which to implement David Allen's GTD system}
-@r{@bullet{} a basic database application}
-@r{@bullet{} a simple hypertext system, with HTML and La@TeX{} export}
-@r{@bullet{} a publishing tool to create a set of interlinked webpages}
-@r{@bullet{} an environment for literate programming}
-@end example
+Org mode contains the Org Babel environment which allows to work with
+embedded source code block in a file, to facilitate code evaluation,
+documentation, and tangling.
 
 Org's automatic, context-sensitive table editor with spreadsheet
 capabilities can be integrated into any major mode by activating the
@@ -562,6 +542,25 @@ minor Orgtbl mode.  Using a translation step, it can be used to maintain
 tables in arbitrary file types, for example in La@TeX{}.  The structure
 editing and list creation capabilities can be used outside Org with
 the minor Orgstruct mode.
+
+Org keeps simple things simple.  When first fired up, it should
+feel like a straightforward, easy to use outliner.  Complexity is not
+imposed, but a large amount of functionality is available when you need
+it.  Org is a toolbox and can be used in different ways and for different
+ends, for example:
+
+@example
+@r{@bullet{} an outline extension with visibility cycling and structure editing}
+@r{@bullet{} an ASCII system and table editor for taking structured notes}
+@r{@bullet{} a TODO list editor}
+@r{@bullet{} a full agenda and planner with deadlines and work scheduling}
+@pindex GTD, Getting Things Done
+@r{@bullet{} an environment in which to implement David Allen's GTD system}
+@r{@bullet{} a simple hypertext system, with HTML and La@TeX{} export}
+@r{@bullet{} a publishing tool to create a set of interlinked webpages}
+@r{@bullet{} an environment for literate programming}
+@end example
+
 
 @cindex FAQ
 There is a website for Org which provides links to the newest
@@ -12199,6 +12198,7 @@ emacsclient \
 @menu
 * Completion::			M-TAB knows what you need
 * Speed keys::			Electic commands at the beginning of a headline
+* Code evaluation security::	Org mode files evaluate inline code
 * Customization::		Adapting Org to your taste
 * In-buffer settings::		Overview of the #+KEYWORDS
 * The very busy C-c C-c key::	When in doubt, press C-c C-c
@@ -12270,7 +12270,7 @@ Elsewhere, complete dictionary words using Ispell.
 @end itemize
 @end table
 
-@node Speed keys, Customization, Completion, Miscellaneous
+@node Speed keys, Code evaluation security, Completion, Miscellaneous
 @section Speed keys
 @cindex speed keys
 @vindex org-use-speed-commands
@@ -12288,7 +12288,58 @@ or on a small mobile device with a limited keyboard.
 To see which commands are available, activate the feature and press @kbd{?}
 with the cursor at the beginning of a headline.
 
-@node Customization, In-buffer settings, Speed keys, Miscellaneous
+@node Code evaluation security, Customization, Speed keys, Miscellaneous
+@section Code evaluation and security issues
+
+Org files can contain embedded code snippets in many programming languages.
+Org provides tool to work with the code snippets, including evaluating them.
+
+Running code on your machine always comes with a security risk.  Badly
+written or malicious code can be executed on purpose or by accident.  Org has
+default settings which will only evaluate such code if you give explicit
+permission to do so, and as a casual user of these features you should leave
+these precautions intact.
+
+For people who regularly work with such code, the confirmation prompts can
+become annoying, and you might want to turn them off.  This can be done, but
+you must be aware of the risks that are involved.
+
+Code evaluation can happen under the following circumstances:
+
+@table @i
+@item Source code blocks
+Source code blocks can be evaluated during export, or when pressing @kbd{C-c
+C-c} in the block.  The most important thing to realize here is that Org mode
+files which contain code snippets are in a certain sense like executable
+files.  So you should accept them and load them into Emacs only from trusted
+sources - just like you would do with a program you install on your computer.
+
+Make sure you know what you are doing before customizing the variables
+which take of the default security brakes.
+
+@defopt org-confirm-babel-evaluate
+Does code evaluation have to be acknowledged by the user?
+@end defopt
+
+@item Following @code{shell} and @code{elisp} links
+Org has two link types that can directly evaluate code (@pxref{External
+links}).  These links can be problematic because the code to be evaluated his
+not visible.
+
+@defopt org-confirm-shell-link-function
+Function to queries user about shell link execution.
+@end defopt
+@defopt org-confirm-elisp-link-function
+Functions to query user for Emacs Lisp link execution.
+@end defopt
+
+@item Formulas in tables
+Formulas in tables (@pxref{The spreadsheet}) are code that is evaluated
+either by the @i{calc} interpreter, or by the @i{Emacs Lisp} interpreter.
+@end table
+
+
+@node Customization, In-buffer settings, Code evaluation security, Miscellaneous
 @section Customization
 @cindex customization
 @cindex options, for customization
