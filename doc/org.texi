@@ -8739,7 +8739,7 @@ Visit the include file at point.
 @end table
 
 @node Index entries, Macro replacement, Include files, Markup
-@section Index enries
+@section Index entries
 @cindex index entries, for publishing
 
 You can specify entries that will be used for generating an index during
