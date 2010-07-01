@@ -1607,12 +1607,15 @@ table line.  If it is a link, add it to the line containing the link."
 		    "^[ \t]*\\(|[^-]\\)"
 		    "\\|"
 		    "^[ \t]*\\[\\[.*\\]\\][ \t]*$"))
-	cap attr label end)
+	cap shortn attr label end)
     (while (re-search-forward re nil t)
       (cond
        ((match-end 1)
 	(progn
 	  (setq cap (concat cap (if cap " " "") (org-trim (match-string 1))))
+	  (when (string-match "\\[\\(.*\\)\\]{\\(.*\\)}" cap)
+	    (setq shortn (match-string 1 cap)
+		  cap (match-string 2 cap)))
 	  (delete-region (point-at-bol) (min (1+ (point-at-eol)) (point-max)))))
        ((match-end 2)
 	(progn
@@ -1629,6 +1632,7 @@ table line.  If it is a link, add it to the line containing the link."
 		    (point-at-eol)))
 	(add-text-properties (point-at-bol) end
 			     (list 'org-caption cap
+				   'org-caption-shortn shortn
 				   'org-attributes attr
 				   'org-label label))
 	(if label (push (cons label label) target-alist))
