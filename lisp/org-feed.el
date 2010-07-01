@@ -267,6 +267,17 @@ have been saved."
 (defvar org-feed-buffer "*Org feed*"
   "The buffer used to retrieve a feed.")
 
+(defun org-feed-unescape (s)
+  "Unescape protected entities in S."
+  (let ((re (concat "&\\("
+		    (mapconcat (lambda (e)
+				 (car e)) xml-entity-alist "\\|")
+		    "\\);")))
+    (while (string-match re s)
+      (setq s (replace-match
+	       (cdr (assoc (match-string 1 s) xml-entity-alist)) nil nil s)))
+    s))
+
 ;;;###autoload
 (defun org-feed-update-all ()
   "Get inbox items from all feeds in `org-feed-alist'."
@@ -647,10 +658,10 @@ formatted as a string, not the original XML data."
         (cond
          ((string= type "text")
           ;; We like plain text.
-          (setq entry (plist-put entry :description (car (xml-node-children content)))))
+	  (setq entry (plist-put entry :description (org-feed-unescape (car (xml-node-children content))))))
          ((string= type "html")
           ;; TODO: convert HTML to Org markup.
-          (setq entry (plist-put entry :description (car (xml-node-children content)))))
+	  (setq entry (plist-put entry :description (org-feed-unescape (car (xml-node-children content))))))
          ((string= type "xhtml")
           ;; TODO: convert XHTML to Org markup.
           (setq entry (plist-put entry :description (prin1-to-string (xml-node-children content)))))
