@@ -1386,7 +1386,7 @@ Changing this requires a restart of Emacs to work correctly."
 
 (defcustom org-link-frame-setup
   '((vm . vm-visit-folder-other-frame)
-    (gnus . gnus-other-frame)
+    (gnus . org-gnus-no-new-news)
     (file . find-file-other-window)
     (wl . wl-other-frame))
   "Setup the frame configuration for following links.
