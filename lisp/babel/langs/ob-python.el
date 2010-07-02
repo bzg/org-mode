@@ -117,7 +117,7 @@ Emacs-lisp table, otherwise return the results as a string."
                                                  "'" "\"" results t))))))
      results))))
 
-(defvar org-babel-python-buffers '(:default . nil))
+(defvar org-babel-python-buffers '((:default . nil)))
 
 (defun org-babel-python-session-buffer (session)
   "Return the buffer associated with SESSION."
