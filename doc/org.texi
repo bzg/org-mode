@@ -12291,55 +12291,32 @@ with the cursor at the beginning of a headline.
 @node Code evaluation security, Customization, Speed keys, Miscellaneous
 @section Code evaluation and security issues
 
-Org files can contain embedded code snippets in many programming languages.
-<<<<<<< HEAD
 Org provides tool to work with the code snippets, including evaluating them.
-=======
-Org mode provides tool ti work with hte code snippets, and that includes
-evaluation.
->>>>>>> new-pw
 
 Running code on your machine always comes with a security risk.  Badly
 written or malicious code can be executed on purpose or by accident.  Org has
 default settings which will only evaluate such code if you give explicit
-<<<<<<< HEAD
 permission to do so, and as a casual user of these features you should leave
-=======
-permission to do so, and as a casual user of these features you should levae
->>>>>>> new-pw
 these precautions intact.
 
 For people who regularly work with such code, the confirmation prompts can
 become annoying, and you might want to turn them off.  This can be done, but
 you must be aware of the risks that are involved.
 
-<<<<<<< HEAD
 Code evaluation can happen under the following circumstances:
-=======
-Code evaluation can happen under the following circumstances
->>>>>>> new-pw
 
 @table @i
 @item Source code blocks
 Source code blocks can be evaluated during export, or when pressing @kbd{C-c
-<<<<<<< HEAD
 C-c} in the block.  The most important thing to realize here is that Org mode
 files which contain code snippets are in a certain sense like executable
 files.  So you should accept them and load them into Emacs only from trusted
 sources - just like you would do with a program you install on your computer.
-=======
-C-c} in the block.  @b{Security advice:} The most important thing to realize
-here is that Org mode files which contain code snippets are in a certain
-sense like executable files.  So you should accept them and load them into
-Emacs only from trusted sources - just like you would do with a program you
-install on your computer.
->>>>>>> new-pw
 
 Make sure you know what you are doing before customizing the variables
 which take of the default security brakes.
 
 @defopt org-confirm-babel-evaluate
-<<<<<<< HEAD
 Does code evaluation have to be acknowledged by the user?
 @end defopt
 
@@ -12354,29 +12331,17 @@ Function to queries user about shell link execution.
 @defopt org-confirm-elisp-link-function
 Functions to query user for Emacs Lisp link execution.
 @end defopt
-=======
-?????????????????????
-@end defopt
-
-@defopt org-not-evluation-with-C-c-C-c
 
 @item Following @code{shell} and @code{elisp} links
 Org has two link types that can directly evaluate code (@pxref{External
 links}).  These links can be problematic because the code to be evaluated his
 not visible.  @b{Security advice:}  Do not use these links, use source code
 blocks which make the associated actions much more transparent.
->>>>>>> new-pw
 
 @item Formulas in tables
 Formulas in tables (@pxref{The spreadsheet}) are code that is evaluated
 either by the @i{calc} interpreter, or by the @i{Emacs Lisp} interpreter.
-<<<<<<< HEAD
-=======
-@b{Security advice:} If you get a file from an untrusted source, do not
-update tables without looking at complex formulas.
->>>>>>> new-pw
 @end table
-
 
 @node Customization, In-buffer settings, Code evaluation security, Miscellaneous
 @section Customization
