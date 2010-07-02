@@ -10681,7 +10681,7 @@ For calling through lisp, arg is also interpreted in the following way:
 	    (looking-at " *"))
 	(let* ((match-data (match-data))
 	       (startpos (point-at-bol))
-	       (logging (save-match-data (org-entry-get nil "LOGGING" t)))
+	       (logging (save-match-data (org-entry-get nil "LOGGING" t t)))
 	       (org-log-done org-log-done)
 	       (org-log-repeat org-log-repeat)
 	       (org-todo-log-states org-todo-log-states)
@@ -13396,7 +13396,7 @@ when a \"nil\" value can supercede a non-nil value higher up the hierarchy."
     (if (and inherit (if (eq inherit 'selective)
 			 (org-property-inherit-p property)
 		       t))
-	(org-entry-get-with-inheritance property)
+	(org-entry-get-with-inheritance property literal-nil)
       (if (member property org-special-properties)
 	  ;; We need a special property.  Use `org-entry-properties' to
 	  ;; retrieve it, but specify the wanted property
@@ -13506,8 +13506,12 @@ no match, the marker will point nowhere.
 Note that also `org-entry-get' calls this function, if the INHERIT flag
 is set.")
 
-(defun org-entry-get-with-inheritance (property)
-  "Get entry property, and search higher levels if not present."
+(defun org-entry-get-with-inheritance (property &optional literal-nil)
+  "Get entry property, and search higher levels if not present.
+The search will stop at the first ancestor which has the property defined.
+If the value found is \"nil\", return nil to show that the property
+should be considered as undefined (this is the meaning of nil here).
+However, if LITERAL-NIL is set, return the string value \"nil\" instead."
   (move-marker org-entry-property-inherited-from nil)
   (let (tmp)
     (save-excursion
@@ -13520,11 +13524,11 @@ is set.")
 	      (move-marker org-entry-property-inherited-from (point))
 	      (throw 'ex tmp))
 	    (or (org-up-heading-safe) (throw 'ex nil)))))
-      (org-not-nil
-       (or tmp
-	   (cdr (assoc property org-file-properties))
-	   (cdr (assoc property org-global-properties))
-	   (cdr (assoc property org-global-properties-fixed)))))))
+      (setq tmp (or tmp
+		    (cdr (assoc property org-file-properties))
+		    (cdr (assoc property org-global-properties))
+		    (cdr (assoc property org-global-properties-fixed))))
+      (if literal-nil tmp (org-not-nil tmp)))))
 
 (defvar org-property-changed-functions nil
   "Hook called when the value of a property has changed.
