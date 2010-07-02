@@ -300,6 +300,8 @@ distfile:
 	$(MKDIR) org-$(TAG)/xemacs
 	$(MKDIR) org-$(TAG)/doc
 	$(MKDIR) org-$(TAG)/lisp
+	$(MKDIR) org-$(TAG)/lisp/babel
+	$(MKDIR) org-$(TAG)/lisp/babel/langs
 	cp -r $(LISPFILES) org-$(TAG)/lisp
 	cp -r $(LISPBFILES) org-$(TAG)/lisp/babel
 	cp -r $(DOCFILES) $(CARDFILES) org-$(TAG)/doc
