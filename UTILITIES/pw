@@ -291,7 +291,7 @@ def action_update_patch(rpc, patch_id, state = None, commit = None,
         params['delegate'] = delegate_str
         ids = person_ids_by_name(rpc, delegate_str)
         if len(ids) == 0:
-            sys.stderr.write("Note: Nobody found matching *%s*\n", \
+            sys.stderr.write("Note: Nobody found matching *%s*\n"% \
                              delegate_str)
         else:
             delegate_id = ids[0]
