@@ -1671,10 +1671,8 @@ following situations:
 
 (defcustom org-default-notes-file (convert-standard-filename "~/.notes")
   "Default target for storing notes.
-Used by the hooks for remember.el.  This can be a string, or nil to mean
-the value of `remember-data-file'.
-You can set this on a per-template basis with the variable
-`org-remember-templates'."
+Used as a fall back file for org-remember.el and org-capture.el, for
+templates that do not specify a target file."
   :group 'org-refile
   :group 'org-remember
   :type '(choice
