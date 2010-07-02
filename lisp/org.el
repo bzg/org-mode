@@ -15236,13 +15236,13 @@ changes from another.  I believe the procedure must be like this:
 ;;;; Agenda files
 
 ;;;###autoload
-(defun org-iswitchb (&optional arg)
-  "Use `org-icompleting-read' to prompt for an Org buffer to switch to.
+(defun org-switchb (&optional arg)
+  "Switch between Org buffers.
 With a prefix argument, restrict available to files.
 With two prefix arguments, restrict available buffers to agenda files.
 
-This will use iswitchb for buffer name completion, unless
-`org-completion-use-ido' is non-nil, to select ido completion."
+Defaults to `iswitchb' for buffer name completion.
+Set `org-completion-use-ido' to make it use ido instead."
   (interactive "P")
   (let ((blist (cond ((equal arg '(4))  (org-buffer-list 'files))
                      ((equal arg '(16)) (org-buffer-list 'agenda))
@@ -15253,11 +15253,14 @@ This will use iswitchb for buffer name completion, unless
       (setq org-completion-use-iswitchb t))
     (switch-to-buffer
      (org-icompleting-read "Org buffer: "
-                              (mapcar 'list (mapcar 'buffer-name blist))
-                              nil t))))
+			   (mapcar 'list (mapcar 'buffer-name blist))
+			   nil t))))
 
+;;; Define some older names previously used for this functionality
 ;;;###autoload
-(defalias 'org-ido-switchb 'org-iswitchb)
+(defalias 'org-ido-switchb 'org-switchb)
+;;;###autoload
+(defalias 'org-iswitchb 'org-switchb)
 
 (defun org-buffer-list (&optional predicate exclude-tmp)
   "Return a list of Org buffers.
