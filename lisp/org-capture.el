@@ -1183,8 +1183,9 @@ The template may still contain \"%?\" for cursor positioning."
 	   (char
 	    ;; These are the date/time related ones
 	    (setq org-time-was-given (equal (upcase char) char))
-	    (setq time (org-read-date (equal (upcase char) "U") t nil
+	    (setq time (org-read-date (equal (upcase char) char) t nil
 				      prompt))
+	    (if (equal (upcase char) char) (setq org-time-was-given t))
 	    (org-insert-time-stamp time org-time-was-given
 				   (member char '("u" "U"))
 				   nil nil (list org-end-time-was-given)))
