@@ -39,9 +39,16 @@
 
 ;;; Code:
 (require 'ob)
-(require 'cl)
-(require 'slime)
-(require 'swank-clojure)
+(eval-when-compile
+  (require 'cl))
+
+(declare-function slime-eval-async "slime" (sexp &optional cont package))
+(declare-function slime-eval "slime" (sexp &optional package))
+(declare-function swank-clojure-concat-paths "slime" (paths))
+(declare-function org-babel-ref-variables "slime" (params))
+(declare-function slime "slime" (&optional command coding-system))
+(declare-function slime-output-buffer "slime" (&optional noprompt))
+(declare-function slime-filter-buffers "slime" (predicate))
 
 (add-to-list 'org-babel-tangle-lang-exts '("clojure" . "clj"))
 
@@ -76,6 +83,12 @@
   (slime-eval `(swank:eval-and-grab-output ,string)))
 
 ;;taken from swank-clojure.el
+(defvar swank-clojure-binary)
+(defvar swank-clojure-classpath)
+(defvar swank-clojure-java-path)
+(defvar swank-clojure-extra-vm-args)
+(defvar swank-clojure-library-paths)
+(defvar swank-clojure-extra-classpaths)
 (defun org-babel-clojure-babel-clojure-cmd ()
   "Create the command to start clojure according to current settings."
   (if (and (not swank-clojure-binary) (not swank-clojure-classpath))
@@ -84,8 +97,8 @@
         (if (listp swank-clojure-binary)
             swank-clojure-binary
           (list swank-clojure-binary))
-      (delete-if
-       'null
+      (delq
+       nil
        (append
         (list swank-clojure-java-path)
         swank-clojure-extra-vm-args
@@ -132,6 +145,7 @@ specifying a var of the same value."
 
 (defun org-babel-prep-session:clojure (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."
+  (require 'slime) (require 'swank-clojure)
   (let* ((session-buf (org-babel-clojure-initiate-session session))
          (vars (org-babel-ref-variables params))
          (var-lines (mapcar ;; define any top level session variables
@@ -143,6 +157,7 @@ specifying a var of the same value."
 
 (defun org-babel-load-session:clojure (session body params)
   "Load BODY into SESSION."
+  (require 'slime) (require 'swank-clojure)
   (save-window-excursion
     (let ((buffer (org-babel-prep-session:clojure session params)))
       (with-current-buffer buffer
@@ -188,6 +203,7 @@ then create one.  Return the initialized session."
 (defun org-babel-clojure-initiate-session (&optional session params)
   "Return the slime-clojure repl buffer bound to this session
 or nil if \"none\" is specified."
+  (require 'slime) (require 'swank-clojure)
   (unless (and (stringp session) (string= session "none"))
     (org-babel-clojure-session-buffer (org-babel-clojure-initiate-session-by-key session))))
 
@@ -254,16 +270,18 @@ repl buffer."
       (set-buffer buffer)
       (setq raw (org-babel-clojure-slime-eval-sync body))
       (setq results (reverse (mapcar #'org-babel-trim raw)))
-      (case result-type
-        (output (mapconcat #'identity (reverse (cdr results)) "\n"))
-        (value (org-babel-clojure-table-or-string (car results)))))))
+      (cond
+       ((equal result-type 'output)
+	(mapconcat #'identity (reverse (cdr results)) "\n"))
+       ((equal result-type 'value)
+	(org-babel-clojure-table-or-string (car results)))))))
 
 (defun org-babel-clojure-evaluate (buffer body &optional result-type)
   "Pass BODY to the Clojure process in BUFFER.  If RESULT-TYPE equals
 'output then return a list of the outputs of the statements in
 BODY, if RESULT-TYPE equals 'value then return the value of the
 last statement in BODY, as elisp."
-  (if session
+  (if buffer
       (org-babel-clojure-evaluate-session buffer body result-type)
     (org-babel-clojure-evaluate-external-process buffer body result-type)))
 
@@ -274,6 +292,7 @@ last statement in BODY, as elisp."
 
 (defun org-babel-execute:clojure (body params)
   "Execute a block of Clojure code with org-babel."
+  (require 'slime) (require 'swank-clojure)
   (let* ((processed-params (org-babel-process-params params))
          (body (org-babel-expand-body:clojure body params processed-params))
          (session (org-babel-clojure-initiate-session (first processed-params))))

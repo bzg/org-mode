@@ -28,9 +28,12 @@
 
 ;;; Code:
 (require 'ob)
-(require 'ob-tangle)
+(require 'ob-ref)
 (require 'ob-comint)
 (require (if (featurep 'xemacs) 'python-mode 'python))
+(eval-when-compile (require 'cl))
+
+(declare-function org-remove-indentation "org" )
 
 (add-to-list 'org-babel-tangle-lang-exts '("python" . "py"))
 
@@ -57,7 +60,8 @@ called by `org-babel-execute-src-block'."
          (result-type (nth 3 processed-params))
          (full-body (org-babel-expand-body:python
                      body params processed-params)) ;; then the source block body
-         (result (org-babel-python-evaluate session full-body result-type)))
+         (result (org-babel-python-evaluate
+		  session full-body result-type result-params)))
     (or (cdr (assoc :file params))
         (org-babel-reassemble-table
          result
@@ -177,12 +181,13 @@ def main():
 
 open('%s', 'w').write( pprint.pformat(main()) )")
 
-(defun org-babel-python-evaluate (buffer body &optional result-type)
+(defun org-babel-python-evaluate
+  (buffer body &optional result-type result-params)
   "Pass BODY to the Python process in BUFFER.  If RESULT-TYPE equals
 'output then return a list of the outputs of the statements in
 BODY, if RESULT-TYPE equals 'value then return the value of the
 last statement in BODY, as elisp."
-  (if (not session)
+  (if (not buffer)
       ;; external process evaluation
       (save-excursion
         (case result-type
@@ -220,7 +225,7 @@ last statement in BODY, as elisp."
     ;; comint session evaluation
     (org-babel-comint-in-buffer buffer
       (let* ((raw (org-babel-comint-with-output
-		      (buffer org-babel-python-eoe-indicator t full-body)
+		      (buffer org-babel-python-eoe-indicator t body)
                     ;; for some reason python is fussy, and likes enters after every input
 		    (let ((comint-process-echoes nil))
 		      (mapc (lambda (statement) (insert statement) (comint-send-input))

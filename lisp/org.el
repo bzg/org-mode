@@ -121,6 +121,7 @@
 (require 'ob-keys)
 
 ;; load languages based on value of `org-babel-load-languages'
+(defvar org-babel-load-languages)
 (defun org-babel-do-load-languages (sym value)
   "Load the languages defined in `org-babel-load-languages'."
   (set-default sym value)
@@ -128,10 +129,8 @@
 	  (let ((active (cdr pair)) (lang (symbol-name (car pair))))
 	    (if active
 		(progn
-		  (message "Activating %s..." lang)
 		  (require (intern (concat "ob-" lang))))
 	      (progn
-		(message "Disabling %s..." lang)
 		(funcall 'fmakunbound
 			 (intern (concat "org-babel-execute:" lang)))
 		(funcall 'fmakunbound

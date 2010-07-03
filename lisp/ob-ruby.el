@@ -38,7 +38,12 @@
 
 ;;; Code:
 (require 'ob)
-(require 'inf-ruby)
+(require 'ob-ref)
+(require 'ob-comint)
+(eval-when-compile
+  (require 'cl))
+
+(declare-function run-ruby "inf-ruby" (&optional command name))
 
 (add-to-list 'org-babel-tangle-lang-exts '("ruby" . "rb"))
 
@@ -46,6 +51,7 @@
 
 (defun org-babel-expand-body:ruby (body params &optional processed-params)
   "Expand BODY according to PARAMS, return the expanded body."
+  (require 'inf-ruby)
   (let ((vars (nth 1 (or processed-params (org-babel-process-params params)))))
     (concat
      (mapconcat ;; define any variables
@@ -65,7 +71,8 @@ called by `org-babel-execute-src-block'."
          (result-type (nth 3 processed-params))
          (full-body (org-babel-expand-body:ruby
                      body params processed-params))
-         (result (org-babel-ruby-evaluate session full-body result-type)))
+         (result (org-babel-ruby-evaluate
+		  session full-body result-type result-params)))
     (or (cdr (assoc :file params))
         (org-babel-reassemble-table
          result
@@ -129,6 +136,7 @@ Emacs-lisp table, otherwise return the results as a string."
 (defun org-babel-ruby-initiate-session (&optional session params)
   "If there is not a current inferior-process-buffer in SESSION
 then create one.  Return the initialized session."
+  (require 'inf-ruby)
   (unless (string= session "none")
     (let ((session-buffer (save-window-excursion
 			    (run-ruby nil session) (current-buffer))))
@@ -164,12 +172,13 @@ File.open('%s', 'w') do |f|
 end
 ")
 
-(defun org-babel-ruby-evaluate (buffer body &optional result-type)
+(defun org-babel-ruby-evaluate
+  (buffer body &optional result-type result-params)
   "Pass BODY to the Ruby process in BUFFER.  If RESULT-TYPE equals
 'output then return a list of the outputs of the statements in
 BODY, if RESULT-TYPE equals 'value then return the value of the
 last statement in BODY, as elisp."
-  (if (not session)
+  (if (not buffer)
       ;; external process evaluation
       (save-excursion
         (case result-type

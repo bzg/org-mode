@@ -49,7 +49,7 @@
 called by `org-babel-execute-src-block'."
   (message "executing Perl source code block")
   (let* ((processed-params (org-babel-process-params params))
-         (session (first processed-params))
+         (session (nth 0 processed-params))
          (vars (nth 1 processed-params))
          (result-params (nth 2 processed-params))
          (result-type (nth 3 processed-params))
@@ -100,22 +100,19 @@ last statement in BODY, as elisp."
   (if (not session)
       ;; external process evaluation
       (save-excursion
-        (case result-type
-          (output
+        (cond
+	 ((equal result-type 'output)
            (with-temp-buffer
              (insert body)
              ;; (message "buffer=%s" (buffer-string)) ;; debugging
              (org-babel-shell-command-on-region (point-min) (point-max) "perl" 'current-buffer 'replace)
              (buffer-string)))
-          (value
+          ((equal result-type 'value)
            (let* ((tmp-file (make-temp-file "perl-functional-results")) exit-code
 		 (stderr
 		  (with-temp-buffer
 		    (insert
-		     (format
-		      (if (member "pp" result-params)
-			  (error "Pretty-printing not implemented for perl")
-			org-babel-perl-wrapper-method) body tmp-file))
+		     (format org-babel-perl-wrapper-method body tmp-file))
 		    (setq exit-code
 			  (org-babel-shell-command-on-region
 			   (point-min) (point-max) "perl" nil 'replace (current-buffer)))

@@ -28,6 +28,17 @@
 
 ;;; Code:
 (require 'ob)
+(require 'ob-ref)
+(eval-when-compile (require 'cl))
+
+(declare-function org-babel-comint-in-buffer "ob-comint" (buffer &rest body))
+(declare-function comint-send-input "ob-comint" (el'.))
+(declare-function org-babel-comint-wait-for-output "ob-comint" (buffer))
+(declare-function org-babel-comint-buffer-livep "ob-comint" (buffer))
+(declare-function org-babel-comint-with-output "ob-comint" (meta &rest body))
+(declare-function orgtbl-to-tsv "ob-table" (table params))
+(declare-function R "essd-r" (&optional start-args))
+(declare-function inferior-ess-send-input "ess-inf" ())
 
 (defconst org-babel-header-arg-names:R
   '(width height bg units pointsize antialias quality compression
@@ -171,6 +182,8 @@ called by `org-babel-execute-src-block'."
 (defvar org-babel-R-wrapper-method "main <- function ()\n{\n%s\n}
 write.table(main(), file=\"%s\", sep=\"\\t\", na=\"nil\",row.names=%s, col.names=%s, quote=FALSE)")
 
+(defvar inferior-ess-primary-prompt)
+(defvar inferior-ess-secondary-prompt)
 (defun org-babel-R-evaluate (session body result-type column-names-p row-names-p)
   "Pass BODY to the R process in SESSION.  If RESULT-TYPE equals
 'output then return a list of the outputs of the statements in

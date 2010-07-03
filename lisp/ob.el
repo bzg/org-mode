@@ -62,7 +62,7 @@
 (declare-function org-babel-ref-resolve-reference "ob-ref" (ref &optional params))
 
 (defcustom org-confirm-babel-evaluate t
-  "Require confirmation before interactively evaluating code
+    "Require confirmation before interactively evaluating code
 blocks in Org-mode buffers.  The default value of this variable
 is t, meaning confirmation is required for any code block
 evaluation.  This variable can be set to nil to inhibit any
@@ -78,8 +78,8 @@ remove code block execution from C-c C-c as further protection
 against accidental code block evaluation.  The
 `org-babel-no-eval-on-ctrl-c-ctrl-c' variable can be used to
 remove code block execution from the C-c C-c keybinding."
-  :group 'org-babel
-  :type '(choice boolean function))
+    :group 'org-babel
+    :type '(choice boolean function))
 ;; don't allow this variable to be changed through file settings
 (put 'org-confirm-babel-evaluate 'safe-local-variable (lambda (x) (eq x t)))
 

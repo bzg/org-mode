@@ -35,7 +35,8 @@
 (require 'org)
 (require 'cc-mode)
 
-(declare-function org-entry-get "org" (&optional inherit))
+(declare-function org-entry-get "org"
+		  (pom property &optional inherit literal-nil))
 
 (add-to-list 'org-babel-tangle-lang-exts '("c++" . "cpp"))
 

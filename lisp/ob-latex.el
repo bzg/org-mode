@@ -32,6 +32,7 @@
 
 ;;; Code:
 (require 'ob)
+(require 'org-latex)
 
 (add-to-list 'org-babel-tangle-lang-exts '("latex" . "tex"))
 
@@ -85,9 +86,12 @@ called by `org-babel-execute-src-block'."
   (with-temp-file tex-file
     (insert (org-splice-latex-header
 	       org-format-latex-header
-	       (remove-if
-                (lambda (el) (and (listp el) (string= "hyperref" (cadr el))))
-                org-export-latex-default-packages-alist)
+	       (delq
+		nil
+		(mapcar
+		 (lambda (el) (unless (and (listp el) (string= "hyperref" (cadr el)))
+			   el))
+		 org-export-latex-default-packages-alist))
 	       org-export-latex-packages-alist
 	       org-format-latex-header-extra)
             (if height (concat "\n" (format "\\pdfpageheight %s" height)) "")

@@ -28,6 +28,10 @@
 
 ;;; Code:
 (require 'ob)
+(require 'ob-ref)
+
+(declare-function org-table-convert-region
+		  "org-table" (beg0 end0 &optional separator))
 
 (defvar org-babel-default-header-args:sqlite '())
 

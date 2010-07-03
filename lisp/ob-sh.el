@@ -28,6 +28,7 @@
 
 ;;; Code:
 (require 'ob)
+(require 'ob-comint)
 (require 'shell)
 (eval-when-compile
   (require 'cl))
