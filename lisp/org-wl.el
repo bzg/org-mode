@@ -62,6 +62,11 @@ googlegroups otherwise."
   :type 'boolean
   :group 'org-wl)
 
+(defcustom org-wl-disable-folder-check t
+  "Disable check for new messages when open a link."
+  :type 'boolean
+  :group 'org-wl)
+
 (defcustom org-wl-namazu-default-index nil
   "Default namazu search index."
   :type 'directory
@@ -94,6 +99,7 @@ googlegroups otherwise."
 (defvar wl-summary-buffer-elmo-folder)
 (defvar wl-summary-buffer-folder-name)
 (defvar wl-folder-group-regexp)
+(defvar wl-auto-check-folder-name)
 
 (defconst org-wl-folder-types
   '(("%" . imap) ("-" . nntp) ("+" . mh) ("=" . spool)
@@ -233,33 +239,37 @@ with `org-wl-namazu-default-index' as search index.  When called
 with two prefixes or `org-wl-namazu-default-index' is nil, ask
 for namazu index."
   (require 'wl)
-  (unless wl-init (wl))
-  ;; XXX: The imap-uw's MH folder names start with "%#".
-  (if (not (string-match "\\`\\(\\(?:%#\\)?[^#]+\\)\\(#\\(.*\\)\\)?" path))
-      (error "Error in Wanderlust link"))
-  (let ((folder (match-string 1 path))
-	(article (match-string 3 path)))
-    ;; maybe open message in namazu search folder
-    (when current-prefix-arg
-      (setq folder (concat "[" article "]"
-			   (if (and (equal current-prefix-arg '(4))
-				    org-wl-namazu-default-index)
-			       org-wl-namazu-default-index
-			     (read-directory-name "Namazu index: ")))))
-    (if (not (elmo-folder-exists-p (org-no-warnings
-				    (wl-folder-get-elmo-folder folder))))
-	(error "No such folder: %s" folder))
-    (let ((old-buf (current-buffer))
-	  (old-point (point-marker)))
-      (wl-folder-goto-folder-subr folder)
-      (with-current-buffer old-buf
-	;; XXX: `wl-folder-goto-folder-subr' moves point to the
-	;; beginning of the current line.  So, restore the point
-	;; in the old buffer.
-	(goto-char old-point))
-      (and article (wl-summary-jump-to-msg-by-message-id (org-add-angle-brackets
-							  article))
-	   (wl-summary-redisplay)))))
+  (let ((wl-auto-check-folder-name
+	 (if org-wl-disable-folder-check
+	     'none
+	   wl-auto-check-folder-name)))
+    (unless wl-init (wl))
+    ;; XXX: The imap-uw's MH folder names start with "%#".
+    (if (not (string-match "\\`\\(\\(?:%#\\)?[^#]+\\)\\(#\\(.*\\)\\)?" path))
+	(error "Error in Wanderlust link"))
+    (let ((folder (match-string 1 path))
+	  (article (match-string 3 path)))
+      ;; maybe open message in namazu search folder
+      (when current-prefix-arg
+	(setq folder (concat "[" article "]"
+			     (if (and (equal current-prefix-arg '(4))
+				      org-wl-namazu-default-index)
+				 org-wl-namazu-default-index
+			       (read-directory-name "Namazu index: ")))))
+      (if (not (elmo-folder-exists-p (org-no-warnings
+				      (wl-folder-get-elmo-folder folder))))
+	  (error "No such folder: %s" folder))
+      (let ((old-buf (current-buffer))
+	    (old-point (point-marker)))
+	(wl-folder-goto-folder-subr folder)
+	(with-current-buffer old-buf
+	  ;; XXX: `wl-folder-goto-folder-subr' moves point to the
+	  ;; beginning of the current line.  So, restore the point
+	  ;; in the old buffer.
+	  (goto-char old-point))
+	(and article (wl-summary-jump-to-msg-by-message-id (org-add-angle-brackets
+							    article))
+	     (wl-summary-redisplay))))))
 
 (provide 'org-wl)
 

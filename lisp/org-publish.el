@@ -931,7 +931,7 @@ and return it."
 	   " in `org-publish-initialize-cache'"))
 
   (unless (file-exists-p org-publish-timestamp-directory)
-    (make-directory org-publish-timestamp-directory))
+    (make-directory org-publish-timestamp-directory t))
   (if (not (file-directory-p org-publish-timestamp-directory))
       (error "Org publish timestamp: %s is not a directory"
 	     org-publish-timestamp-directory))

@@ -29,13 +29,22 @@ import subprocess
 import base64
 import ConfigParser
 import datetime
+import smtplib
+import urllib
 import re
+
+from email.mime.text import MIMEText
+
+notify_on_state_change = {
+    'Accepted': 'emacs-orgmode@gnu.org',
+    'RFC':      'emacs-orgmode@gnu.org'
+}
 
 # Default Patchwork remote XML-RPC server URL
 # This script will check the PW_XMLRPC_URL environment variable
 # for the URL to access.  If that is unspecified, it will fallback to
 # the hardcoded default value specified here.
-DEFAULT_URL = "http://patchwork/xmlrpc/"
+DEFAULT_URL = "http://patchwork.newartisans.com/xmlrpc/"
 CONFIG_FILES = [os.path.expanduser('~/.pwclientrc')]
 
 class Filter:
@@ -267,7 +276,8 @@ def action_apply(rpc, patch_id):
         sys.stderr.write("Error: No patch content found\n")
         sys.exit(1)
 
-def action_update_patch(rpc, patch_id, state = None, commit = None):
+def action_update_patch(rpc, patch_id, state = None, commit = None,
+                        delegate_str = "", archived = False):
     patch = rpc.patch_get(patch_id)
     if patch == {}:
         sys.stderr.write("Error getting information on patch ID %d\n" % \
@@ -276,6 +286,16 @@ def action_update_patch(rpc, patch_id, state = None, commit = None):
 
     params = {}
 
+    delegate_id = None
+    if delegate_str != "":
+        params['delegate'] = delegate_str
+        ids = person_ids_by_name(rpc, delegate_str)
+        if len(ids) == 0:
+            sys.stderr.write("Note: Nobody found matching *%s*\n"% \
+                             delegate_str)
+        else:
+            delegate_id = ids[0]
+
     if state:
         state_id = state_id_by_name(rpc, state)
         if state_id == 0:
@@ -283,11 +303,55 @@ def action_update_patch(rpc, patch_id, state = None, commit = None):
             sys.exit(1)
         params['state'] = state_id
 
+        if state in notify_on_state_change:
+            if not delegate_id:
+                sys.stderr.write("Error: Delete (-d) required for this update\n")
+                sys.exit(1)
+                
+            person = rpc.person_get(delegate_id)
+            submitter = rpc.person_get(patch['submitter_id'])
+
+            from_addr = '%s <%s>' % (person['name'], person['email'])
+            cc_addr   = '%s <%s>' % (submitter['name'], submitter['email'])
+            to_addr   = notify_on_state_change[state]
+
+            longdesc = '''Patch %s (http://patchwork.newartisans.com/patch/%s/) is now %s.
+
+This relates to the following submission:
+
+http://mid.gmane.org/%s''' % \
+                (patch['id'], patch['id'], state, urllib.quote(patch['msgid']))
+            shortdesc = 'Patch %s %s' % (patch['id'], state)
+
+            msg = MIMEText(longdesc)
+
+            msg['Subject']    = 'Patchwork: ' + shortdesc
+            msg['From']       = from_addr
+            msg['To']         = to_addr
+            #msg['Cc']         = cc_addr
+            msg['References'] = patch['msgid']
+
+            # Send the message via our own SMTP server, but don't include
+            # the envelope header.
+            try:
+                s = smtplib.SMTP('localhost')
+                print "Sending e-mail to: %s, %s" % (to_addr, cc_addr)
+                s.sendmail(from_addr, [to_addr, cc_addr], msg.as_string())
+                s.quit()
+            except:
+                sys.stderr.write("Warning: Failed to send e-mail " +
+                                 "(no SMTP server listening at localhost?)\n")
+
     if commit:
         params['commit_ref'] = commit
 
+    if archived:
+        params['archived'] = archived
+
     success = False
     try:
+        print "Updating patch %d to state '%s', delegate %s" % \
+            (patch_id, state, delegate_str)
         success = rpc.patch_set(patch_id, params)
     except xmlrpclib.Fault, f:
         sys.stderr.write("Error updating patch: %s\n" % f.faultString)
@@ -308,7 +372,7 @@ def patch_id_from_hash(rpc, project, hash):
 
     return patch['id']
 
-def branch_with(patch_id, rpc):
+def branch_with(patch_id, rpc, delegate_str):
     s = rpc.patch_get_mbox(patch_id)
     if len(s) > 0:
         print unicode(s).encode("utf-8")
@@ -356,12 +420,45 @@ def branch_with(patch_id, rpc):
         os.waitpid(proc.pid, 0)
         return
 
+    # If it succeeded this far, mark the patch as "Under Review" by the
+    # invoking user.
+    action_update_patch(rpc, patch_id, state = 'Under Review',
+                        delegate_str = delegate_str)
+
     proc = subprocess.Popen(['git', 'rebase', 'master'])
     sts = os.waitpid(proc.pid, 0)
 
     print sha
 
-auth_actions = ['update']
+def merge_with(patch_id, rpc, delegate_str):
+    s = rpc.patch_get_mbox(patch_id)
+    if len(s) > 0:
+        print unicode(s).encode("utf-8")
+
+    proc = subprocess.Popen(['git', 'checkout', 'master'])
+    sts = os.waitpid(proc.pid, 0)
+    if sts[1] != 0:
+        sys.stderr.write("Failed to checkout master branch\n")
+        return
+
+    proc = subprocess.Popen(['git', 'merge', '--ff', 't/patch%s' % patch_id])
+    sts = os.waitpid(proc.pid, 0)
+    if sts[1] != 0:
+        sys.stderr.write("Failed to merge t/patch%s into master\n" % patch_id)
+        return
+
+    proc = subprocess.Popen(['git', 'rev-parse', 'master'],
+                            stdout = subprocess.PIPE)
+    sha = proc.stdout.read()[:-1]
+
+    # If it succeeded this far, mark the patch as "Accepted" by the invoking
+    # user.
+    action_update_patch(rpc, patch_id, state = 'Accepted', commit = sha,
+                        delegate_str = delegate_str, archived = True)
+
+    print sha
+
+auth_actions = ['update', 'branch', 'merge']
 
 def main():
     try:
@@ -478,7 +575,16 @@ def main():
             sys.stderr.write("Invalid patch ID given\n")
             sys.exit(1)
 
-        branch_with(patch_id, rpc)
+        branch_with(patch_id, rpc, config.get('auth', 'username'))
+
+    elif action == 'merge':
+        try:
+            patch_id = patch_id or int(args[0])
+        except:
+            sys.stderr.write("Invalid patch ID given\n")
+            sys.exit(1)
+
+        merge_with(patch_id, rpc, config.get('auth', 'username'))
 
     elif action == 'view':
         try:
@@ -517,7 +623,7 @@ def main():
             sys.exit(1)
 
         action_update_patch(rpc, patch_id, state = state_str,
-                commit = commit_str)
+                            commit = commit_str, delegate_str = delegate_str)
 
     else:
         sys.stderr.write("Unknown action '%s'\n" % action)

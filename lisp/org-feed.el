@@ -99,6 +99,7 @@
 (declare-function xml-get-children "xml" (node child-name))
 (declare-function xml-get-attribute "xml" (node attribute))
 (declare-function xml-get-attribute-or-nil "xml" (node attribute))
+(defvar xml-entity-alist)
 
 (defgroup org-feed  nil
   "Options concerning RSS feeds as inputs for Org files."
@@ -266,6 +267,16 @@ have been saved."
 
 (defvar org-feed-buffer "*Org feed*"
   "The buffer used to retrieve a feed.")
+
+(defun org-feed-unescape (s)
+  "Unescape protected entities in S."
+  (let ((re (concat "&\\("
+		    (mapconcat 'car xml-entity-alist "\\|")
+		    "\\);")))
+    (while (string-match re s)
+      (setq s (replace-match
+	       (cdr (assoc (match-string 1 s) xml-entity-alist)) nil nil s)))
+    s))
 
 ;;;###autoload
 (defun org-feed-update-all ()
@@ -579,11 +590,12 @@ Assumes headers are indeed present!"
   "Parse BUFFER for RSS feed entries.
 Returns a list of entries, with each entry a property list,
 containing the properties `:guid' and `:item-full-text'."
-  (let (entries beg end item guid entry)
+  (let ((case-fold-search t)
+	entries beg end item guid entry)
     (with-current-buffer buffer
       (widen)
       (goto-char (point-min))
-      (while (re-search-forward "<item>" nil t)
+      (while (re-search-forward "<item\\>.*?>" nil t)
 	(setq beg (point)
 	      end (and (re-search-forward "</item>" nil t)
 		       (match-beginning 0)))
@@ -605,7 +617,7 @@ containing the properties `:guid' and `:item-full-text'."
 			      nil t)
       (setq entry (plist-put entry
 			     (intern (concat ":" (match-string 1)))
-			     (match-string 2))))
+			     (org-feed-unescape (match-string 2)))))
     (goto-char (point-min))
     (unless (re-search-forward "isPermaLink[ \t]*=[ \t]*\"false\"" nil t)
       (setq entry (plist-put entry :guid-permalink t))))
@@ -638,18 +650,18 @@ formatted as a string, not the original XML data."
                             'href)))
     ;; Add <title/> as :title.
     (setq entry (plist-put entry :title
-                           (car (xml-node-children
-                                 (car (xml-get-children xml 'title))))))
+			   (org-feed-unescape (car (xml-node-children
+						    (car (xml-get-children xml 'title)))))))
     (let* ((content (car (xml-get-children xml 'content)))
            (type (xml-get-attribute-or-nil content 'type)))
       (when content
         (cond
          ((string= type "text")
           ;; We like plain text.
-          (setq entry (plist-put entry :description (car (xml-node-children content)))))
+	  (setq entry (plist-put entry :description (org-feed-unescape (car (xml-node-children content))))))
          ((string= type "html")
           ;; TODO: convert HTML to Org markup.
-          (setq entry (plist-put entry :description (car (xml-node-children content)))))
+	  (setq entry (plist-put entry :description (org-feed-unescape (car (xml-node-children content))))))
          ((string= type "xhtml")
           ;; TODO: convert XHTML to Org markup.
           (setq entry (plist-put entry :description (prin1-to-string (xml-node-children content)))))

@@ -1161,6 +1161,9 @@ on this string to produce the exported version."
       ;; Remove or replace comments
       (org-export-handle-comments (plist-get parameters :comments))
 
+      ;; Remove #+TBLFM and #+TBLNAME lines
+      (org-export-handle-table-metalines)
+      
       ;; Run the final hook
       (run-hooks 'org-export-preprocess-final-hook)
 
@@ -1526,15 +1529,25 @@ from the buffer."
 
     (while formatters
       (setq fmt (pop formatters))
-      (when (eq (car fmt) backend)
-	;; This is selected code, put it into the file for real
-	(goto-char (point-min))
-	(while (re-search-forward (concat "^\\([ \t]*\\)#\\+" (cadr fmt)
-					  ":[ \t]*\\(.*\\)") nil t)
+      ;; Handle #+Backend: stuff
+      (goto-char (point-min))
+      (while (re-search-forward (concat "^\\([ \t]*\\)#\\+" (cadr fmt)
+					":[ \t]*\\(.*\\)") nil t)
+	(if (not (eq (car fmt) backend))
+	    (delete-region (point-at-bol) (min (1+ (point-at-eol)) (point-max)))
 	  (replace-match "\\1\\2" t)
 	  (add-text-properties
 	   (point-at-bol) (min (1+ (point-at-eol)) (point-max))
 	   '(org-protected t))))
+      ;; Delete #+attr_Backend: stuff of another backend. Those
+      ;; matching the current backend will be taken care of by
+      ;; `org-export-attach-captions-and-attributes'
+      (goto-char (point-min))
+      (while (re-search-forward (concat "^\\([ \t]*\\)#\\+attr_" (cadr fmt)
+					":[ \t]*\\(.*\\)") nil t)
+	(when (not (eq (car fmt) backend))
+	  (delete-region (point-at-bol) (min (1+ (point-at-eol)) (point-max)))))
+      ;; Handle #+begin_Backend and #+end_Backend stuff
       (goto-char (point-min))
       (while (re-search-forward (concat "^[ \t]*#\\+" (caddr fmt) "\\>.*\n?")
 				nil t)
@@ -1568,8 +1581,8 @@ These special cookies will later be interpreted by the backend."
       (setq beg (match-beginning 0)
 	    beg1 (1+ (match-end 0)))
       (when (re-search-forward (concat "^[ \t]*#\\+end_" type "\\>.*") nil t)
-	(setq end (+ (point-at-eol) (if (looking-at "\n$") 1 0))
-	      end1 (1- (match-beginning 0)))
+	(setq end1 (1- (match-beginning 0))
+	      end (+ (point-at-eol) (if (looking-at "\n$") 1 0)))
 	(setq content (org-remove-indentation (buffer-substring beg1 end1)))
 	(setq content (concat "ORG-" (upcase t1) "-START\n"
 			      content "\n"
@@ -1594,15 +1607,24 @@ table line.  If it is a link, add it to the line containing the link."
 		    "^[ \t]*\\(|[^-]\\)"
 		    "\\|"
 		    "^[ \t]*\\[\\[.*\\]\\][ \t]*$"))
-	cap attr label end)
+	cap shortn attr label end)
     (while (re-search-forward re nil t)
       (cond
        ((match-end 1)
-	(setq cap (concat cap (if cap " " "") (org-trim (match-string 1)))))
+	(progn
+	  (setq cap (concat cap (if cap " " "") (org-trim (match-string 1))))
+	  (when (string-match "\\[\\(.*\\)\\]{\\(.*\\)}" cap)
+	    (setq shortn (match-string 1 cap)
+		  cap (match-string 2 cap)))
+	  (delete-region (point-at-bol) (min (1+ (point-at-eol)) (point-max)))))
        ((match-end 2)
-	(setq attr (concat attr (if attr " " "") (org-trim (match-string 2)))))
+	(progn
+	  (setq attr (concat attr (if attr " " "") (org-trim (match-string 2))))
+	  (delete-region (point-at-bol) (min (1+ (point-at-eol)) (point-max)))))
        ((match-end 3)
-	(setq label (org-trim (match-string 3))))
+	(progn
+	  (setq label (org-trim (match-string 3)))
+	  (delete-region (point-at-bol) (min (1+ (point-at-eol)) (point-max)))))
        (t
 	(setq end (if (match-end 4)
 		      (let ((ee (org-table-end)))
@@ -1610,6 +1632,7 @@ table line.  If it is a link, add it to the line containing the link."
 		    (point-at-eol)))
 	(add-text-properties (point-at-bol) end
 			     (list 'org-caption cap
+				   'org-caption-shortn shortn
 				   'org-attributes attr
 				   'org-label label))
 	(if label (push (cons label label) target-alist))
@@ -1644,11 +1667,27 @@ When it is nil, all comments will be removed."
     (while (or (looking-at re)
 	       (re-search-forward re nil t))
       (setq pos (match-beginning 0))
-      (if (and commentsp
-	       (not (equal (char-before (match-end 1)) ?+)))
-	  (progn (add-text-properties
-		  (match-beginning 0) (match-end 0) '(org-protected t))
-		 (replace-match (format commentsp (match-string 2)) t t))
+      (if (get-text-property pos 'org-protected)
+	  (goto-char (1+ pos))
+	(if (and commentsp
+		 (not (equal (char-before (match-end 1)) ?+)))
+	    (progn (add-text-properties
+		    (match-beginning 0) (match-end 0) '(org-protected t))
+		   (replace-match (format commentsp (match-string 2)) t t))
+	  (goto-char (1+ pos))
+	  (replace-match "")
+	  (goto-char (max (point-min) (1- pos))))))))
+
+(defun org-export-handle-table-metalines ()
+  "Remove table specific metalines #+TBLNAME: and #+TBLFM:."
+  (let ((re "^[ \t]*#\\+TBL\\(NAME\\|FM\\):\\(.*\n?\\)")
+	pos)
+    (goto-char (point-min))
+    (while (or (looking-at re)
+	       (re-search-forward re nil t))
+      (setq pos (match-beginning 0))
+      (if (get-text-property (point) 'org-protected)
+	  (goto-char (1+ pos))
 	(goto-char (1+ pos))
 	(replace-match "")
 	(goto-char (max (point-min) (1- pos)))))))

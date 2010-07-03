@@ -433,7 +433,8 @@ This may also be a function, building and inserting the postamble.")
      (concat "ltxpng/" (file-name-sans-extension
 			(file-name-nondirectory
 			 org-current-export-file)))
-     org-current-export-dir nil "Creating LaTeX image %s"))
+     org-current-export-dir nil "Creating LaTeX image %s"
+     nil nil (eq (plist-get parameters :LaTeX-fragments) 'verbatim)))
   (goto-char (point-min))
   (let (label l1)
     (while (re-search-forward "\\\\ref{\\([^{}\n]+\\)}" nil t)

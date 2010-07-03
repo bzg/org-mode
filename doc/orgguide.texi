@@ -102,13 +102,14 @@ license to the document, as described in section 6 of the license.
 * Hyperlinks::			Notes in context
 * TODO Items::			Every tree branch can be a TODO item
 * Tags::			Tagging headlines and matching sets of tags
-* Properties::			
+* Properties::			Properties
 * Dates and Times::		Making items useful for planning
 * Capture - Refile - Archive::	The ins and outs for projects
 * Agenda Views::		Collecting information into views
 * Markup::			Prepare text for rich export
 * Exporting::			Sharing and publishing of notes
 * Publishing::			Create a web site of linked Org files
+* Working With Source Code::	Source code snippets embedded in Org
 * Miscellaneous::		All the rest which did not fit elsewhere
 
 @detailmenu
@@ -2439,7 +2440,7 @@ Dye's LaTeX export tutorial}
 @uref{http://orgmode.org/worg/org-tutorials/org-beamer/tutorial.php, Eric
 Fraga's BEAMER presentation tutorial}}
 
-@node Publishing, Miscellaneous, Exporting, Top
+@node Publishing, Working With Source Code, Exporting, Top
 @chapter Publishing
 
 Org includes a publishing management system that allows you to configure
@@ -2479,14 +2480,24 @@ publishing of all files by giving a prefix argument to any of the commands
 above.
 
 @seealso{
-@uref{http://orgmode.org/manual/Publishing.html#Publishing, Chapter 12 of the
+@uref{http://orgmode.org/manual/Publishing.html#Publishing, Chapter 13 of the
 manual}@*
 @uref{http://orgmode.org/worg/org-tutorials/org-publish-html-tutorial.php,
 Sebastian Rose's publishing tutorial}@*
 @uref{http://orgmode.org/worg/org-tutorials/org-jekyll.php, Ian Barton's
 Jekyll/blogging setup}}
 
-@node Miscellaneous,  , Publishing, Top
+@node Working With Source Code, Miscellaneous, Publishing, Top
+@chapter Working with source code
+
+TBD
+
+@seealso{
+@uref{http://orgmode.org/manual/Working-with-source-code.html#Working-with-source-code,Chapter 14 of the manual}@*
+@uref{http://orgmode.org/worg/org-contrib/babel/index.php,
+The Babel site on Worg}}
+
+@node Miscellaneous,  , Working With Source Code, Top
 @chapter Miscellaneous
 
 @menu
@@ -2557,7 +2568,7 @@ devices, developed by Richard Moreland.  For details, see the Org-mode
 manual.
 
 @seealso{
-@uref{http://orgmode.org/manual/Miscellaneous.html#Miscellaneous, Chapter 14
+@uref{http://orgmode.org/manual/Miscellaneous.html#Miscellaneous, Chapter 15
 of the manual}@*
 @uref{http://orgmode.org/manual/MobileOrg.html#MobileOrg, Appendix B of the
 manual}@*

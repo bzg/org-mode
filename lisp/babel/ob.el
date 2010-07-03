@@ -30,6 +30,7 @@
 
 ;;; Code:
 (eval-when-compile (require 'cl))
+(require 'org-macs)
 
 (defvar org-babel-call-process-region-original)
 (declare-function show-all "outline" ())

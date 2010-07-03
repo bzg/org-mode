@@ -1386,8 +1386,9 @@ Changing this requires a restart of Emacs to work correctly."
 
 (defcustom org-link-frame-setup
   '((vm . vm-visit-folder-other-frame)
-    (gnus . gnus-other-frame)
-    (file . find-file-other-window))
+    (gnus . org-gnus-no-new-news)
+    (file . find-file-other-window)
+    (wl . wl-other-frame))
   "Setup the frame configuration for following links.
 When following a link with Emacs, it may often be useful to display
 this link in another window or frame.  This variable can be used to
@@ -1403,6 +1404,9 @@ For FILE, use any of
     `find-file'
     `find-file-other-window'
     `find-file-other-frame'
+For Wanderlust use any of
+    `wl'
+    `wl-other-frame'
 For the calendar, use the variable `calendar-setup'.
 For BBDB, it is currently only possible to display the matches in
 another window."
@@ -1422,7 +1426,11 @@ another window."
 		(choice
 		 (const find-file)
 		 (const find-file-other-window)
-		 (const find-file-other-frame)))))
+		 (const find-file-other-frame)))
+	  (cons (const wl)
+		(choice
+		 (const wl)
+		 (const wl-other-frame)))))
 
 (defcustom org-display-internal-link-with-indirect-buffer nil
   "Non-nil means use indirect buffer to display infile links.
@@ -1480,6 +1488,9 @@ single keystroke rather than having to type \"yes\"."
 	  (const :tag "with yes-or-no (safer)" yes-or-no-p)
 	  (const :tag "with y-or-n (faster)" y-or-n-p)
 	  (const :tag "no confirmation (dangerous)" nil)))
+(put 'org-confirm-shell-link-function
+     'safe-local-variable
+     '(lambda (x) (member x '(yes-or-no-p y-or-n-p))))
 
 (defcustom org-confirm-elisp-link-function 'yes-or-no-p
   "Non-nil means ask for confirmation before executing Emacs Lisp links.
@@ -1497,6 +1508,9 @@ single keystroke rather than having to type \"yes\"."
 	  (const :tag "with yes-or-no (safer)" yes-or-no-p)
 	  (const :tag "with y-or-n (faster)" y-or-n-p)
 	  (const :tag "no confirmation (dangerous)" nil)))
+(put 'org-confirm-shell-link-function
+     'safe-local-variable
+     '(lambda (x) (member x '(yes-or-no-p y-or-n-p))))
 
 (defconst org-file-apps-defaults-gnu
   '((remote . emacs)
@@ -1657,10 +1671,8 @@ following situations:
 
 (defcustom org-default-notes-file (convert-standard-filename "~/.notes")
   "Default target for storing notes.
-Used by the hooks for remember.el.  This can be a string, or nil to mean
-the value of `remember-data-file'.
-You can set this on a per-template basis with the variable
-`org-remember-templates'."
+Used as a fall back file for org-remember.el and org-capture.el, for
+templates that do not specify a target file."
   :group 'org-refile
   :group 'org-remember
   :type '(choice
@@ -5181,13 +5193,17 @@ will be prompted for."
 	  (if org-export-with-TeX-macros
 	      (list (concat "\\\\"
 			    (regexp-opt
-			     (append (mapcar 'car (append org-entities-user
-							  org-entities))
-				     (if (boundp 'org-latex-entities)
-					 (mapcar (lambda (x)
-						   (or (car-safe x) x))
-						 org-latex-entities)
-				       nil))
+			     (append
+
+			      (delq nil
+				    (mapcar 'car-safe
+					    (append org-entities-user
+						    org-entities)))
+			      (if (boundp 'org-latex-entities)
+				  (mapcar (lambda (x)
+					    (or (car-safe x) x))
+					  org-latex-entities)
+				nil))
 			     'words))) ; FIXME
 	    ))
     ;;			(list "\\\\\\(?:[a-zA-Z]+\\)")))
@@ -10665,7 +10681,7 @@ For calling through lisp, arg is also interpreted in the following way:
 	    (looking-at " *"))
 	(let* ((match-data (match-data))
 	       (startpos (point-at-bol))
-	       (logging (save-match-data (org-entry-get nil "LOGGING" t)))
+	       (logging (save-match-data (org-entry-get nil "LOGGING" t t)))
 	       (org-log-done org-log-done)
 	       (org-log-repeat org-log-repeat)
 	       (org-todo-log-states org-todo-log-states)
@@ -13380,7 +13396,7 @@ when a \"nil\" value can supercede a non-nil value higher up the hierarchy."
     (if (and inherit (if (eq inherit 'selective)
 			 (org-property-inherit-p property)
 		       t))
-	(org-entry-get-with-inheritance property)
+	(org-entry-get-with-inheritance property literal-nil)
       (if (member property org-special-properties)
 	  ;; We need a special property.  Use `org-entry-properties' to
 	  ;; retrieve it, but specify the wanted property
@@ -13490,8 +13506,12 @@ no match, the marker will point nowhere.
 Note that also `org-entry-get' calls this function, if the INHERIT flag
 is set.")
 
-(defun org-entry-get-with-inheritance (property)
-  "Get entry property, and search higher levels if not present."
+(defun org-entry-get-with-inheritance (property &optional literal-nil)
+  "Get entry property, and search higher levels if not present.
+The search will stop at the first ancestor which has the property defined.
+If the value found is \"nil\", return nil to show that the property
+should be considered as undefined (this is the meaning of nil here).
+However, if LITERAL-NIL is set, return the string value \"nil\" instead."
   (move-marker org-entry-property-inherited-from nil)
   (let (tmp)
     (save-excursion
@@ -13504,11 +13524,11 @@ is set.")
 	      (move-marker org-entry-property-inherited-from (point))
 	      (throw 'ex tmp))
 	    (or (org-up-heading-safe) (throw 'ex nil)))))
-      (org-not-nil
-       (or tmp
-	   (cdr (assoc property org-file-properties))
-	   (cdr (assoc property org-global-properties))
-	   (cdr (assoc property org-global-properties-fixed)))))))
+      (setq tmp (or tmp
+		    (cdr (assoc property org-file-properties))
+		    (cdr (assoc property org-global-properties))
+		    (cdr (assoc property org-global-properties-fixed))))
+      (if literal-nil tmp (org-not-nil tmp)))))
 
 (defvar org-property-changed-functions nil
   "Hook called when the value of a property has changed.
@@ -14738,16 +14758,17 @@ If there is a specifyer for a cyclic time stamp, get the closest date to
 DAYNR.
 PREFER and SHOW-ALL are passed through to `org-closest-date'.
 the variable date is bound by the calendar when this is called."
-  (cond
-   ((and daynr (string-match "\\`%%\\((.*)\\)" s))
-    (if (org-diary-sexp-entry (match-string 1 s) "" date)
-	daynr
-      (+ daynr 1000)))
-   ((and daynr (string-match "\\+[0-9]+[dwmy]" s))
-    (org-closest-date s (if (and (boundp 'daynr) (integerp daynr)) daynr
-			  (time-to-days (current-time))) (match-string 0 s)
-			  prefer show-all))
-   (t (time-to-days (apply 'encode-time (org-parse-time-string s))))))
+  (let ((today (calendar-absolute-from-gregorian (calendar-current-date))))
+    (cond
+     ((and daynr (string-match "\\`%%\\((.*)\\)" s))
+      (if (org-diary-sexp-entry (match-string 1 s) "" date)
+	  daynr
+	(+ daynr 1000)))
+     ((and daynr (not (eq daynr today)) (string-match "\\+[0-9]+[dwmy]" s))
+	   (org-closest-date s (if (and (boundp 'daynr) (integerp daynr)) daynr
+				 (time-to-days (current-time))) (match-string 0 s)
+				 prefer show-all))
+      (t (time-to-days (apply 'encode-time (org-parse-time-string s)))))))
 
 (defun org-days-to-iso-week (days)
   "Return the iso week number."
@@ -15217,21 +15238,31 @@ changes from another.  I believe the procedure must be like this:
 ;;;; Agenda files
 
 ;;;###autoload
-(defun org-iswitchb (&optional arg)
-  "Use `org-icompleting-read' to prompt for an Org buffer to switch to.
+(defun org-switchb (&optional arg)
+  "Switch between Org buffers.
 With a prefix argument, restrict available to files.
-With two prefix arguments, restrict available buffers to agenda files."
+With two prefix arguments, restrict available buffers to agenda files.
+
+Defaults to `iswitchb' for buffer name completion.
+Set `org-completion-use-ido' to make it use ido instead."
   (interactive "P")
   (let ((blist (cond ((equal arg '(4))  (org-buffer-list 'files))
                      ((equal arg '(16)) (org-buffer-list 'agenda))
-                     (t                 (org-buffer-list)))))
+                     (t                 (org-buffer-list))))
+	(org-completion-use-iswitchb org-completion-use-iswitchb)
+	(org-completion-use-ido org-completion-use-ido))
+    (unless (or org-completion-use-ido org-completion-use-iswitchb)
+      (setq org-completion-use-iswitchb t))
     (switch-to-buffer
      (org-icompleting-read "Org buffer: "
-                              (mapcar 'list (mapcar 'buffer-name blist))
-                              nil t))))
+			   (mapcar 'list (mapcar 'buffer-name blist))
+			   nil t))))
 
+;;; Define some older names previously used for this functionality
 ;;;###autoload
-(defalias 'org-ido-switchb 'org-iswitchb)
+(defalias 'org-ido-switchb 'org-switchb)
+;;;###autoload
+(defalias 'org-iswitchb 'org-switchb)
 
 (defun org-buffer-list (&optional predicate exclude-tmp)
   "Return a list of Org buffers.
@@ -15718,7 +15749,8 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
     ("$$" "\\$\\$[^\000]*?\\$\\$" 0 nil))
   "Regular expressions for matching embedded LaTeX.")
 
-(defun org-format-latex (prefix &optional dir overlays msg at forbuffer)
+(defun org-format-latex (prefix &optional dir overlays msg at
+				forbuffer protect-only)
   "Replace LaTeX fragments with links to an image, and produce images.
 Some of the options can be changed using the variable
 `org-format-latex-options'."
@@ -15748,60 +15780,63 @@ Some of the options can be changed using the variable
 			 (not (eq (get-char-property (match-beginning n)
 						     'org-overlay-type)
 				  'org-latex-overlay))))
-	    (setq txt (match-string n)
-		  beg (match-beginning n) end (match-end n)
-		  cnt (1+ cnt))
-	    (let (print-length print-level) ; make sure full list is printed
-	      (setq hash (sha1 (prin1-to-string
-				(list org-format-latex-header
-				      org-format-latex-header-extra
-				      org-export-latex-default-packages-alist
-				      org-export-latex-packages-alist
-				      org-format-latex-options
-				      forbuffer txt)))
-		    linkfile (format "%s_%s.png" prefix hash)
-		    movefile (format "%s_%s.png" absprefix hash)))
-            (setq link (concat block "[[file:" linkfile "]]" block))
-	    (if msg (message msg cnt))
-	    (goto-char beg)
-	    (unless checkdir ; make sure the directory exists
-	      (setq checkdir t)
-	      (or (file-directory-p todir) (make-directory todir)))
-
-	    (unless executables-checked
-	      (org-check-external-command
-	       "latex" "needed to convert LaTeX fragments to images")
-	      (org-check-external-command
-	       "dvipng" "needed to convert LaTeX fragments to images")
-	      (setq executables-checked t))
-
-            (unless (file-exists-p movefile)
-              (org-create-formula-image
-               txt movefile opt forbuffer))
-	    (if overlays
-		(progn
-		  (mapc (lambda (o)
-			  (if (eq (overlay-get o 'org-overlay-type)
-				  'org-latex-overlay)
-			      (delete-overlay o)))
-			(overlays-in beg end))
-		  (setq ov (make-overlay beg end))
-		  (overlay-put ov 'org-overlay-type 'org-latex-overlay)
-		  (if (featurep 'xemacs)
-		      (progn
-			(overlay-put ov 'invisible t)
-			(overlay-put
-			 ov 'end-glyph
-			 (make-glyph (vector 'png :file movefile))))
-		    (overlay-put
-		     ov 'display
-		     (list 'image :type 'png :file movefile :ascent 'center)))
-		  (push ov org-latex-fragment-image-overlays)
-		  (goto-char end))
-	      (delete-region beg end)
-              (insert (org-add-props link
-                          (list 'org-latex-src
-                                (replace-regexp-in-string "\"" "" txt)))))))))))
+	    (if protect-only
+		(add-text-properties (match-beginning n) (match-end n)
+				     '(org-protected t))
+	      (setq txt (match-string n)
+		    beg (match-beginning n) end (match-end n)
+		    cnt (1+ cnt))
+	      (let (print-length print-level) ; make sure full list is printed
+		(setq hash (sha1 (prin1-to-string
+				  (list org-format-latex-header
+					org-format-latex-header-extra
+					org-export-latex-default-packages-alist
+					org-export-latex-packages-alist
+					org-format-latex-options
+					forbuffer txt)))
+		      linkfile (format "%s_%s.png" prefix hash)
+		      movefile (format "%s_%s.png" absprefix hash)))
+	      (setq link (concat block "[[file:" linkfile "]]" block))
+	      (if msg (message msg cnt))
+	      (goto-char beg)
+	      (unless checkdir ; make sure the directory exists
+		(setq checkdir t)
+		(or (file-directory-p todir) (make-directory todir)))
+	      
+	      (unless executables-checked
+		(org-check-external-command
+		 "latex" "needed to convert LaTeX fragments to images")
+		(org-check-external-command
+		 "dvipng" "needed to convert LaTeX fragments to images")
+		(setq executables-checked t))
+	      
+	      (unless (file-exists-p movefile)
+		(org-create-formula-image
+		 txt movefile opt forbuffer))
+	      (if overlays
+		  (progn
+		    (mapc (lambda (o)
+			    (if (eq (overlay-get o 'org-overlay-type)
+				    'org-latex-overlay)
+				(delete-overlay o)))
+			  (overlays-in beg end))
+		    (setq ov (make-overlay beg end))
+		    (overlay-put ov 'org-overlay-type 'org-latex-overlay)
+		    (if (featurep 'xemacs)
+			(progn
+			  (overlay-put ov 'invisible t)
+			  (overlay-put
+			   ov 'end-glyph
+			   (make-glyph (vector 'png :file movefile))))
+		      (overlay-put
+		       ov 'display
+		       (list 'image :type 'png :file movefile :ascent 'center)))
+		    (push ov org-latex-fragment-image-overlays)
+		    (goto-char end))
+		(delete-region beg end)
+		(insert (org-add-props link
+			    (list 'org-latex-src
+				  (replace-regexp-in-string "\"" "" txt))))))))))))
 
 ;; This function borrows from Ganesh Swami's latex2png.el
 (defun org-create-formula-image (string tofile options buffer)
