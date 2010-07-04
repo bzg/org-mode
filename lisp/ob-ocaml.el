@@ -41,7 +41,7 @@
 (require 'comint)
 (eval-when-compile (require 'cl))
 
-(declare-function tuareg-run-caml "taureg" ())
+(declare-function tuareg-run-caml "ext:taureg" ())
 
 (add-to-list 'org-babel-tangle-lang-exts '("ocaml" . "ml"))
 

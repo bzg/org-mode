@@ -43,7 +43,7 @@
 (eval-when-compile
   (require 'cl))
 
-(declare-function run-ruby "inf-ruby" (&optional command name))
+(declare-function run-ruby "ext:inf-ruby" (&optional command name))
 
 (add-to-list 'org-babel-tangle-lang-exts '("ruby" . "rb"))
 

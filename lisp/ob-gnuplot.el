@@ -47,9 +47,9 @@
 (declare-function org-time-string-to-time "org" (s))
 (declare-function org-combine-plists "org" (&rest plists))
 (declare-function orgtbl-to-generic "org-table" (table params))
-(declare-function gnuplot-mode "gnuplot-mode" ())
-(declare-function gnuplot-send-string-to-gnuplot "gnuplot-mode" (string text))
-(declare-function gnuplot-send-buffer-to-gnuplot "gnuplot-mode" ())
+(declare-function gnuplot-mode "ext:gnuplot-mode" ())
+(declare-function gnuplot-send-string-to-gnuplot "ext:gnuplot-mode" (str txt))
+(declare-function gnuplot-send-buffer-to-gnuplot "ext:gnuplot-mode" ())
 
 (defvar org-babel-default-header-args:gnuplot
   '((:results . "file") (:exports . "results") (:session . nil))

@@ -37,8 +37,8 @@
 (declare-function org-babel-comint-buffer-livep "ob-comint" (buffer))
 (declare-function org-babel-comint-with-output "ob-comint" (meta &rest body))
 (declare-function orgtbl-to-tsv "ob-table" (table params))
-(declare-function R "essd-r" (&optional start-args))
-(declare-function inferior-ess-send-input "ess-inf" ())
+(declare-function R "ext:essd-r" (&optional start-args))
+(declare-function inferior-ess-send-input "ext:ess-inf" ())
 
 (defconst org-babel-header-arg-names:R
   '(width height bg units pointsize antialias quality compression

@@ -35,8 +35,8 @@
 (require 'ob-comint)
 (eval-when-compile (require 'cl))
 
-(declare-function matlab-shell "matlab-mode")
-(declare-function matlab-shell-run-region "matlab-mode")
+(declare-function matlab-shell "ext:matlab-mode")
+(declare-function matlab-shell-run-region "ext:matlab-mode")
 
 (defvar org-babel-default-header-args:matlab '())
 (defvar org-babel-default-header-args:octave '())

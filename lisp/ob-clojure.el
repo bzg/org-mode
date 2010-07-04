@@ -42,13 +42,13 @@
 (eval-when-compile
   (require 'cl))
 
-(declare-function slime-eval-async "slime" (sexp &optional cont package))
-(declare-function slime-eval "slime" (sexp &optional package))
-(declare-function swank-clojure-concat-paths "slime" (paths))
-(declare-function org-babel-ref-variables "slime" (params))
-(declare-function slime "slime" (&optional command coding-system))
-(declare-function slime-output-buffer "slime" (&optional noprompt))
-(declare-function slime-filter-buffers "slime" (predicate))
+(declare-function slime-eval-async "ext:slime" (sexp &optional cont package))
+(declare-function slime-eval "ext:slime" (sexp &optional package))
+(declare-function swank-clojure-concat-paths "ext:slime" (paths))
+(declare-function org-babel-ref-variables "ext:slime" (params))
+(declare-function slime "ext:slime" (&optional command coding-system))
+(declare-function slime-output-buffer "ext:slime" (&optional noprompt))
+(declare-function slime-filter-buffers "ext:slime" (predicate))
 
 (add-to-list 'org-babel-tangle-lang-exts '("clojure" . "clj"))
 
