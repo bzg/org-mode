@@ -98,7 +98,7 @@ none ----- do not display either code or results upon export"
 (defun org-babel-exp-inline-src-blocks (start end)
   "Process inline src blocks between START and END for export.
 See `org-babel-exp-src-blocks' for export options, currently the
-options and are taken from `org-babel-defualt-inline-header-args'."
+options and are taken from `org-babel-default-inline-header-args'."
   (interactive)
   (save-excursion
     (goto-char start)
