@@ -107,7 +107,7 @@ or user `keyboard-quit' during execution of body."
 	 (if (and ,remove-echo ,full-body
 		  (string-match
 		   (replace-regexp-in-string
-		    "\n" "[\r\n]+" (regexp-quote ,full-body))
+		    "\n" "[\r\n]+" (regexp-quote (or ,full-body "")))
 		   string-buffer))
 	     (setq raw (substring string-buffer (match-end 0))))
 	 (split-string string-buffer comint-prompt-regexp)))))

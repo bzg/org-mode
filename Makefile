@@ -122,6 +122,7 @@ LISPF      = 	org.el			\
 		ob-exp.el		\
 		ob-tangle.el		\
 		ob-comint.el		\
+		ob-eval.el		\
 		ob-keys.el		\
 		ob-C.el			\
 		ob-ditaa.el		\

@@ -61,7 +61,7 @@ otherwise display STDERR with `org-babel-eval-error-notify'."
 (defun org-babel-eval-read-file (file)
   "Return the contents of FILE as a string."
   (with-temp-buffer (insert-file-contents
-		     (org-babel-maybe-remote-file tmp-file))
+		     (org-babel-maybe-remote-file file))
 		    (buffer-string)))
 
 (defun org-babel-shell-command-on-region (start end command

@@ -33,6 +33,7 @@
 (require 'ob)
 (require 'ob-ref)
 (require 'ob-comint)
+(require 'ob-eval)
 (eval-when-compile (require 'cl))
 
 (declare-function matlab-shell "ext:matlab-mode")
