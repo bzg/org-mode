@@ -1073,7 +1073,7 @@ code ---- the results are extracted in the syntax of the source
 					  (listp (cdr (car result)))))
 				 result (list result))
 			     '(:fmt (lambda (cell) (format "%s" cell)))) "\n"))
-	    (goto-char beg) (org-table-align))
+	    (goto-char beg) (when (org-at-table-p) (org-table-align)))
 	   ((member "file" result-params)
 	    (insert result))
 	   ((member "html" result-params)
