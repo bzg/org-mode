@@ -47,13 +47,12 @@
   "Shell command to use to run octave as an external process.")
 
 (defun org-babel-expand-body:matlab (body params &optional processed-params)
-  "Expand BODY according to PARAMS, return the expanded body." body)
+  "Expand BODY according to PARAMS, return the expanded body."
+  (org-babel-expand-body:octave body params processed-params))
 (defun org-babel-expand-body:octave (body params &optional processed-params)
   "Expand BODY according to PARAMS, return the expanded body."
   (let ((vars (nth 1 (or processed-params (org-babel-process-params params)))))
     (concat
-     ;; prepend code to define all arguments passed to the code block
-     ;; (may not be appropriate for all languages)
      (mapconcat
       (lambda (pair)
         (format "%s=%s"
@@ -73,6 +72,15 @@ else, save -ascii %s ans
 end
 delete('%s')
 ")
+(defvar org-babel-octave-wrapper-method
+  "%s
+if ischar(ans), fid = fopen('%s', 'w'); fprintf(fid, '%%s\\n', ans); fclose(fid);
+else, save -ascii %s ans
+end")
+
+(defvar org-babel-octave-eoe-indicator "\'org_babel_eoe\'")
+
+(defvar org-babel-octave-eoe-output "ans = org_babel_eoe")
 
 (defun org-babel-execute:matlab (body params)
   "Execute a block of matlab code with org-babel."
@@ -80,9 +88,8 @@ delete('%s')
   (org-babel-execute:octave body params 'matlab))
 (defun org-babel-execute:octave (body params &optional matlabp)
   "Execute a block of octave code with org-babel."
-  (message (format "executing %s source code block" (if matlabp "matlab" "octave")))
+  (message "executing %s source code block" (if matlabp "matlab" "octave"))
   (let* ((processed-params (org-babel-process-params params))
-         ;; set the session if the session variable is non-nil
          (session
 	  (funcall (intern (format "org-babel-%s-initiate-session"
 				   (if matlabp "matlab" "octave")))
@@ -91,13 +98,17 @@ delete('%s')
          (result-params (nth 2 processed-params))
          (result-type (nth 3 processed-params))
 	 (out-file (cdr (assoc :file params)))
-	 (augmented-body (org-babel-expand-body:octave body params processed-params))
-	 (result (org-babel-octave-evaluate session augmented-body result-type matlabp)))
+	 (augmented-body
+	  (org-babel-expand-body:octave body params processed-params))
+	 (result (org-babel-octave-evaluate
+		  session augmented-body result-type matlabp)))
     (or out-file
         (org-babel-reassemble-table
          result
-         (org-babel-pick-name (nth 4 processed-params) (cdr (assoc :colnames params)))
-         (org-babel-pick-name (nth 5 processed-params) (cdr (assoc :rownames params)))))))
+         (org-babel-pick-name
+	  (nth 4 processed-params) (cdr (assoc :colnames params)))
+         (org-babel-pick-name
+	  (nth 5 processed-params) (cdr (assoc :rownames params)))))))
 
 (defun org-babel-prep-session:matlab (session params)
   "Prepare SESSION according to PARAMS."
@@ -139,23 +150,15 @@ current inferior-process-buffer in SESSION then create. Return
 the initialized session."
   (require 'octave-inf)
   (unless (string= session "none")
-    (let ((session (or session (if matlabp "*Inferior Matlab*" "*Inferior Octave*"))))
+    (let ((session (or session
+		       (if matlabp "*Inferior Matlab*" "*Inferior Octave*"))))
       (if (org-babel-comint-buffer-livep session) session
 	(save-window-excursion
 	  (if matlabp (unless org-babel-matlab-with-emacs-link (matlab-shell))
 	    (run-octave))
 	  (rename-buffer (if (bufferp session) (buffer-name session)
-			   (if (stringp session) session (buffer-name)))) (current-buffer))))))
-
-(defvar org-babel-octave-wrapper-method
-   "%s
-if ischar(ans), fid = fopen('%s', 'w'); fprintf(fid, '%%s\\n', ans); fclose(fid);
-else, save -ascii %s ans
-end")
-
-(defvar org-babel-octave-eoe-indicator "\'org_babel_eoe\'")
-
-(defvar org-babel-octave-eoe-output "ans = org_babel_eoe")
+			   (if (stringp session) session (buffer-name))))
+	  (current-buffer))))))
 
 (defun org-babel-octave-evaluate
   (session body result-type lang &optional matlabp)
@@ -164,29 +167,21 @@ equals 'output then return the outputs of the statements in BODY,
 if RESULT-TYPE equals 'value then return the value of the last
 statement in BODY, as elisp."
   (if session
-    (org-babel-octave-evaluate-session session body result-type matlabp)
+      (org-babel-octave-evaluate-session session body result-type matlabp)
     (org-babel-octave-evaluate-external-process body result-type matlabp)))
 
 (defun org-babel-octave-evaluate-external-process (body result-type matlabp)
   "Evaluate BODY in an external octave process."
-  (let ((cmd (if matlabp org-babel-matlab-shell-command org-babel-octave-shell-command)))
-    (save-excursion
-      (cond
-       ((equal result-type 'output)
-	(with-temp-buffer
-	  (insert body)
-	  (org-babel-shell-command-on-region (point-min) (point-max) cmd 'current-buffer 'replace)
-	  (buffer-string)))
-       ((equal result-type 'value)
-	(let* ((tmp-file (make-temp-file "org-babel-results-")) exit-code
-	       (stderr
-		(with-temp-buffer
-		  (insert (format org-babel-octave-wrapper-method body tmp-file tmp-file))
-		  (setq exit-code (org-babel-shell-command-on-region
-				   (point-min) (point-max) cmd nil 'replace (current-buffer)))
-		  (buffer-string))))
-	  (if (> exit-code 0) (org-babel-error-notify exit-code stderr))
-	  (org-babel-octave-import-elisp-from-file (org-babel-maybe-remote-file tmp-file))))))))
+  (let ((cmd (if matlabp
+		 org-babel-matlab-shell-command
+	       org-babel-octave-shell-command)))
+    (case result-type
+      (output (org-babel-eval cmd body))
+      (value (let ((tmp-file (make-temp-file "org-babel-results-")))
+	       (org-babel-eval
+		cmd
+		(format org-babel-octave-wrapper-method body tmp-file tmp-file))
+	       (org-babel-eval-read-file tmp-file))))))
 
 (defun org-babel-octave-evaluate-session
   (session body result-type &optional matlabp)
