@@ -29,13 +29,10 @@
 ;;; Code:
 (require 'ob)
 (require 'ob-ref)
+(require 'ob-comint)
+(require 'ob-eval)
 (eval-when-compile (require 'cl))
 
-(declare-function org-babel-comint-in-buffer "ob-comint" (buffer &rest body))
-(declare-function comint-send-input "ob-comint" (el'.))
-(declare-function org-babel-comint-wait-for-output "ob-comint" (buffer))
-(declare-function org-babel-comint-buffer-livep "ob-comint" (buffer))
-(declare-function org-babel-comint-with-output "ob-comint" (meta &rest body))
 (declare-function orgtbl-to-tsv "ob-table" (table params))
 (declare-function R "ext:essd-r" (&optional start-args))
 (declare-function inferior-ess-send-input "ext:ess-inf" ())

@@ -28,6 +28,7 @@
 
 ;;; Code:
 (require 'ob)
+(require 'ob-eval)
 (eval-when-compile (require 'cl))
 
 (add-to-list 'org-babel-tangle-lang-exts '("perl" . "pl"))
@@ -108,7 +109,7 @@ last statement in BODY, as elisp."
     (output (org-babel-eval org-babel-perl-command body))
     (value (let ((tmp-file (make-temp-file "org-babel-perl-results-")))
 	     (org-babel-eval
-	      org-babel-python-command
+	      org-babel-perl-command
 	      (format org-babel-perl-wrapper-method body tmp-file))
 	     (org-babel-eval-read-file tmp-file)))))
 

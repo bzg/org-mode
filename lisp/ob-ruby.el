@@ -40,8 +40,8 @@
 (require 'ob)
 (require 'ob-ref)
 (require 'ob-comint)
-(eval-when-compile
-  (require 'cl))
+(require 'ob-eval)
+(eval-when-compile (require 'cl))
 
 (declare-function run-ruby "ext:inf-ruby" (&optional command name))
 
@@ -207,7 +207,7 @@ last statement in BODY, as elisp."
 	   #'org-babel-trim
 	   (butlast
 	    (org-babel-comint-with-output
-		(buffer org-babel-ruby-eoe-indicator t full-body)
+		(buffer org-babel-ruby-eoe-indicator t body)
 	      (mapc
 	       (lambda (line)
 		 (insert (org-babel-chomp line)) (comint-send-input nil t))

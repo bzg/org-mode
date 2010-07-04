@@ -249,7 +249,7 @@ specifies the value of ERROR-BUFFER."
       (delete-file error-file))
     exit-status))
 
-(provide 'ob-run)
+(provide 'ob-eval)
 
 ;; arch-tag: 5328b17f-957d-42d9-94da-a2952682d04d
 

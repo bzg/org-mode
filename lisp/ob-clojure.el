@@ -39,8 +39,8 @@
 
 ;;; Code:
 (require 'ob)
-(eval-when-compile
-  (require 'cl))
+(require 'ob-eval)
+(eval-when-compile (require 'cl))
 
 (declare-function slime-eval-async "ext:slime" (sexp &optional cont package))
 (declare-function slime-eval "ext:slime" (sexp &optional package))

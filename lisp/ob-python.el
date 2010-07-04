@@ -30,7 +30,7 @@
 (require 'ob)
 (require 'ob-ref)
 (require 'ob-comint)
-(require 'ob-run)
+(require 'ob-eval)
 (require (if (featurep 'xemacs) 'python-mode 'python))
 (eval-when-compile (require 'cl))
 
