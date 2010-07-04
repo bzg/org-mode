@@ -228,13 +228,12 @@ last statement in BODY, as elisp."
 	 (mapconcat
 	  #'org-babel-trim
 	  (butlast
-	   (butlast
-	    (org-babel-comint-with-output
-		(buffer org-babel-python-eoe-indicator t body)
-	      (let ((comint-process-echoes nil))
-		(input-body body)
-		(insert org-babel-python-eoe-indicator)
-		(comint-send-input))))) "\n"))
+	   (org-babel-comint-with-output
+	       (buffer org-babel-python-eoe-indicator t body)
+	     (let ((comint-process-echoes nil))
+	       (input-body body)
+	       (insert org-babel-python-eoe-indicator)
+	       (comint-send-input))) 2) "\n"))
 	(value
 	 ((lambda (results)
 	    (if (or (member "code" result-params) (member "pp" result-params))
