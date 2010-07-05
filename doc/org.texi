@@ -260,7 +260,7 @@ Capture - Refile - Archive
 
 Capture
 
-* Setting up a capture location::  Where notes will be stored
+* Setting up capture::		Where notes will be stored
 * Using capture::		Commands to invoke and terminate capture
 * Capture templates::		Define the outline of different note types
 
@@ -5904,11 +5904,10 @@ trees to an archive file keeps the system compact and fast.
 @cindex capture
 
 Org's method for capturing new items is heavily inspired by John Wiegley
-excellent remember package.  Up to version 6.36 Org did actually use a
-special setup for @file{remember.el}.  @file{org-remember.el} is still part
-of Org-mode for backward compatibility with existing setups.  You can find
-the documentation for org-remember at
-@url{http://orgmode.org/org-remember.pdf}.
+excellent remember package.  Up to version 6.36 Org used a special setup
+for @file{remember.el}.  @file{org-remember.el} is still part of Org-mode for
+backward compatibility with existing setups.  You can find the documentation
+for org-remember at @url{http://orgmode.org/org-remember.pdf}.
 
 The new capturing setup described here is preferred and should be used by new
 users.  To convert your @code{org-remember-templates}, run the command
@@ -5917,32 +5916,32 @@ users.  To convert your @code{org-remember-templates}, run the command
 @end example
 @noindent and then customize the new variable with @kbd{M-x
 customize-variable org-capture-templates}, check the result, and save the
-customization.  You will then be able to use both remember and capture until
-you have gotten used to the new mechanism.
+customization.  You can then use both remember and capture until
+you are familiar with the new mechanism.
 
-Capture lets you store quick notes with little interruption of your work
+Capture lets you quickly store notes with little interruption of your work
 flow.  The basic process of capturing is very similar to remember, but Org
 does enhance it with templates and more.
 
 @menu
-* Setting up a capture location::  Where notes will be stored
+* Setting up capture::		Where notes will be stored
 * Using capture::		Commands to invoke and terminate capture
 * Capture templates::		Define the outline of different note types
 @end menu
 
-@node Setting up a capture location, Using capture, Capture, Capture
-@subsection Setting up a capture location
+@node Setting up capture, Using capture, Capture, Capture
+@subsection Setting up capture
 
 The following customization sets a default target file for notes, and defines
 a global key@footnote{Please select your own key, @kbd{C-c c} is only a
-suggestion.}  for capturing new stuff.
+suggestion.}  for capturing new material.
 
 @example
 (setq org-default-notes-file (concat org-directory "/notes.org"))
 (define-key global-map "\C-cc" 'org-capture)
 @end example
 
-@node Using capture, Capture templates, Setting up a capture location, Capture
+@node Using capture, Capture templates, Setting up capture, Capture
 @subsection Using capture
 
 @table @kbd
@@ -5956,14 +5955,14 @@ node.  You may then insert the information you want.
 
 @kindex C-c C-c
 @item C-c C-c
-Once you are done entering information into the capture buffer, 
+Once you have finished entering information into the capture buffer, 
 @kbd{C-c C-c} will return you to the window configuration before the capture
 process, so that you can resume your work without further distraction.
 
 @kindex C-c C-w
 @item C-c C-w
-When this command is used in the capture buffer, it will finalize the capture
-process by refiling (@pxref{Refiling notes}) the note to a different place.
+Finalize the capture process by refiling (@pxref{Refiling notes}) the note to
+a different place.
 
 @kindex C-c C-k
 @item C-c C-k
@@ -5979,8 +5978,8 @@ rather than to the current date.
 @subsection Capture templates
 @cindex templates, for Capture
 
-You can use templates to arrange for different types of capture items, and
-for different target locations.  The easiest way to set up such templates is
+You can use templates for different types of capture items, and
+for different target locations.  The easiest way to create such templates is
 through the customize interface.
 
 @table @kbd
@@ -5994,7 +5993,7 @@ an example.  Say you would like to use one template to create general TODO
 entries, and you want to put these entries under the heading @samp{Tasks} in
 your file @file{~/org/gtd.org}.  Also, a date tree in the file
 @file{journal.org} should capture journal entries.  A possible configuration
-would then look like this:
+would look like:
 
 @example
 (setq org-capture-templates
@@ -6015,7 +6014,7 @@ for you like this:
 During expansion of the template, @code{%a} has been replaced by a link to
 the location from where you called the capture command.  This can be
 extremely useful for deriving tasks from emails, for example.  You fill in
-the task definition, press @code{C-c C-c} and Org puts you back into the same
+the task definition, press @code{C-c C-c} and Org returns you to the same
 place where you started the capture process.
 
 
@@ -6056,15 +6055,15 @@ An Org-mode node, with a headline. Will be filed as the child of the
 target entry or as a top-level entry.  The target file should be an Org-mode
 file.
 @item item
-A plain list item, placed in the first plain  list a the target
+A plain list item, placed in the first plain  list at the target
 location.  Again the target file should be an Org file.
 @item checkitem
-A checkbox item.  This only differs from the plain lis item by the
+A checkbox item.  This only differs from the plain list item by the
 default template.
 @item table-line
-a new line in the first table at target location.  Where exactly the
+a new line in the first table at the target location.  Where exactly the
 line will be inserted depends on the properties @code{:prepend} and
-@code{:table-line-pos} (see below)
+@code{:table-line-pos} (see below).
 @item plain
 Text to be inserted as it is.
 @end table
@@ -6078,13 +6077,13 @@ body of this node.
 Valid values are:
 @table @code
 @item (file "path/to/file")
-Text will be placed at the beginning or end of that file
+Text will be placed at the beginning or end of that file.
 
 @item (id "id of existing org entry")
-Filing as child of this entry, or in the body of the entry
+Filing as child of this entry, or in the body of the entry.
 
 @item (file+headline "path/to/file" "node headline")
-Fast configuration if the target heading is unique in the file
+Fast configuration if the target heading is unique in the file.
 
 @item (file+olp "path/to/file" "Level 1 heading" "Level 2" ...)
 For non-unique headings, the full path is safer.
@@ -6109,7 +6108,7 @@ file and location.
 @item template
 The template for creating the capture item.  If you leave this
 empty, an appropriate default template will be used.  Otherwise this is a
-string with a number of escape code, which will be replaced depending on time
+string with  escape codes, which will be replaced depending on time
 and context of the capture call.  See below for more details.
 
 @item properties
@@ -6127,19 +6126,19 @@ file it away immediately.  This makes sense if the template only needs
 information that can be added automatically.
 
 @item :empty-lines
-Set this to the number of lines the should be inserted
+Set this to the number of lines to insert
 before and after the new item.  Default 0, only common other value is 1.
 
 @item :clock-in
 Start the clock in this item.
 
 @item :clock-resume
-If Starting the capture interrupted a clock, restart that clock when done
+If starting the capture interrupted a clock, restart that clock when finished
 with the capture.
 
 @item :unnarrowed
 Do not narrow the target buffer, simply show the full buffer.  Default is to
-narrow it so that you only see the new stuff.
+narrow it so that you only see the new material.
 @end table
 @end table
 
@@ -6149,6 +6148,8 @@ narrow it so that you only see the new stuff.
 In the template itself, special @kbd{%}-escapes@footnote{If you need one of
 these sequences literally, escape the @kbd{%} with a backslash.}  allow
 dynamic insertion of content:
+
+@comment SJE: should these sentences terminate in period?
 @smallexample
 %^@{@var{prompt}@}  @r{prompt the user for a string and replace this sequence with it.}
             @r{You may specify a default value and a completion table with}
@@ -6202,7 +6203,7 @@ vm, wl, mh, rmail  |  %:type %:subject %:message-id
 gnus               |  %:group, @r{for messages also all email fields}
 w3, w3m            |  %:url
 info               |  %:file %:node
-calendar           |  %:date"
+calendar           |  %:date
 @end smallexample
 
 @noindent
@@ -6220,7 +6221,7 @@ To place the cursor after template expansion use:
 @vindex org-attach-directory
 It is often useful to associate reference material with an outline node/task.
 Small chunks of plain text can simply be stored in the subtree of a project.
-Hyperlinks (@pxref{Hyperlinks}) can be used to establish associations with
+Hyperlinks (@pxref{Hyperlinks}) can establish associations with
 files that live elsewhere on your computer or in the cloud, like emails or
 source code files belonging to a project.  Another method is @i{attachments},
 which are files located in a directory belonging to an outline node.  Org
@@ -6237,14 +6238,14 @@ choice to an entry.  You can also make children inherit the attachment
 directory from a parent, so that an entire subtree uses the same attached
 directory.
 
-@noindent The following commands deal with attachments.
+@noindent The following commands deal with attachments:
 
 @table @kbd
 
 @kindex C-c C-a
 @item C-c C-a
 The dispatcher for commands related to the attachment system.  After these
-keys, a list of commands is displayed and you need to press an additional key
+keys, a list of commands is displayed and you must press an additional key
 to select a command:
 
 @table @kbd
@@ -6274,7 +6275,7 @@ attachments yourself.
 @kindex C-c C-a o
 @item o
 @vindex org-file-apps
-Open current task's attachment.  If there are more than one, prompt for a
+Open current task's attachment.  If there is more than one, prompt for a
 file name first.  Opening will follow the rules set by @code{org-file-apps}.
 For more details, see the information on following hyperlinks
 (@pxref{Handling links}).
@@ -6318,12 +6319,12 @@ same directory for attachments as the parent does.
 @section RSS feeds
 @cindex RSS feeds
 
-Org has the capability to add and change entries based on information found in
-RSS feeds.  You could use this to make a task out of each new podcast in a
-podcast feed.  Or you could use a phone-based note-creating service on the
-web to import tasks into Org.  To access feeds, you need to configure the
-variable @code{org-feed-alist}.  The docstring of this variable has detailed
-information.  Here is just an example:
+Org can add and change entries based on information found in RSS feeds.  You
+could use this to make a task out of each new podcast in a podcast feed.  Or
+you could use a phone-based note-creating service on the web to import tasks
+into Org.  To access feeds, configure the variable @code{org-feed-alist}.
+The docstring of this variable has detailed information.  Here is just an
+example:
 
 @example
 (setq org-feed-alist
@@ -6538,7 +6539,7 @@ Archived trees are excluded from column view unless the variable
 @code{org-columns-skip-archived-trees} is configured to @code{nil}.
 @end itemize
 
-The following commands help managing the ARCHIVE tag:
+The following commands help manage the ARCHIVE tag:
 
 @table @kbd
 @kindex C-c C-x a
