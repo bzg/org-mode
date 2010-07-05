@@ -1654,7 +1654,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
                           (if floatp "\\begin{table}[htb]\n"))
                         (if floatp
                             (format
-                             "\\caption%s{%s%s}"
+                             "\\caption%s{%s}"
                              (if shortn (concat "[" shortn "]") "")
                              (or caption "")))
                         (if (and longtblp caption) "\\\\\n" "\n")
