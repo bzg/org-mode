@@ -34,13 +34,6 @@
 
 (declare-function org-link-escape "org" (text &optional table))
 
-(defcustom org-babel-tangle-w-comments nil
-  "Control the insertion of comments into tangled code.  Non-nil
-value will result in the insertion of comments for those
-languages with comment support."
-  :group 'org-babel-tangle
-  :type 'boolean)
-
 (defcustom org-babel-tangle-lang-exts
   '(("emacs-lisp" . "el"))
   "Alist mapping languages to their file extensions.
@@ -247,8 +240,7 @@ form
 	(body (nth 3 spec))
 	(commentable (string= (cdr (assoc :comments (nth 2 spec))) "yes")))
     (flet ((insert-comment (text)
-			   (when (and commentable
-				      org-babel-tangle-w-comments)
+			   (when commentable
 			     (insert "\n")
 			     (comment-region (point)
 					     (progn (insert text) (point)))
