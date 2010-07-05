@@ -66,7 +66,7 @@
      ((lambda (inside)
 	(if out-file
 	    (append
-	     (org-babel-R-construct-graphics-device-call out-file params)
+	     (list (org-babel-R-construct-graphics-device-call out-file params))
 	     inside
 	     (list "dev.off()"))
 	  inside))
