@@ -127,45 +127,56 @@ Internally this works by adding `line-prefix' properties to all non-headlines.
 These properties are updated locally in idle time.
 FIXME:  How to update when broken?"
   nil " Ind" nil
-  (if (org-bound-and-true-p org-inhibit-startup)
-      (setq org-indent-mode nil)
-    (if org-indent-mode
-	(progn
-	  (org-set-local 'indent-tabs-mode nil)
-	  (or org-indent-strings (org-indent-initialize))
-	  (when org-indent-mode-turns-off-org-adapt-indentation
-	    (org-set-local 'org-adapt-indentation nil))
-	  (when org-indent-mode-turns-on-hiding-stars
-	    (org-set-local 'org-hide-leading-stars-before-indent-mode
-			   org-hide-leading-stars)
-	    (org-set-local 'org-hide-leading-stars t))
-	  (make-local-variable 'buffer-substring-filters)
-	  (add-to-list 'buffer-substring-filters
-		       'org-indent-remove-properties-from-string)
-	  (org-add-hook 'org-after-demote-entry-hook
-			'org-indent-refresh-section nil 'local)
-	  (org-add-hook 'org-after-promote-entry-hook
-			'org-indent-refresh-section nil 'local)
-	  (org-add-hook 'org-font-lock-hook
-			'org-indent-refresh-to nil 'local)
-	  (and font-lock-mode (org-restart-font-lock))
-	  )
-      (save-excursion
-	(save-restriction
-	  (org-indent-remove-properties (point-min) (point-max))
-	  (kill-local-variable 'org-adapt-indentation)
-	  (when (boundp 'org-hide-leading-stars-before-indent-mode)
-	    (org-set-local 'org-hide-leading-stars
-			   org-hide-leading-stars-before-indent-mode))
-	  (setq buffer-substring-filters
-		(delq 'org-indent-remove-properties-from-string
-		      buffer-substring-filters))
-	  (remove-hook 'org-after-promote-entry-hook
-		       'org-indent-refresh-section 'local)
-	  (remove-hook 'org-after-demote-entry-hook
-		       'org-indent-refresh-section 'local)
-	  (and font-lock-mode (org-restart-font-lock))
-	  (redraw-display))))))
+  (cond
+   ((org-bound-and-true-p org-inhibit-startup)
+    (setq org-indent-mode nil))
+   ((and org-indent-mode
+	 (or (< emacs-major-version 23)
+	     (and (= emacs-major-version 23)
+		  (< emacs-minor-version 2))))
+    (message "org-indent-mode is can crash Emacs 23.1 - refused to turn it on!")
+    (ding)
+    (sit-for 1)
+    (setq org-indent-mode nil))
+   (org-indent-mode
+    ;; mode was turned on.
+    (org-set-local 'indent-tabs-mode nil)
+    (or org-indent-strings (org-indent-initialize))
+    (when org-indent-mode-turns-off-org-adapt-indentation
+      (org-set-local 'org-adapt-indentation nil))
+    (when org-indent-mode-turns-on-hiding-stars
+      (org-set-local 'org-hide-leading-stars-before-indent-mode
+		     org-hide-leading-stars)
+      (org-set-local 'org-hide-leading-stars t))
+    (make-local-variable 'buffer-substring-filters)
+    (add-to-list 'buffer-substring-filters
+		 'org-indent-remove-properties-from-string)
+    (org-add-hook 'org-after-demote-entry-hook
+		  'org-indent-refresh-section nil 'local)
+    (org-add-hook 'org-after-promote-entry-hook
+		  'org-indent-refresh-section nil 'local)
+    (org-add-hook 'org-font-lock-hook
+		  'org-indent-refresh-to nil 'local)
+    (and font-lock-mode (org-restart-font-lock))
+    )
+   (t
+    ;; mode was turned off (or we refused to turn it on)
+    (save-excursion
+      (save-restriction
+	(org-indent-remove-properties (point-min) (point-max))
+	(kill-local-variable 'org-adapt-indentation)
+	(when (boundp 'org-hide-leading-stars-before-indent-mode)
+	  (org-set-local 'org-hide-leading-stars
+			 org-hide-leading-stars-before-indent-mode))
+	(setq buffer-substring-filters
+	      (delq 'org-indent-remove-properties-from-string
+		    buffer-substring-filters))
+	(remove-hook 'org-after-promote-entry-hook
+		     'org-indent-refresh-section 'local)
+	(remove-hook 'org-after-demote-entry-hook
+		     'org-indent-refresh-section 'local)
+	(and font-lock-mode (org-restart-font-lock))
+	(redraw-display))))))
 
 
 (defface org-indent

@@ -12687,12 +12687,11 @@ more text                        |          more text
 
 @noindent
 
-If you are using at least Emacs 23.2 and version 6.29 of Org, this kind of
-view can be achieved dynamically at display time using
-@code{org-indent-mode}.  @i{Using this with earlier versions of Emacs can
-lead to crashes.} In this minor
-mode, all lines are prefixed for display with the necessary amount of
-space@footnote{@code{org-indent-mode} also sets the @code{wrap-prefix}
+If you are using at least Emacs 23.2@footnote{Emacs 23.1 can actually crash
+with @code{org-indent-mode}} and version 6.29 of Org, this kind of view can
+be achieved dynamically at display time using @code{org-indent-mode}.  In
+this minor mode, all lines are prefixed for display with the necessary amount
+of space@footnote{@code{org-indent-mode} also sets the @code{wrap-prefix}
 property, such that @code{visual-line-mode} (or purely setting
 @code{word-wrap}) wraps long lines (including headlines) correctly indented.
 }.  Also headlines are prefixed with additional stars, so that the amount of
