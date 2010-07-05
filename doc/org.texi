@@ -6178,9 +6178,6 @@ dynamic insertion of content:
 %:keyword   @r{specific information for certain link types, see below}
 %[@var{file}]     @r{insert the contents of the file given by @var{file}}
 %(@var{sexp})     @r{evaluate Elisp @var{sexp} and replace with the result}
-%!          @r{immediately store note after completing the template}
-            @r{(skipping the @kbd{C-c C-c} that normally triggers storing)}
-%&          @r{jump to target location immediately after storing note}
 @end smallexample
 
 @noindent
