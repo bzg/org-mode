@@ -11417,6 +11417,7 @@ The following header arguments are defined:
 * exports::			Export code and/or results
 * tangle::			Toggle tangling and specify file name
 * no-expand::			Turn off variable assignment and noweb expansion during tangling
+* comments::                    Toggle insertion of comments in tangled code files
 * session::			Preserve the state of code evaluation
 * noweb::			Toggle expansion of noweb references
 * cache::			Avoid re-evaluating unchanged code blocks
@@ -11760,7 +11761,7 @@ Both the code and results are included in the exported file. E.g.,
 Nothing is included in the exported file.  E.g., @code{:exports none}.
 @end itemize
 
-@node tangle, no-expand, exports, Specific header arguments
+@node tangle, comments, exports, Specific header arguments
 @subsubsection @code{:tangle}
 
 The @code{:tangle} header argument specifies whether or not the code
@@ -11780,7 +11781,16 @@ as a file basename to which the block will be exported.  E.g., @code{:tangle
 basename}.
 @end itemize
 
-@node no-expand, session, tangle, Specific header arguments
+@node comments, no-expand, tangle, Specific header arguments
+@subsubsection @code{:comments}
+By default code blocks are tangled to source-code files without any insertion
+of comments beyond those which may already exist in the body of the code
+block.  The @code{:comments} header argument can be set to ``yes''
+e.g. @code{:comments yes} to enable the insertion of comments around code
+blocks during tangling.  The inserted comments contain pointers back to the
+original Org file from which the comment was tangled.
+
+@node no-expand, session, comments, Specific header arguments
 @subsubsection @code{:no-expand}
 
 By default, code blocks are expanded with @code{org-babel-expand-src-block}
