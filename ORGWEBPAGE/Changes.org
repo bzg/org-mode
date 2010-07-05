@@ -178,7 +178,31 @@ language, e.g.
   (add-to-list 'org-babel-default-header-args:sh
                '(:shebang . "#!/bin/bash"))  
 #+end_src
-	  
+
+The final important change included in this release is the
+addition of new security measures into Babel.  These measures are
+in place to protect users from the accidental or uninformed
+execution of code.  Along these lines /every/ execution of a code
+block will now require an explicit confirmation from the user.
+These confirmations can be stifled through customization of the
+`org-confirm-babel-evaluate' variable, e.g.
+#+begin_src emacs-lisp
+  ;; I don't want to be prompted on every code block evaluation
+  (setq org-confirm-babel-evaluate nil)
+#+end_src
+
+In addition, it is now possible to remove code block evaluation
+form the =C-c C-c= keybinding.  This can be done by setting the
+=org-babel-no-eval-on-ctrl-c-ctrl-c= variable to a non-nil value,
+e.g.
+#+begin_src emacs-lisp
+  ;; I don't want to execute code blocks with C-c C-c
+  (setq org-babel-no-eval-on-ctrl-c-ctrl-c t)
+#+end_src
+
+An additional keybinding has been added for code block
+evaluation, namely =C-c C-v e=.
+
 Whew! that seems like a lot of effort for a /simplification/ of
 configuration.
 
