@@ -593,6 +593,11 @@ already gone."
 	(org-capture-put :exact-position (point))
 	(setq target-entry-p (and (org-mode-p) (org-at-heading-p))))
 
+       ((eq (car target) 'function)
+	(funcall (nth 1 target))
+	(org-capture-put :exact-position (point))
+	(setq target-entry-p (and (org-mode-p) (org-at-heading-p))))
+
        ((eq (car target) 'clock)
 	(if (and (markerp org-clock-hd-marker)
 		 (marker-buffer org-clock-hd-marker))
