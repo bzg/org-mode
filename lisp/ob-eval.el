@@ -1,4 +1,4 @@
-;;; ob-run.el --- org-babel functions for external code evaluation
+;;; ob-eval.el --- org-babel functions for external code evaluation
 
 ;; Copyright (C) 2009, 2010  Free Software Foundation, Inc.
 
@@ -252,4 +252,4 @@ specifies the value of ERROR-BUFFER."
 
 ;; arch-tag: 5328b17f-957d-42d9-94da-a2952682d04d
 
-;;; ob-comint.el ends here
+;;; ob-eval.el ends here
