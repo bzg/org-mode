@@ -60,13 +60,80 @@ basis.  This setting overrides
 :END:
 Babel took the integration into Org-mode as an opportunity to do
 some much needed house cleaning.  Most importantly we have
-cleared out unnecessary configuration variables -- which is great
-unless you already have these variables set.
+simplified the enabling of language support, and cleared out
+unnecessary configuration variables -- which is great unless you
+already have a working configuration under the old model.
 
-We have eliminated the two main internal lists of languages,
-namely
+The most important changes regard the /location/ and /enabling/
+of Babel (both core functionality and language specific support).
+
+- Babel :: Babel is now part of the core of Org-mode, so it is
+     now loaded along with the rest of Org-mode.  That means that
+     there is /no configuration/ required to enable the main
+     Babel functionality.  For current users, this means that
+     statements like
+     #+begin_src emacs-lisp
+       (require 'org-babel)
+     #+end_src
+     or
+     #+begin_src emacs-lisp
+       (require 'org-babel-init)
+     #+end_src
+     that may by lying around in your configuration must now be
+     removed.
+- load path :: Babel (including all language specific files --
+     aside from those which are located in the =contrib/=
+     directory for reasons of licencing) now lives in the base of
+     the Org-mode lisp directory, so /no additional directories/
+     need to be added to your load path to use babel.  For Babel
+     users this means that statements adding babel-specific
+     directories to your load-path should now be removed from
+     your config.
+- language support :: It is no longer necessary to require
+     language specific support on a language-by-language basis.
+     Specific language support should now be managed through the
+     `org-babel-load-languages' variable.  This variable can be
+     customized using the Emacs customization interface, or
+     through the addition of something like the following to your
+     configuration (note: any language not mentioned will /not/
+     be enabled, aside from =emacs-lisp= which is enabled by
+     default)
+     #+begin_src emacs-lisp
+       (org-babel-do-load-languages
+        'org-babel-load-languages
+        '((R . t)
+          (ditaa . t)
+          (dot . t)
+          (emacs-lisp . t)
+          (gnuplot . t)
+          (haskell . nil)
+          (ocaml . nil)
+          (python . t)
+          (ruby . t)
+          (screen . nil)
+          (sh . t)
+          (sql . nil)
+          (sqlite . t)))
+     #+end_src
+     
+	   Despite this change it is still possible to add
+	   language support through the use of =require=
+	   statements, however to conform to Emacs file-name
+	   regulations all Babel language files have changed
+	   prefix from =org-babel-*= to =ob-*=, so the require
+	   lines must also change e.g.
+	   #+begin_src emacs-lisp
+       (require 'org-babel-R)
+	   #+end_src
+	   should be changed to
+	   #+begin_src emacs-lisp
+       (require 'ob-R)
+	   #+end_src
+
+We have eliminated the =org-babel-tangle-w-comments= variable as
+well as the two main internal lists of languages, namely
 - =org-babel-interpreters= and
-- =org-babel-tangle-langs=
+- =org-babel-tangle-langs= 
 
 so any config lines which mention those variables, can/should be
 stripped out in their entirety.  This includes any calls to the
@@ -111,21 +178,7 @@ language, e.g.
   (add-to-list 'org-babel-default-header-args:sh
                '(:shebang . "#!/bin/bash"))  
 #+end_src
-
-The final and most important change, is that to conform to Emacs
-guidelines, the prefix =org-babel-*= in all require lines, has
-been changed to =ob-*=, this means that *every language-specific
-require* will need to be changed.  Also, since Babel now loads by
-default with Org-mode you should remove any
-#+begin_src emacs-lisp
-  (require 'org-babel)
-#+end_src
-or
-#+begin_src emacs-lisp
-  (require 'org-babel-init)
-#+end_src
-that may by lying around in your configuration.
-
+	  
 Whew! that seems like a lot of effort for a /simplification/ of
 configuration.
 
