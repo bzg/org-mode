@@ -466,7 +466,7 @@ matching filenames."
 	  ;; [[info:org:Selecting%20files]] shows how this is supposed to work:
 	  (let* ((r (plist-get (cdr prj) :recursive))
 		 (b (expand-file-name (plist-get (cdr prj) :base-directory)))
-		 (x (plist-get (cdr prj) :base-extension))
+		 (x (or (plist-get (cdr prj) :base-extension) "org"))
 		 (e (plist-get (cdr prj) :exclude))
 		 (i (plist-get (cdr prj) :include))
 		 (xm (concat "^" b (if r ".+" "[^/]+") "\\.\\(" x "\\)$")))
