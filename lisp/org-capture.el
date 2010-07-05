@@ -336,7 +336,7 @@ for a Remember buffer.")
 (defun org-capture (&optional goto keys)
   "Capture something.
 
-This will let you select a template from org-capture-templates, and then
+This will let you select a template from `org-capture-templates', and then
 file new captured information.  The text is immediately inserted at the
 target location, and an indirect buffer is shown where you can edit it.
 Pressing `C-c C-c' brings you back to the previous state of Emacs,
