@@ -33,6 +33,7 @@
 ;;; Code:
 (require 'ob)
 (require 'comint)
+(eval-when-compile (require 'cl))
 
 (defun org-babel-comint-buffer-livep (buffer)
   "Check if BUFFER is a comint buffer with a live process."
@@ -68,7 +69,7 @@ or user `keyboard-quit' during execution of body."
 	(remove-echo (cadr (cdr meta)))
 	(full-body (cadr (cdr (cdr meta)))))
     `(org-babel-comint-in-buffer ,buffer
-       (let ((string-buffer "") dangling-text)
+       (let ((string-buffer "") dangling-text raw)
 	 (flet ((my-filt (text)
 			 (setq string-buffer (concat string-buffer text))))
 	   ;; setup filter
@@ -106,7 +107,7 @@ or user `keyboard-quit' during execution of body."
 	 (if (and ,remove-echo ,full-body
 		  (string-match
 		   (replace-regexp-in-string
-		    "\n" "[\r\n]+" (regexp-quote ,full-body))
+		    "\n" "[\r\n]+" (regexp-quote (or ,full-body "")))
 		   string-buffer))
 	     (setq raw (substring string-buffer (match-end 0))))
 	 (split-string string-buffer comint-prompt-regexp)))))

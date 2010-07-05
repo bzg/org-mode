@@ -40,7 +40,6 @@
 
 ;;; Code:
 (require 'ob)
-(require 'sass-mode)
 
 (defvar org-babel-default-header-args:sass '())
 

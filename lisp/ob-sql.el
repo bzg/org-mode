@@ -44,6 +44,9 @@
 
 ;;; Code:
 (require 'ob)
+(eval-when-compile (require 'cl))
+
+(declare-function org-table-import "org-table" (file arg))
 
 (defvar org-babel-default-header-args:sql '())
 
@@ -55,6 +58,7 @@
 called by `org-babel-execute-src-block'."
   (message "executing Sql source code block")
   (let* ((result-params (split-string (or (cdr (assoc :results params)) "")))
+	 (processed-params (org-babel-process-params params))
          (cmdline (cdr (assoc :cmdline params)))
          (engine (cdr (assoc :engine params)))
          (in-file (make-temp-file "org-babel-sql-in"))
@@ -63,7 +67,7 @@ called by `org-babel-execute-src-block'."
          (command (case (intern engine)
                     ('mysql (format "mysql %s -e \"source %s\" > %s"
                                     (or cmdline "") in-file out-file))
-                    (t (error "no support for the %s sql engine")))))
+                    (t (error "no support for the %s sql engine" engine)))))
     (with-temp-file in-file
       (insert (org-babel-expand-body:sql body params)))
     (message command)

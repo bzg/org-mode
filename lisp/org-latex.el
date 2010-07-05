@@ -1894,7 +1894,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 	     (t (insert "\\texttt{" desc "}")))))))
 
 
-(defun org-export-latex-format-image (path caption label attr)
+(defun org-export-latex-format-image (path caption label attr &optional shortn)
   "Format the image element, depending on user settings."
   (let (ind floatp wrapp multicolumnp placement figenv)
     (setq floatp (or caption label))

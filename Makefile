@@ -18,8 +18,6 @@ prefix=/usr/local
 
 # Where local lisp files go.
 lispdir   = $(prefix)/share/emacs/site-lisp
-lispbdir  = $(lispdir)/babel
-lispbldir = $(lispbdir)/langs
 
 # Where info files go.
 infodir = $(prefix)/share/info
@@ -31,11 +29,7 @@ infodir = $(prefix)/share/info
 # Using emacs in batch mode.
 
 BATCH=$(EMACS) -batch -q -no-site-file -eval                             			\
-  "(setq load-path (cons (expand-file-name\
-                       \"langs\"\
-                       (expand-file-name \"babel\" (expand-file-name \"./lisp/\")))\
-                 (cons (expand-file-name \"babel\" (expand-file-name \"./lisp/\"))\
-                        (cons (expand-file-name \"./lisp/\") (cons \"$(lispdir)\" load-path)))))"
+  "(setq load-path (cons (expand-file-name \"./lisp/\") (cons \"$(lispdir)\" load-path)))"
 
 # Specify the byte-compiler for compiling org-mode files
 ELC= $(BATCH) -f batch-byte-compile
@@ -120,18 +114,17 @@ LISPF      = 	org.el			\
 		org-vm.el		\
 		org-w3m.el              \
 		org-wl.el		\
-		org-xoxo.el
-
-LISPBF     = 	ob.el			\
+		org-xoxo.el		\
+		ob.el			\
 		ob-table.el		\
 		ob-lob.el		\
 		ob-ref.el		\
 		ob-exp.el		\
 		ob-tangle.el		\
 		ob-comint.el		\
-		ob-keys.el
-
-LISPBLF   =	ob-C.el			\
+		ob-eval.el		\
+		ob-keys.el		\
+		ob-C.el			\
 		ob-ditaa.el		\
 		ob-haskell.el		\
 		ob-perl.el		\
@@ -156,11 +149,8 @@ LISPBLF   =	ob-C.el			\
 
 LISPFILES0  = $(LISPF:%=lisp/%)
 LISPFILES   = $(LISPFILES0) lisp/org-install.el
-LISPBFILES  = $(LISPBF:%=lisp/babel/%)
-LISPBLFILES = $(LISPBLF:%=lisp/babel/langs/%)
 ELCFILES0   = $(LISPFILES0:.el=.elc)
 ELCFILES    = $(LISPFILES:.el=.elc)
-ELCBFILES   = $(LISPBFILES:.el=.elc)
 DOCFILES    = doc/org.texi doc/org.pdf doc/org doc/dir \
               doc/pdflayout.sty doc/.nosearch \
               doc/orgguide.texi doc/orgguide.pdf
@@ -200,15 +190,10 @@ p:
 g:
 	${MAKE} pdf && open doc/orgguide.pdf
 
-install-lisp: $(LISPFILES) $(LISPBFILES) $(ELCFILES)
+install-lisp: $(LISPFILES) $(ELCFILES)
 	if [ ! -d $(lispdir) ]; then $(MKDIR) $(lispdir); else true; fi ;
-	if [ ! -d $(lispbdir) ]; then $(MKDIR) $(lispbdir); else true; fi ;
-	if [ ! -d $(lispbldir) ]; then $(MKDIR) $(lispbldir); else true; fi ;
 	$(CP) $(LISPFILES)  $(lispdir)
 	$(CP) $(ELCFILES)   $(lispdir)
-	$(CP) $(LISPBFILES) $(lispbdir)
-	$(CP) $(ELCBFILES)  $(lispbdir)
-	$(CP) $(LISPBLFILES) $(lispbldir)
 
 install-info: $(INFOFILES)
 	if [ ! -d $(infodir) ]; then $(MKDIR) $(infodir); else true; fi ;
@@ -224,13 +209,11 @@ install-noutline: xemacs/noutline.elc
 
 autoloads: lisp/org-install.el
 
-lisp/org-install.el: $(LISPFILES0) $(LISPBFILES) Makefile
+lisp/org-install.el: $(LISPFILES0) Makefile
 	$(BATCH) --eval "(require 'autoload)" \
 		--eval '(find-file "org-install.el")'  \
 		--eval '(erase-buffer)' \
-		--eval '(mapc (lambda (x) (generate-file-autoloads (symbol-name x))) (quote ($(LISPFILES0) $(LISPBFILES))))' \
-		--eval "(insert \"(add-to-list 'load-path (expand-file-name \\\"babel\\\" (file-name-directory (or load-file-name (buffer-file-name)))))\")" \
-		--eval "(insert \"\n(add-to-list 'load-path (expand-file-name \\\"langs\\\" (expand-file-name \\\"babel\\\" (file-name-directory (or load-file-name (buffer-file-name))))))\")\n" \
+		--eval '(mapc (lambda (x) (generate-file-autoloads (symbol-name x))) (quote ($(LISPFILES0))))' \
 		--eval '(insert "\n(provide (quote org-install))\n")' \
 		--eval '(save-buffer)'
 	mv org-install.el lisp
@@ -300,10 +283,7 @@ distfile:
 	$(MKDIR) org-$(TAG)/xemacs
 	$(MKDIR) org-$(TAG)/doc
 	$(MKDIR) org-$(TAG)/lisp
-	$(MKDIR) org-$(TAG)/lisp/babel
-	$(MKDIR) org-$(TAG)/lisp/babel/langs
 	cp -r $(LISPFILES) org-$(TAG)/lisp
-	cp -r $(LISPBFILES) org-$(TAG)/lisp/babel
 	cp -r $(DOCFILES) $(CARDFILES) org-$(TAG)/doc
 	cp -r $(DISTFILES_extra) org-$(TAG)/
 	cp -r README_DIST org-$(TAG)/README

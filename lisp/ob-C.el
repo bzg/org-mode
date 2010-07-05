@@ -32,10 +32,12 @@
 
 ;;; Code:
 (require 'ob)
+(require 'ob-eval)
 (require 'org)
 (require 'cc-mode)
 
-(declare-function org-entry-get "org" (&optional inherit))
+(declare-function org-entry-get "org"
+		  (pom property &optional inherit literal-nil))
 
 (add-to-list 'org-babel-tangle-lang-exts '("c++" . "cpp"))
 
@@ -112,14 +114,12 @@ or `org-babel-execute:c++'."
         (org-babel-reassemble-table
          (org-babel-read
           (org-babel-trim
-           (with-temp-buffer
-             (org-babel-shell-command-on-region
-              (point-min) (point-max)
-              (concat tmp-bin-file (if cmdline (concat " " cmdline) ""))
-              (current-buffer) 'replace)
-             (buffer-string))))
-         (org-babel-pick-name (nth 4 processed-params) (cdr (assoc :colnames params)))
-         (org-babel-pick-name (nth 5 processed-params) (cdr (assoc :rownames params))))
+	   (org-babel-eval
+	    (concat tmp-bin-file (if cmdline (concat " " cmdline) "")) "")))
+         (org-babel-pick-name
+	  (nth 4 processed-params) (cdr (assoc :colnames params)))
+         (org-babel-pick-name
+	  (nth 5 processed-params) (cdr (assoc :rownames params))))
       (progn
         (with-current-buffer error-buf
           (goto-char (point-max))

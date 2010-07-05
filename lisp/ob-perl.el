@@ -28,10 +28,15 @@
 
 ;;; Code:
 (require 'ob)
+(require 'ob-eval)
+(eval-when-compile (require 'cl))
 
 (add-to-list 'org-babel-tangle-lang-exts '("perl" . "pl"))
 
 (defvar org-babel-default-header-args:perl '())
+
+(defvar org-babel-perl-command "perl"
+  "Name of command to use for executing perl code.")
 
 (defun org-babel-expand-body:perl (body params &optional processed-params)
   "Expand BODY according to PARAMS, return the expanded body."
@@ -49,17 +54,19 @@
 called by `org-babel-execute-src-block'."
   (message "executing Perl source code block")
   (let* ((processed-params (org-babel-process-params params))
-         (session (first processed-params))
+         (session (nth 0 processed-params))
          (vars (nth 1 processed-params))
          (result-params (nth 2 processed-params))
          (result-type (nth 3 processed-params))
          (full-body (org-babel-expand-body:perl
-                     body params processed-params)) ;; then the source block body
+                     body params processed-params))
 	(session (org-babel-perl-initiate-session session)))
     (org-babel-reassemble-table
      (org-babel-perl-evaluate session full-body result-type)
-     (org-babel-pick-name (nth 4 processed-params) (cdr (assoc :colnames params)))
-     (org-babel-pick-name (nth 5 processed-params) (cdr (assoc :rownames params))))))
+     (org-babel-pick-name
+      (nth 4 processed-params) (cdr (assoc :colnames params)))
+     (org-babel-pick-name
+      (nth 5 processed-params) (cdr (assoc :rownames params))))))
 
 (defun org-babel-prep-session:perl (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."
@@ -97,33 +104,14 @@ print o join(\"\\n\", @r), \"\\n\"")
 'output then return a list of the outputs of the statements in
 BODY, if RESULT-TYPE equals 'value then return the value of the
 last statement in BODY, as elisp."
-  (if (not session)
-      ;; external process evaluation
-      (save-excursion
-        (case result-type
-          (output
-           (with-temp-buffer
-             (insert body)
-             ;; (message "buffer=%s" (buffer-string)) ;; debugging
-             (org-babel-shell-command-on-region (point-min) (point-max) "perl" 'current-buffer 'replace)
-             (buffer-string)))
-          (value
-           (let* ((tmp-file (make-temp-file "perl-functional-results")) exit-code
-		 (stderr
-		  (with-temp-buffer
-		    (insert
-		     (format
-		      (if (member "pp" result-params)
-			  (error "Pretty-printing not implemented for perl")
-			org-babel-perl-wrapper-method) body tmp-file))
-		    (setq exit-code
-			  (org-babel-shell-command-on-region
-			   (point-min) (point-max) "perl" nil 'replace (current-buffer)))
-		    (buffer-string))))
-	     (if (> exit-code 0) (org-babel-error-notify exit-code stderr))
-	     (org-babel-import-elisp-from-file (org-babel-maybe-remote-file tmp-file))))))
-    ;; comint session evaluation
-    (error "Sessions are not supported for Perl.")))
+  (when session (error "Sessions are not supported for Perl."))
+  (case result-type
+    (output (org-babel-eval org-babel-perl-command body))
+    (value (let ((tmp-file (make-temp-file "org-babel-perl-results-")))
+	     (org-babel-eval
+	      org-babel-perl-command
+	      (format org-babel-perl-wrapper-method body tmp-file))
+	     (org-babel-eval-read-file tmp-file)))))
 
 (provide 'ob-perl)
 

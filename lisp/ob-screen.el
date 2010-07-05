@@ -35,6 +35,7 @@
 
 ;;; Code:
 (require 'ob)
+(require 'ob-ref)
 
 (defvar org-babel-screen-location "screen"
   "The command location for screen. 
@@ -53,7 +54,7 @@ In case you want to use a different screen than one selected by your $PATH")
   (message "Sending source code block to interactive terminal session...")
   (save-window-excursion
     (let* ((processed-params (org-babel-process-params params))
-           (session (first processed-params))
+           (session (nth 0 processed-params))
            (socket (org-babel-screen-session-socketname session)))
       (unless socket (org-babel-prep-session:screen session params))
       (org-babel-screen-session-execute-string
@@ -62,7 +63,7 @@ In case you want to use a different screen than one selected by your $PATH")
 (defun org-babel-prep-session:screen (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."
   (let* ((processed-params (org-babel-process-params params))
-         (session (first processed-params))
+         (session (nth 0 processed-params))
          (vars (nth 1 processed-params))
          (socket (org-babel-screen-session-socketname session))
          (vars (org-babel-ref-variables params))
@@ -94,14 +95,22 @@ In case you want to use a different screen than one selected by your $PATH")
 (defun org-babel-screen-session-socketname (session)
   "Check if SESSION exist by parsing output of \"screen -ls\"."
   (let* ((screen-ls (shell-command-to-string "screen -ls"))
-         (sockets (remove-if-not
-                   '(lambda (x)
-                     (string-match (rx (or "(Attached)" "(Detached)")) x))
-                   (split-string screen-ls "\n")))
-         (match-socket (find-if
-                        '(lambda (x)
-                          (string-match (concat "org-babel-session-" session) x))
-                        sockets)))
+         (sockets (delq
+		   nil
+                   (mapcar
+		    (lambda (x)
+		      (when (string-match (rx (or "(Attached)" "(Detached)")) x)
+			x))
+		    (split-string screen-ls "\n"))))
+         (match-socket (car
+			(delq
+			 nil
+			 (mapcar
+			  (lambda (x)
+			    (when (string-match
+				   (concat "org-babel-session-" session) x)
+			      x))
+			  sockets)))))
     (when match-socket (car (split-string match-socket)))))
 
 (defun org-babel-screen-session-write-temp-file (session body)

@@ -40,7 +40,16 @@
 
 ;;; Code:
 (require 'ob)
-(require 'gnuplot)
+(require 'ob-ref)
+(require 'ob-comint)
+(eval-when-compile (require 'cl))
+
+(declare-function org-time-string-to-time "org" (s))
+(declare-function org-combine-plists "org" (&rest plists))
+(declare-function orgtbl-to-generic "org-table" (table params))
+(declare-function gnuplot-mode "ext:gnuplot-mode" ())
+(declare-function gnuplot-send-string-to-gnuplot "ext:gnuplot-mode" (str txt))
+(declare-function gnuplot-send-buffer-to-gnuplot "ext:gnuplot-mode" ())
 
 (defvar org-babel-default-header-args:gnuplot
   '((:results . "file") (:exports . "results") (:session . nil))
@@ -124,10 +133,12 @@ code."
   "Execute a block of Gnuplot code with org-babel.  This function is
 called by `org-babel-execute-src-block'."
   (message "executing Gnuplot source code block")
+  (require 'gnuplot)
   (let ((session (cdr (assoc :session params)))
         (result-type (cdr (assoc :results params)))
         (out-file (cdr (assoc :file params)))
-        (body (org-babel-expand-body:gnuplot body params)))
+        (body (org-babel-expand-body:gnuplot body params))
+	output)
     (save-window-excursion
       ;; evaluate the code body with gnuplot
       (if (string= session "none")
@@ -170,18 +181,23 @@ called by `org-babel-execute-src-block'."
         (insert (org-babel-chomp body)))
       buffer)))
 
+(defvar gnuplot-buffer)
 (defun org-babel-gnuplot-initiate-session (&optional session params)
   "If there is not a current inferior-process-buffer in SESSION
 then create one.  Return the initialized session.  The current
 `gnuplot-mode' doesn't provide support for multiple sessions."
+  (require 'gnuplot)
   (unless (string= session "none")
-    (save-window-excursion (gnuplot-send-string-to-gnuplot "" "line")
-                           gnuplot-buffer)))
+    (save-window-excursion
+      (gnuplot-send-string-to-gnuplot "" "line")
+      gnuplot-buffer)))
 
 (defun org-babel-gnuplot-quote-timestamp-field (s)
   "Convert field S from timestamp to Unix time and export to gnuplot."
   (format-time-string org-babel-gnuplot-timestamp-fmt (org-time-string-to-time s)))
 
+(defvar org-table-number-regexp)
+(defvar org-ts-regexp3)
 (defun org-babel-gnuplot-quote-tsv-field (s)
   "Quote field S for export to gnuplot."
   (unless (stringp s)

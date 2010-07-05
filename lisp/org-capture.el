@@ -336,7 +336,7 @@ for a Remember buffer.")
 (defun org-capture (&optional goto keys)
   "Capture something.
 
-This will let you select a template from org-capture-templates, and then
+This will let you select a template from `org-capture-templates', and then
 file new captured information.  The text is immediately inserted at the
 target location, and an indirect buffer is shown where you can edit it.
 Pressing `C-c C-c' brings you back to the previous state of Emacs,
@@ -454,6 +454,7 @@ bypassed."
 			 '(entry item checkitem plain)))
 	(save-excursion
 	  (goto-char end)
+	  (or (bolp) (newline))
 	  (org-capture-empty-lines-after
 	   (or (org-capture-get :empty-lines 'local) 0))))
       ;; Postprocessing:  Update Statistics cookies, do the sorting
@@ -567,9 +568,10 @@ already gone."
 	(goto-char (point-min))
 	(if (re-search-forward (nth 2 target) nil t)
 	    (progn
-	      (goto-char (match-beginning 0))
+	      (goto-char (if (org-capture-get :prepend)
+			     (match-beginning 0) (match-end 0)))
+	      (org-capture-put :exact-position (point))
 	      (setq target-entry-p (and (org-mode-p) (org-at-heading-p))))
-	  (kill-buffer (current-buffer))
 	  (error "No match for target regexp in file %s" (nth 1 target))))
 
        ((eq (car target) 'file+datetree)
@@ -588,6 +590,12 @@ already gone."
        ((eq (car target) 'file+function)
 	(set-buffer (org-capture-target-buffer (nth 1 target)))
 	(funcall (nth 2 target))
+	(org-capture-put :exact-position (point))
+	(setq target-entry-p (and (org-mode-p) (org-at-heading-p))))
+
+       ((eq (car target) 'function)
+	(funcall (nth 1 target))
+	(org-capture-put :exact-position (point))
 	(setq target-entry-p (and (org-mode-p) (org-at-heading-p))))
 
        ((eq (car target) 'clock)
@@ -640,6 +648,8 @@ already gone."
 	 (target-entry-p (org-capture-get :target-entry-p))
 	 level beg end)
     (cond
+     ((org-capture-get :exact-position)
+      (goto-char (org-capture-get :exact-position)))
      ((not target-entry-p)
       ;; Insert as top-level entry, either at beginning or at end of file
       (setq level 1)
@@ -674,8 +684,11 @@ already gone."
   "Place the template as a new plain list item."
   (let* ((txt (org-capture-get :template))
 	 (target-entry-p (org-capture-get :target-entry-p))
-	 ind beg end)
+	 (ind 0)
+	 beg end)
     (cond
+     ((org-capture-get :exact-position)
+      (goto-char (org-capture-get :exact-position)))
      ((not target-entry-p)
       ;; Insert as top-level entry, either at beginning or at end of file
       (setq beg (point-min) end (point-max)))
@@ -731,6 +744,8 @@ already gone."
 	 (table-line-pos (org-capture-get :table-line-pos))
 	 ind beg end)
     (cond
+     ((org-capture-get :exact-position)
+      (goto-char (org-capture-get :exact-position)))
      ((not target-entry-p)
       ;; Table is not necessarily under a heading
       (setq beg (point-min) end (point-max)))
@@ -804,7 +819,10 @@ already gone."
   "Place the template plainly."
   (let* ((txt (org-capture-get :template))
 	 beg end)
-    (goto-char (if (org-capture-get :prepend) (point-min) (point-max)))
+    (goto-char (cond
+		((org-capture-get :exact-position))
+		((org-capture-get :prepend) (point-min))
+		(t (point-max))))
     (or (bolp) (newline))
     (org-capture-empty-lines-before)
     (setq beg (point))

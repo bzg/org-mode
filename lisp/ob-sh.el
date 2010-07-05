@@ -28,9 +28,10 @@
 
 ;;; Code:
 (require 'ob)
+(require 'ob-comint)
+(require 'ob-eval)
 (require 'shell)
-(eval-when-compile
-  (require 'cl))
+(eval-when-compile (require 'cl))
 
 (declare-function org-babel-ref-variables "ob-ref" (params))
 (declare-function org-babel-comint-in-buffer "ob-comint" (buffer &rest body))
@@ -142,52 +143,30 @@ Emacs-lisp table, otherwise return the results as a string."
 'output then return a list of the outputs of the statements in
 BODY, if RESULT-TYPE equals 'value then return the value of the
 last statement in BODY."
-  (if (not session)
-      ;; external process evaluation
-      (save-window-excursion
-        (with-temp-buffer
-          (insert body)
-          ;; (message "buffer=%s" (buffer-string)) ;; debugging
-          (org-babel-shell-command-on-region (point-min) (point-max) org-babel-sh-command 'current-buffer 'replace)
-	  (cond
-	   ((member "output" result-params) (buffer-string))
-	   ;; TODO: figure out how to return non-output values from shell scripts
-	   (t ;; if not "output" then treat as "value"
-	    (if (member "scalar" result-params)
-		(buffer-string)
-	      (let ((tmp-file (make-temp-file "org-babel-sh"))
-		    (results (buffer-string)))
-		(with-temp-file tmp-file (insert results))
-		(org-babel-import-elisp-from-file tmp-file)))))))
-    ;; comint session evaluation
-    (flet ((strip-empty (lst)
-                        (delq nil (mapcar (lambda (el) (unless (= (length el) 0) el)) lst))))
-      (let ((tmp-file (make-temp-file "org-babel-sh"))
-            (results
-             (cdr (member
-                   org-babel-sh-eoe-output
-                   (strip-empty
-                    (reverse
-                     (mapcar #'org-babel-sh-strip-weird-long-prompt
-                             (mapcar #'org-babel-trim
-                                     (org-babel-comint-with-output
-                                         (session org-babel-sh-eoe-output t body)
-                                       (mapc (lambda (line) (insert line) (comint-send-input))
-                                             (strip-empty (split-string body "\n")))
-                                       (insert org-babel-sh-eoe-indicator)
-                                       (comint-send-input))))))))))
-        ;; (message (replace-regexp-in-string
-        ;;           "%" "%%" (format "processed-results=%S" results))) ;; debugging
-        (or (and results
-                 (cond
-		  ((member "output" result-params)
-		   (org-babel-trim (mapconcat #'org-babel-trim
-					      (reverse results) "\n")))
-		  (t ;; if not "output" then treat as "value"
-		   (with-temp-file tmp-file
-		     (insert (car results)) (insert "\n"))
-		   (org-babel-import-elisp-from-file tmp-file))))
-            "")))))
+  ((lambda (results)
+     (if (or (member "scalar" result-params)
+	     (member "output" result-params))
+	 (buffer-string)
+       (let ((tmp-file (make-temp-file "org-babel-sh")))
+	 (with-temp-file tmp-file (insert results))
+	 (org-babel-import-elisp-from-file tmp-file))))
+   (if (not session)
+       (org-babel-eval org-babel-sh-command (org-babel-trim body))
+     (let ((tmp-file (make-temp-file "org-babel-sh")))
+       (mapconcat
+	#'org-babel-sh-strip-weird-long-prompt
+	(mapcar
+	 #'org-babel-trim
+	 (butlast
+	  (org-babel-comint-with-output
+	      (session org-babel-sh-eoe-output t body)
+	    (mapc
+	     (lambda (line)
+	       (insert line) (comint-send-input nil t) (sleep-for 0.25))
+	     (append
+	      (split-string (org-babel-trim body) "\n")
+	      (list org-babel-sh-eoe-indicator))))
+	  2)) "\n")))))
 
 (defun org-babel-sh-strip-weird-long-prompt (string)
   "Remove prompt cruft from a string of shell output."

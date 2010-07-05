@@ -31,19 +31,29 @@
 
 ;;; Code:
 (require 'ob)
-(require 'octave-inf)
+(require 'ob-ref)
+(require 'ob-comint)
+(require 'ob-eval)
+(eval-when-compile (require 'cl))
 
+(declare-function matlab-shell "ext:matlab-mode")
+(declare-function matlab-shell-run-region "ext:matlab-mode")
+
+(defvar org-babel-default-header-args:matlab '())
 (defvar org-babel-default-header-args:octave '())
 
+(defvar org-babel-matlab-shell-command "matlab -nosplash"
+  "Shell command to use to run matlab as an external process.")
 (defvar org-babel-octave-shell-command "octave -q"
   "Shell command to use to run octave as an external process.")
 
+(defun org-babel-expand-body:matlab (body params &optional processed-params)
+  "Expand BODY according to PARAMS, return the expanded body."
+  (org-babel-expand-body:octave body params processed-params))
 (defun org-babel-expand-body:octave (body params &optional processed-params)
   "Expand BODY according to PARAMS, return the expanded body."
   (let ((vars (nth 1 (or processed-params (org-babel-process-params params)))))
     (concat
-     ;; prepend code to define all arguments passed to the code block
-     ;; (may not be appropriate for all languages)
      (mapconcat
       (lambda (pair)
         (format "%s=%s"
@@ -51,25 +61,60 @@
                 (org-babel-octave-var-to-octave (cdr pair))))
       vars "\n") "\n" body "\n")))
 
+(defvar org-babel-matlab-with-emacs-link nil
+  "If non-nil use matlab-shell-run-region for session
+  evaluation. This will use EmacsLink if (matlab-with-emacs-link)
+  evaluates to a non-nil value.")
+
+(defvar org-babel-matlab-emacs-link-wrapper-method
+   "%s
+if ischar(ans), fid = fopen('%s', 'w'); fprintf(fid, '%%s\\n', ans); fclose(fid);
+else, save -ascii %s ans
+end
+delete('%s')
+")
+(defvar org-babel-octave-wrapper-method
+  "%s
+if ischar(ans), fid = fopen('%s', 'w'); fprintf(fid, '%%s\\n', ans); fclose(fid);
+else, save -ascii %s ans
+end")
+
+(defvar org-babel-octave-eoe-indicator "\'org_babel_eoe\'")
+
+(defvar org-babel-octave-eoe-output "ans = org_babel_eoe")
+
+(defun org-babel-execute:matlab (body params)
+  "Execute a block of matlab code with org-babel."
+  (require 'matlab)
+  (org-babel-execute:octave body params 'matlab))
 (defun org-babel-execute:octave (body params &optional matlabp)
   "Execute a block of octave code with org-babel."
-  (message (format "executing %s source code block" (if matlabp "matlab" "octave")))
+  (message "executing %s source code block" (if matlabp "matlab" "octave"))
   (let* ((processed-params (org-babel-process-params params))
-         ;; set the session if the session variable is non-nil
-         (session (funcall (intern (format "org-babel-%s-initiate-session" lang))
-			   (first processed-params) params))
+         (session
+	  (funcall (intern (format "org-babel-%s-initiate-session"
+				   (if matlabp "matlab" "octave")))
+		   (nth 0 processed-params) params))
          (vars (nth 1 processed-params))
          (result-params (nth 2 processed-params))
          (result-type (nth 3 processed-params))
 	 (out-file (cdr (assoc :file params)))
-	 (augmented-body (org-babel-expand-body:octave body params processed-params))
-	 (result (org-babel-octave-evaluate session augmented-body result-type matlabp)))
+	 (augmented-body
+	  (org-babel-expand-body:octave body params processed-params))
+	 (result (org-babel-octave-evaluate
+		  session augmented-body result-type matlabp)))
     (or out-file
         (org-babel-reassemble-table
          result
-         (org-babel-pick-name (nth 4 processed-params) (cdr (assoc :colnames params)))
-         (org-babel-pick-name (nth 5 processed-params) (cdr (assoc :rownames params)))))))
+         (org-babel-pick-name
+	  (nth 4 processed-params) (cdr (assoc :colnames params)))
+         (org-babel-pick-name
+	  (nth 5 processed-params) (cdr (assoc :rownames params)))))))
 
+(defun org-babel-prep-session:matlab (session params)
+  "Prepare SESSION according to PARAMS."
+  (require 'matlab)
+  (org-babel-prep-session:octave session params 'matlab))
 (defun org-babel-octave-var-to-octave (var)
   "Convert an emacs-lisp variable into an octave variable.
 Converts an emacs-lisp variable into a string of octave code
@@ -94,60 +139,53 @@ specifying a variable of the same value."
               (org-babel-comint-wait-for-output session)) var-lines))
     session))
 
+(defun org-babel-matlab-initiate-session (&optional session params)
+  "Create a matlab inferior process buffer.  If there is not a
+current inferior-process-buffer in SESSION then create. Return
+the initialized session."
+  (require 'matlab)
+  (org-babel-octave-initiate-session session params 'matlab))
 (defun org-babel-octave-initiate-session (&optional session params matlabp)
   "Create an octave inferior process buffer.  If there is not a
 current inferior-process-buffer in SESSION then create. Return
 the initialized session."
+  (require 'octave-inf)
   (unless (string= session "none")
-    (let ((session (or session (if matlabp "*Inferior Matlab*" "*Inferior Octave*"))))
+    (let ((session (or session
+		       (if matlabp "*Inferior Matlab*" "*Inferior Octave*"))))
       (if (org-babel-comint-buffer-livep session) session
 	(save-window-excursion
 	  (if matlabp (unless org-babel-matlab-with-emacs-link (matlab-shell))
 	    (run-octave))
 	  (rename-buffer (if (bufferp session) (buffer-name session)
-			   (if (stringp session) session (buffer-name)))) (current-buffer))))))
+			   (if (stringp session) session (buffer-name))))
+	  (current-buffer))))))
 
-(defvar org-babel-octave-wrapper-method
-   "%s
-if ischar(ans), fid = fopen('%s', 'w'); fprintf(fid, '%%s\\n', ans); fclose(fid);
-else, save -ascii %s ans
-end")
-
-(defvar org-babel-octave-eoe-indicator "\'org_babel_eoe\'")
-
-(defvar org-babel-octave-eoe-output "ans = org_babel_eoe")
-
-(defun org-babel-octave-evaluate (session body result-type lang)
+(defun org-babel-octave-evaluate
+  (session body result-type lang &optional matlabp)
   "Pass BODY to the octave process in SESSION.  If RESULT-TYPE
 equals 'output then return the outputs of the statements in BODY,
 if RESULT-TYPE equals 'value then return the value of the last
 statement in BODY, as elisp."
   (if session
-    (org-babel-octave-evaluate-session session body result-type matlabp)
+      (org-babel-octave-evaluate-session session body result-type matlabp)
     (org-babel-octave-evaluate-external-process body result-type matlabp)))
 
 (defun org-babel-octave-evaluate-external-process (body result-type matlabp)
   "Evaluate BODY in an external octave process."
-  (let ((cmd (if matlabp org-babel-matlab-shell-command org-babel-octave-shell-command)))
-    (save-excursion
-      (case result-type
-	(output
-	 (with-temp-buffer
-	   (insert body)
-	   (org-babel-shell-command-on-region (point-min) (point-max) cmd 'current-buffer 'replace)
-	   (buffer-string)))
-	(value
-	 (let* ((tmp-file (make-temp-file "org-babel-results-")) exit-code
-		(stderr
-		 (with-temp-buffer
-		   (insert (format org-babel-octave-wrapper-method body tmp-file tmp-file))
-		   (setq exit-code (org-babel-shell-command-on-region
-				    (point-min) (point-max) cmd nil 'replace (current-buffer)))
-		   (buffer-string))))
-	   (if (> exit-code 0) (org-babel-error-notify exit-code stderr))
-	   (org-babel-octave-import-elisp-from-file (org-babel-maybe-remote-file tmp-file))))))))
+  (let ((cmd (if matlabp
+		 org-babel-matlab-shell-command
+	       org-babel-octave-shell-command)))
+    (case result-type
+      (output (org-babel-eval cmd body))
+      (value (let ((tmp-file (make-temp-file "org-babel-results-")))
+	       (org-babel-eval
+		cmd
+		(format org-babel-octave-wrapper-method body tmp-file tmp-file))
+	       (org-babel-eval-read-file tmp-file))))))
 
-(defun org-babel-octave-evaluate-session (session body result-type &optional matlabp)
+(defun org-babel-octave-evaluate-session
+  (session body result-type &optional matlabp)
   "Evaluate BODY in SESSION."
   (let* ((tmp-file (make-temp-file "org-babel-results-"))
 	 (wait-file (make-temp-file "org-babel-matlab-emacs-link-wait-signal-"))
@@ -164,7 +202,8 @@ statement in BODY, as elisp."
 			  body tmp-file tmp-file wait-file) "\n")
 	       (mapconcat
 		#'org-babel-chomp
-		(list (format org-babel-octave-wrapper-method body tmp-file tmp-file)
+		(list (format org-babel-octave-wrapper-method
+			      body tmp-file tmp-file)
 		      org-babel-octave-eoe-indicator) "\n")))))
 	 (raw (if (and matlabp org-babel-matlab-with-emacs-link)
 		  (save-window-excursion
@@ -187,16 +226,19 @@ statement in BODY, as elisp."
 		  (insert full-body) (comint-send-input nil t)))) results)
     (case result-type
       (value
-       (org-babel-octave-import-elisp-from-file (org-babel-maybe-remote-file tmp-file)))
+       (org-babel-octave-import-elisp-from-file
+	(org-babel-maybe-remote-file tmp-file)))
       (output
        (progn
 	 (setq results
 	       (if matlabp
-		   (cdr (reverse (delq "" (mapcar #'org-babel-octave-read-string
-						  (mapcar #'org-babel-trim raw)))))
+		   (cdr (reverse (delq "" (mapcar
+					   #'org-babel-octave-read-string
+					   (mapcar #'org-babel-trim raw)))))
 		 (cdr (member org-babel-octave-eoe-output
-			      (reverse (mapcar #'org-babel-octave-read-string
-					       (mapcar #'org-babel-trim raw)))))))
+			      (reverse (mapcar
+					#'org-babel-octave-read-string
+					(mapcar #'org-babel-trim raw)))))))
 	 (mapconcat #'identity (reverse results) "\n"))))))
 
 (defun org-babel-octave-import-elisp-from-file (file-name)
