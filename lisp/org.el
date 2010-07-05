@@ -119,7 +119,62 @@
 (require 'ob-tangle)
 (require 'ob-comint)
 (require 'ob-keys)
-(require 'ob-emacs-lisp)
+
+;; load languages based on value of `org-babel-load-languages'
+(defvar org-babel-load-languages)
+(defun org-babel-do-load-languages (sym value)
+  "Load the languages defined in `org-babel-load-languages'."
+  (set-default sym value)
+  (mapc (lambda (pair)
+	  (let ((active (cdr pair)) (lang (symbol-name (car pair))))
+	    (if active
+		(progn
+		  (require (intern (concat "ob-" lang))))
+	      (progn
+		(funcall 'fmakunbound
+			 (intern (concat "org-babel-execute:" lang)))
+		(funcall 'fmakunbound
+			 (intern (concat "org-babel-expand-body:" lang)))))))
+	org-babel-load-languages))
+
+(defcustom org-babel-load-languages '((emacs-lisp . t))
+  "Languages which can be evaluated in Org-mode buffers.  This
+list can be used to load support for any of the languages below,
+note that each language will depend on a different set of system
+executables and/or Emacs modes.  When a language is \"loaded\",
+then code blocks in that language can be evaluated with
+`org-babel-execute-src-block' bound by default to C-c C-c (note
+the `org-babel-no-eval-on-ctrl-c-ctrl-c' variable can be set to
+remove code block evaluation from the C-c C-c keybinding.  By
+default only Emacs Lisp (which has no requirements) is loaded."
+  :group 'org-babel
+  :set 'org-babel-do-load-languages
+  :type '(alist :tag "Babel Languages"
+		:key-type
+		(choice
+		 (const :tag "C" C)
+		 (const :tag "R" R)
+		 (const :tag "Asymptote" asymptote)
+		 (const :tag "Clojure" clojure)
+		 (const :tag "CSS" css)
+		 (const :tag "Ditaa" ditaa)
+		 (const :tag "Dot" dot)
+		 (const :tag "Emacs Lisp" emacs-lisp)
+		 (const :tag "Gnuplot" gnuplot)
+		 (const :tag "Haskell" haskell)
+		 (const :tag "Latex" latex)
+		 (const :tag "Matlab" matlab)
+		 (const :tag "Ocaml" ocaml)
+		 (const :tag "Octave" octave)
+		 (const :tag "Perl" perl)
+		 (const :tag "Python" python)
+		 (const :tag "Ruby" ruby)
+		 (const :tag "Sass" sass)
+		 (const :tag "Screen" screen)
+		 (const :tag "Shell Script" sh)
+		 (const :tag "Sql" sql)
+		 (const :tag "Sqlite" sqlite))
+		:value-type (boolean :tag "Activate" :value t)))
 
 ;;;; Customization variables
 (defcustom org-clone-delete-id nil
@@ -17021,7 +17076,13 @@ This command does many different things, depending on context:
 - If the cursor is on a numbered item in a plain list, renumber the
   ordered list.
 
-- If the cursor is on a checkbox, toggle it."
+- If the cursor is on a checkbox, toggle it.
+
+- If the cursor is on a code block, evaluate it.  The variable
+  `org-confirm-babel-evaluate' can be used to control prompting
+  before code block evaluation, by default every code block
+  evaluation requires confirmation.  Code block evaluation can be
+  inhibited by setting `org-babel-no-eval-on-ctrl-c-ctrl-c'."
   (interactive "P")
   (let  ((org-enable-table-editor t))
     (cond

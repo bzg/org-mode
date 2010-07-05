@@ -28,8 +28,17 @@
 
 ;;; Code:
 (require 'ob)
+(require 'ob-ref)
+
+(declare-function org-fill-template "org" (template alist))
+(declare-function org-table-convert-region
+		  "org-table" (beg0 end0 &optional separator))
 
 (defvar org-babel-default-header-args:sqlite '())
+
+(defvar org-babel-header-arg-names:sqlite
+  '(db header echo bail csv column html line list separator nullvalue)
+  "Sqlite specific header args.")
 
 (defun org-babel-expand-body:sqlite
   (body params &optional processed-params) body)
@@ -42,16 +51,44 @@ called by `org-babel-execute-src-block'."
   (message "executing Sqlite source code block")
   (let ((result-params (split-string (or (cdr (assoc :results params)) "")))
 	(vars (org-babel-ref-variables params))
-	(headers-p (equal "yes" (cdr (assoc :colnames params)))))
+	(db (cdr (assoc :db params)))
+	(separator (cdr (assoc :separator params)))
+	(nullvalue (cdr (assoc :nullvalue params)))
+	(headers-p (equal "yes" (cdr (assoc :colnames params))))
+	(others (delq nil (mapcar
+			   (lambda (arg) (car (assoc arg params)))
+			   (list :header :echo :bail :column
+				 :csv :html :line :list))))
+	exit-code)
+    (message "others:%s" others)
+    (unless db (error "ob-sqlite: can't evaluate without a database."))
     (with-temp-buffer
       (insert
        (shell-command-to-string
-	(format "%s %s -csv %s %S"
-		org-babel-sqlite3-command
-		(if headers-p "-header" "")
-		(cdr (assoc :db params))
-		(org-babel-sqlite-expand-vars body vars))))
+	(org-fill-template
+	 "%cmd %header %separator %nullvalue %others %csv %db  %body"
+	 (list
+	  (cons "cmd" org-babel-sqlite3-command)
+	  (cons "header" (if headers-p "-header" "-noheader"))
+	  (cons "separator"
+		(if separator (format "-separator %s" separator) ""))
+	  (cons "nullvalue"
+		(if nullvalue (format "-nullvalue %s" nullvalue) ""))
+	  (cons "others"
+		(mapconcat
+		 (lambda (arg) (format "-%s" (substring (symbol-name arg) 1)))
+		 others " "))
+	  ;; for easy table parsing, default header type should be -csv
+	  (cons "csv" (if (or (member :csv others) (member :column others)
+			      (member :line others) (member :list others)
+			      (member :html others) separator)
+			  ""
+			"-csv"))
+	  (cons "db " db)
+	  (cons "body" (format "%S" (org-babel-sqlite-expand-vars
+				     body vars)))))))
       (if (or (member "scalar" result-params)
+	      (member "html" result-params)
 	      (member "code" result-params))
 	  (buffer-string)
 	(org-table-convert-region (point-min) (point-max))
@@ -74,8 +111,11 @@ called by `org-babel-execute-src-block'."
   "If RESULT looks like a trivial table, then unwrap it."
   (if (and (equal 1 (length result))
 	   (equal 1 (length (car result))))
-      (caar result)
-    result))
+      (org-babel-read (caar result))
+    (mapcar (lambda (row)
+	      (if (equal 'hline row)
+		  'hline
+		(mapcar #'org-babel-read row))) result)))
 
 (defun org-babel-sqlite-offset-colnames (table headers-p)
   "If HEADERS-P is non-nil then offset the first row as column names."

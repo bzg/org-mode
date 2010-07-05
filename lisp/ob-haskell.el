@@ -41,8 +41,15 @@
 
 ;;; Code:
 (require 'ob)
-(require 'haskell-mode)
-(require 'inf-haskell)
+(require 'ob-comint)
+(require 'comint)
+(eval-when-compile (require 'cl))
+
+(declare-function org-remove-indentation "org" (code &optional n))
+(declare-function haskell-mode "ext:haskell-mode" ())
+(declare-function run-haskell "ext:inf-haskell" (&optional arg))
+(declare-function inferior-haskell-load-file
+		  "ext:inf-haskell" (&optional reload))
 
 (add-to-list 'org-babel-tangle-lang-exts '("haskell" . "hs"))
 
@@ -66,7 +73,7 @@
   "Execute a block of Haskell code with org-babel."
   (message "executing haskell source code block")
   (let* ((processed-params (org-babel-process-params params))
-         (session (first processed-params))
+         (session (nth 0 processed-params))
          (vars (nth 1 processed-params))
          (result-type (nth 3 processed-params))
          (full-body (org-babel-expand-body:haskell body params processed-params))
@@ -82,9 +89,11 @@
                    (cdr (member org-babel-haskell-eoe
                                 (reverse (mapcar #'org-babel-trim raw)))))))
     (org-babel-reassemble-table
-     (case result-type
-       (output (mapconcat #'identity (reverse (cdr results)) "\n"))
-       (value (org-babel-haskell-table-or-string (car results))))
+     (cond 
+      ((equal result-type 'output)
+       (mapconcat #'identity (reverse (cdr results)) "\n"))
+      ((equal result-type 'value)
+       (org-babel-haskell-table-or-string (car results))))
      (org-babel-pick-name (nth 4 processed-params) (cdr (assoc :colnames params)))
      (org-babel-pick-name (nth 5 processed-params) (cdr (assoc :rownames params))))))
 
@@ -97,7 +106,7 @@
 (defun org-babel-haskell-initiate-session (&optional session params)
   "If there is not a current inferior-process-buffer in SESSION
 then create one.  Return the initialized session."
-  ;; TODO: make it possible to have multiple sessions
+  (require 'inf-haskell)
   (or (get-buffer "*haskell*")
       (save-window-excursion (run-haskell) (sleep-for 0.25) (current-buffer))))
 
@@ -114,13 +123,13 @@ then create one.  Return the initialized session."
       buffer)))
 
 (defun org-babel-prep-session:haskell
-  (session params &optional processesed-params)
+  (session params &optional processed-params)
   "Prepare SESSION according to the header arguments specified in PARAMS."
   (save-window-excursion
     (let ((pp (or processed-params (org-babel-process-params params)))
 	  (buffer (org-babel-haskell-initiate-session session)))
       (org-babel-comint-in-buffer buffer
-      	(mapcar
+      	(mapc
       	 (lambda (pair)
       	   (insert (format "let %s = %s"
       			   (car pair)
@@ -150,6 +159,7 @@ specifying a var of the same value."
       (concat "[" (mapconcat #'org-babel-haskell-var-to-haskell var ", ") "]")
     (format "%S" var)))
 
+(defvar org-src-preserve-indentation)
 (defun org-babel-haskell-export-to-lhs (&optional arg)
   "Export to a .lhs file with all haskell code blocks escaped
 appropriately.  When called with a prefix argument the resulting

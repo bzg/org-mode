@@ -39,9 +39,16 @@
 
 ;;; Code:
 (require 'ob)
-(require 'cl)
-(require 'slime)
-(require 'swank-clojure)
+(require 'ob-eval)
+(eval-when-compile (require 'cl))
+
+(declare-function slime-eval-async "ext:slime" (sexp &optional cont package))
+(declare-function slime-eval "ext:slime" (sexp &optional package))
+(declare-function swank-clojure-concat-paths "ext:slime" (paths))
+(declare-function org-babel-ref-variables "ext:slime" (params))
+(declare-function slime "ext:slime" (&optional command coding-system))
+(declare-function slime-output-buffer "ext:slime" (&optional noprompt))
+(declare-function slime-filter-buffers "ext:slime" (predicate))
 
 (add-to-list 'org-babel-tangle-lang-exts '("clojure" . "clj"))
 
@@ -63,7 +70,8 @@
   []
   %s)
 
-(spit \"%s\" (str (main)))") ;;" <-- syntax highlighting is messed without this double quote
+(spit \"%s\" (str (main)))")
+;;";; <-- syntax highlighting is messed without this double quote
 
 ;;taken mostly from clojure-test-mode.el
 (defun org-babel-clojure-clojure-slime-eval (string &optional handler)
@@ -76,16 +84,23 @@
   (slime-eval `(swank:eval-and-grab-output ,string)))
 
 ;;taken from swank-clojure.el
+(defvar swank-clojure-binary)
+(defvar swank-clojure-classpath)
+(defvar swank-clojure-java-path)
+(defvar swank-clojure-extra-vm-args)
+(defvar swank-clojure-library-paths)
+(defvar swank-clojure-extra-classpaths)
 (defun org-babel-clojure-babel-clojure-cmd ()
   "Create the command to start clojure according to current settings."
   (if (and (not swank-clojure-binary) (not swank-clojure-classpath))
-      (error "You must specifiy either a `swank-clojure-binary' or a `swank-clojure-jar-path'")
+      (error (concat "You must specifiy either a `swank-clojure-binary' "
+		     "or a `swank-clojure-jar-path'"))
     (if swank-clojure-binary
         (if (listp swank-clojure-binary)
             swank-clojure-binary
           (list swank-clojure-binary))
-      (delete-if
-       'null
+      (delq
+       nil
        (append
         (list swank-clojure-java-path)
         swank-clojure-extra-vm-args
@@ -123,15 +138,20 @@ specifying a var of the same value."
 
 (defun org-babel-clojure-build-full-form (body vars)
   "Construct a clojure let form with vars as the let vars."
-  (let ((vars-forms (mapconcat ;; define any variables
-                      (lambda (pair)
-                        (format "%s %s" (car pair) (org-babel-clojure-var-to-clojure (cdr pair))))
-                      vars "\n      "))
+  (let ((vars-forms
+	 (mapconcat ;; define any variables
+	  (lambda (pair)
+	    (format "%s %s"
+		    (car pair) (org-babel-clojure-var-to-clojure (cdr pair))))
+	  vars "\n      "))
 	(body (org-babel-trim body)))
-    (if (> (length vars-forms) 0) (format "(let [%s]\n  %s)" vars-forms body) body)))
+    (if (> (length vars-forms) 0)
+	(format "(let [%s]\n  %s)" vars-forms body)
+      body)))
 
 (defun org-babel-prep-session:clojure (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."
+  (require 'slime) (require 'swank-clojure)
   (let* ((session-buf (org-babel-clojure-initiate-session session))
          (vars (org-babel-ref-variables params))
          (var-lines (mapcar ;; define any top level session variables
@@ -143,6 +163,7 @@ specifying a var of the same value."
 
 (defun org-babel-load-session:clojure (session body params)
   "Load BODY into SESSION."
+  (require 'slime) (require 'swank-clojure)
   (save-window-excursion
     (let ((buffer (org-babel-prep-session:clojure session params)))
       (with-current-buffer buffer
@@ -164,10 +185,11 @@ then create one.  Return the initialized session."
     (let* ((session (if session
                         (if (stringp session) (intern session)
                           session)
-                        :default))
+		      :default))
            (clojure-buffer (org-babel-clojure-session-buffer session)))
       (unless (and clojure-buffer (buffer-live-p clojure-buffer))
-        (setq org-babel-clojure-buffers (assq-delete-all session org-babel-clojure-buffers))
+        (setq org-babel-clojure-buffers
+	      (assq-delete-all session org-babel-clojure-buffers))
         (push session org-babel-clojure-pending-sessions)
         (slime)
         ;; we are waiting to finish setting up which will be done in
@@ -175,7 +197,8 @@ then create one.  Return the initialized session."
         (let ((timeout 9))
           (while (and (not (org-babel-clojure-session-buffer session))
                       (< 0 timeout))
-            (message "Waiting for clojure repl for session: %s ... %i" session timeout)
+            (message "Waiting for clojure repl for session: %s ... %i"
+		     session timeout)
             (sit-for 1)
             (decf timeout)))
         (setq org-babel-clojure-pending-sessions
@@ -188,8 +211,10 @@ then create one.  Return the initialized session."
 (defun org-babel-clojure-initiate-session (&optional session params)
   "Return the slime-clojure repl buffer bound to this session
 or nil if \"none\" is specified."
+  (require 'slime) (require 'swank-clojure)
   (unless (and (stringp session) (string= session "none"))
-    (org-babel-clojure-session-buffer (org-babel-clojure-initiate-session-by-key session))))
+    (org-babel-clojure-session-buffer
+     (org-babel-clojure-initiate-session-by-key session))))
 
 (defun org-babel-clojure-session-connected-hook ()
   "Finish setting up the bindings of org-babel session to a slime-clojure repl."
@@ -197,8 +222,11 @@ or nil if \"none\" is specified."
     (when pending-session
       (save-excursion
         (switch-to-buffer (slime-output-buffer))
-        (rename-buffer (if (stringp pending-session) pending-session (symbol-name pending-session)))
-        (org-babel-clojure-bind-session-to-repl-buffer pending-session (slime-output-buffer))))))
+        (rename-buffer
+	 (if (stringp pending-session)
+	     pending-session (symbol-name pending-session)))
+        (org-babel-clojure-bind-session-to-repl-buffer
+	 pending-session (slime-output-buffer))))))
 
 (add-hook 'slime-connected-hook 'org-babel-clojure-session-connected-hook)
 
@@ -222,48 +250,41 @@ repl buffer."
     (let ((repl-buf (read-buffer "Choose slime-clojure repl: " repl-bufs t)))
       (org-babel-clojure-bind-session-to-repl-buffer session repl-buf))))
 
-(defun org-babel-clojure-evaluate-external-process (buffer body &optional result-type)
+(defun org-babel-clojure-evaluate-external-process
+  (buffer body &optional result-type)
   "Evaluate the body in an external process."
-  (save-excursion
-    (let ((cmd (format "%s -" (mapconcat #'identity (org-babel-clojure-babel-clojure-cmd) " "))))
-      (case result-type
-	(output
-	 (with-temp-buffer
-	   (insert body)
-	   (org-babel-shell-command-on-region cmd (point-min) (point-max) 'current-buffer 'replace)
-	   (buffer-string)))
-	(value
-	 (let* ((tmp-file (make-temp-file "org-babel-clojure-results-")) exit-code
-		(stderr
-		 (with-temp-buffer
-		   (insert
-		    (format org-babel-clojure-wrapper-method body tmp-file tmp-file))
-		   (setq exit-code
-			 (org-babel-shell-command-on-region (point-min) (point-max) cmd nil 'replace (current-buffer)))
-		   (buffer-string))))
-	   (if (> exit-code 0) (org-babel-error-notify exit-code stderr))
-	   (org-babel-clojure-table-or-string
-	    (with-temp-buffer
-	      (insert-file-contents (org-babel-maybe-remote-file tmp-file)) (buffer-string)))))))))
+  (let ((cmd (format "%s -" (mapconcat #'identity
+				       (org-babel-clojure-babel-clojure-cmd)
+				       " "))))
+    (case result-type
+      (output (org-babel-eval cmd body))
+      (value (let* ((tmp-file (make-temp-file "org-babel-clojure-results-")))
+	       (org-babel-eval cmd (format org-babel-clojure-wrapper-method
+					   body tmp-file tmp-file))
+	       (org-babel-clojure-table-or-string
+		(org-babel-eval-read-file tmp-file)))))))
 
 (defun org-babel-clojure-evaluate-session (buffer body &optional result-type)
   "Evaluate the body in the context of a clojure session."
+  (require 'slime) (require 'swank-clojure)
   (let ((raw nil)
         (results nil))
     (save-window-excursion
       (set-buffer buffer)
       (setq raw (org-babel-clojure-slime-eval-sync body))
       (setq results (reverse (mapcar #'org-babel-trim raw)))
-      (case result-type
-        (output (mapconcat #'identity (reverse (cdr results)) "\n"))
-        (value (org-babel-clojure-table-or-string (car results)))))))
+      (cond
+       ((equal result-type 'output)
+	(mapconcat #'identity (reverse (cdr results)) "\n"))
+       ((equal result-type 'value)
+	(org-babel-clojure-table-or-string (car results)))))))
 
 (defun org-babel-clojure-evaluate (buffer body &optional result-type)
   "Pass BODY to the Clojure process in BUFFER.  If RESULT-TYPE equals
 'output then return a list of the outputs of the statements in
 BODY, if RESULT-TYPE equals 'value then return the value of the
 last statement in BODY, as elisp."
-  (if session
+  (if buffer
       (org-babel-clojure-evaluate-session buffer body result-type)
     (org-babel-clojure-evaluate-external-process buffer body result-type)))
 
@@ -274,13 +295,17 @@ last statement in BODY, as elisp."
 
 (defun org-babel-execute:clojure (body params)
   "Execute a block of Clojure code with org-babel."
+  (require 'slime) (require 'swank-clojure)
   (let* ((processed-params (org-babel-process-params params))
          (body (org-babel-expand-body:clojure body params processed-params))
-         (session (org-babel-clojure-initiate-session (first processed-params))))
+         (session (org-babel-clojure-initiate-session
+		   (first processed-params))))
     (org-babel-reassemble-table
      (org-babel-clojure-evaluate session body (nth 3 processed-params))
-     (org-babel-pick-name (nth 4 processed-params) (cdr (assoc :colnames params)))
-     (org-babel-pick-name (nth 5 processed-params) (cdr (assoc :rownames params))))))
+     (org-babel-pick-name
+      (nth 4 processed-params) (cdr (assoc :colnames params)))
+     (org-babel-pick-name
+      (nth 5 processed-params) (cdr (assoc :rownames params))))))
 
 (provide 'ob-clojure)
 

@@ -37,7 +37,11 @@
 
 ;;; Code:
 (require 'ob)
-(require 'tuareg)
+(require 'ob-comint)
+(require 'comint)
+(eval-when-compile (require 'cl))
+
+(declare-function tuareg-run-caml "ext:taureg" ())
 
 (add-to-list 'org-babel-tangle-lang-exts '("ocaml" . "ml"))
 
@@ -60,7 +64,8 @@
   (let* ((processed-params (org-babel-process-params params))
          (vars (nth 1 processed-params))
          (full-body (org-babel-expand-body:ocaml body params processed-params))
-         (session (org-babel-prep-session:ocaml session params))
+         (session (org-babel-prep-session:ocaml
+		   (cdr (assoc :session params)) params))
          (raw (org-babel-comint-with-output
 		  (session org-babel-ocaml-eoe-output t full-body)
                 (insert (concat (org-babel-chomp full-body) " ;;"))
@@ -72,8 +77,10 @@
      (org-babel-pick-name (nth 4 processed-params) (cdr (assoc :colnames params)))
      (org-babel-pick-name (nth 5 processed-params) (cdr (assoc :rownames params))))))
 
+(defvar tuareg-interactive-buffer-name)
 (defun org-babel-prep-session:ocaml (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."
+  (require 'tuareg)
   (let ((tuareg-interactive-buffer-name (if (and (not (string= session "none"))
                                                  (not (string= session "default"))
                                                  (stringp session))

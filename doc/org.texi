@@ -11128,6 +11128,13 @@ Choose a file to tangle.
 @cindex code block, evaluating
 @cindex source code, evaluating
 
+@quotation
+Whenever code is evaluated there is a potential for that code to do harm.
+Org-mode provides a number of safeguards to ensure that it only evaluates
+code with explicit confirmation from the user.  For information on these
+safeguards (and on how to disable them) see @ref{Code evaluation security}.
+@end quotation
+
 Code blocks can be evaluated and the results placed in the Org-mode buffer.
 By default, evaluation is only turned on for @code{emacs-lisp} code blocks,
 however support exists for evaluating blocks in many languages.  See
@@ -11136,9 +11143,14 @@ code blocks} for information on the syntax used to define a code block.
 
 @kindex C-c C-c
 There are a number of ways to evaluate code blocks.  The simplest is to
-press @kbd{C-c C-c} with the point on a code block.  This will call the
-@code{org-babel-execute-src-block} function to evaluate the block and
-insert its results into the Org-mode buffer.
+press @kbd{C-c C-c} or @kbd{C-c C-v e} with the point on a code block.  This
+will call the @code{org-babel-execute-src-block} function to evaluate the
+block and insert its results into the Org-mode buffer.
+
+@quotation
+The @code{org-babel-no-eval-on-ctrl-c-ctrl-c} variable can be used to remove
+code evaluation from the @kbd{C-c C-c} key binding.
+@end quotation
 
 It is also possible to evaluate named code blocks from anywhere in an
 Org-mode buffer or an Org-mode table.  @code{#+call} (or synonymously
@@ -11212,22 +11224,33 @@ Language specific documentation is available for some languages.  If
 available, it can be found at
 @uref{http://orgmode.org/worg/org-contrib/babel/languages}.
 
+The @code{org-babel-load-languages} controls which languages are enabled for
+evaluation (by default only @code{emacs-lisp} is enabled).  This variable can
+be set using the customization interface or by adding code like the following
+to your emacs configuration.
 
-To add support for a particular language to your installation:
+@quotation
+The following disables @code{emacs-lisp} evaluation and enables evaluation of
+@code{R} code blocks.
+@end quotation
 
-@enumerate
-@item
-ensure that the language-specific requirements are met, then
-@item
-add a line to your Emacs configuration like
 @lisp
-(require 'ob-identifier)
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((emacs-lisp . nil)
+   (R . t)))
 @end lisp
-where ``identifier'' is taken from the table above, e.g.,
+
+It is also possible to enable support for a language by loading the related
+elisp file with @code{require}.
+
+@quotation
+The following adds support for evaluating @code{clojure} code blocks.
+@end quotation
+
 @lisp
-(require 'ob-sass)
+(require 'ob-clojure)
 @end lisp
-@end enumerate
 
 @node Header arguments, Results of evaluation, Languages, Working With Source Code
 @section Header arguments
@@ -11394,6 +11417,7 @@ The following header arguments are defined:
 * exports::			Export code and/or results
 * tangle::			Toggle tangling and specify file name
 * no-expand::			Turn off variable assignment and noweb expansion during tangling
+* comments::                    Toggle insertion of comments in tangled code files
 * session::			Preserve the state of code evaluation
 * noweb::			Toggle expansion of noweb references
 * cache::			Avoid re-evaluating unchanged code blocks
@@ -11737,7 +11761,7 @@ Both the code and results are included in the exported file. E.g.,
 Nothing is included in the exported file.  E.g., @code{:exports none}.
 @end itemize
 
-@node tangle, no-expand, exports, Specific header arguments
+@node tangle, comments, exports, Specific header arguments
 @subsubsection @code{:tangle}
 
 The @code{:tangle} header argument specifies whether or not the code
@@ -11757,7 +11781,16 @@ as a file basename to which the block will be exported.  E.g., @code{:tangle
 basename}.
 @end itemize
 
-@node no-expand, session, tangle, Specific header arguments
+@node comments, no-expand, tangle, Specific header arguments
+@subsubsection @code{:comments}
+By default code blocks are tangled to source-code files without any insertion
+of comments beyond those which may already exist in the body of the code
+block.  The @code{:comments} header argument can be set to ``yes''
+e.g. @code{:comments yes} to enable the insertion of comments around code
+blocks during tangling.  The inserted comments contain pointers back to the
+original Org file from which the comment was tangled.
+
+@node no-expand, session, comments, Specific header arguments
 @subsubsection @code{:no-expand}
 
 By default, code blocks are expanded with @code{org-babel-expand-src-block}
@@ -12315,7 +12348,7 @@ Make sure you know what you are doing before customizing the variables
 which take of the default security brakes.
 
 @defopt org-confirm-babel-evaluate
-Does code evaluation have to be acknowledged by the user?
+When set to t user is queried before code block evaluation
 @end defopt
 
 @item Following @code{shell} and @code{elisp} links

@@ -28,13 +28,20 @@
 
 ;;; Code:
 (require 'ob)
-(require 'ob-tangle)
+(require 'ob-ref)
 (require 'ob-comint)
+(require 'ob-eval)
 (require (if (featurep 'xemacs) 'python-mode 'python))
+(eval-when-compile (require 'cl))
+
+(declare-function org-remove-indentation "org" )
 
 (add-to-list 'org-babel-tangle-lang-exts '("python" . "py"))
 
 (defvar org-babel-default-header-args:python '())
+
+(defvar org-babel-python-command "python"
+  "Name of command to use for executing python code.")
 
 (defun org-babel-expand-body:python (body params &optional processed-params)
   "Expand BODY according to PARAMS, return the expanded body."
@@ -56,13 +63,16 @@ called by `org-babel-execute-src-block'."
          (result-params (nth 2 processed-params))
          (result-type (nth 3 processed-params))
          (full-body (org-babel-expand-body:python
-                     body params processed-params)) ;; then the source block body
-         (result (org-babel-python-evaluate session full-body result-type)))
+                     body params processed-params))
+         (result (org-babel-python-evaluate
+		  session full-body result-type result-params)))
     (or (cdr (assoc :file params))
         (org-babel-reassemble-table
          result
-         (org-babel-pick-name (nth 4 processed-params) (cdr (assoc :colnames params)))
-         (org-babel-pick-name (nth 5 processed-params) (cdr (assoc :rownames params)))))))
+         (org-babel-pick-name (nth 4 processed-params)
+			      (cdr (assoc :colnames params)))
+         (org-babel-pick-name (nth 5 processed-params)
+			      (cdr (assoc :rownames params)))))))
 
 (defun org-babel-prep-session:python (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."
@@ -136,31 +146,25 @@ then create.  Return the initialized session."
 	;; `py-shell' creates a buffer whose name is the value of
 	;; `py-which-bufname' with '*'s at the beginning and end
 	(let* ((bufname (if python-buffer
-			    (replace-regexp-in-string "^\\*\\([^*]+\\)\\*$" "\\1" python-buffer) ; zap surrounding *
+			    (replace-regexp-in-string ;; zap surrounding *
+			     "^\\*\\([^*]+\\)\\*$" "\\1" python-buffer)
 			  (concat "Python-" (symbol-name session))))
-	       (py-which-bufname bufname)) ; avoid making a mess with buffer-local
+	       (py-which-bufname bufname))
 	  (py-shell)
 	  (setq python-buffer (concat "*" bufname "*"))))
        (t
 	(error "No function available for running an inferior python.")))
-	
-      (setq org-babel-python-buffers (cons (cons session python-buffer)
-					   (assq-delete-all session org-babel-python-buffers)))
+      (setq org-babel-python-buffers
+	    (cons (cons session python-buffer)
+		  (assq-delete-all session org-babel-python-buffers)))
       session)))
 
 (defun org-babel-python-initiate-session (&optional session params)
   "Create a session named SESSION according to PARAMS."
   (unless (string= session "none")
-    (org-babel-python-session-buffer (org-babel-python-initiate-session-by-key session))))
+    (org-babel-python-session-buffer
+     (org-babel-python-initiate-session-by-key session))))
 
-(defvar org-babel-python-last-value-eval "_"
-  "When evaluated by Python this returns the return value of the last statement.")
-(defvar org-babel-python-pp-last-value-eval
-  '("results = _"
-    "import pprint"
-    "org_babel_pp = pprint.PrettyPrinter()"
-    "org_babel_pp.pprint(results)")
-  "When evaluated by Python this pretty prints the value of the last statement.")
 (defvar org-babel-python-eoe-indicator "'org_babel_python_eoe'"
   "Used to indicate that evaluation is has completed.")
 (defvar org-babel-python-wrapper-method
@@ -177,77 +181,74 @@ def main():
 
 open('%s', 'w').write( pprint.pformat(main()) )")
 
-(defun org-babel-python-evaluate (buffer body &optional result-type)
+(defun org-babel-python-evaluate
+  (buffer body &optional result-type result-params)
   "Pass BODY to the Python process in BUFFER.  If RESULT-TYPE equals
 'output then return a list of the outputs of the statements in
 BODY, if RESULT-TYPE equals 'value then return the value of the
 last statement in BODY, as elisp."
-  (if (not session)
+  (if (not buffer)
       ;; external process evaluation
-      (save-excursion
-        (case result-type
-          (output
-           (with-temp-buffer
-             (insert body)
-             ;; (message "buffer=%s" (buffer-string)) ;; debugging
-             (org-babel-shell-command-on-region (point-min) (point-max) "python" 'current-buffer 'replace)
-             (buffer-string)))
-          (value
-           (let* ((tmp-file (make-temp-file "org-babel-python-results-")) exit-code
-		  (stderr
-		   (with-temp-buffer
-		     (insert
-		      (format
-		       (if (member "pp" result-params)
-			   org-babel-python-pp-wrapper-method
-			 org-babel-python-wrapper-method)
-		       (mapconcat
-			(lambda (line) (format "\t%s" line))
-			(split-string
-			 (org-remove-indentation (org-babel-trim body)) "[\r\n]") "\n")
-		       tmp-file))
-		     ;; (message "buffer=%s" (buffer-string)) ;; debugging
-		     (setq exit-code (org-babel-shell-command-on-region
-				      (point-min) (point-max) "python" nil 'replace (current-buffer)))
-		     (buffer-string))))
-	     (if (> exit-code 0) (org-babel-error-notify exit-code stderr))
-             (let ((raw (with-temp-buffer
-			  (insert-file-contents (org-babel-maybe-remote-file tmp-file))
-			  (buffer-string))))
-               (if (or (member "code" result-params) (member "pp" result-params))
-                   raw
-                 (org-babel-python-table-or-string raw)))))))
+      (case result-type
+	(output (org-babel-eval org-babel-python-command body))
+	(value (let ((tmp-file (make-temp-file "org-babel-python-results-")))
+		 (org-babel-eval org-babel-python-command
+				 (format
+				  (if (member "pp" result-params)
+				      org-babel-python-pp-wrapper-method
+				    org-babel-python-wrapper-method)
+				  (mapconcat
+				   (lambda (line) (format "\t%s" line))
+				   (split-string
+				    (org-remove-indentation
+				     (org-babel-trim body))
+				    "[\r\n]") "\n")
+				  tmp-file))
+		 ((lambda (raw)
+		    (if (or (member "code" result-params)
+			    (member "pp" result-params))
+			raw
+		      (org-babel-python-table-or-string raw)))
+		  (org-babel-eval-read-file tmp-file)))))
     ;; comint session evaluation
-    (org-babel-comint-in-buffer buffer
-      (let* ((raw (org-babel-comint-with-output
-		      (buffer org-babel-python-eoe-indicator t full-body)
-                    ;; for some reason python is fussy, and likes enters after every input
-		    (let ((comint-process-echoes nil))
-		      (mapc (lambda (statement) (insert statement) (comint-send-input))
-			    (split-string (org-babel-trim body) "[\r\n]+"))
-		      (comint-send-input) (comint-send-input)
-		      (if (member "pp" result-params)
-			  (mapc (lambda (statement) (insert statement) (comint-send-input))
-				org-babel-python-pp-last-value-eval)
-			(insert org-babel-python-last-value-eval))
-		      (comint-send-input) (comint-send-input)
-		      (insert org-babel-python-eoe-indicator)
-		      (comint-send-input))))
-	     (raw (apply #'append ; split further
-			 (mapcar #'(lambda (r)
-				     (split-string r "[\r\n]+"))
-				 raw)))
-             (results (delete org-babel-python-eoe-indicator
-                              (cdr (member org-babel-python-eoe-indicator
-                                           (mapcar #'org-babel-trim raw))))))
-        (unless (or (member "code" result-params) (member "pp" result-params))
-          (setq results (mapcar #'org-babel-python-read-string results)))
-        (case result-type
-	  (output (org-babel-trim (mapconcat #'identity (reverse (cdr results)) "\n")))
-	  (value
-           (if (or (member "code" result-params) (member "pp" result-params))
-               (car results)
-             (org-babel-python-table-or-string (org-babel-trim (car results))))))))))
+    (flet ((dump-last-value (tmp-file pp)
+	    (mapc
+	     (lambda (statement) (insert statement) (comint-send-input))
+	     (if pp
+		 (list
+		  "import pp"
+		  (format "open('%s', 'w').write(pprint.pformat(_))" tmp-file))
+	       (list (format "open('%s', 'w').write(str(_))" tmp-file)))))
+	   (input-body (body)
+	    (mapc (lambda (statement) (insert statement) (comint-send-input))
+		  (split-string (org-babel-trim body) "[\r\n]+"))
+	    (comint-send-input) (comint-send-input)))
+      (case result-type
+	(output
+	 (mapconcat
+	  #'org-babel-trim
+	  (butlast
+	   (org-babel-comint-with-output
+	       (buffer org-babel-python-eoe-indicator t body)
+	     (let ((comint-process-echoes nil))
+	       (input-body body)
+	       (insert org-babel-python-eoe-indicator)
+	       (comint-send-input))) 2) "\n"))
+	(value
+	 ((lambda (results)
+	    (if (or (member "code" result-params) (member "pp" result-params))
+		results
+	      (org-babel-python-table-or-string results)))
+	  (let ((tmp-file (make-temp-file "org-babel-python-results-")))
+	    (org-babel-comint-with-output
+		(buffer org-babel-python-eoe-indicator t body)
+	      (let ((comint-process-echoes nil))
+		(input-body body)
+		(dump-last-value tmp-file (member "pp" result-params))
+		(comint-send-input) (comint-send-input)
+		(insert org-babel-python-eoe-indicator)
+		(comint-send-input)))
+	    (org-babel-eval-read-file tmp-file))))))))
 
 (defun org-babel-python-read-string (string)
   "Strip 's from around python string"

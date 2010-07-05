@@ -38,14 +38,23 @@
 
 ;;; Code:
 (require 'ob)
-(require 'inf-ruby)
+(require 'ob-ref)
+(require 'ob-comint)
+(require 'ob-eval)
+(eval-when-compile (require 'cl))
+
+(declare-function run-ruby "ext:inf-ruby" (&optional command name))
 
 (add-to-list 'org-babel-tangle-lang-exts '("ruby" . "rb"))
 
 (defvar org-babel-default-header-args:ruby '())
 
+(defvar org-babel-ruby-command "ruby"
+  "Name of command to use for executing ruby code.")
+
 (defun org-babel-expand-body:ruby (body params &optional processed-params)
   "Expand BODY according to PARAMS, return the expanded body."
+  (require 'inf-ruby)
   (let ((vars (nth 1 (or processed-params (org-babel-process-params params)))))
     (concat
      (mapconcat ;; define any variables
@@ -65,7 +74,8 @@ called by `org-babel-execute-src-block'."
          (result-type (nth 3 processed-params))
          (full-body (org-babel-expand-body:ruby
                      body params processed-params))
-         (result (org-babel-ruby-evaluate session full-body result-type)))
+         (result (org-babel-ruby-evaluate
+		  session full-body result-type result-params)))
     (or (cdr (assoc :file params))
         (org-babel-reassemble-table
          result
@@ -114,7 +124,6 @@ specifying a var of the same value."
 (defun org-babel-ruby-table-or-string (results)
   "If RESULTS look like a table, then convert them into an
 Emacs-lisp table, otherwise return the results as a string."
-  (message "converting %S" results)
   (org-babel-read
    (if (and (stringp results) (string-match "^\\[.+\\]$" results))
        (org-babel-read
@@ -123,12 +132,13 @@ Emacs-lisp table, otherwise return the results as a string."
                  "\\[" "(" (replace-regexp-in-string
                             "\\]" ")" (replace-regexp-in-string
                                        ", " " " (replace-regexp-in-string
-                                                 "'" "\"" results))))))
+						 "'" "\"" results))))))
      results)))
 
 (defun org-babel-ruby-initiate-session (&optional session params)
   "If there is not a current inferior-process-buffer in SESSION
 then create one.  Return the initialized session."
+  (require 'inf-ruby)
   (unless (string= session "none")
     (let ((session-buffer (save-window-excursion
 			    (run-ruby nil session) (current-buffer))))
@@ -137,12 +147,12 @@ then create one.  Return the initialized session."
         (sit-for .5)
         (org-babel-ruby-initiate-session session)))))
 
-(defvar org-babel-ruby-last-value-eval "_"
-  "When evaluated by Ruby this returns the return value of the last statement.")
-(defvar org-babel-ruby-pp-last-value-eval "require 'pp'; pp(_)"
-  "When evaluated by Ruby this pretty prints value of the last statement.")
 (defvar org-babel-ruby-eoe-indicator ":org_babel_ruby_eoe"
   "Used to indicate that evaluation is has completed.")
+(defvar org-babel-ruby-f-write
+  "File.open('%s','w'){|f| f.write((_.class == String) ? _ : _.inspect)}")
+(defvar org-babel-ruby-pp-f-write
+  "File.open('%s','w'){|f| $stdout = f; pp(results); $stdout = orig_out}")
 (defvar org-babel-ruby-wrapper-method
   "
 def main()
@@ -164,66 +174,70 @@ File.open('%s', 'w') do |f|
 end
 ")
 
-(defun org-babel-ruby-evaluate (buffer body &optional result-type)
+(defun org-babel-ruby-evaluate
+  (buffer body &optional result-type result-params)
   "Pass BODY to the Ruby process in BUFFER.  If RESULT-TYPE equals
 'output then return a list of the outputs of the statements in
 BODY, if RESULT-TYPE equals 'value then return the value of the
 last statement in BODY, as elisp."
-  (if (not session)
+  (if (not buffer)
       ;; external process evaluation
-      (save-excursion
-        (case result-type
-          (output
-           (with-temp-buffer
-             (insert body)
-             ;; (message "buffer=%s" (buffer-string)) ;; debugging
-             (org-babel-shell-command-on-region
-	      (point-min) (point-max) "ruby" 'current-buffer 'replace)
-             (buffer-string)))
-          (value
-           (let* ((tmp-file (make-temp-file "ruby-functional-results"))
-		  exit-code
-		  (stderr
-		   (with-temp-buffer
-		     (insert (format (if (member "pp" result-params)
-					 org-babel-ruby-pp-wrapper-method
-				       org-babel-ruby-wrapper-method)
-				     body tmp-file))
-		     (setq exit-code
-			   (org-babel-shell-command-on-region
-			    (point-min) (point-max) "ruby"
-			    nil 'replace (current-buffer)))
-		     (buffer-string))))
-	     (if (> exit-code 0) (org-babel-error-notify exit-code stderr))
-             (let ((raw (with-temp-buffer
-			  (insert-file-contents
-			   (org-babel-maybe-remote-file tmp-file))
-			  (buffer-string))))
-               (if (or (member "code" result-params)
-		       (member "pp" result-params))
-                   raw
-                 (org-babel-ruby-table-or-string raw)))))))
-    ;; comint session evaluation
-    (let* ((full-body
-	    (mapconcat
-	     #'org-babel-chomp
-	     (list body (if (member "pp" result-params)
-                            org-babel-ruby-pp-last-value-eval
-                          org-babel-ruby-last-value-eval)
-                   org-babel-ruby-eoe-indicator) "\n"))
-           (raw (org-babel-comint-with-output
-		    (buffer org-babel-ruby-eoe-indicator t full-body)
-                  (insert full-body) (comint-send-input nil t)))
-           (results (cdr (member
-			  org-babel-ruby-eoe-indicator
-			  (reverse (mapcar #'org-babel-ruby-read-string
-					   (mapcar #'org-babel-trim raw)))))))
       (case result-type
-        (output (mapconcat #'identity (reverse (cdr results)) "\n"))
-        (value
-         (if (or (member "code" result-params) (member "pp" result-params))
-             (car results)
-           (org-babel-ruby-table-or-string (car results))))))))
+	(output (org-babel-eval org-babel-ruby-command body))
+	(value (let ((tmp-file (make-temp-file "org-babel-ruby-results-")))
+		 (org-babel-eval org-babel-ruby-command
+				 (format (if (member "pp" result-params)
+					     org-babel-ruby-pp-wrapper-method
+					   org-babel-ruby-wrapper-method)
+					 body tmp-file))
+		 ((lambda (raw)
+		    (if (or (member "code" result-params)
+			    (member "pp" result-params))
+			raw
+		      (org-babel-ruby-table-or-string raw)))
+		  (org-babel-eval-read-file tmp-file)))))
+    ;; comint session evaluation
+    (case result-type
+      (output
+       (mapconcat
+	#'identity
+	(butlast
+	 (split-string
+	  (mapconcat
+	   #'org-babel-trim
+	   (butlast
+	    (org-babel-comint-with-output
+		(buffer org-babel-ruby-eoe-indicator t body)
+	      (mapc
+	       (lambda (line)
+		 (insert (org-babel-chomp line)) (comint-send-input nil t))
+	       (list body org-babel-ruby-eoe-indicator))
+	      (comint-send-input nil t)) 2)
+	   "\n") "[\r\n]")) "\n"))
+      (value
+       ((lambda (results)
+	  (if (or (member "code" result-params) (member "pp" result-params))
+	      results
+	    (org-babel-ruby-table-or-string results)))
+	(let* ((tmp-file (make-temp-file "org-babel-ruby-results-"))
+	       (ppp (or (member "code" result-params)
+			(member "pp" result-params))))
+	  (org-babel-comint-with-output
+	      (buffer org-babel-ruby-eoe-indicator t body)
+	    (when ppp (insert "require 'pp';") (comint-send-input nil t))
+	    (mapc
+	     (lambda (line)
+	       (insert (org-babel-chomp line)) (comint-send-input nil t))
+	     (append
+	      (list body)
+	      (if (not ppp)
+		  (list (format org-babel-ruby-f-write tmp-file))
+		(list
+		 "results=_" "require 'pp'" "orig_out = $stdout"
+		 (format org-babel-ruby-pp-f-write tmp-file)))
+	      (list org-babel-ruby-eoe-indicator)))
+	    (comint-send-input nil t))
+	  (org-babel-eval-read-file tmp-file)))))))
 
 (defun org-babel-ruby-read-string (string)
   "Strip \\\"s from around a ruby string."

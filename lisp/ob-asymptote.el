@@ -46,6 +46,9 @@
 (require 'ob)
 (eval-when-compile (require 'cl))
 
+(declare-function orgtbl-to-generic "org-table" (table params))
+(declare-function org-combine-plists "org" (&rest plists))
+
 (add-to-list 'org-babel-tangle-lang-exts '("asymptote" . "asy"))
 
 (defvar org-babel-default-header-args:asymptote

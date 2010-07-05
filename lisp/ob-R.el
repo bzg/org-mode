@@ -28,6 +28,14 @@
 
 ;;; Code:
 (require 'ob)
+(require 'ob-ref)
+(require 'ob-comint)
+(require 'ob-eval)
+(eval-when-compile (require 'cl))
+
+(declare-function orgtbl-to-tsv "ob-table" (table params))
+(declare-function R "ext:essd-r" (&optional start-args))
+(declare-function inferior-ess-send-input "ext:ess-inf" ())
 
 (defconst org-babel-header-arg-names:R
   '(width height bg units pointsize antialias quality compression
@@ -37,26 +45,40 @@
 
 (defvar org-babel-default-header-args:R '())
 
+(defvar org-babel-R-command "R --slave --no-save"
+  "Name of command to use for executing R code.")
+
 (defun org-babel-expand-body:R (body params &optional processed-params)
   "Expand BODY according to PARAMS, return the expanded body."
   (let* ((processed-params (or processed-params
                                (org-babel-process-params params)))
-	 (vars (mapcar (lambda (i) (cons (car (nth i (nth 1 processed-params)))
-					 (org-babel-reassemble-table
-					  (cdr (nth i (nth 1 processed-params)))
-					  (cdr (nth i (nth 4 processed-params)))
-					  (cdr (nth i (nth 5 processed-params))))))
-		       (number-sequence 0 (1- (length (nth 1 processed-params))))))
+	 (vars (mapcar
+		(lambda (i)
+		  (cons (car (nth i (nth 1 processed-params)))
+			(org-babel-reassemble-table
+			 (cdr (nth i (nth 1 processed-params)))
+			 (cdr (nth i (nth 4 processed-params)))
+			 (cdr (nth i (nth 5 processed-params))))))
+		(number-sequence 0 (1- (length (nth 1 processed-params))))))
          (out-file (cdr (assoc :file params))))
-    (concat
-     (if out-file (concat (org-babel-R-construct-graphics-device-call out-file params) "\n") "")
-     (mapconcat ;; define any variables
-      (lambda (pair)
-	(org-babel-R-assign-elisp (car pair) (cdr pair)
-				  (equal "yes" (cdr (assoc :colnames params)))
-				  (equal "yes" (cdr (assoc :rownames params)))))
-      vars "\n")
-     "\n" body "\n" (if out-file "dev.off()\n" ""))))
+    (mapconcat ;; define any variables
+     #'org-babel-trim
+     ((lambda (inside)
+	(if out-file
+	    (append
+	     (list (org-babel-R-construct-graphics-device-call out-file params))
+	     inside
+	     (list "dev.off()"))
+	  inside))
+      (append
+       (mapcar
+	(lambda (pair)
+	  (org-babel-R-assign-elisp
+	   (car pair) (cdr pair)
+	   (equal "yes" (cdr (assoc :colnames params)))
+	   (equal "yes" (cdr (assoc :rownames params)))))
+	vars)
+       (list body))) "\n")))
 
 (defun org-babel-execute:R (body params)
   "Execute a block of R code with org-babel.  This function is
@@ -65,7 +87,8 @@ called by `org-babel-execute-src-block'."
   (save-excursion
     (let* ((processed-params (org-babel-process-params params))
            (result-type (nth 3 processed-params))
-           (session (org-babel-R-initiate-session (first processed-params) params))
+           (session (org-babel-R-initiate-session
+		     (first processed-params) params))
 	   (colnames-p (cdr (assoc :colnames params)))
 	   (rownames-p (cdr (assoc :rownames params)))
 	   (out-file (cdr (assoc :file params)))
@@ -77,6 +100,7 @@ called by `org-babel-execute-src-block'."
 		 (org-babel-pick-name (nth 4 processed-params) colnames-p))
 	     (or (equal "yes" rownames-p)
 		 (org-babel-pick-name (nth 5 processed-params) rownames-p)))))
+      (message "result is %S" result)
       (or out-file result))))
 
 (defun org-babel-prep-session:R (session params)
@@ -86,9 +110,9 @@ called by `org-babel-execute-src-block'."
 	 (var-lines
 	  (mapcar
 	   (lambda (pair) (org-babel-R-assign-elisp
-			   (car pair) (cdr pair)
-			   (equal (cdr (assoc :colnames params)) "yes")
-			   (equal (cdr (assoc :rownames params)) "yes")))
+		      (car pair) (cdr pair)
+		      (equal (cdr (assoc :colnames params)) "yes")
+		      (equal (cdr (assoc :rownames params)) "yes")))
 	   vars)))
     (org-babel-comint-in-buffer session
       (mapc (lambda (var)
@@ -136,9 +160,14 @@ called by `org-babel-execute-src-block'."
       (if (org-babel-comint-buffer-livep session)
 	  session
 	(save-window-excursion
-	  (R)
-	  (rename-buffer (if (bufferp session) (buffer-name session)
-			   (if (stringp session) session (buffer-name)))) (current-buffer))))))
+	  (require 'ess) (R)
+	  (rename-buffer
+	   (if (bufferp session)
+	       (buffer-name session)
+	     (if (stringp session)
+		 session
+	       (buffer-name))))
+	  (current-buffer))))))
 
 (defun org-babel-R-construct-graphics-device-call (out-file params)
   "Construct the call to the graphics device."
@@ -153,25 +182,36 @@ called by `org-babel-execute-src-block'."
 	   (:ps . "postscript")
 	   (:postscript . "postscript")))
 	(allowed-args '(:width :height :bg :units :pointsize
-			       :antialias :quality :compression :res :type
-			       :family :title :fonts :version :paper :encoding
-			       :pagecentre :colormodel :useDingbats :horizontal))
-	(device (and (string-match ".+\\.\\([^.]+\\)" out-file) (match-string 1 out-file)))
+			       :antialias :quality :compression :res
+			       :type :family :title :fonts :version
+			       :paper :encoding :pagecentre :colormodel
+			       :useDingbats :horizontal))
+	(device (and (string-match ".+\\.\\([^.]+\\)" out-file)
+		     (match-string 1 out-file)))
 	(extra-args (cdr (assq :R-dev-args params))) filearg args)
-    (setq device (or (and device (cdr (assq (intern (concat ":" device)) devices))) "png"))
-    (setq filearg (if (member device '("pdf" "postscript" "svg")) "file" "filename"))
-    (setq args (mapconcat (lambda (pair)
-			    (if (member (car pair) allowed-args)
-				(format ",%s=%s" (substring (symbol-name (car pair)) 1) (cdr pair)) ""))
-			  params ""))
-    (format "%s(%s=\"%s\"%s%s%s)\n" device filearg out-file args (if extra-args "," "") (or extra-args ""))))
+    (setq device (or (and device (cdr (assq (intern (concat ":" device))
+					    devices))) "png"))
+    (setq filearg
+	  (if (member device '("pdf" "postscript" "svg")) "file" "filename"))
+    (setq args (mapconcat
+		(lambda (pair)
+		  (if (member (car pair) allowed-args)
+		      (format ",%s=%s"
+			      (substring (symbol-name (car pair)) 1)
+			      (cdr pair)) ""))
+		params ""))
+    (format "%s(%s=\"%s\"%s%s%s)"
+	    device filearg out-file args
+	    (if extra-args "," "") (or extra-args ""))))
 
 (defvar org-babel-R-eoe-indicator "'org_babel_R_eoe'")
 (defvar org-babel-R-eoe-output "[1] \"org_babel_R_eoe\"")
 (defvar org-babel-R-wrapper-method "main <- function ()\n{\n%s\n}
 write.table(main(), file=\"%s\", sep=\"\\t\", na=\"nil\",row.names=%s, col.names=%s, quote=FALSE)")
+(defvar org-babel-R-wrapper-lastvar "write.table(.Last.value, file=\"%s\", sep=\"\\t\", na=\"nil\",row.names=%s, col.names=%s, quote=FALSE)")
 
-(defun org-babel-R-evaluate (session body result-type column-names-p row-names-p)
+(defun org-babel-R-evaluate
+  (session body result-type column-names-p row-names-p)
   "Pass BODY to the R process in SESSION.  If RESULT-TYPE equals
 'output then return a list of the outputs of the statements in
 BODY, if RESULT-TYPE equals 'value then return the value of the
@@ -179,65 +219,52 @@ last statement in BODY, as elisp."
   (if (not session)
       ;; external process evaluation
       (case result-type
-	(output
-	 (with-temp-buffer
-	   (insert body)
-	   (org-babel-shell-command-on-region (point-min) (point-max) "R --slave --no-save" 'current-buffer 'replace)
-	   (org-babel-trim (buffer-string))))
+	(output (org-babel-eval org-babel-R-command body))
 	(value
-	 (let* ((tmp-file (make-temp-file "R-out-functional-results")) exit-code
-		(stderr
-		 (with-temp-buffer
-		   (insert (format org-babel-R-wrapper-method
-				   body tmp-file (if row-names-p "TRUE" "FALSE") (if column-names-p (if row-names-p "NA" "TRUE") "FALSE")))
-		   (setq exit-code (org-babel-shell-command-on-region
-				    (point-min) (point-max) "R --no-save" nil 'replace (current-buffer)))
-		   (buffer-string))))
-	   (if (> exit-code 0) (org-babel-error-notify exit-code stderr))
+	 (let ((tmp-file (make-temp-file "org-babel-R-results-")))
+	   (org-babel-eval org-babel-R-command
+			   (format org-babel-R-wrapper-method
+				   body tmp-file
+				   (if row-names-p "TRUE" "FALSE")
+				   (if column-names-p
+				       (if row-names-p "NA" "TRUE")
+				     "FALSE")))
 	   (org-babel-R-process-value-result
-	    (org-babel-import-elisp-from-file (org-babel-maybe-remote-file tmp-file))
-	    column-names-p))))
+	    (org-babel-import-elisp-from-file
+	     (org-babel-maybe-remote-file tmp-file)) column-names-p))))
     ;; comint session evaluation
-    (org-babel-comint-in-buffer session
-      (let* ((tmp-file (make-temp-file "org-babel-R"))
-	     (full-body
-	      (case result-type
-		(value
-		 (mapconcat #'org-babel-chomp (list body
-						    (format "write.table(.Last.value, file=\"%s\", sep=\"\\t\", na=\"nil\",row.names=%s, col.names=%s, quote=FALSE)" tmp-file (if row-names-p "TRUE" "FALSE") (if column-names-p  (if row-names-p "NA" "TRUE") "FALSE"))
-						    org-babel-R-eoe-indicator) "\n"))
-		(output
-		 (mapconcat #'org-babel-chomp (list body org-babel-R-eoe-indicator) "\n"))))
-	     (raw
-	      (org-babel-comint-with-output (session org-babel-R-eoe-output)
-		(insert full-body) (inferior-ess-send-input)))
-	     (comint-prompt-regexp
-	      (concat "^\\("
-		      inferior-ess-primary-prompt
-		      "\\|"
-		      inferior-ess-secondary-prompt
-		      "\\)*"))
-	     broke results)
-        (case result-type
-          (value (org-babel-R-process-value-result
-		  (org-babel-import-elisp-from-file
-		   (org-babel-maybe-remote-file tmp-file))
-		  column-names-p))
-          (output
-	   (flet ((extractor
-		   (el)
-		   (if (or broke
-			   (and (string-match (regexp-quote org-babel-R-eoe-output) el)
-				(setq broke t)))
-		       nil
-		     (if (= (length el) 0)
-			 nil
-		       (if (string-match comint-prompt-regexp el)
-			   (org-babel-trim (substring el (match-end 0)))
-			 el)))))
-	     (mapconcat
-	      #'identity
-	      (delete nil (mapcar #'extractor (mapcar #'org-babel-chomp raw))) "\n"))))))))
+    (case result-type
+      (value
+       (let ((tmp-file (make-temp-file "org-babel-R"))
+	     broke)
+	 (org-babel-comint-with-output (session org-babel-R-eoe-output)
+	   (insert (mapconcat
+		    #'org-babel-chomp
+		    (list
+		     body
+		     (format org-babel-R-wrapper-lastvar
+			     tmp-file
+			     (if row-names-p "TRUE" "FALSE")
+			     (if column-names-p
+				 (if row-names-p "NA" "TRUE")
+			       "FALSE"))
+		     org-babel-R-eoe-indicator) "\n"))
+	   (inferior-ess-send-input))
+	 (org-babel-R-process-value-result
+	  (org-babel-import-elisp-from-file
+	   (org-babel-maybe-remote-file tmp-file))  column-names-p)))
+      (output
+       (mapconcat
+	#'org-babel-chomp
+	(butlast
+	 (delq nil
+	       (mapcar
+		#'identity
+		(org-babel-comint-with-output (session org-babel-R-eoe-output)
+		  (insert (mapconcat #'org-babel-chomp
+				     (list body org-babel-R-eoe-indicator)
+				     "\n"))
+		  (inferior-ess-send-input)))) 2) "\n")))))
 
 (defun org-babel-R-process-value-result (result column-names-p)
   "R-specific processing of return value prior to return to
