@@ -87,45 +87,35 @@ or `org-babel-execute:c++'."
   (let* ((processed-params (org-babel-process-params params))
          (tmp-src-file (make-temp-file "org-babel-C-src" nil
                                        (cond
-                                         ((equal org-babel-c-variant 'c) ".c")
-                                         ((equal org-babel-c-variant 'cpp) ".cpp"))))
+					((equal org-babel-c-variant 'c) ".c")
+					((equal org-babel-c-variant 'cpp) ".cpp"))))
          (tmp-bin-file (make-temp-file "org-babel-C-bin"))
          (tmp-out-file (make-temp-file "org-babel-C-out"))
          (cmdline (cdr (assoc :cmdline params)))
          (flags (cdr (assoc :flags params)))
          (full-body (org-babel-C-expand body params))
-         (error-buf (get-buffer-create "*Org-Babel Error Output*"))
          (compile
-          (progn
-            (with-temp-file tmp-src-file (insert full-body))
-            (with-temp-buffer
-              (org-babel-shell-command-on-region
-               (point-min) (point-max)
-               (format "%s -o %s %s %s"
-		       (cond
-			((equal org-babel-c-variant 'c) org-babel-C-compiler)
-			((equal org-babel-c-variant 'cpp) org-babel-c++-compiler))
-                       tmp-bin-file
-                       (mapconcat 'identity
-                                  (if (listp flags) flags (list flags)) " ")
-                       tmp-src-file)
-               (current-buffer) 'replace error-buf)))))
-    (if (= compile 0)
-        (org-babel-reassemble-table
-         (org-babel-read
-          (org-babel-trim
-	   (org-babel-eval
-	    (concat tmp-bin-file (if cmdline (concat " " cmdline) "")) "")))
-         (org-babel-pick-name
-	  (nth 4 processed-params) (cdr (assoc :colnames params)))
-         (org-babel-pick-name
-	  (nth 5 processed-params) (cdr (assoc :rownames params))))
-      (progn
-        (with-current-buffer error-buf
-          (goto-char (point-max))
-          (insert (concat "\n\n--body--\n" full-body))
-          (goto-char (point-min)))
-        (display-buffer error-buf) nil))))
+	  (progn
+	    (with-temp-file tmp-src-file (insert full-body))
+	    (org-babel-eval
+	     (format "%s -o %s %s %s"
+		     (cond
+		      ((equal org-babel-c-variant 'c) org-babel-C-compiler)
+		      ((equal org-babel-c-variant 'cpp) org-babel-c++-compiler))
+		     tmp-bin-file
+		     (mapconcat 'identity
+				(if (listp flags) flags (list flags)) " ")
+		     tmp-src-file) ""))))
+    (org-babel-reassemble-table
+     (org-babel-read
+      (org-babel-trim
+       (org-babel-eval
+	(concat tmp-bin-file (if cmdline (concat " " cmdline) "")) "")))
+     (org-babel-pick-name
+      (nth 4 processed-params) (cdr (assoc :colnames params)))
+     (org-babel-pick-name
+      (nth 5 processed-params) (cdr (assoc :rownames params))))))
+
 
 (defun org-babel-C-expand (body params &optional processed-params)
   "Expand a block of C or C++ code with org-babel according to

@@ -93,8 +93,8 @@
 (defun org-babel-clojure-babel-clojure-cmd ()
   "Create the command to start clojure according to current settings."
   (if (and (not swank-clojure-binary) (not swank-clojure-classpath))
-      (error (concat "You must specifiy either a `swank-clojure-binary' "
-		     "or a `swank-clojure-jar-path'"))
+      (error "%s" (concat "You must specifiy either a `swank-clojure-binary' "
+			  "or a `swank-clojure-jar-path'"))
     (if swank-clojure-binary
         (if (listp swank-clojure-binary)
             swank-clojure-binary
@@ -269,8 +269,7 @@ repl buffer."
   (require 'slime) (require 'swank-clojure)
   (let ((raw nil)
         (results nil))
-    (save-window-excursion
-      (set-buffer buffer)
+    (with-current-buffer buffer
       (setq raw (org-babel-clojure-slime-eval-sync body))
       (setq results (reverse (mapcar #'org-babel-trim raw)))
       (cond

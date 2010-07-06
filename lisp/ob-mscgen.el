@@ -74,9 +74,8 @@ formats."
   (let* ((out-file (or (cdr (assoc :file params)) "output.png" ))
          (filetype (or (cdr (assoc :filetype params)) "png" )))
     (unless (cdr (assoc :file params))
-      (error (concat
-	      "\nERROR: no output file specified. "
-	      "Add \":file some_name.png\" to the src header")))
+      (error "
+ERROR: no output file specified. Add \":file name.png\" to the src header"))
     (org-babel-eval (concat "mscgen -T " filetype " -o " out-file) body)
     out-file))
 
