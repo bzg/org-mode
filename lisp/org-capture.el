@@ -385,6 +385,7 @@ bypassed."
 	(error "Abort"))
        (t
 	(org-capture-set-plist entry)
+	(org-capture-get-template)
 	(org-capture-put :original-buffer orig-buf :annotation annotation
 			 :initial initial)
 	(org-capture-put :default-time
@@ -423,6 +424,25 @@ bypassed."
 		      (org-set-local 'org-capture-clock-was-started t))
 		  (error
 		   "Could not start the clock in this capture buffer")))))))))))
+
+
+(defun org-capture-get-template ()
+  "Get the template from a file or a function if necessary."
+  (let ((txt (org-capture-get :template)) file)
+    (cond
+     ((and (listp txt) (eq (car txt) 'file))
+      (if (file-exists-p
+	   (setq file (expand-file-name (nth 1 txt) org-directory)))
+	  (setq txt (org-file-contents file))
+	(setq txt (format "* Template file %s not found" (nth 1 txt)))))
+     ((and (listp txt) (eq (car txt) 'function))
+      (if (fboundp (nth 1 txt))
+	  (setq txt (funcall (nth 1 txt)))
+	(setq txt (format "* Template function %s not found" (nth 1 txt)))))
+     ((not txt) (setq txt ""))
+     ((stringp txt))
+     (t (setq txt "* Invalid capture template")))
+    (org-capture-put :template txt)))
 
 (defun org-capture-finalize ()
   "Finalize the capture process."
@@ -660,20 +680,6 @@ already gone."
 	 (reversed (org-capture-get :prepend))
 	 (target-entry-p (org-capture-get :target-entry-p))
 	 level beg end file)
-
-    ;; Get the full template
-    (cond
-     ((and (listp txt) (eq (car txt) 'file))
-      (if (file-exists-p
-	   (setq file (expand-file-name (nth 1 txt) org-directory)))
-	  (setq txt (org-file-contents file))
-	(setq txt (format "Template file %s not found" (nth 1 txt)))))
-     ((and (listp txt) (eq (car txt) 'function))
-      (if (fboundp (nth 1 txt))
-	  (setq txt (funcall (nth 1 txt)))
-	(setq txt (format "Template function %s not found" (nth 1 txt)))))
-     ((not txt) (setq txt ""))
-     (t (setq txt "Invalid capture template")))
 
     (cond
      ((org-capture-get :exact-position)
