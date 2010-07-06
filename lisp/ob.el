@@ -171,18 +171,16 @@ any confirmation from the user.
 
 Note disabling confirmation may result in accidental evaluation
 of potentially harmful code."
-  (let ((eval (cdr (assoc :eval (nth 2 info)))))
+  (let* ((eval (cdr (assoc :eval (nth 2 info))))
+	 (query (or (equal eval "query")
+		    (and (functionp org-confirm-babel-evaluate)
+			 (funcall org-confirm-babel-evaluate
+				  (nth 0 info) (nth 1 info)))
+		    org-confirm-babel-evaluate)))
     (when (or (equal eval "never")
-	      (and (equal eval "query")
+	      (and query
 		   (not (yes-or-no-p
-			(format "Evaluate this%scode on your system?"
-				(if info (format " %s " (nth 0 info)) " ")))))
-	      (and (or (and (functionp org-confirm-babel-evaluate)
-			    (funcall org-confirm-babel-evaluate
-				     (nth 0 info) (nth 1 info)))
-		       org-confirm-babel-evaluate)
-		   (not (yes-or-no-p
-			 (format "Evaluate this%scode on your system?"
+			 (format "Evaluate this%scode on your system? "
 				 (if info (format " %s " (nth 0 info)) " "))))))
       (error "evaluation aborted"))))
 
