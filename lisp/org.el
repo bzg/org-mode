@@ -164,6 +164,7 @@ default only Emacs Lisp (which has no requirements) is loaded."
 		 (const :tag "Haskell" haskell)
 		 (const :tag "Latex" latex)
 		 (const :tag "Matlab" matlab)
+		 (const :tag "Mscgen" mscgen)
 		 (const :tag "Ocaml" ocaml)
 		 (const :tag "Octave" octave)
 		 (const :tag "Perl" perl)
