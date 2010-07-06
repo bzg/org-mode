@@ -28,7 +28,8 @@
 ;; sequence charts. The mscgen utility is used for processing the
 ;; sequence definition, and must therefore be installed in the system.
 ;;
-;; Mscgen is available and documented at http://www.mcternan.me.uk/mscgen/index.html
+;; Mscgen is available and documented at
+;; http://www.mcternan.me.uk/mscgen/index.html
 ;;
 ;; This code is directly inspired by Eric Schulte's ob-dot.el
 ;;
@@ -55,6 +56,7 @@
 
 ;;; Code:
 (require 'ob)
+(require 'ob-eval)
 
 (defvar org-babel-default-header-args:mscgen
   '((:results . "file") (:exports . "results"))
@@ -64,22 +66,18 @@
   "Expand BODY according to PARAMS, return the expanded body." body)
 
 (defun org-babel-execute:mscgen (body params)
-  "Execute a block of Mscgen code with org-babel.  This function is
-called by `org-babel-execute-src-block'.
-Default filetype is png. Modify by setting :filetype parameter to mscgen supported formats."
+  "Execute a block of Mscgen code with org-babel.  This function
+is called by `org-babel-execute-src-block'.  Default filetype is
+png. Modify by setting :filetype parameter to mscgen supported
+formats."
   (message "executing Mscgen source code block")
   (let* ((out-file (or (cdr (assoc :file params)) "output.png" ))
-         exit-code
-         (filetype (or (cdr (assoc :filetype params)) "png" ))
-         (stderr
-          (with-temp-buffer
-            (insert body)
-            (setq exit-code (org-babel-shell-command-on-region
-                             (point-min) (point-max) (concat "mscgen -T " filetype " -o " out-file)
-                             nil 'replace (current-buffer)))
-            (buffer-string))))
-    (unless (cdr (assoc :file params)) (setq stderr (concat stderr "\nERROR: no output file specified. Add \":file some_name.png\" to the src header" )) (error stderr))
-    (if (> exit-code 0) (org-babel-error-notify exit-code stderr))
+         (filetype (or (cdr (assoc :filetype params)) "png" )))
+    (unless (cdr (assoc :file params))
+      (error (concat
+	      "\nERROR: no output file specified. "
+	      "Add \":file some_name.png\" to the src header")))
+    (org-babel-eval (concat "mscgen -T " filetype " -o " out-file) body)
     out-file))
 
 (defun org-babel-prep-session:mscgen (session params)
