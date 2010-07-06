@@ -415,6 +415,11 @@ and `org-export-with-tags' instead."
   :group 'org-export-latex
   :type 'string)
 
+(defcustom org-export-latex-tabular-environment "tabular"
+  "Default environment used to build tables."
+  :group 'org-export-latex
+  :type 'string)
+
 (defcustom org-export-latex-inline-image-extensions
   '("pdf" "jpeg" "jpg" "png" "ps" "eps")
   "Extensions of image files that can be inlined into LaTeX.
@@ -1660,7 +1665,9 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
                         (if (and longtblp caption) "\\\\\n" "\n")
                         (if (and org-export-latex-tables-centered (not longtblp))
                             "\\begin{center}\n")
-                        (if (not longtblp) (concat "\\begin{tabular}{" align "}\n"))
+                        (if (not longtblp)
+			    (format "\\begin{%s}{%s}\n"
+				    org-export-latex-tabular-environment align))
                         (orgtbl-to-latex
                          lines
                          `(:tstart nil :tend nil
@@ -1672,7 +1679,9 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 \\endfoot
 \\endlastfoot" (length org-table-last-alignment))
                                              nil)))
-                        (if (not longtblp) (concat "\n\\end{tabular}"))
+                        (if (not longtblp)
+			    (format "\n\\end{%s}"
+				    org-export-latex-tabular-environment))
                         (if longtblp "\n" (if org-export-latex-tables-centered
                                               "\n\\end{center}\n" "\n"))
                         (if longtblp
