@@ -33,6 +33,11 @@
 ;;; Code:
 (require 'ob)
 
+(declare-function org-create-formula-image "org" (string tofile options buffer))
+(declare-function org-splice-latex-header "org"
+		  (tpl def-pkg pkg snippets-p &optional extra))
+(declare-function org-export-latex-fix-inputenc "org-latex" ())
+
 (add-to-list 'org-babel-tangle-lang-exts '("latex" . "tex"))
 
 (defvar org-babel-default-header-args:latex
@@ -50,6 +55,8 @@
                  body))) (nth 1 (org-babel-process-params params)))
   body)
 
+(defvar org-format-latex-options)
+(defvar org-export-latex-packages-alist)
 (defun org-babel-execute:latex (body params)
   "Execute a block of Latex code with org-babel.  This function is
 called by `org-babel-execute-src-block'."
@@ -79,6 +86,10 @@ called by `org-babel-execute-src-block'."
         out-file)
     body))
 
+(defvar org-format-latex-header)
+(defvar org-format-latex-header-extra)
+(defvar org-export-latex-packages-alist)
+(defvar org-export-latex-default-packages-alist)
 (defun org-babel-latex-body-to-tex-file (tex-file body &optional height width)
   "Place the contents of BODY into TEX-FILE. Extracted from
 `org-create-formula-image' in org.el."
@@ -101,6 +112,9 @@ called by `org-babel-execute-src-block'."
             "\n\\begin{document}\n" body "\n\\end{document}\n")
     (org-export-latex-fix-inputenc)))
 
+(defvar org-export-pdf-logfiles)
+(defvar org-latex-to-pdf-process)
+(defvar org-export-pdf-remove-logfiles)
 (defun org-babel-latex-tex-to-pdf (tex-file)
   "Generate a pdf according to the contents TEX-FILE.  Extracted
 from `org-export-as-pdf' in org-latex.el."
