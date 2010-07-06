@@ -148,6 +148,7 @@ class, you can use the following macro-like placeholders.
  [NO-PACKAGES]           do not include the packages
  [EXTRA]                 the stuff from #+LaTeX_HEADER
  [NO-EXTRA]              do not include #+LaTeX_HEADER stuff
+ [BEAMER-HEADER-EXTRA]   the beamer extra headers
 
 So a header like
 
