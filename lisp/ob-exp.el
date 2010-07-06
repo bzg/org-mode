@@ -54,7 +54,7 @@ line. A source block is considered to be a source block function
 if the source name is present and is followed by a parenthesized
 argument list. The parentheses may be empty or contain
 whitespace. An example is the following which generates n random
-(uniform) numbers.
+\(uniform) numbers.
 
 #+source: rand(n)
 #+begin_src R
