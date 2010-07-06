@@ -145,7 +145,13 @@ target       Specification of where the captured item should be placed.
 
 template     The template for creating the capture item.  If you leave this
              empty, an appropriate default template will be used.  See below
-             for more details.
+             for more details.  Instead of a string, this may also be one of
+
+                 (file \"/path/to/template-file\")
+                 (function function-returning-the-template)
+
+             in order to get a template from a file, or dynamically
+             from a function.
 
 The rest of the entry is a property list of additional options.  Recognized
 properties are:
@@ -274,7 +280,14 @@ calendar           |  %:type %:date"
 		   (list :tag "Function"
 			 (const :format "" function)
 			 (sexp :tag "  Function")))
-	   (string :tag "Template (opt) ")
+	   (choice :tag "Template"
+		   (string)
+		   (list :tag "File"
+			 (const :format "" file-contents)
+			 (file :tag "Template file"))
+		   (list :tag "Function"
+			 (const :format "" function)
+			 (file :tag "Template function")))
 	   (plist :inline t
 		  ;; Give the most common options as checkboxes
 		  :options (((const :format "%v " :prepend) (const t))
@@ -647,6 +660,20 @@ already gone."
 	 (reversed (org-capture-get :prepend))
 	 (target-entry-p (org-capture-get :target-entry-p))
 	 level beg end)
+
+    ;; Get the full template
+    (cond
+     ((and (listp txt) (eq (car txt) 'file))
+      (if (file-exists-p (nth 1 txt))
+	  (setq txt (org-file-contents (nth 1 txt)))
+	(setq txt (format "Template file %s not found" (nth 1 txt)))))
+     ((and (listp txt) (eq (car txt) 'function))
+      (if (fboundp (nth 1 txt))
+	  (setq txt (funcall (nth 1 txt)))
+	(setq txt (format "Template function %s not found" (nth 1 txt)))))
+     ((not txt) (setq txt ""))
+     (t (setq txt "Invalid capture template")))
+
     (cond
      ((org-capture-get :exact-position)
       (goto-char (org-capture-get :exact-position)))
