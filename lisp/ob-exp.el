@@ -59,8 +59,7 @@ whitespace. An example is the following which generates n random
 #+source: rand(n)
 #+begin_src R
   runif(n)
-#+end_src
-")
+#+end_src")
 
 (defvar org-babel-function-def-export-indent 4
   "When exporting a source block function, the block contents
