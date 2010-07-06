@@ -32,7 +32,6 @@
 
 ;;; Code:
 (require 'ob)
-(require 'org-latex)
 
 (add-to-list 'org-babel-tangle-lang-exts '("latex" . "tex"))
 
