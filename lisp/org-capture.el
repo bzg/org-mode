@@ -659,13 +659,14 @@ already gone."
   (let* ((txt (org-capture-get :template))
 	 (reversed (org-capture-get :prepend))
 	 (target-entry-p (org-capture-get :target-entry-p))
-	 level beg end)
+	 level beg end file)
 
     ;; Get the full template
     (cond
      ((and (listp txt) (eq (car txt) 'file))
-      (if (file-exists-p (nth 1 txt))
-	  (setq txt (org-file-contents (nth 1 txt)))
+      (if (file-exists-p
+	   (setq file (expand-file-name (nth 1 txt) org-directory)))
+	  (setq txt (org-file-contents file))
 	(setq txt (format "Template file %s not found" (nth 1 txt)))))
      ((and (listp txt) (eq (car txt) 'function))
       (if (fboundp (nth 1 txt))
