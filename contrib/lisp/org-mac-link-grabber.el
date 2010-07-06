@@ -4,7 +4,7 @@
 ;; Copyright (c) 2010 Free Software Foundation, Inc.
 ;; 
 ;; Author: Anthony Lander <anthony.lander@gmail.com>
-;; Version: 1.0
+;; Version: 1.0.1
 ;; Keywords: org, mac, hyperlink
 ;;
 ;; This program is free software; you can redistribute it and/or modify
@@ -39,6 +39,7 @@
 ;; Mail.app - grab links to the selected messages in the message list
 ;; AddressBook.app - Grab links to the selected addressbook Cards
 ;; Firefox.app - Grab the url of the frontmost tab in the frontmost window
+;; Vimperator/Firefox.app - Grab the url of the frontmost tab in the frontmost window
 ;; Safari.app - Grab the url of the frontmost tab in the frontmost window
 ;; Google Chrome.app - Grab the url of the frontmost tab in the frontmost window
 ;; Together.app - Grab links to the selected items in the library list
@@ -108,6 +109,12 @@ applications and inserting them in org documents"
   :group 'org-mac-link-grabber
   :type 'boolean)
 
+(defcustom org-mac-grab-Firefox+Vimperator-p nil
+  "Enable menu option [v]imperator to grab links from Firefox.app running the Vimperator plugin"
+  :tag "Grab Vimperator/Firefox.app links"
+  :group 'org-mac-link-grabber
+  :type 'boolean)
+
 (defcustom org-mac-grab-Chrome-app-p t
   "Enable menu option [f]irefox to grab links from Google Chrome.app"
   :tag "Grab Google Chrome.app links"
@@ -129,6 +136,7 @@ applications and inserting them in org documents"
 						("a" "ddressbook" org-mac-addressbook-insert-selected ,org-mac-grab-Addressbook-app-p)
 						("s" "afari" org-mac-safari-insert-frontmost-url ,org-mac-grab-Safari-app-p)
 						("f" "irefox" org-mac-firefox-insert-frontmost-url ,org-mac-grab-Firefox-app-p)
+						("v" "imperator" org-mac-vimperator-insert-frontmost-url ,org-mac-grab-Firefox+Vimperator-p)
 						("c" "hrome" org-mac-chrome-insert-frontmost-url ,org-mac-grab-Chrome-app-p)
 						("t" "ogether" org-mac-together-insert-selected ,org-mac-grab-Together-app-p)))
 		 (menu-string (make-string 0 ?x))
@@ -230,6 +238,51 @@ applications and inserting them in org documents"
 (defun org-mac-firefox-insert-frontmost-url ()
   (interactive)
   (insert (org-mac-firefox-get-frontmost-url)))
+
+
+;; Handle links from Google Firefox.app running the Vimperator extension
+;; Grab the frontmost url from Firefox+Vimperator. Same limitations are
+;; Firefox
+
+(defun as-mac-vimperator-get-frontmost-url ()
+  (let ((result (do-applescript
+					(concat
+					 "set oldClipboard to the clipboard\n"
+					 "set frontmostApplication to path to frontmost application\n"
+					 "tell application \"Firefox\"\n"
+					 "	activate\n"
+					 "	delay 0.15\n"
+					 "	tell application \"System Events\"\n"
+					 "		keystroke \"y\"\n"
+					 "	end tell\n"
+					 "	delay 0.15\n"
+					 "	set theUrl to the clipboard\n"
+					 "	set the clipboard to oldClipboard\n"
+					 "	set theResult to (get theUrl) & \"::split::\" & (get name of window 1)\n"
+					 "end tell\n"
+					 "activate application (frontmostApplication as text)\n"
+					 "set links to {}\n"
+					 "copy theResult to the end of links\n"
+					 "return links as string\n"))))
+    (replace-regexp-in-string "\s+-\s+Vimperator" "" (car (split-string result "[\r\n]+" t)))))
+
+
+(defun org-mac-vimperator-get-frontmost-url ()
+  (interactive)
+  (message "Applescript: Getting Vimperator url...")
+  (let* ((url-and-title (as-mac-vimperator-get-frontmost-url))
+	 (split-link (split-string url-and-title "::split::"))
+	 (URL (car split-link))
+	 (description (cadr split-link))
+	 (org-link))
+    (when (not (string= URL ""))
+      (setq org-link (org-make-link-string URL description)))
+    (kill-new org-link)
+    org-link))
+
+(defun org-mac-vimperator-insert-frontmost-url ()
+  (interactive)
+  (insert (org-mac-vimperator-get-frontmost-url)))
 
 
 ;; Handle links from Google Chrome.app
