@@ -534,7 +534,9 @@ already gone."
   (unless (eq (org-capture-get :type 'local) 'entry)
     (error
      "Refiling from a capture buffer makes only sense for `entry'-type templates"))
-  (let ((pos (point)) (base (buffer-base-buffer (current-buffer))))
+  (let ((pos (point))
+	(base (buffer-base-buffer (current-buffer)))
+	(org-refile-for-capture t))
     (org-capture-finalize)
     (save-window-excursion
       (with-current-buffer (or base (current-buffer))
@@ -542,7 +544,16 @@ already gone."
 	  (save-restriction
 	    (widen)
 	    (goto-char pos)
-	    (call-interactively 'org-refile)))))))
+	    (call-interactively 'org-refile)
+	    (when (and (boundp 'bookmark-alist)
+		       (assoc "org-capture-last-stored" bookmark-alist))
+	      (if (assoc "org-refile-last-stored" bookmark-alist)
+		  (setcdr (assoc "org-refile-last-stored" bookmark-alist)
+			  (cdr (assoc "org-refile-last-stored" bookmark-alist)))
+		(push (cons "org-capture-last-stored"
+			    (cdr (assoc "org-refile-last-stored"
+					bookmark-alist)))
+		      bookmark-alist)))))))))
 
 (defun org-capture-kill ()
   "Abort the current capture process."

@@ -10022,6 +10022,7 @@ such as the file name."
 Note that this is still *before* the stuff will be removed from
 the *old* location.")
 
+(defvar org-capture-last-stored-marker)
 (defun org-refile (&optional goto default-buffer rfloc)
   "Move the entry at point to another heading.
 The list of target headings is compiled using the information in
@@ -10142,6 +10143,11 @@ This can be done with a 0 prefix: `C-0 C-c C-w'"
 		      (save-excursion (org-add-log-note))))
 		  (and org-auto-align-tags (org-set-tags nil t))
 		  (bookmark-set "org-refile-last-stored")
+		  ;; If we are refiling for capture, make sure that the
+		  ;; last-capture pointers point here
+		  (when (org-bound-and-true-p org-refile-for-capture)
+		    (bookmark-set "org-refile-last-stored")
+		    (move-marker org-capture-last-stored-marker (point)))
 		  (if (fboundp 'deactivate-mark) (deactivate-mark))
 		  (run-hooks 'org-after-refile-insert-hook))))
 	    (if regionp
