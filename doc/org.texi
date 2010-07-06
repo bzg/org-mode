@@ -11211,13 +11211,14 @@ Code blocks in the following languages are supported.
 @item css @tab css @tab ditaa @tab ditaa
 @item Graphviz @tab dot @tab Emacs Lisp @tab emacs-lisp
 @item gnuplot @tab gnuplot @tab Haskell @tab haskell
-@item Matlab @tab matlab @tab LaTeX @tab latex
-@item Objective Caml @tab ocaml @tab Octave @tab octave
-@item OZ @tab oz @tab Perl @tab perl
-@item Python @tab python @tab R @tab R
-@item Ruby @tab ruby @tab Sass @tab sass
-@item GNU Screen @tab screen @tab shell @tab sh
-@item SQL @tab sql @tab Sqlite @tab sqlite
+@item LaTeX @tab latex @tab Matlab @tab matlab
+@item Mscgen @tab mscgen @tab Objective Caml @tab ocaml
+@item Octave @tab octave @tab OZ @tab oz
+@item Perl @tab perl @tab Python @tab python
+@item R @tab R @tab Ruby @tab ruby
+@item Sass @tab sass @tab GNU Screen @tab screen
+@item shell @tab sh @tab SQL @tab sql
+@item Sqlite @tab sqlite
 @end multitable
 
 Language specific documentation is available for some languages.  If
