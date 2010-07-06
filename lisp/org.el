@@ -3572,7 +3572,9 @@ outside the table.")
    org-table-rotate-recalc-marks org-table-sort-lines org-table-sum
    org-table-toggle-coordinate-overlays
    org-table-toggle-formula-debugger org-table-wrap-region
-   orgtbl-mode turn-on-orgtbl org-table-to-lisp)))
+   orgtbl-mode turn-on-orgtbl org-table-to-lisp
+   orgtbl-to-generic orgtbl-to-tsv orgtbl-to-csv orgtbl-to-latex
+   orgtbl-to-orgtbl orgtbl-to-html orgtbl-to-texinfo)))
 
 (defun org-at-table-p (&optional table-type)
   "Return t if the cursor is inside an org-type table.
