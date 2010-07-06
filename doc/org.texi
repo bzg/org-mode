@@ -3060,7 +3060,7 @@ link and description parts of the link.
 Open link at point.  This will launch a web browser for URLs (using
 @command{browse-url-at-point}), run VM/MH-E/Wanderlust/Rmail/Gnus/BBDB for
 the corresponding links, and execute the command in a shell link.  When the
-cursor is on an internal link, this commands runs the corresponding search.
+cursor is on an internal link, this command runs the corresponding search.
 When the cursor is on a TAG list in a headline, it creates the corresponding
 TAGS view.  If the cursor is on a timestamp, it compiles the agenda for that
 date.  Furthermore, it will visit text and remote files in @samp{file:} links
@@ -11211,13 +11211,14 @@ Code blocks in the following languages are supported.
 @item css @tab css @tab ditaa @tab ditaa
 @item Graphviz @tab dot @tab Emacs Lisp @tab emacs-lisp
 @item gnuplot @tab gnuplot @tab Haskell @tab haskell
-@item Matlab @tab matlab @tab LaTeX @tab latex
-@item Objective Caml @tab ocaml @tab Octave @tab octave
-@item OZ @tab oz @tab Perl @tab perl
-@item Python @tab python @tab R @tab R
-@item Ruby @tab ruby @tab Sass @tab sass
-@item GNU Screen @tab screen @tab shell @tab sh
-@item SQL @tab sql @tab Sqlite @tab sqlite
+@item LaTeX @tab latex @tab Matlab @tab matlab
+@item Mscgen @tab mscgen @tab Objective Caml @tab ocaml
+@item Octave @tab octave @tab OZ @tab oz
+@item Perl @tab perl @tab Python @tab python
+@item R @tab R @tab Ruby @tab ruby
+@item Sass @tab sass @tab GNU Screen @tab screen
+@item shell @tab sh @tab SQL @tab sql
+@item Sqlite @tab sqlite
 @end multitable
 
 Language specific documentation is available for some languages.  If
@@ -11411,13 +11412,17 @@ The following header arguments are defined:
 
 @menu
 * var::				Pass arguments to code blocks
-* results::			Specify the type of results and how they will be collectd and handled
+* results::			Specify the type of results and how they will
+                                be collectd and handled
 * file::			Specify a path for file output
-* dir and remote execution::	Specify the default directory for code block execution
+* dir and remote execution::	Specify the default directory for code block
+                                execution
 * exports::			Export code and/or results
 * tangle::			Toggle tangling and specify file name
-* no-expand::			Turn off variable assignment and noweb expansion during tangling
-* comments::                    Toggle insertion of comments in tangled code files
+* no-expand::			Turn off variable assignment and noweb
+                                expansion during tangling
+* comments::                    Toggle insertion of comments in tangled
+                                code files
 * session::			Preserve the state of code evaluation
 * noweb::			Toggle expansion of noweb references
 * cache::			Avoid re-evaluating unchanged code blocks
@@ -11425,6 +11430,7 @@ The following header arguments are defined:
 * colnames::			Handle column names in tables
 * rownames::			Handle row names in tables
 * shebang::			Make tangled files executable
+* eval::                        Limit evaluation of specific code blocks
 @end menu
 
 @node var, results, Specific header arguments, Specific header arguments
@@ -12003,13 +12009,23 @@ and is then reapplied to the results.
 @end example
 @end itemize
 
-@node shebang,  , rownames, Specific header arguments
+@node shebang, eval, rownames, Specific header arguments
 @subsubsection @code{:shebang}
 
 Setting the @code{:shebang} header argument to a string value
 (e.g. @code{:shebang "#!/bin/bash"}) causes the string to be inserted as the
 first line of any tangled file holding the code block, and the file
 permissions of the tangled file are set to make it executable.
+
+@node eval, , shebang, Specific header arguments
+@subsubsection @code{:eval}
+The @code{:eval} header argument can be used to limit the evaluation of
+specific code blocks.  @code{:eval} accepts two arguments ``never'' and
+``query''.  @code{:eval never} will ensure that a code block is never
+evaluated, this can be useful for protecting against the evaluation of
+dangerous code blocks.  @code{:eval query} will require a query for every
+execution of a code block regardless of the value of the
+@code{org-confirm-babel-evaluate} variable.
 
 @node Results of evaluation, Noweb reference syntax, Header arguments, Working With Source Code
 @section Results of evaluation

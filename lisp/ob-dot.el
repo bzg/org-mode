@@ -40,8 +40,10 @@
 
 ;;; Code:
 (require 'ob)
+(require 'ob-eval)
 
-(defvar org-babel-default-header-args:dot '((:results . "file") (:exports . "results"))
+(defvar org-babel-default-header-args:dot
+  '((:results . "file") (:exports . "results"))
   "Default arguments to use when evaluating a dot source block.")
 
 (defun org-babel-expand-body:dot (body params &optional processed-params)
@@ -57,8 +59,7 @@ called by `org-babel-execute-src-block'."
         (cmd (or (cdr (assoc :cmd params)) "dot"))
         (in-file (make-temp-file "org-babel-dot")))
     (with-temp-file in-file (insert body))
-    (message (concat cmd " " in-file " " cmdline " -o " out-file))
-    (shell-command (concat cmd " " in-file " " cmdline " -o " out-file))
+    (org-babel-eval (concat cmd " " in-file " " cmdline " -o " out-file) "")
     out-file))
 
 (defun org-babel-prep-session:dot (session params)

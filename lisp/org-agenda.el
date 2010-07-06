@@ -7489,11 +7489,12 @@ The prefix arg is passed through to the command if possible."
 		   "Refile to: "
 		   (marker-buffer (car org-agenda-bulk-marked-entries))
 		   org-refile-allow-creating-parent-nodes))
-      (setcar (nthcdr 3 rfloc)
-	      (move-marker (make-marker) (nth 3 rfloc)
-			   (or (get-file-buffer (nth 1 rfloc))
-			       (find-buffer-visiting (nth 1 rfloc))
-			       (error "This should not happen"))))
+      (if (nth 3 rfloc)
+	  (setcar (nthcdr 3 rfloc)
+		  (move-marker (make-marker) (nth 3 rfloc)
+			       (or (get-file-buffer (nth 1 rfloc))
+				   (find-buffer-visiting (nth 1 rfloc))
+				   (error "This should not happen")))))
 
       (setq cmd (list 'org-agenda-refile nil (list 'quote rfloc) t)
 	    redo-at-end t))

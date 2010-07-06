@@ -164,6 +164,7 @@ default only Emacs Lisp (which has no requirements) is loaded."
 		 (const :tag "Haskell" haskell)
 		 (const :tag "Latex" latex)
 		 (const :tag "Matlab" matlab)
+		 (const :tag "Mscgen" mscgen)
 		 (const :tag "Ocaml" ocaml)
 		 (const :tag "Octave" octave)
 		 (const :tag "Perl" perl)
@@ -3571,7 +3572,9 @@ outside the table.")
    org-table-rotate-recalc-marks org-table-sort-lines org-table-sum
    org-table-toggle-coordinate-overlays
    org-table-toggle-formula-debugger org-table-wrap-region
-   orgtbl-mode turn-on-orgtbl org-table-to-lisp)))
+   orgtbl-mode turn-on-orgtbl org-table-to-lisp
+   orgtbl-to-generic orgtbl-to-tsv orgtbl-to-csv orgtbl-to-latex
+   orgtbl-to-orgtbl orgtbl-to-html orgtbl-to-texinfo)))
 
 (defun org-at-table-p (&optional table-type)
   "Return t if the cursor is inside an org-type table.
@@ -10019,6 +10022,7 @@ such as the file name."
 Note that this is still *before* the stuff will be removed from
 the *old* location.")
 
+(defvar org-capture-last-stored-marker)
 (defun org-refile (&optional goto default-buffer rfloc)
   "Move the entry at point to another heading.
 The list of target headings is compiled using the information in
@@ -10139,6 +10143,11 @@ This can be done with a 0 prefix: `C-0 C-c C-w'"
 		      (save-excursion (org-add-log-note))))
 		  (and org-auto-align-tags (org-set-tags nil t))
 		  (bookmark-set "org-refile-last-stored")
+		  ;; If we are refiling for capture, make sure that the
+		  ;; last-capture pointers point here
+		  (when (org-bound-and-true-p org-refile-for-capture)
+		    (bookmark-set "org-refile-last-stored")
+		    (move-marker org-capture-last-stored-marker (point)))
 		  (if (fboundp 'deactivate-mark) (deactivate-mark))
 		  (run-hooks 'org-after-refile-insert-hook))))
 	    (if regionp
@@ -14813,17 +14822,16 @@ If there is a specifyer for a cyclic time stamp, get the closest date to
 DAYNR.
 PREFER and SHOW-ALL are passed through to `org-closest-date'.
 the variable date is bound by the calendar when this is called."
-  (let ((today (calendar-absolute-from-gregorian (calendar-current-date))))
-    (cond
-     ((and daynr (string-match "\\`%%\\((.*)\\)" s))
-      (if (org-diary-sexp-entry (match-string 1 s) "" date)
-	  daynr
-	(+ daynr 1000)))
-     ((and daynr (not (eq daynr today)) (string-match "\\+[0-9]+[dwmy]" s))
-	   (org-closest-date s (if (and (boundp 'daynr) (integerp daynr)) daynr
-				 (time-to-days (current-time))) (match-string 0 s)
-				 prefer show-all))
-      (t (time-to-days (apply 'encode-time (org-parse-time-string s)))))))
+  (cond
+   ((and daynr (string-match "\\`%%\\((.*)\\)" s))
+    (if (org-diary-sexp-entry (match-string 1 s) "" date)
+	daynr
+      (+ daynr 1000)))
+   ((and daynr (string-match "\\+[0-9]+[dwmy]" s))
+    (org-closest-date s (if (and (boundp 'daynr) (integerp daynr)) daynr
+			  (time-to-days (current-time))) (match-string 0 s)
+			  prefer show-all))
+   (t (time-to-days (apply 'encode-time (org-parse-time-string s))))))
 
 (defun org-days-to-iso-week (days)
   "Return the iso week number."

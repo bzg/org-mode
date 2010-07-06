@@ -130,10 +130,11 @@ FIXME:  How to update when broken?"
   (cond
    ((org-bound-and-true-p org-inhibit-startup)
     (setq org-indent-mode nil))
+   ((and org-indent-mode (featurep 'xemacs))
+    (message "org-indent-mode does not work in XEmacs - refused to turn it on")
+    (setq org-indent-mode nil))
    ((and org-indent-mode
-	 (or (< emacs-major-version 23)
-	     (and (= emacs-major-version 23)
-		  (< emacs-minor-version 2))))
+	 (not (org-version-check "23.1.50" "Org Indent mode" :predicate)))
     (message "org-indent-mode is can crash Emacs 23.1 - refused to turn it on!")
     (ding)
     (sit-for 1)

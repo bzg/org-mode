@@ -145,7 +145,13 @@ target       Specification of where the captured item should be placed.
 
 template     The template for creating the capture item.  If you leave this
              empty, an appropriate default template will be used.  See below
-             for more details.
+             for more details.  Instead of a string, this may also be one of
+
+                 (file \"/path/to/template-file\")
+                 (function function-returning-the-template)
+
+             in order to get a template from a file, or dynamically
+             from a function.
 
 The rest of the entry is a property list of additional options.  Recognized
 properties are:
@@ -274,7 +280,14 @@ calendar           |  %:type %:date"
 		   (list :tag "Function"
 			 (const :format "" function)
 			 (sexp :tag "  Function")))
-	   (string :tag "Template (opt) ")
+	   (choice :tag "Template"
+		   (string)
+		   (list :tag "File"
+			 (const :format "" file-contents)
+			 (file :tag "Template file"))
+		   (list :tag "Function"
+			 (const :format "" function)
+			 (file :tag "Template function")))
 	   (plist :inline t
 		  ;; Give the most common options as checkboxes
 		  :options (((const :format "%v " :prepend) (const t))
@@ -372,6 +385,7 @@ bypassed."
 	(error "Abort"))
        (t
 	(org-capture-set-plist entry)
+	(org-capture-get-template)
 	(org-capture-put :original-buffer orig-buf :annotation annotation
 			 :initial initial)
 	(org-capture-put :default-time
@@ -410,6 +424,25 @@ bypassed."
 		      (org-set-local 'org-capture-clock-was-started t))
 		  (error
 		   "Could not start the clock in this capture buffer")))))))))))
+
+
+(defun org-capture-get-template ()
+  "Get the template from a file or a function if necessary."
+  (let ((txt (org-capture-get :template)) file)
+    (cond
+     ((and (listp txt) (eq (car txt) 'file))
+      (if (file-exists-p
+	   (setq file (expand-file-name (nth 1 txt) org-directory)))
+	  (setq txt (org-file-contents file))
+	(setq txt (format "* Template file %s not found" (nth 1 txt)))))
+     ((and (listp txt) (eq (car txt) 'function))
+      (if (fboundp (nth 1 txt))
+	  (setq txt (funcall (nth 1 txt)))
+	(setq txt (format "* Template function %s not found" (nth 1 txt)))))
+     ((not txt) (setq txt ""))
+     ((stringp txt))
+     (t (setq txt "* Invalid capture template")))
+    (org-capture-put :template txt)))
 
 (defun org-capture-finalize ()
   "Finalize the capture process."
@@ -501,7 +534,9 @@ already gone."
   (unless (eq (org-capture-get :type 'local) 'entry)
     (error
      "Refiling from a capture buffer makes only sense for `entry'-type templates"))
-  (let ((pos (point)) (base (buffer-base-buffer (current-buffer))))
+  (let ((pos (point))
+	(base (buffer-base-buffer (current-buffer)))
+	(org-refile-for-capture t))
     (org-capture-finalize)
     (save-window-excursion
       (with-current-buffer (or base (current-buffer))
@@ -509,7 +544,16 @@ already gone."
 	  (save-restriction
 	    (widen)
 	    (goto-char pos)
-	    (call-interactively 'org-refile)))))))
+	    (call-interactively 'org-refile)
+	    (when (and (boundp 'bookmark-alist)
+		       (assoc "org-capture-last-stored" bookmark-alist))
+	      (if (assoc "org-refile-last-stored" bookmark-alist)
+		  (setcdr (assoc "org-refile-last-stored" bookmark-alist)
+			  (cdr (assoc "org-refile-last-stored" bookmark-alist)))
+		(push (cons "org-capture-last-stored"
+			    (cdr (assoc "org-refile-last-stored"
+					bookmark-alist)))
+		      bookmark-alist)))))))))
 
 (defun org-capture-kill ()
   "Abort the current capture process."
@@ -646,7 +690,8 @@ already gone."
   (let* ((txt (org-capture-get :template))
 	 (reversed (org-capture-get :prepend))
 	 (target-entry-p (org-capture-get :target-entry-p))
-	 level beg end)
+	 level beg end file)
+
     (cond
      ((org-capture-get :exact-position)
       (goto-char (org-capture-get :exact-position)))

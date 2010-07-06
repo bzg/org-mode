@@ -387,11 +387,12 @@ the value will be inserted right after the documentclass statement."
 	     org-beamer-header-extra)
     (goto-char (point-min))
     (cond
-     ((re-search-forward "^[ \t]*BEAMER-HEADER-EXTRA-HERE[ \t]*$" nil t)
+     ((re-search-forward
+       "^[ \t]*\\[?BEAMER-HEADER-EXTRA\\(-HERE\\)?\\]?[ \t]*$" nil t)
       (replace-match org-beamer-header-extra t t)
       (or (bolp) (insert "\n")))
-     ((re-search-forward "^[ \t]*\\\\documentclass\\>" nil t)
-      (beginning-of-line 2)
+     ((re-search-forward "^[ \t]*\\\\begin{document}" nil t)
+      (beginning-of-line 1)
       (insert org-beamer-header-extra)
       (or (bolp) (insert "\n"))))))
 

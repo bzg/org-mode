@@ -56,7 +56,7 @@ called by `org-babel-execute-src-block'."
         (cmdline (cdr (assoc :cmdline params)))
         (in-file (make-temp-file "org-babel-ditaa")))
     (unless (file-exists-p org-ditaa-jar-path)
-      (error (format "Could not find ditaa.jar at %s" org-ditaa-jar-path)))
+      (error "Could not find ditaa.jar at %s" org-ditaa-jar-path))
     (with-temp-file in-file (insert body))
     (message (concat "java -jar " org-ditaa-jar-path " " cmdline " " in-file " " out-file))
     (shell-command (concat "java -jar " org-ditaa-jar-path " " cmdline " " in-file " " out-file))

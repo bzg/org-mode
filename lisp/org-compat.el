@@ -89,6 +89,30 @@ any other entries, and any resulting duplicates will be removed entirely."
    (t specs)))
 (put 'org-compatible-face 'lisp-indent-function 1)
 
+(defun org-version-check (version feature level)
+  (let* ((v1 (mapcar 'string-to-number (split-string version "[.]")))
+	 (v2 (mapcar 'string-to-number (split-string emacs-version "[.]")))
+	 (rmaj (or (nth 0 v1) 99))
+	 (rmin (or (nth 1 v1) 99))
+	 (rbld (or (nth 2 v1) 99))
+	 (maj (or (nth 0 v2) 0))
+	 (min (or (nth 1 v2) 0))
+	 (bld (or (nth 2 v2) 0)))
+    (if (or (< maj rmaj)
+	    (and (= maj rmaj)
+		 (< min rmin))
+	    (and (= maj rmaj)
+		 (= min rmin)
+		 (< bld rbld)))
+	(if (eq level :predicate)
+	    ;; just return if we have the version
+	    nil
+	  (let ((msg (format "Emacs %s or greater is recommended for %s"
+			     version feature)))
+	    (display-warning 'org msg level)
+	    t))
+      t)))
+
 ;;;; Emacs/XEmacs compatibility
 
 ;; Keys

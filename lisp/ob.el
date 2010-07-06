@@ -171,14 +171,18 @@ any confirmation from the user.
 
 Note disabling confirmation may result in accidental evaluation
 of potentially harmful code."
-  (unless (or (not (if (functionp org-confirm-babel-evaluate)
-		       (funcall org-confirm-babel-evaluate
-				(nth 0 info) (nth 1 info))
-		     org-confirm-babel-evaluate))
-	      (yes-or-no-p
-	       (format "Evaluate this%scode on your system?"
-		       (if info (format " %s " (nth 0 info)) " "))))
-    (error "evaluation aborted")))
+  (let* ((eval (cdr (assoc :eval (nth 2 info))))
+	 (query (or (equal eval "query")
+		    (and (functionp org-confirm-babel-evaluate)
+			 (funcall org-confirm-babel-evaluate
+				  (nth 0 info) (nth 1 info)))
+		    org-confirm-babel-evaluate)))
+    (when (or (equal eval "never")
+	      (and query
+		   (not (yes-or-no-p
+			 (format "Evaluate this%scode on your system? "
+				 (if info (format " %s " (nth 0 info)) " "))))))
+      (error "evaluation aborted"))))
 
 ;;;###autoload
 (defun org-babel-execute-src-block-maybe ()
@@ -1319,9 +1323,8 @@ block but are passed literally to the \"example-block\"."
           (nb-add (buffer-substring index (point)))
           (goto-char (match-end 0))
           (setq index (point))
-          (nb-add (save-current-buffer
-                    (set-buffer parent-buffer)
-                    (mapconcat ;; interpose `prefix' between every line
+          (nb-add (with-current-buffer parent-buffer
+		    (mapconcat ;; interpose PREFIX between every line
                      #'identity
                      (split-string
                       (if evaluate
@@ -1330,7 +1333,8 @@ block but are passed literally to the \"example-block\"."
                             (if (stringp raw) raw (format "%S" raw)))
 			(save-restriction
 			  (widen)
-			  (let ((point (org-babel-find-named-block source-name)))
+			  (let ((point (org-babel-find-named-block
+					source-name)))
 			    (if point
 				(save-excursion
 				  (goto-char point)
@@ -1340,10 +1344,11 @@ block but are passed literally to the \"example-block\"."
 			      ;; optionally raise an error if named
 			      ;; source-block doesn't exist
 			      (if (member lang org-babel-noweb-error-langs)
-				  (error
-				   (concat "<<%s>> could not be resolved "
-					   "(see `org-babel-noweb-error-langs')")
-				   source-name)
+				  (error "%s"
+					 (concat
+					  "<<" source-name ">> "
+					  "could not be resolved (see "
+					  "`org-babel-noweb-error-langs')"))
 				"")))))
 		      "[\n\r]") (concat "\n" prefix)))))
         (nb-add (buffer-substring index (point-max)))))

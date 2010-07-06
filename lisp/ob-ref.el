@@ -150,8 +150,7 @@ return nil."
 	  ;;       buffer (marker-buffer id-loc)
 	  ;;       loc (marker-position id-loc))
 	  ;; (move-marker id-loc nil)
-	  (progn (message (format "reference '%s' not found in this buffer" ref))
-		 (error (format "reference '%s' not found in this buffer" ref))))
+	  (error "reference '%s' not found in this buffer" ref))
 	(if lob-info
 	    (setq type 'lob)
 	  (while (not (setq type (org-babel-ref-at-ref-p)))

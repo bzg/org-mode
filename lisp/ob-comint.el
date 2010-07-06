@@ -48,7 +48,7 @@ body inside the protection of `save-window-excursion' and
   `(save-excursion
      (save-match-data
        (unless (org-babel-comint-buffer-livep ,buffer)
-         (error (format "buffer %s doesn't exist or has no process" ,buffer)))
+         (error "buffer %s doesn't exist or has no process" ,buffer))
        (set-buffer ,buffer)
        ,@body)))
 
