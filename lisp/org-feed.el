@@ -270,6 +270,7 @@ have been saved."
 
 (defun org-feed-unescape (s)
   "Unescape protected entities in S."
+  (require 'xml)
   (let ((re (concat "&\\("
 		    (mapconcat 'car xml-entity-alist "\\|")
 		    "\\);")))
@@ -630,6 +631,7 @@ containing the properties `:guid' and `:item-full-text'.
 
 The `:item-full-text' property actually contains the sexp
 formatted as a string, not the original XML data."
+  (require 'xml)
   (with-current-buffer buffer
     (widen)
     (let ((feed (car (xml-parse-region (point-min) (point-max)))))
