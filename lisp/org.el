@@ -76,14 +76,15 @@
 
 (require 'calendar)
 ;; Emacs 22 calendar compatibility:  Make sure the new variables are available
-(unless (boundp 'calendar-view-holidays-initially-flag)
-  (defvaralias 'calendar-view-holidays-initially-flag
-    'view-calendar-holidays-initially))
-(unless (boundp 'calendar-view-diary-initially-flag)
-  (defvaralias 'calendar-view-diary-initially-flag
-    'view-diary-entries-initially))
-(unless (boundp 'diary-fancy-buffer)
-  (defvaralias 'diary-fancy-buffer 'fancy-diary-buffer))
+(when (fboundp 'defvaralias)
+  (unless (boundp 'calendar-view-holidays-initially-flag)
+    (defvaralias 'calendar-view-holidays-initially-flag
+      'view-calendar-holidays-initially))
+  (unless (boundp 'calendar-view-diary-initially-flag)
+    (defvaralias 'calendar-view-diary-initially-flag
+      'view-diary-entries-initially))
+  (unless (boundp 'diary-fancy-buffer)
+    (defvaralias 'diary-fancy-buffer 'fancy-diary-buffer)))
 
 ;; For XEmacs, noutline is not yet provided by outline.el, so arrange for
 ;; the file noutline.el being loaded.
@@ -448,7 +449,8 @@ This option can also be set with the +OPTIONS line, e.g. \"^:nil\"."
 	  (const :tag "Only with braces" {})
 	  (const :tag "Never interpret" nil)))
 
-(defvaralias 'org-export-with-sub-superscripts 'org-use-sub-superscripts)
+(if (fboundp 'defvaralias)
+    (defvaralias 'org-export-with-sub-superscripts 'org-use-sub-superscripts))
 
 
 (defcustom org-startup-with-beamer-mode nil
