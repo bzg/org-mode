@@ -66,11 +66,13 @@ function is called by `org-babel-execute-src-block'."
          (session (org-babel-sh-initiate-session (nth 0 processed-params)))
          (result-params (nth 2 processed-params)) 
          (full-body (org-babel-expand-body:sh
-                     body params processed-params))) ;; then the source block body
+                     body params processed-params)))
     (org-babel-reassemble-table
      (org-babel-sh-evaluate session full-body result-params)
-     (org-babel-pick-name (nth 4 processed-params) (cdr (assoc :colnames params)))
-     (org-babel-pick-name (nth 5 processed-params) (cdr (assoc :rownames params))))))
+     (org-babel-pick-name
+      (nth 4 processed-params) (cdr (assoc :colnames params)))
+     (org-babel-pick-name
+      (nth 5 processed-params) (cdr (assoc :rownames params))))))
 
 (defun org-babel-prep-session:sh (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."
@@ -107,9 +109,10 @@ specifying a var of the same value."
       (flet ((deep-string (el)
                           (if (listp el)
                               (mapcar #'deep-string el)
-                           (org-babel-sh-var-to-sh el sep))))
-       (format "$(cat <<BABEL_TABLE\n%s\nBABEL_TABLE\n)"
-                (orgtbl-to-generic (deep-string var) (list :sep (or sep "\t")))))
+			    (org-babel-sh-var-to-sh el sep))))
+	(format "$(cat <<BABEL_TABLE\n%s\nBABEL_TABLE\n)"
+		(orgtbl-to-generic
+		 (deep-string var) (list :sep (or sep "\t")))))
     (if (stringp var) (format "%s" var) (format "%S" var))))
 
 (defun org-babel-sh-table-or-results (results)
@@ -146,7 +149,7 @@ last statement in BODY."
   ((lambda (results)
      (if (or (member "scalar" result-params)
 	     (member "output" result-params))
-	 (buffer-string)
+	 results
        (let ((tmp-file (make-temp-file "org-babel-sh")))
 	 (with-temp-file tmp-file (insert results))
 	 (org-babel-import-elisp-from-file tmp-file))))
