@@ -187,8 +187,7 @@ specifies the value of ERROR-BUFFER."
 	      ;; Clear the output buffer, then run the command with
 	      ;; output there.
 	      (let ((directory default-directory))
-		(save-current-buffer
-		  (set-buffer buffer)
+		(with-current-buffer buffer
 		  (setq buffer-read-only nil)
 		  (if (not output-buffer)
 		      (setq default-directory directory))

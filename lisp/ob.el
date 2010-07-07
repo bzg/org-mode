@@ -1323,9 +1323,8 @@ block but are passed literally to the \"example-block\"."
           (nb-add (buffer-substring index (point)))
           (goto-char (match-end 0))
           (setq index (point))
-          (nb-add (save-current-buffer
-                    (set-buffer parent-buffer)
-                    (mapconcat ;; interpose `prefix' between every line
+          (nb-add (with-current-buffer parent-buffer
+		    (mapconcat ;; interpose PREFIX between every line
                      #'identity
                      (split-string
                       (if evaluate
@@ -1334,7 +1333,8 @@ block but are passed literally to the \"example-block\"."
                             (if (stringp raw) raw (format "%S" raw)))
 			(save-restriction
 			  (widen)
-			  (let ((point (org-babel-find-named-block source-name)))
+			  (let ((point (org-babel-find-named-block
+					source-name)))
 			    (if point
 				(save-excursion
 				  (goto-char point)
@@ -1344,10 +1344,11 @@ block but are passed literally to the \"example-block\"."
 			      ;; optionally raise an error if named
 			      ;; source-block doesn't exist
 			      (if (member lang org-babel-noweb-error-langs)
-				  (error
-				   (concat "<<%s>> could not be resolved "
-					   "(see `org-babel-noweb-error-langs')")
-				   source-name)
+				  (error "%s"
+					 (concat
+					  "<<" source-name ">> "
+					  "could not be resolved (see "
+					  "`org-babel-noweb-error-langs')"))
 				"")))))
 		      "[\n\r]") (concat "\n" prefix)))))
         (nb-add (buffer-substring index (point-max)))))

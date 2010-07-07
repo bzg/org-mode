@@ -80,9 +80,8 @@ called by `org-babel-execute-src-block'."
           (when (file-exists-p out-file) (delete-file out-file))
           (rename-file (org-babel-latex-tex-to-pdf tex-file) out-file))
          ((string-match "\\.\\([^\\.]+\\)$" out-file)
-          (error
-           (message "can not create %s files, please specify a .png or .pdf file"
-                    (match-string 1 out-file)))))
+          (error "can not create %s files, please specify a .png or .pdf file"
+		 (match-string 1 out-file))))
         out-file)
     body))
 
