@@ -43,7 +43,7 @@ This function is called by `org-babel-execute-src-block'."
 (defun org-babel-prep-session:css (session params)
   "Return an error if the :session header argument is set.
 CSS does not support sessions."
-  (error "CSS sessions are noynsensical"))
+  (error "CSS sessions are nonsensical"))
 
 (provide 'ob-css)
 
