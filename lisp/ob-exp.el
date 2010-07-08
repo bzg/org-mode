@@ -53,6 +53,7 @@ When set to nil no code will be exported as part of the export
 process."
   :group 'org-babel
   :type 'boolean)
+(put 'org-export-babel-evaluate 'safe-local-variable (lambda (x) (eq x nil)))
 
 (defvar org-babel-function-def-export-keyword "function"
   "When exporting a source block function, this keyword will
