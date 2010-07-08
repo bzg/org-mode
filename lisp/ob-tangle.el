@@ -33,6 +33,7 @@
   (require 'cl))
 
 (declare-function org-link-escape "org" (text &optional table))
+(declare-function with-temp-filebuffer "org" (file &rest body))
 
 (defcustom org-babel-tangle-lang-exts
   '(("emacs-lisp" . "el"))
