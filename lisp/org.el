@@ -123,6 +123,7 @@
 
 ;; load languages based on value of `org-babel-load-languages'
 (defvar org-babel-load-languages)
+;;;###autoload
 (defun org-babel-do-load-languages (sym value)
   "Load the languages defined in `org-babel-load-languages'."
   (set-default sym value)
