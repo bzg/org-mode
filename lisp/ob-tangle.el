@@ -47,6 +47,11 @@ then the name of the language is used."
 	   (string "Language name")
 	   (string "File Extension"))))
 
+(defcustom org-babel-post-tangle-hook nil
+  "Hook run in code files tangled by `org-babel-tangle'."
+  :group 'org-babel
+  :type 'hook)
+
 ;;;###autoload
 (defun org-babel-load-file (file)
   "Load the contents of the Emacs Lisp source code blocks in the
@@ -138,7 +143,7 @@ exported source code blocks by language."
                       (delete-file file-name))
                     ;; drop source-block to file
                     (with-temp-buffer
-                      (if (fboundp lang-f) (funcall lang-f))
+                      (when (fboundp lang-f) (funcall lang-f))
                       (when (and she-bang (not (member file-name she-banged)))
                         (insert (concat she-bang "\n"))
                         (setq she-banged (cons file-name she-banged)))
@@ -160,6 +165,13 @@ exported source code blocks by language."
        (org-babel-tangle-collect-blocks lang))
       (message "tangled %d code block%s" block-counter
                (if (= block-counter 1) "" "s"))
+      ;; run `org-babel-post-tangle-hook' in all tangled files
+      (when org-babel-post-tangle-hook
+	(mapc
+	 (lambda (file)
+	   (with-temp-filebuffer file
+	     (run-hooks 'org-babel-post-tangle-hook)))
+	 path-collector))
       path-collector)))
 
 (defun org-babel-tangle-clean ()
