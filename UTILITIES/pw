@@ -130,6 +130,7 @@ def usage():
                         by name
         search [str]  : Same as 'list'
         view <ID>     : View a patch
+        show <ID>     : Same as view
         update [-s state] [-c commit-ref] <ID>
                       : Update patch\n""")
     sys.stderr.write("""\nFilter options for 'list' and 'search':
@@ -586,7 +587,7 @@ def main():
 
         merge_with(patch_id, rpc, config.get('auth', 'username'))
 
-    elif action == 'view':
+    elif action == 'view' or action == 'show':
         try:
             patch_id = patch_id or int(args[0])
         except:

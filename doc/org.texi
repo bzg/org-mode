@@ -434,7 +434,7 @@ Using header arguments
 Specific header arguments
 
 * var::				Pass arguments to code blocks
-* results::			Specify the type of results and how they will be collectd and handled
+* results::			Specify the type of results and how they will be collected and handled
 * file::			Specify a path for file output
 * dir and remote execution::	Specify the default directory for code block execution
 * exports::			Export code and/or results
@@ -451,7 +451,7 @@ Specific header arguments
 Miscellaneous
 
 * Completion::			M-TAB knows what you need
-* Speed keys::			Electic commands at the beginning of a headline
+* Speed keys::			Electric commands at the beginning of a headline
 * Code evaluation security::	Org mode files evaluate inline code
 * Customization::		Adapting Org to your taste
 * In-buffer settings::		Overview of the #+KEYWORDS
@@ -1521,7 +1521,7 @@ LaTeX}).  Here are the valid references:
 @table @code
 @item [1]
 A plain numeric footnote marker.  Compatible with @file{footnote.el}, but not
-recommended because somthing like @samp{[1]} could easily be part of a code
+recommended because something like @samp{[1]} could easily be part of a code
 snippet.
 @item [fn:name]
 A named footnote reference, where @code{name} is a unique label word, or, for
@@ -2643,7 +2643,7 @@ functions.
 @node Org-Plot,  , The spreadsheet, Tables
 @section Org-Plot
 @cindex graph, in tables
-@cindex plot tables using gnuplot
+@cindex plot tables using Gnuplot
 @cindex #+PLOT
 
 Org-Plot can produce 2D and 3D graphs of information stored in org tables
@@ -3868,7 +3868,7 @@ If the task was going to be overdue the next day.
 If the task was overdue on that day.
 @end table
 
-In addition to coloring each day, the day is also marked with an asterix if
+In addition to coloring each day, the day is also marked with an asterisk if
 the task was actually done that day, and an exclamation mark to show where
 the current day falls in the graph.
 
@@ -5745,8 +5745,8 @@ use the shift key and press @kbd{S}.  Remember that using shift will always
 leave you clocked out, no matter which option you choose.
 @item C
 To cancel the clock altogether, use @kbd{C}.  Note that if instead of
-cancelling you subtract the away time, and the resulting clock amount is less
-than a minute, the clock will still be cancelled rather than clutter up the
+canceling you subtract the away time, and the resulting clock amount is less
+than a minute, the clock will still be canceled rather than clutter up the
 log with an empty entry.
 @end table
 
@@ -6026,7 +6026,7 @@ place where you started the capture process.
 @node Template elements, Template expansion, Capture templates, Capture templates
 @subsubsection Template elements
 
-Now lets look at the elements of a template defintion.  Each entry in
+Now lets look at the elements of a template definition.  Each entry in
 @code{org-capture-templates} is a list with the following items: 
 
 @table @var
@@ -9455,7 +9455,7 @@ and @code{style} attributes for a link:
 Org-mode tables are exported to HTML using the table tag defined in
 @code{org-export-html-table-tag}.  The default setting makes tables without
 cell borders and frame.  If you would like to change this for individual
-tables, place somthing like the following before the table:
+tables, place something like the following before the table:
 
 @cindex #+CAPTION
 @cindex #+ATTR_HTML
@@ -9486,7 +9486,7 @@ will link to a high resolution version of the image, you could use:
 [[file:highres.jpg][file:thumb.jpg]]
 @end example
 
-If you need to add attributes to an inlines image, use a @code{#+ATTR_HTML}.
+If you need to add attributes to an inlined image, use a @code{#+ATTR_HTML}.
 In the example below we specify the @code{alt} and @code{title} attributes to
 support text viewers and accessibility, and align it to the right.
 
@@ -10329,7 +10329,7 @@ For more information and examples see the Org-taskjuggler tutorial at
 @cindex Freemind export
 @cindex mind map
 
-The freemind exporter was written by Lennart Borgman.
+The Freemind exporter was written by Lennart Borgman.
 
 @table @kbd
 @kindex C-c C-e m
@@ -11005,7 +11005,7 @@ formulas (see @ref{The spreadsheet}).
 @item <language>
 The language of the code in the block.
 @item <switches>
-Switches controling exportation of the code block (see switches discussion in
+Switches controlling exportation of the code block (see switches discussion in
 @ref{Literal examples})
 @item <header arguments>
 Optional header arguments control many aspects of evaluation, export and
@@ -11413,7 +11413,7 @@ The following header arguments are defined:
 @menu
 * var::				Pass arguments to code blocks
 * results::			Specify the type of results and how they will
-                                be collectd and handled
+                                be collected and handled
 * file::			Specify a path for file output
 * dir and remote execution::	Specify the default directory for code block
                                 execution
@@ -12244,7 +12244,7 @@ emacsclient \
 
 @menu
 * Completion::			M-TAB knows what you need
-* Speed keys::			Electic commands at the beginning of a headline
+* Speed keys::			Electric commands at the beginning of a headline
 * Code evaluation security::	Org mode files evaluate inline code
 * Customization::		Adapting Org to your taste
 * In-buffer settings::		Overview of the #+KEYWORDS
@@ -14153,7 +14153,7 @@ the view, only the current agenda files will be searched.
 
 @node History and Acknowledgments, Main Index, MobileOrg, Top
 @appendix History and acknowledgments
-@cindex acknowledgements
+@cindex acknowledgments
 @cindex history
 @cindex thanks
 
