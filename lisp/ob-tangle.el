@@ -105,6 +105,11 @@ exported source code blocks by language."
   (save-buffer)
   (save-excursion
     (let ((block-counter 0)
+	  (org-babel-default-header-args
+	   (if target-file
+	       (org-babel-merge-params org-babel-default-header-args
+				       (list (cons :tangle target-file)))
+	     org-babel-default-header-args))
           path-collector)
       (mapc ;; map over all languages
        (lambda (by-lang)
@@ -126,13 +131,12 @@ exported source code blocks by language."
                 (let* ((tangle (get-spec :tangle))
                        (she-bang ((lambda (sheb) (when (> (length sheb) 0) sheb))
 				  (get-spec :shebang)))
-                       (base-name (or (cond
-                                       ((string= "yes" tangle)
-                                        (file-name-sans-extension
-					 (buffer-file-name)))
-                                       ((string= "no" tangle) nil)
-                                       ((> (length tangle) 0) tangle))
-                                      target-file))
+                       (base-name (cond
+				   ((string= "yes" tangle)
+				    (file-name-sans-extension
+				     (buffer-file-name)))
+				   ((string= "no" tangle) nil)
+				   ((> (length tangle) 0) tangle)))
                        (file-name (when base-name
                                     ;; decide if we want to add ext to base-name
                                     (if (and ext (string= "yes" tangle))
