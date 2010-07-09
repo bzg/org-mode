@@ -61,6 +61,11 @@
 (declare-function org-babel-ref-variables "ob-ref" (params))
 (declare-function org-babel-ref-resolve-reference "ob-ref" (ref &optional params))
 
+(defgroup org-babel nil
+  "Code block evaluation and management in `org-mode' documents."
+  :tag "Babel"
+  :group 'org)
+
 (defcustom org-confirm-babel-evaluate t
     "Require confirmation before interactively evaluating code
 blocks in Org-mode buffers.  The default value of this variable

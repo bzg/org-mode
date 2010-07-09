@@ -47,6 +47,14 @@
 
 (org-export-blocks-add-block '(src org-babel-exp-src-blocks nil))
 
+(defcustom org-export-babel-evaluate t
+  "Switch controlling code evaluation during export.
+When set to nil no code will be exported as part of the export
+process."
+  :group 'org-babel
+  :type 'boolean)
+(put 'org-export-babel-evaluate 'safe-local-variable (lambda (x) (eq x nil)))
+
 (defvar org-babel-function-def-export-keyword "function"
   "When exporting a source block function, this keyword will
 appear in the exported version in the place of source name
@@ -235,56 +243,62 @@ suitable for exportation by org-mode.  This function is called by
 `org-babel-exp-do-export'.  The code block will be evaluated.
 Optional argument SILENT can be used to inhibit insertion of
 results into the buffer."
-  (let ((lang (nth 0 info))
-	(body (nth 1 info))
-	(params
-	 ;; lets ensure that we lookup references in the original file
-	 (mapcar
-	  (lambda (pair)
-	    (if (and org-current-export-file
-		     (eq (car pair) :var)
-		     (string-match org-babel-ref-split-regexp (cdr pair))
-		     (equal :ob-must-be-reference
-			    (org-babel-ref-literal (match-string 2 (cdr pair)))))
-		`(:var . ,(concat (match-string 1 (cdr pair))
-				  "=" org-current-export-file
-				  ":" (match-string 2 (cdr pair))))
-	      pair))
-	  (nth 2 info))))
-    ;; skip code blocks which we can't evaluate
-    (if (fboundp (intern (concat "org-babel-execute:" lang)))
-	(case type
-	  ('inline
-	    (let ((raw (org-babel-execute-src-block
-			nil info '((:results . "silent"))))
-		  (result-params (split-string (cdr (assoc :results params)))))
-	      (unless silent
-		(cond ;; respect the value of the :results header argument
-		 ((member "file" result-params)
-		  (org-babel-result-to-file raw))
-		 ((or (member "raw" result-params) (member "org" result-params))
-		  (format "%s" raw))
-		 ((member "code" result-params)
-		  (format "src_%s{%s}" lang raw))
-		 (t
-		  (if (stringp raw)
-		      (if (= 0 (length raw)) "=(no results)="
-			(format "%s" raw))
-		    (format "%S" raw)))))))
-	  ('block
-	      (org-babel-execute-src-block
-	       nil info (org-babel-merge-params
-			 params
-			 `((:results . ,(if silent "silent" "replace")))))
-	    "")
-	  ('lob
-	   (save-excursion
-	     (re-search-backward org-babel-lob-one-liner-regexp nil t)
-	     (org-babel-execute-src-block
-	      nil info (org-babel-merge-params
-			params `((:results . ,(if silent "silent" "replace")))))
-	     "")))
-      "")))
+  (if org-export-babel-evaluate
+      (let ((lang (nth 0 info))
+	    (body (nth 1 info))
+	    (params
+	     ;; lets ensure that we lookup references in the original file
+	     (mapcar
+	      (lambda (pair)
+		(if (and org-current-export-file
+			 (eq (car pair) :var)
+			 (string-match org-babel-ref-split-regexp (cdr pair))
+			 (equal :ob-must-be-reference
+				(org-babel-ref-literal
+				 (match-string 2 (cdr pair)))))
+		    `(:var . ,(concat (match-string 1 (cdr pair))
+				      "=" org-current-export-file
+				      ":" (match-string 2 (cdr pair))))
+		  pair))
+	      (nth 2 info))))
+	;; skip code blocks which we can't evaluate
+	(if (fboundp (intern (concat "org-babel-execute:" lang)))
+	    (case type
+	      ('inline
+		(let ((raw (org-babel-execute-src-block
+			    nil info '((:results . "silent"))))
+		      (result-params (split-string
+				      (cdr (assoc :results params)))))
+		  (unless silent
+		    (cond ;; respect the value of the :results header argument
+		     ((member "file" result-params)
+		      (org-babel-result-to-file raw))
+		     ((or (member "raw" result-params)
+			  (member "org" result-params))
+		      (format "%s" raw))
+		     ((member "code" result-params)
+		      (format "src_%s{%s}" lang raw))
+		     (t
+		      (if (stringp raw)
+			  (if (= 0 (length raw)) "=(no results)="
+			    (format "%s" raw))
+			(format "%S" raw)))))))
+	      ('block
+		  (org-babel-execute-src-block
+		   nil info (org-babel-merge-params
+			     params
+			     `((:results . ,(if silent "silent" "replace")))))
+		"")
+	      ('lob
+	       (save-excursion
+		 (re-search-backward org-babel-lob-one-liner-regexp nil t)
+		 (org-babel-execute-src-block
+		  nil info (org-babel-merge-params
+			    params
+			    `((:results . ,(if silent "silent" "replace")))))
+		 "")))
+	  ""))
+    ""))
 
 (provide 'ob-exp)
 

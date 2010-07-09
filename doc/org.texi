@@ -11086,6 +11086,13 @@ Both the code block and its results will be exported.
 Neither the code block nor its results will be exported.
 @end table
 
+It is possible to inhibit the evaluation of code blocks during export.
+Setting the the @code{org-export-babel-evaluate} variable to @code{nil} will
+ensure that no code blocks are evaluated as part of the export process.  This
+can be useful in situations where potentially untrusted Org-mode files are
+exported in an automated fashion, for example when Org-mode is used as the
+markup language for a wiki.
+
 @comment  node-name,  next,  previous,  up
 @comment  Extracting source code, Evaluating code blocks, Exporting code blocks, Working With Source Code
 @node Extracting source code, Evaluating code blocks, Exporting code blocks, Working With Source Code

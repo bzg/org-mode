@@ -31,10 +31,11 @@
 (require 'ob-ref)
 (require 'ob-comint)
 (require 'ob-eval)
-(require (if (featurep 'xemacs) 'python-mode 'python))
 (eval-when-compile (require 'cl))
 
 (declare-function org-remove-indentation "org" )
+(declare-function py-shell "ext:python-mode" (&optional argprompt))
+(declare-function run-python "ext:python" (&optional cmd noshow new))
 
 (add-to-list 'org-babel-tangle-lang-exts '("python" . "py"))
 
@@ -42,6 +43,9 @@
 
 (defvar org-babel-python-command "python"
   "Name of command to use for executing python code.")
+
+(defvar org-babel-python-mode (if (featurep 'xemacs) 'python-mode 'python)
+  "Preferred python mode for use in running python interactively.")
 
 (defun org-babel-expand-body:python (body params &optional processed-params)
   "Expand BODY according to PARAMS, return the expanded body."
@@ -136,13 +140,16 @@ Emacs-lisp table, otherwise return the results as a string."
 (defun org-babel-python-initiate-session-by-key (&optional session)
   "If there is not a current inferior-process-buffer in SESSION
 then create.  Return the initialized session."
+  (require org-babel-python-mode)
   (save-window-excursion
     (let* ((session (if session (intern session) :default))
            (python-buffer (org-babel-python-session-buffer session)))
       (cond
-       ((fboundp 'run-python) ; python.el
+       ((and (equal 'python org-babel-python-mode)
+	     (fboundp 'run-python)) ; python.el
 	(run-python))
-       ((fboundp 'py-shell) ; python-mode.el
+       ((and (equal 'python-mode org-babel-python-mode)
+	     (fboundp 'py-shell)) ; python-mode.el
 	;; `py-shell' creates a buffer whose name is the value of
 	;; `py-which-bufname' with '*'s at the beginning and end
 	(let* ((bufname (if python-buffer
