@@ -10385,6 +10385,7 @@ Export only the visible part of the document.
 @vindex org-icalendar-use-deadline
 @vindex org-icalendar-use-scheduled
 @vindex org-icalendar-categories
+@vindex org-icalendar-alarm-time
 Some people use Org-mode for keeping track of projects, but still prefer a
 standard calendar application for anniversaries and appointments.  In this
 case it can be useful to show deadlines and other time-stamped items in Org
@@ -10398,7 +10399,9 @@ to set the start and due dates for the TODO entry@footnote{See the variables
 @code{org-icalendar-use-deadline} and @code{org-icalendar-use-scheduled}.}.
 As categories, it will use the tags locally defined in the heading, and the
 file/tree category@footnote{To add inherited tags or the TODO state,
-configure the variable @code{org-icalendar-categories}.}.
+configure the variable @code{org-icalendar-categories}.}.  See the variable
+@code{org-icalendar-alarm-time} for a way to assign alarms to entries with a
+time.
 
 @vindex org-icalendar-store-UID
 @cindex property, ID
