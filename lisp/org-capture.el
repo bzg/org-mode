@@ -374,7 +374,8 @@ bypassed."
    (t
     ;; FIXME: Are these needed?
     (let* ((orig-buf (current-buffer))
-	   (annotation (if org-capture-link-is-already-stored
+	   (annotation (if (and (boundp 'org-capture-link-is-already-stored)
+				org-capture-link-is-already-stored)
 			   (plist-get org-store-link-plist :annotation)
 			 (org-store-link nil)))
 	   (initial (and (org-region-active-p)
