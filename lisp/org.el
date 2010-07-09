@@ -106,13 +106,6 @@
 (require 'org-footnote)
 
 ;; babel
-(let* ((babel-path (expand-file-name
-		    "babel"
-		    (file-name-directory (or (buffer-file-name)
-					     load-file-name))))
-       (babel-langs-path (expand-file-name "langs" babel-path)))
-  (add-to-list 'load-path babel-path)
-  (add-to-list 'load-path babel-langs-path))
 (require 'ob)
 (require 'ob-table)
 (require 'ob-lob)
