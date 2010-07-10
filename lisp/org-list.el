@@ -1303,9 +1303,9 @@ sublevels as a list of strings."
 		     item)))
 	(push item output)
 	(when (> nextindent indent1)
-	  (narrow-to-region (point) nextitem)
-	  (push (org-list-parse-list) output)
-	  (widen))))
+	  (save-restriction
+	    (narrow-to-region (point) nextitem)
+	    (push (org-list-parse-list) output)))))
     (when delete (delete-region start end))
     (setq output (nreverse output))
     (push ltype output)))
@@ -1366,11 +1366,15 @@ this list."
 	  (error "Don't know how to transform this list"))))
     (let* ((name (match-string 1))
 	   (transform (intern (match-string 2)))
-	   (txt (buffer-substring-no-properties
-		 (org-list-top-point)
-		 (org-list-bottom-point)))
-	   (list (org-list-parse-list))
-	   beg)
+	   (top-point (org-list-top-point))
+	   (bottom-point
+	    (save-excursion
+	      (goto-char (org-list-bottom-point))
+	      (re-search-backward "\\(\\\\end{comment}\\|@end ignore\\|-->\\)" top-point t)))
+	   (list (save-restriction
+		   (narrow-to-region top-point bottom-point)
+		   (org-list-parse-list)))
+	   beg txt)
       (unless (fboundp transform)
 	(error "No such transformation function %s" transform))
       (let ((txt (funcall transform list)))
