@@ -7516,13 +7516,15 @@ and still retain the repeater to cover future instances of the task."
 ;;; Outline Sorting
 
 (defun org-sort (with-case)
-  "Call `org-sort-entries-or-items' or `org-table-sort-lines'.
+  "Call `org-sort-entries', `org-table-sort-lines' or `org-sort-list'.
 Optional argument WITH-CASE means sort case-sensitively.
 With a double prefix argument, also remove duplicate entries."
   (interactive "P")
-  (if (org-at-table-p)
-      (org-call-with-arg 'org-table-sort-lines with-case)
-    (org-call-with-arg 'org-sort-entries-or-items with-case)))
+  (cond
+   ((org-at-table-p) (org-call-with-arg 'org-table-sort-lines with-case))
+   ((org-at-item-p) (org-call-with-arg 'org-sort-list with-case))
+   (t
+    (org-call-with-arg 'org-sort-entries with-case))))
 
 (defun org-sort-remove-invisible (s)
   (remove-text-properties 0 (length s) org-rm-props s)
@@ -7540,14 +7542,12 @@ When children are sorted, the cursor is in the parent line when this
 hook gets called.  When a region or a plain list is sorted, the cursor
 will be in the first entry of the sorted region/list.")
 
-(defun org-sort-entries-or-items
+(defun org-sort-entries
   (&optional with-case sorting-type getkey-func compare-func property)
-  "Sort entries on a certain level of an outline tree, or plain list items.
+  "Sort entries on a certain level of an outline tree.
 If there is an active region, the entries in the region are sorted.
 Else, if the cursor is before the first entry, sort the top-level items.
 Else, the children of the entry at point are sorted.
-If the cursor is at the first item in a plain list, the list items will be
-sorted.
 
 Sorting can be alphabetically, numerically, by date/time as given by
 a time stamp, by a property or by priority.
@@ -7561,7 +7561,6 @@ n   Numerically, by converting the beginning of the entry/item to a number.
 a   Alphabetically, ignoring the TODO keyword and the priority, if any.
 t   By date/time, either the first active time stamp in the entry, or, if
     none exist, by the first inactive one.
-    In items, only the first line will be checked.
 s   By the scheduled date/time.
 d   By deadline date/time.
 c   By creation time, which is assumed to be the first inactive time stamp
@@ -7580,7 +7579,7 @@ WITH-CASE, the sorting considers case as well."
   (interactive "P")
   (let ((case-func (if with-case 'identity 'downcase))
         start beg end stars re re2
-        txt what tmp plain-list-p)
+        txt what tmp)
     ;; Find beginning and end of region to sort
     (cond
      ((org-region-active-p)
@@ -7590,15 +7589,6 @@ WITH-CASE, the sorting considers case as well."
       (goto-char (region-beginning))
       (if (not (org-on-heading-p)) (outline-next-heading))
       (setq start (point)))
-     ((org-at-item-p)
-      ;; we will sort this plain list
-      (org-beginning-of-item-list) (setq start (point))
-      (org-end-of-item-list)
-      (or (bolp) (insert "\n"))
-      (setq end (point))
-      (goto-char start)
-      (setq plain-list-p t
-	    what "plain list"))
      ((or (org-on-heading-p)
           (condition-case nil (progn (org-back-to-heading) t) (error nil)))
       ;; we will sort the children of the current headline
@@ -7631,43 +7621,39 @@ WITH-CASE, the sorting considers case as well."
     (setq beg (point))
     (if (>= beg end) (error "Nothing to sort"))
 
-    (unless plain-list-p
-      (looking-at "\\(\\*+\\)")
-      (setq stars (match-string 1)
-	    re (concat "^" (regexp-quote stars) " +")
-	    re2 (concat "^" (regexp-quote (substring stars 0 -1)) "[^*]")
-	    txt (buffer-substring beg end))
-      (if (not (equal (substring txt -1) "\n")) (setq txt (concat txt "\n")))
-      (if (and (not (equal stars "*")) (string-match re2 txt))
-	  (error "Region to sort contains a level above the first entry")))
+    (looking-at "\\(\\*+\\)")
+    (setq stars (match-string 1)
+	  re (concat "^" (regexp-quote stars) " +")
+	  re2 (concat "^" (regexp-quote (substring stars 0 -1)) "[^*]")
+	  txt (buffer-substring beg end))
+    (if (not (equal (substring txt -1) "\n")) (setq txt (concat txt "\n")))
+    (if (and (not (equal stars "*")) (string-match re2 txt))
+	(error "Region to sort contains a level above the first entry"))
 
     (unless sorting-type
       (message
-       (if plain-list-p
-	   "Sort %s: [a]lpha  [n]umeric  [t]ime  [f]unc   A/N/T/F means reversed:"
-	 "Sort %s: [a]lpha  [n]umeric  [p]riority  p[r]operty  todo[o]rder  [f]unc
+       "Sort %s: [a]lpha  [n]umeric  [p]riority  p[r]operty  todo[o]rder  [f]unc
                [t]ime [s]cheduled  [d]eadline  [c]reated
-               A/N/T/S/D/C/P/O/F means reversed:")
+               A/N/T/S/D/C/P/O/F means reversed:"
        what)
       (setq sorting-type (read-char-exclusive))
 
       (and (= (downcase sorting-type) ?f)
            (setq getkey-func
                  (org-icompleting-read "Sort using function: "
-                                  obarray 'fboundp t nil nil))
+				       obarray 'fboundp t nil nil))
            (setq getkey-func (intern getkey-func)))
 
       (and (= (downcase sorting-type) ?r)
            (setq property
                  (org-icompleting-read "Property: "
-				  (mapcar 'list (org-buffer-property-keys t))
-                                  nil t))))
+				       (mapcar 'list (org-buffer-property-keys t))
+				       nil t))))
 
     (message "Sorting entries...")
 
     (save-restriction
       (narrow-to-region start end)
-
       (let ((dcst (downcase sorting-type))
 	    (case-fold-search nil)
             (now (current-time)))
@@ -7675,99 +7661,70 @@ WITH-CASE, the sorting considers case as well."
          (/= dcst sorting-type)
          ;; This function moves to the beginning character of the "record" to
          ;; be sorted.
-	 (if plain-list-p
-	     (lambda nil
-	       (if (org-at-item-p) t (goto-char (point-max))))
-	   (lambda nil
-	     (if (re-search-forward re nil t)
-		 (goto-char (match-beginning 0))
-	       (goto-char (point-max)))))
+	 (lambda nil
+	   (if (re-search-forward re nil t)
+	       (goto-char (match-beginning 0))
+	     (goto-char (point-max))))
          ;; This function moves to the last character of the "record" being
          ;; sorted.
-	 (if plain-list-p
-	     'org-end-of-item
-	   (lambda nil
-	     (save-match-data
-	       (condition-case nil
-		   (outline-forward-same-level 1)
-		 (error
-		  (goto-char (point-max)))))))
-
+	 (lambda nil
+	   (save-match-data
+	     (condition-case nil
+		 (outline-forward-same-level 1)
+	       (error
+		(goto-char (point-max))))))
          ;; This function returns the value that gets sorted against.
-	 (if plain-list-p
-	     (lambda nil
-	       (when (looking-at "[ \t]*[-+*0-9.)]+[ \t]+")
-		 (cond
-		  ((= dcst ?n)
-		   (string-to-number (buffer-substring (match-end 0)
-						       (point-at-eol))))
-		  ((= dcst ?a)
-		   (buffer-substring (match-end 0) (point-at-eol)))
-		  ((= dcst ?t)
-		   (if (or (re-search-forward org-ts-regexp (point-at-eol) t)
-			   (re-search-forward org-ts-regexp-both
-					      (point-at-eol) t))
-		       (org-time-string-to-seconds (match-string 0))
-		     (org-float-time now)))
-		  ((= dcst ?f)
-		   (if getkey-func
-		       (progn
-			 (setq tmp (funcall getkey-func))
-			 (if (stringp tmp) (setq tmp (funcall case-func tmp)))
-			 tmp)
-		     (error "Invalid key function `%s'" getkey-func)))
-		  (t (error "Invalid sorting type `%c'" sorting-type)))))
-	   (lambda nil
-	     (cond
-	      ((= dcst ?n)
-	       (if (looking-at org-complex-heading-regexp)
-		   (string-to-number (match-string 4))
-		 nil))
-	      ((= dcst ?a)
-	       (if (looking-at org-complex-heading-regexp)
-		   (funcall case-func (match-string 4))
-		 nil))
-	      ((= dcst ?t)
-	       (let ((end (save-excursion (outline-next-heading) (point))))
-		 (if (or (re-search-forward org-ts-regexp end t)
-			 (re-search-forward org-ts-regexp-both end t))
-		     (org-time-string-to-seconds (match-string 0))
-		   (org-float-time now))))
-	      ((= dcst ?c)
-	       (let ((end (save-excursion (outline-next-heading) (point))))
-		 (if (re-search-forward
-		      (concat "^[ \t]*\\[" org-ts-regexp1 "\\]")
-		      end t)
-		     (org-time-string-to-seconds (match-string 0))
-		   (org-float-time now))))
-	      ((= dcst ?s)
-	       (let ((end (save-excursion (outline-next-heading) (point))))
-		 (if (re-search-forward org-scheduled-time-regexp end t)
-		     (org-time-string-to-seconds (match-string 1))
-		   (org-float-time now))))
-	      ((= dcst ?d)
-	       (let ((end (save-excursion (outline-next-heading) (point))))
-		 (if (re-search-forward org-deadline-time-regexp end t)
-		     (org-time-string-to-seconds (match-string 1))
-		   (org-float-time now))))
-	      ((= dcst ?p)
-	       (if (re-search-forward org-priority-regexp (point-at-eol) t)
-		   (string-to-char (match-string 2))
-		 org-default-priority))
-	      ((= dcst ?r)
-	       (or (org-entry-get nil property) ""))
-	      ((= dcst ?o)
-	       (if (looking-at org-complex-heading-regexp)
-		   (- 9999 (length (member (match-string 2)
-					   org-todo-keywords-1)))))
-	      ((= dcst ?f)
-	       (if getkey-func
-		   (progn
-		     (setq tmp (funcall getkey-func))
-		     (if (stringp tmp) (setq tmp (funcall case-func tmp)))
-		     tmp)
-		 (error "Invalid key function `%s'" getkey-func)))
-	      (t (error "Invalid sorting type `%c'" sorting-type)))))
+	 (lambda nil
+	   (cond
+	    ((= dcst ?n)
+	     (if (looking-at org-complex-heading-regexp)
+		 (string-to-number (match-string 4))
+	       nil))
+	    ((= dcst ?a)
+	     (if (looking-at org-complex-heading-regexp)
+		 (funcall case-func (match-string 4))
+	       nil))
+	    ((= dcst ?t)
+	     (let ((end (save-excursion (outline-next-heading) (point))))
+	       (if (or (re-search-forward org-ts-regexp end t)
+		       (re-search-forward org-ts-regexp-both end t))
+		   (org-time-string-to-seconds (match-string 0))
+		 (org-float-time now))))
+	    ((= dcst ?c)
+	     (let ((end (save-excursion (outline-next-heading) (point))))
+	       (if (re-search-forward
+		    (concat "^[ \t]*\\[" org-ts-regexp1 "\\]")
+		    end t)
+		   (org-time-string-to-seconds (match-string 0))
+		 (org-float-time now))))
+	    ((= dcst ?s)
+	     (let ((end (save-excursion (outline-next-heading) (point))))
+	       (if (re-search-forward org-scheduled-time-regexp end t)
+		   (org-time-string-to-seconds (match-string 1))
+		 (org-float-time now))))
+	    ((= dcst ?d)
+	     (let ((end (save-excursion (outline-next-heading) (point))))
+	       (if (re-search-forward org-deadline-time-regexp end t)
+		   (org-time-string-to-seconds (match-string 1))
+		 (org-float-time now))))
+	    ((= dcst ?p)
+	     (if (re-search-forward org-priority-regexp (point-at-eol) t)
+		 (string-to-char (match-string 2))
+	       org-default-priority))
+	    ((= dcst ?r)
+	     (or (org-entry-get nil property) ""))
+	    ((= dcst ?o)
+	     (if (looking-at org-complex-heading-regexp)
+		 (- 9999 (length (member (match-string 2)
+					 org-todo-keywords-1)))))
+	    ((= dcst ?f)
+	     (if getkey-func
+		 (progn
+		   (setq tmp (funcall getkey-func))
+		   (if (stringp tmp) (setq tmp (funcall case-func tmp)))
+		   tmp)
+	       (error "Invalid key function `%s'" getkey-func)))
+	    (t (error "Invalid sorting type `%c'" sorting-type))))
          nil
          (cond
           ((= dcst ?a) 'string<)
@@ -18272,16 +18229,25 @@ really on, so that the block visually is on the match."
 	      (throw 'exit t)))
 	nil))))
 
-(defun org-in-regexps-block-p (start-re end-re)
-  "Return t if the current point is between matches of START-RE and END-RE.
-This will also return to if point is on one of the two matches."
-  (interactive)
-  (let ((p (point)))
+(defun org-in-regexps-block-p (start-re end-re &optional bound)
+  "Returns t if the current point is between matches of START-RE and END-RE.
+This will also return t if point is on one of the two matches or
+in an unfinished block. END-RE can be a string or a form
+returning a string.
+
+An optional third argument bounds the search. It defaults to
+previous heading or `point-min'."
+  (let ((pos (point))
+	(limit (or bound
+		   (save-excursion (outline-previous-heading))
+		   (point-min))))
     (save-excursion
-      (and (or (org-at-regexp-p start-re)
-	       (re-search-backward start-re nil t))
-	   (re-search-forward end-re nil t)
-	   (>= (point) p)))))
+      ;; we're on a block when point is on start-re...
+      (or (org-at-regexp-p start-re)
+	  ;; ... or start-re can be found above...
+	  (and (re-search-backward start-re bound t)
+	       ;; ... but no end-re between start-re and point.
+	       (not (re-search-forward (eval end-re) pos t)))))))
 
 (defun org-occur-in-agenda-files (regexp &optional nlines)
   "Call `multi-occur' with buffers for all agenda files."
@@ -18573,25 +18539,8 @@ which make use of the date at the cursor."
 	     (re-search-backward
 	      (concat "^[ \t]*#\\+begin_" (downcase (match-string 1))) nil t)))
       (setq column (org-get-indentation (match-string 0))))
-     (t
-      (beginning-of-line 0)
-      (while (and (not (bobp)) (looking-at "[ \t]*[\n:#|]")
-		  (not (looking-at "[ \t]*:END:"))
-		  (not (looking-at org-drawer-regexp)))
-	(beginning-of-line 0))
-      (cond
-       ((looking-at "\\*+[ \t]+")
-	(if (not org-adapt-indentation)
-	    (setq column 0)
-	  (goto-char (match-end 0))
-	  (setq column (current-column))))
-       ((looking-at org-drawer-regexp)
-	  (goto-char (1- (match-beginning 1)))
-	  (setq column (current-column)))
-       ((looking-at "\\([ \t]*\\):END:")
-	  (goto-char (match-end 1))
-	  (setq column (current-column)))
-       ((org-in-item-p)
+     ;; Are we in a list ?
+     ((org-in-item-p)
 	(org-beginning-of-item)
 	(looking-at "[ \t]*\\(\\S-+\\)[ \t]*\\(\\[[- X]\\][ \t]*\\|.*? :: \\)?")
 	(setq bpos (match-beginning 1) tpos (match-end 0)
@@ -18603,8 +18552,8 @@ which make use of the date at the cursor."
 	    (setq tcol (+ bcol 5)))
 	(if (not itemp)
 	    (setq column tcol)
-	  (goto-char pos)
 	  (beginning-of-line 1)
+	  (goto-char pos)
 	  (if (looking-at "\\S-")
 	      (progn
 		(looking-at "[ \t]*\\(\\S-+\\)[ \t]*")
@@ -18612,6 +18561,34 @@ which make use of the date at the cursor."
 		      btype (if (string-match "[0-9]" bullet) "n" bullet))
 		(setq column (if (equal btype bullet-type) bcol tcol)))
 	    (setq column (org-get-indentation)))))
+     ;; This line has nothing special, look upside to get a clue about
+     ;; what to do.
+     (t
+      (beginning-of-line 0)
+      (while (and (not (bobp)) (looking-at "[ \t]*[\n:#|]")
+      		  (not (looking-at "[ \t]*:END:"))
+      		  (not (looking-at org-drawer-regexp)))
+      	(beginning-of-line 0))
+      (cond
+       ;; There was an heading above.
+       ((looking-at "\\*+[ \t]+")
+	(if (not org-adapt-indentation)
+	    (setq column 0)
+	  (goto-char (match-end 0))
+	  (setq column (current-column))))
+       ;; A drawer had started and is unfinished: indent consequently.
+       ((looking-at org-drawer-regexp)
+	(goto-char (1- (match-beginning 1)))
+	(setq column (current-column)))
+       ;; The drawer had ended: indent like its :END: line.
+       ((looking-at "\\([ \t]*\\):END:")
+	(goto-char (match-end 1))
+	(setq column (current-column)))
+       ;; There was a list that since ended: indent like top point.
+       ((org-in-item-p)
+	(goto-char (org-list-top-point))
+	(setq column (org-get-indentation)))
+       ;; Else, nothing noticeable found: get indentation and go on.
        (t (setq column (org-get-indentation))))))
     (goto-char pos)
     (if (<= (current-column) (current-indentation))

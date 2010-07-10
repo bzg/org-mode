@@ -2238,7 +2238,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
   "Convert plain text lists in current buffer into LaTeX lists."
   (let (res)
     (goto-char (point-min))
-    (while (org-re-search-forward-unprotected org-list-beginning-re nil t)
+    (while (org-re-search-forward-unprotected (org-item-re) nil t)
       (beginning-of-line)
       (setq res (org-list-to-latex (org-list-parse-list t)
 				   org-export-latex-list-parameters))

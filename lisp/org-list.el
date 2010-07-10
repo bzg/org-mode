@@ -140,10 +140,10 @@ the safe choice."
 (defcustom org-list-two-spaces-after-bullet-regexp nil
   "A regular expression matching bullets that should have 2 spaces after them.
 When nil, no bullet will have two spaces after them.
-When a string, it will be used as a regular expression.	 When the bullet
-type of a list is changed, the new bullet type will be matched against this
-regexp.	 If it matches, there will be two spaces instead of one after
-the bullet in each item of he list."
+When a string, it will be used as a regular expression. When the
+bullet type of a list is changed, the new bullet type will be
+matched against this regexp. If it matches, there will be two
+spaces instead of one after the bullet in each item of he list."
   :group 'org-plain-lists
   :type '(choice
 	  (const :tag "never" nil)
@@ -151,9 +151,8 @@ the bullet in each item of he list."
 
 (defcustom org-empty-line-terminates-plain-lists nil
   "Non-nil means an empty line ends all plain list levels.
-This is currently effective only during export.  It should also have
-an effect for indentation and plain list folding, but it does not.
-When nil, empty lines are part of the preceding item."
+Otherwise it will take two blank lines to end them."
+
   :group 'org-plain-lists
   :type 'boolean)
 
@@ -188,9 +187,6 @@ When the indentation would be larger than this, it will become
   :group 'org-plain-lists
   :type 'integer)
 
-(defvar org-list-beginning-re
-  "^\\([ \t]*\\)\\([-+]\\|[0-9]+[.)]\\) +\\(.*\\)$")
-
 (defcustom org-list-radio-list-templates
   '((latex-mode "% BEGIN RECEIVE ORGLST %n
 % END RECEIVE ORGLST %n
@@ -218,9 +214,14 @@ list, obtained by prompting the user."
 	  (list (symbol :tag "Major mode")
 		(string :tag "Format"))))
 
-;;;; Plain list items, including checkboxes
+;;; Internal functions
 
-;;; Plain list items
+(defun org-list-end-re ()
+  "Return the regex corresponding to the end of a list.
+It depends on `org-empty-line-terminates-plain-lists'."
+  (if org-empty-line-terminates-plain-lists
+      "^\\([ \t]*\n\\)+"
+    "^[ \t]*\n\\([ \t]*\n\\)+"))
 
 (defun org-item-re (&optional general)
   "Return the correct regular expression for plain lists.
@@ -235,9 +236,104 @@ of `org-plain-list-ordered-item-terminator'."
     "\\([ \t]*\\([-+]\\|\\([0-9]+)\\)\\)\\|[ \t]+\\*\\)\\( \\|$\\)")
    (t (error "Invalid value of `org-plain-list-ordered-item-terminator'"))))
 
+(defun org-list-terminator-between (min max &optional firstp)
+  "Find the position of a list ender between MIN and MAX, or nil.
+This function looks for `org-list-end-re' not matching a block.
+
+If FIRSTP in non-nil, return the point at the beginning of the
+nearest valid terminator from min. Otherwise, return the point at
+the end of the nearest terminator from max."
+  (save-excursion
+    (let* ((start (if firstp min max))
+	   (end   (if firstp max min))
+	   (search-fun (if firstp
+			   #'org-search-forward-unenclosed
+			 #'org-search-backward-unenclosed))
+	   (list-end-p (progn
+			 (goto-char start)
+			 (funcall search-fun (org-list-end-re) end))))
+      ;; Is there a valid list terminator somewhere ?
+      (and list-end-p
+	   ;; we want to be on the first line of the list ender
+	   (match-beginning 0)))))
+
+(defun org-search-backward-unenclosed (regexp &optional bound noerror)
+  "Like `re-search-backward' but don't stop inside blocks or throw errors."
+  (ignore-errors
+    (prog1
+	(re-search-backward regexp bound noerror)
+      (when (save-match-data
+	      (or (org-in-regexps-block-p "^[ \t]*#\\+begin_\\([a-zA-Z]\\)"
+					  '(concat "^[ \t]*#\\+end_" (match-string 1)))
+		  (org-in-regexps-block-p "^[ \t]*\\\\begin{\\([a-zA-Z]\\)}"
+					  '(concat "^[ \t]*\\\\end{" (match-string 1) "}"))))
+	(org-search-backward-unenclosed regexp bound noerror)))))
+
+(defun org-search-forward-unenclosed (regexp &optional bound noerror)
+  "Like `re-search-forward' but don't stop inside blocks or throw errors."
+  (ignore-errors
+    (prog1
+	(re-search-forward regexp bound noerror)
+      (when (save-match-data
+	      (or (org-in-regexps-block-p "^[ \t]*#\\+begin_\\([a-zA-Z]\\)"
+					  '(concat "^[ \t]*#\\+end_" (match-string 1)))
+		  (org-in-regexps-block-p "^[ \t]*\\\\begin{\\([a-zA-Z]\\)}"
+					  '(concat "^[ \t]*\\\\end{" (match-string 1) "}"))))
+	(org-search-forward-unenclosed regexp bound noerror)))))
+
+(defun org-get-item-same-level-internal (search-fun pos limit pre-move)
+  "Return point at the beginning of next item at the same level.
+Search items using function SEARCH-FUN, from POS to LIMIT. It
+uses PRE-MOVE before searches. Return nil if no item was found.
+
+Internal use only. Prefer `org-get-next-item' and
+`org-get-previous-item' for cleaner code."
+  (save-excursion
+    (when pos (goto-char pos))
+    (let* ((begin (point))
+	   (ind (progn
+		  (org-beginning-of-item)
+		  (org-get-indentation)))
+	   (start (point-at-bol)))
+      ;; we don't want to match the current line.
+      (funcall pre-move)
+      ;; we skip any sublist on the way
+      (while (and (funcall search-fun (org-item-re) limit)
+		  (> (org-get-indentation) ind))
+	(funcall pre-move))
+      (when (and (/= (point-at-bol) start) ; Have we moved ?
+		 (= (org-get-indentation) ind))
+	(point-at-bol)))))
+
+;;; Predicates
+
+(defun org-in-item-p ()
+  "Is the cursor inside a plain list ?"
+  (save-restriction
+    (save-excursion
+      (widen)
+      ;; we move to eol so that the current line can be matched by
+      ;; `org-item-re'.
+      (let* ((limit (or (save-excursion (outline-previous-heading)) (point-min)))
+	     (actual-pos (goto-char (point-at-eol)))
+	     (last-item-start (save-excursion
+				(org-search-backward-unenclosed (org-item-re) limit)))
+	     (list-ender (org-list-terminator-between last-item-start actual-pos)))
+	;; We are in a list when we are on an item line or we can find
+	;; an item before and there is no valid list ender between us
+	;; and the item found.
+	(and last-item-start
+	     (not list-ender))))))
+
+(defun org-first-list-item-p ()
+  "Is this heading the first item in a plain list?"
+  (unless (org-at-item-p)
+    (error "Not at a plain list item"))
+  (save-excursion
+    (= (save-excursion (org-beginning-of-item)) (org-beginning-of-item-list))))
+
 (defun org-at-item-p ()
   "Is point in a line starting a hand-formatted item?"
-
   (save-excursion
     (goto-char (point-at-bol))
     (looking-at (org-item-re))))
@@ -248,80 +344,6 @@ of `org-plain-list-ordered-item-terminator'."
        (not (member (char-after) '(?\  ?\t)))
        (< (point) (match-end 0))))
 
-(defun org-in-item-p ()
-  "Is the cursor inside a plain list item.
-Does not have to be the first line."
-  (save-excursion
-    (condition-case nil
-	(progn
-	  (org-beginning-of-item)
-	  (org-at-item-p)
-	  t)
-      (error nil))))
-
-(defun org-insert-item (&optional checkbox)
-  "Insert a new item at the current level.
-Return t when things worked, nil when we are not in an item."
-  (when (save-excursion
-	  (condition-case nil
-	      (progn
-		(org-beginning-of-item)
-		(org-at-item-p)
-		(if (org-invisible-p) (error "Invisible item"))
-		t)
-	    (error nil)))
-    (let* ((bul (match-string 0))
-	   (descp (save-excursion (goto-char (match-beginning 0))
-				  (beginning-of-line 1)
-				  (save-match-data
-				    (and (looking-at "[ \t]*\\(.*?\\) ::")
-					 (match-string 1)))))
-	   (empty-line-p (save-excursion
-			   (goto-char (match-beginning 0))
-			   (and (not (bobp))
-				(or (beginning-of-line 0) t)
-				(save-match-data
-				  (looking-at "[ \t]*$")))))
-	   (timerp (and descp
-			(save-match-data
-			  (string-match "^[-+*][ \t]+[0-9]+:[0-9]+:[0-9]+$"
-					descp))))
-	   (eow (save-excursion (beginning-of-line 1) (looking-at "[ \t]*")
-				(match-end 0)))
-	   (blank-a (if org-empty-line-terminates-plain-lists
-			nil
-		      (cdr (assq 'plain-list-item org-blank-before-new-entry))))
-	   (blank (if (eq blank-a 'auto) empty-line-p blank-a))
-	   pos)
-      (if descp (setq checkbox nil))
-      (if timerp
-	  (progn (org-timer-item) t)
-	(cond
-	 ((and (org-at-item-p) (<= (point) eow))
-	  ;; before the bullet
-	  (beginning-of-line 1)
-	  (open-line (if blank 2 1)))
-	 ((<= (point) eow)
-	  (beginning-of-line 1))
-	 (t
-	  (unless (org-get-alist-option org-M-RET-may-split-line 'item)
-	    (end-of-line 1)
-	    (delete-horizontal-space))
-	  (newline (if blank 2 1))))
-	(insert bul
-		(if checkbox "[ ]" "")
-		(if descp (concat (if checkbox " " "")
-				  (read-string "Term: ") " :: ") ""))
-	(just-one-space)
-	(setq pos (point))
-	(end-of-line 1)
-	(unless (= (point) pos) (just-one-space) (backward-delete-char 1)))
-      (org-maybe-renumber-ordered-list)
-      (and checkbox (org-update-checkbox-count-maybe))
-      t)))
-
-;;; Checkboxes
-
 (defun org-at-item-checkbox-p ()
   "Is point at a line starting a plain-list item with a checklet?"
   (and (org-at-item-p)
@@ -329,6 +351,609 @@ Return t when things worked, nil when we are not in an item."
 	 (goto-char (match-end 0))
 	 (skip-chars-forward " \t")
 	 (looking-at "\\[[- X]\\]"))))
+
+(defun org-checkbox-blocked-p ()
+  "Is the current checkbox blocked from for being checked now?
+A checkbox is blocked if all of the following conditions are fulfilled:
+
+1. The checkbox is not checked already.
+2. The current entry has the ORDERED property set.
+3. There is an unchecked checkbox in this entry before the current line."
+  (catch 'exit
+    (save-match-data
+      (save-excursion
+	(unless (org-at-item-checkbox-p) (throw 'exit nil))
+	(when (equal (match-string 0) "[X]")
+	  ;; the box is already checked!
+	  (throw 'exit nil))
+	(let ((end (point-at-bol)))
+	  (condition-case nil (org-back-to-heading t)
+	    (error (throw 'exit nil)))
+	  (unless (org-entry-get nil "ORDERED") (throw 'exit nil))
+	  (if (re-search-forward "^[ \t]*[-+*0-9.)] \\[[- ]\\]" end t)
+	      (org-current-line)
+	    nil))))))
+
+;;; Navigate
+
+(defun org-list-top-point ()
+  "Return point at the top level item in a list, or nil if not in a list."
+  (save-excursion
+    (and (org-in-item-p)
+	 (let ((pos (point-at-eol))
+	       (bound (or (outline-previous-heading) (point-min))))
+	   ;; Is there some list above this one ? If so, go to its ending.
+	   ;; Otherwise, go back to the heading above or bob.
+	   (goto-char (or (org-list-terminator-between bound pos) bound))
+	   ;; From there, search down our list.
+	   (org-search-forward-unenclosed (org-item-re) pos)
+	   (point-at-bol)))))
+
+(defun org-list-bottom-point ()
+  "Return point just before list ending or nil if not in a list."
+  (save-excursion
+    (and (org-in-item-p)
+	 (let ((pos (org-beginning-of-item))
+	       (bound (or (and (outline-next-heading)
+			       (skip-chars-backward "[ \t\r\n]")
+			       (1+ (point-at-eol)))
+			  (point-max))))
+	   ;; The list ending is either first point matching
+	   ;; org-list-end-re, point at first white-line before next
+	   ;; heading, or eob.
+	   (or (org-list-terminator-between pos bound t) bound)))))
+
+(defun org-beginning-of-item ()
+  "Go to the beginning of the current hand-formatted item.
+If the cursor is not in an item, throw an error. Return point."
+  (interactive)
+  (if (org-in-item-p)
+      (if (org-at-item-p)
+	  (progn (beginning-of-line 1)
+		 (point))
+	(org-search-backward-unenclosed (org-item-re))
+	(goto-char (point-at-bol)))
+    (error "Not in an item")))
+
+(defun org-end-of-item ()
+  "Go to the end of the current hand-formatted item.
+If the cursor is not in an item, throw an error."
+  (interactive)
+  (let ((next-p (org-get-next-item (point) (org-list-bottom-point))))
+    (cond ((not (org-in-item-p))
+	   (error "Not in an item"))
+	  (next-p
+	   (goto-char next-p))
+	  (t
+	   (org-end-of-item-list)))))
+
+(defun org-end-of-item-text-before-children ()
+  "Move to the end of the item text, stops before the first child if any.
+Assumes that the cursor is in the first line of an item."
+  (let ((limit (org-list-bottom-point)))
+    (end-of-line)
+    (goto-char
+     (if (org-search-forward-unenclosed (org-item-re) limit)
+	 (point-at-bol)
+       limit))))
+
+(defun org-end-of-item-before-blank ()
+  "Return point at end of item, before any blank line.
+Point returned is at eol."
+  (save-excursion
+    (org-end-of-item)
+    (skip-chars-backward " \r\t\n")
+    (point-at-eol)))
+
+(defun org-get-next-item (pos limit)
+  "Get the point of the next item at the same level as POS.
+ Stop searching at LIMIT. Return nil if no item is found. This
+ function does not move point."
+  (org-get-item-same-level-internal
+   #'org-search-forward-unenclosed
+   pos
+   limit
+   #'end-of-line))
+
+(defun org-get-previous-item (pos limit)
+  "Get the point of the previous item at the same level as POS.
+ Stop searching at LIMIT. Return nil if no item is found. This
+ function does not move point."
+  (org-get-item-same-level-internal
+   #'org-search-backward-unenclosed
+   pos
+   limit
+   #'beginning-of-line))
+
+(defun org-next-item ()
+  "Move to the beginning of the next item.
+Item is at the same level in the current plain list. Error if not
+in a plain list, or if this is the last item in the list."
+  (interactive)
+  (let ((next-p (org-get-next-item (point) (org-list-bottom-point))))
+    (if next-p
+	(goto-char next-p)
+      (error "On last item"))))
+
+(defun org-previous-item ()
+  "Move to the beginning of the previous item.
+Item is at the same level in the current plain list. Error if not
+in a plain list, or if this is the first item in the list."
+  (interactive)
+  (let ((prev-p (org-get-previous-item (point) (org-list-top-point))))
+    (if prev-p
+	(goto-char prev-p)
+      (error "On first item"))))
+
+(defun org-beginning-of-item-list ()
+  "Go to the beginning item of the current list or sublist.
+Return point."
+  (interactive)
+  (let ((limit (org-list-top-point))
+	(move-up (lambda (pos bound)
+		   ;; prev-p: any item of same level before ?
+		   (let ((prev-p (org-get-previous-item pos bound)))
+		     ;; recurse until no more item of the same level
+		     ;; can be found.
+		     (if prev-p
+			 (funcall move-up prev-p bound)
+		       pos)))))
+    ;; Go to the last item found and at bol in case we didn't move
+    (goto-char (funcall move-up (point) limit))
+    (goto-char (point-at-bol))))
+
+(defun org-end-of-item-list ()
+  "Go to the end of the current list or sublist.
+ Return point."
+  (interactive)
+  (org-beginning-of-item)
+  (let ((limit (org-list-bottom-point))
+	(ind (org-get-indentation))
+	(get-last-item (lambda (pos bound)
+			 ;; next-p: any item of same level after ?
+			 (let ((next-p (org-get-next-item pos bound)))
+			   ;; recurse until no more item of the same level
+			   ;; can be found.
+			   (if next-p
+			       (funcall get-last-item next-p bound)
+			     pos)))))
+    ;; Move to the last item of every list or sublist encountered, and
+    ;; down to bol of a higher-level item, or limit.
+    (while (and (/= (point) limit)
+		(>= (org-get-indentation) ind))
+      (goto-char (funcall get-last-item (point) limit))
+      (end-of-line)
+      (when (org-search-forward-unenclosed (org-item-re) limit 'move)
+	(beginning-of-line)))
+    (point)))
+
+;;; Manipulate
+
+(defun org-list-exchange-items (beg-A beg-B)
+  "Swap item starting at BEG-A with item starting at BEG-B.
+  Blank lines at the end of items are left in place. Assumes
+  BEG-A is lesser than BEG-B."
+  (save-excursion
+    (let* ((end-of-item-no-blank (lambda (pos)
+				   (goto-char pos)
+				   (goto-char (org-end-of-item-before-blank))))
+	   (end-A-no-blank (funcall end-of-item-no-blank beg-A))
+	   (end-B-no-blank (funcall end-of-item-no-blank beg-B))
+	   (body-A (buffer-substring beg-A end-A-no-blank))
+	   (body-B (buffer-substring beg-B end-B-no-blank))
+	   (between-A-no-blank-and-B (buffer-substring end-A-no-blank beg-B)))
+      (goto-char beg-A)
+      (delete-region beg-A end-B-no-blank)
+      (insert (concat body-B between-A-no-blank-and-B body-A)))))
+
+(defun org-move-item-down ()
+  "Move the plain list item at point down, i.e. swap with following item.
+Subitems (items with larger indentation) are considered part of the item,
+so this really moves item trees."
+  (interactive)
+  (let ((pos (point))
+	(col (current-column))
+	(actual-item (org-beginning-of-item))
+	(next-item (org-get-next-item (point) (save-excursion (org-end-of-item-list)))))
+    (if (not next-item)
+	(progn
+	  (goto-char pos)
+	  (error "Cannot move this item further down"))
+      (org-list-exchange-items actual-item next-item)
+      (org-maybe-renumber-ordered-list)
+      (org-next-item)
+      (move-to-column col))))
+
+(defun org-move-item-up ()
+  "Move the plain list item at point up, i.e. swap with previous item.
+Subitems (items with larger indentation) are considered part of the item,
+so this really moves item trees."
+  (interactive)
+  (let ((pos (point))
+	(col (current-column))
+	(actual-item (org-beginning-of-item))
+	(prev-item (org-get-previous-item (point) (save-excursion (org-beginning-of-item-list)))))
+    (if (not prev-item)
+	(progn
+	  (goto-char pos)
+	  (error "Cannot move this item further up"))
+      (org-list-exchange-items prev-item actual-item)
+      (org-maybe-renumber-ordered-list)
+      (move-to-column col))))
+
+(defun org-insert-item (&optional checkbox)
+  "Insert a new item at the current level.
+
+If cursor is before first character after bullet of the item, the
+new item will be created before the current one. Return t when
+things worked, nil when we are not in an item, or we are inside a
+block, or item is invisible."
+  (unless (or (not (org-in-item-p))
+	      (org-invisible-p)
+	      (org-in-regexps-block-p "^[ \t]*#\\+begin_\\([a-zA-Z]\\)"
+	      			      '(concat "^[ \t]*#\\+end_" (match-string 1)))
+	      (org-in-regexps-block-p "^[ \t]*\\\\begin{\\([a-zA-Z]\\)}"
+	      			      '(concat "^[ \t]*\\\\end{" (match-string 1) "}")))
+    (let* ((pos (point))
+	   (before-p (and (org-at-item-p)
+			  (<= (point) (match-end 0))))
+	   (item-start (org-beginning-of-item))
+	   (bullet-init (and (looking-at (org-item-re))
+			     (match-string 0)))
+	   (description-p (and (looking-at "[ \t]*\\(.*?\\) ::")
+			       (match-string 1)))
+	   (timer-p (and description-p
+			 (string-match "^[-+*][ \t]+[0-9]+:[0-9]+:[0-9]+$" description-p)))
+	   ;; Guess number of blank lines used to separate items.
+	   (blank-lines-nb (let* ((insert-blank-p
+				   (cdr (assq 'plain-list-item org-blank-before-new-entry)))
+				  (limit (save-excursion (org-end-of-item-list)))
+				  (next-item-p (org-get-next-item (point) limit)))
+			     (cond
+			      ;; cases where there should be no blank line.
+			      ((or (not insert-blank-p)
+				   org-empty-line-terminates-plain-lists) 0)
+			      ;; If there's a next item, count blank
+			      ;; lines between current and next item.
+			      (next-item-p (and (goto-char next-item-p)
+						(org-back-over-empty-lines)))
+			      ;; if we're not on the first item, there
+			      ;; is one above. Count blank lines between.
+			      ((not (org-first-list-item-p)) (org-back-over-empty-lines))
+			      ;; Only one item list: can't guess.
+			      ;; Follow `org-blank-before-new-entry'
+			      ((eq insert-blank-p 'auto) 0)
+			      (t 1))))
+	   (insert-fun (lambda (&optional string-after-bullet)
+			 ;; insert bullet above item in order to avoid
+			 ;; bothering with possible blank lines ending
+			 ;; last item
+			 (org-beginning-of-item)
+			 (insert (concat bullet-init
+					 (when checkbox "[ ] ")
+					 (when (and description-p (not timer-p))
+					   (concat (read-string "Term: ") " :: "))))
+			 (save-excursion
+			   (insert (concat string-after-bullet
+					   (make-string (1+ blank-lines-nb) ?\n))))
+			 (unless before-p (org-move-item-down)))))
+      (goto-char pos)
+      (cond
+       ;; if we're adding a timer, delegate to `org-timer-item'.
+       (timer-p (org-timer-item) t)
+       (before-p
+	(funcall insert-fun)
+	;; Renumber in this case, as we're not moving down.
+	(org-maybe-renumber-ordered-list) t)
+       ;; if we can't split item, just insert bullet at the end of
+       ;; item.
+       ((not (org-get-alist-option org-M-RET-may-split-line 'item))
+	(funcall insert-fun) t)
+       ;; else, insert a new bullet along with everything from point
+       ;; down to last non-blank line of item
+       (t
+	(delete-horizontal-space)
+	;; get pos again in case previous command changed line.
+	(let* ((pos (point))
+	       (end-before-blank (org-end-of-item-before-blank))
+	       (after-bullet (when (< pos end-before-blank)
+			       (prog1
+				   (buffer-substring pos end-before-blank)
+				 (delete-region pos end-before-blank)))))
+	  (funcall insert-fun after-bullet) t))))))
+
+;;; Indentation
+
+(defun org-get-string-indentation (s)
+  "What indentation has S due to SPACE and TAB at the beginning of the string?"
+  (let ((n -1) (i 0) (w tab-width) c)
+    (catch 'exit
+      (while (< (setq n (1+ n)) (length s))
+	(setq c (aref s n))
+	(cond ((= c ?\ ) (setq i (1+ i)))
+	      ((= c ?\t) (setq i (* (/ (+ w i) w) w)))
+	      (t (throw 'exit t)))))
+    i))
+
+(defvar org-suppress-item-indentation) ; dynamically scoped parameter
+
+(defun org-shift-item-indentation (delta)
+  "Shift the indentation in current item by DELTA."
+  (unless (org-bound-and-true-p org-suppress-item-indentation)
+    (save-excursion
+      (let ((beg (point-at-bol))
+	    (end (progn (org-end-of-item) (point)))
+	    i)
+	(goto-char end)
+	(beginning-of-line 0)
+	(while (> (point) beg)
+	  (when (looking-at "[ \t]*\\S-")
+	    ;; this is not an empty line
+	    (setq i (org-get-indentation))
+	    (if (and (> i 0) (> (setq i (+ i delta)) 0))
+		(indent-line-to i)))
+	  (beginning-of-line 0))))))
+
+
+(defvar org-last-indent-begin-marker (make-marker))
+(defvar org-last-indent-end-marker (make-marker))
+
+(defun org-outdent-item (arg)
+  "Outdent a local list item, but not its children."
+  (interactive "p")
+  (org-indent-item-tree (- arg) 'no-subtree))
+
+(defun org-indent-item (arg)
+  "Indent a local list item, but not its children."
+  (interactive "p")
+  (org-indent-item-tree arg 'no-subtree))
+
+(defun org-outdent-item-tree (arg &optional no-subtree)
+  "Outdent a local list item including its children.
+If NO-SUBTREE is set, only outdent the item itself, not its children."
+  (interactive "p")
+  (org-indent-item-tree (- arg) no-subtree))
+
+(defun org-indent-item-tree (arg &optional no-subtree)
+  "Indent a local list item including its children.
+If NO-SUBTREE is set, only indent the item itself, not its children."
+  (interactive "p")
+  (and (org-region-active-p) (org-cursor-to-region-beginning))
+  (unless (org-at-item-p)
+    (error "Not on an item"))
+  (let ((origin-ind (save-excursion
+		      (goto-char (org-list-top-point))
+		      (org-get-indentation)))
+	beg end ind ind1 ind-bul delta ind-down ind-up firstp)
+    (setq firstp (org-first-list-item-p))
+    (save-excursion
+      (setq end (and (org-region-active-p) (region-end)))
+      (if (and (memq last-command '(org-shiftmetaright org-shiftmetaleft))
+	       (memq this-command '(org-shiftmetaright org-shiftmetaleft)))
+	  (setq beg org-last-indent-begin-marker
+		end org-last-indent-end-marker)
+	(org-beginning-of-item)
+	(setq beg (move-marker org-last-indent-begin-marker (point)))
+	(if no-subtree
+	    (org-end-of-item-text-before-children)
+	  (org-end-of-item))
+	(setq end (move-marker org-last-indent-end-marker (or end (point)))))
+      (goto-char beg)
+      (setq ind-bul (org-item-indent-positions)
+	    ind (caar ind-bul)
+	    ind-down (car (nth 2 ind-bul))
+	    ind-up (car (nth 1 ind-bul))
+	    delta (if (> arg 0)
+		      (if ind-down (- ind-down ind) 2)
+		    (if ind-up (- ind-up ind) -2)))
+      (if (and (< (+ delta ind) origin-ind)
+	       ;; verify we're not at the top level item
+	       (/= (point-at-bol) (org-list-top-point)))
+	  (error "Cannot outdent beyond top level item"))
+      (while (< (point) end)
+	(beginning-of-line 1)
+	(skip-chars-forward " \t") (setq ind1 (current-column))
+	(delete-region (point-at-bol) (point))
+	(or (eolp) (org-indent-to-column (+ ind1 delta)))
+	(beginning-of-line 2)))
+    (org-fix-bullet-type
+     (and (> arg 0)
+	  (not firstp)
+	  (cdr (assoc (cdr (nth 0 ind-bul)) org-list-demote-modify-bullet))))
+    (org-maybe-renumber-ordered-list-safe)
+    (save-excursion
+      (beginning-of-line 0)
+      (ignore-errors (org-beginning-of-item))
+      (org-maybe-renumber-ordered-list-safe))))
+
+(defun org-item-indent-positions ()
+  "Return indentation for plain list items.
+This returns a list with three values:	The current indentation, the
+parent indentation and the indentation a child should have.
+Assumes cursor in item line."
+  (let* ((bolpos (point-at-bol))
+	 (ind (org-get-indentation))
+	 (bullet (org-get-bullet))
+	 ind-down ind-up bullet-up bullet-down pos)
+    (save-excursion
+      (org-beginning-of-item-list)
+      (skip-chars-backward "\n\r \t")
+      (when (org-in-item-p)
+	(org-beginning-of-item)
+	(let ((prev-indent (org-get-indentation)))
+	  (when (< prev-indent ind)
+	    (setq ind-up prev-indent)
+	    (setq bullet-up (org-get-bullet))))))
+    (setq pos (point))
+    (save-excursion
+      (cond
+       ((and (ignore-errors (progn (org-previous-item) t))
+	     (or (end-of-line) t)
+	     (re-search-forward (org-item-re) bolpos t))
+	(setq ind-down (org-get-indentation)
+	      bullet-down (org-get-bullet)))
+       ((and (goto-char pos)
+	     (org-at-item-p))
+	(goto-char (match-end 0))
+	(skip-chars-forward " \t")
+	(setq ind-down (current-column)
+	      bullet-down (org-get-bullet)))))
+    (if (and bullet-down (string-match "\\`[0-9]+\\(\\.\\|)\\)\\'" bullet-down))
+	(setq bullet-down (concat "1" (match-string 1 bullet-down))))
+    (if (and bullet-up (string-match "\\`[0-9]+\\(\\.\\|)\\)\\'" bullet-up))
+	(setq bullet-up (concat "1" (match-string 1 bullet-up))))
+    (if (and bullet (string-match "\\`[0-9]+\\(\\.\\|)\\)\\'" bullet))
+	(setq bullet (concat "1" (match-string 1 bullet))))
+    (list (cons ind bullet)
+	  (cons ind-up bullet-up)
+	  (cons ind-down bullet-down))))
+
+(defvar org-tab-ind-state) ; defined in org.el
+(defun org-cycle-item-indentation ()
+  (let ((org-suppress-item-indentation t)
+	(org-adapt-indentation nil))
+    (cond
+     ((and (looking-at "[ \t]*$")
+	   (org-looking-back "^\\([ \t]*\\)\\([-+*]\\|[0-9]+[).]\\)[ \t]+"))
+      (setq this-command 'org-cycle-item-indentation)
+      (if (eq last-command 'org-cycle-item-indentation)
+	  (condition-case nil
+	      (progn (org-outdent-item 1)
+		     (if (equal org-tab-ind-state (org-get-indentation))
+			 (org-outdent-item 1))
+		     (end-of-line 1))
+	    (error
+	     (progn
+	       (while (< (org-get-indentation) org-tab-ind-state)
+		 (progn (org-indent-item 1) (end-of-line 1)))
+	       (setq this-command 'org-cycle))))
+	(setq org-tab-ind-state (org-get-indentation))
+	(org-indent-item 1))
+      t))))
+
+;;; Bullets
+
+(defun org-get-bullet ()
+  (save-excursion
+    (goto-char (point-at-bol))
+    (and (looking-at
+	  "^\\([ \t]*\\([-+]\\|\\([0-9]+[.)]\\)\\)\\|[ \t]+\\(\\*\\)\\)\\( \\|$\\)")
+	 (or (match-string 2) (match-string 4)))))
+
+(defun org-fix-bullet-type (&optional force-bullet)
+  "Make sure all items in this list have the same bullet as the first item.
+Also, fix the indentation."
+  (interactive)
+  (unless (org-at-item-p) (error "This is not a list"))
+  (org-preserve-lc
+   (let* ((bullet
+	   (progn
+	     (org-beginning-of-item-list)
+	     (looking-at "[ \t]*\\(\\S-+\\)")
+	     (concat (or force-bullet (match-string 1)) " "
+		     ;; do we need to concat another white space ?
+		     (when (and org-list-two-spaces-after-bullet-regexp
+				(string-match org-list-two-spaces-after-bullet-regexp bullet))
+		       " "))))
+	  (replace-bullet
+	   (lambda (counter bullet)
+	     (let* ((old (progn
+			   (skip-chars-forward " \t")
+			   (looking-at "\\S-+ *")
+			   (match-string 0))))
+	       (unless (equal bullet old)
+		 (replace-match bullet)
+		 ;; when bullet lengths are differents, move the whole
+		 ;; sublist accordingly
+		 (org-shift-item-indentation (- (length bullet) (length old))))))))
+     (org-apply-on-list replace-bullet bullet)
+     ;; fix item numbers if necessary
+     (when (string-match "[0-9]" bullet) (org-renumber-ordered-list)))))
+
+(defun org-renumber-ordered-list (&optional arg)
+  "Renumber an ordered plain list.
+Cursor needs to be in the first line of an item, the line that starts
+with something like \"1.\" or \"2)\". Start to count at ARG or 1."
+  (interactive "p")
+  (unless (and (org-at-item-p)
+	       (match-beginning 3))
+    (error "This is not an ordered list"))
+  (org-preserve-lc
+   (let* ((offset (progn
+		    (org-beginning-of-item)
+		    (or (and (looking-at "[ \t]*\\[@start:\\([0-9]+\\)")
+			     (string-to-number (match-string 1)))
+			arg
+			1)))
+	  (item-fmt (progn
+		      (looking-at "[ \t]*[0-9]+\\([.)]\\)")
+		      (concat "%d" (or (match-string 1) "."))))
+	  ;; Here is the function applied at each item of the list.
+	  (renumber-item (lambda (counter off fmt)
+			   (let* ((new (format fmt (+ counter off)))
+				  (old (progn
+					 (looking-at (org-item-re))
+					 (match-string 2)))
+				  (begin (match-beginning 2))
+				  (end (match-end 2)))
+			     (delete-region begin end)
+			     (goto-char begin)
+			     (insert new)
+			     ;; In case item number went from 9. to 10.
+			     ;; or the other way.
+			     (org-shift-item-indentation (- (length new) (length old)))))))
+     (org-apply-on-list renumber-item offset item-fmt))))
+
+(defun org-maybe-renumber-ordered-list ()
+  "Renumber the ordered list at point if setup allows it.
+This tests the user option `org-auto-renumber-ordered-lists' before
+doing the renumbering."
+  (interactive)
+  (when (and org-auto-renumber-ordered-lists
+	     (org-at-item-p))
+    (if (match-beginning 3)
+	(org-renumber-ordered-list 1)
+      (org-fix-bullet-type))))
+
+(defun org-maybe-renumber-ordered-list-safe ()
+  (ignore-errors
+    (save-excursion
+      (org-maybe-renumber-ordered-list))))
+
+(defun org-cycle-list-bullet (&optional which)
+  "Cycle through the different itemize/enumerate bullets.
+This cycle the entire list level through the sequence:
+
+   `-'	->  `+'  ->  `*'  ->  `1.'  ->	`1)'
+
+If WHICH is a string, use that as the new bullet.  If WHICH is an integer,
+0 means `-', 1 means `+' etc."
+  (interactive "P")
+  (org-preserve-lc
+   (let* ((current (progn
+		     (org-beginning-of-item-list)
+		     (org-at-item-p)
+		     (match-string 0)))
+	  (prevp (eq which 'previous))
+	  (new (cond
+		((and (numberp which)
+		      (nth (1- which) '("-" "+" "*" "1." "1)"))))
+		((string-match "-" current) (if prevp "1)" "+"))
+		((string-match "\\+" current)
+		 (if prevp "-" (if (looking-at "\\S-") "1." "*")))
+		((string-match "\\*" current) (if prevp "+" "1."))
+		((string-match "\\." current)
+		 (if prevp (if (looking-at "\\S-") "+" "*") "1)"))
+		((string-match ")" current) (if prevp "1." "-"))
+		(t (error "This should not happen"))))
+	  (old (and (looking-at "\\([ \t]*\\)\\(\\S-+\\)")
+		    (match-string 2))))
+     (replace-match (concat "\\1" new))
+     (org-shift-item-indentation (- (length new) (length old)))
+     (org-fix-bullet-type)
+     (org-maybe-renumber-ordered-list))))
+
+;;; Checkboxes
 
 (defun org-toggle-checkbox (&optional toggle-presence)
   "Toggle the checkbox in the current line.
@@ -413,28 +1038,6 @@ text below the heading."
 	  (beginning-of-line 2))))
     (org-update-checkbox-count-maybe)))
 
-(defun org-checkbox-blocked-p ()
-  "Is the current checkbox blocked from for being checked now?
-A checkbox is blocked if all of the following conditions are fulfilled:
-
-1. The checkbox is not checked already.
-2. The current entry has the ORDERED property set.
-3. There is an unchecked checkbox in this entry before the current line."
-  (catch 'exit
-    (save-match-data
-      (save-excursion
-	(unless (org-at-item-checkbox-p) (throw 'exit nil))
-	(when (equal (match-string 0) "[X]")
-	  ;; the box is already checked!
-	  (throw 'exit nil))
-	(let ((end (point-at-bol)))
-	  (condition-case nil (org-back-to-heading t)
-	    (error (throw 'exit nil)))
-	  (unless (org-entry-get nil "ORDERED") (throw 'exit nil))
-	  (if (re-search-forward "^[ \t]*[-+*0-9.)] \\[[- ]\\]" end t)
-	      (org-current-line)
-	    nil))))))
-
 (defvar org-checkbox-statistics-hook nil
   "Hook that is run whenever Org thinks checkbox statistics should be updated.
 This hook runs even if `org-provide-checkbox-statistics' is nil, to it can
@@ -447,112 +1050,114 @@ be used to implement alternative ways of collecting statistics information.")
   (run-hooks 'org-checkbox-statistics-hook))
 
 (defun org-update-checkbox-count (&optional all)
- "Update the checkbox statistics in the current section.
+  "Update the checkbox statistics in the current section.
 This will find all statistic cookies like [57%] and [6/12] and update them
 with the current numbers.  With optional prefix argument ALL, do this for
 the whole buffer."
- (interactive "P")
- (save-excursion
-   (let* ((buffer-invisibility-spec (org-inhibit-invisibility)) ; Emacs 21
-	  (beg (condition-case nil
-		   (progn (org-back-to-heading) (point))
-		 (error (point-min))))
-	  (end (move-marker (make-marker)
-			    (progn (outline-next-heading) (point))))
-	  (re "\\(\\(\\[[0-9]*%\\]\\)\\|\\(\\[[0-9]*/[0-9]*\\]\\)\\)")
-	  (re-box "^[ \t]*\\([-+*]\\|[0-9]+[.)]\\) +\\(\\[[- X]\\]\\)")
-	  (re-find (concat re "\\|" re-box))
-	  beg-cookie end-cookie is-percent c-on c-off lim new
-	  eline curr-ind next-ind continue-from startsearch
-	  (recursive
-	   (or (not org-hierarchical-checkbox-statistics)
-	       (string-match "\\<recursive\\>"
-			     (or (ignore-errors
-				   (org-entry-get nil "COOKIE_DATA"))
-				 ""))))
-	  (cstat 0)
-	  )
-     (when all
-       (goto-char (point-min))
-       (outline-next-heading)
-       (setq beg (point) end (point-max)))
-     (goto-char end)
-     ;; find each statistics cookie
-     (while (and (re-search-backward re-find beg t)
-		 (not (save-match-data
-			(and (org-on-heading-p)
-			     (string-match "\\<todo\\>"
-					   (downcase
-					    (or (org-entry-get
-						 nil "COOKIE_DATA")
-						"")))))))
-       (setq beg-cookie (match-beginning 1)
-	     end-cookie (match-end 1)
-	     cstat (+ cstat (if end-cookie 1 0))
-	     startsearch (point-at-eol)
-	     continue-from (match-beginning 0)
-	     is-percent (match-beginning 2)
-	     lim (cond
-		  ((org-on-heading-p) (outline-next-heading) (point))
-		  ((org-at-item-p) (org-end-of-item) (point))
-		  (t nil))
-	     c-on 0
-	     c-off 0)
-       (when lim
-	 ;; find first checkbox for this cookie and gather
-	 ;; statistics from all that are at this indentation level
-	 (goto-char startsearch)
-	 (if (re-search-forward re-box lim t)
-	     (progn
-	       (org-beginning-of-item)
-	       (setq curr-ind (org-get-indentation))
-	       (setq next-ind curr-ind)
-	       (while (and (bolp) (org-at-item-p)
-			   (if recursive
-			       (<= curr-ind next-ind)
-			     (= curr-ind next-ind)))
-		 (save-excursion (end-of-line) (setq eline (point)))
-		 (if (re-search-forward re-box eline t)
-		     (if (member (match-string 2) '("[ ]" "[-]"))
-			 (setq c-off (1+ c-off))
-		       (setq c-on (1+ c-on))))
-		 (if (not recursive)
-		     (org-end-of-item)
-		   (end-of-line)
-		   (when (re-search-forward org-list-beginning-re lim t)
-		     (beginning-of-line)))
-		 (setq next-ind (org-get-indentation)))))
-	 (goto-char continue-from)
-	 ;; update cookie
-	 (when end-cookie
-	   (setq new (if is-percent
-			 (format "[%d%%]" (/ (* 100 c-on) (max 1 (+ c-on c-off))))
-		       (format "[%d/%d]" c-on (+ c-on c-off))))
-	   (goto-char beg-cookie)
-	   (insert new)
-	   (delete-region (point) (+ (point) (- end-cookie beg-cookie))))
-	 ;; update items checkbox if it has one
-	 (when (org-at-item-p)
-	   (org-beginning-of-item)
-	   (when (and (> (+ c-on c-off) 0)
-		      (re-search-forward re-box (point-at-eol) t))
-	     (setq beg-cookie (match-beginning 2)
-		   end-cookie (match-end       2))
-	     (delete-region beg-cookie end-cookie)
-	     (goto-char beg-cookie)
-	     (cond ((= c-off 0) (insert "[X]"))
-		   ((= c-on  0) (insert "[ ]"))
-		   (t		(insert "[-]")))
-	     )))
-       (goto-char continue-from))
-     (when (interactive-p)
-       (message "Checkbox statistics updated %s (%d places)"
-		(if all "in entire file" "in current outline entry") cstat)))))
+  (interactive "P")
+  (save-excursion
+    (let* ((buffer-invisibility-spec (org-inhibit-invisibility)) ; Emacs 21
+	   (beg (condition-case nil
+		    (progn (org-back-to-heading) (point))
+		  (error (point-min))))
+	   (end (move-marker (make-marker)
+			     (progn (outline-next-heading) (point))))
+	   (re "\\(\\(\\[[0-9]*%\\]\\)\\|\\(\\[[0-9]*/[0-9]*\\]\\)\\)")
+	   (re-box "^[ \t]*\\([-+*]\\|[0-9]+[.)]\\) +\\(\\[[- X]\\]\\)")
+	   (re-find (concat re "\\|" re-box))
+	   beg-cookie end-cookie is-percent c-on c-off lim new
+	   eline curr-ind next-ind continue-from startsearch
+	   (recursive
+	    (or (not org-hierarchical-checkbox-statistics)
+		(string-match "\\<recursive\\>"
+			      (or (ignore-errors
+				    (org-entry-get nil "COOKIE_DATA"))
+				  ""))))
+	   (cstat 0)
+	   )
+      (when all
+	(goto-char (point-min))
+	(outline-next-heading)
+	(setq beg (point) end (point-max)))
+      (goto-char end)
+      ;; find each statistics cookie
+      (while (and (re-search-backward re-find beg t)
+		  (not (save-match-data
+			 (and (org-on-heading-p)
+			      (string-match "\\<todo\\>"
+					    (downcase
+					     (or (org-entry-get
+						  nil "COOKIE_DATA")
+						 "")))))))
+	(setq beg-cookie (match-beginning 1)
+	      end-cookie (match-end 1)
+	      cstat (+ cstat (if end-cookie 1 0))
+	      startsearch (point-at-eol)
+	      continue-from (match-beginning 0)
+	      is-percent (match-beginning 2)
+	      lim (cond
+		   ((org-on-heading-p) (outline-next-heading) (point))
+		   ((org-at-item-p) (org-end-of-item) (point))
+		   (t nil))
+	      c-on 0
+	      c-off 0)
+	(when lim
+	  ;; find first checkbox for this cookie and gather
+	  ;; statistics from all that are at this indentation level
+	  (goto-char startsearch)
+	  (if (re-search-forward re-box lim t)
+	      (progn
+		(org-beginning-of-item)
+		(setq curr-ind (org-get-indentation))
+		(setq next-ind curr-ind)
+		(while (and (bolp) (org-at-item-p)
+			    (if recursive
+				(<= curr-ind next-ind)
+			      (= curr-ind next-ind)))
+		  (save-excursion (end-of-line) (setq eline (point)))
+		  (if (re-search-forward re-box eline t)
+		      (if (member (match-string 2) '("[ ]" "[-]"))
+			  (setq c-off (1+ c-off))
+			(setq c-on (1+ c-on))))
+		  (if (not recursive)
+		      ;; org-get-next-item goes through list-enders
+		      ;; with proper limit.
+		      (goto-char (or (org-get-next-item (point) lim) lim))
+		    (end-of-line)
+		    (when (re-search-forward (org-item-re) lim t)
+		      (beginning-of-line)))
+		  (setq next-ind (org-get-indentation)))))
+	  (goto-char continue-from)
+	  ;; update cookie
+	  (when end-cookie
+	    (setq new (if is-percent
+			  (format "[%d%%]" (/ (* 100 c-on) (max 1 (+ c-on c-off))))
+			(format "[%d/%d]" c-on (+ c-on c-off))))
+	    (goto-char beg-cookie)
+	    (insert new)
+	    (delete-region (point) (+ (point) (- end-cookie beg-cookie))))
+	  ;; update items checkbox if it has one
+	  (when (org-at-item-p)
+	    (org-beginning-of-item)
+	    (when (and (> (+ c-on c-off) 0)
+		       (re-search-forward re-box (point-at-eol) t))
+	      (setq beg-cookie (match-beginning 2)
+		    end-cookie (match-end       2))
+	      (delete-region beg-cookie end-cookie)
+	      (goto-char beg-cookie)
+	      (cond ((= c-off 0) (insert "[X]"))
+		    ((= c-on  0) (insert "[ ]"))
+		    (t		(insert "[-]")))
+	      )))
+	(goto-char continue-from))
+      (when (interactive-p)
+	(message "Checkbox statistics updated %s (%d places)"
+		 (if all "in entire file" "in current outline entry") cstat)))))
 
 (defun org-get-checkbox-statistics-face ()
   "Select the face for checkbox statistics.
-The face will be `org-done' when all relevant boxes are checked.  Otherwise
-it will be `org-todo'."
+The face will be `org-done' when all relevant boxes are checked.
+Otherwise it will be `org-todo'."
   (if (match-end 1)
       (if (equal (match-string 1) "100%")
 	  'org-checkbox-statistics-done
@@ -562,584 +1167,111 @@ it will be `org-todo'."
 	'org-checkbox-statistics-done
       'org-checkbox-statistics-todo)))
 
-(defun org-beginning-of-item ()
-  "Go to the beginning of the current hand-formatted item.
-If the cursor is not in an item, throw an error."
-  (interactive)
-  (let ((pos (point))
-	(limit (save-excursion
-		 (condition-case nil
-		     (progn
-		       (org-back-to-heading)
-		       (beginning-of-line 2) (point))
-		   (error (point-min)))))
-	(ind-empty (if org-empty-line-terminates-plain-lists 0 10000))
-	ind ind1)
-    (if (org-at-item-p)
-	(beginning-of-line 1)
-      (beginning-of-line 1)
-      (skip-chars-forward " \t")
-      (setq ind (current-column))
-      (if (catch 'exit
-	    (while t
-	      (beginning-of-line 0)
-	      (if (or (bobp) (< (point) limit)) (throw 'exit nil))
+;;; Misc Tools
 
-	      (if (looking-at "[ \t]*$")
-		  (setq ind1 ind-empty)
-		(skip-chars-forward " \t")
-		(setq ind1 (current-column)))
-	      (if (< ind1 ind)
-		  (progn (beginning-of-line 1) (throw 'exit (org-at-item-p))))))
-	  nil
-	(goto-char pos)
-	(error "Not in an item")))))
+(defun org-apply-on-list (function &rest args)
+  "Call FUNCTION for each item of a the list under point.
 
-(defun org-end-of-item ()
-  "Go to the end of the current hand-formatted item.
-If the cursor is not in an item, throw an error."
-  (interactive)
-  (let* ((pos (point))
-	 ind1
-	 (ind-empty (if org-empty-line-terminates-plain-lists 0 10000))
-	 (limit (save-excursion (outline-next-heading) (point)))
-	 (ind (save-excursion
-		(org-beginning-of-item)
-		(skip-chars-forward " \t")
-		(current-column)))
-	 (end (catch 'exit
-		(while t
-		  (beginning-of-line 2)
-		  (if (eobp) (throw 'exit (point)))
-		  (if (>= (point) limit) (throw 'exit (point-at-bol)))
-		  (if (looking-at "[ \t]*$")
-		      (setq ind1 ind-empty)
-		    (skip-chars-forward " \t")
-		    (setq ind1 (current-column)))
-		  (if (<= ind1 ind)
-		      (throw 'exit (point-at-bol)))))))
-    (if end
-	(goto-char end)
-      (goto-char pos)
-      (error "Not in an item"))))
+ FUNCTION is called with at least one argument : the number of
+ items visited, starting at 0, plus ARGS extra arguments.
 
-(defun org-end-of-item-text-before-children ()
-  "Move to the end of the item text, stops before the first child if any.
-Assumes that the cursor is in the first line of an item."
-  (goto-char
-   (min (save-excursion (org-end-of-item) (point))
-	(save-excursion
-	  (goto-char (point-at-eol))
-	  (if (re-search-forward (concat "^" (org-item-re t)) nil 'move)
-	      (match-beginning 0)
-	    (point-max))))))
-
-(defun org-next-item ()
-  "Move to the beginning of the next item in the current plain list.
-Error if not at a plain list, or if this is the last item in the list."
-  (interactive)
-  (let (ind ind1 (pos (point)))
-    (org-beginning-of-item)
-    (setq ind (org-get-indentation))
-    (org-end-of-item)
-    (setq ind1 (org-get-indentation))
-    (unless (and (org-at-item-p) (= ind ind1))
-      (goto-char pos)
-      (error "On last item"))))
-
-(defun org-previous-item ()
-  "Move to the beginning of the previous item in the current plain list.
-Error if not at a plain list, or if this is the first item in the list."
-  (interactive)
-  (let (beg ind ind1 (pos (point)))
-    (org-beginning-of-item)
-    (setq beg (point))
-    (setq ind (org-get-indentation))
-    (goto-char beg)
-    (catch 'exit
-      (while t
-	(beginning-of-line 0)
-	(if (looking-at "[ \t]*$")
-	    nil
-	  (if (<= (setq ind1 (org-get-indentation)) ind)
-	      (throw 'exit t)))
-	(if (bobp) (throw 'exit t))))
-    (condition-case nil
-	(if (or (not (org-at-item-p))
-		(< ind1 (1- ind)))
-	    (error "")
-	  (org-beginning-of-item))
-      (error (goto-char pos)
-	     (error "On first item")))))
-
-(defun org-first-list-item-p ()
-  "Is this heading the first item in a plain list?"
-  (unless (org-at-item-p)
-    (error "Not at a plain list item"))
+ Sublists of the list are skipped. Cursor is always at the
+ beginning of the item."
   (save-excursion
-    (org-beginning-of-item)
-    (= (point) (save-excursion (org-beginning-of-item-list)))))
+    (let ((move-down-action
+	   (lambda (pos item-count &rest args)
+	     (goto-char pos)
+	     (apply function item-count args)
+	     ;; we need to recompute each time end of list in case
+	     ;; function modified list.
+	     (let ((next-p (org-get-next-item pos (org-end-of-item-list))))
+	       (when next-p
+		 (apply move-down-action next-p (1+ item-count) args))))))
+      (apply move-down-action (org-beginning-of-item-list) 0 args))))
 
-(defun org-move-item-down ()
-  "Move the plain list item at point down, i.e. swap with following item.
-Subitems (items with larger indentation) are considered part of the item,
-so this really moves item trees."
-  (interactive)
-  (let ((col (current-column))
-	(pos (point))
-	beg beg0 end end0 ind ind1  txt ne-end ne-beg)
-    (org-beginning-of-item)
-    (setq beg0 (point))
-    (save-excursion
-      (setq ne-beg (org-back-over-empty-lines))
-      (setq beg (point)))
-    (goto-char beg0)
-    (setq ind (org-get-indentation))
-    (org-end-of-item)
-    (setq end0 (point))
-    (setq ind1 (org-get-indentation))
-    (setq ne-end (org-back-over-empty-lines))
-    (setq end (point))
-    (goto-char beg0)
-    (when (and (org-first-list-item-p) (< ne-end ne-beg))
-      ;; include less whitespace
-      (save-excursion
-	(goto-char beg)
-	(forward-line (- ne-beg ne-end))
-	(setq beg (point))))
-    (goto-char end0)
-    (if (and (org-at-item-p) (= ind ind1))
-	(progn
-	  (org-end-of-item)
-	  (org-back-over-empty-lines)
-	  (setq txt (buffer-substring beg end))
-	  (save-excursion
-	    (delete-region beg end))
-	  (setq pos (point))
-	  (insert txt)
-	  (goto-char pos) (org-skip-whitespace)
-	  (org-maybe-renumber-ordered-list)
-	  (move-to-column col))
-      (goto-char pos)
-      (move-to-column col)
-      (error "Cannot move this item further down"))))
+(defun org-sort-list (&optional with-case sorting-type getkey-func compare-func)
+  "Sort plain list items.
+The cursor may be at any item of the list that should be sorted.
+Sublists are not sorted.
 
-(defun org-move-item-up (arg)
-  "Move the plain list item at point up, i.e. swap with previous item.
-Subitems (items with larger indentation) are considered part of the item,
-so this really moves item trees."
-  (interactive "p")
-  (let ((col (current-column)) (pos (point))
-	beg beg0 end ind ind1  txt
-	ne-beg ne-ins ins-end)
-    (org-beginning-of-item)
-    (setq beg0 (point))
-    (setq ind (org-get-indentation))
-    (save-excursion
-      (setq ne-beg (org-back-over-empty-lines))
-      (setq beg (point)))
-    (goto-char beg0)
-    (org-end-of-item)
-    (org-back-over-empty-lines)
-    (setq end (point))
-    (goto-char beg0)
-    (catch 'exit
-      (while t
-	(beginning-of-line 0)
-	(if (looking-at "[ \t]*$")
-	    (if org-empty-line-terminates-plain-lists
-		(progn
-		  (goto-char pos)
-		  (error "Cannot move this item further up"))
-	      nil)
-	  (if (<= (setq ind1 (org-get-indentation)) ind)
-	      (throw 'exit t)))))
-    (condition-case nil
-	(org-beginning-of-item)
-      (error (goto-char beg0)
-	     (move-to-column col)
-	     (error "Cannot move this item further up")))
-    (setq ind1 (org-get-indentation))
-    (if (and (org-at-item-p) (= ind ind1))
-	(progn
-	  (setq ne-ins (org-back-over-empty-lines))
-	  (setq txt (buffer-substring beg end))
-	  (save-excursion
-	    (delete-region beg end))
-	  (setq pos (point))
-	  (insert txt)
-	  (setq ins-end (point))
-	  (goto-char pos) (org-skip-whitespace)
+Sorting can be alphabetically, numerically, by date/time as given by
+a time stamp, by a property or by priority.
 
-	  (when (and (org-first-list-item-p) (> ne-ins ne-beg))
-	    ;; Move whitespace back to beginning
-	    (save-excursion
-	      (goto-char ins-end)
-	      (let ((kill-whole-line t))
-		(kill-line (- ne-ins ne-beg)) (point)))
-	    (insert (make-string (- ne-ins ne-beg) ?\n)))
+The command prompts for the sorting type unless it has been given to the
+function through the SORTING-TYPE argument, which needs to be a character,
+\(?n ?N ?a ?A ?t ?T ?s ?S ?d ?D ?p ?P ?r ?R ?f ?F).  Here is the
+precise meaning of each character:
 
-	  (org-maybe-renumber-ordered-list)
-	  (move-to-column col))
-      (goto-char pos)
-      (move-to-column col)
-      (error "Cannot move this item further up"))))
+n   Numerically, by converting the beginning of the entry/item to a number.
+a   Alphabetically, ignoring the TODO keyword and the priority, if any.
+t   By date/time, either the first active time stamp in the entry, or, if
+    none exist, by the first inactive one.
+    In items, only the first line will be checked.
 
-(defun org-maybe-renumber-ordered-list ()
-  "Renumber the ordered list at point if setup allows it.
-This tests the user option `org-auto-renumber-ordered-lists' before
-doing the renumbering."
-  (interactive)
-  (when (and org-auto-renumber-ordered-lists
-	     (org-at-item-p))
-    (if (match-beginning 3)
-	(org-renumber-ordered-list 1)
-      (org-fix-bullet-type))))
+Capital letters will reverse the sort order.
 
-(defun org-maybe-renumber-ordered-list-safe ()
-  (condition-case nil
-      (save-excursion
-	(org-maybe-renumber-ordered-list))
-    (error nil)))
+If the SORTING-TYPE is ?f or ?F, then GETKEY-FUNC specifies a
+function to be called with point at the beginning of the record.
+It must return either a string or a number that should serve as
+the sorting key for that record.
 
-(defun org-cycle-list-bullet (&optional which)
-  "Cycle through the different itemize/enumerate bullets.
-This cycle the entire list level through the sequence:
-
-   `-'	->  `+'	 ->  `*'  ->  `1.'  ->	`1)'
-
-If WHICH is a string, use that as the new bullet.  If WHICH is an integer,
-0 means `-', 1 means `+' etc."
+Comparing entries ignores case by default. However, with an
+optional argument WITH-CASE, the sorting considers case as well."
   (interactive "P")
-  (org-preserve-lc
-   (org-beginning-of-item-list)
-   (org-at-item-p)
-   (beginning-of-line 1)
-   (let ((current (match-string 0))
-	 (prevp (eq which 'previous))
-	 new old)
-     (setq new (cond
-		((and (numberp which)
-		      (nth (1- which) '("-" "+" "*" "1." "1)"))))
-		((string-match "-" current) (if prevp "1)" "+"))
-		((string-match "\\+" current)
-		 (if prevp "-" (if (looking-at "\\S-") "1." "*")))
-		((string-match "\\*" current) (if prevp "+" "1."))
-		((string-match "\\." current)
-		 (if prevp (if (looking-at "\\S-") "+" "*") "1)"))
-		((string-match ")" current) (if prevp "1." "-"))
-		(t (error "This should not happen"))))
-     (and (looking-at "\\([ \t]*\\)\\(\\S-+\\)")
-	  (setq old (match-string 2))
-	  (replace-match (concat "\\1" new)))
-     (org-shift-item-indentation (- (length new) (length old)))
-     (org-fix-bullet-type)
-     (org-maybe-renumber-ordered-list))))
-
-(defun org-get-string-indentation (s)
-  "What indentation has S due to SPACE and TAB at the beginning of the string?"
-  (let ((n -1) (i 0) (w tab-width) c)
-    (catch 'exit
-      (while (< (setq n (1+ n)) (length s))
-	(setq c (aref s n))
-	(cond ((= c ?\ ) (setq i (1+ i)))
-	      ((= c ?\t) (setq i (* (/ (+ w i) w) w)))
-	      (t (throw 'exit t)))))
-    i))
-
-(defun org-renumber-ordered-list (arg)
-  "Renumber an ordered plain list.
-Cursor needs to be in the first line of an item, the line that starts
-with something like \"1.\" or \"2)\"."
-  (interactive "p")
-  (unless (and (org-at-item-p)
-	       (match-beginning 3))
-    (error "This is not an ordered list"))
-  (let ((line (org-current-line))
-	(col (current-column))
-	(ind (org-get-string-indentation
-	      (buffer-substring (point-at-bol) (match-beginning 3))))
-	;; (term (substring (match-string 3) -1))
-	ind1 (n (1- arg))
-	fmt bobp old new delta)
-    ;; find where this list begins
-    (org-beginning-of-item-list)
-    (setq bobp (bobp))
-    (looking-at "[ \t]*[0-9]+\\([.)]\\)")
-    (setq fmt (concat "%d" (or (match-string 1) ".")))
-    (save-excursion
-      (goto-char (match-end 0))
-      (if (looking-at "[ \t]*\\[@start:\\([0-9]+\\)")
-	  (setq n (1- (string-to-number (match-string 1))))))
-    (beginning-of-line 0)
-    ;; walk forward and replace these numbers
-    (catch 'exit
-      (while t
-	(catch 'next
-	  (if bobp (setq bobp nil) (beginning-of-line 2))
-	  (if (eobp) (throw 'exit nil))
-	  (if (looking-at "[ \t]*$") (throw 'next nil))
-	  (skip-chars-forward " \t") (setq ind1 (current-column))
-	  (if (> ind1 ind) (throw 'next t))
-	  (if (< ind1 ind) (throw 'exit t))
-	  (if (not (org-at-item-p)) (throw 'exit nil))
-	  (setq old (match-string 2))
-	  (delete-region (match-beginning 2) (match-end 2))
-	  (goto-char (match-beginning 2))
-	  (insert (setq new (format fmt (setq n (1+ n)))))
-	  (setq delta (- (length new) (length old)))
-	  (org-shift-item-indentation delta)
-	  (if (= (org-current-line) line) (setq col (+ col delta))))))
-    (org-goto-line line)
-    (org-move-to-column col)))
-
-(defvar org-suppress-item-indentation) ; dynamically scoped parameter
-(defun org-fix-bullet-type (&optional force-bullet)
-  "Make sure all items in this list have the same bullet as the first item.
-Also, fix the indentation."
-  (interactive)
-  (unless (org-at-item-p) (error "This is not a list"))
-  (let ((line (org-current-line))
-	(chars-from-eol (- (point-at-eol) (point)))
-	(ind (current-indentation))
-	ind1 bullet oldbullet)
-    ;; find where this list begins
-    (org-beginning-of-item-list)
-    (beginning-of-line 1)
-    ;; find out what the bullet type is
-    (looking-at "[ \t]*\\(\\S-+\\)")
-    (setq bullet (concat (or force-bullet (match-string 1)) " "))
-    (if (and org-list-two-spaces-after-bullet-regexp
-	     (string-match org-list-two-spaces-after-bullet-regexp bullet))
-	(setq bullet (concat bullet " ")))
-    ;; walk forward and replace these numbers
-    (beginning-of-line 0)
-    (catch 'exit
-      (while t
-	(catch 'next
-	  (beginning-of-line 2)
-	  (if (eobp) (throw 'exit nil))
-	  (if (looking-at "[ \t]*$") (throw 'next nil))
-	  (skip-chars-forward " \t") (setq ind1 (current-column))
-	  (if (> ind1 ind) (throw 'next t))
-	  (if (< ind1 ind) (throw 'exit t))
-	  (if (not (org-at-item-p)) (throw 'exit nil))
-	  (skip-chars-forward " \t")
-	  (looking-at "\\S-+ *")
-	  (setq oldbullet (match-string 0))
-	  (unless (equal bullet oldbullet) (replace-match bullet))
-	  (org-shift-item-indentation (- (length bullet)
-					 (length oldbullet))))))
-    (org-goto-line line)
-    (goto-char (max (point-at-bol) (- (point-at-eol) chars-from-eol)))
-    (if (string-match "[0-9]" bullet)
-	(org-renumber-ordered-list 1))))
-
-(defun org-shift-item-indentation (delta)
-  "Shift the indentation in current item by DELTA."
-  (unless (org-bound-and-true-p org-suppress-item-indentation)
-    (save-excursion
-      (let ((beg (point-at-bol))
-	    (end (progn (org-end-of-item) (point)))
-	    i)
-	(goto-char end)
-	(beginning-of-line 0)
-	(while (> (point) beg)
-	  (when (looking-at "[ \t]*\\S-")
-	    ;; this is not an empty line
-	    (setq i (org-get-indentation))
-	    (if (and (> i 0) (> (setq i (+ i delta)) 0))
-		(indent-line-to i)))
-	  (beginning-of-line 0))))))
-
-(defun org-beginning-of-item-list ()
-  "Go to the beginning of the current item list.
-I.e. to the first item in this list."
-  (interactive)
-  (org-beginning-of-item)
-  (let ((pos (point-at-bol))
-	(ind (org-get-indentation))
-	ind1)
-    ;; find where this list begins
-    (catch 'exit
-      (while t
-	(catch 'next
-	  (beginning-of-line 0)
-	  (if (looking-at "[ \t]*$")
-	      (throw (if (bobp) 'exit 'next) t))
-	  (skip-chars-forward " \t") (setq ind1 (current-column))
-	  (if (or (< ind1 ind)
-		  (and (= ind1 ind)
-		       (not (org-at-item-p)))
-		  (and (= (point-at-bol) (point-min))
-		       (setq pos (point-min))))
-	      (throw 'exit t)
-	    (when (org-at-item-p) (setq pos (point-at-bol)))))))
-    (goto-char pos)))
-
-(defun org-end-of-item-list ()
-  "Go to the end of the current item list.
-I.e. to the text after the last item."
-  (interactive)
-  (org-beginning-of-item)
-  (let ((pos (point-at-bol))
-	(ind (org-get-indentation))
-	ind1)
-    ;; find where this list begins
-    (catch 'exit
-      (while t
-	(catch 'next
-	  (beginning-of-line 2)
-	  (if (looking-at "[ \t]*$")
-	      (if (eobp)
-		  (progn (setq pos (point)) (throw 'exit t))
-		(throw 'next t)))
-	  (skip-chars-forward " \t") (setq ind1 (current-column))
-	  (if (or (< ind1 ind)
-		  (and (= ind1 ind)
-		       (not (org-at-item-p)))
-		  (eobp))
-	      (progn
-		(setq pos (point-at-bol))
-		(throw 'exit t))))))
-    (goto-char pos)))
-
-
-(defvar org-last-indent-begin-marker (make-marker))
-(defvar org-last-indent-end-marker (make-marker))
-
-(defun org-outdent-item (arg)
-  "Outdent a local list item, but not its children."
-  (interactive "p")
-  (org-indent-item-tree (- arg) 'no-subtree))
-
-(defun org-indent-item (arg)
-  "Indent a local list item, but not its children."
-  (interactive "p")
-  (org-indent-item-tree arg 'no-subtree))
-
-(defun org-outdent-item-tree (arg &optional no-subtree)
-  "Outdent a local list item including its children.
-If NO-SUBTREE is set, only outdent the item itself, not its children."
-  (interactive "p")
-  (org-indent-item-tree (- arg) no-subtree))
-
-(defun org-indent-item-tree (arg &optional no-subtree)
-  "Indent a local list item including its children.
-If NO-SUBTREE is set, only indent the item itself, not its children."
-  (interactive "p")
-  (and (org-region-active-p) (org-cursor-to-region-beginning))
-  (unless (org-at-item-p)
-    (error "Not on an item"))
-  (let (beg end ind ind1 ind-bul delta ind-down ind-up firstp)
-    (setq firstp (org-first-list-item-p))
-    (save-excursion
-      (setq end (and (org-region-active-p) (region-end)))
-      (if (and (memq last-command '(org-shiftmetaright org-shiftmetaleft))
-	       (memq this-command '(org-shiftmetaright org-shiftmetaleft)))
-	  (setq beg org-last-indent-begin-marker
-		end org-last-indent-end-marker)
-	(org-beginning-of-item)
-	(setq beg (move-marker org-last-indent-begin-marker (point)))
-	(if no-subtree
-	    (org-end-of-item-text-before-children)
-	  (org-end-of-item))
-	(setq end (move-marker org-last-indent-end-marker (or end (point)))))
-      (goto-char beg)
-      (setq ind-bul (org-item-indent-positions)
-	    ind (caar ind-bul)
-	    ind-down (car (nth 2 ind-bul))
-	    ind-up (car (nth 1 ind-bul))
-	    delta (if (> arg 0)
-		      (if ind-down (- ind-down ind) 2)
-		    (if ind-up (- ind-up ind) -2)))
-      (if (< (+ delta ind) 0) (error "Cannot outdent beyond margin"))
-      (while (< (point) end)
-	(beginning-of-line 1)
-	(skip-chars-forward " \t") (setq ind1 (current-column))
-	(delete-region (point-at-bol) (point))
-	(or (eolp) (org-indent-to-column (+ ind1 delta)))
-	(beginning-of-line 2)))
-    (org-fix-bullet-type
-     (and (> arg 0)
-	  (not firstp)
-	  (cdr (assoc (cdr (nth 0 ind-bul)) org-list-demote-modify-bullet))))
-    (org-maybe-renumber-ordered-list-safe)
-    (save-excursion
-      (beginning-of-line 0)
-      (condition-case nil (org-beginning-of-item) (error nil))
-      (org-maybe-renumber-ordered-list-safe))))
-
-(defun org-item-indent-positions ()
-  "Return indentation for plain list items.
-This returns a list with three values:	The current indentation, the
-parent indentation and the indentation a child should have.
-Assumes cursor in item line."
-  (let* ((bolpos (point-at-bol))
-	 (ind (org-get-indentation))
-	 (bullet (org-get-bullet))
-	 ind-down ind-up bullet-up bullet-down pos)
-    (save-excursion
-      (org-beginning-of-item-list)
-      (skip-chars-backward "\n\r \t")
-      (when (org-in-item-p)
-	(org-beginning-of-item)
-	(setq ind-up (org-get-indentation))
-	(setq bullet-up (org-get-bullet))))
-    (setq pos (point))
-    (save-excursion
-      (cond
-       ((and (condition-case nil (progn (org-previous-item) t)
-	       (error nil))
-	     (or (forward-char 1) t)
-	     (re-search-forward "^\\([ \t]*\\([-+]\\|\\([0-9]+[.)]\\)\\)\\|[ \t]+\\*\\)\\( \\|$\\)" bolpos t))
-	(setq ind-down (org-get-indentation)
-	      bullet-down (org-get-bullet)))
-       ((and (goto-char pos)
-	     (org-at-item-p))
-	(goto-char (match-end 0))
-	(skip-chars-forward " \t")
-	(setq ind-down (current-column)
-	      bullet-down (org-get-bullet)))))
-    (if (and bullet-down (string-match "\\`[0-9]+\\(\\.\\|)\\)\\'" bullet-down))
-	(setq bullet-down (concat "1" (match-string 1 bullet-down))))
-    (if (and bullet-up (string-match "\\`[0-9]+\\(\\.\\|)\\)\\'" bullet-up))
-	(setq bullet-up (concat "1" (match-string 1 bullet-up))))
-    (if (and bullet (string-match "\\`[0-9]+\\(\\.\\|)\\)\\'" bullet))
-	(setq bullet (concat "1" (match-string 1 bullet))))
-    (list (cons ind bullet)
-	  (cons ind-up bullet-up)
-	  (cons ind-down bullet-down))))
-
-(defvar org-tab-ind-state) ; defined in org.el
-(defun org-cycle-item-indentation ()
-  (let ((org-suppress-item-indentation t)
-	(org-adapt-indentation nil))
-    (cond
-     ((and (looking-at "[ \t]*$")
-	   (org-looking-back "^\\([ \t]*\\)\\([-+*]\\|[0-9]+[).]\\)[ \t]+"))
-      (setq this-command 'org-cycle-item-indentation)
-      (if (eq last-command 'org-cycle-item-indentation)
-	  (condition-case nil
-	      (progn (org-outdent-item 1)
-		     (if (equal org-tab-ind-state (org-get-indentation))
-			 (org-outdent-item 1))
-		     (end-of-line 1))
-	    (error
-	     (progn
-	       (while (< (org-get-indentation) org-tab-ind-state)
-		 (progn (org-indent-item 1) (end-of-line 1)))
-	       (setq this-command 'org-cycle))))
-	(setq org-tab-ind-state (org-get-indentation))
-	(org-indent-item 1))
-      t))))
-
-(defun org-get-bullet ()
-  (save-excursion
-    (goto-char (point-at-bol))
-    (and (looking-at
-	  "^\\([ \t]*\\([-+]\\|\\([0-9]+[.)]\\)\\)\\|[ \t]+\\(\\*\\)\\)\\( \\|$\\)")
-	 (or (match-string 2) (match-string 4)))))
+  (let* ((case-func (if with-case 'identity 'downcase))
+	 (start (org-beginning-of-item-list))
+	 (end (save-excursion (org-end-of-item-list)))
+	 (sorting-type
+	  (progn
+	    (message
+	     "Sort plain list: [a]lpha  [n]umeric  [t]ime  [f]unc   A/N/T/F means reversed:")
+	    (read-char-exclusive)))
+	 (getkey-func (and (= (downcase sorting-type) ?f)
+			   (org-icompleting-read "Sort using function: "
+						 obarray 'fboundp t nil nil)
+			   (intern getkey-func))))
+    (message "Sorting items...")
+    (save-restriction
+      (narrow-to-region start end)
+      (let* ((dcst (downcase sorting-type))
+	     (case-fold-search nil)
+	     (now (current-time))
+	     (sort-func (cond
+			 ((= dcst ?a) 'string<)
+			 ((= dcst ?f) compare-func)
+			 ((member dcst '(?p ?t ?s ?d ?c)) '<)
+			 (t nil)))
+	     (begin-record (lambda ()
+			     (let ((next-p (org-get-next-item (point) (point-max))))
+			       (goto-char (or next-p (point-max))))))
+	     (end-record (lambda ()
+			   (goto-char (org-end-of-item-before-blank))))
+	     (value-to-sort (lambda nil
+			      (when (looking-at "[ \t]*[-+*0-9.)]+\\([ \t]+\\[[- X]\\]\\)?[ \t]+")
+				(cond
+				 ((= dcst ?n)
+				  (string-to-number (buffer-substring (match-end 0)
+								      (point-at-eol))))
+				 ((= dcst ?a)
+				  (buffer-substring (match-end 0) (point-at-eol)))
+				 ((= dcst ?t)
+				  (if (or (re-search-forward org-ts-regexp (point-at-eol) t)
+					  (re-search-forward org-ts-regexp-both
+							     (point-at-eol) t))
+				      (org-time-string-to-seconds (match-string 0))
+				    (org-float-time now)))
+				 ((= dcst ?f)
+				  (if getkey-func
+				      (let ((value (funcall getkey-func)))
+					(if (stringp value)
+					    (funcall case-func value)
+					  value))
+				    (error "Invalid key function `%s'" getkey-func)))
+				 (t (error "Invalid sorting type `%c'" sorting-type)))))))
+	(sort-subr (/= dcst sorting-type) begin-record end-record value-to-sort nil sort-func)
+	(org-maybe-renumber-ordered-list)
+	(run-hooks 'org-after-sorting-entries-or-items-hook)
+	(message "Sorting items...done")))))
 
 ;;; Send and receive lists
 
@@ -1147,36 +1279,22 @@ Assumes cursor in item line."
   "Parse the list at point and maybe DELETE it.
 Return a list containing first level items as strings and
 sublevels as a list of strings."
-  (let* ((item-beginning (org-list-item-beginning))
-	 (start (car item-beginning))
-	 (end (save-excursion
-		(goto-char (org-list-end (cdr item-beginning)))
-		(org-back-over-empty-lines)
-		(point)))
+  (let* ((start (goto-char (org-list-top-point)))
+	 (end (save-excursion (org-list-bottom-point)))
 	 output itemsep ltype)
-    (while (re-search-forward org-list-beginning-re end t)
-      (goto-char (match-beginning 3))
-      (save-match-data
-	(cond ((string-match "[0-9]" (match-string 2))
+    (while (re-search-forward (org-item-re) end t)
+      (save-excursion
+	(beginning-of-line)
+	(cond ((looking-at-p "^[ \t]*[0-9]")
 	       (setq itemsep "[0-9]+\\(?:\\.\\|)\\)"
 		     ltype 'ordered))
-	      ((string-match "^.*::" (match-string 0))
-	       (setq itemsep "[-+]" ltype 'descriptive))
-	      (t (setq itemsep "[-+]" ltype 'unordered))))
-      (let* ((indent1 (match-string 1))
-	     (nextitem (save-excursion
-			 (save-match-data
-			   (or (and (re-search-forward
-				     (concat "^" indent1 itemsep " *?") end t)
-				    (match-beginning 0)) end))))
-	     (item (buffer-substring
-		    (point)
-		    (or (and (org-re-search-forward-unprotected
-			      org-list-beginning-re end t)
-			     (goto-char (match-beginning 0)))
-			(goto-char end))))
-	     (nextindent (match-string 1))
-	     (item (org-trim item))
+	      ((looking-at-p "^.*::")
+	       (setq itemsep "[-+*]" ltype 'descriptive))
+	      (t (setq itemsep "[-+*]" ltype 'unordered))))
+      (let* ((indent1 (org-get-indentation))
+	     (nextitem (or (org-get-next-item (point) end) end))
+	     (item (org-trim (buffer-substring (point) (org-end-of-item-text-before-children))))
+	     (nextindent (org-get-indentation))
 	     (item (if (string-match "^\\[\\([xX ]\\)\\]" item)
 		       (replace-match (if (equal (match-string 1 item) " ")
 					  "[CBOFF]"
@@ -1184,8 +1302,7 @@ sublevels as a list of strings."
 				      t nil item)
 		     item)))
 	(push item output)
-	(when (> (length nextindent)
-		 (length indent1))
+	(when (> nextindent indent1)
 	  (narrow-to-region (point) nextitem)
 	  (push (org-list-parse-list) output)
 	  (widen))))
@@ -1193,35 +1310,14 @@ sublevels as a list of strings."
     (setq output (nreverse output))
     (push ltype output)))
 
-(defun org-list-item-beginning ()
-  "Find the beginning of the list item.
-Return a cons which car is the beginning position of the item and
-cdr is the indentation string."
-  (save-excursion
-    (if (not (or (looking-at org-list-beginning-re)
-		 (re-search-backward
-		  org-list-beginning-re nil t)))
-	(progn (goto-char (point-min)) (point))
-      (cons (match-beginning 0) (match-string 1)))))
-
-(defun org-list-goto-true-beginning ()
-  "Go to the beginning of the list at point."
-  (beginning-of-line 1)
-  (while (looking-at org-list-beginning-re)
-    (beginning-of-line 0))
-  (progn
-    (re-search-forward org-list-beginning-re nil t)
-    (goto-char (match-beginning 0))))
-
 (defun org-list-make-subtree ()
   "Convert the plain list at point into a subtree."
   (interactive)
-  (org-list-goto-true-beginning)
+  (goto-char (org-list-top-point))
   (let ((list (org-list-parse-list t)) nstars)
     (save-excursion
-      (if (condition-case nil
-	      (org-back-to-heading)
-	    (error nil))
+      (if (ignore-errors
+	    (org-back-to-heading))
 	  (progn (re-search-forward org-complex-heading-regexp nil t)
 		 (setq nstars (length (match-string 1))))
 	(setq nstars 0)))
@@ -1238,20 +1334,6 @@ cdr is the indentation string."
 			       (1- (* 2 level)) level) ?*) " " item "\n")
 		(org-list-make-subtrees item (1+ level))))
 	    list)))
-
-(defun org-list-end (indent)
-  "Return the position of the end of the list.
-INDENT is the indentation of the list, as a string."
-  (save-excursion
-    (catch 'exit
-      (while (or (looking-at org-list-beginning-re)
-		 (looking-at (concat "^" indent "[ \t]+\\|^$"))
-		 (> (or (get-text-property (point) 'original-indentation) -1)
-		     (length indent)))
-	(if (eq (point) (point-max))
-	    (throw 'exit (point-max)))
-	(forward-line 1)))
-    (point)))
 
 (defun org-list-insert-radio-list ()
   "Insert a radio list template appropriate for this major mode."
@@ -1276,7 +1358,7 @@ this list."
   (catch 'exit
     (unless (org-at-item-p) (error "Not at a list"))
     (save-excursion
-      (org-list-goto-true-beginning)
+      (goto-char (org-list-top-point))
       (beginning-of-line 0)
       (unless (looking-at "[ \t]*#\\+ORGLST[: \t][ \t]*SEND[ \t]+\\([^ \t\r\n]+\\)[ \t]+\\([^ \t\r\n]+\\)\\([ \t]+.*\\)?")
 	(if maybe
@@ -1284,10 +1366,11 @@ this list."
 	  (error "Don't know how to transform this list"))))
     (let* ((name (match-string 1))
 	   (transform (intern (match-string 2)))
-	   (item-beginning (org-list-item-beginning))
-	   (list (save-excursion (org-list-goto-true-beginning)
-				 (org-list-parse-list)))
-	   txt beg)
+	   (txt (buffer-substring-no-properties
+		 (org-list-top-point)
+		 (org-list-bottom-point)))
+	   (list (org-list-parse-list))
+	   beg)
       (unless (fboundp transform)
 	(error "No such transformation function %s" transform))
       (let ((txt (funcall transform list)))
@@ -1339,21 +1422,21 @@ Valid parameters PARAMS are
   (interactive)
   (let* ((p params) sublist
 	 (splicep (plist-get p :splice))
-	 (ostart  (plist-get p :ostart))
-	 (oend	(plist-get p :oend))
-	 (ustart  (plist-get p :ustart))
-	 (uend	(plist-get p :uend))
-	 (dstart  (plist-get p :dstart))
-	 (dend	(plist-get p :dend))
-	 (dtstart  (plist-get p :dtstart))
-	 (dtend	 (plist-get p :dtend))
-	 (ddstart  (plist-get p :ddstart))
-	 (ddend	 (plist-get p :ddend))
-	 (istart  (plist-get p :istart))
-	 (iend	(plist-get p :iend))
-	 (isep	(plist-get p :isep))
-	 (lsep	(plist-get p :lsep))
-	 (cbon	(plist-get p :cbon))
+	 (ostart (plist-get p :ostart))
+	 (oend (plist-get p :oend))
+	 (ustart (plist-get p :ustart))
+	 (uend (plist-get p :uend))
+	 (dstart (plist-get p :dstart))
+	 (dend (plist-get p :dend))
+	 (dtstart (plist-get p :dtstart))
+	 (dtend (plist-get p :dtend))
+	 (ddstart (plist-get p :ddstart))
+	 (ddend (plist-get p :ddend))
+	 (istart (plist-get p :istart))
+	 (iend (plist-get p :iend))
+	 (isep (plist-get p :isep))
+	 (lsep (plist-get p :lsep))
+	 (cbon (plist-get p :cbon))
 	 (cboff (plist-get p :cboff)))
     (let ((wrapper
 	   (cond ((eq (car list) 'ordered)
@@ -1369,19 +1452,20 @@ Valid parameters PARAMS are
 	       (when (string-match "^\\(.*\\) ::" sublist)
 		 (setq term (org-trim (format (concat dtstart "%s" dtend)
 					      (match-string 1 sublist))))
-		 (setq sublist (substring sublist (1+ (length term)))))
+		 (setq sublist (concat ddstart
+				       (org-trim (substring sublist (match-end 0)))
+				       ddend)))
 	       (if (string-match "\\[CBON\\]" sublist)
 		   (setq sublist (replace-match cbon t t sublist)))
 	       (if (string-match "\\[CBOFF\\]" sublist)
 		   (setq sublist (replace-match cboff t t sublist)))
 	       (if (string-match "\\[-\\]" sublist)
 		   (setq sublist (replace-match "$\\boxminus$" t t sublist)))
-	       (setq rtn (concat rtn istart term ddstart
-				 sublist ddend iend isep)))
-	      (t (setq rtn (concat rtn	 ;; previous list
-				   lsep	 ;; list separator
+	       (setq rtn (concat rtn istart term sublist iend isep)))
+	      (t (setq rtn (concat rtn	;; previous list
+				   lsep	;; list separator
 				   (org-list-to-generic sublist p)
-				   lsep	 ;; list separator
+				   lsep	;; list separator
 				   )))))
       (format wrapper rtn))))
 
