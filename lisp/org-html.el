@@ -561,7 +561,11 @@ This may also be a function, building and inserting the postamble.")
 	  (if (string-match "\\`[a-z]\\{1,10\\}:\\(.+\\)" label)
 	      (setq l1 (substring label (match-beginning 1)))
 	    (setq l1 label)))
-	(replace-match (format "[[#%s][%s]]" label l1) t t)))))
+	(replace-match (format "[[#%s][%s]]" label l1) t t))))
+  (goto-char (point-min))
+  (while (org-search-forward-unenclosed (org-item-re) nil 'move)
+    (goto-char (org-list-bottom-point))
+    (insert "ORG-LIST-END\n")))
 
 ;;;###autoload
 (defun org-export-as-html-and-open (arg)
@@ -1486,14 +1490,14 @@ lang=\"%s\" xml:lang=\"%s\">
 		(setq txt (replace-match "" t t txt)))
 	    (if (<= level (max umax umax-toc))
 		(setq head-count (+ head-count 1)))
-	    (when in-local-list
-	      ;; Close any local lists before inserting a new header line
-	      (while local-list-type
-		(org-close-li (car local-list-type))
-		(insert (format "</%sl>\n" (car local-list-type)))
-		(pop local-list-type))
-	      (setq local-list-indent nil
-		    in-local-list nil))
+	    ;; (when in-local-list
+	    ;;   ;; Close any local lists before inserting a new header line
+	    ;;   (while local-list-type
+	    ;; 	(org-close-li (car local-list-type))
+	    ;; 	(insert (format "</%sl>\n" (car local-list-type)))
+	    ;; 	(pop local-list-type))
+	    ;;   (setq local-list-indent nil
+	    ;; 	    in-local-list nil))
 	    (setq first-heading-pos (or first-heading-pos (point)))
 	    (org-html-level-start level txt umax
 				  (and org-export-with-toc (<= level umax))
@@ -1505,17 +1509,16 @@ lang=\"%s\" xml:lang=\"%s\">
 	      (insert "<pre>")
 	      (setq inquote t)))
 
-	   ((string-match "^[ \t]*- __+[ \t]*$" line)
+	   ((string-match "^ORG-LIST-END$" line)
 	    ;; Explicit list closure
-	    (when local-list-type
-	      (let ((ind (org-get-indentation line)))
-		(while (and local-list-indent
-			    (<= ind (car local-list-indent)))
-		  (org-close-li (car local-list-type))
-		  (insert (format "</%sl>\n" (car local-list-type)))
-		  (pop local-list-type)
-		  (pop local-list-indent))
-		(or local-list-indent (setq in-local-list nil))))
+	    (let ((ind (org-get-indentation line)))
+	      (while (and local-list-indent
+			  (<= ind (car local-list-indent)))
+		(org-close-li (car local-list-type))
+		(insert (format "</%sl>\n" (car local-list-type)))
+		(pop local-list-type)
+		(pop local-list-indent))
+	      (or local-list-indent (setq in-local-list nil)))
 	    (throw 'nextline nil))
 
 	   ((and org-export-with-tables
