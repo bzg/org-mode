@@ -31,8 +31,9 @@
 (require 'ob-ref)
 
 (declare-function org-fill-template "org" (template alist))
-(declare-function org-table-convert-region
-		  "org-table" (beg0 end0 &optional separator))
+(declare-function org-table-convert-region "org-table"
+		  (beg0 end0 &optional separator))
+(declare-function orgtbl-to-csv "org-table" (TABLE PARAMS))
 
 (defvar org-babel-default-header-args:sqlite '())
 
@@ -40,8 +41,9 @@
   '(db header echo bail csv column html line list separator nullvalue)
   "Sqlite specific header args.")
 
-(defun org-babel-expand-body:sqlite
-  (body params &optional processed-params) body)
+(defun org-babel-expand-body:sqlite (body params &optional processed-params)
+  (org-babel-sqlite-expand-vars
+   body (or (nth 1 processed-params) (org-babel-ref-variables params))))
 
 (defvar org-babel-sqlite3-command "sqlite3")
 
@@ -60,14 +62,19 @@ called by `org-babel-execute-src-block'."
 			   (list :header :echo :bail :column
 				 :csv :html :line :list))))
 	exit-code)
-    (message "others:%s" others)
     (unless db (error "ob-sqlite: can't evaluate without a database."))
     (with-temp-buffer
       (insert
        (shell-command-to-string
 	(org-fill-template
-	 "%cmd %header %separator %nullvalue %others %csv %db  %body"
+	 "%cmd -init %body %header %separator %nullvalue %others %csv %db "
 	 (list
+	  (cons "body" ((lambda (sql-file)
+			  (with-temp-file sql-file
+			    (insert (org-babel-expand-body:sqlite
+				     body nil (list nil vars))))
+			  sql-file)
+			(make-temp-file "ob-sqlite-sql")))
 	  (cons "cmd" org-babel-sqlite3-command)
 	  (cons "header" (if headers-p "-header" "-noheader"))
 	  (cons "separator"
@@ -84,12 +91,11 @@ called by `org-babel-execute-src-block'."
 			      (member :html others) separator)
 			  ""
 			"-csv"))
-	  (cons "db " db)
-	  (cons "body" (format "%S" (org-babel-sqlite-expand-vars
-				     body vars)))))))
+	  (cons "db " db)))))
       (if (or (member "scalar" result-params)
 	      (member "html" result-params)
-	      (member "code" result-params))
+	      (member "code" result-params)
+	      (equal (point-min) (point-max)))
 	  (buffer-string)
 	(org-table-convert-region (point-min) (point-max))
 	(org-babel-sqlite-table-or-scalar
@@ -100,10 +106,22 @@ called by `org-babel-execute-src-block'."
   "Expand the variables held in VARS in BODY."
   (mapc
    (lambda (pair)
-     (setq body (replace-regexp-in-string
-		 (format "\$%s" (car pair))
-		 (format "%S" (cdr pair))
-		 body)))
+     (setq body
+	   (replace-regexp-in-string
+	    (format "\$%s" (car pair))
+	    ((lambda (val)
+	       (if (listp val)
+		   ((lambda (data-file)
+		      (with-temp-file data-file
+			(insert (orgtbl-to-csv
+				 val '(:fmt (lambda (el) (if (stringp el)
+							el
+						      (format "%S" el)))))))
+		      data-file)
+		    (make-temp-file "ob-sqlite-data"))
+		 (format "%S" val)))
+	     (cdr pair))
+	    body)))
    vars)
   body)
 
