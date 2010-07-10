@@ -1221,9 +1221,16 @@ If END is non-nil, it is the end of the region."
 	    :timestamps (plist-get opt-plist :timestamps)
 	    :footnotes (plist-get opt-plist :footnotes)))
 	(org-unmodified
-	 (let ((inhibit-read-only t))
-	   (add-text-properties pt (max pt (1- end))
-				'(:org-license-to-kill t))))))))
+	 (let ((inhibit-read-only t)
+	       (limit (max pt (1- end))))
+	   (add-text-properties pt limit
+				'(:org-license-to-kill t))
+	   (save-excursion
+	     (goto-char pt)
+	     (while (re-search-forward "^[ \t]*#+.*\n?" limit t)
+	       (remove-text-properties (match-beginning 0) (match-end 0)
+				'(:org-license-to-kill t))))))))))
+	       
 
 (defvar org-export-latex-header-defs nil
   "The header definitions that might be used in the LaTeX body.")
