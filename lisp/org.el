@@ -18235,8 +18235,8 @@ This will also return t if point is on one of the two matches or
 in an unfinished block. END-RE can be a string or a form
 returning a string.
 
-An optional third argument bounds the search. It defaults to
-previous heading or `point-min'."
+An optional third argument bounds the search for START-RE. It
+defaults to previous heading or `point-min'."
   (let ((pos (point))
 	(limit (or bound
 		   (save-excursion (outline-previous-heading))
