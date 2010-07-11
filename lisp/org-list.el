@@ -395,7 +395,7 @@ A checkbox is blocked if all of the following conditions are fulfilled:
     (and (org-in-item-p)
 	 (let ((pos (org-beginning-of-item))
 	       (bound (or (and (outline-next-heading)
-			       (skip-chars-backward "[ \t\r\n]")
+			       (skip-chars-backward " \t\r\n")
 			       (1+ (point-at-eol)))
 			  (point-max))))
 	   ;; The list ending is either first point matching
