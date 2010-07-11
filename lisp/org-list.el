@@ -263,9 +263,9 @@ the end of the nearest terminator from max."
     (prog1
 	(re-search-backward regexp bound noerror)
       (when (save-match-data
-	      (or (org-in-regexps-block-p "^[ \t]*#\\+begin_\\([a-zA-Z]\\)"
+	      (or (org-in-regexps-block-p "^[ \t]*#\\+begin_\\([a-zA-Z]+\\)"
 					  '(concat "^[ \t]*#\\+end_" (match-string 1)))
-		  (org-in-regexps-block-p "^[ \t]*\\\\begin{\\([a-zA-Z]\\)}"
+		  (org-in-regexps-block-p "^[ \t]*\\\\begin{\\([a-zA-Z]+\\)}"
 					  '(concat "^[ \t]*\\\\end{" (match-string 1) "}"))))
 	(org-search-backward-unenclosed regexp bound noerror)))))
 
@@ -275,9 +275,9 @@ the end of the nearest terminator from max."
     (prog1
 	(re-search-forward regexp bound noerror)
       (when (save-match-data
-	      (or (org-in-regexps-block-p "^[ \t]*#\\+begin_\\([a-zA-Z]\\)"
+	      (or (org-in-regexps-block-p "^[ \t]*#\\+begin_\\([a-zA-Z]+\\)"
 					  '(concat "^[ \t]*#\\+end_" (match-string 1)))
-		  (org-in-regexps-block-p "^[ \t]*\\\\begin{\\([a-zA-Z]\\)}"
+		  (org-in-regexps-block-p "^[ \t]*\\\\begin{\\([a-zA-Z]+\\)}"
 					  '(concat "^[ \t]*\\\\end{" (match-string 1) "}"))))
 	(org-search-forward-unenclosed regexp bound noerror)))))
 
@@ -1280,7 +1280,7 @@ optional argument WITH-CASE, the sorting considers case as well."
 Return a list containing first level items as strings and
 sublevels as a list of strings."
   (let* ((start (goto-char (org-list-top-point)))
-	 (end (save-excursion (org-list-bottom-point)))
+	 (end (org-list-bottom-point))
 	 output itemsep ltype)
     (while (re-search-forward (org-item-re) end t)
       (save-excursion
@@ -1308,8 +1308,9 @@ sublevels as a list of strings."
 	    (push (org-list-parse-list) output)))))
     (when delete
       (delete-region start end)
-      (when (looking-at (org-list-end-re))
-	(replace-match "")))
+      (save-match-data
+	(when (looking-at (org-list-end-re))
+	  (replace-match "\n"))))
     (setq output (nreverse output))
     (push ltype output)))
 
