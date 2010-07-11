@@ -385,7 +385,7 @@ for example using customize, or with something like
     (shell-script "bash")
     (gnuplot "Gnuplot")
     (ocaml "Caml") (caml "Caml")
-    (sql "SQL"))
+    (sql "SQL") (sqlite "sql"))
   "Alist mapping languages to their listing language counterpart.
 The key is a symbol, the major mode symbol without the \"-mode\".
 The value is the string that should be inserted as the language parameter
