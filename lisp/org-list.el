@@ -1306,7 +1306,10 @@ sublevels as a list of strings."
 	  (save-restriction
 	    (narrow-to-region (point) nextitem)
 	    (push (org-list-parse-list) output)))))
-    (when delete (delete-region start end))
+    (when delete
+      (delete-region start end)
+      (when (looking-at (org-list-end-re))
+	(replace-match "")))
     (setq output (nreverse output))
     (push ltype output)))
 
