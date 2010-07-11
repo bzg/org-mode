@@ -1755,8 +1755,8 @@ lang=\"%s\" xml:lang=\"%s\">
       (while (re-search-forward "<li>[ \r\n\t]*</li>\n?" nil t)
 	(replace-match ""))
       (goto-char (point-min))
-      (while (re-search-forward "</ul>\\s-*<ul>\n?" nil t)
-	(replace-match ""))
+      ;; (while (re-search-forward "</ul>\\s-*<ul>\n?" nil t)
+      ;; 	(replace-match ""))
       ;; Convert whitespace place holders
       (goto-char (point-min))
       (let (beg end n)
