@@ -234,7 +234,7 @@ This option can also be set with the +OPTIONS line, e.g. \"num:t\"."
   "Format of section numbers for export.
 The variable has two components.
 1. A list of lists, each indicating a counter type and a separator.
-   The counter type can be any of \"1\", \"A\", \"a\", \"I\", or \"a\".
+   The counter type can be any of \"1\", \"A\", \"a\", \"I\", or \"i\".
    It causes causes numeric, alphabetic, or roman counters, respectively.
    The separator is only used if another counter for a subsection is being
    added.
