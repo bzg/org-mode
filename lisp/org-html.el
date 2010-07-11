@@ -565,6 +565,8 @@ This may also be a function, building and inserting the postamble.")
   (goto-char (point-min))
   (while (org-search-forward-unenclosed (org-item-re) nil 'move)
     (goto-char (org-list-bottom-point))
+    (when (looking-at (org-list-end-re))
+      (replace-match ""))
     (insert "ORG-LIST-END\n")))
 
 ;;;###autoload
