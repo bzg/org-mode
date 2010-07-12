@@ -1277,7 +1277,7 @@ this list."
     (save-excursion
       (org-list-goto-true-beginning)
       (beginning-of-line 0)
-      (unless (looking-at "#\\+ORGLST: *SEND +\\([a-zA-Z0-9_]+\\) +\\([^ \t\r\n]+\\)\\( +.*\\)?")
+      (unless (looking-at "[ \t]*#\\+ORGLST[: \t][ \t]*SEND[ \t]+\\([^ \t\r\n]+\\)[ \t]+\\([^ \t\r\n]+\\)\\([ \t]+.*\\)?")
 	(if maybe
 	    (throw 'exit nil)
 	  (error "Don't know how to transform this list"))))
