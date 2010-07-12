@@ -11127,8 +11127,13 @@ Tangle the current file.
 Choose a file to tangle.
 @end table
 
-@comment  node-name,  next,  previous,  up
-@comment  Evaluating code blocks,  , Extracting source code, Working With Source Code
+@subsubheading Hooks
+@table @code
+@item org-babel-post-tangle-hook
+This hook is run from within code files tangled by @code{org-babel-tangle}.
+Example applications could include post-processing, compilation or evaluation
+of tangled code files.
+@end table
 
 @node Evaluating code blocks, Library of Babel, Extracting source code, Working With Source Code
 @section Evaluating code blocks

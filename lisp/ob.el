@@ -38,6 +38,7 @@
 (declare-function tramp-dissect-file-name "tramp" (name &optional nodefault))
 (declare-function tramp-file-name-user "tramp" (vec))
 (declare-function tramp-file-name-host "tramp" (vec))
+(declare-function org-icompleting-read "org" (&rest args))
 (declare-function org-edit-src-code "org" (context code edit-buffer-name))
 (declare-function org-open-at-point "org" (&optional in-emacs reference-buffer))
 (declare-function org-save-outline-visibility "org" (use-markers &rest body))
@@ -94,9 +95,14 @@ the C-c C-c key binding."
   :group 'org-babel
   :type 'boolean)
 
-(defvar org-babel-source-name-regexp
+(defvar org-babel-src-name-regexp
   "^[ \t]*#\\+\\(srcname\\|source\\|function\\):[ \t]*"
   "Regular expression used to match a source name line.")
+
+(defvar org-babel-src-name-w-name-regexp
+  (concat org-babel-src-name-regexp
+	  "\\([^ ()\f\t\n\r\v]+\\)\\(\(\\(.*\\)\)\\|\\)")
+  "Regular expression matching source name lines with a name.")
 
 (defvar org-babel-src-block-regexp
   (concat
@@ -137,9 +143,7 @@ added to the header-arguments-alist."
 	  (setq indent (car (last info)))
 	  (setq info (butlast info))
 	  (forward-line -1)
-	  (if (looking-at
-	       (concat org-babel-source-name-regexp
-		       "\\([^ ()\f\t\n\r\v]+\\)\\(\(\\(.*\\)\)\\|\\)"))
+	  (if (looking-at org-babel-src-name-w-name-regexp)
 	      (progn
 		(setq info (append info (list (org-babel-clean-text-properties
 					       (match-string 2)))))
@@ -253,10 +257,14 @@ header arguments as well.")
 (make-variable-buffer-local 'org-babel-current-buffer-properties)
 
 (defvar org-babel-result-regexp
-  "^[ \t]*#\\+res\\(ults\\|name\\)\\(\\[\\([[:alnum:]]+\\)\\]\\)?\\:"
+  "^[ \t]*#\\+res\\(ults\\|name\\)\\(\\[\\([[:alnum:]]+\\)\\]\\)?\\:[ \t]*"
   "Regular expression used to match result lines.  If the
 results are associated with a hash key then the hash will be
 saved in the second match data.")
+
+(defvar org-babel-result-w-name-regexp
+  (concat org-babel-result-regexp
+	  "\\([^ ()\f\t\n\r\v]+\\)\\(\(\\(.*\\)\)\\|\\)"))
 
 (defvar org-babel-min-lines-for-block-output 10
   "If number of lines of output is equal to or exceeds this
@@ -277,7 +285,7 @@ can not be resolved.")
   "Hook for functions to be called after `org-babel-execute-src-block'")
 (defun org-babel-named-src-block-regexp-for-name (name)
   "This generates a regexp used to match a src block named NAME."
-  (concat org-babel-source-name-regexp (regexp-quote name) "[ \t\n]*"
+  (concat org-babel-src-name-regexp (regexp-quote name) "[ \t\n]*"
 	  (substring org-babel-src-block-regexp 1)))
 
 ;;; functions
@@ -625,7 +633,7 @@ portions of results lines."
 	  (lambda () (org-add-hook 'change-major-mode-hook
 			      'org-babel-show-result-all 'append 'local)))
 
-(defmacro org-babel-map-source-blocks (file &rest body)
+(defmacro org-babel-map-src-blocks (file &rest body)
   "Evaluate BODY forms on each source-block in FILE."
   (declare (indent 1))
   `(let ((visited-p (get-file-buffer (expand-file-name ,file)))
@@ -857,7 +865,7 @@ If the point is not on a source block then return nil."
     (or
      (save-excursion ;; on a source name line
        (beginning-of-line 1)
-       (and (looking-at org-babel-source-name-regexp) (forward-line 1)
+       (and (looking-at org-babel-src-name-regexp) (forward-line 1)
             (looking-at org-babel-src-block-regexp)
             (point)))
      (save-excursion ;; on a #+begin_src line
@@ -874,9 +882,12 @@ If the point is not on a source block then return nil."
         (point))))))
 
 ;;;###autoload
-(defun org-babel-goto-named-source-block (&optional name)
+(defun org-babel-goto-named-src-block (name)
   "Go to a named source-code block."
-  (interactive "ssource-block name: ")
+  (interactive
+   (let ((completion-ignore-case t))
+     (list (org-icompleting-read "source-block name: "
+				 (org-babel-src-block-names) nil t))))
   (let ((point (org-babel-find-named-block name)))
     (if point
         ;; taken from `org-open-at-point'
@@ -896,6 +907,29 @@ org-babel-named-src-block-regexp."
                 (re-search-backward regexp nil t))
         (match-beginning 0)))))
 
+(defun org-babel-src-block-names (&optional file)
+  "Returns the names of source blocks in FILE or the current buffer."
+  (save-excursion
+    (when file (find-file file)) (goto-char (point-min))
+    (let (names)
+      (while (re-search-forward org-babel-src-name-w-name-regexp nil t)
+	(setq names (cons (org-babel-clean-text-properties (match-string 2))
+			  names)))
+      names)))
+
+;;;###autoload
+(defun org-babel-goto-named-result (name)
+  "Go to a named result."
+  (interactive
+   (let ((completion-ignore-case t))
+     (list (org-icompleting-read "source-block name: "
+				 (org-babel-result-names) nil t))))
+  (let ((point (org-babel-find-named-result name)))
+    (if point
+        ;; taken from `org-open-at-point'
+        (progn (goto-char point) (org-show-context))
+      (message "result '%s' not found in this buffer" name))))
+
 (defun org-babel-find-named-result (name)
   "Return the location of the result named NAME in the current
 buffer or nil if no such result exists."
@@ -905,6 +939,33 @@ buffer or nil if no such result exists."
            (concat org-babel-result-regexp
                    "[ \t]" (regexp-quote name) "[ \t\n\f\v\r]") nil t)
       (beginning-of-line 0) (point))))
+
+(defun org-babel-result-names (&optional file)
+  "Returns the names of results in FILE or the current buffer."
+  (save-excursion
+    (when file (find-file file)) (goto-char (point-min))
+    (let (names)
+      (while (re-search-forward org-babel-result-w-name-regexp nil t)
+	(setq names (cons (org-babel-clean-text-properties (match-string 4))
+			  names)))
+      names)))
+
+;;;###autoload
+(defun org-babel-next-src-block (&optional arg)
+  "Jump to the next source block.
+With optional prefix argument ARG, jump forward ARG many source blocks."
+  (interactive "P")
+  (when (looking-at org-babel-src-block-regexp) (forward-char 1))
+  (re-search-forward org-babel-src-block-regexp nil nil (or arg 1))
+  (goto-char (match-beginning 0)) (org-show-context))
+
+;;;###autoload
+(defun org-babel-previous-src-block (&optional arg)
+  "Jump to the previous source block.
+With optional prefix argument ARG, jump backward ARG many source blocks."
+  (interactive "P")
+  (re-search-backward org-babel-src-block-regexp nil nil (or arg 1))
+  (goto-char (match-beginning 0)) (org-show-context))
 
 (defvar org-babel-lob-one-liner-regexp)
 (defun org-babel-where-is-src-block-result (&optional insert info hash indent)

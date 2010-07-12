@@ -138,7 +138,7 @@ processing has taken place."
     (goto-char (point-min))
     (while (org-re-search-forward-unprotected
 	    (concat
-	     "\\("org-babel-source-name-regexp"\\|"org-babel-result-regexp"\\)")
+	     "\\("org-babel-src-name-regexp"\\|"org-babel-result-regexp"\\)")
 	    nil t)
       (delete-region
        (progn (beginning-of-line) (point))
