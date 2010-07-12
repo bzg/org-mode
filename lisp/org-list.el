@@ -195,19 +195,19 @@ When the indentation would be larger than this, it will become
 % END RECEIVE ORGLST %n
 \\begin{comment}
 #+ORGLST: SEND %n org-list-to-latex
-| | |
+-
 \\end{comment}\n")
     (texinfo-mode "@c BEGIN RECEIVE ORGLST %n
 @c END RECEIVE ORGLST %n
 @ignore
 #+ORGLST: SEND %n org-list-to-texinfo
-| | |
+-
 @end ignore\n")
     (html-mode "<!-- BEGIN RECEIVE ORGLST %n -->
 <!-- END RECEIVE ORGLST %n -->
 <!--
 #+ORGLST: SEND %n org-list-to-html
-| | |
+-
 -->\n"))
   "Templates for radio lists in different major modes.
 All occurrences of %n in a template will be replaced with the name of the
