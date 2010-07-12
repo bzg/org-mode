@@ -13572,12 +13572,12 @@ parameters.
 Here is a La@TeX{} example.  Let's say that you have this in your
 La@TeX{} file:
 
-@cindex #+ORGLIST
+@cindex #+ORGLST
 @example
 % BEGIN RECEIVE ORGLST to-buy
 % END RECEIVE ORGLST to-buy
 \begin@{comment@}
-#+ORGLIST: SEND to-buy orgtbl-to-latex
+#+ORGLST: SEND to-buy orgtbl-to-latex
 - a new house
 - a new computer
   + a new keyboard
