@@ -874,7 +874,7 @@ Also, fix the indentation."
 				(string-match org-list-two-spaces-after-bullet-regexp bullet))
 		       " "))))
 	  (replace-bullet
-	   (lambda (counter bullet)
+	   (lambda (result bullet)
 	     (let* ((old (progn
 			   (skip-chars-forward " \t")
 			   (looking-at "\\S-+ *")
@@ -884,7 +884,7 @@ Also, fix the indentation."
 		 ;; when bullet lengths are differents, move the whole
 		 ;; sublist accordingly
 		 (org-shift-item-indentation (- (length bullet) (length old))))))))
-     (org-apply-on-list replace-bullet bullet)
+     (org-apply-on-list replace-bullet nil bullet)
      ;; fix item numbers if necessary
      (when (string-match "[0-9]" bullet) (org-renumber-ordered-list)))))
 
@@ -919,8 +919,9 @@ with something like \"1.\" or \"2)\". Start to count at ARG or 1."
 			     (insert new)
 			     ;; In case item number went from 9. to 10.
 			     ;; or the other way.
-			     (org-shift-item-indentation (- (length new) (length old)))))))
-     (org-apply-on-list renumber-item offset item-fmt))))
+			     (org-shift-item-indentation (- (length new) (length old)))
+			     (1+ counter)))))
+     (org-apply-on-list renumber-item 0 offset item-fmt))))
 
 (defun org-maybe-renumber-ordered-list ()
   "Renumber the ordered list at point if setup allows it.
@@ -1187,25 +1188,31 @@ Otherwise it will be `org-todo'."
 
 ;;; Misc Tools
 
-(defun org-apply-on-list (function &rest args)
+(defun org-apply-on-list (function init-value &rest args)
   "Call FUNCTION for each item of a the list under point.
 
- FUNCTION is called with at least one argument : the number of
- items visited, starting at 0, plus ARGS extra arguments.
+FUNCTION must be called with at least one argument : a return
+value that will contain the value returned by the function at
+the previous item, plus ARGS extra arguments. INIT-VALUE will be
+the value passed to the function at the first item of the list.
 
- Sublists of the list are skipped. Cursor is always at the
- beginning of the item."
+As an example, (org-apply-on-list (lambda (result) (1+ result)) 0)
+will return the number of items in the current list.
+
+Sublists of the list are skipped. Cursor is always at the
+beginning of the item."
   (save-excursion
     (let ((move-down-action
-	   (lambda (pos item-count &rest args)
+	   (lambda (pos value &rest args)
 	     (goto-char pos)
-	     (apply function item-count args)
-	     ;; we need to recompute each time end of list in case
-	     ;; function modified list.
-	     (let ((next-p (org-get-next-item pos (org-end-of-item-list))))
-	       (when next-p
-		 (apply move-down-action next-p (1+ item-count) args))))))
-      (apply move-down-action (org-beginning-of-item-list) 0 args))))
+	     (let ((return-value (apply function value args))
+		   ;; we need to recompute each time end of list in case
+		   ;; function modified list.
+		   (next-p (org-get-next-item pos (org-end-of-item-list))))
+	       (if next-p
+		   (apply move-down-action next-p return-value args)
+		 return-value)))))
+      (apply move-down-action (org-beginning-of-item-list) init-value args))))
 
 (defun org-sort-list (&optional with-case sorting-type getkey-func compare-func)
   "Sort plain list items.
