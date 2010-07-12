@@ -134,7 +134,7 @@ return nil."
 	(goto-char (point-min))
 	(if (let ((result_regexp (concat "^[ \t]*#\\+\\(TBLNAME\\|RESNAME\\|RESULTS\\):[ \t]*"
 					 (regexp-quote ref) "[ \t]*$"))
-		  (regexp (concat org-babel-source-name-regexp
+		  (regexp (concat org-babel-src-name-regexp
 				  (regexp-quote ref) "\\(\(.*\)\\)?" "[ \t]*$")))
 	      ;; goto ref in the current buffer
 	      (or (and (not args)

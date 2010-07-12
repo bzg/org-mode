@@ -200,7 +200,7 @@ the form used by `org-babel-spec-to-string' grouped by language.
 Optional argument LANG can be used to limit the collected source
 code blocks by language."
   (let ((block-counter 0) blocks)
-    (org-babel-map-source-blocks (buffer-file-name)
+    (org-babel-map-src-blocks (buffer-file-name)
       (setq block-counter (+ 1 block-counter))
       (let* ((link (progn (call-interactively 'org-store-link)
                           (org-babel-clean-text-properties
