@@ -807,7 +807,7 @@ Assumes cursor in item line."
       (cond
        ((and (ignore-errors (progn (org-previous-item) t))
 	     (or (end-of-line) t)
-	     (re-search-forward (org-item-re) bolpos t))
+	     (org-search-forward-unenclosed (org-item-re) bolpos t))
 	(setq ind-down (org-get-indentation)
 	      bullet-down (org-get-bullet)))
        ((and (goto-char pos)
@@ -1143,7 +1143,7 @@ the whole buffer."
 		      ;; with proper limit.
 		      (goto-char (or (org-get-next-item (point) lim) lim))
 		    (end-of-line)
-		    (when (re-search-forward (org-item-re) lim t)
+		    (when (org-search-forward-unenclosed (org-item-re) lim t)
 		      (beginning-of-line)))
 		  (setq next-ind (org-get-indentation)))))
 	  (goto-char continue-from)
@@ -1307,7 +1307,7 @@ sublevels as a list of strings."
   (let* ((start (goto-char (org-list-top-point)))
 	 (end (org-list-bottom-point))
 	 output itemsep ltype)
-    (while (re-search-forward (org-item-re) end t)
+    (while (org-search-forward-unenclosed (org-item-re) end t)
       (save-excursion
 	(beginning-of-line)
 	(cond ((looking-at-p "^[ \t]*[0-9]")
