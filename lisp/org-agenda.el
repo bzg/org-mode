@@ -1336,6 +1336,11 @@ the headline/diary entry."
 	  (const :tag "Never" nil)
 	  (const :tag "When at beginning of entry" beg)))
 
+(defcustom org-agenda-remove-timeranges-from-blocks nil
+  "Non-nil means remove time ranges specifications in agenda
+items that span on several days."
+  :group 'org-agenda-line-format
+  :type 'boolean)
 
 (defcustom org-agenda-default-appointment-duration nil
   "Default duration for appointments that only have a starting time.
@@ -4790,13 +4795,20 @@ FRACTION is what fraction of the head-warning time has passed."
 		(setq tags (org-get-tags-at))
 		(looking-at "\\*+[ \t]+\\([^\r\n]+\\)")
 		(setq head (match-string 1))
+		(setq remove-re
+		      (if org-agenda-remove-timeranges-from-blocks
+			  (concat
+			   "<" (regexp-quote s1) ".*?>"
+			   "--"
+			   "<" (regexp-quote s2) ".*?>")
+			nil))
 		(setq txt (org-format-agenda-item
 			   (format
 			    (nth (if (= d1 d2) 0 1)
 				 org-agenda-timerange-leaders)
 			    (1+ (- d0 d1)) (1+ (- d2 d1)))
 			   head category tags
-			   timestr)))
+			   timestr nil remove-re)))
 	      (org-add-props txt props
 		'org-marker marker 'org-hd-marker hdmarker
 		'type "block" 'date date
