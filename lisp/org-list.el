@@ -1260,8 +1260,8 @@ optional argument WITH-CASE, the sorting considers case as well."
 			 ((member dcst '(?p ?t ?s ?d ?c)) '<)
 			 (t nil)))
 	     (begin-record (lambda ()
-			     (let ((next-p (org-get-next-item (point) (point-max))))
-			       (goto-char (or next-p (point-max))))))
+			     (skip-chars-forward " \r\t\n")
+			     (beginning-of-line)))
 	     (end-record (lambda ()
 			   (goto-char (org-end-of-item-before-blank))))
 	     (value-to-sort (lambda nil
