@@ -15,49 +15,24 @@
 
 ** Incompatible Changes
 
-*** Customizable variable changes for DocBook exporter
+*** Emacs 21 support has been dropped
 
-To make it more flexible for users to provide DocBook exporter
-related commands, we start to use format-spec to format the
-commands in this release.  If you use DocBook exporter and use it
-to export Org files to PDF and/or FO format, the settings of the
-following two customizable variables need to be changed:
+Do not use Org mode 7.xx with Emacs 21, use an older version, for
+example [[http://orgmode.org/org-6.36c.zip][version 6.36c]].
 
-1. =org-export-docbook-xslt-proc-command=
-2. =org-export-docbook-xsl-fo-proc-command=
+*** XEmacs support requires the XEmacs development version
 
-Instead of using =%s= in the format control string for all
-arguments, now we use /three/ different format spec characters:
-
-1. =%i=: input file argument
-2. =%o=: output file argument
-3. =%s=: XSLT stylesheet argument
-
-For example, if you set =org-export-docbook-xslt-proc-command= to
-
-: java com.icl.saxon.StyleSheet -o %s %s /path/to/docbook.xsl
-
-in the past, now you need to change it to
-
-: java com.icl.saxon.StyleSheet -o %o %i %s
-
-and set a new customizable variable called
-=org-export-docbook-xslt-stylesheet= to =/path/to/docbook.xsl=.
-
-Please check the documentation of these two variables for more
-details and other examples.
-
-Along with the introduction of variable
-=org-export-docbook-xslt-stylesheet=, we also added a new
-in-buffer setting called =#+XSLT:=.  You can use this setting to
-specify the XSLT stylesheet that you want to use on a per-file
-basis.  This setting overrides
-=org-export-docbook-xslt-stylesheet=.
+To use Org mode 7.xx with XEmacs, you need to run the developer
+version of XEmacs.   I was about to drop XEmacs support entirely,
+but Michael Sperber stepped in and made changes to XEmacs that
+made it easier to keep the support.  Thanks to Michael for this
+last-minute save.
 
 *** Org-babel configuration changes
 :PROPERTIES:
 :CUSTOM_ID: ob-configuration-changes
 :END:
+
 Babel took the integration into Org-mode as an opportunity to do
 some much needed house cleaning.  Most importantly we have
 simplified the enabling of language support, and cleared out
@@ -137,7 +112,7 @@ well as the two main internal lists of languages, namely
 
 so any config lines which mention those variables, can/should be
 stripped out in their entirety.  This includes any calls to the
-=org-babl-add-interpreter= function, whose sole purpose was to
+=org-babel-add-interpreter= function, whose sole purpose was to
 add languages to the =org-babel-interpreters= variable.
 
 With those calls stripped out, we may still in some cases want to
@@ -206,14 +181,88 @@ evaluation, namely =C-c C-v e=.
 Whew! that seems like a lot of effort for a /simplification/ of
 configuration.
 
+*** New keys for TODO sparse trees
+
+The key =C-c C-v= is now reserved for Org Babel action.  TODO
+sparse trees can still be made with =C-c / t= (all not-done
+states) and =C-c / T= (specific states).
+
+*** Customizable variable changes for DocBook exporter
+
+To make it more flexible for users to provide DocBook exporter
+related commands, we start to use format-spec to format the
+commands in this release.  If you use DocBook exporter and use it
+to export Org files to PDF and/or FO format, the settings of the
+following two customizable variables need to be changed:
+
+1. =org-export-docbook-xslt-proc-command=
+2. =org-export-docbook-xsl-fo-proc-command=
+
+Instead of using =%s= in the format control string for all
+arguments, now we use /three/ different format spec characters:
+
+1. =%i=: input file argument
+2. =%o=: output file argument
+3. =%s=: XSLT stylesheet argument
+
+For example, if you set =org-export-docbook-xslt-proc-command= to
+
+: java com.icl.saxon.StyleSheet -o %s %s /path/to/docbook.xsl
+
+in the past, now you need to change it to
+
+: java com.icl.saxon.StyleSheet -o %o %i %s
+
+and set a new customizable variable called
+=org-export-docbook-xslt-stylesheet= to =/path/to/docbook.xsl=.
+
+Please check the documentation of these two variables for more
+details and other examples.
+
+Along with the introduction of variable
+=org-export-docbook-xslt-stylesheet=, we also added a new
+in-buffer setting called =#+XSLT:=.  You can use this setting to
+specify the XSLT stylesheet that you want to use on a per-file
+basis.  This setting overrides
+=org-export-docbook-xslt-stylesheet=.
+
 ** Details
+
+*** Org Babel is now part of the Org core
+See [[#ob-configuration-changes][Org-babel configuration changes]] for instructions on how to
+update your babel configuration.
+
+The most significant result of this change is that Babel now has
+documentation!  It is part of Org-mode's documentation, see
+Chapter 14 [[http://orgmode.org/manual/Working-with-source-code.html#Working-with-source-code][Working With Source Code]].  The Babel keybindings
+are now listed in the refcard, and can be viewed from any
+Org-mode buffer by pressing =C-c C-v h=.  In addition this
+integration has included a number of bug fixes, and a significant
+amount of internal code cleanup.
+
+*** Help system for finding entities
+
+The new command =M-x org-entities-help= creates a structured
+buffer that lists all entities available in Org.  Thanks to Ulf
+Stegeman for adding the necessary structure to the internal
+entity list.
+
+*** Implement pretty display of sub- and superscripts.
+
+The command =C-c C-x \= toggles the display of Org's special
+entities like =\alpha= as pretty unicode characters.  Also, sub
+and superscripts are displayed in a pretty way.  If you want to
+exclude sub- and superscripts, see the variable
+=org-pretty-entities-include-sub-superscripts=.
+
+Thanks to Eric Schulte and Ulf Stegeman for making this possible.
 
 *** The default capture system for Org mode is now called org-capture
 
-This replaces the earlier system org-remember.  The manual only
-describes org-capture, but for people who prefer to continue to
-use org-remember, we make available
-[[http://orgmode.org/org-remember.pdf][a static copy of theformer chapter about remember]].
+This replaces the earlier system org-remember.  In the current
+manual, only =org-capture= is described in detail.  For people who
+prefer to continue to use =org-remember=, we make available a
+static copy of the [[http://orgmode.org/org-remember.pdf][former chapter about remember]].
 
 The new system has a better implementation and more
 possibilities.  See [[http://thread.gmane.org/gmane.emacs.orgmode/26441/focus%3D26441][Carsten's announcement]] for more details.
@@ -225,52 +274,30 @@ To switch over to the new system:
    : M-x org-capture-import-remember-templates RET
 
    to get a translated version of your remember templates into the
-   new variable `org-capture-templates'.  This will "mostly" work,
+   new variable =org-capture-templates=.  This will "mostly" work,
    but maybe not for all cases.  At least it will give you a good
    place to modify your templates.  After running this command,
    enter the customize buffer for this variable with 
 
    : M-x customize-variable RET org-capture-templates RET
 
-   and convince yourself that everything is OK.  The save the
+   and convince yourself that everything is OK.  Then save the
    customization.
    
-2. Bind the command `org-capture' to a key, similar to what you did
+2. Bind the command =org-capture= to a key, similar to what you did
    with org-remember:
 
    : (define-key global-map "\C-cc" 'org-capture)
 
-   You may also use `C-c r' once you have decided to move over to
-   the new implementation.
+   If your fingers prefer =C-c r=, you can also use this key once
+   you have decided to move over completely to the new
+   implementation.  During a test time, there is nothing wrong
+   with using both system in parallel.
 
-*** Emacs 21 support has been dropped
+*** New module to create Gantt charts
 
-Do not use Org mode 7.xx with Emacs 21, use an older version.
-
-*** XEmacs support requires the XEmacs development version
-
-To use Org mode 7.xx with XEmacs, you need to run the developer
-version of XEmacs.   I was about to drop XEmacs support entirely,
-but Michael Sperber stepped in and made changes to XEmacs that
-made it easier to keep the support.  Thanks to Michael for this
-last-minute save.
-
-*** New module org-taskjuggler.el helps to create Gantt charts
-
-Christian Egli's org-taskjuggler.el module is now part of Org
+Christian Egli's /org-taskjuggler.el/ module is now part of Org.
 He also wrote a [[http://orgmode.org/worg/org-tutorials/org-taskjuggler.php][tutorial]] for it.
-
-*** Org Babel is now part of the Org core
-See [[#ob-configuration-changes][Org-babel configuration changes]] for instructions on how to
-update your babel configuration.
-
-The most significant result of this change is that Babel now has
-documentation!  It is part of Org-mode's documentation see
-Chapter 14 _Working With Source Code_ also, the Babel keybindings
-are now listed in the refcard, and can be viewed from any
-Org-mode buffer by pressing =C-c C-v h=.  In addition this
-integration has included a number of bug fixes, and a significant
-amount of internal code cleanup.
 
 *** A property value of "nil" now means to unset a property
 
@@ -287,24 +314,25 @@ change.
 Thanks to Leo who has been on a year-long quest to get this fixed
 and finally found the right way to do it.
 
-*** Make it possible to protect hidden subtrees to be killed by `C-k'
+*** Make it possible to protect hidden subtrees to be killed by =C-k=
     
 This was a request by Scott Otterson.
-See the new variable `org-ctrl-k-protect-subtree'. 
-
-*** Implement pretty display of sub- and superscripts.
-
-The command =C-c C-x \= toggles the display or Org's special
-entities like =\alpha= as pretty unicode characters.  Also, sub
-and superscripts are displayed in a pretty way.
-
-Thanks to Eric Schulte and Ulf Stegeman for making this possible.
+See the new variable =org-ctrl-k-protect-subtree=.
     
 *** Add Anthony Lander's org-mac-link-grabber.el
+
+This module allows to grab links to all kinds of applications on
+a mac.
 
 Thanks to Anthony Lander for this contribution.
 
 *** Implement caching of refile targets
+
+You can turn on caching of refile targets by setting the variable
+=org-refile-use-cache=.  This should speed up refiling if you
+have many eligible targets in many files.  If you need to update
+the cache because Org misses a newly created entry or still
+offers a deleted one, press =C-0 C-c C-w=.
 
 *** Enhanced functionality of the clock resolver
 
@@ -333,16 +361,10 @@ changes.
     
 Thanks to Chris Gray for a patch to this effect.
 
-
-*** Remove or renew ID property in clone template
+*** When cloning entries, remove or renew ID property
 
 Thanks to David Maus for this change
 
-*** New keys for TODO sparse trees.
-
-The key =C-c C-v= is now reserved for Org Babel action.  TODO
-sparse trees can still be made with =C-c / t= (all not-done
-states) and =C-c / T= (specific states).
 
 * Version 6.36
 
