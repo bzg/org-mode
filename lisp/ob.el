@@ -1013,12 +1013,13 @@ following the source block."
 			    (concat org-babel-result-regexp "\n")))
 			 (prog1 (point)
 			   ;; must remove and rebuild if hash!=old-hash
-			   (unless (or (not hash)
-				       (string= hash (match-string 3)))
-			     (forward-line 1)
-			     (delete-region
-			      end (org-babel-result-end)) nil))))))))
-      (if insert
+			   (if (and hash (not (string= hash (match-string 3))))
+			       (prog1 nil
+				 (forward-line 1)
+				 (delete-region
+				  end (org-babel-result-end)))
+			     (setq end nil)))))))))
+      (if (and insert end)
 	  (progn
 	    (goto-char end)
 	    (unless beg
