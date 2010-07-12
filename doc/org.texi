@@ -6315,23 +6315,27 @@ same directory for attachments as the parent does.
 @node RSS Feeds, Protocols, Attachments, Capture - Refile - Archive
 @section RSS feeds
 @cindex RSS feeds
+@cindex Atom feeds
 
-Org can add and change entries based on information found in RSS feeds.  You
-could use this to make a task out of each new podcast in a podcast feed.  Or
-you could use a phone-based note-creating service on the web to import tasks
-into Org.  To access feeds, configure the variable @code{org-feed-alist}.
-The docstring of this variable has detailed information.  Here is just an
-example:
+Org can add and change entries based on information found in RSS feeds and
+Atom feeds.  You could use this to make a task out of each new podcast in a
+podcast feed.  Or you could use a phone-based note-creating service on the
+web to import tasks into Org.  To access feeds, configure the variable
+@code{org-feed-alist}.  The docstring of this variable has detailed
+information.  Here is just an example:
 
 @example
 (setq org-feed-alist
-      '(("ReQall" "http://www.reqall.com/user/feeds/rss/a1b2c3....."
-         "~/org/feeds.org" "ReQall Entries")
+     '(("Slashdot"
+	 "http://rss.slashdot.org/Slashdot/slashdot"
+	 "~/txt/org/feeds.org" "Slashdot Entries")))
 @end example
+
 @noindent
-will configure that new items from the feed provided by @file{reqall.com}
-will result in new entries in the file @file{~/org/feeds.org} under the
-heading @samp{ReQall Entries}, whenever the following command is used:
+will configure that new items from the feed provided by
+@code{rss.slashdot.org} will result in new entries in the file
+@file{~/org/feeds.org} under the heading @samp{Slashdot Entries}, whenever
+the following command is used:
 
 @table @kbd
 @kindex C-c C-x g
@@ -6352,8 +6356,8 @@ list of drawers in that file:
 #+DRAWERS: LOGBOOK PROPERTIES FEEDSTATUS
 @end example
 
-For more information, see @file{org-feed.el} and the docstring of
-@code{org-feed-alist}.
+For more information, including how to read atom feeds, see
+@file{org-feed.el} and the docstring of @code{org-feed-alist}.
 
 @node Protocols, Refiling notes, RSS Feeds, Capture - Refile - Archive
 @section Protocols for external access
