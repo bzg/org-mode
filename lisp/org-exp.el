@@ -2107,19 +2107,29 @@ in the list) and remove property and value from the list in LISTVAR."
 	lang code trans opts indent caption)
     (goto-char (point-min))
     (while (re-search-forward
-	    "\\(^\\([ \t]*\\)#\\+BEGIN_SRC:?[ \t]+\\([^ \t\n]+\\)\\(.*\\)\n\\([^\000]+?\n\\)[ \t]*#\\+END_SRC.*\n?\\)\\|\\(^\\([ \t]*\\)#\\+BEGIN_EXAMPLE:?\\(?:[ \t]+\\(.*\\)\\)?\n\\([^\000]+?\n\\)[ \t]*#\\+END_EXAMPLE.*\n?\\)"
+	    "\\(^\\([ \t]*\\)#\\+BEGIN_SRC:?\\([ \t]+\\([^ \t\n]+\\)\\)?\\(.*\\)\n\\([^\000]+?\n\\)[ \t]*#\\+END_SRC.*\n?\\)\\|\\(^\\([ \t]*\\)#\\+BEGIN_EXAMPLE:?\\(?:[ \t]+\\(.*\\)\\)?\n\\([^\000]+?\n\\)[ \t]*#\\+END_EXAMPLE.*\n?\\)"
 	    nil t)
       (if (match-end 1)
-	  ;; src segments
-	  (setq lang (match-string 3)
-		opts (match-string 4)
-		code (match-string 5)
-		indent (length (match-string 2))
-                caption (get-text-property 0 'org-caption (match-string 0)))
+	  (if (not (match-string 4))
+	      (error "source block missing language specification: %s"
+		     (let* ((body (match-string 6))
+			    (nothing (message "body:%s" body))
+			    (preview (or (and (string-match
+					       "^[ \t]*\\([^\n\r]*\\)" body)
+					      (match-string 1 body)) body)))
+		       (if (> (length preview) 35)
+			   (concat (substring preview 0 32) "...")
+			 preview)))
+	    ;; src segments
+	    (setq lang (match-string 4)
+		  opts (match-string 5)
+		  code (match-string 6)
+		  indent (length (match-string 2))
+		  caption (get-text-property 0 'org-caption (match-string 0))))
 	(setq lang nil
-	      opts (match-string 8)
-	      code (match-string 9)
-	      indent (length (match-string 7))
+	      opts (match-string 9)
+	      code (match-string 10)
+	      indent (length (match-string 8))
               caption (get-text-property 0 'org-caption (match-string 0))))
 
       (setq trans (org-export-format-source-code-or-example

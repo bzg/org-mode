@@ -143,7 +143,8 @@ added to the header-arguments-alist."
 	  (setq indent (car (last info)))
 	  (setq info (butlast info))
 	  (forward-line -1)
-	  (if (looking-at org-babel-src-name-w-name-regexp)
+	  (if (and (looking-at org-babel-src-name-w-name-regexp)
+		   (match-string 2))
 	      (progn
 		(setq info (append info (list (org-babel-clean-text-properties
 					       (match-string 2)))))
