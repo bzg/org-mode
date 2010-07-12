@@ -18245,7 +18245,7 @@ defaults to previous heading or `point-min'."
       ;; we're on a block when point is on start-re...
       (or (org-at-regexp-p start-re)
 	  ;; ... or start-re can be found above...
-	  (and (re-search-backward start-re bound t)
+	  (and (re-search-backward start-re limit t)
 	       ;; ... but no end-re between start-re and point.
 	       (not (re-search-forward (eval end-re) pos t)))))))
 
