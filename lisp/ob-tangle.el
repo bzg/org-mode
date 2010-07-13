@@ -33,6 +33,7 @@
   (require 'cl))
 
 (declare-function org-link-escape "org" (text &optional table))
+(declare-function org-heading-components "org" ())
 (declare-function with-temp-filebuffer "org-interaction" (file &rest body))
 
 (defcustom org-babel-tangle-lang-exts
@@ -199,15 +200,23 @@ Return an association list of source-code block specifications of
 the form used by `org-babel-spec-to-string' grouped by language.
 Optional argument LANG can be used to limit the collected source
 code blocks by language."
-  (let ((block-counter 0) blocks)
+  (let ((block-counter 1) (current-heading "") blocks)
     (org-babel-map-src-blocks (buffer-file-name)
-      (setq block-counter (+ 1 block-counter))
+      ((lambda (new-heading)
+	 (if (not (string= new-heading current-heading))
+	     (progn
+	       (setq block-counter 1)
+	       (setq current-heading new-heading))
+	   (setq block-counter (+ 1 block-counter))))
+       (replace-regexp-in-string "[ \t]" "-"
+				 (nth 4 (org-heading-components))))
       (let* ((link (progn (call-interactively 'org-store-link)
                           (org-babel-clean-text-properties
 			   (car (pop org-stored-links)))))
              (info (org-babel-get-src-block-info))
              (source-name (intern (or (nth 4 info)
-                                      (format "block-%d" block-counter))))
+                                      (format "%s:%d"
+					      current-heading block-counter))))
              (src-lang (nth 0 info))
 	     (expand-cmd (intern (concat "org-babel-expand-body:" src-lang)))
              (params (nth 2 info))

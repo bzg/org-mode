@@ -83,7 +83,6 @@
 (defun org-babel-execute:R (body params)
   "Execute a block of R code with org-babel.  This function is
 called by `org-babel-execute-src-block'."
-  (message "executing R source code block...")
   (save-excursion
     (let* ((processed-params (org-babel-process-params params))
            (result-type (nth 3 processed-params))

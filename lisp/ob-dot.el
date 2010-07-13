@@ -52,7 +52,6 @@
 (defun org-babel-execute:dot (body params)
   "Execute a block of Dot code with org-babel.  This function is
 called by `org-babel-execute-src-block'."
-  (message "executing Dot source code block")
   (let ((result-params (split-string (or (cdr (assoc :results params)) "")))
         (out-file (cdr (assoc :file params)))
         (cmdline (cdr (assoc :cmdline params)))

@@ -61,7 +61,6 @@
 (defun org-babel-execute:sh (body params)
   "Execute a block of Shell commands with org-babel.  This
 function is called by `org-babel-execute-src-block'."
-  (message "executing Shell source code block")
   (let* ((processed-params (org-babel-process-params params))
          (session (org-babel-sh-initiate-session (nth 0 processed-params)))
          (result-params (nth 2 processed-params)) 

@@ -60,7 +60,6 @@
 (defun org-babel-execute:latex (body params)
   "Execute a block of Latex code with org-babel.  This function is
 called by `org-babel-execute-src-block'."
-  (message "executing Latex source code block")
   (setq body (org-babel-expand-body:latex body params))
   (if (cdr (assoc :file params))
       (let ((out-file (cdr (assoc :file params)))

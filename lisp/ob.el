@@ -143,7 +143,8 @@ added to the header-arguments-alist."
 	  (setq indent (car (last info)))
 	  (setq info (butlast info))
 	  (forward-line -1)
-	  (if (looking-at org-babel-src-name-w-name-regexp)
+	  (if (and (looking-at org-babel-src-name-w-name-regexp)
+		   (match-string 2))
 	      (progn
 		(setq info (append info (list (org-babel-clean-text-properties
 					       (match-string 2)))))
@@ -239,7 +240,7 @@ then run `org-babel-pop-to-session'."
 
 (defconst org-babel-header-arg-names
   '(cache cmdline colnames dir exports file noweb results
-	  session tangle var noeval)
+	  session tangle var noeval comments)
   "Common header arguments used by org-babel.  Note that
 individual languages may define their own language specific
 header arguments as well.")
@@ -349,7 +350,10 @@ block."
                 (setq result (org-babel-read-result))
                 (message (replace-regexp-in-string "%" "%%"
                                                    (format "%S" result))) result)
-            (setq result (funcall cmd body params))
+            (message "executing %s code block%s..."
+		     (capitalize lang)
+		     (if (nth 4 info) (format " (%s)" (nth 4 info)) ""))
+	    (setq result (funcall cmd body params))
             (if (eq result-type 'value)
                 (setq result (if (and (or (member "vector" result-params)
                                           (member "table" result-params))
@@ -979,39 +983,65 @@ following the source block."
 	   (name (if on-lob-line
 		     (nth 0 (org-babel-lob-get-info))
 		   (nth 4 (or info (org-babel-get-src-block-info)))))
-	   (head (unless on-lob-line (org-babel-where-is-src-block-head))) end)
+	   (head (unless on-lob-line (org-babel-where-is-src-block-head)))
+	   found beg end)
       (when head (goto-char head))
-      (or (and name (org-babel-find-named-result name))
-          (and (or on-lob-line (re-search-forward "^[ \t]*#\\+end_src" nil t))
-               (progn (end-of-line 1)
-		      (if (eobp) (insert "\n") (forward-char 1))
-		      (setq end (point))
-                      (or (and (not name)
-			       (progn ;; unnamed results line already exists
-				 (re-search-forward "[^ \f\t\n\r\v]" nil t)
-				 (beginning-of-line 1)
-                                 (looking-at
-                                  (concat org-babel-result-regexp "\n"))))
-			  ;; or (with optional insert) back up and
-			  ;; make one ourselves
-                          (when insert
-                            (goto-char end)
-			    (if (looking-at "[\n\r]")
-                                (forward-char 1) (insert "\n"))
-                            (insert (concat
-				     (if indent
-					 (mapconcat
-					  (lambda (el) " ")
-					  (number-sequence 1 indent) "")
-				       "")
-				     "#+results"
-				     (when hash (concat "["hash"]"))
-				     ":"
-				     (when name (concat " " name)) "\n\n"))
-			    (backward-char)
-                            (beginning-of-line 0)
-                            (if hash (org-babel-hide-hash)) t)))
-               (point))))))
+      (setq
+       found ;; was there a result (before we potentially insert one)
+       (or
+	(and
+	 ;; named results:
+	 ;; - return t if it is found, else return nil
+	 ;; - if it does not need to be rebuilt, then don't set end
+	 ;; - if it does need to be rebuilt then do set end
+	 name (setq beg (org-babel-find-named-result name))
+	 (prog1 beg
+	   (when (and hash (not (string= hash (match-string 3))))
+	     (goto-char beg) (setq end beg) ;; beginning of result
+	     (forward-line 1)
+	     (delete-region end (org-babel-result-end)) nil)))
+	(and
+	 ;; unnamed results:
+	 ;; - return t if it is found, else return nil
+	 ;; - if it is found, and the hash doesn't match, delete and set end
+	 (or on-lob-line (re-search-forward "^[ \t]*#\\+end_src" nil t))
+	 (progn (end-of-line 1)
+		(if (eobp) (insert "\n") (forward-char 1))
+		(setq end (point))
+		(or (and (not name)
+			 (progn ;; unnamed results line already exists
+			   (re-search-forward "[^ \f\t\n\r\v]" nil t)
+			   (beginning-of-line 1)
+			   (looking-at
+			    (concat org-babel-result-regexp "\n")))
+			 (prog1 (point)
+			   ;; must remove and rebuild if hash!=old-hash
+			   (if (and hash (not (string= hash (match-string 3))))
+			       (prog1 nil
+				 (forward-line 1)
+				 (delete-region
+				  end (org-babel-result-end)))
+			     (setq end nil)))))))))
+      (if (and insert end)
+	  (progn
+	    (goto-char end)
+	    (unless beg
+	      (if (looking-at "[\n\r]") (forward-char 1) (insert "\n")))
+	    (insert (concat
+		     (if indent
+			 (mapconcat
+			  (lambda (el) " ")
+			  (number-sequence 1 indent) "")
+		       "")
+		     "#+results"
+		     (when hash (concat "["hash"]"))
+		     ":"
+		     (when name (concat " " name)) "\n"))
+	    (unless beg (insert "\n") (backward-char))
+	    (beginning-of-line 0)
+	    (if hash (org-babel-hide-hash))
+	    (point))
+	found))))
 
 (defvar org-block-regexp)
 (defun org-babel-read-result ()

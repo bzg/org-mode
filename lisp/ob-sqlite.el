@@ -50,7 +50,6 @@
 (defun org-babel-execute:sqlite (body params)
   "Execute a block of Sqlite code with org-babel.  This function is
 called by `org-babel-execute-src-block'."
-  (message "executing Sqlite source code block")
   (let ((result-params (split-string (or (cdr (assoc :results params)) "")))
 	(vars (org-babel-ref-variables params))
 	(db (cdr (assoc :db params)))

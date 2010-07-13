@@ -71,7 +71,6 @@
 
 (defun org-babel-execute:haskell (body params)
   "Execute a block of Haskell code with org-babel."
-  (message "executing haskell source code block")
   (let* ((processed-params (org-babel-process-params params))
          (session (nth 0 processed-params))
          (vars (nth 1 processed-params))
