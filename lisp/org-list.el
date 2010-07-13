@@ -1319,7 +1319,7 @@ sublevels as a list of strings."
       (let* ((indent1 (org-get-indentation))
 	     (nextitem (or (org-get-next-item (point) end) end))
 	     (item (org-trim (buffer-substring (point) (org-end-of-item-text-before-children))))
-	     (nextindent (org-get-indentation))
+	     (nextindent (if (= (point) end) 0 (org-get-indentation)))
 	     (item (if (string-match "^\\[\\([xX ]\\)\\]" item)
 		       (replace-match (if (equal (match-string 1 item) " ")
 					  "[CBOFF]"

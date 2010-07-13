@@ -1651,7 +1651,7 @@ These special cookies will later be interpreted by the backend.
     (funcall process-buffer "ORG-LIST-END\n"))
    ;; 3. Others backends do not need to know this: clean list enders.
    (t
-    (funcall process-buffer "\n")))))
+    (funcall process-buffer "")))))
 
 (defun org-export-attach-captions-and-attributes (backend target-alist)
   "Move #+CAPTION, #+ATTR_BACKEND, and #+LABEL text into text properties.
