@@ -54,15 +54,16 @@
 (require 'ob)
 
 (defun org-babel-table-truncate-at-newline (string)
-  "If STRING ends in a newline character, then remove the newline
+  "Replace newline character with ellipses.
+If STRING ends in a newline character, then remove the newline
 character and replace it with ellipses."
   (if (and (stringp string) (string-match "[\n\r]" string))
       (concat (substring string 0 (match-beginning 0)) "...")
     string))
 
 (defmacro sbe (source-block &rest variables)
-  "Return the results of calling SOURCE-BLOCK assigning every
-variable in VARIABLES.  Each element of VARIABLES should be a two
+  "Return the results of calling SOURCE-BLOCK with VARIABLES.
+Each element of VARIABLES should be a two
 element list, whose first element is the name of the variable and
 second element is a string of its value.  The following call to
 `sbe' would be equivalent to the following source code block.

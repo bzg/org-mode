@@ -68,7 +68,8 @@
   :group 'org)
 
 (defcustom org-confirm-babel-evaluate t
-    "Require confirmation before interactively evaluating code
+  "Confirm before evaluation.
+Require confirmation before interactively evaluating code
 blocks in Org-mode buffers.  The default value of this variable
 is t, meaning confirmation is required for any code block
 evaluation.  This variable can be set to nil to inhibit any
@@ -90,8 +91,7 @@ remove code block execution from the C-c C-c keybinding."
 (put 'org-confirm-babel-evaluate 'safe-local-variable (lambda (x) (eq x t)))
 
 (defcustom org-babel-no-eval-on-ctrl-c-ctrl-c nil
-  "This variable can be set to remove code block evaluation from
-the C-c C-c key binding."
+  "Remove code block evaluation from the C-c C-c key binding."
   :group 'org-babel
   :type 'boolean)
 
@@ -127,7 +127,7 @@ the C-c C-c key binding."
   "Regexp used to identify inline src-blocks.")
 
 (defun org-babel-get-src-block-info (&optional header-vars-only)
-  "Get information of the current source block.
+  "Get information on the current source block.
 
 Returns a list
  (language body header-arguments-alist switches name function-args indent).
@@ -173,11 +173,11 @@ added to the header-arguments-alist."
         nil))))
 
 (defun org-babel-confirm-evaluate (info)
-  "Confirm that the user wishes to evaluate the code block
-defined by INFO.  This behavior can be suppressed by setting the
-value of `org-confirm-babel-evaluate' to nil, in which case all
-future interactive code block evaluations will proceed without
-any confirmation from the user.
+  "Confirm evaluation of the code block INFO.
+This behavior can be suppressed by setting the value of
+`org-confirm-babel-evaluate' to nil, in which case all future
+interactive code block evaluations will proceed without any
+confirmation from the user.
 
 Note disabling confirmation may result in accidental evaluation
 of potentially harmful code."
@@ -196,7 +196,8 @@ of potentially harmful code."
 
 ;;;###autoload
 (defun org-babel-execute-src-block-maybe ()
-  "Detect if this is context for a org-babel src-block and if so
+  "Conditionally execute a source block.
+Detect if this is context for a Babel src-block and if so
 then run `org-babel-execute-src-block'."
   (interactive)
   (if (not org-babel-no-eval-on-ctrl-c-ctrl-c)
@@ -208,7 +209,8 @@ then run `org-babel-execute-src-block'."
 
 ;;;###autoload
 (defun org-babel-expand-src-block-maybe ()
-  "Detect if this is context for a org-babel src-block and if so
+  "Conditionally expand a source block.
+Detect if this is context for a org-babel src-block and if so
 then run `org-babel-expand-src-block'."
   (interactive)
   (let ((info (org-babel-get-src-block-info)))
@@ -218,7 +220,8 @@ then run `org-babel-expand-src-block'."
 
 ;;;###autoload
 (defun org-babel-load-in-session-maybe ()
-  "Detect if this is context for a org-babel src-block and if so
+  "Conditionally load a source block in a session.
+Detect if this is context for a org-babel src-block and if so
 then run `org-babel-load-in-session'."
   (interactive)
   (let ((info (org-babel-get-src-block-info)))
@@ -230,7 +233,8 @@ then run `org-babel-load-in-session'."
 
 ;;;###autoload
 (defun org-babel-pop-to-session-maybe ()
-  "Detect if this is context for a org-babel src-block and if so
+  "Conditionally pop to a session.
+Detect if this is context for a org-babel src-block and if so
 then run `org-babel-pop-to-session'."
   (interactive)
   (let ((info (org-babel-get-src-block-info)))
@@ -241,9 +245,9 @@ then run `org-babel-pop-to-session'."
 (defconst org-babel-header-arg-names
   '(cache cmdline colnames dir exports file noweb results
 	  session tangle var noeval comments)
-  "Common header arguments used by org-babel.  Note that
-individual languages may define their own language specific
-header arguments as well.")
+  "Common header arguments used by org-babel.
+Note that individual languages may define their own language
+specific header arguments as well.")
 
 (defvar org-babel-default-header-args
   '((:session . "none") (:results . "replace") (:exports . "code")
@@ -259,23 +263,25 @@ header arguments as well.")
 
 (defvar org-babel-result-regexp
   "^[ \t]*#\\+res\\(ults\\|name\\)\\(\\[\\([[:alnum:]]+\\)\\]\\)?\\:[ \t]*"
-  "Regular expression used to match result lines.  If the
-results are associated with a hash key then the hash will be
-saved in the second match data.")
+  "Regular expression used to match result lines.
+If the results are associated with a hash key then the hash will
+be saved in the second match data.")
 
 (defvar org-babel-result-w-name-regexp
   (concat org-babel-result-regexp
 	  "\\([^ ()\f\t\n\r\v]+\\)\\(\(\\(.*\\)\)\\|\\)"))
 
 (defvar org-babel-min-lines-for-block-output 10
-  "If number of lines of output is equal to or exceeds this
+  "The minimum number of lines for block output.
+If number of lines of output is equal to or exceeds this
 value, the output is placed in a #+begin_example...#+end_example
 block. Otherwise the output is marked as literal by inserting
 colons at the starts of the lines. This variable only takes
 effect if the :results output option is in effect.")
 
 (defvar org-babel-noweb-error-langs nil
-  "List of language for which errors should be raised when the
+  "Languages for which Babel will raise literate programming errors.
+List of languages for which errors should be raised when the
 source code block satisfying a noweb reference in this language
 can not be resolved.")
 
@@ -293,10 +299,10 @@ can not be resolved.")
 (defvar call-process-region)
 ;;;###autoload
 (defun org-babel-execute-src-block (&optional arg info params)
-  "Execute the current source code block, and insert the results
-into the buffer.  Source code execution and the collection and
-formatting of results can be controlled through a variety of
-header arguments.
+  "Execute the current source code block.
+Insert the results of execution into the buffer.  Source code
+execution and the collection and formatting of results can be
+controlled through a variety of header arguments.
 
 Optionally supply a value for INFO in the form returned by
 `org-babel-get-src-block-info'.
@@ -367,15 +373,17 @@ block."
       (setq call-process-region 'org-babel-call-process-region-original))))
 
 (defun org-babel-expand-body:generic (body params &optional processed-params)
-  "Expand a block of code with org-babel according to it's header
+  "Expand BODY with PARAMS.
+Expand a block of code with org-babel according to it's header
 arguments.  This generic implementation of body expansion is
 called for languages which have not defined their own specific
 org-babel-expand-body:lang function." body)
 
 ;;;###autoload
 (defun org-babel-expand-src-block (&optional arg info params)
-  "Expand the current source code block according to it's header
-arguments, and pop open the results in a preview buffer."
+  "Expand the current source code block.
+Expand according to the source code block's header
+arguments and pop open the results in a preview buffer."
   (interactive)
   (let* ((info (or info (org-babel-get-src-block-info)))
          (lang (nth 0 info))
@@ -395,9 +403,10 @@ arguments, and pop open the results in a preview buffer."
 
 ;;;###autoload
 (defun org-babel-load-in-session (&optional arg info)
-  "Load the body of the current source-code block.  Evaluate the
-header arguments for the source block before entering the
-session.  After loading the body this pops open the session."
+  "Load the body of the current source-code block.
+Evaluate the header arguments for the source block before
+entering the session.  After loading the body this pops open the
+session."
   (interactive)
   (let* ((info (or info (org-babel-get-src-block-info)))
          (lang (nth 0 info))
@@ -476,7 +485,8 @@ results already exist."
 
 ;;;###autoload
 (defun org-babel-execute-buffer (&optional arg)
-  "Call `org-babel-execute-src-block' on every source block in
+  "Execute source code blocks in a buffer.
+Call `org-babel-execute-src-block' on every source block in
 the current buffer."
   (interactive "P")
   (save-excursion
@@ -491,7 +501,8 @@ the current buffer."
 
 ;;;###autoload
 (defun org-babel-execute-subtree (&optional arg)
-  "Call `org-babel-execute-src-block' on every source block in
+  "Execute source code blocks in a subtree.
+Call `org-babel-execute-src-block' on every source block in
 the current subtree."
   (interactive "P")
   (save-restriction
@@ -512,15 +523,14 @@ the current subtree."
     hash))
 
 (defun org-babel-result-hash (&optional info)
-  "Return the in-buffer hash associated with the results
-specified in INFO."
+  "Return the in-buffer hash associated with INFO."
   (org-babel-where-is-src-block-result nil info)
   (org-babel-clean-text-properties (match-string 3)))
 
 (defun org-babel-hide-hash ()
-  "Hide the hash in the current results line.  Only the initial
-`org-babel-hash-show' characters of the hash will remain
-visible."
+  "Hide the hash in the current results line.
+Only the initial `org-babel-hash-show' characters of the hash
+will remain visible."
   (add-to-invisibility-spec '(org-babel-hide-hash . t))
   (save-excursion
     (when (and (re-search-forward org-babel-result-regexp nil t)
@@ -536,10 +546,10 @@ visible."
         (overlay-put ov1 'babel-hash hash)))))
 
 (defun org-babel-hide-all-hashes ()
-  "Hide the hash in the current buffer.  Only the initial
-`org-babel-hash-show' characters of each hash will remain
-visible.  This function should be called as part of the
-`org-mode-hook'."
+  "Hide the hash in the current buffer.
+Only the initial `org-babel-hash-show' characters of each hash
+will remain visible.  This function should be called as part of
+the `org-mode-hook'."
   (save-excursion
     (while (re-search-forward org-babel-result-regexp nil t)
       (goto-char (match-beginning 0))
@@ -548,9 +558,9 @@ visible.  This function should be called as part of the
 (add-hook 'org-mode-hook 'org-babel-hide-all-hashes)
 
 (defun org-babel-hash-at-point (&optional point)
-  "Return the value of the hash at `point'.  The hash is also
-added as the last element of the kill ring.  This can be called
-with C-c C-c."
+  "Return the value of the hash at POINT.
+The hash is also added as the last element of the kill ring.
+This can be called with C-c C-c."
   (interactive)
   (let ((hash (car (delq nil (mapcar
 			      (lambda (ol) (overlay-get ol 'babel-hash))
@@ -559,7 +569,8 @@ with C-c C-c."
 (add-hook 'org-ctrl-c-ctrl-c-hook 'org-babel-hash-at-point)
 
 (defun org-babel-result-hide-spec ()
-  "Add `org-babel-hide-result' as an invisibility spec for hiding
+  "Hide portions of results lines.
+Add `org-babel-hide-result' as an invisibility spec for hiding
 portions of results lines."
   (add-to-invisibility-spec '(org-babel-hide-result . t)))
 (add-hook 'org-mode-hook 'org-babel-result-hide-spec)
@@ -655,7 +666,8 @@ portions of results lines."
 
 (defvar org-file-properties)
 (defun org-babel-params-from-properties (&optional lang)
-  "Return an association list of any source block params which
+  "Retrieve parameters specified as properties.
+Return an association list of any source block params which
 may be specified in the properties of the current outline entry."
   (save-match-data
     (let (val sym)
@@ -677,7 +689,8 @@ may be specified in the properties of the current outline entry."
 		 (and (boundp sym) (eval sym))))))))))
 
 (defun org-babel-params-from-buffer ()
-  "Return an association list of any source block params which
+  "Retrieve per-buffer parameters.
+ Return an association list of any source block params which
 may be specified at the top of the current buffer."
   (or org-babel-current-buffer-properties
       (setq org-babel-current-buffer-properties
@@ -693,8 +706,7 @@ may be specified at the top of the current buffer."
 
 (defvar org-src-preserve-indentation)
 (defun org-babel-parse-src-block-match ()
-  "Parse the match data resulting from a match of the
-`org-babel-src-block-regexp'."
+  "Parse the results from a match of the `org-babel-src-block-regexp'."
   (let* ((block-indentation (length (match-string 1)))
 	 (lang (org-babel-clean-text-properties (match-string 2)))
          (lang-headers (intern (concat "org-babel-default-header-args:" lang)))
@@ -720,8 +732,7 @@ may be specified at the top of the current buffer."
 	  block-indentation)))
 
 (defun org-babel-parse-inline-src-block-match ()
-  "Parse the match data resulting from a match of the
-`org-babel-inline-src-block-regexp'."
+  "Parse the results from a match of the `org-babel-inline-src-block-regexp'."
   (let* ((lang (org-babel-clean-text-properties (match-string 2)))
          (lang-headers (intern (concat "org-babel-default-header-args:" lang))))
     (list lang
@@ -776,7 +787,8 @@ Return a list (session vars result-params result-type colnames rownames)."
   (remove 'hline table))
 
 (defun org-babel-get-colnames (table)
-  "Return a cons cell, the `car' of which contains the TABLE less
+  "Return the column names of TABLE.
+Return a cons cell, the `car' of which contains the TABLE less
 colnames, and the `cdr' of which contains a list of the column
 names."
   (if (equal 'hline (nth 1 table))
@@ -784,7 +796,8 @@ names."
     (cons (cdr table) (car table))))
 
 (defun org-babel-get-rownames (table)
-  "Return a cons cell, the `car' of which contains the TABLE less
+  "Return the row names of TABLE.
+Return a cons cell, the `car' of which contains the TABLE less
 colnames, and the `cdr' of which contains a list of the column
 names.  Note: this function removes any hlines in TABLE."
   (flet ((trans (table) (apply #'mapcar* #'list table)))
@@ -823,7 +836,8 @@ names.  Note: this function removes any hlines in TABLE."
         (cdr (car (last names)))))))
 
 (defun org-babel-disassemble-tables (vars hlines colnames rownames)
-  "Process the variables in VARS according to the HLINES,
+  "Parse tables for further processing.
+Process the variables in VARS according to the HLINES,
 ROWNAMES and COLNAMES header arguments.  Return a list consisting
 of the vars, cnames and rnames."
   (let (cnames rnames)
@@ -850,7 +864,8 @@ of the vars, cnames and rnames."
      cnames rnames)))
 
 (defun org-babel-reassemble-table (table colnames rownames)
-  "Given a TABLE and set of COLNAMES and ROWNAMES add the names
+  "Add column and row names to a table.
+Given a TABLE and set of COLNAMES and ROWNAMES add the names
 to the table for reinsertion to org-mode."
   (if (listp table)
       ((lambda (table)
@@ -862,7 +877,8 @@ to the table for reinsertion to org-mode."
     table))
 
 (defun org-babel-where-is-src-block-head ()
-  "Return the point at the beginning of the current source
+  "Find where the current source block begins.
+Return the point at the beginning of the current source
 block.  Specifically at the beginning of the #+BEGIN_SRC line.
 If the point is not on a source block then return nil."
   (let ((initial (point)) top bottom)
@@ -935,7 +951,8 @@ org-babel-named-src-block-regexp."
       (message "result '%s' not found in this buffer" name))))
 
 (defun org-babel-find-named-result (name)
-  "Return the location of the result named NAME in the current
+  "Find a named result.
+Return the location of the result named NAME in the current
 buffer or nil if no such result exists."
   (save-excursion
     (goto-char (point-min))
@@ -973,7 +990,8 @@ With optional prefix argument ARG, jump backward ARG many source blocks."
 
 (defvar org-babel-lob-one-liner-regexp)
 (defun org-babel-where-is-src-block-result (&optional insert info hash indent)
-  "Return the point at the beginning of the result of the current
+  "Find where the current source block results begin.
+Return the point at the beginning of the result of the current
 source block.  Specifically at the beginning of the results line.
 If no result exists for this block then create a results line
 following the source block."
@@ -1076,8 +1094,9 @@ following the source block."
 
 (defvar org-link-types-re)
 (defun org-babel-read-link ()
-  "Read the link at `point' into emacs-lisp.  If the path of the
-link is a file path it is expanded using `expand-file-name'."
+  "Read the link at `point' into emacs-lisp.
+If the path of the link is a file path it is expanded using
+`expand-file-name'."
   (let* ((case-fold-search t)
          (raw (and (looking-at org-bracket-link-regexp)
                    (org-babel-clean-text-properties (match-string 1))))
@@ -1092,7 +1111,8 @@ link is a file path it is expanded using `expand-file-name'."
 
 (defun org-babel-insert-result
   (result &optional result-params info hash indent lang)
-  "Insert RESULT into the current buffer after the end of the
+  "Insert RESULT into the current buffer.
+By default RESULT is inserted after the end of the
 current source block.  With optional argument RESULT-PARAMS
 controls insertion of results in the org-mode file.
 RESULT-PARAMS can take the following values...
@@ -1232,9 +1252,9 @@ code ---- the results are extracted in the syntax of the source
       (point))))
 
 (defun org-babel-result-to-file (result)
-  "Convert RESULT into an `org-mode' link.  If the
-`default-directory' is different from the containing file's
-directory then expand relative links."
+  "Convert RESULT into an `org-mode' link.
+If the `default-directory' is different from the containing
+file's directory then expand relative links."
   (format
    "[[file:%s]]"
    (if (and default-directory
@@ -1266,9 +1286,9 @@ directory then expand relative links."
 	     (insert "#+end_example\n"))))))
 
 (defun org-babel-merge-params (&rest plists)
-  "Combine all parameter association lists in PLISTS.  Later
-elements of PLISTS override the values of previous element.  This
-takes into account some special considerations for certain
+  "Combine all parameter association lists in PLISTS.
+Later elements of PLISTS override the values of previous element.
+This takes into account some special considerations for certain
 parameters when merging lists."
   (let ((results-exclusive-groups
 	 '(("file" "vector" "table" "scalar" "raw" "org"
@@ -1367,10 +1387,10 @@ parameters when merging lists."
                                          params)))))))))
 
 (defun org-babel-expand-noweb-references (&optional info parent-buffer)
-  "This function expands Noweb style references in the body of
-the current source-code block.  For example the following
-reference would be replaced with the body of the source-code
-block named 'example-block'.
+  "Expand Noweb references in the body of the current source code block.
+
+For example the following reference would be replaced with the
+body of the source-code block named 'example-block'.
 
 <<example-block>>
 
@@ -1484,8 +1504,8 @@ This is taken almost directly from `org-read-prop'."
       (string-to-number string)))
 
 (defun org-babel-import-elisp-from-file (file-name)
-  "Read the results located at FILE-NAME into an elisp table.  If
-the table is trivial, then return it as a scalar."
+  "Read the results located at FILE-NAME into an elisp table.
+If the table is trivial, then return it as a scalar."
   (let (result)
     (save-window-excursion
       (with-temp-buffer
@@ -1517,8 +1537,8 @@ the table is trivial, then return it as a scalar."
   (apply 'string (reverse (string-to-list string))))
 
 (defun org-babel-chomp (string &optional regexp)
-  "Remove any trailing space or carriage returns characters from
-STRING.  Default regexp used is \"[ \f\t\n\r\v]\" but can be
+  "Strip trailing spaces and carriage returns from STRING.
+Default regexp used is \"[ \f\t\n\r\v]\" but can be
 overwritten by specifying a regexp as a second argument."
   (let ((regexp (or regexp "[ \f\t\n\r\v]")))
     (while (and (> (length string) 0)
@@ -1527,7 +1547,8 @@ overwritten by specifying a regexp as a second argument."
     string))
 
 (defun org-babel-trim (string &optional regexp)
-  "Like `org-babel-chomp' only it runs on both the front and back
+  "Strip leading and trailing spaces and carriage returns from STRING.
+Like `org-babel-chomp' only it runs on both the front and back
 of the string."
   (org-babel-chomp (org-babel-reverse-string
                     (org-babel-chomp (org-babel-reverse-string string) regexp))
@@ -1536,8 +1557,8 @@ of the string."
 (defvar org-babel-org-babel-call-process-region-original nil)
 (defun org-babel-tramp-handle-call-process-region
   (start end program &optional delete buffer display &rest args)
-  "Use tramp to handle call-process-region.  Fixes a bug in
-`tramp-handle-call-process-region'."
+  "Use tramp to handle call-process-region.
+Fixes a bug in `tramp-handle-call-process-region'."
   (if (and (featurep 'tramp) (file-remote-p default-directory))
       (let ((tmpfile (tramp-compat-make-temp-file "")))
 	(write-region start end tmpfile)
@@ -1553,7 +1574,8 @@ of the string."
            start end program delete buffer display args)))
 
 (defun org-babel-maybe-remote-file (file)
-  "If FILE specifies a remove file, then parse the information on
+  "Conditionally parse information on a remote connnection.
+If FILE specifies a remove file, then parse the information on
 the remote connection."
   (if (file-remote-p default-directory)
       (let* ((vec (tramp-dissect-file-name default-directory))

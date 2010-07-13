@@ -33,20 +33,17 @@
 (require 'ob)
 
 (defvar org-babel-key-prefix "\C-c\C-v"
-  "The `org-babel-key-prefix' variable holds the key prefix
-behind which all org-babel interactive key-binding are placed.
+  "The key prefix for Babel interactive key-bindings.
 See `org-babel-key-bindings' for the list of interactive babel
 functions which are assigned key bindings, and see
 `org-babel-map' for the actual babel keymap.")
 
 (defvar org-babel-map (make-sparse-keymap)
-  "The keymap holding key bindings for interactive org-babel
-functions.")
+  "The keymap for interactive Babel functions.")
 
 ;;;###autoload
 (defun org-babel-describe-bindings ()
-  "Describe all key binding placed behind the
-`org-babel-key-prefix' prefix."
+  "Describe all keybindings behind `org-babel-key-prefix'."
   (interactive)
   (describe-bindings org-babel-key-prefix))
 
@@ -79,8 +76,8 @@ functions.")
     ("\C-a" . org-babel-sha1-hash)
     ("a" . org-babel-sha1-hash)
     ("h" . org-babel-describe-bindings))
-  "Alist associating key bindings with interactive Org-babel
-functions.  This list associates interactive org-babel functions
+  "Alist of key bindings and interactive Babel functions.
+This list associates interactive Babel functions
 with keys.  Each element of this list will add an entry to the
 `org-babel-map' using the letter key which is the `car' of the
 a-list placed behind the generic `org-babel-key-prefix'.")

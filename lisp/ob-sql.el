@@ -54,8 +54,8 @@
   "Expand BODY according to PARAMS, return the expanded body." body)
 
 (defun org-babel-execute:sql (body params)
-  "Execute a block of Sql code with org-babel.  This function is
-called by `org-babel-execute-src-block'."
+  "Execute a block of Sql code with Babel.
+This function is called by `org-babel-execute-src-block'."
   (let* ((result-params (split-string (or (cdr (assoc :results params)) "")))
 	 (processed-params (org-babel-process-params params))
          (cmdline (cdr (assoc :cmdline params)))
@@ -80,7 +80,7 @@ called by `org-babel-execute-src-block'."
 
 
 (defun org-babel-prep-session:sql (session params)
-  "Prepare SESSION according to the header arguments specified in PARAMS."
+  "Raise an error because Sql sessions aren't implemented."
   (error "sql sessions not yet implemented"))
 
 (provide 'ob-sql)

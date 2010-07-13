@@ -57,8 +57,9 @@
 (declare-function org-at-table-p "org" (&optional table-type))
 
 (defun org-babel-ref-variables (params)
-  "Takes a parameter alist, and return an alist of variable
-names, and the emacs-lisp representation of the related value."
+  "Convert PARAMS to variable names and values.
+Takes a parameter alist, and return an alist of variable names,
+and the emacs-lisp representation of the related value."
   (let ((assignments
 	 (delq nil (mapcar (lambda (pair) (if (eq (car pair) :var) (cdr pair))) params)))
 	(others
@@ -69,13 +70,14 @@ names, and the emacs-lisp representation of the related value."
   "[ \f\t\n\r\v]*\\(.+?\\)[ \f\t\n\r\v]*=[ \f\t\n\r\v]*\\(.+\\)[ \f\t\n\r\v]*")
 
 (defun org-babel-ref-parse (assignment &optional params)
-  "Parse a variable ASSIGNMENT in a header argument.  If the
-right hand side of the assignment has a literal value return that
-value, otherwise interpret as a reference to an external resource
-and find it's value using `org-babel-ref-resolve-reference'.
-Return a list with two elements.  The first element of the list
-will be the name of the variable, and the second will be an
-emacs-lisp representation of the value of the variable."
+  "Parse a variable ASSIGNMENT in a header argument.
+If the right hand side of the assignment has a literal value
+return that value, otherwise interpret as a reference to an
+external resource and find it's value using
+`org-babel-ref-resolve-reference'.  Return a list with two
+elements.  The first element of the list will be the name of the
+variable, and the second will be an emacs-lisp representation of
+the value of the variable."
   (if (string-match org-babel-ref-split-regexp assignment)
       (let ((var (match-string 1 assignment))
             (ref (match-string 2 assignment)))
@@ -86,7 +88,8 @@ emacs-lisp representation of the value of the variable."
 		   val)) (org-babel-ref-literal ref))))))
 
 (defun org-babel-ref-literal (ref)
-  "Determine if the right side of a header argument variable
+  "Return the value of REF if it is a literal value.
+Determine if the right side of a header argument variable
 assignment is a literal value or is a reference to some external
 resource.  REF should be a string of the right hand side of the
 assignment.  If REF is literal then return it's value, otherwise
@@ -173,11 +176,11 @@ return nil."
 	    result))))))
 
 (defun org-babel-ref-index-list (index lis)
-  "Return the subset of LIS indexed by INDEX.  If INDEX is
-separated by ,s then each PORTION is assumed to index into the
-next deepest nesting or dimension.  A valid PORTION can consist
-of either an integer index, or two integers separated by a : in
-which case the entire range is returned."
+  "Return the subset of LIS indexed by INDEX.
+If INDEX is separated by ,s then each PORTION is assumed to index
+into the next deepest nesting or dimension.  A valid PORTION can
+consist of either an integer index, or two integers separated by
+a : in which case the entire range is returned."
   (if (string-match "^,?\\([^,]+\\)" index)
       (let ((length (length lis))
             (portion (match-string 1 index))
@@ -218,9 +221,9 @@ which case the entire range is returned."
 
 (defvar org-bracket-link-regexp)
 (defun org-babel-ref-at-ref-p ()
-  "Return the type of reference located at point or nil if none
-of the supported reference types are found.  Supported reference
-types are tables and source blocks."
+  "Return the type of reference located at point.
+Return nil if none of the supported reference types are found.
+Supported reference types are tables and source blocks."
   (cond ((org-at-table-p) 'table)
         ((looking-at "^[ \t]*#\\+BEGIN_SRC") 'source-block)
         ((looking-at org-bracket-link-regexp) 'file)
