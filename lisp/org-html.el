@@ -561,13 +561,7 @@ This may also be a function, building and inserting the postamble.")
 	  (if (string-match "\\`[a-z]\\{1,10\\}:\\(.+\\)" label)
 	      (setq l1 (substring label (match-beginning 1)))
 	    (setq l1 label)))
-	(replace-match (format "[[#%s][%s]]" label l1) t t))))
-  (goto-char (point-min))
-  (while (org-search-forward-unenclosed (org-item-re) nil 'move)
-    (goto-char (org-list-bottom-point))
-    (when (looking-at (org-list-end-re))
-      (replace-match ""))
-    (insert "ORG-LIST-END\n")))
+	(replace-match (format "[[#%s][%s]]" label l1) t t)))))
 
 ;;;###autoload
 (defun org-export-as-html-and-open (arg)
@@ -1511,16 +1505,15 @@ lang=\"%s\" xml:lang=\"%s\">
 	      (insert "<pre>")
 	      (setq inquote t)))
 
-	   ((string-match "^ORG-LIST-END" line)
-	    ;; Explicit list closure
-	    (let ((ind (org-get-indentation line)))
-	      (while (and local-list-indent
-			  (<= ind (car local-list-indent)))
-		(org-close-li (car local-list-type))
-		(insert (format "</%sl>\n" (car local-list-type)))
-		(pop local-list-type)
-		(pop local-list-indent))
-	      (or local-list-indent (setq in-local-list nil)))
+	   ;; Explicit list closure
+	   ((equal "ORG-LIST-END" line)
+	    (while local-list-indent
+	      (org-close-li (car local-list-type))
+	      (insert (format "</%sl>\n" (car local-list-type)))
+	      (pop local-list-type)
+	      (pop local-list-indent))
+	    (setq in-local-list nil)
+	    (org-open-par)
 	    (throw 'nextline nil))
 
 	   ((and org-export-with-tables

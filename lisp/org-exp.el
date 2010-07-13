@@ -1076,6 +1076,9 @@ on this string to produce the exported version."
 				     (plist-get parameters :exclude-tags))
       (run-hooks 'org-export-preprocess-after-tree-selection-hook)
 
+      ;; Mark end of lists
+      (org-export-mark-list-ending backend)
+
       ;; Handle source code snippets
       (org-export-replace-src-segments-and-examples backend)
 
@@ -1625,6 +1628,19 @@ These special cookies will later be interpreted by the backend."
 			      "ORG-" (upcase t1) "-END\n"))
 	(delete-region beg end)
 	(insert (org-add-props content nil 'original-indentation ind))))))
+
+(defun org-export-mark-list-ending (backend)
+  "Mark list endings with special cookies.
+These special cookies will later be interpreted by the backend.
+`org-list-end-re' is replaced by a blank line in the process."
+  ;; Backends using `org-list-parse-list' do not need this.
+  (unless (eq backend 'latex)
+    (goto-char (point-min))
+    (while (org-search-forward-unenclosed (org-item-re) nil 'move)
+      (goto-char (org-list-bottom-point))
+      (when (looking-at (org-list-end-re))
+	(replace-match "\n"))
+      (insert "ORG-LIST-END\n"))))
 
 (defun org-export-attach-captions-and-attributes (backend target-alist)
   "Move #+CAPTION, #+ATTR_BACKEND, and #+LABEL text into text properties.
