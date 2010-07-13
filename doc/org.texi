@@ -13577,7 +13577,7 @@ La@TeX{} file:
 % BEGIN RECEIVE ORGLST to-buy
 % END RECEIVE ORGLST to-buy
 \begin@{comment@}
-#+ORGLST: SEND to-buy orgtbl-to-latex
+#+ORGLST: SEND to-buy org-list-to-latex
 - a new house
 - a new computer
   + a new keyboard

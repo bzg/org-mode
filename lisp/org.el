@@ -17122,11 +17122,13 @@ This command does many different things, depending on context:
 	  (org-footnote-at-definition-p))
       (call-interactively 'org-footnote-action))
      ((org-at-item-checkbox-p)
-      (call-interactively 'org-toggle-checkbox))
+      (call-interactively 'org-toggle-checkbox)
+      (org-list-send-list 'maybe))
      ((org-at-item-p)
       (if arg
 	  (call-interactively 'org-toggle-checkbox)
-	(call-interactively 'org-maybe-renumber-ordered-list)))
+	(call-interactively 'org-maybe-renumber-ordered-list))
+      (org-list-send-list 'maybe))
      ((save-excursion (beginning-of-line 1) (looking-at org-dblock-start-re))
       ;; Dynamic block
       (beginning-of-line 1)

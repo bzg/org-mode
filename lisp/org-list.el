@@ -1284,10 +1284,8 @@ this list."
     (let* ((name (match-string 1))
 	   (transform (intern (match-string 2)))
 	   (item-beginning (org-list-item-beginning))
-	   (txt (buffer-substring-no-properties
-		 (car item-beginning)
-		 (org-list-end (cdr item-beginning))))
-	   (list (org-list-parse-list))
+	   (list (save-excursion (org-list-goto-true-beginning)
+				 (org-list-parse-list)))
 	   beg)
       (unless (fboundp transform)
 	(error "No such transformation function %s" transform))
