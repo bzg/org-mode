@@ -547,16 +547,7 @@ already gone."
 	  (save-restriction
 	    (widen)
 	    (goto-char pos)
-	    (call-interactively 'org-refile)
-	    (when (and (boundp 'bookmark-alist)
-		       (assoc "org-capture-last-stored" bookmark-alist))
-	      (if (assoc "org-refile-last-stored" bookmark-alist)
-		  (setcdr (assoc "org-refile-last-stored" bookmark-alist)
-			  (cdr (assoc "org-refile-last-stored" bookmark-alist)))
-		(push (cons "org-capture-last-stored"
-			    (cdr (assoc "org-refile-last-stored"
-					bookmark-alist)))
-		      bookmark-alist)))))))))
+	    (call-interactively 'org-refile)))))))
 
 (defun org-capture-kill ()
   "Abort the current capture process."

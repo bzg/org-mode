@@ -10143,7 +10143,7 @@ This can be done with a 0 prefix: `C-0 C-c C-w'"
 		  ;; If we are refiling for capture, make sure that the
 		  ;; last-capture pointers point here
 		  (when (org-bound-and-true-p org-refile-for-capture)
-		    (bookmark-set "org-refile-last-stored")
+		    (bookmark-set "org-capture-last-stored-marker")
 		    (move-marker org-capture-last-stored-marker (point)))
 		  (if (fboundp 'deactivate-mark) (deactivate-mark))
 		  (run-hooks 'org-after-refile-insert-hook))))
