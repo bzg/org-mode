@@ -13275,7 +13275,6 @@ hard to do in a general way, would lead to a customization nightmare,
 and would take away much of the simplicity of the Orgtbl-mode table
 editor.
 
-
 This appendix describes a different approach.  We keep the Orgtbl mode
 table in its native format (the @i{source table}), and use a custom
 function to @i{translate} the table to the correct syntax, and to
@@ -13283,10 +13282,10 @@ function to @i{translate} the table to the correct syntax, and to
 the burden of writing conversion functions on the user, but it allows
 for a very flexible system.
 
-Bastien added the ability to do the same with lists.  You can use Org's
-facilities to edit and structure lists by turning @code{orgstruct-mode}
-on, then locally exporting such lists in another format (HTML, La@TeX{}
-or Texinfo.)
+Bastien added the ability to do the same with lists, in Orgstruct mode.  You
+can use Org's facilities to edit and structure lists by turning
+@code{orgstruct-mode} on, then locally exporting such lists in another format
+(HTML, La@TeX{} or Texinfo.)
 
 
 @menu
@@ -13547,7 +13546,7 @@ containing the formatted table.  If you write a generally useful
 translator, please post it on @email{emacs-orgmode@@gnu.org} so that
 others can benefit from your work.
 
-@node  Radio lists,  , Translator functions, Tables in arbitrary syntax
+@node Radio lists,  , Translator functions, Tables in arbitrary syntax
 @subsection Radio lists
 @cindex radio lists
 @cindex org-list-insert-radio-list
@@ -13561,7 +13560,9 @@ Here are the differences with radio tables:
 
 @itemize @minus
 @item
-Use @code{ORGLST} instead of @code{ORGTBL}.
+Orgstruct mode must be active.
+@item
+Use the @code{ORGLST} keyword instead of @code{ORGTBL}.
 @item
 The available translation functions for radio lists don't take
 parameters.
