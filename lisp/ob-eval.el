@@ -32,8 +32,7 @@
 (eval-when-compile (require 'cl))
 
 (defun org-babel-eval-error-notify (exit-code stderr)
-  "Open a buffer containing information from STDERR with a
-message about the value of EXIT-CODE."
+  "Open a buffer to display STDERR and a message with the value of EXIT-CODE."
   (let ((buf (get-buffer-create "*Org-Babel Error Output*")))
     (with-current-buffer buf
       (goto-char (point-max))
@@ -42,8 +41,9 @@ message about the value of EXIT-CODE."
   (message "Babel evaluation exited with code %d" exit-code))
 
 (defun org-babel-eval (cmd body)
-  "Run CMD on BODY, if CMD succeeds then return it's results,
-otherwise display STDERR with `org-babel-eval-error-notify'."
+  "Run CMD on BODY.
+If CMD succeeds then return it's results, otherwise display
+STDERR with `org-babel-eval-error-notify'."
   (let ((err-buff (get-buffer-create "*Org-Babel Error*")) exit-code)
     (with-current-buffer err-buff (erase-buffer))
     (with-temp-buffer
@@ -67,7 +67,7 @@ otherwise display STDERR with `org-babel-eval-error-notify'."
 (defun org-babel-shell-command-on-region (start end command
 				      &optional output-buffer replace
 				      error-buffer display-error-buffer)
-  "Execute string COMMAND in inferior shell with region as input.
+  "Execute COMMAND in an inferior shell with region as input.
 
 Fixes bugs in the emacs 23.1.1 version of `shell-command-on-region'
 

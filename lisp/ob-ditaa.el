@@ -41,15 +41,15 @@
 
 (defvar org-babel-default-header-args:ditaa
   '((:results . "file") (:exports . "results"))
-  "Default arguments to use when evaluating a ditaa source block.")
+  "Default arguments for evaluating a ditaa source block.")
 
 (defun org-babel-expand-body:ditaa (body params &optional processed-params)
   "Expand BODY according to PARAMS, return the expanded body." body)
 
 (defvar org-ditaa-jar-path)
 (defun org-babel-execute:ditaa (body params)
-  "Execute a block of Ditaa code with org-babel.  This function is
-called by `org-babel-execute-src-block'."
+  "Execute a block of Ditaa code with org-babel.
+This function is called by `org-babel-execute-src-block'."
   (let ((result-params (split-string (or (cdr (assoc :results params)) "")))
         (out-file (cdr (assoc :file params)))
         (cmdline (cdr (assoc :cmdline params)))
@@ -62,8 +62,7 @@ called by `org-babel-execute-src-block'."
     out-file))
 
 (defun org-babel-prep-session:ditaa (session params)
-  "This function does nothing as ditaa does not support
-sessions."
+  "Return an error because ditaa does not support sessions."
   (error "Ditaa does not support sessions"))
 
 (provide 'ob-ditaa)

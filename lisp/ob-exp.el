@@ -56,7 +56,8 @@ process."
 (put 'org-export-babel-evaluate 'safe-local-variable (lambda (x) (eq x nil)))
 
 (defvar org-babel-function-def-export-keyword "function"
-  "When exporting a source block function, this keyword will
+  "The keyword to substitute for the source name line on export.
+When exporting a source block function, this keyword will
 appear in the exported version in the place of source name
 line. A source block is considered to be a source block function
 if the source name is present and is followed by a parenthesized
@@ -70,14 +71,16 @@ whitespace. An example is the following which generates n random
 #+end_src")
 
 (defvar org-babel-function-def-export-indent 4
-  "When exporting a source block function, the block contents
-will be indented by this many characters. See
+  "Number of characters to indent a source block on export.
+When exporting a source block function, the block contents will
+be indented by this many characters. See
 `org-babel-function-def-export-name' for the definition of a
 source block function.")
 
 (defun org-babel-exp-src-blocks (body &rest headers)
-  "Process src block for export.  Depending on the 'export'
-headers argument in replace the source code block with...
+  "Process source block for export.
+Depending on the 'export' headers argument in replace the source
+code block with...
 
 both ---- display the code and the results
 
@@ -104,7 +107,7 @@ none ----- do not display either code or results upon export"
       (org-babel-exp-do-export info 'block))))
 
 (defun org-babel-exp-inline-src-blocks (start end)
-  "Process inline src blocks between START and END for export.
+  "Process inline source blocks between START and END for export.
 See `org-babel-exp-src-blocks' for export options, currently the
 options and are taken from `org-babel-default-inline-header-args'."
   (interactive)
@@ -130,9 +133,9 @@ options and are taken from `org-babel-default-inline-header-args'."
 	(replace-match replacement t t nil 1)))))
 
 (defun org-exp-res/src-name-cleanup ()
-  "Cleanup leftover #+results and #+srcname lines as part of the
-org export cycle.  This should only be called after all block
-processing has taken place."
+  "Clean up #+results and #+srcname lines for export.
+This function should only be called after all block processing
+has taken place."
   (interactive)
   (save-excursion
     (goto-char (point-min))
@@ -145,8 +148,9 @@ processing has taken place."
        (progn (end-of-line) (+ 1 (point)))))))
 
 (defun org-babel-in-example-or-verbatim ()
-  "Return true if the point is currently in an escaped portion of
-an org-mode buffer code which should be treated as normal
+  "Return true if point is in example or verbatim code.
+Example and verbatim code include escaped portions of
+an org-mode buffer code that should be treated as normal
 org-mode text."
   (or (org-in-indented-comment-line) 
       (save-excursion
@@ -156,7 +160,7 @@ org-mode text."
       (org-in-regexps-block-p "^[ \t]*#\\+begin_src" "^[ \t]*#\\+end_src")))
 
 (defun org-babel-exp-lob-one-liners (start end)
-  "Process #+lob (Library of Babel) calls between START and END for export.
+  "Process Library of Babel calls between START and END for export.
 See `org-babel-exp-src-blocks' for export options. Currently the
 options are taken from `org-babel-default-header-args'."
   (interactive)
@@ -183,8 +187,8 @@ options are taken from `org-babel-default-header-args'."
 	(replace-match replacement t t)))))
 
 (defun org-babel-exp-do-export (info type)
-  "Return a string containing the exported content of the current
-code block respecting the value of the :exports header argument."
+  "Return a string with the exported content of a code block.
+The function respects the value of the :exports header argument."
   (flet ((silently () (let ((session (cdr (assoc :session (nth 2 info)))))
 			(when (and session
 				   (not (equal "none" session))
@@ -201,10 +205,10 @@ code block respecting the value of the :exports header argument."
 
 (defvar backend)
 (defun org-babel-exp-code (info type)
-  "Return the code the current code block in a manner suitable
-for exportation by org-mode.  This function is called by
-`org-babel-exp-do-export'.  The code block will not be
-evaluated."
+  "Prepare and return code in the current code block for export.
+Code is prepared in a manner suitable for exportat by
+org-mode.  This function is called by `org-babel-exp-do-export'.
+The code block is not evaluated."
   (let ((lang (nth 0 info))
         (body (nth 1 info))
         (switches (nth 3 info))
@@ -238,11 +242,11 @@ evaluated."
 	  ((format ": %s\n" call-line))))))))
 
 (defun org-babel-exp-results (info type &optional silent)
-  "Return the results of the current code block in a manner
-suitable for exportation by org-mode.  This function is called by
-`org-babel-exp-do-export'.  The code block will be evaluated.
-Optional argument SILENT can be used to inhibit insertion of
-results into the buffer."
+  "Evaluate and return the results of the current code block for export.
+Results are prepared in a manner suitable for export by org-mode.
+This function is called by `org-babel-exp-do-export'.  The code
+block will be evaluated.  Optional argument SILENT can be used to
+inhibit insertion of results into the buffer."
   (if org-export-babel-evaluate
       (let ((lang (nth 0 info))
 	    (body (nth 1 info))

@@ -31,7 +31,7 @@
 
 (defvar org-babel-default-header-args:emacs-lisp
   '((:hlines . "yes") (:colnames . "no"))
-  "Default arguments to use when evaluating an emacs-lisp source block.")
+  "Default arguments for evaluating an emacs-lisp source block.")
 
 (declare-function org-babel-comint-with-output "ob-comint" (&rest body))
 (declare-function org-babel-comint-buffer-livep "ob-comint" (buffer))
@@ -57,7 +57,7 @@
 	(concat "(pp " body ")") body)))
 
 (defun org-babel-execute:emacs-lisp (body params)
-  "Execute a block of emacs-lisp code with org-babel."
+  "Execute a block of emacs-lisp code with Babel."
   (save-window-excursion
     (let ((processed-params (org-babel-process-params params)))
       (org-babel-reassemble-table
