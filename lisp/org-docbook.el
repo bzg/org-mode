@@ -552,7 +552,7 @@ publishing directory."
 	  (nth 2 (assoc "=" org-export-docbook-emphasis-alist)))
 	 table-open type
 	 table-buffer table-orig-buffer
-	 ind item-type starter didclose
+	 ind item-type starter
 	 rpl path attr caption label desc descp desc1 desc2 link
 	 fnc item-tag initial-number
 	 footref-seen footnote-list
@@ -671,7 +671,21 @@ publishing directory."
 	      (org-export-docbook-open-para))
 	    (throw 'nextline nil))
 
-	  (org-export-docbook-close-lists-maybe line)
+	  ;; List ender: close every open list.
+	  (when (equal "ORG-LIST-END" line)
+	    (while local-list-type
+	      (let ((listtype (car local-list-type)))
+		(org-export-docbook-close-li listtype)
+		(insert (cond
+			 ((equal listtype "o") "</orderedlist>\n")
+			 ((equal listtype "u") "</itemizedlist>\n")
+			 ((equal listtype "d") "</variablelist>\n"))))
+	      (pop local-list-type))
+	    ;; We did close a list, normal text follows: need <para>
+	    (org-export-docbook-open-para)
+	    (setq local-list-indent nil
+		  in-local-list nil)
+	    (throw 'nextline nil))
 
 	  ;; Protected HTML
 	  (when (get-text-property 0 'org-protected line)
@@ -963,18 +977,6 @@ publishing directory."
 		  txt (match-string 2 line))
 	    (if (string-match quote-re0 txt)
 		(setq txt (replace-match "" t t txt)))
-	    (when in-local-list
-	      ;; Close any local lists before inserting a new header line
-	      (while local-list-type
-		(let ((listtype (car local-list-type)))
-		  (org-export-docbook-close-li listtype)
-		  (insert (cond
-			   ((equal listtype "o") "</orderedlist>\n")
-			   ((equal listtype "u") "</itemizedlist>\n")
-			   ((equal listtype "d") "</variablelist>\n"))))
-		(pop local-list-type))
-	      (setq local-list-indent nil
-		    in-local-list nil))
 	    (org-export-docbook-level-start level txt)
 	    ;; QUOTES
 	    (when (string-match quote-re line)
@@ -1004,6 +1006,7 @@ publishing directory."
 	      (org-export-docbook-close-para-maybe)
 	      (insert (org-export-docbook-finalize-table
 		       (org-format-table-html table-buffer table-orig-buffer)))))
+
 	   (t
 	    ;; Normal lines
 	    (when (string-match
@@ -1034,12 +1037,10 @@ publishing directory."
 		(setq ind (if org-empty-line-terminates-plain-lists
 			      0
 			    (1+ (or (car local-list-indent) 1)))))
-	      (setq didclose nil)
 	      (while (and in-local-list
 			  (or (and (= ind (car local-list-indent))
 				   (not starter))
 			      (< ind (car local-list-indent))))
-		(setq didclose t)
 		(let ((listtype (car local-list-type)))
 		  (org-export-docbook-close-li listtype)
 		  (insert (cond
@@ -1089,9 +1090,6 @@ publishing directory."
 						      "???"))))))
 		;; For DocBook, we need to open a para right after tag
 		;; <listitem>.
-		(org-export-docbook-open-para))
-	       (didclose
-		;; We did close a list, normal text follows: need <para>
 		(org-export-docbook-open-para)))
 	      ;; Checkboxes.
 	      (if (string-match "^[ \t]*\\(\\[[X -]\\]\\)" line)
@@ -1134,18 +1132,7 @@ publishing directory."
       (when inquote
 	(insert "]]></programlisting>\n")
 	(org-export-docbook-open-para))
-      (when in-local-list
-	;; Close any local lists before inserting a new header line
-	(while local-list-type
-	  (let ((listtype (car local-list-type)))
-	    (org-export-docbook-close-li listtype)
-	    (insert (cond
-		     ((equal listtype "o") "</orderedlist>\n")
-		     ((equal listtype "u") "</itemizedlist>\n")
-		     ((equal listtype "d") "</variablelist>\n"))))
-	  (pop local-list-type))
-	(setq local-list-indent nil
-	      in-local-list nil))
+
       ;; Close all open sections.
       (org-export-docbook-level-start 1 nil)
 
@@ -1212,24 +1199,6 @@ publishing directory."
 (defvar in-local-list)
 (defvar local-list-indent)
 (defvar local-list-type)
-(defun org-export-docbook-close-lists-maybe (line)
-  (let ((ind (or (get-text-property 0 'original-indentation line)))
-;		 (and (string-match "\\S-" line)
-;		      (org-get-indentation line))))
-	didclose)
-    (when ind
-      (while (and in-local-list
-		  (<= ind (car local-list-indent)))
-	(setq didclose t)
-	(let ((listtype (car local-list-type)))
-	  (org-export-docbook-close-li listtype)
-	  (insert (cond
-		   ((equal listtype "o") "</orderedlist>\n")
-		   ((equal listtype "u") "</itemizedlist>\n")
-		   ((equal listtype "d") "</variablelist>\n"))))
-	(pop local-list-type) (pop local-list-indent)
-	(setq in-local-list local-list-indent))
-      (and didclose (org-export-docbook-open-para)))))
 
 (defun org-export-docbook-level-start (level title)
   "Insert a new level in DocBook export.
