@@ -1181,7 +1181,16 @@ lang=\"%s\" xml:lang=\"%s\">
 	      (org-open-par))
 	    (throw 'nextline nil))
 
-	  ;; (org-export-html-close-lists-maybe line)
+	  ;; Explicit list closure
+	  (when (equal "ORG-LIST-END" line)
+	    (while local-list-indent
+	      (org-close-li (car local-list-type))
+	      (insert (format "</%sl>\n" (car local-list-type)))
+	      (pop local-list-type)
+	      (pop local-list-indent))
+	    (setq in-local-list nil)
+	    (org-open-par)
+	    (throw 'nextline nil))
 
 	  ;; Protected HTML
 	  (when (get-text-property 0 'org-protected line)
@@ -1505,17 +1514,6 @@ lang=\"%s\" xml:lang=\"%s\">
 	      (insert "<pre>")
 	      (setq inquote t)))
 
-	   ;; Explicit list closure
-	   ((equal "ORG-LIST-END" line)
-	    (while local-list-indent
-	      (org-close-li (car local-list-type))
-	      (insert (format "</%sl>\n" (car local-list-type)))
-	      (pop local-list-type)
-	      (pop local-list-indent))
-	    (setq in-local-list nil)
-	    (org-open-par)
-	    (throw 'nextline nil))
-
 	   ((and org-export-with-tables
 		 (string-match "^\\([ \t]*\\)\\(|\\|\\+-+\\+\\)" line))
 	    (when (not table-open)
@@ -1657,14 +1655,7 @@ lang=\"%s\" xml:lang=\"%s\">
       (when inquote
 	(insert "</pre>\n")
 	(org-open-par))
-      ;; (when in-local-list
-      ;; 	;; Close any local lists before inserting a new header line
-      ;; 	(while local-list-type
-      ;; 	  (org-close-li (car local-list-type))
-      ;; 	  (insert (format "</%sl>\n" (car local-list-type)))
-      ;; 	  (pop local-list-type))
-      ;; 	(setq local-list-indent nil
-      ;; 	      in-local-list nil))
+
       (org-html-level-start 1 nil umax
 			    (and org-export-with-toc (<= level umax))
 			    head-count)
@@ -1745,8 +1736,6 @@ lang=\"%s\" xml:lang=\"%s\">
       (while (re-search-forward "<li>[ \r\n\t]*</li>\n?" nil t)
 	(replace-match ""))
       (goto-char (point-min))
-      ;; (while (re-search-forward "</ul>\\s-*<ul>\n?" nil t)
-      ;; 	(replace-match ""))
       ;; Convert whitespace place holders
       (goto-char (point-min))
       (let (beg end n)
@@ -2267,28 +2256,6 @@ If there are links in the string, don't modify these."
 (defvar in-local-list)
 (defvar local-list-indent)
 (defvar local-list-type)
-;; (defun org-export-html-close-lists-maybe (line)
-;;   "Close local lists based on the original indentation of the line."
-;;   (let* ((rawhtml (and in-local-list
-;; 		       (get-text-property 0 'org-protected line)
-;; 		       (not (get-text-property 0 'org-example line))))
-;; 	 ;; rawhtml means: This was between #+begin_html..#+end_html
-;; 	 ;; originally, thus it excludes stuff that was a source code example
-;; 	 ;; Actually, this code seems wrong, I don't know why it works, but
-;; 	 ;; it seems to work.... So keep it like this for now.
-;;          (ind (if rawhtml
-;; 		  (org-get-indentation line)
-;; 		(get-text-property 0 'original-indentation line)))
-;; 	 didclose)
-;;     (when ind
-;;       (while (and in-local-list
-;; 		  (<= ind (car local-list-indent)))
-;; 	(setq didclose t)
-;; 	(org-close-li (car local-list-type))
-;; 	(insert (format "</%sl>\n" (car local-list-type)))
-;; 	(pop local-list-type) (pop local-list-indent)
-;; 	(setq in-local-list local-list-indent))
-;;       (and didclose (org-open-par)))))
 
 (defvar body-only) ; dynamically scoped into this.
 (defun org-html-level-start (level title umax with-toc head-count)
