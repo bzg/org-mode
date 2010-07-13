@@ -151,10 +151,18 @@ spaces instead of one after the bullet in each item of he list."
 
 (defcustom org-empty-line-terminates-plain-lists nil
   "Non-nil means an empty line ends all plain list levels.
-Otherwise it will take two blank lines to end them."
+Otherwise, look for `org-list-end-regexp'."
 
   :group 'org-plain-lists
   :type 'boolean)
+
+(defcustom org-list-end-regexp "^[ \t]*\n\\([ \t]*\n\\)+"
+  "Regexp matching the end of all plain list levels.
+It must start with \"^\" and end with \"\\n\". It defaults to 2
+or more blank lines. `org-empty-line-terminates-plain-lists' has
+precedence over it."
+  :group 'org-plain-lists
+  :type 'string)
 
 (defcustom org-auto-renumber-ordered-lists t
   "Non-nil means automatically renumber ordered plain lists.
@@ -220,8 +228,8 @@ list, obtained by prompting the user."
   "Return the regex corresponding to the end of a list.
 It depends on `org-empty-line-terminates-plain-lists'."
   (if org-empty-line-terminates-plain-lists
-      "^\\([ \t]*\n\\)+"
-    "^[ \t]*\n\\([ \t]*\n\\)+"))
+      "^[ \t]*\n"
+    org-list-end-regexp))
 
 (defun org-item-re (&optional general)
   "Return the correct regular expression for plain lists.
