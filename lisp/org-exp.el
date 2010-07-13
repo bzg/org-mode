@@ -1633,14 +1633,25 @@ These special cookies will later be interpreted by the backend."
   "Mark list endings with special cookies.
 These special cookies will later be interpreted by the backend.
 `org-list-end-re' is replaced by a blank line in the process."
-  ;; Backends using `org-list-parse-list' do not need this.
-  (unless (eq backend 'latex)
-    (goto-char (point-min))
-    (while (org-search-forward-unenclosed (org-item-re) nil 'move)
-      (goto-char (org-list-bottom-point))
-      (when (looking-at (org-list-end-re))
-	(replace-match "\n"))
-      (insert "ORG-LIST-END\n"))))
+  (let ((process-buffer
+	 (lambda (end-list-marker)
+	   (goto-char (point-min))
+	   (while (org-search-forward-unenclosed (org-item-re) nil t)
+	     (goto-char (org-list-bottom-point))
+	     (when (looking-at (org-list-end-re))
+	       (replace-match "\n"))
+	     (insert end-list-marker)))))
+  ;; We need to divide backends into 3 categories.
+  (cond
+   ;; 1. Backends using `org-list-parse-list' do not need markers.
+   ((memq backend '(latex))
+    nil)
+   ;; 2. Line-processing backends need to be told where lists end.
+   ((memq backend '(html docbook))
+    (funcall process-buffer "ORG-LIST-END\n"))
+   ;; 3. Others backends do not need to know this: clean list enders.
+   (t
+    (funcall process-buffer "\n")))))
 
 (defun org-export-attach-captions-and-attributes (backend target-alist)
   "Move #+CAPTION, #+ATTR_BACKEND, and #+LABEL text into text properties.
