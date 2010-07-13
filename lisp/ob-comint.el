@@ -41,8 +41,9 @@
     (and buffer (buffer-live-p buffer) (get-buffer-process buffer) buffer)))
 
 (defmacro org-babel-comint-in-buffer (buffer &rest body)
-  "Check BUFFER with `org-babel-comint-buffer-livep' then execute
-body inside the protection of `save-window-excursion' and
+  "Check BUFFER and execute BODY.
+BUFFER is checked with `org-babel-comint-buffer-livep'.  BODY is
+executed inside the protection of `save-window-excursion' and
 `save-match-data'."
   (declare (indent 1))
   `(save-excursion
@@ -53,11 +54,12 @@ body inside the protection of `save-window-excursion' and
        ,@body)))
 
 (defmacro org-babel-comint-with-output (meta &rest body)
-  "Evaluate BODY in BUFFER, wait until EOE-INDICATOR appears in
-output, then return all process output.  If REMOVE-ECHO and
-FULL-BODY are present and non-nil, then strip echo'd body from
-the returned output.  META should be a list containing the
-following where the last two elements are optional.
+  "Evaluate BODY in BUFFER and return process output.
+Will wait until EOE-INDICATOR appears in the output, then return
+all process output.  If REMOVE-ECHO and FULL-BODY are present and
+non-nil, then strip echo'd body from the returned output.  META
+should be a list containing the following where the last two
+elements are optional.
 
  (BUFFER EOE-INDICATOR REMOVE-ECHO FULL-BODY)
 
@@ -113,7 +115,8 @@ or user `keyboard-quit' during execution of body."
 	 (split-string string-buffer comint-prompt-regexp)))))
 
 (defun org-babel-comint-input-command (buffer cmd)
-  "Pass CMD to BUFFER  The input will not be echoed."
+  "Pass CMD to BUFFER.
+The input will not be echoed."
   (org-babel-comint-in-buffer buffer
     (goto-char (process-mark (get-buffer-process buffer)))
     (insert cmd)
@@ -121,9 +124,9 @@ or user `keyboard-quit' during execution of body."
     (org-babel-comint-wait-for-output buffer)))
 
 (defun org-babel-comint-wait-for-output (buffer)
-  "Wait until output arrives from BUFFER.  Note: this is only
-safe when waiting for the result of a single statement (not large
-blocks of code)."
+  "Wait until output arrives from BUFFER.
+Note: this is only safe when waiting for the result of a single
+statement (not large blocks of code)."
   (org-babel-comint-in-buffer buffer
     (while (progn
              (goto-char comint-last-input-end)
