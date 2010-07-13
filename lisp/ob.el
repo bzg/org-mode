@@ -350,7 +350,10 @@ block."
                 (setq result (org-babel-read-result))
                 (message (replace-regexp-in-string "%" "%%"
                                                    (format "%S" result))) result)
-            (setq result (funcall cmd body params))
+            (message "executing %s code block%s..."
+		     (capitalize lang)
+		     (if (nth 4 info) (format " (%s)" (nth 4 info)) ""))
+	    (setq result (funcall cmd body params))
             (if (eq result-type 'value)
                 (setq result (if (and (or (member "vector" result-params)
                                           (member "table" result-params))

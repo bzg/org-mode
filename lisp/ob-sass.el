@@ -49,7 +49,6 @@
 (defun org-babel-execute:sass (body params)
   "Execute a block of Sass code with org-babel.  This function is
 called by `org-babel-execute-src-block'."
-  (message "executing Sass source code block")
   (let* ((result-params (split-string (or (cdr (assoc :results params)) "")))
          (file (cdr (assoc :file params)))
          (out-file (or file (make-temp-file "org-babel-sass-out")))

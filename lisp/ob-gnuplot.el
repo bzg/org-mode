@@ -132,7 +132,6 @@ code."
 (defun org-babel-execute:gnuplot (body params)
   "Execute a block of Gnuplot code with org-babel.  This function is
 called by `org-babel-execute-src-block'."
-  (message "executing Gnuplot source code block")
   (require 'gnuplot)
   (let ((session (cdr (assoc :session params)))
         (result-type (cdr (assoc :results params)))

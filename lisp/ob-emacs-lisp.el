@@ -58,7 +58,6 @@
 
 (defun org-babel-execute:emacs-lisp (body params)
   "Execute a block of emacs-lisp code with org-babel."
-  (message "executing emacs-lisp code block...")
   (save-window-excursion
     (let ((processed-params (org-babel-process-params params)))
       (org-babel-reassemble-table

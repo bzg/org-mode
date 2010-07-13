@@ -52,7 +52,6 @@
 (defun org-babel-execute:perl (body params)
   "Execute a block of Perl code with org-babel.  This function is
 called by `org-babel-execute-src-block'."
-  (message "executing Perl source code block")
   (let* ((processed-params (org-babel-process-params params))
          (session (nth 0 processed-params))
          (vars (nth 1 processed-params))

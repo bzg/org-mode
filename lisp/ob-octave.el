@@ -89,7 +89,6 @@ end")
   (org-babel-execute:octave body params 'matlab))
 (defun org-babel-execute:octave (body params &optional matlabp)
   "Execute a block of octave code with org-babel."
-  (message "executing %s source code block" (if matlabp "matlab" "octave"))
   (let* ((processed-params (org-babel-process-params params))
          (session
 	  (funcall (intern (format "org-babel-%s-initiate-session"

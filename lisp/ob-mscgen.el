@@ -70,7 +70,6 @@
 is called by `org-babel-execute-src-block'.  Default filetype is
 png. Modify by setting :filetype parameter to mscgen supported
 formats."
-  (message "executing Mscgen source code block")
   (let* ((out-file (or (cdr (assoc :file params)) "output.png" ))
          (filetype (or (cdr (assoc :filetype params)) "png" )))
     (unless (cdr (assoc :file params))

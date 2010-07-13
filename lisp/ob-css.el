@@ -37,9 +37,7 @@
 
 (defun org-babel-execute:css (body params)
   "Execute a block of CSS code with org-babel.  This function is
-called by `org-babel-execute-src-block'."
-  (message "executing CSS source code block")
-  body)
+called by `org-babel-execute-src-block'." body)
 
 (defun org-babel-prep-session:css (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."

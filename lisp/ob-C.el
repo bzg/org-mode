@@ -83,7 +83,6 @@ header arguments (calls `org-babel-C-expand')."
 (defun org-babel-C-execute (body params)
   "This function should only be called by `org-babel-execute:C'
 or `org-babel-execute:c++'."
-  (message "executing C source code block")
   (let* ((processed-params (org-babel-process-params params))
          (tmp-src-file (make-temp-file "org-babel-C-src" nil
                                        (cond

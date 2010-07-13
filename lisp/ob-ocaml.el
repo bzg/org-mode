@@ -60,7 +60,6 @@
 
 (defun org-babel-execute:ocaml (body params)
   "Execute a block of Ocaml code with org-babel."
-  (message "executing ocaml source code block")
   (let* ((processed-params (org-babel-process-params params))
          (vars (nth 1 processed-params))
          (full-body (org-babel-expand-body:ocaml body params processed-params))
