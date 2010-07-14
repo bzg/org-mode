@@ -981,7 +981,7 @@ Point will remain at the first line after the inserted text."
   (org-capture-put :key (car entry) :description (nth 1 entry)
 		   :target (nth 3 entry))
   (let ((txt (nth 4 entry)) (type (or (nth 2 entry) 'entry)))
-    (when (or (not (stringp txt)) (not (string-match "\\S-" txt)))
+    (when (or (not txt) (and (stringp txt) (not (string-match "\\S-" txt))))
       ;; The template may be empty or omitted for special types.
       ;; Here we insert the default templates for such cases.
       (cond
