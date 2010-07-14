@@ -319,11 +319,11 @@ Internal use only. Prefer `org-get-next-item' and
 `org-get-previous-item' for cleaner code."
   (save-excursion
     (when pos (goto-char pos))
-    (let* ((begin (point))
-	   (ind (progn
-		  (org-beginning-of-item)
-		  (org-get-indentation)))
-	   (start (point-at-bol)))
+    (let ((begin (point))
+	  (ind (progn
+		 (org-beginning-of-item)
+		 (org-get-indentation)))
+	  (start (point-at-bol)))
       ;; we don't want to match the current line.
       (funcall pre-move)
       ;; we skip any sublist on the way
@@ -668,8 +668,7 @@ block, or item is invisible."
        ;; inserting a coherent number of blank lines.
        (timer-p
 	(newline (1+ blank-lines-nb))
-	(org-timer-item)
-	t)
+	(org-timer-item) t)
        (before-p
 	(funcall insert-fun)
 	;; Renumber in this case, as we're not moving down.
