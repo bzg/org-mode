@@ -11144,29 +11144,23 @@ of tangled code files.
 @cindex code block, evaluating
 @cindex source code, evaluating
 
-@quotation
-Whenever code is evaluated there is a potential for that code to do harm.
-Org-mode provides a number of safeguards to ensure that it only evaluates
-code with explicit confirmation from the user.  For information on these
-safeguards (and on how to disable them) see @ref{Code evaluation security}.
-@end quotation
-
-Code blocks can be evaluated and the results placed in the Org-mode buffer.
-By default, evaluation is only turned on for @code{emacs-lisp} code blocks,
-however support exists for evaluating blocks in many languages.  See
+Code blocks can be evaluated@footnote{Whenever code is evaluated there is a
+potential for that code to do harm.  Org-mode provides a number of safeguards
+to ensure that it only evaluates code with explicit confirmation from the
+user.  For information on these safeguards (and on how to disable them) see
+@ref{Code evaluation security}.} and the results placed in the Org-mode
+buffer.  By default, evaluation is only turned on for @code{emacs-lisp} code
+blocks, however support exists for evaluating blocks in many languages.  See
 @ref{Languages} for a list of supported languages.  See @ref{Structure of
 code blocks} for information on the syntax used to define a code block.
 
 @kindex C-c C-c
-There are a number of ways to evaluate code blocks.  The simplest is to
-press @kbd{C-c C-c} or @kbd{C-c C-v e} with the point on a code block.  This
-will call the @code{org-babel-execute-src-block} function to evaluate the
-block and insert its results into the Org-mode buffer.
-
-@quotation
-The @code{org-babel-no-eval-on-ctrl-c-ctrl-c} variable can be used to remove
-code evaluation from the @kbd{C-c C-c} key binding.
-@end quotation
+There are a number of ways to evaluate code blocks.  The simplest is to press
+@kbd{C-c C-c} or @kbd{C-c C-v e} with the point on a code block@footnote{The
+@code{org-babel-no-eval-on-ctrl-c-ctrl-c} variable can be used to remove code
+evaluation from the @kbd{C-c C-c} key binding.}.  This will call the
+@code{org-babel-execute-src-block} function to evaluate the block and insert
+its results into the Org-mode buffer.
 
 It is also possible to evaluate named code blocks from anywhere in an
 Org-mode buffer or an Org-mode table.  @code{#+call} (or synonymously
