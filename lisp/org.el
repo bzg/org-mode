@@ -17702,7 +17702,7 @@ Your bug report will be posted to the Org-mode mailing list.
 With prefix arg UNCOMPILED, load the uncompiled versions."
   (interactive "P")
   (require 'find-func)
-  (let* ((file-re "^\\(org\\|orgtbl\\)\\(\\.el\\|-.*\\.el\\)")
+  (let* ((file-re "^\\(ob\\|org\\|orgtbl\\)\\(\\.el\\|-.*\\.el\\)")
 	 (dir-org (file-name-directory (org-find-library-name "org")))
 	 (dir-org-contrib (ignore-errors
 			   (file-name-directory
