@@ -195,16 +195,69 @@ that was not started at the correct moment."
 (defun org-timer-item (&optional arg)
   "Insert a description-type item with the current timer value."
   (interactive "P")
-  (let ((ind (save-excursion
-	       (if (not (org-in-item-p))
-		   (org-indent-line-function)
-		 (org-beginning-of-item)
-		 (org-get-indentation)))))
-    (or (bolp) (newline))
-    (org-indent-line-to ind)
-    (insert "- ")
+  (cond
+   ;; If we are in a timer list, insert item like `org-insert-item'.
+   ((and (org-in-item-p)
+	 (save-excursion
+	   (org-beginning-of-item)
+	   (looking-at "[ \t]*[-+*][ \t]+[0-9]+:[0-9]+:[0-9]+ ::")))
+    (let ((pos (point))
+	  (before-p (and (org-at-item-p)
+			 (<= (point) (match-end 0))))
+	  (item-start (org-beginning-of-item))
+	  (bullet-init (and (looking-at (org-item-re))
+			    (match-string 0)))
+	  (blank-lines-nb
+	   (let ((insert-blank-p
+		  (cdr (assq 'plain-list-item org-blank-before-new-entry))))
+	     (cond
+	      ((or org-empty-line-terminates-plain-lists
+		   (not insert-blank-p))
+	       0)
+	      ((eq insert-blank-p t) 1)
+	      (t
+	       (save-excursion
+		 (if (progn
+		       (org-end-of-item-list)
+		       (skip-chars-backward " \r\t\n")
+		       (org-search-backward-unenclosed
+			"^[ \t]*$" (save-excursion (org-beginning-of-item-list)) t))
+		     (1+ (org-back-over-empty-lines))
+		   0))))))
+	  (insert-fun
+	   (lambda (&optional string-after-bullet)
+	     (org-beginning-of-item)
+	     (insert bullet-init)
+	     (org-timer (if arg '(4)))
+	     (insert ":: ")
+	     (save-excursion
+	       (insert (concat string-after-bullet
+			       (make-string (1+ blank-lines-nb) ?\n))))
+	     (unless before-p (org-move-item-down)))))
+      (goto-char pos)
+      (cond
+       (before-p (funcall insert-fun))
+       ((not (org-get-alist-option org-M-RET-may-split-line 'item))
+	(funcall insert-fun))
+       (t
+	(delete-horizontal-space)
+	(let* ((pos (point))
+	       (end-before-blank (org-end-of-item-before-blank))
+	       (after-bullet (when (< pos end-before-blank)
+			       (prog1
+				   (buffer-substring pos end-before-blank)
+				 (delete-region pos end-before-blank)))))
+	  (funcall insert-fun after-bullet) t)))))
+   ;; We are still are in a list, of a wrong type: throw an error.
+   ((org-in-item-p)
+    (error "This is not a timer list"))
+   ;; Else, go to beginning of line, and insert the timer
+   (t
+    (beginning-of-line)
+    (org-indent-line-function)
+    (insert  "- ")
     (org-timer (if arg '(4)))
-    (insert ":: ")))
+    (insert ":: "))))
 
 (defun org-timer-fix-incomplete (hms)
   "If hms is a H:MM:SS string with missing hour or hour and minute, fix it."

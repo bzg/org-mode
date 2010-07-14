@@ -613,82 +613,90 @@ so this really moves item trees."
 
 If cursor is before first character after bullet of the item, the
 new item will be created before the current one. Return t when
-things worked, nil when we are not in an item, or we are inside a
-block, or item is invisible."
+things worked, nil when we are not in an item, or item is
+invisible."
   (unless (or (not (org-in-item-p))
-	      (org-invisible-p)
-	      (org-in-regexps-block-p "^[ \t]*#\\+begin_\\([a-zA-Z]\\)"
-	      			      '(concat "^[ \t]*#\\+end_" (match-string 1))))
-    (let* ((pos (point))
-	   (before-p (and (org-at-item-p)
-			  (<= (point) (match-end 0))))
-	   (item-start (org-beginning-of-item))
-	   (bullet-init (and (looking-at (org-item-re))
-			     (match-string 0)))
-	   (description-p (and (looking-at "[ \t]*\\(.*?\\) ::")
-			       (match-string 1)))
-	   (timer-p (and description-p
-			 (string-match "^[-+*][ \t]+[0-9]+:[0-9]+:[0-9]+$" description-p)))
-	   ;; Guess number of blank lines used to separate items.
-	   (blank-lines-nb (let ((insert-blank-p
-				  (cdr (assq 'plain-list-item org-blank-before-new-entry))))
-			     (cond
-			      ((or
-				org-empty-line-terminates-plain-lists
-				(not insert-blank-p))
-			       0)
-			      ((eq insert-blank-p t) 1)
-			      ;; plain-list-item is 'auto. Count blank
-			      ;; lines separating items in list.
-			      (t
-			       (save-excursion
-				 (if (progn
-				       (org-end-of-item-list)
-				       (skip-chars-backward " \r\t\n")
-				       (org-search-backward-unenclosed
-					"^[ \t]*$" (save-excursion (org-beginning-of-item-list)) t))
-				     (1+ (org-back-over-empty-lines))
-				   0))))))
-	   (insert-fun (lambda (&optional string-after-bullet)
-			 ;; insert bullet above item in order to avoid
-			 ;; bothering with possible blank lines ending
-			 ;; last item
-			 (org-beginning-of-item)
-			 (insert (concat bullet-init
-					 (when checkbox "[ ] ")
-					 (when (and description-p (not timer-p))
-					   (concat (read-string "Term: ") " :: "))))
-			 (save-excursion
-			   (insert (concat string-after-bullet
-					   (make-string (1+ blank-lines-nb) ?\n))))
-			 (unless before-p (org-move-item-down)))))
-      (goto-char pos)
-      (cond
-       ;; if we're adding a timer, delegate to `org-timer-item' after
-       ;; inserting a coherent number of blank lines.
-       (timer-p
-	(newline (1+ blank-lines-nb))
-	(org-timer-item) t)
-       (before-p
-	(funcall insert-fun)
-	;; Renumber in this case, as we're not moving down.
-	(org-maybe-renumber-ordered-list) t)
-       ;; if we can't split item, just insert bullet at the end of
-       ;; item.
-       ((not (org-get-alist-option org-M-RET-may-split-line 'item))
-	(funcall insert-fun) t)
-       ;; else, insert a new bullet along with everything from point
-       ;; down to last non-blank line of item
-       (t
-	(delete-horizontal-space)
-	;; get pos again in case previous command changed line.
-	(let* ((pos (point))
-	       (end-before-blank (org-end-of-item-before-blank))
-	       (after-bullet (when (< pos end-before-blank)
-			       (prog1
-				   (buffer-substring pos end-before-blank)
-				 (delete-region pos end-before-blank)))))
-	  (funcall insert-fun after-bullet) t))))))
+	      (org-invisible-p))
+    ;; Timer list: delegate to `org-timer-item'.
+    (if (save-excursion
+	  (org-beginning-of-item)
+	  (looking-at "[ \t]*[-+*][ \t]+[0-9]+:[0-9]+:[0-9]+ ::"))
+	(progn
+	  (org-timer-item) t)
+      ;; else check if we're in a special block. If so, move before it
+      ;; prior to add a new item.
+      (when (org-in-regexps-block-p
+	     "^[ \t]*#\\+\\(begin\\|BEGIN\\)_\\([a-zA-Z0-9_]+\\)"
+	     '(concat "^[ \t]*#\\+\\(end\\|END\\)_" (match-string 2)))
+	;; in case we're on the #+begin line
+	(end-of-line)
+	(re-search-backward "^[ \t]*#\\+\\(begin\\|BEGIN\\)" nil t)
+	(end-of-line 0))
+      (let ((pos (point))
+	    (before-p (and (org-at-item-p)
+			   (<= (point) (match-end 0))))
+	    (item-start (org-beginning-of-item))
+	    (bullet-init (and (looking-at (org-item-re))
+			      (match-string 0)))
+	    (description-p (and (looking-at "[ \t]*\\(.*?\\) ::")
+				(match-string 1)))
+	    ;; Guess number of blank lines used to separate items.
+	    (blank-lines-nb
+	     (let ((insert-blank-p
+		    (cdr (assq 'plain-list-item org-blank-before-new-entry))))
+	       (cond
+		((or
+		  org-empty-line-terminates-plain-lists
+		  (not insert-blank-p))
+		 0)
+		((eq insert-blank-p t) 1)
+		;; plain-list-item is 'auto. Count blank
+		;; lines separating items in list.
+		(t
+		 (save-excursion
+		   (if (progn
+			 (org-end-of-item-list)
+			 (skip-chars-backward " \r\t\n")
+			 (org-search-backward-unenclosed
+			  "^[ \t]*$" (save-excursion (org-beginning-of-item-list)) t))
+		       (1+ (org-back-over-empty-lines))
+		     0))))))
+	    (insert-fun
+	     (lambda (&optional string-after-bullet)
+	       ;; insert bullet above item in order to avoid
+	       ;; bothering with possible blank lines ending
+	       ;; last item
+	       (org-beginning-of-item)
+	       (insert (concat bullet-init
+			       (when checkbox "[ ] ")
+			       (when description-p
+				 (concat (read-string "Term: ") " :: "))))
+	       (save-excursion
+		 (insert (concat string-after-bullet
+				 (make-string (1+ blank-lines-nb) ?\n))))
+	       (unless before-p (org-move-item-down)))))
+	(goto-char pos)
+	(cond
+	 (before-p
+	  (funcall insert-fun)
+	  ;; Renumber in this case, as we're not moving down.
+	  (org-maybe-renumber-ordered-list) t)
+	 ;; if we can't split item, just insert bullet at the end of
+	 ;; item.
+	 ((not (org-get-alist-option org-M-RET-may-split-line 'item))
+	  (funcall insert-fun) t)
+	 ;; else, insert a new bullet along with everything from point
+	 ;; down to last non-blank line of item
+	 (t
+	  (delete-horizontal-space)
+	  ;; get pos again in case previous command changed line.
+	  (let* ((pos (point))
+		 (end-before-blank (org-end-of-item-before-blank))
+		 (after-bullet (when (< pos end-before-blank)
+				 (prog1
+				     (buffer-substring pos end-before-blank)
+				   (delete-region pos end-before-blank)))))
+	    (funcall insert-fun after-bullet) t)))))))
 
 ;;; Indentation
 
