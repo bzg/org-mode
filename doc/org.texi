@@ -11445,19 +11445,14 @@ The following header arguments are defined:
 
 @node var, results, Specific header arguments, Specific header arguments
 @subsubsection @code{:var}
-The @code{:var} header argument is used to pass arguments to
-code blocks.  The specifics of how arguments are included
-in a code block vary by language; these are
-addressed in the language-specific documentation. However, the
-syntax used to specify arguments is the same across all
-languages.  The values passed to arguments can be
-@itemize @bullet
-@item literal values
-@item values from org-mode tables
-@item the results of other code blocks
-@end itemize
+The @code{:var} header argument is used to pass arguments to code blocks.
+The specifics of how arguments are included in a code block vary by language;
+these are addressed in the language-specific documentation. However, the
+syntax used to specify arguments is the same across all languages.  The
+values passed to arguments can be literal values, values from org-mode
+tables, or the results of other code blocks.
 
-These values can be indexed in a manner similar to arrays---see the argument
+These values can be indexed in a manner similar to arrays---see the
 ``indexable variable values'' heading below.
 
 The following syntax is used to pass arguments to code blocks using the
@@ -11540,43 +11535,88 @@ following the source name.
 @end example
 
 @subsubheading Indexable variable values
-It is possible to assign a portion of a value to a variable in a source
-block.  The following example assigns the second and third rows of the table
+It is possible to reference portions of variable values by ``indexing'' into
+the variables.  Indexes are 0 based with negative values counting back from
+the end.  If an index is separated by ``,''s then each subsequent section
+will index into the next deepest nesting or dimension of the value.  The
+following example assigns the last cell of the first row the table
 @code{example-table} to the variable @code{data}:
 
 @example
-:var data=example-table[1:2]
+#+results: example-table
+| 1 | a |
+| 2 | b |
+| 3 | c |
+| 4 | d |
+
+#+begin_src emacs-lisp :var data=example-table[0,-1]
+  data
+#+end_src
+
+#+results:
+: a
 @end example
 
-Note: ranges are indexed using the @code{:} operator.
-
-Note: indices are 0 based.
-
-The following example assigns the second column of the first row of
-@code{example-table} to @code{data}:
+Ranges of variable values can be referenced using two integer separated by a
+@code{:}, in which case the entire inclusive range is referenced.  For
+example the following assigns the entire first column of @code{example-table}
+to @code{data}.
 
 @example
-:var data=example-table[0,1]
+#+results: example-table
+| 1 | a |
+| 2 | b |
+| 3 | c |
+| 4 | d |
+
+#+begin_src emacs-lisp :var data=example-table[1:2]
+  data
+#+end_src
+
+#+results:
+| 2 | b |
+| 3 | c |
 @end example
 
-It is possible to index into the results of code blocks as well as
-tables.  Any number of dimensions can be indexed.  Dimensions are separated
-from one another by commas.
+Additionally an empty index, or the single character @code{*} are both
+interpreted to mean the entire range and as such are equivalent to
+@code{0:-1}, as shown in the following example in which the entire first
+column is referenced.
 
-For more information on indexing behavior see the documentation for the
-@code{org-babel-ref-index-list} function, provided below.
+@example
+#+results: example-table
+| 1 | a |
+| 2 | b |
+| 3 | c |
+| 4 | d |
 
-@deffn
-org-babel-ref-index-list is a Lisp function in `org-babel-ref.el'.
+#+begin_src emacs-lisp :var data=example-table[,0]
+  data
+#+end_src
 
-(org-babel-ref-index-list index lis)
+#+results:
+| 1 | 2 | 3 | 4 |
+@end example
 
-Return the subset of LIS indexed by INDEX.  If INDEX is
-separated by ,s then each PORTION is assumed to index into the
-next deepest nesting or dimension.  A valid PORTION can consist
-of either an integer index, or two integers separated by a : in
-which case the entire range is returned.
-@end deffn
+It is possible to index into the results of code blocks as well as tables.
+Any number of dimensions can be indexed.  Dimensions are separated from one
+another by commas, as shown in the following example.
+
+@example
+#+source: 3D
+#+begin_src emacs-lisp
+  '(((1  2  3)  (4  5  6)  (7  8  9))
+    ((10 11 12) (13 14 15) (16 17 18))
+    ((19 20 21) (22 23 24) (25 26 27)))
+#+end_src
+
+#+begin_src emacs-lisp :var data=3D[1,,1]
+  data
+#+end_src
+
+#+results:
+| 11 | 14 | 17 |
+@end example
 
 @node results, file, var, Specific header arguments
 @subsubsection @code{:results}

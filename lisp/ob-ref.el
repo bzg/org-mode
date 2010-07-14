@@ -177,28 +177,36 @@ return nil."
 
 (defun org-babel-ref-index-list (index lis)
   "Return the subset of LIS indexed by INDEX.
-If INDEX is separated by ,s then each PORTION is assumed to index
-into the next deepest nesting or dimension.  A valid PORTION can
-consist of either an integer index, or two integers separated by
-a : in which case the entire range is returned."
-  (if (string-match "^,?\\([^,]+\\)" index)
-      (let ((length (length lis))
+
+Indices are 0 based and negative indices count from the end of
+LIS, so 0 references the first element of LIS and -1 references
+the last.  If INDEX is separated by \",\"s then each \"portion\"
+is assumed to index into the next deepest nesting or dimension.
+
+A valid \"portion\" can consist of either an integer index, two
+integers separated by a \":\" in which case the entire range is
+returned, or an empty string or \"*\" both of which are
+interpreted to mean the entire range and as such are equivalent
+to \"0:-1\"."
+  (if (and (> (length index) 0) (string-match "^\\([^,]*\\),?" index))
+      (let ((ind-re "\\(\\([-[:digit:]]+\\):\\([-[:digit:]]+\\)\\|\*\\)")
+	    (length (length lis))
             (portion (match-string 1 index))
             (remainder (substring index (match-end 0))))
         (flet ((wrap (num) (if (< num 0) (+ length num) num))
-               (open (lis) (if (and (listp lis) (= (length lis) 1)) (car lis) lis)))
+               (open (ls) (if (and (listp ls) (= (length ls) 1)) (car ls) ls)))
           (open
            (mapcar
             (lambda (sub-lis) (org-babel-ref-index-list remainder sub-lis))
-            (if (string-match "\\(\\([-[:digit:]]+\\):\\([-[:digit:]]+\\)\\|\*\\)"
-                              portion)
-                (mapcar (lambda (n) (nth n lis))
-                        (apply 'number-sequence
-                               (if (match-string 2 portion)
-                                   (list
-                                    (wrap (string-to-number (match-string 2 portion)))
-                                    (wrap (string-to-number (match-string 3 portion))))
-                                 (list (wrap 0) (wrap -1)))))
+            (if (or (= 0 (length portion)) (string-match ind-re portion))
+                (mapcar
+		 (lambda (n) (nth n lis))
+		 (apply 'number-sequence
+			(if (and (> (length portion) 0) (match-string 2 portion))
+			    (list
+			     (wrap (string-to-number (match-string 2 portion)))
+			     (wrap (string-to-number (match-string 3 portion))))
+			  (list (wrap 0) (wrap -1)))))
               (list (nth (wrap (string-to-number portion)) lis)))))))
     lis))
 
