@@ -38,7 +38,7 @@
       (goto-char (point-max))
       (save-excursion (insert stderr)))
     (display-buffer buf))
-  (message "Babel evaluation exited with code %d" exit-code))
+  (message "Babel evaluation exited with code %S" exit-code))
 
 (defun org-babel-eval (cmd body)
   "Run CMD on BODY.
@@ -51,7 +51,7 @@ STDERR with `org-babel-eval-error-notify'."
       (setq exit-code
 	    (org-babel-shell-command-on-region
 	     (point-min) (point-max) cmd t 'replace err-buff))
-      (if (> exit-code 0)
+      (if (or (not (numberp exit-code)) (> exit-code 0))
 	  (progn
 	    (with-current-buffer err-buff
 	      (org-babel-eval-error-notify exit-code (buffer-string)))
