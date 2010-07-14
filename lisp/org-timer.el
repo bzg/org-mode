@@ -195,14 +195,11 @@ that was not started at the correct moment."
 (defun org-timer-item (&optional arg)
   "Insert a description-type item with the current timer value."
   (interactive "P")
-  (let ((ind 0))
-    (save-excursion
-      (skip-chars-backward " \n\t")
-      (condition-case nil
-	  (progn
-	    (org-beginning-of-item)
-	    (setq ind (org-get-indentation)))
-	(error nil)))
+  (let ((ind (save-excursion
+	       (if (not (org-in-item-p))
+		   (org-indent-line-function)
+		 (org-beginning-of-item)
+		 (org-get-indentation)))))
     (or (bolp) (newline))
     (org-indent-line-to ind)
     (insert "- ")

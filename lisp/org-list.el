@@ -664,8 +664,12 @@ block, or item is invisible."
 			 (unless before-p (org-move-item-down)))))
       (goto-char pos)
       (cond
-       ;; if we're adding a timer, delegate to `org-timer-item'.
-       (timer-p (org-timer-item) t)
+       ;; if we're adding a timer, delegate to `org-timer-item' after
+       ;; inserting a coherent number of blank lines.
+       (timer-p
+	(newline (1+ blank-lines-nb))
+	(org-timer-item)
+	t)
        (before-p
 	(funcall insert-fun)
 	;; Renumber in this case, as we're not moving down.
