@@ -59,7 +59,7 @@
       vars "\n") "\n" body "\n")))
 
 (defun org-babel-execute:ocaml (body params)
-  "Execute a block of Ocaml code with org-babel."
+  "Execute a block of Ocaml code with Babel."
   (let* ((processed-params (org-babel-process-params params))
          (vars (nth 1 processed-params))
          (full-body (org-babel-expand-body:ocaml body params processed-params))
@@ -78,7 +78,7 @@
 
 (defvar tuareg-interactive-buffer-name)
 (defun org-babel-prep-session:ocaml (session params)
-  "Prepare SESSION according to the header arguments specified in PARAMS."
+  "Prepare SESSION according to the header arguments in PARAMS."
   (require 'tuareg)
   (let ((tuareg-interactive-buffer-name (if (and (not (string= session "none"))
                                                  (not (string= session "default"))
@@ -89,8 +89,8 @@
                            (get-buffer tuareg-interactive-buffer-name))))
 
 (defun org-babel-ocaml-parse-output (output)
-  "Parse OUTPUT where OUTPUT is string output from an ocaml
-process."
+  "Parse OUTPUT.
+OUTPUT is string output from an ocaml process."
   (let ((regexp "%s = \\(.+\\)$"))
     (cond
      ((string-match (format regexp "string") output)
@@ -105,7 +105,8 @@ process."
      (t (message "don't recognize type of %s" output) output))))
 
 (defun org-babel-ocaml-read-list (results)
-  "If the results look like a table, then convert them into an
+  "Convert RESULTS into an elisp table or string.
+If the results look like a table, then convert them into an
 Emacs-lisp table, otherwise return the results as a string."
   (org-babel-read
    (if (and (stringp results) (string-match "^\\[.+\\]$" results))
@@ -118,7 +119,8 @@ Emacs-lisp table, otherwise return the results as a string."
      results)))
 
 (defun org-babel-ocaml-read-array (results)
-  "If the results look like a table, then convert them into an
+  "Convert RESULTS into an elisp table or string.
+If the results look like a table, then convert them into an
 Emacs-lisp table, otherwise return the results as a string."
   (org-babel-read
    (if (and (stringp results) (string-match "^\\[.+\\]$" results))

@@ -36,11 +36,13 @@
   "Expand BODY according to PARAMS, return the expanded body." body)
 
 (defun org-babel-execute:css (body params)
-  "Execute a block of CSS code with org-babel.  This function is
-called by `org-babel-execute-src-block'." body)
+  "Execute a block of CSS code.
+This function is called by `org-babel-execute-src-block'."
+ body)
 
 (defun org-babel-prep-session:css (session params)
-  "Prepare SESSION according to the header arguments specified in PARAMS."
+  "Return an error if the :session header argument is set.
+CSS does not support sessions."
   (error "CSS sessions are nonsensical"))
 
 (provide 'ob-css)

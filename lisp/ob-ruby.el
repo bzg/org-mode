@@ -65,8 +65,8 @@
       vars "\n") "\n" body "\n")))
 
 (defun org-babel-execute:ruby (body params)
-  "Execute a block of Ruby code with org-babel.  This function is
-called by `org-babel-execute-src-block'."
+  "Execute a block of Ruby code with Babel.
+This function is called by `org-babel-execute-src-block'."
   (let* ((processed-params (org-babel-process-params params))
          (session (org-babel-ruby-initiate-session (first processed-params)))
          (result-params (nth 2 processed-params))
@@ -114,14 +114,16 @@ called by `org-babel-execute-src-block'."
 ;; helper functions
 
 (defun org-babel-ruby-var-to-ruby (var)
-  "Convert an elisp var into a string of ruby source code
-specifying a var of the same value."
+  "Convert VAR into a ruby variable.
+Convert an elisp value into a string of ruby source code
+specifying a variable of the same value."
   (if (listp var)
       (concat "[" (mapconcat #'org-babel-ruby-var-to-ruby var ", ") "]")
     (format "%S" var)))
 
 (defun org-babel-ruby-table-or-string (results)
-  "If RESULTS look like a table, then convert them into an
+  "Convert RESULTS into an appropriate elisp value.
+If RESULTS look like a table, then convert them into an
 Emacs-lisp table, otherwise return the results as a string."
   (org-babel-read
    (if (and (stringp results) (string-match "^\\[.+\\]$" results))
@@ -135,7 +137,8 @@ Emacs-lisp table, otherwise return the results as a string."
      results)))
 
 (defun org-babel-ruby-initiate-session (&optional session params)
-  "If there is not a current inferior-process-buffer in SESSION
+  "Initiate a ruby session.
+If there is not a current inferior-process-buffer in SESSION
 then create one.  Return the initialized session."
   (require 'inf-ruby)
   (unless (string= session "none")
@@ -147,7 +150,7 @@ then create one.  Return the initialized session."
         (org-babel-ruby-initiate-session session)))))
 
 (defvar org-babel-ruby-eoe-indicator ":org_babel_ruby_eoe"
-  "Used to indicate that evaluation is has completed.")
+  "String to indicate that evaluation has completed.")
 (defvar org-babel-ruby-f-write
   "File.open('%s','w'){|f| f.write((_.class == String) ? _ : _.inspect)}")
 (defvar org-babel-ruby-pp-f-write
@@ -175,10 +178,10 @@ end
 
 (defun org-babel-ruby-evaluate
   (buffer body &optional result-type result-params)
-  "Pass BODY to the Ruby process in BUFFER.  If RESULT-TYPE equals
-'output then return a list of the outputs of the statements in
-BODY, if RESULT-TYPE equals 'value then return the value of the
-last statement in BODY, as elisp."
+  "Pass BODY to the Ruby process in BUFFER.
+If RESULT-TYPE equals 'output then return a list of the outputs
+of the statements in BODY, if RESULT-TYPE equals 'value then
+return the value of the last statement in BODY, as elisp."
   (if (not buffer)
       ;; external process evaluation
       (case result-type

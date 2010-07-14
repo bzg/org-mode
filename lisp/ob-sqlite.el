@@ -48,8 +48,8 @@
 (defvar org-babel-sqlite3-command "sqlite3")
 
 (defun org-babel-execute:sqlite (body params)
-  "Execute a block of Sqlite code with org-babel.  This function is
-called by `org-babel-execute-src-block'."
+  "Execute a block of Sqlite code with Babel.
+This function is called by `org-babel-execute-src-block'."
   (let ((result-params (split-string (or (cdr (assoc :results params)) "")))
 	(vars (org-babel-ref-variables params))
 	(db (cdr (assoc :db params)))
@@ -141,7 +141,8 @@ called by `org-babel-execute-src-block'."
     table))
 
 (defun org-babel-prep-session:sqlite (session params)
-  "Prepare SESSION according to the header arguments specified in PARAMS."
+  "Raise an error because support for sqlite sessions isn't implemented.
+Prepare SESSION according to the header arguments specified in PARAMS."
   (error "sqlite sessions not yet implemented"))
 
 (provide 'ob-sqlite)

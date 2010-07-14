@@ -43,8 +43,8 @@
 (defvar org-babel-default-header-args:sh '())
 
 (defvar org-babel-sh-command "sh"
-  "Command used to invoke a shell.  This will be passed to
-  `shell-command-on-region'")
+  "Command used to invoke a shell.
+This will be passed to  `shell-command-on-region'")
 
 (defun org-babel-expand-body:sh (body params &optional processed-params)
   "Expand BODY according to PARAMS, return the expanded body."
@@ -59,8 +59,8 @@
     vars "\n") "\n" body "\n\n")))
 
 (defun org-babel-execute:sh (body params)
-  "Execute a block of Shell commands with org-babel.  This
-function is called by `org-babel-execute-src-block'."
+  "Execute a block of Shell commands with Babel.
+This function is called by `org-babel-execute-src-block'."
   (let* ((processed-params (org-babel-process-params params))
          (session (org-babel-sh-initiate-session (nth 0 processed-params)))
          (result-params (nth 2 processed-params)) 
@@ -102,8 +102,9 @@ function is called by `org-babel-execute-src-block'."
 ;; helper functions
 
 (defun org-babel-sh-var-to-sh (var &optional sep)
-  "Convert an elisp var into a string of shell commands
-specifying a var of the same value."
+  "Convert an elisp value to a shell variable.
+Convert an elisp var into a string of shell commands specifying a
+var of the same value."
   (if (listp var)
       (flet ((deep-string (el)
                           (if (listp el)
@@ -115,7 +116,8 @@ specifying a var of the same value."
     (if (stringp var) (format "%s" var) (format "%S" var))))
 
 (defun org-babel-sh-table-or-results (results)
-  "If the results look like a table, then convert them into an
+  "Convert RESULTS to an appropriate elisp value.
+If the results look like a table, then convert them into an
 Emacs-lisp table, otherwise return the results as a string."
   (org-babel-read
    (if (string-match "^\\[.+\\]$" results)
@@ -136,15 +138,15 @@ Emacs-lisp table, otherwise return the results as a string."
           (progn (shell session) (get-buffer (current-buffer)))))))
 
 (defvar org-babel-sh-eoe-indicator "echo 'org_babel_sh_eoe'"
-  "Used to indicate that evaluation is has completed.")
+  "String to indicate that evaluation has completed.")
 (defvar org-babel-sh-eoe-output "org_babel_sh_eoe"
-  "Used to indicate that evaluation is has completed.")
+  "String to indicate that evaluation has completed.")
 
 (defun org-babel-sh-evaluate (session body &optional result-params)
-  "Pass BODY to the Shell process in BUFFER.  If RESULT-TYPE equals
-'output then return a list of the outputs of the statements in
-BODY, if RESULT-TYPE equals 'value then return the value of the
-last statement in BODY."
+  "Pass BODY to the Shell process in BUFFER.
+If RESULT-TYPE equals 'output then return a list of the outputs
+of the statements in BODY, if RESULT-TYPE equals 'value then
+return the value of the last statement in BODY."
   ((lambda (results)
      (if (or (member "scalar" result-params)
 	     (member "output" result-params))
