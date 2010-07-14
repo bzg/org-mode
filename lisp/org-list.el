@@ -156,10 +156,10 @@ Otherwise, look for `org-list-end-regexp'."
   :group 'org-plain-lists
   :type 'boolean)
 
-(defcustom org-list-end-regexp "^[ \t]*\n\\([ \t]*\n\\)+"
+(defcustom org-list-end-regexp "^[ \t]*\n[ \t]*\n"
   "Regexp matching the end of all plain list levels.
 It must start with \"^\" and end with \"\\n\". It defaults to 2
-or more blank lines. `org-empty-line-terminates-plain-lists' has
+blank lines. `org-empty-line-terminates-plain-lists' has
 precedence over it."
   :group 'org-plain-lists
   :type 'string)
