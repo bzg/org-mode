@@ -113,7 +113,11 @@ var of the same value."
 	(format "$(cat <<BABEL_TABLE\n%s\nBABEL_TABLE\n)"
 		(orgtbl-to-generic
 		 (deep-string var) (list :sep (or sep "\t")))))
-    (if (stringp var) (format "%s" var) (format "%S" var))))
+    (if (stringp var)
+	(if (string-match "[\n\r]" var)
+	    (format "$(cat <<BABEL_STRING\n%s\nBABEL_STRING\n)" var)
+	  (format "%s" var))
+      (format "%S" var))))
 
 (defun org-babel-sh-table-or-results (results)
   "Convert RESULTS to an appropriate elisp value.
