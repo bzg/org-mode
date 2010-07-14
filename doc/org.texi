@@ -11537,7 +11537,7 @@ following the source name.
 @subsubheading Indexable variable values
 It is possible to reference portions of variable values by ``indexing'' into
 the variables.  Indexes are 0 based with negative values counting back from
-the end.  If an index is separated by ``,''s then each subsequent section
+the end.  If an index is separated by @code{,}s then each subsequent section
 will index into the next deepest nesting or dimension of the value.  The
 following example assigns the last cell of the first row the table
 @code{example-table} to the variable @code{data}:
@@ -11559,7 +11559,7 @@ following example assigns the last cell of the first row the table
 
 Ranges of variable values can be referenced using two integer separated by a
 @code{:}, in which case the entire inclusive range is referenced.  For
-example the following assigns the entire first column of @code{example-table}
+example the following assigns the middle three rows of @code{example-table}
 to @code{data}.
 
 @example
@@ -11568,14 +11568,16 @@ to @code{data}.
 | 2 | b |
 | 3 | c |
 | 4 | d |
+| 5 | 3 |
 
-#+begin_src emacs-lisp :var data=example-table[1:2]
+#+begin_src emacs-lisp :var data=example-table[1:3]
   data
 #+end_src
 
 #+results:
 | 2 | b |
 | 3 | c |
+| 4 | d |
 @end example
 
 Additionally an empty index, or the single character @code{*} are both
