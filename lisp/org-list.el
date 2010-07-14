@@ -276,10 +276,8 @@ valid or not, then makes sure the last one is valid."
      ((not (re-search-backward regexp bound (or noerror t) count)) nil)
      ;; match is not enclosed: return point.
      ((not (save-match-data
-	     (or (org-in-regexps-block-p "^[ \t]*#\\+\\(begin\\|BEGIN\\)_\\([a-zA-Z0-9_]+\\)"
-					 '(concat "^[ \t]*#\\+\\(end\\|END\\)_" (match-string 2)))
-		 (org-in-regexps-block-p "^[ \t]*\\\\begin{\\([a-zA-Z0-9_]+\\)}"
-					 '(concat "^[ \t]*\\\\end{" (match-string 1) "}")))))
+	     (org-in-regexps-block-p "^[ \t]*#\\+\\(begin\\|BEGIN\\)_\\([a-zA-Z0-9_]+\\)"
+				     '(concat "^[ \t]*#\\+\\(end\\|END\\)_" (match-string 2)))))
       (point))
      (t
       ;; else: we start again, searching one more occurrence away.
@@ -297,10 +295,8 @@ valid or not, then makes sure the last one is valid."
      ((not (re-search-forward regexp bound (or noerror t) count)) nil)
      ;; match is not enclosed: return point.
      ((not (save-match-data
-	     (or (org-in-regexps-block-p "^[ \t]*#\\+\\(begin\\|BEGIN\\)_\\([a-zA-Z0-9_]+\\)"
-					 '(concat "^[ \t]*#\\+\\(end\\|END\\)_" (match-string 2)))
-		 (org-in-regexps-block-p "^[ \t]*\\\\begin{\\([a-zA-Z0-9_]+\\)}"
-					 '(concat "^[ \t]*\\\\end{" (match-string 1) "}")))))
+	     (org-in-regexps-block-p "^[ \t]*#\\+\\(begin\\|BEGIN\\)_\\([a-zA-Z0-9_]+\\)"
+				     '(concat "^[ \t]*#\\+\\(end\\|END\\)_" (match-string 2)))))
       (point))
      ;; else: we start again, searching one more occurrence away.
      (t
