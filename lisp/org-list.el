@@ -266,26 +266,31 @@ the end of the nearest terminator from max."
 	   (match-beginning 0)))))
 
 (defun org-search-backward-unenclosed (regexp &optional bound noerror count)
-  "Like `re-search-backward' but don't stop inside blocks or throw errors.
+  "Like `re-search-backward' but don't stop inside blocks or at protected places.
+This function does not throw errors.
 
-Optional fourth argument COUNT searches for that many occurrences,
-valid or not, then makes sure the last one is valid."
+Optional fourth argument COUNT searches for that many
+occurrences, valid or not, then makes sure the last one is
+valid."
   (let ((origin (point)))
     (cond
      ;; nothing found: return nil
      ((not (re-search-backward regexp bound (or noerror t) count)) nil)
-     ;; match is not enclosed: return point.
-     ((not (save-match-data
-	     (org-in-regexps-block-p "^[ \t]*#\\+\\(begin\\|BEGIN\\)_\\([a-zA-Z0-9_]+\\)"
-				     '(concat "^[ \t]*#\\+\\(end\\|END\\)_" (match-string 2)))))
-      (point))
-     (t
-      ;; else: we start again, searching one more occurrence away.
+     ;; match is enclosed or protected: start again, searching one
+     ;; more occurrence away.
+     ((or (save-match-data
+	    (org-in-regexps-block-p "^[ \t]*#\\+\\(begin\\|BEGIN\\)_\\([a-zA-Z0-9_]+\\)"
+				    '(concat "^[ \t]*#\\+\\(end\\|END\\)_" (match-string 2))))
+	  (get-text-property (match-beginning 0) 'org-protected))
       (goto-char origin)
-      (org-search-backward-unenclosed regexp bound noerror (1+ (or count 1)))))))
+      (org-search-backward-unenclosed regexp bound noerror (1+ (or count 1))))
+     ;; else return point.
+     (t
+      (point)))))
 
 (defun org-search-forward-unenclosed (regexp &optional bound noerror count)
-  "Like `re-search-forward' but don't stop inside blocks or throw errors.
+  "Like `re-search-forward' but don't stop inside blocks or at protected places.
+This function does not throw errors.
 
 Optional fourth argument COUNT searches for that many occurrences,
 valid or not, then makes sure the last one is valid."
@@ -293,15 +298,17 @@ valid or not, then makes sure the last one is valid."
     (cond
      ;; nothing found: return nil
      ((not (re-search-forward regexp bound (or noerror t) count)) nil)
-     ;; match is not enclosed: return point.
-     ((not (save-match-data
-	     (org-in-regexps-block-p "^[ \t]*#\\+\\(begin\\|BEGIN\\)_\\([a-zA-Z0-9_]+\\)"
-				     '(concat "^[ \t]*#\\+\\(end\\|END\\)_" (match-string 2)))))
-      (point))
-     ;; else: we start again, searching one more occurrence away.
-     (t
+     ;; match is enclosed or protected: start again, searching one
+     ;; more occurrence away.
+     ((or (save-match-data
+	    (org-in-regexps-block-p "^[ \t]*#\\+\\(begin\\|BEGIN\\)_\\([a-zA-Z0-9_]+\\)"
+				    '(concat "^[ \t]*#\\+\\(end\\|END\\)_" (match-string 2))))
+	  (get-text-property (match-beginning 0) 'org-protected))
       (goto-char origin)
-      (org-search-forward-unenclosed regexp bound noerror (1+ (or count 1)))))))
+      (org-search-forward-unenclosed regexp bound noerror (1+ (or count 1))))
+     ;; else return point.
+     (t
+      (point)))))
 
 (defun org-get-item-same-level-internal (search-fun pos limit pre-move)
   "Return point at the beginning of next item at the same level.
