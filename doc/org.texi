@@ -11217,7 +11217,7 @@ Code blocks in the following languages are supported.
 @multitable @columnfractions 0.28 0.3 0.22 0.2
 @item @b{Language} @tab @b{Identifier} @tab @b{Language} @tab @b{Identifier}
 @item Asymptote @tab asymptote @tab C @tab C
-@item C @tab C++ @tab Clojure @tab clojure
+@item C++ @tab C++ @tab Clojure @tab clojure
 @item css @tab css @tab ditaa @tab ditaa
 @item Graphviz @tab dot @tab Emacs Lisp @tab emacs-lisp
 @item gnuplot @tab gnuplot @tab Haskell @tab haskell
@@ -11231,7 +11231,7 @@ Code blocks in the following languages are supported.
 @item Sqlite @tab sqlite
 @end multitable
 
-Language specific documentation is available for some languages.  If
+Language-specific documentation is available for some languages.  If
 available, it can be found at
 @uref{http://orgmode.org/worg/org-contrib/babel/languages}.
 
@@ -11449,8 +11449,8 @@ The @code{:var} header argument is used to pass arguments to code blocks.
 The specifics of how arguments are included in a code block vary by language;
 these are addressed in the language-specific documentation. However, the
 syntax used to specify arguments is the same across all languages.  The
-values passed to arguments can be literal values, values from org-mode
-tables, or the results of other code blocks.
+values passed to arguments can be literal values, values from org-mode tables
+and literal example blocks, or the results of other code blocks.
 
 These values can be indexed in a manner similar to arrays---see the
 ``indexable variable values'' heading below.
@@ -11557,7 +11557,7 @@ following example assigns the last cell of the first row the table
 : a
 @end example
 
-Ranges of variable values can be referenced using two integer separated by a
+Ranges of variable values can be referenced using two integers separated by a
 @code{:}, in which case the entire inclusive range is referenced.  For
 example the following assigns the middle three rows of @code{example-table}
 to @code{data}.
@@ -11580,7 +11580,7 @@ to @code{data}.
 | 4 | d |
 @end example
 
-Additionally an empty index, or the single character @code{*} are both
+Additionally, an empty index, or the single character @code{*}, are both
 interpreted to mean the entire range and as such are equivalent to
 @code{0:-1}, as shown in the following example in which the entire first
 column is referenced.
