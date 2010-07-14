@@ -110,7 +110,11 @@ Convert an elisp value, VAR, into a string of python source code
 specifying a variable of the same value."
   (if (listp var)
       (concat "[" (mapconcat #'org-babel-python-var-to-python var ", ") "]")
-    (if (equal var 'hline) "None" (format "%S" var))))
+    (if (equal var 'hline)
+	"None"
+      (format
+       (if (and (stringp var) (string-match "[\n\r]" var)) "\"\"%S\"\"" "%S")
+       var))))
 
 (defun org-babel-python-table-or-string (results)
   "Convert RESULTS into an appropriate elisp value.
