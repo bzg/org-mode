@@ -5851,7 +5851,8 @@ restarted.
 @kindex C-c C-x -
 @item C-c C-x -
 Insert a description list item with the current relative time.  With a prefix
-argument, first reset the timer to 0.
+argument, first reset the timer to 0. This will not work if the cursor is
+already in a list of a different type.
 @kindex M-@key{RET}
 @item M-@key{RET}
 Once the timer list is started, you can also use @kbd{M-@key{RET}} to insert
