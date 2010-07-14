@@ -1034,9 +1034,7 @@ publishing directory."
 	      (when (and (not (equal item-type "d"))
 			 (not (string-match "[^ \t]" line)))
 		;; Empty line.  Pretend indentation is large.
-		(setq ind (if org-empty-line-terminates-plain-lists
-			      0
-			    (1+ (or (car local-list-indent) 1)))))
+		(setq ind (1+ (or (car local-list-indent) 1))))
 	      (while (and in-local-list
 			  (or (and (= ind (car local-list-indent))
 				   (not starter))
