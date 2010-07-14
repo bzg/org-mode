@@ -631,25 +631,25 @@ block, or item is invisible."
 	   (timer-p (and description-p
 			 (string-match "^[-+*][ \t]+[0-9]+:[0-9]+:[0-9]+$" description-p)))
 	   ;; Guess number of blank lines used to separate items.
-	   (blank-lines-nb (let* ((insert-blank-p
-				   (cdr (assq 'plain-list-item org-blank-before-new-entry)))
-				  (limit (save-excursion (org-end-of-item-list)))
-				  (next-item-p (org-get-next-item (point) limit)))
+	   (blank-lines-nb (let ((insert-blank-p
+				  (cdr (assq 'plain-list-item org-blank-before-new-entry))))
 			     (cond
-			      ;; cases where there should be no blank line.
-			      ((or (not insert-blank-p)
-				   org-empty-line-terminates-plain-lists) 0)
-			      ;; If there's a next item, count blank
-			      ;; lines between current and next item.
-			      (next-item-p (and (goto-char next-item-p)
-						(org-back-over-empty-lines)))
-			      ;; if we're not on the first item, there
-			      ;; is one above. Count blank lines between.
-			      ((not (org-first-list-item-p)) (org-back-over-empty-lines))
-			      ;; Only one item list: can't guess.
-			      ;; Follow `org-blank-before-new-entry'
-			      ((eq insert-blank-p 'auto) 0)
-			      (t 1))))
+			      ((or
+				org-empty-line-terminates-plain-lists
+				(not insert-blank-p))
+			       0)
+			      ((eq insert-blank-p t) 1)
+			      ;; plain-list-item is 'auto. Count blank
+			      ;; lines separating items in list.
+			      (t
+			       (save-excursion
+				 (if (progn
+				       (org-end-of-item-list)
+				       (skip-chars-backward " \r\t\n")
+				       (org-search-backward-unenclosed
+					"^[ \t]*$" (save-excursion (org-beginning-of-item-list)) t))
+				     (1+ (org-back-over-empty-lines))
+				   0))))))
 	   (insert-fun (lambda (&optional string-after-bullet)
 			 ;; insert bullet above item in order to avoid
 			 ;; bothering with possible blank lines ending
