@@ -1994,7 +1994,6 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
     s))
 (defvar org-latex-entities)   ; defined below
 (defvar org-latex-entities-regexp)   ; defined below
-(defvar org-latex-entities-exceptions)   ; defined below
 
 (defun org-export-latex-preprocess (parameters)
   "Clean stuff in the LaTeX export."
@@ -2108,15 +2107,18 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 	(add-text-properties (match-beginning 0) (match-end 0)
 			     '(org-protected t)))))
 
+  ;; Special case for \nbsp
+  (goto-char (point-min))
+  (while (re-search-forward "\\\\nbsp\\({}\\|\\>\\)" nil t)
+    (org-if-unprotected
+     (replace-match (org-export-latex-protect-string "~"))))
+
   ;; Protect LaTeX entities
   (goto-char (point-min))
-  (let (a)
-    (while (re-search-forward org-latex-entities-regexp nil t)
-      (if (setq a (assoc (match-string 0) org-latex-entities-exceptions))
-	  (replace-match (org-add-props (nth 1 a) nil 'org-protected t)
-			 t t)
-	(add-text-properties (match-beginning 0) (match-end 0)
-			     '(org-protected t)))))
+  (while (re-search-forward org-latex-entities-regexp nil t)
+    (org-if-unprotected
+     (add-text-properties (match-beginning 0) (match-end 0)
+			  '(org-protected t))))
 
   ;; Replace radio links
   (goto-char (point-min))
@@ -2331,7 +2333,6 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
    "\\medskip"
    "\\multicolumn"
    "\\multiput"
-   ("\\nbsp" "~")
    "\\newcommand"
    "\\newcounter"
    "\\newenvironment"
@@ -2403,14 +2404,9 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
    "\\vspace")
  "A list of LaTeX commands to be protected when performing conversion.")
 
-(defvar org-latex-entities-exceptions nil)
-
 (defconst org-latex-entities-regexp
   (let (names rest)
     (dolist (x org-latex-entities)
-      (when (consp x)
-	(add-to-list 'org-latex-entities-exceptions x)
-	(setq x (car x)))
       (if (string-match "[a-zA-Z]$" x)
 	  (push x names)
 	(push x rest)))
