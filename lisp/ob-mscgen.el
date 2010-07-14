@@ -66,11 +66,10 @@
   "Expand BODY according to PARAMS, return the expanded body." body)
 
 (defun org-babel-execute:mscgen (body params)
-  "Execute a block of Mscgen code with org-babel.  This function
-is called by `org-babel-execute-src-block'.  Default filetype is
-png. Modify by setting :filetype parameter to mscgen supported
-formats."
-  (message "executing Mscgen source code block")
+  "Execute a block of Mscgen code with Babel.
+This function is called by `org-babel-execute-src-block'.
+Default filetype is png. Modify by setting :filetype parameter to
+mscgen supported formats."
   (let* ((out-file (or (cdr (assoc :file params)) "output.png" ))
          (filetype (or (cdr (assoc :filetype params)) "png" )))
     (unless (cdr (assoc :file params))
@@ -80,7 +79,7 @@ ERROR: no output file specified. Add \":file name.png\" to the src header"))
     out-file))
 
 (defun org-babel-prep-session:mscgen (session params)
-  "Prepare SESSION according to PARAMS."
+  "Raise an error because Mscgen doesn't support sessions."
   (error "Mscgen does not support sessions"))
 
 (provide 'ob-mscgen)

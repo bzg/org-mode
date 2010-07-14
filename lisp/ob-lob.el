@@ -33,12 +33,13 @@
 (require 'ob-table)
 
 (defvar org-babel-library-of-babel nil
-  "Library of source-code blocks.  This is an association list.
-Populate the library by adding files to `org-babel-lob-files'.")
+  "Library of source-code blocks.
+This is an association list.  Populate the library by adding
+files to `org-babel-lob-files'.")
 
 (defcustom org-babel-lob-files '()
-  "Files used to populate the `org-babel-library-of-babel'.  To
-add files to this list use the `org-babel-lob-ingest' command."
+  "Files used to populate the `org-babel-library-of-babel'.
+To add files to this list use the `org-babel-lob-ingest' command."
   :group 'org-babel
   :type 'list)
 
@@ -46,7 +47,7 @@ add files to this list use the `org-babel-lob-ingest' command."
 (defun org-babel-lob-ingest (&optional file)
   "Add all source-blocks defined in FILE to `org-babel-library-of-babel'."
   (interactive "f")
-  (org-babel-map-source-blocks file
+  (org-babel-map-src-blocks file
     (let* ((info (org-babel-get-src-block-info))
 	   (source-name (intern (nth 4 info))))
       (when source-name
@@ -55,23 +56,22 @@ add files to this list use the `org-babel-lob-ingest' command."
                     (assq-delete-all source-name org-babel-library-of-babel)))))))
 
 (defconst org-babel-lob-call-aliases '("lob" "call")
-  "These can be used interchangeably to call a source block
-  function. If you change the value of this variable then your
-  files may become unusable by other org-babel users, and vice
-  versa.")
+  "Aliases to call a source block function.
+If you change the value of this variable then your files may
+  become unusable by other org-babel users, and vice versa.")
 
 (defconst org-babel-lob-one-liner-regexp
   (concat "^\\([ \t]*\\)#\\+\\(?:"
 	  (mapconcat #'regexp-quote org-babel-lob-call-aliases "\\|")
 	  "\\):[ \t]+\\([^\(\)\n]+\\)\(\\([^\n]*\\)\)[ \t]*\\([^\n]*\\)")
-  "Regexp to match calls to predefined source block functions")
+  "Regexp to match calls to predefined source block functions.")
 
 ;; functions for executing lob one-liners
 ;;;###autoload
 (defun org-babel-lob-execute-maybe ()
-  "Detect if this is context for a org-babel Library Of Babel
-src-block and if so then run the appropriate source block from
-the Library."
+  "Execute a Library of Babel source block, if appropriate.
+Detect if this is context for a Library Of Babel source block and
+if so then run the appropriate source block from the Library."
   (interactive)
   (let ((info (org-babel-lob-get-info)))
     (if (nth 0 info) (progn (org-babel-lob-execute info) t) nil)))
@@ -80,8 +80,7 @@ the Library."
 
 ;;;###autoload
 (defun org-babel-lob-get-info ()
-  "Return the function call supplied on the current Library of
-Babel line as a string.
+  "Return a Library of Babel function call as a string.
 
 This function is analogous to org-babel-get-src-block-name. For
 both functions, after they are called, (match-string 1) matches

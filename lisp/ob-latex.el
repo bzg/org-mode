@@ -42,7 +42,7 @@
 
 (defvar org-babel-default-header-args:latex
   '((:results . "latex") (:exports . "results"))
-  "Default arguments to use when evaluating a latex source block.")
+  "Default arguments to use when evaluating a LaTeX source block.")
 
 (defun org-babel-expand-body:latex (body params &optional processed-params)
   "Expand BODY according to PARAMS, return the expanded body."
@@ -58,9 +58,8 @@
 (defvar org-format-latex-options)
 (defvar org-export-latex-packages-alist)
 (defun org-babel-execute:latex (body params)
-  "Execute a block of Latex code with org-babel.  This function is
-called by `org-babel-execute-src-block'."
-  (message "executing Latex source code block")
+  "Execute a block of Latex code with Babel.
+This function is called by `org-babel-execute-src-block'."
   (setq body (org-babel-expand-body:latex body params))
   (if (cdr (assoc :file params))
       (let ((out-file (cdr (assoc :file params)))
@@ -90,8 +89,8 @@ called by `org-babel-execute-src-block'."
 (defvar org-export-latex-packages-alist)
 (defvar org-export-latex-default-packages-alist)
 (defun org-babel-latex-body-to-tex-file (tex-file body &optional height width)
-  "Place the contents of BODY into TEX-FILE. Extracted from
-`org-create-formula-image' in org.el."
+  "Place the contents of BODY into TEX-FILE.
+Extracted from `org-create-formula-image' in org.el."
   (with-temp-file tex-file
     (insert (org-splice-latex-header
 	       org-format-latex-header
@@ -115,8 +114,8 @@ called by `org-babel-execute-src-block'."
 (defvar org-latex-to-pdf-process)
 (defvar org-export-pdf-remove-logfiles)
 (defun org-babel-latex-tex-to-pdf (tex-file)
-  "Generate a pdf according to the contents TEX-FILE.  Extracted
-from `org-export-as-pdf' in org-latex.el."
+  "Generate a pdf file according to the contents TEX-FILE.
+Extracted from `org-export-as-pdf' in org-latex.el."
   (let* ((wconfig (current-window-configuration))
          (default-directory (file-name-directory tex-file))
          (base (file-name-sans-extension tex-file))
@@ -149,8 +148,8 @@ from `org-export-as-pdf' in org-latex.el."
       pdffile)))
 
 (defun org-babel-prep-session:latex (session params)
-  "Create a session named SESSION according to PARAMS."
-  (error "Latex does not support sessions"))
+  "Return an error because LaTeX doesn't support sesstions."
+  (error "LaTeX does not support sessions"))
 
 (provide 'ob-latex)
 

@@ -43,9 +43,9 @@
 (defvar org-babel-default-header-args:octave '())
 
 (defvar org-babel-matlab-shell-command "matlab -nosplash"
-  "Shell command to use to run matlab as an external process.")
+  "Shell command to run matlab as an external process.")
 (defvar org-babel-octave-shell-command "octave -q"
-  "Shell command to use to run octave as an external process.")
+  "Shell command to run octave as an external process.")
 
 (defun org-babel-expand-body:matlab (body params &optional processed-params)
   "Expand BODY according to PARAMS, return the expanded body."
@@ -62,9 +62,9 @@
       vars "\n") "\n" body "\n")))
 
 (defvar org-babel-matlab-with-emacs-link nil
-  "If non-nil use matlab-shell-run-region for session
-  evaluation. This will use EmacsLink if (matlab-with-emacs-link)
-  evaluates to a non-nil value.")
+  "If non-nil use matlab-shell-run-region for session evaluation.
+  This will use EmacsLink if (matlab-with-emacs-link) evaluates
+  to a non-nil value.")
 
 (defvar org-babel-matlab-emacs-link-wrapper-method
    "%s
@@ -84,12 +84,11 @@ end")
 (defvar org-babel-octave-eoe-output "ans = org_babel_eoe")
 
 (defun org-babel-execute:matlab (body params)
-  "Execute a block of matlab code with org-babel."
+  "Execute a block of matlab code with Babel."
   (require 'matlab)
   (org-babel-execute:octave body params 'matlab))
 (defun org-babel-execute:octave (body params &optional matlabp)
-  "Execute a block of octave code with org-babel."
-  (message "executing %s source code block" (if matlabp "matlab" "octave"))
+  "Execute a block of octave code with Babel."
   (let* ((processed-params (org-babel-process-params params))
          (session
 	  (funcall (intern (format "org-babel-%s-initiate-session"
@@ -116,7 +115,7 @@ end")
   (require 'matlab)
   (org-babel-prep-session:octave session params 'matlab))
 (defun org-babel-octave-var-to-octave (var)
-  "Convert an emacs-lisp variable into an octave variable.
+  "Convert an emacs-lisp value into an octave variable.
 Converts an emacs-lisp variable into a string of octave code
 specifying a variable of the same value."
   (if (listp var)
@@ -140,15 +139,15 @@ specifying a variable of the same value."
     session))
 
 (defun org-babel-matlab-initiate-session (&optional session params)
-  "Create a matlab inferior process buffer.  If there is not a
-current inferior-process-buffer in SESSION then create. Return
-the initialized session."
+  "Create a matlab inferior process buffer.
+If there is not a current inferior-process-buffer in SESSION then
+create. Return the initialized session."
   (require 'matlab)
   (org-babel-octave-initiate-session session params 'matlab))
 (defun org-babel-octave-initiate-session (&optional session params matlabp)
-  "Create an octave inferior process buffer.  If there is not a
-current inferior-process-buffer in SESSION then create. Return
-the initialized session."
+  "Create an octave inferior process buffer.
+If there is not a current inferior-process-buffer in SESSION then
+create. Return the initialized session."
   (require 'octave-inf)
   (unless (string= session "none")
     (let ((session (or session
@@ -163,10 +162,10 @@ the initialized session."
 
 (defun org-babel-octave-evaluate
   (session body result-type lang &optional matlabp)
-  "Pass BODY to the octave process in SESSION.  If RESULT-TYPE
-equals 'output then return the outputs of the statements in BODY,
-if RESULT-TYPE equals 'value then return the value of the last
-statement in BODY, as elisp."
+  "Pass BODY to the octave process in SESSION.
+If RESULT-TYPE equals 'output then return the outputs of the
+statements in BODY, if RESULT-TYPE equals 'value then return the
+value of the last statement in BODY, as elisp."
   (if session
       (org-babel-octave-evaluate-session session body result-type matlabp)
     (org-babel-octave-evaluate-external-process body result-type matlabp)))
@@ -242,8 +241,9 @@ statement in BODY, as elisp."
 	 (mapconcat #'identity (reverse results) "\n"))))))
 
 (defun org-babel-octave-import-elisp-from-file (file-name)
-  "Import data from FILE-NAME.  This removes initial blank and
-comment lines and then calls `org-babel-import-elisp-from-file'."
+  "Import data from FILE-NAME.
+This removes initial blank and comment lines and then calls
+`org-babel-import-elisp-from-file'."
   (let ((temp-file (make-temp-file "org-babel-results-")) beg end)
     (with-temp-file temp-file
       (insert-file-contents file-name)

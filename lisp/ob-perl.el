@@ -50,9 +50,8 @@
       vars "\n") "\n" (org-babel-trim body) "\n")))
 
 (defun org-babel-execute:perl (body params)
-  "Execute a block of Perl code with org-babel.  This function is
-called by `org-babel-execute-src-block'."
-  (message "executing Perl source code block")
+  "Execute a block of Perl code with Babel.
+This function is called by `org-babel-execute-src-block'."
   (let* ((processed-params (org-babel-process-params params))
          (session (nth 0 processed-params))
          (vars (nth 1 processed-params))
@@ -69,13 +68,14 @@ called by `org-babel-execute-src-block'."
       (nth 5 processed-params) (cdr (assoc :rownames params))))))
 
 (defun org-babel-prep-session:perl (session params)
-  "Prepare SESSION according to the header arguments specified in PARAMS."
+  "Prepare SESSION according to the header arguments in PARAMS."
   (error "Sessions are not supported for Perl."))
 
 ;; helper functions
 
 (defun org-babel-perl-var-to-perl (var)
-  "Convert an elisp var into a string of perl source code
+  "Convert an elisp value to a perl variable.
+The elisp value, VAR, is converted to a string of perl source code
 specifying a var of the same value."
   (if (listp var)
       (concat "[" (mapconcat #'org-babel-perl-var-to-perl var ", ") "]")
@@ -84,7 +84,7 @@ specifying a var of the same value."
 (defvar org-babel-perl-buffers '(:default . nil))
 
 (defun org-babel-perl-initiate-session (&optional session params)
-  "Simply return nil, as sessions are not supported by perl"
+  "Return nil because sessions are not supported by perl"
 nil)
 
 (defvar org-babel-perl-wrapper-method
@@ -100,10 +100,10 @@ print o join(\"\\n\", @r), \"\\n\"")
   nil)
 
 (defun org-babel-perl-evaluate (session body &optional result-type)
-  "Pass BODY to the Perl process in SESSION.  If RESULT-TYPE equals
-'output then return a list of the outputs of the statements in
-BODY, if RESULT-TYPE equals 'value then return the value of the
-last statement in BODY, as elisp."
+  "Pass BODY to the Perl process in SESSION.
+If RESULT-TYPE equals 'output then return a list of the outputs
+of the statements in BODY, if RESULT-TYPE equals 'value then
+return the value of the last statement in BODY, as elisp."
   (when session (error "Sessions are not supported for Perl."))
   (case result-type
     (output (org-babel-eval org-babel-perl-command body))

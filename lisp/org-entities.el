@@ -525,7 +525,9 @@ Kind can be any of `latex', `html', `ascii', `latin1', or `utf8'."
   (interactive)
   (with-output-to-temp-buffer "*Org Entity Help*"
     (princ "Org-mode entities\n=================\n\n")
-    (let ((ll (append org-entities-user org-entities))
+    (let ((ll (append '("* User-defined additions (variable org-entities-user)")
+		      org-entities-user
+		      org-entities))
 	  e latex mathp html latin utf8 name ascii
 	  (lastwasstring t)
 	  (head (concat

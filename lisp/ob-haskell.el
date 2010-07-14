@@ -70,8 +70,7 @@
       vars "\n") "\n" body "\n")))
 
 (defun org-babel-execute:haskell (body params)
-  "Execute a block of Haskell code with org-babel."
-  (message "executing haskell source code block")
+  "Execute a block of Haskell code."
   (let* ((processed-params (org-babel-process-params params))
          (session (nth 0 processed-params))
          (vars (nth 1 processed-params))
@@ -104,7 +103,8 @@
     string))
 
 (defun org-babel-haskell-initiate-session (&optional session params)
-  "If there is not a current inferior-process-buffer in SESSION
+  "Initiate a haskell session.
+If there is not a current inferior-process-buffer in SESSION
 then create one.  Return the initialized session."
   (require 'inf-haskell)
   (or (get-buffer "*haskell*")
@@ -124,7 +124,7 @@ then create one.  Return the initialized session."
 
 (defun org-babel-prep-session:haskell
   (session params &optional processed-params)
-  "Prepare SESSION according to the header arguments specified in PARAMS."
+  "Prepare SESSION according to the header arguments in PARAMS."
   (save-window-excursion
     (let ((pp (or processed-params (org-babel-process-params params)))
 	  (buffer (org-babel-haskell-initiate-session session)))
@@ -139,7 +139,8 @@ then create one.  Return the initialized session."
       (current-buffer))))
 
 (defun org-babel-haskell-table-or-string (results)
-  "If the results look like a table, then convert them into an
+  "Convert RESULTS to an Emacs-lisp table or string.
+If RESULTS look like a table, then convert them into an
 Emacs-lisp table, otherwise return the results as a string."
   (org-babel-read
    (if (and (stringp results) (string-match "^\\[.+\\]$" results))
@@ -153,21 +154,22 @@ Emacs-lisp table, otherwise return the results as a string."
      results)))
 
 (defun org-babel-haskell-var-to-haskell (var)
-  "Convert an elisp var into a string of haskell source code
-specifying a var of the same value."
+  "Convert an elisp value VAR into a haskell variable.
+The elisp VAR is converted to a string of haskell source code
+specifying a variable of the same value."
   (if (listp var)
       (concat "[" (mapconcat #'org-babel-haskell-var-to-haskell var ", ") "]")
     (format "%S" var)))
 
 (defvar org-src-preserve-indentation)
 (defun org-babel-haskell-export-to-lhs (&optional arg)
-  "Export to a .lhs file with all haskell code blocks escaped
-appropriately.  When called with a prefix argument the resulting
+  "Export to a .lhs file with all haskell code blocks escaped.
+When called with a prefix argument the resulting
 .lhs file will be exported to a .tex file.  This function will
 create two new files, base-name.lhs and base-name.tex where
 base-name is the name of the current org-mode file.
 
-Note that all standard org-babel literate programming
+Note that all standard Babel literate programming
 constructs (header arguments, no-web syntax etc...) are ignored."
   (interactive "P")
   (let* ((contents (buffer-string))

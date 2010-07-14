@@ -97,14 +97,16 @@ keys         The keys that will select the template, as a string, characters
 description  A short string describing the template, will be shown during
              selection.
 
-type         The type of entry.  Valid are:
+type         The type of entry.  Valid types are:
                entry       an Org-mode node, with a headline. Will be
                            filed as the child of the target entry or as
                            a top-level entry.
-               item        a plain list item, placed in the first plain
-                           list a the target location.
-               checkitem   a checkbox item.  This only differs from the
-                           plain lis item by the default template.
+               item        a plain list item, will be placed in the
+                           first plain list at the target
+                           location.
+               checkitem   a checkbox item.  This differs from the
+                           plain list item only is so far as it uses a
+                           different default template.
                table-line  a new line in the first table at target location.
                plain       text to be inserted as it is.
 
@@ -119,7 +121,7 @@ target       Specification of where the captured item should be placed.
                  Text will be placed at the beginning or end of that file
 
              (id \"id of existing org entry\")
-                 Filing as child of this entry, or in the body of the entry
+                 File as child of this entry, or in the body of the entry
 
              (file+headline \"path/to/file\" \"node headline\")
                  Fast configuration if the target heading is unique in the file
@@ -128,20 +130,20 @@ target       Specification of where the captured item should be placed.
                  For non-unique headings, the full path is safer
 
              (file+regexp  \"path/to/file\" \"regexp to find location\")
+                 File to the entry matching regexp
 
              (file+datetree \"path/to/file\")
-                 Will create a heading in a date tree.
+                 Will create a heading in a date tree
 
              (file+function \"path/to/file\" function-finding-location)
-                 A function to find the right location in the file.
+                 A function to find the right location in the file
 
              (clock)
-                File to the entry that is currently being clocked.
+                File to the entry that is currently being clocked
 
              (function function-finding-location)
                 Most general way, write your own function to find both
-                file and location.
-
+                file and location
 
 template     The template for creating the capture item.  If you leave this
              empty, an appropriate default template will be used.  See below
@@ -156,7 +158,7 @@ template     The template for creating the capture item.  If you leave this
 The rest of the entry is a property list of additional options.  Recognized
 properties are:
 
- :prepend            Normally new captured information will be appended at
+ :prepend            Normally newly captured information will be appended at
                      the target location (last child, last table line,
                      last list item...).  Setting this property will
                      change that.
@@ -183,12 +185,12 @@ properties are:
                      which means that the new line should become the third
                      line before the second horizontal separaor line.
 
-The template defined the text to be inserted.  Often then this is an org-mode
+The template defines the text to be inserted.  Often this is an org-mode
 entry (so the first line should start with a star) that will be filed as a
 child of the target headline.  It can also be freely formatted text.
 Furthermore, the following %-escapes will be replaced with content:
 
-  %^{prompt}  Prompt the user for a string and replace this sequence with it.
+  %^{prompt}  prompt the user for a string and replace this sequence with it.
               A default value and a completion table ca be specified like this:
               %^{prompt|default|completion2|completion3|...}
   %t          time stamp, date only
@@ -202,13 +204,13 @@ Furthermore, the following %-escapes will be replaced with content:
               indented, the entire inserted text will be indented as well.
   %c          current kill ring head
   %x          content of the X clipboard
-  %^C         Interactive selection of which kill or clip to use
-  %^L         Like %^C, but insert as link
+  %^C         interactive selection of which kill or clip to use
+  %^L         like %^C, but insert as link
   %k          title of currently clocked task
   %K          link to currently clocked task
   %^g         prompt for tags, with completion on tags in target file
-  %^G         prompt for tags, with completion all tags in all agenda files
-  %^{prop}p   Prompt the user for a value for property `prop'
+  %^G         prompt for tags, with completion on all tags in all agenda files
+  %^{prop}p   prompt the user for a value for property `prop'
   %:keyword   specific information for certain link types, see below
   %[pathname] insert the contents of the file given by `pathname'
   %(sexp)     evaluate elisp `(sexp)' and replace with the result
@@ -283,7 +285,7 @@ calendar           |  %:type %:date"
 	   (choice :tag "Template"
 		   (string)
 		   (list :tag "File"
-			 (const :format "" file-contents)
+			 (const :format "" file)
 			 (file :tag "Template file"))
 		   (list :tag "Function"
 			 (const :format "" function)
@@ -372,7 +374,8 @@ bypassed."
    (t
     ;; FIXME: Are these needed?
     (let* ((orig-buf (current-buffer))
-	   (annotation (if org-capture-link-is-already-stored
+	   (annotation (if (and (boundp 'org-capture-link-is-already-stored)
+				org-capture-link-is-already-stored)
 			   (plist-get org-store-link-plist :annotation)
 			 (org-store-link nil)))
 	   (initial (and (org-region-active-p)
@@ -544,16 +547,7 @@ already gone."
 	  (save-restriction
 	    (widen)
 	    (goto-char pos)
-	    (call-interactively 'org-refile)
-	    (when (and (boundp 'bookmark-alist)
-		       (assoc "org-capture-last-stored" bookmark-alist))
-	      (if (assoc "org-refile-last-stored" bookmark-alist)
-		  (setcdr (assoc "org-refile-last-stored" bookmark-alist)
-			  (cdr (assoc "org-refile-last-stored" bookmark-alist)))
-		(push (cons "org-capture-last-stored"
-			    (cdr (assoc "org-refile-last-stored"
-					bookmark-alist)))
-		      bookmark-alist)))))))))
+	    (call-interactively 'org-refile)))))))
 
 (defun org-capture-kill ()
   "Abort the current capture process."
@@ -987,7 +981,7 @@ Point will remain at the first line after the inserted text."
   (org-capture-put :key (car entry) :description (nth 1 entry)
 		   :target (nth 3 entry))
   (let ((txt (nth 4 entry)) (type (or (nth 2 entry) 'entry)))
-    (when (or (not txt) (not (string-match "\\S-" txt)))
+    (when (or (not (stringp txt)) (not (string-match "\\S-" txt)))
       ;; The template may be empty or omitted for special types.
       ;; Here we insert the default templates for such cases.
       (cond

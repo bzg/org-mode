@@ -81,9 +81,8 @@
        (list body))) "\n")))
 
 (defun org-babel-execute:R (body params)
-  "Execute a block of R code with org-babel.  This function is
-called by `org-babel-execute-src-block'."
-  (message "executing R source code block...")
+  "Execute a block of R code.
+This function is called by `org-babel-execute-src-block'."
   (save-excursion
     (let* ((processed-params (org-babel-process-params params))
            (result-type (nth 3 processed-params))
@@ -212,10 +211,10 @@ write.table(main(), file=\"%s\", sep=\"\\t\", na=\"nil\",row.names=%s, col.names
 
 (defun org-babel-R-evaluate
   (session body result-type column-names-p row-names-p)
-  "Pass BODY to the R process in SESSION.  If RESULT-TYPE equals
-'output then return a list of the outputs of the statements in
-BODY, if RESULT-TYPE equals 'value then return the value of the
-last statement in BODY, as elisp."
+  "Pass BODY to the R process in SESSION.
+If RESULT-TYPE equals 'output then return a list of the outputs
+of the statements in BODY, if RESULT-TYPE equals 'value then
+return the value of the last statement in BODY, as elisp."
   (if (not session)
       ;; external process evaluation
       (case result-type
@@ -267,13 +266,11 @@ last statement in BODY, as elisp."
 		  (inferior-ess-send-input)))) 2) "\n")))))
 
 (defun org-babel-R-process-value-result (result column-names-p)
-  "R-specific processing of return value prior to return to
-org-babel.  Insert hline if column names in output have been
-requested."
+  "R-specific processing of return value.
+Insert hline if column names in output have been requested."
   (if column-names-p
       (cons (car result) (cons 'hline (cdr result)))
     result))
-  
 
 (provide 'ob-R)
 

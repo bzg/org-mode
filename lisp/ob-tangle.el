@@ -33,6 +33,8 @@
   (require 'cl))
 
 (declare-function org-link-escape "org" (text &optional table))
+(declare-function org-heading-components "org" ())
+(declare-function with-temp-filebuffer "org-interaction" (file &rest body))
 
 (defcustom org-babel-tangle-lang-exts
   '(("emacs-lisp" . "el"))
@@ -47,12 +49,17 @@ then the name of the language is used."
 	   (string "Language name")
 	   (string "File Extension"))))
 
+(defcustom org-babel-post-tangle-hook nil
+  "Hook run in code files tangled by `org-babel-tangle'."
+  :group 'org-babel
+  :type 'hook)
+
 ;;;###autoload
 (defun org-babel-load-file (file)
-  "Load the contents of the Emacs Lisp source code blocks in the
-org-mode formatted FILE.  This function will first export the
-source code using `org-babel-tangle' and then load the resulting
-file using `load-file'."
+  "Load Emacs Lisp source code blocks in the Org-mode FILE.
+This function exports the source code using
+`org-babel-tangle' and then loads the resulting file using
+`load-file'."
   (flet ((age (file)
               (float-time
                (time-subtract (current-time)
@@ -69,11 +76,11 @@ file using `load-file'."
 
 ;;;###autoload
 (defun org-babel-tangle-file (file &optional target-file lang)
-  "Extract the bodies of all source code blocks in FILE with
-`org-babel-tangle'.  Optional argument TARGET-FILE can be used to
-specify a default export file for all source blocks.  Optional
-argument LANG can be used to limit the exported source code
-blocks by language."
+  "Extract the bodies of source code blocks in FILE.
+Source code blocks are extracted with `org-babel-tangle'.
+Optional argument TARGET-FILE can be used to specify a default
+export file for all source blocks.  Optional argument LANG can be
+used to limit the exported source code blocks by language."
   (interactive "fFile to tangle: \nP")
   (let ((visited-p (get-file-buffer (expand-file-name file)))
 	to-be-removed)
@@ -90,7 +97,8 @@ blocks by language."
 
 ;;;###autoload
 (defun org-babel-tangle (&optional target-file lang)
-  "Extract the bodies of all source code blocks from the current
+  "Write code blocks to source-specific files.
+Extract the bodies of all source code blocks from the current
 file into their own source-specific files.  Optional argument
 TARGET-FILE can be used to specify a default export file for all
 source blocks.  Optional argument LANG can be used to limit the
@@ -99,6 +107,11 @@ exported source code blocks by language."
   (save-buffer)
   (save-excursion
     (let ((block-counter 0)
+	  (org-babel-default-header-args
+	   (if target-file
+	       (org-babel-merge-params org-babel-default-header-args
+				       (list (cons :tangle target-file)))
+	     org-babel-default-header-args))
           path-collector)
       (mapc ;; map over all languages
        (lambda (by-lang)
@@ -120,13 +133,12 @@ exported source code blocks by language."
                 (let* ((tangle (get-spec :tangle))
                        (she-bang ((lambda (sheb) (when (> (length sheb) 0) sheb))
 				  (get-spec :shebang)))
-                       (base-name (or (cond
-                                       ((string= "yes" tangle)
-                                        (file-name-sans-extension
-					 (buffer-file-name)))
-                                       ((string= "no" tangle) nil)
-                                       ((> (length tangle) 0) tangle))
-                                      target-file))
+                       (base-name (cond
+				   ((string= "yes" tangle)
+				    (file-name-sans-extension
+				     (buffer-file-name)))
+				   ((string= "no" tangle) nil)
+				   ((> (length tangle) 0) tangle)))
                        (file-name (when base-name
                                     ;; decide if we want to add ext to base-name
                                     (if (and ext (string= "yes" tangle))
@@ -138,7 +150,7 @@ exported source code blocks by language."
                       (delete-file file-name))
                     ;; drop source-block to file
                     (with-temp-buffer
-                      (if (fboundp lang-f) (funcall lang-f))
+                      (when (fboundp lang-f) (funcall lang-f))
                       (when (and she-bang (not (member file-name she-banged)))
                         (insert (concat she-bang "\n"))
                         (setq she-banged (cons file-name she-banged)))
@@ -160,10 +172,18 @@ exported source code blocks by language."
        (org-babel-tangle-collect-blocks lang))
       (message "tangled %d code block%s" block-counter
                (if (= block-counter 1) "" "s"))
+      ;; run `org-babel-post-tangle-hook' in all tangled files
+      (when org-babel-post-tangle-hook
+	(mapc
+	 (lambda (file)
+	   (with-temp-filebuffer file
+	     (run-hooks 'org-babel-post-tangle-hook)))
+	 path-collector))
       path-collector)))
 
 (defun org-babel-tangle-clean ()
-  "Call this function inside of a source-code file generated by
+  "Remove comments inserted by `org-babel-tangle'.
+Call this function inside of a source-code file generated by
 `org-babel-tangle' to remove all comments inserted automatically
 by `org-babel-tangle'.  Warning, this comment removes any lines
 containing constructs which resemble org-mode file links or noweb
@@ -177,20 +197,28 @@ references."
 
 (defvar org-stored-links)
 (defun org-babel-tangle-collect-blocks (&optional lang)
-  "Collect all source blocks in the current org-mode file.
+  "Collect source blocks in the current Org-mode file.
 Return an association list of source-code block specifications of
 the form used by `org-babel-spec-to-string' grouped by language.
 Optional argument LANG can be used to limit the collected source
 code blocks by language."
-  (let ((block-counter 0) blocks)
-    (org-babel-map-source-blocks (buffer-file-name)
-      (setq block-counter (+ 1 block-counter))
+  (let ((block-counter 1) (current-heading "") blocks)
+    (org-babel-map-src-blocks (buffer-file-name)
+      ((lambda (new-heading)
+	 (if (not (string= new-heading current-heading))
+	     (progn
+	       (setq block-counter 1)
+	       (setq current-heading new-heading))
+	   (setq block-counter (+ 1 block-counter))))
+       (replace-regexp-in-string "[ \t]" "-"
+				 (nth 4 (org-heading-components))))
       (let* ((link (progn (call-interactively 'org-store-link)
                           (org-babel-clean-text-properties
 			   (car (pop org-stored-links)))))
              (info (org-babel-get-src-block-info))
              (source-name (intern (or (nth 4 info)
-                                      (format "block-%d" block-counter))))
+                                      (format "%s:%d"
+					      current-heading block-counter))))
              (src-lang (nth 0 info))
 	     (expand-cmd (intern (concat "org-babel-expand-body:" src-lang)))
              (params (nth 2 info))
@@ -229,7 +257,8 @@ code blocks by language."
     blocks))
 
 (defun org-babel-spec-to-string (spec)
-  "Insert the source-code specified by SPEC into the current
+  "Insert SPEC into the current file.
+Insert the source-code specified by SPEC into the current
 source code file.  This function uses `comment-region' which
 assumes that the appropriate major-mode is set.  SPEC has the
 form

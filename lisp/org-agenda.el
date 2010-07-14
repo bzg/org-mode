@@ -6965,13 +6965,14 @@ m     Mark the entry at point for an agenda action
 s     Schedule the marked entry to the date at the cursor
 d     Set the deadline of the marked entry to the date at the cursor
 r     Call `org-remember' with cursor date as the default date
+c     Call `org-capture' with cursor date as the default date
 SPC   Show marked entry in other window
 TAB   Visit marked entry in other window
 
 The cursor may be at a date in the calendar, or in the Org agenda."
   (interactive)
   (let (ans)
-    (message "Select action: [m]ark | [s]chedule [d]eadline [r]emember [ ]show")
+    (message "Select action: [m]ark | [s]chedule [d]eadline [r]emember [c]apture [ ]show")
     (setq ans (read-char-exclusive))
     (cond
      ((equal ans ?m)

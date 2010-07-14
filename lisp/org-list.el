@@ -195,19 +195,19 @@ When the indentation would be larger than this, it will become
 % END RECEIVE ORGLST %n
 \\begin{comment}
 #+ORGLST: SEND %n org-list-to-latex
-| | |
+-
 \\end{comment}\n")
     (texinfo-mode "@c BEGIN RECEIVE ORGLST %n
 @c END RECEIVE ORGLST %n
 @ignore
 #+ORGLST: SEND %n org-list-to-texinfo
-| | |
+-
 @end ignore\n")
     (html-mode "<!-- BEGIN RECEIVE ORGLST %n -->
 <!-- END RECEIVE ORGLST %n -->
 <!--
 #+ORGLST: SEND %n org-list-to-html
-| | |
+-
 -->\n"))
   "Templates for radio lists in different major modes.
 All occurrences of %n in a template will be replaced with the name of the
@@ -1277,17 +1277,15 @@ this list."
     (save-excursion
       (org-list-goto-true-beginning)
       (beginning-of-line 0)
-      (unless (looking-at "#\\+ORGLST: *SEND +\\([a-zA-Z0-9_]+\\) +\\([^ \t\r\n]+\\)\\( +.*\\)?")
+      (unless (looking-at "[ \t]*#\\+ORGLST[: \t][ \t]*SEND[ \t]+\\([^ \t\r\n]+\\)[ \t]+\\([^ \t\r\n]+\\)\\([ \t]+.*\\)?")
 	(if maybe
 	    (throw 'exit nil)
 	  (error "Don't know how to transform this list"))))
     (let* ((name (match-string 1))
 	   (transform (intern (match-string 2)))
 	   (item-beginning (org-list-item-beginning))
-	   (txt (buffer-substring-no-properties
-		 (car item-beginning)
-		 (org-list-end (cdr item-beginning))))
-	   (list (org-list-parse-list))
+	   (list (save-excursion (org-list-goto-true-beginning)
+				 (org-list-parse-list)))
 	   beg)
       (unless (fboundp transform)
 	(error "No such transformation function %s" transform))

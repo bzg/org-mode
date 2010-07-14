@@ -31,17 +31,21 @@
 (require 'ob-ref)
 (require 'ob-comint)
 (require 'ob-eval)
-(require (if (featurep 'xemacs) 'python-mode 'python))
 (eval-when-compile (require 'cl))
 
 (declare-function org-remove-indentation "org" )
+(declare-function py-shell "ext:python-mode" (&optional argprompt))
+(declare-function run-python "ext:python" (&optional cmd noshow new))
 
 (add-to-list 'org-babel-tangle-lang-exts '("python" . "py"))
 
 (defvar org-babel-default-header-args:python '())
 
 (defvar org-babel-python-command "python"
-  "Name of command to use for executing python code.")
+  "Name of command for executing python code.")
+
+(defvar org-babel-python-mode (if (featurep 'xemacs) 'python-mode 'python)
+  "Preferred python mode for use in running python interactively.")
 
 (defun org-babel-expand-body:python (body params &optional processed-params)
   "Expand BODY according to PARAMS, return the expanded body."
@@ -55,9 +59,8 @@
    "\n" (org-babel-trim body) "\n"))
 
 (defun org-babel-execute:python (body params)
-  "Execute a block of Python code with org-babel.  This function is
-called by `org-babel-execute-src-block'."
-  (message "executing Python source code block")
+  "Execute a block of Python code with Babel.
+This function is called by `org-babel-execute-src-block'."
   (let* ((processed-params (org-babel-process-params params))
          (session (org-babel-python-initiate-session (first processed-params)))
          (result-params (nth 2 processed-params))
@@ -75,7 +78,7 @@ called by `org-babel-execute-src-block'."
 			      (cdr (assoc :rownames params)))))))
 
 (defun org-babel-prep-session:python (session params)
-  "Prepare SESSION according to the header arguments specified in PARAMS."
+  "Prepare SESSION according to the header arguments in PARAMS."
   (let* ((session (org-babel-python-initiate-session session))
          (vars (org-babel-ref-variables params))
          (var-lines (mapcar ;; define any variables
@@ -102,14 +105,20 @@ called by `org-babel-execute-src-block'."
 ;; helper functions
 
 (defun org-babel-python-var-to-python (var)
-  "Convert an elisp var into a string of python source code
-specifying a var of the same value."
+  "Convert an elisp value to a python variable.
+Convert an elisp value, VAR, into a string of python source code
+specifying a variable of the same value."
   (if (listp var)
       (concat "[" (mapconcat #'org-babel-python-var-to-python var ", ") "]")
-    (if (equal var 'hline) "None" (format "%S" var))))
+    (if (equal var 'hline)
+	"None"
+      (format
+       (if (and (stringp var) (string-match "[\n\r]" var)) "\"\"%S\"\"" "%S")
+       var))))
 
 (defun org-babel-python-table-or-string (results)
-  "If the results look like a list or tuple, then convert them into an
+  "Convert RESULTS into an appropriate elisp value.
+If the results look like a list or tuple, then convert them into an
 Emacs-lisp table, otherwise return the results as a string."
   ((lambda (res)
      (if (listp res)
@@ -134,15 +143,19 @@ Emacs-lisp table, otherwise return the results as a string."
   (cdr (assoc session org-babel-python-buffers)))
 
 (defun org-babel-python-initiate-session-by-key (&optional session)
-  "If there is not a current inferior-process-buffer in SESSION
+  "Initiate a python session.
+If there is not a current inferior-process-buffer in SESSION
 then create.  Return the initialized session."
+  (require org-babel-python-mode)
   (save-window-excursion
     (let* ((session (if session (intern session) :default))
            (python-buffer (org-babel-python-session-buffer session)))
       (cond
-       ((fboundp 'run-python) ; python.el
+       ((and (equal 'python org-babel-python-mode)
+	     (fboundp 'run-python)) ; python.el
 	(run-python))
-       ((fboundp 'py-shell) ; python-mode.el
+       ((and (equal 'python-mode org-babel-python-mode)
+	     (fboundp 'py-shell)) ; python-mode.el
 	;; `py-shell' creates a buffer whose name is the value of
 	;; `py-which-bufname' with '*'s at the beginning and end
 	(let* ((bufname (if python-buffer
@@ -166,7 +179,7 @@ then create.  Return the initialized session."
      (org-babel-python-initiate-session-by-key session))))
 
 (defvar org-babel-python-eoe-indicator "'org_babel_python_eoe'"
-  "Used to indicate that evaluation is has completed.")
+  "A string to indicate that evaluation has completed.")
 (defvar org-babel-python-wrapper-method
   "
 def main():
@@ -183,10 +196,10 @@ open('%s', 'w').write( pprint.pformat(main()) )")
 
 (defun org-babel-python-evaluate
   (buffer body &optional result-type result-params)
-  "Pass BODY to the Python process in BUFFER.  If RESULT-TYPE equals
-'output then return a list of the outputs of the statements in
-BODY, if RESULT-TYPE equals 'value then return the value of the
-last statement in BODY, as elisp."
+  "Pass BODY to the Python process in BUFFER.
+If RESULT-TYPE equals 'output then return a list of the outputs
+of the statements in BODY, if RESULT-TYPE equals 'value then
+return the value of the last statement in BODY, as elisp."
   (if (not buffer)
       ;; external process evaluation
       (case result-type

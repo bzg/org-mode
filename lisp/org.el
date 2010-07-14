@@ -76,14 +76,15 @@
 
 (require 'calendar)
 ;; Emacs 22 calendar compatibility:  Make sure the new variables are available
-(unless (boundp 'calendar-view-holidays-initially-flag)
-  (defvaralias 'calendar-view-holidays-initially-flag
-    'view-calendar-holidays-initially))
-(unless (boundp 'calendar-view-diary-initially-flag)
-  (defvaralias 'calendar-view-diary-initially-flag
-    'view-diary-entries-initially))
-(unless (boundp 'diary-fancy-buffer)
-  (defvaralias 'diary-fancy-buffer 'fancy-diary-buffer))
+(when (fboundp 'defvaralias)
+  (unless (boundp 'calendar-view-holidays-initially-flag)
+    (defvaralias 'calendar-view-holidays-initially-flag
+      'view-calendar-holidays-initially))
+  (unless (boundp 'calendar-view-diary-initially-flag)
+    (defvaralias 'calendar-view-diary-initially-flag
+      'view-diary-entries-initially))
+  (unless (boundp 'diary-fancy-buffer)
+    (defvaralias 'diary-fancy-buffer 'fancy-diary-buffer)))
 
 ;; For XEmacs, noutline is not yet provided by outline.el, so arrange for
 ;; the file noutline.el being loaded.
@@ -105,13 +106,6 @@
 (require 'org-footnote)
 
 ;; babel
-(let* ((babel-path (expand-file-name
-		    "babel"
-		    (file-name-directory (or (buffer-file-name)
-					     load-file-name))))
-       (babel-langs-path (expand-file-name "langs" babel-path)))
-  (add-to-list 'load-path babel-path)
-  (add-to-list 'load-path babel-langs-path))
 (require 'ob)
 (require 'ob-table)
 (require 'ob-lob)
@@ -122,6 +116,7 @@
 
 ;; load languages based on value of `org-babel-load-languages'
 (defvar org-babel-load-languages)
+;;;###autoload
 (defun org-babel-do-load-languages (sym value)
   "Load the languages defined in `org-babel-load-languages'."
   (set-default sym value)
@@ -448,7 +443,8 @@ This option can also be set with the +OPTIONS line, e.g. \"^:nil\"."
 	  (const :tag "Only with braces" {})
 	  (const :tag "Never interpret" nil)))
 
-(defvaralias 'org-export-with-sub-superscripts 'org-use-sub-superscripts)
+(if (fboundp 'defvaralias)
+    (defvaralias 'org-export-with-sub-superscripts 'org-use-sub-superscripts))
 
 
 (defcustom org-startup-with-beamer-mode nil
@@ -8708,8 +8704,9 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
 	 (t
 	  (save-match-data
 	    (if (string-match (concat "^" (regexp-quote
-					   (file-name-as-directory
-					    default-directory)))
+					   (expand-file-name
+					    (file-name-as-directory
+					     default-directory))))
 			      (expand-file-name path))
 		;; We are linking a file with relative path name.
 		(setq path (substring (expand-file-name path)
@@ -10146,7 +10143,7 @@ This can be done with a 0 prefix: `C-0 C-c C-w'"
 		  ;; If we are refiling for capture, make sure that the
 		  ;; last-capture pointers point here
 		  (when (org-bound-and-true-p org-refile-for-capture)
-		    (bookmark-set "org-refile-last-stored")
+		    (bookmark-set "org-capture-last-stored-marker")
 		    (move-marker org-capture-last-stored-marker (point)))
 		  (if (fboundp 'deactivate-mark) (deactivate-mark))
 		  (run-hooks 'org-after-refile-insert-hook))))
@@ -17125,11 +17122,13 @@ This command does many different things, depending on context:
 	  (org-footnote-at-definition-p))
       (call-interactively 'org-footnote-action))
      ((org-at-item-checkbox-p)
-      (call-interactively 'org-toggle-checkbox))
+      (call-interactively 'org-toggle-checkbox)
+      (org-list-send-list 'maybe))
      ((org-at-item-p)
       (if arg
 	  (call-interactively 'org-toggle-checkbox)
-	(call-interactively 'org-maybe-renumber-ordered-list)))
+	(call-interactively 'org-maybe-renumber-ordered-list))
+      (org-list-send-list 'maybe))
      ((save-excursion (beginning-of-line 1) (looking-at org-dblock-start-re))
       ;; Dynamic block
       (beginning-of-line 1)

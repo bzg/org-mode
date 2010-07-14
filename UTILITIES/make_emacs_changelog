@@ -1,0 +1,50 @@
+#!/usr/bin/perl
+
+$commitrange = shift @ARGV;
+if (!$commitrange) {
+  print STDERR "Enter commitrange: ";
+  $commitrange = <>;
+  $commitrange =~ s/\s*(.*?)\s+/$1/;
+}
+
+$syncdate = shift @ARGV;
+if (!$syncdate) {
+  print STDERR "Enter syncdate YYYY-MM-DD: ";
+  $syncdate = <>;
+  $syncdate =~ s/\s*(.*?)\s+/$1/;
+}
+
+# Run git log to get the commits the messages
+open IN,"git log $commitrange|";
+undef $/;
+$log = <IN>;
+@commits = split(/^(?=commit)/m,$log);
+
+for $i (0..$#commits) {
+  $entry = ""; $tiny = "";
+  $commit = $commits[$i];
+  $author = $1 if $commit=~/^Author: ([^\n]+)/m;
+  $date   = $1 if $commit=~/^Date: ([^\n]+)/m;
+  $entry  = $1 if $commit=~/^([ \t]*\* [^\f]*?)(\n[ \t]*\n|\Z)/m;
+  $tiny   = "  (tiny change)" if $commit =~ /TINYCHANGE/;
+
+  # split author into name and address
+  if ($author =~ /(.*?)\s+(<.*?>)/) {
+    $name = $1;
+    $address = $2;
+  } else {
+    warn "No name/address";
+    next;
+  }
+
+  if ($entry) {
+    # indent each line by 1 TAB
+    $entry =~ s/^[ \t]*/\t/gm;
+    # Add empty lines if there are several files in there
+    $entry =~ s/(\n[ \t]+\* )/\n$1/g;
+    # remove the lisp part of the path
+    $entry =~ s/^([ \t]+\* )lisp\//$1/mg;
+    print "$syncdate  $name  $address$tiny\n\n$entry\n\n";
+  }
+}
+ 

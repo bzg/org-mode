@@ -47,9 +47,8 @@
   "Expand BODY according to PARAMS, return the expanded body." body)
 
 (defun org-babel-execute:sass (body params)
-  "Execute a block of Sass code with org-babel.  This function is
-called by `org-babel-execute-src-block'."
-  (message "executing Sass source code block")
+  "Execute a block of Sass code with Babel.
+This function is called by `org-babel-execute-src-block'."
   (let* ((result-params (split-string (or (cdr (assoc :results params)) "")))
          (file (cdr (assoc :file params)))
          (out-file (or file (make-temp-file "org-babel-sass-out")))
@@ -61,7 +60,7 @@ called by `org-babel-execute-src-block'."
     (or file (with-temp-buffer (insert-file-contents out-file) (buffer-string)))))
 
 (defun org-babel-prep-session:sass (session params)
-  "This function does nothing as sass does not support sessions."
+  "Raise an error because sass does not support sessions."
   (error "Sass does not support sessions"))
 
 (provide 'ob-sass)

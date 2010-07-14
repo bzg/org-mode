@@ -49,7 +49,7 @@ In case you want to use a different screen than one selected by your $PATH")
   "Expand BODY according to PARAMS, return the expanded body." body)
 
 (defun org-babel-execute:screen (body params)
-  "Send a block of code via screen to a terminal using org-babel.
+  "Send a block of code via screen to a terminal using Babel.
 \"default\" session is be used when none is specified."
   (message "Sending source code block to interactive terminal session...")
   (save-window-excursion
@@ -82,7 +82,7 @@ In case you want to use a different screen than one selected by your $PATH")
 ;; helper functions
 
 (defun org-babel-screen-session-execute-string (session body)
-  "If SESSION exist, send BODY to it."
+  "If SESSION exists, send BODY to it."
   (let ((socket (org-babel-screen-session-socketname session)))
     (when socket
       (let ((tmpfile (org-babel-screen-session-write-temp-file session body)))
@@ -93,7 +93,7 @@ In case you want to use a different screen than one selected by your $PATH")
                       "paste z"))))))
 
 (defun org-babel-screen-session-socketname (session)
-  "Check if SESSION exist by parsing output of \"screen -ls\"."
+  "Check if SESSION exists by parsing output of \"screen -ls\"."
   (let* ((screen-ls (shell-command-to-string "screen -ls"))
          (sockets (delq
 		   nil
@@ -125,8 +125,8 @@ In case you want to use a different screen than one selected by your $PATH")
     tmpfile))
 
 (defun org-babel-screen-test ()
-  "Test if the default setup works.  The terminal should shortly
-flicker."
+  "Test if the default setup works.
+The terminal should shortly flicker."
   (interactive)
   (let* ((session "org-babel-testing")
          (random-string (format "%s" (random 99999)))
