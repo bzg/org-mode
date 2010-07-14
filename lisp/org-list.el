@@ -618,9 +618,7 @@ block, or item is invisible."
   (unless (or (not (org-in-item-p))
 	      (org-invisible-p)
 	      (org-in-regexps-block-p "^[ \t]*#\\+begin_\\([a-zA-Z]\\)"
-	      			      '(concat "^[ \t]*#\\+end_" (match-string 1)))
-	      (org-in-regexps-block-p "^[ \t]*\\\\begin{\\([a-zA-Z]\\)}"
-	      			      '(concat "^[ \t]*\\\\end{" (match-string 1) "}")))
+	      			      '(concat "^[ \t]*#\\+end_" (match-string 1))))
     (let* ((pos (point))
 	   (before-p (and (org-at-item-p)
 			  (<= (point) (match-end 0))))
