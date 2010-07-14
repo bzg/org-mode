@@ -335,21 +335,19 @@ Internal use only. Prefer `org-get-next-item' and
 
 (defun org-in-item-p ()
   "Is the cursor inside a plain list ?"
-  (save-restriction
-    (save-excursion
-      (widen)
-      ;; we move to eol so that the current line can be matched by
-      ;; `org-item-re'.
-      (let* ((limit (or (save-excursion (outline-previous-heading)) (point-min)))
-	     (actual-pos (goto-char (point-at-eol)))
-	     (last-item-start (save-excursion
-				(org-search-backward-unenclosed (org-item-re) limit)))
-	     (list-ender (org-list-terminator-between last-item-start actual-pos)))
-	;; We are in a list when we are on an item line or we can find
-	;; an item before and there is no valid list ender between us
-	;; and the item found.
-	(and last-item-start
-	     (not list-ender))))))
+  (save-excursion
+    ;; we move to eol so that the current line can be matched by
+    ;; `org-item-re'.
+    (let* ((limit (or (save-excursion (outline-previous-heading)) (point-min)))
+	   (actual-pos (goto-char (point-at-eol)))
+	   (last-item-start (save-excursion
+			      (org-search-backward-unenclosed (org-item-re) limit)))
+	   (list-ender (org-list-terminator-between last-item-start actual-pos)))
+      ;; We are in a list when we are on an item line or we can find
+      ;; an item before and there is no valid list ender between us
+      ;; and the item found.
+      (and last-item-start
+	   (not list-ender)))))
 
 (defun org-first-list-item-p ()
   "Is this heading the first item in a plain list?"
@@ -1395,19 +1393,22 @@ this list."
   (catch 'exit
     (unless (org-at-item-p) (error "Not at a list"))
     (save-excursion
-      (goto-char (org-list-top-point))
-      (beginning-of-line 0)
+      (re-search-backward "#\\+ORGLST" nil t)
       (unless (looking-at "[ \t]*#\\+ORGLST[: \t][ \t]*SEND[ \t]+\\([^ \t\r\n]+\\)[ \t]+\\([^ \t\r\n]+\\)\\([ \t]+.*\\)?")
 	(if maybe
 	    (throw 'exit nil)
 	  (error "Don't know how to transform this list"))))
     (let* ((name (match-string 1))
 	   (transform (intern (match-string 2)))
-	   (top-point (org-list-top-point))
 	   (bottom-point
 	    (save-excursion
-	      (goto-char (org-list-bottom-point))
-	      (re-search-backward "\\(\\\\end{comment}\\|@end ignore\\|-->\\)" top-point t)))
+	      (re-search-forward "\\(\\\\end{comment}\\|@end ignore\\|-->\\)" nil t)
+	      (match-beginning 0)))
+	   (top-point
+	    (progn
+	      (re-search-backward "#\\+ORGLST" nil t)
+	      (re-search-forward (org-item-re) bottom-point t)
+	      (match-beginning 0)))
 	   (list (save-restriction
 		   (narrow-to-region top-point bottom-point)
 		   (org-list-parse-list)))
