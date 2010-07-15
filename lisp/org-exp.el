@@ -26,12 +26,15 @@
 ;;
 ;;; Commentary:
 
+;;; Code:
+
 (require 'org)
 (require 'org-macs)
 (require 'org-agenda)
 (require 'org-exp-blocks)
 (require 'ob-exp)
 (require 'org-src)
+
 (eval-when-compile
   (require 'cl))
 
@@ -96,9 +99,10 @@ This works by starting up a separate Emacs process visiting the same file
 and doing the export from there.
 Not all export commands are affected by this - only the ones which
 actually write to a file, and that do not depend on the buffer state.
-
+\\<org-mode-map>
 If this option is nil, you can still get background export by calling
-`org-export' with a double prefix arg: `C-u C-u C-c C-e'.
+`org-export' with a double prefix arg: \
+\\[universal-argument] \\[universal-argument] \\[org-export].
 
 If this option is t, the double prefix can be used to exceptionally
 force an export command into the current process."
@@ -843,7 +847,8 @@ in the background.  This will be done only for commands that write
 to a file.  For details see the docstring of `org-export-run-in-background'.
 
 The prefix argument ARG will be passed to the exporter.  However, if
-ARG is a double universal prefix `C-u C-u', that means to inverse the
+ARG is a double universal prefix \\[universal-argument] \\[universal-argument], \
+that means to inverse the
 value of `org-export-run-in-background'."
   (interactive "P")
   (let* ((bg (org-xor (equal arg '(16)) org-export-run-in-background))
@@ -977,7 +982,7 @@ value of `org-export-run-in-background'."
 (defvar org-export-id-target-alist nil
   "Alist of section id's with preferred aliases.")
 (defvar org-export-code-refs nil
-  "Alist of code references and line numbers")
+  "Alist of code references and line numbers.")
 
 (defun org-export-preprocess-string (string &rest parameters)
   "Cleanup STRING so that that the true exported has a more consistent source.
@@ -1183,7 +1188,7 @@ on this string to produce the exported version."
 (defun org-export-define-heading-targets (target-alist)
   "Find all headings and define the targets for them.
 The new targets are added to TARGET-ALIST, which is also returned.
-Also find all ID and CUSTOM_ID propertiess and store them."
+Also find all ID and CUSTOM_ID properties and store them."
   (goto-char (point-min))
   (org-init-section-numbers)
   (let ((re (concat "^" org-outline-regexp
@@ -2051,7 +2056,7 @@ TYPE must be a string, any of:
 	     (delq nil
 		   (mapcar (lambda (el) (when (member el all) el)) now))))
 	(when intersection
-	  (error "recursive #+INCLUDE: %S" intersection))))))
+	  (error "Recursive #+INCLUDE: %S" intersection))))))
 
 (defun org-get-file-contents (file &optional prefix prefix1 markup)
   "Get the contents of FILE and return them as a string.
@@ -2111,7 +2116,7 @@ in the list) and remove property and value from the list in LISTVAR."
 	    nil t)
       (if (match-end 1)
 	  (if (not (match-string 4))
-	      (error "source block missing language specification: %s"
+	      (error "Source block missing language specification: %s"
 		     (let* ((body (match-string 6))
 			    (nothing (message "body:%s" body))
 			    (preview (or (and (string-match
@@ -2406,8 +2411,8 @@ INDENT was the original indentation of the block."
 (defun org-export-visible (type arg)
   "Create a copy of the visible part of the current buffer, and export it.
 The copy is created in a temporary buffer and removed after use.
-TYPE is the final key (as a string) that also select the export command in
-the `C-c C-e' export dispatcher.
+TYPE is the final key (as a string) that also selects the export command in
+the \\<org-mode-map>\\[org-export] export dispatcher.
 As a special case, if the you type SPC at the prompt, the temporary
 org-mode file will not be removed but presented to you so that you can
 continue to use it.  The prefix arg ARG is passed through to the exporting

@@ -196,7 +196,7 @@ NOT READY YET."
 
 ;;;###autoload
 (defun org-freemind-show (mm-file)
-  "Show file MM-FILE in Freemind."
+  "Show file MM-FILE in FreeMind."
   (interactive
    (list
     (save-match-data
@@ -276,7 +276,7 @@ will also unescape &#nn;."
     ))
 
 (defun org-freemind-convert-links-from-org (org-str)
-  "Convert org links in ORG-STR to freemind links and return the result."
+  "Convert org links in ORG-STR to FreeMind links and return the result."
   (let ((fm-str (replace-regexp-in-string
                  (rx (not (any "[\""))
                      (submatch
@@ -297,7 +297,7 @@ will also unescape &#nn;."
 
 ;;(org-freemind-convert-links-to-org "<a href=\"http://www.somewhere/\">link-text</a>")
 (defun org-freemind-convert-links-to-org (fm-str)
-  "Convert freemind links in FM-STR to org links and return the result."
+  "Convert FreeMind links in FM-STR to org links and return the result."
   (let ((org-str (replace-regexp-in-string
                   (rx "<a"
                       space
@@ -344,10 +344,10 @@ will also unescape &#nn;."
           "</p>\n"))
 
 (defun org-freemind-org-text-to-freemind-subnode/note (node-name start end drawers-regexp)
-  "Convert text part of org node to freemind subnode or note.
-Convert the text part of the org node named NODE-NAME. The text
-is in the current buffer between START and END. Drawers matching
-DRAWERS-REGEXP are converted to freemind notes."
+  "Convert text part of org node to FreeMind subnode or note.
+Convert the text part of the org node named NODE-NAME.  The text
+is in the current buffer between START and END.  Drawers matching
+DRAWERS-REGEXP are converted to FreeMind notes."
   ;; fix-me: doc
   (let ((text (buffer-substring-no-properties start end))
         (node-res "")

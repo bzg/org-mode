@@ -26,7 +26,10 @@
 ;;
 ;;; Commentary:
 
+;;; Code:
+
 (require 'org-exp)
+
 (eval-when-compile (require 'cl))
 
 (declare-function org-id-find-id-file "org-id" (id))
@@ -57,7 +60,7 @@ by the footnotes themselves."
   :type 'string)
 
 (defcustom org-export-html-coding-system nil
-  "Coding system for HTML export, defaults to buffer-file-coding-system."
+  "Coding system for HTML export, defaults to `buffer-file-coding-system'."
   :group 'org-export-html
   :type 'coding-system)
 
@@ -81,7 +84,7 @@ and corresponding declarations."
 			(string :tag "Declaration")))))
 
 (defcustom org-export-html-style-include-scripts t
-  "Non-nil means include the javascript snippets in exported HTML files.
+  "Non-nil means include the JavaScript snippets in exported HTML files.
 The actual script is defined in `org-export-html-scripts' and should
 not be modified."
   :group 'org-export-html
@@ -110,7 +113,7 @@ not be modified."
  }
 /*]]>*///-->
 </script>"
-"Basic javascript that is needed by HTML files produced by Org-mode.")
+"Basic JavaScript that is needed by HTML files produced by Org-mode.")
 
 (defconst org-export-html-style-default
 "<style type=\"text/css\">
@@ -207,20 +210,20 @@ settings with <style>...</style> tags."
 (put 'org-export-html-style-extra 'safe-local-variable 'stringp)
 
 (defcustom org-export-html-tag-class-prefix ""
-  "Prefix to clas names for TODO keywords.
+  "Prefix to class names for TODO keywords.
 Each tag gets a class given by the tag itself, with this prefix.
 The default prefix is empty because it is nice to just use the keyword
 as a class name.  But if you get into conflicts with other, existing
-CSS classes, then this prefic can be very useful."
+CSS classes, then this prefix can be very useful."
   :group 'org-export-html
   :type 'string)
 
 (defcustom org-export-html-todo-kwd-class-prefix ""
-  "Prefix to clas names for TODO keywords.
+  "Prefix to class names for TODO keywords.
 Each TODO keyword gets a class given by the keyword itself, with this prefix.
 The default prefix is empty because it is nice to just use the keyword
 as a class name.  But if you get into conflicts with other, existing
-CSS classes, then this prefic can be very useful."
+CSS classes, then this prefix can be very useful."
   :group 'org-export-html
   :type 'string)
 
@@ -235,10 +238,11 @@ CSS classes, then this prefic can be very useful."
  |
  <a accesskey=\"H\" href=\"%s\"> HOME </a>
 </div>"
-  "Snippet used to insert the HOME and UP links.  This is a format,
-the first %s will receive the UP link, the second the HOME link.
-If both `org-export-html-link-up' and `org-export-html-link-home' are
-empty, the entire snippet will be ignored."
+  "Snippet used to insert the HOME and UP links.
+This is a format string, the first %s will receive the UP link,
+the second the HOME link.  If both `org-export-html-link-up' and
+`org-export-html-link-home' are empty, the entire snippet will be
+ignored."
   :group 'org-export-html
   :type 'string)
 
@@ -340,7 +344,7 @@ When nil, also column one will use data tags."
   :type 'boolean)
 
 (defcustom org-export-html-validation-link nil
-  "Non-nil means add validationlink to postamble of HTML exported files."
+  "Non-nil means add validation link to postamble of HTML exported files."
   :group 'org-export-html
   :type '(choice
 	  (const :tag "Nothing" nil)
@@ -349,9 +353,10 @@ When nil, also column one will use data tags."
 
 
 (defcustom org-export-html-with-timestamp nil
-  "If non-nil, write `org-export-html-html-helper-timestamp'
-into the exported HTML text.  Otherwise, the buffer will just be saved
-to a file."
+  "If non-nil, write timestamp into the exported HTML text.
+If non-nil Write `org-export-html-html-helper-timestamp' into the
+exported HTML text.  Otherwise, the buffer will just be saved to
+a file."
   :group 'org-export-html
   :type 'boolean)
 
@@ -426,7 +431,7 @@ This may also be a function, building and inserting the postamble.")
 ;;; HTML export
 
 (defun org-export-html-preprocess (parameters)
-  ;; Convert LaTeX fragments to images
+  "Convert LaTeX fragments to images."
   (when (and org-current-export-file
 	     (plist-get parameters :LaTeX-fragments))
     (org-format-latex
@@ -460,7 +465,8 @@ headlines.  The default is 3.  Lower levels will become bulleted lists."
 
 ;;;###autoload
 (defun org-export-as-html-batch ()
-  "Call `org-export-as-html', may be used in batch processing as
+  "Call the function `org-export-as-html'.
+This function can be used in batch processing as:
 emacs   --batch
         --load=$HOME/lib/emacs/org.el
         --eval \"(setq org-export-headline-levels 2)\"
@@ -540,12 +546,12 @@ in a window.  A non-interactive call will only return the buffer."
    nil
    "Function to convert link URLs to exportable URLs.
 Takes two arguments, TYPE and PATH.
-Returns exportable url as (TYPE PATH), or `nil' to signal that it
+Returns exportable url as (TYPE PATH), or nil to signal that it
 didn't handle this case.
 Intended to be locally bound around a call to `org-export-as-html'." )
 
 (defun org-html-cvt-org-as-html (opt-plist type path)
-   "Convert and org filename to an equivalent html filename.
+   "Convert an org filename to an equivalent html filename.
 If TYPE is not file, just return `nil'.
 See variable `org-export-html-link-org-files-as-html'"
 
@@ -565,10 +571,10 @@ See variable `org-export-html-link-org-files-as-html'"
 
 ;;; org-html-should-inline-p
 (defun org-html-should-inline-p (filename descp)
-   "Return non-nil if link FILENAME should be inlined, according to
-current settings.
-DESCP is the boolean of whether there was a link description.
-See variables `org-export-html-inline-images' and
+   "Return non-nil if link FILENAME should be inlined.
+The decision to inline the FILENAME link is based on the current
+settings.  DESCP is the boolean of whether there was a link
+description.  See variables `org-export-html-inline-images' and
 `org-export-html-inline-image-extensions'."
    (declare (special
 	     org-export-html-inline-images
@@ -2018,7 +2024,7 @@ that uses these same face definitions."
   (goto-char (point-min)))
 
 (defun org-html-protect (s)
-  ;; convert & to &amp;, < to &lt; and > to &gt;
+  "convert & to &amp;, < to &lt; and > to &gt;"
   (let ((start 0))
     (while (string-match "&" s start)
       (setq s (replace-match "&amp;" t t s)
@@ -2033,7 +2039,7 @@ that uses these same face definitions."
   s)
 
 (defun org-html-expand (string)
-  "Prepare STRING for HTML export.  Applies all active conversions.
+  "Prepare STRING for HTML export.  Apply all active conversions.
 If there are links in the string, don't modify these."
   (let* ((re (concat org-bracket-link-regexp "\\|"
 		     (org-re "[ \t]+\\(:[[:alnum:]_@:]+:\\)[ \t]*$")))

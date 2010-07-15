@@ -26,7 +26,7 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
-;; Commentary:
+;;; Commentary:
 ;;
 ;; This library implements a DocBook exporter for org-mode.  The basic
 ;; idea and design is very similar to what `org-export-as-html' has.
@@ -142,8 +142,8 @@ people work on the same document."
   :type 'string)
 
 (defcustom org-export-docbook-footnote-id-prefix "fn-"
-  "The prefix of footnote IDs used during exporting.  Like
-`org-export-docbook-section-id-prefix', this variable can help
+  "The prefix of footnote IDs used during exporting.
+Like `org-export-docbook-section-id-prefix', this variable can help
 avoid same set of footnote IDs being used multiple times."
   :group 'org-export-docbook
   :type 'string)
@@ -155,7 +155,7 @@ avoid same set of footnote IDs being used multiple times."
     ("=" "<code>" "</code>")
     ("~" "<literal>" "</literal>")
     ("+" "<emphasis role=\"strikethrough\">" "</emphasis>"))
-  "Alist of DocBook expressions to convert emphasis fontifiers.
+  "A list of DocBook expressions to convert emphasis fontifiers.
 Each element of the list is a list of three elements.
 The first element is the character used as a marker for fontification.
 The second element is a formatting string to wrap fontified text with.

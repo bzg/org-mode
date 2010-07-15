@@ -83,8 +83,8 @@
 ;;
 ;;       #+DRAWERS: PROPERTIES LOGBOOK FEEDSTATUS
 ;;
-;;  Acknowledgements
-;;  ----------------
+;;  Acknowledgments
+;;  ---------------
 ;;
 ;;  org-feed.el is based on ideas by Brad Bozarth who implemented a
 ;;  similar mechanism using shell and awk scripts.

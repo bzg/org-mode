@@ -27,8 +27,11 @@
 
 ;; This file contains the habit tracking code for Org-mode
 
+;;; Code:
+
 (require 'org)
 (require 'org-agenda)
+
 (eval-when-compile
   (require 'cl))
 

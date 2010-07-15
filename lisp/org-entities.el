@@ -26,6 +26,8 @@
 ;;
 ;;; Commentary:
 
+;;; Code:
+
 (require 'org-macs)
 
 (declare-function org-table-align "org-table" ())
@@ -459,7 +461,7 @@ loaded, add these packages to `org-export-latex-packages-alist'."
     ("Diamond" "\\diamond" t "&diamond;" "[diamond]" "[diamond]" "⋄")
     ("loz" "\\diamond" t "&loz;" "[lozenge]" "[lozenge]" "◊")
     )
-  "Default entities used in Org-mode to preduce special characters.
+  "Default entities used in Org-mode to produce special characters.
 For details see `org-entities-user'.")
 
 (defsubst org-entity-get (name)
@@ -521,7 +523,7 @@ Kind can be any of `latex', `html', `ascii', `latin1', or `utf8'."
     (org-table-align)))
 
 (defun org-entities-help ()
-  "Create a Help buffer with all available entities"
+  "Create a Help buffer with all available entities."
   (interactive)
   (with-output-to-temp-buffer "*Org Entity Help*"
     (princ "Org-mode entities\n=================\n\n")
@@ -555,7 +557,7 @@ Kind can be any of `latex', `html', `ascii', `latin1', or `utf8'."
 
 
 (defun replace-amp ()
-  "Postprocess HTML file to unescape the ampersant."
+  "Postprocess HTML file to unescape the ampersand."
   (interactive)
   (while (re-search-forward "<td>&amp;\\([^<;]+;\\)" nil t)
     (replace-match (concat "<td>&" (match-string 1)) t t)))
