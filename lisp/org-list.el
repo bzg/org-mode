@@ -624,8 +624,7 @@ invisible."
     (if (save-excursion
 	  (org-beginning-of-item)
 	  (looking-at "[ \t]*[-+*][ \t]+[0-9]+:[0-9]+:[0-9]+ ::"))
-	(progn
-	  (org-timer-item) t)
+	(progn (org-timer-item) t)
       ;; else check if we're in a special block. If so, move before it
       ;; prior to add a new item.
       (when (org-in-regexps-block-p
