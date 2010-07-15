@@ -1286,7 +1286,7 @@ this list."
 	   (item-beginning (org-list-item-beginning))
 	   (list (save-excursion (org-list-goto-true-beginning)
 				 (org-list-parse-list)))
-	   beg)
+	   txt beg)
       (unless (fboundp transform)
 	(error "No such transformation function %s" transform))
       (setq txt (funcall transform list))
