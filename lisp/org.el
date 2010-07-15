@@ -17704,7 +17704,7 @@ Your bug report will be posted to the Org-mode mailing list.
 With prefix arg UNCOMPILED, load the uncompiled versions."
   (interactive "P")
   (require 'find-func)
-  (let* ((file-re "^\\(org\\|orgtbl\\)\\(\\.el\\|-.*\\.el\\)")
+  (let* ((file-re "^\\(ob\\|org\\|orgtbl\\)\\(\\.el\\|-.*\\.el\\)")
 	 (dir-org (file-name-directory (org-find-library-name "org")))
 	 (dir-org-contrib (ignore-errors
 			   (file-name-directory
@@ -18224,6 +18224,17 @@ for the search purpose."
   (while elts
     (setq list (delete (pop elts) list)))
   list)
+
+(defun org-count (cl-item cl-seq)
+  "Count the number of occurrences of ITEM in SEQ.
+Taken from `count' in cl-seq.el with all keyword arguments removed."
+  (let ((cl-end (length cl-seq)) (cl-start 0) (cl-count 0)  cl-x)
+    (when (consp cl-seq) (setq cl-seq (nthcdr cl-start cl-seq)))
+    (while (< cl-start cl-end)
+      (setq cl-x (if (consp cl-seq) (pop cl-seq) (aref cl-seq cl-start)))
+      (if (equal cl-item cl-x) (setq cl-count (1+ cl-count)))
+      (setq cl-start (1+ cl-start)))
+    cl-count))
 
 (defun org-remove-if (predicate seq)
   "Remove everything from SEQ that fulfills PREDICATE."
