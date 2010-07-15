@@ -131,22 +131,23 @@ it's header arguments."
         (defines (org-babel-read
                   (or (cdr (assoc :defines params))
                       (org-babel-read (org-entry-get nil "defines" t))))))
-    (mapconcat 'identity
-               (list
-                ;; includes
-                (mapconcat
-                 (lambda (inc) (format "#include %s" inc))
-                 (if (listp includes) includes (list includes)) "\n")
-                ;; defines
-                (mapconcat
-                 (lambda (inc) (format "#define %s" inc))
-                 (if (listp defines) defines (list defines)) "\n")
-                ;; variables
-                (mapconcat 'org-babel-C-var-to-C vars "\n")
-                ;; body
-                (if main-p
-                    (org-babel-C-ensure-main-wrap body)
-                  body) "\n") "\n")))
+    (org-babel-trim
+     (mapconcat 'identity
+		(list
+		 ;; includes
+		 (mapconcat
+		  (lambda (inc) (format "#include %s" inc))
+		  (if (listp includes) includes (list includes)) "\n")
+		 ;; defines
+		 (mapconcat
+		  (lambda (inc) (format "#define %s" inc))
+		  (if (listp defines) defines (list defines)) "\n")
+		 ;; variables
+		 (mapconcat 'org-babel-C-var-to-C vars "\n")
+		 ;; body
+		 (if main-p
+		     (org-babel-C-ensure-main-wrap body)
+		   body) "\n") "\n"))))
 
 (defun org-babel-C-ensure-main-wrap (body)
   "Wrap body in a \"main\" function call if none exists."
