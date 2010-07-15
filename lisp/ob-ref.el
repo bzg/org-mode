@@ -41,7 +41,7 @@
 ;; same file would be
 
 ;;  #+TBLNAME: sandbox
-;;  | 1 |       2 | 3 |
+;;  | 1 |         2 | 3 |
 ;;  | 4 | org-babel | 6 |
 ;;
 ;;  #+begin_src emacs-lisp :var table=sandbox
@@ -55,6 +55,7 @@
 
 (declare-function org-remove-if-not "org" (predicate seq))
 (declare-function org-at-table-p "org" (&optional table-type))
+(declare-function org-count "org" (CL-ITEM CL-SEQ))
 
 (defun org-babel-ref-variables (params)
   "Convert PARAMS to variable names and values.
@@ -108,13 +109,10 @@ return nil."
     (let ((case-fold-search t)
           type args new-refere new-referent result lob-info split-file split-ref
           index index-row index-col)
-      ;; if ref is indexed grab the indices -- beware nested indicies
+      ;; if ref is indexed grab the indices -- beware nested indices
       (when (and (string-match "\\[\\(.+\\)\\]" ref)
 		 (let ((str (substring ref 0 (match-beginning 0))))
-		   (= (length (org-remove-if-not
-			       (lambda (el) (equal ?( el)) (string-to-list "((eric))")))
-		      (length (org-remove-if-not
-			       (lambda (el) (equal ?) el)) (string-to-list "((eric))"))))))
+		   (= (org-count ?( str) (org-count ?) str))))
         (setq index (match-string 1 ref))
         (setq ref (substring ref 0 (match-beginning 0))))
       ;; assign any arguments to pass to source block
