@@ -5618,6 +5618,8 @@ and subscriipts."
 	  (setq table-p (org-looking-at-p org-table-dataline-regexp)
 		comment-p (org-looking-at-p "[ \t]*#"))
 	  (goto-char pos)
+	  ;; FIXME: Should we go back one character here, for a_b^c
+	  ;; (goto-char (1- pos)) ;????????????????????
 	  (if (or comment-p emph-p link-p keyw-p)
 	      t
 	    (put-text-property (match-beginning 3) (match-end 0)
