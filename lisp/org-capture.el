@@ -25,7 +25,7 @@
 ;;
 ;;; Commentary:
 
-;; This file contains an alternaive implementation of the same functionality
+;; This file contains an alternative implementation of the same functionality
 ;; that is also provided by org-remember.el.  The implementation is more
 ;; streamlined, can produce more target types (e.g. plain list items or
 ;; table lines).  Also, it does not use a temporary buffer for editing
@@ -183,7 +183,7 @@ properties are:
  :table-line-pos     Specification of the location in the table where the
                      new line should be inserted.  It looks like \"II-3\"
                      which means that the new line should become the third
-                     line before the second horizontal separaor line.
+                     line before the second horizontal separator line.
 
 The template defines the text to be inserted.  Often this is an org-mode
 entry (so the first line should start with a star) that will be filed as a
@@ -312,7 +312,7 @@ The remember buffer is still current when this hook runs."
 (defvar org-capture-current-plist nil
   "Local variable holding the plist in a capture buffer.
 This is used to store the plist for use when finishing a capture process.
-Another such process might have changed the global varaible by then.")
+Another such process might have changed the global variable by then.")
 
 (defun org-capture-put (&rest stuff)
   (while stuff
@@ -327,7 +327,7 @@ Another such process might have changed the global varaible by then.")
 ;;; The minor mode
 
 (defvar org-capture-mode-map (make-sparse-keymap)
-  "Keymap for org-capture-mode, a minor mode.
+  "Keymap for `org-capture-mode', a minor mode.
 Use this map to set additional keybindings for when Org-mode is used
 for a Remember buffer.")
 
@@ -350,17 +350,18 @@ for a Remember buffer.")
 ;;;###autoload
 (defun org-capture (&optional goto keys)
   "Capture something.
-
+\\<org-capture-mode-map>
 This will let you select a template from `org-capture-templates', and then
-file new captured information.  The text is immediately inserted at the
-target location, and an indirect buffer is shown where you can edit it.
-Pressing `C-c C-c' brings you back to the previous state of Emacs,
-so that you can continue your work.
+file the newly captured information.  The text is immediately inserted
+at the target location, and an indirect buffer is shown where you can
+edit it.  Pressing \\[org-capture-finalize] brings you back to the previous state
+of Emacs, so that you can continue your work.
 
-When called interactively with a `C-u' prefix argument GOTO, don't capture
+When called interactively with a \\[universal-argument] prefix argument GOTO, don't capture
 anything, just go to the file/headline where the selected template
-stores its notes.  With a double prefix arg `C-u C-u', go to the last
-note stored.
+stores its notes.  With a double prefix argument \
+\\[universal-argument] \\[universal-argument], go to the last note
+stored.
 
 When called with a `C-0' (zero) prefix, insert a template at point.
 
@@ -654,7 +655,7 @@ already gone."
       (find-file-noselect (expand-file-name file org-directory))))
 
 (defun org-capture-steal-local-variables (buffer)
-  "Install Org-mode local variables"
+  "Install Org-mode local variables."
   (mapc (lambda (v)
 	  (ignore-errors (org-set-local (car v) (cdr v))))
 	(buffer-local-variables buffer)))
@@ -916,14 +917,14 @@ already gone."
 	  (move-marker org-capture-last-stored-marker (point)))))))
 
 (defun org-capture-narrow (beg end)
-  "Narrow, unless configuraion says not to narrow."
+  "Narrow, unless configuration says not to narrow."
   (unless (org-capture-get :unnarrowed)
     (narrow-to-region beg end)
     (goto-char beg)))
 
 (defun org-capture-empty-lines-before (&optional n)
   "Arrange for the correct number of empty lines before the insertion point.
-Point will be after the empty lines, so insertion can direcetly be done."
+Point will be after the empty lines, so insertion can directly be done."
   (setq n (or n (org-capture-get :empty-lines) 0))
   (let ((pos (point)))
     (org-back-over-empty-lines)
@@ -998,7 +999,7 @@ The user is queried for the template."
   (let* (org-select-template-temp-major-mode
 	 (entry (org-capture-select-template template-key)))
     (unless entry
-      (error "No capture emplate selected"))
+      (error "No capture template selected"))
     (org-capture-set-plist entry)
     (org-capture-set-target-location)
     (switch-to-buffer (org-capture-get :buffer))

@@ -26,7 +26,10 @@
 ;;
 ;;; Commentary:
 
+;;; Code:
+
 (require 'org-exp)
+
 (eval-when-compile
   (require 'cl))
 
@@ -541,7 +544,7 @@ publishing directory."
       (current-buffer))))
 
 (defun org-export-ascii-preprocess (parameters)
-  "Do extra work for ASCII export"
+  "Do extra work for ASCII export."
   ;;
   ;; Realign tables to get rid of narrowing
   (when org-export-ascii-table-widen-columns

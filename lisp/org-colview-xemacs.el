@@ -184,10 +184,10 @@
 This is the compiled version of the format.")
 (make-variable-buffer-local 'org-columns-current-fmt-compiled)
 (defvar org-columns-current-widths nil
-  "Loval variable, holds the currently widths of fields.")
+  "Local variable, holds the currently widths of fields.")
 (make-variable-buffer-local 'org-columns-current-widths)
 (defvar org-columns-current-maxwidths nil
-  "Loval variable, holds the currently active maximum column widths.")
+  "Local variable, holds the currently active maximum column widths.")
 (make-variable-buffer-local 'org-columns-current-maxwidths)
 (defvar org-columns-begin-marker (make-marker)
   "Points to the position where last a column creation command was called.")
@@ -467,7 +467,7 @@ This is the compiled version of the format.")
       (org-add-hook 'post-command-hook 'org-columns-hscoll-title nil 'local))))
 
 (defun org-columns-hscoll-title ()
-  "Set the header-line-format so that it scrolls along with the table."
+  "Set the `header-line-format' so that it scrolls along with the table."
   (sit-for .0001) ; need to force a redisplay to update window-hscroll
   (when (not (= (window-hscroll) org-columns-previous-hscroll))
     (setq header-line-format
@@ -919,18 +919,18 @@ around it."
      (lambda (&rest x) (/ (apply '+ x) (float (length x))))
      (lambda (x) (- org-columns-time x))))
   "Operator <-> format,function,calc  map.
- Used to compile/uncompile columns format and completing read in
- interactive function org-columns-new.
+Used to compile/uncompile columns format and completing read in
+interactive function `org-columns-new'.
 
  operator    string used in #+COLUMNS definition describing the
 	     summary type
  format      symbol describing summary type selected interactively in
-	     org-columns-new and internally in
-	     org-columns-number-to-string and
-	     org-columns-string-to-number
+	     `org-columns-new' and internally in
+	     `org-columns-number-to-string' and
+	     `org-columns-string-to-number'
  function    called with a list of values as argument to calculate
 	     the summary value
- calc        function called on every element before summarizing. This is
+ calc        function called on every element before summarizing.  This is
 	     optional and should only be specified if needed")
 
 
@@ -1288,8 +1288,7 @@ operator     the operator if any
 format       the output format for computed results, derived from operator
 printf       a printf format for computed values
 fun          the lisp function to compute summary values, derived from operator
-calc         function to get values from base elements
-"
+calc         function to get values from base elements"
   (let ((start 0) width prop title op op-match f printf fun calc)
     (setq org-columns-current-fmt-compiled nil)
     (while (string-match
@@ -1683,7 +1682,7 @@ This will add overlays to the date lines, to show the summary for each day."
 		  (org-columns-compute (car fm)))))))))))
 
 (defun org-format-time-period (interval)
-  "Convert time in fractional days to days/hours/minutes/seconds"
+  "Convert time in fractional days to days/hours/minutes/seconds."
   (if (numberp interval)
     (let* ((days (floor interval))
 	   (frac-hours (* 24 (- interval days)))

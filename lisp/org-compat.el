@@ -122,7 +122,7 @@ any other entries, and any resulting duplicates will be removed entirely."
     ([mouse-3] . [button3])
     ([C-mouse-4] . [(control mouse-4)])
     ([C-mouse-5] . [(control mouse-5)]))
-  "Translation alist for a couple of keys")
+  "Translation alist for a couple of keys.")
 
 ;; Overlay compatibility functions
 (defun org-detach-overlay (ovl)
@@ -184,7 +184,7 @@ that will be added to PLIST.  Returns the string that was modified."
   "Fit WINDOW to the buffer, but only if it is not a side-by-side window.
 WINDOW defaults to the selected window.  MAX-HEIGHT and MIN-HEIGHT are
 passed through to `fit-window-to-buffer'.  If SHRINK-ONLY is set, call
-`shrink-window-if-larger-than-buffer' instead, the hight limit are
+`shrink-window-if-larger-than-buffer' instead, the height limit is
 ignored in this case."
   (cond ((if (fboundp 'window-full-width-p)
 	     (not (window-full-width-p window))
@@ -267,7 +267,7 @@ Works on both Emacs and XEmacs."
     (move-to-column column force)))
 
 (defun org-get-x-clipboard-compat (value)
-  "Get the clipboard value on XEmacs or Emacs 21"
+  "Get the clipboard value on XEmacs or Emacs 21."
   (cond ((featurep 'xemacs)
 	 (org-no-warnings (get-selection-no-error value)))
 	((fboundp 'x-get-selection)

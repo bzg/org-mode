@@ -301,7 +301,7 @@ for the duration of the command.")
     (org-add-hook 'post-command-hook 'org-columns-hscoll-title nil 'local)))
 
 (defun org-columns-hscoll-title ()
-  "Set the header-line-format so that it scrolls along with the table."
+  "Set the `header-line-format' so that it scrolls along with the table."
   (sit-for .0001) ; need to force a redisplay to update window-hscroll
   (when (not (= (window-hscroll) org-columns-previous-hscroll))
     (setq header-line-format
@@ -749,17 +749,17 @@ around it."
      (lambda (x) (- org-columns-time x))))
   "Operator <-> format,function,calc  map.
 Used to compile/uncompile columns format and completing read in
-interactive function org-columns-new.
+interactive function `org-columns-new'.
 
 operator    string used in #+COLUMNS definition describing the
 	    summary type
 format      symbol describing summary type selected interactively in
-	    org-columns-new and internally in
-	    org-columns-number-to-string and
-	    org-columns-string-to-number
+	    `org-columns-new' and internally in
+	    `org-columns-number-to-string' and
+	    `org-columns-string-to-number'
 function    called with a list of values as argument to calculate
 	    the summary value
-calc        function called on every element before summarizing. This is
+calc        function called on every element before summarizing.  This is
 	    optional and should only be specified if needed")
 
 (defun org-columns-new (&optional prop title width op fmt fun &rest rest)
@@ -1112,8 +1112,7 @@ operator     the operator if any
 format       the output format for computed results, derived from operator
 printf       a printf format for computed values
 fun          the lisp function to compute summary values, derived from operator
-calc         function to get values from base elements
-"
+calc         function to get values from base elements"
   (let ((start 0) width prop title op op-match f printf fun calc)
     (setq org-columns-current-fmt-compiled nil)
     (while (string-match
@@ -1482,7 +1481,7 @@ This will add overlays to the date lines, to show the summary for each day."
 		  (org-columns-compute (car fm)))))))))))
 
 (defun org-format-time-period (interval)
-  "Convert time in fractional days to days/hours/minutes/seconds"
+  "Convert time in fractional days to days/hours/minutes/seconds."
   (if (numberp interval)
     (let* ((days (floor interval))
 	   (frac-hours (* 24 (- interval days)))

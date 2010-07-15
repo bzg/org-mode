@@ -67,6 +67,8 @@
 
 (require 'org)
 
+;;; Code:
+
 (declare-function epg-decrypt-string "epg" (context cipher))
 (declare-function epg-list-keys "epg" (context &optional name mode))
 (declare-function epg-make-context "epg"
@@ -81,18 +83,19 @@
   :tag "Org Crypt" :group 'org)
 
 (defcustom org-crypt-tag-matcher "crypt"
-  "The tag matcher used to find headings whose contents should be
-encrypted.  See the \"Match syntax\" section of the org manual
-for more details."
+  "The tag matcher used to find headings whose contents should be encrypted.
+
+See the \"Match syntax\" section of the org manual for more details."
   :type 'string :group 'org-crypt)
 
 (defcustom org-crypt-key nil
-  "The default key to use when encrypting the contents of a
-heading.  This can also be overridden in the CRYPTKEY property."
+  "The default key to use when encrypting the contents of a heading.
+
+This setting can also be overridden in the CRYPTKEY property."
   :type 'string :group 'org-crypt)
 
 (defun org-crypt-key-for-heading ()
-  "Returns the encryption key for the current heading."
+  "Return the encryption key for the current heading."
   (save-excursion
     (org-back-to-heading t)
     (or (org-entry-get nil "CRYPTKEY" 'selective)
@@ -169,8 +172,7 @@ heading.  This can also be overridden in the CRYPTKEY property."
    (cdr (org-make-tags-matcher org-crypt-tag-matcher))))
 
 (defun org-crypt-use-before-save-magic ()
-  "Adds a hook that will automatically encrypt entries before a
-file is saved to disk."
+  "Add a hook to automatically encrypt entries before a file is saved to disk."
   (add-hook
    'org-mode-hook
    (lambda () (add-hook 'before-save-hook 'org-encrypt-entries nil t))))
