@@ -5900,12 +5900,13 @@ in special contexts.
 	(outline-next-heading)
 	(setq has-children (and (org-at-heading-p t)
 				(> (funcall outline-level) level))))
-      (org-end-of-subtree t)
-      (unless (eobp)
-	(skip-chars-forward " \t\n")
-	(beginning-of-line 1) ; in case this is an item
-	)
-      (setq eos (if (eobp) (point) (1- (point)))))
+      ;; if we're in a list, org-end-of-subtree is in fact org-end-of-item.
+      (if (org-at-item-p)
+	  (setq eos (1- (org-end-of-item)))
+	(org-end-of-subtree t)
+	(unless (eobp)
+	  (skip-chars-forward " \t\n"))
+	(setq eos (if (eobp) (point) (1- (point))))))
     ;; Find out what to do next and set `this-command'
     (cond
      ((= eos eoh)
@@ -5939,14 +5940,14 @@ in special contexts.
       ;; We just showed the children, or no children are there,
       ;; now show everything.
       (run-hook-with-args 'org-pre-cycle-hook 'subtree)
-      (org-show-subtree)
+      (outline-flag-region eoh eos nil)
       (message (if children-skipped "SUBTREE (NO CHILDREN)" "SUBTREE"))
       (setq org-cycle-subtree-status 'subtree)
       (run-hook-with-args 'org-cycle-hook 'subtree))
      (t
       ;; Default action: hide the subtree.
       (run-hook-with-args 'org-pre-cycle-hook 'folded)
-      (hide-subtree)
+      (outline-flag-region eoh eos t)
       (message "FOLDED")
       (setq org-cycle-subtree-status 'folded)
       (run-hook-with-args 'org-cycle-hook 'folded)))))

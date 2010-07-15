@@ -421,7 +421,10 @@ A checkbox is blocked if all of the following conditions are fulfilled:
   (save-excursion
     (and (org-in-item-p)
 	 (let ((pos (org-beginning-of-item))
-	       (bound (or (and (outline-next-heading)
+	       (bound (or (and (let ((outline-regexp org-outline-regexp))
+				 ;; we need set the default regexp
+				 ;; because folding change its value.
+				 (outline-next-heading))
 			       (skip-chars-backward " \t\r\n")
 			       (1+ (point-at-eol)))
 			  (point-max))))
