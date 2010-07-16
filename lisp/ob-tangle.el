@@ -34,7 +34,6 @@
 
 (declare-function org-link-escape "org" (text &optional table))
 (declare-function org-heading-components "org" ())
-(declare-function with-temp-filebuffer "org-interaction" (file &rest body))
 
 (defcustom org-babel-tangle-lang-exts
   '(("emacs-lisp" . "el"))
@@ -53,6 +52,20 @@ then the name of the language is used."
   "Hook run in code files tangled by `org-babel-tangle'."
   :group 'org-babel
   :type 'hook)
+
+(defmacro org-babel-with-temp-filebuffer (file &rest body)
+  "Open FILE into a temporary buffer execute BODY there like
+`progn', then kill the FILE buffer returning the result of
+evaluating BODY."
+  (declare (indent 1))
+  (let ((temp-result (make-symbol "temp-result"))
+	(temp-file (make-symbol "temp-file")))
+    `(let (,temp-result ,temp-file)
+       (find-file ,file)
+       (setf ,temp-file (current-buffer))
+       (setf ,temp-result (progn ,@body))
+       (kill-buffer ,temp-file)
+       ,temp-result)))
 
 ;;;###autoload
 (defun org-babel-load-file (file)
@@ -176,7 +189,7 @@ exported source code blocks by language."
       (when org-babel-post-tangle-hook
 	(mapc
 	 (lambda (file)
-	   (with-temp-filebuffer file
+	   (org-babel-with-temp-filebuffer file
 	     (run-hooks 'org-babel-post-tangle-hook)))
 	 path-collector))
       path-collector)))
