@@ -23,6 +23,12 @@
 ;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+
+;;; Commentary:
+;; 
+
+;;; Code:
+
 (require 'org)
 (eval-when-compile
   (require 'cl))
@@ -41,8 +47,8 @@ There should be two types of entries.
    short description string of the item.
 
 The command will then make a temporary buffer listing all entries
-that can be selected with a single key, and all the sinke key
-prefixes.  When you press the key for a single-letter enty, it is selected.
+that can be selected with a single key, and all the single key
+prefixes.  When you press the key for a single-letter entry, it is selected.
 When you press a prefix key, the commands (and maybe further prefixes)
 under this key will be shown and offered for selection.
 
@@ -113,7 +119,7 @@ only the bare key is returned."
 	    (throw 'exit (setq rtn (rassoc (cdr (assoc pressed table))
 					   orig-table))))
 	  (setq current (concat current pressed))
-	  (setq table (mapcar 
+	  (setq table (mapcar
 		       (lambda (x)
 			 (if (and (> (length (car x)) 1)
 				  (equal (substring (car x) 0 1) pressed))

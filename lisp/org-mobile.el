@@ -33,6 +33,8 @@
 
 (require 'org)
 (require 'org-agenda)
+;;; Code:
+
 (eval-when-compile (require 'cl))
 
 (defgroup org-mobile nil
@@ -66,7 +68,7 @@ org-agenda-text-search-extra-files
   :type 'directory)
 
 (defcustom org-mobile-use-encryption nil
-  "Non-nil means keep only encrypted files on the webdav server.
+  "Non-nil means keep only encrypted files on the WebDAV server.
 Encryption uses AES-256, with a password given in
 `org-mobile-encryption-password'.
 When nil, plain files are kept on the server.
@@ -78,7 +80,7 @@ support it - at the time of this writing it did not yet."
 
 (defcustom org-mobile-encryption-tempfile "~/orgtmpcrypt"
   "File that is being used as a temporary file for encryption.
-This must be local file on your local machine (not on the webdav server).
+This must be local file on your local machine (not on the WebDAV server).
 You might want to put this file into a directory where only you have access."
   :group 'org-mobile
   :type 'directory)
@@ -88,7 +90,7 @@ You might want to put this file into a directory where only you have access."
 This is a single password which is used for AES-256 encryption.  The same
 password must also be set in the MobileOrg application.  All Org files,
 including mobileorg.org will be encrypted using this password.
-Note that, whe Org runs the encryption commands, the password could
+Note that, when Org runs the encryption commands, the password could
 be visible on your system with the `ps' command.  So this method is only
 intended to keep the files secure on the server, not on your own machine."
   :group 'org-mobile
@@ -358,10 +360,10 @@ agenda view showing the flagged items."
       (error
        "To use encryption, you must set `org-mobile-encryption-password'"))
     (unless (file-writable-p org-mobile-encryption-tempfile)
-      (error "Cannot write to entryption tempfile %s"
+      (error "Cannot write to encryption tempfile %s"
 	     org-mobile-encryption-tempfile))
     (unless (executable-find "openssl")
-      (error "openssl is needed to encrypt files."))))
+      (error "openssl is needed to encrypt files"))))
 
 (defun org-mobile-create-index-file ()
   "Write the index file in the WebDAV directory."

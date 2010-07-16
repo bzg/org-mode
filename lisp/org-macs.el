@@ -92,7 +92,7 @@ Also, do not record undo information."
 
 (defmacro org-maybe-intangible (props)
   "Add '(intangible t) to PROPS if Emacs version is earlier than Emacs 22.
-In emacs 21, invisible text is not avoided by the command loop, so the
+In Emacs 21, invisible text is not avoided by the command loop, so the
 intangible property is needed to make sure point skips this text.
 In Emacs 22, this is not necessary.  The intangible text property has
 led to problems with flyspell.  These problems are fixed in flyspell.el,
@@ -292,7 +292,7 @@ This is in contrast to merely setting it to 0."
 (defvar org-inlinetask-min-level) ; defined in org-inlinetask.el
 (defun org-get-limited-outline-regexp ()
   "Return outline-regexp with limited number of levels.
-The number of levels is controlled by "
+The number of levels is controlled by `org-inlinetask-min-level'"
   (if (or (not (org-mode-p)) (not (featurep 'org-inlinetask)))
 
       outline-regexp

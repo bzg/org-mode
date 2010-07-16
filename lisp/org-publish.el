@@ -193,7 +193,7 @@ The following properties control the creation of a concept index.
   :type 'alist)
 
 (defcustom org-publish-use-timestamps-flag t
-  "When non-nil, use timestamp checking to publish only changed files.
+  "Non-nil means use timestamp checking to publish only changed files.
 When nil, do no timestamp checking and always publish all files."
   :group 'org-publish
   :type 'boolean)
@@ -260,8 +260,8 @@ You can overwrite this default per project in your
   (concat "X" (if (fboundp 'sha1) (sha1 filename) (md5 filename))))
 
 (defun org-publish-needed-p (filename &optional pub-dir pub-func true-pub-dir)
-  "Return `t' if FILENAME should be published in PUB-DIR using PUB-FUNC.
-TRUE-PUB-DIR is where the file will truely end up.  Currently we are not using
+  "Return t if FILENAME should be published in PUB-DIR using PUB-FUNC.
+TRUE-PUB-DIR is where the file will truly end up.  Currently we are not using
 this - maybe it can eventually be used to check if the file is present at
 the target location, and how old it is.  Right ow we cannot do this, because
 we do not know under what file name the file will be stored - the publishing
@@ -286,7 +286,7 @@ If there is no timestamp, create one."
     (org-publish-cache-set key stamp)))
 
 (defun org-publish-remove-all-timestamps ()
-  "Remove all files in the timstamp directory."
+  "Remove all files in the timestamp directory."
   (let ((dir org-publish-timestamp-directory)
 	files)
     (when (and (file-exists-p dir)
@@ -305,8 +305,8 @@ If there is no timestamp, create one."
 
 ;; Here, so you find the variable right before it's used the first time:
 (defvar org-publish-cache nil
-  "This will cache all the timestamps and titles for
-files in publishing projects. Blocks could hash sha1 values here.")
+  "This will cache timestamps and titles for files in publishing projects.
+Blocks could hash sha1 values here.")
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -354,8 +354,7 @@ This splices all the components into the list."
 (defvar sitemap-ignore-case)
 (defvar sitemap-requested)
 (defun org-publish-compare-directory-files (a b)
-  "Predicate for `sort', that sorts folders-first/last and
-eventually alphabetically."
+  "Predicate for `sort', that sorts folders-first/last and alphabetically."
   (let ((retval t))
     (when (or sitemap-alphabetically sitemap-sort-folders)
       ;; First we sort alphabetically:
@@ -456,7 +455,7 @@ matching filenames."
     org-publish-temp-files))
 
 (defun org-publish-get-project-from-filename (filename &optional up)
-  "Return the project FILENAME belongs."
+  "Return the project that FILENAME belongs to."
   (let* ((filename (expand-file-name filename))
 	 project-name)
 
@@ -577,7 +576,7 @@ See `org-publish-org-to' to the list of arguments."
 (defun org-publish-file (filename &optional project no-cache)
   "Publish file FILENAME from PROJECT.
 If NO-CACHE is not nil, do not initialize org-publish-cache and
-write it to disk. This is needed, since this function is used to
+write it to disk.  This is needed, since this function is used to
 publish single files, when entire projects are published.
 See `org-publish-projects'."
   (let* ((project
@@ -716,7 +715,7 @@ Default for SITEMAP-FILENAME is 'sitemap.org'."
     (or visiting (kill-buffer sitemap-buffer))))
 
 (defun org-publish-find-title (file)
-  "Find the title of file in project."
+  "Find the title of FILE in project."
   (or
    (org-publish-cache-get-file-property file :title nil t)
    (let* ((visiting (find-buffer-visiting file))
@@ -923,8 +922,7 @@ If FREE-CACHE, empty the cache."
     (when free-cache (org-publish-reset-cache))))
 
 (defun org-publish-initialize-cache (project-name)
-  "Initialize the projects cache if not intialized yet
-and return it."
+  "Initialize the projects cache if not initialized yet and return it."
 
   (unless project-name
     (error "%s%s" "Cannot initialize `org-publish-cache' without projects name"
@@ -976,10 +974,9 @@ Return `t', if the file needs publishing"
 	(< pstamp ctime)))))
 
 (defun org-publish-cache-set-file-property (filename property value &optional project-name)
-  "Set the VALUE for a PORPERTY of file FILENAME in publishing cache
-to VALUE. Use cache file of PROJECT-NAME.
-If the entry does not exist, it will be created.
-Return VALUE."
+  "Set the VALUE for a PROPERTY of file FILENAME in publishing cache to VALUE.
+Use cache file of PROJECT-NAME.  If the entry does not exist, it will be
+created.  Return VALUE."
   ;; Evtl. load the requested cache file:
   (if project-name (org-publish-initialize-cache project-name))
   (let ((pl (org-publish-cache-get filename)))
@@ -992,7 +989,7 @@ Return VALUE."
 
 (defun org-publish-cache-get-file-property
   (filename property &optional default no-create project-name)
-  "Return the value for a PORPERTY of file FILENAME in publishing cache.
+  "Return the value for a PROPERTY of file FILENAME in publishing cache.
 Use cache file of PROJECT-NAME. Return the value of that PROPERTY or
 DEFAULT, if the value does not yet exist.
 If the entry will be created, unless NO-CREATE is not nil."
@@ -1019,7 +1016,7 @@ exist."
   (gethash key org-publish-cache))
 
 (defun org-publish-cache-set (key value)
-  "Store KEY VLAUE pair in `org-publish-cache'.
+  "Store KEY VALUE pair in `org-publish-cache'.
 Returns value on success, else nil."
   (unless org-publish-cache
     (error "%s" "`org-publish-cache-set' called, but no cache present"))

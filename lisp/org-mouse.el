@@ -137,6 +137,8 @@
 ;;
 ;; Versions 0.01 -- 0.07: (I don't remember)
 
+;;; Code:
+
 (eval-when-compile (require 'cl))
 (require 'org)
 
@@ -225,7 +227,7 @@ this function is called.  Otherwise, the current major mode menu is used."
     (mouse-save-then-kill event)))
 
 (defun org-mouse-line-position ()
-  "Returns `:beginning' or `:middle' or `:end', depending on the point position.
+  "Return `:beginning' or `:middle' or `:end', depending on the point position.
 
 If the point is at the end of the line, return `:end'.
 If the point is separated from the beginning of the line only by white
@@ -290,7 +292,7 @@ ITEMFORMAT governs formatting of the elements of KEYWORDS.  If it
 is a function, it is invoked with the keyword as the only
 argument.  If it is a string, it is interpreted as the format
 string to (format ITEMFORMAT keyword).  If it is neither a string
-nor a function, elements of KEYWORDS are used directly. "
+nor a function, elements of KEYWORDS are used directly."
   (mapcar
    `(lambda (keyword)
      (vector (cond
@@ -342,8 +344,7 @@ ITEMFORMAT governs formatting of the elements of KEYWORDS.  If it
 is a function, it is invoked with the keyword as the only
 argument.  If it is a string, it is interpreted as the format
 string to (format ITEMFORMAT keyword).  If it is neither a string
-nor a function, elements of KEYWORDS are used directly.
-"
+nor a function, elements of KEYWORDS are used directly."
   (setq group (or group 0))
   (let ((replace (org-mouse-match-closure
 		  (if nosurround 'replace-match
@@ -432,7 +433,7 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
       (lambda (kwd) (equal state kwd))))))
 
 (defun org-mouse-tag-menu ()		;todo
-  "Create the tags menu"
+  "Create the tags menu."
   (append
    (let ((tags (org-get-tags)))
      (org-mouse-keyword-menu
@@ -585,7 +586,8 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
 	(org-next-item)))))
 
 (defun org-mouse-bolp ()
-  "Returns true if there only spaces, tabs, and '*',  between the beginning of line and the point"
+  "Return true if there only spaces, tabs, and '*' before point.
+This means, between the beginning of line and the point."
   (save-excursion
     (skip-chars-backward " \t*") (bolp)))
 
@@ -1145,4 +1147,4 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
 
 ;; arch-tag: ff1ae557-3529-41a3-95c6-baaebdcc280f
 
-;;; org-mouse.el ends-here
+;;; org-mouse.el ends here
