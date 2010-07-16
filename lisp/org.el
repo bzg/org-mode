@@ -331,6 +331,7 @@ to add the symbol `xyz', and the package must have a call to
 	(const :tag "C  toc:               Table of contents for Org-mode buffer" org-toc)
 	(const :tag "C  track:             Keep up with Org-mode development" org-track)
 	(const :tag "C  velocity           Something like Notational Velocity for Org" org-velocity)
+	(const :tag "C  wikinodes:         CamelCase wiki-like links" org-wikinodes)
 	(repeat :tag "External packages" :inline t (symbol :tag "Package"))))
 
 (defcustom org-support-shift-select nil
@@ -5379,6 +5380,12 @@ For plain list items, if they are matched by `outline-regexp', this returns
 (defvar org-font-lock-hook nil
   "Functions to be called for special font lock stuff.")
 
+(defvar org-font-lock-set-keywords-hook nil
+  "Functions that can manipulate `org-font-lock-extra-keywords'.
+This is calles after `org-font-lock-extra-keywords' is defined, but before
+it is installed to be used by font lock.  This can be useful if something
+needs to be inserted at a specific position in the font-lock sequence.")
+
 (defun org-font-lock-hook (limit)
   (run-hook-with-args 'org-font-lock-hook limit))
 
@@ -5473,6 +5480,7 @@ For plain list items, if they are matched by `outline-regexp', this returns
 	   '(org-fontify-meta-lines-and-blocks)
 	   )))
     (setq org-font-lock-extra-keywords (delq nil org-font-lock-extra-keywords))
+    (run-hooks 'org-font-lock-set-keywords-hook)
     ;; Now set the full font-lock-keywords
     (org-set-local 'org-font-lock-keywords org-font-lock-extra-keywords)
     (org-set-local 'font-lock-defaults
@@ -8988,6 +8996,13 @@ Org-mode syntax."
 		  org-link-abbrev-alist-local)))
 	(org-open-at-point arg reference-buffer)))))
 
+(defvar org-open-at-point-functions nil
+  "Hook that is run when following a link at point.
+
+Functions in this hook must return t if they identify and follow
+a link at point.  If they don't find anything interesting at point,
+they must return nil.")
+
 (defun org-open-at-point (&optional in-emacs reference-buffer)
   "Open link at or after point.
 If there is no link at point, this function will search forward up to
@@ -9013,6 +9028,7 @@ application the system uses for this file type."
 	 (not (get-text-property (point) 'org-linked-text)))
     (or (org-offer-links-in-entry in-emacs)
 	(progn (require 'org-attach) (org-attach-reveal 'if-exists))))
+   ((run-hook-with-args-until-success 'org-open-at-point-functions))
    ((org-at-timestamp-p t) (org-follow-timestamp-link))
    ((or (org-footnote-at-reference-p) (org-footnote-at-definition-p))
     (org-footnote-action))
@@ -13987,6 +14003,42 @@ only headings."
 	    (setq end (save-excursion (org-end-of-subtree t t))))
 	  (when (org-on-heading-p)
 	    (move-marker (make-marker) (point))))))))
+
+(defun org-find-exact-headling-in-buffer (heading &optional buffer pos-only)
+  "Find node HEADING in BUFFER.
+Return a marker to the heading if it was found, or nil if not.
+If POS-ONLY is set, return just the position instead of a marker.
+
+The heading text must match exact, but it may have a TODO keyword,
+a priority cookie and tags in the standard locations."
+  (with-current-buffer (or buffer (current-buffer))
+    (save-excursion
+      (save-restriction
+	(widen)
+	(goto-char (point-min))
+	(let (case-fold-search)
+	  (if (setq p (re-search-forward
+		       (format org-complex-heading-regexp-format
+			       (regexp-quote heading)) nil t))
+	      (if pos-only
+		  (match-beginning 0)
+		(move-marker (make-marker) (match-beginning 0)))))))))
+
+(defun org-find-exact-heading-in-directory (heading &optional dir)
+  "Find Org node headline HEADING in all .org files in directory DIR.
+When the target headline is found, return a marker to this location."
+  (let ((files (directory-files (or dir default-directory)
+				nil "\\`[^.#].*\\.org\\'"))
+        file visiting m buffer)
+    (catch 'found
+      (while (setq file (pop files))
+        (message "trying %s" file)
+        (setq visiting (org-find-base-buffer-visiting file))
+        (setq buffer (or visiting (find-file-noselect file)))
+        (setq m (org-find-exact-headling-in-buffer
+                 target buffer))
+        (when (and (not m) (not visiting)) (kill-buffer buffer))
+        (and m (throw 'found m))))))
 
 (defun org-find-entry-with-id (ident)
   "Locate the entry that contains the ID property with exact value IDENT.
@@ -19401,8 +19453,8 @@ To get rid of the restriction, use \\[org-agenda-remove-restriction-lock]."
 ;; Make flyspell not check words in links, to not mess up our keymap
 (defun org-mode-flyspell-verify ()
   "Don't let flyspell put overlays at active buttons."
-  (and (not (get-text-property (point) 'keymap))
-       (not (get-text-property (point) 'org-no-flyspell))))
+  (and (not (get-text-property (max (1- (point)) (point-min)) 'keymap))
+       (not (get-text-property (max (1- (point)) (point-min)) 'org-no-flyspell))))
 
 (defun org-remove-flyspell-overlays-in (beg end)
   "Remove flyspell overlays in region."

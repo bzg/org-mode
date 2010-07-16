@@ -417,6 +417,10 @@ This is run just before backend-specific blocks get selected.")
 This is run after blockquote/quote/verse/center have been marked
 with cookies.")
 
+(defvar org-export-preprocess-after-radio-targets-hook nil
+  "Hook for preprocessing an export buffer.
+This is run after radio target processing.")
+
 (defvar org-export-preprocess-before-normalizing-links-hook nil
   "Hook for preprocessing an export buffer.
 This hook is run before links are normalized.")
@@ -1120,6 +1124,7 @@ on this string to produce the exported version."
 
       ;; Find matches for radio targets and turn them into internal links
       (org-export-mark-radio-links)
+      (run-hooks 'org-export-preprocess-after-radio-targets-hook)
 
       ;; Find all links that contain a newline and put them into a single line
       (org-export-concatenate-multiline-links)
@@ -1185,6 +1190,10 @@ on this string to produce the exported version."
        p (or (next-single-property-change p :org-license-to-kill)
 	     (point-max))))))
 
+(defvar org-export-define-heading-targets-headline-hook nil
+  "Hook that is run when a headline was matched during target search.
+This is part of the preprocessing for export.")
+
 (defun org-export-define-heading-targets (target-alist)
   "Find all headings and define the targets for them.
 The new targets are added to TARGET-ALIST, which is also returned.
@@ -1228,7 +1237,8 @@ Also find all ID and CUSTOM_ID properties and store them."
 	  (push (cons target target) target-alist)
 	  (add-text-properties
 	   (point-at-bol) (point-at-eol)
-	   (list 'target target))))))
+	   (list 'target target))
+	  (run-hooks 'org-export-define-heading-targets-headline-hook)))))
   target-alist)
 
 (defun org-export-handle-invisible-targets (target-alist)

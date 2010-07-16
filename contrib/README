@@ -44,7 +44,7 @@ orgtbl-sqlinsert.el      --- Convert Org-mode tables to SQL insertions
 org-toc.el 	         --- Table of contents for Org-mode buffer
 org-track.el             --- Keep up with Org development
 org-velocity.el          --- something like Notational Velocity for Org
-
+org-wikinodes            --- CamelCase wiki-like links for Org
 
 
 PACKAGES
