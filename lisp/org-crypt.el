@@ -137,25 +137,26 @@ This setting can also be overridden in the CRYPTKEY property."
   "Decrypt the content of the current headline."
   (interactive)
   (require 'epg)
-  (save-excursion
-    (org-back-to-heading t)
-    (forward-line)
-    (when (looking-at "-----BEGIN PGP MESSAGE-----")
-      (let* ((beg (point))
-             (end (save-excursion
-                    (search-forward "-----END PGP MESSAGE-----")
-                    (forward-line)
-                    (point)))
-             (epg-context (epg-make-context nil t t))
-             (decrypted-text
-	      (decode-coding-string
-	       (epg-decrypt-string
-		epg-context
-		(buffer-substring-no-properties beg end))
-	       'utf-8)))
-        (delete-region beg end)
-        (insert decrypted-text)
-        nil))))
+  (unless (org-before-first-heading-p)
+    (save-excursion
+      (org-back-to-heading t)
+      (forward-line)
+      (when (looking-at "-----BEGIN PGP MESSAGE-----")
+	(let* ((beg (point))
+	       (end (save-excursion
+		      (search-forward "-----END PGP MESSAGE-----")
+		      (forward-line)
+		      (point)))
+	       (epg-context (epg-make-context nil t t))
+	       (decrypted-text
+		(decode-coding-string
+		 (epg-decrypt-string
+		  epg-context
+		  (buffer-substring-no-properties beg end))
+		 'utf-8)))
+	  (delete-region beg end)
+	  (insert decrypted-text)
+	  nil)))))
 
 (defun org-encrypt-entries ()
   "Encrypt all top-level entries in the current buffer."
