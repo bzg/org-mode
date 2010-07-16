@@ -624,7 +624,7 @@ If the cursor is not in an item, throw an error."
 
 (defun org-end-of-item-text-before-children ()
   "Move to the end of the item text, stops before the first child if any.
-Assumes that the cursor is in the first ine of an item."
+Assumes that the cursor is in the first line of an item."
   (goto-char
    (min (save-excursion (org-end-of-item) (point))
 	(save-excursion
@@ -1019,7 +1019,7 @@ I.e. to the text after the last item."
 
 (defun org-outdent-item-tree (arg &optional no-subtree)
   "Outdent a local list item including its children.
-If NO-SUBTREE is set, only outdend the item itself, not its children."
+If NO-SUBTREE is set, only outdent the item itself, not its children."
   (interactive "p")
   (org-indent-item-tree (- arg) no-subtree))
 
@@ -1386,7 +1386,7 @@ Valid parameters PARAMS are
 
 (defun org-list-to-latex (list &optional params)
   "Convert LIST into a LaTeX list.
-LIST is as returnd by `org-list-parse-list'.  PARAMS is a property list
+LIST is as returned by `org-list-parse-list'.  PARAMS is a property list
 with overruling parameters for `org-list-to-generic'."
   (org-list-to-generic
    list
@@ -1403,7 +1403,7 @@ with overruling parameters for `org-list-to-generic'."
 
 (defun org-list-to-html (list &optional params)
   "Convert LIST into a HTML list.
-LIST is as returnd by `org-list-parse-list'.  PARAMS is a property list
+LIST is as returned by `org-list-parse-list'.  PARAMS is a property list
 with overruling parameters for `org-list-to-generic'."
   (org-list-to-generic
    list
@@ -1420,7 +1420,7 @@ with overruling parameters for `org-list-to-generic'."
 
 (defun org-list-to-texinfo (list &optional params)
   "Convert LIST into a Texinfo list.
-LIST is as returnd by `org-list-parse-list'.  PARAMS is a property list
+LIST is as returned by `org-list-parse-list'.  PARAMS is a property list
 with overruling parameters for `org-list-to-generic'."
   (org-list-to-generic
    list

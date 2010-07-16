@@ -33,7 +33,7 @@
 ;; and properties.  However, these nodes are treated specially by the
 ;; visibility cycling and export commands.
 ;;
-;; Visibility cycling exempts these nodes from cycling. So whenever their
+;; Visibility cycling exempts these nodes from cycling.  So whenever their
 ;; parent is opened, so are these tasks.  This will only work with
 ;; `org-cycle', so if you are also using other commands to show/hide
 ;; entries, you will occasionally find these tasks to behave like
@@ -74,8 +74,7 @@
 ;;
 ;; C-c C-x t      Insert a new inline task with END line
 
-
-;;; Code
+;;; Code:
 
 (require 'org)
 
@@ -116,7 +115,7 @@ default, or nil of no state should be assigned."
 
 (defun org-inlinetask-insert-task (&optional no-state)
   "Insert an inline task.
-If prefix arg NO-STATE is set, irgnore `org-inlinetask-defaut-state'."
+If prefix arg NO-STATE is set, ignore `org-inlinetask-defaut-state'."
   (interactive "P")
   (or (bolp) (newline))
   (let ((indent org-inlinetask-min-level))

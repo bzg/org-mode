@@ -400,7 +400,7 @@ hurt if it is present."
 
 (defcustom org-export-latex-remove-from-headlines
   '(:todo nil :priority nil :tags nil)
-  "A plist of keywords to remove from headlines. OBSOLETE.
+  "A plist of keywords to remove from headlines.  OBSOLETE.
 Non-nil means remove this keyword type from the headline.
 
 Don't remove the keys, just change their values.
@@ -432,7 +432,7 @@ allowed.  The default we use here encompasses both."
   :type '(repeat (string :tag "Extension")))
 
 (defcustom org-export-latex-coding-system nil
-  "Coding system for the exported LaTex file."
+  "Coding system for the exported LaTeX file."
   :group 'org-export-latex
   :type 'coding-system)
 
@@ -656,7 +656,7 @@ when PUB-DIR is set, use this as the publishing directory."
 			  (org-entry-get rbeg "EXPORT_FILE_NAME" t))
 		     (file-name-nondirectory ;sans-extension
 		      (or buffer-file-name
-			  (error "Don't know which export file to use.")))))
+			  (error "Don't know which export file to use")))))
 		".tex")))
 	 (filename
 	  (and filename
@@ -1136,7 +1136,7 @@ LEVEL indicates the default depth for export."
 
 (defvar org-export-latex-format-toc-function
   'org-export-latex-format-toc-default
-  "The function formatting returning the string to createthe table of contents.
+  "The function formatting returning the string to create the table of contents.
 The function mus take one parameter, the depth of the table of contents.")
 
 (defun org-export-latex-make-header (title opt-plist)
@@ -2190,7 +2190,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
        (replace-match "")))))
 
 (defun org-export-latex-fix-inputenc ()
-  "Set the codingsystem in inputenc to what the buffer is."
+  "Set the coding system in inputenc to what the buffer is."
   (let* ((cs buffer-file-coding-system)
 	 (opt (or (ignore-errors (latexenc-coding-system-to-inputenc cs))
 		  "utf8")))

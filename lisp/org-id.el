@@ -69,6 +69,8 @@
 ;;        Find the location of an entry with specific id.
 ;;
 
+;;; Code:
+
 (require 'org)
 
 (declare-function message-make-fqdn "message" ())

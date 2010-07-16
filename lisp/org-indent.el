@@ -29,12 +29,14 @@
 ;; by adding text properties to a buffer to make sure lines are
 ;; indented according to outline structure.
 
+;;; Code:
+
 (require 'org-macs)
 (require 'org-compat)
 (require 'org)
+
 (eval-when-compile
   (require 'cl))
-
 
 (defgroup org-indent nil
   "Options concerning dynamic virtual outline indentation."
@@ -42,9 +44,9 @@
   :group 'org)
 
 (defconst org-indent-max 40
-  "Maximum indentation in characters")
+  "Maximum indentation in characters.")
 (defconst org-indent-max-levels 40
-  "Maximum indentation in characters")
+  "Maximum indentation in characters.")
 
 (defvar org-indent-strings nil
   "Vector with all indentation strings.
@@ -53,7 +55,7 @@ It will be set in `org-indent-initialize'.")
   "Vector with all indentation star strings.
 It will be set in `org-indent-initialize'.")
 (defvar org-hide-leading-stars-before-indent-mode nil
-  "Used locally")
+  "Used locally.")
 
 (defcustom org-indent-boundary-char ?\   ; comment to protect space char
   "The end of the virtual indentation strings, a single-character string.
@@ -67,13 +69,15 @@ it may be prettier to customize the org-indent face."
   :type 'character)
 
 (defcustom org-indent-mode-turns-off-org-adapt-indentation t
-  "Non-nil means turning on `org-indent-mode' turns off indentation adaptation.
+  "Non-nil means setting the variable `org-indent-mode' will \
+turn off indentation adaptation.
 For details see the variable `org-adapt-indentation'."
   :group 'org-indent
   :type 'boolean)
 
 (defcustom org-indent-mode-turns-on-hiding-stars t
-  "Non-nil means turning on `org-indent-mode' turns on `org-hide-leading-stars'."
+  "Non-nil means setting the variable `org-indent-mode' will \
+turn on `org-hide-leading-stars'."
   :group 'org-indent
   :type 'boolean)
 
