@@ -41,7 +41,8 @@
 (require 'comint)
 (eval-when-compile (require 'cl))
 
-(declare-function tuareg-run-caml "ext:taureg" ())
+(declare-function tuareg-run-caml "ext:tuareg" ())
+(declare-function tuareg-interactive-send-input "ext:tuareg" ())
 
 (add-to-list 'org-babel-tangle-lang-exts '("ocaml" . "ml"))
 
@@ -55,7 +56,8 @@
   (let ((vars (nth 1 (or processed-params (org-babel-process-params params)))))
     (concat
      (mapconcat
-      (lambda (pair) (format "let %s = %s;" (car pair) (cdr pair)))
+      (lambda (pair) (format "let %s = %s;;" (car pair)
+			(org-babel-ocaml-elisp-to-ocaml (cdr pair))))
       vars "\n") "\n" body "\n")))
 
 (defun org-babel-execute:ocaml (body params)
@@ -67,14 +69,24 @@
 		   (cdr (assoc :session params)) params))
          (raw (org-babel-comint-with-output
 		  (session org-babel-ocaml-eoe-output t full-body)
-                (insert (concat (org-babel-chomp full-body) " ;;"))
-                (comint-send-input nil t)
-                (insert org-babel-ocaml-eoe-indicator)
-                (comint-send-input nil t))))
+		(insert
+		 (concat
+		  (org-babel-chomp full-body)"\n"org-babel-ocaml-eoe-indicator))
+		(tuareg-interactive-send-input)))
+	 (clean
+	  (car (let ((re (regexp-quote org-babel-ocaml-eoe-output)) out)
+		 (delq nil (mapcar (lambda (line)
+				     (if out
+					 (progn (setq out nil) line)
+				       (when (string-match re line)
+					 (progn (setq out t) nil))))
+				 (mapcar #'org-babel-trim (reverse raw))))))))
     (org-babel-reassemble-table
-     (org-babel-ocaml-parse-output (org-babel-trim (car raw)))
-     (org-babel-pick-name (nth 4 processed-params) (cdr (assoc :colnames params)))
-     (org-babel-pick-name (nth 5 processed-params) (cdr (assoc :rownames params))))))
+     (org-babel-ocaml-parse-output (org-babel-trim clean))
+     (org-babel-pick-name
+      (nth 4 processed-params) (cdr (assoc :colnames params)))
+     (org-babel-pick-name
+      (nth 5 processed-params) (cdr (assoc :rownames params))))))
 
 (defvar tuareg-interactive-buffer-name)
 (defun org-babel-prep-session:ocaml (session params)
@@ -87,6 +99,12 @@
                                           tuareg-interactive-buffer-name)))
     (save-window-excursion (tuareg-run-caml)
                            (get-buffer tuareg-interactive-buffer-name))))
+
+(defun org-babel-ocaml-elisp-to-ocaml (val)
+  "Return a string of ocaml code which evaluates to VAL."
+  (if (listp val)
+      (concat "[|" (mapconcat #'org-babel-ocaml-elisp-to-ocaml val "; ") "|]")
+    (format "%S" val)))
 
 (defun org-babel-ocaml-parse-output (output)
   "Parse OUTPUT.
@@ -125,11 +143,12 @@ Emacs-lisp table, otherwise return the results as a string."
   (org-babel-read
    (if (and (stringp results) (string-match "^\\[.+\\]$" results))
        (org-babel-read
-        (replace-regexp-in-string
-         "\\[|" "(" (replace-regexp-in-string
-                    "|\\]" ")" (replace-regexp-in-string
-                               "; " " " (replace-regexp-in-string
-                                         "'" "\"" results)))))
+	(concat
+	 "'" (replace-regexp-in-string
+	      "\\[|" "(" (replace-regexp-in-string
+			  "|\\]" ")" (replace-regexp-in-string
+				      "; " " " (replace-regexp-in-string
+						"'" "\"" results))))))
      results)))
 
 (provide 'ob-ocaml)
