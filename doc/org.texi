@@ -77,7 +77,7 @@ license to the document, as described in section 6 of the license.
 
 @subtitle Release @value{VERSION}
 @author by Carsten Dominik
-with contributions by David O'Toole, Dan Davison, Eric Schulte and Thomas Dye
+with contributions by David O'Toole, Bastien Guerry, Philip Rooke, Dan Davison, Eric Schulte, and Thomas Dye
 
 @c The following two commands start the copyright page.
 @page
@@ -14241,10 +14241,10 @@ Before I get to this list, a few special mentions are in order:
 @item Bastien Guerry
 Bastien has written a large number of extensions to Org (most of them
 integrated into the core by now), including the LaTeX exporter and the plain
-list parser.  More importantly, maybe, was his help and support when Org got
-first started, he was very important during this phase.  Also, he invented
-Worg, helped establishing the Web presence of Org, and sponsors hosting costs
-for the orgmode.org website.
+list parser.  His support during the early days, when he basically acted as
+co-maintainer, was central to the success of this project.  Bastien also
+invented Worg, helped establishing the Web presence of Org, and sponsors
+hosting costs for the orgmode.org website.
 @item Eric Schulte and Dan Davison
 Eric and Dan are jointly responsible for the Org-babel system, which turns
 Org into a multi-language environment for evaluating code and doing literate
