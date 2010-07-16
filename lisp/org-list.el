@@ -1289,22 +1289,22 @@ this list."
 	   txt beg)
       (unless (fboundp transform)
 	(error "No such transformation function %s" transform))
-      (setq txt (funcall transform list))
-      ;; Find the insertion place
-      (save-excursion
-	(goto-char (point-min))
-	(unless (re-search-forward
-		 (concat "BEGIN RECEIVE ORGLST +" name "\\([ \t]\\|$\\)") nil t)
-	  (error "Don't know where to insert translated list"))
-	(goto-char (match-beginning 0))
-	(beginning-of-line 2)
-	(setq beg (point))
-	(unless (re-search-forward (concat "END RECEIVE ORGLST +" name) nil t)
-	  (error "Cannot find end of insertion region"))
-	(beginning-of-line 1)
-	(delete-region beg (point))
-	(goto-char beg)
-	(insert txt "\n"))
+      (let ((txt (funcall transform list)))
+	;; Find the insertion place
+	(save-excursion
+	  (goto-char (point-min))
+	  (unless (re-search-forward
+		   (concat "BEGIN RECEIVE ORGLST +" name "\\([ \t]\\|$\\)") nil t)
+	    (error "Don't know where to insert translated list"))
+	  (goto-char (match-beginning 0))
+	  (beginning-of-line 2)
+	  (setq beg (point))
+	  (unless (re-search-forward (concat "END RECEIVE ORGLST +" name) nil t)
+	    (error "Cannot find end of insertion region"))
+	  (beginning-of-line 1)
+	  (delete-region beg (point))
+	  (goto-char beg)
+	  (insert txt "\n")))
       (message "List converted and installed at receiver location"))))
 
 (defun org-list-to-generic (list params)
