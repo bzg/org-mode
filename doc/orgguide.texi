@@ -2489,8 +2489,113 @@ Jekyll/blogging setup}}
 
 @node Working With Source Code, Miscellaneous, Publishing, Top
 @chapter Working with source code
+Org-mode provides a number of features for working with source code,
+including editing of code blocks in their native major-mode, evaluation of
+code blocks, tangling of code blocks, and exporting code blocks and their
+results in several formats.
 
-TBD
+@subheading Structure of Code Blocks
+The structure of code blocks is as follows:
+
+@example
+#+srcname: <name>
+#+begin_src <language> <switches> <header arguments>
+  <body>
+#+end_src
+@end example
+
+Where @code{<name>} is a string used to name the code block,
+@code{<language>} specifies the language of the code block
+(e.g. @code{emacs-lisp}, @code{shell}, @code{R}, @code{python}, etc...),
+@code{<switches>} can be used to control export of the code block,
+@code{<header arguments>} can be used to control many aspects of code block
+behavior as demonstrated below, and @code{<body>} contains the actual source
+code.
+
+@subheading Editing source code
+Use @kbd{C-c '} to edit the current code block. This brings up a language
+major-mode edit buffer containing the body of the code block. Saving this
+buffer will write the new contents back to the Org buffer. Use @kbd{C-c '}
+again to exit the edit buffer.
+
+@subheading Evaluating code blocks
+Use @kbd{C-c C-c} to evaluate the current code block and insert it's results
+in the Org-mode buffer.  By default, evaluation is only turned on for
+@code{emacs-lisp} code blocks, however support exists for evaluating blocks
+in many languages.  For a complete list of supported languages see the
+manual.  The following shows a code block and its results.
+
+@example
+#+begin_src emacs-lisp
+  (+ 1 2 3 4)
+#+end_src
+
+#+results:
+: 10
+@end example
+
+@subheading Extracting source code
+Use @kbd{C-c C-v t} to create pure source code files by extracting code from
+source blocks in the current buffer.  This is referred to as ``tangling''---a
+term adopted from the literate programming community.  During ``tangling'' of
+code blocks their bodies are expanded using @code{org-babel-expand-src-block}
+which can expand both variable and ``noweb'' style references.  In order to
+tangle a code block it must have a @code{:tangle} header argument, see the
+manual for details.
+
+@subheading Header Arguments
+Many aspects of the evaluation and export of code blocks are controlled
+through header arguments.  These can be specified globally, at the file
+level, at the outline subtree level, and at the individual code block level.
+The following describes some of the header arguments.
+@table @code
+@item :var
+The @code{:var} header argument is used to pass arguments to code blocks.
+The values passed to arguments can be literal values, values from org-mode
+tables and literal example blocks, or the results of other named code blocks.
+@item :results
+The @code{:results} header argument controls the @emph{collection},
+@emph{type}, and @emph{handling} of code block results.  Values of
+@code{output} or @code{value} (the default) specify how results are collected
+from a code block's evaluation.  Values of @code{vector}, @code{scalar}
+@code{file} @code{raw} @code{html} @code{latex} and @code{code} specify the
+type of the results of the code block which dictates how they will be
+incorporated into the Org-mode buffer.  Values of @code{silent},
+@code{replace}, @code{prepend}, and @code{append} specify handling of code
+block results, specifically if and how the results should be inserted into
+the Org-mode buffer.
+@item :session
+A header argument of @code{:session} will cause the code block to be
+evaluated in a persistent interactive inferior process in Emacs.  This allows
+for persisting state between code block evaluations, and for manual
+inspection of the results of evaluation.
+@item :exports
+Any combination of the @emph{code} or the @emph{results} of a block can be
+retained on export, this is specified by setting the @code{:results} header
+argument to @code{code} @code{results} @code{none} or @code{both}.
+@item :tangle
+A header argument of @code{:tangle yes} will cause a code block's contents to
+be tangled to a file named after the filename of the Org-mode buffer.  An
+alternate file name can be specified with @code{:tangle filename}.
+@item :cache
+A header argument of @code{:cache yes} will cause associate a hash of the
+expanded code block with the results, ensuring that code blocks are only
+re-run when their inputs have changed.
+@item :noweb
+A header argument of @code{:noweb yes} will expand ``noweb'' style references
+on evaluation and tangling.
+@item :file
+Code blocks which output results to files (e.g. graphs, diagrams and figures)
+can accept a @code{:file filename} header argument in which case the results
+are saved to the named file, and a link to the file is inserted into the
+Org-mode buffer.
+@end table
+
+@subheading Library of Babel
+Use @kbd{C-c C-v l} to load the code blocks from an Org-mode files into the
+``Library of Babel'', these blocks can then be evaluated from any Org-mode
+buffer.  A collection of generally useful code blocks is distributed with
+Org-mode in @code{contrib/library-of-babel.org}.
 
 @seealso{
 @uref{http://orgmode.org/manual/Working-with-source-code.html#Working-with-source-code,Chapter 14 of the manual}@*
@@ -2581,8 +2686,6 @@ manual}@*
 @end ignore
 
 @c Local variables:
-@c ispell-local-dictionary: "en_US-w_accents"
-@c ispell-local-pdict: "./.aspell.org.pws"
 @c fill-column: 77
 @c End:
 
