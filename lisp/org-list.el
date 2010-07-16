@@ -326,7 +326,7 @@ Internal use only. Prefer `org-get-next-item' and
 	  (start (point-at-bol)))
       ;; we don't want to match the current line.
       (funcall pre-move)
-      ;; we skip any sublist on the way
+      ;; Skip any sublist on the way
       (while (and (funcall search-fun (org-item-re) limit)
 		  (> (org-get-indentation) ind))
 	(funcall pre-move))
@@ -344,8 +344,7 @@ Insert a checkbox if CHECKBOX is non-nil, and string AFTER-BULLET
 after the bullet. Cursor will be after this text once the
 function end."
   (goto-char pos)
-  ;; Check if we're in a special block. If so, move before it prior to
-  ;; add a new item.
+  ;; Point in a special block: move before it prior to add a new item.
   (when (org-in-regexps-block-p
 	 "^[ \t]*#\\+\\(begin\\|BEGIN\\)_\\([a-zA-Z0-9_]+\\)"
 	 '(concat "^[ \t]*#\\+\\(end\\|END\\)_" (match-string 2)))
@@ -358,11 +357,11 @@ function end."
 	 (bullet-init (and (looking-at (org-item-re))
 			   (match-string 0)))
 	 (before-p (progn
-		     ;; In a descriptive list, text starts after the double colon
+		     ;; Descriptive list: text starts after colons.
 		     (or (looking-at ".*::[ \t]+")
-			 ;; if at a checkbox, text starts after it.
+			 ;; At a checkbox: text starts after it.
 			 (org-at-item-checkbox-p)
-			 ;; otherwise, text starts after bullet.
+			 ;; Otherwise, text starts after bullet.
 			 (org-at-item-p))
 		     (< true-pos (match-end 0))))
 	 ;; Guess number of blank lines used to separate items.
@@ -375,8 +374,8 @@ function end."
 	       (not insert-blank-p))
 	      0)
 	     ((eq insert-blank-p t) 1)
-	     ;; plain-list-item is 'auto. Count blank
-	     ;; lines separating items in list.
+	     ;; plain-list-item is 'auto. Count blank lines separating
+	     ;; items in current list.
 	     (t
 	      (save-excursion
 		(if (progn
@@ -388,9 +387,8 @@ function end."
 		  0))))))
 	 (insert-fun
 	  (lambda (&optional text)
-	    ;; insert bullet above item in order to avoid
-	    ;; bothering with possible blank lines ending
-	    ;; last item
+	    ;; insert bullet above item in order to avoid bothering
+	    ;; with possible blank lines ending last item.
 	    (org-beginning-of-item)
 	    (insert (concat bullet-init
 			    (when checkbox "[ ] ")
@@ -403,18 +401,17 @@ function end."
     (cond
      (before-p
       (funcall insert-fun)
-      ;; we're not moving down, but we still need a potential
-      ;; renumbering.
+      ;; Not taking advantage of renumbering while moving down. Need
+      ;; to call it directly.
       (org-maybe-renumber-ordered-list) t)
-     ;; if we can't split item, just insert bullet at the end of
-     ;; item.
+     ;; Can't split item: insert bullet at the end of item.
      ((not (org-get-alist-option org-M-RET-may-split-line 'item))
       (funcall insert-fun) t)
      ;; else, insert a new bullet along with everything from point
-     ;; down to last non-blank line of item
+     ;; down to last non-blank line of item.
      (t
       (delete-horizontal-space)
-      ;; get pos again in case previous command changed line.
+      ;; Get pos again in case previous command modified line.
       (let* ((pos (point))
 	     (end-before-blank (org-end-of-item-before-blank))
 	     (after-text (when (< pos end-before-blank)
@@ -428,7 +425,7 @@ function end."
 (defun org-in-item-p ()
   "Is the cursor inside a plain list ?"
   (save-excursion
-    ;; we move to eol so that the current line can be matched by
+    ;; Move to eol so that current line can be matched by
     ;; `org-item-re'.
     (let* ((limit (or (save-excursion (outline-previous-heading)) (point-min)))
 	   (actual-pos (goto-char (point-at-eol)))
@@ -511,14 +508,14 @@ A checkbox is blocked if all of the following conditions are fulfilled:
     (and (org-in-item-p)
 	 (let ((pos (org-beginning-of-item))
 	       (bound (or (and (let ((outline-regexp org-outline-regexp))
-				 ;; we need set the default regexp
-				 ;; because folding change its value.
+				 ;; Use default regexp because folding
+				 ;; changes OUTLINE-REGEXP.
 				 (outline-next-heading))
 			       (skip-chars-backward " \t\r\n")
 			       (1+ (point-at-eol)))
 			  (point-max))))
 	   ;; The list ending is either first point matching
-	   ;; org-list-end-re, point at first white-line before next
+	   ;; `org-list-end-re', point at first white-line before next
 	   ;; heading, or eob.
 	   (or (org-list-terminator-between pos bound t) bound)))))
 
@@ -911,7 +908,7 @@ Also, fix the indentation."
 	     (org-beginning-of-item-list)
 	     (looking-at "[ \t]*\\(\\S-+\\)")
 	     (concat (or force-bullet (match-string 1)) " "
-		     ;; do we need to concat another white space ?
+		     ;; Do we need to concat another white space ?
 		     (when (and org-list-two-spaces-after-bullet-regexp
 				(string-match org-list-two-spaces-after-bullet-regexp bullet))
 		       " "))))
@@ -923,11 +920,11 @@ Also, fix the indentation."
 			   (match-string 0))))
 	       (unless (equal bullet old)
 		 (replace-match bullet)
-		 ;; when bullet lengths are differents, move the whole
+		 ;; When bullet lengths are differents, move the whole
 		 ;; sublist accordingly
 		 (org-shift-item-indentation (- (length bullet) (length old))))))))
      (org-apply-on-list replace-bullet nil bullet)
-     ;; fix item numbers if necessary
+     ;; Fix item numbers if necessary
      (when (string-match "[0-9]" bullet) (org-renumber-ordered-list)))))
 
 (defun org-renumber-ordered-list (&optional arg)
