@@ -97,13 +97,15 @@ none ----- do not display either code or results upon export"
     (goto-char (match-beginning 0))
     (let* ((info (org-babel-get-src-block-info))
 	   (params (nth 2 info)))
-      ;; expand noweb references in the original file
-      (setf (nth 1 info)
-	    (if (and (cdr (assoc :noweb params))
-		     (string= "yes" (cdr (assoc :noweb params))))
-		(org-babel-expand-noweb-references
-		 info (get-file-buffer org-current-export-file))
-	      (nth 1 info)))
+      ;; bail if we couldn't get any info from the block
+      (when info
+	;; expand noweb references in the original file
+	(setf (nth 1 info)
+	      (if (and (cdr (assoc :noweb params))
+		       (string= "yes" (cdr (assoc :noweb params))))
+		  (org-babel-expand-noweb-references
+		   info (get-file-buffer org-current-export-file))
+		(nth 1 info))))
       (org-babel-exp-do-export info 'block))))
 
 (defun org-babel-exp-inline-src-blocks (start end)
