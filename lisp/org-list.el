@@ -438,6 +438,16 @@ function end."
        (not (member (char-after) '(?\  ?\t)))
        (< (point) (match-end 0))))
 
+(defun org-at-item-timer-p ()
+  "Is point at a line starting a plain list item with a timer?
+This skips checkboxes, if any."
+  (and (or (org-at-item-checkbox-p)
+	   (org-at-item-p))
+       (save-excursion
+	 (goto-char (match-end 0))
+	 (skip-chars-forward " \t")
+	 (looking-at "\\([0-9]+:[0-9]+:[0-9]+\\)[ \t]+::[ \t]+"))))
+
 (defun org-at-item-checkbox-p ()
   "Is point at a line starting a plain-list item with a checklet?"
   (and (org-at-item-p)
@@ -686,10 +696,8 @@ things worked, nil when we are not in an item, or item is
 invisible."
   (unless (or (not (org-in-item-p))
 	      (org-invisible-p))
-    ;; Timer list: delegate to `org-timer-item'.
-    (if (save-excursion
-	  (org-beginning-of-item)
-	  (looking-at "[ \t]*[-+*][ \t]+[0-9]+:[0-9]+:[0-9]+ ::"))
+    (if (org-at-item-timer-p)
+	;; Timer list: delegate to `org-timer-item'.
 	(progn (org-timer-item) t)
       ;; if we're in a description list, ask for the new term.
       (let ((desc-text (when (save-excursion
@@ -1302,8 +1310,7 @@ optional argument WITH-CASE, the sorting considers case as well."
 		   ((= dcst ?t)
 		    (cond
 		     ;; If it is a timer list, convert timer to seconds
-		     ((and (goto-char (match-end 0))
-			   (looking-at "\\([0-9]+:[0-9]+:[0-9]+\\)[ \t]+::"))
+		     ((org-at-item-timer-p)
 		      (org-timer-hms-to-secs (match-string 1)))
 		     ((or (org-search-forward-unenclosed org-ts-regexp
 							 (point-at-eol) t)
