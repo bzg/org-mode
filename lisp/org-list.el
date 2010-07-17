@@ -353,9 +353,9 @@ function end."
     (re-search-backward "^[ \t]*#\\+\\(begin\\|BEGIN\\)_" nil t)
     (end-of-line 0))
   (let* ((true-pos (point))
-	 (item-start (org-beginning-of-item))
-	 (bullet-init (and (looking-at (org-item-re))
-			   (match-string 0)))
+	 (bullet (and (org-beginning-of-item)
+		      (looking-at (org-item-re))
+		      (match-string 0)))
 	 (before-p (progn
 		     ;; Descriptive list: text starts after colons.
 		     (or (looking-at ".*::[ \t]+")
@@ -363,7 +363,7 @@ function end."
 			 (org-at-item-checkbox-p)
 			 ;; Otherwise, text starts after bullet.
 			 (org-at-item-p))
-		     (< true-pos (match-end 0))))
+		     (<= true-pos (match-end 0))))
 	 ;; Guess number of blank lines used to separate items.
 	 (blank-lines-nb
 	  (let ((insert-blank-p
@@ -390,9 +390,10 @@ function end."
 	    ;; insert bullet above item in order to avoid bothering
 	    ;; with possible blank lines ending last item.
 	    (org-beginning-of-item)
-	    (insert (concat bullet-init
+	    (insert (concat bullet
 			    (when checkbox "[ ] ")
 			    after-bullet))
+	    ;; Stay between after-bullet and before text.
 	    (save-excursion
 	      (insert (concat text (make-string (1+ blank-lines-nb) ?\n))))
 	    (unless before-p (org-move-item-down))
