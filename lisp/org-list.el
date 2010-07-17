@@ -1236,21 +1236,21 @@ beginning of the item."
 (defun org-sort-list (&optional with-case sorting-type getkey-func compare-func)
   "Sort plain list items.
 The cursor may be at any item of the list that should be sorted.
-Sublists are not sorted.
+Sublists are not sorted. Checkboxes, if any, are ignored.
 
 Sorting can be alphabetically, numerically, by date/time as given by
 a time stamp, by a property or by priority.
 
-The command prompts for the sorting type unless it has been given to the
-function through the SORTING-TYPE argument, which needs to be a character,
-\(?n ?N ?a ?A ?t ?T ?s ?S ?d ?D ?p ?P ?r ?R ?f ?F).  Here is the
-precise meaning of each character:
+The command prompts for the sorting type unless it has been given
+to the function through the SORTING-TYPE argument, which needs to
+be a character, \(?n ?N ?a ?A ?t ?T ?f ?F). Here is the precise
+meaning of each character:
 
-n   Numerically, by converting the beginning of the entry/item to a number.
-a   Alphabetically, ignoring the TODO keyword and the priority, if any.
-t   By date/time, either the first active time stamp in the entry, or, if
-    none exist, by the first inactive one.
-    In items, only the first line will be checked.
+n   Numerically, by converting the beginning of the item to a number.
+a   Alphabetically.
+t   By date/time, either the first active time stamp in the entry, if
+    any, or by the first inactive one. In a timer list, sorts the timers.
+    Only the first line of item is checked.
 
 Capital letters will reverse the sort order.
 
@@ -1283,36 +1283,42 @@ optional argument WITH-CASE, the sorting considers case as well."
 	     (sort-func (cond
 			 ((= dcst ?a) 'string<)
 			 ((= dcst ?f) compare-func)
-			 ((member dcst '(?p ?t ?s ?d ?c)) '<)
+			 ((= dcst ?t) '<)
 			 (t nil)))
 	     (begin-record (lambda ()
 			     (skip-chars-forward " \r\t\n")
 			     (beginning-of-line)))
 	     (end-record (lambda ()
 			   (goto-char (org-end-of-item-before-blank))))
-	     (value-to-sort (lambda nil
-			      (when (looking-at "[ \t]*[-+*0-9.)]+\\([ \t]+\\[[- X]\\]\\)?[ \t]+")
-				(cond
-				 ((= dcst ?n)
-				  (string-to-number (buffer-substring (match-end 0)
-								      (point-at-eol))))
-				 ((= dcst ?a)
-				  (buffer-substring (match-end 0) (point-at-eol)))
-				 ((= dcst ?t)
-				  (if (or (org-search-forward-unenclosed org-ts-regexp
-									 (point-at-eol) t)
-					  (org-search-forward-unenclosed org-ts-regexp-both
-									 (point-at-eol) t))
-				      (org-time-string-to-seconds (match-string 0))
-				    (org-float-time now)))
-				 ((= dcst ?f)
-				  (if getkey-func
-				      (let ((value (funcall getkey-func)))
-					(if (stringp value)
-					    (funcall case-func value)
-					  value))
-				    (error "Invalid key function `%s'" getkey-func)))
-				 (t (error "Invalid sorting type `%c'" sorting-type)))))))
+	     (value-to-sort
+	      (lambda ()
+		(when (looking-at "[ \t]*[-+*0-9.)]+\\([ \t]+\\[[- X]\\]\\)?[ \t]+")
+		  (cond
+		   ((= dcst ?n)
+		    (string-to-number (buffer-substring (match-end 0)
+							(point-at-eol))))
+		   ((= dcst ?a)
+		    (buffer-substring (match-end 0) (point-at-eol)))
+		   ((= dcst ?t)
+		    (cond
+		     ;; If it is a timer list, convert timer to seconds
+		     ((and (goto-char (match-end 0))
+			   (looking-at "\\([0-9]+:[0-9]+:[0-9]+\\)[ \t]+::"))
+		      (org-timer-hms-to-secs (match-string 1)))
+		     ((or (org-search-forward-unenclosed org-ts-regexp
+							 (point-at-eol) t)
+			  (org-search-forward-unenclosed org-ts-regexp-both
+							 (point-at-eol) t))
+		      (org-time-string-to-seconds (match-string 0)))
+		     (t (org-float-time now))))
+		   ((= dcst ?f)
+		    (if getkey-func
+			(let ((value (funcall getkey-func)))
+			  (if (stringp value)
+			      (funcall case-func value)
+			    value))
+		      (error "Invalid key function `%s'" getkey-func)))
+		   (t (error "Invalid sorting type `%c'" sorting-type)))))))
 	(sort-subr (/= dcst sorting-type) begin-record end-record value-to-sort nil sort-func)
 	(org-maybe-renumber-ordered-list)
 	(run-hooks 'org-after-sorting-entries-or-items-hook)
