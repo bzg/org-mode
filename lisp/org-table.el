@@ -196,7 +196,7 @@ t:      accept as input and present for editing"
     calc-date-format (YYYY "-" MM "-" DD " " Www (" " hh ":" mm))
     calc-display-working-message t
     )
-  "List with Calc mode settings for use in calc-eval for table formulas.
+  "List with Calc mode settings for use in `calc-eval' for table formulas.
 The list must contain alternating symbols (Calc modes variables and values).
 Don't remove any of the default settings, just change the values.  Org-mode
 relies on the variables to be present in the list."
@@ -276,10 +276,11 @@ portability of tables."
   :group 'org-table)
 
 (defcustom org-table-export-default-format "orgtbl-to-tsv"
-  "Default export parameters for org-table-export. These can be
-overridden on for a specific table by setting the TABLE_EXPORT_FORMAT
-property.  See the manual section on orgtbl radio tables for the different
-export transformations and available parameters."
+  "Default export parameters for `org-table-export'.
+These can be overridden for a specific table by setting the
+TABLE_EXPORT_FORMAT property.  See the manual section on orgtbl
+radio tables for the different export transformations and
+available parameters."
   :group 'org-table-import-export
   :type 'string)
 
@@ -290,8 +291,7 @@ export transformations and available parameters."
 (defconst org-table-calculate-mark-regexp "^[ \t]*| *[!$^_#*] *\\(|\\|$\\)"
   "Detects a table line marked for automatic recalculation.")
 (defconst org-table-border-regexp "^[ \t]*[^| \t]"
-  "Searching from within a table (any type) this finds the first line
-outside the table.")
+  "Searching from within a table (any type) this finds the first line outside the table.")
 (defvar org-table-last-highlighted-reference nil)
 (defvar org-table-formula-history nil)
 
@@ -305,11 +305,11 @@ outside the table.")
   "Alist with locations of named fields.")
 
 (defvar org-table-current-line-types nil
-  "Table row types, non-nil only for the duration of a comand.")
+  "Table row types, non-nil only for the duration of a command.")
 (defvar org-table-current-begin-line nil
-  "Table begin line, non-nil only for the duration of a comand.")
+  "Table begin line, non-nil only for the duration of a command.")
 (defvar org-table-current-begin-pos nil
-  "Table begin position, non-nil only for the duration of a comand.")
+  "Table begin position, non-nil only for the duration of a command.")
 (defvar org-table-dlines nil
   "Vector of data line line numbers in the current table.")
 (defvar org-table-hlines nil
@@ -497,7 +497,7 @@ FILE can be the output file name.  If not given, it will be taken from
 a TABLE_EXPORT_FILE property in the current entry or higher up in the
 hierarchy, or the user will be prompted for a file name.
 FORMAT can be an export format, of the same kind as it used when
-orgtbl-mode sends a table in a different format.  The default format can
+`orgtbl-mode' sends a table in a different format.  The default format can
 be found in the variable `org-table-export-default-format', but the function
 first checks if there is an export format specified in a TABLE_EXPORT_FORMAT
 property, locally or anywhere up in the hierarchy."
@@ -1052,7 +1052,7 @@ If column is nil, use the current column."
 
 (defun org-table-put (line column value &optional align)
   "Put VALUE into line LINE, column COLUMN.
-When ALIGN is set, als realign the table."
+When ALIGN is set, also realign the table."
   (setq column (or column (org-table-current-column)))
   (prog1 (save-excursion
 	   (and (or (not line) (org-table-goto-line line))
@@ -1159,7 +1159,7 @@ is always the old value."
 
 (defun org-table-current-dline ()
   "Find out what table data line we are in.
-Only datalines count for this."
+Only data lines count for this."
   (interactive)
   (if (interactive-p) (org-table-check-inside-data-field))
   (save-excursion
@@ -1220,7 +1220,7 @@ However, when FORCE is non-nil, create new columns if necessary."
     (org-table-fix-formulas "$LR" nil (1- col) 1)))
 
 (defun org-table-find-dataline ()
-  "Find a dataline in the current table, which is needed for column commands."
+  "Find a data line in the current table, which is needed for column commands."
   (if (and (org-at-table-p)
 	   (not (org-at-table-hline-p)))
       t
@@ -1844,7 +1844,7 @@ If NLAST is a number, only the NLAST fields will actually be summed."
   "Return the formula active for the current field.
 Assumes that specials are in place.
 If KEY is given, return the key to this formula.
-Otherwise return the formula preceeded with \"=\" or \":=\"."
+Otherwise return the formula preceded with \"=\" or \":=\"."
   (let* ((name (car (rassoc (list (org-current-line)
 				  (org-table-current-column))
 			    org-table-named-field-locations)))
@@ -2386,7 +2386,7 @@ $1->    %s\n" orig formula form0 form))
 	  (org-fit-window-to-buffer bw)
 	  (unless (and (interactive-p) (not ndown))
 	    (unless (let (inhibit-redisplay)
-		      (y-or-n-p "Debugging Formula. Continue to next? "))
+		      (y-or-n-p "Debugging Formula.  Continue to next? "))
 	      (org-table-align)
 	      (error "Abort"))
 	    (delete-window bw)
@@ -2483,7 +2483,7 @@ and TABLE is a vector with line types."
 	 ;;                     1  2          3           4  5          6
 	 (and (not (match-end 3)) (not (match-end 6)))
 	 (and (match-end 3) (match-end 6) (not (match-end 5))))
-	(error "invalid row descriptor `%s'" desc))
+	(error "Invalid row descriptor `%s'" desc))
     (let* ((hdir (and (match-end 2) (match-string 2 desc)))
 	   (hn (if (match-end 3) (- (match-end 3) (match-beginning 3)) nil))
 	   (odir (and (match-end 5) (match-string 5 desc)))
@@ -2497,7 +2497,7 @@ and TABLE is a vector with line types."
 	    (setq i 0 hdir "+")
 	    (if (eq (aref table 0) 'hline) (setq hn (1- hn)))))
       (if (and (not hn) on (not odir))
-	  (error "should never happen");;(aref org-table-dlines on)
+	  (error "Should never happen");;(aref org-table-dlines on)
 	(if (and hn (> hn 0))
 	    (setq i (org-table-find-row-type table i 'hline (equal hdir "-")
 					     nil hn cline desc)))
@@ -2568,7 +2568,8 @@ LISPP means to return something appropriate for a Lisp list."
 (defun org-table-recalculate (&optional all noalign)
   "Recalculate the current table line by applying all stored formulas.
 With prefix arg ALL, do this for all lines in the table.
-With the prefix argument ALL is `(16)' (a double `C-c C-u' prefix), or if
+With the prefix argument ALL is `(16)' \
+\(a double \\[universal-prefix] \\[universal-prefix] prefix), or if
 it is the symbol `iterate', recompute the table until it no longer changes.
 If NOALIGN is not nil, do not re-align the table after the computations
 are done.  This is typically used internally to save time, if it is
@@ -3009,7 +3010,7 @@ For example:  28 -> AB."
       (org-rematch-and-replace 5 (eq dir 'left))))))
 
 (defun org-rematch-and-replace (n &optional decr hline)
-  "Re-match the group N, and replace it with the shifted refrence."
+  "Re-match the group N, and replace it with the shifted reference."
   (or (match-end n) (error "Cannot shift reference in this direction"))
   (goto-char (match-beginning n))
   (and (looking-at (regexp-quote (match-string n)))
@@ -3017,7 +3018,7 @@ For example:  28 -> AB."
 		      t t)))
 
 (defun org-table-shift-refpart (ref &optional decr hline)
-  "Shift a refrence part REF.
+  "Shift a reference part REF.
 If DECR is set, decrease the references row/column, else increase.
 If HLINE is set, this may be a hline reference, it certainly is not
 a translation reference."
@@ -3085,7 +3086,7 @@ With prefix ARG, apply the new formulas to the table."
     (select-window sel-win)
     (goto-char pos)
     (unless (org-at-table-p)
-      (error "Lost table position - cannot install formulae"))
+      (error "Lost table position - cannot install formulas"))
     (org-table-store-formulas eql)
     (move-marker pos nil)
     (kill-buffer "*Edit Formulas*")
@@ -3456,7 +3457,7 @@ Use COMMAND to do the motion, repeat if necessary to end up in a data line."
   (orgtbl-mode 1))
 
 (defvar org-old-auto-fill-inhibit-regexp nil
-  "Local variable used by `orgtbl-mode'")
+  "Local variable used by `orgtbl-mode'.")
 
 (defconst orgtbl-line-start-regexp
   "[ \t]*\\(|\\|#\\+\\(TBLFM\\|ORGTBL\\|TBLNAME\\):\\)"
@@ -3465,7 +3466,7 @@ Use COMMAND to do the motion, repeat if necessary to end up in a data line."
 (defconst orgtbl-extra-font-lock-keywords
   (list (list (concat "^" orgtbl-line-start-regexp ".*")
 	      0 (quote 'org-table) 'prepend))
-  "Extra font-lock-keywords to be added when orgtbl-mode is active.")
+  "Extra `font-lock-keywords' to be added when `orgtbl-mode' is active.")
 
 ;; Install it as a minor mode.
 (put 'orgtbl-mode :included t)
@@ -3832,7 +3833,7 @@ overwritten, and the table is not marked as requiring realignment."
     (funcall func table nil)))
 
 (defun orgtbl-gather-send-defs ()
-  "Gathers a plist of :name, :transform, :params for each destination before
+  "Gather a plist of :name, :transform, :params for each destination before
 a radio table."
   (save-excursion
     (goto-char (org-table-begin))
@@ -3989,17 +3990,17 @@ First element has index 0, or I0 if given."
 (defvar *orgtbl-rtn* nil
   "Formatting routines push the output lines here.")
 ;; Formatting parameters for the current table section.
-(defvar *orgtbl-hline* nil "Text used for horizontal lines")
-(defvar *orgtbl-sep* nil "Text used as a column separator")
-(defvar *orgtbl-default-fmt* nil "Default format for each entry")
-(defvar *orgtbl-fmt* nil "Format for each entry")
-(defvar *orgtbl-efmt* nil "Format for numbers")
-(defvar *orgtbl-lfmt* nil "Format for an entire line, overrides fmt")
-(defvar *orgtbl-llfmt* nil "Specializes lfmt for the last row")
-(defvar *orgtbl-lstart* nil "Text starting a row")
-(defvar *orgtbl-llstart* nil "Specializes lstart for the last row")
-(defvar *orgtbl-lend* nil "Text ending a row")
-(defvar *orgtbl-llend* nil "Specializes lend for the last row")
+(defvar *orgtbl-hline* nil "Text used for horizontal lines.")
+(defvar *orgtbl-sep* nil "Text used as a column separator.")
+(defvar *orgtbl-default-fmt* nil "Default format for each entry.")
+(defvar *orgtbl-fmt* nil "Format for each entry.")
+(defvar *orgtbl-efmt* nil "Format for numbers.")
+(defvar *orgtbl-lfmt* nil "Format for an entire line, overrides fmt.")
+(defvar *orgtbl-llfmt* nil "Specializes lfmt for the last row.")
+(defvar *orgtbl-lstart* nil "Text starting a row.")
+(defvar *orgtbl-llstart* nil "Specializes lstart for the last row.")
+(defvar *orgtbl-lend* nil "Text ending a row.")
+(defvar *orgtbl-llend* nil "Specializes lend for the last row.")
 
 (defsubst orgtbl-get-fmt (fmt i)
   "Retrieve the format from FMT corresponding to the Ith column."

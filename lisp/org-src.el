@@ -87,10 +87,11 @@ These are the regions where each line starts with a colon."
 	  (function :tag "Other (specify)")))
 
 (defcustom org-src-preserve-indentation nil
-  "If non-nil, leading whitespace characters in source code
-blocks are preserved on export, and when switching between the
-org buffer and the language mode edit buffer. If this variable
-is nil then, after editing with \\[org-edit-src-code], the
+  "If non-nil preserve leading whitespace characters on export.
+If non-nil leading whitespace characters in source code blocks
+are preserved on export, and when switching between the org
+buffer and the language mode edit buffer.  If this variable is nil
+then, after editing with \\[org-edit-src-code], the
 minimum (across-lines) number of leading whitespace characters
 are removed from all lines, and the code block is uniformly
 indented according to the value of `org-edit-src-content-indentation'."
@@ -101,7 +102,7 @@ indented according to the value of `org-edit-src-content-indentation'."
   "Indentation for the content of a source code block.
 This should be the number of spaces added to the indentation of the #+begin
 line in order to compute the indentation of the block content after
-editing it with \\[org-edit-src-code]. Has no effect if
+editing it with \\[org-edit-src-code].  Has no effect if
 `org-src-preserve-indentation' is non-nil."
   :group 'org-edit-structure
   :type 'integer)
@@ -326,7 +327,7 @@ the edited version. Optional argument CONTEXT is used by
      (switch-to-buffer buffer))))
 
 (defun org-src-construct-edit-buffer-name (org-buffer-name lang)
-  "Construct the buffer name for a source editing buffer"
+  "Construct the buffer name for a source editing buffer."
   (concat "*Org Src " org-buffer-name "[ " lang " ]*"))
 
 (defun org-edit-src-find-buffer (beg end)
@@ -527,7 +528,7 @@ the language, a switch telling if the content should be in a single line."
 	(match-string 1 s))))
 
 (defun org-edit-src-get-indentation (pos)
-  "Count leading whitespace characters on line"
+  "Count leading whitespace characters on line."
   (save-match-data
     (goto-char pos)
     (org-get-indentation)))
@@ -536,7 +537,7 @@ the language, a switch telling if the content should be in a single line."
   "Exit special edit and protect problematic lines."
   (interactive)
   (unless (org-bound-and-true-p org-edit-src-from-org-mode)
-    (error "This is not a sub-editing buffer, something is wrong..."))
+    (error "This is not a sub-editing buffer, something is wrong"))
   (widen)
   (let* ((beg org-edit-src-beg-marker)
 	 (end org-edit-src-end-marker)
