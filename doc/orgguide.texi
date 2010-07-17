@@ -2519,7 +2519,7 @@ buffer will write the new contents back to the Org buffer. Use @kbd{C-c '}
 again to exit the edit buffer.
 
 @subheading Evaluating code blocks
-Use @kbd{C-c C-c} to evaluate the current code block and insert it's results
+Use @kbd{C-c C-c} to evaluate the current code block and insert its results
 in the Org-mode buffer.  By default, evaluation is only turned on for
 @code{emacs-lisp} code blocks, however support exists for evaluating blocks
 in many languages.  For a complete list of supported languages see the
