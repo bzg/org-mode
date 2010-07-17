@@ -203,7 +203,7 @@ it in the buffer."
   (cond
    ;; In a timer list, insert with `org-insert-item-internal'.
    ((and (org-in-item-p)
-	 (org-at-item-timer-p))
+	 (save-excursion (org-beginning-of-item) (org-at-item-timer-p)))
     (org-insert-item-internal
      (point) nil (concat (org-timer (when arg '(4)) t) ":: ")))
    ;; In a list of another type, don't break anything: throw an error.

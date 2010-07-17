@@ -143,7 +143,7 @@ When nil, no bullet will have two spaces after them.
 When a string, it will be used as a regular expression. When the
 bullet type of a list is changed, the new bullet type will be
 matched against this regexp. If it matches, there will be two
-spaces instead of one after the bullet in each item of he list."
+spaces instead of one after the bullet in each item of the list."
   :group 'org-plain-lists
   :type '(choice
 	  (const :tag "never" nil)
@@ -167,8 +167,8 @@ precedence over it."
 (defcustom org-auto-renumber-ordered-lists t
   "Non-nil means automatically renumber ordered plain lists.
 Renumbering happens when the sequence have been changed with
-\\[org-shiftmetaup] or \\[org-shiftmetadown].  After other editing commands,
-use \\[org-ctrl-c-ctrl-c] to trigger renumbering."
+\\[org-shiftmetaup] or \\[org-shiftmetadown].  After other editing
+commands, use \\[org-ctrl-c-ctrl-c] to trigger renumbering."
   :group 'org-plain-lists
   :type 'boolean)
 
@@ -366,7 +366,7 @@ function end."
 		    (1+ (org-back-over-empty-lines))
 		  0))))))
 	 (insert-fun
-	  (lambda (&optional text)
+	  (lambda (text)
 	    ;; insert bullet above item in order to avoid bothering
 	    ;; with possible blank lines ending last item.
 	    (org-beginning-of-item)
@@ -381,13 +381,13 @@ function end."
     (goto-char true-pos)
     (cond
      (before-p
-      (funcall insert-fun)
+      (funcall insert-fun nil)
       ;; Not taking advantage of renumbering while moving down. Need
       ;; to call it directly.
       (org-maybe-renumber-ordered-list) t)
      ;; Can't split item: insert bullet at the end of item.
      ((not (org-get-alist-option org-M-RET-may-split-line 'item))
-      (funcall insert-fun) t)
+      (funcall insert-fun nil) t)
      ;; else, insert a new bullet along with everything from point
      ;; down to last non-blank line of item.
      (t
@@ -395,10 +395,16 @@ function end."
       ;; Get pos again in case previous command modified line.
       (let* ((pos (point))
 	     (end-before-blank (org-end-of-item-before-blank))
-	     (after-text (when (< pos end-before-blank)
-			   (prog1
-			       (buffer-substring pos end-before-blank)
-			     (delete-region pos end-before-blank)))))
+	     (after-text
+	      (when (< pos end-before-blank)
+		(prog1
+		    (buffer-substring pos end-before-blank)
+		  (delete-region pos end-before-blank)
+		  ;; delete any blank line at and before point.
+		  (beginning-of-line)
+		  (while (looking-at "^[ \t]*$")
+		    (delete-region (point-at-bol) (1+ (point-at-eol)))
+		    (backward-char))))))
 	(funcall insert-fun after-text) t)))))
 
 ;;; Predicates
@@ -696,7 +702,9 @@ things worked, nil when we are not in an item, or item is
 invisible."
   (unless (or (not (org-in-item-p))
 	      (org-invisible-p))
-    (if (org-at-item-timer-p)
+    (if (save-excursion
+	  (org-beginning-of-item)
+	  (org-at-item-timer-p))
 	;; Timer list: delegate to `org-timer-item'.
 	(progn (org-timer-item) t)
       ;; if we're in a description list, ask for the new term.
