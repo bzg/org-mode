@@ -436,7 +436,7 @@ Specific header arguments
 * var::				Pass arguments to code blocks
 * results::			Specify the type of results and how they will be collected and handled
 * file::			Specify a path for file output
-* dir and remote execution::	Specify the default directory for code block execution
+* dir::	                        Specify the default directory for code block execution
 * exports::			Export code and/or results
 * tangle::			Toggle tangling and specify file name
 * no-expand::			Turn off variable assignment and noweb expansion during tangling
@@ -11425,8 +11425,8 @@ The following header arguments are defined:
 * results::			Specify the type of results and how they will
                                 be collected and handled
 * file::			Specify a path for file output
-* dir and remote execution::	Specify the default directory for code block
-                                execution
+* dir::	                        Specify the default (possibly remote)
+                                directory for code block execution
 * exports::			Export code and/or results
 * tangle::			Toggle tangling and specify file name
 * no-expand::			Turn off variable assignment and noweb
@@ -11715,7 +11715,7 @@ be prepended to the existing results.  Otherwise the new results will be
 inserted as with @code{replace}.
 @end itemize
 
-@node file, dir and remote execution, results, Specific header arguments
+@node file, dir, results, Specific header arguments
 @subsubsection @code{:file}
 
 The header argument @code{:file} is used to specify a path for file output.
@@ -11731,7 +11731,7 @@ as python and ruby require that the code explicitly create output
 corresponding to the path indicated by @code{:file}.
 
 
-@node dir and remote execution, exports, file, Specific header arguments
+@node dir, exports, file, Specific header arguments
 @subsubsection @code{:dir} and remote execution
 
 While the @code{:file} header argument can be used to specify the path to the
@@ -11799,7 +11799,7 @@ directory}. Therefore, if @code{default-directory} is altered using
 which the link does not point.
 @end itemize
 
-@node exports, tangle, dir and remote execution, Specific header arguments
+@node exports, tangle, dir, Specific header arguments
 @subsubsection @code{:exports}
 
 The @code{:exports} header argument specifies what should be included in HTML
@@ -11861,8 +11861,7 @@ references (see @ref{Noweb reference syntax}) with their targets.  The
 @subsubsection @code{:session}
 
 The @code{:session} header argument starts a session for an interpreted
-language where state is preserved.  This applies particularly to the
-supported languages python, R and ruby.
+language where state is preserved.
 
 By default, a session is not started.
 
