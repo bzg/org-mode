@@ -259,23 +259,18 @@ the end of the nearest terminator from max."
 			 #'org-search-backward-unenclosed))
 	   (list-end-p (progn
 			 (goto-char start)
-			 (funcall search-fun (org-list-end-re) end))))
+			 (funcall search-fun (org-list-end-re) end t))))
       ;; Is there a valid list terminator somewhere ?
       (and list-end-p
 	   ;; we want to be on the first line of the list ender
 	   (match-beginning 0)))))
 
-(defun org-search-backward-unenclosed (regexp &optional bound noerror count)
-  "Like `re-search-backward' but don't stop inside blocks or at protected places.
-This function does not throw errors.
-
-Optional fourth argument COUNT searches for that many
-occurrences, valid or not, then makes sure the last one is
-valid."
+(defun org-search-unenclosed-internal (search-fun regexp bound noerror count)
+  "Search for REGEXP with SEARCH-FUN but don't stop inside blocks or at protected places."
   (let ((origin (point)))
     (cond
      ;; nothing found: return nil
-     ((not (re-search-backward regexp bound (or noerror t) count)) nil)
+     ((not (funcall search-fun regexp bound noerror count)) nil)
      ;; match is enclosed or protected: start again, searching one
      ;; more occurrence away.
      ((or (save-match-data
@@ -283,32 +278,17 @@ valid."
 				    '(concat "^[ \t]*#\\+\\(end\\|END\\)_" (match-string 2))))
 	  (get-text-property (match-beginning 0) 'org-protected))
       (goto-char origin)
-      (org-search-backward-unenclosed regexp bound noerror (1+ (or count 1))))
+      (org-search-unenclosed-internal search-fun regexp bound noerror (1+ count)))
      ;; else return point.
-     (t
-      (point)))))
+     (t (point)))))
 
-(defun org-search-forward-unenclosed (regexp &optional bound noerror count)
-  "Like `re-search-forward' but don't stop inside blocks or at protected places.
-This function does not throw errors.
+(defun org-search-backward-unenclosed (regexp &optional bound noerror)
+  "Like `re-search-backward' but don't stop inside blocks or at protected places."
+  (org-search-unenclosed-internal #'re-search-backward regexp bound noerror 1))
 
-Optional fourth argument COUNT searches for that many occurrences,
-valid or not, then makes sure the last one is valid."
-  (let ((origin (point)))
-    (cond
-     ;; nothing found: return nil
-     ((not (re-search-forward regexp bound (or noerror t) count)) nil)
-     ;; match is enclosed or protected: start again, searching one
-     ;; more occurrence away.
-     ((or (save-match-data
-	    (org-in-regexps-block-p "^[ \t]*#\\+\\(begin\\|BEGIN\\)_\\([a-zA-Z0-9_]+\\)"
-				    '(concat "^[ \t]*#\\+\\(end\\|END\\)_" (match-string 2))))
-	  (get-text-property (match-beginning 0) 'org-protected))
-      (goto-char origin)
-      (org-search-forward-unenclosed regexp bound noerror (1+ (or count 1))))
-     ;; else return point.
-     (t
-      (point)))))
+(defun org-search-forward-unenclosed (regexp &optional bound noerror)
+  "Like `re-search-forward' but don't stop inside blocks or at protected places."
+  (org-search-unenclosed-internal #'re-search-forward regexp bound noerror 1))
 
 (defun org-get-item-same-level-internal (search-fun pos limit pre-move)
   "Return point at the beginning of next item at the same level.
@@ -327,7 +307,7 @@ Internal use only. Prefer `org-get-next-item' and
       ;; we don't want to match the current line.
       (funcall pre-move)
       ;; Skip any sublist on the way
-      (while (and (funcall search-fun (org-item-re) limit)
+      (while (and (funcall search-fun (org-item-re) limit t)
 		  (> (org-get-indentation) ind))
 	(funcall pre-move))
       (when (and (/= (point-at-bol) start) ; Have we moved ?
@@ -431,7 +411,7 @@ function end."
     (let* ((limit (or (save-excursion (outline-previous-heading)) (point-min)))
 	   (actual-pos (goto-char (point-at-eol)))
 	   (last-item-start (save-excursion
-			      (org-search-backward-unenclosed (org-item-re) limit)))
+			      (org-search-backward-unenclosed (org-item-re) limit t)))
 	   (list-ender (org-list-terminator-between last-item-start actual-pos)))
       ;; We are in a list when we are on an item line or we can find
       ;; an item before and there is no valid list ender between us
@@ -484,9 +464,8 @@ A checkbox is blocked if all of the following conditions are fulfilled:
 	  (condition-case nil (org-back-to-heading t)
 	    (error (throw 'exit nil)))
 	  (unless (org-entry-get nil "ORDERED") (throw 'exit nil))
-	  (if (re-search-forward "^[ \t]*[-+*0-9.)] \\[[- ]\\]" end t)
-	      (org-current-line)
-	    nil))))))
+	  (when (org-search-forward-unenclosed "^[ \t]*[-+*0-9.)] \\[[- ]\\]" end t)
+	    (org-current-line)))))))
 
 ;;; Navigate
 
@@ -500,7 +479,7 @@ A checkbox is blocked if all of the following conditions are fulfilled:
 	   ;; Otherwise, go back to the heading above or bob.
 	   (goto-char (or (org-list-terminator-between bound pos) bound))
 	   ;; From there, search down our list.
-	   (org-search-forward-unenclosed (org-item-re) pos)
+	   (org-search-forward-unenclosed (org-item-re) pos t)
 	   (point-at-bol)))))
 
 (defun org-list-bottom-point ()
@@ -528,7 +507,7 @@ If the cursor is not in an item, throw an error. Return point."
       (if (org-at-item-p)
 	  (progn (beginning-of-line 1)
 		 (point))
-	(org-search-backward-unenclosed (org-item-re))
+	(org-search-backward-unenclosed (org-item-re) nil t)
 	(goto-char (point-at-bol)))
     (error "Not in an item")))
 
@@ -550,7 +529,7 @@ Assumes that the cursor is in the first line of an item."
   (let ((limit (org-list-bottom-point)))
     (end-of-line)
     (goto-char
-     (if (org-search-forward-unenclosed (org-item-re) limit)
+     (if (org-search-forward-unenclosed (org-item-re) limit t)
 	 (point-at-bol)
        limit))))
 
@@ -1060,7 +1039,7 @@ text below the heading."
 	(setq first-present (org-at-item-checkbox-p)
 	      first-status
 	      (save-excursion
-		(and (re-search-forward "[ \t]\\(\\[[ X]\\]\\)" end t)
+		(and (org-search-forward-unenclosed "[ \t]\\(\\[[ X]\\]\\)" end t)
 		     (equal (match-string 1) "[X]"))))
 	(while (< (point) end)
 	  (if toggle-presence
@@ -1140,7 +1119,7 @@ the whole buffer."
 	(setq beg (point) end (point-max)))
       (goto-char end)
       ;; find each statistics cookie
-      (while (and (re-search-backward re-find beg t)
+      (while (and (org-search-backward-unenclosed re-find beg t)
 		  (not (save-match-data
 			 (and (org-on-heading-p)
 			      (string-match "\\<todo\\>"
@@ -1164,7 +1143,7 @@ the whole buffer."
 	  ;; find first checkbox for this cookie and gather
 	  ;; statistics from all that are at this indentation level
 	  (goto-char startsearch)
-	  (if (re-search-forward re-box lim t)
+	  (if (org-search-forward-unenclosed re-box lim t)
 	      (progn
 		(org-beginning-of-item)
 		(setq curr-ind (org-get-indentation))
@@ -1174,7 +1153,7 @@ the whole buffer."
 				(<= curr-ind next-ind)
 			      (= curr-ind next-ind)))
 		  (save-excursion (end-of-line) (setq eline (point)))
-		  (if (re-search-forward re-box eline t)
+		  (if (org-search-forward-unenclosed re-box eline t)
 		      (if (member (match-string 2) '("[ ]" "[-]"))
 			  (setq c-off (1+ c-off))
 			(setq c-on (1+ c-on))))
@@ -1199,7 +1178,7 @@ the whole buffer."
 	  (when (org-at-item-p)
 	    (org-beginning-of-item)
 	    (when (and (> (+ c-on c-off) 0)
-		       (re-search-forward re-box (point-at-eol) t))
+		       (org-search-forward-unenclosed re-box (point-at-eol) t))
 	      (setq beg-cookie (match-beginning 2)
 		    end-cookie (match-end       2))
 	      (delete-region beg-cookie end-cookie)
@@ -1320,9 +1299,10 @@ optional argument WITH-CASE, the sorting considers case as well."
 				 ((= dcst ?a)
 				  (buffer-substring (match-end 0) (point-at-eol)))
 				 ((= dcst ?t)
-				  (if (or (re-search-forward org-ts-regexp (point-at-eol) t)
-					  (re-search-forward org-ts-regexp-both
-							     (point-at-eol) t))
+				  (if (or (org-search-forward-unenclosed org-ts-regexp
+									 (point-at-eol) t)
+					  (org-search-forward-unenclosed org-ts-regexp-both
+									 (point-at-eol) t))
 				      (org-time-string-to-seconds (match-string 0))
 				    (org-float-time now)))
 				 ((= dcst ?f)
@@ -1387,7 +1367,7 @@ sublevels as a list of strings."
     (save-excursion
       (if (ignore-errors
 	    (org-back-to-heading))
-	  (progn (re-search-forward org-complex-heading-regexp nil t)
+	  (progn (org-search-forward-unenclosed org-complex-heading-regexp nil t)
 		 (setq nstars (length (match-string 1))))
 	(setq nstars 0)))
     (org-list-make-subtrees list (1+ nstars))))
