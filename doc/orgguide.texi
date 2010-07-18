@@ -2548,6 +2548,12 @@ which can expand both variable and ``noweb'' style references.  In order to
 tangle a code block it must have a @code{:tangle} header argument, see the
 manual for details.
 
+@subheading Library of Babel
+Use @kbd{C-c C-v l} to load the code blocks from an Org-mode files into the
+``Library of Babel'', these blocks can then be evaluated from any Org-mode
+buffer.  A collection of generally useful code blocks is distributed with
+Org-mode in @code{contrib/library-of-babel.org}.
+
 @subheading Header Arguments
 Many aspects of the evaluation and export of code blocks are controlled
 through header arguments.  These can be specified globally, at the file
@@ -2595,12 +2601,6 @@ can accept a @code{:file filename} header argument in which case the results
 are saved to the named file, and a link to the file is inserted into the
 Org-mode buffer.
 @end table
-
-@subheading Library of Babel
-Use @kbd{C-c C-v l} to load the code blocks from an Org-mode files into the
-``Library of Babel'', these blocks can then be evaluated from any Org-mode
-buffer.  A collection of generally useful code blocks is distributed with
-Org-mode in @code{contrib/library-of-babel.org}.
 
 @seealso{
 @uref{http://orgmode.org/manual/Working-with-source-code.html#Working-with-source-code,Chapter 14 of the manual}@*
