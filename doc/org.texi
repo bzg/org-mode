@@ -7,6 +7,11 @@
 @set VERSION 6.36trans
 @set DATE May 2010
 
+@c Use proper quote and backtick for code sections in PDF output
+@c Cf. Texinfo manual 14.2
+@set txicodequoteundirected
+@set txicodequotebacktick
+
 @c Version and Contact Info
 @set MAINTAINERSITE @uref{http://orgmode.org,maintainers webpage}
 @set AUTHOR Carsten Dominik
@@ -656,14 +661,6 @@ Do not forget to activate Org as described in the following section.
 @cindex autoload
 @cindex global key bindings
 @cindex key bindings, global
-
-@iftex
-@b{Important:} @i{If you use copy-and-paste to copy Lisp code from the
-PDF documentation as viewed by some PDF viewers to your @file{.emacs} file, the
-single-quote character comes out incorrectly and the code will not work.
-You need to fix the single-quotes by hand, or copy from Info
-documentation.}
-@end iftex
 
 Add the following lines to your @file{.emacs} file.  The last three lines
 define @emph{global} keys for the commands @command{org-store-link},
