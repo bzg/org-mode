@@ -10432,7 +10432,6 @@ you are using.  The FAQ covers this issue.
 @node Publishing, Working With Source Code, Exporting, Top
 @chapter Publishing
 @cindex publishing
-@cindex O'Toole, David
 
 Org includes a publishing management system that allows you to configure
 automatic HTML conversion of @emph{projects} composed of interlinked org
@@ -14357,6 +14356,10 @@ provided frequent feedback and some patches.
 @item
 @i{Matt Lundin} has proposed last-row references for table formulas and named
 invisible anchors.  He has also worked a lot on the FAQ.
+@item
+@i{David Maus} wrote @file{org-atom.el}, maintains the issues file for Org
+and is a prolific contributor with competent replies, small fixes and patches
+on the mailing list.
 @item
 @i{Jason F. McBrayer} suggested agenda export to CSV format.
 @item
