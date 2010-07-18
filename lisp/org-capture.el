@@ -1109,19 +1109,6 @@ The template may still contain \"%?\" for cursor positioning."
       (goto-char (point-min))
       (org-capture-steal-local-variables buffer)
       (setq buffer-file-name nil)
-      ;; Simple %-escapes
-      (while (re-search-forward "%\\([tTuUaiAcxkKI]\\)" nil t)
-	(unless (org-capture-escaped-%)
-	  (when (and initial (equal (match-string 0) "%i"))
-	    (save-match-data
-	      (let* ((lead (buffer-substring
-			    (point-at-bol) (match-beginning 0))))
-		(setq v-i (mapconcat 'identity
-				     (org-split-string initial "\n")
-				     (concat "\n" lead))))))
-	  (replace-match
-	   (or (eval (intern (concat "v-" (match-string 1)))) "")
-	   t t)))
 
       ;; %[] Insert contents of a file.
       (goto-char (point-min))
@@ -1149,6 +1136,20 @@ The template may still contain \"%?\" for cursor positioning."
 		     (error (format "%%![Error: %s]" error)))))
 	      (delete-region template-start (point))
 	      (insert result)))))
+
+      ;; Simple %-escapes
+      (while (re-search-forward "%\\([tTuUaiAcxkKI]\\)" nil t)
+	(unless (org-capture-escaped-%)
+	  (when (and initial (equal (match-string 0) "%i"))
+	    (save-match-data
+	      (let* ((lead (buffer-substring
+			    (point-at-bol) (match-beginning 0))))
+		(setq v-i (mapconcat 'identity
+				     (org-split-string initial "\n")
+				     (concat "\n" lead))))))
+	  (replace-match
+	   (or (eval (intern (concat "v-" (match-string 1)))) "")
+	   t t)))
 
       ;; From the property list
       (when plist-p
