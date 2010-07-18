@@ -6,11 +6,406 @@
 
 #+STARTUP: indent hidestars
 
+* Version 7.01
+:PROPERTIES:
+:VISIBILITY: content
+:CUSTOM_ID: v7.01
+:END:
+
+** Incompatible Changes
+
+*** Emacs 21 support has been dropped
+
+Do not use Org mode 7.xx with Emacs 21, use an older version, for
+example [[http://orgmode.org/org-6.36c.zip][version 6.36c]].
+
+*** XEmacs support requires the XEmacs development version
+
+To use Org mode 7.xx with XEmacs, you need to run the developer
+version of XEmacs.   I was about to drop XEmacs support entirely,
+but Michael Sperber stepped in and made changes to XEmacs that
+made it easier to keep the support.  Thanks to Michael for this
+last-minute save.
+
+*** Customizable variable changes for DocBook exporter
+
+To make it more flexible for users to provide DocBook exporter
+related commands, we start to use format-spec to format the
+commands in this release.  If you use DocBook exporter and use it
+to export Org files to PDF and/or FO format, the settings of the
+following two customizable variables need to be changed:
+
+1. =org-export-docbook-xslt-proc-command=
+2. =org-export-docbook-xsl-fo-proc-command=
+
+Instead of using =%s= in the format control string for all
+arguments, now we use /three/ different format spec characters:
+
+1. =%i=: input file argument
+2. =%o=: output file argument
+3. =%s=: XSLT stylesheet argument
+
+For example, if you set =org-export-docbook-xslt-proc-command= to
+
+: java com.icl.saxon.StyleSheet -o %s %s /path/to/docbook.xsl
+
+in the past, now you need to change it to
+
+: java com.icl.saxon.StyleSheet -o %o %i %s
+
+and set a new customizable variable called
+=org-export-docbook-xslt-stylesheet= to =/path/to/docbook.xsl=.
+
+Please check the documentation of these two variables for more
+details and other examples.
+
+Along with the introduction of variable
+=org-export-docbook-xslt-stylesheet=, we also added a new
+in-buffer setting called =#+XSLT:=.  You can use this setting to
+specify the XSLT stylesheet that you want to use on a per-file
+basis.  This setting overrides
+=org-export-docbook-xslt-stylesheet=.
+
+*** Org-babel configuration changes
+:PROPERTIES:
+:CUSTOM_ID: ob-configuration-changes
+:END:
+
+Babel took the integration into Org-mode as an opportunity to do
+some much needed house cleaning.  Most importantly we have
+simplified the enabling of language support, and cleared out
+unnecessary configuration variables -- which is great unless you
+already have a working configuration under the old model.
+
+The most important changes regard the /location/ and /enabling/
+of Babel (both core functionality and language specific support).
+
+- Babel :: Babel is now part of the core of Org-mode, so it is
+     now loaded along with the rest of Org-mode.  That means that
+     there is /no configuration/ required to enable the main
+     Babel functionality.  For current users, this means that
+     statements like
+     #+begin_src emacs-lisp
+       (require 'org-babel)
+     #+end_src
+     or
+     #+begin_src emacs-lisp
+       (require 'org-babel-init)
+     #+end_src
+     that may by lying around in your configuration must now be
+     removed.
+- load path :: Babel (including all language specific files --
+     aside from those which are located in the =contrib/=
+     directory for reasons of licencing) now lives in the base of
+     the Org-mode lisp directory, so /no additional directories/
+     need to be added to your load path to use babel.  For Babel
+     users this means that statements adding babel-specific
+     directories to your load-path should now be removed from
+     your config.
+- language support :: It is no longer necessary to require
+     language specific support on a language-by-language basis.
+     Specific language support should now be managed through the
+     `org-babel-load-languages' variable.  This variable can be
+     customized using the Emacs customization interface, or
+     through the addition of something like the following to your
+     configuration (note: any language not mentioned will /not/
+     be enabled, aside from =emacs-lisp= which is enabled by
+     default)
+     #+begin_src emacs-lisp
+       (org-babel-do-load-languages
+        'org-babel-load-languages
+        '((R . t)
+          (ditaa . t)
+          (dot . t)
+          (emacs-lisp . t)
+          (gnuplot . t)
+          (haskell . nil)
+          (ocaml . nil)
+          (python . t)
+          (ruby . t)
+          (screen . nil)
+          (sh . t)
+          (sql . nil)
+          (sqlite . t)))
+     #+end_src
+     
+	   Despite this change it is still possible to add
+	   language support through the use of =require=
+	   statements, however to conform to Emacs file-name
+	   regulations all Babel language files have changed
+	   prefix from =org-babel-*= to =ob-*=, so the require
+	   lines must also change e.g.
+	   #+begin_src emacs-lisp
+       (require 'org-babel-R)
+	   #+end_src
+	   should be changed to
+	   #+begin_src emacs-lisp
+       (require 'ob-R)
+	   #+end_src
+
+We have eliminated the =org-babel-tangle-w-comments= variable as
+well as the two main internal lists of languages, namely
+- =org-babel-interpreters= and
+- =org-babel-tangle-langs= 
+
+so any config lines which mention those variables, can/should be
+stripped out in their entirety.  This includes any calls to the
+=org-babel-add-interpreter= function, whose sole purpose was to
+add languages to the =org-babel-interpreters= variable.
+
+With those calls stripped out, we may still in some cases want to
+associate a file name extension with certain languages, for
+example we want all of our emacs-lisp files to end in a =.el=, we
+can do this will the =org-babel-tangle-lang-exts= variable.  In
+general you shouldn't need to touch this as it already has
+defaults for most common languages, and if a language is not
+present in org-babel-tangle-langs, then babel will just use the
+language name, so for example a file of =c= code will have a =.c=
+extension by default, shell-scripts (identified with =sh=) will
+have a =.sh= extension etc...
+
+The configuration of /shebang/ lines now lives in header
+arguments.  So the shebang for a single file can be set at the
+code block level, e.g.
+
+#+begin_src org
+  ,#+begin_src clojure :shebang #!/usr/bin/env clj
+  ,  (println "with a shebang line, I can be run as a script!")
+  ,#+end_src  
+#+end_src
+
+Note that whenever a file is tangled which includes a /shebang/
+line, Babel will make the file executable, so there is good
+reason to only add /shebangs/ at the source-code block level.
+However if you're sure that you want all of your code in some
+language (say shell scripts) to tangle out with shebang lines,
+then you can customize the default header arguments for that
+language, e.g.
+
+#+begin_src emacs-lisp
+  ;; ensure this variable is defined defined
+  (unless (boundp 'org-babel-default-header-args:sh)
+    (setq org-babel-default-header-args:sh '()))
+  
+  ;; add a default shebang header argument
+  (add-to-list 'org-babel-default-header-args:sh
+               '(:shebang . "#!/bin/bash"))  
+#+end_src
+
+The final important change included in this release is the
+addition of new security measures into Babel.  These measures are
+in place to protect users from the accidental or uninformed
+execution of code.  Along these lines /every/ execution of a code
+block will now require an explicit confirmation from the user.
+These confirmations can be stifled through customization of the
+`org-confirm-babel-evaluate' variable, e.g.
+#+begin_src emacs-lisp
+  ;; I don't want to be prompted on every code block evaluation
+  (setq org-confirm-babel-evaluate nil)
+#+end_src
+
+In addition, it is now possible to remove code block evaluation
+form the =C-c C-c= keybinding.  This can be done by setting the
+=org-babel-no-eval-on-ctrl-c-ctrl-c= variable to a non-nil value,
+e.g.
+#+begin_src emacs-lisp
+  ;; I don't want to execute code blocks with C-c C-c
+  (setq org-babel-no-eval-on-ctrl-c-ctrl-c t)
+#+end_src
+
+An additional keybinding has been added for code block
+evaluation, namely =C-c C-v e=.
+
+Whew! that seems like a lot of effort for a /simplification/ of
+configuration.
+
+*** New keys for TODO sparse trees
+
+The key =C-c C-v= is now reserved for Org Babel action.  TODO
+sparse trees can still be made with =C-c / t= (all not-done
+states) and =C-c / T= (specific states).
+
+*** Customizable variable changes for DocBook exporter
+
+To make it more flexible for users to provide DocBook exporter
+related commands, we start to use format-spec to format the
+commands in this release.  If you use DocBook exporter and use it
+to export Org files to PDF and/or FO format, the settings of the
+following two customizable variables need to be changed:
+
+1. =org-export-docbook-xslt-proc-command=
+2. =org-export-docbook-xsl-fo-proc-command=
+
+Instead of using =%s= in the format control string for all
+arguments, now we use /three/ different format spec characters:
+
+1. =%i=: input file argument
+2. =%o=: output file argument
+3. =%s=: XSLT stylesheet argument
+
+For example, if you set =org-export-docbook-xslt-proc-command= to
+
+: java com.icl.saxon.StyleSheet -o %s %s /path/to/docbook.xsl
+
+in the past, now you need to change it to
+
+: java com.icl.saxon.StyleSheet -o %o %i %s
+
+and set a new customizable variable called
+=org-export-docbook-xslt-stylesheet= to =/path/to/docbook.xsl=.
+
+Please check the documentation of these two variables for more
+details and other examples.
+
+Along with the introduction of variable
+=org-export-docbook-xslt-stylesheet=, we also added a new
+in-buffer setting called =#+XSLT:=.  You can use this setting to
+specify the XSLT stylesheet that you want to use on a per-file
+basis.  This setting overrides
+=org-export-docbook-xslt-stylesheet=.
+
+** Details
+
+*** Org Babel is now part of the Org core
+See [[#ob-configuration-changes][Org-babel configuration changes]] for instructions on how to
+update your babel configuration.
+
+The most significant result of this change is that Babel now has
+documentation!  It is part of Org-mode's documentation, see
+Chapter 14 [[http://orgmode.org/manual/Working-with-source-code.html#Working-with-source-code][Working With Source Code]].  The Babel keybindings
+are now listed in the refcard, and can be viewed from any
+Org-mode buffer by pressing =C-c C-v h=.  In addition this
+integration has included a number of bug fixes, and a significant
+amount of internal code cleanup.
+
+*** Help system for finding entities
+
+The new command =M-x org-entities-help= creates a structured
+buffer that lists all entities available in Org.  Thanks to Ulf
+Stegeman for adding the necessary structure to the internal
+entity list.
+
+*** Implement pretty display of entities, sub-, and superscripts.
+
+The command =C-c C-x \= toggles the display of Org's special
+entities like =\alpha= as pretty unicode characters.  Also, sub
+and superscripts are displayed in a pretty way.  If you want to
+exclude sub- and superscripts, see the variable
+=org-pretty-entities-include-sub-superscripts=.
+
+Thanks to Eric Schulte and Ulf Stegeman for making this possible.
+
+*** The default capture system for Org mode is now called org-capture
+
+This replaces the earlier system org-remember.  The manual only
+describes org-capture, but for people who prefer to continue to
+use org-remember, we make available
+[[http://orgmode.org/org-remember.pdf][a static copy of theformer chapter about remember]].
+
+The new system has a better implementation and more
+possibilities.  See [[http://thread.gmane.org/gmane.emacs.orgmode/26441/focus%3D26441][Carsten's announcement]] for more details.
+
+To switch over to the new system:
+
+1. Run 
+
+   : M-x org-capture-import-remember-templates RET
+
+   to get a translated version of your remember templates into the
+   new variable =org-capture-templates=.  This will "mostly" work,
+   but maybe not for all cases.  At least it will give you a good
+   place to modify your templates.  After running this command,
+   enter the customize buffer for this variable with 
+
+   : M-x customize-variable RET org-capture-templates RET
+
+   and convince yourself that everything is OK.  Then save the
+   customization.
+   
+2. Bind the command =org-capture= to a key, similar to what you did
+   with org-remember:
+
+   : (define-key global-map "\C-cc" 'org-capture)
+
+   If your fingers prefer =C-c r=, you can also use this key once
+   you have decided to move over completely to the new
+   implementation.  During a test time, there is nothing wrong
+   with using both system in parallel.
+
+*** New module to create Gantt charts
+
+Christian Egli's /org-taskjuggler.el/ module is now part of Org.
+He also wrote a [[http://orgmode.org/worg/org-tutorials/org-taskjuggler.php][tutorial]] for it.
+
+*** Refile targets can now be cached
+
+You can turn on caching of refile targets by setting the variable
+=org-refile-use-cache=.  This should speed up refiling if you
+have many eligible targets in many files.  If you need to update
+the cache because Org misses a newly created entry or still
+offers a deleted one, press =C-0 C-c C-w=.
+
+*** Enhanced functionality of the clock resolver
+
+Here are the new options for the clock resolver:
+    
+: i/q/C-g  Ignore this question; the same as keeping all the idle time.
+: 
+: k/K      Keep X minutes of the idle time (default is all).  If this
+:          amount is less than the default, you will be clocked out
+:          that many minutes after the time that idling began, and then
+:          clocked back in at the present time.
+: g/G      Indicate that you \"got back\" X minutes ago.  This is quite
+:          different from 'k': it clocks you out from the beginning of
+:          the idle period and clock you back in X minutes ago.
+: s/S      Subtract the idle time from the current clock.  This is the
+:          same as keeping 0 minutes.
+: C        Cancel the open timer altogether.  It will be as though you
+:          never clocked in.
+: j/J      Jump to the current clock, to make manual adjustments.
+    
+For all these options, using uppercase makes your final state
+to be CLOCKED OUT.  Thanks to John Wiegley for making these
+changes.
+
+*** A property value of "nil" now means to unset a property
+
+This can be useful in particular with property inheritance, if
+some upper level has the property, and some grandchild of it
+would like to have the default settings (i.e. not overruled by a
+property) back.
+
+Thanks to Robert Goldman and Bernt Hansen for pushing this
+change.
+
+*** The problem with comment syntax has finally been fixed
+
+Thanks to Leo who has been on a year-long quest to get this fixed
+and finally found the right way to do it.
+
+*** Make it possible to protect hidden subtrees from being killed by =C-k=
+    
+This was a request by Scott Otterson.
+See the new variable =org-ctrl-k-protect-subtree=.
+    
+*** New module org-mac-link-grabber.el
+
+This module allows to grab links to all kinds of applications on
+a mac.  It is available in the contrib directory.
+
+Thanks to Anthony Lander for this contribution.
+
+*** LaTeX export: Implement table* environment for wide tables
+    
+Thanks to Chris Gray for a patch to this effect.
+
+*** When cloning entries, remove or renew ID property
+
+Thanks to David Maus for this change
 
 * Version 6.36
 
  :PROPERTIES:
- :VISIBILITY: content
  :CUSTOM_ID: v6.36
  :END:
 
