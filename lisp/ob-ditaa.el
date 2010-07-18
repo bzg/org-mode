@@ -58,7 +58,7 @@ This function is called by `org-babel-execute-src-block'."
       (error "Could not find ditaa.jar at %s" org-ditaa-jar-path))
     (with-temp-file in-file (insert body))
     (message (concat "java -jar " org-ditaa-jar-path " " cmdline " " in-file " " out-file))
-    (shell-command (concat "java -jar " org-ditaa-jar-path " " cmdline " " in-file " " out-file))
+    (shell-command (concat "java -jar " (shell-quote-argument org-ditaa-jar-path) " " cmdline " " in-file " " out-file))
     out-file))
 
 (defun org-babel-prep-session:ditaa (session params)
