@@ -17704,13 +17704,23 @@ Your bug report will be posted to the Org-mode mailing list.
 With prefix arg UNCOMPILED, load the uncompiled versions."
   (interactive "P")
   (require 'find-func)
-  (let* ((file-re "^\\(ob\\|org\\|orgtbl\\)\\(\\.el\\|-.*\\.el\\)")
+  (let* ((file-re "^\\(org\\|orgtbl\\)\\(\\.el\\|-.*\\.el\\)")
 	 (dir-org (file-name-directory (org-find-library-name "org")))
 	 (dir-org-contrib (ignore-errors
 			   (file-name-directory
 			    (org-find-library-name "org-contribdir"))))
+	 (babel-files
+	  (mapcar (lambda (el) (concat "ob" (when el (format "-%s" el)) ".el"))
+		  (append (list nil "comint" "eval" "exp" "keys"
+				    "lob" "ref" "table" "tangle")
+			  (delq nil
+				(mapcar
+				 (lambda (lang)
+				   (when (cdr lang) (symbol-name (car lang))))
+				 org-babel-load-languages)))))
 	 (files
 	  (append (directory-files dir-org t file-re)
+		  babel-files
 		  (and dir-org-contrib
 		       (directory-files dir-org-contrib t file-re))))
 	 (remove-re (concat (if (featurep 'xemacs)
