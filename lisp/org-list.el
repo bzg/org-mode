@@ -322,7 +322,7 @@ new item will be created before the current one.
 
 Insert a checkbox if CHECKBOX is non-nil, and string AFTER-BULLET
 after the bullet. Cursor will be after this text once the
-function end."
+function ends."
   (goto-char pos)
   ;; Point in a special block: move before it prior to add a new item.
   (when (org-in-regexps-block-p
@@ -355,16 +355,17 @@ function end."
 	      0)
 	     ((eq insert-blank-p t) 1)
 	     ;; plain-list-item is 'auto. Count blank lines separating
-	     ;; items in current list.
+	     ;; neighbours items in list.
 	     (t
-	      (save-excursion
-		(if (progn
-		      (org-end-of-item-list)
-		      (skip-chars-backward " \r\t\n")
-		      (org-search-backward-unenclosed
-		       "^[ \t]*$" (save-excursion (org-beginning-of-item-list)) t))
-		    (1+ (org-back-over-empty-lines))
-		  0))))))
+	      (let ((next-p (org-get-next-item (point) (org-list-bottom-point))))
+		(cond
+		 ;; Is there a next item?
+		 (next-p (goto-char next-p)
+			 (org-back-over-empty-lines))
+		 ;; Is there a previous item?
+		 ((not (org-first-list-item-p)) (org-back-over-empty-lines))
+		 ;; no luck: item is alone. Use default value.
+		 (t 1)))))))
 	 (insert-fun
 	  (lambda (text)
 	    ;; insert bullet above item in order to avoid bothering
@@ -404,7 +405,7 @@ function end."
 		  (beginning-of-line)
 		  (while (looking-at "^[ \t]*$")
 		    (delete-region (point-at-bol) (1+ (point-at-eol)))
-		    (backward-char))))))
+		    (beginning-of-line 0))))))
 	(funcall insert-fun after-text) t)))))
 
 ;;; Predicates
