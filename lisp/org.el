@@ -133,15 +133,16 @@
 	org-babel-load-languages))
 
 (defcustom org-babel-load-languages '((emacs-lisp . t))
-  "Languages which can be evaluated in Org-mode buffers.  This
-list can be used to load support for any of the languages below,
-note that each language will depend on a different set of system
-executables and/or Emacs modes.  When a language is \"loaded\",
-then code blocks in that language can be evaluated with
-`org-babel-execute-src-block' bound by default to C-c C-c (note
-the `org-babel-no-eval-on-ctrl-c-ctrl-c' variable can be set to
-remove code block evaluation from the C-c C-c keybinding.  By
-default only Emacs Lisp (which has no requirements) is loaded."
+  "Languages which can be evaluated in Org-mode buffers.
+This list can be used to load support for any of the languages
+below, note that each language will depend on a different set of
+system executables and/or Emacs modes.  When a language is
+\"loaded\", then code blocks in that language can be evaluated
+with `org-babel-execute-src-block' bound by default to C-c
+C-c (note the `org-babel-no-eval-on-ctrl-c-ctrl-c' variable can
+be set to remove code block evaluation from the C-c C-c
+keybinding.  By default only Emacs Lisp (which has no
+requirements) is loaded."
   :group 'org-babel
   :set 'org-babel-do-load-languages
   :type '(alist :tag "Babel Languages"
@@ -334,7 +335,7 @@ to add the symbol `xyz', and the package must have a call to
   "Non-nil means make shift-cursor commands select text when possible.
 
 In Emacs 23, when `shift-select-mode' is on, shifted cursor keys start
-selecting a region, or enlarge thusly regions started in this way.
+selecting a region, or enlarge regions started in this way.
 In Org-mode, in special contexts, these same keys are used for other
 purposes, important enough to compete with shift selection.  Org tries
 to balance these needs by supporting `shift-select-mode' outside these
@@ -494,10 +495,10 @@ become effective."
   :type 'boolean)
 
 (defcustom org-use-extra-keys nil
-  "Non-nil means use extra key sequence definitions for certain
-commands.  This happens automatically if you run XEmacs or if
-window-system is nil.  This variable lets you do the same
-manually.  You must set it before loading org.
+  "Non-nil means use extra key sequence definitions for certain commands.
+This happens automatically if you run XEmacs or if `window-system'
+is nil.  This variable lets you do the same manually.  You must
+set it before loading org.
 
 Example: on Carbon Emacs 22 running graphically, with an external
 keyboard on a Powerbook, the default way of setting M-left might
@@ -529,7 +530,7 @@ therefore you'll have to restart Emacs to apply it after changing."
 (defun org-key (key)
   "Select key according to `org-replace-disputed-keys' and `org-disputed-keys'.
 Or return the original if not disputed.
-Also apply the trnaslations defined in `org-xemacs-key-equivalents'."
+Also apply the translations defined in `org-xemacs-key-equivalents'."
   (when org-replace-disputed-keys
     (let* ((nkey (key-description key))
 	   (x (org-find-if (lambda (x)
@@ -751,7 +752,7 @@ The cdr is either a command to be called interactively, a function
 to be called, or a form to be evaluated.
 An entry that is just a list with a single string will be interpreted
 as a descriptive headline that will be added when listing the speed
-copmmands in the Help buffer using the `?' speed command."
+commands in the Help buffer using the `?' speed command."
     :group 'org-structure
     :type '(repeat :value ("k" . ignore)
 	    (choice :value ("k" . ignore)
@@ -831,7 +832,7 @@ of the buffer."
 
 When the cursor is at the end of an empty headline, i.e with only stars
 and maybe a TODO keyword, TAB will then switch the entry to become a child,
-and then all possible anchestor states, before returning to the original state.
+and then all possible ancestor states, before returning to the original state.
 This makes data entry extremely fast:  M-RET to create a new headline,
 on TAB to make it a child, two or more tabs to make it a (grand-)uncle.
 
@@ -1089,9 +1090,8 @@ See also the QUOTE keyword."
   :group 'org-edit-structure
   :type 'boolean)
 
-
 (defcustom org-goto-auto-isearch t
-  "Non-nil means typing characters in org-goto starts incremental search."
+  "Non-nil means typing characters in `org-goto' starts incremental search."
   :group 'org-edit-structure
   :type 'boolean)
 
@@ -1277,11 +1277,11 @@ Changing this variable requires a restart of Emacs to become effective."
 	      (const :tag "Footnotes" footnote)))
 
 (defcustom org-make-link-description-function nil
-  "Function to use to generate link descriptions from links. If
-nil the link location will be used. This function must take two
-parameters; the first is the link and the second the description
-org-insert-link has generated, and should return the description
-to use."
+  "Function to use to generate link descriptions from links.
+If nil the link location will be used.  This function must take
+two parameters; the first is the link and the second the
+description `org-insert-link' has generated, and should return the
+description to use."
   :group 'org-link
   :type 'function)
 
@@ -1431,7 +1431,7 @@ Needs to be set before org.el is loaded."
   :type 'boolean)
 
 (defcustom org-mark-ring-length 4
-  "Number of different positions to be recorded in the ring
+  "Number of different positions to be recorded in the ring.
 Changing this requires a restart of Emacs to work correctly."
   :group 'org-link-follow
   :type 'integer)
@@ -1488,7 +1488,8 @@ another window."
   "Non-nil means use indirect buffer to display infile links.
 Activating internal links (from one location in a file to another location
 in the same file) normally just jumps to the location.  When the link is
-activated with a C-u prefix (or with mouse-3), the link is displayed in
+activated with a \\[universal-argument] prefix (or with mouse-3), the link \
+is displayed in
 another window.  When this option is set, the other window actually displays
 an indirect buffer clone of the current buffer, to avoid any visibility
 changes to the current buffer."
@@ -1513,7 +1514,7 @@ window on that directory."
 
 (defcustom org-link-mailto-program '(browse-url "mailto:%a?subject=%s")
   "Function and arguments to call for following mailto links.
-This is a list with the first element being a lisp function, and the
+This is a list with the first element being a Lisp function, and the
 remaining elements being arguments to the function.  In string arguments,
 %a will be replaced by the address, and %s will be replaced by the subject
 if one was given like in <mailto:arthur@galaxy.org::this subject>."
@@ -1746,7 +1747,7 @@ outline-path-completion  Headlines in the current buffer are offered via
 	  (const :tag "Outline-path-completion" outline-path-completion)))
 
 (defcustom org-goto-max-level 5
-  "Maximum level to be considered when running org-goto with refile interface."
+  "Maximum target level when running `org-goto' with refile interface."
   :group 'org-refile
   :type 'integer)
 
@@ -1815,7 +1816,7 @@ This is list of cons cells.  Each cell contains:
     order in hierarchy, not to the number of stars.
 
 You can set the variable `org-refile-target-verify-function' to a function
-to verify each headline found by the simple critery above.
+to verify each headline found by the simple criteria above.
 
 When this variable is nil, all top-level headlines in the current buffer
 are used, equivalent to the value `((nil . (:level . 1))'."
@@ -1917,9 +1918,8 @@ heading."
   '(
     (:tag "Sequence (cycling hits every state)" sequence)
     (:tag "Type     (cycling directly to DONE)" type))
-  "The available interpretation symbols for customizing
- `org-todo-keywords'.
- Interested libraries should add to this list.")
+  "The available interpretation symbols for customizing `org-todo-keywords'.
+Interested libraries should add to this list.")
 
 (defcustom org-todo-keywords '((sequence "TODO" "DONE"))
   "List of TODO entry keyword sequences and their interpretation.
@@ -1945,7 +1945,7 @@ Each keyword can optionally specify a character for fast state selection
 \(in combination with the variable `org-use-fast-todo-selection')
 and specifiers for state change logging, using the same syntax
 that is used in the \"#+TODO:\" lines.  For example, \"WAIT(w)\" says
-that the WAIT state can be selected with the \"w\" key. \"WAIT(w!)\"
+that the WAIT state can be selected with the \"w\" key.  \"WAIT(w!)\"
 indicates to record a time stamp each time this state is selected.
 
 Each keyword may also specify if a timestamp or a note should be
@@ -2289,7 +2289,7 @@ The value is an alist, with the car being a symbol indicating the note
 context, and the cdr is the heading to be used.  The heading may also be the
 empty string.
 %t in the heading will be replaced by a time stamp.
-%T will be an acive time stamp instead the default inacive one
+%T will be an active time stamp instead the default inactive one
 %s will be replaced by the new TODO state, in double quotes.
 %S will be replaced by the old TODO state, in double quotes.
 %u will be replaced by the user name.
@@ -2383,7 +2383,7 @@ alternatively, set the :REPEAT_TO_STATE: property of the entry."
 (defcustom org-log-repeat 'time
   "Non-nil means record moving through the DONE state when triggering repeat.
 An auto-repeating task is immediately switched back to TODO when
-marked DONE. If you are not logging state changes (by adding \"@\"
+marked DONE.  If you are not logging state changes (by adding \"@\"
 or \"!\" to the TODO keyword definition), or set `org-log-done' to
 record a closing note, there will be no record of the task moving
 through DONE. This variable forces taking a note anyway.
@@ -2472,8 +2472,8 @@ of N minutes, as given by the second value.
 When a setting is 0 or 1, insert the time unmodified.  Useful rounding
 numbers should be factors of 60, so for example 5, 10, 15.
 
-When this is larger than 1, you can still force an exact time-stamp by using
-a double prefix argument to a time-stamp command like `C-c .' or `C-c !',
+When this is larger than 1, you can still force an exact time stamp by using
+a double prefix argument to a time stamp command like `C-c .' or `C-c !',
 and by using a prefix arg to `S-up/down' to specify the exact number
 of minutes to shift."
   :group 'org-time
@@ -2520,8 +2520,8 @@ commands, if custom time display is turned on at the time of export."
       f)))
 
 (defcustom org-time-clocksum-format "%d:%02d"
-  "The format string used when creating CLOCKSUM lines, or when
-org-mode generates a time duration."
+  "The format string used when creating CLOCKSUM lines.
+This is also used when org-mode generates a time duration."
   :group 'org-time
   :type 'string)
 
@@ -2552,8 +2552,8 @@ Custom commands can set this variable in the options section."
   "Non-nil means assume future for incomplete date input from user.
 This affects the following situations:
 1. The user gives a month but not a year.
-   For example, if it is april and you enter \"feb 2\", this will be read
-   as feb 2, *next* year.  \"May 5\", however, will be this year.
+   For example, if it is April and you enter \"feb 2\", this will be read
+   as Feb 2, *next* year.  \"May 5\", however, will be this year.
 2. The user gives a day, but no month.
    For example, if today is the 15th, and you enter \"3\", Org-mode will
    read this as the third of *next* month.  However, if you enter \"17\",
@@ -2803,7 +2803,7 @@ is better to limit inheritance to certain tags using the variables
 	  (const :tag "List them, indented with leading dots" indented)))
 
 (defcustom org-tags-sort-function nil
-  "When set, tags are sorted using this function as a comparator"
+  "When set, tags are sorted using this function as a comparator."
   :group 'org-tags
   :type '(choice
 	  (const :tag "No sorting" nil)
@@ -2834,7 +2834,7 @@ lined-up with respect to each other."
 (defcustom org-use-property-inheritance nil
   "Non-nil means properties apply also for sublevels.
 
-This setting is chiefly used during property searches. Turning it on can
+This setting is chiefly used during property searches.  Turning it on can
 cause significant overhead when doing a search, which is why it is not
 on by default.
 
@@ -3530,18 +3530,18 @@ Normal means no org-mode-specific context."
 ;; by the functions setting up org-mode or checking for table context.
 
 (defconst org-table-any-line-regexp "^[ \t]*\\(|\\|\\+-[-+]\\)"
-  "Detects an org-type or table-type table.")
+  "Detect an org-type or table-type table.")
 (defconst org-table-line-regexp "^[ \t]*|"
-  "Detects an org-type table line.")
+  "Detect an org-type table line.")
 (defconst org-table-dataline-regexp "^[ \t]*|[^-]"
-  "Detects an org-type table line.")
+  "Detect an org-type table line.")
 (defconst org-table-hline-regexp "^[ \t]*|-"
-  "Detects an org-type table hline.")
+  "Detect an org-type table hline.")
 (defconst org-table1-hline-regexp "^[ \t]*\\+-[-+]"
-  "Detects a table-type table hline.")
+  "Detect a table-type table hline.")
 (defconst org-table-any-border-regexp "^[ \t]*[^|+ \t]"
-  "Searching from within a table (any type) this finds the first line
-outside the table.")
+  "Detect the first line outside a table when searching from within it.
+This works for both table types.")
 
 ;; Autoload the functions in org-table.el that are needed by functions here.
 
@@ -3610,7 +3610,7 @@ If TABLE-TYPE is non-nil, also check for table.el-type tables."
 		    (message "recognizing table.el table...")
 		    (table-recognize-table)
 		    (message "recognizing table.el table...done")))
-	      (error "This should not happen..."))
+	      (error "This should not happen"))
 	    t)
 	nil)
     nil))
@@ -4065,7 +4065,7 @@ Also put tags into group 4 if tags are present.")
   "Matches any of the 3 keywords, together with the time stamp.")
 (make-variable-buffer-local 'org-keyword-time-not-clock-regexp)
 (defvar org-maybe-keyword-time-regexp nil
-  "Matches a timestamp, possibly preceeded by a keyword.")
+  "Matches a timestamp, possibly preceded by a keyword.")
 (make-variable-buffer-local 'org-maybe-keyword-time-regexp)
 (defvar org-planning-or-clock-line-re nil
   "Matches a line with planning or clock info.")
@@ -4548,7 +4548,7 @@ This is for getting out of special buffers like remember.")
 ;;;; Define the Org-mode
 
 (if (and (not (keymapp outline-mode-map)) (featurep 'allout))
-    (error "Conflict with outdated version of allout.el.  Load org.el before allout.el, or upgrade to newer allout, for example by switching to Emacs 22."))
+    (error "Conflict with outdated version of allout.el.  Load org.el before allout.el, or upgrade to newer allout, for example by switching to Emacs 22"))
 
 
 ;; We use a before-change function to check if a table might need
@@ -4760,7 +4760,7 @@ Here is what the match groups contain after a match:
 4: [desc]
 5: desc")
 (defvar org-bracket-link-analytic-regexp++ nil
-  "Like org-bracket-link-analytic-regexp, but include coderef internal type.")
+  "Like `org-bracket-link-analytic-regexp', but include coderef internal type.")
 (defvar org-any-link-re nil
   "Regular expression matching any link.")
 
@@ -5296,7 +5296,7 @@ will be prompted for."
       rtn)))
 
 (defun org-restart-font-lock ()
-  "Restart font-lock-mode, to force refontification."
+  "Restart `font-lock-mode', to force refontification."
   (when (and (boundp 'font-lock-mode) font-lock-mode)
     (font-lock-mode -1)
     (font-lock-mode 1)))
@@ -5341,7 +5341,7 @@ between words."
 (defun org-outline-level ()
   "Compute the outline level of the heading at point.
 This function assumes that the cursor is at the beginning of a line matched
-by outline-regexp.  Otherwise it returns garbage.
+by `outline-regexp'.  Otherwise it returns garbage.
 If this is called at a normal headline, the level is the number of stars.
 Use `org-reduced-level' to remove the effect of `org-odd-levels'.
 For plain list items, if they are matched by `outline-regexp', this returns
@@ -5461,7 +5461,7 @@ For plain list items, if they are matched by `outline-regexp', this returns
     (kill-local-variable 'font-lock-keywords) nil))
 
 (defun org-toggle-pretty-entities ()
-  "Toggle the compostion display of entities as UTF8 characters."
+  "Toggle the composition display of entities as UTF8 characters."
   (interactive)
   (org-set-local 'org-pretty-entities (not org-pretty-entities))
   (org-restart-font-lock)
@@ -5494,7 +5494,7 @@ For plain list items, if they are matched by `outline-regexp', this returns
 	nil))))
 
 (defun org-fontify-like-in-org-mode (s &optional odd-levels)
-  "Fontify string S like in Org-mode"
+  "Fontify string S like in Org-mode."
   (with-temp-buffer
     (insert s)
     (let ((org-odd-levels-only odd-levels))
@@ -5592,7 +5592,7 @@ If KWD is a number, get the corresponding match group."
 (defun org-remove-font-lock-display-properties (beg end)
   "Remove specific display properties that have been added by font lock.
 The will remove the raise properties that are used to show superscripts
-and subscriipts."
+and subscripts."
   (let (next prop)
     (while (< beg end)
       (setq next (next-single-property-change beg 'display nil end)
@@ -5686,7 +5686,7 @@ in special contexts.
 - When point is at the beginning of an empty headline and the variable
   `org-cycle-level-after-item/entry-creation' is set, cycle the level
   of the headline by demoting and promoting it to likely levels.  This
-  speeds up creation document structure by presing TAB once or several
+  speeds up creation document structure by pressing TAB once or several
   times right after creating a new headline.
 
 - When there is a numeric prefix, go up to a heading with level ARG, do
@@ -6195,7 +6195,7 @@ Optional argument N means put the headline into the Nth line of the window."
 (defun org-outline-overlay-data (&optional use-markers)
   "Return a list of the locations of all outline overlays.
 The are overlays with the `invisible' property value `outline'.
-The return valus is a list of cons cells, with start and stop
+The return values is a list of cons cells, with start and stop
 positions for each overlay.
 If USE-MARKERS is set, return the positions as markers."
   (let (beg end)
@@ -6259,9 +6259,8 @@ point nowhere."
 (make-variable-buffer-local 'org-hide-block-overlays)
 
 (defun org-block-map (function &optional start end)
-  "Call func at the head of all source blocks in the current
-buffer.  Optional arguments START and END can be used to limit
-the range."
+  "Call function at the head of all source blocks in the current buffer.
+Optional arguments START and END can be used to limit the range."
   (let ((start (or start (point-min)))
         (end (or end (point-max))))
     (save-excursion
@@ -7037,7 +7036,7 @@ After top level, it switches back to sibling level."
 	(funcall fun)))))
 
 (defun org-fixup-indentation (diff)
-  "Change the indentation in the current entry by DIFF
+  "Change the indentation in the current entry by DIFF.
 However, if any line in the current entry has no indentation, or if it
 would end up with no indentation after the change, nothing at all is done."
   (save-excursion
@@ -7075,10 +7074,11 @@ level 5 etc."
 	  (end-of-line 1))))))
 
 (defun org-convert-to-oddeven-levels ()
-  "Convert an org-mode file with only odd levels to one with odd and even levels.
-This promotes level 3 to level 2, level 5 to level 3 etc.  If the file contains a
-section with an even level, conversion would destroy the structure of the file.  An error
-is signaled in this case."
+  "Convert an org-mode file with only odd levels to one with odd/even levels.
+This promotes level 3 to level 2, level 5 to level 3 etc.  If the
+file contains a section with an even level, conversion would
+destroy the structure of the file.  An error is signaled in this
+case."
   (interactive)
   (goto-char (point-min))
   ;; First check if there are no even levels
@@ -7833,7 +7833,7 @@ If WITH-CASE is non-nil, the sorting will be case-sensitive."
   "Keymap for the minor `orgstruct-mode'.")
 
 (defvar org-local-vars nil
-  "List of local variables, for use by `orgstruct-mode'")
+  "List of local variables, for use by `orgstruct-mode'.")
 
 ;;;###autoload
 (define-minor-mode orgstruct-mode
@@ -7892,7 +7892,7 @@ major mode, for example with \\[normal-mode]."
       (org-set-local 'orgstruct-is-++ t))))
 
 (defvar orgstruct-is-++ nil
-  "Is orgstruct-mode in ++ version in the current-buffer?")
+  "Is `orgstruct-mode' in ++ version in the current-buffer?")
 (make-variable-buffer-local 'orgstruct-is-++)
 
 ;;;###autoload
@@ -8134,7 +8134,7 @@ If yes, it should return a non-nil value after a calling
 `org-store-link-props' with a list of properties and values.
 Special properties are:
 
-:type         The link prefix. like \"http\".  This must be given.
+:type         The link prefix, like \"http\".  This must be given.
 :link         The link, like \"http://www.astro.uva.nl/~dominik\".
               This is obligatory as well.
 :description  Optional default description for the second pair
@@ -9230,10 +9230,10 @@ there is one, offer it as link number zero."
 (org-add-link-type "file+sys" 'org-open-file-with-system)
 (org-add-link-type "file+emacs" 'org-open-file-with-emacs)
 (defun org-open-file-with-system (path)
-  "Open file at PATH using the system way of opeing it."
+  "Open file at PATH using the system way of opening it."
   (org-open-file path 'system))
 (defun org-open-file-with-emacs (path)
-  "Open file at PATH in emacs."
+  "Open file at PATH in Emacs."
   (org-open-file path 'emacs))
 (defun org-remove-file-link-modifiers ()
   "Remove the file link modifiers in `file+sys:' and `file+emacs:' links."
@@ -9259,8 +9259,8 @@ These functions are called in turn with point at the location to
 which the link should point.
 
 A function in the hook should first test if it would like to
-handle this file type, for example by checking the major-mode or
-the file extension.  If it decides not to handle this file, it
+handle this file type, for example by checking the `major-mode'
+or the file extension.  If it decides not to handle this file, it
 should just return nil to give other functions a chance.  If it
 does handle the file, it must return the search string to be used
 when following the link.  The search string will be part of the
@@ -9281,8 +9281,8 @@ buffer with \\[org-insert-link].")
 Functions added to this hook must accept a single argument, the
 search string that was part of the file link, the part after the
 double colon.  The function must first check if it would like to
-handle this search, for example by checking the major-mode or the
-file extension.  If it decides not to handle this search, it
+handle this search, for example by checking the `major-mode' or
+the file extension.  If it decides not to handle this search, it
 should just return nil to give other functions a chance.  If it
 does handle the search, it must return a non-nil value to keep
 other functions from trying.
@@ -9943,7 +9943,7 @@ avoiding backtracing.  Refile target collection makes use of that."
   (if fastp
       (progn
 	(if (> level 19)
-	    (error "Outline path failure, more than 19 levels."))
+	    (error "Outline path failure, more than 19 levels"))
 	(loop for i from level upto 19 do
 	      (aset org-olpa i nil))
 	(prog1
@@ -9959,7 +9959,7 @@ avoiding backtracing.  Refile target collection makes use of that."
 	  rtn)))))
 
 (defun org-format-outline-path (path &optional width prefix)
-  "Format the outlie path PATH for display.
+  "Format the outline path PATH for display.
 Width is the maximum number of characters that is available.
 Prefix is a prefix to be included in the returned string,
 such as the file name."
@@ -10033,7 +10033,7 @@ Depending on `org-reverse-note-order', the new subitem will either be the
 first or the last subitem.
 
 If there is an active region, all entries in that region will be moved.
-However, the region must fulfil the requirement that the first heading
+However, the region must fulfill the requirement that the first heading
 is the first one sets the top-level of the moved text - at most siblings
 below it are allowed.
 
@@ -10368,7 +10368,7 @@ blocks in the buffer."
     (org-update-dblock)))
 
 (defun org-update-dblock ()
-  "Update the dynamic block at point
+  "Update the dynamic block at point.
 This means to empty the block, parse for parameters and then call
 the correct writing function."
   (save-window-excursion
@@ -10468,7 +10468,7 @@ usually `M-TAB'.  %file will be replaced by a file name after prompting
 for the file using completion.
 There are two templates for each key, the first uses the original Org syntax,
 the second uses Emacs Muse-like syntax tags.  These Muse-like tags become
-the default when the /org-mtags.el/ module has been loaded. See also the
+the default when the /org-mtags.el/ module has been loaded.  See also the
 variable `org-mtags-prefer-muse-templates'.
 This is an experimental feature, it is undecided if it is going to stay in."
   :group 'org-completion
@@ -10688,15 +10688,13 @@ this is nil.")
 
 (defvar org-todo-setup-filter-hook nil
   "Hook for functions that pre-filter todo specs.
-
-Each function takes a todo spec and returns either `nil' or the spec
+Each function takes a todo spec and returns either nil or the spec
 transformed into canonical form." )
 
 (defvar org-todo-get-default-hook nil
   "Hook for functions that get a default item for todo.
-
 Each function takes arguments (NEW-MARK OLD-MARK) and returns either
-`nil' or a string to be used for the todo mark." )
+nil or a string to be used for the todo mark." )
 
 (defvar org-agenda-headline-snapshot-before-repeat)
 
@@ -10713,10 +10711,12 @@ So for this example: when the item starts with TODO, it is changed to DONE.
 When it starts with DONE, the DONE is removed.  And when neither TODO nor
 DONE are present, add TODO at the beginning of the heading.
 
-With C-u prefix arg, use completion to determine the new state.
+With \\[universal-argument] prefix arg, use completion to determine the new \
+state.
 With numeric prefix arg, switch to that state.
-With a double C-u prefix, switch to the next set of TODO keywords (nextset).
-With a triple C-u prefix, circumvent any state blocking.
+With a double \\[universal-argument] prefix, switch to the next set of TODO \
+keywords (nextset).
+With a triple \\[universal-argument] prefix, circumvent any state blocking.
 
 For calling through lisp, arg is also interpreted in the following way:
 'none             -> empty state
@@ -11540,7 +11540,7 @@ returns nil."
       (apply 'encode-time (org-parse-time-string time)))))
 
 (defun org-get-deadline-time (pom &optional inherit)
-  "Get the deadine as a time tuple, of a format suitable for
+  "Get the deadline as a time tuple, of a format suitable for
 calling org-deadline with, or if there is no scheduling, returns
 nil."
   (let ((time (org-entry-get pom "DEADLINE" inherit)))
@@ -13454,7 +13454,7 @@ If the property is not present at all, nil is returned.
 
 If LITERAL-NIL is set, return the string value \"nil\" as a string,
 do not interpret it as the list atom nil.  This is used for inheritance
-when a \"nil\" value can supercede a non-nil value higher up the hierarchy."
+when a \"nil\" value can supersede a non-nil value higher up the hierarchy."
   (org-with-point-at pom
     (if (and inherit (if (eq inherit 'selective)
 			 (org-property-inherit-p property)
@@ -13908,16 +13908,16 @@ completion."
 (defun org-find-olp (path &optional this-buffer)
   "Return a marker pointing to the entry at outline path OLP.
 If anything goes wrong, throw an error.
-You can wrap this call to cathc the error like this:
+You can wrap this call to catch the error like this:
 
   (condition-case msg
       (org-mobile-locate-entry (match-string 4))
     (error (nth 1 msg)))
 
 The return value will then be either a string with the error message,
-or a marker if everyhing is OK.
+or a marker if everything is OK.
 
-If THIS-BUFFER is set, the putline path does not contain a file,
+If THIS-BUFFER is set, the outline path does not contain a file,
 only headings."
   (let* ((file (if this-buffer buffer-file-name (pop path)))
 	 (buffer (if this-buffer (current-buffer) (find-file-noselect file)))
@@ -14291,7 +14291,7 @@ user."
       (org-overlay-display org-read-date-overlay txt 'secondary-selection))))
 
 (defun org-read-date-analyze (ans def defdecode)
-  "Analyse the combined answer of the date prompt."
+  "Analyze the combined answer of the date prompt."
   ;; FIXME: cleanup and comment
   (let ((nowdecode (decode-time (current-time)))
 	delta deltan deltaw deltadef year month day
@@ -14817,7 +14817,7 @@ days in order to avoid rounding problems."
 
 (defun org-time-string-to-absolute (s &optional daynr prefer show-all)
   "Convert a time stamp to an absolute day number.
-If there is a specifyer for a cyclic time stamp, get the closest date to
+If there is a specifier for a cyclic time stamp, get the closest date to
 DAYNR.
 PREFER and SHOW-ALL are passed through to `org-closest-date'.
 the variable date is bound by the calendar when this is called."
@@ -14930,7 +14930,7 @@ When SHOW-ALL is nil, only return the current occurrence of a time stamp."
       (if (string-match "\\(\\+[0-9]+\\)\\([dwmy]\\)" change)
 	  (setq dn (string-to-number (match-string 1 change))
 		dw (cdr (assoc (match-string 2 change) a1)))
-	(error "Invalid change specifyer: %s" change))
+	(error "Invalid change specifier: %s" change))
       (if (eq dw 'week) (setq dw 'day dn (* 7 dn)))
       (cond
        ((eq dw 'day)
@@ -14976,7 +14976,7 @@ When SHOW-ALL is nil, only return the current occurrence of a time stamp."
 	 (t (if (= cday n1) n1 n2)))))))
 
 (defun org-date-to-gregorian (date)
-  "Turn any specification of DATE into a gregorian date for the calendar."
+  "Turn any specification of DATE into a Gregorian date for the calendar."
   (cond ((integerp date) (calendar-gregorian-from-absolute date))
 	((and (listp date) (= (length date) 3)) date)
 	((stringp date)
@@ -16055,7 +16055,7 @@ INCLUDE-LINKED is passed to `org-display-inline-images'."
 Normally only links without a description part are inlined, because this
 is how it will work for export.  When INCLUDE-LINKED is set, also links
 with a description part will be inlined.  This can be nice for a quick
-look at those images, but it does not reflect whatexported files will look
+look at those images, but it does not reflect what exported files will look
 like.
 When REFRESH is set, refresh existing images between BEG and END.
 This will create new image displays only if necessary.
@@ -16372,7 +16372,7 @@ BEG and END default to the buffer boundaries."
   "Show the available speed commands."
   (interactive)
   (if (not org-use-speed-commands)
-      (error "Speed commands are not activated, customize `org-use-speed-commands'.")
+      (error "Speed commands are not activated, customize `org-use-speed-commands'")
     (with-output-to-temp-buffer "*Help*"
       (princ "User-defined Speed commands\n===========================\n")
       (mapc 'org-print-speed-command org-speed-commands-user)
@@ -16786,7 +16786,7 @@ See the individual commands for more information."
   "Check if there are hidden headlines/items in the current visual line.
 WHAT can be either `headlines' or `items'.  If the current line is
 an outline or item heading and it has a folded subtree below it,
-this fucntion returns t, nil otherwise."
+this function returns t, nil otherwise."
   (let ((re (cond
 	     ((eq what 'headlines) (concat "^" org-outline-regexp))
 	     ((eq what 'items) (concat "^" (org-item-re t)))
@@ -18158,7 +18158,7 @@ really on, so that the block visually is on the match."
 	nil))))
 
 (defun org-in-regexps-block-p (start-re end-re)
-  "Returns t if the current point is between matches of START-RE and END-RE.
+  "Return t if the current point is between matches of START-RE and END-RE.
 This will also return to if point is on one of the two matches."
   (interactive)
   (let ((p (point)))
@@ -18277,7 +18277,7 @@ Returns the number of empty lines passed."
 (defun org-point-in-group (point group &optional context)
   "Check if POINT is in match-group GROUP.
 If CONTEXT is non-nil, return a list with CONTEXT and the boundaries of the
-match.  If the match group does ot exist or point is not inside it,
+match.  If the match group does not exist or point is not inside it,
 return nil."
   (and (match-beginning group)
        (>= point (match-beginning group))
