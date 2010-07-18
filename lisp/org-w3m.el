@@ -28,17 +28,19 @@
 ;; This file implements copying HTML content from a w3m buffer and
 ;; transforming the text on the fly so that it can be pasted into
 ;; an org-mode buffer with hot links.  It will also work for regions
-;; in gnus buffers that have ben washed with w3m.
+;; in gnus buffers that have been washed with w3m.
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
-;;; Acknowledgements:
+;;; Acknowledgments:
 
 ;; Richard Riley <rileyrgdev at googlemail dot com>
 ;;
 ;;      The idea of transforming the HTML content with org-mode style is
 ;;      proposed by Richard, I'm just coding it.
 ;;
+
+;;; Code:
 
 (require 'org)
 
