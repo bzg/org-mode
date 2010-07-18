@@ -365,7 +365,7 @@ HTML export
 * Images in HTML export::	How to insert figures into HTML output
 * Text areas in HTML export::	An alternative way to show an example
 * CSS support::			Changing the appearance of the output
-* Javascript support::		Info and Folding in a web browser
+* JavaScript support::		Info and Folding in a web browser
 
 La@TeX{} and PDF export
 
@@ -9334,7 +9334,7 @@ language, but with additional support for tables.
 * Images in HTML export::	How to insert figures into HTML output
 * Text areas in HTML export::	An alternative way to show an example
 * CSS support::			Changing the appearance of the output
-* Javascript support::		Info and Folding in a web browser
+* JavaScript support::		Info and Folding in a web browser
 @end menu
 
 @node HTML Export commands, Quoting HTML tags, HTML export, HTML export
@@ -9526,7 +9526,7 @@ respectively.  For example
 @end example
 
 
-@node CSS support, Javascript support, Text areas in HTML export, HTML export
+@node CSS support, JavaScript support, Text areas in HTML export, HTML export
 @subsection CSS support
 @cindex CSS, for HTML export
 @cindex HTML export, CSS
@@ -9597,8 +9597,8 @@ referring to an external file.
 @c FIXME: More about header and footer styles
 @c FIXME: Talk about links and targets.
 
-@node Javascript support,  , CSS support, HTML export
-@subsection Javascript supported display of web pages
+@node JavaScript support,  , CSS support, HTML export
+@subsection JavaScript supported display of web pages
 
 @cindex Rose, Sebastian
 Sebastian Rose has written a JavaScript program especially designed to
