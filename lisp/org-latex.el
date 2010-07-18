@@ -836,7 +836,7 @@ when PUB-DIR is set, use this as the publishing directory."
     (with-current-buffer outbuf (erase-buffer))
     (message "Processing LaTeX file...")
     (if (and cmds (symbolp cmds))
-	(funcall cmds file)
+	(funcall cmds (shell-quote-argument file))
       (while cmds
 	(setq cmd (pop cmds))
 	(while (string-match "%b" cmd)
