@@ -6106,10 +6106,12 @@ file and location.
 @end table
 
 @item template
-The template for creating the capture item.  If you leave this
-empty, an appropriate default template will be used.  Otherwise this is a
-string with  escape codes, which will be replaced depending on time
-and context of the capture call.  See below for more details.
+The template for creating the capture item.  If you leave this empty, an
+appropriate default template will be used.  Otherwise this is a string with
+escape codes, which will be replaced depending on time and context of the
+capture call.  The string with escapes may be loaded from a template file,
+using the special syntax @code{(file "path/to/template")}.  See below for
+more details.
 
 @item properties
 The rest of the entry is a property list of additional options.
