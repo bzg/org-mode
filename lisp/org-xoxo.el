@@ -25,10 +25,11 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;; Commentary:
+;; XOXO export
+
+;;; Code:
 
 (require 'org-exp)
-
-;;; XOXO export
 
 (defvar org-export-xoxo-final-hook nil
   "Hook run after XOXO export, in the new buffer.")

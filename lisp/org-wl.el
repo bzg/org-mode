@@ -105,7 +105,7 @@ googlegroups otherwise."
   '(("%" . imap) ("-" . nntp) ("+" . mh) ("=" . spool)
     ("$" . archive) ("&" . pop) ("@" . shimbun) ("[" . search)
     ("*" . multi) ("/" . filter) ("|" . pipe) ("'" . internal))
-  "List of folder indicators. See Wanderlust manual, section 3.")
+  "List of folder indicators.  See Wanderlust manual, section 3.")
 
 ;; Install the link type
 (org-add-link-type "wl" 'org-wl-open)
@@ -114,8 +114,8 @@ googlegroups otherwise."
 ;; Implementation
 
 (defun org-wl-folder-type (folder)
-  "Return symbol that indicicates the type of FOLDER.
-FOLDER is the wanderlust folder name. The first character of the
+  "Return symbol that indicates the type of FOLDER.
+FOLDER is the wanderlust folder name.  The first character of the
 folder name determines the the folder type."
   (let* ((indicator (substring folder 0 1))
 	 (type (cdr (assoc indicator org-wl-folder-types))))
