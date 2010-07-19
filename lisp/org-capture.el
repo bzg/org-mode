@@ -289,7 +289,7 @@ calendar           |  %:type %:date"
 			 (file :tag "Template file"))
 		   (list :tag "Function"
 			 (const :format "" function)
-			 (file :tag "Template function")))
+			 (function :tag "Template function")))
 	   (plist :inline t
 		  ;; Give the most common options as checkboxes
 		  :options (((const :format "%v " :prepend) (const t))
