@@ -1350,12 +1350,9 @@ sublevels as a list of strings."
     (while (org-search-forward-unenclosed (org-item-re) end t)
       (save-excursion
 	(beginning-of-line)
-	(cond ((looking-at-p "^[ \t]*[0-9]")
-	       (setq itemsep "[0-9]+\\(?:\\.\\|)\\)"
-		     ltype 'ordered))
-	      ((org-at-description-p)
-	       (setq itemsep "[-+*]" ltype 'descriptive))
-	      (t (setq itemsep "[-+*]" ltype 'unordered))))
+	(setq ltype (cond ((looking-at-p "^[ \t]*[0-9]") 'ordered)
+			  ((org-at-description-p) 'descriptive)
+			  (t 'unordered))))
       (let* ((indent1 (org-get-indentation))
 	     (nextitem (or (org-get-next-item (point) end) end))
 	     (item (org-trim (buffer-substring (point) (org-end-of-item-text-before-children))))
