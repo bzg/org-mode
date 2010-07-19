@@ -731,16 +731,14 @@ invisible."
   (unless (org-bound-and-true-p org-suppress-item-indentation)
     (save-excursion
       (let ((beg (point-at-bol))
-	    (end (progn (org-end-of-item) (point)))
-	    i)
-	(goto-char end)
+	    (end (org-end-of-item)))
 	(beginning-of-line 0)
 	(while (> (point) beg)
 	  (when (looking-at "[ \t]*\\S-")
 	    ;; this is not an empty line
-	    (setq i (org-get-indentation))
-	    (if (and (> i 0) (> (setq i (+ i delta)) 0))
-		(indent-line-to i)))
+	    (let ((i (org-get-indentation)))
+	      (when (and (> i 0) (> (+ i delta) 0))
+		(indent-line-to (+ i delta)))))
 	  (beginning-of-line 0))))))
 
 
@@ -795,10 +793,12 @@ If NO-SUBTREE is set, only indent the item itself, not its children."
 	    delta (if (> arg 0)
 		      (if ind-down (- ind-down ind) 2)
 		    (if ind-up (- ind-up ind) -2)))
-      (if (and (< (+ delta ind) origin-ind)
-	       ;; verify we're not at the top level item
-	       (/= (point-at-bol) (org-list-top-point)))
-	  (error "Cannot outdent beyond top level item"))
+      (cond
+       ((< (+ delta ind) 0) (error "Cannot outdent beyond margin"))
+       ((and (< (+ delta ind) origin-ind)
+	     ;; verify we're not at the top level item
+	     (/= (point-at-bol) (org-list-top-point)))
+	(error "Cannot outdent beyond top level item")))
       (while (< (point) end)
 	(beginning-of-line)
 	(skip-chars-forward " \t") (setq ind1 (current-column))
