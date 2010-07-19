@@ -463,7 +463,7 @@ function ends."
 
 (defun org-at-item-checkbox-p ()
   "Is point at a line starting a plain-list item with a checklet?"
-  (org-list-at-regexp-after-bullet-p "\\[[- X]\\]"))
+  (org-list-at-regexp-after-bullet-p "\\(\\[[- X]\\]\\)[ \t]+"))
 
 (defun org-checkbox-blocked-p ()
   "Is the current checkbox blocked from for being checked now?
@@ -476,7 +476,7 @@ A checkbox is blocked if all of the following conditions are fulfilled:
     (save-match-data
       (save-excursion
 	(unless (org-at-item-checkbox-p) (throw 'exit nil))
-	(when (equal (match-string 0) "[X]")
+	(when (equal (match-string 1) "[X]")
 	  ;; the box is already checked!
 	  (throw 'exit nil))
 	(let ((end (point-at-bol)))
@@ -863,7 +863,8 @@ Assumes cursor in item line."
 	(org-adapt-indentation nil))
     (cond
      ((and (looking-at "[ \t]*$")
-	   (org-looking-back "^\\([ \t]*\\)\\([-+*]\\|[0-9]+[).]\\)[ \t]+"))
+	   (or (org-at-description-p) (org-at-item-checkbox-p) (org-at-item-p))
+	   (<= (point) (match-end 0)))
       (setq this-command 'org-cycle-item-indentation)
       (if (eq last-command 'org-cycle-item-indentation)
 	  (condition-case nil
@@ -1026,7 +1027,7 @@ text below the heading."
 	(save-excursion
 	  (if (equal toggle-presence '(4))
 	      (progn
-		(replace-match "")
+		(replace-match "" nil nil nil 1)
 		(goto-char (match-beginning 0))
 		(just-one-space))
 	    (when (setq blocked (org-checkbox-blocked-p))
@@ -1034,9 +1035,9 @@ text below the heading."
 		     blocked))
 	    (replace-match
 	     (cond ((equal toggle-presence '(16)) "[-]")
-		   ((member (match-string 0) '("[ ]" "[-]")) "[X]")
+		   ((member (match-string 1) '("[ ]" "[-]")) "[X]")
 		   (t "[ ]"))
-	     t t)))
+	     t t nil 1)))
 	(throw 'exit t))
        ((org-at-item-p)
 	;; add a checkbox
@@ -1052,7 +1053,7 @@ text below the heading."
 	      first-status
 	      (save-excursion
 		(and (org-search-forward-unenclosed "[ \t]\\(\\[[ X]\\]\\)" end t)
-		     (equal (match-string 1) "[X]"))))
+		     (equal (match-string 0) "[X]"))))
 	(while (< (point) end)
 	  (if toggle-presence
 	      (cond
@@ -1067,9 +1068,9 @@ text below the heading."
 		  (goto-char (match-end 0))
 		  (insert "[ ] "))))
 	    (when (org-at-item-checkbox-p)
-	      (setq status (equal (match-string 0) "[X]"))
+	      (setq status (equal (match-string 1) "[X]"))
 	      (replace-match
-	       (if first-status "[ ]" "[X]") t t)))
+	       (if first-status "[ ]" "[X]") t t nil 1)))
 	  (beginning-of-line 2)))))
   (org-update-checkbox-count-maybe))
 
@@ -1084,7 +1085,7 @@ text below the heading."
       (let ((end (point-max)))
 	(while (< (point) end)
 	  (when (org-at-item-checkbox-p)
-	    (replace-match "[ ]" t t))
+	    (replace-match "[ ]" t t nil 1))
 	  (beginning-of-line 2))))
     (org-update-checkbox-count-maybe)))
 
