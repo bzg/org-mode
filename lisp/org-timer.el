@@ -201,10 +201,10 @@ it in the buffer."
   "Insert a description-type item with the current timer value."
   (interactive "P")
   (cond
-   ;; In a timer list, insert with `org-insert-item-internal'.
+   ;; In a timer list, insert with `org-list-insert-item-generic'.
    ((and (org-in-item-p)
 	 (save-excursion (org-beginning-of-item) (org-at-item-timer-p)))
-    (org-insert-item-internal
+    (org-list-insert-item-generic
      (point) nil (concat (org-timer (when arg '(4)) t) ":: ")))
    ;; In a list of another type, don't break anything: throw an error.
    ((org-in-item-p)

@@ -265,7 +265,7 @@ the end of the nearest terminator from max."
 	   ;; we want to be on the first line of the list ender
 	   (match-beginning 0)))))
 
-(defun org-search-unenclosed-internal (search-fun regexp bound noerror count)
+(defun org-list-search-unenclosed-generic (search-fun regexp bound noerror count)
   "Search for REGEXP with SEARCH-FUN but don't stop inside blocks or at protected places."
   (let ((origin (point)))
     (cond
@@ -278,17 +278,17 @@ the end of the nearest terminator from max."
 				    '(concat "^[ \t]*#\\+\\(end\\|END\\)_" (match-string 2))))
 	  (get-text-property (match-beginning 0) 'org-protected))
       (goto-char origin)
-      (org-search-unenclosed-internal search-fun regexp bound noerror (1+ count)))
+      (org-list-search-unenclosed-generic search-fun regexp bound noerror (1+ count)))
      ;; else return point.
      (t (point)))))
 
 (defun org-search-backward-unenclosed (regexp &optional bound noerror)
   "Like `re-search-backward' but don't stop inside blocks or at protected places."
-  (org-search-unenclosed-internal #'re-search-backward regexp bound noerror 1))
+  (org-list-search-unenclosed-generic #'re-search-backward regexp bound noerror 1))
 
 (defun org-search-forward-unenclosed (regexp &optional bound noerror)
   "Like `re-search-forward' but don't stop inside blocks or at protected places."
-  (org-search-unenclosed-internal #'re-search-forward regexp bound noerror 1))
+  (org-list-search-unenclosed-generic #'re-search-forward regexp bound noerror 1))
 
 (defun org-list-at-regexp-after-bullet-p (regexp)
   "Is point at a list item with REGEXP after bullet?"
@@ -298,7 +298,7 @@ the end of the nearest terminator from max."
 	 (skip-chars-forward " \t")
 	 (looking-at regexp))))
 
-(defun org-get-item-same-level-internal (search-fun pos limit pre-move)
+(defun org-list-get-item-same-level (search-fun pos limit pre-move)
   "Return point at the beginning of next item at the same level.
 Search items using function SEARCH-FUN, from POS to LIMIT. It
 uses PRE-MOVE before searches. Return nil if no item was found.
@@ -322,8 +322,8 @@ Internal use only. Prefer `org-get-next-item' and
 		 (= (org-get-indentation) ind))
 	(point-at-bol)))))
 
-(defun org-insert-item-internal (pos &optional checkbox after-bullet)
-  "Insert a new item in a list.
+(defun org-list-insert-item-generic (pos &optional checkbox after-bullet)
+  "Insert a new list item at POS.
 
 If POS is before first character after bullet of the item, the
 new item will be created before the current one.
@@ -563,7 +563,7 @@ Point returned is at eol."
   "Get the point of the next item at the same level as POS.
  Stop searching at LIMIT. Return nil if no item is found. This
  function does not move point."
-  (org-get-item-same-level-internal
+  (org-list-get-item-same-level
    #'org-search-forward-unenclosed
    pos
    limit
@@ -573,7 +573,7 @@ Point returned is at eol."
   "Get the point of the previous item at the same level as POS.
  Stop searching at LIMIT. Return nil if no item is found. This
  function does not move point."
-  (org-get-item-same-level-internal
+  (org-list-get-item-same-level
    #'org-search-backward-unenclosed
    pos
    limit
@@ -714,7 +714,8 @@ invisible."
 			       (and (org-beginning-of-item)
 				    (org-at-description-p)))
 			 (concat (read-string "Term: ") " :: "))))
-	(org-insert-item-internal (point) (and checkbox (not desc-text)) desc-text)))))
+	(org-list-insert-item-generic
+	 (point) (and checkbox (not desc-text)) desc-text)))))
 
 ;;; Indentation
 
