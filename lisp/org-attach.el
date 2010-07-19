@@ -4,7 +4,7 @@
 
 ;; Author: John Wiegley <johnw@newartisans.com>
 ;; Keywords: org data task
-;; Version: 6.36trans
+;; Version: 7.01trans
 
 ;; This file is part of GNU Emacs.
 ;;
