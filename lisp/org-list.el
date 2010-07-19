@@ -697,7 +697,8 @@ new item will be created before the current one. Return t when
 things worked, nil when we are not in an item, or item is
 invisible."
   (unless (or (not (org-in-item-p))
-	      (org-invisible-p))
+	      (org-invisible-p)
+	      (< (org-list-bottom-point) (point)))
     (if (save-excursion
 	  (org-beginning-of-item)
 	  (org-at-item-timer-p))
