@@ -27,7 +27,7 @@ $contents = <<EOF;
 <li><a name="toc_Markup" href="Markup.html#Markup">11 Markup</a>
 <li><a name="toc_Exporting" href="Exporting.html#Exporting">12 Exporting</a>
 <li><a name="toc_Publishing" href="Publishing.html#Publishing">13 Publishing</a>
-<li><a name="toc_Working-with-source-code" href="Working-with-source-code.html#Working-with-source-code">14 Source Code</a>
+<li><a name="toc_Working-With-Source-Code" href="Working-With-Source-Code.html#Working-With-Source-Code">14 Source Code</a>
 <li><a name="toc_Miscellaneous" href="Miscellaneous.html#Miscellaneous">15 Miscellaneous</a>
 <li><a name="toc_Hacking" href="Hacking.html#Hacking">A Hacking</a>
 <li><a name="toc_MobileOrg" href="MobileOrg.html#MobileOrg">B MobileOrg</a>
