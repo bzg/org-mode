@@ -169,13 +169,14 @@ and corresponding to the latest git version.
 
 * Documentation
 ** The Org manual
-   - Read the [[file:manual/index.html][manual online]].
+   - Read the [[file:manual/index.html][compact guide online]] or as [[file:orgguide.pdf][PDF document]].  The
+     compact guide is a 40 page introduction to Org mode.
+   - Read the [[file:manual/index.html][manual online]].  The manual
+     covers all the bells and whistles in a systematic way. 
    - You can also have the entire manual in a [[file:org.html][single monolithic file]].
-   - Download the manual as a  [[file:org.pdf][PDF document]].
+   - Download the manual as a 200 page [[file:org.pdf][PDF document]].
    - A [[http://hpcgi1.nifty.com/spen/index.cgi?OrgMode%2fManual][Japanese translation]] of the manual (version 4.60), by Takeshi
      Okano.
-   - The Org-mode Guide is a compact version of the manual, with all
-     basic information. Read the [[file:guide/index.html][guide online]] or as a [[file:orgguide.pdf][PDF document]]
 
 ** Reference card
    - Download the [[file:orgcard.pdf][Refcard]] for org-mode
