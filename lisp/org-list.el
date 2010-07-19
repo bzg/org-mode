@@ -1235,7 +1235,7 @@ will return the number of items in the current list.
 Sublists of the list are skipped. Cursor is always at the
 beginning of the item."
   (save-excursion
-    (let ((end (copy-marker (org-end-of-item-list)))
+    (let ((end (copy-marker (save-excursion (org-end-of-item-list))))
 	  (next-p (make-marker))
 	  (move-down-action
 	   (lambda (pos value &rest args)
