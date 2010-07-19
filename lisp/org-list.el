@@ -415,7 +415,7 @@ function ends."
   (save-excursion
     ;; Move to eol so that current line can be matched by
     ;; `org-item-re'.
-    (let* ((limit (or (save-excursion (outline-previous-heading)) (point-min)))
+    (let* ((limit (save-excursion (outline-previous-heading)))
 	   (actual-pos (goto-char (point-at-eol)))
 	   (last-item-start (save-excursion
 			      (org-search-backward-unenclosed (org-item-re) limit t)))
@@ -520,13 +520,12 @@ A checkbox is blocked if all of the following conditions are fulfilled:
   "Go to the beginning of the current hand-formatted item.
 If the cursor is not in an item, throw an error. Return point."
   (interactive)
-  (if (org-in-item-p)
-      (if (org-at-item-p)
-	  (progn (beginning-of-line 1)
-		 (point))
-	(org-search-backward-unenclosed (org-item-re) nil t)
-	(goto-char (point-at-bol)))
-    (error "Not in an item")))
+  (if (not (org-in-item-p))
+      (error "Not in an item")
+    ;; Possibly match the current line.
+    (end-of-line)
+    (org-search-backward-unenclosed (org-item-re) nil t)
+    (goto-char (point-at-bol))))
 
 (defun org-end-of-item ()
   "Go to the end of the current hand-formatted item.
@@ -805,7 +804,7 @@ If NO-SUBTREE is set, only indent the item itself, not its children."
 	       (/= (point-at-bol) (org-list-top-point)))
 	  (error "Cannot outdent beyond top level item"))
       (while (< (point) end)
-	(beginning-of-line 1)
+	(beginning-of-line)
 	(skip-chars-forward " \t") (setq ind1 (current-column))
 	(delete-region (point-at-bol) (point))
 	(or (eolp) (org-indent-to-column (+ ind1 delta)))
@@ -875,11 +874,11 @@ Assumes cursor in item line."
 	      (progn (org-outdent-item 1)
 		     (if (equal org-tab-ind-state (org-get-indentation))
 			 (org-outdent-item 1))
-		     (end-of-line 1))
+		     (end-of-line))
 	    (error
 	     (progn
 	       (while (< (org-get-indentation) org-tab-ind-state)
-		 (progn (org-indent-item 1) (end-of-line 1)))
+		 (progn (org-indent-item 1) (end-of-line)))
 	       (setq this-command 'org-cycle))))
 	(setq org-tab-ind-state (org-get-indentation))
 	(org-indent-item 1))
@@ -1169,7 +1168,7 @@ the whole buffer."
 			    (if recursive
 				(<= curr-ind next-ind)
 			      (= curr-ind next-ind)))
-		  (save-excursion (end-of-line) (setq eline (point)))
+		  (setq eline (point-at-eol))
 		  (if (org-search-forward-unenclosed re-box eline t)
 		      (if (member (match-string 2) '("[ ]" "[-]"))
 			  (setq c-off (1+ c-off))
@@ -1463,8 +1462,7 @@ this list."
 	  (setq beg (point))
 	  (unless (re-search-forward (concat "END RECEIVE ORGLST +" name) nil t)
 	    (error "Cannot find end of insertion region"))
-	  (beginning-of-line 1)
-	  (delete-region beg (point))
+	  (delete-region beg (point-at-bol))
 	  (goto-char beg)
 	  (insert txt "\n")))
       (message "List converted and installed at receiver location"))))
