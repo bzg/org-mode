@@ -290,6 +290,14 @@ the end of the nearest terminator from max."
   "Like `re-search-forward' but don't stop inside blocks or at protected places."
   (org-search-unenclosed-internal #'re-search-forward regexp bound noerror 1))
 
+(defun org-list-at-regexp-after-bullet-p (regexp)
+  "Is point at a list item with REGEXP after bullet?"
+  (and (org-at-item-p)
+       (save-excursion
+	 (goto-char (match-end 0))
+	 (skip-chars-forward " \t")
+	 (looking-at regexp))))
+
 (defun org-get-item-same-level-internal (search-fun pos limit pre-move)
   "Return point at the beginning of next item at the same level.
 Search items using function SEARCH-FUN, from POS to LIMIT. It
@@ -337,8 +345,8 @@ function ends."
 		      (looking-at (org-item-re))
 		      (match-string 0)))
 	 (before-p (progn
-		     ;; Descriptive list: text starts after colons.
-		     (or (looking-at ".*::[ \t]+")
+		     ;; Description item: text starts after colons.
+		     (or (org-at-description-p)
 			 ;; At a checkbox: text starts after it.
 			 (org-at-item-checkbox-p)
 			 ;; Otherwise, text starts after bullet.
@@ -447,19 +455,15 @@ function ends."
 
 (defun org-at-item-timer-p ()
   "Is point at a line starting a plain list item with a timer?"
-  (and (org-at-item-p)
-       (save-excursion
-	 (goto-char (match-end 0))
-	 (skip-chars-forward " \t")
-	 (looking-at "\\([0-9]+:[0-9]+:[0-9]+\\)[ \t]+::[ \t]+"))))
+  (org-list-at-regexp-after-bullet-p "\\([0-9]+:[0-9]+:[0-9]+\\)[ \t]+::[ \t]+"))
+
+(defun org-at-description-p ()
+  "Is point at a description list item?"
+  (org-list-at-regexp-after-bullet-p "\\(\\S-+\\)[ \t]+::[ \t]+"))
 
 (defun org-at-item-checkbox-p ()
   "Is point at a line starting a plain-list item with a checklet?"
-  (and (org-at-item-p)
-       (save-excursion
-	 (goto-char (match-end 0))
-	 (skip-chars-forward " \t")
-	 (looking-at "\\[[- X]\\]"))))
+  (org-list-at-regexp-after-bullet-p "\\[[- X]\\]"))
 
 (defun org-checkbox-blocked-p ()
   "Is the current checkbox blocked from for being checked now?
@@ -708,8 +712,7 @@ invisible."
       ;; if we're in a description list, ask for the new term.
       (let ((desc-text (when (save-excursion
 			       (and (org-beginning-of-item)
-				    (looking-at "[ \t]*\\(.*?\\) ::")
-				    (match-string 1)))
+				    (org-at-description-p)))
 			 (concat (read-string "Term: ") " :: "))))
 	(org-insert-item-internal (point) (and checkbox (not desc-text)) desc-text)))))
 
@@ -1352,7 +1355,7 @@ sublevels as a list of strings."
 	(cond ((looking-at-p "^[ \t]*[0-9]")
 	       (setq itemsep "[0-9]+\\(?:\\.\\|)\\)"
 		     ltype 'ordered))
-	      ((looking-at-p "^.*::")
+	      ((org-at-description-p)
 	       (setq itemsep "[-+*]" ltype 'descriptive))
 	      (t (setq itemsep "[-+*]" ltype 'unordered))))
       (let* ((indent1 (org-get-indentation))
@@ -1523,7 +1526,7 @@ Valid parameters PARAMS are
       (while (setq sublist (pop list))
 	(cond ((symbolp sublist) nil)
 	      ((stringp sublist)
-	       (when (string-match "^\\(.*\\) ::" sublist)
+	       (when (string-match "^\\(\\S-+\\)[ \t]+::" sublist)
 		 (setq term (org-trim (format (concat dtstart "%s" dtend)
 					      (match-string 1 sublist))))
 		 (setq sublist (concat ddstart
