@@ -459,7 +459,7 @@ function ends."
 
 (defun org-at-description-p ()
   "Is point at a description list item?"
-  (org-list-at-regexp-after-bullet-p "\\(\\S-+\\)[ \t]+::[ \t]+"))
+  (org-list-at-regexp-after-bullet-p "\\(\\S-.+\\)[ \t]+::[ \t]+"))
 
 (defun org-at-item-checkbox-p ()
   "Is point at a line starting a plain-list item with a checklet?"
