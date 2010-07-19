@@ -564,20 +564,14 @@ Point returned is at eol."
  Stop searching at LIMIT. Return nil if no item is found. This
  function does not move point."
   (org-list-get-item-same-level
-   #'org-search-forward-unenclosed
-   pos
-   limit
-   #'end-of-line))
+   #'org-search-forward-unenclosed pos limit #'end-of-line))
 
 (defun org-get-previous-item (pos limit)
   "Get the point of the previous item at the same level as POS.
  Stop searching at LIMIT. Return nil if no item is found. This
  function does not move point."
   (org-list-get-item-same-level
-   #'org-search-backward-unenclosed
-   pos
-   limit
-   #'beginning-of-line))
+   #'org-search-backward-unenclosed pos limit #'beginning-of-line))
 
 (defun org-next-item ()
   "Move to the beginning of the next item.
