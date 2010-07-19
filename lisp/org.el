@@ -818,7 +818,8 @@ This can also be set in on a per-file basis with
 (defcustom org-cycle-global-at-bob nil
   "Cycle globally if cursor is at beginning of buffer and not at a headline.
 This makes it possible to do global cycling without having to use S-TAB or
-C-u TAB.  For this special case to work, the first line of the buffer
+\\[universal-argument] TAB.  For this special case to work, the first line \
+of the buffer
 must not be a headline - it may be empty or some other text.  When used in
 this way, `org-cycle-hook' is disables temporarily, to make sure the
 cursor stays at the beginning of the buffer.
@@ -1640,7 +1641,6 @@ file identifier are
                  that does not use any of the group matches, this case is
                  handled identically to the second one (i.e. match against
                  file name only).
-
                  In a custom lisp form, you can access the group matches with
                  (match-string n link).
 
@@ -1660,7 +1660,7 @@ file identifier are
  `system'      The system command to open files, like `open' on Windows
                and Mac OS X, and mailcap under GNU/Linux.  This is the command
                that will be selected if you call `C-c C-o' with a double
-               `C-u C-u' prefix.
+               \\[universal-argument] \\[universal-argument] prefix.
 
 Possible values for the command are:
  `emacs'       The file will be visited by the current Emacs process.
@@ -5925,7 +5925,7 @@ in special contexts.
 ;;;###autoload
 (defun org-global-cycle (&optional arg)
   "Cycle the global visibility.  For details see `org-cycle'.
-With C-u prefix arg, switch to startup visibility.
+With \\[universal-argument] prefix arg, switch to startup visibility.
 With a numeric prefix, show all headlines up to that level."
   (interactive "P")
   (let ((org-cycle-include-plain-lists
@@ -6259,7 +6259,7 @@ point nowhere."
 (make-variable-buffer-local 'org-hide-block-overlays)
 
 (defun org-block-map (function &optional start end)
-  "Call function at the head of all source blocks in the current buffer.
+  "Call FUNCTION at the head of all source blocks in the current buffer.
 Optional arguments START and END can be used to limit the range."
   (let ((start (or start (point-min)))
         (end (or end (point-max))))
@@ -6548,10 +6548,12 @@ With numerical prefix ARG, go up to this level and then take that tree.
 If ARG is negative, go up that many levels.
 If `org-indirect-buffer-display' is not `new-frame', the command removes the
 indirect buffer previously made with this command, to avoid proliferation of
-indirect buffers.  However, when you call the command with a `C-u' prefix, or
+indirect buffers.  However, when you call the command with a \
+\\[universal-argument] prefix, or
 when `org-indirect-buffer-display' is `new-frame', the last buffer
 is kept so that you can work with several indirect buffers at the same time.
-If `org-indirect-buffer-display' is `dedicated-frame', the C-u prefix also
+If `org-indirect-buffer-display' is `dedicated-frame', the \
+\\[universal-argument] prefix also
 requests that a new frame be made for the new buffer, so that the dedicated
 frame is not changed."
   (interactive "P")
@@ -9554,7 +9556,8 @@ entry for this file type, and if yes, the corresponding command is launched.
 If no application is found, Emacs simply visits the file.
 
 With optional prefix argument IN-EMACS, Emacs will visit the file.
-With a double C-c C-u prefix arg, Org tries to avoid opening in Emacs
+With a double \\[universal-argument] \\[universal-argument] \
+prefix arg, Org tries to avoid opening in Emacs
 and to use an external application to visit the file.
 
 Optional LINE specifies a line to go to, optional SEARCH a string
@@ -10039,7 +10042,8 @@ below it are allowed.
 
 With prefix arg GOTO, the command will only visit the target location,
 not actually move anything.
-With a double prefix `C-u C-u', go to the location where the last refiling
+With a double prefix arg \\[universal-argument] \\[universal-argument], \
+go to the location where the last refiling
 operation has put the subtree.
 With a prefix argument of `2', refile to the running clock.
 
@@ -12002,7 +12006,8 @@ not t for the search context.
 With optional argument SIBLINGS, on each level of the hierarchy all
 siblings are shown.  This repairs the tree structure to what it would
 look like when opened with hierarchical calls to `org-cycle'.
-With double optional argument `C-u C-u', go to the parent and show the
+With double optional argument \\[universal-argument] \\[universal-argument], \
+go to the parent and show the
 entire tree."
   (interactive "P")
   (run-hooks 'org-reveal-start-hook)
@@ -15765,7 +15770,8 @@ If the cursor is in a LaTeX fragment, create the image and overlay
 it over the source code.  If there is no fragment at point, display
 all fragments in the current text, from one headline to the next.  With
 prefix SUBTREE, display all fragments in the current subtree.  With a
-double prefix `C-u C-u', or when the cursor is before the first headline,
+double prefix arg \\[universal-argument] \\[universal-argument], or when \
+the cursor is before the first headline,
 display all fragments in the buffer.
 The images can be removed again with \\[org-ctrl-c-ctrl-c]."
   (interactive "P")
@@ -18835,7 +18841,8 @@ org-yank-adjusted-subtrees
     *visible* surrounding headings.
 
 Any prefix to this command will cause `yank' to be called directly with
-no special treatment.  In particular, a simple `C-u' prefix will just
+no special treatment.  In particular, a simple \\[universal-argument] prefix \
+will just
 plainly yank the text as it is.
 
 \[1] The test checks if the first non-white line is a heading
