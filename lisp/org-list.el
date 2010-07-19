@@ -781,9 +781,10 @@ If NO-SUBTREE is set, only indent the item itself, not its children."
 		end org-last-indent-end-marker)
 	(org-beginning-of-item)
 	(setq beg (move-marker org-last-indent-begin-marker (point)))
-	(if no-subtree
-	    (org-end-of-item-text-before-children)
-	  (org-end-of-item))
+	(cond
+	 ((= (point-at-bol) (org-list-top-point)) (goto-char (org-list-bottom-point)))
+	 (no-subtree (org-end-of-item-text-before-children))
+	 (t (org-end-of-item)))
 	(setq end (move-marker org-last-indent-end-marker (or end (point)))))
       (goto-char beg)
       (setq ind-bul (org-item-indent-positions)
@@ -1234,14 +1235,14 @@ will return the number of items in the current list.
 Sublists of the list are skipped. Cursor is always at the
 beginning of the item."
   (save-excursion
-    (let ((move-down-action
+    (let ((end (copy-marker (org-end-of-item-list)))
+	  (next-p (make-marker))
+	  (move-down-action
 	   (lambda (pos value &rest args)
 	     (goto-char pos)
-	     (let ((return-value (apply function value args))
-		   ;; we need to recompute each time end of list in case
-		   ;; function modified list.
-		   (next-p (org-get-next-item pos (org-end-of-item-list))))
-	       (if next-p
+	     (set-marker next-p (org-get-next-item pos end))
+	     (let ((return-value (apply function value args)))
+	       (if (marker-position next-p)
 		   (apply move-down-action next-p return-value args)
 		 return-value)))))
       (apply move-down-action (org-beginning-of-item-list) init-value args))))
