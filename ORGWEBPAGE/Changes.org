@@ -16,8 +16,7 @@
 
 *** Emacs 21 support has been dropped
 
-Do not use Org mode 7.xx with Emacs 21, use an older version, for
-example [[http://orgmode.org/org-6.36c.zip][version 6.36c]].
+Do not use Org mode 7.xx with Emacs 21, use [[http://orgmode.org/org-6.36c.zip][version 6.36c]] instead.
 
 *** XEmacs support requires the XEmacs development version
 
@@ -25,46 +24,9 @@ To use Org mode 7.xx with XEmacs, you need to run the developer
 version of XEmacs.   I was about to drop XEmacs support entirely,
 but Michael Sperber stepped in and made changes to XEmacs that
 made it easier to keep the support.  Thanks to Michael for this
-last-minute save.
-
-*** Customizable variable changes for DocBook exporter
-
-To make it more flexible for users to provide DocBook exporter
-related commands, we start to use format-spec to format the
-commands in this release.  If you use DocBook exporter and use it
-to export Org files to PDF and/or FO format, the settings of the
-following two customizable variables need to be changed:
-
-1. =org-export-docbook-xslt-proc-command=
-2. =org-export-docbook-xsl-fo-proc-command=
-
-Instead of using =%s= in the format control string for all
-arguments, now we use /three/ different format spec characters:
-
-1. =%i=: input file argument
-2. =%o=: output file argument
-3. =%s=: XSLT stylesheet argument
-
-For example, if you set =org-export-docbook-xslt-proc-command= to
-
-: java com.icl.saxon.StyleSheet -o %s %s /path/to/docbook.xsl
-
-in the past, now you need to change it to
-
-: java com.icl.saxon.StyleSheet -o %o %i %s
-
-and set a new customizable variable called
-=org-export-docbook-xslt-stylesheet= to =/path/to/docbook.xsl=.
-
-Please check the documentation of these two variables for more
-details and other examples.
-
-Along with the introduction of variable
-=org-export-docbook-xslt-stylesheet=, we also added a new
-in-buffer setting called =#+XSLT:=.  You can use this setting to
-specify the XSLT stylesheet that you want to use on a per-file
-basis.  This setting overrides
-=org-export-docbook-xslt-stylesheet=.
+last-minute save.  I had hoped to be able to remove
+xemacs/noutline.el from release 7 by moving it into XEmacs, but
+this is not yet done.
 
 *** Org-babel configuration changes
 :PROPERTIES:
@@ -233,15 +195,15 @@ commands in this release.  If you use DocBook exporter and use it
 to export Org files to PDF and/or FO format, the settings of the
 following two customizable variables need to be changed:
 
-1. =org-export-docbook-xslt-proc-command=
-2. =org-export-docbook-xsl-fo-proc-command=
+- =org-export-docbook-xslt-proc-command=
+- =org-export-docbook-xsl-fo-proc-command=
 
 Instead of using =%s= in the format control string for all
 arguments, now we use /three/ different format spec characters:
 
-1. =%i=: input file argument
-2. =%o=: output file argument
-3. =%s=: XSLT stylesheet argument
+- =%i=: input file argument
+- =%o=: output file argument
+- =%s=: XSLT stylesheet argument
 
 For example, if you set =org-export-docbook-xslt-proc-command= to
 
@@ -282,11 +244,12 @@ amount of internal code cleanup.
 
 This replaces the earlier system org-remember.  The manual only
 describes org-capture, but for people who prefer to continue to
-use org-remember, we make available
-[[http://orgmode.org/org-remember.pdf][a static copy of theformer chapter about remember]].
+use org-remember, we keep a static copy of the former manual
+section [[http://orgmode.org/org-remember.pdf][chapter about remember]].
 
-The new system has a better implementation and more
-possibilities.  See [[http://thread.gmane.org/gmane.emacs.orgmode/26441/focus%3D26441][Carsten's announcement]] for more details.
+The new system has a technically cleaner implementation and more
+possibilities for capturing different types of data.  See
+[[http://thread.gmane.org/gmane.emacs.orgmode/26441/focus%3D26441][Carsten's announcement]] for more details.
 
 To switch over to the new system:
 
@@ -319,8 +282,9 @@ To switch over to the new system:
 
 The command =C-c C-x \= toggles the display of Org's special
 entities like =\alpha= as pretty unicode characters.  Also, sub
-and superscripts are displayed in a pretty way.  If you want to
-exclude sub- and superscripts, see the variable
+and superscripts are displayed in a pretty way (raised/lower
+display, in a smaller font).  If you want to exclude sub- and
+superscripts, see the variable
 =org-pretty-entities-include-sub-superscripts=.
 
 Thanks to Eric Schulte and Ulf Stegeman for making this possible.
@@ -375,7 +339,7 @@ some upper level has the property, and some grandchild of it
 would like to have the default settings (i.e. not overruled by a
 property) back.
 
-Thanks to Robert Goldman and Bernt Hansen for pushing this
+Thanks to Robert Goldman and Bernt Hansen for suggesting this
 change.
 
 *** The problem with comment syntax has finally been fixed
@@ -401,7 +365,7 @@ Thanks to Chris Gray for a patch to this effect.
 
 *** When cloning entries, remove or renew ID property
 
-Thanks to David Maus for this change
+Thanks to David Maus for this change.
 
 * Version 6.36
 

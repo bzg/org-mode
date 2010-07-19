@@ -14354,9 +14354,9 @@ provided frequent feedback and some patches.
 @i{Matt Lundin} has proposed last-row references for table formulas and named
 invisible anchors.  He has also worked a lot on the FAQ.
 @item
-@i{David Maus} wrote @file{org-atom.el}, maintains the issues file for Org
-and is a prolific contributor with competent replies, small fixes and patches
-on the mailing list.
+@i{David Maus} wrote @file{org-atom.el}, maintains the issues file for Org,
+and is a prolific contributor on the mailing list with competent replies,
+small fixes and patches.
 @item
 @i{Jason F. McBrayer} suggested agenda export to CSV format.
 @item
