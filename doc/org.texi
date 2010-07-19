@@ -12404,7 +12404,7 @@ with the cursor at the beginning of a headline.
 @node Code evaluation security, Customization, Speed keys, Miscellaneous
 @section Code evaluation and security issues
 
-Org provides tool to work with the code snippets, including evaluating them.
+Org provides tools to work with the code snippets, including evaluating them.
 
 Running code on your machine always comes with a security risk.  Badly
 written or malicious code can be executed on purpose or by accident.  Org has
@@ -12422,12 +12422,12 @@ Code evaluation can happen under the following circumstances:
 @item Source code blocks
 Source code blocks can be evaluated during export, or when pressing @kbd{C-c
 C-c} in the block.  The most important thing to realize here is that Org mode
-files which contain code snippets are in a certain sense like executable
+files which contain code snippets are, in a certain sense, like executable
 files.  So you should accept them and load them into Emacs only from trusted
 sources - just like you would do with a program you install on your computer.
 
 Make sure you know what you are doing before customizing the variables
-which take of the default security brakes.
+which take off the default security brakes.
 
 @defopt org-confirm-babel-evaluate
 When set to t user is queried before code block evaluation
@@ -12435,7 +12435,7 @@ When set to t user is queried before code block evaluation
 
 @item Following @code{shell} and @code{elisp} links
 Org has two link types that can directly evaluate code (@pxref{External
-links}).  These links can be problematic because the code to be evaluated his
+links}).  These links can be problematic because the code to be evaluated is
 not visible.
 
 @defopt org-confirm-shell-link-function
@@ -12444,12 +12444,6 @@ Function to queries user about shell link execution.
 @defopt org-confirm-elisp-link-function
 Functions to query user for Emacs Lisp link execution.
 @end defopt
-
-@item Following @code{shell} and @code{elisp} links
-Org has two link types that can directly evaluate code (@pxref{External
-links}).  These links can be problematic because the code to be evaluated his
-not visible.  @b{Security advice:}  Do not use these links, use source code
-blocks which make the associated actions much more transparent.
 
 @item Formulas in tables
 Formulas in tables (@pxref{The spreadsheet}) are code that is evaluated
