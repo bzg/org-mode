@@ -446,10 +446,8 @@ function ends."
        (< (point) (match-end 0))))
 
 (defun org-at-item-timer-p ()
-  "Is point at a line starting a plain list item with a timer?
-This skips checkboxes, if any."
-  (and (or (org-at-item-checkbox-p)
-	   (org-at-item-p))
+  "Is point at a line starting a plain list item with a timer?"
+  (and (org-at-item-p)
        (save-excursion
 	 (goto-char (match-end 0))
 	 (skip-chars-forward " \t")
@@ -713,7 +711,7 @@ invisible."
 				    (looking-at "[ \t]*\\(.*?\\) ::")
 				    (match-string 1)))
 			 (concat (read-string "Term: ") " :: "))))
-	(org-insert-item-internal (point) checkbox desc-text)))))
+	(org-insert-item-internal (point) (and checkbox (not desc-text)) desc-text)))))
 
 ;;; Indentation
 
