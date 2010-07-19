@@ -1501,8 +1501,7 @@ This will add overlays to the date lines, to show the summary for each day."
          (high (float (cadr v)))
          (mean (/ (+ low high) 2.0))
          (var (/ (+ (expt (- mean low) 2.0) (expt (- high mean) 2.0)) 2.0)))
-    (list  mean var)
-    ))
+    (list  mean var)))
 
 (defun org-estimate-combine (&rest el)
   "Combine a list of estimates, using mean and variance.
@@ -1516,22 +1515,21 @@ and variances (respectively) of the individual estimates."
                 (setq var (+ var (cadr stats)))))
             el)
     (let ((stdev (sqrt var)))
-      (list (- mean stdev) (+ mean stdev)))
-    ))
+      (list (- mean stdev) (+ mean stdev)))))
 
 (defun org-estimate-print (e &optional fmt)
-  "Prepare a string representation of an estimate, as two numbers with a '-' in between them."
+  "Prepare a string representation of an estimate.
+This formats these numbers as two numbers with a \"-\" between them."
   (if (null fmt) (set 'fmt "%.0f"))
-  (format "%s" (mapconcat (lambda (n) (format fmt n))  e "-"))
-  )
+  (format "%s" (mapconcat (lambda (n) (format fmt n))  e "-")))
 
 (defun org-string-to-estimate (s)
-  "Convert a string to an estimate. The string should be two numbers joined with a '-'."
+  "Convert a string to an estimate.
+The string should be two numbers joined with a \"-\"."
   (if (string-match "\\(.*\\)-\\(.*\\)" s)
-      (list (string-to-number (match-string 1 s)) (string-to-number(match-string 2 s)))
-    (list (string-to-number s) (string-to-number s))
-    ))
-
+      (list (string-to-number (match-string 1 s))
+	    (string-to-number(match-string 2 s)))
+    (list (string-to-number s) (string-to-number s))))
 
 (provide 'org-colview)
 

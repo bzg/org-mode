@@ -4766,21 +4766,21 @@ Be aware that you can only have one summary type for any property you
 include. Subsequent columns referencing the same property will all display the
 same summary information.
 
-The 'est+' summary type requires further explanation. It is used for
-combining task estimates, expressed as low-high ranges. For example, instead
+The @code{est+} summary type requires further explanation.  It is used for
+combining estimates, expressed as low-high ranges.  For example, instead
 of estimating a particular task will take 5 days, you might estimate it as
 5-6 days if you're fairly confident you know how much woark is required, or
 1-10 days if you don't really know what needs to be done.  Both ranges
 average at 5.5 days, but the first represents a more predictable delivery.
 
 When combining a set of such estimates, simply adding the lows and highs
-produces an unrealistically wide result. Instead, 'est+' adds the statistical
-mean and variance of the sub-tasks, generating a final estimate from the sum.
-For example, suppose you had ten tasks, each of which was estimated at 0.5 to
-2 days of work. Straight addition produces an estimate of 5 to 20 days,
-representing what to expect if everything goes either extremely well or
-extremely poorly. In contrast, 'est+' estimates the full job more
-realistically, at 10-15 days.
+produces an unrealistically wide result. Instead, @code{est+} adds the
+statistical mean and variance of the sub-tasks, generating a final estimate
+from the sum.  For example, suppose you had ten tasks, each of which was
+estimated at 0.5 to 2 days of work.  Straight addition produces an estimate
+of 5 to 20 days, representing what to expect if everything goes either
+extremely well or extremely poorly. In contrast, @code{est+} estimates the
+full job more realistically, at 10-15 days.
 
 Here is an example for a complete columns definition, along with allowed
 values.
