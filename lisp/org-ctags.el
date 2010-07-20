@@ -3,10 +3,10 @@
 ;; Copyright (C) 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 
 ;; Author: Paul Sexton <eeeickythump@gmail.com>
-;; Version: 7.01c
+;; Version: 7.01d
 
 ;; Keywords: org, wp
-;; Version: 7.01c
+;; Version: 7.01d
 ;;
 ;; This file is part of GNU Emacs.
 ;;

@@ -5,7 +5,7 @@
 ;; Author: Eric Schulte
 ;; Keywords: literate programming, reproducible research
 ;; Homepage: http://orgmode.org
-;; Version: 7.01c
+;; Version: 7.01d
 
 ;; This file is part of GNU Emacs.
 
