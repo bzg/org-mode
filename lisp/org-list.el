@@ -975,36 +975,40 @@ doing the renumbering."
 
 (defun org-cycle-list-bullet (&optional which)
   "Cycle through the different itemize/enumerate bullets.
-This cycle the entire list level through the sequence:
+This cycle the entire list level through nnthe sequence:
 
-   `-'	->  `+'  ->  `*'  ->  `1.'  ->	`1)'
+   `-'  ->  `+'  ->  `*'  ->  `1.'  ->  `1)'
 
-If WHICH is a string, use that as the new bullet.  If WHICH is an integer,
-0 means `-', 1 means `+' etc."
+If WHICH is a valid string, use that as the new bullet. If WHICH
+is an integer, 0 means `-', 1 means `+' etc."
   (interactive "P")
   (org-preserve-lc
-   (let* ((current (progn
-		     (org-beginning-of-item-list)
-		     (org-at-item-p)
-		     (match-string 0)))
-	  (prevp (eq which 'previous))
+   (let* ((bullet (progn (org-beginning-of-item-list)
+			 (org-get-bullet)))
+	  (current (cond
+		    ((string-match "\\." bullet) "1.")
+		    ((string-match ")" bullet) "1)")
+		    (t bullet)))
+	  ;; Description items cannot be numbered
+	  (bullet-list (if (org-at-description-p)
+			   '("-" "+" "*")
+			 '("-" "+" "*" "1." "1)")))
+	  ;; *-bullets are not allowed at column 0
+	  (bullet-list (if (looking-at "\\S-")
+			   (remove "*" bullet-list)
+			 bullet-list))
+	  (item-pos (member current bullet-list))
 	  (new (cond
 		((and (numberp which)
-		      (nth (1- which) '("-" "+" "*" "1." "1)"))))
-		((string-match "-" current) (if prevp "1)" "+"))
-		((string-match "\\+" current)
-		 (if prevp "-" (if (looking-at "\\S-") "1." "*")))
-		((string-match "\\*" current) (if prevp "+" "1."))
-		((string-match "\\." current)
-		 (if prevp (if (looking-at "\\S-") "+" "*") "1)"))
-		((string-match ")" current) (if prevp "1." "-"))
-		(t (error "This should not happen"))))
+		      (nth (mod which (length bullet-list)) bullet-list)))
+		((member which bullet-list) which)
+		((and item-pos (cdr item-pos)) (cadr item-pos))
+		(t "-")))
 	  (old (and (looking-at "\\([ \t]*\\)\\(\\S-+\\)")
 		    (match-string 2))))
      (replace-match (concat "\\1" new))
      (org-shift-item-indentation (- (length new) (length old)))
-     (org-fix-bullet-type)
-     (org-maybe-renumber-ordered-list))))
+     (org-fix-bullet-type))))
 
 ;;; Checkboxes
 
