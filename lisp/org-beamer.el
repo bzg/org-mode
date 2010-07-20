@@ -2,7 +2,7 @@
 ;;
 ;; Copyright (C) 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 ;;
-;; Version: 7.01
+;; Version: 7.01trans
 ;; Author: Carsten Dominik <carsten.dominik AT gmail DOT com>
 ;; Maintainer: Carsten Dominik <carsten.dominik AT gmail DOT com>
 ;; Keywords: org, wp, tex

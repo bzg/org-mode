@@ -1,10 +1,10 @@
 
 \input texinfo
 @c %**start of header
-@setfilename info/org
+@setfilename ../../info/org
 @settitle The Org Manual
 
-@set VERSION 7.01
+@set VERSION 7.01trans
 @set DATE July 2010
 
 @c Use proper quote and backtick for code sections in PDF output
@@ -4755,15 +4755,32 @@ optional.  The individual parts have the following meaning:
                 @{:min@}    @r{Smallest time value in column.}
                 @{:max@}    @r{Largest time value.}
                 @{:mean@}   @r{Arithmetic mean of time values.}
-                @{@@min@}   @r{Minimum age (in days/hours/mins/seconds).}
-                @{@@max@}   @r{Maximum age (in days/hours/mins/seconds).}
-                @{@@mean@}  @r{Arithmetic mean of ages (in days/hours/mins/seconds).}
+                @{@@min@}    @r{Minimum age (in days/hours/mins/seconds).}
+                @{@@max@}    @r{Maximum age (in days/hours/mins/seconds).}
+                @{@@mean@}   @r{Arithmetic mean of ages (in days/hours/mins/seconds).}
+                @{est+@}    @r{Add low-high estimates.}
 @end example
 
 @noindent
 Be aware that you can only have one summary type for any property you
 include. Subsequent columns referencing the same property will all display the
 same summary information.
+
+The @code{est+} summary type requires further explanation.  It is used for
+combining estimates, expressed as low-high ranges.  For example, instead
+of estimating a particular task will take 5 days, you might estimate it as
+5-6 days if you're fairly confident you know how much woark is required, or
+1-10 days if you don't really know what needs to be done.  Both ranges
+average at 5.5 days, but the first represents a more predictable delivery.
+
+When combining a set of such estimates, simply adding the lows and highs
+produces an unrealistically wide result. Instead, @code{est+} adds the
+statistical mean and variance of the sub-tasks, generating a final estimate
+from the sum.  For example, suppose you had ten tasks, each of which was
+estimated at 0.5 to 2 days of work.  Straight addition produces an estimate
+of 5 to 20 days, representing what to expect if everything goes either
+extremely well or extremely poorly. In contrast, @code{est+} estimates the
+full job more realistically, at 10-15 days.
 
 Here is an example for a complete columns definition, along with allowed
 values.
@@ -5933,6 +5950,7 @@ The following customization sets a default target file for notes, and defines
 a global key@footnote{Please select your own key, @kbd{C-c c} is only a
 suggestion.}  for capturing new material.
 
+@vindex org-default-notes-file
 @example
 (setq org-default-notes-file (concat org-directory "/notes.org"))
 (define-key global-map "\C-cc" 'org-capture)
@@ -6066,10 +6084,12 @@ Text to be inserted as it is.
 @end table
 
 @item target
-Specification of where the captured item should be placed.
-In Org-mode files, targets usually define a node.  Entries will become
-children of this node, other types will be added to the table or list in the
-body of this node.
+@vindex org-default-notes-file
+Specification of where the captured item should be placed.  In Org-mode
+files, targets usually define a node.  Entries will become children of this
+node, other types will be added to the table or list in the body of this
+node.  Most target specifications contain a file name.  If that file name is
+the empty string, it defaults to @code{org-default-notes-file}.
 
 Valid values are:
 @table @code
@@ -12387,7 +12407,7 @@ with the cursor at the beginning of a headline.
 @node Code evaluation security, Customization, Speed keys, Miscellaneous
 @section Code evaluation and security issues
 
-Org provides tool to work with the code snippets, including evaluating them.
+Org provides tools to work with the code snippets, including evaluating them.
 
 Running code on your machine always comes with a security risk.  Badly
 written or malicious code can be executed on purpose or by accident.  Org has
@@ -12405,12 +12425,12 @@ Code evaluation can happen under the following circumstances:
 @item Source code blocks
 Source code blocks can be evaluated during export, or when pressing @kbd{C-c
 C-c} in the block.  The most important thing to realize here is that Org mode
-files which contain code snippets are in a certain sense like executable
+files which contain code snippets are, in a certain sense, like executable
 files.  So you should accept them and load them into Emacs only from trusted
 sources - just like you would do with a program you install on your computer.
 
 Make sure you know what you are doing before customizing the variables
-which take of the default security brakes.
+which take off the default security brakes.
 
 @defopt org-confirm-babel-evaluate
 When set to t user is queried before code block evaluation
@@ -12418,7 +12438,7 @@ When set to t user is queried before code block evaluation
 
 @item Following @code{shell} and @code{elisp} links
 Org has two link types that can directly evaluate code (@pxref{External
-links}).  These links can be problematic because the code to be evaluated his
+links}).  These links can be problematic because the code to be evaluated is
 not visible.
 
 @defopt org-confirm-shell-link-function
@@ -12427,12 +12447,6 @@ Function to queries user about shell link execution.
 @defopt org-confirm-elisp-link-function
 Functions to query user for Emacs Lisp link execution.
 @end defopt
-
-@item Following @code{shell} and @code{elisp} links
-Org has two link types that can directly evaluate code (@pxref{External
-links}).  These links can be problematic because the code to be evaluated his
-not visible.  @b{Security advice:}  Do not use these links, use source code
-blocks which make the associated actions much more transparent.
 
 @item Formulas in tables
 Formulas in tables (@pxref{The spreadsheet}) are code that is evaluated

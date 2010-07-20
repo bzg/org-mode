@@ -117,6 +117,7 @@ a look at our [[http://orgmode.org/worg/org-quotes.php][collected quotes about O
 #+ATTR_HTML: style="float:right;"
   [[http://mobileorg.ncogni.to/][http://mobileorg.ncogni.to/images/screenshot-browse.png]]
 
+- <2010-04-06 Tue>: Release 7.01
 - <2010-06-06 Sun>: iPhone App [[http://mobileorg.ncogni.to/][MobileOrg]] version 1.3 introduces
   DropBox support, for vastly easier setup.
 - <2010-04-06 Tue>: Release 6.35
@@ -167,14 +168,19 @@ and corresponding to the latest git version.
    - The [[https://launchpad.net/~hexmode/+archive][Ubuntu package]] by Mark A. Hershberger.
 
 * Documentation
-** The Org manual
-   - Read the [[file:manual/index.html][manual online]].
+** The Org guide and manual
+   - Read the [[file:manual/index.html][online compact guide]] or download it as a [[file:orgguide.pdf][PDF document]].
+     The compact guide is a 40-page introduction to Org mode.  It
+     covers all features in a basic way and has links to in-depth
+     documentation in the manual and on the web.
+   - Read the [[file:manual/index.html][online manual]].  The manual covers the complete feature
+     set with all the bells and whistles, in a systematic way.  The
+     main structure is identical to the guide, so it is easy to go
+     back and forth between basic and advanced documentation.
    - You can also have the entire manual in a [[file:org.html][single monolithic file]].
-   - Download the manual as a  [[file:org.pdf][PDF document]].
+   - Download the manual as a 200-page [[file:org.pdf][PDF document]].
    - A [[http://hpcgi1.nifty.com/spen/index.cgi?OrgMode%2fManual][Japanese translation]] of the manual (version 4.60), by Takeshi
      Okano.
-   - The Org-mode Guide is a compact version of the manual, with all
-     basic information. Read the [[file:guide/index.html][guide online]] or as a [[file:orgguide.pdf][PDF document]]
 
 ** Reference card
    - Download the [[file:orgcard.pdf][Refcard]] for org-mode

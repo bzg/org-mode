@@ -6,7 +6,7 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 7.01
+;; Version: 7.01trans
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -38,10 +38,17 @@
     (defmacro declare-function (fn file &optional arglist fileonly))))
 
 (declare-function org-add-props "org-compat" (string plist &rest props))
+(declare-function org-string-match-p "org-compat" (&rest args))
 
 (defmacro org-bound-and-true-p (var)
   "Return the value of symbol VAR if it is bound, else nil."
   `(and (boundp (quote ,var)) ,var))
+
+(defun org-string-nw-p (s)
+  "Is S a string with a non-white character?"
+  (and (stringp s)
+       (org-string-match-p "\\S-" s)
+       s))
 
 (defun org-not-nil (v)
   "If V not nil, and also not the string \"nil\", then return V.

@@ -5,7 +5,7 @@
 ;; Author: Lennart Borgman (lennart O borgman A gmail O com)
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 7.01
+;; Version: 7.01trans
 ;;
 ;; This file is part of GNU Emacs.
 ;;

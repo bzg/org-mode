@@ -36,8 +36,10 @@ import re
 from email.mime.text import MIMEText
 
 notify_on_state_change = {
-    'Accepted': 'emacs-orgmode@gnu.org',
-    'RFC':      'emacs-orgmode@gnu.org'
+    'accepted':          'emacs-orgmode@gnu.org',
+    'rejected':          'emacs-orgmode@gnu.org',
+    'changes requested': 'emacs-orgmode@gnu.org',
+    'rfc':               'emacs-orgmode@gnu.org'
 }
 
 # Default Patchwork remote XML-RPC server URL
@@ -131,8 +133,13 @@ def usage():
         search [str]  : Same as 'list'
         view <ID>     : View a patch
         show <ID>     : Same as view
-        update [-s state] [-c commit-ref] <ID>
-                      : Update patch\n""")
+        update [-s state] [-c commit-ref] [-m email-comment] <ID>
+                      : Update patch, send mail to mailing list if appropriate
+        branch <ID>   : Create a topic branch t/patchNNN for this patch
+                      :  and update it to the current master
+        merge [-m email-comment] <ID>
+                      : Merge the t/patchNNN topic branch into master
+\n""")
     sys.stderr.write("""\nFilter options for 'list' and 'search':
         -s <state>    : Filter by patch state (e.g., 'New', 'Accepted', etc.)
         -p <project>  : Filter by project name (see 'projects' for list)
@@ -278,7 +285,7 @@ def action_apply(rpc, patch_id):
         sys.exit(1)
 
 def action_update_patch(rpc, patch_id, state = None, commit = None,
-                        delegate_str = "", archived = False):
+                        delegate_str = "", comment_str = "No comment", archived = False):
     patch = rpc.patch_get(patch_id)
     if patch == {}:
         sys.stderr.write("Error getting information on patch ID %d\n" % \
@@ -304,7 +311,7 @@ def action_update_patch(rpc, patch_id, state = None, commit = None,
             sys.exit(1)
         params['state'] = state_id
 
-        if state in notify_on_state_change:
+        if state.lower() in notify_on_state_change:
             if not delegate_id:
                 sys.stderr.write("Error: Delete (-d) required for this update\n")
                 sys.exit(1)
@@ -316,17 +323,26 @@ def action_update_patch(rpc, patch_id, state = None, commit = None,
             cc_addr   = '%s <%s>' % (submitter['name'], submitter['email'])
             to_addr   = notify_on_state_change[state]
 
-            longdesc = '''Patch %s (http://patchwork.newartisans.com/patch/%s/) is now %s.
+	    orig_mail = rpc.patch_get_mbox(patch_id)
+	    orig_mail = '> ' + orig_mail.replace('\n','\n> ')
+
+            longdesc = '''Patch %s (http://patchwork.newartisans.com/patch/%s/) is now "%s".
+
+Maintaner comment: %s
 
 This relates to the following submission:
 
-http://mid.gmane.org/%s''' % \
-                (patch['id'], patch['id'], state, urllib.quote(patch['msgid']))
-            shortdesc = 'Patch %s %s' % (patch['id'], state)
+http://mid.gmane.org/%s
+
+Here is the original message containing the patch:
+
+%s''' % \
+                (patch['id'], patch['id'], state, comment_str, urllib.quote(patch['msgid']), orig_mail)
+            shortdesc = '[%s] %s' % (state, patch['name'])
 
             msg = MIMEText(longdesc)
 
-            msg['Subject']    = 'Patchwork: ' + shortdesc
+            msg['Subject']    = shortdesc
             msg['From']       = from_addr
             msg['To']         = to_addr
             #msg['Cc']         = cc_addr
@@ -431,7 +447,7 @@ def branch_with(patch_id, rpc, delegate_str):
 
     print sha
 
-def merge_with(patch_id, rpc, delegate_str):
+def merge_with(patch_id, rpc, delegate_str, comment_str):
     s = rpc.patch_get_mbox(patch_id)
     if len(s) > 0:
         print unicode(s).encode("utf-8")
@@ -463,7 +479,7 @@ auth_actions = ['update', 'branch', 'merge']
 
 def main():
     try:
-        opts, args = getopt.getopt(sys.argv[2:], 's:p:w:d:n:c:h:')
+        opts, args = getopt.getopt(sys.argv[2:], 's:p:w:d:n:c:h:m:')
     except getopt.GetoptError, err:
         print str(err)
         usage()
@@ -506,6 +522,8 @@ def main():
             commit_str = value
         elif name == '-h':
             hash_str = value
+        elif name == '-m':
+	    comment_str = value
         elif name == '-n':
             try:
                 filt.add("max_count", int(value))
@@ -585,7 +603,16 @@ def main():
             sys.stderr.write("Invalid patch ID given\n")
             sys.exit(1)
 
-        merge_with(patch_id, rpc, config.get('auth', 'username'))
+        merge_with(patch_id, rpc, config.get('auth', 'username'), comment_str)
+
+    elif action == 'test':
+
+	patch_id = patch_id or int(args[0])
+	patch = rpc.patch_get(patch_id)
+	s = rpc.patch_get_mbox(patch_id)
+	print "xxx %s xxx"
+	print "xxx %s xxx" % patch['name']
+	print "xxx %s xxx" % rpc.patch_get_mbox(patch_id)
 
     elif action == 'view' or action == 'show':
         try:
@@ -624,7 +651,7 @@ def main():
             sys.exit(1)
 
         action_update_patch(rpc, patch_id, state = state_str,
-                            commit = commit_str, delegate_str = delegate_str)
+                            commit = commit_str, delegate_str = delegate_str, comment_str = comment_str)
 
     else:
         sys.stderr.write("Unknown action '%s'\n" % action)

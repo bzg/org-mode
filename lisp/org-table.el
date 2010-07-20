@@ -6,7 +6,7 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 7.01
+;; Version: 7.01trans
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -453,7 +453,7 @@ nil      When nil, the command tries to be smart and figure out the
 	     (t 1))))
     (goto-char beg)
     (if (equal separator '(4))
-	(while (<= (point) end)
+	(while (< (point) end)
 	  ;; parse the csv stuff
 	  (cond
 	   ((looking-at "^") (insert "| "))
