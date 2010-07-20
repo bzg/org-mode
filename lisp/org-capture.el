@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 7.01
+;; Version: 7.01trans
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -289,7 +289,7 @@ calendar           |  %:type %:date"
 			 (file :tag "Template file"))
 		   (list :tag "Function"
 			 (const :format "" function)
-			 (file :tag "Template function")))
+			 (function :tag "Template function")))
 	   (plist :inline t
 		  ;; Give the most common options as checkboxes
 		  :options (((const :format "%v " :prepend) (const t))

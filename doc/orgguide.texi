@@ -95,7 +95,7 @@ license to the document, as described in section 6 of the license.
 
 @ifnottex
 @node Top, Introduction, (dir), (dir)
-@top Org Mode Manual
+@top Org Mode Guide
 
 @insertcopying
 @end ifnottex

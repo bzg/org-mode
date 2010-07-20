@@ -28,6 +28,11 @@ if (not $only) {
   $c1 = "perl -pi -e '$cmd' doc/org.texi";
   system($c1);
 
+  print STDERR "doc/orgguide.texi\n";
+  $cmd = qq{s/^(\\\@set VERSION)\\s+(\\S+)[ \t]*\$/\$1 $version/;s/^(\\\@set DATE)\\s+(.*)\$/\$1 $date/;};
+  $c1 = "perl -pi -e '$cmd' doc/orgguide.texi";
+  system($c1);
+
   print STDERR "doc/orgcard.tex\n";
   $cmd = qq{s/^\\\\def\\\\orgversionnumber\\{\\S+\\}/\\\\def\\\\orgversionnumber{$version}/;s/\\\\def\\\\versionyear\\{\\S+\\}/\\\\def\\\\versionyear{$year}/;s/\\\\def\\\\year\\{\\S+\\}/\\\\def\\\\year{$year}/;};
   $c1 = "perl -pi -e '$cmd' doc/orgcard.tex";
