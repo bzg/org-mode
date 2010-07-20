@@ -996,10 +996,10 @@ is an integer, 0 means `-', 1 means `+' etc. If WHICH is
 			       ;; Description items cannot be numbered
 			       (unless (org-at-description-p) '("1." "1)"))))
 	  (len (length bullet-list))
-	  (item-pos (or (and (numberp which) which)
-			(- len (length (member current bullet-list)))))
+	  (item-pos (- len (length (member current bullet-list))))
 	  (new (cond
 		((member which bullet-list) which)
+		((numberp which) (nth (mod which len) bullet-list))
 		((eq 'previous which) (nth (mod (1- item-pos) len) bullet-list))
 		(t (nth (mod (1+ item-pos) len) bullet-list)))))
      (org-fix-bullet-type new))))
