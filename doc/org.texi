@@ -5950,6 +5950,7 @@ The following customization sets a default target file for notes, and defines
 a global key@footnote{Please select your own key, @kbd{C-c c} is only a
 suggestion.}  for capturing new material.
 
+@vindex org-default-notes-file
 @example
 (setq org-default-notes-file (concat org-directory "/notes.org"))
 (define-key global-map "\C-cc" 'org-capture)
@@ -6083,10 +6084,12 @@ Text to be inserted as it is.
 @end table
 
 @item target
-Specification of where the captured item should be placed.
-In Org-mode files, targets usually define a node.  Entries will become
-children of this node, other types will be added to the table or list in the
-body of this node.
+@vindex org-default-notes-file
+Specification of where the captured item should be placed.  In Org-mode
+files, targets usually define a node.  Entries will become children of this
+node, other types will be added to the table or list in the body of this
+node.  Most target specifications contain a file name.  If that file name is
+the empty string, it defaults to @code{org-default-notes-file}.
 
 Valid values are:
 @table @code

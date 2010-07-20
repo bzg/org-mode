@@ -651,6 +651,7 @@ already gone."
 
 (defun org-capture-target-buffer (file)
   "Get a buffer for FILE."
+  (setq file (or (org-string-nw-p file) org-default-notes-file))
   (or (org-find-base-buffer-visiting file)
       (find-file-noselect (expand-file-name file org-directory))))
 
