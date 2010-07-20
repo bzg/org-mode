@@ -271,12 +271,12 @@ the end of the nearest terminator from max."
     (cond
      ;; nothing found: return nil
      ((not (funcall search-fun regexp bound noerror count)) nil)
-     ;; match is enclosed or protected: start again, searching one
-     ;; more occurrence away.
      ((or (save-match-data
 	    (org-in-regexps-block-p "^[ \t]*#\\+\\(begin\\|BEGIN\\)_\\([a-zA-Z0-9_]+\\)"
 				    '(concat "^[ \t]*#\\+\\(end\\|END\\)_" (match-string 2))))
 	  (get-text-property (match-beginning 0) 'org-protected))
+      ;; match is enclosed or protected: start again, searching one
+      ;; occurrence away.
       (goto-char origin)
       (org-list-search-unenclosed-generic search-fun regexp bound noerror (1+ count)))
      ;; else return point.
@@ -301,23 +301,18 @@ the end of the nearest terminator from max."
 (defun org-list-get-item-same-level (search-fun pos limit pre-move)
   "Return point at the beginning of next item at the same level.
 Search items using function SEARCH-FUN, from POS to LIMIT. It
-uses PRE-MOVE before searches. Return nil if no item was found.
-
-Internal use only. Prefer `org-get-next-item' and
-`org-get-previous-item' for cleaner code."
+uses PRE-MOVE before search. Return nil if no item was found."
   (save-excursion
-    (when pos (goto-char pos))
-    (let ((begin (point))
-	  (ind (progn
+    (goto-char pos)
+    (let ((ind (progn
 		 (org-beginning-of-item)
 		 (org-get-indentation)))
 	  (start (point-at-bol)))
-      ;; we don't want to match the current line.
+      ;; We don't want to match the current line.
       (funcall pre-move)
       ;; Skip any sublist on the way
       (while (and (funcall search-fun (org-item-re) limit t)
-		  (> (org-get-indentation) ind))
-	(funcall pre-move))
+		  (> (org-get-indentation) ind)))
       (when (and (/= (point-at-bol) start) ; Have we moved ?
 		 (= (org-get-indentation) ind))
 	(point-at-bol)))))
@@ -357,31 +352,26 @@ function ends."
 	  (let ((insert-blank-p
 		 (cdr (assq 'plain-list-item org-blank-before-new-entry))))
 	    (cond
-	     ((or
-	       org-empty-line-terminates-plain-lists
-	       (not insert-blank-p))
-	      0)
+	     ((or org-empty-line-terminates-plain-lists
+		  (not insert-blank-p)) 0)
 	     ((eq insert-blank-p t) 1)
 	     ;; plain-list-item is 'auto. Count blank lines separating
 	     ;; neighbours items in list.
-	     (t
-	      (let ((next-p (org-get-next-item (point) (org-list-bottom-point))))
-		(cond
-		 ;; Is there a next item?
-		 (next-p (goto-char next-p)
-			 (org-back-over-empty-lines))
-		 ;; Is there a previous item?
-		 ((not (org-first-list-item-p)) (org-back-over-empty-lines))
-		 ;; no luck: item is alone. Use default value.
-		 (t 1)))))))
+	     (t (let ((next-p (org-get-next-item (point) (org-list-bottom-point))))
+		  (cond
+		   ;; Is there a next item?
+		   (next-p (goto-char next-p)
+			   (org-back-over-empty-lines))
+		   ;; Is there a previous item?
+		   ((not (org-first-list-item-p)) (org-back-over-empty-lines))
+		   ;; no luck: item is alone. Use default value.
+		   (t 1)))))))
 	 (insert-fun
 	  (lambda (text)
 	    ;; insert bullet above item in order to avoid bothering
 	    ;; with possible blank lines ending last item.
 	    (org-beginning-of-item)
-	    (insert (concat bullet
-			    (when checkbox "[ ] ")
-			    after-bullet))
+	    (insert (concat bullet (when checkbox "[ ] ") after-bullet))
 	    ;; Stay between after-bullet and before text.
 	    (save-excursion
 	      (insert (concat text (make-string (1+ blank-lines-nb) ?\n))))
@@ -389,11 +379,10 @@ function ends."
 	    (when checkbox (org-update-checkbox-count-maybe)))))
     (goto-char true-pos)
     (cond
-     (before-p
-      (funcall insert-fun nil)
-      ;; Not taking advantage of renumbering while moving down. Need
-      ;; to call it directly.
-      (org-maybe-renumber-ordered-list) t)
+     (before-p (funcall insert-fun nil)
+	       ;; Not taking advantage of renumbering while moving
+	       ;; down. Need to call it directly.
+	       (org-maybe-renumber-ordered-list) t)
      ;; Can't split item: insert bullet at the end of item.
      ((not (org-get-alist-option org-M-RET-may-split-line 'item))
       (funcall insert-fun nil) t)
@@ -420,20 +409,19 @@ function ends."
 
 (defun org-in-item-p ()
   "Is the cursor inside a plain list ?"
-  (unless (org-at-heading-p)
+  (unless (let ((outline-regexp org-outline-regexp)) (org-at-heading-p))
     (save-excursion
-    ;; Move to eol so that current line can be matched by
-    ;; `org-item-re'.
-    (let* ((limit (save-excursion (outline-previous-heading)))
-	   (actual-pos (goto-char (point-at-eol)))
-	   (last-item-start (save-excursion
-			      (org-search-backward-unenclosed (org-item-re) limit t)))
-	   (list-ender (org-list-terminator-between last-item-start actual-pos)))
-      ;; We are in a list when we are on an item line or we can find
-      ;; an item before and there is no valid list ender between us
-      ;; and the item found.
-      (and last-item-start
-	   (not list-ender))))))
+      (let* ((limit (save-excursion (outline-previous-heading)))
+	     ;; Move to eol so current line can be matched by `org-item-re'.
+	     (actual-pos (goto-char (point-at-eol)))
+	     (last-item-start (save-excursion
+				(org-search-backward-unenclosed (org-item-re) limit t)))
+	     (list-ender (org-list-terminator-between last-item-start actual-pos)))
+	;; We are in a list when we are on an item line or when we can
+	;; find an item before point and there is no valid list ender
+	;; between it and the point.
+	(and last-item-start
+	     (not list-ender))))))
 
 (defun org-first-list-item-p ()
   "Is this heading the first item in a plain list?"
@@ -604,9 +592,7 @@ Return point."
 		   (let ((prev-p (org-get-previous-item pos bound)))
 		     ;; recurse until no more item of the same level
 		     ;; can be found.
-		     (if prev-p
-			 (funcall move-up prev-p bound)
-		       pos)))))
+		     (if prev-p (funcall move-up prev-p bound) pos)))))
     ;; Go to the last item found and at bol in case we didn't move
     (goto-char (funcall move-up (point) limit))
     (goto-char (point-at-bol))))
@@ -623,9 +609,7 @@ Return point."
 			 (let ((next-p (org-get-next-item pos bound)))
 			   ;; recurse until no more item of the same level
 			   ;; can be found.
-			   (if next-p
-			       (funcall get-last-item next-p bound)
-			     pos)))))
+			   (if next-p (funcall get-last-item next-p bound) pos)))))
     ;; Move to the last item of every list or sublist encountered, and
     ;; down to bol of a higher-level item, or limit.
     (while (and (/= (point) limit)
@@ -886,11 +870,8 @@ Assumes cursor in item line."
 ;;; Bullets
 
 (defun org-get-bullet ()
-  (save-excursion
-    (goto-char (point-at-bol))
-    (and (looking-at
-	  "^\\([ \t]*\\([-+]\\|\\([0-9]+[.)]\\)\\)\\|[ \t]+\\(\\*\\)\\)\\( \\|$\\)")
-	 (or (match-string 2) (match-string 4)))))
+  (and (org-at-item-p)
+       (org-trim (match-string 1))))
 
 (defun org-fix-bullet-type (&optional force-bullet)
   "Make sure all items in this list have the same bullet as the first item.
@@ -898,23 +879,22 @@ Also, fix the indentation."
   (interactive)
   (unless (org-at-item-p) (error "This is not a list"))
   (org-preserve-lc
-   (let* ((bullet
+   (let* ((ini-bul (progn (org-beginning-of-item-list) (org-get-bullet)))
+	  (bullet
 	   (progn
-	     (org-beginning-of-item-list)
-	     (looking-at "[ \t]*\\(\\S-+\\)")
-	     (concat (or force-bullet (match-string 1)) " "
-		     ;; Do we need to concat another white space ?
-		     (when (and org-list-two-spaces-after-bullet-regexp
-				(string-match org-list-two-spaces-after-bullet-regexp bullet))
-		       " "))))
+	     (concat
+	      (or force-bullet ini-bul) " "
+	      ;; Do we need to concat another white space ?
+	      (when (and org-list-two-spaces-after-bullet-regexp
+			 (string-match org-list-two-spaces-after-bullet-regexp ini-bul))
+		" "))))
 	  (replace-bullet
 	   (lambda (result bullet)
 	     (let* ((old (progn
-			   (skip-chars-forward " \t")
-			   (looking-at "\\S-+ *")
-			   (match-string 0))))
+			   (looking-at "[ \t]*\\(\\S-+[ \t]*\\)")
+			   (match-string 1))))
 	       (unless (equal bullet old)
-		 (replace-match bullet)
+		 (replace-match bullet nil nil nil 1)
 		 ;; When bullet lengths are differents, move the whole
 		 ;; sublist accordingly
 		 (org-shift-item-indentation (- (length bullet) (length old))))))))
@@ -996,12 +976,13 @@ is an integer, 0 means `-', 1 means `+' etc. If WHICH is
 			       ;; Description items cannot be numbered
 			       (unless (org-at-description-p) '("1." "1)"))))
 	  (len (length bullet-list))
-	  (item-pos (- len (length (member current bullet-list))))
+	  (item-index (- len (length (member current bullet-list))))
+	  (get-value (lambda (index) (nth (mod index len) bullet-list)))
 	  (new (cond
 		((member which bullet-list) which)
-		((numberp which) (nth (mod which len) bullet-list))
-		((eq 'previous which) (nth (mod (1- item-pos) len) bullet-list))
-		(t (nth (mod (1+ item-pos) len) bullet-list)))))
+		((numberp which) (funcall get-value which))
+		((eq 'previous which) (funcall get-value (1- item-index)))
+		(t (funcall get-value (1+ item-index))))))
      (org-fix-bullet-type new))))
 
 ;;; Checkboxes
