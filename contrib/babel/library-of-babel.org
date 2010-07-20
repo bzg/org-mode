@@ -29,32 +29,31 @@ A collection of simple utility functions
 
 * File I/O
 ** reading and writing files
-Read the contents of the file at =path= into a string.
+Read the contents of the file at =file=.  The =:results vector= and
+=:results scalar= header arguments can be used to read the contents of
+file as either a table or a string.
 #+srcname: read
-#+begin_src emacs-lisp :var path=""
-  (with-temp-filebuffer path
-    (buffer-substring (point-min) (point-max)))
+#+begin_src emacs-lisp :var file=""
+  (if (member "vector" result-params)
+      (with-temp-buffer
+        (org-table-import (expand-file-name file) nil)
+        (org-table-to-lisp))
+    (with-temp-buffer
+      (insert-file-contents (expand-file-name file))
+      (buffer-string)))
 #+end_src
 
-Read the lines of the file at =path= into a list.
-#+srcname: read-lines
-#+begin_src emacs-lisp :var path=""
-  (split-string
-   (with-temp-filebuffer path
-     (buffer-substring (point-min) (point-max))))
-#+end_src
-
-Write =data= to a file at =path=.  If =data= is a list, then write it
+Write =data= to a file at =file=.  If =data= is a list, then write it
 as a table in traditional Org-mode table syntax.
 #+srcname: write
-#+begin_src emacs-lisp :var data="" :var path=""
-  (with-temp-file path
+#+begin_src emacs-lisp :var data="" :var file=""
+  (with-temp-file file
     (org-babel-insert-result data))
   nil
 #+end_src
 
 ** remote files
-
+**** json
 Read local or remote file in [[http://www.json.org/][json]] format into emacs-lisp objects.
 #+srcname: json
 #+begin_src emacs-lisp :var file='() :var url='()
@@ -72,13 +71,81 @@ Read local or remote file in [[http://www.json.org/][json]] format into emacs-li
       (json-read))))
 #+end_src
 
+**** Google docs
+The following code blocks make use of the [[http://code.google.com/p/googlecl/][googlecl]] Google command line
+tool.  This tool provides functionality for accessing Google services
+from the command line, and the following code blocks use /googlecl/
+for reading from and writing to Google docs with Org-mode code blocks.
+
+****** read a document from Google docs
+The =google= command seems to be throwing "Moved Temporarily" errors
+when trying to download textual documents, but this is working fine
+for spreadsheets.
+#+source: gdoc-read
+#+begin_src emacs-lisp :var title="example"
+  (let* ((format (if (member "vector" result-params) "csv" "txt"))
+         (file (concat title "." format))
+         (cmd (format "google docs get --format %S --title %S" format title)))
+    (message cmd) (message (shell-command-to-string cmd))
+    (prog1 (if (string= format "csv")
+               (with-temp-buffer
+                 (org-table-import (shell-quote-argument file) nil)
+                 (org-table-to-lisp))
+             (with-temp-buffer
+               (insert-file-contents (shell-quote-argument file))
+               (buffer-string)))
+      (delete-file file)))
+#+end_src
+
+For example, a line like the following can be used to read the
+contents of a spreadsheet named =num-cells= into a table.
+#+begin_src org
+  ,#+call: gdoc-read(title="num-cells"") :results vector
+#+end_src
+
+A line like the following can be used to read the contents of a
+document as a string.
+#+begin_src org
+  ,#+call: gdoc-read(title="loremi") :results scalar
+#+end_src
+
+****** write a document to a Google docs
+Write =data= to a google document named =title=.  If =data= is tabular
+it will be saved to a spreadsheet, otherwise it will be saved as a
+normal document.
+#+source: gdoc-write
+#+begin_src emacs-lisp :var title="babel-upload" :var data=fibs(n=10) :results silent
+  (let* ((format (if (listp data) "csv" "txt"))
+         (tmp-file (make-temp-file "org-babel-google-doc" nil (concat "." format)))
+         (cmd (format "google docs upload --title %S %S" title tmp-file)))
+    (with-temp-file tmp-file
+      (insert
+       (if (listp data)
+           (orgtbl-to-csv
+            data '(:fmt (lambda (el) (if (stringp el) el (format "%S" el)))))
+         (if (stringp data) data (format "%S" data)))))
+    (message cmd)
+    (prog1 (shell-command-to-string cmd) (delete-file tmp-file)))
+#+end_src
+
+example usage
+#+begin_src org
+  ,#+source: fibs
+  ,#+begin_src emacs-lisp :var n=8
+  ,  (flet ((fib (m) (if (< m 2) 1 (+ (fib (- m 1)) (fib (- m 2))))))
+  ,    (mapcar (lambda (el) (list el (fib el))) (number-sequence 0 (- n 1))))
+  ,#+end_src
+  
+  ,#+call: gdoc-write(title="fibs", data=fibs(n=10))
+#+end_src
+
 * Plotting code
 
 ** R
   Plot column 2 (y axis) against column 1 (x axis). Columns 3 and beyond, if present, are ignored.
 
 #+srcname: R-plot(data=R-plot-example-data)
-#+begin_src R :session *R*
+#+begin_src R
 plot(data)
 #+end_src
 
