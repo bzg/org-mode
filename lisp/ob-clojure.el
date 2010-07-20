@@ -5,7 +5,7 @@
 ;; Author: Joel Boehland
 ;; Keywords: literate programming, reproducible research
 ;; Homepage: http://orgmode.org
-;; Version: 7.01b
+;; Version: 7.01c
 
 ;; This file is part of GNU Emacs.
 

@@ -5,7 +5,7 @@
 ;; Author: Eric Schulte, Dan Davison
 ;; Keywords: literate programming, reproducible research, R, statistics
 ;; Homepage: http://orgmode.org
-;; Version: 7.01b
+;; Version: 7.01c
 
 ;; This file is part of GNU Emacs.
 
