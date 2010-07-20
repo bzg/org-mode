@@ -327,11 +327,12 @@ relup:
 testrelease:
 	git checkout -b testrelease maint
 	git merge -s recursive -X theirs master
-	UTILITIES/set-version.pl $(TAG)
-	git commit -a -m "Release $(TAG)"
+	UTILITIES/set-version.pl testing
+	git commit -a -m "Release testing"
 	make distfile TAG=testversion
 	make cleanrel
 	rm -rf org-testversion*
+	git reset --hard
 	git checkout master
 	git branch -D testrelease
 
@@ -350,6 +351,7 @@ release:
 	git checkout master
 	UTILITIES/set-version.pl -o $(TAG)
 	git commit -a -m "Update website to show $(TAG) as current release"
+	git push
 	make updateweb
 
 cleancontrib:
