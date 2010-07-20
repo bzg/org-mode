@@ -4,7 +4,7 @@
 @setfilename ../../info/org
 @settitle The Org Manual
 
-@set VERSION 7.01d
+@set VERSION 7.01c
 @set DATE July 2010
 
 @c Use proper quote and backtick for code sections in PDF output

@@ -5,7 +5,7 @@
 ;; Author: John Wiegley <johnw@gnu.org>
 ;;         Christopher Suckling <suckling at gmail dot com>
 
-;; Version: 7.01d
+;; Version: 7.01c
 ;; Keywords: outlines, hypermedia, calendar, wp
 
 ;; This file is part of GNU Emacs.
