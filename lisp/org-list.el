@@ -975,12 +975,13 @@ doing the renumbering."
 
 (defun org-cycle-list-bullet (&optional which)
   "Cycle through the different itemize/enumerate bullets.
-This cycle the entire list level through nnthe sequence:
+This cycle the entire list level through the sequence:
 
    `-'  ->  `+'  ->  `*'  ->  `1.'  ->  `1)'
 
 If WHICH is a valid string, use that as the new bullet. If WHICH
-is an integer, 0 means `-', 1 means `+' etc."
+is an integer, 0 means `-', 1 means `+' etc. If WHICH is
+'previous, cycle backwards."
   (interactive "P")
   (org-preserve-lc
    (let* ((bullet (progn (org-beginning-of-item-list)
@@ -994,13 +995,13 @@ is an integer, 0 means `-', 1 means `+' etc."
 			       (unless (looking-at "\\S-") '("*"))
 			       ;; Description items cannot be numbered
 			       (unless (org-at-description-p) '("1." "1)"))))
-	  (item-pos (member current bullet-list))
+	  (len (length bullet-list))
+	  (item-pos (or (and (numberp which) which)
+			(- len (length (member current bullet-list)))))
 	  (new (cond
-		((and (numberp which)
-		      (nth (mod which (length bullet-list)) bullet-list)))
 		((member which bullet-list) which)
-		((and item-pos (cdr item-pos)) (cadr item-pos))
-		(t "-"))))
+		((eq 'previous which) (nth (mod (1- item-pos) len) bullet-list))
+		(t (nth (mod (1+ item-pos) len) bullet-list)))))
      (org-fix-bullet-type new))))
 
 ;;; Checkboxes
