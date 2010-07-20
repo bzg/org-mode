@@ -744,14 +744,14 @@ already gone."
     (if (org-capture-get :prepend)
 	(progn
 	  (goto-char beg)
-	  (if (re-search-forward (concat "^" (org-item-re)) end t)
+	  (if (org-search-forward-unenclosed org-item-beginning-re end t)
 	      (progn
 		(goto-char (match-beginning 0))
 		(setq ind (org-get-indentation)))
 	    (goto-char end)
 	    (setq ind 0)))
       (goto-char end)
-      (if (re-search-backward (concat "^" (org-item-re)) beg t)
+      (if (org-search-backward-unenclosed org-item-beginning-re beg t)
 	  (progn
 	    (setq ind (org-get-indentation))
 	    (org-end-of-item))

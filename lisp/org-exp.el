@@ -1636,7 +1636,7 @@ These special cookies will later be interpreted by the backend.
   (let ((process-buffer
 	 (lambda (end-list-marker)
 	   (goto-char (point-min))
-	   (while (org-search-forward-unenclosed (org-item-re) nil t)
+	   (while (org-search-forward-unenclosed org-item-beginning-re nil t)
 	     (goto-char (org-list-bottom-point))
 	     (when (looking-at (org-list-end-re))
 	       (replace-match "\n"))

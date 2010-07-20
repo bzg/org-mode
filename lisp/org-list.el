@@ -244,6 +244,9 @@ of `org-plain-list-ordered-item-terminator'."
     "\\([ \t]*\\([-+]\\|\\([0-9]+)\\)\\)\\|[ \t]+\\*\\)\\( \\|$\\)")
    (t (error "Invalid value of `org-plain-list-ordered-item-terminator'"))))
 
+(defconst org-item-beginning-re (concat "^" (org-item-re))
+  "Regexp matching the beginning of a plain list item.")
+
 (defun org-list-terminator-between (min max &optional firstp)
   "Find the position of a list ender between MIN and MAX, or nil.
 This function looks for `org-list-end-re' not matching a block.
@@ -311,7 +314,7 @@ uses PRE-MOVE before search. Return nil if no item was found."
       ;; We don't want to match the current line.
       (funcall pre-move)
       ;; Skip any sublist on the way
-      (while (and (funcall search-fun (org-item-re) limit t)
+      (while (and (funcall search-fun org-item-beginning-re limit t)
 		  (> (org-get-indentation) ind)))
       (when (and (/= (point-at-bol) start) ; Have we moved ?
 		 (= (org-get-indentation) ind))
@@ -337,7 +340,7 @@ function ends."
     (end-of-line 0))
   (let* ((true-pos (point))
 	 (bullet (and (org-beginning-of-item)
-		      (looking-at (org-item-re))
+		      (looking-at org-item-beginning-re)
 		      (match-string 0)))
 	 (before-p (progn
 		     ;; Description item: text starts after colons.
@@ -415,7 +418,7 @@ function ends."
 	     ;; Move to eol so current line can be matched by `org-item-re'.
 	     (actual-pos (goto-char (point-at-eol)))
 	     (last-item-start (save-excursion
-				(org-search-backward-unenclosed (org-item-re) limit t)))
+				(org-search-backward-unenclosed org-item-beginning-re limit t)))
 	     (list-ender (org-list-terminator-between last-item-start actual-pos)))
 	;; We are in a list when we are on an item line or when we can
 	;; find an item before point and there is no valid list ender
@@ -434,7 +437,7 @@ function ends."
   "Is point in a line starting a hand-formatted item?"
   (save-excursion
     (goto-char (point-at-bol))
-    (looking-at (org-item-re))))
+    (looking-at org-item-beginning-re)))
 
 (defun org-at-item-bullet-p ()
   "Is point at the bullet of a plain list item?"
@@ -487,7 +490,7 @@ A checkbox is blocked if all of the following conditions are fulfilled:
 	   ;; Otherwise, go back to the heading above or bob.
 	   (goto-char (or (org-list-terminator-between bound pos) bound))
 	   ;; From there, search down our list.
-	   (org-search-forward-unenclosed (org-item-re) pos t)
+	   (org-search-forward-unenclosed org-item-beginning-re pos t)
 	   (point-at-bol)))))
 
 (defun org-list-bottom-point ()
@@ -515,7 +518,7 @@ If the cursor is not in an item, throw an error. Return point."
       (error "Not in an item")
     ;; Possibly match the current line.
     (end-of-line)
-    (org-search-backward-unenclosed (org-item-re) nil t)
+    (org-search-backward-unenclosed org-item-beginning-re nil t)
     (goto-char (point-at-bol))))
 
 (defun org-end-of-item ()
@@ -536,7 +539,7 @@ Assumes that the cursor is in the first line of an item."
   (let ((limit (org-list-bottom-point)))
     (end-of-line)
     (goto-char
-     (if (org-search-forward-unenclosed (org-item-re) limit t)
+     (if (org-search-forward-unenclosed org-item-beginning-re limit t)
 	 (point-at-bol)
        limit))))
 
@@ -616,7 +619,7 @@ Return point."
 		(>= (org-get-indentation) ind))
       (goto-char (funcall get-last-item (point) limit))
       (end-of-line)
-      (when (org-search-forward-unenclosed (org-item-re) limit 'move)
+      (when (org-search-forward-unenclosed org-item-beginning-re limit 'move)
 	(beginning-of-line)))
     (point)))
 
@@ -824,7 +827,7 @@ Assumes cursor in item line."
       (cond
        ((and (ignore-errors (progn (org-previous-item) t))
 	     (or (end-of-line) t)
-	     (org-search-forward-unenclosed (org-item-re) bolpos t))
+	     (org-search-forward-unenclosed org-item-beginning-re bolpos t))
 	(setq ind-down (org-get-indentation)
 	      bullet-down (org-get-bullet)))
        ((and (goto-char pos)
@@ -924,7 +927,7 @@ with something like \"1.\" or \"2)\". Start to count at ARG or 1."
 	  (renumber-item (lambda (counter off fmt)
 			   (let* ((new (format fmt (+ counter off)))
 				  (old (progn
-					 (looking-at (org-item-re))
+					 (looking-at org-item-beginning-re)
 					 (match-string 2)))
 				  (begin (match-beginning 2))
 				  (end (match-end 2)))
@@ -1156,7 +1159,7 @@ the whole buffer."
 		      ;; with proper limit.
 		      (goto-char (or (org-get-next-item (point) lim) lim))
 		    (end-of-line)
-		    (when (org-search-forward-unenclosed (org-item-re) lim t)
+		    (when (org-search-forward-unenclosed org-item-beginning-re lim t)
 		      (beginning-of-line)))
 		  (setq next-ind (org-get-indentation)))))
 	  (goto-char continue-from)
@@ -1326,7 +1329,7 @@ sublevels as a list of strings."
   (let* ((start (goto-char (org-list-top-point)))
 	 (end (org-list-bottom-point))
 	 output itemsep ltype)
-    (while (org-search-forward-unenclosed (org-item-re) end t)
+    (while (org-search-forward-unenclosed org-item-beginning-re end t)
       (save-excursion
 	(beginning-of-line)
 	(setq ltype (cond ((looking-at-p "^[ \t]*[0-9]") 'ordered)
@@ -1419,7 +1422,7 @@ this list."
 	   (top-point
 	    (progn
 	      (re-search-backward "#\\+ORGLST" nil t)
-	      (re-search-forward (org-item-re) bottom-point t)
+	      (re-search-forward org-item-beginning-re bottom-point t)
 	      (match-beginning 0)))
 	   (list (save-restriction
 		   (narrow-to-region top-point bottom-point)
