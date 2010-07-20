@@ -133,8 +133,13 @@ def usage():
         search [str]  : Same as 'list'
         view <ID>     : View a patch
         show <ID>     : Same as view
-        update [-s state] [-c commit-ref] <ID>
-                      : Update patch\n""")
+        update [-s state] [-c commit-ref] [-m email-comment] <ID>
+                      : Update patch, send mail to mailing list if appropriate
+        branch <ID>   : Create a topic branch t/patchNNN for this patch
+                      :  and update it to the current master
+        merge [-m email-comment] <ID>
+                      : Merge the t/patchNNN topic branch into master
+\n""")
     sys.stderr.write("""\nFilter options for 'list' and 'search':
         -s <state>    : Filter by patch state (e.g., 'New', 'Accepted', etc.)
         -p <project>  : Filter by project name (see 'projects' for list)
