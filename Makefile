@@ -164,7 +164,7 @@ INFOFILES   = doc/org
 SHELL = /bin/sh
 
 # Additional distribution files
-DISTFILES_extra=  Makefile ChangeLog request-assign-future.txt contrib
+DISTFILES_extra=  Makefile request-assign-future.txt contrib
 DISTFILES_xemacs=  xemacs/noutline.el xemacs/ps-print-invisible.el xemacs/README
 
 default: $(ELCFILES) $(ELCBFILES)
