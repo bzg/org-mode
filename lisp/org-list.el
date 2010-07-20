@@ -989,26 +989,19 @@ is an integer, 0 means `-', 1 means `+' etc."
 		    ((string-match "\\." bullet) "1.")
 		    ((string-match ")" bullet) "1)")
 		    (t bullet)))
-	  ;; Description items cannot be numbered
-	  (bullet-list (if (org-at-description-p)
-			   '("-" "+" "*")
-			 '("-" "+" "*" "1." "1)")))
-	  ;; *-bullets are not allowed at column 0
-	  (bullet-list (if (looking-at "\\S-")
-			   (remove "*" bullet-list)
-			 bullet-list))
+	  (bullet-list (append '("-" "+" )
+			       ;; *-bullets are not allowed at column 0
+			       (unless (looking-at "\\S-") '("*"))
+			       ;; Description items cannot be numbered
+			       (unless (org-at-description-p) '("1." "1)"))))
 	  (item-pos (member current bullet-list))
 	  (new (cond
 		((and (numberp which)
 		      (nth (mod which (length bullet-list)) bullet-list)))
 		((member which bullet-list) which)
 		((and item-pos (cdr item-pos)) (cadr item-pos))
-		(t "-")))
-	  (old (and (looking-at "\\([ \t]*\\)\\(\\S-+\\)")
-		    (match-string 2))))
-     (replace-match (concat "\\1" new))
-     (org-shift-item-indentation (- (length new) (length old)))
-     (org-fix-bullet-type))))
+		(t "-"))))
+     (org-fix-bullet-type new))))
 
 ;;; Checkboxes
 
