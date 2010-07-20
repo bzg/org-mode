@@ -3,7 +3,7 @@
 @setfilename ../../info/orgguide
 @settitle The compact Org-mode Guide
 
-@set VERSION 7.01c
+@set VERSION 7.01e
 @set DATE July 2010
 
 @c Use proper quote and backtick for code sections in PDF output
