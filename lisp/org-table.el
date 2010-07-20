@@ -453,7 +453,7 @@ nil      When nil, the command tries to be smart and figure out the
 	     (t 1))))
     (goto-char beg)
     (if (equal separator '(4))
-	(while (<= (point) end)
+	(while (< (point) end)
 	  ;; parse the csv stuff
 	  (cond
 	   ((looking-at "^") (insert "| "))
