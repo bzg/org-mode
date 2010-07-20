@@ -320,7 +320,7 @@ relup0:
 	${MAKE} upload_release
 
 relup:
-	${MAKE} release
+	${MAKE} makerelease
 	${MAKE} upload_release
 	${MAKE} upload_manual
 
