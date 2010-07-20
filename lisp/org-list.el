@@ -420,7 +420,8 @@ function ends."
 
 (defun org-in-item-p ()
   "Is the cursor inside a plain list ?"
-  (save-excursion
+  (unless (org-at-heading-p)
+    (save-excursion
     ;; Move to eol so that current line can be matched by
     ;; `org-item-re'.
     (let* ((limit (save-excursion (outline-previous-heading)))
@@ -432,7 +433,7 @@ function ends."
       ;; an item before and there is no valid list ender between us
       ;; and the item found.
       (and last-item-start
-	   (not list-ender)))))
+	   (not list-ender))))))
 
 (defun org-first-list-item-p ()
   "Is this heading the first item in a plain list?"
@@ -697,8 +698,7 @@ new item will be created before the current one. Return t when
 things worked, nil when we are not in an item, or item is
 invisible."
   (unless (or (not (org-in-item-p))
-	      (org-invisible-p)
-	      (< (org-list-bottom-point) (point)))
+	      (org-invisible-p))
     (if (save-excursion
 	  (org-beginning-of-item)
 	  (org-at-item-timer-p))
@@ -1383,15 +1383,17 @@ sublevels as a list of strings."
 (defun org-list-make-subtree ()
   "Convert the plain list at point into a subtree."
   (interactive)
-  (goto-char (org-list-top-point))
-  (let ((list (org-list-parse-list t)) nstars)
-    (save-excursion
-      (if (ignore-errors
-	    (org-back-to-heading))
-	  (progn (org-search-forward-unenclosed org-complex-heading-regexp nil t)
-		 (setq nstars (length (match-string 1))))
-	(setq nstars 0)))
-    (org-list-make-subtrees list (1+ nstars))))
+  (if (not (org-in-item-p))
+      (error "Not in a list.")
+    (goto-char (org-list-top-point))
+    (let ((list (org-list-parse-list t)) nstars)
+      (save-excursion
+	(if (ignore-errors
+	      (org-back-to-heading))
+	    (progn (org-search-forward-unenclosed org-complex-heading-regexp nil t)
+		   (setq nstars (length (match-string 1))))
+	  (setq nstars 0)))
+      (org-list-make-subtrees list (1+ nstars)))))
 
 (defun org-list-make-subtrees (list level)
   "Convert LIST into subtrees starting at LEVEL."
