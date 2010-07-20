@@ -10979,9 +10979,9 @@ e.g.
 
 Org-mode provides a number of features for working with live source code,
 including editing of code blocks in their native major-mode, evaluation of
-code blocks, tangling of code blocks, and exporting code blocks and
-their results in several formats.  This functionality was contributed by Dan
-Davison and Eric Schulte, and was originally named Org-babel.
+code blocks, tangling of code blocks, and exporting code blocks and their
+results in several formats.  This functionality was contributed by Eric
+Schulte and Dan Davison, and was originally named Org-babel.
 
 The following sections describe Org-mode's code block handling facilities.
 
