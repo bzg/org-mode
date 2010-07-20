@@ -293,7 +293,7 @@ distfile:
 	zip -r org-$(TAG).zip org-$(TAG)
 	gtar zcvf org-$(TAG).tar.gz org-$(TAG)
 
-release:
+makerelease:
 	@if [ "X$(TAG)" = "X" ]; then echo "*** No tag ***"; exit 1; fi
 	${MAKE} distfile
 	${MAKE} doc
@@ -316,7 +316,7 @@ upload_manual:
 	rsync -avuz --delete doc/guide/ cdominik@orgmode.org:orgmode.org/guide/
 
 relup0:
-	${MAKE} release
+	${MAKE} makerelease
 	${MAKE} upload_release
 
 relup:
@@ -324,8 +324,33 @@ relup:
 	${MAKE} upload_release
 	${MAKE} upload_manual
 
-db:
-	grep -e '(debug)' lisp/*el
+testrelease:
+	git checkout -b testrelease maint
+	git merge -s recursive -X theirs master
+	UTILITIES/set-version.pl $(TAG)
+	git commit -a -m "Release $(TAG)"
+	make distfile TAG=testversion
+	make cleanrel
+	rm -rf org-testversion*
+	git checkout master
+	git branch -D testrelease
+
+release:
+	git checkout maint
+	git merge -s recursive -X theirs master
+	UTILITIES/set-version.pl $(TAG)
+	git commit -a -m "Release $(TAG)"
+	make relup TAG=$(TAG)
+	make cleanrel
+	rm -rf org-$(TAG)
+	rm org-$(TAG)*.zip
+	rm org-$(TAG)*.tar.gz
+	make pushreleasetag TAG=$(TAG)
+	git push origin maint
+	git checkout master
+	UTILITIES/set-version.pl -o $(TAG)
+	git commit -a -m "Update website to show $(TAG) as current release"
+	make updateweb
 
 cleancontrib:
 	find contrib -name \*~ -exec rm {} \;
