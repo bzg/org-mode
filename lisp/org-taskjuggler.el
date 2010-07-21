@@ -4,7 +4,7 @@
 ;;
 ;; Emacs Lisp Archive Entry
 ;; Filename: org-taskjuggler.el
-;; Version: 7.01e
+;; Version: 7.01f
 ;; Author: Christian Egli
 ;; Maintainer: Christian Egli
 ;; Keywords: org, taskjuggler, project planning
