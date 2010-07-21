@@ -651,7 +651,9 @@ already gone."
 
 (defun org-capture-target-buffer (file)
   "Get a buffer for FILE."
-  (setq file (or (org-string-nw-p file) org-default-notes-file))
+  (setq file (or (org-string-nw-p file)
+		 org-default-notes-file
+		 (error "No notes file specified, and no default available")))
   (or (org-find-base-buffer-visiting file)
       (find-file-noselect (expand-file-name file org-directory))))
 
@@ -1024,17 +1026,19 @@ Use PREFIX as a prefix for the name of the indirect buffer."
 (defun org-capture-select-template (&optional keys)
   "Select a capture template.
 Lisp programs can force the template by setting KEYS to a string."
-  (when org-capture-templates
-    (if keys
-	(or (assoc keys org-capture-templates)
-	    (error "No capture template referred to by \"%s\" keys" keys))
-      (if (= 1 (length org-capture-templates))
-	  (car org-capture-templates)
-	(org-mks org-capture-templates
-		 "Select a capture template\n========================="
-		 "Template key: "
-		 '(("C" "Customize org-capture-templates")
-		   ("q" "Abort")))))))
+  (if org-capture-templates
+      (if keys
+	  (or (assoc keys org-capture-templates)
+	      (error "No capture template referred to by \"%s\" keys" keys))
+	(if (= 1 (length org-capture-templates))
+	    (car org-capture-templates)
+	  (org-mks org-capture-templates
+		   "Select a capture template\n========================="
+		   "Template key: "
+		   '(("C" "Customize org-capture-templates")
+		     ("q" "Abort")))))
+    ;; Use an arbitrary default template
+    '("t" "Task" entry (file+headline "" "Tasks") "* TODO %?\n  %u\n  %a")))
 
 (defun org-capture-fill-template (&optional template initial annotation)
   "Fill a template and return the filled template as a string.

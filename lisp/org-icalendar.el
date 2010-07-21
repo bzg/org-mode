@@ -47,13 +47,24 @@ The file name should be absolute, the file will be overwritten without warning."
   :group 'org-export-icalendar
   :type 'file)
 
+(defcustom org-icalendar-alarm-time 0
+  "Number of minutes for triggering an alarm for exported timed events.
+A zero value (the default) turns off the definition of an alarm trigger
+for timed events.  If non-zero, alarms are created.
+
+- a single alarm per entry is defined
+- The alarm will go off N minutes before the event
+- only a DISPLAY action is defined."
+  :group 'org-export-icalendar
+  :type 'integer)
+
 (defcustom org-icalendar-combined-name "OrgMode"
   "Calendar name for the combined iCalendar representing all agenda files."
   :group 'org-export-icalendar
   :type 'string)
 
 (defcustom org-icalendar-combined-description nil
-  "Calendar description for the combined iCalendar representing all agenda files."
+  "Calendar description for the combined iCalendar (all agenda files)."
   :group 'org-export-icalendar
   :type 'string)
 
@@ -282,7 +293,7 @@ When COMBINE is non nil, add the category to each line."
 	      "DTSTART"))
 	hd ts ts2 state status (inc t) pos b sexp rrule
 	scheduledp deadlinep todo prefix due start
-	tmp pri categories location summary desc uid
+	tmp pri categories location summary desc uid alarm
 	(sexp-buffer (get-buffer-create "*ical-tmp*")))
     (org-refresh-category-properties)
     (save-excursion
@@ -314,6 +325,7 @@ When COMBINE is non nil, add the category to each line."
 			(org-id-get-create)
 		      (or (org-id-get) (org-id-new)))
 		categories (org-export-get-categories)
+		alarm ""
 		deadlinep nil scheduledp nil)
 	  (if (looking-at re2)
 	      (progn
@@ -362,6 +374,17 @@ When COMBINE is non nil, add the category to each line."
 			    ";INTERVAL=" (match-string 1 ts)))
 	    (setq rrule ""))
 	  (setq summary (or summary hd))
+	  ;; create an alarm entry if the entry is timed.  this is not very general in that:
+	  ;; (a) only one alarm per entry is defined,
+	  ;; (b) only minutes are allowed for the trigger period ahead of the start time, and
+	  ;; (c) only a DISPLAY action is defined.
+	  ;; [ESF]
+	  (let ((t1 (ignore-errors (org-parse-time-string ts 'nodefault))))
+	    (if (and (> org-icalendar-alarm-time 0) 
+		     (car t1) (nth 1 t1) (nth 2 t1))
+		(setq alarm (format "\nBEGIN:VALARM\nACTION:DISPLAY\nDESCRIPTION:%s\nTRIGGER:-P0D0H%dM0S\nEND:VALARM" summary org-icalendar-alarm-time))
+	      (setq alarm ""))
+	    )
 	  (if (string-match org-bracket-link-regexp summary)
 	      (setq summary
 		    (replace-match (if (match-end 3)
@@ -378,7 +401,7 @@ UID: %s
 %s
 %s%s
 SUMMARY:%s%s%s
-CATEGORIES:%s
+CATEGORIES:%s%s
 END:VEVENT\n"
 			   (concat prefix uid)
 			   (org-ical-ts-to-string ts "DTSTART")
@@ -388,7 +411,8 @@ END:VEVENT\n"
 			       (concat "\nDESCRIPTION: " desc) "")
 			   (if (and location (string-match "\\S-" location))
 			       (concat "\nLOCATION: " location) "")
-			   categories)))))
+			   categories
+			   alarm)))))
       (when (and org-icalendar-include-sexps
 		 (condition-case nil (require 'icalendar) (error nil))
 		 (fboundp 'icalendar-export-region))

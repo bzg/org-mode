@@ -596,6 +596,7 @@ optional argument MARKERP, return the position as a new marker."
 ;; Calling the following function is hard-coded into `org-store-link',
 ;; so we do have to add it to `org-store-link-functions'.
 
+;;;###autoload
 (defun org-id-store-link ()
   "Store a link to the current entry, using its ID."
   (interactive)

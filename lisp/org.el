@@ -295,6 +295,7 @@ to add the symbol `xyz', and the package must have a call to
 	(const :tag "   wl:                Links to Wanderlust folders/messages" org-wl)
 	(const :tag "   w3m:               Special cut/paste from w3m to Org-mode." org-w3m)
 	(const :tag "   mouse:             Additional mouse support" org-mouse)
+	(const :tag "   TaskJuggler:       Export tasks to a TaskJuggler project" org-taskjuggler)
 
 	(const :tag "C  annotate-file:     Annotate a file with org syntax" org-annotate-file)
 	(const :tag "C  bookmark:          Org-mode links to bookmarks" org-bookmark)
@@ -328,7 +329,7 @@ to add the symbol `xyz', and the package must have a call to
 	(const :tag "C  sqlinsert:         Convert Org-mode tables to SQL insertions" orgtbl-sqlinsert)
 	(const :tag "C  toc:               Table of contents for Org-mode buffer" org-toc)
 	(const :tag "C  track:             Keep up with Org-mode development" org-track)
-	(const :tag "C  TaskJuggler:       Export tasks to a TaskJuggler project" org-taskjuggler)
+	(const :tag "C  velocity           Something like Notational Velocity for Org" org-velocity)
 	(repeat :tag "External packages" :inline t (symbol :tag "Package"))))
 
 (defcustom org-support-shift-select nil
@@ -3991,7 +3992,7 @@ collapsed state."
 (org-autoload "org-id"
  '(org-id-get-create org-id-new org-id-copy org-id-get
    org-id-get-with-outline-path-completion
-   org-id-get-with-outline-drilling
+   org-id-get-with-outline-drilling org-id-store-link
    org-id-goto org-id-find org-id-store-link))
 
 ;; Autoload Plotting Code
