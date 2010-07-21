@@ -398,6 +398,14 @@ hurt if it is present."
 	   (symbol :tag "Major mode       ")
 	   (string :tag "Listings language"))))
 
+(defcustom org-export-latex-listings-w-names t
+  "Non-nil means export names of named code blocks.
+Code blocks exported with the listings package (controlled by the
+`org-export-latex-listings' variable) can be named in the style
+of noweb."
+  :group 'org-export-latex
+  :type 'boolean)
+
 (defcustom org-export-latex-remove-from-headlines
   '(:todo nil :priority nil :tags nil)
   "A plist of keywords to remove from headlines.  OBSOLETE.
