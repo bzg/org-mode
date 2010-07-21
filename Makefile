@@ -297,6 +297,7 @@ release:
 	make pushreleasetag TAG=$(TAG)
 	git push origin maint
 	git checkout master
+	git merge -s ours maint
 	UTILITIES/set-version.pl -o $(TAG)
 	git commit -a -m "Update website to show $(TAG) as current release"
 	git push
