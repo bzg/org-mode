@@ -764,7 +764,8 @@ If NO-SUBTREE is set, only outdent the item itself, not its children."
 
 (defun org-indent-item-tree (arg &optional no-subtree)
   "Indent a local list item including its children.
-If NO-SUBTREE is set, only indent the item itself, not its children."
+If NO-SUBTREE is set, only indent the item itself, not its
+children. Return t if sucessful."
   (interactive "p")
   (and (org-region-active-p) (org-cursor-to-region-beginning))
   (unless (org-at-item-p)
@@ -776,6 +777,7 @@ If NO-SUBTREE is set, only indent the item itself, not its children."
     (setq firstp (org-first-list-item-p))
     (save-excursion
       (setq end (and (org-region-active-p) (region-end)))
+      ;; If moving a subtree, don't drain other items on the way.
       (if (and (memq last-command '(org-shiftmetaright org-shiftmetaleft))
 	       (memq this-command '(org-shiftmetaright org-shiftmetaleft)))
 	  (setq beg org-last-indent-begin-marker
@@ -842,7 +844,8 @@ If NO-SUBTREE is set, only indent the item itself, not its children."
       (org-maybe-renumber-ordered-list))
     (save-excursion
       (org-end-of-item-list)
-      (org-maybe-renumber-ordered-list))))
+      (org-maybe-renumber-ordered-list))
+    t))
 
 (defun org-item-indent-positions ()
   "Return indentation for plain list items.
@@ -887,28 +890,35 @@ Assumes cursor in item line."
 	  (cons ind-down bullet-down))))
 
 (defvar org-tab-ind-state) ; defined in org.el
+
 (defun org-cycle-item-indentation ()
   (let ((org-suppress-item-indentation t)
 	(org-adapt-indentation nil))
-    (cond
-     ((and (looking-at "[ \t]*$")
-	   (or (org-at-description-p) (org-at-item-checkbox-p) (org-at-item-p))
-	   (<= (point) (match-end 0)))
+    (when (and (looking-at "[ \t]*$")
+	       (org-looking-back (concat org-item-beginning-re "[ \t]*")))
       (setq this-command 'org-cycle-item-indentation)
+      ;; When in the middle of the cycle, try to outdent first. If it
+      ;; fails, and point is still at initial position, indent. Else,
+      ;; go back to original position.
       (if (eq last-command 'org-cycle-item-indentation)
-	  (condition-case nil
-	      (progn (org-outdent-item 1)
-		     (when (equal org-tab-ind-state (org-get-indentation))
-		       (org-outdent-item 1))
-		     (end-of-line))
-	    (error
-	     (progn
-	       (while (< (org-get-indentation) org-tab-ind-state)
-		 (progn (org-indent-item 1) (end-of-line)))
-	       (setq this-command 'org-cycle))))
+	  (cond
+	   ((ignore-errors (org-indent-item -1)))
+	   ((and (= (org-get-indentation) org-tab-ind-state)
+		 (ignore-errors (org-indent-item 1))))
+	   (t (back-to-indentation)
+	      (org-indent-to-column org-tab-ind-state)
+	      (end-of-line)
+	      (org-maybe-renumber-ordered-list)
+	      ;; Break cycle
+	      (setq this-command 'identity)))
+	;; If a cycle has just started, try to indent first. If it
+	;; fails, try to outdent.
 	(setq org-tab-ind-state (org-get-indentation))
-	(org-indent-item 1))
-      t))))
+	(cond
+	 ((ignore-errors (org-indent-item 1)))
+	 ((ignore-errors (org-indent-item -1)))
+	 (t (error "Cannot move item"))))))
+  t)
 
 ;;; Bullets
 
