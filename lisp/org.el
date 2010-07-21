@@ -3992,7 +3992,7 @@ collapsed state."
 (org-autoload "org-id"
  '(org-id-get-create org-id-new org-id-copy org-id-get
    org-id-get-with-outline-path-completion
-   org-id-get-with-outline-drilling
+   org-id-get-with-outline-drilling org-id-store-link
    org-id-goto org-id-find org-id-store-link))
 
 ;; Autoload Plotting Code
