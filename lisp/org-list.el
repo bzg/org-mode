@@ -355,9 +355,17 @@ function ends."
 	  (let ((insert-blank-p
 		 (cdr (assq 'plain-list-item org-blank-before-new-entry))))
 	    (cond
+	     ;; Trivial cases where there should be none.
 	     ((or org-empty-line-terminates-plain-lists
 		  (not insert-blank-p)) 0)
-	     ((eq insert-blank-p t) 1)
+	     ;; When `org-blank-before-new-entry' says so, or item is
+	     ;; alone in the whole list, it is 1.
+	     ((or (eq insert-blank-p t)
+		  (save-excursion
+		    (goto-char (org-list-top-point))
+		    (end-of-line)
+		    (not (org-search-forward-unenclosed
+			  org-item-beginning-re (org-list-bottom-point) t)))) 1)
 	     ;; plain-list-item is 'auto. Count blank lines separating
 	     ;; neighbours items in list.
 	     (t (let ((next-p (org-get-next-item (point) (org-list-bottom-point))))
@@ -367,8 +375,13 @@ function ends."
 			   (org-back-over-empty-lines))
 		   ;; Is there a previous item?
 		   ((not (org-first-list-item-p)) (org-back-over-empty-lines))
-		   ;; no luck: item is alone. Use default value.
-		   (t 1)))))))
+		   ;; Local search failed: search globally.
+		   ((and (goto-char (org-list-bottom-point))
+			 (beginning-of-line 0)
+			 (org-search-backward-unenclosed "^[ \t]*$" (org-list-top-point) t))
+		    (1+ (org-back-over-empty-lines)))
+		   ;; No blank line found in the whole list.
+		   (t 0)))))))
 	 (insert-fun
 	  (lambda (text)
 	    ;; insert bullet above item in order to avoid bothering
