@@ -169,7 +169,7 @@ and corresponding to the latest git version.
 
 * Documentation
 ** The Org guide and manual
-   - Read the [[file:manual/index.html][online compact guide]] or download it as a [[file:orgguide.pdf][PDF document]].
+   - Read the [[file:guide/index.html][online compact guide]] or download it as a [[file:orgguide.pdf][PDF document]].
      The compact guide is a 40-page introduction to Org mode.  It
      covers all features in a basic way and has links to in-depth
      documentation in the manual and on the web.
