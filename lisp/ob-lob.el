@@ -61,9 +61,10 @@ If you change the value of this variable then your files may
   become unusable by other org-babel users, and vice versa.")
 
 (defconst org-babel-lob-one-liner-regexp
-  (concat "^\\([ \t]*\\)#\\+\\(?:"
-	  (mapconcat #'regexp-quote org-babel-lob-call-aliases "\\|")
-	  "\\):[ \t]+\\([^\(\)\n]+\\)\(\\([^\n]*\\)\)[ \t]*\\([^\n]*\\)")
+  (concat
+   "^\\([ \t]*\\)#\\+\\(?:"
+   (mapconcat #'regexp-quote org-babel-lob-call-aliases "\\|")
+   "\\):[ \t]+\\([^\(\)\n]+\\)\(\\([^\n]*\\)\)\\(\\[.+\\]\\)[ \t]*\\([^\n]*\\)")
   "Regexp to match calls to predefined source block functions.")
 
 ;; functions for executing lob one-liners
@@ -92,10 +93,13 @@ the word 'call'."
     (save-excursion
       (beginning-of-line 1)
       (if (looking-at org-babel-lob-one-liner-regexp)
-          (append (mapcar #'org-babel-clean-text-properties 
-			  (list (format "%s(%s)" (match-string 2) (match-string 3))
-				(match-string 4)))
-		  (list (length (match-string 1))))))))
+          (append
+	   (mapcar #'org-babel-clean-text-properties 
+		   (list
+		    (format "%s(%s)%s"
+			    (match-string 2) (match-string 3) (match-string 4))
+		    (match-string 5)))
+	   (list (length (match-string 1))))))))
   
 (defun org-babel-lob-execute (info)
   "Execute the lob call specified by INFO."
@@ -105,7 +109,8 @@ the word 'call'."
                  (org-babel-params-from-properties)
 		 (org-babel-parse-header-arguments
 		  (org-babel-clean-text-properties
-		   (concat ":var results=" (mapconcat #'identity (butlast info) " ")))))))
+		   (concat ":var results="
+			   (mapconcat #'identity (butlast info) " ")))))))
     (org-babel-execute-src-block
      nil (list "emacs-lisp" "results" params nil nil (nth 2 info)))))
 

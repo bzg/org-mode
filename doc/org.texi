@@ -10979,9 +10979,9 @@ e.g.
 
 Org-mode provides a number of features for working with live source code,
 including editing of code blocks in their native major-mode, evaluation of
-code blocks, tangling of code blocks, and exporting code blocks and
-their results in several formats.  This functionality was contributed by Dan
-Davison and Eric Schulte, and was originally named Org-babel.
+code blocks, tangling of code blocks, and exporting code blocks and their
+results in several formats.  This functionality was contributed by Eric
+Schulte and Dan Davison, and was originally named Org-babel.
 
 The following sections describe Org-mode's code block handling facilities.
 
@@ -13286,8 +13286,10 @@ Also the @kbd{M-cursor} and @kbd{M-S-cursor} keys have this property.
 Add-ons can tap into this functionality by providing a function that detects
 special context for that add-on and executes functionality appropriate for
 the context.  Here is an example from Dan Davison's @file{org-R.el} which
-allows you to evaluate commands based on the @file{R} programming language.  For
-this package, special contexts are lines that start with @code{#+R:} or
+allows you to evaluate commands based on the @file{R} programming language
+@footnote{@file{org-R.el} has been replaced by the org-mode functionality
+described in @ref{Working With Source Code} and is now obsolete.}.  For this
+package, special contexts are lines that start with @code{#+R:} or
 @code{#+RR:}.
 
 @lisp
