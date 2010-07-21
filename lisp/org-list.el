@@ -826,7 +826,7 @@ If NO-SUBTREE is set, only indent the item itself, not its children."
     (save-excursion
       (beginning-of-line 0)
       (ignore-errors (org-beginning-of-item))
-      (org-maybe-renumber-ordered-list-safe))))
+      (org-maybe-renumber-ordered-list))))
 
 (defun org-item-indent-positions ()
   "Return indentation for plain list items.
@@ -966,15 +966,10 @@ with something like \"1.\" or \"2)\". Start to count at ARG or 1."
 (defun org-maybe-renumber-ordered-list ()
   "Renumber the ordered list at point if setup allows it.
 This tests the user option `org-auto-renumber-ordered-lists' before
-doing the renumbering."
+doing the renumbering. Do not throw error on failure."
   (interactive)
   (when org-auto-renumber-ordered-lists
-    (org-renumber-ordered-list)))
-
-(defun org-maybe-renumber-ordered-list-safe ()
-  (ignore-errors
-    (save-excursion
-      (org-maybe-renumber-ordered-list))))
+    (ignore-errors (org-renumber-ordered-list))))
 
 (defun org-cycle-list-bullet (&optional which)
   "Cycle through the different itemize/enumerate bullets.
