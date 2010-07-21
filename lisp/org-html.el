@@ -579,13 +579,10 @@ description.  See variables `org-export-html-inline-images' and
    (declare (special
 	     org-export-html-inline-images
 	     org-export-html-inline-image-extensions))
-   (or
-      (eq t org-export-html-inline-images)
-      (and
-	 org-export-html-inline-images
-	 (not descp)))
-   (org-file-image-p
-      filename org-export-html-inline-image-extensions))
+   (and (or (eq t org-export-html-inline-images)
+	    (and org-export-html-inline-images (not descp)))
+	(org-file-image-p
+	 filename org-export-html-inline-image-extensions)))
 
 ;;; org-html-make-link
 (defun org-html-make-link (opt-plist type path fragment desc attr
