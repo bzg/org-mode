@@ -61,7 +61,7 @@ evaluating BODY."
   (let ((temp-result (make-symbol "temp-result"))
 	(temp-file (make-symbol "temp-file")))
     `(let (,temp-result ,temp-file)
-       (find-file ,file)
+       (find-file-noselect ,file)
        (setf ,temp-file (current-buffer))
        (setf ,temp-result (progn ,@body))
        (kill-buffer ,temp-file)
