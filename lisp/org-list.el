@@ -772,7 +772,7 @@ If NO-SUBTREE is set, only indent the item itself, not its children."
   (let ((origin-ind (save-excursion
 		      (goto-char (org-list-top-point))
 		      (org-get-indentation)))
-	beg end ind ind1 ind-bul delta ind-down ind-up firstp)
+	beg end ind ind1 ind-pos bullet delta ind-down ind-up firstp)
     (setq firstp (org-first-list-item-p))
     (save-excursion
       (setq end (and (org-region-active-p) (region-end)))
@@ -783,24 +783,36 @@ If NO-SUBTREE is set, only indent the item itself, not its children."
 	(org-beginning-of-item)
 	(setq beg (move-marker org-last-indent-begin-marker (point)))
 	(cond
+	 ;; Top-item: reindent all down to end of list.
 	 ((= (point-at-bol) (org-list-top-point)) (goto-char (org-list-bottom-point)))
+	 ;; No-subtree: reindent down to next children, if any.
 	 (no-subtree (org-end-of-item-text-before-children))
+	 ;; Else: reindent down to next item.
 	 (t (org-end-of-item)))
 	(setq end (move-marker org-last-indent-end-marker (or end (point)))))
       (goto-char beg)
-      (setq ind-bul (org-item-indent-positions)
-	    ind (caar ind-bul)
-	    ind-down (car (nth 2 ind-bul))
-	    ind-up (car (nth 1 ind-bul))
+      (setq ind-pos (org-item-indent-positions)
+	    bullet (cdr (car ind-pos))
+	    ind (caar ind-pos)
+	    ind-down (car (nth 2 ind-pos))
+	    ind-up (car (nth 1 ind-pos))
 	    delta (if (> arg 0)
 		      (if ind-down (- ind-down ind) 2)
 		    (if ind-up (- ind-up ind) -2)))
       (cond
+       ;; Going to a negative column is nonsensical.
        ((< (+ delta ind) 0) (error "Cannot outdent beyond margin"))
+       ;; Do not indent before top-item, unless point is at top-item.
        ((and (< (+ delta ind) origin-ind)
-	     ;; verify we're not at the top level item
 	     (/= (point-at-bol) (org-list-top-point)))
-	(error "Cannot outdent beyond top level item")))
+	(error "Cannot outdent beyond top level item"))
+       ((and firstp (> delta 0) (/= (point-at-bol) (org-list-top-point)))
+	(error "Cannot indent the beginning of a sublist"))
+       ;; If *-list is going to column 0, prevent mixing items and
+       ;; headings by changing bullet to "-".
+       ((and (= (+ delta ind) 0) (equal bullet "*"))
+	(org-fix-bullet-type "-")))
+      ;; Proceed to reindentation.
       (while (< (point) end)
 	(beginning-of-line)
 	(skip-chars-forward " \t") (setq ind1 (current-column))
@@ -810,8 +822,7 @@ If NO-SUBTREE is set, only indent the item itself, not its children."
     (org-fix-bullet-type
      (and (> arg 0)
 	  (not firstp)
-	  (cdr (assoc (cdr (nth 0 ind-bul)) org-list-demote-modify-bullet))))
-    (org-maybe-renumber-ordered-list-safe)
+	  (cdr (assoc bullet org-list-demote-modify-bullet))))
     (save-excursion
       (beginning-of-line 0)
       (ignore-errors (org-beginning-of-item))
