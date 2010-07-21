@@ -926,8 +926,7 @@ Also, fix the indentation."
 		 ;; sublist accordingly
 		 (org-shift-item-indentation (- (length bullet) (length old))))))))
      (org-apply-on-list replace-bullet nil bullet)
-     ;; Fix item numbers if necessary
-     (when (string-match "[0-9]" bullet) (org-renumber-ordered-list)))))
+     (org-maybe-renumber-ordered-list))))
 
 (defun org-renumber-ordered-list (&optional arg)
   "Renumber an ordered plain list.
@@ -969,11 +968,8 @@ with something like \"1.\" or \"2)\". Start to count at ARG or 1."
 This tests the user option `org-auto-renumber-ordered-lists' before
 doing the renumbering."
   (interactive)
-  (when (and org-auto-renumber-ordered-lists
-	     (org-at-item-p))
-    (if (match-beginning 3)
-	(org-renumber-ordered-list 1)
-      (org-fix-bullet-type))))
+  (when org-auto-renumber-ordered-lists
+    (org-renumber-ordered-list)))
 
 (defun org-maybe-renumber-ordered-list-safe ()
   (ignore-errors
