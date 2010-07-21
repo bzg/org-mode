@@ -827,13 +827,18 @@ names.  Note: this function removes any hlines in TABLE."
     table))
 
 (defun org-babel-pick-name (names selector)
-  "Select one out of an alist of row or column names."
-  (when names
-    (if (and selector (symbolp selector) (not (equal t selector)))
-        (cdr (assoc selector names))
-      (if (integerp selector)
-          (nth (- selector 1) names)
-        (cdr (car (last names)))))))
+  "Select one out of an alist of row or column names.
+SELECTOR can be either a list of names in which case those names
+will be returned directly, or an index into the list NAMES in
+which case the indexed names will be return."
+  (if (listp selector)
+      selector
+    (when names
+      (if (and selector (symbolp selector) (not (equal t selector)))
+	  (cdr (assoc selector names))
+	(if (integerp selector)
+	    (nth (- selector 1) names)
+	  (cdr (car (last names))))))))
 
 (defun org-babel-disassemble-tables (vars hlines colnames rownames)
   "Parse tables for further processing.
