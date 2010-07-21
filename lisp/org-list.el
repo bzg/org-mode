@@ -802,16 +802,26 @@ If NO-SUBTREE is set, only indent the item itself, not its children."
       (cond
        ;; Going to a negative column is nonsensical.
        ((< (+ delta ind) 0) (error "Cannot outdent beyond margin"))
-       ;; Do not indent before top-item, unless point is at top-item.
-       ((and (< (+ delta ind) origin-ind)
-	     (/= (point-at-bol) (org-list-top-point)))
-	(error "Cannot outdent beyond top level item"))
-       ((and firstp (> delta 0) (/= (point-at-bol) (org-list-top-point)))
-	(error "Cannot indent the beginning of a sublist"))
-       ;; If *-list is going to column 0, prevent mixing items and
-       ;; headings by changing bullet to "-".
-       ((and (= (+ delta ind) 0) (equal bullet "*"))
-	(org-fix-bullet-type "-")))
+       ;; Apply indent rules if activated.
+       ((cdr (assq 'indent org-list-automatic-rules))
+	(cond
+	 ;; If at top-point move the whole list. Moreover, if *-list
+	 ;; is going to column 0, change bullet to "-".
+	 ((= (point-at-bol) (org-list-top-point))
+	  (when (and (= (+ delta ind) 0) (equal bullet "*")) (org-fix-bullet-type "-"))
+	  (setq end (set-marker org-last-indent-end-marker (org-list-bottom-point))))
+	 ;; Do not indent before top-item.
+	 ((< (+ delta ind) origin-ind)
+	  (error "Cannot outdent beyond top level item"))
+	 ;; Do not indent the first item of a list.
+	 ((and firstp (> delta 0))
+	  (error "Cannot indent the beginning of a sublist"))
+	 ;; Do not outdent item that has children without moving subtree.
+	 ((and (/= (save-excursion (org-end-of-item-text-before-children))
+		   (save-excursion (org-end-of-item)))
+	       (< delta 0)
+	       no-subtree)
+	  (error "Cannot outdent an item having children without moving subtree")))))
       ;; Proceed to reindentation.
       (while (< (point) end)
 	(beginning-of-line)
@@ -821,11 +831,17 @@ If NO-SUBTREE is set, only indent the item itself, not its children."
 	(beginning-of-line 2)))
     (org-fix-bullet-type
      (and (> arg 0)
-	  (not firstp)
 	  (cdr (assoc bullet org-list-demote-modify-bullet))))
+    ;; Reorder lists that might have changed
     (save-excursion
       (beginning-of-line 0)
       (ignore-errors (org-beginning-of-item))
+      (org-maybe-renumber-ordered-list))
+    (save-excursion
+      (org-end-of-item-text-before-children)
+      (org-maybe-renumber-ordered-list))
+    (save-excursion
+      (org-end-of-item-list)
       (org-maybe-renumber-ordered-list))))
 
 (defun org-item-indent-positions ()
@@ -882,8 +898,8 @@ Assumes cursor in item line."
       (if (eq last-command 'org-cycle-item-indentation)
 	  (condition-case nil
 	      (progn (org-outdent-item 1)
-		     (if (equal org-tab-ind-state (org-get-indentation))
-			 (org-outdent-item 1))
+		     (when (equal org-tab-ind-state (org-get-indentation))
+		       (org-outdent-item 1))
 		     (end-of-line))
 	    (error
 	     (progn
