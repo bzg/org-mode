@@ -272,6 +272,42 @@ pdf:	doc/org.pdf doc/orgguide.pdf
 
 card:	doc/orgcard.pdf doc/orgcard_letter.pdf doc/orgcard.txt
 
+testrelease:
+	git checkout -b testrelease maint
+	git merge -s recursive -X theirs master
+	UTILITIES/set-version.pl testing
+	git commit -a -m "Release testing"
+	make distfile TAG=testversion
+	make cleanrel
+	rm -rf org-testversion*
+	git reset --hard
+	git checkout master
+	git branch -D testrelease
+
+release:
+	git checkout maint
+	git merge -s recursive -X theirs master
+	UTILITIES/set-version.pl $(TAG)
+	git commit -a -m "Release $(TAG)"
+	make relup TAG=$(TAG)
+	make cleanrel
+	rm -rf org-$(TAG)
+	rm org-$(TAG)*.zip
+	rm org-$(TAG)*.tar.gz
+	make pushreleasetag TAG=$(TAG)
+	git push origin maint
+	git checkout master
+	git merge -s ours maint
+	UTILITIES/set-version.pl -o $(TAG)
+	git commit -a -m "Update website to show $(TAG) as current release"
+	git push
+	make updateweb
+
+relup:
+	${MAKE} makerelease
+	${MAKE} upload_release
+	${MAKE} upload_manual
+
 distfile:
 	@if [ "X$(TAG)" = "X" ]; then echo "*** No tag ***"; exit 1; fi
 	touch doc/org.texi doc/orgcard.tex # force update
@@ -315,44 +351,15 @@ upload_manual:
 	rsync -avuz --delete doc/manual/ cdominik@orgmode.org:orgmode.org/manual/
 	rsync -avuz --delete doc/guide/ cdominik@orgmode.org:orgmode.org/guide/
 
-relup0:
-	${MAKE} makerelease
-	${MAKE} upload_release
+cleanall:
+	${MAKE} clean
+	rm -f lisp/org-install.el
 
-relup:
-	${MAKE} makerelease
-	${MAKE} upload_release
-	${MAKE} upload_manual
-
-testrelease:
-	git checkout -b testrelease maint
-	git merge -s recursive -X theirs master
-	UTILITIES/set-version.pl testing
-	git commit -a -m "Release testing"
-	make distfile TAG=testversion
-	make cleanrel
-	rm -rf org-testversion*
-	git reset --hard
-	git checkout master
-	git branch -D testrelease
-
-release:
-	git checkout maint
-	git merge -s recursive -X theirs master
-	UTILITIES/set-version.pl $(TAG)
-	git commit -a -m "Release $(TAG)"
-	make relup TAG=$(TAG)
-	make cleanrel
-	rm -rf org-$(TAG)
-	rm org-$(TAG)*.zip
-	rm org-$(TAG)*.tar.gz
-	make pushreleasetag TAG=$(TAG)
-	git push origin maint
-	git checkout master
-	UTILITIES/set-version.pl -o $(TAG)
-	git commit -a -m "Update website to show $(TAG) as current release"
-	git push
-	make updateweb
+clean:
+	${MAKE} cleanelc
+	${MAKE} cleandoc
+	${MAKE} cleanrel
+	rm -f *~ */*~ */*/*~
 
 cleancontrib:
 	find contrib -name \*~ -exec rm {} \;
@@ -371,16 +378,6 @@ cleanrel:
 	rm -rf org-6.*
 	rm -rf org-6*zip org-6*tar.gz
 
-clean:
-	${MAKE} cleanelc
-	${MAKE} cleandoc
-	${MAKE} cleanrel
-	rm -f *~ */*~ */*/*~
-
-cleanall:
-	${MAKE} clean
-	rm -f lisp/org-install.el
-
 .el.elc:
 	$(ELC) $<
 
@@ -395,9 +392,6 @@ pushtag:
 pushreleasetag:
 	git-tag -m "Adding release tag" -a release_$(TAG)
 	git-push git+ssh://repo.or.cz/srv/git/org-mode.git release_$(TAG)
-
-dummy:
-	echo ${prefix}
 
 # Dependencies
 

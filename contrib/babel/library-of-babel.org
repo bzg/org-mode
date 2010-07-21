@@ -33,8 +33,8 @@ Read the contents of the file at =file=.  The =:results vector= and
 =:results scalar= header arguments can be used to read the contents of
 file as either a table or a string.
 #+srcname: read
-#+begin_src emacs-lisp :var file=""
-  (if (member "vector" result-params)
+#+begin_src emacs-lisp :var file="" :var format=""
+  (if (string= format "csv")
       (with-temp-buffer
         (org-table-import (expand-file-name file) nil)
         (org-table-to-lisp))
@@ -82,14 +82,13 @@ The =google= command seems to be throwing "Moved Temporarily" errors
 when trying to download textual documents, but this is working fine
 for spreadsheets.
 #+source: gdoc-read
-#+begin_src emacs-lisp :var title="example"
-  (let* ((format (if (member "vector" result-params) "csv" "txt"))
-         (file (concat title "." format))
+#+begin_src emacs-lisp :var title="example" :var format="csv"
+  (let* ((file (concat title "." format))
          (cmd (format "google docs get --format %S --title %S" format title)))
     (message cmd) (message (shell-command-to-string cmd))
     (prog1 (if (string= format "csv")
                (with-temp-buffer
-                 (org-table-import (shell-quote-argument file) nil)
+                 (org-table-import (shell-quote-argument file) '(4))
                  (org-table-to-lisp))
              (with-temp-buffer
                (insert-file-contents (shell-quote-argument file))
@@ -99,15 +98,11 @@ for spreadsheets.
 
 For example, a line like the following can be used to read the
 contents of a spreadsheet named =num-cells= into a table.
-#+begin_src org
-  ,#+call: gdoc-read(title="num-cells"") :results vector
-#+end_src
+: #+call: gdoc-read(title="num-cells"")
 
 A line like the following can be used to read the contents of a
 document as a string.
-#+begin_src org
-  ,#+call: gdoc-read(title="loremi") :results scalar
-#+end_src
+: #+call: gdoc-read(title="loremi", :format "txt")
 
 ****** write a document to a Google docs
 Write =data= to a google document named =title=.  If =data= is tabular
@@ -129,15 +124,13 @@ normal document.
 #+end_src
 
 example usage
-#+begin_src org
-  ,#+source: fibs
-  ,#+begin_src emacs-lisp :var n=8
-  ,  (flet ((fib (m) (if (< m 2) 1 (+ (fib (- m 1)) (fib (- m 2))))))
-  ,    (mapcar (lambda (el) (list el (fib el))) (number-sequence 0 (- n 1))))
-  ,#+end_src
-  
-  ,#+call: gdoc-write(title="fibs", data=fibs(n=10))
-#+end_src
+: #+source: fibs
+: #+begin_src emacs-lisp :var n=8
+:   (flet ((fib (m) (if (< m 2) 1 (+ (fib (- m 1)) (fib (- m 2))))))
+:     (mapcar (lambda (el) (list el (fib el))) (number-sequence 0 (- n 1))))
+: #+end_src
+: 
+: #+call: gdoc-write(title="fibs", data=fibs(n=10))
 
 * Plotting code
 
