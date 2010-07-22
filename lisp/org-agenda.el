@@ -2717,7 +2717,10 @@ removed from the entry content.  Currently only `planning' is allowed here."
 This must be a list of strings, each string must be a single tag preceded
 by \"+\" or \"-\".
 This variable should not be set directly, but agenda custom commands can
-bind it in the options section.")
+bind it in the options section.  The preset filter is a global property of
+the entire agenda view.  In a block agenda, it will not work reliably to
+define a filter for one of the individual blocks.  You need to set it in
+the global options and expect it to be applied to the entire view.")
 
 (defun org-prepare-agenda (&optional name)
   (setq org-todo-keywords-for-agenda nil)

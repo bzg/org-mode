@@ -7603,7 +7603,9 @@ very fast, so that you can switch quickly between different filters without
 having to recreate the agenda@footnote{Custom commands can preset a filter by
 binding the variable @code{org-agenda-filter-preset} as an option.  This
 filter will then be applied to the view and persist as a basic filter through
-refreshes and more secondary filtering.}
+refreshes and more secondary filtering.  The filter is a global property of
+the entire agenda view - in a block agenda, you should only set this in the
+global options section, not in the section of an individual block.}
 
 You will be prompted for a tag selection letter, SPC will mean any tag at
 all.  Pressing @key{TAB} at that prompt will offer use completion to select a
