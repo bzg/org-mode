@@ -5902,7 +5902,9 @@ in special contexts.
 				(> (funcall outline-level) level))))
       ;; if we're in a list, org-end-of-subtree is in fact org-end-of-item.
       (if (org-at-item-p)
-	  (setq eos (1- (org-end-of-item)))
+	  (setq eos (if (and (org-end-of-item) (bolp))
+			(1- (point))
+		      (point)))
 	(org-end-of-subtree t)
 	(unless (eobp)
 	  (skip-chars-forward " \t\n"))

@@ -470,6 +470,15 @@ function ends."
   "Is point at a line starting a plain-list item with a checklet?"
   (org-list-at-regexp-after-bullet-p "\\(\\[[- X]\\]\\)[ \t]+"))
 
+(defun org-item-has-children-p ()
+  "Does the current item have subitems?"
+  (save-excursion
+    (org-beginning-of-item)
+    (let ((ind (org-get-indentation)))
+      (org-end-of-item-text-before-children)
+      (and (org-at-item-p)
+	   (> (org-get-indentation) ind)))))
+
 (defun org-checkbox-blocked-p ()
   "Is the current checkbox blocked from for being checked now?
 A checkbox is blocked if all of the following conditions are fulfilled:
@@ -821,11 +830,8 @@ children. Return t if sucessful."
 	 ;; 4. Do not outdent item that has children without moving.
 	 ;; In the case of a subtree, make sure the check applies to
 	 ;; its last item.
-	 ((and (save-excursion
-		 (goto-char (1- end))
-		 (/= (save-excursion (org-end-of-item-text-before-children))
-		     (save-excursion (org-end-of-item))))
-	       (< delta 0))
+	 ((and (< delta 0)
+	       (save-excursion (goto-char (1- end)) (org-item-has-children-p)))
 	  (error "Cannot outdent an item having children")))))
       ;; Proceed to reindentation.
       (while (< (point) end)
