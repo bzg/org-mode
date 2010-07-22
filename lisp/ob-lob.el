@@ -64,7 +64,7 @@ If you change the value of this variable then your files may
   (concat
    "^\\([ \t]*\\)#\\+\\(?:"
    (mapconcat #'regexp-quote org-babel-lob-call-aliases "\\|")
-   "\\):[ \t]+\\([^\(\)\n]+\\)\(\\([^\n]*\\)\)\\(\\[.+\\]\\)[ \t]*\\([^\n]*\\)")
+   "\\):[ \t]+\\([^\(\)\n]+\\)\(\\([^\n]*\\)\)\\(\\[.+\\]\\|\\)[ \t]*\\([^\n]*\\)")
   "Regexp to match calls to predefined source block functions.")
 
 ;; functions for executing lob one-liners
