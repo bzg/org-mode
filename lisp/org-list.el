@@ -920,8 +920,8 @@ Assumes cursor in item line."
 	(cond
 	 ((ignore-errors (org-indent-item 1)))
 	 ((ignore-errors (org-indent-item -1)))
-	 (t (error "Cannot move item"))))))
-  t)
+	 (t (error "Cannot move item"))))
+      t)))
 
 ;;; Bullets
 
