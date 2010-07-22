@@ -807,23 +807,26 @@ children. Return t if sucessful."
        ;; Apply indent rules if activated.
        ((cdr (assq 'indent org-list-automatic-rules))
 	(cond
-	 ;; If at top-point move the whole list. Moreover, if *-list
-	 ;; is going to column 0, change bullet to "-".
+	 ;; 1. If at top-point move the whole list. Moreover, if
+	 ;; *-list is going to column 0, change bullet to "-".
 	 ((= (point-at-bol) (org-list-top-point))
 	  (when (and (= (+ delta ind) 0) (equal bullet "*")) (org-fix-bullet-type "-"))
 	  (setq end (set-marker org-last-indent-end-marker (org-list-bottom-point))))
-	 ;; Do not indent before top-item.
+	 ;; 2. Do not indent before top-item.
 	 ((< (+ delta ind) origin-ind)
 	  (error "Cannot outdent beyond top level item"))
-	 ;; Do not indent the first item of a list.
+	 ;; 3. Do not indent the first item of a list.
 	 ((and firstp (> delta 0))
 	  (error "Cannot indent the beginning of a sublist"))
-	 ;; Do not outdent item that has children without moving subtree.
-	 ((and (/= (save-excursion (org-end-of-item-text-before-children))
-		   (save-excursion (org-end-of-item)))
-	       (< delta 0)
-	       no-subtree)
-	  (error "Cannot outdent an item having children without moving subtree")))))
+	 ;; 4. Do not outdent item that has children without moving.
+	 ;; In the case of a subtree, make sure the check applies to
+	 ;; its last item.
+	 ((and (save-excursion
+		 (goto-char (1- end))
+		 (/= (save-excursion (org-end-of-item-text-before-children))
+		     (save-excursion (org-end-of-item))))
+	       (< delta 0))
+	  (error "Cannot outdent an item having children")))))
       ;; Proceed to reindentation.
       (while (< (point) end)
 	(beginning-of-line)
