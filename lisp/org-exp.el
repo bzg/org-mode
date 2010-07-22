@@ -2288,8 +2288,11 @@ INDENT was the original indentation of the block."
 					     lang)))
                                      (format "\\lstset{language=%s}\n" lstlang))
                                  "\n")
-                               (when caption
-                                 (format "\n%s $\\equiv$ \n" caption))
+                               (when (and caption
+					  org-export-latex-listings-w-names)
+                                 (format "\n%s $\\equiv$ \n"
+					 (replace-regexp-in-string
+					  "_" "\\\\_" caption)))
                                "\\begin{lstlisting}\n"
                                rtn "\\end{lstlisting}\n")
                             (concat (car org-export-latex-verbatim-wrap)
