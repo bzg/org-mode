@@ -92,7 +92,8 @@ Most properties are optional, but some should always be set:
 
   :base-directory        Directory containing publishing source files
   :base-extension        Extension (without the dot!) of source files.
-                         This can be a regular expression.
+                         This can be a regular expression.  If not given,
+                         \"org\" will be used as default extension.
   :publishing-directory  Directory (possibly remote) where output
                          files will be published
 
@@ -589,10 +590,18 @@ See `org-publish-projects'."
 	 (publishing-function
 	  (or (plist-get project-plist :publishing-function)
 	      'org-publish-org-to-html))
-	 (base-dir (file-name-as-directory
-		    (file-truename (plist-get project-plist :base-directory))))
-	 (pub-dir (file-name-as-directory
-		   (file-truename (plist-get project-plist :publishing-directory))))
+	 (base-dir
+	  (file-name-as-directory
+	   (file-truename
+	    (or (plist-get project-plist :base-directory)
+		(error "Project %s does not have :base-directory defined"
+		       (car project))))))
+	 (pub-dir
+	  (file-name-as-directory
+	   (file-truename
+	    (or (plist-get project-plist :publishing-directory)
+		(error "Project %s does not have :publishing-directory defined"
+		       (car project))))))
 	 tmp-pub-dir)
 
     (unless no-cache
