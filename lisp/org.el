@@ -159,6 +159,7 @@ requirements) is loaded."
 		 (const :tag "Gnuplot" gnuplot)
 		 (const :tag "Haskell" haskell)
 		 (const :tag "Latex" latex)
+		 (const :tag "Ledger" ledger)
 		 (const :tag "Matlab" matlab)
 		 (const :tag "Mscgen" mscgen)
 		 (const :tag "Ocaml" ocaml)
