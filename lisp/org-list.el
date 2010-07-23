@@ -152,7 +152,6 @@ spaces instead of one after the bullet in each item of the list."
 (defcustom org-empty-line-terminates-plain-lists nil
   "Non-nil means an empty line ends all plain list levels.
 Otherwise, look for `org-list-end-regexp'."
-
   :group 'org-plain-lists
   :type 'boolean)
 
@@ -164,21 +163,46 @@ precedence over it."
   :group 'org-plain-lists
   :type 'string)
 
-(defcustom org-auto-renumber-ordered-lists t
-  "Non-nil means automatically renumber ordered plain lists.
-Renumbering happens when the sequence have been changed with
-\\[org-shiftmetaup] or \\[org-shiftmetadown].  After other editing
-commands, use \\[org-ctrl-c-ctrl-c] to trigger renumbering."
-  :group 'org-plain-lists
-  :type 'boolean)
+(defcustom org-list-automatic-rules '((bullet . t)
+				      (checkbox . t)
+				      (indent . t)
+				      (insert . t)
+				      (renumber . t))
+  "Non-nil means apply set of rules when acting on lists.
 
-(defcustom org-provide-checkbox-statistics t
-  "Non-nil means update checkbox statistics after insert and toggle.
-When this is set, checkbox statistics is updated each time you
-either insert a new checkbox with \\[org-insert-todo-heading] or
-toggle a checkbox with \\[org-ctrl-c-ctrl-c]."
-  :group 'org-plain-lists
-  :type 'boolean)
+By default, automatic actions are taken when using
+\\[org-shiftmetaup], \\[org-shiftmetadown], \\[org-meta-return],
+\\[org-metaright], \\[org-metaleft], \\[org-shiftmetaright],
+\\[org-shiftmetaleft], \\[org-ctrl-c-minus] or
+\\[org-insert-todo-heading].  You can disable individually these
+rules by setting sets to nil. Valid sets are:
+
+bullet    when non-nil, cycling bullet do not allow lists at
+          column 0 to have * as a bullet and descriptions lists
+          to be numbered.
+checkbox  when non-nil, checkbox statistics is updated each time
+          you either insert a new checkbox or toggle a checkbox.
+indent    when non-nil indenting or outdenting list top-item will
+          move the whole list, indenting the first item of a
+          sub-list will be forbidden and outdenting a list whose
+          bullet is * to column 0 will change that bullet to -.
+insert    when non-nil, trying to insert an item inside a block
+          will insert it right before the block instead of
+          throwing an error.
+renumber  when non-nil, renumber ordered plain lists whenever it
+          is modified.  You can always use \\[org-ctrl-c-ctrl-c]
+          to trigger renumbering."
+   :group 'org-plain-lists
+   :type '(alist :tag "Sets of rules"
+		 :key-type
+		 (choice
+		  (const :tag "Bullet" bullet)
+		  (const :tag "Checkbox" checkbox)
+		  (const :tag "Indent" indent)
+		  (const :tag "Insert" insert)
+		  (const :tag "Renumber" renumber))
+		 :value-type
+		 (boolean :tag "Activate" :value t)))
 
 (defcustom org-hierarchical-checkbox-statistics t
   "Non-nil means checkbox statistics counts only the state of direct children.
@@ -330,14 +354,17 @@ Insert a checkbox if CHECKBOX is non-nil, and string AFTER-BULLET
 after the bullet. Cursor will be after this text once the
 function ends."
   (goto-char pos)
-  ;; Point in a special block: move before it prior to add a new item.
+  ;; Is point in a special block?
   (when (org-in-regexps-block-p
 	 "^[ \t]*#\\+\\(begin\\|BEGIN\\)_\\([a-zA-Z0-9_]+\\)"
 	 '(concat "^[ \t]*#\\+\\(end\\|END\\)_" (match-string 2)))
-    ;; in case we're on the #+begin line
-    (end-of-line)
-    (re-search-backward "^[ \t]*#\\+\\(begin\\|BEGIN\\)_" nil t)
-    (end-of-line 0))
+    (if (not (cdr (assq 'insert org-list-automatic-rules)))
+	;; Rule in `org-list-automatic-rules' disallows insertion.
+	(error "Cannot insert item inside a block.")
+      ;; Else, move before it prior to add a new item.
+      (end-of-line)
+      (re-search-backward "^[ \t]*#\\+\\(begin\\|BEGIN\\)_" nil t)
+      (end-of-line 0)))
   (let* ((true-pos (point))
 	 (bullet (and (org-beginning-of-item)
 		      (looking-at org-item-beginning-re)
@@ -793,14 +820,12 @@ children. Return t if sucessful."
 		end org-last-indent-end-marker)
 	(org-beginning-of-item)
 	(setq beg (move-marker org-last-indent-begin-marker (point)))
-	(cond
-	 ;; Top-item: reindent all down to end of list.
-	 ((= (point-at-bol) (org-list-top-point)) (goto-char (org-list-bottom-point)))
-	 ;; No-subtree: reindent down to next children, if any.
-	 (no-subtree (org-end-of-item-text-before-children))
-	 ;; Else: reindent down to next item.
-	 (t (org-end-of-item)))
+	;; Determine end point of indentation
+	(if no-subtree
+	    (org-end-of-item-text-before-children)
+	  (org-end-of-item))
 	(setq end (move-marker org-last-indent-end-marker (or end (point)))))
+      ;; Get some information
       (goto-char beg)
       (setq ind-pos (org-item-indent-positions)
 	    bullet (cdr (car ind-pos))
@@ -810,8 +835,8 @@ children. Return t if sucessful."
 	    delta (if (> arg 0)
 		      (if ind-down (- ind-down ind) 2)
 		    (if ind-up (- ind-up ind) -2)))
+      ;; Make some checks before indenting.
       (cond
-       ;; Going to a negative column is nonsensical.
        ((< (+ delta ind) 0) (error "Cannot outdent beyond margin"))
        ;; Apply indent rules if activated.
        ((cdr (assq 'indent org-list-automatic-rules))
@@ -1000,10 +1025,11 @@ with something like \"1.\" or \"2)\". Start to count at ARG or 1."
 
 (defun org-maybe-renumber-ordered-list ()
   "Renumber the ordered list at point if setup allows it.
-This tests the user option `org-auto-renumber-ordered-lists' before
-doing the renumbering. Do not throw error on failure."
+This tests the if 'renumber rule is set in
+`org-list-automatic-rules' before doing the renumbering.
+Do not throw error on failure."
   (interactive)
-  (when org-auto-renumber-ordered-lists
+  (when (cdr (assq 'renumber org-list-automatic-rules))
     (ignore-errors (org-renumber-ordered-list))))
 
 (defun org-cycle-list-bullet (&optional which)
@@ -1023,11 +1049,14 @@ is an integer, 0 means `-', 1 means `+' etc. If WHICH is
 		    ((string-match "\\." bullet) "1.")
 		    ((string-match ")" bullet) "1)")
 		    (t bullet)))
+	  (bullet-rule-p (cdr (assq 'bullet org-list-automatic-rules)))
 	  (bullet-list (append '("-" "+" )
 			       ;; *-bullets are not allowed at column 0
-			       (unless (looking-at "\\S-") '("*"))
+			       (unless (and bullet-rule-p
+					    (looking-at "\\S-")) '("*"))
 			       ;; Description items cannot be numbered
-			       (unless (org-at-description-p) '("1." "1)"))))
+			       (unless (and bullet-rule-p
+					    (org-at-description-p)) '("1." "1)"))))
 	  (len (length bullet-list))
 	  (item-index (- len (length (member current bullet-list))))
 	  (get-value (lambda (index) (nth (mod index len) bullet-list)))
@@ -1125,12 +1154,14 @@ text below the heading."
 
 (defvar org-checkbox-statistics-hook nil
   "Hook that is run whenever Org thinks checkbox statistics should be updated.
-This hook runs even if `org-provide-checkbox-statistics' is nil, to it can
-be used to implement alternative ways of collecting statistics information.")
+This hook runs even if 'checkbox rules in
+`org-list-automatic-rules' do not apply, so it can be used to
+implement alternative ways of collecting statistics
+information.")
 
 (defun org-update-checkbox-count-maybe ()
   "Update checkbox statistics unless turned off by user."
-  (when org-provide-checkbox-statistics
+  (when (cdr (assq 'checkbox org-list-automatic-rules))
     (org-update-checkbox-count))
   (run-hooks 'org-checkbox-statistics-hook))
 
