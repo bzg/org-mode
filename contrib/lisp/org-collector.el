@@ -177,7 +177,7 @@ variables and values specified in props"
   ;; collect the properties from every header
   (let* ((header-props
 	  (let ((org-trust-scanner-tags t))
-	    (org-map-entries (quote (cons (cons "ITEM" (org-get-heading))
+	    (org-map-entries (quote (cons (cons "ITEM" (org-get-heading t))
 					  (org-entry-properties)))
 			     match scope)))
 	 ;; read property values
