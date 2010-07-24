@@ -1597,7 +1597,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
              (org-table-last-column-widths (copy-sequence
                                             org-table-last-column-widths))
              fnum fields line lines olines gr colgropen line-fmt align
-             caption shortn label attr floatp longtblp)
+             caption shortn label attr floatp placement longtblp)
         (if org-export-latex-tables-verbatim
             (let* ((tbl (concat "\\begin{verbatim}\n" raw-table
                                 "\\end{verbatim}\n")))
@@ -1617,7 +1617,12 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
                   align (and attr (stringp attr)
                              (string-match "\\<align=\\([^ \t\n\r]+\\)" attr)
                              (match-string 1 attr))
-                  floatp (or caption label))
+                  floatp (or caption label)
+		  placement     (if (and attr 
+					 (stringp attr)
+					 (string-match "[ \t]*\\<placement=\\(\\S-+\\)" attr))
+				    (match-string 1 attr)
+				  "[htb]"))
 	    (setq caption (and caption (org-export-latex-fontify-headline caption)))
             (setq lines (org-split-string raw-table "\n"))
             (apply 'delete-region (list beg end))
@@ -1672,7 +1677,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
                        (concat
                         (if longtblp
                             (concat "\\begin{longtable}{" align "}\n")
-                          (if floatp "\\begin{table}[htb]\n"))
+                          (if floatp (format "\\begin{table}%s\n" placement)))
                         (if floatp
                             (format
                              "\\caption%s{%s}"
