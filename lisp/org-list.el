@@ -325,6 +325,19 @@ the end of the nearest terminator from max."
 	 (skip-chars-forward " \t")
 	 (looking-at regexp))))
 
+(defun org-list-replace-bullet (new-bullet)
+  "Replace current item's bullet with NEW-BULLET.
+Assume point is at item. Indent body if needed."
+  (save-excursion
+    (let ((old (progn
+                 (looking-at "[ \t]*\\(\\S-+[ \t]*\\)")
+                 (match-string 1))))
+      (unless (equal new-bullet old)
+        (replace-match new-bullet nil nil nil 1)
+        ;; When bullet lengths are differents, move the whole
+        ;; sublist accordingly
+        (org-shift-item-indentation (- (length new-bullet) (length old)))))))
+
 (defun org-list-get-item-same-level (search-fun pos limit pre-move)
   "Return point at the beginning of next item at the same level.
 Search items using function SEARCH-FUN, from POS to LIMIT. It
@@ -830,6 +843,7 @@ children. Return t if sucessful."
     (goto-char beg)
     (setq ind-pos (org-item-indent-positions)
 	  bullet (cdr (car ind-pos))
+          bul-up (cdr (nth 1 ind-pos))
 	  ind (caar ind-pos)
 	  ind-down (car (nth 2 ind-pos))
 	  ind-up (car (nth 1 ind-pos))
@@ -864,6 +878,16 @@ children. Return t if sucessful."
 	     (save-excursion (goto-char (1- end)) (org-item-has-children-p)))
 	(goto-char pos)
 	(error "Cannot outdent an item having children")))))
+    ;; Replace bullet of current item with the bullet it is going to
+    ;; have if we're outdenting.
+    (when (< delta 0)
+      (let ((new-bul (concat
+                      (or bul-up bullet) " "
+                      ;; Do we need to concat another white space ?
+                      (when (and org-list-two-spaces-after-bullet-regexp
+                                 (string-match org-list-two-spaces-after-bullet-regexp next-bul))
+                        " "))))
+        (org-list-replace-bullet new-bul)))
     ;; Proceed to reindentation.
     (while (< (point) end)
       (beginning-of-line)
@@ -874,25 +898,39 @@ children. Return t if sucessful."
     ;; Get back to original position, shifted by delta
     (goto-line line)
     (move-to-column (max (+ delta col) 0))
-    ;; Fix bullet type
+    ;; Fix and reorder all lists and sublists from parent of the list
+    ;; at point, or from list at point if it hasn't got any parent or
+    ;; if we're outdenting.
+    (save-excursion
+      ;; Take care of parent list, if it makes sense.
+      (org-beginning-of-item-list)
+      (unless (or (< arg 0) (= (org-list-top-point) (point)))
+        (beginning-of-line 0)
+        (org-beginning-of-item)
+        (org-beginning-of-item-list)
+        (org-fix-bullet-type)))
+    ;; Take care of list at point. If demoting, look at
+    ;; `org-list-demote-modify-bullet'.
     (org-fix-bullet-type
      (and (> arg 0)
 	  (cdr (assoc bullet org-list-demote-modify-bullet))))
-    ;; Reorder lists that might have changed
     (save-excursion
-      (beginning-of-line 0)
-      (ignore-errors (org-beginning-of-item))
-      (org-maybe-renumber-ordered-list))
-    (save-excursion
-      (org-end-of-item-text-before-children)
-      (org-maybe-renumber-ordered-list))
-    (save-excursion
-      (org-end-of-item-list)
-      (org-maybe-renumber-ordered-list))
-    ;; Get back to original position, shifted by delta
-    (goto-line line)
-    (move-to-column (+ delta col))
-    t))
+      (when (org-item-has-children-p)
+        ;; Take care of child, or of every sublist if we're moving a
+        ;; subtree.
+        (org-end-of-item-text-before-children)
+        (if no-subtree
+            (org-fix-bullet-type)
+          (let ((fix-list (lambda (i)
+                            (when (org-first-list-item-p)
+                              (org-fix-bullet-type
+                               (and (> arg 0)
+                                    (cdr (assoc (org-get-bullet) org-list-demote-modify-bullet)))))
+                            (when (org-item-has-children-p)
+                              (org-end-of-item-text-before-children)
+                              (org-apply-on-list fix-list nil)))))
+            (org-apply-on-list fix-list nil))))))
+  t)
 
 (defun org-item-indent-positions ()
   "Return indentation for plain list items.
@@ -984,23 +1022,15 @@ Also, fix the indentation."
   (org-preserve-lc
    (let* ((ini-bul (progn (org-beginning-of-item-list) (org-get-bullet)))
 	  (bullet
-	   (progn
-	     (concat
-	      (or force-bullet ini-bul) " "
-	      ;; Do we need to concat another white space ?
-	      (when (and org-list-two-spaces-after-bullet-regexp
-			 (string-match org-list-two-spaces-after-bullet-regexp ini-bul))
-		" "))))
+	   (concat
+            (or force-bullet ini-bul) " "
+            ;; Do we need to concat another white space ?
+            (when (and org-list-two-spaces-after-bullet-regexp
+                       (string-match org-list-two-spaces-after-bullet-regexp ini-bul))
+              " ")))
 	  (replace-bullet
 	   (lambda (result bullet)
-	     (let* ((old (progn
-			   (looking-at "[ \t]*\\(\\S-+[ \t]*\\)")
-			   (match-string 1))))
-	       (unless (equal bullet old)
-		 (replace-match bullet nil nil nil 1)
-		 ;; When bullet lengths are differents, move the whole
-		 ;; sublist accordingly
-		 (org-shift-item-indentation (- (length bullet) (length old))))))))
+	     (org-list-replace-bullet bullet))))
      (org-apply-on-list replace-bullet nil bullet)
      (org-maybe-renumber-ordered-list))))
 
