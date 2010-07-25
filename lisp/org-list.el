@@ -805,65 +805,76 @@ children. Return t if sucessful."
   (and (org-region-active-p) (org-cursor-to-region-beginning))
   (unless (org-at-item-p)
     (error "Not on an item"))
-  (let ((origin-ind (save-excursion
+  (let ((line (org-current-line))
+	(col (current-column))
+	(pos (point))
+	(origin-ind (save-excursion
 		      (goto-char (org-list-top-point))
 		      (org-get-indentation)))
 	beg end ind ind1 ind-pos bullet delta ind-down ind-up firstp)
     (setq firstp (org-first-list-item-p))
-    (save-excursion
-      (setq end (and (org-region-active-p) (region-end)))
-      ;; If moving a subtree, don't drain other items on the way.
-      (if (and (memq last-command '(org-shiftmetaright org-shiftmetaleft))
-	       (memq this-command '(org-shiftmetaright org-shiftmetaleft)))
-	  (setq beg org-last-indent-begin-marker
-		end org-last-indent-end-marker)
-	(org-beginning-of-item)
-	(setq beg (move-marker org-last-indent-begin-marker (point)))
-	;; Determine end point of indentation
-	(if no-subtree
-	    (org-end-of-item-text-before-children)
-	  (org-end-of-item))
-	(setq end (move-marker org-last-indent-end-marker (or end (point)))))
-      ;; Get some information
-      (goto-char beg)
-      (setq ind-pos (org-item-indent-positions)
-	    bullet (cdr (car ind-pos))
-	    ind (caar ind-pos)
-	    ind-down (car (nth 2 ind-pos))
-	    ind-up (car (nth 1 ind-pos))
-	    delta (if (> arg 0)
-		      (if ind-down (- ind-down ind) 2)
-		    (if ind-up (- ind-up ind) -2)))
-      ;; Make some checks before indenting.
+    (setq end (and (org-region-active-p) (region-end)))
+    ;; If moving a subtree, don't drain other items on the way.
+    (if (and (memq last-command '(org-shiftmetaright org-shiftmetaleft))
+	     (memq this-command '(org-shiftmetaright org-shiftmetaleft)))
+	(setq beg org-last-indent-begin-marker
+	      end org-last-indent-end-marker)
+      (org-beginning-of-item)
+      (setq beg (move-marker org-last-indent-begin-marker (point)))
+      ;; Determine end point of indentation
+      (if no-subtree
+	  (org-end-of-item-text-before-children)
+	(org-end-of-item))
+      (setq end (move-marker org-last-indent-end-marker (or end (point)))))
+    ;; Get some information
+    (goto-char beg)
+    (setq ind-pos (org-item-indent-positions)
+	  bullet (cdr (car ind-pos))
+	  ind (caar ind-pos)
+	  ind-down (car (nth 2 ind-pos))
+	  ind-up (car (nth 1 ind-pos))
+	  delta (if (> arg 0)
+		    (if ind-down (- ind-down ind) 2)
+		  (if ind-up (- ind-up ind) -2)))
+    ;; Make some checks before indenting.
+    (cond
+     ((< (+ delta ind) 0)
+      (goto-char pos)
+      (error "Cannot outdent beyond margin"))
+     ;; Apply indent rules if activated.
+     ((cdr (assq 'indent org-list-automatic-rules))
       (cond
-       ((< (+ delta ind) 0) (error "Cannot outdent beyond margin"))
-       ;; Apply indent rules if activated.
-       ((cdr (assq 'indent org-list-automatic-rules))
-	(cond
-	 ;; 1. If at top-point move the whole list. Moreover, if
-	 ;; *-list is going to column 0, change bullet to "-".
-	 ((= (point-at-bol) (org-list-top-point))
-	  (when (and (= (+ delta ind) 0) (equal bullet "*")) (org-fix-bullet-type "-"))
-	  (setq end (set-marker org-last-indent-end-marker (org-list-bottom-point))))
-	 ;; 2. Do not indent before top-item.
-	 ((< (+ delta ind) origin-ind)
-	  (error "Cannot outdent beyond top level item"))
-	 ;; 3. Do not indent the first item of a list.
-	 ((and firstp (> delta 0))
-	  (error "Cannot indent the beginning of a sublist"))
-	 ;; 4. Do not outdent item that has children without moving.
-	 ;; In the case of a subtree, make sure the check applies to
-	 ;; its last item.
-	 ((and (< delta 0)
-	       (save-excursion (goto-char (1- end)) (org-item-has-children-p)))
-	  (error "Cannot outdent an item having children")))))
-      ;; Proceed to reindentation.
-      (while (< (point) end)
-	(beginning-of-line)
-	(skip-chars-forward " \t") (setq ind1 (current-column))
-	(delete-region (point-at-bol) (point))
-	(or (eolp) (org-indent-to-column (+ ind1 delta)))
-	(beginning-of-line 2)))
+       ;; 1. If at top-point move the whole list. Moreover, if
+       ;; *-list is going to column 0, change bullet to "-".
+       ((= (point-at-bol) (org-list-top-point))
+	(when (and (= (+ delta ind) 0) (equal bullet "*")) (org-fix-bullet-type "-"))
+	(setq end (set-marker org-last-indent-end-marker (org-list-bottom-point))))
+       ;; 2. Do not indent before top-item.
+       ((< (+ delta ind) origin-ind)
+	(goto-char pos)
+	(error "Cannot outdent beyond top level item"))
+       ;; 3. Do not indent the first item of a list.
+       ((and firstp (> delta 0))
+	(goto-char pos)
+	(error "Cannot indent the beginning of a sublist"))
+       ;; 4. Do not outdent item that has children without moving.
+       ;; In the case of a subtree, make sure the check applies to
+       ;; its last item.
+       ((and (< delta 0)
+	     (save-excursion (goto-char (1- end)) (org-item-has-children-p)))
+	(goto-char pos)
+	(error "Cannot outdent an item having children")))))
+    ;; Proceed to reindentation.
+    (while (< (point) end)
+      (beginning-of-line)
+      (skip-chars-forward " \t") (setq ind1 (current-column))
+      (delete-region (point-at-bol) (point))
+      (or (eolp) (org-indent-to-column (+ ind1 delta)))
+      (beginning-of-line 2))
+    ;; Get back to original position, shifted by delta
+    (goto-line line)
+    (move-to-column (max (+ delta col) 0))
+    ;; Fix bullet type
     (org-fix-bullet-type
      (and (> arg 0)
 	  (cdr (assoc bullet org-list-demote-modify-bullet))))
@@ -878,6 +889,9 @@ children. Return t if sucessful."
     (save-excursion
       (org-end-of-item-list)
       (org-maybe-renumber-ordered-list))
+    ;; Get back to original position, shifted by delta
+    (goto-line line)
+    (move-to-column (+ delta col))
     t))
 
 (defun org-item-indent-positions ()
