@@ -927,9 +927,11 @@ Assumes cursor in item line."
 (defun org-cycle-item-indentation ()
   (let ((org-suppress-item-indentation t)
 	(org-adapt-indentation nil))
-    (when (and (looking-at "[ \t]*$")
-	       (or (org-at-description-p) (org-at-item-checkbox-p) (org-at-item-p))
-	       (>= (match-end 0) (save-excursion (skip-chars-backward " \r\t\n") (point))))
+    (when (and (or (org-at-description-p) (org-at-item-checkbox-p) (org-at-item-p))
+	       (>= (match-end 0) (save-excursion
+                                   (org-end-of-item-text-before-children)
+                                   (skip-chars-backward " \r\t\n")
+                                   (point))))
       (setq this-command 'org-cycle-item-indentation)
       ;; When in the middle of the cycle, try to outdent first. If it
       ;; fails, and point is still at initial position, indent. Else,
