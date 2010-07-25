@@ -439,8 +439,7 @@ function ends."
 	     (after-text
 	      (when (< pos end-before-blank)
 		(prog1
-		    (buffer-substring pos end-before-blank)
-		  (delete-region pos end-before-blank)
+		    (delete-and-extract-region pos end-before-blank)
 		  ;; delete any blank line at and before point.
 		  (beginning-of-line)
 		  (while (looking-at "^[ \t]*$")
