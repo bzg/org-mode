@@ -1055,7 +1055,11 @@ is an integer, 0 means `-', 1 means `+' etc. If WHICH is
 					    (looking-at "\\S-")) '("*"))
 			       ;; Description items cannot be numbered
 			       (unless (and bullet-rule-p
-					    (org-at-description-p)) '("1." "1)"))))
+					    (or (eq org-plain-list-ordered-item-terminator ?.)
+						(org-at-description-p))) '("1)"))
+			       (unless (and bullet-rule-p
+					    (or (eq  org-plain-list-ordered-item-terminator ?\))
+						(org-at-description-p))) '("1."))))
 	  (len (length bullet-list))
 	  (item-index (- len (length (member current bullet-list))))
 	  (get-value (lambda (index) (nth (mod index len) bullet-list)))
