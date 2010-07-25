@@ -151,7 +151,7 @@ it's header arguments."
 
 (defun org-babel-C-ensure-main-wrap (body)
   "Wrap body in a \"main\" function call if none exists."
-  (if (string-match "^[ \t]*[intvod]+[ \t]*main[ \t]*(.*)" body)
+  (if (string-match "^[ \t]*[intvod]+[ \t\n\r]*main[ \t]*(.*)" body)
       body
     (format "int main() {\n%s\n}\n" body)))
 
