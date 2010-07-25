@@ -14556,7 +14556,6 @@ The command returns the inserted time stamp."
 	stamp)
     (if inactive (setq fmt (concat "[" (substring fmt 1 -1) "]")))
     (insert-before-markers (or pre ""))
-    (insert-before-markers (setq stamp (format-time-string fmt time)))
     (when (listp extra)
       (setq extra (car extra))
       (if (and (stringp extra)
@@ -14566,9 +14565,8 @@ The command returns the inserted time stamp."
 			      (string-to-number (match-string 2 extra))))
 	(setq extra nil)))
     (when extra
-      (backward-char 1)
-      (insert-before-markers extra)
-      (forward-char 1))
+      (setq fmt (concat (substring fmt 0 -1) extra (substring fmt -1))))
+    (insert-before-markers (setq stamp (format-time-string fmt time)))
     (insert-before-markers (or post ""))
     (setq org-last-inserted-timestamp stamp)))
 
