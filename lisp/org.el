@@ -5849,7 +5849,6 @@ in special contexts.
 
 (defun org-cycle-internal-local ()
   "Do the local cycling action."
-  (org-back-to-heading)
   (let ((goal-column 0) eoh eol eos level has-children children-skipped)
     ;; First, some boundaries
     (save-excursion
