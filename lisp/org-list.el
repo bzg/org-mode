@@ -398,14 +398,8 @@ function ends."
 	     ;; Trivial cases where there should be none.
 	     ((or org-empty-line-terminates-plain-lists
 		  (not insert-blank-p)) 0)
-	     ;; When `org-blank-before-new-entry' says so, or item is
-	     ;; alone in the whole list, it is 1.
-	     ((or (eq insert-blank-p t)
-		  (save-excursion
-		    (goto-char (org-list-top-point))
-		    (end-of-line)
-		    (not (org-search-forward-unenclosed
-			  org-item-beginning-re (org-list-bottom-point) t)))) 1)
+	     ;; When `org-blank-before-new-entry' says so, it is 1.
+	     ((eq insert-blank-p t) 1)
 	     ;; plain-list-item is 'auto. Count blank lines separating
 	     ;; neighbours items in list.
 	     (t (let ((next-p (org-get-next-item (point) (org-list-bottom-point))))
@@ -415,12 +409,10 @@ function ends."
 			   (org-back-over-empty-lines))
 		   ;; Is there a previous item?
 		   ((not (org-first-list-item-p)) (org-back-over-empty-lines))
-		   ;; Local search failed: search globally.
-		   ((and (goto-char (org-list-bottom-point))
-			 (beginning-of-line 0)
-			 (org-search-backward-unenclosed "^[ \t]*$" (org-list-top-point) t))
-		    (1+ (org-back-over-empty-lines)))
-		   ;; No blank line found in the whole list.
+		   ;; Item alone: count lines separating it from parent, if any
+		   ((/= (org-list-top-point) (point-at-bol))
+		    (org-back-over-empty-lines))
+		   ;; No parent: no blank line.
 		   (t 0)))))))
 	 (insert-fun
 	  (lambda (text)
