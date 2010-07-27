@@ -942,8 +942,7 @@ Assumes cursor in item line."
 	  (cons ind-up bullet-up)
 	  (cons ind-down bullet-down))))
 
-(defvar org-tab-ind-state) ; defined in org.el
-
+(defvar org-tab-ind-state)
 (defun org-cycle-item-indentation ()
   (let ((org-suppress-item-indentation t)
 	(org-adapt-indentation nil))
@@ -959,17 +958,18 @@ Assumes cursor in item line."
       (if (eq last-command 'org-cycle-item-indentation)
 	  (cond
 	   ((ignore-errors (org-indent-item -1)))
-	   ((and (= (org-get-indentation) org-tab-ind-state)
+	   ((and (= (org-get-indentation) (car org-tab-ind-state))
 		 (ignore-errors (org-indent-item 1))))
 	   (t (back-to-indentation)
-	      (org-indent-to-column org-tab-ind-state)
+	      (indent-to-column (car org-tab-ind-state))
 	      (end-of-line)
-	      (org-fix-bullet-type)
+	      (org-fix-bullet-type (nth 1 org-tab-ind-state))
 	      ;; Break cycle
 	      (setq this-command 'identity)))
-	;; If a cycle has just started, try to indent first. If it
-	;; fails, try to outdent.
-	(setq org-tab-ind-state (org-get-indentation))
+	;; If a cycle is starting, remember indentation and bullet,
+        ;; then try to indent. If it fails, try to outdent.
+	(setq org-tab-ind-state
+              (list (org-get-indentation) (org-get-bullet)))
 	(cond
 	 ((ignore-errors (org-indent-item 1)))
 	 ((ignore-errors (org-indent-item -1)))
