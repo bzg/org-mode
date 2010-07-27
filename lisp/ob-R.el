@@ -258,7 +258,10 @@ return the value of the last statement in BODY, as elisp."
 	(butlast
 	 (delq nil
 	       (mapcar
-		#'identity
+		(lambda (line) ;; cleanup extra prompts left in output
+		  (if (string-match "^\\([ >]+\\)\\[[0-9]+\\]" line)
+		      (substring line (match-end 1))
+		    line))
 		(org-babel-comint-with-output (session org-babel-R-eoe-output)
 		  (insert (mapconcat #'org-babel-chomp
 				     (list body org-babel-R-eoe-indicator)
