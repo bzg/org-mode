@@ -261,11 +261,11 @@ If GENERAL is non-nil, return the general regexp independent of the value
 of `org-plain-list-ordered-item-terminator'."
   (cond
    ((or general (eq org-plain-list-ordered-item-terminator t))
-    "\\([ \t]*\\([-+]\\|\\([0-9]+[.)]\\)\\)\\|[ \t]+\\*\\)\\( \\|$\\)")
+    "\\([ \t]*\\([-+]\\|\\([0-9]+[.)]\\)\\)\\|[ \t]+\\*\\)\\([ \t]+\\|$\\)")
    ((= org-plain-list-ordered-item-terminator ?.)
-    "\\([ \t]*\\([-+]\\|\\([0-9]+\\.\\)\\)\\|[ \t]+\\*\\)\\( \\|$\\)")
+    "\\([ \t]*\\([-+]\\|\\([0-9]+\\.\\)\\)\\|[ \t]+\\*\\)\\([ \t]+\\|$\\)")
    ((= org-plain-list-ordered-item-terminator ?\))
-    "\\([ \t]*\\([-+]\\|\\([0-9]+)\\)\\)\\|[ \t]+\\*\\)\\( \\|$\\)")
+    "\\([ \t]*\\([-+]\\|\\([0-9]+)\\)\\)\\|[ \t]+\\*\\)\\([ \t]+\\|$\\)")
    (t (error "Invalid value of `org-plain-list-ordered-item-terminator'"))))
 
 (defconst org-item-beginning-re (concat "^" (org-item-re))
@@ -322,21 +322,7 @@ the end of the nearest terminator from max."
   (and (org-at-item-p)
        (save-excursion
 	 (goto-char (match-end 0))
-	 (skip-chars-forward " \t")
 	 (looking-at regexp))))
-
-(defun org-list-replace-bullet (new-bullet)
-  "Replace current item's bullet with NEW-BULLET.
-Assume point is at item. Indent body if needed."
-  (save-excursion
-    (let ((old (progn
-                 (looking-at "[ \t]*\\(\\S-+[ \t]*\\)")
-                 (match-string 1))))
-      (unless (equal new-bullet old)
-        (replace-match new-bullet nil nil nil 1)
-        ;; When bullet lengths are differents, move the whole
-        ;; sublist accordingly
-        (org-shift-item-indentation (- (length new-bullet) (length old)))))))
 
 (defun org-list-get-item-same-level (search-fun pos limit pre-move)
   "Return point at the beginning of next item at the same level.
@@ -380,8 +366,8 @@ function ends."
       (end-of-line 0)))
   (let* ((true-pos (point))
 	 (bullet (and (org-beginning-of-item)
-		      (looking-at org-item-beginning-re)
-		      (match-string 0)))
+		      (org-list-bullet-string (org-get-bullet))))
+         (ind (org-get-indentation))
 	 (before-p (progn
 		     ;; Description item: text starts after colons.
 		     (or (org-at-description-p)
@@ -419,6 +405,7 @@ function ends."
 	    ;; insert bullet above item in order to avoid bothering
 	    ;; with possible blank lines ending last item.
 	    (org-beginning-of-item)
+            (indent-to-column ind)
 	    (insert (concat bullet (when checkbox "[ ] ") after-bullet))
 	    ;; Stay between after-bullet and before text.
 	    (save-excursion
@@ -875,12 +862,7 @@ children. Return t if sucessful."
     ;; have if we're outdenting. This is needed to prevent indentation
     ;; problems of subtrees when outdenting changes bullet size.
     (when (< delta 0)
-      (let ((new-bul (concat
-                      (or bul-up bullet) " "
-                      ;; Do we need to concat another white space ?
-                      (when (and org-list-two-spaces-after-bullet-regexp
-                                 (string-match org-list-two-spaces-after-bullet-regexp next-bul))
-                        " "))))
+      (let ((new-bul (org-list-bullet-string (or bul-up bullet))))
         (org-list-replace-bullet new-bul)))
     ;; Proceed to reindentation.
     (while (< (point) end)
@@ -901,7 +883,6 @@ children. Return t if sucessful."
       (unless (or (< arg 0) (= (org-list-top-point) (point)))
         (beginning-of-line 0)
         (org-beginning-of-item)
-        (org-beginning-of-item-list)
         (org-fix-bullet-type)))
     ;; Take care of list at point. If demoting, look at
     ;; `org-list-demote-modify-bullet'.
@@ -1008,6 +989,28 @@ Assumes cursor in item line."
   (and (org-at-item-p)
        (org-trim (match-string 1))))
 
+(defun org-list-bullet-string (bullet)
+  "Concatenate BULLET with an appropriate number of whitespaces.
+It determines the number of whitespaces to append by looking at
+`org-list-two-spaces-after-bullet-regexp'."
+  (concat
+   bullet " "
+   ;; Do we need to concat another white space ?
+   (when (string-match org-list-two-spaces-after-bullet-regexp bullet) " ")))
+
+(defun org-list-replace-bullet (new-bullet)
+  "Replace current item's bullet with NEW-BULLET.
+Assume point is at item. Indent body if needed."
+  (save-excursion
+    (let ((old (progn
+                 (looking-at "[ \t]*\\(\\S-+[ \t]*\\)")
+                 (match-string 1))))
+      (unless (equal new-bullet old)
+        (replace-match new-bullet nil nil nil 1)
+        ;; When bullet lengths are differents, move the whole
+        ;; sublist accordingly
+        (org-shift-item-indentation (- (length new-bullet) (length old)))))))
+
 (defun org-fix-bullet-type (&optional force-bullet)
   "Make sure all items in this list have the same bullet as the first item.
 Also, fix the indentation."
@@ -1015,13 +1018,7 @@ Also, fix the indentation."
   (unless (org-at-item-p) (error "This is not a list"))
   (org-preserve-lc
    (let* ((ini-bul (progn (org-beginning-of-item-list) (org-get-bullet)))
-	  (bullet
-	   (concat
-            (or force-bullet ini-bul) " "
-            ;; Do we need to concat another white space ?
-            (when (and org-list-two-spaces-after-bullet-regexp
-                       (string-match org-list-two-spaces-after-bullet-regexp ini-bul))
-              " ")))
+	  (bullet (org-list-bullet-string (or force-bullet ini-bul)))
 	  (replace-bullet
 	   (lambda (result bullet)
 	     (org-list-replace-bullet bullet))))
@@ -1147,11 +1144,13 @@ text below the heading."
 	     t t nil 1)))
 	(throw 'exit t))
        ((org-at-item-p)
-	;; add a checkbox
-	(save-excursion
-	  (goto-char (match-end 0))
-	  (insert "[ ] "))
-	(throw 'exit t))
+	;; add a checkbox if point is not at a description item
+        (save-excursion
+          (goto-char (match-end 0))
+          (if (org-at-description-p)
+              (error "Cannot add a checkbox in a description list")
+            (insert "[ ] ")))
+        (throw 'exit t))
        (t (error "Not at a checkbox or heading, and no active region")))
       (setq end (move-marker (make-marker) end))
       (save-excursion
