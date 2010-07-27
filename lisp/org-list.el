@@ -853,7 +853,8 @@ children. Return t if sucessful."
        ;; 1. If at top-point move the whole list. Moreover, if
        ;; *-list is going to column 0, change bullet to "-".
        ((= (point-at-bol) (org-list-top-point))
-	(when (and (= (+ delta ind) 0) (equal bullet "*")) (org-fix-bullet-type "-"))
+	(when (and (= (+ delta ind) 0) (equal bullet "*"))
+	  (org-fix-bullet-type (setq bullet "-")))
 	(setq end (set-marker org-last-indent-end-marker (org-list-bottom-point))))
        ;; 2. Do not indent before top-item.
        ((< (+ delta ind) origin-ind)
@@ -871,7 +872,8 @@ children. Return t if sucessful."
 	(goto-char pos)
 	(error "Cannot outdent an item having children")))))
     ;; Replace bullet of current item with the bullet it is going to
-    ;; have if we're outdenting.
+    ;; have if we're outdenting. This is needed to prevent indentation
+    ;; problems of subtrees when outdenting changes bullet size.
     (when (< delta 0)
       (let ((new-bul (concat
                       (or bul-up bullet) " "
