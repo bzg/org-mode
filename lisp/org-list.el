@@ -273,7 +273,7 @@ of `org-plain-list-ordered-item-terminator'."
 
 (defun org-list-terminator-between (min max &optional firstp)
   "Find the position of a list ender between MIN and MAX, or nil.
-This function looks for `org-list-end-re' not matching a block.
+This function looks for `org-list-end-re' outside a block.
 
 If FIRSTP in non-nil, return the point at the beginning of the
 nearest valid terminator from min. Otherwise, return the point at
@@ -358,7 +358,7 @@ function ends."
 	 "^[ \t]*#\\+\\(begin\\|BEGIN\\)_\\([a-zA-Z0-9_]+\\)"
 	 '(concat "^[ \t]*#\\+\\(end\\|END\\)_" (match-string 2)))
     (if (not (cdr (assq 'insert org-list-automatic-rules)))
-	;; Rule in `org-list-automatic-rules' disallows insertion.
+	;; Rule in `org-list-automatic-rules' forbids insertion.
 	(error "Cannot insert item inside a block.")
       ;; Else, move before it prior to add a new item.
       (end-of-line)
@@ -370,7 +370,7 @@ function ends."
          (ind (org-get-indentation))
 	 (before-p (progn
 		     ;; Description item: text starts after colons.
-		     (or (org-at-description-p)
+		     (or (org-at-item-description-p)
 			 ;; At a checkbox: text starts after it.
 			 (org-at-item-checkbox-p)
 			 ;; Otherwise, text starts after bullet.
@@ -394,7 +394,7 @@ function ends."
 		   (next-p (goto-char next-p)
 			   (org-back-over-empty-lines))
 		   ;; Is there a previous item?
-		   ((not (org-first-list-item-p)) (org-back-over-empty-lines))
+		   ((not (org-list-first-item-p)) (org-back-over-empty-lines))
 		   ;; Item alone: count lines separating it from parent, if any
 		   ((/= (org-list-top-point) (point-at-bol))
 		    (org-back-over-empty-lines))
@@ -457,12 +457,10 @@ function ends."
 	(and last-item-start
 	     (not list-ender))))))
 
-(defun org-first-list-item-p ()
-  "Is this heading the first item in a plain list?"
-  (unless (org-at-item-p)
-    (error "Not at a plain list item"))
+(defun org-list-first-item-p ()
+  "Is this item the first item in a plain list?"
   (save-excursion
-    (= (save-excursion (org-beginning-of-item)) (org-beginning-of-item-list))))
+    (= (org-beginning-of-item) (org-beginning-of-item-list))))
 
 (defun org-at-item-p ()
   "Is point in a line starting a hand-formatted item?"
@@ -480,7 +478,7 @@ function ends."
   "Is point at a line starting a plain list item with a timer?"
   (org-list-at-regexp-after-bullet-p "\\([0-9]+:[0-9]+:[0-9]+\\)[ \t]+::[ \t]+"))
 
-(defun org-at-description-p ()
+(defun org-at-item-description-p ()
   "Is point at a description list item?"
   (org-list-at-regexp-after-bullet-p "\\(\\S-.+\\)[ \t]+::[ \t]+"))
 
@@ -488,12 +486,12 @@ function ends."
   "Is point at a line starting a plain-list item with a checklet?"
   (org-list-at-regexp-after-bullet-p "\\(\\[[- X]\\]\\)[ \t]+"))
 
-(defun org-item-has-children-p ()
+(defun org-item-has-child-p ()
   "Does the current item have subitems?"
   (save-excursion
     (org-beginning-of-item)
     (let ((ind (org-get-indentation)))
-      (org-end-of-item-text-before-children)
+      (org-end-of-item-or-at-child)
       (and (org-at-item-p)
 	   (> (org-get-indentation) ind)))))
 
@@ -566,16 +564,12 @@ If the cursor is not in an item, throw an error. Return point."
 If the cursor is not in an item, throw an error."
   (interactive)
   (let ((next-p (org-get-next-item (point) (org-list-bottom-point))))
-    (cond ((not (org-in-item-p))
-	   (error "Not in an item"))
-	  (next-p
-	   (goto-char next-p))
-	  (t
-	   (org-end-of-item-list)))))
+    (cond ((not (org-in-item-p)) (error "Not in an item"))
+	  (next-p (goto-char next-p))
+	  (t (org-end-of-item-list)))))
 
-(defun org-end-of-item-text-before-children ()
-  "Move to the end of the item text, stops before the first child if any.
-Assumes that the cursor is in the first line of an item."
+(defun org-end-of-item-or-at-child ()
+  "Move to the end of the item text, stops before the first child if any."
   (let ((limit (org-list-bottom-point)))
     (end-of-line)
     (goto-char
@@ -629,6 +623,7 @@ in a plain list, or if this is the first item in the list."
   "Go to the beginning item of the current list or sublist.
 Return point."
   (interactive)
+  (org-beginning-of-item)
   (let ((limit (org-list-top-point))
 	(move-up (lambda (pos bound)
 		   ;; prev-p: any item of same level before ?
@@ -734,7 +729,7 @@ invisible."
       ;; if we're in a description list, ask for the new term.
       (let ((desc-text (when (save-excursion
 			       (and (org-beginning-of-item)
-				    (org-at-description-p)))
+				    (org-at-item-description-p)))
 			 (concat (read-string "Term: ") " :: "))))
 	(org-list-insert-item-generic
 	 (point) (and checkbox (not desc-text)) desc-text)))))
@@ -803,10 +798,10 @@ children. Return t if sucessful."
 	(origin-ind (save-excursion
 		      (goto-char (org-list-top-point))
 		      (org-get-indentation)))
-	beg end ind ind1 ind-pos bullet delta ind-down ind-up firstp)
-    (setq firstp (org-first-list-item-p))
+	beg end ind ind1 ind-pos bullet delta ind-down ind-up)
     (setq end (and (org-region-active-p) (region-end)))
-    ;; If moving a subtree, don't drain other items on the way.
+    ;; If moving a subtree, don't drag additional items on subsequent
+    ;; moves.
     (if (and (memq last-command '(org-shiftmetaright org-shiftmetaleft))
 	     (memq this-command '(org-shiftmetaright org-shiftmetaleft)))
 	(setq beg org-last-indent-begin-marker
@@ -814,9 +809,7 @@ children. Return t if sucessful."
       (org-beginning-of-item)
       (setq beg (move-marker org-last-indent-begin-marker (point)))
       ;; Determine end point of indentation
-      (if no-subtree
-	  (org-end-of-item-text-before-children)
-	(org-end-of-item))
+      (if no-subtree (org-end-of-item-or-at-child) (org-end-of-item))
       (setq end (move-marker org-last-indent-end-marker (or end (point)))))
     ;; Get some information
     (goto-char beg)
@@ -848,14 +841,14 @@ children. Return t if sucessful."
 	(goto-char pos)
 	(error "Cannot outdent beyond top level item"))
        ;; 3. Do not indent the first item of a list.
-       ((and firstp (> delta 0))
+       ((and (org-list-first-item-p) (> delta 0))
 	(goto-char pos)
 	(error "Cannot indent the beginning of a sublist"))
        ;; 4. Do not outdent item that has children without moving.
        ;; In the case of a subtree, make sure the check applies to
        ;; its last item.
        ((and (< delta 0)
-	     (save-excursion (goto-char (1- end)) (org-item-has-children-p)))
+	     (save-excursion (goto-char (1- end)) (org-item-has-child-p)))
 	(goto-char pos)
 	(error "Cannot outdent an item having children")))))
     ;; Replace bullet of current item with the bullet it is going to
@@ -890,19 +883,19 @@ children. Return t if sucessful."
      (and (> arg 0)
 	  (cdr (assoc bullet org-list-demote-modify-bullet))))
     (save-excursion
-      (when (org-item-has-children-p)
+      (when (org-item-has-child-p)
         ;; Take care of child, or of every sublist if we're moving a
         ;; subtree.
-        (org-end-of-item-text-before-children)
+        (org-end-of-item-or-at-child)
         (if no-subtree
             (org-fix-bullet-type)
           (let ((fix-list (lambda (i)
-                            (when (org-first-list-item-p)
+                            (when (org-list-first-item-p)
                               (org-fix-bullet-type
                                (and (> arg 0)
                                     (cdr (assoc (org-get-bullet) org-list-demote-modify-bullet)))))
-                            (when (org-item-has-children-p)
-                              (org-end-of-item-text-before-children)
+                            (when (org-item-has-child-p)
+                              (org-end-of-item-or-at-child)
                               (org-apply-on-list fix-list nil)))))
             (org-apply-on-list fix-list nil))))))
   t)
@@ -954,9 +947,9 @@ Assumes cursor in item line."
 (defun org-cycle-item-indentation ()
   (let ((org-suppress-item-indentation t)
 	(org-adapt-indentation nil))
-    (when (and (or (org-at-description-p) (org-at-item-checkbox-p) (org-at-item-p))
+    (when (and (or (org-at-item-description-p) (org-at-item-checkbox-p) (org-at-item-p))
 	       (>= (match-end 0) (save-excursion
-                                   (org-end-of-item-text-before-children)
+                                   (org-end-of-item-or-at-child)
                                    (skip-chars-backward " \r\t\n")
                                    (point))))
       (setq this-command 'org-cycle-item-indentation)
@@ -971,7 +964,7 @@ Assumes cursor in item line."
 	   (t (back-to-indentation)
 	      (org-indent-to-column org-tab-ind-state)
 	      (end-of-line)
-	      (org-maybe-renumber-ordered-list)
+	      (org-fix-bullet-type)
 	      ;; Break cycle
 	      (setq this-command 'identity)))
 	;; If a cycle has just started, try to indent first. If it
@@ -1094,10 +1087,10 @@ is an integer, 0 means `-', 1 means `+' etc. If WHICH is
 			       ;; Description items cannot be numbered
 			       (unless (and bullet-rule-p
 					    (or (eq org-plain-list-ordered-item-terminator ?.)
-						(org-at-description-p))) '("1)"))
+						(org-at-item-description-p))) '("1)"))
 			       (unless (and bullet-rule-p
 					    (or (eq  org-plain-list-ordered-item-terminator ?\))
-						(org-at-description-p))) '("1."))))
+						(org-at-item-description-p))) '("1."))))
 	  (len (length bullet-list))
 	  (item-index (- len (length (member current bullet-list))))
 	  (get-value (lambda (index) (nth (mod index len) bullet-list)))
@@ -1147,7 +1140,7 @@ text below the heading."
 	;; add a checkbox if point is not at a description item
         (save-excursion
           (goto-char (match-end 0))
-          (if (org-at-description-p)
+          (if (org-at-item-description-p)
               (error "Cannot add a checkbox in a description list")
             (insert "[ ] ")))
         (throw 'exit t))
@@ -1457,11 +1450,11 @@ sublevels as a list of strings."
       (save-excursion
 	(beginning-of-line)
 	(setq ltype (cond ((looking-at-p "^[ \t]*[0-9]") 'ordered)
-			  ((org-at-description-p) 'descriptive)
+			  ((org-at-item-description-p) 'descriptive)
 			  (t 'unordered))))
       (let* ((indent1 (org-get-indentation))
 	     (nextitem (or (org-get-next-item (point) end) end))
-	     (item (org-trim (buffer-substring (point) (org-end-of-item-text-before-children))))
+	     (item (org-trim (buffer-substring (point) (org-end-of-item-or-at-child))))
 	     (nextindent (if (= (point) end) 0 (org-get-indentation)))
 	     (item (if (string-match "^\\[\\([xX ]\\)\\]" item)
 		       (replace-match (if (equal (match-string 1 item) " ")
