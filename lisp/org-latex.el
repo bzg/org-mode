@@ -1680,9 +1680,10 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
                           (if floatp (format "\\begin{table}%s\n" placement)))
                         (if floatp
                             (format
-                             "\\caption%s{%s}"
+                             "\\caption%s{%s} %s"
                              (if shortn (concat "[" shortn "]") "")
-                             (or caption "")))
+                             (or caption "")
+			     (when label (format "\\label{%s}" label))))
                         (if (and longtblp caption) "\\\\\n" "\n")
                         (if (and org-export-latex-tables-centered (not longtblp))
                             "\\begin{center}\n")
@@ -1754,7 +1755,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
       (setq tbl (concat "\\begin{center}\n" tbl "\\end{center}")))
     (when floatp
       (setq tbl (concat "\\begin{table}\n"
-			(format "\\caption%s{%s%s}\n"
+			(format "\\caption%s{%s}%s\n"
 				(if shortn (format "[%s]" shortn) "")
 				(if label (format "\\label{%s}" label) "")
 				(or caption ""))
