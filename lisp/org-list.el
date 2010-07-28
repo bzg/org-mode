@@ -827,6 +827,7 @@ children. Return t if sucessful."
     (setq ind-pos (org-item-indent-positions)
 	  bullet (cdr (car ind-pos))
           bul-up (cdr (nth 1 ind-pos))
+          bul-down (cdr (nth 2 ind-pos))
 	  ind (caar ind-pos)
 	  ind-down (car (nth 2 ind-pos))
 	  ind-up (car (nth 1 ind-pos))
@@ -855,9 +856,9 @@ children. Return t if sucessful."
        ((and (org-list-first-item-p) (> delta 0))
 	(goto-char pos)
 	(error "Cannot indent the beginning of a sublist"))
-       ;; 4. Do not outdent item that has children without moving.
-       ;; In the case of a subtree, make sure the check applies to
-       ;; its last item.
+       ;; 4. Do not outdent item that has children without moving
+       ;; subtree. If moving subtree, the rule applies to its last
+       ;; sub-item.
        ((and (< delta 0)
 	     (save-excursion (goto-char (1- end)) (org-item-has-child-p)))
 	(goto-char pos)
@@ -878,21 +879,22 @@ children. Return t if sucessful."
     ;; Get back to original position, shifted by delta
     (goto-line line)
     (move-to-column (max (+ delta col) 0))
-    ;; Fix and reorder all lists and sublists from parent of the list
-    ;; at point, or from list at point if it hasn't got any parent or
-    ;; if we're outdenting.
+    ;; Fix and reorder all lists and sublists from list at point. If
+    ;; it has a parent and we're indenting, renumber parent too.
     (save-excursion
-      ;; Take care of parent list, if it makes sense.
+      ;; Renumber parent list, if needed. No need for fixing bullets
       (org-beginning-of-item-list)
       (unless (or (< arg 0) (= (org-list-top-point) (point)))
         (beginning-of-line 0)
         (org-beginning-of-item)
-        (org-fix-bullet-type)))
-    ;; Take care of list at point. If demoting, look at
-    ;; `org-list-demote-modify-bullet'.
+        (org-maybe-renumber-ordered-list)))
+    ;; Take care of list at point. When demoting, to determine bullet
+    ;; of children, follow, in order: `org-list-demote-modify-bullet',
+    ;; same bullet as others children, same bullet as before
     (org-fix-bullet-type
      (and (> arg 0)
-	  (cdr (assoc bullet org-list-demote-modify-bullet))))
+	  (or (cdr (assoc bullet org-list-demote-modify-bullet))
+              bul-down)))
     (save-excursion
       (when (org-item-has-child-p)
         ;; Take care of child, or of every sublist if we're moving a
@@ -912,46 +914,38 @@ children. Return t if sucessful."
   t)
 
 (defun org-item-indent-positions ()
-  "Return indentation for plain list items.
-This returns a list with three values:	The current indentation, the
-parent indentation and the indentation a child should have.
-Assumes cursor in item line."
-  (let* ((bolpos (point-at-bol))
-	 (ind (org-get-indentation))
-	 (bullet (org-get-bullet))
-	 ind-down ind-up bullet-up bullet-down pos)
-    (save-excursion
-      (org-beginning-of-item-list)
-      (skip-chars-backward "\n\r \t")
-      (when (org-in-item-p)
-	(org-beginning-of-item)
-	(let ((prev-indent (org-get-indentation)))
-	  (when (< prev-indent ind)
-	    (setq ind-up prev-indent)
-	    (setq bullet-up (org-get-bullet))))))
-    (setq pos (point))
-    (save-excursion
-      (cond
-       ((and (ignore-errors (progn (org-previous-item) t))
-	     (or (end-of-line) t)
-	     (org-search-forward-unenclosed org-item-beginning-re bolpos t))
-	(setq ind-down (org-get-indentation)
-	      bullet-down (org-get-bullet)))
-       ((and (goto-char pos)
-	     (org-at-item-p))
-	(goto-char (match-end 0))
-	(skip-chars-forward " \t")
-	(setq ind-down (current-column)
-	      bullet-down (org-get-bullet)))))
-    (if (and bullet-down (string-match "\\`[0-9]+\\(\\.\\|)\\)\\'" bullet-down))
-	(setq bullet-down (concat "1" (match-string 1 bullet-down))))
-    (if (and bullet-up (string-match "\\`[0-9]+\\(\\.\\|)\\)\\'" bullet-up))
-	(setq bullet-up (concat "1" (match-string 1 bullet-up))))
-    (if (and bullet (string-match "\\`[0-9]+\\(\\.\\|)\\)\\'" bullet))
-	(setq bullet (concat "1" (match-string 1 bullet))))
-    (list (cons ind bullet)
-	  (cons ind-up bullet-up)
-	  (cons ind-down bullet-down))))
+  "Return indentations and bullets relatives to a plain list item.
+This returns a list with three cons-cells: the current item, the
+parent item, if any, and the child item.  Each cell has the
+form (indentation . bullet).  Assumes cursor in item line."
+  (let* ((init-bul (lambda (bullet)
+                     (if (string-match "\\`[0-9]+\\(\\.\\|)\\)\\'" bullet)
+                         (concat "1" (match-string 1 bullet))
+                       bullet)))
+         ;; Current item
+	 (item-cur (cons (org-get-indentation)
+                         (funcall init-bul (org-get-bullet))))
+         ;; Parent
+         (item-up (save-excursion
+                    (org-beginning-of-item-list)
+                    (unless (= (org-list-top-point) (point))
+                      (beginning-of-line 0)
+                      (org-beginning-of-item)
+                      (cons (org-get-indentation)
+                            (funcall init-bul (org-get-bullet))))))
+         ;; Child of previous item, if any.
+         (item-down (save-excursion
+                      (let ((prev-p (org-get-previous-item (point) (save-excursion (org-beginning-of-item-list)))))
+                        (if (and prev-p (goto-char prev-p) (org-item-has-child-p))
+                            (progn
+                              (org-end-of-item-or-at-child)
+                              (cons (org-get-indentation)
+                                    (funcall init-bul (org-get-bullet))))
+                          (goto-char pos)
+                          (org-at-item-p)
+                          (goto-char (match-end 0))
+                          (cons (current-column) (cdr item-cur)))))))
+    (list item-cur item-up item-down)))
 
 (defvar org-tab-ind-state)
 (defun org-cycle-item-indentation ()
