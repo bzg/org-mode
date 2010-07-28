@@ -259,7 +259,8 @@ return the value of the last statement in BODY, as elisp."
 	 (delq nil
 	       (mapcar
 		(lambda (line) ;; cleanup extra prompts left in output
-		  (if (string-match "^\\([ >]+\\)\\[[0-9]+\\]" line)
+		  (if (string-match
+		       "^\\([ ]*[>+][ ]?\\)+\\([[0-9]+\\|[ ]\\)" line)
 		      (substring line (match-end 1))
 		    line))
 		(org-babel-comint-with-output (session org-babel-R-eoe-output)
