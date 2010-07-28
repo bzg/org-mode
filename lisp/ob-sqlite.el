@@ -118,7 +118,7 @@ This function is called by `org-babel-execute-src-block'."
 						      (format "%S" el)))))))
 		      data-file)
 		    (make-temp-file "ob-sqlite-data"))
-		 (format "%S" val)))
+		 (if (stringp val) val (format "%S" val))))
 	     (cdr pair))
 	    body)))
    vars)
