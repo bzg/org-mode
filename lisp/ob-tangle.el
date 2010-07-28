@@ -53,18 +53,28 @@ then the name of the language is used."
   :group 'org-babel
   :type 'hook)
 
+(defun org-babel-find-file-noselect-refresh (file)
+  "Find file ensuring that the latest changes on disk are
+represented in the file."
+  (find-file-noselect file)
+  (with-current-buffer (get-file-buffer file)
+    (revert-buffer t t t)))
+
 (defmacro org-babel-with-temp-filebuffer (file &rest body)
   "Open FILE into a temporary buffer execute BODY there like
 `progn', then kill the FILE buffer returning the result of
 evaluating BODY."
   (declare (indent 1))
   (let ((temp-result (make-symbol "temp-result"))
-	(temp-file (make-symbol "temp-file")))
+	(temp-file (make-symbol "temp-file"))
+	(visited-p (make-symbol "already-visited")))
     `(let (,temp-result ,temp-file)
-       (find-file-noselect ,file)
-       (setf ,temp-file (current-buffer))
-       (setf ,temp-result (progn ,@body))
-       (kill-buffer ,temp-file)
+       (setq ,visited-p (get-file-buffer ,file ))
+       (org-babel-find-file-noselect-refresh ,file)
+       (setf ,temp-file (get-file-buffer ,file))
+       (with-current-buffer ,temp-file
+	 (setf ,temp-result (progn ,@body)))
+       (unless ,visited-p (kill-buffer ,temp-file))
        ,temp-result)))
 
 ;;;###autoload
