@@ -55,6 +55,16 @@ negates this setting for the duration of the command."
   :group 'org-link-store
   :type 'boolean)
 
+(defcustom org-gnus-nnimap-query-article-no-from-file nil
+  "If non-nil, `org-gnus-follow-link' will try to translate
+Message-Ids to article numbers by querying the .overview file.
+Normally, this translation is done by querying the IMAP server,
+which is usually very fast.  Unfortunately, some (maybe badly
+configured) IMAP servers don't support this operation quickly.
+So if following a link to a Gnus article takes ages, try setting
+this variable to `t'."
+  :group 'org-link-store
+  :type 'boolean)
 
 ;; Install the link type
 (org-add-link-type "gnus" 'org-gnus-open)
@@ -173,7 +183,11 @@ If `org-store-link' was called with a prefix arg the meaning of
   (cond ((and group article)
 	 (gnus-activate-group group t)
 	 (condition-case nil
-	     (let ((backend (car (gnus-find-method-for-group group))))
+	     (let* ((method (gnus-find-method-for-group group))
+		    (backend (car method))
+		    (server (cadr method)))
+	       (message "method = %s\ngroup = %s\nbackend = %s\nserver = %s"
+			method group backend server)
 	       (cond
 		((eq backend 'nndoc)
 		 (if (gnus-group-read-group t nil group)
@@ -183,6 +197,12 @@ If `org-store-link' was called with a prefix arg the meaning of
 		(t
 		 (let ((articles 1)
 		       group-opened)
+		   ;; work arround IMAP servers that perform badly in
+		   ;; SEARCH commands.
+		   (when (and (eq backend 'nnimap)
+			      org-gnus-nnimap-query-article-no-from-file)
+		     (let ((headers (nnimap-retrieve-headers-from-file group server)))
+		       (message "headers = %s" headers)))
 		   (while (and (not group-opened)
 			       ;; stop on integer overflows
 			       (> articles 0))
