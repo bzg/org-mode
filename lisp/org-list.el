@@ -173,15 +173,18 @@ precedence over it."
 By default, automatic actions are taken when using
 \\[org-shiftmetaup], \\[org-shiftmetadown], \\[org-meta-return],
 \\[org-metaright], \\[org-metaleft], \\[org-shiftmetaright],
-\\[org-shiftmetaleft], \\[org-ctrl-c-minus] or
-\\[org-insert-todo-heading].  You can disable individually these
-rules by setting sets to nil. Valid sets are:
+\\[org-shiftmetaleft], \\[org-ctrl-c-minus],
+\\[org-toggle-checkbox] or \\[org-insert-todo-heading].  You can
+disable individually these rules by setting them to nil.  Valid
+rules are:
 
 bullet    when non-nil, cycling bullet do not allow lists at
           column 0 to have * as a bullet and descriptions lists
           to be numbered.
 checkbox  when non-nil, checkbox statistics is updated each time
           you either insert a new checkbox or toggle a checkbox.
+          It also prevents from inserting a checkbox in a
+          description item.
 indent    when non-nil indenting or outdenting list top-item will
           move the whole list, indenting the first item of a
           sub-list will be forbidden and outdenting a list whose
@@ -734,8 +737,13 @@ invisible."
 			       (and (org-beginning-of-item)
 				    (org-at-item-description-p)))
 			 (concat (read-string "Term: ") " :: "))))
+        ;; Don't insert a checkbox if checkbox rule is applied and it
+        ;; is a description item.
 	(org-list-insert-item-generic
-	 (point) (and checkbox (not desc-text)) desc-text)))))
+	 (point) (and checkbox
+                      (or (not desc-text)
+                          (not (cdr (assq 'checkbox org-list-automatic-rules)))))
+         desc-text)))))
 
 ;;; Indentation
 
