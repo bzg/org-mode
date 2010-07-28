@@ -5457,7 +5457,7 @@ needs to be inserted at a specific position in the font-lock sequence.")
                    '(org-do-emphasis-faces (0 nil append))
                  '(org-do-emphasis-faces)))
 	   ;; Checkboxes
-	   '("^[ \t]*\\([-+*]\\|[0-9]+[.)]\\) +\\(\\[[- X]\\]\\)"
+	   '("^[ \t]*\\([-+*]\\|[0-9]+[.)]\\(?:[ \t]+\\[@start:[0-9]+\\]\\)?\\)[ \t]+\\(\\[[- X]\\]\\)"
 	     2 'org-checkbox prepend)
 	   (if org-provide-checkbox-statistics
 	       '("\\[\\([0-9]*%\\)\\]\\|\\[\\([0-9]*\\)/\\([0-9]*\\)\\]"

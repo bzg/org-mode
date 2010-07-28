@@ -322,6 +322,9 @@ the end of the nearest terminator from max."
   (and (org-at-item-p)
        (save-excursion
 	 (goto-char (match-end 0))
+         ;; Ignore counter if any
+         (when (looking-at "\\(?:\\[@start:[0-9]+\\][ \t]*\\)?")
+           (goto-char (match-end 0)))
 	 (looking-at regexp))))
 
 (defun org-list-get-item-same-level (search-fun pos limit pre-move)
@@ -465,8 +468,7 @@ function ends."
 (defun org-at-item-p ()
   "Is point in a line starting a hand-formatted item?"
   (save-excursion
-    (goto-char (point-at-bol))
-    (looking-at org-item-beginning-re)))
+    (beginning-of-line) (looking-at org-item-beginning-re)))
 
 (defun org-at-item-bullet-p ()
   "Is point at the bullet of a plain list item?"
@@ -513,7 +515,8 @@ A checkbox is blocked if all of the following conditions are fulfilled:
 	  (condition-case nil (org-back-to-heading t)
 	    (error (throw 'exit nil)))
 	  (unless (org-entry-get nil "ORDERED") (throw 'exit nil))
-	  (when (org-search-forward-unenclosed "^[ \t]*[-+*0-9.)] \\[[- ]\\]" end t)
+	  (when (org-search-forward-unenclosed
+                 "^[ \t]*[-+*0-9.)]+[ \t]+\\(\\[@start:[0-9]+\\][ \t]+\\)?\\[[- ]\\]" end t)
 	    (org-current-line)))))))
 
 ;;; Navigate
@@ -1105,73 +1108,74 @@ is an integer, 0 means `-', 1 means `+' etc. If WHICH is
 
 (defun org-toggle-checkbox (&optional toggle-presence)
   "Toggle the checkbox in the current line.
-With prefix arg TOGGLE-PRESENCE, add or remove checkboxes.
-With double prefix, set checkbox to [-].
-When there is an active region, toggle status or presence of the checkbox
-in the first line, and make every item in the region have the same
-status or presence, respectively.
-If the cursor is in a headline, apply this to all checkbox items in the
-text below the heading."
+
+With prefix arg TOGGLE-PRESENCE, add or remove checkboxes.  With
+double prefix, set checkbox to [-].
+
+When there is an active region, toggle status or presence of the
+checkbox in the first line, and make every item in the region
+have the same status or presence, respectively.
+
+If the cursor is in a headline, apply this to all checkbox items
+in the text below the heading, taking as reference the first item
+in subtree."
   (interactive "P")
-  (catch 'exit
-    (let (beg end status first-present first-status blocked)
-      (cond
-       ((org-region-active-p)
-	(setq beg (region-beginning) end (region-end)))
-       ((org-on-heading-p)
-	(setq beg (point) end (save-excursion (outline-next-heading) (point))))
-       ((org-at-item-checkbox-p)
-	(save-excursion
-	  (if (equal toggle-presence '(4))
-	      (progn
-		(replace-match "" nil nil nil 1)
-		(goto-char (match-beginning 0))
-		(just-one-space))
-	    (when (setq blocked (org-checkbox-blocked-p))
-	      (error "Checkbox blocked because of unchecked box in line %d"
-		     blocked))
-	    (replace-match
-	     (cond ((equal toggle-presence '(16)) "[-]")
-		   ((member (match-string 1) '("[ ]" "[-]")) "[X]")
-		   (t "[ ]"))
-	     t t nil 1)))
-	(throw 'exit t))
-       ((org-at-item-p)
-	;; add a checkbox if point is not at a description item
-        (save-excursion
-          (goto-char (match-end 0))
-          (if (org-at-item-description-p)
-              (error "Cannot add a checkbox in a description list")
-            (insert "[ ] ")))
-        (throw 'exit t))
-       (t (error "Not at a checkbox or heading, and no active region")))
-      (setq end (move-marker (make-marker) end))
-      (save-excursion
-	(goto-char beg)
-	(setq first-present (org-at-item-checkbox-p)
-	      first-status
-	      (save-excursion
-		(and (org-search-forward-unenclosed "[ \t]\\(\\[[ X]\\]\\)" end t)
-		     (equal (match-string 0) "[X]"))))
-	(while (< (point) end)
-	  (if toggle-presence
-	      (cond
-	       ((and first-present (org-at-item-checkbox-p))
-		(save-excursion
-		  (replace-match "")
-		  (goto-char (match-beginning 0))
-		  (just-one-space)))
-	       ((and (not first-present) (not (org-at-item-checkbox-p))
-		     (org-at-item-p))
-		(save-excursion
-		  (goto-char (match-end 0))
-		  (insert "[ ] "))))
-	    (when (org-at-item-checkbox-p)
-	      (setq status (equal (match-string 1) "[X]"))
-	      (replace-match
-	       (if first-status "[ ]" "[X]") t t nil 1)))
-	  (beginning-of-line 2)))))
-  (org-update-checkbox-count-maybe))
+  ;; Bounds is a list of type (beg end single-p) where single-p is t
+  ;; when `org-toggle-checkbox' is applied to a single item. Only
+  ;; toggles on single items will return errors.
+  (let* ((bounds
+          (cond
+           ((org-region-active-p)
+            (list (region-beginning) (region-end) nil))
+           ((org-on-heading-p)
+            ;; In this case, reference line is the first item in subtree
+            (let ((limit (save-excursion (outline-next-heading) (point))))
+              (save-excursion
+                (org-search-forward-unenclosed org-item-beginning-re limit 'move)
+                (list (point) limit nil))))
+           ((org-at-item-p)
+            (list (point-at-bol) (point-at-eol) t))
+           (t (error "Not at an item or heading, and no active region"))))
+         ;; marker is needed because deleting checkboxes will change END
+         (end (copy-marker (nth 1 bounds)))
+         (single-p (nth 2 bounds))
+         (ref-presence (save-excursion (goto-char (car bounds)) (org-at-item-checkbox-p)))
+         (ref-status (equal (match-string 1) "[X]"))
+         (act-on-item
+          (lambda (ref-pres ref-stat)
+            (if (equal toggle-presence '(4))
+                (cond
+                 ((and ref-pres (org-at-item-checkbox-p))
+                  (replace-match ""))
+                 ((and (not ref-pres)
+                       (not (org-at-item-checkbox-p))
+                       (org-at-item-p))
+                  (goto-char (match-end 0))
+                  ;; Ignore counter, if any
+                  (when (looking-at "\\(?:\\[@start:[0-9]+\\][ \t]*\\)?")
+                    (goto-char (match-end 0)))
+                  (let ((desc-p (and (org-at-item-description-p)
+                                     (cdr (assq 'checkbox org-list-automatic-rules)))))
+                    (cond
+                     ((and single-p desc-p)
+                      (error "Cannot add a checkbox in a description list"))
+                     ((not desc-p) (insert "[ ] "))))))
+              (let ((blocked (org-checkbox-blocked-p)))
+                (cond
+                 ((and blocked single-p)
+                  (error "Checkbox blocked because of unchecked box in line %d" blocked))
+                 (blocked nil)
+                 ((org-at-item-checkbox-p)
+                  (replace-match
+                   (cond ((equal toggle-presence '(16)) "[-]")
+                         (ref-stat "[ ]")
+                         (t "[X]"))
+                   t t nil 1))))))))
+    (save-excursion
+      (while (< (point) end)
+        (funcall act-on-item ref-presence ref-status)
+        (org-search-forward-unenclosed org-item-beginning-re end 'move)))
+    (org-update-checkbox-count-maybe)))
 
 (defun org-reset-checkbox-state-subtree ()
   "Reset all checkboxes in an entry subtree."
@@ -1455,11 +1459,11 @@ sublevels as a list of strings."
 	     (nextitem (or (org-get-next-item (point) end) end))
 	     (item (org-trim (buffer-substring (point) (org-end-of-item-or-at-child))))
 	     (nextindent (if (= (point) end) 0 (org-get-indentation)))
-	     (item (if (string-match "^\\[\\([xX ]\\)\\]" item)
+	     (item (if (string-match "^\\(?:\\[@start:[0-9]+\\][ \t]+\\)?\\[\\([xX ]\\)\\]" item)
 		       (replace-match (if (equal (match-string 1 item) " ")
-					  "[CBOFF]"
-					"[CBON]")
-				      t nil item)
+					  "CBOFF"
+					"CBON")
+				      t nil item 1)
 		     item)))
 	(push item output)
 	(when (> nextindent indent1)
