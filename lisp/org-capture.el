@@ -467,8 +467,9 @@ bypassed."
 	       (markerp (org-capture-get :interrupted-clock 'local))
 	       (buffer-live-p (marker-buffer
 			       (org-capture-get :interrupted-clock 'local))))
-      (org-with-point-at (org-capture-get :interrupted-clock 'local)
-	(org-clock-in))
+      (let ((clock-in-task (org-capture-get :interrupted-clock 'local)))
+	(org-with-point-at clock-in-task
+	  (org-clock-in)))
       (message "Interrupted clock has been resumed")))
 
   (let ((beg (point-min))

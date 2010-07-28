@@ -5315,8 +5315,9 @@ HH:MM."
 	 (alpha-up        (and (org-em 'alpha-up 'alpha-down ss)
 			       (org-cmp-alpha a b)))
 	 (alpha-down      (if alpha-up (- alpha-up) nil))
+   (need-user-cmp   (org-em 'user-defined-up 'user-defined-down ss))
 	 user-defined-up user-defined-down)
-    (if (and org-agenda-cmp-user-defined
+    (if (and need-user-cmp org-agenda-cmp-user-defined
 	     (functionp org-agenda-cmp-user-defined))
 	(setq user-defined-up
 	      (funcall org-agenda-cmp-user-defined a b)
