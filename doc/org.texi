@@ -9911,9 +9911,9 @@ different level - then the hierarchy above frames will produce the sectioning
 structure of the presentation.
 
 A template for useful in-buffer settings or properties can be inserted into
-the buffer with @kbd{M-x org-beamer-settings-template}.  Among other things,
-this will install a column view format which is very handy for editing
-special properties used by beamer.
+the buffer with @kbd{M-x org-insert-beamer-options-template}.  Among other
+things, this will install a column view format which is very handy for
+editing special properties used by beamer.
 
 You can influence the structure of the presentation using the following
 properties:
@@ -9978,7 +9978,7 @@ environment or the @code{BEAMER_col} property.
 Column view provides a great way to set the environment of a node and other
 important parameters.  Make sure you are using a COLUMN format that is geared
 toward this special purpose.  The command @kbd{M-x
-org-beamer-settings-template} defines such a format.
+org-insert-beamer-options-template} defines such a format.
 
 Here is a simple example Org document that is intended for beamer export.
 
