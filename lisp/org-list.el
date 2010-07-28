@@ -1324,10 +1324,10 @@ Otherwise it will be `org-todo'."
 (defun org-apply-on-list (function init-value &rest args)
   "Call FUNCTION for each item of a the list under point.
 
-FUNCTION must be called with at least one argument : a return
-value that will contain the value returned by the function at
-the previous item, plus ARGS extra arguments. INIT-VALUE will be
-the value passed to the function at the first item of the list.
+FUNCTION must be called with at least one argument: a return
+value that will contain the value returned by the function at the
+previous item, plus ARGS extra arguments.  INIT-VALUE will be the
+value passed to the function at the first item of the list.
 
 As an example, (org-apply-on-list (lambda (result) (1+ result)) 0)
 will return the number of items in the current list.
@@ -1357,14 +1357,13 @@ a time stamp, by a property or by priority.
 
 The command prompts for the sorting type unless it has been given
 to the function through the SORTING-TYPE argument, which needs to
-be a character, \(?n ?N ?a ?A ?t ?T ?f ?F). Here is the precise
+be a character, \(?n ?N ?a ?A ?t ?T ?f ?F).  Here is the precise
 meaning of each character:
 
 n   Numerically, by converting the beginning of the item to a number.
-a   Alphabetically.
+a   Alphabetically.  Only the first line of item is checked.
 t   By date/time, either the first active time stamp in the entry, if
-    any, or by the first inactive one. In a timer list, sorts the timers.
-    Only the first line of item is checked.
+    any, or by the first inactive one.  In a timer list, sort the timers.
 
 Capital letters will reverse the sort order.
 
