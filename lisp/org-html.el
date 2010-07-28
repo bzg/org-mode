@@ -962,7 +962,7 @@ PUB-DIR is set, use this as the publishing directory."
 	 table-buffer table-orig-buffer
 	 ind item-type starter
 	 rpl path attr desc descp desc1 desc2 link
-	 snumber fnc item-tag initial-number
+	 snumber fnc item-tag item-number
 	 footnotes footref-seen
 	 id-file href
 	 )
@@ -1546,10 +1546,10 @@ lang=\"%s\" xml:lang=\"%s\">
 		    starter (if (match-beginning 2)
 				(substring (match-string 2 line) 0 -1))
 		    line (substring line (match-beginning 5))
-		    initial-number nil
+		    item-number nil
 		    item-tag nil)
 	      (if (string-match "\\`\\[@start:\\([0-9]+\\)\\][ \t]?" line)
-		  (setq initial-number (match-string 1 line)
+		  (setq item-number (match-string 1 line)
 			line (replace-match "" t t line)))
 	      (if (and starter (string-match "\\(.*?\\) ::[ \t]*" line))
 		  (setq item-type "d"
@@ -1571,15 +1571,13 @@ lang=\"%s\" xml:lang=\"%s\">
 	       ((and starter
 		     (or (not in-local-list)
 			 (> ind (car local-list-indent))))
-		;; check for a specified start number
 		;; Start new (level of) list
 		(org-close-par-maybe)
 		(insert (cond
 			 ((equal item-type "u") "<ul>\n<li>\n")
-			 ((equal item-type "o")
-			  (if initial-number
-			      (format "<ol start=%s>\n<li>\n" initial-number)
-			    "<ol>\n<li>\n"))
+			 ((and (equal item-type "o") item-number)
+			  (format "<ol>\n<li value=\"%s\">\n" item-number))
+			 ((equal item-type "o") "<ol>\n<li>\n")
 			 ((equal item-type "d")
 			  (format "<dl>\n<dt>%s</dt><dd>\n" item-tag))))
 		(push item-type local-list-type)
@@ -1591,6 +1589,8 @@ lang=\"%s\" xml:lang=\"%s\">
 		(insert (cond
 			 ((equal (car local-list-type) "d")
 			  (format "<dt>%s</dt><dd>\n" (or item-tag "???")))
+			 ((and (equal item-type "o") item-number)
+			  (format "<li value=\"%s\">\n" item-number))
 			 (t "<li>\n")))))
 	      (if (string-match "^[ \t]*\\[\\([X ]\\)\\]" line)
 		  (setq line

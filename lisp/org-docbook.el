@@ -554,7 +554,7 @@ publishing directory."
 	 table-buffer table-orig-buffer
 	 ind item-type starter
 	 rpl path attr caption label desc descp desc1 desc2 link
-	 fnc item-tag initial-number
+	 fnc item-tag item-number
 	 footref-seen footnote-list
 	 id-file
 	 )
@@ -1023,9 +1023,9 @@ publishing directory."
 				(substring (match-string 2 line) 0 -1))
 		    line (substring line (match-beginning 5))
 		    item-tag nil
-		    initial-number nil)
+		    item-number nil)
 	      (if (string-match "\\`\\[@start:\\([0-9]+\\)\\][ \t]?" line)
-		  (setq initial-number (match-string 1 line)
+		  (setq item-number (match-string 1 line)
 			line (replace-match "" t t line)))
 	      (if (and starter (string-match "\\(.*?\\) ::[ \t]*" line))
 		  (setq item-type "d"
@@ -1055,7 +1055,7 @@ publishing directory."
 		(org-export-docbook-close-para-maybe)
 		(insert (cond
 			 ((equal item-type "u") "<itemizedlist>\n<listitem>\n")
-			 ((equal item-type "o")
+			 ((and (equal item-type "o") item-number)
 			  ;; Check for a specific start number.  If it
 			  ;; is specified, we use the ``override''
 			  ;; attribute of element <listitem> to pass the
@@ -1063,10 +1063,8 @@ publishing directory."
 			  ;; ``startingnumber'' attribute of element
 			  ;; <orderedlist>, but the former works on both
 			  ;; DocBook 5.0 and prior versions.
-			  (if initial-number
-			      (format "<orderedlist>\n<listitem override=\"%s\">\n"
-				      initial-number)
-			    "<orderedlist>\n<listitem>\n"))
+			  (format "<orderedlist>\n<listitem override=\"%s\">\n" item-number))
+			 ((equal item-type "o") "<orderedlist>\n<listitem>\n")
 			 ((equal item-type "d")
 			  (format "<variablelist>\n<varlistentry><term>%s</term><listitem>\n" item-tag))))
 		;; For DocBook, we need to open a para right after tag
@@ -1080,6 +1078,8 @@ publishing directory."
 		(let ((listtype (car local-list-type)))
 		  (org-export-docbook-close-li listtype)
 		  (insert (cond
+			   ((and (equal listtype "o") item-number)
+			    (format "<listitem override=\"%s\">" item-number))
 			   ((equal listtype "o") "<listitem>")
 			   ((equal listtype "u") "<listitem>")
 			   ((equal listtype "d") (format
