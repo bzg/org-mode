@@ -915,9 +915,9 @@ children. Return t if sucessful."
 
 (defun org-item-indent-positions ()
   "Return indentations and bullets relatives to a plain list item.
-This returns a list with three cons-cells: the current item, the
-parent item, if any, and the child item.  Each cell has the
-form (indentation . bullet).  Assumes cursor in item line."
+This returns a list with three cons-cells containing indentation
+and bullet of: the item, the item after a promotion, and the item
+after being demoted.  Assume cursor in item line."
   (let* ((init-bul (lambda (bullet)
                      (if (string-match "\\`[0-9]+\\(\\.\\|)\\)\\'" bullet)
                          (concat "1" (match-string 1 bullet))
