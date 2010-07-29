@@ -1144,6 +1144,7 @@ The template may still contain \"%?\" for cursor positioning."
 	      (insert result)))))
 
       ;; Simple %-escapes
+      (goto-char (point-min))
       (while (re-search-forward "%\\([tTuUaiAcxkKI]\\)" nil t)
 	(unless (org-capture-escaped-%)
 	  (when (and initial (equal (match-string 0) "%i"))
