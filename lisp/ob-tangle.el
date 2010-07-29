@@ -67,9 +67,9 @@ evaluating BODY."
   (declare (indent 1))
   (let ((temp-result (make-symbol "temp-result"))
 	(temp-file (make-symbol "temp-file"))
-	(visited-p (make-symbol "already-visited")))
-    `(let (,temp-result ,temp-file)
-       (setq ,visited-p (get-file-buffer ,file ))
+	(visited-p (make-symbol "visited-p")))
+    `(let (,temp-result ,temp-file
+           (,visited-p (get-file-buffer ,file)))
        (org-babel-find-file-noselect-refresh ,file)
        (setf ,temp-file (get-file-buffer ,file))
        (with-current-buffer ,temp-file
