@@ -1232,8 +1232,7 @@ the whole buffer."
 			      (or (ignore-errors
 				    (org-entry-get nil "COOKIE_DATA"))
 				  ""))))
-	   (cstat 0)
-	   )
+	   (cstat 0))
       (when all
 	(goto-char (point-min))
 	(outline-next-heading)
