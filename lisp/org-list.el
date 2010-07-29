@@ -800,7 +800,6 @@ If NO-SUBTREE is set, only outdent the item itself, not its children."
 If NO-SUBTREE is set, only indent the item itself, not its
 children. Return t if sucessful."
   (interactive "p")
-  (and (org-region-active-p) (org-cursor-to-region-beginning))
   (unless (org-at-item-p)
     (error "Not on an item"))
   (let ((line (org-current-line))
@@ -810,7 +809,6 @@ children. Return t if sucessful."
 		      (goto-char (org-list-top-point))
 		      (org-get-indentation)))
 	beg end ind ind1 ind-pos bullet delta ind-down ind-up)
-    (setq end (and (org-region-active-p) (region-end)))
     ;; If moving a subtree, don't drag additional items on subsequent
     ;; moves.
     (if (and (memq last-command '(org-shiftmetaright org-shiftmetaleft))
@@ -834,7 +832,9 @@ children. Return t if sucessful."
 	  delta (if (> arg 0)
 		    (if ind-down (- ind-down ind) 2)
 		  (if ind-up (- ind-up ind) -2)))
-    ;; Make some checks before indenting.
+
+
+    ;; Check for error cases.
     (cond
      ((< (+ delta ind) 0)
       (goto-char pos)
@@ -863,6 +863,8 @@ children. Return t if sucessful."
 	     (save-excursion (goto-char (1- end)) (org-item-has-child-p)))
 	(goto-char pos)
 	(error "Cannot outdent an item having children")))))
+
+
     ;; Replace bullet of current item with the bullet it is going to
     ;; have if we're outdenting. This is needed to prevent indentation
     ;; problems of subtrees when outdenting changes bullet size.
@@ -876,6 +878,8 @@ children. Return t if sucessful."
       (delete-region (point-at-bol) (point))
       (or (eolp) (org-indent-to-column (+ ind1 delta)))
       (beginning-of-line 2))
+
+
     ;; Get back to original position, shifted by delta
     (goto-line line)
     (move-to-column (max (+ delta col) 0))
@@ -918,7 +922,8 @@ children. Return t if sucessful."
 This returns a list with three cons-cells containing indentation
 and bullet of: the item, the item after a promotion, and the item
 after being demoted.  Assume cursor in item line."
-  (let* ((init-bul (lambda (bullet)
+  (let* ((pos (point))
+         (init-bul (lambda (bullet)
                      (if (string-match "\\`[0-9]+\\(\\.\\|)\\)\\'" bullet)
                          (concat "1" (match-string 1 bullet))
                        bullet)))
@@ -936,15 +941,20 @@ after being demoted.  Assume cursor in item line."
          ;; Child of previous item, if any.
          (item-down (save-excursion
                       (let ((prev-p (org-get-previous-item (point) (save-excursion (org-beginning-of-item-list)))))
-                        (if (and prev-p (goto-char prev-p) (org-item-has-child-p))
-                            (progn
-                              (org-end-of-item-or-at-child)
-                              (cons (org-get-indentation)
-                                    (funcall init-bul (org-get-bullet))))
-                          (goto-char pos)
-                          (org-at-item-p)
-                          (goto-char (match-end 0))
-                          (cons (current-column) (cdr item-cur)))))))
+                        (cond
+                         ((and prev-p (goto-char prev-p) (org-item-has-child-p))
+                          (progn
+                            (org-end-of-item-or-at-child)
+                            (cons (org-get-indentation)
+                                  (funcall init-bul (org-get-bullet)))))
+                         ((and (goto-char pos) (org-item-has-child-p))
+                          (progn
+                            (org-end-of-item-or-at-child)
+                            (cons (org-get-indentation)
+                                  (funcall init-bul (org-get-bullet)))))
+                         (t (org-at-item-p)
+                            (goto-char (match-end 0))
+                            (cons (current-column) (cdr item-cur))))))))
     (list item-cur item-up item-down)))
 
 (defvar org-tab-ind-state)
