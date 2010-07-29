@@ -759,23 +759,19 @@ invisible."
 	      (t (throw 'exit t)))))
     i))
 
-(defvar org-suppress-item-indentation) ; dynamically scoped parameter
-
 (defun org-shift-item-indentation (delta)
   "Shift the indentation in current item by DELTA."
-  (unless (org-bound-and-true-p org-suppress-item-indentation)
-    (save-excursion
-      (let ((beg (point-at-bol))
-	    (end (org-end-of-item)))
-	(beginning-of-line 0)
-	(while (> (point) beg)
-	  (when (looking-at "[ \t]*\\S-")
-	    ;; this is not an empty line
-	    (let ((i (org-get-indentation)))
-	      (when (and (> i 0) (> (+ i delta) 0))
-		(indent-line-to (+ i delta)))))
-	  (beginning-of-line 0))))))
-
+  (save-excursion
+    (let ((beg (point-at-bol))
+          (end (org-end-of-item)))
+      (beginning-of-line 0)
+      (while (> (point) beg)
+        (when (looking-at "[ \t]*\\S-")
+          ;; this is not an empty line
+          (let ((i (org-get-indentation)))
+            (when (and (> i 0) (> (+ i delta) 0))
+              (indent-line-to (+ i delta)))))
+        (beginning-of-line 0)))))
 
 (defvar org-last-indent-begin-marker (make-marker))
 (defvar org-last-indent-end-marker (make-marker))
@@ -961,8 +957,7 @@ after being demoted.  Assume cursor in item line."
 
 (defvar org-tab-ind-state)
 (defun org-cycle-item-indentation ()
-  (let ((org-suppress-item-indentation t)
-	(org-adapt-indentation nil))
+  (let ((org-adapt-indentation nil))
     (when (and (or (org-at-item-description-p) (org-at-item-checkbox-p) (org-at-item-p))
 	       (>= (match-end 0) (save-excursion
                                    (org-end-of-item-or-at-child)
