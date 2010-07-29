@@ -17335,21 +17335,21 @@ If the first line is normal text, add an item bullet to each line."
 	  ;; We already have items, de-itemize
 	  (while (< (setq l (1+ l)) l2)
 	    (when (org-at-item-p)
-	      (goto-char (match-beginning 2))
-	      (delete-region (match-beginning 2) (match-end 2))
-	      (and (looking-at "[ \t]+") (replace-match "")))
+	      (skip-chars-forward " \t")
+	      (delete-region (point) (match-end 0)))
 	    (beginning-of-line 2))
 	(if (org-on-heading-p)
 	    ;; Headings, convert to items
 	    (while (< (setq l (1+ l)) l2)
 	      (if (looking-at org-outline-regexp)
-		  (replace-match "- " t t))
+		  (replace-match (org-list-bullet-string "-") t t))
 	      (beginning-of-line 2))
 	  ;; normal lines, turn them into items
 	  (while (< (setq l (1+ l)) l2)
 	    (unless (org-at-item-p)
 	      (if (looking-at "\\([ \t]*\\)\\(\\S-\\)")
-		  (replace-match "\\1- \\2")))
+		  (replace-match
+		   (concat "\\1" (org-list-bullet-string "-") "\\2"))))
 	    (beginning-of-line 2)))))))
 
 (defun org-toggle-heading (&optional nstars)
