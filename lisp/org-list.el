@@ -995,7 +995,9 @@ It determines the number of whitespaces to append by looking at
     (concat
      bullet " "
      ;; Do we need to concat another white space ?
-     (when (string-match org-list-two-spaces-after-bullet-regexp bullet) " "))))
+     (when (and org-list-two-spaces-after-bullet-regexp
+                (string-match org-list-two-spaces-after-bullet-regexp bullet))
+       " "))))
 
 (defun org-list-replace-bullet (new-bullet)
   "Replace current item's bullet with NEW-BULLET.
