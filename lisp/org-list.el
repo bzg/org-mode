@@ -185,10 +185,11 @@ checkbox  when non-nil, checkbox statistics is updated each time
           you either insert a new checkbox or toggle a checkbox.
           It also prevents from inserting a checkbox in a
           description item.
-indent    when non-nil indenting or outdenting list top-item will
-          move the whole list, indenting the first item of a
-          sub-list will be forbidden and outdenting a list whose
-          bullet is * to column 0 will change that bullet to -.
+indent    when non-nil indenting or outdenting list top-item with
+          its subtree will move the whole list, all moves that
+          would break list will be forbidden, and outdenting a
+          list whose bullet is * to column 0 will change that
+          bullet to -.
 insert    when non-nil, trying to insert an item inside a block
           will insert it right before the block instead of
           throwing an error.
@@ -844,7 +845,8 @@ children. Return t if sucessful."
       (cond
        ;; 1. If at top-point move the whole list. Moreover, if
        ;; *-list is going to column 0, change bullet to "-".
-       ((= (point-at-bol) (org-list-top-point))
+       ((and (= (point-at-bol) (org-list-top-point))
+             (not no-subtree))
 	(when (and (= (+ delta ind) 0) (equal bullet "*"))
 	  (org-fix-bullet-type (setq bullet "-")))
 	(setq end (set-marker org-last-indent-end-marker (org-list-bottom-point))))
