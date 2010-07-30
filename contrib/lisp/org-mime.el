@@ -238,7 +238,12 @@ handling with appropriate MIME encoding."
                            (goto-char (point-min)))))
          (html-end (or (and region-p (region-end))
                        (point-max)))
-         (body (org-export-as-org nil nil nil 'string t))
+	 (temp-body-file (make-temp-file "org-mime-export"))
+	 (raw-body (buffer-substring html-start html-end))
+         (body (with-temp-buffer
+		 (insert raw-body)
+		 (write-file temp-body-file)
+		 (org-export-as-org nil nil nil 'string t)))
          (org-link-file-path-type 'absolute)
          ;; because we probably don't want to export a huge style file
          (org-export-htmlize-output-type 'inline-css)
@@ -251,7 +256,8 @@ handling with appropriate MIME encoding."
     ;; dump the exported html into a fresh message buffer
     (reporter-compose-outgoing)
     (goto-char (point-max))
-    (insert (org-mime-multipart body html)
-            (mapconcat 'identity html-images "\n"))))
+    (prog1 (insert (org-mime-multipart body html)
+		   (mapconcat 'identity html-images "\n"))
+      (delete-file temp-body-file))))
 
 (provide 'org-mime)
