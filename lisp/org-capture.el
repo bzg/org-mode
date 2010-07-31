@@ -527,7 +527,7 @@ bypassed."
     (when abort-note
       (cond
        ((equal abort-note 'clean)
-	(message "Capture process aborted and target file cleaned up"))
+	(message "Capture process aborted and target buffer cleaned up"))
        ((equal abort-note 'dirty)
 	(error "Capture process aborted, but target buffer could not be cleaned up correctly"))))))
 
