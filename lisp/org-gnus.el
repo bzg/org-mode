@@ -41,7 +41,8 @@
 (declare-function message-narrow-to-head-1 "message" nil)
 ;; The following line suppresses a compiler warning stemming from gnus-sum.el
 (declare-function gnus-summary-last-subject "gnus-sum" nil)
-
+;; Suppress compiler warning
+(declare-function nnimap-retrieve-headers-from-file "nnimap" nil)
 ;; Customization variables
 
 (when (fboundp 'defvaralias)
