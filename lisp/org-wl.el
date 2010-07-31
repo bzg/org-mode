@@ -189,6 +189,8 @@ ENTITY is a message entity."
 		     msgnum (wl-summary-buffer-msgdb))))
 		 (message-id
 		  (org-wl-message-field 'message-id wl-message-entity))
+		 (message-id-no-brackets
+		  (org-remove-angle-brackets message-id))
 		 (from (org-wl-message-field 'from wl-message-entity))
 		 (to (org-wl-message-field 'to wl-message-entity))
 		 (xref (org-wl-message-field 'xref wl-message-entity))
@@ -212,6 +214,7 @@ ENTITY is a message entity."
 		   org-wl-shimbun-prefer-web-links xref)
 	      (org-store-link-props :type "http" :link xref :description subject
 				    :from from :to to :message-id message-id
+				    :message-id-no-brackets message-id-no-brackets
 				    :subject subject))
 	     ((and (eq folder-type 'nntp) org-wl-nntp-prefer-web-links)
 	      (setq link
@@ -222,13 +225,14 @@ ENTITY is a message entity."
 		     (org-fixup-message-id-for-http message-id)))
 	      (org-store-link-props :type "http" :link link :description subject
 				    :from from :to to :message-id message-id
+				    :message-id-no-brackets message-id-no-brackets
 				    :subject subject))
 	     (t
 	      (org-store-link-props :type "wl" :from from :to to
-				    :subject subject :message-id message-id)
-	      (setq message-id (org-remove-angle-brackets message-id))
+				    :subject subject :message-id message-id
+				    :message-id-no-brackets message-id-no-brackets)
 	      (setq desc (org-email-link-description))
-	      (setq link (org-make-link "wl:" folder-name "#" message-id))
+	      (setq link (org-make-link "wl:" folder-name "#" message-id-no-brackets))
 	      (org-add-link-props :link link :description desc)))
 	    (or link xref)))))))
 
