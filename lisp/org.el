@@ -16356,6 +16356,8 @@ BEG and END default to the buffer boundaries."
     ("Misc")
     ("o" . org-open-at-point)
     ("?" . org-speed-command-help)
+    ("<" . (org-agenda-set-restriction-lock 'subtree))
+    (">" . (org-agenda-remove-restriction-lock))
     )
   "The default speed commands.")
 
