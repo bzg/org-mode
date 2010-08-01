@@ -161,7 +161,7 @@ create. Return the initialized session."
 	  (current-buffer))))))
 
 (defun org-babel-octave-evaluate
-  (session body result-type lang &optional matlabp)
+  (session body result-type &optional matlabp)
   "Pass BODY to the octave process in SESSION.
 If RESULT-TYPE equals 'output then return the outputs of the
 statements in BODY, if RESULT-TYPE equals 'value then return the
