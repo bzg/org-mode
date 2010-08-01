@@ -85,8 +85,8 @@ end")
 
 (defun org-babel-execute:matlab (body params)
   "Execute a block of matlab code with Babel."
-  (require 'matlab)
   (org-babel-execute:octave body params 'matlab))
+
 (defun org-babel-execute:octave (body params &optional matlabp)
   "Execute a block of octave code with Babel."
   (let* ((processed-params (org-babel-process-params params))
@@ -112,8 +112,8 @@ end")
 
 (defun org-babel-prep-session:matlab (session params)
   "Prepare SESSION according to PARAMS."
-  (require 'matlab)
   (org-babel-prep-session:octave session params 'matlab))
+
 (defun org-babel-octave-var-to-octave (var)
   "Convert an emacs-lisp value into an octave variable.
 Converts an emacs-lisp variable into a string of octave code
@@ -142,13 +142,13 @@ specifying a variable of the same value."
   "Create a matlab inferior process buffer.
 If there is not a current inferior-process-buffer in SESSION then
 create. Return the initialized session."
-  (require 'matlab)
   (org-babel-octave-initiate-session session params 'matlab))
+
 (defun org-babel-octave-initiate-session (&optional session params matlabp)
   "Create an octave inferior process buffer.
 If there is not a current inferior-process-buffer in SESSION then
 create. Return the initialized session."
-  (require 'octave-inf)
+  (if matlabp (require 'matlab) (require 'octave-inf))
   (unless (string= session "none")
     (let ((session (or session
 		       (if matlabp "*Inferior Matlab*" "*Inferior Octave*"))))
