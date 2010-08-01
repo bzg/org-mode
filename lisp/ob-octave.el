@@ -119,8 +119,9 @@ end")
 Converts an emacs-lisp variable into a string of octave code
 specifying a variable of the same value."
   (if (listp var)
-      (concat "[" (mapconcat #'org-babel-octave-var-to-octave var ", ") "]")
-    (format "%S" var)))
+      (concat "[" (mapconcat #'org-babel-octave-var-to-octave var
+			     (if (listp (car var)) "; " ",")) "]")
+    (format "%s" (or var "nil"))))
 
 (defun org-babel-prep-session:octave (session params &optional matlabp)
   "Prepare SESSION according to the header arguments specified in PARAMS."
@@ -181,7 +182,7 @@ value of the last statement in BODY, as elisp."
 	       (org-babel-eval
 		cmd
 		(format org-babel-octave-wrapper-method body tmp-file tmp-file))
-	       (org-babel-eval-read-file tmp-file))))))
+	       (org-babel-octave-import-elisp-from-file tmp-file))))))
 
 (defun org-babel-octave-evaluate-session
   (session body result-type &optional matlabp)
