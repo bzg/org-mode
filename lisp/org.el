@@ -15868,7 +15868,7 @@ Some of the options can be changed using the variable
 	      (goto-char beg)
 	      (unless checkdir ; make sure the directory exists
 		(setq checkdir t)
-		(or (file-directory-p todir) (make-directory todir)))
+		(or (file-directory-p todir) (make-directory todir t)))
 	      
 	      (unless executables-checked
 		(org-check-external-command
