@@ -1316,7 +1316,7 @@ the current file."
   (goto-char (point-min))
   (let (class)
     (while (re-search-forward
-	    "^[ \t]*:HTML_CONTAINER_CLASS:[ \t]+\\(\\S-+\\)" nil t)
+	    "^[ \t]*:HTML_CONTAINER_CLASS:[ \t]+\\(.+\\)$" nil t)
       (setq class (match-string 1))
       (save-excursion
 	(org-back-to-heading t)
