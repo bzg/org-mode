@@ -520,7 +520,7 @@ A checkbox is blocked if all of the following conditions are fulfilled:
 	    (error (throw 'exit nil)))
 	  (unless (org-entry-get nil "ORDERED") (throw 'exit nil))
 	  (when (org-search-forward-unenclosed
-                 "^[ \t]*[-+*0-9.)]+[ \t]+\\(\\[@start:[0-9]+\\][ \t]+\\)?\\[[- ]\\]" end t)
+                 "^[ \t]*[-+*0-9.)]+[ \t]+\\(\\[@start:[0-9]+\\][ \t]*\\)?\\[[- ]\\]" end t)
 	    (org-current-line)))))))
 
 ;;; Navigate
@@ -1472,7 +1472,7 @@ sublevels as a list of strings."
 	     (nextitem (or (org-get-next-item (point) end) end))
 	     (item (org-trim (buffer-substring (point) (org-end-of-item-or-at-child))))
 	     (nextindent (if (= (point) end) 0 (org-get-indentation)))
-	     (item (if (string-match "^\\(?:\\[@start:[0-9]+\\][ \t]+\\)?\\[\\([xX ]\\)\\]" item)
+	     (item (if (string-match "^\\(?:\\[@start:[0-9]+\\][ \t]*\\)?\\[\\([xX ]\\)\\]" item)
 		       (replace-match (if (equal (match-string 1 item) " ")
 					  "CBOFF"
 					"CBON")
