@@ -991,8 +991,9 @@ after being demoted.  Assume cursor in item line."
 ;;; Bullets
 
 (defun org-get-bullet ()
-  (and (org-at-item-p)
-       (org-trim (match-string 1))))
+  "Return the bullet of the item at point.
+Assume cursor is at an item."
+  (and (looking-at "[ \t]*\\(\\S-+\\)") (match-string 1)))
 
 (defun org-list-bullet-string (bullet)
   "Concatenate BULLET with an appropriate number of whitespaces.

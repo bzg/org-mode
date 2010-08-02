@@ -18241,9 +18241,7 @@ returning a string.
 An optional third argument bounds the search for START-RE. It
 defaults to previous heading or `point-min'."
   (let ((pos (point))
-	(limit (or bound
-		   (save-excursion (outline-previous-heading))
-		   (point-min))))
+	(limit (or bound (save-excursion (outline-previous-heading)))))
     (save-excursion
       ;; we're on a block when point is on start-re...
       (or (org-at-regexp-p start-re)
