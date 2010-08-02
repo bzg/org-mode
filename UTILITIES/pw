@@ -321,10 +321,10 @@ def action_update_patch(rpc, patch_id, state = None, commit = None,
 
             from_addr = '%s <%s>' % (person['name'], person['email'])
             cc_addr   = '%s <%s>' % (submitter['name'], submitter['email'])
-            to_addr   = notify_on_state_change[state]
+            to_addr   = notify_on_state_change[state.lower()]
 
-	    orig_mail = rpc.patch_get_mbox(patch_id)
-	    orig_mail = '> ' + orig_mail.replace('\n','\n> ')
+            orig_mail = rpc.patch_get_mbox(patch_id)
+            orig_mail = '> ' + orig_mail.replace('\n','\n> ')
 
             longdesc = '''Patch %s (http://patchwork.newartisans.com/patch/%s/) is now "%s".
 
