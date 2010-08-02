@@ -1038,35 +1038,37 @@ Also, fix the indentation."
 Cursor needs to be in the first line of an item, the line that starts
 with something like \"1.\" or \"2)\". Start to count at ARG or 1."
   (interactive "p")
-  (unless (and (org-at-item-p)
-	       (match-beginning 3))
-    (error "This is not an ordered list"))
-  (org-preserve-lc
-   (let* ((offset (progn
-		    (org-beginning-of-item)
-		    (or (and (looking-at "[ \t]*\\[@start:\\([0-9]+\\)")
-			     (string-to-number (match-string 1)))
-			arg
-			1)))
-	  (item-fmt (progn
-		      (looking-at "[ \t]*[0-9]+\\([.)]\\)")
-		      (concat "%d" (or (match-string 1) "."))))
-	  ;; Here is the function applied at each item of the list.
-	  (renumber-item (lambda (counter off fmt)
-			   (let* ((new (format fmt (+ counter off)))
-				  (old (progn
-					 (looking-at org-item-beginning-re)
-					 (match-string 2)))
-				  (begin (match-beginning 2))
-				  (end (match-end 2)))
-			     (delete-region begin end)
-			     (goto-char begin)
-			     (insert new)
-			     ;; In case item number went from 9. to 10.
-			     ;; or the other way.
-			     (org-shift-item-indentation (- (length new) (length old)))
-			     (1+ counter)))))
-     (org-apply-on-list renumber-item 0 offset item-fmt))))
+  (save-match-data
+    (unless (and (org-at-item-p)
+                 (match-beginning 3))
+      (error "This is not an ordered list"))
+    (org-preserve-lc
+     (let* ((item-fmt (progn
+                        (looking-at "[ \t]*[0-9]+\\([.)]\\)")
+                        (concat "%d" (or (match-string 1) "."))))
+            ;; Here is the function applied at each item of the list.
+            (renumber-item (lambda (counter fmt)
+                             (let* ((counter (or (save-excursion
+                                                   (and (org-at-item-p)
+                                                        (goto-char (match-end 0))
+                                                        (looking-at "\\[@start:\\([0-9]+\\)\\]")
+                                                        (string-to-number (match-string 1))))
+                                                 counter))
+                                    (new (format fmt counter))
+                                    (old (progn
+                                           (looking-at org-item-beginning-re)
+                                           (match-string 2)))
+                                    (begin (match-beginning 2))
+                                    (end (match-end 2)))
+                               (unless (equal new old)
+                                 (delete-region begin end)
+                                 (goto-char begin)
+                                 (insert new)
+                                 ;; In case item number went from 9. to 10.
+                                 ;; or the other way.
+                                 (org-shift-item-indentation (- (length new) (length old))))
+                               (1+ counter)))))
+       (org-apply-on-list renumber-item (or arg 1) item-fmt)))))
 
 (defun org-maybe-renumber-ordered-list ()
   "Renumber the ordered list at point if setup allows it.
