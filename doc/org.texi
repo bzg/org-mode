@@ -4737,8 +4737,8 @@ optional.  The individual parts have the following meaning:
 @var{property}        @r{The property that should be edited in this column.}
                 @r{Special properties representing meta data are allowed here}
                 @r{as well (@pxref{Special properties})}
-(title)         @r{The header text for the column. If omitted, the}
-                @r{property name is used.}
+@var{(title)}         @r{The header text for the column. If omitted, the property}
+                @r{name is used.}
 @{@var{summary-type}@}  @r{The summary type.  If specified, the column values for}
                 @r{parent nodes are computed from the children.}
                 @r{Supported summary types are:}
