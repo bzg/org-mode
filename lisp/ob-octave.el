@@ -182,7 +182,8 @@ value of the last statement in BODY, as elisp."
 	       (org-babel-eval
 		cmd
 		(format org-babel-octave-wrapper-method body tmp-file tmp-file))
-	       (org-babel-octave-import-elisp-from-file tmp-file))))))
+	       (org-babel-octave-import-elisp-from-file
+		(org-babel-maybe-remote-file tmp-file)))))))
 
 (defun org-babel-octave-evaluate-session
   (session body result-type &optional matlabp)
