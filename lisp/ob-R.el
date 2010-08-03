@@ -230,7 +230,7 @@ return the value of the last statement in BODY, as elisp."
 				     "FALSE")))
 	   (org-babel-R-process-value-result
 	    (org-babel-import-elisp-from-file
-	     (org-babel-maybe-remote-file tmp-file)) column-names-p))))
+	     (org-babel-maybe-remote-file tmp-file) '(16)) column-names-p))))
     ;; comint session evaluation
     (case result-type
       (value
@@ -251,7 +251,7 @@ return the value of the last statement in BODY, as elisp."
 	   (inferior-ess-send-input))
 	 (org-babel-R-process-value-result
 	  (org-babel-import-elisp-from-file
-	   (org-babel-maybe-remote-file tmp-file))  column-names-p)))
+	   (org-babel-maybe-remote-file tmp-file) '(16))  column-names-p)))
       (output
        (mapconcat
 	#'org-babel-chomp
