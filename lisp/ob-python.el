@@ -125,10 +125,7 @@ Emacs-lisp table, otherwise return the results as a string."
 	 (mapcar (lambda (el) (if (equal el 'None) 'hline el)) res)
        res))
    (org-babel-read
-    (if (or (and (equal (substring results 0 1) "[")
-		 (equal (substring results -2 -1) "]"))
-	    (and (equal (substring results 0 1) "(")
-		 (equal (substring results -2 -1) ")")))
+    (if (and (stringp results) (string-match "^[([].+[])]$" results))
        (org-babel-read
         (concat "'"
                 (replace-regexp-in-string

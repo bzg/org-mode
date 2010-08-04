@@ -1508,7 +1508,7 @@ This is taken almost directly from `org-read-prop'."
 	      (length string)))
       (string-to-number string)))
 
-(defun org-babel-import-elisp-from-file (file-name)
+(defun org-babel-import-elisp-from-file (file-name &optional separator)
   "Read the results located at FILE-NAME into an elisp table.
 If the table is trivial, then return it as a scalar."
   (let (result)
@@ -1516,7 +1516,7 @@ If the table is trivial, then return it as a scalar."
       (with-temp-buffer
 	(condition-case nil
 	    (progn
-	      (org-table-import file-name nil)
+	      (org-table-import file-name separator)
 	      (delete-file file-name)
 	      (setq result (mapcar (lambda (row)
 				     (mapcar #'org-babel-string-read row))
