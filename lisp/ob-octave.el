@@ -76,7 +76,7 @@ delete('%s')
 (defvar org-babel-octave-wrapper-method
   "%s
 if ischar(ans), fid = fopen('%s', 'w'); fprintf(fid, '%%s\\n', ans); fclose(fid);
-else, save -ascii %s ans
+else, dlmwrite('%s', ans, '\\t')
 end")
 
 (defvar org-babel-octave-eoe-indicator "\'org_babel_eoe\'")
@@ -253,7 +253,7 @@ This removes initial blank and comment lines and then calls
       (if (< (setq beg (point-min))
 	     (setq end (point-at-bol)))
 	  (delete-region beg end)))
-    (org-babel-import-elisp-from-file temp-file)))
+    (org-babel-import-elisp-from-file temp-file '(16))))
 
 (defun org-babel-octave-read-string (string)
   "Strip \\\"s from around octave string"
