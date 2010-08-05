@@ -413,6 +413,9 @@ session."
          (body (nth 1 info))
          (params (nth 2 info))
          (session (cdr (assoc :session params)))
+	 (dir (cdr (assoc :dir params)))
+	 (default-directory
+	   (or (and dir (file-name-as-directory dir)) default-directory))
 	 (cmd (intern (concat "org-babel-load-session:" lang))))
     (unless (fboundp cmd)
       (error "No org-babel-load-session function for %s!" lang))
