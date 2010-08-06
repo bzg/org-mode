@@ -1439,6 +1439,17 @@ Changing this requires a restart of Emacs to work correctly."
   :group 'org-link-follow
   :type 'integer)
 
+(defcustom org-link-search-must-match-exact-headline 'query-to-create
+  "Non-nil means internal links in Org files must exactly match a headline.
+When nil, the link search tries to match a phrase will all words
+in the search text."
+  :group 'org-link-follow
+  :type '(choice
+	  (const :tag "Use fuzy text search" nil)
+	  (const :tag "Match only exact headline" t)
+	  (const :tag "Match extact headline or query to create it"
+		 query-to-create)))
+
 (defcustom org-link-frame-setup
   '((vm . vm-visit-folder-other-frame)
     (gnus . org-gnus-no-new-news)
@@ -9300,6 +9311,7 @@ the window configuration before `org-open-at-point' was called using:
 
     (set-window-configuration org-window-config-before-follow-link)")
 
+(defvar org-link-search-inhibit-query nil) ;; dynamically scoped
 (defun org-link-search (s &optional type avoid-pos)
   "Search for a link search option.
 If S is surrounded by forward slashes, it is interpreted as a
@@ -9317,7 +9329,7 @@ in all files.  If AVOID-POS is given, ignore matches near that position."
 	(pre nil) (post nil)
 	words re0 re1 re2 re3 re4_ re4 re5 re2a re2a_ reall)
     (cond
-     ;; First check if there are any special
+     ;; First check if there are any special search functions
      ((run-hook-with-args-until-success 'org-execute-file-search-functions s))
      ;; Now try the builtin stuff
      ((and (equal (string-to-char s0) ?#)
@@ -9362,8 +9374,28 @@ in all files.  If AVOID-POS is given, ignore matches near that position."
        ;;((eq major-mode 'dired-mode)
        ;; (grep (concat "grep -n -e '" (match-string 1 s) "' *")))
        (t (org-do-occur (match-string 1 s)))))
+     ((and (org-mode-p) org-link-search-must-match-exact-headline)
+      (and (equal (string-to-char s) ?*) (setq s (substring s 1)))
+      (goto-char (point-min))
+      (cond
+       ((let (case-fold-search)
+	  (re-search-forward (format org-complex-heading-regexp-format
+				     (regexp-quote s))
+			     nil t))
+	;; OK, found a match
+	(goto-char (match-beginning 0)))
+       ((and (not org-link-search-inhibit-query)
+	     (eq org-link-search-must-match-exact-headline 'query-to-create)
+	     (y-or-n-p "No match - create this as a new heading? "))
+	(goto-char (point-max))
+	(or (bolp) (newline))
+	(insert "* " s "\n")
+	(beginning-of-line 0))
+       (t
+	(goto-char pos)
+	(error "No match"))))
      (t
-      ;; A normal search strings
+      ;; A normal search string
       (when (equal (string-to-char s) ?*)
 	;; Anchor on headlines, post may include tags.
 	(setq pre "^\\*+[ \t]+\\(?:\\sw+\\)?[ \t]*"
@@ -9408,13 +9440,7 @@ in all files.  If AVOID-POS is given, ignore matches near that position."
 		  )
 	      (goto-char (match-beginning 1))
 	    (goto-char pos)
-	    (error "No match")))))
-     (t
-      ;; Normal string-search
-      (goto-char (point-min))
-      (if (search-forward s nil t)
-	  (goto-char (match-beginning 0))
-	(error "No match"))))
+	    (error "No match"))))))
     (and (org-mode-p) (org-show-context 'link-search))
     type))
 
