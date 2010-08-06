@@ -1650,7 +1650,7 @@ The following commands are available:
 (org-defkey org-agenda-mode-map "O" 'org-agenda-clock-out)
 (org-defkey org-agenda-mode-map "\C-c\C-x\C-x" 'org-agenda-clock-cancel)
 (org-defkey org-agenda-mode-map "X" 'org-agenda-clock-cancel)
-(org-defkey org-agenda-mode-map "\C-c\C-x\C-j" 'org-clock-goto)
+(org-defkey org-agenda-mode-map "\C-c\C-x\C-j" 'org-agenda-clock-goto)
 (org-defkey org-agenda-mode-map "J" 'org-clock-goto)
 (org-defkey org-agenda-mode-map "+" 'org-agenda-priority-up)
 (org-defkey org-agenda-mode-map "-" 'org-agenda-priority-down)
@@ -7089,6 +7089,16 @@ The cursor may be at a date in the calendar, or in the Org agenda."
     (error "No running clock"))
   (org-with-remote-undo (marker-buffer org-clock-marker)
     (org-clock-cancel)))
+
+(defun org-agenda-clock-goto ()
+  "Jump to the currently clocked in task within the agenda."
+  (interactive)
+  (let (pos)
+    (mapc (lambda (o)
+	    (if (eq (overlay-get o 'type) 'org-agenda-clocking)
+		(setq pos (overlay-start o))))
+	  (overlays-in (point-min) (point-max)))
+    (if pos (goto-char pos))))
 
 (defun org-agenda-diary-entry-in-org-file ()
   "Make a diary entry in the file `org-agenda-diary-file'."
