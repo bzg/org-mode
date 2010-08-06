@@ -341,6 +341,7 @@ makerelease:
 	$(MKDIR) RELEASEDIR
 	cp org-$(TAG).zip org-$(TAG).tar.gz RELEASEDIR
 	cp doc/org.pdf doc/orgcard.pdf doc/org.texi doc/org.html RELEASEDIR
+	cp doc/org_dual_license.texi RELEASEDIR
 	cp doc/orgguide.pdf doc/orgcard.txt RELEASEDIR
 	cp RELEASEDIR/org-$(TAG).zip    RELEASEDIR/org.zip
 	cp RELEASEDIR/org-$(TAG).tar.gz RELEASEDIR/org.tar.gz
