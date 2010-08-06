@@ -1289,18 +1289,19 @@ the current file."
 		   (string-match "^\\." link))
 	       nil)
 	      (t
-	       (save-excursion
-		 (setq found (condition-case nil (org-link-search link)
-			       (error nil)))
-		 (when (and found
-			    (or (org-on-heading-p)
-				(not (eq found 'dedicated))))
-		   (or (get-text-property (point) 'target)
-		       (get-text-property
-			(max (point-min)
-			     (1- (or (previous-single-property-change
-				      (point) 'target) 0)))
-			'target))))))))
+	       (let ((org-link-search-inhibit-query t))
+		 (save-excursion
+		   (setq found (condition-case nil (org-link-search link)
+				 (error nil)))
+		   (when (and found
+			      (or (org-on-heading-p)
+				  (not (eq found 'dedicated))))
+		     (or (get-text-property (point) 'target)
+			 (get-text-property
+			  (max (point-min)
+			       (1- (or (previous-single-property-change
+					(point) 'target) 0)))
+			  'target)))))))))
        (when target
 	 (set-match-data md)
 	 (goto-char (match-beginning 1))

@@ -2806,23 +2806,13 @@ text before the first headline is usually not exported, so the first such
 target should be after the first headline, or in the line directly before the
 first headline.}.
 
-If no dedicated target exists, Org will search for the words in the link.  In
-the above example the search would be for @samp{my target}.  Links starting
-with a star like @samp{*My Target} restrict the search to
-headlines@footnote{To insert a link targeting a headline, in-buffer
-completion can be used.  Just type a star followed by a few optional letters
-into the buffer and press @kbd{M-@key{TAB}}.  All headlines in the current
-buffer will be offered as completions.  @xref{Handling links}, for more
-commands creating links.}.  When searching, Org-mode will first try an
-exact match, but then move on to more and more lenient searches.  For
-example, the link @samp{[[*My Targets]]} will find any of the following:
-
-@example
-** My targets
-** TODO my targets are bright
-** my 20 targets are
-@end example
-
+If no dedicated target exists, Org will search for a headline that is exactly
+the link text but may also include a TODO keyword and tags@footnote{To insert
+a link targeting a headline, in-buffer completion can be used.  Just type a
+star followed by a few optional letters into the buffer and press
+@kbd{M-@key{TAB}}.  All headlines in the current buffer will be offered as
+completions.}.  In non-Org files, the search will look for the words in the
+link text, in the above example the search would be for @samp{my target}.
 
 Following a link pushes a mark onto Org's own mark ring.  You can
 return to the previous position with @kbd{C-c &}.  Using this command
