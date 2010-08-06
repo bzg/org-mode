@@ -3077,7 +3077,7 @@ points to a file, `org-agenda-diary-entry' will be used instead."
 (defcustom org-format-latex-options
   '(:foreground default :background default :scale 1.0
     :html-foreground "Black" :html-background "Transparent" :html-scale 1.0
-    :matchers ("begin" "$1" "$" "$$" "\\(" "\\["))
+    :html-resolution 140 :matchers ("begin" "$1" "$" "$$" "\\(" "\\["))
   "Options for creating images from LaTeX fragments.
 This is a property list with the following properties:
 :foreground  the foreground color for images embedded in Emacs, e.g. \"Black\".
@@ -3088,7 +3088,11 @@ This is a property list with the following properties:
 
 :html-foreground, :html-background, :html-scale
              the same numbers for HTML export.
+<<<<<<< HEAD
 
+=======
+:html-resolution the resolution of images for HTML output
+>>>>>>> 9330ad5b8106f0c6c0810c993db2f0def1741f63
 :matchers    a list indicating which matchers should be used to
              find LaTeX fragments.  Valid members of this list are:
              \"begin\"  find environments
@@ -15922,8 +15926,9 @@ Some of the options can be changed using the variable
 	 (fnh (if (featurep 'xemacs)
                   (font-height (get-face-font 'default))
                 (face-attribute 'default :height nil)))
+	 (res (plist-get options :html-resolution))
 	 (scale (or (plist-get options (if buffer :scale :html-scale)) 1.0))
-	 (dpi (number-to-string (* scale (floor (* 0.9 (if buffer fnh 140.))))))
+	 (dpi (number-to-string (* scale (floor (* 0.9 (if buffer fnh res))))))
 	 (fg (or (plist-get options (if buffer :foreground :html-foreground))
 		 "Black"))
 	 (bg (or (plist-get options (if buffer :background :html-background))

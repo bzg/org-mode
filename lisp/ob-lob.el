@@ -77,8 +77,6 @@ if so then run the appropriate source block from the Library."
   (let ((info (org-babel-lob-get-info)))
     (if (nth 0 info) (progn (org-babel-lob-execute info) t) nil)))
 
-(add-hook 'org-ctrl-c-ctrl-c-hook 'org-babel-lob-execute-maybe)
-
 ;;;###autoload
 (defun org-babel-lob-get-info ()
   "Return a Library of Babel function call as a string.

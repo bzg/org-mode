@@ -195,17 +195,26 @@ of potentially harmful code."
       (error "evaluation aborted"))))
 
 ;;;###autoload
+(defun org-babel-execute-safely-maybe ()
+  (unless org-babel-no-eval-on-ctrl-c-ctrl-c
+    (org-babel-execute-maybe)))
+
+(add-hook 'org-ctrl-c-ctrl-c-hook 'org-babel-execute-safely-maybe)
+
+;;;###autoload
+(defun org-babel-execute-maybe ()
+  (interactive)
+  (or (org-babel-execute-src-block-maybe)
+      (org-babel-lob-execute-maybe)))
+
 (defun org-babel-execute-src-block-maybe ()
   "Conditionally execute a source block.
 Detect if this is context for a Babel src-block and if so
 then run `org-babel-execute-src-block'."
   (interactive)
-  (if (not org-babel-no-eval-on-ctrl-c-ctrl-c)
-      (let ((info (org-babel-get-src-block-info)))
-	(if info
-	    (progn (org-babel-execute-src-block current-prefix-arg info) t) nil))
-    nil))
-(add-hook 'org-ctrl-c-ctrl-c-hook 'org-babel-execute-src-block-maybe)
+  (let ((info (org-babel-get-src-block-info)))
+    (if info
+	(progn (org-babel-execute-src-block current-prefix-arg info) t) nil)))
 
 ;;;###autoload
 (defun org-babel-expand-src-block-maybe ()
@@ -298,6 +307,7 @@ can not be resolved.")
 ;;; functions
 (defvar call-process-region)
 ;;;###autoload
+
 (defun org-babel-execute-src-block (&optional arg info params)
   "Execute the current source code block.
 Insert the results of execution into the buffer.  Source code
@@ -413,6 +423,9 @@ session."
          (body (nth 1 info))
          (params (nth 2 info))
          (session (cdr (assoc :session params)))
+	 (dir (cdr (assoc :dir params)))
+	 (default-directory
+	   (or (and dir (file-name-as-directory dir)) default-directory))
 	 (cmd (intern (concat "org-babel-load-session:" lang))))
     (unless (fboundp cmd)
       (error "No org-babel-load-session function for %s!" lang))

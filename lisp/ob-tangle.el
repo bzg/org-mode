@@ -234,7 +234,9 @@ code blocks by language."
 	       (setq current-heading new-heading))
 	   (setq block-counter (+ 1 block-counter))))
        (replace-regexp-in-string "[ \t]" "-"
-				 (nth 4 (org-heading-components))))
+				 (condition-case nil
+				     (nth 4 (org-heading-components))
+				   (error (buffer-file-name)))))
       (let* ((link (progn (call-interactively 'org-store-link)
                           (org-babel-clean-text-properties
 			   (car (pop org-stored-links)))))
