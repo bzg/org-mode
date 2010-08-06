@@ -3084,9 +3084,11 @@ This is a property list with the following properties:
              `default' means use the foreground of the default face.
 :background  the background color, or \"Transparent\".
              `default' means use the background of the default face.
-:scale       a scaling factor for the size of the images.
+:scale       a scaling factor for the size of the images, to get more pixels
+
 :html-foreground, :html-background, :html-scale
              the same numbers for HTML export.
+
 :matchers    a list indicating which matchers should be used to
              find LaTeX fragments.  Valid members of this list are:
              \"begin\"  find environments
