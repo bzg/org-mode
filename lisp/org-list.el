@@ -1358,6 +1358,7 @@ in subtree."
                          (t "[X]"))
                    t t nil 1))))))))
     (save-excursion
+      (beginning-of-line)
       (while (< (point) end)
         (funcall act-on-item ref-presence ref-status)
         (org-search-forward-unenclosed org-item-beginning-re end 'move)))
