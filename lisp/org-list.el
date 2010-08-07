@@ -636,7 +636,7 @@ Return point."
 		   (let ((prev-p (org-get-previous-item pos bound)))
 		     ;; recurse until no more item of the same level
 		     ;; can be found.
-		     (if prev-p (funcall move-up prev-p bound) pos)))))
+		     (if (not prev-p) pos (funcall move-up prev-p bound))))))
     ;; Go to the last item found and at bol in case we didn't move
     (goto-char (funcall move-up (point) limit))
     (goto-char (point-at-bol))))
@@ -648,7 +648,7 @@ Return point."
          (get-last-item
           (lambda (pos)
             (let ((next-p (org-get-next-item pos limit)))
-              (if next-p (funcall get-last-item next-p) pos)))))
+              (if (not next-p) pos (funcall get-last-item next-p))))))
     (org-beginning-of-item)
     (goto-char (funcall get-last-item (point)))))
 
@@ -1277,7 +1277,7 @@ is an integer, 0 means `-', 1 means `+' etc. If WHICH is
 					    (or (eq org-plain-list-ordered-item-terminator ?.)
 						(org-at-item-description-p))) '("1)"))
 			       (unless (and bullet-rule-p
-					    (or (eq  org-plain-list-ordered-item-terminator ?\))
+					    (or (eq org-plain-list-ordered-item-terminator ?\))
 						(org-at-item-description-p))) '("1."))))
 	  (len (length bullet-list))
 	  (item-index (- len (length (member current bullet-list))))
