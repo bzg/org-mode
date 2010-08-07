@@ -1006,13 +1006,14 @@ BEGIN is included and END excluded."
   "Apply modifications to list so it mirrors STRUCT.
 Initial position is restored after the changes."
   (let* ((pos (copy-marker (point)))
+	 (ancestor (caar struct))
          (modify
           (lambda (item)
             (goto-char (car item))
 	    (org-list-indent-item (nth 1 item))
 	    (org-list-replace-bullet (org-list-bullet-string (nth 2 item)))))
 	 ;; Remove ancestor if it is left.
-	 (struct-to-apply (if (= 0 (caar struct)) (cdr struct) struct)))
+	 (struct-to-apply (if (or (not ancestor) (= 0 ancestor)) (cdr struct) struct)))
     ;; Apply changes from bottom to top
     (mapc modify (nreverse struct-to-apply))
     (goto-char pos)))
