@@ -451,12 +451,13 @@ allowed.  The default we use here encompasses both."
   :group 'org-export)
 
 (defcustom org-latex-to-pdf-process
-  '("pdflatex -interaction nonstopmode %s"
-    "pdflatex -interaction nonstopmode %s")
+  '("pdflatex -interaction nonstopmode -output-directory %o %f"
+    "pdflatex -interaction nonstopmode -output-directory %o %f")
   "Commands to process a LaTeX file to a PDF file.
 This is a list of strings, each of them will be given to the shell
-as a command.  %s in the command will be replaced by the full file name, %b
-by the file base name (i.e. without extension).
+as a command.  %f in the command will be replaced by the full file name, %b
+by the file base name (i.e. without extension) and %o by the base directory
+of the file.
 The reason why this is a list is that it usually takes several runs of
 pdflatex, maybe mixed with a call to bibtex.  Org does not have a clever
 mechanism to detect which of these commands have to be run to get to a stable
@@ -840,9 +841,10 @@ when PUB-DIR is set, use this as the publishing directory."
 		     (save-excursion
 		       (goto-char (point-min))
 		       (re-search-forward "\\\\bibliography{" nil t))))
-	 cmd)
+	 cmd output-dir)
     (with-current-buffer outbuf (erase-buffer))
-    (message "Processing LaTeX file...")
+    (message (concat "Processing LaTeX file " file "..."))
+    (setq output-dir (file-name-directory file))
     (if (and cmds (symbolp cmds))
 	(funcall cmds (shell-quote-argument file))
       (while cmds
@@ -852,15 +854,20 @@ when PUB-DIR is set, use this as the publishing directory."
 		     (save-match-data
 		       (shell-quote-argument base))
 		     t t cmd)))
-	(while (string-match "%s" cmd)
+	(while (string-match "%f" cmd)
 	  (setq cmd (replace-match
 		     (save-match-data
 		       (shell-quote-argument file))
 		     t t cmd)))
+	(while (string-match "%o" cmd)
+	  (setq cmd (replace-match
+		     (save-match-data
+		       (shell-quote-argument output-dir))
+		     t t cmd)))
 	(shell-command cmd outbuf outbuf)))
-    (message "Processing LaTeX file...done")
+    (message (concat "Processing LaTeX file " file "...done"))
     (if (not (file-exists-p pdffile))
-	(error "PDF file was not produced")
+	(error (concat "PDF file " pdffile " was not produced"))
       (set-window-configuration wconfig)
       (when org-export-pdf-remove-logfiles
 	(dolist (ext org-export-pdf-logfiles)
