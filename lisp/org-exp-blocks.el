@@ -4,7 +4,7 @@
 ;;   Free Software Foundation, Inc.
 
 ;; Author: Eric Schulte
-;; Version: TAG=7.01g
+;; Version: 7.01h
 
 ;; This file is part of GNU Emacs.
 ;;
