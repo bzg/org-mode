@@ -5459,7 +5459,7 @@ needs to be inserted at a specific position in the font-lock sequence.")
 	   ;; Checkboxes
 	   '("^[ \t]*\\([-+*]\\|[0-9]+[.)][ \t]+\\(?:\\[@start:[0-9]+\\][ \t]*\\)?\\)\\(\\[[- X]\\]\\)"
 	     2 'org-checkbox prepend)
-	   (if org-provide-checkbox-statistics
+	   (if (cdr (assq 'checkbox org-list-automatic-rules))
 	       '("\\[\\([0-9]*%\\)\\]\\|\\[\\([0-9]*\\)/\\([0-9]*\\)\\]"
 		 (0 (org-get-checkbox-statistics-face) t)))
 	   ;; Description list items
