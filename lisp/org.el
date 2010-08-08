@@ -14011,9 +14011,9 @@ a priority cookie and tags in the standard locations."
 	(widen)
 	(goto-char (point-min))
 	(let (case-fold-search)
-	  (if (setq p (re-search-forward
-		       (format org-complex-heading-regexp-format
-			       (regexp-quote heading)) nil t))
+	  (if (re-search-forward
+	       (format org-complex-heading-regexp-format
+		       (regexp-quote heading)) nil t)
 	      (if pos-only
 		  (match-beginning 0)
 		(move-marker (make-marker) (match-beginning 0)))))))))
@@ -14030,7 +14030,7 @@ When the target headline is found, return a marker to this location."
         (setq visiting (org-find-base-buffer-visiting file))
         (setq buffer (or visiting (find-file-noselect file)))
         (setq m (org-find-exact-headling-in-buffer
-                 target buffer))
+                 heading buffer))
         (when (and (not m) (not visiting)) (kill-buffer buffer))
         (and m (throw 'found m))))))
 
