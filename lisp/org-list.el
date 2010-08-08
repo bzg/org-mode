@@ -789,9 +789,10 @@ bullet string and bullet counter, if any."
 
 A structure is an alist where key is point of item and values
 are, in that order, indentation, bullet string and value of
-counter if any. The structure contains every list and sublist
-that has items between BEGIN and END and their common parent, if
-any.
+counter, if any. A structure contains every list and sublist that
+has items between BEGIN and END along with their common ancestor.
+If no such ancestor can be found, the function will add a virtual
+ancestor at position 0.
 
 If OUTDENT is non-nil, it will also grab all of the parent list
 and the grand-parent. Setting OUTDENT to t is mandatory when next
@@ -811,8 +812,7 @@ change is an outdent."
                 (while (and (org-search-backward-unenclosed org-item-beginning-re top t)
                             (>= (org-get-indentation) ind-min))
                   (setq pre-list (cons (org-list-struct-assoc-at-point) pre-list)))
-                ;; Now get the parent, if any. If not, add a virtual
-		;; ancestor at position 0.
+                ;; Now get the parent. If none, add a virtual ancestor
                 (if (< (org-get-indentation) ind-min)
                     (setq pre-list (cons (org-list-struct-assoc-at-point) pre-list))
                   (setq pre-list (cons (list 0 (org-get-indentation) "" nil) pre-list)))
@@ -836,8 +836,7 @@ change is an outdent."
           extended)))))
 
 (defun org-list-struct-origins (struct)
-  "Return an alist where key is item's position and value parent's.
-Common ancestor of structure is, as a convention, at position 0."
+  "Return an alist where key is item's position and value parent's."
   (let* ((struct-rev (reverse struct))
 	 (prev-item (lambda (item) (car (nth 1 (member (assq item struct) struct-rev)))))
 	 (get-origins
@@ -1116,9 +1115,12 @@ children. Return t if successful."
             (top-ind (nth 1 beg-item)))
         (if (< (+ top-ind offset) 0)
             (error "Cannot outdent beyond margin")
+	  ;; Change bullet if necessary
           (when (and (= (+ top-ind offset) 0) (string-match "*" (nth 2 beg-item)))
             (setcdr beg-item (list (nth 1 beg-item) (org-list-bullet-string "-"))))
-          (mapc '(lambda (item) (setcdr item (cons (+ (nth 1 item) offset) (cddr item)))) struct)
+	  ;; Shift ancestor
+	  (let ((anc (car struct))) (setcdr anc (list (+ (nth 1 anc) offset) "" nil)))
+	  (org-list-struct-fix-struct struct origins)
           (org-list-struct-apply-struct struct))))
      ;; Forbidden move
      ((and (< arg 0)
