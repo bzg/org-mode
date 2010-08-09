@@ -5212,6 +5212,16 @@ The function understands English month and weekday abbreviations.  If
 you want to use unabbreviated names and/or other languages, configure
 the variables @code{parse-time-months} and @code{parse-time-weekdays}.
 
+You can specify a time range by giving start and end times or by giving a
+start time and a duration (in HH:MM format). Use '-' or '--' as the separator
+in the former case and use '+' as the separator in the latter case. E.g.
+
+@example
+11am-1:15pm    --> 11:00-13:15
+11am--1:15pm   --> same as above
+11am+2:15      --> same as above
+@end example
+
 @cindex calendar, for selecting date
 @vindex org-popup-calendar-for-date-prompt
 Parallel to the minibuffer prompt, a calendar is popped up@footnote{If
