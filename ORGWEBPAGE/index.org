@@ -179,8 +179,10 @@ and corresponding to the latest git version.
      back and forth between basic and advanced documentation.
    - You can also have the entire manual in a [[file:org.html][single monolithic file]].
    - Download the manual as a 200-page [[file:org.pdf][PDF document]].
-   - A [[http://hpcgi1.nifty.com/spen/index.cgi?OrgMode%2fManual][Japanese translation]] of the manual (version 4.60), by Takeshi
-     Okano.
+   - Translations of the manual
+     - A [[http://hpcgi1.nifty.com/spen/index.cgi?OrgMode%2fManual][Japanese translation]] of an older version (4.60), by Takeshi
+       Okano.
+   - A [[http://gnu.manticore.es/manual-org-emacs][Spanish translation]] (version 6.21b).
 
 ** Reference card
    - Download the [[file:orgcard.pdf][Refcard]] for org-mode
