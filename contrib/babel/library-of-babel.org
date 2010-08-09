@@ -46,9 +46,14 @@ file as either a table or a string.
 Write =data= to a file at =file=.  If =data= is a list, then write it
 as a table in traditional Org-mode table syntax.
 #+srcname: write
-#+begin_src emacs-lisp :var data="" :var file=""
-  (with-temp-file file
-    (org-babel-insert-result data))
+#+begin_src emacs-lisp :var data="" :var file="" :var ext='()
+  (flet ((echo (r) (if (stringp r) r (format "%S" r))))
+    (with-temp-file file
+      (case (and (listp data)
+                 (or ext (intern (file-name-extension file))))
+        ('tsv (insert (orgtbl-to-tsv data '(:fmt echo))))
+        ('csv (insert (orgtbl-to-csv data '(:fmt echo))))
+        (t    (org-babel-insert-result data)))))
   nil
 #+end_src
 
