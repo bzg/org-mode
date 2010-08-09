@@ -61,6 +61,7 @@
 (declare-function org-babel-ref-split-args "ob-ref" (arg-string))
 (declare-function org-babel-ref-variables "ob-ref" (params))
 (declare-function org-babel-ref-resolve-reference "ob-ref" (ref &optional params))
+(declare-function org-babel-lob-execute-maybe "ob-lob" ())
 
 (defgroup org-babel nil
   "Code block evaluation and management in `org-mode' documents."
