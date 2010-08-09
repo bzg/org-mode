@@ -1187,7 +1187,8 @@ code ---- the results are extracted in the syntax of the source
 	      (results-switches
                (cdr (assoc :results_switches (nth 2 info))))
 	      beg end)
-	  (when existing-result
+	  (if (not existing-result)
+	      (setq beg (point))
 	    (goto-char existing-result)
 	    (save-excursion
 	      (re-search-forward "#" nil t)
