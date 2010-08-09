@@ -385,7 +385,8 @@ function ends."
 	 ;; Guess number of blank lines used to separate items.
 	 (blank-lines-nb
 	  (let ((insert-blank-p
-		 (cdr (assq 'plain-list-item org-blank-before-new-entry))))
+		 (cdr (assq 'plain-list-item org-blank-before-new-entry)))
+		usr-blank)
 	    (cond
 	     ;; Trivial cases where there should be none.
 	     ((or org-empty-line-terminates-plain-lists
@@ -401,9 +402,20 @@ function ends."
 			   (org-back-over-empty-lines))
 		   ;; Is there a previous item?
 		   ((not (org-list-first-item-p)) (org-back-over-empty-lines))
+		   ;; User inserted blank lines, trust him
+		   ((and (> true-pos (org-end-of-item-before-blank))
+			 (> (save-excursion
+			      (goto-char true-pos)
+			      (skip-chars-backward " \t")
+			      (setq usr-blank (org-back-over-empty-lines))) 0))
+		    usr-blank)
 		   ;; Item alone: count lines separating it from parent, if any
 		   ((/= (org-list-top-point) (point-at-bol))
 		    (org-back-over-empty-lines))
+		   ;; Are there blank lines inside the item ?
+		   ((save-excursion
+		      (org-search-forward-unenclosed
+		       "^[ \t]*$" (org-end-of-item-before-blank) t)) 1)
 		   ;; No parent: no blank line.
 		   (t 0)))))))
 	 (insert-fun
