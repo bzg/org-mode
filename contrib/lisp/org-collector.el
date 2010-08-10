@@ -111,18 +111,31 @@ a column, or through the generation of an error.")
 
 (defun org-read-prop (prop)
   "Convert the string property PROP to a number if appropriate.
-Otherwise if prop looks like a list (meaning it starts with a
-'(') then read it as lisp, otherwise return it unmodified as a
-string."
+If prop looks like a list (meaning it starts with a '(') then
+read it as lisp expression, otherwise return it unmodified as a
+string.
+
+Results of calling:
+\(org-read-prop \"12\") -> 12
+\(org-read-prop \"(1 2 3)\") -> (1 2 3)
+\(org-read-prop \"+0\") -> 0
+\(org-read-prop \"aaa\") -> \"aaa\""
   (if (and (stringp prop) (not (equal prop "")))
       (let ((out (string-to-number prop)))
 	(if (equal out 0)
-	    (if (or (equal "(" (substring prop 0 1)) (equal "'" (substring prop 0 1)))
-		(read prop)
-	      (if (string-match "^\\(+0\\|-0\\|0\\)$" prop)
-		  0
-		(progn (set-text-properties 0 (length prop) nil prop)
-		       prop)))
+	    (cond
+	     ((or
+	       (equal "(" (substring prop 0 1))
+	       (equal "'" (substring prop 0 1)))
+
+	      (condition-case nil
+		  (read prop)
+		(error prop)))
+	     ((string-match "^\\(+0\\|-0\\|0\\)$" prop)
+	      0)
+	     (t
+	      (set-text-properties 0 (length prop) nil prop)
+	      prop))
 	  out))
     prop))
 
