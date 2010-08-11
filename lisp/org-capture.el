@@ -1104,6 +1104,7 @@ The template may still contain \"%?\" for cursor positioning."
 	  (plist-put org-store-link-plist :annotation v-a)
 	  org-store-link-plist
 	  (plist-put org-store-link-plist :initial v-i))
+    (set initial v-i)
 
     (unless template (setq template "") (message "No template") (ding)
 	    (sit-for 1))
