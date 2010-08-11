@@ -749,7 +749,7 @@ N days, just insert a special line indicating the size of the gap."
   :tag "Org Agenda Startup"
   :group 'org-agenda)
 
-(defcustom org-agenda-menu-show-match t
+(defcustom org-agenda-menu-show-matcher t
   "Non-nil menas show the match string in the agenda dispatcher menu.
 When nil, the mathcer string is not shown, but is put into the help-echo
 property so than moving the mouse over the command shows it.
@@ -760,7 +760,8 @@ you wnat to use two-column display (see `org-agenda-menu-two-column')."
 
 (defcustom org-agenda-menu-two-column nil
   "Non-nil means, use two columns to show custom commands in the dispatcher.
-If you use this, you probably want to set `org-agenda-menu-show-match' to nil."
+If you use this, you probably want to set `org-agenda-menu-show-matcher'
+to nil."
   :group 'org-agenda
   :type 'boolean)
 
@@ -2157,7 +2158,7 @@ s   Search for keywords                 C   Configure custom agenda commands
 					    (symbol-name type)
 					  "Lambda expression"))
 		      (t "???"))))
-	      (if org-agenda-menu-show-match
+	      (if org-agenda-menu-show-matcher
 		  (setq line
 			(concat line ": "
 				(cond
