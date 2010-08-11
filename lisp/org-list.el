@@ -955,14 +955,29 @@ BEGIN is included and END excluded."
 	acc)
     (mapcar out origins)))
 
-(defun org-list-struct-indent (start end origins)
+(defun org-list-struct-indent (start end origins struct)
   "Indent items in ORIGINS between BEGIN and END.
-BEGIN is included and END excluded."
+BEGIN is included and END excluded.
+
+STRUCT may be modified if `org-list-demote-modify-bullet' is
+concerning bullets between START and END."
   (let* ((orig-rev (reverse origins))
-	 (get-prev-item (lambda (cell parent)
-			  (car (rassq parent (cdr (memq cell orig-rev))))))
-	 (set-assoc (lambda (cell)
-		      (setq acc (cons cell acc)) cell))
+	 (get-prev-item
+	  (lambda (cell parent)
+	    (car (rassq parent (cdr (memq cell orig-rev))))))
+	 (set-assoc
+	  (lambda (cell)
+	    (setq acc (cons cell acc)) cell))
+	 (change-bullet-maybe
+	  (lambda (item)
+	    (let* ((full-item (assq item struct))
+		   (item-bul (org-trim (nth 2 full-item)))
+		   (new-bul-p (cdr (assoc item-bul org-list-demote-modify-bullet))))
+	      (when new-bul-p
+		;; new bullet is stored without space to ensure item
+		;; will be modified
+		(setcdr full-item
+			(list (nth 1 full-item) new-bul-p (nth 3 full-item)))))))
 	 (ind
 	  (lambda (cell)
 	    (let* ((item (car cell))
@@ -977,6 +992,8 @@ BEGIN is included and END excluded."
 	       (t
 		;; Item is in zone...
 		(let ((prev (funcall get-prev-item cell parent)))
+		  ;; Check if bullet needs to be changed
+		  (funcall change-bullet-maybe item)
 		  (cond
 		   ;; First item indented but not parent: error
 		   ((and (or (not prev) (= prev 0)) (< parent start))
@@ -1125,7 +1142,7 @@ children. Return t if successful."
      (t
       (let* ((shifted-ori (if (< arg 0)
                         (org-list-struct-outdent beg end origins)
-                      (org-list-struct-indent beg end origins))))
+                      (org-list-struct-indent beg end origins struct))))
         (org-list-struct-fix-struct struct shifted-ori)
         (org-list-struct-apply-struct struct)))))
   ;; Return value
