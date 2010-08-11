@@ -5609,10 +5609,8 @@ Cancel the current clock.  This is useful if a clock was started by
 mistake, or if you ended up working on something else.
 @kindex C-c C-x C-j
 @item C-c C-x C-j
-In the agenda buffer, jump to the headline of the currently clocked in task.
-In an org file, jump to the entry that contains the currently running clock.
-With a @kbd{C-u} prefix arg, select the target task from a list of recently
-clocked tasks.
+Jump to the headline of the currently clocked in task.  With a @kbd{C-u}
+prefix arg, select the target task from a list of recently clocked tasks.
 @kindex C-c C-x C-d
 @item C-c C-x C-d
 @vindex org-remove-highlights-with-change
