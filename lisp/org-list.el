@@ -503,15 +503,6 @@ function ends."
   "Is point at a line starting a plain-list item with a checklet?"
   (org-list-at-regexp-after-bullet-p "\\(\\[[- X]\\]\\)[ \t]+"))
 
-(defun org-item-has-child-p ()
-  "Does the current item have subitems?"
-  (save-excursion
-    (org-beginning-of-item)
-    (let ((ind (org-get-indentation)))
-      (org-end-of-item-or-at-child)
-      (and (org-at-item-p)
-	   (> (org-get-indentation) ind)))))
-
 (defun org-checkbox-blocked-p ()
   "Is the current checkbox blocked from for being checked now?
 A checkbox is blocked if all of the following conditions are fulfilled:
@@ -653,17 +644,6 @@ Return point."
     (goto-char (funcall move-up (point) limit))
     (goto-char (point-at-bol))))
 
-(defun org-list-last-item ()
-  "Go to the last item of the current list.
-Return point."
-  (let* ((limit (org-list-bottom-point))
-         (get-last-item
-          (lambda (pos)
-            (let ((next-p (org-get-next-item pos limit)))
-              (if (not next-p) pos (funcall get-last-item next-p))))))
-    (org-beginning-of-item)
-    (goto-char (funcall get-last-item (point)))))
-
 (defun org-end-of-item-list ()
   "Go to the end of the current list or sublist.
  Return point."
@@ -676,7 +656,7 @@ Return point."
 			 (let ((next-p (org-get-next-item pos bound)))
 			   ;; recurse until no more item of the same level
 			   ;; can be found.
-			   (if next-p (funcall get-last-item next-p bound) pos)))))
+			   (if (not next-p) pos (funcall get-last-item next-p bound))))))
     ;; Move to the last item of every list or sublist encountered, and
     ;; down to bol of a higher-level item, or limit.
     (while (and (/= (point) limit)
