@@ -7492,6 +7492,10 @@ Go to today.
 @item j
 Prompt for a date and go there.
 @c
+@kindex J
+@item J
+Go to the currently clocked in task in the agenda buffer.
+@c
 @kindex D
 @item D
 Toggle the inclusion of diary entries.  See @ref{Weekly/daily agenda}.
