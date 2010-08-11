@@ -1683,7 +1683,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
                              "\\caption%s{%s} %s"
                              (if shortn (concat "[" shortn "]") "")
                              (or caption "")
-			     (when label (format "\\label{%s}" label))))
+			     (if label (format "\\label{%s}" label) "")))
                         (if (and longtblp caption) "\\\\\n" "\n")
                         (if (and org-export-latex-tables-centered (not longtblp))
                             "\\begin{center}\n")
