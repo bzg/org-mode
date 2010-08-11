@@ -1666,8 +1666,8 @@ The following commands are available:
 (org-defkey org-agenda-mode-map "O" 'org-agenda-clock-out)
 (org-defkey org-agenda-mode-map "\C-c\C-x\C-x" 'org-agenda-clock-cancel)
 (org-defkey org-agenda-mode-map "X" 'org-agenda-clock-cancel)
-(org-defkey org-agenda-mode-map "\C-c\C-x\C-j" 'org-agenda-clock-goto)
-(org-defkey org-agenda-mode-map "J" 'org-clock-goto)
+(org-defkey org-agenda-mode-map "\C-c\C-x\C-j" 'org-clock-goto)
+(org-defkey org-agenda-mode-map "J" 'org-agenda-clock-goto)
 (org-defkey org-agenda-mode-map "+" 'org-agenda-priority-up)
 (org-defkey org-agenda-mode-map "-" 'org-agenda-priority-down)
 (org-defkey org-agenda-mode-map [(shift up)] 'org-agenda-priority-up)
@@ -7150,7 +7150,12 @@ The cursor may be at a date in the calendar, or in the Org agenda."
 	    (if (eq (overlay-get o 'type) 'org-agenda-clocking)
 		(setq pos (overlay-start o))))
 	  (overlays-in (point-min) (point-max)))
-    (if pos (goto-char pos))))
+    (cond (pos (goto-char pos))
+	  ;; If the currently clocked entry is not in the agenda
+	  ;; buffer, we visit it in another window:
+	  (org-clock-current-task
+	   (org-switch-to-buffer-other-window (org-clock-goto)))
+	  (t (message "No running clock, use `C-c C-x C-j' to jump to the most recent one")))))
 
 (defun org-agenda-diary-entry-in-org-file ()
   "Make a diary entry in the file `org-agenda-diary-file'."
