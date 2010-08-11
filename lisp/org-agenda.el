@@ -749,6 +749,21 @@ N days, just insert a special line indicating the size of the gap."
   :tag "Org Agenda Startup"
   :group 'org-agenda)
 
+(defcustom org-agenda-menu-show-match t
+  "Non-nil menas show the match string in the agenda dispatcher menu.
+When nil, the mathcer string is not shown, but is put into the help-echo
+property so than moving the mouse over the command shows it.
+Setting it to nil if good if matcher strings are very long and/org of
+you wnat to use two-column display (see `org-agenda-menu-two-column')."
+  :group 'org-agenda
+  :type 'boolean)
+
+(defcustom org-agenda-menu-two-column nil
+  "Non-nil means, use two columns to show custom commands in the dispatcher.
+If you use this, you probably want to set `org-agenda-menu-show-match' to nil."
+  :group 'org-agenda
+  :type 'boolean)
+
 (defcustom org-finalize-agenda-hook nil
   "Hook run just before displaying an agenda buffer."
   :group 'org-agenda-startup
@@ -2073,7 +2088,8 @@ Pressing `<' twice means to restrict to the current subtree or region
 	   (custom org-agenda-custom-commands)
 	   (selstring "")
 	   restriction second-time
-	   c entry key type match prefixes rmheader header-end custom1 desc)
+	   c entry key type match prefixes rmheader header-end custom1 desc
+	   line lines left right n n1)
       (save-window-excursion
 	(delete-other-windows)
 	(org-switch-to-buffer-other-window " *Agenda Commands*")
@@ -2111,56 +2127,91 @@ s   Search for keywords                 C   Configure custom agenda commands
 	    (move-marker header-end (match-end 0)))
 	  (goto-char header-end)
 	  (delete-region (point) (point-max))
+
+	  ;; Produce all the lines that describe custom commands and prefixes
+	  (setq lines nil)
 	  (while (setq entry (pop custom1))
 	    (setq key (car entry) desc (nth 1 entry)
 		  type (nth 2 entry)
 		  match (nth 3 entry))
 	    (if (> (length key) 1)
 		(add-to-list 'prefixes (string-to-char key))
-	      (insert
-	       (format
-		"\n%-4s%-14s: %s"
-		(org-add-props (copy-sequence key)
-		    '(face bold))
-		(cond
-		 ((string-match "\\S-" desc) desc)
-		 ((eq type 'agenda) "Agenda for current week or day")
-		 ((eq type 'alltodo) "List of all TODO entries")
-		 ((eq type 'search) "Word search")
-		 ((eq type 'stuck) "List of stuck projects")
-		 ((eq type 'todo) "TODO keyword")
-		 ((eq type 'tags) "Tags query")
-		 ((eq type 'tags-todo) "Tags (TODO)")
-		 ((eq type 'tags-tree) "Tags tree")
-		 ((eq type 'todo-tree) "TODO kwd tree")
-		 ((eq type 'occur-tree) "Occur tree")
-		 ((functionp type) (if (symbolp type)
-				       (symbol-name type)
-				     "Lambda expression"))
-		 (t "???"))
-		(cond
-		 ((stringp match)
-		  (setq match (copy-sequence match))
-		  (org-add-props match nil 'face 'org-warning))
-		 (match
-		  (format "set of %d commands" (length match)))
-		 (t ""))))))
+	      (setq line
+		    (format
+		     "%-4s%-14s"
+		     (org-add-props (copy-sequence key)
+			 '(face bold))
+		     (cond
+		      ((string-match "\\S-" desc) desc)
+		      ((eq type 'agenda) "Agenda for current week or day")
+		      ((eq type 'alltodo) "List of all TODO entries")
+		      ((eq type 'search) "Word search")
+		      ((eq type 'stuck) "List of stuck projects")
+		      ((eq type 'todo) "TODO keyword")
+		      ((eq type 'tags) "Tags query")
+		      ((eq type 'tags-todo) "Tags (TODO)")
+		      ((eq type 'tags-tree) "Tags tree")
+		      ((eq type 'todo-tree) "TODO kwd tree")
+		      ((eq type 'occur-tree) "Occur tree")
+		      ((functionp type) (if (symbolp type)
+					    (symbol-name type)
+					  "Lambda expression"))
+		      (t "???"))))
+	      (if org-agenda-menu-show-match
+		  (setq line
+			(concat line ": "
+				(cond
+				 ((stringp match)
+				  (setq match (copy-sequence match))
+				  (org-add-props match nil 'face 'org-warning))
+				 (match
+				  (format "set of %d commands" (length match)))
+				 (t ""))))
+		(if (org-string-nw-p match)
+		    (add-text-properties
+		     0 (length line) (list 'help-echo
+					   (concat "Matcher: "match)) line)))
+	      (push line lines)))
+	  (setq lines (nreverse lines))
 	  (when prefixes
 	    (mapc (lambda (x)
-		    (insert
-		     (format "\n%s   %s"
+		    (push
+		     (format "%s   %s"
 			     (org-add-props (char-to-string x)
-					    nil 'face 'bold)
-			     (or (cdr (assoc (concat selstring (char-to-string x))
+				 nil 'face 'bold)
+			     (or (cdr (assoc (concat selstring
+						     (char-to-string x))
 					     prefix-descriptions))
-				 "Prefix key"))))
+				 "Prefix key"))
+		     lines))
 		  prefixes))
+
+	  ;; Check if we should display in two columns
+	  (if org-agenda-menu-two-column
+	      (progn
+		(setq n (length lines)
+		      n1 (+ (/ n 2) (mod n 2))
+		      right (nthcdr n1 lines)
+		      left (copy-sequence lines))
+		(setcdr (nthcdr (1- n1) left) nil))
+	    (setq left lines right nil))
+	  (while left
+	    (insert "\n" (pop left))
+	    (when right
+	      (if (< (current-column) 40)
+		  (move-to-column 40 t)
+		(insert "   "))
+	      (insert (pop right))))
+
+	  ;; Make the window the right size
 	  (goto-char (point-min))
 	  (if second-time
 	      (if (not (pos-visible-in-window-p (point-max)))
 		  (org-fit-window-to-buffer))
 	    (setq second-time t)
 	    (org-fit-window-to-buffer))
+
+	  ;; Ask for selection
 	  (message "Press key for agenda command%s:"
 		   (if (or restrict-ok org-agenda-overriding-restriction)
 		       (if org-agenda-overriding-restriction
