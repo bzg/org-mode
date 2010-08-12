@@ -328,7 +328,7 @@ def action_update_patch(rpc, patch_id, state = None, commit = None,
 
             longdesc = '''Patch %s (http://patchwork.newartisans.com/patch/%s/) is now "%s".
 
-Maintaner comment: %s
+Maintainer comment: %s
 
 This relates to the following submission:
 
