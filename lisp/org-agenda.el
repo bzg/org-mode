@@ -7143,7 +7143,9 @@ The cursor may be at a date in the calendar, or in the Org agenda."
     (org-clock-cancel)))
 
 (defun org-agenda-clock-goto ()
-  "Jump to the currently clocked in task within the agenda."
+  "Jump to the currently clocked in task within the agenda.
+If the currently clocked in task is not listed in the agenda
+buffer, display it in another window."
   (interactive)
   (let (pos)
     (mapc (lambda (o)
