@@ -476,9 +476,13 @@ function ends."
 	     (not list-ender))))))
 
 (defun org-list-first-item-p ()
-  "Is this item the first item in a plain list?"
+  "Is this item the first item in a plain list?
+Assume point is at an item."
   (save-excursion
-    (= (org-beginning-of-item) (org-beginning-of-item-list))))
+    (beginning-of-line)
+    (let ((ind (org-get-indentation)))
+      (or (not (org-search-backward-unenclosed org-item-beginning-re (org-list-top-point) t))
+	  (< (org-get-indentation) ind)))))
 
 (defun org-at-item-p ()
   "Is point in a line starting a hand-formatted item?"
@@ -544,7 +548,7 @@ A checkbox is blocked if all of the following conditions are fulfilled:
   "Return point just before list ending or nil if not in a list."
   (save-excursion
     (and (org-in-item-p)
-	 (let ((pos (org-beginning-of-item))
+	 (let ((pos (point))
 	       (bound (or (and (let ((outline-regexp org-outline-regexp))
 				 ;; Use default regexp because folding
 				 ;; changes OUTLINE-REGEXP.
@@ -570,12 +574,10 @@ If the cursor is not in an item, throw an error. Return point."
 
 (defun org-end-of-item ()
   "Go to the end of the current hand-formatted item.
-If the cursor is not in an item, throw an error."
+If the cursor is not in an item, throw an error. Return point."
   (interactive)
   (let ((next-p (org-get-next-item (point) (org-list-bottom-point))))
-    (cond ((not (org-in-item-p)) (error "Not in an item"))
-	  (next-p (goto-char next-p))
-	  (t (org-end-of-item-list)))))
+    (if next-p (goto-char next-p) (org-end-of-item-list))))
 
 (defun org-end-of-item-or-at-child ()
   "Move to the end of the item text, stops before the first child if any."
@@ -614,9 +616,7 @@ Item is at the same level in the current plain list. Error if not
 in a plain list, or if this is the last item in the list."
   (interactive)
   (let ((next-p (org-get-next-item (point) (org-list-bottom-point))))
-    (if next-p
-	(goto-char next-p)
-      (error "On last item"))))
+    (if next-p (goto-char next-p) (error "On last item"))))
 
 (defun org-previous-item ()
   "Move to the beginning of the previous item.
@@ -624,24 +624,16 @@ Item is at the same level in the current plain list. Error if not
 in a plain list, or if this is the first item in the list."
   (interactive)
   (let ((prev-p (org-get-previous-item (point) (org-list-top-point))))
-    (if prev-p
-	(goto-char prev-p)
-      (error "On first item"))))
+    (if prev-p (goto-char prev-p) (error "On first item"))))
 
 (defun org-beginning-of-item-list ()
   "Go to the beginning item of the current list or sublist.
 Return point."
   (interactive)
-  (org-beginning-of-item)
   (let ((limit (org-list-top-point))
-	(move-up (lambda (pos bound)
-		   ;; prev-p: any item of same level before ?
-		   (let ((prev-p (org-get-previous-item pos bound)))
-		     ;; recurse until no more item of the same level
-		     ;; can be found.
-		     (if (not prev-p) pos (funcall move-up prev-p bound))))))
-    ;; Go to the last item found and at bol in case we didn't move
-    (goto-char (funcall move-up (point) limit))
+	prev-p)
+    (while (setq prev-p (org-get-previous-item (point) limit))
+      (goto-char prev-p))
     (goto-char (point-at-bol))))
 
 (defun org-end-of-item-list ()
@@ -650,22 +642,11 @@ Return point."
   (interactive)
   (org-beginning-of-item)
   (let ((limit (org-list-bottom-point))
-	(ind (org-get-indentation))
-	(get-last-item (lambda (pos bound)
-			 ;; next-p: any item of same level after ?
-			 (let ((next-p (org-get-next-item pos bound)))
-			   ;; recurse until no more item of the same level
-			   ;; can be found.
-			   (if (not next-p) pos (funcall get-last-item next-p bound))))))
-    ;; Move to the last item of every list or sublist encountered, and
-    ;; down to bol of a higher-level item, or limit.
+	(ind (org-get-indentation)))
     (while (and (/= (point) limit)
 		(>= (org-get-indentation) ind))
-      (goto-char (funcall get-last-item (point) limit))
-      (end-of-line)
-      (when (org-search-forward-unenclosed org-item-beginning-re limit 'move)
-	(beginning-of-line)))
-    (point)))
+      (org-search-forward-unenclosed org-item-beginning-re limit 'move))
+    (if (= (point) limit) limit (goto-char (point-at-bol)))))
 
 ;;; Manipulate
 
@@ -694,7 +675,7 @@ so this really moves item trees."
   (let ((pos (point))
 	(col (current-column))
 	(actual-item (org-beginning-of-item))
-	(next-item (org-get-next-item (point) (save-excursion (org-end-of-item-list)))))
+	(next-item (org-get-next-item (point) (org-list-bottom-point))))
     (if (not next-item)
 	(progn
 	  (goto-char pos)
@@ -712,7 +693,7 @@ so this really moves item trees."
   (let ((pos (point))
 	(col (current-column))
 	(actual-item (org-beginning-of-item))
-	(prev-item (org-get-previous-item (point) (save-excursion (org-beginning-of-item-list)))))
+	(prev-item (org-get-previous-item (point) (org-list-top-point))))
     (if (not prev-item)
 	(progn
 	  (goto-char pos)
@@ -917,16 +898,10 @@ This function modifies STRUCT."
 (defun org-list-struct-fix-struct (struct origins)
   "Return STRUCT with correct bullets and indentation.
 Only elements of STRUCT that have changed are returned."
-  (let ((before (copy-alist struct))
-	(set-diff (lambda (setA setB result)
-		    (cond
-		     ((null setA) result)
-		     ((equal (car setA) (car setB))
-		      (funcall set-diff (cdr setA) (cdr setB) result))
-		     (t (funcall set-diff (cdr setA) (cdr setB) (cons (car setA) result)))))))
+  (let ((old (copy-alist struct)))
     (org-list-struct-fix-bul struct origins)
     (org-list-struct-fix-ind struct origins)
-    (nreverse (funcall set-diff struct before nil))))
+    (delq nil (mapcar (lambda (e) (when (not (equal (pop old) e)) e)) struct))))
 
 (defun org-list-struct-outdent (start end origins)
   "Outdent items in ORIGINS between BEGIN and END.
@@ -1168,13 +1143,13 @@ children. Return t if successful."
 	   (t (back-to-indentation)
 	      (indent-to-column (car org-tab-ind-state))
 	      (end-of-line)
-	      (org-fix-bullet-type (nth 1 org-tab-ind-state))
+	      (org-fix-bullet-type (cdr org-tab-ind-state))
 	      ;; Break cycle
 	      (setq this-command 'identity)))
 	;; If a cycle is starting, remember indentation and bullet,
         ;; then try to indent. If it fails, try to outdent.
 	(setq org-tab-ind-state
-              (list (org-get-indentation) (org-get-bullet)))
+              (cons (org-get-indentation) (org-get-bullet)))
 	(cond
 	 ((ignore-errors (org-indent-item 1)))
 	 ((ignore-errors (org-indent-item -1)))
@@ -1536,7 +1511,7 @@ will return the number of items in the current list.
 Sublists of the list are skipped. Cursor is always at the
 beginning of the item."
   (save-excursion
-    (let ((end (copy-marker (save-excursion (org-end-of-item-list))))
+    (let ((end (copy-marker (org-list-bottom-point)))
 	  (next-p (make-marker))
 	  (move-down-action
 	   (lambda (pos value &rest args)
