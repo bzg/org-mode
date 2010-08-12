@@ -322,8 +322,8 @@ This is used by Org to re-create the anniversary hash table."
         (when rec
           (let* ((class (or (nth 2 rec)
                             org-bbdb-default-anniversary-format))
-                 (form (or (cdr (assoc class
-                                       org-bbdb-anniversary-format-alist))
+                 (form (or (cdr (assoc-string
+				 class org-bbdb-anniversary-format-alist t))
                            class))	; (as format string)
                  (name (nth 1 rec))
                  (years (- y (car rec)))
