@@ -17157,13 +17157,10 @@ This command does many different things, depending on context:
 
 - If the cursor is a the beginning of a dynamic block, update it.
 
-- If the current buffer is a remember buffer, close note and file
-  it.  A prefix argument of 1 files to the default location
-  without further interaction.  A prefix argument of 2 files to
-  the currently clocking task.
+- If the current buffer is a capture buffer, close note and file it.
 
-- If the cursor is on a <<<target>>>, update radio targets and corresponding
-  links in this buffer.
+- If the cursor is on a <<<target>>>, update radio targets and
+  corresponding links in this buffer.
 
 - If the cursor is on a numbered item in a plain list, renumber the
   ordered list.
