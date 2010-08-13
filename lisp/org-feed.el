@@ -542,7 +542,8 @@ If that property is already present, nothing changes."
 		  (setq tmp (org-feed-make-indented-block
 			     tmp (org-get-indentation))))))
 	    (replace-match tmp t t))))
-	(buffer-string)))))
+	(decode-coding-string
+	 (buffer-string) (detect-coding-region (point-min) (point-max) t))))))
 
 (defun org-feed-make-indented-block (s n)
   "Add indentation of N spaces to a multiline string S."
