@@ -471,20 +471,34 @@ This option can also be set with the +OPTIONS line, e.g. \"TeX:nil\"."
   :group 'org-export-latex
   :type 'boolean)
 
-(defcustom org-export-with-LaTeX-fragments nil
-  "Non-nil means convert LaTeX fragments to images when exporting to HTML.
-When set, the exporter will find LaTeX environments if the \\begin line is
-the first non-white thing on a line.  It will also find the math delimiters
-like $a=b$ and \\( a=b \\) for inline math,  $$a=b$$ and \\[ a=b \\] for
-display math.
+(defcustom org-export-with-LaTeX-fragments t
+  "Non-nil means process LaTeX math fragments for HTML display.
+When set, the exporter will find and process LaTeX environments if the
+\\begin line is the first non-white thing on a line.  It will also find
+and process  the math delimiters like $a=b$ and \\( a=b \\) for inline math,
+$$a=b$$ and \\[ a=b \\] for display math.
 
-This option can also be set with the +OPTIONS line, e.g. \"LaTeX:t\".
+This option can also be set with the +OPTIONS line, e.g. \"LaTeX:mathjax\".
+
+Allowed values are:
+
+nil        Don't do anything.
+verbatim   Keep eveything in verbatim
+dvipng     Process the LaTeX fragments to images.
+           This will also include processing of non-math environments.
+t          Do MathJax preprocessing if there is at least on math snippet,
+           and arrange for MathJax.js to be loaded.
 
 The default is nil, because this option needs the `dvipng' program which
 is not available on all systems."
   :group 'org-export-translation
   :group 'org-export-latex
-  :type 'boolean)
+  :type '(choice
+	  (const :tag "Do not process math in any way" nil)
+	  (const :tag "Obsolete, use dvipng setting" t)
+	  (const :tag "Use dvipng to make images" dvipng)
+	  (const :tag "Use MathJax to display math" mathjax)
+	  (const :tag "Leave math verbatim" verbatim)))
 
 (defcustom org-export-with-fixed-width t
   "Non-nil means lines starting with \":\" will be in fixed width font.
@@ -675,12 +689,13 @@ modified) list.")
       (let ((re (org-make-options-regexp
 		 (append
 		  '("TITLE" "AUTHOR" "DATE" "EMAIL" "TEXT" "OPTIONS" "LANGUAGE"
+		    "MATHJAX"
 		    "LINK_UP" "LINK_HOME" "SETUPFILE" "STYLE"
 		    "LATEX_HEADER" "LATEX_CLASS"
 		    "EXPORT_SELECT_TAGS" "EXPORT_EXCLUDE_TAGS"
 		    "KEYWORDS" "DESCRIPTION" "MACRO" "BIND" "XSLT")
 		  (mapcar 'car org-export-inbuffer-options-extra))))
-	    p key val text options a pr style
+	    p key val text options mathjax a pr style
 	    latex-header latex-class macros letbind
 	    ext-setup-or-nil setup-contents (start 0))
 	(while (or (and ext-setup-or-nil
@@ -712,6 +727,8 @@ modified) list.")
 	    (setq text (if text (concat text "\n" val) val)))
 	   ((string-equal key "OPTIONS")
 	    (setq options (concat val " " options)))
+	   ((string-equal key "MATHJAX")
+	    (setq mathjax (concat val " " mathjax)))
 	   ((string-equal key "BIND")
 	    (push (read (concat "(" val ")")) letbind))
 	   ((string-equal key "XSLT")
@@ -748,6 +765,8 @@ modified) list.")
 	  (setq p (plist-put p :latex-class latex-class)))
 	(when options
 	  (setq p (org-export-add-options-to-plist p options)))
+	(when mathjax
+	  (setq p (plist-put p :mathjax mathjax)))
 	;; Add macro definitions
 	(setq p (plist-put p :macro-date "(eval (format-time-string \"$1\"))"))
 	(setq p (plist-put p :macro-time "(eval (format-time-string \"$1\"))"))

@@ -209,6 +209,112 @@ settings with <style>...</style> tags."
 ;;;###autoload
 (put 'org-export-html-style-extra 'safe-local-variable 'stringp)
 
+(defcustom org-export-html-mathjax-options
+  '((path  "http://orgmode.org/mathjax/MathJax.js")
+    (scale "100")
+    (align "center")
+    (indent "2em")
+    (mathml nil))
+  "Options for MathJax setup.
+
+path        The path where to find MathJax
+scale       Scaling for the HTML-CSS backend, usually between 100 and 133
+align       How to align display math: left, center, or right
+indent      If align is not center, how far from the left/right side?
+mathml      Should a MathML player be used if available?
+            This is faster and reduces bandwidth use, but currently
+            sometimes has lower spacing quality.  Therefore, the default is
+            nil.  When browsers get better, this switch can be flipped.
+
+You can also customize this for each buffer, using something like
+
+#+MATHJAX: scale:\"133\" align:\"right\" mathml:t path:\"/MathJax/\""
+  :group 'org-export-html
+  :type '(list :greedy t
+	      (list :tag "path   (the path from where to load MathJax.js)"
+		    (const :format "       " path) (string))
+	      (list :tag "scale  (scaling for the displayed math)"
+		    (const :format "       " scale) (string))
+	      (list :tag "align  (alignment of displayed equations)"
+		    (const :format "       " align) (string))
+	      (list :tag "indent (indentation with left or right alignment)"
+		    (const :format "       " indent) (string))
+	      (list :tag "mathml (should MathML display be used is possible)"
+		    (const :format "       " mathml) (boolean))))
+
+(defun org-export-html-mathjax-config (template options in-buffer)
+  "Insert the user setup into the matchjax template."
+  (let (name val (yes "   ") (no "// ") x)
+    (mapc
+     (lambda (e)
+       (setq name (car e) val (nth 1 e))
+       (if (string-match (concat "\\<" (symbol-name name) ":") in-buffer)
+	   (setq val (car (read-from-string
+			   (substring in-buffer (match-end 0))))))
+       (if (not (stringp val)) (setq val (format "%s" val)))
+       (if (string-match (concat "%" (upcase (symbol-name name))) template)
+	   (setq template (replace-match val t t template))))
+     options)
+    (setq val (nth 1 (assq 'mathml options)))
+    (if (string-match (concat "\\<mathml:") in-buffer)
+	(setq val (car (read-from-string
+			(substring in-buffer (match-end 0))))))
+    ;; Exchange prefixes depending on mathml setting
+    (if (not val) (setq x yes yes no no x))
+    ;; Replace cookies to turn on or off the config/jax lines
+    (if (string-match ":MMLYES:" template)
+	(setq template (replace-match yes t t template)))
+    (if (string-match ":MMLNO:" template)
+	(setq template (replace-match no t t template)))
+    ;; Return the modified template
+    template))
+
+(defcustom org-export-html-mathjax-template
+  "<script type=\"text/javascript\" src=\"%PATH\">
+<!--/*--><![CDATA[/*><!--*/
+    MathJax.Hub.Config({
+        // Only one of the two following lines, depending on user settings
+        // First allows browser-native MathML display, second forces HTML/CSS
+        :MMLYES: config: [\"MMLorHTML.js\"], jax: [\"input/TeX\"],
+        :MMLNO: jax: [\"input/TeX\", \"output/HTML-CSS\"],
+        extensions: [\"tex2jax.js\",\"TeX/AMSmath.js\",\"TeX/AMSsymbols.js\",
+                     \"TeX/noUndefined.js\"],
+        tex2jax: {
+            inlineMath: [ [\"\\\\(\",\"\\\\)\"] ],
+            displayMath: [ ['$$','$$'], [\"\\\\[\",\"\\\\]\"] ],
+            skipTags: [\"script\",\"noscript\",\"style\",\"textarea\",\"pre\",\"code\"],
+            ignoreClass: \"tex2jax_ignore\",
+            processEscapes: false,
+            processEnvironments: true,
+            preview: \"TeX\"
+        },
+        showProcessingMessages: true,
+        displayAlign: \"%ALIGN\",
+        displayIndent: \"%INDENT\",
+
+        \"HTML-CSS\": {
+             scale: %SCALE,
+             availableFonts: [\"STIX\",\"TeX\"],
+             preferredFont: \"TeX\",
+             webFont: \"TeX\",
+             imageFont: \"TeX\",
+             showMathMenu: true,
+        },
+        MMLorHTML: {
+             prefer: {
+                 MSIE:    \"MML\",
+                 Firefox: \"MML\",
+                 Opera:   \"HTML\",
+                 other:   \"HTML\"
+             }
+        }
+    });
+/*]]>*///-->
+</script>"
+  "The MathJax setup for XHTML files."
+  :group 'org-export-html
+  :type 'string)
+
 (defcustom org-export-html-tag-class-prefix ""
   "Prefix to class names for TODO keywords.
 Each tag gets a class given by the tag itself, with this prefix.
@@ -439,7 +545,13 @@ This may also be a function, building and inserting the postamble.")
 			(file-name-nondirectory
 			 org-current-export-file)))
      org-current-export-dir nil "Creating LaTeX image %s"
-     nil nil (eq (plist-get parameters :LaTeX-fragments) 'verbatim)))
+     nil nil
+     (cond
+      ((eq (plist-get parameters :LaTeX-fragments) 'verbatim) 'verbatim)
+      ((eq (plist-get parameters :LaTeX-fragments) 'mathjax ) 'mathjax)
+      ((eq (plist-get parameters :LaTeX-fragments) t        ) 'mathjax)
+      ((eq (plist-get parameters :LaTeX-fragments) 'dvipng  ) 'dvipng)
+      (t nil))))
   (goto-char (point-min))
   (let (label l1)
     (while (re-search-forward "\\\\ref{\\([^{}\n]+\\)}" nil t)
@@ -812,6 +924,7 @@ PUB-DIR is set, use this as the publishing directory."
 	  (buffer-substring
 	   (if region-p (region-beginning) (point-min))
 	   (if region-p (region-end) (point-max))))
+	 (org-export-have-math nil)
 	 (lines
 	  (org-split-string
 	   (org-export-preprocess-string
@@ -835,6 +948,16 @@ PUB-DIR is set, use this as the publishing directory."
 	    :LaTeX-fragments
 	    (plist-get opt-plist :LaTeX-fragments))
 	   "[\r\n]"))
+	 (mathjax
+	  (if (or (eq (plist-get opt-plist :LaTeX-fragments) 'mathjax)
+		  (and org-export-have-math
+		       (eq (plist-get opt-plist :LaTeX-fragments) t)))
+
+	      (org-export-html-mathjax-config
+	       org-export-html-mathjax-template
+	       org-export-html-mathjax-options
+	       (or (plist-get opt-plist :mathjax) ""))
+	    ""))
 	 table-open type
 	 table-buffer table-orig-buffer
 	 ind item-type starter didclose
@@ -904,6 +1027,7 @@ lang=\"%s\" xml:lang=\"%s\">
 <meta name=\"description\" content=\"%s\"/>
 <meta name=\"keywords\" content=\"%s\"/>
 %s
+%s
 </head>
 <body>
 <div id=\"content\">
@@ -922,6 +1046,7 @@ lang=\"%s\" xml:lang=\"%s\">
 		 (or charset "iso-8859-1")
 		 date author description keywords
 		 style
+		 mathjax
 		 (if (or link-up link-home)
 		     (concat
 		      (format org-export-html-home/up-format
