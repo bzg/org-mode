@@ -62,6 +62,7 @@
 (declare-function org-habit-parse-todo "org-habit" (&optional pom))
 (declare-function org-habit-get-priority "org-habit" (habit &optional moment))
 (defvar calendar-mode-map)
+(defvar org-clock-current-task) ; defined in org-clock.el
 (defvar org-mobile-force-id-on-agenda-items) ; defined in org-mobile.el
 (defvar org-habit-show-habits)
 (defvar org-habit-show-habits-only-for-today)
