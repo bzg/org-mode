@@ -509,6 +509,7 @@ def main():
     if config.has_option('base', 'project'):
         project_str = config.get('base', 'project')
 
+    comment_str = "none"
     for name, value in opts:
         if name == '-s':
             state_str = value
