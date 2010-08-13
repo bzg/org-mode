@@ -295,30 +295,34 @@ the end of the nearest terminator from max."
 	   ;; we want to be on the first line of the list ender
 	   (match-beginning 0)))))
 
-(defun org-list-search-unenclosed-generic (search-fun regexp bound noerror count)
-  "Search for REGEXP with SEARCH-FUN but don't stop inside blocks or at protected places."
-  (let ((origin (point)))
-    (cond
-     ;; nothing found: return nil
-     ((not (funcall search-fun regexp bound noerror count)) nil)
-     ((or (save-match-data
-	    (org-in-regexps-block-p "^[ \t]*#\\+\\(begin\\|BEGIN\\)_\\([a-zA-Z0-9_]+\\)"
-				    '(concat "^[ \t]*#\\+\\(end\\|END\\)_" (match-string 2))))
-	  (get-text-property (match-beginning 0) 'org-protected))
-      ;; match is enclosed or protected: start again, searching one
-      ;; occurrence away.
-      (goto-char origin)
-      (org-list-search-unenclosed-generic search-fun regexp bound noerror (1+ count)))
-     ;; else return point.
-     (t (point)))))
+(defun org-list-search-unenclosed-generic (search skip len re bound noerr)
+  "Search for RE with SEARCH outside blocks and protected places."
+  (let ((in-block-p
+	 (lambda ()
+	   (let ((case-fold-search t))
+	     (when (save-excursion
+		     (and (funcall search "^[ \t]*#\\+\\(begin\\|end\\)_" bound t)
+			  (= (length (match-string 1)) len)))
+	       ;; We're in a block: get out of it and resume searching
+	       (goto-char (funcall skip 0)))))))
+    (catch 'exit
+      (let ((origin (point)))
+	(while t
+	  (unless (funcall search re bound noerr)
+	    (throw 'exit (and (goto-char (if (booleanp noerr) origin bound)) nil)))
+	  (unless (or (get-text-property (match-beginning 0) 'org-protected)
+		      (save-match-data (funcall in-block-p)))
+	    (throw 'exit (point))))))))
 
 (defun org-search-backward-unenclosed (regexp &optional bound noerror)
   "Like `re-search-backward' but don't stop inside blocks or at protected places."
-  (org-list-search-unenclosed-generic #'re-search-backward regexp bound noerror 1))
+  (org-list-search-unenclosed-generic
+   #'re-search-backward #'match-beginning 5 regexp (or bound (point-min)) noerror))
 
 (defun org-search-forward-unenclosed (regexp &optional bound noerror)
   "Like `re-search-forward' but don't stop inside blocks or at protected places."
-  (org-list-search-unenclosed-generic #'re-search-forward regexp bound noerror 1))
+  (org-list-search-unenclosed-generic
+   #'re-search-forward #'match-end 3 regexp (or bound (point-max)) noerror))
 
 (defun org-list-at-regexp-after-bullet-p (regexp)
   "Is point at a list item with REGEXP after bullet?"
