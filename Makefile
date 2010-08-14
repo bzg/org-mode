@@ -377,8 +377,8 @@ cleandoc:
 
 cleanrel:
 	rm -rf RELEASEDIR
-	rm -rf org-6.*
-	rm -rf org-6*zip org-6*tar.gz
+	rm -rf org-7.*
+	rm -rf org-7*zip org-7*tar.gz
 
 .el.elc:
 	$(ELC) $<
