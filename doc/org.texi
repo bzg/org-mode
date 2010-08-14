@@ -463,6 +463,7 @@ Specific header arguments
 Miscellaneous
 
 * Completion::			M-TAB knows what you need
+* Easy Templates::		
 * Speed keys::			Electric commands at the beginning of a headline
 * Code evaluation security::	Org mode files evaluate inline code
 * Customization::		Adapting Org to your taste
@@ -12369,6 +12370,7 @@ emacsclient \
 
 @menu
 * Completion::			M-TAB knows what you need
+* Easy Templates::		Quick insertion of structural elements
 * Speed keys::			Electric commands at the beginning of a headline
 * Code evaluation security::	Org mode files evaluate inline code
 * Customization::		Adapting Org to your taste
@@ -12380,7 +12382,7 @@ emacsclient \
 @end menu
 
 
-@node Completion, Speed keys, Miscellaneous, Miscellaneous
+@node Completion, Easy Templates, Miscellaneous, Miscellaneous
 @section Completion
 @cindex completion, of @TeX{} symbols
 @cindex completion, of TODO keywords
@@ -12442,7 +12444,46 @@ Elsewhere, complete dictionary words using Ispell.
 @end itemize
 @end table
 
-@node Speed keys, Code evaluation security, Completion, Miscellaneous
+@node Easy Templates, Speed keys, Completion, Miscellaneous
+@section Easy Templates
+@cindex template insertion
+@cindex insertion, of templates
+
+Org-mode supports insertion of empty structural elements (like
+@code{#+BEGIN_SRC} and @code{#+END_SRC} pairs) with just a few key
+strokes.  This is achieved through a native template expansion mechanism.
+Note that Emacs has several other template mechanisms which could be used in
+a similar way, for example @file{yasnippet}.
+
+To insert a structural element, type a @samp{<}, followed by a template
+selector and @kbd{@key{TAB}}.  Completion takes effect only when the above
+keystrokes are typed on a line by itself.
+
+The following template selectors are currently supported.
+
+@multitable @columnfractions 0.1 0.9
+@item @kbd{s} @tab @code{#+begin_src     ... #+end_src}
+@item @kbd{e} @tab @code{#+begin_example ... #+end_example}
+@item @kbd{q} @tab @code{#+begin_quote   ... #+end_quote}
+@item @kbd{v} @tab @code{#+begin_verse   ... #+end_verse}
+@item @kbd{c} @tab @code{#+begin_center  ... #+end_center}
+@item @kbd{l} @tab @code{#+begin_latex   ... #+end_latex}
+@item @kbd{L} @tab @code{#+latex:}
+@item @kbd{h} @tab @code{#+begin_html    ... #+end_html}
+@item @kbd{H} @tab @code{#+html:}
+@item @kbd{a} @tab @code{#+begin_ascii   ... #+end_ascii}
+@item @kbd{A} @tab @code{#+ascii:}
+@item @kbd{i} @tab @code{#+include:} line
+@end multitable
+
+For example, on an empty line, typing "<e" and then pressing TAB, will expand
+into a complete EXAMPLE template.
+
+You can install additional templates by customizing the variable
+@code{org-structure-template-alist}. Refer docstring of the variable for
+additional details.
+
+@node Speed keys, Code evaluation security, Easy Templates, Miscellaneous
 @section Speed keys
 @cindex speed keys
 @vindex org-use-speed-commands
