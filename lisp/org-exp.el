@@ -2007,7 +2007,6 @@ TYPE must be a string, any of:
 	  (save-match-data
 	    (when args
 	      (setq args (org-split-string args ",") args2 nil)
-	      (setq args (mapcar 'org-trim args))
 	      (while args
 		(while (string-match "\\\\\\'" (car args))
 		  ;; repair bad splits
