@@ -996,9 +996,25 @@ Initial position is restored after the changes."
 	 (ancestor (caar struct))
          (modify
           (lambda (item)
-            (goto-char (car item))
-	    (org-list-indent-item (nth 1 item))
-	    (org-list-replace-bullet (org-list-bullet-string (nth 2 item)))))
+	    (goto-char (car item))
+            (let* ((new-ind (nth 1 item))
+		   (new-bul (org-list-bullet-string (nth 2 item)))
+		   (old-ind (org-get-indentation))
+		   (old-bul (progn
+			      (looking-at "[ \t]*\\(\\S-+[ \t]*\\)")
+			      (match-string 1)))
+		   (old-body-ind (+ (length old-bul) old-ind))
+		   (new-body-ind (+ (length new-bul) new-ind)))
+	      ;; Replace bullet
+	      (unless (equal new-bul old-bul)
+		(save-excursion (replace-match new-bul nil nil nil 1)))
+	      ;; Indent item to appropriate column
+	      (unless (= new-ind old-ind)
+		(delete-region (point-at-bol) (match-beginning 1))
+		(indent-to new-ind))
+	      ;; Shift item's body
+	      (unless (= old-body-ind new-body-ind)
+		(org-shift-item-indentation (- new-body-ind old-body-ind))))))
 	 ;; Remove ancestor if it is left.
 	 (struct-to-apply (if (or (not ancestor) (= 0 ancestor)) (cdr struct) struct)))
     ;; Apply changes from bottom to top
@@ -1032,18 +1048,6 @@ Sub-items are not moved."
             (when (and (> i 0) (> (+ i delta) 0))
               (indent-line-to (+ i delta)))))
         (beginning-of-line 0)))))
-
-(defun org-list-indent-item (ind)
-  "Change indentation of item at point to IND.
-It does not move sub-lists."
-  (save-excursion
-    (beginning-of-line)
-    (let ((old-ind (org-get-indentation)))
-      (unless (= ind old-ind)
-        (org-shift-item-indentation (- ind old-ind))
-        (skip-chars-forward " \t")
-        (delete-region (point-at-bol) (point))
-        (org-indent-to-column ind)))))
 
 (defun org-outdent-item (arg)
   "Outdent a local list item, but not its children."
@@ -1189,22 +1193,6 @@ It determines the number of whitespaces to append by looking at
       (replace-match
        (number-to-string (1+ (string-to-number (match-string 0 bullet)))) nil nil bullet)
     bullet))
-
-(defun org-list-replace-bullet (new-bullet)
-  "Replace current item's bullet with NEW-BULLET.
-Item body is re-indented, but sub-lists are not moved. Assume
-point is at item."
-  (save-excursion
-    (beginning-of-line)
-    (let ((old (progn
-                 (looking-at "[ \t]*\\(\\S-+[ \t]*\\)")
-                 (match-string 1))))
-      (unless (equal new-bullet old)
-        (replace-match new-bullet nil nil nil 1)
-        ;; When bullet lengths are differents, move the whole
-        ;; sublist accordingly
-        (org-shift-item-indentation
-         (- (length new-bullet) (length old)))))))
 
 (defun org-fix-bullet-type (&optional force-bullet)
   "Make sure all items in this list have the same bullet as the first item.
