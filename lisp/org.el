@@ -5036,8 +5036,9 @@ will be prompted for."
 				    '(display t invisible t intangible t))
 	    (add-text-properties (match-beginning 1) (match-end 3)
 				 '(font-lock-fontified t face org-meta-line))
-	    (add-text-properties (match-beginning 6) (match-end 6)
+	    (add-text-properties (match-beginning 6) (+ (match-end 6) 1)
 				 '(font-lock-fontified t face org-block))
+					; for backend-specific code
 	    t)
 	   ((and (match-end 4) (equal dc3 "begin"))
 	    ;; Truly a block
@@ -5054,10 +5055,13 @@ will be prompted for."
 	       beg end
 	       '(font-lock-fontified t font-lock-multiline t))
 	      (add-text-properties beg beg1 '(face org-meta-line))
-	      (add-text-properties end1 end '(face org-meta-line))
+	      (add-text-properties end1 (+ end 1) '(face org-meta-line))
+					; for end_src
 	      (cond
 	       (quoting
-		(add-text-properties beg1 end1 '(face org-block)))
+		(add-text-properties beg1 (+ end1 1) '(face
+						       org-block)))
+					; end of source block
 	       ((not org-fontify-quote-and-verse-blocks))
 	       ((string= block-type "quote")
 		(add-text-properties beg1 end1 '(face org-quote)))
