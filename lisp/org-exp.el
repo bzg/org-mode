@@ -2006,7 +2006,7 @@ TYPE must be a string, any of:
 				       (intern (concat ":" key)))))
 	  (save-match-data
 	    (when args
-	      (setq args (org-split-string args ",[ \t\n]*") args2 nil)
+	      (setq args (org-split-string args ",") args2 nil)
 	      (setq args (mapcar 'org-trim args))
 	      (while args
 		(while (string-match "\\\\\\'" (car args))
@@ -2015,7 +2015,7 @@ TYPE must be a string, any of:
 					     "," (nth 1 args)))
 		  (pop args))
 		(push (pop args) args2))
-	      (setq args (nreverse args2))
+	      (setq args (mapcar 'org-trim (nreverse args2)))
 	      (setq s 0)
 	      (while (string-match "\\$\\([0-9]+\\)" val s)
 		(setq s (1+ (match-beginning 0))
