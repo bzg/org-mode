@@ -2012,7 +2012,7 @@ TYPE must be a string, any of:
 		(while (string-match "\\\\\\'" (car args))
 		  ;; repair bad splits
 		  (setcar (cdr args) (concat (substring (car args) 0 -1)
-					     ";" (nth 1 args)))
+					     "," (nth 1 args)))
 		  (pop args))
 		(push (pop args) args2))
 	      (setq args (nreverse args2))
