@@ -363,6 +363,7 @@ HTML export
 * Links in HTML export::	How links will be interpreted and formatted
 * Tables in HTML export::	How to modify the formatting of tables
 * Images in HTML export::	How to insert figures into HTML output
+* Math formatting in HTML export::  Beautiful math also on the web
 * Text areas in HTML export::	An alternative way to show an example
 * CSS support::			Changing the appearance of the output
 * JavaScript support::		Info and Folding in a web browser
@@ -439,12 +440,17 @@ Using header arguments
 Specific header arguments
 
 * var::				Pass arguments to code blocks
-* results::			Specify the type of results and how they will be collected and handled
+* results::			Specify the type of results and how they will
+                                be collected and handled
 * file::			Specify a path for file output
-* dir::	                        Specify the default directory for code block execution
+* dir::				Specify the default (possibly remote)
+                                directory for code block execution
 * exports::			Export code and/or results
 * tangle::			Toggle tangling and specify file name
-* no-expand::			Turn off variable assignment and noweb expansion during tangling
+* comments::			Toggle insertion of comments in tangled
+                                code files
+* no-expand::			Turn off variable assignment and noweb
+                                expansion during tangling
 * session::			Preserve the state of code evaluation
 * noweb::			Toggle expansion of noweb references
 * cache::			Avoid re-evaluating unchanged code blocks
@@ -452,6 +458,7 @@ Specific header arguments
 * colnames::			Handle column names in tables
 * rownames::			Handle row names in tables
 * shebang::			Make tangled files executable
+* eval::			Limit evaluation of specific code blocks
 
 Miscellaneous
 
@@ -8818,12 +8825,9 @@ is a macro system based on Donald E. Knuth's @TeX{} system.  Many of the
 features described here as ``La@TeX{}'' are really from @TeX{}, but for
 simplicity I am blurring this distinction.}  is widely used to typeset
 scientific documents. Org-mode supports embedding La@TeX{} code into its
-files, because many academics are used to reading La@TeX{} source code, and
-because it can be readily processed into images for HTML production.
-
-It is not necessary to mark La@TeX{} macros and code in any special way.
-If you observe a few conventions, Org-mode knows how to find it and what
-to do with it.
+files, because many academics are used to writing and reading La@TeX{} source
+code, and because it can be readily processed to produce pretty output for a
+number of export backends.
 
 @menu
 * Special symbols::		Greek letters and other symbols
@@ -8867,7 +8871,7 @@ La@TeX{}, see the variable @code{org-entities} for the complete list.
 @samp{...} are all converted into special commands creating hyphens of
 different lengths or a compact set of dots.
 
-If you would like to see entities displayed as utf8 characters, use the
+If you would like to see entities displayed as UTF8 characters, use the
 following command@footnote{You can turn this on by default by setting the
 variable @code{org-pretty-entities}, or on a per-file base with the
 @code{#+STARTUP} option @code{entitiespretty}.}:
@@ -8908,6 +8912,9 @@ convention, or use, on a per-file basis:
 #+OPTIONS: ^:@{@}
 @end example
 
+@noindent With this setting, @samp{a_b} will not be interpreted as a
+subscript, but @samp{a_@{b@}} will.
+
 @table @kbd
 @kindex C-c C-x \
 @item C-c C-x \
@@ -8920,31 +8927,31 @@ format sub- and superscripts in a WYSIWYM way.
 @cindex La@TeX{} fragments
 
 @vindex org-format-latex-header
-With symbols, sub- and superscripts, HTML is pretty much at its end when
-it comes to representing mathematical formulas@footnote{Yes, there is
-MathML, but that is not yet fully supported by many browsers, and there
-is no decent converter for turning La@TeX{} or ASCII representations of
-formulas into MathML. So for the time being, converting formulas into
-images seems the way to go.}. More complex expressions need a dedicated
-formula processor. To this end, Org-mode can contain arbitrary La@TeX{}
-fragments. It provides commands to preview the typeset result of these
-fragments, and upon export to HTML, all fragments will be converted to
-images and inlined into the HTML document@footnote{The La@TeX{} export
-will not use images for displaying La@TeX{} fragments but include these
-fragments directly into the La@TeX{} code.}. For this to work you
-need to be on a system with a working La@TeX{} installation. You also
-need the @file{dvipng} program, available at
-@url{http://sourceforge.net/projects/dvipng/}. The La@TeX{} header that
-will be used when processing a fragment can be configured with the
-variable @code{org-format-latex-header}.
+Going beyond symbols and sub- and superscripts, a full formula language is
+needed.  Org-mode can contain La@TeX{} math fragments, and it supports ways
+to process these for several export backends.  When exporting to La@TeX{},
+the code is obviously left as it is.  When exporting to HTML, Org invokes the
+@uref{http://www.mathjax.org, MathJax library} (@pxref{Math formatting in
+HTML export}) to process and display the math@footnote{If you plan to use
+this regularly or on pages with significant page views, you should install
+@file{MathJax} on your own server in order to limit the load of our server.}.
+Finally, it can also process the mathematical expressions into
+images@footnote{For this to work you need to be on a system with a working
+La@TeX{} installation. You also need the @file{dvipng} program, available at
+@url{http://sourceforge.net/projects/dvipng/}.  The La@TeX{} header that will
+be used when processing a fragment can be configured with the variable
+@code{org-format-latex-header}.}  that can be displayed in a browser or in
+DocBook documents.
 
 La@TeX{} fragments don't need any special marking at all.  The following
 snippets will be identified as La@TeX{} source code:
 @itemize @bullet
 @item
-Environments of any kind.  The only requirement is that the
-@code{\begin} statement appears on a new line, preceded by only
-whitespace.
+Environments of any kind@footnote{When @file{MathJax} is used, only the
+environment recognized by @file{MathJax} will be processed.  When dvipng is
+used to create images, any La@TeX{} environments will be handled.}.  The only
+requirement is that the @code{\begin} statement appears on a new line,
+preceded by only whitespace.
 @item
 Text within the usual La@TeX{} math delimiters.  To avoid conflicts with
 currency specifications, single @samp{$} characters are only recognized as
@@ -8972,12 +8979,26 @@ If you need any of the delimiter ASCII sequences for other purposes, you
 can configure the option @code{org-format-latex-options} to deselect the
 ones you do not wish to have interpreted by the La@TeX{} converter.
 
+@vindex org-export-with-LaTeX-fragments
+LaTeX processing can be configured with the variable
+@code{org-export-with-LaTeX-fragments}.  The default setting is @code{t}
+which means @file{MathJax} for HTML, and no processing for DocBook, ASCII and
+LaTeX backends.  You can also set this variable on a per-file basis using one
+of these lines:
+
+@example
+#+OPTIONS: LaTeX:t          @r{Do the right thing automatically (MathJax)}
+#+OPTIONS: LaTeX:dvipng     @r{Force using dvipng images}
+#+OPTIONS: LaTeX:nil        @r{Do not process La@TeX{} fragments at all}
+#+OPTIONS: LaTeX:verbatim   @r{Verbatim export, for jsMath or so}
+@end example
+
 @node Previewing LaTeX fragments, CDLaTeX mode, LaTeX fragments, Embedded LaTeX
 @subsection Previewing LaTeX fragments
 @cindex LaTeX fragments, preview
 
-La@TeX{} fragments can be processed to produce preview images of the
-typeset expressions:
+If you have @file{dvipng} installed, La@TeX{} fragments can be processed to
+produce preview images of the typeset expressions:
 
 @table @kbd
 @kindex C-c C-x C-l
@@ -8998,14 +9019,6 @@ You can customize the variable @code{org-format-latex-options} to influence
 some aspects of the preview. In particular, the @code{:scale} (and for HTML
 export, @code{:html-scale}) property can be used to adjust the size of the
 preview images.
-
-During HTML export (@pxref{HTML export}), all La@TeX{} fragments are
-converted into images and inlined into the document if the following
-setting is active:
-
-@lisp
-(setq org-export-with-LaTeX-fragments t)
-@end lisp
 
 @node CDLaTeX mode,  , Previewing LaTeX fragments, Embedded LaTeX
 @subsection Using CDLa@TeX{} to enter math
@@ -9224,7 +9237,7 @@ tags:      @r{turn on/off inclusion of tags, may also be @code{not-in-toc}}
 <:         @r{turn on/off inclusion of any time/date stamps like DEADLINES}
 *:         @r{turn on/off emphasized text (bold, italic, underlined)}
 TeX:       @r{turn on/off simple @TeX{} macros in plain text}
-LaTeX:     @r{turn on/off La@TeX{} fragments}
+LaTeX:     @r{configure export of La@TeX{} fragments.  Default @code{auto}}
 skip:      @r{turn on/off skipping the text before the first heading}
 author:    @r{turn on/off inclusion of author name/email into exported file}
 email:     @r{turn on/off inclusion of author email into exported file}
@@ -9357,6 +9370,7 @@ language, but with additional support for tables.
 * Links in HTML export::	How links will be interpreted and formatted
 * Tables in HTML export::	How to modify the formatting of tables
 * Images in HTML export::	How to insert figures into HTML output
+* Math formatting in HTML export::  Beautiful math also on the web
 * Text areas in HTML export::	An alternative way to show an example
 * CSS support::			Changing the appearance of the output
 * JavaScript support::		Info and Folding in a web browser
@@ -9492,7 +9506,7 @@ tables, place something like the following before the table:
 #+ATTR_HTML: border="2" rules="all" frame="all"
 @end example
 
-@node Images in HTML export, Text areas in HTML export, Tables in HTML export, HTML export
+@node Images in HTML export, Math formatting in HTML export, Tables in HTML export, HTML export
 @subsection Images in HTML export
 
 @cindex images, inline in HTML
@@ -9529,7 +9543,41 @@ support text viewers and accessibility, and align it to the right.
 @noindent
 and you could use @code{http} addresses just as well.
 
-@node Text areas in HTML export, CSS support, Images in HTML export, HTML export
+@node Math formatting in HTML export, Text areas in HTML export, Images in HTML export, HTML export
+@subsection Math formatting in HTML export
+@cindex MathJax
+@cindex dvipng
+
+La@TeX{} math snippets (@pxref{LaTeX fragments}) can be displayed in two
+different ways on HTML pages.  The default is to use the
+@uref{http://www.mathjax.org, MathJax system} which should work out of the
+box with Org mode installation because @code{http://orgmode.org} serves
+@file{MathJax} for Org-mode users for small applications and for testing
+purposes.  @b{If you plan to use this regularly or on pages with significant
+page views, you should install MathJax on your own server in order to limit
+the load of our server.}  To configure @file{MathJax}, use the variable
+@code{org-export-html-mathjax-options} or insert something like the following
+into the buffer:
+
+@example
+#+MATHJAX: align:"left" mathml:t path:"/MathJax/MathJax.js"
+@end example
+
+@noindent See the docstring of the variable
+@code{org-export-html-mathjax-options} for the meaning of the parameters in
+this line.
+
+If you prefer, you can also request that La@TeX{} are processed into small
+images that will be inserted into the browser page.  Before the availability
+of MathJax, this was the default method for Org files.  This method requires
+that the @file{dvipng} program is available on your system.  You can still
+get this processing with
+
+@example
+#+OPTIONS: LaTeX:dvipng
+@end example
+
+@node Text areas in HTML export, CSS support, Math formatting in HTML export, HTML export
 @subsection Text areas in HTML export
 
 @cindex text areas, in HTML
@@ -11451,14 +11499,14 @@ The following header arguments are defined:
 * results::			Specify the type of results and how they will
                                 be collected and handled
 * file::			Specify a path for file output
-* dir::	                        Specify the default (possibly remote)
+* dir::				Specify the default (possibly remote)
                                 directory for code block execution
 * exports::			Export code and/or results
 * tangle::			Toggle tangling and specify file name
+* comments::			Toggle insertion of comments in tangled
+                                code files
 * no-expand::			Turn off variable assignment and noweb
                                 expansion during tangling
-* comments::                    Toggle insertion of comments in tangled
-                                code files
 * session::			Preserve the state of code evaluation
 * noweb::			Toggle expansion of noweb references
 * cache::			Avoid re-evaluating unchanged code blocks
@@ -11466,7 +11514,7 @@ The following header arguments are defined:
 * colnames::			Handle column names in tables
 * rownames::			Handle row names in tables
 * shebang::			Make tangled files executable
-* eval::                        Limit evaluation of specific code blocks
+* eval::			Limit evaluation of specific code blocks
 @end menu
 
 @node var, results, Specific header arguments, Specific header arguments
@@ -12094,7 +12142,7 @@ Setting the @code{:shebang} header argument to a string value
 first line of any tangled file holding the code block, and the file
 permissions of the tangled file are set to make it executable.
 
-@node eval, , shebang, Specific header arguments
+@node eval,  , shebang, Specific header arguments
 @subsubsection @code{:eval}
 The @code{:eval} header argument can be used to limit the evaluation of
 specific code blocks.  @code{:eval} accepts two arguments ``never'' and

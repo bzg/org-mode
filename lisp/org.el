@@ -15880,7 +15880,7 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
 	 (concat "ltxpng/" (file-name-sans-extension
 			    (file-name-nondirectory
 			     buffer-file-name)))
-	 default-directory 'overlays msg at 'forbuffer)
+	 default-directory 'overlays msg at 'forbuffer 'dvipng)
       (message msg "done.  Use `C-c C-c' to remove images.")))))
 
 (defvar org-latex-regexps
@@ -15894,8 +15894,9 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
     ("$$" "\\$\\$[^\000]*?\\$\\$" 0 nil))
   "Regular expressions for matching embedded LaTeX.")
 
+(defvar org-export-have-math nil) ;; dynamic scoping
 (defun org-format-latex (prefix &optional dir overlays msg at
-				forbuffer protect-only)
+				forbuffer processing-type)
   "Replace LaTeX fragments with links to an image, and produce images.
 Some of the options can be changed using the variable
 `org-format-latex-options'."
@@ -15909,7 +15910,7 @@ Some of the options can be changed using the variable
 	 (org-format-latex-header-extra
 	  (plist-get (org-infile-export-plist) :latex-header-extra))
 	 (cnt 0) txt hash link beg end re e checkdir
-	 executables-checked
+	 executables-checked string
 	 m n block linkfile movefile ov)
     ;; Check the different regular expressions
     (while (setq e (pop re-list))
@@ -15925,9 +15926,26 @@ Some of the options can be changed using the variable
 			 (not (eq (get-char-property (match-beginning n)
 						     'org-overlay-type)
 				  'org-latex-overlay))))
-	    (if protect-only
+	    (setq org-export-have-math t)
+	    (cond
+	     ((eq processing-type 'verbatim)
+	      ;; Leave the text verbatim, just protect it
+	      (add-text-properties (match-beginning n) (match-end n)
+				   '(org-protected t)))
+	     ((eq processing-type 'mathjax)
+	      ;; Prepare for MathJax processing
+	      (setq string (match-string n))
+	      (if (equal m "$")
+		  (save-excursion
+		    (delete-region (match-beginning n) (match-end n))
+		    (goto-char (match-beginning n))
+		    (insert (org-add-props (concat "\\(" (substring string 1 -1)
+						   "\\)")
+				'(org-protected t))))
 		(add-text-properties (match-beginning n) (match-end n)
-				     '(org-protected t))
+				     '(org-protected t))))
+	     ((or (eq processing-type 'dvipng) t)
+	      ;; Process to an image
 	      (setq txt (match-string n)
 		    beg (match-beginning n) end (match-end n)
 		    cnt (1+ cnt))
@@ -15981,7 +15999,8 @@ Some of the options can be changed using the variable
 		(delete-region beg end)
 		(insert (org-add-props link
 			    (list 'org-latex-src
-				  (replace-regexp-in-string "\"" "" txt))))))))))))
+				  (replace-regexp-in-string
+				   "\"" "" txt)))))))))))))
 
 ;; This function borrows from Ganesh Swami's latex2png.el
 (defun org-create-formula-image (string tofile options buffer)
@@ -17649,14 +17668,6 @@ See the individual commands for more information."
      ["Modify math symbol" org-cdlatex-math-modify
       (org-inside-LaTeX-fragment-p)]
      ["Insert citation" org-reftex-citation t]
-     "--"
-     ["Export LaTeX fragments as images"
-      (if (featurep 'org-exp)
-	  (setq org-export-with-LaTeX-fragments
-		(not org-export-with-LaTeX-fragments))
-	(require 'org-exp))
-      :style toggle :selected (and (boundp 'org-export-with-LaTeX-fragments)
-				   org-export-with-LaTeX-fragments)]
      "--"
      ["Template for BEAMER" org-insert-beamer-options-template t])
     "--"
