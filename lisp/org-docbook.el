@@ -1031,22 +1031,6 @@ publishing directory."
 		  (setq item-type "d"
 			item-tag (match-string 1 line)
 			line (substring line (match-end 0))))
-	      (when (and (not (equal item-type "d"))
-			 (not (string-match "[^ \t]" line)))
-		;; Empty line.  Pretend indentation is large.
-		(setq ind (1+ (or (car local-list-indent) 1))))
-	      (while (and in-local-list
-			  (or (and (= ind (car local-list-indent))
-				   (not starter))
-			      (< ind (car local-list-indent))))
-		(let ((listtype (car local-list-type)))
-		  (org-export-docbook-close-li listtype)
-		  (insert (cond
-			   ((equal listtype "o") "</orderedlist>\n")
-			   ((equal listtype "u") "</itemizedlist>\n")
-			   ((equal listtype "d") "</variablelist>\n"))))
-		(pop local-list-type) (pop local-list-indent)
-		(setq in-local-list local-list-indent))
 	      (cond
 	       ((and starter
 		     (or (not in-local-list)
@@ -1073,8 +1057,19 @@ publishing directory."
 		(push item-type local-list-type)
 		(push ind local-list-indent)
 		(setq in-local-list t))
-	       (starter
 		;; Continue current list
+	       (starter
+		;; terminate any previous sublist
+		(while (< ind (car local-list-indent))
+		  (let ((listtype (car local-list-type)))
+		    (org-export-docbook-close-li listtype)
+		    (insert (cond
+			     ((equal listtype "o") "</orderedlist>\n")
+			     ((equal listtype "u") "</itemizedlist>\n")
+			     ((equal listtype "d") "</variablelist>\n"))))
+		  (pop local-list-type) (pop local-list-indent)
+		  (setq in-local-list local-list-indent))
+		;; insert new item
 		(let ((listtype (car local-list-type)))
 		  (org-export-docbook-close-li listtype)
 		  (insert (cond

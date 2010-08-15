@@ -1555,18 +1555,6 @@ lang=\"%s\" xml:lang=\"%s\">
 		  (setq item-type "d"
 			item-tag (match-string 1 line)
 			line (substring line (match-end 0))))
-	      (when (and (not (equal item-type "d"))
-			 (not (string-match "[^ \t]" line)))
-		;; empty line.  Pretend indentation is large.
-		(setq ind (1+ (or (car local-list-indent) 1))))
-	      (while (and in-local-list
-			  (or (and (= ind (car local-list-indent))
-				   (not starter))
-			      (< ind (car local-list-indent))))
-		(org-close-li (car local-list-type))
-		(insert (format "</%sl>\n" (car local-list-type)))
-		(pop local-list-type) (pop local-list-indent)
-		(setq in-local-list local-list-indent))
 	      (cond
 	       ((and starter
 		     (or (not in-local-list)
@@ -1583,8 +1571,15 @@ lang=\"%s\" xml:lang=\"%s\">
 		(push item-type local-list-type)
 		(push ind local-list-indent)
 		(setq in-local-list t))
+	       ;; Continue list
 	       (starter
-		;; continue current list
+		;; terminate any previous sublist
+		(while (< ind (car local-list-indent))
+		  (org-close-li (car local-list-type))
+		  (insert (format "</%sl>\n" (car local-list-type)))
+		  (pop local-list-type) (pop local-list-indent)
+		  (setq in-local-list local-list-indent))
+		;; insert new item
 		(org-close-li (car local-list-type))
 		(insert (cond
 			 ((equal (car local-list-type) "d")
