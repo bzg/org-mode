@@ -563,7 +563,7 @@ A checkbox is blocked if all of the following conditions are fulfilled:
 	   ;; The list ending is either first point matching
 	   ;; `org-list-end-re', point at first white-line before next
 	   ;; heading, or eob.
-	   (or (org-list-terminator-between pos bound t) bound)))))
+	   (or (org-list-terminator-between (min pos bound) bound t) bound)))))
 
 (defun org-beginning-of-item ()
   "Go to the beginning of the current hand-formatted item.
