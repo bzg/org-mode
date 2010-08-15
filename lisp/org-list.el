@@ -1103,8 +1103,9 @@ children. Return t if successful."
     (cond
      ;; Special case: moving top-item with indent rule
      ((and (= top beg) (cdr (assq 'indent org-list-automatic-rules)))
-      (let ((offset (if (< arg 0) -2 2))
-            (top-ind (nth 1 beg-item)))
+      (let* ((level-skip (org-level-increment))
+	     (offset (if (< arg 0) (- level-skip) level-skip))
+	     (top-ind (nth 1 beg-item)))
         (if (< (+ top-ind offset) 0)
             (error "Cannot outdent beyond margin")
 	  ;; Change bullet if necessary
