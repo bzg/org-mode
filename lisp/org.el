@@ -18585,10 +18585,16 @@ which make use of the date at the cursor."
        ((looking-at "\\([ \t]*\\):END:")
 	(goto-char (match-end 1))
 	(setq column (current-column)))
-       ;; There was a list that since ended: indent like top point.
+       ;; There was a list that since ended: indent relatively to
+       ;; current heading.
        ((org-in-item-p)
-	(goto-char (org-list-top-point))
-	(setq column (org-get-indentation)))
+	(outline-previous-heading)
+	(if (and org-adapt-indentation
+		 (looking-at "\\*+[ \t]+"))
+	    (progn
+	      (goto-char (match-end 0))
+	      (setq column (current-column)))
+	  (setq column 0)))
        ;; Else, nothing noticeable found: get indentation and go on.
        (t (setq column (org-get-indentation))))))
     (goto-char pos)
