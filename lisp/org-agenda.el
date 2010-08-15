@@ -752,9 +752,9 @@ N days, just insert a special line indicating the size of the gap."
 
 (defcustom org-agenda-menu-show-matcher t
   "Non-nil menas show the match string in the agenda dispatcher menu.
-When nil, the mathcer string is not shown, but is put into the help-echo
+When nil, the matcher string is not shown, but is put into the help-echo
 property so than moving the mouse over the command shows it.
-Setting it to nil if good if matcher strings are very long and/org of
+Setting it to nil is good if matcher strings are very long and/or if
 you wnat to use two-column display (see `org-agenda-menu-two-column')."
   :group 'org-agenda
   :type 'boolean)
