@@ -7138,7 +7138,7 @@ The cursor may be at a date in the calendar, or in the Org agenda."
 	  (setq newhead (org-get-heading)))
 	(org-agenda-change-all-lines newhead hdmarker)))))
 
-(defun org-agenda-clock-out (&optional arg)
+(defun org-agenda-clock-out ()
   "Stop the currently running clock."
   (interactive "P")
   (unless (marker-buffer org-clock-marker)
