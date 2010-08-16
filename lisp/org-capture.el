@@ -680,7 +680,8 @@ already gone."
       ((nil entry) (org-capture-place-entry))
       (table-line (org-capture-place-table-line))
       (plain (org-capture-place-plain-text))
-      (item  (org-capture-place-item))))
+      (item (org-capture-place-item))
+      (checkitem (org-capture-place-item))))
   (org-capture-mode 1)
   (org-set-local 'org-capture-current-plist org-capture-plist))
 
@@ -742,14 +743,14 @@ already gone."
     (if (org-capture-get :prepend)
 	(progn
 	  (goto-char beg)
-	  (if (re-search-forward (concat "^" (org-item-re)) nil t)
+	  (if (re-search-forward (concat "^" (org-item-re)) end t)
 	      (progn
 		(goto-char (match-beginning 0))
 		(setq ind (org-get-indentation)))
 	    (goto-char end)
 	    (setq ind 0)))
       (goto-char end)
-      (if (re-search-backward (concat "^" (org-item-re)) nil t)
+      (if (re-search-backward (concat "^" (org-item-re)) beg t)
 	  (progn
 	    (setq ind (org-get-indentation))
 	    (org-end-of-item))
