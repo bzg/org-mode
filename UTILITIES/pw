@@ -285,7 +285,8 @@ def action_apply(rpc, patch_id):
         sys.exit(1)
 
 def action_update_patch(rpc, patch_id, state = None, commit = None,
-                        delegate_str = "", comment_str, archived = False):
+                        delegate_str = "", comment_str = "None",
+			archived = False):
     patch = rpc.patch_get(patch_id)
     if patch == {}:
         sys.stderr.write("Error getting information on patch ID %d\n" % \
