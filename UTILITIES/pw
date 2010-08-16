@@ -471,7 +471,8 @@ def merge_with(patch_id, rpc, delegate_str, comment_str):
     # If it succeeded this far, mark the patch as "Accepted" by the invoking
     # user.
     action_update_patch(rpc, patch_id, state = 'Accepted', commit = sha,
-                        delegate_str = delegate_str, archived = True)
+                        delegate_str = delegate_str, comment_str = comment_str,
+			archived = True)
 
     print sha
 
