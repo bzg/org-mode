@@ -5198,12 +5198,34 @@ HH:MM."
 			(int-to-string t0))))
        (if string (concat (substring t1 -4 -2) ":" (substring t1 -2)) t0)))))
 
+(defvar org-agenda-before-sorting-filter-function nil
+  "Function to be applied to agenda items prior to sorting.
+Prior to sorting also means just before they are inserted into the agenda.
+
+To aid sorting, you may revisit the original entries and add more text
+properties which will later be used by the sorting functions.
+
+The function should take a string argument, an agenda line.
+It has access to the text properties in that line, which contain among
+other things, the property `org-hd-marker' that points to the entry
+where the line comes from.  Note that not all lines going into the agenda
+have this property, only most.
+
+The function should return the modified string.  It is probably best
+to ONLY change text properties.
+
+You can also use this function as a filter, by returning nil for lines
+you don't want to have in the agenda at all.  For this application, you
+could bind the variable in the options section of a custom command.")
+
 (defun org-finalize-agenda-entries (list &optional nosort)
   "Sort and concatenate the agenda items."
   (setq list (mapcar 'org-agenda-highlight-todo list))
   (if nosort
       list
-    (mapconcat 'identity (sort list 'org-entries-lessp) "\n")))
+    (when org-agenda-before-sorting-filter-function
+      (setq list (mapcar org-agenda-before-sorting-filter-function list)))
+    (delq nil (mapconcat 'identity (sort list 'org-entries-lessp) "\n"))))
 
 (defun org-agenda-highlight-todo (x)
   (let ((org-done-keywords org-done-keywords-for-agenda)
