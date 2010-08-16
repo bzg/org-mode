@@ -1257,9 +1257,13 @@ If END is non-nil, it is the end of the region."
 				'(:org-license-to-kill t))
 	   (save-excursion
 	     (goto-char pt)
-	     (while (re-search-forward "^[ \t]*#+.*\n?" limit t)
-	       (remove-text-properties (match-beginning 0) (match-end 0)
-				'(:org-license-to-kill t))))))))))
+	     (while (re-search-forward "^[ \t]*#\\+.*\n?" limit t)
+	       (let ((case-fold-search t))
+		 (unless (org-string-match-p
+			  "^[ \t]*#\\+\\(attr_\\|caption\\>\\|label\\>\\)"
+			  (match-string 0))
+		   (remove-text-properties (match-beginning 0) (match-end 0)
+					   '(:org-license-to-kill t))))))))))))
 	       
 
 (defvar org-export-latex-header-defs nil
