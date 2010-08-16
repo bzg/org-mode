@@ -6440,7 +6440,9 @@ the headline hierarchy above."
 	 (selected-point
 	  (if (eq interface 'outline)
 	      (car (org-get-location (current-buffer) org-goto-help))
-	    (nth 3 (org-refile-get-location "Goto: ")))))
+	    (let ((pa (org-refile-get-location "Goto: ")))
+	      (org-refile-check-position pa)
+	      (nth 3 pa)))))
     (if selected-point
 	(progn
 	  (org-mark-ring-push org-goto-start-pos)
@@ -10246,6 +10248,7 @@ This can be done with a 0 prefix: `C-0 C-c C-w'"
     (setq answ (funcall cfunc prompt tbl nil (not new-nodes)
 			nil 'org-refile-history))
     (setq pa (or (assoc answ tbl) (assoc (concat answ "/") tbl)))
+    (org-refile-check-position pa)
     (if pa
 	(progn
 	  (when (or (not org-refile-history)
@@ -10271,6 +10274,26 @@ This can be done with a 0 prefix: `C-0 C-c C-w'"
 						  child)))))
 	      (org-refile-new-child parent-target child)))
 	(error "Invalid target location")))))
+
+(defun org-refile-check-position (refile-pointer)
+  "Check if the refile pointer matches the readline to which it points."
+  (let* ((file (nth 1 refile-pointer))
+	 (re (nth 2 refile-pointer))
+	 (pos (nth 3 refile-pointer))
+	 buffer)
+    (when (org-string-nw-p re)
+      (setq buffer (if (markerp pos)
+		       (marker-buffer pos)
+		     (or (find-buffer-visiting file)
+			 (find-file-noselect file))))
+      (with-current-buffer buffer
+	(save-excursion
+	  (save-restriction
+	    (widen)
+	    (goto-char pos)
+	    (beginning-of-line 1)
+	    (unless (org-looking-at-p re)
+	      (error "Invalid refile position, please rebuild the cache"))))))))
 
 (defun org-refile-new-child (parent-target child)
   "Use refile target PARENT-TARGET to add new CHILD below it."
