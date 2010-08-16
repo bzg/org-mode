@@ -50,7 +50,7 @@ interpreted by other mechanisms.")
 seen.  This is run after a few special cases are taken care of."
   (when (or htmlp latexp)
     (goto-char (point-min))
-    (while (re-search-forward "^#\\+\\(begin\\|end\\)_\\(.*\\)$" nil t)
+    (while (re-search-forward "^[ \t]*#\\+\\(begin\\|end\\)_\\(.*\\)$" nil t)
       (unless (org-string-match-p org-special-blocks-ignore-regexp (match-string 2))
 	(replace-match
 	 (if (equal (downcase (match-string 1)) "begin")
