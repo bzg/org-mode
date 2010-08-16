@@ -150,10 +150,10 @@ then create.  Return the initialized session."
     (let* ((session (if session (intern session) :default))
            (python-buffer (org-babel-python-session-buffer session)))
       (cond
-       ((and (equal 'python org-babel-python-mode)
+       ((and (eq 'python org-babel-python-mode)
 	     (fboundp 'run-python)) ; python.el
 	(run-python))
-       ((and (equal 'python-mode org-babel-python-mode)
+       ((and (eq 'python-mode org-babel-python-mode)
 	     (fboundp 'py-shell)) ; python-mode.el
 	;; `py-shell' creates a buffer whose name is the value of
 	;; `py-which-bufname' with '*'s at the beginning and end
