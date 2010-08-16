@@ -4038,7 +4038,11 @@ group 3: Priority cookie
 group 4: True headline
 group 5: Tags")
 (make-variable-buffer-local 'org-complex-heading-regexp)
-(defvar org-complex-heading-regexp-format nil)
+(defvar org-complex-heading-regexp-format nil
+  "Printf format to make regexp to match an exact headline.
+This regexp will match the headline of any node which hase the exact
+headline text that is put into the format, but may have any TODO state,
+priority and tags.")
 (make-variable-buffer-local 'org-complex-heading-regexp-format)
 (defvar org-todo-line-tags-regexp nil
   "Matches a headline and puts TODO state into group 2 if present.
@@ -9941,15 +9945,8 @@ on the system \"/user@host:\"."
 			 (setq level (org-reduced-level
 				      (- (match-end 1) (match-beginning 1)))
 			       txt (org-link-display-format (match-string 4))
-			       re (concat "^" (regexp-quote
-					       (buffer-substring
-						(match-beginning 1)
-						(match-end 4)))))
-			 (if (match-end 5) (setq re (concat
-						     re "[ \t]+"
-						     (regexp-quote
-						      (match-string 5)))))
-			 (setq re (concat re "[ \t]*$"))
+			       re (format org-complex-heading-regexp-format
+					  (regexp-quote (match-string 4))))
 			 (when org-refile-use-outline-path
 			   (setq txt (mapconcat
 				      'org-protect-slash
