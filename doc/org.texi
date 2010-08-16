@@ -727,10 +727,15 @@ active region by using the mouse to select a region, or pressing
 If you find problems with Org, or if you have questions, remarks, or ideas
 about it, please mail to the Org mailing list @email{emacs-orgmode@@gnu.org}.
 If you are not a member of the mailing list, your mail will be passed to the
-list after a moderator has approved it.
+list after a moderator has approved it@footnote{Please consider subscribing
+to the mailing list, in order to minimize the work the mailing list
+moderators have to do.}.
 
-For bug reports, please provide as much information as possible, including
-the version information of Emacs (@kbd{M-x emacs-version @key{RET}}) and Org
+For bug reports, please first try to reproduce the bug with the latest
+version of Org available - if you are running an outdated version, it is
+quite possible that the bug has been fixed already.  If the bug persists,
+prepare a report and provide as much information as possible, including the
+version information of Emacs (@kbd{M-x emacs-version @key{RET}}) and Org
 (@kbd{M-x org-version @key{RET}}), as well as the Org related setup in
 @file{.emacs}.  The easiest way to do this is to use the command
 @example
@@ -749,7 +754,7 @@ about:
 @item What did you expect to happen?
 @item What happened instead?
 @end enumerate
-@noindent Thank you for helping to improve this mode.
+@noindent Thank you for helping to improve this program.
 
 @subsubheading How to create a useful backtrace
 
