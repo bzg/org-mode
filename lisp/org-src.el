@@ -359,6 +359,8 @@ the edited version. Optional argument CONTEXT is used by
      (if (eq context 'edit) (delete-other-windows))
      (org-switch-to-buffer-other-window buffer)
      (if (eq context 'exit) (delete-other-windows)))
+    ('switch-invisibly
+     (set-buffer buffer))
     (t
      (message "Invalid value %s for org-src-window-setup"
 	      (symbol-name org-src-window-setup))

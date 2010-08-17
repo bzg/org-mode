@@ -77,7 +77,9 @@ functions which are assigned key bindings, and see
     ("z" . org-babel-switch-to-session-with-code)
     ("\C-a" . org-babel-sha1-hash)
     ("a" . org-babel-sha1-hash)
-    ("h" . org-babel-describe-bindings))
+    ("h" . org-babel-describe-bindings)
+    ("\C-x" . org-babel-do-key-sequence-in-edit-buffer)
+    ("x" . org-babel-do-key-sequence-in-edit-buffer))
   "Alist of key bindings and interactive Babel functions.
 This list associates interactive Babel functions
 with keys.  Each element of this list will add an entry to the

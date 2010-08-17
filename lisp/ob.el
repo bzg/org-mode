@@ -482,6 +482,28 @@ of the source block to the kill ring."
 	(org-edit-src-code))
       (swap-windows)))
 
+(defmacro org-babel-do-in-edit-buffer (&rest body)
+  "Evaluate BODY in edit buffer if there is a code block at point.
+Return t if a code block was found at point, nil otherwise."
+  `(let ((org-src-window-setup 'switch-invisibly))
+     (when (org-edit-src-code)
+       ,@body
+       (org-edit-src-exit) t)))
+
+(defun org-babel-do-key-sequence-in-edit-buffer (key)
+  "Read key sequence and execute the command in edit buffer.
+Enter a key sequence to be executed in the language major-mode
+edit buffer. For example, TAB will alter the contents of the
+Org-mode code block according to the effect of TAB in the
+language major-mode buffer. For languages that support
+interactive sessions, this can be used to send code from the Org
+buffer to the session for evaluation using the native major-mode
+evaluation mechanisms."
+  (interactive "kEnter key-sequence to execute in edit buffer: ")
+  (org-babel-do-in-edit-buffer
+   (call-interactively
+    (key-binding (or key (read-key-sequence nil))))))
+
 (defvar org-bracket-link-regexp)
 ;;;###autoload
 (defun org-babel-open-src-block-result (&optional re-run)
