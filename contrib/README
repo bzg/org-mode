@@ -18,6 +18,8 @@ org-choose.el            --- Use TODO keywords to mark decision states
 org-collector.el         --- Collect properties into tables
 org-contribdir.el        --- Dummy file to mark the org contrib Lisp directory
 org-depend.el            --- TODO dependencies for Org-mode
+org-drill.el             --- Self-testing with org-learn
+org-depend.el            --- TODO dependencies for Org-mode
 org-elisp-symbol.el      --- Org links to emacs-lisp symbols
 org-eval.el              --- The <lisp> tag, adapted from Muse
 org-eval-light.el        --- Evaluate in-buffer code on demand
