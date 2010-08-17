@@ -203,6 +203,7 @@ the edited version. Optional argument CONTEXT is used by
 	(col (current-column))
 	(case-fold-search t)
 	(info (org-edit-src-find-region-and-lang))
+	(babel-info (org-babel-get-src-block-info))
 	(org-mode-p (eq major-mode 'org-mode))
 	(beg (make-marker))
 	(end (make-marker))
@@ -272,6 +273,8 @@ the edited version. Optional argument CONTEXT is used by
 	(set (make-local-variable 'org-edit-src-from-org-mode) org-mode-p)
 	(set (make-local-variable 'org-edit-src-allow-write-back-p) allow-write-back-p)
 	(set (make-local-variable 'org-src-preserve-indentation) preserve-indentation)
+	(when babel-info
+	  (set (make-local-variable 'org-src-babel-info) babel-info))
 	(when lfmt
 	  (set (make-local-variable 'org-coderef-label-format) lfmt))
 	(when org-mode-p
@@ -653,6 +656,22 @@ the language, a switch telling if the content should be in a single line."
       (setq buffer-read-only t))))
 
 (org-add-hook 'org-src-mode-hook 'org-src-mode-configure-edit-buffer)
+
+
+(defun org-src-associate-babel-session (info)
+  "Associate edit buffer with comint session."
+  (interactive)
+  (let ((session (cdr (assoc :session (nth 2 info)))))
+    (and session (not (string= session "none"))
+	 (org-babel-comint-buffer-livep session)
+	 ((lambda (f) (and (fboundp f) (funcall f session)))
+	  (intern (format "org-babel-%s-associate-session" (nth 0 info)))))))
+
+(defun org-src-babel-configure-edit-buffer ()
+  (when org-src-babel-info
+    (org-src-associate-babel-session org-src-babel-info)))
+
+(org-add-hook 'org-src-mode-hook 'org-src-babel-configure-edit-buffer)
 
 (provide 'org-src)
 
