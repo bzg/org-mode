@@ -5224,8 +5224,8 @@ could bind the variable in the options section of a custom command.")
   (if nosort
       list
     (when org-agenda-before-sorting-filter-function
-      (setq list (mapcar org-agenda-before-sorting-filter-function list)))
-    (delq nil (mapconcat 'identity (sort list 'org-entries-lessp) "\n"))))
+      (setq list (delq nil (mapcar org-agenda-before-sorting-filter-function list))))
+    (mapconcat 'identity (sort list 'org-entries-lessp) "\n")))
 
 (defun org-agenda-highlight-todo (x)
   (let ((org-done-keywords org-done-keywords-for-agenda)
@@ -7138,7 +7138,7 @@ The cursor may be at a date in the calendar, or in the Org agenda."
 	  (setq newhead (org-get-heading)))
 	(org-agenda-change-all-lines newhead hdmarker)))))
 
-(defun org-agenda-clock-out (&optional arg)
+(defun org-agenda-clock-out ()
   "Stop the currently running clock."
   (interactive "P")
   (unless (marker-buffer org-clock-marker)

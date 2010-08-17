@@ -471,7 +471,12 @@ matching filenames."
 		 (i (plist-get (cdr prj) :include))
 		 (xm (concat "^" b (if r ".+" "[^/]+") "\\.\\(" x "\\)$")))
 	    (when (or
-		   (and i (string-match i filename))
+		   (and 
+		    i 
+		    (member filename 
+			    (mapcar 
+			     (lambda (file) (expand-file-name file b))
+			     i)))
 		   (and
 		    (not (and e (string-match e filename)))
 		    (string-match xm filename)))

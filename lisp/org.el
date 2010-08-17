@@ -4038,7 +4038,11 @@ group 3: Priority cookie
 group 4: True headline
 group 5: Tags")
 (make-variable-buffer-local 'org-complex-heading-regexp)
-(defvar org-complex-heading-regexp-format nil)
+(defvar org-complex-heading-regexp-format nil
+  "Printf format to make regexp to match an exact headline.
+This regexp will match the headline of any node which hase the exact
+headline text that is put into the format, but may have any TODO state,
+priority and tags.")
 (make-variable-buffer-local 'org-complex-heading-regexp-format)
 (defvar org-todo-line-tags-regexp nil
   "Matches a headline and puts TODO state into group 2 if present.
@@ -6440,7 +6444,9 @@ the headline hierarchy above."
 	 (selected-point
 	  (if (eq interface 'outline)
 	      (car (org-get-location (current-buffer) org-goto-help))
-	    (nth 3 (org-refile-get-location "Goto: ")))))
+	    (let ((pa (org-refile-get-location "Goto: ")))
+	      (org-refile-check-position pa)
+	      (nth 3 pa)))))
     (if selected-point
 	(progn
 	  (org-mark-ring-push org-goto-start-pos)
@@ -9939,15 +9945,8 @@ on the system \"/user@host:\"."
 			 (setq level (org-reduced-level
 				      (- (match-end 1) (match-beginning 1)))
 			       txt (org-link-display-format (match-string 4))
-			       re (concat "^" (regexp-quote
-					       (buffer-substring
-						(match-beginning 1)
-						(match-end 4)))))
-			 (if (match-end 5) (setq re (concat
-						     re "[ \t]+"
-						     (regexp-quote
-						      (match-string 5)))))
-			 (setq re (concat re "[ \t]*$"))
+			       re (format org-complex-heading-regexp-format
+					  (regexp-quote (match-string 4))))
 			 (when org-refile-use-outline-path
 			   (setq txt (mapconcat
 				      'org-protect-slash
@@ -10246,6 +10245,7 @@ This can be done with a 0 prefix: `C-0 C-c C-w'"
     (setq answ (funcall cfunc prompt tbl nil (not new-nodes)
 			nil 'org-refile-history))
     (setq pa (or (assoc answ tbl) (assoc (concat answ "/") tbl)))
+    (org-refile-check-position pa)
     (if pa
 	(progn
 	  (when (or (not org-refile-history)
@@ -10271,6 +10271,26 @@ This can be done with a 0 prefix: `C-0 C-c C-w'"
 						  child)))))
 	      (org-refile-new-child parent-target child)))
 	(error "Invalid target location")))))
+
+(defun org-refile-check-position (refile-pointer)
+  "Check if the refile pointer matches the readline to which it points."
+  (let* ((file (nth 1 refile-pointer))
+	 (re (nth 2 refile-pointer))
+	 (pos (nth 3 refile-pointer))
+	 buffer)
+    (when (org-string-nw-p re)
+      (setq buffer (if (markerp pos)
+		       (marker-buffer pos)
+		     (or (find-buffer-visiting file)
+			 (find-file-noselect file))))
+      (with-current-buffer buffer
+	(save-excursion
+	  (save-restriction
+	    (widen)
+	    (goto-char pos)
+	    (beginning-of-line 1)
+	    (unless (org-looking-at-p re)
+	      (error "Invalid refile position, please rebuild the cache"))))))))
 
 (defun org-refile-new-child (parent-target child)
   "Use refile target PARENT-TARGET to add new CHILD below it."
@@ -12755,7 +12775,7 @@ With prefix ARG, realign all tags in headings in the current buffer."
 	 (col (current-column))
 	 (org-setting-tags t)
 	 table current-tags inherited-tags ; computed below when needed
-	 tags p0 c0 c1 rpl)
+	 tags p0 c0 c1 rpl di tc level)
     (if arg
 	(save-excursion
 	  (goto-char (point-min))
@@ -12805,6 +12825,9 @@ With prefix ARG, realign all tags in headings in the current buffer."
 
       ;; Insert new tags at the correct column
       (beginning-of-line 1)
+      (setq level (or (and (looking-at org-outline-regexp)
+			   (- (match-end 0) (point) 1))
+		      1))
       (cond
        ((and (equal current "") (equal tags "")))
        ((re-search-forward
@@ -12813,11 +12836,14 @@ With prefix ARG, realign all tags in headings in the current buffer."
 	(if (equal tags "")
 	    (setq rpl "")
 	  (goto-char (match-beginning 0))
-	  (setq c0 (current-column) p0 (if (equal (char-before) ?*)
-					   (1+ (point)) (point))
-		c1 (max (1+ c0) (if (> org-tags-column 0)
-				    org-tags-column
-				  (- (- org-tags-column) (length tags))))
+	  (setq c0 (current-column)
+		;; compute offset for the case of org-indent-mode active
+		di (if org-indent-mode
+		       (* (1- org-indent-indentation-per-level) (1- level))
+		     0)
+		p0 (if (equal (char-before) ?*) (1+ (point)) (point))
+		tc (+ org-tags-column (if (> org-tags-column 0) (- di) di))
+		c1 (max (1+ c0) (if (> tc 0) tc (- (- tc) (length tags))))
 		rpl (concat (make-string (max 0 (- c1 c0)) ?\ ) tags)))
 	(replace-match rpl t t)
 	(and (not (featurep 'xemacs)) c0 indent-tabs-mode (tabify p0 (point)))
