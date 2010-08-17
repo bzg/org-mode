@@ -973,7 +973,7 @@ Point will remain at the first line after the inserted text."
       (insert template)
       (org-capture-empty-lines-after)
       (goto-char beg)
-      (org-maybe-renumber-ordered-list)
+      (org-list-repair)
       (org-end-of-item)
       (setq end (point)))
      (t (insert template)))

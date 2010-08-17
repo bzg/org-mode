@@ -439,7 +439,7 @@ function ends."
      (before-p (funcall insert-fun nil)
 	       ;; Not taking advantage of renumbering while moving
 	       ;; down. Need to call it directly.
-	       (org-maybe-renumber-ordered-list) t)
+	       (org-list-repair) t)
      ;; Can't split item: insert bullet at the end of item.
      ((not (org-get-alist-option org-M-RET-may-split-line 'item))
       (funcall insert-fun nil) t)
@@ -685,7 +685,7 @@ so this really moves item trees."
 	  (goto-char pos)
 	  (error "Cannot move this item further down"))
       (org-list-exchange-items actual-item next-item)
-      (org-maybe-renumber-ordered-list)
+      (org-list-repair)
       (org-next-item)
       (move-to-column col))))
 
@@ -703,7 +703,7 @@ so this really moves item trees."
 	  (goto-char pos)
 	  (error "Cannot move this item further up"))
       (org-list-exchange-items prev-item actual-item)
-      (org-maybe-renumber-ordered-list)
+      (org-list-repair)
       (move-to-column col))))
 
 (defun org-insert-item (&optional checkbox)
@@ -1152,7 +1152,7 @@ children. Return t if successful."
 	   (t (back-to-indentation)
 	      (indent-to-column (car org-tab-ind-state))
 	      (end-of-line)
-	      (org-fix-bullet-type (cdr org-tab-ind-state))
+	      (org-list-repair (cdr org-tab-ind-state))
 	      ;; Break cycle
 	      (setq this-command 'identity)))
 	;; If a cycle is starting, remember indentation and bullet,
@@ -1195,9 +1195,14 @@ It determines the number of whitespaces to append by looking at
        (number-to-string (1+ (string-to-number (match-string 0 bullet)))) nil nil bullet)
     bullet))
 
-(defun org-fix-bullet-type (&optional force-bullet)
-  "Make sure all items in this list have the same bullet as the first item.
-Also, fix the indentation."
+(defun org-list-repair (&optional force-bullet)
+  "Make sure all items are correctly indented, with the right bullet.
+This function scans the list at point, along with any sublist.
+
+If the string FORCE-BULLET is provided, ensure all items in list
+share this bullet, or a logical successor in an ordered list.
+
+Item's body is not indented, only shifted with the bullet."
   (interactive)
   (unless (org-at-item-p) (error "This is not a list"))
   (let* ((struct (org-list-struct (point-at-bol) (point-at-eol)))
@@ -1210,25 +1215,10 @@ Also, fix the indentation."
       (setq fixed-struct (org-list-struct-fix-struct struct origins)))
     (org-list-struct-apply-struct fixed-struct)))
 
-(defun org-renumber-ordered-list ()
-  "Renumber an ordered plain list.
-Cursor needs to be in the first line of an item."
-  (interactive)
-  (unless (and (org-at-item-p)
-               (match-beginning 3))
-    (error "This is not an ordered list"))
-  (let* ((struct (org-list-struct (point-at-bol) (point-at-eol)))
-	 (origins (org-list-struct-origins struct)))
-    (org-list-struct-apply-struct (org-list-struct-fix-struct struct origins))))
-
-(defun org-maybe-renumber-ordered-list ()
-  "Renumber the ordered list at point if setup allows it.
-This tests the if 'renumber rule is set in
-`org-list-automatic-rules' before doing the renumbering.
-Do not throw error on failure."
-  (interactive)
-  (when (cdr (assq 'renumber org-list-automatic-rules))
-    (ignore-errors (org-renumber-ordered-list))))
+;; For backward compatibility
+(defalias 'org-fix-bullet-type 'org-list-repair)
+(defalias 'org-renumber-ordered-list 'org-list-repair)
+(defalias 'org-maybe-renumber-ordered-list 'org-list-repair)
 
 (defun org-cycle-list-bullet (&optional which)
   "Cycle through the different itemize/enumerate bullets.
@@ -1267,7 +1257,7 @@ is an integer, 0 means `-', 1 means `+' etc. If WHICH is
 		((numberp which) (funcall get-value which))
 		((eq 'previous which) (funcall get-value (1- item-index)))
 		(t (funcall get-value (1+ item-index))))))
-     (org-fix-bullet-type new))))
+     (org-list-repair new))))
 
 ;;; Checkboxes
 
@@ -1601,7 +1591,7 @@ optional argument WITH-CASE, the sorting considers case as well."
 		      (error "Invalid key function `%s'" getkey-func)))
 		   (t (error "Invalid sorting type `%c'" sorting-type)))))))
 	(sort-subr (/= dcst sorting-type) begin-record end-record value-to-sort nil sort-func)
-	(org-maybe-renumber-ordered-list)
+	(org-list-repair)
 	(run-hooks 'org-after-sorting-entries-or-items-hook)
 	(message "Sorting items...done")))))
 
