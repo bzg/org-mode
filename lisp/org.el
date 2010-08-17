@@ -12775,7 +12775,7 @@ With prefix ARG, realign all tags in headings in the current buffer."
 	 (col (current-column))
 	 (org-setting-tags t)
 	 table current-tags inherited-tags ; computed below when needed
-	 tags p0 c0 c1 rpl)
+	 tags p0 c0 c1 rpl di tc level)
     (if arg
 	(save-excursion
 	  (goto-char (point-min))
@@ -12825,6 +12825,9 @@ With prefix ARG, realign all tags in headings in the current buffer."
 
       ;; Insert new tags at the correct column
       (beginning-of-line 1)
+      (setq level (or (and (looking-at org-outline-regexp)
+			   (- (match-end 0) (point) 1))
+		      1))
       (cond
        ((and (equal current "") (equal tags "")))
        ((re-search-forward
@@ -12833,11 +12836,14 @@ With prefix ARG, realign all tags in headings in the current buffer."
 	(if (equal tags "")
 	    (setq rpl "")
 	  (goto-char (match-beginning 0))
-	  (setq c0 (current-column) p0 (if (equal (char-before) ?*)
-					   (1+ (point)) (point))
-		c1 (max (1+ c0) (if (> org-tags-column 0)
-				    org-tags-column
-				  (- (- org-tags-column) (length tags))))
+	  (setq c0 (current-column)
+		;; compute offset for the case of org-indent-mode active
+		di (if org-indent-mode
+		       (* (1- org-indent-indentation-per-level) (1- level))
+		     0)
+		p0 (if (equal (char-before) ?*) (1+ (point)) (point))
+		tc (+ org-tags-column (if (> org-tags-column 0) (- di) di))
+		c1 (max (1+ c0) (if (> tc 0) tc (- (- tc) (length tags))))
 		rpl (concat (make-string (max 0 (- c1 c0)) ?\ ) tags)))
 	(replace-match rpl t t)
 	(and (not (featurep 'xemacs)) c0 indent-tabs-mode (tabify p0 (point)))
