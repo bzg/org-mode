@@ -7140,7 +7140,7 @@ The cursor may be at a date in the calendar, or in the Org agenda."
 
 (defun org-agenda-clock-out ()
   "Stop the currently running clock."
-  (interactive "P")
+  (interactive)
   (unless (marker-buffer org-clock-marker)
     (error "No running clock"))
   (let ((marker (make-marker)) newhead)
