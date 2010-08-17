@@ -34,6 +34,7 @@
 
 (require 'org-macs)
 (require 'org-compat)
+(require 'ob-keys)
 (eval-when-compile
   (require 'cl))
 
@@ -165,6 +166,40 @@ For example, there is no ocaml-mode in Emacs, but the mode to use is
 
 (defvar org-src-mode-map (make-sparse-keymap))
 (define-key org-src-mode-map "\C-c'" 'org-edit-src-exit)
+
+(defmacro org-src-do-at-code-block (&rest body)
+  "Execute a command from an edit buffer in the Org-mode buffer."
+  `(let ((beg-marker org-edit-src-beg-marker))
+     (if beg-marker
+	 (with-current-buffer (marker-buffer beg-marker)
+	   (goto-char (marker-position beg-marker))
+	   ,@body))))
+
+(defun org-src-do-key-sequence-at-code-block (&optional key)
+  "Execute key sequence at code block in the source Org buffer.
+The command bound to KEY in the Org-babel key map is executed
+remotely with point temporarily at the start of the code block in
+the Org buffer.
+
+This command is not bound to a key by default, to avoid conflicts
+with language major mode bindings. To bind it to C-c @ in all
+language major modes, you could use
+
+  (add-hook 'org-src-mode-hook
+            (lambda () (define-key org-src-mode-map \"\\C-c@\"
+                    'org-src-do-key-sequence-at-code-block)))
+
+In that case, for example, C-c @ t issued in code edit buffers
+would tangle the current Org code block, C-c @ e would execute
+the block and C-c @ h would display the other available
+Org-babel commands."
+  (interactive "kOrg-babel key: ")
+  (if (equal key (kbd "C-g")) (keyboard-quit)
+    (org-edit-src-save)
+    (org-src-do-at-code-block
+     (call-interactively
+      (lookup-key org-babel-map key)))))
+
 (defvar org-edit-src-force-single-line nil)
 (defvar org-edit-src-from-org-mode nil)
 (defvar org-edit-src-allow-write-back-p t)
