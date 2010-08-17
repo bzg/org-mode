@@ -46,10 +46,10 @@
 (declare-function outline-next-heading "outline" ())
 (declare-function org-back-to-heading "org" (&optional invisible-ok))
 (declare-function org-back-over-empty-lines "org" ())
-(declare-function org-skip-whitespace "org" ())
 (declare-function org-trim "org" (s))
 (declare-function org-get-indentation "org" (&optional line))
 (declare-function org-timer-item "org-timer" (&optional arg))
+(declare-function org-timer-hms-to-secs "org-timer" (hms))
 (declare-function org-combine-plists "org" (&rest plists))
 (declare-function org-entry-get "org"
 		  (pom property &optional inherit literal-nil))
@@ -815,6 +815,7 @@ change is an outdent."
 (defun org-list-struct-origins (struct)
   "Return an alist where key is item's position and value parent's."
   (let* ((struct-rev (reverse struct))
+	 (acc (list (cons (nth 1 (car struct)) 0)))
 	 (prev-item (lambda (item) (car (nth 1 (member (assq item struct) struct-rev)))))
 	 (get-origins
 	  (lambda (item)
@@ -832,8 +833,7 @@ change is an outdent."
 		  (setq acc (cons (cons ind origin) acc))
 		  (cons item-pos origin)))
 	       ;; Current list going on
-	       (t (cons item-pos (cdar acc)))))))
-	 (acc (list (cons (nth 1 (car struct)) 0))))
+	       (t (cons item-pos (cdar acc))))))))
     (cons '(0 . 0) (mapcar get-origins (cdr struct)))))
 
 (defun org-list-struct-get-parent (item struct origins)
@@ -850,7 +850,8 @@ change is an outdent."
 (defun org-list-struct-fix-bul (struct origins)
   "Verify and correct bullets for every association in STRUCT.
 This function modifies STRUCT."
-  (let* ((init-bul (lambda (item)
+  (let* (acc
+	 (init-bul (lambda (item)
 		     (let ((counter (nth 3 item))
 			   (bullet (org-list-bullet-string (nth 2 item))))
 		       (cond
@@ -879,8 +880,7 @@ This function modifies STRUCT."
 		;; A new list is starting
 		(let ((new-bul (funcall init-bul item)))
 		  (funcall set-bul item new-bul)
-		  (setq acc (cons (cons parent (org-list-inc-bullet-maybe new-bul)) acc)))))))
-	 acc)
+		  (setq acc (cons (cons parent (org-list-inc-bullet-maybe new-bul)) acc))))))))
     (mapc fix-bul (cdr struct))))
 
 (defun org-list-struct-fix-ind (struct origins)
@@ -910,28 +910,28 @@ Only elements of STRUCT that have changed are returned."
 (defun org-list-struct-outdent (start end origins)
   "Outdent items in ORIGINS between BEGIN and END.
 BEGIN is included and END excluded."
-  (let ((out (lambda (cell)
-	       (let* ((item (car cell))
-		      (parent (cdr cell)))
-		 (cond
-		  ;; Item not yet in zone: keep association
-		  ((< item start) cell)
-		  ;; Item out of zone: follow associations in acc
-		  ((>= item end)
-		   (let ((convert (assq parent acc)))
-		     (if convert (cons item (cdr convert)) cell)))
-		  ;; Item has no parent: error
-		  ((<= parent 0)
-		   (error "Cannot outdent top-level items"))
-		  ;; Parent is outdented: keep association
-		  ((>= parent start)
-		   (setq acc (cons (cons parent item) acc)) cell)
-		  (t
-		   ;; Parent isn't outdented: reparent to grand-parent
-		   (let ((grand-parent (cdr (assq parent origins))))
-		     (setq acc (cons (cons parent item) acc))
-		     (cons item grand-parent)))))))
-	acc)
+  (let* (acc
+	 (out (lambda (cell)
+		(let* ((item (car cell))
+		       (parent (cdr cell)))
+		  (cond
+		   ;; Item not yet in zone: keep association
+		   ((< item start) cell)
+		   ;; Item out of zone: follow associations in acc
+		   ((>= item end)
+		    (let ((convert (assq parent acc)))
+		      (if convert (cons item (cdr convert)) cell)))
+		   ;; Item has no parent: error
+		   ((<= parent 0)
+		    (error "Cannot outdent top-level items"))
+		   ;; Parent is outdented: keep association
+		   ((>= parent start)
+		    (setq acc (cons (cons parent item) acc)) cell)
+		   (t
+		    ;; Parent isn't outdented: reparent to grand-parent
+		    (let ((grand-parent (cdr (assq parent origins))))
+		      (setq acc (cons (cons parent item) acc))
+		      (cons item grand-parent))))))))
     (mapcar out origins)))
 
 (defun org-list-struct-indent (start end origins struct)
@@ -940,7 +940,8 @@ BEGIN is included and END excluded.
 
 STRUCT may be modified if `org-list-demote-modify-bullet' is
 concerning bullets between START and END."
-  (let* ((orig-rev (reverse origins))
+  (let* (acc
+	 (orig-rev (reverse origins))
 	 (get-prev-item
 	  (lambda (cell parent)
 	    (car (rassq parent (cdr (memq cell orig-rev))))))
@@ -985,8 +986,7 @@ concerning bullets between START and END."
 		    (funcall set-assoc (cons item prev)))
 		   ;; Previous item indented: reparent like it
 		   (t
-		    (funcall set-assoc (cons item (cdr (assq prev acc))))))))))))
-	 acc)
+		    (funcall set-assoc (cons item (cdr (assq prev acc)))))))))))))
     (mapcar ind origins)))
 
 (defun org-list-struct-apply-struct (struct)
@@ -1493,18 +1493,16 @@ will return the number of items in the current list.
 
 Sublists of the list are skipped. Cursor is always at the
 beginning of the item."
-  (save-excursion
-    (let ((end (copy-marker (org-list-bottom-point)))
-	  (next-p (make-marker))
-	  (move-down-action
-	   (lambda (pos value &rest args)
-	     (goto-char pos)
-	     (set-marker next-p (org-get-next-item pos end))
-	     (let ((return-value (apply function value args)))
-	       (if (marker-position next-p)
-		   (apply move-down-action next-p return-value args)
-		 return-value)))))
-      (apply move-down-action (org-beginning-of-item-list) init-value args))))
+  (let* ((pos (copy-marker (point)))
+	 (end (copy-marker (org-list-bottom-point)))
+	 (next-p (copy-marker (save-excursion (org-beginning-of-item-list))))
+	 (value init-value))
+    (while (< next-p end)
+      (goto-char next-p)
+      (set-marker next-p (or (org-get-next-item (point) end) end))
+      (setq value (apply function value args)))
+    (goto-char pos)
+    value))
 
 (defun org-sort-list (&optional with-case sorting-type getkey-func compare-func)
   "Sort plain list items.
