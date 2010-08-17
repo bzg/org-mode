@@ -353,7 +353,7 @@ TIME defaults to the current time."
   (if (fboundp 'looking-at-p)
       (apply 'looking-at-p args)
     (save-match-data
-      (apply 'looking-at-p args))))
+      (apply 'looking-at args))))
 
 ; XEmacs does not have `looking-back'.
 (if (fboundp 'looking-back)
