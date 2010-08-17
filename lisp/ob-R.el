@@ -168,6 +168,14 @@ This function is called by `org-babel-execute-src-block'."
 	       (buffer-name))))
 	  (current-buffer))))))
 
+(defun org-babel-R-associate-session (session)
+  "Associate R code buffer with an R session.
+Make SESSION be the inferior ESS process associated with the
+current code buffer."
+  (setq ess-local-process-name
+	(process-name (get-buffer-process session)))
+  (ess-make-buffer-current))
+
 (defun org-babel-R-construct-graphics-device-call (out-file params)
   "Construct the call to the graphics device."
   (let ((devices
