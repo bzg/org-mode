@@ -465,6 +465,23 @@ of the source block to the kill ring."
 
 (defalias 'org-babel-pop-to-session 'org-babel-switch-to-session)
 
+;;;###autoload
+(defun org-babel-switch-to-session-with-code (&optional arg info)
+    "Switch to code buffer and display session."
+    (interactive "P")
+    (flet ((swap-windows
+	    ()
+	    (let ((other-window-buffer (window-buffer (next-window))))
+	      (set-window-buffer (next-window) (current-buffer))
+	      (set-window-buffer (selected-window) other-window-buffer))
+	    (other-window 1)))
+      (let ((info (org-babel-get-src-block-info))
+	    (org-src-window-setup 'reorganize-frame))
+	(save-excursion
+	  (org-babel-switch-to-session arg info))
+	(org-edit-src-code))
+      (swap-windows)))
+
 (defvar org-bracket-link-regexp)
 ;;;###autoload
 (defun org-babel-open-src-block-result (&optional re-run)
