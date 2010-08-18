@@ -439,7 +439,7 @@ session."
 If called with a prefix argument then evaluate the header arguments
 for the source block before entering the session. Copy the body
 of the source block to the kill ring."
-  (interactive)
+  (interactive "P")
   (let* ((info (or info (org-babel-get-src-block-info)))
          (lang (nth 0 info))
          (body (nth 1 info))
