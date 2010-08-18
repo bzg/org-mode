@@ -12766,6 +12766,7 @@ If DATA is nil or the empty string, any tags will be removed."
 	(org-set-tags t)
       (message "No headings"))))
 
+(defvar org-indent-indentation-per-level)
 (defun org-set-tags (&optional arg just-align)
   "Set the tags for the current headline.
 With prefix ARG, realign all tags in headings in the current buffer."
