@@ -434,11 +434,11 @@ session."
     (end-of-line 1)))
 
 ;;;###autoload
-(defun org-babel-switch-to-session (&optional arg info)
-  "Switch to the session of the current source-code block.
+(defun org-babel-initiate-session (&optional arg info)
+  "Initiate session for current code block.
 If called with a prefix argument then evaluate the header arguments
-for the source block before entering the session. Copy the body
-of the source block to the kill ring."
+for the code block before entering the session. Copy the body
+of the code block to the kill ring."
   (interactive "P")
   (let* ((info (or info (org-babel-get-src-block-info)))
          (lang (nth 0 info))
@@ -454,16 +454,23 @@ of the source block to the kill ring."
 	(error "This block is not using a session!"))
     (unless (fboundp cmd)
       (error "No org-babel-initiate-session function for %s!" lang))
-    ;; copy body to the kill ring
     (with-temp-buffer (insert (org-babel-trim body))
                       (copy-region-as-kill (point-min) (point-max)))
-    ;; if called with a prefix argument, then process header arguments
-    (unless (fboundp cmd2)
-      (error "No org-babel-prep-session function for %s!" lang))
-    (when arg (funcall cmd2 session params))
-    ;; just to the session using pop-to-buffer
-    (pop-to-buffer (funcall cmd session params))
-    (end-of-line 1)))
+    (when arg
+      (unless (fboundp cmd2)
+	(error "No org-babel-prep-session function for %s!" lang))
+      (funcall cmd2 session params))
+    (funcall cmd session params)))
+
+;;;###autoload
+(defun org-babel-switch-to-session (&optional arg info)
+  "Switch to the session of the current code block.
+Uses `org-babel-initiate-session' to start the session. If called
+with a prefix argument then this is passed on to
+`org-babel-initiate-session'."
+  (interactive "P")
+  (pop-to-buffer (org-babel-initiate-session arg info))
+  (end-of-line 1))
 
 (defalias 'org-babel-pop-to-session 'org-babel-switch-to-session)
 
