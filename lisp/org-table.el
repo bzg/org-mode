@@ -369,8 +369,9 @@ and table.el tables."
     (if (y-or-n-p "Convert table to Org-mode table? ")
 	(org-table-convert)))
    ((org-at-table-p)
-    (if (y-or-n-p "Convert table to table.el table? ")
-	(org-table-convert)))
+    (when (y-or-n-p "Convert table to table.el table? ")
+      (org-table-align)
+      (org-table-convert)))
    (t (call-interactively 'table-insert))))
 
 (defun org-table-create-or-convert-from-region (arg)
