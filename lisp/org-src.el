@@ -194,7 +194,7 @@ This minor mode is turned on in two situations:
 There is a mode hook, and keybindings for `org-edit-src-exit' and
 `org-edit-src-save'")
 
-(defun org-edit-src-code (&optional context code edit-buffer-name)
+(defun org-edit-src-code (&optional context code edit-buffer-name quietp)
   "Edit the source code example at point.
 The example is copied to a separate buffer, and that buffer is switched
 to the correct language mode.  When done, exit with \\[org-edit-src-exit].
@@ -298,7 +298,7 @@ the edited version. Optional argument CONTEXT is used by
 	(set-buffer-modified-p nil)
 	(and org-edit-src-persistent-message
 	     (org-set-local 'header-line-format msg)))
-      (message "%s" msg)
+      (unless quietp (message "%s" msg))
       t)))
 
 (defun org-edit-src-continue (e)

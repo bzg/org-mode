@@ -486,9 +486,11 @@ of the source block to the kill ring."
   "Evaluate BODY in edit buffer if there is a code block at point.
 Return t if a code block was found at point, nil otherwise."
   `(let ((org-src-window-setup 'switch-invisibly))
-     (when (org-edit-src-code)
+     (when (org-edit-src-code nil nil nil 'quietly)
        ,@body
-       (org-edit-src-exit) t)))
+       (if (org-bound-and-true-p org-edit-src-from-org-mode)
+	   (org-edit-src-exit))
+       t)))
 
 (defun org-babel-do-key-sequence-in-edit-buffer (key)
   "Read key sequence and execute the command in edit buffer.
