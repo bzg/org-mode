@@ -450,6 +450,8 @@ of the source block to the kill ring."
 	   (or (and dir (file-name-as-directory dir)) default-directory))
 	 (cmd (intern (format "org-babel-%s-initiate-session" lang)))
 	 (cmd2 (intern (concat "org-babel-prep-session:" lang))))
+    (if (and (stringp session) (string= session "none"))
+	(error "This block is not using a session!"))
     (unless (fboundp cmd)
       (error "No org-babel-initiate-session function for %s!" lang))
     ;; copy body to the kill ring
