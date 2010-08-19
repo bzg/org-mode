@@ -1638,7 +1638,8 @@ These special cookies will later be interpreted by the backend.
 	   (goto-char (point-min))
 	   (while (org-search-forward-unenclosed org-item-beginning-re nil t)
 	     (goto-char (org-list-bottom-point))
-	     (when (looking-at (org-list-end-re))
+	     (when (and (not (eq org-list-ending-method 'indent))
+			(looking-at (org-list-end-re)))
 	       (replace-match "\n"))
 	     (insert end-list-marker)))))
   ;; We need to divide backends into 3 categories.

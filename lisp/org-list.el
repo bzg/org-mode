@@ -149,9 +149,32 @@ spaces instead of one after the bullet in each item of the list."
 	  (const :tag "never" nil)
 	  (regexp)))
 
+(defcustom org-list-ending-method 'regexp
+  "Determine where plain lists should end.
+
+Valid values are symbols 'regexp, 'indent or 'both.
+
+When set to 'regexp, Org will look into two variables,
+`org-empty-line-terminates-plain-lists' and the more general
+`org-list-end-regexp', to know what will end lists. This is the
+default value.
+
+When set to 'indent, indentation of the last non-blank line will
+determine if point is in a list. If that line is less indented
+than the previous item in the section, if any, list has ended.
+
+When set to 'both, each of the preceding methods must confirm
+that point is in a list."
+  :group 'org-plain-lists
+  :type '(choice
+	  (const :tag "With a well defined ending (recommended)" regexp)
+	  (const :tag "With indentation of the current line" indent)
+	  (const :tag "With both methods" both)))
+
 (defcustom org-empty-line-terminates-plain-lists nil
   "Non-nil means an empty line ends all plain list levels.
-Otherwise, look for `org-list-end-regexp'."
+This variable only makes sense if `org-list-ending-method' is set
+to 'regexp or 'both."
   :group 'org-plain-lists
   :type 'boolean)
 
@@ -295,34 +318,164 @@ the end of the nearest terminator from max."
 	   ;; we want to be on the first line of the list ender
 	   (match-beginning 0)))))
 
-(defun org-list-search-unenclosed-generic (search skip len re bound noerr)
+(defun org-list-maybe-skip-block (search limit)
+  "Return non-nil value if point is in a block, skipping it on the way.
+
+It looks for the boundary of the block in SEARCH direction."
+  (save-match-data
+    (let ((case-fold-search t)
+	  (boundary (if (eq search 're-search-forward) 3 5)))
+    (when (save-excursion
+	    (and (funcall search "^[ \t]*#\\+\\(begin\\|end\\)_" limit t)
+		 (= (length (match-string 1)) boundary)))
+      ;; We're in a block: get out of it
+      (goto-char (match-beginning 0))))))
+
+(defun org-list-search-unenclosed-generic (search re bound noerr)
   "Search for RE with SEARCH outside blocks and protected places."
-  (let ((in-block-p
-	 (lambda ()
-	   (let ((case-fold-search t))
-	     (when (save-excursion
-		     (and (funcall search "^[ \t]*#\\+\\(begin\\|end\\)_" bound t)
-			  (= (length (match-string 1)) len)))
-	       ;; We're in a block: get out of it and resume searching
-	       (goto-char (funcall skip 0)))))))
-    (catch 'exit
-      (let ((origin (point)))
-	(while t
-	  (unless (funcall search re bound noerr)
-	    (throw 'exit (and (goto-char (if (booleanp noerr) origin bound)) nil)))
-	  (unless (or (get-text-property (match-beginning 0) 'org-protected)
-		      (save-match-data (funcall in-block-p)))
-	    (throw 'exit (point))))))))
+  (catch 'exit
+    (let ((origin (point)))
+      (while t
+	(unless (funcall search re bound noerr)
+	  (throw 'exit (and (goto-char (if (booleanp noerr) origin bound))
+			    nil)))
+	(unless (or (get-text-property (match-beginning 0) 'org-protected)
+		    (org-list-maybe-skip-block search bound))
+	  (throw 'exit (point)))))))
 
 (defun org-search-backward-unenclosed (regexp &optional bound noerror)
-  "Like `re-search-backward' but don't stop inside blocks or at protected places."
+  "Like `re-search-backward' but don't stop inside blocks or protected places."
   (org-list-search-unenclosed-generic
-   #'re-search-backward #'match-beginning 5 regexp (or bound (point-min)) noerror))
+   #'re-search-backward regexp (or bound (point-min)) noerror))
 
 (defun org-search-forward-unenclosed (regexp &optional bound noerror)
-  "Like `re-search-forward' but don't stop inside blocks or at protected places."
+  "Like `re-search-forward' but don't stop inside blocks or protected places."
   (org-list-search-unenclosed-generic
-   #'re-search-forward #'match-end 3 regexp (or bound (point-max)) noerror))
+   #'re-search-forward regexp (or bound (point-max)) noerror))
+
+(defun org-list-in-item-p-with-indent (limit)
+  "Is the cursor inside a plain list?
+
+Plain lists are considered ending when a non-blank line is less
+indented than the previous item within LIMIT.
+
+Return the position of the previous item, if applicable."
+  (save-excursion
+    (beginning-of-line)
+    ;; do not start searching at a blank line or inside a block
+    (while (or (and (org-list-maybe-skip-block #'re-search-backward limit)
+		    (goto-char (1- (point-at-bol))))
+	       (looking-at "^[ \t]*$"))
+      (skip-chars-backward " \r\t\n")
+      (beginning-of-line))
+    (or (and (org-at-item-p) (point-at-bol))
+	(let ((ind (org-get-indentation)))
+	  (catch 'exit
+	    (while t
+	      (cond
+	       ((or (bobp) (< (point) limit)) (throw 'exit nil))
+	       ((and (not (looking-at "[ \t]*$"))
+		     (not (org-list-maybe-skip-block
+			   #'re-search-backward limit))
+		     (< (org-get-indentation) ind))
+		(throw 'exit (and (org-at-item-p) (point-at-bol))))
+	       (t (beginning-of-line 0)))))))))
+
+(defun org-list-in-item-p-with-regexp (limit)
+  "Is the cursor inside a plain list?
+
+Plain lists end when `org-list-end-regexp' is matched, or at a
+blank line if `org-empty-line-terminates-plain-lists' is true."
+  (save-excursion
+    (let* ((actual-pos (goto-char (point-at-eol)))
+	   ;; Moved to eol so current line can be matched by
+	   ;; `org-item-re'.
+	   (last-item-start (save-excursion
+			      (org-search-backward-unenclosed
+			       org-item-beginning-re limit t)))
+	   (list-ender (org-list-terminator-between
+			last-item-start actual-pos)))
+      ;; We are in a list when we are on an item line or when we can
+      ;; find an item before point and there is no valid list ender
+      ;; between it and the point.
+      (and last-item-start
+	   (not list-ender)))))
+
+(defun org-list-top-point-with-regexp (limit)
+  "Return point at the top level item in a list, or nil if not in a list.
+
+List ending is determined by regexp. See
+`org-list-ending-method'. for more information."
+  (save-excursion
+    (and (org-list-in-item-p-with-regexp limit)
+	 (let ((pos (point-at-eol)))
+	   ;; Is there some list above this one ? If so, go to its ending.
+	   ;; Otherwise, go back to the heading above or bob.
+	   (goto-char (or (org-list-terminator-between limit pos) limit))
+	   ;; From there, search down our list.
+	   (org-search-forward-unenclosed org-item-beginning-re pos t)
+	   (point-at-bol)))))
+
+(defun org-list-bottom-point-with-regexp (limit)
+  "Return point just before list ending or nil if not in a list.
+
+List ending is determined by regexp. See
+`org-list-ending-method'. for more information."
+  (save-excursion
+    (and (org-in-item-p)
+	 (let ((pos (point)))
+	   ;; The list ending is either first point matching
+	   ;; `org-list-end-re', point at first white-line before next
+	   ;; heading, or eob.
+	   (or (org-list-terminator-between (min pos limit) limit t) limit)))))
+
+(defun org-list-top-point-with-indent (limit)
+  "Return point just before list ending or nil if not in a list.
+
+List ending is determined by indentation of text. See
+`org-list-ending-method'. for more information."
+  (save-excursion
+    (let ((prev-p (org-list-in-item-p-with-indent limit)))
+      (and prev-p
+           (catch 'exit
+             (while t
+               (cond
+		((not prev-p) (throw 'exit (1+ (point-at-eol))))
+		((= limit prev-p) (throw 'exit limit))
+		(t
+		 (goto-char prev-p)
+		 (beginning-of-line 0)
+		 (setq prev-p (org-list-in-item-p-with-indent limit))))))))))
+
+(defun org-list-bottom-point-with-indent (limit)
+  "Return point just before list ending or nil if not in a list.
+
+List ending is determined by the indentation of text. See
+`org-list-ending-method' for more information."
+  (save-excursion
+    (let* ((ind (save-excursion
+		  (ignore-errors (org-beginning-of-item))
+		  (org-get-indentation)))
+	   (end-item (lambda ()
+		       (save-excursion
+			 (catch 'end
+			   (while t
+			     (beginning-of-line 2)
+			     (cond
+			      ((>= (point) limit) (throw 'end limit))
+			      ((or (looking-at "^[ \t]*$")
+				   (org-list-maybe-skip-block
+				    #'re-search-forward limit)
+				   (> (org-get-indentation) ind)))
+			      (t (throw 'end (point-at-bol))))))))))
+      (and (org-in-item-p)
+	   (catch 'exit
+	     (while t
+	       (goto-char (funcall end-item))
+	       (if (looking-at org-item-beginning-re)
+		   (setq ind (org-get-indentation))
+		 (skip-chars-backward " \r\t\n")
+		 (throw 'exit (1+ (point-at-eol))))))))))
 
 (defun org-list-at-regexp-after-bullet-p (regexp)
   "Is point at a list item with REGEXP after bullet?"
@@ -393,7 +546,8 @@ function ends."
 		usr-blank)
 	    (cond
 	     ;; Trivial cases where there should be none.
-	     ((or org-empty-line-terminates-plain-lists
+	     ((or (and (not (eq org-list-ending-method 'indent))
+		       org-empty-line-terminates-plain-lists)
 		  (not insert-blank-p)) 0)
 	     ;; When `org-blank-before-new-entry' says so, it is 1.
 	     ((eq insert-blank-p t) 1)
@@ -465,20 +619,18 @@ function ends."
 ;;; Predicates
 
 (defun org-in-item-p ()
-  "Is the cursor inside a plain list ?"
+  "Is the cursor inside a plain list?
+This checks `org-list-ending-method'."
   (unless (let ((outline-regexp org-outline-regexp)) (org-at-heading-p))
-    (save-excursion
-      (let* ((limit (save-excursion (outline-previous-heading)))
-	     ;; Move to eol so current line can be matched by `org-item-re'.
-	     (actual-pos (goto-char (point-at-eol)))
-	     (last-item-start (save-excursion
-				(org-search-backward-unenclosed org-item-beginning-re limit t)))
-	     (list-ender (org-list-terminator-between last-item-start actual-pos)))
-	;; We are in a list when we are on an item line or when we can
-	;; find an item before point and there is no valid list ender
-	;; between it and the point.
-	(and last-item-start
-	     (not list-ender))))))
+    (let ((bound (or (save-excursion (outline-previous-heading))
+		     (point-min))))
+      (cond
+       ((eq org-list-ending-method 'indent)
+	(org-list-in-item-p-with-indent bound))
+       ((eq org-list-ending-method 'both)
+	(and (org-list-in-item-p-with-indent bound)
+	     (org-list-in-item-p-with-regexp bound)))
+       (t (org-list-in-item-p-with-regexp bound))))))
 
 (defun org-list-first-item-p ()
   "Is this item the first item in a plain list?
@@ -486,7 +638,8 @@ Assume point is at an item."
   (save-excursion
     (beginning-of-line)
     (let ((ind (org-get-indentation)))
-      (or (not (org-search-backward-unenclosed org-item-beginning-re (org-list-top-point) t))
+      (or (not (org-search-backward-unenclosed
+		org-item-beginning-re (org-list-top-point) t))
 	  (< (org-get-indentation) ind)))))
 
 (defun org-at-item-p ()
@@ -502,7 +655,8 @@ Assume point is at an item."
 
 (defun org-at-item-timer-p ()
   "Is point at a line starting a plain list item with a timer?"
-  (org-list-at-regexp-after-bullet-p "\\([0-9]+:[0-9]+:[0-9]+\\)[ \t]+::[ \t]+"))
+  (org-list-at-regexp-after-bullet-p
+   "\\([0-9]+:[0-9]+:[0-9]+\\)[ \t]+::[ \t]+"))
 
 (defun org-at-item-description-p ()
   "Is point at a description list item?"
@@ -537,34 +691,32 @@ A checkbox is blocked if all of the following conditions are fulfilled:
 ;;; Navigate
 
 (defun org-list-top-point ()
-  "Return point at the top level item in a list, or nil if not in a list."
-  (save-excursion
-    (and (org-in-item-p)
-	 (let ((pos (point-at-eol))
-	       (bound (or (outline-previous-heading) (point-min))))
-	   ;; Is there some list above this one ? If so, go to its ending.
-	   ;; Otherwise, go back to the heading above or bob.
-	   (goto-char (or (org-list-terminator-between bound pos) bound))
-	   ;; From there, search down our list.
-	   (org-search-forward-unenclosed org-item-beginning-re pos t)
-	   (point-at-bol)))))
+  (let ((limit (or (save-excursion (outline-previous-heading))
+		   (point-min))))
+    (cond
+     ((eq org-list-ending-method 'indent)
+      (org-list-top-point-with-indent limit))
+     ((eq org-list-ending-method 'both)
+      (max (org-list-top-point-with-regexp limit)
+	   (org-list-top-point-with-indent limit)))
+     (t (org-list-top-point-with-regexp limit)))))
 
 (defun org-list-bottom-point ()
-  "Return point just before list ending or nil if not in a list."
-  (save-excursion
-    (and (org-in-item-p)
-	 (let ((pos (point))
-	       (bound (or (and (let ((outline-regexp org-outline-regexp))
-				 ;; Use default regexp because folding
-				 ;; changes OUTLINE-REGEXP.
-				 (outline-next-heading))
-			       (skip-chars-backward " \t\r\n")
-			       (1+ (point-at-eol)))
-			  (point-max))))
-	   ;; The list ending is either first point matching
-	   ;; `org-list-end-re', point at first white-line before next
-	   ;; heading, or eob.
-	   (or (org-list-terminator-between (min pos bound) bound t) bound)))))
+  (let ((limit (or (save-excursion
+		     (and (let ((outline-regexp org-outline-regexp))
+			  ;; Use default regexp because folding
+			  ;; changes OUTLINE-REGEXP.
+			  (outline-next-heading))
+			(skip-chars-backward " \r\t\n")
+			(1+ (point-at-eol))))
+		   (point-max))))
+    (cond
+     ((eq org-list-ending-method 'indent)
+      (org-list-bottom-point-with-indent limit))
+     ((eq org-list-ending-method 'both)
+      (min (org-list-bottom-point-with-regexp limit)
+	   (org-list-bottom-point-with-indent limit)))
+     (t (org-list-bottom-point-with-regexp limit)))))
 
 (defun org-beginning-of-item ()
   "Go to the beginning of the current hand-formatted item.
@@ -1032,16 +1184,21 @@ Initial position is restored after the changes."
 			      (match-string 1)))
 		   (old-body-ind (+ (length old-bul) old-ind))
 		   (new-body-ind (+ (length new-bul) new-ind)))
-	      ;; Replace bullet
-	      (unless (equal new-bul old-bul)
-		(save-excursion (replace-match new-bul nil nil nil 1)))
-	      ;; Indent item to appropriate column
-	      (unless (= new-ind old-ind)
-		(delete-region (point-at-bol) (match-beginning 1))
-		(indent-to new-ind))
-	      ;; Shift item's body
+	      ;; 1. Shift item's body
 	      (unless (= old-body-ind new-body-ind)
-		(org-shift-item-indentation (- new-body-ind old-body-ind))))))
+		(org-shift-item-indentation (- new-body-ind old-body-ind)))
+	      ;; 2. Replace bullet
+	      (unless (equal new-bul old-bul)
+		(save-excursion
+		  (looking-at "[ \t]*\\(\\S-+[ \t]*\\)")
+		  (replace-match new-bul nil nil nil 1)))
+	      ;; 3. Indent item to appropriate column
+	      (unless (= new-ind old-ind)
+		(delete-region (point-at-bol)
+			       (progn
+				 (skip-chars-forward " \t")
+				 (point)))
+		(indent-to new-ind)))))
 	 ;; Remove ancestor if it is left.
 	 (struct-to-apply (if (or (not ancestor) (= 0 ancestor))
 			      (cdr struct)
@@ -1680,7 +1837,8 @@ sublevels as a list of strings."
     (when delete
       (delete-region start end)
       (save-match-data
-	(when (looking-at (org-list-end-re))
+	(when (and (not (eq org-list-ending-method 'indent))
+		   (looking-at (org-list-end-re)))
 	  (replace-match "\n"))))
     (setq output (nreverse output))
     (push ltype output)))
