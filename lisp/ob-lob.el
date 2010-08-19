@@ -79,14 +79,7 @@ if so then run the appropriate source block from the Library."
 
 ;;;###autoload
 (defun org-babel-lob-get-info ()
-  "Return a Library of Babel function call as a string.
-
-This function is analogous to org-babel-get-src-block-name. For
-both functions, after they are called, (match-string 1) matches
-the function name, and (match-string 2) matches the function
-arguments inside the parentheses. I think perhaps these functions
-should be renamed to bring out this similarity, perhaps involving
-the word 'call'."
+  "Return a Library of Babel function call as a string."
   (let ((case-fold-search t))
     (save-excursion
       (beginning-of-line 1)
