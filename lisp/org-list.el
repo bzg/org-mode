@@ -173,8 +173,10 @@ that point is in a list."
 
 (defcustom org-empty-line-terminates-plain-lists nil
   "Non-nil means an empty line ends all plain list levels.
+
 This variable only makes sense if `org-list-ending-method' is set
-to 'regexp or 'both."
+to 'regexp or 'both. This is then equivalent to set
+`org-list-end-regexp' to \"^[ \\t]*$\"."
   :group 'org-plain-lists
   :type 'boolean)
 
@@ -336,9 +338,12 @@ It looks for the boundary of the block in SEARCH direction."
   (catch 'exit
     (let ((origin (point)))
       (while t
+	;; 1. No match: return to origin or bound, depending on NOERR.
 	(unless (funcall search re bound noerr)
 	  (throw 'exit (and (goto-char (if (booleanp noerr) origin bound))
 			    nil)))
+	;; 2. Match not in block or protected: return point. Else
+	;; skip the block and carry on.
 	(unless (or (get-text-property (match-beginning 0) 'org-protected)
 		    (org-list-maybe-skip-block search bound))
 	  (throw 'exit (point)))))))
@@ -374,9 +379,12 @@ Return the position of the previous item, if applicable."
 	    (while t
 	      (cond
 	       ((or (bobp) (< (point) limit)) (throw 'exit nil))
+	       ;; skip blank lines..
 	       ((and (not (looking-at "[ \t]*$"))
+		     ;; blocks...
 		     (not (org-list-maybe-skip-block
 			   #'re-search-backward limit))
+		     ;; and items more indented.
 		     (< (org-get-indentation) ind))
 		(throw 'exit (and (org-at-item-p) (point-at-bol))))
 	       (t (beginning-of-line 0)))))))))
@@ -958,8 +966,8 @@ change is an outdent."
                             (>= (org-get-indentation) ind-min))
                   (setq post-list (cons (org-list-struct-assoc-at-point)
 					post-list)))
-		;; we need to check if list is malformed and some
-		;; items are less indented that top-item
+		;; Is list is malformed? If some items are less
+		;; indented that top-item, add them anyhow.
 		(when (and (= (caar pre-list) 0) (org-at-item-p))
 		  (setq post-list (cons (org-list-struct-assoc-at-point)
 					post-list))
