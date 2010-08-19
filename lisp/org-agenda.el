@@ -2549,6 +2549,7 @@ higher priority settings."
 			     (expand-file-name
 			      (concat (file-name-sans-extension file) ".ps"))
 			     (expand-file-name file))
+	       (delete-file (concat (file-name-sans-extension file) ".ps"))
 	       (message "PDF written to %s" file))
 	      ((string-match "\\.ics\\'" file)
 	       (require 'org-icalendar)
