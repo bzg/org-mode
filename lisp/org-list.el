@@ -399,7 +399,8 @@ function ends."
 	     ((eq insert-blank-p t) 1)
 	     ;; plain-list-item is 'auto. Count blank lines separating
 	     ;; neighbours items in list.
-	     (t (let ((next-p (org-get-next-item (point) (org-list-bottom-point))))
+	     (t (let ((next-p (org-get-next-item (point)
+						 (org-list-bottom-point))))
 		  (cond
 		   ;; Is there a next item?
 		   (next-p (goto-char next-p)
@@ -786,19 +787,25 @@ change is an outdent."
                      pre-list post-list)
                 (goto-char begin)
                 ;; Find beginning of most outdented list (min list)
-                (while (and (org-search-backward-unenclosed org-item-beginning-re top t)
+                (while (and (org-search-backward-unenclosed
+			     org-item-beginning-re top t)
                             (>= (org-get-indentation) ind-min))
-                  (setq pre-list (cons (org-list-struct-assoc-at-point) pre-list)))
+                  (setq pre-list (cons (org-list-struct-assoc-at-point)
+				       pre-list)))
                 ;; Now get the parent. If none, add a virtual ancestor
                 (if (< (org-get-indentation) ind-min)
-                    (setq pre-list (cons (org-list-struct-assoc-at-point) pre-list))
-                  (setq pre-list (cons (list 0 (org-get-indentation) "" nil) pre-list)))
+                    (setq pre-list (cons (org-list-struct-assoc-at-point)
+					 pre-list))
+                  (setq pre-list (cons (list 0 (org-get-indentation) "" nil)
+				       pre-list)))
                 ;; Find end of min list
                 (goto-char end)
                 (end-of-line)
-                (while (and (org-search-forward-unenclosed org-item-beginning-re bottom t)
+                (while (and (org-search-forward-unenclosed
+			     org-item-beginning-re bottom t)
                             (>= (org-get-indentation) ind-min))
-                  (setq post-list (cons (org-list-struct-assoc-at-point) post-list)))
+                  (setq post-list (cons (org-list-struct-assoc-at-point)
+					post-list)))
                 (append pre-list struct (reverse post-list))))))
       ;; Here we start: first get the core zone...
       (goto-char end)
@@ -816,7 +823,8 @@ change is an outdent."
   "Return an alist where key is item's position and value parent's."
   (let* ((struct-rev (reverse struct))
 	 (acc (list (cons (nth 1 (car struct)) 0)))
-	 (prev-item (lambda (item) (car (nth 1 (member (assq item struct) struct-rev)))))
+	 (prev-item (lambda (item)
+		      (car (nth 1 (member (assq item struct) struct-rev)))))
 	 (get-origins
 	  (lambda (item)
 	    (let* ((item-pos (car item))
@@ -880,7 +888,9 @@ This function modifies STRUCT."
 		;; A new list is starting
 		(let ((new-bul (funcall init-bul item)))
 		  (funcall set-bul item new-bul)
-		  (setq acc (cons (cons parent (org-list-inc-bullet-maybe new-bul)) acc))))))))
+		  (setq acc (cons (cons parent
+					(org-list-inc-bullet-maybe new-bul))
+				  acc))))))))
     (mapc fix-bul (cdr struct))))
 
 (defun org-list-struct-fix-ind (struct origins)
@@ -894,7 +904,8 @@ This function modifies STRUCT."
             (let* ((parent (org-list-struct-get-parent item headless origins)))
               (if parent
                   ;; Indent like parent + length of parent's bullet
-                  (setcdr item (cons (+ (length (nth 2 parent)) (nth 1 parent)) (cddr item)))
+                  (setcdr item (cons (+ (length (nth 2 parent)) (nth 1 parent))
+				     (cddr item)))
                 ;; If no parent, indent like top-point
                 (setcdr item (cons top-ind (cddr item))))))))
     (mapc new-ind headless)))
@@ -957,7 +968,9 @@ concerning bullets between START and END."
 		;; new bullet is stored without space to ensure item
 		;; will be modified
 		(setcdr full-item
-			(list (nth 1 full-item) new-bul-p (nth 3 full-item)))))))
+			(list (nth 1 full-item)
+			      new-bul-p
+			      (nth 3 full-item)))))))
 	 (ind
 	  (lambda (cell)
 	    (let* ((item (car cell))
@@ -986,7 +999,8 @@ concerning bullets between START and END."
 		    (funcall set-assoc (cons item prev)))
 		   ;; Previous item indented: reparent like it
 		   (t
-		    (funcall set-assoc (cons item (cdr (assq prev acc)))))))))))))
+		    (funcall set-assoc (cons item
+					     (cdr (assq prev acc)))))))))))))
     (mapcar ind origins)))
 
 (defun org-list-struct-apply-struct (struct)
@@ -1016,7 +1030,9 @@ Initial position is restored after the changes."
 	      (unless (= old-body-ind new-body-ind)
 		(org-shift-item-indentation (- new-body-ind old-body-ind))))))
 	 ;; Remove ancestor if it is left.
-	 (struct-to-apply (if (or (not ancestor) (= 0 ancestor)) (cdr struct) struct)))
+	 (struct-to-apply (if (or (not ancestor) (= 0 ancestor))
+			      (cdr struct)
+			    struct)))
     ;; Apply changes from bottom to top
     (mapc modify (nreverse struct-to-apply))
     (goto-char pos)))
@@ -1084,10 +1100,13 @@ children. Return t if successful."
         (progn
           (set-marker org-last-indent-begin-marker (region-beginning))
           (set-marker org-last-indent-end-marker (region-end)))
-      (set-marker org-last-indent-begin-marker (save-excursion (org-beginning-of-item)))
+      (set-marker org-last-indent-begin-marker
+		  (save-excursion (org-beginning-of-item)))
       (set-marker org-last-indent-end-marker
                   (save-excursion
-                    (if no-subtree (org-end-of-item-or-at-child) (org-end-of-item))))))
+                    (if no-subtree
+			(org-end-of-item-or-at-child)
+		      (org-end-of-item))))))
   ;; Get everything ready
   (let* ((beg (marker-position org-last-indent-begin-marker))
          (end (marker-position org-last-indent-end-marker))
@@ -1109,10 +1128,13 @@ children. Return t if successful."
         (if (< (+ top-ind offset) 0)
             (error "Cannot outdent beyond margin")
 	  ;; Change bullet if necessary
-          (when (and (= (+ top-ind offset) 0) (string-match "*" (nth 2 beg-item)))
-            (setcdr beg-item (list (nth 1 beg-item) (org-list-bullet-string "-"))))
+          (when (and (= (+ top-ind offset) 0)
+		     (string-match "*" (nth 2 beg-item)))
+            (setcdr beg-item (list (nth 1 beg-item)
+				   (org-list-bullet-string "-"))))
 	  ;; Shift ancestor
-	  (let ((anc (car struct))) (setcdr anc (list (+ (nth 1 anc) offset) "" nil)))
+	  (let ((anc (car struct)))
+	    (setcdr anc (list (+ (nth 1 anc) offset) "" nil)))
 	  (org-list-struct-fix-struct struct origins)
           (org-list-struct-apply-struct struct))))
      ;; Forbidden move
@@ -1135,7 +1157,9 @@ children. Return t if successful."
 (defvar org-tab-ind-state)
 (defun org-cycle-item-indentation ()
   (let ((org-adapt-indentation nil))
-    (when (and (or (org-at-item-description-p) (org-at-item-checkbox-p) (org-at-item-p))
+    (when (and (or (org-at-item-description-p)
+		   (org-at-item-checkbox-p)
+		   (org-at-item-p))
 	       (>= (match-end 0) (save-excursion
                                    (org-end-of-item-or-at-child)
                                    (skip-chars-backward " \r\t\n")
@@ -1192,7 +1216,8 @@ It determines the number of whitespaces to append by looking at
   "Increment numbered bullets."
   (if (string-match "[0-9]+" bullet)
       (replace-match
-       (number-to-string (1+ (string-to-number (match-string 0 bullet)))) nil nil bullet)
+       (number-to-string (1+ (string-to-number (match-string 0 bullet))))
+       nil nil bullet)
     bullet))
 
 (defun org-list-repair (&optional force-bullet)
@@ -1210,8 +1235,11 @@ Item's body is not indented, only shifted with the bullet."
 	 fixed-struct)
     (if force-bullet
 	(let ((begin (nth 1 struct)))
-	  (setcdr begin (list (nth 1 begin) (org-list-bullet-string force-bullet) (nth 3 begin)))
-	  (setq fixed-struct (cons begin (org-list-struct-fix-struct struct origins))))
+	  (setcdr begin (list (nth 1 begin)
+			      (org-list-bullet-string force-bullet)
+			      (nth 3 begin)))
+	  (setq fixed-struct
+		(cons begin (org-list-struct-fix-struct struct origins))))
       (setq fixed-struct (org-list-struct-fix-struct struct origins)))
     (org-list-struct-apply-struct fixed-struct)))
 
@@ -1286,7 +1314,8 @@ in subtree."
             ;; In this case, reference line is the first item in subtree
             (let ((limit (save-excursion (outline-next-heading) (point))))
               (save-excursion
-                (org-search-forward-unenclosed org-item-beginning-re limit 'move)
+                (org-search-forward-unenclosed
+		 org-item-beginning-re limit 'move)
                 (list (point) limit nil))))
            ((org-at-item-p)
             (list (point-at-bol) (point-at-eol) t))
@@ -1294,7 +1323,9 @@ in subtree."
          ;; marker is needed because deleting checkboxes will change END
          (end (copy-marker (nth 1 bounds)))
          (single-p (nth 2 bounds))
-         (ref-presence (save-excursion (goto-char (car bounds)) (org-at-item-checkbox-p)))
+         (ref-presence (save-excursion
+			 (goto-char (car bounds))
+			 (org-at-item-checkbox-p)))
          (ref-status (equal (match-string 1) "[X]"))
          (act-on-item
           (lambda (ref-pres ref-stat)
@@ -1435,14 +1466,16 @@ the whole buffer."
 		      ;; with proper limit.
 		      (goto-char (or (org-get-next-item (point) lim) lim))
 		    (end-of-line)
-		    (when (org-search-forward-unenclosed org-item-beginning-re lim t)
+		    (when (org-search-forward-unenclosed
+			   org-item-beginning-re lim t)
 		      (beginning-of-line)))
 		  (setq next-ind (org-get-indentation)))))
 	  (goto-char continue-from)
 	  ;; update cookie
 	  (when end-cookie
 	    (setq new (if is-percent
-			  (format "[%d%%]" (/ (* 100 c-on) (max 1 (+ c-on c-off))))
+			  (format "[%d%%]" (/ (* 100 c-on)
+					      (max 1 (+ c-on c-off))))
 			(format "[%d/%d]" c-on (+ c-on c-off))))
 	    (goto-char beg-cookie)
 	    (insert new)
@@ -1588,7 +1621,12 @@ optional argument WITH-CASE, the sorting considers case as well."
 			    value))
 		      (error "Invalid key function `%s'" getkey-func)))
 		   (t (error "Invalid sorting type `%c'" sorting-type)))))))
-	(sort-subr (/= dcst sorting-type) begin-record end-record value-to-sort nil sort-func)
+	(sort-subr (/= dcst sorting-type)
+		   begin-record
+		   end-record
+		   value-to-sort
+		   nil
+		   sort-func)
 	(org-list-repair)
 	(run-hooks 'org-after-sorting-entries-or-items-hook)
 	(message "Sorting items...done")))))
@@ -1610,9 +1648,12 @@ sublevels as a list of strings."
 			  (t 'unordered))))
       (let* ((indent1 (org-get-indentation))
 	     (nextitem (or (org-get-next-item (point) end) end))
-	     (item (org-trim (buffer-substring (point) (org-end-of-item-or-at-child))))
+	     (item (org-trim (buffer-substring (point)
+					       (org-end-of-item-or-at-child))))
 	     (nextindent (if (= (point) end) 0 (org-get-indentation)))
-	     (item (if (string-match "^\\(?:\\[@start:[0-9]+\\][ \t]*\\)?\\[\\([xX ]\\)\\]" item)
+	     (item (if (string-match
+			"^\\(?:\\[@start:[0-9]+\\][ \t]*\\)?\\[\\([xX ]\\)\\]"
+			item)
 		       (replace-match (if (equal (match-string 1 item) " ")
 					  "CBOFF"
 					"CBON")
@@ -1641,7 +1682,8 @@ sublevels as a list of strings."
       (save-excursion
 	(if (ignore-errors
 	      (org-back-to-heading))
-	    (progn (org-search-forward-unenclosed org-complex-heading-regexp nil t)
+	    (progn (org-search-forward-unenclosed
+		    org-complex-heading-regexp nil t)
 		   (setq nstars (length (match-string 1))))
 	  (setq nstars 0)))
       (org-list-make-subtrees list (1+ nstars)))))
@@ -1690,7 +1732,8 @@ this list."
 	   (transform (intern (match-string 2)))
 	   (bottom-point
 	    (save-excursion
-	      (re-search-forward "\\(\\\\end{comment}\\|@end ignore\\|-->\\)" nil t)
+	      (re-search-forward
+	       "\\(\\\\end{comment}\\|@end ignore\\|-->\\)" nil t)
 	      (match-beginning 0)))
 	   (top-point
 	    (progn
@@ -1708,7 +1751,9 @@ this list."
 	(save-excursion
 	  (goto-char (point-min))
 	  (unless (re-search-forward
-		   (concat "BEGIN RECEIVE ORGLST +" name "\\([ \t]\\|$\\)") nil t)
+		   (concat "BEGIN RECEIVE ORGLST +"
+			   name
+			   "\\([ \t]\\|$\\)") nil t)
 	    (error "Don't know where to insert translated list"))
 	  (goto-char (match-beginning 0))
 	  (beginning-of-line 2)
@@ -1782,7 +1827,8 @@ Valid parameters PARAMS are
 		 (setq term (org-trim (format (concat dtstart "%s" dtend)
 					      (match-string 1 sublist))))
 		 (setq sublist (concat ddstart
-				       (org-trim (substring sublist (match-end 0)))
+				       (org-trim (substring sublist
+							    (match-end 0)))
 				       ddend)))
 	       (if (string-match "\\[CBON\\]" sublist)
 		   (setq sublist (replace-match cbon t t sublist)))
