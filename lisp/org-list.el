@@ -802,10 +802,19 @@ change is an outdent."
                 (goto-char end)
                 (end-of-line)
                 (while (and (org-search-forward-unenclosed
-			     org-item-beginning-re bottom t)
+			     org-item-beginning-re bottom 'move)
                             (>= (org-get-indentation) ind-min))
                   (setq post-list (cons (org-list-struct-assoc-at-point)
 					post-list)))
+		;; we need to check if list is malformed and some
+		;; items are less indented that top-item
+		(when (and (= (caar pre-list) 0) (org-at-item-p))
+		  (setq post-list (cons (org-list-struct-assoc-at-point)
+					post-list))
+		  (while (org-search-forward-unenclosed
+			  org-item-beginning-re bottom t)
+		    (setq post-list (cons (org-list-struct-assoc-at-point)
+					  post-list))))
                 (append pre-list struct (reverse post-list))))))
       ;; Here we start: first get the core zone...
       (goto-char end)
@@ -833,8 +842,12 @@ change is an outdent."
 	      (cond
 	       ;; List closing.
 	       ((> prev-ind ind)
-		(setq acc (member (assq ind acc) acc))
-		(cons item-pos (cdar acc)))
+		(let ((current-origin (or (member (assq ind acc) acc)
+					  ;; needed if top-point is
+					  ;; not the most outdented
+					  (last acc))))
+		  (setq acc current-origin)
+		  (cons item-pos (cdar acc))))
 	       ;; New list
 	       ((< prev-ind ind)
 		(let ((origin (funcall prev-item item-pos)))
