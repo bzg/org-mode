@@ -1124,7 +1124,9 @@ LEVEL indicates the default depth for export."
 	      (save-restriction
 		(widen)
 		(goto-char (point-min))
-		(and (re-search-forward "^#\\+LaTeX_CLASS:[ \t]*\\(-[a-zA-Z]+\\)" nil t)
+		(and (let ((case-fold-search t))
+		       (re-search-forward
+			"^#\\+LaTeX_CLASS:[ \t]*\\(-[a-zA-Z]+\\)" nil t))
 		     (match-string 1))))
 	    (plist-get org-export-latex-options-plist :latex-class)
 	    org-export-latex-default-class)
@@ -1138,8 +1140,10 @@ LEVEL indicates the default depth for export."
 	      (save-restriction
 		(widen)
 		(goto-char (point-min))
-		(and (re-search-forward "^#\\+LaTeX_CLASS_OPTIONS:[ \t]*\\(.*?\\)[ \t]*$" nil t)
-		     (match-string 1))))
+		(and (let ((case-fold-search t))
+		       (re-search-forward
+			"^#\\+LaTeX_CLASS_OPTIONS:[ \t]*\\(.*?\\)[ \t]*$" nil t)
+		       (match-string 1)))))
 	    (plist-get org-export-latex-options-plist :latex-class-options))
 	org-export-latex-class
 	(or (car (assoc org-export-latex-class org-export-latex-classes))
