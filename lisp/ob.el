@@ -434,12 +434,12 @@ session."
     (end-of-line 1)))
 
 ;;;###autoload
-(defun org-babel-switch-to-session (&optional arg info)
-  "Switch to the session of the current source-code block.
+(defun org-babel-initiate-session (&optional arg info)
+  "Initiate session for current code block.
 If called with a prefix argument then evaluate the header arguments
-for the source block before entering the session. Copy the body
-of the source block to the kill ring."
-  (interactive)
+for the code block before entering the session. Copy the body
+of the code block to the kill ring."
+  (interactive "P")
   (let* ((info (or info (org-babel-get-src-block-info)))
          (lang (nth 0 info))
          (body (nth 1 info))
@@ -450,20 +450,70 @@ of the source block to the kill ring."
 	   (or (and dir (file-name-as-directory dir)) default-directory))
 	 (cmd (intern (format "org-babel-%s-initiate-session" lang)))
 	 (cmd2 (intern (concat "org-babel-prep-session:" lang))))
+    (if (and (stringp session) (string= session "none"))
+	(error "This block is not using a session!"))
     (unless (fboundp cmd)
       (error "No org-babel-initiate-session function for %s!" lang))
-    ;; copy body to the kill ring
     (with-temp-buffer (insert (org-babel-trim body))
                       (copy-region-as-kill (point-min) (point-max)))
-    ;; if called with a prefix argument, then process header arguments
-    (unless (fboundp cmd2)
-      (error "No org-babel-prep-session function for %s!" lang))
-    (when arg (funcall cmd2 session params))
-    ;; just to the session using pop-to-buffer
-    (pop-to-buffer (funcall cmd session params))
-    (end-of-line 1)))
+    (when arg
+      (unless (fboundp cmd2)
+	(error "No org-babel-prep-session function for %s!" lang))
+      (funcall cmd2 session params))
+    (funcall cmd session params)))
+
+;;;###autoload
+(defun org-babel-switch-to-session (&optional arg info)
+  "Switch to the session of the current code block.
+Uses `org-babel-initiate-session' to start the session. If called
+with a prefix argument then this is passed on to
+`org-babel-initiate-session'."
+  (interactive "P")
+  (pop-to-buffer (org-babel-initiate-session arg info))
+  (end-of-line 1))
 
 (defalias 'org-babel-pop-to-session 'org-babel-switch-to-session)
+
+;;;###autoload
+(defun org-babel-switch-to-session-with-code (&optional arg info)
+    "Switch to code buffer and display session."
+    (interactive "P")
+    (flet ((swap-windows
+	    ()
+	    (let ((other-window-buffer (window-buffer (next-window))))
+	      (set-window-buffer (next-window) (current-buffer))
+	      (set-window-buffer (selected-window) other-window-buffer))
+	    (other-window 1)))
+      (let ((info (org-babel-get-src-block-info))
+	    (org-src-window-setup 'reorganize-frame))
+	(save-excursion
+	  (org-babel-switch-to-session arg info))
+	(org-edit-src-code))
+      (swap-windows)))
+
+(defmacro org-babel-do-in-edit-buffer (&rest body)
+  "Evaluate BODY in edit buffer if there is a code block at point.
+Return t if a code block was found at point, nil otherwise."
+  `(let ((org-src-window-setup 'switch-invisibly))
+     (when (org-edit-src-code nil nil nil 'quietly)
+       ,@body
+       (if (org-bound-and-true-p org-edit-src-from-org-mode)
+	   (org-edit-src-exit))
+       t)))
+
+(defun org-babel-do-key-sequence-in-edit-buffer (key)
+  "Read key sequence and execute the command in edit buffer.
+Enter a key sequence to be executed in the language major-mode
+edit buffer. For example, TAB will alter the contents of the
+Org-mode code block according to the effect of TAB in the
+language major-mode buffer. For languages that support
+interactive sessions, this can be used to send code from the Org
+buffer to the session for evaluation using the native major-mode
+evaluation mechanisms."
+  (interactive "kEnter key-sequence to execute in edit buffer: ")
+  (org-babel-do-in-edit-buffer
+   (call-interactively
+    (key-binding (or key (read-key-sequence nil))))))
 
 (defvar org-bracket-link-regexp)
 ;;;###autoload

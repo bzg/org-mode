@@ -2503,16 +2503,15 @@ higher priority settings."
   (interactive "FWrite agenda to file: \nP")
   (if (not (file-writable-p file))
       (error "Cannot write agenda to file %s" file))
-  (cond
-   ((string-match "\\.html?\\'" file) (require 'htmlize))
-   ((string-match "\\.ps\\'" file) (require 'ps-print)))
   (org-let (if nosettings nil org-agenda-exporter-settings)
-    `(save-excursion
+    '(save-excursion
        (save-window-excursion
 	 (org-agenda-mark-filtered-text)
 	 (let ((bs (copy-sequence (buffer-string))) beg)
 	   (org-agenda-unmark-filtered-text)
 	   (with-temp-buffer
+	     (rename-buffer "Agenda View" t)
+	     (set-buffer-modified-p nil)
 	     (insert bs)
 	     (org-agenda-remove-marked-text 'org-filtered)
 	     (while (setq beg (text-property-any (point-min) (point-max)
@@ -2525,6 +2524,7 @@ higher priority settings."
 	      ((org-bound-and-true-p org-mobile-creating-agendas)
 	       (org-mobile-write-agenda-for-mobile file))
 	      ((string-match "\\.html?\\'" file)
+	       (require 'htmlize)
 	       (set-buffer (htmlize-buffer (current-buffer)))
 
 	       (when (and org-agenda-export-html-style
@@ -2539,18 +2539,17 @@ higher priority settings."
 	       (message "HTML written to %s" file))
 	      ((string-match "\\.ps\\'" file)
 	       (require 'ps-print)
-	       ,(flet ((ps-get-buffer-name () "Agenda View"))
-		  (ps-print-buffer-with-faces file))
+	       (ps-print-buffer-with-faces file)
 	       (message "Postscript written to %s" file))
 	      ((string-match "\\.pdf\\'" file)
 	       (require 'ps-print)
-	       ,(flet ((ps-get-buffer-name () "Agenda View"))
-		  (ps-print-buffer-with-faces
-		   (concat (file-name-sans-extension file) ".ps")))
+	       (ps-print-buffer-with-faces
+		(concat (file-name-sans-extension file) ".ps"))
 	       (call-process "ps2pdf" nil nil nil
 			     (expand-file-name
 			      (concat (file-name-sans-extension file) ".ps"))
 			     (expand-file-name file))
+	       (delete-file (concat (file-name-sans-extension file) ".ps"))
 	       (message "PDF written to %s" file))
 	      ((string-match "\\.ics\\'" file)
 	       (require 'org-icalendar)
@@ -7140,7 +7139,7 @@ The cursor may be at a date in the calendar, or in the Org agenda."
 
 (defun org-agenda-clock-out ()
   "Stop the currently running clock."
-  (interactive "P")
+  (interactive)
   (unless (marker-buffer org-clock-marker)
     (error "No running clock"))
   (let ((marker (make-marker)) newhead)

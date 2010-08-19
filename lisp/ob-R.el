@@ -168,6 +168,14 @@ This function is called by `org-babel-execute-src-block'."
 	       (buffer-name))))
 	  (current-buffer))))))
 
+(defun org-babel-R-associate-session (session)
+  "Associate R code buffer with an R session.
+Make SESSION be the inferior ESS process associated with the
+current code buffer."
+  (setq ess-local-process-name
+	(process-name (get-buffer-process session)))
+  (ess-make-buffer-current))
+
 (defun org-babel-R-construct-graphics-device-call (out-file params)
   "Construct the call to the graphics device."
   (let ((devices
@@ -211,63 +219,76 @@ write.table(main(), file=\"%s\", sep=\"\\t\", na=\"nil\",row.names=%s, col.names
 
 (defun org-babel-R-evaluate
   (session body result-type column-names-p row-names-p)
-  "Pass BODY to the R process in SESSION.
-If RESULT-TYPE equals 'output then return a list of the outputs
-of the statements in BODY, if RESULT-TYPE equals 'value then
-return the value of the last statement in BODY, as elisp."
-  (if (not session)
-      ;; external process evaluation
-      (case result-type
-	(output (org-babel-eval org-babel-R-command body))
-	(value
-	 (let ((tmp-file (make-temp-file "org-babel-R-results-")))
-	   (org-babel-eval org-babel-R-command
-			   (format org-babel-R-wrapper-method
-				   body tmp-file
-				   (if row-names-p "TRUE" "FALSE")
-				   (if column-names-p
-				       (if row-names-p "NA" "TRUE")
-				     "FALSE")))
-	   (org-babel-R-process-value-result
-	    (org-babel-import-elisp-from-file
-	     (org-babel-maybe-remote-file tmp-file) '(16)) column-names-p))))
-    ;; comint session evaluation
-    (case result-type
-      (value
-       (let ((tmp-file (make-temp-file "org-babel-R"))
-	     broke)
-	 (org-babel-comint-with-output (session org-babel-R-eoe-output)
-	   (insert (mapconcat
-		    #'org-babel-chomp
-		    (list
-		     body
-		     (format org-babel-R-wrapper-lastvar
-			     tmp-file
-			     (if row-names-p "TRUE" "FALSE")
-			     (if column-names-p
-				 (if row-names-p "NA" "TRUE")
-			       "FALSE"))
-		     org-babel-R-eoe-indicator) "\n"))
-	   (inferior-ess-send-input))
-	 (org-babel-R-process-value-result
-	  (org-babel-import-elisp-from-file
-	   (org-babel-maybe-remote-file tmp-file) '(16))  column-names-p)))
-      (output
-       (mapconcat
-	#'org-babel-chomp
-	(butlast
-	 (delq nil
-	       (mapcar
-		(lambda (line) ;; cleanup extra prompts left in output
-		  (if (string-match
-		       "^\\([ ]*[>+][ ]?\\)+\\([[0-9]+\\|[ ]\\)" line)
-		      (substring line (match-end 1))
-		    line))
-		(org-babel-comint-with-output (session org-babel-R-eoe-output)
-		  (insert (mapconcat #'org-babel-chomp
-				     (list body org-babel-R-eoe-indicator)
-				     "\n"))
-		  (inferior-ess-send-input)))) 2) "\n")))))
+  "Evaluate R code in BODY."
+  (if session
+      (org-babel-R-evaluate-session
+       session body result-type column-names-p row-names-p)
+    (org-babel-R-evaluate-external-process
+     body result-type column-names-p row-names-p)))
+
+(defun org-babel-R-evaluate-external-process
+  (body result-type column-names-p row-names-p)
+  "Evaluate BODY in external R process.
+If RESULT-TYPE equals 'output then return standard output as a
+string. If RESULT-TYPE equals 'value then return the value of the
+last statement in BODY, as elisp."
+  (case result-type
+    (value
+     (let ((tmp-file (make-temp-file "org-babel-R-results-")))
+       (org-babel-eval org-babel-R-command
+		       (format org-babel-R-wrapper-method
+			       body tmp-file
+			       (if row-names-p "TRUE" "FALSE")
+			       (if column-names-p
+				   (if row-names-p "NA" "TRUE")
+				 "FALSE")))
+       (org-babel-R-process-value-result
+	(org-babel-import-elisp-from-file
+	 (org-babel-maybe-remote-file tmp-file) '(16)) column-names-p)))
+    (output (org-babel-eval org-babel-R-command body))))
+
+(defun org-babel-R-evaluate-session
+  (session body result-type column-names-p row-names-p)
+  "Evaluate BODY in SESSION.
+If RESULT-TYPE equals 'output then return standard output as a
+string. If RESULT-TYPE equals 'value then return the value of the
+last statement in BODY, as elisp."
+  (case result-type
+    (value
+     (let ((tmp-file (make-temp-file "org-babel-R"))
+	   broke)
+       (org-babel-comint-with-output (session org-babel-R-eoe-output)
+	 (insert (mapconcat
+		  #'org-babel-chomp
+		  (list
+		   body
+		   (format org-babel-R-wrapper-lastvar
+			   tmp-file
+			   (if row-names-p "TRUE" "FALSE")
+			   (if column-names-p
+			       (if row-names-p "NA" "TRUE")
+			     "FALSE"))
+		   org-babel-R-eoe-indicator) "\n"))
+	 (inferior-ess-send-input))
+       (org-babel-R-process-value-result
+	(org-babel-import-elisp-from-file
+	 (org-babel-maybe-remote-file tmp-file) '(16))  column-names-p)))
+    (output
+     (mapconcat
+      #'org-babel-chomp
+      (butlast
+       (delq nil
+	     (mapcar
+	      (lambda (line) ;; cleanup extra prompts left in output
+		(if (string-match
+		     "^\\([ ]*[>+][ ]?\\)+\\([[0-9]+\\|[ ]\\)" line)
+		    (substring line (match-end 1))
+		  line))
+	      (org-babel-comint-with-output (session org-babel-R-eoe-output)
+		(insert (mapconcat #'org-babel-chomp
+				   (list body org-babel-R-eoe-indicator)
+				   "\n"))
+		(inferior-ess-send-input)))) 2) "\n"))))
 
 (defun org-babel-R-process-value-result (result column-names-p)
   "R-specific processing of return value.
