@@ -152,18 +152,18 @@ spaces instead of one after the bullet in each item of the list."
 (defcustom org-list-ending-method 'regexp
   "Determine where plain lists should end.
 
-Valid values are symbols 'regexp, 'indent or 'both.
+Valid values are: `regexp', `indent' or `both'.
 
-When set to 'regexp, Org will look into two variables,
+When set to `regexp', Org will look into two variables,
 `org-empty-line-terminates-plain-lists' and the more general
 `org-list-end-regexp', to know what will end lists. This is the
 default value.
 
-When set to 'indent, indentation of the last non-blank line will
+When set to `indent', indentation of the last non-blank line will
 determine if point is in a list. If that line is less indented
 than the previous item in the section, if any, list has ended.
 
-When set to 'both, each of the preceding methods must confirm
+When set to `both', each of the preceding methods must confirm
 that point is in a list."
   :group 'org-plain-lists
   :type '(choice
@@ -175,7 +175,7 @@ that point is in a list."
   "Non-nil means an empty line ends all plain list levels.
 
 This variable only makes sense if `org-list-ending-method' is set
-to 'regexp or 'both. This is then equivalent to set
+to regexp or both. This is then equivalent to set
 `org-list-end-regexp' to \"^[ \\t]*$\"."
   :group 'org-plain-lists
   :type 'boolean)
@@ -191,8 +191,7 @@ precedence over it."
 (defcustom org-list-automatic-rules '((bullet . t)
 				      (checkbox . t)
 				      (indent . t)
-				      (insert . t)
-				      (renumber . t))
+				      (insert . t))
   "Non-nil means apply set of rules when acting on lists.
 
 By default, automatic actions are taken when using
@@ -210,16 +209,13 @@ checkbox  when non-nil, checkbox statistics is updated each time
           you either insert a new checkbox or toggle a checkbox.
           It also prevents from inserting a checkbox in a
           description item.
-indent    when non-nil indenting or outdenting list top-item with
-          its subtree will move the whole list and outdenting a
-          list whose bullet is * to column 0 will change that
-          bullet to -.
+indent    when non-nil, indenting or outdenting list top-item
+          with its subtree will move the whole list and
+          outdenting a list whose bullet is * to column 0 will
+          change that bullet to -
 insert    when non-nil, trying to insert an item inside a block
           will insert it right before the block instead of
-          throwing an error.
-renumber  when non-nil, renumber ordered plain lists whenever it
-          is modified.  You can always use \\[org-ctrl-c-ctrl-c]
-          to trigger renumbering."
+          throwing an error."
    :group 'org-plain-lists
    :type '(alist :tag "Sets of rules"
 		 :key-type
@@ -227,8 +223,7 @@ renumber  when non-nil, renumber ordered plain lists whenever it
 		  (const :tag "Bullet" bullet)
 		  (const :tag "Checkbox" checkbox)
 		  (const :tag "Indent" indent)
-		  (const :tag "Insert" insert)
-		  (const :tag "Renumber" renumber))
+		  (const :tag "Insert" insert))
 		 :value-type
 		 (boolean :tag "Activate" :value t)))
 
@@ -304,8 +299,8 @@ of `org-plain-list-ordered-item-terminator'."
 This function looks for `org-list-end-re' outside a block.
 
 If FIRSTP in non-nil, return the point at the beginning of the
-nearest valid terminator from min. Otherwise, return the point at
-the end of the nearest terminator from max."
+nearest valid terminator from MIN. Otherwise, return the point at
+the end of the nearest terminator from MAX."
   (save-excursion
     (let* ((start (if firstp min max))
 	   (end   (if firstp max min))
@@ -438,7 +433,7 @@ List ending is determined by regexp. See
 	   (or (org-list-terminator-between (min pos limit) limit t) limit)))))
 
 (defun org-list-top-point-with-indent (limit)
-  "Return point just before list ending or nil if not in a list.
+  "Return point at the top level in a list, or nil if not in a list.
 
 List ending is determined by indentation of text. See
 `org-list-ending-method'. for more information."
@@ -600,8 +595,6 @@ function ends."
     (goto-char true-pos)
     (cond
      (before-p (funcall insert-fun nil)
-	       ;; Not taking advantage of renumbering while moving
-	       ;; down. Need to call it directly.
 	       (org-list-repair) t)
      ;; Can't split item: insert bullet at the end of item.
      ((not (org-get-alist-option org-M-RET-may-split-line 'item))
@@ -1299,7 +1292,9 @@ children. Return t if successful."
          (top (org-list-top-point)))
     (cond
      ;; Special case: moving top-item with indent rule
-     ((and (= top beg) (cdr (assq 'indent org-list-automatic-rules)))
+     ((and (= top beg)
+	   (cdr (assq 'indent org-list-automatic-rules))
+	   (not no-subtree))
       (let* ((level-skip (org-level-increment))
 	     (offset (if (< arg 0) (- level-skip) level-skip))
 	     (top-ind (nth 1 beg-item)))
@@ -1402,8 +1397,8 @@ It determines the number of whitespaces to append by looking at
   "Make sure all items are correctly indented, with the right bullet.
 This function scans the list at point, along with any sublist.
 
-If the string FORCE-BULLET is provided, ensure all items in list
-share this bullet, or a logical successor in an ordered list.
+If FORCE-BULLET is a string, ensure all items in list share this
+bullet, or a logical successor in the case of an ordered list.
 
 Item's body is not indented, only shifted with the bullet."
   (interactive)
@@ -1411,7 +1406,7 @@ Item's body is not indented, only shifted with the bullet."
   (let* ((struct (org-list-struct (point-at-bol) (point-at-eol)))
          (origins (org-list-struct-origins struct))
 	 fixed-struct)
-    (if force-bullet
+    (if (stringp force-bullet)
 	(let ((begin (nth 1 struct)))
 	  (setcdr begin (list (nth 1 begin)
 			      (org-list-bullet-string force-bullet)
@@ -1420,11 +1415,6 @@ Item's body is not indented, only shifted with the bullet."
 		(cons begin (org-list-struct-fix-struct struct origins))))
       (setq fixed-struct (org-list-struct-fix-struct struct origins)))
     (org-list-struct-apply-struct fixed-struct)))
-
-;; For backward compatibility
-(defalias 'org-fix-bullet-type 'org-list-repair)
-(defalias 'org-renumber-ordered-list 'org-list-repair)
-(defalias 'org-maybe-renumber-ordered-list 'org-list-repair)
 
 (defun org-cycle-list-bullet (&optional which)
   "Cycle through the different itemize/enumerate bullets.
@@ -1559,8 +1549,8 @@ in subtree."
 
 (defvar org-checkbox-statistics-hook nil
   "Hook that is run whenever Org thinks checkbox statistics should be updated.
-This hook runs even if 'checkbox rules in
-`org-list-automatic-rules' do not apply, so it can be used to
+This hook runs even if checkbox rule in
+`org-list-automatic-rules' does not apply, so it can be used to
 implement alternative ways of collecting statistics
 information.")
 
