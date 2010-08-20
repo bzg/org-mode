@@ -2242,7 +2242,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
       (beginning-of-line)
       (setq res (org-list-to-latex (org-list-parse-list t)
 				   org-export-latex-list-parameters))
-      (while (string-match "^\\(\\\\item[ \t]+\\)\\[@start:\\([0-9]+\\)\\]"
+      (while (string-match "^\\(\\\\item[ \t]+\\)\\[@\\(?:start:\\)?\\([0-9]+\\)\\]"
 			   res)
 	(setq res (replace-match
 		   (concat (format "\\setcounter{enumi}{%d}"

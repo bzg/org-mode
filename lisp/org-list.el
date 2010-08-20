@@ -486,7 +486,7 @@ List ending is determined by the indentation of text. See
        (save-excursion
 	 (goto-char (match-end 0))
          ;; Ignore counter if any
-         (when (looking-at "\\(?:\\[@start:[0-9]+\\][ \t]*\\)?")
+         (when (looking-at "\\(?:\\[@\\(?:start:\\)?[0-9]+\\][ \t]*\\)?")
            (goto-char (match-end 0)))
 	 (looking-at regexp))))
 
@@ -686,7 +686,7 @@ A checkbox is blocked if all of the following conditions are fulfilled:
 	    (error (throw 'exit nil)))
 	  (unless (org-entry-get nil "ORDERED") (throw 'exit nil))
 	  (when (org-search-forward-unenclosed
-                 "^[ \t]*[-+*0-9.)]+[ \t]+\\(\\[@start:[0-9]+\\][ \t]*\\)?\\[[- ]\\]" end t)
+                 "^[ \t]*[-+*0-9.)]+[ \t]+\\(\\[@\\(?:start:\\)?[0-9]+\\][ \t]*\\)?\\[[- ]\\]" end t)
 	    (org-current-line)))))))
 
 ;;; Navigate
@@ -912,7 +912,7 @@ bullet string and bullet counter, if any."
             (match-string 1))
           (progn
             (goto-char (match-end 0))
-            (and (looking-at "\\[@start:\\([0-9]+\\)\\]")
+            (and (looking-at "\\[@\\(?:start:\\)?\\([0-9]+\\)\\]")
                  (match-string 1))))))
 
 (defun org-list-struct (begin end &optional outdent)
@@ -1506,7 +1506,7 @@ in subtree."
                        (org-at-item-p))
                   (goto-char (match-end 0))
                   ;; Ignore counter, if any
-                  (when (looking-at "\\(?:\\[@start:[0-9]+\\][ \t]*\\)?")
+                  (when (looking-at "\\(?:\\[@\\(?:start:\\)?[0-9]+\\][ \t]*\\)?")
                     (goto-char (match-end 0)))
                   (let ((desc-p (and (org-at-item-description-p)
                                      (cdr (assq 'checkbox org-list-automatic-rules)))))
@@ -1820,7 +1820,7 @@ sublevels as a list of strings."
 					       (org-end-of-item-or-at-child))))
 	     (nextindent (if (= (point) end) 0 (org-get-indentation)))
 	     (item (if (string-match
-			"^\\(?:\\[@start:[0-9]+\\][ \t]*\\)?\\[\\([xX ]\\)\\]"
+			"^\\(?:\\[@\\(?:start:\\)?[0-9]+\\][ \t]*\\)?\\[\\([xX ]\\)\\]"
 			item)
 		       (replace-match (if (equal (match-string 1 item) " ")
 					  "CBOFF"

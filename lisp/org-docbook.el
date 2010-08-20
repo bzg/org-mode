@@ -1024,7 +1024,7 @@ publishing directory."
 		    line (substring line (match-beginning 5))
 		    item-tag nil
 		    item-number nil)
-	      (if (string-match "\\`\\[@start:\\([0-9]+\\)\\][ \t]?" line)
+	      (if (string-match "\\[@\\(?:start:\\)?\\([0-9]+\\)\\][ \t]?" line)
 		  (setq item-number (match-string 1 line)
 			line (replace-match "" t t line)))
 	      (if (and starter (string-match "\\(.*?\\) ::[ \t]*" line))
