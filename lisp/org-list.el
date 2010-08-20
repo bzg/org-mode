@@ -365,24 +365,31 @@ Return the position of the previous item, if applicable."
     ;; do not start searching at a blank line or inside a block
     (while (or (and (org-list-maybe-skip-block #'re-search-backward limit)
 		    (goto-char (1- (point-at-bol))))
-	       (looking-at "^[ \t]*$"))
+	       (and (looking-at "^[ \t]*$") (not (bobp))))
       (skip-chars-backward " \r\t\n")
       (beginning-of-line))
     (or (and (org-at-item-p) (point-at-bol))
-	(let ((ind (org-get-indentation)))
-	  (catch 'exit
-	    (while t
-	      (cond
-	       ((or (bobp) (< (point) limit)) (throw 'exit nil))
-	       ;; skip blank lines..
-	       ((and (not (looking-at "[ \t]*$"))
-		     ;; blocks...
-		     (not (org-list-maybe-skip-block
-			   #'re-search-backward limit))
-		     ;; and items more indented.
-		     (< (org-get-indentation) ind))
-		(throw 'exit (and (org-at-item-p) (point-at-bol))))
-	       (t (beginning-of-line 0)))))))))
+	(let* ((pos (point))
+	       (ind (org-get-indentation))
+	       (bound (save-excursion
+			(goto-char limit)
+			(and (org-search-forward-unenclosed
+			      org-item-beginning-re pos t)
+			     (point-at-bol)))))
+	  (when bound
+	    (catch 'exit
+	      (while t
+		(cond
+		 ((or (bobp) (< (point) bound)) (throw 'exit nil))
+		 ;; skip blank lines..
+		 ((and (not (looking-at "[ \t]*$"))
+		       ;; blocks...
+		       (not (org-list-maybe-skip-block
+			     #'re-search-backward bound))
+		       ;; and items more indented.
+		       (< (org-get-indentation) ind))
+		  (throw 'exit (and (org-at-item-p) (point-at-bol))))
+		 (t (beginning-of-line 0))))))))))
 
 (defun org-list-in-item-p-with-regexp (limit)
   "Is the cursor inside a plain list?
@@ -629,8 +636,8 @@ This checks `org-list-ending-method'."
        ((eq org-list-ending-method 'indent)
 	(org-list-in-item-p-with-indent bound))
        ((eq org-list-ending-method 'both)
-	(and (org-list-in-item-p-with-indent bound)
-	     (org-list-in-item-p-with-regexp bound)))
+	(and (org-list-in-item-p-with-regexp bound)
+	     (org-list-in-item-p-with-indent bound)))
        (t (org-list-in-item-p-with-regexp bound))))))
 
 (defun org-list-first-item-p ()
