@@ -22,6 +22,24 @@
 @finalout
 
 @c Macro definitions
+@macro orgcmd{key,command}
+@iftex
+@kindex \key\
+@findex \command\
+@item @kbd{\key\} @hskip 0pt plus 1filll @code{\command\}
+@end iftex
+@ifnottex
+@kindex \key\
+@findex \command\
+@item @kbd{\key\} @tie{}@tie{}@tie{}@tie{}(@code{\command\})
+@end ifnottex
+@end macro
+
+@macro orgkey{key}
+@kindex \key\
+@item @kbd{\key\}
+@end macro
+
 @iftex
 @c @hyphenation{time-stamp time-stamps time-stamp-ing time-stamp-ed}
 @end iftex
@@ -121,6 +139,7 @@ with contributions by David O'Toole, Bastien Guerry, Philip Rooke, Dan Davison, 
 * History and Acknowledgments::	 How Org came into being
 * Main Index::			An index of Org's concepts and features
 * Key Index::			Key bindings and where they are described
+* Command and Function Index::	Command names and some internal functions
 * Variable Index::		Variables mentioned in the manual
 
 @detailmenu
@@ -463,7 +482,7 @@ Specific header arguments
 Miscellaneous
 
 * Completion::			M-TAB knows what you need
-* Easy Templates::		
+* Easy Templates::		Quick insertion of structural elements
 * Speed keys::			Electric commands at the beginning of a headline
 * Code evaluation security::	Org mode files evaluate inline code
 * Customization::		Adapting Org to your taste
@@ -898,9 +917,8 @@ Org uses just two commands, bound to @key{TAB} and
 @cindex folded, subtree visibility state
 @cindex children, subtree visibility state
 @cindex subtree, subtree visibility state
-@table @kbd
-@kindex @key{TAB}
-@item @key{TAB}
+@table @asis
+@orgcmd{@key{TAB},org-cycle}
 @emph{Subtree cycling}: Rotate current subtree among the states
 
 @example
@@ -922,8 +940,7 @@ argument (@kbd{C-u @key{TAB}}), global cycling is invoked.
 @cindex overview, global visibility state
 @cindex contents, global visibility state
 @cindex show all, global visibility state
-@kindex S-@key{TAB}
-@item S-@key{TAB}
+@orgcmd{S-@key{TAB},org-global-cycle}
 @itemx C-u @key{TAB}
 @emph{Global cycling}: Rotate the entire buffer among the states
 
@@ -937,22 +954,18 @@ CONTENTS view up to headlines of level N will be shown.  Note that inside
 tables, @kbd{S-@key{TAB}} jumps to the previous field.
 
 @cindex show all, command
-@kindex C-u C-u C-u @key{TAB}
-@item C-u C-u C-u @key{TAB}
+@orgcmd{C-u C-u C-u @key{TAB},show-all}
 Show all, including drawers.
-@kindex C-c C-r
-@item C-c C-r
+@orgcmd{C-c C-r,org-reveal}
 Reveal context around point, showing the current entry, the following heading
 and the hierarchy above.  Useful for working near a location that has been
 exposed by a sparse tree command (@pxref{Sparse trees}) or an agenda command
 (@pxref{Agenda commands}).  With a prefix argument show, on each
 level, all sibling headings.  With double prefix arg, also show the entire
 subtree of the parent.
-@kindex C-c C-k
-@item C-c C-k
+@orgcmd{C-c C-k,show-branches}
 Expose all the headings of the subtree, CONTENT view for just one subtree.
-@kindex C-c C-x b
-@item C-c C-x b
+@orgcmd{C-c C-x b,org-tree-to-indirect-buffer}
 Show the current subtree in an indirect buffer@footnote{The indirect
 buffer
 @ifinfo
@@ -994,9 +1007,8 @@ Furthermore, any entries with a @samp{VISIBILITY} property (@pxref{Properties
 and Columns}) will get their visibility adapted accordingly.  Allowed values
 for this property are @code{folded}, @code{children}, @code{content}, and
 @code{all}.
-@table @kbd
-@kindex C-u C-u @key{TAB}
-@item C-u C-u @key{TAB}
+@table @asis
+@orgcmd{C-u C-u @key{TAB},org-set-startup-visibility}
 Switch back to the startup visibility of the buffer, i.e. whatever is
 requested by startup options and @samp{VISIBILITY} properties in individual
 entries.
@@ -1009,24 +1021,18 @@ entries.
 @cindex headline navigation
 The following commands jump to other headlines in the buffer.
 
-@table @kbd
-@kindex C-c C-n
-@item C-c C-n
+@table @asis
+@orgcmd{C-c C-n,outline-next-visible-heading}
 Next heading.
-@kindex C-c C-p
-@item C-c C-p
+@orgcmd{C-c C-p,outline-previous-visible-heading}
 Previous heading.
-@kindex C-c C-f
-@item C-c C-f
+@orgcmd{C-c C-f,org-forward-same-level}
 Next heading same level.
-@kindex C-c C-b
-@item C-c C-b
+@orgcmd{C-c C-b,org-backward-same-level}
 Previous heading same level.
-@kindex C-c C-u
-@item C-c C-u
+@orgcmd{C-c C-u,outline-up-heading}
 Backward to higher level heading.
-@kindex C-c C-j
-@item C-c C-j
+@orgcmd{C-c C-j,org-goto}
 Jump to a different place without changing the current outline
 visibility.  Shows the document structure in a temporary buffer, where
 you can use the following keys to find your destination:
@@ -1061,9 +1067,8 @@ See also the variable @code{org-goto-interface}.
 @cindex sorting, of subtrees
 @cindex subtrees, cut and paste
 
-@table @kbd
-@kindex M-@key{RET}
-@item M-@key{RET}
+@table @asis
+@orgcmd{M-@key{RET},org-insert-heading}
 @vindex org-M-RET-may-split-line
 Insert new heading with same level as current.  If the cursor is in a
 plain list item, a new item is created (@pxref{Plain lists}).  To force
@@ -1093,47 +1098,36 @@ variable @code{org-treat-insert-todo-heading-as-state-change}.
 Insert new TODO entry with same level as current heading.  Like
 @kbd{C-@key{RET}}, the new headline will be inserted after the current
 subtree.
-@kindex @key{TAB}
-@item @key{TAB} @r{in new, empty entry}
+@orgcmd{@key{TAB},org-cycle}
 In a new entry with no text yet, the first @key{TAB} demotes the entry to
 become a child of the previous one.  The next @key{TAB} makes it a parent,
 and so on, all the way to top level.  Yet another @key{TAB}, and you are back
 to the initial level.
-@kindex M-@key{left}
-@item M-@key{left}
+@orgcmd{M-@key{left},org-do-promote}
 Promote current heading by one level.
-@kindex M-@key{right}
-@item M-@key{right}
+@orgcmd{M-@key{right},org-do-demote}
 Demote current heading by one level.
-@kindex M-S-@key{left}
-@item M-S-@key{left}
+@orgcmd{M-S-@key{left},org-promote-subtree}
 Promote the current subtree by one level.
-@kindex M-S-@key{right}
-@item M-S-@key{right}
+@orgcmd{M-S-@key{right},org-demote-subtree}
 Demote the current subtree by one level.
-@kindex M-S-@key{up}
-@item M-S-@key{up}
+@orgcmd{M-S-@key{up},org-move-subtree-up}
 Move subtree up (swap with previous subtree of same
 level).
-@kindex M-S-@key{down}
-@item M-S-@key{down}
+@orgcmd{M-S-@key{down},org-move-subtree-down}
 Move subtree down (swap with next subtree of same level).
-@kindex C-c C-x C-w
-@item C-c C-x C-w
+@orgcmd{C-c C-x C-w,org-cut-subtree}
 Kill subtree, i.e. remove it from buffer but save in kill ring.
 With a numeric prefix argument N, kill N sequential subtrees.
-@kindex C-c C-x M-w
-@item C-c C-x M-w
+@orgcmd{C-c C-x M-w,org-copy-subtree}
 Copy subtree to kill ring.  With a numeric prefix argument N, copy the N
 sequential subtrees.
-@kindex C-c C-x C-y
-@item C-c C-x C-y
+@orgcmd{C-c C-x C-y,org-paste-subtree}
 Yank subtree from kill ring.  This does modify the level of the subtree to
 make sure the tree fits in nicely at the yank position.  The yank level can
 also be specified with a numeric prefix argument, or by yanking after a
 headline marker like @samp{****}.
-@kindex C-y
-@item C-y
+@orgcmd{C-y,org-yank}
 @vindex org-yank-adjusted-subtrees
 @vindex org-yank-folded-subtrees
 Depending on the variables @code{org-yank-adjusted-subtrees} and
@@ -1146,19 +1140,16 @@ previously visible.  Any prefix argument to this command will force a normal
 force a normal yank is @kbd{C-u C-y}.  If you use @code{yank-pop} after a
 yank, it will yank previous kill items plainly, without adjustment and
 folding.
-@kindex C-c C-x c
-@item C-c C-x c
+@orgcmd{C-c C-x c,org-clone-subtree-with-time-shift}
 Clone a subtree by making a number of sibling copies of it.  You will be
 prompted for the number of copies to make, and you can also specify if any
 timestamps in the entry should be shifted.  This can be useful, for example,
 to create a number of tasks related to a series of lectures to prepare.  For
 more details, see the docstring of the command
 @code{org-clone-subtree-with-time-shift}.
-@kindex C-c C-w
-@item C-c C-w
+@orgcmd{C-c C-w,org-refile}
 Refile entry or region to a different location.  @xref{Refiling notes}.
-@kindex C-c ^
-@item C-c ^
+@orgcmd{C-c ^,org-sort-entries-or-items}
 Sort same-level entries.  When there is an active region, all entries in the
 region will be sorted.  Otherwise the children of the current headline are
 sorted.  The command prompts for the sorting method, which can be
@@ -1169,14 +1160,11 @@ of a property.  Reverse sorting is possible as well.  You can also supply
 your own function to extract the sorting key.  With a @kbd{C-u} prefix,
 sorting will be case-sensitive.  With two @kbd{C-u C-u} prefixes, duplicate
 entries will also be removed.
-@kindex C-x n s
-@item C-x n s
+@orgcmd{C-x n s,org-narrow-to-subtree}
 Narrow buffer to current subtree.
-@kindex C-x n w
-@item C-x n w
+@orgcmd{C-x n w,widen}
 Widen buffer to remove narrowing.
-@kindex C-c *
-@item C-c *
+@orgcmd{C-c *,org-toggle-heading}
 Turn a normal line or plain list item into a headline (so that it becomes a
 subheading at its location).  Also turn a headline into a normal line by
 removing the stars.  If there is an active region, turn all lines in the
@@ -1220,9 +1208,8 @@ and you will see immediately how it works.
 Org-mode contains several commands creating such trees, all these
 commands can be accessed through a dispatcher:
 
-@table @kbd
-@kindex C-c /
-@item C-c /
+@table @asis
+@orgcmd{C-c /,org-sparse-tree}
 This prompts for an extra key to select a sparse-tree creating command.
 @kindex C-c / r
 @item C-c / r
@@ -1347,9 +1334,8 @@ the current list-level) improves readability, customize the variable
 The following commands act on items when the cursor is in the first line
 of an item (the line with the bullet or number).
 
-@table @kbd
-@kindex @key{TAB}
-@item @key{TAB}
+@table @asis
+@orgcmd{@key{TAB},org-cycle}
 @vindex org-cycle-include-plain-lists
 Items can be folded just like headline levels.  Normally this works only if
 the cursor is on a plain list item.  For more details, see the variable
@@ -1360,8 +1346,7 @@ headlines, however; the hierarchies remain completely separated.
 
 If @code{org-cycle-include-plain-lists} has not been set, @key{TAB}
 fixes the indentation of the current line in a heuristic way.
-@kindex M-@key{RET}
-@item M-@key{RET}
+@orgcmd{M-@key{RET},org-insert-heading}
 @vindex org-M-RET-may-split-line
 Insert new item at current level.  With a prefix argument, force a new
 heading (@pxref{Structure editing}).  If this command is used in the middle
@@ -1375,13 +1360,11 @@ bullet, a bullet is added to the current line.
 @kindex M-S-@key{RET}
 @item M-S-@key{RET}
 Insert a new item with a checkbox (@pxref{Checkboxes}).
-@kindex @key{TAB}
-@item @key{TAB} @r{in new, empty item}
+@orgcmd{@key{TAB},org-cycle}
 In a new item with no text yet, the first @key{TAB} demotes the item to
 become a child of the previous one.  The next @key{TAB} makes it a parent,
 and so on, all the way to the left margin.  Yet another @key{TAB}, and you
 are back to the initial level.
-@kindex S-@key{up}
 @kindex S-@key{down}
 @item S-@key{up}
 @itemx S-@key{down}
@@ -14599,12 +14582,17 @@ and contributed various ideas and code snippets.
 
 @printindex cp
 
-@node Key Index, Variable Index, Main Index, Top
+@node Key Index, Command and Function Index, Main Index, Top
 @unnumbered Key index
 
 @printindex ky
 
-@node Variable Index,  , Key Index, Top
+@node Command and Function Index, Variable Index, Key Index, Top
+@unnumbered Command and function index
+
+@printindex fn
+
+@node Variable Index,  , Command and Function Index, Top
 @unnumbered Variable index
 
 This is not a complete index of variables and faces, only the ones that are
