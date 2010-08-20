@@ -444,7 +444,7 @@ List ending is determined by indentation of text. See
              (while t
                (cond
 		((not prev-p) (throw 'exit (1+ (point-at-eol))))
-		((= limit prev-p) (throw 'exit limit))
+		((= (point) prev-p) (throw 'exit prev-p))
 		(t
 		 (goto-char prev-p)
 		 (beginning-of-line 0)
