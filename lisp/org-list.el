@@ -449,9 +449,9 @@ List ending is determined by indentation of text. See
       (and prev-p
            (catch 'exit
              (while t
-               (cond
+               (cond 
 		((not prev-p) (throw 'exit (1+ (point-at-eol))))
-		((= (point) prev-p) (throw 'exit prev-p))
+		((= prev-p limit) (throw 'exit limit))
 		(t
 		 (goto-char prev-p)
 		 (beginning-of-line 0)
@@ -699,17 +699,22 @@ A checkbox is blocked if all of the following conditions are fulfilled:
 ;;; Navigate
 
 (defun org-list-top-point ()
+  "Return point at the top level in a list, or nil if not in a list."
   (let ((limit (or (save-excursion (outline-previous-heading))
 		   (point-min))))
     (cond
      ((eq org-list-ending-method 'indent)
       (org-list-top-point-with-indent limit))
      ((eq org-list-ending-method 'both)
-      (max (org-list-top-point-with-regexp limit)
-	   (org-list-top-point-with-indent limit)))
+      (let ((top-re (org-list-top-point-with-regexp limit))
+	    (top-ind (org-list-top-point-with-indent limit)))
+	(if (and top-re top-ind)
+	    (max top-re top-ind)
+	  (or top-re top-ind))))
      (t (org-list-top-point-with-regexp limit)))))
 
 (defun org-list-bottom-point ()
+  "Return point just before list ending or nil if not in a list."
   (let ((limit (or (save-excursion
 		     (and (let ((outline-regexp org-outline-regexp))
 			  ;; Use default regexp because folding
@@ -722,8 +727,11 @@ A checkbox is blocked if all of the following conditions are fulfilled:
      ((eq org-list-ending-method 'indent)
       (org-list-bottom-point-with-indent limit))
      ((eq org-list-ending-method 'both)
-      (min (org-list-bottom-point-with-regexp limit)
-	   (org-list-bottom-point-with-indent limit)))
+      (let ((bottom-re (org-list-bottom-point-with-regexp limit))
+	    (bottom-ind (org-list-bottom-point-with-indent limit)))
+	(if (and bottom-re bottom-ind)
+	    (min bottom-re bottom-ind)
+	  (or bottom-re bottom-ind))))
      (t (org-list-bottom-point-with-regexp limit)))))
 
 (defun org-beginning-of-item ()
