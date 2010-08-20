@@ -438,10 +438,8 @@ The effect is that these values will be accessible during export."
 		(save-restriction
 		  (widen)
 		  (goto-char (point-min))
-		  (and (let ((case-fold-search t))
-			 (re-search-forward
-			  "^#\\+BEAMER_FRAME_LEVEL:[ \t]*\\(.*?\\)[ \t]*$"
-			  nil t))
+		  (and (re-search-forward
+			"^#\\+BEAMER_FRAME_LEVEL:[ \t]*\\(.*?\\)[ \t]*$" nil t)
 		       (match-string 1))))
 	      (plist-get org-export-latex-options-plist :beamer-frame-level)
 	      org-beamer-frame-level))
@@ -463,7 +461,7 @@ The effect is that these values will be accessible during export."
 	      (save-excursion
 		(save-restriction
 		  (widen)
-		  (let ((txt "") (case-fold-search t))
+		  (let ((txt ""))
 		    (goto-char (point-min))
 		    (while (re-search-forward
 			    "^#\\+BEAMER_HEADER_EXTRA:[ \t]*\\(.*?\\)[ \t]*$"
