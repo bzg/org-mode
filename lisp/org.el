@@ -86,10 +86,6 @@
   (unless (boundp 'diary-fancy-buffer)
     (defvaralias 'diary-fancy-buffer 'fancy-diary-buffer)))
 
-;; For XEmacs, noutline is not yet provided by outline.el, so arrange for
-;; the file noutline.el being loaded.
-(if (featurep 'xemacs) (condition-case nil (require 'noutline)))
-;; We require noutline, which might be provided in outline.el
 (require 'outline) (require 'noutline)
 ;; Other stuff we need.
 (require 'time-date)

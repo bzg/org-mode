@@ -166,7 +166,6 @@ SHELL = /bin/sh
 
 # Additional distribution files
 DISTFILES_extra=  Makefile request-assign-future.txt contrib
-DISTFILES_xemacs=  xemacs/noutline.el xemacs/ps-print-invisible.el xemacs/README
 
 default: $(ELCFILES) $(ELCBFILES)
 
@@ -205,10 +204,6 @@ install-info: $(INFOFILES)
 install-info-debian: $(INFOFILES)
 	$(INSTALL_INFO) --infodir=$(infodir) $(INFOFILES)
 
-install-noutline: xemacs/noutline.elc
-	if [ ! -d $(lispdir) ]; then $(MKDIR) $(lispdir); else true; fi ;
-	$(CP) xemacs/noutline.el xemacs/noutline.elc $(lispdir)
-
 autoloads: lisp/org-install.el
 
 lisp/org-install.el: $(LISPFILES0) Makefile
@@ -219,8 +214,6 @@ lisp/org-install.el: $(LISPFILES0) Makefile
 		--eval '(insert "\n(provide (quote org-install))\n")' \
 		--eval '(save-buffer)'
 	mv org-install.el lisp
-
-xemacs/noutline.elc: xemacs/noutline.el
 
 doc/org: doc/org.texi
 	(cd doc; $(MAKEINFO) --no-split org.texi -o org)
@@ -318,7 +311,6 @@ distfile:
 	${MAKE} lisp/org-install.el
 	rm -rf org-$(TAG) org-$(TAG).zip
 	$(MKDIR) org-$(TAG)
-	$(MKDIR) org-$(TAG)/xemacs
 	$(MKDIR) org-$(TAG)/doc
 	$(MKDIR) org-$(TAG)/lisp
 	cp -r $(LISPFILES) org-$(TAG)/lisp
@@ -326,7 +318,6 @@ distfile:
 	cp -r $(DISTFILES_extra) org-$(TAG)/
 	cp -r README_DIST org-$(TAG)/README
 	cp -r ORGWEBPAGE/Changes.org org-$(TAG)/
-	cp -r $(DISTFILES_xemacs) org-$(TAG)/xemacs/
 	zip -r org-$(TAG).zip org-$(TAG)
 	gtar zcvf org-$(TAG).tar.gz org-$(TAG)
 

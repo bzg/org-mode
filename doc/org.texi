@@ -634,18 +634,6 @@ step for this directory:
 (setq load-path (cons "~/path/to/orgdir/contrib/lisp" load-path))
 @end example
 
-@sp 2
-@cartouche
-XEmacs users now need to install the file @file{noutline.el} from
-the @file{xemacs} sub-directory of the Org distribution.  Use the
-command:
-
-@example
-     make install-noutline
-@end example
-@end cartouche
-@sp 2
-
 @noindent Now byte-compile the Lisp files with the shell command:
 
 @example
