@@ -1249,7 +1249,7 @@ When TITLE is nil, just close all open levels."
       ;; all levels, so the rest is done only if title is given.
       ;;
       ;; Format tags: put them into a superscript like format.
-      (when (string-match (org-re "\\(:[[:alnum:]_@:]+:\\)[ \t]*$") title)
+      (when (string-match (org-re "\\(:[[:alnum:]_@#%:]+:\\)[ \t]*$") title)
 	(setq title
 	      (replace-match
 	       (if org-export-with-tags
@@ -1273,7 +1273,7 @@ When TITLE is nil, just close all open levels."
 Applies all active conversions.  If there are links in the
 string, don't modify these."
   (let* ((re (concat org-bracket-link-regexp "\\|"
-		     (org-re "[ \t]+\\(:[[:alnum:]_@:]+:\\)[ \t]*$")))
+		     (org-re "[ \t]+\\(:[[:alnum:]_@#%:]+:\\)[ \t]*$")))
 	 m s l res)
     (while (setq m (string-match re string))
       (setq s (substring string 0 m)

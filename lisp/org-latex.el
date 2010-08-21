@@ -1329,7 +1329,7 @@ links, keywords, lists, tables, fixed-width"
 	  (replace-match "")
 	(replace-match (format "\\textbf{%s}" (match-string 0)) t t)))
     ;; convert tags
-    (when (re-search-forward "\\(:[a-zA-Z0-9_@]+\\)+:" nil t)
+    (when (re-search-forward "\\(:[a-zA-Z0-9_@#%]+\\)+:" nil t)
       (if (or (not org-export-with-tags)
 	      (plist-get remove-list :tags))
 	  (replace-match "")
