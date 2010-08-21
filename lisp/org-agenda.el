@@ -2627,7 +2627,9 @@ Drawers will be excluded, also the line with scheduling/deadline info."
 	  (setq txt (org-agenda-get-some-entry-text
 		     m org-agenda-add-entry-text-maxlines "    > "))
 	  (end-of-line 1)
-	  (if (string-match "\\S-" txt) (insert "\n" txt)))))))
+	  (if (string-match "\\S-" txt)
+	      (insert "\n" txt)
+	    (or (eobp (forward-char 1)))))))))
 
 (defun org-agenda-get-some-entry-text (marker n-lines &optional indent
 					      &rest keep)
