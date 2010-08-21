@@ -318,7 +318,8 @@ the end of the nearest terminator from MAX."
 (defun org-list-maybe-skip-block (search limit)
   "Return non-nil value if point is in a block, skipping it on the way.
 
-It looks for the boundary of the block in SEARCH direction."
+It looks for the boundary of the block in SEARCH direction,
+stopping at LIMIT."
   (save-match-data
     (let ((case-fold-search t)
 	  (boundary (if (eq search 're-search-forward) 3 5)))
@@ -329,7 +330,11 @@ It looks for the boundary of the block in SEARCH direction."
       (goto-char (match-beginning 0))))))
 
 (defun org-list-search-unenclosed-generic (search re bound noerr)
-  "Search for RE with SEARCH outside blocks and protected places."
+  "Search a string outside blocks and protected places.
+
+Arguments SEARCH, RE, BOUND and NOERR are similar to those in
+`search-forward', `search-backward', `re-search-forward' and
+`re-search-backward'."
   (catch 'exit
     (let ((origin (point)))
       (while t
@@ -344,12 +349,18 @@ It looks for the boundary of the block in SEARCH direction."
 	  (throw 'exit (point)))))))
 
 (defun org-search-backward-unenclosed (regexp &optional bound noerror)
-  "Like `re-search-backward' but don't stop inside blocks or protected places."
+  "Like `re-search-backward' but don't stop inside blocks or protected places.
+
+Arguments REGEXP, BOUND and NOERROR are similar to those used in
+`re-search-backward'."
   (org-list-search-unenclosed-generic
    #'re-search-backward regexp (or bound (point-min)) noerror))
 
 (defun org-search-forward-unenclosed (regexp &optional bound noerror)
-  "Like `re-search-forward' but don't stop inside blocks or protected places."
+  "Like `re-search-forward' but don't stop inside blocks or protected places.
+
+Arguments REGEXP, BOUND and NOERROR are similar to those used in
+`re-search-forward'."
   (org-list-search-unenclosed-generic
    #'re-search-forward regexp (or bound (point-max)) noerror))
 
@@ -395,7 +406,9 @@ Return the position of the previous item, if applicable."
   "Is the cursor inside a plain list?
 
 Plain lists end when `org-list-end-regexp' is matched, or at a
-blank line if `org-empty-line-terminates-plain-lists' is true."
+blank line if `org-empty-line-terminates-plain-lists' is true.
+
+Argument LIMIT specifies the upper-bound of the search."
   (save-excursion
     (let* ((actual-pos (goto-char (point-at-eol)))
 	   ;; Moved to eol so current line can be matched by
@@ -414,6 +427,8 @@ blank line if `org-empty-line-terminates-plain-lists' is true."
 (defun org-list-top-point-with-regexp (limit)
   "Return point at the top level item in a list, or nil if not in a list.
 
+Argument LIMIT specifies the upper-bound of the search.
+
 List ending is determined by regexp. See
 `org-list-ending-method'. for more information."
   (save-excursion
@@ -429,6 +444,8 @@ List ending is determined by regexp. See
 (defun org-list-bottom-point-with-regexp (limit)
   "Return point just before list ending or nil if not in a list.
 
+Argument LIMIT specifies the lower-bound of the search.
+
 List ending is determined by regexp. See
 `org-list-ending-method'. for more information."
   (save-excursion
@@ -441,6 +458,8 @@ List ending is determined by regexp. See
 
 (defun org-list-top-point-with-indent (limit)
   "Return point at the top level in a list, or nil if not in a list.
+
+Argument LIMIT specifies the upper-bound of the search.
 
 List ending is determined by indentation of text. See
 `org-list-ending-method'. for more information."
@@ -473,6 +492,8 @@ List ending is determined by indentation of text. See
 
 (defun org-list-bottom-point-with-indent (limit)
   "Return point just before list ending or nil if not in a list.
+
+Argument LIMIT specifies the lower-bound of the search.
 
 List ending is determined by the indentation of text. See
 `org-list-ending-method' for more information."
@@ -551,7 +572,7 @@ function ends."
 	 '(concat "^[ \t]*#\\+\\(end\\|END\\)_" (match-string 2)))
     (if (not (cdr (assq 'insert org-list-automatic-rules)))
 	;; Rule in `org-list-automatic-rules' forbids insertion.
-	(error "Cannot insert item inside a block.")
+	(error "Cannot insert item inside a block")
       ;; Else, move before it prior to add a new item.
       (end-of-line)
       (re-search-backward "^[ \t]*#\\+\\(begin\\|BEGIN\\)_" nil t)
@@ -790,20 +811,21 @@ Point returned is at eol."
 
 (defun org-get-next-item (pos limit)
   "Get the point of the next item at the same level as POS.
- Stop searching at LIMIT. Return nil if no item is found. This
- function does not move point."
+Stop searching at LIMIT. Return nil if no item is found. This
+function does not move point."
   (org-list-get-item-same-level
    #'org-search-forward-unenclosed pos limit #'end-of-line))
 
 (defun org-get-previous-item (pos limit)
   "Get the point of the previous item at the same level as POS.
- Stop searching at LIMIT. Return nil if no item is found. This
- function does not move point."
+Stop searching at LIMIT. Return nil if no item is found. This
+function does not move point."
   (org-list-get-item-same-level
    #'org-search-backward-unenclosed pos limit #'beginning-of-line))
 
 (defun org-next-item ()
   "Move to the beginning of the next item.
+
 Item is at the same level in the current plain list. Error if not
 in a plain list, or if this is the last item in the list."
   (interactive)
@@ -812,6 +834,7 @@ in a plain list, or if this is the last item in the list."
 
 (defun org-previous-item ()
   "Move to the beginning of the previous item.
+
 Item is at the same level in the current plain list. Error if not
 in a plain list, or if this is the first item in the list."
   (interactive)
@@ -830,7 +853,7 @@ Return point."
 
 (defun org-end-of-item-list ()
   "Go to the end of the current list or sublist.
- Return point."
+Return point."
   (interactive)
   (org-beginning-of-item)
   (let ((limit (org-list-bottom-point))
@@ -844,8 +867,9 @@ Return point."
 
 (defun org-list-exchange-items (beg-A beg-B)
   "Swap item starting at BEG-A with item starting at BEG-B.
-  Blank lines at the end of items are left in place. Assumes
-  BEG-A is lesser than BEG-B."
+
+Blank lines at the end of items are left in place. Assumes BEG-A
+is lesser than BEG-B."
   (save-excursion
     (let* ((end-of-item-no-blank (lambda (pos)
 				   (goto-char pos)
@@ -861,6 +885,7 @@ Return point."
 
 (defun org-move-item-down ()
   "Move the plain list item at point down, i.e. swap with following item.
+
 Subitems (items with larger indentation) are considered part of the item,
 so this really moves item trees."
   (interactive)
@@ -879,6 +904,7 @@ so this really moves item trees."
 
 (defun org-move-item-up ()
   "Move the plain list item at point up, i.e. swap with previous item.
+
 Subitems (items with larger indentation) are considered part of the item,
 so this really moves item trees."
   (interactive)
@@ -898,9 +924,12 @@ so this really moves item trees."
   "Insert a new item at the current level.
 
 If cursor is before first character after bullet of the item, the
-new item will be created before the current one. Return t when
-things worked, nil when we are not in an item, or item is
-invisible."
+new item will be created before the current one.
+
+If CHECKBOX is non-nil, add a checkbox next to the bullet.
+
+Return t when things worked, nil when we are not in an item, or
+item is invisible."
   (unless (or (not (org-in-item-p))
 	      (org-invisible-p))
     (if (save-excursion
@@ -1016,7 +1045,9 @@ change is an outdent."
           extended)))))
 
 (defun org-list-struct-origins (struct)
-  "Return an alist where key is item's position and value parent's."
+  "Return an alist where key is item's position and value parent's.
+
+STRUCT is the list's structure looked up."
   (let* ((struct-rev (reverse struct))
 	 (acc (list (cons (nth 1 (car struct)) 0)))
 	 (prev-item (lambda (item)
@@ -1045,7 +1076,9 @@ change is an outdent."
     (cons '(0 . 0) (mapcar get-origins (cdr struct)))))
 
 (defun org-list-struct-get-parent (item struct origins)
-  "Return parent association of ITEM in STRUCT or nil."
+  "Return parent association of ITEM in STRUCT or nil.
+
+ORIGINS is the alist of parents. See `org-list-struct-origins'."
   (let* ((parent-pos (cdr (assq (car item) origins))))
     (when (> parent-pos 0) (assq parent-pos struct))))
 
@@ -1057,6 +1090,9 @@ change is an outdent."
 
 (defun org-list-struct-fix-bul (struct origins)
   "Verify and correct bullets for every association in STRUCT.
+
+ORIGINS is the alist of parents. See `org-list-struct-origins'.
+
 This function modifies STRUCT."
   (let* (acc
 	 (init-bul (lambda (item)
@@ -1095,6 +1131,9 @@ This function modifies STRUCT."
 
 (defun org-list-struct-fix-ind (struct origins)
   "Verify and correct indentation for every association in STRUCT.
+
+ORIGINS is the alist of parents. See `org-list-struct-origins'.
+
 This function modifies STRUCT."
   (let* ((headless (cdr struct))
          (ancestor (car struct))
@@ -1112,6 +1151,9 @@ This function modifies STRUCT."
 
 (defun org-list-struct-fix-struct (struct origins)
   "Return STRUCT with correct bullets and indentation.
+
+ORIGINS is the alist of parents. See `org-list-struct-origins'.
+
 Only elements of STRUCT that have changed are returned."
   (let ((old (copy-alist struct)))
     (org-list-struct-fix-bul struct origins)
@@ -1119,8 +1161,14 @@ Only elements of STRUCT that have changed are returned."
     (delq nil (mapcar (lambda (e) (when (not (equal (pop old) e)) e)) struct))))
 
 (defun org-list-struct-outdent (start end origins)
-  "Outdent items in ORIGINS between BEGIN and END.
-BEGIN is included and END excluded."
+  "Outdent items in a structure.
+
+Items are indented when their key is between START, included, and
+END, excluded.
+
+ORIGINS is the alist of parents. See `org-list-struct-origins'.
+
+STRUCT is the concerned structure."
   (let* (acc
 	 (out (lambda (cell)
 		(let* ((item (car cell))
@@ -1146,11 +1194,16 @@ BEGIN is included and END excluded."
     (mapcar out origins)))
 
 (defun org-list-struct-indent (start end origins struct)
-  "Indent items in ORIGINS between BEGIN and END.
-BEGIN is included and END excluded.
+  "Indent items in a structure.
 
-STRUCT may be modified if `org-list-demote-modify-bullet' is
-concerning bullets between START and END."
+Items are indented when their key is between START, included, and
+END, excluded.
+
+ORIGINS is the alist of parents. See `org-list-struct-origins'.
+
+STRUCT is the concerned structure. It may be modified if
+`org-list-demote-modify-bullet' matches bullets between START and
+END."
   (let* (acc
 	 (orig-rev (reverse origins))
 	 (get-prev-item
@@ -1291,7 +1344,11 @@ If NO-SUBTREE is set, only outdent the item itself, not its children."
 
 (defun org-indent-item-tree (arg &optional no-subtree)
   "Indent a local list item including its children.
-If NO-SUBTREE is set, only indent the item itself, not its
+
+When number ARG is a negative, item will be outdented, otherwise
+it will be indented.
+
+If NO-SUBTREE is non-nil, only indent the item itself, not its
 children. Return t if successful."
   (interactive "p")
   (unless (org-at-item-p)
@@ -1363,6 +1420,15 @@ children. Return t if successful."
 
 (defvar org-tab-ind-state)
 (defun org-cycle-item-indentation ()
+  "Cycle levels of indentation of an empty item.
+
+The first run indent the item, if applicable. Subsequents runs
+outdent it at meaningful levels in the list. When done, item is
+put back at its original position with its original bullet.
+
+Return t at each successful move.
+
+The item must be empty."
   (let ((org-adapt-indentation nil))
     (when (and (or (org-at-item-description-p)
 		   (org-at-item-checkbox-p)
@@ -1420,7 +1486,7 @@ It determines the number of whitespaces to append by looking at
      nil nil bullet 1)))
 
 (defun org-list-inc-bullet-maybe (bullet)
-  "Increment numbered bullets."
+  "Increment BULLET if applicable."
   (if (string-match "[0-9]+" bullet)
       (replace-match
        (number-to-string (1+ (string-to-number (match-string 0 bullet))))
@@ -1718,10 +1784,9 @@ Otherwise it will be `org-todo'."
 (defun org-apply-on-list (function init-value &rest args)
   "Call FUNCTION for each item of a the list under point.
 
-FUNCTION must be called with at least one argument: a return
-value that will contain the value returned by the function at the
-previous item, plus ARGS extra arguments.  INIT-VALUE will be the
-value passed to the function at the first item of the list.
+FUNCTION must be called with at least one argument: INIT-VALUE,
+that will contain the value returned by the function at the
+previous item, plus ARGS extra arguments.
 
 As an example, (org-apply-on-list (lambda (result) (1+ result)) 0)
 will return the number of items in the current list.
@@ -1747,6 +1812,9 @@ Sublists are not sorted. Checkboxes, if any, are ignored.
 Sorting can be alphabetically, numerically, by date/time as given by
 a time stamp, by a property or by priority.
 
+Comparing entries ignores case by default. However, with an
+optional argument WITH-CASE, the sorting considers case as well.
+
 The command prompts for the sorting type unless it has been given
 to the function through the SORTING-TYPE argument, which needs to
 be a character, \(?n ?N ?a ?A ?t ?T ?f ?F).  Here is the precise
@@ -1762,10 +1830,8 @@ Capital letters will reverse the sort order.
 If the SORTING-TYPE is ?f or ?F, then GETKEY-FUNC specifies a
 function to be called with point at the beginning of the record.
 It must return either a string or a number that should serve as
-the sorting key for that record.
-
-Comparing entries ignores case by default. However, with an
-optional argument WITH-CASE, the sorting considers case as well."
+the sorting key for that record. It will then use COMPARE-FUNC to
+compare entries."
   (interactive "P")
   (let* ((case-func (if with-case 'identity 'downcase))
 	 (start (org-beginning-of-item-list))
@@ -1879,7 +1945,7 @@ sublevels as a list of strings."
   "Convert the plain list at point into a subtree."
   (interactive)
   (if (not (org-in-item-p))
-      (error "Not in a list.")
+      (error "Not in a list")
     (goto-char (org-list-top-point))
     (let ((list (org-list-parse-list t)) nstars)
       (save-excursion
