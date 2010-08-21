@@ -2629,7 +2629,7 @@ Drawers will be excluded, also the line with scheduling/deadline info."
 	  (end-of-line 1)
 	  (if (string-match "\\S-" txt)
 	      (insert "\n" txt)
-	    (or (eobp (forward-char 1)))))))))
+	    (or (eobp) (forward-char 1))))))))
 
 (defun org-agenda-get-some-entry-text (marker n-lines &optional indent
 					      &rest keep)
