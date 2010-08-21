@@ -11699,7 +11699,7 @@ This is done in the same way as adding a state change note."
 
 (defvar org-property-end-re)
 (defun org-add-log-setup (&optional purpose state prev-state
-				    findpos how &optional extra)
+				    findpos how extra)
   "Set up the post command hook to take a note.
 If this is about to TODO state change, the new state is expected in STATE.
 When FINDPOS is non-nil, find the correct position for the note in
@@ -11848,8 +11848,8 @@ EXTRA is additional text that will be inserted into the notes buffer."
 	  (move-marker org-log-note-marker nil)
 	  (end-of-line 1)
 	  (if (not (bolp)) (let ((inhibit-read-only t)) (insert "\n")))
-	  (insert "- " (pop lines))
 	  (org-indent-line-function)
+	  (insert "- " (pop lines))
 	  (beginning-of-line 1)
 	  (looking-at "[ \t]*")
 	  (setq ind (concat (match-string 0) "  "))
