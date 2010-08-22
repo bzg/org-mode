@@ -187,7 +187,7 @@ exported source code blocks by language."
 			  (insert content)
 			  (write-region nil nil file-name))))
 		    ;; if files contain she-bangs, then make the executable
-		    (when she-bang (set-file-modes file-name ?\755))
+		    (when she-bang (set-file-modes file-name #o755))
                     ;; update counter
                     (setq block-counter (+ 1 block-counter))
                     (add-to-list 'path-collector file-name)))))
