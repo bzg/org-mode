@@ -393,9 +393,13 @@ Return the position of the previous item, if applicable."
 	       (catch 'exit
 		 (while t
 		   (cond
-		    ((or (= (point) limit)
-			 (looking-at "^[ \t]*:END:"))
+		    ((looking-at "^[ \t]*:END:")
 		     (throw 'exit nil))
+		    ((<= (point) limit)
+		     (throw 'exit
+			    (and (org-at-item-p)
+				 (< (org-get-indentation) ind-ref)
+				 (point-at-bol))))
 		    ((looking-at "^[ \t]*$")
 		     (skip-chars-backward " \r\t\n")
 		     (beginning-of-line))
@@ -481,9 +485,13 @@ List ending is determined by indentation of text. See
 	       (while t
 		 (let ((ind (org-get-indentation)))
 		   (cond
-		    ((or (<= (point) limit)
-			 (looking-at "^[ \t]*:END:"))
+		    ((looking-at "^[ \t]*:END:")
 		     (throw 'exit item-ref))
+		    ((<= (point) limit)
+		     (throw 'exit
+			    (if (and (org-at-item-p) (< ind ind-ref))
+				(point-at-bol)
+			      item-ref)))
 		    ((looking-at "^[ \t]*$")
 		     (skip-chars-backward " \r\t\n")
 		     (beginning-of-line))
