@@ -690,15 +690,17 @@ function ends."
 When number ARG is a negative, item will be outdented, otherwise
 it will be indented.
 
-If a region is active, all items in it will be moved. If
-NO-SUBTREE is non-nil, only indent the item itself, not its
+If a region is active and its first line is an item beginning,
+all items inside will be moved.
+
+If NO-SUBTREE is non-nil, only indent the item itself, not its
 children.
 
 Return t if successful."
   (save-restriction
     (unless (or (org-at-item-p)
 		(and (org-region-active-p)
-		     (goto-char region-beginning)
+		     (goto-char (region-beginning))
 		     (org-at-item-p)))
       (error "Not on an item"))
   ;; Are we going to move the whole list?
