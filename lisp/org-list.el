@@ -1147,9 +1147,8 @@ change is an outdent."
 					post-list)))
 		;; Is list is malformed? If some items are less
 		;; indented that top-item, add them anyhow.
-		(when (and (= (caar pre-list) 0) (org-at-item-p))
-		  (setq post-list (cons (org-list-struct-assoc-at-point)
-					post-list))
+		(when (and (= (caar pre-list) 0) (< (point) bottom))
+		  (beginning-of-line)
 		  (while (org-search-forward-unenclosed
 			  org-item-beginning-re bottom t)
 		    (setq post-list (cons (org-list-struct-assoc-at-point)
