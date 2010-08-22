@@ -149,7 +149,7 @@ spaces instead of one after the bullet in each item of the list."
 	  (const :tag "never" nil)
 	  (regexp)))
 
-(defcustom org-list-ending-method 'regexp
+(defcustom org-list-ending-method 'both
   "Determine where plain lists should end.
 
 Valid values are: `regexp', `indent' or `both'.
@@ -157,14 +157,14 @@ Valid values are: `regexp', `indent' or `both'.
 When set to `regexp', Org will look into two variables,
 `org-empty-line-terminates-plain-lists' and the more general
 `org-list-end-regexp', to know what will end lists. This is the
-default value.
+fastest method.
 
-When set to `indent', indentation of the last non-blank line will
-determine if point is in a list. If that line is less indented
-than the previous item in the section, if any, list has ended.
+When set to `indent', a list will end whenever a line following
+an item, but not starting one, is less or equally indented than
+it.
 
 When set to `both', each of the preceding methods must confirm
-that point is in a list."
+that point is in a list. This is the default method."
   :group 'org-plain-lists
   :type '(choice
 	  (const :tag "With a well defined ending (recommended)" regexp)
@@ -785,12 +785,12 @@ This checks `org-list-ending-method'."
 			  prev-head)
 		    (point-min))))
       (cond
+       ((eq org-list-ending-method 'regexp)
+	(org-list-in-item-p-with-regexp bound))
        ((eq org-list-ending-method 'indent)
 	(org-list-in-item-p-with-indent bound))
-       ((eq org-list-ending-method 'both)
-	(and (org-list-in-item-p-with-regexp bound)
-	     (org-list-in-item-p-with-indent bound)))
-       (t (org-list-in-item-p-with-regexp bound))))))
+       (t (and (org-list-in-item-p-with-regexp bound)
+	       (org-list-in-item-p-with-indent bound)))))))
 
 (defun org-list-first-item-p ()
   "Is this item the first item in a plain list?
@@ -860,15 +860,15 @@ A checkbox is blocked if all of the following conditions are fulfilled:
 			prev-head)
 		  (point-min))))
     (cond
+     ((eq org-list-ending-method 'regexp)
+      (org-list-top-point-with-regexp bound))
      ((eq org-list-ending-method 'indent)
       (org-list-top-point-with-indent bound))
-     ((eq org-list-ending-method 'both)
-      (let ((top-re (org-list-top-point-with-regexp bound))
-	    (top-ind (org-list-top-point-with-indent bound)))
-	(if (and top-re top-ind)
-	    (max top-re top-ind)
-	  (or top-re top-ind))))
-     (t (org-list-top-point-with-regexp bound)))))
+     (t (let ((top-re (org-list-top-point-with-regexp bound))
+	      (top-ind (org-list-top-point-with-indent bound)))
+	  (if (and top-re top-ind)
+	      (max top-re top-ind)
+	    (or top-re top-ind)))))))
 
 (defun org-list-bottom-point ()
   "Return point just before list ending or nil if not in a list."
@@ -885,15 +885,15 @@ A checkbox is blocked if all of the following conditions are fulfilled:
 		    next-head
 		    (point-max))))
     (cond
+     ((eq org-list-ending-method 'regexp)
+      (org-list-bottom-point-with-regexp limit))
      ((eq org-list-ending-method 'indent)
       (org-list-bottom-point-with-indent limit))
-     ((eq org-list-ending-method 'both)
-      (let ((bottom-re (org-list-bottom-point-with-regexp limit))
-	    (bottom-ind (org-list-bottom-point-with-indent limit)))
-	(if (and bottom-re bottom-ind)
-	    (min bottom-re bottom-ind)
-	  (or bottom-re bottom-ind))))
-     (t (org-list-bottom-point-with-regexp limit)))))
+     (t (let ((bottom-re (org-list-bottom-point-with-regexp limit))
+	      (bottom-ind (org-list-bottom-point-with-indent limit)))
+	  (if (and bottom-re bottom-ind)
+	      (min bottom-re bottom-ind)
+	    (or bottom-re bottom-ind)))))))
 
 (defun org-beginning-of-item ()
   "Go to the beginning of the current hand-formatted item.
