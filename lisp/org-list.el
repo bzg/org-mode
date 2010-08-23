@@ -156,19 +156,19 @@ Valid values are: `regexp', `indent' or `both'.
 
 When set to `regexp', Org will look into two variables,
 `org-empty-line-terminates-plain-lists' and the more general
-`org-list-end-regexp', to know what will end lists. This is the
-fastest method.
+`org-list-end-regexp', to determine what will end lists. This is
+the fastest method.
 
 When set to `indent', a list will end whenever a line following
 an item, but not starting one, is less or equally indented than
 it.
 
-When set to `both', each of the preceding methods must confirm
-that point is in a list. This is the default method."
+When set to `both', each of the preceding methods is applied to
+determine lists endings. This is the default method."
   :group 'org-plain-lists
   :type '(choice
-	  (const :tag "With a well defined ending (recommended)" regexp)
-	  (const :tag "With indentation of the current line" indent)
+	  (const :tag "With a regexp defining ending" regexp)
+	  (const :tag "With indentation of regular (no bullet) text" indent)
 	  (const :tag "With both methods" both)))
 
 (defcustom org-empty-line-terminates-plain-lists nil
