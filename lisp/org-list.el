@@ -864,11 +864,8 @@ A checkbox is blocked if all of the following conditions are fulfilled:
       (org-list-top-point-with-regexp bound))
      ((eq org-list-ending-method 'indent)
       (org-list-top-point-with-indent bound))
-     (t (let ((top-re (org-list-top-point-with-regexp bound))
-	      (top-ind (org-list-top-point-with-indent bound)))
-	  (if (and top-re top-ind)
-	      (max top-re top-ind)
-	    (or top-re top-ind)))))))
+     (t (let ((top-re (org-list-top-point-with-regexp bound)))
+	  (org-list-top-point-with-indent (or top-re bound)))))))
 
 (defun org-list-bottom-point ()
   "Return point just before list ending or nil if not in a list."
@@ -889,11 +886,8 @@ A checkbox is blocked if all of the following conditions are fulfilled:
       (org-list-bottom-point-with-regexp limit))
      ((eq org-list-ending-method 'indent)
       (org-list-bottom-point-with-indent limit))
-     (t (let ((bottom-re (org-list-bottom-point-with-regexp limit))
-	      (bottom-ind (org-list-bottom-point-with-indent limit)))
-	  (if (and bottom-re bottom-ind)
-	      (min bottom-re bottom-ind)
-	    (or bottom-re bottom-ind)))))))
+     (t (let ((bottom-re (org-list-bottom-point-with-regexp limit)))
+	  (org-list-bottom-point-with-indent (or bottom-re limit)))))))
 
 (defun org-beginning-of-item ()
   "Go to the beginning of the current hand-formatted item.
