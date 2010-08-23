@@ -189,7 +189,14 @@ sitemap of files or summary page for a given project.
 
 The following properties control the creation of a concept index.
 
-  :makeindex             Create a concept index."
+  :makeindex             Create a concept index.
+
+Other properties affecting publication.
+
+  :body-only              Set this to 't' to publish only the body of the
+                         documents, excluding everything outside and 
+                         including the <body> tags in HTML, or 
+                         \begin{document}..\end{document} in LaTeX."
   :group 'org-publish
   :type 'alist)
 
@@ -513,7 +520,9 @@ PUB-DIR is the publishing directory."
 	(setq export-buf-or-file
 	      (funcall (intern (concat "org-export-as-" format))
 		       (plist-get plist :headline-levels)
-		       nil plist nil nil pub-dir))
+		       nil plist nil 
+		       (plist-get plist :body-only) 
+		       pub-dir))
 	(when (and (bufferp export-buf-or-file)
 		   (buffer-live-p export-buf-or-file))
 	  (set-buffer export-buf-or-file)

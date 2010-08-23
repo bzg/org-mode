@@ -8218,7 +8218,7 @@ For file links, arg negates `org-context-in-file-links'."
   (org-load-modules-maybe)
   (setq org-store-link-plist nil)  ; reset
   (let ((outline-regexp (org-get-limited-outline-regexp))
-	link cpltxt desc description search txt custom-id)
+	link cpltxt desc description search txt custom-id agenda-link)
     (cond
 
      ((run-hook-with-args-until-success 'org-store-link-functions)
@@ -8250,9 +8250,10 @@ For file links, arg negates `org-context-in-file-links'."
 		   (get-text-property (point) 'org-marker))))
 	(when m
 	  (org-with-point-at m
-	    (if (interactive-p)
-		(call-interactively 'org-store-link)
-	      (org-store-link nil))))))
+	    (setq agenda-link
+		  (if (interactive-p)
+		      (call-interactively 'org-store-link)
+		    (org-store-link nil)))))))
 
      ((eq major-mode 'calendar-mode)
       (let ((cd (calendar-cursor-to-date)))
@@ -8300,13 +8301,14 @@ For file links, arg negates `org-context-in-file-links'."
  	(setq cpltxt (concat "file:" file)
  	      link (org-make-link cpltxt))))
 
-     ((and buffer-file-name (org-mode-p))
+     ((and (buffer-file-name (buffer-base-buffer)) (org-mode-p))
       (setq custom-id (ignore-errors (org-entry-get nil "CUSTOM_ID")))
       (cond
        ((org-in-regexp "<<\\(.*?\\)>>")
 	(setq cpltxt
 	      (concat "file:"
-		      (abbreviate-file-name buffer-file-name)
+		      (abbreviate-file-name
+		       (buffer-file-name (buffer-base-buffer)))
 		      "::" (match-string 1))
 	      link (org-make-link cpltxt)))
        ((and (featurep 'org-id)
@@ -8328,11 +8330,13 @@ For file links, arg negates `org-context-in-file-links'."
 		     (error
 		      ;; probably before first headline, link to file only
 		      (concat "file:"
-			      (abbreviate-file-name buffer-file-name))))))
+			      (abbreviate-file-name
+			       (buffer-file-name (buffer-base-buffer))))))))
        (t
 	;; Just link to current headline
 	(setq cpltxt (concat "file:"
-			     (abbreviate-file-name buffer-file-name)))
+			     (abbreviate-file-name
+			      (buffer-file-name (buffer-base-buffer)))))
 	;; Add a context search string
 	(when (org-xor org-context-in-file-links arg)
 	  (setq txt (cond
@@ -8389,7 +8393,7 @@ For file links, arg negates `org-context-in-file-links'."
 			       "::#" custom-id))
 	    (setq org-stored-links
 		  (cons (list link desc) org-stored-links))))
-      (and link (org-make-link-string link desc)))))
+      (or agenda-link (and link (org-make-link-string link desc))))))
 
 (defun org-store-link-props (&rest plist)
   "Store link properties, extract names and addresses."
