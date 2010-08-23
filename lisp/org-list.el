@@ -1995,13 +1995,11 @@ sublevels as a list of strings."
   (interactive)
   (if (not (org-in-item-p))
       (error "Not in a list")
-    (goto-char (org-list-top-point))
     (let ((list (org-list-parse-list t)) nstars)
       (save-excursion
 	(if (ignore-errors
 	      (org-back-to-heading))
-	    (progn (org-search-forward-unenclosed
-		    org-complex-heading-regexp nil t)
+	    (progn (looking-at org-complex-heading-regexp)
 		   (setq nstars (length (match-string 1))))
 	  (setq nstars 0)))
       (org-list-make-subtrees list (1+ nstars)))))
