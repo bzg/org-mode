@@ -8300,13 +8300,14 @@ For file links, arg negates `org-context-in-file-links'."
  	(setq cpltxt (concat "file:" file)
  	      link (org-make-link cpltxt))))
 
-     ((and buffer-file-name (org-mode-p))
+     ((and (buffer-file-name (buffer-base-buffer)) (org-mode-p))
       (setq custom-id (ignore-errors (org-entry-get nil "CUSTOM_ID")))
       (cond
        ((org-in-regexp "<<\\(.*?\\)>>")
 	(setq cpltxt
 	      (concat "file:"
-		      (abbreviate-file-name buffer-file-name)
+		      (abbreviate-file-name
+		       (buffer-file-name (buffer-base-buffer)))
 		      "::" (match-string 1))
 	      link (org-make-link cpltxt)))
        ((and (featurep 'org-id)
@@ -8328,11 +8329,13 @@ For file links, arg negates `org-context-in-file-links'."
 		     (error
 		      ;; probably before first headline, link to file only
 		      (concat "file:"
-			      (abbreviate-file-name buffer-file-name))))))
+			      (abbreviate-file-name
+			       (buffer-file-name (buffer-base-buffer))))))))
        (t
 	;; Just link to current headline
 	(setq cpltxt (concat "file:"
-			     (abbreviate-file-name buffer-file-name)))
+			     (abbreviate-file-name
+			      (buffer-file-name (buffer-base-buffer)))))
 	;; Add a context search string
 	(when (org-xor org-context-in-file-links arg)
 	  (setq txt (cond
