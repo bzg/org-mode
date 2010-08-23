@@ -696,82 +696,80 @@ If NO-SUBTREE is non-nil, only indent the item itself, not its
 children.
 
 Return t if successful."
-  (save-restriction
-    (let* ((regionp (org-region-active-p))
-	   (rbeg (and regionp (region-beginning)))
-	   (rend (and regionp (region-end))))
-      (cond
-       ((and regionp
-	     (goto-char rbeg)
-	     (not (org-search-forward-unenclosed org-item-beginning-re rend t)))
-	(error "No item in region"))
-       ((not (org-at-item-p))
-	(error "Not on an item"))
-       (t
-	;; Are we going to move the whole list?
-	(let ((specialp (and (cdr (assq 'indent org-list-automatic-rules))
-			     (not no-subtree)
-			     (= (org-list-top-point) (point-at-bol)))))
-	  ;; Determine begin and end points of zone to indent. If moving
-	  ;; more than one item, ensure we keep them on subsequent moves.
-	  (unless (and (memq last-command '(org-shiftmetaright org-shiftmetaleft))
-		       (memq this-command '(org-shiftmetaright org-shiftmetaleft)))
-	    (if regionp
-		(progn
-		  (set-marker org-last-indent-begin-marker rbeg)
-		  (set-marker org-last-indent-end-marker rend))
-	      (set-marker org-last-indent-begin-marker (point-at-bol))
-	      (set-marker org-last-indent-end-marker
-			  (save-excursion
-			    (cond
-			     (specialp (org-list-bottom-point))
-			     (no-subtree (org-end-of-item-or-at-child))
-			     (t (org-end-of-item)))))))
-	  ;; Get everything ready
-	  (let* ((beg (marker-position org-last-indent-begin-marker))
-		 (end (marker-position org-last-indent-end-marker))
-		 (struct (progn
-			   (when specialp (narrow-to-region beg end))
-			   (org-list-struct beg end (< arg 0))))
-		 (origins (org-list-struct-origins struct))
-		 (beg-item (assq beg struct)))
-	    (cond
-	     ;; Special case: moving top-item with indent rule
-	     (specialp
-	      (let* ((level-skip (org-level-increment))
-		     (offset (if (< arg 0) (- level-skip) level-skip))
-		     (top-ind (nth 1 beg-item)))
-		(if (< (+ top-ind offset) 0)
-		    (error "Cannot outdent beyond margin")
-		  ;; Change bullet if necessary
-		  (when (and (= (+ top-ind offset) 0)
-			     (string-match "*" (nth 2 beg-item)))
-		    (setcdr beg-item (list (nth 1 beg-item)
-					   (org-list-bullet-string "-"))))
-		  ;; Shift ancestor
-		  (let ((anc (car struct)))
-		    (setcdr anc (list (+ (nth 1 anc) offset) "" nil)))
-		  (org-list-struct-fix-struct struct origins)
-		  (org-list-struct-apply-struct struct))))
-	     ;; Forbidden move
-	     ((and (< arg 0)
-		   (or (and no-subtree
-			    (not regionp)
-			    (org-list-struct-get-child beg-item struct))
-		       (let ((last-item (save-excursion
-					  (goto-char end)
-					  (skip-chars-backward " \r\t\n")
-					  (org-beginning-of-item)
-					  (org-list-struct-assoc-at-point))))
-			 (org-list-struct-get-child last-item struct))))
-	      (error "Cannot outdent an item without its children"))
-	     ;; Normal shifting
-	     (t
-	      (let* ((shifted-ori (if (< arg 0)
-				      (org-list-struct-outdent beg end origins)
-				    (org-list-struct-indent beg end origins struct))))
-		(org-list-struct-fix-struct struct shifted-ori)
-		(org-list-struct-apply-struct struct)))))))))))
+  (let* ((regionp (org-region-active-p))
+	 (rbeg (and regionp (region-beginning)))
+	 (rend (and regionp (region-end))))
+    (cond
+     ((and regionp
+	   (goto-char rbeg)
+	   (not (org-search-forward-unenclosed org-item-beginning-re rend t)))
+      (error "No item in region"))
+     ((not (org-at-item-p))
+      (error "Not on an item"))
+     (t
+      ;; Are we going to move the whole list?
+      (let* ((top (org-list-top-point))
+	     (specialp (and (cdr (assq 'indent org-list-automatic-rules))
+			    (not no-subtree)
+			    (= top (point-at-bol)))))
+	;; Determine begin and end points of zone to indent. If moving
+	;; more than one item, ensure we keep them on subsequent moves.
+	(unless (and (memq last-command '(org-shiftmetaright org-shiftmetaleft))
+		     (memq this-command '(org-shiftmetaright org-shiftmetaleft)))
+	  (if regionp
+	      (progn
+		(set-marker org-last-indent-begin-marker rbeg)
+		(set-marker org-last-indent-end-marker rend))
+	    (set-marker org-last-indent-begin-marker (point-at-bol))
+	    (set-marker org-last-indent-end-marker
+			(save-excursion
+			  (cond
+			   (specialp (org-list-bottom-point))
+			   (no-subtree (org-end-of-item-or-at-child))
+			   (t (org-end-of-item)))))))
+	;; Get everything ready
+	(let* ((beg (marker-position org-last-indent-begin-marker))
+	       (end (marker-position org-last-indent-end-marker))
+	       (struct (org-list-struct beg end (< arg 0) top (if specialp end)))
+	       (origins (org-list-struct-origins struct))
+	       (beg-item (assq beg struct)))
+	  (cond
+	   ;; Special case: moving top-item with indent rule
+	   (specialp
+	    (let* ((level-skip (org-level-increment))
+		   (offset (if (< arg 0) (- level-skip) level-skip))
+		   (top-ind (nth 1 beg-item)))
+	      (if (< (+ top-ind offset) 0)
+		  (error "Cannot outdent beyond margin")
+		;; Change bullet if necessary
+		(when (and (= (+ top-ind offset) 0)
+			   (string-match "*" (nth 2 beg-item)))
+		  (setcdr beg-item (list (nth 1 beg-item)
+					 (org-list-bullet-string "-"))))
+		;; Shift ancestor
+		(let ((anc (car struct)))
+		  (setcdr anc (list (+ (nth 1 anc) offset) "" nil)))
+		(org-list-struct-fix-struct struct origins)
+		(org-list-struct-apply-struct struct))))
+	   ;; Forbidden move
+	   ((and (< arg 0)
+		 (or (and no-subtree
+			  (not regionp)
+			  (org-list-struct-get-child beg-item struct))
+		     (let ((last-item (save-excursion
+					(goto-char end)
+					(skip-chars-backward " \r\t\n")
+					(org-beginning-of-item)
+					(org-list-struct-assoc-at-point))))
+		       (org-list-struct-get-child last-item struct))))
+	    (error "Cannot outdent an item without its children"))
+	   ;; Normal shifting
+	   (t
+	    (let* ((shifted-ori (if (< arg 0)
+				    (org-list-struct-outdent beg end origins)
+				  (org-list-struct-indent beg end origins struct))))
+	      (org-list-struct-fix-struct struct shifted-ori)
+	      (org-list-struct-apply-struct struct))))))))))
 
 ;;; Predicates
 
@@ -1101,7 +1099,7 @@ bullet string and bullet counter, if any."
             (and (looking-at "\\[@\\(?:start:\\)?\\([0-9]+\\)\\]")
                  (match-string 1))))))
 
-(defun org-list-struct (begin end &optional outdent)
+(defun org-list-struct (begin end &optional outdent limit-up limit-down)
   "Return the structure containing the list between BEGIN and END.
 
 A structure is an alist where key is point of item and values
@@ -1113,10 +1111,14 @@ ancestor at position 0.
 
 If OUTDENT is non-nil, it will also grab all of the parent list
 and the grand-parent. Setting OUTDENT to t is mandatory when next
-change is an outdent."
+change is an outdent.
+
+Numbers LIMIT-UP and LIMIT-DOWN are the maximal positions the
+structure can extend to. They default respectively to list's top
+point and bottom point."
   (save-excursion
-    (let* ((top (org-list-top-point))
-           (bottom (org-list-bottom-point))
+    (let* ((top (or limit-up (org-list-top-point)))
+           (bottom (or limit-down (org-list-bottom-point)))
            struct
            (extend
             (lambda (struct)
