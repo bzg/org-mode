@@ -155,7 +155,8 @@ This function is called by `org-babel-execute-src-block'."
   "If there is not a current R process then create one."
   (unless (string= session "none")
     (let ((session (or session "*R*"))
-	  (ess-ask-for-ess-directory (not (cdr (assoc :dir params)))))
+	  (ess-ask-for-ess-directory
+	   (and ess-ask-for-ess-directory (not (cdr (assoc :dir params))))))
       (if (org-babel-comint-buffer-livep session)
 	  session
 	(save-window-excursion
