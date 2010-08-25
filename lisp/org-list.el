@@ -873,21 +873,24 @@ A checkbox is blocked if all of the following conditions are fulfilled:
 		      (and (let ((outline-regexp org-outline-regexp))
 			     ;; Use default regexp because folding
 			     ;; changes OUTLINE-REGEXP.
-			     (outline-next-heading))
-			   (skip-chars-backward " \r\t\n")
-			   (1+ (point-at-eol)))))
+			     (outline-next-heading)))))
 	 (limit (or (save-excursion
 		      (and (re-search-forward "^[ \t]*:END:" next-head t)
 			   (point-at-bol)))
 		    next-head
-		    (point-max))))
-    (cond
-     ((eq org-list-ending-method 'regexp)
-      (org-list-bottom-point-with-regexp limit))
-     ((eq org-list-ending-method 'indent)
-      (org-list-bottom-point-with-indent limit))
-     (t (let ((bottom-re (org-list-bottom-point-with-regexp limit)))
-	  (org-list-bottom-point-with-indent (or bottom-re limit)))))))
+		    (point-max)))
+	 (bottom (cond
+		  ((eq org-list-ending-method 'regexp)
+		   (org-list-bottom-point-with-regexp limit))
+		  ((eq org-list-ending-method 'indent)
+		   (org-list-bottom-point-with-indent limit))
+		  (t (let ((bottom-re (org-list-bottom-point-with-regexp limit)))
+		       (org-list-bottom-point-with-indent (or bottom-re limit)))))))
+    (when bottom
+      (save-excursion
+	(goto-char bottom)
+	(skip-chars-backward " \r\t\n")
+	(1+ (point-at-eol))))))
 
 (defun org-beginning-of-item ()
   "Go to the beginning of the current hand-formatted item.
