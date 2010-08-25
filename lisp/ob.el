@@ -421,8 +421,12 @@ session."
   (interactive)
   (let* ((info (or info (org-babel-get-src-block-info)))
          (lang (nth 0 info))
-         (body (nth 1 info))
          (params (nth 2 info))
+         (body (setf (nth 1 info)
+		     (if (and (cdr (assoc :noweb params))
+                              (string= "yes" (cdr (assoc :noweb params))))
+                         (org-babel-expand-noweb-references info)
+		       (nth 1 info))))
          (session (cdr (assoc :session params)))
 	 (dir (cdr (assoc :dir params)))
 	 (default-directory
