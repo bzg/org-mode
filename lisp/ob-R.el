@@ -139,7 +139,7 @@ This function is called by `org-babel-execute-src-block'."
 (defun org-babel-R-assign-elisp (name value colnames-p rownames-p)
   "Construct R code assigning the elisp VALUE to a variable named NAME."
   (if (listp value)
-      (let ((transition-file (make-temp-file "org-babel-R-import")))
+      (let ((transition-file (org-babel-temp-file "R-import-")))
         ;; ensure VALUE has an orgtbl structure (depth of at least 2)
         (unless (listp (car value)) (setq value (list value)))
         (with-temp-file (org-babel-maybe-remote-file transition-file)
@@ -235,7 +235,7 @@ string. If RESULT-TYPE equals 'value then return the value of the
 last statement in BODY, as elisp."
   (case result-type
     (value
-     (let ((tmp-file (make-temp-file "org-babel-R-results-")))
+     (let ((tmp-file (org-babel-temp-file "R-results-")))
        (org-babel-eval org-babel-R-command
 		       (format org-babel-R-wrapper-method
 			       body tmp-file
@@ -256,7 +256,7 @@ string. If RESULT-TYPE equals 'value then return the value of the
 last statement in BODY, as elisp."
   (case result-type
     (value
-     (let ((tmp-file (make-temp-file "org-babel-R"))
+     (let ((tmp-file (org-babel-temp-file "R-"))
 	   broke)
        (org-babel-comint-with-output (session org-babel-R-eoe-output)
 	 (insert (mapconcat

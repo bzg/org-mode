@@ -186,7 +186,7 @@ return the value of the last statement in BODY, as elisp."
       ;; external process evaluation
       (case result-type
 	(output (org-babel-eval org-babel-ruby-command body))
-	(value (let ((tmp-file (make-temp-file "org-babel-ruby-results-")))
+	(value (let ((tmp-file (org-babel-temp-file "ruby-results-")))
 		 (org-babel-eval org-babel-ruby-command
 				 (format (if (member "pp" result-params)
 					     org-babel-ruby-pp-wrapper-method
@@ -221,7 +221,7 @@ return the value of the last statement in BODY, as elisp."
 	  (if (or (member "code" result-params) (member "pp" result-params))
 	      results
 	    (org-babel-ruby-table-or-string results)))
-	(let* ((tmp-file (make-temp-file "org-babel-ruby-results-"))
+	(let* ((tmp-file (org-babel-temp-file "ruby-results-"))
 	       (ppp (or (member "code" result-params)
 			(member "pp" result-params))))
 	  (org-babel-comint-with-output

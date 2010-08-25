@@ -74,7 +74,7 @@ This function is called by `org-babel-execute-src-block'"
          (save-window-excursion
            (cadr (slime-eval `(swank:eval-and-grab-output ,full-body))))
        ;; external evaluation
-       (let ((script-file (make-temp-file "ob-lisp-script")))
+       (let ((script-file (org-babel-temp-file "lisp-script-")))
          (with-temp-file script-file
            (insert
             ;; return the value or the output

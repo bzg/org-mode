@@ -261,7 +261,7 @@ repl buffer."
 				       " "))))
     (case result-type
       (output (org-babel-eval cmd body))
-      (value (let* ((tmp-file (make-temp-file "org-babel-clojure-results-")))
+      (value (let* ((tmp-file (org-babel-temp-file "clojure-results-")))
 	       (org-babel-eval cmd (format org-babel-clojure-wrapper-method
 					   body tmp-file tmp-file))
 	       (org-babel-clojure-table-or-string

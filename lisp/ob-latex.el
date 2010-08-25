@@ -70,7 +70,7 @@ This function is called by `org-babel-execute-src-block'."
   (setq body (org-babel-expand-body:latex body params))
   (if (cdr (assoc :file params))
       (let* ((out-file (cdr (assoc :file params)))
-	     (tex-file (make-temp-file "org-babel-latex" nil ".tex"))
+	     (tex-file (org-babel-temp-file "latex-" nil ".tex"))
 	     (border (cdr (assoc :border params)))
 	     (fit (or (cdr (assoc :fit params)) border))
 	     (height (and fit (cdr (assoc :pdfheight params))))

@@ -203,7 +203,7 @@ return the value of the last statement in BODY, as elisp."
       ;; external process evaluation
       (case result-type
 	(output (org-babel-eval org-babel-python-command body))
-	(value (let ((tmp-file (make-temp-file "org-babel-python-results-")))
+	(value (let ((tmp-file (org-babel-temp-file "python-results-")))
 		 (org-babel-eval org-babel-python-command
 				 (format
 				  (if (member "pp" result-params)
@@ -251,7 +251,7 @@ return the value of the last statement in BODY, as elisp."
 	    (if (or (member "code" result-params) (member "pp" result-params))
 		results
 	      (org-babel-python-table-or-string results)))
-	  (let ((tmp-file (make-temp-file "org-babel-python-results-")))
+	  (let ((tmp-file (org-babel-temp-file "python-results-")))
 	    (org-babel-comint-with-output
 		(buffer org-babel-python-eoe-indicator t body)
 	      (let ((comint-process-echoes nil))

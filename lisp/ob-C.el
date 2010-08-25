@@ -84,12 +84,12 @@ header arguments (calls `org-babel-C-expand')."
   "This function should only be called by `org-babel-execute:C'
 or `org-babel-execute:c++'."
   (let* ((processed-params (org-babel-process-params params))
-         (tmp-src-file (make-temp-file "org-babel-C-src" nil
+         (tmp-src-file (org-babel-temp-file "C-src-" nil
                                        (cond
 					((equal org-babel-c-variant 'c) ".c")
 					((equal org-babel-c-variant 'cpp) ".cpp"))))
-         (tmp-bin-file (make-temp-file "org-babel-C-bin"))
-         (tmp-out-file (make-temp-file "org-babel-C-out"))
+         (tmp-bin-file (org-babel-temp-file "C-bin-"))
+         (tmp-out-file (org-babel-temp-file "C-out-"))
          (cmdline (cdr (assoc :cmdline params)))
          (flags (cdr (assoc :flags params)))
          (full-body (org-babel-C-expand body params))
@@ -108,7 +108,7 @@ or `org-babel-execute:c++'."
     ((lambda (results)
        (org-babel-reassemble-table
 	(if (member "vector" (nth 2 processed-params))
-	    (let ((tmp-file (make-temp-file "ob-c")))
+	    (let ((tmp-file (org-babel-temp-file "c-")))
 	      (with-temp-file tmp-file (insert results))
 	      (org-babel-import-elisp-from-file tmp-file))
 	  (org-babel-read results))

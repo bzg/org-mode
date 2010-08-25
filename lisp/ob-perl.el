@@ -107,7 +107,7 @@ return the value of the last statement in BODY, as elisp."
   (when session (error "Sessions are not supported for Perl."))
   (case result-type
     (output (org-babel-eval org-babel-perl-command body))
-    (value (let ((tmp-file (make-temp-file "org-babel-perl-results-")))
+    (value (let ((tmp-file (org-babel-temp-file "perl-results-")))
 	     (org-babel-eval
 	      org-babel-perl-command
 	      (format org-babel-perl-wrapper-method body tmp-file))

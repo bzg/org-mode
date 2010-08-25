@@ -70,7 +70,7 @@ This function is called by `org-babel-execute-src-block'."
         (out-file (cdr (assoc :file params)))
         (cmdline (cdr (assoc :cmdline params)))
         (cmd (or (cdr (assoc :cmd params)) "dot"))
-        (in-file (make-temp-file "org-babel-dot")))
+        (in-file (org-babel-temp-file "dot-")))
     (with-temp-file in-file
       (insert (org-babel-expand-body:dot body params processed-params)))
     (org-babel-eval (concat cmd " " in-file " " cmdline " -o " out-file) "")

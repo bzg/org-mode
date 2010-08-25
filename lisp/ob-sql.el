@@ -60,9 +60,9 @@ This function is called by `org-babel-execute-src-block'."
 	 (processed-params (org-babel-process-params params))
          (cmdline (cdr (assoc :cmdline params)))
          (engine (cdr (assoc :engine params)))
-         (in-file (make-temp-file "org-babel-sql-in"))
+         (in-file (org-babel-temp-file "sql-in-"))
          (out-file (or (cdr (assoc :out-file params))
-                       (make-temp-file "org-babel-sql-out")))
+                       (org-babel-temp-file "sql-out-")))
          (command (case (intern engine)
                     ('mysql (format "mysql %s -e \"source %s\" > %s"
                                     (or cmdline "") in-file out-file))

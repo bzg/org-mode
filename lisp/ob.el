@@ -1658,6 +1658,31 @@ the remote connection."
         (concat "/" user (when user "@") host ":" file))
     file))
 
+(defvar org-babel-temporary-directory
+  (or (and (boundp 'org-babel-temporary-directory)
+	   org-babel-temporary-directory)
+      (make-temp-file "babel-" t))
+  "Directory to hold temporary files created to execute code blocks.
+Used by `org-babel-temp-file'.  This directory will be removed on
+Emacs shutdown.")
+
+(defun org-babel-temp-file (prefix &optional suffix)
+  "Create a temporary file in the `org-babel-temporary-directory'.
+Passes PREFIX and SUFFIX directly to `make-temp-file' with the
+value of `temporary-file-directory' temporarily set to the value
+of `org-babel-temporary-directory'."
+  (let ((temporary-file-directory (expand-file-name
+				   org-babel-temporary-directory
+				   temporary-file-directory)))
+    (make-temp-file prefix suffix)))
+
+(defun org-babel-remove-temporary-directory ()
+  "Remove `org-babel-temporary-directory' on Emacs shutdown."
+  (when (boundp 'org-babel-temporary-directory)
+    (delete-directory org-babel-temporary-directory t)))
+
+(add-hook 'kill-emacs-hook 'org-babel-remove-temporary-directory)
+
 (provide 'ob)
 
 ;; arch-tag: 01a7ebee-06c5-4ee4-a709-e660d28c0af1

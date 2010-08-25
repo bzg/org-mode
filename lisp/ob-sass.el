@@ -51,9 +51,9 @@
 This function is called by `org-babel-execute-src-block'."
   (let* ((result-params (split-string (or (cdr (assoc :results params)) "")))
          (file (cdr (assoc :file params)))
-         (out-file (or file (make-temp-file "org-babel-sass-out")))
+         (out-file (or file (org-babel-temp-file "sass-out-")))
          (cmdline (cdr (assoc :cmdline params)))
-         (in-file (make-temp-file "org-babel-sass-in"))
+         (in-file (org-babel-temp-file "sass-in-"))
          (cmd (concat "sass " (or cmdline "") in-file " " out-file)))
     (with-temp-file in-file
       (insert (org-babel-expand-body:sass body params))) (shell-command cmd)

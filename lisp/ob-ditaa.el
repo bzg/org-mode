@@ -53,7 +53,7 @@ This function is called by `org-babel-execute-src-block'."
   (let ((result-params (split-string (or (cdr (assoc :results params)) "")))
         (out-file (cdr (assoc :file params)))
         (cmdline (cdr (assoc :cmdline params)))
-        (in-file (make-temp-file "org-babel-ditaa")))
+        (in-file (org-babel-temp-file "ditaa-")))
     (unless (file-exists-p org-ditaa-jar-path)
       (error "Could not find ditaa.jar at %s" org-ditaa-jar-path))
     (with-temp-file in-file (insert body))
