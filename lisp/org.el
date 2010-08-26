@@ -161,6 +161,7 @@ requirements) is loaded."
 		 (const :tag "Ocaml" ocaml)
 		 (const :tag "Octave" octave)
 		 (const :tag "Perl" perl)
+		 (const :tag "PlantUML" plantuml)
 		 (const :tag "Python" python)
 		 (const :tag "Ruby" ruby)
 		 (const :tag "Sass" sass)

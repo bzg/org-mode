@@ -147,7 +147,8 @@ LISPF      = 	org.el			\
 		ob-css.el		\
 		ob-gnuplot.el		\
 		ob-octave.el		\
-		ob-screen.el
+		ob-screen.el		\
+		ob-plantuml.el
 
 LISPFILES0  = $(LISPF:%=lisp/%)
 LISPFILES   = $(LISPFILES0) lisp/org-install.el

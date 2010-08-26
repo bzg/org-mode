@@ -1,6 +1,26 @@
 ;;; ob-plantuml.el --- org-babel functions for plantuml evaluation
 
+;; Copyright (C) 2010  Free Software Foundation, Inc.
+
 ;; Author: Zhang Weize
+;; Keywords: literate programming, reproducible research
+;; Homepage: http://orgmode.org
+;; Version: 7.01trans
+
+;; This file is part of GNU Emacs.
+
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 
@@ -9,8 +29,14 @@
 ;; Inspired by Ian Yang's org-export-blocks-format-plantuml
 ;; http://www.emacswiki.org/emacs/org-export-blocks-format-plantuml.el
 
+;;; Requirements:
+
+;; plantuml     | http://plantuml.sourceforge.net/
+;; plantuml.jar | `org-plantuml-jar-path' should point to the jar file
+
 ;;; Code:
 (require 'ob)
+(require 'ob-eval)
 
 (defvar org-babel-default-header-args:plantuml
   '((:results . "file") (:exports . "results"))
@@ -19,28 +45,25 @@
 (defun org-babel-expand-body:plantuml (body params &optional processed-params)
   "Expand BODY according to PARAMS, return the expanded body." body)
 
-(defvar org-plantuml-jar-path)
+(defcustom org-plantuml-jar-path nil
+  "Path to the plantuml.jar file."
+  :group 'org-babel
+  :type 'string)
+
 (defun org-babel-execute:plantuml (body params)
   "Execute a block of plantuml code with org-babel.
 This function is called by `org-babel-execute-src-block'."
-  (let ((result-params (split-string (or (cdr (assoc :results params)) "")))
-        (out-file (cdr (assoc :file params)))
-        (cmdline (cdr (assoc :cmdline params)))
-        (in-file (make-temp-file "org-babel-plantuml")))
+  (let* ((result-params (split-string (or (cdr (assoc :results params)) "")))
+	 (out-file (cdr (assoc :file params)))
+	 (cmdline (cdr (assoc :cmdline params)))
+	 (in-file (org-babel-temp-file "plantuml-"))
+	 (cmd (concat "java -jar "
+		      (shell-quote-argument org-plantuml-jar-path)
+		      " -p " cmdline " < " in-file " > " out-file)))
     (unless (file-exists-p org-plantuml-jar-path)
       (error "Could not find plantuml.jar at %s" org-plantuml-jar-path))
     (with-temp-file in-file (insert (concat "@startuml\n" body "\n@enduml")))
-    (message (concat "java -jar " org-plantuml-jar-path
-                     " -p " cmdline " < " in-file " > " out-file))
-    (shell-command (concat "java -jar " (shell-quote-argument org-plantuml-jar-path)
-                           " -p " cmdline " < " in-file " > " out-file))
-    ; The method below will produce error when exporting the buffer.
-    ;; (with-temp-buffer
-    ;;   (call-process-shell-command
-    ;;    (concat "java -jar " org-plantuml-jar-path " -p " cmdline)
-    ;;    in-file
-    ;;    '(t nil))
-    ;;   (write-region nil nil out-file))
+    (message "%s" cmd) (org-babel-eval cmd "")
     out-file))
 
 (defun org-babel-prep-session:plantuml (session params)
@@ -48,5 +71,7 @@ This function is called by `org-babel-execute-src-block'."
   (error "Plantuml does not support sessions"))
 
 (provide 'ob-plantuml)
+
+;; arch-tag: 451f50c5-e779-407e-ad64-70e0e8f161d1
 
 ;;; ob-plantuml.el ends here
