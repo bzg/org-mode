@@ -31,7 +31,7 @@
 (require 'ob)
 
 (defvar org-babel-default-header-args:org
-  '((:results . "raw") (:exports . "results"))
+  '((:results . "raw silent") (:exports . "results"))
   "Default arguments for evaluating a org source block.")
 
 (defun org-babel-expand-body:org (body params &optional processed-params)
