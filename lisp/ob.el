@@ -1202,7 +1202,12 @@ raw ----- results are added directly to the org-mode file.  This
           is a good option if you code block will output org-mode
           formatted text.
 
-org ----- this is the same as the 'raw' option
+org ----- similar in effect to raw, only the results are wrapped
+          in an org code block.  Similar to the raw option, on
+          export the results will be interpreted as org-formatted
+          text, however by wrapping the results in an org code
+          block they can be replaced upon re-execution of the
+          code block.
 
 html ---- results are added inside of a #+BEGIN_HTML block.  This
           is a good option if you code block will output html
@@ -1279,7 +1284,9 @@ code ---- the results are extracted in the syntax of the source
 	   ((member "code" result-params)
 	    (insert (format "#+BEGIN_SRC %s%s\n%s#+END_SRC\n"
                             (or lang "none") results-switches result)))
-	   ((or (member "raw" result-params) (member "org" result-params))
+	   ((member "org" result-params)
+	    (insert (format "#+BEGIN_SRC org\n%s#+END_SRC\n" result)))
+	   ((member "raw" result-params)
 	    (save-excursion (insert result)) (if (org-at-table-p) (org-cycle)))
 	   (t
 	    (org-babel-examplize-region

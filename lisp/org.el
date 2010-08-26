@@ -160,6 +160,7 @@ requirements) is loaded."
 		 (const :tag "Mscgen" mscgen)
 		 (const :tag "Ocaml" ocaml)
 		 (const :tag "Octave" octave)
+		 (const :tag "Org" org)
 		 (const :tag "Perl" perl)
 		 (const :tag "PlantUML" plantuml)
 		 (const :tag "Python" python)
