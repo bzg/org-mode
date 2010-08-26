@@ -1679,7 +1679,18 @@ of `org-babel-temporary-directory'."
 (defun org-babel-remove-temporary-directory ()
   "Remove `org-babel-temporary-directory' on Emacs shutdown."
   (when (boundp 'org-babel-temporary-directory)
-    (delete-directory org-babel-temporary-directory t)))
+    ;; taken from `delete-directory' in files.el
+    (mapc (lambda (file)
+	    ;; This test is equivalent to
+	    ;; (and (file-directory-p fn) (not (file-symlink-p fn)))
+	    ;; but more efficient
+	    (if (eq t (car (file-attributes file)))
+		(delete-directory file)
+	      (delete-file file nil)))
+	  ;; We do not want to delete "." and "..".
+	  (directory-files org-babel-temporary-directory 'full
+			   "^\\([^.]\\|\\.\\([^.]\\|\\..\\)\\).*"))
+    (delete-directory org-babel-temporary-directory)))
 
 (add-hook 'kill-emacs-hook 'org-babel-remove-temporary-directory)
 
