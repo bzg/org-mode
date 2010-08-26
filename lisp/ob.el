@@ -182,18 +182,20 @@ confirmation from the user.
 
 Note disabling confirmation may result in accidental evaluation
 of potentially harmful code."
-  (let* ((eval (cdr (assoc :eval (nth 2 info))))
+  (let* ((eval (or (cdr (assoc :eval (nth 2 info)))
+		   (when (assoc :noeval (nth 2 info)) "no")))
 	 (query (or (equal eval "query")
 		    (and (functionp org-confirm-babel-evaluate)
 			 (funcall org-confirm-babel-evaluate
 				  (nth 0 info) (nth 1 info)))
 		    org-confirm-babel-evaluate)))
-    (when (or (equal eval "never")
-	      (and query
-		   (not (yes-or-no-p
-			 (format "Evaluate this%scode on your system? "
-				 (if info (format " %s " (nth 0 info)) " "))))))
-      (error "evaluation aborted"))))
+    (if (or (equal eval "never") (equal eval "no")
+	    (and query
+		 (not (yes-or-no-p
+		       (format "Evaluate this%scode on your system? "
+			       (if info (format " %s " (nth 0 info)) " "))))))
+	(prog1 nil (message "evaluation aborted"))
+      t)))
 
 ;;;###autoload
 (defun org-babel-execute-safely-maybe ()
@@ -254,7 +256,7 @@ then run `org-babel-pop-to-session'."
 
 (defconst org-babel-header-arg-names
   '(cache cmdline colnames dir exports file noweb results
-	  session tangle var noeval comments)
+    session tangle var eval noeval comments)
   "Common header arguments used by org-babel.
 Note that individual languages may define their own language
 specific header arguments as well.")
@@ -322,66 +324,65 @@ Optionally supply a value for PARAMS which will be merged with
 the header arguments specified at the front of the source code
 block."
   (interactive)
-  (let* ((info (or info (org-babel-get-src-block-info)))
-	 ;; note the `evaluation-confirmed' variable is currently not
-	 ;; used, but could be used later to avoid the need for
-	 ;; chaining confirmations
-	 (evaluation-confirmed (org-babel-confirm-evaluate info))
-         (lang (nth 0 info))
-	 (params (setf (nth 2 info)
-                       (sort (org-babel-merge-params (nth 2 info) params)
-                             (lambda (el1 el2) (string< (symbol-name (car el1))
-                                                   (symbol-name (car el2)))))))
-         (new-hash
-          (if (and (cdr (assoc :cache params))
-                   (string= "yes" (cdr (assoc :cache params))))
-              (org-babel-sha1-hash info)))
-         (old-hash (org-babel-result-hash info))
-         (body (setf (nth 1 info)
-		     (if (and (cdr (assoc :noweb params))
-                              (string= "yes" (cdr (assoc :noweb params))))
-                         (org-babel-expand-noweb-references info)
-		       (nth 1 info))))
-         (result-params (split-string (or (cdr (assoc :results params)) "")))
-         (result-type (cond ((member "output" result-params) 'output)
-			    ((member "value" result-params) 'value)
-			    (t 'value)))
-         (cmd (intern (concat "org-babel-execute:" lang)))
-	 (dir (cdr (assoc :dir params)))
-	 (default-directory
-	   (or (and dir (file-name-as-directory dir)) default-directory))
-	 (org-babel-call-process-region-original
-	  (if (boundp 'org-babel-call-process-region-original) org-babel-call-process-region-original
-	    (symbol-function 'call-process-region)))
-	 (indent (car (last info)))
-         result)
-    (unwind-protect
-        (flet ((call-process-region (&rest args)
-                 (apply 'org-babel-tramp-handle-call-process-region args)))
-          (unless (fboundp cmd)
-            (error "No org-babel-execute function for %s!" lang))
-          (if (and (not arg) new-hash (equal new-hash old-hash))
-              (save-excursion ;; return cached result
-                (goto-char (org-babel-where-is-src-block-result nil info))
-                (end-of-line 1) (forward-char 1)
-                (setq result (org-babel-read-result))
-                (message (replace-regexp-in-string "%" "%%"
-                                                   (format "%S" result))) result)
-            (message "executing %s code block%s..."
-		     (capitalize lang)
-		     (if (nth 4 info) (format " (%s)" (nth 4 info)) ""))
-	    (setq result (funcall cmd body params))
-            (if (eq result-type 'value)
-                (setq result (if (and (or (member "vector" result-params)
-                                          (member "table" result-params))
-                                      (not (listp result)))
-                                 (list (list result))
-                               result)))
-            (org-babel-insert-result
-	     result result-params info new-hash indent lang)
-            (run-hooks 'org-babel-after-execute-hook)
-            result))
-      (setq call-process-region 'org-babel-call-process-region-original))))
+  (let ((info (or info (org-babel-get-src-block-info))))
+    (when (org-babel-confirm-evaluate info)
+      (let* ((lang (nth 0 info))
+	     (params (setf
+		      (nth 2 info)
+		      (sort (org-babel-merge-params (nth 2 info) params)
+			    (lambda (el1 el2) (string< (symbol-name (car el1))
+						  (symbol-name (car el2)))))))
+	     (new-hash
+	      (if (and (cdr (assoc :cache params))
+		       (string= "yes" (cdr (assoc :cache params))))
+		  (org-babel-sha1-hash info)))
+	     (old-hash (org-babel-result-hash info))
+	     (body (setf (nth 1 info)
+			 (if (and (cdr (assoc :noweb params))
+				  (string= "yes" (cdr (assoc :noweb params))))
+			     (org-babel-expand-noweb-references info)
+			   (nth 1 info))))
+	     (result-params (split-string (or (cdr (assoc :results params)) "")))
+	     (result-type (cond ((member "output" result-params) 'output)
+				((member "value" result-params) 'value)
+				(t 'value)))
+	     (cmd (intern (concat "org-babel-execute:" lang)))
+	     (dir (cdr (assoc :dir params)))
+	     (default-directory
+	       (or (and dir (file-name-as-directory dir)) default-directory))
+	     (org-babel-call-process-region-original
+	      (if (boundp 'org-babel-call-process-region-original)
+		  org-babel-call-process-region-original
+		(symbol-function 'call-process-region)))
+	     (indent (car (last info)))
+	     result)
+	(unwind-protect
+	    (flet ((call-process-region (&rest args)
+		    (apply 'org-babel-tramp-handle-call-process-region args)))
+	      (unless (fboundp cmd)
+		(error "No org-babel-execute function for %s!" lang))
+	      (if (and (not arg) new-hash (equal new-hash old-hash))
+		  (save-excursion ;; return cached result
+		    (goto-char (org-babel-where-is-src-block-result nil info))
+		    (end-of-line 1) (forward-char 1)
+		    (setq result (org-babel-read-result))
+		    (message (replace-regexp-in-string
+			      "%" "%%" (format "%S" result))) result)
+		(message "executing %s code block%s..."
+			 (capitalize lang)
+			 (if (nth 4 info) (format " (%s)" (nth 4 info)) ""))
+		(setq result (funcall cmd body params))
+		(if (eq result-type 'value)
+		    (setq result (if (and (or (member "vector" result-params)
+					      (member "table" result-params))
+					  (not (listp result)))
+				     (list (list result))
+				   result)))
+		(org-babel-insert-result
+		 result result-params info new-hash indent lang)
+		(run-hooks 'org-babel-after-execute-hook)
+		result))
+	  (setq call-process-region 'org-babel-call-process-region-original))))))
 
 (defun org-babel-expand-body:generic (body params &optional processed-params)
   "Expand BODY with PARAMS.
