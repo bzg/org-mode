@@ -1674,7 +1674,7 @@ of `org-babel-temporary-directory'."
   (let ((temporary-file-directory (expand-file-name
 				   org-babel-temporary-directory
 				   temporary-file-directory)))
-    (make-temp-file prefix suffix)))
+    (make-temp-file prefix nil suffix)))
 
 (defun org-babel-remove-temporary-directory ()
   "Remove `org-babel-temporary-directory' on Emacs shutdown."

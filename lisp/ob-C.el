@@ -84,10 +84,11 @@ header arguments (calls `org-babel-C-expand')."
   "This function should only be called by `org-babel-execute:C'
 or `org-babel-execute:c++'."
   (let* ((processed-params (org-babel-process-params params))
-         (tmp-src-file (org-babel-temp-file "C-src-" nil
-                                       (cond
-					((equal org-babel-c-variant 'c) ".c")
-					((equal org-babel-c-variant 'cpp) ".cpp"))))
+         (tmp-src-file (org-babel-temp-file
+			"C-src-"
+			(cond
+			 ((equal org-babel-c-variant 'c) ".c")
+			 ((equal org-babel-c-variant 'cpp) ".cpp"))))
          (tmp-bin-file (org-babel-temp-file "C-bin-"))
          (tmp-out-file (org-babel-temp-file "C-out-"))
          (cmdline (cdr (assoc :cmdline params)))
