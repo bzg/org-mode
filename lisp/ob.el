@@ -43,9 +43,12 @@
 (declare-function tramp-file-name-host "tramp" (vec))
 (declare-function org-icompleting-read "org" (&rest args))
 (declare-function org-edit-src-code "org-src" 
-                  (&optional context code edit-buffer-name))
+                  (&optional context code edit-buffer-name quietp))
+(declare-function org-edit-src-exit "org-src"  (&optional context))
 (declare-function org-open-at-point "org" (&optional in-emacs reference-buffer))
 (declare-function org-save-outline-visibility "org" (use-markers &rest body))
+(declare-function org-outline-overlay-data "org" (&optional use-markers))
+(declare-function org-set-outline-overlay-data "org" (data))
 (declare-function org-narrow-to-subtree "org" ())
 (declare-function org-entry-get "org" (pom property &optional inherit literal-nil))
 (declare-function org-make-options-regexp "org" (kwds &optional extra))

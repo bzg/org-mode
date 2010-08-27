@@ -127,7 +127,7 @@ Extracted from `org-export-as-pdf' in org-latex.el."
          (pdffile (concat base ".pdf"))
          (cmds org-latex-to-pdf-process)
          (outbuf (get-buffer-create "*Org PDF LaTeX Output*"))
-         cmd)
+         output-dir cmd)
     (with-current-buffer outbuf (erase-buffer))
     (message (concat "Processing LaTeX file " file "..."))
     (setq output-dir (file-name-directory file))
