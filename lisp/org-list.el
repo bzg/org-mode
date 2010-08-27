@@ -1513,7 +1513,9 @@ The item must be empty."
 (defun org-get-bullet ()
   "Return the bullet of the item at point.
 Assume cursor is at an item."
-  (and (looking-at "[ \t]*\\(\\S-+\\)") (match-string 1)))
+  (save-excursion
+    (beginning-of-line)
+    (and (looking-at "[ \t]*\\(\\S-+\\)") (match-string 1))))
 
 (defun org-list-bullet-string (bullet)
   "Return BULLET with the correct number of whitespaces.
