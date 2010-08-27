@@ -14035,7 +14035,7 @@ only headings."
 	  (when (org-on-heading-p)
 	    (move-marker (make-marker) (point))))))))
 
-(defun org-find-exact-headling-in-buffer (heading &optional buffer pos-only)
+(defun org-find-exact-headline-in-buffer (heading &optional buffer pos-only)
   "Find node HEADING in BUFFER.
 Return a marker to the heading if it was found, or nil if not.
 If POS-ONLY is set, return just the position instead of a marker.
@@ -14066,7 +14066,7 @@ When the target headline is found, return a marker to this location."
         (message "trying %s" file)
         (setq visiting (org-find-base-buffer-visiting file))
         (setq buffer (or visiting (find-file-noselect file)))
-        (setq m (org-find-exact-headling-in-buffer
+        (setq m (org-find-exact-headline-in-buffer
                  heading buffer))
         (when (and (not m) (not visiting)) (kill-buffer buffer))
         (and m (throw 'found m))))))
