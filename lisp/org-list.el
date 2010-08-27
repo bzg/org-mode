@@ -525,21 +525,22 @@ List ending is determined by the indentation of text. See
       (beginning-of-line)
       (and beg-item
 	   (catch 'exit
+	     (skip-chars-forward " \t")
 	     (while t
 	       (let ((ind (org-get-indentation)))
 		 (cond
 		  ((or (>= (point) limit)
-		       (looking-at "^[ \t]*:END:"))
+		       (looking-at ":END:"))
 		   (throw 'exit (point)))
-		  ((looking-at "^[ \t]*$")
+		  ((= (point) (point-at-eol))
 		   (skip-chars-forward " \r\t\n")
 		   (beginning-of-line))
-		  ((looking-at org-item-beginning-re)
+		  ((org-at-item-p)
 		   (setq ind-ref (min ind ind-ref))
 		   (forward-line 1))
 		  ((<= ind ind-ref)
 		   (throw 'exit (point-at-bol)))
-		  ((looking-at "^[ \t]*#\\+begin_")
+		  ((looking-at "#\\+begin_")
 		   (re-search-forward "[ \t]*#\\+end_")
 		   (forward-line 1))
 		  (t (forward-line 1))))))))))
@@ -889,8 +890,10 @@ A checkbox is blocked if all of the following conditions are fulfilled:
     (when bottom
       (save-excursion
 	(goto-char bottom)
-	(skip-chars-backward " \r\t\n")
-	(1+ (point-at-eol))))))
+	(if (eobp)
+	    (point)
+	  (skip-chars-backward " \r\t\n")
+	  (1+ (point-at-eol)))))))
 
 (defun org-beginning-of-item ()
   "Go to the beginning of the current hand-formatted item.
