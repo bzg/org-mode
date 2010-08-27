@@ -1971,10 +1971,22 @@ the currently selected interval size."
     (when block
       (setq cc (org-clock-special-range block nil t)
 	    ts (car cc) te (nth 1 cc) range-text (nth 2 cc)))
-    (if ts (setq ts (org-float-time
-		     (apply 'encode-time (org-parse-time-string ts)))))
-    (if te (setq te (org-float-time
-		     (apply 'encode-time (org-parse-time-string te)))))
+    (cond
+     ((numberp ts)
+      ;; If ts is a number, it's an absolute day number from org-agenda.
+      (destructuring-bind (month day year) (calendar-gregorian-from-absolute ts)
+	(setq ts (org-float-time (encode-time 0 0 0 day month year)))))
+     (ts
+      (setq ts (org-float-time
+		(apply 'encode-time (org-parse-time-string ts))))))
+    (cond
+     ((numberp te)
+      ;; Likewise for te.
+      (destructuring-bind (month day year) (calendar-gregorian-from-absolute te)
+	(setq te (org-float-time (encode-time 0 0 0 day month year)))))
+     (te
+      (setq te (org-float-time
+		(apply 'encode-time (org-parse-time-string te))))))
     (setq p1 (plist-put p1 :header ""))
     (setq p1 (plist-put p1 :step nil))
     (setq p1 (plist-put p1 :block nil))
