@@ -1694,7 +1694,7 @@ of `org-babel-temporary-directory'."
 	    ;; but more efficient
 	    (if (eq t (car (file-attributes file)))
 		(delete-directory file)
-	      (delete-file file nil)))
+	      (delete-file file)))
 	  ;; We do not want to delete "." and "..".
 	  (directory-files org-babel-temporary-directory 'full
 			   "^\\([^.]\\|\\.\\([^.]\\|\\..\\)\\).*"))
