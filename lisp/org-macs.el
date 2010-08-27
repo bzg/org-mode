@@ -290,6 +290,25 @@ This is in contrast to merely setting it to 0."
 					(match-beginning 0) string)))
   (replace-match newtext fixedcase literal string))
 
+(defmacro org-save-outline-visibility (use-markers &rest body)
+  "Save and restore outline visibility around BODY.
+If USE-MARKERS is non-nil, use markers for the positions.
+This means that the buffer may change while running BODY,
+but it also means that the buffer should stay alive
+during the operation, because otherwise all these markers will
+point nowhere."
+  (declare (indent 1))
+  `(let ((data (org-outline-overlay-data ,use-markers)))
+     (unwind-protect
+	 (progn
+	   ,@body
+	   (org-set-outline-overlay-data data))
+       (when ,use-markers
+	 (mapc (lambda (c)
+		 (and (markerp (car c)) (move-marker (car c) nil))
+		 (and (markerp (cdr c)) (move-marker (cdr c) nil)))
+	       data)))))
+
 (defmacro org-with-limited-levels (&rest body)
   "Execute BODY with limited number of outline levels."
   `(let* ((outline-regexp (org-get-limited-outline-regexp)))
