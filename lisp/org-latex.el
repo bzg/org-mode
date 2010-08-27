@@ -952,28 +952,13 @@ Return a list reflecting the document structure."
 (defun org-export-latex-parse-subcontent (level odd)
   "Extract the subcontent of a section at LEVEL.
 If ODD Is non-nil, assume subcontent only contains odd sections."
-
-  (let (nstars new-level)
-    ;; In the search, we should not assume there will be exactly
-    ;; LEVEL+1 stars in the next heading, as there may be more than
-    ;; that number of stars.  hence the regexp should be \\*{N,}
-    ;; rather than just \\*{N} (i.e. no upper bound, but N is minimum
-    ;; number of stars to expect.)
-    ;; We then have to check how many stars were found, rather than
-    ;; assuming there were exactly N.
-    (when (org-re-search-forward-unprotected
-	   (concat "^\\(\\(?:\\*\\)\\{"
-		   (number-to-string (+ (if odd 4 2) level))
-		   ",\\}\\) \\(.*\\)$")
-	   nil t)
-      (setq nstars (1- (- (match-end 1) (match-beginning 1))))
-      (setq new-level (if odd 
-			  (/ (+ 3 nstars) 2);; not entirely sure why +3!
-			nstars)))
-    (if nstars
-	(org-export-latex-parse-global new-level odd)
-      nil)				; subcontent is nil
-      ))
+  (if (not (org-re-search-forward-unprotected
+	    (concat "^\\(\\(?:\\*\\)\\{"
+		    (number-to-string (+ (if odd 4 2) level))
+		    "\\}\\) \\(.*\\)$")
+	    nil t))
+      nil ; subcontent is nil
+    (org-export-latex-parse-global (+ (if odd 2 1) level) odd)))
 
 ;;; Rendering functions:
 (defun org-export-latex-global (content)
