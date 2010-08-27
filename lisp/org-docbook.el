@@ -1059,7 +1059,10 @@ publishing directory."
 		(setq in-local-list t))
 		;; Continue current list
 	       (starter
-		;; terminate any previous sublist
+		;; terminate any previous sublist but first ensure
+		;; list is not ill-formed
+		(let ((min-ind (apply 'min local-list-indent)))
+		  (when (< ind min-ind) (setq ind min-ind)))
 		(while (< ind (car local-list-indent))
 		  (let ((listtype (car local-list-type)))
 		    (org-export-docbook-close-li listtype)

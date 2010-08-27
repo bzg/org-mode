@@ -1573,7 +1573,10 @@ lang=\"%s\" xml:lang=\"%s\">
 		(setq in-local-list t))
 	       ;; Continue list
 	       (starter
-		;; terminate any previous sublist
+		;; terminate any previous sublist but first ensure
+		;; list is not ill-formed.
+		(let ((min-ind (apply 'min local-list-indent)))
+		  (when (< ind min-ind) (setq ind min-ind)))
 		(while (< ind (car local-list-indent))
 		  (org-close-li (car local-list-type))
 		  (insert (format "</%sl>\n" (car local-list-type)))
