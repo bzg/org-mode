@@ -573,7 +573,10 @@ publishing directory."
   (goto-char (point-min))
   (while (re-search-forward  "\\[@start:[0-9]+\\] ?" nil t)
     (org-if-unprotected
-     (replace-match ""))))
+     (replace-match "")))
+  (remove-text-properties
+   (point-min) (point-max)
+   '(face nil font-lock-fontified nil font-lock-multiline nil line-prefix nil wrap-prefix nil)))
 
 (defun org-html-expand-for-ascii (line)
   "Handle quoted HTML for ASCII export."
