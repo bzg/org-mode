@@ -217,9 +217,7 @@ current code buffer."
 
 (defvar org-babel-R-eoe-indicator "'org_babel_R_eoe'")
 (defvar org-babel-R-eoe-output "[1] \"org_babel_R_eoe\"")
-(defvar org-babel-R-wrapper-method "main <- function ()\n{\n%s\n}
-write.table(main(), file=\"%s\", sep=\"\\t\", na=\"nil\",row.names=%s, col.names=%s, quote=FALSE)")
-(defvar org-babel-R-wrapper-lastvar "write.table(.Last.value, file=\"%s\", sep=\"\\t\", na=\"nil\",row.names=%s, col.names=%s, quote=FALSE)")
+(defvar org-babel-R-write-object-command "{function(object, transfer.file) {invisible(if(inherits(try(write.table(object, file=transfer.file, sep=\"\\t\", na=\"nil\",row.names=%s, col.names=%s, quote=FALSE), silent=TRUE),\"try-error\")) {if(!file.exists(transfer.file)) file.create(transfer.file)})}}(object=%s, transfer.file=\"%s\")")
 
 (defun org-babel-R-evaluate
   (session body result-type column-names-p row-names-p)
@@ -240,12 +238,13 @@ last statement in BODY, as elisp."
     (value
      (let ((tmp-file (org-babel-temp-file "R-results-")))
        (org-babel-eval org-babel-R-command
-		       (format org-babel-R-wrapper-method
-			       body tmp-file
+		       (format org-babel-R-write-object-command
 			       (if row-names-p "TRUE" "FALSE")
 			       (if column-names-p
 				   (if row-names-p "NA" "TRUE")
-				 "FALSE")))
+				 "FALSE")
+			       (format "{function ()\n{\n%s\n}}()" body)
+			       tmp-file))
        (org-babel-R-process-value-result
 	(org-babel-import-elisp-from-file
 	 (org-babel-maybe-remote-file tmp-file) '(16)) column-names-p)))
@@ -267,12 +266,12 @@ last statement in BODY, as elisp."
      (let ((tmp-file (org-babel-temp-file "R-")))
        (org-babel-comint-eval-invisibly-and-wait-for-file
 	session (org-babel-maybe-remote-file tmp-file)
-		   (format org-babel-R-wrapper-lastvar
-			   tmp-file
-			   (if row-names-p "TRUE" "FALSE")
-			   (if column-names-p
-			       (if row-names-p "NA" "TRUE")
-			     "FALSE"))
+	(format org-babel-R-write-object-command
+		(if row-names-p "TRUE" "FALSE")
+		(if column-names-p
+		    (if row-names-p "NA" "TRUE")
+		  "FALSE")
+		".Last.value" tmp-file))
        (org-babel-R-process-value-result
 	(org-babel-import-elisp-from-file
 	 (org-babel-maybe-remote-file tmp-file) '(16))  column-names-p)))
