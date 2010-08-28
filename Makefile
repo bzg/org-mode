@@ -150,7 +150,8 @@ LISPF      = 	org.el			\
 		ob-screen.el		\
 		ob-plantuml.el		\
 		ob-org.el		\
-		ob-js.el
+		ob-js.el		\
+		ob-scheme.el
 
 LISPFILES0  = $(LISPF:%=lisp/%)
 LISPFILES   = $(LISPFILES0) lisp/org-install.el
