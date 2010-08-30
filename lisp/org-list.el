@@ -1932,7 +1932,7 @@ beginning of the item."
 (defun org-sort-list (&optional with-case sorting-type getkey-func compare-func)
   "Sort plain list items.
 The cursor may be at any item of the list that should be sorted.
-Sublists are not sorted. Checkboxes, if any, are ignored.
+Sublists are not sorted.  Checkboxes, if any, are ignored.
 
 Sorting can be alphabetically, numerically, by date/time as given by
 a time stamp, by a property or by priority.
