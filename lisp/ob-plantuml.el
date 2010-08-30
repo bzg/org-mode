@@ -59,7 +59,10 @@ This function is called by `org-babel-execute-src-block'."
 	 (in-file (org-babel-temp-file "plantuml-"))
 	 (cmd (concat "java -jar "
 		      (shell-quote-argument org-plantuml-jar-path)
-		      " -p " cmdline " < " in-file " > " out-file)))
+		      " -p " cmdline " < "
+		      (shell-quote-argument in-file)
+		      " > "
+		      (shell-quote-argument out-file))))
     (unless (file-exists-p org-plantuml-jar-path)
       (error "Could not find plantuml.jar at %s" org-plantuml-jar-path))
     (with-temp-file in-file (insert (concat "@startuml\n" body "\n@enduml")))
