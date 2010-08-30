@@ -556,8 +556,10 @@ uses PRE-MOVE before search. Return nil if no item was found."
 		 (= (org-get-indentation) ind))
 	(point-at-bol)))))
 
-(defun org-list-separating-blank-lines-number (top bottom)
+(defun org-list-separating-blank-lines-number (pos top bottom)
   "Return number of blank lines that should separate items in list.
+
+POS is the position of point to be considered.
 
 TOP and BOTTOM are respectively position of list beginning and
 list ending.
@@ -586,9 +588,9 @@ some heuristics to guess the result."
 	     ((org-get-previous-item (point) top)
 	      (org-back-over-empty-lines))
 	     ;; User inserted blank lines, trust him
-	     ((and (> true-pos (org-end-of-item-before-blank bottom))
+	     ((and (> pos (org-end-of-item-before-blank bottom))
 		   (> (save-excursion
-			(goto-char true-pos)
+			(goto-char pos)
 			(skip-chars-backward " \t")
 			(setq usr-blank (org-back-over-empty-lines))) 0))
 	      usr-blank)
@@ -634,7 +636,8 @@ function ends."
 			 ;; Otherwise, text starts after bullet.
 			 (org-at-item-p))
 		     (<= true-pos (match-end 0))))
-	 (blank-lines-nb (org-list-separating-blank-lines-number top bottom))
+	 (blank-lines-nb (org-list-separating-blank-lines-number
+			  true-pos top bottom))
 	 (insert-fun
 	  (lambda (text)
 	    ;; insert bullet above item in order to avoid bothering
