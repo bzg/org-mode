@@ -1838,7 +1838,9 @@ can work correctly."
     (if (and (not (= (char-after (match-beginning 3))
 		     (char-after (match-beginning 4))))
 	     (save-excursion (goto-char (match-beginning 0))
-			     (save-match-data (not (org-at-table-p)))))
+			     (save-match-data
+			       (and (not (org-at-table-p))
+				    (not (org-at-heading-p))))))
 	(org-if-unprotected
 	 (subst-char-in-region (match-beginning 0) (match-end 0)
 			       ?\n ?\  t)
