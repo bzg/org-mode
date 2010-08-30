@@ -136,6 +136,23 @@ statement (not large blocks of code)."
                                 "comint-highlight-prompt"))))
       (accept-process-output (get-buffer-process buffer)))))
 
+(defun org-babel-comint-eval-invisibly-and-wait-for-file
+  (buffer file string &optional period)
+  "Evaluate STRING in BUFFER invisibly.
+Don't return until FILE exists. Code in STRING must ensure that
+FILE exists at end of evaluation."
+  (unless (org-babel-comint-buffer-livep buffer)
+    (error "buffer %s doesn't exist or has no process" buffer))
+  (if (file-exists-p file) (delete-file file))
+  (process-send-string
+   (get-buffer-process buffer)
+   (if (string-match "\n$" string) string (concat string "\n")))
+  ;; From Tramp 2.1.19 the following cache flush is not necessary
+  (if (file-remote-p default-directory)
+      (with-parsed-tramp-file-name default-directory nil
+	(tramp-flush-directory-property v "")))
+  (while (not (file-exists-p file)) (sit-for (or period 0.25))))
+
 (provide 'ob-comint)
 
 ;; arch-tag: 9adddce6-0864-4be3-b0b5-6c5157dc7889

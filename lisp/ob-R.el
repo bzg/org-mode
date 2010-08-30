@@ -259,21 +259,20 @@ string. If RESULT-TYPE equals 'value then return the value of the
 last statement in BODY, as elisp."
   (case result-type
     (value
-     (let ((tmp-file (org-babel-temp-file "R-"))
-	   broke)
-       (org-babel-comint-with-output (session org-babel-R-eoe-output)
-	 (insert (mapconcat
-		  #'org-babel-chomp
-		  (list
-		   body
+     (with-temp-buffer
+       (insert (org-babel-chomp body))
+       (let ((ess-local-process-name
+	      (process-name (get-buffer-process session))))
+	 (ess-eval-buffer nil)))
+     (let ((tmp-file (org-babel-temp-file "R-")))
+       (org-babel-comint-eval-invisibly-and-wait-for-file
+	session (org-babel-maybe-remote-file tmp-file)
 		   (format org-babel-R-wrapper-lastvar
 			   tmp-file
 			   (if row-names-p "TRUE" "FALSE")
 			   (if column-names-p
 			       (if row-names-p "NA" "TRUE")
 			     "FALSE"))
-		   org-babel-R-eoe-indicator) "\n"))
-	 (inferior-ess-send-input))
        (org-babel-R-process-value-result
 	(org-babel-import-elisp-from-file
 	 (org-babel-maybe-remote-file tmp-file) '(16))  column-names-p)))
