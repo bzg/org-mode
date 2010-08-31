@@ -11176,10 +11176,10 @@ Include the code block in the tangled output to file @samp{filename}.
 @kindex  C-c C-v t
 @subsubheading Functions
 @table @code
-@item org-babel-tangle @kbd{C-c C-v t}
-Tangle the current file.
+@item org-babel-tangle 
+Tangle the current file.  Bound to @kbd{C-c C-v t}.
 @item org-babel-tangle-file
-Choose a file to tangle.
+Choose a file to tangle.   Bound to @kbd{C-c C-v f}.
 @end table
 
 @subsubheading Hooks
