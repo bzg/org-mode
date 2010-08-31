@@ -268,7 +268,7 @@ this heading."
 	      (progn
 		(if (re-search-forward
 		     (concat "^" (regexp-quote heading)
-			     (org-re "[ \t]*\\(:[[:alnum:]_@:]+:\\)?[ \t]*\\($\\|\r\\)"))
+			     (org-re "[ \t]*\\(:[[:alnum:]_@#%:]+:\\)?[ \t]*\\($\\|\r\\)"))
 		     nil t)
 		    (goto-char (match-end 0))
 		  ;; Heading not found, just insert it at the end

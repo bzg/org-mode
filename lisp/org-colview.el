@@ -519,7 +519,7 @@ Where possible, use the standard interface for changing this line."
 	  (txt (match-string 3))
 	  (post "")
 	  txt2)
-      (if (string-match (org-re "[ \t]+:[[:alnum:]:_@]+:[ \t]*$") txt)
+      (if (string-match (org-re "[ \t]+:[[:alnum:]:_@#%]+:[ \t]*$") txt)
 	  (setq post (match-string 0 txt)
 		txt (substring txt 0 (match-beginning 0))))
       (setq txt2 (read-string "Edit: " txt))

@@ -44,6 +44,11 @@ EMACS = emacs -batch -l ~/.emacs
 LATEX = latex
 DIARY = $($(EMACS) -eval "diary-file")
 
+# Number of weeks to be printed. Should be a multiple of 4, because 4
+# of them are merged on one page. Can be set when invoking the script
+# as follows: make NUMBER_OF_WEEKS=8 -f org2hpda
+NUMBER_OF_WEEKS = 4 
+
 hipsterFiles =  weekCalendar.pdf yearCalendar.pdf monthCalendar3.pdf monthCalendar2.pdf monthCalendar1.pdf
 pocketModFiles =  weekCalendar.pdf yearCalendar-rotated.pdf \
 	monthCalendar3-rotated.pdf monthCalendar2-rotated.pdf monthCalendar1-rotated.pdf
@@ -73,7 +78,7 @@ all: pocketMod.pdf hipsterPDA.pdf
 	done
 
 weekCalendar.tex: $(DIARY)
-	$(EMACS) -eval "(progn (calendar) (cal-tex-cursor-week-iso 4) (with-current-buffer cal-tex-buffer (write-file \"$@\")))"
+	$(EMACS) -eval "(progn (calendar) (cal-tex-cursor-week-iso $(NUMBER_OF_WEEKS)) (with-current-buffer cal-tex-buffer (write-file \"$@\")))"
 
 monthCalendar1.tex: $(DIARY)
 	 $(EMACS) -eval "(progn (calendar) (cal-tex-cursor-month-landscape 1) (with-current-buffer cal-tex-buffer (write-file \"$@\")))"

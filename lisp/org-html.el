@@ -1095,7 +1095,7 @@ lang=\"%s\" xml:lang=\"%s\">
 					 (org-search-todo-below
 					  line lines level))))
 			  (if (string-match
-			       (org-re "[ \t]+:\\([[:alnum:]_@:]+\\):[ \t]*$") txt)
+			       (org-re "[ \t]+:\\([[:alnum:]_@#%:]+\\):[ \t]*$") txt)
 			      (setq txt (replace-match  "&nbsp;&nbsp;&nbsp;<span class=\"tag\"> \\1</span>" t nil txt)))
 			  (if (string-match quote-re0 txt)
 			      (setq txt (replace-match "" t t txt)))
@@ -2164,7 +2164,7 @@ that uses these same face definitions."
   "Prepare STRING for HTML export.  Apply all active conversions.
 If there are links in the string, don't modify these."
   (let* ((re (concat org-bracket-link-regexp "\\|"
-		     (org-re "[ \t]+\\(:[[:alnum:]_@:]+:\\)[ \t]*$")))
+		     (org-re "[ \t]+\\(:[[:alnum:]_@#%:]+:\\)[ \t]*$")))
 	 m s l res)
     (if (string-match "^[ \t]*\\+-[-+]*\\+[ \t]*$" string)
 	string
@@ -2328,7 +2328,7 @@ When TITLE is nil, just close all open levels."
     (when title
       ;; If title is nil, this means this function is called to close
       ;; all levels, so the rest is done only if title is given
-	(when (string-match (org-re "\\(:[[:alnum:]_@:]+:\\)[ \t]*$") title)
+	(when (string-match (org-re "\\(:[[:alnum:]_@#%:]+:\\)[ \t]*$") title)
 	  (setq title (replace-match
 		       (if org-export-with-tags
 			   (save-match-data

@@ -1205,7 +1205,7 @@ The template may still contain \"%?\" for cursor positioning."
 			 'org-tags-history)))
 	      (setq ins (mapconcat 'identity
 				   (org-split-string
-				    ins (org-re "[^[:alnum:]_@]+"))
+				    ins (org-re "[^[:alnum:]_@#%]+"))
 				       ":"))
 	      (when (string-match "\\S-" ins)
 		(or (equal (char-before) ?:) (insert ":"))
