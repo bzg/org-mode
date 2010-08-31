@@ -3176,7 +3176,6 @@ will be appended."
     (""     "float"     nil)
     (""     "wrapfig"   nil)
     (""     "soul"      t)
-    (""     "t1enc"     t)
     (""     "textcomp"  t)
     (""     "marvosym"  t)
     (""     "wasysym"   t)
@@ -3191,7 +3190,7 @@ with another package you are using.
 The packages in this list are needed by one part or another of Org-mode
 to function properly.
 
-- inputenc, fontenc, t1enc: for basic font and character selection
+- inputenc, fontenc:  for basic font and character selection
 - textcomp, marvosymb, wasysym, latexsym, amssym: for various symbols used
   for interpreting the entities in `org-entities'.  You can skip some of these
   packages if you don't use any of the symbols in it.
