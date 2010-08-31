@@ -18528,40 +18528,53 @@ which make use of the date at the cursor."
     ;; Find the previous relevant line
     (beginning-of-line 1)
     (cond
+     ;; Comments
      ((looking-at "#") (setq column 0))
+     ;; Headings
      ((looking-at "\\*+ ") (setq column 0))
+     ;; Drawers
      ((and (looking-at "[ \t]*:END:")
 	   (save-excursion (re-search-backward org-drawer-regexp nil t)))
       (save-excursion
 	(goto-char (1- (match-beginning 1)))
 	(setq column (current-column))))
-     ((and (looking-at "[ \t]+#\\+end_\\([a-z]+\\)")
+     ;; Special blocks
+     ((and (looking-at "[ \t]*#\\+end_\\([a-z]+\\)")
 	   (save-excursion
 	     (re-search-backward
 	      (concat "^[ \t]*#\\+begin_" (downcase (match-string 1))) nil t)))
       (setq column (org-get-indentation (match-string 0))))
-     ;; Are we in a list ?
+     ((and (not (looking-at "[ \t]*#\\+begin_"))
+	   (org-in-regexps-block-p "^[ \t]*#\\+begin_" "[ \t]*#\\+end_"))
+      (save-excursion
+	(re-search-backward "^[ \t]*#\\+begin_\\([a-z]+\\)" nil t))
+      (setq column
+	    (if (equal (downcase (match-string 1)) "src")
+		;; src blocks: let `org-edit-src-exit' handle them
+		(org-get-indentation)
+	      (org-get-indentation (match-string 0)))))
+     ;; Lists
      ((org-in-item-p)
-	(org-beginning-of-item)
-	(looking-at "[ \t]*\\(\\S-+\\)[ \t]*\\(\\[[- X]\\][ \t]*\\|.*? :: \\)?")
-	(setq bpos (match-beginning 1) tpos (match-end 0)
-	      bcol (progn (goto-char bpos) (current-column))
-	      tcol (progn (goto-char tpos) (current-column))
-	      bullet (match-string 1)
-	      bullet-type (if (string-match "[0-9]" bullet) "n" bullet))
-	(if (> tcol (+ bcol org-description-max-indent))
-	    (setq tcol (+ bcol 5)))
-	(if (not itemp)
-	    (setq column tcol)
-	  (beginning-of-line 1)
-	  (goto-char pos)
-	  (if (looking-at "\\S-")
-	      (progn
-		(looking-at "[ \t]*\\(\\S-+\\)[ \t]*")
-		(setq bullet (match-string 1)
-		      btype (if (string-match "[0-9]" bullet) "n" bullet))
-		(setq column (if (equal btype bullet-type) bcol tcol)))
-	    (setq column (org-get-indentation)))))
+      (org-beginning-of-item)
+      (looking-at "[ \t]*\\(\\S-+\\)[ \t]*\\(\\[[- X]\\][ \t]*\\|.*? :: \\)?")
+      (setq bpos (match-beginning 1) tpos (match-end 0)
+	    bcol (progn (goto-char bpos) (current-column))
+	    tcol (progn (goto-char tpos) (current-column))
+	    bullet (match-string 1)
+	    bullet-type (if (string-match "[0-9]" bullet) "n" bullet))
+      (if (> tcol (+ bcol org-description-max-indent))
+	  (setq tcol (+ bcol 5)))
+      (if (not itemp)
+	  (setq column tcol)
+	(beginning-of-line 1)
+	(goto-char pos)
+	(if (looking-at "\\S-")
+	    (progn
+	      (looking-at "[ \t]*\\(\\S-+\\)[ \t]*")
+	      (setq bullet (match-string 1)
+		    btype (if (string-match "[0-9]" bullet) "n" bullet))
+	      (setq column (if (equal btype bullet-type) bcol tcol)))
+	  (setq column (org-get-indentation)))))
      ;; This line has nothing special, look upside to get a clue about
      ;; what to do.
      (t
