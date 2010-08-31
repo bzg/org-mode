@@ -35,13 +35,24 @@
 
 ;; - a working scheme implementation
 ;;   (e.g. guile http://www.gnu.org/software/guile/guile.html)
+;;   
+;; - for session based evaluation cmuscheme.el is required which is
+;;   included in Emacs
 
 ;;; Code:
 (require 'ob)
+(require 'ob-ref)
+(require 'ob-comint)
 (require 'ob-eval)
+(eval-when-compile (require 'cl))
+
+(declare-function run-scheme "ext:cmuscheme" (cmd))
 
 (defvar org-babel-default-header-args:scheme '()
   "Default header arguments for scheme code blocks.")
+
+(defvar org-babel-scheme-eoe "org-babel-scheme-eoe"
+  "String to indicate that evaluation has completed.")
 
 (defcustom org-babel-scheme-cmd "guile"
   "Name of command used to evaluate scheme blocks."
@@ -59,17 +70,25 @@
                 ")\n" body ")")
       body)))
 
+(defvar scheme-program-name)
 (defun org-babel-execute:scheme (body params)
   "Execute a block of Scheme code with org-babel.
 This function is called by `org-babel-execute-src-block'"
   (let* ((processed-params (org-babel-process-params params))
-	 (session (not (string= (nth 0 processed-params) "none")))
          (result-type (nth 3 processed-params))
+	 (org-babel-scheme-cmd (or (cdr (assoc :scheme params)) org-babel-scheme-cmd))
          (full-body (org-babel-expand-body:scheme body params processed-params)))
     (read
-     (if session
+     (if (not (string= (nth 0 processed-params) "none"))
          ;; session evaluation
-         (error "Scheme sessions are not yet supported.")
+	 (let ((session (org-babel-prep-session:scheme
+			 (nth 0 processed-params) params)))
+	   (org-babel-comint-with-output
+	       (session (format "%S" org-babel-scheme-eoe) t body)
+	     (mapc
+	      (lambda (line)
+		(insert (org-babel-chomp line)) (comint-send-input nil t))
+	      (list body (format "%S" org-babel-scheme-eoe)))))
        ;; external evaluation
        (let ((script-file (org-babel-temp-file "lisp-script-")))
          (with-temp-file script-file
@@ -83,12 +102,34 @@ This function is called by `org-babel-execute-src-block'"
 
 (defun org-babel-prep-session:scheme (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."
-  (error "not yet implemented"))
+  (let* ((session (org-babel-scheme-initiate-session session))
+	 (vars (org-babel-ref-variables params))
+	 (var-lines
+	  (mapcar
+	   (lambda (var) (format "%S" (print `(define ,(car var) ',(cdr var)))))
+	   vars)))
+    (when session
+      (org-babel-comint-in-buffer session
+	(sit-for .5) (goto-char (point-max))
+	(mapc (lambda (var)
+		(insert var) (comint-send-input nil t)
+		(org-babel-comint-wait-for-output session)
+		(sit-for .1) (goto-char (point-max))) var-lines)))
+    session))
 
 (defun org-babel-scheme-initiate-session (&optional session)
   "If there is not a current inferior-process-buffer in SESSION
 then create.  Return the initialized session."
-  (error "Scheme sessions are not yet supported."))
+  (require 'cmuscheme)
+  (unless (string= session "none")
+    (let ((session-buffer (save-window-excursion
+			    (run-scheme org-babel-scheme-cmd)
+			    (rename-buffer session)
+			    (current-buffer))))
+      (if (org-babel-comint-buffer-livep session-buffer)
+	  (progn (sit-for .25) session-buffer)
+        (sit-for .5)
+        (org-babel-scheme-initiate-session session)))))
 
 (provide 'ob-scheme)
 

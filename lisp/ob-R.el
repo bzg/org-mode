@@ -37,6 +37,7 @@
 (declare-function R "ext:essd-r" (&optional start-args))
 (declare-function inferior-ess-send-input "ext:ess-inf" ())
 (declare-function ess-make-buffer-current "ext:ess-inf" ())
+(declare-function ess-eval-buffer "ext:ess-inf" (vis))
 
 (defconst org-babel-header-arg-names:R
   '(width height bg units pointsize antialias quality compression
@@ -217,9 +218,7 @@ current code buffer."
 
 (defvar org-babel-R-eoe-indicator "'org_babel_R_eoe'")
 (defvar org-babel-R-eoe-output "[1] \"org_babel_R_eoe\"")
-(defvar org-babel-R-wrapper-method "main <- function ()\n{\n%s\n}
-write.table(main(), file=\"%s\", sep=\"\\t\", na=\"nil\",row.names=%s, col.names=%s, quote=FALSE)")
-(defvar org-babel-R-wrapper-lastvar "write.table(.Last.value, file=\"%s\", sep=\"\\t\", na=\"nil\",row.names=%s, col.names=%s, quote=FALSE)")
+(defvar org-babel-R-write-object-command "{function(object, transfer.file) {invisible(if(inherits(try(write.table(object, file=transfer.file, sep=\"\\t\", na=\"nil\",row.names=%s, col.names=%s, quote=FALSE), silent=TRUE),\"try-error\")) {if(!file.exists(transfer.file)) file.create(transfer.file)})}}(object=%s, transfer.file=\"%s\")")
 
 (defun org-babel-R-evaluate
   (session body result-type column-names-p row-names-p)
@@ -238,17 +237,17 @@ string. If RESULT-TYPE equals 'value then return the value of the
 last statement in BODY, as elisp."
   (case result-type
     (value
-     (let ((tmp-file (org-babel-temp-file "R-results-")))
+     (let ((tmp-file (org-babel-temp-file "R-")))
        (org-babel-eval org-babel-R-command
-		       (format org-babel-R-wrapper-method
-			       body tmp-file
+		       (format org-babel-R-write-object-command
 			       (if row-names-p "TRUE" "FALSE")
 			       (if column-names-p
 				   (if row-names-p "NA" "TRUE")
-				 "FALSE")))
+				 "FALSE")
+			       (format "{function ()\n{\n%s\n}}()" body)
+			       (org-babel-tramp-localname tmp-file)))
        (org-babel-R-process-value-result
-	(org-babel-import-elisp-from-file
-	 (org-babel-maybe-remote-file tmp-file) '(16)) column-names-p)))
+	(org-babel-import-elisp-from-file tmp-file '(16)) column-names-p)))
     (output (org-babel-eval org-babel-R-command body))))
 
 (defun org-babel-R-evaluate-session
@@ -259,24 +258,22 @@ string. If RESULT-TYPE equals 'value then return the value of the
 last statement in BODY, as elisp."
   (case result-type
     (value
-     (let ((tmp-file (org-babel-temp-file "R-"))
-	   broke)
-       (org-babel-comint-with-output (session org-babel-R-eoe-output)
-	 (insert (mapconcat
-		  #'org-babel-chomp
-		  (list
-		   body
-		   (format org-babel-R-wrapper-lastvar
-			   tmp-file
-			   (if row-names-p "TRUE" "FALSE")
-			   (if column-names-p
-			       (if row-names-p "NA" "TRUE")
-			     "FALSE"))
-		   org-babel-R-eoe-indicator) "\n"))
-	 (inferior-ess-send-input))
+     (with-temp-buffer
+       (insert (org-babel-chomp body))
+       (let ((ess-local-process-name
+	      (process-name (get-buffer-process session))))
+	 (ess-eval-buffer nil)))
+     (let ((tmp-file (org-babel-temp-file "R-")))
+       (org-babel-comint-eval-invisibly-and-wait-for-file
+	session tmp-file
+	(format org-babel-R-write-object-command
+		(if row-names-p "TRUE" "FALSE")
+		(if column-names-p
+		    (if row-names-p "NA" "TRUE")
+		  "FALSE")
+		".Last.value" (org-babel-tramp-localname tmp-file)))
        (org-babel-R-process-value-result
-	(org-babel-import-elisp-from-file
-	 (org-babel-maybe-remote-file tmp-file) '(16))  column-names-p)))
+	(org-babel-import-elisp-from-file tmp-file '(16))  column-names-p)))
     (output
      (mapconcat
       #'org-babel-chomp

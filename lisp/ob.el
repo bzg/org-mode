@@ -40,6 +40,7 @@
 (declare-function tramp-dissect-file-name "tramp" (name &optional nodefault))
 (declare-function tramp-file-name-user "tramp" (vec))
 (declare-function tramp-file-name-host "tramp" (vec))
+(declare-function with-parsed-tramp-file-name "tramp" (filename var &rest body))
 (declare-function org-icompleting-read "org" (&rest args))
 (declare-function org-edit-src-code "org-src" 
                   (&optional context code edit-buffer-name quietp))
@@ -1671,6 +1672,14 @@ the remote connection."
         (concat "/" user (when user "@") host ":" file))
     file))
 
+(defun org-babel-tramp-localname (file)
+  "Return the local name component of FILE."
+  (if (file-remote-p file)
+      (let (localname)
+	(with-parsed-tramp-file-name file nil
+	  localname))
+    file))
+
 (defvar org-babel-temporary-directory
   (or (and (boundp 'org-babel-temporary-directory)
 	   org-babel-temporary-directory)
@@ -1684,10 +1693,16 @@ Emacs shutdown.")
 Passes PREFIX and SUFFIX directly to `make-temp-file' with the
 value of `temporary-file-directory' temporarily set to the value
 of `org-babel-temporary-directory'."
-  (let ((temporary-file-directory (expand-file-name
-				   org-babel-temporary-directory
-				   temporary-file-directory)))
-    (make-temp-file prefix nil suffix)))
+  (if (file-remote-p default-directory)
+      (make-temp-file
+       (concat (file-remote-p default-directory)
+	       (expand-file-name 
+		prefix temporary-file-directory)
+	       nil suffix))
+    (let ((temporary-file-directory (expand-file-name
+				     org-babel-temporary-directory
+				     temporary-file-directory)))
+      (make-temp-file prefix nil suffix))))
 
 (defun org-babel-remove-temporary-directory ()
   "Remove `org-babel-temporary-directory' on Emacs shutdown."
