@@ -1863,7 +1863,7 @@ the currently selected interval size."
 	    (when (setq time (get-text-property p :org-clock-minutes))
 	      (save-excursion
 		(beginning-of-line 1)
-		(when (and (looking-at (org-re "\\(\\*+\\)[ \t]+\\(.*?\\)\\([ \t]+:[[:alnum:]_@:]+:\\)?[ \t]*$"))
+		(when (and (looking-at (org-re "\\(\\*+\\)[ \t]+\\(.*?\\)\\([ \t]+:[[:alnum:]_@#%:]+:\\)?[ \t]*$"))
 			   (setq level (org-reduced-level
 					(- (match-end 1) (match-beginning 1))))
 			   (<= level maxlevel))

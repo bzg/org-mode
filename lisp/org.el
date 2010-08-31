@@ -3088,7 +3088,7 @@ points to a file, `org-agenda-diary-entry' will be used instead."
 
 (defcustom org-format-latex-options
   '(:foreground default :background default :scale 1.0
-    :html-foreground "Black" :html-background "Transparent" 
+    :html-foreground "Black" :html-background "Transparent"
     :html-scale 1.0 :matchers ("begin" "$1" "$" "$$" "\\(" "\\["))
   "Options for creating images from LaTeX fragments.
 This is a property list with the following properties:
@@ -3176,7 +3176,6 @@ will be appended."
     (""     "float"     nil)
     (""     "wrapfig"   nil)
     (""     "soul"      t)
-    (""     "t1enc"     t)
     (""     "textcomp"  t)
     (""     "marvosym"  t)
     (""     "wasysym"   t)
@@ -3191,7 +3190,7 @@ with another package you are using.
 The packages in this list are needed by one part or another of Org-mode
 to function properly.
 
-- inputenc, fontenc, t1enc: for basic font and character selection
+- inputenc, fontenc:  for basic font and character selection
 - textcomp, marvosymb, wasysym, latexsym, amssym: for various symbols used
   for interpreting the entities in `org-entities'.  You can skip some of these
   packages if you don't use any of the symbols in it.
@@ -4377,7 +4376,7 @@ means to push this value onto the list in the variable.")
 	     ((equal e "{") (push '(:startgroup) tgs))
 	     ((equal e "}") (push '(:endgroup) tgs))
 	     ((equal e "\\n") (push '(:newline) tgs))
-	     ((string-match (org-re "^\\([[:alnum:]_@]+\\)(\\(.\\))$") e)
+	     ((string-match (org-re "^\\([[:alnum:]_@#%]+\\)(\\(.\\))$") e)
 	      (push (cons (match-string 1 e)
 			  (string-to-char (match-string 2 e)))
 		    tgs))
@@ -4421,7 +4420,7 @@ means to push this value onto the list in the variable.")
 	    (concat "^\\(\\*+\\)[ \t]+\\(?:\\("
 		    (mapconcat 'regexp-quote org-todo-keywords-1 "\\|")
 		    "\\)\\>\\)?\\(?:[ \t]*\\(\\[#.\\]\\)\\)?[ \t]*\\(.*?\\)"
-		    "\\(?:[ \t]+\\(:[[:alnum:]_@:]+:\\)\\)?[ \t]*$")
+		    "\\(?:[ \t]+\\(:[[:alnum:]_@#%:]+:\\)\\)?[ \t]*$")
 	    org-complex-heading-regexp-format
 	    (concat "^\\(\\*+\\)[ \t]+\\(?:\\("
 		    (mapconcat 'regexp-quote org-todo-keywords-1 "\\|")
@@ -4430,7 +4429,7 @@ means to push this value onto the list in the variable.")
 		    "\\(?:[ \t]*\\(?:\\[[0-9%%/]+\\]\\)\\)?" ;; stats cookie
 		    "[ \t]*\\(%s\\)"
 		    "\\(?:[ \t]*\\(?:\\[[0-9%%/]+\\]\\)\\)?" ;; stats cookie
-		    "\\(?:[ \t]+\\(:[[:alnum:]_@:]+:\\)\\)?[ \t]*$")
+		    "\\(?:[ \t]+\\(:[[:alnum:]_@#%:]+:\\)\\)?[ \t]*$")
 	    org-nl-done-regexp
 	    (concat "\n\\*+[ \t]+"
 		    "\\(?:" (mapconcat 'regexp-quote org-done-keywords "\\|")
@@ -4439,7 +4438,7 @@ means to push this value onto the list in the variable.")
 	    (concat "^\\(\\*+\\)[ \t]+\\(?:\\("
 		    (mapconcat 'regexp-quote org-todo-keywords-1 "\\|")
 		    (org-re
-		     "\\)\\>\\)? *\\(.*?\\([ \t]:[[:alnum:]:_@]+:[ \t]*\\)?$\\)"))
+		     "\\)\\>\\)? *\\(.*?\\([ \t]:[[:alnum:]:_@#%]+:[ \t]*\\)?$\\)"))
 	    org-looking-at-done-regexp
 	    (concat "^" "\\(?:"
 		    (mapconcat 'regexp-quote org-done-keywords "\\|") "\\)"
@@ -5353,7 +5352,7 @@ between words."
 	"\\)\\>")))
 
 (defun org-activate-tags (limit)
-  (if (re-search-forward (org-re "^\\*+.*[ \t]\\(:[[:alnum:]_@:]+:\\)[ \r\n]") limit t)
+  (if (re-search-forward (org-re "^\\*+.*[ \t]\\(:[[:alnum:]_@#%:]+:\\)[ \r\n]") limit t)
       (progn
 	(org-remove-flyspell-overlays-in (match-beginning 1) (match-end 1))
 	(add-text-properties (match-beginning 1) (match-end 1)
@@ -6711,7 +6710,7 @@ This is important for non-interactive uses of the command."
 	      (when hide-previous
 		(show-children)
 		(org-show-entry))
-	      (looking-at ".*?\\([ \t]+\\(:[[:alnum:]_@:]+:\\)\\)?[ \t]*$")
+	      (looking-at ".*?\\([ \t]+\\(:[[:alnum:]_@#%:]+:\\)\\)?[ \t]*$")
 	      (setq tags (and (match-end 2) (match-string 2)))
 	      (and (match-end 1)
 		   (delete-region (match-beginning 1) (match-end 1)))
@@ -6747,7 +6746,7 @@ This is important for non-interactive uses of the command."
     (org-back-to-heading t)
     (if (looking-at
 	 (if no-tags
-	     (org-re "\\*+[ \t]+\\([^\n\r]*?\\)\\([ \t]+:[[:alnum:]:_@]+:[ \t]*\\)?$")
+	     (org-re "\\*+[ \t]+\\([^\n\r]*?\\)\\([ \t]+:[[:alnum:]:_@#%]+:[ \t]*\\)?$")
 	   "\\*+[ \t]+\\([^\r\n]*\\)"))
 	(match-string 1) "")))
 
@@ -8441,7 +8440,7 @@ according to FMT (default from `org-email-link-description-format')."
       ;; We are using a headline, clean up garbage in there.
       (if (string-match org-todo-regexp s)
 	  (setq s (replace-match "" t t s)))
-      (if (string-match (org-re ":[[:alnum:]_@:]+:[ \t]*$") s)
+      (if (string-match (org-re ":[[:alnum:]_@#%:]+:[ \t]*$") s)
 	  (setq s (replace-match "" t t s)))
       (setq s (org-trim s))
       (if (string-match (concat "^\\(" org-quote-string "\\|"
@@ -9057,7 +9056,7 @@ application the system uses for this file type."
 	    (setq type (match-string 1) path (match-string 2))
 	    (throw 'match t)))
 	(save-excursion
-	  (when (org-in-regexp (org-re "\\(:[[:alnum:]_@:]+\\):[ \t]*$"))
+	  (when (org-in-regexp (org-re "\\(:[[:alnum:]_@#%:]+\\):[ \t]*$"))
 	    (setq type "tags"
 		  path (match-string 1))
 	    (while (string-match ":" path)
@@ -9411,7 +9410,7 @@ in all files.  If AVOID-POS is given, ignore matches near that position."
       (when (equal (string-to-char s) ?*)
 	;; Anchor on headlines, post may include tags.
 	(setq pre "^\\*+[ \t]+\\(?:\\sw+\\)?[ \t]*"
-	      post (org-re "[ \t]*\\(?:[ \t]+:[[:alnum:]_@:+]:[ \t]*\\)?$")
+	      post (org-re "[ \t]*\\(?:[ \t]+:[[:alnum:]_@#%:+]:[ \t]*\\)?$")
 	      s (substring s 1)))
       (remove-text-properties
        0 (length s)
@@ -10591,7 +10590,7 @@ At all other locations, this simply calls the value of
      (let* ((a nil)
 	    (end (point))
 	    (beg1 (save-excursion
-		    (skip-chars-backward (org-re "[:alnum:]_@"))
+		    (skip-chars-backward (org-re "[:alnum:]_@#%"))
 		    (point)))
 	    (beg (save-excursion
 		   (skip-chars-backward "a-zA-Z0-9_:$")
@@ -12218,7 +12217,7 @@ only lines with a TODO keyword are included in the output."
   (let* ((re (concat "^" outline-regexp " *\\(\\<\\("
 		     (mapconcat 'regexp-quote org-todo-keywords-1 "\\|")
 		     (org-re
-		      "\\>\\)\\)? *\\(.*?\\)\\(:[[:alnum:]_@:]+:\\)?[ \t]*$")))
+		      "\\>\\)\\)? *\\(.*?\\)\\(:[[:alnum:]_@#%:]+:\\)?[ \t]*$")))
 	 (props (list 'face 'default
 		      'done-face 'org-agenda-done
 		      'undone-face 'default
@@ -12418,7 +12417,7 @@ also TODO lines."
 
   ;; Parse the string and create a lisp form
   (let ((match0 match)
-	(re (org-re "^&?\\([-+:]\\)?\\({[^}]+}\\|LEVEL\\([<=>]\\{1,2\\}\\)\\([0-9]+\\)\\|\\(\\(?:[[:alnum:]_]+\\(?:\\\\-\\)*\\)+\\)\\([<>=]\\{1,2\\}\\)\\({[^}]+}\\|\"[^\"]*\"\\|-?[.0-9]+\\(?:[eE][-+]?[0-9]+\\)?\\)\\|[[:alnum:]_@]+\\)"))
+	(re (org-re "^&?\\([-+:]\\)?\\({[^}]+}\\|LEVEL\\([<=>]\\{1,2\\}\\)\\([0-9]+\\)\\|\\(\\(?:[[:alnum:]_]+\\(?:\\\\-\\)*\\)+\\)\\([<>=]\\{1,2\\}\\)\\({[^}]+}\\|\"[^\"]*\"\\|-?[.0-9]+\\(?:[eE][-+]?[0-9]+\\)?\\)\\|[[:alnum:]_@#%]+\\)"))
 	minus tag mm
 	tagsmatch todomatch tagsmatcher todomatcher kwd matcher
 	orterms term orlist re-p str-p level-p level-op time-p
@@ -12448,7 +12447,7 @@ also TODO lines."
 			   (equal (match-string 1 term) "-"))
 		tag (save-match-data (replace-regexp-in-string
 				      "\\\\-" "-"
-				      (match-string 2 term)))				      
+				      (match-string 2 term)))
 		re-p (equal (string-to-char tag) ?{)
 		level-p (match-end 4)
 		prop-p (match-end 5)
@@ -12627,7 +12626,7 @@ ignore inherited ones."
 		    (while (not (equal lastpos (point)))
 		      (setq lastpos (point))
 		      (when (looking-at
-			     (org-re "[^\r\n]+?:\\([[:alnum:]_@:]+\\):[ \t]*$"))
+			     (org-re "[^\r\n]+?:\\([[:alnum:]_@#%:]+\\):[ \t]*$"))
 			(setq ltags (org-split-string
 				     (org-match-string-no-properties 1) ":"))
 			(when parent
@@ -12654,7 +12653,7 @@ If ONOFF is `on' or `off', don't toggle but set to this state."
   (let (res current)
     (save-excursion
       (org-back-to-heading t)
-      (if (re-search-forward (org-re "[ \t]:\\([[:alnum:]_@:]+\\):[ \t]*$")
+      (if (re-search-forward (org-re "[ \t]:\\([[:alnum:]_@#%:]+\\):[ \t]*$")
 			     (point-at-eol) t)
 	  (progn
 	    (setq current (match-string 1))
@@ -12684,7 +12683,7 @@ If ONOFF is `on' or `off', don't toggle but set to this state."
   ;; Assumes that this is a headline
   (let ((pos (point)) (col (current-column)) ncol tags-l p)
     (beginning-of-line 1)
-    (if	(and (looking-at (org-re ".*?\\([ \t]+\\)\\(:[[:alnum:]_@:]+:\\)[ \t]*$"))
+    (if	(and (looking-at (org-re ".*?\\([ \t]+\\)\\(:[[:alnum:]_@#%:]+:\\)[ \t]*$"))
 	     (< pos (match-beginning 2)))
 	(progn
 	  (setq tags-l (- (match-end 2) (match-beginning 2)))
@@ -12804,7 +12803,7 @@ With prefix ARG, realign all tags in headings in the current buffer."
 
       (if org-tags-sort-function
       	  (setq tags (mapconcat 'identity
-      				(sort (org-split-string tags (org-re "[^[:alnum:]_@]+"))
+      				(sort (org-split-string tags (org-re "[^[:alnum:]_@#%]+"))
       				      org-tags-sort-function) ":")))
 
       (if (string-match "\\`[\t ]*\\'" tags)
@@ -12961,7 +12960,7 @@ Returns the new tags string, or nil to not change the current settings."
     (save-excursion
       (beginning-of-line 1)
       (if (looking-at
-	   (org-re ".*[ \t]\\(:[[:alnum:]_@:]+:\\)[ \t]*$"))
+	   (org-re ".*[ \t]\\(:[[:alnum:]_@#%:]+:\\)[ \t]*$"))
 	  (setq ov-start (match-beginning 1)
 		ov-end (match-end 1)
 		ov-prefix "")
@@ -13111,7 +13110,7 @@ Returns the new tags string, or nil to not change the current settings."
 		(org-fast-tag-insert "Current" current c-face)
 		(org-set-current-tags-overlay current ov-prefix)
 		(while (re-search-forward
-			(org-re "\\[.\\] \\([[:alnum:]_@]+\\)") nil t)
+			(org-re "\\[.\\] \\([[:alnum:]_@#%]+\\)") nil t)
 		  (setq tg (match-string 1))
 		  (add-text-properties
 		   (match-beginning 1) (match-end 1)
@@ -13132,7 +13131,7 @@ Returns the new tags string, or nil to not change the current settings."
     (error "Not on a heading"))
   (save-excursion
     (beginning-of-line 1)
-    (if (looking-at (org-re ".*[ \t]\\(:[[:alnum:]_@:]+:\\)[ \t]*$"))
+    (if (looking-at (org-re ".*[ \t]\\(:[[:alnum:]_@#%:]+:\\)[ \t]*$"))
 	(org-match-string-no-properties 1)
       "")))
 
@@ -13146,7 +13145,7 @@ Returns the new tags string, or nil to not change the current settings."
     (save-excursion
       (goto-char (point-min))
       (while (re-search-forward
-	      (org-re "[ \t]:\\([[:alnum:]_@:]+\\):[ \t\r\n]") nil t)
+	      (org-re "[ \t]:\\([[:alnum:]_@#%:]+\\):[ \t\r\n]") nil t)
 	(when (equal (char-after (point-at-bol 0)) ?*)
 	  (mapc (lambda (x) (add-to-list 'tags x))
 		(org-split-string (org-match-string-no-properties 1) ":")))))
@@ -15984,14 +15983,14 @@ Some of the options can be changed using the variable
 	      (unless checkdir ; make sure the directory exists
 		(setq checkdir t)
 		(or (file-directory-p todir) (make-directory todir t)))
-	      
+
 	      (unless executables-checked
 		(org-check-external-command
 		 "latex" "needed to convert LaTeX fragments to images")
 		(org-check-external-command
 		 "dvipng" "needed to convert LaTeX fragments to images")
 		(setq executables-checked t))
-	      
+
 	      (unless (file-exists-p movefile)
 		(org-create-formula-image
 		 txt movefile opt forbuffer))
@@ -17306,7 +17305,7 @@ See the individual commands for more information."
     (call-interactively 'org-open-at-point))
    ((and (org-at-heading-p)
 	 (looking-at
-	  (org-re "\\([ \t]+\\(:[[:alnum:]_@:]+:\\)\\)[ \t]*$")))
+	  (org-re "\\([ \t]+\\(:[[:alnum:]_@#%:]+:\\)\\)[ \t]*$")))
     (org-show-entry)
     (end-of-line 1)
     (newline))
@@ -18867,7 +18866,7 @@ beyond the end of the headline."
 	       (t 'end-of-line)))
       (let ((pos (point)))
 	(beginning-of-line 1)
-	(if (looking-at (org-re ".*?\\(?:\\([ \t]*\\)\\(:[[:alnum:]_@:]+:\\)?[ \t]*\\)?$"))
+	(if (looking-at (org-re ".*?\\(?:\\([ \t]*\\)\\(:[[:alnum:]_@#%:]+:\\)?[ \t]*\\)?$"))
 	    (if (eq special t)
 		(if (or (< pos (match-beginning 1))
 			(= pos (match-end 0)))
@@ -18921,7 +18920,7 @@ depending on context."
 		(not (y-or-n-p "Kill hidden subtree along with headline? ")))
 	    (error "C-k aborted - would kill hidden subtree")))
     (call-interactively 'kill-line))
-   ((looking-at (org-re ".*?\\S-\\([ \t]+\\(:[[:alnum:]_@:]+:\\)\\)[ \t]*$"))
+   ((looking-at (org-re ".*?\\S-\\([ \t]+\\(:[[:alnum:]_@#%:]+:\\)\\)[ \t]*$"))
     (kill-region (point) (match-beginning 1))
     (org-set-tags nil t))
    (t (kill-region (point) (point-at-eol)))))

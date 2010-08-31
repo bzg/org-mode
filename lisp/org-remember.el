@@ -574,7 +574,7 @@ to be run from that hook to function properly."
 			   'org-tags-completion-function nil nil nil
 			   'org-tags-history)))
 		(setq ins (mapconcat 'identity
-				     (org-split-string ins (org-re "[^[:alnum:]_@]+"))
+				     (org-split-string ins (org-re "[^[:alnum:]_@#%]+"))
 				     ":"))
 		(when (string-match "\\S-" ins)
 		  (or (equal (char-before) ?:) (insert ":"))

@@ -400,7 +400,7 @@ publishing directory."
 
 			 (if (and (memq org-export-with-tags '(not-in-toc nil))
 				  (string-match
-				   (org-re "[ \t]+:[[:alnum:]_@:]+:[ \t]*$")
+				   (org-re "[ \t]+:[[:alnum:]_@#%:]+:[ \t]*$")
 				   txt))
 			     (setq txt (replace-match "" t t txt)))
 			 (if (string-match quote-re0 txt)
@@ -648,7 +648,7 @@ publishing directory."
 	  (insert "\n"))
       (setq char (nth (- umax level) (reverse org-export-ascii-underline)))
       (unless org-export-with-tags
-	(if (string-match (org-re "[ \t]+\\(:[[:alnum:]_@:]+:\\)[ \t]*$") title)
+	(if (string-match (org-re "[ \t]+\\(:[[:alnum:]_@#%:]+:\\)[ \t]*$") title)
 	    (setq title (replace-match "" t t title))))
       (if org-export-with-section-numbers
 	  (setq title (concat (org-section-number level) " " title)))

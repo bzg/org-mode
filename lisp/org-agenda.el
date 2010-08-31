@@ -4025,11 +4025,11 @@ MATCH is being ignored."
 			  "\\)\\>"))
 	 (tags (nth 2 org-stuck-projects))
 	 (tags-re (if (member "*" tags)
-		      (org-re "^\\*+ .*:[[:alnum:]_@]+:[ \t]*$")
+		      (org-re "^\\*+ .*:[[:alnum:]_@#%]+:[ \t]*$")
 		    (if tags
 			(concat "^\\*+ .*:\\("
 				(mapconcat 'identity tags "\\|")
-				(org-re "\\):[[:alnum:]_@:]*[ \t]*$")))))
+				(org-re "\\):[[:alnum:]_@#%:]*[ \t]*$")))))
 	 (gen-re (nth 3 org-stuck-projects))
 	 (re-list
 	  (delq nil
@@ -4988,7 +4988,7 @@ Any match of REMOVE-RE will be removed from TXT."
 	  (setq h (/ m 60) m (- m (* h 60)))
 	  (setq s2 (format "%02d:%02d" h m))))
 
-      (when (string-match (org-re "\\([ \t]+\\)\\(:[[:alnum:]_@:]+:\\)[ \t]*$")
+      (when (string-match (org-re "\\([ \t]+\\)\\(:[[:alnum:]_@#%:]+:\\)[ \t]*$")
 			  txt)
 	;; Tags are in the string
 	(if (or (eq org-agenda-remove-tags t)
@@ -5062,7 +5062,7 @@ Any match of REMOVE-RE will be removed from TXT."
 The modified list may contain inherited tags, and tags matched by
 `org-agenda-hide-tags-regexp' will be removed."
   (when (or add-inherited hide-re)
-    (if (string-match (org-re "\\([ \t]+\\)\\(:[[:alnum:]_@:]+:\\)[ \t]*$") txt)
+    (if (string-match (org-re "\\([ \t]+\\)\\(:[[:alnum:]_@#%:]+:\\)[ \t]*$") txt)
 	(setq txt (substring txt 0 (match-beginning 0))))
     (setq tags
 	  (delq nil
@@ -6728,7 +6728,7 @@ If FORCE-TAGS is non nil, the car of it returns the new tags."
   (let ((inhibit-read-only t) l c)
     (save-excursion
       (goto-char (if line (point-at-bol) (point-min)))
-      (while (re-search-forward (org-re "\\([ \t]+\\)\\(:[[:alnum:]_@:]+:\\)[ \t]*$")
+      (while (re-search-forward (org-re "\\([ \t]+\\)\\(:[[:alnum:]_@#%:]+:\\)[ \t]*$")
 				(if line (point-at-eol) nil) t)
 	(add-text-properties
 	 (match-beginning 2) (match-end 2)
