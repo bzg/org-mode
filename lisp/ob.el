@@ -40,6 +40,7 @@
 (declare-function tramp-dissect-file-name "tramp" (name &optional nodefault))
 (declare-function tramp-file-name-user "tramp" (vec))
 (declare-function tramp-file-name-host "tramp" (vec))
+(declare-function with-parsed-tramp-file-name "tramp" (filename var &rest body))
 (declare-function org-icompleting-read "org" (&rest args))
 (declare-function org-edit-src-code "org-src" 
                   (&optional context code edit-buffer-name quietp))
@@ -1674,8 +1675,9 @@ the remote connection."
 (defun org-babel-tramp-localname (file)
   "Return the local name component of FILE."
   (if (file-remote-p file)
-      (with-parsed-tramp-file-name file nil
-	localname)
+      (let (localname)
+	(with-parsed-tramp-file-name file nil
+	  localname))
     file))
 
 (defvar org-babel-temporary-directory

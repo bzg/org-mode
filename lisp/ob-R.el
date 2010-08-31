@@ -37,6 +37,7 @@
 (declare-function R "ext:essd-r" (&optional start-args))
 (declare-function inferior-ess-send-input "ext:ess-inf" ())
 (declare-function ess-make-buffer-current "ext:ess-inf" ())
+(declare-function ess-eval-buffer "ext:ess-inf" (vis))
 
 (defconst org-babel-header-arg-names:R
   '(width height bg units pointsize antialias quality compression
