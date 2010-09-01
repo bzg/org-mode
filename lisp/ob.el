@@ -583,7 +583,7 @@ the current subtree."
   (save-restriction
     (save-excursion
       (org-narrow-to-subtree)
-      (org-babel-execute-buffer)
+      (org-babel-execute-buffer arg)
       (widen))))
 
 ;;;###autoload
