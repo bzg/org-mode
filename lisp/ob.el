@@ -724,12 +724,14 @@ portions of results lines."
 			      'org-babel-show-result-all 'append 'local)))
 
 (defmacro org-babel-map-src-blocks (file &rest body)
-  "Evaluate BODY forms on each source-block in FILE."
+  "Evaluate BODY forms on each source-block in FILE. If FILE is
+nil evaluate BODY forms on source blocks in current buffer."
   (declare (indent 1))
-  `(let ((visited-p (get-file-buffer (expand-file-name ,file)))
-	 to-be-removed)
+  `(let ((visited-p (or (null ,file)
+			(get-file-buffer (expand-file-name ,file))))
+	 (point (point)) to-be-removed)
      (save-window-excursion
-       (find-file ,file)
+       (if ,file (find-file ,file))
        (setq to-be-removed (current-buffer))
        (goto-char (point-min))
        (while (re-search-forward org-babel-src-block-regexp nil t)
@@ -737,7 +739,8 @@ portions of results lines."
          (save-match-data ,@body)
          (goto-char (match-end 0))))
      (unless visited-p
-       (kill-buffer to-be-removed))))
+       (kill-buffer to-be-removed))
+     (goto-char point)))
 
 (defvar org-file-properties)
 (defun org-babel-params-from-properties (&optional lang)
