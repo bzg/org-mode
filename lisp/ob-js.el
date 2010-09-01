@@ -33,14 +33,27 @@
 
 ;;; Requirements:
 
-;; node.js | http://nodejs.org/
+;; - a non-browser javascript engine such as node.js http://nodejs.org/
+;;   or mozrepl http://wiki.github.com/bard/mozrepl/
+;; 
+;; - for session based evaluation mozrepl and moz.el are required see
+;;   http://wiki.github.com/bard/mozrepl/emacs-integration for
+;;   configuration instructions
 
 ;;; Code:
 (require 'ob)
+(require 'ob-ref)
+(require 'ob-comint)
 (require 'ob-eval)
+(eval-when-compile (require 'cl))
+
+(declare-function run-mozilla "ext:moz" (arg))
 
 (defvar org-babel-default-header-args:js '()
   "Default header arguments for js code blocks.")
+
+(defvar org-babel-js-eoe "org-babel-js-eoe"
+  "String to indicate that evaluation has completed.")
 
 (defcustom org-babel-js-cmd "node"
   "Name of command used to evaluate js blocks."
@@ -64,12 +77,22 @@
   "Execute a block of Javascript code with org-babel.
 This function is called by `org-babel-execute-src-block'"
   (let* ((processed-params (org-babel-process-params params))
-	 (session (not (string= (nth 0 processed-params) "none")))
+	 (org-babel-js-cmd (or (cdr (assoc :cmd params)) org-babel-js-cmd))
          (result-type (nth 3 processed-params))
          (full-body (org-babel-expand-body:js body params processed-params)))
     (org-babel-js-read
-     (if session
-         (error "javascript sessions are not yet supported.")
+     (if (not (string= (nth 0 processed-params) "none"))
+	 ;; session evaluation
+         (let ((session (org-babel-prep-session:js
+			 (nth 0 processed-params) params)))
+	   (nth 1
+		(org-babel-comint-with-output
+		    (session (format "%S" org-babel-js-eoe) t body)
+		  (mapc
+		   (lambda (line)
+		     (insert (org-babel-chomp line)) (comint-send-input nil t))
+		   (list body (format "%S" org-babel-js-eoe))))))
+       ;; external evaluation
        (let ((script-file (org-babel-temp-file "js-script-")))
          (with-temp-file script-file
            (insert
@@ -104,12 +127,41 @@ specifying a variable of the same value."
 
 (defun org-babel-prep-session:js (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."
-  (error "not yet implemented"))
+  (let* ((session (org-babel-js-initiate-session session))
+	 (vars (org-babel-ref-variables params))
+	 (var-lines
+	  (mapcar
+	   (lambda (pair) (format "var %s=%s;"
+			     (car pair) (org-babel-js-var-to-js (cdr pair))))
+	   vars)))
+    (when session
+      (org-babel-comint-in-buffer session
+	(sit-for .5) (goto-char (point-max))
+	(mapc (lambda (var)
+		(insert var) (comint-send-input nil t)
+		(org-babel-comint-wait-for-output session)
+		(sit-for .1) (goto-char (point-max))) var-lines)))
+    session))
 
 (defun org-babel-js-initiate-session (&optional session)
   "If there is not a current inferior-process-buffer in SESSION
 then create.  Return the initialized session."
-  (error "Javascript sessions are not yet supported."))
+  (unless (string= session "none")
+    (cond
+     ((string= "mozrepl" org-babel-js-cmd)
+      (require 'moz)
+      (let ((session-buffer (save-window-excursion
+			      (run-mozilla nil)
+			      (rename-buffer session)
+			      (current-buffer))))
+	(if (org-babel-comint-buffer-livep session-buffer)
+	    (progn (sit-for .25) session-buffer)
+	  (sit-for .5)
+	  (org-babel-js-initiate-session session))))
+     ((string= "node" org-babel-js-cmd )
+      (error "session evaluation with node.js is not supported"))
+     (t
+      (error "sessions are only supported with mozrepl add \":cmd mozrepl\"")))))
 
 (provide 'ob-js)
 
