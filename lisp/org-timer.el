@@ -165,9 +165,13 @@ it in the buffer."
 (defun org-timer-value-string ()
   (format org-timer-format (org-timer-secs-to-hms (floor (org-timer-seconds)))))
 
+(defvar org-timer-timer-is-countdown nil)
 (defun org-timer-seconds ()
-  (- (org-float-time (or org-timer-pause-time (current-time)))
-     (org-float-time org-timer-start-time)))
+  (if org-timer-timer-is-countdown
+      (- (org-float-time org-timer-start-time)
+	 (org-float-time (current-time)))
+    (- (org-float-time (or org-timer-pause-time (current-time)))
+       (org-float-time org-timer-start-time))))
 
 ;;;###autoload
 (defun org-timer-change-times-in-region (beg end delta)
@@ -377,8 +381,14 @@ replace any running timer."
 		   secs nil `(lambda ()
 			       (setq org-timer-current-timer nil)
 			       (org-notify ,(format "%s: time out" hl) t)
+			       (setq org-timer-timer-is-countdown nil)
+			       (org-timer-set-mode-line 'off)
 			       (run-hooks 'org-timer-done-hook))))
-	    (run-hooks 'org-timer-set-hook))
+	    (run-hooks 'org-timer-set-hook)
+	    (setq org-timer-timer-is-countdown t
+		  org-timer-start-time
+		  (time-add (current-time) (seconds-to-time (* mins 60))))
+	    (org-timer-set-mode-line 'on))
 	(message "No timer set"))))))
 
 (provide 'org-timer)
