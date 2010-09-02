@@ -4429,7 +4429,7 @@ means to push this value onto the list in the variable.")
 		    "\\(?:[ \t]*\\(?:\\[[0-9%%/]+\\]\\)\\)?" ;; stats cookie
 		    "[ \t]*\\(%s\\)"
 		    "\\(?:[ \t]*\\(?:\\[[0-9%%/]+\\]\\)\\)?" ;; stats cookie
-		    "\\(?:[ \t]+\\(:[[:alnum:]_@#%:]+:\\)\\)?[ \t]*$")
+		    "\\(?:[ \t]+\\(:[[:alnum:]_@#%%:]+:\\)\\)?[ \t]*$")
 	    org-nl-done-regexp
 	    (concat "\n\\*+[ \t]+"
 		    "\\(?:" (mapconcat 'regexp-quote org-done-keywords "\\|")
