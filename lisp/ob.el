@@ -735,7 +735,7 @@ nil evaluate BODY forms on source blocks in current buffer."
 			(get-file-buffer (expand-file-name ,file))))
 	 (point (point)) to-be-removed)
      (save-window-excursion
-       (if ,file (find-file ,file))
+       (when ,file (find-file ,file))
        (setq to-be-removed (current-buffer))
        (goto-char (point-min))
        (while (re-search-forward org-babel-src-block-regexp nil t)
