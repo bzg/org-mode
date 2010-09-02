@@ -726,9 +726,12 @@ fontification of code blocks see `org-src-fontify-block' and
 	 (modified (buffer-modified-p))
 	 (org-buffer (current-buffer)) pos next)
     (remove-text-properties start end '(face nil))
-    (with-temp-buffer
+    (with-current-buffer
+	(get-buffer-create
+	 (concat " org-src-fontification:" (symbol-name lang-mode)))
+      (delete-region (point-min) (point-max))
       (insert string)
-      (funcall lang-mode)
+      (unless (eq major-mode lang-mode) (funcall lang-mode))
       (font-lock-fontify-buffer)
       (setq pos (point-min))
       (while (setq next (next-single-property-change pos 'face))
