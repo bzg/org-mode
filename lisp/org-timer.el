@@ -145,18 +145,23 @@ With prefix arg STOP, stop it entirely."
   (org-timer-set-mode-line 'off))
 
 ;;;###autoload
-(defun org-timer (&optional restart)
+(defun org-timer (&optional restart no-insert-p)
   "Insert a H:MM:SS string from the timer into the buffer.
 The first time this command is used, the timer is started.  When used with
 a \\[universal-argument] prefix, force restarting the timer.
 When used with a double prefix argument \
 \\[universal-argument] \\universal-argument], change all the timer string
 in the region by a fixed amount.  This can be used to recalibrate a timer
-that was not started at the correct moment."
+that was not started at the correct moment.
+
+If NO-INSERT-P is non-nil, return the string instead of inserting
+it in the buffer."
   (interactive "P")
-  (if (equal restart '(4)) (org-timer-start))
-  (or org-timer-start-time (org-timer-start))
-  (insert (org-timer-value-string)))
+  (when (or (equal restart '(4)) (not org-timer-start-time))
+    (org-timer-start))
+  (if no-insert-p
+      (org-timer-value-string)
+    (insert (org-timer-value-string))))
 
 (defun org-timer-value-string ()
   (format org-timer-format (org-timer-secs-to-hms (floor (org-timer-seconds)))))
@@ -195,19 +200,22 @@ that was not started at the correct moment."
 (defun org-timer-item (&optional arg)
   "Insert a description-type item with the current timer value."
   (interactive "P")
-  (let ((ind 0))
-    (save-excursion
-      (skip-chars-backward " \n\t")
-      (condition-case nil
-	  (progn
-	    (org-beginning-of-item)
-	    (setq ind (org-get-indentation)))
-	(error nil)))
-    (or (bolp) (newline))
-    (org-indent-line-to ind)
-    (insert "- ")
-    (org-timer (if arg '(4)))
-    (insert ":: ")))
+  (cond
+   ;; In a timer list, insert with `org-list-insert-item-generic'.
+   ((and (org-in-item-p)
+	 (save-excursion (org-beginning-of-item) (org-at-item-timer-p)))
+    (org-list-insert-item-generic
+     (point) nil (concat (org-timer (when arg '(4)) t) ":: ")))
+   ;; In a list of another type, don't break anything: throw an error.
+   ((org-in-item-p)
+    (error "This is not a timer list"))
+   ;; Else, insert the timer correctly indented at bol.
+   (t
+    (beginning-of-line)
+    (org-indent-line-function)
+    (insert  "- ")
+    (org-timer (when arg '(4)))
+    (insert ":: "))))
 
 (defun org-timer-fix-incomplete (hms)
   "If hms is a H:MM:SS string with missing hour or hour and minute, fix it."

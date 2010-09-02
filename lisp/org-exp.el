@@ -1076,6 +1076,9 @@ on this string to produce the exported version."
 				     (plist-get parameters :exclude-tags))
       (run-hooks 'org-export-preprocess-after-tree-selection-hook)
 
+      ;; Mark end of lists
+      (org-export-mark-list-ending backend)
+
       ;; Handle source code snippets
       (org-export-replace-src-segments-and-examples backend)
 
@@ -1625,6 +1628,31 @@ These special cookies will later be interpreted by the backend."
 			      "ORG-" (upcase t1) "-END\n"))
 	(delete-region beg end)
 	(insert (org-add-props content nil 'original-indentation ind))))))
+
+(defun org-export-mark-list-ending (backend)
+  "Mark list endings with special cookies.
+These special cookies will later be interpreted by the backend.
+`org-list-end-re' is replaced by a blank line in the process."
+  (let ((process-buffer
+	 (lambda (end-list-marker)
+	   (goto-char (point-min))
+	   (while (org-search-forward-unenclosed org-item-beginning-re nil t)
+	     (goto-char (org-list-bottom-point))
+	     (when (and (not (eq org-list-ending-method 'indent))
+			(looking-at (org-list-end-re)))
+	       (replace-match "\n"))
+	     (insert end-list-marker)))))
+  ;; We need to divide backends into 3 categories.
+  (cond
+   ;; 1. Backends using `org-list-parse-list' do not need markers.
+   ((memq backend '(latex))
+    nil)
+   ;; 2. Line-processing backends need to be told where lists end.
+   ((memq backend '(html docbook))
+    (funcall process-buffer "ORG-LIST-END\n"))
+   ;; 3. Others backends do not need to know this: clean list enders.
+   (t
+    (funcall process-buffer "")))))
 
 (defun org-export-attach-captions-and-attributes (backend target-alist)
   "Move #+CAPTION, #+ATTR_BACKEND, and #+LABEL text into text properties.
