@@ -720,7 +720,7 @@ MAY-INLINE-P allows inlining it as an image."
 			   ;;Substitute just if original path was absolute.
 			   ;;(Otherwise path must remain relative)
 			   (if (file-name-absolute-p path)
-			      (concat "/" (expand-file-name path))
+			      (concat "file://" (expand-file-name path))
 			      path)))
 		     ((string= type "")
 			(list nil path))
