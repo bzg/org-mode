@@ -383,6 +383,10 @@ bypassed."
 	   (initial (and (org-region-active-p)
 			 (buffer-substring (point) (mark))))
 	   (entry (org-capture-select-template keys)))
+      (when initial
+	(remove-text-properties 0 (length initial) '(read-only t) initial))
+      (when annotation
+	(remove-text-properties 0 (length initial) '(read-only t) annotation))
       (cond
        ((equal entry "C")
 	(customize-variable 'org-capture-templates))
@@ -590,6 +594,8 @@ already gone."
 	(set-buffer (org-capture-target-buffer (nth 1 target)))
 	(let ((hd (nth 2 target)))
 	  (goto-char (point-min))
+	  (unless (org-mode-p)
+	    (error "Target buffer for file+headline should be in Org mode"))
 	  (if (re-search-forward
 	       (format org-complex-heading-regexp-format (regexp-quote hd))
 	       nil t)
