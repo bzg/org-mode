@@ -720,7 +720,7 @@ MAY-INLINE-P allows inlining it as an image."
 			   ;;Substitute just if original path was absolute.
 			   ;;(Otherwise path must remain relative)
 			   (if (file-name-absolute-p path)
-			      (expand-file-name path)
+			      (concat "/" (expand-file-name path))
 			      path)))
 		     ((string= type "")
 			(list nil path))
@@ -756,8 +756,7 @@ MAY-INLINE-P allows inlining it as an image."
 	 (setq thefile
 	    (let
 	       ((str (org-export-html-format-href thefile)))
-	      (if (and type (not (string= "file" type))
-		       (org-string-match-p "^//" str))
+	      (if (and type (not (string= "file" type)))
 		  (concat type ":" str)
 		  str)))
 
