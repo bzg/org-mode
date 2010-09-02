@@ -119,10 +119,10 @@ setting of `org-wikinodes-create-targets'."
   (let ((create org-wikinodes-create-targets)
 	visiting buffer m pos file rpl)
     (setq pos
-	  (or (org-find-exact-headling-in-buffer target (current-buffer))
+	  (or (org-find-exact-headline-in-buffer target (current-buffer))
 	      (and (eq org-wikinodes-scope 'directory)
 		   (setq file (org-wikinodes-which-file target))
-		   (org-find-exact-headling-in-buffer
+		   (org-find-exact-headline-in-buffer
 		    target (or (get-file-buffer file)
 			       (find-file-noselect file))))))
     (if pos
@@ -288,7 +288,7 @@ with working links."
 	  (delete-region (match-beginning 0) (match-end 0))
 	  (save-match-data
 	    (cond
-	     ((org-find-exact-headling-in-buffer link (current-buffer))
+	     ((org-find-exact-headline-in-buffer link (current-buffer))
 	      ;; Found in current buffer
 	      (insert (format "[[#%s][%s]]" link link)))
 	     ((eq org-wikinodes-scope 'file)
