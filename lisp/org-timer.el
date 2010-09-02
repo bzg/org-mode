@@ -149,8 +149,7 @@ With prefix arg STOP, stop it entirely."
   "Insert a H:MM:SS string from the timer into the buffer.
 The first time this command is used, the timer is started.  When used with
 a \\[universal-argument] prefix, force restarting the timer.
-When used with a double prefix argument \
-\\[universal-argument] \\universal-argument], change all the timer string
+When used with a double prefix argument \\[universal-argument], change all the timer string
 in the region by a fixed amount.  This can be used to recalibrate a timer
 that was not started at the correct moment.
 
