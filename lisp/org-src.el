@@ -715,6 +715,54 @@ Org-babel commands."
      (call-interactively
       (lookup-key org-babel-map key)))))
 
+(defun org-src-font-lock-fontify-block (lang start end)
+  "Fontify code block.
+This function is called by emacs automatic fontification, as long
+as `org-src-fontify-natively' is non-nil. For manual
+fontification of code blocks see `org-src-fontify-block' and
+`org-src-fontify-buffer'"
+  (let* ((lang-mode (org-src-get-lang-mode lang))
+	 (string (buffer-substring-no-properties start end))
+	 (modified (buffer-modified-p))
+	 (org-buffer (current-buffer)) pos next)
+    (remove-text-properties start end '(face nil))
+    (with-temp-buffer
+      (insert string)
+      (funcall lang-mode)
+      (font-lock-fontify-buffer)
+      (setq pos (point-min))
+      (while (setq next (next-single-property-change pos 'face))
+	(put-text-property
+	 (+ start (1- pos)) (+ start next) 'face
+	 (get-text-property pos 'face) org-buffer)
+	(setq pos next)))
+    (add-text-properties
+     start end
+     '(font-lock-fontified t fontified t font-lock-multiline t))
+    (set-buffer-modified-p modified))
+  t) ;; Tell `org-fontify-meta-lines-and-blocks' that we fontified
+
+(defun org-src-fontify-block ()
+  "Fontify code block at point."
+  (interactive)
+  (save-excursion
+    (let ((org-src-fontify-natively t)
+	  (info (org-edit-src-find-region-and-lang)))
+      (font-lock-fontify-region (nth 0 info) (nth 1 info)))))
+
+(defun org-src-fontify-buffer ()
+  "Fontify all code blocks in the current buffer"
+  (interactive)
+  (org-babel-map-src-blocks nil
+    (org-src-fontify-block)))
+
+(defun org-src-get-lang-mode (lang)
+  "Return major mode that should be used for LANG.
+LANG is a string, and the returned major mode is a symbol."
+  (intern
+   (concat
+    ((lambda (l) (if (symbolp l) (symbol-name l) l))
+     (or (cdr (assoc lang org-src-lang-modes)) lang)) "-mode")))
 
 (provide 'org-src)
 
