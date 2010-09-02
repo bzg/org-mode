@@ -50,15 +50,18 @@
 (defun org-babel-execute:ditaa (body params)
   "Execute a block of Ditaa code with org-babel.
 This function is called by `org-babel-execute-src-block'."
-  (let ((result-params (split-string (or (cdr (assoc :results params)) "")))
-        (out-file (cdr (assoc :file params)))
-        (cmdline (cdr (assoc :cmdline params)))
-        (in-file (org-babel-temp-file "ditaa-")))
+  (let* ((result-params (split-string (or (cdr (assoc :results params)) "")))
+	 (out-file (cdr (assoc :file params)))
+	 (cmdline (cdr (assoc :cmdline params)))
+	 (in-file (org-babel-temp-file "ditaa-"))
+	 (cmd (concat "java -jar "
+		      (shell-quote-argument
+		       (expand-file-name org-ditaa-jar-path))
+		      " " cmdline " " in-file " " out-file)))
     (unless (file-exists-p org-ditaa-jar-path)
       (error "Could not find ditaa.jar at %s" org-ditaa-jar-path))
     (with-temp-file in-file (insert body))
-    (message (concat "java -jar " org-ditaa-jar-path " " cmdline " " in-file " " out-file))
-    (shell-command (concat "java -jar " (shell-quote-argument org-ditaa-jar-path) " " cmdline " " in-file " " out-file))
+    (message cmd) (shell-command cmd)
     out-file))
 
 (defun org-babel-prep-session:ditaa (session params)
