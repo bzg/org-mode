@@ -6834,7 +6834,7 @@ Works for outline headings and for plain lists alike."
   (org-insert-heading arg)
   (cond
    ((org-on-heading-p) (org-do-demote))
-   ((org-at-item-p) (org-indent-item 1))))
+   ((org-at-item-p) (org-indent-item))))
 
 (defun org-insert-todo-subheading (arg)
   "Insert a new subheading with TODO keyword or checkbox and demote it.
@@ -6843,7 +6843,7 @@ Works for outline headings and for plain lists alike."
   (org-insert-todo-heading arg)
   (cond
    ((org-on-heading-p) (org-do-demote))
-   ((org-at-item-p) (org-indent-item 1))))
+   ((org-at-item-p) (org-indent-item))))
 
 ;;; Promotion and Demotion
 
