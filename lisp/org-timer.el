@@ -366,9 +366,11 @@ replace any running timer."
 		     (widen)
 		     (goto-char pos)
 		     (org-show-entry)
-		     (org-get-heading))))
+		     (or (ignore-errors (org-get-heading))
+			 (concat "File:" (file-name-nondirectory (buffer-file-name)))))))
 		((eq major-mode 'org-mode)
-		 (org-get-heading))
+		 (or (ignore-errors (org-get-heading))
+		     (concat "File:" (file-name-nondirectory (buffer-file-name)))))
 		(t (error "Not in an Org buffer"))))
 	   timer-set)
       (if (or (and org-timer-current-timer
