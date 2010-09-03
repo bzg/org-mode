@@ -53,6 +53,11 @@ then the name of the language is used."
   :group 'org-babel
   :type 'hook)
 
+(defcustom org-babel-pre-tangle-hook '(save-buffer)
+  "Hook run at the beginning of `org-babel-tangle'."
+  :group 'org-babel
+  :type 'hook)
+
 (defun org-babel-find-file-noselect-refresh (file)
   "Find file ensuring that the latest changes on disk are
 represented in the file."
@@ -127,7 +132,7 @@ TARGET-FILE can be used to specify a default export file for all
 source blocks.  Optional argument LANG can be used to limit the
 exported source code blocks by language."
   (interactive)
-  (save-buffer)
+  (run-hooks 'org-babel-pre-tangle-hook)
   (save-excursion
     (let ((block-counter 0)
 	  (org-babel-default-header-args
