@@ -303,7 +303,9 @@ VALUE can be `on', `off', or `pause'."
   (when (eval org-timer-current-timer)
     (run-hooks 'org-timer-cancel-hook)
     (cancel-timer org-timer-current-timer)
-    (setq org-timer-current-timer nil))
+    (setq org-timer-current-timer nil)
+    (setq org-timer-timer-is-countdown nil)
+    (org-timer-set-mode-line 'off))
   (message "Last timer canceled"))
 
 (defun org-timer-show-remaining-time ()
