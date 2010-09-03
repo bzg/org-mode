@@ -715,6 +715,19 @@ Org-babel commands."
      (call-interactively
       (lookup-key org-babel-map key)))))
 
+(defvar org-src-tab-acts-natively nil
+  "If non-nil, the effect of TAB in a code block is as if it were
+issued in the language major mode buffer.")
+
+(defun org-src-native-tab-command-maybe ()
+  "Perform language-specific TAB action.
+Alter code block according to effect of TAB in the language major
+mode."
+  (and org-src-tab-acts-natively
+       (org-babel-do-key-sequence-in-edit-buffer (kbd "TAB"))))
+
+(add-hook 'org-tab-first-hook 'org-src-native-tab-command-maybe)
+
 (defun org-src-font-lock-fontify-block (lang start end)
   "Fontify code block.
 This function is called by emacs automatic fontification, as long

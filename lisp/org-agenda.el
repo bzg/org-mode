@@ -4002,8 +4002,7 @@ The remainder is either a list of TODO keywords, or a state symbol
   "Create agenda view for projects that are stuck.
 Stuck projects are project that have no next actions.  For the definitions
 of what a project is and how to check if it stuck, customize the variable
-`org-stuck-projects'.
-MATCH is being ignored."
+`org-stuck-projects'."
   (interactive)
   (let* ((org-agenda-skip-function
 	  'org-agenda-skip-entry-when-regexp-matches-in-subtree)

@@ -149,8 +149,7 @@ With prefix arg STOP, stop it entirely."
   "Insert a H:MM:SS string from the timer into the buffer.
 The first time this command is used, the timer is started.  When used with
 a \\[universal-argument] prefix, force restarting the timer.
-When used with a double prefix argument \
-\\[universal-argument] \\universal-argument], change all the timer string
+When used with a double prefix argument \\[universal-argument], change all the timer string
 in the region by a fixed amount.  This can be used to recalibrate a timer
 that was not started at the correct moment.
 
@@ -166,9 +165,13 @@ it in the buffer."
 (defun org-timer-value-string ()
   (format org-timer-format (org-timer-secs-to-hms (floor (org-timer-seconds)))))
 
+(defvar org-timer-timer-is-countdown nil)
 (defun org-timer-seconds ()
-  (- (org-float-time (or org-timer-pause-time (current-time)))
-     (org-float-time org-timer-start-time)))
+  (if org-timer-timer-is-countdown
+      (- (org-float-time org-timer-start-time)
+	 (org-float-time (current-time)))
+    (- (org-float-time (or org-timer-pause-time (current-time)))
+       (org-float-time org-timer-start-time))))
 
 ;;;###autoload
 (defun org-timer-change-times-in-region (beg end delta)
@@ -300,7 +303,9 @@ VALUE can be `on', `off', or `pause'."
   (when (eval org-timer-current-timer)
     (run-hooks 'org-timer-cancel-hook)
     (cancel-timer org-timer-current-timer)
-    (setq org-timer-current-timer nil))
+    (setq org-timer-current-timer nil)
+    (setq org-timer-timer-is-countdown nil)
+    (org-timer-set-mode-line 'off))
   (message "Last timer canceled"))
 
 (defun org-timer-show-remaining-time ()
@@ -361,9 +366,11 @@ replace any running timer."
 		     (widen)
 		     (goto-char pos)
 		     (org-show-entry)
-		     (org-get-heading))))
+		     (or (ignore-errors (org-get-heading))
+			 (concat "File:" (file-name-nondirectory (buffer-file-name)))))))
 		((eq major-mode 'org-mode)
-		 (org-get-heading))
+		 (or (ignore-errors (org-get-heading))
+		     (concat "File:" (file-name-nondirectory (buffer-file-name)))))
 		(t (error "Not in an Org buffer"))))
 	   timer-set)
       (if (or (and org-timer-current-timer
@@ -378,8 +385,14 @@ replace any running timer."
 		   secs nil `(lambda ()
 			       (setq org-timer-current-timer nil)
 			       (org-notify ,(format "%s: time out" hl) t)
+			       (setq org-timer-timer-is-countdown nil)
+			       (org-timer-set-mode-line 'off)
 			       (run-hooks 'org-timer-done-hook))))
-	    (run-hooks 'org-timer-set-hook))
+	    (run-hooks 'org-timer-set-hook)
+	    (setq org-timer-timer-is-countdown t
+		  org-timer-start-time
+		  (time-add (current-time) (seconds-to-time (* mins 60))))
+	    (org-timer-set-mode-line 'on))
 	(message "No timer set"))))))
 
 (provide 'org-timer)

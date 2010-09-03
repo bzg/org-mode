@@ -6843,7 +6843,7 @@ Works for outline headings and for plain lists alike."
   (org-insert-heading arg)
   (cond
    ((org-on-heading-p) (org-do-demote))
-   ((org-at-item-p) (org-indent-item 1))))
+   ((org-at-item-p) (org-indent-item))))
 
 (defun org-insert-todo-subheading (arg)
   "Insert a new subheading with TODO keyword or checkbox and demote it.
@@ -6852,7 +6852,7 @@ Works for outline headings and for plain lists alike."
   (org-insert-todo-heading arg)
   (cond
    ((org-on-heading-p) (org-do-demote))
-   ((org-at-item-p) (org-indent-item 1))))
+   ((org-at-item-p) (org-indent-item))))
 
 ;;; Promotion and Demotion
 
@@ -9899,6 +9899,7 @@ on the system \"/user@host:\"."
 			 (setq level (org-reduced-level
 				      (- (match-end 1) (match-beginning 1)))
 			       txt (org-link-display-format (match-string 4))
+			       txt (replace-regexp-in-string "\\( *\[[0-9]+/?[0-9]*%?\]\\)+$" "" txt)
 			       re (format org-complex-heading-regexp-format
 					  (regexp-quote (match-string 4))))
 			 (when org-refile-use-outline-path
@@ -16379,6 +16380,7 @@ BEG and END default to the buffer boundaries."
 (org-defkey org-mode-map "\C-c\C-xo"    'org-toggle-ordered-property)
 (org-defkey org-mode-map "\C-c\C-xi"    'org-insert-columns-dblock)
 (org-defkey org-mode-map [(control ?c) (control ?x) ?\;] 'org-timer-set-timer)
+(org-defkey org-mode-map [(control ?c) (control ?x) ?\:] 'org-timer-cancel-timer)
 
 (org-defkey org-mode-map "\C-c\C-x."    'org-timer)
 (org-defkey org-mode-map "\C-c\C-x-"    'org-timer-item)
