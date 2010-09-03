@@ -383,10 +383,11 @@ bypassed."
 	   (initial (and (org-region-active-p)
 			 (buffer-substring (point) (mark))))
 	   (entry (org-capture-select-template keys)))
-      (when initial
+      (when (stringp initial)
 	(remove-text-properties 0 (length initial) '(read-only t) initial))
-      (when annotation
-	(remove-text-properties 0 (length initial) '(read-only t) annotation))
+      (when (stringp annotation)
+	(remove-text-properties 0 (length annotation)
+				'(read-only t) annotation))
       (cond
        ((equal entry "C")
 	(customize-variable 'org-capture-templates))
