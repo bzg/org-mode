@@ -5022,13 +5022,19 @@ will be prompted for."
 				'(display t invisible t intangible t))
 	t)))
 
+(defvar org-src-fontify-natively t
+  "When non-nil, fontify code in code blocks.")
+
 (defun org-fontify-meta-lines-and-blocks (limit)
   "Fontify #+ lines and blocks, in the correct ways."
   (let ((case-fold-search t))
     (if (re-search-forward
-	 "^\\([ \t]*#\\+\\(\\([a-zA-Z]+:?\\| \\|$\\)\\(_\\([a-zA-Z]+\\)\\)?\\)\\(.*\\)\\)"
+	 "^\\([ \t]*#\\+\\(\\([a-zA-Z]+:?\\| \\|$\\)\\(_\\([a-zA-Z]+\\)\\)?\\)[ \t]*\\(\\([^ \t\n]*\\)[ \t]*\\(.*\\)\\)\\)"
 	 limit t)
 	(let ((beg (match-beginning 0))
+	      (block-start (match-end 0))
+	      (block-end nil)
+	      (lang (match-string 7))
 	      (beg1 (line-beginning-position 2))
 	      (dc1 (downcase (match-string 2)))
 	      (dc3 (downcase (match-string 3)))
@@ -5053,6 +5059,7 @@ will be prompted for."
 		   (concat "^[ \t]*#\\+end" (match-string 4) "\\>.*")
 		   nil t)  ;; on purpose, we look further than LIMIT
 	      (setq end (match-end 0) end1 (1- (match-beginning 0)))
+	      (setq block-end (match-beginning 0))
 	      (when quoting
 		(remove-text-properties beg end
 					'(display t invisible t intangible t)))
@@ -5063,6 +5070,8 @@ will be prompted for."
 	      (add-text-properties end1 (+ end 1) '(face org-meta-line))
 					; for end_src
 	      (cond
+	       ((and lang org-src-fontify-natively)
+		(org-src-font-lock-fontify-block lang block-start block-end))
 	       (quoting
 		(add-text-properties beg1 (+ end1 1) '(face
 						       org-block)))
@@ -9890,6 +9899,7 @@ on the system \"/user@host:\"."
 			 (setq level (org-reduced-level
 				      (- (match-end 1) (match-beginning 1)))
 			       txt (org-link-display-format (match-string 4))
+			       txt (replace-regexp-in-string " *\[[0-9]+/[0-9]+\]$" "" txt)
 			       re (format org-complex-heading-regexp-format
 					  (regexp-quote (match-string 4))))
 			 (when org-refile-use-outline-path

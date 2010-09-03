@@ -557,6 +557,13 @@ use libnotify if available, or fall back on a message."
 	((stringp org-show-notification-handler)
 	 (start-process "emacs-timer-notification" nil
 			org-show-notification-handler notification))
+	((featurep 'notifications)
+	 (notifications-notify
+	  :title "Org-mode message"
+	  :body notification
+	  ;; FIXME how to link to the Org icon?
+	  ;; :app-icon "~/.emacs.d/icons/mail.png"
+	  :urgency 'low))
 	((org-program-exists "notify-send")
 	 (start-process "emacs-timer-notification" nil
 			"notify-send" notification))
