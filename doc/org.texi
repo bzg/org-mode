@@ -13781,10 +13781,11 @@ written in a way such that it does nothing in buffers that are not in
 @section Special agenda views
 @cindex agenda views, user-defined
 
-Org provides a special hook that can be used to narrow down the
-selection made by any of the agenda views.  You may specify a function
-that is used at each match to verify if the match should indeed be part
-of the agenda view, and if not, how much should be skipped.
+Org provides a special hook that can be used to narrow down the selection
+made by these agenda views: @code{todo}, @code{alltodo}, @code{tags}, @code{tags-todo}, 
+@code{tags-tree}.  You may specify a function that is used at each match to verify 
+if the match should indeed be part of the agenda view, and if not, how 
+much should be skipped.
 
 Let's say you want to produce a list of projects that contain a WAITING
 tag anywhere in the project tree.  Let's further assume that you have
