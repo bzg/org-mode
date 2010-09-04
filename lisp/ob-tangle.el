@@ -34,6 +34,7 @@
 
 (declare-function org-link-escape "org" (text &optional table))
 (declare-function org-heading-components "org" ())
+(declare-function org-back-to-heading "org" (invisible-ok))
 
 (defcustom org-babel-tangle-lang-exts
   '(("emacs-lisp" . "el"))
@@ -57,6 +58,11 @@ then the name of the language is used."
   "Hook run at the beginning of `org-babel-tangle'."
   :group 'org-babel
   :type 'hook)
+
+(defcustom org-babel-tangle-pad-newline t
+  "Switch indicating whether to pad tangled code with newlines."
+  :group 'org-babel
+  :type 'boolean)
 
 (defun org-babel-find-file-noselect-refresh (file)
   "Find file ensuring that the latest changes on disk are
@@ -246,39 +252,45 @@ code blocks by language."
                           (org-babel-clean-text-properties
 			   (car (pop org-stored-links)))))
              (info (org-babel-get-src-block-info))
+	     (params (nth 2 info))
              (source-name (intern (or (nth 4 info)
                                       (format "%s:%d"
 					      current-heading block-counter))))
-             (src-lang (nth 0 info))
+	     (src-lang (nth 0 info))
 	     (expand-cmd (intern (concat "org-babel-expand-body:" src-lang)))
-             (params (nth 2 info))
+	     (body ((lambda (body)
+		      (if (assoc :no-expand params)
+			  body
+			(funcall (if (fboundp expand-cmd)
+				     expand-cmd
+				   'org-babel-expand-body:generic)
+				 body params)))
+		    (if (and (cdr (assoc :noweb params))
+			     (string= "yes" (cdr (assoc :noweb params))))
+			(org-babel-expand-noweb-references info)
+		      (nth 1 info))))
+	     (comment (when (or (string= "both" (cdr (assoc :comments params)))
+				(string= "org" (cdr (assoc :comments params))))
+			;; from the previous heading or code-block end
+			(buffer-substring
+			 (max (condition-case nil
+				  (save-excursion
+				    (org-back-to-heading t) (point))
+				(error 0))
+			      (save-excursion (re-search-backward
+					       org-babel-src-block-regexp nil t)
+					      (match-end 0)))
+			 (point))))
              by-lang)
         (unless (string= (cdr (assoc :tangle params)) "no") ;; skip
           (unless (and lang (not (string= lang src-lang))) ;; limit by language
             ;; add the spec for this block to blocks under it's language
             (setq by-lang (cdr (assoc src-lang blocks)))
             (setq blocks (delq (assoc src-lang blocks) blocks))
-            (setq blocks
-                  (cons
-                   (cons src-lang
-                         (cons (list link source-name params
-                                     ((lambda (body)
-                                        (if (assoc :no-expand params)
-                                            body
-                                          (funcall
-					   (if (fboundp expand-cmd)
-					       expand-cmd
-					     'org-babel-expand-body:generic)
-                                           body
-                                           params)))
-                                      (if (and (cdr (assoc :noweb params))
-                                               (string=
-						"yes"
-						(cdr (assoc :noweb params))))
-                                          (org-babel-expand-noweb-references
-					   info)
-					(nth 1 info))))
-                               by-lang)) blocks))))))
+            (setq blocks (cons
+			  (cons src-lang
+				(cons (list link source-name params body comment)
+				      by-lang)) blocks))))))
     ;; ensure blocks in the correct order
     (setq blocks
           (mapcar
@@ -293,22 +305,30 @@ source code file.  This function uses `comment-region' which
 assumes that the appropriate major-mode is set.  SPEC has the
 form
 
-  (link source-name params body)"
-  (let ((link (nth 0 spec))
-	(source-name (nth 1 spec))
-	(body (nth 3 spec))
-	(commentable (string= (cdr (assoc :comments (nth 2 spec))) "yes")))
+  (link source-name params body comment)"
+  (let* ((link (org-link-escape (nth 0 spec)))
+	 (source-name (nth 1 spec))
+	 (body (nth 3 spec))
+	 (comment (nth 4 spec))
+	 (comments (cdr (assoc :comments (nth 2 spec))))
+	 (link-p (or (string= comments "both") (string= comments "link")
+		     (string= comments "yes"))))
     (flet ((insert-comment (text)
-			   (when commentable
-			     (insert "\n")
+			   (when (and comments (not (string= comments "no")))
+			     (when org-babel-tangle-pad-newline
+			       (insert "\n"))
 			     (comment-region (point)
-					     (progn (insert text) (point)))
+					     (progn
+					       (insert (org-babel-trim text))
+					       (point)))
 			     (end-of-line nil)
 			     (insert "\n"))))
-      (insert-comment (format "[[%s][%s]]" (org-link-escape link) source-name))
-      (insert (format "\n%s\n" (replace-regexp-in-string
-				"^," "" (org-babel-chomp body))))
-      (insert-comment (format "%s ends here" source-name)))))
+      (when comment (insert-comment comment))
+      (when link-p (insert-comment (format "[[%s][%s]]" link source-name)))
+      (when org-babel-tangle-pad-newline (insert "\n"))
+      (insert (format "%s\n" (replace-regexp-in-string
+			      "^," "" (org-babel-trim body))))
+      (when link-p (insert-comment (format "%s ends here" source-name))))))
 
 (provide 'ob-tangle)
 

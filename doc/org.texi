@@ -11894,10 +11894,23 @@ basename}.
 @subsubsection @code{:comments}
 By default code blocks are tangled to source-code files without any insertion
 of comments beyond those which may already exist in the body of the code
-block.  The @code{:comments} header argument can be set to ``yes''
-e.g. @code{:comments yes} to enable the insertion of comments around code
-blocks during tangling.  The inserted comments contain pointers back to the
-original Org file from which the comment was tangled.
+block.  The @code{:comments} header argument can be set as follows to control
+the insertion of extra comments into the tangled code file.
+
+@itemize @bullet
+@item @code{no}
+The default.  No extra comments are inserted during tangling.
+@item @code{link}
+The code block is wrapped in comments which contain pointers back to the
+original Org file from which the code was tangled.
+@item @code{yes}
+A synonym for ``link'' to maintain backwards compatibility.
+@item @code{org}
+Include text from the original org-mode file which preceded the code block as
+a comment which precedes the tangled code.
+@item @code{both}
+Turns on both the ``link'' and ``org'' comment options.
+@end itemize
 
 @node no-expand, session, comments, Specific header arguments
 @subsubsection @code{:no-expand}
