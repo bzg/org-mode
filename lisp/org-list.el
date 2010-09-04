@@ -1689,12 +1689,12 @@ With prefix arg TOGGLE-PRESENCE, add or remove checkboxes.  With
 double prefix, set checkbox to [-].
 
 When there is an active region, toggle status or presence of the
-checkbox in the first line, and make every item in the region
-have the same status or presence, respectively.
+first checkbox there, and make every item inside have the
+same status or presence, respectively.
 
 If the cursor is in a headline, apply this to all checkbox items
 in the text below the heading, taking as reference the first item
-in subtree."
+in subtree, ignoring drawers."
   (interactive "P")
   ;; Bounds is a list of type (beg end single-p) where single-p is t
   ;; when `org-toggle-checkbox' is applied to a single item. Only
@@ -1702,22 +1702,34 @@ in subtree."
   (let* ((bounds
           (cond
            ((org-region-active-p)
-            (list (region-beginning) (region-end) nil))
+            (let ((rbeg (region-beginning))
+		  (rend (region-end)))
+	      (save-excursion
+		(goto-char rbeg)
+		(if (org-search-forward-unenclosed org-item-beginning-re rend 'move)
+		    (list (point-at-bol) rend nil)
+		  (error "No item in region")))))
            ((org-on-heading-p)
-            ;; In this case, reference line is the first item in subtree
-            (let ((limit (save-excursion (outline-next-heading) (point))))
+            ;; In this case, reference line is the first item in
+	    ;; subtree outside drawers
+            (let ((pos (point))
+		  (limit (save-excursion (outline-next-heading) (point))))
               (save-excursion
+		(goto-char limit)
+		(org-search-backward-unenclosed ":END:" pos 'move)
                 (org-search-forward-unenclosed
 		 org-item-beginning-re limit 'move)
                 (list (point) limit nil))))
            ((org-at-item-p)
             (list (point-at-bol) (point-at-eol) t))
            (t (error "Not at an item or heading, and no active region"))))
-         ;; marker is needed because deleting checkboxes will change END
+	 (beg (car bounds))
+	 ;; marker is needed because deleting or inserting checkboxes
+	 ;; will change bottom point
          (end (copy-marker (nth 1 bounds)))
          (single-p (nth 2 bounds))
          (ref-presence (save-excursion
-			 (goto-char (car bounds))
+			 (goto-char beg)
 			 (org-at-item-checkbox-p)))
          (ref-status (equal (match-string 1) "[X]"))
          (act-on-item
@@ -1751,7 +1763,7 @@ in subtree."
                          (t "[X]"))
                    t t nil 1))))))))
     (save-excursion
-      (beginning-of-line)
+      (goto-char beg)
       (while (< (point) end)
         (funcall act-on-item ref-presence ref-status)
         (org-search-forward-unenclosed org-item-beginning-re end 'move)))
@@ -1792,104 +1804,105 @@ with the current numbers.  With optional prefix argument ALL, do this for
 the whole buffer."
   (interactive "P")
   (save-excursion
-    (let* ((buffer-invisibility-spec (org-inhibit-invisibility)) ; Emacs 21
-	   (beg (condition-case nil
-		    (progn (org-back-to-heading) (point))
-		  (error (point-min))))
-	   (end (move-marker (make-marker)
-			     (progn (outline-next-heading) (point))))
-	   (re "\\(\\(\\[[0-9]*%\\]\\)\\|\\(\\[[0-9]*/[0-9]*\\]\\)\\)")
-	   (re-box "^[ \t]*\\([-+*]\\|[0-9]+[.)]\\) +\\(\\[[- X]\\]\\)")
-	   (re-find (concat re "\\|" re-box))
-	   beg-cookie end-cookie is-percent c-on c-off lim new
-	   eline curr-ind next-ind continue-from startsearch
-	   (recursive
-	    (or (not org-hierarchical-checkbox-statistics)
-		(string-match "\\<recursive\\>"
-			      (or (ignore-errors
-				    (org-entry-get nil "COOKIE_DATA"))
-				  ""))))
-	   (cstat 0))
-      (when all
-	(goto-char (point-min))
-	(outline-next-heading)
-	(setq beg (point) end (point-max)))
-      (goto-char end)
-      ;; find each statistics cookie
-      (while (and (org-search-backward-unenclosed re-find beg t)
-		  (not (save-match-data
-			 (and (org-on-heading-p)
-			      (string-match "\\<todo\\>"
-					    (downcase
-					     (or (org-entry-get
-						  nil "COOKIE_DATA")
-						 "")))))))
-	(setq beg-cookie (match-beginning 1)
-	      end-cookie (match-end 1)
-	      cstat (+ cstat (if end-cookie 1 0))
-	      startsearch (point-at-eol)
-	      continue-from (match-beginning 0)
-	      is-percent (match-beginning 2)
-	      lim (cond
-		   ((org-on-heading-p) (outline-next-heading) (point))
-		   ((org-at-item-p) (org-end-of-item) (point))
-		   (t nil))
-	      c-on 0
-	      c-off 0)
-	(when lim
-	  ;; find first checkbox for this cookie and gather
-	  ;; statistics from all that are at this indentation level
-	  (goto-char startsearch)
-	  (if (org-search-forward-unenclosed re-box lim t)
-	      (progn
-		(goto-char (org-get-item-beginning))
-		(setq curr-ind (org-get-indentation))
-		(setq next-ind curr-ind)
-		(while (and (bolp) (org-at-item-p)
-			    (if recursive
-				(<= curr-ind next-ind)
-			      (= curr-ind next-ind)))
-		  (setq eline (point-at-eol))
-		  (if (org-search-forward-unenclosed re-box eline t)
-		      (if (member (match-string 2) '("[ ]" "[-]"))
-			  (setq c-off (1+ c-off))
-			(setq c-on (1+ c-on))))
-		  (if (not recursive)
-		      ;; org-get-next-item goes through list-enders
-		      ;; with proper limit.
-		      (goto-char (or (org-get-next-item (point) lim) lim))
-		    (end-of-line)
-		    (when (org-search-forward-unenclosed
-			   org-item-beginning-re lim t)
-		      (beginning-of-line)))
-		  (setq next-ind (org-get-indentation)))))
-	  (goto-char continue-from)
-	  ;; update cookie
-	  (when end-cookie
-	    (setq new (if is-percent
-			  (format "[%d%%]" (/ (* 100 c-on)
-					      (max 1 (+ c-on c-off))))
-			(format "[%d/%d]" c-on (+ c-on c-off))))
-	    (goto-char beg-cookie)
-	    (insert new)
-	    (delete-region (point) (+ (point) (- end-cookie beg-cookie))))
-	  ;; update items checkbox if it has one
-	  (when (org-at-item-p)
-	    (goto-char (org-get-item-beginning))
-	    (when (and (> (+ c-on c-off) 0)
-		       (org-search-forward-unenclosed re-box (point-at-eol) t))
-	      (setq beg-cookie (match-beginning 2)
-		    end-cookie (match-end       2))
-	      (delete-region beg-cookie end-cookie)
-	      (goto-char beg-cookie)
-	      (cond ((= c-off 0) (insert "[X]"))
-		    ((= c-on  0) (insert "[ ]"))
-		    (t		(insert "[-]")))
-	      )))
-	(goto-char continue-from))
+    (let ((cstat 0))
+      (catch 'exit
+	(while t
+	  (let* ((buffer-invisibility-spec (org-inhibit-invisibility)) ; Emacs 21
+		 (beg (condition-case nil
+			  (progn (org-back-to-heading) (point))
+			(error (point-min))))
+		 (end (copy-marker (save-excursion
+				     (outline-next-heading) (point))))
+		 (re-cookie "\\(\\(\\[[0-9]*%\\]\\)\\|\\(\\[[0-9]*/[0-9]*\\]\\)\\)")
+		 (re-box "^[ \t]*\\([-+*]\\|[0-9]+[.)]\\)[ \t]+\\(?:\\[@\\(?:start:\\)?[0-9]+\\][ \t]*\\)?\\(\\[[- X]\\]\\)")
+		 beg-cookie end-cookie is-percent c-on c-off lim new
+		 curr-ind next-ind continue-from startsearch list-beg list-end
+		 (recursive
+		  (or (not org-hierarchical-checkbox-statistics)
+		      (string-match "\\<recursive\\>"
+				    (or (ignore-errors
+					  (org-entry-get nil "COOKIE_DATA"))
+					"")))))
+	    (goto-char end)
+	    ;; find each statistics cookie
+	    (while (and (org-search-backward-unenclosed re-cookie beg 'move)
+			(not (save-match-data
+			       (and (org-on-heading-p)
+				    (string-match "\\<todo\\>"
+						  (downcase
+						   (or (org-entry-get
+							nil "COOKIE_DATA")
+						       "")))))))
+	      (setq beg-cookie (match-beginning 1)
+		    end-cookie (match-end 1)
+		    cstat (+ cstat (if end-cookie 1 0))
+		    startsearch (point-at-eol)
+		    continue-from (match-beginning 0)
+		    is-percent (match-beginning 2)
+		    lim (cond
+			 ((org-on-heading-p) (outline-next-heading) (point))
+			 ;; Ensure many cookies in the same list won't imply
+			 ;; computing list boundaries as many times.
+			 ((org-at-item-p)
+			  (unless (and list-beg (>= (point) list-beg))
+			    (setq list-beg (org-list-top-point)
+				  list-end (copy-marker
+					    (org-list-bottom-point))))
+			  (org-get-end-of-item list-end))
+			 (t nil))
+		    c-on 0
+		    c-off 0)
+	      (when lim
+		;; find first checkbox for this cookie and gather
+		;; statistics from all that are at this indentation level
+		(goto-char startsearch)
+		(if (org-search-forward-unenclosed re-box lim t)
+		    (progn
+		      (beginning-of-line)
+		      (setq curr-ind (org-get-indentation))
+		      (setq next-ind curr-ind)
+		      (while (and (bolp) (org-at-item-p)
+				  (if recursive
+				      (<= curr-ind next-ind)
+				    (= curr-ind next-ind)))
+			(when (org-at-item-checkbox-p)
+			  (if (member (match-string 1) '("[ ]" "[-]"))
+			      (setq c-off (1+ c-off))
+			    (setq c-on (1+ c-on))))
+			(if (not recursive)
+			    ;; org-get-next-item goes through list-enders
+			    ;; with proper limit.
+			    (goto-char (or (org-get-next-item (point) lim) lim))
+			  (end-of-line)
+			  (when (org-search-forward-unenclosed
+				 org-item-beginning-re lim t)
+			    (beginning-of-line)))
+			(setq next-ind (org-get-indentation)))))
+		(goto-char continue-from)
+		;; update cookie
+		(when end-cookie
+		  (setq new (if is-percent
+				(format "[%d%%]" (/ (* 100 c-on)
+						    (max 1 (+ c-on c-off))))
+			      (format "[%d/%d]" c-on (+ c-on c-off))))
+		  (goto-char beg-cookie)
+		  (insert new)
+		  (delete-region (point) (+ (point) (- end-cookie beg-cookie))))
+		;; update items checkbox if it has one
+		(when (and (org-at-item-checkbox-p)
+			   (> (+ c-on c-off) 0))
+		  (setq beg-cookie (match-beginning 1)
+			end-cookie (match-end 1))
+		  (delete-region beg-cookie end-cookie)
+		  (goto-char beg-cookie)
+		  (cond ((= c-off 0) (insert "[X]"))
+			((= c-on 0) (insert "[ ]"))
+			(t (insert "[-]")))))
+	      (goto-char continue-from)))
+	  (unless (and all (outline-next-heading)) (throw 'exit nil))))
       (when (interactive-p)
-	(message "Checkbox statistics updated %s (%d places)"
-		 (if all "in entire file" "in current outline entry") cstat)))))
+	      (message "Checkbox statistics updated %s (%d places)"
+		       (if all "in entire file" "in current outline entry") cstat)))))
 
 (defun org-get-checkbox-statistics-face ()
   "Select the face for checkbox statistics.
