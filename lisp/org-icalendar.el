@@ -311,9 +311,7 @@ When COMBINE is non nil, add the category to each line."
 		inc t
 		hd (condition-case nil
 		       (org-icalendar-cleanup-string
-			(replace-regexp-in-string 
-			 ":[[:alnum:]_@#%:]+:[ \t]*$" ""
-			 (org-get-heading)))
+			(org-get-heading))
 		     (error (throw :skip nil)))
 		summary (org-icalendar-cleanup-string
 			 (org-entry-get nil "SUMMARY"))
