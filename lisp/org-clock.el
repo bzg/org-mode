@@ -35,6 +35,7 @@
   (require 'cl))
 
 (declare-function calendar-absolute-from-iso    "cal-iso"    (&optional date))
+(declare-function notifications-notify "notifications" ())
 (defvar org-time-stamp-formats)
 
 (defgroup org-clock nil
@@ -558,6 +559,7 @@ use libnotify if available, or fall back on a message."
 	 (start-process "emacs-timer-notification" nil
 			org-show-notification-handler notification))
 	((featurep 'notifications)
+	 (require 'notifications)
 	 (notifications-notify
 	  :title "Org-mode message"
 	  :body notification
