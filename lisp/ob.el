@@ -728,8 +728,26 @@ portions of results lines."
 			      'org-babel-show-result-all 'append 'local)))
 
 (defmacro org-babel-map-src-blocks (file &rest body)
-  "Evaluate BODY forms on each source-block in FILE. If FILE is
-nil evaluate BODY forms on source blocks in current buffer."
+  "Evaluate BODY forms on each source-block in FILE.
+If FILE is nil evaluate BODY forms on source blocks in current
+buffer.  During evaluation of BODY the following local variables
+are set relative to the currently matched code block.
+
+full-block ------- string holding the entirety of the code block
+beg-block -------- point at the beginning of the code block
+end-block -------- point at the end of the matched code block
+lang ------------- string holding the language of the code block
+beg-lang --------- point at the beginning of the lang
+end-lang --------- point at the end of the lang
+switches --------- string holding the switches
+beg-switches ----- point at the beginning of the switches
+end-switches ----- point at the end of the switches
+header-args ------ string holding the header-args
+beg-header-args -- point at the beginning of the header-args
+end-header-args -- point at the end of the header-args
+body ------------- string holding the body of the code block
+beg-body --------- point at the beginning of the body
+end-body --------- point at the end of the body"
   (declare (indent 1))
   `(let ((visited-p (or (null ,file)
 			(get-file-buffer (expand-file-name ,file))))
@@ -740,7 +758,22 @@ nil evaluate BODY forms on source blocks in current buffer."
        (goto-char (point-min))
        (while (re-search-forward org-babel-src-block-regexp nil t)
          (goto-char (match-beginning 0))
-         (save-match-data ,@body)
+	 (let ((full-block (match-string 0))
+	       (beg-block (match-beginning 0))
+	       (end-block (match-beginning 0))
+	       (lang (match-string 2))
+	       (beg-lang (match-beginning 2))
+	       (end-lang (match-end 2))
+	       (switches (match-string 3))
+	       (beg-switches (match-beginning 3))
+	       (end-switches (match-end 3))
+	       (header-args (match-string 4))
+	       (beg-header-args (match-beginning 4))
+	       (end-header-args (match-end 4))
+	       (body (match-string 5))
+	       (beg-body (match-beginning 5))
+	       (end-body (match-end 5)))
+	   (save-match-data ,@body))
          (goto-char (match-end 0))))
      (unless visited-p
        (kill-buffer to-be-removed))
