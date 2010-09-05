@@ -209,6 +209,7 @@ buffer."
     (setq org-edit-src-saved-temp-window-config (current-window-configuration)))
   (let ((line (org-current-line))
 	(col (current-column))
+	(mark (and (use-region-p) (mark)))
 	(case-fold-search t)
 	(info (org-edit-src-find-region-and-lang))
 	(babel-info (org-babel-get-src-block-info))
@@ -217,7 +218,8 @@ buffer."
 	(end (make-marker))
 	(preserve-indentation org-src-preserve-indentation)
 	(allow-write-back-p (null code))
-	block-nindent total-nindent ovl lang lang-f single lfmt begline buffer msg)
+	block-nindent total-nindent ovl lang lang-f single lfmt buffer msg
+	begline markline markcol)
     (if (not info)
 	nil
       (setq beg (move-marker beg (nth 0 info))
@@ -235,6 +237,10 @@ buffer."
 	    block-nindent (nth 5 info)
 	    lang-f (intern (concat lang "-mode"))
 	    begline (save-excursion (goto-char beg) (org-current-line)))
+      (if (and mark (>= mark beg) (<= mark end))
+	  (save-excursion (goto-char mark)
+			  (setq markline (org-current-line)
+				markcol (current-column))))
       (if (equal lang-f 'table.el-mode)
 	  (setq lang-f (lambda ()
 			 (text-mode)
@@ -293,6 +299,12 @@ buffer."
 	  (while (re-search-forward "^," nil t)
 	    (if (eq (org-current-line) line) (setq total-nindent (1+ total-nindent)))
 	    (replace-match "")))
+	(when markline
+	  (org-goto-line (1+ (- markline begline)))
+	  (org-move-to-column
+	   (if preserve-indentation markcol (max 0 (- markcol total-nindent))))
+	  (push-mark (point) 'no-message t)
+	  (setq deactivate-mark nil))
 	(org-goto-line (1+ (- line begline)))
 	(org-move-to-column
 	 (if preserve-indentation col (max 0 (- col total-nindent))))
