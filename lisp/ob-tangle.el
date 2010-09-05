@@ -35,6 +35,7 @@
 (declare-function org-link-escape "org" (text &optional table))
 (declare-function org-heading-components "org" ())
 (declare-function org-back-to-heading "org" (invisible-ok))
+(declare-function org-fill-template "org" (template alist))
 
 (defcustom org-babel-tangle-lang-exts
   '(("emacs-lisp" . "el"))
@@ -63,6 +64,28 @@ then the name of the language is used."
   "Switch indicating whether to pad tangled code with newlines."
   :group 'org-babel
   :type 'boolean)
+
+(defcustom org-babel-tangle-comment-format-beg "[[%link][%sourcename]]"
+  "Format of inserted comments in tangled code files.
+The following format strings can be used to insert special
+information into the output using `org-fill-template'.
+%start-line --- the line number at the start of the code block
+%file --------- the file from which the code block was tangled
+%link --------- Org-mode style link to the code block
+%source-name -- name of the code block"
+  :group 'org-babel
+  :type 'string)
+
+(defcustom org-babel-tangle-comment-format-end "%sourcename ends here"
+  "Format of inserted comments in tangled code files.
+The following format strings can be used to insert special
+information into the output using `org-fill-template'.
+%start-line --- the line number at the start of the code block
+%file --------- the file from which the code block was tangled
+%link --------- Org-mode style link to the code block
+%source-name -- name of the code block"
+  :group 'org-babel
+  :type 'string)
 
 (defun org-babel-find-file-noselect-refresh (file)
   "Find file ensuring that the latest changes on disk are
@@ -163,7 +186,7 @@ exported source code blocks by language."
            (mapc
             (lambda (spec)
               (flet ((get-spec (name)
-                               (cdr (assoc name (nth 2 spec)))))
+                               (cdr (assoc name (nth 4 spec)))))
                 (let* ((tangle (get-spec :tangle))
                        (she-bang ((lambda (sheb) (when (> (length sheb) 0) sheb))
 				  (get-spec :shebang)))
@@ -248,7 +271,10 @@ code blocks by language."
 				 (condition-case nil
 				     (nth 4 (org-heading-components))
 				   (error (buffer-file-name)))))
-      (let* ((link (progn (call-interactively 'org-store-link)
+      (let* ((start-line (save-restriction (widen)
+					   (+ 1 (line-number-at-pos (point)))))
+	     (file (buffer-file-name))
+	     (link (progn (call-interactively 'org-store-link)
                           (org-babel-clean-text-properties
 			   (car (pop org-stored-links)))))
              (info (org-babel-get-src-block-info))
@@ -289,7 +315,8 @@ code blocks by language."
             (setq blocks (delq (assoc src-lang blocks) blocks))
             (setq blocks (cons
 			  (cons src-lang
-				(cons (list link source-name params body comment)
+				(cons (list start-line file link
+					    source-name params body comment)
 				      by-lang)) blocks))))))
     ;; ensure blocks in the correct order
     (setq blocks
@@ -305,30 +332,39 @@ source code file.  This function uses `comment-region' which
 assumes that the appropriate major-mode is set.  SPEC has the
 form
 
-  (link source-name params body comment)"
-  (let* ((link (org-link-escape (nth 0 spec)))
-	 (source-name (nth 1 spec))
-	 (body (nth 3 spec))
-	 (comment (nth 4 spec))
-	 (comments (cdr (assoc :comments (nth 2 spec))))
+  (start-line file link source-name params body comment)"
+  (let* ((start-line (nth 0 spec))
+	 (file (nth 1 spec))
+	 (link (org-link-escape (nth 2 spec)))
+	 (source-name (nth 3 spec))
+	 (body (nth 5 spec))
+	 (comment (nth 6 spec))
+	 (comments (cdr (assoc :comments (nth 4 spec))))
 	 (link-p (or (string= comments "both") (string= comments "link")
-		     (string= comments "yes"))))
+		     (string= comments "yes")))
+	 (link-data (mapcar (lambda (el)
+			      (cons (symbol-name el)
+				    ((lambda (le)
+				       (if (stringp le) le (format "%S" le)))
+				     (eval el))))
+			    '(start-line file link source-name))))
     (flet ((insert-comment (text)
-			   (when (and comments (not (string= comments "no")))
-			     (when org-babel-tangle-pad-newline
-			       (insert "\n"))
-			     (comment-region (point)
-					     (progn
-					       (insert (org-babel-trim text))
-					       (point)))
-			     (end-of-line nil)
-			     (insert "\n"))))
+	    (let ((text (org-babel-trim text)))
+	      (when (and comments (not (string= comments "no"))
+			 (> (length text) 0))
+		(when org-babel-tangle-pad-newline (insert "\n"))
+		(comment-region (point) (progn (insert text) (point)))
+		(end-of-line nil) (insert "\n")))))
       (when comment (insert-comment comment))
-      (when link-p (insert-comment (format "[[%s][%s]]" link source-name)))
+      (when link-p
+	(insert-comment
+	 (org-fill-template org-babel-tangle-comment-format-beg link-data)))
       (when org-babel-tangle-pad-newline (insert "\n"))
       (insert (format "%s\n" (replace-regexp-in-string
 			      "^," "" (org-babel-trim body))))
-      (when link-p (insert-comment (format "%s ends here" source-name))))))
+      (when link-p
+	(insert-comment
+	 (org-fill-template org-babel-tangle-comment-format-end link-data))))))
 
 (provide 'ob-tangle)
 
