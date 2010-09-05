@@ -8141,11 +8141,13 @@ It should be a function accepting three arguments:
 
   path    the path of the link, the text after the prefix (like \"http:\")
   desc    the description of the link, if any, nil if there was no description
-  format  the export format, a symbol like `html' or `latex'.
+  format  the export format, a symbol like `html' or `latex' or `ascii'..
 
 The function may use the FORMAT information to return different values
 depending on the format.  The return value will be put literally into
-the exported file.
+the exported file.  If the return value is nil, this means Org should
+do what it normally does with links which do not have EXPORT defined.
+
 Org-mode has a built-in default for exporting links.  If you are happy with
 this default, there is no need to define an export function for the link
 type.  For a simple example of an export function, see `org-bbdb.el'."
