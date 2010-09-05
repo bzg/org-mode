@@ -40,6 +40,9 @@
 (defvar org-M-RET-may-split-line)
 (defvar org-complex-heading-regexp)
 (defvar org-odd-levels-only)
+(defvar org-outline-regexp)
+(defvar org-ts-regexp)
+(defvar org-ts-regexp-both)
 
 (declare-function org-invisible-p "org" ())
 (declare-function org-on-heading-p "org" (&optional invisible-ok))
@@ -55,6 +58,13 @@
 		  (pom property &optional inherit literal-nil))
 (declare-function org-narrow-to-subtree "org" ())
 (declare-function org-show-subtree "org" ())
+(declare-function org-in-regexps-block-p "org"
+		  (start-re end-re &optional bound))
+(declare-function org-level-increment "org" ())
+(declare-function org-at-heading-p "org" (&optional ignored))
+(declare-function outline-previous-heading "outline" ())
+(declare-function org-icompleting-read "org" (&rest args))
+(declare-function org-time-string-to-seconds "org" (s))
 
 (defgroup org-plain-lists nil
   "Options concerning plain lists in Org-mode."
