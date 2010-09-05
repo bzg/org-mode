@@ -11906,8 +11906,10 @@ original Org file from which the code was tangled.
 @item @code{yes}
 A synonym for ``link'' to maintain backwards compatibility.
 @item @code{org}
-Include text from the original org-mode file which preceded the code block as
-a comment which precedes the tangled code.
+Include text from the org-mode file as a comment.
+
+The text is picked from the leading context of the tangled code and is
+limited by the nearest headline or source block as the case may be.
 @item @code{both}
 Turns on both the ``link'' and ``org'' comment options.
 @end itemize
