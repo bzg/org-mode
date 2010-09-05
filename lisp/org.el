@@ -16385,6 +16385,7 @@ BEG and END default to the buffer boundaries."
 (org-defkey org-mode-map "\C-c\C-x."    'org-timer)
 (org-defkey org-mode-map "\C-c\C-x-"    'org-timer-item)
 (org-defkey org-mode-map "\C-c\C-x0"    'org-timer-start)
+(org-defkey org-mode-map "\C-c\C-x_"    'org-timer-stop)
 (org-defkey org-mode-map "\C-c\C-x,"    'org-timer-pause-or-continue)
 
 (define-key org-mode-map "\C-c\C-x\C-c" 'org-columns)
