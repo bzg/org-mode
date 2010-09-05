@@ -153,7 +153,7 @@ This function is called by `org-babel-execute-src-block'."
 		(if rownames-p "1" "NULL")))
     (format "%s <- %s" name (org-babel-R-quote-tsv-field value))))
 
-(defvar ess-ask-for-ess-directory)
+(defvar ess-ask-for-ess-directory nil)
 (defun org-babel-R-initiate-session (session params)
   "If there is not a current R process then create one."
   (unless (string= session "none")
@@ -172,7 +172,7 @@ This function is called by `org-babel-execute-src-block'."
 	       (buffer-name))))
 	  (current-buffer))))))
 
-(defvar ess-local-process-name)
+(defvar ess-local-process-name nil)
 (defun org-babel-R-associate-session (session)
   "Associate R code buffer with an R session.
 Make SESSION be the inferior ESS process associated with the
