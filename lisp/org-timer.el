@@ -322,10 +322,6 @@ VALUE can be `on', `off', or `pause'."
       (message "%d minute(s) %d seconds left before next time out"
 	       rmins rsecs))))
 
-(defun bzg-test (&optional test)
-  (interactive "P")
-  test)
-
 ;;;###autoload
 (defun org-timer-set-timer (&optional opt)
   "Prompt for a duration and set a timer.
