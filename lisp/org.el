@@ -16496,6 +16496,34 @@ If not, return to the original position and throw an error."
 
 (defvar org-table-auto-blank-field) ; defined in org-table.el
 (defvar org-speed-command nil)
+
+(defun org-speed-command-default-hook (keys)
+  "Hook for activating single-letter speed commands.
+`org-speed-commands-default' specifies a minimal command set. Use
+`org-speed-commands-user' for further customization."
+  (when (or (and (bolp) (looking-at outline-regexp))
+	    (and (functionp org-use-speed-commands)
+		 (funcall org-use-speed-commands)))
+    (cdr (assoc keys (append org-speed-commands-user
+			     org-speed-commands-default)))))
+
+(defcustom org-speed-command-hook 'org-speed-command-default-hook
+  "Hook for activating speed commands at strategic locations.
+Hook functions are called in sequence until a valid handler is
+found.
+
+Each hook takes a single argument, a user-pressed command key
+which is also a `self-insert-command' from the global map.
+
+Within the hook, examine the cursor position and the command key
+and return nil or a valid handler as appropriate. Handler could
+be one of an interactive command, a function, or a form.
+
+Set `org-use-speed-commands' to non-nil value to enable this
+hook. The default setting is `org-speed-command-default-hook'."
+  :group 'org-structure
+  :type 'hook)
+
 (defun org-self-insert-command (N)
   "Like `self-insert-command', use overwrite-mode for whitespace in tables.
 If the cursor is in a table looking at whitespace, the whitespace is
@@ -16503,13 +16531,9 @@ overwritten, and the table is not marked as requiring realignment."
   (interactive "p")
   (cond
    ((and org-use-speed-commands
-	 (or (and (bolp) (looking-at outline-regexp))
-	     (and (functionp org-use-speed-commands)
-		  (funcall org-use-speed-commands)))
-	 (setq
-	  org-speed-command
-	  (or (cdr (assoc (this-command-keys) org-speed-commands-user))
-	      (cdr (assoc (this-command-keys) org-speed-commands-default)))))
+	 (setq org-speed-command
+	       (run-hook-with-args-until-success
+		'org-speed-command-hook (this-command-keys))))
     (cond
      ((commandp org-speed-command)
       (setq this-command org-speed-command)
