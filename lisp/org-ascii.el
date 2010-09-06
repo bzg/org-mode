@@ -311,7 +311,7 @@ publishing directory."
 		  :add-text (plist-get opt-plist :text))
 		 "\n"))
 	 thetoc have-headings first-heading-pos
-	 table-open table-buffer link-buffer link desc desc0 rpl wrap)
+	 table-open table-buffer link-buffer link desc desc0 rpl wrap fnc)
     (let ((inhibit-read-only t))
       (org-unmodified
        (remove-text-properties (point-min) (point-max)
@@ -446,12 +446,17 @@ publishing directory."
 	  (setq rpl (concat "["
 			    (or (match-string 3 line) (match-string 1 line))
 			    "]"))
-	  (when (and desc0 (not (equal desc0 link)))
-	    (if org-export-ascii-links-to-notes
-		(push (cons desc0 link) link-buffer)
-	      (setq rpl (concat rpl " (" link ")")
-		    wrap (+ (length line) (- (length (match-string 0 line)))
-			    (length desc)))))
+	  (if (functionp (setq fnc (nth 2 (assoc type org-link-protocols))))
+	      (setq rpl (or (save-match-data
+			      (funcall fnc (org-link-unescape path)
+				       desc0 'ascii))
+			    rpl))
+	    (when (and desc0 (not (equal desc0 link)))
+	      (if org-export-ascii-links-to-notes
+		  (push (cons desc0 link) link-buffer)
+		(setq rpl (concat rpl " (" link ")")
+		      wrap (+ (length line) (- (length (match-string 0 line)))
+			      (length desc))))))
 	  (setq line (replace-match rpl t t line))))
       (when custom-times
 	(setq line (org-translate-time line)))
@@ -482,7 +487,8 @@ publishing directory."
 		   (org-format-table-ascii table-buffer)
 		   "\n") "\n")))
        (t
-	(if (string-match "^\\([ \t]*\\)\\([-+*][ \t]+\\)\\(.*?\\)\\( ::\\)" line)
+	(if (string-match "^\\([ \t]*\\)\\([-+*][ \t]+\\)\\(.*?\\)\\( ::\\)"
+			  line)
 	    (setq line (replace-match "\\1\\3:" t nil line)))
 	(setq line (org-fix-indentation line org-ascii-current-indentation))
 	;; Remove forced line breaks
