@@ -311,7 +311,7 @@ publishing directory."
 		  :add-text (plist-get opt-plist :text))
 		 "\n"))
 	 thetoc have-headings first-heading-pos
-	 table-open table-buffer link-buffer link desc desc0 rpl wrap fnc)
+	 table-open table-buffer link-buffer link type desc desc0 rpl wrap fnc)
     (let ((inhibit-read-only t))
       (org-unmodified
        (remove-text-properties (point-min) (point-max)
@@ -347,7 +347,7 @@ publishing directory."
 
       (if (and (or author email)
 	       org-export-author-info)
-	  (insert(concat (nth 1 lang-words) ": " (or author "")
+	  (insert (concat (nth 1 lang-words) ": " (or author "")
 			  (if (and org-export-email-info
 				   email (string-match "\\S-" email))
 			      (concat " <" email ">") "")
@@ -431,10 +431,11 @@ publishing directory."
       ;; Remove the quoted HTML tags.
       (setq line (org-html-expand-for-ascii line))
       ;; Replace links with the description when possible
-      (while (string-match org-bracket-link-regexp line)
-	(setq link (match-string 1 line)
-	      desc0 (match-string 3 line)
-	      desc (or desc0 (match-string 1 line)))
+      (while (string-match org-bracket-link-analytic-regexp++ line)
+	(setq link (concat (match-string 1 line) (match-string 3 line))
+	      type (match-string 1 line)
+	      desc0 (match-string 5 line)
+	      desc (or desc0 link))
 	(if (and (> (length link) 8)
 		 (equal (substring link 0 8) "coderef:"))
 	    (setq line (replace-match
@@ -443,9 +444,7 @@ publishing directory."
 				      (substring link 8)
 				      org-export-code-refs)))
 			t t line))
-	  (setq rpl (concat "["
-			    (or (match-string 3 line) (match-string 1 line))
-			    "]"))
+	  (setq rpl (concat "[" desc "]"))
 	  (if (functionp (setq fnc (nth 2 (assoc type org-link-protocols))))
 	      (setq rpl (or (save-match-data
 			      (funcall fnc (org-link-unescape path)
