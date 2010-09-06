@@ -253,7 +253,7 @@ references."
                    (save-excursion (end-of-line 1) (forward-char 1) (point)))))
 
 (defvar org-stored-links)
-(defun org-babel-tangle-collect-blocks (&optional lang)
+(defun org-babel-tangle-collect-blocks (&optional language)
   "Collect source blocks in the current Org-mode file.
 Return an association list of source-code block specifications of
 the form used by `org-babel-spec-to-string' grouped by language.
@@ -308,8 +308,8 @@ code blocks by language."
 					      (match-end 0)))
 			 (point))))
              by-lang)
-        (unless (string= (cdr (assoc :tangle params)) "no") ;; skip
-          (unless (and lang (not (string= lang src-lang))) ;; limit by language
+        (unless (string= (cdr (assoc :tangle params)) "no")
+          (unless (and language (not (string= language src-lang)))
             ;; add the spec for this block to blocks under it's language
             (setq by-lang (cdr (assoc src-lang blocks)))
             (setq blocks (delq (assoc src-lang blocks) blocks))
