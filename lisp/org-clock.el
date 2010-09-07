@@ -35,7 +35,7 @@
   (require 'cl))
 
 (declare-function calendar-absolute-from-iso    "cal-iso"    (&optional date))
-(declare-function notifications-notify "notifications" ())
+(declare-function notifications-notify "notifications" (&rest params))
 (defvar org-time-stamp-formats)
 
 (defgroup org-clock nil
