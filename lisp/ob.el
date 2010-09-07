@@ -1275,76 +1275,76 @@ code ---- the results are extracted in the syntax of the source
         (when (member "file" result-params)
           (setq result (org-babel-result-to-file result))))
     (unless (listp result) (setq result (format "%S" result))))
-  (if (= (length result) 0)
-      (if (member "value" result-params)
-	  (message "No result returned by source block")
-	(message "Source block produced no output"))
-    (if (and result-params (member "silent" result-params))
-        (progn
-	  (message (replace-regexp-in-string "%" "%%" (format "%S" result)))
-	  result)
-      (when (and (stringp result) ;; ensure results end in a newline
-                 (not (or (string-equal (substring result -1) "\n")
-                          (string-equal (substring result -1) "\r"))))
-        (setq result (concat result "\n")))
-      (save-excursion
-	(let ((existing-result (org-babel-where-is-src-block-result
-				t info hash indent))
-	      (results-switches
-               (cdr (assoc :results_switches (nth 2 info))))
-	      beg end)
-	  (if (not existing-result)
-	      (setq beg (point))
-	    (goto-char existing-result)
-	    (save-excursion
-	      (re-search-forward "#" nil t)
-	      (setq indent (- (current-column) 1)))
-	    (forward-line 1)
+  (if (and result-params (member "silent" result-params))
+      (progn
+	(message (replace-regexp-in-string "%" "%%" (format "%S" result)))
+	result)
+    (when (and (stringp result) ;; ensure results end in a newline
+	       (not (or (string-equal (substring result -1) "\n")
+			(string-equal (substring result -1) "\r"))))
+      (setq result (concat result "\n")))
+    (save-excursion
+      (let ((existing-result (org-babel-where-is-src-block-result
+			      t info hash indent))
+	    (results-switches
+	     (cdr (assoc :results_switches (nth 2 info))))
+	    beg end)
+	(if (not existing-result)
 	    (setq beg (point))
-	    (cond
-	     ((member "replace" result-params)
-	      (delete-region (point) (org-babel-result-end)))
-	     ((member "append" result-params)
-	      (goto-char (org-babel-result-end)) (setq beg (point)))
-	     ((member "prepend" result-params) ;; already there
-	      )))
-	  (setq results-switches
-                (if results-switches (concat " " results-switches) ""))
+	  (goto-char existing-result)
+	  (save-excursion
+	    (re-search-forward "#" nil t)
+	    (setq indent (- (current-column) 1)))
+	  (forward-line 1)
+	  (setq beg (point))
 	  (cond
-	   ;; assume the result is a table if it's not a string
-	   ((not (stringp result))
-	    (insert (concat (orgtbl-to-orgtbl
-			     (if (or (eq 'hline (car result))
-				     (and (listp (car result))
-					  (listp (cdr (car result)))))
-				 result (list result))
-			     '(:fmt (lambda (cell) (format "%s" cell)))) "\n"))
-	    (goto-char beg) (when (org-at-table-p) (org-table-align)))
-	   ((member "file" result-params)
-	    (insert result))
-	   ((member "html" result-params)
-	    (insert (format "#+BEGIN_HTML%s\n%s#+END_HTML\n"
-                            results-switches result)))
-	   ((member "latex" result-params)
-	    (insert (format "#+BEGIN_LaTeX%s\n%s#+END_LaTeX\n"
-                            results-switches result)))
-	   ((member "code" result-params)
-	    (insert (format "#+BEGIN_SRC %s%s\n%s#+END_SRC\n"
-                            (or lang "none") results-switches result)))
-	   ((member "org" result-params)
-	    (insert (format "#+BEGIN_SRC org\n%s#+END_SRC\n" result)))
-	   ((member "raw" result-params)
-	    (save-excursion (insert result)) (if (org-at-table-p) (org-cycle)))
-	   (t
-	    (org-babel-examplize-region
-	     (point) (progn (insert result) (point)) results-switches)))
-	  ;; possibly indent the results to match the #+results line
-	  (setq end (if (listp result) (org-table-end) (point)))
-	  (when (and indent (> indent 0)
-		     ;; in this case `table-align' does the work for us
-		     (not (and (listp result)
-			       (member "append" result-params))))
-	    (indent-rigidly beg end indent))))
+	   ((member "replace" result-params)
+	    (delete-region (point) (org-babel-result-end)))
+	   ((member "append" result-params)
+	    (goto-char (org-babel-result-end)) (setq beg (point)))
+	   ((member "prepend" result-params) ;; already there
+	    )))
+	(setq results-switches
+	      (if results-switches (concat " " results-switches) ""))
+	(cond
+	 ;; assume the result is a table if it's not a string
+	 ((not (stringp result))
+	  (insert (concat (orgtbl-to-orgtbl
+			   (if (or (eq 'hline (car result))
+				   (and (listp (car result))
+					(listp (cdr (car result)))))
+			       result (list result))
+			   '(:fmt (lambda (cell) (format "%s" cell)))) "\n"))
+	  (goto-char beg) (when (org-at-table-p) (org-table-align)))
+	 ((member "file" result-params)
+	  (insert result))
+	 ((member "html" result-params)
+	  (insert (format "#+BEGIN_HTML%s\n%s#+END_HTML\n"
+			  results-switches result)))
+	 ((member "latex" result-params)
+	  (insert (format "#+BEGIN_LaTeX%s\n%s#+END_LaTeX\n"
+			  results-switches result)))
+	 ((member "code" result-params)
+	  (insert (format "#+BEGIN_SRC %s%s\n%s#+END_SRC\n"
+			  (or lang "none") results-switches result)))
+	 ((member "org" result-params)
+	  (insert (format "#+BEGIN_SRC org\n%s#+END_SRC\n" result)))
+	 ((member "raw" result-params)
+	  (save-excursion (insert result)) (if (org-at-table-p) (org-cycle)))
+	 (t
+	  (org-babel-examplize-region
+	   (point) (progn (insert result) (point)) results-switches)))
+	;; possibly indent the results to match the #+results line
+	(setq end (if (listp result) (org-table-end) (point)))
+	(when (and indent (> indent 0)
+		   ;; in this case `table-align' does the work for us
+		   (not (and (listp result)
+			     (member "append" result-params))))
+	  (indent-rigidly beg end indent))))
+    (if (= (length result) 0)
+	(if (member "value" result-params)
+	    (message "No result returned by source block")
+	  (message "Source block produced no output"))
       (message "finished"))))
 
 (defun org-babel-remove-result (&optional info)
