@@ -5022,8 +5022,11 @@ will be prompted for."
 				'(display t invisible t intangible t))
 	t)))
 
-(defvar org-src-fontify-natively t
-  "When non-nil, fontify code in code blocks.")
+(defcustom org-src-fontify-natively nil
+  "When non-nil, fontify code in code blocks."
+  :type 'boolean
+  :group 'org-appearance
+  :group 'org-babel)
 
 (defun org-fontify-meta-lines-and-blocks (limit)
   "Fontify #+ lines and blocks, in the correct ways."
