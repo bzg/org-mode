@@ -1115,7 +1115,9 @@ If CHECKBOX is non-nil, add a checkbox next to the bullet.
 Return t when things worked, nil when we are not in an item, or
 item is invisible."
   (unless (or (not (org-in-item-p))
-	      (org-invisible-p))
+	      (save-excursion
+		(goto-char (org-get-item-beginning))
+		(org-invisible-p)))
     (if (save-excursion
 	  (goto-char (org-get-item-beginning))
 	  (org-at-item-timer-p))
