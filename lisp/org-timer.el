@@ -31,7 +31,7 @@
 
 (require 'org)
 
-(declare-function org-show-notification "org-clock" (parameters))
+(declare-function org-notify "org-clock" (notification &optional play-sound))
 (declare-function org-agenda-error "org-agenda" ())
 
 (defvar org-timer-start-time nil
@@ -374,6 +374,7 @@ replace any running timer."
 		       (y-or-n-p "Replace current timer? ")))
 	      (not org-timer-current-timer))
 	  (progn
+	    (require 'org-clock)
 	    (when org-timer-current-timer
 	      (cancel-timer org-timer-current-timer))
 	    (setq org-timer-current-timer
