@@ -669,6 +669,9 @@ function ends."
 	      ;; recompute next-item: last sexp modified list
 	      (goto-char (org-get-next-item (point) bottom))
 	      (org-move-to-column col)))
+	    ;; checkbox update might modify bottom point, so use a
+	    ;; marker here
+	    (setq bottom (copy-marker bottom))
 	    (when checkbox (org-update-checkbox-count-maybe))
 	    (org-list-repair nil top bottom))))
     (goto-char true-pos)
