@@ -311,7 +311,7 @@ publishing directory."
 		  :add-text (plist-get opt-plist :text))
 		 "\n"))
 	 thetoc have-headings first-heading-pos
-	 table-open table-buffer link-buffer link type desc desc0 rpl wrap fnc)
+	 table-open table-buffer link-buffer link type path desc desc0 rpl wrap fnc)
     (let ((inhibit-read-only t))
       (org-unmodified
        (remove-text-properties (point-min) (point-max)
@@ -432,7 +432,8 @@ publishing directory."
       (setq line (org-html-expand-for-ascii line))
       ;; Replace links with the description when possible
       (while (string-match org-bracket-link-analytic-regexp++ line)
-	(setq link (concat (match-string 1 line) (match-string 3 line))
+	(setq path (match-string 3 line)
+	      link (concat (match-string 1 line) path)
 	      type (match-string 1 line)
 	      desc0 (match-string 5 line)
 	      desc (or desc0 link))
