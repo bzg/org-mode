@@ -1022,6 +1022,14 @@ If the point is not on a source block then return nil."
         (point))))))
 
 ;;;###autoload
+(defun org-babel-goto-src-block-head ()
+  "Go to the beginning of the current code block."
+  (interactive)
+  ((lambda (head)
+     (if head (goto-char head) (error "not currently in a code block")))
+   (org-babel-where-is-src-block-head)))
+
+;;;###autoload
 (defun org-babel-goto-named-src-block (name)
   "Go to a named source-code block."
   (interactive
