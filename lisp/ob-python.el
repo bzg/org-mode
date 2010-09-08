@@ -194,73 +194,87 @@ def main():
 open('%s', 'w').write( pprint.pformat(main()) )")
 
 (defun org-babel-python-evaluate
-  (buffer body &optional result-type result-params)
-  "Pass BODY to the Python process in BUFFER.
-If RESULT-TYPE equals 'output then return a list of the outputs
-of the statements in BODY, if RESULT-TYPE equals 'value then
-return the value of the last statement in BODY, as elisp."
-  (if (not buffer)
-      ;; external process evaluation
-      (case result-type
-	(output (org-babel-eval org-babel-python-command body))
-	(value (let ((tmp-file (org-babel-temp-file "python-results-")))
-		 (org-babel-eval org-babel-python-command
-				 (format
-				  (if (member "pp" result-params)
-				      org-babel-python-pp-wrapper-method
-				    org-babel-python-wrapper-method)
-				  (mapconcat
-				   (lambda (line) (format "\t%s" line))
-				   (split-string
-				    (org-remove-indentation
-				     (org-babel-trim body))
-				    "[\r\n]") "\n")
-				  tmp-file))
-		 ((lambda (raw)
-		    (if (or (member "code" result-params)
-			    (member "pp" result-params))
-			raw
-		      (org-babel-python-table-or-string raw)))
-		  (org-babel-eval-read-file tmp-file)))))
-    ;; comint session evaluation
-    (flet ((dump-last-value (tmp-file pp)
-	    (mapc
-	     (lambda (statement) (insert statement) (comint-send-input))
-	     (if pp
-		 (list
-		  "import pp"
-		  (format "open('%s', 'w').write(pprint.pformat(_))" tmp-file))
-	       (list (format "open('%s', 'w').write(str(_))" tmp-file)))))
-	   (input-body (body)
-	    (mapc (lambda (statement) (insert statement) (comint-send-input))
-		  (split-string (org-babel-trim body) "[\r\n]+"))
-	    (comint-send-input) (comint-send-input)))
-      (case result-type
-	(output
-	 (mapconcat
-	  #'org-babel-trim
-	  (butlast
-	   (org-babel-comint-with-output
-	       (buffer org-babel-python-eoe-indicator t body)
-	     (let ((comint-process-echoes nil))
-	       (input-body body)
-	       (insert org-babel-python-eoe-indicator)
-	       (comint-send-input))) 2) "\n"))
-	(value
-	 ((lambda (results)
-	    (if (or (member "code" result-params) (member "pp" result-params))
-		results
-	      (org-babel-python-table-or-string results)))
-	  (let ((tmp-file (org-babel-temp-file "python-results-")))
-	    (org-babel-comint-with-output
-		(buffer org-babel-python-eoe-indicator t body)
-	      (let ((comint-process-echoes nil))
-		(input-body body)
-		(dump-last-value tmp-file (member "pp" result-params))
-		(comint-send-input) (comint-send-input)
-		(insert org-babel-python-eoe-indicator)
-		(comint-send-input)))
-	    (org-babel-eval-read-file tmp-file))))))))
+  (session body &optional result-type result-params)
+  "Evaluate BODY as python code."
+  (if session
+      (org-babel-python-evaluate-session
+       session body result-type result-params)
+    (org-babel-python-evaluate-external-process
+     body result-type result-params)))
+
+(defun org-babel-python-evaluate-external-process
+  (body &optional result-type result-params)
+  "Evaluate BODY in external python process.
+If RESULT-TYPE equals 'output then return standard output as a
+string. If RESULT-TYPE equals 'value then return the value of the
+last statement in BODY, as elisp."
+  (case result-type
+    (output (org-babel-eval org-babel-python-command body))
+    (value (let ((tmp-file (org-babel-temp-file "python-results-")))
+	     (org-babel-eval org-babel-python-command
+			     (format
+			      (if (member "pp" result-params)
+				  org-babel-python-pp-wrapper-method
+				org-babel-python-wrapper-method)
+			      (mapconcat
+			       (lambda (line) (format "\t%s" line))
+			       (split-string
+				(org-remove-indentation
+				 (org-babel-trim body))
+				"[\r\n]") "\n")
+			      tmp-file))
+	     ((lambda (raw)
+		(if (or (member "code" result-params)
+			(member "pp" result-params))
+		    raw
+		  (org-babel-python-table-or-string raw)))
+	      (org-babel-eval-read-file tmp-file))))))
+
+(defun org-babel-python-evaluate-session
+  (session body &optional result-type result-params)
+  "Pass BODY to the Python process in SESSION.
+If RESULT-TYPE equals 'output then return standard output as a
+string. If RESULT-TYPE equals 'value then return the value of the
+last statement in BODY, as elisp."
+  (flet ((dump-last-value
+	  (tmp-file pp)
+	  (mapc
+	   (lambda (statement) (insert statement) (comint-send-input))
+	   (if pp
+	       (list
+		"import pp"
+		(format "open('%s', 'w').write(pprint.pformat(_))" tmp-file))
+	     (list (format "open('%s', 'w').write(str(_))" tmp-file)))))
+	 (input-body (body)
+		     (mapc (lambda (statement) (insert statement) (comint-send-input))
+			   (split-string (org-babel-trim body) "[\r\n]+"))
+		     (comint-send-input) (comint-send-input)))
+    (case result-type
+      (output
+       (mapconcat
+	#'org-babel-trim
+	(butlast
+	 (org-babel-comint-with-output
+	     (session org-babel-python-eoe-indicator t body)
+	   (let ((comint-process-echoes nil))
+	     (input-body body)
+	     (insert org-babel-python-eoe-indicator)
+	     (comint-send-input))) 2) "\n"))
+      (value
+       ((lambda (results)
+	  (if (or (member "code" result-params) (member "pp" result-params))
+	      results
+	    (org-babel-python-table-or-string results)))
+	(let ((tmp-file (org-babel-temp-file "python-results-")))
+	  (org-babel-comint-with-output
+	      (session org-babel-python-eoe-indicator t body)
+	    (let ((comint-process-echoes nil))
+	      (input-body body)
+	      (dump-last-value tmp-file (member "pp" result-params))
+	      (comint-send-input) (comint-send-input)
+	      (insert org-babel-python-eoe-indicator)
+	      (comint-send-input)))
+	  (org-babel-eval-read-file tmp-file)))))))
 
 (defun org-babel-python-read-string (string)
   "Strip 's from around python string"
