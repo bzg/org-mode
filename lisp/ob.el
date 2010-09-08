@@ -1022,6 +1022,14 @@ If the point is not on a source block then return nil."
         (point))))))
 
 ;;;###autoload
+(defun org-babel-goto-src-block-head ()
+  "Go to the beginning of the current code block."
+  (interactive)
+  ((lambda (head)
+     (if head (goto-char head) (error "not currently in a code block")))
+   (org-babel-where-is-src-block-head)))
+
+;;;###autoload
 (defun org-babel-goto-named-src-block (name)
   "Go to a named source-code block."
   (interactive
@@ -1097,7 +1105,9 @@ buffer or nil if no such result exists."
 With optional prefix argument ARG, jump forward ARG many source blocks."
   (interactive "P")
   (when (looking-at org-babel-src-block-regexp) (forward-char 1))
-  (re-search-forward org-babel-src-block-regexp nil nil (or arg 1))
+  (condition-case nil
+      (re-search-forward org-babel-src-block-regexp nil nil (or arg 1))
+    (error (error "No further code blocks")))
   (goto-char (match-beginning 0)) (org-show-context))
 
 ;;;###autoload
@@ -1105,7 +1115,9 @@ With optional prefix argument ARG, jump forward ARG many source blocks."
   "Jump to the previous source block.
 With optional prefix argument ARG, jump backward ARG many source blocks."
   (interactive "P")
-  (re-search-backward org-babel-src-block-regexp nil nil (or arg 1))
+  (condition-case nil
+      (re-search-backward org-babel-src-block-regexp nil nil (or arg 1))
+    (error (error "No previous code blocks")))
   (goto-char (match-beginning 0)) (org-show-context))
 
 (defvar org-babel-lob-one-liner-regexp)

@@ -58,6 +58,8 @@ functions which are assigned key bindings, and see
     ("\C-o" . org-babel-open-src-block-result)
     ("\C-v" . org-babel-expand-src-block)
     ("v" . org-babel-expand-src-block)
+    ("u" . org-babel-goto-src-block-head)
+    ("\C-u" . org-babel-goto-src-block-head)
     ("g" . org-babel-goto-named-src-block)
     ("r" . org-babel-goto-named-result)
     ("\C-r" . org-babel-goto-named-result)
