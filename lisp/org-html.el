@@ -674,7 +674,7 @@ See variable `org-export-html-link-org-files-as-html'"
 	 (string-match "\\.org$" path)
 	 (progn
 	    (list
-	       "http"
+	       "file"
 	       (concat
 		  (substring path 0 (match-beginning 0))
 		  "."
