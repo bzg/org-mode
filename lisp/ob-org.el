@@ -30,6 +30,9 @@
 ;;; Code:
 (require 'ob)
 
+(declare-function org-load-modules-maybe "org" (&optional force))
+(declare-function org-get-local-variables "org" ())
+
 (defvar org-babel-default-header-args:org
   '((:results . "raw silent") (:exports . "results"))
   "Default arguments for evaluating a org source block.")
@@ -40,7 +43,27 @@
 (defun org-babel-execute:org (body params)
   "Execute a block of Org code with.
 This function is called by `org-babel-execute-src-block'."
-  body)
+  (let ((result-params (split-string (or (cdr (assoc :results params)) ""))))
+    (cond
+     ((member "latex" result-params) (org-babel-org-export body "latex"))
+     ((member "html" result-params)  (org-babel-org-export body "html"))
+     ((member "ascii" result-params) (org-babel-org-export body "ascii"))
+     (t body))))
+
+(defvar org-local-vars)
+(defun org-babel-org-export (body fmt)
+  "Export BODY to FMT using Org-mode's export facilities. "
+  (let ((tmp-file (org-babel-temp-file "org-")))
+    (with-temp-buffer
+      (insert body)
+      (write-file tmp-file)
+      (org-load-modules-maybe)
+      (unless org-local-vars
+	(setq org-local-vars (org-get-local-variables)))
+      (eval ;; convert to fmt -- mimicing `org-run-like-in-org-mode'
+       (list 'let org-local-vars 
+	     (list (intern (concat "org-export-as-" fmt))
+		   nil nil nil ''string t))))))
 
 (defun org-babel-prep-session:org (session params)
   "Return an error because org does not support sessions."
