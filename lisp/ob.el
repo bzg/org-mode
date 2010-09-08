@@ -1293,6 +1293,7 @@ code ---- the results are extracted in the syntax of the source
 	(message (replace-regexp-in-string "%" "%%" (format "%S" result)))
 	result)
     (when (and (stringp result) ;; ensure results end in a newline
+	       (> (length result) 0)
 	       (not (or (string-equal (substring result -1) "\n")
 			(string-equal (substring result -1) "\r"))))
       (setq result (concat result "\n")))
@@ -1320,6 +1321,8 @@ code ---- the results are extracted in the syntax of the source
 	(setq results-switches
 	      (if results-switches (concat " " results-switches) ""))
 	(cond
+	 ;; do nothing for an empty result
+	 ((= (length result) 0))
 	 ;; assume the result is a table if it's not a string
 	 ((not (stringp result))
 	  (insert (concat (orgtbl-to-orgtbl
@@ -1412,7 +1415,7 @@ file's directory then expand relative links."
   (let ((size (count-lines beg end)))
     (save-excursion
       (cond ((= size 0)
-	     (error (concat "This should be impossible:"
+	     (error (concat "This should not be impossible:"
                             "a newline was appended to result if missing")))
 	    ((< size org-babel-min-lines-for-block-output)
 	     (goto-char beg)
