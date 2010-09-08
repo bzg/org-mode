@@ -510,7 +510,8 @@ with a prefix argument then this is passed on to
   "Evaluate BODY in edit buffer if there is a code block at point.
 Return t if a code block was found at point, nil otherwise."
   `(let ((org-src-window-setup 'switch-invisibly))
-     (when (org-edit-src-code nil nil nil 'quietly)
+     (when (and (org-babel-where-is-src-block-head)
+		(org-edit-src-code nil nil nil 'quietly))
        (unwind-protect (progn ,@body)
 	 (if (org-bound-and-true-p org-edit-src-from-org-mode)
 	     (org-edit-src-exit)))
