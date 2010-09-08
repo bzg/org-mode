@@ -11050,6 +11050,18 @@ The structure of code blocks is as follows:
 #+end_src
 @end example
 
+Code blocks can also be embedded in text as follows:
+
+@example
+src_<language>@{<body>@}
+@end example
+
+or
+
+@example
+src_<language>[<header arguments>]@{<body>@}
+@end example
+
 @table @code
 @item <name>
 This name is associated with the code block.  This is similar to the
