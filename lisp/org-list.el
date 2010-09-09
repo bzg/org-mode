@@ -2245,7 +2245,7 @@ Valid parameters PARAMS are
       (while (setq sublist (pop list))
 	(cond ((symbolp sublist) nil)
 	      ((stringp sublist)
-	       (when (string-match "^\\(\\S-+\\)[ \t]+::" sublist)
+	       (when (string-match "^\\(.*\\)[ \t]+::" sublist)
 		 (setq term (org-trim (format (concat dtstart "%s" dtend)
 					      (match-string 1 sublist))))
 		 (setq sublist (concat ddstart
