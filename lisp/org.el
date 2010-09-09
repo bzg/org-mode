@@ -18588,7 +18588,7 @@ which make use of the date at the cursor."
      ;; Lists
      ((org-in-item-p)
       (org-beginning-of-item)
-      (looking-at "[ \t]*\\(\\S-+\\)[ \t]*\\(\\[[- X]\\][ \t]*\\|.*? :: \\)?")
+      (looking-at "[ \t]*\\(\\S-+\\)[ \t]*\\(\\(:?\\[@\\(:?start:\\)?[0-9]+\\][ \t]*\\)?\\[[- X]\\][ \t]*\\|.*? :: \\)?")
       (setq bpos (match-beginning 1) tpos (match-end 0)
 	    bcol (progn (goto-char bpos) (current-column))
 	    tcol (progn (goto-char tpos) (current-column))
