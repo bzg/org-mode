@@ -39,6 +39,7 @@
 ;; Declare external functions and variables
 (declare-function message-fetch-field "message" (header &optional not-all))
 (declare-function message-narrow-to-head-1 "message" nil)
+(declare-function nnimap-group-overview-filename "nnimap" (group server))
 ;; The following line suppresses a compiler warning stemming from gnus-sum.el
 (declare-function gnus-summary-last-subject "gnus-sum" nil)
 ;; Customization variables
