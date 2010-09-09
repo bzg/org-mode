@@ -37,6 +37,10 @@
   '((:results . "raw silent") (:exports . "results"))
   "Default arguments for evaluating a org source block.")
 
+(defvar org-babel-org-default-header
+  "#+TITLE: default empty header\n"
+  "Default header inserted during export of org blocks.")
+
 (defun org-babel-expand-body:org (body params &optional processed-params)
   "Expand BODY according to PARAMS, return the expanded body." body)
 
@@ -55,6 +59,7 @@ This function is called by `org-babel-execute-src-block'."
   "Export BODY to FMT using Org-mode's export facilities. "
   (let ((tmp-file (org-babel-temp-file "org-")))
     (with-temp-buffer
+      (insert org-babel-org-default-header)
       (insert body)
       (write-file tmp-file)
       (org-load-modules-maybe)
