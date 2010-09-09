@@ -12120,7 +12120,8 @@ ACTION can be `set', `up', `down', or a character."
 	    (setq new action)
 	  (message "Priority %c-%c, SPC to remove: "
 		   org-highest-priority org-lowest-priority)
-	  (setq new (read-char-exclusive)))
+	  (save-match-data
+	    (setq new (read-char-exclusive))))
 	(if (and (= (upcase org-highest-priority) org-highest-priority)
 		 (= (upcase org-lowest-priority) org-lowest-priority))
 	    (setq new (upcase new)))
