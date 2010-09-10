@@ -38,7 +38,6 @@
 
 ;;; Code:
 (require 'ob)
-(require 'org)
 
 (defvar org-babel-default-header-args:ledger
   '((:results . "output") (:cmdline . "bal"))

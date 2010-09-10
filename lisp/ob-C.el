@@ -33,7 +33,6 @@
 ;;; Code:
 (require 'ob)
 (require 'ob-eval)
-(require 'org)
 (require 'cc-mode)
 
 (declare-function org-entry-get "org"
