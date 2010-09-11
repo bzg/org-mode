@@ -14448,6 +14448,8 @@ around a match in a hidden outline tree.
 @item
 @i{Niels Giesen} had the idea to automatically archive DONE trees.
 @item
+@i{Nicolas Goaziou} rewrote much of the plain list code.
+@item
 @i{Kai Grossjohann} pointed out key-binding conflicts with other packages.
 @item
 @i{Bernt Hansen} has driven much of the support for auto-repeating tasks,
