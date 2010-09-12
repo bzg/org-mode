@@ -11775,10 +11775,11 @@ EXTRA is additional text that will be inserted into the notes buffer."
 (defun org-skip-over-state-notes ()
   "Skip past the list of State notes in an entry."
   (if (looking-at "\n[ \t]*- State") (forward-char 1))
-  (while (looking-at "[ \t]*- State")
-    (condition-case nil
-	(org-next-item)
-      (error (org-end-of-item)))))
+  (when (org-in-item-p)
+    (let ((limit (org-list-bottom-point)))
+      (while (looking-at "[ \t]*- State")
+	(goto-char (or (org-get-next-item (point) limit)
+		       (org-get-end-of-item limit)))))))
 
 (defun org-add-log-note (&optional purpose)
   "Pop up a window for taking a note, and add this note later at point."
