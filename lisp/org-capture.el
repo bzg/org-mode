@@ -221,7 +221,7 @@ Furthermore, the following %-escapes will be replaced with content:
 Apart from these general escapes, you can access information specific to the
 link type that is created.  For example, calling `org-capture' in emails
 or gnus will record the author and the subject of the message, which you
-can access with \"%:author\" and \"%:subject\", respectively.  Here is a
+can access with \"%:from\" and \"%:subject\", respectively.  Here is a
 complete list of what is recorded for each link type.
 
 Link type          |  Available information
