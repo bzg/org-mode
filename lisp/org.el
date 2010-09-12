@@ -11872,7 +11872,7 @@ EXTRA is additional text that will be inserted into the notes buffer."
 			(skip-chars-backward " \r\t\n")
 			(cond
 			 ((and (org-at-heading-p)
-			       (org-adapt-indentation))
+			       org-adapt-indentation)
 			  (1+ (org-current-level)))
 			 ((org-at-heading-p) 0)
 			 (t (org-get-indentation))))))
