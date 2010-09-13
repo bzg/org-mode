@@ -14604,9 +14604,10 @@ user function argument order change dependent on argument order."
 	(list arg2 arg1 arg3))
        ((eq calendar-date-style 'iso)
 	(list arg2 arg3 arg1)))
-    (if (org-bound-and-true-p european-calendar-style)
-	(list arg2 arg1 arg3)
-      (list arg1 arg2 arg3))))
+    (with-no-warnings ;; european-calendar-style is obsolete as of version 23.1
+      (if (org-bound-and-true-p european-calendar-style)
+	  (list arg2 arg1 arg3)
+	(list arg1 arg2 arg3)))))
 
 (defun org-eval-in-calendar (form &optional keepdate)
   "Eval FORM in the calendar window and return to current window.

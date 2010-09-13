@@ -7279,7 +7279,8 @@ the resulting entry will not be shown.  When TEXT is empty, switch to
       (let ((calendar-date-display-form
 	     (if (if (boundp 'calendar-date-style)
 		     (eq calendar-date-style 'european)
-		   (org-bound-and-true-p european-calendar-style)) ; Emacs 22
+		   (with-no-warnings ;; european-calendar-style is obsolete as of version 23.1
+		     (org-bound-and-true-p european-calendar-style))) ; Emacs 22
 		 '(day " " month " " year)
 	       '(month " " day " " year))))
 
