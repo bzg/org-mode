@@ -7296,7 +7296,6 @@ the same tree node, and the headline of the tree node in the Org-mode file."
   (org-agenda-check-no-diary)
   (if (and (org-region-active-p) (interactive-p))
       (call-interactively 'org-change-tag-in-region)
-    (org-agenda-show)   ;;; FIXME This is a stupid hack and should not be needed
     (let* ((hdmarker (or (org-get-at-bol 'org-hd-marker)
 			 (org-agenda-error)))
 	   (buffer (marker-buffer hdmarker))
@@ -7325,7 +7324,6 @@ the same tree node, and the headline of the tree node in the Org-mode file."
   "Set a property for the current headline."
   (interactive)
   (org-agenda-check-no-diary)
-  (org-agenda-show)   ;;; FIXME This is a stupid hack and should not be needed
   (let* ((hdmarker (or (org-get-at-bol 'org-hd-marker)
 		       (org-agenda-error)))
 	 (buffer (marker-buffer hdmarker))
@@ -7348,7 +7346,6 @@ the same tree node, and the headline of the tree node in the Org-mode file."
   "Set the effort property for the current headline."
   (interactive)
   (org-agenda-check-no-diary)
-  (org-agenda-show)   ;;; FIXME This is a stupid hack and should not be needed
   (let* ((hdmarker (or (org-get-at-bol 'org-hd-marker)
 		       (org-agenda-error)))
 	 (buffer (marker-buffer hdmarker))
@@ -7372,7 +7369,6 @@ the same tree node, and the headline of the tree node in the Org-mode file."
   "Toggle the archive tag for the current entry."
   (interactive)
   (org-agenda-check-no-diary)
-  (org-agenda-show)   ;;; FIXME This is a stupid hack and should not be needed
   (let* ((hdmarker (or (org-get-at-bol 'org-hd-marker)
                        (org-agenda-error)))
 	 (buffer (marker-buffer hdmarker))
