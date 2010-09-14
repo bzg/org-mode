@@ -73,7 +73,6 @@
 
 (defcustom org-cycle-include-plain-lists t
   "When t, make TAB cycle visibility on plain list items.
-
 Cycling plain lists works only when the cursor is on a plain list
 item.  When the cursor is on an outline heading, plain lists are
 treated as text.  This is the most stable way of handling this,
@@ -161,7 +160,6 @@ spaces instead of one after the bullet in each item of the list."
 
 (defcustom org-list-ending-method 'both
   "Determine where plain lists should end.
-
 Valid values are: `regexp', `indent' or `both'.
 
 When set to `regexp', Org will look into two variables,
@@ -183,7 +181,6 @@ determine lists endings. This is the default method."
 
 (defcustom org-empty-line-terminates-plain-lists nil
   "Non-nil means an empty line ends all plain list levels.
-
 This variable only makes sense if `org-list-ending-method' is set
 to `regexp' or `both'. This is then equivalent to set
 `org-list-end-regexp' to \"^[ \\t]*$\"."
@@ -203,14 +200,12 @@ precedence over it."
 				      (indent . t)
 				      (insert . t))
   "Non-nil means apply set of rules when acting on lists.
-
 By default, automatic actions are taken when using
-\\[org-shiftmetaup], \\[org-shiftmetadown], \\[org-meta-return],
-\\[org-metaright], \\[org-metaleft], \\[org-shiftmetaright],
-\\[org-shiftmetaleft], \\[org-ctrl-c-minus],
-\\[org-toggle-checkbox] or \\[org-insert-todo-heading].  You can
-disable individually these rules by setting them to nil.  Valid
-rules are:
+ \\[org-meta-return], \\[org-metaright], \\[org-metaleft],
+ \\[org-shiftmetaright], \\[org-shiftmetaleft],
+ \\[org-ctrl-c-minus], \\[org-toggle-checkbox] or
+ \\[org-insert-todo-heading]. You can disable individually these
+ rules by setting them to nil. Valid rules are:
 
 bullet    when non-nil, cycling bullet do not allow lists at
           column 0 to have * as a bullet and descriptions lists
@@ -327,7 +322,6 @@ the end of the nearest terminator from MAX."
 
 (defun org-list-maybe-skip-block (search limit)
   "Return non-nil value if point is in a block, skipping it on the way.
-
 It looks for the boundary of the block in SEARCH direction,
 stopping at LIMIT."
   (save-match-data
@@ -341,7 +335,6 @@ stopping at LIMIT."
 
 (defun org-list-search-unenclosed-generic (search re bound noerr)
   "Search a string outside blocks and protected places.
-
 Arguments SEARCH, RE, BOUND and NOERR are similar to those in
 `search-forward', `search-backward', `re-search-forward' and
 `re-search-backward'."
@@ -360,7 +353,6 @@ Arguments SEARCH, RE, BOUND and NOERR are similar to those in
 
 (defun org-search-backward-unenclosed (regexp &optional bound noerror)
   "Like `re-search-backward' but don't stop inside blocks or protected places.
-
 Arguments REGEXP, BOUND and NOERROR are similar to those used in
 `re-search-backward'."
   (org-list-search-unenclosed-generic
@@ -368,7 +360,6 @@ Arguments REGEXP, BOUND and NOERROR are similar to those used in
 
 (defun org-search-forward-unenclosed (regexp &optional bound noerror)
   "Like `re-search-forward' but don't stop inside blocks or protected places.
-
 Arguments REGEXP, BOUND and NOERROR are similar to those used in
 `re-search-forward'."
   (org-list-search-unenclosed-generic
@@ -376,7 +367,6 @@ Arguments REGEXP, BOUND and NOERROR are similar to those used in
 
 (defun org-list-in-item-p-with-indent (limit)
   "Is the cursor inside a plain list?
-
 Plain lists are considered ending when a non-blank line is less
 indented than the previous item within LIMIT."
   (save-excursion
@@ -413,7 +403,6 @@ indented than the previous item within LIMIT."
 
 (defun org-list-in-item-p-with-regexp (limit)
   "Is the cursor inside a plain list?
-
 Plain lists end when `org-list-end-regexp' is matched, or at a
 blank line if `org-empty-line-terminates-plain-lists' is true.
 
@@ -434,7 +423,6 @@ Argument LIMIT specifies the upper-bound of the search."
 
 (defun org-list-top-point-with-regexp (limit)
   "Return point at the top level item in a list.
-
 Argument LIMIT specifies the upper-bound of the search.
 
 List ending is determined by regexp. See
@@ -450,7 +438,6 @@ List ending is determined by regexp. See
 
 (defun org-list-bottom-point-with-regexp (limit)
   "Return point just before list ending.
-
 Argument LIMIT specifies the lower-bound of the search.
 
 List ending is determined by regexp. See
@@ -464,7 +451,6 @@ List ending is determined by regexp. See
 
 (defun org-list-top-point-with-indent (limit)
   "Return point at the top level in a list.
-
 Argument LIMIT specifies the upper-bound of the search.
 
 List ending is determined by indentation of text. See
@@ -501,7 +487,6 @@ List ending is determined by indentation of text. See
 
 (defun org-list-bottom-point-with-indent (limit)
   "Return point just before list ending or nil if not in a list.
-
 Argument LIMIT specifies the lower-bound of the search.
 
 List ending is determined by the indentation of text. See
@@ -568,7 +553,6 @@ uses PRE-MOVE before search. Return nil if no item was found."
 
 (defun org-list-separating-blank-lines-number (pos top bottom)
   "Return number of blank lines that should separate items in list.
-
 POS is the position of point to be considered.
 
 TOP and BOTTOM are respectively position of list beginning and
@@ -613,7 +597,6 @@ some heuristics to guess the result."
 
 (defun org-list-insert-item-generic (pos &optional checkbox after-bullet)
   "Insert a new list item at POS.
-
 If POS is before first character after bullet of the item, the
 new item will be created before the current one.
 
@@ -703,7 +686,6 @@ function ends."
 
 (defun org-list-indent-item-generic (arg no-subtree top bottom)
   "Indent a local list item including its children.
-
 When number ARG is a negative, item will be outdented, otherwise
 it will be indented.
 
@@ -876,8 +858,10 @@ A checkbox is blocked if all of the following conditions are fulfilled:
 ;; already in a list and doesn't compute list boundaries.
 
 ;; If you plan to use more than one org-list function is some code,
-;; you should therefore first compute list boundaries, and then make
-;; use of non-interactive forms.
+;; you should therefore first check if point is in a list with
+;; `org-in-item-p' or `org-at-item-p', then compute list boundaries
+;; with `org-list-top-point' and `org-list-bottom-point', and make use
+;; of non-interactive forms.
 
 (defun org-list-top-point ()
   "Return point at the top level in a list.
@@ -973,8 +957,8 @@ If the cursor in not in an item, throw an error."
 (defun org-get-end-of-item (bottom)
   "Return position at the end of the current item.
 BOTTOM is the position at list ending."
-  (let* ((next-p (org-get-next-item (point) bottom)))
-    (or next-p (org-get-end-of-list bottom))))
+  (or (org-get-next-item (point) bottom)
+      (org-get-end-of-list bottom)))
 
 (defun org-end-of-item ()
   "Go to the end of the current hand-formatted item.
@@ -1011,7 +995,6 @@ Stop searching at LIMIT. Return nil if no item is found."
 
 (defun org-previous-item ()
   "Move to the beginning of the previous item.
-
 Item is at the same level in the current plain list. Error if not
 in a plain list, or if this is the first item in the list."
   (interactive)
@@ -1028,7 +1011,6 @@ Stop searching at LIMIT. Return nil if no item is found."
 
 (defun org-next-item ()
   "Move to the beginning of the next item.
-
 Item is at the same level in the current plain list. Error if not
 in a plain list, or if this is the last item in the list."
   (interactive)
@@ -1041,7 +1023,6 @@ in a plain list, or if this is the last item in the list."
 
 (defun org-list-exchange-items (beg-A beg-B bottom)
   "Swap item starting at BEG-A with item starting at BEG-B.
-
 Blank lines at the end of items are left in place. Assume BEG-A
 is lesser than BEG-B.
 
@@ -1062,7 +1043,6 @@ BOTTOM is the position at list ending."
 
 (defun org-move-item-down ()
   "Move the plain list item at point down, i.e. swap with following item.
-
 Subitems (items with larger indentation) are considered part of the item,
 so this really moves item trees."
   (interactive)
@@ -1084,7 +1064,6 @@ so this really moves item trees."
 
 (defun org-move-item-up ()
   "Move the plain list item at point up, i.e. swap with previous item.
-
 Subitems (items with larger indentation) are considered part of the item,
 so this really moves item trees."
   (interactive)
@@ -1106,7 +1085,6 @@ so this really moves item trees."
 
 (defun org-insert-item (&optional checkbox)
   "Insert a new item at the current level.
-
 If cursor is before first character after bullet of the item, the
 new item will be created before the current one.
 
@@ -1166,7 +1144,6 @@ bullet string and bullet counter, if any."
 
 (defun org-list-struct (begin end top bottom &optional outdent)
   "Return the structure containing the list between BEGIN and END.
-
 A structure is an alist where key is point of item and values
 are, in that order, indentation, bullet string and value of
 counter, if any. A structure contains every list and sublist that
@@ -1232,7 +1209,6 @@ change is an outdent."
 
 (defun org-list-struct-origins (struct)
   "Return an alist where key is item's position and value parent's.
-
 STRUCT is the list's structure looked up."
   (let* ((struct-rev (reverse struct))
 	 (acc (list (cons (nth 1 (car struct)) 0)))
@@ -1263,7 +1239,6 @@ STRUCT is the list's structure looked up."
 
 (defun org-list-struct-get-parent (item struct origins)
   "Return parent association of ITEM in STRUCT or nil.
-
 ORIGINS is the alist of parents. See `org-list-struct-origins'."
   (let* ((parent-pos (cdr (assq (car item) origins))))
     (when (> parent-pos 0) (assq parent-pos struct))))
@@ -1276,7 +1251,6 @@ ORIGINS is the alist of parents. See `org-list-struct-origins'."
 
 (defun org-list-struct-fix-bul (struct origins)
   "Verify and correct bullets for every association in STRUCT.
-
 ORIGINS is the alist of parents. See `org-list-struct-origins'.
 
 This function modifies STRUCT."
@@ -1317,7 +1291,6 @@ This function modifies STRUCT."
 
 (defun org-list-struct-fix-ind (struct origins)
   "Verify and correct indentation for every association in STRUCT.
-
 ORIGINS is the alist of parents. See `org-list-struct-origins'.
 
 This function modifies STRUCT."
@@ -1337,7 +1310,6 @@ This function modifies STRUCT."
 
 (defun org-list-struct-fix-struct (struct origins)
   "Return STRUCT with correct bullets and indentation.
-
 ORIGINS is the alist of parents. See `org-list-struct-origins'.
 
 Only elements of STRUCT that have changed are returned."
@@ -1348,7 +1320,6 @@ Only elements of STRUCT that have changed are returned."
 
 (defun org-list-struct-outdent (start end origins)
   "Outdent items in a structure.
-
 Items are indented when their key is between START, included, and
 END, excluded.
 
@@ -1381,7 +1352,6 @@ STRUCT is the concerned structure."
 
 (defun org-list-struct-indent (start end origins struct)
   "Indent items in a structure.
-
 Items are indented when their key is between START, included, and
 END, excluded.
 
@@ -1444,7 +1414,6 @@ END."
 
 (defun org-list-struct-apply-struct (struct bottom)
   "Apply modifications to list so it mirrors STRUCT.
-
 BOTTOM is position at list ending.
 
 Initial position is restored after the changes."
@@ -1517,7 +1486,6 @@ BOTTOM is position at list ending."
 
 (defun org-outdent-item ()
   "Outdent a local list item, but not its children.
-
 If a region is active, all items inside will be moved."
   (interactive)
   (org-list-indent-item-generic
@@ -1525,7 +1493,6 @@ If a region is active, all items inside will be moved."
 
 (defun org-indent-item ()
   "Indent a local list item, but not its children.
-
 If a region is active, all items inside will be moved."
   (interactive)
   (org-list-indent-item-generic
@@ -1533,7 +1500,6 @@ If a region is active, all items inside will be moved."
 
 (defun org-outdent-item-tree ()
   "Outdent a local list item including its children.
-
 If a region is active, all items inside will be moved."
   (interactive)
   (org-list-indent-item-generic
@@ -1541,7 +1507,6 @@ If a region is active, all items inside will be moved."
 
 (defun org-indent-item-tree ()
   "Indent a local list item including its children.
-
 If a region is active, all items inside will be moved."
   (interactive)
   (org-list-indent-item-generic
@@ -1550,9 +1515,8 @@ If a region is active, all items inside will be moved."
 (defvar org-tab-ind-state)
 (defun org-cycle-item-indentation ()
   "Cycle levels of indentation of an empty item.
-
-The first run indent the item, if applicable. Subsequents runs
-outdent it at meaningful levels in the list. When done, item is
+The first run indent the item, if applicable.  Subsequents runs
+outdent it at meaningful levels in the list.  When done, item is
 put back at its original position with its original bullet.
 
 Return t at each successful move."
@@ -1699,7 +1663,6 @@ is an integer, 0 means `-', 1 means `+' etc. If WHICH is
 
 (defun org-toggle-checkbox (&optional toggle-presence)
   "Toggle the checkbox in the current line.
-
 With prefix arg TOGGLE-PRESENCE, add or remove checkboxes.  With
 double prefix, set checkbox to [-].
 
@@ -1935,8 +1898,7 @@ Otherwise it will be `org-todo'."
 ;;; Misc Tools
 
 (defun org-apply-on-list (function init-value &rest args)
-  "Call FUNCTION for each item of a the list under point.
-
+  "Call FUNCTION on each item of the list at point.
 FUNCTION must be called with at least one argument: INIT-VALUE,
 that will contain the value returned by the function at the
 previous item, plus ARGS extra arguments.
@@ -1944,7 +1906,7 @@ previous item, plus ARGS extra arguments.
 As an example, (org-apply-on-list (lambda (result) (1+ result)) 0)
 will return the number of items in the current list.
 
-Sublists of the list are skipped. Cursor is always at the
+Sublists of the list are skipped.  Cursor is always at the
 beginning of the item."
   (let* ((pos (copy-marker (point)))
 	 (end (copy-marker (org-list-bottom-point)))
@@ -2189,7 +2151,6 @@ this list."
 
 (defun org-list-to-generic (list params)
   "Convert a LIST parsed through `org-list-parse-list' to other formats.
-
 Valid parameters PARAMS are
 
 :ustart	    String to start an unordered list
