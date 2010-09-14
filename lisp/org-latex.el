@@ -280,6 +280,11 @@ markup defined, the first one in the association list will be used."
 		   (string :tag "Keyword")
 		   (string :tag "Markup")))))
 
+(defcustom org-export-latex-tag-markup "\\textbf{%s}"
+  "Markup for tags, as a printf format."
+  :group 'org-export-latex
+  :type 'string)
+
 (defcustom org-export-latex-timestamp-markup "\\textit{%s}"
   "A printf format string to be applied to time stamps."
   :group 'org-export-latex
@@ -1335,7 +1340,7 @@ links, keywords, lists, tables, fixed-width"
 	  (replace-match "")
 	(replace-match
 	 (org-export-latex-protect-string
-	  (format "\\textbf{%s}"
+	  (format org-export-latex-tag-markup
 		  (save-match-data
 		    (replace-regexp-in-string
 		     "_" "\\\\_" (match-string 0)))))
