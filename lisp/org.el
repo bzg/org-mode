@@ -19150,6 +19150,18 @@ move point."
     (while (org-goto-sibling 'previous)
       (org-flag-heading nil))))
 
+(defun org-goto-first-child ()
+  "Goto the first child, even if it is invisible.
+Return t when a child was found. Otherwise don't move point and
+return nil."
+  (let (level (pos (point)) (re (concat "^" outline-regexp)))
+    (when (condition-case nil (org-back-to-heading t) (error nil))
+      (setq level (outline-level))
+      (forward-char 1)
+      (if (and (re-search-forward re nil t) (> (outline-level) level))
+	  (progn (goto-char (match-beginning 0)) t)
+	(goto-char pos) nil))))
+
 (defun org-show-hidden-entry ()
   "Show an entry where even the heading is hidden."
   (save-excursion
