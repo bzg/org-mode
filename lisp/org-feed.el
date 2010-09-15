@@ -103,7 +103,7 @@
 
 (defgroup org-feed  nil
   "Options concerning RSS feeds as inputs for Org files."
-  :tag "Org ID"
+  :tag "Org Feed"
   :group 'org)
 
 (defcustom org-feed-alist nil
