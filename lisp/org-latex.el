@@ -280,6 +280,11 @@ markup defined, the first one in the association list will be used."
 		   (string :tag "Keyword")
 		   (string :tag "Markup")))))
 
+(defcustom org-export-latex-tag-markup "\\textbf{%s}"
+  "Markup for tags, as a printf format."
+  :group 'org-export-latex
+  :type 'string)
+
 (defcustom org-export-latex-timestamp-markup "\\textit{%s}"
   "A printf format string to be applied to time stamps."
   :group 'org-export-latex
@@ -952,28 +957,13 @@ Return a list reflecting the document structure."
 (defun org-export-latex-parse-subcontent (level odd)
   "Extract the subcontent of a section at LEVEL.
 If ODD Is non-nil, assume subcontent only contains odd sections."
-
-  (let (nstars new-level)
-    ;; In the search, we should not assume there will be exactly
-    ;; LEVEL+1 stars in the next heading, as there may be more than
-    ;; that number of stars.  hence the regexp should be \\*{N,}
-    ;; rather than just \\*{N} (i.e. no upper bound, but N is minimum
-    ;; number of stars to expect.)
-    ;; We then have to check how many stars were found, rather than
-    ;; assuming there were exactly N.
-    (when (org-re-search-forward-unprotected
-	   (concat "^\\(\\(?:\\*\\)\\{"
-		   (number-to-string (+ (if odd 4 2) level))
-		   ",\\}\\) \\(.*\\)$")
-	   nil t)
-      (setq nstars (1- (- (match-end 1) (match-beginning 1))))
-      (setq new-level (if odd 
-			  (/ (+ 3 nstars) 2);; not entirely sure why +3!
-			nstars)))
-    (if nstars
-	(org-export-latex-parse-global new-level odd)
-      nil)				; subcontent is nil
-      ))
+  (if (not (org-re-search-forward-unprotected
+	    (concat "^\\(\\(?:\\*\\)\\{"
+		    (number-to-string (+ (if odd 4 2) level))
+		    "\\}\\) \\(.*\\)$")
+	    nil t))
+      nil ; subcontent is nil
+    (org-export-latex-parse-global (+ (if odd 2 1) level) odd)))
 
 ;;; Rendering functions:
 (defun org-export-latex-global (content)
@@ -1344,13 +1334,13 @@ links, keywords, lists, tables, fixed-width"
 	  (replace-match "")
 	(replace-match (format "\\textbf{%s}" (match-string 0)) t t)))
     ;; convert tags
-    (when (re-search-forward "\\(:[a-zA-Z0-9_@]+\\)+:" nil t)
+    (when (re-search-forward "\\(:[a-zA-Z0-9_@#%]+\\)+:" nil t)
       (if (or (not org-export-with-tags)
 	      (plist-get remove-list :tags))
 	  (replace-match "")
 	(replace-match
 	 (org-export-latex-protect-string
-	  (format "\\textbf{%s}"
+	  (format org-export-latex-tag-markup
 		  (save-match-data
 		    (replace-regexp-in-string
 		     "_" "\\\\_" (match-string 0)))))
@@ -2253,11 +2243,11 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
   "Convert plain text lists in current buffer into LaTeX lists."
   (let (res)
     (goto-char (point-min))
-    (while (org-re-search-forward-unprotected org-list-beginning-re nil t)
+    (while (org-search-forward-unenclosed org-item-beginning-re nil t)
       (beginning-of-line)
       (setq res (org-list-to-latex (org-list-parse-list t)
 				   org-export-latex-list-parameters))
-      (while (string-match "^\\(\\\\item[ \t]+\\)\\[@start:\\([0-9]+\\)\\]"
+      (while (string-match "^\\(\\\\item[ \t]+\\)\\[@\\(?:start:\\)?\\([0-9]+\\)\\]"
 			   res)
 	(setq res (replace-match
 		   (concat (format "\\setcounter{enumi}{%d}"

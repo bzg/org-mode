@@ -73,7 +73,7 @@ This function is called by `org-babel-execute-src-block'."
                           (match-string 1 out-file))
                      "pdf"))
          (cmdline (cdr (assoc :cmdline params)))
-         (in-file (make-temp-file "org-babel-asymptote"))
+         (in-file (org-babel-temp-file "asymptote-"))
          (cmd (concat "asy "
                       (if out-file
                           (concat "-globalwrite -f " format " -o " out-file)

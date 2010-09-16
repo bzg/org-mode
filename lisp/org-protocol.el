@@ -260,7 +260,7 @@ Here is an example:
   :group 'org-protocol
   :type '(alist))
 
-(defcustom org-protocol-default-template-key "w"
+(defcustom org-protocol-default-template-key nil
   "The default org-remember-templates key to use."
   :group 'org-protocol
   :type 'string)

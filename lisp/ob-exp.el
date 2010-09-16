@@ -178,6 +178,8 @@ options are taken from `org-babel-default-header-args'."
 		   (list "emacs-lisp" "results"
 			 (org-babel-merge-params
 			  org-babel-default-header-args
+			  (org-babel-params-from-buffer)
+			  (org-babel-params-from-properties)
 			  (org-babel-parse-header-arguments
 			   (org-babel-clean-text-properties
 			    (concat ":var results="
@@ -193,8 +195,7 @@ options are taken from `org-babel-default-header-args'."
 The function respects the value of the :exports header argument."
   (flet ((silently () (let ((session (cdr (assoc :session (nth 2 info)))))
 			(when (and session
-				   (not (equal "none" session))
-				   (not (assoc :noeval (nth 2 info))))
+				   (not (equal "none" session)))
 			  (org-babel-exp-results info type 'silent))))
 	 (clean () (org-babel-remove-result info)))
     (case (intern (or (cdr (assoc :exports (nth 2 info))) "code"))

@@ -76,6 +76,7 @@
   :tag "Org Capture"
   :group 'org)
 
+;;;###autoload
 (defcustom org-capture-templates nil
   "Templates for the creation of new entries.
 
@@ -220,7 +221,7 @@ Furthermore, the following %-escapes will be replaced with content:
 Apart from these general escapes, you can access information specific to the
 link type that is created.  For example, calling `org-capture' in emails
 or gnus will record the author and the subject of the message, which you
-can access with \"%:author\" and \"%:subject\", respectively.  Here is a
+can access with \"%:from\" and \"%:subject\", respectively.  Here is a
 complete list of what is recorded for each link type.
 
 Link type          |  Available information
@@ -382,6 +383,11 @@ bypassed."
 	   (initial (and (org-region-active-p)
 			 (buffer-substring (point) (mark))))
 	   (entry (org-capture-select-template keys)))
+      (when (stringp initial)
+	(remove-text-properties 0 (length initial) '(read-only t) initial))
+      (when (stringp annotation)
+	(remove-text-properties 0 (length annotation)
+				'(read-only t) annotation))
       (cond
        ((equal entry "C")
 	(customize-variable 'org-capture-templates))
@@ -589,6 +595,8 @@ already gone."
 	(set-buffer (org-capture-target-buffer (nth 1 target)))
 	(let ((hd (nth 2 target)))
 	  (goto-char (point-min))
+	  (unless (org-mode-p)
+	    (error "Target buffer for file+headline should be in Org mode"))
 	  (if (re-search-forward
 	       (format org-complex-heading-regexp-format (regexp-quote hd))
 	       nil t)
@@ -743,14 +751,14 @@ already gone."
     (if (org-capture-get :prepend)
 	(progn
 	  (goto-char beg)
-	  (if (re-search-forward (concat "^" (org-item-re)) end t)
+	  (if (org-search-forward-unenclosed org-item-beginning-re end t)
 	      (progn
 		(goto-char (match-beginning 0))
 		(setq ind (org-get-indentation)))
 	    (goto-char end)
 	    (setq ind 0)))
       (goto-char end)
-      (if (re-search-backward (concat "^" (org-item-re)) beg t)
+      (if (org-search-backward-unenclosed org-item-beginning-re beg t)
 	  (progn
 	    (setq ind (org-get-indentation))
 	    (org-end-of-item))
@@ -972,7 +980,7 @@ Point will remain at the first line after the inserted text."
       (insert template)
       (org-capture-empty-lines-after)
       (goto-char beg)
-      (org-maybe-renumber-ordered-list)
+      (org-list-repair)
       (org-end-of-item)
       (setq end (point)))
      (t (insert template)))
@@ -1204,12 +1212,13 @@ The template may still contain \"%?\" for cursor positioning."
 			 'org-tags-history)))
 	      (setq ins (mapconcat 'identity
 				   (org-split-string
-				    ins (org-re "[^[:alnum:]_@]+"))
+				    ins (org-re "[^[:alnum:]_@#%]+"))
 				       ":"))
 	      (when (string-match "\\S-" ins)
 		(or (equal (char-before) ?:) (insert ":"))
 		(insert ins)
-		(or (equal (char-after) ?:) (insert ":")))))
+		(or (equal (char-after) ?:) (insert ":"))
+		(and (org-on-heading-p) (org-set-tags nil 'align)))))
 	   ((equal char "C")
 	    (cond ((= (length clipboards) 1) (insert (car clipboards)))
 		  ((> (length clipboards) 1)

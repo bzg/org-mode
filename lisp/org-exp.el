@@ -695,6 +695,7 @@ modified) list.")
 		    "EXPORT_SELECT_TAGS" "EXPORT_EXCLUDE_TAGS"
 		    "KEYWORDS" "DESCRIPTION" "MACRO" "BIND" "XSLT")
 		  (mapcar 'car org-export-inbuffer-options-extra))))
+	    (case-fold-search t)
 	    p key val text options mathjax a pr style
 	    latex-header latex-class macros letbind
 	    ext-setup-or-nil setup-contents (start 0))
@@ -1075,6 +1076,9 @@ on this string to produce the exported version."
       (org-export-handle-export-tags (plist-get parameters :select-tags)
 				     (plist-get parameters :exclude-tags))
       (run-hooks 'org-export-preprocess-after-tree-selection-hook)
+
+      ;; Mark end of lists
+      (org-export-mark-list-ending backend)
 
       ;; Handle source code snippets
       (org-export-replace-src-segments-and-examples backend)
@@ -1626,6 +1630,31 @@ These special cookies will later be interpreted by the backend."
 	(delete-region beg end)
 	(insert (org-add-props content nil 'original-indentation ind))))))
 
+(defun org-export-mark-list-ending (backend)
+  "Mark list endings with special cookies.
+These special cookies will later be interpreted by the backend.
+`org-list-end-re' is replaced by a blank line in the process."
+  (let ((process-buffer
+	 (lambda (end-list-marker)
+	   (goto-char (point-min))
+	   (while (org-search-forward-unenclosed org-item-beginning-re nil t)
+	     (goto-char (org-list-bottom-point))
+	     (when (and (not (eq org-list-ending-method 'indent))
+			(looking-at (org-list-end-re)))
+	       (replace-match "\n"))
+	     (insert end-list-marker)))))
+  ;; We need to divide backends into 3 categories.
+  (cond
+   ;; 1. Backends using `org-list-parse-list' do not need markers.
+   ((memq backend '(latex))
+    nil)
+   ;; 2. Line-processing backends need to be told where lists end.
+   ((memq backend '(html docbook))
+    (funcall process-buffer "ORG-LIST-END\n"))
+   ;; 3. Others backends do not need to know this: clean list enders.
+   (t
+    (funcall process-buffer "")))))
+
 (defun org-export-attach-captions-and-attributes (backend target-alist)
   "Move #+CAPTION, #+ATTR_BACKEND, and #+LABEL text into text properties.
 If the next thing following is a table, add the text properties to the first
@@ -1838,7 +1867,9 @@ can work correctly."
     (if (and (not (= (char-after (match-beginning 3))
 		     (char-after (match-beginning 4))))
 	     (save-excursion (goto-char (match-beginning 0))
-			     (save-match-data (not (org-at-table-p)))))
+			     (save-match-data
+			       (and (not (org-at-table-p))
+				    (not (org-at-heading-p))))))
 	(org-if-unprotected
 	 (subst-char-in-region (match-beginning 0) (match-end 0)
 			       ?\n ?\  t)
@@ -2794,7 +2825,7 @@ If yes remove the column and the special lines."
 (defun org-export-cleanup-toc-line (s)
   "Remove tags and timestamps from lines going into the toc."
   (when (memq org-export-with-tags '(not-in-toc nil))
-    (if (string-match (org-re " +:[[:alnum:]_@:]+: *$") s)
+    (if (string-match (org-re " +:[[:alnum:]_@#%:]+: *$") s)
 	(setq s (replace-match "" t t s))))
   (when org-export-remove-timestamps-from-toc
     (while (string-match org-maybe-keyword-time-regexp s)

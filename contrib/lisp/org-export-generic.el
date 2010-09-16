@@ -1,4 +1,4 @@
-;;; org-export-generic.el --- Export frameworg with custom backends
+;; org-export-generic.el --- Export frameworg with custom backends
 
 ;; Copyright (C) 2009  Free Software Foundation, Inc.
 
@@ -444,6 +444,40 @@ in this way, it will be wrapped."
 export definitions."
   (aput 'org-generic-alist type definition))
 
+;;; helper functions for org-set-generic-type
+(defvar org-export-generic-keywords nil)
+(defmacro* def-org-export-generic-keyword (keyword
+                                           &key documentation
+                                                type)
+  "Define KEYWORD as a legitimate element for inclusion in
+the body of an org-set-generic-type definition."
+  `(progn
+     (pushnew ,keyword org-export-generic-keywords)
+     ;; TODO: push the documentation and type information
+     ;; somewhere where it will do us some good.
+     ))
+
+(def-org-export-generic-keyword :body-newline-paragraph
+    :documentation "Bound either to NIL or to a pattern to be 
+inserted in the output for every blank line in the input.
+  The intention is to handle formats where text is flowed, and
+newlines are interpreted as significant \(e.g., as indicating
+preformatted text\).  A common non-nil value for this keyword
+is \"\\n\".  Should typically be combined with a value for 
+:body-line-format that does NOT end with a newline."
+    :type string)
+
+;;; fontification keywords
+(def-org-export-generic-keyword :bold-format)
+(def-org-export-generic-keyword :italic-format)
+(def-org-export-generic-keyword :underline-format)
+(def-org-export-generic-keyword :strikethrough-format)
+(def-org-export-generic-keyword :code-format)
+(def-org-export-generic-keyword :verbatim-format)
+
+    
+  
+
 (defun org-export-generic-remember-section (type suffix &optional prefix)
   (setq org-export-generic-section-type type)
   (setq org-export-generic-section-suffix suffix)
@@ -598,6 +632,7 @@ underlined headlines.  The default is 3."
 		  :verbatim-multiline t
 		  :select-tags (plist-get export-plist :select-tags-export)
 		  :exclude-tags (plist-get export-plist :exclude-tags-export)
+                  :emph-multiline t
 		  :archived-trees
 		  (plist-get export-plist :archived-trees-export)
 		  :add-text (plist-get opt-plist :text))
@@ -646,6 +681,16 @@ underlined headlines.  The default is 3."
 	 (bodylineform  (or (plist-get export-plist :body-line-format) "%s"))
          (blockquotestart (or (plist-get export-plist :blockquote-start) "\n\n\t"))
          (blockquoteend (or (plist-get export-plist :blockquote-end) "\n\n"))
+
+         ;; dynamic variables used heinously in fontification
+         ;; not referenced locally...
+         (format-boldify (plist-get export-plist :bold-format))
+         (format-italicize (plist-get export-plist :italic-format))
+         (format-underline (plist-get export-plist :underline-format))
+         (format-strikethrough (plist-get export-plist :strikethrough-format))
+         (format-code (plist-get export-plist :code-format))
+         (format-verbatim (plist-get export-plist :verbatim-format))
+
          
 
 	 thetoc toctags have-headings first-heading-pos
@@ -829,7 +874,7 @@ underlined headlines.  The default is 3."
 	    (if org-export-generic-links-to-notes
 		(push (cons desc0 link) link-buffer)
 	      (setq rpl (concat rpl " (" link ")")
-		    wrap (+ (length line) (- (length (match-string 0) line))
+		    wrap (+ (length line) (- (length (match-string 0 line)))
 			    (length desc)))))
 	  (setq line (replace-match rpl t t line))))
       (when custom-times
@@ -887,9 +932,13 @@ underlined headlines.  The default is 3."
             (string-match "^\\([ \t]+\\)\\(\\*[ \t]*\\)" line))
 	;;
 	;; plain list item
-	;;
 	;; TODO: nested lists
 	;;
+        ;; first add a line break between any previous paragraph or line item and this
+        ;; one
+        (when bodynewline-paragraph
+          (insert bodynewline-paragraph))
+
         ;; I believe this gets rid of leading whitespace.
 	(setq line (replace-match "" nil nil line))
 
@@ -911,7 +960,7 @@ underlined headlines.  The default is 3."
 			     listcheckhalfend)))
 	 )
 
-	(insert (format listformat line)))
+	(insert (format listformat (org-export-generic-fontify line))))
        ((string-match "^\\([ \t]+\\)\\([0-9]+\\.[ \t]*\\)" line)
 	;;
 	;; numbered list item
@@ -937,7 +986,7 @@ underlined headlines.  The default is 3."
 			     listcheckhalfend)))
 	 )
 
-	(insert (format numlistformat line)))
+	(insert (format numlistformat (org-export-generic-fontify line))))
 
        ((equal line "ORG-BLOCKQUOTE-START")
         (setq line blockquotestart))
@@ -946,12 +995,15 @@ underlined headlines.  The default is 3."
        ((string-match "^\\s-*$" line)
         ;; blank line
         (if bodynewline-paragraph
-            (insert "\n")))
+            (insert bodynewline-paragraph)))
        (t
 	;;
 	;; body
 	;;
 	(org-export-generic-check-section "body" bodytextpre bodytextsuf)
+
+        (setq line 
+              (org-export-generic-fontify line))
 
 	;; XXX: properties?  list?
 	(if (string-match "^\\([ \t]*\\)\\([-+*][ \t]+\\)\\(.*?\\)\\( ::\\)" line)
@@ -1258,6 +1310,74 @@ REVERSE means to reverse the list if the plist match is a list
     (setq vl (nreverse vl))
     (and vl (setcar vl nil))
     vl))
+
+
+;;; FIXME: this should probably turn into a defconstant later [2010/05/20:rpg]
+(defvar org-export-generic-emphasis-alist
+  '(("*" format-boldify nil)
+    ("/" format-italicize nil)
+    ("_" format-underline nil)
+    ("+" format-strikethrough nil)
+    ("=" format-code t)
+    ("~" format-verbatim t))
+  "Alist of org format -> formatting variables for fontification.
+Each element of the list is a list of three elements.
+The first element is the character used as a marker for fontification.
+The second element is a variable name, set in org-export-generic.  That
+variable will be dereferenced to obtain a formatting string to wrap 
+fontified text with.
+The third element decides whether to protect converted text from other
+conversions.")
+
+;;; Cargo-culted from the latex translation.  I couldn't figure out how
+;;; to keep the structure since the generic export operates on lines, rather
+;;; than on a buffer as in the latex export, meaning that none of the
+;;; search forward code could be kept.  This led me to rewrite the
+;;; whole thing recursively.  A huge lose for efficiency (potentially),
+;;; but I couldn't figure out how to make the looping work.
+;;; Worse, it's /doubly/ recursive, because this function calls
+;;; org-export-generic-emph-format, which can call it recursively...
+;;; [2010/05/20:rpg]
+(defun org-export-generic-fontify (string)
+  "Convert fontification according to generic rules."
+  (if (string-match org-emph-re string)
+        ;; The match goes one char after the *string*, except at the end of a line
+        (let ((emph (assoc (match-string 3 string)
+                           org-export-generic-emphasis-alist))
+              (beg (match-beginning 0))
+              (end (match-end 0)))
+          (unless emph
+            (message "`org-export-generic-emphasis-alist' has no entry for formatting triggered by \"%s\""
+                     (match-string 3 string)))
+          ;; now we need to determine whether we have strikethrough or
+          ;; a list, which is a bit nasty
+          (if (and (equal (match-string 3 string) "+")
+                   (save-match-data
+                     (string-match "\\`-+\\'" (match-string 4 string))))
+              ;; a list --- skip this match and recurse on the point after the
+              ;; first emph char...
+              (concat (substring string 0 (1+ (match-beginning 3)))
+                      (org-export-generic-fontify (substring string (match-beginning 3))))
+              (concat (substring string 0 beg) ;; part before the match
+                      (match-string 1 string)
+                      (org-export-generic-emph-format (second emph)
+                                                      (match-string 4 string)
+                                                      (third emph))
+                      (or (match-string 5 string) "")
+                      (org-export-generic-fontify (substring string end)))))
+        string))
+
+(defun org-export-generic-emph-format (format-varname string protect)
+  "Return a string that results from applying the markup indicated by
+FORMAT-VARNAME to STRING."
+  (let ((format (symbol-value format-varname)))
+    (let ((string-to-emphasize
+           (if protect
+               string
+               (org-export-generic-fontify string))))
+      (if format
+          (format format string-to-emphasize)
+          string-to-emphasize))))
 
 (provide 'org-generic)
 (provide 'org-export-generic)

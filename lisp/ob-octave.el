@@ -178,7 +178,7 @@ value of the last statement in BODY, as elisp."
 	       org-babel-octave-shell-command)))
     (case result-type
       (output (org-babel-eval cmd body))
-      (value (let ((tmp-file (make-temp-file "org-babel-results-")))
+      (value (let ((tmp-file (org-babel-temp-file "results-")))
 	       (org-babel-eval
 		cmd
 		(format org-babel-octave-wrapper-method body tmp-file tmp-file))
@@ -188,8 +188,8 @@ value of the last statement in BODY, as elisp."
 (defun org-babel-octave-evaluate-session
   (session body result-type &optional matlabp)
   "Evaluate BODY in SESSION."
-  (let* ((tmp-file (make-temp-file "org-babel-results-"))
-	 (wait-file (make-temp-file "org-babel-matlab-emacs-link-wait-signal-"))
+  (let* ((tmp-file (org-babel-temp-file "results-"))
+	 (wait-file (org-babel-temp-file "matlab-emacs-link-wait-signal-"))
 	 (full-body
 	  (case result-type
 	    (output
@@ -246,7 +246,7 @@ value of the last statement in BODY, as elisp."
   "Import data from FILE-NAME.
 This removes initial blank and comment lines and then calls
 `org-babel-import-elisp-from-file'."
-  (let ((temp-file (make-temp-file "org-babel-results-")) beg end)
+  (let ((temp-file (org-babel-temp-file "results-")) beg end)
     (with-temp-file temp-file
       (insert-file-contents file-name)
       (re-search-forward "^[ \t]*[^# \t]" nil t)

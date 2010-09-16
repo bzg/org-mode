@@ -46,8 +46,11 @@
 
 (require 'org)
 
-(declare-function doc-view-goto-page "doc-view" (page))
-(declare-function doc-view-current-page "doc-view"  (&optional win))
+(declare-function doc-view-goto-page "ext:doc-view" (page))
+(declare-function image-mode-window-get "ext:image-mode"
+		  (prop &optional winprops))
+
+(autoload 'doc-view-goto-page "doc-view")
 
 (org-add-link-type "docview" 'org-docview-open)
 (add-hook 'org-store-link-functions 'org-docview-store-link)
@@ -66,7 +69,7 @@
   (when (eq major-mode 'doc-view-mode)
     ;; This buffer is in doc-view-mode
     (let* ((path buffer-file-name)
-	   (page (doc-view-current-page))
+	   (page (image-mode-window-get 'page))
 	   (link (concat "docview:" path "::" (number-to-string page)))
 	   (description ""))
       (org-store-link-props

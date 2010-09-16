@@ -142,13 +142,14 @@ ENTITY is a message entity."
 
 (defun org-wl-store-link ()
   "Store a link to a WL message or folder."
-  (cond
-   ((memq major-mode '(wl-summary-mode mime-view-mode))
-    (org-wl-store-link-message))
-   ((eq major-mode 'wl-folder-mode)
-    (org-wl-store-link-folder))
-   (t
-    nil)))
+  (unless (eobp)
+    (cond
+     ((memq major-mode '(wl-summary-mode mime-view-mode))
+      (org-wl-store-link-message))
+     ((eq major-mode 'wl-folder-mode)
+      (org-wl-store-link-folder))
+     (t
+      nil))))
 
 (defun org-wl-store-link-folder ()
   "Store a link to a WL folder."

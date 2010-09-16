@@ -38,7 +38,6 @@
 
 ;;; Code:
 (require 'ob)
-(require 'org)
 
 (defvar org-babel-default-header-args:ledger
   '((:results . "output") (:cmdline . "bal"))
@@ -50,8 +49,8 @@ called by `org-babel-execute-src-block'."
   (message "executing Ledger source code block")
   (let ((result-params (split-string (or (cdr (assoc :results params)) "")))
 	(cmdline (cdr (assoc :cmdline params)))
-        (in-file (make-temp-file "org-babel-ledger"))
-	(out-file (make-temp-file "org-babel-ledger-output"))
+        (in-file (org-babel-temp-file "ledger-"))
+	(out-file (org-babel-temp-file "ledger-output-"))
 	)
     (with-temp-file in-file (insert body))
     (message (concat "ledger -f " in-file " " cmdline))

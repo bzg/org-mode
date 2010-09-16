@@ -194,6 +194,13 @@ When nil of the empty string, use the abbreviation retrieved from Emacs."
 	  (const :tag "Unspecified" nil)
 	  (string :tag "Time zone")))
 
+(defcustom org-icalendar-use-UTC-date-time ()
+  "Non-nil force the use of the universal time for iCalendar DATE-TIME.
+The iCalendar DATE-TIME can be expressed with local time or universal Time,
+universal time could be more compatible with some external tools."
+  :group 'org-export-icalendar
+  :type 'boolean)
+
 ;;; iCalendar export
 
 ;;;###autoload
@@ -311,7 +318,7 @@ When COMBINE is non nil, add the category to each line."
 		inc t
 		hd (condition-case nil
 		       (org-icalendar-cleanup-string
-			(org-get-heading))
+			(org-get-heading t))
 		     (error (throw :skip nil)))
 		summary (org-icalendar-cleanup-string
 			 (org-entry-get nil "SUMMARY"))
@@ -439,7 +446,7 @@ END:VEVENT\n"
       (when org-icalendar-include-todo
 	(setq prefix "TODO-")
 	(goto-char (point-min))
-	(while (re-search-forward org-todo-line-regexp nil t)
+	(while (re-search-forward org-complex-heading-regexp nil t)
 	  (catch :skip
 	    (org-agenda-skip)
 	    (when org-icalendar-verify-function
@@ -471,7 +478,7 @@ END:VEVENT\n"
 			((eq org-icalendar-include-todo t)
 			 ;; include everything that is not done
 			 (member state org-not-done-keywords))))
-	      (setq hd (match-string 3)
+	      (setq hd (match-string 4)
 		    summary (org-icalendar-cleanup-string
 			     (org-entry-get nil "SUMMARY"))
 		    desc (org-icalendar-cleanup-string
@@ -634,8 +641,13 @@ a time), or the day by one (if it does not contain a time)."
 		(setq h (+ 2 h)))
 	    (setq d (1+ d))))
 	(setq time (encode-time s mi h d m y)))
-      (setq fmt (if have-time ":%Y%m%dT%H%M%S" ";VALUE=DATE:%Y%m%d"))
-      (concat keyword (format-time-string fmt time)))))
+      (setq fmt (if have-time (if org-icalendar-use-UTC-date-time 
+				  ":%Y%m%dT%H%M%SZ"
+				  ":%Y%m%dT%H%M%S")
+		    ";VALUE=DATE:%Y%m%d"))
+      (concat keyword (format-time-string fmt time 
+					  (and org-icalendar-use-UTC-date-time 
+					       have-time))))))
 
 (provide 'org-icalendar)
 

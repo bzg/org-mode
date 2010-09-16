@@ -39,6 +39,7 @@
 ;; Declare external functions and variables
 (declare-function message-fetch-field "message" (header &optional not-all))
 (declare-function message-narrow-to-head-1 "message" nil)
+(declare-function nnimap-group-overview-filename "nnimap" (group server))
 ;; The following line suppresses a compiler warning stemming from gnus-sum.el
 (declare-function gnus-summary-last-subject "gnus-sum" nil)
 ;; Customization variables
@@ -54,11 +55,39 @@ negates this setting for the duration of the command."
   :group 'org-link-store
   :type 'boolean)
 
+(defcustom org-gnus-nnimap-query-article-no-from-file t
+  "If non-nil, `org-gnus-follow-link' will try to translate
+Message-Ids to article numbers by querying the .overview file.
+Normally, this translation is done by querying the IMAP server,
+which is usually very fast.  Unfortunately, some (maybe badly
+configured) IMAP servers don't support this operation quickly.
+So if following a link to a Gnus article takes ages, try setting
+this variable to `t'."
+  :group 'org-link-store
+  :type 'boolean)
+
+
 ;; Install the link type
 (org-add-link-type "gnus" 'org-gnus-open)
 (add-hook 'org-store-link-functions 'org-gnus-store-link)
 
 ;; Implementation
+
+(defun org-gnus-nnimap-cached-article-number (group server message-id)
+  "Return cached article number (uid) of message in GROUP on SERVER.
+MESSAGE-ID is the message-id header field that identifies the
+message.  If the uid is not cached, return nil."
+  (with-temp-buffer
+    (let ((nov (nnimap-group-overview-filename group server)))
+      (when (file-exists-p nov)
+	(mm-insert-file-contents nov)
+	(set-buffer-modified-p nil)
+	(goto-char (point-min))
+	(catch 'found
+	  (while (search-forward message-id nil t)
+	    (let ((hdr (split-string (thing-at-point 'line) "\t")))
+	      (if (string= (nth 4 hdr) message-id)
+		  (throw 'found (nth 0 hdr))))))))))
 
 (defun org-gnus-group-link (group)
   "Create a link to the Gnus group GROUP.
@@ -171,7 +200,9 @@ If `org-store-link' was called with a prefix arg the meaning of
   (cond ((and group article)
 	 (gnus-activate-group group t)
 	 (condition-case nil
-	     (let ((backend (car (gnus-find-method-for-group group))))
+	     (let* ((method (gnus-find-method-for-group group))
+		    (backend (car method))
+		    (server (cadr method)))
 	       (cond
 		((eq backend 'nndoc)
 		 (if (gnus-group-read-group t nil group)
@@ -181,6 +212,12 @@ If `org-store-link' was called with a prefix arg the meaning of
 		(t
 		 (let ((articles 1)
 		       group-opened)
+		   (when (and (eq backend 'nnimap)
+			      org-gnus-nnimap-query-article-no-from-file)
+		     (setq article
+			   (or (org-gnus-nnimap-cached-article-number
+				(nth 1 (split-string group ":"))
+				server (concat "<" article ">")) article)))
 		   (while (and (not group-opened)
 			       ;; stop on integer overflows
 			       (> articles 0))

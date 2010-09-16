@@ -21,12 +21,6 @@ doc/
     The documentation files.  org.texi is the source of the
     documentation, org.html and org.pdf are formatted versions of it.
 
-xemacs/
-    The xemacs directory contains special code for XEmacs users, in
-    particular a port of the GNU Emacs outline.el to XEmacs.  Org-mode
-    does not work under XEmacs without this file installed.  It did
-    until version 4.37, but no longer.
-
 contrib/
     A directory with third-party additions for Org.  Some really cool
     stuff is in there.

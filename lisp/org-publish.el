@@ -189,7 +189,14 @@ sitemap of files or summary page for a given project.
 
 The following properties control the creation of a concept index.
 
-  :makeindex             Create a concept index."
+  :makeindex             Create a concept index.
+
+Other properties affecting publication.
+
+  :body-only              Set this to 't' to publish only the body of the
+                         documents, excluding everything outside and 
+                         including the <body> tags in HTML, or 
+                         \begin{document}..\end{document} in LaTeX."
   :group 'org-publish
   :type 'alist)
 
@@ -465,13 +472,19 @@ matching filenames."
 	(unless (plist-get (cdr prj) :components)
 	  ;; [[info:org:Selecting%20files]] shows how this is supposed to work:
 	  (let* ((r (plist-get (cdr prj) :recursive))
-		 (b (expand-file-name (plist-get (cdr prj) :base-directory)))
+		 (b (expand-file-name (file-name-as-directory
+				       (plist-get (cdr prj) :base-directory))))
 		 (x (or (plist-get (cdr prj) :base-extension) "org"))
 		 (e (plist-get (cdr prj) :exclude))
 		 (i (plist-get (cdr prj) :include))
 		 (xm (concat "^" b (if r ".+" "[^/]+") "\\.\\(" x "\\)$")))
 	    (when (or
-		   (and i (string-match i filename))
+		   (and 
+		    i 
+		    (member filename 
+			    (mapcar 
+			     (lambda (file) (expand-file-name file b))
+			     i)))
 		   (and
 		    (not (and e (string-match e filename)))
 		    (string-match xm filename)))
@@ -508,7 +521,9 @@ PUB-DIR is the publishing directory."
 	(setq export-buf-or-file
 	      (funcall (intern (concat "org-export-as-" format))
 		       (plist-get plist :headline-levels)
-		       nil plist nil nil pub-dir))
+		       nil plist nil 
+		       (plist-get plist :body-only) 
+		       pub-dir))
 	(when (and (bufferp export-buf-or-file)
 		   (buffer-live-p export-buf-or-file))
 	  (set-buffer export-buf-or-file)

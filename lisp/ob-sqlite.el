@@ -73,7 +73,7 @@ This function is called by `org-babel-execute-src-block'."
 			    (insert (org-babel-expand-body:sqlite
 				     body nil (list nil vars))))
 			  sql-file)
-			(make-temp-file "ob-sqlite-sql")))
+			(org-babel-temp-file "sqlite-sql-")))
 	  (cons "cmd" org-babel-sqlite3-command)
 	  (cons "header" (if headers-p "-header" "-noheader"))
 	  (cons "separator"
@@ -117,7 +117,7 @@ This function is called by `org-babel-execute-src-block'."
 							el
 						      (format "%S" el)))))))
 		      data-file)
-		    (make-temp-file "ob-sqlite-data"))
+		    (org-babel-temp-file "sqlite-data-"))
 		 (if (stringp val) val (format "%S" val))))
 	     (cdr pair))
 	    body)))

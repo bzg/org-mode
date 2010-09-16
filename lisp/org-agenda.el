@@ -1488,6 +1488,18 @@ the lower-case version of all tags."
   (require 'cl))
 (require 'org)
 
+(defmacro org-agenda-with-point-at-orig-entry (string &rest body)
+  "Execute BODY with point at location given by `org-hd-marker' property.
+If STRING is non-nil, the text property will be fetched from position 0
+in that string.  If STRING is nil, it will be fetched from the beginning
+of the current line."
+  `(let ((marker (get-text-property (if string 0 (point-at-bol))
+				    'org-hd-marker string)))
+     (with-current-buffer (marker-buffer marker)
+       (save-excursion
+	 (goto-char marker)
+	 ,@body))))
+
 (defun org-add-agenda-custom-command (entry)
   "Replace or add a command in `org-agenda-custom-commands'.
 This is mostly for hacking and trying a new command - once the command
@@ -2503,16 +2515,15 @@ higher priority settings."
   (interactive "FWrite agenda to file: \nP")
   (if (not (file-writable-p file))
       (error "Cannot write agenda to file %s" file))
-  (cond
-   ((string-match "\\.html?\\'" file) (require 'htmlize))
-   ((string-match "\\.ps\\'" file) (require 'ps-print)))
   (org-let (if nosettings nil org-agenda-exporter-settings)
-    `(save-excursion
+    '(save-excursion
        (save-window-excursion
 	 (org-agenda-mark-filtered-text)
 	 (let ((bs (copy-sequence (buffer-string))) beg)
 	   (org-agenda-unmark-filtered-text)
 	   (with-temp-buffer
+	     (rename-buffer "Agenda View" t)
+	     (set-buffer-modified-p nil)
 	     (insert bs)
 	     (org-agenda-remove-marked-text 'org-filtered)
 	     (while (setq beg (text-property-any (point-min) (point-max)
@@ -2525,6 +2536,7 @@ higher priority settings."
 	      ((org-bound-and-true-p org-mobile-creating-agendas)
 	       (org-mobile-write-agenda-for-mobile file))
 	      ((string-match "\\.html?\\'" file)
+	       (require 'htmlize)
 	       (set-buffer (htmlize-buffer (current-buffer)))
 
 	       (when (and org-agenda-export-html-style
@@ -2539,18 +2551,17 @@ higher priority settings."
 	       (message "HTML written to %s" file))
 	      ((string-match "\\.ps\\'" file)
 	       (require 'ps-print)
-	       ,(flet ((ps-get-buffer-name () "Agenda View"))
-		  (ps-print-buffer-with-faces file))
+	       (ps-print-buffer-with-faces file)
 	       (message "Postscript written to %s" file))
 	      ((string-match "\\.pdf\\'" file)
 	       (require 'ps-print)
-	       ,(flet ((ps-get-buffer-name () "Agenda View"))
-		  (ps-print-buffer-with-faces
-		   (concat (file-name-sans-extension file) ".ps")))
+	       (ps-print-buffer-with-faces
+		(concat (file-name-sans-extension file) ".ps"))
 	       (call-process "ps2pdf" nil nil nil
 			     (expand-file-name
 			      (concat (file-name-sans-extension file) ".ps"))
 			     (expand-file-name file))
+	       (delete-file (concat (file-name-sans-extension file) ".ps"))
 	       (message "PDF written to %s" file))
 	      ((string-match "\\.ics\\'" file)
 	       (require 'org-icalendar)
@@ -2616,7 +2627,9 @@ Drawers will be excluded, also the line with scheduling/deadline info."
 	  (setq txt (org-agenda-get-some-entry-text
 		     m org-agenda-add-entry-text-maxlines "    > "))
 	  (end-of-line 1)
-	  (if (string-match "\\S-" txt) (insert "\n" txt)))))))
+	  (if (string-match "\\S-" txt)
+	      (insert "\n" txt)
+	    (or (eobp) (forward-char 1))))))))
 
 (defun org-agenda-get-some-entry-text (marker n-lines &optional indent
 					      &rest keep)
@@ -3993,8 +4006,7 @@ The remainder is either a list of TODO keywords, or a state symbol
   "Create agenda view for projects that are stuck.
 Stuck projects are project that have no next actions.  For the definitions
 of what a project is and how to check if it stuck, customize the variable
-`org-stuck-projects'.
-MATCH is being ignored."
+`org-stuck-projects'."
   (interactive)
   (let* ((org-agenda-skip-function
 	  'org-agenda-skip-entry-when-regexp-matches-in-subtree)
@@ -4016,11 +4028,11 @@ MATCH is being ignored."
 			  "\\)\\>"))
 	 (tags (nth 2 org-stuck-projects))
 	 (tags-re (if (member "*" tags)
-		      (org-re "^\\*+ .*:[[:alnum:]_@]+:[ \t]*$")
+		      (org-re "^\\*+ .*:[[:alnum:]_@#%]+:[ \t]*$")
 		    (if tags
 			(concat "^\\*+ .*:\\("
 				(mapconcat 'identity tags "\\|")
-				(org-re "\\):[[:alnum:]_@:]*[ \t]*$")))))
+				(org-re "\\):[[:alnum:]_@#%:]*[ \t]*$")))))
 	 (gen-re (nth 3 org-stuck-projects))
 	 (re-list
 	  (delq nil
@@ -4979,7 +4991,7 @@ Any match of REMOVE-RE will be removed from TXT."
 	  (setq h (/ m 60) m (- m (* h 60)))
 	  (setq s2 (format "%02d:%02d" h m))))
 
-      (when (string-match (org-re "\\([ \t]+\\)\\(:[[:alnum:]_@:]+:\\)[ \t]*$")
+      (when (string-match (org-re "\\([ \t]+\\)\\(:[[:alnum:]_@#%:]+:\\)[ \t]*$")
 			  txt)
 	;; Tags are in the string
 	(if (or (eq org-agenda-remove-tags t)
@@ -5053,7 +5065,7 @@ Any match of REMOVE-RE will be removed from TXT."
 The modified list may contain inherited tags, and tags matched by
 `org-agenda-hide-tags-regexp' will be removed."
   (when (or add-inherited hide-re)
-    (if (string-match (org-re "\\([ \t]+\\)\\(:[[:alnum:]_@:]+:\\)[ \t]*$") txt)
+    (if (string-match (org-re "\\([ \t]+\\)\\(:[[:alnum:]_@#%:]+:\\)[ \t]*$") txt)
 	(setq txt (substring txt 0 (match-beginning 0))))
     (setq tags
 	  (delq nil
@@ -5109,7 +5121,7 @@ The modified list may contain inherited tags, and tags matched by
 	  (throw 'exit list))
       (while (setq time (pop gridtimes))
 	(unless (and remove (member time have))
-	  (setq time (int-to-string time))
+	  (setq time (replace-regexp-in-string " " "0" (format "%4s" time)))
 	  (push (org-format-agenda-item
 		 nil string "" nil
 		 (concat (substring time 0 -2) ":" (substring time -2)))
@@ -5228,8 +5240,8 @@ could bind the variable in the options section of a custom command.")
   (if nosort
       list
     (when org-agenda-before-sorting-filter-function
-      (setq list (mapcar org-agenda-before-sorting-filter-function list)))
-    (delq nil (mapconcat 'identity (sort list 'org-entries-lessp) "\n"))))
+      (setq list (delq nil (mapcar org-agenda-before-sorting-filter-function list))))
+    (mapconcat 'identity (sort list 'org-entries-lessp) "\n")))
 
 (defun org-agenda-highlight-todo (x)
   (let ((org-done-keywords org-done-keywords-for-agenda)
@@ -6719,7 +6731,7 @@ If FORCE-TAGS is non nil, the car of it returns the new tags."
   (let ((inhibit-read-only t) l c)
     (save-excursion
       (goto-char (if line (point-at-bol) (point-min)))
-      (while (re-search-forward (org-re "\\([ \t]+\\)\\(:[[:alnum:]_@:]+:\\)[ \t]*$")
+      (while (re-search-forward (org-re "\\([ \t]+\\)\\(:[[:alnum:]_@#%:]+:\\)[ \t]*$")
 				(if line (point-at-eol) nil) t)
 	(add-text-properties
 	 (match-beginning 2) (match-end 2)
@@ -7142,9 +7154,9 @@ The cursor may be at a date in the calendar, or in the Org agenda."
 	  (setq newhead (org-get-heading)))
 	(org-agenda-change-all-lines newhead hdmarker)))))
 
-(defun org-agenda-clock-out (&optional arg)
+(defun org-agenda-clock-out ()
   "Stop the currently running clock."
-  (interactive "P")
+  (interactive)
   (unless (marker-buffer org-clock-marker)
     (error "No running clock"))
   (let ((marker (make-marker)) newhead)
@@ -7271,7 +7283,8 @@ the resulting entry will not be shown.  When TEXT is empty, switch to
       (let ((calendar-date-display-form
 	     (if (if (boundp 'calendar-date-style)
 		     (eq calendar-date-style 'european)
-		   (org-bound-and-true-p european-calendar-style)) ; Emacs 22
+		   (with-no-warnings ;; european-calendar-style is obsolete as of version 23.1
+		     (org-bound-and-true-p european-calendar-style))) ; Emacs 22
 		 '(day " " month " " year)
 	       '(month " " day " " year))))
 

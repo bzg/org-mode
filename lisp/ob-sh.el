@@ -155,12 +155,12 @@ return the value of the last statement in BODY."
      (if (or (member "scalar" result-params)
 	     (member "output" result-params))
 	 results
-       (let ((tmp-file (make-temp-file "org-babel-sh")))
+       (let ((tmp-file (org-babel-temp-file "sh-")))
 	 (with-temp-file tmp-file (insert results))
 	 (org-babel-import-elisp-from-file tmp-file))))
    (if (not session)
        (org-babel-eval org-babel-sh-command (org-babel-trim body))
-     (let ((tmp-file (make-temp-file "org-babel-sh")))
+     (let ((tmp-file (org-babel-temp-file "sh-")))
        (mapconcat
 	#'org-babel-sh-strip-weird-long-prompt
 	(mapcar

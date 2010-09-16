@@ -116,7 +116,7 @@ then create one.  Return the initialized session."
   (save-window-excursion
     (let* ((buffer (org-babel-prep-session:haskell
 		    session params processed-params))
-           (load-file (concat (make-temp-file "org-babel-haskell-load") ".hs")))
+           (load-file (concat (org-babel-temp-file "haskell-load-") ".hs")))
       (with-temp-buffer
         (insert body) (write-file load-file)
         (haskell-mode) (inferior-haskell-load-file))
@@ -177,7 +177,7 @@ constructs (header arguments, no-web syntax etc...) are ignored."
           (concat "^\\([ \t]*\\)#\\+begin_src[ \t]haskell*\\(.*\\)?[\r\n]"
                   "\\([^\000]*?\\)[\r\n][ \t]*#\\+end_src.*"))
          (base-name (file-name-sans-extension (buffer-file-name)))
-         (tmp-file (make-temp-file "ob-haskell"))
+         (tmp-file (org-babel-temp-file "haskell-"))
          (tmp-org-file (concat tmp-file ".org"))
          (tmp-tex-file (concat tmp-file ".tex"))
          (lhs-file (concat base-name ".lhs"))
