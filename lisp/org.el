@@ -6238,8 +6238,8 @@ Optional argument N means put the headline into the Nth line of the window."
 
 (defun org-outline-overlay-data (&optional use-markers)
   "Return a list of the locations of all outline overlays.
-The are overlays with the `invisible' property value `outline'.
-The return values is a list of cons cells, with start and stop
+These are overlays with the `invisible' property value `outline'.
+The return value is a list of cons cells, with start and stop
 positions for each overlay.
 If USE-MARKERS is set, return the positions as markers."
   (let (beg end)
@@ -18268,7 +18268,7 @@ really on, so that the block visually is on the match."
 	nil))))
 
 (defun org-in-regexps-block-p (start-re end-re &optional bound)
-  "Returns t if the current point is between matches of START-RE and END-RE.
+  "Return t if the current point is between matches of START-RE and END-RE.
 This will also return t if point is on one of the two matches or
 in an unfinished block. END-RE can be a string or a form
 returning a string.

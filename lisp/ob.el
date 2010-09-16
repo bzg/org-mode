@@ -1719,7 +1719,7 @@ Fixes a bug in `tramp-handle-call-process-region'."
 
 (defun org-babel-maybe-remote-file (file)
   "Conditionally parse information on a remote connnection.
-If FILE specifies a remove file, then parse the information on
+If FILE specifies a remote file, then parse the information on
 the remote connection."
   (if (file-remote-p default-directory)
       (let* ((vec (tramp-dissect-file-name default-directory))
