@@ -578,13 +578,18 @@ See `org-publish-org-to' to the list of arguments."
   "Publish a file with no transformation of any kind.
 See `org-publish-org-to' to the list of arguments."
   ;; make sure eshell/cp code is loaded
-  (unless (file-directory-p pub-dir)
-    (make-directory pub-dir t))
-  (or (equal (expand-file-name (file-name-directory filename))
-	     (file-name-as-directory (expand-file-name pub-dir)))
-      (copy-file filename
-		 (expand-file-name (file-name-nondirectory filename) pub-dir)
-		 t)))
+  (let* ((rel-dir
+	  (file-relative-name
+	   (file-name-directory filename)
+	   (plist-get plist :base-directory)))
+	 (pub-dir
+	  (expand-file-name
+	   (concat (file-name-as-directory pub-dir) rel-dir))))
+    (unless (file-directory-p pub-dir)
+      (make-directory pub-dir t))
+    (or (equal (expand-file-name (file-name-directory filename))
+	       (file-name-as-directory (expand-file-name pub-dir)))
+	(copy-file filename pub-dir t))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Publishing files, sets of files, and indices

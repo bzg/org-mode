@@ -6238,8 +6238,8 @@ Optional argument N means put the headline into the Nth line of the window."
 
 (defun org-outline-overlay-data (&optional use-markers)
   "Return a list of the locations of all outline overlays.
-The are overlays with the `invisible' property value `outline'.
-The return values is a list of cons cells, with start and stop
+These are overlays with the `invisible' property value `outline'.
+The return value is a list of cons cells, with start and stop
 positions for each overlay.
 If USE-MARKERS is set, return the positions as markers."
   (let (beg end)
@@ -14604,9 +14604,10 @@ user function argument order change dependent on argument order."
 	(list arg2 arg1 arg3))
        ((eq calendar-date-style 'iso)
 	(list arg2 arg3 arg1)))
-    (if (org-bound-and-true-p european-calendar-style)
-	(list arg2 arg1 arg3)
-      (list arg1 arg2 arg3))))
+    (with-no-warnings ;; european-calendar-style is obsolete as of version 23.1
+      (if (org-bound-and-true-p european-calendar-style)
+	  (list arg2 arg1 arg3)
+	(list arg1 arg2 arg3)))))
 
 (defun org-eval-in-calendar (form &optional keepdate)
   "Eval FORM in the calendar window and return to current window.
@@ -18267,7 +18268,7 @@ really on, so that the block visually is on the match."
 	nil))))
 
 (defun org-in-regexps-block-p (start-re end-re &optional bound)
-  "Returns t if the current point is between matches of START-RE and END-RE.
+  "Return t if the current point is between matches of START-RE and END-RE.
 This will also return t if point is on one of the two matches or
 in an unfinished block. END-RE can be a string or a form
 returning a string.
@@ -19198,6 +19199,18 @@ move point."
   (save-excursion
     (while (org-goto-sibling 'previous)
       (org-flag-heading nil))))
+
+(defun org-goto-first-child ()
+  "Goto the first child, even if it is invisible.
+Return t when a child was found. Otherwise don't move point and
+return nil."
+  (let (level (pos (point)) (re (concat "^" outline-regexp)))
+    (when (condition-case nil (org-back-to-heading t) (error nil))
+      (setq level (outline-level))
+      (forward-char 1)
+      (if (and (re-search-forward re nil t) (> (outline-level) level))
+	  (progn (goto-char (match-beginning 0)) t)
+	(goto-char pos) nil))))
 
 (defun org-show-hidden-entry ()
   "Show an entry where even the heading is hidden."

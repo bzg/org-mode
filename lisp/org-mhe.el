@@ -181,7 +181,7 @@ you have a better idea of how to do this then please let us know."
     (if (equal major-mode 'mh-folder-mode)
 	(mh-show)
       (mh-show-show))
-    header-field)))
+    (org-trim header-field))))
 
 (defun org-mhe-follow-link (folder article)
   "Follow an MH-E link to FOLDER and ARTICLE.

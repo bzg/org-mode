@@ -276,7 +276,10 @@ buffer."
 	(unless preserve-indentation
 	  (setq total-nindent (or (org-do-remove-indentation) 0)))
 	(let ((org-inhibit-startup t))
-	  (funcall lang-f))
+	  (condition-case e
+	      (funcall lang-f)
+	    (error
+	     (error "Language mode `%s' fails with: %S" lang-f (nth 1 e)))))
 	(set (make-local-variable 'org-edit-src-force-single-line) single)
 	(set (make-local-variable 'org-edit-src-from-org-mode) org-mode-p)
 	(set (make-local-variable 'org-edit-src-allow-write-back-p) allow-write-back-p)

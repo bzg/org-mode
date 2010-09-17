@@ -2829,7 +2829,11 @@ the global options and expect it to be applied to the entire view.")
 	(switch-to-buffer-other-frame abuf))
        ((equal org-agenda-window-setup 'reorganize-frame)
 	(delete-other-windows)
-	(org-switch-to-buffer-other-window abuf))))
+	(org-switch-to-buffer-other-window abuf)))
+      ;; additional test in case agenda is invoked from within agenda
+      ;; buffer via elisp link
+      (unless (equal (current-buffer) abuf)
+	(switch-to-buffer abuf)))
     (setq buffer-read-only nil)
     (let ((inhibit-read-only t)) (erase-buffer))
     (org-agenda-mode)
@@ -7279,7 +7283,8 @@ the resulting entry will not be shown.  When TEXT is empty, switch to
       (let ((calendar-date-display-form
 	     (if (if (boundp 'calendar-date-style)
 		     (eq calendar-date-style 'european)
-		   (org-bound-and-true-p european-calendar-style)) ; Emacs 22
+		   (with-no-warnings ;; european-calendar-style is obsolete as of version 23.1
+		     (org-bound-and-true-p european-calendar-style))) ; Emacs 22
 		 '(day " " month " " year)
 	       '(month " " day " " year))))
 

@@ -771,6 +771,7 @@ modified) list.")
 	;; Add macro definitions
 	(setq p (plist-put p :macro-date "(eval (format-time-string \"$1\"))"))
 	(setq p (plist-put p :macro-time "(eval (format-time-string \"$1\"))"))
+	(setq p (plist-put p :macro-property "(eval (org-entry-get nil \"$1\" 'selective))"))
 	(setq p (plist-put
 		 p :macro-modification-time
 		 (and (buffer-file-name)
