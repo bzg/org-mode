@@ -515,7 +515,7 @@ List ending is determined by the indentation of text. See
 	      (skip-chars-forward " \r\t\n")
 	      (beginning-of-line))
 	     ((org-at-item-p)
-	      (setq ind-ref (min ind ind-ref))
+	      (setq ind-ref ind)
 	      (forward-line 1))
 	     ((<= ind ind-ref)
 	      (throw 'exit (point-at-bol)))
@@ -1644,11 +1644,11 @@ is an integer, 0 means `-', 1 means `+' etc. If WHICH is
 					   (looking-at "\\S-")) '("*"))
 			      ;; Description items cannot be numbered
 			      (unless (and bullet-rule-p
-					   (or (eq org-plain-list-ordered-item-terminator ?.)
-					       (org-at-item-description-p))) '("1)"))
-			      (unless (and bullet-rule-p
 					   (or (eq org-plain-list-ordered-item-terminator ?\))
-					       (org-at-item-description-p))) '("1."))))
+					       (org-at-item-description-p))) '("1."))
+			      (unless (and bullet-rule-p
+					   (or (eq org-plain-list-ordered-item-terminator ?.)
+					       (org-at-item-description-p))) '("1)"))))
 	 (len (length bullet-list))
 	 (item-index (- len (length (member current bullet-list))))
 	 (get-value (lambda (index) (nth (mod index len) bullet-list)))
