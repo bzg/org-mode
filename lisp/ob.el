@@ -596,9 +596,17 @@ the current subtree."
   "Generate an sha1 hash based on the value of info."
   (interactive)
   (let* ((info (or info (org-babel-get-src-block-info)))
-         (hash (sha1 (format "%s-%s" (mapconcat (lambda (arg) (format "%S" arg))
-                                                (nth 2 info) ":")
-                             (nth 1 info)))))
+         (hash (sha1
+		(format "%s-%s"
+			(mapconcat
+			 (lambda (arg)
+			   (if (stringp (cdr arg))
+			       (mapconcat
+				#'identity
+				(sort (split-string (cdr arg)) #'string<) " ")
+			     (cdr arg)))
+			 (nth 2 info) ":")
+			(nth 1 info)))))
     (when (interactive-p) (message hash))
     hash))
 
