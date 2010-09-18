@@ -794,7 +794,6 @@ directory and force publishing all files."
   (interactive "P")
   (when force
     (org-publish-remove-all-timestamps))
-  ;;  (org-publish-initialize-files-alist force)
   (save-window-excursion
     (let ((org-publish-use-timestamps-flag
 	   (if force nil org-publish-use-timestamps-flag)))
