@@ -7369,8 +7369,9 @@ list of small improvements and some new significant features.
 
    - Export content specified via the #+TEXT construct is now
      fully processed, i.e. links, emphasis etc. are all
-     interpreted.  #+TEXT lines may include
-     #+BEGIN_HTML...#+END_HTML sections to embed literal HTML.
+     interpreted.  #+TEXT lines may
+     include #+BEGIN_HTML... #+END_HTML sections to embed literal
+     HTML.
 
    - During HTML export, you can request to have a_{b}
      interpreted as a subscript, but to leave a_b as it is.  This
