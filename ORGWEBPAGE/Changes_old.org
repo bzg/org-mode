@@ -31,9 +31,9 @@ Currently I do not recommend to turn it on globally using
 the variable =org-startup-indented=.  But you can turn it on
 for a particular buffer using
 
-#+begin_src org
+#+begin_example
   ,#+STARTUP: indent
-#+end_src
+#+end_example
 
 Turning on this minor mode automatically turns on
 =org-hide-leading-stars=, and it turns off
