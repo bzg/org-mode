@@ -578,18 +578,13 @@ See `org-publish-org-to' to the list of arguments."
   "Publish a file with no transformation of any kind.
 See `org-publish-org-to' to the list of arguments."
   ;; make sure eshell/cp code is loaded
-  (let* ((rel-dir
-	  (file-relative-name
-	   (file-name-directory filename)
-	   (plist-get plist :base-directory)))
-	 (pub-dir
-	  (expand-file-name
-	   (concat (file-name-as-directory pub-dir) rel-dir))))
     (unless (file-directory-p pub-dir)
       (make-directory pub-dir t))
     (or (equal (expand-file-name (file-name-directory filename))
 	       (file-name-as-directory (expand-file-name pub-dir)))
-	(copy-file filename pub-dir t))))
+      (copy-file filename
+		 (expand-file-name (file-name-nondirectory filename) pub-dir)
+		 t)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Publishing files, sets of files, and indices
@@ -606,13 +601,13 @@ See `org-publish-projects'."
 		  (error "File %s not part of any known project"
 			 (abbreviate-file-name filename)))))
 	 (project-plist (cdr project))
-	 (ftname (file-truename filename))
+	 (ftname (expand-file-name filename))
 	 (publishing-function
 	  (or (plist-get project-plist :publishing-function)
 	      'org-publish-org-to-html))
 	 (base-dir
 	  (file-name-as-directory
-	   (file-truename
+	   (expand-file-name
 	    (or (plist-get project-plist :base-directory)
 		(error "Project %s does not have :base-directory defined"
 		       (car project))))))
