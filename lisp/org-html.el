@@ -519,7 +519,7 @@ with a link to this URL."
   "Preamble, to be inserted just after <body>.  Set by publishing functions.
 This may also be a function, building and inserting the preamble.")
 (defvar org-export-html-postamble nil
-  "Preamble, to be inserted just before </body>.  Set by publishing functions.
+  "Postamble, to be inserted just before </body>.  Set by publishing functions.
 This may also be a function, building and inserting the postamble.")
 (defvar org-export-html-auto-preamble t
   "Should default preamble be inserted?  Set by publishing functions.")
