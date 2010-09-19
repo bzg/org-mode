@@ -10696,27 +10696,6 @@ this is nil.")
 
 (defvar org-setting-tags nil) ; dynamically skipped
 
-(defun org-parse-local-options (string var)
-  "Parse STRING for startup setting relevant for variable VAR."
-  (let ((rtn (symbol-value var))
-	e opts)
-    (save-match-data
-      (if (or (not string) (not (string-match "\\S-" string)))
-	  rtn
-	(setq opts (delq nil (mapcar (lambda (x)
-				       (setq e (assoc x org-startup-options))
-				       (if (eq (nth 1 e) var) e nil))
-				     (org-split-string string "[ \t]+"))))
-	(if (not opts)
-	    rtn
-	  (setq rtn nil)
-	  (while (setq e (pop opts))
-	    (if (not (nth 3 e))
-		(setq rtn (nth 2 e))
-	      (if (not (listp rtn)) (setq rtn nil))
-	      (push (nth 2 e) rtn)))
-	  rtn)))))
-
 (defvar org-todo-setup-filter-hook nil
   "Hook for functions that pre-filter todo specs.
 Each function takes a todo spec and returns either nil or the spec
