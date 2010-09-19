@@ -67,6 +67,8 @@ functions which are assigned key bindings, and see
     ("b" . org-babel-execute-buffer)
     ("\C-s" . org-babel-execute-subtree)
     ("s" . org-babel-execute-subtree)
+    ("\C-d" . org-babel-demarcate-block)
+    ("d" . org-babel-demarcate-block)
     ("\C-t" . org-babel-tangle)
     ("t" . org-babel-tangle)
     ("\C-f" . org-babel-tangle-file)

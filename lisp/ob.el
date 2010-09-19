@@ -1129,6 +1129,37 @@ With optional prefix argument ARG, jump backward ARG many source blocks."
     (error (error "No previous code blocks")))
   (goto-char (match-beginning 0)) (org-show-context))
 
+;;;###autoload
+(defun org-babel-demarcate-block (&optional arg)
+  "Wrap or split the code in the region or on the point.
+When called from inside of a code block the current block is
+split.  When called from outside of a code block a new code block
+is created.  In both cases if the region is demarcated and if the
+region is not active then the point is demarcated."
+  (interactive "P")
+  (let ((info (org-babel-get-src-block-info)))
+    (if info
+        (mapc
+         (lambda (place)
+           (save-excursion
+             (goto-char place)
+             (let ((lang (nth 0 info))
+                   (indent (make-string (nth 6 info) ? ))
+                   (stars (concat (make-string (org-current-level) ?*) " ")))
+               (insert (concat (if (looking-at "^") "" "\n")
+                               indent "#+end_src\n"
+                               (if arg stars indent) "\n"
+                               indent "#+begin_src " lang
+                               (if (looking-at "[\n\r]") "" "\n")))
+               (when arg (previous-line) (move-end-of-line 1)))))
+         (sort (if (region-active-p) (list (mark) (point)) (list (point))) #'>))
+      (insert (concat (if (looking-at "^") "" "\n")
+                      (if arg (concat stars "\n") "")
+                      "#+begin_src " (read-from-minibuffer "Lang: ") "\n"
+                      (delete-and-extract-region (or (mark) (point)) (point))
+                      "\n#+end_src"))
+      (previous-line) (move-end-of-line 1))))
+
 (defvar org-babel-lob-one-liner-regexp)
 (defun org-babel-where-is-src-block-result (&optional insert info hash indent)
   "Find where the current source block results begin.
