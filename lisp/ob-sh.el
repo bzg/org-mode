@@ -160,21 +160,20 @@ return the value of the last statement in BODY."
 	 (org-babel-import-elisp-from-file tmp-file))))
    (if (not session)
        (org-babel-eval org-babel-sh-command (org-babel-trim body))
-     (let ((tmp-file (org-babel-temp-file "sh-")))
-       (mapconcat
-	#'org-babel-sh-strip-weird-long-prompt
-	(mapcar
-	 #'org-babel-trim
-	 (butlast
-	  (org-babel-comint-with-output
-	      (session org-babel-sh-eoe-output t body)
-	    (mapc
-	     (lambda (line)
-	       (insert line) (comint-send-input nil t) (sleep-for 0.25))
-	     (append
-	      (split-string (org-babel-trim body) "\n")
-	      (list org-babel-sh-eoe-indicator))))
-	  2)) "\n")))))
+     (mapconcat
+      #'org-babel-sh-strip-weird-long-prompt
+      (mapcar
+       #'org-babel-trim
+       (butlast
+	(org-babel-comint-with-output
+	    (session org-babel-sh-eoe-output t body)
+	  (mapc
+	   (lambda (line)
+	     (insert line) (comint-send-input nil t) (sleep-for 0.25))
+	   (append
+	    (split-string (org-babel-trim body) "\n")
+	    (list org-babel-sh-eoe-indicator))))
+	2)) "\n"))))
 
 (defun org-babel-sh-strip-weird-long-prompt (string)
   "Remove prompt cruft from a string of shell output."
