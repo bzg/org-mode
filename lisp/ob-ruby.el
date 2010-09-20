@@ -221,7 +221,7 @@ return the value of the last statement in BODY, as elisp."
 	  (if (or (member "code" result-params) (member "pp" result-params))
 	      results
 	    (org-babel-ruby-table-or-string results)))
-	(let* ((tmp-file (org-babel-temp-file "ruby-results-"))
+	(let* ((tmp-file (org-babel-temp-file "ruby-"))
 	       (ppp (or (member "code" result-params)
 			(member "pp" result-params))))
 	  (org-babel-comint-with-output

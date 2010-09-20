@@ -50,8 +50,7 @@ called by `org-babel-execute-src-block'."
   (let ((result-params (split-string (or (cdr (assoc :results params)) "")))
 	(cmdline (cdr (assoc :cmdline params)))
         (in-file (org-babel-temp-file "ledger-"))
-	(out-file (org-babel-temp-file "ledger-output-"))
-	)
+	(out-file (org-babel-temp-file "ledger-output-")))
     (with-temp-file in-file (insert body))
     (message (concat "ledger"
 		     " -f " (org-babel-process-file-name in-file)

@@ -210,7 +210,7 @@ string. If RESULT-TYPE equals 'value then return the value of the
 last statement in BODY, as elisp."
   (case result-type
     (output (org-babel-eval org-babel-python-command body))
-    (value (let ((tmp-file (org-babel-temp-file "python-results-")))
+    (value (let ((tmp-file (org-babel-temp-file "python-")))
 	     (org-babel-eval org-babel-python-command
 			     (format
 			      (if (member "pp" result-params)
