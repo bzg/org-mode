@@ -240,6 +240,21 @@ ENTITY is a message entity."
 	      (org-add-link-props :link link :description desc)))
 	    (or link xref)))))))
 
+(defun org-wl-open-nntp (path)
+  "Follow the nntp: link specified by PATH."
+  (let* ((spec (split-string path "/"))
+	 (server (split-string (nth 2 spec) "@"))
+	 (group (nth 3 spec))
+	 (article (nth 4 spec)))
+    (org-wl-open
+     (concat "-" group ":" (if (cdr server)
+			       (car (split-string (car server) ":"))
+			     "")
+	     (if (string= elmo-nntp-default-server (nth 2 spec))
+		 ""
+	       (concat "@" (or (cdr server) (car server))))
+	     (if article (concat "#" article) "")))))
+
 (defun org-wl-open (path)
   "Follow the WL message link specified by PATH.
 When called with one prefix, open message in namazu search folder
