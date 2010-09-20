@@ -84,6 +84,8 @@ googlegroups otherwise."
 (declare-function wl-summary-buffer-msgdb "ext:wl-folder" () t)
 (declare-function wl-summary-jump-to-msg-by-message-id "ext:wl-summary"
 		  (&optional id))
+(declare-function wl-summary-jump-to-msg "ext:wl-summary"
+		  (&optional number beg end))
 (declare-function wl-summary-line-from "ext:wl-summary" ())
 (declare-function wl-summary-line-subject "ext:wl-summary" ())
 (declare-function wl-summary-message-number "ext:wl-summary" ())
@@ -100,6 +102,7 @@ googlegroups otherwise."
 (defvar wl-summary-buffer-folder-name)
 (defvar wl-folder-group-regexp)
 (defvar wl-auto-check-folder-name)
+(defvar elmo-nntp-default-server)
 
 (defconst org-wl-folder-types
   '(("%" . imap) ("-" . nntp) ("+" . mh) ("=" . spool)
@@ -272,8 +275,12 @@ for namazu index."
 	  ;; beginning of the current line.  So, restore the point
 	  ;; in the old buffer.
 	  (goto-char old-point))
-	(and article (wl-summary-jump-to-msg-by-message-id (org-add-angle-brackets
-							    article))
+	(when article
+	  (if (org-string-match-p "@" article)
+	      (wl-summary-jump-to-msg-by-message-id (org-add-angle-brackets
+						     article))
+	    (or (wl-summary-jump-to-msg (string-to-number article))
+		(error "No such message: %s" article)))
 	     (wl-summary-redisplay))))))
 
 (provide 'org-wl)
