@@ -5730,7 +5730,9 @@ If the line does not have an effort defined, return nil."
 	      (if (not (eval org-agenda-filter-form))
 		  (org-agenda-filter-by-tag-hide-line))
 	      (beginning-of-line 2))
-	  (beginning-of-line 2))))))
+	  (beginning-of-line 2))))
+    (if (get-char-property (point) 'invisible)
+	(org-agenda-previous-line))))
 
 (defun org-agenda-filter-by-tag-hide-line ()
   (let (ov)
