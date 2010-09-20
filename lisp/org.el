@@ -4755,7 +4755,7 @@ The following commands are available:
 
 (defconst org-non-link-chars "]\t\n\r<>")
 (defvar org-link-types '("http" "https" "ftp" "mailto" "file" "news"
-			   "shell" "elisp" "doi"))
+			   "shell" "elisp" "doi" "message"))
 (defvar org-link-types-re nil
    "Matches a link that has a url-like prefix like \"http:\"")
 (defvar org-link-re-with-space nil
