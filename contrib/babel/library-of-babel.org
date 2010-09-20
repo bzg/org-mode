@@ -161,6 +161,20 @@ plot(data)
 
 ** Gnuplot
 
+* Org reference
+** headline references
+#+source: headline
+#+begin_src emacs-lisp :var headline=top :var file='()
+  (save-excursion
+    (when file (get-file-buffer file))
+    (org-open-link-from-string (org-make-link-string headline))
+    (save-restriction
+      (org-narrow-to-subtree)
+      (buffer-string)))
+#+end_src
+
+#+call: headline(headline="headline references")
+
 * Tables
 ** LaTeX Table export
 *** booktabs
