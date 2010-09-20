@@ -42,7 +42,7 @@
 
 (defun org-babel-eval (cmd body)
   "Run CMD on BODY.
-If CMD succeeds then return it's results, otherwise display
+If CMD succeeds then return its results, otherwise display
 STDERR with `org-babel-eval-error-notify'."
   (let ((err-buff (get-buffer-create "*Org-Babel Error*")) exit-code)
     (with-current-buffer err-buff (erase-buffer))

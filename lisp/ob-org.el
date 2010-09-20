@@ -67,7 +67,7 @@ This function is called by `org-babel-execute-src-block'."
       (org-load-modules-maybe)
       (unless org-local-vars
 	(setq org-local-vars (org-get-local-variables)))
-      (eval ;; convert to fmt -- mimicing `org-run-like-in-org-mode'
+      (eval ;; convert to fmt -- mimicking `org-run-like-in-org-mode'
        (list 'let org-local-vars 
 	     (list (intern (concat "org-export-as-" fmt))
 		   nil nil nil ''string t))))))
