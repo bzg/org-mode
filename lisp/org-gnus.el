@@ -175,6 +175,16 @@ If `org-store-link' was called with a prefix arg the meaning of
       (org-add-link-props :link link :description desc)
       link))))
 
+(defun org-gnus-open-nntp (path)
+  "Follow the nntp: link specified by PATH."
+  (let* ((spec (split-string path "/"))
+	 (server (split-string (nth 2 spec) "@"))
+	 (group (nth 3 spec))
+	 (article (nth 4 spec)))
+    (org-gnus-follow-link
+     (format "nntp+%s:%s" (or (cdr server) (car server)) group)
+     article)))
+
 (defun org-gnus-open (path)
   "Follow the Gnus message or folder link specified by PATH."
   (let (group article)
