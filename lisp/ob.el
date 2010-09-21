@@ -1146,6 +1146,10 @@ region is not active then the point is demarcated."
              (let ((lang (nth 0 info))
                    (indent (make-string (nth 6 info) ? ))
                    (stars (concat (make-string (org-current-level) ?*) " ")))
+	       (when (string-match "^[[:space:]]*$"
+				   (buffer-substring (point-at-bol)
+						     (point-at-eol)))
+		 (delete-region (point-at-bol) (point-at-eol)))
                (insert (concat (if (looking-at "^") "" "\n")
                                indent "#+end_src\n"
                                (if arg stars indent) "\n"
@@ -1153,12 +1157,17 @@ region is not active then the point is demarcated."
                                (if (looking-at "[\n\r]") "" "\n")))
                (when arg (previous-line) (move-end-of-line 1)))))
          (sort (if (region-active-p) (list (mark) (point)) (list (point))) #'>))
-      (insert (concat (if (looking-at "^") "" "\n")
-                      (if arg (concat stars "\n") "")
-                      "#+begin_src " (read-from-minibuffer "Lang: ") "\n"
-                      (delete-and-extract-region (or (mark) (point)) (point))
-                      "\n#+end_src"))
-      (previous-line) (move-end-of-line 1))))
+      (let ((start (point))
+	    (body (delete-and-extract-region
+		   (if (region-active-p) (mark) (point)) (point))))
+	(insert (concat (if (looking-at "^") "" "\n")
+			(if arg (concat stars "\n") "")
+			"#+begin_src " (read-from-minibuffer "Lang: ") "\n"
+			body
+			(if (or (= (length body) 0)
+				(string-match "[\r\n]$" body)) "" "\n")
+			"#+end_src\n"))
+	(goto-char start) (move-end-of-line 1)))))
 
 (defvar org-babel-lob-one-liner-regexp)
 (defun org-babel-where-is-src-block-result (&optional insert info hash indent)
