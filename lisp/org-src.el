@@ -109,6 +109,10 @@ editing it with \\[org-edit-src-code].  Has no effect if
   :group 'org-edit-structure
   :type 'integer)
 
+(defvar org-src-strip-leading-and-trailing-blank-lines nil
+  "If non-nil, blank lines are removed when exiting the code edit
+buffer.")
+
 (defcustom org-edit-src-persistent-message t
   "Non-nil means show persistent exit help message while editing src examples.
 The message is shown in the header-line, which will be created in the
@@ -209,6 +213,7 @@ buffer."
     (setq org-edit-src-saved-temp-window-config (current-window-configuration)))
   (let ((line (org-current-line))
 	(col (current-column))
+	(mark (and (use-region-p) (mark)))
 	(case-fold-search t)
 	(info (org-edit-src-find-region-and-lang))
 	(babel-info (org-babel-get-src-block-info))
@@ -217,7 +222,8 @@ buffer."
 	(end (make-marker))
 	(preserve-indentation org-src-preserve-indentation)
 	(allow-write-back-p (null code))
-	block-nindent total-nindent ovl lang lang-f single lfmt begline buffer msg)
+	block-nindent total-nindent ovl lang lang-f single lfmt buffer msg
+	begline markline markcol)
     (if (not info)
 	nil
       (setq beg (move-marker beg (nth 0 info))
@@ -235,6 +241,10 @@ buffer."
 	    block-nindent (nth 5 info)
 	    lang-f (intern (concat lang "-mode"))
 	    begline (save-excursion (goto-char beg) (org-current-line)))
+      (if (and mark (>= mark beg) (<= mark end))
+	  (save-excursion (goto-char mark)
+			  (setq markline (org-current-line)
+				markcol (current-column))))
       (if (equal lang-f 'table.el-mode)
 	  (setq lang-f (lambda ()
 			 (text-mode)
@@ -293,6 +303,12 @@ buffer."
 	  (while (re-search-forward "^," nil t)
 	    (if (eq (org-current-line) line) (setq total-nindent (1+ total-nindent)))
 	    (replace-match "")))
+	(when markline
+	  (org-goto-line (1+ (- markline begline)))
+	  (org-move-to-column
+	   (if preserve-indentation markcol (max 0 (- markcol total-nindent))))
+	  (push-mark (point) 'no-message t)
+	  (setq deactivate-mark nil))
 	(org-goto-line (1+ (- line begline)))
 	(org-move-to-column
 	 (if preserve-indentation col (max 0 (- col total-nindent))))
@@ -568,11 +584,12 @@ the language, a switch telling if the content should be in a single line."
 	 (delta 0) code line col indent)
     (when allow-write-back-p
       (unless preserve-indentation (untabify (point-min) (point-max)))
-      (save-excursion
-	(goto-char (point-min))
-	(if (looking-at "[ \t\n]*\n") (replace-match ""))
-	(unless macro
-	  (if (re-search-forward "\n[ \t\n]*\\'" nil t) (replace-match "")))))
+      (if org-src-strip-leading-and-trailing-blank-lines
+	  (save-excursion
+	    (goto-char (point-min))
+	    (if (looking-at "[ \t\n]*\n") (replace-match ""))
+	    (unless macro
+	      (if (re-search-forward "\n[ \t\n]*\\'" nil t) (replace-match ""))))))
     (setq line (if (org-bound-and-true-p org-edit-src-force-single-line)
 		   1
 		 (org-current-line))
@@ -718,16 +735,19 @@ Org-babel commands."
      (call-interactively
       (lookup-key org-babel-map key)))))
 
-(defvar org-src-tab-acts-natively nil
+(defcustom org-src-tab-acts-natively nil
   "If non-nil, the effect of TAB in a code block is as if it were
-issued in the language major mode buffer.")
+issued in the language major mode buffer."
+  :type 'boolean
+  :group 'org-babel)
 
 (defun org-src-native-tab-command-maybe ()
   "Perform language-specific TAB action.
 Alter code block according to effect of TAB in the language major
 mode."
   (and org-src-tab-acts-natively
-       (org-babel-do-key-sequence-in-edit-buffer (kbd "TAB"))))
+       (let ((org-src-strip-leading-and-trailing-blank-lines nil))
+	 (org-babel-do-key-sequence-in-edit-buffer (kbd "TAB")))))
 
 (add-hook 'org-tab-first-hook 'org-src-native-tab-command-maybe)
 
