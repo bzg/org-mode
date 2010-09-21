@@ -63,6 +63,8 @@ This function is called by `org-babel-execute-src-block'."
 		(concat "java -jar "
 			(shell-quote-argument
 			 (expand-file-name org-plantuml-jar-path))
+			(if (string= (file-name-extension out-file) "svg")
+			    "-tsvg" "")
 			" -p " cmdline " < "
 			(shell-quote-argument
 			 (expand-file-name in-file))
