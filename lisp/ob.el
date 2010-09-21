@@ -1138,15 +1138,15 @@ split.  When called from outside of a code block a new code block
 is created.  In both cases if the region is demarcated and if the
 region is not active then the point is demarcated."
   (interactive "P")
-  (let ((info (org-babel-get-src-block-info)))
+  (let ((info (org-babel-get-src-block-info))
+	(stars (concat (make-string (or (org-current-level) 1) ?*) " ")))
     (if info
         (mapc
          (lambda (place)
            (save-excursion
              (goto-char place)
              (let ((lang (nth 0 info))
-                   (indent (make-string (nth 6 info) ? ))
-                   (stars (concat (make-string (org-current-level) ?*) " ")))
+                   (indent (make-string (nth 6 info) ? )))
 	       (when (string-match "^[[:space:]]*$"
 				   (buffer-substring (point-at-bol)
 						     (point-at-eol)))
@@ -1160,8 +1160,7 @@ region is not active then the point is demarcated."
          (sort (if (region-active-p) (list (mark) (point)) (list (point))) #'>))
       (let ((start (point))
 	    (body (delete-and-extract-region
-		   (if (region-active-p) (mark) (point)) (point)))
-	    (stars (concat (make-string (org-current-level) ?*) " ")))
+		   (if (region-active-p) (mark) (point)) (point))))
 	(insert (concat (if (looking-at "^") "" "\n")
 			(if arg (concat stars "\n") "")
 			"#+begin_src " (read-from-minibuffer "Lang: ") "\n"
