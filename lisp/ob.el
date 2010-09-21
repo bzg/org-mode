@@ -57,6 +57,7 @@
 (declare-function org-at-table-p "org" (&optional table-type))
 (declare-function org-cycle "org" (&optional arg))
 (declare-function org-uniquify "org" (list))
+(declare-function org-current-level "org" ())
 (declare-function org-table-import "org-table" (file arg))
 (declare-function org-add-hook "org-compat" (hook function &optional append local))
 (declare-function org-table-align "org-table" ())
@@ -1154,12 +1155,13 @@ region is not active then the point is demarcated."
                                indent "#+end_src\n"
                                (if arg stars indent) "\n"
                                indent "#+begin_src " lang
-                               (if (looking-at "[\n\r]") "" "\n")))
-               (when arg (previous-line) (move-end-of-line 1)))))
+                               (if (looking-at "[\n\r]") "" "\n")))))
+	   (move-end-of-line 2))
          (sort (if (region-active-p) (list (mark) (point)) (list (point))) #'>))
       (let ((start (point))
 	    (body (delete-and-extract-region
-		   (if (region-active-p) (mark) (point)) (point))))
+		   (if (region-active-p) (mark) (point)) (point)))
+	    (stars (concat (make-string (org-current-level) ?*) " ")))
 	(insert (concat (if (looking-at "^") "" "\n")
 			(if arg (concat stars "\n") "")
 			"#+begin_src " (read-from-minibuffer "Lang: ") "\n"
