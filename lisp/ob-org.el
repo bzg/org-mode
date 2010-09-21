@@ -57,6 +57,8 @@ This function is called by `org-babel-execute-src-block'."
 (defvar org-local-vars)
 (defun org-babel-org-export (body fmt)
   "Export BODY to FMT using Org-mode's export facilities. "
+  (when (get-buffer " org-mode-tmp")
+    (error "Nested call to org-export: from org code block exporting results"))
   (let ((tmp-file (org-babel-temp-file "org-")))
     (with-temp-buffer
       (insert org-babel-org-default-header)
