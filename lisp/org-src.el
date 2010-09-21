@@ -735,9 +735,11 @@ Org-babel commands."
      (call-interactively
       (lookup-key org-babel-map key)))))
 
-(defvar org-src-tab-acts-natively nil
+(defcustom org-src-tab-acts-natively nil
   "If non-nil, the effect of TAB in a code block is as if it were
-issued in the language major mode buffer.")
+issued in the language major mode buffer."
+  :type 'boolean
+  :group 'org-babel)
 
 (defun org-src-native-tab-command-maybe ()
   "Perform language-specific TAB action.
