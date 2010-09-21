@@ -65,12 +65,13 @@
 (defun org-babel-execute:dot (body params)
   "Execute a block of Dot code with org-babel.
 This function is called by `org-babel-execute-src-block'."
-  (let ((processed-params (org-babel-process-params params))
-	(result-params (split-string (or (cdr (assoc :results params)) "")))
-        (out-file (cdr (assoc :file params)))
-        (cmdline (cdr (assoc :cmdline params)))
-        (cmd (or (cdr (assoc :cmd params)) "dot"))
-        (in-file (org-babel-temp-file "dot-")))
+  (let* ((processed-params (org-babel-process-params params))
+	 (result-params (split-string (or (cdr (assoc :results params)) "")))
+	 (out-file (cdr (assoc :file params)))
+	 (cmdline (or (cdr (assoc :cmdline params))
+		      (format "-T%s" (file-name-extension out-file))))
+	 (cmd (or (cdr (assoc :cmd params)) "dot"))
+	 (in-file (org-babel-temp-file "dot-")))
     (with-temp-file in-file
       (insert (org-babel-expand-body:dot body params processed-params)))
     (org-babel-eval (concat cmd " " in-file " " cmdline " -o " out-file) "")
