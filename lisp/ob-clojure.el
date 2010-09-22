@@ -267,7 +267,7 @@ repl buffer."
 		(format
 		 org-babel-clojure-wrapper-method
 		 body
-		 (org-babel-process-file-name tmp-file 'noquote) tmp-file))
+		 (org-babel-process-file-name tmp-file 'noquote)))
 	       (org-babel-clojure-table-or-string
 		(org-babel-eval-read-file tmp-file)))))))
 
