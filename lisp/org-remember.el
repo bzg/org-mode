@@ -167,7 +167,8 @@ vm, wl, mh, rmail  |  %:type %:subject %:message-id
                    |  %:from %:fromname %:fromaddress
                    |  %:to   %:toname   %:toaddress
                    |  %:fromto (either \"to NAME\" or \"from NAME\")
-gnus               |  %:group, for messages also all email fields
+gnus               |  %:group, for messages also all email fields and
+                   |  %:org-date (the Date: header in Org format)
 w3, w3m            |  %:type %:url
 info               |  %:type %:file %:node
 calendar           |  %:type %:date"
