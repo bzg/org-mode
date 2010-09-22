@@ -267,7 +267,7 @@ last statement in BODY, as elisp."
 	  (if (or (member "code" result-params) (member "pp" result-params))
 	      results
 	    (org-babel-python-table-or-string results)))
-	(let ((tmp-file (org-babel-temp-file "python-results-")))
+	(let ((tmp-file (org-babel-temp-file "python-")))
 	  (org-babel-comint-with-output
 	      (session org-babel-python-eoe-indicator t body)
 	    (let ((comint-process-echoes nil))

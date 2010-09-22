@@ -261,7 +261,7 @@ repl buffer."
 				       " "))))
     (case result-type
       (output (org-babel-eval cmd body))
-      (value (let* ((tmp-file (org-babel-temp-file "clojure-results-")))
+      (value (let* ((tmp-file (org-babel-temp-file "clojure-")))
 	       (org-babel-eval
 		cmd
 		(format

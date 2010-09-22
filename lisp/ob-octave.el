@@ -178,7 +178,7 @@ value of the last statement in BODY, as elisp."
 	       org-babel-octave-shell-command)))
     (case result-type
       (output (org-babel-eval cmd body))
-      (value (let ((tmp-file (org-babel-temp-file "results-")))
+      (value (let ((tmp-file (org-babel-temp-file "octave-")))
 	       (org-babel-eval
 		cmd
 		(format org-babel-octave-wrapper-method body
