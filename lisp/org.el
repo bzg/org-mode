@@ -8451,7 +8451,11 @@ according to FMT (default from `org-email-link-description-format')."
   (when (and (not description)
 	     (not (equal link (org-link-escape link))))
     (setq description (org-extract-attributes link)))
-  (concat "[[" (org-link-escape link) "]"
+  (setq link (if (string-match org-link-types-re link)
+		 (concat (match-string 1 link) ":"
+			 (org-link-escape (substring link (match-end 1))))
+	       (org-link-escape link)))
+  (concat "[[" link "]"
 	  (if description (concat "[" description "]") "")
 	  "]"))
 
