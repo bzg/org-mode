@@ -98,7 +98,8 @@ This function is called by `org-babel-execute-src-block'"
                 (format "(display %s)" full-body)
               full-body)))
          (org-babel-eval
-	  (format "%s %s" org-babel-scheme-cmd script-file) ""))))))
+	  (format "%s %s" org-babel-scheme-cmd
+		  (org-babel-process-file-name script-file)) ""))))))
 
 (defun org-babel-prep-session:scheme (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."

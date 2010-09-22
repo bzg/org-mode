@@ -1766,24 +1766,24 @@ Fixes a bug in `tramp-handle-call-process-region'."
     (apply org-babel-call-process-region-original
            start end program delete buffer display args)))
 
-(defun org-babel-maybe-remote-file (file)
-  "Conditionally parse information on a remote connnection.
-If FILE specifies a remote file, then parse the information on
-the remote connection."
-  (if (file-remote-p default-directory)
-      (let* ((vec (tramp-dissect-file-name default-directory))
-             (user (tramp-file-name-user vec))
-             (host (tramp-file-name-host vec)))
-        (concat "/" user (when user "@") host ":" file))
-    file))
-
-(defun org-babel-tramp-localname (file)
+(defun org-babel-local-file-name (file)
   "Return the local name component of FILE."
   (if (file-remote-p file)
       (let (localname)
 	(with-parsed-tramp-file-name file nil
 	  localname))
     file))
+
+(defun org-babel-process-file-name (name &optional no-quote-p)
+  "Prepare NAME to be used in an external process.
+If NAME specifies a remote location, the remote portion of the
+name is removed, since in that case the process will be executing
+remotely. The file name is then processed by
+`expand-file-name'. Unless second argument NO-QUOTE-P is non-nil,
+the file name is additionally processed by
+`shell-quote-argument'"
+  ((lambda (f) (if no-quote-p f (shell-quote-argument f)))
+   (expand-file-name (org-babel-local-file-name name))))
 
 ;; (defvar org-babel-temporary-directory
 ;;   (or (and (boundp 'org-babel-temporary-directory)

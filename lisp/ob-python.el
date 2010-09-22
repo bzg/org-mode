@@ -222,7 +222,7 @@ last statement in BODY, as elisp."
 				(org-remove-indentation
 				 (org-babel-trim body))
 				"[\r\n]") "\n")
-			      tmp-file))
+			      (org-babel-process-file-name tmp-file 'noquote)))
 	     ((lambda (raw)
 		(if (or (member "code" result-params)
 			(member "pp" result-params))
@@ -243,8 +243,10 @@ last statement in BODY, as elisp."
 	   (if pp
 	       (list
 		"import pp"
-		(format "open('%s', 'w').write(pprint.pformat(_))" tmp-file))
-	     (list (format "open('%s', 'w').write(str(_))" tmp-file)))))
+		(format "open('%s', 'w').write(pprint.pformat(_))"
+			(org-babel-process-file-name tmp-file 'noquote)))
+	     (list (format "open('%s', 'w').write(str(_))"
+			   (org-babel-process-file-name tmp-file 'noquote))))))
 	 (input-body (body)
 		     (mapc (lambda (statement) (insert statement) (comint-send-input))
 			   (split-string (org-babel-trim body) "[\r\n]+"))

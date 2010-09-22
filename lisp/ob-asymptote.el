@@ -74,11 +74,15 @@ This function is called by `org-babel-execute-src-block'."
                      "pdf"))
          (cmdline (cdr (assoc :cmdline params)))
          (in-file (org-babel-temp-file "asymptote-"))
-         (cmd (concat "asy "
-                      (if out-file
-                          (concat "-globalwrite -f " format " -o " out-file)
-                        "-V")
-                      " " cmdline " " in-file)))
+         (cmd
+	  (concat "asy "
+		  (if out-file
+		      (concat
+		       "-globalwrite -f " format
+		       " -o " (org-babel-process-file-name out-file))
+		    "-V")
+		  " " cmdline
+		  " " (org-babel-process-file-name in-file))))
     (with-temp-file in-file
       (insert (org-babel-expand-body:asymptote body params processed-params)))
     (message cmd) (shell-command cmd)

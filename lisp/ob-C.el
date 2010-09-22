@@ -100,10 +100,10 @@ or `org-babel-execute:c++'."
 		     (cond
 		      ((equal org-babel-c-variant 'c) org-babel-C-compiler)
 		      ((equal org-babel-c-variant 'cpp) org-babel-c++-compiler))
-		     tmp-bin-file
+		     (org-babel-process-file-name tmp-bin-file)
 		     (mapconcat 'identity
 				(if (listp flags) flags (list flags)) " ")
-		     tmp-src-file) ""))))
+		     (org-babel-process-file-name tmp-src-file)) ""))))
     ((lambda (results)
        (org-babel-reassemble-table
 	(if (member "vector" (nth 2 processed-params))

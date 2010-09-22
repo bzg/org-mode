@@ -57,7 +57,9 @@ This function is called by `org-babel-execute-src-block'."
 	 (cmd (concat "java -jar "
 		      (shell-quote-argument
 		       (expand-file-name org-ditaa-jar-path))
-		      " " cmdline " " in-file " " out-file)))
+		      " " cmdline
+		      " " (org-babel-process-file-name in-file)
+		      " " (org-babel-process-file-name out-file))))
     (unless (file-exists-p org-ditaa-jar-path)
       (error "Could not find ditaa.jar at %s" org-ditaa-jar-path))
     (with-temp-file in-file (insert body))

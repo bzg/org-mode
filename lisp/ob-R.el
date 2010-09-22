@@ -144,11 +144,11 @@ This function is called by `org-babel-execute-src-block'."
       (let ((transition-file (org-babel-temp-file "R-import-")))
         ;; ensure VALUE has an orgtbl structure (depth of at least 2)
         (unless (listp (car value)) (setq value (list value)))
-        (with-temp-file (org-babel-maybe-remote-file transition-file)
+        (with-temp-file transition-file
           (insert (orgtbl-to-tsv value '(:fmt org-babel-R-quote-tsv-field)))
           (insert "\n"))
         (format "%s <- read.table(\"%s\", header=%s, row.names=%s, sep=\"\\t\", as.is=TRUE)"
-                name transition-file
+                name (org-babel-process-file-name transition-file 'noquote)
 		(if (or (eq (nth 1 value) 'hline) colnames-p) "TRUE" "FALSE")
 		(if rownames-p "1" "NULL")))
     (format "%s <- %s" name (org-babel-R-quote-tsv-field value))))
@@ -245,7 +245,7 @@ last statement in BODY, as elisp."
 				   (if row-names-p "NA" "TRUE")
 				 "FALSE")
 			       (format "{function ()\n{\n%s\n}}()" body)
-			       (org-babel-tramp-localname tmp-file)))
+			       (org-babel-process-file-name tmp-file 'noquote)))
        (org-babel-R-process-value-result
 	(org-babel-import-elisp-from-file tmp-file '(16)) column-names-p)))
     (output (org-babel-eval org-babel-R-command body))))
@@ -271,7 +271,7 @@ last statement in BODY, as elisp."
 		(if column-names-p
 		    (if row-names-p "NA" "TRUE")
 		  "FALSE")
-		".Last.value" (org-babel-tramp-localname tmp-file)))
+		".Last.value" (org-babel-process-file-name tmp-file 'noquote)))
        (org-babel-R-process-value-result
 	(org-babel-import-elisp-from-file tmp-file '(16))  column-names-p)))
     (output

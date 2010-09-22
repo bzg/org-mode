@@ -74,7 +74,11 @@ This function is called by `org-babel-execute-src-block'."
 	 (in-file (org-babel-temp-file "dot-")))
     (with-temp-file in-file
       (insert (org-babel-expand-body:dot body params processed-params)))
-    (org-babel-eval (concat cmd " " in-file " " cmdline " -o " out-file) "")
+    (org-babel-eval
+     (concat cmd
+	     " " (org-babel-process-file-name in-file)
+	     " " cmdline
+	     " -o " (org-babel-process-file-name out-file)) "")
     out-file))
 
 (defun org-babel-prep-session:dot (session params)

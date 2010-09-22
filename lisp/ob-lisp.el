@@ -81,7 +81,9 @@ This function is called by `org-babel-execute-src-block'"
             (if (string= result-type "value")
                 (format "(print %s)" full-body)
               full-body)))
-         (org-babel-eval (format "%s %s" org-babel-lisp-cmd script-file) ""))))))
+         (org-babel-eval
+	  (format "%s %s" org-babel-lisp-cmd
+		  (org-babel-process-file-name script-file)) ""))))))
 
 ;; This function should be used to assign any variables in params in
 ;; the context of the session environment.

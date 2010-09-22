@@ -66,11 +66,9 @@ This function is called by `org-babel-execute-src-block'."
 			(if (string= (file-name-extension out-file) "svg")
 			    "-tsvg" "")
 			" -p " cmdline " < "
-			(shell-quote-argument
-			 (expand-file-name in-file))
+			(org-babel-process-file-name in-file)
 			" > "
-			(shell-quote-argument
-			 (expand-file-name out-file))))))
+			(org-babel-process-file-name out-file)))))
     (unless (file-exists-p org-plantuml-jar-path)
       (error "Could not find plantuml.jar at %s" org-plantuml-jar-path))
     (with-temp-file in-file (insert (concat "@startuml\n" body "\n@enduml")))

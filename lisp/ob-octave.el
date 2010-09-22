@@ -181,9 +181,10 @@ value of the last statement in BODY, as elisp."
       (value (let ((tmp-file (org-babel-temp-file "results-")))
 	       (org-babel-eval
 		cmd
-		(format org-babel-octave-wrapper-method body tmp-file tmp-file))
-	       (org-babel-octave-import-elisp-from-file
-		(org-babel-maybe-remote-file tmp-file)))))))
+		(format org-babel-octave-wrapper-method body
+			(org-babel-process-file-name tmp-file 'noquote)
+			(org-babel-process-file-name tmp-file 'noquote)))
+	       (org-babel-octave-import-elisp-from-file tmp-file))))))
 
 (defun org-babel-octave-evaluate-session
   (session body result-type &optional matlabp)
@@ -200,11 +201,15 @@ value of the last statement in BODY, as elisp."
 	     (if (and matlabp org-babel-matlab-with-emacs-link)
 		 (concat
 		  (format org-babel-matlab-emacs-link-wrapper-method
-			  body tmp-file tmp-file wait-file) "\n")
+			  body
+			  (org-babel-process-file-name tmp-file 'noquote)
+			  (org-babel-process-file-name tmp-file 'noquote) wait-file) "\n")
 	       (mapconcat
 		#'org-babel-chomp
 		(list (format org-babel-octave-wrapper-method
-			      body tmp-file tmp-file)
+			      body
+			      (org-babel-process-file-name tmp-file 'noquote)
+			      (org-babel-process-file-name tmp-file 'noquote))
 		      org-babel-octave-eoe-indicator) "\n")))))
 	 (raw (if (and matlabp org-babel-matlab-with-emacs-link)
 		  (save-window-excursion
@@ -227,8 +232,7 @@ value of the last statement in BODY, as elisp."
 		  (insert full-body) (comint-send-input nil t)))) results)
     (case result-type
       (value
-       (org-babel-octave-import-elisp-from-file
-	(org-babel-maybe-remote-file tmp-file)))
+       (org-babel-octave-import-elisp-from-file tmp-file))
       (output
        (progn
 	 (setq results

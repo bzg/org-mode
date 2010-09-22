@@ -146,7 +146,10 @@ This function is called by `org-babel-execute-src-block'."
               (insert (concat body "\n")))
             (message "gnuplot \"%s\"" script-file)
             (setq output
-                  (shell-command-to-string (format "gnuplot \"%s\"" script-file)))
+                  (shell-command-to-string
+		   (format
+		    "gnuplot \"%s\""
+		    (org-babel-process-file-name script-file))))
             (message output))
         (with-temp-buffer
           (insert (concat body "\n"))
