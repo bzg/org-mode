@@ -8422,8 +8422,6 @@ according to FMT (default from `org-email-link-description-format')."
 	  (setq s (replace-match "" t t s)))
       (while (string-match org-ts-regexp s)
 	(setq s (replace-match "" t t s))))
-    (while (string-match "[^a-zA-Z_0-9 \t]+" s)
-      (setq s (replace-match " " t t s)))
     (or string (setq s (concat "*" s)))  ; Add * for headlines
     (mapconcat 'identity (org-split-string s "[ \t]+") " ")))
 
