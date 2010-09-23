@@ -6195,7 +6195,7 @@ similar way.}:
 Link type          |  Available keywords
 -------------------+----------------------------------------------
 bbdb               |  %:name %:company
-bbdb               |  %::server %:port %:nick
+irc                |  %:server %:port %:nick
 vm, wl, mh, rmail  |  %:type %:subject %:message-id
                    |  %:from %:fromname %:fromaddress
                    |  %:to   %:toname   %:toaddress
