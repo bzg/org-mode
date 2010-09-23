@@ -6194,16 +6194,16 @@ similar way.}:
 @smallexample
 Link type          |  Available keywords
 -------------------+----------------------------------------------
-bbdb               |  %:name %:company
-irc                |  %:server %:port %:nick
-vm, wl, mh, rmail  |  %:type %:subject %:message-id
-                   |  %:from %:fromname %:fromaddress
-                   |  %:to   %:toname   %:toaddress
-                   |  %:fromto @r{(either "to NAME" or "from NAME")@footnote{This will always be the other, not the user.  See the variable @code{org-from-is-user-regexp}.}}
-gnus               |  %:group, @r{for messages also all email fields}
-w3, w3m            |  %:url
-info               |  %:file %:node
-calendar           |  %:date
+bbdb                    |  %:name %:company
+irc                     |  %:server %:port %:nick
+vm, wl, mh, mew, rmail  |  %:type %:subject %:message-id
+                        |  %:from %:fromname %:fromaddress
+                        |  %:to   %:toname   %:toaddress
+                        |  %:fromto @r{(either "to NAME" or "from NAME")@footnote{This will always be the other, not the user.  See the variable @code{org-from-is-user-regexp}.}}
+gnus                    |  %:group, @r{for messages also all email fields}
+w3, w3m                 |  %:url
+info                    |  %:file %:node
+calendar                |  %:date
 @end smallexample
 
 @noindent
