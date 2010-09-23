@@ -6199,6 +6199,9 @@ irc                     |  %:server %:port %:nick
 vm, wl, mh, mew, rmail  |  %:type %:subject %:message-id
                         |  %:from %:fromname %:fromaddress
                         |  %:to   %:toname   %:toaddress
+                        |  %:date @r{(message date header field)}
+                        |  %:date-timestamp @r{(date as active timestamp)}
+                        |  %:date-timestamp-inactive @r{(date as inactive timestamp)}
                         |  %:fromto @r{(either "to NAME" or "from NAME")@footnote{This will always be the other, not the user.  See the variable @code{org-from-is-user-regexp}.}}
 gnus                    |  %:group, @r{for messages also all email fields}
 w3, w3m                 |  %:url
