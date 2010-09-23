@@ -10463,7 +10463,7 @@ This function can be used in a hook."
     "BEGIN_VERSE" "END_VERSE"
     "BEGIN_CENTER" "END_CENTER"
     "BEGIN_SRC" "END_SRC"
-    "CATEGORY" "COLUMNS"
+    "CATEGORY" "COLUMNS" "PROPERTY"
     "CAPTION" "LABEL"
     "SETUPFILE"
     "BIND"
@@ -10582,8 +10582,10 @@ At all other locations, this simply calls the value of
 	       (throw 'exit t)))
 	    (tag (and (equal (char-before beg1) ?:)
 		      (equal (char-after (point-at-bol)) ?*)))
-	    (prop (and (equal (char-before beg1) ?:)
-		       (not (equal (char-after (point-at-bol)) ?*))))
+	    (prop (or (and (equal (char-before beg1) ?:)
+			   (not (equal (char-after (point-at-bol)) ?*)))
+		      (string-match "^#\\+PROPERTY:.*"
+				    (buffer-substring (point-at-bol) (point)))))
 	    (texp (equal (char-before beg) ?\\))
 	    (link (equal (char-before beg) ?\[))
 	    (opt (equal (buffer-substring (max (point-at-bol) (- beg 2))
@@ -10660,7 +10662,10 @@ At all other locations, this simply calls the value of
 		  (delete-window (get-buffer-window "*Completions*")))
 	      (if (assoc completion table)
 		  (if (eq type :todo) (insert " ")
-		    (if (memq type '(:tag :prop)) (insert ":"))))
+		    (if (and (memq type '(:tag :prop))
+			     (not (string-match "^#[ \t]*\\+property:"
+						(org-current-line-string t))))
+			(insert ":"))))
 	      (if (and (equal type :opt) (assoc completion table))
 		  (message "%s" (substitute-command-keys
 				 "Press \\[org-complete] again to insert example settings"))))
