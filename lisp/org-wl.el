@@ -140,7 +140,7 @@ folder name determines the the folder type."
   "Return content of FIELD in ENTITY.
 FIELD is a symbol of a rfc822 message header field.
 ENTITY is a message entity."
-  (let ((content (elmo-message-entity-field entity field)))
+  (let ((content (elmo-message-entity-field entity field 'string)))
     (if (listp content) (car content) content)))
 
 (defun org-wl-store-link ()
