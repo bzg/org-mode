@@ -16507,7 +16507,13 @@ If not, return to the original position and throw an error."
     (cdr (assoc keys (append org-speed-commands-user
 			     org-speed-commands-default)))))
 
-(defcustom org-speed-command-hook 'org-speed-command-default-hook
+(defun org-babel-speed-command-hook (keys)
+  "Hook for activating single-letter code block commands."
+  (when (and (bolp) (looking-at org-babel-src-block-regexp))
+    (cdr (assoc keys org-babel-key-bindings))))
+
+(defcustom org-speed-command-hook
+  '(org-speed-command-default-hook org-babel-speed-command-hook)
   "Hook for activating speed commands at strategic locations.
 Hook functions are called in sequence until a valid handler is
 found.
