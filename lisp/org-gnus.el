@@ -170,8 +170,9 @@ If `org-store-link' was called with a prefix arg the meaning of
 	      newsgroups (gnus-fetch-original-field "Newsgroups")
 	      x-no-archive (gnus-fetch-original-field "x-no-archive")))
       (org-store-link-props :type "gnus" :from from :subject subject 
-			    :date date :org-date org-date
 			    :message-id message-id :group group :to to)
+      (when date
+	(org-add-link-props :date date :org-date org-date))
       (setq desc (org-email-link-description)
 	    link (org-gnus-article-link
 		  group	newsgroups message-id x-no-archive))
