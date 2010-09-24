@@ -3131,15 +3131,16 @@ letters, numbers, @samp{-}, and @samp{_}.  Abbreviations are resolved
 according to the information in the variable @code{org-link-abbrev-alist}
 that relates the linkwords to replacement text.  Here is an example:
 
-@lisp
+@smalllisp
 @group
 (setq org-link-abbrev-alist
   '(("bugzilla" . "http://10.1.2.9/bugzilla/show_bug.cgi?id=")
     ("google"   . "http://www.google.com/search?q=")
-    ("ads"      . "http://adsabs.harvard.edu/cgi-bin/
-                   nph-abs_connect?author=%s&db_key=AST")))
+    ("gmap"     . "http://maps.google.com/maps?q=%s")
+    ("omap"     . "http://nominatim.openstreetmap.org/search?q=%s&polygon=1")
+    ("ads"      . "http://adsabs.harvard.edu/cgi-bin/nph-abs_connect?author=%s&db_key=AST")))
 @end group
-@end lisp
+@end smalllisp
 
 If the replacement text contains the string @samp{%s}, it will be
 replaced with the tag.  Otherwise the tag will be appended to the string
@@ -3148,8 +3149,11 @@ be called with the tag as the only argument to create the link.
 
 With the above setting, you could link to a specific bug with
 @code{[[bugzilla:129]]}, search the web for @samp{OrgMode} with
-@code{[[google:OrgMode]]} and find out what the Org author is
-doing besides Emacs hacking with @code{[[ads:Dominik,C]]}.
+@code{[[google:OrgMode]]}, show the map location of the Free Software
+Foundation @code{[[gmap:51 Franklin Street, Boston]]} or of Carsten office
+@code{[[omap:Science Park 904, Amsterdam, The Netherlands]]} and find out
+what the Org author is doing besides Emacs hacking with
+@code{[[ads:Dominik,C]]}.
 
 If you need special abbreviations just for a single Org buffer, you
 can define them in the file with
