@@ -14235,12 +14235,14 @@ MobileOrg needs to interact with Emacs through directory on a
 server@footnote{If you are using a public server, you might prefer to encrypt
 the files on the server.  This can be done with Org-mode 6.35 and, hopefully,
 with MobileOrg 1.5 (please check before trying to use this).  On the Emacs
-side, configure the variables @code{org-mobile-use-encryption} and
-@code{org-mobile-encryption-password}.}.  The easiest way to create that
-directory is to use a free @uref{http://dropbox.com,Dropbox.com}
-account@footnote{If you cannot use Dropbox, or if your version of MobileOrg
-does not support it, you can use a webdav server.  For more information,
-check out the the documentation of MobileOrg and also this
+side, configure the variable @code{org-mobile-use-encryption}.  If you can
+safely store the password in your Emacs setup, you might also want to
+configure @code{org-mobile-encryption-password}.  Please read the docstring
+of that variable.}.  The easiest way to create that directory is to use a
+free @uref{http://dropbox.com,Dropbox.com} account@footnote{If you cannot use
+Dropbox, or if your version of MobileOrg does not support it, you can use a
+webdav server.  For more information, check out the the documentation of
+MobileOrg and also this
 @uref{http://orgmode.org/worg/org-faq.php#mobileorg_webdav, FAQ entry}.}.
 When MobileOrg first connects to your Dropbox, it will create a directory
 @i{MobileOrg} inside the Dropbox.  After the directory has been created, tell
@@ -14263,15 +14265,17 @@ can be included by customizing @code{org-mobiles-files}.  File names will be
 staged with path relative to @code{org-directory}, so all files should be
 inside this directory.  The push operation also creates a special Org file
 @file{agendas.org} with all custom agenda view defined by the
-user@footnote{While creating the agendas, Org-mode will force (see the
-variable @code{org-mobile-force-id-on-agenda-items}) ID properties on all
-referenced entries, so that these entries can be uniquely
-identified if @i{MobileOrg} flags them for further action.}.  Finally, Org
-writes the file @file{index.org}, containing links to all other files.
-@i{MobileOrg} first reads this file from the server, and then downloads all
-agendas and Org files listed in it.  To speed up the download, MobileOrg will
-only read files whose checksums@footnote{stored automatically in the file
-@file{checksums.dat}} have changed.
+user@footnote{While creating the agendas, Org-mode will force ID properties
+on all referenced entries, so that these entries can be uniquely identified
+if @i{MobileOrg} flags them for further action.  If you do not want to get
+these properties in so many entries, you can set the variable
+@code{org-mobile-force-id-on-agenda-items} to @code{nil}.  Org mode will then
+rely on outline paths, in the hope that these will be unique enough.}.
+Finally, Org writes the file @file{index.org}, containing links to all other
+files.  @i{MobileOrg} first reads this file from the server, and then
+downloads all agendas and Org files listed in it.  To speed up the download,
+MobileOrg will only read files whose checksums@footnote{stored automatically
+in the file @file{checksums.dat}} have changed.
 
 @node Pulling from MobileOrg,  , Pushing to MobileOrg, MobileOrg
 @section Pulling from MobileOrg
