@@ -49,7 +49,7 @@
 
 (defcustom org-export-babel-evaluate t
   "Switch controlling code evaluation during export.
-When set to nil no code will be exported as part of the export
+When set to nil no code will be evaluated as part of the export
 process."
   :group 'org-babel
   :type 'boolean)
@@ -236,7 +236,7 @@ The function respects the value of the :exports header argument."
 (defvar backend)
 (defun org-babel-exp-code (info type)
   "Prepare and return code in the current code block for export.
-Code is prepared in a manner suitable for exportat by
+Code is prepared in a manner suitable for export by
 org-mode.  This function is called by `org-babel-exp-do-export'.
 The code block is not evaluated."
   (let ((lang (nth 0 info))
