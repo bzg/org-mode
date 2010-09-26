@@ -151,13 +151,6 @@ added to the header-arguments-alist."
 	  (setq indent (car (last info)))
 	  (setq info (butlast info))
 	  (forward-line -1)
-		;; Note that e.g. "name()" and "name( )" result in
-		;; ((:var . "")).  We maintain that behaviour, and the
-		;; resulting non-nil sixth element is relied upon in
-		;; org-babel-exp-code to detect a functional-style
-		;; block in those cases. However, "name" without any
-		;; parentheses would result in the same thing, so we
-		;; explicitly avoid that.
 	  (when (and (looking-at org-babel-src-name-w-name-regexp)
 		     (match-string 2))
 	    (setq name (org-babel-clean-text-properties (match-string 2)))
