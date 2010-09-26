@@ -143,7 +143,7 @@ Unless HEADER-VARS-ONLY is non-nil, any variable
 references provided in 'function call style' (i.e. in a
 parenthesised argument list following the src block name) are
 added to the header-arguments-alist."
-  (let ((case-fold-search t) head info args indent)
+  (let ((case-fold-search t) head info name args indent)
     (if (setq head (org-babel-where-is-src-block-head))
         (save-excursion
 	  (goto-char head)
@@ -151,11 +151,6 @@ added to the header-arguments-alist."
 	  (setq indent (car (last info)))
 	  (setq info (butlast info))
 	  (forward-line -1)
-	  (if (and (looking-at org-babel-src-name-w-name-regexp)
-		   (match-string 2))
-	      (progn
-		(setq info (append info (list (org-babel-clean-text-properties
-					       (match-string 2)))))
 		;; Note that e.g. "name()" and "name( )" result in
 		;; ((:var . "")).  We maintain that behaviour, and the
 		;; resulting non-nil sixth element is relied upon in
@@ -163,18 +158,17 @@ added to the header-arguments-alist."
 		;; block in those cases. However, "name" without any
 		;; parentheses would result in the same thing, so we
 		;; explicitly avoid that.
-		(if (setq args (match-string 4))
-		    (setq info
-			  (append info (list
-					(mapcar
-					 (lambda (ref) (cons :var ref))
-					 (org-babel-ref-split-args args)))))
-		  (setq info (append info (list nil))))
-		(unless header-vars-only
-		  (setf (nth 2 info)
-			(org-babel-merge-params (nth 5 info) (nth 2 info)))))
-	    (setq info (append info (list nil nil))))
-	  (append info (list indent)))
+	  (when (and (looking-at org-babel-src-name-w-name-regexp)
+		     (match-string 2))
+	    (setq name (org-babel-clean-text-properties (match-string 2)))
+	    (when (setq args (match-string 4))
+	      (setq args (mapcar
+			  (lambda (ref) (cons :var ref))
+			  (org-babel-ref-split-args args)))
+	      (unless header-vars-only
+		(setf (nth 2 info)
+		      (org-babel-merge-params args (nth 2 info))))))
+	  (append info (list name args indent)))
       (if (save-excursion ;; inline source block
             (re-search-backward "[ \f\t\n\r\v]" nil t)
             (looking-at org-babel-inline-src-block-regexp))
