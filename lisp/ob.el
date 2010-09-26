@@ -168,7 +168,8 @@ added to the header-arguments-alist."
 			  (append info (list
 					(mapcar
 					 (lambda (ref) (cons :var ref))
-					 (org-babel-ref-split-args args))))))
+					 (org-babel-ref-split-args args)))))
+		  (setq info (append info (list nil))))
 		(unless header-vars-only
 		  (setf (nth 2 info)
 			(org-babel-merge-params (nth 5 info) (nth 2 info)))))
