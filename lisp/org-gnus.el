@@ -152,8 +152,11 @@ If `org-store-link' was called with a prefix arg the meaning of
 	   (from (mail-header-from header))
 	   (message-id (org-remove-angle-brackets (mail-header-id header)))
 	   (date (mail-header-date header))
-	   (org-date (format-time-string 
-		      (cdr org-time-stamp-formats) (date-to-time date)))
+	   (date-ts (and date (format-time-string
+			       (org-time-stamp-format t) (date-to-time date))))
+	   (date-ts-ia (and date (format-time-string
+				  (org-time-stamp-format t t)
+				  (date-to-time date))))
 	   (subject (copy-sequence (mail-header-subject header)))
 	   (to (cdr (assq 'To (mail-header-extra header))))
 	   newsgroups x-no-archive desc link)
@@ -170,8 +173,10 @@ If `org-store-link' was called with a prefix arg the meaning of
 	      newsgroups (gnus-fetch-original-field "Newsgroups")
 	      x-no-archive (gnus-fetch-original-field "x-no-archive")))
       (org-store-link-props :type "gnus" :from from :subject subject 
-			    :date date :org-date org-date
 			    :message-id message-id :group group :to to)
+      (when date
+	(org-add-link-props :date date :date-timestamp date-ts
+			    :date-timestamp-inactive date-ts-ia))
       (setq desc (org-email-link-description)
 	    link (org-gnus-article-link
 		  group	newsgroups message-id x-no-archive))

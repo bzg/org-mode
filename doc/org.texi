@@ -3131,15 +3131,16 @@ letters, numbers, @samp{-}, and @samp{_}.  Abbreviations are resolved
 according to the information in the variable @code{org-link-abbrev-alist}
 that relates the linkwords to replacement text.  Here is an example:
 
-@lisp
+@smalllisp
 @group
 (setq org-link-abbrev-alist
   '(("bugzilla" . "http://10.1.2.9/bugzilla/show_bug.cgi?id=")
     ("google"   . "http://www.google.com/search?q=")
-    ("ads"      . "http://adsabs.harvard.edu/cgi-bin/
-                   nph-abs_connect?author=%s&db_key=AST")))
+    ("gmap"     . "http://maps.google.com/maps?q=%s")
+    ("omap"     . "http://nominatim.openstreetmap.org/search?q=%s&polygon=1")
+    ("ads"      . "http://adsabs.harvard.edu/cgi-bin/nph-abs_connect?author=%s&db_key=AST")))
 @end group
-@end lisp
+@end smalllisp
 
 If the replacement text contains the string @samp{%s}, it will be
 replaced with the tag.  Otherwise the tag will be appended to the string
@@ -3148,8 +3149,11 @@ be called with the tag as the only argument to create the link.
 
 With the above setting, you could link to a specific bug with
 @code{[[bugzilla:129]]}, search the web for @samp{OrgMode} with
-@code{[[google:OrgMode]]} and find out what the Org author is
-doing besides Emacs hacking with @code{[[ads:Dominik,C]]}.
+@code{[[google:OrgMode]]}, show the map location of the Free Software
+Foundation @code{[[gmap:51 Franklin Street, Boston]]} or of Carsten office
+@code{[[omap:Science Park 904, Amsterdam, The Netherlands]]} and find out
+what the Org author is doing besides Emacs hacking with
+@code{[[ads:Dominik,C]]}.
 
 If you need special abbreviations just for a single Org buffer, you
 can define them in the file with
@@ -6194,16 +6198,19 @@ similar way.}:
 @smallexample
 Link type          |  Available keywords
 -------------------+----------------------------------------------
-bbdb               |  %:name %:company
-bbdb               |  %::server %:port %:nick
-vm, wl, mh, rmail  |  %:type %:subject %:message-id
-                   |  %:from %:fromname %:fromaddress
-                   |  %:to   %:toname   %:toaddress
-                   |  %:fromto @r{(either "to NAME" or "from NAME")@footnote{This will always be the other, not the user.  See the variable @code{org-from-is-user-regexp}.}}
-gnus               |  %:group, @r{for messages also all email fields}
-w3, w3m            |  %:url
-info               |  %:file %:node
-calendar           |  %:date
+bbdb                    |  %:name %:company
+irc                     |  %:server %:port %:nick
+vm, wl, mh, mew, rmail  |  %:type %:subject %:message-id
+                        |  %:from %:fromname %:fromaddress
+                        |  %:to   %:toname   %:toaddress
+                        |  %:date @r{(message date header field)}
+                        |  %:date-timestamp @r{(date as active timestamp)}
+                        |  %:date-timestamp-inactive @r{(date as inactive timestamp)}
+                        |  %:fromto @r{(either "to NAME" or "from NAME")@footnote{This will always be the other, not the user.  See the variable @code{org-from-is-user-regexp}.}}
+gnus                    |  %:group, @r{for messages also all email fields}
+w3, w3m                 |  %:url
+info                    |  %:file %:node
+calendar                |  %:date
 @end smallexample
 
 @noindent
@@ -14227,13 +14234,15 @@ in-buffer settings, but it will understand the logistics of TODO state
 MobileOrg needs to interact with Emacs through directory on a
 server@footnote{If you are using a public server, you might prefer to encrypt
 the files on the server.  This can be done with Org-mode 6.35 and, hopefully,
-with MobileOrg 1.4 (please check before trying to use this).  On the Emacs
-side, configure the variables @code{org-mobile-use-encryption} and
-@code{org-mobile-encryption-password}.}.  The easiest way to create that
-directory is to use a free @uref{http://dropbox.com,Dropbox.com}
-account@footnote{If you cannot use Dropbox, or if your version of MobileOrg
-does not support it, you can use a webdav server.  For more information,
-check out the the documentation of MobileOrg and also this
+with MobileOrg 1.5 (please check before trying to use this).  On the Emacs
+side, configure the variable @code{org-mobile-use-encryption}.  If you can
+safely store the password in your Emacs setup, you might also want to
+configure @code{org-mobile-encryption-password}.  Please read the docstring
+of that variable.}.  The easiest way to create that directory is to use a
+free @uref{http://dropbox.com,Dropbox.com} account@footnote{If you cannot use
+Dropbox, or if your version of MobileOrg does not support it, you can use a
+webdav server.  For more information, check out the the documentation of
+MobileOrg and also this
 @uref{http://orgmode.org/worg/org-faq.php#mobileorg_webdav, FAQ entry}.}.
 When MobileOrg first connects to your Dropbox, it will create a directory
 @i{MobileOrg} inside the Dropbox.  After the directory has been created, tell
@@ -14256,15 +14265,17 @@ can be included by customizing @code{org-mobiles-files}.  File names will be
 staged with path relative to @code{org-directory}, so all files should be
 inside this directory.  The push operation also creates a special Org file
 @file{agendas.org} with all custom agenda view defined by the
-user@footnote{While creating the agendas, Org-mode will force (see the
-variable @code{org-mobile-force-id-on-agenda-items}) ID properties on all
-referenced entries, so that these entries can be uniquely
-identified if @i{MobileOrg} flags them for further action.}.  Finally, Org
-writes the file @file{index.org}, containing links to all other files.
-@i{MobileOrg} first reads this file from the server, and then downloads all
-agendas and Org files listed in it.  To speed up the download, MobileOrg will
-only read files whose checksums@footnote{stored automatically in the file
-@file{checksums.dat}} have changed.
+user@footnote{While creating the agendas, Org-mode will force ID properties
+on all referenced entries, so that these entries can be uniquely identified
+if @i{MobileOrg} flags them for further action.  If you do not want to get
+these properties in so many entries, you can set the variable
+@code{org-mobile-force-id-on-agenda-items} to @code{nil}.  Org mode will then
+rely on outline paths, in the hope that these will be unique enough.}.
+Finally, Org writes the file @file{index.org}, containing links to all other
+files.  @i{MobileOrg} first reads this file from the server, and then
+downloads all agendas and Org files listed in it.  To speed up the download,
+MobileOrg will only read files whose checksums@footnote{stored automatically
+in the file @file{checksums.dat}} have changed.
 
 @node Pulling from MobileOrg,  , Pushing to MobileOrg, MobileOrg
 @section Pulling from MobileOrg

@@ -90,11 +90,28 @@ You might want to put this file into a directory where only you have access."
 This is a single password which is used for AES-256 encryption.  The same
 password must also be set in the MobileOrg application.  All Org files,
 including mobileorg.org will be encrypted using this password.
+
+SECURITY CONSIDERATIONS:
+
 Note that, when Org runs the encryption commands, the password could
-be visible on your system with the `ps' command.  So this method is only
-intended to keep the files secure on the server, not on your own machine."
+be visible briefly on your system with the `ps' command.  So this method is
+only intended to keep the files secure on the server, not on your own machine.
+
+Also, if you set this variable in an init file (.emacs or .emacs.d/init.el
+or custom.el...) and if that file is stored in a way so that other can read
+it, this also limits the security of this approach.  You can also leave
+this variable empty - Org will then ask for the password once per Emacs
+session."
   :group 'org-mobile
   :type '(string :tag "Password"))
+
+(defvar org-mobile-encryption-password-session nil)
+
+(defun org-mobile-encryption-password ()
+  (or (org-string-nw-p org-mobile-encryption-password)
+      (org-string-nw-p org-mobile-encryption-password-session)
+      (setq org-mobile-encryption-password-session
+	    (read-passwd "Password for MobileOrg: " t))))
 
 (defcustom org-mobile-inbox-for-pull "~/org/from-mobile.org"
   "The file where captured notes and flags will be appended to.
@@ -356,7 +373,7 @@ agenda view showing the flagged items."
 	       (string-match "\\S-" org-mobile-checksum-binary))
     (error "No executable found to compute checksums"))
   (when org-mobile-use-encryption
-    (unless (string-match "\\S-" org-mobile-encryption-password)
+    (unless (string-match "\\S-" (org-mobile-encryption-password))
       (error
        "To use encryption, you must set `org-mobile-encryption-password'"))
     (unless (file-writable-p org-mobile-encryption-tempfile)
@@ -649,7 +666,8 @@ encryption program does not understand them."
   "Encrypt INFILE to OUTFILE, using `org-mobile-encryption-password'."
   (shell-command
    (format "openssl enc -aes-256-cbc -salt -pass %s -in %s -out %s"
-	   (shell-quote-argument (concat "pass:" org-mobile-encryption-password))
+	   (shell-quote-argument (concat "pass:"
+					 (org-mobile-encryption-password)))
 	   (shell-quote-argument (expand-file-name infile))
 	   (shell-quote-argument (expand-file-name outfile)))))
 
@@ -657,7 +675,8 @@ encryption program does not understand them."
   "Decrypt INFILE to OUTFILE, using `org-mobile-encryption-password'."
   (shell-command
    (format "openssl enc -d -aes-256-cbc -salt -pass %s -in %s -out %s"
-	   (shell-quote-argument (concat "pass:" org-mobile-encryption-password))
+	   (shell-quote-argument (concat "pass:"
+					 (org-mobile-encryption-password)))
 	   (shell-quote-argument (expand-file-name infile))
 	   (shell-quote-argument (expand-file-name outfile)))))
 
