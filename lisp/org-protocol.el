@@ -305,7 +305,7 @@ part."
 
 (defun org-protocol-unhex-string(str)
   "Unhex hexified unicode strings as returned from the JavaScript function
-encodeURIComponent. E.g. `%C3%B6' is the german Umlaut `ü'."
+encodeURIComponent. E.g. `%C3%B6' is the german Umlaut `ö'."
   (setq str (or str ""))
   (let ((tmp "")
 	(case-fold-search t))
@@ -321,7 +321,9 @@ encodeURIComponent. E.g. `%C3%B6' is the german Umlaut `ü'."
 
 
 (defun org-protocol-unhex-compound (hex)
-  "Unhexify unicode hex-chars. E.g. `%C3%B6' is the German Umlaut `ü'."
+  "Unhexify unicode hex-chars. E.g. `%C3%B6' is the German Umlaut `ö'.
+Note: this function also decodes single byte encodings like
+`%E1' (\"á\") if not followed by another `%[A-F0-9]{2}' group."
   (let* ((bytes (remove "" (split-string hex "%")))
 	 (ret "")
 	 (eat 0)
@@ -353,11 +355,29 @@ encodeURIComponent. E.g. `%C3%B6' is the german Umlaut `ü'."
 	(setq val (logxor val xor))
 	(setq sum (+ (lsh sum shift) val))
 	(if (> eat 0) (setq eat (- eat 1)))
-	(when (= 0 eat)
+	(cond
+	 ((= 0 eat)                         ;multi byte
 	  (setq ret (concat ret (org-protocol-char-to-string sum)))
 	  (setq sum 0))
+	 ((not bytes)                       ; single byte(s)
+	  (setq ret (org-protocol-unhex-single-byte-sequence hex))))
 	)) ;; end (while bytes
     ret ))
+
+(defun org-protocol-unhex-single-byte-sequence(hex)
+  "Unhexify hex-encoded single byte character sequences."
+  (let ((bytes (remove "" (split-string hex "%")))
+	(ret ""))
+    (while bytes
+      (let* ((b (pop bytes))
+	     (a (elt b 0))
+	     (b (elt b 1))
+	     (c1 (if (> a ?9) (+ 10 (- a ?A)) (- a ?0)))
+	     (c2 (if (> b ?9) (+ 10 (- b ?A)) (- b ?0))))
+	(setq ret
+	      (concat ret (char-to-string
+			   (+ (lsh c1 4) c2))))))
+    ret))
 
 (defun org-protocol-flatten-greedy (param-list &optional strip-path replacement)
   "Greedy handlers might receive a list like this from emacsclient:
