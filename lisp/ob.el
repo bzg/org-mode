@@ -134,15 +134,11 @@ remove code block execution from the C-c C-c keybinding."
    "{\\([^\f\n\r\v]+?\\)}\\)")
   "Regexp used to identify inline src-blocks.")
 
-(defun org-babel-get-src-block-info (&optional header-vars-only)
+(defun org-babel-get-src-block-info ()
   "Get information on the current source block.
 
 Returns a list
- (language body header-arguments-alist switches name function-args indent).
-Unless HEADER-VARS-ONLY is non-nil, any variable
-references provided in 'function call style' (i.e. in a
-parenthesised argument list following the src block name) are
-added to the header-arguments-alist."
+ (language body header-arguments-alist switches name function-args indent)."
   (let ((case-fold-search t) head info name args indent)
     (if (setq head (org-babel-where-is-src-block-head))
         (save-excursion
@@ -152,15 +148,14 @@ added to the header-arguments-alist."
 	  (setq info (butlast info))
 	  (forward-line -1)
 	  (when (and (looking-at org-babel-src-name-w-name-regexp)
-		     (match-string 2))
-	    (setq name (org-babel-clean-text-properties (match-string 2)))
+		     (setq name (match-string 2)))
+	    (setq name (org-babel-clean-text-properties name))
 	    (when (setq args (match-string 4))
 	      (setq args (mapcar
 			  (lambda (ref) (cons :var ref))
 			  (org-babel-ref-split-args args)))
-	      (unless header-vars-only
-		(setf (nth 2 info)
-		      (org-babel-merge-params args (nth 2 info))))))
+	      (setf (nth 2 info)
+		    (org-babel-merge-params args (nth 2 info)))))
 	  (append info (list name args indent)))
       (if (save-excursion ;; inline source block
             (re-search-backward "[ \f\t\n\r\v]" nil t)
