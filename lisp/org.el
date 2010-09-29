@@ -471,6 +471,15 @@ the following lines anywhere in the buffer:
   :group 'org-startup
   :type 'boolean)
 
+(defcustom org-startup-with-inline-images nil
+  "Non-nil means show inline images when loading a new Org file.
+This can also be configured on a per-file basis by adding one of
+the following lines anywhere in the buffer:
+   #+STARTUP: inlineimages
+   #+STARTUP: noinlineimages"
+  :group 'org-startup
+  :type 'boolean)
+
 (defcustom org-insert-mode-line-in-empty-file nil
   "Non-nil means insert the first line setting Org-mode in empty files.
 When the function `org-mode' is called interactively in an empty file, this
@@ -4148,6 +4157,8 @@ After a match, the following groups carry important information:
     ("oddeven" org-odd-levels-only nil)
     ("align" org-startup-align-all-tables t)
     ("noalign" org-startup-align-all-tables nil)
+    ("inlineimages" org-startup-with-inline-images t)
+    ("noinlineimages" org-startup-with-inline-images nil)
     ("customtime" org-display-custom-times t)
     ("logdone" org-log-done time)
     ("lognotedone" org-log-done note)
@@ -4718,6 +4729,8 @@ The following commands are available:
       (let ((bmp (buffer-modified-p)))
 	(org-table-map-tables 'org-table-align 'quietly)
 	(set-buffer-modified-p bmp)))
+    (when org-startup-with-inline-images
+      (org-display-inline-images))
     (when org-startup-indented
       (require 'org-indent)
       (org-indent-mode 1))

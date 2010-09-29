@@ -3061,11 +3061,17 @@ variable @code{org-display-internal-link-with-indirect-buffer}}.
 @cindex inlining images
 @cindex images, inlining
 @kindex C-c C-x C-v
+@vindex org-startup-with-inline-images
+@cindex @code{inlineimages}, STARTUP keyword
+@cindex @code{noinlineimages}, STARTUP keyword
 @item C-c C-x C-v
 Toggle the inline display of linked images.  Normally this will only inline
 images that have no description part in the link, i.e. images that will also
 be inlined during export.  When called with a prefix argument, also display
-images that do have a link description.
+images that do have a link description.  You can ask for inline images to be
+displayed at startup by configuring the variable
+@code{org-startup-with-inline-images}@footnote{with corresponding
+@code{#+STARTUP} keywords @code{inlineimages} and @code{inlineimages}}.
 @cindex mark ring
 @kindex C-c %
 @item C-c %
@@ -12686,6 +12692,18 @@ variable is @code{org-startup-align-all-tables}, with a default value
 align      @r{align all tables}
 noalign    @r{don't align tables on startup}
 @end example
+
+@vindex org-startup-with-inline-images
+When visiting a file, inline images can be automatically displayed.  The
+corresponding variable is @code{org-startup-with-inline-images}, with a
+default value @code{nil} to avoid delays when visiting a file.
+@cindex @code{inlineimages}, STARTUP keyword
+@cindex @code{noinlineimages}, STARTUP keyword
+@example
+inlineimages   @r{show inline images}
+noinlineimages @r{don't show inline images on startup}
+@end example
+
 @vindex org-log-done
 @vindex org-log-note-clock-out
 @vindex org-log-repeat
