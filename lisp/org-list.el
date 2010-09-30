@@ -1699,7 +1699,7 @@ in subtree, ignoring drawers."
 		 org-item-beginning-re limit 'move)
                 (list (point) limit nil))))
            ((org-at-item-p)
-            (list (point-at-bol) (point-at-eol) t))
+            (list (point-at-bol) (1+ (point-at-eol)) t))
            (t (error "Not at an item or heading, and no active region"))))
 	 (beg (car bounds))
 	 ;; marker is needed because deleting or inserting checkboxes
