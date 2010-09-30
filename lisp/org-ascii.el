@@ -434,7 +434,7 @@ publishing directory."
       (while (string-match org-bracket-link-analytic-regexp++ line)
 	(setq path (match-string 3 line)
 	      link (concat (match-string 1 line) path)
-	      type (match-string 1 line)
+	      type (match-string 2 line)
 	      desc0 (match-string 5 line)
 	      desc (or desc0 link))
 	(if (and (> (length link) 8)
