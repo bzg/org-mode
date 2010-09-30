@@ -211,9 +211,7 @@ buffer."
   (interactive)
   (unless (eq context 'save)
     (setq org-edit-src-saved-temp-window-config (current-window-configuration)))
-  (let ((line (org-current-line))
-	(col (current-column))
-	(mark (and (use-region-p) (mark)))
+  (let ((mark (and (use-region-p) (mark)))
 	(case-fold-search t)
 	(info (org-edit-src-find-region-and-lang))
 	(babel-info (org-babel-get-src-block-info))
@@ -223,7 +221,7 @@ buffer."
 	(preserve-indentation org-src-preserve-indentation)
 	(allow-write-back-p (null code))
 	block-nindent total-nindent ovl lang lang-f single lfmt buffer msg
-	begline markline markcol)
+	begline markline markcol line col)
     (if (not info)
 	nil
       (setq beg (move-marker beg (nth 0 info))
@@ -254,6 +252,9 @@ buffer."
 			 (org-set-local 'org-edit-src-content-indentation 0))))
       (unless (functionp lang-f)
 	(error "No such language mode: %s" lang-f))
+      (if (> (point) end) (goto-char end))
+      (setq line (org-current-line)
+	    col (current-column))
       (org-goto-line line)
       (if (and (setq buffer (org-edit-src-find-buffer beg end))
 	       (if org-src-ask-before-returning-to-edit-buffer
