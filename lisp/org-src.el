@@ -252,10 +252,10 @@ buffer."
 			 (org-set-local 'org-edit-src-content-indentation 0))))
       (unless (functionp lang-f)
 	(error "No such language mode: %s" lang-f))
-      (if (> (point) end) (goto-char end))
-      (setq line (org-current-line)
-	    col (current-column))
-      (org-goto-line line)
+      (save-excursion
+	(if (> (point) end) (goto-char end))
+	(setq line (org-current-line)
+	      col (current-column)))
       (if (and (setq buffer (org-edit-src-find-buffer beg end))
 	       (if org-src-ask-before-returning-to-edit-buffer
 		   (y-or-n-p "Return to existing edit buffer? [n] will revert changes: ") t))
