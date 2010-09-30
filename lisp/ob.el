@@ -1107,6 +1107,8 @@ With optional prefix argument ARG, jump backward ARG many source blocks."
     (error (error "No previous code blocks")))
   (goto-char (match-beginning 0)) (org-show-context))
 
+(defvar org-babel-load-languages)
+
 ;;;###autoload
 (defun org-babel-demarcate-block (&optional arg)
   "Wrap or split the code in the region or on the point.
