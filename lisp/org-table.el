@@ -1151,11 +1151,14 @@ is always the old value."
 
 (defun org-table-current-column ()
   "Find out which column we are in."
+  (interactive)
+  (if (interactive-p) (org-table-check-inside-data-field))
   (save-excursion
     (let ((cnt 0) (pos (point)))
       (beginning-of-line 1)
       (while (search-forward "|" pos t)
 	(setq cnt (1+ cnt)))
+      (if (interactive-p) (message "In table column %d" cnt))
       cnt)))
 
 (defun org-table-current-dline ()
