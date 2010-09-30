@@ -1765,13 +1765,15 @@ the file name is additionally processed by
   ((lambda (f) (if no-quote-p f (shell-quote-argument f)))
    (expand-file-name (org-babel-local-file-name name))))
 
-;; (defvar org-babel-temporary-directory
-;;   (or (and (boundp 'org-babel-temporary-directory)
-;; 	   org-babel-temporary-directory)
-;;       (make-temp-file "babel-" t))
-;;   "Directory to hold temporary files created to execute code blocks.
-;; Used by `org-babel-temp-file'.  This directory will be removed on
-;; Emacs shutdown.")
+(unless (boundp 'org-babel-temporary-directory)
+  (defvar org-babel-temporary-directory
+    (or (and (boundp 'org-babel-temporary-directory)
+	     (file-exists-p org-babel-temporary-directory)
+	     org-babel-temporary-directory)
+	(make-temp-file "babel-" t))
+    "Directory to hold temporary files created to execute code blocks.
+Used by `org-babel-temp-file'.  This directory will be removed on
+Emacs shutdown."))
 
 (defun org-babel-temp-file (prefix &optional suffix)
   "Create a temporary file in the `org-babel-temporary-directory'.
@@ -1784,29 +1786,29 @@ of `org-babel-temporary-directory'."
 	       (expand-file-name 
 		prefix temporary-file-directory)
 	       nil suffix))
-    ;; (let ((temporary-file-directory (expand-file-name
-    ;; 				     org-babel-temporary-directory
-    ;; 				     temporary-file-directory)))
-    ;;   (make-temp-file prefix nil suffix))
-    (make-temp-file prefix nil suffix)))
+    (let ((temporary-file-directory
+	   (or (and (file-exists-p org-babel-temporary-directory)
+		    org-babel-temporary-directory)
+	       temporary-file-directory)))
+      (make-temp-file prefix nil suffix))))
 
-;; (defun org-babel-remove-temporary-directory ()
-;;   "Remove `org-babel-temporary-directory' on Emacs shutdown."
-;;   (when (boundp 'org-babel-temporary-directory)
-;;     ;; taken from `delete-directory' in files.el
-;;     (mapc (lambda (file)
-;; 	    ;; This test is equivalent to
-;; 	    ;; (and (file-directory-p fn) (not (file-symlink-p fn)))
-;; 	    ;; but more efficient
-;; 	    (if (eq t (car (file-attributes file)))
-;; 		(delete-directory file)
-;; 	      (delete-file file)))
-;; 	  ;; We do not want to delete "." and "..".
-;; 	  (directory-files org-babel-temporary-directory 'full
-;; 			   "^\\([^.]\\|\\.\\([^.]\\|\\..\\)\\).*"))
-;;     (delete-directory org-babel-temporary-directory)))
+(defun org-babel-remove-temporary-directory ()
+  "Remove `org-babel-temporary-directory' on Emacs shutdown."
+  (when (boundp 'org-babel-temporary-directory)
+    ;; taken from `delete-directory' in files.el
+    (mapc (lambda (file)
+	    ;; This test is equivalent to
+	    ;; (and (file-directory-p fn) (not (file-symlink-p fn)))
+	    ;; but more efficient
+	    (if (eq t (car (file-attributes file)))
+		(delete-directory file)
+	      (delete-file file)))
+	  ;; We do not want to delete "." and "..".
+	  (directory-files org-babel-temporary-directory 'full
+			   "^\\([^.]\\|\\.\\([^.]\\|\\..\\)\\).*"))
+    (delete-directory org-babel-temporary-directory)))
 
-;; (add-hook 'kill-emacs-hook 'org-babel-remove-temporary-directory)
+(add-hook 'kill-emacs-hook 'org-babel-remove-temporary-directory)
 
 (provide 'ob)
 

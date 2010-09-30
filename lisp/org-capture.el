@@ -1202,6 +1202,7 @@ The template may still contain \"%?\" for cursor positioning."
 				   "org-capture-template-prompt-history::"
 				   (or prompt "")))
 		  completions (mapcar 'list completions)))
+	  (unless (boundp histvar) (set histvar nil))
 	  (cond
 	   ((member char '("G" "g"))
 	    (let* ((org-last-tags-completion-table
