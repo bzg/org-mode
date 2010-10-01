@@ -12361,17 +12361,18 @@ Be sure to adjust the paths to fit your system.
 #!/bin/sh
 # -*- mode: shell-script -*-
 #
-# tangle a file with org-mode
+# tangle files with org-mode
 #
 DIR=`pwd`
 FILES=""
+ORGINSTALL="~/src/org/lisp/org-install.el"
 
 # wrap each argument in the code required to call tangle on it
 for i in $@@; do
-FILES="$FILES \"$i\""
+    FILES="$FILES \"$i\""
 done
 
-emacsclient \
+emacs -Q --batch -l $ORGINSTALL \
 --eval "(progn
 (add-to-list 'load-path (expand-file-name \"~/src/org/lisp/\"))
 (add-to-list 'load-path (expand-file-name \"~/src/org/contrib/lisp/\"))
@@ -12379,7 +12380,7 @@ emacsclient \
 (mapc (lambda (file)
        (find-file (expand-file-name file \"$DIR\"))
        (org-babel-tangle)
-       (kill-buffer)) '($FILES)))"
+       (kill-buffer)) '($FILES)))" 2>&1 |grep tangled
 @end example
 
 @node Miscellaneous, Hacking, Working With Source Code, Top
