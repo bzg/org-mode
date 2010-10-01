@@ -1767,6 +1767,7 @@ the file name is additionally processed by
   ((lambda (f) (if no-quote-p f (shell-quote-argument f)))
    (expand-file-name (org-babel-local-file-name name))))
 
+(defvar org-babel-temporary-directory)
 (unless (boundp 'org-babel-temporary-directory)
   (defvar org-babel-temporary-directory
     (or (and (boundp 'org-babel-temporary-directory)
