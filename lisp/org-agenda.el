@@ -5135,13 +5135,13 @@ The modified list may contain inherited tags, and tags matched by
 	  (throw 'exit list))
       (while (setq time (pop gridtimes))
 	(unless (and remove (member time have))
-	  (setq time (replace-regexp-in-string " " "0" (format "%4s" time)))
+	  (setq time (replace-regexp-in-string " " "0" (format "%04s" time)))
 	  (push (org-format-agenda-item
 		 nil string "" nil
 		 (concat (substring time 0 -2) ":" (substring time -2)))
 		new)
 	  (put-text-property
-	   1 (length (car new)) 'face 'org-time-grid (car new))))
+	   2 (length (car new)) 'face 'org-time-grid (car new))))
       (if (member 'time-up org-agenda-sorting-strategy-selected)
 	  (append new list)
 	(append list new)))))
