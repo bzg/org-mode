@@ -1768,7 +1768,7 @@ the file name is additionally processed by
    (expand-file-name (org-babel-local-file-name name))))
 
 (defvar org-babel-temporary-directory)
-(unless (boundp 'org-babel-temporary-directory)
+(unless (or noninteractive (boundp 'org-babel-temporary-directory))
   (defvar org-babel-temporary-directory
     (or (and (boundp 'org-babel-temporary-directory)
 	     (file-exists-p org-babel-temporary-directory)
@@ -1797,7 +1797,8 @@ of `org-babel-temporary-directory'."
 
 (defun org-babel-remove-temporary-directory ()
   "Remove `org-babel-temporary-directory' on Emacs shutdown."
-  (when (boundp 'org-babel-temporary-directory)
+  (when (and (boundp 'org-babel-temporary-directory)
+	     (file-exists-p org-babel-temporary-directory))
     ;; taken from `delete-directory' in files.el
     (mapc (lambda (file)
 	    ;; This test is equivalent to
