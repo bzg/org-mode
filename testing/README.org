@@ -15,6 +15,11 @@
       not yet exist, create them.  If the file did not yet exist,
       insert a little template test to get started.
 
+  * =org-test-edit-current-defuns-tests= :: Open the file with tests for
+      the current defun.  Note: this opens a file with the name of the
+      current defun.  If you do not expect many tests for a file to be
+      written, you could as call `org-test-edit-buffer-file-tests'.
+
   * =org-test-test-current-defun= :: Look up test files for defun at
        point and execute the tests.  This is done by searching an
        elisp file with the name of the current defun plus ".el".  In

@@ -157,7 +157,7 @@ currently executed.")
   "Run all tests matched by SELECTOR.
 SELECTOR defaults to \"^org\".
 See the docstring of `ert-select-tests' for valid selectors.
-Tests are run inside
+Unless `ert', this function runs all tests inside
  (let ((deactivate-mark nil))
     (save-excursion
       (save-match-data
@@ -193,28 +193,48 @@ Uses `org-test-run-tests' to run the actual tests."
 
 
 
+;;; Utility functions:
+
+(defun org-test-which-func ()
+  "Return the name of the current defun."
+  (save-excursion
+    (save-match-data
+      (end-of-line)
+      (beginning-of-defun)
+      (if (looking-at "(defun[[:space:]]+\\([^([:space:]]*\\)[[:space:]]*(")
+	  (match-string-no-properties 1)
+	(error "No defun found around point.")))))
+
+(defun org-test-ensure-buffer-emacs-lisp-p (&optional buffer)
+  "Ensure BUFFER contains an elisp file based on extension.
+If BUFFER is nil, use the current buffer.
+Error if not."
+  (save-excursion
+    (save-match-data
+      ;; Check, if editing an emacs-lisp file
+      (with-current-buffer (or buffer (current-buffer))
+	(unless
+	    (string-match "\\.el$" buffer-file-name)
+	(error "Not an emacs lisp file: %s" buffer-file-name))))))
+
+
 ;;; Commands:
 
 (defun org-test-test-current-defun ()
   "Execute all tests for function at point if tests exist."
   (interactive)
   (ert-delete-all-tests)
-  (save-excursion
-    (save-match-data
-      (end-of-line)
-      (beginning-of-defun)
-      (when (looking-at "(defun[[:space:]]+\\([^([:space:]]*\\)[[:space:]]*(")
-        (let* ((fun (match-string-no-properties 1))
-	       (dir (org-test-test-directory-for-file buffer-file-name))
-               (tf (or (org-test-test-file-name-for-defun
-			dir fun buffer-file-name)
-		       (org-test-test-file-name-for-file dir buffer-file-name))))
-          (if tf
-	      (progn
-		(load-file tf)
-		(org-test-run-tests
-		 (concat "^" fun)))
-            (error "No test files found for \"%s\"" fun)))))))
+  (let* ((fun (org-test-wich-func))
+	 (dir (org-test-test-directory-for-file buffer-file-name))
+	 (tf (or (org-test-test-file-name-for-defun
+		  dir fun buffer-file-name)
+		 (org-test-test-file-name-for-file dir buffer-file-name))))
+    (if tf
+	(progn
+	  (load-file tf)
+	  (org-test-run-tests
+	   (concat "^" fun)))
+      (error "No test files found for \"%s\"" fun))))
 
 (defun org-test-test-buffer-file (&optional only)
   "Run all tests for current `buffer-file-name' if tests exist.
@@ -245,16 +265,12 @@ file only."
 	       "test files")
 	     buffer-file-name))))
 
-(defun org-test-edit-buffer-file-tests ()
+(defun org-test-edit-buffer-file-tests (&optional func)
   "Open the `org-test-default-test-file-name' file for editing.
 If the file (and parent directories) do not yet exist,
 create them."
   (interactive)
-  (save-match-data
-    ;; Check, if editing an emacs-lisp file
-    (unless
-	(string-match "\\.el$" buffer-file-name)
-      (error "Not an emacs lisp file: %s" buffer-file-name)))
+  (org-test-ensure-buffer-emacs-lisp-p)
 
   (let ((dir (org-test-test-directory-for-file
 	      buffer-file-name)))
@@ -262,7 +278,11 @@ create them."
       (error "Directory %s not found. Sorry."
 	     org-test-default-directory-name))
 
-    (let* ((tf     (concat dir org-test-default-test-file-name))
+    (let* ((tf     (concat
+		    dir
+		    (if func
+			(concat func ".el")
+			org-test-default-test-file-name)))
 	  (exists  (file-exists-p tf))
 	  (rel     (file-relative-name buffer-file-name dir))
 	  (tprefix (file-name-nondirectory
@@ -272,9 +292,11 @@ create them."
       (find-file tf)
       (unless exists
 	(insert
-	 ";;; " org-test-default-test-file-name " --- Tests for "
+	 ";;; " (file-name-nondirectory tf) "\n"
+	 ";; Tests for `"
+	 (if func (concat  func "' in `") "")
 	 (replace-regexp-in-string "^\\(?:\\.+/\\)+" "" rel)
-	 "\n\n"
+	 "'\n\n"
 	 "\n"
 	 ";;; Code:\n"
 	 "(require 'org-test)\n"
@@ -289,6 +311,14 @@ create them."
 	 "  (should-not nil)\n"
 	 "  (should-error (error \"errr...\")))\n")))))
 
+(defun org-test-edit-current-defuns-tests ()
+  "Open the file with tests related to the current defun.
+If the file (and parent directories) do not yet exist,
+create them."
+  (interactive)
+  (org-test-ensure-buffer-emacs-lisp-p)
+  (org-test-edit-buffer-file-tests
+   (org-test-which-func)))
 
 
 (provide 'org-test)
