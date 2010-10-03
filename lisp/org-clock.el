@@ -975,7 +975,8 @@ the clocking selection, associated with the letter `d'."
 	(move-marker org-clock-interrupted-task
 		     (marker-position org-clock-marker)
 		     (marker-buffer org-clock-marker))
-	(org-clock-out t))
+	(let ((org-clock-clocking-in t))
+	  (org-clock-out t)))
 
       (when (equal select '(16))
 	;; Mark as default clocking task
