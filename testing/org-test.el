@@ -25,14 +25,23 @@
 
 
 ;;;; Code:
-(require 'ert-batch)
-(require 'ert)
-(require 'ert-exp)
-(require 'ert-exp-t)
-(require 'ert-run)
-(require 'ert-ui)
-(require 'which-func)
-(require 'org)
+(let* ((org-test-dir (expand-file-name
+		      (file-name-directory
+		       (or load-file-name buffer-file-name))))
+       (load-path (cons
+		   (expand-file-name "ert" org-test-dir)
+		   (cons
+		    (expand-file-name "jump" org-test-dir)
+		    load-path))))
+  (require 'ert-batch)
+  (require 'ert)
+  (require 'ert-exp)
+  (require 'ert-exp-t)
+  (require 'ert-run)
+  (require 'ert-ui)
+  (require 'jump)
+  (require 'which-func)
+  (require 'org))
 
 (defconst org-test-default-test-file-name "tests.el"
   "For each defun a separate file with tests may be defined.
