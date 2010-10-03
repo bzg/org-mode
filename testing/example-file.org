@@ -1,0 +1,18 @@
+#+TITLE: Example file
+#+OPTIONS: num:nil ^:nil
+#+STARTUP: hideblocks
+
+This is an example file for use by the Org-mode tests.
+
+* top
+** code block
+   :PROPERTIES:
+   :tangle:   yes
+   :CUSTOM_ID: code-block-section
+   :END:
+Here are a couple of code blocks.
+
+#+begin_src emacs-lisp :tangle no
+  ;; 94839181-184f-4ff4-a72f-94214df6f5ba
+  (message "I am code")
+#+end_src
