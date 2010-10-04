@@ -387,7 +387,7 @@ be linked only."
 		 (const :tag "When there is no description" maybe)))
 
 (defcustom org-export-html-inline-image-extensions
-  '("png" "jpeg" "jpg" "gif")
+  '("png" "jpeg" "jpg" "gif" "svg")
   "Extensions of image files that can be inlined into HTML."
   :group 'org-export-html
   :type '(repeat (string :tag "Extension")))
