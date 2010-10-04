@@ -127,12 +127,16 @@ currently executed.")
 
 
 ;;; Load and Run tests
-(defun org-load-tests ()
+(defun org-test-load ()
   "Load up the org-mode test suite."
   (interactive)
-  (mapc (lambda (file) (load-file file))
-	(directory-files (expand-file-name "lisp" org-test-dir)
-			 'full "^\\([^.]\\|\\.\\([^.]\\|\\..\\)\\).*\\.el")))
+  (flet ((rload (base)
+		(mapc
+		 (lambda (path)
+		   (if (file-directory-p path) (rload path) (load-file path)))
+		 (directory-files base 'full
+				  "^\\([^.]\\|\\.\\([^.]\\|\\..\\)\\).*\\.el"))))
+    (rload (expand-file-name "lisp" org-test-dir))))
 
 (defun org-test-current-defun ()
   "Test the current function."
@@ -143,7 +147,7 @@ currently executed.")
   "Run all defined tests matching \"^org\".
 Load all test files first."
   (interactive)
-  (org-load-tests)
+  (org-test-load)
   (ert "^org"))
 
 (provide 'org-test)
