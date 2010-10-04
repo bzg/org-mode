@@ -18,8 +18,7 @@
 
 ;;; Prerequisites:
 
-;; ERT and jump.el are both installed as git submodules to install
-;;   them run
+;; ERT and jump.el are both included as git submodules, install with
 ;;   $ git submodule init
 ;;   $ git submodule update
 
@@ -54,18 +53,19 @@ org-test searches this directory up the directory tree.")
 (defconst org-test-dir
   (expand-file-name (file-name-directory (or load-file-name buffer-file-name))))
 
+(defconst org-base-dir
+  (expand-file-name ".." org-test-dir))
+
 (defconst org-test-example-file-name
   (expand-file-name "example-file.org" org-test-dir))
 
 
 ;;; Functions for writing tests
 
-;; TODO
 (defun org-test-buffer (&optional file)
   "TODO:  Setup and return a buffer to work with.
 If file is non-nil insert it's contents in there.")
 
-;; TODO
 (defun org-test-compare-with-file (&optional file)
   "TODO:  Compare the contents of the test buffer with FILE.
 If file is not given, search for a file named after the test
@@ -89,8 +89,44 @@ currently executed.")
        (kill-buffer to-be-removed))))
 
 
-;;; Load and Run tests
+;;; Navigation Functions
+(defjump 'org-test-jump
+  '(("lisp/\\1.el" . "testing/lisp/test-\\1.el")
+    ("lisp/\\1.el" . "testing/lisp/\\1.el/test.*.el")
+    ("contrib/lisp/\\1.el" . "testing/contrib/lisp/test-\\1.el")
+    ("contrib/lisp/\\1.el" . "testing/contrib/lisp/\\1.el/test.*.el")
+    ("testing/lisp/test-\\1.el" . "lisp/\\1.el")
+    ("testing/lisp/\\1.el" . "lisp/\\1.el/test.*.el")
+    ("testing/contrib/lisp/test-\\1.el" . "contrib/lisp/\\1.el")
+    ("testing/contrib/lisp/test-\\1.el" . "contrib/lisp/\\1.el/test.*.el"))
+  (concat org-base-dir "/")
+  "Jump between org-mode files and their tests."
+  (lambda (path)
+    (let ((full-path (expand-file-name path org-base-dir))
+	  (name (file-name-nondirectory path)))
+      (find-file full-path)
+      (insert
+       ";;; " name "\n\n"
+       ";; Copyright (c) 2010 " user-full-name "\n"
+       ";; Authors: " user-full-name "\n\n"
+       ";; Released under the GNU General Public License version 3\n"
+       ";; see: http://www.gnu.org/licenses/gpl-3.0.html\n\n"
+       ";;;; Comments:\n\n"
+       ";; Template test file for Org-mode tests\n\n"
+       "\n"
+       ";;; Code:\n"
+       "(require 'org-test)\n\n"
+       "\n"
+       ";;; Tests\n"
+       "(ert-deftest " name "/example-test ()\n"
+       "  \"Just an example to get you started.\"\n"
+       "  (should t)\n"
+       "  (should-not nil)\n"
+       "  (should-error (error \"errr...\")))") full-path))
+  (lambda () (car (which-function))))
 
+
+;;; Load and Run tests
 (defun org-load-tests ()
   "Load up the org-mode test suite."
   (interactive)
