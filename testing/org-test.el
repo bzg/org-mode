@@ -59,6 +59,9 @@ org-test searches this directory up the directory tree.")
 (defconst org-test-example-file-name
   (expand-file-name "example-file.org" org-test-dir))
 
+(defconst org-test-no-header-example-file-name
+  (expand-file-name "example-file-no-header.org" org-test-dir))
+
 
 ;;; Functions for writing tests
 
@@ -74,16 +77,20 @@ currently executed.")
 (defmacro org-test-in-example-file (file &rest body)
   "Execute body in the Org-mode example file."
   (declare (indent 1))
-  `(let ((visited-p (get-file-buffer (or ,file org-test-example-file-name)))
-	 to-be-removed)
+  `(let* ((my-file (or ,file org-test-example-file-name))
+	  (visited-p (get-file-buffer my-file))
+	  to-be-removed)
      (save-window-excursion
        (save-match-data
-	 (find-file org-test-example-file-name)
+	 (find-file my-file)
 	 (setq to-be-removed (current-buffer))
 	 (goto-char (point-min))
-	 (outline-next-visible-heading 1)
-	 (org-show-subtree)
-	 (org-show-block-all)
+	 (condition-case nil
+	     (progn
+	       (outline-next-visible-heading 1)
+	       (org-show-subtree)
+	       (org-show-block-all))
+	   (error nil))
 	 ,@body))
      (unless visited-p
        (kill-buffer to-be-removed))))
@@ -113,11 +120,12 @@ files."
   (concat org-base-dir "/")
   "Jump between org-mode files and their tests."
   (lambda (path)
-    (let ((full-path (expand-file-name path org-base-dir))
-	  (name (file-name-nondirectory path)))
+    (let* ((full-path (expand-file-name path org-base-dir))
+	  (file-name (file-name-nondirectory path))
+	  (name (file-name-sans-extension file-name)))
       (find-file full-path)
       (insert
-       ";;; " name "\n\n"
+       ";;; " file-name "\n\n"
        ";; Copyright (c) 2010 " user-full-name "\n"
        ";; Authors: " user-full-name "\n\n"
        ";; Released under the GNU General Public License version 3\n"
@@ -133,7 +141,9 @@ files."
        "  \"Just an example to get you started.\"\n"
        "  (should t)\n"
        "  (should-not nil)\n"
-       "  (should-error (error \"errr...\")))") full-path))
+       "  (should-error (error \"errr...\")))\n\n\n"
+       "(provide '" name ")\n\n"
+       ";;; " file-name " ends here\n") full-path))
   (lambda () ((lambda (res) (if (listp res) (car res) res)) (which-function))))
 
 
