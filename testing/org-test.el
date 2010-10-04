@@ -171,7 +171,7 @@ files."
 Load all test files first."
   (interactive)
   (org-test-load)
-  (ert "^org"))
+  (ert "org"))
 
 (provide 'org-test)
 
