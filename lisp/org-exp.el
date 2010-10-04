@@ -181,7 +181,7 @@ This option can also be set with the +OPTIONS line, e.g. \"-:nil\"."
     ("no" "Forfatter"  "Dato"  "Innhold" "Fotnoter")
     ("nb" "Forfatter"  "Dato"  "Innhold" "Fotnoter")  ;; nb = Norsk (bokm.l)
     ("nn" "Forfattar"  "Dato"  "Innhald" "Fotnotar")  ;; nn = Norsk (nynorsk)
-    ("pl" "Autor"      "Data" "Spis tre&sacute;ci"  "Przypis")
+    ("pl" "Autor"      "Data" "Spis tre&#x015b;ci"  "Przypis")
     ("sv" "F&ouml;rfattare" "Datum" "Inneh&aring;ll" "Fotnoter"))
   "Terms used in export text, translated to different languages.
 Use the variable `org-export-default-language' to set the language,
