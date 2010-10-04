@@ -71,10 +71,10 @@ If file is non-nil insert it's contents in there.")
 If file is not given, search for a file named after the test
 currently executed.")
 
-(defmacro in-org-example-file (&rest body)
+(defmacro org-test-in-example-file (file &rest body)
   "Execute body in the Org-mode example file."
-  (declare (indent 0))
-  `(let ((visited-p (get-file-buffer org-test-example-file-name))
+  (declare (indent 1))
+  `(let ((visited-p (get-file-buffer (or ,file org-test-example-file-name)))
 	 to-be-removed)
      (save-window-excursion
        (save-match-data
@@ -87,6 +87,17 @@ currently executed.")
 	 ,@body))
      (unless visited-p
        (kill-buffer to-be-removed))))
+
+(defmacro org-test-at-marker (file marker &rest body)
+  "Run body after placing the point at MARKER in FILE.
+Note the uuidgen command-line command can be useful for
+generating unique markers for insertion as anchors into org
+files."
+  (declare (indent 2))
+  `(org-test-in-example-file ,file
+     (goto-char (point-min))
+     (re-search-forward (regexp-quote ,marker))
+     ,@body))
 
 
 ;;; Navigation Functions
@@ -123,7 +134,7 @@ currently executed.")
        "  (should t)\n"
        "  (should-not nil)\n"
        "  (should-error (error \"errr...\")))") full-path))
-  (lambda () (car (which-function))))
+  (lambda () ((lambda (res) (if (listp res) (car res) res)) (which-function))))
 
 
 ;;; Load and Run tests
@@ -136,7 +147,9 @@ currently executed.")
 		   (if (file-directory-p path) (rload path) (load-file path)))
 		 (directory-files base 'full
 				  "^\\([^.]\\|\\.\\([^.]\\|\\..\\)\\).*\\.el"))))
-    (rload (expand-file-name "lisp" org-test-dir))))
+    (rload (expand-file-name "lisp" org-test-dir))
+    (rload (expand-file-name "lisp"
+			     (expand-file-name "contrib" org-test-dir)))))
 
 (defun org-test-current-defun ()
   "Test the current function."
