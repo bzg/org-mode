@@ -104,11 +104,11 @@ none ----- do not display either code or results upon export"
 	    (org-babel-parse-header-arguments
 	     (org-babel-clean-text-properties
 	      (mapconcat #'identity (cdr (split-string raw-header)) " "))))
+	   (heading (nth 4 (ignore-errors (org-heading-components))))
 	   (link (org-make-link-string
-		  (concat
-		   org-current-export-file
-		   "::"
-		   (nth 4 (ignore-errors (org-heading-components))))))
+		  (if heading
+		      (concat org-current-export-file "::" heading)
+		    org-current-export-file)))
 	   (export-buffer (current-buffer)))
       ;; bail if we couldn't get any info from the block
       (when info
