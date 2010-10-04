@@ -105,27 +105,29 @@ none ----- do not display either code or results upon export"
 	     (org-babel-clean-text-properties
 	      (mapconcat #'identity (cdr (split-string raw-header)) " "))))
 	   (heading (nth 4 (ignore-errors (org-heading-components))))
-	   (link (org-make-link-string
-		  (if heading
-		      (concat org-current-export-file "::" heading)
-		    org-current-export-file)))
+	   (link (when org-current-export-file
+		   (org-make-link-string
+		    (if heading
+			(concat org-current-export-file "::" heading)
+		      org-current-export-file))))
 	   (export-buffer (current-buffer)))
       ;; bail if we couldn't get any info from the block
       (when info
-	;; resolve parameters in the original file so that headline
-	;; and file-wide parameters are included
-	;; attempt to go to the same heading in the original file
-	(set-buffer (get-file-buffer org-current-export-file))
-	(save-restriction
-	  (org-open-link-from-string link)
-	  (setf (nth 2 info)
-		(org-babel-merge-params
-		 org-babel-default-header-args
-		 (org-babel-params-from-buffer)
-		 (org-babel-params-from-properties lang)
-		 (if (boundp lang-headers) (eval lang-headers) nil)
-		 raw-params)))
-	(set-buffer export-buffer)
+	(when link
+	    ;; resolve parameters in the original file so that headline
+	    ;; and file-wide parameters are included
+	    ;; attempt to go to the same heading in the original file
+	    (set-buffer (get-file-buffer org-current-export-file))
+	  (save-restriction
+	    (org-open-link-from-string link)
+	    (setf (nth 2 info)
+		  (org-babel-merge-params
+		   org-babel-default-header-args
+		   (org-babel-params-from-buffer)
+		   (org-babel-params-from-properties lang)
+		   (if (boundp lang-headers) (eval lang-headers) nil)
+		   raw-params)))
+	  (set-buffer export-buffer))
 	;; expand noweb references in the original file
 	(setf (nth 1 info)
 	      (if (and (cdr (assoc :noweb (nth 2 info)))
