@@ -18,7 +18,6 @@
 ;;; Tests
 (ert-deftest test-ob-exp/org-babel-exp-src-blocks/w-no-headers ()
   "Testing export without any headlines in the org-mode file."
-  
   (org-test-in-example-file org-test-no-header-example-file-name
     ;; export the file to html
     (org-export-as-html nil)
@@ -30,6 +29,21 @@
     ;; should not create a file with "::" appended to it's name
     (should-not (file-exists-p
 		 (concat org-test-no-header-example-file-name "::")))))
+
+(ert-deftest test-ob-exp/org-babel-exp-src-blocks/w-no-file ()
+  "Testing export from buffers which are not visiting any file."
+  (when (get-buffer "*Org HTML Export*") (kill-buffer "*Org HTML Export*"))
+  (should-not (get-buffer "*Org HTML Export*"))
+  ;; export the file to HTML in a temporary buffer
+  (org-test-in-example-file nil (org-export-as-html-to-buffer nil))
+  ;; should create a .html buffer
+  (should (buffer-live-p (get-buffer "*Org HTML Export*")))
+  ;; should contain the content of the buffer
+  (save-excursion
+    (set-buffer (get-buffer "*Org HTML Export*"))
+    (should (string-match (regexp-quote test-org-code-block-anchor)
+			  (buffer-string))))
+  (when (get-buffer "*Org HTML Export*") (kill-buffer "*Org HTML Export*")))
 
 (provide 'test-ob-exp)
 

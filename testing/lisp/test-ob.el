@@ -15,18 +15,18 @@
 (require 'org-test)
 
 (ert-deftest test-org-babel-get-src-block-info-language ()
-  (org-test-at-marker nil "94839181-184f-4ff4-a72f-94214df6f5ba"
+  (org-test-at-marker nil test-org-code-block-anchor
     (let ((info (org-babel-get-src-block-info)))
       (should (string= "emacs-lisp" (nth 0 info))))))
 
 (ert-deftest test-org-babel-get-src-block-info-body ()
-  (org-test-at-marker nil "94839181-184f-4ff4-a72f-94214df6f5ba"
+  (org-test-at-marker nil test-org-code-block-anchor
     (let ((info (org-babel-get-src-block-info)))
-      (should (string-match (regexp-quote "94839181-184f-4ff4-a72f-94214df6f5ba")
+      (should (string-match (regexp-quote test-org-code-block-anchor)
 			    (nth 1 info))))))
 
 (ert-deftest test-org-babel-get-src-block-info-tangle ()
-  (org-test-at-marker nil "94839181-184f-4ff4-a72f-94214df6f5ba"
+  (org-test-at-marker nil test-org-code-block-anchor
     (let ((info (org-babel-get-src-block-info)))
       (should (string= "no" (cdr (assoc :tangle (nth 2 info))))))))
 
