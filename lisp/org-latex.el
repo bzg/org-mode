@@ -456,8 +456,10 @@ allowed.  The default we use here encompasses both."
   :group 'org-export)
 
 (defcustom org-latex-to-pdf-process
-  '("pdflatex -interaction nonstopmode -output-directory %o %f"
-    "pdflatex -interaction nonstopmode -output-directory %o %f")
+  (if (executable-find "texi2dvi")
+      '("texi2dvi -p -b -c -V %f")
+    '("pdflatex -interaction nonstopmode -output-directory %o %f"
+      "pdflatex -interaction nonstopmode -output-directory %o %f"))
   "Commands to process a LaTeX file to a PDF file.
 This is a list of strings, each of them will be given to the shell
 as a command.  %f in the command will be replaced by the full file name, %b
@@ -467,6 +469,9 @@ The reason why this is a list is that it usually takes several runs of
 pdflatex, maybe mixed with a call to bibtex.  Org does not have a clever
 mechanism to detect which of these commands have to be run to get to a stable
 result, and it also does not do any error checking.
+
+By default, Org used texi2dvi to do the processing, if that command
+is on the system.  If not, it uses 2 pdflatex runs.
 
 Alternatively, this may be a Lisp function that does the processing, so you
 could use this to apply the machinery of AUCTeX or the Emacs LaTeX mode.
@@ -871,15 +876,39 @@ when PUB-DIR is set, use this as the publishing directory."
 		     t t cmd)))
 	(shell-command cmd outbuf outbuf)))
     (message (concat "Processing LaTeX file " file "...done"))
+    (setq errors (org-export-latex-get-error outbuf))
     (if (not (file-exists-p pdffile))
-	(error (concat "PDF file " pdffile " was not produced"))
+	(error (concat "PDF file " pdffile " was not produced"
+		       (if errors (concat ":" errors "") "")))
       (set-window-configuration wconfig)
       (when org-export-pdf-remove-logfiles
 	(dolist (ext org-export-pdf-logfiles)
 	  (setq file (concat base "." ext))
 	  (and (file-exists-p file) (delete-file file))))
-      (message "Exporting to PDF...done")
+      (message (concat
+		"Exporting to PDF...done"
+		(if errors
+		    (concat ", with some errors:" errors)
+		  "")))
       pdffile)))
+
+(defun org-export-latex-get-error (buf)
+  "Collect the kinds of errors that remain in pdflatex processing."
+  (with-current-buffer buf
+    (save-excursion
+      (goto-char (point-max))
+      (when (re-search-backward "^[ \t]*This is pdf.*?TeX.*?Version" nil t)
+	;; OK, we are at the location of the final run
+	(let ((pos (point)) (errors "") (case-fold-search t))
+	  (if (re-search-forward "Reference.*?undefined" nil t)
+	      (setq errors (concat errors " [undefined reference]")))
+	  (goto-char pos)
+	  (if (re-search-forward "Citation.*?undefined" nil t)
+	      (setq errors (concat errors " [undefined citation]")))
+	  (goto-char pos)
+	  (if (re-search-forward "Undefined control sequence" nil t)
+	      (setq errors (concat errors " [undefined control sequence]")))
+	  (and (org-string-nw-p errors) errors))))))
 
 ;;;###autoload
 (defun org-export-as-pdf-and-open (arg)
