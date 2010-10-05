@@ -164,6 +164,19 @@ CARDFILES   = doc/orgcard.tex doc/orgcard.pdf doc/orgcard_letter.pdf
 TEXIFILES   = doc/org.texi
 INFOFILES   = doc/org
 
+# Package Manager (ELPA)
+PKG_TAG = $(shell date +%Y%m%d)
+PKG_DOC = "Outline-based notes management and organizer"
+PKG_REQ = "nil"
+
+PKG_FILES = $(LISPFILES0)		\
+            doc/dir doc/org		\
+            doc/pdflayout.sty		\
+            doc/org.pdf			\
+            doc/orgguide.pdf		\
+            doc/orgcard.tex		\
+            doc/orgcard.pdf		\
+            doc/orgcard_letter.pdf
 
 .SUFFIXES: .el .elc .texi
 SHELL = /bin/sh
@@ -324,6 +337,17 @@ distfile:
 	cp -r ORGWEBPAGE/Changes.org org-$(TAG)/
 	zip -r org-$(TAG).zip org-$(TAG)
 	gtar zcvf org-$(TAG).tar.gz org-$(TAG)
+
+pkg:
+	@if [ "X$(PKG_TAG)" = "X" ]; then echo "*** No tag ***"; exit 1; fi
+	touch doc/org.texi doc/orgcard.tex # force update
+	${MAKE} info
+	${MAKE} doc
+	rm -rf org-$(PKG_TAG) org-$(PKG_TAG).tar
+	$(MKDIR) org-$(PKG_TAG)
+	cp -r $(PKG_FILES) org-$(PKG_TAG)
+	echo "(define-package \"org\" \"$(PKG_TAG)\" \"$(PKG_DOC)\" $(PKG_REQ))" > org-$(PKG_TAG)/org-pkg.el
+	tar cf org-$(PKG_TAG).tar org-$(PKG_TAG) --remove-files
 
 makerelease:
 	@if [ "X$(TAG)" = "X" ]; then echo "*** No tag ***"; exit 1; fi
