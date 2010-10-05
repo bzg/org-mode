@@ -851,7 +851,7 @@ when PUB-DIR is set, use this as the publishing directory."
 		     (save-excursion
 		       (goto-char (point-min))
 		       (re-search-forward "\\\\bibliography{" nil t))))
-	 cmd output-dir)
+	 cmd output-dir errors)
     (with-current-buffer outbuf (erase-buffer))
     (message (concat "Processing LaTeX file " file "..."))
     (setq output-dir (file-name-directory file))
