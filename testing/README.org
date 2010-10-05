@@ -1,0 +1,99 @@
+#+OPTIONS:  ^:nil
+
+
+* Testing elisp files with ERT
+
+  The aim is to provide a few simple yet helpfull commands for testing
+  while hacking on elisp files.  The entire thing is based on
+  conventions.  You don't need to care for those conventions, but it
+  makes live easier.
+
+  Currently three commands are provided:
+
+  * =org-test-edit-buffer-file-tests= :: Open the file with tests for
+      the current buffer.  If the file and it's parent directories do
+      not yet exist, create them.  If the file did not yet exist,
+      insert a little template test to get started.
+
+  * =org-test-edit-current-defuns-tests= :: Open the file with tests for
+      the current defun.  Note: this opens a file with the name of the
+      current defun.  If you do not expect many tests for a file to be
+      written, you could as call `org-test-edit-buffer-file-tests'.
+
+  * =org-test-test-current-defun= :: Look up test files for defun at
+       point and execute the tests.  This is done by searching an
+       elisp file with the name of the current defun plus ".el".  In
+       case your point is in defun DEFUN in the file
+       =proj/lisp/FILE.el=, this command will search the directory tree
+       up until it finds a directory named =testing/=.  If there is a
+       directory =proj/testing/= it assumes your tests are in
+       =proj/testing/lisp/FILE.el/DEFUN.el=.  If that file is found, it
+       will be loaded and all ERT tests for the selector "^DEFUN" will
+       be executed.  If that file does not exist, fall back on loading
+       =proj/testing/lisp/FILE.el/tests.el=.
+
+  * =org-test-test-buffer-file= :: Look up a test file for
+       `buffer-file-name' and execute the tests.  This is done by
+       searching for a directory =testing/= from `buffer-file-name's
+       directory upwards and then apply the relative path to your
+       source file there.  In case you're editing =proj/lisp/FILE.el=,
+       and a directory =proj/testing/= exists, this command will try to
+       load =proj/testing/lisp/FILE.el/tests.el= and other elisp files
+       in that directory.  The resulting list of files will be loaded
+       and all ERT tests for selector "^FILE" will be executed.  With
+       a prefix argument, load only =tests.el=.
+
+  * =org-test-run-all-tests= :: Run all tests for all lisp files and all
+       defuns in your project.
+
+
+  The first two commands call `ert-delete-all-tests' to make sure that
+  only the desired tests are executed.  All functions load the test
+  files for each call, hence always a current version of tests are
+  used.  (This might change in the future...)
+
+
+* Getting started
+
+  You should obtain ERT by cloning Christian Ohler's public git
+  repository:
+
+  : sh$ git clone http://github.com/ohler/ert.git
+
+  Ensure that the =ert/= directory is in your loadpath:
+
+  : (add-to-list 'load-path "~/path/to/ert/")
+
+
+*** Where to put the tests
+
+    The tests live in a directory (e.g. =proj/testing/=) that closely
+    resembles the directory structure below =proj/=.
+
+    For example let's assume a file =proj/lisp/FILE.el= exists.  To write tests
+    for this file, create a directory structure in =proj/testing/= with the relative
+    path to your file plus the name of that file as directory:
+    =proj/testing/lisp/FILE.el/=
+
+    Org-test searches that directory for a file named =tests.el= and
+    executes all ERT tests that match the selector "=^FILE=".
+
+    To run a test, you might want to use one of the two commands
+    provided by =org-test.el= (see above).
+
+
+* TODOs
+
+*** TODO Setup a buffers for testing
+
+***** TODO Compare the contents of such a buffer
+      ...with a control file.
+
+*** TODO Provide directory and file functions
+    Provide little services to help test writers with temporary
+    buffers, files and directories.
+
+    Or just use temp-files for that?
+
+*** TODO let-bind different setups for tests
+    Maybe just provide an example on how to do that.
