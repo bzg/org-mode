@@ -18,17 +18,15 @@
 ;;; Tests
 (ert-deftest test-ob-exp/org-babel-exp-src-blocks/w-no-headers ()
   "Testing export without any headlines in the org-mode file."
-  (org-test-in-example-file org-test-no-header-example-file-name
+  (org-test-in-example-file org-test-no-header-file
     ;; export the file to html
     (org-export-as-html nil)
     ;; should create a .html file
     (should (file-exists-p (concat
-			    (file-name-sans-extension
-			     org-test-no-header-example-file-name)
+			    (file-name-sans-extension org-test-no-header-file)
 			    ".html")))
     ;; should not create a file with "::" appended to it's name
-    (should-not (file-exists-p
-		 (concat org-test-no-header-example-file-name "::")))))
+    (should-not (file-exists-p (concat org-test-no-header-file "::")))))
 
 (ert-deftest test-ob-exp/org-babel-exp-src-blocks/w-no-file ()
   "Testing export from buffers which are not visiting any file."

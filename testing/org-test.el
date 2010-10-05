@@ -56,11 +56,17 @@ org-test searches this directory up the directory tree.")
 (defconst org-base-dir
   (expand-file-name ".." org-test-dir))
 
-(defconst org-test-example-file-name
-  (expand-file-name "example-file.org" org-test-dir))
+(defconst org-test-example-dir
+  (expand-file-name "examples" org-test-dir))
 
-(defconst org-test-no-header-example-file-name
-  (expand-file-name "example-file-no-header.org" org-test-dir))
+(defconst org-test-file
+  (expand-file-name "normal.org" org-test-example-dir))
+
+(defconst org-test-no-header-file
+  (expand-file-name "no-header.org" org-test-dir))
+
+(defconst org-test-link-in-heading-file
+  (expand-file-name "link-in-heading.org" org-test-dir))
 
 (defconst test-org-code-block-anchor
   "94839181-184f-4ff4-a72f-94214df6f5ba")
@@ -80,7 +86,7 @@ currently executed.")
 (defmacro org-test-in-example-file (file &rest body)
   "Execute body in the Org-mode example file."
   (declare (indent 1))
-  `(let* ((my-file (or ,file org-test-example-file-name))
+  `(let* ((my-file (or ,file org-test-file))
 	  (visited-p (get-file-buffer my-file))
 	  to-be-removed)
      (save-window-excursion
