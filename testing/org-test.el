@@ -62,14 +62,11 @@ org-test searches this directory up the directory tree.")
 (defconst org-test-file
   (expand-file-name "normal.org" org-test-example-dir))
 
-(defconst org-test-no-header-file
-  (expand-file-name "no-header.org" org-test-dir))
+(defconst org-test-no-heading-file
+  (expand-file-name "no-heading.org" org-test-example-dir))
 
 (defconst org-test-link-in-heading-file
   (expand-file-name "link-in-heading.org" org-test-dir))
-
-(defconst test-org-code-block-anchor
-  "94839181-184f-4ff4-a72f-94214df6f5ba")
 
 
 ;;; Functions for writing tests

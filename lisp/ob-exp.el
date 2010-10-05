@@ -119,7 +119,11 @@ none ----- do not display either code or results upon export"
 	    ;; attempt to go to the same heading in the original file
 	    (set-buffer (get-file-buffer org-current-export-file))
 	  (save-restriction
-	    (org-open-link-from-string link)
+	    (condition-case nil
+		(org-open-link-from-string link)
+	      (error (when heading
+		       (goto-char (point-min))
+		       (re-search-forward (regexp-quote heading) nil t))))
 	    (setf (nth 2 info)
 		  (org-babel-merge-params
 		   org-babel-default-header-args
