@@ -12769,8 +12769,10 @@ With prefix ARG, realign all tags in headings in the current buffer."
 	(save-excursion
 	  (setq table (append org-tag-persistent-alist
 			      (or org-tag-alist (org-get-buffer-tags))
-			      (and org-complete-tags-always-offer-all-agenda-tags
-				   (org-global-tags-completion-table (org-agenda-files))))
+			      (and
+			       org-complete-tags-always-offer-all-agenda-tags
+			       (org-global-tags-completion-table
+				(org-agenda-files))))
 		org-last-tags-completion-table table
 		current-tags (org-split-string current ":")
 		inherited-tags (nreverse
@@ -12782,19 +12784,24 @@ With prefix ARG, realign all tags in headings in the current buffer."
 			     (delq nil (mapcar 'cdr table))))
 		    (org-fast-tag-selection
 		     current-tags inherited-tags table
-		     (if org-fast-tag-selection-include-todo org-todo-key-alist))
+		     (if org-fast-tag-selection-include-todo
+			 org-todo-key-alist))
 		  (let ((org-add-colon-after-tag-completion t))
 		    (org-trim
 		     (org-without-partial-completion
-		      (org-icompleting-read "Tags: " 'org-tags-completion-function
+		      (org-icompleting-read "Tags: "
+					    'org-tags-completion-function
 				       nil nil current 'org-tags-history)))))))
 	(while (string-match "[-+&]+" tags)
 	  ;; No boolean logic, just a list
 	  (setq tags (replace-match ":" t t tags))))
 
+      (setq tags (replace-regexp-in-string "[ ,]" ":" tags))
+
       (if org-tags-sort-function
       	  (setq tags (mapconcat 'identity
-      				(sort (org-split-string tags (org-re "[^[:alnum:]_@#%]+"))
+      				(sort (org-split-string
+				       tags (org-re "[^[:alnum:]_@#%]+"))
       				      org-tags-sort-function) ":")))
 
       (if (string-match "\\`[\t ]*\\'" tags)
@@ -12874,7 +12881,7 @@ This works in the agenda, and also in an org-mode buffer."
 (defun org-tags-completion-function (string predicate &optional flag)
   (let (s1 s2 rtn (ctable org-last-tags-completion-table)
 	   (confirm (lambda (x) (stringp (car x)))))
-    (if (string-match "^\\(.*[-+:&|]\\)\\([^-+:&|]*\\)$" string)
+    (if (string-match "^\\(.*[-+:&,|]\\)\\([^-+:&,|]*\\)$" string)
         (setq s1 (match-string 1 string)
               s2 (match-string 2 string))
       (setq s1 "" s2 string))
