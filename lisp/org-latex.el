@@ -459,6 +459,7 @@ allowed.  The default we use here encompasses both."
   (if (executable-find "texi2dvi")
       '("texi2dvi -p -b -c -V %f")
     '("pdflatex -interaction nonstopmode -output-directory %o %f"
+      "pdflatex -interaction nonstopmode -output-directory %o %f"
       "pdflatex -interaction nonstopmode -output-directory %o %f"))
   "Commands to process a LaTeX file to a PDF file.
 This is a list of strings, each of them will be given to the shell
