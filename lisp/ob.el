@@ -1671,7 +1671,7 @@ This is taken almost directly from `org-read-prop'."
     cell))
 
 (defun org-babel-number-p (string)
-  "Return t if STRING represents a number."
+  "If STRING represents a number return it's value."
   (if (and (string-match "^-?[0-9]*\\.?[0-9]*$" string)
            (= (length (substring string (match-beginning 0)
 				 (match-end 0)))
