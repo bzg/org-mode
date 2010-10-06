@@ -294,7 +294,10 @@ code blocks by language."
 				   'org-babel-expand-body:generic)
 				 body params)))
 		    (if (and (cdr (assoc :noweb params))
-			     (string= "yes" (cdr (assoc :noweb params))))
+			     (let ((nowebs (split-string
+					    (cdr (assoc :noweb params)))))
+			       (or (member "yes" nowebs)
+				   (member "tangle" nowebs))))
 			(org-babel-expand-noweb-references info)
 		      (nth 1 info))))
 	     (comment (when (or (string= "both" (cdr (assoc :comments params)))
