@@ -21,7 +21,7 @@ Org-mode test framework.
 
 3) The =org-test-jump= command is now bound to =M-C-j= in all
    emacs-lisp files.  Call this command from any file in the =lisp/=
-   directory of the org-mode repository to just to the related test
+   directory of the org-mode repository to jump to the related test
    file in the =testing/= directory.  Call this functions with a
    prefix argument, and the corresponding test file will be stubbed
    out if it doesn't already exist.
