@@ -70,7 +70,6 @@ org-test searches this directory up the directory tree.")
 
 
 ;;; Functions for writing tests
-
 (defun org-test-buffer (&optional file)
   "TODO:  Setup and return a buffer to work with.
 If file is non-nil insert it's contents in there.")
@@ -151,6 +150,8 @@ files."
        "(provide '" name ")\n\n"
        ";;; " file-name " ends here\n") full-path))
   (lambda () ((lambda (res) (if (listp res) (car res) res)) (which-function))))
+
+(define-key emacs-lisp-mode-map "\M-\C-j" 'org-test-jump)
 
 
 ;;; Load and Run tests
