@@ -90,7 +90,7 @@ This function is called by `org-babel-execute-src-block'"
 		(insert (org-babel-chomp line)) (comint-send-input nil t))
 	      (list body (format "%S" org-babel-scheme-eoe)))))
        ;; external evaluation
-       (let ((script-file (org-babel-temp-file "lisp-script-")))
+       (let ((script-file (org-babel-temp-file "scheme-script-")))
          (with-temp-file script-file
            (insert
             ;; return the value or the output
@@ -98,7 +98,8 @@ This function is called by `org-babel-execute-src-block'"
                 (format "(display %s)" full-body)
               full-body)))
          (org-babel-eval
-	  (format "%s %s" org-babel-scheme-cmd script-file) ""))))))
+	  (format "%s %s" org-babel-scheme-cmd
+		  (org-babel-process-file-name script-file)) ""))))))
 
 (defun org-babel-prep-session:scheme (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."

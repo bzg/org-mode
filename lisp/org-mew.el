@@ -81,7 +81,7 @@
 		(mew-case-folder (mew-sinfo-get-case)
 				 (nth 1 (mew-refile-get msgnum)))
 	      (mew-summary-folder-name)))
-	   message-id from to subject desc link)
+	   message-id from to subject desc link date date-ts date-ts-ia)
       (save-window-excursion
 	(if (fboundp 'mew-summary-set-message-buffer)
 	    (mew-summary-set-message-buffer folder-name msgnum)
@@ -89,9 +89,19 @@
 	(setq message-id (mew-header-get-value "Message-Id:"))
 	(setq from (mew-header-get-value "From:"))
 	(setq to (mew-header-get-value "To:"))
+	(setq date (mew-header-get-value "Date:"))
+	(setq date-ts (and date (format-time-string
+				 (org-time-stamp-format t)
+				 (date-to-time date))))
+	(setq date-ts-ia (and date (format-time-string
+				    (org-time-stamp-format t t)
+				    (date-to-time date))))
 	(setq subject (mew-header-get-value "Subject:")))
       (org-store-link-props :type "mew" :from from :to to
 			    :subject subject :message-id message-id)
+      (when date
+	(org-add-link-props :date date :date-timestamp date-ts
+			    :date-timestamp-inactive date-ts-ia))
       (setq message-id (org-remove-angle-brackets message-id))
       (setq desc (org-email-link-description))
       (setq link (org-make-link "mew:" folder-name

@@ -182,7 +182,9 @@ constructs (header arguments, no-web syntax etc...) are ignored."
          (tmp-tex-file (concat tmp-file ".tex"))
          (lhs-file (concat base-name ".lhs"))
          (tex-file (concat base-name ".tex"))
-         (command (concat org-babel-haskell-lhs2tex-command " " lhs-file " > " tex-file))
+         (command (concat org-babel-haskell-lhs2tex-command
+			  " " (org-babel-process-file-name lhs-file)
+			  " > " (org-babel-process-file-name tex-file)))
          (preserve-indentp org-src-preserve-indentation)
          indentation)
     ;; escape haskell source-code blocks

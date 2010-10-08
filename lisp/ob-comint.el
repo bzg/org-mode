@@ -45,7 +45,7 @@
 (defmacro org-babel-comint-in-buffer (buffer &rest body)
   "Check BUFFER and execute BODY.
 BUFFER is checked with `org-babel-comint-buffer-livep'.  BODY is
-executed inside the protection of `save-window-excursion' and
+executed inside the protection of `save-excursion' and
 `save-match-data'."
   (declare (indent 1))
   `(save-excursion

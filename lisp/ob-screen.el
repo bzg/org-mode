@@ -50,7 +50,7 @@ In case you want to use a different screen than one selected by your $PATH")
 
 (defun org-babel-execute:screen (body params)
   "Send a block of code via screen to a terminal using Babel.
-\"default\" session is be used when none is specified."
+\"default\" session is used when none is specified."
   (message "Sending source code block to interactive terminal session...")
   (save-window-excursion
     (let* ((processed-params (org-babel-process-params params))

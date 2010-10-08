@@ -387,7 +387,7 @@ be linked only."
 		 (const :tag "When there is no description" maybe)))
 
 (defcustom org-export-html-inline-image-extensions
-  '("png" "jpeg" "jpg" "gif")
+  '("png" "jpeg" "jpg" "gif" "svg")
   "Extensions of image files that can be inlined into HTML."
   :group 'org-export-html
   :type '(repeat (string :tag "Extension")))
@@ -519,7 +519,7 @@ with a link to this URL."
   "Preamble, to be inserted just after <body>.  Set by publishing functions.
 This may also be a function, building and inserting the preamble.")
 (defvar org-export-html-postamble nil
-  "Preamble, to be inserted just before </body>.  Set by publishing functions.
+  "Postamble, to be inserted just before </body>.  Set by publishing functions.
 This may also be a function, building and inserting the postamble.")
 (defvar org-export-html-auto-preamble t
   "Should default preamble be inserted?  Set by publishing functions.")
@@ -674,7 +674,7 @@ See variable `org-export-html-link-org-files-as-html'"
 	 (string-match "\\.org$" path)
 	 (progn
 	    (list
-	       "http"
+	       "file"
 	       (concat
 		  (substring path 0 (match-beginning 0))
 		  "."

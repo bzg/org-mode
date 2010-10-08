@@ -157,7 +157,7 @@ Furthermore, the following %-escapes will be replaced with content:
 Apart from these general escapes, you can access information specific to the
 link type that is created.  For example, calling `remember' in emails or gnus
 will record the author and the subject of the message, which you can access
-with %:author and %:subject, respectively.  Here is a complete list of what
+with %:fromname and %:subject, respectively.  Here is a complete list of what
 is recorded for each link type.
 
 Link type          |  Available information
@@ -167,7 +167,8 @@ vm, wl, mh, rmail  |  %:type %:subject %:message-id
                    |  %:from %:fromname %:fromaddress
                    |  %:to   %:toname   %:toaddress
                    |  %:fromto (either \"to NAME\" or \"from NAME\")
-gnus               |  %:group, for messages also all email fields
+gnus               |  %:group, for messages also all email fields and
+                   |  %:org-date (the Date: header in Org format)
 w3, w3m            |  %:type %:url
 info               |  %:type %:file %:node
 calendar           |  %:type %:date"

@@ -84,6 +84,8 @@ googlegroups otherwise."
 (declare-function wl-summary-buffer-msgdb "ext:wl-folder" () t)
 (declare-function wl-summary-jump-to-msg-by-message-id "ext:wl-summary"
 		  (&optional id))
+(declare-function wl-summary-jump-to-msg "ext:wl-summary"
+		  (&optional number beg end))
 (declare-function wl-summary-line-from "ext:wl-summary" ())
 (declare-function wl-summary-line-subject "ext:wl-summary" ())
 (declare-function wl-summary-message-number "ext:wl-summary" ())
@@ -100,6 +102,7 @@ googlegroups otherwise."
 (defvar wl-summary-buffer-folder-name)
 (defvar wl-folder-group-regexp)
 (defvar wl-auto-check-folder-name)
+(defvar elmo-nntp-default-server)
 
 (defconst org-wl-folder-types
   '(("%" . imap) ("-" . nntp) ("+" . mh) ("=" . spool)
@@ -137,7 +140,7 @@ folder name determines the the folder type."
   "Return content of FIELD in ENTITY.
 FIELD is a symbol of a rfc822 message header field.
 ENTITY is a message entity."
-  (let ((content (elmo-message-entity-field entity field)))
+  (let ((content (elmo-message-entity-field entity field 'string)))
     (if (listp content) (car content) content)))
 
 (defun org-wl-store-link ()
@@ -196,6 +199,13 @@ ENTITY is a message entity."
 		 (to (org-wl-message-field 'to wl-message-entity))
 		 (xref (org-wl-message-field 'xref wl-message-entity))
 		 (subject (org-wl-message-field 'subject wl-message-entity))
+		 (date (org-wl-message-field 'date wl-message-entity))
+		 (date-ts (and date (format-time-string
+				     (org-time-stamp-format t)
+				     (date-to-time date))))
+		 (date-ts-ia (and date (format-time-string
+					(org-time-stamp-format t t)
+					(date-to-time date))))
 		 desc link)
 
 	    ;; remove text properties of subject string to avoid possible bug
@@ -235,7 +245,25 @@ ENTITY is a message entity."
 	      (setq desc (org-email-link-description))
 	      (setq link (org-make-link "wl:" folder-name "#" message-id-no-brackets))
 	      (org-add-link-props :link link :description desc)))
+	    (when date
+	      (org-add-link-props :date date :date-timestamp date-ts
+				  :date-timestamp-inactive date-ts-ia))
 	    (or link xref)))))))
+
+(defun org-wl-open-nntp (path)
+  "Follow the nntp: link specified by PATH."
+  (let* ((spec (split-string path "/"))
+	 (server (split-string (nth 2 spec) "@"))
+	 (group (nth 3 spec))
+	 (article (nth 4 spec)))
+    (org-wl-open
+     (concat "-" group ":" (if (cdr server)
+			       (car (split-string (car server) ":"))
+			     "")
+	     (if (string= elmo-nntp-default-server (nth 2 spec))
+		 ""
+	       (concat "@" (or (cdr server) (car server))))
+	     (if article (concat "#" article) "")))))
 
 (defun org-wl-open (path)
   "Follow the WL message link specified by PATH.
@@ -272,8 +300,12 @@ for namazu index."
 	  ;; beginning of the current line.  So, restore the point
 	  ;; in the old buffer.
 	  (goto-char old-point))
-	(and article (wl-summary-jump-to-msg-by-message-id (org-add-angle-brackets
-							    article))
+	(when article
+	  (if (org-string-match-p "@" article)
+	      (wl-summary-jump-to-msg-by-message-id (org-add-angle-brackets
+						     article))
+	    (or (wl-summary-jump-to-msg (string-to-number article))
+		(error "No such message: %s" article)))
 	     (wl-summary-redisplay))))))
 
 (provide 'org-wl)

@@ -100,7 +100,9 @@ This function is called by `org-babel-execute-src-block'"
             (if (string= result-type "value")
                 (format org-babel-js-function-wrapper full-body)
               full-body)))
-         (org-babel-eval (format "%s %s" org-babel-js-cmd script-file) ""))))))
+         (org-babel-eval
+	  (format "%s %s" org-babel-js-cmd
+		  (org-babel-process-file-name script-file)) ""))))))
 
 (defun org-babel-js-read (results)
   "Convert RESULTS into an appropriate elisp value.

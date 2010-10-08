@@ -221,20 +221,23 @@ Furthermore, the following %-escapes will be replaced with content:
 Apart from these general escapes, you can access information specific to the
 link type that is created.  For example, calling `org-capture' in emails
 or gnus will record the author and the subject of the message, which you
-can access with \"%:author\" and \"%:subject\", respectively.  Here is a
+can access with \"%:from\" and \"%:subject\", respectively.  Here is a
 complete list of what is recorded for each link type.
 
-Link type          |  Available information
--------------------+------------------------------------------------------
-bbdb               |  %:type %:name %:company
-vm, wl, mh, rmail  |  %:type %:subject %:message-id
-                   |  %:from %:fromname %:fromaddress
-                   |  %:to   %:toname   %:toaddress
-                   |  %:fromto (either \"to NAME\" or \"from NAME\")
-gnus               |  %:group, for messages also all email fields
-w3, w3m            |  %:type %:url
-info               |  %:type %:file %:node
-calendar           |  %:type %:date"
+Link type               |  Available information
+------------------------+------------------------------------------------------
+bbdb                    |  %:type %:name %:company
+vm, wl, mh, mew, rmail  |  %:type %:subject %:message-id
+                        |  %:from %:fromname %:fromaddress
+                        |  %:to   %:toname   %:toaddress
+                        |  %:fromto (either \"to NAME\" or \"from NAME\")
+                        |  %:date
+                        |  %:date-timestamp (as active timestamp)
+                        |  %:date-timestamp-inactive (as inactive timestamp)
+gnus                    |  %:group, for messages also all email fields
+w3, w3m                 |  %:type %:url
+info                    |  %:type %:file %:node
+calendar                |  %:type %:date"
   :group 'org-capture
   :type
   '(repeat
@@ -678,6 +681,7 @@ already gone."
   (delete-other-windows)
   (org-switch-to-buffer-other-window
    (org-capture-get-indirect-buffer (org-capture-get :buffer) "CAPTURE"))
+  (widen)
   (show-all)
   (goto-char (org-capture-get :pos))
   (org-set-local 'org-capture-target-marker
@@ -1198,6 +1202,7 @@ The template may still contain \"%?\" for cursor positioning."
 				   "org-capture-template-prompt-history::"
 				   (or prompt "")))
 		  completions (mapcar 'list completions)))
+	  (unless (boundp histvar) (set histvar nil))
 	  (cond
 	   ((member char '("G" "g"))
 	    (let* ((org-last-tags-completion-table

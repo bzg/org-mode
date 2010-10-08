@@ -2829,7 +2829,11 @@ the global options and expect it to be applied to the entire view.")
 	(switch-to-buffer-other-frame abuf))
        ((equal org-agenda-window-setup 'reorganize-frame)
 	(delete-other-windows)
-	(org-switch-to-buffer-other-window abuf))))
+	(org-switch-to-buffer-other-window abuf)))
+      ;; additional test in case agenda is invoked from within agenda
+      ;; buffer via elisp link
+      (unless (equal (current-buffer) abuf)
+	(switch-to-buffer abuf)))
     (setq buffer-read-only nil)
     (let ((inhibit-read-only t)) (erase-buffer))
     (org-agenda-mode)
@@ -3552,6 +3556,20 @@ in `org-agenda-text-search-extra-files'."
 	    (member (string-to-char words) '(?- ?+ ?\{)))
 	(setq boolean t))
     (setq words (org-split-string words))
+    (let (www w)
+      (while (setq w (pop words))
+	(while (and (string-match "\\\\\\'" w) words)
+	  (setq w (concat (substring w 0 -1) " " (pop words))))
+	(push w www))
+      (setq words (nreverse www) www nil)
+      (while (setq w (pop words))
+	(when (and (string-match "\\`[-+]?{" w)
+		   (not (string-match "}\\'" w)))
+	  (while (and words (not (string-match "}\\'" (car words))))
+	    (setq w (concat w " " (pop words))))
+	  (setq w (concat w " " (pop words))))
+	(push w www))
+      (setq words (nreverse www)))
     (setq org-agenda-last-search-view-search-was-boolean boolean)
     (when boolean
       (let (wds w)
@@ -5117,13 +5135,13 @@ The modified list may contain inherited tags, and tags matched by
 	  (throw 'exit list))
       (while (setq time (pop gridtimes))
 	(unless (and remove (member time have))
-	  (setq time (format "%4d" time))
+	  (setq time (replace-regexp-in-string " " "0" (format "%04s" time)))
 	  (push (org-format-agenda-item
 		 nil string "" nil
 		 (concat (substring time 0 -2) ":" (substring time -2)))
 		new)
 	  (put-text-property
-	   1 (length (car new)) 'face 'org-time-grid (car new))))
+	   2 (length (car new)) 'face 'org-time-grid (car new))))
       (if (member 'time-up org-agenda-sorting-strategy-selected)
 	  (append new list)
 	(append list new)))))
@@ -5726,7 +5744,9 @@ If the line does not have an effort defined, return nil."
 	      (if (not (eval org-agenda-filter-form))
 		  (org-agenda-filter-by-tag-hide-line))
 	      (beginning-of-line 2))
-	  (beginning-of-line 2))))))
+	  (beginning-of-line 2))))
+    (if (get-char-property (point) 'invisible)
+	(org-agenda-previous-line))))
 
 (defun org-agenda-filter-by-tag-hide-line ()
   (let (ov)
@@ -5803,7 +5823,8 @@ Negative selection means regexp must not match for selection of an entry."
 
 (defun org-agenda-goto-date (date)
   "Jump to DATE in agenda."
-  (interactive (list (org-read-date)))
+  (interactive (list (let ((org-read-date-prefer-future nil))
+		       (org-read-date))))
   (org-agenda-list nil date))
 
 (defun org-agenda-goto-today ()
@@ -7279,7 +7300,8 @@ the resulting entry will not be shown.  When TEXT is empty, switch to
       (let ((calendar-date-display-form
 	     (if (if (boundp 'calendar-date-style)
 		     (eq calendar-date-style 'european)
-		   (org-bound-and-true-p european-calendar-style)) ; Emacs 22
+		   (with-no-warnings ;; european-calendar-style is obsolete as of version 23.1
+		     (org-bound-and-true-p european-calendar-style))) ; Emacs 22
 		 '(day " " month " " year)
 	       '(month " " day " " year))))
 

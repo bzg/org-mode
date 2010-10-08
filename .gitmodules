@@ -1,0 +1,6 @@
+[submodule "testing/jump"]
+	path = testing/jump
+	url = git://github.com/eschulte/jump.el.git
+[submodule "testing/ert"]
+	path = testing/ert
+	url = http://github.com/ohler/ert.git

@@ -115,7 +115,7 @@ information."
 	 ((or (re-search-backward re nil t)
 	      (re-search-forward re nil t))
 	  (match-string 1))
-	 (t org-archive-location (match-string 1)))))))
+	 (t org-archive-location))))))
 
 (defun org-add-archive-files (files)
   "Splice the archive files into the list of files.

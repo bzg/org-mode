@@ -178,17 +178,18 @@ value of the last statement in BODY, as elisp."
 	       org-babel-octave-shell-command)))
     (case result-type
       (output (org-babel-eval cmd body))
-      (value (let ((tmp-file (org-babel-temp-file "results-")))
+      (value (let ((tmp-file (org-babel-temp-file "octave-")))
 	       (org-babel-eval
 		cmd
-		(format org-babel-octave-wrapper-method body tmp-file tmp-file))
-	       (org-babel-octave-import-elisp-from-file
-		(org-babel-maybe-remote-file tmp-file)))))))
+		(format org-babel-octave-wrapper-method body
+			(org-babel-process-file-name tmp-file 'noquote)
+			(org-babel-process-file-name tmp-file 'noquote)))
+	       (org-babel-octave-import-elisp-from-file tmp-file))))))
 
 (defun org-babel-octave-evaluate-session
   (session body result-type &optional matlabp)
   "Evaluate BODY in SESSION."
-  (let* ((tmp-file (org-babel-temp-file "results-"))
+  (let* ((tmp-file (org-babel-temp-file (if matlabp "matlab-" "octave-")))
 	 (wait-file (org-babel-temp-file "matlab-emacs-link-wait-signal-"))
 	 (full-body
 	  (case result-type
@@ -200,11 +201,15 @@ value of the last statement in BODY, as elisp."
 	     (if (and matlabp org-babel-matlab-with-emacs-link)
 		 (concat
 		  (format org-babel-matlab-emacs-link-wrapper-method
-			  body tmp-file tmp-file wait-file) "\n")
+			  body
+			  (org-babel-process-file-name tmp-file 'noquote)
+			  (org-babel-process-file-name tmp-file 'noquote) wait-file) "\n")
 	       (mapconcat
 		#'org-babel-chomp
 		(list (format org-babel-octave-wrapper-method
-			      body tmp-file tmp-file)
+			      body
+			      (org-babel-process-file-name tmp-file 'noquote)
+			      (org-babel-process-file-name tmp-file 'noquote))
 		      org-babel-octave-eoe-indicator) "\n")))))
 	 (raw (if (and matlabp org-babel-matlab-with-emacs-link)
 		  (save-window-excursion
@@ -227,8 +232,7 @@ value of the last statement in BODY, as elisp."
 		  (insert full-body) (comint-send-input nil t)))) results)
     (case result-type
       (value
-       (org-babel-octave-import-elisp-from-file
-	(org-babel-maybe-remote-file tmp-file)))
+       (org-babel-octave-import-elisp-from-file tmp-file))
       (output
        (progn
 	 (setq results
@@ -246,7 +250,7 @@ value of the last statement in BODY, as elisp."
   "Import data from FILE-NAME.
 This removes initial blank and comment lines and then calls
 `org-babel-import-elisp-from-file'."
-  (let ((temp-file (org-babel-temp-file "results-")) beg end)
+  (let ((temp-file (org-babel-temp-file "octave-matlab-")) beg end)
     (with-temp-file temp-file
       (insert-file-contents file-name)
       (re-search-forward "^[ \t]*[^# \t]" nil t)

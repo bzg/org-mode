@@ -68,7 +68,7 @@ code."
       (car pair) ;; variable name
       (if (listp (cdr pair)) ;; variable value
           (org-babel-gnuplot-table-to-data
-           (cdr pair) (org-babel-temp-file "gnuplot") params)
+           (cdr pair) (org-babel-temp-file "gnuplot-") params)
         (cdr pair))))
    (org-babel-ref-variables params)))
 
@@ -141,12 +141,15 @@ This function is called by `org-babel-execute-src-block'."
     (save-window-excursion
       ;; evaluate the code body with gnuplot
       (if (string= session "none")
-          (let ((script-file (org-babel-temp-file "gnuplot-script")))
+          (let ((script-file (org-babel-temp-file "gnuplot-script-")))
             (with-temp-file script-file
               (insert (concat body "\n")))
             (message "gnuplot \"%s\"" script-file)
             (setq output
-                  (shell-command-to-string (format "gnuplot \"%s\"" script-file)))
+                  (shell-command-to-string
+		   (format
+		    "gnuplot \"%s\""
+		    (org-babel-process-file-name script-file))))
             (message output))
         (with-temp-buffer
           (insert (concat body "\n"))

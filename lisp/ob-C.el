@@ -33,7 +33,6 @@
 ;;; Code:
 (require 'ob)
 (require 'ob-eval)
-(require 'org)
 (require 'cc-mode)
 
 (declare-function org-entry-get "org"
@@ -90,7 +89,6 @@ or `org-babel-execute:c++'."
 			 ((equal org-babel-c-variant 'c) ".c")
 			 ((equal org-babel-c-variant 'cpp) ".cpp"))))
          (tmp-bin-file (org-babel-temp-file "C-bin-"))
-         (tmp-out-file (org-babel-temp-file "C-out-"))
          (cmdline (cdr (assoc :cmdline params)))
          (flags (cdr (assoc :flags params)))
          (full-body (org-babel-C-expand body params))
@@ -102,10 +100,10 @@ or `org-babel-execute:c++'."
 		     (cond
 		      ((equal org-babel-c-variant 'c) org-babel-C-compiler)
 		      ((equal org-babel-c-variant 'cpp) org-babel-c++-compiler))
-		     tmp-bin-file
+		     (org-babel-process-file-name tmp-bin-file)
 		     (mapconcat 'identity
 				(if (listp flags) flags (list flags)) " ")
-		     tmp-src-file) ""))))
+		     (org-babel-process-file-name tmp-src-file)) ""))))
     ((lambda (results)
        (org-babel-reassemble-table
 	(if (member "vector" (nth 2 processed-params))

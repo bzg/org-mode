@@ -578,10 +578,10 @@ See `org-publish-org-to' to the list of arguments."
   "Publish a file with no transformation of any kind.
 See `org-publish-org-to' to the list of arguments."
   ;; make sure eshell/cp code is loaded
-  (unless (file-directory-p pub-dir)
-    (make-directory pub-dir t))
-  (or (equal (expand-file-name (file-name-directory filename))
-	     (file-name-as-directory (expand-file-name pub-dir)))
+    (unless (file-directory-p pub-dir)
+      (make-directory pub-dir t))
+    (or (equal (expand-file-name (file-name-directory filename))
+	       (file-name-as-directory (expand-file-name pub-dir)))
       (copy-file filename
 		 (expand-file-name (file-name-nondirectory filename) pub-dir)
 		 t)))
@@ -601,13 +601,13 @@ See `org-publish-projects'."
 		  (error "File %s not part of any known project"
 			 (abbreviate-file-name filename)))))
 	 (project-plist (cdr project))
-	 (ftname (file-truename filename))
+	 (ftname (expand-file-name filename))
 	 (publishing-function
 	  (or (plist-get project-plist :publishing-function)
 	      'org-publish-org-to-html))
 	 (base-dir
 	  (file-name-as-directory
-	   (file-truename
+	   (expand-file-name
 	    (or (plist-get project-plist :base-directory)
 		(error "Project %s does not have :base-directory defined"
 		       (car project))))))
@@ -794,7 +794,6 @@ directory and force publishing all files."
   (interactive "P")
   (when force
     (org-publish-remove-all-timestamps))
-  ;;  (org-publish-initialize-files-alist force)
   (save-window-excursion
     (let ((org-publish-use-timestamps-flag
 	   (if force nil org-publish-use-timestamps-flag)))

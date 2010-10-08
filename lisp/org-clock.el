@@ -35,6 +35,7 @@
   (require 'cl))
 
 (declare-function calendar-absolute-from-iso    "cal-iso"    (&optional date))
+(declare-function notifications-notify "notifications" (&rest params))
 (defvar org-time-stamp-formats)
 
 (defgroup org-clock nil
@@ -558,6 +559,7 @@ use libnotify if available, or fall back on a message."
 	 (start-process "emacs-timer-notification" nil
 			org-show-notification-handler notification))
 	((featurep 'notifications)
+	 (require 'notifications)
 	 (notifications-notify
 	  :title "Org-mode message"
 	  :body notification
@@ -957,7 +959,7 @@ the clocking selection, associated with the letter `d'."
 	;; We are interrupting the clocking of a different task.
 	;; Save a marker to this task, so that we can go back.
 	;; First check if we are trying to clock into the same task!
-	(if (save-excursion
+	(when (save-excursion
 		(unless selected-task
 		  (org-back-to-heading t))
 		(and (equal (marker-buffer org-clock-hd-marker)
@@ -968,13 +970,13 @@ the clocking selection, associated with the letter `d'."
 			(if selected-task
 			    (marker-position selected-task)
 			  (point)))))
-	    (message "Clock continues in \"%s\"" org-clock-heading)
-	  (progn
-	    (move-marker org-clock-interrupted-task
-			 (marker-position org-clock-marker)
-			 (org-clocking-buffer))
-	    (let ((org-clock-clocking-in t))
-	      (org-clock-out t)))))
+	  (message "Clock continues in \"%s\"" org-clock-heading)
+	  (throw 'abort nil))
+	(move-marker org-clock-interrupted-task
+		     (marker-position org-clock-marker)
+		     (marker-buffer org-clock-marker))
+	(let ((org-clock-clocking-in t))
+	  (org-clock-out t)))
 
       (when (equal select '(16))
 	;; Mark as default clocking task
