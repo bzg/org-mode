@@ -150,7 +150,7 @@ list     a list of selection key(s) as string."
 		  (string :tag "Selection Keys"))))
 
 (defcustom org-mobile-force-id-on-agenda-items t
-  "Non-nil means make all agenda items carry and ID."
+  "Non-nil means make all agenda items carry an ID."
   :group 'org-mobile
   :type 'boolean)
 
@@ -626,13 +626,29 @@ The table of checksums is written to the file mobile-checksums."
 			(if (org-bound-and-true-p
 			     org-mobile-force-id-on-agenda-items)
 			    (org-id-get m 'create)
-			  (org-entry-get m "ID")))
+			  (or (org-entry-get m "ID")
+			      (org-mobile-get-outline-path-link m))))
 	      (insert "   :PROPERTIES:\n   :ORIGINAL_ID: " id
 		      "\n   :END:\n")))))
 	(beginning-of-line 2))
       (push (cons "agendas.org" (md5 (buffer-string)))
 	    org-mobile-checksum-files))
     (message "Agenda written to Org file %s" file)))
+
+(defun org-mobile-get-outline-path-link (pom)
+  (org-with-point-at pom
+    (concat "olp:"
+	    (org-mobile-escape-olp (file-name-nondirectory buffer-file-name))
+	    "/"
+	    (mapconcat 'org-mobile-escape-olp
+		       (org-get-outline-path)
+		       "/")
+	    "/"
+	    (org-mobile-escape-olp (nth 4 (org-heading-components))))))
+
+(defun org-mobile-escape-olp (s)
+  (let  ((table '((?: . "%3a") (?\[ . "%5b") (?\] . "%5d") (?/ . "%2f"))))
+    (org-link-escape s table)))
 
 ;;;###autoload
 (defun org-mobile-create-sumo-agenda ()
