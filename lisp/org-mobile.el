@@ -476,7 +476,10 @@ agenda view showing the flagged items."
       (and (= (point-min) (point-max)) (insert "\n"))
       (save-buffer)
       (push (cons org-mobile-capture-file (md5 (buffer-string)))
-	    org-mobile-checksum-files))
+	    org-mobile-checksum-files)
+      (when org-mobile-use-encryption
+	(write-file org-mobile-encryption-tempfile)
+	(org-mobile-encrypt-and-move org-mobile-encryption-tempfile file)))
     (kill-buffer buf)))
 
 (defun org-mobile-write-checksums ()
@@ -627,7 +630,7 @@ The table of checksums is written to the file mobile-checksums."
 	      (insert "   :PROPERTIES:\n   :ORIGINAL_ID: " id
 		      "\n   :END:\n")))))
 	(beginning-of-line 2))
-      (push (cons (file-name-nondirectory file) (md5 (buffer-string)))
+      (push (cons "agendas.org" (md5 (buffer-string)))
 	    org-mobile-checksum-files))
     (message "Agenda written to Org file %s" file)))
 
@@ -692,7 +695,8 @@ If nothing new has been added, return nil."
 	 (capture-buffer
 	  (if (not org-mobile-use-encryption)
 	      (find-file-noselect capture-file)
-	    (delete-file org-mobile-encryption-tempfile)
+	    (if (file-exists-p org-mobile-encryption-tempfile)
+		(delete-file org-mobile-encryption-tempfile))
 	    (setq encfile (concat org-mobile-encryption-tempfile "_enc"))
 	    (copy-file capture-file encfile)
 	    (org-mobile-decrypt-file encfile org-mobile-encryption-tempfile)
