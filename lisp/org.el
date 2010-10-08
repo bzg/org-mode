@@ -1076,9 +1076,13 @@ for the duration of the command."
 					(plain-list-item . auto))
   "Should `org-insert-heading' leave a blank line before new heading/item?
 The value is an alist, with `heading' and `plain-list-item' as car,
-and a boolean flag as cdr.  For plain lists, if the variable
-`org-empty-line-terminates-plain-lists' is set, the setting here
-is ignored and no empty line is inserted, to keep the list in tact."
+and a boolean flag as cdr. The cdr may lso be the symbol `auto', and then
+Org will look at the surrounding headings/items and try to make an
+intelligent decision wether to insert a blank line or not.
+
+For plain lists, if the variable `org-empty-line-terminates-plain-lists' is
+set, the setting here is ignored and no empty line is inserted, to avoid
+breaking the list structure."
   :group 'org-edit-structure
   :type '(list
 	  (cons (const heading)
