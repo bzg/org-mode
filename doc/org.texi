@@ -11966,16 +11966,20 @@ interpreted language.
 
 The @code{:noweb} header argument controls expansion of ``noweb'' style (see
 @ref{Noweb reference syntax}) references in a code block.  This header
-argument can have one of two values: @code{yes} or @code{no}.
+argument can have one of three values: @code{yes} @code{no} or @code{tangle}.
 
 @itemize @bullet
+@item @code{yes}
+All ``noweb'' syntax references in the body of the code block will be
+expanded before the block is evaluated, tangled or exported.
 @item @code{no}
 The default.  No ``noweb'' syntax specific action is taken on evaluating
 code blocks, However, noweb references will still be expanded during
 tangling.
 @item @code{yes}
 All ``noweb'' syntax references in the body of the code block will be
-expanded before the block is evaluated.
+expanded before the block is tangled, however ``noweb'' references will not
+be expanded when the block is evaluated or exported.
 @end itemize
 
 @subsubheading Noweb prefix lines

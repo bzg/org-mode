@@ -1,0 +1,29 @@
+#+Title: a collection of examples for Babel tests
+
+* =:noweb= header argument expansion
+  :PROPERTIES:
+  :ID:       eb1f6498-5bd9-45e0-9c56-50717053e7b7
+  :END:
+
+#+source: noweb-example
+#+begin_src emacs-lisp
+  (message "expanded")
+#+end_src
+
+#+begin_src emacs-lisp :noweb yes
+  ;; noweb-yes-start
+  <<noweb-example>>
+  ;; noweb-yes-end
+#+end_src
+
+#+begin_src emacs-lisp :noweb no
+  ;; noweb-no-start
+  <<noweb-example>>
+  ;; noweb-no-end
+#+end_src
+
+#+begin_src emacs-lisp :noweb tangle
+  ;; noweb-tangle-start
+  <<noweb-example>>
+  ;; noweb-tangle-end
+#+end_src

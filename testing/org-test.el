@@ -79,6 +79,26 @@ If file is non-nil insert it's contents in there.")
 If file is not given, search for a file named after the test
 currently executed.")
 
+(defmacro org-test-at-id (id &rest body)
+  "Run body after placing the point in the headline identified by ID."
+  (declare (indent 1))
+  `(let* ((id-location (org-id-find ,id))
+	  (id-file (car id-location))
+	  (visited-p (get-file-buffer id-file))
+	  to-be-removed)
+     (save-window-excursion
+       (save-match-data
+	 (org-id-goto ,id)
+	 (setq to-be-removed (current-buffer))
+	 (condition-case nil
+	     (progn
+	       (org-show-subtree)
+	       (org-show-block-all))
+	   (error nil))
+	 (save-restriction ,@body)))
+     (unless visited-p
+       (kill-buffer to-be-removed))))
+
 (defmacro org-test-in-example-file (file &rest body)
   "Execute body in the Org-mode example file."
   (declare (indent 1))
@@ -96,7 +116,7 @@ currently executed.")
 	       (org-show-subtree)
 	       (org-show-block-all))
 	   (error nil))
-	 ,@body))
+	 (save-restriction ,@body)))
      (unless visited-p
        (kill-buffer to-be-removed))))
 
@@ -139,7 +159,12 @@ files."
        ";; Template test file for Org-mode tests\n\n"
        "\n"
        ";;; Code:\n"
-       "(require 'org-test)\n\n"
+       "(let ((load-path (cons (expand-file-name\n"
+       "			\"..\" (file-name-directory\n"
+       "			      (or load-file-name buffer-file-name)))\n"
+       "		       load-path)))\n"
+       "  (require 'org-test)\n"
+       "  (require 'org-test-ob-consts))\n\n"
        "\n"
        ";;; Tests\n"
        "(ert-deftest " name "/example-test ()\n"
@@ -174,11 +199,11 @@ files."
   (ert (car (which-function))))
 
 (defun org-test-run-all-tests ()
-  "Run all defined tests matching \"^org\".
+  "Run all defined tests matching \"\\(org\\|ob\\)\".
 Load all test files first."
   (interactive)
   (org-test-load)
-  (ert "org"))
+  (ert "\\(org\\|ob\\)"))
 
 (provide 'org-test)
 
