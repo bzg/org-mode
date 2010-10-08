@@ -14256,13 +14256,13 @@ in-buffer settings, but it will understand the logistics of TODO state
 
 MobileOrg needs to interact with Emacs through directory on a
 server@footnote{If you are using a public server, you might prefer to encrypt
-the files on the server.  This can be done with Org-mode 6.35 and, hopefully,
-with MobileOrg 1.5 (please check before trying to use this).  On the Emacs
-side, configure the variable @code{org-mobile-use-encryption}.  If you can
-safely store the password in your Emacs setup, you might also want to
-configure @code{org-mobile-encryption-password}.  Please read the docstring
-of that variable.}.  The easiest way to create that directory is to use a
-free @uref{http://dropbox.com,Dropbox.com} account@footnote{If you cannot use
+the files on the server.  This can be done with Org-mode 7.02 and with
+MobileOrg 1.5.  On the Emacs side, configure the variable
+@code{org-mobile-use-encryption}.  If you can safely store the password in
+your Emacs setup, you might also want to configure
+@code{org-mobile-encryption-password}.  Please read the docstring of that
+variable.}.  The easiest way to create that directory is to use a free
+@uref{http://dropbox.com,Dropbox.com} account@footnote{If you cannot use
 Dropbox, or if your version of MobileOrg does not support it, you can use a
 webdav server.  For more information, check out the the documentation of
 MobileOrg and also this
