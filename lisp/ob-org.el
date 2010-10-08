@@ -47,7 +47,8 @@
 (defun org-babel-execute:org (body params)
   "Execute a block of Org code with.
 This function is called by `org-babel-execute-src-block'."
-  (let ((result-params (split-string (or (cdr (assoc :results params)) ""))))
+  (let ((result-params (split-string (or (cdr (assoc :results params)) "")))
+	(body (replace-regexp-in-string "^," "" body)))
     (cond
      ((member "latex" result-params) (org-babel-org-export body "latex"))
      ((member "html" result-params)  (org-babel-org-export body "html"))
