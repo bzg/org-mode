@@ -456,31 +456,51 @@ allowed.  The default we use here encompasses both."
   :group 'org-export)
 
 (defcustom org-latex-to-pdf-process
-  (if (executable-find "texi2dvi")
-      '("texi2dvi -p -b -c -V %f")
-    '("pdflatex -interaction nonstopmode -output-directory %o %f"
-      "pdflatex -interaction nonstopmode -output-directory %o %f"
-      "pdflatex -interaction nonstopmode -output-directory %o %f"))
+  '("pdflatex -interaction nonstopmode -output-directory %o %f"
+    "pdflatex -interaction nonstopmode -output-directory %o %f"
+    "pdflatex -interaction nonstopmode -output-directory %o %f")
   "Commands to process a LaTeX file to a PDF file.
 This is a list of strings, each of them will be given to the shell
 as a command.  %f in the command will be replaced by the full file name, %b
 by the file base name (i.e. without extension) and %o by the base directory
 of the file.
+
 The reason why this is a list is that it usually takes several runs of
-pdflatex, maybe mixed with a call to bibtex.  Org does not have a clever
+`pdflatex', maybe mixed with a call to `bibtex'.  Org does not have a clever
 mechanism to detect which of these commands have to be run to get to a stable
 result, and it also does not do any error checking.
 
-By default, Org used texi2dvi to do the processing, if that command
-is on the system.  If not, it uses 2 pdflatex runs.
+By default, Org uses 3 runs of `pdflatex' to do the processing.  If you
+have texi2dvi on your system and if that does not cause the infamous
+egrep/locale bug:
+
+     http://lists.gnu.org/archive/html/bug-texinfo/2010-03/msg00031.html
+
+then `texi2dvi' is the superior choice.  Org does offer it as one
+of the customize options.
 
 Alternatively, this may be a Lisp function that does the processing, so you
 could use this to apply the machinery of AUCTeX or the Emacs LaTeX mode.
 This function should accept the file name as its single argument."
   :group 'org-export-pdf
-  :type '(choice (repeat :tag "Shell command sequence"
+  :type '(choice
+	  (repeat :tag "Shell command sequence"
 		  (string :tag "Shell command"))
-		 (function)))
+	  (const :tag "2 runs of pdflatex"
+		 '("pdflatex -interaction nonstopmode -output-directory %o %f"
+		   "pdflatex -interaction nonstopmode -output-directory %o %f"))
+	  (const :tag "3 runs of pdflatex"
+		 '("pdflatex -interaction nonstopmode -output-directory %o %f"
+		   "pdflatex -interaction nonstopmode -output-directory %o %f"
+		   "pdflatex -interaction nonstopmode -output-directory %o %f"))
+	  (const :tag "pdflatex,bibtex,pdflatex,pdflatex"
+		 '("pdflatex -interaction nonstopmode -output-directory %o %f"
+		   "bibtex %b"
+		   "pdflatex -interaction nonstopmode -output-directory %o %f"
+		   "pdflatex -interaction nonstopmode -output-directory %o %f"))
+	  (const :tag "texi2dvi"
+		 '("texi2dvi -p -b -c -V %f"))
+	  (function)))
 
 (defcustom org-export-pdf-logfiles
   '("aux" "idx" "log" "out" "toc" "nav" "snm" "vrb")
