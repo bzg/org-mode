@@ -15960,7 +15960,7 @@ Some of the options can be changed using the variable
 	     ((eq processing-type 'mathjax)
 	      ;; Prepare for MathJax processing
 	      (setq string (match-string n))
-	      (if (equal m "$")
+	      (if (member m '("$" "$1"))
 		  (save-excursion
 		    (delete-region (match-beginning n) (match-end n))
 		    (goto-char (match-beginning n))
