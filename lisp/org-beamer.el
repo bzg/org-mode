@@ -382,7 +382,7 @@ The need to be after the begin statement of the environment."
 	      (insert dovl)))))))
 
 (defun org-beamer-amend-header ()
-  "Add `org-beamer-header-extra' to the LaTeX herder.
+  "Add `org-beamer-header-extra' to the LaTeX header.
 If the file contains the string BEAMER-HEADER-EXTRA-HERE on a line
 by itself, it will be replaced with `org-beamer-header-extra'.  If not,
 the value will be inserted right after the documentclass statement."
