@@ -735,6 +735,7 @@ already gone."
     (setq end (point))
     (org-capture-mark-kill-region beg (1- end))
     (org-capture-narrow beg (1- end))
+    (goto-char beg)
     (if (re-search-forward "%\\?" end t) (replace-match ""))))
 
 (defun org-capture-place-item ()
