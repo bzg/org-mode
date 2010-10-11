@@ -49,9 +49,10 @@ To add files to this list use the `org-babel-lob-ingest' command."
   (interactive "f")
   (org-babel-map-src-blocks file
     (let* ((info (org-babel-get-src-block-info))
-	   (source-name (intern (nth 4 info))))
+	   (source-name (nth 4 info)))
       (when source-name
-        (setq org-babel-library-of-babel
+	(setq source-name (intern source-name)
+	      org-babel-library-of-babel
               (cons (cons source-name info)
                     (assq-delete-all source-name org-babel-library-of-babel)))))))
 
