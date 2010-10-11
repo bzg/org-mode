@@ -55,7 +55,7 @@ negates this setting for the duration of the command."
   :group 'org-link-store
   :type 'boolean)
 
-(defcustom org-gnus-nnimap-query-article-no-from-file t
+(defcustom org-gnus-nnimap-query-article-no-from-file nil
   "If non-nil, `org-gnus-follow-link' will try to translate
 Message-Ids to article numbers by querying the .overview file.
 Normally, this translation is done by querying the IMAP server,
