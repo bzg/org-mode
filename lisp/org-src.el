@@ -211,7 +211,7 @@ buffer."
   (interactive)
   (unless (eq context 'save)
     (setq org-edit-src-saved-temp-window-config (current-window-configuration)))
-  (let ((mark (and (use-region-p) (mark)))
+  (let ((mark (and (org-region-active-p) (mark)))
 	(case-fold-search t)
 	(info (org-edit-src-find-region-and-lang))
 	(babel-info (org-babel-get-src-block-info))
