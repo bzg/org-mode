@@ -45,16 +45,21 @@ To add files to this list use the `org-babel-lob-ingest' command."
 
 ;;;###autoload
 (defun org-babel-lob-ingest (&optional file)
-  "Add all source-blocks defined in FILE to `org-babel-library-of-babel'."
+  "Add all named source-blocks defined in FILE to
+`org-babel-library-of-babel'."
   (interactive "f")
-  (org-babel-map-src-blocks file
-    (let* ((info (org-babel-get-src-block-info))
-	   (source-name (nth 4 info)))
-      (when source-name
-	(setq source-name (intern source-name)
-	      org-babel-library-of-babel
-              (cons (cons source-name info)
-                    (assq-delete-all source-name org-babel-library-of-babel)))))))
+  (let ((lob-ingest-count 0))
+    (org-babel-map-src-blocks file
+      (let* ((info (org-babel-get-src-block-info))
+	     (source-name (nth 4 info)))
+	(when source-name
+	  (setq source-name (intern source-name)
+		org-babel-library-of-babel
+		(cons (cons source-name info)
+		      (assq-delete-all source-name org-babel-library-of-babel))
+		lob-ingest-count (1+ lob-ingest-count)))))
+    (message "%d src block%s added to Library of Babel"
+	     lob-ingest-count (if (> lob-ingest-count 1) "s" ""))))
 
 (defconst org-babel-lob-call-aliases '("lob" "call")
   "Aliases to call a source block function.
