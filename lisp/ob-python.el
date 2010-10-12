@@ -56,7 +56,9 @@
               (car pair)
               (org-babel-python-var-to-python (cdr pair))))
     (nth 1 (or processed-params (org-babel-process-params params))) "\n")
-   "\n" (org-babel-trim body (if org-src-preserve-indentation "[\f\n\r\v]")) "\n"))
+   "\n"
+   (org-babel-trim body (if org-src-preserve-indentation "[\f\n\r\v]"))
+   "\n"))
 
 (defun org-babel-execute:python (body params)
   "Execute a block of Python code with Babel.

@@ -365,8 +365,12 @@ form
 	(insert-comment
 	 (org-fill-template org-babel-tangle-comment-format-beg link-data)))
       (when org-babel-tangle-pad-newline (insert "\n"))
-      (insert (format "%s\n" (replace-regexp-in-string
-			      "^," "" (org-babel-trim body (if org-src-preserve-indentation "[\f\n\r\v]")))))
+      (insert
+       (format
+	"%s\n"
+	(replace-regexp-in-string
+	 "^," ""
+	 (org-babel-trim body (if org-src-preserve-indentation "[\f\n\r\v]")))))
       (when link-p
 	(insert-comment
 	 (org-fill-template org-babel-tangle-comment-format-end link-data))))))
