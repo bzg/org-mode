@@ -8653,13 +8653,24 @@ Here is an example
 @cindex formatting source code, markup rules
 If the example is source code from a programming language, or any other text
 that can be marked up by font-lock in Emacs, you can ask for the example to
-look like the fontified Emacs buffer@footnote{Currently this works for the
-HTML backend, and requires the @file{htmlize.el} package version 1.34 or
-later.  It also works for LaTeX with the listings package, if you turn on the
-option @code{org-export-latex-listings} and make sure that the listings
-package is included by the LaTeX header.}.  This is done with the @samp{src}
-block, where you also need to specify the name of the major mode that should
-be used to fontify the example:
+look like the fontified Emacs buffer@footnote{This works automatically for
+the HTML backend (it requires version 1.34 of the @file{htmlize.el} package,
+which is distributed with Org.)  Fontified code chunks in LaTeX can be
+achieved using either the listings or the
+@url{http://code.google.com/p/minted, minted,} package. To use listings, turn
+on the variable @code{org-export-latex-listings} and ensure that the listings
+package is included by the LaTeX header (e.g. by configuring
+@code{org-export-latex-packages-alist}). See the listings documentation for
+configuration options, including obtaining colored output.  For minted it is
+necessary to install the program @url{http://pygments.org, pygments}, in
+addition to setting @code{org-export-latex-minted}, ensuring that the minted
+package is included by the LaTeX header, and ensuring that the
+@code{-shell-escape} option is passed to @file{pdflatex} (see
+@code{org-latex-to-pdf-process}). See the documentation of the variables
+@code{org-export-latex-listings} and @code{org-export-latex-minted} for
+further details.}.  This is done with the @samp{src} block, where you also
+need to specify the name of the major mode that should be used to fontify the
+example:
 @cindex #+BEGIN_SRC
 
 @example

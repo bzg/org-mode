@@ -411,6 +411,52 @@ of noweb."
   :group 'org-export-latex
   :type 'boolean)
 
+(defcustom org-export-latex-minted nil
+  "Non-nil means export source code using the minted package.
+This package will fontify source code with color.
+If you want to use this, you need to make LaTeX use the
+minted package. Add this to `org-export-latex-packages-alist',
+for example using customize, or with something like
+
+  (require 'org-latex)
+  (add-to-list 'org-export-latex-packages-alist '(\"\" \"minted\"))
+
+In addition, it is neccessary to configure
+`org-latex-to-pdf-process' so that the -shell-escape option is
+passed to pdflatex."
+  :group 'org-export-latex
+  :type 'boolean)
+
+(defcustom org-export-latex-minted-langs
+  '((emacs-lisp "common-lisp")
+    (cc "c++")
+    (cperl "perl")
+    (shell-script "bash")
+    (caml "ocaml"))
+  "Alist mapping languages to their minted language counterpart.
+The key is a symbol, the major mode symbol without the \"-mode\".
+The value is the string that should be inserted as the language parameter
+for the minted package.  If the mode name and the listings name are
+the same, the language does not need an entry in this list - but it does not
+hurt if it is present.
+
+Note that minted uses all lower case for language identifiers,
+and that the full list of language identifiers can be obtained
+with:
+pygmentize -L lexers
+"
+  :group 'org-export-latex
+  :type '(repeat
+	  (list
+	   (symbol :tag "Major mode       ")
+	   (string :tag "Listings language"))))
+
+(defcustom org-export-latex-minted-with-line-numbers nil
+  "Should source code line numbers be included when exporting
+with the latex minted package?"
+  :group 'org-export-latex
+  :type 'boolean)
+
 (defcustom org-export-latex-remove-from-headlines
   '(:todo nil :priority nil :tags nil)
   "A plist of keywords to remove from headlines.  OBSOLETE.
