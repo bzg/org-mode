@@ -373,7 +373,7 @@ The need to be after the begin statement of the environment."
     (let (dovl)
       (goto-char (point-min))
       (while (re-search-forward
-	      "^[ \t]*\\\\begin{\\(itemize\\|enumerate\\|desctiption\\)}[ \t\n]*\\\\item\\>\\( ?\\(<[^<>\n]*>\\|\\[[^][\n*]\\]\\)\\)?[ \t]*\\S-" nil t)
+	      "^[ \t]*\\\\begin{\\(itemize\\|enumerate\\|description\\)}[ \t\n]*\\\\item\\>\\( ?\\(<[^<>\n]*>\\|\\[[^][\n*]\\]\\)\\)?[ \t]*\\S-" nil t)
 	(if (setq dovl (cdr (assoc "BEAMER_dovl"
 				   (get-text-property (match-end 0)
 						      'org-props))))
