@@ -47,6 +47,7 @@
 (defvar org-babel-python-mode (if (featurep 'xemacs) 'python-mode 'python)
   "Preferred python mode for use in running python interactively.")
 
+(defvar org-src-preserve-indentation)
 (defun org-babel-expand-body:python (body params &optional processed-params)
   "Expand BODY according to PARAMS, return the expanded body."
   (concat

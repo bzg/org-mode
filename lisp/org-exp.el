@@ -607,6 +607,7 @@ table.el tables."
     (:TeX-macros	      "TeX"	  org-export-with-TeX-macros)
     (:LaTeX-fragments	      "LaTeX"	  org-export-with-LaTeX-fragments)
     (:latex-listings	      nil         org-export-latex-listings)
+    (:latex-minted	      nil         org-export-latex-minted)
     (:skip-before-1st-heading "skip"	  org-export-skip-text-before-1st-heading)
     (:fixed-width	      ":"	  org-export-with-fixed-width)
     (:timestamps	      "<"	  org-export-with-timestamps)
@@ -2208,6 +2209,9 @@ in the list) and remove property and value from the list in LISTVAR."
 (defvar org-export-latex-listings) ;; defined in org-latex.el
 (defvar org-export-latex-listings-langs) ;; defined in org-latex.el
 (defvar org-export-latex-listings-w-names) ;; defined in org-latex.el
+(defvar org-export-latex-minted) ;; defined in org-latex.el
+(defvar org-export-latex-minted-langs) ;; defined in org-latex.el
+(defvar org-export-latex-minted-with-line-numbers) ;; defined in org-latex.el
 
 (defun org-export-format-source-code-or-example
   (backend lang code &optional opts indent caption)
@@ -2337,35 +2341,55 @@ INDENT was the original indentation of the block."
 	      (setq rtn (org-export-number-lines rtn 'latex 0 0 num cont rpllbl fmt))
 	      (concat "#+BEGIN_LaTeX\n"
 		      (org-add-props
-                          (if org-export-latex-listings
-                              (concat
-                               (if lang
-                                   (let*
-				       ((lang-sym (intern lang))
-					(lstlang
-					 (or (cadr
-					      (assq
-					       lang-sym
-					       org-export-latex-listings-langs))
-					     lang)))
-                                     (format "\\lstset{language=%s}\n" lstlang))
-                                 "\n")
-                               (when (and caption
-					  org-export-latex-listings-w-names)
-                                 (format "\n%s $\\equiv$ \n"
-					 (replace-regexp-in-string
-					  "_" "\\\\_" caption)))
-                               "\\begin{lstlisting}\n"
-                               rtn "\\end{lstlisting}\n")
-                            (concat (car org-export-latex-verbatim-wrap)
-                                    rtn (cdr org-export-latex-verbatim-wrap)))
-			  '(org-protected t org-example t))
-		      "#+END_LaTeX\n"))
-	     ((eq backend 'ascii)
-	      ;; This is not HTML or LaTeX, so just make it an example.
-	      (setq rtn (org-export-number-lines rtn 'ascii 0 0 num cont rpllbl fmt))
-	      (concat caption "\n"
-                      "#+BEGIN_ASCII\n"
+                          (cond
+			   (org-export-latex-listings
+			    (concat
+			     (if lang
+				 (let*
+				     ((lang-sym (intern lang))
+				      (lstlang
+				       (or (cadr
+					    (assq
+					     lang-sym
+					     org-export-latex-listings-langs))
+					   lang)))
+				   (format "\\lstset{language=%s}\n" lstlang))
+			       "\n")
+			     (when (and caption
+					org-export-latex-listings-w-names)
+			       (format "\n%s $\\equiv$ \n"
+				       (replace-regexp-in-string
+					"_" "\\\\_" caption)))
+			     "\\begin{lstlisting}\n"
+			     rtn "\\end{lstlisting}\n"))
+			   (org-export-latex-minted
+			    (if lang
+				(let*
+				    ((lang-sym (intern lang))
+				     (minted-lang
+				      (or (cadr
+					   (assq
+					    lang-sym
+					    org-export-latex-minted-langs))
+					  (downcase lang))))
+				  (concat
+				   (when (and caption
+					      org-export-latex-listings-w-names)
+				     (format "\n%s $\\equiv$ \n"
+					     (replace-regexp-in-string
+					      "_" "\\\\_" caption)))
+				   (format
+				    "\\begin{minted}[mathescape,%s\nnumbersep=5pt,\nframe=lines,\nframesep=2mm]{%s}\n" (if org-export-latex-minted-with-line-numbers "\nlinenos," "") minted-lang)
+				   rtn "\\end{minted}\n"))))
+			    (t (concat (car org-export-latex-verbatim-wrap)
+				       rtn (cdr org-export-latex-verbatim-wrap))))
+			   '(org-protected t org-example t))
+			  "#+END_LaTeX\n"))
+	      ((eq backend 'ascii)
+	       ;; This is not HTML or LaTeX, so just make it an example.
+	       (setq rtn (org-export-number-lines rtn 'ascii 0 0 num cont rpllbl fmt))
+	       (concat caption "\n"
+		      "#+BEGIN_ASCII\n"
 		      (org-add-props
 			  (concat
 			   (mapconcat
