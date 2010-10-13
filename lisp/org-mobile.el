@@ -349,6 +349,7 @@ agenda view showing the flagged items."
 
 (defun org-mobile-check-setup ()
   "Check if org-mobile-directory has been set up."
+  (org-mobile-cleanup-encryption-tempfile)
   (unless (and org-directory
 	       (stringp org-directory)
 	       (string-match "\\S-" org-directory)
@@ -453,9 +454,10 @@ agenda view showing the flagged items."
 			link-name link-name)))
       (push (cons org-mobile-index-file (md5 (buffer-string)))
 	    org-mobile-checksum-files))
-    (if org-mobile-use-encryption
-	(org-mobile-encrypt-and-move org-mobile-encryption-tempfile
-				     target-file))))
+    (when org-mobile-use-encryption
+      (org-mobile-encrypt-and-move org-mobile-encryption-tempfile
+				   target-file)
+      (org-mobile-cleanup-encryption-tempfile))))
 
 (defun org-mobile-copy-agenda-files ()
   "Copy all agenda files to the stage or WebDAV directory."
@@ -490,6 +492,7 @@ agenda view showing the flagged items."
 	  (org-mobile-encrypt-and-move org-mobile-encryption-tempfile file)))
       (push (cons org-mobile-capture-file (md5 (buffer-string)))
 	    org-mobile-checksum-files))
+    (org-mobile-cleanup-encryption-tempfile)
     (kill-buffer buf)))
 
 (defun org-mobile-write-checksums ()
@@ -679,7 +682,8 @@ The table of checksums is written to the file mobile-checksums."
       (org-store-agenda-views))
     (when org-mobile-use-encryption
       (org-mobile-encrypt-file file1 file)
-      (delete-file file1))))
+      (delete-file file1)
+      (org-mobile-cleanup-encryption-tempfile))))
 
 (defun org-mobile-encrypt-and-move (infile outfile)
   "Encrypt INFILE locally to INFILE_enc, then move it to OUTFILE.
@@ -709,6 +713,12 @@ encryption program does not understand them."
 	   (shell-quote-argument (expand-file-name infile))
 	   (shell-quote-argument (expand-file-name outfile)))))
 
+(defun org-mobile-cleanup-encryption-tempfile ()
+  "Remove the encryption tempfile if it exists."
+  (and (stringp org-mobile-encryption-tempfile)
+       (file-exists-p org-mobile-encryption-tempfile)
+       (delete-file org-mobile-encryption-tempfile)))
+
 (defun org-mobile-move-capture ()
   "Move the contents of the capture file to the inbox file.
 Return a marker to the location where the new content has been added.
@@ -721,8 +731,7 @@ If nothing new has been added, return nil."
 	 (capture-buffer
 	  (if (not org-mobile-use-encryption)
 	      (find-file-noselect capture-file)
-	    (if (file-exists-p org-mobile-encryption-tempfile)
-		(delete-file org-mobile-encryption-tempfile))
+	    (org-mobile-cleanup-encryption-tempfile)
 	    (setq encfile (concat org-mobile-encryption-tempfile "_enc"))
 	    (copy-file capture-file encfile)
 	    (org-mobile-decrypt-file encfile org-mobile-encryption-tempfile)
@@ -747,7 +756,8 @@ If nothing new has been added, return nil."
     (kill-buffer capture-buffer)
     (when org-mobile-use-encryption
       (org-mobile-encrypt-and-move org-mobile-encryption-tempfile
-				   capture-file))
+				   capture-file)
+      (org-mobile-cleanup-encryption-tempfile))
     (if not-empty insertion-point)))
 
 (defun org-mobile-update-checksum-for-capture-file (buffer-string)
