@@ -421,7 +421,8 @@ for example using customize, or with something like
   (require 'org-latex)
   (add-to-list 'org-export-latex-packages-alist '(\"\" \"minted\"))
 
-In addition, it is neccessary to configure
+In addition, it is neccessary to install
+pygments (http://pygments.org), and configure
 `org-latex-to-pdf-process' so that the -shell-escape option is
 passed to pdflatex."
   :group 'org-export-latex
