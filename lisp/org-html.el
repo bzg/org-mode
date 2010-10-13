@@ -763,7 +763,8 @@ MAY-INLINE-P allows inlining it as an image."
 	    ((or
 		(not type)
 		(string= type "http")
-		(string= type "https"))
+		(string= type "https")
+		(string= type "file"))
 	       (if fragment
 		  (setq thefile (concat thefile "#" fragment))))
 
