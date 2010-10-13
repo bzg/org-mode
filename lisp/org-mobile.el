@@ -26,10 +26,11 @@
 ;;; Commentary:
 ;;
 ;; This file contains the code to interact with Richard Moreland's iPhone
-;; application MobileOrg.  This code is documented in Appendix B of the
-;; Org-mode manual.  The code is not specific for the iPhone, however.
-;; Any external viewer/flagging/editing application that uses the same
-;; conventions could be used.
+;; application MobileOrg, as well as with the Android version by Matthew Jones.
+;; This code is documented in Appendix B of the Org-mode manual.  The code is
+;; not specific for the iPhone and Android - any external
+;; viewer/flagging/editing application that uses the same conventions could
+;; be used.
 
 (require 'org)
 (require 'org-agenda)
