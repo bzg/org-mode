@@ -546,6 +546,8 @@ This function should accept the file name as its single argument."
 		   "pdflatex -interaction nonstopmode -output-directory %o %f"))
 	  (const :tag "texi2dvi"
 		 '("texi2dvi -p -b -c -V %f"))
+	  (const :tag "rubber"
+		 '("rubber -d --into %o %f"))
 	  (function)))
 
 (defcustom org-export-pdf-logfiles
