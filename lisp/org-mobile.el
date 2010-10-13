@@ -388,6 +388,8 @@ agenda view showing the flagged items."
 			   (lambda (a b) (string< (cdr a) (cdr b)))))
 	(def-todo (default-value 'org-todo-keywords))
 	(def-tags (default-value 'org-tag-alist))
+	(target-file (expand-file-name org-mobile-index-file
+				       org-mobile-directory))
 	file link-name todo-kwds done-kwds tags drawers entry kwds dwds twds)
 
     (org-prepare-agenda-buffers (mapcar 'car files-alist))
@@ -406,7 +408,9 @@ agenda view showing the flagged items."
 			       (t nil)))
 		       org-tag-alist-for-agenda))))
     (with-temp-file
-	(expand-file-name org-mobile-index-file org-mobile-directory)
+	(if org-mobile-use-encryption
+	    org-mobile-encryption-tempfile
+	  target-file)
       (while (setq entry (pop def-todo))
 	(insert "#+READONLY\n")
 	(setq kwds (mapcar (lambda (x) (if (string-match "(" x)
@@ -447,7 +451,10 @@ agenda view showing the flagged items."
 	(insert (format "* [[file:%s][%s]]\n"
 			link-name link-name)))
       (push (cons org-mobile-index-file (md5 (buffer-string)))
-	    org-mobile-checksum-files))))
+	    org-mobile-checksum-files))
+    (if org-mobile-use-encryption
+	(org-mobile-encrypt-and-move org-mobile-encryption-tempfile
+				     target-file))))
 
 (defun org-mobile-copy-agenda-files ()
   "Copy all agenda files to the stage or WebDAV directory."
@@ -469,17 +476,19 @@ agenda view showing the flagged items."
 	(when (string-match "[a-fA-F0-9]\\{30,40\\}" check)
 	  (push (cons link-name (match-string 0 check))
 		org-mobile-checksum-files))))
+
     (setq file (expand-file-name org-mobile-capture-file
 				 org-mobile-directory))
     (save-excursion
       (setq buf (find-file file))
-      (and (= (point-min) (point-max)) (insert "\n"))
-      (save-buffer)
+      (when (and (= (point-min) (point-max))) 
+	(insert "\n")
+	(save-buffer)
+	(when org-mobile-use-encryption
+	  (write-file org-mobile-encryption-tempfile)
+	  (org-mobile-encrypt-and-move org-mobile-encryption-tempfile file)))
       (push (cons org-mobile-capture-file (md5 (buffer-string)))
-	    org-mobile-checksum-files)
-      (when org-mobile-use-encryption
-	(write-file org-mobile-encryption-tempfile)
-	(org-mobile-encrypt-and-move org-mobile-encryption-tempfile file)))
+	    org-mobile-checksum-files))
     (kill-buffer buf)))
 
 (defun org-mobile-write-checksums ()

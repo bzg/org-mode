@@ -14261,7 +14261,9 @@ MobileOrg 1.5.  On the Emacs side, configure the variable
 @code{org-mobile-use-encryption}.  If you can safely store the password in
 your Emacs setup, you might also want to configure
 @code{org-mobile-encryption-password}.  Please read the docstring of that
-variable.}.  The easiest way to create that directory is to use a free
+variable.  Note that encryption will apply only to the contents of the
+@file{.org} files.  The file names themselves will remain visible.}.  The
+easiest way to create that directory is to use a free
 @uref{http://dropbox.com,Dropbox.com} account@footnote{If you cannot use
 Dropbox, or if your version of MobileOrg does not support it, you can use a
 webdav server.  For more information, check out the the documentation of
