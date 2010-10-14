@@ -781,7 +781,7 @@ may be specified in the properties of the current outline entry."
 				  (org-entry-get (point) header-arg t)
 				(error nil))
 			      (cdr (assoc header-arg org-file-properties))))
-		    (cons (intern (concat ":" header-arg)) val)))
+		    (cons (intern (concat ":" header-arg)) (org-babel-read val))))
 	     (mapcar
 	      'symbol-name
 	      (append
