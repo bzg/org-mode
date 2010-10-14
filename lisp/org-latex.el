@@ -381,7 +381,7 @@ for example using customize, or with something like
   :type 'boolean)
 
 (defcustom org-export-latex-listings-langs
-  '((emacs-lisp "Lisp") (lisp "Lisp")
+  '((emacs-lisp "Lisp") (lisp "Lisp") (clojure "Lisp")
     (c "C") (cc "C++")
     (fortran "fortran")
     (perl "Perl") (cperl "Perl") (python "Python") (ruby "Ruby")
