@@ -10557,7 +10557,8 @@ variable, called @code{org-publish-project-alist}.  Each element of the list
 configures one project, and may be in one of the two following forms:
 
 @lisp
-   ("project-name" :property value :property value ...)
+   ("project-name" :property value :property value ...) 
+     @r{i.e. a well-formed property list with alternating keys and values}
 @r{or}
    ("project-name" :components ("project-name" "project-name" ...))
 
