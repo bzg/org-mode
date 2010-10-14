@@ -681,7 +681,7 @@ The table of checksums is written to the file mobile-checksums."
     (when sumo
       (org-store-agenda-views))
     (when org-mobile-use-encryption
-      (org-mobile-encrypt-file file1 file)
+      (org-mobile-encrypt-and-move file1 file)
       (delete-file file1)
       (org-mobile-cleanup-encryption-tempfile))))
 
