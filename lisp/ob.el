@@ -50,7 +50,8 @@
 (declare-function org-outline-overlay-data "org" (&optional use-markers))
 (declare-function org-set-outline-overlay-data "org" (data))
 (declare-function org-narrow-to-subtree "org" ())
-(declare-function org-entry-get "org" (pom property &optional inherit literal-nil))
+(declare-function org-entry-get "org"
+		  (pom property &optional inherit literal-nil))
 (declare-function org-make-options-regexp "org" (kwds &optional extra))
 (declare-function org-do-remove-indentation "org" (&optional n))
 (declare-function org-show-context "org" (&optional key))
@@ -59,7 +60,8 @@
 (declare-function org-uniquify "org" (list))
 (declare-function org-current-level "org" ())
 (declare-function org-table-import "org-table" (file arg))
-(declare-function org-add-hook "org-compat" (hook function &optional append local))
+(declare-function org-add-hook "org-compat"
+		  (hook function &optional append local))
 (declare-function org-table-align "org-table" ())
 (declare-function org-table-end "org-table" (&optional table-type))
 (declare-function orgtbl-to-generic "org-table" (table params))
@@ -67,7 +69,8 @@
 (declare-function org-babel-lob-get-info "ob-lob" nil)
 (declare-function org-babel-ref-split-args "ob-ref" (arg-string))
 (declare-function org-babel-ref-variables "ob-ref" (params))
-(declare-function org-babel-ref-resolve-reference "ob-ref" (ref &optional params))
+(declare-function org-babel-ref-resolve-reference "ob-ref"
+		  (ref &optional params))
 (declare-function org-babel-lob-execute-maybe "ob-lob" ())
 
 (defgroup org-babel nil
@@ -781,7 +784,8 @@ may be specified in the properties of the current outline entry."
 				  (org-entry-get (point) header-arg t)
 				(error nil))
 			      (cdr (assoc header-arg org-file-properties))))
-		    (cons (intern (concat ":" header-arg)) (org-babel-read val))))
+		    (cons (intern (concat ":" header-arg))
+			  (org-babel-read val))))
 	     (mapcar
 	      'symbol-name
 	      (append
@@ -901,12 +905,14 @@ Return a cons cell, the `car' of which contains the TABLE less
 colnames, and the `cdr' of which contains a list of the column
 names.  Note: this function removes any hlines in TABLE."
   (flet ((trans (table) (apply #'mapcar* #'list table)))
-    (let* ((width (apply 'max (mapcar (lambda (el) (if (listp el) (length el) 0)) table)))
+    (let* ((width (apply 'max
+			 (mapcar (lambda (el) (if (listp el) (length el) 0)) table)))
            (table (trans (mapcar (lambda (row)
                                    (if (not (equal row 'hline))
                                        row
                                      (setq row '())
-                                     (dotimes (n width) (setq row (cons 'hline row)))
+                                     (dotimes (n width)
+				       (setq row (cons 'hline row)))
                                      row))
                                  table))))
       (cons (mapcar (lambda (row) (if (equal (car row) 'hline) 'hline row))
@@ -1741,8 +1747,9 @@ Fixes a bug in `tramp-handle-call-process-region'."
             ;; bug in tramp
 	    (apply 'process-file program tmpfile buffer display args)
 	  (delete-file tmpfile)))
-    ;; org-babel-call-process-region-original is the original emacs definition. It
-    ;; is in scope from the let binding in org-babel-execute-src-block
+    ;; org-babel-call-process-region-original is the original emacs
+    ;; definition. It is in scope from the let binding in
+    ;; org-babel-execute-src-block
     (apply org-babel-call-process-region-original
            start end program delete buffer display args)))
 
