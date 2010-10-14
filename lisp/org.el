@@ -18601,6 +18601,8 @@ which make use of the date at the cursor."
 	 (itemp (org-at-item-p))
 	 (case-fold-search t)
 	 (org-drawer-regexp (or org-drawer-regexp "\000"))
+	 (inline-task-p (and (featurep 'org-inlinetask)
+			     (org-inlinetask-in-task-p)))
 	 column bpos bcol tpos tcol bullet btype bullet-type)
     ;; Find the previous relevant line
     (beginning-of-line 1)
@@ -18656,7 +18658,14 @@ which make use of the date at the cursor."
      ;; what to do.
      (t
       (beginning-of-line 0)
-      (while (and (not (bobp)) (looking-at "[ \t]*[\n:#|]")
+      (while (and (not (bobp))
+		  ;; skip comments, verbatim, empty lines, tables,
+		  ;; inline tasks
+		  (or (looking-at "[ \t]*[\n:#|]")
+		      (and (org-in-item-p) (goto-char (org-list-top-point)))
+		      (and (not inline-task-p)
+			   (featurep 'org-inlinetask)
+			   (org-inlinetask-in-task-p)))
       		  (not (looking-at "[ \t]*:END:"))
       		  (not (looking-at org-drawer-regexp)))
       	(beginning-of-line 0))
@@ -18675,16 +18684,6 @@ which make use of the date at the cursor."
        ((looking-at "\\([ \t]*\\):END:")
 	(goto-char (match-end 1))
 	(setq column (current-column)))
-       ;; There was a list that since ended: indent relatively to
-       ;; current heading.
-       ((org-in-item-p)
-	(outline-previous-heading)
-	(if (and org-adapt-indentation
-		 (looking-at "\\*+[ \t]+"))
-	    (progn
-	      (goto-char (match-end 0))
-	      (setq column (current-column)))
-	  (setq column 0)))
        ;; Else, nothing noticeable found: get indentation and go on.
        (t (setq column (org-get-indentation))))))
     (goto-char pos)

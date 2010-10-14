@@ -129,6 +129,22 @@ If prefix arg NO-STATE is set, ignore `org-inlinetask-defaut-state'."
   (end-of-line -1))
 (define-key org-mode-map "\C-c\C-xt" 'org-inlinetask-insert-task)
 
+(defun org-inlinetask-in-task-p ()
+  "Return true if point is inside an inline task."
+  (save-excursion
+    (let* ((nstars (if org-odd-levels-only
+		       (1- (* 2 (or org-inlinetask-min-level 200)))
+		     (or org-inlinetask-min-level 200)))
+	   (stars-re (concat "^\\(?:\\*\\{"
+			     (format "%d" (- nstars 1))
+			     ",\\}\\)[ \t]+"))
+	   (task-beg-re (concat stars-re "\\(?:.*\\)"))
+	   (task-end-re (concat stars-re "\\(?:END\\|end\\)")))
+      (beginning-of-line)
+      (or (looking-at task-beg-re)
+	  (and (re-search-forward "^\\*+[ \t]+" nil t)
+	       (progn (beginning-of-line) (looking-at task-end-re)))))))
+
 (defvar htmlp)  ; dynamically scoped into the next function
 (defvar latexp) ; dynamically scoped into the next function
 (defun org-inlinetask-export-handler ()
