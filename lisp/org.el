@@ -3538,6 +3538,7 @@ Normal means no org-mode-specific context."
 (declare-function org-agenda-check-for-timestamp-as-reason-to-ignore-todo-item
 		  "org-agenda" (&optional end))
 (declare-function org-inlinetask-remove-END-maybe "org-inlinetask" ())
+(declare-function org-inlinetask-in-task-p "org-inlinetask" ())
 (declare-function org-indent-mode "org-indent" (&optional arg))
 (declare-function parse-time-string "parse-time" (string))
 (declare-function org-attach-reveal "org-attach" (&optional if-exists))
@@ -3728,7 +3729,6 @@ If TABLE-TYPE is non-nil, also check for table.el-type tables."
                   org-capture-import-remember-templates)))
 
 ;; Autoload org-clock.el
-
 
 (declare-function org-clock-save-markers-for-cut-and-paste "org-clock"
 		  (beg end))
