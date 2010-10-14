@@ -90,7 +90,9 @@ or to a number smaller than this one.  In fact, when `org-cycle-max-level' is
 not set, it will be assumed to be one less than the value of smaller than
 the value of this variable."
   :group 'org-inlinetask
-  :type 'boolean)
+  :type '(choice
+	  (const :tag "Off" nil)
+	  (integer)))
 
 (defcustom org-inlinetask-export t
   "Non-nil means export inline tasks.

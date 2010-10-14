@@ -6687,8 +6687,9 @@ When INVISIBLE-OK is set, stop at invisible headlines when going back.
 This is important for non-interactive uses of the command."
   (interactive "P")
   (if (or (= (buffer-size) 0)
-	  (and (not (save-excursion (and (ignore-errors (org-back-to-heading invisible-ok))
-					 (org-on-heading-p))))
+	  (and (not (save-excursion
+		      (and (ignore-errors (org-back-to-heading invisible-ok))
+			   (org-on-heading-p))))
 	       (not (org-in-item-p))))
       (progn
 	(insert "\n* ")
@@ -6699,6 +6700,16 @@ This is important for non-interactive uses of the command."
 		     (condition-case nil
 			 (progn
 			   (org-back-to-heading invisible-ok)
+			   (when (and (featurep 'org-inlinetask)
+				      (integerp org-inlinetask-min-level)
+				      (>= (length (match-string 0))
+					  org-inlinetask-min-level))
+			     ;; Find a heading level before the inline task
+			     (while (and (setq level (org-up-heading-safe))
+					 (>= level org-inlinetask-min-level)))
+			     (if (org-on-heading-p)
+				 (org-back-to-heading invisible-ok)
+			       (error "This should not happen")))
 			   (setq empty-line-p (org-previous-line-empty-p))
 			   (match-string 0))
 		       (error "*"))))
