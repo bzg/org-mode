@@ -71,11 +71,14 @@ Each element of the alist is a publishing 'project.'  The CAR of
 each element is a string, uniquely identifying the project.  The
 CDR of each element is in one of the following forms:
 
-  (:property value :property value ... )
+1. A well-formed property list with an even number of elements, alternating
+   keys and values, specifying parameters for the publishing process.
 
-OR,
+     (:property value :property value ... )
 
-  (:components (\"project-1\" \"project-2\" ...))
+2. A meta-project definition, specifying of a list of sub-projects:
+
+     (:components (\"project-1\" \"project-2\" ...))
 
 When the CDR of an element of org-publish-project-alist is in
 this second form, the elements of the list after :components are
