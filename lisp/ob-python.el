@@ -50,16 +50,15 @@
 (defvar org-src-preserve-indentation)
 (defun org-babel-expand-body:python (body params &optional processed-params)
   "Expand BODY according to PARAMS, return the expanded body."
-  (concat
-   (mapconcat ;; define any variables
-    (lambda (pair)
-      (format "%s=%s"
-              (car pair)
-              (org-babel-python-var-to-python (cdr pair))))
-    (nth 1 (or processed-params (org-babel-process-params params))) "\n")
-   "\n"
-   (org-babel-trim body (if org-src-preserve-indentation "[\f\n\r\v]"))
-   "\n"))
+  (let ((var-lines
+	 (org-babel-python-variable-assignments params processed-params)))
+    (mapconcat
+     #'identity
+     (append
+      (org-babel-python-variable-assignments params processed-params)
+      (list
+       (org-babel-trim body (if org-src-preserve-indentation "[\f\n\r\v]"))))
+     "\n")))
 
 (defun org-babel-execute:python (body params)
   "Execute a block of Python code with Babel.
@@ -83,13 +82,7 @@ This function is called by `org-babel-execute-src-block'."
 (defun org-babel-prep-session:python (session params)
   "Prepare SESSION according to the header arguments in PARAMS."
   (let* ((session (org-babel-python-initiate-session session))
-         (vars (org-babel-ref-variables params))
-         (var-lines (mapcar ;; define any variables
-                     (lambda (pair)
-                       (format "%s=%s"
-                               (car pair)
-                               (org-babel-python-var-to-python (cdr pair))))
-                     vars)))
+	 (var-lines (org-babel-python-variable-assignments params)))
     (org-babel-comint-in-buffer session
       (mapc (lambda (var)
               (end-of-line 1) (insert var) (comint-send-input)
@@ -106,6 +99,14 @@ This function is called by `org-babel-execute-src-block'."
       buffer)))
 
 ;; helper functions
+
+(defun org-babel-python-variable-assignments (params &optional processed-params)
+  (mapcar
+   (lambda (pair)
+     (format "%s=%s"
+	     (car pair)
+	     (org-babel-python-var-to-python (cdr pair))))
+   (nth 1 (or processed-params (org-babel-process-params params)))))
 
 (defun org-babel-python-var-to-python (var)
   "Convert an elisp value to a python variable.
