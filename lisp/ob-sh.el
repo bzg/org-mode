@@ -51,12 +51,13 @@ This will be passed to  `shell-command-on-region'")
   (let ((vars (nth 1 (or processed-params (org-babel-process-params params))))
         (sep (cdr (assoc :separator params))))
     (concat
-     (mapconcat ;; define any variables
-      (lambda (pair)
-	(format "%s=%s"
-		(car pair)
-		(org-babel-sh-var-to-sh (cdr pair) sep)))
-      vars "\n") "\n" body "\n\n")))
+     (if vars (concat (mapconcat ;; define any variables
+		       (lambda (pair)
+			 (format "%s=%s"
+				 (car pair)
+				 (org-babel-sh-var-to-sh (cdr pair) sep)))
+		       vars "\n") "\n"))
+     (org-babel-trim body) "\n")))
 
 (defun org-babel-execute:sh (body params)
   "Execute a block of Shell commands with Babel.
