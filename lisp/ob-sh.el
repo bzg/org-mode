@@ -56,7 +56,7 @@ This will be passed to  `shell-command-on-region'")
       (format "%s=%s"
               (car pair)
               (org-babel-sh-var-to-sh (cdr pair) sep)))
-    vars "\n") "\n" body "\n\n")))
+    vars "\n") (if vars "\n" "") body "\n\n")))
 
 (defun org-babel-execute:sh (body params)
   "Execute a block of Shell commands with Babel.
