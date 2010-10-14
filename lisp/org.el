@@ -1274,7 +1274,7 @@ type.  In principle, it does not hurt to turn on most link types - there may
 be a small gain when turning off unused link types.  The types are:
 
 bracket   The recommended [[link][description]] or [[link]] links with hiding.
-angular   Links in angular brackets that may contain whitespace like
+angle     Links in angular brackets that may contain whitespace like
           <bbdb:Carsten Dominik>.
 plain     Plain links in normal text, no whitespace, like http://google.com.
 radio     Text that is matched by a radio target, see manual for details.
@@ -1285,8 +1285,8 @@ footnote  Footnote labels.
 Changing this variable requires a restart of Emacs to become effective."
   :group 'org-link
   :type '(set :greedy t
-	      (const :tag "Double bracket links (new style)" bracket)
-	      (const :tag "Angular bracket links (old style)" angular)
+	      (const :tag "Double bracket links" bracket)
+	      (const :tag "Angular bracket links" angle)
 	      (const :tag "Plain text links" plain)
 	      (const :tag "Radio target matches" radio)
 	      (const :tag "Tags" tag)
