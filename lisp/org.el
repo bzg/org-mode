@@ -6696,6 +6696,7 @@ This is important for non-interactive uses of the command."
 	(run-hooks 'org-insert-heading-hook))
     (when (or force-heading (not (org-insert-item)))
       (let* ((empty-line-p nil)
+	     (level nil)
 	     (head (save-excursion
 		     (condition-case nil
 			 (progn
