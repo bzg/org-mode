@@ -14265,16 +14265,19 @@ in-buffer settings, but it will understand the logistics of TODO state
 @node Setting up the staging area, Pushing to MobileOrg, MobileOrg, MobileOrg
 @section Setting up the staging area
 
-MobileOrg needs to interact with Emacs through directory on a
-server@footnote{If you are using a public server, you might prefer to encrypt
-the files on the server.  This can be done with Org-mode 7.02 and with
-MobileOrg 1.5.  On the Emacs side, configure the variable
-@code{org-mobile-use-encryption}.  If you can safely store the password in
-your Emacs setup, you might also want to configure
+MobileOrg needs to interact with Emacs through directory on a server.  If you
+are using a public server, you should consider to encrypt the files that are
+uploaded to the server.  This can be done with Org-mode 7.02 and with
+@i{MobileOrg 1.5} (iPhone version), and you need an @file{openssl}
+installation on your system.  To turn on encryption, set a password in
+@i{MobileOrg} and, on the Emacs side, configure the variable
+@code{org-mobile-use-encryption}@footnote{If you can safely store the
+password in your Emacs setup, you might also want to configure
 @code{org-mobile-encryption-password}.  Please read the docstring of that
 variable.  Note that encryption will apply only to the contents of the
-@file{.org} files.  The file names themselves will remain visible.}.  The
-easiest way to create that directory is to use a free
+@file{.org} files.  The file names themselves will remain visible.}.
+
+The easiest way to create that directory is to use a free
 @uref{http://dropbox.com,Dropbox.com} account@footnote{If you cannot use
 Dropbox, or if your version of MobileOrg does not support it, you can use a
 webdav server.  For more information, check out the the documentation of
@@ -14359,12 +14362,12 @@ this flagged entry is finished.
 
 @kindex C-c a ?
 If you are not able to process all flagged entries directly, you can always
-return to this agenda view using @kbd{C-c a ?}.  Note, however, that there is
-a subtle difference.  The view created automatically by @kbd{M-x
-org-mobile-pull @key{RET}} is guaranteed to search all files that have been
-addressed by the last pull.  This might include a file that is not currently
-in your list of agenda files.  If you later use @kbd{C-c a ?} to regenerate
-the view, only the current agenda files will be searched.
+return to this agenda view@footnote{Note, however, that there is a subtle
+difference.  The view created automatically by @kbd{M-x org-mobile-pull
+@key{RET}} is guaranteed to search all files that have been addressed by the
+last pull.  This might include a file that is not currently in your list of
+agenda files.  If you later use @kbd{C-c a ?} to regenerate the view, only
+the current agenda files will be searched.} using @kbd{C-c a ?}.
 
 @node History and Acknowledgments, Main Index, MobileOrg, Top
 @appendix History and acknowledgments
