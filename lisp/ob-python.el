@@ -101,6 +101,7 @@ This function is called by `org-babel-execute-src-block'."
 ;; helper functions
 
 (defun org-babel-python-variable-assignments (params &optional processed-params)
+  "Return list of python statements assigning the block's variables"
   (mapcar
    (lambda (pair)
      (format "%s=%s"

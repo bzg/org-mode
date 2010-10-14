@@ -90,6 +90,7 @@ This function is called by `org-babel-execute-src-block'."
 ;; helper functions
 
 (defun org-babel-sh-variable-assignments (params &optional processed-params)
+  "Return list of shell statements assigning the block's variables"
   (let ((sep (cdr (assoc :separator params))))
     (mapcar
      (lambda (pair)
