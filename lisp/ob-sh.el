@@ -48,15 +48,10 @@ This will be passed to  `shell-command-on-region'")
 
 (defun org-babel-expand-body:sh (body params &optional processed-params)
   "Expand BODY according to PARAMS, return the expanded body."
-  (let ((vars (nth 1 (or processed-params (org-babel-process-params params))))
-        (sep (cdr (assoc :separator params))))
-    (concat
-   (mapconcat ;; define any variables
-    (lambda (pair)
-      (format "%s=%s"
-              (car pair)
-              (org-babel-sh-var-to-sh (cdr pair) sep)))
-    vars "\n") (if vars "\n" "") body "\n\n")))
+  (mapconcat
+   #'identity
+   (append (org-babel-sh-variable-assignments params processed-params)
+	   (list body)) "\n")
 
 (defun org-babel-execute:sh (body params)
   "Execute a block of Shell commands with Babel.
@@ -76,14 +71,7 @@ This function is called by `org-babel-execute-src-block'."
 (defun org-babel-prep-session:sh (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."
   (let* ((session (org-babel-sh-initiate-session session))
-         (vars (org-babel-ref-variables params))
-         (sep (cdr (assoc :separator params)))
-         (var-lines (mapcar ;; define any variables
-                     (lambda (pair)
-                       (format "%s=%s"
-                               (car pair)
-                               (org-babel-sh-var-to-sh (cdr pair) sep)))
-                     vars)))
+	 (var-lines (org-babel-sh-variable-assignments params)))
     (org-babel-comint-in-buffer session
       (mapc (lambda (var)
               (insert var) (comint-send-input nil t)
@@ -100,6 +88,15 @@ This function is called by `org-babel-execute-src-block'."
       buffer)))
 
 ;; helper functions
+
+(defun org-babel-sh-variable-assignments (params &optional processed-params)
+  (let ((sep (cdr (assoc :separator params))))
+    (mapcar
+     (lambda (pair)
+       (format "%s=%s"
+	       (car pair)
+	       (org-babel-sh-var-to-sh (cdr pair) sep)))
+     (nth 1 (or processed-params (org-babel-process-params params))))))
 
 (defun org-babel-sh-var-to-sh (var &optional sep)
   "Convert an elisp value to a shell variable.
