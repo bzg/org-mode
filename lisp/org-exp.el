@@ -2211,6 +2211,7 @@ in the list) and remove property and value from the list in LISTVAR."
 (defvar org-export-latex-listings-w-names) ;; defined in org-latex.el
 (defvar org-export-latex-minted) ;; defined in org-latex.el
 (defvar org-export-latex-minted-langs) ;; defined in org-latex.el
+(defvar org-export-latex-minted-with-line-numbers) ;; defined in org-latex.el
 
 (defun org-export-format-source-code-or-example
   (backend lang code &optional opts indent caption)

@@ -421,7 +421,8 @@ for example using customize, or with something like
   (require 'org-latex)
   (add-to-list 'org-export-latex-packages-alist '(\"\" \"minted\"))
 
-In addition, it is neccessary to configure
+In addition, it is neccessary to install
+pygments (http://pygments.org), and configure
 `org-latex-to-pdf-process' so that the -shell-escape option is
 passed to pdflatex."
   :group 'org-export-latex
@@ -546,6 +547,8 @@ This function should accept the file name as its single argument."
 		   "pdflatex -interaction nonstopmode -output-directory %o %f"))
 	  (const :tag "texi2dvi"
 		 '("texi2dvi -p -b -c -V %f"))
+	  (const :tag "rubber"
+		 '("rubber -d --into %o %f"))
 	  (function)))
 
 (defcustom org-export-pdf-logfiles

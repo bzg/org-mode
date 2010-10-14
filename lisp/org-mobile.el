@@ -26,10 +26,11 @@
 ;;; Commentary:
 ;;
 ;; This file contains the code to interact with Richard Moreland's iPhone
-;; application MobileOrg.  This code is documented in Appendix B of the
-;; Org-mode manual.  The code is not specific for the iPhone, however.
-;; Any external viewer/flagging/editing application that uses the same
-;; conventions could be used.
+;; application MobileOrg, as well as with the Android version by Matthew Jones.
+;; This code is documented in Appendix B of the Org-mode manual.  The code is
+;; not specific for the iPhone and Android - any external
+;; viewer/flagging/editing application that uses the same conventions could
+;; be used.
 
 (require 'org)
 (require 'org-agenda)
@@ -348,6 +349,7 @@ agenda view showing the flagged items."
 
 (defun org-mobile-check-setup ()
   "Check if org-mobile-directory has been set up."
+  (org-mobile-cleanup-encryption-tempfile)
   (unless (and org-directory
 	       (stringp org-directory)
 	       (string-match "\\S-" org-directory)
@@ -388,6 +390,8 @@ agenda view showing the flagged items."
 			   (lambda (a b) (string< (cdr a) (cdr b)))))
 	(def-todo (default-value 'org-todo-keywords))
 	(def-tags (default-value 'org-tag-alist))
+	(target-file (expand-file-name org-mobile-index-file
+				       org-mobile-directory))
 	file link-name todo-kwds done-kwds tags drawers entry kwds dwds twds)
 
     (org-prepare-agenda-buffers (mapcar 'car files-alist))
@@ -406,7 +410,9 @@ agenda view showing the flagged items."
 			       (t nil)))
 		       org-tag-alist-for-agenda))))
     (with-temp-file
-	(expand-file-name org-mobile-index-file org-mobile-directory)
+	(if org-mobile-use-encryption
+	    org-mobile-encryption-tempfile
+	  target-file)
       (while (setq entry (pop def-todo))
 	(insert "#+READONLY\n")
 	(setq kwds (mapcar (lambda (x) (if (string-match "(" x)
@@ -447,7 +453,11 @@ agenda view showing the flagged items."
 	(insert (format "* [[file:%s][%s]]\n"
 			link-name link-name)))
       (push (cons org-mobile-index-file (md5 (buffer-string)))
-	    org-mobile-checksum-files))))
+	    org-mobile-checksum-files))
+    (when org-mobile-use-encryption
+      (org-mobile-encrypt-and-move org-mobile-encryption-tempfile
+				   target-file)
+      (org-mobile-cleanup-encryption-tempfile))))
 
 (defun org-mobile-copy-agenda-files ()
   "Copy all agenda files to the stage or WebDAV directory."
@@ -469,17 +479,20 @@ agenda view showing the flagged items."
 	(when (string-match "[a-fA-F0-9]\\{30,40\\}" check)
 	  (push (cons link-name (match-string 0 check))
 		org-mobile-checksum-files))))
+
     (setq file (expand-file-name org-mobile-capture-file
 				 org-mobile-directory))
     (save-excursion
       (setq buf (find-file file))
-      (and (= (point-min) (point-max)) (insert "\n"))
-      (save-buffer)
+      (when (and (= (point-min) (point-max))) 
+	(insert "\n")
+	(save-buffer)
+	(when org-mobile-use-encryption
+	  (write-file org-mobile-encryption-tempfile)
+	  (org-mobile-encrypt-and-move org-mobile-encryption-tempfile file)))
       (push (cons org-mobile-capture-file (md5 (buffer-string)))
-	    org-mobile-checksum-files)
-      (when org-mobile-use-encryption
-	(write-file org-mobile-encryption-tempfile)
-	(org-mobile-encrypt-and-move org-mobile-encryption-tempfile file)))
+	    org-mobile-checksum-files))
+    (org-mobile-cleanup-encryption-tempfile)
     (kill-buffer buf)))
 
 (defun org-mobile-write-checksums ()
@@ -668,8 +681,9 @@ The table of checksums is written to the file mobile-checksums."
     (when sumo
       (org-store-agenda-views))
     (when org-mobile-use-encryption
-      (org-mobile-encrypt-file file1 file)
-      (delete-file file1))))
+      (org-mobile-encrypt-and-move file1 file)
+      (delete-file file1)
+      (org-mobile-cleanup-encryption-tempfile))))
 
 (defun org-mobile-encrypt-and-move (infile outfile)
   "Encrypt INFILE locally to INFILE_enc, then move it to OUTFILE.
@@ -699,6 +713,12 @@ encryption program does not understand them."
 	   (shell-quote-argument (expand-file-name infile))
 	   (shell-quote-argument (expand-file-name outfile)))))
 
+(defun org-mobile-cleanup-encryption-tempfile ()
+  "Remove the encryption tempfile if it exists."
+  (and (stringp org-mobile-encryption-tempfile)
+       (file-exists-p org-mobile-encryption-tempfile)
+       (delete-file org-mobile-encryption-tempfile)))
+
 (defun org-mobile-move-capture ()
   "Move the contents of the capture file to the inbox file.
 Return a marker to the location where the new content has been added.
@@ -711,8 +731,7 @@ If nothing new has been added, return nil."
 	 (capture-buffer
 	  (if (not org-mobile-use-encryption)
 	      (find-file-noselect capture-file)
-	    (if (file-exists-p org-mobile-encryption-tempfile)
-		(delete-file org-mobile-encryption-tempfile))
+	    (org-mobile-cleanup-encryption-tempfile)
 	    (setq encfile (concat org-mobile-encryption-tempfile "_enc"))
 	    (copy-file capture-file encfile)
 	    (org-mobile-decrypt-file encfile org-mobile-encryption-tempfile)
@@ -737,7 +756,8 @@ If nothing new has been added, return nil."
     (kill-buffer capture-buffer)
     (when org-mobile-use-encryption
       (org-mobile-encrypt-and-move org-mobile-encryption-tempfile
-				   capture-file))
+				   capture-file)
+      (org-mobile-cleanup-encryption-tempfile))
     (if not-empty insertion-point)))
 
 (defun org-mobile-update-checksum-for-capture-file (buffer-string)

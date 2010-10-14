@@ -71,11 +71,14 @@ Each element of the alist is a publishing 'project.'  The CAR of
 each element is a string, uniquely identifying the project.  The
 CDR of each element is in one of the following forms:
 
-  (:property value :property value ... )
+1. A well-formed property list with an even number of elements, alternating
+   keys and values, specifying parameters for the publishing process.
 
-OR,
+     (:property value :property value ... )
 
-  (:components (\"project-1\" \"project-2\" ...))
+2. A meta-project definition, specifying of a list of sub-projects:
+
+     (:components (\"project-1\" \"project-2\" ...))
 
 When the CDR of an element of org-publish-project-alist is in
 this second form, the elements of the list after :components are
@@ -573,6 +576,24 @@ See `org-publish-org-to' to the list of arguments."
   "Publish an org file to HTML.
 See `org-publish-org-to' to the list of arguments."
   (org-publish-org-to "org" plist filename pub-dir))
+
+(defun org-publish-org-to-ascii (plist filename pub-dir)
+  "Publish an org file to ASCII.
+See `org-publish-org-to' to the list of arguments."
+  (org-publish-with-aux-preprocess-maybe
+    (org-publish-org-to "ascii" plist filename pub-dir)))
+
+(defun org-publish-org-to-latin1 (plist filename pub-dir)
+  "Publish an org file to Latin-1.
+See `org-publish-org-to' to the list of arguments."
+  (org-publish-with-aux-preprocess-maybe
+    (org-publish-org-to "latin1" plist filename pub-dir)))
+
+(defun org-publish-org-to-utf8 (plist filename pub-dir)
+  "Publish an org file to UTF-8.
+See `org-publish-org-to' to the list of arguments."
+  (org-publish-with-aux-preprocess-maybe
+    (org-publish-org-to "utf8" plist filename pub-dir)))
 
 (defun org-publish-attachment (plist filename pub-dir)
   "Publish a file with no transformation of any kind.

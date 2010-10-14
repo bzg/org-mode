@@ -3794,7 +3794,10 @@ The habit is a TODO, with a TODO keyword representing an open state.
 @item
 The property @code{STYLE} is set to the value @code{habit}.
 @item
-The TODO has a scheduled date, with a @code{.+} style repeat interval.
+The TODO has a scheduled date, usually with a @code{.+} style repeat
+interval.  A @code{++} style may be appropriate for habits with time
+constraints, e.g., must be done on weekends, or a @code{+} style for an
+unusual habit that can have a backlog, e.g., weekly reports.
 @item
 The TODO may also have minimum and maximum ranges specified by using the
 syntax @samp{.+2d/3d}, which says that you want to do the task at least every
@@ -10554,7 +10557,8 @@ variable, called @code{org-publish-project-alist}.  Each element of the list
 configures one project, and may be in one of the two following forms:
 
 @lisp
-   ("project-name" :property value :property value ...)
+   ("project-name" :property value :property value ...) 
+     @r{i.e. a well-formed property list with alternating keys and values}
 @r{or}
    ("project-name" :components ("project-name" "project-name" ...))
 
@@ -10630,20 +10634,20 @@ possibly transformed in the process.  The default transformation is to export
 Org files as HTML files, and this is done by the function
 @code{org-publish-org-to-html} which calls the HTML exporter (@pxref{HTML
 export}).  But you also can publish your content as PDF files using
-@code{org-publish-org-to-pdf}.  If you want to publish the Org file itself,
-but with @i{archived}, @i{commented}, and @i{tag-excluded} trees removed, use
-@code{org-publish-org-to-org} and set the parameters @code{:plain-source}
-and/or @code{:htmlized-source}.  This will produce @file{file.org} and
-@file{file.org.html} in the publishing
+@code{org-publish-org-to-pdf}, or as @code{ascii}, @code{latin1} or
+@code{utf8} encoded files using the corresponding functions.  If you want to
+publish the Org file itself, but with @i{archived}, @i{commented}, and
+@i{tag-excluded} trees removed, use @code{org-publish-org-to-org} and set the
+parameters @code{:plain-source} and/or @code{:htmlized-source}.  This will
+produce @file{file.org} and @file{file.org.html} in the publishing
 directory@footnote{@file{file-source.org} and @file{file-source.org.html} if
 source and publishing directories are equal.  Note that with this kind of
 setup, you need to add @code{:exclude "-source\\.org"} to the project
 definition in @code{org-publish-project-alist} to avoid that the published
 source files will be considered as new org files the next time the project is
-published.}.  Other files like images only
-need to be copied to the publishing destination, for this you may use
-@code{org-publish-attachment}.  For non-Org files, you always need to
-specify the publishing function:
+published.}.  Other files like images only need to be copied to the
+publishing destination, for this you may use @code{org-publish-attachment}.
+For non-Org files, you always need to specify the publishing function:
 
 @multitable @columnfractions 0.3 0.7
 @item @code{:publishing-function}
@@ -14265,14 +14269,19 @@ in-buffer settings, but it will understand the logistics of TODO state
 @node Setting up the staging area, Pushing to MobileOrg, MobileOrg, MobileOrg
 @section Setting up the staging area
 
-MobileOrg needs to interact with Emacs through directory on a
-server@footnote{If you are using a public server, you might prefer to encrypt
-the files on the server.  This can be done with Org-mode 7.02 and with
-MobileOrg 1.5.  On the Emacs side, configure the variable
-@code{org-mobile-use-encryption}.  If you can safely store the password in
-your Emacs setup, you might also want to configure
+MobileOrg needs to interact with Emacs through directory on a server.  If you
+are using a public server, you should consider to encrypt the files that are
+uploaded to the server.  This can be done with Org-mode 7.02 and with
+@i{MobileOrg 1.5} (iPhone version), and you need an @file{openssl}
+installation on your system.  To turn on encryption, set a password in
+@i{MobileOrg} and, on the Emacs side, configure the variable
+@code{org-mobile-use-encryption}@footnote{If you can safely store the
+password in your Emacs setup, you might also want to configure
 @code{org-mobile-encryption-password}.  Please read the docstring of that
-variable.}.  The easiest way to create that directory is to use a free
+variable.  Note that encryption will apply only to the contents of the
+@file{.org} files.  The file names themselves will remain visible.}.
+
+The easiest way to create that directory is to use a free
 @uref{http://dropbox.com,Dropbox.com} account@footnote{If you cannot use
 Dropbox, or if your version of MobileOrg does not support it, you can use a
 webdav server.  For more information, check out the the documentation of
@@ -14357,12 +14366,12 @@ this flagged entry is finished.
 
 @kindex C-c a ?
 If you are not able to process all flagged entries directly, you can always
-return to this agenda view using @kbd{C-c a ?}.  Note, however, that there is
-a subtle difference.  The view created automatically by @kbd{M-x
-org-mobile-pull @key{RET}} is guaranteed to search all files that have been
-addressed by the last pull.  This might include a file that is not currently
-in your list of agenda files.  If you later use @kbd{C-c a ?} to regenerate
-the view, only the current agenda files will be searched.
+return to this agenda view@footnote{Note, however, that there is a subtle
+difference.  The view created automatically by @kbd{M-x org-mobile-pull
+@key{RET}} is guaranteed to search all files that have been addressed by the
+last pull.  This might include a file that is not currently in your list of
+agenda files.  If you later use @kbd{C-c a ?} to regenerate the view, only
+the current agenda files will be searched.} using @kbd{C-c a ?}.
 
 @node History and Acknowledgments, Main Index, MobileOrg, Top
 @appendix History and acknowledgments
