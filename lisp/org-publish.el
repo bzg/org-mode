@@ -574,6 +574,24 @@ See `org-publish-org-to' to the list of arguments."
 See `org-publish-org-to' to the list of arguments."
   (org-publish-org-to "org" plist filename pub-dir))
 
+(defun org-publish-org-to-ascii (plist filename pub-dir)
+  "Publish an org file to ASCII.
+See `org-publish-org-to' to the list of arguments."
+  (org-publish-with-aux-preprocess-maybe
+    (org-publish-org-to "ascii" plist filename pub-dir)))
+
+(defun org-publish-org-to-latin1 (plist filename pub-dir)
+  "Publish an org file to Latin-1.
+See `org-publish-org-to' to the list of arguments."
+  (org-publish-with-aux-preprocess-maybe
+    (org-publish-org-to "latin1" plist filename pub-dir)))
+
+(defun org-publish-org-to-utf8 (plist filename pub-dir)
+  "Publish an org file to UTF-8.
+See `org-publish-org-to' to the list of arguments."
+  (org-publish-with-aux-preprocess-maybe
+    (org-publish-org-to "utf8" plist filename pub-dir)))
+
 (defun org-publish-attachment (plist filename pub-dir)
   "Publish a file with no transformation of any kind.
 See `org-publish-org-to' to the list of arguments."
