@@ -41,3 +41,21 @@
 #+results:
 : 4
 
+
+* excessive id links on tangling
+  :PROPERTIES:
+  :ID:       ef06fd7f-012b-4fde-87a2-2ae91504ea7e
+  :END:
+
+** no, don't give me an ID
+#+begin_src emacs-lisp :tangle no
+  (message "not to be tangled")
+#+end_src
+
+** yes, I'd love an ID
+   :PROPERTIES:
+   :ID:       ae7b55ca-9ef2-4d30-bd48-da30e35fd0f3
+   :END:
+#+begin_src emacs-lisp :tangle no
+  (message "for tangling")
+#+end_src

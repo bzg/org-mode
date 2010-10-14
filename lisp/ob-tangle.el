@@ -276,11 +276,12 @@ code blocks by language."
       (let* ((start-line (save-restriction (widen)
 					   (+ 1 (line-number-at-pos (point)))))
 	     (file (buffer-file-name))
-	     (link (progn (call-interactively 'org-store-link)
-                          (org-babel-clean-text-properties
-			   (car (pop org-stored-links)))))
              (info (org-babel-get-src-block-info))
 	     (params (nth 2 info))
+	     (link (unless (string= (cdr (assoc :tangle params)) "no")
+		     (progn (call-interactively 'org-store-link)
+			    (org-babel-clean-text-properties
+			     (car (pop org-stored-links))))))
              (source-name (intern (or (nth 4 info)
                                       (format "%s:%d"
 					      current-heading block-counter))))
