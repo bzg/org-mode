@@ -52,14 +52,10 @@
   (org-babel-expand-body:octave body params processed-params))
 (defun org-babel-expand-body:octave (body params &optional processed-params)
   "Expand BODY according to PARAMS, return the expanded body."
-  (let ((vars (nth 1 (or processed-params (org-babel-process-params params)))))
-    (concat
-     (mapconcat
-      (lambda (pair)
-        (format "%s=%s"
-                (car pair)
-                (org-babel-octave-var-to-octave (cdr pair))))
-      vars "\n") "\n" body "\n")))
+  (mapconcat
+   #'identity
+   (append (org-babel-octave-variable-assignments params processed-params)
+	   (list body)) "\n"))
 
 (defvar org-babel-matlab-with-emacs-link nil
   "If non-nil use matlab-shell-run-region for session evaluation.
@@ -114,6 +110,15 @@ end")
   "Prepare SESSION according to PARAMS."
   (org-babel-prep-session:octave session params 'matlab))
 
+(defun org-babel-octave-variable-assignments (params &optional processed-params)
+  "Return list of octave statements assigning the block's variables"
+  (mapcar
+   (lambda (pair)
+     (format "%s=%s"
+	     (car pair)
+	     (org-babel-octave-var-to-octave (cdr pair))))
+   (nth 1 (or processed-params (org-babel-process-params params)))))
+
 (defun org-babel-octave-var-to-octave (var)
   "Convert an emacs-lisp value into an octave variable.
 Converts an emacs-lisp variable into a string of octave code
@@ -126,13 +131,7 @@ specifying a variable of the same value."
 (defun org-babel-prep-session:octave (session params &optional matlabp)
   "Prepare SESSION according to the header arguments specified in PARAMS."
   (let* ((session (org-babel-octave-initiate-session session params matlabp))
-         (vars (org-babel-ref-variables params))
-         (var-lines (mapcar
-                     (lambda (pair)
-                       (format "%s=%s"
-                               (car pair)
-                               (org-babel-octave-var-to-octave (cdr pair))))
-                     vars)))
+	 (var-lines (org-babel-octave-variable-assignments params)))
     (org-babel-comint-in-buffer session
       (mapc (lambda (var)
               (end-of-line 1) (insert var) (comint-send-input nil t)
