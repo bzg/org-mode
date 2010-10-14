@@ -27,3 +27,17 @@
   <<noweb-example>>
   ;; noweb-tangle-end
 #+end_src
+
+* elisp forms in header arguments
+  :PROPERTIES:
+  :ID:       22d67284-bf14-4cdc-8319-f4bd876829d7
+  :var:      prop=(+ 2 2)
+  :END:
+
+#+begin_src emacs-lisp
+  prop
+#+end_src
+
+#+results:
+: 4
+
