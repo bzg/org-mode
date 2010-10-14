@@ -452,19 +452,19 @@ of the code block to the kill ring."
 	 (dir (cdr (assoc :dir params)))
 	 (default-directory
 	   (or (and dir (file-name-as-directory dir)) default-directory))
-	 (cmd (intern (format "org-babel-%s-initiate-session" lang)))
-	 (cmd2 (intern (concat "org-babel-prep-session:" lang))))
+	 (init-cmd (intern (format "org-babel-%s-initiate-session" lang)))
+	 (prep-cmd (intern (concat "org-babel-prep-session:" lang))))
     (if (and (stringp session) (string= session "none"))
 	(error "This block is not using a session!"))
-    (unless (fboundp cmd)
+    (unless (fboundp init-cmd)
       (error "No org-babel-initiate-session function for %s!" lang))
     (with-temp-buffer (insert (org-babel-trim body))
                       (copy-region-as-kill (point-min) (point-max)))
     (when arg
-      (unless (fboundp cmd2)
+      (unless (fboundp prep-cmd)
 	(error "No org-babel-prep-session function for %s!" lang))
-      (funcall cmd2 session params))
-    (funcall cmd session params)))
+      (funcall prep-cmd session params))
+    (funcall init-cmd session params)))
 
 ;;;###autoload
 (defun org-babel-switch-to-session (&optional arg info)
