@@ -6748,6 +6748,12 @@ This is important for non-interactive uses of the command."
 	    (cond
 	     (org-insert-heading-respect-content
 	      (org-end-of-subtree nil t)
+	      (when (featurep 'org-inlinetask)
+		(while (and (not (eobp))
+			    (looking-at "\\(\\*+\\)[ \t]+")
+			    (>= (length (match-string 1))
+				org-inlinetask-min-level))
+		  (org-end-of-subtree nil t)))
 	      (or (bolp) (newline))
 	      (or (org-previous-line-empty-p)
 		  (and blank (newline)))
