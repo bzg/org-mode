@@ -51,7 +51,7 @@ This will be passed to  `shell-command-on-region'")
   (mapconcat
    #'identity
    (append (org-babel-sh-variable-assignments params processed-params)
-	   (list body)) "\n")
+	   (list body)) "\n"))
 
 (defun org-babel-execute:sh (body params)
   "Execute a block of Shell commands with Babel.
