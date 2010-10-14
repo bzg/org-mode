@@ -858,9 +858,7 @@ may be specified at the top of the current buffer."
                     "\\([^ \f\t\n\r\v]+\\)[ \f\t\n\r\v]+\\([^ \f\t\n\r\v]+.*\\)"
                     arg)
 		   (cons (intern (concat ":" (match-string 1 arg)))
-                         (let ((raw (org-babel-chomp (match-string 2 arg))))
-                           (if (org-babel-number-p raw)
-                               raw (org-babel-read raw))))
+                         (org-babel-read (org-babel-chomp (match-string 2 arg))))
 		 (cons (intern (concat ":" arg)) nil)))
 	     (split-string (concat " " arg-string) "[ \f\t\n\r\v]+:" t)))))
 
