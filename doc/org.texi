@@ -7266,6 +7266,7 @@ associated with the item.
 @subsection Categories
 
 @cindex category
+@cindex #+CATEGORY
 The category is a broad label assigned to each agenda item.  By default,
 the category is simply derived from the file name, but you can also
 specify it with a special line in the buffer, like this@footnote{For
