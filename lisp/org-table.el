@@ -4258,7 +4258,7 @@ so you cannot specify parameters for it."
 		 (lambda (x)
 		   (if (eq x 'hline)
 		       "|----+----|"
-		     (concat "| " (mapconcat 'identity x " | ") " |")))
+		     (concat "| " (mapconcat 'org-html-expand x " | ") " |")))
 		 table)
 		splicep))
     (if (string-match "\n+\\'" html)
