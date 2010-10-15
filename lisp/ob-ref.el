@@ -57,13 +57,6 @@
 (declare-function org-at-table-p "org" (&optional table-type))
 (declare-function org-count "org" (CL-ITEM CL-SEQ))
 
-(defun org-babel-ref-variables (params)
-  "Convert PARAMS to variable names and values.
-Takes a parameter alist, and return an alist of variable names,
-and the emacs-lisp representation of the related value."
-  (mapcar (lambda (el) (org-babel-ref-parse (cdr el)))
-	  (org-babel-get-header params :var)))
-
 (defvar org-babel-ref-split-regexp
   "[ \f\t\n\r\v]*\\(.+?\\)[ \f\t\n\r\v]*=[ \f\t\n\r\v]*\\(.+\\)[ \f\t\n\r\v]*")
 

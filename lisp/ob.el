@@ -68,9 +68,7 @@
 (declare-function orgtbl-to-orgtbl "org-table" (table params))
 (declare-function org-babel-lob-get-info "ob-lob" nil)
 (declare-function org-babel-ref-split-args "ob-ref" (arg-string))
-(declare-function org-babel-ref-variables "ob-ref" (params))
-(declare-function org-babel-ref-resolve-reference "ob-ref"
-		  (ref &optional params))
+(declare-function org-babel-ref-parse "ob-ref" (assignment &optional params))
 (declare-function org-babel-lob-execute-maybe "ob-lob" ())
 (declare-function org-number-sequence "org-compat" (from &optional to inc))
 
@@ -142,9 +140,10 @@ remove code block execution from the C-c C-c keybinding."
   "Select only header argument of type KEY from a list.
 Optional argument OTHERS indicates that only the header that do
 not match KEY should be returned."
-  (delq nil (mapcar
-	     (lambda (p) (when ((if others #'not #'identity) (eq (car p) key)) p))
-	     params)))
+  (delq nil
+	(mapcar
+	 (lambda (p) (when (funcall (if others #'not #'identity) (eq (car p) key)) p))
+	 params)))
 
 (defun org-babel-get-src-block-info (&optional light)
   "Get information on the current source block.
@@ -180,8 +179,10 @@ Returns a list
     ;; resolve variable references
     (when (and info (not light))
       (setf (nth 2 info)
-	    (append (org-babel-ref-variables (nth 2 info))
-		    (org-babel-get-header (nth 2 info) :var 'other))))
+	    (let ((params (nth 2 info)))
+	      (append (mapcar (lambda (el) (org-babel-ref-parse (cdr el)))
+			      (org-babel-get-header params :var))
+		      (org-babel-get-header params :var 'other)))))
     info))
 
 (defun org-babel-confirm-evaluate (info)
@@ -891,7 +892,7 @@ may be specified at the top of the current buffer."
 Return a list (session vars result-params result-type colnames rownames)."
   (let* ((session (cdr (assoc :session params)))
          (vars-and-names (org-babel-disassemble-tables
-                          (org-babel-ref-variables params)
+                          (org-babel-get-header params :var)
                           (cdr (assoc :hlines params))
                           (cdr (assoc :colnames params))
                           (cdr (assoc :rownames params))))
