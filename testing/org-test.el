@@ -133,15 +133,15 @@ files."
 
 
 ;;; Navigation Functions
-(defjump 'org-test-jump
-  '(("lisp/\\1.el" . "testing/lisp/test-\\1.el")
-    ("lisp/\\1.el" . "testing/lisp/\\1.el/test.*.el")
-    ("contrib/lisp/\\1.el" . "testing/contrib/lisp/test-\\1.el")
-    ("contrib/lisp/\\1.el" . "testing/contrib/lisp/\\1.el/test.*.el")
-    ("testing/lisp/test-\\1.el" . "lisp/\\1.el")
-    ("testing/lisp/\\1.el" . "lisp/\\1.el/test.*.el")
-    ("testing/contrib/lisp/test-\\1.el" . "contrib/lisp/\\1.el")
-    ("testing/contrib/lisp/test-\\1.el" . "contrib/lisp/\\1.el/test.*.el"))
+(defjump org-test-jump
+  (("lisp/\\1.el" . "testing/lisp/test-\\1.el")
+   ("lisp/\\1.el" . "testing/lisp/\\1.el/test.*.el")
+   ("contrib/lisp/\\1.el" . "testing/contrib/lisp/test-\\1.el")
+   ("contrib/lisp/\\1.el" . "testing/contrib/lisp/\\1.el/test.*.el")
+   ("testing/lisp/test-\\1.el" . "lisp/\\1.el")
+   ("testing/lisp/\\1.el" . "lisp/\\1.el/test.*.el")
+   ("testing/contrib/lisp/test-\\1.el" . "contrib/lisp/\\1.el")
+   ("testing/contrib/lisp/test-\\1.el" . "contrib/lisp/\\1.el/test.*.el"))
   (concat org-base-dir "/")
   "Jump between org-mode files and their tests."
   (lambda (path)
