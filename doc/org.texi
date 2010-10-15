@@ -11296,7 +11296,7 @@ for information on the syntax of remote code block evaluation).
 @kindex C-c C-v l
 Code blocks located in any Org-mode file can be loaded into the ``Library of
 Babel'' with the @code{org-babel-lob-ingest} function, bound to @kbd{C-c C-v
-l}.
+i}.
 
 @node Languages, Header arguments, Library of Babel, Working With Source Code
 @section Languages
