@@ -295,7 +295,41 @@ testrelease:
 	git checkout master
 	git branch -D testrelease
 
+# The following target makes a full release fro the stuff that is
+# currently on master.  Do it like this:
+#
+#   make release TAG=7.01
+
 release:
+	git checkout maint
+	git merge -s recursive -X theirs master
+	UTILITIES/set-version.pl $(TAG)
+	git commit -a -m "Release $(TAG)"
+	make relup TAG=$(TAG)
+	make cleanrel
+	rm -rf org-$(TAG)
+	rm org-$(TAG)*.zip
+	rm org-$(TAG)*.tar.gz
+	make pushreleasetag TAG=$(TAG)
+	git push origin maint
+	git checkout master
+	git merge -s ours maint
+	UTILITIES/set-version.pl -o $(TAG)
+	git commit -a -m "Update website to show $(TAG) as current release"
+	git push
+	make updateweb
+
+# The following target makes a release, but from the studd that is on
+# maint, not from the stuff that is on master.  The idea is that it pushes
+# out a minor fix into a minor update, while development on master
+# already went full steam ahead.  To make a micro-relesse, cherry-pick
+# the necessary changes into maint, then run (with proper version number)
+# This is just like release, but we skip  the step which merges master
+# into maint.
+#
+#   make fixrelease TAG=7.01.02
+
+fixrelease:
 	git checkout maint
 	git merge -s recursive -X theirs master
 	UTILITIES/set-version.pl $(TAG)
