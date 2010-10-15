@@ -41,7 +41,6 @@
 #+results:
 : 4
 
-
 * excessive id links on tangling
   :PROPERTIES:
   :ID:       ef06fd7f-012b-4fde-87a2-2ae91504ea7e
@@ -59,3 +58,20 @@
 #+begin_src emacs-lisp :tangle no
   (message "for tangling")
 #+end_src
+* simple variable resolution
+  :PROPERTIES:
+  :ID:       f68821bc-7f49-4389-85b5-914791ee3718
+  :END:
+
+#+source: four
+#+begin_src emacs-lisp
+  (list 1 2 3 4)
+#+end_src
+
+#+begin_src emacs-lisp :var four=four
+  (length four)
+#+end_src
+
+#+results:
+: 4
+

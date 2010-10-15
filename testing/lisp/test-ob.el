@@ -36,13 +36,19 @@
     (let ((info (org-babel-get-src-block-info)))
       (should (string= "no" (cdr (assoc :tangle (nth 2 info))))))))
 
-;;; elisp forms in header arguments
 (ert-deftest test-org-babel-elisp-in-header-arguments ()
+  "Test execution of elisp forms in header arguments."
   ;; at the babel.org:elisp-forms-in-header-arguments header
   (org-test-at-id "22d67284-bf14-4cdc-8319-f4bd876829d7"
     (org-babel-next-src-block)
     (let ((info (org-babel-get-src-block-info)))
       (should (= 4 (org-babel-execute-src-block))))))
+
+(ert-deftest test-org-babel-simple-variable-resolution ()
+  "Test that simple variable resolution is working."
+  (org-test-at-id "f68821bc-7f49-4389-85b5-914791ee3718"
+    (org-babel-next-src-block 2)
+    (should (= 4 (org-babel-execute-src-block)))))
 
 (provide 'test-ob)
 
