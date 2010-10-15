@@ -182,7 +182,7 @@ Returns a list
 	      (append (mapcar (lambda (el) (cons :var (org-babel-ref-parse (cdr el))))
 			      (org-babel-get-header params :var))
 		      (org-babel-get-header params :var 'other)))))
-    (append info (list name indent))))
+    (when info (append info (list name indent)))))
 
 (defun org-babel-confirm-evaluate (info)
   "Confirm evaluation of the code block INFO.
