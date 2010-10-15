@@ -109,8 +109,15 @@ remove code block execution from the C-c C-c keybinding."
   "^[ \t]*#\\+\\(srcname\\|source\\|function\\):[ \t]*"
   "Regular expression used to match a source name line.")
 
+(defvar org-babel-multi-line-header-regexp
+  "^[ \t]*#\\+headers?:[ \t]*\\([^\n]*\\)$"
+  "Regular expression used to match multi-line header arguments.")
+
 (defvar org-babel-src-name-w-name-regexp
   (concat org-babel-src-name-regexp
+	  "\\("
+	  org-babel-multi-line-header-regexp
+	  "\\)*"
 	  "\\([^ ()\f\t\n\r\v]+\\)\\(\(\\(.*\\)\)\\|\\)")
   "Regular expression matching source name lines with a name.")
 
@@ -164,13 +171,20 @@ Returns a list
 	  (setq info (butlast info))
 	  (forward-line -1)
 	  (when (looking-at org-babel-src-name-w-name-regexp)
-	    (setq name (org-babel-clean-text-properties (match-string 2)))
-	    (when (match-string 4)
+	    (setq name (org-babel-clean-text-properties (match-string 3)))
+	    (when (match-string 5)
 	      (setf (nth 2 info) ;; merge functional-syntax vars and header-args
 		    (org-babel-merge-params
 		     (mapcar (lambda (ref) (cons :var ref))
-			     (org-babel-ref-split-args (match-string 4)))
-		     (nth 2 info))))))
+			     (org-babel-ref-split-args (match-string 5)))
+		     (nth 2 info)))))
+	  (goto-char head)
+	  (while (and (forward-line -1)
+		      (looking-at org-babel-multi-line-header-regexp))
+	    (setf (nth 2 info)
+		  (org-babel-merge-params
+		   (org-babel-parse-header-arguments (match-string 1))
+		   (nth 2 info)))))
       ;; inline source block
       (when (save-excursion (re-search-backward "[ \f\t\n\r\v]" nil t)
 			    (looking-at org-babel-inline-src-block-regexp))
@@ -1071,7 +1085,7 @@ org-babel-named-src-block-regexp."
     (when file (find-file file)) (goto-char (point-min))
     (let (names)
       (while (re-search-forward org-babel-src-name-w-name-regexp nil t)
-	(setq names (cons (org-babel-clean-text-properties (match-string 2))
+	(setq names (cons (org-babel-clean-text-properties (match-string 3))
 			  names)))
       names)))
 
@@ -1534,9 +1548,9 @@ parameters when merging lists."
 			 (let ((name (if (listp (cdr pair))
 					 (cadr pair)
 				       (string-match
-					".+=[ \t]*\\([^\f\n\r\v]+\\)$"
+					"^\\([^= \f\t\n\r\v]+\\)[ \t]*="
 					(cdr pair))
-				       (intern (match-string 1)))))
+				       (intern (match-string 1 (cdr pair))))))
 			   (unless (member name (mapcar #'car vars))
 			     (setq vars (cons (cons name (cdr pair)) vars)))))
                         (:results

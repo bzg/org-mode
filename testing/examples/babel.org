@@ -75,3 +75,38 @@
 #+results:
 : 4
 
+* multi-line header arguments
+  :PROPERTIES:
+  :ID:       b77c8857-6c76-4ea9-8a61-ddc2648d96c4
+  :END:
+
+#+headers: :var letters='(a b c d e f g)
+#+begin_src emacs-lisp :var numbers='(1 2 3 4 5 6 7)
+  (map 'list #'list numbers letters)
+#+end_src
+
+#+results:
+| 1 | a |
+| 2 | b |
+| 3 | c |
+| 4 | d |
+| 5 | e |
+| 6 | f |
+| 7 | g |
+
+* simple named code block
+  :PROPERTIES:
+  :ID:       0d82b52d-1bb9-4916-816b-2c67c8108dbb
+  :END:
+
+#+source: i-have-a-name
+#+begin_src emacs-lisp
+  42
+#+end_src
+
+#+results: 
+: 42
+
+#+results: i-have-a-name
+: 42
+
