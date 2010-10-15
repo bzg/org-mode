@@ -95,15 +95,10 @@ none ----- do not display either code or results upon export"
   (message "org-babel-exp processing...")
   (save-excursion
     (goto-char (match-beginning 0))
-    (let* ((raw-header (match-string 3))
-	   (info (org-babel-get-src-block-info))
+    (let* ((info (org-babel-get-src-block-info 'light))
 	   (lang (nth 0 info))
-	   (lang-headers
-	    (intern (concat "org-babel-default-header-args:" lang)))
-	   (raw-params
-	    (org-babel-parse-header-arguments
-	     (org-babel-clean-text-properties
-	      (mapconcat #'identity (cdr (split-string raw-header)) " "))))
+	   (raw-params (nth 2 info))
+	   (lang-headers (intern (concat "org-babel-default-header-args:" lang)))
 	   (heading (nth 4 (ignore-errors (org-heading-components))))
 	   (link (when org-current-export-file
 		   (org-make-link-string
@@ -114,10 +109,10 @@ none ----- do not display either code or results upon export"
       ;; bail if we couldn't get any info from the block
       (when info
 	(when link
-	    ;; resolve parameters in the original file so that headline
-	    ;; and file-wide parameters are included
-	    ;; attempt to go to the same heading in the original file
-	    (set-buffer (get-file-buffer org-current-export-file))
+	  ;; resolve parameters in the original file so that
+	  ;; headline and file-wide parameters are included, attempt
+	  ;; to go to the same heading in the original file
+	  (set-buffer (get-file-buffer org-current-export-file))
 	  (save-restriction
 	    (condition-case nil
 		(org-open-link-from-string link)
@@ -138,8 +133,8 @@ none ----- do not display either code or results upon export"
 		       (string= "yes" (cdr (assoc :noweb (nth 2 info)))))
 		  (org-babel-expand-noweb-references
 		   info (get-file-buffer org-current-export-file))
-		(nth 1 info))))
-      (org-babel-exp-do-export info 'block))))
+		(nth 1 info)))
+	(org-babel-exp-do-export info 'block)))))
 
 (defun org-babel-exp-inline-src-blocks (start end)
   "Process inline source blocks between START and END for export.

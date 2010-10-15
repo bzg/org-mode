@@ -50,7 +50,7 @@ To add files to this list use the `org-babel-lob-ingest' command."
   (interactive "f")
   (let ((lob-ingest-count 0))
     (org-babel-map-src-blocks file
-      (let* ((info (org-babel-get-src-block-info))
+      (let* ((info (org-babel-get-src-block-info 'light))
 	     (source-name (nth 4 info)))
 	(when source-name
 	  (setq source-name (intern source-name)

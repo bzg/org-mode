@@ -61,11 +61,8 @@
   "Convert PARAMS to variable names and values.
 Takes a parameter alist, and return an alist of variable names,
 and the emacs-lisp representation of the related value."
-  (let ((assignments
-	 (delq nil (mapcar (lambda (pair) (if (eq (car pair) :var) (cdr pair))) params)))
-	(others
-         (delq nil (mapcar (lambda (pair) (unless (eq :var (car pair)) pair)) params))))
-    (mapcar (lambda (assignment) (org-babel-ref-parse assignment)) assignments)))
+  (mapcar (lambda (el) (org-babel-ref-parse (cdr el)))
+	  (org-babel-get-header params :var)))
 
 (defvar org-babel-ref-split-regexp
   "[ \f\t\n\r\v]*\\(.+?\\)[ \f\t\n\r\v]*=[ \f\t\n\r\v]*\\(.+\\)[ \f\t\n\r\v]*")

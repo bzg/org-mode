@@ -138,34 +138,51 @@ remove code block execution from the C-c C-c keybinding."
    "{\\([^\f\n\r\v]+?\\)}\\)")
   "Regexp used to identify inline src-blocks.")
 
-(defun org-babel-get-src-block-info ()
+(defun org-babel-get-header (params key &optional others)
+  "Select only header argument of type KEY from a list.
+Optional argument OTHERS indicates that only the header that do
+not match KEY should be returned."
+  (delq nil (mapcar
+	     (lambda (p) (when ((if others #'not #'identity) (eq (car p) key)) p))
+	     params)))
+
+(defun org-babel-get-src-block-info (&optional light)
   "Get information on the current source block.
 
+Optional argument LIGHT does not resolve remote variable
+references; a process which could likely result in the execution
+of other code blocks.
+
 Returns a list
- (language body header-arguments-alist switches name function-args indent)."
-  (let ((case-fold-search t) head info name args indent)
+ (language body header-arguments-alist switches name indent)."
+  (let ((case-fold-search t) head info name indent)
+    ;; full code block
     (if (setq head (org-babel-where-is-src-block-head))
-        (save-excursion
+	(save-excursion
 	  (goto-char head)
 	  (setq info (org-babel-parse-src-block-match))
 	  (setq indent (car (last info)))
 	  (setq info (butlast info))
 	  (forward-line -1)
-	  (when (and (looking-at org-babel-src-name-w-name-regexp)
-		     (setq name (match-string 2)))
-	    (setq name (org-babel-clean-text-properties name))
-	    (when (setq args (match-string 4))
-	      (setq args (mapcar
-			  (lambda (ref) (cons :var ref))
-			  (org-babel-ref-split-args args)))
-	      (setf (nth 2 info)
-		    (org-babel-merge-params args (nth 2 info)))))
-	  (append info (list name args indent)))
-      (if (save-excursion ;; inline source block
-            (re-search-backward "[ \f\t\n\r\v]" nil t)
-            (looking-at org-babel-inline-src-block-regexp))
-          (org-babel-parse-inline-src-block-match)
-        nil))))
+	  (when (looking-at org-babel-src-name-w-name-regexp)
+	    (setq name (org-babel-clean-text-properties (match-string 2)))
+	    (when (match-string 4)
+	      (setf (nth 2 info) ;; merge functional-syntax vars and header-args
+		    (org-babel-merge-params
+		     (mapcar (lambda (ref) (cons :var ref))
+			     (org-babel-ref-split-args (match-string 4)))
+		     (nth 2 info)))))
+	  (append info (list name indent)))
+      ;; inline source block
+      (when (save-excursion (re-search-backward "[ \f\t\n\r\v]" nil t)
+			    (looking-at org-babel-inline-src-block-regexp))
+	(setq info (org-babel-parse-inline-src-block-match))))
+    ;; resolve variable references
+    (when (and info (not light))
+      (setf (nth 2 info)
+	    (append (org-babel-ref-variables (nth 2 info))
+		    (org-babel-get-header (nth 2 info) :var 'other))))
+    info))
 
 (defun org-babel-confirm-evaluate (info)
   "Confirm evaluation of the code block INFO.
