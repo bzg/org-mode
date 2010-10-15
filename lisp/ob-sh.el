@@ -152,12 +152,13 @@ If RESULT-TYPE equals 'output then return a list of the outputs
 of the statements in BODY, if RESULT-TYPE equals 'value then
 return the value of the last statement in BODY."
   ((lambda (results)
-     (if (or (member "scalar" result-params)
-	     (member "output" result-params))
-	 results
-       (let ((tmp-file (org-babel-temp-file "sh-")))
-	 (with-temp-file tmp-file (insert results))
-	 (org-babel-import-elisp-from-file tmp-file))))
+     (when results
+       (if (or (member "scalar" result-params)
+	       (member "output" result-params))
+	   results
+	 (let ((tmp-file (org-babel-temp-file "sh-")))
+	   (with-temp-file tmp-file (insert results))
+	   (org-babel-import-elisp-from-file tmp-file)))))
    (if (not session)
        (org-babel-eval org-babel-sh-command (org-babel-trim body))
      (mapconcat

@@ -29,6 +29,11 @@ unless the body of the tangled block does."
   (should (string-match "^[\n\r][\t ]*[\n\r]"
 			(org-babel-expand-body:sh "\n\necho 2" '()))))
 
+(ert-deftest test-ob-sh/dont-error-on-empty-results ()
+  "Was throwing an elisp error when shell blocks threw errors and
+returned empty results."
+  (should (null (org-babel-execute:sh "ls NoSuchFileOrDirectory.txt" nil))))
+
 (provide 'test-ob-sh)
 
 ;;; test-ob-sh.el ends here
