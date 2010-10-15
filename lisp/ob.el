@@ -170,8 +170,7 @@ Returns a list
 		    (org-babel-merge-params
 		     (mapcar (lambda (ref) (cons :var ref))
 			     (org-babel-ref-split-args (match-string 4)))
-		     (nth 2 info)))))
-	  (append info (list name indent)))
+		     (nth 2 info))))))
       ;; inline source block
       (when (save-excursion (re-search-backward "[ \f\t\n\r\v]" nil t)
 			    (looking-at org-babel-inline-src-block-regexp))
@@ -180,10 +179,10 @@ Returns a list
     (when (and info (not light))
       (setf (nth 2 info)
 	    (let ((params (nth 2 info)))
-	      (append (mapcar (lambda (el) (org-babel-ref-parse (cdr el)))
+	      (append (mapcar (lambda (el) (cons :var (org-babel-ref-parse (cdr el))))
 			      (org-babel-get-header params :var))
 		      (org-babel-get-header params :var 'other)))))
-    info))
+    (append info (list name indent))))
 
 (defun org-babel-confirm-evaluate (info)
   "Confirm evaluation of the code block INFO.
@@ -892,7 +891,7 @@ may be specified at the top of the current buffer."
 Return a list (session vars result-params result-type colnames rownames)."
   (let* ((session (cdr (assoc :session params)))
          (vars-and-names (org-babel-disassemble-tables
-                          (org-babel-get-header params :var)
+                          (mapcar #'cdr (org-babel-get-header params :var))
                           (cdr (assoc :hlines params))
                           (cdr (assoc :colnames params))
                           (cdr (assoc :rownames params))))
@@ -1508,7 +1507,7 @@ parameters when merging lists."
 	   ("output" "value")))
 	(exports-exclusive-groups
 	 '(("code" "results" "both" "none")))
-	params results exports tangle noweb cache vars var ref shebang comments)
+	params results exports tangle noweb cache vars shebang comments)
     (flet ((e-merge (exclusive-groups &rest result-params)
              ;; maintain exclusivity of mutually exclusive parameters
              (let (output)
@@ -1532,15 +1531,14 @@ parameters when merging lists."
               (mapc (lambda (pair)
                       (case (car pair)
                         (:var
-                         ;; we want only one specification per variable
-                         (when (string-match
-                                (concat "^\\([^= \f\t\n\r\v]+\\)[ \t]*="
-                                        "[ \t]*\\([^\f\n\r\v]+\\)$") (cdr pair))
-                           ;; TODO: When is this not true?
-                           (setq var (intern (match-string 1 (cdr pair)))
-                                 ref (match-string 2 (cdr pair))
-                                 vars (cons (cons var ref)
-                                            (assq-delete-all var vars)))))
+			 (let ((name (if (listp (cdr pair))
+					 (cadr pair)
+				       (string-match
+					".+=[ \t]*\\([^\f\n\r\v]+\\)$"
+					(cdr pair))
+				       (intern (match-string 1)))))
+			   (unless (member name (mapcar #'car vars))
+			     (setq vars (cons (cons name (cdr pair)) vars)))))
                         (:results
                          (setq results
 			       (e-merge results-exclusive-groups
@@ -1583,8 +1581,7 @@ parameters when merging lists."
                                      (assq-delete-all (car pair) params))))))
                     plist))
             plists))
-    (setq vars (mapcar (lambda (pair) (format "%s=%s" (car pair) (cdr pair))) vars))
-    (while vars (setq params (cons (cons :var (pop vars)) params)))
+    (while vars (setq params (cons (cons :var (cdr (pop vars))) params)))
     (cons (cons :comments (mapconcat 'identity comments " "))
           (cons (cons :shebang (mapconcat 'identity shebang " "))
                 (cons (cons :cache (mapconcat 'identity cache " "))
