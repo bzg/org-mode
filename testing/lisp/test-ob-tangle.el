@@ -43,6 +43,14 @@
 	(should-not (exp-p "no"))
 	(should (exp-p "tangle"))))))
 
+(ert-deftest ob-tangle/no-excessive-id-insertion-on-tangle ()
+  "Don't add IDs to headings without tangling code blocks."
+  (org-test-at-id "ae7b55ca-9ef2-4d30-bd48-da30e35fd0f3"
+    (org-babel-next-src-block)
+    (org-babel-tangle)
+    (org-babel-previous-src-block)
+    (should (null (org-id-get)))))
+
 (provide 'test-ob-tangle)
 
 ;;; test-ob-tangle.el ends here
