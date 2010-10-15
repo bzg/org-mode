@@ -6697,11 +6697,13 @@ This is important for non-interactive uses of the command."
     (when (or force-heading (not (org-insert-item)))
       (let* ((empty-line-p nil)
 	     (level nil)
+	     (on-heading (org-on-heading-p))
 	     (head (save-excursion
 		     (condition-case nil
 			 (progn
 			   (org-back-to-heading invisible-ok)
-			   (when (and (featurep 'org-inlinetask)
+			   (when (and (not on-heading)
+				      (featurep 'org-inlinetask)
 				      (integerp org-inlinetask-min-level)
 				      (>= (length (match-string 0))
 					  org-inlinetask-min-level))
