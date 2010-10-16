@@ -149,7 +149,8 @@ return nil."
 	    (beginning-of-line)
 	    (if (or (= (point) (point-min)) (= (point) (point-max)))
 		(error "reference not found"))))
-	(setq params (org-babel-merge-params params args '((:results . "silent"))))
+	(setq params (org-babel-merge-params
+		      params (org-babel-expand-variables args) '((:results . "silent"))))
 	(setq result
 	      (case type
 		('results-line (org-babel-read-result))
