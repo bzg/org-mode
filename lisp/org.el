@@ -6681,8 +6681,10 @@ frame is not changed."
   "Insert a new heading or item with same depth at point.
 If point is in a plain list and FORCE-HEADING is nil, create a new list item.
 If point is at the beginning of a headline, insert a sibling before the
-current headline.  If point is not at the beginning, do not split the line,
-but create the new headline after the current line.
+current headline.  If point is not at the beginning, split the line,
+create the new headline with the text in the current line after point
+\(but see also the variable `org-M-RET-may-split-line').
+
 When INVISIBLE-OK is set, stop at invisible headlines when going back.
 This is important for non-interactive uses of the command."
   (interactive "P")
