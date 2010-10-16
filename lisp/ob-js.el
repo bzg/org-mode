@@ -64,9 +64,9 @@
   "require('sys').print(require('sys').inspect(function(){%s}()));"
   "Javascript code to print value of body.")
 
-(defun org-babel-expand-body:js (body params &optional processed-params)
+(defun org-babel-expand-body:js (body params)
   "Expand BODY according to PARAMS, return the expanded body."
-  (let ((vars (nth 1 (or processed-params (org-babel-process-params params)))))
+  (let ((vars (mapcar #'cdr (org-babel-get-header params :var))))
     (concat
      (mapconcat ;; define any variables
       (lambda (pair) (format "var %s=%s;"
@@ -79,7 +79,7 @@ This function is called by `org-babel-execute-src-block'"
   (let* ((processed-params (org-babel-process-params params))
 	 (org-babel-js-cmd (or (cdr (assoc :cmd params)) org-babel-js-cmd))
          (result-type (nth 3 processed-params))
-         (full-body (org-babel-expand-body:js body params processed-params)))
+         (full-body (org-babel-expand-body:js body params)))
     (org-babel-js-read
      (if (not (string= (nth 0 processed-params) "none"))
 	 ;; session evaluation

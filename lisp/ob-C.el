@@ -64,20 +64,20 @@ is currently being evaluated.")
 called by `org-babel-execute-src-block'."
   (let ((org-babel-c-variant 'cpp)) (org-babel-C-execute body params)))
 
-(defun org-babel-expand-body:c++ (body params &optional processed-params)
+(defun org-babel-expand-body:c++ (body params)
   "Expand a block of C++ code with org-babel according to it's
 header arguments (calls `org-babel-C-expand')."
-  (let ((org-babel-c-variant 'cpp)) (org-babel-C-expand body params processed-params)))
+  (let ((org-babel-c-variant 'cpp)) (org-babel-C-expand body params)))
 
 (defun org-babel-execute:C (body params)
   "Execute a block of C code with org-babel.  This function is
 called by `org-babel-execute-src-block'."
   (let ((org-babel-c-variant 'c)) (org-babel-C-execute body params)))
 
-(defun org-babel-expand-body:c (body params &optional processed-params)
+(defun org-babel-expand-body:c (body params)
   "Expand a block of C code with org-babel according to it's
 header arguments (calls `org-babel-C-expand')."
-  (let ((org-babel-c-variant 'c)) (org-babel-C-expand body params processed-params)))
+  (let ((org-babel-c-variant 'c)) (org-babel-C-expand body params)))
 
 (defun org-babel-C-execute (body params)
   "This function should only be called by `org-babel-execute:C'
@@ -119,11 +119,10 @@ or `org-babel-execute:c++'."
        (org-babel-eval
 	(concat tmp-bin-file (if cmdline (concat " " cmdline) "")) "")))))
 
-(defun org-babel-C-expand (body params &optional processed-params)
+(defun org-babel-C-expand (body params)
   "Expand a block of C or C++ code with org-babel according to
 it's header arguments."
-  (let ((vars (nth 1 (or processed-params
-                          (org-babel-process-params params))))
+  (let ((vars (mapcar #'cdr (org-babel-get-header params :var)))
         (main-p (not (string= (cdr (assoc :main params)) "no")))
         (includes (or (cdr (assoc :includes params))
                       (org-babel-read (org-entry-get nil "includes" t))))

@@ -47,14 +47,14 @@
 (defvar org-babel-octave-shell-command "octave -q"
   "Shell command to run octave as an external process.")
 
-(defun org-babel-expand-body:matlab (body params &optional processed-params)
+(defun org-babel-expand-body:matlab (body params)
   "Expand BODY according to PARAMS, return the expanded body."
-  (org-babel-expand-body:octave body params processed-params))
-(defun org-babel-expand-body:octave (body params &optional processed-params)
+  (org-babel-expand-body:octave body params))
+(defun org-babel-expand-body:octave (body params)
   "Expand BODY according to PARAMS, return the expanded body."
   (mapconcat
    #'identity
-   (append (org-babel-octave-variable-assignments params processed-params)
+   (append (org-babel-octave-variable-assignments params)
 	   (list body)) "\n"))
 
 (defvar org-babel-matlab-with-emacs-link nil
@@ -94,8 +94,7 @@ end")
          (result-params (nth 2 processed-params))
          (result-type (nth 3 processed-params))
 	 (out-file (cdr (assoc :file params)))
-	 (augmented-body
-	  (org-babel-expand-body:octave body params processed-params))
+	 (augmented-body (org-babel-expand-body:octave body params))
 	 (result (org-babel-octave-evaluate
 		  session augmented-body result-type matlabp)))
     (or out-file
@@ -110,14 +109,14 @@ end")
   "Prepare SESSION according to PARAMS."
   (org-babel-prep-session:octave session params 'matlab))
 
-(defun org-babel-octave-variable-assignments (params &optional processed-params)
+(defun org-babel-octave-variable-assignments (params)
   "Return list of octave statements assigning the block's variables"
   (mapcar
    (lambda (pair)
      (format "%s=%s"
 	     (car pair)
 	     (org-babel-octave-var-to-octave (cdr pair))))
-   (nth 1 (or processed-params (org-babel-process-params params)))))
+   (mapcar #'cdr (org-babel-get-header params :var))))
 
 (defun org-babel-octave-var-to-octave (var)
   "Convert an emacs-lisp value into an octave variable.

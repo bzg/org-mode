@@ -55,10 +55,9 @@
   '((:results . "file") (:exports . "results"))
   "Default arguments when evaluating an Asymptote source block.")
 
-(defun org-babel-expand-body:asymptote (body params &optional processed-params)
+(defun org-babel-expand-body:asymptote (body params)
   "Expand BODY according to PARAMS, return the expanded body."
-  (let ((vars (nth 1 (or processed-params
-                          (org-babel-process-params params)))))
+  (let ((vars (mapcar #'cdr (org-babel-get-header params :var))))
     (concat (mapconcat 'org-babel-asymptote-var-to-asymptote vars "\n")
 	    "\n" body "\n")))
 
@@ -84,7 +83,7 @@ This function is called by `org-babel-execute-src-block'."
 		  " " cmdline
 		  " " (org-babel-process-file-name in-file))))
     (with-temp-file in-file
-      (insert (org-babel-expand-body:asymptote body params processed-params)))
+      (insert (org-babel-expand-body:asymptote body params)))
     (message cmd) (shell-command cmd)
     out-file))
 

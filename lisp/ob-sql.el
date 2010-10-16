@@ -50,7 +50,7 @@
 
 (defvar org-babel-default-header-args:sql '())
 
-(defun org-babel-expand-body:sql (body params &optional processed-params)
+(defun org-babel-expand-body:sql (body params)
   "Expand BODY according to PARAMS, return the expanded body." body)
 
 (defun org-babel-execute:sql (body params)

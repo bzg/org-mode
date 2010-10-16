@@ -49,9 +49,9 @@
 (defcustom org-babel-lisp-cmd "sbcl --script"
   "Name of command used to evaluate lisp blocks.")
 
-(defun org-babel-expand-body:lisp (body params &optional processed-params)
+(defun org-babel-expand-body:lisp (body params)
   "Expand BODY according to PARAMS, return the expanded body."
-  (let ((vars (nth 1 (or processed-params (org-babel-process-params params)))))
+  (let ((vars (mapcar #'cdr (org-babel-get-header params :var))))
     (if (> (length vars) 0)
         (concat "(let ("
                 (mapconcat
@@ -67,7 +67,7 @@ This function is called by `org-babel-execute-src-block'"
   (let* ((processed-params (org-babel-process-params params))
          (session (org-babel-lisp-initiate-session (first processed-params)))
          (result-type (fourth processed-params))
-         (full-body (org-babel-expand-body:lisp body params processed-params)))
+         (full-body (org-babel-expand-body:lisp body params)))
     (read
      (if session
          ;; session evaluation

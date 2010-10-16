@@ -414,7 +414,7 @@ block."
 		result))
 	  (setq call-process-region 'org-babel-call-process-region-original))))))
 
-(defun org-babel-expand-body:generic (body params &optional processed-params)
+(defun org-babel-expand-body:generic (body params)
   "Expand BODY with PARAMS.
 Expand a block of code with org-babel according to it's header
 arguments.  This generic implementation of body expansion is

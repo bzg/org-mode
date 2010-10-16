@@ -62,7 +62,7 @@
   '((:results . "file") (:exports . "results"))
   "Default arguments to use when evaluating a mscgen source block.")
 
-(defun org-babel-expand-body:mscgen (body params &optional processed-params)
+(defun org-babel-expand-body:mscgen (body params)
   "Expand BODY according to PARAMS, return the expanded body." body)
 
 (defun org-babel-execute:mscgen (body params)

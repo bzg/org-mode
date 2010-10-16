@@ -52,9 +52,9 @@
 (defvar org-babel-ruby-command "ruby"
   "Name of command to use for executing ruby code.")
 
-(defun org-babel-expand-body:ruby (body params &optional processed-params)
+(defun org-babel-expand-body:ruby (body params)
   "Expand BODY according to PARAMS, return the expanded body."
-  (let ((vars (nth 1 (or processed-params (org-babel-process-params params)))))
+  (let ((vars (mapcar #'cdr (org-babel-get-header params :var))))
     (concat
      (mapconcat ;; define any variables
       (lambda (pair)
@@ -70,8 +70,7 @@ This function is called by `org-babel-execute-src-block'."
          (session (org-babel-ruby-initiate-session (first processed-params)))
          (result-params (nth 2 processed-params))
          (result-type (nth 3 processed-params))
-         (full-body (org-babel-expand-body:ruby
-                     body params processed-params))
+         (full-body (org-babel-expand-body:ruby body params))
          (result (org-babel-ruby-evaluate
 		  session full-body result-type result-params)))
     (or (cdr (assoc :file params))

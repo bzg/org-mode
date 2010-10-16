@@ -36,10 +36,9 @@
 
 (declare-function orgtbl-to-generic "org-table" (table params))
 
-(defun org-babel-expand-body:emacs-lisp (body params &optional processed-params)
+(defun org-babel-expand-body:emacs-lisp (body params)
   "Expand BODY according to PARAMS, return the expanded body."
-  (let* ((processed-params (or processed-params
-			       (org-babel-process-params params)))
+  (let* ((processed-params (org-babel-process-params params))
          (vars (nth 1 processed-params))
          (result-params (nth 2 processed-params))
          (print-level nil) (print-length nil)
@@ -61,8 +60,7 @@
     (let ((processed-params (org-babel-process-params params)))
       (org-babel-reassemble-table
        (eval (read (format "(progn %s)"
-			   (org-babel-expand-body:emacs-lisp
-			    body params processed-params))))
+			   (org-babel-expand-body:emacs-lisp body params))))
        (org-babel-pick-name (nth 4 processed-params)
 			    (cdr (assoc :colnames params)))
        (org-babel-pick-name (nth 5 processed-params)

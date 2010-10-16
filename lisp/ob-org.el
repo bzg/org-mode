@@ -41,7 +41,7 @@
   "#+TITLE: default empty header\n"
   "Default header inserted during export of org blocks.")
 
-(defun org-babel-expand-body:org (body params &optional processed-params)
+(defun org-babel-expand-body:org (body params)
   "Expand BODY according to PARAMS, return the expanded body." body)
 
 (defun org-babel-execute:org (body params)

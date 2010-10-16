@@ -72,7 +72,7 @@ code."
         (cdr pair))))
    (mapcar #'cdr (org-babel-get-header params :var))))
 
-(defun org-babel-expand-body:gnuplot (body params &optional processed-params)
+(defun org-babel-expand-body:gnuplot (body params)
   "Expand BODY according to PARAMS, return the expanded body."
   (save-window-excursion
     (let* ((vars (org-babel-gnuplot-process-vars params))

@@ -51,7 +51,7 @@
 (defvar org-babel-R-command "R --slave --no-save"
   "Name of command to use for executing R code.")
 
-(defun org-babel-expand-body:R (body params &optional processed-params)
+(defun org-babel-expand-body:R (body params)
   "Expand BODY according to PARAMS, return the expanded body."
   (let (out-file (cdr (assoc :file params)))
     (mapconcat
@@ -76,7 +76,7 @@ This function is called by `org-babel-execute-src-block'."
 	   (colnames-p (cdr (assoc :colnames params)))
 	   (rownames-p (cdr (assoc :rownames params)))
 	   (out-file (cdr (assoc :file params)))
-	   (full-body (org-babel-expand-body:R body params processed-params))
+	   (full-body (org-babel-expand-body:R body params))
 	   (result
 	    (org-babel-R-evaluate
 	     session full-body result-type
@@ -108,10 +108,9 @@ This function is called by `org-babel-execute-src-block'."
 
 ;; helper functions
 
-(defun org-babel-R-variable-assignments (params &optional processed-params)
+(defun org-babel-R-variable-assignments (params)
   "Return list of R statements assigning the block's variables"
-  (let ((processed-params (or processed-params
-			      (org-babel-process-params params))))
+  (let ((processed-params (org-babel-process-params params)))
     (mapcar
      (lambda (pair)
        (org-babel-R-assign-elisp

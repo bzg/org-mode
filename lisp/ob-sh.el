@@ -45,12 +45,11 @@
   "Command used to invoke a shell.
 This will be passed to  `shell-command-on-region'")
 
-(defun org-babel-expand-body:sh (body params &optional processed-params)
+(defun org-babel-expand-body:sh (body params)
   "Expand BODY according to PARAMS, return the expanded body."
-  (mapconcat
-   #'identity
-   (append (org-babel-sh-variable-assignments params processed-params)
-	   (list body)) "\n"))
+  (mapconcat #'identity
+	     (append (org-babel-sh-variable-assignments params) (list body))
+	     "\n"))
 
 (defun org-babel-execute:sh (body params)
   "Execute a block of Shell commands with Babel.
@@ -58,8 +57,7 @@ This function is called by `org-babel-execute-src-block'."
   (let* ((processed-params (org-babel-process-params params))
          (session (org-babel-sh-initiate-session (nth 0 processed-params)))
          (result-params (nth 2 processed-params)) 
-         (full-body (org-babel-expand-body:sh
-                     body params processed-params)))
+         (full-body (org-babel-expand-body:sh body params)))
     (org-babel-reassemble-table
      (org-babel-sh-evaluate session full-body result-params)
      (org-babel-pick-name
@@ -88,7 +86,7 @@ This function is called by `org-babel-execute-src-block'."
 
 ;; helper functions
 
-(defun org-babel-sh-variable-assignments (params &optional processed-params)
+(defun org-babel-sh-variable-assignments (params)
   "Return list of shell statements assigning the block's variables"
   (let ((sep (cdr (assoc :separator params))))
     (mapcar
@@ -96,7 +94,7 @@ This function is called by `org-babel-execute-src-block'."
        (format "%s=%s"
 	       (car pair)
 	       (org-babel-sh-var-to-sh (cdr pair) sep)))
-     (nth 1 (or processed-params (org-babel-process-params params))))))
+     (mapcar #'cdr (org-babel-get-header params :var)))))
 
 (defun org-babel-sh-var-to-sh (var &optional sep)
   "Convert an elisp value to a shell variable.

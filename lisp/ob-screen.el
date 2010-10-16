@@ -45,7 +45,7 @@ In case you want to use a different screen than one selected by your $PATH")
   '((:results . "silent") (:session . "default") (:cmd . "sh") (:terminal . "xterm"))
   "Default arguments to use when running screen source blocks.")
 
-(defun org-babel-expand-body:screen (body params &optional processed-params)
+(defun org-babel-expand-body:screen (body params)
   "Expand BODY according to PARAMS, return the expanded body." body)
 
 (defun org-babel-execute:screen (body params)

@@ -46,10 +46,9 @@
   '((:results . "file") (:exports . "results"))
   "Default arguments to use when evaluating a dot source block.")
 
-(defun org-babel-expand-body:dot (body params &optional processed-params)
+(defun org-babel-expand-body:dot (body params)
   "Expand BODY according to PARAMS, return the expanded body."
-  (let ((vars (nth 1 (or processed-params
-			 (org-babel-process-params params)))))
+  (let ((vars (mapcar #'cdr (org-babel-get-header params :var))))
     (mapc
      (lambda (pair)
        (let ((name (symbol-name (car pair)))
@@ -73,7 +72,7 @@ This function is called by `org-babel-execute-src-block'."
 	 (cmd (or (cdr (assoc :cmd params)) "dot"))
 	 (in-file (org-babel-temp-file "dot-")))
     (with-temp-file in-file
-      (insert (org-babel-expand-body:dot body params processed-params)))
+      (insert (org-babel-expand-body:dot body params)))
     (org-babel-eval
      (concat cmd
 	     " " (org-babel-process-file-name in-file)

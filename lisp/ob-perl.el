@@ -38,9 +38,9 @@
 (defvar org-babel-perl-command "perl"
   "Name of command to use for executing perl code.")
 
-(defun org-babel-expand-body:perl (body params &optional processed-params)
+(defun org-babel-expand-body:perl (body params)
   "Expand BODY according to PARAMS, return the expanded body."
-  (let ((vars (nth 1 (or processed-params (org-babel-process-params params)))))
+  (let ((vars (mapcar #'cdr (org-babel-get-header params :var))))
     (concat
      (mapconcat ;; define any variables
       (lambda (pair)
@@ -57,8 +57,7 @@ This function is called by `org-babel-execute-src-block'."
          (vars (nth 1 processed-params))
          (result-params (nth 2 processed-params))
          (result-type (nth 3 processed-params))
-         (full-body (org-babel-expand-body:perl
-                     body params processed-params))
+         (full-body (org-babel-expand-body:perl body params))
 	(session (org-babel-perl-initiate-session session)))
     (org-babel-reassemble-table
      (org-babel-perl-evaluate session full-body result-type)

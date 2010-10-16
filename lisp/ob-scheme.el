@@ -59,9 +59,9 @@
   :group 'org-babel
   :type 'string)
 
-(defun org-babel-expand-body:scheme (body params &optional processed-params)
+(defun org-babel-expand-body:scheme (body params)
   "Expand BODY according to PARAMS, return the expanded body."
-  (let ((vars (nth 1 (or processed-params (org-babel-process-params params)))))
+  (let ((vars (org-babel-get-header params :var)))
     (if (> (length vars) 0)
         (concat "(let ("
                 (mapconcat
@@ -76,8 +76,9 @@
 This function is called by `org-babel-execute-src-block'"
   (let* ((processed-params (org-babel-process-params params))
          (result-type (nth 3 processed-params))
-	 (org-babel-scheme-cmd (or (cdr (assoc :scheme params)) org-babel-scheme-cmd))
-         (full-body (org-babel-expand-body:scheme body params processed-params)))
+	 (org-babel-scheme-cmd (or (cdr (assoc :scheme params))
+				   org-babel-scheme-cmd))
+         (full-body (org-babel-expand-body:scheme body params)))
     (read
      (if (not (string= (nth 0 processed-params) "none"))
          ;; session evaluation

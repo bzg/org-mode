@@ -48,14 +48,13 @@
   "Preferred python mode for use in running python interactively.")
 
 (defvar org-src-preserve-indentation)
-(defun org-babel-expand-body:python (body params &optional processed-params)
+(defun org-babel-expand-body:python (body params)
   "Expand BODY according to PARAMS, return the expanded body."
-  (let ((var-lines
-	 (org-babel-python-variable-assignments params processed-params)))
+  (let ((var-lines (org-babel-python-variable-assignments params)))
     (mapconcat
      #'identity
      (append
-      (org-babel-python-variable-assignments params processed-params)
+      (org-babel-python-variable-assignments params)
       (list
        (org-babel-trim body (if org-src-preserve-indentation "[\f\n\r\v]"))))
      "\n")))
@@ -67,8 +66,7 @@ This function is called by `org-babel-execute-src-block'."
          (session (org-babel-python-initiate-session (first processed-params)))
          (result-params (nth 2 processed-params))
          (result-type (nth 3 processed-params))
-         (full-body (org-babel-expand-body:python
-                     body params processed-params))
+         (full-body (org-babel-expand-body:python body params))
          (result (org-babel-python-evaluate
 		  session full-body result-type result-params)))
     (or (cdr (assoc :file params))
@@ -100,14 +98,14 @@ This function is called by `org-babel-execute-src-block'."
 
 ;; helper functions
 
-(defun org-babel-python-variable-assignments (params &optional processed-params)
+(defun org-babel-python-variable-assignments (params)
   "Return list of python statements assigning the block's variables"
   (mapcar
    (lambda (pair)
      (format "%s=%s"
 	     (car pair)
 	     (org-babel-python-var-to-python (cdr pair))))
-   (nth 1 (or processed-params (org-babel-process-params params)))))
+   (mapcar #'cdr (org-babel-get-header params :var))))
 
 (defun org-babel-python-var-to-python (var)
   "Convert an elisp value to a python variable.

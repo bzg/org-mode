@@ -59,9 +59,9 @@
 
 (defvar org-babel-haskell-eoe "\"org-babel-haskell-eoe\"")
 
-(defun org-babel-expand-body:haskell (body params &optional processed-params)
+(defun org-babel-expand-body:haskell (body params)
   "Expand BODY according to PARAMS, return the expanded body."
-  (let ((vars (nth 1 (or processed-params (org-babel-process-params params)))))
+  (let ((vars (mapcar #'cdr (org-babel-get-header params :var))))
     (concat
      (mapconcat
       (lambda (pair) (format "let %s = %s"
@@ -75,7 +75,7 @@
          (session (nth 0 processed-params))
          (vars (nth 1 processed-params))
          (result-type (nth 3 processed-params))
-         (full-body (org-babel-expand-body:haskell body params processed-params))
+         (full-body (org-babel-expand-body:haskell body params))
          (session (org-babel-haskell-initiate-session session params))
          (raw (org-babel-comint-with-output
 		  (session org-babel-haskell-eoe t full-body)
@@ -93,8 +93,10 @@
        (mapconcat #'identity (reverse (cdr results)) "\n"))
       ((equal result-type 'value)
        (org-babel-haskell-table-or-string (car results))))
-     (org-babel-pick-name (nth 4 processed-params) (cdr (assoc :colnames params)))
-     (org-babel-pick-name (nth 5 processed-params) (cdr (assoc :rownames params))))))
+     (org-babel-pick-name (nth 4 processed-params)
+			  (cdr (assoc :colnames params)))
+     (org-babel-pick-name (nth 5 processed-params)
+			  (cdr (assoc :rownames params))))))
 
 (defun org-babel-haskell-read-string (string)
   "Strip \\\"s from around a haskell string."
@@ -110,23 +112,20 @@ then create one.  Return the initialized session."
   (or (get-buffer "*haskell*")
       (save-window-excursion (run-haskell) (sleep-for 0.25) (current-buffer))))
 
-(defun org-babel-load-session:haskell
-  (session body params &optional processed-params)
+(defun org-babel-load-session:haskell (session body params)
   "Load BODY into SESSION."
   (save-window-excursion
-    (let* ((buffer (org-babel-prep-session:haskell
-		    session params processed-params))
+    (let* ((buffer (org-babel-prep-session:haskell session params))
            (load-file (concat (org-babel-temp-file "haskell-load-") ".hs")))
       (with-temp-buffer
         (insert body) (write-file load-file)
         (haskell-mode) (inferior-haskell-load-file))
       buffer)))
 
-(defun org-babel-prep-session:haskell
-  (session params &optional processed-params)
+(defun org-babel-prep-session:haskell (session params)
   "Prepare SESSION according to the header arguments in PARAMS."
   (save-window-excursion
-    (let ((pp (or processed-params (org-babel-process-params params)))
+    (let ((pp (org-babel-process-params params))
 	  (buffer (org-babel-haskell-initiate-session session)))
       (org-babel-comint-in-buffer buffer
       	(mapc

@@ -43,7 +43,7 @@
 
 (defvar org-babel-default-header-args:sass '())
 
-(defun org-babel-expand-body:sass (body params &optional processed-params)
+(defun org-babel-expand-body:sass (body params)
   "Expand BODY according to PARAMS, return the expanded body." body)
 
 (defun org-babel-execute:sass (body params)

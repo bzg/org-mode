@@ -51,20 +51,19 @@
 (defvar org-babel-ocaml-eoe-indicator "\"org-babel-ocaml-eoe\";;")
 (defvar org-babel-ocaml-eoe-output "org-babel-ocaml-eoe")
 
-(defun org-babel-expand-body:ocaml (body params &optional processed-params)
+(defun org-babel-expand-body:ocaml (body params)
   "Expand BODY according to PARAMS, return the expanded body."
-  (let ((vars (nth 1 (or processed-params (org-babel-process-params params)))))
-    (concat
-     (mapconcat
-      (lambda (pair) (format "let %s = %s;;" (car pair)
-			(org-babel-ocaml-elisp-to-ocaml (cdr pair))))
-      vars "\n") "\n" body "\n")))
+  (let ((vars (nth 1 (org-babel-process-params params))))
+    (concat (mapconcat
+	     (lambda (pair) (format "let %s = %s;;" (car pair)
+			       (org-babel-ocaml-elisp-to-ocaml (cdr pair))))
+	     vars "\n") "\n" body "\n")))
 
 (defun org-babel-execute:ocaml (body params)
   "Execute a block of Ocaml code with Babel."
   (let* ((processed-params (org-babel-process-params params))
          (vars (nth 1 processed-params))
-         (full-body (org-babel-expand-body:ocaml body params processed-params))
+         (full-body (org-babel-expand-body:ocaml body params))
          (session (org-babel-prep-session:ocaml
 		   (cdr (assoc :session params)) params))
          (raw (org-babel-comint-with-output

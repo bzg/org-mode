@@ -293,16 +293,16 @@ return the value of the last statement in BODY as elisp."
       (org-babel-clojure-evaluate-session buffer body result-type)
     (org-babel-clojure-evaluate-external-process buffer body result-type)))
 
-(defun org-babel-expand-body:clojure (body params &optional processed-params)
+(defun org-babel-expand-body:clojure (body params)
   "Expand BODY according to PARAMS, return the expanded body."
   (org-babel-clojure-build-full-form
-   body (nth 1 (or processed-params (org-babel-process-params params)))))
+   body (mapcar #'cdr (org-babel-get-header params :var))))
 
 (defun org-babel-execute:clojure (body params)
   "Execute a block of Clojure code."
   (require 'slime) (require 'swank-clojure)
   (let* ((processed-params (org-babel-process-params params))
-         (body (org-babel-expand-body:clojure body params processed-params))
+         (body (org-babel-expand-body:clojure body params))
          (session (org-babel-clojure-initiate-session
 		   (first processed-params))))
     (org-babel-reassemble-table
