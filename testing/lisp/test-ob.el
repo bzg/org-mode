@@ -64,6 +64,12 @@
       (should (equal 'a (cadr (assoc 1 results))))
       (should (equal 'd (cadr (assoc 4 results)))))))
 
+(ert-deftest test-org-babel/sha1-hash ()
+  (org-test-at-id "f68821bc-7f49-4389-85b5-914791ee3718"
+    (org-babel-next-src-block 2)
+    (should (string= "615946d1cd30c88c17ae6bf1d56a3f90232ddf78"
+		     (org-babel-sha1-hash)))))
+
 (provide 'test-ob)
 
 ;;; test-ob ends here

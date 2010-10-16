@@ -609,17 +609,24 @@ the current subtree."
 (defun org-babel-sha1-hash (&optional info)
   "Generate an sha1 hash based on the value of info."
   (interactive)
-  (let* ((info (or info (org-babel-get-src-block-info)))
+  (let* ((print-level nil)
+	 (info (or info (org-babel-get-src-block-info)))
          (hash (sha1
 		(format "%s-%s"
 			(mapconcat
-			 (lambda (arg)
-			   (if (stringp (cdr arg))
-			       (mapconcat
-				#'identity
-				(sort (split-string (cdr arg)) #'string<) " ")
-			     (cdr arg)))
-			 (nth 2 info) ":")
+			 #'identity
+			 (delq nil
+			       (mapcar
+				(lambda (arg)
+				  (let ((v (cdr arg)))
+				    (when (and v (not (and (sequencep v)
+							   (> (length v) 0))))
+				      (if (stringp v)
+					  (mapconcat #'identity
+						     (sort (split-string v)
+							   #'string<) " ")
+					(format "%S" v)))))
+				(nth 2 info))) ":")
 			(nth 1 info)))))
     (when (interactive-p) (message hash))
     hash))

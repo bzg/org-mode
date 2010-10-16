@@ -129,6 +129,7 @@
 
   (pascals-triangle n)
 #+end_src
+
 * calling code blocks from inside table
   :PROPERTIES:
   :ID:       6d2ff4ce-4489-4e2a-9c65-e3f71f77d975
@@ -138,6 +139,7 @@
 #+begin_src emacs-lisp :var n=9
   (sqrt n)
 #+end_src
+
 * executing an lob call line
   :PROPERTIES:
   :results:  silent
