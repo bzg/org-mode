@@ -712,7 +712,8 @@ already gone."
       (setq level 1)
       (if reversed
 	  (progn (goto-char (point-min))
-		 (outline-next-heading))
+		 (or (org-at-heading-p)
+		     (outline-next-heading)))
 	(goto-char (point-max))
 	(or (bolp) (insert "\n"))))
      (t
