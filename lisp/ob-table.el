@@ -115,10 +115,7 @@ example above."
 				 ',variables ", ")
                                 ")")))))
            (org-babel-execute-src-block
-            nil (list "emacs-lisp" "results"
-                      (org-babel-merge-params
-		       '((:results . "silent"))
-		       (org-babel-process-params params)))))
+            nil (list "emacs-lisp" "results" params) '((:results . "silent"))))
        ""))))
 
 (provide 'ob-table)
