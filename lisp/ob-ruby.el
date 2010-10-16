@@ -86,7 +86,7 @@ This function is called by `org-babel-execute-src-block'."
   "Prepare SESSION according to the header arguments specified in PARAMS."
   ;; (message "params=%S" params) ;; debugging
   (let* ((session (org-babel-ruby-initiate-session session))
-         (vars (org-babel-ref-variables params))
+         (vars (mapcar #'cdr (org-babel-get-header params :var)))
          (var-lines (mapcar ;; define any variables
                      (lambda (pair)
                        (format "%s=%s"

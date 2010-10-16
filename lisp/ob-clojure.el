@@ -45,7 +45,6 @@
 (declare-function slime-eval-async "ext:slime" (sexp &optional cont package))
 (declare-function slime-eval "ext:slime" (sexp &optional package))
 (declare-function swank-clojure-concat-paths "ext:slime" (paths))
-(declare-function org-babel-ref-variables "ext:slime" (params))
 (declare-function slime "ext:slime" (&optional command coding-system))
 (declare-function slime-output-buffer "ext:slime" (&optional noprompt))
 (declare-function slime-filter-buffers "ext:slime" (predicate))
@@ -155,7 +154,7 @@ code specifying a variable of the same value."
   "Prepare SESSION according to the header arguments specified in PARAMS."
   (require 'slime) (require 'swank-clojure)
   (let* ((session-buf (org-babel-clojure-initiate-session session))
-         (vars (org-babel-ref-variables params))
+         (vars (mapcar #'cdr (org-babel-get-header params :var)))
          (var-lines (mapcar ;; define any top level session variables
                      (lambda (pair)
                        (format "(def %s %s)\n" (car pair)

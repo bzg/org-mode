@@ -42,8 +42,9 @@
   "Sqlite specific header args.")
 
 (defun org-babel-expand-body:sqlite (body params &optional processed-params)
+  "Expand BODY according to the values of PARAMS."
   (org-babel-sqlite-expand-vars
-   body (or (nth 1 processed-params) (org-babel-ref-variables params))))
+   body (mapcar #'cdr (org-babel-get-header params :var))))
 
 (defvar org-babel-sqlite3-command "sqlite3")
 
@@ -51,7 +52,7 @@
   "Execute a block of Sqlite code with Babel.
 This function is called by `org-babel-execute-src-block'."
   (let ((result-params (split-string (or (cdr (assoc :results params)) "")))
-	(vars (org-babel-ref-variables params))
+	(vars (org-babel-get-header params :var))
 	(db (cdr (assoc :db params)))
 	(separator (cdr (assoc :separator params)))
 	(nullvalue (cdr (assoc :nullvalue params)))

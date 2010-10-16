@@ -104,7 +104,7 @@ This function is called by `org-babel-execute-src-block'"
 (defun org-babel-prep-session:scheme (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."
   (let* ((session (org-babel-scheme-initiate-session session))
-	 (vars (org-babel-ref-variables params))
+	 (vars (mapcar #'cdr (org-babel-get-header params :var)))
 	 (var-lines
 	  (mapcar
 	   (lambda (var) (format "%S" (print `(define ,(car var) ',(cdr var)))))

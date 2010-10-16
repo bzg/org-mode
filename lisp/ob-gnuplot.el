@@ -70,7 +70,7 @@ code."
           (org-babel-gnuplot-table-to-data
            (cdr pair) (org-babel-temp-file "gnuplot-") params)
         (cdr pair))))
-   (org-babel-ref-variables params)))
+   (mapcar #'cdr (org-babel-get-header params :var))))
 
 (defun org-babel-expand-body:gnuplot (body params &optional processed-params)
   "Expand BODY according to PARAMS, return the expanded body."
