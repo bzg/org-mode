@@ -175,22 +175,20 @@ Returns a list
 	  (setq info (org-babel-parse-src-block-match))
 	  (setq indent (car (last info)))
 	  (setq info (butlast info))
-	  (forward-line -1)
-	  (when (looking-at org-babel-src-name-w-name-regexp)
-	    (setq name (org-babel-clean-text-properties (match-string 3)))
-	    (when (match-string 5)
-	      (setf (nth 2 info) ;; merge functional-syntax vars and header-args
-		    (org-babel-merge-params
-		     (mapcar (lambda (ref) (cons :var ref))
-			     (org-babel-ref-split-args (match-string 5)))
-		     (nth 2 info)))))
-	  (goto-char head)
 	  (while (and (forward-line -1)
 		      (looking-at org-babel-multi-line-header-regexp))
 	    (setf (nth 2 info)
 		  (org-babel-merge-params
 		   (org-babel-parse-header-arguments (match-string 1))
-		   (nth 2 info)))))
+		   (nth 2 info))))
+	  (when (looking-at org-babel-src-name-w-name-regexp)
+	    (setq name (org-babel-clean-text-properties (match-string 4)))
+	    (when (match-string 5)
+	      (setf (nth 2 info) ;; merge functional-syntax vars and header-args
+		    (org-babel-merge-params
+		     (mapcar (lambda (ref) (cons :var ref))
+			     (org-babel-ref-split-args (match-string 5)))
+		     (nth 2 info))))))
       ;; inline source block
       (when (save-excursion (re-search-backward "[ \f\t\n\r\v]" nil t)
 			    (looking-at org-babel-inline-src-block-regexp))
@@ -1549,11 +1547,13 @@ parameters when merging lists."
                         (:var
 			 (let ((name (if (listp (cdr pair))
 					 (cadr pair)
-				       (string-match
-					"^\\([^= \f\t\n\r\v]+\\)[ \t]*="
-					(cdr pair))
-				       (intern (match-string 1 (cdr pair))))))
-			   (unless (member name (mapcar #'car vars))
+				       (and
+					(string-match
+					 "^\\([^= \f\t\n\r\v]+\\)[ \t]*="
+					 (cdr pair))
+					(intern (match-string 1 (cdr pair)))))))
+			   (when (and name
+				      (not (member name (mapcar #'car vars))))
 			     (setq vars (cons (cons name (cdr pair)) vars)))))
                         (:results
                          (setq results

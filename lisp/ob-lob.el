@@ -59,7 +59,8 @@ To add files to this list use the `org-babel-lob-ingest' command."
 		      (assq-delete-all source-name org-babel-library-of-babel))
 		lob-ingest-count (1+ lob-ingest-count)))))
     (message "%d src block%s added to Library of Babel"
-	     lob-ingest-count (if (> lob-ingest-count 1) "s" ""))))
+	     lob-ingest-count (if (> lob-ingest-count 1) "s" ""))
+    lob-ingest-count))
 
 (defconst org-babel-lob-call-aliases '("lob" "call")
   "Aliases to call a source block function.
