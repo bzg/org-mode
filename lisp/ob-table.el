@@ -118,7 +118,7 @@ example above."
             nil (list "emacs-lisp" "results"
                       (org-babel-merge-params
 		       '((:results . "silent"))
-		       (org-babel-expand-variables params)))))
+		       (org-babel-process-params params)))))
        ""))))
 
 (provide 'ob-table)
