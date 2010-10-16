@@ -152,6 +152,12 @@ not match KEY should be returned."
 	 (lambda (p) (when (funcall (if others #'not #'identity) (eq (car p) key)) p))
 	 params)))
 
+(defun org-babel-expand-variables (params)
+  "Expand variables in PARAMS."
+  (append (mapcar (lambda (el) (cons :var (org-babel-ref-parse (cdr el))))
+		  (org-babel-get-header params :var))
+	  (org-babel-get-header params :var 'other)))
+
 (defun org-babel-get-src-block-info (&optional light)
   "Get information on the current source block.
 
@@ -191,11 +197,7 @@ Returns a list
 	(setq info (org-babel-parse-inline-src-block-match))))
     ;; resolve variable references
     (when (and info (not light))
-      (setf (nth 2 info)
-	    (let ((params (nth 2 info)))
-	      (append (mapcar (lambda (el) (cons :var (org-babel-ref-parse (cdr el))))
-			      (org-babel-get-header params :var))
-		      (org-babel-get-header params :var 'other)))))
+      (setf (nth 2 info) (org-babel-expand-variables (nth 2 info))))
     (when info (append info (list name indent)))))
 
 (defun org-babel-confirm-evaluate (info)
