@@ -357,16 +357,18 @@ block."
   (let ((info (or info (org-babel-get-src-block-info))))
     (when (org-babel-confirm-evaluate info)
       (let* ((lang (nth 0 info))
-	     (params (setf
-		      (nth 2 info)
-		      (sort (org-babel-merge-params (nth 2 info) params)
-			    (lambda (el1 el2) (string< (symbol-name (car el1))
-						  (symbol-name (car el2)))))))
-	     (new-hash
-	      (if (and (cdr (assoc :cache params))
-		       (string= "yes" (cdr (assoc :cache params))))
-		  (org-babel-sha1-hash info)))
-	     (old-hash (org-babel-result-hash info))
+	     (params (org-babel-merge-params (nth 2 info) params))
+	     (cache? (and (cdr (assoc :cache params))
+			  (string= "yes" (cdr (assoc :cache params)))))
+	     (params (setf (nth 2 info)
+			   (if cache?
+			       (sort params
+				     (lambda (el1 el2)
+				       (string< (symbol-name (car el1))
+						(symbol-name (car el2)))))
+			     params)))
+	     (new-hash (when cache? (org-babel-sha1-hash info)))
+	     (old-hash (when cache? (org-babel-result-hash info)))
 	     (body (setf (nth 1 info)
 			 (if (and (cdr (assoc :noweb params))
 				  (string= "yes" (cdr (assoc :noweb params))))
