@@ -109,12 +109,10 @@ return nil."
       (when (string-match "^\\(.+?\\)\(\\(.*\\)\)$" ref)
         (setq new-refere (match-string 1 ref))
         (setq new-referent (match-string 2 ref))
-        ;; (message "new-refere=%S, new-referent=%S" new-refere new-referent) ;; debugging
         (when (> (length new-refere) 0)
           (if (> (length new-referent) 0)
               (setq args (mapcar (lambda (ref) (cons :var ref))
                                  (org-babel-ref-split-args new-referent))))
-          ;; (message "args=%S" args) ;; debugging
           (setq ref new-refere)))
       (when (string-match "^\\(.+\\):\\(.+\\)$" ref)
         (setq split-file (match-string 1 ref))
@@ -123,7 +121,8 @@ return nil."
       (save-restriction
 	(widen)
 	(goto-char (point-min))
-	(if (let ((result_regexp (concat "^[ \t]*#\\+\\(TBLNAME\\|RESNAME\\|RESULTS\\):[ \t]*"
+	(if (let ((result_regexp (concat "^[ \t]*#\\+\\(TBLNAME\\|RESNAME"
+					 "\\|RESULTS\\):[ \t]*"
 					 (regexp-quote ref) "[ \t]*$"))
 		  (regexp (concat org-babel-src-name-regexp
 				  (regexp-quote ref) "\\(\(.*\)\\)?" "[ \t]*$")))
@@ -134,7 +133,8 @@ return nil."
 		  (re-search-forward regexp nil t)
 		  (re-search-backward regexp nil t)
 		  ;; check the Library of Babel
-		  (setq lob-info (cdr (assoc (intern ref) org-babel-library-of-babel)))))
+		  (setq lob-info (cdr (assoc (intern ref)
+					     org-babel-library-of-babel)))))
 	    (unless lob-info (goto-char (match-beginning 0)))
 	  ;; ;; TODO: allow searching for names in other buffers
 	  ;; (setq id-loc (org-id-find ref 'marker)
@@ -149,14 +149,15 @@ return nil."
 	    (beginning-of-line)
 	    (if (or (= (point) (point-min)) (= (point) (point-max)))
 		(error "reference not found"))))
-	(setq params (org-babel-process-params '((:results . "silent"))))
 	(setq result
 	      (case type
 		('results-line (org-babel-read-result))
 		('table (org-babel-read-table))
 		('file (org-babel-read-link))
-		('source-block (org-babel-execute-src-block nil nil params))
-		('lob (org-babel-execute-src-block nil lob-info params))))
+		('source-block (org-babel-execute-src-block
+				nil nil '((:results . "silent"))))
+		('lob (org-babel-execute-src-block
+		       nil lob-info '((:results . "silent"))))))
 	(if (symbolp result)
 	    (format "%S" result)
 	  (if (and index (listp result))
