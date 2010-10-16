@@ -149,15 +149,14 @@ return nil."
 	    (beginning-of-line)
 	    (if (or (= (point) (point-min)) (= (point) (point-max)))
 		(error "reference not found"))))
-	(setq result
-	      (case type
-		('results-line (org-babel-read-result))
-		('table (org-babel-read-table))
-		('file (org-babel-read-link))
-		('source-block (org-babel-execute-src-block
-				nil nil '((:results . "silent"))))
-		('lob (org-babel-execute-src-block
-		       nil lob-info '((:results . "silent"))))))
+	(let ((params (append args '((:results . "silent")))))
+	  (setq result
+		(case type
+		  ('results-line (org-babel-read-result))
+		  ('table (org-babel-read-table))
+		  ('file (org-babel-read-link))
+		  ('source-block (org-babel-execute-src-block nil nil params))
+		  ('lob (org-babel-execute-src-block nil lob-info params)))))
 	(if (symbolp result)
 	    (format "%S" result)
 	  (if (and index (listp result))
