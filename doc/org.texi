@@ -1072,8 +1072,7 @@ the content of that line is made the new heading.  If the command is
 used at the end of a folded subtree (i.e. behind the ellipses at the end
 of a headline), then a headline like the current one will be inserted
 after the end of the subtree.
-@kindex C-@key{RET}
-@item C-@key{RET}
+@orgcmd{C-@key{RET},org-insert-heading-respect-content}
 Just like @kbd{M-@key{RET}}, except when adding a new heading below the
 current heading, the new heading is placed after the body instead of before
 it.  This command works from anywhere in the entry.
