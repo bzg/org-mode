@@ -101,14 +101,15 @@ if so then run the appropriate source block from the Library."
   
 (defun org-babel-lob-execute (info)
   "Execute the lob call specified by INFO."
-  (let ((params (org-babel-merge-params
-		 org-babel-default-header-args
-		 (org-babel-params-from-buffer)
-                 (org-babel-params-from-properties)
-		 (org-babel-parse-header-arguments
-		  (org-babel-clean-text-properties
-		   (concat ":var results="
-			   (mapconcat #'identity (butlast info) " ")))))))
+  (let ((params (org-babel-expand-variables
+		 (org-babel-merge-params
+		  org-babel-default-header-args
+		  (org-babel-params-from-buffer)
+		  (org-babel-params-from-properties)
+		  (org-babel-parse-header-arguments
+		   (org-babel-clean-text-properties
+		    (concat ":var results="
+			    (mapconcat #'identity (butlast info) " "))))))))
     (org-babel-execute-src-block
      nil (list "emacs-lisp" "results" params nil nil (nth 2 info)))))
 

@@ -138,3 +138,13 @@
 #+begin_src emacs-lisp :var n=9
   (sqrt n)
 #+end_src
+* executing an lob call line
+  :PROPERTIES:
+  :results:  silent
+  :END:
+
+69fbe856-ca9c-4f20-9146-826d2f488c1d
+#+call: echo(input="testing")
+#+call: echo(input="testing") :results vector
+#+call: echo() :var input="testing"
+#+call: echo() :var input="testing" :results vector

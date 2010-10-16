@@ -1543,72 +1543,60 @@ parameters when merging lists."
                              new-params))
                      result-params)
                output)))
-      (mapc (lambda (plist)
-              (mapc (lambda (pair)
-                      (case (car pair)
-                        (:var
-			 (let ((name (if (listp (cdr pair))
-					 (cadr pair)
-				       (and
-					(string-match
-					 "^\\([^= \f\t\n\r\v]+\\)[ \t]*="
-					 (cdr pair))
-					(intern (match-string 1 (cdr pair)))))))
-			   (when name
-			     (setq vars
-				   (cons
-				    pair
-				    (if (member name (mapcar #'car vars))
-					(delq nil
-					      (mapcar
-					       (lambda (p)
-						 (unless (equal (car p) name)
-						   p))
-					       vars))
-				      vars))))))
-                        (:results
-                         (setq results
-			       (e-merge results-exclusive-groups
-                                        results (split-string (cdr pair)))))
-			(:file
-			 (when (cdr pair)
-			   (setq results (e-merge results-exclusive-groups
-                                                  results '("file")))
-			   (unless (or (member "both" exports)
-                                       (member "none" exports)
-                                       (member "code" exports))
-			     (setq exports (e-merge exports-exclusive-groups
-                                                    exports '("results"))))
-			   (setq params
-                                 (cons pair
-                                       (assq-delete-all (car pair) params)))))
-                        (:exports
-                         (setq exports
-                               (e-merge exports-exclusive-groups
-                                        exports (split-string (cdr pair)))))
-                        (:tangle ;; take the latest -- always overwrite
-                         (setq tangle (or (list (cdr pair)) tangle)))
-                        (:noweb
-                         (setq noweb
-                               (e-merge '(("yes" "no")) noweb
-                                        (split-string (or (cdr pair) "")))))
-                        (:cache
-                         (setq cache
-                               (e-merge '(("yes" "no")) cache
-                                        (split-string (or (cdr pair) "")))))
-                        (:shebang ;; take the latest -- always overwrite
-                         (setq shebang (or (list (cdr pair)) shebang)))
-                        (:comments
-                         (setq comments
-                               (e-merge '(("yes" "no")) comments
-                                        (split-string (or (cdr pair) "")))))
-                        (t ;; replace: this covers e.g. :session
-                         (setq params
-                               (cons pair
-                                     (assq-delete-all (car pair) params))))))
-                    plist))
-            plists))
-    (while vars (setq params (cons (cons :var (cdr (pop vars))) params)))
+      (mapc
+       (lambda (plist)
+	 (mapc
+	  (lambda (pair)
+	    (case (car pair)
+	      (:var
+	       (let ((name (if (listp (cdr pair))
+			       (cadr pair)
+			     (and (string-match "^\\([^= \f\t\n\r\v]+\\)[ \t]*="
+						(cdr pair))
+				  (intern (match-string 1 (cdr pair)))))))
+		 (when name
+		   (setq vars
+			 (cons (cons name pair)
+			       (if (member name (mapcar #'car vars))
+				   (delq nil
+					 (mapcar
+					  (lambda (p) (unless (equal (car p) name) p))
+					  vars))
+				 vars))))))
+	      (:results
+	       (setq results (e-merge results-exclusive-groups
+				      results (split-string (cdr pair)))))
+	      (:file
+	       (when (cdr pair)
+		 (setq results (e-merge results-exclusive-groups
+					results '("file")))
+		 (unless (or (member "both" exports)
+			     (member "none" exports)
+			     (member "code" exports))
+		   (setq exports (e-merge exports-exclusive-groups
+					  exports '("results"))))
+		 (setq params (cons pair (assq-delete-all (car pair) params)))))
+	      (:exports
+	       (setq exports (e-merge exports-exclusive-groups
+				      exports (split-string (cdr pair)))))
+	      (:tangle ;; take the latest -- always overwrite
+	       (setq tangle (or (list (cdr pair)) tangle)))
+	      (:noweb
+	       (setq noweb (e-merge '(("yes" "no")) noweb
+				    (split-string (or (cdr pair) "")))))
+	      (:cache
+	       (setq cache (e-merge '(("yes" "no")) cache
+				    (split-string (or (cdr pair) "")))))
+	      (:shebang ;; take the latest -- always overwrite
+	       (setq shebang (or (list (cdr pair)) shebang)))
+	      (:comments
+	       (setq comments (e-merge '(("yes" "no")) comments
+				       (split-string (or (cdr pair) "")))))
+	      (t ;; replace: this covers e.g. :session
+	       (setq params (cons pair (assq-delete-all (car pair) params))))))
+	  plist))
+       plists))
+    (while vars (setq params (cons (cons :var (cddr (pop vars))) params)))
     (cons (cons :comments (mapconcat 'identity comments " "))
           (cons (cons :shebang (mapconcat 'identity shebang " "))
                 (cons (cons :cache (mapconcat 'identity cache " "))
