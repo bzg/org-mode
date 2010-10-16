@@ -1552,9 +1552,18 @@ parameters when merging lists."
 					 "^\\([^= \f\t\n\r\v]+\\)[ \t]*="
 					 (cdr pair))
 					(intern (match-string 1 (cdr pair)))))))
-			   (when (and name
-				      (not (member name (mapcar #'car vars))))
-			     (setq vars (cons (cons name (cdr pair)) vars)))))
+			   (when name
+			     (setq vars
+				   (cons
+				    pair
+				    (if (member name (mapcar #'car vars))
+					(delq nil
+					      (mapcar
+					       (lambda (p)
+						 (unless (equal (car p) name)
+						   p))
+					       vars))
+				      vars))))))
                         (:results
                          (setq results
 			       (e-merge results-exclusive-groups
