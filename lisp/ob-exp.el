@@ -286,7 +286,7 @@ inhibit insertion of results into the buffer."
      (let ((lang (nth 0 info))
 	   (body (nth 1 info)))
        (setf (nth 2 info) (org-babel-exp-in-export-file
-			   (org-babel-expand-variables (nth 2 info))))
+			   (org-babel-process-params (nth 2 info))))
        ;; skip code blocks which we can't evaluate
        (when (fboundp (intern (concat "org-babel-execute:" lang)))
 	 (if (equal type 'inline)

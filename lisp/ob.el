@@ -68,7 +68,7 @@
 (declare-function orgtbl-to-orgtbl "org-table" (table params))
 (declare-function org-babel-lob-get-info "ob-lob" nil)
 (declare-function org-babel-ref-split-args "ob-ref" (arg-string))
-(declare-function org-babel-ref-parse "ob-ref" (assignment &optional params))
+(declare-function org-babel-ref-parse "ob-ref" (assignment))
 (declare-function org-babel-lob-execute-maybe "ob-lob" ())
 (declare-function org-number-sequence "org-compat" (from &optional to inc))
 
@@ -152,12 +152,6 @@ not match KEY should be returned."
 	 (lambda (p) (when (funcall (if others #'not #'identity) (eq (car p) key)) p))
 	 params)))
 
-(defun org-babel-expand-variables (params)
-  "Expand variables in PARAMS."
-  (append (mapcar (lambda (el) (cons :var (org-babel-ref-parse (cdr el))))
-		  (org-babel-get-header params :var))
-	  (org-babel-get-header params :var 'other)))
-
 (defun org-babel-get-src-block-info (&optional light)
   "Get information on the current source block.
 
@@ -193,9 +187,9 @@ Returns a list
       (when (save-excursion (re-search-backward "[ \f\t\n\r\v]" nil t)
 			    (looking-at org-babel-inline-src-block-regexp))
 	(setq info (org-babel-parse-inline-src-block-match))))
-    ;; resolve variable references
+    ;; resolve variable references and add summary parameters
     (when (and info (not light))
-      (setf (nth 2 info) (org-babel-expand-variables (nth 2 info))))
+      (setf (nth 2 info) (org-babel-process-params (nth 2 info))))
     (when info (append info (list name indent)))))
 
 (defun org-babel-confirm-evaluate (info)
@@ -281,7 +275,7 @@ then run `org-babel-pop-to-session'."
 
 (defconst org-babel-header-arg-names
   '(cache cmdline colnames dir exports file noweb results
-    session tangle var eval noeval comments)
+	  session tangle var eval noeval comments)
   "Common header arguments used by org-babel.
 Note that individual languages may define their own language
 specific header arguments as well.")
@@ -357,7 +351,10 @@ block."
   (let ((info (or info (org-babel-get-src-block-info))))
     (when (org-babel-confirm-evaluate info)
       (let* ((lang (nth 0 info))
-	     (params (org-babel-merge-params (nth 2 info) params))
+	     (params (if params
+			 (org-babel-process-params
+			  (org-babel-merge-params (nth 2 info) params))
+		       (nth 2 info)))
 	     (cache? (and (cdr (assoc :cache params))
 			  (string= "yes" (cdr (assoc :cache params)))))
 	     (params (setf (nth 2 info)
@@ -374,10 +371,6 @@ block."
 				  (string= "yes" (cdr (assoc :noweb params))))
 			     (org-babel-expand-noweb-references info)
 			   (nth 1 info))))
-	     (result-params (split-string (or (cdr (assoc :results params)) "")))
-	     (result-type (cond ((member "output" result-params) 'output)
-				((member "value" result-params) 'value)
-				(t 'value)))
 	     (cmd (intern (concat "org-babel-execute:" lang)))
 	     (dir (cdr (assoc :dir params)))
 	     (default-directory
@@ -390,7 +383,7 @@ block."
 	     result)
 	(unwind-protect
 	    (flet ((call-process-region (&rest args)
-		    (apply 'org-babel-tramp-handle-call-process-region args)))
+					(apply 'org-babel-tramp-handle-call-process-region args)))
 	      (unless (fboundp cmd)
 		(error "No org-babel-execute function for %s!" lang))
 	      (if (and (not arg) new-hash (equal new-hash old-hash))
@@ -513,20 +506,20 @@ with a prefix argument then this is passed on to
 
 ;;;###autoload
 (defun org-babel-switch-to-session-with-code (&optional arg info)
-    "Switch to code buffer and display session."
-    (interactive "P")
-    (flet ((swap-windows
-	    ()
-	    (let ((other-window-buffer (window-buffer (next-window))))
-	      (set-window-buffer (next-window) (current-buffer))
-	      (set-window-buffer (selected-window) other-window-buffer))
-	    (other-window 1)))
-      (let ((info (org-babel-get-src-block-info))
-	    (org-src-window-setup 'reorganize-frame))
-	(save-excursion
-	  (org-babel-switch-to-session arg info))
-	(org-edit-src-code))
-      (swap-windows)))
+  "Switch to code buffer and display session."
+  (interactive "P")
+  (flet ((swap-windows
+	  ()
+	  (let ((other-window-buffer (window-buffer (next-window))))
+	    (set-window-buffer (next-window) (current-buffer))
+	    (set-window-buffer (selected-window) other-window-buffer))
+	  (other-window 1)))
+    (let ((info (org-babel-get-src-block-info))
+	  (org-src-window-setup 'reorganize-frame))
+      (save-excursion
+	(org-babel-switch-to-session arg info))
+      (org-edit-src-code))
+    (swap-windows)))
 
 (defmacro org-babel-do-in-edit-buffer (&rest body)
   "Evaluate BODY in edit buffer if there is a code block at point.
@@ -750,7 +743,7 @@ portions of results lines."
 ;; Remove overlays when changing major mode
 (add-hook 'org-mode-hook
 	  (lambda () (org-add-hook 'change-major-mode-hook
-			      'org-babel-show-result-all 'append 'local)))
+				   'org-babel-show-result-all 'append 'local)))
 
 (defmacro org-babel-map-src-blocks (file &rest body)
   "Evaluate BODY forms on each source-block in FILE.
@@ -902,23 +895,27 @@ may be specified at the top of the current buffer."
 	     (split-string (concat " " arg-string) "[ \f\t\n\r\v]+:" t)))))
 
 (defun org-babel-process-params (params)
-  "Parse params and resolve references.
-
-Return a list (session vars result-params result-type colnames rownames)."
-  (let* ((session (cdr (assoc :session params)))
-         (vars-and-names (org-babel-disassemble-tables
-                          (mapcar #'cdr (org-babel-get-header params :var))
-                          (cdr (assoc :hlines params))
-                          (cdr (assoc :colnames params))
-                          (cdr (assoc :rownames params))))
-         (vars     (car   vars-and-names))
-         (colnames (cadr  vars-and-names))
-         (rownames (caddr vars-and-names))
-	 (result-params (split-string (or (cdr (assoc :results params)) "")))
-	 (result-type (cond ((member "output" result-params) 'output)
-			    ((member "value" result-params) 'value)
-			    (t 'value))))
-    (list session vars result-params result-type colnames rownames)))
+  "Expand variables in PARAMS and add summary parameters."
+  (let ((vars-and-names (org-babel-disassemble-tables
+			 (mapcar
+			  (lambda (el) (cons :var (if (consp (cdr el))
+						 (cdr el)
+					       (org-babel-ref-parse (cdr el)))))
+			  (org-babel-get-header params :var))
+			 (cdr (assoc :hlines params))
+			 (cdr (assoc :colnames params))
+			 (cdr (assoc :rownames params))))
+	(result-params (split-string (or (cdr (assoc :results params)) ""))))
+    (append
+     (car vars-and-names)
+     (list
+      (cons :colname-names (cadr  vars-and-names))
+      (cons :rowname-names (caddr vars-and-names))
+      (cons :result-params result-params)
+      (cons :results-type  (cond ((member "output" result-params) 'output)
+				 ((member "value" result-params) 'value)
+				 (t 'value))))
+     (org-babel-get-header params :var 'other))))
 
 ;; row and column names
 (defun org-babel-del-hlines (table)
@@ -1667,8 +1664,7 @@ block but are passed literally to the \"example-block\"."
                      #'identity
                      (split-string
                       (if evaluate
-                          (let ((raw (org-babel-ref-resolve-reference
-                                      source-name nil)))
+                          (let ((raw (org-babel-ref-resolve source-name)))
                             (if (stringp raw) raw (format "%S" raw)))
 			(save-restriction
 			  (widen)

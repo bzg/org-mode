@@ -60,23 +60,23 @@
 (defvar org-babel-ref-split-regexp
   "[ \f\t\n\r\v]*\\(.+?\\)[ \f\t\n\r\v]*=[ \f\t\n\r\v]*\\(.+\\)[ \f\t\n\r\v]*")
 
-(defun org-babel-ref-parse (assignment &optional params)
+(defun org-babel-ref-parse (assignment)
   "Parse a variable ASSIGNMENT in a header argument.
 If the right hand side of the assignment has a literal value
 return that value, otherwise interpret as a reference to an
 external resource and find it's value using
-`org-babel-ref-resolve-reference'.  Return a list with two
-elements.  The first element of the list will be the name of the
-variable, and the second will be an emacs-lisp representation of
-the value of the variable."
-  (if (string-match org-babel-ref-split-regexp assignment)
-      (let ((var (match-string 1 assignment))
-            (ref (match-string 2 assignment)))
-        (cons (intern var)
-	      ((lambda (val)
-		 (if (equal :ob-must-be-reference val)
-		     (org-babel-ref-resolve-reference ref params)
-		   val)) (org-babel-ref-literal ref))))))
+`org-babel-ref-resolve'.  Return a list with two elements.  The
+first element of the list will be the name of the variable, and
+the second will be an emacs-lisp representation of the value of
+the variable."
+  (when (string-match org-babel-ref-split-regexp assignment)
+    (let ((var (match-string 1 assignment))
+	  (ref (match-string 2 assignment)))
+      (cons (intern var)
+	    ((lambda (val)
+	       (if (equal :ob-must-be-reference val)
+		   (org-babel-ref-resolve ref) val))
+	     (org-babel-ref-literal ref))))))
 
 (defun org-babel-ref-literal (ref)
   "Return the value of REF if it is a literal value.
@@ -93,7 +93,7 @@ return nil."
       out)))
 
 (defvar org-babel-library-of-babel)
-(defun org-babel-ref-resolve-reference (ref &optional params)
+(defun org-babel-ref-resolve (ref)
   "Resolve the reference REF and return its value."
   (save-excursion
     (let ((case-fold-search t)
@@ -149,8 +149,7 @@ return nil."
 	    (beginning-of-line)
 	    (if (or (= (point) (point-min)) (= (point) (point-max)))
 		(error "reference not found"))))
-	(setq params (org-babel-merge-params
-		      params (org-babel-expand-variables args) '((:results . "silent"))))
+	(setq params (org-babel-process-params '((:results . "silent"))))
 	(setq result
 	      (case type
 		('results-line (org-babel-read-result))

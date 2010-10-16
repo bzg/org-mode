@@ -101,7 +101,7 @@ if so then run the appropriate source block from the Library."
   
 (defun org-babel-lob-execute (info)
   "Execute the lob call specified by INFO."
-  (let ((params (org-babel-expand-variables
+  (let ((params (org-babel-process-params
 		 (org-babel-merge-params
 		  org-babel-default-header-args
 		  (org-babel-params-from-buffer)
