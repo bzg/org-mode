@@ -364,6 +364,7 @@ block."
 				       (string< (symbol-name (car el1))
 						(symbol-name (car el2)))))
 			     params)))
+	     (result-params (cdr (assoc :result-params params)))
 	     (new-hash (when cache? (org-babel-sha1-hash info)))
 	     (old-hash (when cache? (org-babel-result-hash info)))
 	     (body (setf (nth 1 info)
@@ -397,7 +398,7 @@ block."
 			 (capitalize lang)
 			 (if (nth 4 info) (format " (%s)" (nth 4 info)) ""))
 		(setq result (funcall cmd body params))
-		(if (eq result-type 'value)
+		(if (eq (cdr (assoc :result-type params)) 'value)
 		    (setq result (if (and (or (member "vector" result-params)
 					      (member "table" result-params))
 					  (not (listp result)))
@@ -428,7 +429,7 @@ arguments and pop open the results in a preview buffer."
 	 (params (setf (nth 2 info)
                        (sort (org-babel-merge-params (nth 2 info) params)
                              (lambda (el1 el2) (string< (symbol-name (car el1))
-                                                   (symbol-name (car el2)))))))
+						   (symbol-name (car el2)))))))
          (body (setf (nth 1 info)
 		     (if (and (cdr (assoc :noweb params))
                               (string= "yes" (cdr (assoc :noweb params))))
@@ -900,25 +901,26 @@ may be specified at the top of the current buffer."
 
 (defun org-babel-process-params (params)
   "Expand variables in PARAMS and add summary parameters."
-  (let ((vars-and-names (org-babel-disassemble-tables
-			 (mapcar
-			  (lambda (el) (cons :var (if (consp (cdr el))
-						 (cdr el)
-					       (org-babel-ref-parse (cdr el)))))
-			  (org-babel-get-header params :var))
-			 (cdr (assoc :hlines params))
-			 (cdr (assoc :colnames params))
-			 (cdr (assoc :rownames params))))
-	(result-params (split-string (or (cdr (assoc :results params)) ""))))
+  (let* ((vars-and-names (org-babel-disassemble-tables
+			  (mapcar (lambda (el)
+				    (if (consp (cdr el))
+					(cdr el) (org-babel-ref-parse (cdr el))))
+				  (org-babel-get-header params :var))
+			  (cdr (assoc :hlines params))
+			  (cdr (assoc :colnames params))
+			  (cdr (assoc :rownames params))))
+	 (result-params (append
+			 (split-string (or (cdr (assoc :results params)) ""))
+			 (cdr (assoc :result-params params)))))
     (append
-     (car vars-and-names)
+     (mapcar (lambda (var) (cons :var var)) (car vars-and-names))
      (list
       (cons :colname-names (cadr  vars-and-names))
       (cons :rowname-names (caddr vars-and-names))
       (cons :result-params result-params)
-      (cons :results-type  (cond ((member "output" result-params) 'output)
-				 ((member "value" result-params) 'value)
-				 (t 'value))))
+      (cons :result-type  (cond ((member "output" result-params) 'output)
+				((member "value" result-params) 'value)
+				(t 'value))))
      (org-babel-get-header params :var 'other))))
 
 ;; row and column names
