@@ -1178,7 +1178,7 @@ split.  When called from outside of a code block a new code block
 is created.  In both cases if the region is demarcated and if the
 region is not active then the point is demarcated."
   (interactive "P")
-  (let ((info (org-babel-get-src-block-info))
+  (let ((info (org-babel-get-src-block-info 'light))
 	(stars (concat (make-string (or (org-current-level) 1) ?*) " ")))
     (if info
         (mapc
