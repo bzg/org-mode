@@ -750,7 +750,7 @@ end-body --------- point at the end of the body"
          (goto-char (match-beginning 0))
 	 (let ((full-block (match-string 0))
 	       (beg-block (match-beginning 0))
-	       (end-block (match-beginning 0))
+	       (end-block (match-end 0))
 	       (lang (match-string 2))
 	       (beg-lang (match-beginning 2))
 	       (end-lang (match-end 2))
