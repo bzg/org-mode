@@ -2015,10 +2015,10 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 	      (insert (format
 		       (org-export-get-coderef-format path desc)
 		       (cdr (assoc path org-export-code-refs)))))
-	     (radiop (insert (format "\\hyperref[%s]{%s}"
+	     (radiop (insert (format org-export-latex-hyperref-format
 				     (org-solidify-link-text raw-path) desc)))
 	     ((not type)
-	      (insert (format "\\hyperref[%s]{%s}"
+	      (insert (format org-export-latex-hyperref-format
 			      (org-remove-initial-hash
 			       (org-solidify-link-text raw-path))
 			      desc)))
