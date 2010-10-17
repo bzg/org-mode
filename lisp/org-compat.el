@@ -162,6 +162,15 @@ If DELETE is non-nil, delete all those overlays."
       (let ((x (org-get-x-clipboard-compat value)))
 	(if x (org-no-properties x)))))
 
+(defsubst org-decompose-region (beg end)
+  "Decompose from BEG to END."
+  (if (featurep 'xemacs)
+      (let ((modified-p (buffer-modified-p))
+	    (buffer-read-only nil))
+	(remove-text-properties beg end '(composition nil))
+	(set-buffer-modified-p modified-p))
+    (decompose-region beg end)))
+
 ;; Miscellaneous functions
 
 (defun org-add-hook (hook function &optional append local)

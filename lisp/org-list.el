@@ -343,7 +343,7 @@ Arguments SEARCH, RE, BOUND and NOERR are similar to those in
       (while t
 	;; 1. No match: return to origin or bound, depending on NOERR.
 	(unless (funcall search re bound noerr)
-	  (throw 'exit (and (goto-char (if (booleanp noerr) origin bound))
+	  (throw 'exit (and (goto-char (if (memq noerr '(t nil)) origin bound))
 			    nil)))
 	;; 2. Match not in block or protected: return point. Else
 	;; skip the block and carry on.
