@@ -73,7 +73,10 @@ information into the output using `org-fill-template'.
 %start-line --- the line number at the start of the code block
 %file --------- the file from which the code block was tangled
 %link --------- Org-mode style link to the code block
-%source-name -- name of the code block"
+%source-name -- name of the code block
+
+Whether or not comments are inserted during tangling is
+controlled by the :comments header argument."
   :group 'org-babel
   :type 'string)
 
@@ -84,7 +87,10 @@ information into the output using `org-fill-template'.
 %start-line --- the line number at the start of the code block
 %file --------- the file from which the code block was tangled
 %link --------- Org-mode style link to the code block
-%source-name -- name of the code block"
+%source-name -- name of the code block
+
+Whether or not comments are inserted during tangling is
+controlled by the :comments header argument."
   :group 'org-babel
   :type 'string)
 
