@@ -456,6 +456,7 @@ Using header arguments
 * Buffer-wide header arguments::  Set default values for a specific buffer
 * Header arguments in Org-mode properties::  Set default values for a buffer or heading
 * Code block specific header arguments::  The most common way to set values
+* Header arguments in function calls::  
 
 Specific header arguments
 
@@ -11299,7 +11300,7 @@ Code blocks defined in the ``Library of Babel'' can be called remotely as if
 they were in the current Org-mode buffer (see @ref{Evaluating code blocks}
 for information on the syntax of remote code block evaluation).
 
-@kindex C-c C-v l
+@kindex C-c C-v i
 Code blocks located in any Org-mode file can be loaded into the ``Library of
 Babel'' with the @code{org-babel-lob-ingest} function, bound to @kbd{C-c C-v
 i}.
@@ -11378,7 +11379,7 @@ describes each header argument in detail.
 @node Using header arguments, Specific header arguments, Header arguments, Header arguments
 @subsection Using header arguments
 
-The values of header arguments can be set in five different ways, each more
+The values of header arguments can be set in six different ways, each more
 specific (and having higher priority) than the last.
 @menu
 * System-wide header arguments::  Set global default values
@@ -11386,6 +11387,7 @@ specific (and having higher priority) than the last.
 * Buffer-wide header arguments::  Set default values for a specific buffer
 * Header arguments in Org-mode properties::  Set default values for a buffer or heading
 * Code block specific header arguments::  The most common way to set values
+* Header arguments in function calls::  The most specific level
 @end menu
 
 
@@ -11480,7 +11482,7 @@ Properties defined in this way override the properties set in
 @code{org-set-property} function bound to @kbd{C-c C-x p} to set properties
 in Org-mode documents.
 
-@node Code block specific header arguments,  , Header arguments in Org-mode properties, Using header arguments
+@node Code block specific header arguments, Header arguments in function calls, Header arguments in Org-mode properties, Using header arguments
 @subsubheading Code block specific header arguments
 
 The most common way to assign values to header arguments is at the
@@ -11501,14 +11503,18 @@ fac 0 = 1
 fac n = n * fac (n-1)
 #+end_src
 @end example
-
 Similarly, it is possible to set header arguments for inline code blocks:
 
 @example
 src_haskell[:exports both]@{fac 5@}
 @end example
 
-Header arguments for ``Library of Babel'' or function call lines can be set as shown below:
+@node Header arguments in function calls,  , Code block specific header arguments, Using header arguments
+@comment  node-name,  next,  previous,  up
+@subsubheading Header arguments in function calls
+
+At the most specific level, header arguments for ``Library of Babel'' or
+function call lines can be set as shown below:
 
 @example
 #+call: factorial(n=5) :exports results
