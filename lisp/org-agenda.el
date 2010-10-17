@@ -5823,7 +5823,8 @@ Negative selection means regexp must not match for selection of an entry."
 
 (defun org-agenda-goto-date (date)
   "Jump to DATE in agenda."
-  (interactive (list (let ((org-read-date-prefer-future nil))
+  (interactive (list (let ((org-read-date-prefer-future
+			    (eval org-agenda-jump-prefer-future)))
 		       (org-read-date))))
   (org-agenda-list nil date))
 

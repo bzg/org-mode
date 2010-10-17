@@ -2595,12 +2595,27 @@ will work:
 Currently none of this works for ISO week specifications.
 
 When this option is nil, the current day, month and year will always be
-used as defaults."
+used as defaults.
+
+See also `org-agenda-jump-prefer-future'."
   :group 'org-time
   :type '(choice
 	  (const :tag "Never" nil)
 	  (const :tag "Check month and day" t)
 	  (const :tag "Check month, day, and time" time)))
+
+(defcustom org-agenda-jump-prefer-future 'org-read-date-prefer-future
+  "Should the agenda jump command prefer the future for incomplete dates?
+The default is to do the same as configured in `org-read-date-prefer-future'.
+But you can alse set a deviating value here.
+This may t or nil, or the symbol `org-read-date-prefer-future'."
+  :group 'org-agenda 
+  :group 'org-time 
+  :type '(choice
+	  (const :tag "Use org-aread-date-prefer-future"
+		 org-read-date-prefer-future)
+	  (const :tag "Never" nil)
+	  (const :tag "Always" t)))
 
 (defcustom org-read-date-display-live t
   "Non-nil means display current interpretation of date prompt live.
