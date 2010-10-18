@@ -150,7 +150,7 @@ Extracted from `org-export-as-pdf' in org-latex.el."
 		     (save-match-data
 		       (shell-quote-argument output-dir))
 		     t t cmd)))
-	(shell-command cmd outbuf outbuf)))
+	(shell-command cmd outbuf)))
     (message (concat "Processing LaTeX file " file "...done"))
     (if (not (file-exists-p pdffile))
 	(error (concat "PDF file " pdffile " was not produced"))

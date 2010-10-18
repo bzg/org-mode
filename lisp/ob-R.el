@@ -61,7 +61,7 @@
 			 (cdr (nth i (nth 1 processed-params)))
 			 (cdr (nth i (nth 4 processed-params)))
 			 (cdr (nth i (nth 5 processed-params))))))
-		(number-sequence 0 (1- (length (nth 1 processed-params))))))
+		(org-number-sequence 0 (1- (length (nth 1 processed-params))))))
          (out-file (cdr (assoc :file params))))
     (mapconcat ;; define any variables
      #'org-babel-trim

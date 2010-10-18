@@ -944,7 +944,7 @@ when PUB-DIR is set, use this as the publishing directory."
 		     (save-match-data
 		       (shell-quote-argument output-dir))
 		     t t cmd)))
-	(shell-command cmd outbuf outbuf)))
+	(shell-command cmd outbuf)))
     (message (concat "Processing LaTeX file " file "...done"))
     (setq errors (org-export-latex-get-error outbuf))
     (if (not (file-exists-p pdffile))

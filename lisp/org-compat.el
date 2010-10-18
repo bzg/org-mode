@@ -206,6 +206,26 @@ ignored in this case."
 	 (shrink-window-if-larger-than-buffer window)))
   (or window (selected-window)))
 
+(defun org-number-sequence (from &optional to inc)
+  "Call `number-sequence or emulate it."
+  (if (fboundp 'number-sequence)
+      (number-sequence from to inc)
+    (if (or (not to) (= from to))
+	(list from)
+      (or inc (setq inc 1))
+      (when (zerop inc) (error "The increment can not be zero"))
+      (let (seq (n 0) (next from))
+	(if (> inc 0)
+	    (while (<= next to)
+	      (setq seq (cons next seq)
+		    n (1+ n)
+		    next (+ from (* n inc))))
+	  (while (>= next to)
+	    (setq seq (cons next seq)
+		  n (1+ n)
+		  next (+ from (* n inc)))))
+	(nreverse seq)))))
+
 ;; Region compatibility
 
 (defvar org-ignore-region nil
