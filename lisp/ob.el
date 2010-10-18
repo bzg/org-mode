@@ -1114,6 +1114,18 @@ With optional prefix argument ARG, jump backward ARG many source blocks."
 (defvar org-babel-load-languages)
 
 ;;;###autoload
+(defun org-babel-mark-block ()
+  "Mark current src block"
+  (interactive)
+  ((lambda (head)
+     (when head
+       (save-excursion
+	 (goto-char head)
+	 (looking-at org-babel-src-block-regexp))
+       (push-mark (match-end 5) nil t)
+       (goto-char (match-beginning 5))))
+   (org-babel-where-is-src-block-head)))
+
 (defun org-babel-demarcate-block (&optional arg)
   "Wrap or split the code in the region or on the point.
 When called from inside of a code block the current block is
