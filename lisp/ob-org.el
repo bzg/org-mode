@@ -30,8 +30,7 @@
 ;;; Code:
 (require 'ob)
 
-(declare-function org-load-modules-maybe "org" (&optional force))
-(declare-function org-get-local-variables "org" ())
+(declare-function org-export-string "org-exp" (string fmt &optional dir))
 
 (defvar org-babel-default-header-args:org
   '((:results . "raw silent") (:exports . "results"))
@@ -47,28 +46,10 @@ This function is called by `org-babel-execute-src-block'."
   (let ((result-params (split-string (or (cdr (assoc :results params)) "")))
 	(body (replace-regexp-in-string "^," "" body)))
     (cond
-     ((member "latex" result-params) (org-babel-org-export body "latex"))
-     ((member "html" result-params)  (org-babel-org-export body "html"))
-     ((member "ascii" result-params) (org-babel-org-export body "ascii"))
+     ((member "latex" result-params) (org-export-string body "latex"))
+     ((member "html" result-params)  (org-export-string body "html"))
+     ((member "ascii" result-params) (org-export-string body "ascii"))
      (t body))))
-
-(defvar org-local-vars)
-(defun org-babel-org-export (body fmt)
-  "Export BODY to FMT using Org-mode's export facilities. "
-  (when (get-buffer " org-mode-tmp")
-    (error "Nested call to org-export: from org code block exporting results"))
-  (let ((tmp-file (org-babel-temp-file "org-")))
-    (with-temp-buffer
-      (insert org-babel-org-default-header)
-      (insert body)
-      (write-file tmp-file)
-      (org-load-modules-maybe)
-      (unless org-local-vars
-	(setq org-local-vars (org-get-local-variables)))
-      (eval ;; convert to fmt -- mimicking `org-run-like-in-org-mode'
-       (list 'let org-local-vars 
-	     (list (intern (concat "org-export-as-" fmt))
-		   nil nil nil ''string t))))))
 
 (defun org-babel-prep-session:org (session params)
   "Return an error because org does not support sessions."
