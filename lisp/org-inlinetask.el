@@ -106,7 +106,7 @@ When nil, they will not be exported."
 (defvar org-complex-heading-regexp)
 (defvar org-property-end-re)
 
-(defcustom org-inlinetask-defaut-state nil
+(defcustom org-inlinetask-default-state nil
   "Non-nil means make inline tasks have a TODO keyword initially.
 This should be the state `org-inlinetask-insert-task' should use by
 default, or nil of no state should be assigned."
@@ -117,16 +117,16 @@ default, or nil of no state should be assigned."
 
 (defun org-inlinetask-insert-task (&optional no-state)
   "Insert an inline task.
-If prefix arg NO-STATE is set, ignore `org-inlinetask-defaut-state'."
+If prefix arg NO-STATE is set, ignore `org-inlinetask-default-state'."
   (interactive "P")
   (or (bolp) (newline))
   (let ((indent org-inlinetask-min-level))
     (if org-odd-levels-only
         (setq indent (- (* 2 indent) 1)))
     (insert (make-string indent ?*)
-            (if (or no-state (not org-inlinetask-defaut-state))
+            (if (or no-state (not org-inlinetask-default-state))
 		" \n"
-	      (concat " " org-inlinetask-defaut-state " \n"))
+	      (concat " " org-inlinetask-default-state " \n"))
             (make-string indent ?*) " END\n"))
   (end-of-line -1))
 (define-key org-mode-map "\C-c\C-xt" 'org-inlinetask-insert-task)
