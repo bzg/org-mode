@@ -282,56 +282,64 @@ code blocks by language."
       (let* ((start-line (save-restriction (widen)
 					   (+ 1 (line-number-at-pos (point)))))
 	     (file (buffer-file-name))
-             (info (org-babel-get-src-block-info))
-	     (params (nth 2 info))
-	     (link (unless (string= (cdr (assoc :tangle params)) "no")
-		     (progn (call-interactively 'org-store-link)
-			    (org-babel-clean-text-properties
-			     (car (pop org-stored-links))))))
-             (source-name (intern (or (nth 4 info)
-                                      (format "%s:%d"
-					      current-heading block-counter))))
-	     (src-lang (nth 0 info))
-	     (expand-cmd (intern (concat "org-babel-expand-body:" src-lang)))
-	     (assignments-cmd (intern (concat "org-babel-variable-assignments:" src-lang)))
-	     (body ((lambda (body)
-		      (if (assoc :no-expand params)
-			  body
-			(if (fboundp expand-cmd) (funcall expand-cmd body params)
-			  (org-babel-expand-body:generic
-			   body params
-			   (and (fboundp assignments-cmd)
-				(funcall assignments-cmd params))))))
-		    (if (and (cdr (assoc :noweb params))
-			     (let ((nowebs (split-string
-					    (cdr (assoc :noweb params)))))
-			       (or (member "yes" nowebs)
-				   (member "tangle" nowebs))))
-			(org-babel-expand-noweb-references info)
-		      (nth 1 info))))
-	     (comment (when (or (string= "both" (cdr (assoc :comments params)))
-				(string= "org" (cdr (assoc :comments params))))
-			;; from the previous heading or code-block end
-			(buffer-substring
-			 (max (condition-case nil
-				  (save-excursion
-				    (org-back-to-heading t) (point))
-				(error 0))
-			      (save-excursion (re-search-backward
-					       org-babel-src-block-regexp nil t)
-					      (match-end 0)))
-			 (point))))
-             by-lang)
-        (unless (string= (cdr (assoc :tangle params)) "no")
+	     (info (org-babel-get-src-block-info 'light)))
+        (unless (string= (cdr (assoc :tangle (nth 2 info))) "no")
           (unless (and language (not (string= language src-lang)))
-            ;; add the spec for this block to blocks under it's language
-            (setq by-lang (cdr (assoc src-lang blocks)))
-            (setq blocks (delq (assoc src-lang blocks) blocks))
-            (setq blocks (cons
-			  (cons src-lang
-				(cons (list start-line file link
-					    source-name params body comment)
-				      by-lang)) blocks))))))
+	    (let* ((info (org-babel-get-src-block-info 'light))
+		   (params (nth 2 info))
+		   (link (unless (string= (cdr (assoc :tangle params)) "no")
+			   (progn (call-interactively 'org-store-link)
+				  (org-babel-clean-text-properties
+				   (car (pop org-stored-links))))))
+		   (source-name
+		    (intern (or (nth 4 info)
+				(format "%s:%d"
+					current-heading block-counter))))
+		   (src-lang (nth 0 info))
+		   (expand-cmd
+		    (intern (concat "org-babel-expand-body:" src-lang)))
+		   (assignments-cmd
+		    (intern (concat "org-babel-variable-assignments:" src-lang)))
+		   (body
+		    ((lambda (body)
+		       (if (assoc :no-expand params)
+			   body
+			 (if (fboundp expand-cmd)
+			     (funcall expand-cmd body params)
+			   (org-babel-expand-body:generic
+			    body params
+			    (and (fboundp assignments-cmd)
+				 (funcall assignments-cmd params))))))
+		     (if (and (cdr (assoc :noweb params))
+			      (let ((nowebs (split-string
+					     (cdr (assoc :noweb params)))))
+				(or (member "yes" nowebs)
+				    (member "tangle" nowebs))))
+			 (org-babel-expand-noweb-references info)
+		       (nth 1 info))))
+		   (comment
+		    (when (or (string= "both" (cdr (assoc :comments params)))
+			      (string= "org" (cdr (assoc :comments params))))
+		      ;; from the previous heading or code-block end
+		      (buffer-substring
+		       (max (condition-case nil
+				(save-excursion
+				  (org-back-to-heading t) (point))
+			      (error 0))
+			    (save-excursion
+			      (re-search-backward
+			       org-babel-src-block-regexp nil t)
+			      (match-end 0)))
+		       (point))))
+		   by-lang)
+	      ;; add the spec for this block to blocks under it's language
+	      (setq by-lang (cdr (assoc src-lang blocks)))
+	      (setq blocks (delq (assoc src-lang blocks) blocks))
+	      (setq blocks (cons
+			    (cons src-lang
+				  (cons (list start-line file link
+					      source-name params body comment)
+					by-lang)) blocks)))))))
     ;; ensure blocks in the correct order
     (setq blocks
           (mapcar
