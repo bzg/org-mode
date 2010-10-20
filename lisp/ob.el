@@ -620,7 +620,8 @@ the current subtree."
 				(lambda (arg)
 				  (let ((v (cdr arg)))
 				    (when (and v (not (and (sequencep v)
-							   (> (length v) 0))))
+							   (not (consp v))
+							   (= (length v) 0))))
 				      (if (stringp v)
 					  (mapconcat #'identity
 						     (sort (split-string v)
