@@ -1077,13 +1077,11 @@ after the end of the subtree.
 Just like @kbd{M-@key{RET}}, except when adding a new heading below the
 current heading, the new heading is placed after the body instead of before
 it.  This command works from anywhere in the entry.
-@kindex M-S-@key{RET}
-@item M-S-@key{RET}
+@orgcmd{M-S-@key{RET},org-insert-todo-heading}
 @vindex org-treat-insert-todo-heading-as-state-change
 Insert new TODO entry with same level as current heading.  See also the
 variable @code{org-treat-insert-todo-heading-as-state-change}.
-@kindex C-S-@key{RET}
-@item C-S-@key{RET}
+@orgcmd{C-S-@key{RET},org-insert-todo-heading-respect-content}
 Insert new TODO entry with same level as current heading.  Like
 @kbd{C-@key{RET}}, the new headline will be inserted after the current
 subtree.
