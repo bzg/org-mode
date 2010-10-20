@@ -33,7 +33,6 @@
       "69fbe856-ca9c-4f20-9146-826d2f488c1d"
     (move-beginning-of-line 1)
     (forward-line 1)
-    (message (buffer-substring (point-at-bol) (point-at-eol)))
     (should (string= "testing" (org-babel-lob-execute
 				(org-babel-lob-get-info))))
     (forward-line 1)

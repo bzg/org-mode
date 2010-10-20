@@ -25,9 +25,9 @@
   "Expanded shell bodies should not start with a blank line
 unless the body of the tangled block does."
   (should-not (string-match "^[\n\r][\t ]*[\n\r]"
-			    (org-babel-expand-body:sh "echo 2" '())))
+			    (org-babel-expand-body:generic "echo 2" '())))
   (should (string-match "^[\n\r][\t ]*[\n\r]"
-			(org-babel-expand-body:sh "\n\necho 2" '()))))
+			(org-babel-expand-body:generic "\n\necho 2" '()))))
 
 (ert-deftest test-ob-sh/dont-error-on-empty-results ()
   "Was throwing an elisp error when shell blocks threw errors and
