@@ -456,7 +456,7 @@ Using header arguments
 * Buffer-wide header arguments::  Set default values for a specific buffer
 * Header arguments in Org-mode properties::  Set default values for a buffer or heading
 * Code block specific header arguments::  The most common way to set values
-* Header arguments in function calls::  
+* Header arguments in function calls::  The most specific level
 
 Specific header arguments
 
