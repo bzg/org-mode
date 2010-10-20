@@ -38,6 +38,7 @@
 (declare-function inferior-ess-send-input "ext:ess-inf" ())
 (declare-function ess-make-buffer-current "ext:ess-inf" ())
 (declare-function ess-eval-buffer "ext:ess-inf" (vis))
+(declare-function org-number-sequence "org-compat" (from &optional to inc))
 
 (defconst org-babel-header-arg-names:R
   '(width height bg units pointsize antialias quality compression

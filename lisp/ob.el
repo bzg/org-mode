@@ -72,6 +72,7 @@
 (declare-function org-babel-ref-resolve-reference "ob-ref"
 		  (ref &optional params))
 (declare-function org-babel-lob-execute-maybe "ob-lob" ())
+(declare-function org-number-sequence "org-compat" (from &optional to inc))
 
 (defgroup org-babel nil
   "Code block evaluation and management in `org-mode' documents."
