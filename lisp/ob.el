@@ -803,10 +803,9 @@ end-body --------- point at the end of the body"
 	       (body (match-string 5))
 	       (beg-body (match-beginning 5))
 	       (end-body (match-end 5)))
-	   (save-match-data ,@body))
-         (goto-char (match-end 0))))
-     (unless visited-p
-       (kill-buffer to-be-removed))
+	   ,@body
+	   (goto-char end-block))))
+     (unless visited-p (kill-buffer to-be-removed))
      (goto-char point)))
 
 (defvar org-file-properties)
