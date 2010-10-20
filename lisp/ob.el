@@ -622,11 +622,7 @@ the current subtree."
 				    (when (and v (not (and (sequencep v)
 							   (not (consp v))
 							   (= (length v) 0))))
-				      (if (stringp v)
-					  (mapconcat #'identity
-						     (sort (split-string v)
-							   #'string<) " ")
-					(format "%S" v)))))
+				      (format "%S" v))))
 				(nth 2 info))) ":")
 			(nth 1 info)))))
     (when (interactive-p) (message hash))
