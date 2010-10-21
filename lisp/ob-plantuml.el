@@ -42,9 +42,6 @@
   '((:results . "file") (:exports . "results"))
   "Default arguments for evaluating a plantuml source block.")
 
-(defun org-babel-expand-body:plantuml (body params)
-  "Expand BODY according to PARAMS, return the expanded body." body)
-
 (defcustom org-plantuml-jar-path nil
   "Path to the plantuml.jar file."
   :group 'org-babel
