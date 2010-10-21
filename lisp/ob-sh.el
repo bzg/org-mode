@@ -102,7 +102,8 @@ var of the same value."
 			    (org-babel-sh-var-to-sh el sep))))
 	(format "$(cat <<BABEL_TABLE\n%s\nBABEL_TABLE\n)"
 		(orgtbl-to-generic
-		 (deep-string var) (list :sep (or sep "\t")))))
+		 (deep-string (if (listp (car var)) var (list var)))
+		 (list :sep (or sep "\t")))))
     (if (stringp var)
 	(if (string-match "[\n\r]" var)
 	    (format "$(cat <<BABEL_STRING\n%s\nBABEL_STRING\n)" var)
