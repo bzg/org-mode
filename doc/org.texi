@@ -3895,13 +3895,13 @@ placing a @emph{priority cookie} into the headline of a TODO item, like this
 @vindex org-priority-faces
 By default, Org-mode supports three priorities: @samp{A}, @samp{B}, and
 @samp{C}.  @samp{A} is the highest priority.  An entry without a cookie is
-treated as priority @samp{B}.  Priorities make a difference only in the
-agenda (@pxref{Weekly/daily agenda}); outside the agenda, they have no
-inherent meaning to Org-mode.  The cookies can be highlighted with special
-faces by customizing the variable @code{org-priority-faces}.
+treated just like priority @samp{B}.  Priorities make a difference only for
+sorting in the agenda (@pxref{Weekly/daily agenda}); outside the agenda, they
+have no inherent meaning to Org-mode.  The cookies can be highlighted with
+special faces by customizing the variable @code{org-priority-faces}.
 
-Priorities can be attached to any outline tree entries; they do not need
-to be TODO items.
+Priorities can be attached to any outline node; they do not need to be TODO
+items.
 
 @table @kbd
 @kindex @kbd{C-c ,}
