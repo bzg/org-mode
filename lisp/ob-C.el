@@ -129,7 +129,6 @@ it's header arguments."
         (defines (org-babel-read
                   (or (cdr (assoc :defines params))
                       (org-babel-read (org-entry-get nil "defines" t))))))
-    (org-babel-trim
      (mapconcat 'identity
 		(list
 		 ;; includes
@@ -145,7 +144,7 @@ it's header arguments."
 		 ;; body
 		 (if main-p
 		     (org-babel-C-ensure-main-wrap body)
-		   body) "\n") "\n"))))
+		   body) "\n") "\n")))
 
 (defun org-babel-C-ensure-main-wrap (body)
   "Wrap body in a \"main\" function call if none exists."
