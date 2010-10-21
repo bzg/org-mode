@@ -204,8 +204,8 @@ useful to make it ever so slightly different."
 (defun org-indent-remove-properties (beg end)
   "Remove indentations between BEG and END."
   (let ((inhibit-modification-hooks t))
-    (org-unmodified
-     (remove-text-properties beg end '(line-prefix nil wrap-prefix nil)))))
+    (with-silent-modifications
+      (remove-text-properties beg end '(line-prefix nil wrap-prefix nil)))))
 
 (defun org-indent-remove-properties-from-string (string)
   "Remove indentations between BEG and END."
@@ -222,7 +222,7 @@ Assumes that BEG is at the beginning of a line."
   (when (or t org-indent-mode)
     (let ((inhibit-modification-hooks t)
 	  ov b e n level exit nstars)
-      (org-unmodified
+      (with-silent-modifications
        (save-excursion
 	 (goto-char beg)
 	 (while (not exit)
