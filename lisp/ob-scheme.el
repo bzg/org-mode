@@ -61,7 +61,7 @@
 
 (defun org-babel-expand-body:scheme (body params)
   "Expand BODY according to PARAMS, return the expanded body."
-  (let ((vars (org-babel-get-header params :var)))
+  (let ((vars (mapcar #'cdr (org-babel-get-header params :var))))
     (if (> (length vars) 0)
         (concat "(let ("
                 (mapconcat
