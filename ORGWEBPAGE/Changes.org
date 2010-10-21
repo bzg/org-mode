@@ -15,6 +15,13 @@ an argument to the code block has changed.  As a result of this
 change *all* code blocks with cached results will be re-run after
 upgrading to the latest version.
 
+*** Testing update
+Anyone using the org-mode test suite will need to update the jump
+repository for test navigation by executing the following from
+the root of the org-mode repository.
+: git submodule update
+Failure to update this repository will cause loading of
+org-test.el to throw errors.
 ** Details
 *** Multi-line header arguments to code blocks
 Code block header arguments can now span multiple lines using the
