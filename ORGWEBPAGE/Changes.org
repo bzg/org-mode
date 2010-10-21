@@ -48,6 +48,29 @@ code base (especially the language-specific files), and ensures
 that the arguments to a code block will not be evaluated multiple
 times.  This change should not be externally visible to the
 Org-mode user.
+*** Improved Caching
+Code block caches now notice if the value of a variable argument
+to the code block has changed, if this is the case the cache is
+invalidated and the code block is re-run.  The following example
+can provide intuition for the new behavior.
+#+begin_src org :exports code
+  ,#+srcname: random
+  ,#+begin_src R :cache yes
+  ,runif(1)
+  ,#+end_src
+  
+  ,#+results[a2a72cd647ad44515fab62e144796432793d68e1]: random
+  ,: 0.4659510825295
+  
+  ,#+srcname: caller
+  ,#+begin_src emacs-lisp :var x=random :cache yes
+  ,x
+  ,#+end_src
+  
+  ,#+results[bec9c8724e397d5df3b696502df3ed7892fc4f5f]: caller
+  ,: 0.254227238707244
+#+end_src
+
 * Version 7.01
 :PROPERTIES:
 :VISIBILITY: content
