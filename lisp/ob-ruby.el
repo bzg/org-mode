@@ -55,10 +55,10 @@
 (defun org-babel-execute:ruby (body params)
   "Execute a block of Ruby code with Babel.
 This function is called by `org-babel-execute-src-block'."
-  (let* ((processed-params (org-babel-process-params params))
-         (session (org-babel-ruby-initiate-session (first processed-params)))
-         (result-params (nth 2 processed-params))
-         (result-type (nth 3 processed-params))
+  (let* ((session (org-babel-ruby-initiate-session
+		   (cdr (assoc :session params))))
+         (result-params (cdr (assoc :result-params params)))
+         (result-type (cdr (assoc :result-type params)))
          (full-body (org-babel-expand-body:generic
 		     body params (org-babel-variable-assignments:ruby params)))
          (result (org-babel-ruby-evaluate
@@ -66,9 +66,9 @@ This function is called by `org-babel-execute-src-block'."
     (or (cdr (assoc :file params))
         (org-babel-reassemble-table
          result
-         (org-babel-pick-name (nth 4 processed-params)
+         (org-babel-pick-name (cdr (assoc :colname-names params))
 			      (cdr (assoc :colnames params)))
-         (org-babel-pick-name (nth 5 processed-params)
+         (org-babel-pick-name (cdr (assoc :rowname-names params))
 			      (cdr (assoc :rownames params)))))))
 
 (defun org-babel-prep-session:ruby (session params)

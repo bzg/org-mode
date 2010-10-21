@@ -41,20 +41,18 @@
 (defun org-babel-execute:perl (body params)
   "Execute a block of Perl code with Babel.
 This function is called by `org-babel-execute-src-block'."
-  (let* ((processed-params (org-babel-process-params params))
-         (session (nth 0 processed-params))
-         (vars (nth 1 processed-params))
-         (result-params (nth 2 processed-params))
-         (result-type (nth 3 processed-params))
+  (let* ((session (cdr (assoc :session params)))
+         (result-params (cdr (assoc :result-params params)))
+         (result-type (cdr (assoc :result-type params)))
          (full-body (org-babel-expand-body:generic
 		     body params (org-babel-variable-assignments:perl params)))
 	(session (org-babel-perl-initiate-session session)))
     (org-babel-reassemble-table
      (org-babel-perl-evaluate session full-body result-type)
      (org-babel-pick-name
-      (nth 4 processed-params) (cdr (assoc :colnames params)))
+      (cdr (assoc :colname-names params)) (cdr (assoc :colnames params)))
      (org-babel-pick-name
-      (nth 5 processed-params) (cdr (assoc :rownames params))))))
+      (cdr (assoc :rowname-names params)) (cdr (assoc :rownames params))))))
 
 (defun org-babel-prep-session:perl (session params)
   "Prepare SESSION according to the header arguments in PARAMS."

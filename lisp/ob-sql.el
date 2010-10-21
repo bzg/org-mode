@@ -53,8 +53,7 @@
 (defun org-babel-execute:sql (body params)
   "Execute a block of Sql code with Babel.
 This function is called by `org-babel-execute-src-block'."
-  (let* ((result-params (split-string (or (cdr (assoc :results params)) "")))
-	 (processed-params (org-babel-process-params params))
+  (let* ((result-params (cdr (assoc :result-params params)))
          (cmdline (cdr (assoc :cmdline params)))
          (engine (cdr (assoc :engine params)))
          (in-file (org-babel-temp-file "sql-in-"))
@@ -78,8 +77,10 @@ This function is called by `org-babel-execute-src-block'."
       (org-table-import out-file nil)
       (org-babel-reassemble-table
        (org-table-to-lisp)
-       (org-babel-pick-name (nth 4 processed-params) (cdr (assoc :colnames params)))
-       (org-babel-pick-name (nth 5 processed-params) (cdr (assoc :rownames params)))))))
+       (org-babel-pick-name (cdr (assoc :colname-names params))
+			    (cdr (assoc :colnames params)))
+       (org-babel-pick-name (cdr (assoc :rowname-names params))
+			    (cdr (assoc :rownames params)))))))
 
 
 (defun org-babel-prep-session:sql (session params)

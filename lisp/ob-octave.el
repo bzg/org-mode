@@ -75,14 +75,13 @@ end")
 
 (defun org-babel-execute:octave (body params &optional matlabp)
   "Execute a block of octave code with Babel."
-  (let* ((processed-params (org-babel-process-params params))
-         (session
+  (let* ((session
 	  (funcall (intern (format "org-babel-%s-initiate-session"
 				   (if matlabp "matlab" "octave")))
-		   (nth 0 processed-params) params))
-         (vars (nth 1 processed-params))
-         (result-params (nth 2 processed-params))
-         (result-type (nth 3 processed-params))
+		   (cdr (assoc :session params)) params))
+         (vars (mapcar #'cdr (org-babel-get-header params :var)))
+         (result-params (cdr (assoc :result-params params)))
+         (result-type (cdr (assoc :result-type params)))
 	 (out-file (cdr (assoc :file params)))
 	 (full-body
 	  (org-babel-expand-body:generic
@@ -93,9 +92,9 @@ end")
         (org-babel-reassemble-table
          result
          (org-babel-pick-name
-	  (nth 4 processed-params) (cdr (assoc :colnames params)))
+	  (cdr (assoc :colname-names params)) (cdr (assoc :colnames params)))
          (org-babel-pick-name
-	  (nth 5 processed-params) (cdr (assoc :rownames params)))))))
+	  (cdr (assoc :rowname-names params)) (cdr (assoc :rownames params)))))))
 
 (defun org-babel-prep-session:matlab (session params)
   "Prepare SESSION according to PARAMS."

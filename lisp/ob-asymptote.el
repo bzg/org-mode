@@ -58,8 +58,7 @@
 (defun org-babel-execute:asymptote (body params)
   "Execute a block of Asymptote code.
 This function is called by `org-babel-execute-src-block'."
-  (let* ((processed-params (org-babel-process-params params))
-         (result-params (split-string (or (cdr (assoc :results params)) "")))
+  (let* ((result-params (split-string (or (cdr (assoc :results params)) "")))
          (out-file (cdr (assoc :file params)))
          (format (or (and out-file
                           (string-match ".+\\.\\(.+\\)" out-file)

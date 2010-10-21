@@ -48,17 +48,17 @@ This will be passed to  `shell-command-on-region'")
 (defun org-babel-execute:sh (body params)
   "Execute a block of Shell commands with Babel.
 This function is called by `org-babel-execute-src-block'."
-  (let* ((processed-params (org-babel-process-params params))
-         (session (org-babel-sh-initiate-session (nth 0 processed-params)))
-         (result-params (nth 2 processed-params)) 
+  (let* ((session (org-babel-sh-initiate-session
+		   (cdr (assoc :session params))))
+         (result-params (cdr (assoc :result-params params))) 
          (full-body (org-babel-expand-body:generic
 		     body params (org-babel-variable-assignments:sh params))))
     (org-babel-reassemble-table
      (org-babel-sh-evaluate session full-body result-params)
      (org-babel-pick-name
-      (nth 4 processed-params) (cdr (assoc :colnames params)))
+      (cdr (assoc :colname-names params)) (cdr (assoc :colnames params)))
      (org-babel-pick-name
-      (nth 5 processed-params) (cdr (assoc :rownames params))))))
+      (cdr (assoc :rowname-names params)) (cdr (assoc :rownames params))))))
 
 (defun org-babel-prep-session:sh (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."

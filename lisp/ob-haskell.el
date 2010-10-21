@@ -61,10 +61,9 @@
 
 (defun org-babel-execute:haskell (body params)
   "Execute a block of Haskell code."
-  (let* ((processed-params (org-babel-process-params params))
-         (session (nth 0 processed-params))
-         (vars (nth 1 processed-params))
-         (result-type (nth 3 processed-params))
+  (let* ((session (cdr (assoc :session params)))
+         (vars (mapcar #'cdr (org-babel-get-header params :var)))
+         (result-type (cdr (assoc :result-type params)))
          (full-body (org-babel-expand-body:generic
 		     body params
 		     (org-babel-variable-assignments:haskell params)))
@@ -85,10 +84,10 @@
        (mapconcat #'identity (reverse (cdr results)) "\n"))
       ((equal result-type 'value)
        (org-babel-haskell-table-or-string (car results))))
-     (org-babel-pick-name (nth 4 processed-params)
-			  (cdr (assoc :colnames params)))
-     (org-babel-pick-name (nth 5 processed-params)
-			  (cdr (assoc :rownames params))))))
+     (org-babel-pick-name (cdr (assoc :colname-names params))
+			  (cdr (assoc :colname-names params)))
+     (org-babel-pick-name (cdr (assoc :rowname-names params))
+			  (cdr (assoc :rowname-names params))))))
 
 (defun org-babel-haskell-read-string (string)
   "Strip \\\"s from around a haskell string."

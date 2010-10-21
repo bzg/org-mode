@@ -64,9 +64,9 @@
   "Execute a block of Lisp code with org-babel.
 This function is called by `org-babel-execute-src-block'"
   (message "executing Lisp source code block")
-  (let* ((processed-params (org-babel-process-params params))
-         (session (org-babel-lisp-initiate-session (first processed-params)))
-         (result-type (fourth processed-params))
+  (let* ((session (org-babel-lisp-initiate-session
+		   (cdr (assoc :session params))))
+         (result-type (cdr (assoc :result-type params)))
          (full-body (org-babel-expand-body:lisp body params)))
     (read
      (if session

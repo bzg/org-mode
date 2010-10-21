@@ -51,7 +51,7 @@
 (defvar org-babel-R-command "R --slave --no-save"
   "Name of command to use for executing R code.")
 
-(defun org-babel-expand-body:R (body params &optional processed-params)
+(defun org-babel-expand-body:R (body params)
   "Expand BODY according to PARAMS, return the expanded body."
   (let (out-file (cdr (assoc :file params)))
     (mapconcat
@@ -63,28 +63,29 @@
 	     inside
 	     (list "dev.off()"))
 	  inside))
-      (append (org-babel-variable-assignments:R params processed-params)
+      (append (org-babel-variable-assignments:R params)
 	      (list body))) "\n")))
 
 (defun org-babel-execute:R (body params)
   "Execute a block of R code.
 This function is called by `org-babel-execute-src-block'."
   (save-excursion
-    (let* ((processed-params (org-babel-process-params params))
-           (result-type (nth 3 processed-params))
+    (let* ((result-type (cdr (assoc :result-type params)))
            (session (org-babel-R-initiate-session
-		     (first processed-params) params))
+		     (cdr (assoc :session params)) params))
 	   (colnames-p (cdr (assoc :colnames params)))
 	   (rownames-p (cdr (assoc :rownames params)))
 	   (out-file (cdr (assoc :file params)))
-	   (full-body (org-babel-expand-body:R body params processed-params))
+	   (full-body (org-babel-expand-body:R body params))
 	   (result
 	    (org-babel-R-evaluate
 	     session full-body result-type
 	     (or (equal "yes" colnames-p)
-		 (org-babel-pick-name (nth 4 processed-params) colnames-p))
+		 (org-babel-pick-name
+		  (cdr (assoc :colname-names params)) colnames-p))
 	     (or (equal "yes" rownames-p)
-		 (org-babel-pick-name (nth 5 processed-params) rownames-p)))))
+		 (org-babel-pick-name
+		  (cdr (assoc :rowname-names params)) rownames-p)))))
       (message "result is %S" result)
       (or out-file result))))
 
@@ -109,10 +110,9 @@ This function is called by `org-babel-execute-src-block'."
 
 ;; helper functions
 
-(defun org-babel-variable-assignments:R (params &optional processed-params)
+(defun org-babel-variable-assignments:R (params)
   "Return list of R statements assigning the block's variables"
-  (let ((processed-params
-	 (or processed-params (org-babel-process-params params))))
+  (let ((vars (mapcar #'cdr (org-babel-get-header params :var))))
     (mapcar
      (lambda (pair)
        (org-babel-R-assign-elisp
@@ -121,12 +121,12 @@ This function is called by `org-babel-execute-src-block'."
 	(equal "yes" (cdr (assoc :rownames params)))))
      (mapcar
       (lambda (i)
-	(cons (car (nth i (nth 1 processed-params)))
+	(cons (car (nth i vars))
 	      (org-babel-reassemble-table
-	       (cdr (nth i (nth 1 processed-params)))
-	       (cdr (nth i (nth 4 processed-params)))
-	       (cdr (nth i (nth 5 processed-params))))))
-      (org-number-sequence 0 (1- (length (nth 1 processed-params))))))))
+	       (cdr (nth i vars))
+	       (cdr (nth i (cdr (assoc :colname-names params))))
+	       (cdr (nth i (cdr (assoc :rowname-names params)))))))
+      (org-number-sequence 0 (1- (length vars)))))))
 
 (defun org-babel-R-quote-tsv-field (s)
   "Quote field S for export to R."

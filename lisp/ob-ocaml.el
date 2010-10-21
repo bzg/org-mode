@@ -53,8 +53,7 @@
 
 (defun org-babel-execute:ocaml (body params)
   "Execute a block of Ocaml code with Babel."
-  (let* ((processed-params (org-babel-process-params params))
-         (vars (nth 1 processed-params))
+  (let* ((vars (mapcar #'cdr (org-babel-get-header params :var)))
          (full-body (org-babel-expand-body:generic
 		     body params
 		     (org-babel-variable-assignments:ocaml params)))
@@ -77,9 +76,9 @@
     (org-babel-reassemble-table
      (org-babel-ocaml-parse-output (org-babel-trim clean))
      (org-babel-pick-name
-      (nth 4 processed-params) (cdr (assoc :colnames params)))
+      (cdr (assoc :colname-names params)) (cdr (assoc :colnames params)))
      (org-babel-pick-name
-      (nth 5 processed-params) (cdr (assoc :rownames params))))))
+      (cdr (assoc :rowname-names params)) (cdr (assoc :rownames params))))))
 
 (defvar tuareg-interactive-buffer-name)
 (defun org-babel-prep-session:ocaml (session params)

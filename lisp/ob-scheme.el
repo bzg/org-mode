@@ -74,16 +74,15 @@
 (defun org-babel-execute:scheme (body params)
   "Execute a block of Scheme code with org-babel.
 This function is called by `org-babel-execute-src-block'"
-  (let* ((processed-params (org-babel-process-params params))
-         (result-type (nth 3 processed-params))
+  (let* ((result-type (cdr (assoc :result-type params)))
 	 (org-babel-scheme-cmd (or (cdr (assoc :scheme params))
 				   org-babel-scheme-cmd))
          (full-body (org-babel-expand-body:scheme body params)))
     (read
-     (if (not (string= (nth 0 processed-params) "none"))
+     (if (not (string= (cdr (assoc :session params)) "none"))
          ;; session evaluation
 	 (let ((session (org-babel-prep-session:scheme
-			 (nth 0 processed-params) params)))
+			 (cdr (assoc :session params)) params)))
 	   (org-babel-comint-with-output
 	       (session (format "%S" org-babel-scheme-eoe) t body)
 	     (mapc

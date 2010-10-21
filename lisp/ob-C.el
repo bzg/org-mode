@@ -82,8 +82,7 @@ header arguments (calls `org-babel-C-expand')."
 (defun org-babel-C-execute (body params)
   "This function should only be called by `org-babel-execute:C'
 or `org-babel-execute:c++'."
-  (let* ((processed-params (org-babel-process-params params))
-         (tmp-src-file (org-babel-temp-file
+  (let* ((tmp-src-file (org-babel-temp-file
 			"C-src-"
 			(cond
 			 ((equal org-babel-c-variant 'c) ".c")
@@ -106,15 +105,15 @@ or `org-babel-execute:c++'."
 		     (org-babel-process-file-name tmp-src-file)) ""))))
     ((lambda (results)
        (org-babel-reassemble-table
-	(if (member "vector" (nth 2 processed-params))
+	(if (member "vector" (cdr (assoc :result-params params)))
 	    (let ((tmp-file (org-babel-temp-file "c-")))
 	      (with-temp-file tmp-file (insert results))
 	      (org-babel-import-elisp-from-file tmp-file))
 	  (org-babel-read results))
 	(org-babel-pick-name
-	 (nth 4 processed-params) (cdr (assoc :colnames params)))
+	 (cdr (assoc :colname-names params)) (cdr (assoc :colnames params)))
 	(org-babel-pick-name
-	 (nth 5 processed-params) (cdr (assoc :rownames params)))))
+	 (cdr (assoc :rowname-names params)) (cdr (assoc :rownames params)))))
      (org-babel-trim
        (org-babel-eval
 	(concat tmp-bin-file (if cmdline (concat " " cmdline) "")) "")))))

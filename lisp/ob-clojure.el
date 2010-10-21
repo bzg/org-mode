@@ -301,16 +301,15 @@ return the value of the last statement in BODY as elisp."
 (defun org-babel-execute:clojure (body params)
   "Execute a block of Clojure code."
   (require 'slime) (require 'swank-clojure)
-  (let* ((processed-params (org-babel-process-params params))
-         (body (org-babel-expand-body:clojure body params))
+  (let* ((body (org-babel-expand-body:clojure body params))
          (session (org-babel-clojure-initiate-session
-		   (first processed-params))))
+		   (cdr (assoc :session params)))))
     (org-babel-reassemble-table
-     (org-babel-clojure-evaluate session body (nth 3 processed-params))
+     (org-babel-clojure-evaluate session body (cdr (assoc :result-type params)))
      (org-babel-pick-name
-      (nth 4 processed-params) (cdr (assoc :colnames params)))
+      (cdr (assoc :colname-names params)) (cdr (assoc :colnames params)))
      (org-babel-pick-name
-      (nth 5 processed-params) (cdr (assoc :rownames params))))))
+      (cdr (assoc :rowname-names params)) (cdr (assoc :rownames params))))))
 
 (provide 'ob-clojure)
 
