@@ -51,11 +51,11 @@
 (defvar org-babel-R-command "R --slave --no-save"
   "Name of command to use for executing R code.")
 
-(defun org-babel-expand-body:R (body params)
+(defun org-babel-expand-body:R (body params &optional processed-params)
   "Expand BODY according to PARAMS, return the expanded body."
   (let (out-file (cdr (assoc :file params)))
     (mapconcat
-     #'org-babel-trim
+     #'identity
      ((lambda (inside)
 	(if out-file
 	    (append
@@ -63,7 +63,8 @@
 	     inside
 	     (list "dev.off()"))
 	  inside))
-      (append (org-babel-R-variable-assignments params) (list body))) "\n")))
+      (append (org-babel-variable-assignments:R params processed-params)
+	      (list body))) "\n")))
 
 (defun org-babel-execute:R (body params)
   "Execute a block of R code.
@@ -76,7 +77,7 @@ This function is called by `org-babel-execute-src-block'."
 	   (colnames-p (cdr (assoc :colnames params)))
 	   (rownames-p (cdr (assoc :rownames params)))
 	   (out-file (cdr (assoc :file params)))
-	   (full-body (org-babel-expand-body:R body params))
+	   (full-body (org-babel-expand-body:R body params processed-params))
 	   (result
 	    (org-babel-R-evaluate
 	     session full-body result-type
@@ -90,7 +91,7 @@ This function is called by `org-babel-execute-src-block'."
 (defun org-babel-prep-session:R (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."
   (let* ((session (org-babel-R-initiate-session session params))
-	 (var-lines (org-babel-R-variable-assignments params)))
+	 (var-lines (org-babel-variable-assignments:R params)))
     (org-babel-comint-in-buffer session
       (mapc (lambda (var)
               (end-of-line 1) (insert var) (comint-send-input nil t)
@@ -108,9 +109,10 @@ This function is called by `org-babel-execute-src-block'."
 
 ;; helper functions
 
-(defun org-babel-R-variable-assignments (params)
+(defun org-babel-variable-assignments:R (params &optional processed-params)
   "Return list of R statements assigning the block's variables"
-  (let ((processed-params (org-babel-process-params params)))
+  (let ((processed-params
+	 (or processed-params (org-babel-process-params params))))
     (mapcar
      (lambda (pair)
        (org-babel-R-assign-elisp
