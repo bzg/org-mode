@@ -72,6 +72,7 @@
 (declare-function org-babel-ref-resolve-reference "ob-ref"
 		  (ref &optional params))
 (declare-function org-babel-lob-execute-maybe "ob-lob" ())
+(declare-function org-number-sequence "org-compat" (from &optional to inc))
 
 (defgroup org-babel nil
   "Code block evaluation and management in `org-mode' documents."
@@ -263,7 +264,8 @@ specific header arguments as well.")
   '((:session . "none") (:results . "silent") (:exports . "results"))
   "Default arguments to use when evaluating an inline source block.")
 
-(defvar org-babel-current-buffer-properties)
+(defvar org-babel-current-buffer-properties nil
+  "Local cache for buffer properties.")
 (make-variable-buffer-local 'org-babel-current-buffer-properties)
 
 (defvar org-babel-result-regexp
@@ -1229,7 +1231,7 @@ following the source block."
 		     (if indent
 			 (mapconcat
 			  (lambda (el) " ")
-			  (number-sequence 1 indent) "")
+			  (org-number-sequence 1 indent) "")
 		       "")
 		     "#+results"
 		     (when hash (concat "["hash"]"))

@@ -5543,7 +5543,7 @@ needs to be inserted at a specific position in the font-lock sequence.")
       (message "Entities are displayed as UTF8 characers")
     (save-restriction
       (widen)
-      (decompose-region (point-min) (point-max))
+      (org-decompose-region (point-min) (point-max))
       (message "Entities are displayed plain"))))
 
 (defun org-fontify-entities (limit)
@@ -5643,7 +5643,7 @@ If KWD is a number, get the corresponding match group."
 	 (inhibit-read-only t) (inhibit-point-motion-hooks t)
 	 (inhibit-modification-hooks t)
 	 deactivate-mark buffer-file-name buffer-file-truename)
-    (decompose-region beg end)
+    (org-decompose-region beg end)
     (remove-text-properties
      beg end
      (if org-indent-mode

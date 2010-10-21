@@ -38,6 +38,7 @@
 (declare-function inferior-ess-send-input "ext:ess-inf" ())
 (declare-function ess-make-buffer-current "ext:ess-inf" ())
 (declare-function ess-eval-buffer "ext:ess-inf" (vis))
+(declare-function org-number-sequence "org-compat" (from &optional to inc))
 
 (defconst org-babel-header-arg-names:R
   '(width height bg units pointsize antialias quality compression
@@ -61,7 +62,7 @@
 			 (cdr (nth i (nth 1 processed-params)))
 			 (cdr (nth i (nth 4 processed-params)))
 			 (cdr (nth i (nth 5 processed-params))))))
-		(number-sequence 0 (1- (length (nth 1 processed-params))))))
+		(org-number-sequence 0 (1- (length (nth 1 processed-params))))))
          (out-file (cdr (assoc :file params))))
     (mapconcat ;; define any variables
      #'org-babel-trim

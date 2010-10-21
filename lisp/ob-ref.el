@@ -199,7 +199,7 @@ to \"0:-1\"."
             (if (or (= 0 (length portion)) (string-match ind-re portion))
                 (mapcar
 		 (lambda (n) (nth n lis))
-		 (apply 'number-sequence
+		 (apply 'org-number-sequence
 			(if (and (> (length portion) 0) (match-string 2 portion))
 			    (list
 			     (wrap (string-to-number (match-string 2 portion)))

@@ -534,21 +534,21 @@ This function should accept the file name as its single argument."
 	  (repeat :tag "Shell command sequence"
 		  (string :tag "Shell command"))
 	  (const :tag "2 runs of pdflatex"
-		 '("pdflatex -interaction nonstopmode -output-directory %o %f"
+		 ("pdflatex -interaction nonstopmode -output-directory %o %f"
 		   "pdflatex -interaction nonstopmode -output-directory %o %f"))
 	  (const :tag "3 runs of pdflatex"
-		 '("pdflatex -interaction nonstopmode -output-directory %o %f"
+		 ("pdflatex -interaction nonstopmode -output-directory %o %f"
 		   "pdflatex -interaction nonstopmode -output-directory %o %f"
 		   "pdflatex -interaction nonstopmode -output-directory %o %f"))
 	  (const :tag "pdflatex,bibtex,pdflatex,pdflatex"
-		 '("pdflatex -interaction nonstopmode -output-directory %o %f"
+		 ("pdflatex -interaction nonstopmode -output-directory %o %f"
 		   "bibtex %b"
 		   "pdflatex -interaction nonstopmode -output-directory %o %f"
 		   "pdflatex -interaction nonstopmode -output-directory %o %f"))
 	  (const :tag "texi2dvi"
-		 '("texi2dvi -p -b -c -V %f"))
+		 ("texi2dvi -p -b -c -V %f"))
 	  (const :tag "rubber"
-		 '("rubber -d --into %o %f"))
+		 ("rubber -d --into %o %f"))
 	  (function)))
 
 (defcustom org-export-pdf-logfiles
@@ -944,7 +944,7 @@ when PUB-DIR is set, use this as the publishing directory."
 		     (save-match-data
 		       (shell-quote-argument output-dir))
 		     t t cmd)))
-	(shell-command cmd outbuf outbuf)))
+	(shell-command cmd outbuf)))
     (message (concat "Processing LaTeX file " file "...done"))
     (setq errors (org-export-latex-get-error outbuf))
     (if (not (file-exists-p pdffile))
