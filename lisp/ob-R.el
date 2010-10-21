@@ -38,6 +38,7 @@
 (declare-function inferior-ess-send-input "ext:ess-inf" ())
 (declare-function ess-make-buffer-current "ext:ess-inf" ())
 (declare-function ess-eval-buffer "ext:ess-inf" (vis))
+(declare-function org-number-sequence "org-compat" (from &optional to inc))
 
 (defconst org-babel-header-arg-names:R
   '(width height bg units pointsize antialias quality compression
@@ -50,21 +51,11 @@
 (defvar org-babel-R-command "R --slave --no-save"
   "Name of command to use for executing R code.")
 
-(defun org-babel-expand-body:R (body params &optional processed-params)
+(defun org-babel-expand-body:R (body params)
   "Expand BODY according to PARAMS, return the expanded body."
-  (let* ((processed-params (or processed-params
-                               (org-babel-process-params params)))
-	 (vars (mapcar
-		(lambda (i)
-		  (cons (car (nth i (nth 1 processed-params)))
-			(org-babel-reassemble-table
-			 (cdr (nth i (nth 1 processed-params)))
-			 (cdr (nth i (nth 4 processed-params)))
-			 (cdr (nth i (nth 5 processed-params))))))
-		(org-number-sequence 0 (1- (length (nth 1 processed-params))))))
-         (out-file (cdr (assoc :file params))))
-    (mapconcat ;; define any variables
-     #'org-babel-trim
+  (let (out-file (cdr (assoc :file params)))
+    (mapconcat
+     #'identity
      ((lambda (inside)
 	(if out-file
 	    (append
@@ -72,49 +63,36 @@
 	     inside
 	     (list "dev.off()"))
 	  inside))
-      (append
-       (mapcar
-	(lambda (pair)
-	  (org-babel-R-assign-elisp
-	   (car pair) (cdr pair)
-	   (equal "yes" (cdr (assoc :colnames params)))
-	   (equal "yes" (cdr (assoc :rownames params)))))
-	vars)
-       (list body))) "\n")))
+      (append (org-babel-variable-assignments:R params)
+	      (list body))) "\n")))
 
 (defun org-babel-execute:R (body params)
   "Execute a block of R code.
 This function is called by `org-babel-execute-src-block'."
   (save-excursion
-    (let* ((processed-params (org-babel-process-params params))
-           (result-type (nth 3 processed-params))
+    (let* ((result-type (cdr (assoc :result-type params)))
            (session (org-babel-R-initiate-session
-		     (first processed-params) params))
+		     (cdr (assoc :session params)) params))
 	   (colnames-p (cdr (assoc :colnames params)))
 	   (rownames-p (cdr (assoc :rownames params)))
 	   (out-file (cdr (assoc :file params)))
-	   (full-body (org-babel-expand-body:R body params processed-params))
+	   (full-body (org-babel-expand-body:R body params))
 	   (result
 	    (org-babel-R-evaluate
 	     session full-body result-type
 	     (or (equal "yes" colnames-p)
-		 (org-babel-pick-name (nth 4 processed-params) colnames-p))
+		 (org-babel-pick-name
+		  (cdr (assoc :colname-names params)) colnames-p))
 	     (or (equal "yes" rownames-p)
-		 (org-babel-pick-name (nth 5 processed-params) rownames-p)))))
+		 (org-babel-pick-name
+		  (cdr (assoc :rowname-names params)) rownames-p)))))
       (message "result is %S" result)
       (or out-file result))))
 
 (defun org-babel-prep-session:R (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."
   (let* ((session (org-babel-R-initiate-session session params))
-	 (vars (org-babel-ref-variables params))
-	 (var-lines
-	  (mapcar
-	   (lambda (pair) (org-babel-R-assign-elisp
-		      (car pair) (cdr pair)
-		      (equal (cdr (assoc :colnames params)) "yes")
-		      (equal (cdr (assoc :rownames params)) "yes")))
-	   vars)))
+	 (var-lines (org-babel-variable-assignments:R params)))
     (org-babel-comint-in-buffer session
       (mapc (lambda (var)
               (end-of-line 1) (insert var) (comint-send-input nil t)
@@ -131,6 +109,24 @@ This function is called by `org-babel-execute-src-block'."
       buffer)))
 
 ;; helper functions
+
+(defun org-babel-variable-assignments:R (params)
+  "Return list of R statements assigning the block's variables"
+  (let ((vars (mapcar #'cdr (org-babel-get-header params :var))))
+    (mapcar
+     (lambda (pair)
+       (org-babel-R-assign-elisp
+	(car pair) (cdr pair)
+	(equal "yes" (cdr (assoc :colnames params)))
+	(equal "yes" (cdr (assoc :rownames params)))))
+     (mapcar
+      (lambda (i)
+	(cons (car (nth i vars))
+	      (org-babel-reassemble-table
+	       (cdr (nth i vars))
+	       (cdr (nth i (cdr (assoc :colname-names params))))
+	       (cdr (nth i (cdr (assoc :rowname-names params)))))))
+      (org-number-sequence 0 (1- (length vars)))))))
 
 (defun org-babel-R-quote-tsv-field (s)
   "Quote field S for export to R."

@@ -1859,6 +1859,8 @@ lang=\"%s\" xml:lang=\"%s\">
 
   (let* ((caption (org-find-text-property-in-string 'org-caption (car lines)))
 	 (label (org-find-text-property-in-string 'org-label (car lines)))
+	 (forced-aligns (org-find-text-property-in-string 'org-forced-aligns
+							  (car lines)))
 	 (attributes (org-find-text-property-in-string 'org-attributes
 						       (car lines)))
 	 (html-table-tag (org-export-splice-attributes
@@ -1868,9 +1870,12 @@ lang=\"%s\" xml:lang=\"%s\">
 			       (lambda (x) (string-match "^[ \t]*|-" x))
 			       (cdr lines)))))
 
-	 (nline 0) fnum nfields i
+	 (nline 0) fnum nfields i (cnt 0)
 	 tbopen line fields html gr colgropen rowstart rowend)
     (setq caption (and caption (org-html-do-expand caption)))
+    (when (and forced-aligns org-table-clean-did-remove-column)
+    (setq forced-aligns
+	  (mapcar (lambda (x) (cons (1- (car x)) (cdr x))) forced-aligns)))
     (if splice (setq head nil))
     (unless splice (push (if head "<thead>" "<tbody>") html))
     (setq tbopen t)
@@ -1923,17 +1928,21 @@ lang=\"%s\" xml:lang=\"%s\">
       (unless (car org-table-colgroup-info)
 	(setq org-table-colgroup-info
 	      (cons :start (cdr org-table-colgroup-info))))
+      (setq i 0)
       (push (mapconcat
 	     (lambda (x)
-	       (setq gr (pop org-table-colgroup-info))
+	       (setq gr (pop org-table-colgroup-info)
+		     i (1+ i))
 	       (format "%s<col align=\"%s\" />%s"
 		       (if (memq gr '(:start :startend))
 			   (prog1
 			       (if colgropen "</colgroup>\n<colgroup>" "<colgroup>")
 			     (setq colgropen t))
 			 "")
-		       (if (> (/ (float x) nline) org-table-number-fraction)
-			   "right" "left")
+		       (if (assoc i forced-aligns)
+			   (cdr (assoc (cdr (assoc i forced-aligns)) '(("l" . "left") ("r" . "right"))))
+			 (if (> (/ (float x) nline) org-table-number-fraction)
+			     "right" "left"))
 		       (if (memq gr '(:end :startend))
 			   (progn (setq colgropen nil) "</colgroup>")
 			 "")))

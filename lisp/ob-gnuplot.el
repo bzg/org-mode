@@ -70,9 +70,9 @@ code."
           (org-babel-gnuplot-table-to-data
            (cdr pair) (org-babel-temp-file "gnuplot-") params)
         (cdr pair))))
-   (org-babel-ref-variables params)))
+   (mapcar #'cdr (org-babel-get-header params :var))))
 
-(defun org-babel-expand-body:gnuplot (body params &optional processed-params)
+(defun org-babel-expand-body:gnuplot (body params)
   "Expand BODY according to PARAMS, return the expanded body."
   (save-window-excursion
     (let* ((vars (org-babel-gnuplot-process-vars params))
@@ -118,9 +118,9 @@ code."
         ;; insert variables into code body: this should happen last
         ;; placing the variables at the *top* of the code in case their
         ;; values are used later
-        (add-to-body (mapconcat
-                      (lambda (pair) (format "%s = \"%s\"" (car pair) (cdr pair)))
-                      vars "\n"))
+        (add-to-body (mapconcat #'identity
+				(org-babel-variable-assignments:gnuplot params)
+				"\n"))
         ;; replace any variable names preceded by '$' with the actual
         ;; value of the variable
         (mapc (lambda (pair)
@@ -162,10 +162,7 @@ This function is called by `org-babel-execute-src-block'."
 (defun org-babel-prep-session:gnuplot (session params)
   "Prepare SESSION according to the header arguments in PARAMS."
   (let* ((session (org-babel-gnuplot-initiate-session session))
-         (vars (org-babel-ref-variables params))
-         (var-lines (mapcar
-                     (lambda (pair) (format "%s = \"%s\"" (car pair) (cdr pair)))
-                     vars)))
+         (var-lines (org-babel-variable-assignments:gnuplot params)))
     (message "%S" session)
     (org-babel-comint-in-buffer session
       (mapc (lambda (var-line)
@@ -182,6 +179,12 @@ This function is called by `org-babel-execute-src-block'."
         (goto-char (process-mark (get-buffer-process (current-buffer))))
         (insert (org-babel-chomp body)))
       buffer)))
+
+(defun org-babel-variable-assignments:gnuplot (params)
+  "Return list of gnuplot statements assigning the block's variables"
+  (mapcar
+   (lambda (pair) (format "%s = \"%s\"" (car pair) (cdr pair)))
+   (mapcar #'cdr (org-babel-get-header params :var))))
 
 (defvar gnuplot-buffer)
 (defun org-babel-gnuplot-initiate-session (&optional session params)

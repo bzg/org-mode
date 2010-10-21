@@ -41,7 +41,6 @@
 #+results:
 : 4
 
-
 * excessive id links on tangling
   :PROPERTIES:
   :ID:       ef06fd7f-012b-4fde-87a2-2ae91504ea7e
@@ -59,3 +58,95 @@
 #+begin_src emacs-lisp :tangle no
   (message "for tangling")
 #+end_src
+* simple variable resolution
+  :PROPERTIES:
+  :ID:       f68821bc-7f49-4389-85b5-914791ee3718
+  :END:
+
+#+source: four
+#+begin_src emacs-lisp
+  (list 1 2 3 4)
+#+end_src
+
+#+begin_src emacs-lisp :var four=four
+  (length four)
+#+end_src
+
+#+results:
+: 4
+
+* multi-line header arguments
+  :PROPERTIES:
+  :ID:       b77c8857-6c76-4ea9-8a61-ddc2648d96c4
+  :END:
+
+#+headers: :var letters='(a b c d e f g)
+#+begin_src emacs-lisp :var numbers='(1 2 3 4 5 6 7)
+  (map 'list #'list numbers letters)
+#+end_src
+
+#+results:
+| 1 | a |
+| 2 | b |
+| 3 | c |
+| 4 | d |
+| 5 | e |
+| 6 | f |
+| 7 | g |
+
+* simple named code block
+  :PROPERTIES:
+  :ID:       0d82b52d-1bb9-4916-816b-2c67c8108dbb
+  :END:
+
+#+source: i-have-a-name
+#+begin_src emacs-lisp
+  42
+#+end_src
+
+#+results: 
+: 42
+
+#+results: i-have-a-name
+: 42
+
+* Pascal's Triangle -- export test
+  :PROPERTIES:
+  :ID:       92518f2a-a46a-4205-a3ab-bcce1008a4bb
+  :END:
+
+#+source: pascals-triangle
+#+begin_src emacs-lisp :var n=5 :exports both
+  (defun pascals-triangle (n)
+    (if (= n 0)
+        (list (list 1))
+      (let* ((prev-triangle (pascals-triangle (- n 1)))
+             (prev-row (car (reverse prev-triangle))))
+        (append prev-triangle
+                (list (map 'list #'+
+                           (append prev-row '(0))
+                           (append '(0) prev-row)))))))
+
+  (pascals-triangle n)
+#+end_src
+
+* calling code blocks from inside table
+  :PROPERTIES:
+  :ID:       6d2ff4ce-4489-4e2a-9c65-e3f71f77d975
+  :END:
+
+#+source: take-sqrt
+#+begin_src emacs-lisp :var n=9
+  (sqrt n)
+#+end_src
+
+* executing an lob call line
+  :PROPERTIES:
+  :results:  silent
+  :END:
+
+69fbe856-ca9c-4f20-9146-826d2f488c1d
+#+call: echo(input="testing")
+#+call: echo(input="testing") :results vector
+#+call: echo() :var input="testing"
+#+call: echo() :var input="testing" :results vector

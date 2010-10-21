@@ -1168,7 +1168,8 @@ on this string to produce the exported version."
       (when (plist-get parameters :emph-multiline)
 	(org-export-concatenate-multiline-emphasis))
 
-      ;; Remove special table lines
+      ;; Remove special table lines, and store alignment information
+      (org-store-forced-table-alignment)
       (when org-export-table-remove-special-lines
 	(org-export-remove-special-table-lines))
 
@@ -1773,8 +1774,30 @@ When it is nil, all comments will be removed."
 	  (org-if-unprotected
 	   (replace-match "\\1[[\\2]]")))))))
 
+(defun org-store-forced-table-alignment ()
+  "Find table lines which force alignment, store the results in properties."
+  (let (line)
+    (goto-char (point-min))
+    (while (re-search-forward "|[ \t]*<[rl][0-9]*>[ \t]*|" nil t)
+      ;; OK, this looks like a table line with an alignment cookie
+      (org-if-unprotected
+       (setq line (buffer-substring (point-at-bol) (point-at-eol)))
+       (when (and (org-at-table-p)
+		  (org-table-cookie-line-p line))
+	 (setq cnt 0 aligns nil)
+	 (mapcar
+	  (lambda (x)
+	    (setq cnt (1+ cnt))
+	    (if (string-match "\\`<\\([lr]\\)" x)
+		(push (cons cnt (downcase (match-string 1 x))) aligns)))
+	  (org-split-string line "[ \t]*|[ \t]*"))
+	 (add-text-properties (org-table-begin) (org-table-end)
+			      (list 'org-forced-aligns aligns))))
+      (goto-char (point-at-eol)))))
+
 (defun org-export-remove-special-table-lines ()
-  "Remove tables lines that are used for internal purposes."
+  "Remove tables lines that are used for internal purposes.
+Also, store forcedalignment information found in such lines."
   (goto-char (point-min))
   (while (re-search-forward "^[ \t]*|" nil t)
     (org-if-unprotected-at (1- (point))

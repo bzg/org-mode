@@ -53,7 +53,7 @@
   '((:results . "latex") (:exports . "results"))
   "Default arguments to use when evaluating a LaTeX source block.")
 
-(defun org-babel-expand-body:latex (body params &optional processed-params)
+(defun org-babel-expand-body:latex (body params)
   "Expand BODY according to PARAMS, return the expanded body."
   (mapc (lambda (pair) ;; replace variables
           (setq body
@@ -61,7 +61,7 @@
                  (regexp-quote (format "%S" (car pair)))
                  (if (stringp (cdr pair))
                      (cdr pair) (format "%S" (cdr pair)))
-                 body))) (nth 1 (org-babel-process-params params)))
+                 body))) (mapcar #'cdr (org-babel-get-header params :var)))
   (org-babel-trim body))
 
 (defun org-babel-execute:latex (body params)

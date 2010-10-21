@@ -48,48 +48,33 @@
   "Preferred python mode for use in running python interactively.")
 
 (defvar org-src-preserve-indentation)
-(defun org-babel-expand-body:python (body params &optional processed-params)
-  "Expand BODY according to PARAMS, return the expanded body."
-  (concat
-   (mapconcat ;; define any variables
-    (lambda (pair)
-      (format "%s=%s"
-              (car pair)
-              (org-babel-python-var-to-python (cdr pair))))
-    (nth 1 (or processed-params (org-babel-process-params params))) "\n")
-   "\n"
-   (org-babel-trim body (if org-src-preserve-indentation "[\f\n\r\v]"))
-   "\n"))
 
 (defun org-babel-execute:python (body params)
   "Execute a block of Python code with Babel.
 This function is called by `org-babel-execute-src-block'."
-  (let* ((processed-params (org-babel-process-params params))
-         (session (org-babel-python-initiate-session (first processed-params)))
-         (result-params (nth 2 processed-params))
-         (result-type (nth 3 processed-params))
-         (full-body (org-babel-expand-body:python
-                     body params processed-params))
+  (let* ((session (org-babel-python-initiate-session
+		   (cdr (assoc :session params))))
+         (result-params (cdr (assoc :result-params params)))
+         (result-type (cdr (assoc :result-type params)))
+         (full-body
+	  (org-babel-expand-body:generic
+	   body params (org-babel-variable-assignments:python params)))
          (result (org-babel-python-evaluate
 		  session full-body result-type result-params)))
     (or (cdr (assoc :file params))
         (org-babel-reassemble-table
          result
-         (org-babel-pick-name (nth 4 processed-params)
+         (org-babel-pick-name (cdr (assoc :colname-names params))
 			      (cdr (assoc :colnames params)))
-         (org-babel-pick-name (nth 5 processed-params)
+         (org-babel-pick-name (cdr (assoc :rowname-names params))
 			      (cdr (assoc :rownames params)))))))
 
 (defun org-babel-prep-session:python (session params)
-  "Prepare SESSION according to the header arguments in PARAMS."
+  "Prepare SESSION according to the header arguments in PARAMS.
+VARS contains resolved variable references"
   (let* ((session (org-babel-python-initiate-session session))
-         (vars (org-babel-ref-variables params))
-         (var-lines (mapcar ;; define any variables
-                     (lambda (pair)
-                       (format "%s=%s"
-                               (car pair)
-                               (org-babel-python-var-to-python (cdr pair))))
-                     vars)))
+	 (var-lines
+	  (org-babel-variable-assignments:python params)))
     (org-babel-comint-in-buffer session
       (mapc (lambda (var)
               (end-of-line 1) (insert var) (comint-send-input)
@@ -106,6 +91,15 @@ This function is called by `org-babel-execute-src-block'."
       buffer)))
 
 ;; helper functions
+
+(defun org-babel-variable-assignments:python (params)
+  "Return list of python statements assigning the block's variables"
+  (mapcar
+   (lambda (pair)
+     (format "%s=%s"
+	     (car pair)
+	     (org-babel-python-var-to-python (cdr pair))))
+   (mapcar #'cdr (org-babel-get-header params :var))))
 
 (defun org-babel-python-var-to-python (var)
   "Convert an elisp value to a python variable.

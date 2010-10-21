@@ -80,22 +80,21 @@ cell's value as a string, prefix the identifier with two \"$\"s
 rather than a single \"$\" (i.e. \"$$2\" instead of \"$2\" in the
 example above."
   (let* (quote
-	 (variables (mapcar
-		     (lambda (var)
-		       ;; ensure that all cells prefixed with $'s are strings
-		       (cons (car var)
-			     (delq nil
-				   (mapcar
-				    (lambda (el)
-				      (if (eq '$ el)
-					  (setq quote t)
-					(prog1
-					    (if quote
-						(format "\"%s\"" el)
-					      (org-babel-clean-text-properties el))
-					  (setq quote nil))))
-				    (cdr var)))))
-		     variables)))
+	 (variables
+	  (mapcar
+	   (lambda (var)
+	     ;; ensure that all cells prefixed with $'s are strings
+	     (cons (car var)
+		   (delq nil (mapcar
+			      (lambda (el)
+				(if (eq '$ el)
+				    (setq quote t)
+				  (prog1 (if quote
+					     (format "\"%s\"" el)
+					   (org-babel-clean-text-properties el))
+				    (setq quote nil))))
+			      (cdr var)))))
+	   variables)))
     (unless (stringp source-block)
       (setq source-block (symbol-name source-block)))
     (org-babel-table-truncate-at-newline ;; org-table cells can't be multi-line
@@ -109,14 +108,14 @@ example above."
 				 (lambda (var-spec)
 				   (if (> (length (cdr var-spec)) 1)
 				       (format "%S='%S"
-					       (car var-spec) (mapcar #'read (cdr var-spec)))
+					       (car var-spec)
+					       (mapcar #'read (cdr var-spec)))
 				     (format "%S=%s"
 					     (car var-spec) (cadr var-spec))))
 				 ',variables ", ")
                                 ")")))))
            (org-babel-execute-src-block
-            nil (list "emacs-lisp" "results"
-                      (org-babel-merge-params '((:results . "silent")) params))))
+            nil (list "emacs-lisp" "results" params) '((:results . "silent"))))
        ""))))
 
 (provide 'ob-table)

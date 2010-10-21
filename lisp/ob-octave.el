@@ -47,20 +47,6 @@
 (defvar org-babel-octave-shell-command "octave -q"
   "Shell command to run octave as an external process.")
 
-(defun org-babel-expand-body:matlab (body params &optional processed-params)
-  "Expand BODY according to PARAMS, return the expanded body."
-  (org-babel-expand-body:octave body params processed-params))
-(defun org-babel-expand-body:octave (body params &optional processed-params)
-  "Expand BODY according to PARAMS, return the expanded body."
-  (let ((vars (nth 1 (or processed-params (org-babel-process-params params)))))
-    (concat
-     (mapconcat
-      (lambda (pair)
-        (format "%s=%s"
-                (car pair)
-                (org-babel-octave-var-to-octave (cdr pair))))
-      vars "\n") "\n" body "\n")))
-
 (defvar org-babel-matlab-with-emacs-link nil
   "If non-nil use matlab-shell-run-region for session evaluation.
   This will use EmacsLink if (matlab-with-emacs-link) evaluates
@@ -89,30 +75,42 @@ end")
 
 (defun org-babel-execute:octave (body params &optional matlabp)
   "Execute a block of octave code with Babel."
-  (let* ((processed-params (org-babel-process-params params))
-         (session
+  (let* ((session
 	  (funcall (intern (format "org-babel-%s-initiate-session"
 				   (if matlabp "matlab" "octave")))
-		   (nth 0 processed-params) params))
-         (vars (nth 1 processed-params))
-         (result-params (nth 2 processed-params))
-         (result-type (nth 3 processed-params))
+		   (cdr (assoc :session params)) params))
+         (vars (mapcar #'cdr (org-babel-get-header params :var)))
+         (result-params (cdr (assoc :result-params params)))
+         (result-type (cdr (assoc :result-type params)))
 	 (out-file (cdr (assoc :file params)))
-	 (augmented-body
-	  (org-babel-expand-body:octave body params processed-params))
+	 (full-body
+	  (org-babel-expand-body:generic
+	   body params (org-babel-variable-assignments:octave params)))
 	 (result (org-babel-octave-evaluate
-		  session augmented-body result-type matlabp)))
+		  session full-body result-type matlabp)))
     (or out-file
         (org-babel-reassemble-table
          result
          (org-babel-pick-name
-	  (nth 4 processed-params) (cdr (assoc :colnames params)))
+	  (cdr (assoc :colname-names params)) (cdr (assoc :colnames params)))
          (org-babel-pick-name
-	  (nth 5 processed-params) (cdr (assoc :rownames params)))))))
+	  (cdr (assoc :rowname-names params)) (cdr (assoc :rownames params)))))))
 
 (defun org-babel-prep-session:matlab (session params)
   "Prepare SESSION according to PARAMS."
   (org-babel-prep-session:octave session params 'matlab))
+
+(defun org-babel-variable-assignments:octave (params)
+  "Return list of octave statements assigning the block's variables"
+  (mapcar
+   (lambda (pair)
+     (format "%s=%s"
+	     (car pair)
+	     (org-babel-octave-var-to-octave (cdr pair))))
+   (mapcar #'cdr (org-babel-get-header params :var))))
+
+(defalias 'org-babel-variable-assignments:matlab
+  'org-babel-variable-assignments:octave)
 
 (defun org-babel-octave-var-to-octave (var)
   "Convert an emacs-lisp value into an octave variable.
@@ -126,13 +124,7 @@ specifying a variable of the same value."
 (defun org-babel-prep-session:octave (session params &optional matlabp)
   "Prepare SESSION according to the header arguments specified in PARAMS."
   (let* ((session (org-babel-octave-initiate-session session params matlabp))
-         (vars (org-babel-ref-variables params))
-         (var-lines (mapcar
-                     (lambda (pair)
-                       (format "%s=%s"
-                               (car pair)
-                               (org-babel-octave-var-to-octave (cdr pair))))
-                     vars)))
+	 (var-lines (org-babel-variable-assignments:octave params)))
     (org-babel-comint-in-buffer session
       (mapc (lambda (var)
               (end-of-line 1) (insert var) (comint-send-input nil t)

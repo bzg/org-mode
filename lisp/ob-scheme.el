@@ -59,9 +59,9 @@
   :group 'org-babel
   :type 'string)
 
-(defun org-babel-expand-body:scheme (body params &optional processed-params)
+(defun org-babel-expand-body:scheme (body params)
   "Expand BODY according to PARAMS, return the expanded body."
-  (let ((vars (nth 1 (or processed-params (org-babel-process-params params)))))
+  (let ((vars (mapcar #'cdr (org-babel-get-header params :var))))
     (if (> (length vars) 0)
         (concat "(let ("
                 (mapconcat
@@ -74,15 +74,15 @@
 (defun org-babel-execute:scheme (body params)
   "Execute a block of Scheme code with org-babel.
 This function is called by `org-babel-execute-src-block'"
-  (let* ((processed-params (org-babel-process-params params))
-         (result-type (nth 3 processed-params))
-	 (org-babel-scheme-cmd (or (cdr (assoc :scheme params)) org-babel-scheme-cmd))
-         (full-body (org-babel-expand-body:scheme body params processed-params)))
+  (let* ((result-type (cdr (assoc :result-type params)))
+	 (org-babel-scheme-cmd (or (cdr (assoc :scheme params))
+				   org-babel-scheme-cmd))
+         (full-body (org-babel-expand-body:scheme body params)))
     (read
-     (if (not (string= (nth 0 processed-params) "none"))
+     (if (not (string= (cdr (assoc :session params)) "none"))
          ;; session evaluation
 	 (let ((session (org-babel-prep-session:scheme
-			 (nth 0 processed-params) params)))
+			 (cdr (assoc :session params)) params)))
 	   (org-babel-comint-with-output
 	       (session (format "%S" org-babel-scheme-eoe) t body)
 	     (mapc
@@ -104,7 +104,7 @@ This function is called by `org-babel-execute-src-block'"
 (defun org-babel-prep-session:scheme (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."
   (let* ((session (org-babel-scheme-initiate-session session))
-	 (vars (org-babel-ref-variables params))
+	 (vars (mapcar #'cdr (org-babel-get-header params :var)))
 	 (var-lines
 	  (mapcar
 	   (lambda (var) (format "%S" (print `(define ,(car var) ',(cdr var)))))

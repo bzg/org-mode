@@ -133,15 +133,15 @@ files."
 
 
 ;;; Navigation Functions
-(defjump 'org-test-jump
-  '(("lisp/\\1.el" . "testing/lisp/test-\\1.el")
-    ("lisp/\\1.el" . "testing/lisp/\\1.el/test.*.el")
-    ("contrib/lisp/\\1.el" . "testing/contrib/lisp/test-\\1.el")
-    ("contrib/lisp/\\1.el" . "testing/contrib/lisp/\\1.el/test.*.el")
-    ("testing/lisp/test-\\1.el" . "lisp/\\1.el")
-    ("testing/lisp/\\1.el" . "lisp/\\1.el/test.*.el")
-    ("testing/contrib/lisp/test-\\1.el" . "contrib/lisp/\\1.el")
-    ("testing/contrib/lisp/test-\\1.el" . "contrib/lisp/\\1.el/test.*.el"))
+(defjump org-test-jump
+  (("lisp/\\1.el" . "testing/lisp/test-\\1.el")
+   ("lisp/\\1.el" . "testing/lisp/\\1.el/test.*.el")
+   ("contrib/lisp/\\1.el" . "testing/contrib/lisp/test-\\1.el")
+   ("contrib/lisp/\\1.el" . "testing/contrib/lisp/\\1.el/test.*.el")
+   ("testing/lisp/test-\\1.el" . "lisp/\\1.el")
+   ("testing/lisp/\\1.el" . "lisp/\\1.el/test.*.el")
+   ("testing/contrib/lisp/test-\\1.el" . "contrib/lisp/\\1.el")
+   ("testing/contrib/lisp/test-\\1.el" . "contrib/lisp/\\1.el/test.*.el"))
   (concat org-base-dir "/")
   "Jump between org-mode files and their tests."
   (lambda (path)
@@ -151,7 +151,8 @@ files."
       (find-file full-path)
       (insert
        ";;; " file-name "\n\n"
-       ";; Copyright (c) 2010 " user-full-name "\n"
+       ";; Copyright (c) " (nth 5 (decode-time (current-time)))
+       " " user-full-name "\n"
        ";; Authors: " user-full-name "\n\n"
        ";; Released under the GNU General Public License version 3\n"
        ";; see: http://www.gnu.org/licenses/gpl-3.0.html\n\n"

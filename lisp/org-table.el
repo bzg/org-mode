@@ -345,14 +345,19 @@ available parameters."
 
   (save-match-data
     (and (string-match "[<>]\\|&[lg]t;" line)
-	 (or (string-match "\\`[ \t]*|[ \t]*/[ \t]*\\(|[ \t<>0-9|lgt&;]+\\)\\'" line)
+	 (or (string-match
+	      "\\`[ \t]*|[ \t]*/[ \t]*\\(|[ \t<>0-9|lgt&;]+\\)\\'" line)
 	     (string-match "\\(\\`[ \t<>lr0-9|gt&;]+\\'\\)" line))
 	 (not (delq nil (mapcar
 			 (lambda (s)
 			   (not (or (equal s "")
-				    (string-match "\\`<\\([lr]?[0-9]+\\|[lr]\\)>\\'" s)
-				    (string-match "\\`&lt;\\([lr]?[0-9]+\\|[lr]\\)&gt;\\'" s))))
-			 (org-split-string (match-string 1 line) "[ \t]*|[ \t]*")))))))
+				    (string-match
+				     "\\`<\\([lr]?[0-9]+\\|[lr]\\)>\\'" s)
+				    (string-match
+				     "\\`&lt;\\([lr]?[0-9]+\\|[lr]\\)&gt;\\'"
+				     s))))
+			 (org-split-string (match-string 1 line)
+					   "[ \t]*|[ \t]*")))))))
 
 (defconst org-table-translate-regexp
   (concat "\\(" "@[-0-9I$]+" "\\|" "[a-zA-Z]\\{1,2\\}\\([0-9]+\\|&\\)" "\\)")

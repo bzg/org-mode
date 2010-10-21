@@ -43,9 +43,6 @@
   '((:results . "file") (:exports . "results"))
   "Default arguments for evaluating a ditaa source block.")
 
-(defun org-babel-expand-body:ditaa (body params &optional processed-params)
-  "Expand BODY according to PARAMS, return the expanded body." body)
-
 (defvar org-ditaa-jar-path)
 (defun org-babel-execute:ditaa (body params)
   "Execute a block of Ditaa code with org-babel.
