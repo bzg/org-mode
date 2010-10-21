@@ -282,11 +282,11 @@ code blocks by language."
       (let* ((start-line (save-restriction (widen)
 					   (+ 1 (line-number-at-pos (point)))))
 	     (file (buffer-file-name))
-	     (info (org-babel-get-src-block-info 'light)))
+	     (info (org-babel-get-src-block-info 'light))
+	     (src-lang (nth 0 info)))
         (unless (string= (cdr (assoc :tangle (nth 2 info))) "no")
           (unless (and language (not (string= language src-lang)))
-	    (let* ((info (org-babel-get-src-block-info 'light))
-		   (params (nth 2 info))
+	    (let* ((params (nth 2 info))
 		   (link (unless (string= (cdr (assoc :tangle params)) "no")
 			   (progn (call-interactively 'org-store-link)
 				  (org-babel-clean-text-properties
@@ -295,7 +295,6 @@ code blocks by language."
 		    (intern (or (nth 4 info)
 				(format "%s:%d"
 					current-heading block-counter))))
-		   (src-lang (nth 0 info))
 		   (expand-cmd
 		    (intern (concat "org-babel-expand-body:" src-lang)))
 		   (assignments-cmd
