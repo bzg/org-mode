@@ -59,23 +59,15 @@
 
 (defvar org-babel-haskell-eoe "\"org-babel-haskell-eoe\"")
 
-(defun org-babel-expand-body:haskell (body params)
-  "Expand BODY according to PARAMS, return the expanded body."
-  (let ((vars (mapcar #'cdr (org-babel-get-header params :var))))
-    (concat
-     (mapconcat
-      (lambda (pair) (format "let %s = %s"
-			(car pair)
-			(org-babel-haskell-var-to-haskell (cdr pair))))
-      vars "\n") "\n" body "\n")))
-
 (defun org-babel-execute:haskell (body params)
   "Execute a block of Haskell code."
   (let* ((processed-params (org-babel-process-params params))
          (session (nth 0 processed-params))
          (vars (nth 1 processed-params))
          (result-type (nth 3 processed-params))
-         (full-body (org-babel-expand-body:haskell body params))
+         (full-body (org-babel-expand-body:generic
+		     body params
+		     (org-babel-variable-assignments:haskell params)))
          (session (org-babel-haskell-initiate-session session params))
          (raw (org-babel-comint-with-output
 		  (session org-babel-haskell-eoe t full-body)
@@ -125,17 +117,21 @@ then create one.  Return the initialized session."
 (defun org-babel-prep-session:haskell (session params)
   "Prepare SESSION according to the header arguments in PARAMS."
   (save-window-excursion
-    (let ((pp (org-babel-process-params params))
-	  (buffer (org-babel-haskell-initiate-session session)))
+    (let ((buffer (org-babel-haskell-initiate-session session)))
       (org-babel-comint-in-buffer buffer
-      	(mapc
-      	 (lambda (pair)
-      	   (insert (format "let %s = %s"
-      			   (car pair)
-      			   (org-babel-haskell-var-to-haskell (cdr pair))))
-      	   (comint-send-input nil t))
-      	 (nth 1 pp)))
+      	(mapc (lambda (line)
+		(insert line)
+		(comint-send-input nil t))
+	      (org-babel-variable-assignments:haskell params)))
       (current-buffer))))
+
+(defun org-babel-variable-assignments:haskell (params)
+  "Return list of haskell statements assigning the block's variables"
+  (mapcar (lambda (pair)
+	    (format "let %s = %s"
+		    (car pair)
+		    (org-babel-haskell-var-to-haskell (cdr pair))))
+   (mapcar #'cdr (org-babel-get-header params :var)) "\n"))
 
 (defun org-babel-haskell-table-or-string (results)
   "Convert RESULTS to an Emacs-lisp table or string.
