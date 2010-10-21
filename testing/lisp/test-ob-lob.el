@@ -41,9 +41,10 @@
     (forward-line 1)
     (should (string= "testing" (org-babel-lob-execute
     				(org-babel-lob-get-info))))
-    (forward-line 1)
-    (should (string= "testing" (caar (org-babel-lob-execute
-				      (org-babel-lob-get-info)))))))
+    ;; (forward-line 1)
+    ;; (should (string= "testing" (caar (org-babel-lob-execute
+    ;; 				      (org-babel-lob-get-info)))))
+    ))
 
 (provide 'test-ob-lob)
 
