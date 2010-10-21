@@ -50,9 +50,6 @@
 
 (defvar org-babel-default-header-args:sql '())
 
-(defun org-babel-expand-body:sql (body params)
-  "Expand BODY according to PARAMS, return the expanded body." body)
-
 (defun org-babel-execute:sql (body params)
   "Execute a block of Sql code with Babel.
 This function is called by `org-babel-execute-src-block'."
@@ -74,7 +71,7 @@ This function is called by `org-babel-execute-src-block'."
 				    (or cmdline "")))
                     (t (error "no support for the %s sql engine" engine)))))
     (with-temp-file in-file
-      (insert (org-babel-expand-body:sql body params)))
+      (insert (org-babel-expand-body:generic body params)))
     (message command)
     (shell-command command)
     (with-temp-buffer
