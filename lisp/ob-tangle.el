@@ -287,13 +287,15 @@ code blocks by language."
 					      current-heading block-counter))))
 	     (src-lang (nth 0 info))
 	     (expand-cmd (intern (concat "org-babel-expand-body:" src-lang)))
+	     (assignments-cmd (intern (concat "org-babel-variable-assignments:" src-lang)))
 	     (body ((lambda (body)
 		      (if (assoc :no-expand params)
 			  body
-			(funcall (if (fboundp expand-cmd)
-				     expand-cmd
-				   'org-babel-expand-body:generic)
-				 body params)))
+			(if (fboundp expand-cmd) (funcall expand-cmd body params)
+			  (org-babel-expand-body:generic
+			   body params
+			   (and (fboundp assignments-cmd)
+				(funcall assignments-cmd params))))))
 		    (if (and (cdr (assoc :noweb params))
 			     (let ((nowebs (split-string
 					    (cdr (assoc :noweb params)))))
