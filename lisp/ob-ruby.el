@@ -52,17 +52,6 @@
 (defvar org-babel-ruby-command "ruby"
   "Name of command to use for executing ruby code.")
 
-(defun org-babel-expand-body:ruby (body params)
-  "Expand BODY according to PARAMS, return the expanded body."
-  (let ((vars (mapcar #'cdr (org-babel-get-header params :var))))
-    (concat
-     (mapconcat ;; define any variables
-      (lambda (pair)
-        (format "%s=%s"
-                (car pair)
-                (org-babel-ruby-var-to-ruby (cdr pair))))
-      vars "\n") "\n" body "\n")))
-
 (defun org-babel-execute:ruby (body params)
   "Execute a block of Ruby code with Babel.
 This function is called by `org-babel-execute-src-block'."
@@ -70,7 +59,8 @@ This function is called by `org-babel-execute-src-block'."
          (session (org-babel-ruby-initiate-session (first processed-params)))
          (result-params (nth 2 processed-params))
          (result-type (nth 3 processed-params))
-         (full-body (org-babel-expand-body:ruby body params))
+         (full-body (org-babel-expand-body:generic
+		     body params (org-babel-variable-assignments:ruby params)))
          (result (org-babel-ruby-evaluate
 		  session full-body result-type result-params)))
     (or (cdr (assoc :file params))
@@ -85,13 +75,7 @@ This function is called by `org-babel-execute-src-block'."
   "Prepare SESSION according to the header arguments specified in PARAMS."
   ;; (message "params=%S" params) ;; debugging
   (let* ((session (org-babel-ruby-initiate-session session))
-         (vars (mapcar #'cdr (org-babel-get-header params :var)))
-         (var-lines (mapcar ;; define any variables
-                     (lambda (pair)
-                       (format "%s=%s"
-                               (car pair)
-                               (org-babel-ruby-var-to-ruby (cdr pair))))
-                     vars)))
+         (var-lines (org-babel-variable-assignments:ruby params)))
     (org-babel-comint-in-buffer session
       (sit-for .5) (goto-char (point-max))
       (mapc (lambda (var)
@@ -110,6 +94,15 @@ This function is called by `org-babel-execute-src-block'."
       buffer)))
 
 ;; helper functions
+
+(defun org-babel-variable-assignments:ruby (params)
+  "Return list of ruby statements assigning the block's variables"
+  (mapcar
+   (lambda (pair)
+     (format "%s=%s"
+	     (car pair)
+	     (org-babel-ruby-var-to-ruby (cdr pair))))
+   (mapcar #'cdr (org-babel-get-header params :var))))
 
 (defun org-babel-ruby-var-to-ruby (var)
   "Convert VAR into a ruby variable.
