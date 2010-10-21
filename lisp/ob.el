@@ -357,13 +357,6 @@ block."
 		       (nth 2 info)))
 	     (cache? (and (cdr (assoc :cache params))
 			  (string= "yes" (cdr (assoc :cache params)))))
-	     (params (setf (nth 2 info)
-			   (if cache?
-			       (sort params
-				     (lambda (el1 el2)
-				       (string< (symbol-name (car el1))
-						(symbol-name (car el2)))))
-			     params)))
 	     (result-params (cdr (assoc :result-params params)))
 	     (new-hash (when cache? (org-babel-sha1-hash info)))
 	     (old-hash (when cache? (org-babel-result-hash info)))
