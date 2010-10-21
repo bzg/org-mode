@@ -55,12 +55,6 @@
   '((:results . "file") (:exports . "results"))
   "Default arguments when evaluating an Asymptote source block.")
 
-(defun org-babel-expand-body:asymptote (body params)
-  "Expand BODY according to PARAMS, return the expanded body."
-  (let ((vars (mapcar #'cdr (org-babel-get-header params :var))))
-    (concat (mapconcat 'org-babel-asymptote-var-to-asymptote vars "\n")
-	    "\n" body "\n")))
-
 (defun org-babel-execute:asymptote (body params)
   "Execute a block of Asymptote code.
 This function is called by `org-babel-execute-src-block'."
@@ -83,7 +77,9 @@ This function is called by `org-babel-execute-src-block'."
 		  " " cmdline
 		  " " (org-babel-process-file-name in-file))))
     (with-temp-file in-file
-      (insert (org-babel-expand-body:asymptote body params)))
+      (insert (org-babel-expand-body:generic
+	       body params
+	       (org-babel-variable-assignments:asymptote params))))
     (message cmd) (shell-command cmd)
     out-file))
 
@@ -91,6 +87,11 @@ This function is called by `org-babel-execute-src-block'."
   "Return an error if the :session header argument is set.
 Asymptote does not support sessions"
   (error "Asymptote does not support sessions"))
+
+(defun org-babel-variable-assignments:asymptote (params)
+  "Return list of asymptote statements assigning the block's variables"
+  (mapcar #'org-babel-asymptote-var-to-asymptote
+	  (mapcar #'cdr (org-babel-get-header params :var))))
 
 (defun org-babel-asymptote-var-to-asymptote (pair)
   "Convert an elisp value into an Asymptote variable.
