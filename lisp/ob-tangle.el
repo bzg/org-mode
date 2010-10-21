@@ -286,11 +286,11 @@ code blocks by language."
 	     (src-lang (nth 0 info)))
         (unless (string= (cdr (assoc :tangle (nth 2 info))) "no")
           (unless (and language (not (string= language src-lang)))
-	    (let* ((params (nth 2 info))
-		   (link (unless (string= (cdr (assoc :tangle params)) "no")
-			   (progn (call-interactively 'org-store-link)
-				  (org-babel-clean-text-properties
-				   (car (pop org-stored-links))))))
+	    (let* ((info (org-babel-get-src-block-info))
+		   (params (nth 2 info))
+		   (link (progn (call-interactively 'org-store-link)
+				(org-babel-clean-text-properties
+				 (car (pop org-stored-links)))))
 		   (source-name
 		    (intern (or (nth 4 info)
 				(format "%s:%d"
