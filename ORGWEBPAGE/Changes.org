@@ -6,6 +6,48 @@
 
 #+STARTUP: indent hidestars
 
+* Version 7.02
+** Incompatible Changes
+*** Code block hashes
+Due to changes in the code resolving code block header arguments
+hashing of code block results should now re-run a code block when
+an argument to the code block has changed.  As a result of this
+change *all* code blocks with cached results will be re-run after
+upgrading to the latest version.
+
+** Details
+*** Multi-line header arguments to code blocks
+Code block header arguments can now span multiple lines using the
+new =#+header:= or =#+headers:= lines preceding a code block or
+nested in between the name and body of a named code block.
+Examples are given below.
+
+- multi-line header arguments on an un-named code block
+  : #+headers: :var data1=1
+  : #+begin_src emacs-lisp :var data2=2
+  :   (message "data1:%S, data2:%S" data1 data2)
+  : #+end_src
+  : 
+  : #+results:
+  : : data1:1, data2:2
+
+- multi-line header arguments on a named code block
+  :   #+source: named-block
+  :   #+header: :var data=2
+  :   #+begin_src emacs-lisp
+  :     (message "data:%S" data)
+  :   #+end_src
+  : 
+  :   #+results: named-block
+  :   : data:2
+
+*** Unified handling of variable expansion for code blocks
+The code used to resolve variable references in code block header
+arguments has now been consolidated.  This both simplifies the
+code base (especially the language-specific files), and ensures
+that the arguments to a code block will not be evaluated multiple
+times.  This change should not be externally visible to the
+Org-mode user.
 * Version 7.01
 :PROPERTIES:
 :VISIBILITY: content
@@ -444,7 +486,6 @@ etc…) in headline properties or in tables.
 Org-babel now supports three new header arguments, and new
 default behavior for handling horizontal lines in tables
 (hlines), column names, and rownames across all languages.
-
 
 * Version 6.35
  :PROPERTIES:
@@ -1042,7 +1083,6 @@ around org-babel.
 - Now able to reference file links as results.
 - Allow pdf/png generation directly from latex source blocks
   with :file header argument.
-
 
 * Version 6.34
  :PROPERTIES:
