@@ -355,7 +355,7 @@ block."
 			 (org-babel-process-params
 			  (org-babel-merge-params (nth 2 info) params))
 		       (nth 2 info)))
-	     (cache? (and (cdr (assoc :cache params))
+	     (cache? (and (not arg) (cdr (assoc :cache params))
 			  (string= "yes" (cdr (assoc :cache params)))))
 	     (result-params (cdr (assoc :result-params params)))
 	     (new-hash (when cache? (org-babel-sha1-hash info)))
