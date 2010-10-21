@@ -84,6 +84,17 @@
       (should-not (exp-p "no"))
       (should-not (exp-p "tangle")))))
 
+(ert-deftest ob-exp/exports-both ()
+    "Test the :exports both header argument.
+The code block should create both <pre></pre> and <table></table>
+elements in the final html."
+  (let (html)
+    (org-test-at-id "92518f2a-a46a-4205-a3ab-bcce1008a4bb"
+      (org-narrow-to-subtree)
+      (setq html (org-export-as-html nil nil nil 'string))
+      (should (string-match "<pre.*>[^\000]*</pre>" html))
+      (should (string-match "<table.*>[^\000]*</table>" html)))))
+
 (provide 'test-ob-exp)
 
 ;;; test-ob-exp.el ends here

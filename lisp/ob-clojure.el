@@ -45,7 +45,6 @@
 (declare-function slime-eval-async "ext:slime" (sexp &optional cont package))
 (declare-function slime-eval "ext:slime" (sexp &optional package))
 (declare-function swank-clojure-concat-paths "ext:slime" (paths))
-(declare-function org-babel-ref-variables "ext:slime" (params))
 (declare-function slime "ext:slime" (&optional command coding-system))
 (declare-function slime-output-buffer "ext:slime" (&optional noprompt))
 (declare-function slime-filter-buffers "ext:slime" (predicate))
@@ -155,7 +154,7 @@ code specifying a variable of the same value."
   "Prepare SESSION according to the header arguments specified in PARAMS."
   (require 'slime) (require 'swank-clojure)
   (let* ((session-buf (org-babel-clojure-initiate-session session))
-         (vars (org-babel-ref-variables params))
+         (vars (mapcar #'cdr (org-babel-get-header params :var)))
          (var-lines (mapcar ;; define any top level session variables
                      (lambda (pair)
                        (format "(def %s %s)\n" (car pair)
@@ -294,24 +293,23 @@ return the value of the last statement in BODY as elisp."
       (org-babel-clojure-evaluate-session buffer body result-type)
     (org-babel-clojure-evaluate-external-process buffer body result-type)))
 
-(defun org-babel-expand-body:clojure (body params &optional processed-params)
+(defun org-babel-expand-body:clojure (body params)
   "Expand BODY according to PARAMS, return the expanded body."
   (org-babel-clojure-build-full-form
-   body (nth 1 (or processed-params (org-babel-process-params params)))))
+   body (mapcar #'cdr (org-babel-get-header params :var))))
 
 (defun org-babel-execute:clojure (body params)
   "Execute a block of Clojure code."
   (require 'slime) (require 'swank-clojure)
-  (let* ((processed-params (org-babel-process-params params))
-         (body (org-babel-expand-body:clojure body params processed-params))
+  (let* ((body (org-babel-expand-body:clojure body params))
          (session (org-babel-clojure-initiate-session
-		   (first processed-params))))
+		   (cdr (assoc :session params)))))
     (org-babel-reassemble-table
-     (org-babel-clojure-evaluate session body (nth 3 processed-params))
+     (org-babel-clojure-evaluate session body (cdr (assoc :result-type params)))
      (org-babel-pick-name
-      (nth 4 processed-params) (cdr (assoc :colnames params)))
+      (cdr (assoc :colname-names params)) (cdr (assoc :colnames params)))
      (org-babel-pick-name
-      (nth 5 processed-params) (cdr (assoc :rownames params))))))
+      (cdr (assoc :rowname-names params)) (cdr (assoc :rownames params))))))
 
 (provide 'ob-clojure)
 

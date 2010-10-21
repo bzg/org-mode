@@ -64,27 +64,18 @@
   "require('sys').print(require('sys').inspect(function(){%s}()));"
   "Javascript code to print value of body.")
 
-(defun org-babel-expand-body:js (body params &optional processed-params)
-  "Expand BODY according to PARAMS, return the expanded body."
-  (let ((vars (nth 1 (or processed-params (org-babel-process-params params)))))
-    (concat
-     (mapconcat ;; define any variables
-      (lambda (pair) (format "var %s=%s;"
-			(car pair) (org-babel-js-var-to-js (cdr pair))))
-      vars "\n") "\n" body "\n")))
-
 (defun org-babel-execute:js (body params)
   "Execute a block of Javascript code with org-babel.
 This function is called by `org-babel-execute-src-block'"
-  (let* ((processed-params (org-babel-process-params params))
-	 (org-babel-js-cmd (or (cdr (assoc :cmd params)) org-babel-js-cmd))
-         (result-type (nth 3 processed-params))
-         (full-body (org-babel-expand-body:js body params processed-params)))
+  (let* ((org-babel-js-cmd (or (cdr (assoc :cmd params)) org-babel-js-cmd))
+         (result-type (cdr (assoc :result-type params)))
+         (full-body (org-babel-expand-body:generic
+		     body params (org-babel-variable-assignments:js params))))
     (org-babel-js-read
-     (if (not (string= (nth 0 processed-params) "none"))
+     (if (not (string= (cdr (assoc :session params)) "none"))
 	 ;; session evaluation
          (let ((session (org-babel-prep-session:js
-			 (nth 0 processed-params) params)))
+			 (cdr (assoc :session params)) params)))
 	   (nth 1
 		(org-babel-comint-with-output
 		    (session (format "%S" org-babel-js-eoe) t body)
@@ -130,12 +121,7 @@ specifying a variable of the same value."
 (defun org-babel-prep-session:js (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."
   (let* ((session (org-babel-js-initiate-session session))
-	 (vars (org-babel-ref-variables params))
-	 (var-lines
-	  (mapcar
-	   (lambda (pair) (format "var %s=%s;"
-			     (car pair) (org-babel-js-var-to-js (cdr pair))))
-	   vars)))
+	 (var-lines (org-babel-variable-assignments:js params)))
     (when session
       (org-babel-comint-in-buffer session
 	(sit-for .5) (goto-char (point-max))
@@ -144,6 +130,13 @@ specifying a variable of the same value."
 		(org-babel-comint-wait-for-output session)
 		(sit-for .1) (goto-char (point-max))) var-lines)))
     session))
+
+(defun org-babel-variable-assignments:js (params)
+  "Return list of Javascript statements assigning the block's variables"
+  (mapcar
+   (lambda (pair) (format "var %s=%s;"
+			  (car pair) (org-babel-js-var-to-js (cdr pair))))
+   (mapcar #'cdr (org-babel-get-header params :var))))
 
 (defun org-babel-js-initiate-session (&optional session)
   "If there is not a current inferior-process-buffer in SESSION
