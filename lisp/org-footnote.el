@@ -302,15 +302,19 @@ or new, let the user edit the definition of the footnote."
      (t
       (setq re (concat "^" org-footnote-tag-for-non-org-mode-files "[ \t]*$"))
       (unless (re-search-forward re nil t)
-	(goto-char (point-max))
-	(skip-chars-backward " \t\r\n")
-	(insert "\n\n")
-	(delete-region (point) (point-max))
-	(insert org-footnote-tag-for-non-org-mode-files "\n"))
-      (goto-char (point-max))
-      (skip-chars-backward " \t\r\n")))
-    (insert "\n\n")
-    (insert "[" label "] ")
+	(let ((max (if (and (eq major-mode 'message-mode)
+			    (re-search-forward message-signature-separator nil t))
+		       (progn (beginning-of-line) (point))
+		     (goto-char (point-max)))))
+	  (skip-chars-backward " \t\r\n")
+	  (delete-region (point) max)
+	  (insert "\n\n")
+	  (insert org-footnote-tag-for-non-org-mode-files "\n")))))
+    ;; Skip existing footnotes
+    (while (re-search-forward "^[[:space:]]*\\[[^]]+\\] " nil t)
+      (forward-line))
+    (insert "[" label "] \n")
+    (goto-char (1- (point)))
     (message "Edit definition and go back with `C-c &' or, if unique, with `C-c C-c'.")))
 
 ;;;###autoload
@@ -506,7 +510,8 @@ ENTRY is (fn-label num-mark definition)."
     (beginning-of-line 0))
   (if (looking-at "[ \t]*#\\+TBLFM:") (beginning-of-line 2))
   (end-of-line 1)
-  (skip-chars-backward "\n\r\t "))
+  (skip-chars-backward "\n\r\t ")
+  (forward-line))
 
 (defun org-footnote-delete (&optional label)
   "Delete the footnote at point.
