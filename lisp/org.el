@@ -5814,6 +5814,7 @@ in special contexts.
       (cond
 
        ((equal arg '(16))
+	(setq last-command 'dummy)
 	(org-set-startup-visibility)
 	(message "Startup visibility, plus VISIBILITY properties"))
 
