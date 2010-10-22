@@ -53,7 +53,7 @@
 
 (defun org-babel-expand-body:R (body params)
   "Expand BODY according to PARAMS, return the expanded body."
-  (let (out-file (cdr (assoc :file params)))
+  (let ((out-file (cdr (assoc :file params))))
     (mapconcat
      #'identity
      ((lambda (inside)

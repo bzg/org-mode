@@ -1831,16 +1831,19 @@ Also, store forcedalignment information found in such lines."
 	nodesc)
     (goto-char (point-min))
     (while (re-search-forward re-plain-link nil t)
-      (goto-char (1- (match-end 0)))
-      (org-if-unprotected-at (1+ (match-beginning 0))
-       (let* ((s (concat (match-string 1)
-			 "[[" (match-string 2) ":" (match-string 3)
-			 "][" (match-string 2) ":" (org-export-protect-sub-super
-						    (match-string 3))
-			 "]]")))
-	 ;; added 'org-link face to links
-	 (put-text-property 0 (length s) 'face 'org-link s)
-	 (replace-match s t t))))
+      (unless (org-string-match-p
+	       "\\[\\[\\S+:\\S-*?\\<"
+	       (buffer-substring (point-at-bol) (match-beginning 0)))
+	(goto-char (1- (match-end 0)))
+	(org-if-unprotected-at (1+ (match-beginning 0))
+	  (let* ((s (concat (match-string 1)
+			    "[[" (match-string 2) ":" (match-string 3)
+			    "][" (match-string 2) ":" (org-export-protect-sub-super
+						       (match-string 3))
+			    "]]")))
+	    ;; added 'org-link face to links
+	    (put-text-property 0 (length s) 'face 'org-link s)
+	    (replace-match s t t)))))
     (goto-char (point-min))
     (while (re-search-forward re-angle-link nil t)
       (goto-char (1- (match-end 0)))
