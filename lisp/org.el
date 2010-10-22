@@ -16234,7 +16234,8 @@ BEG and END default to the buffer boundaries."
       (widen)
       (setq beg (or beg (point-min)) end (or end (point-max)))
       (goto-char (point-min))
-      (let ((re (concat "\\[\\[\\(\\(file:\\)\\|\\([./~]\\)\\)\\([-+~.:/\\_0-9a-zA-Z ]+"
+      ;; (let ((re (concat "\\[\\[\\(\\(file:\\)\\|\\([./~]\\)\\)\\([-+~.:/\\_0-9a-zA-Z ]+"
+      (let ((re (concat "\\[\\[\\(\\(file:\\)\\|\\([./~]\\)\\)\\([-+~.:/\\_0-9a-zA-Z \x00080-\xfffff]+"
 			(substring (org-image-file-name-regexp) 0 -2)
 			"\\)\\]" (if include-linked "" "\\]")))
 	    old file ov img)
@@ -16246,7 +16247,7 @@ BEG and END default to the buffer boundaries."
 	  (when (file-exists-p file)
 	    (if (and (car-safe old) refresh)
 		(image-refresh (overlay-get (cdr old) 'display))
-	      (setq img (create-image file))
+	      (setq img (save-match-data (create-image file)))
 	      (when img
 		(setq ov (make-overlay (match-beginning 0) (match-end 0)))
 		(overlay-put ov 'display img)
