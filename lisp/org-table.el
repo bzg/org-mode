@@ -342,19 +342,18 @@ available parameters."
 
 (defun org-table-cookie-line-p (line)
   "Is this a table line with only alignment/width cookies?"
-
   (save-match-data
     (and (string-match "[<>]\\|&[lg]t;" line)
 	 (or (string-match
-	      "\\`[ \t]*|[ \t]*/[ \t]*\\(|[ \t<>0-9|lgt&;]+\\)\\'" line)
-	     (string-match "\\(\\`[ \t<>lr0-9|gt&;]+\\'\\)" line))
+	      "\\`[ \t]*|[ \t]*/[ \t]*\\(|[ \t<>0-9|lrcgt&;]+\\)\\'" line)
+	     (string-match "\\(\\`[ \t<>lrc0-9|gt&;]+\\'\\)" line))
 	 (not (delq nil (mapcar
 			 (lambda (s)
 			   (not (or (equal s "")
 				    (string-match
-				     "\\`<\\([lr]?[0-9]+\\|[lr]\\)>\\'" s)
+				     "\\`<\\([lrc]?[0-9]+\\|[lrc]\\)>\\'" s)
 				    (string-match
-				     "\\`&lt;\\([lr]?[0-9]+\\|[lr]\\)&gt;\\'"
+				     "\\`&lt;\\([lrc]?[0-9]+\\|[lrc]\\)&gt;\\'"
 				     s))))
 			 (org-split-string (match-string 1 line)
 					   "[ \t]*|[ \t]*")))))))
@@ -662,9 +661,9 @@ When nil, simply write \"#ERROR\" in corrupted fields.")
     (goto-char beg)
     (setq narrow (and org-table-do-narrow
 		      org-format-transports-properties-p
-		      (re-search-forward "<[rl]?[0-9]+>" end t)))
+		      (re-search-forward "<[lrc]?[0-9]+>" end t)))
     (goto-char beg)
-    (setq falign (re-search-forward "<[rl][0-9]*>" end t))
+    (setq falign (re-search-forward "<[lrc][0-9]*>" end t))
     (goto-char beg)
     ;; Get the rows
     (setq lines (org-split-string
@@ -705,7 +704,7 @@ When nil, simply write \"#ERROR\" in corrupted fields.")
 	(setq c column fmax nil falign1 nil)
 	(while c
 	  (setq e (pop c))
-	  (when (and (stringp e) (string-match "^<\\([rl]\\)?\\([0-9]+\\)?>$" e))
+	  (when (and (stringp e) (string-match "^<\\([lrc]\\)?\\([0-9]+\\)?>$" e))
 	    (if (match-end 1) (setq falign1 (match-string 1 e)))
 	    (if (and org-table-do-narrow (match-end 2))
 		(setq fmax (string-to-number (match-string 2 e)) c nil))))

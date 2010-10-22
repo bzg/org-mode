@@ -1776,19 +1776,19 @@ When it is nil, all comments will be removed."
 
 (defun org-store-forced-table-alignment ()
   "Find table lines which force alignment, store the results in properties."
-  (let (line)
+  (let (line cnt aligns)
     (goto-char (point-min))
-    (while (re-search-forward "|[ \t]*<[rl][0-9]*>[ \t]*|" nil t)
+    (while (re-search-forward "|[ \t]*<[lrc][0-9]*>[ \t]*|" nil t)
       ;; OK, this looks like a table line with an alignment cookie
       (org-if-unprotected
        (setq line (buffer-substring (point-at-bol) (point-at-eol)))
        (when (and (org-at-table-p)
 		  (org-table-cookie-line-p line))
 	 (setq cnt 0 aligns nil)
-	 (mapcar
+	 (mapc
 	  (lambda (x)
 	    (setq cnt (1+ cnt))
-	    (if (string-match "\\`<\\([lr]\\)" x)
+	    (if (string-match "\\`<\\([lrc]\\)" x)
 		(push (cons cnt (downcase (match-string 1 x))) aligns)))
 	  (org-split-string line "[ \t]*|[ \t]*"))
 	 (add-text-properties (org-table-begin) (org-table-end)
@@ -1810,7 +1810,7 @@ Also, store forcedalignment information found in such lines."
 		 (lambda (f)
 		   (or (= (length f) 0)
 		       (string-match
-			"\\`<\\([0-9]\\|[rl]\\|[rl][0-9]+\\)>\\'" f)))
+			"\\`<\\([0-9]\\|[lrc]\\|[lrc][0-9]+\\)>\\'" f)))
 		 (org-split-string ;; FIXME, can't we do without splitting???
 		  (buffer-substring (point-at-bol) (point-at-eol))
 		  "[ \t]*|[ \t]*")))))

@@ -400,17 +400,22 @@ borders and spacing."
   :group 'org-export-html
   :type 'string)
 
-(defcustom org-export-table-header-tags '("<th scope=\"%s\">" . "</th>")
+(defcustom org-export-table-header-tags '("<th scope=\"%s\"%s>" . "</th>")
   "The opening tag for table header fields.
 This is customizable so that alignment options can be specified.
-%s will be filled with the scope of the field, either row or col.
-See also the variable `org-export-html-table-use-header-tags-for-first-column'."
+The first %s will be filled with the scope of the field, either row or col.
+The second %s will be replaced by a style entry to align the field.
+See also the variable `org-export-html-table-use-header-tags-for-first-column'.
+See also the variable `org-export-html-table-align-individual-fields'."
   :group 'org-export-tables
   :type '(cons (string :tag "Opening tag") (string :tag "Closing tag")))
 
-(defcustom org-export-table-data-tags '("<td>" . "</td>")
+(defcustom org-export-table-data-tags '("<td%s>" . "</td>")
   "The opening tag for table data fields.
-This is customizable so that alignment options can be specified."
+This is customizable so that alignment options can be specified.
+The first %s will be filled with the scope of the field, either row or col.
+The second %s will be replaced by a style entry to align the field.
+See also the variable `org-export-html-table-align-individual-fields'."
   :group 'org-export-tables
   :type '(cons (string :tag "Opening tag") (string :tag "Closing tag")))
 
@@ -441,7 +446,13 @@ will give even lines the class \"tr-even\" and odd lines the class \"tr-odd\"."
 		  (string :tag "Specify")
 		  (sexp))))
 
-
+(defcustom org-export-html-table-align-individual-fields t
+  "Non-nil means attach style attributes for alignment to each table field.
+When nil, alignment will only be specified in the column tags, but this
+is ignored by some browsers (like Firefox, Safari).  Opera does it right
+though."
+  :group 'org-export-tables
+  :type 'boolean)
 
 (defcustom org-export-html-table-use-header-tags-for-first-column nil
   "Non-nil means format column one in tables with header tags.
@@ -1869,9 +1880,9 @@ lang=\"%s\" xml:lang=\"%s\">
 		    (delq nil (mapcar
 			       (lambda (x) (string-match "^[ \t]*|-" x))
 			       (cdr lines)))))
-
 	 (nline 0) fnum nfields i (cnt 0)
-	 tbopen line fields html gr colgropen rowstart rowend)
+	 tbopen line fields html gr colgropen rowstart rowend
+	 ali align aligns n)
     (setq caption (and caption (org-html-do-expand caption)))
     (when (and forced-aligns org-table-clean-did-remove-column)
     (setq forced-aligns
@@ -1899,23 +1910,26 @@ lang=\"%s\" xml:lang=\"%s\">
 	(push (concat rowstart
 		      (mapconcat
 		       (lambda (x)
-			 (setq i (1+ i))
+			 (setq i (1+ i) ali (format "@@align%03d@@" i))
 			 (if (and (< i nfields) ; make sure no rogue line causes an error here
 				  (string-match org-table-number-regexp x))
 			     (incf (aref fnum i)))
 			 (cond
 			  (head
 			   (concat
-			    (format (car org-export-table-header-tags) "col")
+			    (format (car org-export-table-header-tags)
+				    "col" ali)
 			    x
 			    (cdr org-export-table-header-tags)))
 			  ((and (= i 0) org-export-html-table-use-header-tags-for-first-column)
 			   (concat
-			    (format (car org-export-table-header-tags) "row")
+			    (format (car org-export-table-header-tags)
+				    "row" ali)
 			    x
 			    (cdr org-export-table-header-tags)))
 			  (t
-			   (concat (car org-export-table-data-tags) x
+			   (concat (format (car org-export-table-data-tags) ali)
+				   x
 				   (cdr org-export-table-data-tags)))))
 		       fields "")
 		      rowend)
@@ -1932,23 +1946,32 @@ lang=\"%s\" xml:lang=\"%s\">
       (push (mapconcat
 	     (lambda (x)
 	       (setq gr (pop org-table-colgroup-info)
-		     i (1+ i))
+		     i (1+ i)
+		     align (if (assoc i forced-aligns)
+			       (cdr (assoc (cdr (assoc i forced-aligns))
+					   '(("l" . "left") ("r" . "right")
+					     ("c" . "center"))))
+			     (if (> (/ (float x) nline)
+				    org-table-number-fraction)
+				 "right" "left")))
+	       (push align aligns)
 	       (format "%s<col align=\"%s\" />%s"
 		       (if (memq gr '(:start :startend))
 			   (prog1
-			       (if colgropen "</colgroup>\n<colgroup>" "<colgroup>")
+			       (if colgropen
+				   "</colgroup>\n<colgroup>"
+				 "<colgroup>")
 			     (setq colgropen t))
 			 "")
-		       (if (assoc i forced-aligns)
-			   (cdr (assoc (cdr (assoc i forced-aligns)) '(("l" . "left") ("r" . "right"))))
-			 (if (> (/ (float x) nline) org-table-number-fraction)
-			     "right" "left"))
+		       align
 		       (if (memq gr '(:end :startend))
 			   (progn (setq colgropen nil) "</colgroup>")
 			 "")))
 	     fnum "")
 	    html)
-      (if colgropen (setq html (cons (car html) (cons "</colgroup>" (cdr html)))))
+      (setq aligns (nreverse aligns))
+      (if colgropen (setq html (cons (car html)
+				     (cons "</colgroup>" (cdr html)))))
       ;; Since the output of HTML table formatter can also be used in
       ;; DocBook document, we want to always include the caption to make
       ;; DocBook XML file valid.
@@ -1956,6 +1979,18 @@ lang=\"%s\" xml:lang=\"%s\">
       (when label (push (format "<a name=\"%s\" id=\"%s\"></a>" label label)
 			html))
       (push html-table-tag html))
+    (setq html (mapcar
+		(lambda (x)
+		  (replace-regexp-in-string
+		   "@@align\\([0-9]+\\)@@"
+		   (lambda (txt)
+		     (if (not org-export-html-table-align-individual-fields)
+			 ""
+		       (setq n (string-to-number (match-string 1 txt)))
+		       (format " style=\"text-align:%s\""
+			       (or (nth n aligns) "left"))))
+		   x))
+		html))
     (concat (mapconcat 'identity html "\n") "\n")))
 
 (defun org-export-splice-attributes (tag attributes)
@@ -2000,10 +2035,10 @@ But it has the disadvantage, that no cell- or row-spanning is allowed."
 			 (if (equal x "") (setq x empty))
 			 (if head
 			     (concat
-			      (format (car org-export-table-header-tags) "col")
+			      (format (car org-export-table-header-tags) "col" "")
 			      x
 			      (cdr org-export-table-header-tags))
-			   (concat (car org-export-table-data-tags) x
+			   (concat (format (car org-export-table-data-tags) "") x
 				   (cdr org-export-table-data-tags))))
 		       field-buffer "\n")
 		      "</tr>\n"))

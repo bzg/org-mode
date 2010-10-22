@@ -1922,9 +1922,10 @@ on a per-file basis with:
 @end example
 
 If you would like to overrule the automatic alignment of number-rich columns
-to the right and of string-rich column to the left, you and use @samp{<r>} or
-@samp{<l>} in a similar fashion.  You may also combine alignment and field
-width like this: @samp{<l10>}.
+to the right and of string-rich column to the left, you and use @samp{<r>},
+@samp{c}@footnote{Centering does not work inside Emacs, but it does have an
+effect when exporting to HTML.} or @samp{<l>} in a similar fashion.  You may
+also combine alignment and field width like this: @samp{<l10>}.
 
 Lines which only contain these formatting cookies will be removed
 automatically when exporting the document.

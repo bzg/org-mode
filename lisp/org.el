@@ -5457,7 +5457,7 @@ needs to be inserted at a specific position in the font-lock sequence.")
 	   '("^[ \t]*|\\(?:.*?|\\)? *\\(:?=[^|\n]*\\)" (1 'org-formula t))
 	   '("^[ \t]*| *\\([#*]\\) *|" (1 'org-formula t))
 	   '("^[ \t]*|\\( *\\([$!_^/]\\) *|.*\\)|" (1 'org-formula t))
-	   '("| *\\(<[lr]?[0-9]*>\\)" (1 'org-formula t))
+	   '("| *\\(<[lrc]?[0-9]*>\\)" (1 'org-formula t))
 	   ;; Drawers
 	   (list org-drawer-regexp '(0 'org-special-keyword t))
 	   (list "^[ \t]*:END:" '(0 'org-special-keyword t))
