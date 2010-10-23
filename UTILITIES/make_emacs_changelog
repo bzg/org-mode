@@ -14,6 +14,18 @@ if (!$syncdate) {
   $syncdate =~ s/\s*(.*?)\s+/$1/;
 }
 
+$kind = shift @ARGV;
+if (!$kind) {
+  print STDERR 'Enter kind ("lisp" or "texi" or "card" or press RET): ';
+  $kind = <>;
+  $kind =~ s/\s*(.*?)\s+/$1/;
+  $kind =~ s/"(.*?)"/$1/;
+  if ($kind ne "lisp" and $kind ne "texi" and  $kind ne "card"
+      and $kind ne "") {
+    die "Invalid Changelog kind";
+  }
+}
+
 # Run git log to get the commits the messages
 open IN,"git log $commitrange|";
 undef $/;
@@ -25,7 +37,7 @@ for $i (0..$#commits) {
   $commit = $commits[$i];
   $author = $1 if $commit=~/^Author: ([^\n]+)/m;
   $date   = $1 if $commit=~/^Date: ([^\n]+)/m;
-  $entry  = $1 if $commit=~/^([ \t]*\* [^\f]*?)(\n[ \t]*\n|\Z)/m;
+  $entry  = $1 if $commit=~/^([ \t]*\* [^\f]*?)(\n[ \t]*\n([^*]|\Z)|\Z)/m;
   $tiny   = "  (tiny change)" if $commit =~ /TINYCHANGE/;
 
   # split author into name and address
@@ -38,13 +50,50 @@ for $i (0..$#commits) {
   }
 
   if ($entry) {
+
+    # Fix the path when directories have been omitted
+
+    $entry =~ s/^([ \t]*\* )([-a-zA-Z]+\.el)/$1lisp\/$2/mg;
+    $entry =~ s/^([ \t]*\* )(org[a-z]*\.texi?)/$1doc\/$2/mg;
+    
+    # remove stuff which is not for this output
+    if ($kind =~ /\S/) { 
+      remove_parts("contrib/","testing/","xemacs/");
+      remove_parts("Makefile","README");
+    }
+    if ($kind eq "lisp") { remove_parts("doc/")                               }
+    if ($kind eq "texi") { remove_parts("lisp/","doc/orgcard","doc/orgguide") }
+    if ($kind eq "card") { remove_parts("lisp/","doc/org\\.","doc/orgguide")  }
+
     # indent each line by 1 TAB
     $entry =~ s/^[ \t]*/\t/gm;
+
     # Add empty lines if there are several files in there
     $entry =~ s/(\n[ \t]+\* )/\n$1/g;
-    # remove the lisp part of the path
+
+    # remove blocks of more than one empty line
+    while ($entry =~s/\n[ \t]*\n[ \t]*\n/\n/g) {};
+
+    # remove/replace parts of the path
+
     $entry =~ s/^([ \t]+\* )lisp\//$1/mg;
-    print "$syncdate  $name  $address$tiny\n\n$entry\n\n";
+    $entry =~ s/^([ \t]+\* )doc\/orgcard/$1 refcards\/orgcard/mg;
+    $entry =~ s/^([ \t]+\* )doc\//$1misc\//mg;
+
+    # remove empty space at beginning and end
+    $entry =~ s/\A\s*/\t/;
+    $entry =~ s/\s*\Z/\n/;
+
+    # If there is anything left in the entry, print it
+    if ($entry =~ /\S/) {
+      print "$syncdate  $name  $address$tiny\n\n$entry\n";
+    }
   }
 }
  
+sub remove_parts {
+  foreach $path (@_) {
+    $re = "^[ \t]*\\*\\s+" . $path . "[^\\000]*?(?=^[ \\t]*\\*|\\Z)";
+    $entry =~ s/$re/\n$1/mg;
+  }
+}

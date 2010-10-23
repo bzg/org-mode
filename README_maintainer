@@ -7,7 +7,6 @@
 This document describes the tasks the Org-mode maintainer has to do
 and how they are performed.
 
-
 * Releases
 
 ** Main releases
@@ -23,6 +22,15 @@ release.  The release process is a single make command:
 
 : make release TAG=7.13
 
+Before issuing this command, you should make sure that everything
+during the process will work right, you can do so my running
+
+: make testrelease TAG=7.13
+
+When this fails, make sure to clean up.  =git reset --hard= if
+necessary, and check if there are unwanted files, directories, or
+branches left over from the testing.
+
 ** Minor releases
 
 The release number for minor releases look like this:  =7.13.01=
@@ -37,31 +45,48 @@ maint with this command:
 
 : make fixrelease TAG=7.13.01
 
+** Between releases
+
+While working on master between releases, I use something like
+7.02trans as the version string.  To set this version string in all
+relevant files, use
+
+: UTILITIES/set_version 7.02trans
+
+and commit the result.  Note that the above command does not change
+the version string in the file from which Org's homepage is
+generated.  To change that as well, you would use a =--all= flag.  TO
+change only this file, use =--only=.
+
 * Synchonization with Emacs
 
 This is still a significant headache.  Some hand work is needed here.
 
-Emacs uses bzr, I cannot bring myself to switch from git to bzr for the
-development version of Org-mode.  So the way I have been doing things
-is this:
+Emacs uses bzr, and while I see all the advantages thiswould have, I
+cannot bring myself to switch away from git for my day-to-day work.
+So the way I have been doing things with Emacs is this:
 
-1. I watch the Emacs diffs for changes made by the maintainers of
+1. I do not update the version in Emacs too often.  Just once every
+   few month - this is frequently enough for the Emacs release cycle.
+
+2. I watch the Emacs diffs for changes made by the maintainers of
    Emacs in the org-mode files in Emacs.  Any changes that come up
    there, I merge into the development version of Org-mode.
    Occasionally I do not do this, if I do not agree with a change.
    The changes go into Org /without/ a ChangeLog-like entry in the
    commit message.  The reason for this is that we will later generate
    a ChangeLog file from our commit messages, and I do not want double
-   Change entries in the Emacs ChangeLog file.
+   ChangeLog entries in the Emacs ChangeLog file.
 
-2. When I have made a release (usually I wait for the minor releases
-   to stabilize), I copy org files into the Emacs repository.  Yes, I
-   do not merge, I copy.  This has been the source of some problems in
-   the past - but I have not had the patience to work out a better
-   mechanism.
+3. When I have made a release (usually I wait for the minor releases
+   to stabilize), I *copy* org files into the Emacs repository.  Yes,
+   I do not merge, I copy.  This has been the source of some problems
+   in the past - but I have not had the patience to work out a better
+   mechanism, and I really dislike the idea that the version in Emacs
+   starts diverging from my own.
 
-   Careful: Copy org.texi and orgcard.tex into the right places, and
-   also copy the lisp files with *two exceptions*: Do *not* copy
+   Careful: Copy /org.texi/ and /orgcard.tex/ into the right places,
+   and also copy the lisp files with *two exceptions*: Do *not* copy
    /org-colview-xemacs.el/ and /org-install.el/.  The former does not
    belong in Emacs.  And the latter would actually be harmful because
    Emacs generates its own autoloads.  The Emacs distribution contains
@@ -70,13 +95,41 @@ is this:
    copy org-install.el, you would overwrite that empty placeholder
    file.
 
-3. Generate the ChangeLog entries
+4. Generate the ChangeLog entries
 
    For this, I do in the org-mode git repository
 
    : UTILITIES/make_emacs_changelog release_7.02.05..release_7.03.02
 
-   This will spit out the ChangeLog entries that need to go into the
-   ChangeLog file in the lisp/org directory in Emacs.
+   This will spit out ChangeLog entries (for the given commit range)
+   that need to go into the ChangeLog files in Emacs.  Org-mode
+   contributes to 3 different ChangeLog files in Emacs:
+
+   : lisp/org/ChangeLog    (for lisp changes)
+   : doc/misc/ChangeLog    (for org.texi changes)
+   : etc/ChangeLog         (for refcard changes)
+
+   When you run the =make_emacs_changelog= program, you will be
+   prompted for a date in ISO format YYYY-MM-DD, this date will be
+   used in the ChangeLog entries - Emacs wants these dates to be the
+   time when the change has been installed into Emacs, not the time
+   when we made the change in our own repository.  You will also be
+   prompted for the kind of ChangeLog you want to make, possible
+   answers are =lisp=, =texi=, and =card=.  The program will then
+   select the correct entries for the specified ChangeLog file.  If
+   you don't like being prompted, you can give the date and type as
+   second and third command line arguments to =make_emacs_changelog=.
+
+   These entries need to be added to the ChangeLog files in Emacs.
+   You should, in the ChangeLog file, select the inserted region of
+   new entries and do =M-x fill-region=, so that the entries are
+   formatted correctly.  I then do look through the entries quickly to
+   make sure they are formatted properly, that the email addresses
+   look right etc.
+
+5. Commit the changes into the bzr repository and you are done.  Emacs
+   developers often look throught the commit and make minor changes -
+   these need to be merged back into our own repo.
+
 
 
