@@ -136,7 +136,13 @@ not be modified."
         overflow:auto;
   }
   table { border-collapse: collapse; }
-  td, th { vertical-align: top; }
+  td, th { vertical-align: top;  }
+  th.right  { text-align:center;  }
+  th.left   { text-align:center;   }
+  th.center { text-align:center; }
+  td.right  { text-align:right;  }
+  td.left   { text-align:left;   }
+  td.center { text-align:center; }
   dt { font-weight: bold; }
   div.figure { padding: 0.5em; }
   div.figure p { text-align: center; }
@@ -1910,7 +1916,7 @@ lang=\"%s\" xml:lang=\"%s\">
 	(push (concat rowstart
 		      (mapconcat
 		       (lambda (x)
-			 (setq i (1+ i) ali (format "@@align%03d@@" i))
+			 (setq i (1+ i) ali (format "@@class%03d@@" i))
 			 (if (and (< i nfields) ; make sure no rogue line causes an error here
 				  (string-match org-table-number-regexp x))
 			     (incf (aref fnum i)))
@@ -1982,12 +1988,12 @@ lang=\"%s\" xml:lang=\"%s\">
     (setq html (mapcar
 		(lambda (x)
 		  (replace-regexp-in-string
-		   "@@align\\([0-9]+\\)@@"
+		   "@@class\\([0-9]+\\)@@"
 		   (lambda (txt)
 		     (if (not org-export-html-table-align-individual-fields)
 			 ""
 		       (setq n (string-to-number (match-string 1 txt)))
-		       (format " style=\"text-align:%s\""
+		       (format " class=\"%s\""
 			       (or (nth n aligns) "left"))))
 		   x))
 		html))
