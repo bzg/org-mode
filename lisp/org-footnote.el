@@ -188,7 +188,7 @@ with start and label of the footnote if there is a definition at point."
       (message "Edit definition and go back with `C-c &' or, if unique, with `C-c C-c'."))))
 
 (defun org-footnote-goto-previous-reference (label)
-  "Find the next previous of the footnote with label LABEL."
+  "Find the first closest (to point) reference of footnote with label LABEL."
   (interactive "sLabel: ")
   (org-mark-ring-push)
   (setq label (org-footnote-normalize-label label))
