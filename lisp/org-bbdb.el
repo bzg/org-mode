@@ -338,8 +338,7 @@ This is used by Org to re-create the anniversary hash table."
                 (setq text (append text (list tmp)))
               (setq text (list tmp)))))
         ))
-    (when text
-      (mapconcat 'identity text "; "))))
+    text))
 
 (defun org-bbdb-complete-link ()
   "Read a bbdb link with name completion."
