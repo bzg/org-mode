@@ -2624,7 +2624,7 @@ to the value of `temporary-file-directory'."
 	(tmp-file (make-temp-file "org-")))
     (unwind-protect
 	(with-temp-buffer
-	  (insert body)
+	  (insert string)
 	  (write-file tmp-file)
 	  (org-load-modules-maybe)
 	  (unless org-local-vars
