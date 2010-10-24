@@ -5772,7 +5772,8 @@ in special contexts.
   `org-cycle-emulate-tab' for details.
 
 - Special case: if point is at the beginning of the buffer and there is
-  no headline in line 1, this function will act as if called with prefix arg.
+  no headline in line 1, this function will act as if called with prefix arg
+  (C-u TAB, same as S-TAB) also when called without prefix arg.
   But only if also the variable `org-cycle-global-at-bob' is t."
   (interactive "P")
   (org-load-modules-maybe)
@@ -5798,7 +5799,7 @@ in special contexts.
 		      (if nstars (format "\\{1,%d\\}" nstars) "+")
 		      " \\|\\([ \t]*\\)\\([-+*]\\|[0-9]+[.)]\\) \\)"))
 	     (t (concat "\\*" (if nstars (format "\\{1,%d\\} " nstars) "+ ")))))
-	   (bob-special (and org-cycle-global-at-bob (bobp)
+	   (bob-special (and org-cycle-global-at-bob (not arg) (bobp)
 			     (not (looking-at outline-regexp))))
 	   (org-cycle-hook
 	    (if bob-special
