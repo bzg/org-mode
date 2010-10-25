@@ -1838,13 +1838,13 @@ lang=\"%s\" xml:lang=\"%s\">
 	nil))))
 
 (defvar org-table-number-regexp) ; defined in org-table.el
-(defun org-format-table-html (lines olines)
+(defun org-format-table-html (lines olines &optional docbook)
   "Find out which HTML converter to use and return the HTML code."
   (if (stringp lines)
       (setq lines (org-split-string lines "\n")))
   (if (string-match "^[ \t]*|" (car lines))
       ;; A normal org table
-      (org-format-org-table-html lines)
+      (org-format-org-table-html lines nil docbook)
     ;; Table made by table.el - test for spanning
     (let* ((hlines (delq nil (mapcar
 			      (lambda (x)
@@ -1865,7 +1865,7 @@ lang=\"%s\" xml:lang=\"%s\">
 	(org-format-table-table-html-using-table-generate-source olines)))))
 
 (defvar org-table-number-fraction) ; defined in org-table.el
-(defun org-format-org-table-html (lines &optional splice)
+(defun org-format-org-table-html (lines &optional splice docbook)
   "Format a table into HTML."
   (require 'org-table)
   ;; Get rid of hlines at beginning and end
@@ -1997,7 +1997,7 @@ lang=\"%s\" xml:lang=\"%s\">
 		     (if (not org-export-html-table-align-individual-fields)
 			 ""
 		       (setq n (string-to-number (match-string 1 txt)))
-		       (format " class=\"%s\""
+		       (format (if docbook " align=\"%s\"" " class=\"%s\"")
 			       (or (nth n aligns) "left"))))
 		   x))
 		html))

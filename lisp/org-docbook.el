@@ -1005,7 +1005,8 @@ publishing directory."
 		    table-orig-buffer (nreverse table-orig-buffer))
 	      (org-export-docbook-close-para-maybe)
 	      (insert (org-export-docbook-finalize-table
-		       (org-format-table-html table-buffer table-orig-buffer)))))
+		       (org-format-table-html table-buffer table-orig-buffer
+					      'docbook)))))
 
 	   (t
 	    ;; Normal lines
