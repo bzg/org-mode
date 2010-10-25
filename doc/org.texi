@@ -5070,15 +5070,13 @@ format.  All commands listed below produce timestamps in the correct
 format.
 
 @table @kbd
-@kindex C-c .
-@item C-c .
+@orgcmd{C-c .,org-time-stamp}
 Prompt for a date and insert a corresponding timestamp.  When the cursor is
 at an existing timestamp in the buffer, the command is used to modify this
 timestamp instead of inserting a new one.  When this command is used twice in
 succession, a time range is inserted.
 @c
-@kindex C-c !
-@item C-c !
+@orgcmd{C-c !,org-time-stamp-inactive}
 Like @kbd{C-c .}, but insert an inactive timestamp that will not cause
 an agenda entry.
 @c
@@ -5091,18 +5089,15 @@ Like @kbd{C-c .} and @kbd{C-c !}, but use the alternative format which
 contains date and time.  The default time can be rounded to multiples of 5
 minutes, see the option @code{org-time-stamp-rounding-minutes}.
 @c
-@kindex C-c <
-@item C-c <
+@orgcmd{C-c <,org-date-from-calendar}
 Insert a timestamp corresponding to the cursor date in the Calendar.
 @c
-@kindex C-c >
-@item C-c >
+@orgcmd{C-c >,org-goto-calendar}
 Access the Emacs calendar for the current date.  If there is a
 timestamp in the current line, go to the corresponding date
 instead.
 @c
-@kindex C-c C-o
-@item C-c C-o
+@orgcmd{C-c C-o,org-open-at-point}
 Access the agenda for the date given by the timestamp or -range at
 point (@pxref{Weekly/daily agenda}).
 @c
