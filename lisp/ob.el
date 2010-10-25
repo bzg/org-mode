@@ -69,6 +69,7 @@
 (declare-function org-babel-lob-get-info "ob-lob" nil)
 (declare-function org-babel-ref-split-args "ob-ref" (arg-string))
 (declare-function org-babel-ref-parse "ob-ref" (assignment))
+(declare-function org-babel-ref-resolve "ob-ref" (ref))
 (declare-function org-babel-lob-execute-maybe "ob-lob" ())
 (declare-function org-number-sequence "org-compat" (from &optional to inc))
 

@@ -49,6 +49,7 @@
 (declare-function org-in-verbatim-emphasis "org" ())
 (declare-function org-inside-latex-macro-p "org" ())
 (defvar org-odd-levels-only) ;; defined in org.el
+(defvar message-signature-separator) ;; defined in message.el
 
 (defconst org-footnote-re
   (concat "[^][\n]"   ; to make sure it is not at the beginning of a line

@@ -130,7 +130,7 @@ then create one.  Return the initialized session."
 	    (format "let %s = %s"
 		    (car pair)
 		    (org-babel-haskell-var-to-haskell (cdr pair))))
-   (mapcar #'cdr (org-babel-get-header params :var)) "\n"))
+   (mapcar #'cdr (org-babel-get-header params :var))))
 
 (defun org-babel-haskell-table-or-string (results)
   "Convert RESULTS to an Emacs-lisp table or string.
