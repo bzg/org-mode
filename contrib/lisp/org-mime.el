@@ -175,7 +175,7 @@ export that region, otherwise export the entire body."
                        (point-max)))
          (raw-body (buffer-substring html-start html-end))
          (tmp-file (make-temp-name (expand-file-name "mail" temporary-file-directory)))
-         (body (org-mime-org-export "org" raw-body tmp-file))
+         (body (org-export-string raw-body "org" (file-name-directory tmp-file)))
          ;; because we probably don't want to skip part of our mail
          (org-export-skip-text-before-1st-heading nil)
          ;; because we probably don't want to export a huge style file
@@ -197,24 +197,6 @@ export that region, otherwise export the entire body."
       (goto-char html-start)
       (insert (org-mime-multipart body html)
               (mapconcat 'identity html-images "\n")))))
-
-(defun org-mime-org-export (fmt body tmp-file)
-  "Org-Export BODY to format FMT with the file name set to
-TMP-FILE during export."
-  (save-excursion
-    (with-temp-buffer
-      (insert org-mime-default-header)
-      (insert body)
-      (write-file tmp-file)
-      (org-load-modules-maybe)
-      (unless org-local-vars
-        (setq org-local-vars (org-get-local-variables)))
-      (substring
-       (eval ;; convert to fmt -- mimicing `org-run-like-in-org-mode'
-        (list 'let org-local-vars 
-              (list (intern (concat "org-export-as-" fmt))
-                    nil nil nil ''string t)))
-       (if (string= fmt "org") (length org-mime-default-header) 0)))))
 
 (defun org-mime-apply-html-hook (html)
   (if org-mime-html-hook

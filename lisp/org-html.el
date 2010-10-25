@@ -126,6 +126,9 @@ not be modified."
   .target { }
   .timestamp { color: #bebebe; }
   .timestamp-kwd { color: #5f9ea0; }
+  .right  {margin-left:auto; margin-right:0px;  text-align:right;}
+  .left   {margin-left:0px;  margin-right:auto; text-align:left;}
+  .center {margin-left:auto; margin-right:auto; text-align:center;}
   p.verse { margin-left: 3% }
   pre {
 	border: 1pt solid #AEBDCC;
@@ -136,7 +139,13 @@ not be modified."
         overflow:auto;
   }
   table { border-collapse: collapse; }
-  td, th { vertical-align: top; }
+  td, th { vertical-align: top;  }
+  th.right  { text-align:center;  }
+  th.left   { text-align:center;   }
+  th.center { text-align:center; }
+  td.right  { text-align:right;  }
+  td.left   { text-align:left;   }
+  td.center { text-align:center; }
   dt { font-weight: bold; }
   div.figure { padding: 0.5em; }
   div.figure p { text-align: center; }
@@ -757,7 +766,8 @@ MAY-INLINE-P allows inlining it as an image."
 	    ((or
 		(not type)
 		(string= type "http")
-		(string= type "https"))
+		(string= type "https")
+		(string= type "file"))
 	       (if fragment
 		  (setq thefile (concat thefile "#" fragment))))
 
@@ -1910,7 +1920,7 @@ lang=\"%s\" xml:lang=\"%s\">
 	(push (concat rowstart
 		      (mapconcat
 		       (lambda (x)
-			 (setq i (1+ i) ali (format "@@align%03d@@" i))
+			 (setq i (1+ i) ali (format "@@class%03d@@" i))
 			 (if (and (< i nfields) ; make sure no rogue line causes an error here
 				  (string-match org-table-number-regexp x))
 			     (incf (aref fnum i)))
@@ -1982,12 +1992,12 @@ lang=\"%s\" xml:lang=\"%s\">
     (setq html (mapcar
 		(lambda (x)
 		  (replace-regexp-in-string
-		   "@@align\\([0-9]+\\)@@"
+		   "@@class\\([0-9]+\\)@@"
 		   (lambda (txt)
 		     (if (not org-export-html-table-align-individual-fields)
 			 ""
 		       (setq n (string-to-number (match-string 1 txt)))
-		       (format " style=\"text-align:%s\""
+		       (format " class=\"%s\""
 			       (or (nth n aligns) "left"))))
 		   x))
 		html))

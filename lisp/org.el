@@ -5772,7 +5772,8 @@ in special contexts.
   `org-cycle-emulate-tab' for details.
 
 - Special case: if point is at the beginning of the buffer and there is
-  no headline in line 1, this function will act as if called with prefix arg.
+  no headline in line 1, this function will act as if called with prefix arg
+  (C-u TAB, same as S-TAB) also when called without prefix arg.
   But only if also the variable `org-cycle-global-at-bob' is t."
   (interactive "P")
   (org-load-modules-maybe)
@@ -5798,7 +5799,7 @@ in special contexts.
 		      (if nstars (format "\\{1,%d\\}" nstars) "+")
 		      " \\|\\([ \t]*\\)\\([-+*]\\|[0-9]+[.)]\\) \\)"))
 	     (t (concat "\\*" (if nstars (format "\\{1,%d\\} " nstars) "+ ")))))
-	   (bob-special (and org-cycle-global-at-bob (bobp)
+	   (bob-special (and org-cycle-global-at-bob (not arg) (bobp)
 			     (not (looking-at outline-regexp))))
 	   (org-cycle-hook
 	    (if bob-special
@@ -5814,6 +5815,7 @@ in special contexts.
       (cond
 
        ((equal arg '(16))
+	(setq last-command 'dummy)
 	(org-set-startup-visibility)
 	(message "Startup visibility, plus VISIBILITY properties"))
 
@@ -9426,6 +9428,7 @@ in all files.  If AVOID-POS is given, ignore matches near that position."
 				     (regexp-quote s))
 			     nil t))
 	;; OK, found a match
+	(setq type 'dedicated)
 	(goto-char (match-beginning 0)))
        ((and (not org-link-search-inhibit-query)
 	     (eq org-link-search-must-match-exact-headline 'query-to-create)
@@ -16234,8 +16237,7 @@ BEG and END default to the buffer boundaries."
       (widen)
       (setq beg (or beg (point-min)) end (or end (point-max)))
       (goto-char (point-min))
-      ;; (let ((re (concat "\\[\\[\\(\\(file:\\)\\|\\([./~]\\)\\)\\([-+~.:/\\_0-9a-zA-Z ]+"
-      (let ((re (concat "\\[\\[\\(\\(file:\\)\\|\\([./~]\\)\\)\\([-+~.:/\\_0-9a-zA-Z \x00080-\xfffff]+"
+      (let ((re (concat "\\[\\[\\(\\(file:\\)\\|\\([./~]\\)\\)\\([^]\n]+?"
 			(substring (org-image-file-name-regexp) 0 -2)
 			"\\)\\]" (if include-linked "" "\\]")))
 	    old file ov img)

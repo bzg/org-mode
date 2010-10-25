@@ -2613,6 +2613,28 @@ command."
 
 (defvar org-export-htmlized-org-css-url) ;; defined in org-html.el
 
+(defun org-export-string (string fmt &optional dir)
+  "Export STRING to FMT using existing export facilities.
+During export STRING is saved to a temporary file whose location
+could vary.  Optional argument DIR can be used to force the
+directory in which the temporary file is created during export
+which can be useful for resolving relative paths.  Dir defaults
+to the value of `temporary-file-directory'."
+  (let ((temporary-file-directory (or dir temporary-file-directory))
+	(tmp-file (make-temp-file "org-")))
+    (unwind-protect
+	(with-temp-buffer
+	  (insert string)
+	  (write-file tmp-file)
+	  (org-load-modules-maybe)
+	  (unless org-local-vars
+	    (setq org-local-vars (org-get-local-variables)))
+	  (eval ;; convert to fmt -- mimicing `org-run-like-in-org-mode'
+	   (list 'let org-local-vars
+		 (list (intern (concat "org-export-as-" fmt))
+		       nil nil nil ''string t))))
+      (delete-file tmp-file))))
+
 ;;;###autoload
 (defun org-export-as-org (arg &optional hidden ext-plist
 			      to-buffer body-only pub-dir)

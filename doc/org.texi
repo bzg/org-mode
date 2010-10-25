@@ -8625,6 +8625,7 @@ You may also define additional attributes for the figure.  As this is
 backend-specific, see the sections about the individual backends for more
 information.
 
+@xref{Handling links,the discussion of image links}.
 
 @node Literal examples, Include files, Images and tables, Markup
 @section Literal examples
