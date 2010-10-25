@@ -40,6 +40,15 @@
 (declare-function org-add-props "org-compat" (string plist &rest props))
 (declare-function org-string-match-p "org-compat" (&rest args))
 
+(defmacro org-called-interactively-p (&optional kind)
+  `(if (featurep 'xemacs)
+       (interactive-p)
+     (if (or (> emacs-major-version 23)
+	     (and (>= emacs-major-version 23)
+		  (>= emacs-minor-version 2)))
+	 (called-interactively-p ,kind)
+       (interactive-p))))
+
 (defmacro org-bound-and-true-p (var)
   "Return the value of symbol VAR if it is bound, else nil."
   `(and (boundp (quote ,var)) ,var))
