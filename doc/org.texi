@@ -6152,6 +6152,10 @@ with the capture.
 @item :unnarrowed
 Do not narrow the target buffer, simply show the full buffer.  Default is to
 narrow it so that you only see the new material.
+
+@item :kill-buffer
+If the target file was not yet visited when capture was invoked, kill the
+buffer again after capture is completed.
 @end table
 @end table
 

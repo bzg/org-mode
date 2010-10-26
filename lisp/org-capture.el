@@ -186,6 +186,10 @@ properties are:
                      which means that the new line should become the third
                      line before the second horizontal separator line.
 
+ :kill-buffer        If the target file was not yet visited by a buffer when
+                     capture was invoked, kill the buffer again after capture
+                     is finalized.
+
 The template defines the text to be inserted.  Often this is an org-mode
 entry (so the first line should start with a star) that will be filed as a
 child of the target headline.  It can also be freely formatted text.
@@ -301,7 +305,8 @@ calendar                |  %:type %:date"
 			    ((const :format "%v " :empty-lines) (const 1))
 			    ((const :format "%v " :clock-in) (const t))
 			    ((const :format "%v " :clock-resume) (const t))
-			    ((const :format "%v " :unnarrowed) (const t))))))))
+			    ((const :format "%v " :unnarrowed) (const t))
+			    ((const :format "%v " :kill-buffer) (const t))))))))
 
 (defcustom org-capture-before-finalize-hook nil
   "Hook that is run right before a remember process is finalized.
@@ -529,8 +534,19 @@ bypassed."
 
     ;; Kill the indirect buffer
     (save-buffer)
-    (let ((return-wconf (org-capture-get :return-to-wconf 'local)))
+    (let ((return-wconf (org-capture-get :return-to-wconf 'local))
+	  (new-buffer (org-capture-get :new-buffer 'local))
+	  (kill-buffer (org-capture-get :kill-buffer 'local))
+	  (base-buffer (buffer-base-buffer (current-buffer))))
+
+      ;; Kill the indiret buffer
       (kill-buffer (current-buffer))
+
+      ;; Kill the target buffer if that is desired
+      (when (and base-buffer new-buffer kill-buffer)
+	(with-current-buffer base-buffer (save-buffer))
+	(kill-buffer base-buffer))
+
       ;; Restore the window configuration before capture
       (set-window-configuration return-wconf))
     (when abort-note
@@ -667,7 +683,8 @@ already gone."
 		 org-default-notes-file
 		 (error "No notes file specified, and no default available")))
   (or (org-find-base-buffer-visiting file)
-      (find-file-noselect (expand-file-name file org-directory))))
+      (progn (org-capture-put :new-buffer t)
+	     (find-file-noselect (expand-file-name file org-directory)))))
 
 (defun org-capture-steal-local-variables (buffer)
   "Install Org-mode local variables."
