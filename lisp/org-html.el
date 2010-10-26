@@ -1838,13 +1838,14 @@ lang=\"%s\" xml:lang=\"%s\">
 	nil))))
 
 (defvar org-table-number-regexp) ; defined in org-table.el
-(defun org-format-table-html (lines olines &optional docbook)
-  "Find out which HTML converter to use and return the HTML code."
+(defun org-format-table-html (lines olines &optional no-css)
+  "Find out which HTML converter to use and return the HTML code.
+NO-CSS is passed to the exporter."
   (if (stringp lines)
       (setq lines (org-split-string lines "\n")))
   (if (string-match "^[ \t]*|" (car lines))
       ;; A normal org table
-      (org-format-org-table-html lines nil docbook)
+      (org-format-org-table-html lines nil no-css)
     ;; Table made by table.el - test for spanning
     (let* ((hlines (delq nil (mapcar
 			      (lambda (x)
@@ -1865,8 +1866,12 @@ lang=\"%s\" xml:lang=\"%s\">
 	(org-format-table-table-html-using-table-generate-source olines)))))
 
 (defvar org-table-number-fraction) ; defined in org-table.el
-(defun org-format-org-table-html (lines &optional splice docbook)
-  "Format a table into HTML."
+(defun org-format-org-table-html (lines &optional splice no-css)
+  "Format a table into HTML.
+LINES is a list of lines.  Optional argument SPLICE means, do not
+insert header and surrounding <table> tags, just format the lines.
+Optional argument NO-CSS means use XHTML attributes instead of CSS
+for formatting.  This is required for the DocBook exporter."
   (require 'org-table)
   ;; Get rid of hlines at beginning and end
   (if (string-match "^[ \t]*|-" (car lines)) (setq lines (cdr lines)))
@@ -1965,7 +1970,9 @@ lang=\"%s\" xml:lang=\"%s\">
 				    org-table-number-fraction)
 				 "right" "left")))
 	       (push align aligns)
-	       (format "%s<col align=\"%s\" />%s"
+	       (format (if no-css
+			   "%s<col align=\"%s\" />%s"
+			 "%s<col class=\"%s\" />%s")
 		       (if (memq gr '(:start :startend))
 			   (prog1
 			       (if colgropen
@@ -1997,7 +2004,7 @@ lang=\"%s\" xml:lang=\"%s\">
 		     (if (not org-export-html-table-align-individual-fields)
 			 ""
 		       (setq n (string-to-number (match-string 1 txt)))
-		       (format (if docbook " align=\"%s\"" " class=\"%s\"")
+		       (format (if no-css " align=\"%s\"" " class=\"%s\"")
 			       (or (nth n aligns) "left"))))
 		   x))
 		html))
