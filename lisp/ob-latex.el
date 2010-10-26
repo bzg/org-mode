@@ -75,6 +75,7 @@ This function is called by `org-babel-execute-src-block'."
 	     (fit (or (cdr (assoc :fit params)) border))
 	     (height (and fit (cdr (assoc :pdfheight params))))
 	     (width (and fit (cdr (assoc :pdfwidth params))))
+	     (headers (cdr (assoc :headers params)))
 	     (in-buffer (not (string= "no" (cdr (assoc :buffer params)))))
 	     (org-export-latex-packages-alist
 	      (append (cdr (assoc :packages params))
@@ -102,6 +103,12 @@ This function is called by `org-babel-execute-src-block'."
 	     (if border (format "\\setlength{\\PreviewBorder}{%s}" border) "")
 	     (if height (concat "\n" (format "\\pdfpageheight %s" height)) "")
 	     (if width  (concat "\n" (format "\\pdfpagewidth %s" width))   "")
+	     (if headers
+		 (concat "\n"
+			 (if (listp headers)
+			     (mapconcat #'identity headers "\n")
+			   headers) "\n")
+	       "")
 	     (if org-format-latex-header-extra
 		 (concat "\n" org-format-latex-header-extra)
 	       "")
