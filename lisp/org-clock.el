@@ -1839,8 +1839,8 @@ the currently selected interval size."
 	    (setq p1 (plist-put p1 :scope 'file))
 	    (org-prepare-agenda-buffers files)
 	    (while (setq file (pop files))
-	      (setq org-clock-file-total-minutes 0)
 	      (with-current-buffer (find-buffer-visiting file)
+		(setq org-clock-file-total-minutes 0)
 		(setq tbl1 (org-dblock-write:clocktable p1))
 		(when tbl1
 		  (push (org-clocktable-add-file
