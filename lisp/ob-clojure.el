@@ -91,28 +91,28 @@
 (defvar swank-clojure-extra-classpaths)
 (defun org-babel-clojure-babel-clojure-cmd ()
   "Create the command to start clojure according to current settings."
-  (if (and (not swank-clojure-binary) (not swank-clojure-classpath))
+  (or (when swank-clojure-binary
+	(if (listp swank-clojure-binary)
+	    swank-clojure-binary
+	  (list swank-clojure-binary)))
+      (when swank-clojure-classpath
+	(delq
+	 nil
+	 (append
+	  (list swank-clojure-java-path)
+	  swank-clojure-extra-vm-args
+	  (list
+	   (when swank-clojure-library-paths
+	     (concat "-Djava.library.path="
+		     (swank-clojure-concat-paths swank-clojure-library-paths)))
+	   "-classpath"
+	   (swank-clojure-concat-paths
+	    (append
+	     swank-clojure-classpath
+	     swank-clojure-extra-classpaths))
+	   "clojure.main"))))
       (error "%s" (concat "You must specifiy either a `swank-clojure-binary' "
-			  "or a `swank-clojure-jar-path'"))
-    (if swank-clojure-binary
-        (if (listp swank-clojure-binary)
-            swank-clojure-binary
-          (list swank-clojure-binary))
-      (delq
-       nil
-       (append
-        (list swank-clojure-java-path)
-        swank-clojure-extra-vm-args
-        (list
-         (when swank-clojure-library-paths
-           (concat "-Djava.library.path="
-                   (swank-clojure-concat-paths swank-clojure-library-paths)))
-         "-classpath"
-         (swank-clojure-concat-paths
-          (append
-           swank-clojure-classpath
-           swank-clojure-extra-classpaths))
-         "clojure.main"))))))
+			  "or a `swank-clojure-classpath'"))))
 
 (defun org-babel-clojure-table-or-string (results)
   "Convert RESULTS to an elisp value.

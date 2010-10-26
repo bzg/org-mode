@@ -1006,7 +1006,7 @@ publishing directory."
 	      (org-export-docbook-close-para-maybe)
 	      (insert (org-export-docbook-finalize-table
 		       (org-format-table-html table-buffer table-orig-buffer
-					      'docbook)))))
+					      'no-css)))))
 
 	   (t
 	    ;; Normal lines

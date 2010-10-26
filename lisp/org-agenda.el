@@ -4499,17 +4499,20 @@ the documentation of `org-diary'."
 		category (org-get-category beg)
 		todo-state (org-get-todo-state))
 
-	  (if (string-match "\\S-" result)
-	      (setq txt result)
-	    (setq txt "SEXP entry returned empty string"))
+	  (dolist (r (if (stringp result)
+			 (list result)
+		       result)) ;; we expect a list here
+	    (if (string-match "\\S-" r)
+		(setq txt r)
+	      (setq txt "SEXP entry returned empty string"))
 
-	  (setq txt (org-format-agenda-item
-                     "" txt category tags 'time))
-	  (org-add-props txt props 'org-marker marker)
-	  (org-add-props txt nil
-	    'org-category category 'date date 'todo-state todo-state
-	    'type "sexp")
-	  (push txt ee))))
+	    (setq txt (org-format-agenda-item
+		       "" txt category tags 'time))
+	    (org-add-props txt props 'org-marker marker)
+	    (org-add-props txt nil
+	      'org-category category 'date date 'todo-state todo-state
+	      'type "sexp")
+	    (push txt ee)))))
     (nreverse ee)))
 
 (defun org-diary-class (m1 d1 y1 m2 d2 y2 dayname &rest skip-weeks)

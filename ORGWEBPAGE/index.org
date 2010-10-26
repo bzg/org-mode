@@ -145,8 +145,9 @@ formats.  Follow the instructions for [[http://orgmode.org/manual/Installation.h
 
 You can check out the latest Org development version (along with every
 release we ever had) by using git.  The git repository is [[http://repo.or.cz/w/org-mode.git][browsable
-online]].  To get a local clone use something like the following (from 
-the command line....):
+online]].  At any time you can get a [[http://repo.or.cz/w/org-mode.git/snapshot][snapshot]] of the files in it.  To
+get a local clone of the repository use something like the following
+(from the command line....):
 
 : git clone git://repo.or.cz/org-mode.git
 

@@ -948,7 +948,7 @@ Point will be after the empty lines, so insertion can directly be done."
   (let ((pos (point)))
     (org-back-over-empty-lines)
     (delete-region (point) pos)
-    (newline n)))
+    (if (> n 0) (newline n))))
 
 (defun org-capture-empty-lines-after (&optional n)
   "Arrange for the correct number of empty lines after the inserted string.
@@ -957,7 +957,7 @@ Point will remain at the first line after the inserted text."
   (org-back-over-empty-lines)
   (while (looking-at "[ \t]*\n") (replace-match ""))
   (let ((pos (point)))
-    (newline n)
+    (if (> n 0) (newline n))
     (goto-char pos)))
 
 (defvar org-clock-marker) ; Defined in org.el
