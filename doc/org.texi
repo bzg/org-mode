@@ -263,6 +263,7 @@ Dates and times
 * Resolving idle time::         Resolving time if you've been idle
 * Effort estimates::            Planning work effort in advance
 * Relative timer::              Notes with a running timer
+* Countdown timer::             Starting a countdown timer for a task
 
 Creating timestamps
 
@@ -5012,6 +5013,7 @@ is used in a much wider sense.
 * Resolving idle time::         Resolving time if you've been idle
 * Effort estimates::            Planning work effort in advance
 * Relative timer::              Notes with a running timer
+* Countdown timer::             Starting a countdown timer for a task
 @end menu
 
 
