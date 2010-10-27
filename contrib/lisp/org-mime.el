@@ -185,7 +185,7 @@ export that region, otherwise export the entire body."
          ;; to hold attachments for inline html images
          (html-and-images
           (org-mime-replace-images
-           (org-mime-org-export "html" raw-body tmp-file)
+           (org-export-string raw-body "html" (file-name-directory tmp-file))
            tmp-file))
          (html-images (unless arg (cdr html-and-images)))
          (html (org-mime-apply-html-hook
