@@ -1250,9 +1250,9 @@ part of the document and print the resulting file.
 @cindex ordered lists
 
 Within an entry of the outline tree, hand-formatted lists can provide
-additional structure.  They also provide a way to create lists of
-checkboxes (@pxref{Checkboxes}).  Org supports editing such lists,
-and the HTML exporter (@pxref{Exporting}) parses and formats them.
+additional structure.  They also provide a way to create lists of checkboxes
+(@pxref{Checkboxes}).  Org supports editing such lists, and every exporter
+(@pxref{Exporting}) can parse and format them.
 
 Org knows ordered lists, unordered lists, and description lists.
 @itemize @bullet
@@ -1265,26 +1265,39 @@ visually indistinguishable from true headlines.  In short: even though
 @samp{*} is supported, it may be better to not use it for plain list items.}
 as bullets.
 @item
+@vindex org-plain-list-ordered-item-terminator
 @emph{Ordered} list items start with a numeral followed by either a period or
-a right parenthesis, such as @samp{1.} or @samp{1)}.  If you want a list to
-start a different value (e.g. 20), start the text of the item with
-@code{[@@start:20]}.
+a right parenthesis@footnote{You can filter out any of them by configuring
+@code{org-plain-list-ordered-item-terminator}.}, such as @samp{1.} or
+@samp{1)}.  If you want a list to start a different value (e.g. 20), start
+the text of the item with @code{[@@20]}@footnote{If there's a checkbox in the
+item, the cookie must be put @emph{before} the checkbox.}.  Those constructs
+can be used in any item of the list in order to enforce a particular
+numbering.
 @item
 @emph{Description} list items are unordered list items, and contain the
 separator @samp{ :: } to separate the description @emph{term} from the
 description.
 @end itemize
 
-@vindex org-empty-line-terminates-plain-lists
 Items belonging to the same list must have the same indentation on the first
 line.  In particular, if an ordered list reaches number @samp{10.}, then the
 2--digit numbers must be written left-aligned with the other numbers in the
-list.  Indentation also determines the end of a list item.  It ends before
-the next line that is indented like the bullet/number, or less.  Empty lines
-are part of the previous item, so you can have several paragraphs in one
-item.  If you would like an empty line to terminate all currently open plain
-lists, configure the variable @code{org-empty-line-terminates-plain-lists}.
-Here is an example:
+list.
+
+@vindex org-list-ending-method
+@vindex org-list-end-regexp
+@vindex org-empty-line-terminates-plain-lists
+Two methods@footnote{To disable either of them, configure
+@code{org-list-ending-method}.} are provided to terminate lists.  A list ends
+before the next line that is indented like the bullet/number or less, or it
+ends before two blank lines@footnote{See also
+@code{org-empty-line-terminates-plain-lists}.}.  In both cases, all levels of
+the list are closed@footnote{So you cannot have a sublist, some text and then
+another sublist while still in the same top-level list item.  This used to be
+possible, but it was only supported in the HTML exporter and difficult to
+manage with automatic indentation.}.  For finer control, you can end lists
+with any pattern set in @code{org-list-end-regexp}.  Here is an example:
 
 @example
 @group
@@ -1295,8 +1308,8 @@ Here is an example:
       + this was already my favorite scene in the book
       + I really like Miranda Otto.
    3. Peter Jackson being shot by Legolas
-       - on DVD only
       He makes a really funny face when it happens.
+      - on DVD only
    But in the end, no individual scenes matter but the film as a whole.
    Important actors in this film are:
    - @b{Elijah Wood} :: He plays Frodo
@@ -1311,15 +1324,20 @@ XEmacs, you should use Kyle E. Jones' @file{filladapt.el}.  To turn this on,
 put into @file{.emacs}: @code{(require 'filladapt)}}, and by exporting them
 properly (@pxref{Exporting}).  Since indentation is what governs the
 structure of these lists, many structural constructs like @code{#+BEGIN_...}
-blocks can be indented to signal that they should be part of a list item.
+blocks can be indented to signal that they should be considered of a list
+item.
 
-@vindex org-list-demote-modify-bullet
+@Vindex org-list-demote-modify-bullet
 If you find that using a different bullet for a sub-list (than that used for
 the current list-level) improves readability, customize the variable
 @code{org-list-demote-modify-bullet}.
 
-The following commands act on items when the cursor is in the first line
-of an item (the line with the bullet or number).
+@vindex org-list-automatic-rules
+The following commands act on items when the cursor is in the first line of
+an item (the line with the bullet or number).  Some of them imply the
+application of automatic rules to keep list structure in tact.  If some of
+these actions get in your way, configure @code{org-list-automatic-rules}
+to disable them individually.
 
 @table @asis
 @orgcmd{@key{TAB},org-cycle}
@@ -1330,28 +1348,29 @@ the cursor is on a plain list item.  For more details, see the variable
 will be treated like low-level.  The level of an item is then given by the
 indentation of the bullet/number.  Items are always subordinate to real
 headlines, however; the hierarchies remain completely separated.
-
-If @code{org-cycle-include-plain-lists} has not been set, @key{TAB}
-fixes the indentation of the current line in a heuristic way.
 @orgcmd{M-@key{RET},org-insert-heading}
 @vindex org-M-RET-may-split-line
+@vindex org-list-automatic-rules
 Insert new item at current level.  With a prefix argument, force a new
 heading (@pxref{Structure editing}).  If this command is used in the middle
 of a line, the line is @emph{split} and the rest of the line becomes the new
 item@footnote{If you do not want the line to be split, customize the variable
-@code{org-M-RET-may-split-line}.}.  If this command is executed in the
-@emph{whitespace before a bullet or number}, the new item is created
-@emph{before} the current item.  If the command is executed in the white
-space before the text that is part of an item but does not contain the
-bullet, a bullet is added to the current line.
+@code{org-M-RET-may-split-line}.}.  If this command is executed @emph{before
+item's body}, the new item is created @emph{before} the current item.  If the
+command is executed in the white space before the text that is part of an
+item but does not contain the bullet, a bullet is added to the current line.
+
+As a new item cannot be inserted in a structural construct (like an example
+or source code block) within a list, Org will instead insert it right before
+the structure, or return an error.
 @kindex M-S-@key{RET}
 @item M-S-@key{RET}
 Insert a new item with a checkbox (@pxref{Checkboxes}).
 @orgcmd{@key{TAB},org-cycle}
 In a new item with no text yet, the first @key{TAB} demotes the item to
-become a child of the previous one.  The next @key{TAB} makes it a parent,
-and so on, all the way to the left margin.  Yet another @key{TAB}, and you
-are back to the initial level.
+become a child of the previous one.  Subsequents @key{TAB} move the item to
+meaningful levels in the list and eventually get it back to its initial
+position.
 @kindex S-@key{down}
 @item S-@key{up}
 @itemx S-@key{down}
@@ -1378,25 +1397,35 @@ Decrease/increase the indentation of an item, leaving children alone.
 @item M-S-@key{left}
 @itemx M-S-@key{right}
 Decrease/increase the indentation of the item, including subitems.
-Initially, the item tree is selected based on current indentation.
-When these commands are executed several times in direct succession,
-the initially selected region is used, even if the new indentation
-would imply a different hierarchy.  To use the new hierarchy, break
-the command chain with a cursor motion or so.
+Initially, the item tree is selected based on current indentation.  When
+these commands are executed several times in direct succession, the initially
+selected region is used, even if the new indentation would imply a different
+hierarchy.  To use the new hierarchy, break the command chain with a cursor
+motion or so.
+
+As a special case, using this command on the very first item of a list will
+move the whole list.  This behavior can be disabled by configuring
+@code{org-list-automatic-rules}.  The global indentation of a list has no
+influence on the text @emph{after} the list.
 @kindex C-c C-c
 @item C-c C-c
 If there is a checkbox (@pxref{Checkboxes}) in the item line, toggle the
-state of the checkbox.  If not, this command makes sure that all the
-items on this list level use the same bullet.  Furthermore, if this is
-an ordered list, make sure the numbering is OK.
+state of the checkbox.  Also, makes sure that all the
+items on this list level use the same bullet and that the numbering of list
+items (if applicable) is correct.
 @kindex C-c -
+@vindex org-plain-list-ordered-item-terminator
+@vindex org-list-automatic-rules
 @item C-c -
 Cycle the entire list level through the different itemize/enumerate bullets
-(@samp{-}, @samp{+}, @samp{*}, @samp{1.}, @samp{1)}).  With a numeric prefix
-argument N, select the Nth bullet from this list.  If there is an active
-region when calling this, all lines will be converted to list items.  If the
-first line already was a list item, any item markers will be removed from the
-list.  Finally, even without an active region, a normal line will be
+(@samp{-}, @samp{+}, @samp{*}, @samp{1.}, @samp{1)}) or a subset of them,
+depending on @code{org-plain-list-ordered-item-terminator}, the type of list,
+and its position@footnote{See @code{bullet} rule in
+@code{org-list-automatic-rules} for more information.}.  With a numeric
+prefix argument N, select the Nth bullet from this list.  If there is an
+active region when calling this, all lines will be converted to list items.
+If the first line already was a list item, any item markers will be removed
+from the list.  Finally, even without an active region, a normal line will be
 converted into a list item.
 @kindex C-c *
 @item C-c *
@@ -4003,13 +4032,16 @@ large number of subtasks (@pxref{Checkboxes}).
 @section Checkboxes
 @cindex checkboxes
 
-Every item in a plain list (@pxref{Plain lists}) can be made into a
-checkbox by starting it with the string @samp{[ ]}.  This feature is
-similar to TODO items (@pxref{TODO Items}), but is more lightweight.
-Checkboxes are not included into the global TODO list, so they are often
-great to split a task into a number of simple steps.  Or you can use
-them in a shopping list.  To toggle a checkbox, use @kbd{C-c C-c}, or
-use the mouse (thanks to Piotr Zielinski's @file{org-mouse.el}).
+@vindex org-list-automatic-rules
+Every item in a plain list@footnote{With the exception of description
+lists. But you can allow it by modifying @code{org-list-automatic-rules}
+accordingly.} (@pxref{Plain lists}) can be made into a checkbox by starting
+it with the string @samp{[ ]}.  This feature is similar to TODO items
+(@pxref{TODO Items}), but is more lightweight.  Checkboxes are not included
+into the global TODO list, so they are often great to split a task into a
+number of simple steps.  Or you can use them in a shopping list.  To toggle a
+checkbox, use @kbd{C-c C-c}, or use the mouse (thanks to Piotr Zielinski's
+@file{org-mouse.el}).
 
 Here is an example of a checkbox list.
 

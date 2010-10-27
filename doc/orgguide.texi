@@ -507,7 +507,7 @@ description.
 
 Items belonging to the same list must have the same indentation on the first
 line.  A list ends before the next line that is indented like the
-bullet/number, or less.  An example:
+bullet/number, or less.  It also ends before two blank lines. An example:
 
 @smallexample
 @group
@@ -544,7 +544,7 @@ Decrease/increase the indentation of an item, leaving children alone.
 Decrease/increase the indentation of the item, including subitems.
 @item C-c C-c
 If there is a checkbox (@pxref{Checkboxes}) in the item line, toggle the
-state of the checkbox.  If not, make sure all items have the same bullet type
+state of the checkbox.  Also make sure all items have the same bullet type
 and renumber ordered lists.
 @item C-c -
 Cycle the entire list level through the different itemize/enumerate bullets
