@@ -85,6 +85,34 @@ can provide intuition for the new behavior.
   ,: 0.254227238707244
 #+end_src
 
+*** Added :headers header argument for LaTeX code blocks
+This makes it possible to set LaTeX options which must take place in
+the document pre-amble for LaTeX code blocks.  This header argument
+accepts either a single string or a list, e.g.
+
+#+begin_src org
+  ,#+begin_src latex :headers \usepackage{lmodern} :file name1.pdf
+  ,  latex body
+  ,#+end_src
+  
+  ,#+begin_src latex :headers '("\\usepackage{mathpazo}" "\\usepackage{fullpage}") :file name2.pdf
+  ,  latex body
+  ,#+end_src
+#+end_src
+
+*** New function `org-export-string'
+Allows exporting directly from a string to the specified export format.
+*** Code block header argument ":noweb tangle"
+Only expands <<noweb>> syntax references when tangling, not during
+export (weaving).
+*** Temporary file directory
+All babel temporary files are now kept in a single sub-directory in
+the /tmp directory and are cleaned up when Emacs exits.
+
+*** Function for demarcating blocks `ob-demarcate-block'
+Can be called to wrap the region in a block, or to split the block
+around point, bound to (C-c C-v d).
+
 *** Lists of anniversaries are now handeled better
 
 When several anniversaries are defined in the bbdb anniversaries
