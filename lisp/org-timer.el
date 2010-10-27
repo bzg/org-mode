@@ -328,7 +328,7 @@ VALUE can be `on', `off', or `pause'."
 
 If `org-timer-default-timer' is not zero, suggest this value as
 the default duration for the timer.  If a timer is already set,
-prompt the use if she wants to replace it.
+prompt the user if she wants to replace it.
 
 Called with a numeric prefix argument, use this numeric value as
 the duration of the timer.

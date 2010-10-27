@@ -5874,7 +5874,7 @@ with the @kbd{/} key in the agenda (@pxref{Agenda commands}).  If you have
 these estimates defined consistently, two or three key presses will narrow
 down the list to stuff that fits into an available time slot.
 
-@node Relative timer,  , Effort estimates, Dates and Times
+@node Relative timer, Countdown timer, Effort estimates, Dates and Times
 @section Taking notes with a relative timer
 @cindex relative timer
 
@@ -5915,6 +5915,20 @@ prefix argument @kbd{C-u C-u}, change all timer strings in the active region
 by a certain amount.  This can be used to fix timer strings if the timer was
 not started at exactly the right moment.
 @end table
+
+@node Countdown timer,  , Relative timer, Dates and Times
+@section Countdown timer
+@cindex Countdown timer
+@kindex C-c C-x ;
+@kindex ;
+
+Calling @code{org-timer-set-timer} from an Org-mode buffer runs a countdown
+timer.  Use @key{;} from agenda buffers, @key{C-c C-x ;} everwhere else.
+
+@code{org-timer-set-timer} prompts the user for a duration and displays a
+countdown timer in the modeline.  @code{org-timer-default-timer} sets the
+default countdown value.  Giving a prefix numeric argument overrides this
+default value.
 
 @node Capture - Refile - Archive, Agenda Views, Dates and Times, Top
 @chapter Capture - Refile - Archive

@@ -255,6 +255,11 @@ possible with org-wikinodes.el, which is available in the contrib
 directory.  We also have some [[http://orgmode.org/worg/org-contrib/org-wikinodes.php][documentation]] for this feature up
 on Worg.
 
+*** Timer/clock enhancements
+
+=org-timer-set-timer= displays a countdow timer in the modeline.
+From the agenda, `J' invokes =org-agenda-clock-goto=.
+
 * Version 7.01
 :PROPERTIES:
 :CUSTOM_ID: v7.01
