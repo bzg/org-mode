@@ -1726,8 +1726,7 @@ table.  But it's easier just to start typing, like
 @item C-c C-c
 Re-align the table without moving the cursor.
 @c
-@kindex @key{TAB}
-@item @key{TAB}
+@orgcmd{<TAB>,org-cycle}
 Re-align the table, move to the next field.  Creates a new row if
 necessary.
 @c
