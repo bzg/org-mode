@@ -178,11 +178,11 @@ Returns a list
 		   (nth 2 info))))
 	  (when (looking-at org-babel-src-name-w-name-regexp)
 	    (setq name (org-babel-clean-text-properties (match-string 4)))
-	    (when (match-string 5)
+	    (when (match-string 6)
 	      (setf (nth 2 info) ;; merge functional-syntax vars and header-args
 		    (org-babel-merge-params
 		     (mapcar (lambda (ref) (cons :var ref))
-			     (org-babel-ref-split-args (match-string 5)))
+			     (org-babel-ref-split-args (match-string 6)))
 		     (nth 2 info))))))
       ;; inline source block
       (when (save-excursion (re-search-backward "[ \f\t\n\r\v]" nil t)
