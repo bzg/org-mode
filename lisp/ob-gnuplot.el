@@ -184,7 +184,7 @@ This function is called by `org-babel-execute-src-block'."
   "Return list of gnuplot statements assigning the block's variables"
   (mapcar
    (lambda (pair) (format "%s = \"%s\"" (car pair) (cdr pair)))
-   (mapcar #'cdr (org-babel-get-header params :var))))
+   (org-babel-gnuplot-process-vars params)))
 
 (defvar gnuplot-buffer)
 (defun org-babel-gnuplot-initiate-session (&optional session params)
