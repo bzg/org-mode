@@ -1,4 +1,5 @@
-#   -*- mode: org; fill-column: 65 -*-
+
+* #   -*- mode: org; fill-column: 65 -*-
 
 #+begin_html
 <a href="/"><img src="http://orgmode.org/img/org-mode-unicorn.png" class="logo-link" /></a>
@@ -7,6 +8,12 @@
 #+STARTUP: indent hidestars
 
 * Version 7.02
+
+:PROPERTIES:
+:VISIBILITY: content
+:CUSTOM_ID: v7.02
+:END:
+
 ** Incompatible Changes
 *** Code block hashes
 Due to changes in the code resolving code block header arguments
@@ -78,9 +85,178 @@ can provide intuition for the new behavior.
   ,: 0.254227238707244
 #+end_src
 
+*** Lists of anniversaries are now handeled better
+
+When several anniversaries are defined in the bbdb anniversaries
+field (separated by semicolon), this is now handled nicely by the
+agenda.
+
+Thanks to Lukasz Setmann for a patch to this effect.
+
+*** Table fields are now aligned better, new <c> cookie.
+
+In HTML export, table fields are now properly aligned in accord
+with automatic alignment in org, or as set by the =<r>=, =<l>=, and
+=<c>= cookies.  The =<c>= cookie is new and has no effect in
+Org, but it does do the right thing in HTML export.
+
+*** Update freemind converter to include body text
+
+The freemind exporter now incorporates body text into the mind
+map. 
+
+Thanks to Lennard Borgman for this patch.
+    
+*** Make footnotes work correctly in message-mode
+The footnotes code now searches for the message delimiter "--" in
+order to place footnotes before the signature.
+Thanks to Tassilo Horn for this patch.
+
+*** Improve XEmacs compatibility
+
+Org-mode 7.02 now runs again in 21.4.22 if the new XEmacs base
+package is installed.
+
+Thanks to Uwe Bauer, Volker Ziegler, Michael Sperber and others
+for a discussion that lead to this nice result.
+    
+*** Make it configurable wether agenda jumping prefers the future
+
+When jumping to a date from the agenda using the =j= key, you may
+or may not like the property of Org's date reader to prefer the
+future when you enter incomplete dates.   This can now be
+configured using the variable =org-agenda-jump-prefer-future'.
+
+*** Add publishing functions for ASCII, Latin-1 and UTF-8
+
+There are now publishing functions =org-publish-org-to-ascii=,
+=org-publish-org-to-latin1=, and =org-publish-org-to-utf8=. 
+
+Thanks to Matthias Danzl for showing how to do this.
+
+*** Indentation and headline insertion after inline tasks
+
+Indentation in inline tasks, and headline insertion after inline
+tasks now behave as expected.
+
+*** Encryption in MobileOrg finally works
+
+As soon as MobilOrg 1.5 hits the Apple's AppStore, you can
+encrypt your org files on public servers.  Please see the
+documentation of MobileOrg and Appendix B of the manual for more
+details.
+
+*** LaTeX minted package for fontified source code export
+
+Patch by Dan Davison FIXME
+    
+*** MobileOrg: Do not force to insert IDs
+
+If you dislike the property of MobileOrg to insert ID properties
+for in all entries being part of an agenda view, you can now turn
+this off using the variable
+=org-mobile-force-id-on-agenda-items=.  When this variable is set
+to =nil=, MobileOrg will use outline paths to identify entries.
+Note that this may fail if several entries have identical outline
+paths.
+
+*** Allow to use texi2dvi or rubber for processing LaTeX to pdf
+
+Please see the variable =org-export-latex-to-pdf-process= for
+more information.
+
+Thanks to Olivier Schwander for the rubber part.
+
+*** New STARTUP keywords to turn on inline images
+
+If you want to inline images whenever you visit an Org file, use
+
+: #+STARTUP: inlineimages
+ 
+*** Support for user-extensible speed commands.
+
+There is a new hook =org-speed-command-hook=.  Thanks to
+Jambunathan for a patch to this effect.
+
+*** Add macro to insert property values into exported text
+
+you can use {{{property{NAME}}}} to insert the value of a
+property upon export.
+
+Thanks to David Maus for a patch to this effect.
+
+*** Fontify code in code blocks.
+
+Source code in code block can now be fontified.  Please customize
+the varable =org-src-fontify-natively=, but be prepared for some
+editing delays in larger blocks.  Thanks to Dan Davison for this.
+
+*** LaTeX package fixes
+
+We updated the list of default packages loaded by LaTeX exported
+files.
+
+*** Allow "#" and "%" in tags
+
+Tags can now also contain the characters =#= and =%=, in addition
+to =@= and letters.
+
+*** Show command names in manual
+
+Andreas Röhler is adding command names to keys in the manual.
+This will take a while to complete, but a start has been made.
+
+*** Make backslash escape "-" in property matches
+
+When entering a tags/property query, "-" is a logical operator.
+However, "-" is also allowed in property names.  So you can now
+write "SOME\-NAME" to work around this issue.
+
+This was a request by Ilya Shlyakhter.
+    
+*** Document quick insertion of empty structural elements
+
+Org-mode has a built-in template mechanism for inserting block
+templates.  This was undocumented until now.
+
+Thanks to Jambunathan K for the patch.
+
+*** Implement MathJax support
+
+Org-mode now uses MathJax to display math on web pages.  We serve
+MathJax from the orgmode.org server, at least for the time being
+(thanks Bastien!).  If you are going to use this for pages which
+are viewd often, please install MathJax on your own webserver.
+
+To return to the old way of creating images and inserting them
+into web pages, you would have to set
+
+: (setq org-export-with-LaTeX-fragments 'dvipng)
+
+or on a per-file basis
+
+: #+OPTIONS: LaTeX:dvipng
+    
+*** Agenda: Allow compact two-column display in agenda dispatcher
+
+If you have many custom agenda commands, you can have the display
+in the dispatcher use two columns with the following settings
+
+: (setq org-agenda-menu-show-match nil
+:       org-agenda-menu-two-column t)
+
+This was a request by John Wiegley.
+
+*** Add org-wikinodes.el as a contributed package
+
+One frequent request has been to be able to use CamelCase words
+for automatic cross links in a Wiki created by Org.  THis is now
+possible with org-wikinodes.el, which is available in the contrib
+directory.  We also have some [[http://orgmode.org/worg/org-contrib/org-wikinodes.php][documentation]] for this feature up
+on Worg.
+
 * Version 7.01
 :PROPERTIES:
-:VISIBILITY: content
 :CUSTOM_ID: v7.01
 :END:
 
