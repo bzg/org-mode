@@ -154,7 +154,8 @@ get a local clone of the repository use something like the following
 Some more information about this can be found in the [[http://orgmode.org/worg/org-faq.php][FAQ]], under [[http://orgmode.org/worg/org-faq.php#keeping-current-with-Org-mode-development][How do
 I keep current with Org mode development?]].  For people who cannot use
 git, we provide [[file:org-latest.zip][zip]] or [[file:org-latest.tar.gz][tar.gz]] snapshot release files updated each day
-and corresponding to the latest git version.
+and corresponding to the latest git version.  Alternatively, you can
+also download a [[http://repo.or.cz/w/org-mode.git/snapshot][tar.gz snapshot]] from the repo.or.cz server.
 
 ** Alternative distributions
 
@@ -213,10 +214,13 @@ and corresponding to the latest git version.
 
    - [[http://lists.gnu.org/mailman/listinfo/emacs-orgmode][Subscribe to it]] at the web interface.
    - Directly [[mailto:emacs-orgmode@gnu.org][send mail to it]].  If you are not subscribed, a moderator
-     will look at the message before passing it through to the
-     list.
+     will look at the message before passing it through to the list.
    - Read the list on [[http://www.gmane.org][Gmane]] through a [[http://news.gmane.org/gmane.emacs.orgmode][web interface]] or with a
      [[news://news.gmane.org/gmane.emacs.orgmode][newsreader]].
+   - Please read the [[http://orgmode.org/manual/Feedback.html][Feedback]] section of Org's manual before posting a
+     question, it helps getting useful answer.  [[http://www.catb.org/esr/faqs/smart-questions.html][How To Ask Questions
+     The Smart Way]], by E. S. Raymond is also worth reading.
+
 
 #+BEGIN_HTML
 </li><li><form method="get" action="http://search.gmane.org/"><div>
