@@ -56,11 +56,158 @@ checkbox rule. The latter has no equivalent, but a new way is provided
 to enforce some special numbering in a list. See [[* Plain lists changes][announcement]] below.
 
 ** Details
+*** Plain lists changes
+
+There is now two possibilities to end a plain list: either by
+indenting some text less than the last bullet of the list — like
+before, but now it now closes /all/ sublists in the process — or by
+specifying some regex — two blank lines, by default. All of this can
+be configured through =org-list-ending-method=, =org-list-end-regexp= and
+=org-empty-line-terminates-plain-lists=. This allows such constructs:
+
+#+BEGIN_SRC org :exports code
+,1. an ordered list
+,2. with two items
+
+
+,- another independent list
+,- of two items
+#+END_SRC
+
+Note that anyting inside a block (like example or src) isn't taken
+into consideration with regards to list ending.
+
+You can now enforce a special numbering in an ordered list with =[@num]=
+syntax, which generalizes the =[@start:num]= concept. It can be inserted
+in any item of the list, and exporters recognize it. Here is an
+example of what you can obtain:
+
+#+BEGIN_SRC org :exports code
+,2. [@2] I like
+,3. prime-numbered
+,5. [@5] lists
+#+END_SRC
+
+Cycling an item – using TAB — more than once just after its creation
+no longer moves it until it reaches the left margin. Now, all
+positions offered are meaningful in list's structure. Furthermore,
+indenting and outdenting items or subtrees within the list cannot
+break its integrity either.
+
+=org-insert-item=, when plain-list-item is set to auto in
+=org-blank-before-new-entry=, will apply some heuristics to insert the
+right number of blank lines, if any, after, or before, the newly
+created item. When no information is avalaible to take a guess, it
+will default to no blank line.
+
+=org-sort-list= sorts timer lists with t and T commands.
+
+Automatic actions are now taken by Org when some commands are issued.
+You can have a look at them and disable them individually with the
+help of the new variable =org-list-automatic-rules=.
+
+It is possible to change indentation of the whole list — it's, by the
+way, the only way to acheive this: indenting a region won't move lists
+— by using M-S-right and M-S-left when on its very first item. This
+global indentation has no influence on the text after the list:
+
+#+BEGIN_SRC org :exports code
+,You can have some text before a list.
+
+,      - then a
+,      - small list
+
+,And a text following the list, indented like if there was no list at
+,all.
+#+END_SRC
+
+Many bugfixes are included. For example, =org-cycle= on a list no longer
+swallows text after it and indenting a region containing a list
+shouldn't be problematic anymore. Some inconsistencies are also
+corrected. Thus, =org-cycle-list-bullet= will not offer "1." if you have
+disabled this kind of bullet by configuring
+=org-plain-list-ordered-item-terminator=.
+
+*** Implement MathJax support
+
+Org-mode now uses MathJax to display math on web pages.  We serve
+MathJax from the orgmode.org server, at least for the time being
+(thanks Bastien!).  If you are going to use this for pages which
+are viewd often, please install MathJax on your own webserver.
+
+To return to the old way of creating images and inserting them
+into web pages, you would have to set
+
+: (setq org-export-with-LaTeX-fragments 'dvipng)
+
+or on a per-file basis
+
+: #+OPTIONS: LaTeX:dvipng
+
+*** Add org-wikinodes.el as a contributed package
+
+One frequent request has been to be able to use CamelCase words
+for automatic cross links in a Wiki created by Org.  THis is now
+possible with org-wikinodes.el, which is available in the contrib
+directory.  We also have some [[http://orgmode.org/worg/org-contrib/org-wikinodes.php][documentation]] for this feature up
+on Worg.
+
+*** Timer/clock enhancements
+
+=org-timer-set-timer= displays a countdow timer in the modeline.
+From the agenda, `J' invokes =org-agenda-clock-goto=.
 *** Fontify code in code blocks.
 
 Source code in code block can now be fontified.  Please customize
 the varable =org-src-fontify-natively=, but be prepared for some
 editing delays in large blocks.  Thanks to Dan Davison for this.
+
+*** Allow "#" and "%" in tags
+
+Tags can now also contain the characters =#= and =%=, in addition
+to =@= and letters.
+
+*** MobileOrg: Encryption finally works
+
+As soon as MobilOrg 1.5 hits the Apple's AppStore, you can
+encrypt your org files on public servers.  Please see the
+documentation of MobileOrg and Appendix B of the manual for more
+details.
+    
+*** MobileOrg: Do not force to insert IDs
+
+If you dislike the property of MobileOrg to insert ID properties
+for in all entries being part of an agenda view, you can now turn
+this off using the variable
+=org-mobile-force-id-on-agenda-items=.  When this variable is set
+to =nil=, MobileOrg will use outline paths to identify entries.
+Note that this may fail if several entries have identical outline
+paths.
+
+*** Table fields are now aligned better, new <c> cookie.
+
+In HTML export, table fields are now properly aligned in accord
+with automatic alignment in org, or as set by the =<r>=, =<l>=, and
+=<c>= cookies.  The =<c>= cookie is new and has no effect in
+Org, but it does do the right thing in HTML export.
+
+*** Improve XEmacs compatibility
+
+Org-mode 7.02 now runs again in 21.4.22 if the new XEmacs base
+package is installed.
+
+Thanks to Uwe Bauer, Volker Ziegler, Michael Sperber and others
+for a discussion that lead to this nice result.
+    
+*** Agenda: Allow compact two-column display in agenda dispatcher
+
+If you have many custom agenda commands, you can have the display
+in the dispatcher use two columns with the following settings
+
+: (setq org-agenda-menu-show-match nil
+:       org-agenda-menu-two-column t)
+
+This was a request by John Wiegley.
 
 *** Language-mode commands are available in the Org-buffer
     The most general machinery for doing this is the macro
@@ -224,13 +371,6 @@ agenda.
 
 Thanks to Lukasz Setmann for a patch to this effect.
 
-*** Table fields are now aligned better, new <c> cookie.
-
-In HTML export, table fields are now properly aligned in accord
-with automatic alignment in org, or as set by the =<r>=, =<l>=, and
-=<c>= cookies.  The =<c>= cookie is new and has no effect in
-Org, but it does do the right thing in HTML export.
-
 *** Update freemind converter to include body text
 
 The freemind exporter now incorporates body text into the mind
@@ -242,14 +382,6 @@ Thanks to Lennard Borgman for this patch.
 The footnotes code now searches for the message delimiter "--" in
 order to place footnotes before the signature.
 Thanks to Tassilo Horn for this patch.
-
-*** Improve XEmacs compatibility
-
-Org-mode 7.02 now runs again in 21.4.22 if the new XEmacs base
-package is installed.
-
-Thanks to Uwe Bauer, Volker Ziegler, Michael Sperber and others
-for a discussion that lead to this nice result.
     
 *** Make it configurable wether agenda jumping prefers the future
 
@@ -270,13 +402,6 @@ Thanks to Matthias Danzl for showing how to do this.
 Indentation in inline tasks, and headline insertion after inline
 tasks now behave as expected.
 
-*** Encryption in MobileOrg finally works
-
-As soon as MobilOrg 1.5 hits the Apple's AppStore, you can
-encrypt your org files on public servers.  Please see the
-documentation of MobileOrg and Appendix B of the manual for more
-details.
-
 *** LaTeX minted package for fontified source code export
 Patch by Dan Davison.
 
@@ -293,16 +418,6 @@ In addition, it is neccessary to install
 pygments (http://pygments.org), and to configure
 `org-latex-to-pdf-process' so that the -shell-escape option is
 passed to pdflatex.
-    
-*** MobileOrg: Do not force to insert IDs
-
-If you dislike the property of MobileOrg to insert ID properties
-for in all entries being part of an agenda view, you can now turn
-this off using the variable
-=org-mobile-force-id-on-agenda-items=.  When this variable is set
-to =nil=, MobileOrg will use outline paths to identify entries.
-Note that this may fail if several entries have identical outline
-paths.
 
 *** Allow to use texi2dvi or rubber for processing LaTeX to pdf
 
@@ -310,6 +425,11 @@ Please see the variable =org-export-latex-to-pdf-process= for
 more information.
 
 Thanks to Olivier Schwander for the rubber part.
+
+*** LaTeX package fixes
+
+We updated the list of default packages loaded by LaTeX exported
+files.
 
 *** New STARTUP keywords to turn on inline images
 
@@ -328,16 +448,6 @@ you can use {{{property{NAME}}}} to insert the value of a
 property upon export.
 
 Thanks to David Maus for a patch to this effect.
-
-*** LaTeX package fixes
-
-We updated the list of default packages loaded by LaTeX exported
-files.
-
-*** Allow "#" and "%" in tags
-
-Tags can now also contain the characters =#= and =%=, in addition
-to =@= and letters.
 
 *** Show command names in manual
 
@@ -358,117 +468,6 @@ Org-mode has a built-in template mechanism for inserting block
 templates.  This was undocumented until now.
 
 Thanks to Jambunathan K for the patch.
-
-*** Implement MathJax support
-
-Org-mode now uses MathJax to display math on web pages.  We serve
-MathJax from the orgmode.org server, at least for the time being
-(thanks Bastien!).  If you are going to use this for pages which
-are viewd often, please install MathJax on your own webserver.
-
-To return to the old way of creating images and inserting them
-into web pages, you would have to set
-
-: (setq org-export-with-LaTeX-fragments 'dvipng)
-
-or on a per-file basis
-
-: #+OPTIONS: LaTeX:dvipng
-    
-*** Agenda: Allow compact two-column display in agenda dispatcher
-
-If you have many custom agenda commands, you can have the display
-in the dispatcher use two columns with the following settings
-
-: (setq org-agenda-menu-show-match nil
-:       org-agenda-menu-two-column t)
-
-This was a request by John Wiegley.
-
-*** Add org-wikinodes.el as a contributed package
-
-One frequent request has been to be able to use CamelCase words
-for automatic cross links in a Wiki created by Org.  THis is now
-possible with org-wikinodes.el, which is available in the contrib
-directory.  We also have some [[http://orgmode.org/worg/org-contrib/org-wikinodes.php][documentation]] for this feature up
-on Worg.
-
-*** Timer/clock enhancements
-
-=org-timer-set-timer= displays a countdow timer in the modeline.
-From the agenda, `J' invokes =org-agenda-clock-goto=.
-
-*** Plain lists changes
-
-There is now two possibilities to end a plain list: either by
-indenting some text less than the last bullet of the list — like
-before, but now it now closes /all/ sublists in the process — or by
-specifying some regex — two blank lines, by default. All of this can
-be configured through =org-list-ending-method=, =org-list-end-regexp= and
-=org-empty-line-terminates-plain-lists=. This allows such constructs:
-
-#+BEGIN_SRC org :exports code
-,1. an ordered list
-,2. with two items
-
-
-,- another independent list
-,- of two items
-#+END_SRC
-
-Note that anyting inside a block (like example or src) isn't taken
-into consideration with regards to list ending.
-
-You can now enforce a special numbering in an ordered list with =[@num]=
-syntax, which generalizes the =[@start:num]= concept. It can be inserted
-in any item of the list, and exporters recognize it. Here is an
-example of what you can obtain:
-
-#+BEGIN_SRC org :exports code
-,2. [@2] I like
-,3. prime-numbered
-,5. [@5] lists
-#+END_SRC
-
-Cycling an item – using TAB — more than once just after its creation
-no longer moves it until it reaches the left margin. Now, all
-positions offered are meaningful in list's structure. Furthermore,
-indenting and outdenting items or subtrees within the list cannot
-break its integrity either.
-
-=org-insert-item=, when plain-list-item is set to auto in
-=org-blank-before-new-entry=, will apply some heuristics to insert the
-right number of blank lines, if any, after, or before, the newly
-created item. When no information is avalaible to take a guess, it
-will default to no blank line.
-
-=org-sort-list= sorts timer lists with t and T commands.
-
-Automatic actions are now taken by Org when some commands are issued.
-You can have a look at them and disable them individually with the
-help of the new variable =org-list-automatic-rules=.
-
-It is possible to change indentation of the whole list — it's, by the
-way, the only way to acheive this: indenting a region won't move lists
-— by using M-S-right and M-S-left when on its very first item. This
-global indentation has no influence on the text after the list:
-
-#+BEGIN_SRC org :exports code
-,You can have some text before a list.
-
-,      - then a
-,      - small list
-
-,And a text following the list, indented like if there was no list at
-,all.
-#+END_SRC
-
-Many bugfixes are included. For example, =org-cycle= on a list no longer
-swallows text after it and indenting a region containing a list
-shouldn't be problematic anymore. Some inconsistencies are also
-corrected. Thus, =org-cycle-list-bullet= will not offer "1." if you have
-disabled this kind of bullet by configuring
-=org-plain-list-ordered-item-terminator=.
 
 * Version 7.01
 :PROPERTIES:
