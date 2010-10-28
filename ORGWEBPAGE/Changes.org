@@ -29,6 +29,32 @@ the root of the org-mode repository.
 : git submodule update
 Failure to update this repository will cause loading of
 org-test.el to throw errors.
+
+*** Lists handling
+
+Due to changes made to lists, it is no longer possible to have a
+sublist, some text and then another sublist while still in the same
+top-level list item, like in the following situation:
+
+#+BEGIN_SRC org :exports code
+,- Some list
+,  + A first sublist
+,  + of two elements
+
+,  A text belonging to the top-level list
+
+,  + Then another sublist
+,  + and a second element in it
+,- End of main list
+#+END_SRC
+
+Moreover, two variables are now obsolete, namely
+=org-provide-checkbox-statistics= and =org-auto-renumber-ordered-lists=.
+If you have changed default value of the former, you should have a
+look at the new variable =org-list-automatic-rules=, specifically at the
+checkbox rule. The latter has no equivalent, but a new way is provided
+to enforce some special numbering in a list. See [[* Plain lists changes][announcement]] below.
+
 ** Details
 *** Fontify code in code blocks.
 
@@ -371,6 +397,78 @@ on Worg.
 
 =org-timer-set-timer= displays a countdow timer in the modeline.
 From the agenda, `J' invokes =org-agenda-clock-goto=.
+
+*** Plain lists changes
+
+There is now two possibilities to end a plain list: either by
+indenting some text less than the last bullet of the list — like
+before, but now it now closes /all/ sublists in the process — or by
+specifying some regex — two blank lines, by default. All of this can
+be configured through =org-list-ending-method=, =org-list-end-regexp= and
+=org-empty-line-terminates-plain-lists=. This allows such constructs:
+
+#+BEGIN_SRC org :exports code
+,1. an ordered list
+,2. with two items
+
+
+,- another independent list
+,- of two items
+#+END_SRC
+
+Note that anyting inside a block (like example or src) isn't taken
+into consideration with regards to list ending.
+
+You can now enforce a special numbering in an ordered list with =[@num]=
+syntax, which generalizes the =[@start:num]= concept. It can be inserted
+in any item of the list, and exporters recognize it. Here is an
+example of what you can obtain:
+
+#+BEGIN_SRC org :exports code
+,2. [@2] I like
+,3. prime-numbered
+,5. [@5] lists
+#+END_SRC
+
+Cycling an item – using TAB — more than once just after its creation
+no longer moves it until it reaches the left margin. Now, all
+positions offered are meaningful in list's structure. Furthermore,
+indenting and outdenting items or subtrees within the list cannot
+break its integrity either.
+
+=org-insert-item=, when plain-list-item is set to auto in
+=org-blank-before-new-entry=, will apply some heuristics to insert the
+right number of blank lines, if any, after, or before, the newly
+created item. When no information is avalaible to take a guess, it
+will default to no blank line.
+
+=org-sort-list= sorts timer lists with t and T commands.
+
+Automatic actions are now taken by Org when some commands are issued.
+You can have a look at them and disable them individually with the
+help of the new variable =org-list-automatic-rules=.
+
+It is possible to change indentation of the whole list — it's, by the
+way, the only way to acheive this: indenting a region won't move lists
+— by using M-S-right and M-S-left when on its very first item. This
+global indentation has no influence on the text after the list:
+
+#+BEGIN_SRC org :exports code
+,You can have some text before a list.
+
+,      - then a
+,      - small list
+
+,And a text following the list, indented like if there was no list at
+,all.
+#+END_SRC
+
+Many bugfixes are included. For example, =org-cycle= on a list no longer
+swallows text after it and indenting a region containing a list
+shouldn't be problematic anymore. Some inconsistencies are also
+corrected. Thus, =org-cycle-list-bullet= will not offer "1." if you have
+disabled this kind of bullet by configuring
+=org-plain-list-ordered-item-terminator=.
 
 * Version 7.01
 :PROPERTIES:
