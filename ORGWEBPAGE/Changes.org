@@ -32,9 +32,13 @@ org-test.el to throw errors.
 ** Details
 *** Fontify code in code blocks.
 
-Source code in code block can now be fontified.  Please customize
-the varable =org-src-fontify-natively=, but be prepared for some
-editing delays in large blocks.  Thanks to Dan Davison for this.
+Source code in code blocks can now be fontified.  Please customize the
+varable =org-src-fontify-natively=. For very large blocks (several
+hundreds of lines) there can be delays in editing such fontified
+blocks, in which case C-c ' should be used to bring up a dedicated
+edit buffer.
+
+Thanks to Dan Davison for this.
 
 *** Language-mode commands are available in the Org-buffer
     The most general machinery for doing this is the macro
