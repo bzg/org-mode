@@ -375,17 +375,6 @@ agenda.
 
 Thanks to Lukasz Setmann for a patch to this effect.
 
-<<<<<<< HEAD
-=======
-*** Table fields are now aligned better, new <c> cookie.
-
-In HTML export, table fields are now properly aligned in accord
-with automatic alignment in org, or as set by the =<r>=, =<l>=, and
-=<c>= cookies.  The =<c>= cookie is new and has no effect in
-Org, but it does do the right thing in HTML export.  A LaTeX export
-implementation will follow, but is currently still missing.
-
->>>>>>> 4f429f5ffbb77dd34e02112416dadbd558079180
 *** Update freemind converter to include body text
 
 The freemind exporter now incorporates body text into the mind
@@ -417,8 +406,6 @@ Thanks to Matthias Danzl for showing how to do this.
 Indentation in inline tasks, and headline insertion after inline
 tasks now behave as expected.
 
-<<<<<<< HEAD
-=======
 *** Encryption in MobileOrg finally works
 
 As soon as MobilOrg 1.5 hits the Apple's AppStore, you can
@@ -436,7 +423,6 @@ to =nil=, MobileOrg will use outline paths to identify entries.
 Note that this may fail if several entries have identical outline
 paths.
 
->>>>>>> 4f429f5ffbb77dd34e02112416dadbd558079180
 *** LaTeX minted package for fontified source code export
 Patch by Dan Davison.
 
