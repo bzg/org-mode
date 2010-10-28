@@ -269,11 +269,12 @@ paths.
 *** LaTeX minted package for fontified source code export
 Patch by Dan Davison.
 
-A non-nil value of `org-export-latex-minted' means to export source
-code using the minted package, which will fontify source code
-with color.  If you want to use this, you need to make LaTeX use the
-minted package. Add minted to `org-export-latex-packages-alist', for
-example using customize, or with something like
+Setting `org-export-latex-listings' to have the special value 'minted
+causes source code to be exported to latex using the minted package,
+which will fontify source code with color.  If you want to use this,
+you need to make LaTeX use the minted package. Add minted to
+`org-export-latex-packages-alist', for example using customize, or
+with something like
 
   (require 'org-latex)
   (add-to-list 'org-export-latex-packages-alist '("" "minted"))
