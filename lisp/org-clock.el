@@ -1849,9 +1849,9 @@ the currently selected interval size."
 				 (org-minutes-to-hh:mm-string
 				  org-clock-file-total-minutes)
 				 "*|\n"
-				 tbl1)) tbl))
-		(setq total-time (+ (or total-time 0)
-				    org-clock-file-total-minutes)))))))
+				 tbl1)) tbl)
+		  (setq total-time (+ (or total-time 0)
+				      org-clock-file-total-minutes))))))))
 	(goto-char pos)
 
 	(unless scope-is-list
