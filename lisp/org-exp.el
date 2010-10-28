@@ -607,7 +607,6 @@ table.el tables."
     (:TeX-macros	      "TeX"	  org-export-with-TeX-macros)
     (:LaTeX-fragments	      "LaTeX"	  org-export-with-LaTeX-fragments)
     (:latex-listings	      nil         org-export-latex-listings)
-    (:latex-minted	      nil         org-export-latex-minted)
     (:skip-before-1st-heading "skip"	  org-export-skip-text-before-1st-heading)
     (:fixed-width	      ":"	  org-export-with-fixed-width)
     (:timestamps	      "<"	  org-export-with-timestamps)
@@ -2235,7 +2234,6 @@ in the list) and remove property and value from the list in LISTVAR."
 (defvar org-export-latex-listings) ;; defined in org-latex.el
 (defvar org-export-latex-listings-langs) ;; defined in org-latex.el
 (defvar org-export-latex-listings-w-names) ;; defined in org-latex.el
-(defvar org-export-latex-minted) ;; defined in org-latex.el
 (defvar org-export-latex-minted-langs) ;; defined in org-latex.el
 (defvar org-export-latex-minted-with-line-numbers) ;; defined in org-latex.el
 
@@ -2368,7 +2366,8 @@ INDENT was the original indentation of the block."
 	      (concat "#+BEGIN_LaTeX\n"
 		      (org-add-props
                           (cond
-			   (org-export-latex-listings
+			   ((and org-export-latex-listings
+				 (not (eq org-export-latex-listings 'minted)))
 			    (concat
 			     (if lang
 				 (let*
@@ -2388,7 +2387,7 @@ INDENT was the original indentation of the block."
 					"_" "\\\\_" caption)))
 			     "\\begin{lstlisting}\n"
 			     rtn "\\end{lstlisting}\n"))
-			   (org-export-latex-minted
+			   ((eq org-export-latex-listings 'minted)
 			    (if lang
 				(let*
 				    ((lang-sym (intern lang))

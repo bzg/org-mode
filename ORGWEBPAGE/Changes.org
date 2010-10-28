@@ -158,9 +158,13 @@ on Worg.
 From the agenda, `J' invokes =org-agenda-clock-goto=.
 *** Fontify code in code blocks.
 
-Source code in code block can now be fontified.  Please customize
-the varable =org-src-fontify-natively=, but be prepared for some
-editing delays in large blocks.  Thanks to Dan Davison for this.
+Source code in code blocks can now be fontified.  Please customize the
+varable =org-src-fontify-natively=. For very large blocks (several
+hundreds of lines) there can be delays in editing such fontified
+blocks, in which case C-c ' should be used to bring up a dedicated
+edit buffer.
+
+Thanks to Dan Davison for this.
 
 *** Allow "#" and "%" in tags
 
@@ -371,6 +375,17 @@ agenda.
 
 Thanks to Lukasz Setmann for a patch to this effect.
 
+<<<<<<< HEAD
+=======
+*** Table fields are now aligned better, new <c> cookie.
+
+In HTML export, table fields are now properly aligned in accord
+with automatic alignment in org, or as set by the =<r>=, =<l>=, and
+=<c>= cookies.  The =<c>= cookie is new and has no effect in
+Org, but it does do the right thing in HTML export.  A LaTeX export
+implementation will follow, but is currently still missing.
+
+>>>>>>> 4f429f5ffbb77dd34e02112416dadbd558079180
 *** Update freemind converter to include body text
 
 The freemind exporter now incorporates body text into the mind
@@ -402,14 +417,35 @@ Thanks to Matthias Danzl for showing how to do this.
 Indentation in inline tasks, and headline insertion after inline
 tasks now behave as expected.
 
+<<<<<<< HEAD
+=======
+*** Encryption in MobileOrg finally works
+
+As soon as MobilOrg 1.5 hits the Apple's AppStore, you can
+encrypt your org files on public servers.  Please see the
+documentation of MobileOrg and Appendix B of the manual for more
+details.
+    
+*** MobileOrg: Do not force to insert IDs
+
+If you dislike the property of MobileOrg to insert ID properties
+for in all entries being part of an agenda view, you can now turn
+this off using the variable
+=org-mobile-force-id-on-agenda-items=.  When this variable is set
+to =nil=, MobileOrg will use outline paths to identify entries.
+Note that this may fail if several entries have identical outline
+paths.
+
+>>>>>>> 4f429f5ffbb77dd34e02112416dadbd558079180
 *** LaTeX minted package for fontified source code export
 Patch by Dan Davison.
 
-A non-nil value of `org-export-latex-minted' means to export source
-code using the minted package, which will fontify source code
-with color.  If you want to use this, you need to make LaTeX use the
-minted package. Add minted to `org-export-latex-packages-alist', for
-example using customize, or with something like
+Setting `org-export-latex-listings' to have the special value 'minted
+causes source code to be exported to latex using the minted package,
+which will fontify source code with color.  If you want to use this,
+you need to make LaTeX use the minted package. Add minted to
+`org-export-latex-packages-alist', for example using customize, or
+with something like
 
   (require 'org-latex)
   (add-to-list 'org-export-latex-packages-alist '("" "minted"))
