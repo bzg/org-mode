@@ -4,7 +4,7 @@
 ;;   Free Software Foundation, Inc.
 
 ;; Author: Eric Schulte
-;; Version: 7.02
+;; Version: 7.02.01
 
 ;; This file is part of GNU Emacs.
 ;;
