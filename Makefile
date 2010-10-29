@@ -200,7 +200,7 @@ compile: $(ELCFILES0) $(ELCBFILES)
 
 install: install-lisp
 
-doc: doc/org.html doc/org.pdf doc/orgcard.pdf doc/orgcard_letter.pdf doc/orgguide.pdf
+doc: doc/org.html doc/org.pdf doc/orgcard.pdf doc/orgcard_letter.pdf doc/orgguide.pdf doc/orgcard.txt
 
 p:
 	${MAKE} pdf && open doc/org.pdf
