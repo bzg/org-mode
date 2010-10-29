@@ -1514,6 +1514,14 @@ file's directory then expand relative links."
 	     (forward-char (- end beg))
 	     (insert "#+end_example\n"))))))
 
+(defun org-babel-update-block-body (new-body)
+  "Update the body of the current code block to NEW-BODY."
+  (if (not (org-babel-where-is-src-block-head))
+      (error "not in source block")
+    (save-match-data
+      (replace-match (concat (org-babel-trim new-body) "\n") nil nil nil 5))
+    (indent-rigidly (match-beginning 5) (match-end 5) 2)))
+
 (defun org-babel-merge-params (&rest plists)
   "Combine all parameter association lists in PLISTS.
 Later elements of PLISTS override the values of previous element.

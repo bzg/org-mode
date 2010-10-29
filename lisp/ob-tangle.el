@@ -36,6 +36,7 @@
 (declare-function org-heading-components "org" ())
 (declare-function org-back-to-heading "org" (invisible-ok))
 (declare-function org-fill-template "org" (template alist))
+(declare-function org-babel-update-block-body "org" (new-body))
 
 ;;;###autoload
 (defcustom org-babel-tangle-lang-exts
@@ -370,7 +371,7 @@ form
 				     (eval el))))
 			    '(start-line file link source-name))))
     (flet ((insert-comment (text)
-	    (let ((text (org-babel-trim text)))
+            (let ((text (org-babel-trim text)))
 	      (when (and comments (not (string= comments "no"))
 			 (> (length text) 0))
 		(when org-babel-tangle-pad-newline (insert "\n"))
@@ -390,6 +391,60 @@ form
       (when link-p
 	(insert-comment
 	 (org-fill-template org-babel-tangle-comment-format-end link-data))))))
+
+;; detangling functions
+(defvar org-bracket-link-analytic-regexp)
+(defun org-babel-detangle (&optional source-code-file)
+  "Propagate changes in source file back original to Org-mode file.
+This requires that code blocks were tangled with link comments
+which enable the original code blocks to be found."
+  (interactive)
+  (save-excursion
+    (when source-code-file (find-file source-code-file))
+    (goto-char (point-min))
+    (let ((counter 0) new-body end)
+      (while (re-search-forward org-bracket-link-analytic-regexp nil t)
+        (when (re-search-forward
+	       (concat " " (regexp-quote (match-string 5)) " ends here"))
+          (setq end (match-end 0))
+          (forward-line -1)
+          (save-excursion
+	    (when (setq new-body (org-babel-tangle-jump-to-org))
+	      (org-babel-update-block-body new-body)))
+          (setq counter (+ 1 counter)))
+        (goto-char end))
+      (prog1 counter (message "detangled %d code blocks" counter)))))
+
+(defun org-babel-tangle-jump-to-org ()
+  "Jump from a tangled code file to the related Org-mode file."
+  (interactive)
+  (let ((mid (point))
+        target-buffer target-char
+        start end link path block-name body)
+    (save-window-excursion
+      (save-excursion
+        (unless (and (re-search-backward org-bracket-link-analytic-regexp nil t)
+                     (setq start (point-at-eol))
+                     (setq link (match-string 0))
+                     (setq path (match-string 3))
+                     (setq block-name (match-string 5))
+                     (re-search-forward
+                      (concat " " (regexp-quote block-name) " ends here") nil t)
+                     (setq end (point-at-bol))
+                     (< start mid) (< mid end))
+          (error "not in tangled code"))
+        (setq body (org-babel-trim (buffer-substring start end))))
+      (when (string-match "::" path)
+        (setq path (substring path 0 (match-beginning 0))))
+      (find-file path) (setq target-buffer (current-buffer))
+      (goto-char start) (org-open-link-from-string link)
+      (if (string-match "[^ \t\n\r]:\\([[:digit:]]+\\)" block-name)
+          (org-babel-next-src-block
+           (string-to-number (match-string 1 block-name)))
+        (org-babel-goto-named-src-block block-name))
+      (setq target-char (point)))
+    (pop-to-buffer target-buffer)
+    (prog1 body (goto-char target-char))))
 
 (provide 'ob-tangle)
 
