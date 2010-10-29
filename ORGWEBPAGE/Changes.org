@@ -218,9 +218,9 @@ map.
 Thanks to Lennard Borgman for this patch.
     
 *** Make footnotes work correctly in message-mode
-The footnotes code now searches for the message delimiter "--" in
-order to place footnotes before the signature.
-Thanks to Tassilo Horn for this patch.
+The footnotes code now searches for =message-signature-separator=
+(which is "-- " by default) in order to place footnotes before the
+signature.  Thanks to Tassilo Horn for this patch.
 
 *** Improve XEmacs compatibility
 
