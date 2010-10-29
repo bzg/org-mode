@@ -465,11 +465,11 @@ session."
 ;;;###autoload
 (defun org-babel-initiate-session (&optional arg info)
   "Initiate session for current code block.
-If called with a prefix argument then evaluate the header arguments
-for the code block before entering the session. Copy the body
-of the code block to the kill ring."
+If called with a prefix argument then resolve any variable
+references in the header arguments and assign these variables in
+the session. Copy the body of the code block to the kill ring."
   (interactive "P")
-  (let* ((info (or info (org-babel-get-src-block-info)))
+  (let* ((info (or info (org-babel-get-src-block-info (not arg))))
          (lang (nth 0 info))
          (body (nth 1 info))
          (params (nth 2 info))
