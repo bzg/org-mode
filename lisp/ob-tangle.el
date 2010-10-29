@@ -66,7 +66,7 @@ then the name of the language is used."
   :group 'org-babel
   :type 'boolean)
 
-(defcustom org-babel-tangle-comment-format-beg "[[%link][%sourcename]]"
+(defcustom org-babel-tangle-comment-format-beg "[[%link][%source-name]]"
   "Format of inserted comments in tangled code files.
 The following format strings can be used to insert special
 information into the output using `org-fill-template'.
@@ -80,7 +80,7 @@ controlled by the :comments header argument."
   :group 'org-babel
   :type 'string)
 
-(defcustom org-babel-tangle-comment-format-end "%sourcename ends here"
+(defcustom org-babel-tangle-comment-format-end "%source-name ends here"
   "Format of inserted comments in tangled code files.
 The following format strings can be used to insert special
 information into the output using `org-fill-template'.
