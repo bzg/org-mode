@@ -30,6 +30,13 @@ the root of the org-mode repository.
 Failure to update this repository will cause loading of
 org-test.el to throw errors.
 ** Details
+*** Org-babel speed commands
+All Org-babel commands (behind the C-c C-v key prefix) are now
+available as speed commands when the point is on the first line of a
+code block.  This uses the existing Org-mode speed key mechanisms.
+
+Thanks to Jambunathan K for implementation this new feature.
+
 *** Fontify code in code blocks.
 
 Source code in code blocks can now be fontified.  Please customize the
