@@ -123,9 +123,9 @@ a look at our [[http://orgmode.org/worg/org-quotes.php][collected quotes about O
   DropBox support, for vastly easier setup.
 - <2010-04-06 Tue>: Release 6.35
 
-* Current Version (7.01h)
+* Current Version (7.02)
 
-The current version is 7.01h.  To see what has changed in recent
+The current version is 7.02.  To see what has changed in recent
 releases, check this detailed list of [[file:Changes.html][user-visible changes]].
 
 This package works on Emacs 23 and 22, and (with minor restrictions)
@@ -137,7 +137,7 @@ recent version, but may lag a bit behind the website release.
 
 ** The standard distribution
 
-Download as [[file:org-7.01h.zip][zip file]] or [[file:org-7.01h.tar.gz][gzipped tar archive]].  These archives contain
+Download as [[file:org-7.02.zip][zip file]] or [[file:org-7.02.tar.gz][gzipped tar archive]].  These archives contain
 both the Lisp file org.el and the documentation in PDF and (TeX)Info
 formats.  Follow the instructions for [[http://orgmode.org/manual/Installation.html#Installation][Installation]] and [[http://orgmode.org/manual/Activation.html#Activation][Activation]].
 
