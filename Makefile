@@ -311,7 +311,7 @@ release:
 	rm org-$(TAG)*.zip
 	rm org-$(TAG)*.tar.gz
 	make pushreleasetag TAG=$(TAG)
-	git push origin maint
+	git push -f origin maint
 	git checkout master
 	git merge -s ours maint
 	UTILITIES/set-version.pl -o $(TAG)
@@ -340,7 +340,7 @@ fixrelease:
 	rm org-$(TAG)*.zip
 	rm org-$(TAG)*.tar.gz
 	make pushreleasetag TAG=$(TAG)
-	git push origin maint
+	git push -f origin maint
 	git checkout master
 	git merge -s ours maint
 	UTILITIES/set-version.pl -o $(TAG)
