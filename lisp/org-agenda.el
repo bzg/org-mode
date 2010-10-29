@@ -1211,11 +1211,11 @@ When nil, such items are sorted as 0 minutes effort."
   :group 'org-agenda)
 
 (defcustom org-agenda-prefix-format
-  '((agenda  . "  %-12:c%?-12t% s")
+  '((agenda  . " %i %-12:c%?-12t% s")
     (timeline  . "  % s")
-    (todo  . "  %-12:c")
-    (tags  . "  %-12:c")
-    (search . "  %-12:c"))
+    (todo  . " %i %-12:c")
+    (tags  . " %i %-12:c")
+    (search . " %i %-12:c"))
   "Format specifications for the prefix of items in the agenda views.
 An alist with four entries, for the different agenda types.  The keys to the
 sublists are `agenda', `timeline', `todo', and `tags'.  The values
@@ -1224,6 +1224,8 @@ This format works similar to a printf format, with the following meaning:
 
   %c   the category of the item, \"Diary\" for entries from the diary, or
        as given by the CATEGORY keyword or derived from the file name.
+  %i   the icon category of the item, as give in
+       `org-agenda-category-icon-alist'.
   %T   the *last* tag of the item.  Last because inherited tags come
        first in the list.
   %t   the time-of-day specification if one applies to the entry, in the
@@ -1430,6 +1432,45 @@ determines if it is a foreground or a background color."
 			(choice    :tag "Face    "
 				   (string :tag "Color")
 				   (sexp :tag "Face"))))))
+
+(defcustom org-agenda-category-icon-alist nil
+  "Alist of category icon to be displayed in agenda views.
+
+Each entry should have the following format:
+
+  (CATEGORY-REGEXP FILE-OR-DATA TYPE DATA-P PROPS)
+
+Where CATEGORY-REGEXP is a regexp matching the categories where
+the icon should be displayed.
+FILE-OR-DATA either a file path or a string containing image data.
+
+The other fields can be ommited safely if not needed:
+TYPE indicates the image type.
+DATA-P is a boolean indicating whether the FILE-OR-DATA string is
+image data.
+PROPS are additional image attributes to assign to the image,
+like, e.g. `:ascent center'.
+
+   (\"Org\" \"/path/to/icon.png\" nil nil :ascent center)
+
+If you want to set the display properties yourself, just put a
+list as second element:
+
+  (CATEGORY-REGEXP (MY PROPERTY LIST))
+
+For example, to display a 16px horizontal space for Emacs
+category, you can use:
+
+  (\"Emacs\" '(space . (:width (16))))"
+  :group 'org-agenda-line-format
+  :type '(list :tag "Category icons"
+	       (repeat
+		(list
+		 (string :tag "Category regexp")
+		 (string :tag "File or data")
+		 (string :tag "Type")
+		 (boolean :tag "Data?")
+		 (list :tag "Properties")))))
 
 (defgroup org-agenda-column-view nil
   "Options concerning column view in the agenda."
@@ -4934,6 +4975,14 @@ The flag is set if the currently compiled format contains a `%e'.")
 (defvar org-prefix-category-max-length nil
   "Used by `org-compile-prefix-format' to remember the category field width.")
 
+(defun org-agenda-get-category-icon (category)
+  "Return an image for CATEGORY according to `org-agenda-category-icon-alist'."
+  (dolist (entry org-agenda-category-icon-alist)
+    (when (org-string-match-p (car entry) category)
+      (if (listp (cadr entry))
+	  (return (cadr entry))
+      (return (apply 'create-image (cdr entry)))))))
+
 (defun org-format-agenda-item (extra txt &optional category tags dotime
 				     noprefix remove-re habitp)
   "Format TXT to be inserted into the agenda buffer.
@@ -4963,6 +5012,10 @@ Any match of REMOVE-RE will be removed from TXT."
 			     (file-name-sans-extension
 			      (file-name-nondirectory buffer-file-name))
 			   "")))
+	   (category-icon (org-agenda-get-category-icon category))
+	   (category-icon (if category-icon
+			      (propertize " " 'display category-icon)
+			    ""))
 	   ;; time, tag, effort are needed for the eval of the prefix format
 	   (tag (if tags (nth (1- (length tags)) tags) ""))
 	   time effort neffort
@@ -5173,11 +5226,11 @@ The resulting form is returned and stored in the variable
 	    (t "  %-12:c%?-12t% s")))
 	(start 0)
 	varform vars var e c f opt)
-    (while (string-match "%\\(\\?\\)?\\([-+]?[0-9.]*\\)\\([ .;,:!?=|/<>]?\\)\\([ctse]\\)"
+    (while (string-match "%\\(\\?\\)?\\([-+]?[0-9.]*\\)\\([ .;,:!?=|/<>]?\\)\\([ctsei]\\)"
 			 s start)
       (setq var (cdr (assoc (match-string 4 s)
 			    '(("c" . category) ("t" . time) ("s" . extra)
-			      ("T" . tag) ("e" . effort))))
+			      ("i" . category-icon) ("T" . tag) ("e" . effort))))
 	    c (or (match-string 3 s) "")
 	    opt (match-beginning 1)
 	    start (1+ (match-beginning 0)))

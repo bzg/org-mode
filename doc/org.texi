@@ -7398,6 +7398,10 @@ special category you want to apply as the value.
 The display in the agenda buffer looks best if the category is not
 longer than 10 characters.
 
+@noindent
+You can set up icons for category by customizing the
+@code{org-agenda-category-icon-alist} variable.
+
 @node Time-of-day specifications, Sorting of agenda items, Categories, Presentation and sorting
 @subsection Time-of-day specifications
 @cindex time-of-day specification
