@@ -2603,7 +2603,6 @@ Org-mode buffer.
 @end table
 
 @seealso{
-@uref{http://orgmode.org/manual/Working-with-source-code.html#Working-with-source-code,Chapter 14 of the manual}@*
 @uref{http://orgmode.org/manual/Literal-examples.html#Literal-examples,
 Chapter 11.3 of the manual}@*
 @uref{http://orgmode.org/worg/org-contrib/babel/index.php,
