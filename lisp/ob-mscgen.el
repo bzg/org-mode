@@ -5,7 +5,7 @@
 ;; Author: Juan Pechiar
 ;; Keywords: literate programming, reproducible research
 ;; Homepage: http://orgmode.org
-;; Version: 7.02.01
+;; Version: 7.02
 
 ;; This file is part of GNU Emacs.
 
