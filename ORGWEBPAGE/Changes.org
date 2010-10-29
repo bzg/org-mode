@@ -343,7 +343,7 @@ Thanks to Jambunathan K for the patch.
 Org-mode now uses MathJax to display math on web pages.  We serve
 MathJax from the orgmode.org server, at least for the time being
 (thanks Bastien!).  If you are going to use this for pages which
-are viewd often, please install MathJax on your own webserver.
+are viewed often, please install MathJax on your own webserver.
 
 To return to the old way of creating images and inserting them
 into web pages, you would have to set
