@@ -372,15 +372,15 @@ TIME defaults to the current time."
       (time-to-seconds (or time (current-time)))
     (float-time time)))
 
-(defun org-string-match-p (&rest args)
-  (if (fboundp 'string-match-p)
-      (apply 'string-match-p args)
+(if (fboundp 'string-match-p)
+    (defalias 'org-string-match-p 'string-match-p)
+  (defun org-string-match-p (regexp string &optional start)
     (save-match-data
-      (apply 'string-match args))))
+      (funcall 'string-match regexp string start))))
 
-(defun org-looking-at-p (&rest args)
-  (if (fboundp 'looking-at-p)
-      (apply 'looking-at-p args)
+(if (fboundp 'looking-at-p)
+    (defalias 'org-looking-at-p 'looking-at-p)
+  (defun org-looking-at-p (&rest args)
     (save-match-data
       (apply 'looking-at args))))
 
