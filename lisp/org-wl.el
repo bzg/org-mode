@@ -7,7 +7,7 @@
 ;;         David Maus <dmaus at ictsoc dot de>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 7.01trans
+;; Version: 7.02trans
 ;;
 ;; This file is part of GNU Emacs.
 ;;

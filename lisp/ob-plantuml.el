@@ -5,7 +5,7 @@
 ;; Author: Zhang Weize
 ;; Keywords: literate programming, reproducible research
 ;; Homepage: http://orgmode.org
-;; Version: 7.01trans
+;; Version: 7.02trans
 
 ;; This file is part of GNU Emacs.
 
