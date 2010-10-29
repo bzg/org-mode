@@ -295,7 +295,14 @@ markup defined, the first one in the association list will be used."
   :group 'org-export-latex
   :type 'string)
 
-(defcustom org-export-latex-hyperref-format "\\href{%s}{%s}"
+(defcustom org-export-latex-href-format "\\href{%s}{%s}"
+  "A printf format string to be applied to href links.
+The format must contain two %s instances.  The first will be filled with
+the link, the second with the link description."
+  :group 'org-export-latex
+  :type 'string)
+
+(defcustom org-export-latex-hyperref-format "\\hyperref[%s]{%s}"
   "A printf format string to be applied to hyperref links.
 The format must contain two %s instances.  The first will be filled with
 the link, the second with the link description."
@@ -2010,10 +2017,10 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 	      (insert (format
 		       (org-export-get-coderef-format path desc)
 		       (cdr (assoc path org-export-code-refs)))))
-	     (radiop (insert (format "\\hyperref[%s]{%s}"
+	     (radiop (insert (format org-export-latex-hyperref-format
 				     (org-solidify-link-text raw-path) desc)))
 	     ((not type)
-	      (insert (format "\\hyperref[%s]{%s}"
+	      (insert (format org-export-latex-hyperref-format
 			      (org-remove-initial-hash
 			       (org-solidify-link-text raw-path))
 			      desc)))
@@ -2024,7 +2031,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 		;; a LaTeX issue, but we here implement a work-around anyway.
 		(setq path (org-export-latex-protect-amp path)
 		      desc (org-export-latex-protect-amp desc)))
-	      (insert (format org-export-latex-hyperref-format path desc)))
+	      (insert (format org-export-latex-href-format path desc)))
 
 	     ((functionp (setq fnc (nth 2 (assoc type org-link-protocols))))
 	      ;; The link protocol has a function for formatting the link
