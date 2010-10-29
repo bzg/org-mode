@@ -29,6 +29,7 @@
 ;;; Code:
 (require 'ob)
 (require 'calc)
+(require 'calc-trail)
 (eval-when-compile (require 'ob-comint))
 
 (defvar org-babel-default-header-args:calc nil
@@ -48,7 +49,9 @@
 				  (if (numberp res) res (math-read-number res)))
 				(calc-eval line)))))))
    (split-string (org-babel-expand-body:calc body params) "[\n\r]"))
-  (calc-eval (calc-top 1)))
+  (save-excursion
+    (set-buffer (get-buffer "*Calculator*"))
+    (calc-eval (calc-top 1))))
 
 (provide 'ob-calc)
 
