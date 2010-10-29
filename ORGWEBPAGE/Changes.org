@@ -200,7 +200,7 @@ When several anniversaries are defined in the bbdb anniversaries
 field (separated by semicolon), this is now handled nicely by the
 agenda.
 
-Thanks to Lukasz Setmann for a patch to this effect.
+Thanks to Łukasz Stelmach for a patch to this effect.
 
 *** Table fields are now aligned better, new <c> cookie.
 
@@ -1039,7 +1039,7 @@ implemented in the LaTeX, Docbook, and HTML interfaces.
 The new option =org-outline-frame-title= allows to set the 
 title for outline frames in Beamer presentations.
 
-Patch by Lukasz Stelmach.
+Patch by Łukasz Stelmach.
     
 *** BEAMER export: fragile frames are better recognized
 
@@ -1188,7 +1188,7 @@ manual for more information.
 (org-agenda-skip-entry-if 'nottodo 'done)
 #+end_src
 
-Thanks to Lukasz Stelmach for this patch.
+Thanks to Łukasz Stelmach for this patch.
 
 *** Extracting the time-of-day when adding diary entries
 
@@ -1213,7 +1213,7 @@ more detail.  Please see the docstrings of
 =org-agenda-todo-ignore-scheduled= and
 =org-agenda-todo-ignore-deadline=.
 
-Thanks to Lukasz Stelmach for patches to this effect.
+Thanks to Łukasz Stelmach for patches to this effect.
 
 ** Hyperlinks
 
@@ -1350,7 +1350,7 @@ this area by Frédéric Couchet.
 =C-3 C-c C-c= will file the remember entry as a sibling of the
 last filed entry.
 
-Patch by Lukasz Stelmach.
+Patch by Łukasz Stelmach.
 
 *** Org-reveal: Double prefix arg shows the entire subtree of the parent
     
