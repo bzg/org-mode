@@ -4,8 +4,8 @@
 @setfilename ../../info/org
 @settitle The Org Manual
 
-@set VERSION 7.01trans
-@set DATE July 2010
+@set VERSION 7.02
+@set DATE October 2010
 
 @c Use proper quote and backtick for code sections in PDF output
 @c Cf. Texinfo manual 14.2

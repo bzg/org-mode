@@ -5,7 +5,7 @@
 ;; Author: Eric Schulte
 ;; Keywords: literate programming, reproducible research, scheme
 ;; Homepage: http://orgmode.org
-;; Version: 0.01
+;; Version: 7.02
 
 ;;; License:
 
