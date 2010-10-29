@@ -1732,8 +1732,7 @@ necessary.
 @orgcmd{S-@key{TAB},org-shifttab}
 Re-align, move to previous field.
 @c
-@kindex @key{RET}
-@item @key{RET}
+@orgcmd{@key{RET},org-return}
 Re-align the table and move down to next row.  Creates a new row if
 necessary.  At the beginning or end of a line, @key{RET} still does
 NEWLINE, so it can be used to split a table.
