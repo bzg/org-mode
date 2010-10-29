@@ -4,8 +4,8 @@
 @setfilename ../../info/org
 @settitle The Org Manual
 
-@set VERSION 7.01trans
-@set DATE July 2010
+@set VERSION 7.02trans
+@set DATE October 2010
 
 @c Use proper quote and backtick for code sections in PDF output
 @c Cf. Texinfo manual 14.2
@@ -1708,8 +1708,7 @@ unpredictable for you, configure the variables
 
 @table @kbd
 @tsubheading{Creation and conversion}
-@kindex C-c |
-@item C-c |
+@orgcmd{C-c |,org-table-create-or-convert-from-region}
 Convert the active region to table. If every line contains at least one
 TAB character, the function assumes that the material is tab separated.
 If every line contains a comma, comma-separated values (CSV) are assumed.
@@ -1723,16 +1722,14 @@ table.  But it's easier just to start typing, like
 @kbd{|Name|Phone|Age @key{RET} |- @key{TAB}}.
 
 @tsubheading{Re-aligning and field motion}
-@kindex C-c C-c
-@item C-c C-c
+@orgcmd{C-c C-c,org-ctrl-c-ctrl-c}
 Re-align the table without moving the cursor.
 @c
 @orgcmd{<TAB>,org-cycle}
 Re-align the table, move to the next field.  Creates a new row if
 necessary.
 @c
-@kindex S-@key{TAB}
-@item S-@key{TAB}
+@orgcmd{S-@key{TAB},org-shifttab}
 Re-align, move to previous field.
 @c
 @kindex @key{RET}

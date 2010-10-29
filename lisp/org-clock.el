@@ -6,7 +6,7 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 7.01trans
+;; Version: 7.02trans
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -1849,9 +1849,9 @@ the currently selected interval size."
 				 (org-minutes-to-hh:mm-string
 				  org-clock-file-total-minutes)
 				 "*|\n"
-				 tbl1)) tbl))
-		(setq total-time (+ (or total-time 0)
-				    org-clock-file-total-minutes)))))))
+				 tbl1)) tbl)
+		  (setq total-time (+ (or total-time 0)
+				      org-clock-file-total-minutes))))))))
 	(goto-char pos)
 
 	(unless scope-is-list

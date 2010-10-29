@@ -123,9 +123,9 @@ a look at our [[http://orgmode.org/worg/org-quotes.php][collected quotes about O
   DropBox support, for vastly easier setup.
 - <2010-04-06 Tue>: Release 6.35
 
-* Current Version (7.01h)
+* Current Version (7.02)
 
-The current version is 7.01h.  To see what has changed in recent
+The current version is 7.02.  To see what has changed in recent
 releases, check this detailed list of [[file:Changes.html][user-visible changes]].
 
 This package works on Emacs 23 and 22, and (with minor restrictions)
@@ -137,7 +137,7 @@ recent version, but may lag a bit behind the website release.
 
 ** The standard distribution
 
-Download as [[file:org-7.01h.zip][zip file]] or [[file:org-7.01h.tar.gz][gzipped tar archive]].  These archives contain
+Download as [[file:org-7.02.zip][zip file]] or [[file:org-7.02.tar.gz][gzipped tar archive]].  These archives contain
 both the Lisp file org.el and the documentation in PDF and (TeX)Info
 formats.  Follow the instructions for [[http://orgmode.org/manual/Installation.html#Installation][Installation]] and [[http://orgmode.org/manual/Activation.html#Activation][Activation]].
 
@@ -154,7 +154,8 @@ get a local clone of the repository use something like the following
 Some more information about this can be found in the [[http://orgmode.org/worg/org-faq.php][FAQ]], under [[http://orgmode.org/worg/org-faq.php#keeping-current-with-Org-mode-development][How do
 I keep current with Org mode development?]].  For people who cannot use
 git, we provide [[file:org-latest.zip][zip]] or [[file:org-latest.tar.gz][tar.gz]] snapshot release files updated each day
-and corresponding to the latest git version.
+and corresponding to the latest git version.  Alternatively, you can
+also download a [[http://repo.or.cz/w/org-mode.git/snapshot][tar.gz snapshot]] from the repo.or.cz server.
 
 ** Alternative distributions
 
@@ -213,10 +214,13 @@ and corresponding to the latest git version.
 
    - [[http://lists.gnu.org/mailman/listinfo/emacs-orgmode][Subscribe to it]] at the web interface.
    - Directly [[mailto:emacs-orgmode@gnu.org][send mail to it]].  If you are not subscribed, a moderator
-     will look at the message before passing it through to the
-     list.
+     will look at the message before passing it through to the list.
    - Read the list on [[http://www.gmane.org][Gmane]] through a [[http://news.gmane.org/gmane.emacs.orgmode][web interface]] or with a
      [[news://news.gmane.org/gmane.emacs.orgmode][newsreader]].
+   - Please read the [[http://orgmode.org/manual/Feedback.html][Feedback]] section of Org's manual before posting a
+     question, it helps getting useful answer.  [[http://www.catb.org/esr/faqs/smart-questions.html][How To Ask Questions
+     The Smart Way]], by E. S. Raymond is also worth reading.
+
 
 #+BEGIN_HTML
 </li><li><form method="get" action="http://search.gmane.org/"><div>

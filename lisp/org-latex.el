@@ -4,7 +4,7 @@
 ;;
 ;; Emacs Lisp Archive Entry
 ;; Filename: org-latex.el
-;; Version: 7.01trans
+;; Version: 7.02trans
 ;; Author: Bastien Guerry <bzg AT altern DOT org>
 ;; Maintainer: Carsten Dominik <carsten.dominik AT gmail DOT com>
 ;; Keywords: org, wp, tex
@@ -376,7 +376,25 @@ for example using customize, or with something like
 
   (require 'org-latex)
   (add-to-list 'org-export-latex-packages-alist '(\"\" \"listings\"))
-  (add-to-list 'org-export-latex-packages-alist '(\"\" \"color\"))"
+  (add-to-list 'org-export-latex-packages-alist '(\"\" \"color\"))
+
+Alternatively,
+
+  (setq org-export-latex-listings 'minted)
+
+causes source code to be exported using the minted package as
+opposed to listings. If you want to use minted, you need to add
+the minted package to `org-export-latex-packages-alist', for
+example using customize, or with
+
+  (require 'org-latex)
+  (add-to-list 'org-export-latex-packages-alist '(\"\" \"minted\"))
+
+In addition, it is neccessary to install
+pygments (http://pygments.org), and to configure
+`org-latex-to-pdf-process' so that the -shell-escape option is
+passed to pdflatex.
+"
   :group 'org-export-latex
   :type 'boolean)
 
@@ -408,23 +426,6 @@ hurt if it is present."
 Code blocks exported with the listings package (controlled by the
 `org-export-latex-listings' variable) can be named in the style
 of noweb."
-  :group 'org-export-latex
-  :type 'boolean)
-
-(defcustom org-export-latex-minted nil
-  "Non-nil means export source code using the minted package.
-This package will fontify source code with color.
-If you want to use this, you need to make LaTeX use the
-minted package. Add this to `org-export-latex-packages-alist',
-for example using customize, or with something like
-
-  (require 'org-latex)
-  (add-to-list 'org-export-latex-packages-alist '(\"\" \"minted\"))
-
-In addition, it is neccessary to install
-pygments (http://pygments.org), and configure
-`org-latex-to-pdf-process' so that the -shell-escape option is
-passed to pdflatex."
   :group 'org-export-latex
   :type 'boolean)
 
@@ -2015,10 +2016,10 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 	      (insert (format
 		       (org-export-get-coderef-format path desc)
 		       (cdr (assoc path org-export-code-refs)))))
-	     (radiop (insert (format org-export-latex-hyperref-format
+	     (radiop (insert (format "\\hyperref[%s]{%s}"
 				     (org-solidify-link-text raw-path) desc)))
 	     ((not type)
-	      (insert (format org-export-latex-hyperref-format
+	      (insert (format "\\hyperref[%s]{%s}"
 			      (org-remove-initial-hash
 			       (org-solidify-link-text raw-path))
 			      desc)))
