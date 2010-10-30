@@ -500,8 +500,8 @@ List ending is determined by the indentation of text. See
       (org-list-maybe-skip-block #'re-search-forward limit)
       (beginning-of-line)
       (catch 'exit
-	(skip-chars-forward " \t")
 	(while t
+	  (skip-chars-forward " \t")
 	  (let ((ind (org-get-indentation)))
 	    (cond
 	     ((or (>= (point) limit)
@@ -1965,6 +1965,7 @@ compare entries."
     (message "Sorting items...")
     (save-restriction
       (narrow-to-region start end)
+      (goto-char (point-min))
       (let* ((dcst (downcase sorting-type))
 	     (case-fold-search nil)
 	     (now (current-time))
