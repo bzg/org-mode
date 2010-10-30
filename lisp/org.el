@@ -147,6 +147,7 @@ requirements) is loaded."
 		 (const :tag "C" C)
 		 (const :tag "R" R)
 		 (const :tag "Asymptote" asymptote)
+		 (const :tag "Calc" calc)
 		 (const :tag "Clojure" clojure)
 		 (const :tag "CSS" css)
 		 (const :tag "Ditaa" ditaa)
