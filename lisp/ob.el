@@ -606,7 +606,7 @@ the current subtree."
   (let ((print-level nil)
 	(info (or info (org-babel-get-src-block-info))))
     (setf (nth 2 info)
-	  (sort (nth 2 info)
+	  (sort (copy-tree (nth 2 info))
 		(lambda (a b) (string< (car a) (car b)))))
     (let ((hash (sha1
 		 (format "%s-%s"
