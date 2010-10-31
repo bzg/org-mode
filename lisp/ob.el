@@ -391,13 +391,18 @@ block."
 		(message "executing %s code block%s..."
 			 (capitalize lang)
 			 (if (nth 4 info) (format " (%s)" (nth 4 info)) ""))
-		(setq result (funcall cmd body params))
-		(if (eq (cdr (assoc :result-type params)) 'value)
-		    (setq result (if (and (or (member "vector" result-params)
-					      (member "table" result-params))
-					  (not (listp result)))
-				     (list (list result))
-				   result)))
+		(setq result
+		      ((lambda (result)
+			 (cond
+			  ((member "file" result-params)
+			   (cdr (assoc :file params)))
+			  ((and (eq (cdr (assoc :result-type params)) 'value)
+				(or (member "vector" result-params)
+				    (member "table" result-params))
+				(not (listp result)))
+			   (list (list result)))
+			  (t result)))
+		       (funcall cmd body params)))
 		(org-babel-insert-result
 		 result result-params info new-hash indent lang)
 		(run-hooks 'org-babel-after-execute-hook)
