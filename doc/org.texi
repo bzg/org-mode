@@ -260,7 +260,6 @@ Dates and times
 * Creating timestamps::         Commands which insert timestamps
 * Deadlines and scheduling::    Planning your work
 * Clocking work time::          Tracking how long you spend on a task
-* Resolving idle time::         Resolving time if you've been idle
 * Effort estimates::            Planning work effort in advance
 * Relative timer::              Notes with a running timer
 * Countdown timer::             Starting a countdown timer for a task
@@ -274,6 +273,12 @@ Deadlines and scheduling
 
 * Inserting deadline/schedule::  Planning items
 * Repeated tasks::              Items that show up again and again
+
+Clocking work time
+
+* Clocking commands::           Starting and stopping a clock
+* The clock table::             Detailed reports
+* Resolving idle time::         Resolving time when you've been idle
 
 Capture - Refile - Archive
 
@@ -5006,7 +5011,6 @@ is used in a much wider sense.
 * Creating timestamps::         Commands which insert timestamps
 * Deadlines and scheduling::    Planning your work
 * Clocking work time::          Tracking how long you spend on a task
-* Resolving idle time::         Resolving time if you've been idle
 * Effort estimates::            Planning work effort in advance
 * Relative timer::              Notes with a running timer
 * Countdown timer::             Starting a countdown timer for a task
@@ -5547,8 +5551,10 @@ subtree, with dates shifted in each copy.  The command @kbd{C-c C-x c} was
 created for this purpose, it is described in @ref{Structure editing}.
 
 
-@node Clocking work time, Resolving idle time, Deadlines and scheduling, Dates and Times
+@node Clocking work time, Effort estimates, Deadlines and scheduling, Dates and Times
 @section Clocking work time
+@cindex clocking time
+@cindex time clocking
 
 Org-mode allows you to clock the time you spend on specific tasks in a
 project.  When you start working on an item, you can start the clock.
@@ -5568,6 +5574,15 @@ clock@footnote{To resume the clock under the assumption that you have worked
 on this task while outside Emacs, use @code{(setq org-clock-persist t)}.}
 will be found (@pxref{Resolving idle time}) and you will be prompted about
 what to do with it.
+
+@menu
+* Clocking commands::           Starting and stopping a clock
+* The clock table::             Detailed reports
+* Resolving idle time::         Resolving time when you've been idle
+@end menu
+
+@node Clocking commands, The clock table, Clocking work time, Clocking work time
+@subsection Clocking commands
 
 @table @kbd
 @kindex C-c C-x C-i
@@ -5641,6 +5656,22 @@ recorded under that heading, including the time of any subheadings. You
 can use visibility cycling to study the tree, but the overlays disappear
 when you change the buffer (see variable
 @code{org-remove-highlights-with-change}) or press @kbd{C-c C-c}.
+@end table
+
+The @kbd{l} key may be used in the timeline (@pxref{Timeline}) and in
+the agenda (@pxref{Weekly/daily agenda}) to show which tasks have been
+worked on or closed during a day.
+
+@node The clock table, Resolving idle time, Clocking commands, Clocking work time
+@subsection The clock table
+@cindex clocktable, dynamic block
+@cindex report, of clocked time
+
+Org mode can produce quite complex reports based on the time clocking
+inormation.  Such a report is called a @emph{clock table}, because it is
+formatted as one or several Org tables.
+
+@table @kbd
 @kindex C-c C-x C-r
 @item C-c C-x C-r
 Insert a dynamic block (@pxref{Dynamic blocks}) containing a clock
@@ -5648,17 +5679,45 @@ report as an Org-mode table into the current file.  When the cursor is
 at an existing clock table, just update it.  When called with a prefix
 argument, jump to the first clock report in the current document and
 update it.
+@kindex C-c C-c
+@item C-c C-c
+@kindex C-c C-x C-u
+@itemx C-c C-x C-u
+Update dynamic block at point.  The cursor needs to be in the
+@code{#+BEGIN} line of the dynamic block.
+@kindex C-u C-c C-x C-u
+@item C-u C-c C-x C-u
+Update all dynamic blocks (@pxref{Dynamic blocks}).  This is useful if
+you have several clock table blocks in a buffer.
+@kindex S-@key{left}
+@kindex S-@key{right}
+@item S-@key{left}
+@itemx S-@key{right}
+Shift the current @code{:block} interval and update the table.  The cursor
+needs to be in the @code{#+BEGIN: clocktable} line for this command.  If
+@code{:block} is @code{today}, it will be shifted to @code{today-1} etc.
+@end table
+
+
+Here is an example of the frame for a clock table as it is inserted into the
+buffer with the @kbd{C-c C-x C-r} command:
+
 @cindex #+BEGIN, clocktable
 @example
 #+BEGIN: clocktable :maxlevel 2 :emphasize nil :scope file
 #+END: clocktable
 @end example
 @noindent
-If such a block already exists at point, its content is replaced by the
-new table.  The @samp{BEGIN} line can specify options:
+@vindex org-clocktable-defaults
+The @samp{BEGIN} line and specify a number of options to define the scope,
+structure, and formatting of the report.  Defaults for all these options can
+be configured in the variable @code{org-clocktable-defaults}.
+
+@noindent First there are options that determine which clock entries are to
+be selected:
 @example
 :maxlevel    @r{Maximum level depth to which times are listed in the table.}
-:emphasize   @r{When @code{t}, emphasize level one and level two items.}
+             @r{Clocks at deeper levels will be summed into the upper level.}
 :scope       @r{The scope to consider.  This can be any of the following:}
              nil        @r{the current buffer or narrowed region}
              file       @r{the full current buffer}
@@ -5685,15 +5744,34 @@ new table.  The @samp{BEGIN} line can specify options:
 :tend        @r{A time string specifying when to stop considering times.}
 :step        @r{@code{week} or @code{day}, to split the table into chunks.}
              @r{To use this, @code{:block} or @code{:tstart}, @code{:tend} are needed.}
-:stepskip0   @r{Don't show steps that have zero time}
-:tags        @r{A tags match to select entries that should contribute}
+:stepskip0   @r{Do not show steps that have zero time.}
+:fileskip0   @r{Do not show table sections from files which did not contribute.}
+:tags        @r{A tags match to select entries that should contribute}.
+@end example
+
+Then there are options which determine the formatting of the table.  There
+options are interpreted by the function @code{org-clocktable-write-default},
+but you can specify your own function using the @code{:formatter} parameter.
+@example
+:emphasize   @r{When @code{t}, emphasize level one and level two items.}
 :link        @r{Link the item headlines in the table to their origins.}
+:narrow      @r{An integer to limit the width of the headline column in}
+             @r{the org table.  Does not work together with @code{:link}.}
+             @r{If you write it like @samp{50!}, then the headline will also}
+             @r{be shortened in export, and will work with @code{:link}.}
+:indent      @r{Indent each headline field according to its level.}
+:tcolumns    @r{Number of columns to be used for times.  If this is smaller}
+             @r{than @code{:maxlevel}, lower levels will be lumped into one column.}
+:level       @r{Should a level number column be included?}
+:compact     @r{Abbreviation for @code{:level nil :indent t :narrow 40! :tcolumns 1}}
+             @r{All are overwritten except if there is an explicit @code{:narrow}}
+:timestamp   @r{A timestamp for the entry, when available.  Look for SCHEDULED,}
+             @r{DEADLINE, TIMESTAMP and TIMESTAMP_IA, in this order.}
 :formula     @r{Content of a @code{#+TBLFM} line to be added and evaluated.}
              @r{As a special case, @samp{:formula %} adds a column with % time.}
              @r{If you do not specify a formula here, any existing formula.}
              @r{below the clock table will survive updates and be evaluated.}
-:timestamp   @r{A timestamp for the entry, when available.  Look for SCHEDULED,}
-             @r{DEADLINE, TIMESTAMP and TIMESTAMP_IA, in this order.}
+:formatter   @r{A function to format clock data and insert it into the buffer.}
 @end example
 To get a clock summary of the current level 1 tree, for the current
 day, you could write
@@ -5715,31 +5793,15 @@ A summary of the current subtree with % times would be
 #+BEGIN: clocktable :scope subtree :link t :formula %
 #+END: clocktable
 @end example
-@kindex C-c C-c
-@item C-c C-c
-@kindex C-c C-x C-u
-@itemx C-c C-x C-u
-Update dynamic block at point.  The cursor needs to be in the
-@code{#+BEGIN} line of the dynamic block.
-@kindex C-u C-c C-x C-u
-@item C-u C-c C-x C-u
-Update all dynamic blocks (@pxref{Dynamic blocks}).  This is useful if
-you have several clock table blocks in a buffer.
-@kindex S-@key{left}
-@kindex S-@key{right}
-@item S-@key{left}
-@itemx S-@key{right}
-Shift the current @code{:block} interval and update the table.  The cursor
-needs to be in the @code{#+BEGIN: clocktable} line for this command.  If
-@code{:block} is @code{today}, it will be shifted to @code{today-1} etc.
-@end table
+A horizontally compact representation of everything clocked during last week
+would be
+@example
+#+BEGIN: clocktable :block lastweek :indent t :narrow 40! :tcolumn 1
+#+END: clocktable
+@end example
 
-The @kbd{l} key may be used in the timeline (@pxref{Timeline}) and in
-the agenda (@pxref{Weekly/daily agenda}) to show which tasks have been
-worked on or closed during a day.
-
-@node Resolving idle time, Effort estimates, Clocking work time, Dates and Times
-@section Resolving idle time
+@node Resolving idle time,  , The clock table, Clocking work time
+@subsection Resolving idle time
 @cindex resolve idle time
 
 @cindex idle, resolve, dangling
@@ -5806,7 +5868,7 @@ to a recovery event rather than a set amount of idle time.
 You can also check all the files visited by your Org agenda for dangling
 clocks at any time using @kbd{M-x org-resolve-clocks}.
 
-@node Effort estimates, Relative timer, Resolving idle time, Dates and Times
+@node Effort estimates, Relative timer, Clocking work time, Dates and Times
 @section Effort estimates
 @cindex effort estimates
 
@@ -7584,7 +7646,10 @@ Toggle Clockreport mode.  In Clockreport mode, the daily/weekly agenda will
 always show a table with the clocked times for the timespan and file scope
 covered by the current agenda view.  The initial setting for this mode in new
 agenda buffers can be set with the variable
-@code{org-agenda-start-with-clockreport-mode}.
+@code{org-agenda-start-with-clockreport-mode}.  By using a prefix argument
+when toggling this mode (i.e. @kbd{C-u R}), the clock table will not show
+contributions from entries that are hidden by agenda filtering@footnote{Only
+tags filtering will be respected here, effort filtering is ignored.}.
 @c
 @kindex v E
 @kindex E

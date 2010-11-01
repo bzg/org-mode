@@ -18066,6 +18066,23 @@ upon the next fontification round."
       (setq l (- l (get-text-property b 'org-dwidth-n s))))
     l))
 
+(defun org-shorten-string (s maxlength)
+  "Shorten string S so tht it is no longer than MAXLENGTH characters.
+If the string is shorter or has length MAXLENGTH, just return the
+original string.  If it is longer, the functions finds a space in the
+string, breaks this string off at that locations and adds three dots
+as ellipsis.  Including the ellipsis, the string will not be longer
+than MAXLENGTH.  If finding a good breaking point in the string does
+not work, the string is just chopped off in the middle of a word
+if necessary."
+  (if (<= (length s) maxlength)
+      s
+    (let* ((n (max (- maxlength 4) 1))
+	   (re (concat "\\`\\(.\\{1," (int-to-string n) "\\}[^ ]\\)\\([ ]\\|\\'\\)")))
+      (if (string-match re s)
+	  (concat (match-string 1 s) "...")
+	(concat (substring s 0 (max (- maxlength 3) 0)) "...")))))
+
 (defun org-get-indentation (&optional line)
   "Get the indentation of the current line, interpreting tabs.
 When LINE is given, assume it represents a line and compute its indentation."

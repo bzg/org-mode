@@ -2778,6 +2778,7 @@ removed from the entry content.  Currently only `planning' is allowed here."
 (defvar org-agenda-columns-active nil)
 (defvar org-agenda-name nil)
 (defvar org-agenda-filter nil)
+(defvar org-agenda-filter-while-redo nil)
 (defvar org-agenda-filter-preset nil
   "A preset of the tags filter used for secondary agenda filtering.
 This must be a list of strings, each string must be a single tag preceded
@@ -3299,7 +3300,7 @@ given in `org-agenda-start-on-weekday'."
 	 (day-cnt 0)
 	 (inhibit-redisplay (not debug-on-error))
 	 s e rtn rtnall file date d start-pos end-pos todayp nd wd
-	 clocktable-start clocktable-end)
+	 clocktable-start clocktable-end filter)
     (setq org-agenda-redo-command
 	  (list 'org-agenda-list (list 'quote include-all) start-day ndays))
     ;; Make the list of days
@@ -3425,6 +3426,15 @@ given in `org-agenda-start-on-weekday'."
 	(setq p (plist-put p :tstart clocktable-start))
 	(setq p (plist-put p :tend clocktable-end))
 	(setq p (plist-put p :scope 'agenda))
+	(when (and (eq org-agenda-clockreport-mode 'with-filter)
+		   (setq filter (or org-agenda-filter-while-redo
+				    (get 'org-agenda-filter :preset-filter))))
+	  (setq p (plist-put p :tags (mapconcat (lambda (x)
+						  (if (string-match "[<>=]" x)
+						      ""
+						    x))
+						filter ""))))
+	(message "%s" (plist-get p :tags)) (sit-for 2)
 	(setq tbl (apply 'org-get-clocktable p))
 	(insert tbl)))
     (goto-char (point-min))
@@ -5567,6 +5577,7 @@ When this is the global TODO list, a prefix argument will be interpreted."
   (let* ((org-agenda-keep-modes t)
 	 (filter org-agenda-filter)
 	 (preset (get 'org-agenda-filter :preset-filter))
+	 (org-agenda-filter-while-redo (or filter preset))
 	 (cols org-agenda-columns-active)
 	 (line (org-current-line))
 	 (window-line (- line (org-current-line (window-start))))
@@ -6094,11 +6105,15 @@ so that the date SD will be in that range."
 	   (if org-agenda-entry-text-mode "on" "off")
 	   (if (integerp arg) arg org-agenda-entry-text-maxlines)))
 
-(defun org-agenda-clockreport-mode ()
-  "Toggle clocktable mode in an agenda buffer."
-  (interactive)
+(defun org-agenda-clockreport-mode (&optional with-filter)
+  "Toggle clocktable mode in an agenda buffer.
+With prefix arg WITH-FILTER, make the clocktable respect the current
+agenda filter."
+  (interactive "P")
   (org-agenda-check-type t 'agenda)
-  (setq org-agenda-clockreport-mode (not org-agenda-clockreport-mode))
+  (if with-filter
+      (setq org-agenda-clockreport-mode 'with-filter)
+    (setq org-agenda-clockreport-mode (not org-agenda-clockreport-mode)))
   (org-agenda-set-mode-name)
   (org-agenda-redo)
   (message "Clocktable mode is %s"
@@ -6199,7 +6214,10 @@ When called with a prefix argument, include all archive files as well."
 			" Archives"
 		      (format " :%s:" org-archive-tag))
 		  "")
-		(if org-agenda-clockreport-mode " Clock"   "")))
+		(if org-agenda-clockreport-mode
+		    (if (eq org-agenda-clockreport-mode 'with-filter)
+			" Clock{}" " Clock")
+		  "")))
   (force-mode-line-update))
 
 (defun org-agenda-post-command-hook ()

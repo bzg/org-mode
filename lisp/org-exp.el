@@ -1086,6 +1086,9 @@ on this string to produce the exported version."
       ;; Protect short examples marked by a leading colon
       (org-export-protect-colon-examples)
 
+      ;; Protected spaces
+      (org-export-convert-protected-spaces backend)
+
       ;; Normalize footnotes
       (when (plist-get parameters :footnotes)
 	(org-footnote-normalize nil t))
@@ -1535,6 +1538,26 @@ from the buffer."
       (end-of-line 1)
       (add-text-properties (point) (org-end-of-subtree t)
 			   '(org-protected t)))))
+
+(defun org-export-convert-protected-spaces (backend)
+  "Convert strings like \\____ to protected spaces in all backends."
+  (goto-char (point-min))
+  (while (re-search-forward "\\\\__+" nil t)
+    (org-if-unprotected-1
+     (replace-match
+      (org-add-props
+	  (cond
+	   ((eq backend 'latex)
+	    (format "\\hspace{%dex}" (- (match-end 0) (match-beginning 0))))
+	   ((eq backend 'html)
+	    (org-add-props (match-string 0) nil
+	      'org-whitespace (- (match-end 0) (match-beginning 0))))
+	   ;; ((eq backend 'docbook))
+	   ((eq backend 'ascii)
+	    (org-add-props (match-string 0) '(org-whitespace t)))
+	   (t (make-string (- (match-end 0) (match-beginning 0)) ?\ )))
+	  '(org-protected t))
+      t t))))
 
 (defun org-export-protect-verbatim ()
   "Mark verbatim snippets with the protection property."
