@@ -308,8 +308,8 @@ release:
 	make relup TAG=$(TAG)
 	make cleanrel
 	rm -rf org-$(TAG)
-	rm org-$(TAG)*.zip
-	rm org-$(TAG)*.tar.gz
+	rm -f org-$(TAG)*.zip
+	rm -f org-$(TAG)*.tar.gz
 	make pushreleasetag TAG=$(TAG)
 	git push -f origin maint
 	git checkout master
