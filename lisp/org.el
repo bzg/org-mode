@@ -7501,7 +7501,7 @@ If yes, remember the marker and the distance to BEG."
       (narrow-to-region
        (progn (org-back-to-heading t) (point))
        (progn (org-end-of-subtree t t)
-	      (if (org-on-heading-p) (backward-char 1))
+	      (if (and (org-on-heading-p) (not (eobp))) (backward-char 1))
 	      (point))))))
 
 (eval-when-compile
