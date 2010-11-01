@@ -1482,7 +1482,7 @@ from the buffer."
       (goto-char (point-min))
       (while (re-search-forward re-archive nil t)
 	(if (not (org-on-heading-p t))
-	    (org-end-of-subtree t)
+	    (goto-char (point-at-eol))
 	  (beginning-of-line 1)
 	  (setq a (if export-archived-trees
 		      (1+ (point-at-eol)) (point))
