@@ -35,6 +35,57 @@
 @end ifnottex
 @end macro
 
+@macro orgxcmd{key1,key2,command}
+@iftex
+@kindex \key1\
+@kindex \key2\
+@findex \command\
+@item @kbd{\key1\}
+@itemx @kbd{\key2\} @hskip 0pt plus 1filll @code{\command\}
+@end iftex
+@ifnottex
+@kindex \key1\
+@kindex \key2\
+@findex \command\
+@item @kbd{\key1\}
+@itemx @kbd{\key2\} @tie{}@tie{}@tie{}@tie{}(@code{\command\})
+@end ifnottex
+@end macro
+
+@macro orgxxcmd{key1,key2,command1,command2}
+@iftex
+@kindex \key1\
+@kindex \key2\
+@findex \command1\
+@findex \command2\
+@item @kbd{\key1\} @hskip 0pt plus 1filll @code{\command1\}
+@itemx @kbd{\key2\} @hskip 0pt plus 1filll @code{\command2\}
+@end iftex
+@ifnottex
+@kindex \key1\
+@kindex \key2\
+@findex \command1\
+@findex \command2\
+@item @kbd{\key1\} @tie{}@tie{}@tie{}@tie{}(@code{\command1\})
+@itemx @kbd{\key2\} @tie{}@tie{}@tie{}@tie{}(@code{\command2\})
+@end ifnottex
+@end macro
+
+@macro orgtxxcmd{text,key1,key2,command}
+@iftex
+@kindex \key1\
+@kindex \key2\
+@findex \command\
+@item @kbd{\text\} @hskip 0pt plus 1filll @code{\command\}
+@end iftex
+@ifnottex
+@kindex \key1\
+@kindex \key2\
+@findex \command\
+@item @kbd{\text\} @tie{}@tie{}@tie{}@tie{}(@code{\command\})
+@end ifnottex
+@end macro
+
 @macro orgkey{key}
 @kindex \key\
 @item @kbd{\key\}
@@ -5134,17 +5185,11 @@ instead.
 Access the agenda for the date given by the timestamp or -range at
 point (@pxref{Weekly/daily agenda}).
 @c
-@kindex S-@key{left}
-@kindex S-@key{right}
-@item S-@key{left}
-@itemx S-@key{right}
+@orgxxcmd{S-@key{left},S-@key{right},org-timestamp-down-day,org-timestamp-up-day}
 Change date at cursor by one day.  These key bindings conflict with
 shift-selection and related modes (@pxref{Conflicts}).
 @c
-@kindex S-@key{up}
-@kindex S-@key{down}
-@item S-@key{up}
-@itemx S-@key{down}
+@orgxxcmd{S-@key{up},S-@key{down},org-timestamp-up,org-timestamp-down-down}
 Change the item under the cursor in a timestamp.  The cursor can be on a
 year, month, day, hour or minute.  When the timestamp contains a time range
 like @samp{15:30-16:30}, modifying the first time will also shift the second,
@@ -5154,9 +5199,8 @@ timestamp, these same keys modify the priority of an item.
 (@pxref{Priorities}). The key bindings also conflict with shift-selection and
 related modes (@pxref{Conflicts}).
 @c
-@kindex C-c C-y
+@orgcmd{C-c C-y, org-evaluate-time-range}
 @cindex evaluate time range
-@item C-c C-y
 Evaluate a time range by computing the difference between start and end.
 With a prefix argument, insert result after the time range (in a table: into
 the following column).
@@ -5302,8 +5346,7 @@ customizing the variables @code{org-display-custom-times} and
 @code{org-time-stamp-custom-formats}.
 
 @table @kbd
-@kindex C-c C-x C-t
-@item C-c C-x C-t
+@orgcmd{C-c C-x C-t,org-toggle-time-stamp-overlays}
 Toggle the display of custom formats for dates and times.
 @end table
 
@@ -5419,8 +5462,7 @@ an item:
 
 @table @kbd
 @c
-@kindex C-c C-d
-@item C-c C-d
+@orgcmd{C-c C-d, org-deadline}
 Insert @samp{DEADLINE} keyword along with a stamp.  The insertion will happen
 in the line directly following the headline.  When called with a prefix arg,
 an existing deadline will be removed from the entry.  Depending on the
@@ -5430,8 +5472,7 @@ and @code{nologredeadline}}, a note will be taken when changing an existing
 deadline.
 @c FIXME Any CLOSED timestamp will be removed.????????
 @c
-@kindex C-c C-s
-@item C-c C-s
+@orgcmd{C-c C-s,org-schedule}
 Insert @samp{SCHEDULED} keyword along with a stamp.  The insertion will
 happen in the line directly following the headline.  Any CLOSED timestamp
 will be removed.  When called with a prefix argument, remove the scheduling
@@ -5441,18 +5482,16 @@ keywords @code{logredeadline}, @code{lognoteredeadline}, and
 @code{nologredeadline}}, a note will be taken when changing an existing
 scheduling time.
 @c
-@kindex C-c C-x C-k
+@orgcmd{C-c C-x C-k, org-mark-entry-for-agenda-action}
 @kindex k a
 @kindex k s
-@item C-c C-x C-k
 Mark the current entry for agenda action.  After you have marked the entry
 like this, you can open the agenda or the calendar to find an appropriate
 date.  With the cursor on the selected date, press @kbd{k s} or @kbd{k d} to
 schedule the marked item.
 @c
-@kindex C-c / d
+@orgcmd{C-c / d, org-check-deadlines}
 @cindex sparse tree, for deadlines
-@item C-c / d
 @vindex org-deadline-warning-days
 Create a sparse tree with all deadlines that are either past-due, or
 which will become due within @code{org-deadline-warning-days}.
@@ -5460,12 +5499,10 @@ With @kbd{C-u} prefix, show all deadlines in the file.  With a numeric
 prefix, check that many days.  For example, @kbd{C-1 C-c / d} shows
 all deadlines due tomorrow.
 @c
-@kindex C-c / b
-@item C-c / b
+@orgcmd{C-c / b, org-check-before-date}
 Sparse tree for deadlines and scheduled items before a given date.
 @c
-@kindex C-c / a
-@item C-c / a
+@orgcmd{C-c / a, org-check-after-date}
 Sparse tree for deadlines and scheduled items after a given date.
 @end table
 
@@ -5585,8 +5622,7 @@ what to do with it.
 @subsection Clocking commands
 
 @table @kbd
-@kindex C-c C-x C-i
-@item C-c C-x C-i
+@orgcmd{C-c C-x C-i, org-clock-in}
 @vindex org-clock-into-drawer
 Start the clock on the current item (clock-in).  This inserts the CLOCK
 keyword together with a timestamp.  If this is not the first clocking of
@@ -5616,8 +5652,8 @@ show all time clocked on this tasks today (see also the variable
 @code{auto} which is the default@footnote{See also the variable
 @code{org-clock-modeline-total}.}.@* Clicking with @kbd{mouse-1} onto the
 mode line entry will pop up a menu with clocking options.
-@kindex C-c C-x C-o
-@item C-c C-x C-o
+@c
+@orgcmd{C-c C-x C-o,org-clock-out}
 @vindex org-log-note-clock-out
 Stop the clock (clock-out).  This inserts another timestamp at the same
 location where the clock was last started.  It also directly computes
@@ -5626,29 +5662,24 @@ HH:MM}.  See the variable @code{org-log-note-clock-out} for the
 possibility to record an additional note together with the clock-out
 timestamp@footnote{The corresponding in-buffer setting is:
 @code{#+STARTUP: lognoteclock-out}}.
-@kindex C-c C-x C-e
-@item C-c C-x C-e
+@orgcmd{C-c C-x C-e,org-clock-modify-effort-estimate}
 Update the effort estimate for the current clock task.
 @kindex C-c C-y
 @kindex C-c C-c
-@item C-c C-y @ @ @r{or}@ @ C-c C-c
+@orgtxxcmd{C-c C-y @ @ @r{or}@ @ C-c C-c,C-c C-y,C-c C-c,org-evaluate-time-range}
 Recompute the time interval after changing one of the timestamps.  This
 is only necessary if you edit the timestamps directly.  If you change
 them with @kbd{S-@key{cursor}} keys, the update is automatic.
-@kindex C-c C-t
-@item C-c C-t
+@orgcmd{C-c C-t, org-todo}
 Changing the TODO state of an item to DONE automatically stops the clock
 if it is running in this same item.
-@kindex C-c C-x C-x
-@item C-c C-x C-x
+@orgcmd{C-c C-x C-x, org-clock-cancel}
 Cancel the current clock.  This is useful if a clock was started by
 mistake, or if you ended up working on something else.
-@kindex C-c C-x C-j
-@item C-c C-x C-j
+@orgcmd{C-c C-x C-j,org-clock-goto}
 Jump to the headline of the currently clocked in task.  With a @kbd{C-u}
 prefix arg, select the target task from a list of recently clocked tasks.
-@kindex C-c C-x C-d
-@item C-c C-x C-d
+@orgcmd{C-c C-x C-d, org-clock-display}
 @vindex org-remove-highlights-with-change
 Display time summaries for each subtree in the current buffer.  This
 puts overlays at the end of each headline, showing the total time
@@ -5672,27 +5703,19 @@ inormation.  Such a report is called a @emph{clock table}, because it is
 formatted as one or several Org tables.
 
 @table @kbd
-@kindex C-c C-x C-r
-@item C-c C-x C-r
+@orgcmd{C-c C-x C-r, org-clock-report}
 Insert a dynamic block (@pxref{Dynamic blocks}) containing a clock
 report as an Org-mode table into the current file.  When the cursor is
 at an existing clock table, just update it.  When called with a prefix
 argument, jump to the first clock report in the current document and
 update it.
-@kindex C-c C-c
-@item C-c C-c
-@kindex C-c C-x C-u
-@itemx C-c C-x C-u
+@orgxcmd{C-c C-c, C-c C-x C-u, org-dblock-update}
 Update dynamic block at point.  The cursor needs to be in the
 @code{#+BEGIN} line of the dynamic block.
-@kindex C-u C-c C-x C-u
-@item C-u C-c C-x C-u
+@orgkey{C-u C-c C-x C-u}
 Update all dynamic blocks (@pxref{Dynamic blocks}).  This is useful if
 you have several clock table blocks in a buffer.
-@kindex S-@key{left}
-@kindex S-@key{right}
-@item S-@key{left}
-@itemx S-@key{right}
+@orgxcmd{S-@key{left},S-@key{right},org-clocktable-try-shift}
 Shift the current @code{:block} interval and update the table.  The cursor
 needs to be in the @code{#+BEGIN: clocktable} line for this command.  If
 @code{:block} is @code{today}, it will be shifted to @code{today-1} etc.
@@ -5884,13 +5907,11 @@ used with the variable @code{org-effort-property}.}.  You can set the effort
 for an entry with the following commands:
 
 @table @kbd
-@kindex C-c C-x e
-@item C-c C-x e
+@orgcmd{C-c C-x e, org-set-effort}
 Set the effort estimate for the current entry.  With a numeric prefix
 argument, set it to the NTH allowed value (see below).  This command is also
 accessible from the agenda with the @kbd{e} key.
-@kindex C-c C-x C-e
-@item C-c C-x C-e
+@orgcmd{C-c C-x C-e, org-clock-modify-effort-estimate}
 Modify the effort estimate of the item currently being clocked.
 @end table
 
@@ -5942,29 +5963,27 @@ be useful to have access to times relative to a starting time.  Org provides
 such a relative timer and make it easy to create timed notes.
 
 @table @kbd
-@kindex C-c C-x .
-@item C-c C-x .
+@orgcmd{C-c C-x .,org-timer}
 Insert a relative time into the buffer.  The first time you use this, the
 timer will be started.  When called with a prefix argument, the timer is
 restarted.
-@kindex C-c C-x -
-@item C-c C-x -
+@orgcmd{C-c C-x -,org-timer-item}
 Insert a description list item with the current relative time.  With a prefix
 argument, first reset the timer to 0.
-@kindex M-@key{RET}
-@item M-@key{RET}
+@orgcmd{M-@key{RET},org-insert-heading}
 Once the timer list is started, you can also use @kbd{M-@key{RET}} to insert
 new timer items.
+@c for key sequences with a comma, command name macros fail :(
 @kindex C-c C-x ,
 @item C-c C-x ,
-Pause the timer, or continue it if it is already paused.
+Pause the timer, or continue it if it is already paused
+(@command{org-timer-pause-or-continue}).
 @c removed the sentence because it is redundant to the following item
 @kindex C-u C-c C-x ,
 @item C-u C-c C-x ,
 Stop the timer.  After this, you can only start a new timer, not continue the
 old one.  This command also removes the timer from the mode line.
-@kindex C-c C-x 0
-@item C-c C-x 0
+@orgcmd{C-c C-x 0,org-timer-start}
 Reset the timer without inserting anything into the buffer.  By default, the
 timer is reset to 0.  When called with a @kbd{C-u} prefix, reset the timer to
 specific starting offset.  The user is prompted for the offset, with a
