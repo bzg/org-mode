@@ -1903,6 +1903,7 @@ from the dynamic block defintion."
 	 (rm-file-column (plist-get params :one-file-with-archives))
 	 (indent (plist-get params :indent))
 	 link range-text total-time tbl level hlc formula pcol
+	 file-time entries entry headline
 	 recalc content narrow-cut-p)
 
     ;; Implement abbreviations

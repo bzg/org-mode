@@ -5796,7 +5796,7 @@ A summary of the current subtree with % times would be
 A horizontally compact representation of everything clocked during last week
 would be
 @example
-#+BEGIN: clocktable :block lastweek :indent t :narrow 40! :tcolumn 1
+#+BEGIN: clocktable :scope agenda :block lastweek :compact t
 #+END: clocktable
 @end example
 
