@@ -197,7 +197,7 @@ files."
 (defun org-test-current-defun ()
   "Test the current function."
   (interactive)
-  (ert (car (which-function))))
+  (ert (which-function)))
 
 (defun org-test-run-all-tests ()
   "Run all defined tests matching \"\\(org\\|ob\\)\".
