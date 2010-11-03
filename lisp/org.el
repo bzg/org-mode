@@ -18665,7 +18665,7 @@ which make use of the date at the cursor."
 	 (org-drawer-regexp (or org-drawer-regexp "\000"))
 	 (inline-task-p (and (featurep 'org-inlinetask)
 			     (org-inlinetask-in-task-p)))
-	 column bpos bcol tpos tcol bullet btype bullet-type)
+	 column bpos bcol tpos tcol)
     ;; Find the previous relevant line
     (beginning-of-line 1)
     (cond
@@ -18700,22 +18700,11 @@ which make use of the date at the cursor."
       (looking-at "[ \t]*\\(\\S-+\\)[ \t]*\\(\\(:?\\[@\\(:?start:\\)?[0-9]+\\][ \t]*\\)?\\[[- X]\\][ \t]*\\|.*? :: \\)?")
       (setq bpos (match-beginning 1) tpos (match-end 0)
 	    bcol (progn (goto-char bpos) (current-column))
-	    tcol (progn (goto-char tpos) (current-column))
-	    bullet (match-string 1)
-	    bullet-type (if (string-match "[0-9]" bullet) "n" bullet))
+	    tcol (progn (goto-char tpos) (current-column)))
       (if (> tcol (+ bcol org-description-max-indent))
 	  (setq tcol (+ bcol 5)))
-      (if (not itemp)
-	  (setq column tcol)
-	(beginning-of-line 1)
-	(goto-char pos)
-	(if (looking-at "\\S-")
-	    (progn
-	      (looking-at "[ \t]*\\(\\S-+\\)[ \t]*")
-	      (setq bullet (match-string 1)
-		    btype (if (string-match "[0-9]" bullet) "n" bullet))
-	      (setq column (if (equal btype bullet-type) bcol tcol)))
-	  (setq column (org-get-indentation)))))
+      (goto-char pos)
+      (setq column (if itemp (org-get-indentation) tcol)))
      ;; This line has nothing special, look upside to get a clue about
      ;; what to do.
      (t
