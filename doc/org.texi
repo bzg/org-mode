@@ -12131,7 +12131,7 @@ expanded before the block is evaluated, tangled or exported.
 The default.  No ``noweb'' syntax specific action is taken on evaluating
 code blocks, However, noweb references will still be expanded during
 tangling.
-@item @code{yes}
+@item @code{tangle}
 All ``noweb'' syntax references in the body of the code block will be
 expanded before the block is tangled, however ``noweb'' references will not
 be expanded when the block is evaluated or exported.
