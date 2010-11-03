@@ -15025,7 +15025,7 @@ D may be an absolute day number, or a calendar-type list (month day year)."
 			      (org-current-line)
 			      (buffer-file-name) sexp)
                      (sleep-for 2))))))
-    (cond ((stringp result) result)
+    (cond ((stringp result) (split-string result "; "))
 	  ((and (consp result)
 		(not (consp (cdr result)))
 		(stringp (cdr result))) (cdr result))
