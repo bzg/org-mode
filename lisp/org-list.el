@@ -2029,7 +2029,7 @@ sublevels as a list of strings."
     (while (org-search-forward-unenclosed org-item-beginning-re end t)
       (save-excursion
 	(beginning-of-line)
-	(setq ltype (cond ((looking-at-p "^[ \t]*[0-9]") 'ordered)
+	(setq ltype (cond ((org-looking-at-p "^[ \t]*[0-9]") 'ordered)
 			  ((org-at-item-description-p) 'descriptive)
 			  (t 'unordered))))
       (let* ((indent1 (org-get-indentation))
