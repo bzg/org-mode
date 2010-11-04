@@ -53,6 +53,11 @@
 @item @kbd{\key\}
 @end macro
 
+@macro xorgkey{key}
+@kindex \key\
+@itemx @kbd{\key\}
+@end macro
+
 @c one key with a command
 @c   Inserts:    @item KEY               COMMAND
 @macro orgcmd{key,command}
@@ -9328,8 +9333,7 @@ In particular, note that you can place commonly-used (export) options in
 a separate file which can be included using @code{#+SETUPFILE}.
 
 @table @kbd
-@kindex C-c C-e t
-@item C-c C-e t
+@orgcmd{C-c C-e t,org-insert-export-options-template}
 Insert template with export options, see example below.
 @end table
 
@@ -9441,8 +9445,7 @@ contains one outline tree, the first heading is used as document title and
 the subtrees are exported.
 
 @table @kbd
-@kindex C-c C-e
-@item C-c C-e
+@orgcmd{C-c C-e,org-export}
 @vindex org-export-run-in-background
 Dispatcher for export and publishing commands.  Displays a help-window
 listing the additional key(s) needed to launch an export or publishing
@@ -9450,12 +9453,10 @@ command.  The prefix arg is passed through to the exporter.  A double prefix
 @kbd{C-u C-u} causes most commands to be executed in the background, in a
 separate Emacs process@footnote{To make this behavior the default, customize
 the variable @code{org-export-run-in-background}.}.
-@kindex C-c C-e v
-@item C-c C-e v
+@orgcmd{C-c C-e v,org-export-visible}
 Like @kbd{C-c C-e}, but only export the text that is currently visible
 (i.e. not hidden by outline visibility).
-@kindex C-u C-u C-c C-e
-@item C-u C-u C-c C-e
+@orgcmd{C-u C-u C-c C-e,org-export}
 @vindex org-export-run-in-background
 Call an the exporter, but reverse the setting of
 @code{org-export-run-in-background}, i.e. request background processing if
@@ -9476,8 +9477,7 @@ with special characters and symbols available in these encodings.
 @cindex active region
 @cindex transient-mark-mode
 @table @kbd
-@kindex C-c C-e a
-@item C-c C-e a
+@orgcmd{C-c C-e a,org-export-as-ascii}
 @cindex property, EXPORT_FILE_NAME
 Export as ASCII file.  For an Org file, @file{myfile.org}, the ASCII file
 will be @file{myfile.txt}.  The file will be overwritten without
@@ -9488,21 +9488,15 @@ current subtree, use @kbd{C-c @@}.}, the tree head will
 become the document title.  If the tree head entry has or inherits an
 @code{EXPORT_FILE_NAME} property, that name will be used for the
 export.
-@kindex C-c C-e A
-@item C-c C-e A
+@orgcmd{C-c C-e A,org-export-as-ascii-to-buffer}
 Export to a temporary buffer, do not create a file.
-@kindex C-c C-e n
-@kindex C-c C-e N
-@item C-c C-e n @ @ @r{and} @ @ C-c C-e N
+@orgcmd{C-c C-e n,org-export-as-latin1}
+@xorgcmd{C-c C-e N,org-export-as-latin1-to-buffer}
 Like the above commands, but use Latin-1 encoding.
-@kindex C-c C-e u
-@kindex C-c C-e U
-@item C-c C-e u @ @ @r{and} @ @ C-c C-e U
+@orgcmd{C-c C-e u,org-export-as-utf8}
+@xorgcmd{C-c C-e U,org-export-as-utf8-to-buffer}
 Like the above commands, but use UTF-8 encoding.
-@kindex C-c C-e v a
-@kindex C-c C-e v n
-@kindex C-c C-e v u
-@item C-c C-e v a @ @ @r{and} @ @ C-c C-e v n @ @ @r{and} @ @ C-c C-e v u
+@item C-c C-e v a/n/u
 Export only the visible part of the document.
 @end table
 
@@ -9557,8 +9551,7 @@ language, but with additional support for tables.
 @cindex active region
 @cindex transient-mark-mode
 @table @kbd
-@kindex C-c C-e h
-@item C-c C-e h
+@orgcmd{C-c C-e h,org-export-as-html}
 @cindex property, EXPORT_FILE_NAME
 Export as HTML file @file{myfile.html}.  For an Org file @file{myfile.org},
 the ASCII file will be @file{myfile.html}.  The file will be overwritten
@@ -9568,25 +9561,15 @@ exported. If the selected region is a single tree@footnote{To select the
 current subtree, use @kbd{C-c @@}.}, the tree head will become the document
 title.  If the tree head entry has, or inherits, an @code{EXPORT_FILE_NAME}
 property, that name will be used for the export.
-@kindex C-c C-e b
-@item C-c C-e b
+@orgcmd{C-c C-e b,org-export-as-html-and-open}
 Export as HTML file and immediately open it with a browser.
-@kindex C-c C-e H
-@item C-c C-e H
+@orgcmd{C-c C-e H,org-export-as-html-to-buffer}
 Export to a temporary buffer, do not create a file.
-@kindex C-c C-e R
-@item C-c C-e R
+@orgcmd{C-c C-e R,org-export-region-as-html}
 Export the active region to a temporary buffer.  With a prefix argument, do
 not produce the file header and footer, but just the plain HTML section for
 the region.  This is good for cut-and-paste operations.
-@kindex C-c C-e v h
-@kindex C-c C-e v b
-@kindex C-c C-e v H
-@kindex C-c C-e v R
-@item C-c C-e v h
-@item C-c C-e v b
-@item C-c C-e v H
-@item C-c C-e v R
+@item C-c C-e v h/b/H/R
 Export only the visible part of the document.
 @item M-x org-export-region-as-html
 Convert the region to HTML under the assumption that it was Org-mode
@@ -9948,8 +9931,7 @@ linked.
 @cindex active region
 @cindex transient-mark-mode
 @table @kbd
-@kindex C-c C-e l
-@item C-c C-e l
+@orgcmd{C-c C-e l,org-export-as-latex}
 @cindex property EXPORT_FILE_NAME
 Export as La@TeX{} file @file{myfile.tex}.  For an Org file
 @file{myfile.org}, the ASCII file will be @file{myfile.tex}.  The file will
@@ -9959,13 +9941,9 @@ exported. If the selected region is a single tree@footnote{To select the
 current subtree, use @kbd{C-c @@}.}, the tree head will become the document
 title.  If the tree head entry has or inherits an @code{EXPORT_FILE_NAME}
 property, that name will be used for the export.
-@kindex C-c C-e L
-@item C-c C-e L
+@orgcmd{C-c C-e L,org-export-as-latex-to-buffer}
 Export to a temporary buffer, do not create a file.
-@kindex C-c C-e v l
-@kindex C-c C-e v L
-@item C-c C-e v l
-@item C-c C-e v L
+@item C-c C-e v l/L 
 Export only the visible part of the document.
 @item M-x org-export-region-as-latex
 Convert the region to La@TeX{} under the assumption that it was Org-mode
@@ -9974,11 +9952,9 @@ buffer.
 @item M-x org-replace-region-by-latex
 Replace the active region (assumed to be in Org-mode syntax) by La@TeX{}
 code.
-@kindex C-c C-e p
-@item C-c C-e p
+@orgcmd{C-c C-e p,org-export-as-pdf}
 Export as La@TeX{} and then process to PDF.
-@kindex C-c C-e d
-@item C-c C-e d
+@orgcmd{C-c C-e d,org-export-as-pdf-and-open}
 Export as La@TeX{} and then process to PDF, then open the resulting PDF file.
 @end table
 
@@ -10199,8 +10175,7 @@ support with
 @end example
 
 @table @kbd
-@kindex C-c C-b
-@item C-c C-b
+@orgcmd{C-c C-b,org-beamer-select-environment}
 In @code{org-beamer-mode}, this key offers fast selection of a beamer
 environment or the @code{BEAMER_col} property.
 @end table
@@ -10278,8 +10253,7 @@ Currently DocBook exporter only supports DocBook V5.0.
 @cindex active region
 @cindex transient-mark-mode
 @table @kbd
-@kindex C-c C-e D
-@item C-c C-e D
+@orgcmd{C-c C-e D,org-export-as-docbook}
 @cindex property EXPORT_FILE_NAME
 Export as DocBook file.  For an Org file, @file{myfile.org}, the DocBook XML
 file will be @file{myfile.xml}.  The file will be overwritten without
@@ -10289,8 +10263,7 @@ exported.  If the selected region is a single tree@footnote{To select the
 current subtree, use @kbd{C-c @@}.}, the tree head will become the document
 title.  If the tree head entry has, or inherits, an @code{EXPORT_FILE_NAME}
 property, that name will be used for the export.
-@kindex C-c C-e V
-@item C-c C-e V
+@orgcmd{C-c C-e V,org-export-as-docbook-pdf-and-open}
 Export as DocBook file, process to PDF, then open the resulting PDF file.
 
 @vindex org-export-docbook-xslt-proc-command
@@ -10307,8 +10280,7 @@ variable @code{org-export-docbook-xslt-stylesheet}, which needs to be set by
 the user.  You can also overrule this global setting on a per-file basis by
 adding an in-buffer setting @code{#+XSLT:} to the Org file.
 
-@kindex C-c C-e v D
-@item C-c C-e v D
+@orgkey{C-c C-e v D}
 Export only the visible part of the document.
 @end table
 
@@ -10472,12 +10444,10 @@ all the nodes.
 @subsection TaskJuggler export commands
 
 @table @kbd
-@kindex C-c C-e j
-@item C-c C-e j
+@orgcmd{C-c C-e j,org-export-as-taskjuggler}
 Export as TaskJuggler file.
 
-@kindex C-c C-e J
-@item C-c C-e J
+@orgcmd{C-c C-e J,org-export-as-taskjuggler-and-open}
 Export as TaskJuggler file and then open the file with TaskJugglerUI.
 @end table
 
@@ -10587,8 +10557,7 @@ For more information and examples see the Org-taskjuggler tutorial at
 The Freemind exporter was written by Lennart Borgman.
 
 @table @kbd
-@kindex C-c C-e m
-@item C-c C-e m
+@orgcmd{C-c C-e m,org-export-as-freemind}
 Export as Freemind mind map @file{myfile.mm}.
 @end table
 
@@ -10601,11 +10570,9 @@ Currently, this exporter only handles the general outline structure and
 does not interpret any additional Org-mode features.
 
 @table @kbd
-@kindex C-c C-e x
-@item C-c C-e x
+@orgcmd{C-c C-e x,org-export-as-xoxo}
 Export as XOXO file @file{myfile.html}.
-@kindex C-c C-e v
-@item C-c C-e v x
+@orgkey{C-c C-e v x}
 Export only the visible part of the document.
 @end table
 
@@ -10648,18 +10615,15 @@ In this way the UID remains unique, but a synchronization program can still
 figure out from which entry all the different instances originate.
 
 @table @kbd
-@kindex C-c C-e i
-@item C-c C-e i
+@orgcmd{C-c C-e i,org-export-icalendar-this-file}
 Create iCalendar entries for the current file and store them in the same
 directory, using a file extension @file{.ics}.
-@kindex C-c C-e I
-@item C-c C-e I
+@orgcmd{C-c C-e I, org-export-icalendar-all-agenda-files}
 @vindex org-agenda-files
 Like @kbd{C-c C-e i}, but do this for all files in
 @code{org-agenda-files}.  For each of these files, a separate iCalendar
 file will be written.
-@kindex C-c C-e c
-@item C-c C-e c
+@orgcmd{C-c C-e c,org-export-icalendar-combine-agenda-files}
 @vindex org-combined-agenda-icalendar-file
 Create a single large iCalendar file from all files in
 @code{org-agenda-files} and write it to the file given by
@@ -11171,17 +11135,13 @@ right place on the web server, and publishing images to it.
 Once properly configured, Org can publish with the following commands:
 
 @table @kbd
-@kindex C-c C-e C
-@item C-c C-e C
+@orgcmd{C-c C-e X,org-publish}
 Prompt for a specific project and publish all files that belong to it.
-@kindex C-c C-e P
-@item C-c C-e P
+@orgcmd{C-c C-e P,org-publish-current-project}
 Publish the project containing the current file.
-@kindex C-c C-e F
-@item C-c C-e F
+@orgcmd{C-c C-e F,org-publish-current-file}
 Publish only the current file.
-@kindex C-c C-e E
-@item C-c C-e E
+@orgcmd{C-c C-e E,org-publish-all}
 Publish every project.
 @end table
 
@@ -13344,12 +13304,10 @@ these tables directly in the buffer.  Instead, you need to use the command
 @kbd{C-c '} to edit them, similar to source code snippets.
 
 @table @kbd
-@kindex C-c '
-@item C-c '
+@orgcmd{C-c ',org-edit-special}
 Edit a @file{table.el} table.  Works when the cursor is in a table.el table.
 @c
-@kindex C-c ~
-@item C-c ~
+@orgcmd{C-c ~,org-table-create-with-table.el}
 Insert a @file{table.el} table.  If there is already a table at point, this
 command converts it between the @file{table.el} format and the Org-mode
 format.  See the documentation string of the command
@@ -13987,11 +13945,9 @@ the content of the block.
 Dynamic blocks are updated with the following commands
 
 @table @kbd
-@kindex C-c C-x C-u
-@item C-c C-x C-u
+@orgcmd{C-c C-x C-u,org-dblock-update}
 Update dynamic block at point.
-@kindex C-u C-c C-x C-u
-@item C-u C-c C-x C-u
+@orgkey{C-u C-c C-x C-u}
 Update all dynamic blocks in the current file.
 @end table
 
