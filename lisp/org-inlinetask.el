@@ -183,15 +183,13 @@ Either remove headline and meta data, or do special formatting."
 	  (setq headline (concat
 			  (if (match-end 2)
 			      (concat
-			       (org-add-props
-				   (format
-				    "@<span class=\"%s %s\"> %s@</span>"
-				    (if (member (match-string 2 headline)
-						org-done-keywords)
-					"done" "todo")
-				    (match-string 2 headline)
-				    (match-string 2 headline))
-				   nil 'org-protected t)
+			       (format
+				"@<span class=\"%s %s\"> %s@</span>"
+				(if (member (match-string 2 headline)
+					    org-done-keywords)
+				    "done" "todo")
+				(match-string 2 headline)
+				(match-string 2 headline))
 			       " ") "")
 			  (match-string 4 headline)))
 	  (when content
@@ -200,11 +198,11 @@ Either remove headline and meta data, or do special formatting."
 	      (if (string-match "[ \t\n]+\\'" content)
 		  (setq content (substring content 0 (match-beginning 0))))
 	      (setq content (org-remove-indentation content))
-	      (if latexp (setq content (concat "\\quad \\\\\n" content)))))
+	      (if latexp (setq content (concat "\\nbsp\\\\ \\quad " content)))))
 	  (insert (make-string (org-inlinetask-get-current-indentation) ?\ )
-		  "- ")
+		  "-  ")
 	  (setq indent (make-string (current-column) ?\ ))
-	  (insert headline " ::")
+	  (insert headline " :: ")
 	  (if content
 	      (insert (if htmlp " " (concat "\n" indent))
 		      (mapconcat 'identity (org-split-string content "\n")
