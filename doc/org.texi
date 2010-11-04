@@ -21,91 +21,231 @@
 @c %**end of header
 @finalout
 
-@c Macro definitions
-@macro orgcmd{key,command}
-@iftex
-@kindex \key\
-@findex \command\
-@item @kbd{\key\} @hskip 0pt plus 1filll @code{\command\}
-@end iftex
-@ifnottex
-@kindex \key\
-@findex \command\
-@item @kbd{\key\} @tie{}@tie{}@tie{}@tie{}(@code{\command\})
-@end ifnottex
-@end macro
 
-@macro orgxcmd{key1,key2,command}
-@iftex
-@kindex \key1\
-@kindex \key2\
-@findex \command\
-@item @kbd{\key1\}
-@itemx @kbd{\key2\} @hskip 0pt plus 1filll @code{\command\}
-@end iftex
-@ifnottex
-@kindex \key1\
-@kindex \key2\
-@findex \command\
-@item @kbd{\key1\}
-@itemx @kbd{\key2\} @tie{}@tie{}@tie{}@tie{}(@code{\command\})
-@end ifnottex
-@end macro
+@c -----------------------------------------------------------------------------
 
-@macro orgxxcmd{key1,key2,command1,command2}
-@iftex
-@kindex \key1\
-@kindex \key2\
-@findex \command1\
-@findex \command2\
-@item @kbd{\key1\} @hskip 0pt plus 1filll @code{\command1\}
-@itemx @kbd{\key2\} @hskip 0pt plus 1filll @code{\command2\}
-@end iftex
-@ifnottex
-@kindex \key1\
-@kindex \key2\
-@findex \command1\
-@findex \command2\
-@item @kbd{\key1\} @tie{}@tie{}@tie{}@tie{}(@code{\command1\})
-@itemx @kbd{\key2\} @tie{}@tie{}@tie{}@tie{}(@code{\command2\})
-@end ifnottex
-@end macro
+@c Macro definitions for commands and keys
+@c =======================================
 
-@macro orgtxxcmd{text,key1,key2,command}
-@iftex
-@kindex \key1\
-@kindex \key2\
-@findex \command\
-@item @kbd{\text\} @hskip 0pt plus 1filll @code{\command\}
-@end iftex
-@ifnottex
-@kindex \key1\
-@kindex \key2\
-@findex \command\
-@item @kbd{\text\} @tie{}@tie{}@tie{}@tie{}(@code{\command\})
-@end ifnottex
-@end macro
+@c The behavior of the key/command macros will depend on the flag cmdnames
+@c When set, commands names are shown.  When clear, they are not shown.
 
+@set cmdnames
+
+@c Below we define the following macros for Org key tables:
+
+@c orgkey{key}                        A key item                     
+@c orgcmd{key,cmd}                    Key with command name
+@c xorgcmd{key,cmmand}                Key with command name as @itemx
+@c orgcmdnki{key,cmd}                 Like orgcmd, but do not index the key
+@c orgcmdtkc{text,key,cmd}            Like orgcmd,special text instead of key
+@c orgcmdkkc{key1,key2,cmd}           Two keys with one command name, use "or"
+@c orgcmdkxkc{key1,key2,cmd}          Two keys with one command name, but
+@c                                    different functions, so format as @itemx
+@c orgcmdkskc{key1,key2,cmd}          Same as orgcmdkkc, but use "or short"
+@c xorgcmdkskc{key1,key2,cmd}         Same as previous, but use @itemx
+@c orgcmdkkcc{key1,key2,cmd1,cmd2}    Two keys and two commands
+
+@c a key but no command
+@c    Inserts:    @item key
 @macro orgkey{key}
 @kindex \key\
 @item @kbd{\key\}
 @end macro
 
+@c one key with a command
+@c   Inserts:    @item KEY               COMMAND
+@macro orgcmd{key,command}
+@ifset cmdnames
+@kindex \key\
+@findex \command\
+@iftex
+@item @kbd{\key\} @hskip 0pt plus 1filll @code{\command\}
+@end iftex
+@ifnottex
+@item @kbd{\key\} @tie{}@tie{}@tie{}@tie{}(@code{\command\})
+@end ifnottex
+@end ifset
+@ifclear cmdnames
+@kindex \key\
+@item @kbd{\key\}
+@end ifclear
+@end macro
+
+@c One key with one command, formatted using @itemx
+@c   Inserts:    @itemx KEY               COMMAND
+@macro xorgcmd{key,command}
+@ifset cmdnames
+@kindex \key\
+@findex \command\
+@iftex
+@itemx @kbd{\key\} @hskip 0pt plus 1filll @code{\command\}
+@end iftex
+@ifnottex
+@itemx @kbd{\key\} @tie{}@tie{}@tie{}@tie{}(@code{\command\})
+@end ifnottex
+@end ifset
+@ifclear cmdnames
+@kindex \key\
+@itemx @kbd{\key\}
+@end ifclear
+@end macro
+
+@c one key with a command, bit do not index the key
+@c   Inserts:    @item KEY               COMMAND
+@macro orgcmdnki{key,command}
+@ifset cmdnames
+@findex \command\
+@iftex
+@item @kbd{\key\} @hskip 0pt plus 1filll @code{\command\}
+@end iftex
+@ifnottex
+@item @kbd{\key\} @tie{}@tie{}@tie{}@tie{}(@code{\command\})
+@end ifnottex
+@end ifset
+@ifclear cmdnames
+@item @kbd{\key\}
+@end ifclear
+@end macro
+
+@c one key with a command, and special text to replace key in item
+@c   Inserts:    @item TEXT                    COMMAND
+@macro orgcmdtkc{text,key,command}
+@ifset cmdnames
+@kindex \key\
+@findex \command\
+@iftex
+@item @kbd{\text\} @hskip 0pt plus 1filll @code{\command\}
+@end iftex
+@ifnottex
+@item @kbd{\text\} @tie{}@tie{}@tie{}@tie{}(@code{\command\})
+@end ifnottex
+@end ifset
+@ifclear cmdnames
+@kindex \key\
+@item @kbd{\text\}
+@end ifclear
+@end macro
+
+@c two keys with one command
+@c   Inserts:    @item KEY1 or KEY2            COMMAND
+@macro orgcmdkkc{key1,key2,command}
+@ifset cmdnames
+@kindex \key1\
+@kindex \key2\
+@findex \command\
+@iftex
+@item @kbd{\key1\} @ @r{or} @ @kbd{\key2\} @hskip 0pt plus 1filll @code{\command\}
+@end iftex
+@ifnottex
+@item @kbd{\key1\} @ @r{or} @ @kbd{\key2\} @tie{}@tie{}@tie{}@tie{}(@code{\command\})
+@end ifnottex
+@end ifset
+@ifclear cmdnames
+@kindex \key1\
+@kindex \key2\
+@item @kbd{\key1\} @ @r{or} @ @kbd{\key2\}
+@end ifclear
+@end macro
+
+@c Two keys with one command name, but different functions, so format as
+@c @itemx
+@c   Inserts:    @item KEY1
+@c               @itemx KEY2                COMMAND
+@macro orgcmdkxkc{key1,key2,command}
+@ifset cmdnames
+@kindex \key1\
+@kindex \key2\
+@findex \command\
+@iftex
+@item @kbd{\key1\}
+@itemx @kbd{\key2\} @hskip 0pt plus 1filll @code{\command\}
+@end iftex
+@ifnottex
+@item @kbd{\key1\}
+@itemx @kbd{\key2\} @tie{}@tie{}@tie{}@tie{}(@code{\command\})
+@end ifnottex
+@end ifset
+@ifclear cmdnames
+@kindex \key1\
+@kindex \key2\
+@item @kbd{\key1\}
+@itemx @kbd{\key2\}
+@end ifclear
+@end macro
+
+@c Same as previous, but use "or short"
+@c   Inserts:    @item KEY1 or short KEY2            COMMAND
+@macro orgcmdkskc{key1,key2,command}
+@ifset cmdnames
+@kindex \key1\
+@kindex \key2\
+@findex \command\
+@iftex
+@item @kbd{\key1\} @ @r{or short} @ @kbd{\key2\} @hskip 0pt plus 1filll @code{\command\}
+@end iftex
+@ifnottex
+@item @kbd{\key1\} @ @r{or short} @ @kbd{\key2\} @tie{}@tie{}@tie{}@tie{}(@code{\command\})
+@end ifnottex
+@end ifset
+@ifclear cmdnames
+@kindex \key1\
+@kindex \key2\
+@item @kbd{\key1\} @ @r{or short} @ @kbd{\key2\}
+@end ifclear
+@end macro
+
+@c Same as previous, but use @itemx
+@c   Inserts:    @itemx KEY1 or short KEY2            COMMAND
+@macro xorgcmdkskc{key1,key2,command}
+@ifset cmdnames
+@kindex \key1\
+@kindex \key2\
+@findex \command\
+@iftex
+@itemx @kbd{\key1\} @ @r{or short} @ @kbd{\key2\} @hskip 0pt plus 1filll @code{\command\}
+@end iftex
+@ifnottex
+@itemx @kbd{\key1\} @ @r{or short} @ @kbd{\key2\} @tie{}@tie{}@tie{}@tie{}(@code{\command\})
+@end ifnottex
+@end ifset
+@ifclear cmdnames
+@kindex \key1\
+@kindex \key2\
+@itemx @kbd{\key1\} @ @r{or short} @ @kbd{\key2\}
+@end ifclear
+@end macro
+
+@c two keys with two commands
+@c   Inserts:    @item KEY1                        COMMAND1
+@c               @itemx KEY2                       COMMAND2
+@macro orgcmdkkcc{key1,key2,command1,command2}
+@ifset cmdnames
+@kindex \key1\
+@kindex \key2\
+@findex \command1\
+@findex \command2\
+@iftex
+@item @kbd{\key1\} @hskip 0pt plus 1filll @code{\command1\}
+@itemx @kbd{\key2\} @hskip 0pt plus 1filll @code{\command2\}
+@end iftex
+@ifnottex
+@item @kbd{\key1\} @tie{}@tie{}@tie{}@tie{}(@code{\command1\})
+@itemx @kbd{\key2\} @tie{}@tie{}@tie{}@tie{}(@code{\command2\})
+@end ifnottex
+@end ifset
+@ifclear cmdnames
+@kindex \key1\
+@kindex \key2\
+@item @kbd{\key1\}
+@itemx @kbd{\key2\}
+@end ifclear
+@end macro
+@c -----------------------------------------------------------------------------
+
 @iftex
 @c @hyphenation{time-stamp time-stamps time-stamp-ing time-stamp-ed}
 @end iftex
-@macro Ie {}
-I.e.,
-@end macro
-@macro ie {}
-i.e.,
-@end macro
-@macro Eg {}
-E.g.,
-@end macro
-@macro eg {}
-e.g.,
-@end macro
 
 @c Subheadings inside a table.
 @macro tsubheading{text}
@@ -5185,11 +5325,11 @@ instead.
 Access the agenda for the date given by the timestamp or -range at
 point (@pxref{Weekly/daily agenda}).
 @c
-@orgxxcmd{S-@key{left},S-@key{right},org-timestamp-down-day,org-timestamp-up-day}
+@orgcmdkkcc{S-@key{left},S-@key{right},org-timestamp-down-day,org-timestamp-up-day}
 Change date at cursor by one day.  These key bindings conflict with
 shift-selection and related modes (@pxref{Conflicts}).
 @c
-@orgxxcmd{S-@key{up},S-@key{down},org-timestamp-up,org-timestamp-down-down}
+@orgcmdkkcc{S-@key{up},S-@key{down},org-timestamp-up,org-timestamp-down-down}
 Change the item under the cursor in a timestamp.  The cursor can be on a
 year, month, day, hour or minute.  When the timestamp contains a time range
 like @samp{15:30-16:30}, modifying the first time will also shift the second,
@@ -5199,7 +5339,7 @@ timestamp, these same keys modify the priority of an item.
 (@pxref{Priorities}). The key bindings also conflict with shift-selection and
 related modes (@pxref{Conflicts}).
 @c
-@orgcmd{C-c C-y, org-evaluate-time-range}
+@orgcmd{C-c C-y,org-evaluate-time-range}
 @cindex evaluate time range
 Evaluate a time range by computing the difference between start and end.
 With a prefix argument, insert result after the time range (in a table: into
@@ -5462,7 +5602,7 @@ an item:
 
 @table @kbd
 @c
-@orgcmd{C-c C-d, org-deadline}
+@orgcmd{C-c C-d,org-deadline}
 Insert @samp{DEADLINE} keyword along with a stamp.  The insertion will happen
 in the line directly following the headline.  When called with a prefix arg,
 an existing deadline will be removed from the entry.  Depending on the
@@ -5482,7 +5622,7 @@ keywords @code{logredeadline}, @code{lognoteredeadline}, and
 @code{nologredeadline}}, a note will be taken when changing an existing
 scheduling time.
 @c
-@orgcmd{C-c C-x C-k, org-mark-entry-for-agenda-action}
+@orgcmd{C-c C-x C-k,org-mark-entry-for-agenda-action}
 @kindex k a
 @kindex k s
 Mark the current entry for agenda action.  After you have marked the entry
@@ -5490,7 +5630,7 @@ like this, you can open the agenda or the calendar to find an appropriate
 date.  With the cursor on the selected date, press @kbd{k s} or @kbd{k d} to
 schedule the marked item.
 @c
-@orgcmd{C-c / d, org-check-deadlines}
+@orgcmd{C-c / d,org-check-deadlines}
 @cindex sparse tree, for deadlines
 @vindex org-deadline-warning-days
 Create a sparse tree with all deadlines that are either past-due, or
@@ -5499,10 +5639,10 @@ With @kbd{C-u} prefix, show all deadlines in the file.  With a numeric
 prefix, check that many days.  For example, @kbd{C-1 C-c / d} shows
 all deadlines due tomorrow.
 @c
-@orgcmd{C-c / b, org-check-before-date}
+@orgcmd{C-c / b,org-check-before-date}
 Sparse tree for deadlines and scheduled items before a given date.
 @c
-@orgcmd{C-c / a, org-check-after-date}
+@orgcmd{C-c / a,org-check-after-date}
 Sparse tree for deadlines and scheduled items after a given date.
 @end table
 
@@ -5622,7 +5762,7 @@ what to do with it.
 @subsection Clocking commands
 
 @table @kbd
-@orgcmd{C-c C-x C-i, org-clock-in}
+@orgcmd{C-c C-x C-i,org-clock-in}
 @vindex org-clock-into-drawer
 Start the clock on the current item (clock-in).  This inserts the CLOCK
 keyword together with a timestamp.  If this is not the first clocking of
@@ -5666,20 +5806,20 @@ timestamp@footnote{The corresponding in-buffer setting is:
 Update the effort estimate for the current clock task.
 @kindex C-c C-y
 @kindex C-c C-c
-@orgtxxcmd{C-c C-y @ @ @r{or}@ @ C-c C-c,C-c C-y,C-c C-c,org-evaluate-time-range}
+@orgcmdkkc{C-c C-c,C-c C-y,org-evaluate-time-range}
 Recompute the time interval after changing one of the timestamps.  This
 is only necessary if you edit the timestamps directly.  If you change
 them with @kbd{S-@key{cursor}} keys, the update is automatic.
-@orgcmd{C-c C-t, org-todo}
+@orgcmd{C-c C-t,org-todo}
 Changing the TODO state of an item to DONE automatically stops the clock
 if it is running in this same item.
-@orgcmd{C-c C-x C-x, org-clock-cancel}
+@orgcmd{C-c C-x C-x,org-clock-cancel}
 Cancel the current clock.  This is useful if a clock was started by
 mistake, or if you ended up working on something else.
 @orgcmd{C-c C-x C-j,org-clock-goto}
 Jump to the headline of the currently clocked in task.  With a @kbd{C-u}
 prefix arg, select the target task from a list of recently clocked tasks.
-@orgcmd{C-c C-x C-d, org-clock-display}
+@orgcmd{C-c C-x C-d,org-clock-display}
 @vindex org-remove-highlights-with-change
 Display time summaries for each subtree in the current buffer.  This
 puts overlays at the end of each headline, showing the total time
@@ -5703,19 +5843,19 @@ inormation.  Such a report is called a @emph{clock table}, because it is
 formatted as one or several Org tables.
 
 @table @kbd
-@orgcmd{C-c C-x C-r, org-clock-report}
+@orgcmd{C-c C-x C-r,org-clock-report}
 Insert a dynamic block (@pxref{Dynamic blocks}) containing a clock
 report as an Org-mode table into the current file.  When the cursor is
 at an existing clock table, just update it.  When called with a prefix
 argument, jump to the first clock report in the current document and
 update it.
-@orgxcmd{C-c C-c, C-c C-x C-u, org-dblock-update}
+@orgcmdkkc{C-c C-c,C-c C-x C-u,org-dblock-update}
 Update dynamic block at point.  The cursor needs to be in the
 @code{#+BEGIN} line of the dynamic block.
 @orgkey{C-u C-c C-x C-u}
 Update all dynamic blocks (@pxref{Dynamic blocks}).  This is useful if
 you have several clock table blocks in a buffer.
-@orgxcmd{S-@key{left},S-@key{right},org-clocktable-try-shift}
+@orgcmdkxkc{S-@key{left},S-@key{right},org-clocktable-try-shift}
 Shift the current @code{:block} interval and update the table.  The cursor
 needs to be in the @code{#+BEGIN: clocktable} line for this command.  If
 @code{:block} is @code{today}, it will be shifted to @code{today-1} etc.
@@ -5907,11 +6047,11 @@ used with the variable @code{org-effort-property}.}.  You can set the effort
 for an entry with the following commands:
 
 @table @kbd
-@orgcmd{C-c C-x e, org-set-effort}
+@orgcmd{C-c C-x e,org-set-effort}
 Set the effort estimate for the current entry.  With a numeric prefix
 argument, set it to the NTH allowed value (see below).  This command is also
 accessible from the agenda with the @kbd{e} key.
-@orgcmd{C-c C-x C-e, org-clock-modify-effort-estimate}
+@orgcmd{C-c C-x C-e,org-clock-modify-effort-estimate}
 Modify the effort estimate of the item currently being clocked.
 @end table
 
@@ -6796,18 +6936,15 @@ the easiest way to maintain it is through the following commands
 
 @cindex files, adding to agenda list
 @table @kbd
-@kindex C-c [
-@item C-c [
+@orgcmd{C-c [,org-agenda-to-front}
 Add current file to the list of agenda files.  The file is added to
 the front of the list.  If it was already in the list, it is moved to
 the front.  With a prefix argument, file is added/moved to the end.
-@kindex C-c ]
-@item C-c ]
+@orgcmd{C-c ],org-remove-file}
 Remove current file from the list of agenda files.
 @kindex C-,
-@kindex C-'
-@item C-,
-@itemx C-'
+@orgcmd{C-',org-cycle-agenda-files}
+@itemx C-,
 Cycle through agenda file list, visiting one file after the other.
 @kindex M-x org-iswitchb
 @item M-x org-iswitchb
@@ -6827,16 +6964,14 @@ you may press @kbd{<} once or several times in the dispatcher
 extended period, use the following commands:
 
 @table @kbd
-@kindex C-c C-x <
-@item C-c C-x <
+@orgcmd{C-c C-x <,org-agenda-set-restriction-lock}
 Permanently restrict the agenda to the current subtree.  When with a
 prefix argument, or with the cursor before the first headline in a file,
 the agenda scope is set to the entire file.  This restriction remains in
 effect until removed with @kbd{C-c C-x >}, or by typing either @kbd{<}
 or @kbd{>} in the agenda dispatcher.  If there is a window displaying an
 agenda view, the new restriction takes effect immediately.
-@kindex C-c C-x >
-@item C-c C-x >
+@orgcmd{C-c C-x >,org-agenda-remove-restriction-lock}
 Remove the permanent restriction created by @kbd{C-c C-x <}.
 @end table
 
@@ -6844,14 +6979,12 @@ Remove the permanent restriction created by @kbd{C-c C-x <}.
 When working with @file{speedbar.el}, you can use the following commands in
 the Speedbar frame:
 @table @kbd
-@kindex <
-@item < @r{in the speedbar frame}
+@orgcmdtkc{< @r{in the speedbar frame},<,org-speedbar-set-agenda-restriction}
 Permanently restrict the agenda to the item---either an Org file or a subtree
 in such a file---at the cursor in the Speedbar frame.
 If there is a window displaying an agenda view, the new restriction takes
 effect immediately.
-@kindex >
-@item > @r{in the speedbar frame}
+@orgcmdtkc{> @r{in the speedbar frame},>,org-agenda-remove-restriction-lock}
 Lift the restriction.
 @end table
 
@@ -6931,8 +7064,7 @@ paper agenda, showing all the tasks for the current week or day.
 
 @table @kbd
 @cindex org-agenda, command
-@kindex C-c a a
-@item C-c a a
+@orgcmd{C-c a a,org-agenda-list}
 @vindex org-agenda-ndays
 Compile an agenda for the current week from a list of Org files.  The agenda
 shows the entries for each day.  With a numeric prefix@footnote{For backward
@@ -7053,15 +7185,13 @@ The global TODO list contains all unfinished TODO items formatted and
 collected into a single place.
 
 @table @kbd
-@kindex C-c a t
-@item C-c a t
+@orgcmd{C-c a t,org-todo-list}
 Show the global TODO list.  This collects the TODO items from all agenda
 files (@pxref{Agenda Views}) into a single buffer.  By default, this lists
 items with a state the is not a DONE state.  The buffer is in
 @code{agenda-mode}, so there are commands to examine and manipulate the TODO
 entries directly from that buffer (@pxref{Agenda commands}).
-@kindex C-c a T
-@item C-c a T
+@orgcmd{C-c a T,org-todo-list}
 @cindex TODO keyword matching
 @vindex org-todo-keywords
 Like the above, but allows selection of a specific TODO keyword.  You can
@@ -7119,15 +7249,13 @@ syntax described here also applies when creating sparse trees with @kbd{C-c /
 m}.
 
 @table @kbd
-@kindex C-c a m
-@item C-c a m
+@orgcmd{C-c a m,org-tags-view}
 Produce a list of all headlines that match a given set of tags.  The
 command prompts for a selection criterion, which is a boolean logic
 expression with tags, like @samp{+work+urgent-withboss} or
 @samp{work|home} (@pxref{Tags}).  If you often need a specific search,
 define a custom command for it (@pxref{Agenda dispatcher}).
-@kindex C-c a M
-@item C-c a M
+@orgcmd{C-c a M,org-tags-view}
 @vindex org-tags-match-list-sublevels
 @vindex org-agenda-tags-todo-honor-ignore-options
 Like @kbd{C-c a m}, but only select headlines that are also TODO items in a
@@ -7278,8 +7406,7 @@ file in a @emph{time-sorted view}.  The main purpose of this command is
 to give an overview over events in a project.
 
 @table @kbd
-@kindex C-c a L
-@item C-c a L
+@orgcmd{C-c a L,org-timeline}
 Show a time-sorted view of the Org file, with all time-stamped items.
 When called with a @kbd{C-u} prefix, all unfinished TODO entries
 (scheduled or not) are also listed under the current date.
@@ -7299,8 +7426,7 @@ This agenda view is a general text search facility for Org-mode entries.
 It is particularly useful to find notes.
 
 @table @kbd
-@kindex C-c a s
-@item C-c a s
+@orgcmd{C-c a s,org-search-view}
 This is a special search that lets you select entries by matching a substring
 or specific words using a boolean logic.
 @end table
@@ -7331,8 +7457,7 @@ Org-mode produces.  During the review, you need to identify such
 projects and define next actions for them.
 
 @table @kbd
-@kindex C-c a #
-@item C-c a #
+@orgcmd{C-c a #,org-agenda-list-stuck-projects}
 List projects that are stuck.
 @kindex C-c a !
 @item C-c a !
@@ -7519,40 +7644,26 @@ the other commands, the cursor needs to be in the desired line.
 @table @kbd
 @tsubheading{Motion}
 @cindex motion commands in agenda
-@kindex n
-@item n
+@orgcmd{n,org-agenda-next-line}
 Next line (same as @key{up} and @kbd{C-p}).
-@kindex p
-@item p
+@orgcmd{p,org-agenda-previous-line}
 Previous line (same as @key{down} and @kbd{C-n}).
 @tsubheading{View/Go to Org file}
-@kindex mouse-3
-@kindex @key{SPC}
-@item mouse-3
-@itemx @key{SPC}
+@orgcmdkkc{@key{SPC},mouse-3,org-agenda-show-and-scroll-up}
 Display the original location of the item in another window.
 With prefix arg, make sure that the entire entry is made visible in the
 outline, not only the heading.
 @c
-@kindex L
-@item L
+@orgcmd{L,org-agenda-recenter}
 Display original location and recenter that window.
 @c
-@kindex mouse-2
-@kindex mouse-1
-@kindex @key{TAB}
-@item mouse-2
-@itemx mouse-1
-@itemx @key{TAB}
-Go to the original location of the item in another window.  Under Emacs
-22, @kbd{mouse-1} will also works for this.
+@orgcmdkkc{@key{TAB},mouse-2,org-agenda-goto}
+Go to the original location of the item in another window.
 @c
-@kindex @key{RET}
-@itemx @key{RET}
+@orgcmd{@key{RET},org-agenda-switch-to}
 Go to the original location of the item and delete other windows.
 @c
-@kindex F
-@item F
+@orgcmd{F,org-agenda-follow-mode}
 @vindex org-agenda-start-with-follow-mode
 Toggle Follow mode.  In Follow mode, as you move the cursor through
 the agenda buffer, the other window always shows the corresponding
@@ -7560,15 +7671,13 @@ location in the Org file.  The initial setting for this mode in new
 agenda buffers can be set with the variable
 @code{org-agenda-start-with-follow-mode}.
 @c
-@kindex C-c C-x b
-@item C-c C-x b
+@orgcmd{C-c C-x b,org-agenda-tree-to-indirect-buffer}
 Display the entire subtree of the current item in an indirect buffer.  With a
 numeric prefix argument N, go up to level N and then take that tree.  If N is
 negative, go up that many levels.  With a @kbd{C-u} prefix, do not remove the
 previously used indirect buffer.
 
-@kindex C-c C-o
-@item C-c C-o
+@orgcmd{C-c C-o,org-agenda-open-link}
 Follow a link in the entry.  This will offer a selection of any links in the
 text belonging to the referenced Org node.  If there is only one link, it
 will be followed without a selection prompt.
@@ -7579,16 +7688,20 @@ will be followed without a selection prompt.
 @item o
 Delete other windows.
 @c
-@kindex v d
-@kindex d
-@kindex v w
-@kindex w
-@kindex v m
-@kindex v y
-@item v d @ @r{or short} @ d
-@itemx v w @ @r{or short} @ w
-@itemx v m
-@itemx v y
+@c @kindex v d
+@c @kindex d
+@c @kindex v w
+@c @kindex w
+@c @kindex v m
+@c @kindex v y
+@c @item v d @ @r{or short} @ d
+@c @itemx v w @ @r{or short} @ w
+@c @itemx v m
+@c @itemx v y
+@orgcmdkskc{v d,d,org-aganda-day-view}
+@xorgcmdkskc{v w,w,org-aganda-day-view}
+@xorgcmd{v m,org-agenda-month-view}
+@xorgcmd{v y,org-agenda-month-year}
 Switch to day/week/month/year view.  When switching to day or week view,
 this setting becomes the default for subsequent agenda commands.  Since
 month and year views are slow to create, they do not become the default.
@@ -7600,37 +7713,29 @@ argument as well.  For example, @kbd{200712 w} will jump to week 12 in
 2007.  If such a year specification has only one or two digits, it will
 be mapped to the interval 1938-2037.
 @c
-@kindex f
-@item f
+@orgcmd{f,org-agenda-later}
 @vindex org-agenda-ndays
 Go forward in time to display the following @code{org-agenda-ndays} days.
 For example, if the display covers a week, switch to the following week.
 With prefix arg, go forward that many times @code{org-agenda-ndays} days.
 @c
-@kindex b
-@item b
+@orgcmd{b,org-agenda-earlier}
 Go backward in time to display earlier dates.
 @c
-@kindex .
-@item .
+@orgcmd{.,org-agenda-goto-today}
 Go to today.
 @c
-@kindex j
-@item j
+@orgcmd{j,org-agenda-goto-date}
 Prompt for a date and go there.
 @c
-@kindex J
-@item J
-Go to the currently clocked in task in the agenda buffer.
+@orgcmd{J,org-agenda-clock-goto}
+Go to the currently clocked-in task @i{in the agenda buffer}.
 @c
-@kindex D
-@item D
+@orgcmd{D,org-agenda-toggle-diary}
 Toggle the inclusion of diary entries.  See @ref{Weekly/daily agenda}.
 @c
-@kindex v l
+@orgcmdkskc{v l,l,org-agenda-log-mode}
 @kindex v L
-@kindex l
-@item v l @ @r{or short} @ l
 @vindex org-log-done
 @vindex org-agenda-log-mode-items
 Toggle Logbook mode.  In Logbook mode, entries that were marked DONE while
@@ -7642,24 +7747,18 @@ all possible logbook entries, including state changes.  When called with two
 prefix args @kbd{C-u C-u}, show only logging information, nothing else.
 @kbd{v L} is equivalent to @kbd{C-u v l}.
 @c
-@kindex v [
-@kindex [
-@item v [ @ @r{or short} @ [
+@orgcmdkskc{v [,[,org-agenda-manipulate-query-add}
 Include inactive timestamps into the current view.  Only for weekly/daily
 agenda and timeline views.
 @c
-@kindex v a
-@kindex v A
-@item v a
-@itemx v A
+@orgcmd{v a,org-agenda-archives-mode}
+@xorgcmd{v A,org-agenda-archives-mode 'files}
 Toggle Archives mode.  In Archives mode, trees that are marked
 @code{ARCHIVED} are also scanned when producing the agenda.  When you use the
 capital @kbd{A}, even all archive files are included.  To exit archives mode,
 press @kbd{v a} again.
 @c
-@kindex v R
-@kindex R
-@item v R @ @r{or short} @ R
+@orgcmdkskc{v R,R,org-agenda-clockreport-mode}
 @vindex org-agenda-start-with-clockreport-mode
 Toggle Clockreport mode.  In Clockreport mode, the daily/weekly agenda will
 always show a table with the clocked times for the timespan and file scope
@@ -7670,9 +7769,7 @@ when toggling this mode (i.e. @kbd{C-u R}), the clock table will not show
 contributions from entries that are hidden by agenda filtering@footnote{Only
 tags filtering will be respected here, effort filtering is ignored.}.
 @c
-@kindex v E
-@kindex E
-@item v E @ @r{or short} @ E
+@orgcmdkskc{v E,E,org-agenda-entry-text-mode}
 @vindex org-agenda-start-with-entry-text-mode
 @vindex org-agenda-entry-text-maxlines
 Toggle entry text mode.  In entry text mode, a number of lines from the Org
@@ -7681,33 +7778,26 @@ The maximum number of lines is given by the variable
 @code{org-agenda-entry-text-maxlines}.  Calling this command with a numeric
 prefix argument will temporarily modify that number to the prefix value.
 @c
-@kindex G
-@item G
+@orgcmd{G,org-agenda-toggle-time-grid}
 @vindex org-agenda-use-time-grid
 @vindex org-agenda-time-grid
 Toggle the time grid on and off.  See also the variables
 @code{org-agenda-use-time-grid} and @code{org-agenda-time-grid}.
 @c
-@kindex r
-@item r
+@orgcmd{r,org-agenda-rodo}
 Recreate the agenda buffer, for example to reflect the changes after
 modification of the timestamps of items with @kbd{S-@key{left}} and
 @kbd{S-@key{right}}.  When the buffer is the global TODO list, a prefix
 argument is interpreted to create a selective list for a specific TODO
 keyword.
-@kindex g
-@item g
+@orgcmd{g,org-agenda-rodo}
 Same as @kbd{r}.
 @c
-@kindex s
-@kindex C-x C-s
-@item s
-@itemx C-x C-s
+@orgcmdkskc{C-x C-s,s,org-save-all-org-buffers}
 Save all Org buffers in the current Emacs session, and also the locations of
 IDs.
 @c
-@kindex C-c C-x C-c
-@item C-c C-x C-c
+@orgcmd{C-c C-x C-c,org-agenda-columns}
 @vindex org-columns-default-format
 Invoke column view (@pxref{Column view}) in the agenda buffer.  The column
 view format is taken from the entry at point, or (if there is no entry at
@@ -7716,8 +7806,7 @@ that entry would be in the original buffer (taken from a property, from a
 @code{#+COLUMNS} line, or from the default variable
 @code{org-columns-default-format}), will be used in the agenda.
 
-@kindex C-c C-x >
-@item C-c C-x >
+@orgcmd{C-c C-x >,org-agenda-remove-restriction-lock}
 Remove the restriction lock on the agenda, if it is currently restricted to a
 file or subtree (@pxref{Agenda files}).
 
@@ -7727,8 +7816,7 @@ file or subtree (@pxref{Agenda files}).
 @cindex effort filtering, in agenda
 @cindex query editing, in agenda
 
-@kindex /
-@item /
+@orgcmd{/,org-agenda-filter-by-tag}
 @vindex org-agenda-filter-preset
 Filter the current agenda view with respect to a tag and/or effort estimates.
 The difference between this and a custom agenda command is that filtering is
@@ -7795,13 +7883,13 @@ Internet, and outside of business hours, with something like this:
 @end group
 @end lisp
 
-@kindex \
-@item \
+@orgcmd{\,org-agenda-filter-by-tag-refine}
 Narrow the current agenda filter by an additional condition.  When called with
 prefix arg, remove the entries that @emph{do} have the tag, or that do match
 the effort criterion.  You can achieve the same effect by pressing @kbd{+} or
 @kbd{-} as the first key after the @kbd{/} command.
 
+@c
 @kindex [
 @kindex ]
 @kindex @{
@@ -7817,7 +7905,6 @@ negative search term which @i{must not} occur/match in the entry for it to be
 selected.
 @end table
 
-@page
 @tsubheading{Remote editing}
 @cindex remote editing, from agenda
 
@@ -7826,115 +7913,89 @@ Digit argument.
 @c
 @cindex undoing remote-editing events
 @cindex remote editing, undo
-@kindex C-_
-@item C-_
+@orgcmd{C-_,org-agenda-undo}
 Undo a change due to a remote editing command.  The change is undone
 both in the agenda buffer and in the remote buffer.
 @c
-@kindex t
-@item t
+@orgcmd{t,org-agenda-todo}
 Change the TODO state of the item, both in the agenda and in the
 original org file.
 @c
-@kindex C-S-@key{right}
-@kindex C-S-@key{left}
-@item C-S-@key{right}@r{/}@key{left}
+@orgcmd{C-S-@key{right},org-agenda-todo-nextset}
+@orgcmd{C-S-@key{left},org-agenda-todo-previousset}
 Switch to the next/previous set of TODO keywords.
 @c
-@kindex C-k
-@item C-k
+@orgcmd{C-k,org-agenda-kill}
 @vindex org-agenda-confirm-kill
 Delete the current agenda item along with the entire subtree belonging
 to it in the original Org file.  If the text to be deleted remotely
 is longer than one line, the kill needs to be confirmed by the user.  See
 variable @code{org-agenda-confirm-kill}.
 @c
-@kindex C-c C-w
-@item C-c C-w
+@orgcmd{C-c C-w,org-agenda-refile}
 Refile the entry at point.
 @c
-@kindex C-c C-x C-a
-@kindex a
-@item C-c C-x C-a @ @r{or short} @ a
+@orgcmdkskc{C-c C-x C-a,a,org-agenda-archive-default-with-confirmation}
 @vindex org-archive-default-command
 Archive the subtree corresponding to the entry at point using the default
 archiving command set in @code{org-archive-default-command}.  When using the
 @code{a} key, confirmation will be required.
 @c
-@kindex C-c C-x a
-@item C-c C-x a
+@orgcmd{C-c C-x a,org-agenda-toggle-archive-tag}
 Toggle the ARCHIVE tag for the current headline.
 @c
-@kindex C-c C-x A
-@item C-c C-x A
+@orgcmd{C-c C-x A,org-agenda-archive-to-archive-sibling}
 Move the subtree corresponding to the current entry to its @emph{archive
 sibling}.
 @c
-@kindex $
-@kindex C-c C-x C-s
-@item C-c C-x C-s @ @r{or short} @ $
+@orgcmdkskc{C-c C-x C-s,$,org-agenda-archive}
 Archive the subtree corresponding to the current headline.  This means the
 entry will be moved to the configured archive location, most likely a
 different file.
 @c
-@kindex T
-@item T
+@orgcmd{T,org-agenda-show-tags}
 @vindex org-agenda-show-inherited-tags
 Show all tags associated with the current item.  This is useful if you have
 turned off @code{org-agenda-show-inherited-tags}, but still want to see all
 tags of a headline occasionally.
 @c
-@kindex :
-@item :
+@orgcmd{:,org-agenda-set-tags}
 Set tags for the current headline.  If there is an active region in the
 agenda, change a tag for all headings in the region.
 @c
 @kindex ,
 @item ,
-Set the priority for the current item.  Org-mode prompts for the
-priority character. If you reply with @key{SPC}, the priority cookie
-is removed from the entry.
+Set the priority for the current item (@command{org-agenda-priority}).
+Org-mode prompts for the priority character. If you reply with @key{SPC}, the
+priority cookie is removed from the entry.
 @c
-@kindex P
-@item P
+@orgcmd{P,org-agenda-show-priority}
 Display weighted priority of current item.
 @c
-@kindex +
-@kindex S-@key{up}
-@item +
-@itemx S-@key{up}
+@orgcmdkkc{+,S-@key{up},org-agenda-priority-up}
 Increase the priority of the current item.  The priority is changed in
 the original buffer, but the agenda is not resorted.  Use the @kbd{r}
 key for this.
 @c
-@kindex -
-@kindex S-@key{down}
-@item -
-@itemx S-@key{down}
+@orgcmdkkc{-,S-@key{down},org-agenda-priority-down}
 Decrease the priority of the current item.
 @c
-@kindex C-c C-z
-@kindex z
-@item z @ @r{or also} @ C-c C-z
+@orgcmdkkc{z,C-c C-z,org-agenda-add-note}
 @vindex org-log-into-drawer
 Add a note to the entry.  This note will be recorded, and then files to the
 same location where state change notes are put.  Depending on
 @code{org-log-into-drawer}, this maybe inside a drawer.
 @c
-@kindex C-c C-a
-@item C-c C-a
+@orgcmd{C-c C-a,org-attach}
 Dispatcher for all command related to attachments.
 @c
-@kindex C-c C-s
-@item C-c C-s
+@orgcmd{C-c C-s,org-agenda-schedule}
 Schedule this item, with prefix arg remove the scheduling timestamp
 @c
-@kindex C-c C-d
-@item C-c C-d
+@orgcmd{C-c C-d,org-agenda-deadline}
 Set a deadline for this item, with prefix arg remove the deadline.
 @c
-@kindex k
-@item k
+@orgcmd{k,org-agenda-action}
 Agenda actions, to set dates for selected items to the cursor date.
 This command also works in the calendar!  The command prompts for an
 additional key:
@@ -7949,8 +8010,7 @@ r   @r{Call @code{org-capture} with the cursor date as default date.}
 Press @kbd{r} afterward to refresh the agenda and see the effect of the
 command.
 @c
-@kindex S-@key{right}
-@item S-@key{right}
+@orgcmd{S-@key{right},org-agenda-do-date-later}
 Change the timestamp associated with the current line by one day into the
 future.  With a numeric prefix argument, change it by that many days.  For
 example, @kbd{3 6 5 S-@key{right}} will change it by a year.  With a
@@ -7960,50 +8020,40 @@ a double @kbd{C-u C-u} prefix, do the same for changing minutes.  The stamp
 is changed in the original Org file, but the change is not directly reflected
 in the agenda buffer.  Use @kbd{r} or @kbd{g} to update the buffer.
 @c
-@kindex S-@key{left}
-@item S-@key{left}
+@orgcmd{S-@key{left},org-agenda-do-date-earlier}
 Change the timestamp associated with the current line by one day
 into the past.
 @c
-@kindex >
-@item >
+@orgcmd{>,org-agenda-date-prompt}
 Change the timestamp associated with the current line.  The key @kbd{>} has
 been chosen, because it is the same as @kbd{S-.}  on my keyboard.
 @c
-@kindex I
-@item I
+@orgcmd{I,org-agenda-clock-in}
 Start the clock on the current item.  If a clock is running already, it
 is stopped first.
 @c
-@kindex O
-@item O
+@orgcmd{O,org-agenda-clock-out}
 Stop the previously started clock.
 @c
-@kindex X
-@item X
+@orgcmd{X,org-agenda-clock-cancel}
 Cancel the currently running clock.
-
-@kindex J
-@item J
+@c
+@orgcmd{J,org-agenda-clock-goto}
 Jump to the running clock in another window.
 
 @tsubheading{Bulk remote editing selected entries}
 @cindex remote editing, bulk, from agenda
 
-@kindex m
-@item m
+@orgcmd{m,org-agenda-bulk-mark}
 Mark the entry at point for bulk action.
-
-@kindex u
-@item u
+@c
+@orgcmd{u,org-agenda-bulk-unmark}
 Unmark entry for bulk action.
-
-@kindex U
-@item U
+@c
+@orgcmd{U,org-agenda-bulk-remove-all-marks}
 Unmark all marked entries for bulk action.
-
-@kindex B
-@item B
+@c
+@orgcmd{B,org-agenda-bulk-action}
 Bulk action: act on all marked entries in the agenda.  This will prompt for
 another key to select the action to be applied.  The prefix arg to @kbd{B}
 will be passed through to the @kbd{s} and @kbd{d} commands, to bulk-remove
@@ -8027,17 +8077,16 @@ d  @r{Set deadline to a specific date.}
 
 @tsubheading{Calendar commands}
 @cindex calendar commands, from agenda
-@kindex c
-@item c
+
+@orgcmd{c,org-agenda-goto-calendar}
 Open the Emacs calendar and move to the date at the agenda cursor.
 @c
-@item c
+@orgcmd{c,org-calendar-goto-agenda}
 When in the calendar, compute and show the Org-mode agenda for the
 date at the cursor.
 @c
 @cindex diary entries, creating from agenda
-@kindex i
-@item i
+@orgcmd{i,org-agenda-diary-entry}
 @vindex org-agenda-diary-file
 Insert a new entry into the diary, using the date at the cursor and (for
 block entries) the date at the mark.  This will add to the Emacs diary
@@ -8057,22 +8106,18 @@ interaction.  If you directly press @key{RET} at the prompt without typing
 text, the target file will be shown in another window for you to finish the
 entry there.  See also the @kbd{k r} command.
 @c
-@kindex M
-@item M
+@orgcmd{M,org-agenda-phases-of-moon}
 Show the phases of the moon for the three months around current date.
 @c
-@kindex S
-@item S
+@orgcmd{S,org-agenda-sunrise-sunset}
 Show sunrise and sunset times.  The geographical location must be set
 with calendar variables, see the documentation for the Emacs calendar.
 @c
-@kindex C
-@item C
+@orgcmd{C,org-agenda-convert-date}
 Convert the date at cursor into many other cultural and historic
 calendars.
 @c
-@kindex H
-@item H
+@orgcmd{H,org-agenda-holidays}
 Show holidays for three months around the cursor date.
 
 @item M-x org-export-icalendar-combine-agenda-files
@@ -8080,8 +8125,7 @@ Export a single iCalendar file containing entries from all agenda files.
 This is a globally available command, and also available in the agenda menu.
 
 @tsubheading{Exporting to a file}
-@kindex C-x C-w
-@item C-x C-w
+@orgcmd{C-x C-w,org-write-agenda}
 @cindex exporting agenda views
 @cindex agenda views, exporting
 @vindex org-agenda-exporter-settings
@@ -8094,13 +8138,11 @@ argument, immediately open the newly created file.  Use the variable
 for @file{htmlize} to be used during export.
 
 @tsubheading{Quit and Exit}
-@kindex q
-@item q
+@orgcmd{q,org-agenda-quit}
 Quit agenda, remove the agenda buffer.
 @c
-@kindex x
 @cindex agenda files, removing buffers
-@item x
+@orgcmd{x,org-agenda-exit}
 Exit agenda, remove the agenda buffer and all buffers loaded by Emacs
 for the compilation of the agenda.  Buffers created by the user to
 visit Org files will not be removed.
@@ -8310,8 +8352,7 @@ a PDF file with also create the postscript file.}, and iCalendar files.  If
 you want to do this only occasionally, use the command
 
 @table @kbd
-@kindex C-x C-w
-@item C-x C-w
+@orgcmd{C-x C-w,org-write-agenda}
 @cindex exporting agenda views
 @cindex agenda views, exporting
 @vindex org-agenda-exporter-settings
@@ -8381,8 +8422,7 @@ Instead, there is a special command to produce @emph{all} specified
 files in one step:
 
 @table @kbd
-@kindex C-c a e
-@item C-c a e
+@orgcmd{C-c a e,org-store-agenda-views}
 Export all agenda views that have export file names associated with
 them.
 @end table
@@ -8449,8 +8489,7 @@ quite useful to use column view also from the agenda, where entries are
 collected by certain criteria.
 
 @table @kbd
-@kindex C-c C-x C-c
-@item C-c C-x C-c
+@orgcmd{C-c C-x C-c,org-agenda-columns}
 Turn on column view in the agenda.
 @end table
 
