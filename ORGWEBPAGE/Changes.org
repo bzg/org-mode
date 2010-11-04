@@ -1,5 +1,5 @@
 
-* #   -*- mode: org; fill-column: 65 -*-
+#   -*- mode: org; fill-column: 65 -*-
 
 #+begin_html
 <a href="/"><img src="http://orgmode.org/img/org-mode-unicorn.png" class="logo-link" /></a>
