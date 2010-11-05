@@ -916,6 +916,35 @@ This function makes sure that dates are aligned for easy reading."
     (format "%-10s %2d %s %4d%s"
 	    dayname day monthname year weekstring)))
 
+(defcustom org-agenda-timegrid-use-ampm nil
+  "When set, show AM/PM style timestamps on the timegrid."
+  :group 'org-agenda
+  :type 'boolean)
+
+(defun org-agenda-time-of-day-to-ampm (time)
+  "Convert TIME of a string like '13:45' to an AM/PM style time string."
+  (let* ((hour-number (string-to-number (substring time 0 -3)))
+         (minute (substring time -2))
+         (ampm "AM"))
+    (cond
+     ((equal hour-number 12)
+      (setq ampm "PM"))
+     ((> hour-number 12)
+      (setq ampm "PM")
+      (setq hour-number (- hour-number 12))))
+    (concat
+     (if org-agenda-time-leading-zero
+	 (format "%02d" hour-number)
+       (format "%02s" (number-to-string hour-number)))
+     ":" minute ampm)))
+
+(defun org-agenda-time-of-day-to-ampm-maybe (time)
+  "Conditionally convert TIME to AM/PM format
+based on `org-agenda-timegrid-use-ampm'"
+  (if org-agenda-timegrid-use-ampm
+      (org-agenda-time-of-day-to-ampm time)
+    time))
+
 (defcustom org-agenda-time-leading-zero nil
   "Non-nil means use leading zero for military times in agenda.
 For example, 9:30am would become 09:30 rather than  9:30."
@@ -5109,8 +5138,15 @@ Any match of REMOVE-RE will be removed from TXT."
       (if noprefix
 	  (setq rtn txt)
 	;; Prepare the variables needed in the eval of the compiled format
-	(setq time (cond (s2 (concat s1 "-" s2))
-			 (s1 (concat s1 "......"))
+	(setq time (cond (s2 (concat
+			      (org-agenda-time-of-day-to-ampm-maybe s1)
+			      "-" (org-agenda-time-of-day-to-ampm-maybe s2)
+			      (if org-agenda-timegrid-use-ampm " ")))
+			 (s1 (concat
+			      (org-agenda-time-of-day-to-ampm-maybe s1)
+			      (if org-agenda-timegrid-use-ampm
+				  "........ "
+				"......")))
 			 (t ""))
 	      extra (or (and (not habitp) extra) "")
 	      category (if (symbolp category) (symbol-name category) category)
