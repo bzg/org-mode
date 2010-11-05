@@ -6220,30 +6220,27 @@ suggestion.}  for capturing new material.
 @subsection Using capture
 
 @table @kbd
-@kindex C-c c
-@item C-c c
-Call the command @code{org-capture}.  If you have templates defined
-@pxref{Capture templates}, it will offer these templates for selection or use
-a new Org outline node as the default template.  It will insert the template
-into the target file and switch to an indirect buffer narrowed to this new
-node.  You may then insert the information you want.
+@orgcmd{C-c c,org-capture}
+Call the command @code{org-capture}.  Note that this keybinding is global and
+not active by default - you need to install it.  If you have templates
+defined @pxref{Capture templates}, it will offer these templates for
+selection or use a new Org outline node as the default template.  It will
+insert the template into the target file and switch to an indirect buffer
+narrowed to this new node.  You may then insert the information you want.
 
-@kindex C-c C-c
-@item C-c C-c
-Once you have finished entering information into the capture buffer, 
-@kbd{C-c C-c} will return you to the window configuration before the capture
-process, so that you can resume your work without further distraction.
+@orgcmd{C-c C-c,org-capture-finalize}
+Once you have finished entering information into the capture buffer, @kbd{C-c
+C-c} will return you to the window configuration before the capture process,
+so that you can resume your work without further distraction.
 
-@kindex C-c C-w
-@item C-c C-w
+@orgcmd{C-c C-w,org-capture-refile}
 Finalize the capture process by refiling (@pxref{Refiling notes}) the note to
 a different place.  Please realize that this is a normal refiling command
 that will be executed - so the cursor position at the moment you run this
 command is important.  If you have inserted a tree with a parent and
 children, first move the cursor back to the parent.
 
-@kindex C-c C-k
-@item C-c C-k
+@orgcmd{C-c C-k,org-capture-kill}
 Abort the capture process and return to the previous state.
 @end table
 
@@ -6261,8 +6258,7 @@ for different target locations.  The easiest way to create such templates is
 through the customize interface.
 
 @table @kbd
-@kindex C-c c C
-@item C-c c C
+@orgkey{C-c c C}
 Customize the variable @code{org-capture-templates}.
 @end table
 
@@ -6528,15 +6524,13 @@ directory.
 
 @table @kbd
 
-@kindex C-c C-a
-@item C-c C-a
+@orgcmd{C-c C-a,org-attach}
 The dispatcher for commands related to the attachment system.  After these
 keys, a list of commands is displayed and you must press an additional key
 to select a command:
 
 @table @kbd
-@kindex C-c C-a a
-@item a
+@orgcmdtkc{a,C-c C-a a,org-attach-attach}
 @vindex org-attach-method
 Select a file and move it into the task's attachment directory.  The file
 will be copied, moved, or linked, depending on @code{org-attach-method}.
@@ -6549,52 +6543,42 @@ Note that hard links are not supported on all systems.
 Attach a file using the copy/move/link method.
 Note that hard links are not supported on all systems.
 
-@kindex C-c C-a n
-@item n
+@orgcmdtkc{n,C-c C-a n,org-attach-new}
 Create a new attachment as an Emacs buffer.
 
-@kindex C-c C-a z
-@item z
+@orgcmdtkc{z,C-c C-a z,org-attach-sync}
 Synchronize the current task with its attachment directory, in case you added
 attachments yourself.
 
-@kindex C-c C-a o
-@item o
+@orgcmdtkc{p,C-c C-a o,org-attach-open}
 @vindex org-file-apps
 Open current task's attachment.  If there is more than one, prompt for a
 file name first.  Opening will follow the rules set by @code{org-file-apps}.
 For more details, see the information on following hyperlinks
 (@pxref{Handling links}).
 
-@kindex C-c C-a O
-@item O
+@orgcmdtkc{O,C-c C-a O,org-attach-open-in-emacs}
 Also open the attachment, but force opening the file in Emacs.
 
-@kindex C-c C-a f
-@item f
+@orgcmdtkc{f,C-c C-a f,org-attach-reveal}
 Open the current task's attachment directory.
 
-@kindex C-c C-a F
-@item F
+@orgcmdtkc{F,C-c C-a F,org-attach-reveal-in-emacs}
 Also open the directory, but force using @command{dired} in Emacs.
 
-@kindex C-c C-a d
-@item d
+@orgcmdtkc{d,C-c C-a d,org-attach-delete-one}
 Select and delete a single attachment.
 
-@kindex C-c C-a D
-@item D
+@orgcmdtkc{D,C-c C-a D,org-attach-delete-all}
 Delete all of a task's attachments.  A safer way is to open the directory in
 @command{dired} and delete from there.
 
-@kindex C-c C-a s
-@item C-c C-a s
+@orgcmdtkc{s,C-c C-a s,org-attach-set-directory}
 @cindex property, ATTACH_DIR
 Set a specific directory as the entry's attachment directory.  This works by
 putting the directory path into the @code{ATTACH_DIR} property.
 
-@kindex C-c C-a i
-@item C-c C-a i
+@orgcmdtkc{i,C-c C-a i,org-attach-set-inherit}
 @cindex property, ATTACH_DIR_INHERIT
 Set the @code{ATTACH_DIR_INHERIT} property, so that children will use the
 same directory for attachments as the parent does.
@@ -6627,12 +6611,11 @@ will configure that new items from the feed provided by
 the following command is used:
 
 @table @kbd
-@kindex C-c C-x g
+@orgcmd{C-c C-x g,org-feed-update-all}
 @item C-c C-x g
 Collect items from the feeds configured in @code{org-feed-alist} and act upon
 them.
-@kindex C-c C-x G
-@item C-c C-x G
+@orgcmd{C-c C-x G,org-feed-goto-inbox}
 Prompt for a feed name and go to the inbox configured for this feed.
 @end table
 
@@ -6672,8 +6655,7 @@ right location, and then pasting the note is cumbersome.  To simplify this
 process, you can use the following special command:
 
 @table @kbd
-@kindex C-c C-w
-@item C-c C-w
+@orgcmd{C-c C-w,org-refile}
 @vindex org-reverse-note-order
 @vindex org-refile-targets
 @vindex org-refile-use-outline-path
@@ -6698,15 +6680,16 @@ When the variable @code{org-log-refile}@footnote{with corresponding
 @code{#+STARTUP} keywords @code{logrefile}, @code{lognoterefile},
 and @code{nologrefile}} is set, a time stamp or a note will be
 recorded when an entry has been refiled.
-@kindex C-u C-c C-w
-@item C-u C-c C-w
+@orgkey{C-u C-c C-w}
 Use the refile interface to jump to a heading.
-@kindex C-u C-u C-c C-w
-@item C-u C-u C-c C-w
+@orgcmd{C-u C-u C-c C-w,org-refile-goto-last-stored}
 Jump to the location where @code{org-refile} last moved a tree to.
 @item C-2 C-c C-w
 Refile as the child of the item currently being clocked.
 @item C-0 C-c C-w @ @r{or} @ C-u C-u C-u C-c C-w
+
+@orgcmdtkc{C-0 C-c C-w @ @r{or} @ C-u C-u C-u C-c C-w,C-0 C-c C-w,org-refile-cache-clear}
+
 Clear the target cache.  Caching of refile targets can be turned on by
 setting @code{org-refile-use-cache}.  To make the command seen new possible
 targets, you have to clear the cache with this command.
@@ -6722,8 +6705,7 @@ agenda.  Archiving is important to keep your working files compact and global
 searches like the construction of agenda views fast.
 
 @table @kbd
-@kindex C-c C-x C-a
-@item C-c C-x C-a
+@orgcmd{C-c C-x C-a,org-archive-subtree-default}
 @vindex org-archive-default-command
 Archive the current entry using the command specified in the variable
 @code{org-archive-default-command}.
@@ -6742,14 +6724,11 @@ The most common archiving action is to move a project tree to another file,
 the archive file.
 
 @table @kbd
-@kindex C-c $
-@kindex C-c C-x C-s
-@item C-c C-x C-s@ @r{or short} @ C-c $
+@orgcmdkskc{C-c C-x C-s,C-c $,org-archive-subtree}
 @vindex org-archive-location
 Archive the subtree starting at the cursor position to the location
 given by @code{org-archive-location}.
-@kindex C-u C-c C-x C-s
-@item C-u C-c C-x C-s
+@orgkey{C-u C-c C-x C-s}
 Check if any direct children of the current headline could be moved to
 the archive.  To do this, each subtree is checked for open TODO entries.
 If none are found, the command offers to move it to the archive
@@ -6832,23 +6811,19 @@ Archived trees are excluded from column view unless the variable
 The following commands help manage the ARCHIVE tag:
 
 @table @kbd
-@kindex C-c C-x a
-@item C-c C-x a
+@orgcmd{C-c C-x a,org-toggle-archive-tag}
 Toggle the ARCHIVE tag for the current headline.  When the tag is set,
 the headline changes to a shadowed face, and the subtree below it is
 hidden.
-@kindex C-u C-c C-x a
-@item C-u C-c C-x a
+@orgkey{C-u C-c C-x a}
 Check if any direct children of the current headline should be archived.
 To do this, each subtree is checked for open TODO entries.  If none are
 found, the command offers to set the ARCHIVE tag for the child.  If the
 cursor is @emph{not} on a headline when this command is invoked, the
 level 1 trees will be checked.
-@kindex C-@kbd{TAB}
-@item C-@kbd{TAB}
+@orgcmd{C-@kbd{TAB},org-force-cycle-archived}
 Cycle a tree even if it is tagged with ARCHIVE.
-@kindex C-c C-x A
-@item C-c C-x A
+@orgcmd{C-c C-x A,org-archive-to-archive-sibling}
 Move the current entry to the @emph{Archive Sibling}.  This is a sibling of
 the entry with the heading @samp{Archive} and the tag @samp{ARCHIVE}.  The
 entry becomes a child of that sibling and in this way retains a lot of its
@@ -14822,6 +14797,8 @@ org-customize @key{RET}} and then click yourself through the tree.
 @c Local variables:
 @c fill-column: 77
 @c indent-tabs-mode: nil
+@c paragraph-start:    "\\|^@[a-zA-Z]*[ \n]\\|^@x?org\\(key\\|cmd\\)\\|\f\\|[ 	]*$"
+@c paragraph-separate: "\\|^@[a-zA-Z]*[ \n]\\|^@x?org\\(key\\|cmd\\)\\|[ 	\f]*$"
 @c End:
 
 
