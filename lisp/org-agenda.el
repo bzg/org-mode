@@ -1463,14 +1463,13 @@ category, you can use:
 
   (\"Emacs\" '(space . (:width (16))))"
   :group 'org-agenda-line-format
-  :type '(list :tag "Category icons"
-	       (repeat
-		(list
-		 (string :tag "Category regexp")
-		 (string :tag "File or data")
-		 (string :tag "Type")
-		 (boolean :tag "Data?")
-		 (list :tag "Properties")))))
+  :type '(alist :key-type (string :tag "Regexp matching category")
+		:value-type (choice (list :tag "Icon"
+					  (string :tag "File or data")
+					  (symbol :tag "Type")
+					  (boolean :tag "Data?")
+					  (repeat :tag "Extra image properties" :inline t symbol))
+				    (list :tag "Display properties" sexp))))
 
 (defgroup org-agenda-column-view nil
   "Options concerning column view in the agenda."
