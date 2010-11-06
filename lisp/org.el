@@ -3570,6 +3570,8 @@ Normal means, no org-mode-specific context."
 		  "org-agenda" (&optional end))
 (declare-function org-inlinetask-remove-END-maybe "org-inlinetask" ())
 (declare-function org-inlinetask-in-task-p "org-inlinetask" ())
+(declare-function org-inlinetask-goto-beginning "org-inlinetask" ())
+(declare-function org-inlinetask-goto-end "org-inlinetask" ())
 (declare-function org-indent-mode "org-indent" (&optional arg))
 (declare-function parse-time-string "parse-time" (string))
 (declare-function org-attach-reveal "org-attach" (&optional if-exists))
@@ -16353,6 +16355,7 @@ BEG and END default to the buffer boundaries."
 (org-defkey org-mode-map "\C-c\C-xf"    'org-footnote-action)
 (org-defkey org-mode-map "\C-c\C-x\C-mg"    'org-mobile-pull)
 (org-defkey org-mode-map "\C-c\C-x\C-mp"    'org-mobile-push)
+(org-defkey org-mode-map "\C-c@" 'org-mark-subtree)
 (org-defkey org-mode-map [?\C-c (control ?*)] 'org-list-make-subtree)
 ;;(org-defkey org-mode-map [?\C-c (control ?-)] 'org-list-make-list-from-subtree)
 
@@ -16426,7 +16429,7 @@ BEG and END default to the buffer boundaries."
     ("^" . org-sort)
     ("w" . org-refile)
     ("a" . org-archive-subtree-default-with-confirmation)
-    ("." . outline-mark-subtree)
+    ("." . org-mark-subtree)
     ("Clock Commands")
     ("I" . org-clock-in)
     ("O" . org-clock-out)
@@ -18575,6 +18578,30 @@ which make use of the date at the cursor."
 	       (current-buffer))
   (message
    "Entry marked for action; press `k' at desired date in agenda or calendar"))
+
+(defun org-mark-subtree ()
+  "Mark the current subtree.
+This puts point at the start of the current subtree, and mark at the end.
+
+If point is in an inline task, mark that task instead."
+  (interactive)
+  (let ((inline-task-p
+	 (and (featurep 'org-inlinetask)
+	      (org-inlinetask-in-task-p)))
+	(beg))
+    ;; Get beginning of subtree
+    (cond
+     (inline-task-p (org-inlinetask-goto-beginning))
+     ((org-at-heading-p) (beginning-of-line))
+     (t (outline-previous-visible-heading 1)))
+    (setq beg (point))
+    ;; Get end of it
+    (if	inline-task-p
+	(org-inlinetask-goto-end)
+      (org-end-of-subtree))
+    ;; Mark zone
+    (push-mark (point) nil t)
+    (goto-char beg)))
 
 ;;; Paragraph filling stuff.
 ;; We want this to be just right, so use the full arsenal.

@@ -131,24 +131,56 @@ If prefix arg NO-STATE is set, ignore `org-inlinetask-default-state'."
   (end-of-line -1))
 (define-key org-mode-map "\C-c\C-xt" 'org-inlinetask-insert-task)
 
+(defun org-inlinetask-outline-regexp ()
+  "Return string matching an inline task heading.
+The number of levels is controlled by `org-inlinetask-min-level'."
+  (let ((nstars (if org-odd-levels-only
+		    (1- (* org-inlinetask-min-level 2))
+		  org-inlinetask-min-level)))
+    (format "^\\(\\*\\{%d,\\}\\)[ \t]+" nstars)))
+
 (defun org-inlinetask-in-task-p ()
   "Return true if point is inside an inline task."
   (save-excursion
-    (let* ((nstars (if org-odd-levels-only
-		       (1- (* 2 (or org-inlinetask-min-level 200)))
-		     (or org-inlinetask-min-level 200)))
-	   (stars-re (concat "^\\(?:\\*\\{"
-			     (format "%d" (- nstars 1))
-			     ",\\}\\)[ \t]+"))
+    (let* ((stars-re (org-inlinetask-outline-regexp))
 	   (task-beg-re (concat stars-re "\\(?:.*\\)"))
-	   (task-end-re (concat stars-re "\\(?:END\\|end\\)")))
+	   (task-end-re (concat stars-re "\\(?:END\\|end\\)[ \t]*$")))
       (beginning-of-line)
       (or (looking-at task-beg-re)
 	  (and (re-search-forward "^\\*+[ \t]+" nil t)
 	       (progn (beginning-of-line) (looking-at task-end-re)))))))
 
-(defvar htmlp)  ; dynamically scoped into the next function
-(defvar latexp) ; dynamically scoped into the next function
+(defun org-inlinetask-goto-beginning ()
+  "Go to the beginning of the inline task at point."
+  (end-of-line)
+  (re-search-backward (org-inlinetask-outline-regexp) nil t)
+  (when (org-looking-at-p (concat (org-inlinetask-outline-regexp) "END[ \t]*$"))
+    (re-search-backward (org-inlinetask-outline-regexp) nil t)))
+
+(defun org-inlinetask-goto-end ()
+  "Go to the end of the inline task at point."
+  (beginning-of-line)
+  (cond
+   ((org-looking-at-p (concat (org-inlinetask-outline-regexp) "END[ \t]*$"))
+    (forward-line 1))
+   ((org-looking-at-p (org-inlinetask-outline-regexp))
+    (forward-line 1)
+    (when (org-inlinetask-in-task-p)
+      (re-search-forward (org-inlinetask-outline-regexp) nil t)
+      (forward-line 1)))
+   (t
+    (re-search-forward (org-inlinetask-outline-regexp) nil t)
+    (forward-line 1))))
+
+(defun org-inlinetask-get-task-level ()
+  "Get the level of the inline task around.
+This assumes the point is inside an inline task."
+  (save-excursion
+    (end-of-line)
+    (re-search-backward (org-inlinetask-outline-regexp) nil t)
+    (- (match-end 1) (match-beginning 1))))
+
+(defvar backend) ; dynamically scoped into the next function
 (defun org-inlinetask-export-handler ()
   "Handle headlines with level larger or equal to `org-inlinetask-min-level'.
 Either remove headline and meta data, or do special formatting."
