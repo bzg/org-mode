@@ -1895,6 +1895,7 @@ from the dynamic block defintion."
 	 (te (plist-get params :tend))
 	 (header (plist-get  params :header))
 	 (narrow (plist-get params :narrow))
+	 (link (plist-get params :link))
 	 (maxlevel (or (plist-get params :maxlevel) 3))
 	 (emph (plist-get params :emphasize))
 	 (level-p (plist-get params :level))
@@ -1902,7 +1903,7 @@ from the dynamic block defintion."
 	 (ntcol (max 1 (or (plist-get params :tcolumns) 100)))
 	 (rm-file-column (plist-get params :one-file-with-archives))
 	 (indent (plist-get params :indent))
-	 link range-text total-time tbl level hlc formula pcol
+	 range-text total-time tbl level hlc formula pcol
 	 file-time entries entry headline
 	 recalc content narrow-cut-p)
 
@@ -1917,8 +1918,8 @@ from the dynamic block defintion."
       (when (and narrow (integerp narrow) link)
 	;; We cannot have both integer narrow and link
 	(message
-	 "Suppressing :narrow INTEGER in clocktable because :link was also given")
-	(setq narrow nil))
+	 "Using hard narrowing in clocktable to allow for links")
+	(setq narrow (intern (format "%d!" narrow))))
 
       (when narrow
 	(cond
@@ -1926,9 +1927,11 @@ from the dynamic block defintion."
 	 ((and (symbolp narrow)
 	       (string-match "\\`[0-9]+!\\'" (symbol-name narrow)))
 	  (setq narrow-cut-p t
-		narrow (string-to-number (substring (symbol-name narrow) 0 -1))))
+		narrow (string-to-number (substring (symbol-name narrow)
+						    0 -1))))
 	 (t
-	  (error "Invalid value %s of :narrow property in clock table" narrow))))
+	  (error "Invalid value %s of :narrow property in clock table"
+		 narrow))))
 
       (when block
 	;; Get the range text for the header
@@ -2008,8 +2011,17 @@ from the dynamic block defintion."
 	      (setq level (car entry)
 		    headline (nth 1 entry)
 		    hlc (if emph (or (cdr (assoc level hlchars)) "") ""))
-	      (if narrow-cut-p
-		  (setq headline (org-shorten-string headline narrow)))
+	      (when narrow-cut-p
+		(if (and (string-match (concat "\\`" org-bracket-link-regexp
+					       "\\'")
+				       headline)
+			 (match-end 3))
+		    (setq headline
+			  (format "[[%s][%s]]"
+				  (match-string 1 headline)
+				  (org-shorten-string (match-string 3 headline)
+						      narrow)))
+		  (setq headline (org-shorten-string headline narrow))))
 	      (insert-before-markers
 	       "|"                      ; start the table line
 	       (if multifile "|" "")    ; free space for file name column?
