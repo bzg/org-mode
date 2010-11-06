@@ -1325,7 +1325,7 @@ If END is non-nil, it is the end of the region."
   (save-excursion
     (goto-char (or beg (point-min)))
     (let* ((pt (point))
-	   (end (if (re-search-forward "^\\*+ " end t)
+	   (end (if (re-search-forward (org-get-limited-outline-regexp) end t)
 		    (goto-char (match-beginning 0))
 		  (goto-char (or end (point-max))))))
       (prog1

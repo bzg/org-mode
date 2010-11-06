@@ -18593,7 +18593,8 @@ If point is in an inline task, mark that task instead."
     (cond
      (inline-task-p (org-inlinetask-goto-beginning))
      ((org-at-heading-p) (beginning-of-line))
-     (t (outline-previous-visible-heading 1)))
+     (t (let ((outline-regexp (org-get-limited-outline-regexp)))
+	  (outline-previous-visible-heading 1))))
     (setq beg (point))
     ;; Get end of it
     (if	inline-task-p
