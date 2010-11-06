@@ -1400,7 +1400,7 @@ commands can be accessed through a dispatcher:
 @table @asis
 @orgcmd{C-c /,org-sparse-tree}
 This prompts for an extra key to select a sparse-tree creating command.
-@orgcmd{C-c / r,org-sparse-tree}
+@orgcmd{C-c / r,org-occur}
 @vindex org-remove-highlights-with-change
 Occur.  Prompts for a regexp and shows a sparse tree with all matches.  If
 the match is in a headline, the headline is made visible.  If the match is in
