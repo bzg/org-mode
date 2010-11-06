@@ -7020,11 +7020,12 @@ in the region."
   "Return the level of the current entry, or nil if before the first headline.
 The level is the number of stars at the beginning of the headline."
   (save-excursion
-    (condition-case nil
-	(progn
-	  (org-back-to-heading t)
-	  (funcall outline-level))
-      (error nil))))
+    (let ((outline-regexp (org-get-limited-outline-regexp)))
+      (condition-case nil
+	  (progn
+	    (org-back-to-heading t)
+	    (funcall outline-level))
+	(error nil)))))
 
 (defun org-get-previous-line-level ()
   "Return the outline depth of the last headline before the current line.
