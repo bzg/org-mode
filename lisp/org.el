@@ -18674,7 +18674,8 @@ If point is in an inline task, mark that task instead."
 		      (and (org-in-item-p) (goto-char (org-list-top-point)))
 		      (and (not inline-task-p)
 			   (featurep 'org-inlinetask)
-			   (org-inlinetask-in-task-p))))
+			   (org-inlinetask-in-task-p)
+			   (or (org-inlinetask-goto-beginning) t))))
       	(beginning-of-line 0))
       (cond
        ;; There was an heading above.
