@@ -9170,10 +9170,6 @@ application the system uses for this file type."
 	      (dired path)
 	    (org-open-file path in-emacs line search)))
 
-	 ((string= type "news")
-	  (require 'org-gnus)
-	  (org-gnus-follow-link path))
-
 	 ((string= type "shell")
 	  (let ((cmd path))
 	    (if (or (not org-confirm-shell-link-function)
