@@ -5,7 +5,7 @@
 ;; Author: Eric Schulte
 ;; Keywords: literate programming, reproducible research, js
 ;; Homepage: http://orgmode.org
-;; Version: 7.02trans
+;; Version: 7.3
 
 ;;; License:
 
