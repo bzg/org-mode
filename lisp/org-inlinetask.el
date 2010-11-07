@@ -100,6 +100,61 @@ When nil, they will not be exported."
   :group 'org-inlinetask
   :type 'boolean)
 
+(defvar org-inlinetask-export-templates
+  '((html "<pre class=\"inlinetask\"><b>%s%s</b><br>%s</pre>"
+	  '((unless (eq todo "")
+	      (format "<span class=\"%s %s\">%s%s</span> "
+		      class todo todo priority))
+	    heading content))
+    (latex "\\begin\{description\}\\item[%s%s]%s\\end\{description\}"
+	   '((unless (eq todo "") (format "\\textsc\{%s%s\} " todo priority))
+	     heading content))
+    (ascii "     -- %s%s%s"
+	   '((unless (eq todo "") (format "%s%s " todo priority))
+	     heading
+	     (unless (eq content "")
+	       (format "\n         ¦ %s"
+		       (mapconcat 'identity (org-split-string content "\n")
+				  "\n         ¦ ")))))
+    (docbook "<variablelist>
+<varlistentry>
+<term>%s%s</term>
+<listitem><para>%s</para></listitem>
+</varlistentry>
+</variablelist>"
+	     '((unless (eq todo "") (format "%s%s " todo priority))
+	       heading content)))
+  "Templates for inline tasks in various exporters.
+
+This variable is an alist in the shape of (BACKEND STRING OBJECTS).
+
+BACKEND is the name of the backend for the template (ascii, html...).
+
+STRING is a format control string.
+
+OBJECTS is a list of elements to be substituted into the format
+string.  They can be of any type, from a string to a form
+returning a value (thus allowing conditional insertion).  A nil
+object will be substituted as the empty string.  Obviously, there
+must be at least as many objects as %-sequences in the format
+string.
+
+Moreover, the following special keywords are provided: `todo',
+`priority', `heading', `content', `tags'.  If some of them are not
+defined in an inline task, their value is the empty string.
+
+As an example, valid associations are:
+
+(html \"<ul><li>%s <p>%s</p></li></ul>\" (heading content))
+
+or, in a conditional way,
+
+(latex \"\\\\begin\{flushright\}%s%s%s\\\\end\{flushright\}\"
+       ((unless (eq todo \"\")
+	  (format \"\\\\textsc\{%s%s: \}\" todo priority))
+	heading
+	(unless (eq content \"\") (format \"\\n%s\" content))))")
+
 (defvar org-odd-levels-only)
 (defvar org-keyword-time-regexp)
 (defvar org-drawer-regexp)
@@ -190,7 +245,7 @@ Either remove headline and meta data, or do special formatting."
 		   (or org-inlinetask-min-level 200)))
 	 (re1 (format "^\\(\\*\\{%d,\\}\\) .*\n" nstars))
 	 (re2 (concat "^[ \t]*" org-keyword-time-regexp))
-	 headline beg end stars content indent)
+	 headline beg end stars content)
     (while (re-search-forward re1 nil t)
       (setq headline (match-string 0)
 	    stars (match-string 1)
@@ -211,38 +266,34 @@ Either remove headline and meta data, or do special formatting."
 	(delete-region beg (1+ (match-end 0))))
       (goto-char beg)
       (when org-inlinetask-export
-	(when (string-match org-complex-heading-regexp headline)
-	  (setq headline (concat
-			  (if (match-end 2)
-			      (concat
-			       (format
-				"@<span class=\"%s %s\"> %s@</span>"
-				(if (member (match-string 2 headline)
-					    org-done-keywords)
-				    "done" "todo")
-				(match-string 2 headline)
-				(match-string 2 headline))
-			       " ") "")
-			  (match-string 4 headline)))
-	  (when content
+	;; content formatting
+	(when content
 	    (if (not (string-match "\\S-" content))
 		(setq content nil)
 	      (if (string-match "[ \t\n]+\\'" content)
 		  (setq content (substring content 0 (match-beginning 0))))
-	      (setq content (org-remove-indentation content))
-	      (if latexp (setq content (concat "\\nbsp\\\\ \\quad " content)))))
-	  (insert (make-string (org-inlinetask-get-current-indentation) ?\ )
-		  "-  ")
-	  (setq indent (make-string (current-column) ?\ ))
-	  (insert headline " :: ")
-	  (if content
-	      (insert (if htmlp " " (concat "\n" indent))
-		      (mapconcat 'identity (org-split-string content "\n")
-				 (concat "\n" indent)) "\n")
-	    (insert "\n"))
-	  (insert indent)
-	  (backward-delete-char 2)
-	  (insert "THISISTHEINLINELISTTEMINATOR\n"))))))
+	      (setq content (org-remove-indentation content))))
+	(setq content (or content ""))
+	;; grab elements to export
+	(when (string-match org-complex-heading-regexp headline)
+	  (let* ((todo (or (match-string 2 headline) ""))
+		 (class (or (and (eq "" todo) "")
+			    (if (member todo org-done-keywords) "done" "todo")))
+		 (priority (or (match-string 3 headline) ""))
+		 (heading (or (match-string 4 headline) ""))
+		 (tags (or (match-string 5 headline) ""))
+		 (backend-spec (assq backend org-inlinetask-export-templates))
+		 (format-str (nth 1 backend-spec))
+		 (tokens (cadr (nth 2 backend-spec)))
+		 ;; change nil arguments into empty strings
+		 (nil-to-str (lambda (el) (or (eval el) "")))
+		 ;; build and protect export string
+		 (export-str (org-add-props
+				 (eval (append '(format format-str)
+					       (mapcar nil-to-str tokens)))
+				 nil 'org-protected t)))
+	    ;; eventually insert it
+	    (insert export-str "\n")))))))
 
 (defun org-inlinetask-get-current-indentation ()
   "Get the indentation of the last non-while line above this one."
@@ -277,31 +328,11 @@ Either remove headline and meta data, or do special formatting."
 			    org-inlinetask-min-level))
     (replace-match "")))
 
-(defun org-inlinetask-remove-terminator ()
-  (let (beg end)
-    (save-excursion
-      (goto-char (point-min))
-      (while (re-search-forward "THISISTHEINLINELISTTEMINATOR\n" nil t)
-	(setq beg (match-beginning 0) end (match-end 0))
-	(save-excursion
-	  (beginning-of-line 1)
-	  (and (looking-at "<p\\(ara\\)?>THISISTHEINLINELISTTEMINATOR[ \t\n]*</p\\(ara\\)?>")
-	       (setq beg (point) end (match-end 0))))
-	(delete-region beg end)))))
-
 (eval-after-load "org-exp"
   '(add-hook 'org-export-preprocess-after-tree-selection-hook
 	     'org-inlinetask-export-handler))
 (eval-after-load "org"
   '(add-hook 'org-font-lock-hook 'org-inlinetask-fontify))
-(eval-after-load "org-html"
-  '(add-hook 'org-export-html-final-hook 'org-inlinetask-remove-terminator))
-(eval-after-load "org-latex"
-  '(add-hook 'org-export-latex-final-hook 'org-inlinetask-remove-terminator))
-(eval-after-load "org-ascii"
-  '(add-hook 'org-export-ascii-final-hook 'org-inlinetask-remove-terminator))
-(eval-after-load "org-docbook"
-  '(add-hook 'org-export-docbook-final-hook 'org-inlinetask-remove-terminator))
 
 (provide 'org-inlinetask)
 
