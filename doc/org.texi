@@ -5923,9 +5923,8 @@ but you can specify your own function using the @code{:formatter} parameter.
 :emphasize   @r{When @code{t}, emphasize level one and level two items.}
 :link        @r{Link the item headlines in the table to their origins.}
 :narrow      @r{An integer to limit the width of the headline column in}
-             @r{the org table.  Does not work together with @code{:link}.}
-             @r{If you write it like @samp{50!}, then the headline will also}
-             @r{be shortened in export, and will work with @code{:link}.}
+             @r{the org table.  If you write it like @samp{50!}, then the}
+             @r{headline will also be shortened in export.}
 :indent      @r{Indent each headline field according to its level.}
 :tcolumns    @r{Number of columns to be used for times.  If this is smaller}
              @r{than @code{:maxlevel}, lower levels will be lumped into one column.}
