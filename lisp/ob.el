@@ -362,10 +362,12 @@ block."
 	     (new-hash (when cache? (org-babel-sha1-hash info)))
 	     (old-hash (when cache? (org-babel-result-hash info)))
 	     (body (setf (nth 1 info)
-			 (if (and (cdr (assoc :noweb params))
-				  (string= "yes" (cdr (assoc :noweb params))))
-			     (org-babel-expand-noweb-references info)
-			   (nth 1 info))))
+			 (let ((noweb (cdr (assoc :noweb params))))
+			   (if (and noweb
+				    (or (string= "yes" noweb)
+					(string= "tangle" noweb)))
+			       (org-babel-expand-noweb-references info)
+			     (nth 1 info)))))
 	     (cmd (intern (concat "org-babel-execute:" lang)))
 	     (dir (cdr (assoc :dir params)))
 	     (default-directory
@@ -378,7 +380,7 @@ block."
 	     result)
 	(unwind-protect
 	    (flet ((call-process-region (&rest args)
-					(apply 'org-babel-tramp-handle-call-process-region args)))
+		    (apply 'org-babel-tramp-handle-call-process-region args)))
 	      (unless (fboundp cmd)
 		(error "No org-babel-execute function for %s!" lang))
 	      (if (and (not arg) new-hash (equal new-hash old-hash))
@@ -892,17 +894,32 @@ may be specified at the top of the current buffer."
 
 (defun org-babel-parse-header-arguments (arg-string)
   "Parse a string of header arguments returning an alist."
-  (if (> (length arg-string) 0)
-      (delq nil
-	    (mapcar
-	     (lambda (arg)
-	       (if (string-match
-                    "\\([^ \f\t\n\r\v]+\\)[ \f\t\n\r\v]+\\([^ \f\t\n\r\v]+.*\\)"
-                    arg)
-		   (cons (intern (concat ":" (match-string 1 arg)))
-                         (org-babel-read (org-babel-chomp (match-string 2 arg))))
-		 (cons (intern (concat ":" arg)) nil)))
-	     (split-string (concat " " arg-string) "[ \f\t\n\r\v]+:" t)))))
+  (when (> (length arg-string) 0)
+    (delq nil
+	  (mapcar
+	   (lambda (arg)
+	     (if (string-match
+		  "\\([^ \f\t\n\r\v]+\\)[ \f\t\n\r\v]+\\([^ \f\t\n\r\v]+.*\\)"
+		  arg)
+		 (cons (intern (match-string 1 arg))
+		       (org-babel-read (org-babel-chomp (match-string 2 arg))))
+	       (cons (intern (concat ":" arg)) nil)))
+	   ;; walk the list splitting on balanced instances of [ \t]:
+	   (let ((balance 0) (partial nil) (lst nil) (last 0))
+	     (mapc (lambda (ch)
+		     (setq balance (+ balance
+				      (cond ((equal 91 ch) 1)
+					    ((equal 93 ch) -1)
+					    (t 0))))
+		     (setq partial (cons ch partial))
+		     (when (and (= ch 58) (= balance 0)
+				(or (= last 32) (= last 9)))
+		       (setq lst (cons (apply #'string (nreverse (cddr partial)))
+				       lst))
+		       (setq partial (list ch)))
+		     (setq last ch))
+		   (string-to-list arg-string))
+	     (nreverse (cons (apply #'string (nreverse partial)) lst)))))))
 
 (defun org-babel-process-params (params)
   "Expand variables in PARAMS and add summary parameters."
@@ -1598,7 +1615,7 @@ parameters when merging lists."
 	      (:tangle ;; take the latest -- always overwrite
 	       (setq tangle (or (list (cdr pair)) tangle)))
 	      (:noweb
-	       (setq noweb (e-merge '(("yes" "no")) noweb
+	       (setq noweb (e-merge '(("yes" "no" "tangle")) noweb
 				    (split-string (or (cdr pair) "")))))
 	      (:cache
 	       (setq cache (e-merge '(("yes" "no")) cache

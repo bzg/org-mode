@@ -73,46 +73,39 @@ the variable."
     (let ((var (match-string 1 assignment))
 	  (ref (match-string 2 assignment)))
       (cons (intern var)
-	    ((lambda (val)
-	       (if (equal :ob-must-be-reference val)
-		   (org-babel-ref-resolve ref) val))
-	     (org-babel-ref-literal ref))))))
-
-(defun org-babel-ref-literal (ref)
-  "Return the value of REF if it is a literal value.
-Determine if the right side of a header argument variable
-assignment is a literal value or is a reference to some external
-resource.  REF should be a string of the right hand side of the
-assignment.  If REF is literal then return it's value, otherwise
-return nil."
-  (let ((out (org-babel-read ref)))
-    (if (equal out ref)
-        (if (string-match "^\".+\"$" ref)
-            (read ref)
-	  :ob-must-be-reference)
-      out)))
+	    (let ((out (org-babel-read ref)))
+	      (if (equal out ref)
+		  (if (string-match "^\".+\"$" ref)
+		      (read ref)
+		    (org-babel-ref-resolve ref))
+		out))))))
 
 (defvar org-babel-library-of-babel)
 (defun org-babel-ref-resolve (ref)
   "Resolve the reference REF and return its value."
   (save-excursion
     (let ((case-fold-search t)
-          type args new-refere new-referent result lob-info split-file split-ref
-          index index-row index-col)
+          type args new-refere new-header-args new-referent result
+	  lob-info split-file split-ref index index-row index-col)
       ;; if ref is indexed grab the indices -- beware nested indices
-      (when (and (string-match "\\[\\(.+\\)\\]" ref)
+      (when (and (string-match "\\[\\([^\\[]+\\)\\]$" ref)
 		 (let ((str (substring ref 0 (match-beginning 0))))
 		   (= (org-count ?( str) (org-count ?) str))))
         (setq index (match-string 1 ref))
         (setq ref (substring ref 0 (match-beginning 0))))
       ;; assign any arguments to pass to source block
-      (when (string-match "^\\(.+?\\)\(\\(.*\\)\)$" ref)
-        (setq new-refere (match-string 1 ref))
-        (setq new-referent (match-string 2 ref))
+      (when (string-match
+	     "^\\(.+?\\)\\(\\[\\(.*\\)\\]\\|\\(\\)\\)\(\\(.*\\)\)$" ref)
+        (setq new-refere      (match-string 1 ref))
+	(setq new-header-args (match-string 3 ref))
+        (setq new-referent    (match-string 5 ref))
         (when (> (length new-refere) 0)
-          (if (> (length new-referent) 0)
-              (setq args (mapcar (lambda (ref) (cons :var ref))
-                                 (org-babel-ref-split-args new-referent))))
+          (when (> (length new-referent) 0)
+	    (setq args (mapcar (lambda (ref) (cons :var ref))
+			       (org-babel-ref-split-args new-referent))))
+	  (when (> (length new-header-args) 0)
+	    (setq args (append (org-babel-parse-header-arguments new-header-args)
+			       args)))
           (setq ref new-refere)))
       (when (string-match "^\\(.+\\):\\(.+\\)$" ref)
         (setq split-file (match-string 1 ref))

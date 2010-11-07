@@ -39,7 +39,6 @@
 (defvar org-babel-lob-one-liner-regexp)
 (defvar org-babel-ref-split-regexp)
 (declare-function org-babel-lob-get-info "ob-lob" ())
-(declare-function org-babel-ref-literal "ob-ref" (ref))
 
 (add-to-list 'org-export-interblocks '(src org-babel-exp-inline-src-blocks))
 (add-to-list 'org-export-interblocks '(lob org-babel-exp-lob-one-liners))

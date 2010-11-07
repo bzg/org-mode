@@ -71,7 +71,8 @@ If you change the value of this variable then your files may
   (concat
    "^\\([ \t]*\\)#\\+\\(?:"
    (mapconcat #'regexp-quote org-babel-lob-call-aliases "\\|")
-   "\\):[ \t]+\\([^\(\)\n]+\\)\(\\([^\n]*\\)\)\\(\\[.+\\]\\|\\)[ \t]*\\([^\n]*\\)")
+   "\\):[ \t]+\\([^\(\)\n]+?\\)\\(\\[\\(.*\\)\\]\\|\\(\\)\\)"
+   "\(\\([^\n]*\\)\)\\(\\[.+\\]\\|\\)[ \t]*\\([^\n]*\\)")
   "Regexp to match calls to predefined source block functions.")
 
 ;; functions for executing lob one-liners
@@ -94,9 +95,12 @@ if so then run the appropriate source block from the Library."
           (append
 	   (mapcar #'org-babel-clean-text-properties 
 		   (list
-		    (format "%s(%s)%s"
-			    (match-string 2) (match-string 3) (match-string 4))
-		    (match-string 5)))
+		    (format "%s%s(%s)%s"
+			    (match-string 2)
+			    (if (match-string 4)
+				(concat "[" (match-string 4) "]") "")
+			    (or (match-string 6) "") (match-string 7))
+		    (match-string 8)))
 	   (list (length (match-string 1))))))))
   
 (defun org-babel-lob-execute (info)
