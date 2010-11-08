@@ -2608,9 +2608,10 @@ command."
 	;; does do the trick.
 	(if (looking-at "#[^\r\n]*")
 	    (append-to-buffer buffer (match-beginning 0) (1+ (match-end 0))))
-	(while (re-search-forward "[\n\r]#[^\n\r]*" nil t)
-	  (append-to-buffer buffer (1+ (match-beginning 0))
-			    (min (point-max) (1+ (match-end 0))))))
+	(when (re-search-forward "^\\*+[ \t]+" nil t)
+	  (while (re-search-backward "[\n\r]#[^\n\r]*" nil t)
+	    (append-to-buffer buffer (1+ (match-beginning 0))
+			      (min (point-max) (1+ (match-end 0)))))))
       (set-buffer buffer)
       (let ((buffer-file-name file)
 	    (org-inhibit-startup t))
