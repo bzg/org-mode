@@ -252,7 +252,7 @@ string as argument."
   :type 'plist)
 
 (defcustom org-clock-clocktable-formatter 'org-clocktable-write-default
-  "Function to turn clockng data into a table.
+  "Function to turn clocking data into a table.
 For more information, see `org-clocktable-write-default'."
   :group 'org-clocktable
   :type 'function)
@@ -1806,7 +1806,7 @@ the currently selected interval size."
 			  org-clock-clocktable-formatter
 			  'org-clocktable-write-default))
 	   cc range-text ipos pos one-file-with-archives
-	   scope-is-list tbls level link)
+	   scope-is-list tbls level)
 
       ;; Check if we need to do steps
       (when block
@@ -1879,7 +1879,7 @@ the currently selected interval size."
       (funcall formatter ipos tbls params))))
 
 (defun org-clocktable-write-default (ipos tables params)
-  "Write out a clock table at position IPOS in the current buffer
+  "Write out a clock table at position IPOS in the current buffer.
 TABLES is a list of tables with clocking data as produced by
 `org-clock-get-table-data'.  PARAMS is the parameter property list obtained
 from the dynamic block defintion."
@@ -2231,7 +2231,6 @@ TIME:      The sum of all time spend in this tree, in minutes.  This time
 	      (when (> time 0) (push (list level hdl tsp time) tbl))))))
       (setq tbl (nreverse tbl))
       (list file org-clock-file-total-minutes tbl))))
-
 
 (defun org-clock-time% (total &rest strings)
   "Compute a time fraction in percent.
