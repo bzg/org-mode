@@ -17320,7 +17320,8 @@ This command does many different things, depending on context:
       (if arg
 	  (call-interactively 'org-table-recalculate)
 	(org-table-maybe-recalculate-line))
-      (call-interactively 'org-table-align))
+      (call-interactively 'org-table-align)
+      (orgtbl-send-table 'maybe))
      ((or (org-footnote-at-reference-p)
 	  (org-footnote-at-definition-p))
       (call-interactively 'org-footnote-action))
