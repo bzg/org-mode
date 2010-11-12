@@ -1922,70 +1922,55 @@ table.  But it's easier just to start typing, like
 @kbd{|Name|Phone|Age @key{RET} |- @key{TAB}}.
 
 @tsubheading{Re-aligning and field motion}
-@orgcmd{C-c C-c,org-ctrl-c-ctrl-c}
+@orgcmd{C-c C-c,org-table-align}
 Re-align the table without moving the cursor.
 @c
-@orgcmd{<TAB>,org-cycle}
+@orgcmd{<TAB>,org-table-next-field}
 Re-align the table, move to the next field.  Creates a new row if
 necessary.
 @c
-@orgcmd{S-@key{TAB},org-shifttab}
+@orgcmd{S-@key{TAB},org-table-previous-field}
 Re-align, move to previous field.
 @c
-@orgcmd{@key{RET},org-return}
+@orgcmd{@key{RET},org-table-next-row}
 Re-align the table and move down to next row.  Creates a new row if
 necessary.  At the beginning or end of a line, @key{RET} still does
 NEWLINE, so it can be used to split a table.
 @c
-@kindex M-a
-@item M-a
+@orgcmd{M-a,org-table-beginning-of-field}
 Move to beginning of the current table field, or on to the previous field.
-@kindex M-e
-@item M-e
+@orgcmd{M-e,org-table-end-of-field}
 Move to end of the current table field, or on to the next field.
 
 @tsubheading{Column and row editing}
-@kindex M-@key{left}
-@kindex M-@key{right}
-@item M-@key{left}
-@itemx M-@key{right}
+@orgcmdkkcc{M-@key{left},M-@key{right},org-table-move-column-left,org-table-move-column-right}
 Move the current column left/right.
 @c
-@kindex M-S-@key{left}
-@item M-S-@key{left}
+@orgcmd{M-S-@key{left},org-table-delete-column}
 Kill the current column.
 @c
-@kindex M-S-@key{right}
-@item M-S-@key{right}
+@orgcmd{M-S-@key{right},org-table-insert-column}
 Insert a new column to the left of the cursor position.
 @c
-@kindex M-@key{up}
-@kindex M-@key{down}
-@item M-@key{up}
-@itemx M-@key{down}
+@orgcmdkkcc{M-@key{up},M-@key{down},org-table-move-row-up,org-table-move-row-down}
 Move the current row up/down.
 @c
-@kindex M-S-@key{up}
-@item M-S-@key{up}
+@orgcmd{M-S-@key{up},org-table-kill-row}
 Kill the current row or horizontal line.
 @c
-@kindex M-S-@key{down}
-@item M-S-@key{down}
+@orgcmd{M-S-@key{down},org-table-insert-row}
 Insert a new row above the current row.  With a prefix argument, the line is
 created below the current one.
 @c
-@kindex C-c -
-@item C-c -
+@orgcmd{C-c -,org-table-insert-hline}
 Insert a horizontal line below current row.  With a prefix argument, the line
 is created above the current line.
 @c
-@kindex C-c @key{RET}
-@item C-c @key{RET}
+@orgcmd{C-c @key{RET},org-table-hline-and-move}
 Insert a horizontal line below current row, and move the cursor into the row
 below that line.
 @c
-@kindex C-c ^
-@item C-c ^
+@orgcmd{C-c ^,org-table-sort-lines}
 Sort the table lines in the region.  The position of point indicates the
 column to be used for sorting, and the range of lines is the range
 between the nearest horizontal separator lines, or the entire table.  If
@@ -1997,35 +1982,30 @@ included into the sorting.  The command prompts for the sorting type
 argument, alphabetic sorting will be case-sensitive.
 
 @tsubheading{Regions}
-@kindex C-c C-x M-w
-@item C-c C-x M-w
+@orgcmd{C-c C-x M-w,org-table-copy-region}
 Copy a rectangular region from a table to a special clipboard.  Point and
 mark determine edge fields of the rectangle.  If there is no active region,
 copy just the current field.  The process ignores horizontal separator lines.
 @c
-@kindex C-c C-x C-w
-@item C-c C-x C-w
+@orgcmd{C-c C-x C-w,org-table-cut-region}
 Copy a rectangular region from a table to a special clipboard, and
 blank all fields in the rectangle.  So this is the ``cut'' operation.
 @c
-@kindex C-c C-x C-y
-@item C-c C-x C-y
+@orgcmd{C-c C-x C-y,org-table-paste-rectangle}
 Paste a rectangular region into a table.
 The upper left corner ends up in the current field.  All involved fields
 will be overwritten.  If the rectangle does not fit into the present table,
 the table is enlarged as needed.  The process ignores horizontal separator
 lines.
 @c
-@kindex M-@key{RET}
-@itemx M-@kbd{RET}
-Wrap several fields in a column like a paragraph.  If there is an active
-region, and both point and mark are in the same column, the text in the
-column is wrapped to minimum width for the given number of lines.  A numeric
-prefix argument may be used to change the number of desired lines.  If there
-is no region, the current field is split at the cursor position and the text
-fragment to the right of the cursor is prepended to the field one line
-down. If there is no region, but you specify a prefix argument, the current
-field is made blank, and the content is appended to the field above.
+@orgcmd{M-@key{RET},org-table-wrap-region}
+Split the current field at the cursor position and move the rest to the line
+below.  If there is an active region, and both point and mark are in the same
+column, the text in the column is wrapped to minimum width for the given
+number of lines.  A numeric prefix argument may be used to change the number
+of desired lines.  If there is no region, but you specify a prefix argument,
+the current field is made blank, and the content is appended to the field
+above.
 
 @tsubheading{Calculations}
 @cindex formula, in tables
@@ -2033,14 +2013,12 @@ field is made blank, and the content is appended to the field above.
 @cindex region, active
 @cindex active region
 @cindex transient mark mode
-@kindex C-c +
-@item C-c +
+@orgcmd{C-c +,org-table-sum}
 Sum the numbers in the current column, or in the rectangle defined by
 the active region.  The result is shown in the echo area and can
 be inserted with @kbd{C-y}.
 @c
-@kindex S-@key{RET}
-@item S-@key{RET}
+@orgcmd{S-@key{RET},org-table-copy-down}
 @vindex org-table-copy-increment
 When current field is empty, copy from first non-empty field above.  When not
 empty, copy current field down to next row and move cursor along with it.
@@ -2051,8 +2029,7 @@ increment.  This key is also used by shift-selection and related modes
 (@pxref{Conflicts}).
 
 @tsubheading{Miscellaneous}
-@kindex C-c `
-@item C-c `
+@orgcmd{C-c `,org-table-edit-field}
 Edit the current field in a separate window.  This is useful for fields that
 are not fully visible (@pxref{Column width and alignment}).  When called with
 a @kbd{C-u} prefix, just make the full field visible, so that it can be
@@ -2066,12 +2043,13 @@ TAB-separated text files.  This command works by inserting the file into
 the buffer and then converting the region to a table.  Any prefix
 argument is passed on to the converter, which uses it to determine the
 separator.
-@item C-c |
+@orgcmd{C-c |,org-table-create-or-convert-from-region}
 Tables can also be imported by pasting tabular text into the Org
 buffer, selecting the pasted text with @kbd{C-x C-x} and then using the
 @kbd{C-c |} command (see above under @i{Creation and conversion}).
 @c
 @item M-x org-table-export
+@findex org-table-export
 @vindex org-table-export-default-format
 Export the table, by default as a TAB-separated file.  Use for data
 exchange with, for example, spreadsheet or database programs.  The format
@@ -2548,8 +2526,7 @@ Instead of typing an equation into the field, you may also use the
 following command
 
 @table @kbd
-@kindex C-u C-c =
-@item C-u C-c =
+@orgcmd{C-u C-c =,org-table-eval-formula}
 Install a new formula for the current field.  The command prompts for a
 formula with default taken from the @samp{#+TBLFM:} line, applies
 it to the current field, and stores it.
@@ -2582,8 +2559,7 @@ Instead of typing an equation into the field, you may also use the
 following command:
 
 @table @kbd
-@kindex C-c =
-@item C-c =
+@orgcmd{C-c =,org-table-eval-formula}
 Install a new formula for the current column and replace current field with
 the result of the formula.  The command prompts for a formula, with default
 taken from the @samp{#+TBLFM} line, applies it to the current field and
@@ -2606,32 +2582,29 @@ if possible.  If you prefer to only work with the internal format (like
 @code{org-table-use-standard-references}.
 
 @table @kbd
-@kindex C-c =
-@kindex C-u C-c =
-@item C-c =
-@itemx C-u C-c =
+@orgcmdkkc{C-c =,C-u C-c =,org-table-eval-formula}
 Edit the formula associated with the current column/field in the
 minibuffer.  See @ref{Column formulas}, and @ref{Field formulas}.
-@kindex C-u C-u C-c =
-@item C-u C-u C-c =
+@orgcmd{C-u C-u C-c =,org-table-eval-formula}
 Re-insert the active formula (either a
 field formula, or a column formula) into the current field, so that you
 can edit it directly in the field.  The advantage over editing in the
 minibuffer is that you can use the command @kbd{C-c ?}.
-@kindex C-c ?
-@item C-c ?
+@orgcmd{C-c ?,org-table-field-info}
 While editing a formula in a table field, highlight the field(s)
 referenced by the reference at the cursor position in the formula.
 @kindex C-c @}
+@findex org-table-toggle-coordinate-overlays
 @item C-c @}
-Toggle the display of row and column numbers for a table, using
-overlays.  These are updated each time the table is aligned; you can
-force it with @kbd{C-c C-c}.
+Toggle the display of row and column numbers for a table, using overlays
+(@command{org-table-toggle-coordinate-overlays}).  These are updated each
+time the table is aligned; you can force it with @kbd{C-c C-c}.
 @kindex C-c @{
+@findex org-table-toggle-formula-debugger
 @item C-c @{
-Toggle the formula debugger on and off.  See below.
-@kindex C-c '
-@item C-c '
+Toggle the formula debugger on and off
+(@command{org-table-toggle-formula-debugger}).  See below.
+@orgcmd{C-c ',org-table-edit-formulas}
 Edit all formulas for the current table in a special buffer, where the
 formulas will be displayed one per line.  If the current field has an
 active formula, the cursor in the formula editor will mark it.
@@ -2639,46 +2612,40 @@ While inside the special buffer, Org will automatically highlight
 any field or range reference at the cursor position.  You may edit,
 remove and add formulas, and use the following commands:
 @table @kbd
-@kindex C-c C-c
-@kindex C-x C-s
-@item C-c C-c
-@itemx C-x C-s
+@orgcmdkkc{C-c C-c,C-x C-s,org-table-fedit-finish}
 Exit the formula editor and store the modified formulas.  With @kbd{C-u}
 prefix, also apply the new formulas to the entire table.
-@kindex C-c C-q
-@item C-c C-q
+@orgcmd{C-c C-q,org-table-fedit-abort}
 Exit the formula editor without installing changes.
-@kindex C-c C-r
-@item C-c C-r
+@orgcmd{C-c C-r,org-table-fedit-toggle-ref-type}
 Toggle all references in the formula editor between standard (like
 @code{B3}) and internal (like @code{@@3$2}).
-@kindex @key{TAB}
-@item @key{TAB}
+@orgcmd{@key{TAB},org-table-fedit-lisp-indent}
 Pretty-print or indent Lisp formula at point.  When in a line containing
 a Lisp formula, format the formula according to Emacs Lisp rules.
 Another @key{TAB} collapses the formula back again.  In the open
 formula, @key{TAB} re-indents just like in Emacs Lisp mode.
-@kindex M-@key{TAB}
-@item M-@key{TAB}
+@orgcmd{M-@key{TAB},lisp-complete-symbol}
 Complete Lisp symbols, just like in Emacs Lisp mode.
 @kindex S-@key{up}
 @kindex S-@key{down}
 @kindex S-@key{left}
 @kindex S-@key{right}
+@findex org-table-fedit-ref-up
+@findex org-table-fedit-ref-down
+@findex org-table-fedit-ref-left
+@findex org-table-fedit-ref-right
 @item S-@key{up}/@key{down}/@key{left}/@key{right}
 Shift the reference at point.  For example, if the reference is
 @code{B3} and you press @kbd{S-@key{right}}, it will become @code{C3}.
 This also works for relative references and for hline references.
-@kindex M-S-@key{up}
-@kindex M-S-@key{down}
-@item M-S-@key{up}/@key{down}
+@orgcmdkkcc{M-S-@key{up},M-S-@key{down},org-table-fedit-line-up,org-table-fedit-line-down}
 Move the test line for column formulas in the Org buffer up and
 down.
-@kindex M-@key{up}
-@kindex M-@key{down}
-@item M-@key{up}/@key{down}
+@orgcmdkkcc{M-@key{up},M-@key{down},org-table-fedit-scroll-down,org-table-fedit-scroll-up}
 Scroll the window displaying the table.
 @kindex C-c @}
+@findex org-table-toggle-coordinate-overlays
 @item C-c @}
 Turn the coordinate grid in the table on and off.
 @end table
@@ -2718,8 +2685,7 @@ In order to recalculate a line of a table or the entire table, use the
 following commands:
 
 @table @kbd
-@kindex C-c *
-@item C-c *
+@orgcmd{C-c *,org-table-recalculate}
 Recalculate the current row by first applying the stored column formulas
 from left to right, and all field formulas in the current row.
 @c
@@ -2730,16 +2696,15 @@ from left to right, and all field formulas in the current row.
 Recompute the entire table, line by line.  Any lines before the first
 hline are left alone, assuming that these are part of the table header.
 @c
-@kindex C-u C-u C-c *
-@kindex C-u C-u C-c C-c
-@item C-u C-u C-c *
-@itemx C-u C-u C-c C-c
+@orgcmdkkc{C-u C-u C-c *,C-u C-u C-c C-c,org-table-iterate}
 Iterate the table by recomputing it until no further changes occur.
 This may be necessary if some computed fields use the value of other
 fields that are computed @i{later} in the calculation sequence.
 @item M-x org-table-recalculate-buffer-tables
+@findex org-table-recalculate-buffer-tables
 Recompute all tables in the current buffer.
 @item M-x org-table-iterate-buffer-tables
+@findex org-table-iterate-buffer-tables
 Iterate all tables in the current buffer, in order to converge table-to-table
 dependencies.
 @end table
@@ -2751,8 +2716,7 @@ If you want the recalculation of fields to happen automatically, or if
 you want to be able to assign @i{names} to fields and columns, you need
 to reserve the first column of the table for special marking characters.
 @table @kbd
-@kindex C-#
-@item C-#
+@orgcmd{C-#,org-table-rotate-recalc-marks}
 Rotate the calculation mark in first column through the states @samp{ },
 @samp{#}, @samp{*}, @samp{!}, @samp{$}.  When there is an active region,
 change all marks in the region.
