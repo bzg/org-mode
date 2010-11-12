@@ -1213,7 +1213,11 @@ lang=\"%s\" xml:lang=\"%s\">
 	    (throw 'nextline nil))
 
 	  ;; Protected HTML
-	  (when (get-text-property 0 'org-protected line)
+	  (when (and (get-text-property 0 'org-protected line)
+		     ;; Make sure it is the entire line that is protected
+		     (not (< (or (next-single-property-change
+				  0 'org-protected line) 10000)
+			     (length line))))
 	    (let (par (ind (get-text-property 0 'original-indentation line)))
 	      (when (re-search-backward
 		     "\\(<p>\\)\\([ \t\r\n]*\\)\\=" (- (point) 100) t)
