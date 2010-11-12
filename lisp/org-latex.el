@@ -453,12 +453,6 @@ pygmentize -L lexers
 	   (symbol :tag "Major mode       ")
 	   (string :tag "Listings language"))))
 
-(defcustom org-export-latex-minted-with-line-numbers nil
-  "Should source code line numbers be included when exporting
-with the latex minted package?"
-  :group 'org-export-latex
-  :type 'boolean)
-
 (defcustom org-export-latex-remove-from-headlines
   '(:todo nil :priority nil :tags nil)
   "A plist of keywords to remove from headlines.  OBSOLETE.
