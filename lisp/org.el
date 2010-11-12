@@ -19011,8 +19011,6 @@ beyond the end of the headline."
 
 (define-key org-mode-map "\C-a" 'org-beginning-of-line)
 (define-key org-mode-map "\C-e" 'org-end-of-line)
-(define-key org-mode-map [home] 'org-beginning-of-line)
-(define-key org-mode-map [end]  'org-end-of-line)
 
 (defun org-backward-sentence (&optional arg)
   "Go to beginning of sentence, or beginning of table field.
