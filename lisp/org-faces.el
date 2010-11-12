@@ -685,6 +685,15 @@ If it is less than 8, the level-1 face gets re-used for level N+1 etc."
   :type 'integer
   :group 'org-faces)
 
+(defcustom org-cycle-level-faces t
+ "Non-nil means level styles cycle after level `org-n-level-faces'.
+Then so level org-n-level-faces+1 is styled like level 1.
+If nil, then all levels >=org-n-level-faces are styled like
+level org-n-level-faces"
+ :group 'org-appearance
+ :group 'org-faces
+ :type 'boolean)
+
 (defface org-latex-and-export-specials
   (let ((font (cond ((assq :inherit custom-face-attributes)
 		     '(:inherit underline))

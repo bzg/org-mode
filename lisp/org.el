@@ -5581,14 +5581,17 @@ needs to be inserted at a specific position in the font-lock sequence.")
 (defvar org-l nil)
 (defvar org-f nil)
 (defun org-get-level-face (n)
-  "Get the right face for match N in font-lock matching of headlines."
-  (setq org-l (- (match-end 2) (match-beginning 1) 1))
-  (if org-odd-levels-only (setq org-l (1+ (/ org-l 2))))
-  (setq org-f (nth (% (1- org-l) org-n-level-faces) org-level-faces))
-  (cond
-   ((eq n 1) (if org-hide-leading-stars 'org-hide org-f))
-   ((eq n 2) org-f)
-   (t (if org-level-color-stars-only nil org-f))))
+ "Get the right face for match N in font-lock matching of headlines."
+ (setq org-l (- (match-end 2) (match-beginning 1) 1))
+ (if org-odd-levels-only (setq org-l (1+ (/ org-l 2))))
+ (if org-cycle-level-faces
+     (setq org-f (nth (% (1- org-l) org-n-level-faces) org-level-faces))
+   (setq org-f (nth (1- (min org-l org-n-level-faces)) org-level-faces)))
+ (cond
+  ((eq n 1) (if org-hide-leading-stars 'org-hide org-f))
+  ((eq n 2) org-f)
+  (t (if org-level-color-stars-only nil org-f))))
+
 
 (defun org-get-todo-face (kwd)
   "Get the right face for a TODO keyword KWD.
