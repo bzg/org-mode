@@ -3422,7 +3422,7 @@ After a match, the match groups contain these elements:
 (defcustom org-emphasis-regexp-components
   '(" \t('\"{" "- \t.,:!?;'\")}\\" " \t\r\n,\"'" "." 1)
   "Components used to build the regular expression for emphasis.
-This is a list with 6 entries.  Terminology:  In an emphasis string
+This is a list with five entries.  Terminology:  In an emphasis string
 like \" *strong word* \", we call the initial space PREMATCH, the final
 space POSTMATCH, the stars MARKERS, \"s\" and \"d\" are BORDER characters
 and \"trong wor\" is the body.  The different components in this variable
