@@ -925,12 +925,12 @@ This function makes sure that dates are aligned for easy reading."
   "Convert TIME of a string like '13:45' to an AM/PM style time string."
   (let* ((hour-number (string-to-number (substring time 0 -3)))
          (minute (substring time -2))
-         (ampm "AM"))
+         (ampm "am"))
     (cond
      ((equal hour-number 12)
-      (setq ampm "PM"))
+      (setq ampm "pm"))
      ((> hour-number 12)
-      (setq ampm "PM")
+      (setq ampm "pm")
       (setq hour-number (- hour-number 12))))
     (concat
      (if org-agenda-time-leading-zero
