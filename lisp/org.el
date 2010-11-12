@@ -1958,7 +1958,7 @@ indicating if the keywords should be interpreted as a sequence of
 action steps, or as different types of TODO items.  The first
 keywords are states requiring action - these states will select a headline
 for inclusion into the global TODO list Org-mode produces.  If one of
-the \"keywords\" is the vertical bat \"|\" the remaining keywords
+the \"keywords\" is the vertical bar, \"|\", the remaining keywords
 signify that no further action is necessary.  If \"|\" is not found,
 the last keyword is treated as the only DONE state of the sequence.
 
