@@ -1080,6 +1080,9 @@ on this string to produce the exported version."
       ;; Mark end of lists
       (org-export-mark-list-ending backend)
 
+      ;; Export code blocks
+      (org-export-blocks-preprocess)
+
       ;; Handle source code snippets
       (org-export-replace-src-segments-and-examples backend)
 
