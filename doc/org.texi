@@ -1020,6 +1020,18 @@ User-defined properties are capitalized; built-in properties with
 special meaning are written with all capitals.
 @end table
 
+The manual lists both the keys and the corresponding commands for accessing
+functionality.  Org mode often uses the same key for different functions,
+depending on context.  The command that is bound to such keys has a generic
+name, like @code{org-metaright}.  In the manual we will, wherever possible,
+give the function that is internally called by the generic command.  For
+example, in the chapter on document structure, @kbd{M-@key{right}} will be
+listed to call @code{org-do-demote}, while in the chapter on tables, it will
+be listed to call org-table-move-column-right.
+
+If you prefer, you can compile the manual without the command names by
+unsetting the flag @code{cmdnames} in @file{org.texi}.
+
 @node Document Structure, Tables, Introduction, Top
 @chapter Document structure
 @cindex document structure
@@ -3103,9 +3115,8 @@ Org provides methods to create a link in the correct syntax, to
 insert it into an Org file, and to follow the link.
 
 @table @kbd
-@kindex C-c l
+@orgcmd{C-c l,org-store-link}
 @cindex storing links
-@item C-c l
 Store a link to the current location.  This is a @emph{global} command (you
 must create the key binding yourself) which can be used in any buffer to
 create a link.  The link will be stored for later insertion into an Org
@@ -3161,11 +3172,10 @@ When the cursor is in an agenda view, the created link points to the
 entry referenced by the current line.
 
 @c
-@kindex C-c C-l
+@orgcmd{C-c C-l,org-insert-link}
 @cindex link completion
 @cindex completion, of links
 @cindex inserting links
-@item C-c C-l
 @vindex org-keep-stored-link-after-insertion
 Insert a link@footnote{ Note that you don't have to use this command to
 insert a link.  Links in Org are plain text, and you can type or paste them
@@ -3195,10 +3205,9 @@ calling a special function @code{org-PREFIX-complete-link}.}  For
 example, if you type @kbd{file @key{RET}}, file name completion (alternative
 access: @kbd{C-u C-c C-l}, see below) will be offered, and after @kbd{bbdb
 @key{RET}} you can complete contact names.
-@kindex C-u C-c C-l
+@orgkey C-u C-c C-l
 @cindex file name completion
 @cindex completion, of file names
-@item C-u C-c C-l
 When @kbd{C-c C-l} is called with a @kbd{C-u} prefix argument, a link to
 a file will be inserted and you may use file name completion to select
 the name of the file.  The path to the file is inserted relative to the
@@ -3213,9 +3222,7 @@ When the cursor is on an existing link, @kbd{C-c C-l} allows you to edit the
 link and description parts of the link.
 @c
 @cindex following links
-@kindex C-c C-o
-@kindex @key{RET}
-@item C-c C-o @ @r{(or, if @code{org-return-follows-link} is set, also} @key{RET}
+@orgcmd{C-c C-o,org-open-at-point}
 @vindex org-file-apps
 Open link at point.  This will launch a web browser for URLs (using
 @command{browse-url-at-point}), run VM/MH-E/Wanderlust/Rmail/Gnus/BBDB for
@@ -3231,13 +3238,17 @@ visit the file with Emacs, use a @kbd{C-u} prefix.  If you want to avoid
 opening in Emacs, use a @kbd{C-u C-u} prefix.@*
 If the cursor is on a headline, but not on a link, offer all links in the
 headline and entry text.
+@orgkey @key{RET}
+@vindex org-return-follows-link
+When @code{org-return-follows-link} is set, @kbd{@key{RET}} will also follow
+the link at point.
 @c
 @kindex mouse-2
 @kindex mouse-1
 @item mouse-2
 @itemx mouse-1
 On links, @kbd{mouse-2} will open the link just as @kbd{C-c C-o}
-would.  Under Emacs 22, @kbd{mouse-1} will also follow a link.
+would.  Under Emacs 22 and later, @kbd{mouse-1} will also follow a link.
 @c
 @kindex mouse-3
 @item mouse-3
@@ -3246,13 +3257,12 @@ Like @kbd{mouse-2}, but force file links to be opened with Emacs, and
 internal links to be displayed in another window@footnote{See the
 variable @code{org-display-internal-link-with-indirect-buffer}}.
 @c
+@orgcmd{C-c C-x C-v,org-toggle-inline-images}
 @cindex inlining images
 @cindex images, inlining
-@kindex C-c C-x C-v
 @vindex org-startup-with-inline-images
 @cindex @code{inlineimages}, STARTUP keyword
 @cindex @code{noinlineimages}, STARTUP keyword
-@item C-c C-x C-v
 Toggle the inline display of linked images.  Normally this will only inline
 images that have no description part in the link, i.e. images that will also
 be inlined during export.  When called with a prefix argument, also display
@@ -3260,25 +3270,20 @@ images that do have a link description.  You can ask for inline images to be
 displayed at startup by configuring the variable
 @code{org-startup-with-inline-images}@footnote{with corresponding
 @code{#+STARTUP} keywords @code{inlineimages} and @code{inlineimages}}.
+@orgcmd{C-c %,org-mark-ring-push}
 @cindex mark ring
-@kindex C-c %
-@item C-c %
 Push the current position onto the mark ring, to be able to return
 easily. Commands following an internal link do this automatically.
 @c
+@orgcmd{C-c &,org-mark-ring-goto}
 @cindex links, returning to
-@kindex C-c &
-@item C-c &
 Jump back to a recorded position.  A position is recorded by the
 commands following internal links, and by @kbd{C-c %}.  Using this
 command several times in direct succession moves through a ring of
 previously recorded positions.
 @c
-@kindex C-c C-x C-n
-@kindex C-c C-x C-p
+@orgcmdkkcc{C-c C-x C-n,C-c C-x C-p,org-next-link,org-previous-link}
 @cindex links, finding next/previous
-@item C-c C-x C-n
-@itemx C-c C-x C-p
 Move forward/backward to the next link in the buffer.  At the limit of
 the buffer, the search fails once, and then wraps around.  The key
 bindings for this are really too long, you might want to bind this also
@@ -3480,9 +3485,8 @@ Any headline becomes a TODO item when it starts with the word
 The most important commands to work with TODO entries are:
 
 @table @kbd
-@kindex C-c C-t
+@orgcmd{C-c C-t,org-todo}
 @cindex cycling, of TODO states
-@item C-c C-t
 Rotate the TODO state of the current item among
 
 @example
@@ -3493,8 +3497,7 @@ Rotate the TODO state of the current item among
 The same rotation can also be done ``remotely'' from the timeline and
 agenda buffers with the @kbd{t} command key (@pxref{Agenda commands}).
 
-@kindex C-u C-c C-t
-@item C-u C-c C-t
+@orgkey{C-u C-c C-t}
 Select a specific keyword using completion or (if it has been set up)
 the fast selection interface.  For the latter, you need to assign keys
 to TODO states, see @ref{Per-file keywords}, and @ref{Setting tags}, for
@@ -3502,17 +3505,15 @@ more information.
 
 @kindex S-@key{right}
 @kindex S-@key{left}
+@item S-@key{right} @ @r{/} @ S-@key{left}
 @vindex org-treat-S-cursor-todo-selection-as-state-change
-@item S-@key{right}
-@itemx S-@key{left}
 Select the following/preceding TODO state, similar to cycling.  Useful
 mostly if more than two TODO states are possible (@pxref{TODO
 extensions}).  See also @ref{Conflicts}, for a discussion of the interaction
 with @code{shift-selection-mode}.  See also the variable
 @code{org-treat-S-cursor-todo-selection-as-state-change}.
-@kindex C-c / t
+@orgcmd{C-c / t,org-show-todo-key}
 @cindex sparse tree, for TODO
-@itemx C-c / t
 @vindex org-todo-keywords
 View TODO items in a @emph{sparse tree} (@pxref{Sparse trees}).  Folds the
 entire buffer, but shows all TODO items (with not-DONE state) and the
@@ -3523,15 +3524,13 @@ entries that match any one of these keywords.  With numeric prefix argument
 N, show the tree for the Nth keyword in the variable
 @code{org-todo-keywords}.  With two prefix arguments, find all TODO states,
 both un-done and done.
-@kindex C-c a t
-@item C-c a t
+@orgcmd{C-c a t,org-todo-list}
 Show the global TODO list.  Collects the TODO items (with not-DONE states)
 from all agenda files (@pxref{Agenda Views}) into a single buffer.  The new
 buffer will be in @code{agenda-mode}, which provides commands to examine and
 manipulate the TODO entries from the new buffer (@pxref{Agenda commands}).
 @xref{Global TODO list}, for more information.
-@kindex S-M-@key{RET}
-@item S-M-@key{RET}
+@orgcmd{S-M-@key{RET},org-insert-todo-heading}
 Insert a new TODO entry below the current one.
 @end table
 
@@ -3808,8 +3807,7 @@ example:
 @end example
 
 @table @kbd
-@kindex C-c C-x o
-@item C-c C-x o
+@orgcmd{C-c C-x o,org-toggle-ordered-property}
 @vindex org-track-ordered-property-with-tag
 @cindex property, ORDERED
 Toggle the @code{ORDERED} property of the current entry.  A property is used
@@ -3817,8 +3815,7 @@ for this behavior because this should be local to the current entry, not
 inherited like a tag.  However, if you would like to @i{track} the value of
 this property with a tag for better visibility, customize the variable
 @code{org-track-ordered-property-with-tag}.
-@kindex C-u C-u C-u C-c C-t
-@item C-u C-u C-u C-c C-t
+@orgkey{C-u C-u C-u C-c C-t}
 Change TODO state, circumventing any state blocking.
 @end table
 
@@ -4092,18 +4089,16 @@ Priorities can be attached to any outline node; they do not need to be TODO
 items.
 
 @table @kbd
-@kindex @kbd{C-c ,}
 @item @kbd{C-c ,}
-Set the priority of the current headline.  The command prompts for a
-priority character @samp{A}, @samp{B} or @samp{C}.  When you press
-@key{SPC} instead, the priority cookie is removed from the headline.
-The priorities can also be changed ``remotely'' from the timeline and
-agenda buffer with the @kbd{,} command (@pxref{Agenda commands}).
+@kindex @kbd{C-c ,}
+@findex org-priority
+Set the priority of the current headline (@command{org-priority}).  The
+command prompts for a priority character @samp{A}, @samp{B} or @samp{C}.
+When you press @key{SPC} instead, the priority cookie is removed from the
+headline.  The priorities can also be changed ``remotely'' from the timeline
+and agenda buffer with the @kbd{,} command (@pxref{Agenda commands}).
 @c
-@kindex S-@key{up}
-@kindex S-@key{down}
-@item S-@key{up}
-@itemx S-@key{down}
+@orgcmdkkcc{S-@key{up},S-@key{down},org-priority-up,org-priority-down}
 @vindex org-priority-start-cycle-with-default
 Increase/decrease priority of current headline@footnote{See also the option
 @code{org-priority-start-cycle-with-default}.}.  Note that these keys are
@@ -4253,13 +4248,11 @@ off a box while there are unchecked boxes above it.
 @noindent The following commands work with checkboxes:
 
 @table @kbd
-@kindex C-c C-c
-@item C-c C-c
+@orgcmd{C-c C-c,org-toggle-checkbox}
 Toggle checkbox status or (with prefix arg) checkbox presence at point.  With
 double prefix argument, set it to @samp{[-]}, which is considered to be an
 intermediate state.
-@kindex C-c C-x C-b
-@item C-c C-x C-b
+@orgcmd{C-c C-x C-b,org-toggle-checkbox}
 Toggle checkbox status or (with prefix arg) checkbox presence at point.  With
 double prefix argument, set it to @samp{[-]}, which is considered to be an
 intermediate state.
@@ -4274,13 +4267,11 @@ this headline and the next (so @emph{not} the entire subtree).
 @item
 If there is no active region, just toggle the checkbox at point.
 @end itemize
-@kindex M-S-@key{RET}
-@item M-S-@key{RET}
+@orgcmd{M-S-@key{RET},org-insert-todo-heading}
 Insert a new item with a checkbox.
 This works only if the cursor is already in a plain list item
 (@pxref{Plain lists}).
-@kindex C-c C-x o
-@item C-c C-x o
+@orgcmd{C-c C-x o,org-toggle-ordered-property}
 @vindex org-track-ordered-property-with-tag
 @cindex property, ORDERED
 Toggle the @code{ORDERED} property of the entry, to toggle if checkboxes must
@@ -4289,8 +4280,7 @@ this should be local to the current entry, not inherited like a tag.
 However, if you would like to @i{track} the value of this property with a tag
 for better visibility, customize the variable
 @code{org-track-ordered-property-with-tag}.
-@kindex C-c #
-@item C-c #
+@orgcmd{C-c #,org-update-statistics-cookies}
 Update the statistics cookie in the current outline entry.  When called with
 a @kbd{C-u} prefix, update the entire file.  Checkbox statistic cookies are
 updated automatically if you toggle checkboxes with @kbd{C-c C-c} and make
@@ -4384,8 +4374,7 @@ After a colon, @kbd{M-@key{TAB}} offers completion on tags.  There is
 also a special command for inserting tags:
 
 @table @kbd
-@kindex C-c C-q
-@item C-c C-q
+@orgcmd{C-c C-q,org-set-tags-command}
 @cindex completion, of tags
 @vindex org-tags-column
 Enter new tags for the current headline.  Org-mode will either offer
@@ -4395,8 +4384,7 @@ to @code{org-tags-column}.  When called with a @kbd{C-u} prefix, all
 tags in the current buffer will be aligned to that column, just to make
 things look nice.  TAGS are automatically realigned after promotion,
 demotion, and TODO state changes (@pxref{TODO basics}).
-@kindex C-c C-c
-@item C-c C-c
+@orgcmd{C-c C-c,org-set-tags-command}
 When the cursor is in a headline, this does the same as @kbd{C-c C-q}.
 @end table
 
@@ -4563,18 +4551,13 @@ Once a system of tags has been set up, it can be used to collect related
 information into special lists.
 
 @table @kbd
-@kindex C-c \
-@kindex C-c / m
-@item C-c \
-@itemx C-c / m
+@orgcmdkkc{C-c / m,C-c \,org-match-sparse-tree}
 Create a sparse tree with all headlines matching a tags search.  With a
 @kbd{C-u} prefix argument, ignore headlines that are not a TODO line.
-@kindex C-c a m
-@item C-c a m
+@orgcmd{C-c a m,org-tags-view}
 Create a global list of tag matches from all agenda files.
 @xref{Matching tags and properties}.
-@kindex C-c a M
-@item C-c a M
+@orgcmd{C-c a M,org-tags-view}
 @vindex org-tags-match-list-sublevels
 Create a global list of tag matches from all agenda files, but check
 only TODO items and force checking subitems (see variable
@@ -4675,33 +4658,29 @@ Org files.
 The following commands help to work with properties:
 
 @table @kbd
-@kindex M-@key{TAB}
-@item M-@key{TAB}
+@orgcmd{M-@key{TAB},org-complete}
 After an initial colon in a line, complete property keys.  All keys used
 in the current file will be offered as possible completions.
-@kindex C-c C-x p
-@item C-c C-x p
+@orgcmd{C-c C-x p,org-set-property}
 Set a property.  This prompts for a property name and a value.  If
 necessary, the property drawer is created as well.
 @item M-x org-insert-property-drawer
+@findex{org-insert-property-drawer}
 Insert a property drawer into the current entry.  The drawer will be
 inserted early in the entry, but after the lines with planning
 information like deadlines.
-@kindex C-c C-c
-@item C-c C-c
+@orgcmd{C-c C-c,org-property-action}
 With the cursor in a property drawer, this executes property commands.
-@item C-c C-c s
+@orgcmd{C-c C-c s,org-set-property}
 Set a property in the current entry.  Both the property and the value
 can be inserted using completion.
-@kindex S-@key{right}
-@kindex S-@key{left}
-@item S-@key{left}/@key{right}
+@orgcmdkkcc{S-@key{right},S-@key{left},org-property-next-allowed-value,org-property-previous-allowed-value}
 Switch property at point to the next/previous allowed value.
-@item C-c C-c d
+@orgcmd{C-c C-c d,org-delete-property}
 Remove a property from the current entry.
-@item C-c C-c D
+@orgcmd{C-c C-c D,org-delete-property-globally}
 Globally remove a property, from all entries in the current file.
-@item C-c C-c c
+@orgcmd{C-c C-c c,org-compute-property-at-point}
 Compute the property at point, using the operator and scope from the
 nearest column format definition.
 @end table
@@ -4756,18 +4735,13 @@ ITEM         @r{The content of the entry.}
 To create sparse trees and special lists with selection based on properties,
 the same commands are used as for tag searches (@pxref{Tag searches}).
 @table @kbd
-@kindex C-c \
-@kindex C-c / m
-@item C-c \
-@itemx C-c / m
+@orgcmdkkc{C-c / m,C-c \,org-match-sparse-tree}
 Create a sparse tree with all matching entries.  With a
 @kbd{C-u} prefix argument, ignore headlines that are not a TODO line.
-@kindex C-c a m
-@item C-c a m
+@orgcmd{C-c a m,org-tags-view}
 Create a global list of tag/property  matches from all agenda files.
 @xref{Matching tags and properties}.
-@kindex C-c a M
-@item C-c a M
+@orgcmd{C-c a M,org-tags-view}
 @vindex org-tags-match-list-sublevels
 Create a global list of tag matches from all agenda files, but check
 only TODO items and force checking of subitems (see variable
@@ -4781,8 +4755,7 @@ There is also a special command for creating sparse trees based on a
 single property:
 
 @table @kbd
-@kindex C-c / p
-@item C-c / p
+@orgkey{C-c / p}
 Create a sparse tree based on the value of a property.  This first
 prompts for the name of a property, and then for a value.  A sparse tree
 is created with all entries that define this property with the given
@@ -4993,8 +4966,7 @@ in the subtree.
 
 @table @kbd
 @tsubheading{Turning column view on and off}
-@kindex C-c C-x C-c
-@item C-c C-x C-c
+@orgcmd{C-c C-x C-c,org-columns}
 @vindex org-columns-default-format
 Turn on column view.  If the cursor is before the first headline in the file,
 column view is turned on for the entire file, using the @code{#+COLUMNS}
@@ -5005,14 +4977,11 @@ for the tree starting at the entry that contains the @code{:COLUMNS:}
 property.  If no such property is found, the format is taken from the
 @code{#+COLUMNS} line or from the variable @code{org-columns-default-format},
 and column view is established for the current entry and its subtree.
-@kindex r
-@item r
+@orgcmd{r,org-columns-redo}
 Recreate the column view, to include recent changes made in the buffer.
-@kindex g
-@item g
+@orgcmd{g,org-columns-redo}
 Same as @kbd{r}.
-@kindex q
-@item q
+@orgcmd{q,org-columns-quit}
 Exit column view.
 @tsubheading{Editing values}
 @item @key{left} @key{right} @key{up} @key{down}
@@ -5024,39 +4993,29 @@ Switch to the next/previous allowed value of the field.  For this, you
 have to have specified allowed values for a property.
 @item 1..9,0
 Directly select the nth allowed value, @kbd{0} selects the 10th value.
-@kindex n
-@kindex p
-@itemx  n / p
+@orgcmdkkcc{n,p,org-columns-next-allowed-value,org-columns-previous-allowed-value}
 Same as @kbd{S-@key{left}/@key{right}}
-@kindex e
-@item e
+@orgcmd{e,org-columns-edit-value}
 Edit the property at point.  For the special properties, this will
 invoke the same interface that you normally use to change that
 property.  For example, when editing a TAGS property, the tag completion
 or fast selection interface will pop up.
-@kindex C-c C-c
-@item C-c C-c
+@orgcmd{C-c C-c,org-columns-set-tags-or-toggle}
 When there is a checkbox at point, toggle it.
-@kindex v
-@item v
+@orgcmd{v,org-columns-show-value}
 View the full value of this property.  This is useful if the width of
 the column is smaller than that of the value.
-@kindex a
-@item a
+@orgcmd{a,org-columns-edit-allowed}
 Edit the list of allowed values for this property.  If the list is found
 in the hierarchy, the modified values is stored there.  If no list is
 found, the new value is stored in the first entry that is part of the
 current column view.
 @tsubheading{Modifying the table structure}
-@kindex <
-@kindex >
-@item < / >
+@orgcmdkkcc{<,>,org-columns-narrow,org-columns-widen}
 Make the column narrower/wider by one character.
-@kindex S-M-@key{right}
-@item S-M-@key{right}
+@orgcmd{S-M-@key{right},org-columns-new}
 Insert a new column, to the left of the current column.
-@kindex S-M-@key{left}
-@item S-M-@key{left}
+@orgcmd{S-M-@key{left},org-columns-delete}
 Delete the current column.
 @end table
 
@@ -5112,20 +5071,16 @@ column view is @code{ITEM}.
 The following commands insert or update the dynamic block:
 
 @table @kbd
-@kindex C-c C-x i
-@item C-c C-x i
+@orgcmd{C-c C-x i,org-insert-columns-dblock}
 Insert a dynamic block capturing a column view.  You will be prompted
 for the scope or ID of the view.
-@kindex C-c C-c
-@item C-c C-c
-@kindex C-c C-x C-u
-@itemx C-c C-x C-u
+@orgcmdkkc{C-c C-c,C-c C-x C-u,org-dblock-update}
 Update dynamic block at point.  The cursor needs to be in the
 @code{#+BEGIN} line of the dynamic block.
-@kindex C-u C-c C-x C-u
-@item C-u C-c C-x C-u
+@orgcmd{C-u C-c C-x C-u,org-update-all-dblocks}
 Update all dynamic blocks (@pxref{Dynamic blocks}).  This is useful if
-you have several clock table blocks in a buffer.
+you have several clock table blocks, column-capturing blocks or other dynamic
+blocks in a buffer.
 @end table
 
 You can add formulas to the column view table and you may add plotting

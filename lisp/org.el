@@ -10463,6 +10463,7 @@ blocks in the buffer."
   "Update the dynamic block at point.
 This means to empty the block, parse for parameters and then call
 the correct writing function."
+  (interactive)
   (save-window-excursion
     (let* ((pos (point))
 	   (line (org-current-line))
@@ -10504,6 +10505,7 @@ Error if there is no such block at point."
 (defun org-update-all-dblocks ()
   "Update all dynamic blocks in the buffer.
 This function can be used in a hook."
+  (interactive)
   (when (org-mode-p)
     (org-map-dblocks 'org-update-dblock)))
 
