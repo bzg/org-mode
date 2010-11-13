@@ -40,6 +40,8 @@
 
 (defun org-babel-execute:calc (body params)
   "Execute a block of calc code with Babel."
+  (unless (get-buffer "*Calculator*")
+    (save-window-excursion (calc) (calc-quit)))
   (let* ((vars (mapcar #'cdr (org-babel-get-header params :var)))
 	 (var-syms (mapcar #'car vars))
 	 (var-names (mapcar #'symbol-name var-syms)))
