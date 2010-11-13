@@ -286,11 +286,85 @@ are optional.
 #+begin_src python
 a
 #+end_src
-
 #+srcname: python-add(a=1, b=2)
 #+begin_src python
 a + b
 #+end_src
+* GANTT Charts
 
-
-
+The =elispgantt= source block was sent to the mailing list by Eric
+Fraga.  It was modified slightly by Tom Dye.
+ 
+#+source: elispgantt
+#+begin_src emacs-lisp :var table=gantttest
+  (let ((dates "")
+        (entries (nthcdr 2 table))
+        (milestones "")
+        (nmilestones 0)
+        (ntasks 0)
+        (projecttime 0)
+        (tasks "")
+        (xlength 1))
+    (message "Initial: %s\n" table)
+    (message "Entries: %s\n" entries)
+    (while entries
+      (let ((entry (first entries)))
+        (if (listp entry)
+            (let ((id (first entry))
+                  (type (nth 1 entry))
+                  (label (nth 2 entry))
+                  (task (nth 3 entry))
+                  (dependencies (nth 4 entry))
+                  (start (nth 5 entry))
+                  (duration (nth 6 entry))
+                  (end (nth 7 entry))
+                  (alignment (nth 8 entry)))
+              (if (> start projecttime) (setq projecttime start))
+              (if (string= type "task")
+                  (let ((end (+ start duration))
+                        (textposition (+ start (/ duration 2)))
+                        (flush ""))
+                    (if (string= alignment "left")
+                        (progn
+                          (setq textposition start)
+                          (setq flush "[left]"))
+                      (if (string= alignment "right")
+                          (progn
+                            (setq textposition end)
+                            (setq flush "[right]"))))
+                    (setq tasks
+                          (format "%s  \\gantttask{%s}{%s}{%d}{%d}{%d}{%s}\n"
+                                  tasks label task start end textposition flush))
+                    (setq ntasks (+ 1 ntasks))
+                    (if (> end projecttime)
+                        (setq projecttime end)))
+                (if (string= type "milestone")
+                    (progn
+                      (setq milestones
+                            (format
+                             "%s  \\ganttmilestone{$\\begin{array}{c}\\mbox{%s}\\\\ \\mbox{%s}\\end{array}$}{%d}\n"
+                             milestones label task start))
+                      (setq nmilestones (+ 1 nmilestones)))
+                  (if (string= type "date")
+                      (setq dates (format "%s  \\ganttdateline{%s}{%d}\n"
+                                          dates label start))
+                    (message "Ignoring entry with type %s\n" type)))))
+          (message "Ignoring non-list entry %s\n" entry)) ; end if list entry
+        (setq entries (cdr entries))))  ; end while entries left
+    (format "\\pgfdeclarelayer{background}
+  \\pgfdeclarelayer{foreground}
+  \\pgfsetlayers{background,foreground}
+  \\renewcommand{\\ganttprojecttime}{%d}
+  \\renewcommand{\\ganttntasks}{%d}
+  \\noindent
+  \\begin{tikzpicture}[y=-0.75cm,x=0.75\\textwidth]
+    \\begin{pgfonlayer}{background}
+      \\draw[very thin, red!10!white] (0,1+\\ganttntasks) grid [ystep=0.75cm,xstep=1/\\ganttprojecttime] (1,0);
+      \\draw[\\ganttdatelinecolour] (0,0) -- (1,0);
+      \\draw[\\ganttdatelinecolour] (0,1+\\ganttntasks) -- (1,1+\\ganttntasks);
+    \\end{pgfonlayer}
+  %s
+  %s
+  %s
+  \\end{tikzpicture}" projecttime ntasks tasks milestones dates))
+#+end_src

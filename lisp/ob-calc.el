@@ -40,6 +40,8 @@
 
 (defun org-babel-execute:calc (body params)
   "Execute a block of calc code with Babel."
+  (unless (get-buffer "*Calculator*")
+    (save-window-excursion (calc) (calc-quit)))
   (let* ((vars (mapcar #'cdr (org-babel-get-header params :var)))
 	 (var-syms (mapcar #'car vars))
 	 (var-names (mapcar #'symbol-name var-syms)))
@@ -48,7 +50,7 @@
        (calc-push-list (list (cdr pair)))
        (calc-store-into (car pair)))
      vars)
-    (mapcar
+    (mapc
      (lambda (line)
        (when (> (length line) 0)
 	 (cond
@@ -80,13 +82,13 @@
 					     (calc-pop 1)))
 				       el))
 				   ;; parse line into calc objects
-				   (first (math-read-exprs line))))))))
+				   (car (math-read-exprs line))))))))
 		   (calc-eval line))))))))
      (mapcar #'org-babel-trim
 	     (split-string (org-babel-expand-body:calc body params) "[\n\r]"))))
   (save-excursion
-    (set-buffer (get-buffer "*Calculator*"))
-    (calc-eval (calc-top 1))))
+    (with-current-buffer (get-buffer "*Calculator*")
+      (calc-eval (calc-top 1)))))
 
 (provide 'ob-calc)
 

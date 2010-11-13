@@ -125,6 +125,7 @@ LISPF      = 	org.el			\
 		ob-eval.el		\
 		ob-keys.el		\
 		ob-C.el			\
+		ob-calc.el		\
 		ob-ditaa.el		\
 		ob-haskell.el		\
 		ob-perl.el		\

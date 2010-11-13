@@ -41,13 +41,18 @@
 (require 'ob-ref)
 (require 'ob-comint)
 (require 'ob-eval)
-(require 'slime)
+
+(declare-function slime-eval "ext:slime" (sexp &optional package))
+(declare-function slime-process "ext:slime" (&optional connection))
+(declare-function slime-connected-p "ext:slime" ())
 
 (defvar org-babel-default-header-args:lisp '()
   "Default header arguments for lisp code blocks.")
 
 (defcustom org-babel-lisp-cmd "sbcl --script"
-  "Name of command used to evaluate lisp blocks.")
+  "Name of command used to evaluate lisp blocks."
+  :group 'org-babel
+  :type 'string)
 
 (defun org-babel-expand-body:lisp (body params)
   "Expand BODY according to PARAMS, return the expanded body."
@@ -63,6 +68,7 @@
 (defun org-babel-execute:lisp (body params)
   "Execute a block of Lisp code with org-babel.
 This function is called by `org-babel-execute-src-block'"
+  (require 'slime)
   (message "executing Lisp source code block")
   (let* ((session (org-babel-lisp-initiate-session
 		   (cdr (assoc :session params))))
@@ -94,6 +100,7 @@ This function is called by `org-babel-execute-src-block'"
 (defun org-babel-lisp-initiate-session (&optional session)
   "If there is not a current inferior-process-buffer in SESSION
 then create.  Return the initialized session."
+  (require 'slime)
   (unless (string= session "none")
     (save-window-excursion
       (or (slime-connected-p)
