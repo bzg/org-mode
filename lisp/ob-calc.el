@@ -48,7 +48,7 @@
        (calc-push-list (list (cdr pair)))
        (calc-store-into (car pair)))
      vars)
-    (mapcar
+    (mapc
      (lambda (line)
        (when (> (length line) 0)
 	 (cond
@@ -80,13 +80,13 @@
 					     (calc-pop 1)))
 				       el))
 				   ;; parse line into calc objects
-				   (first (math-read-exprs line))))))))
+				   (car (math-read-exprs line))))))))
 		   (calc-eval line))))))))
      (mapcar #'org-babel-trim
 	     (split-string (org-babel-expand-body:calc body params) "[\n\r]"))))
   (save-excursion
-    (set-buffer (get-buffer "*Calculator*"))
-    (calc-eval (calc-top 1))))
+    (with-current-buffer (get-buffer "*Calculator*")
+      (calc-eval (calc-top 1)))))
 
 (provide 'ob-calc)
 
