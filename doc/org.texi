@@ -8832,8 +8832,10 @@ language for formatting the contents.  The markup is optional, if it is not
 given, the text will be assumed to be in Org-mode format and will be
 processed normally.  The include line will also allow additional keyword
 parameters @code{:prefix1} and @code{:prefix} to specify prefixes for the
-first line and for each following line, as well as any options accepted by
-the selected markup.  For example, to include a file as an item, use
+first line and for each following line, @code{:minlevel} in order to get
+org-mode content demoted to a specified level, as well as any options
+accepted by the selected markup.  For example, to include a file as an item,
+use
 
 @example
 #+INCLUDE: "~/snippets/xx" :prefix1 "   + " :prefix "     "
