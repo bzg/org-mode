@@ -636,7 +636,7 @@ function ends."
 	    ;; insert bullet above item in order to avoid bothering
 	    ;; with possible blank lines ending last item.
 	    (goto-char (org-get-item-beginning))
-            (indent-to-column ind)
+            (org-indent-to-column ind)
 	    (insert (concat bullet (when checkbox "[ ] ") after-bullet))
 	    ;; Stay between after-bullet and before text.
 	    (save-excursion
@@ -1060,7 +1060,7 @@ so this really moves item trees."
 	(org-list-exchange-items actual-item next-item bottom)
 	(org-list-repair nil nil bottom)
 	(goto-char (org-get-next-item (point) bottom))
-	(move-to-column col)))))
+	(org-move-to-column col)))))
 
 (defun org-move-item-up ()
   "Move the plain list item at point up, i.e. swap with previous item.
@@ -1081,7 +1081,7 @@ so this really moves item trees."
 	    (error "Cannot move this item further up"))
 	(org-list-exchange-items prev-item actual-item bottom)
 	(org-list-repair nil top bottom)
-	(move-to-column col)))))
+	(org-move-to-column col)))))
 
 (defun org-insert-item (&optional checkbox)
   "Insert a new item at the current level.
@@ -1481,7 +1481,7 @@ BOTTOM is position at list ending."
           ;; this is not an empty line
           (let ((i (org-get-indentation)))
             (when (and (> i 0) (> (+ i delta) 0))
-              (indent-line-to (+ i delta)))))
+              (org-indent-line-to (+ i delta)))))
         (beginning-of-line 0)))))
 
 (defun org-outdent-item ()
@@ -1543,7 +1543,7 @@ Return t at each successful move."
 		   (ignore-errors
 		     (org-list-indent-item-generic 1 t top bottom))))
 	     (t (back-to-indentation)
-		(indent-to-column (car org-tab-ind-state))
+		(org-indent-to-column (car org-tab-ind-state))
 		(end-of-line)
 		(org-list-repair (cdr org-tab-ind-state))
 		;; Break cycle
