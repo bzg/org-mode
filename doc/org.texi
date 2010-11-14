@@ -4665,7 +4665,7 @@ in the current file will be offered as possible completions.
 Set a property.  This prompts for a property name and a value.  If
 necessary, the property drawer is created as well.
 @item M-x org-insert-property-drawer
-@findex{org-insert-property-drawer}
+@findex org-insert-property-drawer
 Insert a property drawer into the current entry.  The drawer will be
 inserted early in the entry, but after the lines with planning
 information like deadlines.
