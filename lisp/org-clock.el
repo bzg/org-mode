@@ -1623,7 +1623,7 @@ fontified, and then returned."
     (font-lock-fontify-buffer)
     (forward-line 2)
     (buffer-substring (point) (progn
-				(re-search-forward "^#\\+END" nil t)
+				(re-search-forward "^[ \t]+#\\+END" nil t)
 				(point-at-bol)))))
 
 (defun org-clock-report (&optional arg)
@@ -1648,9 +1648,9 @@ buffer and update it."
   (let ((pos (point)) start)
     (save-excursion
       (end-of-line 1)
-      (and (re-search-backward "^#\\+BEGIN:[ \t]+clocktable" nil t)
+      (and (re-search-backward "^[ \t]+#\\+BEGIN:[ \t]+clocktable" nil t)
 	   (setq start (match-beginning 0))
-	   (re-search-forward "^#\\+END:.*" nil t)
+	   (re-search-forward "^[ \t]+#\\+END:.*" nil t)
 	   (>= (match-end 0) pos)
 	   start))))
 
@@ -1741,7 +1741,7 @@ the currently selected interval size."
   (and (memq dir '(left down)) (setq n (- n)))
   (save-excursion
     (goto-char (point-at-bol))
-    (if (not (looking-at "#\\+BEGIN: clocktable\\>.*?:block[ \t]+\\(\\S-+\\)"))
+    (if (not (looking-at "^[ \t]+#\\+BEGIN:[ \t]+clocktable\\>.*?:block[ \t]+\\(\\S-+\\)"))
 	(error "Line needs a :block definition before this command works")
       (let* ((b (match-beginning 1)) (e (match-end 1))
 	     (s (match-string 1))
@@ -2134,7 +2134,7 @@ from the dynamic block defintion."
 		     "Weekly report starting on: ")
 	      (plist-get p1 :tstart) "\n")
       (setq step-time (org-dblock-write:clocktable p1))
-      (re-search-forward "#\\+END:")
+      (re-search-forward "^[ \t]+#\\+END:")
       (when (and (equal step-time 0) stepskip0)
 	;; Remove the empty table
 	(delete-region (point-at-bol)
