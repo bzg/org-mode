@@ -9275,8 +9275,8 @@ Insert template with export options, see example below.
 
 @noindent
 The OPTIONS line is a compact@footnote{If you want to configure many options
-this way, you can use several OPTIONS lines.} form to specify export settings.  Here
-you can:
+this way, you can use several OPTIONS lines.} form to specify export
+settings.  Here you can:
 @cindex headline levels
 @cindex section-numbers
 @cindex table of contents
@@ -9320,9 +9320,12 @@ timestamp: @r{turn on/off inclusion creation time into exported file}
 d:         @r{turn on/off inclusion of drawers}
 @end example
 @noindent
-These options take effect in both the HTML and La@TeX{} export, except
-for @code{TeX} and @code{LaTeX}, which are respectively @code{t} and
-@code{nil} for the La@TeX{} export.
+These options take effect in both the HTML and La@TeX{} export, except for
+@code{TeX} and @code{LaTeX}, which are respectively @code{t} and @code{nil}
+for the La@TeX{} export.  The default values for these and many other options
+are given by a set of variables.  For a list of such variables, the
+corresponding OPTIONS keys and also the publishing keys (pxref{Project
+alist}), see the constant @code{org-export-plist-vars}.
 
 When exporting only a single subtree by selecting it with @kbd{C-c @@} before
 calling an export command, the subtree can overrule some of the file's export
