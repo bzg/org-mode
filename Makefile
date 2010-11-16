@@ -382,7 +382,7 @@ pkg:
 	$(MKDIR) org-$(PKG_TAG)
 	cp -r $(PKG_FILES) org-$(PKG_TAG)
 	echo "(define-package \"org\" \"$(PKG_TAG)\" \"$(PKG_DOC)\" $(PKG_REQ))" > org-$(PKG_TAG)/org-pkg.el
-	tar cf org-$(PKG_TAG).tar org-$(PKG_TAG) --remove-files --group=staff
+	tar cf org-$(PKG_TAG).tar org-$(PKG_TAG) --remove-files
 
 makerelease:
 	@if [ "X$(TAG)" = "X" ]; then echo "*** No tag ***"; exit 1; fi
