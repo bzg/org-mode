@@ -2126,12 +2126,13 @@ TYPE must be a string, any of:
 (defun org-export-handle-include-files ()
   "Include the contents of include files, with proper formatting."
   (let ((case-fold-search t)
-	params file markup lang start end prefix prefix1 switches all)
+	params file markup lang start end prefix prefix1 switches all minlevel)
     (goto-char (point-min))
     (while (re-search-forward "^#\\+INCLUDE:?[ \t]+\\(.*\\)" nil t)
       (setq params (read (concat "(" (match-string 1) ")"))
 	    prefix (org-get-and-remove-property 'params :prefix)
 	    prefix1 (org-get-and-remove-property 'params :prefix1)
+	    minlevel (org-get-and-remove-property 'params :minlevel)
 	    file (org-symname-or-string (pop params))
 	    markup (org-symname-or-string (pop params))
 	    lang (and (member markup '("src" "SRC"))
@@ -2154,7 +2155,7 @@ TYPE must be a string, any of:
 		  end  (format "#+end_%s" markup))))
 	(insert (or start ""))
 	(insert (org-get-file-contents (expand-file-name file)
-				       prefix prefix1 markup))
+				       prefix prefix1 markup minlevel))
 	(or (bolp) (newline))
 	(insert (or end ""))))
     all))
@@ -2171,7 +2172,7 @@ TYPE must be a string, any of:
 	(when intersection
 	  (error "Recursive #+INCLUDE: %S" intersection))))))
 
-(defun org-get-file-contents (file &optional prefix prefix1 markup)
+(defun org-get-file-contents (file &optional prefix prefix1 markup minlevel)
   "Get the contents of FILE and return them as a string.
 If PREFIX is a string, prepend it to each line.  If PREFIX1
 is a string, prepend it to the first line instead of PREFIX.
@@ -2193,6 +2194,9 @@ take care of the block they are in."
 	(goto-char (match-beginning 0))
 	(insert ",")
 	(end-of-line 1)))
+    (when minlevel
+      (dotimes (lvl minlevel)
+	(org-map-region 'org-demote (point-min) (point-max))))
     (buffer-string)))
 
 (defun org-get-and-remove-property (listvar prop)
