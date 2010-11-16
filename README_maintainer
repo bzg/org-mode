@@ -1,8 +1,7 @@
-
 # -*- mode:org -*-
 
 #+title: Maintainer tasks
-#+startup: indent
+#+startup: noindent
 
 This document describes the tasks the Org-mode maintainer has to do
 and how they are performed.
