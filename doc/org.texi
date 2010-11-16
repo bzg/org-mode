@@ -9326,7 +9326,7 @@ These options take effect in both the HTML and La@TeX{} export, except for
 @code{TeX} and @code{LaTeX}, which are respectively @code{t} and @code{nil}
 for the La@TeX{} export.  The default values for these and many other options
 are given by a set of variables.  For a list of such variables, the
-corresponding OPTIONS keys and also the publishing keys (pxref{Project
+corresponding OPTIONS keys and also the publishing keys (@pxref{Project
 alist}), see the constant @code{org-export-plist-vars}.
 
 When exporting only a single subtree by selecting it with @kbd{C-c @@} before
