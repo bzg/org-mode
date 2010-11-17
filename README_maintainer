@@ -224,3 +224,10 @@ So the way I have been doing things with Emacs is this:
   headline.  I guess babel code could be used to update this
   automatically, but I have not implemented this - I have been doing
   it by hand every few months.
+
+* Copyright assignments
+
+  The maintainer needs to keep track of copyright assignments.  The
+  list of all contributors from who we have the papers is kept on Worg
+  at http://orgmode.org/worg/org-contribute.php, so that committers
+  can check if a patch can go into the core.
