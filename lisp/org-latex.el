@@ -461,6 +461,67 @@ pygmentize -L lexers
 	   (symbol :tag "Major mode       ")
 	   (string :tag "Listings language"))))
 
+(defcustom org-export-latex-listings-options nil
+  "Association list of options for the latex listings package.
+
+These options are supplied as a comma-separated list to the
+\\lstset command. Each element of the association list should be
+a list containing two strings: the name of the option, and the
+value. For example,
+
+  (setq org-export-latex-listings-options
+    '((\"basicstyle\" \"\\small\")
+      (\"keywordstyle\" \"\\color{black}\\bfseries\\underbar\")))
+
+will typeset the code in a small size font with underlined, bold
+black keywords.
+
+Note that the same options will be applied to blocks of all
+languages."
+  :group 'org-export-latex
+  :type '(repeat
+	  (list
+	   (string :tag "Listings option name ")
+	   (string :tag "Listings option value"))))
+
+(defcustom org-export-latex-minted-options nil
+  "Association list of options for the latex minted package.
+
+These options are supplied within square brackets in
+\\begin{minted} environments. Each element of the alist should be
+a list containing two strings: the name of the option, and the
+value. For example,
+
+  (setq org-export-latex-minted-options
+    '((\"bgcolor\" \"bg\") (\"frame\" \"lines\")))
+
+will result in src blocks being exported with
+
+\\begin{minted}[bgcolor=bg,frame=lines]{<LANG>}
+
+as the start of the minted environment. Note that the same
+options will be applied to blocks of all languages."
+  :group 'org-export-latex
+  :type '(repeat
+	  (list
+	   (string :tag "Minted option name ")
+	   (string :tag "Minted option value"))))
+
+(defvar org-export-latex-custom-lang-environments nil
+  "Association list mapping languages to language-specific latex
+  environments used during export of src blocks by the listings
+  and minted latex packages. For example,
+
+  (setq org-export-latex-custom-lang-environments
+     '((python \"pythoncode\")))
+
+  would have the effect that if org encounters begin_src python
+  during latex export it will output
+
+  \\begin{pythoncode}
+  <src block body>
+  \\end{pythoncode}")
+
 (defcustom org-export-latex-remove-from-headlines
   '(:todo nil :priority nil :tags nil)
   "A plist of keywords to remove from headlines.  OBSOLETE.

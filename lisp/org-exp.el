@@ -2293,6 +2293,10 @@ in the list) and remove property and value from the list in LISTVAR."
 (defvar org-export-latex-listings-langs) ;; defined in org-latex.el
 (defvar org-export-latex-listings-w-names) ;; defined in org-latex.el
 (defvar org-export-latex-minted-langs) ;; defined in org-latex.el
+(defvar org-export-latex-custom-lang-environments) ;; defined in org-latex.el
+(defvar org-export-latex-listings-options) ;; defined in org-latex.el
+(defvar org-export-latex-minted-options) ;; defined in org-latex.el
+
 (defun org-export-format-source-code-or-example
   (backend lang code &optional opts indent caption)
   "Format CODE from language LANG and return it formatted for export.
@@ -2419,56 +2423,61 @@ INDENT was the original indentation of the block."
 	      (concat "\n#+BEGIN_HTML\n" (org-add-props rtn '(org-protected t org-example t)) "\n#+END_HTML\n\n"))
 	     ((eq backend 'latex)
 	      (setq rtn (org-export-number-lines rtn 'latex 0 0 num cont rpllbl fmt))
-	      (concat "#+BEGIN_LaTeX\n"
-		      (org-add-props
-                          (cond
-			   ((and org-export-latex-listings
-				 (not (eq org-export-latex-listings 'minted)))
-			    (concat
-			     (if lang
-				 (let*
-				     ((lang-sym (intern lang))
-				      (lstlang
-				       (or (cadr
-					    (assq
-					     lang-sym
-					     org-export-latex-listings-langs))
-					   lang)))
-				   (format "\\lstset{language=%s}\n" lstlang))
-			       "\n")
-			     (when (and caption
-					org-export-latex-listings-w-names)
-			       (format "\n%s $\\equiv$ \n"
-				       (replace-regexp-in-string
-					"_" "\\\\_" caption)))
-			     "\\begin{lstlisting}\n"
-			     rtn "\\end{lstlisting}\n"))
-			   ((eq org-export-latex-listings 'minted)
-			    (if lang
-				(let*
-				    ((lang-sym (intern lang))
-				     (minted-lang
-				      (or (cadr
-					   (assq
-					    lang-sym
-					    org-export-latex-minted-langs))
-					  (downcase lang))))
-				  (concat
-				   (when (and caption
-					      org-export-latex-listings-w-names)
-				     (format "\n%s $\\equiv$ \n"
-					     (replace-regexp-in-string
-					      "_" "\\\\_" caption)))
-				   (format "\\begin{minted}{%s}\n" minted-lang)
-				   rtn "\\end{minted}\n"))))
-			    (t (concat (car org-export-latex-verbatim-wrap)
-				       rtn (cdr org-export-latex-verbatim-wrap))))
-			   '(org-protected t org-example t))
-			  "#+END_LaTeX\n"))
-	      ((eq backend 'ascii)
-	       ;; This is not HTML or LaTeX, so just make it an example.
-	       (setq rtn (org-export-number-lines rtn 'ascii 0 0 num cont rpllbl fmt))
-	       (concat caption "\n"
+	      (concat
+	       "#+BEGIN_LaTeX\n"
+	       (org-add-props
+		   (cond
+		    ((and lang org-export-latex-listings)
+		     (let* ((lang-sym (intern lang))
+			    (minted-p (eq org-export-latex-listings 'minted))
+			    (listings-p (not minted-p))
+			    (backend-lang
+			     (or (cadr
+				  (assq
+				   lang-sym
+				   (cond
+				    (minted-p org-export-latex-minted-langs)
+				    (listings-p org-export-latex-listings-langs))))
+				 lang))
+			    (custom-environment
+			     (cadr
+			      (assq
+			       lang-sym
+			       org-export-latex-custom-lang-environments))))
+		       (concat
+			(when (and listings-p (not custom-environment))
+			  (format
+			   "\\lstset{%s}\n"
+			   (mapconcat
+			    (lambda (pair) (mapconcat #'identity pair "="))
+			    (append org-export-latex-listings-options
+				    `(("language" ,backend-lang))) ",")))
+			(when (and caption org-export-latex-listings-w-names)
+			  (format
+			   "\n%s $\\equiv$ \n"
+			   (replace-regexp-in-string "_" "\\\\_" caption)))
+			(cond
+			 (custom-environment
+			  (format "\\begin{%s}\n%s\\end{%s}\n"
+				  custom-environment rtn custom-environment))
+			 (listings-p
+			   (format "\\begin{%s}\n%s\\end{%s}\n"
+				   "lstlisting" rtn "lstlisting"))
+			 (minted-p
+			  (format
+			   "\\begin{minted}[%s]{%s}\n%s\\end{minted}\n"
+			   (mapconcat
+			    (lambda (pair) (mapconcat #'identity pair "="))
+			    org-export-latex-minted-options ",")
+			   backend-lang rtn))))))
+		    (t (concat (car org-export-latex-verbatim-wrap)
+			       rtn (cdr org-export-latex-verbatim-wrap))))
+		   '(org-protected t org-example t))
+	       "#+END_LaTeX\n"))
+	     ((eq backend 'ascii)
+	      ;; This is not HTML or LaTeX, so just make it an example.
+	      (setq rtn (org-export-number-lines rtn 'ascii 0 0 num cont rpllbl fmt))
+	      (concat caption "\n"
 		      "#+BEGIN_ASCII\n"
 		      (org-add-props
 			  (concat
