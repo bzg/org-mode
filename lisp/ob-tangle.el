@@ -125,6 +125,7 @@ evaluating BODY."
 This function exports the source code using
 `org-babel-tangle' and then loads the resulting file using
 `load-file'."
+  (interactive "fFile to load: ")
   (flet ((age (file)
               (float-time
                (time-subtract (current-time)
