@@ -2473,6 +2473,16 @@ command used) one higher or lower that the default priority."
   :group 'org-priorities
   :type 'boolean)
 
+(defcustom org-get-priority-function nil
+  "Function to extract the priority from a string.
+The string is normally the headline.  If this is nil Org computes the
+priority from the priority cookie like [#A] in the headline.  It returns
+an integer, increasing by 1000 for each priority level.
+The user can set a different function here, which should take a string
+as an argument and return the numeric priority."
+  :group 'org-priorities
+  :type 'function)
+
 (defgroup org-time nil
   "Options concerning time stamps and deadlines in Org-mode."
   :tag "Org Time"
@@ -12214,11 +12224,13 @@ ACTION can be `set', `up', `down', or a character."
 
 (defun org-get-priority (s)
   "Find priority cookie and return priority."
-  (save-match-data
-    (if (not (string-match org-priority-regexp s))
-	(* 1000 (- org-lowest-priority org-default-priority))
-      (* 1000 (- org-lowest-priority
-		 (string-to-char (match-string 2 s)))))))
+  (if (functionp org-get-priority-function)
+      (funcall org-get-priority-function)
+    (save-match-data
+      (if (not (string-match org-priority-regexp s))
+	  (* 1000 (- org-lowest-priority org-default-priority))
+	(* 1000 (- org-lowest-priority
+		   (string-to-char (match-string 2 s))))))))
 
 ;;;; Tags
 
