@@ -9011,10 +9011,11 @@ the code is obviously left as it is.  When exporting to HTML, Org invokes the
 @uref{http://www.mathjax.org, MathJax library} (@pxref{Math formatting in
 HTML export}) to process and display the math@footnote{If you plan to use
 this regularly or on pages with significant page views, you should install
-@file{MathJax} on your own server in order to limit the load of our server.}.
-Finally, it can also process the mathematical expressions into
-images@footnote{For this to work you need to be on a system with a working
-La@TeX{} installation. You also need the @file{dvipng} program, available at
+@file{MathJax} on your own
+server in order to limit the load of our server.}.  Finally, it can also
+process the mathematical expressions into images@footnote{For this to work
+you need to be on a system with a working La@TeX{} installation. You also
+need the @file{dvipng} program, available at
 @url{http://sourceforge.net/projects/dvipng/}.  The La@TeX{} header that will
 be used when processing a fragment can be configured with the variable
 @code{org-format-latex-header}.}  that can be displayed in a browser or in
@@ -9612,10 +9613,12 @@ different ways on HTML pages.  The default is to use the
 box with Org mode installation because @code{http://orgmode.org} serves
 @file{MathJax} for Org-mode users for small applications and for testing
 purposes.  @b{If you plan to use this regularly or on pages with significant
-page views, you should install MathJax on your own server in order to limit
-the load of our server.}  To configure @file{MathJax}, use the variable
-@code{org-export-html-mathjax-options} or insert something like the following
-into the buffer:
+page views, you should install@footnote{Installation instructions can be
+found on the MathJax website, see
+@uref{http://www.mathjax.org/resources/docs/?installation.html}.} MathJax on
+your own server in order to limit the load of our server.}  To configure
+@file{MathJax}, use the variable @code{org-export-html-mathjax-options} or
+insert something like the following into the buffer:
 
 @example
 #+MATHJAX: align:"left" mathml:t path:"/MathJax/MathJax.js"
