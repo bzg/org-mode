@@ -11758,8 +11758,8 @@ another by commas, as shown in the following example.
 @node results, file, var, Specific header arguments
 @subsubsection @code{:results}
 
-There are three classes of @code{:results} header argument.  Only one option of
-each type may be supplied per code block.
+There are three classes of @code{:results} header argument.  Only one option
+per class may be supplied per code block.
 
 @itemize @bullet
 @item
@@ -11802,6 +11802,9 @@ table or scalar depending on their value.
 The results should be interpreted as an Org-mode table.  If a single value is
 returned, it will be converted into a table with one row and one column.
 E.g., @code{:results value table}.
+@item @code{list}
+The results should be interpreted as an Org-mode list.  If a single scalar
+value is returned it will be converted into a list with only one element.
 @item @code{scalar}, @code{verbatim}
 The results should be interpreted literally---they will not be
 converted into a table.  The results will be inserted into the Org-mode

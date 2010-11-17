@@ -1307,6 +1307,7 @@ following the source block."
   (let ((case-fold-search t) result-string)
     (cond
      ((org-at-table-p) (org-babel-read-table))
+     ((org-list-in-item-p-with-indent 0) (org-babel-read-list))
      ((looking-at org-bracket-link-regexp) (org-babel-read-link))
      ((looking-at org-block-regexp) (org-babel-trim (match-string 4)))
      ((looking-at "^[ \t]*: ")
@@ -1331,6 +1332,10 @@ following the source block."
             (if (and (symbolp row) (equal row 'hline)) row
               (mapcar #'org-babel-read row)))
           (org-table-to-lisp)))
+
+(defun org-babel-read-list ()
+  "Read the list at `point' into emacs-lisp."
+  (mapcar #'org-babel-read (cdr (org-list-parse-list))))
 
 (defvar org-link-types-re)
 (defun org-babel-read-link ()
@@ -1365,7 +1370,9 @@ silent -- no results are inserted
 file ---- the results are interpreted as a file path, and are
           inserted into the buffer using the Org-mode file syntax
 
-raw ----- results are added directly to the org-mode file.  This
+list ---- the results are interpreted as an Org-mode list.
+
+raw ----- results are added directly to the Org-mode file.  This
           is a good option if you code block will output org-mode
           formatted text.
 
@@ -1430,6 +1437,13 @@ code ---- the results are extracted in the syntax of the source
 	(cond
 	 ;; do nothing for an empty result
 	 ((= (length result) 0))
+	 ;; insert a list if preferred
+	 ((member "list" result-params)
+	  (insert
+	   (org-babel-trim
+	    (org-list-to-generic (cons 'unordered
+				       (if (listp result) result (list result)))
+				 '(:splicep nil :istart "- " :iend "\n")))))
 	 ;; assume the result is a table if it's not a string
 	 ((not (stringp result))
 	  (insert (concat (orgtbl-to-orgtbl
@@ -1482,8 +1496,10 @@ code ---- the results are extracted in the syntax of the source
 (defun org-babel-result-end ()
   "Return the point at the end of the current set of results"
   (save-excursion
-    (if (org-at-table-p)
-        (progn (goto-char (org-table-end)) (point))
+    (cond
+     ((org-at-table-p) (progn (goto-char (org-table-end)) (point)))
+     ((org-list-in-item-p-with-indent 0) (- (org-list-bottom-point) 1))
+     (t
       (let ((case-fold-search t))
         (cond
          ((looking-at "[ \t]*#\\+begin_latex")
@@ -1500,7 +1516,7 @@ code ---- the results are extracted in the syntax of the source
           (forward-line 1))
          (t (progn (while (looking-at "[ \t]*\\(: \\|\\[\\[\\)")
                      (forward-line 1))))))
-      (point))))
+      (point)))))
 
 (defun org-babel-result-to-file (result)
   "Convert RESULT into an `org-mode' link.
@@ -1550,7 +1566,7 @@ Later elements of PLISTS override the values of previous element.
 This takes into account some special considerations for certain
 parameters when merging lists."
   (let ((results-exclusive-groups
-	 '(("file" "vector" "table" "scalar" "raw" "org"
+	 '(("file" "list" "vector" "table" "scalar" "raw" "org"
             "html" "latex" "code" "pp")
 	   ("replace" "silent" "append" "prepend")
 	   ("output" "value")))
