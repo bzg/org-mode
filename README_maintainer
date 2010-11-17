@@ -215,3 +215,12 @@ So the way I have been doing things with Emacs is this:
 
 
 
+* Updating the list of hooks on Worg
+
+  The file org-configs/org-hooks.org contains a list of all hooks in
+  Org.  This list has to be updated after hooks have been added or
+  removed.  The perl script UTILITIES/list-hooks.pl creates the entire
+  section "Hooks and Function variables", including its level-one
+  headline.  I guess babel code could be used to update this
+  automatically, but I have not implemented this - I have been doing
+  it by hand every few months.
