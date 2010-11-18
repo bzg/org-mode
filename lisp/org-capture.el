@@ -319,6 +319,12 @@ The remember buffer is still current when this hook runs."
   :group 'org-capture
   :type 'hook)
 
+(defcustom org-capture-after-finalize-hook nil
+  "Hook that is run right after a capture process is finalized.
+  Suitable for window cleanup"
+  :group 'org-capture
+  :type 'hook)
+
 ;;; The property list for keeping information about the capture process
 
 (defvar org-capture-plist nil
@@ -554,6 +560,8 @@ bypassed."
 
       ;; Restore the window configuration before capture
       (set-window-configuration return-wconf))
+
+    (run-hooks 'org-capture-after-finalize-hook)
     (when abort-note
       (cond
        ((equal abort-note 'clean)
