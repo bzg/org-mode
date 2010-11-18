@@ -78,6 +78,7 @@
 (declare-function org-list-to-generic "org-list" (LIST PARAMS))
 (declare-function org-list-bottom-point "org-list" ())
 
+(declare-function org-babel-eval-wipe-error-buffer "ob-eval" ())
 (defgroup org-babel nil
   "Code block evaluation and management in `org-mode' documents."
   :tag "Babel"
@@ -242,7 +243,8 @@ then run `org-babel-execute-src-block'."
   (interactive)
   (let ((info (org-babel-get-src-block-info)))
     (if info
-	(progn (org-babel-execute-src-block current-prefix-arg info) t) nil)))
+	(progn (org-babel-eval-wipe-error-buffer)
+	       (org-babel-execute-src-block current-prefix-arg info) t) nil)))
 
 ;;;###autoload
 (defun org-babel-expand-src-block-maybe ()

@@ -31,9 +31,11 @@
 (require 'ob)
 (eval-when-compile (require 'cl))
 
+(defvar org-babel-error-buffer-name "*Org-Babel Error Output*")
+
 (defun org-babel-eval-error-notify (exit-code stderr)
   "Open a buffer to display STDERR and a message with the value of EXIT-CODE."
-  (let ((buf (get-buffer-create "*Org-Babel Error Output*")))
+  (let ((buf (get-buffer-create org-babel-error-buffer-name)))
     (with-current-buffer buf
       (goto-char (point-max))
       (save-excursion (insert stderr)))
@@ -44,7 +46,7 @@
   "Run CMD on BODY.
 If CMD succeeds then return its results, otherwise display
 STDERR with `org-babel-eval-error-notify'."
-  (let ((err-buff (get-buffer-create "*Org-Babel Error*")) exit-code)
+  (let ((err-buff (get-buffer-create " *Org-Babel Error*")) exit-code)
     (with-current-buffer err-buff (erase-buffer))
     (with-temp-buffer
       (insert body)
@@ -246,6 +248,13 @@ specifies the value of ERROR-BUFFER."
 		 (display-buffer (current-buffer)))))
       (delete-file error-file))
     exit-status))
+
+
+(defun org-babel-eval-wipe-error-buffer ()
+  (when (get-buffer org-babel-error-buffer-name)
+    (save-excursion
+     (set-buffer org-babel-error-buffer-name)
+     (delete-region (point-min) (point-max)))))
 
 (provide 'ob-eval)
 
