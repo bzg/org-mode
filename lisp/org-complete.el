@@ -1,13 +1,13 @@
 ;;; org-complete.el --- In-buffer completion code
 
-;; Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009
+;; Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009, 2010
 ;;   Free Software Foundation, Inc.
 ;;
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;;         John Wiegley <johnw at gnu dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 6.31trans
+;; Version: 7.03trans
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -50,12 +50,19 @@ The return value is a string naming the thing at point."
 		(point)))
 	(beg (save-excursion
 	       (skip-chars-backward "a-zA-Z0-9_:$")
-	       (point))))
+	       (point)))
+	(line-to-here (buffer-substring (point-at-bol) (point))))
     (cond
+     ((string-match "\\`[ \t]*#\\+begin: clocktable[ \t]+" line-to-here)
+      (cons "block-option" "clocktable"))
+     ((string-match "\\`[ \t]*#\\+begin_src[ \t]+" line-to-here)
+      (cons "block-option" "src"))
      ((save-excursion
-	(re-search-backward "^#\\+\\([A-Z_]+\\):.*"
+	(re-search-backward "^[ \t]*#\\+\\([A-Z_]+\\):.*"
 			    (line-beginning-position) t))
       (cons "file-option" (match-string-no-properties 1)))
+     ((string-match "\\`[ \t]*#\\+[a-zA-Z]*\\'" line-to-here)
+      (cons "file-option" nil))
      ((equal (char-before beg) ?\[)
       (cons "link" nil))
      ((equal (char-before beg) ?\\)
@@ -76,11 +83,13 @@ The return value is a string naming the thing at point."
 (defun org-command-at-point ()
   "Return the qualified name of the Org completion entity at point.
 When completing for #+STARTUP, for example, this function returns
-\"file-option/STARTUP\"."
+\"file-option/startup\"."
   (let ((thing (org-thing-at-point)))
     (cond
      ((string= "file-option" (car thing))
-      (concat (car thing) "/" (cdr thing)))
+      (concat (car thing) "/" (downcase (cdr thing))))
+     ((string= "block-option" (car thing))
+      (concat (car thing) "/" (downcase (cdr thing))))
      (t
       (car thing)))))
 
@@ -114,21 +123,22 @@ When completing for #+STARTUP, for example, this function returns
   "Complete against all valid file options."
   (require 'org-exp)
   (pcomplete-here
-   (mapcar (lambda (x)
-	     (if (= ?: (aref x (1- (length x))))
-		 (concat x " ")
-	       x))
-	   (delq nil
-		 (pcomplete-uniqify-list
-		  (append
-		   (mapcar (lambda (x)
-			     (if (string-match "^#\\+\\([A-Z_]+:?\\)" x)
-				 (match-string 1 x)))
-			   (org-split-string (org-get-current-options) "\n"))
-		   org-additional-option-like-keywords))))
+   (org-complete-case-double
+    (mapcar (lambda (x)
+	      (if (= ?: (aref x (1- (length x))))
+		  (concat x " ")
+		x))
+	    (delq nil
+		  (pcomplete-uniqify-list
+		   (append
+		    (mapcar (lambda (x)
+			      (if (string-match "^#\\+\\([A-Z_]+:?\\)" x)
+				  (match-string 1 x)))
+			    (org-split-string (org-get-current-options) "\n"))
+		    org-additional-option-like-keywords)))))
    (substring pcomplete-stub 2)))
-
-(defun pcomplete/org-mode/file-option/STARTUP ()
+  
+(defun pcomplete/org-mode/file-option/startup ()
   "Complete arguments for the #+STARTUP file option."
   (while (pcomplete-here
 	  (let ((opts (pcomplete-uniqify-list
@@ -141,6 +151,13 @@ When completing for #+STARTUP, for example, this function returns
 		(setq opts (delete "showstars" opts)))))
 	    opts))))
 
+(defun pcomplete/org-mode/file-option/bind ()
+  "Complete arguments for the #+BIND file option, which are variable names"
+  (let (vars)
+    (mapatoms
+     (lambda (a) (if (boundp a) (setq vars (cons (symbol-name a) vars)))))
+    (pcomplete-here vars)))
+
 (defun pcomplete/org-mode/link ()
   "Complete against defined #+LINK patterns."
   (pcomplete-here
@@ -149,8 +166,9 @@ When completing for #+STARTUP, for example, this function returns
 
 (defun pcomplete/org-mode/tex ()
   "Complete against TeX-style HTML entity names."
+  (require 'org-entities)
   (while (pcomplete-here
-	  (pcomplete-uniqify-list (mapcar 'car org-html-entities))
+	  (pcomplete-uniqify-list (remove nil (mapcar 'car-safe org-entities)))
 	  (substring pcomplete-stub 1))))
 
 (defun pcomplete/org-mode/todo ()
@@ -178,7 +196,11 @@ This needs more work, to handle headings with lots of spaces in them."
 	  (mapcar (lambda (x)
 		    (concat x ":"))
 		  (let ((lst (pcomplete-uniqify-list
-			      (or (mapcar 'car org-tag-alist)
+			      (or (remove
+				   nil
+				   (mapcar (lambda (x)
+					     (and (stringp (car x)) (car x)))
+					   org-tag-alist))
 				  (mapcar 'car (org-get-buffer-tags))))))
 		    (dolist (tag (org-get-tags))
 		      (setq lst (delete tag lst)))
@@ -197,6 +219,38 @@ This needs more work, to handle headings with lots of spaces in them."
 	       (setq lst (delete (car prop) lst)))
 	     lst))
    (substring pcomplete-stub 1)))
+
+(defun pcomplete/org-mode/block-option/src ()
+  "Complete the arguments of a begin_src block.
+Complete a language in the first field, the header arguments and switches."
+  (pcomplete-here
+   (mapcar
+    (lambda(x) (symbol-name (nth 3 x)))
+    (cdr (car (cdr (memq :key-type (plist-get
+				    (symbol-plist
+				     'org-babel-load-languages)
+				    'custom-type)))))))
+  (while (pcomplete-here
+	  '("-n" "-r" "-l"
+	    ":cache" ":colnames" ":comments" ":dir" ":eval" ":exports"
+	    ":file" ":hlines" ":no-expand" ":noweb" ":results" ":rownames"
+	    ":session" ":shebang" ":tangle" ":var"))))
+
+(defun pcomplete/org-mode/block-option/clocktable ()
+  "Complete keywords in a clocktable line"
+  (while (pcomplete-here '(":maxlevel" ":scope"
+			   ":tstart" ":tend" ":block" ":step"
+			   ":stepskip0" ":fileskip0"
+			   ":emphasize" ":link" ":narrow" ":indent"
+			   ":tcolumns" ":level" ":compact" ":timestamp"
+			   ":formula" ":formatter"))))
+
+(defun org-complete-case-double (list)
+  "Return list with both upcase and downcase version of all strings in LIST."
+  (let (e res)
+    (while (setq e (pop list))
+      (setq res (cons (downcase e) (cons (upcase e) res))))
+    (nreverse res)))
 
 ;;;; Finish up
 
