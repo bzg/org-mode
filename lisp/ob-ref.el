@@ -215,7 +215,7 @@ to \"0:-1\"."
 Return nil if none of the supported reference types are found.
 Supported reference types are tables and source blocks."
   (cond ((org-at-table-p) 'table)
-	((org-list-in-item-p-with-indent 0) 'list)
+	((org-in-item-p) 'list)
         ((looking-at "^[ \t]*#\\+BEGIN_SRC") 'source-block)
         ((looking-at org-bracket-link-regexp) 'file)
         ((looking-at org-babel-result-regexp) 'results-line)))

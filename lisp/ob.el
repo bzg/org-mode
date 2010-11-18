@@ -1309,7 +1309,7 @@ following the source block."
   (let ((case-fold-search t) result-string)
     (cond
      ((org-at-table-p) (org-babel-read-table))
-     ((org-list-in-item-p-with-indent 0) (org-babel-read-list))
+     ((org-in-item-p) (org-babel-read-list))
      ((looking-at org-bracket-link-regexp) (org-babel-read-link))
      ((looking-at org-block-regexp) (org-babel-trim (match-string 4)))
      ((looking-at "^[ \t]*: ")
@@ -1500,7 +1500,7 @@ code ---- the results are extracted in the syntax of the source
   (save-excursion
     (cond
      ((org-at-table-p) (progn (goto-char (org-table-end)) (point)))
-     ((org-list-in-item-p-with-indent 0) (- (org-list-bottom-point) 1))
+     ((org-in-item-p) (- (org-list-bottom-point) 1))
      (t
       (let ((case-fold-search t))
         (cond
