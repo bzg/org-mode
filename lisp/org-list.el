@@ -1629,35 +1629,36 @@ If WHICH is a valid string, use that as the new bullet. If WHICH
 is an integer, 0 means `-', 1 means `+' etc. If WHICH is
 'previous, cycle backwards."
   (interactive "P")
-  (let* ((top (org-list-top-point))
-	 (bullet (save-excursion
-		   (goto-char (org-get-beginning-of-list top))
-		   (org-get-bullet)))
-	 (current (cond
-		   ((string-match "\\." bullet) "1.")
-		   ((string-match ")" bullet) "1)")
-		   (t bullet)))
-	 (bullet-rule-p (cdr (assq 'bullet org-list-automatic-rules)))
-	 (bullet-list (append '("-" "+" )
-			      ;; *-bullets are not allowed at column 0
-			      (unless (and bullet-rule-p
-					   (looking-at "\\S-")) '("*"))
-			      ;; Description items cannot be numbered
-			      (unless (and bullet-rule-p
-					   (or (eq org-plain-list-ordered-item-terminator ?\))
-					       (org-at-item-description-p))) '("1."))
-			      (unless (and bullet-rule-p
-					   (or (eq org-plain-list-ordered-item-terminator ?.)
-					       (org-at-item-description-p))) '("1)"))))
-	 (len (length bullet-list))
-	 (item-index (- len (length (member current bullet-list))))
-	 (get-value (lambda (index) (nth (mod index len) bullet-list)))
-	 (new (cond
-	       ((member which bullet-list) which)
-	       ((numberp which) (funcall get-value which))
-	       ((eq 'previous which) (funcall get-value (1- item-index)))
-	       (t (funcall get-value (1+ item-index))))))
-    (org-list-repair new top)))
+  (save-excursion
+    (let* ((top (org-list-top-point))
+	   (bullet (progn
+		     (goto-char (org-get-beginning-of-list top))
+		     (org-get-bullet)))
+	   (current (cond
+		     ((string-match "\\." bullet) "1.")
+		     ((string-match ")" bullet) "1)")
+		     (t bullet)))
+	   (bullet-rule-p (cdr (assq 'bullet org-list-automatic-rules)))
+	   (bullet-list (append '("-" "+" )
+				;; *-bullets are not allowed at column 0
+				(unless (and bullet-rule-p
+					     (looking-at "\\S-")) '("*"))
+				;; Description items cannot be numbered
+				(unless (and bullet-rule-p
+					     (or (eq org-plain-list-ordered-item-terminator ?\))
+						 (org-at-item-description-p))) '("1."))
+				(unless (and bullet-rule-p
+					     (or (eq org-plain-list-ordered-item-terminator ?.)
+						 (org-at-item-description-p))) '("1)"))))
+	   (len (length bullet-list))
+	   (item-index (- len (length (member current bullet-list))))
+	   (get-value (lambda (index) (nth (mod index len) bullet-list)))
+	   (new (cond
+		 ((member which bullet-list) which)
+		 ((numberp which) (funcall get-value which))
+		 ((eq 'previous which) (funcall get-value (1- item-index)))
+		 (t (funcall get-value (1+ item-index))))))
+      (org-list-repair new top))))
 
 ;;; Checkboxes
 
