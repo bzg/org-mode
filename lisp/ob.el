@@ -30,6 +30,7 @@
 
 ;;; Code:
 (eval-when-compile
+  (require 'org-list)
   (require 'cl))
 (require 'org-macs)
 
