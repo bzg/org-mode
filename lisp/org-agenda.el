@@ -916,6 +916,12 @@ This function makes sure that dates are aligned for easy reading."
     (format "%-10s %2d %s %4d%s"
 	    dayname day monthname year weekstring)))
 
+(defcustom org-agenda-time-leading-zero nil
+  "Non-nil means use leading zero for military times in agenda.
+For example, 9:30am would become 09:30 rather than  9:30."
+  :group 'org-agenda-daily/weekly
+  :type 'boolean)
+
 (defcustom org-agenda-timegrid-use-ampm nil
   "When set, show AM/PM style timestamps on the timegrid."
   :group 'org-agenda
@@ -944,12 +950,6 @@ based on `org-agenda-timegrid-use-ampm'"
   (if org-agenda-timegrid-use-ampm
       (org-agenda-time-of-day-to-ampm time)
     time))
-
-(defcustom org-agenda-time-leading-zero nil
-  "Non-nil means use leading zero for military times in agenda.
-For example, 9:30am would become 09:30 rather than  9:30."
-  :group 'org-agenda-daily/weekly
-  :type 'boolean)
 
 (defcustom org-agenda-weekend-days '(6 0)
   "Which days are weekend?
