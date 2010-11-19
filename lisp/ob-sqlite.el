@@ -28,6 +28,7 @@
 
 ;;; Code:
 (require 'ob)
+(require 'ob-eval)
 (require 'ob-ref)
 
 (declare-function org-fill-template "org" (template alist))
@@ -65,15 +66,10 @@ This function is called by `org-babel-execute-src-block'."
     (unless db (error "ob-sqlite: can't evaluate without a database."))
     (with-temp-buffer
       (insert
-       (shell-command-to-string
+       (org-babel-eval
 	(org-fill-template
-	 "%cmd -init %body %header %separator %nullvalue %others %csv %db "
+	 "%cmd %header %separator %nullvalue %others %csv %db "
 	 (list
-	  (cons "body" ((lambda (sql-file)
-			  (with-temp-file sql-file
-			    (insert (org-babel-expand-body:sqlite body params)))
-			  sql-file)
-			(org-babel-temp-file "sqlite-sql-")))
 	  (cons "cmd" org-babel-sqlite3-command)
 	  (cons "header" (if headers-p "-header" "-noheader"))
 	  (cons "separator"
@@ -90,7 +86,9 @@ This function is called by `org-babel-execute-src-block'."
 			      (member :html others) separator)
 			  ""
 			"-csv"))
-	  (cons "db " db)))))
+	  (cons "db " db)))
+	;; body of the code block
+	(org-babel-expand-body:sqlite body params)))
       (if (or (member "scalar" result-params)
 	      (member "html" result-params)
 	      (member "code" result-params)

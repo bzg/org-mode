@@ -18553,7 +18553,7 @@ which make use of the date at the cursor."
 ;; We want this to be just right, so use the full arsenal.
 
 (defun org-indent-line-function ()
-  "Indent line like previous, but further if previous was headline or item."
+  "Indent line depending on context."
   (interactive)
   (let* ((pos (point))
 	 (itemp (org-at-item-p))
@@ -18562,13 +18562,15 @@ which make use of the date at the cursor."
 	 (inline-task-p (and (featurep 'org-inlinetask)
 			     (org-inlinetask-in-task-p)))
 	 column bpos bcol tpos tcol)
-    ;; Find the previous relevant line
     (beginning-of-line 1)
     (cond
      ;; Comments
-     ((looking-at "#") (setq column 0))
+     ((looking-at "# ") (setq column 0))
      ;; Headings
      ((looking-at "\\*+ ") (setq column 0))
+     ;; Literal examples
+     ((looking-at "[ \t]*:[ \t]")
+      (setq column (org-get-indentation))) ; do nothing
      ;; Drawers
      ((and (looking-at "[ \t]*:END:")
 	   (save-excursion (re-search-backward org-drawer-regexp nil t)))
@@ -18601,20 +18603,23 @@ which make use of the date at the cursor."
 	  (setq tcol (+ bcol 5)))
       (goto-char pos)
       (setq column (if itemp (org-get-indentation) tcol)))
-     ;; This line has nothing special, look upside to get a clue about
-     ;; what to do.
+     ;; This line has nothing special, look at the previous relevant
+     ;; line to compute indentation
      (t
       (beginning-of-line 0)
       (while (and (not (bobp))
+		  (not (looking-at org-drawer-regexp))
 		  ;; skip comments, verbatim, empty lines, tables,
-		  ;; inline tasks
-		  (or (looking-at "[ \t]*[\n:#|]")
+		  ;; inline tasks, lists, drawers and blocks
+		  (or (and (looking-at "[ \t]*:END:")
+			   (re-search-backward org-drawer-regexp nil t))
+		      (and (looking-at "[ \t]*#\\+end_")
+			   (re-search-backward "[ \t]*#\\+begin_"nil t))
+		      (looking-at "[ \t]*[\n:#|]")
 		      (and (org-in-item-p) (goto-char (org-list-top-point)))
 		      (and (not inline-task-p)
 			   (featurep 'org-inlinetask)
-			   (org-inlinetask-in-task-p)))
-      		  (not (looking-at "[ \t]*:END:"))
-      		  (not (looking-at org-drawer-regexp)))
+			   (org-inlinetask-in-task-p))))
       	(beginning-of-line 0))
       (cond
        ;; There was an heading above.
@@ -18623,20 +18628,18 @@ which make use of the date at the cursor."
 	    (setq column 0)
 	  (goto-char (match-end 0))
 	  (setq column (current-column))))
-       ;; A drawer had started and is unfinished: indent consequently.
+       ;; A drawer had started and is unfinished
        ((looking-at org-drawer-regexp)
 	(goto-char (1- (match-beginning 1)))
 	(setq column (current-column)))
-       ;; The drawer had ended: indent like its :END: line.
-       ((looking-at "\\([ \t]*\\):END:")
-	(goto-char (match-end 1))
-	(setq column (current-column)))
        ;; Else, nothing noticeable found: get indentation and go on.
        (t (setq column (org-get-indentation))))))
+    ;; Now apply indentation and move cursor accordingly
     (goto-char pos)
     (if (<= (current-column) (current-indentation))
 	(org-indent-line-to column)
       (save-excursion (org-indent-line-to column)))
+    ;; Special polishing for properties, see `org-property-format'
     (setq column (current-column))
     (beginning-of-line 1)
     (if (looking-at
