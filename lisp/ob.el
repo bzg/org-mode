@@ -43,7 +43,7 @@
 (declare-function tramp-file-name-host "tramp" (vec))
 (declare-function with-parsed-tramp-file-name "tramp" (filename var &rest body))
 (declare-function org-icompleting-read "org" (&rest args))
-(declare-function org-edit-src-code "org-src" 
+(declare-function org-edit-src-code "org-src"
                   (&optional context code edit-buffer-name quietp))
 (declare-function org-edit-src-exit "org-src"  (&optional context))
 (declare-function org-open-at-point "org" (&optional in-emacs reference-buffer))
@@ -1439,10 +1439,10 @@ code ---- the results are extracted in the syntax of the source
 	    (delete-region (point) (org-babel-result-end)))
 	   ((member "append" result-params)
 	    (goto-char (org-babel-result-end)) (setq beg (point)))
-	   ((member "prepend" result-params) ;; already there
-	    )))
+	   ((member "prepend" result-params)))) ; already there
 	(setq results-switches
 	      (if results-switches (concat " " results-switches) ""))
+	;; insert results based on type
 	(cond
 	 ;; do nothing for an empty result
 	 ((= (length result) 0))
@@ -1455,6 +1455,7 @@ code ---- the results are extracted in the syntax of the source
 				 '(:splicep nil :istart "- " :iend "\n")))))
 	 ;; assume the result is a table if it's not a string
 	 ((not (stringp result))
+	  (goto-char beg)
 	  (insert (concat (orgtbl-to-orgtbl
 			   (if (or (eq 'hline (car result))
 				   (and (listp (car result))
@@ -1464,24 +1465,31 @@ code ---- the results are extracted in the syntax of the source
 	  (goto-char beg) (when (org-at-table-p) (org-table-align)))
 	 ((member "file" result-params)
 	  (insert result))
-	 ((member "html" result-params)
-	  (insert (format "#+BEGIN_HTML%s\n%s#+END_HTML\n"
-			  results-switches result)))
-	 ((member "latex" result-params)
-	  (insert (format "#+BEGIN_LaTeX%s\n%s#+END_LaTeX\n"
-			  results-switches result)))
-	 ((member "code" result-params)
-	  (insert (format "#+BEGIN_SRC %s%s\n%s#+END_SRC\n"
-			  (or lang "none") results-switches result)))
-	 ((member "org" result-params)
-	  (insert (format "#+BEGIN_SRC org\n%s#+END_SRC\n" result)))
-	 ((member "raw" result-params)
-	  (save-excursion (insert result)) (if (org-at-table-p) (org-cycle)))
-	 (t
-	  (org-babel-examplize-region
-	   (point) (progn (insert result) (point)) results-switches)))
-	;; possibly indent the results to match the #+results line
+	 (t (goto-char beg)
+	    (org-babel-examplize-region
+	     (point) (progn (insert result) (point)) results-switches)))
 	(setq end (if (listp result) (org-table-end) (point)))
+	;; possibly wrap result
+	(flet ((wrap (start finish)
+		     (goto-char beg) (insert start)
+		     (goto-char
+		      (+ (if (and result (listp result)) 0 (length start)) end))
+		     (insert finish) (setq end (point))))
+	  (cond
+	   ((member "html" result-params)
+	    (wrap "#+BEGIN_HTML\n" "#+END_HTML"))
+	   ((member "latex" result-params)
+	    (wrap "#+BEGIN_LaTeX\n" "#+END_LaTeX"))
+	   ((member "code" result-params)
+	    (wrap (format "#+BEGIN_SRC %s%s\n" (or lang "none") results-switches)
+		  "#+END_SRC"))
+	   ((member "org" result-params)
+	    (wrap "#+BEGIN_ORG\n" "#+END_ORG"))
+	   ((member "raw" result-params)
+	    (goto-char beg) (if (org-at-table-p) (org-cycle)))
+	   ((member "wrap" result-params)
+	    (wrap "#+BEGIN_RESULT\n" "#+END_RESULT"))))
+	;; possibly indent the results to match the #+results line
 	(when (and indent (> indent 0)
 		   ;; in this case `table-align' does the work for us
 		   (not (and (listp result)
@@ -1509,22 +1517,13 @@ code ---- the results are extracted in the syntax of the source
      ((org-at-table-p) (progn (goto-char (org-table-end)) (point)))
      ((org-in-item-p) (- (org-list-bottom-point) 1))
      (t
-      (let ((case-fold-search t))
-        (cond
-         ((looking-at "[ \t]*#\\+begin_latex")
-          (re-search-forward "[ \t]*#\\+end_latex" nil t)
-          (forward-line 1))
-         ((looking-at "[ \t]*#\\+begin_html")
-          (re-search-forward "[ \t]*#\\+end_html" nil t)
-          (forward-line 1))
-         ((looking-at "[ \t]*#\\+begin_example")
-          (re-search-forward "[ \t]*#\\+end_example" nil t)
-          (forward-line 1))
-         ((looking-at "[ \t]*#\\+begin_src")
-          (re-search-forward "[ \t]*#\\+end_src" nil t)
-          (forward-line 1))
-         (t (progn (while (looking-at "[ \t]*\\(: \\|\\[\\[\\)")
-                     (forward-line 1))))))
+      (let ((case-fold-search t)
+	    (blocks-re (regexp-opt
+			(list "latex" "html" "example" "src" "result"))))
+	(if (looking-at (concat "[ \t]*#\\+begin_" blocks-re))
+	    (re-search-forward (concat "[ \t]*#\\+end_" blocks-re) nil t)
+	  (while (looking-at "[ \t]*\\(: \\|\\[\\[\\)")
+	    (forward-line 1))))
       (point)))))
 
 (defun org-babel-result-to-file (result)
@@ -1576,7 +1575,7 @@ This takes into account some special considerations for certain
 parameters when merging lists."
   (let ((results-exclusive-groups
 	 '(("file" "list" "vector" "table" "scalar" "raw" "org"
-            "html" "latex" "code" "pp")
+            "html" "latex" "code" "pp" "wrap")
 	   ("replace" "silent" "append" "prepend")
 	   ("output" "value")))
 	(exports-exclusive-groups
@@ -1924,7 +1923,7 @@ of `org-babel-temporary-directory'."
   (if (file-remote-p default-directory)
       (make-temp-file
        (concat (file-remote-p default-directory)
-	       (expand-file-name 
+	       (expand-file-name
 		prefix temporary-file-directory)
 	       nil suffix))
     (let ((temporary-file-directory
