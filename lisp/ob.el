@@ -585,6 +585,60 @@ results already exist."
       t)))
 
 ;;;###autoload
+(defmacro org-babel-map-src-blocks (file &rest body)
+  "Evaluate BODY forms on each source-block in FILE.
+If FILE is nil evaluate BODY forms on source blocks in current
+buffer.  During evaluation of BODY the following local variables
+are set relative to the currently matched code block.
+
+full-block ------- string holding the entirety of the code block
+beg-block -------- point at the beginning of the code block
+end-block -------- point at the end of the matched code block
+lang ------------- string holding the language of the code block
+beg-lang --------- point at the beginning of the lang
+end-lang --------- point at the end of the lang
+switches --------- string holding the switches
+beg-switches ----- point at the beginning of the switches
+end-switches ----- point at the end of the switches
+header-args ------ string holding the header-args
+beg-header-args -- point at the beginning of the header-args
+end-header-args -- point at the end of the header-args
+body ------------- string holding the body of the code block
+beg-body --------- point at the beginning of the body
+end-body --------- point at the end of the body"
+  (declare (indent 1))
+  (let ((tempvar (make-symbol "file")))
+    `(let* ((,tempvar ,file)
+	    (visited-p (or (null ,tempvar)
+			   (get-file-buffer (expand-file-name ,tempvar))))
+	    (point (point)) to-be-removed)
+       (save-window-excursion
+	 (when ,tempvar (find-file ,tempvar))
+	 (setq to-be-removed (current-buffer))
+	 (goto-char (point-min))
+	 (while (re-search-forward org-babel-src-block-regexp nil t)
+	   (goto-char (match-beginning 0))
+	   (let ((full-block (match-string 0))
+		 (beg-block (match-beginning 0))
+		 (end-block (match-end 0))
+		 (lang (match-string 2))
+		 (beg-lang (match-beginning 2))
+		 (end-lang (match-end 2))
+		 (switches (match-string 3))
+		 (beg-switches (match-beginning 3))
+		 (end-switches (match-end 3))
+		 (header-args (match-string 4))
+		 (beg-header-args (match-beginning 4))
+		 (end-header-args (match-end 4))
+		 (body (match-string 5))
+		 (beg-body (match-beginning 5))
+		 (end-body (match-end 5)))
+	     ,@body
+	     (goto-char end-block))))
+       (unless visited-p (kill-buffer to-be-removed))
+       (goto-char point))))
+
+;;;###autoload
 (defun org-babel-execute-buffer (&optional arg)
   "Execute source code blocks in a buffer.
 Call `org-babel-execute-src-block' on every source block in
@@ -757,59 +811,6 @@ portions of results lines."
 (add-hook 'org-mode-hook
 	  (lambda () (org-add-hook 'change-major-mode-hook
 				   'org-babel-show-result-all 'append 'local)))
-
-(defmacro org-babel-map-src-blocks (file &rest body)
-  "Evaluate BODY forms on each source-block in FILE.
-If FILE is nil evaluate BODY forms on source blocks in current
-buffer.  During evaluation of BODY the following local variables
-are set relative to the currently matched code block.
-
-full-block ------- string holding the entirety of the code block
-beg-block -------- point at the beginning of the code block
-end-block -------- point at the end of the matched code block
-lang ------------- string holding the language of the code block
-beg-lang --------- point at the beginning of the lang
-end-lang --------- point at the end of the lang
-switches --------- string holding the switches
-beg-switches ----- point at the beginning of the switches
-end-switches ----- point at the end of the switches
-header-args ------ string holding the header-args
-beg-header-args -- point at the beginning of the header-args
-end-header-args -- point at the end of the header-args
-body ------------- string holding the body of the code block
-beg-body --------- point at the beginning of the body
-end-body --------- point at the end of the body"
-  (declare (indent 1))
-  (let ((tempvar (make-symbol "file")))
-    `(let* ((,tempvar ,file)
-	    (visited-p (or (null ,tempvar)
-			   (get-file-buffer (expand-file-name ,tempvar))))
-	    (point (point)) to-be-removed)
-       (save-window-excursion
-	 (when ,tempvar (find-file ,tempvar))
-	 (setq to-be-removed (current-buffer))
-	 (goto-char (point-min))
-	 (while (re-search-forward org-babel-src-block-regexp nil t)
-	   (goto-char (match-beginning 0))
-	   (let ((full-block (match-string 0))
-		 (beg-block (match-beginning 0))
-		 (end-block (match-end 0))
-		 (lang (match-string 2))
-		 (beg-lang (match-beginning 2))
-		 (end-lang (match-end 2))
-		 (switches (match-string 3))
-		 (beg-switches (match-beginning 3))
-		 (end-switches (match-end 3))
-		 (header-args (match-string 4))
-		 (beg-header-args (match-beginning 4))
-		 (end-header-args (match-end 4))
-		 (body (match-string 5))
-		 (beg-body (match-beginning 5))
-		 (end-body (match-end 5)))
-	     ,@body
-	     (goto-char end-block))))
-       (unless visited-p (kill-buffer to-be-removed))
-       (goto-char point))))
 
 (defvar org-file-properties)
 (defun org-babel-params-from-properties (&optional lang)
