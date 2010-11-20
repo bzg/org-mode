@@ -9080,7 +9080,8 @@ application the system uses for this file type."
 	(progn (require 'org-attach) (org-attach-reveal 'if-exists))))
    ((run-hook-with-args-until-success 'org-open-at-point-functions))
    ((org-at-timestamp-p t) (org-follow-timestamp-link))
-   ((or (org-footnote-at-reference-p) (org-footnote-at-definition-p))
+   ((and (or (org-footnote-at-reference-p) (org-footnote-at-definition-p))
+	 (not (org-in-regexp org-bracket-link-regexp)))
     (org-footnote-action))
    (t
     (let (type path link line search (pos (point)))
