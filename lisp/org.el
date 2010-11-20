@@ -10539,10 +10539,10 @@ This function can be used in a hook."
 ;;;; Completion
 
 (defconst org-additional-option-like-keywords
-  '("BEGIN_HTML"  "END_HTML"  "HTML:" "ATTR_HTML"
-    "BEGIN_DocBook"  "END_DocBook"  "DocBook:" "ATTR_DocBook"
+  '("BEGIN_HTML"  "END_HTML"  "HTML:" "ATTR_HTML:"
+    "BEGIN_DocBook"  "END_DocBook"  "DocBook:" "ATTR_DocBook:"
     "BEGIN_LaTeX" "END_LaTeX" "LaTeX:" "LATEX_HEADER:"
-    "LATEX_CLASS:" "LATEX_CLASS_OPTIONS:" "ATTR_LaTeX"
+    "LATEX_CLASS:" "LATEX_CLASS_OPTIONS:" "ATTR_LaTeX:"
     "BEGIN:" "END:"
     "ORGTBL" "TBLFM:" "TBLNAME:"
     "BEGIN_EXAMPLE" "END_EXAMPLE"
@@ -10550,11 +10550,16 @@ This function can be used in a hook."
     "BEGIN_VERSE" "END_VERSE"
     "BEGIN_CENTER" "END_CENTER"
     "BEGIN_SRC" "END_SRC"
-    "CATEGORY" "COLUMNS" "PROPERTY"
-    "CAPTION" "LABEL"
-    "SETUPFILE"
-    "BIND"
-    "MACRO"))
+    "SOURCE:" "SRCNAME:" "FUNCTION:"
+    "RESULTS:"
+    "HEADER:" "HEADERS:"
+    "BABEL:"
+    "CATEGORY:" "COLUMNS:" "PROPERTY:"
+    "CAPTION:" "LABEL:"
+    "SETUPFILE:"
+    "INCLUDE:"
+    "BIND:"
+    "MACRO:"))
 
 (defcustom org-structure-template-alist
   '(
