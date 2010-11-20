@@ -17259,7 +17259,10 @@ When in an #+include line, visit the include file.  Otherwise call
    ((org-edit-fixed-width-region))
    ((org-at-table.el-p)
     (org-edit-src-code))
-   ((org-at-table-p)
+   ((or (org-at-table-p)
+	(save-excursion
+	  (beginning-of-line 1)
+	  (looking-at "[ \t]*#\\+TBLFM:")))
     (call-interactively 'org-table-edit-formulas))
    (t (call-interactively 'ffap))))
 
