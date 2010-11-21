@@ -8614,14 +8614,22 @@ This is the list that is used for internal purposes.")
   "List of escapes for characters that are problematic in links.
 This is the list that is used before handing over to the browser.")
 
-(defun org-link-escape (text &optional table)
+(defun org-link-escape (text &optional table merge)
   "Return percent escaped representation of TEXT.
 TEXT is a string with the text to escape.
 Optional argument TABLE is a list with characters that should be
-escaped.  When nil, `org-link-escape-chars' is used."
+escaped.  When nil, `org-link-escape-chars' is used.
+If optional argument MERGE is set, merge TABLE into
+`org-link-escape-chars'."
   (if (and org-url-encoding-use-url-hexify (not table))
       (url-hexify-string text)
-    (setq table (or table org-link-escape-chars))
+    (cond
+     ((and table merge)
+      (mapc (lambda (defchr)
+	      (unless (member defchr table)
+		(setq table (cons defchr table)))) org-link-escape-chars))
+     ((null table)
+      (setq table org-link-escape-chars)))
     (mapconcat
      (lambda (char)
        (if (or (member char table)
