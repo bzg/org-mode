@@ -729,33 +729,13 @@ when PUB-DIR is set, use this as the publishing directory."
 	 (org-current-export-file buffer-file-name)
 	 (title (or (and subtree-p (org-export-get-title-from-subtree))
 		    (plist-get opt-plist :title)
-		    (unless (plist-get opt-plist :skip-before-1st-heading)
-		      (let ((pt (org-export-grab-title-from-buffer)))
-			(remove-text-properties 0 (length pt)
-						'(:org-license-to-kill t) pt)
-			pt))
+		    (and (not
+			  (plist-get opt-plist :skip-before-1st-heading))
+			 (org-export-grab-title-from-buffer))
 		    (and buffer-file-name
 			 (file-name-sans-extension
 			  (file-name-nondirectory buffer-file-name)))
 		    "No Title"))
-	 ; Preprocessing preserves math environments in title
-	 (title
-	  (and title (string-match "\\S-" title)
-	       (org-export-preprocess-string
-		title
-		:emph-multiline t
-		:for-LaTeX t
-		:comments nil
-		:tags (plist-get opt-plist :tags)
-		:priority (plist-get opt-plist :priority)
-		:footnotes (plist-get opt-plist :footnotes)
-		:drawers (plist-get opt-plist :drawers)
-		:timestamps (plist-get opt-plist :timestamps)
-		:todo-keywords (plist-get opt-plist :todo-keywords)
-		:add-text nil
-		:select-tags nil
-		:exclude-tags nil
-		:LaTeX-fragments nil)))
 	 (filename
 	  (and (not to-buffer)
 	       (concat
