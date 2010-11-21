@@ -8636,17 +8636,14 @@ This is the list that is used before handing over to the browser.")
   (if (and org-url-encoding-use-url-hexify (not table))
       (url-hexify-string text)
     (setq table (or table org-link-escape-chars))
-    (when text
-      (let ((re (mapconcat (lambda (x) (regexp-quote
-					(char-to-string (car x))))
-			   table "\\|")))
-	(while (string-match re text)
-	  (setq text
-		(replace-match
-		 (cdr (assoc (string-to-char (match-string 0 text))
-			     table))
-	       t t text)))
-	text))))
+    (mapconcat
+     (lambda (char)
+       (if (or (assoc char table)
+	       (< char 32) (> char 126))
+	   (mapconcat (lambda (sequence)
+			(format "%%%.2X" sequence))
+		      (encode-coding-char char 'utf-8) "")
+	   (char-to-string char))) text "")))
 
 (defun org-link-unescape (text &optional table)
   "Reverse the action of `org-link-escape'."
