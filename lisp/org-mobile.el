@@ -969,11 +969,10 @@ is currently a noop.")
     (if (not (string-match "\\`olp:\\(.*?\\):\\(.*\\)$" link))
 	nil
       (let ((file (match-string 1 link))
-	    (path (match-string 2 link))
-	    (table '((?: . "%3a") (?\[ . "%5b") (?\] . "%5d") (?/ . "%2f"))))
-	(setq file (org-link-unescape file table))
+	    (path (match-string 2 link)))
+	(setq file (org-link-unescape file))
 	(setq file (expand-file-name file org-directory))
-	(setq path (mapcar (lambda (x) (org-link-unescape x table))
+	(setq path (mapcar 'org-link-unescape
 			   (org-split-string path "/")))
 	(org-find-olp (cons file path))))))
 
