@@ -8615,7 +8615,10 @@ This is the list that is used for internal purposes.")
 This is the list that is used before handing over to the browser.")
 
 (defun org-link-escape (text &optional table)
-  "Escape characters in TEXT that are problematic for links."
+  "Return percent escaped representation of TEXT.
+TEXT is a string with the text to escape.
+Optional argument TABLE is a list with characters that should be
+escaped.  When nil, `org-link-escape-chars' is used."
   (if (and org-url-encoding-use-url-hexify (not table))
       (url-hexify-string text)
     (setq table (or table org-link-escape-chars))
