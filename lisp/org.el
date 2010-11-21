@@ -8639,22 +8639,80 @@ If optional argument MERGE is set, merge TABLE into
 		      (encode-coding-char char 'utf-8) "")
 	   (char-to-string char))) text "")))
 
-(defun org-link-unescape (text &optional table)
-  "Reverse the action of `org-link-escape'."
-  (if (and org-url-encoding-use-url-hexify (not table))
-      (url-unhex-string text)
-    (setq table (or table org-link-escape-chars))
-    (when text
-      (let ((case-fold-search t)
-	    (re (mapconcat (lambda (x) (regexp-quote (downcase (cdr x))))
-			   table "\\|")))
-	(while (string-match re text)
-	  (setq text
-		(replace-match
-		 (char-to-string (car (rassoc (upcase (match-string 0 text))
-					      table)))
-		 t t text)))
-	text))))
+(defun org-link-unescape (str)
+  "Unhex hexified unicode strings as returned from the JavaScript function
+encodeURIComponent. E.g. `%C3%B6' is the german Umlaut `ö'."
+  (setq str (or str ""))
+  (let ((tmp "")
+	(case-fold-search t))
+    (while (string-match "\\(%[0-9a-f][0-9a-f]\\)+" str)
+      (let* ((start (match-beginning 0))
+	     (end (match-end 0))
+	     (hex (match-string 0 str))
+	     (replacement (org-link-unescape-compound (upcase hex))))
+	(setq tmp (concat tmp (substring str 0 start) replacement))
+	(setq str (substring str end))))
+    (setq tmp (concat tmp str))
+    tmp))
+
+(defun org-link-unescape-compound (hex)
+  "Unhexify unicode hex-chars. E.g. `%C3%B6' is the German Umlaut `ö'.
+Note: this function also decodes single byte encodings like
+`%E1' (\"á\") if not followed by another `%[A-F0-9]{2}' group."
+  (let* ((bytes (remove "" (split-string hex "%")))
+	 (ret "")
+	 (eat 0)
+	 (sum 0))
+    (while bytes
+      (let* ((b (pop bytes))
+	     (a (elt b 0))
+	     (b (elt b 1))
+	     (c1 (if (> a ?9) (+ 10 (- a ?A)) (- a ?0)))
+	     (c2 (if (> b ?9) (+ 10 (- b ?A)) (- b ?0)))
+	     (val (+ (lsh c1 4) c2))
+	     (shift
+	      (if (= 0 eat) ;; new byte
+		  (if (>= val 252) 6
+		    (if (>= val 248) 5
+		      (if (>= val 240) 4
+			(if (>= val 224) 3
+			  (if (>= val 192) 2 0)))))
+		6))
+	     (xor
+	      (if (= 0 eat) ;; new byte
+		  (if (>= val 252) 252
+		    (if (>= val 248) 248
+		      (if (>= val 240) 240
+			(if (>= val 224) 224
+			  (if (>= val 192) 192 0)))))
+		128)))
+	(if (>= val 192) (setq eat shift))
+	(setq val (logxor val xor))
+	(setq sum (+ (lsh sum shift) val))
+	(if (> eat 0) (setq eat (- eat 1)))
+	(cond
+	 ((= 0 eat)                         ;multi byte
+	  (setq ret (concat ret (org-char-to-string sum)))
+	  (setq sum 0))
+	 ((not bytes)                       ; single byte(s)
+	  (setq ret (org-link-unescape-single-byte-sequence hex))))
+	)) ;; end (while bytes
+    ret ))
+
+(defun org-link-unescape-single-byte-sequence (hex)
+  "Unhexify hex-encoded single byte character sequences."
+  (let ((bytes (remove "" (split-string hex "%")))
+	(ret ""))
+    (while bytes
+      (let* ((b (pop bytes))
+	     (a (elt b 0))
+	     (b (elt b 1))
+	     (c1 (if (> a ?9) (+ 10 (- a ?A)) (- a ?0)))
+	     (c2 (if (> b ?9) (+ 10 (- b ?A)) (- b ?0))))
+	(setq ret
+	      (concat ret (char-to-string
+			   (+ (lsh c1 4) c2))))))
+    ret))
 
 (defun org-xor (a b)
   "Exclusive or."
