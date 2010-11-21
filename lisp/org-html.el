@@ -2320,10 +2320,9 @@ When TITLE is nil, just close all open levels."
 	 (extra-class (and title (org-get-text-property-any 0 'html-container-class title)))
 	 (preferred (and target
 			 (cdr (assoc target org-export-preferred-target-alist))))
-	 (remove (or preferred target))
 	 (l org-level-max)
 	 snumber snu href suffix)
-    (setq extra-targets (remove remove extra-targets))
+    (setq extra-targets (remove (or preferred target) extra-targets))
     (setq extra-targets
 	  (mapconcat (lambda (x)
 		       (if (org-uuidgen-p x) (setq x (concat "ID-" x)))
@@ -2362,12 +2361,13 @@ When TITLE is nil, just close all open levels."
 		(progn
 		  (org-close-li)
 		  (if target
-		      (insert (format "<li id=\"%s\">" target) extra-targets title "<br/>\n")
+		      (insert (format "<li id=\"%s\">" (or preferred target))
+			      extra-targets title "<br/>\n")
 		    (insert "<li>" title "<br/>\n")))
 	      (aset org-levels-open (1- level) t)
 	      (org-close-par-maybe)
 	      (if target
-		  (insert (format "<ul>\n<li id=\"%s\">" target)
+		  (insert (format "<ul>\n<li id=\"%s\">" (or preferred target))
 			  extra-targets title "<br/>\n")
 		(insert "<ul>\n<li>" title "<br/>\n"))))
 	(aset org-levels-open (1- level) t)

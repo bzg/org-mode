@@ -1285,8 +1285,7 @@ OPT-PLIST is the options plist for current buffer."
      (format
       "\n\n\\title{%s}\n"
       ;; convert the title
-      (org-export-latex-content
-       title '(lists tables fixed-width keywords)))
+      (org-export-latex-fontify-headline title))
      ;; insert author info
      (if (plist-get opt-plist :author-info)
 	 (format "\\author{%s}\n"
@@ -1453,6 +1452,33 @@ links, keywords, lists, tables, fixed-width"
     ;; FIXME: org-inside-LaTeX-fragment-p doesn't work when the $...$ is at
     ;; the beginning of the buffer - inserting "\n" is safe here though.
     (insert "\n" string)
+
+    ;; Preserve math snippets
+    
+    (let* ((matchers (plist-get org-format-latex-options :matchers))
+	   (re-list org-latex-regexps)
+	   beg end re e m n block off)
+      ;; Check the different regular expressions
+      (while (setq e (pop re-list))
+	(setq m (car e) re (nth 1 e) n (nth 2 e)
+	      block (if (nth 3 e) "\n\n" ""))
+	(setq off (if (member m '("$" "$1")) 1 0))
+	(when (and (member m matchers) (not (equal m "begin")))
+	  (goto-char (point-min))
+	  (while (re-search-forward re nil t)
+	    (setq beg (+ (match-beginning 0) off) end (- (match-end 0) 0))
+	    (add-text-properties beg end
+				 '(org-protected t org-latex-math t))))))
+
+    ;; Convert LaTeX to \LaTeX{} and TeX to \TeX{}
+    (goto-char (point-min))
+    (let ((case-fold-search nil))
+      (while (re-search-forward "\\<\\(\\(La\\)?TeX\\)\\>" nil t)
+	(unless (eq (char-before (match-beginning 1)) ?\\)
+	  (org-if-unprotected-1
+	   (replace-match (org-export-latex-protect-string
+			   (concat "\\" (match-string 1)
+				   "{}")) t t)))))
     (goto-char (point-min))
     (let ((re (concat "\\\\\\([a-zA-Z]+\\)"
 		      "\\(?:<[^<>\n]*>\\)*"
