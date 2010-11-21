@@ -8603,32 +8603,15 @@ according to FMT (default from `org-email-link-description-format')."
 	  "]"))
 
 (defconst org-link-escape-chars
-  '((?\    . "%20")
-    (?\[   . "%5B")
-    (?\]   . "%5D")
-    (?\340 . "%E0")  ; `a
-    (?\342 . "%E2")  ; ^a
-    (?\347 . "%E7")  ; ,c
-    (?\350 . "%E8")  ; `e
-    (?\351 . "%E9")  ; 'e
-    (?\352 . "%EA")  ; ^e
-    (?\356 . "%EE")  ; ^i
-    (?\364 . "%F4")  ; ^o
-    (?\371 . "%F9")  ; `u
-    (?\373 . "%FB")  ; ^u
-    (?\;   . "%3B")
-;;  (??    . "%3F")
-    (?=    . "%3D")
-    (?+    . "%2B")
-    )
-  "Association list of escapes for some characters problematic in links.
+  '(?\ ?\[ ?\] ?\; ?\= ?\+)
+  "List of characters that should be escaped in link.
 This is the list that is used for internal purposes.")
 
 (defvar org-url-encoding-use-url-hexify nil)
 
 (defconst org-link-escape-chars-browser
-  '((?\  . "%20")) ; 32 for the SPC char
-  "Association list of escapes for some characters problematic in links.
+  '(?\ )
+  "List of escapes for characters that are problematic in links.
 This is the list that is used before handing over to the browser.")
 
 (defun org-link-escape (text &optional table)
@@ -8638,7 +8621,7 @@ This is the list that is used before handing over to the browser.")
     (setq table (or table org-link-escape-chars))
     (mapconcat
      (lambda (char)
-       (if (or (assoc char table)
+       (if (or (member char table)
 	       (< char 32) (> char 126))
 	   (mapconcat (lambda (sequence)
 			(format "%%%.2X" sequence))
