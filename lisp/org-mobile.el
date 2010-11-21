@@ -660,7 +660,7 @@ The table of checksums is written to the file mobile-checksums."
 	    (org-mobile-escape-olp (nth 4 (org-heading-components))))))
 
 (defun org-mobile-escape-olp (s)
-  (let  ((table '((?: . "%3a") (?\[ . "%5b") (?\] . "%5d") (?/ . "%2f"))))
+  (let  ((table '(?: ?/)))
     (org-link-escape s table)))
 
 ;;;###autoload
