@@ -8603,14 +8603,14 @@ according to FMT (default from `org-email-link-description-format')."
 	  "]"))
 
 (defconst org-link-escape-chars
-  '(?\ ?\[ ?\] ?\; ?\= ?\+)
+  '(?\ ?\[ ?\] ?\; ?\= ?\+ ?\%)
   "List of characters that should be escaped in link.
 This is the list that is used for internal purposes.")
 
 (defvar org-url-encoding-use-url-hexify nil)
 
 (defconst org-link-escape-chars-browser
-  '(?\ )
+  '(?\ ?\%)
   "List of escapes for characters that are problematic in links.
 This is the list that is used before handing over to the browser.")
 
