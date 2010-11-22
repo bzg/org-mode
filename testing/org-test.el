@@ -199,6 +199,14 @@ files."
   (interactive)
   (ert (which-function)))
 
+(defun org-test-current-file ()
+  "Run all tests for current file."
+  (interactive)
+  (ert (concat "test-"
+	       (file-name-sans-extension
+		(file-name-nondirectory (buffer-file-name)))
+	       "/")))
+
 (defun org-test-run-all-tests ()
   "Run all defined tests matching \"\\(org\\|ob\\)\".
 Load all test files first."
