@@ -10665,6 +10665,9 @@ extension.
 @item @code{:include}
 @tab List of files to be included regardless of @code{:base-extension}
 and @code{:exclude}.
+
+@item @code{:recursive}
+@tab Non-nil means, check base-directory recursively for files to publish.
 @end multitable
 
 @node Publishing action, Publishing options, Selecting files, Configuration
