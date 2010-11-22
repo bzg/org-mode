@@ -906,10 +906,9 @@ may be specified at the top of the current buffer."
 		  arg)
 		 (cons (intern (match-string 1 arg))
 		       (org-babel-read (org-babel-chomp (match-string 2 arg))))
-	       (cons (intern (concat ":" arg)) nil)))
-	   ;; walk the list splitting on balanced instances of [ \t]:
+	       (cons (intern arg) nil)))
 	   (let ((balance 0) (partial nil) (lst nil) (last 0))
-	     (mapc (lambda (ch)
+	     (mapc (lambda (ch)  ; split on [] balanced instances of [ \t]:
 		     (setq balance (+ balance
 				      (cond ((equal 91 ch) 1)
 					    ((equal 93 ch) -1)
