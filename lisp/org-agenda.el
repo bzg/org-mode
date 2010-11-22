@@ -927,12 +927,6 @@ For example, 9:30am would become 09:30 rather than  9:30."
   :group 'org-agenda
   :type 'boolean)
 
-(defcustom org-agenda-time-leading-zero nil
-  "Non-nil means use leading zero for military times in agenda.
-For example, 9:30am would become 09:30 rather than  9:30."
-  :group 'org-agenda-daily/weekly
-  :type 'boolean)
-
 (defun org-agenda-time-of-day-to-ampm (time)
   "Convert TIME of a string like '13:45' to an AM/PM style time string."
   (let* ((hour-number (string-to-number (substring time 0 -3)))
