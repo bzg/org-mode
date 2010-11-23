@@ -39,7 +39,7 @@
 (defvar org-babel-lob-one-liner-regexp)
 (defvar org-babel-ref-split-regexp)
 (declare-function org-babel-lob-get-info "ob-lob" ())
-
+(declare-function org-babel-eval-wipe-error-buffer "ob-eval" ())
 (add-to-list 'org-export-interblocks '(src org-babel-exp-inline-src-blocks))
 (add-to-list 'org-export-interblocks '(lob org-babel-exp-lob-one-liners))
 (add-hook 'org-export-blocks-postblock-hook 'org-exp-res/src-name-cleanup)
@@ -288,6 +288,7 @@ inhibit insertion of results into the buffer."
 			   (org-babel-process-params (nth 2 info))))
        ;; skip code blocks which we can't evaluate
        (when (fboundp (intern (concat "org-babel-execute:" lang)))
+	 (org-babel-eval-wipe-error-buffer)
 	 (if (equal type 'inline)
 	     (let ((raw (org-babel-execute-src-block
 			 nil info '((:results . "silent"))))
