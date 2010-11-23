@@ -1757,6 +1757,38 @@ block but are passed literally to the \"example-block\"."
   "Strip protective commas from bodies of source blocks."
   (replace-regexp-in-string "^,#" "#" body))
 
+(defun org-babel-script-escape (str)
+  "Safely convert tables into elisp lists."
+  (let (in-single in-double out)
+    (org-babel-read
+     (if (and (stringp str) (string-match "^\\[.+\\]$" str))
+	 (org-babel-read
+	  (concat
+	   "'"
+	   (progn
+	     (mapc
+	      (lambda (ch)
+		(setq
+		 out
+		 (case ch
+		   (91 (if (or in-double in-single) ; [
+			   (cons 91 out)
+			 (cons 40 out)))
+		   (93 (if (or in-double in-single) ; ]
+			   (cons 93 out)
+			 (cons 41 out)))
+		   (44 (if (or in-double in-single) (cons 44 out) out)) ; ,
+		   (39 (if in-double	; '
+			   (cons 39 out)
+			 (setq in-single (not in-single)) (cons 34 out)))
+		   (34 (if in-single	; "
+			   (append (list 34 32) out)
+			 (setq in-double (not in-double)) (cons 34 out)))
+		   (t  (cons ch out)))))
+	      (string-to-list str))
+	     (apply #'string (reverse out)))))
+       str))))
+
 (defun org-babel-read (cell)
   "Convert the string value of CELL to a number if appropriate.
 Otherwise if cell looks like lisp (meaning it starts with a

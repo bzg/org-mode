@@ -116,16 +116,7 @@ specifying a variable of the same value."
   "Convert RESULTS into an appropriate elisp value.
 If RESULTS look like a table, then convert them into an
 Emacs-lisp table, otherwise return the results as a string."
-  (org-babel-read
-   (if (and (stringp results) (string-match "^\\[.+\\]$" results))
-       (org-babel-read
-        (concat "'"
-                (replace-regexp-in-string
-                 "\\[" "(" (replace-regexp-in-string
-                            "\\]" ")" (replace-regexp-in-string
-                                       ", " " " (replace-regexp-in-string
-						 "'" "\"" results))))))
-     results)))
+  (org-babel-script-escape results))
 
 (defun org-babel-ruby-initiate-session (&optional session params)
   "Initiate a ruby session.

@@ -136,16 +136,7 @@ then create one.  Return the initialized session."
   "Convert RESULTS to an Emacs-lisp table or string.
 If RESULTS look like a table, then convert them into an
 Emacs-lisp table, otherwise return the results as a string."
-  (org-babel-read
-   (if (and (stringp results) (string-match "^\\[.+\\]$" results))
-       (org-babel-read
-        (concat "'"
-                (replace-regexp-in-string
-                 "\\[" "(" (replace-regexp-in-string
-                            "\\]" ")" (replace-regexp-in-string
-                                       "," " " (replace-regexp-in-string
-                                                "'" "\"" results))))))
-     results)))
+  (org-babel-script-escape results))
 
 (defun org-babel-haskell-var-to-haskell (var)
   "Convert an elisp value VAR into a haskell variable.

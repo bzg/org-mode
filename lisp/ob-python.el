@@ -117,20 +117,7 @@ specifying a variable of the same value."
   "Convert RESULTS into an appropriate elisp value.
 If the results look like a list or tuple, then convert them into an
 Emacs-lisp table, otherwise return the results as a string."
-  ((lambda (res)
-     (if (listp res)
-	 (mapcar (lambda (el) (if (equal el 'None) 'hline el)) res)
-       res))
-   (org-babel-read
-    (if (and (stringp results) (string-match "^[([].+[])]$" results))
-       (org-babel-read
-        (concat "'"
-                (replace-regexp-in-string
-                 "\\[" "(" (replace-regexp-in-string
-                            "\\]" ")" (replace-regexp-in-string
-                                       ", " " " (replace-regexp-in-string
-                                                 "'" "\"" results t))))))
-     results))))
+  (org-babel-script-escape results))
 
 (defvar org-babel-python-buffers '((:default . nil)))
 
