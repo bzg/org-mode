@@ -8634,8 +8634,8 @@ If optional argument MERGE is set, merge TABLE into
      (lambda (char)
        (if (or (member char table)
 	       (< char 32) (> char 126))
-	   (mapconcat (lambda (sequence)
-			(format "%%%.2X" sequence))
+	   (mapconcat (lambda (sequence-element)
+			(format "%%%.2X" sequence-element))
 		      (encode-coding-char char 'utf-8) "")
 	   (char-to-string char))) text "")))
 
