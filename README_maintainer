@@ -11,7 +11,10 @@ and how they are performed.
 John Wiegley is running a patchwork server that looks at the
 emacs-orgmode mailing list and extracts patches.  The maintainer and
 his helpers should work through such patches, give feedback on them
-and apply the ones which are good and done.
+and apply the ones which are good and done.  A task for the maintainer
+is to every now and then try to get old stuff out of that list, by
+asking some helpers to investigate the patch, by rejecting or
+accepting it.
 
 I have found that the best workflow for this is using the pw script by
 Nate Case, with the modifications for Org-mode made by John Wiegley
@@ -118,12 +121,13 @@ branches left over from the testing.
 The release number for minor releases look like this:  =7.13.01=
 
 Minor releases are small amends to main releases.  Usually they fix
-bugs discovered in a main release.  Only the fix to the bug is
-bundled into a release, without the main development work going on in
-the master branch.  Since the bug fix will also be needed in the
-master branch, usually the fix is made in master and then
-cherry-picked into maint.  When this is done, a release is made from
-maint with this command:
+critical bugs discovered in a main release.  Minor bugs are not
+fixed - they will be adressed in the next main release.  Only the fix
+to the bug is bundled into a release, without the main development
+work going on in the master branch.  Since the bug fix will also be
+needed in the master branch, usually the fix is made in master and
+then cherry-picked into maint.  When this is done, a release is made
+from maint with this command:
 
 : make fixrelease TAG=7.13.01
 
