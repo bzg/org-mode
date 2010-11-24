@@ -70,6 +70,19 @@
     (should (string= "7374bf4f8a18dfcb6f365f93d15f1a0ef42db745"
 		     (org-babel-sha1-hash)))))
 
+(ert-deftest test-org-babel/parse-header-args ()
+  (org-test-at-id "7eb0dc6e-1c53-4275-88b3-b22f3113b9c3"
+    (org-babel-next-src-block)
+    (let* ((info (org-babel-get-src-block-info))
+	   (params (nth 2 info)))
+      (message "%S" params)
+      (should (equal "example-lang" (nth 0 info)))
+      (should (string= "the body" (org-babel-trim (nth 1 info))))
+      (should-not (member '(:session\ \ \ \ ) params))
+      (should (equal '(:session) (assoc :session params)))
+      (should (equal '(:result-type . output) (assoc :result-type params)))
+      (should (equal '(num . 9) (cdr (assoc :var params)))))))
+
 (provide 'test-ob)
 
 ;;; test-ob ends here

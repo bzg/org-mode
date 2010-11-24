@@ -143,10 +143,19 @@
 * executing an lob call line
   :PROPERTIES:
   :results:  silent
+  :ID:       fab7e291-fde6-45fc-bf6e-a485b8bca2f0
   :END:
 
-69fbe856-ca9c-4f20-9146-826d2f488c1d
 #+call: echo(input="testing")
 #+call: echo(input="testing") :results vector
 #+call: echo[:var input="testing"]()
 #+call: echo[:var input="testing"]() :results vector
+
+* parsing header arguments
+  :PROPERTIES:
+  :ID:       7eb0dc6e-1c53-4275-88b3-b22f3113b9c3
+  :END:
+
+#+begin_src example-lang :session     :results output :var num=9
+  the body
+#+end_src

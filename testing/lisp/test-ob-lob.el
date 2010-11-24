@@ -28,11 +28,10 @@
 
 (ert-deftest test-ob-lob/call-with-header-arguments ()
   "Test the evaluation of a library of babel #+call: line."
-  (org-test-at-marker
-      (expand-file-name "babel.org" org-test-example-dir)
-      "69fbe856-ca9c-4f20-9146-826d2f488c1d"
+  (org-test-at-id "fab7e291-fde6-45fc-bf6e-a485b8bca2f0"
     (move-beginning-of-line 1)
-    (forward-line 1)
+    (forward-line 6)
+    (message (buffer-substring (point-at-bol) (point-at-eol)))
     (should (string= "testing" (org-babel-lob-execute
 				(org-babel-lob-get-info))))
     (forward-line 1)

@@ -913,7 +913,7 @@ may be specified at the top of the current buffer."
 		  arg)
 		 (cons (intern (match-string 1 arg))
 		       (org-babel-read (org-babel-chomp (match-string 2 arg))))
-	       (cons (intern arg) nil)))
+	       (cons (intern (org-babel-chomp arg)) nil)))
 	   (let ((balance 0) (partial nil) (lst nil) (last 0))
 	     (mapc (lambda (ch)  ; split on [] balanced instances of [ \t]:
 		     (setq balance (+ balance
