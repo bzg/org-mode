@@ -14464,12 +14464,12 @@ Eric and Dan are jointly responsible for the Org-babel system, which turns
 Org into a multi-language environment for evaluating code and doing literate
 programming and reproducible research.
 @item John Wiegley
-John has also contributed a number of great ideas and patches
-directly to Org, including the attachment system (@file{org-attach.el}),
-integration with Apple Mail (@file{org-mac-message.el}), hierarchical
-dependencies of TODO items, habit tracking (@file{org-habits.el}), and
-encryption (@file{org-crypt.el}).  Also, the capture system is really an
-extended copy of his great @file{remember.el}.
+John has contributed a number of great ideas and patches directly to Org,
+including the attachment system (@file{org-attach.el}), integration with
+Apple Mail (@file{org-mac-message.el}), hierarchical dependencies of TODO
+items, habit tracking (@file{org-habits.el}), and encryption
+(@file{org-crypt.el}).  Also, the capture system is really an extended copy
+of his great @file{remember.el}.
 @item Sebastian Rose
 Without Sebastian, the HTML/XHTML publishing of Org would be the pitiful work
 of an ignorant amateur.  Sebastian has pushed this part of Org onto a much
