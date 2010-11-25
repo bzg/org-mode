@@ -768,8 +768,8 @@ As a project planning environment, Org works by adding metadata to outline
 nodes.  Based on this data, specific entries can be extracted in queries and
 create dynamic @i{agenda views}.
 
-Org mode contains the Org Babel environment which allows to work with
-embedded source code block in a file, to facilitate code evaluation,
+Org mode contains the Org Babel environment which allows you to work with
+embedded source code blocks in a file, to facilitate code evaluation,
 documentation, and tangling.
 
 Org's automatic, context-sensitive table editor with spreadsheet
@@ -4769,7 +4769,7 @@ a regular expression and matched against the property values.
 @cindex inheritance, of properties
 
 @vindex org-use-property-inheritance
-The outline structure of Org-mode documents lends itself for an
+The outline structure of Org-mode documents lends itself to an
 inheritance model of properties: if the parent in a tree has a certain
 property, the children can inherit this property.  Org-mode does not
 turn this on by default, because it can slow down property searches
