@@ -220,7 +220,9 @@ of potentially harmful code."
 		 (not (yes-or-no-p
 		       (format "Evaluate this%scode on your system? "
 			       (if info (format " %s " (nth 0 info)) " "))))))
-	(prog1 nil (message "evaluation aborted"))
+	(prog1 nil (message "Evaluation %s"
+			    (if (or (equal eval "never") (equal eval "no"))
+				"Disabled" "Aborted")))
       t)))
 
 ;;;###autoload
