@@ -4992,7 +4992,7 @@ Move through the column view from field to field.
 Switch to the next/previous allowed value of the field.  For this, you
 have to have specified allowed values for a property.
 @item 1..9,0
-Directly select the nth allowed value, @kbd{0} selects the 10th value.
+Directly select the Nth allowed value, @kbd{0} selects the 10th value.
 @orgcmdkkcc{n,p,org-columns-next-allowed-value,org-columns-previous-allowed-value}
 Same as @kbd{S-@key{left}/@key{right}}
 @orgcmd{e,org-columns-edit-value}
@@ -5326,7 +5326,7 @@ letter ([dwmy]) to indicate change in days, weeks, months, or years.  With a
 single plus or minus, the date is always relative to today.  With a
 double plus or minus, it is relative to the default date.  If instead of
 a single letter, you use the abbreviation of day name, the date will be
-the nth such day.  E.g.
+the Nth such day.  E.g.
 
 @example
 +0            --> today
@@ -5972,7 +5972,7 @@ for an entry with the following commands:
 @table @kbd
 @orgcmd{C-c C-x e,org-set-effort}
 Set the effort estimate for the current entry.  With a numeric prefix
-argument, set it to the NTH allowed value (see below).  This command is also
+argument, set it to the Nth allowed value (see below).  This command is also
 accessible from the agenda with the @kbd{e} key.
 @orgcmd{C-c C-x C-e,org-clock-modify-effort-estimate}
 Modify the effort estimate of the item currently being clocked.
@@ -7105,7 +7105,7 @@ Like the above, but allows selection of a specific TODO keyword.  You can
 also do this by specifying a prefix argument to @kbd{C-c a t}.  You are
 prompted for a keyword, and you may also specify several keywords by
 separating them with @samp{|} as the boolean OR operator.  With a numeric
-prefix, the nth keyword in @code{org-todo-keywords} is selected.
+prefix, the Nth keyword in @code{org-todo-keywords} is selected.
 @kindex r
 The @kbd{r} key in the agenda buffer regenerates it, and you can give
 a prefix argument to this command to change the selected TODO keyword,
