@@ -117,6 +117,10 @@ a look at our [[http://orgmode.org/worg/org-quotes.php][collected quotes about O
 #+ATTR_HTML: style="float:right;"
   [[http://mobileorg.ncogni.to/][http://mobileorg.ncogni.to/images/screenshot-browse.png]]
 
+- <2010-11-25 Thu>: Maybe the times where Org mode could change
+  hard-core vi users into honorable Emacs users are coming to an end?
+  A [[https://github.com/hsitz/VimOrganizer][Vim clone of Org]] mode is be written by Herbert Sitz, and judging
+  by the [[http://vimeo.com/17182850][videos]] it looks promising.
 - <2010-06-06 Sun>: iPhone App [[http://mobileorg.ncogni.to/][MobileOrg]] version 1.5 introduces
   encryption.
 - <2010-10-27 Wed>: Release 7.02
