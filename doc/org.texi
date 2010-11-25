@@ -6285,7 +6285,10 @@ For non-unique headings, the full path is safer.
 Use a regular expression to position the cursor.
 
 @item (file+datetree "path/to/file")
-Will create a heading in a date tree.
+Will create a heading in a date tree for today's date.
+
+@item (file+datetree+prompt "path/to/file")
+Will create a heading in a date tree, but will prompt for the date.
 
 @item (file+function "path/to/file" function-finding-location)
 A function to find the right location in the file.

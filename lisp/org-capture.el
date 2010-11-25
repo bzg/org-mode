@@ -133,7 +133,10 @@ target       Specification of where the captured item should be placed.
                  File to the entry matching regexp
 
              (file+datetree \"path/to/file\")
-                 Will create a heading in a date tree
+                 Will create a heading in a date tree for today's date
+
+             (file+datetree+prompt \"path/to/file\")
+                 Will create a heading in a date tree, promts for date
 
              (file+function \"path/to/file\" function-finding-location)
                  A function to find the right location in the file
@@ -279,6 +282,9 @@ calendar                |  %:type %:date"
 			 (regexp :tag "  Regexp"))
 		   (list :tag "File & Date tree"
 			 (const :format "" file+datetree)
+			 (file :tag "  File"))
+		   (list :tag "File & Date tree, prompt for date"
+			 (const :format "" file+datetree+prompt)
 			 (file :tag "  File"))
 		   (list :tag "File & function"
 			 (const :format "" file+function)
@@ -640,19 +646,33 @@ already gone."
 	      (setq target-entry-p (and (org-mode-p) (org-at-heading-p))))
 	  (error "No match for target regexp in file %s" (nth 1 target))))
 
-       ((eq (car target) 'file+datetree)
+       ((memq (car target) '(file+datetree file+datetree+prompt))
 	(require 'org-datetree)
 	(set-buffer (org-capture-target-buffer (nth 1 target)))
 	;; Make a date tree entry, with the current date (or yesterday,
 	;; if we are extending dates for a couple of hours)
 	(org-datetree-find-date-create
 	 (calendar-gregorian-from-absolute
-	  (if org-overriding-default-time
-	      (time-to-days org-overriding-default-time)
+	  (cond
+
+	   (org-overriding-default-time
+	    ;; use the overriding default time
+	    (time-to-days org-overriding-default-time))
+
+	   ((eq (car target) 'file+datetree+prompt)
+	    ;; prompt for date
+	    (time-to-days (org-read-date 
+			   nil t nil "Date for tree entry:"
+			   (time-subtract (current-time)
+					  (list 0 (* 3600 
+						     org-extend-today-until)
+						0)))))
+	   (t
+	    ;; current date, possible corrected for late night workers
 	    (time-to-days
 	     (time-subtract (current-time)
-			    (list 0 (* 3600 org-extend-today-until) 0)))))))
-
+			    (list 0 (* 3600 org-extend-today-until) 0))))))))
+       
        ((eq (car target) 'file+function)
 	(set-buffer (org-capture-target-buffer (nth 1 target)))
 	(funcall (nth 2 target))
@@ -1358,5 +1378,3 @@ The template may still contain \"%?\" for cursor positioning."
 ;; arch-tag: 986bf41b-8ada-4e28-bf20-e8388a7205a0
 
 ;;; org-capture.el ends here
-
-
