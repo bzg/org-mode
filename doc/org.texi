@@ -7120,13 +7120,15 @@ it more compact:
 @item
 @vindex org-agenda-todo-ignore-scheduled
 @vindex org-agenda-todo-ignore-deadlines
+@vindex org-agenda-todo-ignore-timestamp
 @vindex org-agenda-todo-ignore-with-date
 Some people view a TODO item that has been @emph{scheduled} for execution or
 have a @emph{deadline} (@pxref{Timestamps}) as no longer @emph{open}.
 Configure the variables @code{org-agenda-todo-ignore-scheduled},
-@code{org-agenda-todo-ignore-deadlines}, and/or
-@code{org-agenda-todo-ignore-with-date} to exclude such items from the
-global TODO list.
+@code{org-agenda-todo-ignore-deadlines},
+@code{org-agenda-todo-ignore-timestamp} and/or
+@code{org-agenda-todo-ignore-with-date} to exclude such items from the global
+TODO list.
 @item
 @vindex org-agenda-todo-list-sublevels
 TODO items may have sublevels to break up the task into subtasks.  In
