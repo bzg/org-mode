@@ -49,16 +49,24 @@
 (defun org-babel-expand-body:clojure (body params)
   "Expand BODY according to PARAMS, return the expanded body."
   (let* ((vars (mapcar #'cdr (org-babel-get-header params :var)))
-         (print-level nil) (print-length nil)
-         (body (if (> (length vars) 0)
-		   (concat "(let ["
-			   (mapconcat
-			    (lambda (var)
-			      (format "%S (quote %S)" (car var) (cdr var)))
-			    vars "\n      ")
-			   "]\n" body ")")
-		 body)))
-    body))
+	 (print-level nil) (print-length nil)
+	 (body (org-babel-trim
+		(if (> (length vars) 0)
+		    (concat "(let ["
+			    (mapconcat
+			     (lambda (var)
+			       (format "%S (quote %S)" (car var) (cdr var)))
+			     vars "\n      ")
+			    "]\n" body ")")
+		  body))))
+    (if (or (member "code" result-params)
+	    (member "pp" result-params))
+	(format (concat "(let [org-mode-print-catcher (java.io.StringWriter.)]"
+			"(with-pprint-dispatch %s-dispatch"
+			"(clojure.pprint/pprint %s org-mode-print-catcher)"
+			"(str org-mode-print-catcher)))")
+		(if (member "code" result-params) "code" "simple") body)
+      body)))
 
 (defun org-babel-execute:clojure (body params)
   "Execute a block of Clojure code with Babel."
