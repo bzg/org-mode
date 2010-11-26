@@ -14530,8 +14530,9 @@ asked for a way to narrow wide table columns.
 @i{Thomas S. Dye} contributed documentation on Worg and helped integrating
 the Org-Babel documentation into the manual.
 @item
-@i{Christian Egli} converted the documentation into Texinfo format,
-patched CSS formatting into the HTML exporter, and inspired the agenda.
+@i{Christian Egli} converted the documentation into Texinfo format, inspired
+the agenda, patched CSS formatting into the HTML exporter, and wrote
+@file{org-taskjuggler.el}.
 @item
 @i{David Emery} provided a patch for custom CSS support in exported
 HTML agendas.
@@ -14676,7 +14677,8 @@ with links transformation to Org syntax.
 @i{David O'Toole} wrote @file{org-publish.el} and drafted the manual
 chapter about publishing.
 @item
-@i{Sebastien Vauban} reported many issues with LaTeX and BEAMER export.
+@i{Sebastien Vauban} reported many issues with LaTeX and BEAMER export and
+enabled source code highlighling in Gnus.
 @item
 @i{Stefan Vollmar} organized a video-recorded talk at the
 Max-Planck-Institute for Neurology.  He also inspired the creation of a
