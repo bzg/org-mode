@@ -14549,6 +14549,9 @@ around a match in a hidden outline tree.
 @item
 @i{Austin Frank} works as a mailing list moderator.
 @item
+@i{Eric Fraga} drove the development of BEAMER export with ideas and
+testing.
+@item
 @i{Niels Giesen} had the idea to automatically archive DONE trees.
 @item
 @i{Nicolas Goaziou} rewrote much of the plain list code.
@@ -14672,6 +14675,8 @@ with links transformation to Org syntax.
 @item
 @i{David O'Toole} wrote @file{org-publish.el} and drafted the manual
 chapter about publishing.
+@item
+@i{Sebastien Vauban} reported many issues with LaTeX and BEAMER export.
 @item
 @i{Stefan Vollmar} organized a video-recorded talk at the
 Max-Planck-Institute for Neurology.  He also inspired the creation of a
