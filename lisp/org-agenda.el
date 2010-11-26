@@ -6329,7 +6329,6 @@ When called with a prefix argument, include all archive files as well."
 
 (defun org-agenda-previous-line ()
   "Move cursor to the previous line, and show if follow-mode is active."
-
   (interactive)
   (call-interactively 'previous-line)
   (org-agenda-do-context-action))
