@@ -249,12 +249,12 @@ specifies the value of ERROR-BUFFER."
       (delete-file error-file))
     exit-status))
 
-
 (defun org-babel-eval-wipe-error-buffer ()
+  "Delete the contents of the Org code block error buffer.
+This buffer is named by `org-babel-error-buffer-name'."
   (when (get-buffer org-babel-error-buffer-name)
-    (save-excursion
-     (set-buffer org-babel-error-buffer-name)
-     (delete-region (point-min) (point-max)))))
+    (with-current-buffer org-babel-error-buffer-name
+      (delete-region (point-min) (point-max)))))
 
 (provide 'ob-eval)
 
