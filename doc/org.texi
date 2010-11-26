@@ -10043,7 +10043,8 @@ The beamer-special arguments that should be used for the environment, like
 @code{[t]} or @code{[<+->]} of @code{<2-3>}.  If the @code{BEAMER_col}
 property is also set, something like @code{C[t]} can be added here as well to
 set an options argument for the implied @code{columns} environment.
-@code{c[t]} will set an option for the implied @code{column} environment.
+@code{c[t]} or @code{c<2->} will set an options for the implied @code{column}
+environment.
 @item BEAMER_col
 The width of a column that should start with this entry.  If this property is
 set, the entry will also get a @code{:BMCOL:} property to make this visible.
