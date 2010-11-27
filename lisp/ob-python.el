@@ -56,9 +56,12 @@ This function is called by `org-babel-execute-src-block'."
 		   (cdr (assoc :session params))))
          (result-params (cdr (assoc :result-params params)))
          (result-type (cdr (assoc :result-type params)))
+	 (return-val (when (and (eq result-type 'value) (not session))
+		       (cdr (assoc :return params))))
          (full-body
 	  (org-babel-expand-body:generic
-	   body params (org-babel-variable-assignments:python params)))
+	   (concat body (if return-val (format "return %s" return-val) ""))
+	   params (org-babel-variable-assignments:python params)))
          (result (org-babel-python-evaluate
 		  session full-body result-type result-params)))
     (or (cdr (assoc :file params))
