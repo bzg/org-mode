@@ -17157,7 +17157,6 @@ When in an #+include line, visit the include file.  Otherwise call
     (call-interactively 'org-table-edit-formulas))
    (t (call-interactively 'ffap))))
 
-
 (defun org-ctrl-c-ctrl-c (&optional arg)
   "Set tags in headline, or update according to changed information at point.
 
