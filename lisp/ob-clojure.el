@@ -49,6 +49,7 @@
 (defun org-babel-expand-body:clojure (body params)
   "Expand BODY according to PARAMS, return the expanded body."
   (let* ((vars (mapcar #'cdr (org-babel-get-header params :var)))
+	 (result-params (cdr (assoc :result-params params)))
 	 (print-level nil) (print-length nil)
 	 (body (org-babel-trim
 		(if (> (length vars) 0)
