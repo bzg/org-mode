@@ -1467,9 +1467,7 @@ code ---- the results are extracted in the syntax of the source
 	  (goto-char beg) (when (org-at-table-p) (org-table-align)))
 	 ((member "file" result-params)
 	  (insert result))
-	 (t (goto-char beg)
-	    (org-babel-examplize-region
-	     (point) (progn (insert result) (point)) results-switches)))
+	 (t (goto-char beg) (insert result)))
 	(setq end (if (listp result) (org-table-end) (point)))
 	;; possibly wrap result
 	(flet ((wrap (start finish)
@@ -1490,7 +1488,11 @@ code ---- the results are extracted in the syntax of the source
 	   ((member "raw" result-params)
 	    (goto-char beg) (if (org-at-table-p) (org-cycle)))
 	   ((member "wrap" result-params)
-	    (wrap "#+BEGIN_RESULT\n" "#+END_RESULT"))))
+	    (when (and (stringp result) (not (member "file" result-params)))
+	      (org-babel-examplize-region beg end results-switches))
+	    (wrap "#+BEGIN_RESULT\n" "#+END_RESULT"))
+	   ((and (stringp result) (not (member "file" result-params)))
+	    (org-babel-examplize-region beg end results-switches))))
 	;; possibly indent the results to match the #+results line
 	(when (and indent (> indent 0)
 		   ;; in this case `table-align' does the work for us
