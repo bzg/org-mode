@@ -1549,9 +1549,7 @@ file's directory then expand relative links."
   (interactive "*r")
   (let ((size (count-lines beg end)))
     (save-excursion
-      (cond ((= size 0)
-	     (error (concat "This should not be impossible:"
-                            "a newline was appended to result if missing")))
+      (cond ((= size 0))	      ; do nothing for an empty result
 	    ((< size org-babel-min-lines-for-block-output)
 	     (goto-char beg)
 	     (dotimes (n size)
