@@ -197,10 +197,7 @@ This list represents a \"habit\" for the rest of this module."
   "Determine the relative priority of a habit.
 This must take into account not just urgency, but consistency as well."
   (let ((pri 1000)
-	(now (time-to-days
-	      (or moment
-		  (time-subtract (current-time)
-				 (list 0 (* 3600 org-extend-today-until) 0)))))
+	(now (if moment (time-to-days moment) (org-today)))
 	(scheduled (org-habit-scheduled habit))
 	(deadline (org-habit-deadline habit)))
     ;; add 10 for every day past the scheduled date, and subtract for every
@@ -240,7 +237,7 @@ Habits are assigned colors on the following basis:
 	 (deadline (if scheduled-days
 		       (+ scheduled-days (- d-repeat s-repeat))
 		     (org-habit-deadline habit)))
-	 (m-days (or now-days (time-to-days (current-time)))))
+	 (m-days (or now-days (org-today))))
     (cond
      ((< m-days scheduled)
       '(org-habit-clear-face . org-habit-clear-future-face))
@@ -319,8 +316,7 @@ current time."
   "Insert consistency graph for any habitual tasks."
   (let ((inhibit-read-only t) l c
 	(buffer-invisibility-spec '(org-link))
-	(moment (time-subtract (current-time)
-			       (list 0 (* 3600 org-extend-today-until) 0))))
+	(moment (days-to-time (org-today))))
     (save-excursion
       (goto-char (if line (point-at-bol) (point-min)))
       (while (not (eobp))
