@@ -5820,6 +5820,7 @@ be selected:
              2007-12-31    @r{New year eve 2007}
              2007-12       @r{December 2007}
              2007-W50      @r{ISO-week 50 in 2007}
+             2007-Q2       @r{2nd quarter in 2007}
              2007          @r{the year 2007}
              today, yesterday, today-@var{N}          @r{a relative day}
              thisweek, lastweek, thisweek-@var{N}     @r{a relative week}
