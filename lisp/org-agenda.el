@@ -3180,7 +3180,7 @@ dates."
 					 org-timeline-show-empty-dates))
 	 (org-deadline-warning-days 0)
 	 (org-agenda-only-exact-dates t)
-	 (today (org-agenda-today))
+	 (today (org-today))
 	 (past t)
 	 args
 	 s e rtn d emptyp)
@@ -3257,7 +3257,7 @@ When EMPTY is non-nil, also include days without any entries."
 	     (if inactive org-ts-regexp-both org-ts-regexp)))
 	 dates dates1 date day day1 day2 ts1 ts2)
     (if force-today
-	(setq dates (list (org-agenda-today))))
+	(setq dates (list (org-today))))
     (save-excursion
       (goto-char beg)
       (while (re-search-forward re end t)
@@ -3368,7 +3368,7 @@ given in `org-agenda-start-on-weekday'."
 	      org-agenda-start-on-weekday nil))
 	 (thefiles (org-agenda-files nil 'ifmode))
 	 (files thefiles)
-	 (today (org-agenda-today))
+	 (today (org-today))
 	 (sd (or start-day today))
 	 (start (if (or (null org-agenda-start-on-weekday)
 			(< org-agenda-ndays 7))
@@ -3811,7 +3811,7 @@ for a keyword.  A numeric prefix directly selects the Nth keyword in
   (org-set-sorting-strategy 'todo)
   (org-prepare-agenda "TODO")
   (if (and (stringp arg) (not (string-match "\\S-" arg))) (setq arg nil))
-  (let* ((today (org-agenda-today))
+  (let* ((today (org-today))
 	 (date (calendar-gregorian-from-absolute today))
 	 (kwds org-todo-keywords-for-agenda)
 	 (completion-ignore-case t)
@@ -7903,7 +7903,7 @@ belonging to the \"Work\" category."
   (let* ((cnt 0) ; count added events
 	 (org-agenda-new-buffers nil)
 	 (org-deadline-warning-days 0)
-	 ;; Do not use `org-agenda-today' here because appt only takes
+	 ;; Do not use `org-today' here because appt only takes
 	 ;; time and without date as argument, so it may pass wrong
 	 ;; information otherwise
 	 (today (org-date-to-gregorian
@@ -7946,15 +7946,9 @@ belonging to the \"Work\" category."
 	(message "No event to add")
       (message "Added %d event%s for today" cnt (if (> cnt 1) "s" "")))))
 
-(defun org-agenda-today ()
-  "Return today date, considering `org-extend-today-until'."
-  (time-to-days
-   (time-subtract (current-time)
-		  (list 0 (* 3600 org-extend-today-until) 0))))
-
 (defun org-agenda-todayp (date)
   "Does DATE mean today, when considering `org-extend-today-until'?"
-  (let ((today (org-agenda-today))
+  (let ((today (org-today))
 	(date (if (and date (listp date)) (calendar-absolute-from-gregorian date)
 		date)))
     (eq date today)))
