@@ -671,15 +671,10 @@ already gone."
 	    ;; prompt for date
 	    (time-to-days (org-read-date 
 			   nil t nil "Date for tree entry:"
-			   (time-subtract (current-time)
-					  (list 0 (* 3600 
-						     org-extend-today-until)
-						0)))))
+			   (days-to-time (org-today)))))
 	   (t
 	    ;; current date, possible corrected for late night workers
-	    (time-to-days
-	     (time-subtract (current-time)
-			    (list 0 (* 3600 org-extend-today-until) 0))))))))
+	    (org-today))))))
        
        ((eq (car target) 'file+function)
 	(set-buffer (org-capture-target-buffer (nth 1 target)))
