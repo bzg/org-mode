@@ -229,7 +229,7 @@ last statement in BODY, as elisp."
 	   (lambda (statement) (insert statement) (comint-send-input))
 	   (if pp
 	       (list
-		"import pp"
+		"import pprint"
 		(format "open('%s', 'w').write(pprint.pformat(_))"
 			(org-babel-process-file-name tmp-file 'noquote)))
 	     (list (format "open('%s', 'w').write(str(_))"
