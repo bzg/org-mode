@@ -47,6 +47,7 @@
 (eval-when-compile (require 'cl))
 
 (declare-function org-table-import "org-table" (file arg))
+(declare-function orgtbl-to-csv "org-table" (TABLE PARAMS))
 
 (defvar org-babel-default-header-args:sql '())
 
