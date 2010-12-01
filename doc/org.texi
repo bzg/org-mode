@@ -10974,9 +10974,13 @@ of links to all files in the project.
 (default) or @code{last} to display folders first or last,
 respectively.  Any other value will mix files and folders.
 
-@item @code{:sitemap-alphabetically}
-@tab The site map is normally sorted alphabetically.  Set this explicitly to
-@code{nil} to turn off sorting.
+@item @code{:sitemap-sort-files}
+@tab How the files are sorted in the site map.  Set this
+@code{alphabetically} (default), @code{chronologically} or
+@code{anti-chronologically}. @code{chronologically} sorts the files with
+older date first while @code{anti-chronologically} sorts the files with newer
+date first. @code{alphabetically} sorts the files alphabetically. The date of
+a file is retrieved with @code{org-publish-find-date}.
 
 @item @code{:sitemap-ignore-case}
 @tab Should sorting be case-sensitive?  Default @code{nil}.

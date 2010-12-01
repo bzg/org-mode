@@ -186,8 +186,9 @@ sitemap of files or summary page for a given project.
                            Set this to `first' (default) or `last' to
                            display folders first or last, respectively.
                            Any other value will mix files and folders.
-  :sitemap-alphabetically  The site map is normally sorted alphabetically.
-                           Set this explicitly to nil to turn off sorting.
+  :sitemap-sort-files      The site map is normally sorted alphabetically.
+                           You can change this behaviour setting this to
+                           `chronologically', `anti-chronologically' or nil.
   :sitemap-ignore-case     Should sorting be case-sensitive?  Default nil.
 
 The following properties control the creation of a concept index.
@@ -233,13 +234,18 @@ Any changes made by this hook will be saved."
   :group 'org-publish
   :type 'hook)
 
-(defcustom org-publish-sitemap-sort-alphabetically t
-  "Should sitemaps be sorted alphabetically by default?
+(defcustom org-publish-sitemap-sort-files 'alphabetically
+  "How sitemaps files should be sorted by default?
+Possible values are `alphabetically', `chronologically', `anti-chronologically' and nil.
+If `alphabetically', files will be sorted alphabetically.
+If `chronologically', files will be sorted with older modification time first.
+If `anti-chronologically', files will be sorted with newer modification time first.
+nil won't sort files.
 
 You can overwrite this default per project in your
-`org-publish-project-alist', using `:sitemap-alphabetically'."
+`org-publish-project-alist', using `:sitemap-sort-files'."
   :group 'org-publish
-  :type 'boolean)
+  :type 'symbol)
 
 (defcustom org-publish-sitemap-sort-folders 'first
   "A symbol, denoting if folders are sorted first in sitemaps.
@@ -360,30 +366,37 @@ This splices all the components into the list."
     (nreverse (org-publish-delete-dups (delq nil rtn)))))
 
 
-(defvar sitemap-alphabetically)
+(defvar sitemap-sort-files)
 (defvar sitemap-sort-folders)
 (defvar sitemap-ignore-case)
 (defvar sitemap-requested)
 (defun org-publish-compare-directory-files (a b)
-  "Predicate for `sort', that sorts folders-first/last and alphabetically."
+  "Predicate for `sort', that sorts folders and files for sitemap."
   (let ((retval t))
-    (when (or sitemap-alphabetically sitemap-sort-folders)
-      ;; First we sort alphabetically:
-      (when sitemap-alphabetically
-        (let* ((adir (file-directory-p a))
-               (aorg (and (string-match "\\.org$" a) (not adir)))
-               (bdir (file-directory-p b))
-               (borg (and (string-match "\\.org$" b) (not bdir)))
-               (A (if aorg
-                      (concat (file-name-directory a)
-                              (org-publish-find-title a)) a))
-               (B (if borg
-                      (concat (file-name-directory b)
-                              (org-publish-find-title b)) b)))
-          (setq retval (if sitemap-ignore-case
-			   (not (string-lessp (upcase B) (upcase A)))
-			 (not (string-lessp B A))))))
-
+    (when (or sitemap-sort-files sitemap-sort-folders)
+      ;; First we sort files:
+      (when sitemap-sort-files
+	(cond ((equal sitemap-sort-files 'alphabetically)
+	       (let* ((adir (file-directory-p a))
+		      (aorg (and (string-match "\\.org$" a) (not adir)))
+		      (bdir (file-directory-p b))
+		      (borg (and (string-match "\\.org$" b) (not bdir)))
+		      (A (if aorg
+			     (concat (file-name-directory a)
+				     (org-publish-find-title a)) a))
+		      (B (if borg
+			     (concat (file-name-directory b)
+				     (org-publish-find-title b)) b)))
+		 (setq retval (if sitemap-ignore-case
+				  (not (string-lessp (upcase B) (upcase A)))
+				(not (string-lessp B A))))))
+		((or (equal sitemap-sort-files 'chronologically)
+		     (equal sitemap-sort-files 'anti-chronologically))
+		 (let ((A (org-publish-find-date a))
+		       (B (org-publish-find-date b)))
+		   (setq retval (if (equal sitemap-sort-files 'chronologically)
+				    (<= A B)
+				  (>= A B)))))))
       ;; Directory-wise wins:
       (when sitemap-sort-folders
         ;; a is directory, b not:
@@ -441,10 +454,14 @@ matching filenames."
 	  (if (plist-member project-plist :sitemap-sort-folders)
 	      (plist-get project-plist :sitemap-sort-folders)
 	    org-publish-sitemap-sort-folders))
-	 (sitemap-alphabetically
-	  (if (plist-member project-plist :sitemap-alphabetically)
-	      (plist-get project-plist :sitemap-alphabetically)
-	    org-publish-sitemap-sort-alphabetically))
+	 (sitemap-sort-files
+	  (cond ((plist-member project-plist :sitemap-sort-files)
+		 (plist-get project-plist :sitemap-sort-files))
+		;; For backward compatibility:
+		((plist-member project-plist :sitemap-alphabetically)
+		 (if (plist-get project-plist :sitemap-alphabetically)
+		     'alphabetically nil))
+		(t org-publish-sitemap-sort-files)))
 	 (sitemap-ignore-case
 	  (if (plist-member project-plist :sitemap-ignore-case)
 	      (plist-get project-plist :sitemap-ignore-case)
@@ -487,10 +504,10 @@ matching filenames."
 		 (e (plist-get (cdr prj) :exclude))
 		 (i (plist-get (cdr prj) :include))
 		 (xm (concat "^" b (if r ".+" "[^/]+") "\\.\\(" x "\\)$")))
-	    (when (or
+	    (when
+		(or
 		   (and 
-		    i 
-		    (member filename 
+		  i (member filename
 			    (mapcar 
 			     (lambda (file) (expand-file-name file b))
 			     i)))
@@ -785,6 +802,23 @@ Default for SITEMAP-FILENAME is 'sitemap.org'."
       (kill-buffer buffer))
     (org-publish-cache-set-file-property file :title title)
     title)))
+
+(defun org-publish-find-date (file)
+  "Find the date of FILE in project.
+If FILE provides a #+date keyword use it else use the file
+system's modification time."
+  (let ((visiting (find-buffer-visiting file)))
+    (save-excursion
+      (switch-to-buffer (or visiting (find-file file)))
+      (let* ((plist (org-infile-export-plist))
+	     (date (plist-get plist :date)))
+	(unless visiting
+	  (kill-buffer (current-buffer)))
+	(if date
+	    (let ((dt (org-time-string-to-time date)))
+	      (+ (lsh (car dt) 16) (cadr dt)))
+	  (when (file-exists-p file)
+	    (org-publish-cache-ctime-of-src file)))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Interactive publishing functions
