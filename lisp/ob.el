@@ -1440,7 +1440,7 @@ code ---- the results are extracted in the syntax of the source
 	   ((member "replace" result-params)
 	    (delete-region (point) (org-babel-result-end)))
 	   ((member "append" result-params)
-	    (goto-char (org-babel-result-end)) (setq beg (point)))
+	    (goto-char (org-babel-result-end)) (setq beg (point-marker)))
 	   ((member "prepend" result-params)))) ; already there
 	(setq results-switches
 	      (if results-switches (concat " " results-switches) ""))
@@ -1468,13 +1468,13 @@ code ---- the results are extracted in the syntax of the source
 	 ((member "file" result-params)
 	  (insert result))
 	 (t (goto-char beg) (insert result)))
-	(setq end (if (listp result) (org-table-end) (point)))
+	(when (listp result) (goto-char (org-table-end)))
+	(setq end (point-marker))
 	;; possibly wrap result
 	(flet ((wrap (start finish)
 		     (goto-char beg) (insert start)
-		     (goto-char
-		      (+ (if (and result (listp result)) 0 (length start)) end))
-		     (insert finish) (setq end (point))))
+		     (goto-char end) (insert finish)
+		     (setq end (point-marker))))
 	  (cond
 	   ((member "html" result-params)
 	    (wrap "#+BEGIN_HTML\n" "#+END_HTML"))
@@ -1492,7 +1492,8 @@ code ---- the results are extracted in the syntax of the source
 	      (org-babel-examplize-region beg end results-switches))
 	    (wrap "#+BEGIN_RESULT\n" "#+END_RESULT"))
 	   ((and (stringp result) (not (member "file" result-params)))
-	    (org-babel-examplize-region beg end results-switches))))
+	    (org-babel-examplize-region beg end results-switches)
+	    (setq end (point)))))
 	;; possibly indent the results to match the #+results line
 	(when (and indent (> indent 0)
 		   ;; in this case `table-align' does the work for us
