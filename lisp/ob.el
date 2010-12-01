@@ -32,6 +32,7 @@
 (eval-when-compile
   (require 'org-list)
   (require 'cl))
+(require 'ob-eval)
 (require 'org-macs)
 
 (defvar org-babel-call-process-region-original)
@@ -78,7 +79,6 @@
 (declare-function org-list-to-generic "org-list" (LIST PARAMS))
 (declare-function org-list-bottom-point "org-list" ())
 
-(declare-function org-babel-eval-wipe-error-buffer "ob-eval" ())
 (defgroup org-babel nil
   "Code block evaluation and management in `org-mode' documents."
   :tag "Babel"
