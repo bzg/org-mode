@@ -218,8 +218,10 @@ of potentially harmful code."
     (if (or (equal eval "never") (equal eval "no")
 	    (and query
 		 (not (yes-or-no-p
-		       (format "Evaluate this%scode on your system? "
-			       (if info (format " %s " (nth 0 info)) " "))))))
+		       (format "Evaluate this%scode block%son your system? "
+			       (if info (format " %s " (nth 0 info)) " ")
+			       (if (nth 4 info)
+				   (format " (%s) " (nth 4 info)) " "))))))
 	(prog1 nil (message "Evaluation %s"
 			    (if (or (equal eval "never") (equal eval "no"))
 				"Disabled" "Aborted")))
