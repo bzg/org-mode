@@ -11392,13 +11392,13 @@ This function is run automatically after each state change to a DONE state."
 	     ((equal (match-string 1 ts) ".")
 	      ;; Shift starting date to today
 	      (org-timestamp-change
-	       (- (org-today) (time-to-days time))
+	       (- (time-to-days (current-time)) (time-to-days time))
 	       'day))
 	     ((equal (match-string 1 ts) "+")
 	      (let ((nshiftmax 10) (nshift 0))
 		(while (or (= nshift 0)
 			   (<= (time-to-days time)
-			       (org-today)))
+			       (time-to-days (current-time))))
 		  (when (= (incf nshift) nshiftmax)
 		    (or (y-or-n-p (message "%d repeater intervals were not enough to shift date past today.  Continue? " nshift))
 			(error "Abort")))
