@@ -5820,6 +5820,7 @@ be selected:
              2007-12-31    @r{New year eve 2007}
              2007-12       @r{December 2007}
              2007-W50      @r{ISO-week 50 in 2007}
+             2007-Q2       @r{2nd quarter in 2007}
              2007          @r{the year 2007}
              today, yesterday, today-@var{N}          @r{a relative day}
              thisweek, lastweek, thisweek-@var{N}     @r{a relative week}
@@ -6965,15 +6966,21 @@ paper agenda, showing all the tasks for the current week or day.
 @table @kbd
 @cindex org-agenda, command
 @orgcmd{C-c a a,org-agenda-list}
-@vindex org-agenda-ndays
 Compile an agenda for the current week from a list of Org files.  The agenda
 shows the entries for each day.  With a numeric prefix@footnote{For backward
 compatibility, the universal prefix @kbd{C-u} causes all TODO entries to be
 listed before the agenda.  This feature is deprecated, use the dedicated TODO
 list, or a block agenda instead (@pxref{Block agenda}).}  (like @kbd{C-u 2 1
-C-c a a}) you may set the number of days to be displayed (see also the
-variable @code{org-agenda-ndays})
+C-c a a}) you may set the number of days to be displayed.
 @end table
+
+@vindex org-agenda-span
+@vindex org-agenda-ndays
+The default number of days displayed in the agenda is set by the variable
+@code{org-agenda-span} (or the obsolete @code{org-agenda-ndays}).  This
+variable can be set to any number of days you want to see by default in the
+agenda, or to a span name, such a @code{day}, @code{week}, @code{month} or
+@code{year}.
 
 Remote editing from the agenda buffer means, for example, that you can
 change the dates of deadlines and appointments from the agenda buffer.
@@ -7120,13 +7127,15 @@ it more compact:
 @item
 @vindex org-agenda-todo-ignore-scheduled
 @vindex org-agenda-todo-ignore-deadlines
+@vindex org-agenda-todo-ignore-timestamp
 @vindex org-agenda-todo-ignore-with-date
 Some people view a TODO item that has been @emph{scheduled} for execution or
 have a @emph{deadline} (@pxref{Timestamps}) as no longer @emph{open}.
 Configure the variables @code{org-agenda-todo-ignore-scheduled},
-@code{org-agenda-todo-ignore-deadlines}, and/or
-@code{org-agenda-todo-ignore-with-date} to exclude such items from the
-global TODO list.
+@code{org-agenda-todo-ignore-deadlines},
+@code{org-agenda-todo-ignore-timestamp} and/or
+@code{org-agenda-todo-ignore-with-date} to exclude such items from the global
+TODO list.
 @item
 @vindex org-agenda-todo-list-sublevels
 TODO items may have sublevels to break up the task into subtasks.  In
@@ -7618,10 +7627,9 @@ argument as well.  For example, @kbd{200712 w} will jump to week 12 in
 be mapped to the interval 1938-2037.
 @c
 @orgcmd{f,org-agenda-later}
-@vindex org-agenda-ndays
-Go forward in time to display the following @code{org-agenda-ndays} days.
+Go forward in time to display the following @code{org-agenda-current-span} days.
 For example, if the display covers a week, switch to the following week.
-With prefix arg, go forward that many times @code{org-agenda-ndays} days.
+With prefix arg, go forward that many times @code{org-agenda-current-span} days.
 @c
 @orgcmd{b,org-agenda-earlier}
 Go backward in time to display earlier dates.
@@ -8366,7 +8374,7 @@ or, if you need to modify some parameters@footnote{Quoting depends on the
 system you use, please check the FAQ for examples.}
 @example
 emacs -eval '(org-batch-store-agenda-views                      \
-              org-agenda-ndays 30                               \
+              org-agenda-span month                             \
               org-agenda-start-day "2007-11-01"                 \
               org-agenda-include-diary nil                      \
               org-agenda-files (quote ("~/org/project.org")))'  \
@@ -14030,7 +14038,7 @@ You may also modify parameters on the fly like this:
 @example
 emacs -batch -l ~/.emacs                                      \
    -eval '(org-batch-agenda "a"                               \
-            org-agenda-ndays 30                               \
+            org-agenda-span month                             \
             org-agenda-include-diary nil                      \
             org-agenda-files (quote ("~/org/project.org")))'  \
    | lpr

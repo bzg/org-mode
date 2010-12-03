@@ -47,8 +47,14 @@
 (eval-when-compile (require 'cl))
 
 (declare-function org-table-import "org-table" (file arg))
+(declare-function orgtbl-to-csv "org-table" (TABLE PARAMS))
 
 (defvar org-babel-default-header-args:sql '())
+
+(defun org-babel-expand-body:sql (body params)
+  "Expand BODY according to the values of PARAMS."
+  (org-babel-sql-expand-vars
+   body (mapcar #'cdr (org-babel-get-header params :var))))
 
 (defun org-babel-execute:sql (body params)
   "Execute a block of Sql code with Babel.
@@ -70,11 +76,11 @@ This function is called by `org-babel-execute-src-block'."
 				    (or cmdline "")))
                     (t (error "no support for the %s sql engine" engine)))))
     (with-temp-file in-file
-      (insert (org-babel-expand-body:generic body params)))
+      (insert (org-babel-expand-body:sql body params)))
     (message command)
     (shell-command command)
     (with-temp-buffer
-      (org-table-import out-file nil)
+      (org-table-import out-file '(16))
       (org-babel-reassemble-table
        (org-table-to-lisp)
        (org-babel-pick-name (cdr (assoc :colname-names params))
@@ -82,6 +88,28 @@ This function is called by `org-babel-execute-src-block'."
        (org-babel-pick-name (cdr (assoc :rowname-names params))
 			    (cdr (assoc :rownames params)))))))
 
+(defun org-babel-sql-expand-vars (body vars)
+  "Expand the variables held in VARS in BODY."
+  (mapc
+   (lambda (pair)
+     (setq body
+	   (replace-regexp-in-string
+	    (format "\$%s" (car pair))
+	    ((lambda (val)
+	       (if (listp val)
+		   ((lambda (data-file)
+		      (with-temp-file data-file
+			(insert (orgtbl-to-csv
+				 val '(:fmt (lambda (el) (if (stringp el)
+							el
+						      (format "%S" el)))))))
+		      data-file)
+		    (org-babel-temp-file "sql-data-"))
+		 (if (stringp val) val (format "%S" val))))
+	     (cdr pair))
+	    body)))
+   vars)
+  body)
 
 (defun org-babel-prep-session:sql (session params)
   "Raise an error because Sql sessions aren't implemented."

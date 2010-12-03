@@ -72,11 +72,10 @@
 
 (eval-when-compile
   (require 'cl)
-  (require 'gnus-sum)
-)
+  (require 'gnus-sum))
 
 (require 'calendar)
-(require 'pcomplete)
+
 ;; Emacs 22 calendar compatibility:  Make sure the new variables are available
 (when (fboundp 'defvaralias)
   (unless (boundp 'calendar-view-holidays-initially-flag)
@@ -2732,10 +2731,10 @@ To disable these tags on a per-file basis, insert anywhere in the file:
 (defcustom org-complete-tags-always-offer-all-agenda-tags nil
   "If non-nil, always offer completion for all tags of all agenda files.
 Instead of customizing this variable directly, you might want to
-set it locally for remember buffers, because there no list of
+set it locally for capture buffers, because there no list of
 tags in that file can be created dynamically (there are none).
 
-  (add-hook 'org-remember-mode-hook
+  (add-hook 'org-capture-mode-hook
             (lambda ()
               (set (make-local-variable
                     'org-complete-tags-always-offer-all-agenda-tags)

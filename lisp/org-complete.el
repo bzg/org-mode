@@ -35,6 +35,16 @@
 (require 'org-macs)
 (require 'pcomplete)
 
+(declare-function org-split-string "org" (string &optional separators))
+(declare-function org-get-current-options "org-exp" ())
+(declare-function org-make-org-heading-search-string "org"
+		  (&optional string heading))
+(declare-function org-get-buffer-tags "org" ())
+(declare-function org-get-tags "org" ())
+(declare-function org-buffer-property-keys "org"
+		  (&optional include-specials include-defaults include-columns))
+(declare-function org-entry-properties "org" (&optional pom which specific))
+
 ;;;; Customization variables
 
 (defgroup org-complete nil
@@ -119,6 +129,7 @@ When completing for #+STARTUP, for example, this function returns
 		 (car (org-thing-at-point)))
 		pcomplete-default-completion-function))))
 
+(defvar org-additional-option-like-keywords)
 (defun pcomplete/org-mode/file-option ()
   "Complete against all valid file options."
   (require 'org-exp)
@@ -138,6 +149,7 @@ When completing for #+STARTUP, for example, this function returns
 		    org-additional-option-like-keywords)))))
    (substring pcomplete-stub 2)))
   
+(defvar org-startup-options)
 (defun pcomplete/org-mode/file-option/startup ()
   "Complete arguments for the #+STARTUP file option."
   (while (pcomplete-here
@@ -158,12 +170,15 @@ When completing for #+STARTUP, for example, this function returns
      (lambda (a) (if (boundp a) (setq vars (cons (symbol-name a) vars)))))
     (pcomplete-here vars)))
 
+(defvar org-link-abbrev-alist-local)
+(defvar org-link-abbrev-alist)
 (defun pcomplete/org-mode/link ()
   "Complete against defined #+LINK patterns."
   (pcomplete-here
    (pcomplete-uniqify-list (append (mapcar 'car org-link-abbrev-alist-local)
 				   (mapcar 'car org-link-abbrev-alist)))))
 
+(defvar org-entities)
 (defun pcomplete/org-mode/tex ()
   "Complete against TeX-style HTML entity names."
   (require 'org-entities)
@@ -171,10 +186,12 @@ When completing for #+STARTUP, for example, this function returns
 	  (pcomplete-uniqify-list (remove nil (mapcar 'car-safe org-entities)))
 	  (substring pcomplete-stub 1))))
 
+(defvar org-todo-keywords-1)
 (defun pcomplete/org-mode/todo ()
   "Complete against known TODO keywords."
   (pcomplete-here (pcomplete-uniqify-list org-todo-keywords-1)))
 
+(defvar org-todo-line-regexp)
 (defun pcomplete/org-mode/searchhead ()
   "Complete against all headings.
 This needs more work, to handle headings with lots of spaces in them."
@@ -190,6 +207,7 @@ This needs more work, to handle headings with lots of spaces in them."
 	(pcomplete-uniqify-list tbl)))
     (substring pcomplete-stub 1))))
 
+(defvar org-tag-alist)
 (defun pcomplete/org-mode/tag ()
   "Complete a tag name.  Omit tags already set."
   (while (pcomplete-here

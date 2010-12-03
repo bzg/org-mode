@@ -1100,10 +1100,10 @@ This means, between the beginning of line and the point."
 	 "--"
 	 ["Day View" org-agenda-day-view
 	  :active (org-agenda-check-type nil 'agenda)
-	  :style radio :selected (equal org-agenda-ndays 1)]
+	  :style radio :selected (eq org-agenda-current-span 'day)]
 	 ["Week View" org-agenda-week-view
 	  :active (org-agenda-check-type nil 'agenda)
-	  :style radio :selected (equal org-agenda-ndays 7)]
+	  :style radio :selected (eq org-agenda-current-span 'week)]
 	 "--"
 	 ["Show Logbook entries" org-agenda-log-mode
 	  :style toggle :selected org-agenda-show-log

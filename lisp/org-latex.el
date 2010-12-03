@@ -2383,7 +2383,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 			   "\n"
 			   (match-string 1 res))
 		   t t res)))
-      (insert res "\n"))))
+      (insert res))))
 
 (defconst org-latex-entities
  '("\\!"

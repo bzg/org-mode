@@ -84,6 +84,14 @@
     "àâçèéêîôùû"
     (org-link-unescape "%E0%E2%E7%E8%E9%EA%EE%F4%F9%FB"))))
 
+(ert-deftest test-org/org-link-escape-url-with-escaped-char ()
+  "Escape and unscape a URL that includes an escaped char.
+http://article.gmane.org/gmane.emacs.orgmode/21459/"
+  (should
+   (string=
+    "http://some.host.com/form?&id=blah%2Bblah25"
+    (org-link-unescape (org-link-escape "http://some.host.com/form?&id=blah%2Bblah25")))))
+
 (provide 'test-org)
 
 ;;; test-org.el ends here

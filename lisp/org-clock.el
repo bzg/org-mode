@@ -1654,6 +1654,62 @@ buffer and update it."
 	   (>= (match-end 0) pos)
 	   start))))
 
+(defun org-day-of-week (day month year)
+  "Returns the day of the week as an integer."
+  (nth 6
+       (decode-time
+	(date-to-time
+	 (format "%d-%02d-%02dT00:00:00" year month day)))))
+
+(defun org-quarter-to-date (quarter year)
+  "Get the date (week day year) of the first day of a given quarter."
+  (let (startday)
+    (cond
+     ((= quarter 1)
+      (setq startday (org-day-of-week 1 1 year))
+      (cond
+       ((= startday 0)
+	(list 52 7 (- year 1)))
+       ((= startday 6)
+	(list 52 6 (- year 1)))
+       ((<= startday 4)
+	(list 1 startday year))
+       ((> startday 4)
+	(list 53 startday (- year 1)))
+       )
+      )
+     ((= quarter 2)
+      (setq startday (org-day-of-week 1 4 year))
+      (cond
+       ((= startday 0)
+	(list 13 startday year))
+       ((< startday 4)
+	(list 14 startday year))
+       ((>= startday 4)
+	(list 13 startday year))
+       )
+      )
+     ((= quarter 3)
+      (setq startday (org-day-of-week 1 7 year))
+      (cond
+       ((= startday 0)
+	(list 26 startday year))
+       ((< startday 4)
+	(list 27 startday year))
+       ((>= startday 4)
+	(list 26 startday year))
+       )
+      )
+     ((= quarter 4)
+      (setq startday (org-day-of-week 1 10 year))
+      (cond
+       ((= startday 0)
+	(list 39 startday year))
+       ((<= startday 4)
+	(list 40 startday year))
+       ((> startday 4)
+	(list 39 startday year)))))))
+
 (defun org-clock-special-range (key &optional time as-strings)
   "Return two times bordering a special time range.
 Key is a symbol specifying the range and can be one of `today', `yesterday',
@@ -1670,7 +1726,12 @@ the returned times will be formatted strings."
 	 (dow (nth 6 tm))
 	 (skey (symbol-name key))
 	 (shift 0)
-	 s1 m1 h1 d1 month1 y1 diff ts te fm txt w date)
+         (q (cond ((>= (nth 4 tm) 10) 4)
+                  ((>= (nth 4 tm) 7) 3)
+                  ((>= (nth 4 tm) 4) 2)
+                  ((>= (nth 4 tm) 1) 1)))
+	 s1 m1 h1 d1 month1 y1 diff ts te fm txt w date
+	 interval tmp shiftedy shiftedm shiftedq)
     (cond
      ((string-match "^[0-9]+$" skey)
       (setq y (string-to-number skey) m 1 d 1 key 'year))
@@ -1687,6 +1748,15 @@ the returned times will be formatted strings."
       (setq d (nth 1 date) month (car date) y (nth 2 date)
 	    dow 1
 	    key 'week))
+      ((string-match "^\\([0-9]+\\)-[qQ]\\([1-4]\\)$" skey)
+       (require 'cal-iso)
+       (setq y (string-to-number (match-string 1 skey)))
+       (setq q (string-to-number (match-string 2 skey)))
+       (setq date (calendar-gregorian-from-absolute
+                   (calendar-absolute-from-iso (org-quarter-to-date q y))))
+       (setq d (nth 1 date) month (car date) y (nth 2 date)
+            dow 1
+            key 'quarter))
      ((string-match "^\\([0-9]+\\)-\\([0-9]\\{1,2\\}\\)-\\([0-9]\\{1,2\\}\\)$" skey)
       (setq y (string-to-number (match-string 1 skey))
 	    month (string-to-number (match-string 2 skey))
@@ -1694,12 +1764,17 @@ the returned times will be formatted strings."
 	    key 'day))
      ((string-match "\\([-+][0-9]+\\)$" skey)
       (setq shift (string-to-number (match-string 1 skey))
-	    key (intern (substring skey 0 (match-beginning 1))))))
+            key (intern (substring skey 0 (match-beginning 1))))
+       (if(and (memq key '(quarter thisq)) (> shift 0))
+         (error "Looking forward with quarters isn't implemented.")
+        ())))
+
     (when (= shift 0)
-      (cond ((eq key 'yesterday) (setq key 'today shift -1))
-	    ((eq key 'lastweek)  (setq key 'week  shift -1))
-	    ((eq key 'lastmonth) (setq key 'month shift -1))
-	    ((eq key 'lastyear)  (setq key 'year  shift -1))))
+       (cond ((eq key 'yesterday) (setq key 'today   shift -1))
+            ((eq key 'lastweek)  (setq key 'week    shift -1))
+            ((eq key 'lastmonth) (setq key 'month   shift -1))
+            ((eq key 'lastyear)  (setq key 'year    shift -1))
+            ((eq key 'lastq)     (setq key 'quarter shift -1))))
     (cond
      ((memq key '(day today))
       (setq d (+ d shift) h 0 m 0 h1 24 m1 0))
@@ -1708,6 +1783,28 @@ the returned times will be formatted strings."
 	    m 0 h 0 d (- d diff) d1 (+ 7 d)))
      ((memq key '(month thismonth))
       (setq d 1 h 0 m 0 d1 1 month (+ month shift) month1 (1+ month) h1 0 m1 0))
+     ((memq key '(quarter thisq))
+      ; compute if this shift remains in this year
+      ; if not, compute how many years and quarters we have to shift (via floor*)
+      ; and compute the shifted years, months and quarters
+      (cond
+       ((< (+ (- q 1) shift) 0) ; shift not in this year
+       (setq interval (* -1 (+ (- q 1) shift)))
+       ; set tmp to ((years to shift) (quarters to shift))
+       (setq tmp (org-floor* interval 4))
+       ; due to the use of floor, 0 quarters actually means 4
+       (if (= 0 (nth 1 tmp))
+           (setq shiftedy (- y (nth 0 tmp))
+                 shiftedm 1
+                 shiftedq 1)
+         (setq shiftedy (- y (+ 1 (nth 0 tmp)))
+               shiftedm (- 13 (* 3 (nth 1 tmp)))
+               shiftedq (- 5 (nth 1 tmp))))
+       (setq d 1 h 0 m 0 d1 1 month shiftedm month1 (+ 3 shiftedm) h1 0 m1 0 y shiftedy))
+       ((> (+ q shift) 0) ; shift is whitin this year
+       (setq shiftedq (+ q shift))
+       (setq shiftedy y)
+       (setq d 1 h 0 m 0 d1 1 month (+ 1 (* 3 (- (+ q shift) 1))) month1 (+ 4 (* 3 (- (+ q shift) 1))) h1 0 m1 0))))
      ((memq key '(year thisyear))
       (setq m 0 h 0 d 1 month 1 y (+ y shift) y1 (1+ y)))
      (t (error "No such time block %s" key)))
@@ -1723,10 +1820,20 @@ the returned times will be formatted strings."
      ((memq key '(month thismonth))
       (setq txt (format-time-string "%B %Y" ts)))
      ((memq key '(year thisyear))
-      (setq txt (format-time-string "the year %Y" ts))))
+      (setq txt (format-time-string "the year %Y" ts)))
+     ((memq key '(quarter thisq))
+      (setq txt (concatenate 'string (org-count-quarter shiftedq) " quarter of " (number-to-string shiftedy))))
+     )
     (if as-strings
 	(list (format-time-string fm ts) (format-time-string fm te) txt)
       (list ts te txt))))
+
+(defun org-count-quarter (n)
+  (cond
+   ((= n 1) "1st")
+   ((= n 2) "2nd")
+   ((= n 3) "3rd")
+   ((= n 4) "4th")))
 
 (defun org-clocktable-shift (dir n)
   "Try to shift the :block date of the clocktable at point.
@@ -1750,45 +1857,63 @@ the currently selected interval size."
 	 ((equal s "yesterday") (setq s "today-1"))
 	 ((equal s "lastweek") (setq s "thisweek-1"))
 	 ((equal s "lastmonth") (setq s "thismonth-1"))
-	 ((equal s "lastyear") (setq s "thisyear-1")))
-	(cond
-	 ((string-match "^\\(today\\|thisweek\\|thismonth\\|thisyear\\)\\([-+][0-9]+\\)?$" s)
-	  (setq block (match-string 1 s)
-		shift (if (match-end 2)
-			  (string-to-number (match-string 2 s))
-			0))
-	  (setq shift (+ shift n))
-	  (setq ins (if (= shift 0) block (format "%s%+d" block shift))))
-	 ((string-match "\\([0-9]+\\)\\(-\\([wW]?\\)\\([0-9]\\{1,2\\}\\)\\(-\\([0-9]\\{1,2\\}\\)\\)?\\)?" s)
-	  ;;               1        1  2   3       3  4                4  5   6                6  5   2
-	  (setq y (string-to-number (match-string 1 s))
-		wp (and (match-end 3) (match-string 3 s))
-		mw (and (match-end 4) (string-to-number (match-string 4 s)))
-		d (and (match-end 6) (string-to-number (match-string 6 s))))
-	  (cond
-	   (d (setq ins (format-time-string
-			 "%Y-%m-%d"
-			 (encode-time 0 0 0 (+ d n) m y))))
-	   ((and wp mw (> (length wp) 0))
-	    (require 'cal-iso)
-	    (setq date (calendar-gregorian-from-absolute (calendar-absolute-from-iso (list (+ mw n) 1 y))))
-	    (setq ins (format-time-string
-		       "%G-W%V"
-		       (encode-time 0 0 0 (nth 1 date) (car date) (nth 2 date)))))
-	   (mw
-	    (setq ins (format-time-string
-		       "%Y-%m"
-		       (encode-time 0 0 0 1 (+ mw n) y))))
-	   (y
-	    (setq ins (number-to-string (+ y n))))))
-	 (t (error "Cannot shift clocktable block")))
-	(when ins
-	  (goto-char b)
-	  (insert ins)
-	  (delete-region (point) (+ (point) (- e b)))
-	  (beginning-of-line 1)
-	  (org-update-dblock)
-	  t)))))
+	 ((equal s "lastyear") (setq s "thisyear-1"))
+	 ((equal s "lastq") (setq s "thisq-1")))
+
+       (cond
+        ((string-match "^\\(today\\|thisweek\\|thismonth\\|thisyear\\|thisq\\)\\([-+][0-9]+\\)?$" s)
+         (setq block (match-string 1 s)
+               shift (if (match-end 2)
+                         (string-to-number (match-string 2 s))
+                       0))
+         (setq shift (+ shift n))
+         (setq ins (if (= shift 0) block (format "%s%+d" block shift))))
+	((string-match "\\([0-9]+\\)\\(-\\([wWqQ]?\\)\\([0-9]\\{1,2\\}\\)\\(-\\([0-9]\\{1,2\\}\\)\\)?\\)?" s)
+        ;;               1        1  2   3       3  4                  4  5   6                6  5   2
+         (setq y (string-to-number (match-string 1 s))
+               wp (and (match-end 3) (match-string 3 s))
+               mw (and (match-end 4) (string-to-number (match-string 4 s)))
+	       d (and (match-end 6) (string-to-number (match-string 6 s))))
+	 (cond
+	  (d (setq ins (format-time-string
+                        "%Y-%m-%d"
+                        (encode-time 0 0 0 (+ d n) m y))))
+          ((and wp (string-match "w\\|W" wp) mw (> (length wp) 0))
+           (require 'cal-iso)
+           (setq date (calendar-gregorian-from-absolute (calendar-absolute-from-iso (list (+ mw n) 1 y))))
+           (setq ins (format-time-string
+                      "%G-W%V"
+                      (encode-time 0 0 0 (nth 1 date) (car date) (nth 2 date)))))
+	  ((and wp (string-match "q\\|Q" wp) mw (> (length wp) 0))
+           (require 'cal-iso)
+	   ; if the 4th + 1 quarter is requested we flip to the 1st quarter of the next year
+           (if (> (+ mw n) 4)
+               (setq mw 0
+                     y (+ 1 y))
+	     ())
+	   ; if the 1st - 1 quarter is requested we flip to the 4th quarter of the previous year
+           (if (= (+ mw n) 0)
+               (setq mw 5
+                     y (- y 1))
+             ())
+           (setq date (calendar-gregorian-from-absolute (calendar-absolute-from-iso (org-quarter-to-date (+ mw n) y))))
+           (setq ins (format-time-string
+                      (concatenate 'string (number-to-string y) "-Q" (number-to-string (+ mw n)))
+                      (encode-time 0 0 0 (nth 1 date) (car date) (nth 2 date)))))
+          (mw
+           (setq ins (format-time-string
+                      "%Y-%m"
+		      (encode-time 0 0 0 1 (+ mw n) y))))
+	  (y
+	   (setq ins (number-to-string (+ y n))))))
+	(t (error "Cannot shift clocktable block")))
+       (when ins
+	 (goto-char b)
+	 (insert ins)
+	 (delete-region (point) (+ (point) (- e b)))
+	 (beginning-of-line 1)
+	 (org-update-dblock)
+	 t)))))
 
 (defun org-dblock-write:clocktable (params)
   "Write the standard clocktable."
@@ -1905,7 +2030,7 @@ from the dynamic block defintion."
 	 (indent (plist-get params :indent))
 	 range-text total-time tbl level hlc formula pcol
 	 file-time entries entry headline
-	 recalc content narrow-cut-p)
+	 recalc content narrow-cut-p tcol)
 
     ;; Implement abbreviations
     (when (plist-get params :compact)
@@ -2038,18 +2163,25 @@ from the dynamic block defintion."
       (if (setq formula (plist-get params :formula))
 	  (cond
 	   ((eq formula '%)
-	    (setq pcol (+ 3
+	    ;; compute the column where the % numbers need to go
+	    (setq pcol (+ 2
 			  (if multifile 1 0)
-			  (min maxlevel (or ntcol 100))
+			  (if level-p 1 0)
+			  (if timestamp 1 0)
+			  (min maxlevel (or ntcol 100))))
+	    ;; compute the column where the total time is
+	    (setq tcol (+ 2
+			  (if multifile 1 0)
+			  (if level-p 1 0)
 			  (if timestamp 1 0)))
 	    (insert
 	     (format
 	      "\n#+TBLFM: $%d='(org-clock-time%% @%d$%d $%d..$%d);%%.1f"
-	      pcol
-	      (+ 2 (if narrow 1 0))
-	      (+ 3 (if multifile 1 0))
-	      (+ (if multifile 1 0) 3)
-	      (1- pcol)))
+	      pcol            ; the column where the % numbers should go
+	      (if (and narrow (not narrow-cut-p)) 3 2) ; row of the total time
+	      tcol            ; column of the total time
+	      tcol (1- pcol)  ; range of columns where times can be found
+	      ))
 	    (setq recalc t))
 	   ((stringp formula)
 	    (insert "\n#+TBLFM: " formula)
@@ -2071,7 +2203,7 @@ from the dynamic block defintion."
       (when recalc
 	(if (eq formula '%)
 	    (save-excursion
-	      (if narrow (beginning-of-line 2))
+	      (if (and narrow (not narrow-cut-p)) (beginning-of-line 2))
 	      (org-table-goto-column pcol nil 'force)
 	      (insert "%")))
 	(org-table-recalculate 'all))

@@ -518,7 +518,11 @@ List ending is determined by the indentation of text. See
 	      (setq ind-ref ind)
 	      (forward-line 1))
 	     ((<= ind ind-ref)
-	      (throw 'exit (point-at-bol)))
+	      (throw 'exit (progn
+			     ;; Again, ensure bottom is just after a
+			     ;; non-blank line.
+			     (skip-chars-backward " \r\t\n")
+			     (min (point-max) (1+ (point-at-eol))))))
 	     ((looking-at "#\\+begin_")
 	      (re-search-forward "[ \t]*#\\+end_")
 	      (forward-line 1))

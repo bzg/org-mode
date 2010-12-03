@@ -28,7 +28,7 @@
 
 ;;; Requirements:
 
-;;; A working clojure install. This also implies a working java executable
+;;; - clojure (at least 1.2.0)
 ;;; - clojure-mode
 ;;; - slime
 ;;; - swank-clojure
@@ -49,6 +49,7 @@
 (defun org-babel-expand-body:clojure (body params)
   "Expand BODY according to PARAMS, return the expanded body."
   (let* ((vars (mapcar #'cdr (org-babel-get-header params :var)))
+	 (result-params (cdr (assoc :result-params params)))
 	 (print-level nil) (print-length nil)
 	 (body (org-babel-trim
 		(if (> (length vars) 0)
@@ -62,7 +63,7 @@
     (if (or (member "code" result-params)
 	    (member "pp" result-params))
 	(format (concat "(let [org-mode-print-catcher (java.io.StringWriter.)]"
-			"(with-pprint-dispatch %s-dispatch"
+			"(clojure.pprint/with-pprint-dispatch %s-dispatch"
 			"(clojure.pprint/pprint %s org-mode-print-catcher)"
 			"(str org-mode-print-catcher)))")
 		(if (member "code" result-params) "code" "simple") body)

@@ -53,7 +53,6 @@
   "Execute a block of Sqlite code with Babel.
 This function is called by `org-babel-execute-src-block'."
   (let ((result-params (split-string (or (cdr (assoc :results params)) "")))
-	(vars (org-babel-get-header params :var))
 	(db (cdr (assoc :db params)))
 	(separator (cdr (assoc :separator params)))
 	(nullvalue (cdr (assoc :nullvalue params)))

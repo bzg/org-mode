@@ -32,6 +32,7 @@
 (eval-when-compile
   (require 'org-list)
   (require 'cl))
+(require 'ob-eval)
 (require 'org-macs)
 
 (defvar org-babel-call-process-region-original)
@@ -78,7 +79,6 @@
 (declare-function org-list-to-generic "org-list" (LIST PARAMS))
 (declare-function org-list-bottom-point "org-list" ())
 
-(declare-function org-babel-eval-wipe-error-buffer "ob-eval" ())
 (defgroup org-babel nil
   "Code block evaluation and management in `org-mode' documents."
   :tag "Babel"
@@ -218,8 +218,10 @@ of potentially harmful code."
     (if (or (equal eval "never") (equal eval "no")
 	    (and query
 		 (not (yes-or-no-p
-		       (format "Evaluate this%scode on your system? "
-			       (if info (format " %s " (nth 0 info)) " "))))))
+		       (format "Evaluate this%scode block%son your system? "
+			       (if info (format " %s " (nth 0 info)) " ")
+			       (if (nth 4 info)
+				   (format " (%s) " (nth 4 info)) " "))))))
 	(prog1 nil (message "Evaluation %s"
 			    (if (or (equal eval "never") (equal eval "no"))
 				"Disabled" "Aborted")))
@@ -1440,7 +1442,7 @@ code ---- the results are extracted in the syntax of the source
 	   ((member "replace" result-params)
 	    (delete-region (point) (org-babel-result-end)))
 	   ((member "append" result-params)
-	    (goto-char (org-babel-result-end)) (setq beg (point)))
+	    (goto-char (org-babel-result-end)) (setq beg (point-marker)))
 	   ((member "prepend" result-params)))) ; already there
 	(setq results-switches
 	      (if results-switches (concat " " results-switches) ""))
@@ -1468,13 +1470,13 @@ code ---- the results are extracted in the syntax of the source
 	 ((member "file" result-params)
 	  (insert result))
 	 (t (goto-char beg) (insert result)))
-	(setq end (if (listp result) (org-table-end) (point)))
+	(when (listp result) (goto-char (org-table-end)))
+	(setq end (point-marker))
 	;; possibly wrap result
 	(flet ((wrap (start finish)
 		     (goto-char beg) (insert start)
-		     (goto-char
-		      (+ (if (and result (listp result)) 0 (length start)) end))
-		     (insert finish) (setq end (point))))
+		     (goto-char end) (insert finish)
+		     (setq end (point-marker))))
 	  (cond
 	   ((member "html" result-params)
 	    (wrap "#+BEGIN_HTML\n" "#+END_HTML"))
@@ -1492,7 +1494,8 @@ code ---- the results are extracted in the syntax of the source
 	      (org-babel-examplize-region beg end results-switches))
 	    (wrap "#+BEGIN_RESULT\n" "#+END_RESULT"))
 	   ((and (stringp result) (not (member "file" result-params)))
-	    (org-babel-examplize-region beg end results-switches))))
+	    (org-babel-examplize-region beg end results-switches)
+	    (setq end (point)))))
 	;; possibly indent the results to match the #+results line
 	(when (and indent (> indent 0)
 		   ;; in this case `table-align' does the work for us
@@ -1549,9 +1552,7 @@ file's directory then expand relative links."
   (interactive "*r")
   (let ((size (count-lines beg end)))
     (save-excursion
-      (cond ((= size 0)
-	     (error (concat "This should not be impossible:"
-                            "a newline was appended to result if missing")))
+      (cond ((= size 0))	      ; do nothing for an empty result
 	    ((< size org-babel-min-lines-for-block-output)
 	     (goto-char beg)
 	     (dotimes (n size)
@@ -1561,7 +1562,7 @@ file's directory then expand relative links."
 	     (insert (if results-switches
                          (format "#+begin_example%s\n" results-switches)
                        "#+begin_example\n"))
-	     (forward-char (- end beg))
+	     (if (markerp end) (goto-char end) (forward-char (- end beg)))
 	     (insert "#+end_example\n"))))))
 
 (defun org-babel-update-block-body (new-body)
