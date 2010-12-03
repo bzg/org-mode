@@ -2165,18 +2165,25 @@ from the dynamic block defintion."
       (if (setq formula (plist-get params :formula))
 	  (cond
 	   ((eq formula '%)
-	    (setq pcol (+ 3
+	    ;; compute the column where the % numbers need to go
+	    (setq pcol (+ 2
 			  (if multifile 1 0)
-			  (min maxlevel (or ntcol 100))
+			  (if level-p 1 0)
+			  (if timestamp 1 0)
+			  (min maxlevel (or ntcol 100))))
+	    ;; compute the column where the total time is
+	    (setq tcol (+ 2
+			  (if multifile 1 0)
+			  (if level-p 1 0)
 			  (if timestamp 1 0)))
 	    (insert
 	     (format
 	      "\n#+TBLFM: $%d='(org-clock-time%% @%d$%d $%d..$%d);%%.1f"
-	      pcol
-	      (+ 2 (if narrow 1 0))
-	      (+ 3 (if multifile 1 0))
-	      (+ (if multifile 1 0) 3)
-	      (1- pcol)))
+	      pcol            ; the column where the % numbers should go
+	      (if (and narrow (not narrow-cut-p)) 3 2) ; row of the total time
+	      tcol            ; column of the total time
+	      tcol (1- pcol)  ; range of columns where times can be found
+	      ))
 	    (setq recalc t))
 	   ((stringp formula)
 	    (insert "\n#+TBLFM: " formula)
@@ -2198,7 +2205,7 @@ from the dynamic block defintion."
       (when recalc
 	(if (eq formula '%)
 	    (save-excursion
-	      (if narrow (beginning-of-line 2))
+	      (if (and narrow (not narrow-cut-p)) (beginning-of-line 2))
 	      (org-table-goto-column pcol nil 'force)
 	      (insert "%")))
 	(org-table-recalculate 'all))
