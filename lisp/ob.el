@@ -1562,7 +1562,7 @@ file's directory then expand relative links."
 	     (insert (if results-switches
                          (format "#+begin_example%s\n" results-switches)
                        "#+begin_example\n"))
-	     (forward-char (- end beg))
+	     (if (markerp end) (goto-char end) (forward-char (- end beg)))
 	     (insert "#+end_example\n"))))))
 
 (defun org-babel-update-block-body (new-body)
