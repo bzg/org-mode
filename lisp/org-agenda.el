@@ -3409,7 +3409,7 @@ given in `org-agenda-start-on-weekday'."
   (org-compile-prefix-format 'agenda)
   (org-set-sorting-strategy 'agenda)
   (let* ((span (org-agenda-ndays-to-span (or span org-agenda-ndays org-agenda-span)))
-	 (today (org-agenda-today))
+	 (today (org-today))
 	 (sd (or start-day today))
 	 (ndays (org-agenda-span-to-ndays span sd))
 	 (org-agenda-start-on-weekday
@@ -6038,7 +6038,8 @@ Negative selection means regexp must not match for selection of an entry."
     (cond
      (tdpos (goto-char tdpos))
      ((eq org-agenda-type 'agenda)
-      (let* ((sd (org-agenda-compute-starting-span (org-agenda-today) (or org-agenda-ndays org-agenda-span)))
+      (let* ((sd (org-agenda-compute-starting-span
+		  (org-today) (or org-agenda-ndays org-agenda-span)))
 	     (org-agenda-overriding-arguments org-agenda-last-arguments))
 	(setf (nth 1 org-agenda-overriding-arguments) sd)
 	(org-agenda-redo)
