@@ -6314,7 +6314,7 @@ When called with a prefix argument, include all archive files as well."
 	   (if org-agenda-include-diary "on" "off")))
 
 (defun org-agenda-toggle-deadlines ()
-  "Toggle diary inclusion in an agenda buffer."
+  "Toggle inclusion of entries with a deadline in an agenda buffer."
   (interactive)
   (org-agenda-check-type t 'agenda)
   (setq org-agenda-include-deadlines (not org-agenda-include-deadlines))
