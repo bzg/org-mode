@@ -49,11 +49,12 @@
 	 (with-no-warnings (called-interactively-p ,kind)) ;; defined with no argument in <=23.1
        (interactive-p))))
 
-(if (or (< emacs-major-version 23)
-	(and (<= emacs-major-version 23)
-	     (< emacs-minor-version 2)))
-    (defmacro with-silent-modifications
-      (org-unmodified)))
+(if (and (not (fboundp 'with-silent-modifications))
+	 (or (< emacs-major-version 23)
+	     (and (= emacs-major-version 23)
+		  (< emacs-minor-version 2))))
+    (defmacro with-silent-modifications (&rest body)
+      `(org-unmodified ,@body)))
 
 (defmacro org-bound-and-true-p (var)
   "Return the value of symbol VAR if it is bound, else nil."
