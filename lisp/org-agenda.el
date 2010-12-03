@@ -7741,25 +7741,26 @@ This is a command that has to be installed in `calendar-mode-map'."
   (eq (get-char-property (point-at-bol) 'type)
       'org-marked-entry-overlay))
 
-(defun org-agenda-bulk-mark ()
+(defun org-agenda-bulk-mark (&optional arg)
   "Mark the entry at point for future bulk action."
-  (interactive)
-  (org-agenda-check-no-diary)
-  (let* ((m (org-get-at-bol 'org-hd-marker))
-	 ov)
-    (unless (org-agenda-bulk-marked-p)
-      (unless m (error "Nothing to mark at point"))
-      (push m org-agenda-bulk-marked-entries)
-      (setq ov (make-overlay (point-at-bol) (+ 2 (point-at-bol))))
-      (org-overlay-display ov "> "
-			   (org-get-todo-face "TODO")
-			   'evaporate)
-      (overlay-put ov 'type 'org-marked-entry-overlay))
-    (beginning-of-line 2)
-    (while (and (get-char-property (point) 'invisible) (not (eobp)))
-      (beginning-of-line 2))
-    (message "%d entries marked for bulk action"
-	     (length org-agenda-bulk-marked-entries))))
+  (interactive "p")
+  (dotimes (i (max arg 1))
+    (unless (org-get-at-bol 'org-agenda-diary-link)
+      (let* ((m (org-get-at-bol 'org-hd-marker))
+	     ov)
+	(unless (org-agenda-bulk-marked-p)
+	  (unless m (error "Nothing to mark at point"))
+	  (push m org-agenda-bulk-marked-entries)
+	  (setq ov (make-overlay (point-at-bol) (+ 2 (point-at-bol))))
+	  (org-overlay-display ov "> "
+			       (org-get-todo-face "TODO")
+			       'evaporate)
+	  (overlay-put ov 'type 'org-marked-entry-overlay))
+	(beginning-of-line 2)
+	(while (and (get-char-property (point) 'invisible) (not (eobp)))
+	  (beginning-of-line 2))
+	(message "%d entries marked for bulk action"
+		 (length org-agenda-bulk-marked-entries))))))
 
 (defun org-agenda-bulk-unmark ()
   "Unmark the entry at point for future bulk action."
