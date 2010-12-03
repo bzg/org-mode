@@ -7810,7 +7810,7 @@ The prefix arg is passed through to the command if possible."
   (interactive "P")
   (unless org-agenda-bulk-marked-entries
     (error "No entries are marked"))
-  (message "Bulk: [r]efile [$]archive [A]rch->sib [t]odo [+/-]tag [s]chedule [d]eadline")
+  (message "Bulk: [r]efile [$]arch [A]rch->sib [t]odo [+/-]tag [s]chd [S]catter [d]eadline")
   (let* ((action (read-char-exclusive))
 	 (org-log-refile (if org-log-refile 'time nil))
 	 (entries (reverse org-agenda-bulk-marked-entries))
@@ -7872,6 +7872,10 @@ The prefix arg is passed through to the command if possible."
 		       (if bound
 			   (fset 'read-string old)
 			 (fmakunbound 'read-string)))))))
+
+     ((eq action '?S)
+      (let ((days (read-number "Scatter tasks across how many days: " 7)))
+	(setq cmd `(org-agenda-date-later (random ,(1+ days))))))
      (t (error "Invalid bulk action")))
 
     ;; Sort the markers, to make sure that parents are handled before children
