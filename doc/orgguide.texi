@@ -1931,9 +1931,9 @@ Delete other windows.
 Switch to day/week view. 
 @c
 @item f @r{and} b
-Go forward/backward in time to display the following @code{org-agenda-ndays}
-days.  For example, if the display covers a week, switch to the
-following/previous week.
+Go forward/backward in time to display the following
+@code{org-agenda-current-span} days.  For example, if the display covers a
+week, switch to the following/previous week.
 @c
 @item .
 Go to today.
