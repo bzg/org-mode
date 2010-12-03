@@ -80,7 +80,7 @@ This function is called by `org-babel-execute-src-block'."
     (message command)
     (shell-command command)
     (with-temp-buffer
-      (org-table-import out-file nil)
+      (org-table-import out-file '(16))
       (org-babel-reassemble-table
        (org-table-to-lisp)
        (org-babel-pick-name (cdr (assoc :colname-names params))
