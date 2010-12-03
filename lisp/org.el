@@ -72,11 +72,10 @@
 
 (eval-when-compile
   (require 'cl)
-  (require 'gnus-sum)
-)
+  (require 'gnus-sum))
 
 (require 'calendar)
-(require 'pcomplete)
+
 ;; Emacs 22 calendar compatibility:  Make sure the new variables are available
 (when (fboundp 'defvaralias)
   (unless (boundp 'calendar-view-holidays-initially-flag)

@@ -1663,55 +1663,52 @@ buffer and update it."
 
 (defun org-quarter-to-date (quarter year)
   "Get the date (week day year) of the first day of a given quarter."
-  (cond
-   ((= quarter 1)
-    (setq startday (org-day-of-week 1 1 year))
+  (let (startday)
     (cond
-     ((= startday 0)
-      (list 52 7 (- year 1)))
-     ((= startday 6)
-      (list 52 6 (- year 1)))
-     ((<= startday 4)
-      (list 1 startday year))
-     ((> startday 4)
-      (list 53 startday (- year 1)))
-     )
-    )
-   ((= quarter 2)
-    (setq startday (org-day-of-week 1 4 year))
-    (cond
-     ((= startday 0)
-      (list 13 startday year))
-     ((< startday 4)
-      (list 14 startday year))
-     ((>= startday 4)
-      (list 13 startday year))
-     )
-    )
-   ((= quarter 3)
-    (setq startday (org-day-of-week 1 7 year))
-    (cond
-     ((= startday 0)
-      (list 26 startday year))
-     ((< startday 4)
-      (list 27 startday year))
-     ((>= startday 4)
-      (list 26 startday year))
-     )
-    )
-   ((= quarter 4)
-    (setq startday (org-day-of-week 1 10 year))
-    (cond
-     ((= startday 0)
-      (list 39 startday year))
-     ((<= startday 4)
-      (list 40 startday year))
-     ((> startday 4)
-      (list 39 startday year))
-     )
-    )
-   )
-  )
+     ((= quarter 1)
+      (setq startday (org-day-of-week 1 1 year))
+      (cond
+       ((= startday 0)
+	(list 52 7 (- year 1)))
+       ((= startday 6)
+	(list 52 6 (- year 1)))
+       ((<= startday 4)
+	(list 1 startday year))
+       ((> startday 4)
+	(list 53 startday (- year 1)))
+       )
+      )
+     ((= quarter 2)
+      (setq startday (org-day-of-week 1 4 year))
+      (cond
+       ((= startday 0)
+	(list 13 startday year))
+       ((< startday 4)
+	(list 14 startday year))
+       ((>= startday 4)
+	(list 13 startday year))
+       )
+      )
+     ((= quarter 3)
+      (setq startday (org-day-of-week 1 7 year))
+      (cond
+       ((= startday 0)
+	(list 26 startday year))
+       ((< startday 4)
+	(list 27 startday year))
+       ((>= startday 4)
+	(list 26 startday year))
+       )
+      )
+     ((= quarter 4)
+      (setq startday (org-day-of-week 1 10 year))
+      (cond
+       ((= startday 0)
+	(list 39 startday year))
+       ((<= startday 4)
+	(list 40 startday year))
+       ((> startday 4)
+	(list 39 startday year)))))))
 
 (defun org-clock-special-range (key &optional time as-strings)
   "Return two times bordering a special time range.
@@ -1733,7 +1730,8 @@ the returned times will be formatted strings."
                   ((>= (nth 4 tm) 7) 3)
                   ((>= (nth 4 tm) 4) 2)
                   ((>= (nth 4 tm) 1) 1)))
-	 s1 m1 h1 d1 month1 y1 diff ts te fm txt w date)
+	 s1 m1 h1 d1 month1 y1 diff ts te fm txt w date
+	 interval tmp shiftedy shiftedm shiftedq)
     (cond
      ((string-match "^[0-9]+$" skey)
       (setq y (string-to-number skey) m 1 d 1 key 'year))
@@ -1793,7 +1791,7 @@ the returned times will be formatted strings."
        ((< (+ (- q 1) shift) 0) ; shift not in this year
        (setq interval (* -1 (+ (- q 1) shift)))
        ; set tmp to ((years to shift) (quarters to shift))
-       (setq tmp (floor* interval 4))
+       (setq tmp (org-floor* interval 4))
        ; due to the use of floor, 0 quarters actually means 4
        (if (= 0 (nth 1 tmp))
            (setq shiftedy (- y (nth 0 tmp))
@@ -2032,7 +2030,7 @@ from the dynamic block defintion."
 	 (indent (plist-get params :indent))
 	 range-text total-time tbl level hlc formula pcol
 	 file-time entries entry headline
-	 recalc content narrow-cut-p)
+	 recalc content narrow-cut-p tcol)
 
     ;; Implement abbreviations
     (when (plist-get params :compact)
