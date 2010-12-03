@@ -58,13 +58,13 @@ This function is called by `org-babel-execute-src-block'."
          (result-type (cdr (assoc :result-type params)))
 	 (return-val (when (and (eq result-type 'value) (not session))
 		       (cdr (assoc :return params))))
-	 (prefix (cdr (assoc :prefix params)))
+	 (preamble (cdr (assoc :preamble params)))
          (full-body
 	  (org-babel-expand-body:generic
 	   (concat body (if return-val (format "return %s" return-val) ""))
 	   params (org-babel-variable-assignments:python params)))
          (result (org-babel-python-evaluate
-		  session full-body result-type result-params prefix)))
+		  session full-body result-type result-params preamble)))
     (or (cdr (assoc :file params))
         (org-babel-reassemble-table
          result
@@ -182,27 +182,27 @@ def main():
 open('%s', 'w').write( pprint.pformat(main()) )")
 
 (defun org-babel-python-evaluate
-  (session body &optional result-type result-params prefix)
+  (session body &optional result-type result-params preamble)
   "Evaluate BODY as python code."
   (if session
       (org-babel-python-evaluate-session
        session body result-type result-params)
     (org-babel-python-evaluate-external-process
-     body result-type result-params prefix)))
+     body result-type result-params preamble)))
 
 (defun org-babel-python-evaluate-external-process
-  (body &optional result-type result-params prefix)
+  (body &optional result-type result-params preamble)
   "Evaluate BODY in external python process.
 If RESULT-TYPE equals 'output then return standard output as a
 string. If RESULT-TYPE equals 'value then return the value of the
 last statement in BODY, as elisp."
   (case result-type
     (output (org-babel-eval org-babel-python-command
-			    (concat (if prefix (concat prefix "\n") "") body)))
+			    (concat (if preamble (concat preamble "\n") "") body)))
     (value (let ((tmp-file (org-babel-temp-file "python-")))
 	     (org-babel-eval org-babel-python-command
 			     (concat
-			      (if prefix (concat prefix "\n") "")
+			      (if preamble (concat preamble "\n") "")
 			      (format
 			       (if (member "pp" result-params)
 				   org-babel-python-pp-wrapper-method
