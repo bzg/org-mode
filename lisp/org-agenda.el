@@ -5097,7 +5097,7 @@ Any match of REMOVE-RE will be removed from TXT."
     (let* ((category (or category
 			 (if (stringp org-category)
 			     org-category
-			   (symbol-name org-category))
+			   (and org-category (symbol-name org-category)))
 			 (if buffer-file-name
 			     (file-name-sans-extension
 			      (file-name-nondirectory buffer-file-name))
