@@ -1557,8 +1557,9 @@ to disable them individually.
 @vindex org-cycle-include-plain-lists
 Items can be folded just like headline levels.  Normally this works only if
 the cursor is on a plain list item.  For more details, see the variable
-@code{org-cycle-include-plain-lists}. to @code{integrate}, plain list items
-will be treated like low-level.  The level of an item is then given by the
+@code{org-cycle-include-plain-lists}.  If this variable is set to
+@code{integrate}, plain list items will be treated like low-level
+headlines.  The level of an item is then given by the
 indentation of the bullet/number.  Items are always subordinate to real
 headlines, however; the hierarchies remain completely separated.
 @orgcmd{M-@key{RET},org-insert-heading}
@@ -9166,7 +9167,7 @@ after the backquote, a help window will pop up.
 @kindex '
 Pressing the single-quote @kbd{'} followed by another character modifies
 the symbol before point with an accent or a font.  If you wait more than
-1.5 seconds after the backquote, a help window will pop up.  Character
+1.5 seconds after the single-quote, a help window will pop up.  Character
 modification will work only inside La@TeX{} fragments, outside the quote
 is normal.
 @end itemize
@@ -11980,7 +11981,7 @@ The @code{:tangle} header argument specifies whether or not the code
 block should be included in tangled extraction of source code files.
 
 @itemize @bullet
-@item @code{yes}
+@item @code{tangle}
 The code block is exported to a source code file named after the
 basename (name w/o extension) of the Org-mode file.  E.g., @code{:tangle
 yes}.
@@ -12288,7 +12289,7 @@ contents of the standard output stream are returned as text. (In certain
 languages this also contains the error output stream; this is an area for
 future work.)
 
-@subsection @code{:session}
+@subsection Session
 @subsubsection @code{:results value}
 The code is passed to the interpreter running as an interactive Emacs
 inferior process. The result returned is the result of the last evaluation
@@ -13858,7 +13859,7 @@ Dynamic blocks are enclosed by a BEGIN-END structure that assigns a name
 to the block and can also specify parameters for the function producing
 the content of the block.
 
-#+BEGIN:dynamic block
+@cindex #+BEGIN:dynamic block
 @example
 #+BEGIN: myblock :parameter1 value1 :parameter2 value2 ...
 
