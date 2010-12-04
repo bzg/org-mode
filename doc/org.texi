@@ -12317,7 +12317,7 @@ process. For example, compare the following two blocks:
 : bye
 @end example
 
-In non-session mode, the '2' is not printed and does not appear.
+In non-session mode, the `2' is not printed and does not appear.
 @example
 #+begin_src python :results output :session
  print "hello"
@@ -12331,8 +12331,8 @@ In non-session mode, the '2' is not printed and does not appear.
 : bye
 @end example
 
-But in @code{:session} mode, the interactive interpreter receives input '2'
-and prints out its value, '2'. (Indeed, the other print statements are
+But in @code{:session} mode, the interactive interpreter receives input `2'
+and prints out its value, `2'. (Indeed, the other print statements are
 unnecessary here).
 
 @node Noweb reference syntax, Key bindings and useful functions, Results of evaluation, Working With Source Code
