@@ -1385,12 +1385,15 @@ nil   Never use an ID to make a link, instead link using a text search for
 (defcustom org-context-in-file-links t
   "Non-nil means file links from `org-store-link' contain context.
 A search string will be added to the file name with :: as separator and
-used to find the context when the link is activated by the command
-`org-open-at-point'.
+used to find the context when the link is activated by the command 
+`org-open-at-point'. When this option is t, the entire active region 
+will be placed in the search string of the file link. If set to a 
+positive integer, only the first n lines of context will be stored.
+
 Using a prefix arg to the command \\[org-store-link] (`org-store-link')
 negates this setting for the duration of the command."
   :group 'org-link-store
-  :type 'boolean)
+  :type '(choice boolean integer))
 
 (defcustom org-keep-stored-link-after-insertion nil
   "Non-nil means keep link in list for entire session.
@@ -8501,7 +8504,8 @@ according to FMT (default from `org-email-link-description-format')."
 (defun org-make-org-heading-search-string (&optional string heading)
   "Make search string for STRING or current headline."
   (interactive)
-  (let ((s (or string (org-get-heading))))
+  (let ((s (or string (org-get-heading)))
+	(lines org-context-in-file-links))
     (unless (and string (not heading))
       ;; We are using a headline, clean up garbage in there.
       (if (string-match org-todo-regexp s)
@@ -8515,6 +8519,13 @@ according to FMT (default from `org-email-link-description-format')."
       (while (string-match org-ts-regexp s)
 	(setq s (replace-match "" t t s))))
     (or string (setq s (concat "*" s)))  ; Add * for headlines
+    (when (and string (integerp lines) (> lines 0))
+      (let ((slines (org-split-string s "\n")))
+	(when (< lines (length slines))
+	  (setq s (mapconcat 
+		   'identity
+		   (reverse (nthcdr (- (length slines) lines) 
+				    (reverse slines))) "\n")))))
     (mapconcat 'identity (org-split-string s "[ \t]+") " ")))
 
 (defun org-make-link (&rest strings)
