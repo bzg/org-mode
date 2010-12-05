@@ -8969,8 +8969,8 @@ variable @code{org-pretty-entities}, or on a per-file base with the
 @table @kbd
 @kindex C-c C-x \
 @item C-c C-x \
-Toggle display of entities as UTF8 characters.  This does not change the
-buffer content which remains plain ASCII, but it overlays the UTF8 character
+Toggle display of entities as UTF-8 characters.  This does not change the
+buffer content which remains plain ASCII, but it overlays the UTF-8 character
 for display purposes only.
 @end table
 
@@ -9008,7 +9008,7 @@ subscript, but @samp{a_@{b@}} will.
 @table @kbd
 @kindex C-c C-x \
 @item C-c C-x \
-In addition to showing entities as UTF8 characters, this command will also
+In addition to showing entities as UTF-8 characters, this command will also
 format sub- and superscripts in a WYSIWYM way.
 @end table
 
@@ -9800,7 +9800,7 @@ toc:     @r{Should the table of contents @emph{initially} be visible?}
          @r{Even when @code{nil}, you can always get to the "toc" with @kbd{i}.}
 tdepth:  @r{The depth of the table of contents.  The defaults are taken from}
          @r{the variables @code{org-export-headline-levels} and @code{org-export-with-toc}.}
-ftoc:    @r{Does the css of the page specify a fixed position for the "toc"?}
+ftoc:    @r{Does the CSS of the page specify a fixed position for the "toc"?}
          @r{If yes, the toc will never be displayed as a section.}
 ltoc:    @r{Should there be short contents (children) in each section?}
          @r{Make this @code{above} if the section should be above initial text.}
@@ -11196,7 +11196,7 @@ can be used to map arbitrary language names to existing major modes.
 Controls the way Emacs windows are rearranged when the edit buffer is created.
 @item org-src-preserve-indentation
 This variable is especially useful for tangling languages such as
-python, in which whitespace indentation in the output is critical.
+Python, in which whitespace indentation in the output is critical.
 @item org-src-ask-before-returning-to-edit-buffer
 By default, Org will ask before returning to an open edit buffer. Set
 this variable to nil to switch without asking.
@@ -11365,17 +11365,17 @@ Code blocks in the following languages are supported.
 @item @b{Language} @tab @b{Identifier} @tab @b{Language} @tab @b{Identifier}
 @item Asymptote @tab asymptote @tab C @tab C
 @item C++ @tab C++ @tab Clojure @tab clojure
-@item css @tab css @tab ditaa @tab ditaa
+@item CSS @tab css @tab ditaa @tab ditaa
 @item Graphviz @tab dot @tab Emacs Lisp @tab emacs-lisp
 @item gnuplot @tab gnuplot @tab Haskell @tab haskell
-@item LaTeX @tab latex @tab Matlab @tab matlab
+@item LaTeX @tab latex @tab MATLAB @tab matlab
 @item Mscgen @tab mscgen @tab Objective Caml @tab ocaml
-@item Octave @tab octave @tab OZ @tab oz
+@item Octave @tab octave @tab Oz @tab oz
 @item Perl @tab perl @tab Python @tab python
 @item R @tab R @tab Ruby @tab ruby
 @item Sass @tab sass @tab GNU Screen @tab screen
 @item shell @tab sh @tab SQL @tab sql
-@item Sqlite @tab sqlite
+@item SQLite @tab sqlite
 @end multitable
 
 Language-specific documentation is available for some languages.  If
@@ -11799,7 +11799,7 @@ should be collected from the code block.
 @item @code{value}
 This is the default.  The result is the value of the last statement in the
 code block.  This header argument places the evaluation in functional
-mode.  Note that in some languages, e.g., python, use of this result type
+mode.  Note that in some languages, e.g., Python, use of this result type
 requires that a @code{return} statement be included in the body of the source
 code block. E.g., @code{:results value}.
 @item @code{output}
@@ -11844,7 +11844,7 @@ Result are assumed to be parseable code and are enclosed in a code block.
 E.g., @code{:results value code}.
 @item @code{pp}
 The result is converted to pretty-printed code and is enclosed in a code
-block.  This option currently supports Emacs Lisp, python, and ruby.  E.g.,
+block.  This option currently supports Emacs Lisp, Python, and Ruby.  E.g.,
 @code{:results value pp}.
 @end itemize
 
@@ -11882,7 +11882,7 @@ Note that for some languages, including R, gnuplot, LaTeX and ditaa,
 graphical output is sent to the specified file without the file being
 referenced explicitly in the code block. See the documentation for the
 individual languages for details. In contrast, general purpose languages such
-as python and ruby require that the code explicitly create output
+as Python and Ruby require that the code explicitly create output
 corresponding to the path indicated by @code{:file}.
 
 
@@ -12098,7 +12098,7 @@ values: @code{yes} or @code{no}.
 The default.  No caching takes place, and the code block will be evaluated
 every time it is called.
 @item @code{yes}
-Every time the code block is run a sha1 hash of the code and arguments
+Every time the code block is run a SHA1 hash of the code and arguments
 passed to the block will be generated.  This hash is packed into the
 @code{#+results:} line and will be checked on subsequent
 executions of the code block.  If the code block has not
@@ -12276,9 +12276,9 @@ vector of strings or numbers) when appropriate.
 This is the default. Internally, the value is obtained by wrapping the code
 in a function definition in the external language, and evaluating that
 function. Therefore, code should be written as if it were the body of such a
-function. In particular, note that python does not automatically return a
+function. In particular, note that Python does not automatically return a
 value from a function unless a @code{return} statement is present, and so a
-@samp{return} statement will usually be required in python.
+@samp{return} statement will usually be required in Python.
 
 This is the only one of the four evaluation contexts in which the code is
 automatically wrapped in a function definition.
@@ -12294,7 +12294,7 @@ future work.)
 The code is passed to the interpreter running as an interactive Emacs
 inferior process. The result returned is the result of the last evaluation
 performed by the interpreter. (This is obtained in a language-specific
-manner: the value of the variable @code{_} in python and ruby, and the value
+manner: the value of the variable @code{_} in Python and Ruby, and the value
 of @code{.Last.value} in R).
 
 @subsubsection @code{:results output}
@@ -12595,7 +12595,7 @@ beginning of a headline, i.e. before the first star.  Configure the variable
 pre-defined list of commands, and you can add more such commands using the
 variable @code{org-speed-commands-user}.  Speed keys do not only speed up
 navigation and other commands, but they also provide an alternative way to
-execute commands bound to keys that are not or not easily available on a tty,
+execute commands bound to keys that are not or not easily available on a TTY,
 or on a small mobile device with a limited keyboard.
 
 To see which commands are available, activate the feature and press @kbd{?}
@@ -12901,12 +12901,12 @@ hideblocks   @r{Hide all begin/end blocks on startup}
 nohideblocks @r{Do not hide blocks on startup}
 @end example
 @cindex org-pretty-entities
-The display of entities as UTF8 characters is governed by the variable
+The display of entities as UTF-8 characters is governed by the variable
 @code{org-pretty-entities} and the keywords
 @cindex @code{entitiespretty}, STARTUP keyword
 @cindex @code{entitiesplain}, STARTUP keyword
 @example
-entitiespretty  @r{Show entities as UTF8 characters where possible}
+entitiespretty  @r{Show entities as UTF-8 characters where possible}
 entitiesplain   @r{Leave entities plain}
 @end example
 @item #+TAGS:  TAG1(c1) TAG2(c2)
@@ -13293,7 +13293,7 @@ to have other replacement keys, look at the variable
 @item @file{yasnippet.el}
 @cindex @file{yasnippet.el}
 The way Org-mode binds the TAB key (binding to @code{[tab]} instead of
-@code{"\t"}) overrules yasnippet's access to this key.  The following code
+@code{"\t"}) overrules YASnippet's access to this key.  The following code
 fixed this problem:
 
 @lisp
@@ -14616,7 +14616,7 @@ and being able to quickly restrict the agenda to a subtree.
 @i{Tim O'Callaghan} suggested in-file links, search options for general
 file links, and TAGS.
 @item
-@i{Osamu Okano} wrote @file{orgcard2ref.pl}, a perl program to create a text
+@i{Osamu Okano} wrote @file{orgcard2ref.pl}, a Perl program to create a text
 version of the reference card.
 @item
 @i{Takeshi Okano} translated the manual and David O'Toole's tutorial
