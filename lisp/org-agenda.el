@@ -7874,8 +7874,27 @@ The prefix arg is passed through to the command if possible."
 			 (fmakunbound 'read-string)))))))
 
      ((eq action '?S)
-      (let ((days (read-number "Scatter tasks across how many days: " 7)))
-	(setq cmd `(org-agenda-date-later (random ,(1+ days))))))
+      (let ((days (read-number
+		   (format "Scatter tasks across how many %sdays: "
+			   (if arg "week" "")) 7)))
+	(setq cmd
+	      `(let ((distance (random ,(1+ days))))
+		 (if arg
+		     (let ((dist distance)
+			   (day-of-week
+			    (calendar-day-of-week
+			     (calendar-gregorian-from-absolute (org-today)))))
+		       (dotimes (i (1+ dist))
+			 (while (member day-of-week org-agenda-weekend-days)
+			   (incf distance)
+			   (incf day-of-week)
+			   (if (= day-of-week 7)
+			       (setq day-of-week 0)))
+			 (incf day-of-week)
+			 (if (= day-of-week 7)
+			     (setq day-of-week 0)))))
+		 (org-agenda-date-later distance)))))
+
      (t (error "Invalid bulk action")))
 
     ;; Sort the markers, to make sure that parents are handled before children
