@@ -7984,7 +7984,9 @@ t  @r{Change TODO state.  This prompts for a single TODO keyword and}
 s  @r{Schedule all items to a new date.  To shift existing schedule dates}
    @r{by a fixed number of days, use something starting with double plus}
    @r{at the prompt, for example @samp{++8d} or @samp{++2w}.}
-S  @r{Reschedule randomly by N days.  N will be prompted for.}
+S  @r{Reschedule randomly by N days.  N will be prompted for.  With prefix}
+   @r{arg (@kbd{C-u B S}), scatter only accross weekdays.}
+}
 d  @r{Set deadline to a specific date.}
 @end example
 
