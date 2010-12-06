@@ -266,6 +266,11 @@ are preserved on all copies.
 \def\threecol#1#2#3{\hskip\keyindent\relax#1\hfil&\kbd{#2}\hfil\quad
   &\kbd{#3}\hfil\quad\cr}
 
+\def\noteone{{\small \hfill [1]}}
+\def\notetwo{{\small \hfill [2]}}
+\def\notethree{{\small \hfill [3]}}
+
+
 %**end of header
 
 
@@ -298,7 +303,7 @@ are preserved on all copies.
 \key{next/previous heading, same level}{C-c C-f/b}
 \key{backward to higher level heading}{C-c C-u}
 \key{jump to another place in document}{C-c C-j}
-\key{previous/next plain list item}{S-UP/DOWN$^3$}
+\key{previous/next plain list item}{S-UP/DOWN\notethree}
 
 \section{Structure Editing}
 
@@ -310,17 +315,16 @@ are preserved on all copies.
 \key{turn item/line into headline}{C-c *}
 \key{promote/demote heading}{M-LEFT/RIGHT}
 \metax{promote/demote current subtree}{M-S-LEFT/RIGHT}
-
 \metax{move subtree/list item up/down}{M-S-UP/DOWN}
 \metax{sort subtree/region/plain-list}{C-c \^{}}
 \metax{clone a subtree}{C-c C-x c}
-\metax{refile subtree}{C-c C-w}
 \metax{kill/copy subtree}{C-c C-x C-w/M-w}
 \metax{yank subtree}{C-c C-x C-y or C-y}
 \metax{narrow buffer to subtree / widen}{C-x n s/w}
 
-\section{Archiving}
-
+\section{Capture - Refile - Archiving}
+\key{capture a new item (C-u C-u = goto last)}{C-c c \noteone}
+\key{refile subtree (C-u C-u = goto last)}{C-c C-w}
 \key{archive subtree using the default command}{C-c C-x C-a}
 \key{move subtree to archive file}{C-c C-x C-s}
 \key{toggle ARCHIVE tag / to ARCHIVE sibling}{C-c C-x a/A}
@@ -330,7 +334,7 @@ are preserved on all copies.
 
 \key{construct a sparse tree by various criteria}{C-c /}
 \key{view TODO's in sparse tree}{C-c / t/T}
-\key{global TODO list in agenda mode}{C-c a t$^1$}
+\key{global TODO list in agenda mode}{C-c a t \noteone}
 \key{time sorted view of current org file}{C-c a L}
 
 \section{Tables}
@@ -428,7 +432,7 @@ formula, \kbd{:=} a field formula.
 
 \section{Links}
 
-\key{globally store link to the current location}{C-c l$^1$}
+\key{globally store link to the current location}{C-c l \noteone}
 \key{insert a link (TAB completes stored links)}{C-c C-l}
 \key{insert file link with file name completion}{C-u C-c C-l}
 \key{edit (also hidden part of) link at point}{C-c C-l}
@@ -447,7 +451,7 @@ formula, \kbd{:=} a field formula.
 % {\bf Internal Links}
 
 % \key{\kbd{<<My Target>>}}{\rm target}
-% \key{\kbd{<<<My Target>>>}}{\rm radio target$^2$}
+% \key{\kbd{<<<My Target>>>}}{\rm radio target \notetwo}
 % \key{\kbd{[[*this text]]}}{\rm find headline}
 % \metax{\kbd{[[this text]]}}{\rm find target or text in buffer}
 % \metax{\kbd{[[this text][description]]}}{\rm optional link text}
@@ -538,8 +542,8 @@ after  ``{\tt :}'', and dictionary words elsewhere.
 
 \key{set the priority of the current item}{C-c , [ABC]}
 \key{remove priority cookie from current item}{C-c , SPC}
-\key{raise/lower priority of current item}{S-UP/DOWN$^3$}
-%\key{lower priority of current item}{S-DOWN$^3$}
+\key{raise/lower priority of current item}{S-UP/DOWN\notethree}
+%\key{lower priority of current item}{S-DOWN \notethree}
 
 %\key{\kbd{\#+SEQ_TODO: TODO TRY BLUFF DONE}}{\rm todo workflow}
 %\key{\kbd{\#+TYP_TODO: Phil home work DONE}}{\rm todo types}
@@ -585,8 +589,8 @@ after  ``{\tt :}'', and dictionary words elsewhere.
 \key{insert SCHEDULED timestamp}{C-c C-s}
 \key{create sparse tree with all deadlines due}{C-c / d}
 \key{the time between 2 dates in a time range}{C-c C-y}
-\key{change timestamp at cursor by $\pm 1$ day}{S-RIGHT/LEFT$^3$}
-\key{change year/month/day at cursor by $\pm 1$}{S-UP/DOWN$^3$}
+\metax{change timestamp at cursor $\pm 1$ day}{S-RIGHT/LEFT\notethree}
+\key{change year/month/day at cursor by $\pm 1$}{S-UP/DOWN\notethree}
 \key{access the calendar for the current date}{C-c >}
 \key{insert timestamp matching date in calendar}{C-c <}
 \key{access agenda for current date}{C-c C-o}
@@ -615,15 +619,15 @@ after  ``{\tt :}'', and dictionary words elsewhere.
 \key{cycle through agenda file list}{C-'}
 \key{set/remove restriction lock}{C-c C-x </>}
 
-\key{compile agenda for the current week}{C-c a a$^1$}
+\key{compile agenda for the current week}{C-c a a \noteone}
 \key{compile global TODO list}{C-c a t$^1$}
-\key{compile TODO list for specific keyword}{C-c a T$^1$}
-\key{match tags, TODO kwds, properties}{C-c a m$^1$}
-\key{match only in TODO entries}{C-c a M$^1$}
-\key{find stuck projects}{C-c a \#$^1$}
-\key{show timeline of current org file}{C-c a L$^1$}
-\key{configure custom commands}{C-c a C$^1$}
-%\key{configure stuck projects}{C-c a !$^1$}
+\key{compile TODO list for specific keyword}{C-c a T \noteone}
+\key{match tags, TODO kwds, properties}{C-c a m \noteone}
+\key{match only in TODO entries}{C-c a M \noteone}
+\key{find stuck projects}{C-c a \# \noteone}
+\key{show timeline of current org file}{C-c a L \noteone}
+\key{configure custom commands}{C-c a C \noteone}
+%\key{configure stuck projects}{C-c a ! \noteone}
 \key{agenda for date at cursor}{C-c C-o}
 
 {\bf Commands available in an agenda buffer}
@@ -664,10 +668,10 @@ after  ``{\tt :}'', and dictionary words elsewhere.
 \key{set/show tags of current headline}{: / T}
 \key{set effort property (prefix=nth)}{e}
 \key{set / compute priority of current item}{, / P}
-\key{raise/lower priority of current item}{S-UP/DOWN$^3$}
+\key{raise/lower priority of current item}{S-UP/DOWN\notethree}
 \key{run an attachment command}{C-c C-a}
 \key{schedule/set deadline for this item}{C-c C-s/d}
-\key{change timestamp to one day earlier/later}{S-LEFT/RIGHT$^3$}
+\metax{change timestamp one day earlier/later}{S-LEFT/RIGHT\notethree}
 \key{change timestamp to today}{>}
 \key{insert new entry into diary}{i}
 \newcolumn
@@ -763,13 +767,13 @@ never exported.
 \metax{update all dynamic blocks}{C-u C-c C-x C-u}
 
 \section{Notes}
-$^1$ This is only a suggestion for a binding of this command.  Choose
+[1] This is only a suggestion for a binding of this command.  Choose
 your own key as shown under INSTALLATION.
 
-$^2$ After changing a \kbd{\#+KEYWORD} or \kbd{<<<target>>>} line,
+[2] After changing a \kbd{\#+KEYWORD} or \kbd{<<<target>>>} line,
 press \kbd{C-c C-c} with the cursor still in the line to update.
 
-$^3$ Keybinding affected by {\tt org-support-shift-select} and
+[3] Keybinding affected by {\tt org-support-shift-select} and
  {\tt org-replace-disputed-keys}.
 
 \copyrightnotice
