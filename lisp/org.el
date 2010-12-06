@@ -6076,8 +6076,8 @@ With a numeric prefix, show all headlines up to that level."
   (interactive)
   (let (org-show-entry-below state)
     (save-excursion
-      (goto-char (point-max))
-      (while (re-search-backward
+      (goto-char (point-min))
+      (while (re-search-forward
 	      "^[ \t]*:VISIBILITY:[ \t]+\\([a-z]+\\)"
 	      nil t)
 	(setq state (match-string 1))
