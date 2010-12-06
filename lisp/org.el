@@ -72,11 +72,10 @@
 
 (eval-when-compile
   (require 'cl)
-  (require 'gnus-sum)
-)
+  (require 'gnus-sum))
 
 (require 'calendar)
-(require 'pcomplete)
+
 ;; Emacs 22 calendar compatibility:  Make sure the new variables are available
 (when (fboundp 'defvaralias)
   (unless (boundp 'calendar-view-holidays-initially-flag)
@@ -1386,12 +1385,15 @@ nil   Never use an ID to make a link, instead link using a text search for
 (defcustom org-context-in-file-links t
   "Non-nil means file links from `org-store-link' contain context.
 A search string will be added to the file name with :: as separator and
-used to find the context when the link is activated by the command
-`org-open-at-point'.
+used to find the context when the link is activated by the command 
+`org-open-at-point'. When this option is t, the entire active region 
+will be placed in the search string of the file link. If set to a 
+positive integer, only the first n lines of context will be stored.
+
 Using a prefix arg to the command \\[org-store-link] (`org-store-link')
 negates this setting for the duration of the command."
   :group 'org-link-store
-  :type 'boolean)
+  :type '(choice boolean integer))
 
 (defcustom org-keep-stored-link-after-insertion nil
   "Non-nil means keep link in list for entire session.
@@ -2732,10 +2734,10 @@ To disable these tags on a per-file basis, insert anywhere in the file:
 (defcustom org-complete-tags-always-offer-all-agenda-tags nil
   "If non-nil, always offer completion for all tags of all agenda files.
 Instead of customizing this variable directly, you might want to
-set it locally for remember buffers, because there no list of
+set it locally for capture buffers, because there no list of
 tags in that file can be created dynamically (there are none).
 
-  (add-hook 'org-remember-mode-hook
+  (add-hook 'org-capture-mode-hook
             (lambda ()
               (set (make-local-variable
                     'org-complete-tags-always-offer-all-agenda-tags)
@@ -4798,6 +4800,12 @@ The following commands are available:
 		       (nthcdr 2 time))))
     (current-time)))
 
+(defun org-today ()
+  "Return today date, considering `org-extend-today-until'."
+  (time-to-days
+   (time-subtract (current-time)
+		  (list 0 (* 3600 org-extend-today-until) 0))))
+
 ;;;; Font-Lock stuff, including the activators
 
 (defvar org-mouse-map (make-sparse-keymap))
@@ -6068,8 +6076,8 @@ With a numeric prefix, show all headlines up to that level."
   (interactive)
   (let (org-show-entry-below state)
     (save-excursion
-      (goto-char (point-max))
-      (while (re-search-backward
+      (goto-char (point-min))
+      (while (re-search-forward
 	      "^[ \t]*:VISIBILITY:[ \t]+\\([a-z]+\\)"
 	      nil t)
 	(setq state (match-string 1))
@@ -7598,7 +7606,7 @@ and still retain the repeater to cover future instances of the task."
 	    (and idprop (if org-clone-delete-id
 			    (org-entry-delete nil "ID")
 			  (org-id-get-create t)))
-	    (while (re-search-forward org-property-drawer-re nil t)
+	    (while (re-search-forward org-property-start-re nil t)
 	      (org-remove-empty-drawer-at "PROPERTIES" (point)))
 	    (goto-char (point-min))
 	    (when doshift
@@ -8496,7 +8504,8 @@ according to FMT (default from `org-email-link-description-format')."
 (defun org-make-org-heading-search-string (&optional string heading)
   "Make search string for STRING or current headline."
   (interactive)
-  (let ((s (or string (org-get-heading))))
+  (let ((s (or string (org-get-heading)))
+	(lines org-context-in-file-links))
     (unless (and string (not heading))
       ;; We are using a headline, clean up garbage in there.
       (if (string-match org-todo-regexp s)
@@ -8510,6 +8519,13 @@ according to FMT (default from `org-email-link-description-format')."
       (while (string-match org-ts-regexp s)
 	(setq s (replace-match "" t t s))))
     (or string (setq s (concat "*" s)))  ; Add * for headlines
+    (when (and string (integerp lines) (> lines 0))
+      (let ((slines (org-split-string s "\n")))
+	(when (< lines (length slines))
+	  (setq s (mapconcat 
+		   'identity
+		   (reverse (nthcdr (- (length slines) lines) 
+				    (reverse slines))) "\n")))))
     (mapconcat 'identity (org-split-string s "[ \t]+") " ")))
 
 (defun org-make-link (&rest strings)

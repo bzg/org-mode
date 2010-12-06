@@ -473,9 +473,11 @@ bypassed."
      (t (setq txt "* Invalid capture template")))
     (org-capture-put :template txt)))
 
-(defun org-capture-finalize ()
-  "Finalize the capture process."
-  (interactive)
+(defun org-capture-finalize (&optional stay-with-capture)
+  "Finalize the capture process.
+With prefix argument STAY-WITH-CAPTURE, jump to the location of the
+captured item after finalizing."
+  (interactive "P")
   (unless (and org-capture-mode
 	       (buffer-base-buffer (current-buffer)))
     (error "This does not seem to be a capture buffer for Org-mode"))
@@ -562,17 +564,23 @@ bypassed."
       (set-window-configuration return-wconf))
 
     (run-hooks 'org-capture-after-finalize-hook)
-    (when abort-note
+    ;; Special cases
+    (cond
+     (abort-note
       (cond
        ((equal abort-note 'clean)
 	(message "Capture process aborted and target buffer cleaned up"))
        ((equal abort-note 'dirty)
-	(error "Capture process aborted, but target buffer could not be cleaned up correctly"))))))
+	(error "Capture process aborted, but target buffer could not be cleaned up correctly"))))
+     (stay-with-capture
+      (org-capture-goto-last-stored)))
+    ;; Return if we did store something
+    (not abort-note)))
 
 (defun org-capture-refile ()
   "Finalize the current capture and then refile the entry.
 Refiling is done from the base buffer, because the indirect buffer is then
-already gone."
+already gone.  Any prefix argument will be passed to the refile comand."
   (interactive)
   (unless (eq (org-capture-get :type 'local) 'entry)
     (error
@@ -671,15 +679,10 @@ already gone."
 	    ;; prompt for date
 	    (time-to-days (org-read-date 
 			   nil t nil "Date for tree entry:"
-			   (time-subtract (current-time)
-					  (list 0 (* 3600 
-						     org-extend-today-until)
-						0)))))
+			   (days-to-time (org-today)))))
 	   (t
 	    ;; current date, possible corrected for late night workers
-	    (time-to-days
-	     (time-subtract (current-time)
-			    (list 0 (* 3600 org-extend-today-until) 0))))))))
+	    (org-today))))))
        
        ((eq (car target) 'file+function)
 	(set-buffer (org-capture-target-buffer (nth 1 target)))

@@ -28,7 +28,6 @@
 ;; shell commands.
 
 ;;; Code:
-(require 'ob)
 (eval-when-compile (require 'cl))
 
 (defvar org-babel-error-buffer-name "*Org-Babel Error Output*")
