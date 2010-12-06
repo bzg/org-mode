@@ -7603,7 +7603,7 @@ and still retain the repeater to cover future instances of the task."
 	    (and idprop (if org-clone-delete-id
 			    (org-entry-delete nil "ID")
 			  (org-id-get-create t)))
-	    (while (re-search-forward org-property-drawer-re nil t)
+	    (while (re-search-forward org-property-start-re nil t)
 	      (org-remove-empty-drawer-at "PROPERTIES" (point)))
 	    (goto-char (point-min))
 	    (when doshift
