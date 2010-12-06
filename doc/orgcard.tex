@@ -278,14 +278,6 @@ are preserved on all copies.
 \centerline{(for version \orgversionnumber)}
 
 \section{Getting Started}
-%
-%\vskip -2mm
-%\beginexample%
-%(add-to-list 'auto-mode-alist '("\\\\.org\$" . org-mode))
-%(define-key global-map "\\C-cl" 'org-store-link)$^1$
-%(define-key global-map "\\C-ca" 'org-agenda)$^1$
-%\endexample
-%
 \metax{To read the on-line documentation try}{M-x org-info}
 
 \section{Visibility Cycling}
@@ -447,35 +439,6 @@ formula, \kbd{:=} a field formula.
 \key{edit code snippet of file at point}{C-c '}
 \key{toggle inline display of linked images}{C-c C-x C-v}
 
-% {\bf Internal Links}
-
-% \key{\kbd{<<My Target>>}}{\rm target}
-% \key{\kbd{<<<My Target>>>}}{\rm radio target \notetwo}
-% \key{\kbd{[[*this text]]}}{\rm find headline}
-% \metax{\kbd{[[this text]]}}{\rm find target or text in buffer}
-% \metax{\kbd{[[this text][description]]}}{\rm optional link text}
-
-% {\bf External Links}
-
-% \key{\kbd{file:/home/dominik/img/mars.jpg}}{\rm file, absolute}
-% \key{\kbd{file:papers/last.pdf}}{\rm file, relative}
-% \key{\kbd{file:projects.org::*that text}}{\rm find headline}
-% \key{\kbd{file:projects.org::find me}}{\rm find trgt/string}
-% %\key{\kbd{file:projects.org::/regexp/}}{\rm regexp search}
-% \key{\kbd{http://www.astro.uva.nl/~dominik}}{\rm on the web}
-% \key{\kbd{mailto:adent@galaxy.net}}{\rm Email address}
-% \key{\kbd{news:comp.emacs}}{\rm Usenet group}
-% \key{\kbd{bbdb:Richard Stallman}}{\rm BBDB person}
-% \key{\kbd{gnus:group}}{\rm GNUS group}
-% \key{\kbd{gnus:group\#id}}{\rm GNUS message}
-% \key{\kbd{vm|wl|mhe|rmail:folder}}{\rm Mail folder}
-% \key{\kbd{vm|wl|mhe|rmail:folder\#id}}{\rm Mail message}
-% \key{\kbd{info:emacs:Regexps}}{\rm Info file:node}
-% \key{\kbd{shell:ls *.org}}{\rm shell command}
-% \key{\kbd{elisp:(calendar)}}{\rm elisp form}
-% \metax{\kbd{[[external link][description]]}}{\rm optional link text}
-% %\key{\kbd{vm://myself@some.where.org/folder\#id}}{\rm VM remote}
-
 \section{Working with Code (Babel)}
 
 \key{execute code block at point}{C-c C-c}
@@ -496,25 +459,6 @@ formula, \kbd{:=} a field formula.
 \key{switch to the session of the current code block}{C-c C-v z}
 \key{load expanded body of the current code block into a session}{C-c C-v l}
 \key{view sha1 hash of the current code block}{C-c C-v a}
-
-% \section{Remember-mode Integration}
-
-% See the manual for how to make remember.el use Org-mode links and
-% files.  The note-finishing command \kbd{C-c C-c} will first prompt for
-% an org file. In the file, find a location with:
-
-% \key{rotate subtree visibility}{TAB}
-% \key{next heading}{DOWN}
-% \key{previous heading}{UP}
-
-% Insert the note with one of the following: 
-
-% \key{as sublevel of heading at cursor}{RET}
-% \key{right here (cursor not on heading)}{RET}
-% \key{before current heading}{LEFT}
-% \key{after current heading}{RIGHT}
-% \key{shortcut to end of buffer (cursor at buf-start)}{RET}
-% \key{Abort}{q}
 
 \section{Completion}
 
@@ -542,10 +486,6 @@ after  ``{\tt :}'', and dictionary words elsewhere.
 \key{set the priority of the current item}{C-c , [ABC]}
 \key{remove priority cookie from current item}{C-c , SPC}
 \key{raise/lower priority of current item}{S-UP/DOWN\notetwo}
-%\key{lower priority of current item}{S-DOWN \notetwo}
-
-%\key{\kbd{\#+SEQ_TODO: TODO TRY BLUFF DONE}}{\rm todo workflow}
-%\key{\kbd{\#+TYP_TODO: Phil home work DONE}}{\rm todo types}
 
 \key{insert new checkbox item in plain list}{M-S-RET}
 \key{toggle checkbox(es) in region/entry/at point}{C-c C-x C-b}
@@ -619,7 +559,7 @@ after  ``{\tt :}'', and dictionary words elsewhere.
 \key{set/remove restriction lock}{C-c C-x </>}
 
 \key{compile agenda for the current week}{C-c a a \noteone}
-\key{compile global TODO list}{C-c a t$^1$}
+\key{compile global TODO list}{C-c a t \noteone}
 \key{compile TODO list for specific keyword}{C-c a T \noteone}
 \key{match tags, TODO kwds, properties}{C-c a m \noteone}
 \key{match only in TODO entries}{C-c a M \noteone}
@@ -715,43 +655,6 @@ some other place.
 \key{insert template of export options}{C-c C-e t}
 \key{toggle fixed width for entry or region}{C-c :}
 \key{toggle pretty display of scripts, entities}{C-c C-x {\tt\char`\\}}
-
-%{\bf HTML formatting}
-
-%\key{make words {\bf bold}}{*bold*}
-%\key{make words {\it italic}}{/italic/}
-%\key{make words \underbar{underlined}}{_underlined_}
-%\key{sub- and superscripts}{x\^{}3, J_dust}
-%\key{\TeX{}-like macros}{\\alpha, \\to}
-%\key{typeset lines in fixed width font}{start with :}
-%\key{tables are exported as HTML tables}{start with |}
-%\key{links become HTML links}{http:... etc}
-%\key{include html tags}{@<b>...@</b>}
-
-%{\bf Export options}
-%
-%Include additional information for export by putting these anywhere in the
-%org file.  Use {\tt M-TAB} completion to make sure to get the right
-%keywords. {\tt M-TAB} again just after keyword is complete inserts examples.
-%
-%\key{the title to be shown}{\#+TITLE:}
-%\key{the author}{\#+AUTHOR:}
-%\key{authors email address}{\#+EMAIL:}
-%\key{language code for html}{\#+LANGUAGE:}
-%\key{free text description of file}{\#+TEXT:}
-%\key{... which can carry over multiple lines}{\#+TEXT:}
-%\key{settings for the export process}{\#+OPTIONS:}
-
-%\key{set number of headline levels for export}{H:2}
-%\key{turn on/off section numbers}{num:t}
-%\key{turn on/off table of contents}{toc:t}
-%\key{turn on/off linebreak preservation}{\\n:nil}
-%\key{turn on/off quoted html tags}{@:t}
-%\key{turn on/off fixed width sections}{::t}
-%\key{turn on/off tables}{|:t}
-%\key{turn on/off \TeX\ syntax for sub/super-scripts}{\^{}:t}
-%\key{turn on/off emphasised text}{*:nil}
-%\key{turn on/off \TeX\ macros}{TeX:t}
 
 {\bf Comments: Text not being exported}
 
