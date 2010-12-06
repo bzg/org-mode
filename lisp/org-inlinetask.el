@@ -147,13 +147,12 @@ As an example, valid associations are:
 
 (html \"<ul><li>%s <p>%s</p></li></ul>\" (heading content))
 
-or, in a conditional way,
+or, with the additional package \"todonotes\" for LaTeX,
 
-(latex \"\\\\begin\{flushright\}%s%s%s\\\\end\{flushright\}\"
-       ((unless (eq todo \"\")
-	  (format \"\\\\textsc\{%s%s: \}\" todo priority))
-	heading
-	(unless (eq content \"\") (format \"\\n%s\" content))))")
+(latex \"\\todo[inline]{\\textbf{\\textsf{%s %s}}\\linebreak{} %s}\"
+       '((unless (eq todo \"\")
+	   (format \"\\textsc{%s%s}\" todo priority))
+	 heading content)))")
 
 (defvar org-odd-levels-only)
 (defvar org-keyword-time-regexp)
