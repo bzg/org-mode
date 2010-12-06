@@ -4,7 +4,7 @@
 
 ;; Author: Paul M. Rodriguez <paulmrodriguez@gmail.com>
 ;; Created: 2010-05-05
-;; Version: 2.2
+;; Version: 2.3
 
 ;; This file is not part of GNU Emacs.
 
@@ -64,8 +64,8 @@
 ;; preferring `org-capture'.  Otherwise the user is simply taken to a
 ;; new heading at the end of the file.
 
-;; Thanks to Richard Riley, Carsten Dominik, and Bastien Guerry for
-;; their suggestions.
+;; Thanks to Richard Riley, Carsten Dominik, Bastien Guerry, and Jeff
+;; Horn for their suggestions.
 
 ;;; Usage:
 ;; (require 'org-velocity)
@@ -125,6 +125,32 @@
   :group 'org-velocity
   :type 'boolean)
 
+(defcustom org-velocity-remember-templates
+  '(("Velocity entry"
+     ?v
+     "* %:search\n\n%i%?"
+     nil
+     bottom))
+  "Use these templates with `org-remember'.
+Meanwhile `org-default-notes-file' is bound to `org-velocity-use-file'.
+The keyword :search inserts the current search.
+See the documentation for `org-remember-templates'."
+  :group 'org-velocity
+  :type (or (get 'org-remember-templates 'custom-type) 'list))
+
+(defcustom org-velocity-capture-templates
+  '(("v"
+     "Velocity entry"
+     entry
+     (file "")
+     "* %:search\n\n%i%?"))
+  "Use these template with `org-capture'.
+Meanwhile `org-default-notes-file' is bound to `org-velocity-use-file'.
+The keyword :search inserts the current search.
+See the documentation for `org-capture-templates'."
+  :group 'org-velocity
+  :type (or (get 'org-capture-templates 'custom-type) 'list))
+
 (defstruct (org-velocity-heading
 	    (:constructor org-velocity-make-heading)
 	    (:type list))
@@ -139,23 +165,39 @@
 	  (number-sequence 65 90)))	;uppercase letters
   "List of chars for indexing results.")
 
+(defconst org-velocity-display-buffer-name "*Velocity headings*")
+
+(defvar org-velocity-search nil
+  "Variable to bind to current search.")
+
+(defsubst org-velocity-buffer-file-name (&optional buffer)
+  "Return the name of the file BUFFER saves to.
+Same as function `buffer-file-name' unless BUFFER is an
+indirect buffer."
+  (buffer-file-name
+   (or (buffer-base-buffer buffer)
+       buffer)))
+
 (defun org-velocity-use-file ()
   "Return the proper file for Org-Velocity to search.
 If `org-velocity-always-use-bucket' is t, use bucket file; complain
 if missing.  Otherwise if this is an Org file, use it."
-  (let ((org-velocity-bucket
-	 (and org-velocity-bucket (expand-file-name org-velocity-bucket))))
-    (if org-velocity-always-use-bucket
-	(or org-velocity-bucket (error "Bucket required but not defined"))
-      (if (and (eq major-mode 'org-mode)
-	       (buffer-file-name))
-	  (buffer-file-name)
-	(or org-velocity-bucket
-	    (error "No bucket and not an Org file"))))))
+  (or
+   ;; In remember and capture buffers the target should be used.
+   (and org-remember-mode org-default-notes-file)
+   (let ((org-velocity-bucket
+	  (and org-velocity-bucket (expand-file-name org-velocity-bucket))))
+     (if org-velocity-always-use-bucket
+	 (or org-velocity-bucket (error "Bucket required but not defined"))
+       (if (and (eq major-mode 'org-mode)
+		(org-velocity-buffer-file-name))
+	   (org-velocity-buffer-file-name)
+	 (or org-velocity-bucket
+	     (error "No bucket and not an Org file")))))))
 
 (defsubst org-velocity-display-buffer ()
   "Return the proper buffer for Org-Velocity to display in."
-  (get-buffer-create "*Velocity headings*"))
+  (get-buffer-create org-velocity-display-buffer-name))
 
 (defsubst org-velocity-bucket-buffer ()
   "Return proper buffer for bucket operations."
@@ -232,29 +274,18 @@ If there is no last heading, return nil."
     'action action))
   (newline))
 
-(defun org-velocity-remember (heading &optional region)
-  "Use `org-remember' to record a note to HEADING.
-If there is a REGION that will be inserted."
+(defun org-velocity-remember ()
+  "Use `org-remember' to record a note."
   (let ((org-remember-templates
-	 (list (list
-		"Velocity entry"
-		?v
-		(format "* %s\n\n%%?%s" heading (or region ""))
-		(org-velocity-use-file)
-		'bottom))))
-    (org-remember nil ?v)))
+	 org-velocity-remember-templates))
+    (call-interactively 'org-remember)))
 
-(defun org-velocity-capture (heading &optional region)
-  "Use `org-capture' to record a note to HEADING.
-If there is a REGION that will be inserted."
+(defun org-velocity-capture ()
+  "Use `org-capture' to record a note."
   (let ((org-capture-templates
-	 (list `("v"
-		 "Velocity entry"
-		 entry
-		 (file ,(org-velocity-use-file))
-		 ,(format "* %s\n\n%%?%s" heading (or region ""))))))
+	 org-velocity-capture-templates))
     (if (fboundp 'org-capture) ;; quiet compiler
-     (org-capture nil "v"))))
+	(call-interactively 'org-capture))))
 
 (defun org-velocity-insert-heading (heading)
   "Add a new heading named HEADING."
@@ -265,12 +296,15 @@ If there is a REGION that will be inserted."
     (newline)
     (goto-char (point-max))))
 
-(defun org-velocity-create-heading (search region)
-  "Add and visit a new heading named SEARCH.
-If REGION is non-nil insert as the contents of the heading."
-  (org-velocity-insert-heading search)
-  (switch-to-buffer (org-velocity-bucket-buffer))
-  (when region (insert region)))
+(defun org-velocity-create-heading ()
+  "Add and visit a new heading."
+  (org-store-link nil)
+  (destructuring-bind (&key search initial
+			    &allow-other-keys)
+      org-store-link-plist
+    (org-velocity-insert-heading search)
+    (switch-to-buffer (org-velocity-bucket-buffer))
+    (insert (or initial ""))))
 
 (defun org-velocity-all-search (search)
   "Return entries containing all words in SEARCH."
@@ -327,9 +361,8 @@ If REGION is non-nil insert as the contents of the heading."
      headings)
     (goto-char (point-min))))
 
-(defun org-velocity-create-1 (search region)
-  "Create a new heading named SEARCH.
-If REGION is non-nil insert as contents of new heading.
+(defun org-velocity-create-1 ()
+  "Create a new heading.
 The possible methods are `org-velocity-capture',
 `org-velocity-remember', or `org-velocity-create-heading', in
 that order.  Which is preferred is determined by
@@ -341,23 +374,27 @@ that order.  Which is preferred is determined by
 		  'org-velocity-create-heading))
      (remember (or (and (featurep 'org-remember) 'org-velocity-remember)
 		   'org-velocity-create-heading))
-     (buffer 'org-velocity-create-heading))
-   search region))
+     (buffer 'org-velocity-create-heading))))
+
+(defun org-velocity-store-link ()
+  "Function for `org-store-link-functions'."
+  (if org-velocity-search
+   (org-store-link-props
+    :search org-velocity-search)))
+
+(add-hook 'org-store-link-functions 'org-velocity-store-link)
 
 (defun org-velocity-create (search &optional ask)
   "Create new heading named SEARCH.
 If ASK is non-nil, ask first."
-  (if (or (null ask)
-	  (y-or-n-p "No match found, create? "))
-      ;; if there's a region, we want to insert it
-      (let ((region (if (use-region-p)
-			(buffer-substring
-			 (region-beginning)
-			 (region-end)))))
-	(with-current-buffer (org-velocity-bucket-buffer)
-	 (org-velocity-create-1 search region))
-	(when region (message "%s" "Inserted region"))
-	search)))
+  (when (or (null ask)
+	    (y-or-n-p "No match found, create? "))
+    (let ((org-velocity-search search)
+	  (org-default-notes-file (org-velocity-use-file))
+	  ;; save a stored link
+	  (org-store-link-plist))
+      (org-velocity-create-1))
+    search))
 
 (defun org-velocity-get-matches (search)
   "Return matches for SEARCH in current bucket.
