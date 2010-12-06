@@ -6149,14 +6149,16 @@ narrowed to this new node.  You may then insert the information you want.
 @orgcmd{C-c C-c,org-capture-finalize}
 Once you have finished entering information into the capture buffer, @kbd{C-c
 C-c} will return you to the window configuration before the capture process,
-so that you can resume your work without further distraction.
+so that you can resume your work without further distraction.  When called
+with a prefix arg, finalize and then jump to the captured item.
 
 @orgcmd{C-c C-w,org-capture-refile}
 Finalize the capture process by refiling (@pxref{Refiling notes}) the note to
 a different place.  Please realize that this is a normal refiling command
 that will be executed - so the cursor position at the moment you run this
 command is important.  If you have inserted a tree with a parent and
-children, first move the cursor back to the parent.
+children, first move the cursor back to the parent.  Any prefix argument
+given to this command will be passed on to the @code{org-refile} command.
 
 @orgcmd{C-c C-k,org-capture-kill}
 Abort the capture process and return to the previous state.
