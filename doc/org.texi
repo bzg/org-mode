@@ -14577,11 +14577,17 @@ around a match in a hidden outline tree.
 @i{Eric Fraga} drove the development of BEAMER export with ideas and
 testing.
 @item
+@i{Barry Gidden} did proofreading the manual in preparation for the book
+publication through Network Theory Ltd.
+@item
 @i{Niels Giesen} had the idea to automatically archive DONE trees.
 @item
 @i{Nicolas Goaziou} rewrote much of the plain list code.
 @item
 @i{Kai Grossjohann} pointed out key-binding conflicts with other packages.
+@item
+@i{Brian Gough} of Network Theory Ltd publishes the Org mode manual as a
+book.
 @item
 @i{Bernt Hansen} has driven much of the support for auto-repeating tasks,
 task state change logging, and the clocktable.  His clear explanations have
