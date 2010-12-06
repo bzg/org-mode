@@ -5345,7 +5345,7 @@ you want to use unabbreviated names and/or other languages, configure
 the variables @code{parse-time-months} and @code{parse-time-weekdays}.
 
 You can specify a time range by giving start and end times or by giving a
-start time and a duration (in HH:MM format). Use `-' or `-{}-' as the separator
+start time and a duration (in HH:MM format). Use `-' or `-@{@}-' as the separator
 in the former case and use '+' as the separator in the latter case. E.g.
 
 @example
