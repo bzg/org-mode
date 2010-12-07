@@ -290,7 +290,7 @@ You can also customize this for each buffer, using something like
                      \"TeX/noUndefined.js\"],
         tex2jax: {
             inlineMath: [ [\"\\\\(\",\"\\\\)\"] ],
-            displayMath: [ ['$$','$$'], [\"\\\\[\",\"\\\\]\"] ],
+            displayMath: [ ['$$','$$'], [\"\\\\[\",\"\\\\]\"], [\"\\\\begin{displaymath}\",\"\\\\end{displaymath}\"] ],
             skipTags: [\"script\",\"noscript\",\"style\",\"textarea\",\"pre\",\"code\"],
             ignoreClass: \"tex2jax_ignore\",
             processEscapes: false,
