@@ -303,7 +303,7 @@ or new, let the user edit the definition of the footnote."
      (t
       (setq re (concat "^" org-footnote-tag-for-non-org-mode-files "[ \t]*$"))
       (unless (re-search-forward re nil t)
-	(let ((max (if (and (eq major-mode 'message-mode)
+	(let ((max (if (and (derived-mode-p 'message-mode)
 			    (re-search-forward message-signature-separator nil t))
 		       (progn (beginning-of-line) (point))
 		     (goto-char (point-max)))))
