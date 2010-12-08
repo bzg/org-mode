@@ -771,7 +771,7 @@ create dynamic @i{agenda views}.
 
 Org mode contains the Org Babel environment which allows you to work with
 embedded source code blocks in a file, to facilitate code evaluation,
-documentation, and tangling.
+documentation, and literate programming techniques.
 
 Org's automatic, context-sensitive table editor with spreadsheet
 capabilities can be integrated into any major mode by activating the
@@ -11153,7 +11153,8 @@ e.g.@:
 
 Org-mode provides a number of features for working with live source code,
 including editing of code blocks in their native major-mode, evaluation of
-code blocks, tangling of code blocks, and exporting code blocks and their
+code blocks, converting code blocks into source files (known as @dfn{tangling} 
+in literate programming), and exporting code blocks and their
 results in several formats.  This functionality was contributed by Eric
 Schulte and Dan Davison, and was originally named Org-babel.
 
