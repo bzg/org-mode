@@ -1942,17 +1942,22 @@ of `org-babel-temporary-directory'."
   (when (and (boundp 'org-babel-temporary-directory)
 	     (file-exists-p org-babel-temporary-directory))
     ;; taken from `delete-directory' in files.el
-    (mapc (lambda (file)
-	    ;; This test is equivalent to
-	    ;; (and (file-directory-p fn) (not (file-symlink-p fn)))
-	    ;; but more efficient
-	    (if (eq t (car (file-attributes file)))
-		(delete-directory file)
-	      (delete-file file)))
-	  ;; We do not want to delete "." and "..".
-	  (directory-files org-babel-temporary-directory 'full
-			   "^\\([^.]\\|\\.\\([^.]\\|\\..\\)\\).*"))
-    (delete-directory org-babel-temporary-directory)))
+    (condition-case nil
+	(progn
+	  (mapc (lambda (file)
+		  ;; This test is equivalent to
+		  ;; (and (file-directory-p fn) (not (file-symlink-p fn)))
+		  ;; but more efficient
+		  (if (eq t (car (file-attributes file)))
+		      (delete-directory file)
+		    (delete-file file)))
+		;; We do not want to delete "." and "..".
+		(directory-files org-babel-temporary-directory 'full
+				 "^\\([^.]\\|\\.\\([^.]\\|\\..\\)\\).*"))
+	  (delete-directory org-babel-temporary-directory))
+      (error
+       (message "Failed to remove temporary Org-babel directory %s"
+		org-babel-temporary-directory)))))
 
 (add-hook 'kill-emacs-hook 'org-babel-remove-temporary-directory)
 
