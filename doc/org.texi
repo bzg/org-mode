@@ -6154,6 +6154,7 @@ suggestion.}  for capturing new material.
 @orgcmd{C-c c,org-capture}
 Call the command @code{org-capture}.  Note that this keybinding is global and
 not active by default - you need to install it.  If you have templates
+@cindex date tree
 defined @pxref{Capture templates}, it will offer these templates for
 selection or use a new Org outline node as the default template.  It will
 insert the template into the target file and switch to an indirect buffer
@@ -7394,6 +7395,7 @@ the files listed in @code{org-agenda-text-search-extra-files}.
 
 @node Stuck projects,  , Search view, Built-in agenda views
 @subsection Stuck projects
+@pindex GTD, Getting Things Done
 
 If you are following a system like David Allen's GTD to organize your
 work, one of the ``duties'' you have is a regular review to make sure
@@ -11309,6 +11311,7 @@ markup language for a wiki.
 @comment  Extracting source code, Evaluating code blocks, Exporting code blocks, Working With Source Code
 @node Extracting source code, Evaluating code blocks, Exporting code blocks, Working With Source Code
 @section Extracting source code
+@cindex tangling
 @cindex source code, extracting
 @cindex code block, extracting source code
 
