@@ -9656,11 +9656,11 @@ insert something like the following into the buffer:
 @code{org-export-html-mathjax-options} for the meaning of the parameters in
 this line.
 
-If you prefer, you can also request that La@TeX{} are processed into small
-images that will be inserted into the browser page.  Before the availability
-of MathJax, this was the default method for Org files.  This method requires
-that the @file{dvipng} program is available on your system.  You can still
-get this processing with
+If you prefer, you can also request that La@TeX{} fragments are processed
+into small images that will be inserted into the browser page.  Before the
+availability of MathJax, this was the default method for Org files.  This
+method requires that the @file{dvipng} program is available on your system.
+You can still get this processing with
 
 @example
 #+OPTIONS: LaTeX:dvipng
