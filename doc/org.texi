@@ -13069,9 +13069,9 @@ fninline    @r{define footnotes inline}
 fnnoinline  @r{define footnotes in separate section}
 fnlocal     @r{define footnotes near first reference, but not inline}
 fnprompt    @r{prompt for footnote labels}
-fnauto      @r{create [fn:1]-like labels automatically (default)}
+fnauto      @r{create @code{[fn:1]}-like labels automatically (default)}
 fnconfirm   @r{offer automatic label for editing or confirmation}
-fnplain     @r{create [1]-like labels automatically}
+fnplain     @r{create @code{[1]}-like labels automatically}
 fnadjust    @r{automatically renumber and sort footnotes}
 nofnadjust  @r{do not renumber and sort automatically}
 @end example
