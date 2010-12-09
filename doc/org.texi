@@ -5318,20 +5318,20 @@ various inputs will be interpreted, the items filled in by Org-mode are
 in @b{bold}.
 
 @example
-3-2-5         --> 2003-02-05
-2/5/3         --> 2003-02-05
-14            --> @b{2006}-@b{06}-14
-12            --> @b{2006}-@b{07}-12
-2/5           --> @b{2007}-02-05
-Fri           --> nearest Friday (default date or later)
-sep 15        --> @b{2006}-09-15
-feb 15        --> @b{2007}-02-15
-sep 12 9      --> 2009-09-12
-12:45         --> @b{2006}-@b{06}-@b{13} 12:45
-22 sept 0:34  --> @b{2006}-09-22 0:34
-w4            --> ISO week for of the current year @b{2006}
-2012 w4 fri   --> Friday of ISO week 4 in 2012
-2012-w04-5    --> Same as above
+3-2-5         @result{} 2003-02-05
+2/5/3         @result{} 2003-02-05
+14            @result{} @b{2006}-@b{06}-14
+12            @result{} @b{2006}-@b{07}-12
+2/5           @result{} @b{2007}-02-05
+Fri           @result{} nearest Friday (default date or later)
+sep 15        @result{} @b{2006}-09-15
+feb 15        @result{} @b{2007}-02-15
+sep 12 9      @result{} 2009-09-12
+12:45         @result{} @b{2006}-@b{06}-@b{13} 12:45
+22 sept 0:34  @result{} @b{2006}-09-22 0:34
+w4            @result{} ISO week for of the current year @b{2006}
+2012 w4 fri   @result{} Friday of ISO week 4 in 2012
+2012-w04-5    @result{} Same as above
 @end example
 
 Furthermore you can specify a relative date by giving, as the
@@ -5343,13 +5343,13 @@ a single letter, you use the abbreviation of day name, the date will be
 the Nth such day.  e.g.@:
 
 @example
-+0            --> today
-.             --> today
-+4d           --> four days from today
-+4            --> same as above
-+2w           --> two weeks from today
-++5           --> five days from default date
-+2tue         --> second Tuesday from now.
++0            @result{} today
+.             @result{} today
++4d           @result{} four days from today
++4            @result{} same as above
++2w           @result{} two weeks from today
+++5           @result{} five days from default date
++2tue         @result{} second Tuesday from now.
 @end example
 
 @vindex parse-time-months
@@ -5363,9 +5363,9 @@ start time and a duration (in HH:MM format). Use `-' or `-@{@}-' as the separato
 in the former case and use '+' as the separator in the latter case. E.g.@:
 
 @example
-11am-1:15pm    --> 11:00-13:15
-11am--1:15pm   --> same as above
-11am+2:15      --> same as above
+11am-1:15pm    @result{} 11:00-13:15
+11am--1:15pm   @result{} same as above
+11am+2:15      @result{} same as above
 @end example
 
 @cindex calendar, for selecting date
@@ -13463,9 +13463,9 @@ Org will move the following key bindings in Org files, and in the agenda
 buffer (but not during date selection).
 
 @example
-S-UP      ->  M-p             S-DOWN     ->  M-n
-S-LEFT    ->  M--             S-RIGHT    ->  M-+
-C-S-LEFT  ->  M-S--           C-S-RIGHT  ->  M-S-+
+S-UP      @result{}  M-p             S-DOWN     @result{}  M-n
+S-LEFT    @result{}  M--             S-RIGHT    @result{}  M-+
+C-S-LEFT  @result{}  M-S--           C-S-RIGHT  @result{}  M-S-+
 @end example
 
 @vindex org-disputed-keys
