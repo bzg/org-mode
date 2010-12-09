@@ -1760,7 +1760,7 @@ Since Org allows multiple references to the same note, you can then use
 @vindex org-footnote-auto-label
 Footnote labels can be created automatically, or you can create names yourself.
 This is handled by the variable @code{org-footnote-auto-label} and its
-corresponding @code{#+STARTUP} keywords, see the docstring of that variable
+corresponding @code{#+STARTUP} keywords.  See the docstring of that variable
 for details.
 
 @noindent The following command handles footnotes:
@@ -2997,7 +2997,7 @@ a link targeting a headline, in-buffer completion can be used.  Just type a
 star followed by a few optional letters into the buffer and press
 @kbd{M-@key{TAB}}.  All headlines in the current buffer will be offered as
 completions.}.  In non-Org files, the search will look for the words in the
-link text, in the above example the search would be for @samp{my target}.
+link text.  In the above example the search would be for @samp{my target}.
 
 Following a link pushes a mark onto Org's own mark ring.  You can
 return to the previous position with @kbd{C-c &}.  Using this command
@@ -3286,7 +3286,7 @@ previously recorded positions.
 @cindex links, finding next/previous
 Move forward/backward to the next link in the buffer.  At the limit of
 the buffer, the search fails once, and then wraps around.  The key
-bindings for this are really too long, you might want to bind this also
+bindings for this are really too long; you might want to bind this also
 to @kbd{C-n} and @kbd{C-p}
 @lisp
 (add-hook 'org-load-hook
@@ -5948,7 +5948,7 @@ If you restart Emacs and clock into any task, Org will notice that you have a
 dangling clock which was never clocked out from your last session.  Using
 that clock's starting time as the beginning of the unaccounted-for period,
 Org will ask how you want to resolve that time.  The logic and behavior is
-identical to dealing with away time due to idleness, it's just happening due
+identical to dealing with away time due to idleness; it's just happening due
 to a recovery event rather than a set amount of idle time.
 
 You can also check all the files visited by your Org agenda for dangling
@@ -6278,7 +6278,7 @@ Text to be inserted as it is.
 @vindex org-default-notes-file
 Specification of where the captured item should be placed.  In Org-mode
 files, targets usually define a node.  Entries will become children of this
-node, other types will be added to the table or list in the body of this
+node.  Other types will be added to the table or list in the body of this
 node.  Most target specifications contain a file name.  If that file name is
 the empty string, it defaults to @code{org-default-notes-file}.
 
@@ -7754,7 +7754,7 @@ refreshes and more secondary filtering.  The filter is a global property of
 the entire agenda view---in a block agenda, you should only set this in the
 global options section, not in the section of an individual block.}
 
-You will be prompted for a tag selection letter, @key{SPC} will mean any tag at
+You will be prompted for a tag selection letter; @key{SPC} will mean any tag at
 all.  Pressing @key{TAB} at that prompt will offer use completion to select a
 tag (including any tags that do not have a selection character).  The command
 then hides all entries that do not contain or inherit this tag.  When called
@@ -7916,10 +7916,10 @@ same location where state change notes are put.  Depending on
 Dispatcher for all command related to attachments.
 @c
 @orgcmd{C-c C-s,org-agenda-schedule}
-Schedule this item, with prefix arg remove the scheduling timestamp
+Schedule this item.  With prefix arg remove the scheduling timestamp
 @c
 @orgcmd{C-c C-d,org-agenda-deadline}
-Set a deadline for this item, with prefix arg remove the deadline.
+Set a deadline for this item.  With prefix arg remove the deadline.
 @c
 @orgcmd{k,org-agenda-action}
 Agenda actions, to set dates for selected items to the cursor date.
@@ -7987,7 +7987,7 @@ will be passed through to the @kbd{s} and @kbd{d} commands, to bulk-remove
 these special timestamps.
 @example
 r  @r{Prompt for a single refile target and move all entries.  The entries}
-   @r{will no longer be in the agenda, refresh (@kbd{g}) to bring them back.}
+   @r{will no longer be in the agenda; refresh (@kbd{g}) to bring them back.}
 $  @r{Archive all selected entries.}
 A  @r{Archive entries by moving them to their respective archive siblings.}
 t  @r{Change TODO state.  This prompts for a single TODO keyword and}
@@ -8237,7 +8237,7 @@ For command sets creating a block agenda,
 @code{org-agenda-custom-commands} has two separate spots for setting
 options.  You can add options that should be valid for just a single
 command in the set, and options that should be valid for all commands in
-the set.  The former are just added to the command entry, the latter
+the set.  The former are just added to the command entry; the latter
 must come after the list of command entries.  Going back to the block
 agenda example (@pxref{Block agenda}), let's change the sorting strategy
 for the @kbd{C-c a h} commands to @code{priority-down}, but let's sort
@@ -8445,7 +8445,7 @@ turning on column view in the agenda will visit all relevant agenda files and
 make sure that the computations of this property are up to date.  This is
 also true for the special @code{CLOCKSUM} property.  Org will then sum the
 values displayed in the agenda.  In the daily/weekly agenda, the sums will
-cover a single day, in all other views they cover the entire block.  It is
+cover a single day; in all other views they cover the entire block.  It is
 vital to realize that the agenda may show the same entry @emph{twice} (for
 example as scheduled and as a deadline), and it may show two entries from the
 same hierarchy (for example a @emph{parent} and its @emph{child}).  In these
@@ -8657,7 +8657,7 @@ different backends support this to varying degrees.
 You can make words @b{*bold*}, @i{/italic/}, _underlined_, @code{=code=}
 and @code{~verbatim~}, and, if you must, @samp{+strike-through+}.  Text
 in the code and verbatim string is not processed for Org-mode specific
-syntax, it is exported verbatim.
+syntax; it is exported verbatim.
 
 @node Horizontal rules, Comment lines, Emphasis and monospace, Structural markup elements
 @subheading  Horizontal rules
@@ -8825,7 +8825,7 @@ switching to a temporary buffer with the source code.  You need to exit by
 pressing @kbd{C-c '} again@footnote{Upon exit, lines starting with @samp{*}
 or @samp{#} will get a comma prepended, to keep them from being interpreted
 by Org as outline nodes or special comments.  These commas will be stripped
-for editing with @kbd{C-c '}, and also for export.}, the edited version will
+for editing with @kbd{C-c '}, and also for export.}.  The edited version will
 then replace the old version in the Org buffer.  Fixed-width regions
 (where each line starts with a colon followed by a space) will be edited
 using @code{artist-mode}@footnote{You may select a different-mode with the
@@ -8835,7 +8835,7 @@ fixed-width region.
 @kindex C-c l
 @item C-c l
 Calling @code{org-store-link} while editing a source code example in a
-temporary buffer created with @kbd{C-c '} will prompt for a label, make sure
+temporary buffer created with @kbd{C-c '} will prompt for a label.  Make sure
 that it is unique in the current buffer, and insert it with the proper
 formatting like @samp{(ref:label)} at the end of the current line.  Then the
 label is stored as a link @samp{(label)}, for retrieval with @kbd{C-c C-l}.
@@ -8856,7 +8856,7 @@ include your @file{.emacs} file, you could use:
 @noindent
 The optional second and third parameter are the markup (e.g. @samp{quote},
 @samp{example}, or @samp{src}), and, if the markup is @samp{src}, the
-language for formatting the contents.  The markup is optional, if it is not
+language for formatting the contents.  The markup is optional; if it is not
 given, the text will be assumed to be in Org-mode format and will be
 processed normally.  The include line will also allow additional keyword
 parameters @code{:prefix1} and @code{:prefix} to specify prefixes for the
@@ -8971,7 +8971,7 @@ output.  Similarly, @code{\nbsp} will become @code{&nbsp;} in HTML and
 like this: @samp{\Aacute@{@}stor}.
 
 A large number of entities is provided, with names taken from both HTML and
-La@TeX{}, see the variable @code{org-entities} for the complete list.
+La@TeX{}; see the variable @code{org-entities} for the complete list.
 @samp{\-} is treated as a shy hyphen, and @samp{--}, @samp{---}, and
 @samp{...} are all converted into special commands creating hyphens of
 different lengths or a compact set of dots.
@@ -9183,7 +9183,7 @@ after the backquote, a help window will pop up.
 Pressing the single-quote @kbd{'} followed by another character modifies
 the symbol before point with an accent or a font.  If you wait more than
 1.5 seconds after the single-quote, a help window will pop up.  Character
-modification will work only inside La@TeX{} fragments, outside the quote
+modification will work only inside La@TeX{} fragments; outside the quote
 is normal.
 @end itemize
 
@@ -9419,7 +9419,7 @@ become the document title.  If the tree head entry has or inherits an
 @code{EXPORT_FILE_NAME} property, that name will be used for the
 export.
 @orgcmd{C-c C-e A,org-export-as-ascii-to-buffer}
-Export to a temporary buffer, do not create a file.
+Export to a temporary buffer.  Do not create a file.
 @orgcmd{C-c C-e n,org-export-as-latin1}
 @xorgcmd{C-c C-e N,org-export-as-latin1-to-buffer}
 Like the above commands, but use Latin-1 encoding.
@@ -9494,7 +9494,7 @@ property, that name will be used for the export.
 @orgcmd{C-c C-e b,org-export-as-html-and-open}
 Export as HTML file and immediately open it with a browser.
 @orgcmd{C-c C-e H,org-export-as-html-to-buffer}
-Export to a temporary buffer, do not create a file.
+Export to a temporary buffer.  Do not create a file.
 @orgcmd{C-c C-e R,org-export-region-as-html}
 Export the active region to a temporary buffer.  With a prefix argument, do
 not produce the file header and footer, but just the plain HTML section for
@@ -9874,7 +9874,7 @@ current subtree, use @kbd{C-c @@}.}, the tree head will become the document
 title.  If the tree head entry has or inherits an @code{EXPORT_FILE_NAME}
 property, that name will be used for the export.
 @orgcmd{C-c C-e L,org-export-as-latex-to-buffer}
-Export to a temporary buffer, do not create a file.
+Export to a temporary buffer.  Do not create a file.
 @item C-c C-e v l/L 
 Export only the visible part of the document.
 @item M-x org-export-region-as-latex
@@ -10407,7 +10407,7 @@ with @code{:taskjuggler_resource:} (or whatever you customized
 identifier (named @samp{resource_id}) to the resources (using the standard
 Org properties commands, @pxref{Property syntax}) or you can let the exporter
 generate identifiers automatically (the exporter picks the first word of the
-headline as the identifier as long as it is unique, see the documentation of
+headline as the identifier as long as it is unique---see the documentation of
 @code{org-taskjuggler-get-unique-id}). Using that identifier you can then
 allocate resources to tasks. This is again done with the @samp{allocate}
 property on the tasks. Do this in column view or when on the task type
@@ -10720,7 +10720,7 @@ setup, you need to add @code{:exclude "-source\\.org"} to the project
 definition in @code{org-publish-project-alist} to avoid that the published
 source files will be considered as new org files the next time the project is
 published.}.  Other files like images only need to be copied to the
-publishing destination, for this you may use @code{org-publish-attachment}.
+publishing destination; for this you may use @code{org-publish-attachment}.
 For non-Org files, you always need to specify the publishing function:
 
 @multitable @columnfractions 0.3 0.7
@@ -13663,7 +13663,7 @@ will then get the following template:
 The @code{#+ORGTBL: SEND} line tells Orgtbl mode to use the function
 @code{orgtbl-to-latex} to convert the table into La@TeX{} and to put it
 into the receiver location with name @code{salesfigures}.  You may now
-fill in the table, feel free to use the spreadsheet features@footnote{If
+fill in the table---feel free to use the spreadsheet features@footnote{If
 the @samp{#+TBLFM} line contains an odd number of dollar characters,
 this may cause problems with font-lock in La@TeX{} mode.  As shown in the
 example you can fix this by adding an extra line inside the
@@ -14133,7 +14133,7 @@ properties.
 Get all properties of the entry at point-or-marker POM.@*
 This includes the TODO keyword, the tags, time strings for deadline,
 scheduled, and clocking, and any additional properties defined in the
-entry.  The return value is an alist, keys may occur multiple times
+entry.  The return value is an alist.  Keys may occur multiple times
 if the property key was used several times.@*
 POM may also be nil, in which case the current entry is used.
 If WHICH is nil or `all', get all properties.  If WHICH is
@@ -14270,12 +14270,12 @@ information about the entry, or in order to change metadata in the entry.
 Here are a couple of functions that might be handy:
 
 @defun org-todo &optional arg
-Change the TODO state of the entry, see the docstring of the functions for
+Change the TODO state of the entry.  See the docstring of the functions for
 the many possible values for the argument ARG.
 @end defun
 
 @defun org-priority &optional action
-Change the priority of the entry, see the docstring of this function for the
+Change the priority of the entry.  See the docstring of this function for the
 possible values for ACTION.
 @end defun
 
