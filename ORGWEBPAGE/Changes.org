@@ -7,10 +7,202 @@
 
 #+STARTUP: indent hidestars
 
+* Version 7.4
+:PROPERTIES:
+:VISIBILITY: content
+:CUSTOM_ID: v7.4
+:END:
+
+
+** Incompatible changes
+
+*** Agenda: rework ndays and span handling
+    
+The variable =org-agenda-ndays= is obsolete - please use
+=org-agenda-span= instead.
+
+Thanks to Julien Danjou for this.
+
+** Details
+
+*** Improvements with inline tasks and indentation
+
+There is now a configurable way on how to export inline tasks.  See
+the new variable =org-inlinetask-export-templates=.
+
+Thanks to Nicolas Goaziou for coding these changes.
+
+*** Agenda: Added a bulk "scattering" command
+    
+=B S= in the agenda buffer will cause tasks to be rescheduled a random
+number of days into the future, with 7 as the default.  This is useful
+if you've got a ton of tasks scheduled for today, you realize you'll
+never deal with them all, and you just want them to be distributed
+across the next N days.  When called with a prefix arg, rescheduling
+will avoid weekend days.
+
+Thanks to John Wiegley for this.
+
+*** In-buffer completion is now done using John Wiegleys pcomplete.el
+
+Thanks to John Wiegley for much of this code.
+
+*** Sending radio tables from org buffers is now allowed
+
+Org radio tables can no also be sent inside Org buffers.  Also,
+there is a new hook which get called after a table has been sent.
+
+Thanks to Seweryn Kokot.
+
+*** Command names shown in manual
+
+The reference manual now lists command names for most commands.
+Thanks to Andreas Röhler who started this project.
+
+*** Allow ap/pm times in agenda time grid
+
+Times in the agenda can now be displayed in am/pm format.  See the new
+variable =org-agenda-timegrid-use-ampm=.  Thanks to C. A. Webber for
+a patch to this effect.
+
+*** Rewriten clock table code 
+
+The entire clocktable code has been rewritten to add more options and
+to make hacking time reports easier.
+
+Thanks to Erwin Vrolijk for a patch introducing clock tables for
+quarters.
+
+*** Babel
+**** Add =msosql= engine to sql code blocks
+SQL code blocks can now be executed using the =myosql= engine on
+Windows systems.
+
+Thanks to S√©bastien Vauban for this contribution.
+
+**** Python code blocks now accept a =preamble= header argument
+This allows specification of coding declarations and library imports
+which must take place in the beginning of a file of executed python
+code (note this header argument is used during code block evaluation
+unlike the =shebang= header argument which is used during tangling).
+For example
+
+#+begin_src org
+  ,#+begin_src python :preamble # -*- coding: utf-8 -*- :return s
+  ,s = "√©"
+  ,#+end_src
+#+end_src
+
+Thanks to Vincent Beffara for this idea.
+
+**** Code block name is shown during evaluation query
+When the user is queried about the evaluation of a named code block
+the name of the code block is now displayed.
+
+Thanks to Tom Dye for this suggestion.
+
+**** Clojure code blocks results insertion
+The results of Clojure code blocks have been improved in two ways.
+1. lazy sequences are now expanded for insertion into the Org-mode
+   buffer
+2. pretty printing of results is now possible with both "code" and
+   "data" pretty print formats
+
+Thanks to Rick Moynihan for suggesting these changes.
+
+**** Python code blocks now accept a =:return= header argument
+This alleviates the need to explicitly insert return statements into
+the bode of Python code blocks.  This change both
+- allows the same python code blocks to be run both in sessions and
+  externally
+- removes the floating =return= statements which violated python
+  syntax
+
+Thanks to Darlan Cavalcante for proposing this feature.
+
+**** =:results wrap= header argument wraps code block results
+The new =:results wrap= wraps code blocks results in a custom
+environment making it possible to offset their contents during
+export.  For example
+
+#+begin_src org
+  ,#+begin_src emacs-lisp :results wrap
+  ,  "code block results"
+  ,#+end_src
+  
+  ,#+results:
+  ,#+BEGIN_RESULT
+  ,: code block results
+  ,#+END_RESULT
+#+end_src
+
+Thanks to S√©bastien Vauban for persistently suggesting this enhancement.
+
+**** Code block error buffer wiped clean between executions
+Previously the code block error buffer accumulated errors making it
+difficult to distinguish between previous and current errors.  This
+buffer is now cleaned before every interactive code block evaluation.
+
+**** Lists now recognized by code blocks
+It is now possible for code blocks to both read and write list
+contents from and to Org-mode buffers.  For example
+
+#+begin_src org
+  ,#+results: a-list
+  ,- babel
+  ,- and
+  ,- org-mode
+  
+  ,#+source: a-list
+  ,#+begin_src emacs-lisp :var lst=a-list :results list
+  ,  (reverse lst)
+  ,#+end_src
+#+end_src
+
+**** Calc added as a supported code block language
+The Emacs Calc package can be used through =calc= code blocks allowing
+both regular arithmetic operations as well as stack based
+calculation.  For example
+
+#+begin_src org
+  ,#+source: calc-stack
+  ,#+begin_src calc
+  ,  8
+  ,  1
+  ,  '+
+  ,  9
+  ,  '*
+  ,#+end_src
+  
+  ,#+results: calc-stack
+  ,: 81
+  
+  ,#+source: calc-arithmetic
+  ,#+begin_src calc :var in=calc-stack
+  ,  in / 9
+  ,#+end_src
+  
+  ,#+results: calc-arithmetic
+  ,: 9
+#+end_src
+
+**** "org-babel-detangle" propagates change to source code files into code blocks
+`org-babel-detangle' can be used to propagate changes to pure source
+code files tangled from embedded code blocks in Org-mode files back to
+the original code blocks in the Org-mode file.  This can be used on
+collaborative projects to keep embedded code blocks up to date with
+edits made in pure source code files.
+
+
+
+
+
+
+
+
 * Version 7.02
 
 :PROPERTIES:
-:VISIBILITY: content
 :CUSTOM_ID: v7.02
 :END:
 
