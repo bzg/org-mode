@@ -943,7 +943,7 @@ to the mailing list, in order to minimize the work the mailing list
 moderators have to do.}.
 
 For bug reports, please first try to reproduce the bug with the latest
-version of Org available - if you are running an outdated version, it is
+version of Org available---if you are running an outdated version, it is
 quite possible that the bug has been fixed already.  If the bug persists,
 prepare a report and provide as much information as possible, including the
 version information of Emacs (@kbd{M-x emacs-version @key{RET}}) and Org
@@ -6155,7 +6155,7 @@ with a prefix arg, finalize and then jump to the captured item.
 @orgcmd{C-c C-w,org-capture-refile}
 Finalize the capture process by refiling (@pxref{Refiling notes}) the note to
 a different place.  Please realize that this is a normal refiling command
-that will be executed - so the cursor position at the moment you run this
+that will be executed---so the cursor position at the moment you run this
 command is important.  If you have inserted a tree with a parent and
 children, first move the cursor back to the parent.  Any prefix argument
 given to this command will be passed on to the @code{org-refile} command.
@@ -7751,7 +7751,7 @@ having to recreate the agenda.@footnote{Custom commands can preset a filter by
 binding the variable @code{org-agenda-filter-preset} as an option.  This
 filter will then be applied to the view and persist as a basic filter through
 refreshes and more secondary filtering.  The filter is a global property of
-the entire agenda view - in a block agenda, you should only set this in the
+the entire agenda view---in a block agenda, you should only set this in the
 global options section, not in the section of an individual block.}
 
 You will be prompted for a tag selection letter, SPC will mean any tag at
@@ -8029,7 +8029,7 @@ Org will create entries (in org-mode syntax) in that file instead.  Most
 entries will be stored in a date-based outline tree that will later make it
 easy to archive appointments from previous months/years.  The tree will be
 built under an entry with a @code{DATE_TREE} property, or else with years as
-top-level entries.  Emacs will prompt you for the entry text - if you specify
+top-level entries.  Emacs will prompt you for the entry text---if you specify
 it, the entry will be created in @code{org-agenda-diary-file} without further
 interaction.  If you directly press @key{RET} at the prompt without typing
 text, the target file will be shown in another window for you to finish the
@@ -10045,7 +10045,7 @@ exportable as a beamer presentation.  By default, the top-level entries (or
 the first level below the selected subtree heading) will be turned into
 frames, and the outline structure below this level will become itemize lists.
 You can also configure the variable @code{org-beamer-frame-level} to a
-different level - then the hierarchy above frames will produce the sectioning
+different level---then the hierarchy above frames will produce the sectioning
 structure of the presentation.
 
 A template for useful in-buffer settings or properties can be inserted into
@@ -12639,7 +12639,7 @@ Source code blocks can be evaluated during export, or when pressing @kbd{C-c
 C-c} in the block.  The most important thing to realize here is that Org mode
 files which contain code snippets are, in a certain sense, like executable
 files.  So you should accept them and load them into Emacs only from trusted
-sources - just like you would do with a program you install on your computer.
+sources---just like you would do with a program you install on your computer.
 
 Make sure you know what you are doing before customizing the variables
 which take off the default security brakes.
