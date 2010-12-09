@@ -9735,7 +9735,7 @@ p.date              @r{publishing date}
 p.creator           @r{creator info, about org-mode version}
 .title              @r{document title}
 .todo               @r{TODO keywords, all not-done states}
-.done               @r{the DONE keywords, all stated the count as done}
+.done               @r{the DONE keywords, all states that count as done}
 .WAITING            @r{each TODO keyword also uses a class named after itself}
 .timestamp          @r{timestamp}
 .timestamp-kwd      @r{keyword associated with a timestamp, like SCHEDULED}
