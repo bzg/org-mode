@@ -12546,13 +12546,13 @@ are active:
 
 @multitable @columnfractions 0.25 0.75
 @kindex C-c C-c
-@item @kbd{C-c C-c} @tab org-babel-execute-src-block
+@item @kbd{C-c C-c} @tab @code{org-babel-execute-src-block}
 @kindex C-c C-o
-@item @kbd{C-c C-o} @tab org-babel-open-src-block-result
+@item @kbd{C-c C-o} @tab @code{org-babel-open-src-block-result}
 @kindex C-up
-@item @kbd{C-@key{up}}    @tab org-babel-load-in-session
+@item @kbd{C-@key{up}}    @tab @code{org-babel-load-in-session}
 @kindex M-down
-@item @kbd{M-@key{down}}  @tab org-babel-pop-to-session
+@item @kbd{M-@key{down}}  @tab @code{org-babel-pop-to-session}
 @end multitable
 
 In an Org-mode buffer, the following key bindings are active:
@@ -12560,46 +12560,46 @@ In an Org-mode buffer, the following key bindings are active:
 @multitable @columnfractions 0.45 0.55
 @kindex C-c C-v a
 @kindex C-c C-v C-a
-@item @kbd{C-c C-v a} @ @ @r{or} @ @ @kbd{C-c C-v C-a} @tab org-babel-sha1-hash
+@item @kbd{C-c C-v a} @ @ @r{or} @ @ @kbd{C-c C-v C-a} @tab @code{org-babel-sha1-hash}
 @kindex C-c C-v b
 @kindex C-c C-v C-b
-@item @kbd{C-c C-v b} @ @ @r{or} @ @ @kbd{C-c C-v C-b} @tab org-babel-execute-buffer
+@item @kbd{C-c C-v b} @ @ @r{or} @ @ @kbd{C-c C-v C-b} @tab @code{org-babel-execute-buffer}
 @kindex C-c C-v f
 @kindex C-c C-v C-f
-@item @kbd{C-c C-v f} @ @ @r{or} @ @ @kbd{C-c C-v C-f} @tab org-babel-tangle-file
+@item @kbd{C-c C-v f} @ @ @r{or} @ @ @kbd{C-c C-v C-f} @tab @code{org-babel-tangle-file}
 @kindex C-c C-v g
-@item @kbd{C-c C-v g} @tab org-babel-goto-named-source-block
+@item @kbd{C-c C-v g} @tab @code{org-babel-goto-named-source-block}
 @kindex C-c C-v h
-@item @kbd{C-c C-v h} @tab org-babel-describe-bindings
+@item @kbd{C-c C-v h} @tab @code{org-babel-describe-bindings}
 @kindex C-c C-v l
 @kindex C-c C-v C-l
-@item @kbd{C-c C-v l} @ @ @r{or} @ @ @kbd{C-c C-v C-l} @tab org-babel-lob-ingest
+@item @kbd{C-c C-v l} @ @ @r{or} @ @ @kbd{C-c C-v C-l} @tab @code{org-babel-lob-ingest}
 @kindex C-c C-v p
 @kindex C-c C-v C-p
-@item @kbd{C-c C-v p} @ @ @r{or} @ @ @kbd{C-c C-v C-p} @tab org-babel-expand-src-block
+@item @kbd{C-c C-v p} @ @ @r{or} @ @ @kbd{C-c C-v C-p} @tab @code{org-babel-expand-src-block}
 @kindex C-c C-v s
 @kindex C-c C-v C-s
-@item @kbd{C-c C-v s} @ @ @r{or} @ @ @kbd{C-c C-v C-s} @tab org-babel-execute-subtree
+@item @kbd{C-c C-v s} @ @ @r{or} @ @ @kbd{C-c C-v C-s} @tab @code{org-babel-execute-subtree}
 @kindex C-c C-v t
 @kindex C-c C-v C-t
-@item @kbd{C-c C-v t} @ @ @r{or} @ @ @kbd{C-c C-v C-t} @tab org-babel-tangle
+@item @kbd{C-c C-v t} @ @ @r{or} @ @ @kbd{C-c C-v C-t} @tab @code{org-babel-tangle}
 @kindex C-c C-v z
 @kindex C-c C-v C-z
-@item @kbd{C-c C-v z} @ @ @r{or} @ @ @kbd{C-c C-v C-z} @tab org-babel-switch-to-session
+@item @kbd{C-c C-v z} @ @ @r{or} @ @ @kbd{C-c C-v C-z} @tab @code{org-babel-switch-to-session}
 @end multitable
 
 @c When possible these keybindings were extended to work when the control key is
 @c kept pressed, resulting in the following additional keybindings.
 
 @c @multitable @columnfractions 0.25 0.75
-@c @item @kbd{C-c C-v C-a} @tab org-babel-sha1-hash
-@c @item @kbd{C-c C-v C-b} @tab org-babel-execute-buffer
-@c @item @kbd{C-c C-v C-f} @tab org-babel-tangle-file
-@c @item @kbd{C-c C-v C-l} @tab org-babel-lob-ingest
-@c @item @kbd{C-c C-v C-p} @tab org-babel-expand-src-block
-@c @item @kbd{C-c C-v C-s} @tab org-babel-execute-subtree
-@c @item @kbd{C-c C-v C-t} @tab org-babel-tangle
-@c @item @kbd{C-c C-v C-z} @tab org-babel-switch-to-session
+@c @item @kbd{C-c C-v C-a} @tab @code{org-babel-sha1-hash}
+@c @item @kbd{C-c C-v C-b} @tab @code{org-babel-execute-buffer}
+@c @item @kbd{C-c C-v C-f} @tab @code{org-babel-tangle-file}
+@c @item @kbd{C-c C-v C-l} @tab @code{org-babel-lob-ingest}
+@c @item @kbd{C-c C-v C-p} @tab @code{org-babel-expand-src-block}
+@c @item @kbd{C-c C-v C-s} @tab @code{org-babel-execute-subtree}
+@c @item @kbd{C-c C-v C-t} @tab @code{org-babel-tangle}
+@c @item @kbd{C-c C-v C-z} @tab @code{org-babel-switch-to-session}
 @c @end multitable
 
 @node Batch execution,  , Key bindings and useful functions, Working With Source Code
