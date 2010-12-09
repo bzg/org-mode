@@ -6637,7 +6637,7 @@ create new nodes as new parents for refiling on the fly, check the
 variable @code{org-refile-allow-creating-parent-nodes}.
 When the variable @code{org-log-refile}@footnote{with corresponding
 @code{#+STARTUP} keywords @code{logrefile}, @code{lognoterefile},
-and @code{nologrefile}} is set, a time stamp or a note will be
+and @code{nologrefile}} is set, a timestamp or a note will be
 recorded when an entry has been refiled.
 @orgkey{C-u C-c C-w}
 Use the refile interface to jump to a heading.
@@ -8009,7 +8009,7 @@ $  @r{Archive all selected entries.}
 A  @r{Archive entries by moving them to their respective archive siblings.}
 t  @r{Change TODO state.  This prompts for a single TODO keyword and}
    @r{changes the state of all selected entries, bypassing blocking and}
-   @r{suppressing logging notes (but not time stamps).}
+   @r{suppressing logging notes (but not timestamps).}
 +  @r{Add a tag to all selected entries.}
 -  @r{Remove a tag from all selected entries.}
 s  @r{Schedule all items to a new date.  To shift existing schedule dates}
