@@ -2884,8 +2884,8 @@ Defaults to @code{lines}.
 If you want to plot to a file, specify @code{"@var{path/to/desired/output-file}"}.
 
 @item labels
-List of labels to be used for the deps (defaults to the column headers if
-they exist).
+List of labels to be used for the @code{deps} (defaults to the column headers
+if they exist).
 
 @item line
 Specify an entire line to be inserted in the Gnuplot script.
@@ -9054,10 +9054,10 @@ snippets will be identified as La@TeX{} source code:
 @itemize @bullet
 @item
 Environments of any kind@footnote{When @file{MathJax} is used, only the
-environment recognized by @file{MathJax} will be processed.  When dvipng is
-used to create images, any La@TeX{} environments will be handled.}.  The only
-requirement is that the @code{\begin} statement appears on a new line,
-preceded by only whitespace.
+environment recognized by @file{MathJax} will be processed.  When
+@file{dvipng} is used to create images, any La@TeX{} environments will be
+handled.}.  The only requirement is that the @code{\begin} statement appears
+on a new line, preceded by only whitespace.
 @item
 Text within the usual La@TeX{} math delimiters.  To avoid conflicts with
 currency specifications, single @samp{$} characters are only recognized as
@@ -10433,7 +10433,7 @@ resource or resource node which is known to TaskJuggler, such as
 
 The exporter will handle dependencies that are defined in the tasks either
 with the @samp{ORDERED} attribute (@pxref{TODO dependencies}), with the
-@samp{BLOCKER} attribute (see org-depend.el) or alternatively with a
+@samp{BLOCKER} attribute (see @file{org-depend.el}) or alternatively with a
 @samp{depends} attribute. Both the @samp{BLOCKER} and the @samp{depends}
 attribute can be either @samp{previous-sibling} or a reference to an
 identifier (named @samp{task_id}) which is defined for another task in the
@@ -11916,8 +11916,8 @@ When using @code{:dir}, you should supply a relative path for file output
 (e.g. @code{:file myfile.jpg} or @code{:file results/myfile.jpg}) in which
 case that path will be interpreted relative to the default directory.
 
-In other words, if you want your plot to go into a folder called Work in your
-home directory, you could use
+In other words, if you want your plot to go into a folder called @file{Work}
+in your home directory, you could use
 
 @example
 #+begin_src R :file myplot.png :dir ~/Work
