@@ -462,7 +462,8 @@ List ending is determined by indentation of text. See
 	(forward-line -1)
 	(catch 'exit
 	  (while t
-	    (let ((ind (org-get-indentation)))
+	    (let ((ind (+ (or (get-text-property (point) 'original-indentation) 0)
+			(org-get-indentation))))
 	      (cond
 	       ((looking-at "^[ \t]*:END:")
 		(throw 'exit item-ref))
@@ -502,7 +503,8 @@ List ending is determined by the indentation of text. See
       (catch 'exit
 	(while t
 	  (skip-chars-forward " \t")
-	  (let ((ind (org-get-indentation)))
+	  (let ((ind (+ (or (get-text-property (point) 'original-indentation) 0)
+			(org-get-indentation))))
 	    (cond
 	     ((or (>= (point) limit)
 		  (looking-at ":END:"))
