@@ -13382,7 +13382,7 @@ if the property key was used several times.
 POM may also be nil, in which case the current entry is used.
 If WHICH is nil or `all', get all properties.  If WHICH is
 `special' or `standard', only get that subclass.  If WHICH
-is a string only get exactly this property.  Specific can be a string, the
+is a string only get exactly this property.  SPECIFIC can be a string, the
 specific property we are interested in.  Specifying it can speed
 things up because then unnecessary parsing is avoided."
   (setq which (or which 'all))
