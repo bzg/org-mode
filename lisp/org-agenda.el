@@ -4650,8 +4650,7 @@ the documentation of `org-diary'."
 (defun org-agenda-get-sexps ()
   "Return the sexp information for agenda display."
   (require 'diary-lib)
-  (let* ((props (list 'face nil
-		      'mouse-face 'highlight
+  (let* ((props (list 'mouse-face 'highlight
 		      'help-echo
 		      (format "mouse-2 or RET jump to org file %s"
 			      (abbreviate-file-name buffer-file-name))))
