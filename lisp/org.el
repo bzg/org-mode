@@ -12381,7 +12381,7 @@ also TODO lines."
 	minus tag mm
 	tagsmatch todomatch tagsmatcher todomatcher kwd matcher
 	orterms term orlist re-p str-p level-p level-op time-p
-	prop-p pn pv po cat-p gv rest)
+	prop-p pn pv po gv rest)
     (if (string-match "/+" match)
 	;; match contains also a todo-matching request
 	(progn
@@ -12421,7 +12421,6 @@ also TODO lines."
 		     (setq pn (match-string 5 term)
 			   po (match-string 6 term)
 			   pv (match-string 7 term)
-			   cat-p (equal pn "CATEGORY")
 			   re-p (equal (string-to-char pv) ?{)
 			   str-p (equal (string-to-char pv) ?\")
 			   time-p (save-match-data
