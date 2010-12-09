@@ -7754,7 +7754,7 @@ refreshes and more secondary filtering.  The filter is a global property of
 the entire agenda view---in a block agenda, you should only set this in the
 global options section, not in the section of an individual block.}
 
-You will be prompted for a tag selection letter, SPC will mean any tag at
+You will be prompted for a tag selection letter, @key{SPC} will mean any tag at
 all.  Pressing @key{TAB} at that prompt will offer use completion to select a
 tag (including any tags that do not have a selection character).  The command
 then hides all entries that do not contain or inherit this tag.  When called
