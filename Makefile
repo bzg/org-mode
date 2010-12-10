@@ -316,7 +316,7 @@ release:
 	git push -f origin maint
 	git checkout master
 	git merge -s ours maint
-	UTILITIES/set-version.pl -o $(TAG)
+	UTILITIES/set-version.pl -a $(TAG)
 	git commit -a -m "Update website to show $(TAG) as current release"
 	git push
 	make updateweb
