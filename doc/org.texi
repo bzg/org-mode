@@ -1854,8 +1854,7 @@ item.
 @cindex editing tables
 
 Org comes with a fast and intuitive table editor.  Spreadsheet-like
-calculations are supported in connection with the Emacs @file{calc}
-package
+calculations are supported using the Emacs @file{calc} package
 @ifinfo
 (@pxref{Top,Calc,,Calc,Gnu Emacs Calculator Manual}).
 @end ifinfo
@@ -2116,7 +2115,7 @@ will then set the width of this column to this value.
 
 @noindent
 Fields that are wider become clipped and end in the string @samp{=>}.
-Note that the full text is still in the buffer, it is only invisible.
+Note that the full text is still in the buffer but is hidden.
 To see the full text, hold the mouse over the field---a tool-tip window
 will show the full content.  To edit such a field, use the command
 @kbd{C-c `} (that is @kbd{C-c} followed by the backquote).  This will
@@ -2483,24 +2482,23 @@ if($1<20,teen,string(""))  @r{``teen'' if age $1 less than 20, else empty}
 @subsection Emacs Lisp forms as formulas
 @cindex Lisp forms, as table formulas
 
-It is also possible to write a formula in Emacs Lisp; this can be useful
-for string manipulation and control structures, if Calc's
-functionality is not enough.  If a formula starts with a single-quote
-followed by an opening parenthesis, then it is evaluated as a Lisp form.
-The evaluation should return either a string or a number.  Just as with
-@file{calc} formulas, you can specify modes and a printf format after a
-semicolon.  With Emacs Lisp forms, you need to be conscious about the way
-field references are interpolated into the form.  By default, a
-reference will be interpolated as a Lisp string (in double-quotes)
-containing the field.  If you provide the @samp{N} mode switch, all
-referenced elements will be numbers (non-number fields will be zero) and
-interpolated as Lisp numbers, without quotes.  If you provide the
-@samp{L} flag, all fields will be interpolated literally, without quotes.
-I.e., if you want a reference to be interpreted as a string by the Lisp
-form, enclose the reference operator itself in double-quotes, like
-@code{"$3"}.  Ranges are inserted as space-separated fields, so you can
-embed them in list or vector syntax.  A few examples, note how the
-@samp{N} mode is used when we do computations in Lisp.
+It is also possible to write a formula in Emacs Lisp; this can be useful for
+string manipulation and control structures, if Calc's functionality is not
+enough.  If a formula starts with a single-quote followed by an opening
+parenthesis, then it is evaluated as a Lisp form.  The evaluation should
+return either a string or a number.  Just as with @file{calc} formulas, you
+can specify modes and a printf format after a semicolon.  With Emacs Lisp
+forms, you need to be conscious about the way field references are
+interpolated into the form.  By default, a reference will be interpolated as
+a Lisp string (in double-quotes) containing the field.  If you provide the
+@samp{N} mode switch, all referenced elements will be numbers (non-number
+fields will be zero) and interpolated as Lisp numbers, without quotes.  If
+you provide the @samp{L} flag, all fields will be interpolated literally,
+without quotes.  I.e., if you want a reference to be interpreted as a string
+by the Lisp form, enclose the reference operator itself in double-quotes,
+like @code{"$3"}.  Ranges are inserted as space-separated fields, so you can
++embed them in list or vector syntax.  Here are a few examples---note how the
+@samp{N} mode is used when we do computations in Lisp:
 
 @example
 @r{Swap the first two characters of the content of column 1}
@@ -2524,7 +2522,7 @@ evaluated, and the current field replaced with the result.
 
 @cindex #+TBLFM
 Formulas are stored in a special line starting with @samp{#+TBLFM:}
-directly below the table.  If you typed the equation in the 4th field of
+directly below the table.  If you type the equation in the 4th field of
 the 3rd data line in the table, the formula will look like
 @samp{@@3$4=$1+$2}.  When inserting/deleting/swapping column and rows
 with the appropriate commands, @i{absolute references} (but not relative
@@ -5482,8 +5480,8 @@ The headline will be listed under the given date@footnote{It will still
 be listed on that date after it has been marked DONE.  If you don't like
 this, set the variable @code{org-agenda-skip-scheduled-if-done}.}.  In
 addition, a reminder that the scheduled date has passed will be present
-in the compilation for @emph{today}, until the entry is marked DONE.
-I.e. the task will automatically be forwarded until completed.
+in the compilation for @emph{today}, until the entry is marked DONE, i.e.
+the task will automatically be forwarded until completed.
 
 @example
 *** TODO Call Trillian for a date on New Years Eve.
@@ -5628,7 +5626,7 @@ forgot to call your father for 3 weeks, it does not make sense to call
 him 3 times in a single day to make up for it.  Finally, there are tasks
 like changing batteries which should always repeat a certain time
 @i{after} the last time you did it.  For these tasks, Org-mode has
-special repeaters markers with @samp{++} and @samp{.+}.  For example:
+special repeaters  @samp{++} and @samp{.+}.  For example:
 
 @example
 ** TODO Call Father
@@ -8923,16 +8921,15 @@ construct complex HTML code.
 @cindex @TeX{} interpretation
 @cindex @LaTeX{} interpretation
 
-Plain ASCII is normally sufficient for almost all note taking.  One
-exception, however, are scientific notes which need to be able to contain
-mathematical symbols and the occasional formula.  @LaTeX{}@footnote{@LaTeX{}
-is a macro system based on Donald E. Knuth's @TeX{} system.  Many of the
-features described here as ``@LaTeX{}'' are really from @TeX{}, but for
-simplicity I am blurring this distinction.}  is widely used to typeset
-scientific documents. Org-mode supports embedding @LaTeX{} code into its
-files, because many academics are used to writing and reading @LaTeX{} source
-code, and because it can be readily processed to produce pretty output for a
-number of export backends.
+Plain ASCII is normally sufficient for almost all note taking.  Exceptions
+include scientific notes, which often require mathematical symbols and the
+occasional formula.  @LaTeX{}@footnote{@LaTeX{} is a macro system based on
+Donald E. Knuth's @TeX{} system.  Many of the features described here as
+``@LaTeX{}'' are really from @TeX{}, but for simplicity I am blurring this
+distinction.}  is widely used to typeset scientific documents. Org-mode
+supports embedding @LaTeX{} code into its files, because many academics are
+used to writing and reading @LaTeX{} source code, and because it can be
+readily processed to produce pretty output for a number of export backends.
 
 @menu
 * Special symbols::             Greek letters and other symbols
@@ -9743,7 +9740,7 @@ inclusion of these defaults off, customize
 @code{org-export-html-style-include-default}}.  You may overwrite these
 settings, or add to them by using the variables @code{org-export-html-style}
 (for Org-wide settings) and @code{org-export-html-style-extra} (for more
-granular settings, like file-local settings).  To set the latter variable
+fine-grained settings, like file-local settings).  To set the latter variable
 individually for each file, you can use
 
 @cindex #+STYLE
@@ -10717,9 +10714,9 @@ produce @file{file.org} and @file{file.org.html} in the publishing
 directory@footnote{@file{file-source.org} and @file{file-source.org.html} if
 source and publishing directories are equal.  Note that with this kind of
 setup, you need to add @code{:exclude "-source\\.org"} to the project
-definition in @code{org-publish-project-alist} to avoid that the published
-source files will be considered as new org files the next time the project is
-published.}.  Other files like images only need to be copied to the
+definition in @code{org-publish-project-alist} to prevent the published
+source files from being considered as new org files the next time the project
+is published.}.  Other files like images only need to be copied to the
 publishing destination; for this you may use @code{org-publish-attachment}.
 For non-Org files, you always need to specify the publishing function:
 
@@ -12595,7 +12592,7 @@ For example, on an empty line, typing "<e" and then pressing TAB, will expand
 into a complete EXAMPLE template.
 
 You can install additional templates by customizing the variable
-@code{org-structure-template-alist}. Refer docstring of the variable for
+@code{org-structure-template-alist}. See the docstring of the variable for
 additional details.
 
 @node Speed keys, Code evaluation security, Easy Templates, Miscellaneous
