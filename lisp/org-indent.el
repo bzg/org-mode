@@ -38,6 +38,10 @@
 (eval-when-compile
   (require 'cl))
 
+(defvar org-inlinetask-min-level)
+(declare-function org-inlinetask-get-task-level "org-inlinetask" ())
+(declare-function org-inlinetask-in-task-p "org-inlinetask" ())
+
 (defgroup org-indent nil
   "Options concerning dynamic virtual outline indentation."
   :tag "Org Indent"
@@ -261,6 +265,7 @@ Assumes that BEG is at the beginning of a line."
 		n (* (funcall get-real-level b level)
 		     org-indent-indentation-per-level)))))))
 
+(defvar org-inlinetask-min-level)
 (defun org-indent-refresh-section ()
   "Refresh indentation properties in the current outline section.
 Point is assumed to be at the beginning of a headline."

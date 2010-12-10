@@ -7546,6 +7546,7 @@ If yes, remember the marker and the distance to BEG."
 (eval-when-compile
   (defvar org-property-drawer-re))
 
+(defvar org-property-start-re)  ;; defined below
 (defun org-clone-subtree-with-time-shift (n &optional shift)
   "Clone the task (subtree) at point N times.
 The clones will be inserted as siblings.
