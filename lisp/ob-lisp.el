@@ -5,7 +5,7 @@
 ;; Author: David T. O'Toole <dto@gnu.org>, Eric Schulte
 ;; Keywords: literate programming, reproducible research, lisp
 ;; Homepage: http://orgmode.org
-;; Version: 7.3
+;; Version: 7.4
 
 ;;; License:
 
