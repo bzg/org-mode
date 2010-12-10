@@ -1,4 +1,3 @@
-
 #   -*- mode: org; fill-column: 65 -*-
 
 #+begin_html
