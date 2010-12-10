@@ -5760,7 +5760,7 @@ worked on or closed during a day.
 @cindex report, of clocked time
 
 Org mode can produce quite complex reports based on the time clocking
-inormation.  Such a report is called a @emph{clock table}, because it is
+information.  Such a report is called a @emph{clock table}, because it is
 formatted as one or several Org tables.
 
 @table @kbd

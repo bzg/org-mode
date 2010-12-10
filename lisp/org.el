@@ -2628,7 +2628,7 @@ This may t or nil, or the symbol `org-read-date-prefer-future'."
   :group 'org-agenda 
   :group 'org-time 
   :type '(choice
-	  (const :tag "Use org-aread-date-prefer-future"
+	  (const :tag "Use org-read-date-prefer-future"
 		 org-read-date-prefer-future)
 	  (const :tag "Never" nil)
 	  (const :tag "Always" t)))
