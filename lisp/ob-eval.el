@@ -139,9 +139,9 @@ specifies the value of ERROR-BUFFER."
 	 (if error-buffer
 	     (make-temp-file
 	      (expand-file-name "scor"
-				(or (unless (featurep 'xemacs)
-				      small-temporary-file-directory)
-				    temporary-file-directory)))
+                                (if (featurep 'xemacs)
+                                    (temp-directory)
+                                  temporary-file-directory)))
 	   nil))
 	exit-status)
     (if (or replace
