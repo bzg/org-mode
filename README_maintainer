@@ -148,12 +148,20 @@ change only this file, use =--only=.
 
 This is still a significant headache.  Some hand work is needed here.
 
-Emacs uses bzr, and while I see all the advantages this would have, I
-cannot bring myself to switch away from git for my day-to-day work.
+Emacs uses bzr.  A useful introduction to bzr for Emacs developers can
+be found [[http://www.emacswiki.org/emacs/BzrForEmacsDevs][here]].  While I see all the advantages this would have, I
+cannot bring myself to switch away from git for my day-to-day work,
+because I know git so well, and because git seems to me as being much
+more powerful, conceptionally simple (once you have [[http://www.newartisans.com/2008/04/git-from-the-bottom-up.html][bent your head
+around it]]), and so much faster.
+
 So the way I have been doing things with Emacs is this:
 
 1. I do not update the version in Emacs too often.  Just once every
    few month - this is frequently enough for the Emacs release cycle.
+   Care must be taken to get in a *new and stable* version shortly
+   before Emacs goes into feature freeze and pretest, because that
+   version is going to be in the wild for a long time.
 
 2. I watch the Emacs diffs for changes made by the maintainers of
    Emacs in the org-mode files in Emacs.  Any changes that come up
@@ -167,9 +175,10 @@ So the way I have been doing things with Emacs is this:
 3. When I have made a release (usually I wait for the minor releases
    to stabilize), I *copy* org files into the Emacs repository.  Yes,
    I do not merge, I copy.  This has been the source of some problems
-   in the past - but I have not had the patience to work out a better
-   mechanism, and I really dislike the idea that the version in Emacs
-   starts diverging from my own.
+   in the past - Emacs developers are not happy when I accidentally
+   overwrite changes they made.  But I have not had the patience to
+   work out a better mechanism, and I really dislike the idea that the
+   version in Emacs starts diverging from my own.
 
    Careful: Copy /org.texi/ and /orgcard.tex/ into the right places,
    and also copy the lisp files with *two exceptions*: Do *not* copy
@@ -197,14 +206,18 @@ So the way I have been doing things with Emacs is this:
 
    When you run the =make_emacs_changelog= program, you will be
    prompted for a date in ISO format YYYY-MM-DD, this date will be
-   used in the ChangeLog entries - Emacs wants these dates to be the
-   time when the change has been installed into Emacs, not the time
-   when we made the change in our own repository.  You will also be
+   used in the ChangeLog entries - Emacs developers want these dates
+   to be the time when the change has been installed into Emacs, not
+   the time when we made the change in our own repository.  So all the
+   ChangeLog entries will get the same date.  You will also be
    prompted for the kind of ChangeLog you want to make, possible
    answers are =lisp=, =texi=, and =card=.  The program will then
    select the correct entries for the specified ChangeLog file.  If
    you don't like being prompted, you can give the date and type as
-   second and third command line arguments to =make_emacs_changelog=.
+   second and third command line arguments to =make_emacs_changelog=,
+   for example
+
+   : UTILITIES/make_emacs_changelog release_7.02.05..release_7.03.02 2010-12-11 lisp
 
    These entries need to be added to the ChangeLog files in Emacs.
    You should, in the ChangeLog file, select the inserted region of
@@ -216,8 +229,6 @@ So the way I have been doing things with Emacs is this:
 5. Commit the changes into the bzr repository and you are done.  Emacs
    developers often look throught the commit and make minor changes -
    these need to be merged back into our own repo.
-
-
 
 * Updating the list of hooks on Worg
 

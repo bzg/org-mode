@@ -20,10 +20,11 @@ if (!$kind) {
   $kind = <>;
   $kind =~ s/\s*(.*?)\s+/$1/;
   $kind =~ s/"(.*?)"/$1/;
-  if ($kind ne "lisp" and $kind ne "texi" and  $kind ne "card"
-      and $kind ne "") {
-    die "Invalid Changelog kind";
-  }
+}
+
+if ($kind ne "lisp" and $kind ne "texi" and  $kind ne "card"
+    and $kind ne "") {
+  die "Invalid Changelog kind";
 }
 
 # Run git log to get the commits the messages
