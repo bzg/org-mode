@@ -13026,7 +13026,7 @@ Returns the new tags string, or nil to not change the current settings."
 		       (setq exit-after-next (not exit-after-next)))
 		    (setq expert nil)
 		    (delete-other-windows)
-		    (split-window-vertically)
+		    (set-window-buffer (split-window-vertically) " *Org tags*")
 		    (org-switch-to-buffer-other-window " *Org tags*")
 		    (org-fit-window-to-buffer)))
 		 ((or (= c ?\C-g)
