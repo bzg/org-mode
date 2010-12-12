@@ -3721,12 +3721,13 @@ to execute outside of tables."
 If it is a table to be sent away to a receiver, do it.
 With prefix arg, also recompute table."
   (interactive "P")
-  (let ((pos (point)) action)
+  (let ((pos (point)) action consts-str consts cst)
     (save-excursion
       (beginning-of-line 1)
-      (setq action (cond ((looking-at "[ \t]*#\\+ORGTBL:.*\n[ \t]*|") (match-end 0))
-			 ((looking-at "[ \t]*|") pos)
-			 ((looking-at "[ \t]*#\\+TBLFM:") 'recalc))))
+      (setq action (cond
+		    ((looking-at "[ \t]*#\\+ORGTBL:.*\n[ \t]*|") (match-end 0))
+		    ((looking-at "[ \t]*|") pos)
+		    ((looking-at "[ \t]*#\\+TBLFM:") 'recalc))))
     (cond
      ((integerp action)
       (goto-char action)
@@ -3738,6 +3739,17 @@ With prefix arg, also recompute table."
       (when (orgtbl-send-table 'maybe)
 	(run-hooks 'orgtbl-after-send-table-hook)))
      ((eq action 'recalc)
+      (save-excursion
+	(goto-char (point-min))
+	(while (re-search-forward "^[ \t]*#\\+CONSTANTS: \\(.*\\)" nil t)
+	  (setq const-str (substring-no-properties (match-string 1)))
+	  (setq consts (append consts (org-split-string const-str "[ \t]+")))
+	  (when consts
+	    (let (e)
+	      (while (setq e (pop consts))
+		(if (string-match "^\\([a-zA-Z0][_a-zA-Z0-9]*\\)=\\(.*\\)" e)
+		    (push (cons (match-string 1 e) (match-string 2 e)) cst)))
+	      (setq org-table-formula-constants-local cst)))))
       (save-excursion
 	(beginning-of-line 1)
 	(skip-chars-backward " \r\n\t")
