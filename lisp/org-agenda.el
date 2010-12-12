@@ -1183,6 +1183,17 @@ a grid line."
     (string :tag "Grid String")
     (repeat :tag "Grid Times" (integer :tag "Time"))))
 
+(defcustom org-agenda-show-current-time-in-grid t
+  "Non-nil means show the current time in the time grid."
+  :group 'org-agenda-time-grid
+  :type 'boolean)
+
+(defcustom org-agenda-current-time-string
+  "now - - - - - - - - - - - - - - - - - - - - - - - - -"
+  "The string for the current time marker in the agenda."
+  :group 'org-agenda-time-grid
+  :type 'string)
+
 (defgroup org-agenda-sorting nil
   "Options concerning sorting in the Org-mode Agenda."
   :tag "Org Agenda Sorting"
@@ -5342,6 +5353,16 @@ The modified list may contain inherited tags, and tags matched by
 		new)
 	  (put-text-property
 	   2 (length (car new)) 'face 'org-time-grid (car new))))
+      (when org-agenda-show-current-time-in-grid
+	(push (org-format-agenda-item
+	       nil 
+	       org-agenda-current-time-string
+	       "" nil
+	       (format-time-string "%H:%M "))
+	      new)
+	(put-text-property
+	 2 (length (car new)) 'face 'org-agenda-current-time (car new)))
+
       (if (member 'time-up org-agenda-sorting-strategy-selected)
 	  (append new list)
 	(append list new)))))

@@ -667,6 +667,9 @@ month and 365.24 days for a year)."
   "Face used for time grids."
   :group 'org-faces)
 
+(org-copy-face 'org-time-grid 'org-agenda-current-time
+  "Face used to show the current time in the time grid.")
+
 (defface org-agenda-diary
   (org-compatible-face 'default
     nil)
