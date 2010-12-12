@@ -51,7 +51,6 @@
 ;;; Code:
 (require 'ob)
 (eval-when-compile
-  (require 'org-list)
   (require 'cl))
 
 (declare-function org-remove-if-not "org" (predicate seq))
