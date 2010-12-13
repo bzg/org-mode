@@ -5353,7 +5353,7 @@ The modified list may contain inherited tags, and tags matched by
 		new)
 	  (put-text-property
 	   2 (length (car new)) 'face 'org-time-grid (car new))))
-      (when org-agenda-show-current-time-in-grid
+      (when (and todayp org-agenda-show-current-time-in-grid)
 	(push (org-format-agenda-item
 	       nil 
 	       org-agenda-current-time-string
