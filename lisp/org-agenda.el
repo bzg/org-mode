@@ -7254,7 +7254,7 @@ be used to request time specification in the time stamp."
       (org-agenda-show-new-time marker org-last-changed-timestamp))
     (message "Time stamp changed to %s" org-last-changed-timestamp)))
 
-(defun org-agenda-schedule (arg)
+(defun org-agenda-schedule (arg &optional time)
   "Schedule the item at point.
 Arg is passed through to `org-schedule'."
   (interactive "P")
@@ -7272,11 +7272,11 @@ Arg is passed through to `org-schedule'."
       (with-current-buffer buffer
 	(widen)
 	(goto-char pos)
-	(setq ts (org-schedule arg)))
+	(setq ts (org-schedule arg time)))
       (org-agenda-show-new-time marker ts "S"))
     (message "Item scheduled for %s" ts)))
 
-(defun org-agenda-deadline (arg)
+(defun org-agenda-deadline (arg &optional time)
   "Schedule the item at point.
 Arg is passed through to `org-deadline'."
   (interactive "P")
@@ -7292,7 +7292,7 @@ Arg is passed through to `org-deadline'."
       (with-current-buffer buffer
 	(widen)
 	(goto-char pos)
-	(setq ts (org-deadline arg)))
+	(setq ts (org-deadline arg time)))
       (org-agenda-show-new-time marker ts "D"))
 	(message "Deadline for this item set to %s" ts)))
 
@@ -7885,13 +7885,7 @@ The prefix arg is passed through to the command if possible."
 	     (c1 (if (eq action ?s) 'org-agenda-schedule 'org-agenda-deadline)))
 	(setq cmd `(let* ((bound (fboundp 'read-string))
 			  (old (and bound (symbol-function 'read-string))))
-		     (unwind-protect
-			 (progn
-			   (fset 'read-string (lambda (&rest ignore) ,ans))
-			   (eval '(,c1 arg)))
-		       (if bound
-			   (fset 'read-string old)
-			 (fmakunbound 'read-string)))))))
+		     (eval '(,c1 arg nil ,date))))))
 
      ((eq action '?S)
       (let ((days (read-number
@@ -7913,6 +7907,7 @@ The prefix arg is passed through to the command if possible."
 			 (incf day-of-week)
 			 (if (= day-of-week 7)
 			     (setq day-of-week 0)))))
+		 (org-agenda-schedule nil (days-to-time (org-today)))
 		 (org-agenda-date-later distance)))))
 
      (t (error "Invalid bulk action")))
