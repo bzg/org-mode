@@ -4968,12 +4968,14 @@ FRACTION is what fraction of the head-warning time has passed."
 	  (save-excursion
 	    (setq todo-state (org-get-todo-state))
 	    (setq donep (member todo-state org-done-keywords))
-	    (setq habitp (and (functionp 'org-is-habit-p)
-			      (org-is-habit-p)))
 	    (if (and donep
-		     (or habitp org-agenda-skip-scheduled-if-done
-			 (not (= diff 0))))
+		     (or org-agenda-skip-scheduled-if-done
+			 (not (= diff 0))
+			 (and (functionp 'org-is-habit-p)
+			      (org-is-habit-p))))
 		(setq txt nil)
+	      (setq habitp (and (functionp 'org-is-habit-p)
+				(org-is-habit-p)))
 	      (setq category (org-get-category))
 	      (if (not (re-search-backward "^\\*+[ \t]+" nil t))
 		  (setq txt org-agenda-no-heading-message)
