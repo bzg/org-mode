@@ -1,4 +1,4 @@
-;;; org.el --- Outline-based notes management and organizer
+';;; org.el --- Outline-based notes management and organizer
 ;; Carstens outline-mode for keeping track of everything.
 ;; Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009, 2010
 ;;   Free Software Foundation, Inc.
@@ -13424,32 +13424,38 @@ things up because then unnecessary parsing is avoided."
 		      (member specific
 			      '("SCHEDULED" "DEADLINE" "CLOCK" "CLOSED"
 				"TIMESTAMP" "TIMESTAMP_IA")))
-	      (while (re-search-forward org-maybe-keyword-time-regexp end t)
-		(setq key (if (match-end 1)
-			      (substring (org-match-string-no-properties 1)
-					 0 -1))
-		      string (if (equal key clockstr)
-				 (org-no-properties
-				  (org-trim
-				   (buffer-substring
-				    (match-beginning 3) (goto-char
-							 (point-at-eol)))))
-			       (substring (org-match-string-no-properties 3)
-					  1 -1)))
-		;; Get the correct property name from the key.  This is
-		;; necessary if the user has configured time keywords.
-		(setq key1 (concat key ":"))
-		(cond
-		 ((not key)
-		  (setq key
-			(if (= (char-after (match-beginning 3)) ?\[)
-			    "TIMESTAMP_IA" "TIMESTAMP")))
-		 ((equal key1 org-scheduled-string) (setq key "SCHEDULED"))
-		 ((equal key1 org-deadline-string)  (setq key "DEADLINE"))
-		 ((equal key1 org-closed-string)    (setq key "CLOSED"))
-		 ((equal key1 org-clock-string)     (setq key "CLOCK")))
-		(when (or (equal key "CLOCK") (not (assoc key props)))
-		  (push (cons key string) props))))
+	      (catch 'match
+		(while (re-search-forward org-maybe-keyword-time-regexp end t)
+		  (setq key (if (match-end 1)
+				(substring (org-match-string-no-properties 1)
+					   0 -1))
+			string (if (equal key clockstr)
+				   (org-no-properties
+				    (org-trim
+				     (buffer-substring
+				      (match-beginning 3) (goto-char
+							   (point-at-eol)))))
+				 (substring (org-match-string-no-properties 3)
+					    1 -1)))
+		  ;; Get the correct property name from the key.  This is
+		  ;; necessary if the user has configured time keywords.
+		  (setq key1 (concat key ":"))
+		  (cond
+		   ((not key)
+		    (setq key
+			  (if (= (char-after (match-beginning 3)) ?\[)
+			      "TIMESTAMP_IA" "TIMESTAMP")))
+		   ((equal key1 org-scheduled-string) (setq key "SCHEDULED"))
+		   ((equal key1 org-deadline-string)  (setq key "DEADLINE"))
+		   ((equal key1 org-closed-string)    (setq key "CLOSED"))
+		   ((equal key1 org-clock-string)     (setq key "CLOCK")))
+		  (if (and specific (equal key specific) (not (equal key "CLOCK")))
+		      (progn 
+			(push (cons key string) props)
+			;; no need to search further if match is found
+			(throw 'match t))
+		    (when (or (equal key "CLOCK") (not (assoc key props)))
+		      (push (cons key string) props))))))
 	    )
 
 	  (when (memq which '(all standard))
