@@ -159,3 +159,18 @@
 #+begin_src example-lang :session     :results output :var num=9
   the body
 #+end_src
+* conflicting blocks on export
+  :PROPERTIES:
+  :ID:       5daa4d03-e3ea-46b7-b093-62c1b7632df3
+  :END:
+#+results: a-list
+- a
+- b
+- c
+
+#+begin_src emacs-lisp :results wrap :exports both
+    "code block results"
+#+end_src
+#+begin_src emacs-lisp :var lst=a-list :results list
+  (reverse lst)
+#+end_src
