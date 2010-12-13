@@ -105,7 +105,7 @@ var of the same value."
 		 (deep-string (if (listp (car var)) var (list var)))
 		 (list :sep (or sep "\t")))))
     (if (stringp var)
-	(if (string-match "[\n\r]" var)
+	(if (string-match "[ \t\n\r]" var)
 	    (format "$(cat <<BABEL_STRING\n%s\nBABEL_STRING\n)" var)
 	  (format "%s" var))
       (format "%S" var))))
