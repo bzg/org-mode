@@ -5424,6 +5424,7 @@ between words."
 	"\\<\\("
 	(mapconcat
 	 (lambda (x)
+	   (setq x (regexp-quote x))
 	   (while (string-match " +" x)
 	     (setq x (replace-match "\\s-+" t t x)))
 	   x)
