@@ -151,7 +151,7 @@ If `org-store-link' was called with a prefix arg the meaning of
 		     (gnus-summary-article-header)))
 	   (from (mail-header-from header))
 	   (message-id (org-remove-angle-brackets (mail-header-id header)))
-	   (date (mail-header-date header))
+	   (date (org-trim (mail-header-date header)))
 	   (date-ts (and date (format-time-string
 			       (org-time-stamp-format t) (date-to-time date))))
 	   (date-ts-ia (and date (format-time-string
