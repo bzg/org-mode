@@ -35,6 +35,7 @@
 
 (declare-function org-remove-indentation "org" )
 (declare-function py-shell "ext:python-mode" (&optional argprompt))
+(declare-function py-toggle-shells "ext:python-mode" (arg))
 (declare-function run-python "ext:python" (&optional cmd noshow new))
 
 (add-to-list 'org-babel-tangle-lang-exts '("python" . "py"))
@@ -143,6 +144,11 @@ then create.  Return the initialized session."
 	(run-python))
        ((and (eq 'python-mode org-babel-python-mode)
 	     (fboundp 'py-shell)) ; python-mode.el
+	;; Make sure that py-which-bufname is initialized, as otherwise
+	;; it will be overwritten the first time a Python buffer is
+	;; created.
+	(when (fboundp 'py-shell)
+	   (py-toggle-shells py-default-interpreter))
 	;; `py-shell' creates a buffer whose name is the value of
 	;; `py-which-bufname' with '*'s at the beginning and end
 	(let* ((bufname (if python-buffer
