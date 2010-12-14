@@ -7909,7 +7909,7 @@ The prefix arg is passed through to the command if possible."
 			 (incf day-of-week)
 			 (if (= day-of-week 7)
 			     (setq day-of-week 0)))))
-		 (org-agenda-schedule nil (days-to-time (org-today)))
+		 (org-agenda-schedule nil (current-time))
 		 (org-agenda-date-later distance)))))
 
      (t (error "Invalid bulk action")))
