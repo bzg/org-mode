@@ -13237,7 +13237,7 @@ a *different* entry, you cannot use these techniques."
 
 (defconst org-special-properties
   '("TODO" "TAGS" "ALLTAGS" "DEADLINE" "SCHEDULED" "CLOCK" "CLOSED" "PRIORITY"
-    "TIMESTAMP" "TIMESTAMP_IA" "BLOCKED")
+    "TIMESTAMP" "TIMESTAMP_IA" "BLOCKED" "FILE")
   "The special properties valid in Org-mode.
 
 These are properties that are not defined in the property drawer,
@@ -13409,6 +13409,8 @@ things up because then unnecessary parsing is avoided."
 	    (when (and (or (not specific) (string= specific "PRIORITY"))
 		       (looking-at org-priority-regexp))
 	      (push (cons "PRIORITY" (org-match-string-no-properties 2)) props))
+	    (when (or (not specific) (string= specific "FILE"))
+	      (push (cons "FILE" buffer-file-name) props))
 	    (when (and (or (not specific) (string= specific "TAGS"))
 		       (setq value (org-get-tags-string))
 		       (string-match "\\S-" value))

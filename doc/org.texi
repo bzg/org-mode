@@ -4708,6 +4708,7 @@ used as keys in the properties drawer:
 @cindex property, special, BLOCKED
 @c guessing that ITEM is needed in this area; also, should this list be sorted?
 @cindex property, special, ITEM
+@cindex property, special, FILE
 @example
 TODO         @r{The TODO keyword of the entry.}
 TAGS         @r{The tags defined directly in the headline.}
@@ -4723,6 +4724,7 @@ CLOCKSUM     @r{The sum of CLOCK intervals in the subtree.  @code{org-clock-sum}
              @r{must be run first to compute the values.}
 BLOCKED      @r{"t" if task is currently blocked by children or siblings}
 ITEM         @r{The content of the entry.}
+FILE         @r{The filename the entry is located in.}
 @end example
 
 @node Property searches, Property inheritance, Special properties, Properties and Columns
