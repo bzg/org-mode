@@ -1321,6 +1321,7 @@ The following %-escapes will be replaced by corresponding information:
 %c   correspondent.  Usually \"from NAME\", but if you sent it yourself, it
      will be \"to NAME\".  See also the variable `org-from-is-user-regexp'.
 %s   subject
+%d   date
 %m   message-id.
 
 You may use normal field width specification between the % and the letter.
@@ -8497,6 +8498,7 @@ according to FMT (default from `org-email-link-description-format')."
 	   (cons "%T" (plist-get p :to))
 	   (cons "%t" (or (plist-get p :toname) (plist-get p :toaddress) "?"))
 	   (cons "%s" (plist-get p :subject))
+	   (cons "%d" (plist-get p :date))
 	   (cons "%m" (plist-get p :message-id)))))
     (when (string-match "%c" fmt)
       ;; Check if the user wrote this message
