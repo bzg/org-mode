@@ -8603,14 +8603,14 @@ according to FMT (default from `org-email-link-description-format')."
 	  "]"))
 
 (defconst org-link-escape-chars
-  '(?\ ?\[ ?\] ?\; ?\= ?\+ ?\%)
+  '(?\ ?\[ ?\] ?\; ?\= ?\+)
   "List of characters that should be escaped in link.
 This is the list that is used for internal purposes.")
 
 (defvar org-url-encoding-use-url-hexify nil)
 
 (defconst org-link-escape-chars-browser
-  '(?\ ?\%)
+  '(?\ )
   "List of escapes for characters that are problematic in links.
 This is the list that is used before handing over to the browser.")
 
@@ -8633,7 +8633,7 @@ If optional argument MERGE is set, merge TABLE into
     (mapconcat
      (lambda (char)
        (if (or (member char table)
-	       (< char 32) (> char 126))
+	       (< char 32) (= char 37) (> char 126))
 	   (mapconcat (lambda (sequence-element)
 			(format "%%%.2X" sequence-element))
 		      (encode-coding-char char 'utf-8) "")
