@@ -1527,7 +1527,8 @@ code ---- the results are extracted in the syntax of the source
 	    (blocks-re (regexp-opt
 			(list "latex" "html" "example" "src" "result"))))
 	(if (looking-at (concat "[ \t]*#\\+begin_" blocks-re))
-	    (re-search-forward (concat "[ \t]*#\\+end_" blocks-re) nil t)
+	    (progn (re-search-forward (concat "[ \t]*#\\+end_" blocks-re) nil t)
+		   (forward-char 1))
 	  (while (looking-at "[ \t]*\\(: \\|\\[\\[\\)")
 	    (forward-line 1))))
       (point)))))
