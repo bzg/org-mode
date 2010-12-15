@@ -8636,8 +8636,10 @@ If optional argument MERGE is set, merge TABLE into
 	       (< char 32) (= char 37) (> char 126))
 	   (mapconcat (lambda (sequence-element)
 			(format "%%%.2X" sequence-element))
-		      (encode-coding-char char 'utf-8) "")
-	   (char-to-string char))) text "")))
+		      (or (encode-coding-char char 'utf-8)
+			  (error "Unable to percent escape character: %s"
+				 (char-to-string char))) "")
+	 (char-to-string char))) text "")))
 
 (defun org-link-unescape (str)
   "Unhex hexified unicode strings as returned from the JavaScript function
