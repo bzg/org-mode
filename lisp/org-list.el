@@ -1145,7 +1145,9 @@ bullet string and bullet counter, if any."
           (progn
             (goto-char (match-end 0))
             (and (looking-at "\\[@\\(?:start:\\)?\\([0-9]+\\)\\]")
-                 (match-string 1))))))
+                 (match-string-no-properties 1)))
+	  (when (org-at-item-checkbox-p)
+	    (match-string-no-properties 1)))))
 
 (defun org-list-struct (begin end top bottom &optional outdent)
   "Return the structure containing the list between BEGIN and END.
@@ -1424,15 +1426,18 @@ BOTTOM is position at list ending.
 Initial position is restored after the changes."
   (let* ((pos (copy-marker (point)))
 	 (ancestor (caar struct))
+	 (full-item-re (concat "[ \t]*\\(\\(?:[-+*]\\|[0-9]+[.)]\\)[ \t]+\\)"
+			       "\\(\\[@\\(?:start:\\)[0-9]+\\]\\)?"
+			       "\\(?:\\(\\[[ X-]\\]\\)[ \t]+\\)?"))
          (modify
           (lambda (item)
 	    (goto-char (car item))
+	    (looking-at full-item-re)
             (let* ((new-ind (nth 1 item))
 		   (new-bul (org-list-bullet-string (nth 2 item)))
-		   (old-ind (org-get-indentation))
-		   (old-bul (progn
-			      (looking-at "[ \t]*\\(\\S-+[ \t]*\\)")
-			      (match-string 1)))
+		   (new-box (nth 4 item))
+		   (old-bul (match-string 1))
+		   (old-ind (save-match-data (org-get-indentation)))
 		   (old-body-ind (+ (length old-bul) old-ind))
 		   (new-body-ind (+ (length new-bul) new-ind)))
 	      ;; 1. Shift item's body
@@ -1440,16 +1445,23 @@ Initial position is restored after the changes."
 		(org-shift-item-indentation
 		 (- new-body-ind old-body-ind) bottom))
 	      ;; 2. Replace bullet
-	      (unless (equal new-bul old-bul)
-		(save-excursion
-		  (looking-at "[ \t]*\\(\\S-+[ \t]*\\)")
-		  (replace-match new-bul nil nil nil 1)))
-	      ;; 3. Indent item to appropriate column
+	      (unless (equal (match-string 1) new-bul)
+		(replace-match new-bul nil nil nil 1))
+	      ;; 3. Replace checkbox
+	      (cond
+	       ((equal (match-string 3) new-box))
+	       ((and (match-string 3) new-box)
+		(replace-match new-box nil nil nil 3))
+	       ((match-string 3)
+		(goto-char (or (match-end 2) (match-end 1)))
+		(looking-at "\\[[ X-]\\][ \t]+")
+		(replace-match ""))
+	       (t (goto-char (or (match-end 2) (match-end 1)))
+		  (insert (concat new-box " "))))
+	      ;; 4. Indent item to appropriate column
 	      (unless (= new-ind old-ind)
-		(delete-region (point-at-bol)
-			       (progn
-				 (skip-chars-forward " \t")
-				 (point)))
+		(delete-region (goto-char (point-at-bol))
+			       (progn (skip-chars-forward " \t") (point)))
 		(indent-to new-ind)))))
 	 ;; Remove ancestor if it is left.
 	 (struct-to-apply (if (or (not ancestor) (= 0 ancestor))
@@ -1478,16 +1490,17 @@ Sub-items are not moved.
 
 BOTTOM is position at list ending."
   (save-excursion
-    (let ((beg (point-at-bol))
-          (end (org-end-of-item-or-at-child bottom)))
-      (beginning-of-line (unless (eolp) 0))
-      (while (> (point) beg)
-        (when (looking-at "[ \t]*\\S-")
-          ;; this is not an empty line
-          (let ((i (org-get-indentation)))
-            (when (and (> i 0) (> (+ i delta) 0))
-              (org-indent-line-to (+ i delta)))))
-        (beginning-of-line 0)))))
+    (save-match-data
+      (let ((beg (point-at-bol))
+	    (end (org-end-of-item-or-at-child bottom)))
+	(beginning-of-line (unless (eolp) 0))
+	(while (> (point) beg)
+	  (when (looking-at "[ \t]*\\S-")
+	    ;; this is not an empty line
+	    (let ((i (org-get-indentation)))
+	      (when (and (> i 0) (> (+ i delta) 0))
+		(org-indent-line-to (+ i delta)))))
+	  (beginning-of-line 0))))))
 
 (defun org-outdent-item ()
   "Outdent a local list item, but not its children.
