@@ -301,7 +301,7 @@ part."
     (if unhexify
 	(if (fboundp unhexify)
 	    (mapcar unhexify split-parts)
-	  (mapcar 'org-protocol-unhex-string split-parts))
+	  (mapcar 'org-link-unescape split-parts))
       split-parts)))
 
 (defun org-protocol-flatten-greedy (param-list &optional strip-path replacement)
@@ -476,7 +476,7 @@ The location for a browser's bookmark should look like this:
   ;; As we enter this function for a match on our protocol, the return value
   ;; defaults to nil.
   (let ((result nil)
-        (f (org-protocol-unhex-string fname)))
+        (f (org-link-unescape fname)))
     (catch 'result
       (dolist (prolist org-protocol-project-alist)
         (let* ((base-url (plist-get (cdr prolist) :base-url))
