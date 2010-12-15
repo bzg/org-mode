@@ -1731,25 +1731,27 @@ block but are passed literally to the \"example-block\"."
                       (if evaluate
                           (let ((raw (org-babel-ref-resolve source-name)))
                             (if (stringp raw) raw (format "%S" raw)))
-			(save-restriction
-			  (widen)
-			  (let ((point (org-babel-find-named-block
-					source-name)))
-			    (if point
-				(save-excursion
-				  (goto-char point)
-				  (org-babel-trim
-				   (org-babel-expand-noweb-references
-				    (org-babel-get-src-block-info))))
-			      ;; optionally raise an error if named
-			      ;; source-block doesn't exist
-			      (if (member lang org-babel-noweb-error-langs)
-				  (error "%s"
-					 (concat
-					  "<<" source-name ">> "
-					  "could not be resolved (see "
-					  "`org-babel-noweb-error-langs')"))
-				"")))))
+			(or (nth 2 (assoc (intern source-name)
+					  org-babel-library-of-babel))
+			    (save-restriction
+			      (widen)
+			      (let ((point (org-babel-find-named-block
+					    source-name)))
+				(if point
+				    (save-excursion
+				      (goto-char point)
+				      (org-babel-trim
+				       (org-babel-expand-noweb-references
+					(org-babel-get-src-block-info))))
+				  ;; optionally raise an error if named
+				  ;; source-block doesn't exist
+				  (if (member lang org-babel-noweb-error-langs)
+				      (error "%s"
+					     (concat
+					      "<<" source-name ">> "
+					      "could not be resolved (see "
+					      "`org-babel-noweb-error-langs')"))
+				    ""))))))
 		      "[\n\r]") (concat "\n" prefix)))))
         (nb-add (buffer-substring index (point-max)))))
     new-body))
