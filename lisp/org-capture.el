@@ -776,6 +776,7 @@ already gone.  Any prefix argument will be passed to the refile comand."
 	(or (bolp) (insert "\n")))))
     (org-capture-empty-lines-before)
     (setq beg (point))
+    (org-capture-verify-tree txt)
     (org-paste-subtree level txt 'for-yank)
     (org-capture-empty-lines-after 1)
     (org-capture-position-for-last-stored beg)
@@ -1017,6 +1018,7 @@ Point will remain at the first line after the inserted text."
     (setq beg (point))
     (cond
      ((and (eq type 'entry) (org-mode-p))
+      (org-capture-verify-tree txt)
       (org-paste-subtree nil template t))
      ((and (memq type '(item checkitem))
 	   (org-mode-p)
@@ -1083,6 +1085,11 @@ Use PREFIX as a prefix for the name of the indirect buffer."
         (make-indirect-buffer buffer bname 'clone)
       (error (make-indirect-buffer buffer bname)))))
 
+
+(defun org-capture-verify-tree (tree)
+  "Throw error if TREE is not a valid tree"
+  (unless (org-kill-is-subtree-p tree)
+    (error "Template is not a valid Org entry or tree")))
 
 ;;; The template code
 
