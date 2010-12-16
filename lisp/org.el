@@ -13797,6 +13797,54 @@ formats in the current buffer."
 	  (hide-entry))
       (org-flag-drawer t))))
 
+(defvar org-property-set-functions-alist nil
+  "Property set function alist.
+Each entry should have the following format:
+
+ (PROPERTY . READ-FUNCTION)
+
+The read function will be called with the same argument as
+`org-completing-read.")
+
+(defun org-set-property-function (property)
+  "Get the function that should be used to set PROPERTY.
+This is computed according to `org-property-set-functions-alist'."
+  (or (cdr (assoc property org-property-set-functions-alist))
+      'org-completing-read))
+
+(defun org-read-property-value (property)
+  "Read PROPERTY value from user."
+  (let* ((completion-ignore-case t)
+	 (allowed (org-property-get-allowed-values nil property 'table))
+	 (cur (org-entry-get nil property))
+	 (prompt (concat property " value"
+			 (if (and cur (string-match "\\S-" cur))
+			     (concat " [" cur "]") "") ": "))
+	 (set-function (org-set-property-function property))
+	 (val (if allowed
+		  (funcall set-function prompt allowed nil
+			   (not (get-text-property 0 'org-unrestricted
+						   (caar allowed))))
+		(let (org-completion-use-ido org-completion-use-iswitchb)
+		  (funcall set-function prompt
+			   (mapcar 'list (org-property-values property))
+			   nil nil "" nil cur)))))
+    (if (equal val "")
+	cur
+      val)))
+
+(defun org-read-property-name ()
+  "Read a property name."
+  (let* ((completion-ignore-case t)
+	 (keys (org-buffer-property-keys nil t t))
+	 (property (org-icompleting-read "Property: " (mapcar 'list keys))))
+    (if (member property keys)
+	property
+      (or (cdr (assoc (downcase property)
+		      (mapcar (lambda (x) (cons (downcase x) x))
+			      keys)))
+	  property))))
+
 (defun org-set-property (property value)
   "In the current entry, set PROPERTY to VALUE.
 When called interactively, this will prompt for a property name, offering
@@ -13804,31 +13852,11 @@ completion on existing and default properties.  And then it will prompt
 for a value, offering completion either on allowed values (via an inherited
 xxx_ALL property) or on existing values in other instances of this property
 in the current file."
-  (interactive
-   (let* ((completion-ignore-case t)
-	  (keys (org-buffer-property-keys nil t t))
-	  (prop0 (org-icompleting-read "Property: " (mapcar 'list keys)))
-	  (prop (if (member prop0 keys)
-		    prop0
-		  (or (cdr (assoc (downcase prop0)
-				  (mapcar (lambda (x) (cons (downcase x) x))
-					  keys)))
-		      prop0)))
-	  (cur (org-entry-get nil prop))
-	  (prompt (concat prop " value"
-			  (if (and cur (string-match "\\S-" cur))
-			      (concat " [" cur "]") "") ": "))
-	  (allowed (org-property-get-allowed-values nil prop 'table))
-	  (existing (mapcar 'list (org-property-values prop)))
-	  (val (if allowed
-		   (org-completing-read prompt allowed nil
-		      (not (get-text-property 0 'org-unrestricted
-					      (caar allowed))))
-		 (let (org-completion-use-ido org-completion-use-iswitchb)
-		   (org-completing-read prompt existing nil nil "" nil cur)))))
-     (list prop (if (equal val "") cur val))))
-  (unless (equal (org-entry-get nil property) value)
-    (org-entry-put nil property value)))
+  (interactive (list nil nil))
+  (let* ((property (or property (org-read-property-name)))
+	 (value (or value (org-read-property-value property))))
+    (unless (equal (org-entry-get nil property) value)
+      (org-entry-put nil property value))))
 
 (defun org-delete-property (property)
   "In the current entry, delete PROPERTY."

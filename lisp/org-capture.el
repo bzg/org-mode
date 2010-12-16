@@ -1295,29 +1295,7 @@ The template may still contain \"%?\" for cursor positioning."
 						   '(clipboards . 1)
 						   (car clipboards))))))
 	   ((equal char "p")
-	    (let*
-		((prop (org-substring-no-properties prompt))
-		 (pall (concat prop "_ALL"))
-		 (allowed
-		  (with-current-buffer
-		      (get-buffer (file-name-nondirectory file))
-		    (or (cdr (assoc pall org-file-properties))
-			(cdr (assoc pall org-global-properties))
-			(cdr (assoc pall org-global-properties-fixed)))))
-		 (existing (with-current-buffer
-			       (get-buffer (file-name-nondirectory file))
-			     (mapcar 'list (org-property-values prop))))
-		 (propprompt (concat "Value for " prop ": "))
-		 (val (if allowed
-			  (org-completing-read
-			   propprompt
-			   (mapcar 'list (org-split-string allowed
-							   "[ \t]+"))
-			   nil 'req-match)
-			(org-completing-read-no-i propprompt
-						  existing nil nil
-						  "" nil ""))))
-	      (org-set-property prop val)))
+	    (org-set-property (org-substring-no-properties prompt) nil))
 	   (char
 	    ;; These are the date/time related ones
 	    (setq org-time-was-given (equal (upcase char) char))
