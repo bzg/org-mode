@@ -7887,7 +7887,13 @@ The prefix arg is passed through to the command if possible."
 	     (c1 (if (eq action ?s) 'org-agenda-schedule 'org-agenda-deadline)))
 	(setq cmd `(let* ((bound (fboundp 'read-string))
 			  (old (and bound (symbol-function 'read-string))))
-		     (eval '(,c1 arg nil ,date))))))
+		     (unwind-protect
+			 (progn
+			   (fset 'read-string (lambda (&rest ignore) ,ans))
+			   (eval '(,c1 arg)))
+		       (if bound
+			   (fset 'read-string old)
+			 (fmakunbound 'read-string)))))))
 
      ((eq action '?S)
       (let ((days (read-number
