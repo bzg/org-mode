@@ -234,7 +234,7 @@ handling with appropriate MIME encoding."
          (html (org-mime-apply-html-hook (car html-and-images))))
     ;; dump the exported html into a fresh message buffer
     (reporter-compose-outgoing)
-    (goto-char (point-max))
+    (message-goto-body)
     (prog1 (insert (org-mime-multipart body html)
 		   (mapconcat 'identity html-images "\n"))
       (delete-file temp-body-file))))
