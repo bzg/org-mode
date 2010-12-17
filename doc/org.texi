@@ -804,6 +804,11 @@ version of Org, as well as additional information, frequently asked
 questions (FAQ), links to tutorials, etc@.  This page is located at
 @uref{http://orgmode.org}.
 
+@cindex print edition
+The version 7.3 of this manual is available as a
+@uref{http://www.network-theory.co.uk/org/manual/, paperback book from Network
+Theory Ltd.}
+
 @page
 
 

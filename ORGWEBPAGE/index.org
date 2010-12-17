@@ -109,7 +109,6 @@
      effectively.
 - It's free! :: Org is [[http://en.wikipedia.org/wiki/Open-source_software][open source software]], it is [[http://www.gnu.org/licenses/licenses.html#GPL][free]], like Emacs.
 
-
 If you'd like to know what other people have said about Org-mode, take
 a look at our [[http://orgmode.org/worg/org-quotes.php][collected quotes about Org]].
 
@@ -117,15 +116,17 @@ a look at our [[http://orgmode.org/worg/org-quotes.php][collected quotes about O
 #+ATTR_HTML: style="float:right;"
   [[http://mobileorg.ncogni.to/][http://mobileorg.ncogni.to/images/screenshot-browse.png]]
 
+- <2010-12-17 Fri> The Org manual is now available as [[http://www.network-theory.co.uk/org/manual/][book published
+  by Network Theory Ltd]], at a retail price of $14.95.  For each book
+  sold, $1 is donated to the Org project.
+- <2010-12-10 Fri>: Release 7.04.
+- <2010-12-03 Fri>: MobileOrg for Android supports Voice Capture
 - <2010-11-25 Thu>: Maybe the times where Org mode could change
   hard-core vi users into honorable Emacs users are coming to an end?
   A [[https://github.com/hsitz/VimOrganizer][Vim clone of Org]] mode is be written by Herbert Sitz, and judging
   by the [[http://vimeo.com/17182850][videos]] it looks promising.
 - <2010-06-06 Sun>: iPhone App [[http://mobileorg.ncogni.to/][MobileOrg]] version 1.5 introduces
   encryption.
-- <2010-10-27 Wed>: Release 7.02
-- <2010-09-24 Fri>: FLOSS Weekly [[http://twit.tv/floss136][interview]] with Carsten available
-- <2010-04-06 Tue>: Release 7.01
 
 * Current Version (7.4)
 
@@ -185,6 +186,8 @@ also download a [[http://repo.or.cz/w/org-mode.git/snapshot][tar.gz snapshot]] f
      back and forth between basic and advanced documentation.
    - You can also have the entire manual in a [[file:org.html][single monolithic file]].
    - Download the manual as a 200-page [[file:org.pdf][PDF document]].
+   - Buy a paperback edition of the manual from [[http://www.network-theory.co.uk/org/manual/][Network Theory Ltd.]]
+     One Euro of each book sold is donated to Org mode project.
    - Translations of the manual
      - A [[http://hpcgi1.nifty.com/spen/index.cgi?OrgMode%2fManual][Japanese translation]] of an older version (4.60), by Takeshi
        Okano.
