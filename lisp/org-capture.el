@@ -1206,10 +1206,7 @@ The template may still contain \"%?\" for cursor positioning."
 	  (goto-char (match-beginning 0))
 	  (let ((template-start (point)))
 	    (forward-char 1)
-	    (let ((result
-		   (condition-case error
-		       (eval (read (current-buffer)))
-		     (error (format "%%![Error: %s]" error)))))
+	    (let ((result (org-eval (read (current-buffer)))))
 	      (delete-region template-start (point))
 	      (insert result)))))
 
