@@ -1303,7 +1303,7 @@ When nil, such items are sorted as 0 minutes effort."
     (search . " %i %-12:c"))
   "Format specifications for the prefix of items in the agenda views.
 An alist with four entries, for the different agenda types.  The keys to the
-sublists are `agenda', `timeline', `todo', and `tags'.  The values
+sublists are `agenda', `timeline', `todo', `search' and `tags'.  The values
 are format strings.
 This format works similar to a printf format, with the following meaning:
 
