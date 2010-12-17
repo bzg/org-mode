@@ -2658,7 +2658,7 @@ to the value of `temporary-file-directory'."
 	    (setq org-local-vars (org-get-local-variables)))
 	  (eval ;; convert to fmt -- mimicing `org-run-like-in-org-mode'
 	   (list 'let org-local-vars
-		 (list (intern (concat "org-export-as-" fmt))
+		 (list (intern (format "org-export-as-%s" fmt))
 		       nil nil nil ''string t))))
       (delete-file tmp-file))))
 
