@@ -175,7 +175,7 @@ export that region, otherwise export the entire body."
                        (point-max)))
          (raw-body (buffer-substring html-start html-end))
          (tmp-file (make-temp-name (expand-file-name "mail" temporary-file-directory)))
-         (body (org-export-string raw-body "org" (file-name-directory tmp-file)))
+         (body (org-export-string raw-body 'org (file-name-directory tmp-file)))
          ;; because we probably don't want to skip part of our mail
          (org-export-skip-text-before-1st-heading nil)
          ;; because we probably don't want to export a huge style file
@@ -185,7 +185,7 @@ export that region, otherwise export the entire body."
          ;; to hold attachments for inline html images
          (html-and-images
           (org-mime-replace-images
-           (org-export-string raw-body "html" (file-name-directory tmp-file))
+           (org-export-string raw-body 'html (file-name-directory tmp-file))
            tmp-file))
          (html-images (unless arg (cdr html-and-images)))
          (html (org-mime-apply-html-hook
@@ -222,10 +222,7 @@ handling with appropriate MIME encoding."
                        (point-max)))
 	 (temp-body-file (make-temp-file "org-mime-export"))
 	 (raw-body (buffer-substring html-start html-end))
-         (body (with-temp-buffer
-		 (insert raw-body)
-		 (write-file temp-body-file)
-		 (org-export-as-org nil nil nil 'string t)))
+         (body (org-export-string raw-body 'org))
          (org-link-file-path-type 'absolute)
          ;; because we probably don't want to export a huge style file
          (org-export-htmlize-output-type 'inline-css)
