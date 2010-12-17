@@ -1798,77 +1798,91 @@ If the cursor is in a headline, apply this to all checkbox items
 in the text below the heading, taking as reference the first item
 in subtree, ignoring drawers."
   (interactive "P")
-  ;; Bounds is a list of type (beg end single-p) where single-p is t
-  ;; when `org-toggle-checkbox' is applied to a single item. Only
-  ;; toggles on single items will return errors.
-  (let* ((bounds
-          (cond
-           ((org-region-active-p)
-            (let ((rbeg (region-beginning))
-		  (rend (region-end)))
-	      (save-excursion
-		(goto-char rbeg)
-		(if (org-search-forward-unenclosed org-item-beginning-re rend 'move)
-		    (list (point-at-bol) rend nil)
-		  (error "No item in region")))))
-           ((org-on-heading-p)
-            ;; In this case, reference line is the first item in
-	    ;; subtree outside drawers
-            (let ((pos (point))
-		  (limit (save-excursion (outline-next-heading) (point))))
-              (save-excursion
-		(goto-char limit)
-		(org-search-backward-unenclosed ":END:" pos 'move)
-                (org-search-forward-unenclosed
-		 org-item-beginning-re limit 'move)
-                (list (point) limit nil))))
-           ((org-at-item-p)
-            (list (point-at-bol) (1+ (point-at-eol)) t))
-           (t (error "Not at an item or heading, and no active region"))))
-	 (beg (car bounds))
-	 ;; marker is needed because deleting or inserting checkboxes
-	 ;; will change bottom point
-         (end (copy-marker (nth 1 bounds)))
-         (single-p (nth 2 bounds))
-         (ref-presence (save-excursion
-			 (goto-char beg)
-			 (org-at-item-checkbox-p)))
-         (ref-status (equal (match-string 1) "[X]"))
-         (act-on-item
-          (lambda (ref-pres ref-stat)
-            (if (equal toggle-presence '(4))
-                (cond
-                 ((and ref-pres (org-at-item-checkbox-p))
-                  (replace-match ""))
-                 ((and (not ref-pres)
-                       (not (org-at-item-checkbox-p))
-                       (org-at-item-p))
-                  (goto-char (match-end 0))
-                  ;; Ignore counter, if any
-                  (when (looking-at "\\(?:\\[@\\(?:start:\\)?[0-9]+\\][ \t]*\\)?")
-                    (goto-char (match-end 0)))
-                  (let ((desc-p (and (org-at-item-description-p)
-                                     (cdr (assq 'checkbox org-list-automatic-rules)))))
-                    (cond
-                     ((and single-p desc-p)
-                      (error "Cannot add a checkbox in a description list"))
-                     ((not desc-p) (insert "[ ] "))))))
-              (let ((blocked (org-checkbox-blocked-p)))
-                (cond
-                 ((and blocked single-p)
-                  (error "Checkbox blocked because of unchecked box in line %d" blocked))
-                 (blocked nil)
-                 ((org-at-item-checkbox-p)
-                  (replace-match
-                   (cond ((equal toggle-presence '(16)) "[-]")
-                         (ref-stat "[ ]")
-                         (t "[X]"))
-                   t t nil 1))))))))
-    (save-excursion
-      (goto-char beg)
-      (while (< (point) end)
-        (funcall act-on-item ref-presence ref-status)
-        (org-search-forward-unenclosed org-item-beginning-re end 'move)))
+  (save-excursion
+    (let* (singlep
+	   block-item
+	   lim-up
+	   lim-down
+	   (orderedp (ignore-errors (org-entry-get nil "ORDERED")))
+	   (bounds
+	    ;; In a region, start at first item in region
+	    (cond
+	     ((org-region-active-p)
+	      (let ((limit (region-end)))
+		(goto-char (region-beginning))
+		(if (org-search-forward-unenclosed org-item-beginning-re
+						   limit t)
+		    (setq lim-up (point-at-bol))
+		  (error "No item in region"))
+		(setq lim-down (copy-marker limit))))
+	     ((org-on-heading-p)
+	      ;; On an heading, start at first item after drawers
+	      (let ((limit (save-excursion (outline-next-heading) (point))))
+		(forward-line 1)
+		(when (looking-at org-drawer-regexp)
+		  (re-search-forward "^[ \t]*:END:" limit nil))
+		(if (org-search-forward-unenclosed org-item-beginning-re
+						   limit t)
+		    (setq lim-up (point-at-bol))
+		  (error "No item in subtree"))
+		(setq lim-down (copy-marker limit))))
+	     ;; Just one item: set singlep flag
+	     ((org-at-item-p)
+	      (setq singlep t)
+	      (setq lim-up (point-at-bol)
+		    lim-down (point-at-eol)))
+	     (t (error "Not at an item or heading, and no active region"))))
+	   ;; determine the checkbox going to be applied to all items
+	   ;; within bounds
+	   (ref-checkbox
+	    (progn
+	      (goto-char lim-up)
+	      (let ((cbox (and (org-at-item-checkbox-p) (match-string 1))))
+		(cond
+		 ((equal toggle-presence '(16)) "[-]")
+		 ((equal toggle-presence '(4))
+		  (unless cbox "[ ]"))
+		 ((equal "[ ]" cbox) "[X]")
+		 (t "[ ]"))))))
+      ;; When an item is found within bounds, grab the full list at
+      ;; point structure, then: 1. set checkbox of all its items
+      ;; within bounds to ref-checkbox; 2. fix checkboxes of the whole
+      ;; list; 3. move point after the list.
+      (goto-char lim-up)
+      (while (and (< (point) lim-down)
+		  (org-search-forward-unenclosed
+		   org-item-beginning-re lim-down 'move))
+	(let* ((struct (org-list-struct))
+	       (struct-copy (mapcar (lambda (e) (copy-alist e)) struct))
+	       (parents (org-list-struct-parent-alist struct))
+	       (bottom (copy-marker (org-list-get-bottom-point struct)))
+	       (items-to-toggle (org-remove-if
+				 (lambda (e) (or (< e lim-up) (> e lim-down)))
+				 (mapcar 'car (cdr struct)))))
+	  (mapc (lambda (e) (org-list-set-checkbox
+			e struct
+			;; if there is no box at item, leave as-is
+			;; unless function was called with C-u prefix
+			(let ((cur-box (org-list-get-checkbox e struct)))
+			  (if (or cur-box (equal toggle-presence '(4)))
+			      ref-checkbox
+			    cur-box))))
+		items-to-toggle)
+	  (setq block-item (org-list-struct-fix-box struct parents orderedp))
+	  ;; Report some problems due to ORDERED status of subtree. If
+	  ;; only one box was being checked, throw an error, else,
+	  ;; only signal problems.
+	  (cond
+	   ((and singlep block-item (> lim-up block-item))
+	    (error
+	     "Checkbox blocked because of unchecked box at line %d"
+	     (org-current-line block-item)))
+	   (block-item
+	    (message
+	     "Checkboxes were removed due to unchecked box at line %d"
+	     (org-current-line block-item))))
+	  (goto-char bottom)
+	  (org-list-struct-apply-struct struct struct-copy))))
     (org-update-checkbox-count-maybe)))
 
 (defun org-reset-checkbox-state-subtree ()
@@ -1901,110 +1915,114 @@ information.")
 
 (defun org-update-checkbox-count (&optional all)
   "Update the checkbox statistics in the current section.
-This will find all statistic cookies like [57%] and [6/12] and update them
-with the current numbers.  With optional prefix argument ALL, do this for
-the whole buffer."
+This will find all statistic cookies like [57%] and [6/12] and
+update them with the current numbers.
+
+With optional prefix argument ALL, do this for the whole buffer."
   (interactive "P")
   (save-excursion
-    (let ((cstat 0))
-      (catch 'exit
-	(while t
-	  (let* ((buffer-invisibility-spec (org-inhibit-invisibility)) ; Emacs 21
-		 (beg (condition-case nil
-			  (progn (org-back-to-heading) (point))
-			(error (point-min))))
-		 (end (copy-marker (save-excursion
-				     (outline-next-heading) (point))))
-		 (re-cookie "\\(\\(\\[[0-9]*%\\]\\)\\|\\(\\[[0-9]*/[0-9]*\\]\\)\\)")
-		 (re-box "^[ \t]*\\([-+*]\\|[0-9]+[.)]\\)[ \t]+\\(?:\\[@\\(?:start:\\)?[0-9]+\\][ \t]*\\)?\\(\\[[- X]\\]\\)")
-		 beg-cookie end-cookie is-percent c-on c-off lim new
-		 curr-ind next-ind continue-from startsearch list-beg list-end
-		 (recursive
-		  (or (not org-hierarchical-checkbox-statistics)
-		      (string-match "\\<recursive\\>"
-				    (or (ignore-errors
-					  (org-entry-get nil "COOKIE_DATA"))
-					"")))))
-	    (goto-char end)
-	    ;; find each statistics cookie
-	    (while (and (org-search-backward-unenclosed re-cookie beg 'move)
-			(not (save-match-data
-			       (and (org-on-heading-p)
-				    (string-match "\\<todo\\>"
-						  (downcase
-						   (or (org-entry-get
-							nil "COOKIE_DATA")
-						       "")))))))
-	      (setq beg-cookie (match-beginning 1)
-		    end-cookie (match-end 1)
-		    cstat (+ cstat (if end-cookie 1 0))
-		    startsearch (point-at-eol)
-		    continue-from (match-beginning 0)
-		    is-percent (match-beginning 2)
-		    lim (cond
-			 ((org-on-heading-p) (outline-next-heading) (point))
-			 ;; Ensure many cookies in the same list won't imply
-			 ;; computing list boundaries as many times.
-			 ((org-at-item-p)
-			  (unless (and list-beg (>= (point) list-beg))
-			    (setq list-beg (org-list-top-point)
-				  list-end (copy-marker
-					    (org-list-bottom-point))))
-			  (org-get-end-of-item list-end))
-			 (t nil))
-		    c-on 0
-		    c-off 0)
-	      (when lim
-		;; find first checkbox for this cookie and gather
-		;; statistics from all that are at this indentation level
-		(goto-char startsearch)
-		(if (org-search-forward-unenclosed re-box lim t)
-		    (progn
-		      (beginning-of-line)
-		      (setq curr-ind (org-get-indentation))
-		      (setq next-ind curr-ind)
-		      (while (and (bolp) (org-at-item-p)
-				  (if recursive
-				      (<= curr-ind next-ind)
-				    (= curr-ind next-ind)))
-			(when (org-at-item-checkbox-p)
-			  (if (member (match-string 1) '("[ ]" "[-]"))
-			      (setq c-off (1+ c-off))
-			    (setq c-on (1+ c-on))))
-			(if (not recursive)
-			    ;; org-get-next-item goes through list-enders
-			    ;; with proper limit.
-			    (goto-char (or (org-get-next-item (point) lim) lim))
-			  (end-of-line)
-			  (when (org-search-forward-unenclosed
-				 org-item-beginning-re lim t)
-			    (beginning-of-line)))
-			(setq next-ind (org-get-indentation)))))
-		(goto-char continue-from)
-		;; update cookie
-		(when end-cookie
-		  (setq new (if is-percent
-				(format "[%d%%]" (/ (* 100 c-on)
-						    (max 1 (+ c-on c-off))))
-			      (format "[%d/%d]" c-on (+ c-on c-off))))
-		  (goto-char beg-cookie)
-		  (insert new)
-		  (delete-region (point) (+ (point) (- end-cookie beg-cookie))))
-		;; update items checkbox if it has one
-		(when (and (org-at-item-checkbox-p)
-			   (> (+ c-on c-off) 0))
-		  (setq beg-cookie (match-beginning 1)
-			end-cookie (match-end 1))
-		  (delete-region beg-cookie end-cookie)
-		  (goto-char beg-cookie)
-		  (cond ((= c-off 0) (insert "[X]"))
-			((= c-on 0) (insert "[ ]"))
-			(t (insert "[-]")))))
-	      (goto-char continue-from)))
-	  (unless (and all (outline-next-heading)) (throw 'exit nil))))
-      (when (interactive-p)
-	      (message "Checkbox statistics updated %s (%d places)"
-		       (if all "in entire file" "in current outline entry") cstat)))))
+    (let ((cookie-re "\\(\\(\\[[0-9]*%\\]\\)\\|\\(\\[[0-9]*/[0-9]*\\]\\)\\)")
+	  (box-re "^[ \t]*\\([-+*]\\|[0-9]+[.)]\\)[ \t]+\\(?:\\[@\\(?:start:\\)?[0-9]+\\][ \t]*\\)?\\(\\[[- X]\\]\\)")
+	  (recursivep
+	   (or (not org-hierarchical-checkbox-statistics)
+	       (string-match "\\<recursive\\>"
+			     (or (ignore-errors
+				   (org-entry-get nil "COOKIE_DATA"))
+				 ""))))
+	  (bounds (if all
+		      (cons (point-min) (point-max))
+		    (cons (or (ignore-errors (org-back-to-heading) (point))
+			      (point-min))
+			  (save-excursion (outline-next-heading) (point)))))
+	  (count-boxes
+	   (function
+            ;; add checked boxes and boxes of all types in all
+            ;; structures in STRUCTS to c-on and c-all, respectively.
+            ;; This looks at RECURSIVEP value. If ITEM is nil, count
+            ;; across the whole structure, else count only across
+            ;; subtree whose ancestor is ITEM.
+	    (lambda (item structs)
+	      (mapc
+               (lambda (s)
+                 (let* ((pre (org-list-struct-prev-alist s))
+                        (items
+                         (if recursivep
+                             (or (and item (org-list-get-subtree item s pre))
+                                 (mapcar 'car s))
+                           (or (and item (org-list-get-all-children item s pre))
+                               (org-list-get-all-items
+                                (org-list-get-top-point s) s pre))))
+                        (cookies (delq nil (mapcar
+                                            (lambda (e)
+                                              (org-list-get-checkbox e s))
+                                            items))))
+                   (setq c-all (+ (length cookies) c-all)
+                         c-on (+ (org-count "[X]" cookies) c-on))))
+               structs))))
+	  cookies-list backup-end structs-backup)
+      (goto-char (car bounds))
+      ;; 1. Build an alist for each cookie found within BOUNDS. The
+      ;;    key will be position at beginning of cookie and values
+      ;;    ending position, format of cookie, number of checked boxes
+      ;;    to report, and total number of boxes.
+      (while (re-search-forward cookie-re (cdr bounds) t)
+	(save-excursion
+	  (let ((c-on 0) (c-all 0))
+	    (save-match-data
+              ;; There are two types of cookies: those at headings and those
+              ;; at list items.
+	      (cond
+	       ((and (org-on-heading-p)
+		     (string-match "\\<todo\\>"
+				   (downcase
+				    (or (org-entry-get nil "COOKIE_DATA") "")))))
+               ;; This cookie is at an heading, but specifically for
+               ;; todo, not for checkboxes: skip it.
+	       ((org-on-heading-p)
+		(setq backup-end (save-excursion
+                                   (outline-next-heading) (point)))
+                ;; This cookie is at an heading. Grab structure of
+		;; every list containing a checkbox between point and
+		;; next headline, and save them in STRUCTS-BACKUP
+		(while (org-search-forward-unenclosed box-re backup-end 'move)
+		  (let* ((struct (org-list-struct))
+			 (bottom (org-list-get-bottom-point struct)))
+		    (setq structs-backup (cons struct structs-backup))
+		    (goto-char bottom)))
+		(funcall count-boxes nil structs-backup))
+	       ((org-at-item-p)
+		;; This cookie is at an item. Look in STRUCTS-BACKUP
+                ;; to see if we have the structure of list at point in
+                ;; it. Else compute the structure.
+		(let ((item (point-at-bol)))
+		  (if (and backup-end (< item backup-end))
+		      (funcall count-boxes item structs-backup)
+		    (setq end-entry bottom
+			  structs-backup (list (org-list-struct)))
+		    (funcall count-boxes item structs-backup))))))
+	    ;; Build the cookies list, with appropriate information
+	    (setq cookies-list (cons (list (match-beginning 1) ; cookie start
+					   (match-end 1) ; cookie end
+					   (match-beginning 2) ; percent?
+					   c-on   ; checked boxes
+					   c-all) ; total boxes
+				     cookies-list)))))
+      ;; 2. Apply alist to buffer, in reverse order so positions stay
+      ;;    unchanged after cookie modifications.
+      (mapc (lambda (cookie)
+	      (let* ((beg (car cookie))
+		     (end (nth 1 cookie))
+		     (percentp (nth 2 cookie))
+		     (checked (nth 3 cookie))
+		     (total (nth 4 cookie))
+		     (new (if percentp
+			      (format "[%d%%]" (/ (* 100 checked)
+						  (max 1 total)))
+			    (format "[%d/%d]" checked total))))
+		(goto-char beg)
+		(insert new)
+		(delete-region (point) (+ (point) (- end beg)))))
+	    cookies-list))))
 
 (defun org-get-checkbox-statistics-face ()
   "Select the face for checkbox statistics.
