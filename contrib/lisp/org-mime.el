@@ -215,6 +215,7 @@ handling with appropriate MIME encoding."
   (require 'reporter)
   (let* ((region-p (org-region-active-p))
          (current-file (buffer-file-name (current-buffer)))
+	 (title (org-export-grab-title-from-buffer))
          (html-start (or (and region-p (region-beginning))
                          (save-excursion
                            (goto-char (point-min)))))
@@ -233,7 +234,7 @@ handling with appropriate MIME encoding."
          (html-images (cdr html-and-images))
          (html (org-mime-apply-html-hook (car html-and-images))))
     ;; dump the exported html into a fresh message buffer
-    (reporter-compose-outgoing)
+    (message-mail nil title)
     (message-goto-body)
     (prog1 (insert (org-mime-multipart body html)
 		   (mapconcat 'identity html-images "\n"))
