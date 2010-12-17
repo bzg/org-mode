@@ -1741,7 +1741,8 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
              (org-table-last-column-widths (copy-sequence
                                             org-table-last-column-widths))
              fnum fields line lines olines gr colgropen line-fmt align
-             caption shortn label attr floatp placement longtblp)
+             caption shortn label attr floatp placement
+	     longtblp tblenv tabular-env)
         (if org-export-latex-tables-verbatim
             (let* ((tbl (concat "\\begin{verbatim}\n" raw-table
                                 "\\end{verbatim}\n")))
@@ -1758,6 +1759,17 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
                          'org-label raw-table)
                   longtblp (and attr (stringp attr)
                                 (string-match "\\<longtable\\>" attr))
+		  tblenv (if (and attr (stringp attr)
+				  (string-match (regexp-quote "table*") attr))
+			     "table*" "table")
+		  tabular-env
+		  (if (and attr (stringp attr)
+			   (string-match "\\(tabular.\\)" attr))
+		      (match-string 1 attr)
+		    org-export-latex-tabular-environment)
+		  width (and attr (stringp attr)
+                             (string-match "\\<width=\\([^ \t\n\r]+\\)" attr)
+                             (match-string 1 attr))
                   align (and attr (stringp attr)
                              (string-match "\\<align=\\([^ \t\n\r]+\\)" attr)
                              (match-string 1 attr))
@@ -1821,7 +1833,8 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
                        (concat
                         (if longtblp
                             (concat "\\begin{longtable}{" align "}\n")
-                          (if floatp (format "\\begin{table}%s\n" placement)))
+                          (if floatp
+			      (format "\\begin{%s}%s\n" tblenv placement)))
                         (if floatp
                             (format
                              "\\caption%s{%s} %s"
@@ -1832,8 +1845,10 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
                         (if (and org-export-latex-tables-centered (not longtblp))
                             "\\begin{center}\n")
                         (if (not longtblp)
-			    (format "\\begin{%s}{%s}\n"
-				    org-export-latex-tabular-environment align))
+			    (format "\\begin{%s}%s{%s}\n"
+				    tabular-env
+				    (if width (format "{%s}" width) "")
+				    align))
                         (orgtbl-to-latex
                          lines
                          `(:tstart nil :tend nil
@@ -1845,14 +1860,12 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 \\endfoot
 \\endlastfoot" (length org-table-last-alignment))
                                              nil)))
-                        (if (not longtblp)
-			    (format "\n\\end{%s}"
-				    org-export-latex-tabular-environment))
+                        (if (not longtblp) (format "\n\\end{%s}" tabular-env))
                         (if longtblp "\n" (if org-export-latex-tables-centered
                                               "\n\\end{center}\n" "\n"))
                         (if longtblp
                             "\\end{longtable}"
-                          (if floatp "\\end{table}"))))
+                          (if floatp (format "\\end{%s}" tblenv)))))
                       "\n\n"))))))))
 
 (defun org-export-latex-convert-table.el-table ()
