@@ -7026,12 +7026,10 @@ in the region."
   "Return the level of the current entry, or nil if before the first headline.
 The level is the number of stars at the beginning of the headline."
   (save-excursion
-    (let ((outline-regexp (org-get-limited-outline-regexp)))
-      (condition-case nil
-	  (progn
-	    (org-back-to-heading t)
-	    (funcall outline-level))
-	(error nil)))))
+    (org-with-limited-levels
+     (ignore-errors
+       (org-back-to-heading t)
+       (funcall outline-level)))))
 
 (defun org-get-previous-line-level ()
   "Return the outline depth of the last headline before the current line.
@@ -8283,183 +8281,183 @@ For file links, arg negates `org-context-in-file-links'."
   (interactive "P")
   (org-load-modules-maybe)
   (setq org-store-link-plist nil)  ; reset
-  (let ((outline-regexp (org-get-limited-outline-regexp))
-	link cpltxt desc description search txt custom-id agenda-link)
-    (cond
+  (org-with-limited-levels
+   (let (link cpltxt desc description search txt custom-id agenda-link)
+     (cond
 
-     ((run-hook-with-args-until-success 'org-store-link-functions)
-      (setq link (plist-get org-store-link-plist :link)
-	    desc (or (plist-get org-store-link-plist :description) link)))
+      ((run-hook-with-args-until-success 'org-store-link-functions)
+       (setq link (plist-get org-store-link-plist :link)
+	     desc (or (plist-get org-store-link-plist :description) link)))
 
-     ((equal (buffer-name) "*Org Edit Src Example*")
-      (let (label gc)
-	(while (or (not label)
-		   (save-excursion
-		     (save-restriction
-		       (widen)
-		       (goto-char (point-min))
-		       (re-search-forward
-			(regexp-quote (format org-coderef-label-format label))
-			nil t))))
-	  (when label (message "Label exists already") (sit-for 2))
-	  (setq label (read-string "Code line label: " label)))
-	(end-of-line 1)
-	(setq link (format org-coderef-label-format label))
-	(setq gc (- 79 (length link)))
-	(if (< (current-column) gc) (org-move-to-column gc t) (insert " "))
-	(insert link)
-	(setq link (concat "(" label ")") desc nil)))
+      ((equal (buffer-name) "*Org Edit Src Example*")
+       (let (label gc)
+	 (while (or (not label)
+		    (save-excursion
+		      (save-restriction
+			(widen)
+			(goto-char (point-min))
+			(re-search-forward
+			 (regexp-quote (format org-coderef-label-format label))
+			 nil t))))
+	   (when label (message "Label exists already") (sit-for 2))
+	   (setq label (read-string "Code line label: " label)))
+	 (end-of-line 1)
+	 (setq link (format org-coderef-label-format label))
+	 (setq gc (- 79 (length link)))
+	 (if (< (current-column) gc) (org-move-to-column gc t) (insert " "))
+	 (insert link)
+	 (setq link (concat "(" label ")") desc nil)))
 
-     ((equal (org-bound-and-true-p org-agenda-buffer-name) (buffer-name))
-      ;; We are in the agenda, link to referenced location
-      (let ((m (or (get-text-property (point) 'org-hd-marker)
-		   (get-text-property (point) 'org-marker))))
-	(when m
-	  (org-with-point-at m
-	    (setq agenda-link
-		  (if (interactive-p)
-		      (call-interactively 'org-store-link)
-		    (org-store-link nil)))))))
+      ((equal (org-bound-and-true-p org-agenda-buffer-name) (buffer-name))
+       ;; We are in the agenda, link to referenced location
+       (let ((m (or (get-text-property (point) 'org-hd-marker)
+		    (get-text-property (point) 'org-marker))))
+	 (when m
+	   (org-with-point-at m
+	     (setq agenda-link
+		   (if (interactive-p)
+		       (call-interactively 'org-store-link)
+		     (org-store-link nil)))))))
 
-     ((eq major-mode 'calendar-mode)
-      (let ((cd (calendar-cursor-to-date)))
-	(setq link
-	      (format-time-string
-	       (car org-time-stamp-formats)
-	       (apply 'encode-time
-		      (list 0 0 0 (nth 1 cd) (nth 0 cd) (nth 2 cd)
-			    nil nil nil))))
-	(org-store-link-props :type "calendar" :date cd)))
+      ((eq major-mode 'calendar-mode)
+       (let ((cd (calendar-cursor-to-date)))
+	 (setq link
+	       (format-time-string
+		(car org-time-stamp-formats)
+		(apply 'encode-time
+		       (list 0 0 0 (nth 1 cd) (nth 0 cd) (nth 2 cd)
+			     nil nil nil))))
+	 (org-store-link-props :type "calendar" :date cd)))
 
-     ((eq major-mode 'w3-mode)
-      (setq cpltxt (if (and (buffer-name)
-			    (not (string-match "Untitled" (buffer-name))))
-		       (buffer-name)
-		     (url-view-url t))
-	    link (org-make-link (url-view-url t)))
-      (org-store-link-props :type "w3" :url (url-view-url t)))
+      ((eq major-mode 'w3-mode)
+       (setq cpltxt (if (and (buffer-name)
+			     (not (string-match "Untitled" (buffer-name))))
+			(buffer-name)
+		      (url-view-url t))
+	     link (org-make-link (url-view-url t)))
+       (org-store-link-props :type "w3" :url (url-view-url t)))
 
-     ((eq major-mode 'w3m-mode)
-      (setq cpltxt (or w3m-current-title w3m-current-url)
-	    link (org-make-link w3m-current-url))
-      (org-store-link-props :type "w3m" :url (url-view-url t)))
+      ((eq major-mode 'w3m-mode)
+       (setq cpltxt (or w3m-current-title w3m-current-url)
+	     link (org-make-link w3m-current-url))
+       (org-store-link-props :type "w3m" :url (url-view-url t)))
 
-     ((setq search (run-hook-with-args-until-success
-		    'org-create-file-search-functions))
-      (setq link (concat "file:" (abbreviate-file-name buffer-file-name)
-			 "::" search))
-      (setq cpltxt (or description link)))
+      ((setq search (run-hook-with-args-until-success
+		     'org-create-file-search-functions))
+       (setq link (concat "file:" (abbreviate-file-name buffer-file-name)
+			  "::" search))
+       (setq cpltxt (or description link)))
 
-     ((eq major-mode 'image-mode)
-      (setq cpltxt (concat "file:"
-			   (abbreviate-file-name buffer-file-name))
-	    link (org-make-link cpltxt))
-      (org-store-link-props :type "image" :file buffer-file-name))
+      ((eq major-mode 'image-mode)
+       (setq cpltxt (concat "file:"
+			    (abbreviate-file-name buffer-file-name))
+	     link (org-make-link cpltxt))
+       (org-store-link-props :type "image" :file buffer-file-name))
 
-     ((eq major-mode 'dired-mode)
-      ;; link to the file in the current line
-      (let ((file (dired-get-filename nil t)))
- 	(setq file (if file
- 		       (abbreviate-file-name
- 			(expand-file-name (dired-get-filename nil t)))
- 		     ;; otherwise, no file so use current directory.
- 		     default-directory))
- 	(setq cpltxt (concat "file:" file)
- 	      link (org-make-link cpltxt))))
+      ((eq major-mode 'dired-mode)
+       ;; link to the file in the current line
+       (let ((file (dired-get-filename nil t)))
+	 (setq file (if file
+			(abbreviate-file-name
+			 (expand-file-name (dired-get-filename nil t)))
+		      ;; otherwise, no file so use current directory.
+		      default-directory))
+	 (setq cpltxt (concat "file:" file)
+	       link (org-make-link cpltxt))))
 
-     ((and (buffer-file-name (buffer-base-buffer)) (org-mode-p))
-      (setq custom-id (ignore-errors (org-entry-get nil "CUSTOM_ID")))
-      (cond
-       ((org-in-regexp "<<\\(.*?\\)>>")
-	(setq cpltxt
-	      (concat "file:"
-		      (abbreviate-file-name
-		       (buffer-file-name (buffer-base-buffer)))
-		      "::" (match-string 1))
-	      link (org-make-link cpltxt)))
-       ((and (featurep 'org-id)
-	     (or (eq org-link-to-org-use-id t)
-		 (and (eq org-link-to-org-use-id 'create-if-interactive)
-		      (interactive-p))
-		 (and (eq org-link-to-org-use-id 'create-if-interactive-and-no-custom-id)
-		      (interactive-p)
-		      (not custom-id))
-		 (and org-link-to-org-use-id
-		      (condition-case nil
-			  (org-entry-get nil "ID")
-			(error nil)))))
-	;; We can make a link using the ID.
-	(setq link (condition-case nil
-		       (prog1 (org-id-store-link)
-			 (setq desc (plist-get org-store-link-plist
-					       :description)))
-		     (error
-		      ;; probably before first headline, link to file only
-		      (concat "file:"
+      ((and (buffer-file-name (buffer-base-buffer)) (org-mode-p))
+       (setq custom-id (ignore-errors (org-entry-get nil "CUSTOM_ID")))
+       (cond
+	((org-in-regexp "<<\\(.*?\\)>>")
+	 (setq cpltxt
+	       (concat "file:"
+		       (abbreviate-file-name
+			(buffer-file-name (buffer-base-buffer)))
+		       "::" (match-string 1))
+	       link (org-make-link cpltxt)))
+	((and (featurep 'org-id)
+	      (or (eq org-link-to-org-use-id t)
+		  (and (eq org-link-to-org-use-id 'create-if-interactive)
+		       (interactive-p))
+		  (and (eq org-link-to-org-use-id 'create-if-interactive-and-no-custom-id)
+		       (interactive-p)
+		       (not custom-id))
+		  (and org-link-to-org-use-id
+		       (condition-case nil
+			   (org-entry-get nil "ID")
+			 (error nil)))))
+	 ;; We can make a link using the ID.
+	 (setq link (condition-case nil
+			(prog1 (org-id-store-link)
+			  (setq desc (plist-get org-store-link-plist
+						:description)))
+		      (error
+		       ;; probably before first headline, link to file only
+		       (concat "file:"
+			       (abbreviate-file-name
+				(buffer-file-name (buffer-base-buffer))))))))
+	(t
+	 ;; Just link to current headline
+	 (setq cpltxt (concat "file:"
 			      (abbreviate-file-name
-			       (buffer-file-name (buffer-base-buffer))))))))
-       (t
-	;; Just link to current headline
-	(setq cpltxt (concat "file:"
-			     (abbreviate-file-name
-			      (buffer-file-name (buffer-base-buffer)))))
-	;; Add a context search string
-	(when (org-xor org-context-in-file-links arg)
-	  (setq txt (cond
-		     ((org-on-heading-p) nil)
-		     ((org-region-active-p)
-		      (buffer-substring (region-beginning) (region-end)))
-		     (t nil)))
-	  (when (or (null txt) (string-match "\\S-" txt))
-	    (setq cpltxt
-		  (concat cpltxt "::"
-			  (condition-case nil
-			      (org-make-org-heading-search-string txt)
-			    (error "")))
-		  desc (or (nth 4 (ignore-errors
-				    (org-heading-components))) "NONE"))))
-	(if (string-match "::\\'" cpltxt)
-	    (setq cpltxt (substring cpltxt 0 -2)))
-	(setq link (org-make-link cpltxt)))))
+			       (buffer-file-name (buffer-base-buffer)))))
+	 ;; Add a context search string
+	 (when (org-xor org-context-in-file-links arg)
+	   (setq txt (cond
+		      ((org-on-heading-p) nil)
+		      ((org-region-active-p)
+		       (buffer-substring (region-beginning) (region-end)))
+		      (t nil)))
+	   (when (or (null txt) (string-match "\\S-" txt))
+	     (setq cpltxt
+		   (concat cpltxt "::"
+			   (condition-case nil
+			       (org-make-org-heading-search-string txt)
+			     (error "")))
+		   desc (or (nth 4 (ignore-errors
+				     (org-heading-components))) "NONE"))))
+	 (if (string-match "::\\'" cpltxt)
+	     (setq cpltxt (substring cpltxt 0 -2)))
+	 (setq link (org-make-link cpltxt)))))
 
-     ((buffer-file-name (buffer-base-buffer))
-      ;; Just link to this file here.
-      (setq cpltxt (concat "file:"
-			   (abbreviate-file-name
-			    (buffer-file-name (buffer-base-buffer)))))
-      ;; Add a context string
-      (when (org-xor org-context-in-file-links arg)
-	(setq txt (if (org-region-active-p)
-		      (buffer-substring (region-beginning) (region-end))
-		    (buffer-substring (point-at-bol) (point-at-eol))))
-	;; Only use search option if there is some text.
-	(when (string-match "\\S-" txt)
-	  (setq cpltxt
-		(concat cpltxt "::" (org-make-org-heading-search-string txt))
-		desc "NONE")))
-      (setq link (org-make-link cpltxt)))
+      ((buffer-file-name (buffer-base-buffer))
+       ;; Just link to this file here.
+       (setq cpltxt (concat "file:"
+			    (abbreviate-file-name
+			     (buffer-file-name (buffer-base-buffer)))))
+       ;; Add a context string
+       (when (org-xor org-context-in-file-links arg)
+	 (setq txt (if (org-region-active-p)
+		       (buffer-substring (region-beginning) (region-end))
+		     (buffer-substring (point-at-bol) (point-at-eol))))
+	 ;; Only use search option if there is some text.
+	 (when (string-match "\\S-" txt)
+	   (setq cpltxt
+		 (concat cpltxt "::" (org-make-org-heading-search-string txt))
+		 desc "NONE")))
+       (setq link (org-make-link cpltxt)))
 
-     ((interactive-p)
-      (error "Cannot link to a buffer which is not visiting a file"))
+      ((interactive-p)
+       (error "Cannot link to a buffer which is not visiting a file"))
 
-     (t (setq link nil)))
+      (t (setq link nil)))
 
-    (if (consp link) (setq cpltxt (car link) link (cdr link)))
-    (setq link (or link cpltxt)
-	  desc (or desc cpltxt))
-    (if (equal desc "NONE") (setq desc nil))
+     (if (consp link) (setq cpltxt (car link) link (cdr link)))
+     (setq link (or link cpltxt)
+	   desc (or desc cpltxt))
+     (if (equal desc "NONE") (setq desc nil))
 
-    (if (and (or (interactive-p) executing-kbd-macro) link)
-	(progn
-	  (setq org-stored-links
-		(cons (list link desc) org-stored-links))
-	  (message "Stored: %s" (or desc link))
-	  (when custom-id
-	    (setq link (concat "file:" (abbreviate-file-name (buffer-file-name))
-			       "::#" custom-id))
-	    (setq org-stored-links
-		  (cons (list link desc) org-stored-links))))
-      (or agenda-link (and link (org-make-link-string link desc))))))
+     (if (and (or (interactive-p) executing-kbd-macro) link)
+	 (progn
+	   (setq org-stored-links
+		 (cons (list link desc) org-stored-links))
+	   (message "Stored: %s" (or desc link))
+	   (when custom-id
+	     (setq link (concat "file:" (abbreviate-file-name (buffer-file-name))
+				"::#" custom-id))
+	     (setq org-stored-links
+		   (cons (list link desc) org-stored-links))))
+       (or agenda-link (and link (org-make-link-string link desc)))))))
 
 (defun org-store-link-props (&rest plist)
   "Store link properties, extract names and addresses."
@@ -18658,8 +18656,7 @@ If point is in an inline task, mark that task instead."
     (cond
      (inline-task-p (org-inlinetask-goto-beginning))
      ((org-at-heading-p) (beginning-of-line))
-     (t (let ((outline-regexp (org-get-limited-outline-regexp)))
-	  (outline-previous-visible-heading 1))))
+     (t (org-with-limited-levels (outline-previous-visible-heading 1))))
     (setq beg (point))
     ;; Get end of it
     (if	inline-task-p
