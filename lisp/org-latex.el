@@ -2179,14 +2179,14 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
   (while (re-search-forward "^[ \t]*\\\\begin{\\([a-zA-Z]+\\*?\\)}" nil t)
     (org-if-unprotected
      (let* ((start (progn (beginning-of-line) (point)))
-	   (end (and (re-search-forward
-		      (concat "^[ \t]*\\\\end{"
-			      (regexp-quote (match-string 1))
-			      "}") nil t)
-		     (point-at-eol))))
-      (if end
-	  (add-text-properties start end '(org-protected t))
-	(goto-char (point-at-eol))))))
+	    (end (and (re-search-forward
+		       (concat "^[ \t]*\\\\end{"
+			       (regexp-quote (match-string 1))
+			       "}") nil t)
+		      (point-at-eol))))
+       (if end
+	   (add-text-properties start end '(org-protected t))
+	 (goto-char (point-at-eol))))))
 
   ;; Preserve math snippets
 
@@ -2297,13 +2297,13 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 	  (concat "<<<?" org-export-latex-all-targets-re
 		  ">>>?\\((INVISIBLE)\\)?") nil t)
     (org-if-unprotected-at (+ (match-beginning 0) 2)
-     (replace-match
-      (concat
-       (org-export-latex-protect-string
-	(format "\\label{%s}" (save-match-data (org-solidify-link-text
-						(match-string 1)))))
-       (if (match-string 2) "" (match-string 1)))
-      t t)))
+      (replace-match
+       (concat
+	(org-export-latex-protect-string
+	 (format "\\label{%s}" (save-match-data (org-solidify-link-text
+						 (match-string 1)))))
+	(if (match-string 2) "" (match-string 1)))
+       t t)))
 
   ;; Delete @<...> constructs
   ;; Thanks to Daniel Clemente for this regexp
@@ -2316,7 +2316,8 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
   ;; FIXME: don't protect footnotes from conversion
   (when (plist-get org-export-latex-options-plist :footnotes)
     (goto-char (point-min))
-    (while (re-search-forward "\\[\\([0-9]+\\)\\]" nil t)
+    (while (and (re-search-forward "\\[\\([0-9]+\\)\\]" nil t)
+		(not (equal (char-before (match-beginning 0)) ?\])))
       (org-if-unprotected
        (when (and (save-match-data
 		    (save-excursion (beginning-of-line)
@@ -2347,9 +2348,9 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 				      (length footnote-rpl)
 				      '(org-protected t) footnote-rpl)
 		 (if (org-on-heading-p)
-                     (setq footnote-rpl
-                           (concat (org-export-latex-protect-string "\\protect")
-                                   footnote-rpl)))
+		     (setq footnote-rpl
+			   (concat (org-export-latex-protect-string "\\protect")
+				   footnote-rpl)))
 		 (insert footnote-rpl)))
 	     )))))
 
