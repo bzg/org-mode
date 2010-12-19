@@ -834,28 +834,6 @@ TOP is the position of list's top-item."
   "Is point at a line starting a plain-list item with a checklet?"
   (org-list-at-regexp-after-bullet-p "\\(\\[[- X]\\]\\)[ \t]+"))
 
-(defun org-checkbox-blocked-p ()
-  "Is the current checkbox blocked from for being checked now?
-A checkbox is blocked if all of the following conditions are fulfilled:
-
-1. The checkbox is not checked already.
-2. The current entry has the ORDERED property set.
-3. There is an unchecked checkbox in this entry before the current line."
-  (catch 'exit
-    (save-match-data
-      (save-excursion
-	(unless (org-at-item-checkbox-p) (throw 'exit nil))
-	(when (equal (match-string 1) "[X]")
-	  ;; the box is already checked!
-	  (throw 'exit nil))
-	(let ((end (point-at-bol)))
-	  (condition-case nil (org-back-to-heading t)
-	    (error (throw 'exit nil)))
-	  (unless (org-entry-get nil "ORDERED") (throw 'exit nil))
-	  (when (org-search-forward-unenclosed
-                 "^[ \t]*[-+*0-9.)]+[ \t]+\\(\\[@\\(?:start:\\)?[0-9]+\\][ \t]*\\)?\\[[- ]\\]" end t)
-	    (org-current-line)))))))
-
 ;;; Navigate
 
 ;; Every interactive navigation function is derived from a
@@ -1336,15 +1314,13 @@ This function modifies STRUCT."
 			((string-match "[0-9]+" bullet)
 			 (replace-match "1" nil nil bullet))
 			(t bullet)))))
-	 (set-bul (lambda (item bullet)
-		    (setcdr item (list (nth 1 item) bullet (nth 3 item)))))
 	 (get-bul (lambda (item bullet)
 		    (let* ((counter (nth 3 item)))
 		      (if (and counter (string-match "[0-9]+" bullet))
 			  (replace-match counter nil nil bullet)
 			bullet))))
 	 (fix-bul
-	  (lambda (item) struct
+	  (lambda (item)
 	    (let* ((parent (cdr (assq (car item) origins)))
 		   (orig-ref (assq parent acc)))
 	      (if orig-ref
@@ -1382,11 +1358,70 @@ This function modifies STRUCT."
 		(org-list-set-ind item struct top-ind))))))
     (mapc new-ind (mapcar 'car (cdr struct)))))
 
+(defun org-list-struct-fix-checkboxes (struct origins &optional ordered)
+  "Verify and correct checkboxes for every association in STRUCT.
+ORIGINS is the alist of parents. See `org-list-struct-origins'.
+
+If ORDERED is non-nil, a checkbox can only be checked when every
+checkbox before it is checked too.  If there was an attempt to
+break this rule, the function will return the blocking item.  In
+all others cases, the return value will be `nil'.
+
+To act reliably, this function requires the full structure of the
+list, and not a part of it. It will modify STRUCT."
+  (let ((struct (cdr struct))
+	(set-parent-box
+	 (function
+	  (lambda (item)
+	    (let* ((box-list (mapcar (lambda (child)
+				       (org-list-get-checkbox child struct))
+				     (org-list-get-all-children item origins))))
+	      (org-list-set-checkbox
+	       item struct
+	       (cond
+		((and (member "[ ]" box-list) (member "[X]" box-list)) "[-]")
+		((member "[-]" box-list) "[-]")
+		((member "[X]" box-list) "[X]")
+		((member "[ ]" box-list) "[ ]")
+		;; parent has no boxed child: leave box as-is
+		(t (org-list-get-checkbox item struct))))))))
+	parent-list)
+    ;; Start: get all parents with a checkbox
+    (mapc
+     (lambda (elt)
+       (let* ((parent (cdr elt))
+	      (parent-box-p (org-list-get-checkbox parent struct)))
+	 (when (and parent-box-p (not (memq parent parent-list)))
+	   (setq parent-list (cons parent parent-list)))))
+     origins)
+    ;; sort those parents by decreasing indentation
+    (setq parent-list (sort parent-list
+			    (lambda (e1 e2)
+			      (> (org-list-get-ind e1 struct)
+				 (org-list-get-ind e2 struct)))))
+    ;; for each parent, get all children's checkboxes to determine and
+    ;; set its checkbox accordingly
+    (mapc set-parent-box parent-list)
+    ;; if ORDERED is set, see if we need to uncheck some boxes
+    (when ordered
+      (let* ((all-items (mapcar 'car struct))
+	     (box-list
+	      (mapcar (lambda (e) (org-list-get-checkbox e struct)) all-items))
+	     (after-unchecked (member "[ ]" box-list)))
+	;; there are boxes checked after an unchecked one: fix that
+	(when (member "[X]" after-unchecked)
+	  (let ((index (- (length struct) (length after-unchecked))))
+	    (mapc (lambda (e) (org-list-set-checkbox e struct "[ ]"))
+		  (nthcdr index all-items))
+	    ;; Verify once again the structure, without ORDERED
+	    (org-list-struct-fix-checkboxes struct origins nil)
+	    ;; return blocking item
+	    (nth index all-items)))))))
+
 (defun org-list-struct-fix-struct (struct origins)
   "Return STRUCT with correct bullets and indentation.
 ORIGINS is the alist of parents. See `org-list-struct-origins'.
-
-Only elements of STRUCT that have changed are returned."
+\nOnly elements of STRUCT that have changed are returned."
   (let ((old (copy-alist struct)))
     (org-list-struct-fix-bul struct origins)
     (org-list-struct-fix-ind struct origins)
@@ -1516,6 +1551,10 @@ Initial position is restored after the changes."
 		(replace-match new-bul nil nil nil 1))
 	      ;; 3. Replace checkbox
 	      (cond
+	       ((and new-box
+		     (save-match-data (org-at-item-description-p))
+		     (cdr (assq 'checkbox org-list-automatic-rules)))
+		(message "Cannot add a checkbox to a description list item"))
 	       ((equal (match-string 3) new-box))
 	       ((and (match-string 3) new-box)
 		(replace-match new-box nil nil nil 3))
