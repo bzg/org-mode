@@ -64,6 +64,8 @@
 (declare-function outline-previous-heading "outline" ())
 (declare-function org-icompleting-read "org" (&rest args))
 (declare-function org-time-string-to-seconds "org" (s))
+(declare-function org-sublist "org" (list start end))
+(declare-function org-remove-if-not "org" (predicate seq))
 
 (defgroup org-plain-lists nil
   "Options concerning plain lists in Org-mode."
@@ -738,37 +740,35 @@ Return t if successful."
 	       (end (marker-position org-last-indent-end-marker))
 	       (struct (org-list-struct
 			beg end top (if specialp end bottom) (< arg 0)))
-	       (origins (org-list-struct-origins struct))
-	       (beg-item (assq beg struct)))
+	       (origins (org-list-struct-origins struct)))
 	  (cond
 	   ;; Special case: moving top-item with indent rule
 	   (specialp
 	    (let* ((level-skip (org-level-increment))
 		   (offset (if (< arg 0) (- level-skip) level-skip))
-		   (top-ind (nth 1 beg-item)))
+		   (top-ind (org-list-get-ind beg struct)))
 	      (if (< (+ top-ind offset) 0)
 		  (error "Cannot outdent beyond margin")
 		;; Change bullet if necessary
 		(when (and (= (+ top-ind offset) 0)
-			   (string-match "*" (nth 2 beg-item)))
-		  (setcdr beg-item (list (nth 1 beg-item)
-					 (org-list-bullet-string "-"))))
+			   (string-match "*" (org-list-get-bullet beg struct)))
+		  (org-list-set-bullet beg struct (org-list-bullet-string "-")))
 		;; Shift ancestor
-		(let ((anc (car struct)))
-		  (setcdr anc (list (+ (nth 1 anc) offset) "" nil)))
+		(let ((anc (caar struct)))
+		  (org-list-set-ind anc struct (+ (org-list-get-ind anc struct)
+						  offset)))
 		(org-list-struct-fix-struct struct origins)
 		(org-list-struct-apply-struct struct end))))
 	   ;; Forbidden move
 	   ((and (< arg 0)
 		 (or (and no-subtree
 			  (not regionp)
-			  (org-list-struct-get-child beg-item struct))
+			  (org-list-get-child beg origins))
 		     (let ((last-item (save-excursion
 					(goto-char end)
 					(skip-chars-backward " \r\t\n")
-					(goto-char (org-get-item-beginning))
-					(org-list-struct-assoc-at-point))))
-		       (org-list-struct-get-child last-item struct))))
+					(org-get-item-beginning))))
+		       (org-list-get-child last-item origins))))
 	    (error "Cannot outdent an item without its children"))
 	   ;; Normal shifting
 	   (t
@@ -1244,17 +1244,82 @@ STRUCT is the list's structure looked up."
 	       (t (cons item-pos (cdar acc))))))))
     (cons '(0 . 0) (mapcar get-origins (cdr struct)))))
 
-(defun org-list-struct-get-parent (item struct origins)
-  "Return parent association of ITEM in STRUCT or nil.
+(defun org-list-get-parent (item origins)
+  "Return parent of ITEM or nil.
 ORIGINS is the alist of parents. See `org-list-struct-origins'."
-  (let* ((parent-pos (cdr (assq (car item) origins))))
-    (when (> parent-pos 0) (assq parent-pos struct))))
+  (let* ((parent (cdr (assq item origins))))
+    (and (> parent 0) parent)))
 
-(defun org-list-struct-get-child (item struct)
-  "Return child association of ITEM in STRUCT or nil."
-  (let ((ind (nth 1 item))
-        (next-item (cadr (member item struct))))
-    (when (and next-item (> (nth 1 next-item) ind)) next-item)))
+(defun org-list-get-child (item origins)
+  "Return child of ITEM or nil.
+ORIGINS is the alist of parents. See `org-list-struct-origins'."
+  (car (rassq item origins)))
+
+(defun org-list-get-next-item (item origins)
+  "Return next item at same level of ITEM or nil.
+ORIGINS is the alist of parents. See `org-list-struct-origins'."
+  (unless (zerop item)
+    (let ((parent (cdr (assq item origins))))
+      (car (rassq parent (cdr (member (assq item origins) origins)))))))
+
+(defun org-list-get-subtree (item origins)
+  "Return all items with ITEM as a common ancestor or nil.
+ORIGINS is the alist of parents. See `org-list-struct-origins'."
+  (let ((next (org-list-get-next-item item origins)))
+    (if next
+	(let ((len (length origins))
+	      (orig-car (mapcar 'car origins)))
+	  (cdr (org-sublist orig-car
+			    (- len (1- (length (memq item orig-car))))
+			    (- len (length (memq next orig-car))))))
+      (mapcar 'car (cdr (member (assq item origins) origins))))))
+
+(defun org-list-get-all-items (item origins)
+  "List of items in the same sub-list as ITEM.
+ORIGINS is the alist of parents. See `org-list-struct-origins'."
+  (let ((anc (cdr (assq item origins))))
+    (mapcar 'car (org-remove-if-not (lambda (e) (= (cdr e) anc)) origins))))
+
+(defun org-list-get-all-children (item origins)
+  "List all children of ITEM, or nil.
+ORIGINS is the alist of parents. See `org-list-struct-origins'."
+  (mapcar 'car (org-remove-if-not (lambda (e) (= (cdr e) item)) origins)))
+
+(defun org-list-get-nth (n key struct)
+  "Return the Nth value of KEY in STRUCT."
+  (nth n (assq key struct)))
+
+(defun org-list-set-nth (n key struct new)
+  "Set the Nth value of KEY in STRUCT to NEW.
+\nThis function modifies STRUCT."
+  (setcar (nthcdr n (assq key struct)) new))
+
+(defun org-list-get-ind (item struct)
+  "Return indentation of ITEM in STRUCT."
+  (org-list-get-nth 1 item struct))
+
+(defun org-list-set-ind (item struct ind)
+  "Set indentation of ITEM in STRUCT to IND.
+\nThis function modifies STRUCT."
+  (org-list-set-nth 1 item struct ind))
+
+(defun org-list-get-bullet (item struct)
+  "Return bullet of ITEM in STRUCT."
+  (org-list-get-nth 2 item struct))
+
+(defun org-list-set-bullet (item struct bullet)
+  "Set bullet of ITEM in STRUCT to BULLET.
+\nThis function modifies STRUCT."
+  (org-list-set-nth 2 item struct bullet))
+
+(defun org-list-get-checkbox (item struct)
+  "Return checkbox of ITEM in STRUCT or nil."
+  (org-list-get-nth 4 item struct))
+
+(defun org-list-set-checkbox (item struct checkbox)
+  "Set checkbox of ITEM in STRUCT to CHECKBOX.
+\nThis function modifies STRUCT."
+  (org-list-set-nth 4 item struct checkbox))
 
 (defun org-list-struct-fix-bul (struct origins)
   "Verify and correct bullets for every association in STRUCT.
@@ -1287,10 +1352,10 @@ This function modifies STRUCT."
 		  (let* ((prev-bul (cdr orig-ref))
 			 (new-bul (funcall get-bul item prev-bul)))
 		    (setcdr orig-ref (org-list-inc-bullet-maybe new-bul))
-		    (funcall set-bul item new-bul))
+		    (org-list-set-bullet (car item) struct new-bul))
 		;; A new list is starting
 		(let ((new-bul (funcall init-bul item)))
-		  (funcall set-bul item new-bul)
+		  (org-list-set-bullet (car item) struct new-bul)
 		  (setq acc (cons (cons parent
 					(org-list-inc-bullet-maybe new-bul))
 				  acc))))))))
@@ -1301,19 +1366,21 @@ This function modifies STRUCT."
 ORIGINS is the alist of parents. See `org-list-struct-origins'.
 
 This function modifies STRUCT."
-  (let* ((headless (cdr struct))
-         (ancestor (car struct))
-         (top-ind (+ (nth 1 ancestor) (length (nth 2 ancestor))))
+  (let* ((ancestor (caar struct))
+         (top-ind (+ (org-list-get-ind ancestor struct)
+		     (length (org-list-get-bullet ancestor struct))))
          (new-ind
           (lambda (item)
-            (let* ((parent (org-list-struct-get-parent item headless origins)))
+            (let ((parent (org-list-get-parent item origins)))
               (if parent
                   ;; Indent like parent + length of parent's bullet
-                  (setcdr item (cons (+ (length (nth 2 parent)) (nth 1 parent))
-				     (cddr item)))
+                  (org-list-set-ind item
+				    struct
+				    (+ (length (org-list-get-bullet parent struct))
+				       (org-list-get-ind parent struct)))
                 ;; If no parent, indent like top-point
-                (setcdr item (cons top-ind (cddr item))))))))
-    (mapc new-ind headless)))
+		(org-list-set-ind item struct top-ind))))))
+    (mapc new-ind (mapcar 'car (cdr struct)))))
 
 (defun org-list-struct-fix-struct (struct origins)
   "Return STRUCT with correct bullets and indentation.
@@ -1629,9 +1696,8 @@ Item's body is not indented, only shifted with the bullet."
 	 fixed-struct)
     (if (stringp force-bullet)
 	(let ((begin (nth 1 struct)))
-	  (setcdr begin (list (nth 1 begin)
-			      (org-list-bullet-string force-bullet)
-			      (nth 3 begin)))
+	  (org-list-set-bullet (car begin) struct
+			       (org-list-bullet-string force-bullet))
 	  (setq fixed-struct
 		(cons begin (org-list-struct-fix-struct struct origins))))
       (setq fixed-struct (org-list-struct-fix-struct struct origins)))
