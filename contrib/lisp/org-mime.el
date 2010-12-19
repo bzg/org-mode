@@ -85,6 +85,15 @@
   :group 'org-mime
   :type 'hook)
 
+(mapc (lambda (fmt)
+	(eval `(defcustom
+		 ,(intern (concat "org-mime-pre-" fmt "-hook"))
+		 nil
+		 (concat "Hook to run before " fmt " export.\nFunctions "
+			 "should take no arguments and will be run in a "
+			 "buffer holding\nthe text to be exported."))))
+      '("ascii" "org" "html" "html-ascii"))
+
 ;; example hook, for setting a dark background in <pre style="background-color: #EEE;"> elements
 (defun org-mime-change-element-style (element style)
   "Set new default htlm style for <ELEMENT> elements in exported html."
@@ -245,7 +254,15 @@ export that region, otherwise export the entire body."
   (require 'message)
   (message-mail to subject headers nil)
   (message-goto-body)
-  (let ((fmt (if (symbolp fmt) fmt (intern fmt))))
+  (let* ((fmt (if (symbolp fmt) fmt (intern fmt)))
+	 (hook (intern (concat "org-mime-pre-" (symbol-name fmt) "-hook")))
+	 (body (if (> (eval `(length ,hook)) 0)
+		   (with-temp-buffer
+		     (insert body)
+		     (goto-char (point-min))
+		     (eval `(run-hooks ',hook))
+		     (buffer-string))
+		 body)))
     (cond
      ((eq fmt 'org)
       (insert (org-export-string (org-babel-trim body) 'org)))
