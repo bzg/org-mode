@@ -19195,6 +19195,7 @@ This version does not only check the character property, but also
 (defun org-before-first-heading-p ()
   "Before first heading?"
   (save-excursion
+    (end-of-line)
     (null (re-search-backward "^\\*+ " nil t))))
 
 (defun org-on-heading-p (&optional ignored)
