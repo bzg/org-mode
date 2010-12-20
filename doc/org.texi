@@ -6228,6 +6228,14 @@ extremely useful for deriving tasks from emails, for example.  You fill in
 the task definition, press @code{C-c C-c} and Org returns you to the same
 place where you started the capture process.
 
+To define special keys to capture to a particular template without going
+through the interactive template selection, you can create your key binding
+like this:
+
+@lisp
+(define-key global-map "\C-c c"
+   (lambda () (interactive) (org-capture "t")))
+@end lisp
 
 @menu
 * Template elements::           What is needed for a complete template entry

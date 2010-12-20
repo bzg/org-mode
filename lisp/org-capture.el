@@ -636,7 +636,9 @@ already gone.  Any prefix argument will be passed to the refile comand."
 	(let ((hd (nth 2 target)))
 	  (goto-char (point-min))
 	  (unless (org-mode-p)
-	    (error "Target buffer for file+headline should be in Org mode"))
+	    (error
+	     "Target buffer \"%s\" for file+headline should be in Org mode"
+	     (current-buffer)))
 	  (if (re-search-forward
 	       (format org-complex-heading-regexp-format (regexp-quote hd))
 	       nil t)
@@ -679,7 +681,7 @@ already gone.  Any prefix argument will be passed to the refile comand."
 	    ;; prompt for date
 	    (time-to-days (org-read-date 
 			   nil t nil "Date for tree entry:"
-			   (days-to-time (org-today)))))
+			   (current-time))))
 	   (t
 	    ;; current date, possible corrected for late night workers
 	    (org-today))))))
@@ -1096,19 +1098,18 @@ Use PREFIX as a prefix for the name of the indirect buffer."
 (defun org-capture-select-template (&optional keys)
   "Select a capture template.
 Lisp programs can force the template by setting KEYS to a string."
-  (if org-capture-templates
-      (if keys
-	  (or (assoc keys org-capture-templates)
-	      (error "No capture template referred to by \"%s\" keys" keys))
-	(if (= 1 (length org-capture-templates))
-	    (car org-capture-templates)
-	  (org-mks org-capture-templates
-		   "Select a capture template\n========================="
-		   "Template key: "
-		   '(("C" "Customize org-capture-templates")
-		     ("q" "Abort")))))
-    ;; Use an arbitrary default template
-    '("t" "Task" entry (file+headline "" "Tasks") "* TODO %?\n  %u\n  %a")))
+  (let ((org-capture-templates
+	 (or org-capture-templates
+	     '(("t" "Task" entry (file+headline "" "Tasks")
+		"* TODO %?\n  %u\n  %a")))))
+    (if keys
+	(or (assoc keys org-capture-templates)
+	    (error "No capture template referred to by \"%s\" keys" keys))
+      (org-mks org-capture-templates
+	       "Select a capture template\n========================="
+	       "Template key: "
+	       '(("C" "Customize org-capture-templates")
+		 ("q" "Abort"))))))
 
 (defun org-capture-fill-template (&optional template initial annotation)
   "Fill a template and return the filled template as a string.
