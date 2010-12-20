@@ -65,6 +65,9 @@ When 0, the user is prompted for a value."
 (defvar org-timer-pause-hook nil
   "Hook run before relative timer is paused.")
 
+(defvar org-timer-continue-hook nil
+ "Hook run after relative timer is continued.")
+
 (defvar org-timer-set-hook nil
   "Hook run after countdown timer is set.")
 
@@ -128,6 +131,7 @@ With prefix arg STOP, stop it entirely."
 	       (org-float-time org-timer-start-time))))
 	  org-timer-pause-time nil)
     (org-timer-set-mode-line 'on)
+    (run-hooks 'org-timer-continue-hook)
     (message "Timer continues at %s" (org-timer-value-string)))
    (t
     ;; pause timer
