@@ -407,7 +407,8 @@ block."
 		      ((lambda (result)
 			 (cond
 			  ((member "file" result-params)
-			   (cdr (assoc :file params)))
+			   (or (cdr (assoc :file params))
+			       (if (stringp result) result)))
 			  ((and (eq (cdr (assoc :result-type params)) 'value)
 				(or (member "vector" result-params)
 				    (member "table" result-params))

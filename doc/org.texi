@@ -9978,9 +9978,10 @@ All lines between these markers are exported literally
 For @LaTeX{} export of a table, you can specify a label and a caption
 (@pxref{Images and tables}).  You can also use the @code{ATTR_LaTeX} line to
 request a @code{longtable} environment for the table, so that it may span
-several pages, or provide the @code{multicolumn} keyword that will make the
-table span the page in a multicolumn environment (@code{table*} environment).
-Finally, you can set the alignment string:
+several pages, or to change the default table environment from @code{table}
+to @code{table*} or to change the default inner tabular environment to
+@code{tabularx} or @code{tabulary}.  Finally, you can set the alignment
+string, and (with @code{tabularx} or @code{tabulary}) the width:
 
 @cindex #+CAPTION
 @cindex #+LABEL
@@ -9993,6 +9994,18 @@ Finally, you can set the alignment string:
 | ..... | ..... |
 @end example
 
+or to specify a multicolumn table with @code{tabulary}
+
+@cindex #+CAPTION
+@cindex #+LABEL
+@cindex #+ATTR_LaTeX
+@example
+#+CAPTION: A wide table with tabulary
+#+LABEL: tbl:wide
+#+ATTR_LaTeX: table* tabulary width=\textwidth
+| ..... | ..... |
+| ..... | ..... |
+@end example
 
 @node Images in LaTeX export, Beamer class export, Tables in LaTeX export, LaTeX and PDF export
 @subsection Images in @LaTeX{} export
