@@ -417,12 +417,16 @@ block."
 		  (when (cdr (assoc :file params))
 		    (when result
 		      (with-temp-file (cdr (assoc :file params))
-			(if (stringp result)
-			    (insert result)
-			  (insert (orgtbl-to-generic
-				   result
-				   (list :sep (or (cdr (assoc :sep params)) "\t")
-					 :fmt 'echo-res))))))
+			(insert
+			 (if (listp result)
+			     ;; table result
+			     (orgtbl-to-generic
+			      result
+			      (list
+			       :sep (or (cdr (assoc :sep (nth 2 info))) "\t")
+			       :fmt 'echo-res))
+			   ;; scalar result
+			   (echo-res result)))))
 		    (setq result (cdr (assoc :file params)))))
 		(org-babel-insert-result
 		 result result-params info new-hash indent lang)
