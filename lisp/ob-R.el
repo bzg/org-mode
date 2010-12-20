@@ -51,20 +51,27 @@
 (defvar org-babel-R-command "R --slave --no-save"
   "Name of command to use for executing R code.")
 
-(defun org-babel-expand-body:R (body params)
+(defun org-babel-expand-body:R (body params &optional graphics-file)
   "Expand BODY according to PARAMS, return the expanded body."
-  (let ((out-file (cdr (assoc :file params))))
+  (let ((graphics-file
+	 (or graphics-file (org-babel-R-graphical-output-file params))))
     (mapconcat
      #'identity
      ((lambda (inside)
-	(if out-file
+	(if graphics-file
 	    (append
-	     (list (org-babel-R-construct-graphics-device-call out-file params))
+	     (list (org-babel-R-construct-graphics-device-call
+		    graphics-file params))
 	     inside
 	     (list "dev.off()"))
 	  inside))
       (append (org-babel-variable-assignments:R params)
 	      (list body))) "\n")))
+
+(defun org-babel-R-graphical-output-file (params)
+  "Name of file to which R should send graphical output."
+  (and (member "graphics" (cdr (assq :result-params params)))
+       (cdr (assq :file params))))
 
 (defun org-babel-execute:R (body params)
   "Execute a block of R code.
@@ -75,8 +82,8 @@ This function is called by `org-babel-execute-src-block'."
 		     (cdr (assoc :session params)) params))
 	   (colnames-p (cdr (assoc :colnames params)))
 	   (rownames-p (cdr (assoc :rownames params)))
-	   (out-file (cdr (assoc :file params)))
-	   (full-body (org-babel-expand-body:R body params))
+	   (graphics-file (org-babel-R-graphical-output-file params))
+	   (full-body (org-babel-expand-body:R body params graphics-file))
 	   (result
 	    (org-babel-R-evaluate
 	     session full-body result-type
@@ -87,7 +94,7 @@ This function is called by `org-babel-execute-src-block'."
 		 (org-babel-pick-name
 		  (cdr (assoc :rowname-names params)) rownames-p)))))
       (message "result is %S" result)
-      (or out-file result))))
+      (if graphics-file nil result))))
 
 (defun org-babel-prep-session:R (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."
