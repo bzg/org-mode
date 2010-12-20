@@ -94,6 +94,12 @@
 			 "buffer holding\nthe text to be exported."))))
       '("ascii" "org" "html" "html-ascii"))
 
+(defcustom org-mime-send-subtree-hook nil
+  "Hook to run in the subtree in the Org-mode file before export.")
+
+(defcustom org-mime-send-buffer-hook nil
+  "Hook to run in the Org-mode file before export.")
+
 ;; example hook, for setting a dark background in <pre style="background-color: #EEE;"> elements
 (defun org-mime-change-element-style (element style)
   "Set new default htlm style for <ELEMENT> elements in exported html."
@@ -223,6 +229,7 @@ export that region, otherwise export the entire body."
 (defun org-mime-send-subtree (&optional fmt)
   (save-restriction
     (org-narrow-to-subtree)
+    (run-hooks 'org-mime-send-subtree-hook)
     (let* ((file (buffer-file-name (current-buffer)))
 	   (subject (nth 4 (org-heading-components)))
 	   (to (org-entry-get nil "MAIL_TO"))
@@ -240,6 +247,7 @@ export that region, otherwise export the entire body."
 			`((cc . ,cc) (bcc . ,bcc))))))
 
 (defun org-mime-send-buffer (&optional fmt)
+  (run-hooks 'org-mime-send-buffer-hook)
   (let* ((region-p (org-region-active-p))
 	 (subject (org-export-grab-title-from-buffer))
          (file (buffer-file-name (current-buffer)))
