@@ -679,7 +679,7 @@ already gone.  Any prefix argument will be passed to the refile comand."
 	    ;; prompt for date
 	    (time-to-days (org-read-date 
 			   nil t nil "Date for tree entry:"
-			   (days-to-time (org-today)))))
+			   (current-time))))
 	   (t
 	    ;; current date, possible corrected for late night workers
 	    (org-today))))))
