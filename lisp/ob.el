@@ -405,17 +405,23 @@ block."
 			 (if (nth 4 info) (format " (%s)" (nth 4 info)) ""))
 		(setq result
 		      ((lambda (result)
-			 (cond
-			  ((member "file" result-params)
-			   (or (cdr (assoc :file params))
-			       (if (stringp result) result)))
-			  ((and (eq (cdr (assoc :result-type params)) 'value)
-				(or (member "vector" result-params)
-				    (member "table" result-params))
-				(not (listp result)))
-			   (list (list result)))
-			  (t result)))
+			 (if (and (eq (cdr (assoc :result-type params)) 'value)
+				  (or (member "vector" result-params)
+				      (member "table" result-params))
+				  (not (listp result)))
+			     (list (list result)) result))
 		       (funcall cmd body params)))
+		;; if non-empty result and :file then write to :file
+		(flet ((echo-res (result)
+                         (if (stringp result) result (format "%S" result))))
+		  (when (cdr (assoc :file params))
+		    (when result
+		      (with-temp-file (cdr (assoc :file params))
+			(if (stringp result)
+			    (insert result)
+			  (insert (orgtbl-to-generic
+				   result '(:sep "\t" :fmt echo-res))))))
+		    (setq result (cdr (assoc :file params)))))
 		(org-babel-insert-result
 		 result result-params info new-hash indent lang)
 		(run-hooks 'org-babel-after-execute-hook)
@@ -1538,15 +1544,19 @@ code ---- the results are extracted in the syntax of the source
   "Convert RESULT into an `org-mode' link.
 If the `default-directory' is different from the containing
 file's directory then expand relative links."
-  (format
-   "[[file:%s]]"
-   (if (and default-directory
-            buffer-file-name
-            (not (string= (expand-file-name default-directory)
-                          (expand-file-name
-                           (file-name-directory buffer-file-name)))))
-       (expand-file-name result default-directory)
-     result)))
+  (flet ((cond-exp (file)
+	  (if (and default-directory
+		   buffer-file-name
+		   (not (string= (expand-file-name default-directory)
+				 (expand-file-name
+				  (file-name-directory buffer-file-name)))))
+	      (expand-file-name file default-directory)
+	    file)))
+    (if (stringp result)
+	(format "[[file:%s]]" (cond-exp result))
+      (when (and (listp result) (= 2 (length result))
+		 (stringp (car result)) (stringp (cadr result)))
+	(format "[[file:%s][%s]]" (car result) (cadr result))))))
 
 (defun org-babel-examplize-region (beg end &optional results-switches)
   "Comment out region using the ': ' org example quote."
