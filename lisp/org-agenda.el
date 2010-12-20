@@ -5369,6 +5369,12 @@ The modified list may contain inherited tags, and tags matched by
 	  (append new list)
 	(append list new)))))
 
+(defun org-eval (form)
+  "Eval FORM and return result."
+  (condition-case error
+      (eval form)
+    (error (format "%%![Error: %s]" error))))
+
 (defun org-compile-prefix-format (key)
   "Compile the prefix format into a Lisp form that can be evaluated.
 The resulting form is returned and stored in the variable
