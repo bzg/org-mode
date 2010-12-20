@@ -418,15 +418,8 @@ block."
 		    (when result
 		      (with-temp-file (cdr (assoc :file params))
 			(insert
-			 (if (listp result)
-			     ;; table result
-			     (orgtbl-to-generic
-			      result
-			      (list
-			       :sep (or (cdr (assoc :sep (nth 2 info))) "\t")
-			       :fmt 'echo-res))
-			   ;; scalar result
-			   (echo-res result)))))
+			 (org-babel-format-result
+			  result (cdr (assoc :sep (nth 2 info)))))))
 		    (setq result (cdr (assoc :file params)))))
 		(org-babel-insert-result
 		 result result-params info new-hash indent lang)
@@ -596,20 +589,10 @@ results already exist."
 	(if (looking-at org-bracket-link-regexp)
 	    ;; file results
 	    (org-open-at-point)
-	  (let ((results (org-babel-read-result)))
-	    (flet ((echo-res (result)
-			     (if (stringp result) result (format "%S" result))))
-	      (pop-to-buffer (get-buffer-create "org-babel-results"))
-	      (delete-region (point-min) (point-max))
-	      (if (listp results)
-		  ;; table result
-		  (insert (orgtbl-to-generic
-			   results
-			   (list
-			    :sep (or (cdr (assoc :sep (nth 2 info))) "\t")
-			    :fmt 'echo-res)))
-		;; scalar result
-		(insert (echo-res results))))))
+	  (pop-to-buffer (get-buffer-create "*Org-Babel Results*"))
+	  (delete-region (point-min) (point-max))
+	  (insert (org-babel-format-result (org-babel-read-result)
+					   (cdr (assoc :sep (nth 2 info))))))
 	t))))
 
 ;;;###autoload
@@ -1384,6 +1367,20 @@ If the path of the link is a file path it is expanded using
       (and (string-match "file\\(.*\\):\\(.+\\)" raw)
            (expand-file-name (match-string 2 raw))))
      (t raw))))
+
+(defun org-babel-format-result (result &optional sep)
+  "Format RESULT for writing to file."
+  (flet ((echo-res (result)
+		   (if (stringp result) result (format "%S" result))))
+    (if (listp result)
+	;; table result
+	(orgtbl-to-generic
+	 result
+	 (list
+	  :sep (or sep "\t")
+	  :fmt 'echo-res))
+      ;; scalar result
+      (echo-res result))))
 
 (defun org-babel-insert-result
   (result &optional result-params info hash indent lang)
