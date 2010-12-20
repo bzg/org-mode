@@ -109,36 +109,6 @@ a column, or through the generation of an error.")
      'error-conditions
      '(error column-prop-error org-collector-error))
 
-(defun org-read-prop (prop)
-  "Convert the string property PROP to a number if appropriate.
-If prop looks like a list (meaning it starts with a '(') then
-read it as lisp expression, otherwise return it unmodified as a
-string.
-
-Results of calling:
-\(org-read-prop \"12\") -> 12
-\(org-read-prop \"(1 2 3)\") -> (1 2 3)
-\(org-read-prop \"+0\") -> 0
-\(org-read-prop \"aaa\") -> \"aaa\""
-  (if (and (stringp prop) (not (equal prop "")))
-      (let ((out (string-to-number prop)))
-	(if (equal out 0)
-	    (cond
-	     ((or
-	       (equal "(" (substring prop 0 1))
-	       (equal "'" (substring prop 0 1)))
-
-	      (condition-case nil
-		  (read prop)
-		(error prop)))
-	     ((string-match "^\\(+0\\|-0\\|0\\)$" prop)
-	      0)
-	     (t
-	      (set-text-properties 0 (length prop) nil prop)
-	      prop))
-	  out))
-    prop))
-
 (defun org-dblock-write:propview (params)
   "collect the column specification from the #+cols line
 preceeding the dblock, then update the contents of the dblock."
@@ -195,7 +165,7 @@ variables and values specified in props"
 			     match scope)))
 	 ;; read property values
 	 (header-props (mapcar (lambda (props)
-				 (mapcar (lambda (pair) (cons (car pair) (org-read-prop (cdr pair))))
+				 (mapcar (lambda (pair) (cons (car pair) (org-babel-read (cdr pair))))
 					 props))
 			       header-props))
 	 ;; collect all property names
