@@ -886,26 +886,25 @@ Do not forget to activate Org as described in the following section.
 @cindex global key bindings
 @cindex key bindings, global
 
-Add the following lines to your @file{.emacs} file.  The last three lines
-define @emph{global} keys for the commands @command{org-store-link},
-@command{org-agenda}, and @command{org-iswitchb}---please choose suitable
-keys yourself.
-
+To make sure files with extension @file{.org} use Org mode, add the following
+line to your @file{.emacs} file.
 @lisp
-;; The following lines are always needed.  Choose your own keys.
 (add-to-list 'auto-mode-alist '("\\.org\\'" . org-mode))
+@end lisp
+@noindent Org mode buffers need font-lock to be turned on - this is the
+default in Emacs@footnote{If you don't use font-lock globally, turn it on in
+Org buffer with @code{(add-hook 'org-mode-hook 'turn-on-font-lock)}}.
+
+The four Org commands @command{org-store-link}, @command{org-capture},
+@command{org-agenda}, and @command{org-iswitchb} should be accessible through
+global keys (i.e. anywhere in Emacs, not just in Org buffers).  Here are
+suggested bindings for these keys, please modify the keys to your own
+liking.
+@lisp
 (global-set-key "\C-cl" 'org-store-link)
+(global-set-key "\C-cc" 'org-capture)
 (global-set-key "\C-ca" 'org-agenda)
 (global-set-key "\C-cb" 'org-iswitchb)
-@end lisp
-
-Furthermore, you must activate @code{font-lock-mode} in Org
-buffers, because significant functionality depends on font-locking being
-active.  You can do this with either one of the following two lines
-(XEmacs users must use the second option):
-@lisp
-(global-font-lock-mode 1)                     ; for all buffers
-(add-hook 'org-mode-hook 'turn-on-font-lock)  ; Org buffers only
 @end lisp
 
 @cindex Org-mode, turning on
