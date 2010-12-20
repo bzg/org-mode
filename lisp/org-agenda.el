@@ -1316,6 +1316,8 @@ This format works similar to a printf format, with the following meaning:
   %t   the time-of-day specification if one applies to the entry, in the
        format HH:MM
   %s   Scheduling/Deadline information, a short string
+  %(expression) Eval expression and replaces the control string
+                by the result
 
 All specifiers work basically like the standard `%s' of printf, but may
 contain two additional characters:  A question mark just after the `%' and
@@ -5389,11 +5391,12 @@ The resulting form is returned and stored in the variable
 	    (t "  %-12:c%?-12t% s")))
 	(start 0)
 	varform vars var e c f opt)
-    (while (string-match "%\\(\\?\\)?\\([-+]?[0-9.]*\\)\\([ .;,:!?=|/<>]?\\)\\([ctsei]\\)"
+    (while (string-match "%\\(\\?\\)?\\([-+]?[0-9.]*\\)\\([ .;,:!?=|/<>]?\\)\\([ctsei]\\|(.+)\\)"
 			 s start)
-      (setq var (cdr (assoc (match-string 4 s)
-			    '(("c" . category) ("t" . time) ("s" . extra)
-			      ("i" . category-icon) ("T" . tag) ("e" . effort))))
+      (setq var (or (cdr (assoc (match-string 4 s)
+				'(("c" . category) ("t" . time) ("s" . extra)
+				  ("i" . category-icon) ("T" . tag) ("e" . effort))))
+		    'eval)
 	    c (or (match-string 3 s) "")
 	    opt (match-beginning 1)
 	    start (1+ (match-beginning 0)))
@@ -5409,12 +5412,14 @@ The resulting form is returned and stored in the variable
 		(save-match-data
 		  (if (string-match "\\.[0-9]+" x)
 		      (string-to-number (substring (match-string 0 x) 1)))))))
-      (if opt
-	  (setq varform
-		`(if (equal "" ,var)
-		     ""
-		   (format ,f (if (equal "" ,var) "" (concat ,var ,c)))))
-	(setq varform `(format ,f (if (equal ,var "") "" (concat ,var ,c (get-text-property 0 'extra-space ,var))))))
+      (if (eq var 'eval)
+	  (setq varform `(format ,f (org-eval ,(read (match-string 4 s)))))
+	(if opt
+	    (setq varform
+		  `(if (equal "" ,var)
+		       ""
+		     (format ,f (if (equal "" ,var) "" (concat ,var ,c)))))
+	  (setq varform `(format ,f (if (equal ,var "") "" (concat ,var ,c (get-text-property 0 'extra-space ,var)))))))
       (setq s (replace-match "%s" t nil s))
       (push varform vars))
     (setq vars (nreverse vars))
