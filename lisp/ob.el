@@ -420,7 +420,9 @@ block."
 			(if (stringp result)
 			    (insert result)
 			  (insert (orgtbl-to-generic
-				   result '(:sep "\t" :fmt echo-res))))))
+				   result
+				   (list :sep (or (cdr (assoc :sep params)) "\t")
+					 :fmt 'echo-res))))))
 		    (setq result (cdr (assoc :file params)))))
 		(org-babel-insert-result
 		 result result-params info new-hash indent lang)
@@ -577,29 +579,34 @@ source code block, otherwise return nil.  With optional prefix
 argument RE-RUN the source-code block is evaluated even if
 results already exist."
   (interactive "P")
-  (when (org-babel-get-src-block-info)
-    (save-excursion
-      ;; go to the results, if there aren't any then run the block
-      (goto-char (or (and (not re-run) (org-babel-where-is-src-block-result))
-                     (progn (org-babel-execute-src-block)
-                            (org-babel-where-is-src-block-result))))
-      (end-of-line 1)
-      (while (looking-at "[\n\r\t\f ]") (forward-char 1))
-      ;; open the results
-      (if (looking-at org-bracket-link-regexp)
-          ;; file results
-          (org-open-at-point)
-        (let ((results (org-babel-read-result)))
-          (flet ((echo-res (result)
-                           (if (stringp result) result (format "%S" result))))
-            (pop-to-buffer (get-buffer-create "org-babel-results"))
-            (delete-region (point-min) (point-max))
-            (if (listp results)
-                ;; table result
-                (insert (orgtbl-to-generic results '(:sep "\t" :fmt echo-res)))
-              ;; scalar result
-              (insert (echo-res results))))))
-      t)))
+  (let ((info (org-babel-get-src-block-info)))
+    (when info
+      (save-excursion
+	;; go to the results, if there aren't any then run the block
+	(goto-char (or (and (not re-run) (org-babel-where-is-src-block-result))
+		       (progn (org-babel-execute-src-block)
+			      (org-babel-where-is-src-block-result))))
+	(end-of-line 1)
+	(while (looking-at "[\n\r\t\f ]") (forward-char 1))
+	;; open the results
+	(if (looking-at org-bracket-link-regexp)
+	    ;; file results
+	    (org-open-at-point)
+	  (let ((results (org-babel-read-result)))
+	    (flet ((echo-res (result)
+			     (if (stringp result) result (format "%S" result))))
+	      (pop-to-buffer (get-buffer-create "org-babel-results"))
+	      (delete-region (point-min) (point-max))
+	      (if (listp results)
+		  ;; table result
+		  (insert (orgtbl-to-generic
+			   results
+			   (list
+			    :sep (or (cdr (assoc :sep (nth 2 info))) "\t")
+			    :fmt 'echo-res)))
+		;; scalar result
+		(insert (echo-res results))))))
+	t))))
 
 ;;;###autoload
 (defmacro org-babel-map-src-blocks (file &rest body)
