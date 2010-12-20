@@ -184,6 +184,11 @@ current code buffer."
 	(process-name (get-buffer-process session)))
   (ess-make-buffer-current))
 
+(defun org-babel-R-graphical-output-file (params)
+  "Name of file to which R should send graphical output."
+  (and (member "graphics" (cdr (assq :result-params params)))
+       (cdr (assq :file params))))
+
 (defun org-babel-R-construct-graphics-device-call (out-file params)
   "Construct the call to the graphics device."
   (let ((devices
