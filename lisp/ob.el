@@ -661,6 +661,7 @@ end-body --------- point at the end of the body"
 Call `org-babel-execute-src-block' on every source block in
 the current buffer."
   (interactive "P")
+  (org-babel-eval-wipe-error-buffer)
   (org-save-outline-visibility t
     (org-babel-map-src-blocks nil
       (org-babel-execute-src-block arg))))
