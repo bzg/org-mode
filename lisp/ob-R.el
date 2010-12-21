@@ -68,11 +68,6 @@
       (append (org-babel-variable-assignments:R params)
 	      (list body))) "\n")))
 
-(defun org-babel-R-graphical-output-file (params)
-  "Name of file to which R should send graphical output."
-  (and (member "graphics" (cdr (assq :result-params params)))
-       (cdr (assq :file params))))
-
 (defun org-babel-execute:R (body params)
   "Execute a block of R code.
 This function is called by `org-babel-execute-src-block'."
