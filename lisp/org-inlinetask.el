@@ -52,14 +52,18 @@
 ;; An inline task is identified solely by a minimum outline level, given
 ;; by the variable `org-inlinetask-min-level', default 15.
 ;;
-;; Inline tasks are normally assumed to contain at most a time planning
-;; line (DEADLINE etc) after it, and then any number of drawers, for
-;; example LOGBOOK of PROPERTIES.  No empty lines are allowed.
-;; If you need to have normal text as part of an inline task, you
-;; can do so by adding an "END" headline with the same number of stars,
-;; for example
+;; If you need to have a time planning line (DEADLINE etc), drawers,
+;; for example LOGBOOK of PROPERTIES, or even normal text as part of
+;; the inline task, you must add an "END" headline with the same
+;; number of stars.
 ;;
-;;    **************** TODO some small task
+;; As an example, here are two valid inline tasks:
+;;
+;;    **************** TODO a small task
+;;
+;; and
+;;
+;;    **************** TODO another small task
 ;;                     DEADLINE: <2009-03-30 Mon>
 ;;                     :PROPERTIES:
 ;;                       :SOMETHING: or other
@@ -196,35 +200,40 @@ The number of levels is controlled by `org-inlinetask-min-level'."
 (defun org-inlinetask-in-task-p ()
   "Return true if point is inside an inline task."
   (save-excursion
-    (let* ((stars-re (org-inlinetask-outline-regexp))
+    (beginning-of-line)
+    (let* ((case-fold-search t)
+	   (stars-re (org-inlinetask-outline-regexp))
 	   (task-beg-re (concat stars-re "\\(?:.*\\)"))
-	   (task-end-re (concat stars-re "\\(?:END\\|end\\)[ \t]*$")))
-      (beginning-of-line)
-      (or (looking-at task-beg-re)
+	   (task-end-re (concat stars-re "END[ \t]*$")))
+      (or (org-looking-at-p task-beg-re)
 	  (and (re-search-forward "^\\*+[ \t]+" nil t)
-	       (progn (beginning-of-line) (looking-at task-end-re)))))))
+	       (progn (beginning-of-line) (org-looking-at-p task-end-re)))))))
 
 (defun org-inlinetask-goto-beginning ()
   "Go to the beginning of the inline task at point."
   (end-of-line)
-  (re-search-backward (org-inlinetask-outline-regexp) nil t)
-  (when (org-looking-at-p (concat (org-inlinetask-outline-regexp) "END[ \t]*$"))
-    (re-search-backward (org-inlinetask-outline-regexp) nil t)))
+  (let ((case-fold-search t)
+	(inlinetask-re (org-inlinetask-outline-regexp)))
+    (re-search-backward inlinetask-re nil t)
+    (when (org-looking-at-p (concat inlinetask-re "END[ \t]*$"))
+      (re-search-backward inlinetask-re nil t))))
 
 (defun org-inlinetask-goto-end ()
   "Go to the end of the inline task at point."
   (beginning-of-line)
-  (cond
-   ((org-looking-at-p (concat (org-inlinetask-outline-regexp) "END[ \t]*$"))
-    (forward-line 1))
-   ((org-looking-at-p (org-inlinetask-outline-regexp))
-    (forward-line 1)
-    (when (org-inlinetask-in-task-p)
-      (re-search-forward (org-inlinetask-outline-regexp) nil t)
-      (forward-line 1)))
-   (t
-    (re-search-forward (org-inlinetask-outline-regexp) nil t)
-    (forward-line 1))))
+  (let ((case-fold-search t)
+	(inlinetask-re (org-inlinetask-outline-regexp)))
+    (cond
+     ((org-looking-at-p (concat inlinetask-re "END[ \t]*$"))
+      (forward-line 1))
+     ((org-looking-at-p inlinetask-re)
+      (forward-line 1)
+      (when (org-inlinetask-in-task-p)
+	(re-search-forward inlinetask-re nil t)
+	(forward-line 1)))
+     (t
+      (re-search-forward inlinetask-re nil t)
+      (forward-line 1)))))
 
 (defun org-inlinetask-get-task-level ()
   "Get the level of the inline task around.
