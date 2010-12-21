@@ -1316,7 +1316,7 @@ This format works similar to a printf format, with the following meaning:
   %t   the time-of-day specification if one applies to the entry, in the
        format HH:MM
   %s   Scheduling/Deadline information, a short string
-  %(expression) Eval expression and replaces the control string
+  %(expression) Eval EXPRESSION and replace the control string
                 by the result
 
 All specifiers work basically like the standard `%s' of printf, but may
