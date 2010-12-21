@@ -56,7 +56,9 @@ This function is called by `org-babel-execute-src-block'."
 		      " " (org-babel-process-file-name out-file))))
     (with-temp-file in-file
       (insert (org-babel-expand-body:generic body params))) (shell-command cmd)
-    (or file (with-temp-buffer (insert-file-contents out-file) (buffer-string)))))
+    (if file
+	nil ;; signal that output has already been written to file
+      (with-temp-buffer (insert-file-contents out-file) (buffer-string)))))
 
 (defun org-babel-prep-session:sass (session params)
   "Raise an error because sass does not support sessions."

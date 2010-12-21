@@ -157,7 +157,7 @@ This function is called by `org-babel-execute-src-block'."
           (gnuplot-send-buffer-to-gnuplot)))
       (if (member "output" (split-string result-type))
           output
-        out-file))))
+	nil)))) ;; signal that output has already been written to file
 
 (defun org-babel-prep-session:gnuplot (session params)
   "Prepare SESSION according to the header arguments in PARAMS."

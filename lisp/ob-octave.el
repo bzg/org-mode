@@ -88,13 +88,12 @@ end")
 	   body params (org-babel-variable-assignments:octave params)))
 	 (result (org-babel-octave-evaluate
 		  session full-body result-type matlabp)))
-    (or out-file
-        (org-babel-reassemble-table
-         result
-         (org-babel-pick-name
-	  (cdr (assoc :colname-names params)) (cdr (assoc :colnames params)))
-         (org-babel-pick-name
-	  (cdr (assoc :rowname-names params)) (cdr (assoc :rownames params)))))))
+    (org-babel-reassemble-table
+     result
+     (org-babel-pick-name
+      (cdr (assoc :colname-names params)) (cdr (assoc :colnames params)))
+     (org-babel-pick-name
+      (cdr (assoc :rowname-names params)) (cdr (assoc :rownames params))))))
 
 (defun org-babel-prep-session:matlab (session params)
   "Prepare SESSION according to PARAMS."

@@ -80,7 +80,7 @@ This function is called by `org-babel-execute-src-block'."
 	       body params
 	       (org-babel-variable-assignments:asymptote params))))
     (message cmd) (shell-command cmd)
-    out-file))
+    nil)) ;; signal that output has already been written to file
 
 (defun org-babel-prep-session:asymptote (session params)
   "Return an error if the :session header argument is set.

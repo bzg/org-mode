@@ -73,7 +73,7 @@ mscgen supported formats."
       (error "
 ERROR: no output file specified. Add \":file name.png\" to the src header"))
     (org-babel-eval (concat "mscgen -T " filetype " -o " out-file) body)
-    out-file))
+    nil)) ;; signal that output has already been written to file
 
 (defun org-babel-prep-session:mscgen (session params)
   "Raise an error because Mscgen doesn't support sessions."

@@ -70,7 +70,7 @@ This function is called by `org-babel-execute-src-block'."
       (error "Could not find plantuml.jar at %s" org-plantuml-jar-path))
     (with-temp-file in-file (insert (concat "@startuml\n" body "\n@enduml")))
     (message "%s" cmd) (org-babel-eval cmd "")
-    out-file))
+    nil)) ;; signal that output has already been written to file
 
 (defun org-babel-prep-session:plantuml (session params)
   "Return an error because plantuml does not support sessions."

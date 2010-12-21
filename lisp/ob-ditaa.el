@@ -61,7 +61,7 @@ This function is called by `org-babel-execute-src-block'."
       (error "Could not find ditaa.jar at %s" org-ditaa-jar-path))
     (with-temp-file in-file (insert body))
     (message cmd) (shell-command cmd)
-    out-file))
+    nil)) ;; signal that output has already been written to file
 
 (defun org-babel-prep-session:ditaa (session params)
   "Return an error because ditaa does not support sessions."

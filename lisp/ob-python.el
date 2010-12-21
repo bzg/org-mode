@@ -66,13 +66,12 @@ This function is called by `org-babel-execute-src-block'."
 	   params (org-babel-variable-assignments:python params)))
          (result (org-babel-python-evaluate
 		  session full-body result-type result-params preamble)))
-    (or (cdr (assoc :file params))
-        (org-babel-reassemble-table
-         result
-         (org-babel-pick-name (cdr (assoc :colname-names params))
-			      (cdr (assoc :colnames params)))
-         (org-babel-pick-name (cdr (assoc :rowname-names params))
-			      (cdr (assoc :rownames params)))))))
+    (org-babel-reassemble-table
+     result
+     (org-babel-pick-name (cdr (assoc :colname-names params))
+			  (cdr (assoc :colnames params)))
+     (org-babel-pick-name (cdr (assoc :rowname-names params))
+			  (cdr (assoc :rownames params))))))
 
 (defun org-babel-prep-session:python (session params)
   "Prepare SESSION according to the header arguments in PARAMS.

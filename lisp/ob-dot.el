@@ -77,7 +77,7 @@ This function is called by `org-babel-execute-src-block'."
 	     " " (org-babel-process-file-name in-file)
 	     " " cmdline
 	     " -o " (org-babel-process-file-name out-file)) "")
-    out-file))
+    nil)) ;; signal that output has already been written to file
 
 (defun org-babel-prep-session:dot (session params)
   "Return an error because Dot does not support sessions."
