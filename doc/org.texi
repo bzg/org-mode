@@ -11912,18 +11912,18 @@ inserted as with @code{replace}.
 @node file, dir, results, Specific header arguments
 @subsubsection @code{:file}
 
-The header argument @code{:file} is used to specify a path for file output.
-An Org-mode style @code{file:} link is inserted into the buffer as the result
-(see @ref{Link format}). Common examples are graphical output from R,
-gnuplot, ditaa and LaTeX code blocks.
+The header argument @code{:file} is used to specify an external file in which
+to save code block results.  After code block evaluation an Org-mode style
+@code{[[file:]]} link (see @ref{Link format}) to the file will be inserted
+into the Org-mode buffer.  Some languages including R, gnuplot, dot, and
+ditaa provide special handling of the @code{:file} header argument
+automatically wrapping the code block body in the boilerplate code required
+to save output to the specified file.  This is often useful for saving
+graphical output of a code block to the specified file.
 
-Note that for some languages, including R, gnuplot, LaTeX and ditaa,
-graphical output is sent to the specified file without the file being
-referenced explicitly in the code block. See the documentation for the
-individual languages for details. In contrast, general purpose languages such
-as Python and Ruby require that the code explicitly create output
-corresponding to the path indicated by @code{:file}.
-
+The argument to @code{:file} should be either a string specifying the path to
+a file, or a list of two strings in which case the first element of the list
+should be the path to a file and the second a description for the link.
 
 @node dir, exports, file, Specific header arguments
 @subsubsection @code{:dir} and remote execution
