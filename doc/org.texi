@@ -12684,8 +12684,19 @@ Make sure you know what you are doing before customizing the variables
 which take off the default security brakes.
 
 @defopt org-confirm-babel-evaluate
-When set to t user is queried before code block evaluation
+When t (the default), the user is asked before every code block evaluation.
+When nil, the user is not asked.  When set to a function, it is called with
+two arguments (language and body of the code block) and should return t to
+ask and nil not to ask.
 @end defopt
+
+For example, here is how to execute "ditaa" code (which is considered safe)
+without asking:
+@example
+(defun my-org-confirm-babel-evaluate (lang body)
+  (not (string= lang "ditaa")))  ; don't ask for ditaa
+(setq org-confirm-babel-evaluate 'my-org-confirm-babel-evaluate)
+@end example
 
 @item Following @code{shell} and @code{elisp} links
 Org has two link types that can directly evaluate code (@pxref{External

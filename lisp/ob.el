@@ -209,11 +209,11 @@ Note disabling confirmation may result in accidental evaluation
 of potentially harmful code."
   (let* ((eval (or (cdr (assoc :eval (nth 2 info)))
 		   (when (assoc :noeval (nth 2 info)) "no")))
-	 (query (or (equal eval "query")
-		    (if (functionp org-confirm-babel-evaluate)
-			(funcall org-confirm-babel-evaluate
-				 (nth 0 info) (nth 1 info))
-		      org-confirm-babel-evaluate))))
+         (query (cond ((equal eval "query") t)
+                      ((functionp org-confirm-babel-evaluate)
+                       (funcall org-confirm-babel-evaluate
+                                (nth 0 info) (nth 1 info)))
+                      (t org-confirm-babel-evaluate))))
     (if (or (equal eval "never") (equal eval "no")
 	    (and query
 		 (not (yes-or-no-p
