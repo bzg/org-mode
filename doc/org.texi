@@ -677,6 +677,7 @@ Specific header arguments
 * session::                     Preserve the state of code evaluation
 * noweb::                       Toggle expansion of noweb references
 * cache::                       Avoid re-evaluating unchanged code blocks
+* sep::                         Specify delimiter for writing external tables
 * hlines::                      Handle horizontal lines in tables
 * colnames::                    Handle column names in tables
 * rownames::                    Handle row names in tables
@@ -11627,6 +11628,7 @@ The following header arguments are defined:
 * session::                     Preserve the state of code evaluation
 * noweb::                       Toggle expansion of noweb references
 * cache::                       Avoid re-evaluating unchanged code blocks
+* sep::                         Delimiter for writing tabular results outside Org
 * hlines::                      Handle horizontal lines in tables
 * colnames::                    Handle column names in tables
 * rownames::                    Handle row names in tables
@@ -12124,7 +12126,7 @@ Note that noweb replacement text that does not contain any newlines will not
 be affected by this change, so it is still possible to use inline noweb
 references.
 
-@node cache, hlines, noweb, Specific header arguments
+@node cache, sep, noweb, Specific header arguments
 @subsubsection @code{:cache}
 
 The @code{:cache} header argument controls the use of in-buffer caching of
@@ -12144,7 +12146,20 @@ executions of the code block.  If the code block has not
 changed since the last time it was evaluated, it will not be re-evaluated.
 @end itemize
 
-@node hlines, colnames, cache, Specific header arguments
+@node sep, hlines, cache, Specific header arguments
+@subsubsection @code{:sep}
+
+The @code{:sep} header argument can be used to control the delimiter used
+when writing tabular results out to files external to Org-mode.  This is used
+either when opening tabular results of a code block by calling the
+@code{org-open-at-point} function bound to @kbd{C-c C-o} on the code block,
+or when writing code block results to an external file (see @ref{file})
+header argument.
+
+By default, when @code{:sep} is not specified output tables are tab
+delimited.
+
+@node hlines, colnames, sep, Specific header arguments
 @subsubsection @code{:hlines}
 
 Tables are frequently represented with one or more horizontal lines, or
