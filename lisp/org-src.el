@@ -759,29 +759,29 @@ This function is called by emacs automatic fontification, as long
 as `org-src-fontify-natively' is non-nil. For manual
 fontification of code blocks see `org-src-fontify-block' and
 `org-src-fontify-buffer'"
-  (let* ((lang-mode (org-src-get-lang-mode lang))
-	 (string (buffer-substring-no-properties start end))
-	 (modified (buffer-modified-p))
-	 (org-buffer (current-buffer)) pos next)
-    (remove-text-properties start end '(face nil))
-    (with-current-buffer
-	(get-buffer-create
-	 (concat " org-src-fontification:" (symbol-name lang-mode)))
-      (delete-region (point-min) (point-max))
-      (insert string)
-      (unless (eq major-mode lang-mode) (funcall lang-mode))
-      (font-lock-fontify-buffer)
-      (setq pos (point-min))
-      (while (setq next (next-single-property-change pos 'face))
-	(put-text-property
-	 (+ start (1- pos)) (+ start next) 'face
-	 (get-text-property pos 'face) org-buffer)
-	(setq pos next)))
-    (add-text-properties
-     start end
-     '(font-lock-fontified t fontified t font-lock-multiline t))
-    (set-buffer-modified-p modified))
-  t) ;; Tell `org-fontify-meta-lines-and-blocks' that we fontified
+  (let ((lang-mode (org-src-get-lang-mode lang)))
+    (if (fboundp lang-mode)
+	(let ((string (buffer-substring-no-properties start end))
+	      (modified (buffer-modified-p))
+	      (org-buffer (current-buffer)) pos next)
+	  (remove-text-properties start end '(face nil))
+	  (with-current-buffer
+	      (get-buffer-create
+	       (concat " org-src-fontification:" (symbol-name lang-mode)))
+	    (delete-region (point-min) (point-max))
+	    (insert string)
+	    (unless (eq major-mode lang-mode) (funcall lang-mode))
+	    (font-lock-fontify-buffer)
+	    (setq pos (point-min))
+	    (while (setq next (next-single-property-change pos 'face))
+	      (put-text-property
+	       (+ start (1- pos)) (+ start next) 'face
+	       (get-text-property pos 'face) org-buffer)
+	      (setq pos next)))
+	  (add-text-properties
+	   start end
+	   '(font-lock-fontified t fontified t font-lock-multiline t))
+	  (set-buffer-modified-p modified)))))
 
 (defun org-src-fontify-block ()
   "Fontify code block at point."
