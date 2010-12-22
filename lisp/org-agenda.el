@@ -5236,7 +5236,7 @@ Any match of REMOVE-RE will be removed from TXT."
 			   (if (stringp dotime) dotime "")
 			   (and org-agenda-search-headline-for-time txt))))
 	   (time-of-day (and dotime (org-get-time-of-day ts)))
-	   stamp plain s0 s1 s2 t1 t2 rtn srp l
+	   stamp plain s0 s1 s2 rtn srp l
 	   duration thecategory)
       (and (org-mode-p) buffer-file-name
 	   (add-to-list 'org-agenda-contributing-files buffer-file-name))
@@ -5263,26 +5263,17 @@ Any match of REMOVE-RE will be removed from TXT."
 	;; Normalize the time(s) to 24 hour
 	(if s1 (setq s1 (org-get-time-of-day s1 'string t)))
 	(if s2 (setq s2 (org-get-time-of-day s2 'string t)))
-	;; Compute the duration
-	(when s1
-	  (setq t1 (+ (* 60 (string-to-number (substring s1 0 2)))
-		      (string-to-number (substring s1 3)))
-		t2 (cond
-		    (s2 (+ (* 60 (string-to-number (substring s2 0 2)))
-			   (string-to-number (substring s2 3))))
-		    (org-agenda-default-appointment-duration
-		     (+ t1 org-agenda-default-appointment-duration))
-		    (t nil)))
-	  (setq duration (if t2 (- t2 t1)))))
 
-      (when (and s1 (not s2) org-agenda-default-appointment-duration
-		 (string-match "\\([0-9]+\\):\\([0-9]+\\)" s1))
-	(let ((m (+ (string-to-number (match-string 2 s1))
-		    (* 60 (string-to-number (match-string 1 s1)))
-		    org-agenda-default-appointment-duration))
-	      h)
-	  (setq h (/ m 60) m (- m (* h 60)))
-	  (setq s2 (format "%02d:%02d" h m))))
+	;; Try to set s2 if s1 and `org-agenda-default-appointment-duration' are set
+	(when (and s1 (not s2) org-agenda-default-appointment-duration)
+	  (setq s2
+		(org-minutes-to-hh:mm-string
+		 (+ (org-hh:mm-string-to-minutes s1) org-agenda-default-appointment-duration))))
+
+	;; Compute the duration
+	(when s2
+	  (setq duration (- (org-hh:mm-string-to-minutes s2)
+			    (org-hh:mm-string-to-minutes s1)))))
 
       (when (string-match (org-re "\\([ \t]+\\)\\(:[[:alnum:]_@#%:]+:\\)[ \t]*$")
 			  txt)
