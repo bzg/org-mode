@@ -1482,6 +1482,7 @@ this link in another window or frame.  This variable can be used to
 set this up for the different types of links.
 For VM, use any of
     `vm-visit-folder'
+    `vm-visit-folder-other-window'
     `vm-visit-folder-other-frame'
 For Gnus, use any of
     `gnus'
