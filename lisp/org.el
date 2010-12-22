@@ -16198,7 +16198,7 @@ BEG and END default to the buffer boundaries."
   (interactive "P")
   (unless refresh
     (org-remove-inline-images)
-    (clear-image-cache))
+    (if (fboundp 'clear-image-cache) (clear-image-cache)))
   (save-excursion
     (save-restriction
       (widen)
