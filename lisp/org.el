@@ -8142,7 +8142,11 @@ call CMD."
 
 (defun org-get-category (&optional pos)
   "Get the category applying to position POS."
-  (get-text-property (or pos (point)) 'org-category))
+  (let ((pos (or pos (point))))
+    (or (get-text-property pos 'org-category)
+	(progn
+	  (org-refresh-category-properties)
+	  (get-text-property pos 'org-category)))))
 
 (defun org-refresh-category-properties ()
   "Refresh category text properties in the buffer."
@@ -13482,10 +13486,7 @@ things up because then unnecessary parsing is avoided."
 						       'add_times))
 		    props))
 	  (unless (assoc "CATEGORY" props)
-	    (setq value (or (org-get-category)
-			    (progn (org-refresh-category-properties)
-				   (org-get-category))))
-	    (push (cons "CATEGORY" value) props))
+	    (push (cons "CATEGORY" (org-get-category)) props))
 	  (append sum-props (nreverse props)))))))
 
 (defun org-entry-get (pom property &optional inherit literal-nil)
@@ -15702,7 +15703,6 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
 	      (set-buffer (org-get-agenda-file-buffer file)))
 	    (widen)
 	    (setq bmp (buffer-modified-p))
-	    (org-refresh-category-properties)
 	    (setq org-todo-keywords-for-agenda
 		  (append org-todo-keywords-for-agenda org-todo-keywords-1))
 	    (setq org-done-keywords-for-agenda
