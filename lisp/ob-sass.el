@@ -40,6 +40,7 @@
 
 ;;; Code:
 (require 'ob)
+(require 'ob-eval)
 
 (defvar org-babel-default-header-args:sass '())
 
@@ -55,7 +56,8 @@ This function is called by `org-babel-execute-src-block'."
 		      " " (org-babel-process-file-name in-file)
 		      " " (org-babel-process-file-name out-file))))
     (with-temp-file in-file
-      (insert (org-babel-expand-body:generic body params))) (shell-command cmd)
+      (insert (org-babel-expand-body:generic body params)))
+    (org-babel-eval cmd "")
     (if file
 	nil ;; signal that output has already been written to file
       (with-temp-buffer (insert-file-contents out-file) (buffer-string)))))
