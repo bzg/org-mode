@@ -1803,7 +1803,8 @@ block but are passed literally to the \"example-block\"."
 		   (93 (if (or in-double in-single) ; ]
 			   (cons 93 out)
 			 (cons 41 out)))
-		   (44 (if (or in-double in-single) (cons 44 out) out)) ; ,
+		   (44 (if (or in-double in-single) ; ,
+			   (cons 44 out) (cons 32 out)))
 		   (39 (if in-double	; '
 			   (cons 39 out)
 			 (setq in-single (not in-single)) (cons 34 out)))
