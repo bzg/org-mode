@@ -199,12 +199,25 @@ When nil of the empty string, use the abbreviation retrieved from Emacs."
 	  (const :tag "Unspecified" nil)
 	  (string :tag "Time zone")))
 
-(defcustom org-icalendar-use-UTC-date-time ()
-  "Non-nil force the use of the universal time for iCalendar DATE-TIME.
-The iCalendar DATE-TIME can be expressed with local time or universal Time,
-universal time could be more compatible with some external tools."
+(defcustom org-icalendar-date-time-format ":%Y%m%dT%H%M%S"
+  "format-string for exporting icalendar DATE-TIME.
+See `format-time-string' for a full documentation. The only
+difference is that `org-icalendar-timezone' is used for %Z
+
+Interesting value are:
+ - \":%Y%m%dT%H%M%S\" for local time
+ - \";TZID=%Z:%Y%m%dT%H%M%S\" for local time with explicit timezone
+ - \":%Y%m%dT%H%M%SZ\" for time expressed in Universal Time"
+
   :group 'org-export-icalendar
-  :type 'boolean)
+  :type '(choice
+	  (const :tag "Local time" ":%Y%m%dT%H%M%S")
+	  (const :tag "Explicit local time" ";TZID=%Z:%Y%m%dT%H%M%S")
+	  (const :tag "Universal time" ":%Y%m%dT%H%M%SZ")
+	  (string :tag "Explicit format")))
+
+(defun org-icalendar-use-UTC-date-timep () 
+  (char-equal (elt org-icalendar-date-time-format (1- (length org-icalendar-date-time-format))) ?Z))
 
 ;;; iCalendar export
 
@@ -652,12 +665,11 @@ a time), or the day by one (if it does not contain a time)."
 		(setq h (+ 2 h)))
 	    (setq d (1+ d))))
 	(setq time (encode-time s mi h d m y)))
-      (setq fmt (if have-time (if org-icalendar-use-UTC-date-time 
-				  ":%Y%m%dT%H%M%SZ"
-				  ":%Y%m%dT%H%M%S")
+      (setq fmt (if have-time 
+		    (replace-regexp-in-string "%Z" org-icalendar-timezone org-icalendar-date-time-format)
 		    ";VALUE=DATE:%Y%m%d"))
       (concat keyword (format-time-string fmt time 
-					  (and org-icalendar-use-UTC-date-time 
+					  (and (org-icalendar-use-UTC-date-timep)
 					       have-time))))))
 
 (provide 'org-icalendar)
