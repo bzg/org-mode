@@ -1669,7 +1669,10 @@ These special cookies will later be interpreted by the backend.
 	     (when (and (not (eq org-list-ending-method 'indent))
 			(looking-at (org-list-end-re)))
 	       (replace-match "\n"))
-	     (insert end-list-marker)))))
+	     (unless (bolp) (insert "\n"))
+	     (unless (looking-at end-list-marker)
+	       (insert end-list-marker))
+	     (unless (eolp) (insert "\n"))))))
   ;; We need to divide backends into 3 categories.
   (cond
    ;; 1. Backends using `org-list-parse-list' do not need markers.
