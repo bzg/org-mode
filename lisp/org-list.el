@@ -419,40 +419,6 @@ Symbols `block' and `invalid' refer to `org-list-blocks'."
 	    ;; Return the closest context around
 	    (assq (apply 'max (mapcar 'car context-list)) context-list)))))))
 
-(defun org-list-ending-between (min max &optional firstp)
-  "Find the position of a list ending between MIN and MAX, or nil.
-This function looks for `org-list-end-re' outside a block.
-
-If FIRSTP in non-nil, return the point at the beginning of the
-nearest valid terminator from MIN. Otherwise, return the point at
-the end of the nearest terminator from MAX."
-  (save-excursion
-    (let* ((start (if firstp min max))
-	   (end   (if firstp max min))
-	   (search-fun (if firstp
-			   #'org-search-forward-unenclosed
-			 #'org-search-backward-unenclosed))
-	   (list-end-p (progn
-			 (goto-char start)
-			 (funcall search-fun (org-list-end-re) end t))))
-      ;; Is there a valid list ending somewhere ?
-      (and list-end-p
-	   ;; we want to be on the first line of the list ender
-	   (match-beginning 0)))))
-
-(defun org-list-maybe-skip-block (search limit)
-  "Return non-nil value if point is in a block, skipping it on the way.
-It looks for the boundary of the block in SEARCH direction,
-stopping at LIMIT."
-  (save-match-data
-    (let ((case-fold-search t)
-	  (boundary (if (eq search 're-search-forward) 3 5)))
-    (when (save-excursion
-	    (and (funcall search "^[ \t]*#\\+\\(begin\\|end\\)_" limit t)
-		 (= (length (match-string 1)) boundary)))
-      ;; We're in a block: get out of it
-      (goto-char (match-beginning 0))))))
-
 (defun org-list-search-unenclosed-generic (search re bound noerr)
   "Search a string outside blocks and protected places.
 Arguments SEARCH, RE, BOUND and NOERR are similar to those in
@@ -485,171 +451,6 @@ Arguments REGEXP, BOUND and NOERROR are similar to those used in
   (org-list-search-unenclosed-generic
    #'re-search-forward regexp (or bound (point-max)) noerror))
 
-(defun org-list-in-item-p-with-indent (limit)
-  "Is the cursor inside a plain list?
-Plain lists are considered ending when a non-blank line is less
-indented than the previous item within LIMIT."
-  (save-excursion
-    (beginning-of-line)
-    (cond
-     ;; do not start searching inside a block...
-     ((org-list-maybe-skip-block #'re-search-backward limit))
-     ;; ... or at a blank line
-     ((looking-at "^[ \t]*$")
-      (skip-chars-backward " \r\t\n")
-      (beginning-of-line)))
-    (beginning-of-line)
-    (or (org-at-item-p)
-	(let* ((case-fold-search t)
-	       (ind-ref (org-get-indentation))
-	       ;; Ensure there is at least an item above
-	       (up-item-p (save-excursion
-			    (org-search-backward-unenclosed
-			     org-item-beginning-re limit t))))
-	  (and up-item-p
-	       (catch 'exit
-		 (while t
-		   (cond
-		    ((org-at-item-p)
-		     (throw 'exit (< (org-get-indentation) ind-ref)))
-		    ((looking-at "^[ \t]*$")
-		     (skip-chars-backward " \r\t\n")
-		     (beginning-of-line))
-		    ((looking-at "^[ \t]*#\\+end_")
-		     (re-search-backward "^[ \t]*#\\+begin_"))
-		    (t
-		     (setq ind-ref (min (org-get-indentation) ind-ref))
-		     (forward-line -1))))))))))
-
-(defun org-list-in-item-p-with-regexp (limit)
-  "Is the cursor inside a plain list?
-Plain lists end when `org-list-end-regexp' is matched, or at a
-blank line if `org-empty-line-terminates-plain-lists' is true.
-
-Argument LIMIT specifies the upper-bound of the search."
-  (save-excursion
-    (let* ((actual-pos (goto-char (point-at-eol)))
-	   ;; Moved to eol so current line can be matched by
-	   ;; `org-item-re'.
-	   (last-item-start (save-excursion
-			      (org-search-backward-unenclosed
-			       org-item-beginning-re limit t)))
-	   (list-ender (org-list-ending-between
-			last-item-start actual-pos)))
-      ;; We are in a list when we are on an item line or when we can
-      ;; find an item before point and there is no valid list ender
-      ;; between it and the point.
-      (and last-item-start (not list-ender)))))
-
-(defun org-list-top-point-with-regexp (limit)
-  "Return point at the top level item in a list.
-Argument LIMIT specifies the upper-bound of the search.
-
-List ending is determined by regexp. See
-`org-list-ending-method'. for more information."
-  (save-excursion
-    (let ((pos (point-at-eol)))
-      ;; Is there some list above this one ? If so, go to its ending.
-      ;; Otherwise, go back to the heading above or bob.
-      (goto-char (or (org-list-ending-between limit pos) limit))
-      ;; From there, search down our list.
-      (org-search-forward-unenclosed org-item-beginning-re pos t)
-      (point-at-bol))))
-
-(defun org-list-bottom-point-with-regexp (limit)
-  "Return point just before list ending.
-Argument LIMIT specifies the lower-bound of the search.
-
-List ending is determined by regexp. See
-`org-list-ending-method'. for more information."
-  (save-excursion
-    (let ((pos (org-get-item-beginning)))
-      ;; The list ending is either first point matching
-      ;; `org-list-end-re', point at first white-line before next
-      ;; heading, or eob.
-      (or (org-list-ending-between (min pos limit) limit t) limit))))
-
-(defun org-list-top-point-with-indent (limit)
-  "Return point at the top level in a list.
-Argument LIMIT specifies the upper-bound of the search.
-
-List ending is determined by indentation of text. See
-`org-list-ending-method'. for more information."
-  (save-excursion
-    (let ((case-fold-search t))
-      (let ((item-ref (goto-char (org-get-item-beginning)))
-	    (ind-ref 10000))
-	(forward-line -1)
-	(catch 'exit
-	  (while t
-	    (let ((ind (+ (or (get-text-property (point) 'original-indentation) 0)
-			(org-get-indentation))))
-	      (cond
-	       ((looking-at "^[ \t]*:END:")
-		(throw 'exit item-ref))
-	       ((<= (point) limit)
-		(throw 'exit
-		       (if (and (org-at-item-p) (< ind ind-ref))
-			   (point-at-bol)
-			 item-ref)))
-	       ((looking-at "^[ \t]*$")
-		(skip-chars-backward " \r\t\n")
-		(beginning-of-line))
-	       ((looking-at "^[ \t]*#\\+end_")
-		(re-search-backward "^[ \t]*#\\+begin_"))
-	       ((not (org-at-item-p))
-		(setq ind-ref (min ind ind-ref))
-		(forward-line -1))
-	       ((>= ind ind-ref)
-		(throw 'exit item-ref))
-	       (t
-		(setq item-ref (point-at-bol) ind-ref 10000)
-		(forward-line -1))))))))))
-
-(defun org-list-bottom-point-with-indent (limit)
-  "Return point just before list ending or nil if not in a list.
-Argument LIMIT specifies the lower-bound of the search.
-
-List ending is determined by the indentation of text. See
-`org-list-ending-method' for more information."
-  (save-excursion
-    (let ((ind-ref (progn
-		     (goto-char (org-get-item-beginning))
-		     (org-get-indentation)))
-	  (case-fold-search t))
-      ;; do not start inside a block
-      (org-list-maybe-skip-block #'re-search-forward limit)
-      (beginning-of-line)
-      (catch 'exit
-	(while t
-	  (skip-chars-forward " \t")
-	  (let ((ind (+ (or (get-text-property (point) 'original-indentation) 0)
-			(org-get-indentation))))
-	    (cond
-	     ((or (>= (point) limit)
-		  (looking-at ":END:"))
-	      (throw 'exit (progn
-			     ;; Ensure bottom is just after a
-			     ;; non-blank line.
-			     (skip-chars-backward " \r\t\n")
-			     (min (point-max) (1+ (point-at-eol))))))
-	     ((= (point) (point-at-eol))
-	      (skip-chars-forward " \r\t\n")
-	      (beginning-of-line))
-	     ((org-at-item-p)
-	      (setq ind-ref ind)
-	      (forward-line 1))
-	     ((<= ind ind-ref)
-	      (throw 'exit (progn
-			     ;; Again, ensure bottom is just after a
-			     ;; non-blank line.
-			     (skip-chars-backward " \r\t\n")
-			     (min (point-max) (1+ (point-at-eol))))))
-	     ((looking-at "#\\+begin_")
-	      (re-search-forward "[ \t]*#\\+end_")
-	      (forward-line 1))
-	     (t (forward-line 1)))))))))
-
 (defun org-list-at-regexp-after-bullet-p (regexp)
   "Is point at a list item with REGEXP after bullet?"
   (and (org-at-item-p)
@@ -659,23 +460,6 @@ List ending is determined by the indentation of text. See
          (when (looking-at "\\(?:\\[@\\(?:start:\\)?[0-9]+\\][ \t]*\\)?")
            (goto-char (match-end 0)))
 	 (looking-at regexp))))
-
-(defun org-list-get-item-same-level (search-fun pos limit pre-move)
-  "Return point at the beginning of next item at the same level.
-Search items using function SEARCH-FUN, from POS to LIMIT. It
-uses PRE-MOVE before search. Return nil if no item was found."
-  (save-excursion
-    (goto-char pos)
-    (let* ((start (org-get-item-beginning))
-	   (ind (progn (goto-char start) (org-get-indentation))))
-      ;; We don't want to match the current line.
-      (funcall pre-move)
-      ;; Skip any sublist on the way
-      (while (and (funcall search-fun org-item-beginning-re limit t)
-		  (> (org-get-indentation) ind)))
-      (when (and (/= (point-at-bol) start) ; Have we moved ?
-		 (= (org-get-indentation) ind))
-	(point-at-bol)))))
 
 (defun org-list-separating-blank-lines-number (pos top bottom)
   "Return number of blank lines that should separate items in list.
@@ -744,7 +528,7 @@ function ends."
   (let* ((true-pos (point))
 	 (top (org-list-top-point))
 	 (bottom (copy-marker (org-list-bottom-point)))
-	 (bullet (and (goto-char (org-get-item-beginning))
+	 (bullet (and (goto-char (org-list-get-item-begin))
 		      (org-list-bullet-string (org-get-bullet))))
          (ind (org-get-indentation))
 	 (before-p (progn
@@ -761,7 +545,7 @@ function ends."
 	  (lambda (text)
 	    ;; insert bullet above item in order to avoid bothering
 	    ;; with possible blank lines ending last item.
-	    (goto-char (org-get-item-beginning))
+	    (goto-char (org-list-get-item-begin))
             (org-indent-to-column ind)
 	    (insert (concat bullet (when checkbox "[ ] ") after-bullet))
 	    ;; Stay between after-bullet and before text.
@@ -773,7 +557,7 @@ function ends."
 	      (setq bottom (marker-position bottom))
 	      (let ((col (current-column)))
 		(org-list-exchange-items
-		 (org-get-item-beginning) (org-get-next-item (point) bottom)
+		 (org-list-get-item-begin) (org-get-next-item (point) bottom)
 		 bottom)
 	      ;; recompute next-item: last sexp modified list
 	      (goto-char (org-get-next-item (point) bottom))
@@ -910,32 +694,50 @@ Return t if successful."
 (defun org-in-item-p ()
   "Is the cursor inside a plain list?
 This checks `org-list-ending-method'."
-  (unless (let ((outline-regexp org-outline-regexp)) (org-at-heading-p))
-    (let* ((prev-head (save-excursion (outline-previous-heading)))
-	   (bound (if prev-head
-		      (or (save-excursion
-			    (let ((case-fold-search t))
-			      (re-search-backward "^[ \t]*:END:" prev-head t)))
-			  prev-head)
-		    (point-min))))
-      (cond
-       ((eq org-list-ending-method 'regexp)
-	(org-list-in-item-p-with-regexp bound))
-       ((eq org-list-ending-method 'indent)
-	(org-list-in-item-p-with-indent bound))
-       (t (and (org-list-in-item-p-with-regexp bound)
-	       (org-list-in-item-p-with-indent bound)))))))
-
-(defun org-list-first-item-p (top)
-  "Is this item the first item in a plain list?
-Assume point is at an item.
-
-TOP is the position of list's top-item."
   (save-excursion
     (beginning-of-line)
-    (let ((ind (org-get-indentation)))
-      (or (not (org-search-backward-unenclosed org-item-beginning-re top t))
-	  (< (org-get-indentation) ind)))))
+    (unless (or (let ((outline-regexp org-outline-regexp)) (org-at-heading-p))
+		(and (not (eq org-list-ending-method 'indent))
+		     (looking-at (org-list-end-re))
+		     (progn (forward-line -1) (looking-at (org-list-end-re)))))
+      (or (and (org-at-item-p) (point-at-bol))
+	  (let* ((case-fold-search t)
+		 (context (org-list-context))
+		 (lim-up (car context))
+		 (inlinetask-re (and (featurep 'org-inlinetask)
+				     (org-inlinetask-outline-regexp)))
+		 (ind-ref (if (looking-at "^[ \t]*$")
+			      10000
+			    (org-get-indentation))))
+	    (catch 'exit
+	      (while t
+		(let ((ind (org-get-indentation)))
+		  (cond
+		   ((<= (point) lim-up)
+		    (throw 'exit (and (org-at-item-p) (< ind ind-ref))))
+		   ((and (not (eq org-list-ending-method 'indent))
+			 (looking-at (org-list-end-re)))
+		    (throw 'exit nil))
+		   ;; Skip blocks, drawers, inline-tasks, blank lines
+		   ((looking-at "^[ \t]*#\\+end_")
+		    (re-search-backward "^[ \t]*#\\+begin_" nil t))
+		   ((looking-at "^[ \t]*:END:")
+		    (re-search-backward org-drawer-regexp nil t)
+		    (beginning-of-line))
+		   ((and inlinetask-re (looking-at inlinetask-re))
+		    (org-inlinetask-goto-beginning)
+		    (forward-line -1))
+		   ((looking-at "^[ \t]*$")
+		    (forward-line -1))
+		   ((< ind ind-ref)
+		    (if (org-at-item-p)
+			(throw 'exit (point))
+		      (setq ind-ref ind)
+		      (forward-line -1)))
+		   (t (if (and (eq org-list-ending-method 'regexp)
+			       (org-at-item-p))
+			  (throw 'exit (point))
+			(forward-line -1))))))))))))
 
 (defun org-at-item-p ()
   "Is point in a line starting a hand-formatted item?"
@@ -963,178 +765,86 @@ TOP is the position of list's top-item."
 
 ;;; Navigate
 
-;; Every interactive navigation function is derived from a
-;; non-interactive one, which doesn't move point, assumes point is
-;; already in a list and doesn't compute list boundaries.
-
-;; If you plan to use more than one org-list function is some code,
-;; you should therefore first check if point is in a list with
-;; `org-in-item-p' or `org-at-item-p', then compute list boundaries
-;; with `org-list-top-point' and `org-list-bottom-point', and make use
-;; of non-interactive forms.
-
-(defun org-list-top-point ()
-  "Return point at the top level in a list.
-Assume point is in a list."
-  (let* ((prev-head (save-excursion (outline-previous-heading)))
-	 (bound (if prev-head
-		    (or (save-excursion
-			  (let ((case-fold-search t))
-			    (re-search-backward "^[ \t]*:END:" prev-head t)))
-			prev-head)
-		  (point-min))))
-    (cond
-     ((eq org-list-ending-method 'regexp)
-      (org-list-top-point-with-regexp bound))
-     ((eq org-list-ending-method 'indent)
-      (org-list-top-point-with-indent bound))
-     (t (let ((top-re (org-list-top-point-with-regexp bound)))
-	  (org-list-top-point-with-indent (or top-re bound)))))))
-
-(defun org-list-bottom-point ()
-  "Return point just before list ending.
-Assume point is in a list."
-  (let* ((next-head (save-excursion
-		      (and (let ((outline-regexp org-outline-regexp))
-			     ;; Use default regexp because folding
-			     ;; changes OUTLINE-REGEXP.
-			     (outline-next-heading)))))
-	 (limit (or (save-excursion
-		      (and (re-search-forward "^[ \t]*:END:" next-head t)
-			   (point-at-bol)))
-		    next-head
-		    (point-max))))
-    (cond
-     ((eq org-list-ending-method 'regexp)
-      (org-list-bottom-point-with-regexp limit))
-     ((eq org-list-ending-method 'indent)
-      (org-list-bottom-point-with-indent limit))
-     (t (let ((bottom-re (org-list-bottom-point-with-regexp limit)))
-	  (org-list-bottom-point-with-indent (or bottom-re limit)))))))
-
-(defun org-get-item-beginning ()
-  "Return position of current item beginning."
-  (save-excursion
-    ;; possibly match current line
-    (end-of-line)
-    (org-search-backward-unenclosed org-item-beginning-re nil t)
-    (point-at-bol)))
+(defalias 'org-list-get-item-begin 'org-in-item-p)
 
 (defun org-beginning-of-item ()
   "Go to the beginning of the current hand-formatted item.
 If the cursor is not in an item, throw an error."
   (interactive)
-  (if (org-in-item-p)
-      (goto-char (org-get-item-beginning))
-    (error "Not in an item")))
-
-(defun org-get-beginning-of-list (top)
-  "Return position of the first item of the current list or sublist.
-TOP is the position at list beginning."
-  (save-excursion
-    (let (prev-p)
-      (while (setq prev-p (org-get-previous-item (point) top))
-	(goto-char prev-p))
-      (point-at-bol))))
+  (let ((begin (org-in-item-p)))
+    (if begin (goto-char begin) (error "Not in an item"))))
 
 (defun org-beginning-of-item-list ()
   "Go to the beginning item of the current list or sublist.
 Return an error if not in a list."
   (interactive)
-  (if (org-in-item-p)
-      (goto-char (org-get-beginning-of-list (org-list-top-point)))
-    (error "Not in an item")))
-
-(defun org-get-end-of-list (bottom)
-  "Return position at the end of the current list or sublist.
-BOTTOM is the position at list ending."
-  (save-excursion
-    (goto-char (org-get-item-beginning))
-    (let ((ind (org-get-indentation)))
-      (while (and (/= (point) bottom)
-		  (>= (org-get-indentation) ind))
-	(org-search-forward-unenclosed org-item-beginning-re bottom 'move))
-      (if (= (point) bottom) bottom (point-at-bol)))))
+  (let ((begin (org-in-item-p)))
+    (if (not begin)
+	(error "Not in an item")
+      (goto-char begin)
+      (let ((struct (org-list-struct)))
+	(goto-char (org-list-get-list-begin begin (org-list-struct)))))))
 
 (defun org-end-of-item-list ()
   "Go to the end of the current list or sublist.
 If the cursor in not in an item, throw an error."
   (interactive)
-  (if (org-in-item-p)
-      (goto-char (org-get-end-of-list (org-list-bottom-point)))
-    (error "Not in an item")))
-
-(defun org-get-end-of-item (bottom)
-  "Return position at the end of the current item.
-BOTTOM is the position at list ending."
-  (or (org-get-next-item (point) bottom)
-      (org-get-end-of-list bottom)))
+  (let ((begin (org-in-item-p)))
+    (if (not begin)
+	(error "Not in an item")
+      (goto-char begin)
+      (let ((struct (org-list-struct)))
+	(goto-char (org-list-get-list-end begin (org-list-struct)))))))
 
 (defun org-end-of-item ()
   "Go to the end of the current hand-formatted item.
 If the cursor is not in an item, throw an error."
   (interactive)
-  (if (org-in-item-p)
-      (goto-char (org-get-end-of-item (org-list-bottom-point)))
-    (error "Not in an item")))
-
-(defun org-end-of-item-or-at-child (bottom)
-  "Move to the end of the item, stops before the first child if any.
-BOTTOM is the position at list ending."
-  (end-of-line)
-  (goto-char
-   (if (org-search-forward-unenclosed org-item-beginning-re bottom t)
-       (point-at-bol)
-     (org-get-end-of-item bottom))))
-
-(defun org-end-of-item-before-blank (bottom)
-  "Return point at end of item, before any blank line.
-Point returned is at eol.
-
-BOTTOM is the position at list ending."
-  (save-excursion
-    (goto-char (org-get-end-of-item bottom))
-    (skip-chars-backward " \r\t\n")
-    (point-at-eol)))
-
-(defun org-get-previous-item (pos limit)
-  "Return point of the previous item at the same level as POS.
-Stop searching at LIMIT. Return nil if no item is found."
-  (org-list-get-item-same-level
-   #'org-search-backward-unenclosed pos limit #'beginning-of-line))
+  (let ((begin (org-in-item-p)))
+    (if (not begin)
+	(error "Not in an item")
+      (goto-char begin)
+      (let ((struct (org-list-struct)))
+	(goto-char (org-list-get-item-end begin struct))))))
 
 (defun org-previous-item ()
   "Move to the beginning of the previous item.
 Item is at the same level in the current plain list. Error if not
 in a plain list, or if this is the first item in the list."
   (interactive)
-  (if (not (org-in-item-p))
-      (error "Not in an item")
-    (let ((prev-p (org-get-previous-item (point) (org-list-top-point))))
-      (if prev-p (goto-char prev-p) (error "On first item")))))
-
-(defun org-get-next-item (pos limit)
-  "Return point of the next item at the same level as POS.
-Stop searching at LIMIT. Return nil if no item is found."
-  (org-list-get-item-same-level
-   #'org-search-forward-unenclosed pos limit #'end-of-line))
+  (let ((begin (org-in-item-p)))
+    (if (not begin)
+	(error "Not in an item")
+      (goto-char begin)
+      (let* ((struct (org-list-struct))
+	     (prevs (org-list-struct-prev-alist struct))
+	     (prevp (org-list-get-prev-item begin struct prevs)))
+	(if prevp (goto-char prevp) (error "On first item"))))))
 
 (defun org-next-item ()
   "Move to the beginning of the next item.
 Item is at the same level in the current plain list. Error if not
 in a plain list, or if this is the last item in the list."
   (interactive)
-  (if (not (org-in-item-p))
-      (error "Not in an item")
-    (let ((next-p (org-get-next-item (point) (org-list-bottom-point))))
-      (if next-p (goto-char next-p) (error "On last item")))))
+  (let ((begin (org-in-item-p)))
+    (if (not begin)
+	(error "Not in an item")
+      (goto-char begin)
+      (let* ((struct (org-list-struct))
+	     (prevs (org-list-struct-prev-alist struct))
+	     (prevp (org-list-get-next-item begin struct prevs)))
+	(if prevp (goto-char prevp) (error "On last item"))))))
 
 ;;; Manipulate
 
 (defun org-list-exchange-items (beg-A beg-B struct)
-  "Swap item starting at BEG-A with item starting at BEG-B.
-Blank lines at the end of items are left in place. Assume BEG-A
-is lesser than BEG-B."
+  "Swap item starting at BEG-A with item starting at BEG-B in STRUCT.
+Blank lines at the end of items are left in place.
+
+Assume BEG-A is lesser than BEG-B and that BEG-A and BEG-B
+belong to the same sub-list.
+
+This function modifies STRUCT."
   (save-excursion
     (let* ((end-of-item-no-blank
 	    (lambda (pos)
@@ -1146,7 +856,21 @@ is lesser than BEG-B."
 	   (between-A-no-blank-and-B (buffer-substring end-A-no-blank beg-B)))
       (goto-char beg-A)
       (delete-region beg-A end-B-no-blank)
-      (insert (concat body-B between-A-no-blank-and-B body-A)))))
+      (insert (concat body-B between-A-no-blank-and-B body-A))
+      ;; Now modify struct. No need to re-read the list, the
+      ;; transformation is just a shift of positions
+      (let* ((sub-A (cons beg-A (org-list-get-subtree beg-A struct)))
+	     (sub-B (cons beg-B (org-list-get-subtree beg-B struct)))
+	     (end-A (org-list-get-item-end beg-A struct))
+	     (end-B (org-list-get-item-end beg-B struct))
+	     (inter-A-B (- beg-B end-A))
+	     (size-A (- end-A beg-A))
+	     (size-B (- end-B beg-B)))
+	(mapc (lambda (e) (org-list-set-pos e struct (+ e size-B inter-A-B)))
+	      sub-A)
+	(mapc (lambda (e) (org-list-set-pos e struct (- e size-A inter-A-B)))
+	      sub-B)
+	(sort struct (lambda (e1 e2) (< (car e1) (car e2))))))))
 
 (defun org-move-item-down ()
   "Move the plain list item at point down, i.e. swap with following item.
@@ -1164,12 +888,17 @@ so this really moves item trees."
 	(progn
 	  (goto-char pos)
 	  (error "Cannot move this item further down"))
-      (let ((next-item-size (- (org-list-get-item-end next-item struct)
-			       next-item)))
-	(org-list-exchange-items actual-item next-item struct)
-	(org-list-repair)
-	(goto-char (+ (point) next-item-size))
-	(org-move-to-column col)))))
+      (org-list-exchange-items actual-item next-item struct)
+      ;; Use a short variation of `org-list-struct-fix-struct' as
+      ;; there's no need to go through all the steps.
+      (let ((old-struct (mapcar (lambda (e) (copy-alist e)) struct))
+	    (prevs (org-list-struct-prev-alist struct))
+	    (parents (org-list-struct-parent-alist struct)))
+        (org-list-struct-fix-bul struct prevs)
+        (org-list-struct-fix-ind struct parents)
+        (org-list-struct-apply-struct struct old-struct)
+	(goto-char (org-list-get-next-item (point-at-bol) struct prevs)))
+      (org-move-to-column col))))
 
 (defun org-move-item-up ()
   "Move the plain list item at point up, i.e. swap with previous item.
@@ -1188,7 +917,14 @@ so this really moves item trees."
 	  (goto-char pos)
 	  (error "Cannot move this item further up"))
       (org-list-exchange-items prev-item actual-item struct)
-      (org-list-repair)
+      ;; Use a short variation of `org-list-struct-fix-struct' as
+      ;; there's no need to go through all the steps.
+      (let ((old-struct (mapcar (lambda (e) (copy-alist e)) struct))
+	    (prevs (org-list-struct-prev-alist struct))
+	    (parents (org-list-struct-parent-alist struct)))
+        (org-list-struct-fix-bul struct prevs)
+        (org-list-struct-fix-ind struct parents)
+        (org-list-struct-apply-struct struct old-struct))
       (org-move-to-column col))))
 
 (defun org-insert-item (&optional checkbox)
@@ -1205,13 +941,13 @@ item is invisible."
 		(goto-char (org-get-item-beginning))
 		(outline-invisible-p)))
     (if (save-excursion
-	  (goto-char (org-get-item-beginning))
+	  (goto-char (org-list-get-item-begin))
 	  (org-at-item-timer-p))
 	;; Timer list: delegate to `org-timer-item'.
 	(progn (org-timer-item) t)
       ;; if we're in a description list, ask for the new term.
       (let ((desc-text (when (save-excursion
-			       (and (goto-char (org-get-item-beginning))
+			       (and (goto-char (org-list-get-item-begin))
 				    (org-at-item-description-p)))
 			 (concat (read-string "Term: ") " :: "))))
         ;; Don't insert a checkbox if checkbox rule is applied and it
@@ -1611,6 +1347,14 @@ previous items. See `org-list-struct-prev-alist'."
 (defun org-list-get-item-end (item struct)
   "Return end position of ITEM in STRUCT."
   (org-list-get-nth 5 item struct))
+
+(defun org-list-get-item-end-before-blank (item struct)
+  "Return point at end of item, before any blank line.
+Point returned is at end of line."
+  (save-excursion
+    (goto-char (org-list-get-item-end item struct))
+    (skip-chars-backward " \r\t\n")
+    (point-at-eol)))
 
 (defun org-list-struct-fix-bul (struct prevs)
   "Verify and correct bullets for every association in STRUCT.
