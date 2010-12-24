@@ -11174,7 +11174,8 @@ The structure of code blocks is as follows:
 #+end_src
 @end example
 
-code blocks can also be embedded in text as so called inline code blocks as
+Switches and header arguments are optional. Code can also be embedded in text
+inline using
 
 @example
 src_<language>@{<body>@}
@@ -11196,7 +11197,7 @@ formulas (see @ref{The spreadsheet}).
 @item <language>
 The language of the code in the block.
 @item <switches>
-Switches controlling exportation of the code block (see switches discussion in
+Optional switches controlling exportation of the code block (see switches discussion in
 @ref{Literal examples})
 @item <header arguments>
 Optional header arguments control many aspects of evaluation, export and
@@ -11241,6 +11242,9 @@ Python, in which whitespace indentation in the output is critical.
 By default, Org will ask before returning to an open edit buffer. Set
 this variable to nil to switch without asking.
 @end table
+
+To turn on native code fontification in the @emph{Org} buffer, configure the
+variable @code{org-src-fontify-natively}.
 
 @comment  node-name,  next,  previous,  up
 @comment  Exporting code blocks, Extracting source code, Editing source code, Working With Source Code
