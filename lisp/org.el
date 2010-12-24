@@ -17398,12 +17398,46 @@ This command does many different things, depending on context:
 	  (org-footnote-at-definition-p))
       (call-interactively 'org-footnote-action))
      ((org-at-item-checkbox-p)
-      (call-interactively 'org-list-repair)
-      (call-interactively 'org-toggle-checkbox)
+      ;; Use a light version of `org-toggle-checkbox' to avoid
+      ;; computing list structure twice.
+      (let* ((cbox (match-string 1))
+	     (struct (org-list-struct))
+	     (old-struct (mapcar (lambda (e) (copy-alist e)) struct))
+	     (parents (org-list-struct-parent-alist struct))
+	     (prevs (org-list-struct-prev-alist struct))
+	     (orderedp (ignore-errors (org-entry-get nil "ORDERED")))
+	     block-item)
+	(org-list-set-checkbox (point-at-bol) struct
+			       (cond
+				((equal arg '(16)) "[-]")
+				((equal arg '(4)) nil)
+				((equal "[ ]" cbox) "[X]")
+				(t "[ ]")))
+	(org-list-struct-fix-ind struct parents)
+	(org-list-struct-fix-bul struct prevs)
+	(setq block-item
+	      (org-list-struct-fix-box struct parents prevs orderedp))
+	(when block-item
+	  (message
+	   "Checkboxes were removed due to unchecked box at line %d"
+	   (org-current-line block-item)))
+	(org-list-struct-apply-struct struct old-struct)
+	(org-update-checkbox-count-maybe))
       (org-list-send-list 'maybe))
      ((org-at-item-p)
-      (call-interactively 'org-list-repair)
-      (when arg (call-interactively 'org-toggle-checkbox))
+      ;; Do checkbox related actions only if function was called with
+      ;; an argument
+      (let* ((struct (org-list-struct))
+	     (old-struct (mapcar (lambda (e) (copy-alist e)) struct))
+	     (parents (org-list-struct-parent-alist struct))
+	     (prevs (org-list-struct-prev-alist struct)))
+	(org-list-struct-fix-ind struct parents)
+	(org-list-struct-fix-bul struct prevs)
+	(when arg
+	  (org-list-set-checkbox (point-at-bol) struct "[ ]")
+	  (org-list-struct-fix-box struct parents prevs))
+	(org-list-struct-apply-struct struct old-struct)
+	(when arg (org-update-checkbox-count-maybe)))
       (org-list-send-list 'maybe))
      ((save-excursion (beginning-of-line 1) (looking-at org-dblock-start-re))
       ;; Dynamic block
