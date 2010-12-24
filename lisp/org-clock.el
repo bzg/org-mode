@@ -442,7 +442,9 @@ pointing to it."
 	    (ignore-errors
 	      (goto-char marker)
 	      (setq file (buffer-file-name (marker-buffer marker))
-		    cat (org-get-category)
+		    cat (or (org-get-category)
+			    (progn (org-refresh-category-properties)
+				   (org-get-category)))
 		    heading (org-get-heading 'notags)
 		    prefix (save-excursion
 			     (org-back-to-heading t)

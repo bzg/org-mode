@@ -302,6 +302,7 @@ When COMBINE is non nil, add the category to each line."
 	scheduledp deadlinep todo prefix due start
 	tmp pri categories location summary desc uid alarm
 	(sexp-buffer (get-buffer-create "*ical-tmp*")))
+    (org-refresh-category-properties)
     (save-excursion
       (goto-char (point-min))
       (while (re-search-forward re1 nil t)
