@@ -92,7 +92,7 @@
 		 (concat "Hook to run before " fmt " export.\nFunctions "
 			 "should take no arguments and will be run in a "
 			 "buffer holding\nthe text to be exported."))))
-      '("ascii" "org" "html" "html-ascii"))
+      '("ascii" "org" "html"))
 
 (defcustom org-mime-send-subtree-hook nil
   "Hook to run in the subtree in the Org-mode file before export.")
@@ -262,35 +262,41 @@ export that region, otherwise export the entire body."
   (require 'message)
   (message-mail to subject headers nil)
   (message-goto-body)
-  (let* ((fmt (if (symbolp fmt) fmt (intern fmt)))
-	 (hook (intern (concat "org-mime-pre-" (symbol-name fmt) "-hook")))
-	 (body (if (> (eval `(length ,hook)) 0)
-		   (with-temp-buffer
-		     (insert body)
-		     (goto-char (point-min))
-		     (eval `(run-hooks ',hook))
-		     (buffer-string))
-		 body)))
-    (cond
-     ((eq fmt 'org)
-      (insert (org-export-string (org-babel-trim body) 'org)))
-     ((eq fmt 'ascii)
-      (insert (org-export-string (concat "#+Title:\n" body) 'ascii)))
-     ((or (eq fmt 'html) (eq fmt 'html-ascii))
-      (let* ((org-link-file-path-type 'absolute)
-	     ;; we probably don't want to export a huge style file
-	     (org-export-htmlize-output-type 'inline-css)
-	     (html-and-images (org-mime-replace-images
-			       (org-export-string
-				body 'html (file-name-nondirectory file))
-			       file))
-	     (images (cdr html-and-images))
-	     (html (org-mime-apply-html-hook (car html-and-images))))
-	(insert (org-mime-multipart
-		 (org-export-string
-		  (org-babel-trim body) (if (eq fmt 'html) 'org 'ascii))
-		 html)
-		(mapconcat 'identity images "\n")))))))
+  (flet ((bhook (body fmt)
+		(let ((hook (intern (concat "org-mime-pre-"
+					    (symbol-name fmt)
+					    "-hook"))))
+		  (if (> (eval `(length ,hook)) 0)
+		      (with-temp-buffer
+			(insert body)
+			(goto-char (point-min))
+			(eval `(run-hooks ',hook))
+			(buffer-string))
+		    body))))
+    (let ((fmt (if (symbolp fmt) fmt (intern fmt))))
+      (cond
+       ((eq fmt 'org)
+	(insert (org-export-string (org-babel-trim (bhook body 'org)) 'org)))
+       ((eq fmt 'ascii)
+	(insert (org-export-string
+		 (concat "#+Title:\n" (bhook body 'ascii)) 'ascii)))
+       ((or (eq fmt 'html) (eq fmt 'html-ascii))
+	(let* ((org-link-file-path-type 'absolute)
+	       ;; we probably don't want to export a huge style file
+	       (org-export-htmlize-output-type 'inline-css)
+	       (html-and-images (org-mime-replace-images
+				 (org-export-string
+				  (bhook body 'html)
+				  'html (file-name-nondirectory file))
+				 file))
+	       (images (cdr html-and-images))
+	       (html (org-mime-apply-html-hook (car html-and-images))))
+	  (insert (org-mime-multipart
+		   (org-export-string
+		    (org-babel-trim (bhook body 'html))
+		    (if (eq fmt 'html) 'org 'ascii))
+		   html)
+		  (mapconcat 'identity images "\n"))))))))
 
 (defun org-mime-org-buffer-htmlize ()
   "Create an email buffer containing the current org-mode file
