@@ -135,6 +135,7 @@ LISPF      = 	org.el			\
 		ob-dot.el		\
 		ob-mscgen.el		\
 		ob-latex.el		\
+		ob-lisp.el		\
 		ob-ledger.el		\
 		ob-python.el		\
 		ob-sql.el		\
