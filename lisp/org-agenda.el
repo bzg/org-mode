@@ -7911,7 +7911,7 @@ The prefix arg is passed through to the command if possible."
 		   (format "Scatter tasks across how many %sdays: "
 			   (if arg "week" "")) 7)))
 	(setq cmd
-	      `(let ((distance (random ,(1+ days))))
+	      `(let ((distance (1+ (random ,days))))
 		 (if arg
 		     (let ((dist distance)
 			   (day-of-week
