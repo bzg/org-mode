@@ -293,7 +293,8 @@ export that region, otherwise export the entire body."
 	       (html (org-mime-apply-html-hook (car html-and-images))))
 	  (insert (org-mime-multipart
 		   (org-export-string
-		    (org-babel-trim (bhook body 'html))
+		    (org-babel-trim
+		     (bhook body (if (eq fmt 'html) 'org 'ascii)))
 		    (if (eq fmt 'html) 'org 'ascii))
 		   html)
 		  (mapconcat 'identity images "\n"))))))))
