@@ -720,7 +720,7 @@ Return t if successful."
 		   ;; If only one item is moved, it mustn't have a child
 		   (or (and no-subtree
 			    (not regionp)
-			    (org-list-get-child beg struct))
+			    (org-list-has-child-p beg struct))
 		       ;; If a subtree or region is moved, the last item
 		       ;; of the subtree mustn't have a child
 		       (let ((last-item (caar
@@ -728,7 +728,7 @@ Return t if successful."
 					  (org-remove-if
 					   (lambda (e) (>= (car e) end))
 					   struct)))))
-			 (org-list-get-child last-item struct))))
+			 (org-list-has-child-p last-item struct))))
 	      (error "Cannot outdent an item without its children"))
 	     ;; Normal shifting
 	     (t
@@ -765,7 +765,7 @@ This checks `org-list-ending-method'."
 		(let ((ind (org-get-indentation)))
 		  (cond
 		   ((<= (point) lim-up)
-		    (throw 'exit (and (org-at-item-p) (< ind ind-ref))))
+		    (throw 'exit (and (org-at-item-p) (< ind ind-ref) (point))))
 		   ((and (not (eq org-list-ending-method 'indent))
 			 (looking-at (org-list-end-re)))
 		    (throw 'exit nil))
@@ -1288,15 +1288,16 @@ This function modifies STRUCT."
 		       (t (cons pos (cdar ind-to-ori))))))
 		  (cdr struct)))))
 
-(defun org-list-get-parent (item struct &optional parents)
+(defun org-list-get-parent (item struct parents)
   "Return parent of ITEM in STRUCT, or nil.
-PARENTS, when provided, is the alist of items' parent. See
+PARENTS is the alist of items' parent. See
 `org-list-struct-parent-alist'."
   (let ((parents (or parents (org-list-struct-parent-alist struct))))
     (cdr (assq item parents))))
 
-(defun org-list-get-child (item struct)
-  "Return child of ITEM in STRUCT, or nil."
+(defun org-list-has-child-p (item struct)
+  "Return a non-nil value if ITEM in STRUCT has a child.
+The value returned is the position of the first child of ITEM."
   (let ((ind (org-list-get-ind item struct))
 	(child-maybe (car (nth 1 (member (assq item struct) struct)))))
     (when (and child-maybe
@@ -1338,17 +1339,20 @@ PREVS, when provided, is the alist of previous items. See
 	(next-item item)
 	before-item after-item)
     (while (setq prev-item (org-list-get-prev-item prev-item struct prevs))
-      (setq before-item (cons prev-item before-item)))
+      (push prev-item before-item))
     (while (setq next-item (org-list-get-next-item next-item struct prevs))
-      (setq after-item (cons next-item after-item)))
+      (push next-item after-item))
     (append before-item (list item) (nreverse after-item))))
 
-(defun org-list-get-all-children (item struct prevs)
+(defun org-list-get-children (item struct parents)
   "List all children of ITEM in STRUCT, or nil.
-PREVS is the alist of previous items. See
-`org-list-struct-prev-alist'."
-  (let ((child (org-list-get-child item struct)))
-    (and child (org-list-get-all-items child struct prevs))))
+PARENTS is the alist of items' parent. See
+`org-list-struct-parent-alist'."
+  (let (all)
+    (while (setq child (car (rassq item parents)))
+      (setq parents (cdr (member (assq child parents) parents))
+	    all (cons child all)))
+    (nreverse all)))
 
 (defun org-list-get-top-point (struct)
   "Return point at beginning of list.
@@ -1365,8 +1369,8 @@ STRUCT is the structure of the list."
   "Return point at beginning of sub-list ITEM belongs.
 STRUCT is the structure of the list. PREVS is the alist of
 previous items. See `org-list-struct-prev-alist'."
-  (let ((prev-item item) first-item)
-    (while (setq prev-item (org-list-get-prev-item prev-item struct prevs))
+  (let ((first-item item) prev-item)
+    (while (setq prev-item (org-list-get-prev-item first-item struct prevs))
       (setq first-item prev-item))
     first-item))
 
@@ -1374,8 +1378,8 @@ previous items. See `org-list-struct-prev-alist'."
   "Return point at end of sub-list ITEM belongs.
 STRUCT is the structure of the list. PREVS is the alist of
 previous items. See `org-list-struct-prev-alist'."
-  (let ((next-item item) last-item)
-    (while (setq next-item (org-list-get-next-item next-item struct prevs))
+  (let ((last-item item) next-item)
+    (while (setq next-item (org-list-get-next-item last-item struct prevs))
       (setq last-item next-item))
     (org-list-get-item-end last-item struct)))
 
@@ -1495,7 +1499,7 @@ This function modifies STRUCT."
 	    (let* ((box-list
 		    (mapcar (lambda (child)
 			      (org-list-get-checkbox child struct))
-			    (org-list-get-all-children item struct prevs))))
+			    (org-list-get-children item struct parents))))
 	      (org-list-set-checkbox
 	       item struct
 	       (cond
@@ -2117,11 +2121,12 @@ With optional prefix argument ALL, do this for the whole buffer."
 	      (mapc
                (lambda (s)
                  (let* ((pre (org-list-struct-prev-alist s))
+			(par (org-list-struct-parent-alist s))
                         (items
                          (if recursivep
                              (or (and item (org-list-get-subtree item s))
                                  (mapcar 'car s))
-                           (or (and item (org-list-get-all-children item s pre))
+                           (or (and item (org-list-get-children item s par))
                                (org-list-get-all-items
                                 (org-list-get-top-point s) s pre))))
                         (cookies (delq nil (mapcar
