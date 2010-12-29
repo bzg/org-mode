@@ -18191,6 +18191,17 @@ When LINE is given, assume it represents a line and compute its indentation."
       (skip-chars-forward " \t")
       (current-column))))
 
+(defun org-get-string-indentation (s)
+  "What indentation has S due to SPACE and TAB at the beginning of the string?"
+  (let ((n -1) (i 0) (w tab-width) c)
+    (catch 'exit
+      (while (< (setq n (1+ n)) (length s))
+	(setq c (aref s n))
+	(cond ((= c ?\ ) (setq i (1+ i)))
+	      ((= c ?\t) (setq i (* (/ (+ w i) w) w)))
+	      (t (throw 'exit t)))))
+    i))
+
 (defun org-remove-tabs (s &optional width)
   "Replace tabulators in S with spaces.
 Assumes that s is a single line, starting in column 0."
