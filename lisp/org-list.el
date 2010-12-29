@@ -2338,46 +2338,103 @@ compare entries."
 	(message "Sorting items...done")))))
 
 ;;; Send and receive lists
-
 (defun org-list-parse-list (&optional delete)
   "Parse the list at point and maybe DELETE it.
-Return a list containing first level items as strings and
-sublevels as a list of strings."
-  (let* ((start (goto-char (org-list-top-point)))
-	 (end (org-list-bottom-point))
-	 output itemsep ltype)
-    (while (org-search-forward-unenclosed org-item-beginning-re end t)
-      (save-excursion
-	(beginning-of-line)
-	(setq ltype (cond ((org-looking-at-p "^[ \t]*[0-9]") 'ordered)
-			  ((org-at-item-description-p) 'descriptive)
-			  (t 'unordered))))
-      (let* ((indent1 (org-get-indentation))
-	     (nextitem (or (org-get-next-item (point) end) end))
-	     (item (org-trim (buffer-substring (point)
-					       (org-end-of-item-or-at-child end))))
-	     (nextindent (if (= (point) end) 0 (org-get-indentation)))
-	     (item (if (string-match
-			"^\\(?:\\[@\\(?:start:\\)?[0-9]+\\][ \t]*\\)?\\[\\([xX ]\\)\\]"
-			item)
-		       (replace-match (if (equal (match-string 1 item) " ")
-					  "CBOFF"
-					"CBON")
-				      t nil item 1)
-		     item)))
-	(push item output)
-	(when (> nextindent indent1)
-	  (save-restriction
-	    (narrow-to-region (point) nextitem)
-	    (push (org-list-parse-list) output)))))
+
+Return a list whose car is a symbol of list type, among
+`ordered', `unordered' and `descriptive'. Then, each item is a
+list whose elements are strings and other sub-lists. Inside
+strings, checkboxes are replaced by \"[CBON]\" and \"[CBOFF]\".
+
+For example, the following list:
+
+1. first item
+   + sub-item one
+   + [X] sub-item two
+   more text in first item
+2. last item
+
+will be parsed as:
+
+\(ordered \(\"first item\"
+	  \(unordered \(\"sub-item one\"\) \(\"[CBON] sub-item two\"\)\)
+	  \"more text in first item\"\)
+	 \(\"last item\"\)\)
+
+Point is left at list end."
+  (let* ((struct (org-list-struct))
+	 (prevs (org-list-struct-prev-alist struct))
+	 (parents (org-list-struct-parent-alist struct))
+	 (top (org-list-get-top-point struct))
+	 (bottom (org-list-get-bottom-point struct))
+	 out
+	 (get-list-type
+	  (function
+	   ;; determine type of list by looking at item at POS.
+	   (lambda (pos)
+	     (save-excursion
+	       (goto-char pos)
+	       (cond ((org-looking-at-p "^[ \t]*[0-9]") 'ordered)
+		     ((org-at-item-description-p) 'descriptive)
+		     (t 'unordered))))))
+	 (parse-sublist
+	  (function
+	   ;; return a list whose car is list type and cdr a list of
+	   ;; items' body.
+	   (lambda (e)
+	     (cons (funcall get-list-type (car e))
+		   (mapcar parse-item e)))))
+	 (parse-item
+	  (function
+	   ;; return a list containing text and any sublist inside
+	   ;; item.
+	   (lambda (e)
+	     (let ((start (save-excursion
+			    (goto-char e)
+			    (looking-at org-item-beginning-re)
+			    (match-end 0)))
+		   (childp (org-list-has-child-p e struct))
+		   (end (org-list-get-item-end e struct)))
+	       (if childp
+		   (let* ((children (org-list-get-children e struct parents))
+			  (body (list (funcall get-text start childp t))))
+		     (while children
+		       (let* ((first (car children))
+			      (sub (org-list-get-all-items first struct prevs))
+			      (last-c (car (last sub)))
+			      (last-end (org-list-get-item-end last-c struct)))
+			 (push (funcall parse-sublist sub) body)
+			 (setq children (cdr (member last-c children)))
+			 (unless (= (or (car children) end) last-end)
+			   (push (funcall get-text last-end (or (car children) end) nil)
+				 body))))
+		     (nreverse body))
+		 (list (funcall get-text start end t)))))))
+	 (get-text
+	  (function
+	   ;; return text between BEG and END, trimmed, with
+	   ;; checkboxes replaced if BOX is true.
+	   (lambda (beg end box)
+	     (let ((text (org-trim (buffer-substring beg end))))
+	       (if (and box
+			(string-match
+			 "^\\(?:\\[@\\(?:start:\\)?[0-9]+\\][ \t]*\\)?\\[\\([xX ]\\)\\]"
+			 text))
+		   (replace-match
+		    (if (equal (match-string 1 text) " ") "CBOFF" "CBON")
+		    t nil text 1)
+		 text))))))
+    ;; store output, take care of cursor position and deletion of
+    ;; list, then return output.
+    (setq out (funcall parse-sublist (org-list-get-all-items top struct prevs)))
+    (goto-char bottom)
     (when delete
-      (delete-region start end)
+      (delete-region top bottom)
       (save-match-data
 	(when (and (not (eq org-list-ending-method 'indent))
 		   (looking-at (org-list-end-re)))
 	  (replace-match "\n"))))
-    (setq output (nreverse output))
-    (push ltype output)))
+    out))
 
 (defun org-list-make-subtree ()
   "Convert the plain list at point into a subtree."
@@ -2515,38 +2572,53 @@ Valid parameters PARAMS are
 	 (isep (plist-get p :isep))
 	 (lsep (plist-get p :lsep))
 	 (cbon (plist-get p :cbon))
-	 (cboff (plist-get p :cboff)))
-    (let ((wrapper
-	   (cond ((eq (car list) 'ordered)
-		  (concat ostart "\n%s" oend "\n"))
-		 ((eq (car list) 'unordered)
-		  (concat ustart "\n%s" uend "\n"))
-		 ((eq (car list) 'descriptive)
-		  (concat dstart "\n%s" dend "\n"))))
-	  rtn term defstart defend)
-      (while (setq sublist (pop list))
-	(cond ((symbolp sublist) nil)
-	      ((stringp sublist)
-	       (when (string-match "^\\(.*\\)[ \t]+::" sublist)
-		 (setq term (org-trim (format (concat dtstart "%s" dtend)
-					      (match-string 1 sublist))))
-		 (setq sublist (concat ddstart
-				       (org-trim (substring sublist
-							    (match-end 0)))
-				       ddend)))
-	       (if (string-match "\\[CBON\\]" sublist)
-		   (setq sublist (replace-match cbon t t sublist)))
-	       (if (string-match "\\[CBOFF\\]" sublist)
-		   (setq sublist (replace-match cboff t t sublist)))
-	       (if (string-match "\\[-\\]" sublist)
-		   (setq sublist (replace-match "$\\boxminus$" t t sublist)))
-	       (setq rtn (concat rtn istart term sublist iend isep)))
-	      (t (setq rtn (concat rtn	;; previous list
-				   lsep	;; list separator
-				   (org-list-to-generic sublist p)
-				   lsep	;; list separator
-				   )))))
-      (format wrapper rtn))))
+	 (cboff (plist-get p :cboff))
+	 (export-item
+	  (function
+	   ;; Export an item ITEM of type TYPE. First string in item
+	   ;; is treated in a special way as it can bring extra
+	   ;; information that needs to be processed.
+	   (lambda (item type)
+	     (let ((fmt (if (eq type 'descriptive)
+			    (concat (org-trim istart) "%s" ddend iend isep)
+			  (concat istart "%s" iend isep)))
+		   (first (car item)))
+	       ;; Replace checkbox if any is found.
+	       (cond
+		((string-match "\\[CBON\\]" first)
+		 (setq first (replace-match cbon t t first)))
+		((string-match "\\[CBOFF\\]" first)
+		 (setq first (replace-match cboff t t first)))
+		((string-match "\\[-\\]" first)
+		 (setq first (replace-match "$\\boxminus$" t t first))))
+	       ;; Insert descriptive term if TYPE is `descriptive'.
+	       (when (and (eq type 'descriptive)
+			  (string-match "^\\(.*\\)[ \t]+::" first))
+		 (setq first (concat
+			      dtstart (org-trim (match-string 1 first)) dtend
+			      ddstart (org-trim (substring first (match-end 0))))))
+	       (setcar item first)
+	       (format fmt (mapconcat
+			    (lambda (e)
+			      (if (stringp e) e (funcall export-sublist e)))
+			    item isep))))))
+	 (export-sublist
+	  (function
+	   ;; Export sublist SUB
+	   (lambda (sub)
+	     (let* ((type (car sub))
+		    (items (cdr sub))
+		    (fmt (cond
+			  (splicep "%s")
+			  ((eq type 'ordered)
+			   (concat ostart "\n%s" oend))
+			  ((eq type 'descriptive)
+			   (concat dstart "\n%s" dend))
+			  (t (concat ustart "\n%s" uend)))))
+	       (format fmt (mapconcat
+			    (lambda (e) (funcall export-item e type))
+			    items lsep)))))))
+    (concat (funcall export-sublist list) "\n")))
 
 (defun org-list-to-latex (list &optional params)
   "Convert LIST into a LaTeX list.
@@ -2558,7 +2630,7 @@ with overruling parameters for `org-list-to-generic'."
     '(:splicep nil :ostart "\\begin{enumerate}" :oend "\\end{enumerate}"
 	       :ustart "\\begin{itemize}" :uend "\\end{itemize}"
 	       :dstart "\\begin{description}" :dend "\\end{description}"
-	       :dtstart "[" :dtend "]"
+	       :dtstart "[" :dtend "] "
 	       :ddstart "" :ddend ""
 	       :istart "\\item " :iend ""
 	       :isep "\n" :lsep "\n"
@@ -2591,8 +2663,8 @@ with overruling parameters for `org-list-to-generic'."
    (org-combine-plists
     '(:splicep nil :ostart "@itemize @minus" :oend "@end itemize"
 	       :ustart "@enumerate" :uend "@end enumerate"
-	       :dstart "@table" :dend "@end table"
-	       :dtstart "@item " :dtend "\n"
+	       :dstart "@table @asis" :dend "@end table"
+	       :dtstart " " :dtend "\n"
 	       :ddstart "" :ddend ""
 	       :istart "@item\n" :iend ""
 	       :isep "\n" :lsep "\n"
