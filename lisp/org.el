@@ -18817,9 +18817,9 @@ If point is in an inline task, mark that task instead."
 		(org-get-indentation)
 	      (org-get-indentation (match-string 0)))))
      ;; Lists
-     ((org-in-item-p)
-      (org-beginning-of-item)
-      (looking-at "[ \t]*\\(\\S-+\\)[ \t]*\\(\\(:?\\[@\\(:?start:\\)?[0-9]+\\][ \t]*\\)?\\[[- X]\\][ \t]*\\|.*? :: \\)?")
+     ((let ((in-item-p (org-in-item-p)))
+	(and in-item-p (goto-char in-item-p)))
+      (or (org-at-item-description-p) (org-at-item-p))
       (setq bpos (match-beginning 1) tpos (match-end 0)
 	    bcol (progn (goto-char bpos) (current-column))
 	    tcol (progn (goto-char tpos) (current-column)))
@@ -18840,7 +18840,11 @@ If point is in an inline task, mark that task instead."
 		      (and (looking-at "[ \t]*#\\+end_")
 			   (re-search-backward "[ \t]*#\\+begin_"nil t))
 		      (looking-at "[ \t]*[\n:#|]")
-		      (and (org-in-item-p) (goto-char (org-list-top-point)))
+		      (let ((itemp (org-in-item-p)))
+			(and itemp
+			     (goto-char itemp)
+			     (goto-char
+			      (org-list-get-top-point (org-list-struct)))))
 		      (and (not inline-task-p)
 			   (featurep 'org-inlinetask)
 			   (org-inlinetask-in-task-p)
