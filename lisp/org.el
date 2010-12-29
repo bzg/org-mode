@@ -11819,11 +11819,13 @@ EXTRA is additional text that will be inserted into the notes buffer."
 (defun org-skip-over-state-notes ()
   "Skip past the list of State notes in an entry."
   (if (looking-at "\n[ \t]*- State") (forward-char 1))
-  (when (org-in-item-p)
-    (let ((limit (org-list-bottom-point)))
-      (while (looking-at "[ \t]*- State")
-	(goto-char (or (org-get-next-item (point) limit)
-		       (org-get-end-of-item limit)))))))
+  (let ((itemp (org-in-item-p)))
+    (when itemp
+      (let* ((struct (progn (goto-char itemp) (org-list-struct)))
+	     (prevs (org-list-struct-prev-alist struct)))
+	(while (looking-at "[ \t]*- State")
+	  (goto-char (or (org-list-get-next-item (point) struct prevs)
+			 (org-list-get-item-end (point) struct))))))))
 
 (defun org-add-log-note (&optional purpose)
   "Pop up a window for taking a note, and add this note later at point."
@@ -11909,17 +11911,19 @@ EXTRA is additional text that will be inserted into the notes buffer."
 	  (end-of-line 1)
 	  (if (not (bolp)) (let ((inhibit-read-only t)) (insert "\n")))
 	  (setq ind (save-excursion
-		      (if (org-in-item-p)
-			  (progn
-			    (goto-char (org-list-top-point))
-			    (org-get-indentation))
-			(skip-chars-backward " \r\t\n")
-			(cond
-			 ((and (org-at-heading-p)
-			       org-adapt-indentation)
-			  (1+ (org-current-level)))
-			 ((org-at-heading-p) 0)
-			 (t (org-get-indentation))))))
+		      (let ((itemp (org-in-item-p)))
+			(if itemp
+			    (progn
+			      (goto-char itemp)
+			      (org-list-get-ind
+			       (org-list-get-top-point (org-list-struct))))
+			  (skip-chars-backward " \r\t\n")
+			  (cond
+			   ((and (org-at-heading-p)
+				 org-adapt-indentation)
+			    (1+ (org-current-level)))
+			   ((org-at-heading-p) 0)
+			   (t (org-get-indentation)))))))
 	  (setq bul (org-list-bullet-string "-"))
 	  (org-indent-line-to ind)
 	  (insert bul (pop lines))

@@ -76,7 +76,8 @@
 (declare-function org-in-item-p "org-list" ())
 (declare-function org-list-parse-list "org-list" (&optional delete))
 (declare-function org-list-to-generic "org-list" (LIST PARAMS))
-(declare-function org-list-bottom-point "org-list" ())
+(declare-function org-list-struct "org-list" ())
+(declare-function org-list-get-bottom-point "org-list" (struct))
 
 (defgroup org-babel nil
   "Code block evaluation and management in `org-mode' documents."
@@ -1582,7 +1583,9 @@ code ---- the results are extracted in the syntax of the source
   (save-excursion
     (cond
      ((org-at-table-p) (progn (goto-char (org-table-end)) (point)))
-     ((org-at-item-p) (- (org-list-bottom-point) 1))
+     ((org-at-item-p) (save-excursion
+			(org-beginning-of-item)
+			(1- (org-list-get-bottom-point (org-list-struct)))))
      (t
       (let ((case-fold-search t)
 	    (blocks-re (regexp-opt
