@@ -29,6 +29,32 @@
 
 ;; This file contains the code dealing with plain lists in Org-mode.
 
+;; The fundamental idea behind lists work is to use structures. A
+;; structure is a snapshot of the list, in the shape of data tree (see
+;; `org-list-struct').
+
+;; Once the list structure is stored, it is possible to make changes
+;; directly on it or get useful information on the list, with helper
+;; functions `org-list-struct-parent-alist' and
+;; `org-list-struct-prev-alist', and using accessors provided in the
+;; file.
+
+;; Structure is repaired with `org-list-struct-fix-struct'. Then
+;; changes are applied to buffer with `org-list-struct-apply-struct'.
+
+;; So any function working on plain lists should follow this template:
+;; 1. Verify point is in a list and grab item beginning (with the same
+;;    function `org-in-item-p') ;
+;; 2. Get list structure ;
+;; 3. Compute one, or both, helper functions depending on required
+;;    accessors ;
+;; 4. Proceed with the modifications ;
+;; 5. Then fix the structure one last time and apply it on buffer.
+
+;; It is usally a bad idea to use directly an interactive function
+;; inside a function, as those read the whole list structure another
+;; time.
+
 ;;; Code:
 
 (eval-when-compile
@@ -169,12 +195,11 @@ Valid values are: `regexp', `indent' or `both'.
 
 When set to `regexp', Org will look into two variables,
 `org-empty-line-terminates-plain-lists' and the more general
-`org-list-end-regexp', to determine what will end lists. This is
-the fastest method.
+`org-list-end-regexp', to determine what will end lists.
 
 When set to `indent', a list will end whenever a line following
 an item, but not starting one, is less or equally indented than
-it.
+the first item of the list.
 
 When set to `both', each of the preceding methods is applied to
 determine lists endings. This is the default method."
@@ -323,7 +348,7 @@ Context is determined by reading `org-context' text property if
 applicable, or looking at Org syntax around.
 
 Context will be an alist like (MIN MAX CONTEXT) where MIN and MAX
-are boundaries and CONTEXT is a symbol among `nil', `drawer',
+are boundaries and CONTEXT is a symbol among nil, `drawer',
 `block', `invalid' and `inlinetask'.
 
 Symbols `block' and `invalid' refer to `org-list-blocks'."
@@ -463,7 +488,9 @@ Arguments REGEXP, BOUND and NOERROR are similar to those used in
 
 (defun org-list-separating-blank-lines-number (pos struct prevs)
   "Return number of blank lines that should separate items in list.
-POS is the position at item beginning to be considered.
+POS is the position at item beginning to be considered. STRUCT is
+the list structure. PREVS is the alist of previous items. See
+`org-list-struct-prev-alist'.
 
 Assume point is at item's beginning. If the item is alone, apply
 some heuristics to guess the result."
@@ -655,7 +682,7 @@ If a region is active, all items inside will be moved.
 If NO-SUBTREE is non-nil, only indent the item itself, not its
 children.
 
-Return t if successful."
+STRUCT is the list structure. Return t if successful."
   (save-excursion
     (beginning-of-line)
     (let* ((regionp (org-region-active-p))
@@ -735,7 +762,7 @@ Return t if successful."
 ;;; Predicates
 
 (defun org-in-item-p ()
-  "Is the cursor inside a plain list?
+  "Return item beginning position when in a plain list, nil otherwise.
 This checks `org-list-ending-method'."
   (save-excursion
     (beginning-of-line)
@@ -1027,16 +1054,6 @@ item is invisible."
 
 ;;; Structures
 
-;; The idea behind structures is to avoid moving back and forth in the
-;; buffer on costly operations like indenting or fixing bullets.
-
-;; It achieves this by taking a snapshot of an interesting part of the
-;; list, in the shape of an alist, using `org-list-struct'.
-
-;; It then proceeds to changes directly on the alist, with the help of
-;; and `org-list-struct-origins'. When those are done,
-;; `org-list-struct-apply-struct' applies the changes to the buffer.
-
 (defun org-list-struct ()
   "Return structure of list at point.
 
@@ -1047,6 +1064,23 @@ values are:
 3. bullet counter, if any,
 4. checkbox, if any,
 5. position at item end.
+
+Thus the following list, where numbers in parens are
+point-at-bol:
+
+- [X] first item                             (1)
+  1. sub-item 1                              (18)
+  5. [@5] sub-item 2                         (34)
+  some other text belonging to first item    (55)
+- last item                                  (97)
+                                             (109)
+
+will get the following structure:
+
+\(\(1 0 \"- \"  nil [X] 92)
+ \(18 2 \"1. \"  nil nil 34\)
+ \(34 2 \"5. \" \"5\" nil 55\)
+ \(97 0 \"- \"  nil nil 109\)\)
 
 Assume point is at an item."
   (save-excursion
@@ -1289,7 +1323,7 @@ PARENTS is the alist of items' parent. See
 
 (defun org-list-has-child-p (item struct)
   "Return a non-nil value if ITEM in STRUCT has a child.
-The value returned is the position of the first child of ITEM."
+Value returned is the position of the first child of ITEM."
   (let ((ind (org-list-get-ind item struct))
 	(child-maybe (car (nth 1 (member (assq item struct) struct)))))
     (when (and child-maybe
@@ -1310,8 +1344,7 @@ PREVS is the alist of previous items. See
 
 (defun org-list-get-subtree (item struct)
   "Return all items with ITEM as a common ancestor or nil.
-PREVS is the alist of previous items. See
-`org-list-struct-prev-alist'."
+STRUCT is the list structure considered."
   (let* ((item-end (org-list-get-item-end item struct))
 	 (sub-struct (cdr (member (assq item struct) struct)))
 	 subtree)
@@ -1420,7 +1453,7 @@ previous items. See `org-list-struct-prev-alist'."
   (org-list-get-nth 5 item struct))
 
 (defun org-list-get-item-end-before-blank (item struct)
-  "Return point at end of item, before any blank line.
+  "Return point at end of ITEM in STRUCT, before any blank line.
 Point returned is at end of line."
   (save-excursion
     (goto-char (org-list-get-item-end item struct))
@@ -1429,7 +1462,10 @@ Point returned is at end of line."
 
 (defun org-list-struct-fix-bul (struct prevs)
   "Verify and correct bullets for every association in STRUCT.
-\nThis function modifies STRUCT."
+PREVS is the alist of previous items. See
+`org-list-struct-prev-alist'.
+
+This function modifies STRUCT."
   (let ((fix-bul
 	 (function
 	  (lambda (item)
@@ -1455,6 +1491,9 @@ Point returned is at end of line."
 (defun org-list-struct-fix-ind (struct parents &optional bullet-size)
   "Verify and correct indentation for every association in STRUCT.
 
+PARENTS is the alist of items' parents. See
+`org-list-struct-parent-alist'.
+
 If numeric optional argument BULLET-SIZE is set, assume all
 bullets in list have this length to determine new indentation.
 
@@ -1478,10 +1517,14 @@ This function modifies STRUCT."
 (defun org-list-struct-fix-box (struct parents prevs &optional ordered)
   "Verify and correct checkboxes for every association in STRUCT.
 
+PARENTS is the alist of items' parents. See
+`org-list-struct-parent-alist'. PREVS is the alist of previous
+items. See `org-list-struct-prev-alist.
+
 If ORDERED is non-nil, a checkbox can only be checked when every
 checkbox before it is checked too.  If there was an attempt to
 break this rule, the function will return the blocking item.  In
-all others cases, the return value will be `nil'.
+all others cases, the return value will be nil.
 
 This function modifies STRUCT."
   (let ((all-items (mapcar 'car struct))
@@ -1534,7 +1577,9 @@ This function modifies STRUCT."
 	    (nth index all-items)))))))
 
 (defun org-list-struct-fix-struct (struct parents)
-  "Return STRUCT with correct bullets and indentation."
+  "Return STRUCT with correct bullets and indentation.
+PARENTS is the alist of items' parents. See
+`org-list-struct-parent-alist'."
   ;; Order of functions matters here: checkboxes and endings need
   ;; correct indentation to be set, and indentation needs correct
   ;; bullets.
@@ -1581,9 +1626,12 @@ This function modifies STRUCT."
   (org-list-struct-apply-struct struct old-struct)))
 
 (defun org-list-struct-outdent (start end struct parents)
-  "Outdent items in a structure.
-Items are indented when their key is between START, included, and
-END, excluded. STRUCT is the concerned structure."
+  "Outdent items between START and END in structure STRUCT.
+
+PARENTS is the alist of items' parents. See
+`org-list-struct-parent-alist'.
+
+START is included, END excluded."
   (let* (acc
 	 (out (lambda (cell)
 		(let* ((item (car cell))
@@ -1610,17 +1658,16 @@ END, excluded. STRUCT is the concerned structure."
     (mapcar out parents)))
 
 (defun org-list-struct-indent (start end struct parents prevs)
-  "Indent items in a structure.
-Items are indented when their key is between START, included, and
-END, excluded.
+  "Indent items between START and END in structure STRUCT.
 
 PARENTS is the alist of parents. See
 `org-list-struct-parent-alist'. PREVS is the alist of previous
 items. See `org-list-struct-prev-alist'.
 
-STRUCT is the concerned structure. It may be modified if
-`org-list-demote-modify-bullet' matches bullets between START and
-END."
+START is included and END excluded.
+
+STRUCT may be modified if `org-list-demote-modify-bullet' matches
+bullets between START and END."
   (let* (acc
 	 (set-assoc (lambda (cell) (setq acc (cons cell acc)) cell))
 	 (change-bullet-maybe
