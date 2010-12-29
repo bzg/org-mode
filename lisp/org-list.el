@@ -2223,20 +2223,23 @@ FUNCTION must be called with at least one argument: INIT-VALUE,
 that will contain the value returned by the function at the
 previous item, plus ARGS extra arguments.
 
+FUNCTION is applied on items in reverse order.
+
 As an example, (org-apply-on-list (lambda (result) (1+ result)) 0)
 will return the number of items in the current list.
 
 Sublists of the list are skipped.  Cursor is always at the
 beginning of the item."
-  (let* ((pos (copy-marker (point)))
-	 (end (copy-marker (org-list-bottom-point)))
-	 (next-p (copy-marker (org-get-beginning-of-list (org-list-top-point))))
+  (let* ((struct (org-list-struct))
+	 (prevs (org-list-struct-prev-alist struct))
+	 (item (copy-marker (point-at-bol)))
+	 (all (org-list-get-all-items (marker-position item) struct prevs))
 	 (value init-value))
-    (while (< next-p end)
-      (goto-char next-p)
-      (set-marker next-p (or (org-get-next-item (point) end) end))
-      (setq value (apply function value args)))
-    (goto-char pos)
+    (mapc (lambda (e)
+	    (goto-char e)
+	    (setq value (apply function value args)))
+	  (nreverse all))
+    (goto-char item)
     value))
 
 (defun org-sort-list (&optional with-case sorting-type getkey-func compare-func)

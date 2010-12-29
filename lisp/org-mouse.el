@@ -579,9 +579,12 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
 
 (defun org-mouse-for-each-item (funct)
   ;; Functions called by `org-apply-on-list' need an argument
-  (let ((wrap-fun (lambda (c) (funcall funct))))
-    (when (org-in-item-p)
-      (org-apply-on-list wrap-fun nil))))
+  (let ((wrap-fun (lambda (c) (funcall funct)))
+	(item-beg (org-in-item-p)))
+    (when item-beg
+      (save-excursion
+	(goto-char item-beg)
+	(org-apply-on-list wrap-fun nil)))))
 
 (defun org-mouse-bolp ()
   "Return true if there only spaces, tabs, and '*' before point.
