@@ -333,13 +333,15 @@ of `org-plain-list-ordered-item-terminator'."
   "Regexp matching the beginning of a plain list item.")
 
 (defconst org-list-full-item-re
-  (concat "[ \t]*\\(\\(?:[-+*]\\|[0-9]+[.)]\\)[ \t]+\\)"
+  (concat "^[ \t]*\\(\\(?:[-+*]\\|[0-9]+[.)]\\)[ \t]+\\)"
 	  "\\(?:\\[@\\(?:start:\\)?\\([0-9]+\\)\\]\\)?"
-	  "\\(?:\\(\\[[ X-]\\]\\)[ \t]+\\)?")
+	  "\\(?:\\(\\[[ X-]\\]\\)[ \t]+\\)?"
+	  "\\(?:\\(.*\\)[ \t]+::[ \t]+\\)?")
   "Matches a list item and puts everything into groups:
-group 1: the bullet
-group 2: the counter
-group 3: the checkbox")
+group 1: bullet
+group 2: counter
+group 3: checkbox
+group 4: description tag")
 
 (defun org-list-context ()
   "Determine context, and its boundaries, around point.
@@ -573,8 +575,7 @@ function ends."
 	   (prevs (org-list-struct-prev-alist struct))
 	   (item-end (org-list-get-item-end item struct))
 	   (item-end-no-blank (org-list-get-item-end-before-blank item struct))
-	   (beforep (and (or (org-at-item-description-p)
-			     (looking-at org-list-full-item-re))
+	   (beforep (and (looking-at org-list-full-item-re)
 			 (<= pos (match-end 0))))
 	   (split-line-p (org-get-alist-option org-M-RET-may-split-line 'item))
 	   (blank-nb (org-list-separating-blank-lines-number
@@ -613,19 +614,19 @@ function ends."
       ;; 5. Add new item to STRUCT.
       (mapc (lambda (e)
       	      (let ((p (car e))
-      		    (end (nth 5 e)))
+      		    (end (nth 6 e)))
       		(cond
 		 ;; Before inserted item, positions don't change but
 		 ;; an item ending after insertion has its end shifted
 		 ;; by SIZE-OFFSET.
 		 ((< p item)
-		  (when (> end item) (setcar (nthcdr 5 e) (+ end size-offset))))
+		  (when (> end item) (setcar (nthcdr 6 e) (+ end size-offset))))
 		 ;; Trivial cases where current item isn't split in
 		 ;; two. Just shift every item after new one by
 		 ;; ITEM-SIZE.
 		 ((or beforep (not split-line-p))
 		  (setcar e (+ p item-size))
-		  (setcar (nthcdr 5 e) (+ end item-size)))
+		  (setcar (nthcdr 6 e) (+ end item-size)))
 		 ;; Item is split in two: elements before POS are just
 		 ;; shifted by ITEM-SIZE. In the case item would end
 		 ;; after split POS, ending is only shifted by
@@ -633,22 +634,22 @@ function ends."
 		 ((< p pos)
 		  (setcar e (+ p item-size))
 		  (if (< end pos)
-		      (setcar (nthcdr 5 e) (+ end item-size))
-		    (setcar (nthcdr 5 e) (+ end size-offset))))
+		      (setcar (nthcdr 6 e) (+ end item-size))
+		    (setcar (nthcdr 6 e) (+ end size-offset))))
 		 ;; Elements after POS are moved into new item. Length
 		 ;; of ITEM-SEP has to be removed as ITEM-SEP
 		 ;; doesn't appear in buffer yet.
 		 ((< p item-end)
 		  (setcar e (+ p size-offset (- item pos (length item-sep))))
 		  (if (= end item-end)
-		      (setcar (nthcdr 5 e) (+ item item-size))
-		    (setcar (nthcdr 5 e)
+		      (setcar (nthcdr 6 e) (+ item item-size))
+		    (setcar (nthcdr 6 e)
 			    (+ end size-offset
 			       (- item pos (length item-sep))))))
 		 ;; Elements at ITEM-END or after are only shifted by
 		 ;; SIZE-OFFSET.
 		 (t (setcar e (+ p size-offset))
-		    (setcar (nthcdr 5 e) (+ end size-offset))))))
+		    (setcar (nthcdr 6 e) (+ end size-offset))))))
       	    struct)
       (setq struct (sort
       		    (cons (list item ind bullet nil box (+ item item-size))
@@ -664,8 +665,7 @@ function ends."
 		    item struct (org-list-struct-prev-alist struct))))
       (org-list-struct-fix-struct struct (org-list-struct-parent-alist struct))
       (when checkbox (org-update-checkbox-count-maybe))
-      (or (org-at-item-description-p)
-	  (looking-at org-list-full-item-re))
+      (looking-at org-list-full-item-re)
       (goto-char (match-end 0))
       t)))
 
@@ -943,22 +943,22 @@ This function modifies STRUCT."
 		(cond
 		 ((< pos beg-A))
 		 ((memq pos sub-A)
-		  (let ((end-e (nth 5 e)))
+		  (let ((end-e (nth 6 e)))
 		    (setcar e (+ pos (- end-B-no-blank end-A-no-blank)))
-		    (setcar (nthcdr 5 e)
+		    (setcar (nthcdr 6 e)
 			    (+ end-e (- end-B-no-blank end-A-no-blank)))
-		    (when (= end-e end-A) (setcar (nthcdr 5 e) end-B))))
+		    (when (= end-e end-A) (setcar (nthcdr 6 e) end-B))))
 		 ((memq pos sub-B)
-		  (let ((end-e (nth 5 e)))
+		  (let ((end-e (nth 6 e)))
 		    (setcar e (- (+ pos beg-A) beg-B))
-		    (setcar (nthcdr 5 e) (+ end-e (- beg-A beg-B)))
+		    (setcar (nthcdr 6 e) (+ end-e (- beg-A beg-B)))
 		    (when (= end-e end-B)
-		      (setcar (nthcdr 5 e)
+		      (setcar (nthcdr 6 e)
 			      (+ beg-A size-B (- end-A end-A-no-blank))))))
 		 ((< pos beg-B)
-		  (let ((end-e (nth 5 e)))
+		  (let ((end-e (nth 6 e)))
 		    (setcar e (+ pos (- size-B size-A)))
-		    (setcar (nthcdr 5 e) (+ end-e (- size-B size-A))))))))
+		    (setcar (nthcdr 6 e) (+ end-e (- size-B size-A))))))))
 	    struct)
       (sort struct (lambda (e1 e2) (< (car e1) (car e2)))))))
 
@@ -1063,7 +1063,8 @@ values are:
 2. bullet with trailing whitespace,
 3. bullet counter, if any,
 4. checkbox, if any,
-5. position at item end.
+5. position at item end,
+6. description tag, if any.
 
 Thus the following list, where numbers in parens are
 point-at-bol:
@@ -1073,14 +1074,16 @@ point-at-bol:
   5. [@5] sub-item 2                         (34)
   some other text belonging to first item    (55)
 - last item                                  (97)
-                                             (109)
+  + tag :: description                       (109)
+                                             (131)
 
 will get the following structure:
 
-\(\(1 0 \"- \"  nil [X] 92)
- \(18 2 \"1. \"  nil nil 34\)
- \(34 2 \"5. \" \"5\" nil 55\)
- \(97 0 \"- \"  nil nil 109\)\)
+\(\(1 0 \"- \"  nil [X] nil 97)
+ \(18 2 \"1. \"  nil nil nil 34\)
+ \(34 2 \"5. \" \"5\" nil nil 55\)
+ \(97 0 \"- \"  nil nil nil 131\)
+ \(109 2 \"+ \" nil nil \"tag\" 131\)
 
 Assume point is at an item."
   (save-excursion
@@ -1106,9 +1109,10 @@ Assume point is at an item."
 	       (looking-at org-list-full-item-re)
 	       (list (point)
 		     ind
-		     (match-string-no-properties 1)   ; bullet
-		     (match-string-no-properties 2)   ; counter
-		     (match-string-no-properties 3)))))	; checkbox
+		     (match-string-no-properties 1)	; bullet
+		     (match-string-no-properties 2)	; counter
+		     (match-string-no-properties 3)	; checkbox
+		     (match-string-no-properties 4)))))	; description tag
 	   (end-before-blank
 	    ;; Ensure list ends at the first blank line.
 	    (function
@@ -1276,7 +1280,7 @@ This function modifies STRUCT."
 	 (while (or (<= (cdar endings) pos))
 	   (pop endings))
 	 ;; add end position to item assoc
-	 (let ((old-end (nthcdr 5 elt))
+	 (let ((old-end (nthcdr 6 elt))
 	       (new-end (assoc-default ind endings '<=)))
 	   (if old-end
 	       (setcar old-end new-end)
@@ -1285,7 +1289,7 @@ This function modifies STRUCT."
 
 (defun org-list-struct-prev-alist (struct)
   "Return alist between item and previous item in STRUCT."
-  (let ((item-end-alist (mapcar (lambda (e) (cons (car e) (nth 5 e)))
+  (let ((item-end-alist (mapcar (lambda (e) (cons (car e) (nth 6 e)))
 				struct)))
     (mapcar (lambda (e)
 	      (let ((prev (car (rassq (car e) item-end-alist))))
@@ -1448,9 +1452,13 @@ previous items. See `org-list-struct-prev-alist'."
 \nThis function modifies STRUCT."
   (org-list-set-nth 4 item struct checkbox))
 
-(defun org-list-get-item-end (item struct)
+(defun org-list-get-tag (item struct)
   "Return end position of ITEM in STRUCT."
   (org-list-get-nth 5 item struct))
+
+(defun org-list-get-item-end (item struct)
+  "Return end position of ITEM in STRUCT."
+  (org-list-get-nth 6 item struct))
 
 (defun org-list-get-item-end-before-blank (item struct)
   "Return point at end of ITEM in STRUCT, before any blank line.
@@ -1879,10 +1887,9 @@ Return t at each successful move."
 	   (struct (org-list-struct))
 	   (ind (org-list-get-ind (point-at-bol) struct)))
       ;; Check that item is really empty
-      (when (and (or (org-at-item-description-p)
-		     (save-excursion
-		       (beginning-of-line)
-		       (looking-at org-list-full-item-re)))
+      (when (and (save-excursion
+		   (beginning-of-line)
+		   (looking-at org-list-full-item-re))
 		 (>= (match-end 0) (save-excursion
 				     (goto-char (org-list-get-item-end
 						 (point-at-bol) struct))
@@ -2422,19 +2429,19 @@ Point is left at list end."
 	 out
 	 (get-list-type
 	  (function
-	   ;; determine type of list by looking at item at POS.
-	   (lambda (pos)
-	     (save-excursion
-	       (goto-char pos)
-	       (cond ((org-looking-at-p "^[ \t]*[0-9]") 'ordered)
-		     ((org-at-item-description-p) 'descriptive)
-		     (t 'unordered))))))
+	   ;; determine type of list by getting info on item POS in
+	   ;; STRUCT.
+	   (lambda (pos struct)
+	     (cond ((string-match "[0-9]" (org-list-get-bullet pos struct))
+		    'ordered)
+		   ((org-list-get-tag pos struct) 'descriptive)
+		   (t 'unordered)))))
 	 (parse-sublist
 	  (function
 	   ;; return a list whose car is list type and cdr a list of
 	   ;; items' body.
 	   (lambda (e)
-	     (cons (funcall get-list-type (car e))
+	     (cons (funcall get-list-type (car e) struct)
 		   (mapcar parse-item e)))))
 	 (parse-item
 	  (function
