@@ -692,9 +692,13 @@ STRUCT is the list structure. Return t if successful."
 	   (parents (org-list-struct-parent-alist struct))
 	   (prevs (org-list-struct-prev-alist struct))
 	   ;; Are we going to move the whole list?
-	   (specialp (and (cdr (assq 'indent org-list-automatic-rules))
-			  (not no-subtree)
-			  (= top (point)))))
+	   (specialp
+	    (and (= top (point))
+		 (cdr (assq 'indent org-list-automatic-rules))
+		 (if no-subtree
+		     (error
+		      "First item of list cannot move without its subtree")
+		   t))))
       ;; Determine begin and end points of zone to indent. If moving
       ;; more than one item, save them for subsequent moves.
       (unless (and (memq last-command '(org-shiftmetaright org-shiftmetaleft))
