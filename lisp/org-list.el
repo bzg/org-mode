@@ -652,7 +652,7 @@ function ends."
 		    (setcar (nthcdr 6 e) (+ end size-offset))))))
       	    struct)
       (setq struct (sort
-      		    (cons (list item ind bullet nil box (+ item item-size))
+      		    (cons (list item ind bullet nil box nil (+ item item-size))
       			  struct)
       		    (lambda (e1 e2) (< (car e1) (car e2)))))
       ;; 6. If not BEFOREP, new item must appear after ITEM, so
