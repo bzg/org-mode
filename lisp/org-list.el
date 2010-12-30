@@ -1403,14 +1403,22 @@ previous items. See `org-list-struct-prev-alist'."
       (setq first-item prev-item))
     first-item))
 
-(defun org-list-get-list-end (item struct prevs)
-  "Return point at end of sub-list ITEM belongs.
+(defalias 'org-list-get-first-item 'org-list-get-list-begin)
+
+(defun org-list-get-last-item (item struct prevs)
+  "Return point at last item of sub-list ITEM belongs.
 STRUCT is the structure of the list. PREVS is the alist of
 previous items. See `org-list-struct-prev-alist'."
   (let ((last-item item) next-item)
     (while (setq next-item (org-list-get-next-item last-item struct prevs))
       (setq last-item next-item))
-    (org-list-get-item-end last-item struct)))
+    last-item))
+
+(defun org-list-get-list-end (item struct prevs)
+  "Return point at end of sub-list ITEM belongs.
+STRUCT is the structure of the list. PREVS is the alist of
+previous items. See `org-list-struct-prev-alist'."
+  (org-list-get-item-end (org-list-get-list-last item struct prevs) struct))
 
 (defun org-list-get-nth (n key struct)
   "Return the Nth value of KEY in STRUCT."
