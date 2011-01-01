@@ -6486,7 +6486,9 @@ and by additional input from the age of a schedules or deadline entry."
       (org-show-context 'agenda)
       (save-excursion
 	(and (outline-next-heading)
-	     (org-flag-heading nil)))) ; show the next heading
+	     (org-flag-heading nil))))	; show the next heading
+    (when (outline-invisible-p)
+      (show-entry))			; display invisible text
     (recenter (/ (window-height) 2))
     (run-hooks 'org-agenda-after-show-hook)
     (and highlight (org-highlight (point-at-bol) (point-at-eol)))))
@@ -6672,7 +6674,9 @@ at the text of the entry itself."
 	(org-show-context 'agenda)
 	(save-excursion
 	  (and (outline-next-heading)
-	       (org-flag-heading nil)))))))  ; show the next heading
+	       (org-flag-heading nil))) ; show the next heading
+	(when (outline-invisible-p)
+	  (show-entry))))))		; display invisible text
 
 (defun org-agenda-goto-mouse (ev)
   "Go to the Org-mode file which contains the item at the mouse click."
