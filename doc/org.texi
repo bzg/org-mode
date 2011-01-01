@@ -12179,6 +12179,30 @@ executions of the code block.  If the code block has not
 changed since the last time it was evaluated, it will not be re-evaluated.
 @end itemize
 
+Code block caches notice if the value of a variable argument
+to the code block has changed. If this is the case, the cache is
+invalidated and the code block is re-run.  In the following example,
+@code{caller} will not be re-run unless the results of @code{random} have
+changed since it was last run.
+
+@example
+ #+srcname: random
+ #+begin_src R :cache yes
+ runif(1)
+ #+end_src
+
+ #+results[a2a72cd647ad44515fab62e144796432793d68e1]: random
+ 0.4659510825295
+
+ #+srcname: caller
+ #+begin_src emacs-lisp :var x=random :cache yes
+ x
+ #+end_src
+
+ #+results[bec9c8724e397d5df3b696502df3ed7892fc4f5f]: caller
+ 0.254227238707244
+@end example
+
 @node sep, hlines, cache, Specific header arguments
 @subsubsection @code{:sep}
 
