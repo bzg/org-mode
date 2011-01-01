@@ -827,14 +827,14 @@ already gone.  Any prefix argument will be passed to the refile comand."
     (if (org-capture-get :prepend)
 	(progn
 	  (goto-char beg)
-	  (if (org-search-forward-unenclosed org-item-beginning-re end t)
+	  (if (org-list-search-forward org-item-beginning-re end t)
 	      (progn
 		(goto-char (match-beginning 0))
 		(setq ind (org-get-indentation)))
 	    (goto-char end)
 	    (setq ind 0)))
       (goto-char end)
-      (if (org-search-backward-unenclosed org-item-beginning-re beg t)
+      (if (org-list-search-backward org-item-beginning-re beg t)
 	  (progn
 	    (setq ind (org-get-indentation))
 	    (org-end-of-item))

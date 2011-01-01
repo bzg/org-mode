@@ -432,11 +432,10 @@ Contexts `block' and `invalid' refer to `org-list-blocks'."
 	;; Return the closest context around
 	(assq (apply 'max (mapcar 'car context-list)) context-list)))))
 
-(defun org-list-search-unenclosed-generic (search re bound noerr)
-  "Search a string outside blocks and protected places.
+(defun org-list-search-generic (search re bound noerr)
+  "Search a string in valid contexts for lists.
 Arguments SEARCH, RE, BOUND and NOERR are similar to those in
-`search-forward', `search-backward', `re-search-forward' and
-`re-search-backward'."
+`re-search-forward'."
   (catch 'exit
     (let ((origin (point)))
       (while t
@@ -444,25 +443,23 @@ Arguments SEARCH, RE, BOUND and NOERR are similar to those in
 	(unless (funcall search re bound noerr)
 	  (throw 'exit (and (goto-char (if (memq noerr '(t nil)) origin bound))
 			    nil)))
-	;; 2. Match not in block or protected: return point. Else
-	;; skip the block and carry on.
-	(unless (or (get-text-property (match-beginning 0) 'org-protected)
-		    (org-list-maybe-skip-block search bound))
-	  (throw 'exit (point)))))))
+	;; 2. Match in an `invalid' context: continue searching. Else,
+	;;    return point.
+	(unless (eq (org-list-context) 'invalid) (throw 'exit (point)))))))
 
-(defun org-search-backward-unenclosed (regexp &optional bound noerror)
-  "Like `re-search-backward' but don't stop inside blocks or protected places.
+(defun org-list-search-backward (regexp &optional bound noerror)
+  "Like `re-search-backward' but stop only where lists are recognized.
 Arguments REGEXP, BOUND and NOERROR are similar to those used in
 `re-search-backward'."
-  (org-list-search-unenclosed-generic
-   #'re-search-backward regexp (or bound (point-min)) noerror))
+  (org-list-search-generic #'re-search-backward
+			   regexp (or bound (point-min)) noerror))
 
-(defun org-search-forward-unenclosed (regexp &optional bound noerror)
-  "Like `re-search-forward' but don't stop inside blocks or protected places.
+(defun org-list-search-forward (regexp &optional bound noerror)
+  "Like `re-search-forward' but stop only where lists are recognized.
 Arguments REGEXP, BOUND and NOERROR are similar to those used in
 `re-search-forward'."
-  (org-list-search-unenclosed-generic
-   #'re-search-forward regexp (or bound (point-max)) noerror))
+  (org-list-search-generic #'re-search-forward
+			   regexp (or bound (point-max)) noerror))
 
 (defun org-list-at-regexp-after-bullet-p (regexp)
   "Is point at a list item with REGEXP after bullet?"
@@ -512,7 +509,7 @@ some heuristics to guess the result."
 	      usr-blank)
 	     ;; Are there blank lines inside the item ?
 	     ((save-excursion
-		(org-search-forward-unenclosed
+		(org-list-search-forward
 		 "^[ \t]*$" (org-list-get-item-end-before-blank pos struct) t))
 	      1)
 	     ;; No parent: no blank line.
@@ -1115,7 +1112,8 @@ Assume point is at an item."
       (save-excursion
 	(catch 'exit
 	  (while t
-	    (let ((ind (org-get-indentation)))
+	    (let ((ind (+ (or (get-text-property (point) 'original-indentation) 0)
+			  (org-get-indentation))))
 	      (cond
 	       ((<= (point) lim-up)
 		;; At upward limit: if we ended at an item, store it,
@@ -1185,7 +1183,8 @@ Assume point is at an item."
       ;;    of items in END-LST-2.
       (catch 'exit
       	(while t
-      	  (let ((ind (org-get-indentation)))
+      	  (let ((ind (+ (or (get-text-property (point) 'original-indentation) 0)
+			(org-get-indentation))))
       	    (cond
       	     ((>= (point) lim-down)
 	      ;; At downward limit: this is de facto the end of the
@@ -2028,8 +2027,7 @@ in subtree, ignoring drawers."
 	     ((org-region-active-p)
 	      (let ((limit (region-end)))
 		(goto-char (region-beginning))
-		(if (org-search-forward-unenclosed org-item-beginning-re
-						   limit t)
+		(if (org-list-search-forward org-item-beginning-re limit t)
 		    (setq lim-up (point-at-bol))
 		  (error "No item in region"))
 		(setq lim-down (copy-marker limit))))
@@ -2039,8 +2037,7 @@ in subtree, ignoring drawers."
 		(forward-line 1)
 		(when (looking-at org-drawer-regexp)
 		  (re-search-forward "^[ \t]*:END:" limit nil))
-		(if (org-search-forward-unenclosed org-item-beginning-re
-						   limit t)
+		(if (org-list-search-forward org-item-beginning-re limit t)
 		    (setq lim-up (point-at-bol))
 		  (error "No item in subtree"))
 		(setq lim-down (copy-marker limit))))
@@ -2068,8 +2065,8 @@ in subtree, ignoring drawers."
       ;; list; 3. move point after the list.
       (goto-char lim-up)
       (while (and (< (point) lim-down)
-		  (org-search-forward-unenclosed
-		   org-item-beginning-re lim-down 'move))
+		  (org-list-search-forward org-item-beginning-re
+					   lim-down 'move))
 	(let* ((struct (org-list-struct))
 	       (struct-copy (mapcar (lambda (e) (copy-alist e)) struct))
 	       (parents (org-list-struct-parent-alist struct))
@@ -2205,7 +2202,7 @@ With optional prefix argument ALL, do this for the whole buffer."
                 ;; This cookie is at an heading. Grab structure of
 		;; every list containing a checkbox between point and
 		;; next headline, and save them in STRUCTS-BACKUP
-		(while (org-search-forward-unenclosed box-re backup-end 'move)
+		(while (org-list-search-forward box-re backup-end 'move)
 		  (let* ((struct (org-list-struct))
 			 (bottom (org-list-get-bottom-point struct)))
 		    (push struct structs-backup)
@@ -2360,10 +2357,9 @@ compare entries."
 		     ;; If it is a timer list, convert timer to seconds
 		     ((org-at-item-timer-p)
 		      (org-timer-hms-to-secs (match-string 1)))
-		     ((or (org-search-forward-unenclosed org-ts-regexp
-							 (point-at-eol) t)
-			  (org-search-forward-unenclosed org-ts-regexp-both
-							 (point-at-eol) t))
+		     ((or (re-search-forward org-ts-regexp (point-at-eol) t)
+			  (re-search-forward org-ts-regexp-both
+					     (point-at-eol) t))
 		      (org-time-string-to-seconds (match-string 0)))
 		     (t (org-float-time now))))
 		   ((= dcst ?f)
