@@ -11603,6 +11603,33 @@ Similarly, it is possible to set header arguments for inline code blocks:
 src_haskell[:exports both]@{fac 5@}
 @end example
 
+Code block header arguments can span multiple lines using =#+header:= or
+=#+headers:= lines preceding a code block or nested in between the name and
+body of a named code block.
+
+Multi-line header arguments on an un-named code block:
+@example
+ #+headers: :var data1=1
+ #+begin_src emacs-lisp :var data2=2
+   (message "data1:%S, data2:%S" data1 data2)
+ #+end_src
+
+ #+results:
+ : data1:1, data2:2
+@end example
+
+Multi-line header arguments on a named code block:
+@example
+   #+source: named-block
+   #+header: :var data=2
+   #+begin_src emacs-lisp
+     (message "data:%S" data)
+   #+end_src
+
+   #+results: named-block
+   : data:2
+@end example
+
 @node Header arguments in function calls,  , Code block specific header arguments, Using header arguments
 @comment  node-name,  next,  previous,  up
 @subsubheading Header arguments in function calls
