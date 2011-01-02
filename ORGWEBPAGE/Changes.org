@@ -77,7 +77,7 @@ quarters.
 SQL code blocks can now be executed using the =myosql= engine on
 Windows systems.
 
-Thanks to S√©bastien Vauban for this contribution.
+Thanks to Sébastien Vauban for this contribution.
 
 **** Python code blocks now accept a =preamble= header argument
 This allows specification of coding declarations and library imports
@@ -88,7 +88,7 @@ For example
 
 #+begin_src org
   ,#+begin_src python :preamble # -*- coding: utf-8 -*- :return s
-  ,s = "√©"
+  ,s = "é"
   ,#+end_src
 #+end_src
 
@@ -135,7 +135,7 @@ export.  For example
   ,#+END_RESULT
 #+end_src
 
-Thanks to S√©bastien Vauban for persistently suggesting this enhancement.
+Thanks to Sébastien Vauban for persistently suggesting this enhancement.
 
 **** Code block error buffer wiped clean between executions
 Previously the code block error buffer accumulated errors making it
