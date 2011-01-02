@@ -1729,7 +1729,7 @@ These special properties will later be interpreted by the backend.
 	 (goto-char (point-min))
 	 (while (re-search-forward org-item-beginning-re nil t)
 	   (when (eq (nth 2 (org-list-context)) e) (funcall mark-list e))))
-       '(nil block)))))
+       (cons nil org-list-export-context)))))
 
 (defun org-export-attach-captions-and-attributes (backend target-alist)
   "Move #+CAPTION, #+ATTR_BACKEND, and #+LABEL text into text properties.

@@ -304,10 +304,18 @@ list, obtained by prompting the user."
 	  (list (symbol :tag "Major mode")
 		(string :tag "Format"))))
 
-;;; Internal functions
+(defvar org-list-forbidden-blocks '("example" "verse" "src")
+  "Names of blocks where lists are not allowed.
+Names must be in lower case.")
 
-(defconst org-list-blocks '("EXAMPLE" "VERSE" "SRC")
-  "Names of blocks where lists are not allowed.")
+(defvar org-list-export-context '(block inlinetask)
+  "Context types where lists will be interpreted during export.
+
+Valid types are `drawer', `inlinetask' and `block'. More
+specifically, type `block' is determined by the variable
+`org-list-forbidden-blocks'.")
+
+;;; Internal functions
 
 (defun org-list-end-re ()
   "Return the regex corresponding to the end of a list.
@@ -350,7 +358,7 @@ Context will be an alist like (MIN MAX CONTEXT) where MIN and MAX
 are boundaries and CONTEXT is a symbol among `drawer', `block',
 `invalid', `inlinetask' and nil.
 
-Contexts `block' and `invalid' refer to `org-list-blocks'."
+Contexts `block' and `invalid' refer to `org-list-forbidden-blocks'."
   (save-match-data
     (save-excursion
       (beginning-of-line)
@@ -409,7 +417,8 @@ Contexts `block' and `invalid' refer to `org-list-blocks'."
 		     (if (re-search-forward "^[ \t]*#\\+end_" next-head t)
 			 (1- (point-at-bol))
 		       next-head))
-		   (if (member (upcase (match-string 1)) org-list-blocks)
+		   (if (member (downcase (match-string 1))
+			       org-list-forbidden-blocks)
 		       'invalid
 		     'block)))))
 	     ;; Are we in an inlinetask?

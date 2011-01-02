@@ -2499,7 +2499,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 	   (insert (org-add-props res nil 'original-indentation
 				  (org-find-text-property-in-string
 				   'original-indentation res)))))))
-   '(block nil)))
+   (append org-list-export-context '(nil))))
 
 (defconst org-latex-entities
  '("\\!"
