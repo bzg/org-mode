@@ -1,9 +1,12 @@
+
 #+TITLE:     Org-Mode: Your Life in Plain Text
 #+LANGUAGE:  en
 #+EMAIL:     carsten at orgmode dot org
 #+OPTIONS:   H:3 num:nil toc:2 \n:nil @:t ::t |:t ^:t *:t TeX:t author:nil <:t LaTeX:t
 #+STYLE: <base href="http://orgmode.org/index.html" />
 #+STYLE: <link rel="stylesheet" href="http://orgmode.org/org.css" type="text/css" />
+
+
 
 #+begin_html
 <!-- The logo links to the root of the website -->
@@ -190,8 +193,8 @@ also download a [[http://repo.or.cz/w/org-mode.git/snapshot][tar.gz snapshot]] f
    - A [[http://gnu.manticore.es/manual-org-emacs][Spanish translation]] (version 6.21b).
 
 ** Reference card
-   - Download the [[http://orgmode.org/manual/orgcard.pdf][Refcard]] for org-mode
-   - There is also a [[http://orgmode.org/manual/orgcard.txt][text version]] of the
+   - Download the [[file:orgcard.pdf][Refcard]] for org-mode
+   - There is also a [[file:orgcard.txt][text version]] of the
      reference card.
 ** The FAQ
    - The [[http://orgmode.org/worg/org-faq.php][Org Mode FAQ]] is user-editable and is maintained by the [[http://orgmode.org/worg/][Worg
