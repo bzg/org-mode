@@ -2351,7 +2351,8 @@ compare entries."
 			     (skip-chars-forward " \r\t\n")
 			     (beginning-of-line)))
 	     (end-record (lambda ()
-			   (goto-char (org-list-get-item-end (point) struct))))
+			   (goto-char (org-list-get-item-end-before-blank
+				       (point) struct))))
 	     (value-to-sort
 	      (lambda ()
 		(when (looking-at "[ \t]*[-+*0-9.)]+\\([ \t]+\\[[- X]\\]\\)?[ \t]+")
@@ -2385,7 +2386,9 @@ compare entries."
 		   value-to-sort
 		   nil
 		   sort-func)
-	(org-list-repair nil)
+	;; Read and fix list again, as `sort-subr' probably destroyed
+	;; its structure.
+	(org-list-repair)
 	(run-hooks 'org-after-sorting-entries-or-items-hook)
 	(message "Sorting items...done")))))
 
