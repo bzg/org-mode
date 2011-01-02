@@ -813,7 +813,7 @@ amount of internal code cleanup.
 This replaces the earlier system org-remember.  The manual only
 describes org-capture, but for people who prefer to continue to
 use org-remember, we keep a static copy of the former manual
-section [[http://orgmode.org/org-remember.pdf][chapter about remember]].
+section [[http://orgmode.org/manual/org-remember.pdf][chapter about remember]].
 
 The new system has a technically cleaner implementation and more
 possibilities for capturing different types of data.  See
