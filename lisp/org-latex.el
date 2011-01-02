@@ -2460,22 +2460,46 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 
 (defun org-export-latex-lists ()
   "Convert plain text lists in current buffer into LaTeX lists."
-  (let (res)
-    (goto-char (point-min))
-    (while (org-search-forward-unenclosed org-item-beginning-re nil t)
-      (beginning-of-line)
-      (setq res (org-list-to-latex (org-list-parse-list t)
-				   org-export-latex-list-parameters))
-      (while (string-match "^\\(\\\\item[ \t]+\\)\\[@\\(?:start:\\)?\\([0-9]+\\)\\]"
-			   res)
-	(setq res (replace-match
-		   (concat (format "\\setcounter{enumi}{%d}"
-				   (1- (string-to-number
-					(match-string 2 res))))
-			   "\n"
-			   (match-string 1 res))
-		   t t res)))
-      (insert res))))
+  (mapc
+   (lambda (e)
+     ;; For each type of context allowed for list export (E), find
+     ;; every list, parse it, delete it and insert resulting
+     ;; conversion to latex (RES).
+     (let (res)
+       (goto-char (point-min))
+       (while (re-search-forward org-item-beginning-re nil t)
+	 (when (eq (get-text-property (point) 'list-context) e)
+	   (beginning-of-line)
+	   (setq res
+		 (org-list-to-latex
+		  ;; Narrowing is needed because we're converting
+		  ;; inner functions to outer ones.
+		  (save-restriction
+		    (narrow-to-region (point) (point-max))
+		    ;; `org-list-end-re' output has changed since
+		    ;; preprocess from org-exp.el. Tell it to
+		    ;; `org-list-parse-list'.
+		    (flet ((org-list-end-re nil "^ORG-LIST-END\n"))
+		      (org-list-parse-list t)))
+		  org-export-latex-list-parameters))
+	   ;; Replace any counter with its latex expression in output
+	   ;; string.
+	   (while (string-match
+		   "^\\(\\\\item[ \t]+\\)\\[@\\(?:start:\\)?\\([0-9]+\\)\\]"
+		   res)
+	     (setq res (replace-match
+			(concat (format "\\setcounter{enumi}{%d}"
+					(1- (string-to-number
+					     (match-string 2 res))))
+				"\n"
+				(match-string 1 res))
+			t t res)))
+	   ;; Extend previous value of original-indentation to the whole
+	   ;; string
+	   (insert (org-add-props res nil 'original-indentation
+				  (org-find-text-property-in-string
+				   'original-indentation res)))))))
+   '(block nil)))
 
 (defconst org-latex-entities
  '("\\!"

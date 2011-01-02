@@ -1089,8 +1089,8 @@ on this string to produce the exported version."
 				     (plist-get parameters :exclude-tags))
       (run-hooks 'org-export-preprocess-after-tree-selection-hook)
 
-      ;; Mark end of lists
-      (org-export-mark-list-ending backend)
+      ;; Mark lists
+      (org-export-mark-lists backend)
 
       ;; Export code blocks
       (org-export-blocks-preprocess)
@@ -1670,34 +1670,66 @@ These special cookies will later be interpreted by the backend."
 	(delete-region beg end)
 	(insert (org-add-props content nil 'original-indentation ind))))))
 
-(defun org-export-mark-list-ending (backend)
-  "Mark list endings with special cookies.
-These special cookies will later be interpreted by the backend.
+(defun org-export-mark-lists (backend)
+  "Mark list with special properties.
+These special properties will later be interpreted by the backend.
 `org-list-end-re' is replaced by a blank line in the process."
-  (let ((process-buffer
-	 (lambda (end-list-marker)
-	   (goto-char (point-min))
-	   (while (org-search-forward-unenclosed org-item-beginning-re nil t)
-	     (beginning-of-line)
-	     (goto-char (org-list-get-bottom-point (org-list-struct)))
-	     (when (and (not (eq org-list-ending-method 'indent))
-			(looking-at (org-list-end-re)))
-	       (replace-match "\n"))
-	     (unless (bolp) (insert "\n"))
-	     (unless (looking-at end-list-marker)
-	       (insert end-list-marker))
-	     (unless (eolp) (insert "\n"))))))
-  ;; We need to divide backends into 3 categories.
-  (cond
-   ;; 1. Backends using `org-list-parse-list' do not need markers.
-   ((memq backend '(latex))
-    nil)
-   ;; 2. Line-processing backends need to be told where lists end.
-   ((memq backend '(html docbook))
-    (funcall process-buffer "ORG-LIST-END\n"))
-   ;; 3. Others backends do not need to know this: clean list enders.
-   (t
-    (funcall process-buffer "")))))
+  (let ((mark-list
+	 (function
+	  ;; Mark a list with 3 properties: `list-item' which is
+	  ;; position at beginning of line, `list-struct' which is
+	  ;; list structure, and `list-prevs' which is the alist of
+	  ;; item and its predecessor. Leave point at list ending.
+	  (lambda (ctxt)
+	    (let* ((struct (org-list-struct))
+		   (top (org-list-get-top-point struct))
+		   (bottom (org-list-get-bottom-point struct))
+		   (prevs (org-list-struct-prev-alist struct))
+		   poi)
+	      ;; Get every item and ending position, without dups and
+	      ;; without bottom point of list.
+	      (mapc (lambda (e)
+		      (let ((pos (car e))
+			    (end (nth 6 e)))
+			(unless (memq pos poi)
+			  (push pos poi))
+			(unless (or (= end bottom) (memq end poi))
+			  (push end poi))))
+		    struct)
+	      (setq poi (sort poi '<))
+	      ;; For every point of interest, mark the whole line with
+	      ;; its position in list.
+	      (mapc
+	       (lambda (e)
+		 (goto-char e)
+		 (add-text-properties (point-at-bol) (point-at-eol)
+				      (list 'list-item (point-at-bol)
+					    'list-struct struct
+					    'list-prevs prevs)))
+	       poi)
+	      ;; Take care of bottom point. As it is probably at an
+	      ;; empty line, insert a virtual ending with required
+	      ;; property.
+	      (goto-char bottom)
+	      (when (and (not (eq org-list-ending-method 'indent))
+			 (looking-at (org-list-end-re)))
+		(replace-match ""))
+	      (unless (bolp) (insert "\n"))
+	      (insert
+	       (org-add-props "ORG-LIST-END\n" (list 'list-item bottom
+						     'list-struct struct
+						     'list-prevs prevs)))
+	      ;; Add `list-context' as text property between top and
+	      ;; bottom.
+	      (add-text-properties top (point) (list 'list-context ctxt)))))))
+    ;; Mark lists except for backends not interpreting them.
+    (unless (eq backend 'ascii)
+      (mapc
+       (lambda (e)
+	 (goto-char (point-min))
+	 (while (re-search-forward org-item-beginning-re nil t)
+	   (when (eq (nth 2 (org-list-context)) e) (funcall mark-list e))))
+       '(nil block)))))
 
 (defun org-export-attach-captions-and-attributes (backend target-alist)
   "Move #+CAPTION, #+ATTR_BACKEND, and #+LABEL text into text properties.

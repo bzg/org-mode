@@ -2494,13 +2494,12 @@ Point is left at list end."
     ;; store output, take care of cursor position and deletion of
     ;; list, then return output.
     (setq out (funcall parse-sublist (org-list-get-all-items top struct prevs)))
-    (goto-char bottom)
+    (goto-char top)
     (when delete
       (delete-region top bottom)
-      (save-match-data
-	(when (and (not (eq org-list-ending-method 'indent))
-		   (looking-at (org-list-end-re)))
-	  (replace-match "\n"))))
+      (when (and (not (eq org-list-ending-method 'indent))
+		 (looking-at (org-list-end-re)))
+	(replace-match "\n")))
     out))
 
 (defun org-list-make-subtree ()
