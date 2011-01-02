@@ -553,7 +553,7 @@ function ends."
     ;;    (BEFOREP), blank lines number separating items (BLANK-NB),
     ;;    position of split (POS) if we're allowed to (SPLIT-LINE-P).
     (let* ((pos (point))
-	   (item (goto-char (org-get-item-beginning)))
+	   (item (goto-char (org-list-get-item-begin)))
 	   (struct (org-list-struct))
 	   (prevs (org-list-struct-prev-alist struct))
 	   (item-end (org-list-get-item-end item struct))
