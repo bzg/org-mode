@@ -1410,7 +1410,7 @@ previous items. See `org-list-struct-prev-alist'."
   "Return point at end of sub-list ITEM belongs.
 STRUCT is the structure of the list. PREVS is the alist of
 previous items. See `org-list-struct-prev-alist'."
-  (org-list-get-item-end (org-list-get-list-last item struct prevs) struct))
+  (org-list-get-item-end (org-list-get-last-item item struct prevs) struct))
 
 (defun org-list-get-nth (n key struct)
   "Return the Nth value of KEY in STRUCT."
