@@ -2855,7 +2855,7 @@ Further control over the labels, type, content, and appearance of plots can
 be exercised through the @code{#+PLOT:} lines preceding a table.  See below
 for a complete list of Org-plot options.  For more information and examples
 see the Org-plot tutorial at
-@uref{http://orgmode.org/worg/org-tutorials/org-plot.php}.
+@uref{http://orgmode.org/worg/org-tutorials/org-plot.html}.
 
 @subsubheading Plot Options
 
@@ -10505,7 +10505,7 @@ customize along with a number of other options. For a more complete list, see
 @kbd{M-x customize-group @key{RET} org-export-taskjuggler @key{RET}}.
 
 For more information and examples see the Org-taskjuggler tutorial at
-@uref{http://orgmode.org/worg/org-tutorials/org-taskjuggler.php}.
+@uref{http://orgmode.org/worg/org-tutorials/org-taskjuggler.html}.
 
 @node Freemind export, XOXO export, TaskJuggler export, Exporting
 @section Freemind export
@@ -14413,7 +14413,7 @@ The easiest way to create that directory is to use a free
 @uref{http://dropbox.com,Dropbox.com} account@footnote{If you cannot use
 Dropbox, or if your version of MobileOrg does not support it, you can use a
 webdav server.  For more information, check out the documentation of MobileOrg and also this
-@uref{http://orgmode.org/worg/org-faq.php#mobileorg_webdav, FAQ entry}.}.
+@uref{http://orgmode.org/worg/org-faq.html#mobileorg_webdav, FAQ entry}.}.
 When MobileOrg first connects to your Dropbox, it will create a directory
 @i{MobileOrg} inside the Dropbox.  After the directory has been created, tell
 Emacs about it:
