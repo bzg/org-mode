@@ -17997,16 +17997,6 @@ With prefix arg UNCOMPILED, load the uncompiled versions."
       (concat "\"" (mapconcat 'identity (split-string s "\"") "\"\"") "\"")
     s))
 
-(defun org-plist-delete (plist property)
-  "Delete PROPERTY from PLIST.
-This is in contrast to merely setting it to 0."
-  (let (p)
-    (while plist
-      (if (not (eq property (car plist)))
-	  (setq p (plist-put p (car plist) (nth 1 plist))))
-      (setq plist (cddr plist)))
-    p))
-
 (defun org-force-self-insert (N)
   "Needed to enforce self-insert under remapping."
   (interactive "p")
