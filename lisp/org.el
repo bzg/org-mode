@@ -8140,9 +8140,13 @@ call CMD."
 
 ;;;; Archiving
 
-(defun org-get-category (&optional pos)
+(defun org-get-category (&optional pos force-refresh)
   "Get the category applying to position POS."
-  (get-text-property (or pos (point)) 'org-category))
+  (if force-refresh (org-refresh-category-properties))
+  (let ((pos (or pos (point))))
+    (or (get-text-property pos 'org-category)
+	(progn (org-refresh-category-properties)
+	       (get-text-property pos 'org-category)))))
 
 (defun org-refresh-category-properties ()
   "Refresh category text properties in the buffer."
@@ -13482,10 +13486,7 @@ things up because then unnecessary parsing is avoided."
 						       'add_times))
 		    props))
 	  (unless (assoc "CATEGORY" props)
-	    (setq value (or (org-get-category)
-			    (progn (org-refresh-category-properties)
-				   (org-get-category))))
-	    (push (cons "CATEGORY" value) props))
+	    (push (cons "CATEGORY" (org-get-category)) props))
 	  (append sum-props (nreverse props)))))))
 
 (defun org-entry-get (pom property &optional inherit literal-nil)

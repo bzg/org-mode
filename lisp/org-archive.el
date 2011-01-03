@@ -226,8 +226,7 @@ this heading."
       (save-excursion
 	(org-back-to-heading t)
 	;; Get context information that will be lost by moving the tree
-	(org-refresh-category-properties)
-	(setq category (org-get-category)
+	(setq category (org-get-category nil 'force-refresh)
 	      todo (and (looking-at org-todo-line-regexp)
 			(match-string 2))
 	      priority (org-get-priority
