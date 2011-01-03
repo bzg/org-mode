@@ -72,7 +72,10 @@
                     <input type="hidden" name="no_note" value="1" />
                     <input type="hidden" name="currency_code" value="EUR" />
                     <input type="hidden" name="tax" value="0" />
-                    <input type="image" src="http://lumiere.ens.fr/~guerry/bhl/img/donation.png" name="submit" alt="Make a donation!" />
+                    <input type="image" style="text-align:right;margin-left:auto;margin-right:0px;border-style:none;"
+                           src="http://www.paypal.com/en_US/i/btn/x-click-but04.gif" 
+                           name="submit" 
+                           alt="Make payments with PayPal - it's fast, free and secure!" />
                   </div>
                 </form>
 
