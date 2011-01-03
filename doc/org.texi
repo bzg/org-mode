@@ -3294,8 +3294,8 @@ to @kbd{C-n} and @kbd{C-p}
 @lisp
 (add-hook 'org-load-hook
   (lambda ()
-    (define-key 'org-mode-map "\C-n" 'org-next-link)
-    (define-key 'org-mode-map "\C-p" 'org-previous-link)))
+    (define-key org-mode-map "\C-n" 'org-next-link)
+    (define-key org-mode-map "\C-p" 'org-previous-link)))
 @end lisp
 @end table
 
