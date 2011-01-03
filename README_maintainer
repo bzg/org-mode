@@ -108,7 +108,7 @@ release.  The release process is a single make command:
 : make release TAG=7.13
 
 Before issuing this command, you should make sure that everything
-during the process will work right, you can do so my running
+during the process will work right, you can do so by running
 
 : make testrelease TAG=7.13
 
@@ -133,15 +133,17 @@ from maint with this command:
 
 ** Between releases
 
-While working on master between releases, I use something like
-7.02trans as the version string.  To set this version string in all
-relevant files, use
+While working on master between releases, I used to use something like
+7.02trans as the version string.  I no longer do this.  =M-x
+org-version= will spit ut complete version infor related to git, with
+the neares commit and tag.  I you ever need to set a special version
+number, use this:
 
 : UTILITIES/set_version 7.02trans
 
 and commit the result.  Note that the above command does not change
 the version string in the file from which Org's homepage is
-generated.  To change that as well, you would use a =--all= flag.  TO
+generated.  To change that as well, you would use a =--all= flag.  To
 change only this file, use =--only=.
 
 * Synchonization with Emacs
@@ -185,9 +187,9 @@ So the way I have been doing things with Emacs is this:
    /org-colview-xemacs.el/ and /org-install.el/.  The former does not
    belong in Emacs.  And the latter would actually be harmful because
    Emacs generates its own autoloads.  The Emacs distribution contains
-   an empty org-install.el, so that users can have =(require
+   an empty /org-install.el/, so that users can have =(require
    'org-install)= in .emacs with no ill effects.  So if you were to
-   copy org-install.el, you would overwrite that empty placeholder
+   copy /org-install.el/, you would overwrite that empty placeholder
    file.
 
 4. Generate the ChangeLog entries
@@ -232,17 +234,23 @@ So the way I have been doing things with Emacs is this:
 
 * Updating the list of hooks on Worg
 
-  The file org-configs/org-hooks.org contains a list of all hooks in
+  The file /org-configs/org-hooks.org/ contains a list of all hooks in
   Org.  This list has to be updated after hooks have been added or
-  removed.  The perl script UTILITIES/list-hooks.pl creates the entire
-  section "Hooks and Function variables", including its level-one
-  headline.  I guess babel code could be used to update this
+  removed.  The perl script /UTILITIES/list-hooks.pl/ creates the
+  entire section "Hooks and Function variables", including its
+  level-one headline.  I guess babel code could be used to update this
   automatically, but I have not implemented this - I have been doing
   it by hand every few months.
 
 * Copyright assignments
 
-  The maintainer needs to keep track of copyright assignments.  The
-  list of all contributors from who we have the papers is kept on Worg
-  at http://orgmode.org/worg/org-contribute.php, so that committers
-  can check if a patch can go into the core.
+  The maintainer needs to keep track of copyright assignments.  Even
+  better, find a volunteer to do this.  The list of all contributors
+  from who we have the papers is kept on Worg at
+  http://orgmode.org/worg/org-contribute.php, so that committers can
+  check if a patch can go into the core.  The assignment process does
+  not allways go smoothly, and it has happened several times that it
+  gets stuck or forgotten at the FSF.  Emails from the paper submitter
+  have been ignored in the past, but an email from me as the
+  maintainer of Org mode has usually fixed such cases within a few
+  days.
