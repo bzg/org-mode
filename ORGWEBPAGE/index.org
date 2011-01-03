@@ -69,7 +69,7 @@
                     <input type="hidden" name="business" value="bastien1@free.fr" />
                     <input type="hidden" name="item_name" value="Emacs Org-mode maintainance" />
                     <input type="hidden" name="item_number" value="1" />
-                    <input type="hidden" name="no_note" value="1" />
+                    <input type="hidden" name="lc" value="US" />
                     <input type="hidden" name="currency_code" value="EUR" />
                     <input type="hidden" name="tax" value="0" />
                     <input type="image" style="text-align:right;margin-left:auto;margin-right:0px;border-style:none;"
