@@ -45,6 +45,8 @@
 by org-special-blocks.  These blocks will presumably be
 interpreted by other mechanisms.")
 
+(defvar htmlp)
+(defvar latexp)
 (defun org-special-blocks-make-special-cookies ()
   "Adds special cookies when #+begin_foo and #+end_foo tokens are
 seen.  This is run after a few special cases are taken care of."
@@ -75,6 +77,7 @@ seen.  This is run after a few special cases are taken care of."
 (add-hook 'org-export-latex-after-blockquotes-hook
 	  'org-special-blocks-convert-latex-special-cookies)
 
+(defvar line)
 (defun org-special-blocks-convert-html-special-cookies ()
   "Converts the special cookies into div blocks."
   ;; Uses the dynamically-bound variable `line'.

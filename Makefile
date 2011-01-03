@@ -108,6 +108,7 @@ LISPF      = 	org.el			\
 		org-protocol.el		\
 		org-remember.el		\
 		org-rmail.el		\
+		org-special-blocks.el	\
 		org-src.el		\
 		org-table.el		\
 		org-taskjuggler.el	\
