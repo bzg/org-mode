@@ -178,6 +178,10 @@ also download a [[http://repo.or.cz/w/org-mode.git/snapshot][tar.gz snapshot]] f
 
 * Documentation
 ** The Org guide and manual
+
+   - Links below point to the /development version/ of the manual.  If
+     you want to read the latest released manuals (currently for Org
+     7.4), please browse [[http://orgmode.org/manual/release_7.4/][this directory]].
    - Read the [[file:guide/index.html][online compact guide]] or download it as a [[file:orgguide.pdf][PDF document]].
      The compact guide is a 40-page introduction to Org mode.  It
      covers all features in a basic way and has links to in-depth
