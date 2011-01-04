@@ -789,7 +789,7 @@ MAY-INLINE-P allows inlining it as an image."
 	       (message "image %s %s" thefile org-par-open)
 	       (org-export-html-format-image thefile org-par-open))
 	    (concat
-	       "<a href=\"" thefile "\"" attr ">"
+	       "<a href=\"" thefile "\"" (if attr (concat " " attr)) ">"
 	       (org-export-html-format-desc desc)
 	       "</a>")))))
 
