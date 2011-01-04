@@ -4504,6 +4504,8 @@ exclusive tags will turn off any other tags from that group.
 @item @key{TAB}
 Enter a tag in the minibuffer, even if the tag is not in the predefined
 list.  You will be able to complete on all tags present in the buffer.
+You can also add several tags: just separate them with a comma.
+
 @kindex @key{SPC}
 @item @key{SPC}
 Clear all tags for this line.
