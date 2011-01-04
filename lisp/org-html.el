@@ -1719,14 +1719,14 @@ lang=\"%s\" xml:lang=\"%s\">
 	    (goto-char (match-end 0))
 	    (insert "\n")))
 	(insert "<div id=\"table-of-contents\">\n")
-	(mapc 'insert thetoc)
-	(insert "</div>\n"))
-      ;; remove empty paragraphs and lists
+	(let ((beg (point)))
+	  (mapc 'insert thetoc)
+	  (insert "</div>\n")
+	  (while (re-search-backward "<li>[ \r\n\t]*</li>\n?" beg t)
+	    (replace-match ""))))
+      ;; remove empty paragraphs
       (goto-char (point-min))
       (while (re-search-forward "<p>[ \r\n\t]*</p>" nil t)
-	(replace-match ""))
-      (goto-char (point-min))
-      (while (re-search-forward "<li>[ \r\n\t]*</li>\n?" nil t)
 	(replace-match ""))
       (goto-char (point-min))
       ;; Convert whitespace place holders
@@ -2440,7 +2440,7 @@ the alist of previous items."
       (let* ((counter (match-string 2 line))
 	     (checkbox (match-string 3 line))
 	     (desc-tag (or (match-string 4 line) "???"))
-	     (body (match-string 5 line))
+	     (body (or (match-string 5 line) ""))
 	     (list-beg (org-list-get-list-begin pos struct prevs))
 	     (firstp (= list-beg pos))
 	     ;; Always refer to first item to determine list type, in

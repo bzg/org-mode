@@ -1041,20 +1041,12 @@ publishing directory."
 	(if (eq major-mode (default-value 'major-mode))
 	    (nxml-mode)))
 
-      ;; Remove empty paragraphs and lists.  Replace them with a
-      ;; newline.
+      ;; Remove empty paragraphs. Replace them with a newline.
       (goto-char (point-min))
       (while (re-search-forward
 	      "[ \r\n\t]*\\(<para>\\)[ \r\n\t]*</para>[ \r\n\t]*" nil t)
 	(when (not (get-text-property (match-beginning 1) 'org-protected))
 	  (replace-match "\n")
-	  ;; Avoid empty <listitem></listitem> caused by inline tasks.
-	  ;; We should add an empty para to make everything valid.
-	  (when (and (looking-at "</listitem>")
-		     (save-excursion
-		       (backward-char (length "<listitem>\n"))
-		       (looking-at "<listitem>")))
-	    (insert "<para></para>"))
 	  (backward-char 1)))
       ;; Fill empty sections with <para></para>.  This is to make sure
       ;; that the DocBook document generated is valid and well-formed.
