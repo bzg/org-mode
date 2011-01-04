@@ -12776,7 +12776,7 @@ With prefix ARG, realign all tags in headings in the current buffer."
 	  ;; No boolean logic, just a list
 	  (setq tags (replace-match ":" t t tags))))
 
-      (setq tags (replace-regexp-in-string "[ ,]" ":" tags))
+      (setq tags (replace-regexp-in-string "[,]" ":" tags))
 
       (if org-tags-sort-function
       	  (setq tags (mapconcat 'identity
