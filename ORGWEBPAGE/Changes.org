@@ -74,8 +74,8 @@ quarters.
 
 *** Babel
 **** Add =msosql= engine to sql code blocks
-SQL code blocks can now be executed using the =myosql= engine on
-Windows systems.
+SQL code blocks can now be executed using the =myosql= engine
+using the osql command (from MS SQL Server) on Windows systems.
 
 Thanks to Sébastien Vauban for this contribution.
 
