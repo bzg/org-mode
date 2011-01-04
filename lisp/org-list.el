@@ -2186,55 +2186,69 @@ With optional prefix argument ALL, do this for the whole buffer."
                    (setq c-all (+ (length cookies) c-all)
                          c-on (+ (org-count "[X]" cookies) c-on))))
                structs))))
-	  cookies-list backup-end structs-backup)
+	  (backup-end 1)
+	  cookies-list structs-backup)
       (goto-char (car bounds))
       ;; 1. Build an alist for each cookie found within BOUNDS. The
       ;;    key will be position at beginning of cookie and values
       ;;    ending position, format of cookie, number of checked boxes
       ;;    to report, and total number of boxes.
       (while (re-search-forward cookie-re (cdr bounds) t)
-	(save-excursion
-	  (let ((c-on 0) (c-all 0))
-	    (save-match-data
-              ;; There are two types of cookies: those at headings and those
-              ;; at list items.
-	      (cond
-	       ((and (org-on-heading-p)
-		     (string-match "\\<todo\\>"
-				   (downcase
-				    (or (org-entry-get nil "COOKIE_DATA") "")))))
-               ;; This cookie is at an heading, but specifically for
-               ;; todo, not for checkboxes: skip it.
-	       ((org-on-heading-p)
-		(setq backup-end (save-excursion
-                                   (outline-next-heading) (point)))
-                ;; This cookie is at an heading. Grab structure of
-		;; every list containing a checkbox between point and
-		;; next headline, and save them in STRUCTS-BACKUP
-		(while (org-list-search-forward box-re backup-end 'move)
-		  (let* ((struct (org-list-struct))
-			 (bottom (org-list-get-bottom-point struct)))
-		    (push struct structs-backup)
-		    (goto-char bottom)))
-		(funcall count-boxes nil structs-backup))
-	       ((org-at-item-p)
-		;; This cookie is at an item. Look in STRUCTS-BACKUP
-                ;; to see if we have the structure of list at point in
-                ;; it. Else compute the structure.
-		(let ((item (point-at-bol)))
-		  (if (and backup-end (< item backup-end))
-		      (funcall count-boxes item structs-backup)
-		    (let ((struct (org-list-struct)))
-                      (setq backup-end (org-list-get-bottom-point struct)
-                            structs-backup (list struct)))
-		    (funcall count-boxes item structs-backup))))))
-	    ;; Build the cookies list, with appropriate information
-	    (push (list (match-beginning 1) ; cookie start
-			(match-end 1)	    ; cookie end
-			(match-beginning 2) ; percent?
-			c-on		    ; checked boxes
-			c-all)		    ; total boxes
-		  cookies-list))))
+	(catch 'skip
+	  (save-excursion
+	    (let ((c-on 0) (c-all 0))
+	      (save-match-data
+		;; There are two types of cookies: those at headings and those
+		;; at list items.
+		(cond
+		 ;; Cookie is at an heading, but specifically for todo,
+		 ;; not for checkboxes: skip it.
+		 ((and (org-on-heading-p)
+		       (string-match "\\<todo\\>"
+				     (downcase
+				      (or (org-entry-get nil "COOKIE_DATA") ""))))
+		  (throw 'skip nil))
+		 ;; Cookie is at an heading, but all lists before next
+		 ;; heading already have been read. Use data collected
+		 ;; in STRUCTS-BACKUP. This should only happen when
+		 ;; heading has more than one cookie on it.
+		 ((and (org-on-heading-p)
+		       (<= (save-excursion (outline-next-heading) (point))
+			   backup-end))
+		  (funcall count-boxes nil structs-backup))
+		 ;; Cookie is at a fresh heading. Grab structure of
+		 ;; every list containing a checkbox between point and
+		 ;; next headline, and save them in STRUCTS-BACKUP.
+		 ((org-on-heading-p)
+		  (setq backup-end (save-excursion
+				     (outline-next-heading) (point)))
+		  (while (org-list-search-forward box-re backup-end 'move)
+		    (let* ((struct (org-list-struct))
+			   (bottom (org-list-get-bottom-point struct)))
+		      (push struct structs-backup)
+		      (goto-char bottom)))
+		  (funcall count-boxes nil structs-backup))
+		 ;; Cookie is at an item, and we already list structure
+		 ;; stored in STRUCTS-BACKUP.
+		 ((and (org-at-item-p)
+		       (< (point-at-bol) backup-end))
+		  (funcall count-boxes (point-at-bol) structs-backup))
+		 ;; Cookie is at an item, but we need to compute list
+		 ;; structure.
+		 ((org-at-item-p)
+		  (let ((struct (org-list-struct)))
+		    (setq backup-end (org-list-get-bottom-point struct)
+			  structs-backup (list struct)))
+		  (funcall count-boxes item structs-backup))
+		 ;; Else, cookie found is at a wrong place. Skip it.
+		 (t (throw 'skip nil))))
+	      ;; Build the cookies list, with appropriate information
+	      (push (list (match-beginning 1) ; cookie start
+			  (match-end 1)	      ; cookie end
+			  (match-string 2)    ; percent?
+			  c-on		      ; checked boxes
+			  c-all)	      ; total boxes
+		    cookies-list)))))
       ;; 2. Apply alist to buffer, in reverse order so positions stay
       ;;    unchanged after cookie modifications.
       (mapc (lambda (cookie)
