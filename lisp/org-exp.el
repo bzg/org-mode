@@ -1949,7 +1949,8 @@ can work correctly."
 
 (defun org-export-get-title-from-subtree ()
   "Return subtree title and exclude it from export."
-  (let (title (rbeg (region-beginning)) (rend (region-end)))
+  (let ((rbeg (region-beginning)) (rend (region-end))
+	(inhibit-read-only t) title)
     (save-excursion
       (goto-char rbeg)
       (when (and (org-at-heading-p)
