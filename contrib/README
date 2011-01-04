@@ -21,6 +21,7 @@ org-depend.el            --- TODO dependencies for Org-mode
 org-drill.el             --- Self-testing with org-learn
 org-depend.el            --- TODO dependencies for Org-mode
 org-elisp-symbol.el      --- Org links to emacs-lisp symbols
+org-eshell.el            --- Support for links to working directories in eshell
 org-eval.el              --- The <lisp> tag, adapted from Muse
 org-eval-light.el        --- Evaluate in-buffer code on demand
 org-exp-bibtex.el        --- Export citations to LaTeX and HTML
