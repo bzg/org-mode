@@ -1837,11 +1837,11 @@ If you like the intuitive way the Org-mode structure editing and list
 formatting works, you might want to use these commands in other modes like
 Text mode or Mail mode as well.  The minor mode @code{orgstruct-mode} makes
 this possible.   Toggle the mode with @kbd{M-x orgstruct-mode}, or
-turn it on by default, for example in Mail mode, with one of:
+turn it on by default, for example in Message mode, with one of:
 
 @lisp
-(add-hook 'mail-mode-hook 'turn-on-orgstruct)
-(add-hook 'mail-mode-hook 'turn-on-orgstruct++)
+(add-hook 'message-mode-hook 'turn-on-orgstruct)
+(add-hook 'message-mode-hook 'turn-on-orgstruct++)
 @end lisp
 
 When this mode is active and the cursor is on a line that looks to Org like a
@@ -2193,10 +2193,10 @@ If you like the intuitive way the Org table editor works, you
 might also want to use it in other modes like Text mode or Mail mode.
 The minor mode Orgtbl mode makes this possible.  You can always toggle
 the mode with @kbd{M-x orgtbl-mode}.  To turn it on by default, for
-example in mail mode, use
+example in Message mode, use
 
 @lisp
-(add-hook 'mail-mode-hook 'turn-on-orgtbl)
+(add-hook 'message-mode-hook 'turn-on-orgtbl)
 @end lisp
 
 Furthermore, with some special setup, it is possible to maintain tables
