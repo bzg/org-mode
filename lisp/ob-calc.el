@@ -29,7 +29,7 @@
 ;;; Code:
 (require 'ob)
 (require 'calc)
-(require 'calc-trail)
+(unless (featurep 'xemacs) (require 'calc-trail))
 (eval-when-compile (require 'ob-comint))
 
 (defvar org-babel-default-header-args:calc nil
