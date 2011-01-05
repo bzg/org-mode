@@ -499,8 +499,10 @@ a file."
 
 (defcustom org-export-htmlize-output-type 'inline-css
   "Output type to be used by htmlize when formatting code snippets.
-We use as default  `inline-css', in order to make the resulting
-HTML self-containing.
+Choices are `css', to export the CSS selectors only, or `inline-css', to
+export the CSS attribute values inline in the HTML.  We use as default
+`inline-css', in order to make the resulting HTML self-containing.
+
 However, this will fail when using Emacs in batch mode for export, because
 then no rich font definitions are in place.  It will also not be good if
 people with different Emacs setup contribute HTML files to a website,
