@@ -1860,7 +1860,7 @@ Also, store forcedalignment information found in such lines."
     (goto-char (point-min))
     (while (re-search-forward re-plain-link nil t)
       (unless (org-string-match-p
-	       "\\[\\[\\S+:\\S-*?\\<"
+	       "\\[\\[\\S-+:\\S-*?\\<"
 	       (buffer-substring (point-at-bol) (match-beginning 0)))
 	(goto-char (1- (match-end 0)))
 	(org-if-unprotected-at (1+ (match-beginning 0))
