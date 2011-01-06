@@ -4720,6 +4720,8 @@ The following commands are available:
   ;; Beginning/end of defun
   (org-set-local 'beginning-of-defun-function 'org-beginning-of-defun)
   (org-set-local 'end-of-defun-function 'org-end-of-defun)
+  ;; Next error for sparse trees
+  (org-set-local 'next-error-function 'org-occur-next-match)
   ;; Make sure dependence stuff works reliably, even for users who set it
   ;; too late :-(
   (if org-enforce-todo-dependencies
@@ -11981,6 +11983,32 @@ that the match should indeed be shown."
 	(message "%d match(es) for regexp %s" cnt regexp))
     cnt))
 
+(defun org-occur-next-match (&optional n reset)
+  "Function for `next-error-function' to find sparse tree matches.
+N is the number of matches to move, when negative move backwards.
+RESET is entirely ignored - this function always goes back to the
+starting point when no match is found."
+  (let* ((limit (if (< n 0) (point-min) (point-max)))
+	 (search-func (if (< n 0)
+			  'previous-single-char-property-change
+			'next-single-char-property-change))
+	 (n (abs n))
+	 (pos (point))
+	 p1)
+    (catch 'exit
+      (while (setq p1 (funcall search-func (point) 'org-type))
+	(when (equal p1 limit)
+	  (goto-char pos)
+	  (error "No more matches"))
+	(when (equal (get-char-property p1 'org-type) 'org-occur)
+	  (setq n (1- n))
+	  (when (= n 0)
+	    (goto-char p1)
+	    (throw 'exit (point))))
+	(goto-char p1))
+      (goto-char p1)
+      (error "No more matches"))))
+
 (defun org-show-context (&optional key)
   "Make sure point and context are visible.
 How much context is shown depends upon the variables
@@ -12044,6 +12072,7 @@ entire tree."
   "Highlight from BEG to END and mark the highlight is an occur headline."
   (let ((ov (make-overlay beg end)))
     (overlay-put ov 'face 'secondary-selection)
+    (overlay-put ov 'org-type 'org-occur)
     (push ov org-occur-highlights)))
 
 (defun org-remove-occur-highlights (&optional beg end noremove)

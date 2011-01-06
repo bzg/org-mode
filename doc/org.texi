@@ -1429,7 +1429,12 @@ editing command@footnote{This depends on the option
 @code{org-remove-highlights-with-change}}, or by pressing @kbd{C-c C-c}.
 When called with a @kbd{C-u} prefix argument, previous highlights are kept,
 so several calls to this command can be stacked.
+@orgcmdkkc{M-g n,M-g M-n,next-error}
+Jump to the next sparse tree match in this buffer.
+@orgcmdkkc{M-g p,M-g M-p,previous-error}
+Jump to the previous sparse tree match in this buffer.
 @end table
+
 
 @noindent
 @vindex org-agenda-custom-commands
