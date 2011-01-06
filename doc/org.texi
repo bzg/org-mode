@@ -10810,6 +10810,7 @@ respective variable for details.
 @vindex org-export-with-tables
 @vindex org-export-highlight-first-table-line
 @vindex org-export-html-style-include-default
+@vindex org-export-html-style-include-scripts
 @vindex org-export-html-style
 @vindex org-export-html-style-extra
 @vindex org-export-html-link-org-files-as-html
@@ -10859,6 +10860,7 @@ respective variable for details.
 @item @code{:tables}                @tab @code{org-export-with-tables}
 @item @code{:table-auto-headline}   @tab @code{org-export-highlight-first-table-line}
 @item @code{:style-include-default} @tab @code{org-export-html-style-include-default}
+@item @code{:style-include-scripts} @tab @code{org-export-html-style-include-scripts}
 @item @code{:style}                 @tab @code{org-export-html-style}
 @item @code{:style-extra}           @tab @code{org-export-html-style-extra}
 @item @code{:convert-org-links}     @tab @code{org-export-html-link-org-files-as-html}
