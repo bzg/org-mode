@@ -1089,11 +1089,15 @@ on this string to produce the exported version."
 				     (plist-get parameters :exclude-tags))
       (run-hooks 'org-export-preprocess-after-tree-selection-hook)
 
-      ;; Mark lists
-      (org-export-mark-lists backend)
+      ;; Change lists ending. Other parts of export may insert blank
+      ;; lines and lists' structure could be altered.
+      (org-export-mark-list-end backend)
 
       ;; Export code blocks
       (org-export-blocks-preprocess)
+
+      ;; Mark lists with properties
+      (org-export-mark-list-properties backend)
 
       ;; Handle source code snippets
       (org-export-replace-src-segments-and-examples backend)
@@ -1670,10 +1674,40 @@ These special cookies will later be interpreted by the backend."
 	(delete-region beg end)
 	(insert (org-add-props content nil 'original-indentation ind))))))
 
-(defun org-export-mark-lists (backend)
+(defun org-export-mark-list-end (backend)
+  "Mark all list endings with a special string."
+  (unless (eq backend 'ascii)
+    (mapc
+     (lambda (e)
+       ;; For each type allowing list export, find every list, remove
+       ;; ending regexp if needed, and insert org-list-end.
+       (goto-char (point-min))
+       (while (re-search-forward org-item-beginning-re nil t)
+	 (when (eq (nth 2 (org-list-context)) e)
+	   (let* ((struct (org-list-struct))
+		  (bottom (org-list-get-bottom-point struct))
+		  (top (org-list-get-top-point struct))
+		  (top-ind (org-list-get-ind top struct)))
+	     (goto-char bottom)
+	     (when (and (not (eq org-list-ending-method 'indent))
+			(looking-at (org-list-end-re)))
+	       (replace-match ""))
+	     (unless (bolp) (insert "\n"))
+	     ;; As org-list-end is inserted at column 0, it would end
+	     ;; by indentation any list. It can be problematic when
+	     ;; there are lists within lists: the inner list end would
+	     ;; also become the outer list end. To avoid this, text
+	     ;; property `original-indentation' is added, as
+	     ;; `org-list-struct' pay attention to it when reading a
+	     ;; list.
+	     (insert (org-add-props
+			 "ORG-LIST-END\n"
+			 (list 'original-indentation top-ind)))))))
+     (cons nil org-list-export-context))))
+
+(defun org-export-mark-list-properties (backend)
   "Mark list with special properties.
-These special properties will later be interpreted by the backend.
-`org-list-end-re' is replaced by a blank line in the process."
+These special properties will later be interpreted by the backend."
   (let ((mark-list
 	 (function
 	  ;; Mark a list with 3 properties: `list-item' which is
@@ -1707,28 +1741,30 @@ These special properties will later be interpreted by the backend.
 					    'list-struct struct
 					    'list-prevs prevs)))
 	       poi)
-	      ;; Take care of bottom point. As it is probably at an
-	      ;; empty line, insert a virtual ending with required
-	      ;; property.
+	      ;; Take care of bottom point. As babel may have inserted
+	      ;; a new list in buffer, list ending isn't always
+	      ;; marked. Now mark every list ending and add properties
+	      ;; useful to line processing exporters.
 	      (goto-char bottom)
-	      (when (and (not (eq org-list-ending-method 'indent))
-			 (looking-at (org-list-end-re)))
+	      (when (or (looking-at "^ORG-LIST-END\n")
+			(and (not (eq org-list-ending-method 'indent))
+			     (looking-at (org-list-end-re))))
 		(replace-match ""))
 	      (unless (bolp) (insert "\n"))
 	      (insert
 	       (org-add-props "ORG-LIST-END\n" (list 'list-item bottom
 						     'list-struct struct
 						     'list-prevs prevs)))
-	      ;; Add `list-context' as text property between top and
-	      ;; bottom.
+	      ;; Following property is used by LaTeX exporter.
 	      (add-text-properties top (point) (list 'list-context ctxt)))))))
     ;; Mark lists except for backends not interpreting them.
     (unless (eq backend 'ascii)
       (mapc
        (lambda (e)
-	 (goto-char (point-min))
-	 (while (re-search-forward org-item-beginning-re nil t)
-	   (when (eq (nth 2 (org-list-context)) e) (funcall mark-list e))))
+	 (flet ((org-list-end-re nil "ORG-LIST-END"))
+	   (goto-char (point-min))
+	   (while (re-search-forward org-item-beginning-re nil t)
+	     (when (eq (nth 2 (org-list-context)) e) (funcall mark-list e)))))
        (cons nil org-list-export-context)))))
 
 (defun org-export-attach-captions-and-attributes (backend target-alist)
