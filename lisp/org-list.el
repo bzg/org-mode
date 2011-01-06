@@ -227,8 +227,7 @@ precedence over it."
 
 (defcustom org-list-automatic-rules '((bullet . t)
 				      (checkbox . t)
-				      (indent . t)
-				      (insert . t))
+				      (indent . t))
   "Non-nil means apply set of rules when acting on lists.
 By default, automatic actions are taken when using
  \\[org-meta-return], \\[org-metaright], \\[org-metaleft],
@@ -247,10 +246,7 @@ checkbox  when non-nil, checkbox statistics is updated each time
 indent    when non-nil, indenting or outdenting list top-item
           with its subtree will move the whole list and
           outdenting a list whose bullet is * to column 0 will
-          change that bullet to -
-insert    when non-nil, trying to insert an item inside a block
-          will insert it right before the block instead of
-          throwing an error."
+          change that bullet to \"-\"."
    :group 'org-plain-lists
    :type '(alist :tag "Sets of rules"
 		 :key-type
@@ -533,31 +529,7 @@ Insert a checkbox if CHECKBOX is non-nil, and string AFTER-BULLET
 after the bullet. Cursor will be after this text once the
 function ends."
   (let ((case-fold-search t))
-    (goto-char pos)
-    ;; 1. Check if a new item can be inserted at point: are we in an
-    ;;    invalid block ? Move outside it if `org-list-automatic'
-    ;;    rules says so.
-    (when (or (eq (nth 2 (org-list-context)) 'invalid)
-	      (save-excursion
-		(beginning-of-line)
-		(or (looking-at "^[ \t]*#\\+\\(begin\\|end\\)_")
-		    (looking-at (concat
-				 "\\("
-				 org-drawer-regexp
-				 "\\|^[ \t]*:END:[ \t]*$\\)"))
-		    (and (featurep 'org-inlinetask)
-			 (looking-at (org-inlinetask-outline-regexp))))))
-      (if (not (cdr (assq 'insert org-list-automatic-rules)))
-	  (error "Cannot insert item inside a block")
-	(end-of-line)
-	(if (string-match "^\\*+[ \t]+" (match-string 0))
-	    (org-inlinetask-goto-beginning)
-	  (let ((block-start (if (string-match "#\\+" (match-string 0))
-				 "^[ \t]*#\\+begin_"
-			       org-drawer-regexp)))
-	    (re-search-backward block-start nil t)))
-	(end-of-line 0)))
-    ;; 2. Get information about list: structure, usual helper
+    ;; 1. Get information about list: structure, usual helper
     ;;    functions, position of point with regards to item start
     ;;    (BEFOREP), blank lines number separating items (BLANK-NB),
     ;;    position of split (POS) if we're allowed to (SPLIT-LINE-P).
@@ -572,7 +544,7 @@ function ends."
 	   (split-line-p (org-get-alist-option org-M-RET-may-split-line 'item))
 	   (blank-nb (org-list-separating-blank-lines-number
 		      item struct prevs))
-	   ;; 3. Build the new item to be created. Concatenate same
+	   ;; 2. Build the new item to be created. Concatenate same
 	   ;;    bullet as item, checkbox, text AFTER-BULLET if
 	   ;;    provided, and text cut from point to end of item
 	   ;;    (TEXT-CUT) to form item's BODY. TEXT-CUT depends on
