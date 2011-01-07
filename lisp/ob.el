@@ -378,7 +378,6 @@ block."
 					(string= "tangle" noweb)))
 			       (org-babel-expand-noweb-references info)
 			     (nth 1 info)))))
-	     (cmd (intern (concat "org-babel-execute:" lang)))
 	     (dir (cdr (assoc :dir params)))
 	     (default-directory
 	       (or (and dir (file-name-as-directory dir)) default-directory))
@@ -387,12 +386,18 @@ block."
 		  org-babel-call-process-region-original
 		(symbol-function 'call-process-region)))
 	     (indent (car (last info)))
-	     result)
+	     result cmd)
 	(unwind-protect
 	    (flet ((call-process-region (&rest args)
 		    (apply 'org-babel-tramp-handle-call-process-region args)))
-	      (unless (fboundp cmd)
-		(error "No org-babel-execute function for %s!" lang))
+	      (flet ((lang-check (f)
+		       (let ((f (intern (concat "org-babel-execute:" f))))
+			 (when (fboundp f) f))))
+		(setq cmd
+		      (or (lang-check lang)
+			  (lang-check (symbol-name
+				       (cdr (assoc lang org-src-lang-modes))))
+			  (error "No org-babel-execute function for %s!" lang))))
 	      (if (and (not arg) new-hash (equal new-hash old-hash))
 		  (save-excursion ;; return cached result
 		    (goto-char (org-babel-where-is-src-block-result nil info))
