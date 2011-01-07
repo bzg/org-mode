@@ -215,6 +215,8 @@ Furthermore, the following %-escapes will be replaced with content:
   %^L         like %^C, but insert as link
   %k          title of currently clocked task
   %K          link to currently clocked task
+  %f          file visited by current buffer when org-capture was called
+  %F          like @code{%f}, but include full path
   %^g         prompt for tags, with completion on tags in target file
   %^G         prompt for tags, with completion on all tags in all agenda files
   %^{prop}p   prompt the user for a value for property `prop'
@@ -415,7 +417,13 @@ bypassed."
        (t
 	(org-capture-set-plist entry)
 	(org-capture-get-template)
-	(org-capture-put :original-buffer orig-buf :annotation annotation
+	(org-capture-put :original-buffer orig-buf
+			 :original-file (buffer-file-name orig-buf)
+			 :original-file-nondirectory
+			 (and (buffer-file-name orig-buf)
+			      (file-name-nondirectory
+			       (buffer-file-name orig-buf)))
+			 :annotation annotation
 			 :initial initial)
 	(org-capture-put :default-time
 			 (or org-overriding-default-time
@@ -1164,6 +1172,8 @@ The template may still contain \"%?\" for cursor positioning."
 		  (org-make-link-string
 		   (buffer-file-name (marker-buffer org-clock-marker))
 		   org-clock-heading)))
+	 (v-f (or (org-capture-get :original-file-nondirectory) ""))
+	 (v-F (or (org-capture-get :original-file) ""))
 	 v-I
 	 (org-startup-folded nil)
 	 (org-inhibit-startup t)
@@ -1213,7 +1223,7 @@ The template may still contain \"%?\" for cursor positioning."
 
       ;; Simple %-escapes
       (goto-char (point-min))
-      (while (re-search-forward "%\\([tTuUaiAcxkKI]\\)" nil t)
+      (while (re-search-forward "%\\([tTuUaiAcxkKInfF]\\)" nil t)
 	(unless (org-capture-escaped-%)
 	  (when (and initial (equal (match-string 0) "%i"))
 	    (save-match-data

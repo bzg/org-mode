@@ -6409,6 +6409,8 @@ dynamic insertion of content:
 %^L         @r{Like @code{%^C}, but insert as link.}
 %k          @r{title of the currently clocked task}
 %K          @r{link to the currently clocked task}
+%f          @r{file visited by current buffer when org-capture was called}
+%F          @r{like @code{%f}, but include full path}
 %^g         @r{prompt for tags, with completion on tags in target file.}
 %^G         @r{prompt for tags, with completion all tags in all agenda files.}
 %^@{@var{prop}@}p   @r{Prompt the user for a value for property @var{prop}}
