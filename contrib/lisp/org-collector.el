@@ -160,8 +160,12 @@ variables and values specified in props"
 (defun org-propview-get-with-inherited (&optional inherit)
   (append
    (org-entry-properties)
-   (mapcar (lambda (i) (cons i (org-entry-get nil i 'do-inherit))) inherit))
-  (org-entry-properties))
+   (delq nil
+	 (mapcar (lambda (i)
+		   (let* ((n (symbol-name i))
+			  (p (org-entry-get (point) n 'do-inherit)))
+		     (when p (cons n p))))
+		 inherit))))
 
 (defun org-propview-collect (cols &optional conds match scope inherit)
   (interactive)
