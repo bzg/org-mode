@@ -115,6 +115,7 @@ preceeding the dblock, then update the contents of the dblock."
   (interactive)
   (condition-case er
       (let ((cols (plist-get params :cols))
+	    (inherit (plist-get params :inherit))
 	    (conds (plist-get params :conds))
 	    (match (plist-get params :match))
 	    (scope (plist-get params :scope))
@@ -129,7 +130,7 @@ preceeding the dblock, then update the contents of the dblock."
 		   (goto-char idpos))
 		  (t (error "Cannot find entry with :ID: %s" id))))
 	  (org-narrow-to-subtree)
-	  (setq table (org-propview-to-table (org-propview-collect cols conds match scope)))
+	  (setq table (org-propview-to-table (org-propview-collect cols conds match scope inherit)))
 	  (widen))
 	(setq pos (point))
 	(when content-lines
@@ -155,13 +156,19 @@ variables and values specified in props"
 	       ,body))
     (error nil)))
 
-(defun org-propview-collect (cols &optional conds match scope)
+(defun org-propview-get-with-inherited (&optional inherit)
+  (append
+   (org-entry-properties)
+   (mapcar (lambda (i) (cons i (org-entry-get nil i 'do-inherit))) inherit))
+  (org-entry-properties))
+
+(defun org-propview-collect (cols &optional conds match scope inherit)
   (interactive)
   ;; collect the properties from every header
   (let* ((header-props
-	  (let ((org-trust-scanner-tags t))
+	  (let ((org-trust-scanner-tags t) alst)
 	    (org-map-entries (quote (cons (cons "ITEM" (org-get-heading t))
-					  (org-entry-properties)))
+					  (org-propview-get-with-inherited inherit)))
 			     match scope)))
 	 ;; read property values
 	 (header-props (mapcar (lambda (props)
