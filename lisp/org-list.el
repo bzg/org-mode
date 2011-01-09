@@ -1173,11 +1173,11 @@ Assume point is at an item."
 	      ;; part 3.
       	      (throw 'exit
 		     (push (cons 0 (funcall end-before-blank)) end-lst-2)))
-	     ((and (not (eq org-list-ending-method 'regexp))
+	     ((and (not (eq org-list-ending-method 'indent))
 		   (looking-at (org-list-end-re)))
 	      ;; Looking at a list ending regexp. Save point as an
 	      ;; ending position and jump to part 3.
-	      (throw 'exit (push (cons ind (point-at-bol)) end-lst-2)))
+	      (throw 'exit (push (cons 0 (point-at-bol)) end-lst-2)))
 	     ;; Skip blocks, drawers, inline tasks and blank lines
 	     ;; along the way
 	     ((looking-at "^[ \t]*#\\+begin_")
