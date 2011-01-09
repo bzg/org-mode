@@ -115,6 +115,7 @@ preceeding the dblock, then update the contents of the dblock."
   (interactive)
   (condition-case er
       (let ((cols (plist-get params :cols))
+	    (inherit (plist-get params :inherit))
 	    (conds (plist-get params :conds))
 	    (match (plist-get params :match))
 	    (scope (plist-get params :scope))
@@ -129,7 +130,8 @@ preceeding the dblock, then update the contents of the dblock."
 		   (goto-char idpos))
 		  (t (error "Cannot find entry with :ID: %s" id))))
 	  (org-narrow-to-subtree)
-	  (setq table (org-propview-to-table (org-propview-collect cols conds match scope)))
+	  (setq table (org-propview-to-table
+		       (org-propview-collect cols conds match scope inherit)))
 	  (widen))
 	(setq pos (point))
 	(when content-lines
@@ -155,38 +157,56 @@ variables and values specified in props"
 	       ,body))
     (error nil)))
 
-(defun org-propview-collect (cols &optional conds match scope)
+(defun org-propview-get-with-inherited (&optional inherit)
+  (append
+   (org-entry-properties)
+   (delq nil
+	 (mapcar (lambda (i)
+		   (let* ((n (symbol-name i))
+			  (p (org-entry-get (point) n 'do-inherit)))
+		     (when p (cons n p))))
+		 inherit))))
+
+(defun org-propview-collect (cols &optional conds match scope inherit)
   (interactive)
   ;; collect the properties from every header
   (let* ((header-props
-	  (let ((org-trust-scanner-tags t))
-	    (org-map-entries (quote (cons (cons "ITEM" (org-get-heading t))
-					  (org-entry-properties)))
-			     match scope)))
+	  (let ((org-trust-scanner-tags t) alst)
+	    (org-map-entries
+	     (quote (cons (cons "ITEM" (org-get-heading t))
+			  (org-propview-get-with-inherited inherit)))
+	     match scope)))
 	 ;; read property values
-	 (header-props (mapcar (lambda (props)
-				 (mapcar (lambda (pair) (cons (car pair) (org-babel-read (cdr pair))))
-					 props))
-			       header-props))
+	 (header-props
+	  (mapcar (lambda (props)
+		    (mapcar (lambda (pair)
+			      (cons (car pair) (org-babel-read (cdr pair))))
+			    props))
+		  header-props))
 	 ;; collect all property names
-	 (prop-names (mapcar 'intern (delete-dups
-				      (apply 'append (mapcar (lambda (header)
-							       (mapcar 'car header))
-							     header-props))))))
+	 (prop-names
+	  (mapcar 'intern (delete-dups
+			   (apply 'append (mapcar (lambda (header)
+						    (mapcar 'car header))
+						  header-props))))))
     (append
      (list
       (mapcar (lambda (el) (format "%S" el)) cols) ;; output headers
       'hline) ;; ------------------------------------------------
      (mapcar ;; calculate the value of the column for each header
-      (lambda (props) (mapcar (lambda (col) (let ((result (org-propview-eval-w-props props col)))
-					      (if result result org-propview-default-value)))
-			      cols))
+      (lambda (props) (mapcar (lambda (col)
+			   (let ((result (org-propview-eval-w-props props col)))
+			     (if result result org-propview-default-value)))
+			 cols))
       (if conds
 	  ;; eliminate the headers which don't satisfy the property
 	  (delq nil
 		(mapcar
 		 (lambda (props)
-		   (if (and-rest (mapcar (lambda (col) (org-propview-eval-w-props props col)) conds))
+		   (if (and-rest (mapcar
+				  (lambda (col)
+				    (org-propview-eval-w-props props col))
+				  conds))
 		       props))
 		 header-props))
 	  header-props)))))

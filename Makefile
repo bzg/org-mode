@@ -372,7 +372,6 @@ distfile:
 	cp -r $(DOCFILES) $(CARDFILES) org-$(TAG)/doc
 	cp -r $(DISTFILES_extra) org-$(TAG)/
 	cp -r README_DIST org-$(TAG)/README
-	cp -r ORGWEBPAGE/Changes.org org-$(TAG)/
 	zip -r org-$(TAG).zip org-$(TAG)
 	gtar zcvf org-$(TAG).tar.gz org-$(TAG)
 
