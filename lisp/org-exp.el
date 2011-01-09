@@ -2130,13 +2130,14 @@ TYPE must be a string, any of:
 (defun org-export-handle-include-files ()
   "Include the contents of include files, with proper formatting."
   (let ((case-fold-search t)
-	params file markup lang start end prefix prefix1 switches all minlevel)
+	params file markup lang start end prefix prefix1 switches all minlevel lines)
     (goto-char (point-min))
     (while (re-search-forward "^#\\+INCLUDE:?[ \t]+\\(.*\\)" nil t)
       (setq params (read (concat "(" (match-string 1) ")"))
 	    prefix (org-get-and-remove-property 'params :prefix)
 	    prefix1 (org-get-and-remove-property 'params :prefix1)
 	    minlevel (org-get-and-remove-property 'params :minlevel)
+	    lines (org-get-and-remove-property 'params :lines)
 	    file (org-symname-or-string (pop params))
 	    markup (org-symname-or-string (pop params))
 	    lang (and (member markup '("src" "SRC"))
@@ -2159,7 +2160,7 @@ TYPE must be a string, any of:
 		  end  (format "#+end_%s" markup))))
 	(insert (or start ""))
 	(insert (org-get-file-contents (expand-file-name file)
-				       prefix prefix1 markup minlevel))
+				       prefix prefix1 markup minlevel lines))
 	(or (bolp) (newline))
 	(insert (or end ""))))
     all))
@@ -2176,15 +2177,30 @@ TYPE must be a string, any of:
 	(when intersection
 	  (error "Recursive #+INCLUDE: %S" intersection))))))
 
-(defun org-get-file-contents (file &optional prefix prefix1 markup minlevel)
+(defun org-get-file-contents (file &optional prefix prefix1 markup minlevel lines)
   "Get the contents of FILE and return them as a string.
 If PREFIX is a string, prepend it to each line.  If PREFIX1
 is a string, prepend it to the first line instead of PREFIX.
 If MARKUP, don't protect org-like lines, the exporter will
-take care of the block they are in."
+take care of the block they are in.  If LINES is a string, 
+include only the lines specified."
   (if (stringp markup) (setq markup (downcase markup)))
   (with-temp-buffer
     (insert-file-contents file)
+    (when lines
+      (let (beg end)
+	(setq lines (split-string lines "-")
+	      beg (if (string= "" (car lines))
+		      (point-min)
+		    (goto-char (point-min)) 
+		    (forward-line (1- (string-to-number (car lines))))
+		    (point))
+	      end (if (string= "" (cadr lines))
+		      (point-max)
+		    (goto-char (point-min)) 
+		    (forward-line (1- (string-to-number (cadr lines))))
+		    (point)))
+	(narrow-to-region beg end)))
     (when (or prefix prefix1)
       (goto-char (point-min))
       (while (not (eobp))
