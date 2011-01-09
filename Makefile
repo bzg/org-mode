@@ -264,9 +264,6 @@ doc/orgcard_letter.pdf: doc/orgcard_letter.tex
 
 # Below here are special targets for maintenance only
 
-updateweb:
-	ssh cdominik@orgmode.org 'pull-worg-orgweb.sh && publish-worg-orgweb.sh'
-
 html: doc/org.html
 
 html_manual: doc/org.texi
