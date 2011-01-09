@@ -820,8 +820,9 @@ Return an error if not in a list."
     (if (not begin)
 	(error "Not in an item")
       (goto-char begin)
-      (let ((struct (org-list-struct)))
-	(goto-char (org-list-get-list-begin begin (org-list-struct)))))))
+      (let* ((struct (org-list-struct))
+	     (prevs (org-list-struct-prev-alist struct)))
+	(goto-char (org-list-get-list-begin begin struct prevs))))))
 
 (defun org-end-of-item-list ()
   "Go to the end of the current list or sublist.
@@ -831,8 +832,9 @@ If the cursor in not in an item, throw an error."
     (if (not begin)
 	(error "Not in an item")
       (goto-char begin)
-      (let ((struct (org-list-struct)))
-	(goto-char (org-list-get-list-end begin (org-list-struct)))))))
+      (let* ((struct (org-list-struct))
+	     (prevs (org-list-struct-prev-alist struct)))
+	(goto-char (org-list-get-list-end begin struct prevs))))))
 
 (defun org-end-of-item ()
   "Go to the end of the current hand-formatted item.
@@ -1830,7 +1832,6 @@ If a region is active, all items inside will be moved."
   "Indent a local list item including its children.
 If a region is active, all items inside will be moved."
   (interactive)
-  (interactive)
   (let ((regionp (org-region-active-p)))
     (cond
      ((or (org-at-item-p)
@@ -2134,30 +2135,30 @@ With optional prefix argument ALL, do this for the whole buffer."
 			  (save-excursion (outline-next-heading) (point)))))
 	  (count-boxes
 	   (function
-            ;; add checked boxes and boxes of all types in all
-            ;; structures in STRUCTS to c-on and c-all, respectively.
-            ;; This looks at RECURSIVEP value. If ITEM is nil, count
-            ;; across the whole structure, else count only across
-            ;; subtree whose ancestor is ITEM.
+	    ;; add checked boxes and boxes of all types in all
+	    ;; structures in STRUCTS to c-on and c-all, respectively.
+	    ;; This looks at RECURSIVEP value. If ITEM is nil, count
+	    ;; across the whole structure, else count only across
+	    ;; subtree whose ancestor is ITEM.
 	    (lambda (item structs)
 	      (mapc
-               (lambda (s)
-                 (let* ((pre (org-list-struct-prev-alist s))
+	       (lambda (s)
+		 (let* ((pre (org-list-struct-prev-alist s))
 			(par (org-list-struct-parent-alist s))
-                        (items
+			(items
 			 (cond
 			  ((and recursivep item) (org-list-get-subtree item s))
 			  (recursivep (mapcar 'car s))
 			  (item (org-list-get-children item s par))
 			  (t (org-list-get-all-items
 			      (org-list-get-top-point s) s pre))))
-                        (cookies (delq nil (mapcar
-                                            (lambda (e)
-                                              (org-list-get-checkbox e s))
-                                            items))))
-                   (setq c-all (+ (length cookies) c-all)
-                         c-on (+ (org-count "[X]" cookies) c-on))))
-               structs))))
+			(cookies (delq nil (mapcar
+					    (lambda (e)
+					      (org-list-get-checkbox e s))
+					    items))))
+		   (setq c-all (+ (length cookies) c-all)
+			 c-on (+ (org-count "[X]" cookies) c-on))))
+	       structs))))
 	  (backup-end 1)
 	  cookies-list structs-backup)
       (goto-char (car bounds))
@@ -2211,7 +2212,7 @@ With optional prefix argument ALL, do this for the whole buffer."
 		  (let ((struct (org-list-struct)))
 		    (setq backup-end (org-list-get-bottom-point struct)
 			  structs-backup (list struct)))
-		  (funcall count-boxes item structs-backup))
+		  (funcall count-boxes (point-at-bol) structs-backup))
 		 ;; Else, cookie found is at a wrong place. Skip it.
 		 (t (throw 'skip nil))))
 	      ;; Build the cookies list, with appropriate information

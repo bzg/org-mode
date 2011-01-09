@@ -11915,8 +11915,9 @@ EXTRA is additional text that will be inserted into the notes buffer."
 			(if itemp
 			    (progn
 			      (goto-char itemp)
-			      (org-list-get-ind
-			       (org-list-get-top-point (org-list-struct))))
+			      (let ((struct (org-list-struct)))
+				(org-list-get-ind
+				 (org-list-get-top-point struct) struct)))
 			  (skip-chars-backward " \r\t\n")
 			  (cond
 			   ((and (org-at-heading-p)
