@@ -61,7 +61,7 @@ changes to the same branch =t/patchNNN=.
 If you ask the contributor to make the changes, the patch should be
 marked on the patchwork server as "changes requested".
 
-: pw update -s "Changed Requested" -m "What to change" NNN
+: pw update -s "Changes Requested" -m "What to change" NNN
 
 This will send an email to the contributor and the mailing list with a
 request for changes.  The =-m= message should not be more than one
@@ -90,7 +90,7 @@ has been accepted, along with the comment given in the =-m= message.
 
 At some point you might then want to remove the topic branch
 
-: git -d t/patchNNN
+: git branch -d t/patchNNN
 
 * Releases
 
