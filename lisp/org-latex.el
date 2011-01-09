@@ -2468,37 +2468,43 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
      (let (res)
        (goto-char (point-min))
        (while (re-search-forward org-item-beginning-re nil t)
-	 (when (eq (get-text-property (point) 'list-context) e)
-	   (beginning-of-line)
-	   (setq res
-		 (org-list-to-latex
-		  ;; Narrowing is needed because we're converting
-		  ;; inner functions to outer ones.
-		  (save-restriction
-		    (narrow-to-region (point) (point-max))
-		    ;; `org-list-end-re' output has changed since
-		    ;; preprocess from org-exp.el. Tell it to
-		    ;; `org-list-parse-list'.
-		    (flet ((org-list-end-re nil "^ORG-LIST-END\n"))
-		      (org-list-parse-list t)))
-		  org-export-latex-list-parameters))
-	   ;; Replace any counter with its latex expression in output
-	   ;; string.
-	   (while (string-match
-		   "^\\(\\\\item[ \t]+\\)\\[@\\(?:start:\\)?\\([0-9]+\\)\\]"
-		   res)
-	     (setq res (replace-match
-			(concat (format "\\setcounter{enumi}{%d}"
-					(1- (string-to-number
-					     (match-string 2 res))))
-				"\n"
-				(match-string 1 res))
-			t t res)))
-	   ;; Extend previous value of original-indentation to the whole
-	   ;; string
-	   (insert (org-add-props res nil 'original-indentation
-				  (org-find-text-property-in-string
-				   'original-indentation res)))))))
+	 (org-if-unprotected
+	  (when (eq (get-text-property (point) 'list-context) e)
+	    (beginning-of-line)
+	    (setq res
+		  (org-list-to-latex
+		   ;; Narrowing is needed because we're converting
+		   ;; from inner functions to outer ones.
+		   (save-restriction
+		     (narrow-to-region (point) (point-max))
+		     ;; `org-list-end-re' output has changed since
+		     ;; preprocess from org-exp.el. Moreover, we now
+		     ;; only consider unprotected item as valid.
+		     (flet ((org-list-end-re nil "^ORG-LIST-END\n")
+			    (org-at-item-p
+			     nil (save-excursion
+				   (beginning-of-line)
+				   (org-if-unprotected
+				    (looking-at org-item-beginning-re)))))
+		       (org-list-parse-list t)))
+		   org-export-latex-list-parameters))
+	    ;; Replace any counter with its latex expression in output
+	    ;; string.
+	    (while (string-match
+		    "^\\(\\\\item[ \t]+\\)\\[@\\(?:start:\\)?\\([0-9]+\\)\\]"
+		    res)
+	      (setq res (replace-match
+			 (concat (format "\\setcounter{enumi}{%d}"
+					 (1- (string-to-number
+					      (match-string 2 res))))
+				 "\n"
+				 (match-string 1 res))
+			 t t res)))
+	    ;; Extend previous value of original-indentation to the whole
+	    ;; string
+	    (insert (org-add-props res nil 'original-indentation
+				   (org-find-text-property-in-string
+				    'original-indentation res))))))))
    (append org-list-export-context '(nil))))
 
 (defconst org-latex-entities
