@@ -1958,7 +1958,8 @@ of `org-babel-temporary-directory'."
 		prefix temporary-file-directory)
 	       nil suffix))
     (let ((temporary-file-directory
-	   (or (and (file-exists-p org-babel-temporary-directory)
+	   (or (and (boundp 'org-babel-temporary-directory)
+		    (file-exists-p org-babel-temporary-directory)
 		    org-babel-temporary-directory)
 	       temporary-file-directory)))
       (make-temp-file prefix nil suffix))))
@@ -1983,7 +1984,9 @@ of `org-babel-temporary-directory'."
 	  (delete-directory org-babel-temporary-directory))
       (error
        (message "Failed to remove temporary Org-babel directory %s"
-		org-babel-temporary-directory)))))
+		(if (boundp 'org-babel-temporary-directory)
+		    org-babel-temporary-directory
+		  "[directory not defined]"))))))
 
 (add-hook 'kill-emacs-hook 'org-babel-remove-temporary-directory)
 
