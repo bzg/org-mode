@@ -313,12 +313,11 @@ specifically, type `block' is determined by the variable
 
 ;;; Internal functions
 
-(defun org-list-end-re ()
-  "Return the regex corresponding to the end of a list.
-It depends on `org-empty-line-terminates-plain-lists'."
-  (if org-empty-line-terminates-plain-lists
-      "^[ \t]*\n"
-    org-list-end-regexp))
+(defconst org-list-end-re (if org-empty-line-terminates-plain-lists
+			      "^[ \t]*\n"
+			    org-list-end-regexp)
+  "Regex corresponding to the end of a list.
+It depends on `org-empty-line-terminates-plain-lists'.")
 
 (defun org-item-re (&optional general)
   "Return the correct regular expression for plain lists.
@@ -736,8 +735,8 @@ This checks `org-list-ending-method'."
     (beginning-of-line)
     (unless (or (let ((outline-regexp org-outline-regexp)) (org-at-heading-p))
 		(and (not (eq org-list-ending-method 'indent))
-		     (looking-at (org-list-end-re))
-		     (progn (forward-line -1) (looking-at (org-list-end-re)))))
+		     (looking-at org-list-end-re)
+		     (progn (forward-line -1) (looking-at org-list-end-re))))
       (or (and (org-at-item-p) (point-at-bol))
 	  (let* ((case-fold-search t)
 		 (context (org-list-context))
@@ -754,7 +753,7 @@ This checks `org-list-ending-method'."
 		   ((<= (point) lim-up)
 		    (throw 'exit (and (org-at-item-p) (< ind ind-ref) (point))))
 		   ((and (not (eq org-list-ending-method 'indent))
-			 (looking-at (org-list-end-re)))
+			 (looking-at org-list-end-re))
 		    (throw 'exit nil))
 		   ;; Skip blocks, drawers, inline-tasks, blank lines
 		   ((looking-at "^[ \t]*#\\+end_")
@@ -779,8 +778,7 @@ This checks `org-list-ending-method'."
 
 (defun org-at-item-p ()
   "Is point in a line starting a hand-formatted item?"
-  (save-excursion
-    (beginning-of-line) (looking-at org-item-beginning-re)))
+  (save-excursion (beginning-of-line) (looking-at org-item-beginning-re)))
 
 (defun org-at-item-bullet-p ()
   "Is point at the bullet of a plain list item?"
@@ -1109,7 +1107,7 @@ Assume point is at an item."
 			       (setq beg-cell (cons (point) ind))
 			       (cons (funcall assoc-at-point ind) itm-lst)))))
 	       ((and (not (eq org-list-ending-method 'indent))
-		     (looking-at (org-list-end-re)))
+		     (looking-at org-list-end-re))
 		;; Looking at a list ending regexp. Dismiss useless
 		;; data recorded above BEG-CELL. Jump to part 2.
 		(throw 'exit
@@ -1176,7 +1174,7 @@ Assume point is at an item."
       	      (throw 'exit
 		     (push (cons 0 (funcall end-before-blank)) end-lst-2)))
 	     ((and (not (eq org-list-ending-method 'indent))
-		   (looking-at (org-list-end-re)))
+		   (looking-at org-list-end-re))
 	      ;; Looking at a list ending regexp. Save point as an
 	      ;; ending position and jump to part 3.
 	      (throw 'exit (push (cons 0 (point-at-bol)) end-lst-2)))
@@ -2472,7 +2470,7 @@ Point is left at list end."
     (when delete
       (delete-region top bottom)
       (when (and (not (eq org-list-ending-method 'indent))
-		 (looking-at (org-list-end-re)))
+		 (looking-at org-list-end-re))
 	(replace-match "\n")))
     out))
 

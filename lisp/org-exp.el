@@ -1690,7 +1690,7 @@ These special cookies will later be interpreted by the backend."
 		  (top-ind (org-list-get-ind top struct)))
 	     (goto-char bottom)
 	     (when (and (not (eq org-list-ending-method 'indent))
-			(looking-at (org-list-end-re)))
+			(looking-at org-list-end-re))
 	       (replace-match ""))
 	     (unless (bolp) (insert "\n"))
 	     ;; As org-list-end is inserted at column 0, it would end
@@ -1748,7 +1748,7 @@ These special properties will later be interpreted by the backend."
 	      (goto-char bottom)
 	      (when (or (looking-at "^ORG-LIST-END\n")
 			(and (not (eq org-list-ending-method 'indent))
-			     (looking-at (org-list-end-re))))
+			     (looking-at org-list-end-re)))
 		(replace-match ""))
 	      (unless (bolp) (insert "\n"))
 	      (insert
@@ -1759,13 +1759,13 @@ These special properties will later be interpreted by the backend."
 	      (add-text-properties top (point) (list 'list-context ctxt)))))))
     ;; Mark lists except for backends not interpreting them.
     (unless (eq backend 'ascii)
-      (mapc
-       (lambda (e)
-	 (flet ((org-list-end-re nil "ORG-LIST-END"))
+      (let ((org-list-end-re "^ORG-LIST-END\n"))
+	(mapc
+	 (lambda (e)
 	   (goto-char (point-min))
 	   (while (re-search-forward org-item-beginning-re nil t)
-	     (when (eq (nth 2 (org-list-context)) e) (funcall mark-list e)))))
-       (cons nil org-list-export-context)))))
+	     (when (eq (nth 2 (org-list-context)) e) (funcall mark-list e))))
+	 (cons nil org-list-export-context))))))
 
 (defun org-export-attach-captions-and-attributes (backend target-alist)
   "Move #+CAPTION, #+ATTR_BACKEND, and #+LABEL text into text properties.
