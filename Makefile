@@ -264,9 +264,6 @@ doc/orgcard_letter.pdf: doc/orgcard_letter.tex
 
 # Below here are special targets for maintenance only
 
-updateweb:
-	ssh cdominik@orgmode.org 'pull-worg-orgweb.sh && publish-worg-orgweb.sh'
-
 html: doc/org.html
 
 html_manual: doc/org.texi
@@ -425,7 +422,7 @@ cleancontrib:
 cleanelc:
 	rm -f $(ELCFILES)
 cleandoc:
-	(cd doc; rm -f org.pdf org org.html orgcard.pdf)
+	(cd doc; rm -f org.pdf org org.html orgcard.pdf orgguide.pdf)
 	(cd doc; rm -f *.aux *.cp *.cps *.dvi *.fn *.fns *.ky *.kys *.pg *.pgs)
 	(cd doc; rm -f *.toc *.tp *.tps *.vr *.vrs *.log *.html *.ps)
 	(cd doc; rm -f orgcard_letter.tex orgcard_letter.pdf)
@@ -441,15 +438,15 @@ cleanrel:
 
 
 push:
-	git-push git+ssh://repo.or.cz/srv/git/org-mode.git master
+	git-push orgmode@orgmode.org:org-mode.git master
 
 pushtag:
 	git-tag -m "Adding tag" -a $(TAG)
-	git-push git+ssh://repo.or.cz/srv/git/org-mode.git $(TAG)
+	git-push orgmode@orgmode.org:org-mode.git $(TAG)
 
 pushreleasetag:
 	git-tag -m "Adding release tag" -a release_$(TAG)
-	git-push git+ssh://repo.or.cz/srv/git/org-mode.git release_$(TAG)
+	git-push orgmode@orgmode.org:org-mode.git release_$(TAG)
 
 # Dependencies
 
