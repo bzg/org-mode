@@ -11819,13 +11819,12 @@ EXTRA is additional text that will be inserted into the notes buffer."
 (defun org-skip-over-state-notes ()
   "Skip past the list of State notes in an entry."
   (if (looking-at "\n[ \t]*- State") (forward-char 1))
-  (let ((itemp (org-in-item-p)))
-    (when itemp
-      (let* ((struct (progn (goto-char itemp) (org-list-struct)))
-	     (prevs (org-list-struct-prev-alist struct)))
-	(while (looking-at "[ \t]*- State")
-	  (goto-char (or (org-list-get-next-item (point) struct prevs)
-			 (org-list-get-item-end (point) struct))))))))
+  (when (ignore-errors (goto-char (org-in-item-p)))
+    (let* ((struct (org-list-struct))
+	   (prevs (org-list-struct-prev-alist struct)))
+      (while (looking-at "[ \t]*- State")
+	(goto-char (or (org-list-get-next-item (point) struct prevs)
+		       (org-list-get-item-end (point) struct)))))))
 
 (defun org-add-log-note (&optional purpose)
   "Pop up a window for taking a note, and add this note later at point."
@@ -11911,20 +11910,17 @@ EXTRA is additional text that will be inserted into the notes buffer."
 	  (end-of-line 1)
 	  (if (not (bolp)) (let ((inhibit-read-only t)) (insert "\n")))
 	  (setq ind (save-excursion
-		      (let ((itemp (org-in-item-p)))
-			(if itemp
-			    (progn
-			      (goto-char itemp)
-			      (let ((struct (org-list-struct)))
-				(org-list-get-ind
-				 (org-list-get-top-point struct) struct)))
-			  (skip-chars-backward " \r\t\n")
-			  (cond
-			   ((and (org-at-heading-p)
-				 org-adapt-indentation)
-			    (1+ (org-current-level)))
-			   ((org-at-heading-p) 0)
-			   (t (org-get-indentation)))))))
+		      (if (ignore-errors (goto-char (org-in-item-p)))
+			  (let ((struct (org-list-struct)))
+			    (org-list-get-ind
+			     (org-list-get-top-point struct) struct))
+			(skip-chars-backward " \r\t\n")
+			(cond
+			 ((and (org-at-heading-p)
+			       org-adapt-indentation)
+			  (1+ (org-current-level)))
+			 ((org-at-heading-p) 0)
+			 (t (org-get-indentation))))))
 	  (setq bul (org-list-bullet-string "-"))
 	  (org-indent-line-to ind)
 	  (insert bul (pop lines))
@@ -18833,8 +18829,7 @@ If point is in an inline task, mark that task instead."
 		(org-get-indentation)
 	      (org-get-indentation (match-string 0)))))
      ;; Lists
-     ((let ((in-item-p (org-in-item-p)))
-	(and in-item-p (goto-char in-item-p)))
+     ((ignore-errors (goto-char (org-in-item-p)))
       (or (org-at-item-description-p) (org-at-item-p))
       (setq bpos (match-beginning 1) tpos (match-end 0)
 	    bcol (progn (goto-char bpos) (current-column))
@@ -18856,11 +18851,9 @@ If point is in an inline task, mark that task instead."
 		      (and (looking-at "[ \t]*#\\+end_")
 			   (re-search-backward "[ \t]*#\\+begin_"nil t))
 		      (looking-at "[ \t]*[\n:#|]")
-		      (let ((itemp (org-in-item-p)))
-			(and itemp
-			     (goto-char itemp)
-			     (goto-char
-			      (org-list-get-top-point (org-list-struct)))))
+		      (and (ignore-errors (goto-char (org-in-item-p)))
+			   (goto-char
+			    (org-list-get-top-point (org-list-struct))))
 		      (and (not inline-task-p)
 			   (featurep 'org-inlinetask)
 			   (org-inlinetask-in-task-p)

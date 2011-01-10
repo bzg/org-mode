@@ -2479,12 +2479,11 @@ Point is left at list end."
 (defun org-list-make-subtree ()
   "Convert the plain list at point into a subtree."
   (interactive)
-  (if (not (org-in-item-p))
+  (if (not (ignore-errors (goto-char (org-in-item-p))))
       (error "Not in a list")
     (let ((list (org-list-parse-list t)) nstars)
       (save-excursion
-	(if (ignore-errors
-	      (org-back-to-heading))
+	(if (ignore-errors (org-back-to-heading))
 	    (progn (looking-at org-complex-heading-regexp)
 		   (setq nstars (length (match-string 1))))
 	  (setq nstars 0)))
