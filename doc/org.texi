@@ -13423,7 +13423,7 @@ to have other replacement keys, look at the variable
 
 @item @file{yasnippet.el}
 @cindex @file{yasnippet.el}
-The way Org-mode binds the TAB key (binding to @code{[tab]} instead of
+The way Org mode binds the TAB key (binding to @code{[tab]} instead of
 @code{"\t"}) overrules YASnippet's access to this key.  The following code
 fixed this problem:
 
@@ -13432,6 +13432,24 @@ fixed this problem:
           (lambda ()
             (org-set-local 'yas/trigger-key [tab])
             (define-key yas/keymap [tab] 'yas/next-field-group)))
+@end lisp
+
+The latest version of yasnippets doesn't play well with Org mode. If the
+above code does not fix the conflict, start by defining the following
+function:
+@lisp
+(defun yas/org-very-safe-expand ()
+       (let ((yas/fallback-behavior 'return-nil)) (yas/expand)))
+@end lisp
+
+Then, tell Org mode what to do with the new function:
+@lisp
+(add-hook 'org-mode-hook
+          (lambda ()
+              (make-variable-buffer-local 'yas/trigger-key)
+              (setq yas/trigger-key [tab])
+              (add-to-list 'org-tab-first-hook 'yas/org-very-safe-expand)
+              (define-key yas/keymap [tab] 'yas/next-field)))
 @end lisp
 
 @item @file{windmove.el} by Hovav Shacham
