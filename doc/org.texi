@@ -12379,7 +12379,8 @@ execution of a code block regardless of the value of the
 
 The way in which results are handled depends on whether a session is invoked,
 as well as on whether @code{:results value} or @code{:results output} is
-used. The following table shows the possibilities:
+used. The following table shows the table possibilities.  For a full listing
+of the possible results header arguments see @ref{results}.
 
 @multitable @columnfractions 0.26 0.33 0.41
 @item @tab @b{Non-session} @tab @b{Session}
