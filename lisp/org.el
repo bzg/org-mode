@@ -7744,7 +7744,7 @@ WITH-CASE, the sorting considers case as well."
     (looking-at "\\(\\*+\\)")
     (setq stars (match-string 1)
 	  re (concat "^" (regexp-quote stars) " +")
-	  re2 (concat "^" (regexp-quote (substring stars 0 -1)) "[^*]")
+	  re2 (concat "^" (regexp-quote (substring stars 0 -1)) "[ \t\n]")
 	  txt (buffer-substring beg end))
     (if (not (equal (substring txt -1) "\n")) (setq txt (concat txt "\n")))
     (if (and (not (equal stars "*")) (string-match re2 txt))
