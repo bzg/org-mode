@@ -592,10 +592,11 @@ results already exist."
 	(if (looking-at org-bracket-link-regexp)
 	    ;; file results
 	    (org-open-at-point)
-	  (pop-to-buffer (get-buffer-create "*Org-Babel Results*"))
-	  (delete-region (point-min) (point-max))
-	  (insert (org-babel-format-result (org-babel-read-result)
-					   (cdr (assoc :sep (nth 2 info))))))
+	  (let ((r (org-babel-format-result
+		    (org-babel-read-result) (cdr (assoc :sep (nth 2 info))))))
+	    (pop-to-buffer (get-buffer-create "*Org-Babel Results*"))
+	    (delete-region (point-min) (point-max))
+	    (insert r)))
 	t))))
 
 ;;;###autoload
@@ -1129,7 +1130,7 @@ org-babel-named-src-block-regexp."
     (when file (find-file file)) (goto-char (point-min))
     (let (names)
       (while (re-search-forward org-babel-src-name-w-name-regexp nil t)
-	(setq names (cons (org-babel-clean-text-properties (match-string 3))
+	(setq names (cons (org-babel-clean-text-properties (match-string 4))
 			  names)))
       names)))
 
@@ -1958,7 +1959,8 @@ of `org-babel-temporary-directory'."
 		prefix temporary-file-directory)
 	       nil suffix))
     (let ((temporary-file-directory
-	   (or (and (file-exists-p org-babel-temporary-directory)
+	   (or (and (boundp 'org-babel-temporary-directory)
+		    (file-exists-p org-babel-temporary-directory)
 		    org-babel-temporary-directory)
 	       temporary-file-directory)))
       (make-temp-file prefix nil suffix))))
@@ -1983,7 +1985,9 @@ of `org-babel-temporary-directory'."
 	  (delete-directory org-babel-temporary-directory))
       (error
        (message "Failed to remove temporary Org-babel directory %s"
-		org-babel-temporary-directory)))))
+		(if (boundp 'org-babel-temporary-directory)
+		    org-babel-temporary-directory
+		  "[directory not defined]"))))))
 
 (add-hook 'kill-emacs-hook 'org-babel-remove-temporary-directory)
 

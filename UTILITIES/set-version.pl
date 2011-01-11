@@ -43,10 +43,3 @@ if (not $only) {
   $c1 = "perl -pi -e '$cmd' README_DIST";
   system($c1);
 }
-
-if ($all or $only) {
-  print STDERR "ORGWEBPAGE/index.org\n";
-  $cmd = qq{s/^(\\* Current Version )\\(\\S+?\\)/\$1($version)/;s/^(The current version is)\\s+(\\S+)\\. /\$1 $version. /;s/org-[6-9].*?\\.(zip|tar\\.gz)/org-$version.\$1/g};
-  $c1 = "perl -pi -e '$cmd' ORGWEBPAGE/index.org";
-  system($c1);
-}
