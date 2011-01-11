@@ -1129,7 +1129,7 @@ org-babel-named-src-block-regexp."
     (when file (find-file file)) (goto-char (point-min))
     (let (names)
       (while (re-search-forward org-babel-src-name-w-name-regexp nil t)
-	(setq names (cons (org-babel-clean-text-properties (match-string 3))
+	(setq names (cons (org-babel-clean-text-properties (match-string 4))
 			  names)))
       names)))
 
