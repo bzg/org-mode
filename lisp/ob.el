@@ -592,10 +592,11 @@ results already exist."
 	(if (looking-at org-bracket-link-regexp)
 	    ;; file results
 	    (org-open-at-point)
-	  (pop-to-buffer (get-buffer-create "*Org-Babel Results*"))
-	  (delete-region (point-min) (point-max))
-	  (insert (org-babel-format-result (org-babel-read-result)
-					   (cdr (assoc :sep (nth 2 info))))))
+	  (let ((r (org-babel-format-result
+		    (org-babel-read-result) (cdr (assoc :sep (nth 2 info))))))
+	    (pop-to-buffer (get-buffer-create "*Org-Babel Results*"))
+	    (delete-region (point-min) (point-max))
+	    (insert r)))
 	t))))
 
 ;;;###autoload
