@@ -11380,12 +11380,32 @@ blocks located in the current Org-mode buffer or in the ``Library of Babel''
 @item <name>
 The name of the code block to be evaluated.
 @item <arguments>
-Arguments specified in this section will be passed to the code block.
+Arguments specified in this section will be passed to the code block.  These
+arguments should relate to @code{:var} header arguments in the called code
+block expressed using standard function call syntax.  For example if the
+original code block named @code{double} has the header argument @code{:var
+n=2}, then the call line passing the number four to that block would be
+written as @code{#+call: double(n=2)}.
 @item <header arguments>
 Header arguments can be placed after the function invocation.  See
 @ref{Header arguments} for more information on header arguments.
 @end table
 
+All header arguments placed in the @code{<header arguments>} section
+described above will be applied to the evaluation of the @code{#+call:} line,
+however it is sometimes desirable to specify header arguments to be passed to
+the code block being evaluated.
+
+This is possible through the use of the following optional extended syntax.
+
+@example
+#+call: <name>[<block header arguments>](<arguments>) <header arguments>
+@end example
+
+Any header argument placed between the square brackets in the @code{<block
+header arguments>} section will be applied to the evaluation of the named
+code block.  For more examples of passing header arguments to @code{#+call:}
+lines see @ref{Header arguments in function calls}.
 
 @node Library of Babel, Languages, Evaluating code blocks, Working With Source Code
 @section Library of Babel
@@ -11644,10 +11664,20 @@ Multi-line header arguments on a named code block:
 @subsubheading Header arguments in function calls
 
 At the most specific level, header arguments for ``Library of Babel'' or
-function call lines can be set as shown below:
+function call lines can be set as shown in the two examples below.  For more
+information on the structure of @code{#+call:} lines see @ref{Evaluating code
+blocks}.
 
+The following will apply the @code{:exports results} header argument to the
+evaluation of the @code{#+call:} line.
 @example
 #+call: factorial(n=5) :exports results
+@end example
+
+The following will apply the @code{:session special} header argument to the
+evaluation of the @code{factorial} code block.
+@example
+#+call: factorial[:session special](n=5)
 @end example
 
 @node Specific header arguments,  , Using header arguments, Header arguments
@@ -12379,7 +12409,8 @@ execution of a code block regardless of the value of the
 
 The way in which results are handled depends on whether a session is invoked,
 as well as on whether @code{:results value} or @code{:results output} is
-used. The following table shows the possibilities:
+used. The following table shows the table possibilities.  For a full listing
+of the possible results header arguments see @ref{results}.
 
 @multitable @columnfractions 0.26 0.33 0.41
 @item @tab @b{Non-session} @tab @b{Session}
@@ -13423,7 +13454,7 @@ to have other replacement keys, look at the variable
 
 @item @file{yasnippet.el}
 @cindex @file{yasnippet.el}
-The way Org-mode binds the TAB key (binding to @code{[tab]} instead of
+The way Org mode binds the TAB key (binding to @code{[tab]} instead of
 @code{"\t"}) overrules YASnippet's access to this key.  The following code
 fixed this problem:
 
@@ -13432,6 +13463,24 @@ fixed this problem:
           (lambda ()
             (org-set-local 'yas/trigger-key [tab])
             (define-key yas/keymap [tab] 'yas/next-field-group)))
+@end lisp
+
+The latest version of yasnippets doesn't play well with Org mode. If the
+above code does not fix the conflict, start by defining the following
+function:
+@lisp
+(defun yas/org-very-safe-expand ()
+       (let ((yas/fallback-behavior 'return-nil)) (yas/expand)))
+@end lisp
+
+Then, tell Org mode what to do with the new function:
+@lisp
+(add-hook 'org-mode-hook
+          (lambda ()
+              (make-variable-buffer-local 'yas/trigger-key)
+              (setq yas/trigger-key [tab])
+              (add-to-list 'org-tab-first-hook 'yas/org-very-safe-expand)
+              (define-key yas/keymap [tab] 'yas/next-field)))
 @end lisp
 
 @item @file{windmove.el} by Hovav Shacham
