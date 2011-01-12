@@ -11376,6 +11376,18 @@ blocks located in the current Org-mode buffer or in the ``Library of Babel''
 #+lob: <name>(<arguments>) <header arguments>
 @end example
 
+All variable (@code{:var}) header arguments can be placed in the
+@code{<arguments>} section using normal function call syntax. For example:
+
+@example
+#+source: double
+#+begin_src emacs-lisp :var n=2
+  (* n 2)
+#+end_src
+
+#+call: double(n=3)
+@end example
+
 @table @code
 @item <name>
 The name of the code block to be evaluated.
