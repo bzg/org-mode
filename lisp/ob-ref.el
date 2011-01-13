@@ -76,7 +76,7 @@ the variable."
       (cons (intern var)
 	    (let ((out (org-babel-read ref)))
 	      (if (equal out ref)
-		  (if (string-match "^\".+\"$" ref)
+		  (if (string-match "^\".*\"$" ref)
 		      (read ref)
 		    (org-babel-ref-resolve ref))
 		out))))))
