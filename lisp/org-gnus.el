@@ -152,11 +152,16 @@ If `org-store-link' was called with a prefix arg the meaning of
 	   (from (mail-header-from header))
 	   (message-id (org-remove-angle-brackets (mail-header-id header)))
 	   (date (org-trim (mail-header-date header)))
-	   (date-ts (and date (format-time-string
-			       (org-time-stamp-format t) (date-to-time date))))
-	   (date-ts-ia (and date (format-time-string
-				  (org-time-stamp-format t t)
-				  (date-to-time date))))
+	   (date-ts (and date
+			 (ignore-errors
+			   (format-time-string
+			    (org-time-stamp-format t)
+			    (date-to-time date)))))
+	   (date-ts-ia (and date
+			    (ignore-errors
+			      (format-time-string
+			       (org-time-stamp-format t t)
+			       (date-to-time date)))))
 	   (subject (copy-sequence (mail-header-subject header)))
 	   (to (cdr (assq 'To (mail-header-extra header))))
 	   newsgroups x-no-archive desc link)
