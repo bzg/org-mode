@@ -1266,7 +1266,9 @@ TITLE is the current title from the buffer or region.
 OPT-PLIST is the options plist for current buffer."
   (let ((toc (plist-get opt-plist :table-of-contents))
 	(author (org-export-apply-macros-in-string
-		 (plist-get opt-plist :author))))
+		 (plist-get opt-plist :author)))
+	(email (org-export-apply-macros-in-string
+		(plist-get opt-plist :email))))
     (concat
      (if (plist-get opt-plist :time-stamp-file)
 	 (format-time-string "%% Created %Y-%m-%d %a %H:%M\n"))
@@ -1290,8 +1292,12 @@ OPT-PLIST is the options plist for current buffer."
       (org-export-latex-fontify-headline title))
      ;; insert author info
      (if (plist-get opt-plist :author-info)
-	 (format "\\author{%s}\n"
-		 (org-export-latex-fontify-headline (or author user-full-name)))
+	 (format "\\author{%s%s}\n"
+		 (org-export-latex-fontify-headline (or author user-full-name))
+		 (if (and org-export-email-info email
+			  (string-match "\\S-" email))
+		     (format "\\thanks{%s}" email)
+		   ""))
        (format "%%\\author{%s}\n"
 	       (org-export-latex-fontify-headline (or author user-full-name))))
      ;; insert the date
