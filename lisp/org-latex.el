@@ -2467,7 +2467,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
      ;; conversion to latex (RES).
      (let (res)
        (goto-char (point-min))
-       (while (re-search-forward org-item-beginning-re nil t)
+       (while (re-search-forward (org-item-beginning-re) nil t)
 	 (when (and (eq (get-text-property (point) 'list-context) e)
 		    (not (get-text-property (point) 'org-example)))
 	   (beginning-of-line)
@@ -2483,16 +2483,25 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 		      (org-list-parse-list t)))
 		  org-export-latex-list-parameters))
 	   ;; Replace any counter with its latex expression in string.
+           ;;
+	   ;; FIXME: enumi is for top list only. Sub-lists are using
+	   ;;        enumii, enumiii, enumiv. So, basically, using a
+	   ;;        counter within a sublist will break top-level
+	   ;;        item numbering.
 	   (while (string-match
-		   "^\\(\\\\item[ \t]+\\)\\[@\\(?:start:\\)?\\([0-9]+\\)\\]"
+		   "^\\(\\\\item[ \t]+\\)\\[@\\(?:start:\\)?\\([0-9]+\\|[A-Z-a-z]\\)\\]"
 		   res)
-	     (setq res (replace-match
-			(concat (format "\\setcounter{enumi}{%d}"
-					(1- (string-to-number
-					     (match-string 2 res))))
-				"\n"
-				(match-string 1 res))
-			t t res)))
+	     (let ((count (match-string 2 res)))
+	       (setq res (replace-match
+			  (concat
+			   ;; Filter out non-numeric counters,
+			   ;; unsupported in standard LaTeX.
+			   (if (save-match-data (string-match "[0-9]" count))
+			       (format "\\setcounter{enumi}{%d}\n"
+				       (1- (string-to-number count)))
+			     "")
+			   (match-string 1 res))
+			  t t res))))
 	   ;; Extend previous value of original-indentation to the
 	   ;; whole string
 	   (insert (org-add-props res nil 'original-indentation

@@ -577,7 +577,8 @@ publishing directory."
       (replace-match "\\1\\2")))
   ;; Remove list start counters
   (goto-char (point-min))
-  (while (org-list-search-forward "\\[@\\(?:start:\\)?[0-9]+\\][ \t]*" nil t)
+  (while (org-list-search-forward
+	  "\\[@\\(?:start:\\)?\\([0-9]+\\|[A-Za-z]\\)\\][ \t]*" nil t)
     (replace-match ""))
   (remove-text-properties
    (point-min) (point-max)

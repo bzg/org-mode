@@ -1341,7 +1341,7 @@ the alist of previous items."
 	   ;; "ordered", "variable" or "itemized".
 	   (lambda (pos)
 	     (cond
-	      ((string-match "[0-9]" (org-list-get-bullet pos struct))
+	      ((string-match "[[:alnum:]]" (org-list-get-bullet pos struct))
 	       "ordered")
 	      ((org-list-get-tag pos struct) "variable")
 	      (t "itemized")))))
@@ -1376,25 +1376,42 @@ the alist of previous items."
     (cond
      ;; At an item: insert appropriate tags in export buffer.
      ((assq pos struct)
-      (string-match
-       (concat "[ \t]*\\(\\(?:[-+*]\\|[0-9]+[.)]\\)[ \t]+\\)"
-	       "\\(?:\\[@\\(?:start:\\)?\\([0-9]+\\)\\]\\)?"
-	       "\\(?:\\(\\[[ X-]\\]\\)[ \t]+\\)?"
-	       "\\(?:\\(.*\\)[ \t]+::[ \t]+\\)?"
-	       "\\(.*\\)") line)
-      (let* ((counter (match-string 2 line))
-	     (checkbox (match-string 3 line))
+      (string-match (concat "[ \t]*\\(\\S-+[ \t]+\\)"
+			    "\\(?:\\[@\\(?:start:\\)?\\([0-9]+\\|[a-zA-Z]\\)\\]\\)?"
+			    "\\(?:\\(\\[[ X-]\\]\\)[ \t]+\\)?"
+			    "\\(?:\\(.*\\)[ \t]+::[ \t]+\\)?"
+			    "\\(.*\\)")
+		    line)
+      (let* ((checkbox (match-string 3 line))
 	     (desc-tag (or (match-string 4 line) "???"))
 	     (body (match-string 5 line))
 	     (list-beg (org-list-get-list-begin pos struct prevs))
 	     (firstp (= list-beg pos))
 	     ;; Always refer to first item to determine list type, in
 	     ;; case list is ill-formed.
-	     (type (funcall get-type list-beg)))
+	     (type (funcall get-type list-beg))
+	     ;; Special variables for ordered lists.
+	     (order-type (let ((bullet (org-list-get-bullet list-beg struct)))
+			   (cond
+			    ((not (equal type "ordered")) nil)
+			    ((string-match "[a-z]" bullet) "loweralpha")
+			    ((string-match "[A-Z]" bullet) "upperalpha")
+			    (t "arabic"))))
+	     (counter (let ((count-tmp (org-list-get-counter pos struct)))
+			(cond
+			 ((not count-tmp) nil)
+			 ((and (member order-type '("loweralpha" "upperalpha"))
+			       (string-match "[A-Za-z]" count-tmp))
+			  count-tmp)
+			 ((and (equal order-type "arabic")
+			       (string-match "[0-9]+" count-tmp))
+			  count-tmp)))))
 	;; When FIRSTP, a new list or sub-list is starting.
 	(when firstp
 	  (org-export-docbook-close-para-maybe)
-	  (insert (format "<%slist>\n" type)))
+	  (insert (if (equal type "ordered")
+		      (concat "<orderedlist numeration=\"" order-type "\">\n")
+		    (format "<%slist>\n" type))))
 	(insert (cond
 		 ((equal type "variable")
 		  (format "<varlistentry><term>%s</term><listitem>" desc-tag))

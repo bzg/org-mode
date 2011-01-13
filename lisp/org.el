@@ -17064,7 +17064,7 @@ an outline or item heading and it has a folded subtree below it,
 this function returns t, nil otherwise."
   (let ((re (cond
 	     ((eq what 'headlines) (concat "^" org-outline-regexp))
-	     ((eq what 'items) (concat "^" (org-item-re t)))
+	     ((eq what 'items) (org-item-beginning-re))
 	     (t (error "This should not happen"))))
 	beg end)
     (save-excursion

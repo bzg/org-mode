@@ -2399,7 +2399,8 @@ the alist of previous items."
 	   ;; "o" or "u".
 	   (lambda (pos)
 	     (cond
-	      ((string-match "[0-9]" (org-list-get-bullet pos struct)) "o")
+	      ((string-match "[[:alnum:]]" (org-list-get-bullet pos struct))
+	       "o")
 	      ((org-list-get-tag pos struct) "d")
 	      (t "u")))))
 	 (get-closings
@@ -2432,23 +2433,41 @@ the alist of previous items."
      ;; At an item: insert appropriate tags in export buffer.
      ((assq pos struct)
       (string-match
-       (concat "[ \t]*\\(\\(?:[-+*]\\|[0-9]+[.)]\\)[ \t]+\\)"
-	       "\\(?:\\[@\\(?:start:\\)?\\([0-9]+\\)\\]\\)?"
+       (concat "[ \t]*\\(\\S-+[ \t]+\\)"
+	       "\\(?:\\[@\\(?:start:\\)?\\([0-9]+\\|[A-Za-z]\\)\\]\\)?"
 	       "\\(?:\\(\\[[ X-]\\]\\)[ \t]+\\)?"
 	       "\\(?:\\(.*\\)[ \t]+::[ \t]+\\)?"
 	       "\\(.*\\)") line)
-      (let* ((counter (match-string 2 line))
-	     (checkbox (match-string 3 line))
+      (let* ((checkbox (match-string 3 line))
 	     (desc-tag (or (match-string 4 line) "???"))
 	     (body (or (match-string 5 line) ""))
 	     (list-beg (org-list-get-list-begin pos struct prevs))
 	     (firstp (= list-beg pos))
 	     ;; Always refer to first item to determine list type, in
 	     ;; case list is ill-formed.
-	     (type (funcall get-type list-beg)))
+	     (type (funcall get-type list-beg))
+	     ;; Special variables for ordered lists.
+	     (order-type (let ((bullet (org-list-get-bullet list-beg struct)))
+			   (cond
+			    ((not (equal type "o")) nil)
+			    ((string-match "[a-z]" bullet) "a")
+			    ((string-match "[A-Z]" bullet) "A")
+			    (t "1"))))
+	     (counter (let ((count-tmp (org-list-get-counter pos struct)))
+			(cond
+			 ((not count-tmp) nil)
+			 ((and (member order-type '("a" "A"))
+			       (string-match "[A-Za-z]" count-tmp))
+			  (- (string-to-char (upcase count-tmp)) 64))
+			 ((and (equal order-type "1")
+			       (string-match "[0-9]+" count-tmp))
+			  count-tmp)))))
 	(when firstp
 	  (org-close-par-maybe)
-	  (insert (format "<%sl>\n" type)))
+	  ;; Treat ordered lists differently because of ORDER-TYPE.
+	  (insert (if (equal type "o")
+		      (concat "<ol type=\"" order-type "\">\n")
+		    (format "<%sl>\n" type))))
 	(insert (cond
 		 ((equal type "d")
 		  (format "<dt>%s</dt><dd>\n" desc-tag))

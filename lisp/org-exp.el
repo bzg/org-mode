@@ -1682,11 +1682,11 @@ These special cookies will later be interpreted by the backend."
        ;; For each type allowing list export, find every list, remove
        ;; ending regexp if needed, and insert org-list-end.
        (goto-char (point-min))
-       (while (re-search-forward org-item-beginning-re nil t)
+       (while (re-search-forward (org-item-beginning-re) nil t)
 	 (when (eq (nth 2 (org-list-context)) e)
 	   (let* ((struct (org-list-struct))
 		  (bottom (org-list-get-bottom-point struct))
-		  (top (org-list-get-top-point struct))
+		  (top (point-at-bol))
 		  (top-ind (org-list-get-ind top struct)))
 	     (goto-char bottom)
 	     (when (and (not (eq org-list-ending-method 'indent))
@@ -1698,7 +1698,7 @@ These special cookies will later be interpreted by the backend."
 	     ;; there are lists within lists: the inner list end would
 	     ;; also become the outer list end. To avoid this, text
 	     ;; property `original-indentation' is added, as
-	     ;; `org-list-struct' pay attention to it when reading a
+	     ;; `org-list-struct' pays attention to it when reading a
 	     ;; list.
 	     (insert (org-add-props
 			 "ORG-LIST-END\n"
@@ -1763,7 +1763,7 @@ These special properties will later be interpreted by the backend."
 	(mapc
 	 (lambda (e)
 	   (goto-char (point-min))
-	   (while (re-search-forward org-item-beginning-re nil t)
+	   (while (re-search-forward (org-item-beginning-re) nil t)
 	     (when (eq (nth 2 (org-list-context)) e) (funcall mark-list e))))
 	 (cons nil org-list-export-context))))))
 

@@ -177,6 +177,13 @@ the safe choice."
 		 (const :tag "paren like in \"2)\"" ?\))
 		 (const :tab "both" t)))
 
+(defcustom org-alphabetical-lists nil
+  "Non-nil means single character alphabetical bullets are allowed.
+Both uppercase and lowercase are handled. Lists with more than 26
+items will fallback to standard numbering."
+  :group 'org-plain-lists
+  :type 'boolean)
+
 (defcustom org-list-two-spaces-after-bullet-regexp nil
   "A regular expression matching bullets that should have 2 spaces after them.
 When nil, no bullet will have two spaces after them.
@@ -319,25 +326,24 @@ specifically, type `block' is determined by the variable
   "Regex corresponding to the end of a list.
 It depends on `org-empty-line-terminates-plain-lists'.")
 
-(defun org-item-re (&optional general)
-  "Return the correct regular expression for plain lists.
-If GENERAL is non-nil, return the general regexp independent of the value
-of `org-plain-list-ordered-item-terminator'."
-  (cond
-   ((or general (eq org-plain-list-ordered-item-terminator t))
-    "\\([ \t]*\\([-+]\\|\\([0-9]+[.)]\\)\\)\\|[ \t]+\\*\\)\\([ \t]+\\|$\\)")
-   ((= org-plain-list-ordered-item-terminator ?.)
-    "\\([ \t]*\\([-+]\\|\\([0-9]+\\.\\)\\)\\|[ \t]+\\*\\)\\([ \t]+\\|$\\)")
-   ((= org-plain-list-ordered-item-terminator ?\))
-    "\\([ \t]*\\([-+]\\|\\([0-9]+)\\)\\)\\|[ \t]+\\*\\)\\([ \t]+\\|$\\)")
-   (t (error "Invalid value of `org-plain-list-ordered-item-terminator'"))))
+(defun org-item-re ()
+  "Return the correct regular expression for plain lists."
+  (let ((term (cond
+	       ((eq org-plain-list-ordered-item-terminator t) "[.)]")
+	       ((= org-plain-list-ordered-item-terminator ?\)) ")")
+	       ((= org-plain-list-ordered-item-terminator ?.) "\\.")
+	       (t "[.)]")))
+	(alpha (if org-alphabetical-lists "\\|[A-Za-z]" "")))
+    (concat "\\([ \t]*\\([-+]\\|\\(\\([0-9]+" alpha "\\)" term
+	    "\\)\\)\\|[ \t]+\\*\\)\\([ \t]+\\|$\\)")))
 
-(defconst org-item-beginning-re (concat "^" (org-item-re))
-  "Regexp matching the beginning of a plain list item.")
+(defun org-item-beginning-re ()
+  "Regexp matching the beginning of a plain list item."
+  (concat "^" (org-item-re)))
 
 (defconst org-list-full-item-re
-  (concat "^[ \t]*\\(\\(?:[-+*]\\|[0-9]+[.)]\\)[ \t]+\\)"
-	  "\\(?:\\[@\\(?:start:\\)?\\([0-9]+\\)\\]\\)?"
+  (concat "^[ \t]*\\(\\(?:[-+*]\\|\\(?:[0-9]+\\|[A-Za-z]\\)[.)]\\)[ \t]+\\)"
+	  "\\(?:\\[@\\(?:start:\\)?\\([0-9]+\\|[A-Za-z]\\)\\]\\)?"
 	  "\\(?:\\(\\[[ X-]\\]\\)[ \t]+\\)?"
 	  "\\(?:\\(.*\\)[ \t]+::[ \t]+\\)?")
   "Matches a list item and puts everything into groups:
@@ -778,7 +784,7 @@ This checks `org-list-ending-method'."
 
 (defun org-at-item-p ()
   "Is point in a line starting a hand-formatted item?"
-  (save-excursion (beginning-of-line) (looking-at org-item-beginning-re)))
+  (save-excursion (beginning-of-line) (looking-at (org-item-beginning-re))))
 
 (defun org-at-item-bullet-p ()
   "Is point at the bullet of a plain list item?"
@@ -1445,8 +1451,12 @@ PREVS is the alist of previous items. See
 `org-list-struct-prev-alist'.
 
 This function modifies STRUCT."
-  (let ((fix-bul
+  (let ((case-fold-search nil)
+	(fix-bul
 	 (function
+	  ;; Set bullet of ITEM in STRUCT, depending on the type of
+	  ;; first item of the list, the previous bullet and counter
+	  ;; if any.
 	  (lambda (item)
 	    (let* ((prev (org-list-get-prev-item item struct prevs))
 		   (prev-bul (and prev (org-list-get-bullet prev struct)))
@@ -1456,14 +1466,51 @@ This function modifies STRUCT."
 	       item struct
 	       (org-list-bullet-string
 		(cond
-		 ((and prev (string-match "[0-9]+" prev-bul) counter)
+		 ;; Alpha counter in alpha list: use counter.
+		 ((and prev counter
+		       (string-match "[a-zA-Z]" counter)
+		       (string-match "[a-zA-Z]" prev-bul))
+		  ;; Use cond to be sure `string-match' is used in
+		  ;; both cases.
+		  (let ((real-count
+			 (cond
+			  ((string-match "[a-z]" prev-bul) (downcase counter))
+			  ((string-match "[A-Z]" prev-bul) (upcase counter)))))
+		    (replace-match real-count nil nil prev-bul)))
+		 ;; Num counter in a num list: use counter.
+		 ((and prev counter
+		       (string-match "[0-9]+" counter)
+		       (string-match "[0-9]+" prev-bul))
 		  (replace-match counter nil nil prev-bul))
+		 ;; No counter: increase, if needed, previous bullet.
 		 (prev
 		  (org-list-inc-bullet-maybe (org-list-get-bullet prev struct)))
-		 ((and (string-match "[0-9]+" bullet) counter)
+		 ;; Alpha counter at first item: use counter.
+		 ((and counter (org-list-use-alpha-bul-p item struct prevs)
+		       (string-match "[A-Za-z]" counter)
+		       (string-match "[A-Za-z]" bullet))
+		  (let ((real-count
+			 (cond
+			  ((string-match "[a-z]" bullet) (downcase counter))
+			  ((string-match "[A-Z]" bullet) (upcase counter)))))
+		    (replace-match real-count nil nil bullet)))
+		 ;; Num counter at first item: use counter.
+		 ((and counter
+		       (string-match "[0-9]+" counter)
+		       (string-match "[0-9]+" bullet))
 		  (replace-match counter nil nil bullet))
-		 ((string-match "[0-9]+" bullet)
+		 ;; First bullet is alpha uppercase: use "A".
+		 ((and (org-list-use-alpha-bul-p item struct prevs)
+		       (string-match "[A-Z]" bullet))
+		  (replace-match "A" nil nil bullet))
+		 ;; First bullet is alpha lowercase: use "a".
+		 ((and (org-list-use-alpha-bul-p item struct prevs)
+		       (string-match "[a-z]" bullet))
+		  (replace-match "a" nil nil bullet))
+		 ;; First bullet is num: use "1".
+		 ((string-match "\\([0-9]+\\|[A-Za-z]\\)" bullet)
 		  (replace-match "1" nil nil bullet))
+		 ;; Not an ordered list: keep bullet.
 		 (t bullet)))))))))
     (mapc fix-bul (mapcar 'car struct))))
 
@@ -1911,13 +1958,47 @@ It determines the number of whitespaces to append by looking at
           " ")))
      nil nil bullet 1)))
 
+(defun org-list-use-alpha-bul-p (first struct prevs)
+  "Can list starting at FIRST use alphabetical bullets?
+
+STRUCT is list structure. See `org-list-struct'. PREVS is the
+alist of previous items. See `org-list-struct-prev-alist'."
+  (and org-alphabetical-lists
+       (catch 'exit
+	 (let ((item first) (ascii 64) (case-fold-search nil))
+	   ;; Pretend that bullets are uppercase and checked if
+	   ;; alphabet is sufficient, taking counters into account.
+	   (while item
+	     (let ((bul (org-list-get-bullet item struct))
+		   (count (org-list-get-counter item struct)))
+	       ;; Virtually determine current bullet
+	       (if (and count (string-match "[a-zA-Z]" count))
+		   ;; Counters are not case-sensitive.
+		   (setq ascii (string-to-char (upcase count)))
+		 (setq ascii (1+ ascii)))
+	       ;; Test if bullet would be over z or Z.
+	       (if (> ascii 90)
+		   (throw 'exit nil)
+		 (setq item (org-list-get-next-item item struct prevs)))))
+	   ;; All items checked. All good.
+	   t))))
+
 (defun org-list-inc-bullet-maybe (bullet)
   "Increment BULLET if applicable."
-  (if (string-match "[0-9]+" bullet)
+  (let ((case-fold-search nil))
+    (cond
+     ;; Num bullet: increment it.
+     ((string-match "[0-9]+" bullet)
       (replace-match
        (number-to-string (1+ (string-to-number (match-string 0 bullet))))
-       nil nil bullet)
-    bullet))
+       nil nil bullet))
+     ;; Alpha bullet: increment it.
+     ((string-match "[A-Za-z]" bullet)
+      (replace-match
+       (char-to-string (1+ (string-to-char (match-string 0 bullet))))
+       nil nil bullet))
+     ;; Unordered bullet: leave it.
+     (t bullet))))
 
 (defun org-list-repair ()
   "Make sure all items are correctly indented, with the right bullet.
@@ -1944,25 +2025,40 @@ is an integer, 0 means `-', 1 means `+' etc. If WHICH is
     (let* ((struct (org-list-struct))
            (parents (org-list-struct-parent-alist struct))
            (prevs (org-list-struct-prev-alist struct))
-           (list-beg (org-list-get-list-begin (point) struct prevs))
+           (list-beg (org-list-get-first-item (point) struct prevs))
            (bullet (org-list-get-bullet list-beg struct))
+	   (bullet-rule-p (cdr (assq 'bullet org-list-automatic-rules)))
+	   (alpha-p (org-list-use-alpha-bul-p list-beg struct prevs))
+	   (case-fold-search nil)
 	   (current (cond
+		     ((string-match "[a-z]\\." bullet) "a.")
+		     ((string-match "[a-z])" bullet) "a)")
+		     ((string-match "[A-Z]\\." bullet) "A.")
+		     ((string-match "[A-Z])" bullet) "A)")
 		     ((string-match "\\." bullet) "1.")
 		     ((string-match ")" bullet) "1)")
 		     (t (org-trim bullet))))
-	   (bullet-rule-p (cdr (assq 'bullet org-list-automatic-rules)))
            ;; Compute list of possible bullets, depending on context
-	   (bullet-list (append '("-" "+" )
-				;; *-bullets are not allowed at column 0
-				(unless (and bullet-rule-p
-					     (looking-at "\\S-")) '("*"))
-				;; Description items cannot be numbered
-				(unless (and bullet-rule-p
-					     (or (eq org-plain-list-ordered-item-terminator ?\))
-						 (org-at-item-description-p))) '("1."))
-				(unless (and bullet-rule-p
-					     (or (eq org-plain-list-ordered-item-terminator ?.)
-						 (org-at-item-description-p))) '("1)"))))
+	   (bullet-list
+	    (append '("-" "+" )
+		    ;; *-bullets are not allowed at column 0
+		    (unless (and bullet-rule-p
+				 (looking-at "\\S-")) '("*"))
+		    ;; Description items cannot be numbered
+		    (unless (or (eq org-plain-list-ordered-item-terminator ?\))
+				(and bullet-rule-p (org-at-item-description-p)))
+		      '("1."))
+		    (unless (or (eq org-plain-list-ordered-item-terminator ?.)
+				(and bullet-rule-p (org-at-item-description-p)))
+		      '("1)"))
+		    (unless (or (not alpha-p)
+				(eq org-plain-list-ordered-item-terminator ?\))
+				(and bullet-rule-p (org-at-item-description-p)))
+		      '("a." "A."))
+		    (unless (or (not alpha-p)
+				(eq org-plain-list-ordered-item-terminator ?.)
+				(and bullet-rule-p (org-at-item-description-p)))
+		      '("a)" "A)"))))
 	   (len (length bullet-list))
 	   (item-index (- len (length (member current bullet-list))))
 	   (get-value (lambda (index) (nth (mod index len) bullet-list)))
@@ -2006,7 +2102,7 @@ in subtree, ignoring drawers."
 	     ((org-region-active-p)
 	      (let ((limit (region-end)))
 		(goto-char (region-beginning))
-		(if (org-list-search-forward org-item-beginning-re limit t)
+		(if (org-list-search-forward (org-item-beginning-re) limit t)
 		    (setq lim-up (point-at-bol))
 		  (error "No item in region"))
 		(setq lim-down (copy-marker limit))))
@@ -2016,7 +2112,7 @@ in subtree, ignoring drawers."
 		(forward-line 1)
 		(when (looking-at org-drawer-regexp)
 		  (re-search-forward "^[ \t]*:END:" limit nil))
-		(if (org-list-search-forward org-item-beginning-re limit t)
+		(if (org-list-search-forward (org-item-beginning-re) limit t)
 		    (setq lim-up (point-at-bol))
 		  (error "No item in subtree"))
 		(setq lim-down (copy-marker limit))))
@@ -2044,7 +2140,7 @@ in subtree, ignoring drawers."
       ;; list; 3. move point after the list.
       (goto-char lim-up)
       (while (and (< (point) lim-down)
-		  (org-list-search-forward org-item-beginning-re
+		  (org-list-search-forward (org-item-beginning-re)
 					   lim-down 'move))
 	(let* ((struct (org-list-struct))
 	       (struct-copy (mapcar (lambda (e) (copy-alist e)) struct))
@@ -2118,7 +2214,7 @@ With optional prefix argument ALL, do this for the whole buffer."
   (interactive "P")
   (save-excursion
     (let ((cookie-re "\\(\\(\\[[0-9]*%\\]\\)\\|\\(\\[[0-9]*/[0-9]*\\]\\)\\)")
-	  (box-re "^[ \t]*\\([-+*]\\|[0-9]+[.)]\\)[ \t]+\\(?:\\[@\\(?:start:\\)?[0-9]+\\][ \t]*\\)?\\(\\[[- X]\\]\\)")
+	  (box-re "^[ \t]*\\([-+*]\\|\\([0-9]+\\|[A-Za-z]\\)[.)]\\)[ \t]+\\(?:\\[@\\(?:start:\\)?\\([0-9]+\\|[A-Za-z]\\)\\][ \t]*\\)?\\(\\[[- X]\\]\\)")
 	  (recursivep
 	   (or (not org-hierarchical-checkbox-statistics)
 	       (string-match "\\<recursive\\>"
@@ -2410,7 +2506,8 @@ Point is left at list end."
 	   ;; determine type of list by getting info on item POS in
 	   ;; STRUCT.
 	   (lambda (pos struct)
-	     (cond ((string-match "[0-9]" (org-list-get-bullet pos struct))
+	     (cond ((string-match "[[:alnum:]]"
+				  (org-list-get-bullet pos struct))
 		    'ordered)
 		   ((org-list-get-tag pos struct) 'descriptive)
 		   (t 'unordered)))))
@@ -2428,7 +2525,7 @@ Point is left at list end."
 	   (lambda (e)
 	     (let ((start (save-excursion
 			    (goto-char e)
-			    (looking-at org-item-beginning-re)
+			    (looking-at (org-item-beginning-re))
 			    (match-end 0)))
 		   (childp (org-list-has-child-p e struct))
 		   (end (org-list-get-item-end e struct)))
@@ -2455,7 +2552,7 @@ Point is left at list end."
 	     (let ((text (org-trim (buffer-substring beg end))))
 	       (if (and box
 			(string-match
-			 "^\\(?:\\[@\\(?:start:\\)?[0-9]+\\][ \t]*\\)?\\[\\([xX ]\\)\\]"
+			 "^\\(?:\\[@\\(?:start:\\)?\\(?:[0-9]+\\|[A-Za-z]\\)\\][ \t]*\\)?\\[\\([xX ]\\)\\]"
 			 text))
 		   (replace-match
 		    (if (equal (match-string 1 text) " ") "CBOFF" "CBON")
@@ -2535,7 +2632,7 @@ this list."
 	   (top-point
 	    (progn
 	      (re-search-backward "#\\+ORGLST" nil t)
-	      (re-search-forward org-item-beginning-re bottom-point t)
+	      (re-search-forward (org-item-beginning-re) bottom-point t)
 	      (match-beginning 0)))
 	   (list (save-restriction
 		   (narrow-to-region top-point bottom-point)
