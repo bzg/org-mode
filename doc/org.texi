@@ -14093,11 +14093,17 @@ written in a way such that it does nothing in buffers that are not in
 @section Special agenda views
 @cindex agenda views, user-defined
 
+@vindex org-agenda-skip-function
+@vindex org-agenda-skip-function-global
 Org provides a special hook that can be used to narrow down the selection
-made by these agenda views: @code{todo}, @code{alltodo}, @code{tags}, @code{tags-todo}, 
-@code{tags-tree}.  You may specify a function that is used at each match to verify 
-if the match should indeed be part of the agenda view, and if not, how 
-much should be skipped.
+made by these agenda views: @code{todo}, @code{alltodo}, @code{tags},
+@code{tags-todo}, @code{tags-tree}.  You may specify a function that is used
+at each match to verify if the match should indeed be part of the agenda
+view, and if not, how much should be skipped.  You can specify a global
+condition that will be applied to all agenda views, this condition would be
+stored in the variable @code{org-agenda-skip-function-global}.  More
+commonly, such a definition is applied only to specific custom searches,
+using @code{org-agenda-skip-function}.
 
 Let's say you want to produce a list of projects that contain a WAITING
 tag anywhere in the project tree.  Let's further assume that you have
