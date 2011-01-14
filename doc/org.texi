@@ -13465,15 +13465,17 @@ fixed this problem:
             (define-key yas/keymap [tab] 'yas/next-field-group)))
 @end lisp
 
-The latest version of yasnippets doesn't play well with Org mode. If the
+The latest version of yasnippet doesn't play well with Org mode. If the
 above code does not fix the conflict, start by defining the following
 function:
+
 @lisp
 (defun yas/org-very-safe-expand ()
        (let ((yas/fallback-behavior 'return-nil)) (yas/expand)))
 @end lisp
 
 Then, tell Org mode what to do with the new function:
+
 @lisp
 (add-hook 'org-mode-hook
           (lambda ()
