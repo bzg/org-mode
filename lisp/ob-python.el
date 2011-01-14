@@ -146,11 +146,10 @@ then create.  Return the initialized session."
 	;; Make sure that py-which-bufname is initialized, as otherwise
 	;; it will be overwritten the first time a Python buffer is
 	;; created.
-	(when (fboundp 'py-shell)
-	   (py-toggle-shells py-default-interpreter))
+	(py-toggle-shells py-default-interpreter)
 	;; `py-shell' creates a buffer whose name is the value of
 	;; `py-which-bufname' with '*'s at the beginning and end
-	(let* ((bufname (if python-buffer
+	(let* ((bufname (if (and python-buffer (buffer-live-p python-buffer))
 			    (replace-regexp-in-string ;; zap surrounding *
 			     "^\\*\\([^*]+\\)\\*$" "\\1" python-buffer)
 			  (concat "Python-" (symbol-name session))))
