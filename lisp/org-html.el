@@ -1308,8 +1308,6 @@ lang=\"%s\" xml:lang=\"%s\">
 				  "@</a> ")
 			  t t line)))))
 
-	  (setq line (org-html-handle-time-stamps line))
-
 	  ;; replace "&" by "&amp;", "<" and ">" by "&lt;" and "&gt;"
 	  ;; handle @<..> HTML tags (replace "@&gt;..&lt;" by "<..>")
 	  ;; Also handle sub_superscripts and checkboxes
@@ -1473,6 +1471,8 @@ lang=\"%s\" xml:lang=\"%s\">
 				"&gt;</i>"))))
 	    (setq line (replace-match rpl t t line)
 		  start (+ start (length rpl))))
+
+	  (setq line (org-html-handle-time-stamps line))
 
 	  ;; TODO items
 	  (if (and (string-match org-todo-line-regexp line)

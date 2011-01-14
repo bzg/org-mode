@@ -232,9 +232,9 @@ export that region, otherwise export the entire body."
     (run-hooks 'org-mime-send-subtree-hook)
     (let* ((file (buffer-file-name (current-buffer)))
 	   (subject (nth 4 (org-heading-components)))
-	   (to (org-entry-get nil "MAIL_TO"))
-	   (cc (org-entry-get nil "MAIL_CC"))
-	   (bcc (org-entry-get nil "MAIL_BCC"))
+	   (to (org-entry-get nil "MAIL_TO" org-use-property-inheritance))
+	   (cc (org-entry-get nil "MAIL_CC" org-use-property-inheritance))
+	   (bcc (org-entry-get nil "MAIL_BCC" org-use-property-inheritance))
 	   (body (buffer-substring
 		  (save-excursion (goto-char (point-min))
 				  (forward-line 1)
@@ -311,6 +311,7 @@ export that region, otherwise export the entire body."
   exported to a org format or to the format specified by the
   MAIL_FMT property of the subtree."
   (interactive)
-  (org-mime-send-subtree (or (org-entry-get nil "MAIL_FMT") 'org)))
+  (org-mime-send-subtree
+   (or (org-entry-get nil "MAIL_FMT" org-use-property-inheritance) 'org)))
 
 (provide 'org-mime)

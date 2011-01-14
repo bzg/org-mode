@@ -393,7 +393,7 @@ form
 	(insert-comment
 	 (org-fill-template org-babel-tangle-comment-format-end link-data))))))
 
-;; detangling functions
+;; dangling functions
 (defvar org-bracket-link-analytic-regexp)
 (defun org-babel-detangle (&optional source-code-file)
   "Propagate changes in source file back original to Org-mode file.
@@ -420,20 +420,24 @@ which enable the original code blocks to be found."
   "Jump from a tangled code file to the related Org-mode file."
   (interactive)
   (let ((mid (point))
-        target-buffer target-char
-        start end link path block-name body)
+	start end done
+        target-buffer target-char link path block-name body)
     (save-window-excursion
       (save-excursion
-        (unless (and (re-search-backward org-bracket-link-analytic-regexp nil t)
-                     (setq start (point-at-eol))
-                     (setq link (match-string 0))
-                     (setq path (match-string 3))
-                     (setq block-name (match-string 5))
-                     (re-search-forward
-                      (concat " " (regexp-quote block-name) " ends here") nil t)
-                     (setq end (point-at-bol))
-                     (< start mid) (< mid end))
-          (error "not in tangled code"))
+	(while (and (re-search-backward org-bracket-link-analytic-regexp nil t)
+		    (not ; ever wider searches until matching block comments
+		     (and (setq start (point-at-eol))
+			  (setq link (match-string 0))
+			  (setq path (match-string 3))
+			  (setq block-name (match-string 5))
+			  (save-excursion
+			    (save-match-data
+			      (re-search-forward
+			       (concat " " (regexp-quote block-name)
+				       " ends here") nil t)
+			      (setq end (point-at-bol))))))))
+	(unless (and start (< start mid) (< mid end))
+	  (error "not in tangled code"))
         (setq body (org-babel-trim (buffer-substring start end))))
       (when (string-match "::" path)
         (setq path (substring path 0 (match-beginning 0))))

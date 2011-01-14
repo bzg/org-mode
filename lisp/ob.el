@@ -1594,7 +1594,7 @@ file's directory then expand relative links."
   (if (not (org-babel-where-is-src-block-head))
       (error "not in source block")
     (save-match-data
-      (replace-match (concat (org-babel-trim new-body) "\n") nil nil nil 5))
+      (replace-match (concat (org-babel-trim new-body) "\n") nil t nil 5))
     (indent-rigidly (match-beginning 5) (match-end 5) 2)))
 
 (defun org-babel-merge-params (&rest plists)
