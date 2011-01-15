@@ -10984,7 +10984,7 @@ publish it as @file{theindex.html}.
 
 The file will be create when first publishing a project with the
 @code{:makeindex} set.  The file only contains a statement @code{#+include:
-"theindex.inc"}.  You can then built around this include statement by adding
+"theindex.inc"}.  You can then build around this include statement by adding
 a title, style information etc.
 
 @node Uploading files, Sample configuration, Configuration, Publishing
