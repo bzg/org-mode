@@ -317,6 +317,6 @@ export that region, otherwise export the entire body."
   MAIL_FMT property of the subtree."
   (interactive)
   (org-mime-send-subtree
-   (or (org-entry-get nil "MAIL_FMT" org-use-mime-property-inheritance) 'org)))
+   (or (org-entry-get nil "MAIL_FMT" org-mime-use-property-inheritance) 'org)))
 
 (provide 'org-mime)
