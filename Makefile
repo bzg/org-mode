@@ -318,7 +318,6 @@ release:
 	UTILITIES/set-version.pl -a $(TAG)
 	git commit -a -m "Update website to show $(TAG) as current release"
 	git push
-	make updateweb
 
 # The following target makes a release, but from the stuff that is on
 # maint, not from the stuff that is on master.  The idea is that it pushes
@@ -347,7 +346,34 @@ fixrelease:
 	UTILITIES/set-version.pl -o $(TAG)
 	git commit -a -m "Update website to show $(TAG) as current release"
 	git push
-	make updateweb
+
+relup:
+	${MAKE} makerelease
+	${MAKE} sync_release
+	${MAKE} sync_manual
+
+makerelease:
+	@if [ "X$(TAG)" = "X" ]; then echo "*** No tag ***"; exit 1; fi
+	${MAKE} distfile
+	${MAKE} doc
+	UTILITIES/gplmanual.pl
+	${MAKE} html_manual
+	${MAKE} html_guide
+	rm -rf RELEASEDIR
+	$(MKDIR) RELEASEDIR
+	cp org-$(TAG).zip org-$(TAG).tar.gz RELEASEDIR
+	cp doc/org.pdf doc/orgcard.pdf doc/org.texi doc/org.html RELEASEDIR
+	cp doc/org_dual_license.texi RELEASEDIR
+	cp doc/orgguide.pdf doc/orgcard.txt RELEASEDIR
+	cp RELEASEDIR/org-$(TAG).zip    RELEASEDIR/org.zip
+	cp RELEASEDIR/org-$(TAG).tar.gz RELEASEDIR/org.tar.gz
+
+sync_release:
+	rsync -avuz RELEASEDIR/ /var/www/orgmode.org/
+
+sync_manual:
+	rsync -avuz --delete doc/manual/ /var/www/orgmode.org/manual/
+	rsync -avuz --delete doc/guide/ /var/www/orgmode.org/guide/
 
 distfile:
 	@if [ "X$(TAG)" = "X" ]; then echo "*** No tag ***"; exit 1; fi
@@ -377,22 +403,6 @@ pkg:
 	cp -r $(PKG_FILES) org-$(PKG_TAG)
 	echo "(define-package \"org\" \"$(PKG_TAG)\" \"$(PKG_DOC)\" $(PKG_REQ))" > org-$(PKG_TAG)/org-pkg.el
 	tar cf org-$(PKG_TAG).tar org-$(PKG_TAG) --remove-files
-
-makerelease:
-	@if [ "X$(TAG)" = "X" ]; then echo "*** No tag ***"; exit 1; fi
-	${MAKE} distfile
-	${MAKE} doc
-	UTILITIES/gplmanual.pl
-	${MAKE} html_manual
-	${MAKE} html_guide
-	rm -rf RELEASEDIR
-	$(MKDIR) RELEASEDIR
-	cp org-$(TAG).zip org-$(TAG).tar.gz RELEASEDIR
-	cp doc/org.pdf doc/orgcard.pdf doc/org.texi doc/org.html RELEASEDIR
-	cp doc/org_dual_license.texi RELEASEDIR
-	cp doc/orgguide.pdf doc/orgcard.txt RELEASEDIR
-	cp RELEASEDIR/org-$(TAG).zip    RELEASEDIR/org.zip
-	cp RELEASEDIR/org-$(TAG).tar.gz RELEASEDIR/org.tar.gz
 
 cleanall:
 	${MAKE} clean
