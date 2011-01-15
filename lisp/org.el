@@ -10368,7 +10368,7 @@ This can be done with a 0 prefix: `C-0 C-c C-w'"
 	    (goto-char pos)
 	    (beginning-of-line 1)
 	    (unless (org-looking-at-p re)
-	      (error "Invalid refile position, please rebuild the cache"))))))))
+	      (error "Invalid refile position, please clear the cache with `C-0 C-c C-w' before refiling"))))))))
 
 (defun org-refile-new-child (parent-target child)
   "Use refile target PARENT-TARGET to add new CHILD below it."
