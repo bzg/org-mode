@@ -347,6 +347,8 @@ fixrelease:
 	git commit -a -m "Update website to show $(TAG) as current release"
 	git push
 
+# ~$ make relup only makes sense from orgmode.org server
+# Don't call it from your computer!
 relup:
 	${MAKE} makerelease
 	${MAKE} sync_release
@@ -368,9 +370,13 @@ makerelease:
 	cp RELEASEDIR/org-$(TAG).zip    RELEASEDIR/org.zip
 	cp RELEASEDIR/org-$(TAG).tar.gz RELEASEDIR/org.tar.gz
 
+# ~$ make sync_release only makes sense from orgmode.org server
+# Don't call it from your computer!
 sync_release:
 	rsync -avuz RELEASEDIR/ /var/www/orgmode.org/
 
+# ~$ make sync_manual only makes sense from orgmode.org server
+# Don't call it from your computer!
 sync_manual:
 	rsync -avuz --delete doc/manual/ /var/www/orgmode.org/manual/
 	rsync -avuz --delete doc/guide/ /var/www/orgmode.org/guide/
