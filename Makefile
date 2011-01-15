@@ -349,11 +349,6 @@ fixrelease:
 	git push
 	make updateweb
 
-relup:
-	${MAKE} makerelease
-	${MAKE} upload_release
-	${MAKE} upload_manual
-
 distfile:
 	@if [ "X$(TAG)" = "X" ]; then echo "*** No tag ***"; exit 1; fi
 	touch doc/org.texi doc/orgcard.tex # force update
@@ -398,13 +393,6 @@ makerelease:
 	cp doc/orgguide.pdf doc/orgcard.txt RELEASEDIR
 	cp RELEASEDIR/org-$(TAG).zip    RELEASEDIR/org.zip
 	cp RELEASEDIR/org-$(TAG).tar.gz RELEASEDIR/org.tar.gz
-
-upload_release:
-	rsync -avuz RELEASEDIR/ cdominik@orgmode.org:orgmode.org/
-
-upload_manual:
-	rsync -avuz --delete doc/manual/ cdominik@orgmode.org:orgmode.org/manual/
-	rsync -avuz --delete doc/guide/ cdominik@orgmode.org:orgmode.org/guide/
 
 cleanall:
 	${MAKE} clean
