@@ -370,7 +370,7 @@ distfile:
 	cp -r $(DISTFILES_extra) org-$(TAG)/
 	cp -r README_DIST org-$(TAG)/README
 	zip -r org-$(TAG).zip org-$(TAG)
-	gtar zcvf org-$(TAG).tar.gz org-$(TAG)
+	tar zcvf org-$(TAG).tar.gz org-$(TAG)
 
 pkg:
 	@if [ "X$(PKG_TAG)" = "X" ]; then echo "*** No tag ***"; exit 1; fi
