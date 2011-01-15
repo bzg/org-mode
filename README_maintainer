@@ -160,7 +160,7 @@ around it]]), and so much faster.
 So the way I have been doing things with Emacs is this:
 
 1. I do not update the version in Emacs too often.  Just once every
-   few month - this is frequently enough for the Emacs release cycle.
+   few months - this is frequently enough for the Emacs release cycle.
    Care must be taken to get in a *new and stable* version shortly
    before Emacs goes into feature freeze and pretest, because that
    version is going to be in the wild for a long time.
