@@ -1729,9 +1729,14 @@ block but are passed literally to the \"example-block\"."
          (info (or info (org-babel-get-src-block-info)))
          (lang (nth 0 info))
          (body (nth 1 info))
+	 (comment (string= "noweb" (cdr (assoc :comments (nth 2 info)))))
          (new-body "") index source-name evaluate prefix)
-    (flet ((nb-add (text)
-                   (setq new-body (concat new-body text))))
+    (flet ((nb-add (text) (setq new-body (concat new-body text)))
+	   (c-wrap (text)
+		   (with-temp-buffer
+		     (funcall (intern (concat lang "-mode")))
+		     (comment-region (point) (progn (insert text) (point)))
+		     (org-babel-trim (buffer-string)))))
       (with-temp-buffer
         (insert body) (goto-char (point-min))
         (setq index (point))
@@ -1748,35 +1753,44 @@ block but are passed literally to the \"example-block\"."
           (nb-add (buffer-substring index (point)))
           (goto-char (match-end 0))
           (setq index (point))
-          (nb-add (with-current-buffer parent-buffer
-		    (mapconcat ;; interpose PREFIX between every line
-                     #'identity
-                     (split-string
-                      (if evaluate
-                          (let ((raw (org-babel-ref-resolve source-name)))
-                            (if (stringp raw) raw (format "%S" raw)))
-			(or (nth 2 (assoc (intern source-name)
-					  org-babel-library-of-babel))
-			    (save-restriction
-			      (widen)
-			      (let ((point (org-babel-find-named-block
-					    source-name)))
-				(if point
-				    (save-excursion
-				      (goto-char point)
-				      (org-babel-trim
-				       (org-babel-expand-noweb-references
-					(org-babel-get-src-block-info))))
-				  ;; optionally raise an error if named
-				  ;; source-block doesn't exist
-				  (if (member lang org-babel-noweb-error-langs)
-				      (error "%s"
-					     (concat
-					      "<<" source-name ">> "
-					      "could not be resolved (see "
-					      "`org-babel-noweb-error-langs')"))
-				    ""))))))
-		      "[\n\r]") (concat "\n" prefix)))))
+          (nb-add
+	   (with-current-buffer parent-buffer
+	     (mapconcat ;; interpose PREFIX between every line
+	      #'identity
+	      (split-string
+	       (if evaluate
+		   (let ((raw (org-babel-ref-resolve source-name)))
+		     (if (stringp raw) raw (format "%S" raw)))
+		 (or (nth 2 (assoc (intern source-name)
+				   org-babel-library-of-babel))
+		     (save-restriction
+		       (widen)
+		       (let ((point (org-babel-find-named-block
+				     source-name)))
+			 (if point
+			     (save-excursion
+			       (goto-char point)
+			       ;; possibly wrap body in comments
+			       (let* ((i (org-babel-get-src-block-info 'light))
+				      (body (org-babel-trim
+					     (org-babel-expand-noweb-references
+					      i))))
+				 (if comment
+				     ((lambda (cs) (concat (c-wrap (car cs)) "\n"
+						      body
+						      "\n" (c-wrap (cadr cs))))
+				      (org-babel-tangle-comment-links i))
+				   body)))
+			   ;; optionally raise an error if named
+			   ;; source-block doesn't exist
+			   (if (member lang org-babel-noweb-error-langs)
+			       (error "%s"
+				      (concat
+				       "<<" source-name ">> "
+				       "could not be resolved (see "
+				       "`org-babel-noweb-error-langs')"))
+			     ""))))))
+	       "[\n\r]") (concat "\n" prefix)))))
         (nb-add (buffer-substring index (point-max)))))
     new-body))
 

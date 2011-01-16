@@ -364,7 +364,7 @@ form
 	 (comment (nth 6 spec))
 	 (comments (cdr (assoc :comments (nth 4 spec))))
 	 (link-p (or (string= comments "both") (string= comments "link")
-		     (string= comments "yes")))
+		     (string= comments "yes") (string= comments "noweb")))
 	 (link-data (mapcar (lambda (el)
 			      (cons (symbol-name el)
 				    ((lambda (le)
@@ -393,7 +393,24 @@ form
 	(insert-comment
 	 (org-fill-template org-babel-tangle-comment-format-end link-data))))))
 
-;; dangling functions
+(defun org-babel-tangle-comment-links ( &optional info)
+  "Return a list of begin and end link comments for the code block at point."
+  (let* ((start-line (org-babel-where-is-src-block-head))
+	 (file (buffer-file-name))
+	 (link (org-link-escape (progn (call-interactively 'org-store-link)
+				       (org-babel-clean-text-properties
+					(car (pop org-stored-links))))))
+	 (source-name (nth 4 (or info (org-babel-get-src-block-info 'light))))
+	 (link-data (mapcar (lambda (el)
+			      (cons (symbol-name el)
+				    ((lambda (le)
+				       (if (stringp le) le (format "%S" le)))
+				     (eval el))))
+			    '(start-line file link source-name))))
+    (list (org-fill-template org-babel-tangle-comment-format-beg link-data)
+	  (org-fill-template org-babel-tangle-comment-format-end link-data))))
+
+;; de-tangling functions
 (defvar org-bracket-link-analytic-regexp)
 (defun org-babel-detangle (&optional source-code-file)
   "Propagate changes in source file back original to Org-mode file.
