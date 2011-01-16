@@ -12129,6 +12129,9 @@ The text is picked from the leading context of the tangled code and is
 limited by the nearest headline or source block as the case may be.
 @item @code{both}
 Turns on both the ``link'' and ``org'' comment options.
+@item @code{noweb}
+Turns on the ``link'' comment option, and additionally wraps expanded noweb
+references in the code block body in link comments.
 @end itemize
 
 @node no-expand, session, comments, Specific header arguments
