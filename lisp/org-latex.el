@@ -2482,26 +2482,6 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 		    (let ((org-list-end-re "^ORG-LIST-END\n"))
 		      (org-list-parse-list t)))
 		  org-export-latex-list-parameters))
-	   ;; Replace any counter with its latex expression in string.
-           ;;
-	   ;; FIXME: enumi is for top list only. Sub-lists are using
-	   ;;        enumii, enumiii, enumiv. So, basically, using a
-	   ;;        counter within a sublist will break top-level
-	   ;;        item numbering.
-	   (while (string-match
-		   "^\\(\\\\item[ \t]+\\)\\[@\\(?:start:\\)?\\([0-9]+\\|[A-Z-a-z]\\)\\]"
-		   res)
-	     (let ((count (match-string 2 res)))
-	       (setq res (replace-match
-			  (concat
-			   ;; Filter out non-numeric counters,
-			   ;; unsupported in standard LaTeX.
-			   (if (save-match-data (string-match "[0-9]" count))
-			       (format "\\setcounter{enumi}{%d}\n"
-				       (1- (string-to-number count)))
-			     "")
-			   (match-string 1 res))
-			  t t res))))
 	   ;; Extend previous value of original-indentation to the
 	   ;; whole string
 	   (insert (org-add-props res nil 'original-indentation

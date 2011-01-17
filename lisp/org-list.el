@@ -805,6 +805,12 @@ This checks `org-list-ending-method'."
   "Is point at a line starting a plain-list item with a checklet?"
   (org-list-at-regexp-after-bullet-p "\\(\\[[- X]\\]\\)[ \t]+"))
 
+(defun org-at-item-counter-p ()
+  "Is point at a line starting a plain-list item with a counter?"
+  (and (org-at-item-p)
+       (looking-at org-list-full-item-re)
+       (match-string 2)))
+
 ;;; Navigate
 
 (defalias 'org-list-get-item-begin 'org-in-item-p)
@@ -2491,8 +2497,9 @@ compare entries."
 
 Return a list whose car is a symbol of list type, among
 `ordered', `unordered' and `descriptive'. Then, each item is a
-list whose elements are strings and other sub-lists. Inside
-strings, checkboxes are replaced by \"[CBON]\" and \"[CBOFF]\".
+list whose car is counter, and cdr are strings and other
+sub-lists. Inside strings, checkboxes are replaced by \"[CBON]\"
+and \"[CBOFF]\".
 
 For example, the following list:
 
@@ -2500,14 +2507,17 @@ For example, the following list:
    + sub-item one
    + [X] sub-item two
    more text in first item
-2. last item
+2. [@3] last item
 
 will be parsed as:
 
-\(ordered \(\"first item\"
-	  \(unordered \(\"sub-item one\"\) \(\"[CBON] sub-item two\"\)\)
-	  \"more text in first item\"\)
-	 \(\"last item\"\)\)
+\(ordered
+  \(nil \"first item\"
+  \(unordered
+    \(nil \"sub-item one\"\)
+    \(nil \"[CBON] sub-item two\"\)\)
+  \"more text in first item\"\)
+  \(3 \"last item\"\)\)
 
 Point is left at list end."
   (let* ((struct (org-list-struct))
@@ -2516,54 +2526,70 @@ Point is left at list end."
 	 (top (org-list-get-top-point struct))
 	 (bottom (org-list-get-bottom-point struct))
 	 out
+	 (get-text
+	  (function
+	   ;; Return text between BEG and END, trimmed, with
+	   ;; checkboxes replaced.
+	   (lambda (beg end)
+	     (let ((text (org-trim (buffer-substring beg end))))
+	       (if (string-match "\\`\\[\\([xX ]\\)\\]" text)
+		   (replace-match
+		    (if (equal (match-string 1 text) " ") "CBOFF" "CBON")
+		    t nil text 1)
+		 text)))))
 	 (parse-sublist
 	  (function
-	   ;; return a list whose car is list type and cdr a list of
+	   ;; Return a list whose car is list type and cdr a list of
 	   ;; items' body.
 	   (lambda (e)
 	     (cons (org-list-get-list-type (car e) struct prevs)
 		   (mapcar parse-item e)))))
 	 (parse-item
 	  (function
-	   ;; return a list containing text and any sublist inside
-	   ;; item.
+	   ;; Return a list containing conter of item, if any, text
+	   ;; and any sublist inside it.
 	   (lambda (e)
 	     (let ((start (save-excursion
 			    (goto-char e)
-			    (looking-at (org-item-beginning-re))
+			    (or (org-at-item-counter-p) (org-at-item-p))
 			    (match-end 0)))
+		   ;; Get counter number. For alphabetic counter, get
+		   ;; its position in the alphabet.
+		   (counter (let ((c (org-list-get-counter e struct)))
+			      (cond
+			       ((not c) nil)
+			       ((string-match "[A-Za-z]" c)
+				(- (string-to-char (upcase (match-string 0 c)))
+				   64))
+			       ((string-match "[0-9]+" c)
+				(string-to-number (match-string 0 c))))))
 		   (childp (org-list-has-child-p e struct))
 		   (end (org-list-get-item-end e struct)))
+	       ;; If item has a child, store text between bullet and
+	       ;; next child, then recursively parse all sublists. At
+	       ;; the end of each sublist, check for the presence of
+	       ;; text belonging to the original item.
 	       (if childp
 		   (let* ((children (org-list-get-children e struct parents))
-			  (body (list (funcall get-text start childp t))))
+			  (body (list (funcall get-text start childp))))
 		     (while children
 		       (let* ((first (car children))
 			      (sub (org-list-get-all-items first struct prevs))
 			      (last-c (car (last sub)))
 			      (last-end (org-list-get-item-end last-c struct)))
 			 (push (funcall parse-sublist sub) body)
+			 ;; Remove children from the list just parsed.
 			 (setq children (cdr (member last-c children)))
+			 ;; There is a chunk of text belonging to the
+			 ;; item if last child doesn't end where next
+			 ;; child starts or where item ends.
 			 (unless (= (or (car children) end) last-end)
-			   (push (funcall get-text last-end (or (car children) end) nil)
+			   (push (funcall get-text
+					  last-end (or (car children) end))
 				 body))))
-		     (nreverse body))
-		 (list (funcall get-text start end t)))))))
-	 (get-text
-	  (function
-	   ;; return text between BEG and END, trimmed, with
-	   ;; checkboxes replaced if BOX is true.
-	   (lambda (beg end box)
-	     (let ((text (org-trim (buffer-substring beg end))))
-	       (if (and box
-			(string-match
-			 "^\\(?:\\[@\\(?:start:\\)?\\(?:[0-9]+\\|[A-Za-z]\\)\\][ \t]*\\)?\\[\\([xX ]\\)\\]"
-			 text))
-		   (replace-match
-		    (if (equal (match-string 1 text) " ") "CBOFF" "CBON")
-		    t nil text 1)
-		 text))))))
-    ;; store output, take care of cursor position and deletion of
+		     (cons counter (nreverse body)))
+		 (list counter (funcall get-text start end))))))))
+    ;; Store output, take care of cursor position and deletion of
     ;; list, then return output.
     (setq out (funcall parse-sublist (org-list-get-all-items top struct prevs)))
     (goto-char top)
@@ -2684,15 +2710,23 @@ Valid parameters PARAMS are
 :splice	    When set to t, return only list body lines, don't wrap
 	    them into :[u/o]start and :[u/o]end.  Default is nil.
 
-:istart	    String to start a list item
+:istart	    String to start a list item.
+:icount     String to start an item with a counter.
 :iend	    String to end a list item
 :isep	    String to separate items
 :lsep	    String to separate sublists
 
 :cboff      String to insert for an unchecked checkbox
-:cbon       String to insert for a checked checkbox"
+:cbon       String to insert for a checked checkbox
+
+Alternatively, each parameter can also be a form returning a
+string. These sexp can use keywords `counter' and `depth',
+reprensenting respectively counter associated to the current
+item, and depth of the current sub-list, starting at 0.
+Obviously, `counter' is only available for parameters applying to
+items."
   (interactive)
-  (let* ((p params) sublist
+  (let* ((p params)
 	 (splicep (plist-get p :splice))
 	 (ostart (plist-get p :ostart))
 	 (oend (plist-get p :oend))
@@ -2705,6 +2739,7 @@ Valid parameters PARAMS are
 	 (ddstart (plist-get p :ddstart))
 	 (ddend (plist-get p :ddend))
 	 (istart (plist-get p :istart))
+	 (icount (plist-get p :icount))
 	 (iend (plist-get p :iend))
 	 (isep (plist-get p :isep))
 	 (lsep (plist-get p :lsep))
@@ -2712,14 +2747,19 @@ Valid parameters PARAMS are
 	 (cboff (plist-get p :cboff))
 	 (export-item
 	  (function
-	   ;; Export an item ITEM of type TYPE. First string in item
-	   ;; is treated in a special way as it can bring extra
-	   ;; information that needs to be processed.
-	   (lambda (item type)
-	     (let ((fmt (if (eq type 'descriptive)
-			    (concat (org-trim istart) "%s" ddend iend isep)
-			  (concat istart "%s" iend isep)))
-		   (first (car item)))
+	   ;; Export an item ITEM of type TYPE, at DEPTH. First string
+	   ;; in item is treated in a special way as it can bring
+	   ;; extra information that needs to be processed.
+	   (lambda (item type depth)
+	     (let* ((counter (pop item))
+		    (fmt (cond
+			  ((eq type 'descriptive)
+			   (mapconcat 'eval `(,(org-trim istart)
+					      "%s" ,ddend ,iend ,isep) ""))
+			  ((and counter (eq type 'ordered))
+			   (mapconcat 'eval `(,icount "%s" ,iend ,isep) ""))
+			  (t (mapconcat 'eval `(,istart "%s" ,iend ,isep) ""))))
+		    (first (car item)))
 	       ;; Replace checkbox if any is found.
 	       (cond
 		((string-match "\\[CBON\\]" first)
@@ -2731,31 +2771,33 @@ Valid parameters PARAMS are
 	       ;; Insert descriptive term if TYPE is `descriptive'.
 	       (when (and (eq type 'descriptive)
 			  (string-match "^\\(.*\\)[ \t]+::" first))
-		 (setq first (concat
-			      dtstart (org-trim (match-string 1 first)) dtend
-			      ddstart (org-trim (substring first (match-end 0))))))
+		 (setq first (mapconcat
+			      'eval
+			      `(,dtstart ,(org-trim (match-string 1 first)) ,dtend
+					 ,ddstart ,(org-trim (substring first (match-end 0)))))))
 	       (setcar item first)
-	       (format fmt (mapconcat
-			    (lambda (e)
-			      (if (stringp e) e (funcall export-sublist e)))
-			    item isep))))))
+	       (format fmt
+		       (mapconcat (lambda (e)
+				    (if (stringp e) e
+				      (funcall export-sublist e (1+ depth))))
+				  item isep))))))
 	 (export-sublist
 	  (function
-	   ;; Export sublist SUB
-	   (lambda (sub)
+	   ;; Export sublist SUB at DEPTH
+	   (lambda (sub depth)
 	     (let* ((type (car sub))
 		    (items (cdr sub))
 		    (fmt (cond
 			  (splicep "%s")
 			  ((eq type 'ordered)
-			   (concat ostart "\n%s" oend))
+			   (mapconcat 'eval `(,ostart "\n%s" ,oend) ""))
 			  ((eq type 'descriptive)
-			   (concat dstart "\n%s" dend))
-			  (t (concat ustart "\n%s" uend)))))
-	       (format fmt (mapconcat
-			    (lambda (e) (funcall export-item e type))
-			    items lsep)))))))
-    (concat (funcall export-sublist list) "\n")))
+			   (mapconcat 'eval `(,dstart "\n%s" ,dend) ""))
+			  (t (mapconcat 'eval `(,ustart "\n%s" ,uend) "")))))
+	       (format fmt (mapconcat (lambda (e)
+					(funcall export-item e type depth))
+				      items lsep)))))))
+    (concat (funcall export-sublist list 0) "\n")))
 
 (defun org-list-to-latex (list &optional params)
   "Convert LIST into a LaTeX list.
@@ -2770,6 +2812,11 @@ with overruling parameters for `org-list-to-generic'."
 	       :dtstart "[" :dtend "] "
 	       :ddstart "" :ddend ""
 	       :istart "\\item " :iend ""
+	       :icount (let ((enum (nth depth '("i" "ii" "iii" "iv"))))
+			 (if enum
+			     (format "\\setcounter{enum%s}{%s}\n\\item "
+				     enum counter)
+			   "\\item "))
 	       :isep "\n" :lsep "\n"
 	       :cbon "\\texttt{[X]}" :cboff "\\texttt{[ ]}")
     params)))
@@ -2787,6 +2834,7 @@ with overruling parameters for `org-list-to-generic'."
 	       :dtstart "<dt>" :dtend "</dt>"
 	       :ddstart "<dd>" :ddend "</dd>"
 	       :istart "<li>" :iend "</li>"
+	       :icount (format "<li value=\"%s\">" counter)
 	       :isep "\n" :lsep "\n"
 	       :cbon "<code>[X]</code>" :cboff "<code>[ ]</code>")
     params)))
@@ -2804,6 +2852,7 @@ with overruling parameters for `org-list-to-generic'."
 	       :dtstart " " :dtend "\n"
 	       :ddstart "" :ddend ""
 	       :istart "@item\n" :iend ""
+	       :icount "@item\n"
 	       :isep "\n" :lsep "\n"
 	       :cbon "@code{[X]}" :cboff "@code{[ ]}")
     params)))
