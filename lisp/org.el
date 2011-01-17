@@ -1080,7 +1080,7 @@ for the duration of the command."
 					(plain-list-item . auto))
   "Should `org-insert-heading' leave a blank line before new heading/item?
 The value is an alist, with `heading' and `plain-list-item' as car,
-and a boolean flag as cdr. The cdr may lso be the symbol `auto', and then
+and a boolean flag as cdr. The cdr may also be the symbol `auto', and then
 Org will look at the surrounding headings/items and try to make an
 intelligent decision wether to insert a blank line or not.
 
