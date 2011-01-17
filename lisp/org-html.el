@@ -2395,14 +2395,14 @@ modifications to buffer. STRUCT is the list structure. PREVS is
 the alist of previous items."
   (let* ((get-type
 	  (function
-	   ;; Return type of list containing element POS, among "d",
-	   ;; "o" or "u".
-	   (lambda (pos)
-	     (cond
-	      ((string-match "[[:alnum:]]" (org-list-get-bullet pos struct))
-	       "o")
-	      ((org-list-get-tag pos struct) "d")
-	      (t "u")))))
+	   ;; Translate type of list containing POS to "d", "o" or
+	   ;; "u".
+	   (lambda (pos struct prevs)
+	     (let ((type (org-list-get-list-type pos struct prevs)))
+	       (cond
+		((eq 'ordered type) "o")
+		((eq 'descriptive type) "d")
+		(t "u"))))))
 	 (get-closings
 	  (function
 	   ;; Return list of all items and sublists ending at POS, in
@@ -2422,7 +2422,7 @@ the alist of previous items."
     (mapc (lambda (e)
 	    (let* ((lastp (= (org-list-get-last-item e struct prevs) e))
 		   (first-item (org-list-get-list-begin e struct prevs))
-		   (type (funcall get-type first-item)))
+		   (type (funcall get-type first-item struct prevs)))
 	      (org-close-par-maybe)
 	      ;; Ending for every item
 	      (org-close-li type)
@@ -2445,7 +2445,7 @@ the alist of previous items."
 	     (firstp (= list-beg pos))
 	     ;; Always refer to first item to determine list type, in
 	     ;; case list is ill-formed.
-	     (type (funcall get-type list-beg))
+	     (type (funcall get-type list-beg struct prevs))
 	     ;; Special variables for ordered lists.
 	     (order-type (let ((bullet (org-list-get-bullet list-beg struct)))
 			   (cond

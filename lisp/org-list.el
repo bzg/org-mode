@@ -1389,6 +1389,21 @@ STRUCT is the structure of the list. PREVS is the alist of
 previous items. See `org-list-struct-prev-alist'."
   (org-list-get-item-end (org-list-get-last-item item struct prevs) struct))
 
+(defun org-list-get-list-type (item struct prevs)
+  "Return the type of the list containing ITEM as a symbol.
+
+STRUCT is the structure of the list, as returned by
+`org-list-struct'. PREVS is the alist of previous items. See
+`org-list-struct-prev-alist'.
+
+Possible types are `descriptive', `ordered' and `unordered'. The
+type is determined by the first item of the list."
+  (let ((first (org-list-get-list-begin item struct prevs)))
+    (cond
+     ((org-list-get-tag first struct) 'descriptive)
+     ((string-match "[[:alnum:]]" (org-list-get-bullet first struct)) 'ordered)
+     (t 'unordered))))
+
 (defun org-list-get-nth (n key struct)
   "Return the Nth value of KEY in STRUCT."
   (nth n (assq key struct)))
@@ -2501,22 +2516,12 @@ Point is left at list end."
 	 (top (org-list-get-top-point struct))
 	 (bottom (org-list-get-bottom-point struct))
 	 out
-	 (get-list-type
-	  (function
-	   ;; determine type of list by getting info on item POS in
-	   ;; STRUCT.
-	   (lambda (pos struct)
-	     (cond ((string-match "[[:alnum:]]"
-				  (org-list-get-bullet pos struct))
-		    'ordered)
-		   ((org-list-get-tag pos struct) 'descriptive)
-		   (t 'unordered)))))
 	 (parse-sublist
 	  (function
 	   ;; return a list whose car is list type and cdr a list of
 	   ;; items' body.
 	   (lambda (e)
-	     (cons (funcall get-list-type (car e) struct)
+	     (cons (org-list-get-list-type (car e) struct prevs)
 		   (mapcar parse-item e)))))
 	 (parse-item
 	  (function
