@@ -55,6 +55,11 @@
 ;;; Code:
 (require 'cl)
 
+(defcustom org-mime-use-property-inheritance nil
+  "Non-nil means al MAIL_ properties apply also for sublevels."
+  :group 'org-mime
+  :type 'boolean)
+
 (defcustom org-mime-default-header
   "#+OPTIONS: latex:t\n"
   "Default header to control html export options, and ensure
@@ -232,9 +237,9 @@ export that region, otherwise export the entire body."
     (run-hooks 'org-mime-send-subtree-hook)
     (let* ((file (buffer-file-name (current-buffer)))
 	   (subject (nth 4 (org-heading-components)))
-	   (to (org-entry-get nil "MAIL_TO" org-use-property-inheritance))
-	   (cc (org-entry-get nil "MAIL_CC" org-use-property-inheritance))
-	   (bcc (org-entry-get nil "MAIL_BCC" org-use-property-inheritance))
+	   (to (org-entry-get nil "MAIL_TO" org-mime-use-property-inheritance))
+	   (cc (org-entry-get nil "MAIL_CC" org-mime-use-property-inheritance))
+	   (bcc (org-entry-get nil "MAIL_BCC" org-mime-use-property-inheritance))
 	   (body (buffer-substring
 		  (save-excursion (goto-char (point-min))
 				  (forward-line 1)
@@ -312,6 +317,6 @@ export that region, otherwise export the entire body."
   MAIL_FMT property of the subtree."
   (interactive)
   (org-mime-send-subtree
-   (or (org-entry-get nil "MAIL_FMT" org-use-property-inheritance) 'org)))
+   (or (org-entry-get nil "MAIL_FMT" org-mime-use-property-inheritance) 'org)))
 
 (provide 'org-mime)

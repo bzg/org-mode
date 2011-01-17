@@ -10982,10 +10982,10 @@ Org-mode can generate an index across the files of a publishing project.
 publish it as @file{theindex.html}.
 @end multitable
 
-The file will be create when first publishing a project with the
+The file will be created when first publishing a project with the
 @code{:makeindex} set.  The file only contains a statement @code{#+include:
-"theindex.inc"}.  You can then built around this include statement by adding
-a title, style information etc.
+"theindex.inc"}.  You can then build around this include statement by adding
+a title, style information, etc.
 
 @node Uploading files, Sample configuration, Configuration, Publishing
 @section Uploading files
@@ -12129,6 +12129,9 @@ The text is picked from the leading context of the tangled code and is
 limited by the nearest headline or source block as the case may be.
 @item @code{both}
 Turns on both the ``link'' and ``org'' comment options.
+@item @code{noweb}
+Turns on the ``link'' comment option, and additionally wraps expanded noweb
+references in the code block body in link comments.
 @end itemize
 
 @node no-expand, session, comments, Specific header arguments
@@ -13465,15 +13468,17 @@ fixed this problem:
             (define-key yas/keymap [tab] 'yas/next-field-group)))
 @end lisp
 
-The latest version of yasnippets doesn't play well with Org mode. If the
+The latest version of yasnippet doesn't play well with Org mode. If the
 above code does not fix the conflict, start by defining the following
 function:
+
 @lisp
 (defun yas/org-very-safe-expand ()
        (let ((yas/fallback-behavior 'return-nil)) (yas/expand)))
 @end lisp
 
 Then, tell Org mode what to do with the new function:
+
 @lisp
 (add-hook 'org-mode-hook
           (lambda ()
@@ -14093,11 +14098,17 @@ written in a way such that it does nothing in buffers that are not in
 @section Special agenda views
 @cindex agenda views, user-defined
 
+@vindex org-agenda-skip-function
+@vindex org-agenda-skip-function-global
 Org provides a special hook that can be used to narrow down the selection
-made by these agenda views: @code{todo}, @code{alltodo}, @code{tags}, @code{tags-todo}, 
-@code{tags-tree}.  You may specify a function that is used at each match to verify 
-if the match should indeed be part of the agenda view, and if not, how 
-much should be skipped.
+made by these agenda views: @code{todo}, @code{alltodo}, @code{tags},
+@code{tags-todo}, @code{tags-tree}.  You may specify a function that is used
+at each match to verify if the match should indeed be part of the agenda
+view, and if not, how much should be skipped.  You can specify a global
+condition that will be applied to all agenda views, this condition would be
+stored in the variable @code{org-agenda-skip-function-global}.  More
+commonly, such a definition is applied only to specific custom searches,
+using @code{org-agenda-skip-function}.
 
 Let's say you want to produce a list of projects that contain a WAITING
 tag anywhere in the project tree.  Let's further assume that you have

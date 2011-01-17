@@ -131,6 +131,23 @@ from maint with this command:
 
 : make fixrelease TAG=7.13.01
 
+** Updating release files on orgmode.org server
+
+As of 2011-01-15, these directives of the Makefile are meant to be
+used /from orgmode.org server/ and will copy the release files to the
+webserver directory.
+
+- ~$ make makerelease :: creates a =RELEASE/= directory containing
+     manuals and release files (=org.tar.gz=, =org.zip=, etc.)
+
+- ~$ make sync_release :: copy the content of =RELEASE/= to the right
+     location on the server
+
+- ~$ make sync_manuals :: copy the manuals from =doc/= to the right
+     location on the server
+
+- ~$ make relup :: call the three directives described above.
+
 ** Between releases
 
 While working on master between releases, I used to use something like
@@ -160,7 +177,7 @@ around it]]), and so much faster.
 So the way I have been doing things with Emacs is this:
 
 1. I do not update the version in Emacs too often.  Just once every
-   few month - this is frequently enough for the Emacs release cycle.
+   few months - this is frequently enough for the Emacs release cycle.
    Care must be taken to get in a *new and stable* version shortly
    before Emacs goes into feature freeze and pretest, because that
    version is going to be in the wild for a long time.

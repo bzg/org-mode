@@ -516,6 +516,23 @@ this one will be used."
  "Options concerning skipping parts of agenda files."
  :tag "Org Agenda Skip"
  :group 'org-agenda)
+
+(defcustom org-agenda-skip-function-global nil
+  "Function to be called at each match during agenda construction.
+If this function returns nil, the current match should not be skipped.
+If the function decised to skip an agenda match, is must return the
+buffer position from which the search should be continued.
+This may also be a Lisp form, which will be evaluated.
+
+This variable will be applied to every agenda match, including
+tags/property searches and TODO lists.  So try to make the test function
+do its checking as efficiently as possible.  To implement a skipping
+condition just for specific agenda commands, use the variable
+`org-agenda-skip-function' which can be set in the options section
+of custom agenda commands."
+  :group 'org-agenda-skip
+  :type 'sexp)
+
 (defgroup org-agenda-daily/weekly nil
   "Options concerning the daily/weekly agenda."
   :tag "Org Agenda Daily/Weekly"
@@ -3112,15 +3129,17 @@ Otherwise, the function must return a position from where the search
 should be continued.
 This may also be a Lisp form, it will be evaluated.
 Never set this variable using `setq' or so, because then it will apply
-to all future agenda commands.  Instead, bind it with `let' to scope
-it dynamically into the agenda-constructing command.  A good way to set
-it is through options in `org-agenda-custom-commands'.")
+to all future agenda commands.  If you do want a global skipping condition,
+use the option `org-agenda-skip-function-global' instead.
+The correct usage for `org-agenda-skip-function' is to bind it with
+`let' to scope it dynamically into the agenda-constructing command.
+A good way to set it is through options in `org-agenda-custom-commands'.")
 
 (defun org-agenda-skip ()
   "Throw to `:skip' in places that should be skipped.
 Also moves point to the end of the skipped region, so that search can
 continue from there."
-  (let ((p (point-at-bol)) to fp)
+  (let ((p (point-at-bol)) to)
     (and org-agenda-skip-archived-trees (not org-agenda-archives-mode)
 	 (get-text-property p :org-archived)
 	 (org-end-of-subtree t)
@@ -3130,15 +3149,25 @@ continue from there."
 	 (org-end-of-subtree t)
 	 (throw :skip t))
     (if (equal (char-after p) ?#) (throw :skip t))
-    (when (and (or (setq fp (functionp org-agenda-skip-function))
-		   (consp org-agenda-skip-function))
-	       (setq to (save-excursion
-			  (save-match-data
-			    (if fp
-				(funcall org-agenda-skip-function)
-			      (eval org-agenda-skip-function))))))
+    (when (setq to (or (org-agenda-skip-eval org-agenda-skip-function-global)
+		       (org-agenda-skip-eval org-agenda-skip-function)))
       (goto-char to)
       (throw :skip t))))
+
+(defun org-agenda-skip-eval (form)
+  "If FORM is a function or a list, call (or eval) is and return result.
+`save-excursion' and `save-match-data' are wrapped around the call, so point
+and match data are returned to the previous state no matter what these
+functions do."
+  (let (fp)
+    (and form
+	 (or (setq fp (functionp form))
+	     (consp form))
+	 (save-excursion
+	   (save-match-data
+	     (if fp
+		 (funcall form)
+	       (eval form)))))))
 
 (defvar org-agenda-markers nil
   "List of all currently active markers created by `org-agenda'.")

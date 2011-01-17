@@ -318,7 +318,6 @@ release:
 	UTILITIES/set-version.pl -a $(TAG)
 	git commit -a -m "Update website to show $(TAG) as current release"
 	git push
-	make updateweb
 
 # The following target makes a release, but from the stuff that is on
 # maint, not from the stuff that is on master.  The idea is that it pushes
@@ -347,41 +346,13 @@ fixrelease:
 	UTILITIES/set-version.pl -o $(TAG)
 	git commit -a -m "Update website to show $(TAG) as current release"
 	git push
-	make updateweb
 
+# ~$ make relup only makes sense from orgmode.org server
+# Don't call it from your computer!
 relup:
 	${MAKE} makerelease
-	${MAKE} upload_release
-	${MAKE} upload_manual
-
-distfile:
-	@if [ "X$(TAG)" = "X" ]; then echo "*** No tag ***"; exit 1; fi
-	touch doc/org.texi doc/orgcard.tex # force update
-	${MAKE} cleancontrib
-	${MAKE} info
-	${MAKE} doc
-	${MAKE} lisp/org-install.el
-	rm -rf org-$(TAG) org-$(TAG).zip
-	$(MKDIR) org-$(TAG)
-	$(MKDIR) org-$(TAG)/doc
-	$(MKDIR) org-$(TAG)/lisp
-	cp -r $(LISPFILES) org-$(TAG)/lisp
-	cp -r $(DOCFILES) $(CARDFILES) org-$(TAG)/doc
-	cp -r $(DISTFILES_extra) org-$(TAG)/
-	cp -r README_DIST org-$(TAG)/README
-	zip -r org-$(TAG).zip org-$(TAG)
-	gtar zcvf org-$(TAG).tar.gz org-$(TAG)
-
-pkg:
-	@if [ "X$(PKG_TAG)" = "X" ]; then echo "*** No tag ***"; exit 1; fi
-	touch doc/org.texi doc/orgcard.tex # force update
-	${MAKE} info
-	${MAKE} doc
-	rm -rf org-$(PKG_TAG) org-$(PKG_TAG).tar
-	$(MKDIR) org-$(PKG_TAG)
-	cp -r $(PKG_FILES) org-$(PKG_TAG)
-	echo "(define-package \"org\" \"$(PKG_TAG)\" \"$(PKG_DOC)\" $(PKG_REQ))" > org-$(PKG_TAG)/org-pkg.el
-	tar cf org-$(PKG_TAG).tar org-$(PKG_TAG) --remove-files
+	${MAKE} sync_release
+	${MAKE} sync_manual
 
 makerelease:
 	@if [ "X$(TAG)" = "X" ]; then echo "*** No tag ***"; exit 1; fi
@@ -399,12 +370,45 @@ makerelease:
 	cp RELEASEDIR/org-$(TAG).zip    RELEASEDIR/org.zip
 	cp RELEASEDIR/org-$(TAG).tar.gz RELEASEDIR/org.tar.gz
 
-upload_release:
-	rsync -avuz RELEASEDIR/ cdominik@orgmode.org:orgmode.org/
+# ~$ make sync_release only makes sense from orgmode.org server
+# Don't call it from your computer!
+sync_release:
+	rsync -avuz RELEASEDIR/ /var/www/orgmode.org/
 
-upload_manual:
-	rsync -avuz --delete doc/manual/ cdominik@orgmode.org:orgmode.org/manual/
-	rsync -avuz --delete doc/guide/ cdominik@orgmode.org:orgmode.org/guide/
+# ~$ make sync_manual only makes sense from orgmode.org server
+# Don't call it from your computer!
+sync_manual:
+	rsync -avuz --delete doc/manual/ /var/www/orgmode.org/manual/
+	rsync -avuz --delete doc/guide/ /var/www/orgmode.org/guide/
+
+distfile:
+	@if [ "X$(TAG)" = "X" ]; then echo "*** No tag ***"; exit 1; fi
+	touch doc/org.texi doc/orgcard.tex # force update
+	${MAKE} cleancontrib
+	${MAKE} info
+	${MAKE} doc
+	${MAKE} lisp/org-install.el
+	rm -rf org-$(TAG) org-$(TAG).zip
+	$(MKDIR) org-$(TAG)
+	$(MKDIR) org-$(TAG)/doc
+	$(MKDIR) org-$(TAG)/lisp
+	cp -r $(LISPFILES) org-$(TAG)/lisp
+	cp -r $(DOCFILES) $(CARDFILES) org-$(TAG)/doc
+	cp -r $(DISTFILES_extra) org-$(TAG)/
+	cp -r README_DIST org-$(TAG)/README
+	zip -r org-$(TAG).zip org-$(TAG)
+	tar zcvf org-$(TAG).tar.gz org-$(TAG)
+
+pkg:
+	@if [ "X$(PKG_TAG)" = "X" ]; then echo "*** No tag ***"; exit 1; fi
+	touch doc/org.texi doc/orgcard.tex # force update
+	${MAKE} info
+	${MAKE} doc
+	rm -rf org-$(PKG_TAG) org-$(PKG_TAG).tar
+	$(MKDIR) org-$(PKG_TAG)
+	cp -r $(PKG_FILES) org-$(PKG_TAG)
+	echo "(define-package \"org\" \"$(PKG_TAG)\" \"$(PKG_DOC)\" $(PKG_REQ))" > org-$(PKG_TAG)/org-pkg.el
+	tar cf org-$(PKG_TAG).tar org-$(PKG_TAG) --remove-files
 
 cleanall:
 	${MAKE} clean
