@@ -175,8 +175,10 @@ When completing for #+STARTUP, for example, this function returns
 (defun pcomplete/org-mode/link ()
   "Complete against defined #+LINK patterns."
   (pcomplete-here
-   (pcomplete-uniqify-list (append (mapcar 'car org-link-abbrev-alist-local)
-				   (mapcar 'car org-link-abbrev-alist)))))
+   (pcomplete-uniqify-list
+    (copy-sequence
+     (append (mapcar 'car org-link-abbrev-alist-local)
+	     (mapcar 'car org-link-abbrev-alist))))))
 
 (defvar org-entities)
 (defun pcomplete/org-mode/tex ()
@@ -189,7 +191,7 @@ When completing for #+STARTUP, for example, this function returns
 (defvar org-todo-keywords-1)
 (defun pcomplete/org-mode/todo ()
   "Complete against known TODO keywords."
-  (pcomplete-here (pcomplete-uniqify-list org-todo-keywords-1)))
+  (pcomplete-here (pcomplete-uniqify-list (copy-sequence org-todo-keywords-1))))
 
 (defvar org-todo-line-regexp)
 (defun pcomplete/org-mode/searchhead ()
@@ -232,7 +234,8 @@ This needs more work, to handle headings with lots of spaces in them."
    (mapcar (lambda (x)
 	     (concat x ": "))
 	   (let ((lst (pcomplete-uniqify-list
-		       (org-buffer-property-keys nil t t))))
+		       (copy-sequence
+			(org-buffer-property-keys nil t t)))))
 	     (dolist (prop (org-entry-properties))
 	       (setq lst (delete (car prop) lst)))
 	     lst))
