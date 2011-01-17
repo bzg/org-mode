@@ -6101,7 +6101,7 @@ Negative selection means regexp must not match for selection of an entry."
      (tdpos (goto-char tdpos))
      ((eq org-agenda-type 'agenda)
       (let* ((sd (org-agenda-compute-starting-span
-		  (org-today) (or org-agenda-ndays org-agenda-span)))
+		  (org-today) (or org-agenda-current-span org-agenda-ndays org-agenda-span)))
 	     (org-agenda-overriding-arguments org-agenda-last-arguments))
 	(setf (nth 1 org-agenda-overriding-arguments) sd)
 	(org-agenda-redo)
