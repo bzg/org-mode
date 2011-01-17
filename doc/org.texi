@@ -3093,6 +3093,8 @@ elisp:org-agenda                          @r{Interactive Elisp command}
 elisp:(find-file-other-frame "Elisp.org") @r{Elisp form to evaluate}
 @end example
 
+For customizing Org to add new link types @ref{Adding hyperlink types}.
+
 A link should be enclosed in double brackets and may contain a
 descriptive text to be displayed instead of the URL (@pxref{Link
 format}), for example:
