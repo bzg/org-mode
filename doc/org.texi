@@ -7643,16 +7643,19 @@ Delete other windows.
 @xorgcmdkskc{v w,w,org-aganda-day-view}
 @xorgcmd{v m,org-agenda-month-view}
 @xorgcmd{v y,org-agenda-month-year}
-Switch to day/week/month/year view.  When switching to day or week view,
-this setting becomes the default for subsequent agenda commands.  Since
-month and year views are slow to create, they do not become the default.
-A numeric prefix argument may be used to jump directly to a specific day
-of the year, ISO week, month, or year, respectively.  For example,
-@kbd{32 d} jumps to February 1st, @kbd{9 w} to ISO week number 9.  When
-setting day, week, or month view, a year may be encoded in the prefix
-argument as well.  For example, @kbd{200712 w} will jump to week 12 in
-2007.  If such a year specification has only one or two digits, it will
-be mapped to the interval 1938-2037.
+@xorgcmd{v SPC,org-agenda-reset-view}
+@vindex org-agenda-span
+Switch to day/week/month/year view.  When switching to day or week view, this
+setting becomes the default for subsequent agenda refreshes.  Since month and
+year views are slow to create, they do not become the default.  A numeric
+prefix argument may be used to jump directly to a specific day of the year,
+ISO week, month, or year, respectively.  For example, @kbd{32 d} jumps to
+February 1st, @kbd{9 w} to ISO week number 9.  When setting day, week, or
+month view, a year may be encoded in the prefix argument as well.  For
+example, @kbd{200712 w} will jump to week 12 in 2007.  If such a year
+specification has only one or two digits, it will be mapped to the interval
+1938-2037. @kbd{v @key{SPC}} will reset to what is set in
+@code{org-agenda-span}.
 @c
 @orgcmd{f,org-agenda-later}
 Go forward in time to display the following @code{org-agenda-current-span} days.

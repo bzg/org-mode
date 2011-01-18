@@ -6154,11 +6154,12 @@ With prefix ARG, go backward that many times the current span."
 (defun org-agenda-view-mode-dispatch ()
   "Call one of the view mode commands."
   (interactive)
-  (message "View: [d]ay [w]eek [m]onth [y]ear                         [q]uit/abort
+  (message "View: [d]ay [w]eek [m]onth [y]ear [SPC]reset                [q]uit/abort
       time[G]rid     [[]inactive [f]ollow [l]og [L]og-all   [E]ntryText
       [a]rch-trees   [A]rch-files    clock[R]eport   include[D]iary")
   (let ((a (read-char-exclusive)))
     (case a
+      (?\  (call-interactively 'org-agenda-reset-view))
       (?d (call-interactively 'org-agenda-day-view))
       (?w (call-interactively 'org-agenda-week-view))
       (?m (call-interactively 'org-agenda-month-view))
@@ -6180,6 +6181,10 @@ With prefix ARG, go backward that many times the current span."
       (?q (message "Abort"))
       (otherwise (error "Invalid key" )))))
 
+(defun org-agenda-reset-view ()
+  "Switch to default view for agenda."
+  (interactive)
+  (org-agenda-change-time-span (or org-agenda-ndays org-agenda-span)))
 (defun org-agenda-day-view (&optional day-of-year)
   "Switch to daily view for agenda.
 With argument DAY-OF-YEAR, switch to that day of the year."
