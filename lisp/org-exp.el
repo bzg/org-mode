@@ -2182,24 +2182,23 @@ TYPE must be a string, any of:
 If PREFIX is a string, prepend it to each line.  If PREFIX1
 is a string, prepend it to the first line instead of PREFIX.
 If MARKUP, don't protect org-like lines, the exporter will
-take care of the block they are in.  If LINES is a string, 
-include only the lines specified."
+take care of the block they are in.  If LINES is a string
+specifying a range of lines, include only those lines ."
   (if (stringp markup) (setq markup (downcase markup)))
   (with-temp-buffer
     (insert-file-contents file)
     (when lines
-      (let (beg end)
-	(setq lines (split-string lines "-")
-	      beg (if (string= "" (car lines))
-		      (point-min)
+      (let* ((lines (split-string lines "-"))
+	     (lbeg (string-to-number (car lines)))
+	     (lend (string-to-number (cadr lines)))
+	     (beg (if (zerop lbeg) (point-min)
 		    (goto-char (point-min)) 
-		    (forward-line (1- (string-to-number (car lines))))
-		    (point))
-	      end (if (string= "" (cadr lines))
-		      (point-max)
-		    (goto-char (point-min)) 
-		    (forward-line (1- (string-to-number (cadr lines))))
+		    (forward-line (1- lbeg))
 		    (point)))
+	     (end (if (zerop lend) (point-max)
+		    (goto-char (point-min))
+		    (forward-line (1- lend))
+		    (point))))
 	(narrow-to-region beg end)))
     (when (or prefix prefix1)
       (goto-char (point-min))
