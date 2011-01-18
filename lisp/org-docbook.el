@@ -1391,27 +1391,17 @@ the alist of previous items."
 	     ;; case list is ill-formed.
 	     (type (funcall get-type list-beg struct prevs))
 	     ;; Special variables for ordered lists.
-	     (order-type (let ((bullet (org-list-get-bullet list-beg struct)))
-			   (cond
-			    ((not (equal type "ordered")) nil)
-			    ((string-match "[a-z]" bullet) "loweralpha")
-			    ((string-match "[A-Z]" bullet) "upperalpha")
-			    (t "arabic"))))
 	     (counter (let ((count-tmp (org-list-get-counter pos struct)))
 			(cond
 			 ((not count-tmp) nil)
-			 ((and (member order-type '("loweralpha" "upperalpha"))
-			       (string-match "[A-Za-z]" count-tmp))
-			  count-tmp)
-			 ((and (equal order-type "arabic")
-			       (string-match "[0-9]+" count-tmp))
+			 ((string-match "[A-Za-z]" count-tmp)
+			  (- (string-to-char (upcase count-tmp)) 64))
+			 ((string-match "[0-9]+" count-tmp)
 			  count-tmp)))))
 	;; When FIRSTP, a new list or sub-list is starting.
 	(when firstp
 	  (org-export-docbook-close-para-maybe)
-	  (insert (if (equal type "ordered")
-		      (concat "<orderedlist numeration=\"" order-type "\">\n")
-		    (format "<%slist>\n" type))))
+	  (insert (format "<%slist>\n" type)))
 	(insert (cond
 		 ((equal type "variable")
 		  (format "<varlistentry><term>%s</term><listitem>" desc-tag))

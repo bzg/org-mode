@@ -2446,28 +2446,16 @@ the alist of previous items."
 	     ;; Always refer to first item to determine list type, in
 	     ;; case list is ill-formed.
 	     (type (funcall get-type list-beg struct prevs))
-	     ;; Special variables for ordered lists.
-	     (order-type (let ((bullet (org-list-get-bullet list-beg struct)))
-			   (cond
-			    ((not (equal type "o")) nil)
-			    ((string-match "[a-z]" bullet) "a")
-			    ((string-match "[A-Z]" bullet) "A")
-			    (t "1"))))
 	     (counter (let ((count-tmp (org-list-get-counter pos struct)))
 			(cond
 			 ((not count-tmp) nil)
-			 ((and (member order-type '("a" "A"))
-			       (string-match "[A-Za-z]" count-tmp))
+			 ((string-match "[A-Za-z]" count-tmp)
 			  (- (string-to-char (upcase count-tmp)) 64))
-			 ((and (equal order-type "1")
-			       (string-match "[0-9]+" count-tmp))
+			 ((string-match "[0-9]+" count-tmp)
 			  count-tmp)))))
 	(when firstp
 	  (org-close-par-maybe)
-	  ;; Treat ordered lists differently because of ORDER-TYPE.
-	  (insert (if (equal type "o")
-		      (concat "<ol type=\"" order-type "\">\n")
-		    (format "<%sl>\n" type))))
+	  (insert (format "<%sl>\n" type)))
 	(insert (cond
 		 ((equal type "d")
 		  (format "<dt>%s</dt><dd>\n" desc-tag))
