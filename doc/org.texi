@@ -8893,10 +8893,10 @@ use
 #+INCLUDE: "~/snippets/xx" :prefix1 "   + " :prefix "     "
 @end example
 
-You can also include a portion of a file, by specifying a range of line
-numbers using the @code{:lines} parameter.  The line with the line number
-equal to the end of the range, will not be included.  The start or/and the
-end limits of the range, may be omitted to use the obvious defaults.
+You can also include a portion of a file by specifying a lines range using
+the @code{:lines} parameter.  The line at the upper end of the range will not
+be included.  The start and/or the end of the range may be omitted to use the
+obvious defaults.
 
 @example
 #+INCLUDE: "~/.emacs" :lines "5-10"   @r{Include lines 5 to 10, 10 excluded}
