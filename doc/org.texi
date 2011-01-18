@@ -7639,16 +7639,6 @@ will be followed without a selection prompt.
 @item o
 Delete other windows.
 @c
-@c @kindex v d
-@c @kindex d
-@c @kindex v w
-@c @kindex w
-@c @kindex v m
-@c @kindex v y
-@c @item v d @ @r{or short} @ d
-@c @itemx v w @ @r{or short} @ w
-@c @itemx v m
-@c @itemx v y
 @orgcmdkskc{v d,d,org-aganda-day-view}
 @xorgcmdkskc{v w,w,org-aganda-day-view}
 @xorgcmd{v m,org-agenda-month-view}
