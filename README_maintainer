@@ -262,12 +262,16 @@ So the way I have been doing things with Emacs is this:
 * Copyright assignments
 
   The maintainer needs to keep track of copyright assignments.  Even
-  better, find a volunteer to do this.  The list of all contributors
-  from who we have the papers is kept on Worg at
-  http://orgmode.org/worg/org-contribute.php, so that committers can
-  check if a patch can go into the core.  The assignment process does
-  not allways go smoothly, and it has happened several times that it
-  gets stuck or forgotten at the FSF.  Emails from the paper submitter
-  have been ignored in the past, but an email from me as the
-  maintainer of Org mode has usually fixed such cases within a few
-  days.
+  better, find a volunteer to do this.  
+
+  The list of all contributors from who we have the papers is kept on
+  Worg at http://orgmode.org/worg/org-contribute.php, so that
+  committers can check if a patch can go into the core.
+
+  The assignment process does not allways go smoothly, and it has
+  happened several times that it gets stuck or forgotten at the FSF.
+  The contact at the FSF for this is: copyright-clerk@fsf.org 
+
+  Emails from the paper submitter have been ignored in the past, but
+  an email from me (Carsten) as the maintainer of Org mode has usually
+  fixed such cases within a few days.
