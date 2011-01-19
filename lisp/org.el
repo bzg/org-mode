@@ -19104,12 +19104,12 @@ beyond the end of the headline."
        ((org-at-item-p)
 	(goto-char
 	 (if (eq special t)
-	     (cond ((> pos (match-end 4)) (match-end 4))
-		   ((= pos (point)) (match-end 4))
+	     (cond ((> pos (match-end 0)) (match-end 0))
+		   ((= pos (point)) (match-end 0))
 		   (t (point)))
 	   (cond ((> pos (point)) (point))
 		 ((not (eq last-command this-command)) (point))
-		 (t (match-end 4))))))))
+		 (t (match-end 0))))))))
     (org-no-warnings
      (and (featurep 'xemacs) (setq zmacs-region-stays t)))))
 
