@@ -364,13 +364,13 @@ Contexts `block' and `invalid' refer to `org-list-forbidden-blocks'."
     (save-excursion
       (beginning-of-line)
       (let* ((outline-regexp (org-get-limited-outline-regexp))
-	     ;; can't use org-drawers-regexp as this function might be
+	     ;; Can't use org-drawers-regexp as this function might be
 	     ;; called in buffers not in Org mode
 	     (drawers-re (concat "^[ \t]*:\\("
 				 (mapconcat 'regexp-quote org-drawers "\\|")
 				 "\\):[ \t]*$"))
 	     (case-fold-search t)
-	     ;; compute position of surrounding headings. this is the
+	     ;; Compute position of surrounding headings. This is the
 	     ;; default context.
 	     (heading
 	      (save-excursion
@@ -383,7 +383,7 @@ Contexts `block' and `invalid' refer to `org-list-forbidden-blocks'."
 		 nil)))
 	     (prev-head (car heading))
 	     (next-head (nth 1 heading))
-	     ;; Are we strictly inside a drawer?
+	     ;; Is point inside a drawer?
 	     (drawerp
 	      (when (and (org-in-regexps-block-p
 			  drawers-re "^[ \t]*:END:" prev-head)
@@ -400,7 +400,7 @@ Contexts `block' and `invalid' refer to `org-list-forbidden-blocks'."
 		       (1- (point-at-bol))
 		     next-head)
 		   'drawer))))
-	     ;; Are we strictly in a block, and of which type?
+	     ;; Is point strictly in a block, and of which type?
 	     (blockp
 	      (save-excursion
 		(when (and (org-in-regexps-block-p
@@ -422,7 +422,7 @@ Contexts `block' and `invalid' refer to `org-list-forbidden-blocks'."
 			       org-list-forbidden-blocks)
 		       'invalid
 		     'block)))))
-	     ;; Are we in an inlinetask?
+	     ;; Is point in an inlinetask?
 	     (inlinetaskp
 	      (when (and (featurep 'org-inlinetask)
 			 (org-inlinetask-in-task-p)
@@ -436,7 +436,7 @@ Contexts `block' and `invalid' refer to `org-list-forbidden-blocks'."
 		     (forward-line -1)
 		     (1- (point-at-bol)))
 		   'inlinetask))))
-	     ;; list actual candidates
+	     ;; List actual candidates
 	     (context-list
 	      (delq nil (list heading drawerp blockp inlinetaskp))))
 	;; Return the closest context around
@@ -1252,10 +1252,10 @@ This function modifies STRUCT."
      (lambda (elt)
        (let ((pos (car elt))
 	     (ind (nth 1 elt)))
-	 ;; remove end candidates behind current item
+	 ;; Remove end candidates behind current item
 	 (while (or (<= (cdar endings) pos))
 	   (pop endings))
-	 ;; add end position to item assoc
+	 ;; Add end position to item assoc
 	 (let ((old-end (nthcdr 6 elt))
 	       (new-end (assoc-default ind endings '<=)))
 	   (if old-end
@@ -1337,7 +1337,7 @@ STRUCT is the list structure considered."
 
 (defun org-list-get-all-items (item struct prevs)
   "List of items in the same sub-list as ITEM in STRUCT.
-PREVS, when provided, is the alist of previous items. See
+PREVS is the alist of previous items. See
 `org-list-struct-prev-alist'."
   (let ((prev-item item)
 	(next-item item)
@@ -1482,7 +1482,9 @@ This function modifies STRUCT."
 	    (let* ((prev (org-list-get-prev-item item struct prevs))
 		   (prev-bul (and prev (org-list-get-bullet prev struct)))
 		   (counter (org-list-get-counter item struct))
-		   (bullet (org-list-get-bullet item struct)))
+		   (bullet (org-list-get-bullet item struct))
+		   (alphap (and (not prev)
+				(org-list-use-alpha-bul-p item struct prevs))))
 	      (org-list-set-bullet
 	       item struct
 	       (org-list-bullet-string
@@ -1521,12 +1523,10 @@ This function modifies STRUCT."
 		       (string-match "[0-9]+" bullet))
 		  (replace-match counter nil nil bullet))
 		 ;; First bullet is alpha uppercase: use "A".
-		 ((and (org-list-use-alpha-bul-p item struct prevs)
-		       (string-match "[A-Z]" bullet))
+		 ((and alphap (string-match "[A-Z]" bullet))
 		  (replace-match "A" nil nil bullet))
 		 ;; First bullet is alpha lowercase: use "a".
-		 ((and (org-list-use-alpha-bul-p item struct prevs)
-		       (string-match "[a-z]" bullet))
+		 ((and alphap (string-match "[a-z]" bullet))
 		  (replace-match "a" nil nil bullet))
 		 ;; First bullet is num: use "1".
 		 ((string-match "\\([0-9]+\\|[A-Za-z]\\)" bullet)
@@ -2143,7 +2143,7 @@ in subtree, ignoring drawers."
 	      (setq lim-up (point-at-bol)
 		    lim-down (point-at-eol)))
 	     (t (error "Not at an item or heading, and no active region"))))
-	   ;; determine the checkbox going to be applied to all items
+	   ;; Determine the checkbox going to be applied to all items
 	   ;; within bounds
 	   (ref-checkbox
 	    (progn
