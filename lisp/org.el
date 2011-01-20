@@ -11821,7 +11821,7 @@ EXTRA is additional text that will be inserted into the notes buffer."
   (if (looking-at "\n[ \t]*- State") (forward-char 1))
   (when (ignore-errors (goto-char (org-in-item-p)))
     (let* ((struct (org-list-struct))
-	   (prevs (org-list-struct-prev-alist struct)))
+	   (prevs (org-list-prevs-alist struct)))
       (while (looking-at "[ \t]*- State")
 	(goto-char (or (org-list-get-next-item (point) struct prevs)
 		       (org-list-get-item-end (point) struct)))))))
@@ -17404,8 +17404,8 @@ This command does many different things, depending on context:
       (let* ((cbox (match-string 1))
 	     (struct (org-list-struct))
 	     (old-struct (mapcar (lambda (e) (copy-alist e)) struct))
-	     (parents (org-list-struct-parent-alist struct))
-	     (prevs (org-list-struct-prev-alist struct))
+	     (parents (org-list-parents-alist struct))
+	     (prevs (org-list-prevs-alist struct))
 	     (orderedp (ignore-errors (org-entry-get nil "ORDERED")))
 	     block-item)
 	(org-list-set-checkbox (point-at-bol) struct
@@ -17430,8 +17430,8 @@ This command does many different things, depending on context:
       ;; an argument
       (let* ((struct (org-list-struct))
 	     (old-struct (mapcar (lambda (e) (copy-alist e)) struct))
-	     (parents (org-list-struct-parent-alist struct))
-	     (prevs (org-list-struct-prev-alist struct)))
+	     (parents (org-list-parents-alist struct))
+	     (prevs (org-list-prevs-alist struct)))
 	(org-list-struct-fix-ind struct parents)
 	(org-list-struct-fix-bul struct prevs)
 	(when arg

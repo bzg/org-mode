@@ -209,15 +209,15 @@ it in the buffer."
   (interactive "P")
   (let ((itemp (org-in-item-p)))
     (cond
-     ;; In a timer list, insert with `org-list-insert-item-generic',
+     ;; In a timer list, insert with `org-list-insert-item',
      ;; then fix the list.
      ((and itemp
 	   (save-excursion (goto-char itemp) (org-at-item-timer-p)))
       (let* ((struct (org-list-struct))
-	     (prevs (org-list-struct-prev-alist struct))
+	     (prevs (org-list-prevs-alist struct))
 	     (s (concat (org-timer (when arg '(4)) t) ":: ")))
-	(setq struct (org-list-insert-item-generic (point) struct prevs nil s))
-	(org-list-struct-fix-struct struct (org-list-struct-parent-alist struct))
+	(setq struct (org-list-insert-item (point) struct prevs nil s))
+	(org-list-write-struct struct (org-list-parents-alist struct))
 	(looking-at org-list-full-item-re)
 	(goto-char (match-end 0))))
      ;; In a list of another type, don't break anything: throw an error.

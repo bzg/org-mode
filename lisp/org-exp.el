@@ -1718,7 +1718,7 @@ These special properties will later be interpreted by the backend."
 	    (let* ((struct (org-list-struct))
 		   (top (org-list-get-top-point struct))
 		   (bottom (org-list-get-bottom-point struct))
-		   (prevs (org-list-struct-prev-alist struct))
+		   (prevs (org-list-prevs-alist struct))
 		   poi)
 	      ;; Get every item and ending position, without dups and
 	      ;; without bottom point of list.
