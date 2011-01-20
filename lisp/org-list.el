@@ -525,23 +525,26 @@ some heuristics to guess the result."
 	     ;; No parent: no blank line.
 	     (t 0))))))))
 
-(defun org-list-insert-item-generic (pos &optional checkbox after-bullet)
+(defun org-list-insert-item-generic (pos struct prevs &optional checkbox after-bullet)
   "Insert a new list item at POS.
 If POS is before first character after bullet of the item, the
 new item will be created before the current one.
 
+STRUCT is the list structure, as returned by `org-list-struct'.
+PREVS is the the alist of previous items. See
+`org-list-struct-prev-alist'.
+
 Insert a checkbox if CHECKBOX is non-nil, and string AFTER-BULLET
 after the bullet. Cursor will be after this text once the
-function ends."
+function ends.
+
+Return the new structure of the list."
   (let ((case-fold-search t))
     ;; 1. Get information about list: structure, usual helper
     ;;    functions, position of point with regards to item start
     ;;    (BEFOREP), blank lines number separating items (BLANK-NB),
     ;;    position of split (POS) if we're allowed to (SPLIT-LINE-P).
-    (let* ((pos (point))
-	   (item (goto-char (org-list-get-item-begin)))
-	   (struct (org-list-struct))
-	   (prevs (org-list-struct-prev-alist struct))
+    (let* ((item (goto-char (org-list-get-item-begin)))
 	   (item-end (org-list-get-item-end item struct))
 	   (item-end-no-blank (org-list-get-item-end-before-blank item struct))
 	   (beforep (and (looking-at org-list-full-item-re)
@@ -620,10 +623,8 @@ function ends."
 		 (t (setcar e (+ p size-offset))
 		    (setcar (nthcdr 6 e) (+ end size-offset))))))
       	    struct)
-      (setq struct (sort
-      		    (cons (list item ind bullet nil box nil (+ item item-size))
-      			  struct)
-      		    (lambda (e1 e2) (< (car e1) (car e2)))))
+      (push (list item ind bullet nil box nil (+ item item-size)) struct)
+      (setq struct (sort struct (lambda (e1 e2) (< (car e1) (car e2)))))
       ;; 6. If not BEFOREP, new item must appear after ITEM, so
       ;; exchange ITEM with the next item in list. Position cursor
       ;; after bullet, counter, checkbox, and label.
@@ -632,11 +633,7 @@ function ends."
 	(setq struct (org-list-exchange-items item (+ item item-size) struct))
 	(goto-char (org-list-get-next-item
 		    item struct (org-list-struct-prev-alist struct))))
-      (org-list-struct-fix-struct struct (org-list-struct-parent-alist struct))
-      (when checkbox (org-update-checkbox-count-maybe))
-      (looking-at org-list-full-item-re)
-      (goto-char (match-end 0))
-      t)))
+      struct)))
 
 (defvar org-last-indent-begin-marker (make-marker))
 (defvar org-last-indent-end-marker (make-marker))
@@ -1008,7 +1005,9 @@ If CHECKBOX is non-nil, add a checkbox next to the bullet.
 
 Return t when things worked, nil when we are not in an item, or
 item is invisible."
-  (let ((itemp (org-in-item-p)))
+  (let ((itemp (org-in-item-p))
+	(pos (point)))
+    ;; If cursor isn't is a list or if list is invisible, return nil.
     (unless (or (not itemp)
 		(save-excursion
 		  (goto-char itemp)
@@ -1018,18 +1017,25 @@ item is invisible."
 	    (org-at-item-timer-p))
 	  ;; Timer list: delegate to `org-timer-item'.
 	  (progn (org-timer-item) t)
-	;; if we're in a description list, ask for the new term.
-	(let ((desc-text (when (save-excursion
-				 (and (goto-char itemp)
-				      (org-at-item-description-p)))
-			   (concat (read-string "Term: ") " :: "))))
-	  ;; Don't insert a checkbox if checkbox rule is applied and it
-	  ;; is a description item.
-	  (org-list-insert-item-generic
-	   (point) (and checkbox
-			(or (not desc-text)
-			    (not (cdr (assq 'checkbox org-list-automatic-rules)))))
-	   desc-text))))))
+	(goto-char itemp)
+	(let* ((struct (org-list-struct))
+	       (prevs (org-list-struct-prev-alist struct))
+	       ;; If we're in a description list, ask for the new term.
+	       (desc (when (org-list-get-tag itemp struct)
+		       (concat (read-string "Term: ") " :: ")))
+	       ;; Don't insert a checkbox if checkbox rule is applied
+	       ;; and it is a description item.
+	       (checkp (and checkbox
+			    (or (not desc)
+				(not (cdr (assq 'checkbox
+						org-list-automatic-rules)))))))
+	  (setq struct
+		(org-list-insert-item-generic pos struct prevs checkp desc))
+	  (org-list-struct-fix-struct struct (org-list-struct-parent-alist struct))
+	  (when checkp (org-update-checkbox-count-maybe))
+	  (looking-at org-list-full-item-re)
+	  (goto-char (match-end 0))
+	  t)))))
 
 
 ;;; Structures

@@ -209,14 +209,20 @@ it in the buffer."
   (interactive "P")
   (let ((itemp (org-in-item-p)))
     (cond
-     ;; In a timer list, insert with `org-list-insert-item-generic'.
+     ;; In a timer list, insert with `org-list-insert-item-generic',
+     ;; then fix the list.
      ((and itemp
 	   (save-excursion (goto-char itemp) (org-at-item-timer-p)))
-      (org-list-insert-item-generic
-       (point) nil (concat (org-timer (when arg '(4)) t) ":: ")))
+      (let* ((struct (org-list-struct))
+	     (prevs (org-list-struct-prev-alist struct))
+	     (s (concat (org-timer (when arg '(4)) t) ":: ")))
+	(setq struct (org-list-insert-item-generic (point) struct prevs nil s))
+	(org-list-struct-fix-struct struct (org-list-struct-parent-alist struct))
+	(looking-at org-list-full-item-re)
+	(goto-char (match-end 0))))
      ;; In a list of another type, don't break anything: throw an error.
      (itemp (error "This is not a timer list"))
-     ;; Else, insert the timer correctly indented at bol.
+     ;; Else, start a new list.
      (t
       (beginning-of-line)
       (org-indent-line-function)
