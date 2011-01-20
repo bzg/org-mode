@@ -46,7 +46,8 @@
   "Name of command for executing python code.")
 
 (defvar org-babel-python-mode (if (featurep 'xemacs) 'python-mode 'python)
-  "Preferred python mode for use in running python interactively.")
+  "Preferred python mode for use in running python interactively.
+This will typically be either 'python or 'python-mode.")
 
 (defvar org-src-preserve-indentation)
 
