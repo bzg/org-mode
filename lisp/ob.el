@@ -179,8 +179,8 @@ Returns a list
 		      (looking-at org-babel-multi-line-header-regexp))
 	    (setf (nth 2 info)
 		  (org-babel-merge-params
-		   (org-babel-parse-header-arguments (match-string 1))
-		   (nth 2 info))))
+		   (nth 2 info)
+		   (org-babel-parse-header-arguments (match-string 1)))))
 	  (when (looking-at org-babel-src-name-w-name-regexp)
 	    (setq name (org-babel-clean-text-properties (match-string 4)))
 	    (when (match-string 6)
