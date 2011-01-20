@@ -2605,25 +2605,8 @@ Point is left at list end."
   (interactive)
   (if (not (ignore-errors (goto-char (org-in-item-p))))
       (error "Not in a list")
-    (let ((list (org-list-parse-list t)) nstars)
-      (save-excursion
-	(if (ignore-errors (org-back-to-heading))
-	    (progn (looking-at org-complex-heading-regexp)
-		   (setq nstars (length (match-string 1))))
-	  (setq nstars 0)))
-      (org-list-make-subtrees list (1+ nstars)))))
-
-(defun org-list-make-subtrees (list level)
-  "Convert LIST into subtrees starting at LEVEL."
-  (if (symbolp (car list))
-      (org-list-make-subtrees (cdr list) level)
-    (mapcar (lambda (item)
-	      (if (stringp item)
-		  (insert (make-string
-			   (if org-odd-levels-only
-			       (1- (* 2 level)) level) ?*) " " item "\n")
-		(org-list-make-subtrees item (1+ level))))
-	    list)))
+    (let ((list (save-excursion (org-list-parse-list t))))
+      (insert (org-list-to-subtree list)))))
 
 (defun org-list-insert-radio-list ()
   "Insert a radio list template appropriate for this major mode."
@@ -2715,6 +2698,7 @@ Valid parameters PARAMS are
 :iend	    String to end a list item
 :isep	    String to separate items
 :lsep	    String to separate sublists
+:csep	    String to separate text from a sub-list
 
 :cboff      String to insert for an unchecked checkbox
 :cbon       String to insert for a checked checkbox
@@ -2743,6 +2727,7 @@ items."
 	 (iend (plist-get p :iend))
 	 (isep (plist-get p :isep))
 	 (lsep (plist-get p :lsep))
+	 (csep (plist-get p :csep))
 	 (cbon (plist-get p :cbon))
 	 (cboff (plist-get p :cboff))
 	 (export-item
@@ -2752,13 +2737,14 @@ items."
 	   ;; extra information that needs to be processed.
 	   (lambda (item type depth)
 	     (let* ((counter (pop item))
-		    (fmt (cond
-			  ((eq type 'descriptive)
-			   (mapconcat 'eval `(,(org-trim istart)
-					      "%s" ,ddend ,iend ,isep) ""))
-			  ((and counter (eq type 'ordered))
-			   (mapconcat 'eval `(,icount "%s" ,iend ,isep) ""))
-			  (t (mapconcat 'eval `(,istart "%s" ,iend ,isep) ""))))
+		    (fmt (concat (cond
+				  ((eq type 'descriptive)
+				   (concat (org-trim (eval istart)) "%s"
+				   (eval ddend)))
+				  ((and counter (eq type 'ordered))
+				   (concat (eval icount) "%s"))
+				  (t (concat (eval istart) "%s")))
+				 (eval iend)))
 		    (first (car item)))
 	       ;; Replace checkbox if any is found.
 	       (cond
@@ -2771,32 +2757,33 @@ items."
 	       ;; Insert descriptive term if TYPE is `descriptive'.
 	       (when (and (eq type 'descriptive)
 			  (string-match "^\\(.*\\)[ \t]+::" first))
-		 (setq first (mapconcat
-			      'eval
-			      `(,dtstart ,(org-trim (match-string 1 first)) ,dtend
-					 ,ddstart ,(org-trim (substring first (match-end 0)))))))
+		 (setq first (concat
+			      (eval dtstart) (org-trim (match-string 1 first))
+			      (eval dtend) (eval ddstart)
+			      (org-trim (substring first (match-end 0))) "")))
 	       (setcar item first)
 	       (format fmt
 		       (mapconcat (lambda (e)
 				    (if (stringp e) e
 				      (funcall export-sublist e (1+ depth))))
-				  item isep))))))
+				  item (or (eval csep) "")))))))
 	 (export-sublist
 	  (function
 	   ;; Export sublist SUB at DEPTH
 	   (lambda (sub depth)
 	     (let* ((type (car sub))
 		    (items (cdr sub))
-		    (fmt (cond
-			  (splicep "%s")
-			  ((eq type 'ordered)
-			   (mapconcat 'eval `(,ostart "\n%s" ,oend) ""))
-			  ((eq type 'descriptive)
-			   (mapconcat 'eval `(,dstart "\n%s" ,dend) ""))
-			  (t (mapconcat 'eval `(,ustart "\n%s" ,uend) "")))))
+		    (fmt (concat (cond
+				  (splicep "%s")
+				  ((eq type 'ordered)
+				   (concat (eval ostart) "\n%s" (eval oend)))
+				  ((eq type 'descriptive)
+				   (concat (eval dstart) "\n%s" (eval dend)))
+				  (t (concat (eval ustart) "\n%s" (eval uend))))
+				 (eval lsep))))
 	       (format fmt (mapconcat (lambda (e)
 					(funcall export-item e type depth))
-				      items lsep)))))))
+				      items (or (eval isep) ""))))))))
     (concat (funcall export-sublist list 0) "\n")))
 
 (defun org-list-to-latex (list &optional params)
@@ -2806,18 +2793,17 @@ with overruling parameters for `org-list-to-generic'."
   (org-list-to-generic
    list
    (org-combine-plists
-    '(:splicep nil :ostart "\\begin{enumerate}" :oend "\\end{enumerate}"
+    '(:splice nil :ostart "\\begin{enumerate}" :oend "\\end{enumerate}"
 	       :ustart "\\begin{itemize}" :uend "\\end{itemize}"
 	       :dstart "\\begin{description}" :dend "\\end{description}"
 	       :dtstart "[" :dtend "] "
-	       :ddstart "" :ddend ""
-	       :istart "\\item " :iend ""
+	       :istart "\\item " :iend "\n"
 	       :icount (let ((enum (nth depth '("i" "ii" "iii" "iv"))))
 			 (if enum
 			     (format "\\setcounter{enum%s}{%s}\n\\item "
 				     enum counter)
 			   "\\item "))
-	       :isep "\n" :lsep "\n"
+	       :csep "\n"
 	       :cbon "\\texttt{[X]}" :cboff "\\texttt{[ ]}")
     params)))
 
@@ -2828,14 +2814,14 @@ with overruling parameters for `org-list-to-generic'."
   (org-list-to-generic
    list
    (org-combine-plists
-    '(:splicep nil :ostart "<ol>" :oend "</ol>"
-	       :ustart "<ul>" :uend "</ul>"
+    '(:splice nil :ostart "<ol>" :oend "\n</ol>"
+	       :ustart "<ul>" :uend "\n</ul>"
 	       :dstart "<dl>" :dend "</dl>"
-	       :dtstart "<dt>" :dtend "</dt>"
+	       :dtstart "<dt>" :dtend "</dt>\n"
 	       :ddstart "<dd>" :ddend "</dd>"
 	       :istart "<li>" :iend "</li>"
 	       :icount (format "<li value=\"%s\">" counter)
-	       :isep "\n" :lsep "\n"
+	       :isep "\n" :lsep "\n" :csep "\n"
 	       :cbon "<code>[X]</code>" :cboff "<code>[ ]</code>")
     params)))
 
@@ -2846,16 +2832,48 @@ with overruling parameters for `org-list-to-generic'."
   (org-list-to-generic
    list
    (org-combine-plists
-    '(:splicep nil :ostart "@itemize @minus" :oend "@end itemize"
+    '(:splice nil :ostart "@itemize @minus" :oend "@end itemize"
 	       :ustart "@enumerate" :uend "@end enumerate"
 	       :dstart "@table @asis" :dend "@end table"
 	       :dtstart " " :dtend "\n"
-	       :ddstart "" :ddend ""
-	       :istart "@item\n" :iend ""
+	       :istart "@item\n" :iend "\n"
 	       :icount "@item\n"
-	       :isep "\n" :lsep "\n"
+	       :csep "\n"
 	       :cbon "@code{[X]}" :cboff "@code{[ ]}")
     params)))
+
+(defun org-list-to-subtree (list &optional params)
+  "Convert LIST into an Org subtree.
+LIST is as returned by `org-list-parse-list'.  PARAMS is a property list
+with overruling parameters for `org-list-to-generic'."
+  (let* ((rule (cdr (assq 'heading org-blank-before-new-entry)))
+	 (level (or (org-current-level) 0))
+	 (blankp (or (eq rule t)
+		     (and (eq rule 'auto)
+			  (save-excursion
+			    (outline-previous-heading)
+			    (org-previous-line-empty-p)))))
+	 (get-stars
+	  (function
+	   ;; Return the string for the heading, depending on depth D
+	   ;; of current sub-list.
+	   (lambda (d)
+	     (concat
+	      (make-string (+ level
+			      (if org-odd-levels-only (* 2 (1+ d)) (1+ d)))
+			   ?*)
+	      " ")))))
+    (org-list-to-generic
+     list
+     (org-combine-plists
+      '(:splice t
+		:dtstart " " :dtend " "
+		:istart (funcall get-stars depth)
+		:icount (funcall get-stars depth)
+		:isep (if blankp "\n\n" "\n")
+		:csep (if blankp "\n\n" "\n")
+		:cbon "DONE" :cboff "TODO")
+      params))))
 
 (provide 'org-list)
 
