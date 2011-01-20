@@ -856,18 +856,20 @@ may be specified in the properties of the current outline entry."
 (defun org-babel-params-from-buffer ()
   "Retrieve per-buffer parameters.
  Return an association list of any source block params which
-may be specified at the top of the current buffer."
+may be specified in the current buffer."
   (or org-babel-current-buffer-properties
-      (setq org-babel-current-buffer-properties
-	    (save-match-data
-	      (save-excursion
-		(save-restriction
-		  (widen)
-		  (goto-char (point-min))
-		  (when (re-search-forward
-			 (org-make-options-regexp (list "BABEL")) nil t)
-		    (org-babel-parse-header-arguments
-		     (org-match-string-no-properties 2)))))))))
+      (save-match-data
+	(save-excursion
+	  (save-restriction
+	    (widen)
+	    (goto-char (point-min))
+	    (while (re-search-forward
+		    (org-make-options-regexp (list "BABEL")) nil t)
+	      (setq org-babel-current-buffer-properties
+		    (org-babel-merge-params
+		     org-babel-current-buffer-properties
+		     (org-babel-parse-header-arguments
+		      (org-match-string-no-properties 2))))))))))
 
 (defvar org-src-preserve-indentation)
 (defun org-babel-parse-src-block-match ()
