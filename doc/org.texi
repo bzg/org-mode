@@ -11699,6 +11699,8 @@ The following header arguments are defined:
                                 directory for code block execution
 * exports::                     Export code and/or results
 * tangle::                      Toggle tangling and specify file name
+* mkdirp::                      Toggle creation of parent directories of target
+                                files during tangling
 * comments::                    Toggle insertion of comments in tangled
                                 code files
 * no-expand::                   Turn off variable assignment and noweb
@@ -12093,7 +12095,7 @@ Both the code and results are included in the exported file. E.g.,
 Nothing is included in the exported file.  E.g., @code{:exports none}.
 @end itemize
 
-@node tangle, comments, exports, Specific header arguments
+@node tangle, mkdirp, exports, Specific header arguments
 @subsubsection @code{:tangle}
 
 The @code{:tangle} header argument specifies whether or not the code
@@ -12113,7 +12115,14 @@ as a file basename to which the block will be exported.  E.g., @code{:tangle
 basename}.
 @end itemize
 
-@node comments, no-expand, tangle, Specific header arguments
+@node mkdirp, comments, tangle, Specific header arguments
+@subsubsection @code{:mkdirp}
+
+The @code{:mkdirp} header argument can be used to create parent directories
+of tangled files when missing.  This can be set to @code{yes} to enable
+directory creation or to @code{no} to inhibit directory creation.
+
+@node comments, no-expand, mkdirp, Specific header arguments
 @subsubsection @code{:comments}
 By default code blocks are tangled to source-code files without any insertion
 of comments beyond those which may already exist in the body of the code
