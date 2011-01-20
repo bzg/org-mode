@@ -475,8 +475,8 @@ This option can also be set with the +OPTIONS line, e.g. \"TeX:nil\"."
   "Non-nil means process LaTeX math fragments for HTML display.
 When set, the exporter will find and process LaTeX environments if the
 \\begin line is the first non-white thing on a line.  It will also find
-and process  the math delimiters like $a=b$ and \\( a=b \\) for inline math,
-$$a=b$$ and \\[ a=b \\] for display math.
+and process the math delimiters like $a=b$ and \\( a=b \\) for inline math,
+$$a=b$$ and \\=\\[ a=b \\] for display math.
 
 This option can also be set with the +OPTIONS line, e.g. \"LaTeX:mathjax\".
 
