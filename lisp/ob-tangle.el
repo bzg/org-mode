@@ -37,6 +37,7 @@
 (declare-function org-back-to-heading "org" (invisible-ok))
 (declare-function org-fill-template "org" (template alist))
 (declare-function org-babel-update-block-body "org" (new-body))
+(declare-function make-directory "files" (dir &optional parents))
 
 ;;;###autoload
 (defcustom org-babel-tangle-lang-exts
@@ -210,6 +211,10 @@ exported source code blocks by language."
                                     (if (and ext (string= "yes" tangle))
                                         (concat base-name "." ext) base-name))))
                   (when file-name
+		    ;; possibly create the parent directories for file
+		    (when ((lambda (m) (and m (not (string= m "no"))))
+			   (get-spec :mkdirp))
+		      (make-directory (file-name-directory file-name) 'parents))
                     ;; delete any old versions of file
                     (when (and (file-exists-p file-name)
                                (not (member file-name path-collector)))
