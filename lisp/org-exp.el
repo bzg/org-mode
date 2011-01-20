@@ -830,7 +830,7 @@ security risks."
       (let ((op org-export-plist-vars))
 	(while (setq o (pop op))
 	  (if (and (nth 1 o)
-		   (string-match (concat (regexp-quote (nth 1 o))
+		   (string-match (concat "\\<" (regexp-quote (nth 1 o))
 					 ":\\([^ \t\n\r;,.]*\\)")
 				 options))
 	      (setq p (plist-put p (car o)
