@@ -2662,9 +2662,10 @@ indentation for each level.  To get this support in a file, use
 @node MobileOrg,  , Clean view, Miscellaneous
 @section MobileOrg
 
-@i{MobileOrg} is an application for the @i{iPhone/iPod Touch} series of
-devices, developed by Richard Moreland.  For details, see the Org-mode
-manual.
+@i{MobileOrg} is an application originally developed for the @i{iPhone/iPod
+Touch} series of devices, developed by Richard Moreland.  There is also an
+independent implementation for Android devices, by Matt Jones.
+For details, see the Org-mode manual.
 
 @seealso{
 @uref{http://orgmode.org/manual/Miscellaneous.html#Miscellaneous, Chapter 15
