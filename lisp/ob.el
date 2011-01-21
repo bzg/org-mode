@@ -142,7 +142,7 @@ remove code block execution from the C-c C-c keybinding."
 (defvar org-babel-inline-src-block-regexp
   (concat
    ;; (1) replacement target (2) lang
-   "[ \f\t\n\r\v]\\(src_\\([^ \f\t\n\r\v]+\\)"
+   "[^-[:alnum:]]\\(src_\\([^ \f\t\n\r\v]+\\)"
    ;; (3,4) (unused, headers)
    "\\(\\|\\[\\(.*?\\)\\]\\)"
    ;; (5) body
