@@ -97,6 +97,7 @@
 		  (pom property &optional inherit literal-nil))
 (declare-function org-get-indentation "org" (&optional line))
 (declare-function org-icompleting-read "org" (&rest args))
+(declare-function org-in-regexp "org" (re &optional nlines visually))
 (declare-function org-in-regexps-block-p "org"
 		  (start-re end-re &optional bound))
 (declare-function org-inlinetask-goto-beginning "org-inlinetask" ())
@@ -397,16 +398,33 @@ This checks `org-list-ending-method'."
   (save-excursion
     (beginning-of-line)
     (unless (or (let ((outline-regexp org-outline-regexp)) (org-at-heading-p))
-		(and (not (eq org-list-ending-method 'indent))
-		     (looking-at org-list-end-re)
-		     (progn (forward-line -1) (looking-at org-list-end-re))))
+		(org-looking-back org-list-end-re))
+      ;; Detect if cursor in amidst `org-list-end-re'. First, count
+      ;; number HL of hard lines it takes, then call `org-in-regexp'
+      ;; to compute its boundaries END-BOUNDS. When point is
+      ;; in-between, move cursor before regexp beginning.
+      (let ((hl 0) (i -1) end-bounds)
+	(when (and (not (eq org-list-ending-method 'indent))
+		   (progn
+		     (while (setq i (string-match
+				     "[\r\n]" org-list-end-re (1+ i)))
+		       (setq hl (1+ hl)))
+		     (setq end-bounds (org-in-regexp org-list-end-re hl)))
+		   (>= (point) (car end-bounds))
+		   (< (point) (cdr end-bounds)))
+	  (goto-char (car end-bounds))
+	  (forward-line -1)))
       (or (and (org-at-item-p) (point-at-bol))
 	  (let* ((case-fold-search t)
 		 (context (org-list-context))
 		 (lim-up (car context))
 		 (inlinetask-re (and (featurep 'org-inlinetask)
 				     (org-inlinetask-outline-regexp)))
-		 (ind-ref (if (looking-at "^[ \t]*$")
+		 ;; Indentation isn't meaningful when point starts at
+		 ;; an empty line or an inline task.
+		 (ind-ref (if (or (looking-at "^[ \t]*$")
+				  (and inlinetask-re
+				       (looking-at inlinetask-re)))
 			      10000
 			    (org-get-indentation))))
 	    (catch 'exit
@@ -430,10 +448,10 @@ This checks `org-list-ending-method'."
 		   ((looking-at "^[ \t]*$")
 		    (forward-line -1))
 		   ((< ind ind-ref)
-		    (if (org-at-item-p)
-			(throw 'exit (point))
-		      (setq ind-ref ind)
-		      (forward-line -1)))
+		    (cond
+		     ((org-at-item-p) (throw 'exit (point)))
+		     ((zerop ind) (throw 'exit nil))
+		     (t (setq ind-ref ind) (forward-line -1))))
 		   (t (if (and (eq org-list-ending-method 'regexp)
 			       (org-at-item-p))
 			  (throw 'exit (point))
