@@ -481,7 +481,7 @@ Capture - Refile - Archive
 * Capture::                     Capturing new stuff
 * Attachments::                 Add files to tasks
 * RSS Feeds::                   Getting input from RSS feeds
-* Protocols::                   External (e.g. Browser) access to Emacs and Org
+* Protocols::                   External (e.g.@: Browser) access to Emacs and Org
 * Refiling notes::              Moving a tree from one place to another
 * Archiving::                   What to do with finished projects
 
@@ -898,7 +898,7 @@ Org buffer with @code{(add-hook 'org-mode-hook 'turn-on-font-lock)}}.
 
 The four Org commands @command{org-store-link}, @command{org-capture},
 @command{org-agenda}, and @command{org-iswitchb} should be accessible through
-global keys (i.e. anywhere in Emacs, not just in Org buffers).  Here are
+global keys (i.e.@: anywhere in Emacs, not just in Org buffers).  Here are
 suggested bindings for these keys, please modify the keys to your own
 liking.
 @lisp
@@ -1198,7 +1198,7 @@ the previously used indirect buffer.
 @cindex @code{showeverything}, STARTUP keyword
 
 When Emacs first visits an Org file, the global state is set to
-OVERVIEW, i.e. only the top level headlines are visible.  This can be
+OVERVIEW, i.e.@: only the top level headlines are visible.  This can be
 configured through the variable @code{org-startup-folded}, or on a
 per-file basis by adding one of the following lines anywhere in the
 buffer:
@@ -1218,7 +1218,7 @@ for this property are @code{folded}, @code{children}, @code{content}, and
 @code{all}.
 @table @asis
 @orgcmd{C-u C-u @key{TAB},org-set-startup-visibility}
-Switch back to the startup visibility of the buffer, i.e. whatever is
+Switch back to the startup visibility of the buffer, i.e.@: whatever is
 requested by startup options and @samp{VISIBILITY} properties in individual
 entries.
 @end table
@@ -1289,7 +1289,7 @@ customize the variable @code{org-M-RET-may-split-line}.}.  If the
 command is used at the beginning of a headline, the new headline is
 created before the current line.  If at the beginning of any other line,
 the content of that line is made the new heading.  If the command is
-used at the end of a folded subtree (i.e. behind the ellipses at the end
+used at the end of a folded subtree (i.e.@: behind the ellipses at the end
 of a headline), then a headline like the current one will be inserted
 after the end of the subtree.
 @orgcmd{C-@key{RET},org-insert-heading-respect-content}
@@ -1323,7 +1323,7 @@ level).
 @orgcmd{M-S-@key{down},org-move-subtree-down}
 Move subtree down (swap with next subtree of same level).
 @orgcmd{C-c C-x C-w,org-cut-subtree}
-Kill subtree, i.e. remove it from buffer but save in kill ring.
+Kill subtree, i.e.@: remove it from buffer but save in kill ring.
 With a numeric prefix argument N, kill N sequential subtrees.
 @orgcmd{C-c C-x M-w,org-copy-subtree}
 Copy subtree to kill ring.  With a numeric prefix argument N, copy the N
@@ -1492,7 +1492,7 @@ as bullets.
 @emph{Ordered} list items start with a numeral followed by either a period or
 a right parenthesis@footnote{You can filter out any of them by configuring
 @code{org-plain-list-ordered-item-terminator}.}, such as @samp{1.} or
-@samp{1)}.  If you want a list to start with a different value (e.g. 20), start
+@samp{1)}.  If you want a list to start with a different value (e.g.@: 20), start
 the text of the item with @code{[@@20]}@footnote{If there's a checkbox in the
 item, the cookie must be put @emph{before} the checkbox.}.  Those constructs
 can be used in any item of the list in order to enforce a particular
@@ -1732,7 +1732,7 @@ or on a per-file basis by using
 Org-mode supports the creation of footnotes.  In contrast to the
 @file{footnote.el} package, Org-mode's footnotes are designed for work on a
 larger document, not only for one-off documents like emails.  The basic
-syntax is similar to the one used by @file{footnote.el}, i.e. a footnote is
+syntax is similar to the one used by @file{footnote.el}, i.e.@: a footnote is
 defined in a paragraph that is started by a footnote marker in square
 brackets in column 0, no indentation allowed.  If you need a paragraph break
 inside a footnote, use the @LaTeX{} idiom @samp{\par}.  The footnote reference
@@ -1809,7 +1809,7 @@ S   @r{Short for first @code{r}, then @code{s} action.}
 n   @r{Normalize the footnotes by collecting all definitions (including}
     @r{inline definitions) into a special section, and then numbering them}
     @r{in sequence.  The references will then also be numbers.  This is}
-    @r{meant to be the final step before finishing a document (e.g. sending}
+    @r{meant to be the final step before finishing a document (e.g.@: sending}
     @r{off an email).  The exporters do this automatically, and so could}
     @r{something like @code{message-send-hook}.}
 d   @r{Delete the footnote at point, and all definitions of and references}
@@ -2504,7 +2504,7 @@ a Lisp string (in double-quotes) containing the field.  If you provide the
 @samp{N} mode switch, all referenced elements will be numbers (non-number
 fields will be zero) and interpolated as Lisp numbers, without quotes.  If
 you provide the @samp{L} flag, all fields will be interpolated literally,
-without quotes.  I.e., if you want a reference to be interpreted as a string
+without quotes.  i.e., if you want a reference to be interpreted as a string
 by the Lisp form, enclose the reference operator itself in double-quotes,
 like @code{"$3"}.  Ranges are inserted as space-separated fields, so you can
 +embed them in list or vector syntax.  Here are a few examples---note how the
@@ -2583,7 +2583,7 @@ following command:
 Install a new formula for the current column and replace current field with
 the result of the formula.  The command prompts for a formula, with default
 taken from the @samp{#+TBLFM} line, applies it to the current field and
-stores it.  With a numeric prefix argument(e.g. @kbd{C-5 C-c =}) the command
+stores it.  With a numeric prefix argument(e.g.@: @kbd{C-5 C-c =}) the command
 will apply it to that many consecutive fields in the current column.
 @end table
 
@@ -2885,7 +2885,7 @@ Specify whether the plot will be @code{2d}, @code{3d}, or @code{grid}.
 
 @item with
 Specify a @code{with} option to be inserted for every col being plotted
-(e.g. @code{lines}, @code{points}, @code{boxes}, @code{impulses}, etc...).
+(e.g.@: @code{lines}, @code{points}, @code{boxes}, @code{impulses}, etc...).
 Defaults to @code{lines}.
 
 @item file
@@ -3274,7 +3274,7 @@ variable @code{org-display-internal-link-with-indirect-buffer}}.
 @cindex @code{inlineimages}, STARTUP keyword
 @cindex @code{noinlineimages}, STARTUP keyword
 Toggle the inline display of linked images.  Normally this will only inline
-images that have no description part in the link, i.e. images that will also
+images that have no description part in the link, i.e.@: images that will also
 be inlined during export.  When called with a prefix argument, also display
 images that do have a link description.  You can ask for inline images to be
 displayed at startup by configuring the variable
@@ -3376,7 +3376,7 @@ can define them in the file with
 @noindent
 In-buffer completion (@pxref{Completion}) can be used after @samp{[} to
 complete link abbreviations.  You may also define a function
-@code{org-PREFIX-complete-link} that implements special (e.g. completion)
+@code{org-PREFIX-complete-link} that implements special (e.g.@: completion)
 support for inserting such a link with @kbd{C-c C-l}.  Such a function should
 not accept any arguments, and return the full link with prefix.
 
@@ -4961,7 +4961,7 @@ values.
 
 @noindent
 The first column, @samp{%25ITEM}, means the first 25 characters of the
-item itself, i.e. of the headline.  You probably always should start the
+item itself, i.e.@: of the headline.  You probably always should start the
 column definition with the @samp{ITEM} specifier.  The other specifiers
 create columns @samp{Owner} with a list of names as allowed values, for
 @samp{Status} with four different possible values, and for a checkbox
@@ -5340,7 +5340,7 @@ letter ([dwmy]) to indicate change in days, weeks, months, or years.  With a
 single plus or minus, the date is always relative to today.  With a
 double plus or minus, it is relative to the default date.  If instead of
 a single letter, you use the abbreviation of day name, the date will be
-the Nth such day.  E.g.
+the Nth such day.  e.g.@:
 
 @example
 +0            --> today
@@ -5360,7 +5360,7 @@ the variables @code{parse-time-months} and @code{parse-time-weekdays}.
 
 You can specify a time range by giving start and end times or by giving a
 start time and a duration (in HH:MM format). Use `-' or `-@{@}-' as the separator
-in the former case and use '+' as the separator in the latter case. E.g.
+in the former case and use '+' as the separator in the latter case. E.g.@:
 
 @example
 11am-1:15pm    --> 11:00-13:15
@@ -5496,7 +5496,7 @@ The headline will be listed under the given date@footnote{It will still
 be listed on that date after it has been marked DONE.  If you don't like
 this, set the variable @code{org-agenda-skip-scheduled-if-done}.}.  In
 addition, a reminder that the scheduled date has passed will be present
-in the compilation for @emph{today}, until the entry is marked DONE, i.e.
+in the compilation for @emph{today}, until the entry is marked DONE, i.e.@:
 the task will automatically be forwarded until completed.
 
 @example
@@ -6100,7 +6100,7 @@ trees to an archive file keeps the system compact and fast.
 * Capture::                     Capturing new stuff
 * Attachments::                 Add files to tasks
 * RSS Feeds::                   Getting input from RSS feeds
-* Protocols::                   External (e.g. Browser) access to Emacs and Org
+* Protocols::                   External (e.g.@: Browser) access to Emacs and Org
 * Refiling notes::              Moving a tree from one place to another
 * Archiving::                   What to do with finished projects
 @end menu
@@ -7292,7 +7292,7 @@ brackets (like @samp{DEADLINE<="<2008-12-24 18:30>"}), both values are
 assumed to be date/time specifications in the standard Org way, and the
 comparison will be done accordingly.  Special values that will be recognized
 are @code{"<now>"} for now (including time), and @code{"<today>"}, and
-@code{"<tomorrow>"} for these days at 0:00 hours, i.e. without a time
+@code{"<tomorrow>"} for these days at 0:00 hours, i.e.@: without a time
 specification.  Also strings like @code{"<+5d>"} or @code{"<-2m>"} with units
 @code{d}, @code{w}, @code{m}, and @code{y} for day, week, month, and year,
 respectively, can be used.
@@ -7708,7 +7708,7 @@ always show a table with the clocked times for the timespan and file scope
 covered by the current agenda view.  The initial setting for this mode in new
 agenda buffers can be set with the variable
 @code{org-agenda-start-with-clockreport-mode}.  By using a prefix argument
-when toggling this mode (i.e. @kbd{C-u R}), the clock table will not show
+when toggling this mode (i.e.@: @kbd{C-u R}), the clock table will not show
 contributions from entries that are hidden by agenda filtering@footnote{Only
 tags filtering will be respected here, effort filtering is ignored.}.
 @c
@@ -8777,7 +8777,7 @@ which is distributed with Org).  Fontified code chunks in LaTeX can be
 achieved using either the listings or the
 @url{http://code.google.com/p/minted, minted,} package. To use listings, turn
 on the variable @code{org-export-latex-listings} and ensure that the listings
-package is included by the LaTeX header (e.g. by configuring
+package is included by the LaTeX header (e.g.@: by configuring
 @code{org-export-latex-packages-alist}). See the listings documentation for
 configuration options, including obtaining colored output.  For minted it is
 necessary to install the program @url{http://pygments.org, pygments}, in
@@ -8804,7 +8804,7 @@ switch to the end of the @code{BEGIN} line, to get the lines of the example
 numbered.  If you use a @code{+n} switch, the numbering from the previous
 numbered snippet will be continued in the current one.  In literal examples,
 Org will interpret strings like @samp{(ref:name)} as labels, and use them as
-targets for special hyperlinks like @code{[[(name)]]} (i.e. the reference name
+targets for special hyperlinks like @code{[[(name)]]} (i.e.@: the reference name
 enclosed in single parenthesis).  In HTML, hovering the mouse over such a
 link will remote-highlight the corresponding code line, which is kind of
 cool.
@@ -8871,7 +8871,7 @@ include your @file{.emacs} file, you could use:
 #+INCLUDE: "~/.emacs" src emacs-lisp
 @end example
 @noindent
-The optional second and third parameter are the markup (e.g. @samp{quote},
+The optional second and third parameter are the markup (e.g.@: @samp{quote},
 @samp{example}, or @samp{src}), and, if the markup is @samp{src}, the
 language for formatting the contents.  The markup is optional; if it is not
 given, the text will be assumed to be in Org-mode format and will be
@@ -9315,13 +9315,13 @@ Insert template with export options, see example below.
 #+AUTHOR:      the author (default taken from @code{user-full-name})
 #+DATE:        a date, fixed, or a format string for @code{format-time-string}
 #+EMAIL:       his/her email address (default from @code{user-mail-address})
-#+DESCRIPTION: the page description, e.g. for the XHTML meta tag
-#+KEYWORDS:    the page keywords, e.g. for the XHTML meta tag
-#+LANGUAGE:    language for HTML, e.g. @samp{en} (@code{org-export-default-language})
+#+DESCRIPTION: the page description, e.g.@: for the XHTML meta tag
+#+KEYWORDS:    the page keywords, e.g.@: for the XHTML meta tag
+#+LANGUAGE:    language for HTML, e.g.@: @samp{en} (@code{org-export-default-language})
 #+TEXT:        Some descriptive text to be inserted at the beginning.
 #+TEXT:        Several lines may be given.
 #+OPTIONS:     H:2 num:t toc:t \n:nil @@:t ::t |:t ^:t f:t TeX:t ...
-#+BIND:        lisp-var lisp-val, e.g.: org-export-latex-low-levels itemize
+#+BIND:        lisp-var lisp-val, e.g.@:: org-export-latex-low-levels itemize
                @r{You need to confirm using these, or configure @code{org-export-allow-BIND}}
 #+LINK_UP:     the ``up'' link of an exported page
 #+LINK_HOME:   the ``home'' link of an exported page
@@ -9412,11 +9412,11 @@ separate Emacs process@footnote{To make this behavior the default, customize
 the variable @code{org-export-run-in-background}.}.
 @orgcmd{C-c C-e v,org-export-visible}
 Like @kbd{C-c C-e}, but only export the text that is currently visible
-(i.e. not hidden by outline visibility).
+(i.e.@: not hidden by outline visibility).
 @orgcmd{C-u C-u C-c C-e,org-export}
 @vindex org-export-run-in-background
 Call the exporter, but reverse the setting of
-@code{org-export-run-in-background}, i.e. request background processing if
+@code{org-export-run-in-background}, i.e.@: request background processing if
 not set, or force processing in the current Emacs process if set.
 @end table
 
@@ -10299,7 +10299,7 @@ exported DocBook XML files invalid by not quoting DocBook code correctly.
 @cindex DocBook recursive sections
 
 DocBook exporter exports Org files as articles using the @code{article}
-element in DocBook.  Recursive sections, i.e. @code{section} elements, are
+element in DocBook.  Recursive sections, i.e.@: @code{section} elements, are
 used in exported articles.  Top level headlines in Org files are exported as
 top level sections, and lower level headlines are exported as nested
 sections.  The entire structure of Org files will be exported completely, no
@@ -10459,7 +10459,7 @@ time.
 
 @subsection Export of properties
 
-The exporter also takes TODO state information into consideration, i.e. if a
+The exporter also takes TODO state information into consideration, i.e.@: if a
 task is marked as done it will have the corresponding attribute in
 TaskJuggler (@samp{complete 100}). Also it will export any property on a task
 resource or resource node which is known to TaskJuggler, such as
@@ -10511,7 +10511,7 @@ examples should illustrate this:
 @subsection Reports
 
 @vindex org-export-taskjuggler-default-reports
-TaskJuggler can produce many kinds of reports (e.g. gantt chart, resource
+TaskJuggler can produce many kinds of reports (e.g.@: gantt chart, resource
 allocation, etc). The user defines what kind of reports should be generated
 for a project in the TaskJuggler file. The exporter will automatically insert
 some default reports in the file. These defaults are defined in
@@ -10669,7 +10669,7 @@ configures one project, and may be in one of the two following forms:
 
 @lisp
    ("project-name" :property value :property value ...) 
-     @r{i.e. a well-formed property list with alternating keys and values}
+     @r{i.e.@: a well-formed property list with alternating keys and values}
 @r{or}
    ("project-name" :components ("project-name" "project-name" ...))
 
@@ -11141,7 +11141,7 @@ This may be necessary in particular if files include other files via
 @cindex source code, working with
 
 Source code can be included in Org-mode documents using a @samp{src} block,
-e.g.
+e.g.@:
 
 @example
 #+BEGIN_SRC emacs-lisp
@@ -11274,7 +11274,7 @@ variable @code{org-src-fontify-natively}.
 It is possible to export the @emph{contents} of code blocks, the
 @emph{results} of code block evaluation, @emph{neither}, or @emph{both}.  For
 most languages, the default exports the contents of code blocks. However, for
-some languages (e.g. @code{ditaa}) the default exports the results of code
+some languages (e.g.@: @code{ditaa}) the default exports the results of code
 block evaluation.  For information on exporting code block bodies, see
 @ref{Literal examples}.
 
@@ -12019,7 +12019,7 @@ then not supplying @code{:dir}. Under the surface, @code{:dir} simply sets
 the value of the Emacs variable @code{default-directory}.
 
 When using @code{:dir}, you should supply a relative path for file output
-(e.g. @code{:file myfile.jpg} or @code{:file results/myfile.jpg}) in which
+(e.g.@: @code{:file myfile.jpg} or @code{:file results/myfile.jpg}) in which
 case that path will be interpreted relative to the default directory.
 
 In other words, if you want your plot to go into a folder called @file{Work}
@@ -12368,7 +12368,7 @@ No column name pre-processing takes place
 
 @item @code{yes}
 Column names are removed and reapplied as with @code{nil} even if the table
-does not ``look like'' it has column names (i.e. the second row is not an
+does not ``look like'' it has column names (i.e.@: the second row is not an
 hline)
 @end itemize
 
@@ -12406,7 +12406,7 @@ and is then reapplied to the results.
 @subsubsection @code{:shebang}
 
 Setting the @code{:shebang} header argument to a string value
-(e.g. @code{:shebang "#!/bin/bash"}) causes the string to be inserted as the
+(e.g.@: @code{:shebang "#!/bin/bash"}) causes the string to be inserted as the
 first line of any tangled file holding the code block, and the file
 permissions of the tangled file are set to make it executable.
 
@@ -12707,7 +12707,7 @@ option keyword is already complete, pressing @kbd{M-@key{TAB}} again
 will insert example settings for this keyword.
 @item
 In the line after @samp{#+STARTUP: }, complete startup keywords,
-i.e. valid keys for this line.
+i.e.@: valid keys for this line.
 @item
 Elsewhere, complete dictionary words using Ispell.
 @end itemize
@@ -12759,7 +12759,7 @@ additional details.
 @vindex org-speed-commands-user
 
 Single keys can be made to execute commands when the cursor is at the
-beginning of a headline, i.e. before the first star.  Configure the variable
+beginning of a headline, i.e.@: before the first star.  Configure the variable
 @code{org-use-speed-commands} to activate this feature.  There is a
 pre-defined list of commands, and you can add more such commands using the
 variable @code{org-speed-commands-user}.  Speed keys do not only speed up
@@ -12908,7 +12908,7 @@ buffer, most useful for specifying the allowed values of a property.
 @item #+SETUPFILE: file
 This line defines a file that holds more in-buffer setup.  Normally this is
 entirely ignored.  Only when the buffer is parsed for option-setting lines
-(i.e. when starting Org-mode for a file, when pressing @kbd{C-c C-c} in a
+(i.e.@: when starting Org-mode for a file, when pressing @kbd{C-c C-c} in a
 settings line, or when exporting), then the contents of this file are parsed
 as if they had been included in the buffer.  In particular, the file can be
 any other Org-mode file with internal setup.  You can visit the file the
@@ -13676,7 +13676,7 @@ the link description when the link is later inserted into an Org
 buffer with @kbd{C-c C-l}.
 
 When it makes sense for your new link type, you may also define a function
-@code{org-PREFIX-complete-link} that implements special (e.g. completion)
+@code{org-PREFIX-complete-link} that implements special (e.g.@: completion)
 support for inserting such a link with @kbd{C-c C-l}.  Such a function should
 not accept any arguments, and return the full link with prefix.
 
@@ -13879,7 +13879,7 @@ table inserted between the two marker lines.
 Now let's assume you want to make the table header by hand, because you
 want to control how columns are aligned, etc@.  In this case we make sure
 that the table translator skips the first 2 lines of the source
-table, and tell the command to work as a @i{splice}, i.e. to not produce
+table, and tell the command to work as a @i{splice}, i.e.@: to not produce
 header and footer commands of the target table:
 
 @example
@@ -13962,7 +13962,7 @@ hands processing over to the generic translator.  Here is the entire code:
 
 As you can see, the properties passed into the function (variable
 @var{PARAMS}) are combined with the ones newly defined in the function
-(variable @var{PARAMS2}).  The ones passed into the function (i.e. the
+(variable @var{PARAMS2}).  The ones passed into the function (i.e.@: the
 ones set by the @samp{ORGTBL SEND} line) take precedence.  So if you
 would like to use the @LaTeX{} translator, but wanted the line endings to
 be @samp{\\[2mm]} instead of the default @samp{\\}, you could just
@@ -14414,7 +14414,7 @@ does not need to preserve point.  After evaluation, the cursor will be
 moved to the end of the line (presumably of the headline of the
 processed entry) and search continues from there.  Under some
 circumstances, this may not produce the wanted results.  For example,
-if you have removed (e.g. archived) the current (sub)tree it could
+if you have removed (e.g.@: archived) the current (sub)tree it could
 mean that the next entry will be skipped entirely.  In such cases, you
 can specify the position from where search should continue by making
 FUNC set the variable `org-map-continue-from' to the desired buffer
