@@ -377,7 +377,7 @@ group 4: description tag")
     (concat "\\([ \t]*\\([-+]\\|\\(\\([0-9]+" alpha "\\)" term
 	    "\\)\\)\\|[ \t]+\\*\\)\\([ \t]+\\|$\\)")))
 
-(defun org-item-beginning-re ()
+(defsubst org-item-beginning-re ()
   "Regexp matching the beginning of a plain list item."
   (concat "^" (org-item-re)))
 
@@ -601,6 +601,7 @@ Assume point is at an item."
 	   (lim-up (car context))
 	   (lim-down (nth 1 context))
 	   (text-min-ind 10000)
+	   (item-re (org-item-re))
 	   (drawers-re (concat "^[ \t]*:\\("
 				     (mapconcat 'regexp-quote org-drawers "\\|")
 				     "\\):[ \t]*$"))
@@ -642,7 +643,7 @@ Assume point is at an item."
 		;; Jump to part 2.
 		(throw 'exit
 		       (setq itm-lst
-			     (if (not (org-at-item-p))
+			     (if (not (looking-at item-re))
 				 (memq (assq (car beg-cell) itm-lst) itm-lst)
 			       (setq beg-cell (cons (point) ind))
 			       (cons (funcall assoc-at-point ind) itm-lst)))))
@@ -665,7 +666,7 @@ Assume point is at an item."
 		(forward-line -1))
 	       ((looking-at "^[ \t]*$")
 		(forward-line -1))
-	       ((org-at-item-p)
+	       ((looking-at item-re)
 		;; Point is at an item. Add data to ITM-LST. It may
 		;; also end a previous item: save it in END-LST. If
 		;; ind is less or equal than BEG-CELL and there is no
@@ -730,7 +731,7 @@ Assume point is at an item."
 	      (org-inlinetask-goto-end))
 	     ((looking-at "^[ \t]*$")
 	      (forward-line 1))
-	     ((org-at-item-p)
+	     ((looking-at item-re)
 	      ;; Point is at an item. Add data to ITM-LST-2. It may also
 	      ;; end a previous item, so save it in END-LST-2.
 	      (push (funcall assoc-at-point ind) itm-lst-2)
@@ -825,7 +826,7 @@ This function modifies STRUCT."
 
 ;;; Accessors
 
-(defun org-list-get-nth (n key struct)
+(defsubst org-list-get-nth (n key struct)
   "Return the Nth value of KEY in STRUCT."
   (nth n (assq key struct)))
 
@@ -834,7 +835,7 @@ This function modifies STRUCT."
 \nThis function modifies STRUCT."
   (setcar (nthcdr n (assq key struct)) new))
 
-(defun org-list-get-ind (item struct)
+(defsubst org-list-get-ind (item struct)
   "Return indentation of ITEM in STRUCT."
   (org-list-get-nth 1 item struct))
 
@@ -843,7 +844,7 @@ This function modifies STRUCT."
 \nThis function modifies STRUCT."
   (org-list-set-nth 1 item struct ind))
 
-(defun org-list-get-bullet (item struct)
+(defsubst org-list-get-bullet (item struct)
   "Return bullet of ITEM in STRUCT."
   (org-list-get-nth 2 item struct))
 
@@ -852,11 +853,11 @@ This function modifies STRUCT."
 \nThis function modifies STRUCT."
   (org-list-set-nth 2 item struct bullet))
 
-(defun org-list-get-counter (item struct)
+(defsubst org-list-get-counter (item struct)
   "Return counter of ITEM in STRUCT."
   (org-list-get-nth 3 item struct))
 
-(defun org-list-get-checkbox (item struct)
+(defsubst org-list-get-checkbox (item struct)
   "Return checkbox of ITEM in STRUCT or nil."
   (org-list-get-nth 4 item struct))
 
@@ -865,7 +866,7 @@ This function modifies STRUCT."
 \nThis function modifies STRUCT."
   (org-list-set-nth 4 item struct checkbox))
 
-(defun org-list-get-tag (item struct)
+(defsubst org-list-get-tag (item struct)
   "Return end position of ITEM in STRUCT."
   (org-list-get-nth 5 item struct))
 
@@ -1538,18 +1539,17 @@ Initial position of cursor is restored after the changes."
 	   ;; Shift the indentation between END and BEG by DELTA.
 	   ;; Start from the line before END.
 	   (lambda (end beg delta)
-	     (unless (= delta 0)
-	       (goto-char end)
-	       (forward-line -1)
-	       (while (or (> (point) beg)
-			  (and (= (point) beg) (not (org-at-item-p))))
-		 (when (org-looking-at-p "^[ \t]*\\S-")
-		   (let ((i (org-get-indentation)))
-		     (org-indent-line-to (+ i delta))))
-		 (forward-line -1))))))
+	     (goto-char end)
+	     (forward-line -1)
+	     (while (or (> (point) beg)
+			(and (= (point) beg) (not (org-at-item-p))))
+	       (when (org-looking-at-p "^[ \t]*\\S-")
+		 (let ((i (org-get-indentation)))
+		   (org-indent-line-to (+ i delta))))
+	       (forward-line -1)))))
          (modify-item
           (function
-	   ;; Replace item first line elements with new elements from
+	   ;; Replace ITEM first line elements with new elements from
 	   ;; STRUCT, if appropriate.
 	   (lambda (item)
 	     (goto-char item)
@@ -1621,12 +1621,14 @@ Initial position of cursor is restored after the changes."
 			(cdr (assq up itm-shift))
 		      (cdr (assq (cdr (assq up end-list)) itm-shift)))))
 	  (push (list down up ind) sliced-struct)))
-      ;; 3. Modify each slice in buffer, from end to beginning, with a
-      ;;    special action when beginning is at item start.
+      ;; 3. Shift each slice in buffer, provided delta isn't 0, from
+      ;;    end to beginning. Take a special action when beginning is
+      ;;    at item bullet.
       (mapc (lambda (e)
-	      (apply shift-body-ind e)
-	      (let ((beg (nth 1 e)))
-		(when (assq beg struct)
+	      (unless (zerop (nth 2 e)) (apply shift-body-ind e))
+	      (let* ((beg (nth 1 e))
+		     (cell (assq beg struct)))
+		(unless (or (not cell) (equal cell (assq beg old-struct)))
 		  (funcall modify-item beg))))
 	    sliced-struct))
     ;; 4. Go back to initial position
@@ -1641,7 +1643,7 @@ PARENTS is the alist of items' parents. See
   ;; bullets.
   ;;
   ;; 0. Save a copy of structure before modifications
-  (let ((old-struct (mapcar (lambda (e) (copy-alist e)) struct)))
+  (let ((old-struct (copy-tree struct)))
     ;; 1. Set a temporary, but coherent with PARENTS, indentation in
     ;;    order to get items endings and bullets properly
     (org-list-struct-fix-ind struct parents 2)
@@ -1681,21 +1683,18 @@ PARENTS is the alist of items' parents. See
 
 ;;; Misc Tools
 
-(defun org-list-bullet-string (bullet)
+(defsubst org-list-bullet-string (bullet)
   "Return BULLET with the correct number of whitespaces.
 It determines the number of whitespaces to append by looking at
 `org-list-two-spaces-after-bullet-regexp'."
   (save-match-data
-    (string-match "\\S-+\\([ \t]*\\)" bullet)
-    (replace-match
-     (save-match-data
-       (concat
-        " "
-        ;; Do we need to concat another white space ?
-        (when (and org-list-two-spaces-after-bullet-regexp
-                   (string-match org-list-two-spaces-after-bullet-regexp bullet))
-          " ")))
-     nil nil bullet 1)))
+    (let ((spaces (if (and org-list-two-spaces-after-bullet-regexp
+			   (string-match
+			    org-list-two-spaces-after-bullet-regexp bullet))
+		      "  "
+		    " ")))
+      (string-match "\\S-+\\([ \t]*\\)" bullet)
+      (replace-match spaces nil nil bullet 1))))
 
 (defun org-apply-on-list (function init-value &rest args)
   "Call FUNCTION on each item of the list at point.
@@ -1817,7 +1816,7 @@ so this really moves item trees."
 	    (org-list-exchange-items actual-item next-item struct))
       ;; Use a short variation of `org-list-write-struct' as there's
       ;; no need to go through all the steps.
-      (let ((old-struct (mapcar (lambda (e) (copy-alist e)) struct))
+      (let ((old-struct (copy-tree struct))
 	    (prevs (org-list-prevs-alist struct))
 	    (parents (org-list-parents-alist struct)))
         (org-list-struct-fix-bul struct prevs)
@@ -1846,7 +1845,7 @@ so this really moves item trees."
 	    (org-list-exchange-items prev-item actual-item struct))
       ;; Use a short variation of `org-list-write-struct' as there's
       ;; no need to go through all the steps.
-      (let ((old-struct (mapcar (lambda (e) (copy-alist e)) struct))
+      (let ((old-struct (copy-tree struct))
 	    (prevs (org-list-prevs-alist struct))
 	    (parents (org-list-parents-alist struct)))
         (org-list-struct-fix-bul struct prevs)
@@ -1964,7 +1963,7 @@ is an integer, 0 means `-', 1 means `+' etc. If WHICH is
 		 (t (funcall get-value (1+ item-index))))))
       ;; Use a short variation of `org-list-write-struct' as there's
       ;; no need to go through all the steps.
-      (let ((old-struct (mapcar (lambda (e) (copy-alist e)) struct)))
+      (let ((old-struct (copy-tree struct)))
         (org-list-set-bullet list-beg struct (org-list-bullet-string new))
         (org-list-struct-fix-bul struct prevs)
         (org-list-struct-fix-ind struct parents)
@@ -2036,7 +2035,7 @@ in subtree, ignoring drawers."
 		  (org-list-search-forward (org-item-beginning-re)
 					   lim-down 'move))
 	(let* ((struct (org-list-struct))
-	       (struct-copy (mapcar (lambda (e) (copy-alist e)) struct))
+	       (struct-copy (copy-tree struct))
 	       (parents (org-list-parents-alist struct))
 	       (prevs (org-list-prevs-alist struct))
 	       (bottom (copy-marker (org-list-get-bottom-point struct)))
@@ -2280,7 +2279,7 @@ STRUCT is the list structure. Return t if successful."
 	  (let* ((level-skip (org-level-increment))
 		 (offset (if (< arg 0) (- level-skip) level-skip))
 		 (top-ind (org-list-get-ind beg struct))
-		 (old-struct (mapcar (lambda (e) (copy-alist e)) struct)))
+		 (old-struct (copy-tree struct)))
 	    (if (< (+ top-ind offset) 0)
 		(error "Cannot outdent beyond margin")
 	      ;; Change bullet if necessary
@@ -2560,7 +2559,7 @@ Point is left at list end."
 	   ;; checkboxes replaced.
 	   (lambda (beg end)
 	     (let ((text (org-trim (buffer-substring beg end))))
-	       (if (string-match "\\`\\[\\([xX ]\\)\\]" text)
+	       (if (string-match "\\`\\[\\([X ]\\)\\]" text)
 		   (replace-match
 		    (if (equal (match-string 1 text) " ") "CBOFF" "CBON")
 		    t nil text 1)
