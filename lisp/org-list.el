@@ -621,8 +621,8 @@ Assume point is at an item."
 	   (text-min-ind 10000)
 	   (item-re (org-item-re))
 	   (drawers-re (concat "^[ \t]*:\\("
-				     (mapconcat 'regexp-quote org-drawers "\\|")
-				     "\\):[ \t]*$"))
+			       (mapconcat 'regexp-quote org-drawers "\\|")
+			       "\\):[ \t]*$"))
 	   (inlinetask-re (and (featurep 'org-inlinetask)
 			       (org-inlinetask-outline-regexp)))
 	   (beg-cell (cons (point) (org-get-indentation)))
@@ -661,14 +661,22 @@ Assume point is at an item."
 		;; Jump to part 2.
 		(throw 'exit
 		       (setq itm-lst
-			     (if (not (looking-at item-re))
+			     (if (or (not (looking-at item-re))
+				     (get-text-property (point) 'org-example))
 				 (memq (assq (car beg-cell) itm-lst) itm-lst)
 			       (setq beg-cell (cons (point) ind))
 			       (cons (funcall assoc-at-point ind) itm-lst)))))
+	       ;; At a verbatim block, go before its beginning. Move
+	       ;; from eol to ensure `previous-single-property-change'
+	       ;; will return a value.
+	       ((get-text-property (point) 'org-example)
+		(goto-char (previous-single-property-change
+			    (point-at-eol) 'org-example nil lim-up))
+		(forward-line -1))
+	       ;; Looking at a list ending regexp. Dismiss useless
+	       ;; data recorded above BEG-CELL. Jump to part 2.
 	       ((and (not (eq org-list-ending-method 'indent))
 		     (looking-at org-list-end-re))
-		;; Looking at a list ending regexp. Dismiss useless
-		;; data recorded above BEG-CELL. Jump to part 2.
 		(throw 'exit
 		       (setq itm-lst
 			     (memq (assq (car beg-cell) itm-lst) itm-lst))))
@@ -732,10 +740,16 @@ Assume point is at an item."
 	      ;; part 3.
       	      (throw 'exit
 		     (push (cons 0 (funcall end-before-blank)) end-lst-2)))
+	     ;; At a verbatim block, move to its end. Point is at bol
+	     ;; and 'org-example property is set by whole lines:
+	     ;; `next-single-property-change' always return a value.
+	     ((get-text-property (point) 'org-example)
+	      (goto-char
+	       (next-single-property-change (point) 'org-example nil lim-down)))
+	     ;; Looking at a list ending regexp. Save point as an
+	     ;; ending position and jump to part 3.
 	     ((and (not (eq org-list-ending-method 'indent))
 		   (looking-at org-list-end-re))
-	      ;; Looking at a list ending regexp. Save point as an
-	      ;; ending position and jump to part 3.
 	      (throw 'exit (push (cons 0 (point-at-bol)) end-lst-2)))
 	     ;; Skip blocks, drawers, inline tasks and blank lines
 	     ;; along the way
@@ -765,14 +779,14 @@ Assume point is at an item."
 	      ;;
 	      ;; - ind is lesser or equal than previous item's. This
 	      ;;    is an ending position. Store it and proceed.
-	       (cond
-		((eq org-list-ending-method 'regexp))
-		((<= ind (cdr beg-cell))
-		 (push (cons ind (funcall end-before-blank)) end-lst-2)
-		 (throw 'exit nil))
-		((<= ind (nth 1 (car itm-lst-2)))
-		 (push (cons ind (point-at-bol)) end-lst-2)))
-	       (forward-line 1))))))
+	      (cond
+	       ((eq org-list-ending-method 'regexp))
+	       ((<= ind (cdr beg-cell))
+		(push (cons ind (funcall end-before-blank)) end-lst-2)
+		(throw 'exit nil))
+	       ((<= ind (nth 1 (car itm-lst-2)))
+		(push (cons ind (point-at-bol)) end-lst-2)))
+	      (forward-line 1))))))
       (setq struct (append itm-lst (cdr (nreverse itm-lst-2))))
       (setq end-lst (append end-lst (cdr (nreverse end-lst-2))))
       ;; 3. Correct ill-formed lists by making sure top item has the
