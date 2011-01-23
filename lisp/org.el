@@ -17548,16 +17548,20 @@ Calls `org-table-insert-hline', `org-toggle-item', or
    (t
     (call-interactively 'org-toggle-item))))
 
-(defun org-toggle-item ()
+(defun org-toggle-item (arg)
   "Convert headings or normal lines to items, items to normal lines.
 If there is no active region, only the current line is considered.
 
-If the first line in the region is a headline, convert all headlines to items.
+If the first line in the region is a headline, convert all
+headlines to items.
 
-If the first line in the region is an item, convert all items to normal lines.
+If the first line in the region is an item, convert all items to
+normal lines.
 
-If the first line is normal text, add an item bullet to each line."
-  (interactive)
+If the first line is normal text, change region into an
+item. With a prefix argument ARG, change each line in region into
+an item."
+  (interactive "P")
   (let (l2 l beg end)
     (if (org-region-active-p)
 	(setq beg (region-beginning) end (region-end))
@@ -17567,6 +17571,9 @@ If the first line is normal text, add an item bullet to each line."
       (goto-char end)
       (setq l2 (org-current-line))
       (goto-char beg)
+      (beginning-of-line 1)
+      ;; Ignore blank lines at beginning of region
+      (skip-chars-forward " \t\r\n")
       (beginning-of-line 1)
       (setq l (1- (org-current-line)))
       (if (org-at-item-p)
@@ -17582,13 +17589,26 @@ If the first line is normal text, add an item bullet to each line."
 	      (if (looking-at org-outline-regexp)
 		  (replace-match (org-list-bullet-string "-") t t))
 	      (beginning-of-line 2))
-	  ;; normal lines, turn them into items
-	  (while (< (setq l (1+ l)) l2)
-	    (unless (org-at-item-p)
-	      (if (looking-at "\\([ \t]*\\)\\(\\S-\\)")
-		  (replace-match
-		   (concat "\\1" (org-list-bullet-string "-") "\\2"))))
-	    (beginning-of-line 2)))))))
+	  ;; normal lines, with ARG, turn all of them into items
+	  ;; unless they are already one.
+	  (if arg
+	      (while (< (setq l (1+ l)) l2)
+		(unless (org-at-item-p)
+		  (if (looking-at "\\([ \t]*\\)\\(\\S-\\)")
+		      (replace-match
+		       (concat "\\1" (org-list-bullet-string "-") "\\2"))))
+		(beginning-of-line 2))
+	    ;; Without ARG, make the first line of region an item, and
+	    ;; shift indentation of others lines to set them as item's
+	    ;; body.
+	    (let* ((bul (org-list-bullet-string "-"))
+		   (bul-len (length bul)))
+	      (skip-chars-forward " \t")
+	      (insert bul)
+	      (beginning-of-line 2)
+	      (while (and (< (setq l (1+ l)) l2) (< (point) end))
+		(org-indent-line-to (+ (org-get-indentation) bul-len))
+		(beginning-of-line 2)))))))))
 
 (defun org-toggle-heading (&optional nstars)
   "Convert headings to normal text, or items or text to headings.
