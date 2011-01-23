@@ -17490,6 +17490,18 @@ See the individual commands for more information."
    ((org-at-table-p)
     (org-table-justify-field-maybe)
     (call-interactively 'org-table-next-row))
+   ;; when `newline-and-indent' is called within a list, make sure
+   ;; text moved stays inside the item.
+   ((and (org-in-item-p) indent)
+    (if (and (org-at-item-p) (>= (point) (match-end 0)))
+	(progn
+	  (newline)
+	  (org-indent-line-to (length (match-string 0))))
+      (let ((ind (org-get-indentation)))
+	(newline)
+	(if (org-looking-back org-list-end-re)
+	    (org-indent-line-function)
+	  (org-indent-line-to ind)))))
    ((and org-return-follows-link
 	 (eq (get-text-property (point) 'face) 'org-link))
     (call-interactively 'org-open-at-point))
