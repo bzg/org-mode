@@ -1572,7 +1572,8 @@ Initial position of cursor is restored after the changes."
 	   ;; Start from the line before END.
 	   (lambda (end beg delta)
 	     (goto-char end)
-	     (forward-line -1)
+	     (skip-chars-backward " \r\t\n")
+	     (beginning-of-line)
 	     (while (or (> (point) beg)
 			(and (= (point) beg) (not (org-at-item-p))))
 	       (when (org-looking-at-p "^[ \t]*\\S-")
