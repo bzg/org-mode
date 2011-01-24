@@ -1159,8 +1159,7 @@ org-babel-named-src-block-regexp."
     (when file (find-file file)) (goto-char (point-min))
     (let (names)
       (while (re-search-forward org-babel-src-name-w-name-regexp nil t)
-	(setq names (cons (org-babel-clean-text-properties (match-string 4))
-			  names)))
+	(setq names (cons (match-string 4) names)))
       names)))
 
 ;;;###autoload
@@ -1193,8 +1192,7 @@ buffer or nil if no such result exists."
     (when file (find-file file)) (goto-char (point-min))
     (let (names)
       (while (re-search-forward org-babel-result-w-name-regexp nil t)
-	(setq names (cons (org-babel-clean-text-properties (match-string 4))
-			  names)))
+	(setq names (cons (match-string 4) names)))
       names)))
 
 ;;;###autoload
