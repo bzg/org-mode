@@ -397,65 +397,71 @@ group 4: description tag")
 This checks `org-list-ending-method'."
   (save-excursion
     (beginning-of-line)
-    (unless (or (let ((outline-regexp org-outline-regexp)) (org-at-heading-p))
-		(org-looking-back org-list-end-re))
-      ;; Detect if cursor in amidst `org-list-end-re'. First, count
-      ;; number HL of hard lines it takes, then call `org-in-regexp'
-      ;; to compute its boundaries END-BOUNDS. When point is
-      ;; in-between, move cursor before regexp beginning.
-      (let ((hl 0) (i -1) end-bounds)
-	(when (and (not (eq org-list-ending-method 'indent))
-		   (progn
-		     (while (setq i (string-match
-				     "[\r\n]" org-list-end-re (1+ i)))
-		       (setq hl (1+ hl)))
-		     (setq end-bounds (org-in-regexp org-list-end-re hl)))
-		   (>= (point) (car end-bounds))
-		   (< (point) (cdr end-bounds)))
-	  (goto-char (car end-bounds))
-	  (forward-line -1)))
-      (or (and (org-at-item-p) (point-at-bol))
-	  (let* ((case-fold-search t)
-		 (context (org-list-context))
-		 (lim-up (car context))
-		 (inlinetask-re (and (featurep 'org-inlinetask)
-				     (org-inlinetask-outline-regexp)))
-		 ;; Indentation isn't meaningful when point starts at
-		 ;; an empty line or an inline task.
-		 (ind-ref (if (or (looking-at "^[ \t]*$")
-				  (and inlinetask-re
-				       (looking-at inlinetask-re)))
-			      10000
-			    (org-get-indentation))))
-	    (catch 'exit
-	      (while t
-		(let ((ind (org-get-indentation)))
-		  (cond
-		   ((<= (point) lim-up)
-		    (throw 'exit (and (org-at-item-p) (< ind ind-ref) (point))))
-		   ((and (not (eq org-list-ending-method 'indent))
-			 (looking-at org-list-end-re))
-		    (throw 'exit nil))
-		   ;; Skip blocks, drawers, inline-tasks, blank lines
-		   ((looking-at "^[ \t]*#\\+end_")
-		    (re-search-backward "^[ \t]*#\\+begin_" nil t))
-		   ((looking-at "^[ \t]*:END:")
-		    (re-search-backward org-drawer-regexp nil t)
-		    (beginning-of-line))
-		   ((and inlinetask-re (looking-at inlinetask-re))
-		    (org-inlinetask-goto-beginning)
-		    (forward-line -1))
-		   ((looking-at "^[ \t]*$")
-		    (forward-line -1))
-		   ((< ind ind-ref)
-		    (cond
-		     ((org-at-item-p) (throw 'exit (point)))
-		     ((zerop ind) (throw 'exit nil))
-		     (t (setq ind-ref ind) (forward-line -1))))
-		   (t (if (and (eq org-list-ending-method 'regexp)
-			       (org-at-item-p))
-			  (throw 'exit (point))
-			(forward-line -1))))))))))))
+    (let* ((case-fold-search t)
+	   (context (org-list-context))
+	   (lim-up (car context))
+	   (inlinetask-re (and (featurep 'org-inlinetask)
+			       (org-inlinetask-outline-regexp)))
+	   ;; Indentation isn't meaningful when point starts at an empty
+	   ;; line or an inline task.
+	   (ind-ref (if (or (looking-at "^[ \t]*$")
+			    (and inlinetask-re (looking-at inlinetask-re)))
+			10000
+		      (org-get-indentation))))
+      (cond
+       ((eq (nth 2 context) 'invalid) nil)
+       ((org-at-item-p) (point))
+       (t
+	;; Detect if cursor in amidst `org-list-end-re'. First, count
+	;; number HL of hard lines it takes, then call `org-in-regexp'
+	;; to compute its boundaries END-BOUNDS. When point is
+	;; in-between, move cursor before regexp beginning.
+	(let ((hl 0) (i -1) end-bounds)
+	  (when (and (not (eq org-list-ending-method 'indent))
+		     (progn
+		       (while (setq i (string-match
+				       "[\r\n]" org-list-end-re (1+ i)))
+			 (setq hl (1+ hl)))
+		       (setq end-bounds (org-in-regexp org-list-end-re hl)))
+		     (>= (point) (car end-bounds))
+		     (< (point) (cdr end-bounds)))
+	    (goto-char (car end-bounds))
+	    (forward-line -1)))
+	;; Look for an item, less indented that reference line if
+	;; `org-list-ending-method' isn't `regexp'.
+	(catch 'exit
+	  (while t
+	    (let ((ind (org-get-indentation)))
+	      (cond
+	       ;; This is exactly what we want.
+	       ((and (org-at-item-p)
+		     (or (< ind ind-ref)
+			 (eq org-list-ending-method 'regexp)))
+		(throw 'exit (point)))
+	       ;; At upper bound of search or looking at the end of a
+	       ;; previous list: search is over.
+	       ((<= (point) lim-up) (throw 'exit nil))
+	       ((and (not (eq org-list-ending-method 'indent))
+		     (looking-at org-list-end-re))
+		(throw 'exit nil))
+	       ;; Skip blocks, drawers, inline-tasks, blank lines
+	       ((looking-at "^[ \t]*#\\+end_")
+		(re-search-backward "^[ \t]*#\\+begin_" nil t))
+	       ((looking-at "^[ \t]*:END:")
+		(re-search-backward org-drawer-regexp nil t)
+		(beginning-of-line))
+	       ((and inlinetask-re (looking-at inlinetask-re))
+		(org-inlinetask-goto-beginning)
+		(forward-line -1))
+	       ((looking-at "^[ \t]*$") (forward-line -1))
+	       ;; Text at column 0 cannot belong to a list: stop.
+	       ((zerop ind) (throw 'exit nil))
+	       ;; Normal text less indented than reference line, take
+	       ;; it as new reference.
+	       ((< ind ind-ref)
+		(setq ind-ref ind)
+		(forward-line -1))
+	       (t (forward-line -1)))))))))))
 
 (defun org-at-item-p ()
   "Is point in a line starting a hand-formatted item?"
