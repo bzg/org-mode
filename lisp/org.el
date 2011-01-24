@@ -17602,12 +17602,16 @@ an item."
 	    ;; shift indentation of others lines to set them as item's
 	    ;; body.
 	    (let* ((bul (org-list-bullet-string "-"))
-		   (bul-len (length bul)))
+		   (bul-len (length bul))
+		   (ref-ind (org-get-indentation)))
 	      (skip-chars-forward " \t")
 	      (insert bul)
 	      (beginning-of-line 2)
 	      (while (and (< (setq l (1+ l)) l2) (< (point) end))
-		(org-indent-line-to (+ (org-get-indentation) bul-len))
+		;; Ensure that lines less indented than first one
+		;; still get included in item body.
+		(org-indent-line-to (+ (max ref-ind (org-get-indentation))
+				       bul-len))
 		(beginning-of-line 2)))))))))
 
 (defun org-toggle-heading (&optional nstars)
