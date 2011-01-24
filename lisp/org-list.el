@@ -82,8 +82,10 @@
 (require 'org-compat)
 
 (defvar org-blank-before-new-entry)
-(defvar org-M-RET-may-split-line)
 (defvar org-complex-heading-regexp)
+(defvar org-drawer-regexp)
+(defvar org-drawers)
+(defvar org-M-RET-may-split-line)
 (defvar org-odd-levels-only)
 (defvar org-outline-regexp)
 (defvar org-ts-regexp)
@@ -93,6 +95,8 @@
 (declare-function org-back-over-empty-lines "org" ())
 (declare-function org-back-to-heading "org" (&optional invisible-ok))
 (declare-function org-combine-plists "org" (&rest plists))
+(declare-function org-count "org" (cl-item cl-seq))
+(declare-function org-current-level "org" ())
 (declare-function org-entry-get "org"
 		  (pom property &optional inherit literal-nil))
 (declare-function org-get-indentation "org" (&optional line))
@@ -103,10 +107,12 @@
 (declare-function org-inlinetask-goto-beginning "org-inlinetask" ())
 (declare-function org-inlinetask-goto-end "org-inlinetask" ())
 (declare-function org-inlinetask-in-task-p "org-inlinetask" ())
+(declare-function org-inlinetask-outline-regexp "org-inlinetask" ())
 (declare-function org-invisible-p "org" ())
 (declare-function org-level-increment "org" ())
 (declare-function org-narrow-to-subtree "org" ())
 (declare-function org-on-heading-p "org" (&optional invisible-ok))
+(declare-function org-previous-line-empty-p "org" ())
 (declare-function org-remove-if "org" (predicate seq))
 (declare-function org-show-subtree "org" ())
 (declare-function org-time-string-to-seconds "org" (s))
@@ -978,7 +984,7 @@ PREVS is the alist of previous items. See
   "List all children of ITEM in STRUCT, or nil.
 PARENTS is the alist of items' parent. See
 `org-list-parents-alist'."
-  (let (all)
+  (let (all child)
     (while (setq child (car (rassq item parents)))
       (setq parents (cdr (member (assq child parents) parents)))
       (push child all))
@@ -1071,6 +1077,19 @@ Arguments REGEXP, BOUND and NOERROR are similar to those used in
 
 
 ;;; Methods on structures
+
+(defsubst org-list-bullet-string (bullet)
+  "Return BULLET with the correct number of whitespaces.
+It determines the number of whitespaces to append by looking at
+`org-list-two-spaces-after-bullet-regexp'."
+  (save-match-data
+    (let ((spaces (if (and org-list-two-spaces-after-bullet-regexp
+			   (string-match
+			    org-list-two-spaces-after-bullet-regexp bullet))
+		      "  "
+		    " ")))
+      (string-match "\\S-+\\([ \t]*\\)" bullet)
+      (replace-match spaces nil nil bullet 1))))
 
 (defun org-list-separating-blank-lines-number (pos struct prevs)
   "Return number of blank lines that should separate items in list.
@@ -1721,19 +1740,6 @@ PARENTS is the alist of items' parents. See
 
 
 ;;; Misc Tools
-
-(defsubst org-list-bullet-string (bullet)
-  "Return BULLET with the correct number of whitespaces.
-It determines the number of whitespaces to append by looking at
-`org-list-two-spaces-after-bullet-regexp'."
-  (save-match-data
-    (let ((spaces (if (and org-list-two-spaces-after-bullet-regexp
-			   (string-match
-			    org-list-two-spaces-after-bullet-regexp bullet))
-		      "  "
-		    " ")))
-      (string-match "\\S-+\\([ \t]*\\)" bullet)
-      (replace-match spaces nil nil bullet 1))))
 
 (defun org-apply-on-list (function init-value &rest args)
   "Call FUNCTION on each item of the list at point.
@@ -2592,6 +2598,7 @@ Point is left at list end."
 	 (top (org-list-get-top-point struct))
 	 (bottom (org-list-get-bottom-point struct))
 	 out
+	 parse-item			; for byte-compiler
 	 (get-text
 	  (function
 	   ;; Return text between BEG and END, trimmed, with
@@ -2796,6 +2803,7 @@ items."
 	 (csep (plist-get p :csep))
 	 (cbon (plist-get p :cbon))
 	 (cboff (plist-get p :cboff))
+	 export-sublist			; for byte-compiler
 	 (export-item
 	  (function
 	   ;; Export an item ITEM of type TYPE, at DEPTH. First string
