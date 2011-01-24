@@ -4701,11 +4701,11 @@ nearest column format definition.
 @section Special properties
 @cindex properties, special
 
-Special properties provide an alternative access method to Org-mode
-features, like the TODO state or the priority of an entry, discussed in the
-previous chapters.  This interface exists so that you can include
-these states in a column view (@pxref{Column view}), or to use them in
-queries.  The following property names are special and should not be
+Special properties provide an alternative access method to Org-mode features,
+like the TODO state or the priority of an entry, discussed in the previous
+chapters.  This interface exists so that you can include these states in a
+column view (@pxref{Column view}), or to use them in queries.  The following
+property names are special and (except for @code{:CATEGORY:}) should not be
 used as keys in the properties drawer:
 
 @cindex property, special, TODO
