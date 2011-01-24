@@ -18866,7 +18866,7 @@ If point is in an inline task, mark that task instead."
 	      (org-get-indentation (match-string 0)))))
      ;; Lists
      ((ignore-errors (goto-char (org-in-item-p)))
-      (or (org-at-item-description-p) (org-at-item-p))
+      (looking-at "[ \t]*\\(\\S-+\\)\\(.*[ \t]+::\\)?[ \t]+")
       (setq bpos (match-beginning 1) tpos (match-end 0)
 	    bcol (progn (goto-char bpos) (current-column))
 	    tcol (progn (goto-char tpos) (current-column)))

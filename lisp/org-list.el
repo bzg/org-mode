@@ -408,6 +408,7 @@ This checks `org-list-ending-method'."
 	   (lim-up (car context))
 	   (inlinetask-re (and (featurep 'org-inlinetask)
 			       (org-inlinetask-outline-regexp)))
+	   (item-re (org-item-re))
 	   ;; Indentation isn't meaningful when point starts at an empty
 	   ;; line or an inline task.
 	   (ind-ref (if (or (looking-at "^[ \t]*$")
@@ -416,7 +417,7 @@ This checks `org-list-ending-method'."
 		      (org-get-indentation))))
       (cond
        ((eq (nth 2 context) 'invalid) nil)
-       ((org-at-item-p) (point))
+       ((looking-at item-re) (point))
        (t
 	;; Detect if cursor in amidst `org-list-end-re'. First, count
 	;; number HL of hard lines it takes, then call `org-in-regexp'
@@ -440,7 +441,7 @@ This checks `org-list-ending-method'."
 	    (let ((ind (org-get-indentation)))
 	      (cond
 	       ;; This is exactly what we want.
-	       ((and (org-at-item-p)
+	       ((and (looking-at item-re)
 		     (or (< ind ind-ref)
 			 (eq org-list-ending-method 'regexp)))
 		(throw 'exit (point)))
@@ -471,7 +472,10 @@ This checks `org-list-ending-method'."
 
 (defun org-at-item-p ()
   "Is point in a line starting a hand-formatted item?"
-  (save-excursion (beginning-of-line) (looking-at (org-item-beginning-re))))
+  (save-excursion
+    (beginning-of-line)
+    (and (not (eq (nth 2 (org-list-context)) 'invalid))
+	 (looking-at (org-item-re)))))
 
 (defun org-at-item-bullet-p ()
   "Is point at the bullet of a plain list item?"
@@ -1591,6 +1595,7 @@ have changed.
 
 Initial position of cursor is restored after the changes."
   (let* ((pos (copy-marker (point)))
+	 (item-re (org-item-re))
 	 (shift-body-ind
 	  (function
 	   ;; Shift the indentation between END and BEG by DELTA.
@@ -1600,7 +1605,8 @@ Initial position of cursor is restored after the changes."
 	     (skip-chars-backward " \r\t\n")
 	     (beginning-of-line)
 	     (while (or (> (point) beg)
-			(and (= (point) beg) (not (org-at-item-p))))
+			(and (= (point) beg)
+			     (not (looking-at item-re))))
 	       (when (org-looking-at-p "^[ \t]*\\S-")
 		 (let ((i (org-get-indentation)))
 		   (org-indent-line-to (+ i delta))))
@@ -1958,7 +1964,7 @@ If WHICH is a valid string, use that as the new bullet. If WHICH
 is an integer, 0 means `-', 1 means `+' etc. If WHICH is
 `previous', cycle backwards."
   (interactive "P")
-  (unless (org-at-item-p) (error "This is not a list"))
+  (unless (org-at-item-p) (error "Not at an item"))
   (save-excursion
     (beginning-of-line)
     (let* ((struct (org-list-struct))
@@ -2619,12 +2625,12 @@ Point is left at list end."
 		   (mapcar parse-item e)))))
 	 (parse-item
 	  (function
-	   ;; Return a list containing conter of item, if any, text
+	   ;; Return a list containing counter of item, if any, text
 	   ;; and any sublist inside it.
 	   (lambda (e)
 	     (let ((start (save-excursion
 			    (goto-char e)
-			    (or (org-at-item-counter-p) (org-at-item-p))
+			    (looking-at "[ \t]*\\S-+[ \t]+\\(\\[@[:[:alnum:]]+\\][ \t]*\\)?")
 			    (match-end 0)))
 		   ;; Get counter number. For alphabetic counter, get
 		   ;; its position in the alphabet.
