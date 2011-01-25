@@ -654,6 +654,28 @@ end-body --------- point at the end of the body"
        (goto-char point))))
 
 ;;;###autoload
+(defmacro org-babel-map-inline-src-blocks (file &rest body)
+  "Evaluate BODY forms on each inline source-block in FILE.
+If FILE is nil evaluate BODY forms on source blocks in current
+buffer."
+  (declare (indent 1))
+  (let ((tempvar (make-symbol "file")))
+    `(let* ((,tempvar ,file)
+	    (visited-p (or (null ,tempvar)
+			   (get-file-buffer (expand-file-name ,tempvar))))
+	    (point (point)) to-be-removed)
+       (save-window-excursion
+	 (when ,tempvar (find-file ,tempvar))
+	 (setq to-be-removed (current-buffer))
+	 (goto-char (point-min))
+	 (while (re-search-forward org-babel-inline-src-block-regexp nil t)
+	   (goto-char (match-beginning 1))
+	   (save-match-data ,@body)
+	   (goto-char (match-end 0))))
+       (unless visited-p (kill-buffer to-be-removed))
+       (goto-char point))))
+
+;;;###autoload
 (defun org-babel-execute-buffer (&optional arg)
   "Execute source code blocks in a buffer.
 Call `org-babel-execute-src-block' on every source block in
@@ -662,6 +684,8 @@ the current buffer."
   (org-babel-eval-wipe-error-buffer)
   (org-save-outline-visibility t
     (org-babel-map-src-blocks nil
+      (org-babel-execute-src-block arg))
+    (org-babel-map-inline-src-blocks nil
       (org-babel-execute-src-block arg))))
 
 ;;;###autoload
