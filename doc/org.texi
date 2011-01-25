@@ -11444,19 +11444,22 @@ Code blocks in the following languages are supported.
 
 @multitable @columnfractions 0.28 0.3 0.22 0.2
 @item @b{Language} @tab @b{Identifier} @tab @b{Language} @tab @b{Identifier}
-@item Asymptote @tab asymptote @tab C @tab C
-@item C++ @tab C++ @tab Clojure @tab clojure
-@item CSS @tab css @tab ditaa @tab ditaa
-@item Graphviz @tab dot @tab Emacs Lisp @tab emacs-lisp
-@item gnuplot @tab gnuplot @tab Haskell @tab haskell
-@item LaTeX @tab latex @tab MATLAB @tab matlab
+@item Asymptote @tab asymptote @tab Emacs Calc @tab calc
+@item C @tab C @tab C++ @tab C++
+@item Clojure @tab clojure @tab CSS @tab css
+@item ditaa @tab ditaa  @tab Graphviz @tab dot
+@item Emacs Lisp @tab emacs-lisp  @tab gnuplot @tab gnuplot
+@item Haskell @tab haskell @tab Javascript @tab js
+@item LaTeX @tab latex @tab Ledger @tab ledger
+@item Lisp @tab lisp @tab MATLAB @tab matlab
 @item Mscgen @tab mscgen @tab Objective Caml @tab ocaml
-@item Octave @tab octave @tab Oz @tab oz
-@item Perl @tab perl @tab Python @tab python
+@item Octave @tab octave @tab Org-mode @tab org
+@item Oz @tab oz @tab Perl @tab perl
+@item Plantuml @tab plantuml @tab Python @tab python
 @item R @tab R @tab Ruby @tab ruby
-@item Sass @tab sass @tab GNU Screen @tab screen
-@item shell @tab sh @tab SQL @tab sql
-@item SQLite @tab sqlite
+@item Sass @tab sass @tab Scheme @tab scheme
+@item GNU Screen @tab screen @tab shell @tab sh
+@item SQL @tab sql @tab SQLite @tab sqlite
 @end multitable
 
 Language-specific documentation is available for some languages.  If
