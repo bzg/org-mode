@@ -1547,7 +1547,7 @@ code ---- the results are extracted in the syntax of the source
      (t
       (let ((case-fold-search t)
 	    (blocks-re (regexp-opt
-			(list "latex" "html" "example" "src" "result"))))
+			(list "latex" "html" "example" "src" "result" "org"))))
 	(if (looking-at (concat "[ \t]*#\\+begin_" blocks-re))
 	    (progn (re-search-forward (concat "[ \t]*#\\+end_" blocks-re) nil t)
 		   (forward-char 1))
