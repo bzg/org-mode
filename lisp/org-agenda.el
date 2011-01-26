@@ -5075,55 +5075,61 @@ FRACTION is what fraction of the head-warning time has passed."
 			      (abbreviate-file-name buffer-file-name))))
 	 (regexp org-tr-regexp)
 	 (d0 (calendar-absolute-from-gregorian date))
-	 marker hdmarker ee txt d1 d2 s1 s2 timestr category todo-state tags pos
+	 marker hdmarker ee txt d1 d2 s1 s2 category todo-state tags pos
 	 head donep)
     (goto-char (point-min))
     (while (re-search-forward regexp nil t)
       (catch :skip
 	(org-agenda-skip)
 	(setq pos (point))
-	(setq timestr (match-string 0)
-	      s1 (match-string 1)
-	      s2 (match-string 2)
-	      d1 (time-to-days (org-time-string-to-time s1))
-	      d2 (time-to-days (org-time-string-to-time s2)))
-	(if (and (> (- d0 d1) -1) (> (- d2 d0) -1))
-	    ;; Only allow days between the limits, because the normal
-	    ;; date stamps will catch the limits.
-	    (save-excursion
-	      (setq todo-state (org-get-todo-state))
-	      (setq donep (member todo-state org-done-keywords))
-	      (if (and donep org-agenda-skip-timestamp-if-done)
-		  (throw :skip t))
-	      (setq marker (org-agenda-new-marker (point)))
-	      (setq category (org-get-category))
-	      (if (not (re-search-backward "^\\*+ " nil t))
-		  (setq txt org-agenda-no-heading-message)
-		(goto-char (match-beginning 0))
-		(setq hdmarker (org-agenda-new-marker (point)))
-		(setq tags (org-get-tags-at))
-		(looking-at "\\*+[ \t]+\\([^\r\n]+\\)")
-		(setq head (match-string 1))
-		(let ((remove-re
-		       (if org-agenda-remove-timeranges-from-blocks
-			   (concat
-			    "<" (regexp-quote s1) ".*?>"
-			    "--"
-			    "<" (regexp-quote s2) ".*?>")
-			 nil)))
-		  (setq txt (org-format-agenda-item
-			     (format
-			      (nth (if (= d1 d2) 0 1)
-				   org-agenda-timerange-leaders)
-			      (1+ (- d0 d1)) (1+ (- d2 d1)))
-			     head category tags
-			     timestr nil remove-re))))
-	      (org-add-props txt props
-		'org-marker marker 'org-hd-marker hdmarker
-		'type "block" 'date date
-		'todo-state todo-state
-		'priority (org-get-priority txt) 'org-category category)
-	      (push txt ee)))
+	(let ((start-time (match-string 1))
+	      (end-time (match-string 2)))
+	  (setq s1 (match-string 1)
+		s2 (match-string 2)
+		d1 (time-to-days (org-time-string-to-time s1))
+		d2 (time-to-days (org-time-string-to-time s2)))
+	  (if (and (> (- d0 d1) -1) (> (- d2 d0) -1))
+	      ;; Only allow days between the limits, because the normal
+	      ;; date stamps will catch the limits.
+	      (save-excursion
+		(setq todo-state (org-get-todo-state))
+		(setq donep (member todo-state org-done-keywords))
+		(if (and donep org-agenda-skip-timestamp-if-done)
+		    (throw :skip t))
+		(setq marker (org-agenda-new-marker (point)))
+		(setq category (org-get-category))
+		(if (not (re-search-backward "^\\*+ " nil t))
+		    (setq txt org-agenda-no-heading-message)
+		  (goto-char (match-beginning 0))
+		  (setq hdmarker (org-agenda-new-marker (point)))
+		  (setq tags (org-get-tags-at))
+		  (looking-at "\\*+[ \t]+\\([^\r\n]+\\)")
+		  (setq head (match-string 1))
+		  (let ((remove-re
+			 (if org-agenda-remove-timeranges-from-blocks
+			     (concat
+			      "<" (regexp-quote s1) ".*?>"
+			      "--"
+			      "<" (regexp-quote s2) ".*?>")
+			   nil)))
+		    (setq txt (org-format-agenda-item
+			       (format
+				(nth (if (= d1 d2) 0 1)
+				     org-agenda-timerange-leaders)
+				(1+ (- d0 d1)) (1+ (- d2 d1)))
+			       head category tags
+			       (cond ((= d1 d0)
+				      (concat "<" start-time ">"))
+				     ((= d2 d0)
+				      (concat "<" end-time ">"))
+				     (t nil))
+			       remove-re))))
+		(org-add-props txt props
+		  'org-marker marker 'org-hd-marker hdmarker
+		  'type "block" 'date date
+		  'todo-state todo-state
+		  'priority (org-get-priority txt) 'org-category category)
+		(push txt ee))))
 	(goto-char pos)))
     ;; Sort the entries by expiration date.
     (nreverse ee)))

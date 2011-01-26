@@ -388,6 +388,9 @@ of a different task.")
   "Return t when clocking a task."
   (not (equal (org-clocking-buffer) nil)))
 
+(defvar org-clock-before-select-task-hook nil
+  "Hook called in task selection just before prompting the user.")
+
 (defun org-clock-select-task (&optional prompt)
   "Select a task that recently was associated with clocking."
   (interactive)
@@ -420,6 +423,7 @@ of a different task.")
 	   (if (fboundp 'int-to-char) (setf (car s) (int-to-char (car s))))
 	   (push s sel-list)))
        org-clock-history)
+      (run-hooks 'org-clock-before-select-task-hook)
       (org-fit-window-to-buffer)
       (message (or prompt "Select task for clocking:"))
       (setq rpl (read-char-exclusive))
