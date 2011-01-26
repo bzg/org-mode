@@ -140,23 +140,32 @@ This setting can also be overridden in the CRYPTKEY property."
   (unless (org-before-first-heading-p)
     (save-excursion
       (org-back-to-heading t)
-      (forward-line)
-      (when (looking-at "-----BEGIN PGP MESSAGE-----")
-	(let* ((beg (point))
-	       (end (save-excursion
-		      (search-forward "-----END PGP MESSAGE-----")
-		      (forward-line)
-		      (point)))
-	       (epg-context (epg-make-context nil t t))
-	       (decrypted-text
-		(decode-coding-string
-		 (epg-decrypt-string
-		  epg-context
-		  (buffer-substring-no-properties beg end))
-		 'utf-8)))
-	  (delete-region beg end)
-	  (insert decrypted-text)
-	  nil)))))
+      (let ((heading-point (point))
+	    (heading-was-invisible-p
+	     (save-excursion
+	       (outline-end-of-heading)
+	       (outline-invisible-p))))
+	(forward-line)
+	(when (looking-at "-----BEGIN PGP MESSAGE-----")
+	  (let* ((end (save-excursion
+			(search-forward "-----END PGP MESSAGE-----")
+			(forward-line)
+			(point)))
+		 (epg-context (epg-make-context nil t t))
+		 (decrypted-text
+		  (decode-coding-string
+		   (epg-decrypt-string
+		    epg-context
+		    (buffer-substring-no-properties (point) end))
+		   'utf-8)))
+	    ;; Delete region starting just before point, because the
+	    ;; outline property starts at the \n of the heading.
+	    (delete-region (1- (point)) end)
+	    (insert "\n" decrypted-text)
+	    (when heading-was-invisible-p
+	      (goto-char heading-point)
+	      (org-flag-subtree t))
+	    nil))))))
 
 (defun org-encrypt-entries ()
   "Encrypt all top-level entries in the current buffer."
