@@ -170,10 +170,18 @@ This list represents a \"habit\" for the rest of this module."
 		   habit-entry scheduled-repeat))
 	(setq deadline (+ scheduled (- dr-days sr-days))))
       (org-back-to-heading t)
-      (while (re-search-forward "- State \"DONE\".*\\[\\([^]]+\\)\\]" end t)
-	(push (time-to-days
-	       (org-time-string-to-time (match-string-no-properties 1)))
-	      closed-dates))
+      (let* ((maxdays (+ org-habit-preceding-days org-habit-following-days))
+	     (reversed org-log-states-order-reversed)
+	     (search (if reversed 're-search-forward 're-search-backward))
+	     (limit (if reversed end (point)))
+	     (count 0))
+	(unless reversed (goto-char end))
+	(while (and (< count maxdays)
+		    (funcall search "- State \"DONE\".*\\[\\([^]]+\\)\\]" limit t))
+	  (push (time-to-days
+		 (org-time-string-to-time (match-string-no-properties 1)))
+		closed-dates)
+	  (setq count (1+ count))))
       (list scheduled sr-days deadline dr-days closed-dates))))
 
 (defsubst org-habit-scheduled (habit)
