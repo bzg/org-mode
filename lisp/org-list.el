@@ -599,7 +599,7 @@ Contexts `block' and `invalid' refer to
 (defun org-list-struct ()
   "Return structure of list at point.
 
-A list structure is an alist where keys is point at item, and
+A list structure is an alist where key is point at item, and
 values are:
 1. indentation,
 2. bullet with trailing whitespace,
@@ -644,10 +644,8 @@ Assume point is at an item."
 	   (beg-cell (cons (point) (org-get-indentation)))
 	   ind itm-lst itm-lst-2 end-lst end-lst-2 struct
 	   (assoc-at-point
-	    ;; Return an association whose key is point and values are
-	    ;; indentation, bullet string, bullet counter, and
-	    ;; checkbox.
 	    (function
+	     ;; Return association at point.
 	     (lambda (ind)
 	       (looking-at org-list-full-item-re)
 	       (list (point)
@@ -657,8 +655,8 @@ Assume point is at an item."
 		     (match-string-no-properties 3)	; checkbox
 		     (match-string-no-properties 4)))))	; description tag
 	   (end-before-blank
-	    ;; Ensure list ends at the first blank line.
 	    (function
+	     ;; Ensure list ends at the first blank line.
 	     (lambda ()
 	       (skip-chars-backward " \r\t\n")
 	       (min (1+ (point-at-eol)) lim-down)))))
@@ -715,31 +713,27 @@ Assume point is at an item."
 		;; end at this ind or lesser, this item becomes the
 		;; new BEG-CELL.
 		(push (funcall assoc-at-point ind) itm-lst)
-		(push (cons ind (point-at-bol)) end-lst)
+		(push (cons ind (point)) end-lst)
 		(when (or (and (eq org-list-ending-method 'regexp)
 			       (<= ind (cdr beg-cell)))
 			  (< ind text-min-ind))
-		  (setq beg-cell (cons (point-at-bol) ind)))
+		  (setq beg-cell (cons (point) ind)))
 		(forward-line -1))
+	       ;; From there, point is not at an item. Unless ending
+	       ;; method is `regexp', interpret line's indentation:
+	       ;; - text at column 0 is necessarily out of any list.
+	       ;;   Dismiss data recorded above BEG-CELL. Jump to
+	       ;;   part 2.
+	       ;; - any other case, it can possibly be an ending
+	       ;;   position for an item above. Save it and proceed.
+	       ((eq org-list-ending-method 'regexp) (forward-line -1))
+	       ((zerop ind)
+		(throw 'exit
+		       (setq itm-lst
+			     (memq (assq (car beg-cell) itm-lst) itm-lst))))
 	       (t
-		;; Point is not at an item. Unless ending method is
-		;; `regexp', interpret line's indentation:
-		;;
-		;; - text at column 0 is necessarily out of any list.
-		;;   Dismiss data recorded above BEG-CELL. Jump to
-		;;   part 2.
-		;;
-		;; - any other case, it can possibly be an ending
-		;;   position for an item above. Save it and proceed.
-		(cond
-		 ((eq org-list-ending-method 'regexp))
-		 ((= ind 0)
-		  (throw 'exit
-			 (setq itm-lst
-			       (memq (assq (car beg-cell) itm-lst) itm-lst))))
-		 (t
-		  (when (< ind text-min-ind) (setq text-min-ind ind))
-		  (push (cons ind (point-at-bol)) end-lst)))
+		(when (< ind text-min-ind) (setq text-min-ind ind))
+		(push (cons ind (point)) end-lst)
 		(forward-line -1)))))))
       ;; 2. Read list from starting point to its end, that is until we
       ;;    get out of context, or a non-item line is less or equally
@@ -766,7 +760,7 @@ Assume point is at an item."
 	     ;; ending position and jump to part 3.
 	     ((and (not (eq org-list-ending-method 'indent))
 		   (looking-at org-list-end-re))
-	      (throw 'exit (push (cons 0 (point-at-bol)) end-lst-2)))
+	      (throw 'exit (push (cons 0 (point)) end-lst-2)))
 	     ;; Skip blocks, drawers, inline tasks and blank lines
 	     ;; along the way
 	     ((looking-at "^[ \t]*#\\+begin_")
@@ -783,30 +777,26 @@ Assume point is at an item."
 	      ;; Point is at an item. Add data to ITM-LST-2. It may also
 	      ;; end a previous item, so save it in END-LST-2.
 	      (push (funcall assoc-at-point ind) itm-lst-2)
-	      (push (cons ind (point-at-bol)) end-lst-2)
+	      (push (cons ind (point)) end-lst-2)
 	      (forward-line 1))
-	     (t
-	      ;; Point is not at an item. If ending method is not
-	      ;; `regexp', two situations are of interest:
-	      ;;
-	      ;; - ind is lesser or equal than BEG-CELL's. The list is
-	      ;;   over. Store point as an ending position and jump to
-	      ;;   part 3.
-	      ;;
-	      ;; - ind is lesser or equal than previous item's. This
-	      ;;    is an ending position. Store it and proceed.
-	      (cond
-	       ((eq org-list-ending-method 'regexp))
-	       ((<= ind (cdr beg-cell))
-		(push (cons ind (funcall end-before-blank)) end-lst-2)
-		(throw 'exit nil))
-	       ((<= ind (nth 1 (car itm-lst-2)))
-		(push (cons ind (point-at-bol)) end-lst-2)))
+	     ;; From there, point is not at an item. If ending method
+	     ;; is not `regexp', two situations are of interest:
+	     ;; - ind is lesser or equal than BEG-CELL's. The list is
+	     ;;   over. Store point as an ending position and jump to
+	     ;;   part 3.
+	     ;; - ind is lesser or equal than previous item's. This
+	     ;;   is an ending position. Store it and proceed.
+	     ((eq org-list-ending-method 'regexp) (forward-line 1))
+	     ((<= ind (cdr beg-cell))
+	      (throw 'exit
+		     (push (cons 0 (funcall end-before-blank)) end-lst-2)))
+	     ((<= ind (nth 1 (car itm-lst-2)))
+	      (push (cons ind (point)) end-lst-2)
 	      (forward-line 1))))))
       (setq struct (append itm-lst (cdr (nreverse itm-lst-2))))
       (setq end-lst (append end-lst (cdr (nreverse end-lst-2))))
-      ;; 3. Correct ill-formed lists by making sure top item has the
-      ;;    least indentation of the list
+      ;; 3. Correct ill-formed lists by ensuring top item is the least
+      ;;    indented.
       (let ((min-ind (nth 1 (car struct))))
 	(mapc (lambda (item)
 		(let ((ind (nth 1 item)))
