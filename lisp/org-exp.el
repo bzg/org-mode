@@ -2615,7 +2615,7 @@ command."
       (goto-char (point-min))
       (while (re-search-forward org-drawer-regexp nil t)
 	(goto-char (match-beginning 1))
-	(or (org-invisible-p) (org-flag-drawer nil))))
+	(or (outline-invisible-p) (org-flag-drawer nil))))
     (with-current-buffer buffer (erase-buffer))
     (save-excursion
       (setq s (goto-char (point-min)))

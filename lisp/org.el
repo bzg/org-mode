@@ -6010,7 +6010,7 @@ in special contexts.
       (save-excursion
 	(goto-char eos)
 	(outline-next-heading)
-	(if (org-invisible-p) (org-flag-heading nil))))
+	(if (outline-invisible-p) (org-flag-heading nil))))
      ((and (or (>= eol eos)
 	       (not (string-match "\\S-" (buffer-substring eol eos))))
 	   (or has-children
@@ -6024,7 +6024,7 @@ in special contexts.
       (save-excursion
 	(goto-char eos)
 	(outline-next-heading)
-	(if (org-invisible-p) (org-flag-heading nil)))
+	(if (outline-invisible-p) (org-flag-heading nil)))
       (setq org-cycle-subtree-status 'children)
       (run-hook-with-args 'org-cycle-hook 'children))
      ((or children-skipped
@@ -6191,9 +6191,9 @@ This function is the default value of the hook `org-cycle-hook'."
 	  ;; Properly fold already folded siblings
 	  (goto-char (point-min))
 	  (while (re-search-forward re nil t)
-	    (if (and (not (org-invisible-p))
+	    (if (and (not (outline-invisible-p))
 		     (save-excursion
-		       (goto-char (point-at-eol)) (org-invisible-p)))
+		       (goto-char (point-at-eol)) (outline-invisible-p)))
 		(hide-entry))))
 	(org-cycle-show-empty-lines 'overview)
 	(org-cycle-hide-drawers 'overview)))))
@@ -6526,7 +6526,7 @@ the headline hierarchy above."
 	(progn
 	  (org-mark-ring-push org-goto-start-pos)
 	  (goto-char selected-point)
-	  (if (or (org-invisible-p) (org-invisible-p2))
+	  (if (or (outline-invisible-p) (org-invisible-p2))
 	      (org-show-context 'org-goto)))
       (message "Quit"))))
 
@@ -6571,7 +6571,7 @@ or nil."
 		  (org-show-siblings t)
 		  (org-show-following-heading t))
 	      (goto-char org-goto-start-pos)
-	      (and (org-invisible-p) (org-show-context)))
+	      (and (outline-invisible-p) (org-show-context)))
 	  (goto-char (point-min)))
 	(let (org-special-ctrl-a/e) (org-beginning-of-line))
 	(message "Select location and press RET")
@@ -6786,14 +6786,14 @@ This is important for non-interactive uses of the command."
 	(cond
 	 ((and (org-on-heading-p) (bolp)
 	       (or (bobp)
-		   (save-excursion (backward-char 1) (not (org-invisible-p)))))
+		   (save-excursion (backward-char 1) (not (outline-invisible-p)))))
 	  ;; insert before the current line
 	  (open-line (if blank 2 1)))
 	 ((and (bolp)
 	       (not org-insert-heading-respect-content)
 	       (or (bobp)
 		   (save-excursion
-		     (backward-char 1) (not (org-invisible-p)))))
+		     (backward-char 1) (not (outline-invisible-p)))))
 	  ;; insert right here
 	  nil)
 	 (t
@@ -6801,7 +6801,7 @@ This is important for non-interactive uses of the command."
           (save-excursion
 	    (setq previous-pos (point-at-bol))
             (end-of-line)
-            (setq hide-previous (org-invisible-p)))
+            (setq hide-previous (outline-invisible-p)))
 	  (and org-insert-heading-respect-content (org-show-subtree))
 	  (let ((split
 		 (and (org-get-alist-option org-M-RET-may-split-line 'headline)
@@ -7255,7 +7255,7 @@ case."
       (setq beg (point)))
     (save-match-data
       (save-excursion (outline-end-of-heading)
-		      (setq folded (org-invisible-p)))
+		      (setq folded (outline-invisible-p)))
       (outline-end-of-subtree))
     (outline-next-heading)
     (setq ne-end (org-back-over-empty-lines))
@@ -7347,7 +7347,7 @@ useful if the caller implements cut-and-paste as copy-then-paste-then-cut."
     (skip-chars-forward " \t\r\n")
     (save-match-data
       (save-excursion (outline-end-of-heading)
-		      (setq folded (org-invisible-p)))
+		      (setq folded (outline-invisible-p)))
       (condition-case nil
 	  (org-forward-same-level (1- n) t)
 	(error nil))
@@ -7395,7 +7395,7 @@ the inserted text when done."
     (error "%s"
      (substitute-command-keys
       "The kill is not a (set of) tree(s) - please use \\[yank] to yank anyway")))
-  (let* ((visp (not (org-invisible-p)))
+  (let* ((visp (not (outline-invisible-p)))
 	 (txt tree)
 	 (^re (concat "^\\(" outline-regexp "\\)"))
 	 (re  (concat "\\(" outline-regexp "\\)"))
@@ -7457,7 +7457,7 @@ the inserted text when done."
     (goto-char beg)
     (skip-chars-forward " \t\n\r")
     (setq beg (point))
-    (if (and (org-invisible-p) visp)
+    (if (and (outline-invisible-p) visp)
 	(save-excursion (outline-show-heading)))
     ;; Shift if necessary
     (unless (= shift 0)
@@ -8974,7 +8974,7 @@ If the link is in hidden text, expose it."
     (if (re-search-forward org-any-link-re nil t)
 	(progn
 	  (goto-char (match-beginning 0))
-	  (if (org-invisible-p) (org-show-context)))
+	  (if (outline-invisible-p) (org-show-context)))
       (goto-char pos)
       (setq org-link-search-failed t)
       (error "No further link found"))))
@@ -8994,7 +8994,7 @@ If the link is in hidden text, expose it."
     (if (re-search-backward org-any-link-re nil t)
 	(progn
 	  (goto-char (match-beginning 0))
-	  (if (org-invisible-p) (org-show-context)))
+	  (if (outline-invisible-p) (org-show-context)))
       (goto-char pos)
       (setq org-link-search-failed t)
       (error "No further link found"))))
@@ -9640,7 +9640,7 @@ onto the ring."
     (setq m (car p))
     (switch-to-buffer (marker-buffer m))
     (goto-char m)
-    (if (or (org-invisible-p) (org-invisible-p2)) (org-show-context 'mark-goto))))
+    (if (or (outline-invisible-p) (org-invisible-p2)) (org-show-context 'mark-goto))))
 
 (defun org-remove-angle-brackets (s)
   (if (equal (substring s 0 1) "<") (setq s (substring s 1)))
@@ -12021,7 +12021,7 @@ How much context is shown depends upon the variables
       ;; Show heading or entry text
       (if (and heading-p (not entry-p))
 	  (org-flag-heading nil)    ; only show the heading
-	(and (or entry-p (org-invisible-p) (org-invisible-p2))
+	(and (or entry-p (outline-invisible-p) (org-invisible-p2))
 	     (org-show-hidden-entry)))    ; show entire entry
       (when following-p
 	;; Show next sibling, or heading below text
@@ -13804,7 +13804,7 @@ formats in the current buffer."
     (setq end (point))
     (goto-char beg)
     (while (re-search-forward re end t))
-    (setq hiddenp (org-invisible-p))
+    (setq hiddenp (outline-invisible-p))
     (end-of-line 1)
     (and (equal (char-after) ?\n) (forward-char 1))
     (while (looking-at "^[ \t]*\\(:CLOCK:\\|:LOGBOOK:\\|CLOCK:\\|:END:\\)")
@@ -19172,13 +19172,6 @@ interactive command with similar behavior."
 
 (define-key org-mode-map "\C-y" 'org-yank)
 
-(defun org-invisible-p ()
-  "Check if point is at a character currently not visible."
-  ;; Early versions of noutline don't have `outline-invisible-p'.
-  (if (fboundp 'outline-invisible-p)
-      (outline-invisible-p)
-    (get-char-property (point) 'invisible)))
-
 (defun org-truely-invisible-p ()
   "Check if point is at a character currently not visible.
 This version does not only check the character property, but also
@@ -19186,18 +19179,14 @@ This version does not only check the character property, but also
   ;; Early versions of noutline don't have `outline-invisible-p'.
   (if (org-bound-and-true-p visible-mode)
       nil
-    (if (fboundp 'outline-invisible-p)
-	(outline-invisible-p)
-      (get-char-property (point) 'invisible))))
+    (outline-invisible-p)))
 
 (defun org-invisible-p2 ()
   "Check if point is at a character currently not visible."
   (save-excursion
     (if (and (eolp) (not (bobp))) (backward-char 1))
     ;; Early versions of noutline don't have `outline-invisible-p'.
-    (if (fboundp 'outline-invisible-p)
-	(outline-invisible-p)
-      (get-char-property (point) 'invisible))))
+    (outline-invisible-p)))
 
 (defun org-back-to-heading (&optional invisible-ok)
   "Call `outline-back-to-heading', but provide a better error message."
@@ -19425,7 +19414,7 @@ it wil also look at invisible ones."
 		  (setq l (- (match-end 0) (match-beginning 0) 1))
 		  (= l level)
 		  (not invisible-ok)
-		  (progn (backward-char 1) (org-invisible-p)))
+		  (progn (backward-char 1) (outline-invisible-p)))
 	(if (< l level) (setq arg 1)))
       (setq arg (1- arg)))
     (beginning-of-line 1)))
@@ -19444,7 +19433,7 @@ Stop at the first and last subheadings of a superior heading."
 		  (setq l (- (match-end 0) (match-beginning 0) 1))
 		  (= l level)
 		  (not invisible-ok)
-		  (org-invisible-p))
+		  (outline-invisible-p))
 	(if (< l level) (setq arg 1)))
       (setq arg (1- arg)))))
 
@@ -19665,9 +19654,9 @@ To get rid of the restriction, use \\[org-agenda-remove-restriction-lock]."
 (defun org-bookmark-jump-unhide ()
   "Unhide the current position, to show the bookmark location."
   (and (org-mode-p)
-       (or (org-invisible-p)
+       (or (outline-invisible-p)
 	   (save-excursion (goto-char (max (point-min) (1- (point))))
-			   (org-invisible-p)))
+			   (outline-invisible-p)))
        (org-show-context 'bookmark-jump)))
 
 ;; Make session.el ignore our circular variable

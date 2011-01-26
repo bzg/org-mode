@@ -112,7 +112,7 @@ This setting can also be overridden in the CRYPTKEY property."
     (let ((start-heading (point)))
       (forward-line)
       (when (not (looking-at "-----BEGIN PGP MESSAGE-----"))
-        (let ((folded (org-invisible-p))
+        (let ((folded (outline-invisible-p))
               (epg-context (epg-make-context nil t t))
               (crypt-key (org-crypt-key-for-heading))
               (beg (point))
