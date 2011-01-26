@@ -792,7 +792,8 @@ Assume point is at an item."
 		     (push (cons 0 (funcall end-before-blank)) end-lst-2)))
 	     ((<= ind (nth 1 (car itm-lst-2)))
 	      (push (cons ind (point)) end-lst-2)
-	      (forward-line 1))))))
+	      (forward-line 1))
+	     (t (forward-line 1))))))
       (setq struct (append itm-lst (cdr (nreverse itm-lst-2))))
       (setq end-lst (append end-lst (cdr (nreverse end-lst-2))))
       ;; 3. Correct ill-formed lists by ensuring top item is the least
