@@ -18833,6 +18833,8 @@ If point is in an inline task, mark that task instead."
 	 (org-drawer-regexp (or org-drawer-regexp "\000"))
 	 (inline-task-p (and (featurep 'org-inlinetask)
 			     (org-inlinetask-in-task-p)))
+	 (inline-re (and inline-task-p
+			 (org-inlinetask-outline-regexp)))
 	 column bpos bcol tpos tcol)
     (beginning-of-line 1)
     (cond
@@ -18880,8 +18882,12 @@ If point is in an inline task, mark that task instead."
       (beginning-of-line 0)
       (while (and (not (bobp))
 		  (not (looking-at org-drawer-regexp))
-		  ;; skip comments, verbatim, empty lines, tables,
-		  ;; inline tasks, lists, drawers and blocks
+		  ;; When point started in an inline task, do not move
+		  ;; above task starting line.
+		  (not (and inline-task-p
+			    (looking-at inline-re)))
+		  ;; Skip comments, verbatim, empty lines, tables,
+		  ;; inline tasks, lists, drawers and blocks.
 		  (or (and (looking-at "[ \t]*:END:")
 			   (re-search-backward org-drawer-regexp nil t))
 		      (and (looking-at "[ \t]*#\\+end_")

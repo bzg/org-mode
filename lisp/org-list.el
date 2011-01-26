@@ -1586,6 +1586,8 @@ have changed.
 
 Initial position of cursor is restored after the changes."
   (let* ((pos (copy-marker (point)))
+	 (inlinetask-re (and (featurep 'org-inlinetask)
+			     (org-inlinetask-outline-regexp)))
 	 (item-re (org-item-re))
 	 (shift-body-ind
 	  (function
@@ -1598,9 +1600,14 @@ Initial position of cursor is restored after the changes."
 	     (while (or (> (point) beg)
 			(and (= (point) beg)
 			     (not (looking-at item-re))))
-	       (when (org-looking-at-p "^[ \t]*\\S-")
+	       (cond
+		;; Skip inline tasks
+		((and inlinetask-re (looking-at inlinetask-re))
+		 (org-inlinetask-goto-beginning))
+		;; Shift only non-empty lines
+		((org-looking-at-p "^[ \t]*\\S-")
 		 (let ((i (org-get-indentation)))
-		   (org-indent-line-to (+ i delta))))
+		   (org-indent-line-to (+ i delta)))))
 	       (forward-line -1)))))
          (modify-item
           (function
