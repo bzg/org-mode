@@ -12945,8 +12945,7 @@ possibly with grouping information.  TODO-TABLE is a similar table with
 TODO keywords, should these have keys assigned to them.
 If the keys are nil, a-z are automatically assigned.
 Returns the new tags string, or nil to not change the current settings."
-  (let* ((table (sort table (lambda (a b) (string< (car a) (car b)))))
-	 (fulltable (append table todo-table))
+  (let* ((fulltable (append table todo-table))
 	 (maxlen (apply 'max (mapcar
 			      (lambda (x)
 				(if (stringp (car x)) (string-width (car x)) 0))
