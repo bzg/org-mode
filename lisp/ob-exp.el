@@ -44,7 +44,7 @@
 (add-to-list 'org-export-interblocks '(lob org-babel-exp-lob-one-liners))
 (add-hook 'org-export-blocks-postblock-hook 'org-exp-res/src-name-cleanup)
 
-(org-export-blocks-add-block '(src org-babel-exp-src-blocks nil))
+(org-export-blocks-add-block '(src org-babel-exp-src-block nil))
 
 (defcustom org-export-babel-evaluate t
   "Switch controlling code evaluation during export.
@@ -100,7 +100,7 @@ source block function.")
        (set-buffer export-buffer)
        results)))
 
-(defun org-babel-exp-src-blocks (body &rest headers)
+(defun org-babel-exp-src-block (body &rest headers)
   "Process source block for export.
 Depending on the 'export' headers argument in replace the source
 code block with...
@@ -142,7 +142,7 @@ none ----- do not display either code or results upon export"
 
 (defun org-babel-exp-inline-src-blocks (start end)
   "Process inline source blocks between START and END for export.
-See `org-babel-exp-src-blocks' for export options, currently the
+See `org-babel-exp-src-block' for export options, currently the
 options and are taken from `org-babel-default-inline-header-args'."
   (interactive)
   (save-excursion
@@ -150,7 +150,7 @@ options and are taken from `org-babel-default-inline-header-args'."
     (while (and (< (point) end)
                 (re-search-forward org-babel-inline-src-block-regexp end t))
       (let* ((info (save-match-data (org-babel-parse-inline-src-block-match)))
-	     (params (nth 2 info)))
+	     (params (nth 2 info)) code-replacement)
 	(save-match-data
 	  (goto-char (match-beginning 2))
 	  (if (org-babel-in-example-or-verbatim)
@@ -162,8 +162,11 @@ options and are taken from `org-babel-default-inline-header-args'."
 		      (org-babel-expand-noweb-references
 		       info (get-file-buffer org-current-export-file))
 		    (nth 1 info)))
-	    (org-babel-exp-do-export info 'inline)))
-	(delete-region (match-beginning 0) (match-end 0))))))
+	    (setq code-replacement (org-babel-exp-do-export info 'inline))))
+	(if code-replacement
+	    (replace-match code-replacement nil nil nil 1)
+	  (org-babel-examplize-region (match-beginning 1) (match-end 1))
+	  (forward-char 2))))))
 
 (defun org-exp-res/src-name-cleanup ()
   "Clean up #+results and #+srcname lines for export.
@@ -194,7 +197,7 @@ org-mode text."
 
 (defun org-babel-exp-lob-one-liners (start end)
   "Process Library of Babel calls between START and END for export.
-See `org-babel-exp-src-blocks' for export options. Currently the
+See `org-babel-exp-src-block' for export options. Currently the
 options are taken from `org-babel-default-header-args'."
   (interactive)
   (let (replacement)
@@ -225,53 +228,14 @@ options are taken from `org-babel-default-header-args'."
   "Return a string with the exported content of a code block.
 The function respects the value of the :exports header argument."
   (flet ((silently () (let ((session (cdr (assoc :session (nth 2 info)))))
-			(when (and session
-				   (not (equal "none" session)))
+			(when (and session (not (equal "none" session)))
 			  (org-babel-exp-results info type 'silent))))
-	 (clean () (org-babel-remove-result info)))
+	 (clean () (unless (eq type 'inline) (org-babel-remove-result info))))
     (case (intern (or (cdr (assoc :exports (nth 2 info))) "code"))
       ('none (silently) (clean) "")
-      ('code (silently) (clean) (org-babel-exp-code info type))
-      ('results (org-babel-exp-results info type))
-      ('both (concat (org-babel-exp-code info type)
-		     "\n\n"
-		     (org-babel-exp-results info type))))))
-
-(defvar backend)
-(defun org-babel-exp-code (info type)
-  "Prepare and return code in the current code block for export.
-Code is prepared in a manner suitable for export by
-org-mode.  This function is called by `org-babel-exp-do-export'.
-The code block is not evaluated."
-  (let ((lang (nth 0 info))
-        (body (nth 1 info))
-        (switches (nth 3 info))
-        (name (nth 4 info))
-        (args (mapcar #'cdr (org-babel-get-header (nth 2 info) :var))))
-    (case type
-      ('inline (format "=%s=" body))
-      ('block
-	  (let ((str
-		 (format "#+BEGIN_SRC %s %s\n%s%s#+END_SRC\n" lang switches body
-			 (if (and body (string-match "\n$" body))
-			     "" "\n"))))
-	    (when name
-	      (add-text-properties
-	       0 (length str)
-	       (list 'org-caption
-		     (format "%s(%s)"
-			     name
-			     (mapconcat #'identity args ", ")))
-	       str))
-	    str))
-      ('lob
-       (let ((call-line (and (string-match "results=" (car args))
-			     (substring (car args) (match-end 0)))))
-	 (cond
-	  ((eq backend 'html)
-	   (format "\n#+HTML: <label class=\"org-src-name\">%s</label>\n"
-		   call-line))
-	  ((format ": %s\n" call-line))))))))
+      ('code (silently) (clean) nil)
+      ('results (org-babel-exp-results info type) "")
+      ('both (org-babel-exp-results info type) nil))))
 
 (defun org-babel-exp-results (info type &optional silent)
   "Evaluate and return the results of the current code block for export.
