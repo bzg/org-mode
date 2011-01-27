@@ -2229,7 +2229,9 @@ With optional prefix argument ALL, do this for the whole buffer."
 	       ;; Cookie is at an item, and we already have list
 	       ;; structure stored in STRUCTS-BAK.
 	       ((and (org-at-item-p)
-		     (< (point-at-bol) backup-end))
+		     (< (point-at-bol) backup-end)
+		     ;; Only lists in no special context are stored.
+		     (not (nth 2 (org-list-context))))
 		(funcall count-boxes (point-at-bol) structs-bak recursivep))
 	       ;; Cookie is at an item, but we need to compute list
 	       ;; structure.
