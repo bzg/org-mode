@@ -150,21 +150,20 @@ options and are taken from `org-babel-default-inline-header-args'."
     (while (and (< (point) end)
                 (re-search-forward org-babel-inline-src-block-regexp end t))
       (let* ((info (save-match-data (org-babel-parse-inline-src-block-match)))
-	     (params (nth 2 info))
-	     (replacement
-	      (save-match-data
-		(if (org-babel-in-example-or-verbatim)
-		    (buffer-substring (match-beginning 0) (match-end 0))
-		  ;; expand noweb references in the original file
-		  (setf (nth 1 info)
-			(if (and (cdr (assoc :noweb params))
-				 (string= "yes" (cdr (assoc :noweb params))))
-			    (org-babel-expand-noweb-references
-			     info (get-file-buffer org-current-export-file))
-			  (nth 1 info)))
-		  (org-babel-exp-do-export info 'inline)))))
-	(setq end (+ end (- (length replacement) (length (match-string 1)))))
-	(replace-match replacement t t nil 1)))))
+	     (params (nth 2 info)))
+	(save-match-data
+	  (goto-char (match-beginning 2))
+	  (if (org-babel-in-example-or-verbatim)
+	      (buffer-substring (match-beginning 0) (match-end 0))
+	    ;; expand noweb references in the original file
+	    (setf (nth 1 info)
+		  (if (and (cdr (assoc :noweb params))
+			   (string= "yes" (cdr (assoc :noweb params))))
+		      (org-babel-expand-noweb-references
+		       info (get-file-buffer org-current-export-file))
+		    (nth 1 info)))
+	    (org-babel-exp-do-export info 'inline)))
+	(delete-region (match-beginning 0) (match-end 0))))))
 
 (defun org-exp-res/src-name-cleanup ()
   "Clean up #+results and #+srcname lines for export.
@@ -280,46 +279,26 @@ Results are prepared in a manner suitable for export by org-mode.
 This function is called by `org-babel-exp-do-export'.  The code
 block will be evaluated.  Optional argument SILENT can be used to
 inhibit insertion of results into the buffer."
-  (or
-   (when org-export-babel-evaluate
-     (let ((lang (nth 0 info))
-	   (body (nth 1 info)))
-       (setf (nth 2 info) (org-babel-exp-in-export-file
-			   (org-babel-process-params (nth 2 info))))
-       ;; skip code blocks which we can't evaluate
-       (when (fboundp (intern (concat "org-babel-execute:" lang)))
-	 (org-babel-eval-wipe-error-buffer)
-	 (if (equal type 'inline)
-	     (let ((raw (org-babel-execute-src-block
-			 nil info '((:results . "silent"))))
-		   (result-params (split-string
-				   (cdr (assoc :results (nth 2 info))))))
-	       (unless silent
-		 (cond ;; respect the value of the :results header argument
-		  ((member "file" result-params)
-		   (org-babel-result-to-file raw))
-		  ((or (member "raw" result-params)
-		       (member "org" result-params))
-		   (format "%s" raw))
-		  ((member "code" result-params)
-		   (format "src_%s{%s}" lang raw))
-		  (t
-		   (if (stringp raw)
-		       (if (= 0 (length raw)) "=(no results)="
-			 (format "%s" raw))
-		     (format "%S" raw))))))
-	   (prog1 nil
-	     (setf (nth 2 info)
-		   (org-babel-merge-params
-		    (nth 2 info)
-		    `((:results . ,(if silent "silent" "replace")))))
-	     (cond
-	      ((equal type 'block) (org-babel-execute-src-block nil info))
-	      ((equal type 'lob)
-	       (save-excursion
-		 (re-search-backward org-babel-lob-one-liner-regexp nil t)
-		 (org-babel-execute-src-block nil info)))))))))
-   ""))
+  (when org-export-babel-evaluate
+    (let ((lang (nth 0 info))
+	  (body (nth 1 info)))
+      (setf (nth 2 info) (org-babel-exp-in-export-file
+			  (org-babel-process-params (nth 2 info))))
+      ;; skip code blocks which we can't evaluate
+      (when (fboundp (intern (concat "org-babel-execute:" lang)))
+	(org-babel-eval-wipe-error-buffer)
+	(prog1 nil
+	  (setf (nth 2 info)
+		(org-babel-merge-params
+		 (nth 2 info)
+		 `((:results . ,(if silent "silent" "replace")))))
+	  (cond
+	   ((or (equal type 'block) (equal type 'inline))
+	    (org-babel-execute-src-block nil info))
+	   ((equal type 'lob)
+	    (save-excursion
+	      (re-search-backward org-babel-lob-one-liner-regexp nil t)
+	      (org-babel-execute-src-block nil info)))))))))
 
 (provide 'ob-exp)
 

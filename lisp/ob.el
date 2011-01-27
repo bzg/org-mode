@@ -1280,8 +1280,13 @@ source block.  Specifically at the beginning of the results line.
 If no result exists for this block then create a results line
 following the source block."
   (save-excursion
-    (let* ((on-lob-line (progn (beginning-of-line 1)
-			       (looking-at org-babel-lob-one-liner-regexp)))
+    (let* ((on-lob-line (save-excursion
+			  (beginning-of-line 1)
+			  (looking-at org-babel-lob-one-liner-regexp)))
+	   (inlinep (save-excursion
+		      (re-search-backward "[ \f\t\n\r\v]" nil t)
+		      (when (looking-at org-babel-inline-src-block-regexp)
+			(match-end 0))))
 	   (name (if on-lob-line
 		     (nth 0 (org-babel-lob-get-info))
 		   (nth 4 (or info (org-babel-get-src-block-info)))))
@@ -1291,6 +1296,7 @@ following the source block."
       (setq
        found ;; was there a result (before we potentially insert one)
        (or
+	inlinep
 	(and
 	 ;; named results:
 	 ;; - return t if it is found, else return nil
@@ -1550,7 +1556,7 @@ code ---- the results are extracted in the syntax of the source
 	    (org-babel-examplize-region beg end results-switches)
 	    (setq end (point)))))
 	;; possibly indent the results to match the #+results line
-	(when (and indent (> indent 0)
+	(when (and (not inlinep) indent (> indent 0)
 		   ;; in this case `table-align' does the work for us
 		   (not (and (listp result)
 			     (member "append" result-params))))
