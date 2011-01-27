@@ -2350,7 +2350,7 @@ $3 = remote(FOO, @@@@#$2)      @r{copy column 2 from table FOO into}
 @end example
 
 @noindent For the second example, table FOO must have at least as many rows
-as the current table.  Inefficient@footnote{The computation time scales as
+as the current table.  Note that this is inefficient@footnote{The computation time scales as
 O(N^2) because table FOO is parsed for each field to be copied.} for large
 number of rows.
 
