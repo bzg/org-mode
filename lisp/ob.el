@@ -1464,19 +1464,27 @@ code ---- the results are extracted in the syntax of the source
       (progn
 	(message (replace-regexp-in-string "%" "%%" (format "%S" result)))
 	result)
-    (when (and (stringp result) ;; ensure results end in a newline
-	       (> (length result) 0)
-	       (not (or (string-equal (substring result -1) "\n")
-			(string-equal (substring result -1) "\r"))))
-      (setq result (concat result "\n")))
     (save-excursion
-      (let ((existing-result (org-babel-where-is-src-block-result
-			      t info hash indent))
-	    (results-switches
-	     (cdr (assoc :results_switches (nth 2 info))))
-	    beg end)
+      (let* ((inlinep (save-excursion
+			(re-search-backward "[ \f\t\n\r\v]" nil t)
+			(when (looking-at org-babel-inline-src-block-regexp)
+			  (goto-char (match-end 0))
+			  (insert (if (listp result) "\n" " "))
+			  (point))))
+	     (existing-result (unless inlinep
+				(org-babel-where-is-src-block-result
+				 t info hash indent)))
+	     (results-switches
+	      (cdr (assoc :results_switches (nth 2 info))))
+	     beg end)
+	(when (and (stringp result)  ; ensure results end in a newline
+		   (not inlinep)
+		   (> (length result) 0)
+		   (not (or (string-equal (substring result -1) "\n")
+			    (string-equal (substring result -1) "\r"))))
+	  (setq result (concat result "\n")))
 	(if (not existing-result)
-	    (setq beg (point))
+	    (setq beg (or inlinep (point)))
 	  (goto-char existing-result)
 	  (save-excursion
 	    (re-search-forward "#" nil t)
@@ -1598,22 +1606,29 @@ file's directory then expand relative links."
 	(format "[[file:%s][%s]]" (car result) (cadr result))))))
 
 (defun org-babel-examplize-region (beg end &optional results-switches)
-  "Comment out region using the ': ' org example quote."
+  "Comment out region using the inline '==' or ': ' org example quote."
   (interactive "*r")
-  (let ((size (count-lines beg end)))
-    (save-excursion
-      (cond ((= size 0))	      ; do nothing for an empty result
-	    ((< size org-babel-min-lines-for-block-output)
-	     (goto-char beg)
-	     (dotimes (n size)
-	       (beginning-of-line 1) (insert ": ") (forward-line 1)))
-	    (t
-	     (goto-char beg)
-	     (insert (if results-switches
-                         (format "#+begin_example%s\n" results-switches)
-                       "#+begin_example\n"))
-	     (if (markerp end) (goto-char end) (forward-char (- end beg)))
-	     (insert "#+end_example\n"))))))
+  (flet ((chars-between (b e) (string-match "[\\S]" (buffer-substring b e))))
+    (if (or (chars-between (save-excursion (goto-char beg) (point-at-bol)) beg)
+	    (chars-between end (save-excursion (goto-char end) (point-at-eol))))
+	(save-excursion
+	  (goto-char beg)
+	  (insert (format "=%s=" (prog1 (buffer-substring beg end)
+				   (delete-region beg end)))))
+      (let ((size (count-lines beg end)))
+	(save-excursion
+	  (cond ((= size 0))	      ; do nothing for an empty result
+		((< size org-babel-min-lines-for-block-output)
+		 (goto-char beg)
+		 (dotimes (n size)
+		   (beginning-of-line 1) (insert ": ") (forward-line 1)))
+		(t
+		 (goto-char beg)
+		 (insert (if results-switches
+			     (format "#+begin_example%s\n" results-switches)
+			   "#+begin_example\n"))
+		 (if (markerp end) (goto-char end) (forward-char (- end beg)))
+		 (insert "#+end_example\n"))))))))
 
 (defun org-babel-update-block-body (new-body)
   "Update the body of the current code block to NEW-BODY."
