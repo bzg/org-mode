@@ -434,6 +434,9 @@ matching filenames."
 	 ;; org-publish-compare-directory-files:
 	 (sitemap-requested
 	  (plist-get project-plist :auto-sitemap))
+	 (sitemap-filename
+	  (or (plist-get project-plist :sitemap-filename)
+	      "sitemap.org"))
 	 (sitemap-sort-folders
 	  (if (plist-member project-plist :sitemap-sort-folders)
 	      (plist-get project-plist :sitemap-sort-folders)
@@ -454,6 +457,9 @@ matching filenames."
       (setq sitemap-sort-folders nil))
 
     (setq org-publish-temp-files nil)
+    (if sitemap-requested
+	(pushnew (expand-file-name (concat base-dir sitemap-filename))
+		  org-publish-temp-files))
     (org-publish-get-base-files-1 base-dir recurse match
 				  ;; FIXME distinguish exclude regexp
 				  ;; for skip-file and skip-dir?

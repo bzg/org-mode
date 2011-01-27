@@ -704,7 +704,8 @@ when PUB-DIR is set, use this as the publishing directory."
   (org-install-letbind)
   (run-hooks 'org-export-latex-after-initial-vars-hook)
   (let* ((wcf (current-window-configuration))
-	 (opt-plist org-export-latex-options-plist)
+	 (opt-plist
+	  (org-export-process-option-filters org-export-latex-options-plist))
 	 (region-p (org-region-active-p))
 	 (rbeg (and region-p (region-beginning)))
 	 (rend (and region-p (region-end)))

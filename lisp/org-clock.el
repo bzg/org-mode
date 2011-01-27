@@ -2481,7 +2481,7 @@ The details of what will be saved are regulated by the variable
 	      (goto-char (cdr resume-clock))
 	      (let ((org-clock-auto-clock-resolution nil))
 		(org-clock-in)
-		(if (org-invisible-p)
+		(if (outline-invisible-p)
 		    (org-show-context))))))))))
 
 ;;;###autoload

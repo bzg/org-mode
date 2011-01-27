@@ -44,7 +44,6 @@
 (defvar org-ts-regexp)
 (defvar org-ts-regexp-both)
 
-(declare-function org-invisible-p "org" ())
 (declare-function org-on-heading-p "org" (&optional invisible-ok))
 (declare-function outline-next-heading "outline" ())
 (declare-function org-back-to-heading "org" (&optional invisible-ok))
@@ -1101,7 +1100,7 @@ item is invisible."
   (unless (or (not (org-in-item-p))
 	      (save-excursion
 		(goto-char (org-get-item-beginning))
-		(org-invisible-p)))
+		(outline-invisible-p)))
     (if (save-excursion
 	  (goto-char (org-get-item-beginning))
 	  (org-at-item-timer-p))
