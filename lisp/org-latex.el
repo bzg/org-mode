@@ -478,6 +478,11 @@ and `org-export-with-tags' instead."
   :group 'org-export-latex
   :type 'string)
 
+(defcustom org-latex-default-figure-position "htb"
+  "Default position for latex figures."
+  :group 'org-export-latex
+  :type 'string)
+
 (defcustom org-export-latex-tabular-environment "tabular"
   "Default environment used to build tables."
   :group 'org-export-latex
@@ -1785,7 +1790,8 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 					 (stringp attr)
 					 (string-match "[ \t]*\\<placement=\\(\\S-+\\)" attr))
 				    (match-string 1 attr)
-				  "[htb]"))
+				  (concat
+				   "[" org-latex-default-figure-position "]")))
 	    (setq caption (and caption (org-export-latex-fontify-headline caption)))
             (setq lines (org-split-string raw-table "\n"))
             (apply 'delete-region (list beg end))
@@ -2105,7 +2111,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
     (setq placement
 	  (cond
 	   (wrapp "{l}{0.5\\textwidth}")
-	   (floatp "[htb]")
+	   (floatp (concat "[" org-latex-default-figure-position "]"))
 	   (t "")))
 
     (when (and attr (stringp attr)
