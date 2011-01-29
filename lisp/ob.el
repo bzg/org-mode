@@ -1581,7 +1581,7 @@ code ---- the results are extracted in the syntax of the source
   (save-excursion
     (cond
      ((org-at-table-p) (progn (goto-char (org-table-end)) (point)))
-     ((org-in-item-p) (- (org-list-bottom-point) 1))
+     ((org-at-item-p) (- (org-list-bottom-point) 1))
      (t
       (let ((case-fold-search t)
 	    (blocks-re (regexp-opt
