@@ -1315,7 +1315,7 @@ lang=\"%s\" xml:lang=\"%s\">
 					 (setq href
 					       (replace-regexp-in-string
 						"\\." "_" (format "sec-%s" snumber)))
-					 (setq href (or (cdr (assoc href org-export-preferred-target-alist)) href))
+					 (setq href (org-solidify-link-text (or (cdr (assoc href org-export-preferred-target-alist)) href)))
 					 (push
 					  (format
 					   (if todo
@@ -1824,7 +1824,7 @@ lang=\"%s\" xml:lang=\"%s\">
 	    (format "%s<div %sclass=\"figure\">
 <p>"
 		    (if org-par-open "</p>\n" "")
-		    (if label (format "id=\"%s\" " label) "")))
+		    (if label (format "id=\"%s\" " (org-solidify-link-text label)) "")))
 	(format "<img src=\"%s\"%s />"
 		src
 		(if (string-match "\\<alt=" (or attr ""))
@@ -2009,7 +2009,7 @@ for formatting.  This is required for the DocBook exporter."
       ;; DocBook document, we want to always include the caption to make
       ;; DocBook XML file valid.
       (push (format "<caption>%s</caption>" (or caption "")) html)
-      (when label (push (format "<a name=\"%s\" id=\"%s\"></a>" label label)
+      (when label (push (format "<a name=\"%s\" id=\"%s\"></a>" (org-solidify-link-text label) (org-solidify-link-text label))
 			html))
       (push html-table-tag html))
     (setq html (mapcar
@@ -2337,7 +2337,8 @@ When TITLE is nil, just close all open levels."
     (setq extra-targets (remove (or preferred target) extra-targets))
     (setq extra-targets
 	  (mapconcat (lambda (x)
-		       (if (org-uuidgen-p x) (setq x (concat "ID-" x)))
+		       (setq x (org-solidify-link-text
+				(if (org-uuidgen-p x) (concat "ID-" x) x)))
 		       (format "<a name=\"%s\" id=\"%s\"></a>"
 			       x x))
 		     extra-targets
@@ -2373,13 +2374,13 @@ When TITLE is nil, just close all open levels."
 		(progn
 		  (org-close-li)
 		  (if target
-		      (insert (format "<li id=\"%s\">" (or preferred target))
+		      (insert (format "<li id=\"%s\">" (org-solidify-link-text (or preferred target)))
 			      extra-targets title "<br/>\n")
 		    (insert "<li>" title "<br/>\n")))
 	      (aset org-levels-open (1- level) t)
 	      (org-close-par-maybe)
 	      (if target
-		  (insert (format "<ul>\n<li id=\"%s\">" (or preferred target))
+		  (insert (format "<ul>\n<li id=\"%s\">" (org-solidify-link-text (or preferred target)))
 			  extra-targets title "<br/>\n")
 		(insert "<ul>\n<li>" title "<br/>\n"))))
 	(aset org-levels-open (1- level) t)
@@ -2393,8 +2394,8 @@ When TITLE is nil, just close all open levels."
 			 " " title)))
 	(unless (= head-count 1) (insert "\n</div>\n"))
 	(setq href (cdr (assoc (concat "sec-" snu) org-export-preferred-target-alist)))
-	(setq suffix (or href snu))
-	(setq href (or href (concat "sec-" snu)))
+	(setq suffix (org-solidify-link-text (or href snu)))
+	(setq href (org-solidify-link-text (or href (concat "sec-" snu))))
 	(insert (format "\n<div id=\"outline-container-%s\" class=\"outline-%d%s\">\n<h%d id=\"%s\">%s%s</h%d>\n<div class=\"outline-text-%d\" id=\"text-%s\">\n"
 			suffix level (if extra-class (concat " " extra-class) "")
 			level href

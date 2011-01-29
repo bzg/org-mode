@@ -1971,7 +1971,7 @@ can work correctly."
     (let* ((rtn
 	    (mapconcat
 	     'identity
-	     (org-split-string s "[ \t\r\n]+") "=="))
+	     (org-split-string s "[^a-zA-Z0-9_\\.-]+") "--"))
 	   (a (assoc rtn alist)))
       (or (cdr a) rtn))))
 
