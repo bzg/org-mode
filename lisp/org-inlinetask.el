@@ -42,7 +42,9 @@
 ;;
 ;; Export commands do not treat these nodes as part of the sectioning
 ;; structure, but as a special inline text that is either removed, or
-;; formatted in some special way.
+;; formatted in some special way.  This in handled by
+;; `org-inlinetask-export' and `org-inlinetask-export-templates'
+;; variables.
 ;;
 ;; Special fontification of inline tasks, so that they can be immediately
 ;; recognized.  From the stars of the headline, only the first and the
@@ -197,6 +199,13 @@ The number of levels is controlled by `org-inlinetask-min-level'."
 		  org-inlinetask-min-level)))
     (format "^\\(\\*\\{%d,\\}\\)[ \t]+" nstars)))
 
+(defun org-inlinetask-at-task-p ()
+  "Return true if point is at beginning of an inline task."
+  (save-excursion
+    (beginning-of-line)
+    (and (looking-at (concat (org-inlinetask-outline-regexp)  "\\(.*\\)"))
+	 (not (string-match "^end[ \t]*$" (downcase (match-string 2)))))))
+
 (defun org-inlinetask-in-task-p ()
   "Return true if point is inside an inline task."
   (save-excursion
@@ -334,6 +343,22 @@ Either remove headline and meta data, or do special formatting."
 			   '(face org-hide font-lock-fontified t))
       (add-text-properties (match-beginning 3) (match-end 3)
 			   '(face shadow font-lock-fontified t)))))
+
+(defun org-inlinetask-toggle-visibility ()
+  "Toggle visibility of inline task at point."
+  (let ((end (save-excursion
+	       (org-inlinetask-goto-end)
+	       (if (bolp) (1- (point)) (point))))
+	(start (save-excursion
+		 (org-inlinetask-goto-beginning)
+		 (point-at-eol))))
+    (cond
+     ;; Nothing to show/hide.
+     ((= end start))
+     ;; Inlinetask was folded: expand it.
+     ((get-char-property (1+ start) 'invisible)
+      (outline-flag-region start end nil))
+     (t (outline-flag-region start end t)))))
 
 (defun org-inlinetask-remove-END-maybe ()
   "Remove an END line when present."

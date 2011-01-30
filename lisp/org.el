@@ -5455,14 +5455,10 @@ between words."
 This function assumes that the cursor is at the beginning of a line matched
 by `outline-regexp'.  Otherwise it returns garbage.
 If this is called at a normal headline, the level is the number of stars.
-Use `org-reduced-level' to remove the effect of `org-odd-levels'.
-For plain list items, if they are matched by `outline-regexp', this returns
-1000 plus the line indentation."
+Use `org-reduced-level' to remove the effect of `org-odd-levels'."
   (save-excursion
     (looking-at outline-regexp)
-    (if (match-beginning 1)
-	(+ (org-get-string-indentation (match-string 1)) 1000)
-      (1- (- (match-end 0) (match-beginning 0))))))
+    (1- (- (match-end 0) (match-beginning 0)))))
 
 (defvar org-font-lock-keywords nil)
 
@@ -5839,14 +5835,9 @@ in special contexts.
 			  (and limit-level (1- (* limit-level 2)))
 			limit-level)))
 	   (outline-regexp
-	    (cond
-	     ((not (org-mode-p)) outline-regexp)
-	     ((or (eq org-cycle-include-plain-lists 'integrate)
-		  (and org-cycle-include-plain-lists (org-at-item-p)))
-	      (concat "\\(?:\\*"
-		      (if nstars (format "\\{1,%d\\}" nstars) "+")
-		      " \\|\\([ \t]*\\)\\([-+*]\\|[0-9]+[.)]\\) \\)"))
-	     (t (concat "\\*" (if nstars (format "\\{1,%d\\} " nstars) "+ ")))))
+	    (if (not (org-mode-p))
+		outline-regexp
+	      (concat "\\*" (if nstars (format "\\{1,%d\\} " nstars) "+ "))))
 	   (bob-special (and org-cycle-global-at-bob (not arg) (bobp)
 			     (not (looking-at outline-regexp))))
 	   (org-cycle-hook
@@ -5871,8 +5862,8 @@ in special contexts.
 	(show-all)
 	(message "Entire buffer visible, including drawers"))
 
+       ;; Table: enter it or move to the next field.
        ((org-at-table-p 'any)
-	;; Enter the table or move to the next field in the table
 	(if (org-at-table.el-p)
 	    (message "Use C-c ' to edit table.el tables")
 	  (if arg (org-table-edit-field t)
@@ -5882,31 +5873,39 @@ in special contexts.
        ((run-hook-with-args-until-success
 	 'org-tab-after-check-for-table-hook))
 
-       ((eq arg t) ;; Global cycling
-	(org-cycle-internal-global))
+       ;; Global cycling: delegate to `org-cycle-internal-global'.
+       ((eq arg t) (org-cycle-internal-global))
 
+       ;; Drawers: delegate to `org-flag-drawer'.
        ((and org-drawers org-drawer-regexp
 	     (save-excursion
 	       (beginning-of-line 1)
 	       (looking-at org-drawer-regexp)))
-	;; Toggle block visibility
-	(org-flag-drawer
+	(org-flag-drawer ; toggle block visibility
 	 (not (get-char-property (match-end 0) 'invisible))))
 
+       ;; Show-subtree, ARG levels up from here.
        ((integerp arg)
-	;; Show-subtree, ARG levels up from here.
 	(save-excursion
 	  (org-back-to-heading)
 	  (outline-up-heading (if (< arg 0) (- arg)
 				(- (funcall outline-level) arg)))
 	  (org-show-subtree)))
 
-       ((and (save-excursion (beginning-of-line 1) (looking-at outline-regexp))
+       ;; Inline task: delegate to `org-inlinetask-toggle-visibility'.
+       ((and (featurep 'org-inlinetask)
+	     (org-inlinetask-at-task-p)
 	     (or (bolp) (not (eq org-cycle-emulate-tab 'exc-hl-bol))))
+	(org-inlinetask-toggle-visibility))
 
+       ;; At an item/headline: delegate to `org-cycle-internal-local'.
+       ((and (or (and org-cycle-include-plain-lists (org-at-item-p))
+		 (save-excursion (beginning-of-line 1)
+				 (looking-at outline-regexp)))
+	     (or (bolp) (not (eq org-cycle-emulate-tab 'exc-hl-bol))))
 	(org-cycle-internal-local))
 
-       ;; TAB emulation and template completion
+       ;; From there: TAB emulation and template completion.
        (buffer-read-only (org-back-to-heading))
 
        ((run-hook-with-args-until-success
@@ -5971,38 +5970,44 @@ in special contexts.
 
 (defun org-cycle-internal-local ()
   "Do the local cycling action."
-  (let ((goal-column 0) eoh eol eos level has-children children-skipped)
-    ;; First, some boundaries
+  (let ((goal-column 0) eoh eol eos has-children children-skipped struct)
+    ;; First, determine end of headline (EOH), end of subtree or item
+    ;; (EOS), and if item or heading has children (HAS-CHILDREN).
     (save-excursion
-      (org-back-to-heading)
-      (setq level (funcall outline-level))
-      (save-excursion
-	(beginning-of-line 2)
-	(if (or (featurep 'xemacs) (<= emacs-major-version 21))
-	    ; XEmacs does not have `next-single-char-property-change'
-	    ; I'm not sure about Emacs 21.
-	    (while (and (not (eobp)) ;; this is like `next-line'
-			(get-char-property (1- (point)) 'invisible))
-	      (beginning-of-line 2))
+      (if (org-at-item-p)
+	  (progn
+	    (beginning-of-line)
+	    (setq struct (org-list-struct))
+	    (setq eoh (point-at-eol))
+	    (setq eos (org-list-get-item-end-before-blank (point) struct))
+	    (setq has-children (org-list-has-child-p (point) struct)))
+	(org-back-to-heading)
+	(setq eoh (save-excursion (outline-end-of-heading) (point)))
+	(setq eos (save-excursion
+		    (org-end-of-subtree t)
+		    (unless (eobp)
+		      (skip-chars-forward " \t\n"))
+		    (if (eobp) (point) (1- (point)))))
+	(setq has-children
+	      (or (save-excursion
+		    (let ((level (funcall outline-level)))
+		      (outline-next-heading)
+		      (and (org-at-heading-p t)
+			   (> (funcall outline-level) level))))
+		  (save-excursion
+		    (org-list-search-forward (org-item-beginning-re) eos t)))))
+      ;; Determine end invisible part of buffer (EOL)
+      (beginning-of-line 2)
+      ;; XEmacs doesn't have `next-single-char-property-change'
+      (if (featurep 'xemacs)
 	  (while (and (not (eobp)) ;; this is like `next-line'
 		      (get-char-property (1- (point)) 'invisible))
-	    (goto-char (next-single-char-property-change (point) 'invisible))
-	    (and (eolp) (beginning-of-line 2))))
-	(setq eol (point)))
-      (outline-end-of-heading)   (setq eoh (point))
-      (save-excursion
-	(outline-next-heading)
-	(setq has-children (and (org-at-heading-p t)
-				(> (funcall outline-level) level))))
-      ;; if we're in a list, org-end-of-subtree is in fact org-end-of-item.
-      (if (org-at-item-p)
-	  (setq eos (if (and (org-end-of-item) (bolp))
-			(1- (point))
-		      (point)))
-	(org-end-of-subtree t)
-	(unless (eobp)
-	  (skip-chars-forward " \t\n"))
-	(setq eos (if (eobp) (point) (1- (point))))))
+	    (beginning-of-line 2))
+	(while (and (not (eobp)) ;; this is like `next-line'
+		    (get-char-property (1- (point)) 'invisible))
+	  (goto-char (next-single-char-property-change (point) 'invisible))
+	  (and (eolp) (beginning-of-line 2))))
+      (setq eol (point)))
     ;; Find out what to do next and set `this-command'
     (cond
      ((= eos eoh)
@@ -6021,8 +6026,22 @@ in special contexts.
 			  org-cycle-skip-children-state-if-no-children))))
       ;; Entire subtree is hidden in one line: children view
       (run-hook-with-args 'org-pre-cycle-hook 'children)
-      (org-show-entry)
-      (show-children)
+      (if (org-at-item-p)
+	  (org-list-set-item-visibility (point-at-bol) struct 'children)
+	(org-show-entry)
+	(show-children)
+	;; Fold every list in subtree to top-level items.
+	(when (eq org-cycle-include-plain-lists 'integrate)
+	  (save-excursion
+	    (org-back-to-heading)
+	    (while (org-list-search-forward (org-item-beginning-re) eos t)
+	      (beginning-of-line 1)
+	      (let* ((struct (org-list-struct))
+		     (prevs (org-list-prevs-alist struct))
+		     (end (org-list-get-bottom-point struct)))
+		(mapc (lambda (e) (org-list-set-item-visibility e struct 'folded))
+		      (org-list-get-all-items (point) struct prevs))
+		(goto-char end))))))
       (message "CHILDREN")
       (save-excursion
 	(goto-char eos)

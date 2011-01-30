@@ -1774,6 +1774,30 @@ beginning of the item."
     (goto-char item)
     value))
 
+(defun org-list-set-item-visibility (item struct view)
+  "Set visibility of ITEM in STRUCT.
+
+Symbol VIEW determines visibility.  Possible values are: `folded',
+`children' or `subtree'.  See `org-cycle' for more information."
+  (cond
+   ((eq view 'folded)
+    (let ((item-end (org-list-get-item-end-before-blank item struct)))
+      ;; Hide from eol
+      (outline-flag-region (save-excursion (goto-char item) (point-at-eol))
+			   item-end t)))
+   ((eq view 'children)
+    ;; First show everything.
+    (org-list-set-item-visibility item struct 'subtree)
+    ;; Then fold every child.
+    (let* ((parents (org-list-parents-alist struct))
+	   (children (org-list-get-children item struct parents)))
+      (mapc (lambda (e)
+	      (org-list-set-item-visibility e struct 'folded))
+	    children)))
+   ((eq view 'subtree)
+    ;; Show everything
+    (let ((item-end (org-list-get-item-end item struct)))
+      (outline-flag-region item item-end nil)))))
 
 ;;; Interactive functions
 
