@@ -800,8 +800,12 @@ Assume point is at an item."
       ;;    indented.
       (let ((min-ind (nth 1 (car struct))))
 	(mapc (lambda (item)
-		(let ((ind (nth 1 item)))
-		  (when (< ind min-ind) (setcar (cdr item) min-ind))))
+		(let ((ind (nth 1 item))
+		      (bul (nth 2 item)))
+		  (when (< ind min-ind)
+		    (setcar (cdr item) min-ind)
+		    ;; Modify bullet to be sure item will be modified
+		    (setcar (nthcdr 2 item) (org-trim bul)))))
 	      struct))
       ;; 4. Associate each item to its end pos.
       (org-list-struct-assoc-end struct end-lst)
@@ -1616,7 +1620,7 @@ Initial position of cursor is restored after the changes."
 	   (lambda (item)
 	     (goto-char item)
 	     (let* ((new-ind (org-list-get-ind item struct))
-		    (old-ind (org-list-get-ind item old-struct))
+		    (old-ind (org-get-indentation))
 		    (new-bul (org-list-bullet-string
 			      (org-list-get-bullet item struct)))
 		    (old-bul (org-list-get-bullet item old-struct))

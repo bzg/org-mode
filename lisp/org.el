@@ -17429,7 +17429,7 @@ This command does many different things, depending on context:
       ;; Do checkbox related actions only if function was called with
       ;; an argument
       (let* ((struct (org-list-struct))
-	     (old-struct (mapcar (lambda (e) (copy-alist e)) struct))
+	     (old-struct (copy-tree struct))
 	     (parents (org-list-parents-alist struct))
 	     (prevs (org-list-prevs-alist struct)))
 	(org-list-struct-fix-ind struct parents)
