@@ -109,7 +109,6 @@
 (declare-function org-inlinetask-goto-end "org-inlinetask" ())
 (declare-function org-inlinetask-in-task-p "org-inlinetask" ())
 (declare-function org-inlinetask-outline-regexp "org-inlinetask" ())
-(declare-function org-invisible-p "org" ())
 (declare-function org-level-increment "org" ())
 (declare-function org-narrow-to-subtree "org" ())
 (declare-function org-on-heading-p "org" (&optional invisible-ok))
@@ -121,6 +120,7 @@
 (declare-function org-timer-item "org-timer" (&optional arg))
 (declare-function org-trim "org" (s))
 (declare-function org-uniquify "org" (list))
+(declare-function outline-invisible-p "outline" (&optional pos))
 (declare-function outline-next-heading "outline" ())
 (declare-function outline-previous-heading "outline" ())
 
@@ -1960,7 +1960,7 @@ item is invisible."
     (unless (or (not itemp)
 		(save-excursion
 		  (goto-char itemp)
-		  (org-invisible-p)))
+		  (outline-invisible-p)))
       (if (save-excursion
 	    (goto-char itemp)
 	    (org-at-item-timer-p))
