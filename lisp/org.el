@@ -18854,7 +18854,7 @@ If point is in an inline task, mark that task instead."
 			     (org-inlinetask-in-task-p)))
 	 (inline-re (and inline-task-p
 			 (org-inlinetask-outline-regexp)))
-	 column bpos bcol tpos tcol)
+	 column)
     (beginning-of-line 1)
     (cond
      ;; Comments
@@ -18887,14 +18887,10 @@ If point is in an inline task, mark that task instead."
 	      (org-get-indentation (match-string 0)))))
      ;; Lists
      ((ignore-errors (goto-char (org-in-item-p)))
-      (looking-at "[ \t]*\\(\\S-+\\)\\(.*[ \t]+::\\)?[ \t]+")
-      (setq bpos (match-beginning 1) tpos (match-end 0)
-	    bcol (progn (goto-char bpos) (current-column))
-	    tcol (progn (goto-char tpos) (current-column)))
-      (if (> tcol (+ bcol org-description-max-indent))
-	  (setq tcol (+ bcol 5)))
-      (goto-char pos)
-      (setq column (if itemp (org-get-indentation) tcol)))
+      (setq column (if itemp
+		       (org-get-indentation)
+		     (org-list-item-body-column (point))))
+      (goto-char pos))
      ;; This line has nothing special, look at the previous relevant
      ;; line to compute indentation
      (t
@@ -18970,7 +18966,7 @@ the functionality can be provided as a fall-back.")
     "[ 	]*$" "\\|"
     "\\*+ " "\\|"
     "[ \t]*#" "\\|"
-    "[ \t]*\\([-+*][ \t]+\\|[0-9]+[.)][ \t]+\\)" "\\|"
+    (org-item-re) "\\|"
     "[ \t]*[:|]" "\\|"
     "\\$\\$" "\\|"
     "\\\\\\(begin\\|end\\|[][]\\)"))
@@ -18996,6 +18992,7 @@ the functionality can be provided as a fall-back.")
     (org-set-local 'org-adaptive-fill-regexp-backup
                    adaptive-fill-regexp))
   (org-set-local 'adaptive-fill-regexp "\000")
+  (org-set-local 'normal-auto-fill-function 'org-auto-fill-function)
   (org-set-local 'adaptive-fill-function
 		 'org-adaptive-fill-function)
   (org-set-local
@@ -19007,42 +19004,116 @@ the functionality can be provided as a fall-back.")
 (defun org-fill-paragraph (&optional justify)
   "Re-align a table, pass through to fill-paragraph if no table."
   (let ((table-p (org-at-table-p))
-	(table.el-p (org-at-table.el-p)))
+	(table.el-p (org-at-table.el-p))
+	(itemp (org-in-item-p)))
     (cond ((and (equal (char-after (point-at-bol)) ?*)
 		(save-excursion (goto-char (point-at-bol))
 				(looking-at outline-regexp)))
-	   t)					     ; skip headlines
-	  (table.el-p t)			     ; skip table.el tables
-	  (table-p (org-table-align) t)		     ; align org-mode tables
-	  (t nil))))				     ; call paragraph-fill
+	   t)				; skip headlines
+	  (table.el-p t)		; skip table.el tables
+	  (table-p (org-table-align) t)	; align Org tables
+	  (itemp			; align text in items
+	   (let* ((struct (save-excursion (goto-char itemp)
+					  (org-list-struct)))
+		  (parents (org-list-parents-alist struct))
+		  (children (org-list-get-children itemp struct parents))
+		  beg end prev next prefix)
+	     ;; Determine in which part of item point is: before
+	     ;; first child, after last child, between two
+	     ;; sub-lists, or simply in item if there's no child.
+	     (cond
+	      ((not children)
+	       (setq prefix (make-string (org-list-item-body-column itemp) ?\ )
+		     beg itemp
+		     end (org-list-get-item-end itemp struct)))
+	      ((< (point) (setq next (car children)))
+	       (setq prefix (make-string (org-list-item-body-column itemp) ?\ )
+		     beg itemp
+		     end next))
+	      ((> (point) (setq prev (car (last children))))
+	       (setq beg (org-list-get-item-end prev struct)
+		     end (org-list-get-item-end itemp struct)
+		     prefix (save-excursion
+			      (goto-char beg)
+			      (skip-chars-forward " \t")
+			      (make-string (current-column) ?\ ))))
+	      (t (catch 'exit
+		   (while (setq next (pop children))
+		     (if (> (point) next)
+			 (setq prev next)
+		       (setq beg (org-list-get-item-end prev struct)
+			     end next
+			     prefix (save-excursion
+				      (goto-char beg)
+				      (skip-chars-forward " \t")
+				      (make-string (current-column) ?\ )))
+		       (throw 'exit nil))))))
+	     ;; Use `fill-paragraph' with buffer narrowed to item
+	     ;; without any child, and with our computed PREFIX.
+	     (flet ((fill-context-prefix (from to &optional flr) prefix))
+	       (save-restriction
+		 (narrow-to-region beg end)
+		 (save-excursion (fill-paragraph justify)))) t))
+	  ;; Special case where point is not in a list but is on a
+	  ;; paragraph adjacent to a list: make sure this paragraph
+	  ;; doesn't get merged with the end of the list by narrowing
+	  ;; buffer first.
+	  ((save-excursion
+	     (fill-forward-paragraph -1)
+	     (setq itemp (org-in-item-p)))
+	   (save-excursion
+	     (goto-char itemp)
+	     (setq struct (org-list-struct)))
+	   (save-restriction
+	     (narrow-to-region (org-list-get-bottom-point struct)
+			       (save-excursion
+				 (fill-forward-paragraph 1)
+				 (point)))
+	     (fill-paragraph justify) t))
+	  (t nil))))			; call `fill-paragraph'
 
 ;; For reference, this is the default value of adaptive-fill-regexp
 ;;  "[ \t]*\\([-|#;>*]+[ \t]*\\|(?[0-9]+[.)][ \t]*\\)*"
 
 (defun org-adaptive-fill-function ()
-  "Return a fill prefix for org-mode files.
-In particular, this makes sure hanging paragraphs for hand-formatted lists
-work correctly."
-  (cond
-   ;; Comment line
-   ((looking-at "#[ \t]+")
-    (match-string-no-properties 0))
-   ;; Description list
-	((looking-at "[ \t]*\\([-*+] .*? :: \\)")
-	 (save-excursion
-	   (if (> (match-end 1) (+ (match-beginning 1)
-				   org-description-max-indent))
-	       (goto-char (+ (match-beginning 1) 5))
-	     (goto-char (match-end 0)))
-	   (make-string (current-column) ?\ )))
-    ;; Ordered or unordered list
-	((looking-at "[ \t]*\\([-*+] \\|[0-9]+[.)]  ?\\)")
-	 (save-excursion
-	   (goto-char (match-end 0))
-	   (make-string (current-column) ?\ )))
-    ;; Other text
-    ((looking-at org-adaptive-fill-regexp-backup)
-     (match-string-no-properties 0))))
+  "Return a fill prefix for org-mode files."
+  (let (itemp)
+    (save-excursion
+      (cond
+       ;; Comment line
+       ((looking-at "#[ \t]+")
+	(match-string-no-properties 0))
+       ;; Point is in a list after `backward-paragraph': original
+       ;; point wasn't in the list, or filling would have been taken
+       ;; care of by `org-auto-fill-function', but the list and the
+       ;; real paragraph are not separated by a blank line. Thus, move
+       ;; point after the list to go back to real paragraph and
+       ;; determine fill-prefix. If point is at an item, do not
+       ;; compute prefix and list structure, as first line of
+       ;; paragraph will be skipped anyway.
+       ((org-at-item-p) "")
+       ((setq itemp (org-in-item-p))
+	(goto-char itemp)
+	(let* ((struct (org-list-struct))
+	       (bottom (org-list-get-bottom-point struct)))
+	  (goto-char bottom)
+	  (make-string (org-get-indentation) ?\ )))
+       ;; Other text
+       ((looking-at org-adaptive-fill-regexp-backup)
+	(match-string-no-properties 0))))))
+
+(defun org-auto-fill-function ()
+  "Auto-fill function."
+  (let (itemp prefix)
+    ;; When in a list, compute an appropriate fill-prefix and make
+    ;; sure it will be used by `do-auto-fill'.
+    (if (setq itemp (org-in-item-p))
+	(progn
+	  (setq prefix (make-string (org-list-item-body-column itemp) ?\ ))
+	  (flet ((fill-context-prefix (from to &optional flr) prefix))
+	    (do-auto-fill)))
+      ;; Else just use `do-auto-fill'.
+      (do-auto-fill))))
 
 ;;; Other stuff.
 

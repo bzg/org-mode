@@ -83,6 +83,7 @@
 
 (defvar org-blank-before-new-entry)
 (defvar org-complex-heading-regexp)
+(defvar org-description-max-indent)
 (defvar org-drawer-regexp)
 (defvar org-drawers)
 (defvar org-M-RET-may-split-line)
@@ -1798,6 +1799,20 @@ Symbol VIEW determines visibility.  Possible values are: `folded',
     ;; Show everything
     (let ((item-end (org-list-get-item-end item struct)))
       (outline-flag-region item item-end nil)))))
+
+(defun org-list-item-body-column (item)
+  "Return column where body of ITEM should start."
+  (let (bpos bcol tpos tcol)
+    (save-excursion
+      (goto-char item)
+      (looking-at "[ \t]*\\(\\S-+\\)\\(.*[ \t]+::\\)?[ \t]+")
+      (setq bpos (match-beginning 1) tpos (match-end 0)
+	    bcol (progn (goto-char bpos) (current-column))
+	    tcol (progn (goto-char tpos) (current-column)))
+      (when (> tcol (+ bcol org-description-max-indent))
+	(setq tcol (+ bcol 5))))
+    tcol))
+
 
 ;;; Interactive functions
 
