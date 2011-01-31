@@ -477,7 +477,6 @@ When nil, also column one will use data tags."
 	  (const :tag "XHTML 1.0" "<p class=\"xhtml-validation\"><a href=\"http://validator.w3.org/check?uri=referer\">Validate XHTML 1.0</a></p>")
 	  (string :tag "Specify full HTML")))
 
-
 (defcustom org-export-html-with-timestamp nil
   "If non-nil, write timestamp into the exported HTML text.
 If non-nil Write `org-export-html-html-helper-timestamp' into the
@@ -487,7 +486,7 @@ a file."
   :type 'boolean)
 
 (defcustom org-export-html-html-helper-timestamp
-  "<br/><br/><hr><p><!-- hhmts start --> <!-- hhmts end --></p>\n"
+  "<br/><br/><hr/><p><!-- hhmts start --> <!-- hhmts end --></p>\n"
   "The HTML tag used as timestamp delimiter for HTML-helper-mode."
   :group 'org-export-html
   :type 'string)
