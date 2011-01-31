@@ -15054,7 +15054,7 @@ This uses the icalendar.el library."
 
 (defun org-closest-date (start current change prefer show-all)
   "Find the date closest to CURRENT that is consistent with START and CHANGE.
-When PREFER is `past' return a date that is either CURRENT or past.
+When PREFER is `past', return a date that is either CURRENT or past.
 When PREFER is `future', return a date that is either CURRENT or future.
 When SHOW-ALL is nil, only return the current occurrence of a time stamp."
   ;; Make the proper lists from the dates
