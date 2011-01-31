@@ -47,7 +47,7 @@ To add files to this list use the `org-babel-lob-ingest' command."
 (defun org-babel-lob-ingest (&optional file)
   "Add all named source-blocks defined in FILE to
 `org-babel-library-of-babel'."
-  (interactive "f")
+  (interactive "fFile: ")
   (let ((lob-ingest-count 0))
     (org-babel-map-src-blocks file
       (let* ((info (org-babel-get-src-block-info 'light))

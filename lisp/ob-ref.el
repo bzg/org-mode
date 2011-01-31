@@ -84,6 +84,7 @@ the variable."
 (defvar org-babel-library-of-babel)
 (defun org-babel-ref-resolve (ref)
   "Resolve the reference REF and return its value."
+  (save-window-excursion
   (save-excursion
     (let ((case-fold-search t)
           type args new-refere new-header-args new-referent result
@@ -156,7 +157,7 @@ the variable."
 	    (format "%S" result)
 	  (if (and index (listp result))
 	      (org-babel-ref-index-list index result)
-	    result))))))
+	    result)))))))
 
 (defun org-babel-ref-index-list (index lis)
   "Return the subset of LIS indexed by INDEX.
