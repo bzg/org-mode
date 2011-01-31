@@ -1098,9 +1098,10 @@ block.  Specifically at the beginning of the #+BEGIN_SRC line.
 If the point is not on a source block then return nil."
   (let ((initial (point)) top bottom)
     (or
-     (save-excursion ;; on a source name line
+     (save-excursion ;; on a source name line or a #+header line
        (beginning-of-line 1)
-       (and (looking-at org-babel-src-name-regexp)
+       (and (or (looking-at org-babel-src-name-regexp)
+		(looking-at org-babel-multi-line-header-regexp))
 	    (progn
 	      (while (and (forward-line 1)
 			  (looking-at org-babel-multi-line-header-regexp)))
