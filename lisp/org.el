@@ -14963,7 +14963,7 @@ days in order to avoid rounding problems."
 If there is a specifier for a cyclic time stamp, get the closest date to
 DAYNR.
 PREFER and SHOW-ALL are passed through to `org-closest-date'.
-the variable date is bound by the calendar when this is called."
+The variable date is bound by the calendar when this is called."
   (cond
    ((and daynr (string-match "\\`%%\\((.*)\\)" s))
     (if (org-diary-sexp-entry (match-string 1 s) "" date)
