@@ -4670,7 +4670,7 @@ Org files.
 The following commands help to work with properties:
 
 @table @kbd
-@orgcmd{M-@key{TAB},org-complete}
+@orgcmd{M-@key{TAB},pcomplete}
 After an initial colon in a line, complete property keys.  All keys used
 in the current file will be offered as possible completions.
 @orgcmd{C-c C-x p,org-set-property}

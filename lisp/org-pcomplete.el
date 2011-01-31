@@ -1,4 +1,4 @@
-;;; org-complete.el --- In-buffer completion code
+;;; org-pcomplete.el --- In-buffer completion code
 
 ;; Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009, 2010
 ;;   Free Software Foundation, Inc.
@@ -47,7 +47,7 @@
 
 ;;;; Customization variables
 
-(defgroup org-complete nil
+(defgroup org-pcomplete nil
   "Outline-based notes management and organizer."
   :tag "Org"
   :group 'org)
@@ -122,7 +122,7 @@ When completing for #+STARTUP, for example, this function returns
 	(cons (reverse args) (reverse begins))))))
 
 
-(defun org-complete-initial ()
+(defun org-pcomplete-initial ()
   "Calls the right completion function for first argument completions."
   (ignore
    (funcall (or (pcomplete-find-completion-function
@@ -134,7 +134,7 @@ When completing for #+STARTUP, for example, this function returns
   "Complete against all valid file options."
   (require 'org-exp)
   (pcomplete-here
-   (org-complete-case-double
+   (org-pcomplete-case-double
     (mapcar (lambda (x)
 	      (if (= ?: (aref x (1- (length x))))
 		  (concat x " ")
@@ -266,7 +266,7 @@ Complete a language in the first field, the header arguments and switches."
 			   ":tcolumns" ":level" ":compact" ":timestamp"
 			   ":formula" ":formatter"))))
 
-(defun org-complete-case-double (list)
+(defun org-pcomplete-case-double (list)
   "Return list with both upcase and downcase version of all strings in LIST."
   (let (e res)
     (while (setq e (pop list))
@@ -275,8 +275,8 @@ Complete a language in the first field, the header arguments and switches."
 
 ;;;; Finish up
 
-(provide 'org-complete)
+(provide 'org-pcomplete)
 
 ;; arch-tag: 
 
-;;; org-complete.el ends here
+;;; org-pcomplete.el ends here

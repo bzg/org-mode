@@ -99,7 +99,7 @@
 (require 'org-compat)
 (require 'org-faces)
 (require 'org-list)
-(require 'org-complete)
+(require 'org-pcomplete)
 (require 'org-src)
 (require 'org-footnote)
 
@@ -4764,7 +4764,7 @@ The following commands are available:
 
   ;; Setup the pcomplete hooks
   (set (make-local-variable 'pcomplete-command-completion-function)
-       'org-complete-initial)
+       'org-pcomplete-initial)
   (set (make-local-variable 'pcomplete-command-name-function)
        'org-command-at-point)
   (set (make-local-variable 'pcomplete-default-completion-function)
@@ -18476,6 +18476,9 @@ Taken from `count' in cl-seq.el with all keyword arguments removed."
 Returns the number of empty lines passed."
   (let ((pos (point)))
     (skip-chars-backward " \t\n\r")
+    ;; (if (cdr (assoc 'heading org-blank-before-new-entry))
+    ;;    (skip-chars-backward " \t\n\r")
+    ;;   (forward-line -1))
     (beginning-of-line 2)
     (goto-char (min (point) pos))
     (count-lines (point) pos)))

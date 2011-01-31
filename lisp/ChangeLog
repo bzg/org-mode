@@ -1,0 +1,10 @@
+2011-01-18  Bastien Guerry  <bzg@altern.org>
+
+	* org.el (org-fast-tag-selection): Fix bug when assigning keys
+	for fast tag selection.
+
+2011-01-17  Bastien Guerry  <bzg@altern.org>
+
+	* org-latex.el (org-export-latex-make-header): Fix inclusion
+	of email.
+
