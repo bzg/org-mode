@@ -47,7 +47,7 @@
 
 ;;;; Customization variables
 
-(defgroup org-pcomplete nil
+(defgroup org-complete nil
   "Outline-based notes management and organizer."
   :tag "Org"
   :group 'org)
