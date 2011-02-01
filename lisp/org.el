@@ -8145,6 +8145,18 @@ Possible values in the list of contexts are `table', `headline', and `item'."
 		 x nil))
 	   varlist))))
 
+(defun org-clone-local-variables (from-buffer &optional regexp)
+  "Clone local variables from FROM-BUFFER.
+Optional argument REGEXP selects variables to clone."
+  (mapc
+   (lambda (pair)
+     (and (symbolp (car pair))
+	  (or (null regexp)
+	      (string-match regexp (symbol-name (car pair))))
+	  (set (make-local-variable (car pair))
+	       (cdr pair))))
+   (buffer-local-variables from-buffer)))
+
 ;;;###autoload
 (defun org-run-like-in-org-mode (cmd)
   "Run a command, pretending that the current buffer is in Org-mode.

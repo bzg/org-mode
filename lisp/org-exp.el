@@ -1038,6 +1038,7 @@ on this string to produce the exported version."
 	 (inhibit-read-only t)
 	 (drawers org-drawers)
 	 (outline-regexp "\\*+ ")
+	 (source-buffer (current-buffer))
 	 target-alist rtn)
 
     (setq org-export-target-aliases nil
@@ -1061,6 +1062,7 @@ on this string to produce the exported version."
 
       (let ((org-inhibit-startup t)) (org-mode))
       (setq case-fold-search t)
+      (org-clone-local-variables source-buffer "^\\(org-\\|orgtbl-\\)")
       (org-install-letbind)
 
       ;; Call the hook
