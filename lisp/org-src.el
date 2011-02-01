@@ -116,8 +116,7 @@ buffer.")
 (defcustom org-edit-src-persistent-message t
   "Non-nil means show persistent exit help message while editing src examples.
 The message is shown in the header-line, which will be created in the
-first line of the window showing the editing buffer.
-When nil, the message will only be shown intermittently in the echo area."
+first line of the window showing the editing buffer."
   :group 'org-edit-structure
   :type 'boolean)
 
@@ -199,7 +198,7 @@ This minor mode is turned on in two situations:
 There is a mode hook, and keybindings for `org-edit-src-exit' and
 `org-edit-src-save'")
 
-(defun org-edit-src-code (&optional context code edit-buffer-name quietp)
+(defun org-edit-src-code (&optional context code edit-buffer-name)
   "Edit the source code example at point.
 The example is copied to a separate buffer, and that buffer is
 switched to the correct language mode.  When done, exit with
@@ -322,7 +321,6 @@ buffer."
 	(set-buffer-modified-p nil)
 	(and org-edit-src-persistent-message
 	     (org-set-local 'header-line-format msg)))
-      (unless quietp (message "%s" msg))
       t)))
 
 (defun org-edit-src-continue (e)

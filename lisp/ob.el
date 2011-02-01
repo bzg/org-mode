@@ -551,7 +551,7 @@ with a prefix argument then this is passed on to
 Return t if a code block was found at point, nil otherwise."
   `(let ((org-src-window-setup 'switch-invisibly))
      (when (and (org-babel-where-is-src-block-head)
-		(org-edit-src-code nil nil nil 'quietly))
+		(org-edit-src-code nil nil nil))
        (unwind-protect (progn ,@body)
 	 (if (org-bound-and-true-p org-edit-src-from-org-mode)
 	     (org-edit-src-exit)))
