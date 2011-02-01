@@ -1978,14 +1978,11 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 	(replace-match rpl t t)))
     (backward-char)))
 
-(defvar org-export-latex-use-verb t
-  "Toggle the use of \\verb for ~ emphasis.
-Set to nil for \\texttt, t for \\verb.")
 (defun org-export-latex-emph-format (format string)
   "Format an emphasis string and handle the \\verb special case."
   (when (member format '("\\verb" "\\protectedtexttt"))
     (save-match-data
-      (if (and (equal format "\\verb") org-export-latex-use-verb)
+      (if (equal format "\\verb")
 	  (let ((ll "~,./?;':\"|!@#%^&-_=+abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ<>()[]{}"))
 	    (catch 'exit
 	      (loop for i from 0 to (1- (length ll)) do
