@@ -88,7 +88,7 @@ olpath     The outline path to the item.  These are all headlines above
            the current item, separated by /, like a file path.
 
 For each symbol present in the list, a property will be created in
-the archived entry, with a prefix \"PRE_ARCHIVE_\", to remember this
+the archived entry, with a prefix \"ARCHIVE_\", to remember this
 information."
   :group 'org-archive
   :type '(set :greedy t
