@@ -180,6 +180,13 @@ files."
 (define-key emacs-lisp-mode-map "\M-\C-j" 'org-test-jump)
 
 
+;;; Miscellaneous helper functions
+(defun org-test-strip-text-props (s)
+  "Return S without any text properties."
+  (let ((noprop (copy-sequence s)))
+    (set-text-properties 0 (length noprop) nil noprop)
+    noprop))
+
 ;;; Load and Run tests
 (defun org-test-load ()
   "Load up the org-mode test suite."
