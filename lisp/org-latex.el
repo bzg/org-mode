@@ -230,14 +230,15 @@ are written as utf8 files."
     ("/" "\\emph{%s}" nil)
     ("_" "\\underline{%s}" nil)
     ("+" "\\st{%s}" nil)
-    ("=" "\\verb" t)
+    ("=" "\\protectedtexttt" t)
     ("~" "\\verb" t))
   "Alist of LaTeX expressions to convert emphasis fontifiers.
 Each element of the list is a list of three elements.
 The first element is the character used as a marker for fontification.
 The second element is a formatting string to wrap fontified text with.
 If it is \"\\verb\", Org will automatically select a delimiter
-character that is not in the string.
+character that is not in the string.  \"\\protectedtexttt\" will use \\texttt
+to typeset and try to protect special characters.
 The third element decides whether to protect converted text from other
 conversions."
   :group 'org-export-latex
@@ -1977,12 +1978,14 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 	(replace-match rpl t t)))
     (backward-char)))
 
-(defvar org-export-latex-use-verb nil)
+(defvar org-export-latex-use-verb t
+  "Toggle the use of \\verb for ~ emphasis.
+Set to nil for \\texttt, t for \\verb.")
 (defun org-export-latex-emph-format (format string)
   "Format an emphasis string and handle the \\verb special case."
-  (when (equal format "\\verb")
+  (when (member format '("\\verb" "\\protectedtexttt"))
     (save-match-data
-      (if org-export-latex-use-verb
+      (if (and (equal format "\\verb") org-export-latex-use-verb)
 	  (let ((ll "~,./?;':\"|!@#%^&-_=+abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ<>()[]{}"))
 	    (catch 'exit
 	      (loop for i from 0 to (1- (length ll)) do
@@ -2005,7 +2008,9 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 	    (setq string (substring string (1+ (match-beginning 0))))
 	    (setq char (or (cdr (assoc char trans)) (concat "\\" char))
 		  rtn (concat rtn char)))
-	  (setq string (concat rtn string) format "\\texttt{%s}")))))
+	  (setq string (concat rtn string) format "\\texttt{%s}")
+	  (while (string-match "--" string)
+	    (setq string (replace-match "-{}-" t t string)))))))
   (format format string))
 
 (defun org-export-latex-links ()
