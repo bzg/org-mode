@@ -8185,7 +8185,7 @@ call CMD."
 
 (defun org-link-expand-abbrev (link)
   "Apply replacements as defined in `org-link-abbrev-alist."
-  (if (string-match "^\\([a-zA-Z][-_a-zA-Z0-9]*\\)\\(::?\\(.*\\)\\)?$" link)
+  (if (string-match "^\\([^:]*\\)\\(::?\\(.*\\)\\)?$" link)
       (let* ((key (match-string 1 link))
 	     (as (or (assoc key org-link-abbrev-alist-local)
 		     (assoc key org-link-abbrev-alist)))
