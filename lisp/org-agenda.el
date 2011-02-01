@@ -520,7 +520,7 @@ this one will be used."
 (defcustom org-agenda-skip-function-global nil
   "Function to be called at each match during agenda construction.
 If this function returns nil, the current match should not be skipped.
-If the function decised to skip an agenda match, is must return the
+If the function decided to skip an agenda match, is must return the
 buffer position from which the search should be continued.
 This may also be a Lisp form, which will be evaluated.
 
@@ -817,11 +817,11 @@ N days, just insert a special line indicating the size of the gap."
   :group 'org-agenda)
 
 (defcustom org-agenda-menu-show-matcher t
-  "Non-nil menas show the match string in the agenda dispatcher menu.
+  "Non-nil means show the match string in the agenda dispatcher menu.
 When nil, the matcher string is not shown, but is put into the help-echo
 property so than moving the mouse over the command shows it.
 Setting it to nil is good if matcher strings are very long and/or if
-you wnat to use two-column display (see `org-agenda-menu-two-column')."
+you want to use two-column display (see `org-agenda-menu-two-column')."
   :group 'org-agenda
   :type 'boolean)
 
@@ -1573,7 +1573,7 @@ Where CATEGORY-REGEXP is a regexp matching the categories where
 the icon should be displayed.
 FILE-OR-DATA either a file path or a string containing image data.
 
-The other fields can be ommited safely if not needed:
+The other fields can be omited safely if not needed:
 TYPE indicates the image type.
 DATA-P is a boolean indicating whether the FILE-OR-DATA string is
 image data.

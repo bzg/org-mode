@@ -321,7 +321,7 @@ specific tags."
       (((class color) (min-colors 8)) (:foreground "green"))
       (t (:bold nil))))
   "Face used in agenda, to indicate lines switched to DONE.
-This face is used to de-emphasize items that where brightly colord in the
+This face is used to de-emphasize items that where brightly colored in the
 agenda because they were things to do, or overdue.  The DONE state itself
 is of course immediately visible, but for example a passed deadline is
 \(by default) very bright read.  This face could be simply the default face

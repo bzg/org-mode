@@ -136,7 +136,7 @@ target       Specification of where the captured item should be placed.
                  Will create a heading in a date tree for today's date
 
              (file+datetree+prompt \"path/to/file\")
-                 Will create a heading in a date tree, promts for date
+                 Will create a heading in a date tree, prompts for date
 
              (file+function \"path/to/file\" function-finding-location)
                  A function to find the right location in the file

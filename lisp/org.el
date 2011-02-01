@@ -1082,7 +1082,7 @@ for the duration of the command."
 The value is an alist, with `heading' and `plain-list-item' as car,
 and a boolean flag as cdr. The cdr may also be the symbol `auto', and then
 Org will look at the surrounding headings/items and try to make an
-intelligent decision wether to insert a blank line or not.
+intelligent decision whether to insert a blank line or not.
 
 For plain lists, if the variable `org-empty-line-terminates-plain-lists' is
 set, the setting here is ignored and no empty line is inserted, to avoid
@@ -2626,7 +2626,7 @@ See also `org-agenda-jump-prefer-future'."
 (defcustom org-agenda-jump-prefer-future 'org-read-date-prefer-future
   "Should the agenda jump command prefer the future for incomplete dates?
 The default is to do the same as configured in `org-read-date-prefer-future'.
-But you can alse set a deviating value here.
+But you can also set a deviating value here.
 This may t or nil, or the symbol `org-read-date-prefer-future'."
   :group 'org-agenda 
   :group 'org-time 

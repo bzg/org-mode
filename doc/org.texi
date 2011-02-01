@@ -819,7 +819,10 @@ Theory Ltd.}
 @cindex XEmacs
 
 @b{Important:} @i{If you are using a version of Org that is part of the Emacs
-distribution or an XEmacs package, please skip this section and go directly to @ref{Activation}.  To see what version of Org (if any) is part of your Emacs distribution, type @kbd{M-x load-library RET org} and then @kbd{M-x org-version}.}
+distribution or an XEmacs package, please skip this section and go directly
+to @ref{Activation}.  To see what version of Org (if any) is part of your
+Emacs distribution, type @kbd{M-x load-library RET org} and then @kbd{M-x
+org-version}.}
 
 If you have downloaded Org from the Web, either as a distribution @file{.zip}
 or @file{.tar} file, or as a Git archive, you must take the following steps

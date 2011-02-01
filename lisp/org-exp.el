@@ -483,7 +483,7 @@ This option can also be set with the +OPTIONS line, e.g. \"LaTeX:mathjax\".
 Allowed values are:
 
 nil        Don't do anything.
-verbatim   Keep eveything in verbatim
+verbatim   Keep everything in verbatim
 dvipng     Process the LaTeX fragments to images.
            This will also include processing of non-math environments.
 t          Do MathJax preprocessing if there is at least on math snippet,
