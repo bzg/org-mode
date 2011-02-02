@@ -11472,7 +11472,9 @@ scheduling will use the corresponding date."
   (interactive "P")
   (let* ((old-date (org-entry-get nil "DEADLINE"))
 	 (repeater (and old-date
-			(string-match "\\([.+]+[0-9]+[dwmy]\\) ?" old-date)
+			(string-match 
+			 "\\([.+]+[0-9]+[dwmy]\\(?:[/ ][-+]?[0-9]+[dwmy]\\)?\\) ?" 
+			 old-date)
 			(match-string 1 old-date))))
     (if remove
 	(progn
@@ -11510,7 +11512,9 @@ scheduling will use the corresponding date."
   (interactive "P")
   (let* ((old-date (org-entry-get nil "SCHEDULED"))
 	 (repeater (and old-date
-			(string-match "\\([.+]+[0-9]+[dwmy]\\) ?" old-date)
+			(string-match 
+			 "\\([.+]+[0-9]+[dwmy]\\(?:[/ ][-+]?[0-9]+[dwmy]\\)?\\) ?"
+			 old-date)
 			(match-string 1 old-date))))
     (if remove
 	(progn
