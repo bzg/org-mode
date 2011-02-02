@@ -137,7 +137,7 @@ color of the frame."
   :group 'org-faces)
 
 (defface org-special-keyword ;; originally copied from font-lock-string-face
-  (org-compatible-face nil
+  (org-compatible-face 'font-lock-keyword-face
     '((((class color) (min-colors 16) (background light)) (:foreground "RosyBrown"))
       (((class color) (min-colors 16) (background dark)) (:foreground "LightSalmon"))
       (t (:italic t))))
