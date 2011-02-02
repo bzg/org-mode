@@ -2427,7 +2427,7 @@ the alist of previous items."
 	      ;; Ending for every item
 	      (org-close-li type)
 	      ;; We're ending last item of the list: end list.
-	      (when lastp (insert (format "</%sl>\n" type)))))
+	      (when lastp (insert (format "\n</%sl>\n" type)))))
 	  (funcall get-closings pos))
     (cond
      ;; At an item: insert appropriate tags in export buffer.

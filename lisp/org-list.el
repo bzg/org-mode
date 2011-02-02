@@ -2942,7 +2942,7 @@ with overruling parameters for `org-list-to-generic'."
 	       :dstart "<dl>" :dend "</dl>"
 	       :dtstart "<dt>" :dtend "</dt>\n"
 	       :ddstart "<dd>" :ddend "</dd>"
-	       :istart "<li>" :iend "</li>"
+	       :istart "<li>" :iend "\n</li>"
 	       :icount (format "<li value=\"%s\">" counter)
 	       :isep "\n" :lsep "\n" :csep "\n"
 	       :cbon "<code>[X]</code>" :cboff "<code>[ ]</code>")
