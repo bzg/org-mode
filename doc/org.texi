@@ -6514,7 +6514,7 @@ Create a new attachment as an Emacs buffer.
 Synchronize the current task with its attachment directory, in case you added
 attachments yourself.
 
-@orgcmdtkc{p,C-c C-a o,org-attach-open}
+@orgcmdtkc{o,C-c C-a o,org-attach-open}
 @vindex org-file-apps
 Open current task's attachment.  If there is more than one, prompt for a
 file name first.  Opening will follow the rules set by @code{org-file-apps}.
