@@ -247,9 +247,10 @@ column view defines special faces for each outline level.  See the file
   :group 'org-faces)
 
 (defface org-link
-  '((((class color) (background light)) (:foreground "Purple" :underline t))
-    (((class color) (background dark)) (:foreground "Cyan" :underline t))
-    (t (:underline t)))
+  (org-compatible-face 'link
+    '((((class color) (background light)) (:foreground "Purple" :underline t))
+      (((class color) (background dark)) (:foreground "Cyan" :underline t))
+      (t (:underline t))))
   "Face for links."
   :group 'org-faces)
 
