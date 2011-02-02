@@ -7547,6 +7547,22 @@ If yes, remember the marker and the distance to BEG."
 	      (if (and (org-on-heading-p) (not (eobp))) (backward-char 1))
 	      (point))))))
 
+(defun org-narrow-to-block ()
+  "Narrow buffer to the current block."
+  (interactive)
+  (let ((bstart "^[ \t]*#\\+begin")
+	(bend "[ \t]*#\\+end")
+	(case-fold-search t) ;; allow #+BEGIN 
+	b_start b_end)
+    (if (org-in-regexps-block-p bstart bend)
+	(progn
+	  (save-excursion (re-search-backward bstart nil t)
+			  (setq b_start (match-beginning 0)))
+	  (save-excursion (re-search-forward  bend nil t)
+			  (setq b_end (match-end 0)))
+	  (narrow-to-region b_start b_end))
+      (error "Not in a block"))))
+
 (eval-when-compile
   (defvar org-property-drawer-re))
 
@@ -16364,6 +16380,9 @@ BEG and END default to the buffer boundaries."
 (if (boundp 'narrow-map)
     (org-defkey narrow-map "s" 'org-narrow-to-subtree)
   (org-defkey org-mode-map "\C-xns" 'org-narrow-to-subtree))
+(if (boundp 'narrow-map)
+    (org-defkey narrow-map "b" 'org-narrow-to-block)
+  (org-defkey org-mode-map "\C-xnb" 'org-narrow-to-block))
 (org-defkey org-mode-map "\C-c\C-f"    'org-forward-same-level)
 (org-defkey org-mode-map "\C-c\C-b"    'org-backward-same-level)
 (org-defkey org-mode-map "\C-c$"    'org-archive-subtree)

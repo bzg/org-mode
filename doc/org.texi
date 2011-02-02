@@ -1370,6 +1370,8 @@ sorting will be case-sensitive.  With two @kbd{C-u C-u} prefixes, duplicate
 entries will also be removed.
 @orgcmd{C-x n s,org-narrow-to-subtree}
 Narrow buffer to current subtree.
+@orgcmd{C-x n b,org-narrow-to-block}
+Narrow buffer to current block.
 @orgcmd{C-x n w,widen}
 Widen buffer to remove narrowing.
 @orgcmd{C-c *,org-toggle-heading}
@@ -14117,6 +14119,9 @@ you could add the function @code{org-update-all-dblocks} to a hook, for
 example @code{before-save-hook}.  @code{org-update-all-dblocks} is
 written in a way such that it does nothing in buffers that are not in
 @code{org-mode}.
+
+You can narrow the current buffer to the current dynamic block (like any
+other block) with @code{org-narrow-to-block}.
 
 @node Special agenda views, Extracting agenda information, Dynamic blocks, Hacking
 @section Special agenda views
