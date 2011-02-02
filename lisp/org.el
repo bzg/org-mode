@@ -3316,15 +3316,14 @@ lines to the buffer:
   :type 'boolean)
 
 (defcustom org-hidden-keywords nil
-  "List of keywords that should be hidden when typed in the org buffer.
-For example, add #+TITLE to this list in order to make the
-document title appear in the buffer without the initial #+TITLE:
-keyword."
+  "List of symbols corresponding to keywords to be hidden the org buffer.
+For example, a value '(title) for this list will make the document's title 
+appear in the buffer without the initial #+TITLE: keyword."
   :group 'org-appearance
   :type '(set (const :tag "#+AUTHOR" author)
 	      (const :tag "#+DATE" date)
 	      (const :tag "#+EMAIL" email)
-	      (const :tag "#+TITLE"  title)))
+	      (const :tag "#+TITLE" title)))
 
 (defcustom org-fontify-done-headline nil
   "Non-nil means change the face of a headline if it is marked DONE.
