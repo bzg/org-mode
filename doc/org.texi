@@ -4567,7 +4567,7 @@ Once a system of tags has been set up, it can be used to collect related
 information into special lists.
 
 @table @kbd
-@orgcmdkkc{C-c / m,C-c \,org-match-sparse-tree}
+@orgcmdkkc{C-c / m,C-c \\,org-match-sparse-tree}
 Create a sparse tree with all headlines matching a tags search.  With a
 @kbd{C-u} prefix argument, ignore headlines that are not a TODO line.
 @orgcmd{C-c a m,org-tags-view}
