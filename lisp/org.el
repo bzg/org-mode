@@ -6353,8 +6353,7 @@ DATA should have been made by `org-outline-overlay-data'."
 ;;; Folding of blocks
 
 (defconst org-block-regexp
-
-  "^[ \t]*#\\+begin_\\([^ \n]+\\)\\(\\([^\n]+\\)\\)?\n\\([^\000]+?\\)#\\+end_\\1[ \t]*$"
+  "^[ \t]*#\\+begin_?\\([^ \n]+\\)\\(\\([^\n]+\\)\\)?\n\\([^\000]+?\\)#\\+end_?\\1[ \t]*$"
   "Regular expression for hiding blocks.")
 
 (defvar org-hide-block-overlays nil
