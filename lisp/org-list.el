@@ -364,7 +364,7 @@ specifically, type `block' is determined by the variable
 It depends on `org-empty-line-terminates-plain-lists'.")
 
 (defconst org-list-full-item-re
-  (concat "^[ \t]*\\(\\(?:[-+*]\\|\\(?:[0-9]+\\|[A-Za-z]\\)[.)]\\)[ \t]+\\)"
+  (concat "^[ \t]*\\(\\(?:[-+*]\\|\\(?:[0-9]+\\|[A-Za-z]\\)[.)]\\)[ \t]*\\)"
 	  "\\(?:\\[@\\(?:start:\\)?\\([0-9]+\\|[A-Za-z]\\)\\]\\)?"
 	  "\\(?:\\(\\[[ X-]\\]\\)[ \t]+\\)?"
 	  "\\(?:\\(.*\\)[ \t]+::[ \t]+\\)?")
