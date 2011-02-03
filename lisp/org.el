@@ -1463,7 +1463,7 @@ Changing this requires a restart of Emacs to work correctly."
 
 (defcustom org-link-search-must-match-exact-headline 'query-to-create
   "Non-nil means internal links in Org files must exactly match a headline.
-When nil, the link search tries to match a phrase will all words
+When nil, the link search tries to match a phrase with all words
 in the search text."
   :group 'org-link-follow
   :type '(choice
