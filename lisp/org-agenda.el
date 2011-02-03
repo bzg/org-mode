@@ -1757,6 +1757,7 @@ The following commands are available:
 (org-defkey org-agenda-mode-map "\C-k"     'org-agenda-kill)
 (org-defkey org-agenda-mode-map "\C-c\C-w" 'org-agenda-refile)
 (org-defkey org-agenda-mode-map "m"        'org-agenda-bulk-mark)
+(org-defkey org-agenda-mode-map "%"        'org-agenda-bulk-mark-regexp)
 (org-defkey org-agenda-mode-map "u"        'org-agenda-bulk-unmark)
 (org-defkey org-agenda-mode-map "U"        'org-agenda-bulk-remove-all-marks)
 (org-defkey org-agenda-mode-map "B"        'org-agenda-bulk-action)
@@ -1961,9 +1962,10 @@ The following commands are available:
      ["Delete subtree" org-agenda-kill t])
     ("Bulk action"
      ["Mark entry" org-agenda-bulk-mark t]
+     ["Mark matching regexp" org-agenda-bulk-mark-regexp t]
      ["Unmark entry" org-agenda-bulk-unmark t]
-     ["Act on all marked" org-agenda-bulk-action t]
      ["Unmark all entries" org-agenda-bulk-remove-all-marks :active t :keys "C-u s"])
+     ["Act on all marked" org-agenda-bulk-action t]
     "--"
     ("Tags and Properties"
      ["Show all Tags" org-agenda-show-tags t]
@@ -7868,6 +7870,14 @@ This is a command that has to be installed in `calendar-mode-map'."
 	  (beginning-of-line 2))
 	(message "%d entries marked for bulk action"
 		 (length org-agenda-bulk-marked-entries))))))
+
+(defun org-agenda-bulk-mark-regexp (regexp)
+  "Mark entries match REGEXP."
+  (interactive "sRegexp: ")
+  (save-excursion
+    (goto-char (point-min))
+    (while (re-search-forward regexp nil t)
+      (call-interactively 'org-agenda-bulk-mark))))
 
 (defun org-agenda-bulk-unmark ()
   "Unmark the entry at point for future bulk action."
