@@ -12229,10 +12229,10 @@ MATCHER is a Lisp form to be evaluated, testing if a given set of tags
 qualifies a headline for inclusion.  When TODO-ONLY is non-nil,
 only lines with a TODO keyword are included in the output."
   (require 'org-agenda)
-  (let* ((re (concat "^" outline-regexp " *"
-		     (when todo-only
-		       (concat "\\(" (regexp-opt org-todo-keywords-1) "\\)"))
-  		     (org-re " *\\(.*?\\)\\(\\(:[[:alnum:]_@#%:]+:\\)\\)?[ \t]*$")))
+  (let* ((re (concat "^" outline-regexp " *\\(\\<\\("
+		     (mapconcat 'regexp-quote org-todo-keywords-1 "\\|")
+		     (org-re
+		      "\\>\\)\\)? *\\(.*?\\)\\(:[[:alnum:]_@#%:]+:\\)?[ \t]*$")))
 	 (props (list 'face 'default
 		      'done-face 'org-agenda-done
 		      'undone-face 'default
@@ -12259,9 +12259,8 @@ only lines with a TODO keyword are included in the output."
 	(org-remove-occur-highlights))
       (while (re-search-forward re nil t)
 	(catch :skip
-	  (when todo-only (setq todo (org-match-string-no-properties 1)))
-	  (setq tags (or (org-match-string-no-properties 4)
-			 (org-match-string-no-properties 3)))
+	  (setq todo (if (match-end 1) (org-match-string-no-properties 2))
+		tags (if (match-end 4) (org-match-string-no-properties 4)))
 	  (goto-char (setq lspos (match-beginning 0)))
 	  (setq level (org-reduced-level (funcall outline-level))
 		category (org-get-category))
