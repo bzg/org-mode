@@ -297,7 +297,7 @@ specific header arguments as well.")
   "Default arguments to use when evaluating a source block.")
 
 (defvar org-babel-default-inline-header-args
-  '((:session . "none") (:results . "silent") (:exports . "results"))
+  '((:session . "none") (:results . "replace") (:exports . "results"))
   "Default arguments to use when evaluating an inline source block.")
 
 (defvar org-babel-current-buffer-properties nil

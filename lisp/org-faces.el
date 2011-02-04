@@ -1,6 +1,6 @@
 ;;; org-faces.el --- Face definitions for Org-mode.
 
-;; Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009, 2010
+;; Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011
 ;;   Free Software Foundation, Inc.
 
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
@@ -510,6 +510,15 @@ follows a #+DATE:, #+AUTHOR: or #+EMAIL: keyword."
   "Face text in #+begin ... #+end blocks."
   :group 'org-faces
   :version "22.1")
+
+(defface org-block-background '((t ()))
+  "Face used for the source block background.")
+
+(org-copy-face 'org-meta-line 'org-block-begin-line
+  "Face used for the line delimiting the begin of source blocks.")
+
+(org-copy-face 'org-meta-line 'org-block-end-line
+  "Face used for the line delimiting the end of source blocks.")
 
 (defface org-verbatim
   (org-compatible-face 'shadow

@@ -1,6 +1,6 @@
 ;;; org.el --- Outline-based notes management and organizer
 ;; Carstens outline-mode for keeping track of everything.
-;; Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009, 2010
+;; Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011
 ;;   Free Software Foundation, Inc.
 ;;
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
@@ -5146,16 +5146,19 @@ will be prompted for."
 					; for end_src
 	      (cond
 	       ((and lang org-src-fontify-natively)
-		(org-src-font-lock-fontify-block lang block-start block-end))
+		(org-src-font-lock-fontify-block lang block-start block-end)
+                (overlay-put (make-overlay beg1 block-end)
+                             'face 'org-block-background))
 	       (quoting
-		(add-text-properties beg1 (+ end1 1) '(face
-						       org-block)))
+		(add-text-properties beg1 (+ end1 1) '(face org-block)))
 					; end of source block
 	       ((not org-fontify-quote-and-verse-blocks))
 	       ((string= block-type "quote")
-		(add-text-properties beg1 end1 '(face org-quote)))
+		(add-text-properties beg1 (1+ end1) '(face org-quote)))
 	       ((string= block-type "verse")
-		(add-text-properties beg1 end1 '(face org-verse))))
+		(add-text-properties beg1 (1+ end1) '(face org-verse))))
+      	      (add-text-properties beg beg1 '(face org-block-begin-line))
+      	      (add-text-properties (1+ end) (1+ end1) '(face org-block-end-line))
 	      t))
 	   ((member dc1 '("title:" "author:" "email:" "date:"))
 	    (add-text-properties
@@ -5171,7 +5174,7 @@ will be prompted for."
 	   ((not (member (char-after beg) '(?\  ?\t)))
 	    ;; just any other in-buffer setting, but not indented
 	    (add-text-properties
-	     beg (match-end 0)
+	     beg (1+ (match-end 0))
 	     '(font-lock-fontified t face org-meta-line))
 	    t)
 	   ((or (member dc1 '("begin:" "end:" "caption:" "label:"
