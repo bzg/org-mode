@@ -11138,7 +11138,8 @@ statistics everywhere."
 	 (first t)
 	 (box-re "\\(\\(\\[[0-9]*%\\]\\)\\|\\(\\[[0-9]*/[0-9]*\\]\\)\\)")
 	 level ltoggle l1 new ndel
-	 (cnt-all 0) (cnt-done 0) is-percent kwd cookie-present)
+	 (cnt-all 0) (cnt-done 0) is-percent kwd 
+	 checkbox-beg ov ovs ove cookie-present)
     (catch 'exit
       (save-excursion
 	(beginning-of-line 1)
@@ -11159,31 +11160,36 @@ statistics everywhere."
 	    (throw 'exit nil))
 	  (while (re-search-forward box-re (point-at-eol) t)
 	    (setq cnt-all 0 cnt-done 0 cookie-present t)
-	    (setq is-percent (match-end 2))
+	    (setq is-percent (match-end 2) checkbox-beg (match-beginning 0))
 	    (save-match-data
 	      (unless (outline-next-heading) (throw 'exit nil))
 	      (while (and (looking-at org-complex-heading-regexp)
-			  (> (setq l1 (length (match-string 1))) level))
-		(setq kwd (and (or recursive (= l1 ltoggle))
-			       (match-string 2)))
-		(if (or (eq org-provide-todo-statistics 'all-headlines)
-			(and (listp org-provide-todo-statistics)
-			     (or (member kwd org-provide-todo-statistics)
-				 (member kwd org-done-keywords))))
-		    (setq cnt-all (1+ cnt-all))
-		  (if (eq org-provide-todo-statistics t)
-		      (and kwd (setq cnt-all (1+ cnt-all)))))
-		(and (member kwd org-done-keywords)
-		     (setq cnt-done (1+ cnt-done)))
-		(outline-next-heading)))
+	    		  (> (setq l1 (length (match-string 1))) level))
+	    	(setq kwd (and (or recursive (= l1 ltoggle))
+	    		       (match-string 2)))
+	    	(if (or (eq org-provide-todo-statistics 'all-headlines)
+	    		(and (listp org-provide-todo-statistics)
+	    		     (or (member kwd org-provide-todo-statistics)
+	    			 (member kwd org-done-keywords))))
+	    	    (setq cnt-all (1+ cnt-all))
+	    	  (if (eq org-provide-todo-statistics t)
+	    	      (and kwd (setq cnt-all (1+ cnt-all)))))
+	    	(and (member kwd org-done-keywords)
+	    	     (setq cnt-done (1+ cnt-done)))
+	    	(outline-next-heading)))
 	    (setq new
-		  (if is-percent
-		      (format "[%d%%]" (/ (* 100 cnt-done) (max 1 cnt-all)))
-		    (format "[%d/%d]" cnt-done cnt-all))
-		  ndel (- (match-end 0) (match-beginning 0)))
-	    (goto-char (match-beginning 0))
+	    	  (if is-percent
+	    	      (format "[%d%%]" (/ (* 100 cnt-done) (max 1 cnt-all)))
+	    	    (format "[%d/%d]" cnt-done cnt-all))
+	    	  ndel (- (match-end 0) checkbox-beg))
+	    ;; handle overlays when updating cookie from column view
+	    (when (setq ov (car (overlays-at checkbox-beg))) 
+	      (setq ovs (overlay-start ov) ove (overlay-end ov))
+	      (delete-overlay ov))
+	    (goto-char checkbox-beg)
 	    (insert new)
-	    (delete-region (point) (+ (point) ndel)))
+	    (delete-region (point) (+ (point) ndel))
+	    (when ov (move-overlay ov ovs ove)))
 	  (when cookie-present
 	    (run-hook-with-args 'org-after-todo-statistics-hook
 				cnt-done (- cnt-all cnt-done))))))
