@@ -1066,10 +1066,15 @@ This option is deprecated, it is better to define a block agenda instead."
 
 (defcustom org-agenda-repeating-timestamp-show-all t
   "Non-nil means show all occurrences of a repeating stamp in the agenda.
-When nil, only one occurrence is shown, either today or the
-nearest into the future."
+When set to a list of strings, only show occurrences of repeating
+stamps for these TODO keywords.  When nil, only one occurrence is
+shown, either today or the nearest into the future."
   :group 'org-agenda-daily/weekly
-  :type 'boolean)
+  :type '(choice
+	  (const :tag "Show repeating stamps" t)
+	  (repeat :tag "Show repeating stamps for these TODO keywords"
+		  (string :tag "TODO Keyword"))
+	  (const :tag "Don't show repeating stamps" nil)))
 
 (defcustom org-scheduled-past-days 10000
   "No. of days to continue listing scheduled items that are not marked DONE.
@@ -4671,14 +4676,17 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
     (goto-char (point-min))
     (while (setq end-of-match (re-search-forward regexp nil t))
       (setq b0 (match-beginning 0)
-	    b3 (match-beginning 3) e3 (match-end 3))
+	    b3 (match-beginning 3) e3 (match-end 3)
+	    todo-state (save-match-data (ignore-errors (org-get-todo-state)))
+	    show-all (or (eq org-agenda-repeating-timestamp-show-all t)
+			 (member todo-state 
+				 org-agenda-repeating-timestamp-show-all)))
       (catch :skip
 	(and (org-at-date-range-p) (throw :skip nil))
 	(org-agenda-skip)
 	(if (and (match-end 1)
 		 (not (= d1 (org-time-string-to-absolute
-			     (match-string 1) d1 nil
-			     org-agenda-repeating-timestamp-show-all))))
+			     (match-string 1) d1 nil show-all))))
 	    (throw :skip nil))
 	(if (and e3
 		 (not (org-diary-sexp-entry (buffer-substring b3 e3) "" date)))
@@ -4695,7 +4703,6 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 	      clockp (and org-agenda-include-inactive-timestamps
 			  (or (string-match org-clock-string tmp)
 			      (string-match "]-+\\'" tmp)))
-	      todo-state (ignore-errors (org-get-todo-state))
 	      donep (member todo-state org-done-keywords))
 	(if (or scheduledp deadlinep closedp clockp
 		(and donep org-agenda-skip-timestamp-if-done))
@@ -4906,7 +4913,7 @@ be skipped."
 	 (d1 (calendar-absolute-from-gregorian date))  ; DATE bound by calendar
 	 d2 diff dfrac wdays pos pos1 category tags
 	 suppress-prewarning
-	 ee txt head face s todo-state upcomingp donep timestr)
+	 ee txt head face s todo-state show-all upcomingp donep timestr)
     (goto-char (point-min))
     (while (re-search-forward regexp nil t)
       (setq suppress-prewarning nil)
@@ -4924,9 +4931,12 @@ be skipped."
 	(setq s (match-string 1)
 	      txt nil
 	      pos (1- (match-beginning 1))
+	      todo-state (save-match-data (org-get-todo-state))
+	      show-all (or (eq org-agenda-repeating-timestamp-show-all t)
+			   (member todo-state 
+				    org-agenda-repeating-timestamp-show-all))
 	      d2 (org-time-string-to-absolute
-		  (match-string 1) d1 'past
-		  org-agenda-repeating-timestamp-show-all)
+		  (match-string 1) d1 'past show-all)
 	      diff (- d2 d1)
 	      wdays (if suppress-prewarning
 			(let ((org-deadline-warning-days suppress-prewarning))
@@ -4941,7 +4951,7 @@ be skipped."
 			  (and todayp (not org-agenda-only-exact-dates)))
 		     (= diff 0)))
 	    (save-excursion
-	      (setq todo-state (org-get-todo-state))
+	      ;; (setq todo-state (org-get-todo-state))
 	      (setq donep (member todo-state org-done-keywords))
 	      (if (and donep
 		       (or org-agenda-skip-deadline-if-done
@@ -5026,9 +5036,12 @@ FRACTION is what fraction of the head-warning time has passed."
 	(setq s (match-string 1)
 	      txt nil
 	      pos (1- (match-beginning 1))
+	      todo-state (save-match-data (org-get-todo-state))
+	      show-all (or (eq org-agenda-repeating-timestamp-show-all t)
+			   (member todo-state
+				   org-agenda-repeating-timestamp-show-all))
 	      d2 (org-time-string-to-absolute
-		  (match-string 1) d1 'past
-		  org-agenda-repeating-timestamp-show-all)
+		  (match-string 1) d1 'past show-all)
 	      diff (- d2 d1))
 	(setq pastschedp (and todayp (< diff 0)))
 	;; When to show a scheduled item in the calendar:
@@ -5038,7 +5051,6 @@ FRACTION is what fraction of the head-warning time has passed."
 		       (and todayp (not org-agenda-only-exact-dates)))
 		  (= diff 0))
 	  (save-excursion
-	    (setq todo-state (org-get-todo-state))
 	    (setq donep (member todo-state org-done-keywords))
 	    (if (and donep
 		     (or org-agenda-skip-scheduled-if-done
