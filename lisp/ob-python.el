@@ -265,7 +265,7 @@ last statement in BODY, as elisp."
 	    (org-babel-python-table-or-string results)))
 	(let ((tmp-file (org-babel-temp-file "python-")))
 	  (org-babel-comint-with-output
-	      (session org-babel-python-eoe-indicator t body)
+	      (session org-babel-python-eoe-indicator nil body)
 	    (let ((comint-process-echoes nil))
 	      (input-body body)
 	      (dump-last-value tmp-file (member "pp" result-params))
