@@ -2467,10 +2467,9 @@ the alist of previous items."
 	  (setq body
 		(concat
 		 (cond
-		  ((string-match "X" checkbox) "<b>[X]</b> ")
-		  ((string-match " " checkbox)
-		   "<b>[<span style=\"visibility:hidden;\">X</span>]</b> ")
-		  (t "[-] "))
+		  ((string-match "X" checkbox) "<code>[X]</code> ")
+		  ((string-match " " checkbox) "<code>[ ]</code> ")
+		  (t "<code>[-]</code> "))
 		 body)))
 	;; Return modified line
 	body))
