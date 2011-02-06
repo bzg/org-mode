@@ -1857,7 +1857,10 @@ block but are passed literally to the \"example-block\"."
   "Safely convert tables into elisp lists."
   (let (in-single in-double out)
     (org-babel-read
-     (if (and (stringp str) (string-match "^\\[.+\\]$" str))
+     (if (and (stringp str)
+	      (> (length str) 2)
+	      (string-equal "[" (substring str 0 1))
+	      (string-equal "]" (substring str -1)))
 	 (org-babel-read
 	  (concat
 	   "'"
