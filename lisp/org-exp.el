@@ -1609,7 +1609,7 @@ from the buffer."
 	   (ascii "ASCII" "BEGIN_ASCII" "END_ASCII")
 	   (latex "LaTeX" "BEGIN_LaTeX" "END_LaTeX")))
 	(case-fold-search t)
-	fmt beg beg-content end end-content)
+	fmt beg beg-content end end-content ind)
 
     (while formatters
       (setq fmt (pop formatters))
@@ -1622,13 +1622,14 @@ from the buffer."
 	  (replace-match "\\1\\2" t)
 	  (add-text-properties
 	   (point-at-bol) (min (1+ (point-at-eol)) (point-max))
-	   '(org-protected t))))
-      ;; Delete #+attr_backend: stuff of another backend. Those
+	   `(org-protected t original-indentation ,ind))))
+      ;; Delete #+attr_Backend: stuff of another backend. Those
       ;; matching the current backend will be taken care of by
       ;; `org-export-attach-captions-and-attributes'
       (goto-char (point-min))
       (while (re-search-forward (concat "^\\([ \t]*\\)#\\+attr_" (cadr fmt)
 					":[ \t]*\\(.*\\)") nil t)
+	(setq ind (org-get-indentation))
 	(when (not (eq (car fmt) backend))
 	  (delete-region (point-at-bol) (min (1+ (point-at-eol)) (point-max)))))
       ;; Handle #+begin_backend and #+end_backend stuff
@@ -1636,13 +1637,16 @@ from the buffer."
       (while (re-search-forward (concat "^[ \t]*#\\+" (caddr fmt) "\\>.*\n?")
 				nil t)
 	(setq beg (match-beginning 0) beg-content (match-end 0))
+	(setq ind (save-excursion (goto-char beg) (org-get-indentation)))
 	(when (re-search-forward (concat "^[ \t]*#\\+" (cadddr fmt) "\\>.*\n?")
 				 nil t)
 	  (setq end (match-end 0) end-content (match-beginning 0))
 	  (if (eq (car fmt) backend)
 	      ;; yes, keep this
 	      (progn
-		(add-text-properties beg-content end-content '(org-protected t))
+		(add-text-properties
+		 beg-content end-content
+		 `(org-protected t original-indentation ,ind))
 		(delete-region (match-beginning 0) (match-end 0))
 		(save-excursion
 		  (goto-char beg)
