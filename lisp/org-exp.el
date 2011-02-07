@@ -388,7 +388,7 @@ Good for general initialization")
   "Hook for preprocessing an export buffer.
 Pretty much the first thing when exporting is running this hook.
 Point will be in a temporary buffer that contains a copy of
-the original buffer, or of the section that is being export.
+the original buffer, or of the section that is being exported.
 All the other hooks in the org-export-preprocess... category
 also work in that temporary buffer, already modified by various
 stages of the processing.")
