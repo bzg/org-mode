@@ -2427,7 +2427,7 @@ the alist of previous items."
 	      ;; Ending for every item
 	      (org-close-li type)
 	      ;; We're ending last item of the list: end list.
-	      (when lastp (insert (format "\n</%sl>\n" type)))))
+	      (when lastp (insert (format "</%sl>\n" type)))))
 	  (funcall get-closings pos))
     (cond
      ;; At an item: insert appropriate tags in export buffer.
@@ -2458,10 +2458,10 @@ the alist of previous items."
 	  (insert (format "<%sl>\n" type)))
 	(insert (cond
 		 ((equal type "d")
-		  (format "<dt>%s</dt><dd>\n" desc-tag))
+		  (format "<dt>%s</dt><dd>" desc-tag))
 		 ((and (equal type "o") counter)
-		  (format "<li value=\"%s\">\n" counter))
-		 (t "<li>\n")))
+		  (format "<li value=\"%s\">" counter))
+		 (t "<li>")))
 	;; If line had a checkbox, some additional modification is required.
 	(when checkbox
 	  (setq body
