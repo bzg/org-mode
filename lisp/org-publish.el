@@ -267,6 +267,22 @@ You can overwrite this default per project in your
   :group 'org-publish
   :type 'boolean)
 
+(defcustom org-publish-sitemap-date-format "%Y-%m-%d"
+  "Format for `format-time-string' which is used to print a date
+in the sitemap."
+  :group 'org-publish
+  :type 'string)
+
+(defcustom org-publish-sitemap-file-entry-format "%T"
+  "How a sitemap file entry is formated.
+You could use brackets to delimit on what part the link will be.
+
+%T is the title.
+%A is the author.
+%D is the date formated using `org-publish-sitemap-date-format'."
+  :group 'org-publish
+  :type 'string)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Timestamp-related functions
 
@@ -370,6 +386,8 @@ This splices all the components into the list."
 (defvar sitemap-sort-folders)
 (defvar sitemap-ignore-case)
 (defvar sitemap-requested)
+(defvar sitemap-date-format)
+(defvar sitemap-file-entry-format)
 (defun org-publish-compare-directory-files (a b)
   "Predicate for `sort', that sorts folders and files for sitemap."
   (let ((retval t))
@@ -392,8 +410,10 @@ This splices all the components into the list."
 				(not (string-lessp B A))))))
 		((or (equal sitemap-sort-files 'chronologically)
 		     (equal sitemap-sort-files 'anti-chronologically))
-		 (let ((A (org-publish-find-date a))
-		       (B (org-publish-find-date b)))
+		 (let* ((adate (org-publish-find-date a))
+			(bdate (org-publish-find-date b))
+			(A (+ (lsh (car adate) 16) (cadr adate)))
+			(B (+ (lsh (car bdate) 16) (cadr bdate))))
 		   (setq retval (if (equal sitemap-sort-files 'chronologically)
 				    (<= A B)
 				  (>= A B)))))))
@@ -701,6 +721,10 @@ If :makeindex is set, also produce a file theindex.org."
 				"sitemap.org"))
 	  (sitemap-function (or (plist-get project-plist :sitemap-function)
 				'org-publish-org-sitemap))
+	  (sitemap-date-format (or (plist-get project-plist :sitemap-date-format)
+				   org-publish-sitemap-date-format))
+	  (sitemap-file-entry-format (or (plist-get project-plist :sitemap-file-entry-format)
+					 org-publish-sitemap-file-entry-format))
 	  (preparation-function (plist-get project-plist :preparation-function))
 	  (completion-function (plist-get project-plist :completion-function))
 	  (files (org-publish-get-base-files project exclude-regexp)) file)
@@ -776,12 +800,32 @@ Default for SITEMAP-FILENAME is 'sitemap.org'."
 		      (setq indent-str (make-string
 					(+ (length indent-str) 2) ?\ )))))))
 	    ;; This is common to 'flat and 'tree
-	    (insert (concat indent-str " + [[file:" link "]["
-			    (org-publish-find-title file)
-			    "]]\n")))))
+	    (let ((entry
+		   (org-publish-format-file-entry sitemap-file-entry-format 
+						  file project-plist))
+		  (regexp "\\(.*\\)\\[\\([^][]+\\)\\]\\(.*\\)"))
+	      (cond ((string-match-p regexp entry)
+		     (string-match regexp entry)
+		     (insert (concat indent-str " + " (match-string 1 entry)
+				     "[[file:" link "]["
+				     (match-string 2 entry)
+				     "]]" (match-string 3 entry) "\n")))
+		    (t 
+		     (insert (concat indent-str " + [[file:" link "]["
+				     entry
+				     "]]\n"))))))))
       (save-buffer))
     (or visiting (kill-buffer sitemap-buffer))))
 
+(defun org-publish-format-file-entry (fmt file project-plist)
+  (org-replace-escapes fmt
+		       (list (cons "%T" (org-publish-find-title file))
+			     (cons "%D" (format-time-string 
+					 sitemap-date-format 
+					 (org-publish-find-date file)))
+			     (cons "%A" (or (plist-get project-plist :author)
+					    user-full-name)))))
+			    
 (defun org-publish-find-title (file)
   "Find the title of FILE in project."
   (or
@@ -806,7 +850,9 @@ Default for SITEMAP-FILENAME is 'sitemap.org'."
 (defun org-publish-find-date (file)
   "Find the date of FILE in project.
 If FILE provides a #+date keyword use it else use the file
-system's modification time."
+system's modification time.
+
+It returns time in `current-time' format."
   (let ((visiting (find-buffer-visiting file)))
     (save-excursion
       (switch-to-buffer (or visiting (find-file file)))
@@ -815,10 +861,9 @@ system's modification time."
 	(unless visiting
 	  (kill-buffer (current-buffer)))
 	(if date
-	    (let ((dt (org-time-string-to-time date)))
-	      (+ (lsh (car dt) 16) (cadr dt)))
+	    (org-time-string-to-time date)
 	  (when (file-exists-p file)
-	    (org-publish-cache-ctime-of-src file)))))))
+	    (nth 5 (file-attributes file))))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Interactive publishing functions
