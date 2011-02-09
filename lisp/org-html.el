@@ -2467,7 +2467,7 @@ the alist of previous items."
 		(concat
 		 (cond
 		  ((string-match "X" checkbox) "<code>[X]</code> ")
-		  ((string-match " " checkbox) "<code>[ ]</code> ")
+		  ((string-match " " checkbox) "<code>[&nbsp;]</code> ")
 		  (t "<code>[-]</code> "))
 		 body)))
 	;; Return modified line
