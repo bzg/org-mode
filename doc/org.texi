@@ -6880,7 +6880,7 @@ the easiest way to maintain it is through the following commands
 
 @cindex files, adding to agenda list
 @table @kbd
-@orgcmd{C-c [,org-agenda-to-front}
+@orgcmd{C-c [,org-agenda-file-to-front}
 Add current file to the list of agenda files.  The file is added to
 the front of the list.  If it was already in the list, it is moved to
 the front.  With a prefix argument, file is added/moved to the end.
