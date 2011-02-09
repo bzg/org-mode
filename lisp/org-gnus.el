@@ -186,7 +186,35 @@ If `org-store-link' was called with a prefix arg the meaning of
 	    link (org-gnus-article-link
 		  group	newsgroups message-id x-no-archive))
       (org-add-link-props :link link :description desc)
-      link))))
+      link))
+   ((eq major-mode 'message-mode)
+    (setq org-store-link-plist nil)  ; reset
+    (save-excursion
+      (save-restriction
+        (message-narrow-to-headers)
+        (and (not (message-fetch-field "Message-ID"))
+             (message-generate-headers '(Message-ID)))
+        (goto-char (point-min))
+        (re-search-forward "^Message-ID: *.*$" nil t)
+        (put-text-property (match-beginning 0) (match-end 0) 'message-deletable nil)
+        (let ((gcc (car (last
+                         (message-unquote-tokens
+                          (message-tokenize-header (mail-fetch-field "gcc" nil t) " ,")))))
+              (id (org-remove-angle-brackets (mail-fetch-field "Message-ID")))
+              (to (mail-fetch-field "To"))
+              (from (mail-fetch-field "From"))
+              (subject (mail-fetch-field "Subject"))
+              desc link
+              newsgroup xarchive)       ; those are always nil for gcc
+          (and (not gcc)
+               (error "Can not create link: No Gcc header found."))
+          (org-store-link-props :type "gnus" :from from :subject subject
+                                :message-id id :group gcc :to to)
+          (setq desc (org-email-link-description)
+                link (org-gnus-article-link
+                      gcc newsgroup id xarchive))
+          (org-add-link-props :link link :description desc)
+          link))))))
 
 (defun org-gnus-open-nntp (path)
   "Follow the nntp: link specified by PATH."
