@@ -1116,7 +1116,6 @@ PUB-DIR is set, use this as the publishing directory."
 	 (inquote     nil)
 	 (infixed     nil)
 	 (inverse     nil)
-	 (llt org-plain-list-ordered-item-terminator)
 	 (email       (plist-get opt-plist :email))
 	 (language    (plist-get opt-plist :language))
 	 (keywords    (plist-get opt-plist :keywords))
