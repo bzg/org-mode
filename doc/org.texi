@@ -7452,12 +7452,14 @@ will still be searched for stuck projects.
 @cindex presentation, of agenda items
 
 @vindex org-agenda-prefix-format
-Before displaying items in an agenda view, Org-mode visually prepares
-the items and sorts them.  Each item occupies a single line.  The line
-starts with a @emph{prefix} that contains the @emph{category}
-(@pxref{Categories}) of the item and other important information.  You can
-customize the prefix using the option @code{org-agenda-prefix-format}.
-The prefix is followed by a cleaned-up version of the outline headline
+@vindex org-agenda-tags-column
+Before displaying items in an agenda view, Org-mode visually prepares the
+items and sorts them.  Each item occupies a single line.  The line starts
+with a @emph{prefix} that contains the @emph{category} (@pxref{Categories})
+of the item and other important information.  You can customize in which
+column tags will be displayed through @code{org-agenda-tags-column}.  You can
+also customize the prefix using the option @code{org-agenda-prefix-format}.
+This prefix is followed by a cleaned-up version of the outline headline
 associated with the item.
 
 @menu
