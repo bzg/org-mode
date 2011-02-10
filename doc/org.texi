@@ -8688,8 +8688,8 @@ syntax; it is exported verbatim.
 @node Horizontal rules, Comment lines, Emphasis and monospace, Structural markup elements
 @subheading  Horizontal rules
 @cindex horizontal rules, markup rules
-A line consisting of only dashes, and at least 5 of them, will be
-exported as a horizontal line (@samp{<hr/>} in HTML).
+A line consisting of only dashes, and at least 5 of them, will be exported as
+a horizontal line (@samp{<hr/>} in HTML and @code{\hrule} in @LaTeX{}).
 
 @node Comment lines,  , Horizontal rules, Structural markup elements
 @subheading Comment lines

@@ -2270,7 +2270,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 
   ;; Convert horizontal rules
   (goto-char (point-min))
-  (while (re-search-forward "^----+.$" nil t)
+  (while (re-search-forward "^[ \t]*-\\{5,\\}[ \t]*$" nil t)
     (org-if-unprotected
      (replace-match (org-export-latex-protect-string "\\hrule") t t)))
 
