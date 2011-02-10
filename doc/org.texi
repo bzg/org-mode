@@ -6880,7 +6880,7 @@ the easiest way to maintain it is through the following commands
 
 @cindex files, adding to agenda list
 @table @kbd
-@orgcmd{C-c [,org-agenda-to-front}
+@orgcmd{C-c [,org-agenda-file-to-front}
 Add current file to the list of agenda files.  The file is added to
 the front of the list.  If it was already in the list, it is moved to
 the front.  With a prefix argument, file is added/moved to the end.
@@ -7098,14 +7098,15 @@ following to one your your agenda files:
 
 You can then go ahead and define anniversaries for a BBDB record.  Basically,
 you need to press @kbd{C-o anniversary @key{RET}} with the cursor in a BBDB
-record and then add the date in the format @code{YYYY-MM-DD}, followed by a
-space and the class of the anniversary (@samp{birthday} or @samp{wedding}, or
-a format string).  If you omit the class, it will default to @samp{birthday}.
-Here are a few examples, the header for the file @file{org-bbdb.el} contains
-more detailed information.
+record and then add the date in the format @code{YYYY-MM-DD} or @code{MM-DD},
+followed by a space and the class of the anniversary (@samp{birthday} or
+@samp{wedding}, or a format string).  If you omit the class, it will default to
+@samp{birthday}. Here are a few examples, the header for the file
+@file{org-bbdb.el} contains more detailed information.
 
 @example
 1973-06-22
+06-22
 1955-08-02 wedding
 2008-04-14 %s released version 6.01 of org-mode, %d years ago
 @end example
@@ -7451,12 +7452,14 @@ will still be searched for stuck projects.
 @cindex presentation, of agenda items
 
 @vindex org-agenda-prefix-format
-Before displaying items in an agenda view, Org-mode visually prepares
-the items and sorts them.  Each item occupies a single line.  The line
-starts with a @emph{prefix} that contains the @emph{category}
-(@pxref{Categories}) of the item and other important information.  You can
-customize the prefix using the option @code{org-agenda-prefix-format}.
-The prefix is followed by a cleaned-up version of the outline headline
+@vindex org-agenda-tags-column
+Before displaying items in an agenda view, Org-mode visually prepares the
+items and sorts them.  Each item occupies a single line.  The line starts
+with a @emph{prefix} that contains the @emph{category} (@pxref{Categories})
+of the item and other important information.  You can customize in which
+column tags will be displayed through @code{org-agenda-tags-column}.  You can
+also customize the prefix using the option @code{org-agenda-prefix-format}.
+This prefix is followed by a cleaned-up version of the outline headline
 associated with the item.
 
 @menu
@@ -8685,8 +8688,8 @@ syntax; it is exported verbatim.
 @node Horizontal rules, Comment lines, Emphasis and monospace, Structural markup elements
 @subheading  Horizontal rules
 @cindex horizontal rules, markup rules
-A line consisting of only dashes, and at least 5 of them, will be
-exported as a horizontal line (@samp{<hr/>} in HTML).
+A line consisting of only dashes, and at least 5 of them, will be exported as
+a horizontal line (@samp{<hr/>} in HTML and @code{\hrule} in @LaTeX{}).
 
 @node Comment lines,  , Horizontal rules, Structural markup elements
 @subheading Comment lines
@@ -10973,9 +10976,13 @@ of links to all files in the project.
 (default) or @code{last} to display folders first or last,
 respectively.  Any other value will mix files and folders.
 
-@item @code{:sitemap-alphabetically}
-@tab The site map is normally sorted alphabetically.  Set this explicitly to
-@code{nil} to turn off sorting.
+@item @code{:sitemap-sort-files}
+@tab How the files are sorted in the site map.  Set this
+@code{alphabetically} (default), @code{chronologically} or
+@code{anti-chronologically}. @code{chronologically} sorts the files with
+older date first while @code{anti-chronologically} sorts the files with newer
+date first. @code{alphabetically} sorts the files alphabetically. The date of
+a file is retrieved with @code{org-publish-find-date}.
 
 @item @code{:sitemap-ignore-case}
 @tab Should sorting be case-sensitive?  Default @code{nil}.

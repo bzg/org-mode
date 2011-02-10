@@ -103,6 +103,15 @@ This setting can also be overridden in the CRYPTKEY property."
         (and (boundp 'epa-file-encrypt-to) epa-file-encrypt-to)
         (message "No crypt key set, using symmetric encryption."))))
 
+(defun org-encrypt-string (str crypt-key)
+  "Return STR encrypted with CRYPT-KEY."
+  ;; Text and key have to be identical, otherwise we re-crypt.
+  (if (and (string= crypt-key (get-text-property 0 'org-crypt-key str))
+	   (string= (sha1 str) (get-text-property 0 'org-crypt-checksum str)))
+      (get-text-property 0 'org-crypt-text str)
+    (let ((epg-context (epg-make-context nil t t)))
+      (epg-encrypt-string epg-context str (epg-list-keys epg-context crypt-key)))))
+
 (defun org-encrypt-entry ()
   "Encrypt the content of the current headline."
   (interactive)
@@ -122,10 +131,7 @@ This setting can also be overridden in the CRYPTKEY property."
           (org-back-over-empty-lines)
           (setq end (point)
                 encrypted-text
-                (epg-encrypt-string
-                 epg-context
-                 (buffer-substring-no-properties beg end)
-                 (epg-list-keys epg-context crypt-key)))
+		(org-encrypt-string (buffer-substring beg end) crypt-key))
           (delete-region beg end)
           (insert encrypted-text)
           (when folded
@@ -152,16 +158,24 @@ This setting can also be overridden in the CRYPTKEY property."
 			(forward-line)
 			(point)))
 		 (epg-context (epg-make-context nil t t))
+		 (encrypted-text (buffer-substring-no-properties (point) end))
 		 (decrypted-text
 		  (decode-coding-string
 		   (epg-decrypt-string
 		    epg-context
-		    (buffer-substring-no-properties (point) end))
+		    encrypted-text)
 		   'utf-8)))
 	    ;; Delete region starting just before point, because the
 	    ;; outline property starts at the \n of the heading.
 	    (delete-region (1- (point)) end)
-	    (insert "\n" decrypted-text)
+	    ;; Store a checksum of the decrypted and the encrypted
+	    ;; text value. This allow to reuse the same encrypted text
+	    ;; if the text does not change, and therefore avoid a
+	    ;; re-encryption process.
+	    (insert "\n" (propertize decrypted-text
+				     'org-crypt-checksum (sha1 decrypted-text)
+				     'org-crypt-key (org-crypt-key-for-heading)
+				     'org-crypt-text encrypted-text))
 	    (when heading-was-invisible-p
 	      (goto-char heading-point)
 	      (org-flag-subtree t))

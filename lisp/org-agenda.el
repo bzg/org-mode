@@ -2161,6 +2161,7 @@ Pressing `<' twice means to restrict to the current subtree or region
       (put 'org-agenda-redo-command 'org-lprops nil)
       ;; Remember where this call originated
       (setq org-agenda-last-dispatch-buffer (current-buffer))
+      (kill-local-variable 'org-agenda-current-span)
       (unless keys
 	(setq ans (org-agenda-get-restriction-and-command prefix-descriptions)
 	      keys (car ans)
@@ -3609,7 +3610,7 @@ given in `org-agenda-start-on-weekday'."
     (when (and org-agenda-clockreport-mode clocktable-start)
       (let ((org-agenda-files (org-agenda-files nil 'ifmode))
 	    ;; the above line is to ensure the restricted range!
-	    (p org-agenda-clockreport-parameter-plist)
+	    (p (copy-sequence org-agenda-clockreport-parameter-plist))
 	    tbl)
 	(setq p (org-plist-delete p :block))
 	(setq p (plist-put p :tstart clocktable-start))
@@ -3623,7 +3624,6 @@ given in `org-agenda-start-on-weekday'."
 						      ""
 						    x))
 						filter ""))))
-	(message "%s" (plist-get p :tags)) (sit-for 2)
 	(setq tbl (apply 'org-get-clocktable p))
 	(insert tbl)))
     (goto-char (point-min))
@@ -4489,7 +4489,8 @@ the documentation of `org-diary'."
 	      (while (setq arg (pop args))
 		(cond
 		 ((and (eq arg :todo)
-		       (equal date (calendar-current-date)))
+		       (equal date (calendar-gregorian-from-absolute
+				    (org-today))))
 		  (setq rtn (org-agenda-get-todos))
 		  (setq results (append results rtn)))
 		 ((eq arg :timestamp)
@@ -5921,7 +5922,7 @@ to switch to narrowing."
 	 (effort-prompt "")
 	 (inhibit-read-only t)
 	 (current org-agenda-filter)
-	 a n tag)
+	 maybe-reftresh a n tag)
     (unless char
       (message
        "%s by tag [%s ], [TAB], %s[/]:off, [+-]:narrow, [>=<?]:effort: "
@@ -5967,11 +5968,13 @@ to switch to narrowing."
 	    (if modifier
 		(push modifier org-agenda-filter))))
 	(if (not (null org-agenda-filter))
-	    (org-agenda-filter-apply org-agenda-filter))))
+	    (org-agenda-filter-apply org-agenda-filter)))
+      (setq maybe-reftresh t))
      ((equal char ?/)
       (org-agenda-filter-by-tag-show-all)
       (when (get 'org-agenda-filter :preset-filter)
-	(org-agenda-filter-apply org-agenda-filter)))
+	(org-agenda-filter-apply org-agenda-filter))
+      (setq maybe-reftresh t))
      ((or (equal char ?\ )
 	  (setq a (rassoc char alist))
 	  (and (>= char ?0) (<= char ?9)
@@ -5987,8 +5990,12 @@ to switch to narrowing."
       (setq org-agenda-filter
 	    (cons (concat (if strip "-" "+") tag)
 		  (if narrow current nil)))
-      (org-agenda-filter-apply org-agenda-filter))
-     (t (error "Invalid tag selection character %c" char)))))
+      (org-agenda-filter-apply org-agenda-filter)
+      (setq maybe-reftresh t))
+     (t (error "Invalid tag selection character %c" char)))
+    (when (and maybe-reftresh
+	       (eq org-agenda-clockreport-mode 'with-filter))
+      (org-agenda-redo))))
 
 (defun org-agenda-get-represented-tags ()
   "Get a list of all tags currently represented in the agenda."

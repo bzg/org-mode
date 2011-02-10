@@ -388,7 +388,7 @@ Good for general initialization")
   "Hook for preprocessing an export buffer.
 Pretty much the first thing when exporting is running this hook.
 Point will be in a temporary buffer that contains a copy of
-the original buffer, or of the section that is being export.
+the original buffer, or of the section that is being exported.
 All the other hooks in the org-export-preprocess... category
 also work in that temporary buffer, already modified by various
 stages of the processing.")
@@ -963,6 +963,7 @@ value of `org-export-run-in-background'."
 		  (setq r1 (read-char-exclusive)))
 	      (error "No enclosing node with LaTeX_CLASS or EXPORT_FILE_NAME")
 	      )))))
+    (redisplay)
     (and bpos (goto-char bpos))
     (setq r2 (if (< r1 27) (+ r1 96) r1))
     (unless (setq ass (assq r2 cmds))

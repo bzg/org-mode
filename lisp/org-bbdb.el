@@ -136,12 +136,12 @@
   '(("birthday" lambda
      (name years suffix)
      (concat "Birthday: [[bbdb:" name "][" name " ("
-	     (number-to-string years)
+	     (format "%s" years)        ; handles numbers as well as strings
 	     suffix ")]]"))
     ("wedding" lambda
      (name years suffix)
      (concat "[[bbdb:" name "][" name "'s "
-	     (number-to-string years)
+	     (format "%s" years)
 	     suffix " wedding anniversary]]")))
   "How different types of anniversaries should be formatted.
 An alist of elements (STRING . FORMAT) where STRING is the name of an
@@ -239,11 +239,16 @@ italicized, in all other cases it is left unchanged."
 
 (defun org-bbdb-anniv-extract-date (time-str)
   "Convert YYYY-MM-DD to (month date year).
-Argument TIME-STR is the value retrieved from BBDB."
-  (multiple-value-bind (y m d) (values-list (bbdb-split time-str "-"))
-    (list (string-to-number m)
-	  (string-to-number d)
-	  (string-to-number y))))
+Argument TIME-STR is the value retrieved from BBDB.  If YYYY- is omitted
+it will be considered unknown."
+  (multiple-value-bind (a b c) (values-list (bbdb-split time-str "-"))
+    (if (eq c nil)
+        (list (string-to-number a)
+              (string-to-number b)
+              nil)
+      (list (string-to-number b)
+            (string-to-number c)
+            (string-to-number a)))))
 
 (defun org-bbdb-anniv-split (str)
   "Split multiple entries in the BBDB anniversary field.
@@ -326,8 +331,12 @@ This is used by Org to re-create the anniversary hash table."
 				 class org-bbdb-anniversary-format-alist t))
                            class))	; (as format string)
                  (name (nth 1 rec))
-                 (years (- y (car rec)))
-                 (suffix (diary-ordinal-suffix years))
+                 (years (if (eq (car rec) nil)
+                            "unknown"
+                          (- y (car rec))))
+                 (suffix (if (eq (car rec) nil)
+                             ""
+                           (diary-ordinal-suffix years)))
                  (tmp (cond
                        ((functionp form)
                         (funcall form name years suffix))

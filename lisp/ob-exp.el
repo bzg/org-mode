@@ -222,7 +222,7 @@ options are taken from `org-babel-default-header-args'."
 			 (car (last lob-info)))
 		   'lob))))
 	(setq end (+ end (- (length replacement) (length (match-string 0)))))
-	(replace-match replacement t t)))))
+	(if replacement (replace-match replacement t t))))))
 
 (defun org-babel-exp-do-export (info type)
   "Return a string with the exported content of a code block.
