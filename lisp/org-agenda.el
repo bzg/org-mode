@@ -2161,6 +2161,7 @@ Pressing `<' twice means to restrict to the current subtree or region
       (put 'org-agenda-redo-command 'org-lprops nil)
       ;; Remember where this call originated
       (setq org-agenda-last-dispatch-buffer (current-buffer))
+      (kill-local-variable 'org-agenda-current-span)
       (unless keys
 	(setq ans (org-agenda-get-restriction-and-command prefix-descriptions)
 	      keys (car ans)
