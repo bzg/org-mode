@@ -155,10 +155,8 @@ learn more about their use and default values.
   :expand-quoted-html    `org-export-html-expand'
   :timestamp             `org-export-html-with-timestamp'
   :publishing-directory  `org-export-publishing-directory'
-  :preamble              `org-export-html-preamble'
-  :postamble             `org-export-html-postamble'
-  :auto-preamble         `org-export-html-auto-preamble'
-  :auto-postamble        `org-export-html-auto-postamble'
+  :html-preamble         `org-export-html-preamble'
+  :html-postamble        `org-export-html-postamble'
   :author                `user-full-name'
   :email                 `user-mail-address'
 

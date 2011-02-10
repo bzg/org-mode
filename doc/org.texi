@@ -10839,8 +10839,6 @@ respective variable for details.
 @vindex org-export-publishing-directory
 @vindex org-export-html-preamble
 @vindex org-export-html-postamble
-@vindex org-export-html-auto-preamble
-@vindex org-export-html-auto-postamble
 @vindex user-full-name
 @vindex user-mail-address
 @vindex org-export-select-tags
@@ -10888,10 +10886,8 @@ respective variable for details.
 @item @code{:expand-quoted-html}    @tab @code{org-export-html-expand}
 @item @code{:timestamp}             @tab @code{org-export-html-with-timestamp}
 @item @code{:publishing-directory}  @tab @code{org-export-publishing-directory}
-@item @code{:preamble}              @tab @code{org-export-html-preamble}
-@item @code{:postamble}             @tab @code{org-export-html-postamble}
-@item @code{:auto-preamble}         @tab @code{org-export-html-auto-preamble}
-@item @code{:auto-postamble}        @tab @code{org-export-html-auto-postamble}
+@item @code{:html-preamble}         @tab @code{org-export-html-preamble}
+@item @code{:html-postamble}        @tab @code{org-export-html-postamble}
 @item @code{:author}                @tab @code{user-full-name}
 @item @code{:email}                 @tab @code{user-mail-address} : @code{addr;addr;..}
 @item @code{:select-tags}           @tab @code{org-export-select-tags}
@@ -11103,8 +11099,7 @@ right place on the web server, and publishing images to it.
           :table-of-contents nil
           :style "<link rel=\"stylesheet\"
                   href=\"../other/mystyle.css\" type=\"text/css\"/>"
-          :auto-preamble t
-          :auto-postamble nil)
+          :html-preamble t)
 
          ("images"
           :base-directory "~/images/"
