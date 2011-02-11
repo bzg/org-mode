@@ -3091,7 +3091,7 @@ gnus:group                                @r{Gnus group link}
 gnus:group#id                             @r{Gnus article link}
 bbdb:R.*Stallman                          @r{BBDB link (with regexp)}
 irc:/irc.com/#emacs/bob                   @r{IRC link}
-info:org:External%20links                 @r{Info node link (with encoded space)}
+info:org#External%20links                 @r{Info node link (with encoded space)}
 shell:ls *.org                            @r{A shell command}
 elisp:org-agenda                          @r{Interactive Elisp command}
 elisp:(find-file-other-frame "Elisp.org") @r{Elisp form to evaluate}
