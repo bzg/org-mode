@@ -120,6 +120,10 @@ target       Specification of where the captured item should be placed.
              (file \"path/to/file\")
                  Text will be placed at the beginning or end of that file
 
+             (currentfile)
+                 Text will be placed at the beginning or end of the file
+                 org-capture is called from
+
              (id \"id of existing org entry\")
                  File as child of this entry, or in the body of the entry
 
@@ -266,6 +270,8 @@ calendar                |  %:type %:date"
 		   (list :tag "File"
 			 (const :format "" file)
 			 (file :tag "  File"))
+		   (list :tag "Current file"
+			 (const :format "" currentfile))
 		   (list :tag "ID"
 			 (const :format "" id)
 			 (string :tag "  ID"))
@@ -631,6 +637,12 @@ already gone.  Any prefix argument will be passed to the refile comand."
        ((eq (car target) 'file)
 	(set-buffer (org-capture-target-buffer (nth 1 target)))
 	(setq target-entry-p nil))
+
+       ((eq (car target) 'currentfile)
+	(if (not (and (buffer-file-name) (org-mode-p)))
+	    (error "Cannot call this capture template outside of an Org buffer")
+	  (set-buffer (org-capture-target-buffer (buffer-file-name)))
+	  (setq target-entry-p nil)))
 
        ((eq (car target) 'id)
 	(let ((loc (org-id-find (nth 1 target))))
