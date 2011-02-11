@@ -73,6 +73,11 @@ for timed events.  If non-zero, alarms are created.
   :group 'org-export-icalendar
   :type 'boolean)
 
+(defcustom org-icalendar-honor-noexport-tag nil
+  "Non-nil means don't export entries with a :noexport: tag."
+  :group 'org-export-icalendar
+  :type 'boolean)
+
 (defcustom org-icalendar-use-deadline '(event-if-not-todo todo-due)
   "Contexts where iCalendar export should use a deadline time stamp.
 This is a list with several symbols in it.  Valid symbol are:
@@ -299,7 +304,7 @@ When COMBINE is non nil, add the category to each line."
 	      (format-time-string (cdr org-time-stamp-formats) (current-time))
 	      "DTSTART"))
 	hd ts ts2 state status (inc t) pos b sexp rrule
-	scheduledp deadlinep todo prefix due start
+	scheduledp deadlinep todo prefix due start tags
 	tmp pri categories location summary desc uid alarm
 	(sexp-buffer (get-buffer-create "*ical-tmp*")))
     (org-refresh-category-properties)
@@ -315,6 +320,7 @@ When COMBINE is non nil, add the category to each line."
 	      (throw :skip nil)))
 	  (setq pos (match-beginning 0)
 		ts (match-string 0)
+		tags (org-get-tags-at)
 		inc t
 		hd (condition-case nil
 		       (org-icalendar-cleanup-string
@@ -354,6 +360,10 @@ When COMBINE is non nil, add the category to each line."
 		  ))
 	  (when (and (not org-icalendar-use-plain-timestamp)
 		     (not deadlinep) (not scheduledp))
+	    (throw :skip t))
+	  ;; don't export entries with a :noexport: tag
+	  (when (and t org-icalendar-honor-noexport-tag
+		     (member "noexport" tags))
 	    (throw :skip t))
 	  (when (and
 		 deadlinep
