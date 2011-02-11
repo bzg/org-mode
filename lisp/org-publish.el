@@ -55,6 +55,7 @@
   (require 'cl))
 (require 'org)
 (require 'org-exp)
+(require 'format-spec)
 
 (eval-and-compile
   (unless (fboundp 'declare-function)
@@ -271,13 +272,13 @@ in the sitemap."
   :group 'org-publish
   :type 'string)
 
-(defcustom org-publish-sitemap-file-entry-format "%T"
+(defcustom org-publish-sitemap-file-entry-format "%t"
   "How a sitemap file entry is formated.
 You could use brackets to delimit on what part the link will be.
 
-%T is the title.
-%A is the author.
-%D is the date formated using `org-publish-sitemap-date-format'."
+%t is the title.
+%a is the author.
+%d is the date formated using `org-publish-sitemap-date-format'."
   :group 'org-publish
   :type 'string)
 
@@ -816,13 +817,11 @@ Default for SITEMAP-FILENAME is 'sitemap.org'."
     (or visiting (kill-buffer sitemap-buffer))))
 
 (defun org-publish-format-file-entry (fmt file project-plist)
-  (org-replace-escapes fmt
-		       (list (cons "%T" (org-publish-find-title file))
-			     (cons "%D" (format-time-string 
-					 sitemap-date-format 
-					 (org-publish-find-date file)))
-			     (cons "%A" (or (plist-get project-plist :author)
-					    user-full-name)))))
+  (format-spec fmt
+	     `((?t . ,(org-publish-find-title file))
+	       (?d . ,(format-time-string sitemap-date-format 
+					  (org-publish-find-date file)))
+	       (?a . ,(or (plist-get project-plist :author) user-full-name)))))
 			    
 (defun org-publish-find-title (file)
   "Find the title of FILE in project."
