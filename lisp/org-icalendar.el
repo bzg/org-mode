@@ -74,7 +74,7 @@ for timed events.  If non-zero, alarms are created.
   :type 'boolean)
 
 (defcustom org-icalendar-honor-noexport-tag nil
-  "Non-nil means don't export entries with a :noexport: tag."
+  "Non-nil means don't export entries with a tag in `org-export-exclude-tags'."
   :group 'org-export-icalendar
   :type 'boolean)
 
@@ -362,8 +362,9 @@ When COMBINE is non nil, add the category to each line."
 		     (not deadlinep) (not scheduledp))
 	    (throw :skip t))
 	  ;; don't export entries with a :noexport: tag
-	  (when (and t org-icalendar-honor-noexport-tag
-		     (member "noexport" tags))
+	  (when (and org-icalendar-honor-noexport-tag
+		     (delq nil (mapcar (lambda(x) 
+					 (member x org-export-exclude-tags)) tags)))
 	    (throw :skip t))
 	  (when (and
 		 deadlinep
