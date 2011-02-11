@@ -109,6 +109,14 @@ force an export command into the current process."
   :group 'org-export-general
   :type 'boolean)
 
+(defcustom org-export-initial-scope 'buffer
+  "The initial scope when exporting with `org-export'.
+This variable can be either set to 'buffer or 'subtree."
+  :group 'org-export-general
+  :type '(choice
+	  (const :tag "Export current buffer" 'buffer)
+	  (const :tag "Export current subtree" 'subtree)))
+
 (defcustom org-export-select-tags '("export")
   "Tags that select a tree for export.
 If any such tag is found in a buffer, all trees that do not carry one
@@ -872,13 +880,18 @@ to a file.  For details see the docstring of `org-export-run-in-background'.
 The prefix argument ARG will be passed to the exporter.  However, if
 ARG is a double universal prefix \\[universal-argument] \\[universal-argument], \
 that means to inverse the
-value of `org-export-run-in-background'."
+value of `org-export-run-in-background'.
+
+If `org-export-initial-scope' is set to 'subtree, try to export
+the current subtree, otherwise try to export the whole buffer.
+Pressing `1' will switch between these two options."
   (interactive "P")
   (let* ((bg (org-xor (equal arg '(16)) org-export-run-in-background))
-	 subtree-p
+	 (subtree-p (or (org-region-active-p)
+			(eq org-export-initial-scope 'subtree)))
 	 (help "[t]   insert the export option template
 \[v]   limit export to visible part of outline tree
-\[1]   only export the current subtree
+\[1]   switch buffer/subtree export
 \[SPC] publish enclosing subtree (with LaTeX_CLASS or EXPORT_FILE_NAME prop)
 
 \[a/n/u] export as ASCII/Latin-1/UTF-8         [A/N/U] to temporary buffer
@@ -937,17 +950,21 @@ value of `org-export-run-in-background'."
 	 (cpos (point)) (cbuf (current-buffer)) bpos)
     (save-excursion
       (save-window-excursion
+	(if subtree-p
+	    (message "Export subtree: ")
+	  (message "Export buffer: "))
 	(delete-other-windows)
 	(with-output-to-temp-buffer "*Org Export/Publishing Help*"
 	  (princ help))
 	(org-fit-window-to-buffer (get-buffer-window
 				   "*Org Export/Publishing Help*"))
-	(message "Select command: ")
-	(setq r1 (read-char-exclusive))
-	(when (eq r1 ?1)
-	  (setq subtree-p t)
-	  (message "Select command (for subtree): ")
-	  (setq r1 (read-char-exclusive)))
+	(while (eq (setq r1 (read-char-exclusive)) ?1)
+	  (cond (subtree-p
+		 (setq subtree-p nil)
+		 (message "Export buffer: "))
+		((not subtree-p) 
+		 (setq subtree-p t)
+		 (message "Export subtree: "))))
 	(when (eq r1 ?\ )
 	  (let ((case-fold-search t))
 	    (if (re-search-backward
