@@ -52,9 +52,9 @@
     (let (link desc)
       (setq link (org-make-link "info:"
 				(file-name-nondirectory Info-current-file)
-				":" Info-current-node))
+				"#" Info-current-node))
       (setq desc (concat (file-name-nondirectory Info-current-file)
-			 ":" Info-current-node))
+			 "#" Info-current-node))
       (org-store-link-props :type "info" :file Info-current-file
 			    :node Info-current-node
 			    :link link :desc desc)
@@ -67,7 +67,7 @@
 
 (defun org-info-follow-link (name)
   "Follow an Info file and node link specified by NAME."
-  (if (or (string-match "\\(.*\\)::?\\(.*\\)" name)
+  (if (or (string-match "\\(.*\\)[#:]:?\\(.*\\)" name)
           (string-match "\\(.*\\)" name))
       (progn
 	(require 'info)
