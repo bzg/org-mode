@@ -863,9 +863,7 @@ may be specified in the properties of the current outline entry."
 	    (mapcar
 	     (lambda (header-arg)
 	       (and (setq val
-			  (or (condition-case nil
-				  (org-entry-get (point) header-arg t)
-				(error nil))
+			  (or (org-entry-get (point) header-arg t)
 			      (cdr (assoc header-arg org-file-properties))))
 		    (cons (intern (concat ":" header-arg))
 			  (org-babel-read val))))

@@ -520,14 +520,9 @@ property, locally or anywhere up in the hierarchy."
   (let* ((beg (org-table-begin))
 	 (end (org-table-end))
 	 (txt (buffer-substring-no-properties beg end))
-	 (file (or file
-		   (condition-case nil
-		       (org-entry-get beg "TABLE_EXPORT_FILE" t)
-		     (error nil))))
-	 (format (or format
-		     (condition-case nil
-			 (org-entry-get beg "TABLE_EXPORT_FORMAT" t)
-		       (error nil))))
+	 (file (or file (org-entry-get beg "TABLE_EXPORT_FILE" t)))
+	 (format (or format 
+		     (org-entry-get beg "TABLE_EXPORT_FORMAT" t)))
 	 buf deffmt-readable)
     (unless file
       (setq file (read-file-name "Export table to: "))

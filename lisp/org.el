@@ -8401,9 +8401,7 @@ For file links, arg negates `org-context-in-file-links'."
 		       (interactive-p)
 		       (not custom-id))
 		  (and org-link-to-org-use-id
-		       (condition-case nil
-			   (org-entry-get nil "ID")
-			 (error nil)))))
+			   (org-entry-get nil "ID"))))
 	 ;; We can make a link using the ID.
 	 (setq link (condition-case nil
 			(prog1 (org-id-store-link)
