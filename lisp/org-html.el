@@ -523,6 +523,15 @@ a file."
   :group 'org-export-html
   :type 'string)
 
+
+(defcustom org-export-html-protect-char-alist
+  '(("&" . "&amp;")
+    ("<" . "&lt;")
+    (">" . "&gt;"))
+  "Alist of characters to be converted by `org-html-protect'."
+  :type '((repeat (cons (string :tag "Character")
+			(string :tag "HTML equivalent")))))
+  
 (defgroup org-export-htmlize nil
   "Options for processing examples with htmlize.el."
   :tag "Org Export Htmlize"
@@ -2218,19 +2227,15 @@ that uses these same face definitions."
   (goto-char (point-min)))
 
 (defun org-html-protect (s)
-  "convert & to &amp;, < to &lt; and > to &gt;"
-  (let ((start 0))
-    (while (string-match "&" s start)
-      (setq s (replace-match "&amp;" t t s)
-	    start (1+ (match-beginning 0))))
-    (while (string-match "<" s)
-      (setq s (replace-match "&lt;" t t s)))
-    (while (string-match ">" s)
-      (setq s (replace-match "&gt;" t t s)))
-;    (while (string-match "\"" s)
-;      (setq s (replace-match "&quot;" t t s)))
-    )
-  s)
+  "Convert characters to HTML equivalent.
+Possible conversions are set in `org-export-html-protect-char-alist'."
+  (let ((start 0) 
+	(cl org-export-html-protect-char-alist) c)
+    (while (setq c (pop cl))
+      (while (string-match (car c) s start)
+	(setq s (replace-match (cdr c) t t s)
+	      start (1+ (match-beginning 0)))))
+    s))
 
 (defun org-html-expand (string)
   "Prepare STRING for HTML export.  Apply all active conversions.
