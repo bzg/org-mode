@@ -8016,7 +8016,7 @@ The prefix arg is passed through to the command if possible."
 			   (fset 'read-string old)
 			 (fmakunbound 'read-string)))))))
 
-     ((eq action '?S)
+     ((equal action ?S)
       (let ((days (read-number
 		   (format "Scatter tasks across how many %sdays: "
 			   (if arg "week" "")) 7)))
