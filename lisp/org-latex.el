@@ -850,7 +850,7 @@ when PUB-DIR is set, use this as the publishing directory."
 	       "\n\n"))
 
     ;; insert lines before the first headline
-    (unless skip
+    (unless (or skip (string-match "^\\*" first-lines))
       (insert first-lines))
 
     ;; export the content of headlines
