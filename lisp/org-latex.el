@@ -305,8 +305,8 @@ the link, the second with the link description."
 
 (defcustom org-export-latex-hyperref-format "\\hyperref[%s]{%s}"
   "A printf format string to be applied to hyperref links.
-The format must contain two %s instances.  The first will be filled with
-the link, the second with the link description."
+The format must contain one or two %s instances.  The first one
+will be filled with the link, the second with its description."
   :group 'org-export-latex
   :type 'string)
 
