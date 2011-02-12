@@ -13568,7 +13568,8 @@ when a \"nil\" value can supersede a non-nil value higher up the hierarchy."
 	  ;; We need a special property.  Use `org-entry-properties' to
 	  ;; retrieve it, but specify the wanted property
 	  (cdr (assoc property (org-entry-properties nil 'special property)))
-	(let ((range (org-get-property-block)))
+	(let ((range (unless (org-before-first-heading-p)
+		       (org-get-property-block))))
 	  (if (and range
 		   (goto-char (car range))
 		   (re-search-forward
@@ -13681,6 +13682,7 @@ should be considered as undefined (this is the meaning of nil here).
 However, if LITERAL-NIL is set, return the string value \"nil\" instead."
   (move-marker org-entry-property-inherited-from nil)
   (let (tmp)
+    (unless (org-before-first-heading-p)
     (save-excursion
       (save-restriction
 	(widen)
@@ -13691,11 +13693,12 @@ However, if LITERAL-NIL is set, return the string value \"nil\" instead."
 	      (move-marker org-entry-property-inherited-from (point))
 	      (throw 'ex tmp))
 	    (or (org-up-heading-safe) (throw 'ex nil)))))
+      ))
       (setq tmp (or tmp
 		    (cdr (assoc property org-file-properties))
 		    (cdr (assoc property org-global-properties))
 		    (cdr (assoc property org-global-properties-fixed))))
-      (if literal-nil tmp (org-not-nil tmp)))))
+      (if literal-nil tmp (org-not-nil tmp))))
 
 (defvar org-property-changed-functions nil
   "Hook called when the value of a property has changed.
