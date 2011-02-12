@@ -199,10 +199,15 @@ When nil of the empty string, use the abbreviation retrieved from Emacs."
 	  (const :tag "Unspecified" nil)
 	  (string :tag "Time zone")))
 
-(defcustom org-icalendar-date-time-format ":%Y%m%dT%H%M%S"
-  "format-string for exporting icalendar DATE-TIME.
-See `format-time-string' for a full documentation. The only
-difference is that `org-icalendar-timezone' is used for %Z
+;; Backward compatibility with previous variable
+(defvar org-icalendar-use-UTC-date-time nil)
+(defcustom org-icalendar-date-time-format
+  (if org-icalendar-use-UTC-date-time
+      ":%Y%m%dT%H%M%SZ"
+    ":%Y%m%dT%H%M%S")
+  "Format-string for exporting icalendar DATE-TIME.
+See `format-time-string' for a full documentation.  The only
+difference is that `org-icalendar-timezone' is used for %Z.
 
 Interesting value are:
  - \":%Y%m%dT%H%M%S\" for local time
@@ -216,8 +221,9 @@ Interesting value are:
 	  (const :tag "Universal time" ":%Y%m%dT%H%M%SZ")
 	  (string :tag "Explicit format")))
 
-(defun org-icalendar-use-UTC-date-timep () 
-  (char-equal (elt org-icalendar-date-time-format (1- (length org-icalendar-date-time-format))) ?Z))
+(defun org-icalendar-use-UTC-date-timep ()
+  (char-equal (elt org-icalendar-date-time-format
+		   (1- (length org-icalendar-date-time-format))) ?Z))
 
 ;;; iCalendar export
 
@@ -376,7 +382,7 @@ When COMBINE is non nil, add the category to each line."
 	    (throw :skip t))
 	  ;; don't export entries with a :noexport: tag
 	  (when (and org-icalendar-honor-noexport-tag
-		     (delq nil (mapcar (lambda(x) 
+		     (delq nil (mapcar (lambda(x)
 					 (member x org-export-exclude-tags)) tags)))
 	    (throw :skip t))
 	  (when (and
@@ -411,7 +417,7 @@ When COMBINE is non nil, add the category to each line."
 	  ;; (c) only a DISPLAY action is defined.
 	  ;; [ESF]
 	  (let ((t1 (ignore-errors (org-parse-time-string ts 'nodefault))))
-	    (if (and (> org-icalendar-alarm-time 0) 
+	    (if (and (> org-icalendar-alarm-time 0)
 		     (car t1) (nth 1 t1) (nth 2 t1))
 		(setq alarm (format "\nBEGIN:VALARM\nACTION:DISPLAY\nDESCRIPTION:%s\nTRIGGER:-P0D0H%dM0S\nEND:VALARM" summary org-icalendar-alarm-time))
 	      (setq alarm ""))
@@ -665,10 +671,12 @@ a time), or the day by one (if it does not contain a time)."
 		(setq h (+ 2 h)))
 	    (setq d (1+ d))))
 	(setq time (encode-time s mi h d m y)))
-      (setq fmt (if have-time 
-		    (replace-regexp-in-string "%Z" org-icalendar-timezone org-icalendar-date-time-format)
+      (setq fmt (if have-time
+		    (replace-regexp-in-string "%Z"
+					      org-icalendar-timezone
+					      org-icalendar-date-time-format)
 		    ";VALUE=DATE:%Y%m%d"))
-      (concat keyword (format-time-string fmt time 
+      (concat keyword (format-time-string fmt time
 					  (and (org-icalendar-use-UTC-date-timep)
 					       have-time))))))
 
