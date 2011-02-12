@@ -5559,8 +5559,8 @@ happen in the line directly following the headline.  Any CLOSED timestamp
 will be removed.  When called with a prefix argument, remove the scheduling
 date from the entry.  Depending on the variable
 @code{org-log-reschedule}@footnote{with corresponding @code{#+STARTUP}
-keywords @code{logredeadline}, @code{lognoteredeadline}, and
-@code{nologredeadline}}, a note will be taken when changing an existing
+keywords @code{logreschedule}, @code{lognotereschedule}, and
+@code{nologreschedule}}, a note will be taken when changing an existing
 scheduling time.
 @c
 @orgcmd{C-c C-x C-k,org-mark-entry-for-agenda-action}
