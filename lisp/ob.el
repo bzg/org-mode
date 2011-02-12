@@ -864,7 +864,7 @@ may be specified in the properties of the current outline entry."
 	     (lambda (header-arg)
 	       (and (setq val
 			  (or (org-entry-get (point) header-arg t)
-			      (cdr (assoc header-arg org-file-properties))))
+			      (org-entry-get (point) (concat ":" header-arg) t)))
 		    (cons (intern (concat ":" header-arg))
 			  (org-babel-read val))))
 	     (mapcar
