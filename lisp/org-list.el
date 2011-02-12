@@ -2079,7 +2079,7 @@ in subtree, ignoring drawers."
 	   block-item
 	   lim-up
 	   lim-down
-	   (orderedp (ignore-errors (org-entry-get nil "ORDERED")))
+	   (orderedp (org-entry-get nil "ORDERED"))
 	   (bounds
 	    ;; In a region, start at first item in region
 	    (cond
@@ -2189,9 +2189,7 @@ With optional prefix argument ALL, do this for the whole buffer."
 	  (recursivep
 	   (or (not org-hierarchical-checkbox-statistics)
 	       (string-match "\\<recursive\\>"
-			     (or (ignore-errors
-				   (org-entry-get nil "COOKIE_DATA"))
-				 ""))))
+			     (or (org-entry-get nil "COOKIE_DATA") ""))))
 	  (bounds (if all
 		      (cons (point-min) (point-max))
 		    (cons (or (ignore-errors (org-back-to-heading) (point))
