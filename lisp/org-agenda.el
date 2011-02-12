@@ -917,7 +917,7 @@ It only matters if `org-agenda-window-setup' is `reorganize-frame'."
   :type '(cons (number :tag "Minimum") (number :tag "Maximum")))
 
 (defcustom org-agenda-restore-windows-after-quit nil
-  "Non-nil means restore window configuration open exiting agenda.
+  "Non-nil means restore window configuration upon exiting agenda.
 Before the window configuration is changed for displaying the agenda,
 the current status is recorded.  When the agenda is exited with
 `q' or `x' and this option is set, the old state is restored.  If
