@@ -893,7 +893,8 @@ may be specified in the current buffer."
 		    (org-babel-merge-params
 		     org-babel-current-buffer-properties
 		     (org-babel-parse-header-arguments
-		      (org-match-string-no-properties 2))))))))))
+		      (org-match-string-no-properties 2)))))
+	    org-babel-current-buffer-properties)))))
 
 (defvar org-src-preserve-indentation)
 (defun org-babel-parse-src-block-match ()
