@@ -1388,9 +1388,9 @@ nil   Never use an ID to make a link, instead link using a text search for
 (defcustom org-context-in-file-links t
   "Non-nil means file links from `org-store-link' contain context.
 A search string will be added to the file name with :: as separator and
-used to find the context when the link is activated by the command 
-`org-open-at-point'. When this option is t, the entire active region 
-will be placed in the search string of the file link. If set to a 
+used to find the context when the link is activated by the command
+`org-open-at-point'. When this option is t, the entire active region
+will be placed in the search string of the file link. If set to a
 positive integer, only the first n lines of context will be stored.
 
 Using a prefix arg to the command \\[org-store-link] (`org-store-link')
@@ -2629,8 +2629,8 @@ See also `org-agenda-jump-prefer-future'."
 The default is to do the same as configured in `org-read-date-prefer-future'.
 But you can also set a deviating value here.
 This may t or nil, or the symbol `org-read-date-prefer-future'."
-  :group 'org-agenda 
-  :group 'org-time 
+  :group 'org-agenda
+  :group 'org-time
   :type '(choice
 	  (const :tag "Use org-read-date-prefer-future"
 		 org-read-date-prefer-future)
@@ -3318,7 +3318,7 @@ lines to the buffer:
 
 (defcustom org-hidden-keywords nil
   "List of symbols corresponding to keywords to be hidden the org buffer.
-For example, a value '(title) for this list will make the document's title 
+For example, a value '(title) for this list will make the document's title
 appear in the buffer without the initial #+TITLE: keyword."
   :group 'org-appearance
   :type '(set (const :tag "#+AUTHOR" author)
@@ -7554,7 +7554,7 @@ If yes, remember the marker and the distance to BEG."
   (interactive)
   (let ((bstart "^[ \t]*#\\+begin")
 	(bend "[ \t]*#\\+end")
-	(case-fold-search t) ;; allow #+BEGIN 
+	(case-fold-search t) ;; allow #+BEGIN
 	b_start b_end)
     (if (org-in-regexps-block-p bstart bend)
 	(progn
@@ -8553,9 +8553,9 @@ according to FMT (default from `org-email-link-description-format')."
     (when (and string (integerp lines) (> lines 0))
       (let ((slines (org-split-string s "\n")))
 	(when (< lines (length slines))
-	  (setq s (mapconcat 
+	  (setq s (mapconcat
 		   'identity
-		   (reverse (nthcdr (- (length slines) lines) 
+		   (reverse (nthcdr (- (length slines) lines)
 				    (reverse slines))) "\n")))))
     (mapconcat 'identity (org-split-string s "[ \t]+") " ")))
 
@@ -11142,7 +11142,7 @@ statistics everywhere."
 	 (first t)
 	 (box-re "\\(\\(\\[[0-9]*%\\]\\)\\|\\(\\[[0-9]*/[0-9]*\\]\\)\\)")
 	 level ltoggle l1 new ndel
-	 (cnt-all 0) (cnt-done 0) is-percent kwd 
+	 (cnt-all 0) (cnt-done 0) is-percent kwd
 	 checkbox-beg ov ovs ove cookie-present)
     (catch 'exit
       (save-excursion
@@ -11187,7 +11187,7 @@ statistics everywhere."
 	    	    (format "[%d/%d]" cnt-done cnt-all))
 	    	  ndel (- (match-end 0) checkbox-beg))
 	    ;; handle overlays when updating cookie from column view
-	    (when (setq ov (car (overlays-at checkbox-beg))) 
+	    (when (setq ov (car (overlays-at checkbox-beg)))
 	      (setq ovs (overlay-start ov) ove (overlay-end ov))
 	      (delete-overlay ov))
 	    (goto-char checkbox-beg)
@@ -11496,8 +11496,8 @@ scheduling will use the corresponding date."
   (interactive "P")
   (let* ((old-date (org-entry-get nil "DEADLINE"))
 	 (repeater (and old-date
-			(string-match 
-			 "\\([.+]+[0-9]+[dwmy]\\(?:[/ ][-+]?[0-9]+[dwmy]\\)?\\) ?" 
+			(string-match
+			 "\\([.+]+[0-9]+[dwmy]\\(?:[/ ][-+]?[0-9]+[dwmy]\\)?\\) ?"
 			 old-date)
 			(match-string 1 old-date))))
     (if remove
@@ -11536,7 +11536,7 @@ scheduling will use the corresponding date."
   (interactive "P")
   (let* ((old-date (org-entry-get nil "SCHEDULED"))
 	 (repeater (and old-date
-			(string-match 
+			(string-match
 			 "\\([.+]+[0-9]+[dwmy]\\(?:[/ ][-+]?[0-9]+[dwmy]\\)?\\) ?"
 			 old-date)
 			(match-string 1 old-date))))
@@ -13518,7 +13518,7 @@ things up because then unnecessary parsing is avoided."
 		   ((equal key1 org-closed-string)    (setq key "CLOSED"))
 		   ((equal key1 org-clock-string)     (setq key "CLOCK")))
 		  (if (and specific (equal key specific) (not (equal key "CLOCK")))
-		      (progn 
+		      (progn
 			(push (cons key string) props)
 			;; no need to search further if match is found
 			(throw 'match t))
@@ -13683,22 +13683,21 @@ However, if LITERAL-NIL is set, return the string value \"nil\" instead."
   (move-marker org-entry-property-inherited-from nil)
   (let (tmp)
     (unless (org-before-first-heading-p)
-    (save-excursion
-      (save-restriction
-	(widen)
-	(catch 'ex
-	  (while t
-	    (when (setq tmp (org-entry-get nil property nil 'literal-nil))
-	      (org-back-to-heading t)
-	      (move-marker org-entry-property-inherited-from (point))
-	      (throw 'ex tmp))
-	    (or (org-up-heading-safe) (throw 'ex nil)))))
-      ))
-      (setq tmp (or tmp
-		    (cdr (assoc property org-file-properties))
-		    (cdr (assoc property org-global-properties))
-		    (cdr (assoc property org-global-properties-fixed))))
-      (if literal-nil tmp (org-not-nil tmp))))
+      (save-excursion
+	(save-restriction
+	  (widen)
+	  (catch 'ex
+	    (while t
+	      (when (setq tmp (org-entry-get nil property nil 'literal-nil))
+		(org-back-to-heading t)
+		(move-marker org-entry-property-inherited-from (point))
+		(throw 'ex tmp))
+	      (or (org-up-heading-safe) (throw 'ex nil)))))))
+    (setq tmp (or tmp
+		  (cdr (assoc property org-file-properties))
+		  (cdr (assoc property org-global-properties))
+		  (cdr (assoc property org-global-properties-fixed))))
+    (if literal-nil tmp (org-not-nil tmp))))
 
 (defvar org-property-changed-functions nil
   "Hook called when the value of a property has changed.
