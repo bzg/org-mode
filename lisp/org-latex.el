@@ -1368,7 +1368,7 @@ If END is non-nil, it is the end of the region."
 			  (match-string 0))
 		   (remove-text-properties (match-beginning 0) (match-end 0)
 					   '(:org-license-to-kill t))))))))))))
-	       
+
 
 (defvar org-export-latex-header-defs nil
   "The header definitions that might be used in the LaTeX body.")
@@ -1468,7 +1468,7 @@ links, keywords, lists, tables, fixed-width"
     (insert "\n" string)
 
     ;; Preserve math snippets
-    
+
     (let* ((matchers (plist-get org-format-latex-options :matchers))
 	   (re-list org-latex-regexps)
 	   beg end re e m n block off)
@@ -1512,6 +1512,7 @@ links, keywords, lists, tables, fixed-width"
 			       '(org-protected t)))))
     (when (plist-get org-export-latex-options-plist :emphasize)
       (org-export-latex-fontify))
+    (org-export-latex-time-stamps)
     (org-export-latex-keywords-maybe)
     (org-export-latex-special-chars
      (plist-get org-export-latex-options-plist :sub-superscript))
@@ -1787,7 +1788,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
                              (string-match "\\<align=\\([^ \t\n\r]+\\)" attr)
                              (match-string 1 attr))
                   floatp (or caption label)
-		  placement     (if (and attr 
+		  placement     (if (and attr
 					 (stringp attr)
 					 (string-match "[ \t]*\\<placement=\\(\\S-+\\)" attr))
 				    (match-string 1 attr)
