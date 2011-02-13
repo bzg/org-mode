@@ -7276,7 +7276,7 @@ the same tree node, and the headline of the tree node in the Org-mode file."
     (org-agenda-date-earlier (prefix-numeric-value arg)))))
 
 (defun org-agenda-date-later (arg &optional what)
-  "Change the date of this item to one day later."
+  "Change the date of this item to ARG day(s) later."
   (interactive "p")
   (org-agenda-check-type t 'agenda 'timeline)
   (org-agenda-check-no-diary)
@@ -7295,7 +7295,7 @@ the same tree node, and the headline of the tree node in the Org-mode file."
     (message "Time stamp changed to %s" org-last-changed-timestamp)))
 
 (defun org-agenda-date-earlier (arg &optional what)
-  "Change the date of this item to one day earlier."
+  "Change the date of this item to ARG day(s) earlier."
   (interactive "p")
   (org-agenda-date-later (- arg) what))
 
@@ -7899,11 +7899,17 @@ This is a command that has to be installed in `calendar-mode-map'."
 
 (defun org-agenda-bulk-mark-regexp (regexp)
   "Mark entries match REGEXP."
-  (interactive "sRegexp: ")
-  (save-excursion
-    (goto-char (point-min))
-    (while (re-search-forward regexp nil t)
-      (call-interactively 'org-agenda-bulk-mark))))
+  (interactive "sMark entries matching regexp: ")
+  (let (entries-marked)
+    (save-excursion
+      (goto-char (point-min))
+      (goto-char (next-single-property-change (point) 'txt))
+      (while (re-search-forward regexp nil t)
+	(when (string-match regexp (get-text-property (point) 'txt))
+	  (setq entries-marked (+ entries-marked 1))
+	  (call-interactively 'org-agenda-bulk-mark))))
+    (if (not entries-marked) 
+	(message "No entry matching this regexp."))))
 
 (defun org-agenda-bulk-unmark ()
   "Unmark the entry at point for future bulk action."
@@ -8017,27 +8023,31 @@ The prefix arg is passed through to the command if possible."
 			 (fmakunbound 'read-string)))))))
 
      ((equal action ?S)
-      (let ((days (read-number
-		   (format "Scatter tasks across how many %sdays: "
-			   (if arg "week" "")) 7)))
-	(setq cmd
-	      `(let ((distance (1+ (random ,days))))
-		 (if arg
-		     (let ((dist distance)
-			   (day-of-week
-			    (calendar-day-of-week
-			     (calendar-gregorian-from-absolute (org-today)))))
-		       (dotimes (i (1+ dist))
-			 (while (member day-of-week org-agenda-weekend-days)
-			   (incf distance)
+      (if (not (org-agenda-check-type nil 'agenda 'timeline))
+	  (error "Can't scatter tasks in \"%s\" agenda view" org-agenda-type)
+	(let ((days (read-number
+		     (format "Scatter tasks across how many %sdays: "
+			     (if arg "week" "")) 7)))
+	  (setq cmd
+		`(let ((distance (1+ (random ,days))))
+		   (if arg
+		       (let ((dist distance)
+			     (day-of-week
+			      (calendar-day-of-week
+			       (calendar-gregorian-from-absolute (org-today)))))
+			 (dotimes (i (1+ dist))
+			   (while (member day-of-week org-agenda-weekend-days)
+			     (incf distance)
+			     (incf day-of-week)
+			     (if (= day-of-week 7)
+				 (setq day-of-week 0)))
 			   (incf day-of-week)
 			   (if (= day-of-week 7)
-			       (setq day-of-week 0)))
-			 (incf day-of-week)
-			 (if (= day-of-week 7)
-			     (setq day-of-week 0)))))
-		 (org-agenda-schedule nil (current-time))
-		 (org-agenda-date-later distance)))))
+			       (setq day-of-week 0)))))
+		   ;; silently fail when try to replan a sexp entry
+		   (condition-case nil
+		       (org-agenda-date-later distance)
+		     (error nil)))))))
 
      (t (error "Invalid bulk action")))
 
