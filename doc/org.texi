@@ -5859,6 +5859,7 @@ options are interpreted by the function @code{org-clocktable-write-default},
 but you can specify your own function using the @code{:formatter} parameter.
 @example
 :emphasize   @r{When @code{t}, emphasize level one and level two items.}
+:lang        @r{Language@footnote{Language terms can be set through the variable @code{org-clock-clocktable-language-setup}.} to use for descriptive cells like "Task".}
 :link        @r{Link the item headlines in the table to their origins.}
 :narrow      @r{An integer to limit the width of the headline column in}
              @r{the org table.  If you write it like @samp{50!}, then the}
