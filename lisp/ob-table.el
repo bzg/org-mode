@@ -97,7 +97,7 @@ example above."
 	   variables)))
     (unless (stringp source-block)
       (setq source-block (symbol-name source-block)))
-    (org-babel-table-truncate-at-newline ;; org-table cells can't be multi-line
+    (org-babel-trim
      (if (and source-block (> (length source-block) 0))
          (let ((params
                 (eval `(org-babel-parse-header-arguments
