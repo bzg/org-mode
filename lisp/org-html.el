@@ -1091,6 +1091,7 @@ PUB-DIR is set, use this as the publishing directory."
 	 (org-levels-open (make-vector org-level-max nil))
 	 (date (plist-get opt-plist :date))
 	 (author      (plist-get opt-plist :author))
+	 (html-validation-link (or org-export-html-validation-link ""))
 	 (title       (or (and subtree-p (org-export-get-title-from-subtree))
 			  (plist-get opt-plist :title)
 			  (and (not body-only)
@@ -1756,7 +1757,7 @@ lang=\"%s\" xml:lang=\"%s\">
 	    (insert (format-spec html-postamble-format
 				 `((?a . ,author) (?e . ,email)
 				   (?d . ,date)   (?c . ,creator-info)
-				   (?v . ,org-export-html-validation-link))))
+				   (?v . ,html-validation-link))))
 	    (insert "</div>")
 	    )))
 
