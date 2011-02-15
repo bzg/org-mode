@@ -391,15 +391,15 @@ Alternatively,
   (setq org-export-latex-listings 'minted)
 
 causes source code to be exported using the minted package as
-opposed to listings. If you want to use minted, you need to add
+opposed to listings.  If you want to use minted, you need to add
 the minted package to `org-export-latex-packages-alist', for
 example using customize, or with
 
   (require 'org-latex)
   (add-to-list 'org-export-latex-packages-alist '(\"\" \"minted\"))
 
-In addition, it is neccessary to install
-pygments (http://pygments.org), and to configure
+In addition, it is necessary to install 
+pygments (http://pygments.org), and to configure the variable
 `org-latex-to-pdf-process' so that the -shell-escape option is
 passed to pdflatex.
 "
