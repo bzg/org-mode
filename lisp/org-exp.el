@@ -962,7 +962,7 @@ Pressing `1' will switch between these two options."
 	  (cond (subtree-p
 		 (setq subtree-p nil)
 		 (message "Export buffer: "))
-		((not subtree-p) 
+		((not subtree-p)
 		 (setq subtree-p t)
 		 (message "Export subtree: "))))
 	(when (eq r1 ?\ )
@@ -1032,14 +1032,8 @@ to export.  It then creates a temporary buffer where it does its job.
 The result is then again returned as a string, and the exporter works
 on this string to produce the exported version."
   (interactive)
-  (let* ((htmlp (plist-get parameters :for-html))
-	 (asciip (plist-get parameters :for-ascii))
-	 (latexp (plist-get parameters :for-LaTeX))
-	 (docbookp (plist-get parameters :for-docbook))
-	 (backend (cond (htmlp 'html)
-			(latexp 'latex)
-			(asciip 'ascii)
-			(docbookp 'docbook)))
+  (let* ((docbookp (eq (plist-get parameters :for-backend) 'docbook))
+	 (backend (plist-get parameters :for-backend))
 	 (archived-trees (plist-get parameters :archived-trees))
 	 (inhibit-read-only t)
 	 (drawers org-drawers)
@@ -1198,20 +1192,20 @@ on this string to produce the exported version."
       (run-hooks 'org-export-preprocess-before-backend-specifics-hook)
 
       ;; LaTeX-specific preprocessing
-      (when latexp
+      (when (eq backend 'latex)
 	(require 'org-latex nil)
 	(org-export-latex-preprocess parameters))
 
       ;; ASCII-specific preprocessing
-      (when asciip
+      (when (eq backend 'ascii)
 	(org-export-ascii-preprocess parameters))
 
       ;; HTML-specific preprocessing
-      (when htmlp
+      (when (eq backend 'html)
 	(org-export-html-preprocess parameters))
 
       ;; DocBook-specific preprocessing
-      (when docbookp
+      (when (eq backend 'docbook)
 	(require 'org-docbook nil)
 	(org-export-docbook-preprocess parameters))
 
@@ -1220,7 +1214,7 @@ on this string to produce the exported version."
 
       ;; Remove #+TBLFM and #+TBLNAME lines
       (org-export-handle-table-metalines)
-      
+
       ;; Run the final hook
       (run-hooks 'org-export-preprocess-final-hook)
 
@@ -2209,7 +2203,7 @@ specifying a range of lines, include only those lines ."
 	     (lbeg (string-to-number (car lines)))
 	     (lend (string-to-number (cadr lines)))
 	     (beg (if (zerop lbeg) (point-min)
-		    (goto-char (point-min)) 
+		    (goto-char (point-min))
 		    (forward-line (1- lbeg))
 		    (point)))
 	     (end (if (zerop lend) (point-max)
@@ -2294,8 +2288,6 @@ in the list) and remove property and value from the list in LISTVAR."
 		   backend lang code opts indent caption))
       (replace-match trans t t))))
 
-(defvar htmlp)  ;; dynamically scoped
-(defvar latexp)  ;; dynamically scoped
 (defvar org-export-latex-verbatim-wrap) ;; defined in org-latex.el
 (defvar org-export-latex-listings) ;; defined in org-latex.el
 (defvar org-export-latex-listings-langs) ;; defined in org-latex.el
@@ -2802,8 +2794,8 @@ Does include HTML export options as well as TODO and CATEGORY stuff."
 #+AUTHOR:    %s
 #+EMAIL:     %s
 #+DATE:      %s
-#+DESCRIPTION: 
-#+KEYWORDS: 
+#+DESCRIPTION:
+#+KEYWORDS:
 #+LANGUAGE:  %s
 #+OPTIONS:   H:%d num:%s toc:%s \\n:%s @:%s ::%s |:%s ^:%s -:%s f:%s *:%s <:%s
 #+OPTIONS:   TeX:%s LaTeX:%s skip:%s d:%s todo:%s pri:%s tags:%s
@@ -2812,7 +2804,7 @@ Does include HTML export options as well as TODO and CATEGORY stuff."
 #+EXPORT_EXCLUDE_TAGS: %s
 #+LINK_UP:   %s
 #+LINK_HOME: %s
-#+XSLT: 
+#+XSLT:
 #+CATEGORY:  %s
 #+SEQ_TODO:  %s
 #+TYP_TODO:  %s

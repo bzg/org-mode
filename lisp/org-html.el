@@ -531,7 +531,7 @@ a file."
   "Alist of characters to be converted by `org-html-protect'."
   :type '((repeat (cons (string :tag "Character")
 			(string :tag "HTML equivalent")))))
-  
+
 (defgroup org-export-htmlize nil
   "Options for processing examples with htmlize.el."
   :tag "Org Export Htmlize"
@@ -1145,7 +1145,7 @@ PUB-DIR is set, use this as the publishing directory."
 	   (org-export-preprocess-string
 	    region
 	    :emph-multiline t
-	    :for-html t
+	    :for-backend 'html
 	    :skip-before-1st-heading
 	    (plist-get opt-plist :skip-before-1st-heading)
 	    :drawers (plist-get opt-plist :drawers)
@@ -2229,7 +2229,7 @@ that uses these same face definitions."
 (defun org-html-protect (s)
   "Convert characters to HTML equivalent.
 Possible conversions are set in `org-export-html-protect-char-alist'."
-  (let ((start 0) 
+  (let ((start 0)
 	(cl org-export-html-protect-char-alist) c)
     (while (setq c (pop cl))
       (while (string-match (car c) s start)

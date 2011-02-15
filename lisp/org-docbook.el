@@ -527,7 +527,7 @@ publishing directory."
 	   (org-export-preprocess-string
 	    region
 	    :emph-multiline t
-	    :for-docbook t
+	    :for-backend 'docbook
 	    :skip-before-1st-heading
 	    (plist-get opt-plist :skip-before-1st-heading)
 	    :drawers (plist-get opt-plist :drawers)

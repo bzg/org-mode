@@ -801,7 +801,7 @@ when PUB-DIR is set, use this as the publishing directory."
 	       (org-export-preprocess-string
 		text
 		:emph-multiline t
-		:for-LaTeX t
+		:for-backend 'latex
 		:comments nil
 		:tags (plist-get opt-plist :tags)
 		:priority (plist-get opt-plist :priority)
@@ -818,7 +818,7 @@ when PUB-DIR is set, use this as the publishing directory."
 	  (org-export-preprocess-string
 	   region
 	   :emph-multiline t
-	   :for-LaTeX t
+	   :for-backend 'latex
 	   :comments nil
 	   :tags (plist-get opt-plist :tags)
 	   :priority (plist-get opt-plist :priority)
@@ -1346,7 +1346,7 @@ If END is non-nil, it is the end of the region."
 	  (org-export-latex-content
 	   (org-export-preprocess-string
 	    (buffer-substring pt end)
-	    :for-LaTeX t
+	    :for-backend 'latex
 	    :emph-multiline t
 	    :add-text nil
 	    :comments nil

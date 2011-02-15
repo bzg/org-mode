@@ -294,7 +294,7 @@ publishing directory."
 	 (lines (org-split-string
 		 (org-export-preprocess-string
 		  region
-		  :for-ascii t
+		  :for-backend 'ascii
 		  :skip-before-1st-heading
 		  (plist-get opt-plist :skip-before-1st-heading)
 		  :drawers (plist-get opt-plist :drawers)
