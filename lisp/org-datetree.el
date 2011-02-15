@@ -64,7 +64,7 @@ tree can be found."
       (goto-char (prog1 (point) (widen))))))
 
 (defun org-datetree-find-year-create (year)
-  (let ((re "^\\*+[ \t]+\\([12][0-9][0-9][0-9]\\)[ \t]*$")
+  (let ((re "^\\*+[ \t]+\\([12][0-9][0-9][0-9]\\)$")
 	match)
     (goto-char (point-min))
     (while (and (setq match (re-search-forward re nil t))
@@ -83,7 +83,7 @@ tree can be found."
 
 (defun org-datetree-find-month-create (year month)
   (org-narrow-to-subtree)
-  (let ((re (format "^\\*+[ \t]+%d-\\([01][0-9]\\)[ \t]*$" year))
+  (let ((re (format "^\\*+[ \t]+%d-\\([01][0-9]\\) \\w+$" year))
 	match)
     (goto-char (point-min))
     (while (and (setq match (re-search-forward re nil t))
@@ -102,7 +102,7 @@ tree can be found."
 
 (defun org-datetree-find-day-create (year month day)
   (org-narrow-to-subtree)
-  (let ((re (format "^\\*+[ \t]+%d-%02d-\\([0123][0-9]\\)[ \t]*$" year month))
+  (let ((re (format "^\\*+[ \t]+%d-%02d-\\([0123][0-9]\\) \\w+$" year month))
 	match)
     (goto-char (point-min))
     (while (and (setq match (re-search-forward re nil t))
