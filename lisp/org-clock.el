@@ -259,9 +259,9 @@ For more information, see `org-clocktable-write-default'."
   :type 'function)
 
 (defcustom org-clock-clocktable-language-setup
-  '(("en" "File"     "L"  "Timestamp"  "Headline" "Time"  "ALL"  "Total time" "File time")
-    ("fr" "Fichier"  "N"  "Horodatage" "Tâche"    "Durée" "TOUT" "Durée totale" "Durée fichier")
-    ("nl" "Bestand"  "N"  "Tijdstip"   "Taak"    "Duur"   "ALLES" "Totale duur" "Bestandstijd"))
+  '(("en" "File"     "L"  "Timestamp"  "Headline" "Time"  "ALL"   "Total time"   "File time")
+    ("fr" "Fichier"  "N"  "Horodatage" "En-tête"  "Durée" "TOUT"  "Durée totale" "Durée fichier")
+    ("nl" "Bestand"  "N"  "Tijdstip"   "Hoofding" "Duur"  "ALLES" "Totale duur"  "Bestandstijd"))
   "Terms used in clocktable, translated to different languages."
   :group 'org-clocktable
   :type 'alist)
