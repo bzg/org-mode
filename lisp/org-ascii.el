@@ -653,7 +653,7 @@ publishing directory."
 	      (not (equal (char-before (1- (point))) ?\n)))
 	  (insert "\n"))
       (setq char (or (nth (1- level) org-export-ascii-underline)
-      		     (last org-export-ascii-underline)))
+      		     (car (last org-export-ascii-underline))))
       (unless org-export-with-tags
 	(if (string-match (org-re "[ \t]+\\(:[[:alnum:]_@#%:]+:\\)[ \t]*$") title)
 	    (setq title (replace-match "" t t title))))
