@@ -38,7 +38,7 @@
   :tag "Org Export ASCII"
   :group 'org-export)
 
-(defcustom org-export-ascii-underline '(?\$ ?\# ?^ ?\~ ?\= ?\-)
+(defcustom org-export-ascii-underline '(?\- ?\= ?\~ ?^ ?\# ?\$)
   "Characters for underlining headings in ASCII export.
 In the given sequence, these characters will be used for level 1, 2, ..."
   :group 'org-export-ascii
@@ -652,9 +652,8 @@ publishing directory."
       (if (or (not (equal (char-before) ?\n))
 	      (not (equal (char-before (1- (point))) ?\n)))
 	  (insert "\n"))
-      (setq char (or (nth (max (- umax level) 0)
-      			  (reverse org-export-ascii-underline))
-      		     (car (last org-export-ascii-underline))))
+      (setq char (or (nth (1- level) org-export-ascii-underline)
+      		     (last org-export-ascii-underline)))
       (unless org-export-with-tags
 	(if (string-match (org-re "[ \t]+\\(:[[:alnum:]_@#%:]+:\\)[ \t]*$") title)
 	    (setq title (replace-match "" t t title))))
