@@ -214,7 +214,7 @@ buffer."
   (let ((mark (and (org-region-active-p) (mark)))
 	(case-fold-search t)
 	(info (org-edit-src-find-region-and-lang))
-	(org-mode-p (org-mode-p))
+	(org-mode-p (or (org-mode-p) (derived-mode-p 'org-mode)))
 	(beg (make-marker))
 	(end (make-marker))
 	(allow-write-back-p (null code))
