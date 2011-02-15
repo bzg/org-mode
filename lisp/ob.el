@@ -1557,7 +1557,7 @@ code ---- the results are extracted in the syntax of the source
 	    (org-babel-examplize-region beg end results-switches)
 	    (setq end (point)))))
 	;; possibly indent the results to match the #+results line
-	(when (and (not inlinep) indent (> indent 0)
+	(when (and (not inlinep) (numberp indent) indent (> indent 0)
 		   ;; in this case `table-align' does the work for us
 		   (not (and (listp result)
 			     (member "append" result-params))))
