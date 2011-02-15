@@ -204,8 +204,9 @@ or use the +OPTION lines for a per-file setting."
 	   (string :tag "Footnotes"))))
 
 (defcustom org-export-default-language "en"
-  "The default language of HTML export, as a string.
-This should have an association in `org-export-language-setup'."
+  "The default language for export and clocktable translations, as a string.
+This should have an association in `org-export-language-setup'
+and in `org-clock-clocktable-language-setup'."
   :group 'org-export-general
   :type 'string)
 
@@ -1718,6 +1719,7 @@ table line.  If it is a link, add it to the line containing the link."
 	cap shortn attr label end)
     (while (re-search-forward re nil t)
       (cond
+       ;; there is a caption
        ((match-end 1)
 	(progn
 	  (setq cap (concat cap (if cap " " "") (org-trim (match-string 1))))
@@ -1725,10 +1727,12 @@ table line.  If it is a link, add it to the line containing the link."
 	    (setq shortn (match-string 1 cap)
 		  cap (match-string 2 cap)))
 	  (delete-region (point-at-bol) (min (1+ (point-at-eol)) (point-max)))))
+       ;; there is an attribute
        ((match-end 2)
 	(progn
 	  (setq attr (concat attr (if attr " " "") (org-trim (match-string 2))))
 	  (delete-region (point-at-bol) (min (1+ (point-at-eol)) (point-max)))))
+       ;; there is a label
        ((match-end 3)
 	(progn
 	  (setq label (org-trim (match-string 3)))
