@@ -394,7 +394,7 @@ the fragment in the Org-mode buffer."
 	(case-fold-search t)
 	(msg (substitute-command-keys
 	      "Edit, then exit with C-c ' (C-c and single quote)"))
-	(org-mode-p (eq major-mode 'org-mode))
+	(org-mode-p (org-mode-p))
 	(beg (make-marker))
 	(end (make-marker))
 	(preserve-indentation org-src-preserve-indentation)

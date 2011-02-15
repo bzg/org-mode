@@ -6262,7 +6262,7 @@ open and agenda-wise Org files."
   (let ((files (mapcar 'expand-file-name (org-agenda-files))))
     (dolist (buf (buffer-list))
       (with-current-buffer buf
-	(if (and (eq major-mode 'org-mode) (buffer-file-name))
+	(if (and (org-mode-p) (buffer-file-name))
 	    (let ((file (expand-file-name (buffer-file-name))))
 	      (unless (member file files)
 		(push file files))))))
@@ -15516,17 +15516,17 @@ If EXCLUDE-TMP is non-nil, ignore temporary buffers."
 	 (filter
 	  (cond
 	   ((eq predicate 'files)
-	    (lambda (b) (with-current-buffer b (eq major-mode 'org-mode))))
+	    (lambda (b) (with-current-buffer b (org-mode-p))))
 	   ((eq predicate 'export)
 	    (lambda (b) (string-match "\*Org .*Export" (buffer-name b))))
 	   ((eq predicate 'agenda)
 	    (lambda (b)
 	      (with-current-buffer b
-		(and (eq major-mode 'org-mode)
+		(and (org-mode-p)
 		     (setq bfn (buffer-file-name b))
 		     (member (file-truename bfn) agenda-files)))))
 	   (t (lambda (b) (with-current-buffer b
-			    (or (eq major-mode 'org-mode)
+			    (or (org-mode-p)
 				(string-match "\*Org .*Export"
 					      (buffer-name b)))))))))
     (delq nil
@@ -19426,7 +19426,7 @@ If there is no such heading, return nil."
 
 (defadvice outline-end-of-subtree (around prefer-org-version activate compile)
   "Use Org version in org-mode, for dramatic speed-up."
-  (if (eq major-mode 'org-mode)
+  (if (org-mode-p)
       (progn
 	(org-end-of-subtree nil t)
 	(unless (eobp) (backward-char 1)))
@@ -19579,7 +19579,7 @@ Show the heading too, if it is currently invisible."
   '(progn
      (add-hook 'imenu-after-jump-hook
 	       (lambda ()
-		 (if (eq major-mode 'org-mode)
+		 (if (org-mode-p)
 		     (org-show-context 'org-goto))))))
 
 (defun org-link-display-format (link)
@@ -19683,7 +19683,7 @@ To get rid of the restriction, use \\[org-agenda-remove-restriction-lock]."
 (eval-after-load "ecb"
   '(defadvice ecb-method-clicked (after esf/org-show-context activate)
      "Make hierarchy visible when jumping into location from ECB tree buffer."
-     (if (eq major-mode 'org-mode)
+     (if (org-mode-p)
 	 (org-show-context))))
 
 (defun org-bookmark-jump-unhide ()
