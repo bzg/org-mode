@@ -208,10 +208,12 @@ date year)."
   "Create the export version of a BBDB link specified by PATH or DESC.
 If exporting to either HTML or LaTeX FORMAT the link will be
 italicized, in all other cases it is left unchanged."
+  (when (string= desc (format "bbdb:%s" path))
+    (setq desc path))
   (cond
-   ((eq format 'html) (format "<i>%s</i>" (or desc path)))
-   ((eq format 'latex) (format "\\textit{%s}" (or desc path)))
-   (t (or desc path))))
+   ((eq format 'html) (format "<i>%s</i>" desc))
+   ((eq format 'latex) (format "\\textit{%s}" desc))
+   (t desc)))
 
 (defun org-bbdb-open (name)
   "Follow a BBDB link to NAME."
