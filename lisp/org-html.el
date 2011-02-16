@@ -1092,16 +1092,17 @@ PUB-DIR is set, use this as the publishing directory."
 	 (date (plist-get opt-plist :date))
 	 (author      (plist-get opt-plist :author))
 	 (html-validation-link (or org-export-html-validation-link ""))
-	 (title       (or (and subtree-p (org-export-get-title-from-subtree))
-			  (plist-get opt-plist :title)
-			  (and (not body-only)
-			       (not
-				(plist-get opt-plist :skip-before-1st-heading))
-			       (org-export-grab-title-from-buffer))
-			  (and buffer-file-name
-			       (file-name-sans-extension
-				(file-name-nondirectory buffer-file-name)))
-			  "UNTITLED"))
+	 (title       (org-html-expand
+		       (or (and subtree-p (org-export-get-title-from-subtree))
+			   (plist-get opt-plist :title)
+			   (and (not body-only)
+				(not
+				 (plist-get opt-plist :skip-before-1st-heading))
+				(org-export-grab-title-from-buffer))
+			   (and buffer-file-name
+				(file-name-sans-extension
+				 (file-name-nondirectory buffer-file-name)))
+			   "UNTITLED")))
 	 (link-up (and (plist-get opt-plist :link-up)
 		       (string-match "\\S-" (plist-get opt-plist :link-up))
 		       (plist-get opt-plist :link-up)))
@@ -1280,7 +1281,7 @@ lang=\"%s\" xml:lang=\"%s\">
 				     org-export-html-preamble-format))
 			(cadr (assoc "en" org-export-html-preamble-format))))))
 	    (insert (format-spec html-preamble-format
-				 `((?t . ,(org-html-expand title))
+				 `((?t . ,title)
 				   (?a . ,author) (?d . ,date) (?e . ,email)))))))
 
       (if (and org-export-with-toc (not body-only))
