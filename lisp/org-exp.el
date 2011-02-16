@@ -1033,8 +1033,7 @@ to export.  It then creates a temporary buffer where it does its job.
 The result is then again returned as a string, and the exporter works
 on this string to produce the exported version."
   (interactive)
-  (let* ((docbookp (eq (plist-get parameters :for-backend) 'docbook))
-	 (backend (plist-get parameters :for-backend))
+  (let* ((backend (plist-get parameters :for-backend))
 	 (archived-trees (plist-get parameters :archived-trees))
 	 (inhibit-read-only t)
 	 (drawers org-drawers)
@@ -1610,7 +1609,7 @@ from the buffer."
 
     (while formatters
       (setq fmt (pop formatters))
-      ;; Handle #+Backend: stuff
+      ;; Handle #+backend: stuff
       (goto-char (point-min))
       (while (re-search-forward (concat "^\\([ \t]*\\)#\\+" (cadr fmt)
 					":[ \t]*\\(.*\\)") nil t)
@@ -1620,7 +1619,7 @@ from the buffer."
 	  (add-text-properties
 	   (point-at-bol) (min (1+ (point-at-eol)) (point-max))
 	   '(org-protected t))))
-      ;; Delete #+attr_Backend: stuff of another backend. Those
+      ;; Delete #+attr_backend: stuff of another backend. Those
       ;; matching the current backend will be taken care of by
       ;; `org-export-attach-captions-and-attributes'
       (goto-char (point-min))
@@ -1628,7 +1627,7 @@ from the buffer."
 					":[ \t]*\\(.*\\)") nil t)
 	(when (not (eq (car fmt) backend))
 	  (delete-region (point-at-bol) (min (1+ (point-at-eol)) (point-max)))))
-      ;; Handle #+begin_Backend and #+end_Backend stuff
+      ;; Handle #+begin_backend and #+end_backend stuff
       (goto-char (point-min))
       (while (re-search-forward (concat "^[ \t]*#\\+" (caddr fmt) "\\>.*\n?")
 				nil t)

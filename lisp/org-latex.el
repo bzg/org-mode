@@ -73,7 +73,6 @@
 	  org-closed-string"\\)")
   "Regexp matching special time planning keywords plus the time after it.")
 
-(defvar latexp)    ; dynamically scoped from org.el
 (defvar re-quote)  ; dynamically scoped from org.el
 (defvar commentsp) ; dynamically scoped from org.el
 
