@@ -818,15 +818,15 @@ Default for SITEMAP-FILENAME is 'sitemap.org'."
 
 (defun org-publish-format-file-entry (fmt file project-plist)
   (format-spec fmt
-	     `((?t . ,(org-publish-find-title file))
+	     `((?t . ,(org-publish-find-title file t))
 	       (?d . ,(format-time-string sitemap-date-format 
 					  (org-publish-find-date file)))
 	       (?a . ,(or (plist-get project-plist :author) user-full-name)))))
 			    
-(defun org-publish-find-title (file)
+(defun org-publish-find-title (file &optional reset)
   "Find the title of FILE in project."
   (or
-   (org-publish-cache-get-file-property file :title nil t)
+   (and (not reset) (org-publish-cache-get-file-property file :title nil t))
    (let* ((visiting (find-buffer-visiting file))
 	 (buffer (or visiting (find-file-noselect file)))
 	 title)
@@ -1149,15 +1149,13 @@ Returns value on success, else nil."
   (puthash key value org-publish-cache))
 
 (defun org-publish-cache-ctime-of-src (filename)
-  "Get the files ctime as integer."
+  "Get the FILENAME ctime as an integer."
   (let ((src-attr (file-attributes (if (stringp (file-symlink-p filename))
 				       (file-symlink-p filename)
 				     filename))))
     (+
      (lsh (car (nth 5 src-attr)) 16)
      (cadr (nth 5 src-attr)))))
-
-
 
 (provide 'org-publish)
 
