@@ -45,7 +45,7 @@
 by org-special-blocks.  These blocks will presumably be
 interpreted by other mechanisms.")
 
-(defvar backend)
+(defvar backend) ; dynamically scoped
 (defun org-special-blocks-make-special-cookies ()
   "Adds special cookies when #+begin_foo and #+end_foo tokens are
 seen.  This is run after a few special cases are taken care of."
