@@ -132,16 +132,16 @@
 
 (define-obsolete-function-alias
   'org-protocol-unhex-compound 'org-link-unescape-compound
-  "2010-11-21")
+  "2011-02-17")
 
 (define-obsolete-function-alias
   'org-protocol-unhex-string 'org-link-unescape
-  "2010-11-21")
+  "2011-02-17")
 
 (define-obsolete-function-alias
   'org-protocol-unhex-single-byte-sequence
   'org-link-unescape-single-byte-sequence
-  "2011-11-21")
+  "2011-02-17")
 
 (defgroup org-protocol nil
   "Intercept calls from emacsclient to trigger custom actions.
