@@ -1585,8 +1585,8 @@ code ---- the results are extracted in the syntax of the source
     (cond
      ((org-at-table-p) (progn (goto-char (org-table-end)) (point)))
      ((org-at-item-p) (let* ((struct (org-list-struct))
-			     (prevs (org-list-prevs-alist struct)))
-			(org-list-get-list-end (point-at-bol) struct prevs)))
+			     (prvs (org-list-prevs-alist struct)))
+			(1- (org-list-get-list-end (point-at-bol) struct prvs))))
      (t
       (let ((case-fold-search t)
 	    (blocks-re (regexp-opt
