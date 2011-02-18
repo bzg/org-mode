@@ -1441,31 +1441,32 @@ Don't perform conversions that are in EXCLUDE-LIST.  Recognized
 conversion types are: quotation-marks, emphasis, sub-superscript,
 links, keywords, lists, tables, fixed-width"
   (with-temp-buffer
-   (insert content)
-   (unless (memq 'timestamps exclude-list)
-     (org-export-latex-time-stamps))
-   (unless (memq 'quotation-marks exclude-list)
-     (org-export-latex-quotation-marks))
-   (unless (memq 'emphasis exclude-list)
-     (when (plist-get org-export-latex-options-plist :emphasize)
-       (org-export-latex-fontify)))
-   (unless (memq 'sub-superscript exclude-list)
-     (org-export-latex-special-chars
-      (plist-get org-export-latex-options-plist :sub-superscript)))
-   (unless (memq 'links exclude-list)
-     (org-export-latex-links))
-   (unless (memq 'keywords exclude-list)
-     (org-export-latex-keywords))
-   (unless (memq 'lists exclude-list)
-     (org-export-latex-lists))
-   (unless (memq 'tables exclude-list)
-     (org-export-latex-tables
-      (plist-get org-export-latex-options-plist :tables)))
-   (unless (memq 'fixed-width exclude-list)
-     (org-export-latex-fixed-width
-      (plist-get org-export-latex-options-plist :fixed-width)))
+    (org-install-letbind)
+    (insert content)
+    (unless (memq 'timestamps exclude-list)
+      (org-export-latex-time-stamps))
+    (unless (memq 'quotation-marks exclude-list)
+      (org-export-latex-quotation-marks))
+    (unless (memq 'emphasis exclude-list)
+      (when (plist-get org-export-latex-options-plist :emphasize)
+	(org-export-latex-fontify)))
+    (unless (memq 'sub-superscript exclude-list)
+      (org-export-latex-special-chars
+       (plist-get org-export-latex-options-plist :sub-superscript)))
+    (unless (memq 'links exclude-list)
+      (org-export-latex-links))
+    (unless (memq 'keywords exclude-list)
+      (org-export-latex-keywords))
+    (unless (memq 'lists exclude-list)
+      (org-export-latex-lists))
+    (unless (memq 'tables exclude-list)
+      (org-export-latex-tables
+       (plist-get org-export-latex-options-plist :tables)))
+    (unless (memq 'fixed-width exclude-list)
+      (org-export-latex-fixed-width
+       (plist-get org-export-latex-options-plist :fixed-width)))
    ;; return string
-   (buffer-substring (point-min) (point-max))))
+    (buffer-substring (point-min) (point-max))))
 
 (defun org-export-latex-protect-string (s)
   "Add the org-protected property to string S."
