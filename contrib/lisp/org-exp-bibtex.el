@@ -2,7 +2,7 @@
 
 ;; Copyright (C) 2009 Taru Karttunen
 
-;; Author: Taru Karttunen <taruti@taruti.net >
+;; Author: Taru Karttunen <taruti@taruti.net>
 
 ;; This file is not currently part of GNU Emacs.
 
@@ -72,12 +72,11 @@
 	    (opt   (org-exp-bibtex-options-to-plist (match-string 3))))
 	(replace-match
 	(cond
-	 (htmlp ;; We are exporting to HTML
+	 ((eq backend 'html) ;; We are exporting to HTML
 	  (let (extra-args cite-list end-hook tmp-files)
 	    (dolist (elt opt)
 	      (when (equal "option" (car elt))
 		(setq extra-args (cons (cdr elt) extra-args))))
-
 
 	    (when (assoc "limit" opt) ;; Limit is true - collect references
 	      (org-exp-bibtex-docites (lambda ()
@@ -107,13 +106,12 @@
 	      (while (re-search-forward "<hr>" nil t)
 		(replace-match "<hr/>" t t))
 	      (concat "\n#+BEGIN_HTML\n<div id=\"bibliography\">\n" (buffer-string) "\n</div>\n#+END_HTML\n"))))
-	 (latexp ;; Latex export
+	 ((eq backend 'latex) ;; Latex export
 	  (concat "\n#+LATEX: \\bibliographystyle{" style "}"
 		  "\n#+LATEX: \\bibliography{" file "}\n"))) t t)))
-    
 
     ;; Convert cites to links in html
-    (when htmlp
+    (when (eq backend 'html)
       ;; Split citation commands with multiple keys
       (org-exp-bibtex-docites
        (lambda ()
@@ -126,27 +124,20 @@
        (lambda () (let* ((cn (match-string 1))
 			 (cv (assoc cn oebp-cite-plist)))
 ;;		    (message "L: %s" (concat "\[_{}[[" cn "][" (if cv (cdr cv) cn) "]]\]"))
-		    (replace-match (concat "\[_{}[[#" cn "][" (if cv (cdr cv) cn) "]]\]")) t t))))
-
-
-))
+		    (replace-match (concat "\[_{}[[#" cn "][" (if cv (cdr cv) cn) "]]\]")) t t))))))
 
 (defun org-exp-bibtex-docites (fun)
   (save-excursion
     (save-match-data
       (goto-char (point-min))
-      (when htmlp
+      (when (eq backend 'html)
 	(while (re-search-forward "\\\\cite{\\([^}\n]+\\)}" nil t)
 	  (apply fun nil))))))
-
 
 (defun org-exp-bibtex-options-to-plist (options)
   (save-match-data
     (flet ((f (o) (let ((s (split-string o ":"))) (cons (nth 0 s) (nth 1 s)))))
       (mapcar 'f (split-string options nil t)))))
-
-
-
 
 (add-hook 'org-export-preprocess-hook 'org-export-bibtex-preprocess)
 
