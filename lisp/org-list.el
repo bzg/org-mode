@@ -927,14 +927,17 @@ Point returned is at end of line."
     (point-at-eol)))
 
 (defun org-list-get-parent (item struct parents)
-  "Return parent of ITEM in STRUCT, or nil.
-PARENTS is the alist of items' parent. See
-`org-list-parents-alist'."
+  "Return parent of ITEM or nil.
+STRUCT is the list structure. PARENTS is the alist of parents, as
+returned by `org-list-parents-alist'."
   (let ((parents (or parents (org-list-parents-alist struct))))
     (cdr (assq item parents))))
 
 (defun org-list-has-child-p (item struct)
-  "Return a non-nil value if ITEM in STRUCT has a child.
+  "Non-nil if ITEM has a child.
+
+STRUCT is the list structure.
+
 Value returned is the position of the first child of ITEM."
   (let ((ind (org-list-get-ind item struct))
 	(child-maybe (car (nth 1 (member (assq item struct) struct)))))
@@ -943,20 +946,20 @@ Value returned is the position of the first child of ITEM."
       child-maybe)))
 
 (defun org-list-get-next-item (item struct prevs)
-  "Return next item in same sub-list as ITEM in STRUCT, or nil.
-PREVS is the alist of previous items. See
-`org-list-prevs-alist'."
+  "Return next item in same sub-list as ITEM, or nil.
+STRUCT is the list structure. PREVS is the alist of previous
+items, as returned by `org-list-prevs-alist'."
   (car (rassq item prevs)))
 
 (defun org-list-get-prev-item (item struct prevs)
-  "Return previous item in same sub-list as ITEM in STRUCT, or nil.
-PREVS is the alist of previous items. See
-`org-list-prevs-alist'."
+  "Return previous item in same sub-list as ITEM, or nil.
+STRUCT is the list structure. PREVS is the alist of previous
+items, as returned by `org-list-prevs-alist'."
   (cdr (assq item prevs)))
 
 (defun org-list-get-subtree (item struct)
-  "Return all items with ITEM as a common ancestor or nil.
-STRUCT is the list structure considered."
+  "List all items having ITEM as a common ancestor, or nil.
+STRUCT is the list structure."
   (let* ((item-end (org-list-get-item-end item struct))
 	 (sub-struct (cdr (member (assq item struct) struct)))
 	 subtree)
@@ -968,9 +971,9 @@ STRUCT is the list structure considered."
     (nreverse subtree)))
 
 (defun org-list-get-all-items (item struct prevs)
-  "List of items in the same sub-list as ITEM in STRUCT.
-PREVS is the alist of previous items. See
-`org-list-prevs-alist'."
+  "List all items in the same sub-list as ITEM.
+STRUCT is the list structure. PREVS is the alist of previous
+items, as returned by `org-list-prevs-alist'."
   (let ((prev-item item)
 	(next-item item)
 	before-item after-item)
@@ -981,9 +984,9 @@ PREVS is the alist of previous items. See
     (append before-item (list item) (nreverse after-item))))
 
 (defun org-list-get-children (item struct parents)
-  "List all children of ITEM in STRUCT, or nil.
-PARENTS is the alist of items' parent. See
-`org-list-parents-alist'."
+  "List all children of ITEM, or nil.
+STRUCT is the list structure. PARENTS is the alist of parents, as
+returned by `org-list-parents-alist'."
   (let (all child)
     (while (setq child (car (rassq item parents)))
       (setq parents (cdr (member (assq child parents) parents)))
@@ -992,19 +995,19 @@ PARENTS is the alist of items' parent. See
 
 (defun org-list-get-top-point (struct)
   "Return point at beginning of list.
-STRUCT is the structure of the list."
+STRUCT is the list structure."
   (caar struct))
 
 (defun org-list-get-bottom-point (struct)
   "Return point at bottom of list.
-STRUCT is the structure of the list."
+STRUCT is the list structure."
   (apply 'max
 	 (mapcar (lambda (e) (org-list-get-item-end (car e) struct)) struct)))
 
 (defun org-list-get-list-begin (item struct prevs)
   "Return point at beginning of sub-list ITEM belongs.
-STRUCT is the structure of the list. PREVS is the alist of
-previous items. See `org-list-prevs-alist'."
+STRUCT is the list structure. PREVS is the alist of previous
+items, as returned by `org-list-prevs-alist'."
   (let ((first-item item) prev-item)
     (while (setq prev-item (org-list-get-prev-item first-item struct prevs))
       (setq first-item prev-item))
@@ -1014,8 +1017,8 @@ previous items. See `org-list-prevs-alist'."
 
 (defun org-list-get-last-item (item struct prevs)
   "Return point at last item of sub-list ITEM belongs.
-STRUCT is the structure of the list. PREVS is the alist of
-previous items. See `org-list-prevs-alist'."
+STRUCT is the list structure. PREVS is the alist of previous
+items, as returned by `org-list-prevs-alist'."
   (let ((last-item item) next-item)
     (while (setq next-item (org-list-get-next-item last-item struct prevs))
       (setq last-item next-item))
@@ -1023,16 +1026,15 @@ previous items. See `org-list-prevs-alist'."
 
 (defun org-list-get-list-end (item struct prevs)
   "Return point at end of sub-list ITEM belongs.
-STRUCT is the structure of the list. PREVS is the alist of
-previous items. See `org-list-prevs-alist'."
+STRUCT is the list structure. PREVS is the alist of previous
+items, as returned by `org-list-prevs-alist'."
   (org-list-get-item-end (org-list-get-last-item item struct prevs) struct))
 
 (defun org-list-get-list-type (item struct prevs)
-  "Return the type of the list containing ITEM as a symbol.
+  "Return the type of the list containing ITEM, as a symbol.
 
-STRUCT is the structure of the list, as returned by
-`org-list-struct'. PREVS is the alist of previous items. See
-`org-list-prevs-alist'.
+STRUCT is the list structure. PREVS is the alist of previous
+items, as returned by `org-list-prevs-alist'.
 
 Possible types are `descriptive', `ordered' and `unordered'. The
 type is determined by the first item of the list."
@@ -1047,8 +1049,8 @@ type is determined by the first item of the list."
 
 (defun org-list-search-generic (search re bound noerr)
   "Search a string in valid contexts for lists.
-Arguments SEARCH, RE, BOUND and NOERR are similar to those in
-`re-search-forward'."
+Arguments SEARCH, RE, BOUND and NOERR are similar to those used
+in `re-search-forward'."
   (catch 'exit
     (let ((origin (point)))
       (while t
@@ -1075,7 +1077,6 @@ Arguments REGEXP, BOUND and NOERROR are similar to those used in
 			   regexp (or bound (point-max)) noerror))
 
 
-
 ;;; Methods on structures
 
 (defsubst org-list-bullet-string (bullet)
@@ -1093,9 +1094,11 @@ It determines the number of whitespaces to append by looking at
 
 (defun org-list-separating-blank-lines-number (pos struct prevs)
   "Return number of blank lines that should separate items in list.
-POS is the position at item beginning to be considered. STRUCT is
-the list structure. PREVS is the alist of previous items. See
-`org-list-prevs-alist'.
+
+POS is the position at item beginning to be considered.
+
+STRUCT is the list structure. PREVS is the alist of previous
+items, as returned by `org-list-prevs-alist'.
 
 Assume point is at item's beginning. If the item is alone, apply
 some heuristics to guess the result."
@@ -1136,19 +1139,18 @@ some heuristics to guess the result."
 	     (t 0))))))))
 
 (defun org-list-insert-item (pos struct prevs &optional checkbox after-bullet)
-  "Insert a new list item at POS.
+  "Insert a new list item at POS and return the new structure.
 If POS is before first character after bullet of the item, the
 new item will be created before the current one.
 
-STRUCT is the list structure, as returned by `org-list-struct'.
-PREVS is the the alist of previous items. See
-`org-list-prevs-alist'.
+STRUCT is the list structure. PREVS is the the alist of previous
+items, as returned by `org-list-prevs-alist'.
 
 Insert a checkbox if CHECKBOX is non-nil, and string AFTER-BULLET
 after the bullet. Cursor will be after this text once the
 function ends.
 
-Return the new structure of the list."
+This function modifies STRUCT."
   (let ((case-fold-search t))
     ;; 1. Get information about list: structure, usual helper
     ;;    functions, position of point with regards to item start
@@ -1301,10 +1303,10 @@ This function modifies STRUCT."
       (sort struct (lambda (e1 e2) (< (car e1) (car e2)))))))
 
 (defun org-list-struct-outdent (start end struct parents)
-  "Outdent items between START and END in structure STRUCT.
+  "Outdent items between positions START and END.
 
-PARENTS is the alist of items' parents. See
-`org-list-parents-alist'.
+STRUCT is the list structure. PARENTS is the alist of items'
+parents, as returned by `org-list-parents-alist'.
 
 START is included, END excluded."
   (let* (acc
@@ -1333,10 +1335,11 @@ START is included, END excluded."
     (mapcar out parents)))
 
 (defun org-list-struct-indent (start end struct parents prevs)
-  "Indent items between START and END in structure STRUCT.
+  "Indent items between positions START and END.
 
-PARENTS is the alist of parents. See `org-list-parents-alist'.
-PREVS is the alist of previous items. See `org-list-prevs-alist'.
+STRUCT is the list structure. PARENTS is the alist of parents and
+PREVS is the alist of previous items, returned by, respectively,
+`org-list-parents-alist' and `org-list-prevs-alist'.
 
 START is included and END excluded.
 
@@ -1384,10 +1387,10 @@ bullets between START and END."
 ;;; Repairing structures
 
 (defun org-list-use-alpha-bul-p (first struct prevs)
-  "Can list starting at FIRST use alphabetical bullets?
+  "Non-nil if list starting at FIRST can have alphabetical bullets.
 
-STRUCT is list structure. See `org-list-struct'. PREVS is the
-alist of previous items. See `org-list-prevs-alist'."
+STRUCT is list structure. PREVS is the alist of previous items,
+as returned by `org-list-prevs-alist'."
   (and org-alphabetical-lists
        (catch 'exit
 	 (let ((item first) (ascii 64) (case-fold-search nil))
@@ -1426,8 +1429,8 @@ alist of previous items. See `org-list-prevs-alist'."
      (t bullet))))
 
 (defun org-list-struct-fix-bul (struct prevs)
-  "Verify and correct bullets for every association in STRUCT.
-PREVS is the alist of previous items. See
+  "Verify and correct bullets in STRUCT.
+PREVS is the alist of previous items, as returned by
 `org-list-prevs-alist'.
 
 This function modifies STRUCT."
@@ -1495,9 +1498,9 @@ This function modifies STRUCT."
     (mapc fix-bul (mapcar 'car struct))))
 
 (defun org-list-struct-fix-ind (struct parents &optional bullet-size)
-  "Verify and correct indentation for every association in STRUCT.
+  "Verify and correct indentation in STRUCT.
 
-PARENTS is the alist of items' parents. See
+PARENTS is the alist of parents, as returned by
 `org-list-parents-alist'.
 
 If numeric optional argument BULLET-SIZE is set, assume all
@@ -1521,15 +1524,15 @@ This function modifies STRUCT."
     (mapc new-ind (mapcar 'car (cdr struct)))))
 
 (defun org-list-struct-fix-box (struct parents prevs &optional ordered)
-  "Verify and correct checkboxes for every association in STRUCT.
+  "Verify and correct checkboxes in STRUCT.
 
-PARENTS is the alist of items' parents. See
-`org-list-parents-alist'. PREVS is the alist of previous items.
-See `org-list-prevs-alist'.
+PARENTS is the alist of parents and PREVS is the alist of
+previous items, as returned by, respectively,
+`org-list-parents-alist' and `org-list-prevs-alist'.
 
 If ORDERED is non-nil, a checkbox can only be checked when every
-checkbox before it is checked too.  If there was an attempt to
-break this rule, the function will return the blocking item.  In
+checkbox before it is checked too. If there was an attempt to
+break this rule, the function will return the blocking item. In
 all others cases, the return value will be nil.
 
 This function modifies STRUCT."
@@ -1583,11 +1586,11 @@ This function modifies STRUCT."
 	    (nth index all-items)))))))
 
 (defun org-list-struct-apply-struct (struct old-struct)
-  "Apply modifications to list so it mirrors STRUCT.
+  "Apply set-difference between STRUCT and OLD-STRUCT to the buffer.
 
-OLD-STRUCT is the structure before any modifications. Thus, the
-function is smart enough to modify only parts of buffer which
-have changed.
+OLD-STRUCT is the structure before any modifications, and STRUCT
+the structure to be applied. The function will only modify parts
+of the list which have changed.
 
 Initial position of cursor is restored after the changes."
   (let* ((pos (copy-marker (point)))
@@ -1702,9 +1705,9 @@ Initial position of cursor is restored after the changes."
     (goto-char pos)))
 
 (defun org-list-write-struct (struct parents)
-  "Verify bullets, checkboxes, indentation in STRUCT and apply it to buffer.
-PARENTS is the alist of items' parents. See
-`org-list-parents-alist'."
+  "Correct bullets, checkboxes and indentation in list at point.
+STRUCT is the list structure. PARENTS is the alist of parents, as
+returned by `org-list-parents-alist'."
   ;; Order of functions matters here: checkboxes and endings need
   ;; correct indentation to be set, and indentation needs correct
   ;; bullets.
@@ -1758,10 +1761,10 @@ previous item, plus ARGS extra arguments.
 
 FUNCTION is applied on items in reverse order.
 
-As an example, (org-apply-on-list (lambda (result) (1+ result)) 0)
+As an example, \(org-apply-on-list \(lambda \(result\) \(1+ result\)\) 0\)
 will return the number of items in the current list.
 
-Sublists of the list are skipped.  Cursor is always at the
+Sublists of the list are skipped. Cursor is always at the
 beginning of the item."
   (let* ((struct (org-list-struct))
 	 (prevs (org-list-prevs-alist struct))
@@ -1776,10 +1779,10 @@ beginning of the item."
     value))
 
 (defun org-list-set-item-visibility (item struct view)
-  "Set visibility of ITEM in STRUCT.
+  "Set visibility of ITEM in STRUCT to VIEW.
 
-Symbol VIEW determines visibility.  Possible values are: `folded',
-`children' or `subtree'.  See `org-cycle' for more information."
+Possible values are: `folded', `children' or `subtree'. See
+`org-cycle' for more information."
   (cond
    ((eq view 'folded)
     (let ((item-end (org-list-get-item-end-before-blank item struct)))
@@ -1801,7 +1804,7 @@ Symbol VIEW determines visibility.  Possible values are: `folded',
       (outline-flag-region item item-end nil)))))
 
 (defun org-list-item-body-column (item)
-  "Return column where body of ITEM should start."
+  "Return column at which body of ITEM should start."
   (let (bpos bcol tpos tcol)
     (save-excursion
       (goto-char item)
@@ -1819,15 +1822,15 @@ Symbol VIEW determines visibility.  Possible values are: `folded',
 (defalias 'org-list-get-item-begin 'org-in-item-p)
 
 (defun org-beginning-of-item ()
-  "Go to the beginning of the current hand-formatted item.
-If the cursor is not in an item, throw an error."
+  "Go to the beginning of the current item.
+Throw an error when not in a list."
   (interactive)
   (let ((begin (org-in-item-p)))
     (if begin (goto-char begin) (error "Not in an item"))))
 
 (defun org-beginning-of-item-list ()
   "Go to the beginning item of the current list or sublist.
-Return an error if not in a list."
+Throw an error when not in a list."
   (interactive)
   (let ((begin (org-in-item-p)))
     (if (not begin)
@@ -1839,7 +1842,7 @@ Return an error if not in a list."
 
 (defun org-end-of-item-list ()
   "Go to the end of the current list or sublist.
-If the cursor in not in an item, throw an error."
+Throw an error when not in a list."
   (interactive)
   (let ((begin (org-in-item-p)))
     (if (not begin)
@@ -1850,8 +1853,8 @@ If the cursor in not in an item, throw an error."
 	(goto-char (org-list-get-list-end begin struct prevs))))))
 
 (defun org-end-of-item ()
-  "Go to the end of the current hand-formatted item.
-If the cursor is not in an item, throw an error."
+  "Go to the end of the current item.
+Throw an error when not in a list."
   (interactive)
   (let ((begin (org-in-item-p)))
     (if (not begin)
@@ -1862,8 +1865,7 @@ If the cursor is not in an item, throw an error."
 
 (defun org-previous-item ()
   "Move to the beginning of the previous item.
-Item is at the same level in the current plain list. Error if not
-in a plain list, or if this is the first item in the list."
+Throw an error when not in a list, or at first item."
   (interactive)
   (let ((begin (org-in-item-p)))
     (if (not begin)
@@ -1876,8 +1878,7 @@ in a plain list, or if this is the first item in the list."
 
 (defun org-next-item ()
   "Move to the beginning of the next item.
-Item is at the same level in the current plain list. Error if not
-in a plain list, or if this is the last item in the list."
+Throw an error when not in a plain list, or at last item."
   (interactive)
   (let ((begin (org-in-item-p)))
     (if (not begin)
@@ -1889,9 +1890,9 @@ in a plain list, or if this is the last item in the list."
 	(if prevp (goto-char prevp) (error "On last item"))))))
 
 (defun org-move-item-down ()
-  "Move the plain list item at point down, i.e. swap with following item.
-Subitems (items with larger indentation) are considered part of the item,
-so this really moves item trees."
+  "Move the item at point down, i.e. swap with following item.
+Subitems (items with larger indentation) are considered part of
+the item, so this really moves item trees."
   (interactive)
   (unless (org-at-item-p) (error "Not at an item"))
   (let* ((pos (point))
@@ -1918,9 +1919,9 @@ so this really moves item trees."
       (org-move-to-column col))))
 
 (defun org-move-item-up ()
-  "Move the plain list item at point up, i.e. swap with previous item.
-Subitems (items with larger indentation) are considered part of the item,
-so this really moves item trees."
+  "Move the item at point up, i.e. swap with previous item.
+Subitems (items with larger indentation) are considered part of
+the item, so this really moves item trees."
   (interactive)
   (unless (org-at-item-p) (error "Not at an item"))
   (let* ((pos (point))
@@ -1987,8 +1988,7 @@ item is invisible."
 	  t)))))
 
 (defun org-list-repair ()
-  "Make sure all items are correctly indented, with the right bullet.
-This function scans the list at point, along with any sublist."
+  "Fix indentation, bullets and checkboxes is the list at point."
   (interactive)
   (unless (org-at-item-p) (error "This is not a list"))
   (let* ((struct (org-list-struct))
@@ -2067,8 +2067,8 @@ With prefix arg TOGGLE-PRESENCE, add or remove checkboxes.  With
 double prefix, set checkbox to [-].
 
 When there is an active region, toggle status or presence of the
-first checkbox there, and make every item inside have the
-same status or presence, respectively.
+first checkbox there, and make every item inside have the same
+status or presence, respectively.
 
 If the cursor is in a headline, apply this to all checkbox items
 in the text below the heading, taking as reference the first item
@@ -2332,7 +2332,9 @@ If a region is active, all items inside will be moved.
 If NO-SUBTREE is non-nil, only indent the item itself, not its
 children.
 
-STRUCT is the list structure. Return t if successful."
+STRUCT is the list structure.
+
+Return t if successful."
   (save-excursion
     (beginning-of-line)
     (let* ((regionp (org-region-active-p))
@@ -2464,8 +2466,8 @@ If a region is active, all items inside will be moved."
 (defvar org-tab-ind-state)
 (defun org-cycle-item-indentation ()
   "Cycle levels of indentation of an empty item.
-The first run indents the item, if applicable.  Subsequents runs
-outdent it at meaningful levels in the list.  When done, item is
+The first run indents the item, if applicable. Subsequents runs
+outdent it at meaningful levels in the list. When done, item is
 put back at its original position with its original bullet.
 
 Return t at each successful move."
@@ -2509,9 +2511,9 @@ Return t at each successful move."
 	t))))
 
 (defun org-sort-list (&optional with-case sorting-type getkey-func compare-func)
-  "Sort plain list items.
+  "Sort list items.
 The cursor may be at any item of the list that should be sorted.
-Sublists are not sorted.  Checkboxes, if any, are ignored.
+Sublists are not sorted. Checkboxes, if any, are ignored.
 
 Sorting can be alphabetically, numerically, by date/time as given by
 a time stamp, by a property or by priority.
