@@ -2382,7 +2382,7 @@ a subtree."
   "Return the value of `org-log-into-drawer', but let properties overrule.
 If the current entry has or inherits a LOG_INTO_DRAWER property, it will be
 used instead of the default value."
-  (let ((p (ignore-errors (org-entry-get nil "LOG_INTO_DRAWER" 'inherit))))
+  (let ((p (org-entry-get nil "LOG_INTO_DRAWER" 'inherit)))
     (cond
      ((or (not p) (equal p "nil")) org-log-into-drawer)
      ((equal p "t") "LOGBOOK")
@@ -8416,7 +8416,7 @@ For file links, arg negates `org-context-in-file-links'."
 	       link (org-make-link cpltxt))))
 
       ((and (buffer-file-name (buffer-base-buffer)) (org-mode-p))
-       (setq custom-id (ignore-errors (org-entry-get nil "CUSTOM_ID")))
+       (setq custom-id (org-entry-get nil "CUSTOM_ID"))
        (cond
 	((org-in-regexp "<<\\(.*?\\)>>")
 	 (setq cpltxt
@@ -17425,7 +17425,7 @@ This command does many different things, depending on context:
 	     (old-struct (mapcar (lambda (e) (copy-alist e)) struct))
 	     (parents (org-list-parents-alist struct))
 	     (prevs (org-list-prevs-alist struct))
-	     (orderedp (ignore-errors (org-entry-get nil "ORDERED")))
+	     (orderedp (org-entry-get nil "ORDERED"))
 	     block-item)
 	(org-list-set-checkbox (point-at-bol) struct
 			       (cond
@@ -17887,10 +17887,10 @@ See the individual commands for more information."
       :selected org-enforce-todo-dependencies :style toggle :active t]
      "Settings for tree at point"
      ["Do Children sequentially" org-toggle-ordered-property :style radio
-      :selected (ignore-errors (org-entry-get nil "ORDERED"))
+      :selected (org-entry-get nil "ORDERED")
       :active org-enforce-todo-dependencies :keys "C-c C-x o"]
      ["Do Children parallel" org-toggle-ordered-property :style radio
-      :selected (ignore-errors (not (org-entry-get nil "ORDERED")))
+      :selected (not (org-entry-get nil "ORDERED"))
       :active org-enforce-todo-dependencies :keys "C-c C-x o"]
      "--"
      ["Set Priority" org-priority t]
