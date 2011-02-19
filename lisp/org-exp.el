@@ -1197,23 +1197,11 @@ on this string to produce the exported version."
       ;; Another hook
       (run-hooks 'org-export-preprocess-before-backend-specifics-hook)
 
-      ;; LaTeX-specific preprocessing
-      (when (eq backend 'latex)
-	(require 'org-latex nil)
-	(org-export-latex-preprocess parameters))
-
-      ;; ASCII-specific preprocessing
-      (when (eq backend 'ascii)
-	(org-export-ascii-preprocess parameters))
-
-      ;; HTML-specific preprocessing
-      (when (eq backend 'html)
-	(org-export-html-preprocess parameters))
-
-      ;; DocBook-specific preprocessing
-      (when (eq backend 'docbook)
-	(require 'org-docbook nil)
-	(org-export-docbook-preprocess parameters))
+      ;; Backend-specific preprocessing
+      (let* ((backend-name (symbol-name backend))
+	     (f (intern (format "org-export-%s-preprocess" backend-name))))
+	(require (intern (concat "org-" backend-name)) nil)
+	(funcall f parameters))
 
       ;; Remove or replace comments
       (org-export-handle-comments (plist-get parameters :comments))
