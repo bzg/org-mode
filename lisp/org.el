@@ -9218,8 +9218,10 @@ application the system uses for this file type."
 		pos (if (get-text-property (1+ (point)) 'org-linked-text)
 			(1+ (point)) (point))
 		path (buffer-substring
-		      (previous-single-property-change pos 'org-linked-text)
-		      (next-single-property-change pos 'org-linked-text)))
+		      (or (previous-single-property-change pos 'org-linked-text)
+			  (point-min))
+		      (or (next-single-property-change pos 'org-linked-text)
+			  (point-max))))
 	  (throw 'match t))
 
 	(save-excursion
