@@ -1765,6 +1765,7 @@ The following commands are available:
 (org-defkey org-agenda-mode-map "%"        'org-agenda-bulk-mark-regexp)
 (org-defkey org-agenda-mode-map "u"        'org-agenda-bulk-unmark)
 (org-defkey org-agenda-mode-map "U"        'org-agenda-bulk-remove-all-marks)
+(org-defkey org-agenda-mode-map "A"        'org-agenda-append-agenda)
 (org-defkey org-agenda-mode-map "B"        'org-agenda-bulk-action)
 (org-defkey org-agenda-mode-map "\C-c\C-x!" 'org-reload)
 (org-defkey org-agenda-mode-map "\C-c\C-x\C-a" 'org-agenda-archive-default)
@@ -2043,7 +2044,6 @@ The following commands are available:
 (defvar org-agenda-pending-undo-list nil
   "In a series of undo commands, this is the list of remaining undo items.")
 
-
 (defun org-agenda-undo ()
   "Undo a remote editing step in the agenda.
 This undoes changes both in the agenda buffer and in the remote buffer
@@ -2260,6 +2260,15 @@ Pressing `<' twice means to restrict to the current subtree or region
        ((equal keys "/") (call-interactively 'org-occur-in-agenda-files))
        ((equal keys "!") (customize-variable 'org-stuck-projects))
        (t (error "Invalid agenda key"))))))
+
+(defun org-agenda-append-agenda ()
+  "Append another agenda view to the current one.
+This function allows interactive building of block agendas.
+Agenda views are separated by `org-agenda-block-separator'."
+  (interactive)
+  (let ((org-agenda-multi t))
+    (org-agenda)
+    (widen)))
 
 (defun org-agenda-normalize-custom-commands (cmds)
   (delq nil
