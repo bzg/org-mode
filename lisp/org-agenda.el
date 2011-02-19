@@ -2159,9 +2159,10 @@ Pressing `<' twice means to restrict to the current subtree or region
 	(move-marker org-agenda-restrict-end nil))
       ;; Delete old local properties
       (put 'org-agenda-redo-command 'org-lprops nil)
+      ;; Delete previously set last-arguments
+      (put 'org-agenda-redo-command 'last-args nil)
       ;; Remember where this call originated
       (setq org-agenda-last-dispatch-buffer (current-buffer))
-      (kill-local-variable 'org-agenda-current-span)
       (unless keys
 	(setq ans (org-agenda-get-restriction-and-command prefix-descriptions)
 	      keys (car ans)
@@ -2462,6 +2463,10 @@ s   Search for keywords                 C   Configure custom agenda commands
   (org-let (nth 1 series) '(org-prepare-agenda name))
   (let* ((org-agenda-multi t)
 	 (redo (list 'org-run-agenda-series name (list 'quote series)))
+	 (org-agenda-overriding-arguments 
+	  (or org-agenda-overriding-arguments
+	      (unless (null (delq nil (get 'org-agenda-redo-command 'last-args)))
+		(get 'org-agenda-redo-command 'last-args))))
 	 (cmds (car series))
 	 (gprops (nth 1 series))
 	 match ;; The byte compiler incorrectly complains about this.  Keep it!
@@ -2496,6 +2501,7 @@ s   Search for keywords                 C   Configure custom agenda commands
        (t (error "Invalid type in command series"))))
     (widen)
     (setq org-agenda-redo-command redo)
+    (put 'org-agenda-redo-command 'last-args org-agenda-last-arguments)
     (goto-char (point-min)))
   (org-fit-agenda-window)
   (org-let (nth 1 series) '(org-finalize-agenda)))
@@ -6292,7 +6298,8 @@ SPAN may be `day', `week', `month', `year'."
 		org-starting-day))
 	 (sd (org-agenda-compute-starting-span sd span n))
 	 (org-agenda-overriding-arguments
-	  (list (car org-agenda-last-arguments) sd span t)))
+	  (or org-agenda-overriding-arguments
+	      (list (car org-agenda-last-arguments) sd span t))))
     (org-agenda-redo)
     (org-agenda-find-same-or-today-or-agenda))
   (org-agenda-set-mode-name)

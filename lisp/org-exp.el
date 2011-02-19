@@ -1033,8 +1033,7 @@ to export.  It then creates a temporary buffer where it does its job.
 The result is then again returned as a string, and the exporter works
 on this string to produce the exported version."
   (interactive)
-  (let* ((docbookp (eq (plist-get parameters :for-backend) 'docbook))
-	 (backend (plist-get parameters :for-backend))
+  (let* ((backend (plist-get parameters :for-backend))
 	 (archived-trees (plist-get parameters :archived-trees))
 	 (inhibit-read-only t)
 	 (drawers org-drawers)
@@ -1090,11 +1089,15 @@ on this string to produce the exported version."
 				     (plist-get parameters :exclude-tags))
       (run-hooks 'org-export-preprocess-after-tree-selection-hook)
 
-      ;; Mark end of lists
-      (org-export-mark-list-ending backend)
+      ;; Change lists ending. Other parts of export may insert blank
+      ;; lines and lists' structure could be altered.
+      (org-export-mark-list-end backend)
 
       ;; Export code blocks
       (org-export-blocks-preprocess)
+
+      ;; Mark lists with properties
+      (org-export-mark-list-properties backend)
 
       ;; Handle source code snippets
       (org-export-replace-src-segments-and-examples backend)
@@ -1606,11 +1609,11 @@ from the buffer."
 	   (ascii "ASCII" "BEGIN_ASCII" "END_ASCII")
 	   (latex "LaTeX" "BEGIN_LaTeX" "END_LaTeX")))
 	(case-fold-search t)
-	fmt beg beg-content end end-content)
+	fmt beg beg-content end end-content ind)
 
     (while formatters
       (setq fmt (pop formatters))
-      ;; Handle #+Backend: stuff
+      ;; Handle #+backend: stuff
       (goto-char (point-min))
       (while (re-search-forward (concat "^\\([ \t]*\\)#\\+" (cadr fmt)
 					":[ \t]*\\(.*\\)") nil t)
@@ -1619,27 +1622,31 @@ from the buffer."
 	  (replace-match "\\1\\2" t)
 	  (add-text-properties
 	   (point-at-bol) (min (1+ (point-at-eol)) (point-max))
-	   '(org-protected t))))
+	   `(org-protected t original-indentation ,ind))))
       ;; Delete #+attr_Backend: stuff of another backend. Those
       ;; matching the current backend will be taken care of by
       ;; `org-export-attach-captions-and-attributes'
       (goto-char (point-min))
       (while (re-search-forward (concat "^\\([ \t]*\\)#\\+attr_" (cadr fmt)
 					":[ \t]*\\(.*\\)") nil t)
+	(setq ind (org-get-indentation))
 	(when (not (eq (car fmt) backend))
 	  (delete-region (point-at-bol) (min (1+ (point-at-eol)) (point-max)))))
-      ;; Handle #+begin_Backend and #+end_Backend stuff
+      ;; Handle #+begin_backend and #+end_backend stuff
       (goto-char (point-min))
       (while (re-search-forward (concat "^[ \t]*#\\+" (caddr fmt) "\\>.*\n?")
 				nil t)
 	(setq beg (match-beginning 0) beg-content (match-end 0))
+	(setq ind (save-excursion (goto-char beg) (org-get-indentation)))
 	(when (re-search-forward (concat "^[ \t]*#\\+" (cadddr fmt) "\\>.*\n?")
 				 nil t)
 	  (setq end (match-end 0) end-content (match-beginning 0))
 	  (if (eq (car fmt) backend)
 	      ;; yes, keep this
 	      (progn
-		(add-text-properties beg-content end-content '(org-protected t))
+		(add-text-properties
+		 beg-content end-content
+		 `(org-protected t original-indentation ,ind))
 		(delete-region (match-beginning 0) (match-end 0))
 		(save-excursion
 		  (goto-char beg)
@@ -1671,33 +1678,98 @@ These special cookies will later be interpreted by the backend."
 	(delete-region beg end)
 	(insert (org-add-props content nil 'original-indentation ind))))))
 
-(defun org-export-mark-list-ending (backend)
-  "Mark list endings with special cookies.
-These special cookies will later be interpreted by the backend.
-`org-list-end-re' is replaced by a blank line in the process."
-  (let ((process-buffer
-	 (lambda (end-list-marker)
-	   (goto-char (point-min))
-	   (while (org-search-forward-unenclosed org-item-beginning-re nil t)
-	     (goto-char (org-list-bottom-point))
+(defun org-export-mark-list-end (backend)
+  "Mark all list endings with a special string."
+  (unless (eq backend 'ascii)
+    (mapc
+     (lambda (e)
+       ;; For each type allowing list export, find every list, remove
+       ;; ending regexp if needed, and insert org-list-end.
+       (goto-char (point-min))
+       (while (re-search-forward (org-item-beginning-re) nil t)
+	 (when (eq (nth 2 (org-list-context)) e)
+	   (let* ((struct (org-list-struct))
+		  (bottom (org-list-get-bottom-point struct))
+		  (top (point-at-bol))
+		  (top-ind (org-list-get-ind top struct)))
+	     (goto-char bottom)
 	     (when (and (not (eq org-list-ending-method 'indent))
-			(looking-at (org-list-end-re)))
-	       (replace-match "\n"))
+			(looking-at org-list-end-re))
+	       (replace-match ""))
 	     (unless (bolp) (insert "\n"))
-	     (unless (looking-at end-list-marker)
-	       (insert end-list-marker))
-	     (unless (eolp) (insert "\n"))))))
-  ;; We need to divide backends into 3 categories.
-  (cond
-   ;; 1. Backends using `org-list-parse-list' do not need markers.
-   ((memq backend '(latex))
-    nil)
-   ;; 2. Line-processing backends need to be told where lists end.
-   ((memq backend '(html docbook))
-    (funcall process-buffer "ORG-LIST-END\n"))
-   ;; 3. Others backends do not need to know this: clean list enders.
-   (t
-    (funcall process-buffer "")))))
+	     ;; As org-list-end is inserted at column 0, it would end
+	     ;; by indentation any list. It can be problematic when
+	     ;; there are lists within lists: the inner list end would
+	     ;; also become the outer list end. To avoid this, text
+	     ;; property `original-indentation' is added, as
+	     ;; `org-list-struct' pays attention to it when reading a
+	     ;; list.
+	     (insert (org-add-props
+			 "ORG-LIST-END\n"
+			 (list 'original-indentation top-ind)))))))
+     (cons nil org-list-export-context))))
+
+(defun org-export-mark-list-properties (backend)
+  "Mark list with special properties.
+These special properties will later be interpreted by the backend."
+  (let ((mark-list
+	 (function
+	  ;; Mark a list with 3 properties: `list-item' which is
+	  ;; position at beginning of line, `list-struct' which is
+	  ;; list structure, and `list-prevs' which is the alist of
+	  ;; item and its predecessor. Leave point at list ending.
+	  (lambda (ctxt)
+	    (let* ((struct (org-list-struct))
+		   (top (org-list-get-top-point struct))
+		   (bottom (org-list-get-bottom-point struct))
+		   (prevs (org-list-prevs-alist struct))
+		   poi)
+	      ;; Get every item and ending position, without dups and
+	      ;; without bottom point of list.
+	      (mapc (lambda (e)
+		      (let ((pos (car e))
+			    (end (nth 6 e)))
+			(unless (memq pos poi)
+			  (push pos poi))
+			(unless (or (= end bottom) (memq end poi))
+			  (push end poi))))
+		    struct)
+	      (setq poi (sort poi '<))
+	      ;; For every point of interest, mark the whole line with
+	      ;; its position in list.
+	      (mapc
+	       (lambda (e)
+		 (goto-char e)
+		 (add-text-properties (point-at-bol) (point-at-eol)
+				      (list 'list-item (point-at-bol)
+					    'list-struct struct
+					    'list-prevs prevs)))
+	       poi)
+	      ;; Take care of bottom point. As babel may have inserted
+	      ;; a new list in buffer, list ending isn't always
+	      ;; marked. Now mark every list ending and add properties
+	      ;; useful to line processing exporters.
+	      (goto-char bottom)
+	      (when (or (looking-at "^ORG-LIST-END\n")
+			(and (not (eq org-list-ending-method 'indent))
+			     (looking-at org-list-end-re)))
+		(replace-match ""))
+	      (unless (bolp) (insert "\n"))
+	      (insert
+	       (org-add-props "ORG-LIST-END\n" (list 'list-item bottom
+						     'list-struct struct
+						     'list-prevs prevs)))
+	      ;; Following property is used by LaTeX exporter.
+	      (add-text-properties top (point) (list 'list-context ctxt)))))))
+    ;; Mark lists except for backends not interpreting them.
+    (unless (eq backend 'ascii)
+      (let ((org-list-end-re "^ORG-LIST-END\n"))
+	(mapc
+	 (lambda (e)
+	   (goto-char (point-min))
+	   (while (re-search-forward (org-item-beginning-re) nil t)
+	     (when (eq (nth 2 (org-list-context)) e) (funcall mark-list e))))
+	 (cons nil org-list-export-context))))))
 
 (defun org-export-attach-captions-and-attributes (backend target-alist)
   "Move #+CAPTION, #+ATTR_BACKEND, and #+LABEL text into text properties.

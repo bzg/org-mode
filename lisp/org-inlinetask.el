@@ -42,7 +42,9 @@
 ;;
 ;; Export commands do not treat these nodes as part of the sectioning
 ;; structure, but as a special inline text that is either removed, or
-;; formatted in some special way.
+;; formatted in some special way.  This in handled by
+;; `org-inlinetask-export' and `org-inlinetask-export-templates'
+;; variables.
 ;;
 ;; Special fontification of inline tasks, so that they can be immediately
 ;; recognized.  From the stars of the headline, only the first and the
@@ -105,12 +107,12 @@ When nil, they will not be exported."
   :type 'boolean)
 
 (defvar org-inlinetask-export-templates
-  '((html "<pre class=\"inlinetask\"><b>%s%s</b><br>%s</pre>"
+  '((html "<pre class=\"inlinetask\"><b>%s%s</b><br />\n%s\n</pre>"
 	  '((unless (eq todo "")
 	      (format "<span class=\"%s %s\">%s%s</span> "
 		      class todo todo priority))
 	    heading content))
-    (latex "\\begin\{description\}\\item[%s%s]%s\\end\{description\}"
+    (latex "\\begin\{description\}\n\\item[%s%s]~\n%s\n\\end\{description\}"
 	   '((unless (eq todo "") (format "\\textsc\{%s%s\} " todo priority))
 	     heading content))
     (ascii "     -- %s%s%s"
@@ -197,6 +199,13 @@ The number of levels is controlled by `org-inlinetask-min-level'."
 		  org-inlinetask-min-level)))
     (format "^\\(\\*\\{%d,\\}\\)[ \t]+" nstars)))
 
+(defun org-inlinetask-at-task-p ()
+  "Return true if point is at beginning of an inline task."
+  (save-excursion
+    (beginning-of-line)
+    (and (looking-at (concat (org-inlinetask-outline-regexp)  "\\(.*\\)"))
+	 (not (string-match "^end[ \t]*$" (downcase (match-string 2)))))))
+
 (defun org-inlinetask-in-task-p ()
   "Return true if point is inside an inline task."
   (save-excursion
@@ -251,7 +260,7 @@ Either remove headline and meta data, or do special formatting."
   (let* ((nstars (if org-odd-levels-only
 		     (1- (* 2 (or org-inlinetask-min-level 200)))
 		   (or org-inlinetask-min-level 200)))
-	 (re1 (format "^\\(\\*\\{%d,\\}\\) .*\n" nstars))
+	 (re1 (format "^\\(\\*\\{%d,\\}\\)[ \t]+.*\n" nstars))
 	 (re2 (concat "^[ \t]*" org-keyword-time-regexp))
 	 headline beg end stars content)
     (while (re-search-forward re1 nil t)
@@ -266,7 +275,7 @@ Either remove headline and meta data, or do special formatting."
 	(if (re-search-forward org-property-end-re nil t)
 	    (delete-region beg (1+ (match-end 0)))))
       (setq beg (point))
-      (when (and (re-search-forward "^\\(\\*+\\) " nil t)
+      (when (and (re-search-forward "^\\(\\*+\\)[ \t]+" nil t)
 		 (= (length (match-string 1)) (length stars))
 		 (progn (goto-char (match-end 0))
 			(looking-at "END[ \t]*$")))
@@ -281,7 +290,10 @@ Either remove headline and meta data, or do special formatting."
 	      (if (string-match "[ \t\n]+\\'" content)
 		  (setq content (substring content 0 (match-beginning 0))))
 	      (setq content (org-remove-indentation content))))
-	(setq content (or content ""))
+	;; Prevent from protecting content if there's any
+	(setq content (or (and content
+			       (org-add-props content '(org-protected nil)))
+			  ""))
 	;; grab elements to export
 	(when (string-match org-complex-heading-regexp headline)
 	  (let* ((todo (or (match-string 2 headline) ""))
@@ -291,16 +303,18 @@ Either remove headline and meta data, or do special formatting."
 		 (heading (or (match-string 4 headline) ""))
 		 (tags (or (match-string 5 headline) ""))
 		 (backend-spec (assq backend org-inlinetask-export-templates))
-		 (format-str (nth 1 backend-spec))
+		 (format-str (org-add-props (nth 1 backend-spec)
+				 '(org-protected t)))
 		 (tokens (cadr (nth 2 backend-spec)))
-		 ;; change nil arguments into empty strings
-		 (nil-to-str (lambda (el) (or (eval el) "")))
-		 ;; build and protect export string
+		 (nil-to-str
+		  ;; Change nil arguments into empty strings
+		  (lambda (el) (or (eval el) "")))
+		 ;; Build and ensure export string will not break lists
 		 (export-str (org-add-props
 				 (eval (append '(format format-str)
 					       (mapcar nil-to-str tokens)))
-				 nil 'org-protected t)))
-	    ;; eventually insert it
+				 '(original-indentation 1000))))
+	    ;; Eventually insert it
 	    (insert export-str "\n")))))))
 
 (defun org-inlinetask-get-current-indentation ()
@@ -330,6 +344,22 @@ Either remove headline and meta data, or do special formatting."
       (add-text-properties (match-beginning 3) (match-end 3)
 			   '(face shadow font-lock-fontified t)))))
 
+(defun org-inlinetask-toggle-visibility ()
+  "Toggle visibility of inline task at point."
+  (let ((end (save-excursion
+	       (org-inlinetask-goto-end)
+	       (if (bolp) (1- (point)) (point))))
+	(start (save-excursion
+		 (org-inlinetask-goto-beginning)
+		 (point-at-eol))))
+    (cond
+     ;; Nothing to show/hide.
+     ((= end start))
+     ;; Inlinetask was folded: expand it.
+     ((get-char-property (1+ start) 'invisible)
+      (outline-flag-region start end nil))
+     (t (outline-flag-region start end t)))))
+
 (defun org-inlinetask-remove-END-maybe ()
   "Remove an END line when present."
   (when (looking-at (format "\\([ \t]*\n\\)*\\*\\{%d,\\}[ \t]+END[ \t]*$"
@@ -337,7 +367,7 @@ Either remove headline and meta data, or do special formatting."
     (replace-match "")))
 
 (eval-after-load "org-exp"
-  '(add-hook 'org-export-preprocess-after-tree-selection-hook
+  '(add-hook 'org-export-preprocess-before-backend-specifics-hook
 	     'org-inlinetask-export-handler))
 (eval-after-load "org"
   '(add-hook 'org-font-lock-hook 'org-inlinetask-fontify))

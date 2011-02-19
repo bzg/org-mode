@@ -1092,16 +1092,17 @@ PUB-DIR is set, use this as the publishing directory."
 	 (date (plist-get opt-plist :date))
 	 (author      (plist-get opt-plist :author))
 	 (html-validation-link (or org-export-html-validation-link ""))
-	 (title       (or (and subtree-p (org-export-get-title-from-subtree))
-			  (plist-get opt-plist :title)
-			  (and (not body-only)
-			       (not
-				(plist-get opt-plist :skip-before-1st-heading))
-			       (org-export-grab-title-from-buffer))
-			  (and buffer-file-name
-			       (file-name-sans-extension
-				(file-name-nondirectory buffer-file-name)))
-			  "UNTITLED"))
+	 (title       (org-html-expand
+		       (or (and subtree-p (org-export-get-title-from-subtree))
+			   (plist-get opt-plist :title)
+			   (and (not body-only)
+				(not
+				 (plist-get opt-plist :skip-before-1st-heading))
+				(org-export-grab-title-from-buffer))
+			   (and buffer-file-name
+				(file-name-sans-extension
+				 (file-name-nondirectory buffer-file-name)))
+			   "UNTITLED")))
 	 (link-up (and (plist-get opt-plist :link-up)
 		       (string-match "\\S-" (plist-get opt-plist :link-up))
 		       (plist-get opt-plist :link-up)))
@@ -1115,10 +1116,6 @@ PUB-DIR is set, use this as the publishing directory."
 	 (inquote     nil)
 	 (infixed     nil)
 	 (inverse     nil)
-	 (in-local-list nil)
-	 (local-list-type nil)
-	 (local-list-indent nil)
-	 (llt org-plain-list-ordered-item-terminator)
 	 (email       (plist-get opt-plist :email))
 	 (language    (plist-get opt-plist :language))
 	 (keywords    (plist-get opt-plist :keywords))
@@ -1176,8 +1173,9 @@ PUB-DIR is set, use this as the publishing directory."
 	    ""))
 	 table-open
 	 table-buffer table-orig-buffer
-	 ind item-type starter
-	 snumber item-tag item-number
+	 ind
+	 rpl path attr desc descp desc1 desc2 link
+	 snumber fnc
 	 footnotes footref-seen
 	 href
 	 )
@@ -1280,7 +1278,7 @@ lang=\"%s\" xml:lang=\"%s\">
 				     org-export-html-preamble-format))
 			(cadr (assoc "en" org-export-html-preamble-format))))))
 	    (insert (format-spec html-preamble-format
-				 `((?t . ,(org-html-expand title))
+				 `((?t . ,title)
 				   (?a . ,author) (?d . ,date) (?e . ,email)))))))
 
       (if (and org-export-with-toc (not body-only))
@@ -1401,17 +1399,6 @@ lang=\"%s\" xml:lang=\"%s\">
 	      (setq infixed nil)
 	      (insert "</pre>\n")
 	      (org-open-par))
-	    (throw 'nextline nil))
-
-	  ;; Explicit list closure
-	  (when (equal "ORG-LIST-END" line)
-	    (while local-list-indent
-	      (org-close-li (car local-list-type))
-	      (insert (format "</%sl>\n" (car local-list-type)))
-	      (pop local-list-type)
-	      (pop local-list-indent))
-	    (setq in-local-list nil)
-	    (org-open-par)
 	    (throw 'nextline nil))
 
 	  ;; Protected HTML
@@ -1594,72 +1581,17 @@ lang=\"%s\" xml:lang=\"%s\">
 		    table-orig-buffer (nreverse table-orig-buffer))
 	      (org-close-par-maybe)
 	      (insert (org-format-table-html table-buffer table-orig-buffer))))
+
+	   ;; Normal lines
+
 	   (t
-	    ;; Normal lines
-	    (when (string-match
-		   (cond
-		    ((eq llt t) "^\\([ \t]*\\)\\(\\([-+*] \\)\\|\\([0-9]+[.)]\\) \\)?\\( *[^ \t\n\r]\\|[ \t]*$\\)")
-		    ((= llt ?.) "^\\([ \t]*\\)\\(\\([-+*] \\)\\|\\([0-9]+\\.\\) \\)?\\( *[^ \t\n\r]\\|[ \t]*$\\)")
-		    ((= llt ?\)) "^\\([ \t]*\\)\\(\\([-+*] \\)\\|\\([0-9]+)\\) \\)?\\( *[^ \t\n\r]\\|[ \t]*$\\)")
-		    (t (error "Invalid value of `org-plain-list-ordered-item-terminator'")))
-		   line)
-	      (setq ind (or (get-text-property 0 'original-indentation line)
-			    (org-get-string-indentation line))
-		    item-type (if (match-beginning 4) "o" "u")
-		    starter (if (match-beginning 2)
-				(substring (match-string 2 line) 0 -1))
-		    line (substring line (match-beginning 5))
-		    item-number nil
-		    item-tag nil)
-	      (if (string-match "\\[@\\(?:start:\\)?\\([0-9]+\\)\\][ \t]?" line)
-		  (setq item-number (match-string 1 line)
-			line (replace-match "" t t line)))
-	      (if (and starter (string-match "\\(.*?\\) ::[ \t]*" line))
-		  (setq item-type "d"
-			item-tag (match-string 1 line)
-			line (substring line (match-end 0))))
-	      (cond
-	       ((and starter
-		     (or (not in-local-list)
-			 (> ind (car local-list-indent))))
-		;; Start new (level of) list
-		(org-close-par-maybe)
-		(insert (cond
-			 ((equal item-type "u") "<ul>\n<li>\n")
-			 ((and (equal item-type "o") item-number)
-			  (format "<ol>\n<li value=\"%s\">\n" item-number))
-			 ((equal item-type "o") "<ol>\n<li>\n")
-			 ((equal item-type "d")
-			  (format "<dl>\n<dt>%s</dt><dd>\n" item-tag))))
-		(push item-type local-list-type)
-		(push ind local-list-indent)
-		(setq in-local-list t))
-	       ;; Continue list
-	       (starter
-		;; terminate any previous sublist but first ensure
-		;; list is not ill-formed.
-		(let ((min-ind (apply 'min local-list-indent)))
-		  (when (< ind min-ind) (setq ind min-ind)))
-		(while (< ind (car local-list-indent))
-		  (org-close-li (car local-list-type))
-		  (insert (format "</%sl>\n" (car local-list-type)))
-		  (pop local-list-type) (pop local-list-indent)
-		  (setq in-local-list local-list-indent))
-		;; insert new item
-		(org-close-li (car local-list-type))
-		(insert (cond
-			 ((equal (car local-list-type) "d")
-			  (format "<dt>%s</dt><dd>\n" (or item-tag "???")))
-			 ((and (equal item-type "o") item-number)
-			  (format "<li value=\"%s\">\n" item-number))
-			 (t "<li>\n")))))
-	      (if (string-match "^[ \t]*\\[\\([X ]\\)\\]" line)
-		  (setq line
-			(replace-match
-			 (if (equal (match-string 1 line) "X")
-			     "<b>[X]</b>"
-			   "<b>[<span style=\"visibility:hidden;\">X</span>]</b>")
-			 t t line))))
+	    ;; This line either is list item or end a list.
+	    (when (get-text-property 0 'list-item line)
+	      (setq line (org-html-export-list-line
+			  line
+			  (get-text-property 0 'list-item line)
+			  (get-text-property 0 'list-struct line)
+			  (get-text-property 0 'list-prevs line))))
 
 	    ;; Horizontal line
 	    (when (string-match "^[ \t]*-\\{5,\\}[ \t]*$" line)
@@ -1786,14 +1718,14 @@ lang=\"%s\" xml:lang=\"%s\">
 	    (goto-char (match-end 0))
 	    (insert "\n")))
 	(insert "<div id=\"table-of-contents\">\n")
-	(mapc 'insert thetoc)
-	(insert "</div>\n"))
-      ;; remove empty paragraphs and lists
+	(let ((beg (point)))
+	  (mapc 'insert thetoc)
+	  (insert "</div>\n")
+	  (while (re-search-backward "<li>[ \r\n\t]*</li>\n?" beg t)
+	    (replace-match ""))))
+      ;; remove empty paragraphs
       (goto-char (point-min))
       (while (re-search-forward "<p>[ \r\n\t]*</p>" nil t)
-	(replace-match ""))
-      (goto-char (point-min))
-      (while (re-search-forward "<li>[ \r\n\t]*</li>\n?" nil t)
 	(replace-match ""))
       (goto-char (point-min))
       ;; Convert whitespace place holders
@@ -2349,10 +2281,6 @@ If there are links in the string, don't modify these."
   (org-close-par-maybe)
   (insert (if (equal type "d") "</dd>\n" "</li>\n")))
 
-(defvar in-local-list)
-(defvar local-list-indent)
-(defvar local-list-type)
-
 (defvar body-only) ; dynamically scoped into this.
 (defun org-html-level-start (level title umax with-toc head-count)
   "Insert a new level in HTML export.
@@ -2457,6 +2385,97 @@ Replaces invalid characters with \"_\" and then prepends a prefix."
       (insert "</div>\n")
     (org-close-li)
     (insert "</ul>\n")))
+
+(defun org-html-export-list-line (line pos struct prevs)
+  "Insert list syntax in export buffer. Return LINE, maybe modified.
+
+POS is the item position or line position the line had before
+modifications to buffer. STRUCT is the list structure. PREVS is
+the alist of previous items."
+  (let* ((get-type
+	  (function
+	   ;; Translate type of list containing POS to "d", "o" or
+	   ;; "u".
+	   (lambda (pos struct prevs)
+	     (let ((type (org-list-get-list-type pos struct prevs)))
+	       (cond
+		((eq 'ordered type) "o")
+		((eq 'descriptive type) "d")
+		(t "u"))))))
+	 (get-closings
+	  (function
+	   ;; Return list of all items and sublists ending at POS, in
+	   ;; reverse order.
+	   (lambda (pos)
+	     (let (out)
+	       (catch 'exit
+		 (mapc (lambda (e)
+			 (let ((end (nth 6 e))
+			       (item (car e)))
+			   (cond
+			    ((= end pos) (push item out))
+			    ((>= item pos) (throw 'exit nil)))))
+		       struct))
+	       out)))))
+    ;; First close any previous item, or list, ending at POS.
+    (mapc (lambda (e)
+	    (let* ((lastp (= (org-list-get-last-item e struct prevs) e))
+		   (first-item (org-list-get-list-begin e struct prevs))
+		   (type (funcall get-type first-item struct prevs)))
+	      (org-close-par-maybe)
+	      ;; Ending for every item
+	      (org-close-li type)
+	      ;; We're ending last item of the list: end list.
+	      (when lastp (insert (format "</%sl>\n" type)))))
+	  (funcall get-closings pos))
+    (cond
+     ;; At an item: insert appropriate tags in export buffer.
+     ((assq pos struct)
+      (string-match
+       (concat "[ \t]*\\(\\S-+[ \t]+\\)"
+	       "\\(?:\\[@\\(?:start:\\)?\\([0-9]+\\|[A-Za-z]\\)\\]\\)?"
+	       "\\(?:\\(\\[[ X-]\\]\\)[ \t]+\\)?"
+	       "\\(?:\\(.*\\)[ \t]+::[ \t]+\\)?"
+	       "\\(.*\\)") line)
+      (let* ((checkbox (match-string 3 line))
+	     (desc-tag (or (match-string 4 line) "???"))
+	     (body (or (match-string 5 line) ""))
+	     (list-beg (org-list-get-list-begin pos struct prevs))
+	     (firstp (= list-beg pos))
+	     ;; Always refer to first item to determine list type, in
+	     ;; case list is ill-formed.
+	     (type (funcall get-type list-beg struct prevs))
+	     (counter (let ((count-tmp (org-list-get-counter pos struct)))
+			(cond
+			 ((not count-tmp) nil)
+			 ((string-match "[A-Za-z]" count-tmp)
+			  (- (string-to-char (upcase count-tmp)) 64))
+			 ((string-match "[0-9]+" count-tmp)
+			  count-tmp)))))
+	(when firstp
+	  (org-close-par-maybe)
+	  (insert (format "<%sl>\n" type)))
+	(insert (cond
+		 ((equal type "d")
+		  (format "<dt>%s</dt><dd>" desc-tag))
+		 ((and (equal type "o") counter)
+		  (format "<li value=\"%s\">" counter))
+		 (t "<li>")))
+	;; If line had a checkbox, some additional modification is required.
+	(when checkbox
+	  (setq body
+		(concat
+		 (cond
+		  ((string-match "X" checkbox) "<code>[X]</code> ")
+		  ((string-match " " checkbox) "<code>[&nbsp;]</code> ")
+		  (t "<code>[-]</code> "))
+		 body)))
+	;; Return modified line
+	body))
+     ;; At a list ender: go to next line (side-effects only).
+     ((equal "ORG-LIST-END" line) (throw 'nextline nil))
+     ;; Not at an item: return line unchanged (side-effects only).
+     (t line))))
 
 (provide 'org-html)
 

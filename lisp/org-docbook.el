@@ -499,9 +499,6 @@ publishing directory."
 	 (inquote     nil)
 	 (infixed     nil)
 	 (inverse     nil)
-	 (in-local-list nil)
-	 (local-list-type nil)
-	 (local-list-indent nil)
 	 (llt org-plain-list-ordered-item-terminator)
 	 (email (plist-get opt-plist :email))
 	 (language (plist-get opt-plist :language))
@@ -669,22 +666,6 @@ publishing directory."
 	      (setq infixed nil)
 	      (insert "]]></programlisting>\n")
 	      (org-export-docbook-open-para))
-	    (throw 'nextline nil))
-
-	  ;; List ender: close every open list.
-	  (when (equal "ORG-LIST-END" line)
-	    (while local-list-type
-	      (let ((listtype (car local-list-type)))
-		(org-export-docbook-close-li listtype)
-		(insert (cond
-			 ((equal listtype "o") "</orderedlist>\n")
-			 ((equal listtype "u") "</itemizedlist>\n")
-			 ((equal listtype "d") "</variablelist>\n"))))
-	      (pop local-list-type))
-	    ;; We did close a list, normal text follows: need <para>
-	    (org-export-docbook-open-para)
-	    (setq local-list-indent nil
-		  in-local-list nil)
 	    (throw 'nextline nil))
 
 	  ;; Protected HTML
@@ -1008,93 +989,15 @@ publishing directory."
 		       (org-format-table-html table-buffer table-orig-buffer
 					      'no-css)))))
 
+	   ;; Normal lines
 	   (t
-	    ;; Normal lines
-	    (when (string-match
-		   (cond
-		    ((eq llt t) "^\\([ \t]*\\)\\(\\([-+*] \\)\\|\\([0-9]+[.)]\\) \\)?\\( *[^ \t\n\r]\\|[ \t]*$\\)")
-		    ((= llt ?.) "^\\([ \t]*\\)\\(\\([-+*] \\)\\|\\([0-9]+\\.\\) \\)?\\( *[^ \t\n\r]\\|[ \t]*$\\)")
-		    ((= llt ?\)) "^\\([ \t]*\\)\\(\\([-+*] \\)\\|\\([0-9]+)\\) \\)?\\( *[^ \t\n\r]\\|[ \t]*$\\)")
-		    (t (error "Invalid value of `org-plain-list-ordered-item-terminator'")))
-		   line)
-	      (setq ind (or (get-text-property 0 'original-indentation line)
-			    (org-get-string-indentation line))
-		    item-type (if (match-beginning 4) "o" "u")
-		    starter (if (match-beginning 2)
-				(substring (match-string 2 line) 0 -1))
-		    line (substring line (match-beginning 5))
-		    item-tag nil
-		    item-number nil)
-	      (if (string-match "\\[@\\(?:start:\\)?\\([0-9]+\\)\\][ \t]?" line)
-		  (setq item-number (match-string 1 line)
-			line (replace-match "" t t line)))
-	      (if (and starter (string-match "\\(.*?\\) ::[ \t]*" line))
-		  (setq item-type "d"
-			item-tag (match-string 1 line)
-			line (substring line (match-end 0))))
-	      (cond
-	       ((and starter
-		     (or (not in-local-list)
-			 (> ind (car local-list-indent))))
-		;; Start new (level of) list
-		(org-export-docbook-close-para-maybe)
-		(insert (cond
-			 ((equal item-type "u") "<itemizedlist>\n<listitem>\n")
-			 ((and (equal item-type "o") item-number)
-			  ;; Check for a specific start number.  If it
-			  ;; is specified, we use the ``override''
-			  ;; attribute of element <listitem> to pass the
-			  ;; info to DocBook.  We could also use the
-			  ;; ``startingnumber'' attribute of element
-			  ;; <orderedlist>, but the former works on both
-			  ;; DocBook 5.0 and prior versions.
-			  (format "<orderedlist>\n<listitem override=\"%s\">\n" item-number))
-			 ((equal item-type "o") "<orderedlist>\n<listitem>\n")
-			 ((equal item-type "d")
-			  (format "<variablelist>\n<varlistentry><term>%s</term><listitem>\n" item-tag))))
-		;; For DocBook, we need to open a para right after tag
-		;; <listitem>.
-		(org-export-docbook-open-para)
-		(push item-type local-list-type)
-		(push ind local-list-indent)
-		(setq in-local-list t))
-		;; Continue current list
-	       (starter
-		;; terminate any previous sublist but first ensure
-		;; list is not ill-formed
-		(let ((min-ind (apply 'min local-list-indent)))
-		  (when (< ind min-ind) (setq ind min-ind)))
-		(while (< ind (car local-list-indent))
-		  (let ((listtype (car local-list-type)))
-		    (org-export-docbook-close-li listtype)
-		    (insert (cond
-			     ((equal listtype "o") "</orderedlist>\n")
-			     ((equal listtype "u") "</itemizedlist>\n")
-			     ((equal listtype "d") "</variablelist>\n"))))
-		  (pop local-list-type) (pop local-list-indent)
-		  (setq in-local-list local-list-indent))
-		;; insert new item
-		(let ((listtype (car local-list-type)))
-		  (org-export-docbook-close-li listtype)
-		  (insert (cond
-			   ((and (equal listtype "o") item-number)
-			    (format "<listitem override=\"%s\">" item-number))
-			   ((equal listtype "o") "<listitem>")
-			   ((equal listtype "u") "<listitem>")
-			   ((equal listtype "d") (format
-						  "<varlistentry><term>%s</term><listitem>"
-						  (or item-tag
-						      "???"))))))
-		;; For DocBook, we need to open a para right after tag
-		;; <listitem>.
-		(org-export-docbook-open-para)))
-	      ;; Checkboxes.
-	      (if (string-match "^[ \t]*\\(\\[[X -]\\]\\)" line)
-		  (setq line
-			(replace-match (concat checkbox-start
-					       (match-string 1 line)
-					       checkbox-end)
-				       t t line))))
+	    ;; This line either is list item or end a list.
+	    (when (when (get-text-property 0 'list-item line)
+	   	      (setq line (org-export-docbook-list-line
+			  line
+			  (get-text-property 0 'list-item line)
+			  (get-text-property 0 'list-struct line)
+			  (get-text-property 0 'list-prevs line)))))
 
 	    ;; Empty lines start a new paragraph.  If hand-formatted lists
 	    ;; are not fully interpreted, lines starting with "-", "+", "*"
@@ -1138,20 +1041,12 @@ publishing directory."
 	(if (eq major-mode (default-value 'major-mode))
 	    (nxml-mode)))
 
-      ;; Remove empty paragraphs and lists.  Replace them with a
-      ;; newline.
+      ;; Remove empty paragraphs. Replace them with a newline.
       (goto-char (point-min))
       (while (re-search-forward
 	      "[ \r\n\t]*\\(<para>\\)[ \r\n\t]*</para>[ \r\n\t]*" nil t)
 	(when (not (get-text-property (match-beginning 1) 'org-protected))
 	  (replace-match "\n")
-	  ;; Avoid empty <listitem></listitem> caused by inline tasks.
-	  ;; We should add an empty para to make everything valid.
-	  (when (and (looking-at "</listitem>")
-		     (save-excursion
-		       (backward-char (length "<listitem>\n"))
-		       (looking-at "<listitem>")))
-	    (insert "<para></para>"))
 	  (backward-char 1)))
       ;; Fill empty sections with <para></para>.  This is to make sure
       ;; that the DocBook document generated is valid and well-formed.
@@ -1192,10 +1087,6 @@ publishing directory."
   (if (equal type "d")
       (insert "</listitem></varlistentry>\n")
     (insert "</listitem>\n")))
-
-(defvar in-local-list)
-(defvar local-list-indent)
-(defvar local-list-type)
 
 (defun org-export-docbook-level-start (level title)
   "Insert a new level in DocBook export.
@@ -1437,6 +1328,99 @@ that need to be preserved in later phase of DocBook exporting."
 					(match-string 3 line)) 1 -1)))
 	    line (substring line (match-end 0))))
     (concat replaced line)))
+
+(defun org-export-docbook-list-line (line pos struct prevs)
+  "Insert list syntax in export buffer. Return LINE, maybe modified.
+
+POS is the item position or line position the line had before
+modifications to buffer. STRUCT is the list structure. PREVS is
+the alist of previous items."
+  (let* ((get-type
+	  (function
+	   ;; Translate type of list containing POS to "ordered",
+	   ;; "variable" or "itemized".
+	   (lambda (pos struct prevs)
+	     (let ((type (org-list-get-list-type pos struct prevs)))
+	       (cond
+		((eq 'ordered type) "ordered")
+		((eq 'descriptive type) "variable")
+		(t "itemized"))))))
+	 (get-closings
+	  (function
+	   ;; Return list of all items and sublists ending at POS, in
+	   ;; reverse order.
+	   (lambda (pos)
+	     (let (out)
+	       (catch 'exit
+		 (mapc (lambda (e)
+			 (let ((end (nth 6 e))
+			       (item (car e)))
+			   (cond
+			    ((= end pos) (push item out))
+			    ((>= item pos) (throw 'exit nil)))))
+		       struct))
+	       out)))))
+    ;; First close any previous item, or list, ending at POS.
+    (mapc (lambda (e)
+	    (let* ((lastp (= (org-list-get-last-item e struct prevs) e))
+		   (first-item (org-list-get-list-begin e struct prevs))
+		   (type (funcall get-type first-item struct prevs)))
+	      ;; Ending for every item
+	      (org-export-docbook-close-para-maybe)
+	      (insert (if (equal type "variable")
+			  "</listitem></varlistentry>\n"
+			"</listitem>\n"))
+	      ;; We're ending last item of the list: end list.
+	      (when lastp (insert (format "</%slist>\n" type)))))
+	  (funcall get-closings pos))
+    (cond
+     ;; At an item: insert appropriate tags in export buffer.
+     ((assq pos struct)
+      (string-match (concat "[ \t]*\\(\\S-+[ \t]+\\)"
+			    "\\(?:\\[@\\(?:start:\\)?\\([0-9]+\\|[a-zA-Z]\\)\\]\\)?"
+			    "\\(?:\\(\\[[ X-]\\]\\)[ \t]+\\)?"
+			    "\\(?:\\(.*\\)[ \t]+::[ \t]+\\)?"
+			    "\\(.*\\)")
+		    line)
+      (let* ((checkbox (match-string 3 line))
+	     (desc-tag (or (match-string 4 line) "???"))
+	     (body (match-string 5 line))
+	     (list-beg (org-list-get-list-begin pos struct prevs))
+	     (firstp (= list-beg pos))
+	     ;; Always refer to first item to determine list type, in
+	     ;; case list is ill-formed.
+	     (type (funcall get-type list-beg struct prevs))
+	     ;; Special variables for ordered lists.
+	     (counter (let ((count-tmp (org-list-get-counter pos struct)))
+			(cond
+			 ((not count-tmp) nil)
+			 ((string-match "[A-Za-z]" count-tmp)
+			  (- (string-to-char (upcase count-tmp)) 64))
+			 ((string-match "[0-9]+" count-tmp)
+			  count-tmp)))))
+	;; When FIRSTP, a new list or sub-list is starting.
+	(when firstp
+	  (org-export-docbook-close-para-maybe)
+	  (insert (format "<%slist>\n" type)))
+	(insert (cond
+		 ((equal type "variable")
+		  (format "<varlistentry><term>%s</term><listitem>" desc-tag))
+		 ((and (equal type "ordered") counter)
+		  (format "<listitem override=\"%s\">" counter))
+		 (t "<listitem>")))
+	;; For DocBook, we need to open a para right after tag
+	;; <listitem>.
+	(org-export-docbook-open-para)
+	;; If line had a checkbox, some additional modification is required.
+	(when checkbox (setq body (concat checkbox " " body)))
+	;; Return modified line
+	body))
+     ;; At a list ender:  normal text follows: need <para>.
+     ((equal "ORG-LIST-END" line)
+      (org-export-docbook-open-para)
+      (throw 'nextline nil))
+     ;; Not at an item: return line unchanged (side-effects only).
+     (t line))))
 
 (provide 'org-docbook)
 

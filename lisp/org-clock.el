@@ -29,6 +29,7 @@
 ;; This file contains the time clocking code for Org-mode
 
 (require 'org)
+(require 'org-exp)
 ;;; Code:
 
 (eval-when-compile
@@ -260,6 +261,7 @@ For more information, see `org-clocktable-write-default'."
 
 (defcustom org-clock-clocktable-language-setup
   '(("en" "File"     "L"  "Timestamp"  "Headline" "Time"  "ALL"   "Total time"   "File time")
+    ("es" "Archivo"  "N"  "Fecha y hora" "Tarea" "Tiempo" "TODO" "Tiempo total" "Tiempo archivo")
     ("fr" "Fichier"  "N"  "Horodatage" "En-tête"  "Durée" "TOUT"  "Durée totale" "Durée fichier")
     ("nl" "Bestand"  "N"  "Tijdstip"   "Hoofding" "Duur"  "ALLES" "Totale duur"  "Bestandstijd"))
   "Terms used in clocktable, translated to different languages."

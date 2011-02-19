@@ -1493,38 +1493,41 @@ visually indistinguishable from true headlines.  In short: even though
 as bullets.
 @item
 @vindex org-plain-list-ordered-item-terminator
+@vindex org-alphabetical-lists
 @emph{Ordered} list items start with a numeral followed by either a period or
 a right parenthesis@footnote{You can filter out any of them by configuring
 @code{org-plain-list-ordered-item-terminator}.}, such as @samp{1.} or
-@samp{1)}.  If you want a list to start with a different value (e.g.@: 20), start
-the text of the item with @code{[@@20]}@footnote{If there's a checkbox in the
-item, the cookie must be put @emph{before} the checkbox.}.  Those constructs
-can be used in any item of the list in order to enforce a particular
-numbering.
+@samp{1)}@footnote{You can also get @samp{a.}, @samp{A.}, @samp{a)} and
+@samp{A)} by configuring @code{org-alphabetical-lists}.  To minimize
+confusion with normal text, those are limited to one character only.  Beyond
+that limit, bullets will automatically fallback to numbers.}.  If you want a
+list to start with a different value (e.g.@: 20), start the text of the item
+with @code{[@@20]}@footnote{If there's a checkbox in the item, the cookie
+must be put @emph{before} the checkbox.  If you have activated alphabetical
+lists, you can also use counters like @code{[@@b]}.}.  Those constructs can
+be used in any item of the list in order to enforce a particular numbering.
 @item
 @emph{Description} list items are unordered list items, and contain the
-separator @samp{ :: } to separate the description @emph{term} from the
+separator @samp{ :: } to distinguish the description @emph{term} from the
 description.
 @end itemize
 
 Items belonging to the same list must have the same indentation on the first
 line.  In particular, if an ordered list reaches number @samp{10.}, then the
 2--digit numbers must be written left-aligned with the other numbers in the
-list.
+list.  An item ends before the next line that is less or equally indented
+than the bullet/number.
 
 @vindex org-list-ending-method
 @vindex org-list-end-regexp
 @vindex org-empty-line-terminates-plain-lists
 Two methods@footnote{To disable either of them, configure
 @code{org-list-ending-method}.} are provided to terminate lists.  A list ends
-before the next line that is indented like the bullet/number or less, or it
-ends before two blank lines@footnote{See also
-@code{org-empty-line-terminates-plain-lists}.}.  In both cases, all levels of
-the list are closed@footnote{So you cannot have a sublist, some text and then
-another sublist while still in the same top-level list item.  This used to be
-possible, but it was only supported in the HTML exporter and difficult to
-manage with automatic indentation.}.  For finer control, you can end lists
-with any pattern set in @code{org-list-end-regexp}.  Here is an example:
+whenever every item has ended, which means before any line less or equally
+indented than items at top level.  It also ends before two blank
+lines@footnote{See also @code{org-empty-line-terminates-plain-lists}.}.  In
+that case, all items are closed.  For finer control, you can end lists with
+any pattern set in @code{org-list-end-regexp}.  Here is an example:
 
 @example
 @group
@@ -1535,8 +1538,8 @@ with any pattern set in @code{org-list-end-regexp}.  Here is an example:
       + this was already my favorite scene in the book
       + I really like Miranda Otto.
    3. Peter Jackson being shot by Legolas
-      He makes a really funny face when it happens.
       - on DVD only
+      He makes a really funny face when it happens.
    But in the end, no individual scenes matter but the film as a whole.
    Important actors in this film are:
    - @b{Elijah Wood} :: He plays Frodo
@@ -1651,14 +1654,20 @@ depending on @code{org-plain-list-ordered-item-terminator}, the type of list,
 and its position@footnote{See @code{bullet} rule in
 @code{org-list-automatic-rules} for more information.}.  With a numeric
 prefix argument N, select the Nth bullet from this list.  If there is an
-active region when calling this, all lines will be converted to list items.
-If the first line already was a list item, any item markers will be removed
-from the list.  Finally, even without an active region, a normal line will be
+active region when calling this, selected text will be changed into an item.
+With a prefix argument, all lines will be converted to list items.  If the
+first line already was a list item, any item markers will be removed from the
+list.  Finally, even without an active region, a normal line will be
 converted into a list item.
 @kindex C-c *
 @item C-c *
 Turn a plain list item into a headline (so that it becomes a subheading at
 its location). @xref{Structure editing}, for a detailed explanation.
+@kindex C-c C-*
+@item C-c C-*
+Turn the whole plain list into a subtree of the current heading.  Checkboxes
+(@pxref{Checkboxes}) will become TODO (resp. DONE) keywords when unchecked
+(resp. checked).
 @kindex S-@key{left}
 @kindex S-@key{right}
 @item S-@key{left}/@key{right}
@@ -4282,9 +4291,8 @@ this headline and the next (so @emph{not} the entire subtree).
 If there is no active region, just toggle the checkbox at point.
 @end itemize
 @orgcmd{M-S-@key{RET},org-insert-todo-heading}
-Insert a new item with a checkbox.
-This works only if the cursor is already in a plain list item
-(@pxref{Plain lists}).
+Insert a new item with a checkbox.  This works only if the cursor is already
+in a plain list item (@pxref{Plain lists}).
 @orgcmd{C-c C-x o,org-toggle-ordered-property}
 @vindex org-track-ordered-property-with-tag
 @cindex property, ORDERED

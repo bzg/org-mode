@@ -130,6 +130,18 @@
 		  (filename &optional up))
 (declare-function server-edit "server" (&optional arg))
 
+(define-obsolete-function-alias
+  'org-protocol-unhex-compound 'org-link-unescape-compound
+  "2011-02-17")
+
+(define-obsolete-function-alias
+  'org-protocol-unhex-string 'org-link-unescape
+  "2011-02-17")
+
+(define-obsolete-function-alias
+  'org-protocol-unhex-single-byte-sequence
+  'org-link-unescape-single-byte-sequence
+  "2011-02-17")
 
 (defgroup org-protocol nil
   "Intercept calls from emacsclient to trigger custom actions.
@@ -289,75 +301,8 @@ part."
     (if unhexify
 	(if (fboundp unhexify)
 	    (mapcar unhexify split-parts)
-	  (mapcar 'org-protocol-unhex-string split-parts))
+	  (mapcar 'org-link-unescape split-parts))
       split-parts)))
-
-;; This inline function is needed in org-protocol-unhex-compound to do
-;; the right thing to decode UTF-8 char integer values.
-(eval-when-compile
-  (if (>= emacs-major-version 23)
-      (defsubst org-protocol-char-to-string(c)
-	"Defsubst to decode UTF-8 character values in emacs 23 and beyond."
-	(char-to-string c))
-    (defsubst org-protocol-char-to-string (c)
-      "Defsubst to decode UTF-8 character values in emacs 22."
-      (string (decode-char 'ucs c)))))
-
-(defun org-protocol-unhex-string(str)
-  "Unhex hexified unicode strings as returned from the JavaScript function
-encodeURIComponent. E.g. `%C3%B6' is the german Umlaut `ü'."
-  (setq str (or str ""))
-  (let ((tmp "")
-	(case-fold-search t))
-    (while (string-match "\\(%[0-9a-f][0-9a-f]\\)+" str)
-      (let* ((start (match-beginning 0))
-	     (end (match-end 0))
-	     (hex (match-string 0 str))
-	     (replacement (org-protocol-unhex-compound (upcase hex))))
-	(setq tmp (concat tmp (substring str 0 start) replacement))
-	(setq str (substring str end))))
-    (setq tmp (concat tmp str))
-    tmp))
-
-
-(defun org-protocol-unhex-compound (hex)
-  "Unhexify unicode hex-chars. E.g. `%C3%B6' is the German Umlaut `ü'."
-  (let* ((bytes (remove "" (split-string hex "%")))
-	 (ret "")
-	 (eat 0)
-	 (sum 0))
-    (while bytes
-      (let* ((b (pop bytes))
-	     (a (elt b 0))
-	     (b (elt b 1))
-	     (c1 (if (> a ?9) (+ 10 (- a ?A)) (- a ?0)))
-	     (c2 (if (> b ?9) (+ 10 (- b ?A)) (- b ?0)))
-	     (val (+ (lsh c1 4) c2))
-	     (shift
-	      (if (= 0 eat) ;; new byte
-		  (if (>= val 252) 6
-		    (if (>= val 248) 5
-		      (if (>= val 240) 4
-			(if (>= val 224) 3
-			  (if (>= val 192) 2 0)))))
-		6))
-	     (xor
-	      (if (= 0 eat) ;; new byte
-		  (if (>= val 252) 252
-		    (if (>= val 248) 248
-		      (if (>= val 240) 240
-			(if (>= val 224) 224
-			  (if (>= val 192) 192 0)))))
-		128)))
-	(if (>= val 192) (setq eat shift))
-	(setq val (logxor val xor))
-	(setq sum (+ (lsh sum shift) val))
-	(if (> eat 0) (setq eat (- eat 1)))
-	(when (= 0 eat)
-	  (setq ret (concat ret (org-protocol-char-to-string sum)))
-	  (setq sum 0))
-	)) ;; end (while bytes
-    ret ))
 
 (defun org-protocol-flatten-greedy (param-list &optional strip-path replacement)
   "Greedy handlers might receive a list like this from emacsclient:
@@ -531,7 +476,7 @@ The location for a browser's bookmark should look like this:
   ;; As we enter this function for a match on our protocol, the return value
   ;; defaults to nil.
   (let ((result nil)
-        (f (org-protocol-unhex-string fname)))
+        (f (org-link-unescape fname)))
     (catch 'result
       (dolist (prolist org-protocol-project-alist)
         (let* ((base-url (plist-get (cdr prolist) :base-url))

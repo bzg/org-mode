@@ -35,7 +35,14 @@
 
 (eval-and-compile
   (unless (fboundp 'declare-function)
-    (defmacro declare-function (fn file &optional arglist fileonly))))
+    (defmacro declare-function (fn file &optional arglist fileonly)))
+  (if (>= emacs-major-version 23)
+      (defsubst org-char-to-string(c)
+	"Defsubst to decode UTF-8 character values in emacs 23 and beyond."
+	(char-to-string c))
+    (defsubst org-char-to-string (c)
+      "Defsubst to decode UTF-8 character values in emacs 22."
+      (string (decode-char 'ucs c)))))
 
 (declare-function org-add-props "org-compat" (string plist &rest props))
 (declare-function org-string-match-p "org-compat" (&rest args))

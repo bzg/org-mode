@@ -45,12 +45,11 @@
 by org-special-blocks.  These blocks will presumably be
 interpreted by other mechanisms.")
 
-(defvar htmlp)
-(defvar latexp)
+(defvar backend) ; dynamically scoped
 (defun org-special-blocks-make-special-cookies ()
   "Adds special cookies when #+begin_foo and #+end_foo tokens are
 seen.  This is run after a few special cases are taken care of."
-  (when (or htmlp latexp)
+  (when (or (eq backend 'html) (eq backend 'latex))
     (goto-char (point-min))
     (while (re-search-forward "^[ \t]*#\\+\\(begin\\|end\\)_\\(.*\\)$" nil t)
       (unless (org-string-match-p org-special-blocks-ignore-regexp (match-string 2))

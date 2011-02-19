@@ -76,11 +76,6 @@
   (require 'cl))
 (require 'org)
 
-(defvar htmlp)
-(defvar latexp)
-(defvar docbookp)
-(defvar asciip)
-
 (defun org-export-blocks-set (var value)
   "Set the value of `org-export-blocks' and install fontification."
   (set var value)
@@ -247,7 +242,7 @@ passed to the ditaa utility as command line arguments."
 			    "\n")))
     (prog1
     (cond
-     ((or htmlp latexp docbookp)
+     ((member backend '(html latex docbook))
       (unless (file-exists-p out-file)
         (mapc ;; remove old hashed versions of this file
          (lambda (file)
@@ -306,7 +301,7 @@ digraph data_relationships {
 	 (out-file (concat (car out-file-parts) "_" hash "." (cdr out-file-parts))))
     (prog1
     (cond
-     ((or htmlp latexp docbookp)
+     ((member backend '(html latex docbook))
       (unless (file-exists-p out-file)
 	(mapc ;; remove old hashed versions of this file
 	 (lambda (file)
@@ -338,7 +333,7 @@ other backends, it converts the comment into an EXAMPLE segment."
   (let ((owner (if headers (car headers)))
 	(title (if (cdr headers) (mapconcat 'identity (cdr headers) " "))))
     (cond
-     (htmlp ;; We are exporting to HTML
+     ((eq backend 'html) ;; We are exporting to HTML
       (concat "#+BEGIN_HTML\n"
 	      "<div class=\"org-comment\""
 	      (if owner (format " id=\"org-comment-%s\" " owner))

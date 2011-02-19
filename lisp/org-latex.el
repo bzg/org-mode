@@ -73,7 +73,6 @@
 	  org-closed-string"\\)")
   "Regexp matching special time planning keywords plus the time after it.")
 
-(defvar latexp)    ; dynamically scoped from org.el
 (defvar re-quote)  ; dynamically scoped from org.el
 (defvar commentsp) ; dynamically scoped from org.el
 
@@ -1442,31 +1441,32 @@ Don't perform conversions that are in EXCLUDE-LIST.  Recognized
 conversion types are: quotation-marks, emphasis, sub-superscript,
 links, keywords, lists, tables, fixed-width"
   (with-temp-buffer
-   (insert content)
-   (unless (memq 'timestamps exclude-list)
-     (org-export-latex-time-stamps))
-   (unless (memq 'quotation-marks exclude-list)
-     (org-export-latex-quotation-marks))
-   (unless (memq 'emphasis exclude-list)
-     (when (plist-get org-export-latex-options-plist :emphasize)
-       (org-export-latex-fontify)))
-   (unless (memq 'sub-superscript exclude-list)
-     (org-export-latex-special-chars
-      (plist-get org-export-latex-options-plist :sub-superscript)))
-   (unless (memq 'links exclude-list)
-     (org-export-latex-links))
-   (unless (memq 'keywords exclude-list)
-     (org-export-latex-keywords))
-   (unless (memq 'lists exclude-list)
-     (org-export-latex-lists))
-   (unless (memq 'tables exclude-list)
-     (org-export-latex-tables
-      (plist-get org-export-latex-options-plist :tables)))
-   (unless (memq 'fixed-width exclude-list)
-     (org-export-latex-fixed-width
-      (plist-get org-export-latex-options-plist :fixed-width)))
+    (org-install-letbind)
+    (insert content)
+    (unless (memq 'timestamps exclude-list)
+      (org-export-latex-time-stamps))
+    (unless (memq 'quotation-marks exclude-list)
+      (org-export-latex-quotation-marks))
+    (unless (memq 'emphasis exclude-list)
+      (when (plist-get org-export-latex-options-plist :emphasize)
+	(org-export-latex-fontify)))
+    (unless (memq 'sub-superscript exclude-list)
+      (org-export-latex-special-chars
+       (plist-get org-export-latex-options-plist :sub-superscript)))
+    (unless (memq 'links exclude-list)
+      (org-export-latex-links))
+    (unless (memq 'keywords exclude-list)
+      (org-export-latex-keywords))
+    (unless (memq 'lists exclude-list)
+      (org-export-latex-lists))
+    (unless (memq 'tables exclude-list)
+      (org-export-latex-tables
+       (plist-get org-export-latex-options-plist :tables)))
+    (unless (memq 'fixed-width exclude-list)
+      (org-export-latex-fixed-width
+       (plist-get org-export-latex-options-plist :fixed-width)))
    ;; return string
-   (buffer-substring (point-min) (point-max))))
+    (buffer-substring (point-min) (point-max))))
 
 (defun org-export-latex-protect-string (s)
   "Add the org-protected property to string S."
@@ -2460,22 +2460,34 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 
 (defun org-export-latex-lists ()
   "Convert plain text lists in current buffer into LaTeX lists."
-  (let (res)
-    (goto-char (point-min))
-    (while (org-search-forward-unenclosed org-item-beginning-re nil t)
-      (beginning-of-line)
-      (setq res (org-list-to-latex (org-list-parse-list t)
-				   org-export-latex-list-parameters))
-      (while (string-match "^\\(\\\\item[ \t]+\\)\\[@\\(?:start:\\)?\\([0-9]+\\)\\]"
-			   res)
-	(setq res (replace-match
-		   (concat (format "\\setcounter{enumi}{%d}"
-				   (1- (string-to-number
-					(match-string 2 res))))
-			   "\n"
-			   (match-string 1 res))
-		   t t res)))
-      (insert res))))
+  (mapc
+   (lambda (e)
+     ;; For each type of context allowed for list export (E), find
+     ;; every list, parse it, delete it and insert resulting
+     ;; conversion to latex (RES).
+     (let (res)
+       (goto-char (point-min))
+       (while (re-search-forward (org-item-beginning-re) nil t)
+	 (when (and (eq (get-text-property (point) 'list-context) e)
+		    (not (get-text-property (point) 'org-example)))
+	   (beginning-of-line)
+	   (setq res
+		 (org-list-to-latex
+		  ;; Narrowing is needed because we're converting
+		  ;; from inner functions to outer ones.
+		  (save-restriction
+		    (narrow-to-region (point) (point-max))
+		    ;; `org-list-end-re' output has changed since
+		    ;; preprocess from org-exp.el.
+		    (let ((org-list-end-re "^ORG-LIST-END\n"))
+		      (org-list-parse-list t)))
+		  org-export-latex-list-parameters))
+	   ;; Extend previous value of original-indentation to the
+	   ;; whole string
+	   (insert (org-add-props res nil 'original-indentation
+				  (org-find-text-property-in-string
+				   'original-indentation res)))))))
+   (append org-list-export-context '(nil))))
 
 (defconst org-latex-entities
  '("\\!"

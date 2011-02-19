@@ -494,8 +494,9 @@ description.
 @end itemize
 
 Items belonging to the same list must have the same indentation on the first
-line.  A list ends before the next line that is indented like the
-bullet/number, or less.  It also ends before two blank lines. An example:
+line.  An item ends before the next line that is indented like the
+bullet/number, or less.  A list ends when all items are closed, or before two
+blank lines. An example:
 
 @smallexample
 @group

@@ -207,22 +207,28 @@ it in the buffer."
 (defun org-timer-item (&optional arg)
   "Insert a description-type item with the current timer value."
   (interactive "P")
-  (cond
-   ;; In a timer list, insert with `org-list-insert-item-generic'.
-   ((and (org-in-item-p)
-	 (save-excursion (org-beginning-of-item) (org-at-item-timer-p)))
-    (org-list-insert-item-generic
-     (point) nil (concat (org-timer (when arg '(4)) t) ":: ")))
-   ;; In a list of another type, don't break anything: throw an error.
-   ((org-in-item-p)
-    (error "This is not a timer list"))
-   ;; Else, insert the timer correctly indented at bol.
-   (t
-    (beginning-of-line)
-    (org-indent-line-function)
-    (insert  "- ")
-    (org-timer (when arg '(4)))
-    (insert ":: "))))
+  (let ((itemp (org-in-item-p)))
+    (cond
+     ;; In a timer list, insert with `org-list-insert-item',
+     ;; then fix the list.
+     ((and itemp
+	   (save-excursion (goto-char itemp) (org-at-item-timer-p)))
+      (let* ((struct (org-list-struct))
+	     (prevs (org-list-prevs-alist struct))
+	     (s (concat (org-timer (when arg '(4)) t) ":: ")))
+	(setq struct (org-list-insert-item (point) struct prevs nil s))
+	(org-list-write-struct struct (org-list-parents-alist struct))
+	(looking-at org-list-full-item-re)
+	(goto-char (match-end 0))))
+     ;; In a list of another type, don't break anything: throw an error.
+     (itemp (error "This is not a timer list"))
+     ;; Else, start a new list.
+     (t
+      (beginning-of-line)
+      (org-indent-line-function)
+      (insert  "- ")
+      (org-timer (when arg '(4)))
+      (insert ":: ")))))
 
 (defun org-timer-fix-incomplete (hms)
   "If hms is a H:MM:SS string with missing hour or hour and minute, fix it."
