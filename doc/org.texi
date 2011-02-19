@@ -1500,12 +1500,12 @@ a right parenthesis@footnote{You can filter out any of them by configuring
 @samp{1)}@footnote{You can also get @samp{a.}, @samp{A.}, @samp{a)} and
 @samp{A)} by configuring @code{org-alphabetical-lists}.  To minimize
 confusion with normal text, those are limited to one character only.  Beyond
-that limit, items will automatically fallback to numbers.}.  If you want a
+that limit, bullets will automatically fallback to numbers.}.  If you want a
 list to start with a different value (e.g.@: 20), start the text of the item
 with @code{[@@20]}@footnote{If there's a checkbox in the item, the cookie
 must be put @emph{before} the checkbox.  If you have activated alphabetical
-lists, you can also use counters like @code{[@@b}.}.  Those constructs can be
-used in any item of the list in order to enforce a particular numbering.
+lists, you can also use counters like @code{[@@b]}.}.  Those constructs can
+be used in any item of the list in order to enforce a particular numbering.
 @item
 @emph{Description} list items are unordered list items, and contain the
 separator @samp{ :: } to distinguish the description @emph{term} from the
