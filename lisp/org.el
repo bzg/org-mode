@@ -12275,7 +12275,7 @@ Can be set by the action argument to `org-scan-tag's and `org-map-entries'.")
 (defvar org-scanner-tags nil
   "The current tag list while the tags scanner is running.")
 (defvar org-trust-scanner-tags nil
-  "Should `org-get-tags-at' use the tags fro the scanner.
+  "Should `org-get-tags-at' use the tags for the scanner.
 This is for internal dynamical scoping only.
 When this is non-nil, the function `org-get-tags-at' will return the value
 of `org-scanner-tags' instead of building the list by itself.  This

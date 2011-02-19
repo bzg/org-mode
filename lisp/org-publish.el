@@ -295,7 +295,7 @@ You could use brackets to delimit on what part the link will be.
   "Return t if FILENAME should be published in PUB-DIR using PUB-FUNC.
 TRUE-PUB-DIR is where the file will truly end up.  Currently we are not using
 this - maybe it can eventually be used to check if the file is present at
-the target location, and how old it is.  Right ow we cannot do this, because
+the target location, and how old it is.  Right now we cannot do this, because
 we do not know under what file name the file will be stored - the publishing
 function can still decide about that independently."
   (let ((rtn
