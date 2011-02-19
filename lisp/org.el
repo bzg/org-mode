@@ -17418,15 +17418,18 @@ This command does many different things, depending on context:
 	  (org-footnote-at-definition-p))
       (call-interactively 'org-footnote-action))
      ((org-at-item-checkbox-p)
-      ;; Use a light version of `org-toggle-checkbox' to avoid
-      ;; computing list structure twice.
+      ;; Cursor at a checkbox: repair list and update checkboxes. Send
+      ;; list only if at top item.
       (let* ((cbox (match-string 1))
 	     (struct (org-list-struct))
-	     (old-struct (mapcar (lambda (e) (copy-alist e)) struct))
+	     (old-struct (copy-tree struct))
 	     (parents (org-list-parents-alist struct))
 	     (prevs (org-list-prevs-alist struct))
 	     (orderedp (org-entry-get nil "ORDERED"))
+	     (firstp (= (org-list-get-top-point struct) (point-at-bol)))
 	     block-item)
+	;; Use a light version of `org-toggle-checkbox' to avoid
+	;; computing list structure twice.
 	(org-list-set-checkbox (point-at-bol) struct
 			       (cond
 				((equal arg '(16)) "[-]")
@@ -17442,23 +17445,25 @@ This command does many different things, depending on context:
 	   "Checkboxes were removed due to unchecked box at line %d"
 	   (org-current-line block-item)))
 	(org-list-struct-apply-struct struct old-struct)
-	(org-update-checkbox-count-maybe))
-      (org-list-send-list 'maybe))
+	(org-update-checkbox-count-maybe)
+	(when firstp (org-list-send-list 'maybe))))
      ((org-at-item-p)
-      ;; Do checkbox related actions only if function was called with
-      ;; an argument
+      ;; Cursor at an item: repair list. Do checkbox related actions
+      ;; only if function was called with an argument. Send list only
+      ;; if at top item.
       (let* ((struct (org-list-struct))
 	     (old-struct (copy-tree struct))
 	     (parents (org-list-parents-alist struct))
-	     (prevs (org-list-prevs-alist struct)))
+	     (prevs (org-list-prevs-alist struct))
+	     (firstp (= (org-list-get-top-point struct) (point-at-bol))))
 	(org-list-struct-fix-ind struct parents)
 	(org-list-struct-fix-bul struct prevs)
 	(when arg
 	  (org-list-set-checkbox (point-at-bol) struct "[ ]")
 	  (org-list-struct-fix-box struct parents prevs))
 	(org-list-struct-apply-struct struct old-struct)
-	(when arg (org-update-checkbox-count-maybe)))
-      (org-list-send-list 'maybe))
+	(when arg (org-update-checkbox-count-maybe))
+	(when firstp (org-list-send-list 'maybe))))
      ((save-excursion (beginning-of-line 1) (looking-at org-dblock-start-re))
       ;; Dynamic block
       (beginning-of-line 1)
