@@ -976,8 +976,11 @@ may be specified in the current buffer."
 			  (cdr (assoc :hlines params))
 			  (cdr (assoc :colnames params))
 			  (cdr (assoc :rownames params))))
+	 (raw-result (or (cdr (assoc :results params)) ""))
 	 (result-params (append
-			 (split-string (or (cdr (assoc :results params)) ""))
+			 (split-string (if (stringp raw-result)
+					   raw-result
+					 (eval raw-result)))
 			 (cdr (assoc :result-params params)))))
     (append
      (mapcar (lambda (var) (cons :var var)) (car vars-and-names))
@@ -1703,7 +1706,10 @@ parameters when merging lists."
 				 vars))))))
 	      (:results
 	       (setq results (e-merge results-exclusive-groups
-				      results (split-string (cdr pair)))))
+				      results
+				      (split-string
+				       (let ((r (cdr pair)))
+					 (if (stringp r) r (eval r)))))))
 	      (:file
 	       (when (cdr pair)
 		 (setq results (e-merge results-exclusive-groups
