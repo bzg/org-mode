@@ -2497,6 +2497,8 @@ Return t at each successful move."
 	     (t (back-to-indentation)
 		(org-indent-to-column (car org-tab-ind-state))
 		(looking-at "\\S-+")
+		(goto-char (match-end 0))
+		(delete-region (point) (point-at-eol))
 		(replace-match (cdr org-tab-ind-state))
 		(end-of-line)
 		;; Break cycle
