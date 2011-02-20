@@ -5837,17 +5837,10 @@ If KWD is a number, get the corresponding match group."
 	 (inhibit-modification-hooks t)
 	 deactivate-mark buffer-file-name buffer-file-truename)
     (org-decompose-region beg end)
-    (remove-text-properties
-     beg end
-     (if org-indent-mode
-	 ;; also remove line-prefix and wrap-prefix properties
-	 '(mouse-face t keymap t org-linked-text t
-		      invisible t intangible t
-		      line-prefix t wrap-prefix t
-		      org-no-flyspell t org-emphasis t)
-       '(mouse-face t keymap t org-linked-text t
-		    invisible t intangible t
-		    org-no-flyspell t org-emphasis t)))
+    (remove-text-properties beg end
+     '(mouse-face t keymap t org-linked-text t
+		  invisible t intangible t
+		  org-no-flyspell t org-emphasis t))
     (org-remove-font-lock-display-properties beg end)))
 
 (defconst org-script-display  '(((raise -0.3) (height 0.7))
