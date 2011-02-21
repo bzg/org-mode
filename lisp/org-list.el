@@ -1597,6 +1597,7 @@ Initial position of cursor is restored after the changes."
 	 (inlinetask-re (and (featurep 'org-inlinetask)
 			     (org-inlinetask-outline-regexp)))
 	 (item-re (org-item-re))
+	 (box-rule-p (cdr (assq 'checkbox org-list-automatic-rules)))
 	 (shift-body-ind
 	  (function
 	   ;; Shift the indentation between END and BEG by DELTA.
@@ -1635,9 +1636,8 @@ Initial position of cursor is restored after the changes."
 		 (replace-match new-bul nil nil nil 1))
 	       ;; b. Replace checkbox
 	       (cond
-		((and new-box
-		      (save-match-data (org-at-item-description-p))
-		      (cdr (assq 'checkbox org-list-automatic-rules)))
+		((and new-box box-rule-p
+		      (save-match-data (org-at-item-description-p)))
 		 (message "Cannot add a checkbox to a description list item"))
 		((equal (match-string 3) new-box))
 		((and (match-string 3) new-box)
@@ -2494,13 +2494,9 @@ Return t at each successful move."
 	     ((ignore-errors (org-list-indent-item-generic -1 t struct)))
 	     ((and (= ind (car org-tab-ind-state))
 		   (ignore-errors (org-list-indent-item-generic 1 t struct))))
-	     (t (back-to-indentation)
+	     (t (delete-region (point-at-bol) (point-at-eol))
 		(org-indent-to-column (car org-tab-ind-state))
-		(looking-at "\\S-+")
-		(goto-char (match-end 0))
-		(delete-region (point) (point-at-eol))
-		(replace-match (cdr org-tab-ind-state))
-		(end-of-line)
+		(insert (cdr org-tab-ind-state))
 		;; Break cycle
 		(setq this-command 'identity)))
 	  ;; If a cycle is starting, remember indentation and bullet,
