@@ -121,6 +121,7 @@
 (declare-function org-trim "org" (s))
 (declare-function org-uniquify "org" (list))
 (declare-function outline-invisible-p "outline" (&optional pos))
+(declare-function outline-flag-region "outline" (from to flag))
 (declare-function outline-next-heading "outline" ())
 (declare-function outline-previous-heading "outline" ())
 

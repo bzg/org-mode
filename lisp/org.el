@@ -19096,23 +19096,21 @@ the functionality can be provided as a fall-back.")
 	       (save-restriction
 		 (narrow-to-region beg end)
 		 (save-excursion (fill-paragraph justify)))) t))
-	  ;; Special case where point is not in a list but is on a
-	  ;; paragraph adjacent to a list: make sure this paragraph
+	  ;; Special case where point is not in a list but is on
+	  ;; a paragraph adjacent to a list: make sure this paragraph
 	  ;; doesn't get merged with the end of the list by narrowing
 	  ;; buffer first.
-	  ((save-excursion
-	     (fill-forward-paragraph -1)
-	     (setq itemp (org-in-item-p)))
-	   (save-excursion
-	     (goto-char itemp)
-	     (setq struct (org-list-struct)))
-	   (save-restriction
-	     (narrow-to-region (org-list-get-bottom-point struct)
-			       (save-excursion
-				 (fill-forward-paragraph 1)
-				 (point)))
-	     (fill-paragraph justify) t))
-	  (t nil))))			; call `fill-paragraph'
+	  ((save-excursion (fill-forward-paragraph -1)
+			   (setq itemp (org-in-item-p)))
+	   (let ((struct (save-excursion (goto-char itemp)
+					 (org-list-struct))))
+	     (save-restriction
+	       (narrow-to-region (org-list-get-bottom-point struct)
+				 (save-excursion (fill-forward-paragraph 1)
+						 (point)))
+	       (fill-paragraph justify) t)))
+	  ;; Else simply call `fill-paragraph'.
+	  (t nil))))
 
 ;; For reference, this is the default value of adaptive-fill-regexp
 ;;  "[ \t]*\\([-|#;>*]+[ \t]*\\|(?[0-9]+[.)][ \t]*\\)*"
