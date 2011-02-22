@@ -741,7 +741,7 @@ it.  When it is a variable, retrieve the value.  Return whatever we get."
 	 ((functionp file) (funcall file))
 	 ((and (symbolp file) (boundp file)) (symbol-value file))
 	 ((and file (consp file)) (eval file))
-	 t file)))
+	 (t file))))
 
 (defun org-capture-target-buffer (file)
   "Get a buffer for FILE."
