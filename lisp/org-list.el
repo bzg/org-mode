@@ -121,6 +121,7 @@
 (declare-function org-trim "org" (s))
 (declare-function org-uniquify "org" (list))
 (declare-function outline-invisible-p "outline" (&optional pos))
+(declare-function outline-flag-region "outline" (from to flag))
 (declare-function outline-next-heading "outline" ())
 (declare-function outline-previous-heading "outline" ())
 
@@ -1597,6 +1598,7 @@ Initial position of cursor is restored after the changes."
 	 (inlinetask-re (and (featurep 'org-inlinetask)
 			     (org-inlinetask-outline-regexp)))
 	 (item-re (org-item-re))
+	 (box-rule-p (cdr (assq 'checkbox org-list-automatic-rules)))
 	 (shift-body-ind
 	  (function
 	   ;; Shift the indentation between END and BEG by DELTA.
@@ -1635,9 +1637,8 @@ Initial position of cursor is restored after the changes."
 		 (replace-match new-bul nil nil nil 1))
 	       ;; b. Replace checkbox
 	       (cond
-		((and new-box
-		      (save-match-data (org-at-item-description-p))
-		      (cdr (assq 'checkbox org-list-automatic-rules)))
+		((and new-box box-rule-p
+		      (save-match-data (org-at-item-description-p)))
 		 (message "Cannot add a checkbox to a description list item"))
 		((equal (match-string 3) new-box))
 		((and (match-string 3) new-box)
@@ -2476,15 +2477,16 @@ Return t at each successful move."
 	   (struct (org-list-struct))
 	   (ind (org-list-get-ind (point-at-bol) struct))
 	   (bullet (org-list-get-bullet (point-at-bol) struct)))
-      ;; Check that item is really empty
-      (when (and (save-excursion
-		   (beginning-of-line)
-		   (looking-at org-list-full-item-re))
-		 (>= (match-end 0) (save-excursion
-				     (goto-char (org-list-get-item-end
-						 (point-at-bol) struct))
-				     (skip-chars-backward " \r\t\n")
-				     (point))))
+      ;; Accept empty items or if cycle has already started.
+      (when (or (eq last-command 'org-cycle-item-indentation)
+		(and (save-excursion
+		       (beginning-of-line)
+		       (looking-at org-list-full-item-re))
+		     (>= (match-end 0) (save-excursion
+					 (goto-char (org-list-get-item-end
+						     (point-at-bol) struct))
+					 (skip-chars-backward " \r\t\n")
+					 (point)))))
 	(setq this-command 'org-cycle-item-indentation)
 	;; When in the middle of the cycle, try to outdent first. If it
 	;; fails, and point is still at initial position, indent. Else,
@@ -2494,11 +2496,9 @@ Return t at each successful move."
 	     ((ignore-errors (org-list-indent-item-generic -1 t struct)))
 	     ((and (= ind (car org-tab-ind-state))
 		   (ignore-errors (org-list-indent-item-generic 1 t struct))))
-	     (t (back-to-indentation)
+	     (t (delete-region (point-at-bol) (point-at-eol))
 		(org-indent-to-column (car org-tab-ind-state))
-		(looking-at "\\S-+")
-		(replace-match (cdr org-tab-ind-state))
-		(end-of-line)
+		(insert (cdr org-tab-ind-state))
 		;; Break cycle
 		(setq this-command 'identity)))
 	  ;; If a cycle is starting, remember indentation and bullet,

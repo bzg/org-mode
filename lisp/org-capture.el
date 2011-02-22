@@ -669,7 +669,9 @@ already gone.  Any prefix argument will be passed to the refile comand."
 	    (beginning-of-line 0))))
 
        ((eq (car target) 'file+olp)
-	(let ((m (org-find-olp (cdr target))))
+ 	(let ((m (org-find-olp
+		  (cons (org-capture-expand-file (nth 1 target))
+			(cddr target)))))
 	  (set-buffer (marker-buffer m))
 	  (goto-char m)))
 
@@ -729,8 +731,20 @@ already gone.  Any prefix argument will be passed to the refile comand."
       (org-capture-put :buffer (current-buffer) :pos (point)
 		       :target-entry-p target-entry-p))))
 
+(defun org-capture-expand-file (file)
+  "Expand functions and symbols for FILE.
+When FILE is a function, call it.  When it is a form, evaluate
+it.  When it is a variable, retrieve the value.  Return whatever we get."
+  (cond
+   ((org-string-nw-p file) file)
+   ((functionp file) (funcall file))
+   ((and (symbolp file) (boundp file)) (symbol-value file))
+   ((and file (consp file)) (eval file))
+   (t file)))
+
 (defun org-capture-target-buffer (file)
   "Get a buffer for FILE."
+  (setq file (org-capture-expand-file file))
   (setq file (or (org-string-nw-p file)
 		 org-default-notes-file
 		 (error "No notes file specified, and no default available")))

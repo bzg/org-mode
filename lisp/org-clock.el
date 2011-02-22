@@ -2021,13 +2021,15 @@ the currently selected interval size."
 TABLES is a list of tables with clocking data as produced by
 `org-clock-get-table-data'.  PARAMS is the parameter property list obtained
 from the dynamic block defintion."
-  ;; This function looks quite complicated, mainly because there are a lot
-  ;; of options which can add or remove columns.  I have massively commented
-  ;; function, to I hope it is understandable.  If someone want to write
-  ;; there own special formatter, this maybe much easier because there can
-  ;; be a fixed format with a well-defined number of columns...
+  ;; This function looks quite complicated, mainly because there are a
+  ;; lot of options which can add or remove columns.  I have massively
+  ;; commented this function, the I hope it is understandable.  If
+  ;; someone wants to write their own special formatter, this maybe
+  ;; much easier because there can be a fixed format with a
+  ;; well-defined number of columns...
   (let* ((hlchars '((1 . "*") (2 . "/")))
-	 (lwords (assoc (plist-get params :lang) 
+	 (lwords (assoc (or (plist-get params :lang) 
+			    org-export-default-language)
 			org-clock-clocktable-language-setup))
 	 (multifile (plist-get params :multifile))
 	 (block (plist-get params :block))

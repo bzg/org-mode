@@ -807,7 +807,7 @@ modified) list.")
 (defvar org-export-allow-BIND-local nil)
 (defun org-export-confirm-letbind ()
   "Can we use #+BIND values during export?
-By default this will ask fro confirmation by the user, to divert possible
+By default this will ask for confirmation by the user, to divert possible
 security risks."
   (cond
    ((not org-export-allow-BIND) nil)

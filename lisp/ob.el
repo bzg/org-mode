@@ -976,8 +976,11 @@ may be specified in the current buffer."
 			  (cdr (assoc :hlines params))
 			  (cdr (assoc :colnames params))
 			  (cdr (assoc :rownames params))))
+	 (raw-result (or (cdr (assoc :results params)) ""))
 	 (result-params (append
-			 (split-string (or (cdr (assoc :results params)) ""))
+			 (split-string (if (stringp raw-result)
+					   raw-result
+					 (eval raw-result)))
 			 (cdr (assoc :result-params params)))))
     (append
      (mapcar (lambda (var) (cons :var var)) (car vars-and-names))
@@ -1388,7 +1391,7 @@ following the source block."
 
 (defun org-babel-read-list ()
   "Read the list at `point' into emacs-lisp."
-  (mapcar #'org-babel-read (cdr (org-list-parse-list))))
+  (mapcar #'org-babel-read (mapcar #'cadr (cdr (org-list-parse-list)))))
 
 (defvar org-link-types-re)
 (defun org-babel-read-link ()
@@ -1516,9 +1519,13 @@ code ---- the results are extracted in the syntax of the source
 	 ((member "list" result-params)
 	  (insert
 	   (org-babel-trim
-	    (org-list-to-generic (cons 'unordered
-				       (if (listp result) result (list result)))
-				 '(:splicep nil :istart "- " :iend "\n")))))
+	    (org-list-to-generic
+	     (cons 'unordered
+		   (mapcar
+		    (lambda (el) (list nil (if (stringp el) el (format "%S" el))))
+		    (if (listp result) result (list result))))
+	     '(:splicep nil :istart "- " :iend "\n")))
+	   "\n"))
 	 ;; assume the result is a table if it's not a string
 	 ((not (stringp result))
 	  (goto-char beg)
@@ -1586,7 +1593,7 @@ code ---- the results are extracted in the syntax of the source
      ((org-at-table-p) (progn (goto-char (org-table-end)) (point)))
      ((org-at-item-p) (let* ((struct (org-list-struct))
 			     (prvs (org-list-prevs-alist struct)))
-			(1- (org-list-get-list-end (point-at-bol) struct prvs))))
+			(org-list-get-list-end (point-at-bol) struct prvs)))
      (t
       (let ((case-fold-search t)
 	    (blocks-re (regexp-opt
@@ -1703,7 +1710,10 @@ parameters when merging lists."
 				 vars))))))
 	      (:results
 	       (setq results (e-merge results-exclusive-groups
-				      results (split-string (cdr pair)))))
+				      results
+				      (split-string
+				       (let ((r (cdr pair)))
+					 (if (stringp r) r (eval r)))))))
 	      (:file
 	       (when (cdr pair)
 		 (setq results (e-merge results-exclusive-groups

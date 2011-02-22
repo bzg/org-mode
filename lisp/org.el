@@ -2382,7 +2382,7 @@ a subtree."
   "Return the value of `org-log-into-drawer', but let properties overrule.
 If the current entry has or inherits a LOG_INTO_DRAWER property, it will be
 used instead of the default value."
-  (let ((p (ignore-errors (org-entry-get nil "LOG_INTO_DRAWER" 'inherit))))
+  (let ((p (org-entry-get nil "LOG_INTO_DRAWER" 'inherit)))
     (cond
      ((or (not p) (equal p "nil")) org-log-into-drawer)
      ((equal p "t") "LOGBOOK")
@@ -8416,7 +8416,7 @@ For file links, arg negates `org-context-in-file-links'."
 	       link (org-make-link cpltxt))))
 
       ((and (buffer-file-name (buffer-base-buffer)) (org-mode-p))
-       (setq custom-id (ignore-errors (org-entry-get nil "CUSTOM_ID")))
+       (setq custom-id (org-entry-get nil "CUSTOM_ID"))
        (cond
 	((org-in-regexp "<<\\(.*?\\)>>")
 	 (setq cpltxt
@@ -12275,7 +12275,7 @@ Can be set by the action argument to `org-scan-tag's and `org-map-entries'.")
 (defvar org-scanner-tags nil
   "The current tag list while the tags scanner is running.")
 (defvar org-trust-scanner-tags nil
-  "Should `org-get-tags-at' use the tags fro the scanner.
+  "Should `org-get-tags-at' use the tags for the scanner.
 This is for internal dynamical scoping only.
 When this is non-nil, the function `org-get-tags-at' will return the value
 of `org-scanner-tags' instead of building the list by itself.  This
@@ -17418,15 +17418,18 @@ This command does many different things, depending on context:
 	  (org-footnote-at-definition-p))
       (call-interactively 'org-footnote-action))
      ((org-at-item-checkbox-p)
-      ;; Use a light version of `org-toggle-checkbox' to avoid
-      ;; computing list structure twice.
+      ;; Cursor at a checkbox: repair list and update checkboxes. Send
+      ;; list only if at top item.
       (let* ((cbox (match-string 1))
 	     (struct (org-list-struct))
-	     (old-struct (mapcar (lambda (e) (copy-alist e)) struct))
+	     (old-struct (copy-tree struct))
 	     (parents (org-list-parents-alist struct))
 	     (prevs (org-list-prevs-alist struct))
-	     (orderedp (ignore-errors (org-entry-get nil "ORDERED")))
+	     (orderedp (org-entry-get nil "ORDERED"))
+	     (firstp (= (org-list-get-top-point struct) (point-at-bol)))
 	     block-item)
+	;; Use a light version of `org-toggle-checkbox' to avoid
+	;; computing list structure twice.
 	(org-list-set-checkbox (point-at-bol) struct
 			       (cond
 				((equal arg '(16)) "[-]")
@@ -17442,23 +17445,25 @@ This command does many different things, depending on context:
 	   "Checkboxes were removed due to unchecked box at line %d"
 	   (org-current-line block-item)))
 	(org-list-struct-apply-struct struct old-struct)
-	(org-update-checkbox-count-maybe))
-      (org-list-send-list 'maybe))
+	(org-update-checkbox-count-maybe)
+	(when firstp (org-list-send-list 'maybe))))
      ((org-at-item-p)
-      ;; Do checkbox related actions only if function was called with
-      ;; an argument
+      ;; Cursor at an item: repair list. Do checkbox related actions
+      ;; only if function was called with an argument. Send list only
+      ;; if at top item.
       (let* ((struct (org-list-struct))
 	     (old-struct (copy-tree struct))
 	     (parents (org-list-parents-alist struct))
-	     (prevs (org-list-prevs-alist struct)))
+	     (prevs (org-list-prevs-alist struct))
+	     (firstp (= (org-list-get-top-point struct) (point-at-bol))))
 	(org-list-struct-fix-ind struct parents)
 	(org-list-struct-fix-bul struct prevs)
 	(when arg
 	  (org-list-set-checkbox (point-at-bol) struct "[ ]")
 	  (org-list-struct-fix-box struct parents prevs))
 	(org-list-struct-apply-struct struct old-struct)
-	(when arg (org-update-checkbox-count-maybe)))
-      (org-list-send-list 'maybe))
+	(when arg (org-update-checkbox-count-maybe))
+	(when firstp (org-list-send-list 'maybe))))
      ((save-excursion (beginning-of-line 1) (looking-at org-dblock-start-re))
       ;; Dynamic block
       (beginning-of-line 1)
@@ -17887,10 +17892,10 @@ See the individual commands for more information."
       :selected org-enforce-todo-dependencies :style toggle :active t]
      "Settings for tree at point"
      ["Do Children sequentially" org-toggle-ordered-property :style radio
-      :selected (ignore-errors (org-entry-get nil "ORDERED"))
+      :selected (org-entry-get nil "ORDERED")
       :active org-enforce-todo-dependencies :keys "C-c C-x o"]
      ["Do Children parallel" org-toggle-ordered-property :style radio
-      :selected (ignore-errors (not (org-entry-get nil "ORDERED")))
+      :selected (not (org-entry-get nil "ORDERED"))
       :active org-enforce-todo-dependencies :keys "C-c C-x o"]
      "--"
      ["Set Priority" org-priority t]
@@ -19091,23 +19096,21 @@ the functionality can be provided as a fall-back.")
 	       (save-restriction
 		 (narrow-to-region beg end)
 		 (save-excursion (fill-paragraph justify)))) t))
-	  ;; Special case where point is not in a list but is on a
-	  ;; paragraph adjacent to a list: make sure this paragraph
+	  ;; Special case where point is not in a list but is on
+	  ;; a paragraph adjacent to a list: make sure this paragraph
 	  ;; doesn't get merged with the end of the list by narrowing
 	  ;; buffer first.
-	  ((save-excursion
-	     (fill-forward-paragraph -1)
-	     (setq itemp (org-in-item-p)))
-	   (save-excursion
-	     (goto-char itemp)
-	     (setq struct (org-list-struct)))
-	   (save-restriction
-	     (narrow-to-region (org-list-get-bottom-point struct)
-			       (save-excursion
-				 (fill-forward-paragraph 1)
-				 (point)))
-	     (fill-paragraph justify) t))
-	  (t nil))))			; call `fill-paragraph'
+	  ((save-excursion (fill-forward-paragraph -1)
+			   (setq itemp (org-in-item-p)))
+	   (let ((struct (save-excursion (goto-char itemp)
+					 (org-list-struct))))
+	     (save-restriction
+	       (narrow-to-region (org-list-get-bottom-point struct)
+				 (save-excursion (fill-forward-paragraph 1)
+						 (point)))
+	       (fill-paragraph justify) t)))
+	  ;; Else simply call `fill-paragraph'.
+	  (t nil))))
 
 ;; For reference, this is the default value of adaptive-fill-regexp
 ;;  "[ \t]*\\([-|#;>*]+[ \t]*\\|(?[0-9]+[.)][ \t]*\\)*"
