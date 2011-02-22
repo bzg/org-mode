@@ -2476,15 +2476,16 @@ Return t at each successful move."
 	   (struct (org-list-struct))
 	   (ind (org-list-get-ind (point-at-bol) struct))
 	   (bullet (org-list-get-bullet (point-at-bol) struct)))
-      ;; Check that item is really empty
-      (when (and (save-excursion
-		   (beginning-of-line)
-		   (looking-at org-list-full-item-re))
-		 (>= (match-end 0) (save-excursion
-				     (goto-char (org-list-get-item-end
-						 (point-at-bol) struct))
-				     (skip-chars-backward " \r\t\n")
-				     (point))))
+      ;; Accept empty items or if cycle has already started.
+      (when (or (eq last-command 'org-cycle-item-indentation)
+		(and (save-excursion
+		       (beginning-of-line)
+		       (looking-at org-list-full-item-re))
+		     (>= (match-end 0) (save-excursion
+					 (goto-char (org-list-get-item-end
+						     (point-at-bol) struct))
+					 (skip-chars-backward " \r\t\n")
+					 (point)))))
 	(setq this-command 'org-cycle-item-indentation)
 	;; When in the middle of the cycle, try to outdent first. If it
 	;; fails, and point is still at initial position, indent. Else,
