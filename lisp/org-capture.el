@@ -735,13 +735,12 @@ already gone.  Any prefix argument will be passed to the refile comand."
   "Expand functions and symbols for FILE.
 When FILE is a function, call it.  When it is a form, evaluate
 it.  When it is a variable, retrieve the value.  Return whatever we get."
-  (setq file
-	(cond
-	 ((org-string-nw-p file) file)
-	 ((functionp file) (funcall file))
-	 ((and (symbolp file) (boundp file)) (symbol-value file))
-	 ((and file (consp file)) (eval file))
-	 (t file))))
+  (cond
+   ((org-string-nw-p file) file)
+   ((functionp file) (funcall file))
+   ((and (symbolp file) (boundp file)) (symbol-value file))
+   ((and file (consp file)) (eval file))
+   (t file)))
 
 (defun org-capture-target-buffer (file)
   "Get a buffer for FILE."
