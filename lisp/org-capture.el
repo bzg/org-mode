@@ -594,7 +594,7 @@ captured item after finalizing."
 (defun org-capture-refile ()
   "Finalize the current capture and then refile the entry.
 Refiling is done from the base buffer, because the indirect buffer is then
-already gone.  Any prefix argument will be passed to the refile comand."
+already gone.  Any prefix argument will be passed to the refile command."
   (interactive)
   (unless (eq (org-capture-get :type 'local) 'entry)
     (error
