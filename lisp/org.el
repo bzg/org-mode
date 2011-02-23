@@ -103,6 +103,10 @@
 (require 'org-src)
 (require 'org-footnote)
 
+(declare-function org-inlinetask-at-task-p "org-inlinetask" ())
+(declare-function org-inlinetask-outline-regexp "org-inlinetask" ())
+(declare-function org-inlinetask-toggle-visibility "org-inlinetask" ())
+
 ;; babel
 (require 'ob)
 (require 'ob-table)
