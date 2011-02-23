@@ -88,7 +88,6 @@ This function is called by `org-babel-execute-src-block'."
 	     (or (equal "yes" rownames-p)
 		 (org-babel-pick-name
 		  (cdr (assoc :rowname-names params)) rownames-p)))))
-      (message "result is %S" result)
       (if graphics-file nil result))))
 
 (defun org-babel-prep-session:R (session params)
