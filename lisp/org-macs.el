@@ -134,11 +134,12 @@ We use a macro so that the test can happen at compilation time."
 
 (defmacro org-with-point-at (pom &rest body)
   "Move to buffer and point of point-or-marker POM for the duration of BODY."
-  `(save-excursion
-     (if (markerp ,pom) (set-buffer (marker-buffer ,pom)))
+  `(let ((pom ,pom))
      (save-excursion
-       (goto-char (or ,pom (point)))
-       ,@body)))
+       (if (markerp pom) (set-buffer (marker-buffer pom)))
+       (save-excursion
+	 (goto-char (or pom (point)))
+	 ,@body))))
 (put 'org-with-point-at 'lisp-indent-function 1)
 
 (defmacro org-no-warnings (&rest body)
