@@ -1172,7 +1172,10 @@ This function modifies STRUCT."
 	   ;;    BEFOREP and SPLIT-LINE-P. The difference of size
 	   ;;    between what was cut and what was inserted in buffer
 	   ;;    is stored in SIZE-OFFSET.
-	   (ind (org-list-get-ind item struct))
+	   (ind (let ((ind-ref (org-list-get-ind item struct)))
+		  (if (not indent-tabs-mode)
+		      ind-ref
+		    (+ (/ ind-ref tab-width) (mod ind-ref tab-width)))))
 	   (bullet (org-list-bullet-string (org-list-get-bullet item struct)))
 	   (box (when checkbox "[ ]"))
 	   (text-cut
