@@ -2134,7 +2134,7 @@ in subtree, ignoring drawers."
 	       (bottom (copy-marker (org-list-get-bottom-point struct)))
 	       (items-to-toggle (org-remove-if
 				 (lambda (e) (or (< e lim-up) (> e lim-down)))
-				 (mapcar 'car (cdr struct)))))
+				 (mapcar 'car struct))))
 	  (mapc (lambda (e) (org-list-set-checkbox
 			e struct
 			;; if there is no box at item, leave as-is
