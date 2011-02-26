@@ -1279,8 +1279,8 @@ The template may still contain \"%?\" for cursor positioning."
       (while (re-search-forward "%^\\({\\([^}]*\\)}\\)?\\([gGtTuUCLp]\\)?"
 				nil t)
 	(unless (org-capture-escaped-%)
-	  (setq char (if (match-end 3) (match-string 3))
-		prompt (if (match-end 2) (match-string 2)))
+	  (setq char (if (match-end 3) (match-string-no-properties 3))
+		prompt (if (match-end 2) (match-string-no-properties 2)))
 	  (goto-char (match-beginning 0))
 	  (replace-match "")
 	  (setq completions nil default nil)
