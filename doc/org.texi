@@ -9895,7 +9895,9 @@ compatible with xetex and possibly luatex.  See the variables
 @code{org-export-latex-packages-alist}.}, this backend is also used to
 produce PDF output.  Since the @LaTeX{} output uses @file{hyperref} to
 implement links and cross references, the PDF output file will be fully
-linked.
+linked.  Beware of the fact that your @code{org} file has to be properly
+structured in order to be correctly exported: respect the hierarchy of
+sections.
 
 @menu
 * LaTeX/PDF export commands::   Which key invokes which commands
