@@ -1361,10 +1361,11 @@ OPT-PLIST is the options plist for current buffer."
      (if (plist-get opt-plist :author-info)
 	 (format "\\author{%s%s}\n"
 		 (org-export-latex-fontify-headline (or author user-full-name))
-		 (if (and (plist-get opt-plist :email-info) email
-			  (string-match "\\S-" email))
-		     (format "\\thanks{%s}" email)
-		   ""))
+		 (org-export-latex-fontify-headline 
+		  (if (and (plist-get opt-plist :email-info) email
+			   (string-match "\\S-" email))
+		      (format "\\thanks{%s}" email)
+		    "")))
        (format "%%\\author{%s}\n"
 	       (org-export-latex-fontify-headline (or author user-full-name))))
      ;; insert the date
