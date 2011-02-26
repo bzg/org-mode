@@ -343,7 +343,7 @@ other backends, it converts the comment into an EXAMPLE segment."
 	      "<p>\n"
 	      "#+END_HTML\n"
 	      body
-	      "#+BEGIN_HTML\n"
+	      "\n#+BEGIN_HTML\n"
 	      "</p>\n"
 	      "</div>\n"
 	      "#+END_HTML\n"))
