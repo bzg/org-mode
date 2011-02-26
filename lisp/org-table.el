@@ -980,16 +980,15 @@ Before doing so, re-align the table if necessary."
 
 (defun org-table-copy-down (n)
   "Copy a field down in the current column.
-If the field at the cursor is empty, copy into it the content of the nearest
-non-empty field above.  With argument N, use the Nth non-empty field.
-If the current field is not empty, it is copied down to the next row, and
-the cursor is moved with it.  Therefore, repeating this command causes the
-column to be filled row-by-row.
-If the variable `org-table-copy-increment' is non-nil and the field is an
-integer or a timestamp, it will be incremented while copying.  In the case of
-a timestamp, if the cursor is on the year, change the year.  If it is on the
-month or the day, change that.  Point will stay on the current date field
-in order to easily repeat the interval."
+If the field at the cursor is empty, copy into it the content of
+the nearest non-empty field above.  With argument N, use the Nth
+non-empty field.  If the current field is not empty, it is copied
+down to the next row, and the cursor is moved with it.
+Therefore, repeating this command causes the column to be filled
+row-by-row.
+If the variable `org-table-copy-increment' is non-nil and the
+field is an integer or a timestamp, it will be incremented while
+copying.  In the case of a timestamp, increment by one day."
   (interactive "p")
   (let* ((colpos (org-table-current-column))
 	 (col (current-column))
