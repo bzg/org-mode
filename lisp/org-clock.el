@@ -1519,7 +1519,9 @@ nil are excluded from the clock summation."
 (defun org-clock-display (&optional total-only)
   "Show subtree times in the entire buffer.
 If TOTAL-ONLY is non-nil, only show the total time for the entire file
-in the echo area."
+in the echo area.
+
+Use \\[org-clock-remove-overlays] to remove the subtree times."
   (interactive)
   (org-clock-remove-overlays)
   (let (time h m p)
