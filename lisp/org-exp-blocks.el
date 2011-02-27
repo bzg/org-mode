@@ -76,6 +76,13 @@
   (require 'cl))
 (require 'org)
 
+(defvar org-exp-blocks-block-regexp
+  (concat
+   "^\\([ \t]*\\)#\\+begin_\\(\\S-+\\)"
+   "[ \t]*\\(.*\\)?[\r\n]\\([^\000]*?\\)[\r\n]*[ \t]*"
+   "#\\+end_\\S-+.*[\r\n]?")
+  "Regular expression used to match blocks by org-exp-blocks.")
+
 (defun org-export-blocks-set (var value)
   "Set the value of `org-export-blocks' and install fontification."
   (set var value)
@@ -174,8 +181,7 @@ which defaults to the value of `org-export-blocks-witheld'."
 				 org-export-interblocks)))
 	(goto-char (point-min))
 	(setq start (point))
-	(while (re-search-forward
-		"^\\([ \t]*\\)#\\+begin_\\(\\S-+\\)[ \t]*\\(.*\\)?[\r\n]\\([^\000]*?\\)[\r\n][ \t]*#\\+end_\\S-+.*[\r\n]?" nil t)
+	(while (re-search-forward org-exp-blocks-block-regexp nil t)
           (setq indentation (length (match-string 1)))
 	  (setq type (intern (downcase (match-string 2))))
 	  (setq headers (save-match-data (org-split-string (match-string 3) "[ \t]+")))
