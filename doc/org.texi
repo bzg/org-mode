@@ -12009,6 +12009,10 @@ E.g., @code{:results value code}.
 The result is converted to pretty-printed code and is enclosed in a code
 block.  This option currently supports Emacs Lisp, Python, and Ruby.  E.g.,
 @code{:results value pp}.
+@item @code{wrap}
+The result is wrapped in a @code{begin_result} block.  This can be useful for
+inserting @code{raw} or @code{org} syntax results in such a way that their
+extend is known and they can be automatically removed or replaced.
 @end itemize
 
 @subsubheading Handling
