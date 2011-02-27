@@ -1875,7 +1875,7 @@ block but are passed literally to the \"example-block\"."
 (defun org-babel-script-escape (str)
   "Safely convert tables into elisp lists."
   (let (in-single in-double out)
-    (org-babel-read
+    ((lambda (escaped) (condition-case nil (org-babel-read escaped) (error escaped)))
      (if (and (stringp str)
 	      (> (length str) 2)
 	      (string-equal "[" (substring str 0 1))
