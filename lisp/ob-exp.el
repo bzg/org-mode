@@ -120,17 +120,21 @@ none ----- do not display either code or results upon export"
     (goto-char (match-beginning 0))
     (let* ((info (org-babel-get-src-block-info 'light))
 	   (lang (nth 0 info))
-	   (raw-params (nth 2 info)))
+	   (raw-params (nth 2 info)) hash)
       ;; bail if we couldn't get any info from the block
       (when info
-	(org-babel-exp-in-export-file
-	 (setf (nth 2 info)
-	       (org-babel-merge-params
-		org-babel-default-header-args
-		(org-babel-params-from-buffer)
-		(org-babel-params-from-properties lang)
-		(if (boundp lang-headers) (eval lang-headers) nil)
-		raw-params)))
+	;; if we're actually going to need the parameters
+	(when (member (cdr (assoc :exports (nth 2 info))) '("both" "results"))
+	  (org-babel-exp-in-export-file
+	   (setf (nth 2 info)
+		 (org-babel-process-params
+		  (org-babel-merge-params
+		   org-babel-default-header-args
+		   (org-babel-params-from-buffer)
+		   (org-babel-params-from-properties lang)
+		   (if (boundp lang-headers) (eval lang-headers) nil)
+		   raw-params))))
+	  (setf hash (org-babel-sha1-hash info)))
 	;; expand noweb references in the original file
 	(setf (nth 1 info)
 	      (if (and (cdr (assoc :noweb (nth 2 info)))
@@ -138,7 +142,7 @@ none ----- do not display either code or results upon export"
 		  (org-babel-expand-noweb-references
 		   info (get-file-buffer org-current-export-file))
 		(nth 1 info)))
-	(org-babel-exp-do-export info 'block)))))
+	(org-babel-exp-do-export info 'block hash)))))
 
 (defun org-babel-exp-inline-src-blocks (start end)
   "Process inline source blocks between START and END for export.
@@ -224,7 +228,7 @@ options are taken from `org-babel-default-header-args'."
 	(setq end (+ end (- (length replacement) (length (match-string 0)))))
 	(if replacement (replace-match replacement t t))))))
 
-(defun org-babel-exp-do-export (info type)
+(defun org-babel-exp-do-export (info type &optional hash)
   "Return a string with the exported content of a code block.
 The function respects the value of the :exports header argument."
   (flet ((silently () (let ((session (cdr (assoc :session (nth 2 info)))))
@@ -234,16 +238,17 @@ The function respects the value of the :exports header argument."
     (case (intern (or (cdr (assoc :exports (nth 2 info))) "code"))
       ('none (silently) (clean) "")
       ('code (silently) (clean) nil)
-      ('results (org-babel-exp-results info type) "")
-      ('both (org-babel-exp-results info type) nil))))
+      ('results (org-babel-exp-results info type nil hash) "")
+      ('both (org-babel-exp-results info type nil hash) nil))))
 
-(defun org-babel-exp-results (info type &optional silent)
+(defun org-babel-exp-results (info type &optional silent hash)
   "Evaluate and return the results of the current code block for export.
 Results are prepared in a manner suitable for export by org-mode.
 This function is called by `org-babel-exp-do-export'.  The code
 block will be evaluated.  Optional argument SILENT can be used to
 inhibit insertion of results into the buffer."
-  (when org-export-babel-evaluate
+  (when (and org-export-babel-evaluate
+	     (not (equal hash (org-babel-result-hash))))
     (let ((lang (nth 0 info))
 	  (body (nth 1 info)))
       (setf (nth 2 info) (org-babel-exp-in-export-file
