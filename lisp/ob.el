@@ -131,14 +131,14 @@ remove code block execution from the C-c C-c keybinding."
 
 (defvar org-babel-src-block-regexp
   (concat
-   ;; (1) indentation                     (2) lang
+   ;; (1) indentation                 (2) lang
    "^\\([ \t]*\\)#\\+begin_src[ \t]+\\([^ \f\t\n\r\v]+\\)[ \t]*"
    ;; (3) switches
    "\\([^\":\n]*\"[^\"\n*]*\"[^\":\n]*\\|[^\":\n]*\\)"
    ;; (4) header arguments
    "\\([^\n]*\\)\n"
    ;; (5) body
-   "\\([^\000]+?\n\\)[ \t]*#\\+end_src")
+   "\\([^\000]*?\n*\\)[ \t]*#\\+end_src")
   "Regexp used to identify code blocks.")
 
 (defvar org-babel-inline-src-block-regexp
