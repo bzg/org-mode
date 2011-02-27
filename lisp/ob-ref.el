@@ -181,7 +181,10 @@ to \"0:-1\"."
                (open (ls) (if (and (listp ls) (= (length ls) 1)) (car ls) ls)))
           (open
            (mapcar
-            (lambda (sub-lis) (org-babel-ref-index-list remainder sub-lis))
+            (lambda (sub-lis)
+	      (if (listp sub-lis)
+		  (org-babel-ref-index-list remainder sub-lis)
+		sub-lis))
             (if (or (= 0 (length portion)) (string-match ind-re portion))
                 (mapcar
 		 (lambda (n) (nth n lis))
