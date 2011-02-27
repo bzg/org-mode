@@ -1393,12 +1393,13 @@ following the source block."
   "Read the table at `point' into emacs-lisp."
   (mapcar (lambda (row)
             (if (and (symbolp row) (equal row 'hline)) row
-              (mapcar #'org-babel-read row)))
+              (mapcar (lambda (el) (org-babel-read el 'inhibit-lisp-eval)) row)))
           (org-table-to-lisp)))
 
 (defun org-babel-read-list ()
   "Read the list at `point' into emacs-lisp."
-  (mapcar #'org-babel-read (mapcar #'cadr (cdr (org-list-parse-list)))))
+  (mapcar (lambda (el) (org-babel-read el 'inhibit-lisp-eval))
+	  (mapcar #'cadr (cdr (org-list-parse-list)))))
 
 (defvar org-link-types-re)
 (defun org-babel-read-link ()
@@ -1908,18 +1909,18 @@ block but are passed literally to the \"example-block\"."
 	     (apply #'string (reverse out)))))
        str))))
 
-(defun org-babel-read (cell)
+(defun org-babel-read (cell &optional inhibit-lisp-eval)
   "Convert the string value of CELL to a number if appropriate.
-Otherwise if cell looks like lisp (meaning it starts with a
-\"(\" or a \"'\") then read it as lisp, otherwise return it
-unmodified as a string.
-
-This is taken almost directly from `org-read-prop'."
+Otherwise if cell looks like lisp (meaning it starts with a \"(\"
+or a \"'\") then read it as lisp, otherwise return it unmodified
+as a string.  Optional argument NO-LISP-EVAL inhibits lisp
+evaluation for situations in which is it not appropriate."
   (if (and (stringp cell) (not (equal cell "")))
       (or (org-babel-number-p cell)
-          (if (or (equal "(" (substring cell 0 1))
-                  (equal "'" (substring cell 0 1))
-                  (equal "`" (substring cell 0 1)))
+          (if (and (not inhibit-lisp-eval)
+		   (or (equal "(" (substring cell 0 1))
+		       (equal "'" (substring cell 0 1))
+		       (equal "`" (substring cell 0 1))))
               (eval (read cell))
             (progn (set-text-properties 0 (length cell) nil cell) cell)))
     cell))
