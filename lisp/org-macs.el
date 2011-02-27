@@ -192,6 +192,7 @@ We use a macro so that the test can happen at compilation time."
 	 ;; remember which buffer to undo
 	 (push (list _cmd _cline _buf1 _c1 _buf2 _c2)
 	       org-agenda-undo-list)))))
+(put 'org-with-remote-undo 'lisp-indent-function 1)
 
 (defmacro org-no-read-only (&rest body)
   "Inhibit read-only for BODY."
