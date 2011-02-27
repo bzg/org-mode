@@ -711,22 +711,29 @@ the current subtree."
     (setf (nth 2 info)
 	  (sort (copy-sequence (nth 2 info))
 		(lambda (a b) (string< (car a) (car b)))))
-    (let ((hash (sha1
-		 (format "%s-%s"
-			 (mapconcat
-			  #'identity
-			  (delq nil
-				(mapcar
-				 (lambda (arg)
-				   (let ((v (cdr arg)))
-				     (when (and v (not (and (sequencep v)
-							    (not (consp v))
-							    (= (length v) 0))))
-				       (format "%S" v))))
-				 (nth 2 info))) ":")
-			 (nth 1 info)))))
-      (when (interactive-p) (message hash))
-      hash)))
+    ((lambda (hash) (when (interactive-p) (message hash)) hash)
+     (sha1 (format "%s-%s"
+		   (mapconcat
+		    #'identity
+		    (delq nil
+			  (mapcar
+			   (lambda (arg)
+			     (let ((v (cdr arg)))
+			       (when (and v (not (and (sequencep v)
+						      (not (consp v))
+						      (= (length v) 0))))
+				 ((lambda (el) (format "%S" el))
+				  (cond
+				   ((and (listp v) ; lists are sorted
+					 (member (car arg) '(:result-params)))
+				    (sort v #'string<))
+				   ((and (stringp v) ; strings are sorted
+					 (member (car arg) '(:results :exports)))
+				    (mapconcat #'identity (sort (split-string v)
+								#'string<) " "))
+				   (t v)))))) ; atomic are left untouched
+			   (nth 2 info))) ":")
+		   (nth 1 info))))))
 
 (defun org-babel-result-hash (&optional info)
   "Return the in-buffer hash associated with INFO."
