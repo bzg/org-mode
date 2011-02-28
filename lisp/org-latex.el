@@ -2461,34 +2461,38 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 
 (defun org-export-latex-lists ()
   "Convert plain text lists in current buffer into LaTeX lists."
-  (mapc
-   (lambda (e)
-     ;; For each type of context allowed for list export (E), find
-     ;; every list, parse it, delete it and insert resulting
-     ;; conversion to latex (RES).
-     (let (res)
-       (goto-char (point-min))
-       (while (re-search-forward (org-item-beginning-re) nil t)
-	 (when (and (eq (get-text-property (point) 'list-context) e)
-		    (not (get-text-property (point) 'org-example)))
-	   (beginning-of-line)
-	   (setq res
-		 (org-list-to-latex
-		  ;; Narrowing is needed because we're converting
-		  ;; from inner functions to outer ones.
-		  (save-restriction
-		    (narrow-to-region (point) (point-max))
-		    ;; `org-list-end-re' output has changed since
-		    ;; preprocess from org-exp.el.
-		    (let ((org-list-end-re "^ORG-LIST-END\n"))
-		      (org-list-parse-list t)))
-		  org-export-latex-list-parameters))
-	   ;; Extend previous value of original-indentation to the
-	   ;; whole string
-	   (insert (org-add-props res nil 'original-indentation
-				  (org-find-text-property-in-string
-				   'original-indentation res)))))))
-   (append org-list-export-context '(nil))))
+  ;; `org-list-end-re' output has changed since preprocess from
+  ;; org-exp.el. Make sure it is taken into account.
+  (let ((org-list-ending-method
+	 (if (eq org-list-ending-method 'regexp) 'regexp 'both))
+	(org-list-end-re "^ORG-LIST-END\n"))
+    (mapc
+     (lambda (e)
+       ;; For each type of context allowed for list export (E), find
+       ;; every list, parse it, delete it and insert resulting
+       ;; conversion to latex (RES), while keeping the same
+       ;; `original-indentation' property.
+       (let (res)
+	 (goto-char (point-min))
+	 (while (re-search-forward (org-item-beginning-re) nil t)
+	   (when (and (eq (get-text-property (point) 'list-context) e)
+		      (not (get-text-property (point) 'org-example)))
+	     (beginning-of-line)
+	     (setq res
+		   (org-list-to-latex
+		    ;; Narrowing is needed because we're converting
+		    ;; from inner functions to outer ones.
+		    (save-restriction
+		      (narrow-to-region (point) (point-max))
+		      (org-list-parse-list t))
+		    org-export-latex-list-parameters))
+	     ;; Extend previous value of original-indentation to the
+	     ;; whole string
+	     (insert (org-add-props res nil 'original-indentation
+				    (org-find-text-property-in-string
+				     'original-indentation res)))))))
+     ;; List of allowed contexts for export, and the default one.
+     (append org-list-export-context '(nil)))))
 
 (defconst org-latex-entities
  '("\\!"
