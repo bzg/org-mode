@@ -1416,7 +1416,7 @@ the alist of previous items."
 	;; Return modified line
 	body))
      ;; At a list ender:  normal text follows: need <para>.
-     ((equal "ORG-LIST-END" line)
+     ((equal "ORG-LIST-END-MARKER" line)
       (org-export-docbook-open-para)
       (throw 'nextline nil))
      ;; Not at an item: return line unchanged (side-effects only).

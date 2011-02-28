@@ -2473,7 +2473,7 @@ the alist of previous items."
 	;; Return modified line
 	body))
      ;; At a list ender: go to next line (side-effects only).
-     ((equal "ORG-LIST-END" line) (throw 'nextline nil))
+     ((equal "ORG-LIST-END-MARKER" line) (throw 'nextline nil))
      ;; Not at an item: return line unchanged (side-effects only).
      (t line))))
 

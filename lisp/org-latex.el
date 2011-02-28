@@ -2465,7 +2465,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
   ;; org-exp.el. Make sure it is taken into account.
   (let ((org-list-ending-method
 	 (if (eq org-list-ending-method 'regexp) 'regexp 'both))
-	(org-list-end-re "^ORG-LIST-END\n"))
+	(org-list-end-re "^ORG-LIST-END-MARKER\n"))
     (mapc
      (lambda (e)
        ;; For each type of context allowed for list export (E), find

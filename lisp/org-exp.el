@@ -1705,7 +1705,7 @@ These special cookies will later be interpreted by the backend."
 	     ;; `org-list-struct' pays attention to it when reading a
 	     ;; list.
 	     (insert (org-add-props
-			 "ORG-LIST-END\n"
+			 "ORG-LIST-END-MARKER\n"
 			 (list 'original-indentation top-ind)))))))
      (cons nil org-list-export-context))))
 
@@ -1750,20 +1750,20 @@ These special properties will later be interpreted by the backend."
 	      ;; marked. Now mark every list ending and add properties
 	      ;; useful to line processing exporters.
 	      (goto-char bottom)
-	      (when (or (looking-at "^ORG-LIST-END\n")
+	      (when (or (looking-at "^ORG-LIST-END-MARKER\n")
 			(and (not (eq org-list-ending-method 'indent))
 			     (looking-at org-list-end-re)))
 		(replace-match ""))
 	      (unless (bolp) (insert "\n"))
 	      (insert
-	       (org-add-props "ORG-LIST-END\n" (list 'list-item bottom
+	       (org-add-props "ORG-LIST-END-MARKER\n" (list 'list-item bottom
 						     'list-struct struct
 						     'list-prevs prevs)))
 	      ;; Following property is used by LaTeX exporter.
 	      (add-text-properties top (point) (list 'list-context ctxt)))))))
     ;; Mark lists except for backends not interpreting them.
     (unless (eq backend 'ascii)
-      (let ((org-list-end-re "^ORG-LIST-END\n"))
+      (let ((org-list-end-re "^ORG-LIST-END-MARKER\n"))
 	(mapc
 	 (lambda (e)
 	   (goto-char (point-min))
