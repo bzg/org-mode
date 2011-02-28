@@ -11853,7 +11853,9 @@ following the source name.
 It is possible to reference portions of variable values by ``indexing'' into
 the variables.  Indexes are 0 based with negative values counting back from
 the end.  If an index is separated by @code{,}s then each subsequent section
-will index into the next deepest nesting or dimension of the value.  The
+will index into the next deepest nesting or dimension of the value.  Note
+that this indexing occurs @emph{before} other table related header arguments
+like @code{:hlines}, @code{:colnames} and @code{:rownames} are applied.  The
 following example assigns the last cell of the first row the table
 @code{example-table} to the variable @code{data}:
 
