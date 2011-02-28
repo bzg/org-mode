@@ -5334,7 +5334,7 @@ Any match of REMOVE-RE will be removed from TXT."
 		       (get-text-property 0 'org-marker txt)))
 		(error nil)))
 	(when effort
-	  (setq neffort (org-hh:mm-string-to-minutes effort)
+	  (setq neffort (org-duration-string-to-minutes effort)
 		effort (setq effort (concat "[" effort "]" )))))
 
       (when remove-re
@@ -6055,7 +6055,7 @@ E looks like \"+<2:25\"."
 		   ((equal op ??) op)
 		   (t '=)))
     (list 'org-agenda-compare-effort (list 'quote op)
-	  (org-hh:mm-string-to-minutes e))))
+	  (org-duration-string-to-minutes e))))
 
 (defun org-agenda-compare-effort (op value)
   "Compare the effort of the current line with VALUE, using OP.

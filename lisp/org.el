@@ -15524,6 +15524,47 @@ If no number is found, the return value is 0."
     (string-to-number (match-string 1 s)))
    (t 0)))
 
+(defcustom org-effort-durations
+  `(("h" . 60)
+    ("d" . ,(* 60 8))
+    ("w" . ,(* 60 8 5))
+    ("m" . ,(* 60 8 5 4))
+    ("y" . ,(* 60 8 5 40)))
+  "Conversion factor to minutes for an effort modifier.
+
+Each entry has the form (MODIFIER . MINUTES).
+
+In an effort string, a number followed by MODIFIER is multiplied
+by the specified number of MINUTES to obtain an effort in
+minutes.
+
+For example, if the value of this variable is ((\"hours\" . 60)), then an
+effort string \"2hours\" is equivalent to 120 minutes."
+  :group 'org-agenda
+  :type '(alist :key-type (string :tag "Modifier")
+		:value-type (number :tag "Minutes")))
+
+(defun org-duration-string-to-minutes (s)
+  "Convert a duration string S to minutes.
+
+A bare number is interpreted as minutes, modifiers can be set by
+customizing `org-effort-durations' (which see).
+
+Entries containing a colon are interpreted as H:MM by
+`org-hh:mm-string-to-minutes'."
+  (let ((result 0)
+	(regex (rx-to-string (group (1+ (any "0-9")))
+			     (0+ (syntax whitespace))
+			     (group
+			      (eval (cons 'or
+					  (mapcar 'car org-effort-durations)))))))
+    (while (string-match regex s)
+      (incf result (* (cdr (assoc (match-string 2 s) org-effort-durations))
+		      (string-to-number (match-string 1 s))))
+      (setq s (replace-match "" nil t s)))
+    (incf result (org-hh:mm-string-to-minutes s))
+    result))
+
 ;;;; Files
 
 (defun org-save-all-org-buffers ()

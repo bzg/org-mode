@@ -487,7 +487,7 @@ If not, show simply the clocked time like 01:50."
 	 (m (- clocked-time (* 60 h))))
     (if org-clock-effort
 	(let* ((effort-in-minutes
-		(org-hh:mm-string-to-minutes org-clock-effort))
+		(org-duration-string-to-minutes org-clock-effort))
 	       (effort-h (floor effort-in-minutes 60))
 	       (effort-m (- effort-in-minutes (* effort-h 60)))
 	       (work-done-str
@@ -561,10 +561,10 @@ the mode line."
        ;; A string.  See if it is a delta
        (setq sign (string-to-char value))
        (if (member sign '(?- ?+))
-	   (setq current (org-hh:mm-string-to-minutes current)
+	   (setq current (org-duration-string-to-minutes current)
 		 value (substring value 1))
 	 (setq current 0))
-       (setq value (org-hh:mm-string-to-minutes value))
+       (setq value (org-duration-string-to-minutes value))
        (if (equal ?- sign)
 	   (setq value (- current value))
 	 (if (equal ?+ sign) (setq value (+ current value)))))
@@ -581,7 +581,7 @@ the mode line."
   "Show notification if we spent more time than we estimated before.
 Notification is shown only once."
   (when (org-clocking-p)
-    (let ((effort-in-minutes (org-hh:mm-string-to-minutes org-clock-effort))
+    (let ((effort-in-minutes (org-duration-string-to-minutes org-clock-effort))
 	  (clocked-time (org-clock-get-clocked-time)))
       (if (setq org-task-overrun
 		(if (or (null effort-in-minutes) (zerop effort-in-minutes))
