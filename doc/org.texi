@@ -12411,6 +12411,9 @@ processing, then reapplied to the results.
 | c* |
 @end example
 
+Please note that column names are not removed before the table is indexed
+using variable indexing @xref{var, Indexable variable values}.
+
 @item @code{no}
 No column name pre-processing takes place
 
@@ -12448,6 +12451,10 @@ and is then reapplied to the results.
 | one | 11 | 12 | 13 | 14 | 15 |
 | two | 16 | 17 | 18 | 19 | 20 |
 @end example
+
+Please note that row names are not removed before the table is indexed using
+variable indexing @xref{var, Indexable variable values}.
+
 @end itemize
 
 @node shebang, eval, rownames, Specific header arguments
