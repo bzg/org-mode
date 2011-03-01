@@ -11765,7 +11765,8 @@ The specifics of how arguments are included in a code block vary by language;
 these are addressed in the language-specific documentation. However, the
 syntax used to specify arguments is the same across all languages.  The
 values passed to arguments can be literal values, values from org-mode tables
-and literal example blocks, or the results of other code blocks.
+and literal example blocks, the results of other code blocks, or Emacs Lisp
+code---see the ``Emacs Lisp evaluation of variables'' heading below.
 
 These values can be indexed in a manner similar to arrays---see the
 ``indexable variable values'' heading below.
@@ -11935,6 +11936,39 @@ another by commas, as shown in the following example.
 
 #+results:
 | 11 | 14 | 17 |
+@end example
+
+@subsubheading Emacs Lisp evaluation of variables
+
+Emacs lisp code can be used to initialize variable values.  When a variable
+value starts with @code{(}, @code{'} or @code{`} it will be evaluated as
+Emacs Lisp and the result of the evaluation will be assigned as the variable
+value.  The following example demonstrates use of this evaluation to reliably
+pass the file-name of the org-mode buffer to a code block---note that
+evaluation of header arguments is guaranteed to take place in the original
+org-mode file, while there is no such guarantee for evaluation of the code
+block body.
+
+@example
+#+begin_src sh :var file-name=(buffer-file-name) :exports both
+  wc -w $file
+#+end_src
+@end example
+
+Note that values read from tables and lists will not be evaluated as
+Emacs Lisp, as shown in the following example.
+
+@example
+#+results: table
+| (a b c) |
+
+#+headers: :var data=table[0,0]
+#+begin_src perl
+  $data
+#+end_src
+
+#+results:
+: (a b c)
 @end example
 
 @node results, file, var, Specific header arguments
