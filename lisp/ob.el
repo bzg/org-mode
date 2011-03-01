@@ -35,6 +35,7 @@
 (require 'org-macs)
 
 (defvar org-babel-call-process-region-original)
+(defvar org-src-lang-modes)
 (declare-function show-all "outline" ())
 (declare-function tramp-compat-make-temp-file "tramp-compat"
                   (filename &optional dir-flag))
@@ -74,6 +75,7 @@
 (declare-function org-babel-lob-execute-maybe "ob-lob" ())
 (declare-function org-number-sequence "org-compat" (from &optional to inc))
 (declare-function org-in-item-p "org-list" ())
+(declare-function org-at-item-p "org-list" ())
 (declare-function org-list-parse-list "org-list" (&optional delete))
 (declare-function org-list-to-generic "org-list" (LIST PARAMS))
 (declare-function org-list-struct "org-list" ())

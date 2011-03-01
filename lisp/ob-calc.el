@@ -29,6 +29,7 @@
 ;;; Code:
 (require 'ob)
 (require 'calc)
+(require 'calc-store)
 (unless (featurep 'xemacs) (require 'calc-trail))
 (eval-when-compile (require 'ob-comint))
 
@@ -83,6 +84,7 @@
     (with-current-buffer (get-buffer "*Calculator*")
       (calc-eval (calc-top 1)))))
 
+(defvar var-syms) ; Dynamically scoped from org-babel-execute:calc
 (defun ob-calc-maybe-resolve-var (el)
   (if (consp el)
       (if (and (equal 'var (car el)) (member (cadr el) var-syms))
