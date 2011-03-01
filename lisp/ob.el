@@ -74,7 +74,6 @@
 (declare-function org-babel-ref-resolve "ob-ref" (ref))
 (declare-function org-babel-lob-execute-maybe "ob-lob" ())
 (declare-function org-number-sequence "org-compat" (from &optional to inc))
-(declare-function org-in-item-p "org-list" ())
 (declare-function org-at-item-p "org-list" ())
 (declare-function org-list-parse-list "org-list" (&optional delete))
 (declare-function org-list-to-generic "org-list" (LIST PARAMS))
