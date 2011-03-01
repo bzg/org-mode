@@ -130,6 +130,7 @@ Emacs-lisp table, otherwise return the results as a string."
   "Return the buffer associated with SESSION."
   (cdr (assoc session org-babel-python-buffers)))
 
+(defvar py-default-interpreter)
 (defun org-babel-python-initiate-session-by-key (&optional session)
   "Initiate a python session.
 If there is not a current inferior-process-buffer in SESSION

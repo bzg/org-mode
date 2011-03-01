@@ -40,6 +40,8 @@
 ;; user to add this class to his or her stylesheet if this div is to
 ;; mean anything.
 
+(require 'org-compat)
+
 (defvar org-special-blocks-ignore-regexp "^\\(LaTeX\\|HTML\\)$"
   "A regexp indicating the names of blocks that should be ignored
 by org-special-blocks.  These blocks will presumably be

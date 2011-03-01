@@ -97,7 +97,8 @@ example above."
 	   variables)))
     (unless (stringp source-block)
       (setq source-block (symbol-name source-block)))
-    (org-babel-trim
+    ((lambda (result)
+       (org-babel-trim (if (stringp result) result (format "%S" result))))
      (if (and source-block (> (length source-block) 0))
          (let ((params
                 (eval `(org-babel-parse-header-arguments

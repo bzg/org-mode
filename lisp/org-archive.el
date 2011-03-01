@@ -211,7 +211,7 @@ this heading."
 		 (current-time)))
 	  category todo priority ltags itags atags
           ;; end of variables that will be used for saving context
-	  location afile heading buffer level newfile-p visiting)
+	  location afile heading buffer level newfile-p infile-p visiting)
 
       ;; Find the local archive location
       (setq location (org-get-local-archive-location)

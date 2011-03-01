@@ -76,6 +76,8 @@
   (require 'cl))
 (require 'org)
 
+(defvar backend) ; dynamically scoped from caller
+
 (defvar org-exp-blocks-block-regexp
   (concat
    "^\\([ \t]*\\)#\\+begin_\\(\\S-+\\)"

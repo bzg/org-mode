@@ -476,8 +476,8 @@ This checks `org-list-ending-method'."
   "Is point in a line starting a hand-formatted item?"
   (save-excursion
     (beginning-of-line)
-    (and (not (eq (nth 2 (org-list-context)) 'invalid))
-	 (looking-at (org-item-re)))))
+    (and (looking-at (org-item-re))
+	 (not (eq (nth 2 (org-list-context)) 'invalid)))))
 
 (defun org-at-item-bullet-p ()
   "Is point at the bullet of a plain list item?"
@@ -514,89 +514,75 @@ Context will be a cell like (MIN MAX CONTEXT) where MIN and MAX
 are boundaries and CONTEXT is a symbol among `drawer', `block',
 `invalid', `inlinetask' and nil.
 
-Contexts `block' and `invalid' refer to
-`org-list-forbidden-blocks'."
+Contexts `block' and `invalid' refer to `org-list-forbidden-blocks'."
   (save-match-data
-    (save-excursion
-      (beginning-of-line)
-      (let* ((outline-regexp (org-get-limited-outline-regexp))
-	     ;; Can't use org-drawers-regexp as this function might be
-	     ;; called in buffers not in Org mode
-	     (drawers-re (concat "^[ \t]*:\\("
-				 (mapconcat 'regexp-quote org-drawers "\\|")
-				 "\\):[ \t]*$"))
-	     (case-fold-search t)
-	     ;; Compute position of surrounding headings. This is the
-	     ;; default context.
-	     (heading
-	      (save-excursion
-		(list
-		 (or (and (org-at-heading-p) (point-at-bol))
-		     (outline-previous-heading)
-		     (point-min))
-		 (or (outline-next-heading)
-		     (point-max))
-		 nil)))
-	     (prev-head (car heading))
-	     (next-head (nth 1 heading))
-	     ;; Is point inside a drawer?
-	     (drawerp
-	      (when (and (org-in-regexps-block-p
-			  drawers-re "^[ \t]*:END:" prev-head)
-			 (save-excursion
-			   (beginning-of-line)
-			   (and (not (looking-at drawers-re))
-				(not (looking-at "^[ \t]*:END:")))))
-		(save-excursion
-		  (list
-		   (progn
-		     (re-search-backward drawers-re prev-head t)
-		     (1+ (point-at-eol)))
-		   (if (re-search-forward "^[ \t]*:END:" next-head t)
-		       (1- (point-at-bol))
-		     next-head)
-		   'drawer))))
-	     ;; Is point strictly in a block, and of which type?
-	     (blockp
-	      (save-excursion
-		(when (and (org-in-regexps-block-p
-			    "^[ \t]*#\\+begin_" "^[ \t]*#\\+end_" prev-head)
-			   (save-excursion
-			     (beginning-of-line)
-			     (not (looking-at
-				   "^[ \t]*#\\+\\(begin\\|end\\)_"))))
-		  (list
-		   (progn
-		     (re-search-backward
-		      "^[ \t]*#\\+begin_\\(\\S-+\\)" prev-head t)
-		     (1+ (point-at-eol)))
-		   (save-match-data
-		     (if (re-search-forward "^[ \t]*#\\+end_" next-head t)
-			 (1- (point-at-bol))
-		       next-head))
-		   (if (member (downcase (match-string 1))
-			       org-list-forbidden-blocks)
-		       'invalid
-		     'block)))))
-	     ;; Is point in an inlinetask?
-	     (inlinetaskp
-	      (when (and (featurep 'org-inlinetask)
-			 (org-inlinetask-in-task-p)
-			 (not (looking-at "^\\*+")))
-		(save-excursion
-		  (list
-		   (progn (org-inlinetask-goto-beginning)
-			  (1+ (point-at-eol)))
-		   (progn
-		     (org-inlinetask-goto-end)
-		     (forward-line -1)
-		     (1- (point-at-bol)))
-		   'inlinetask))))
-	     ;; List actual candidates
-	     (context-list
-	      (delq nil (list heading drawerp blockp inlinetaskp))))
-	;; Return the closest context around
-	(assq (apply 'max (mapcar 'car context-list)) context-list)))))
+    (org-with-limited-levels
+     (beginning-of-line)
+     (let* ((case-fold-search t) (pos (point)) beg end
+	    ;; Compute position of surrounding headings. This is the
+	    ;; default context.
+	    (heading
+	     (save-excursion
+	       (list (or (and (org-at-heading-p) (point-at-bol))
+			 (outline-previous-heading)
+			 (point-min))
+		     (or (outline-next-heading) (point-max))
+		     nil)))
+	    (prev-head (car heading))
+	    (next-head (nth 1 heading))
+	    ;; Is point inside a drawer?
+	    (drawerp
+	     (save-excursion
+	       (let ((end-re "^[ \t]*:END:")
+		     ;; Can't use org-drawers-regexp as this function
+		     ;; might be called in buffers not in Org mode
+		     (drawers-re (concat "^[ \t]*:\\("
+					 (mapconcat 'regexp-quote org-drawers "\\|")
+				"\\):[ \t]*$")))
+		 (and (not (looking-at drawers-re))
+		      (not (looking-at end-re))
+		      (setq beg (and (re-search-backward drawers-re prev-head t)
+				     (1+ (point-at-eol))))
+		      (setq end (or (and (re-search-forward end-re next-head t)
+					 (1- (match-beginning 0)))
+				    next-head))
+		      (>= end pos)
+		      (list beg end 'drawer)))))
+	    ;; Is point strictly in a block, and of which type?
+	    (blockp
+	     (save-excursion
+	       (let ((block-re "^[ \t]*#\\+\\(begin\\|end\\)_") type)
+		 (and (not (looking-at block-re))
+		      (setq beg (and (re-search-backward block-re prev-head t)
+				     (1+ (point-at-eol))))
+		      (looking-at "^[ \t]*#\\+begin_\\(\\S-+\\)")
+		      (setq type (downcase (match-string 1)))
+		      (goto-char beg)
+		      (setq end (or (and (re-search-forward block-re next-head t)
+					 (1- (point-at-bol)))
+				    next-head))
+		      (>= end pos)
+		      (equal (downcase (match-string 1)) "end")
+		      (list beg end (if (member type org-list-forbidden-blocks)
+					'invalid 'block))))))
+	    ;; Is point in an inlinetask?
+	    (inlinetaskp
+	     (when (featurep 'org-inlinetask)
+	       (save-excursion
+		 (let* ((stars-re (org-inlinetask-outline-regexp))
+			(end-re (concat stars-re "END[ \t]*$")))
+		   (and (not (looking-at "^\\*+"))
+			(setq beg (and (re-search-backward stars-re prev-head t)
+				       (1+ (point-at-eol))))
+			(not (looking-at end-re))
+			(setq end (and (re-search-forward end-re next-head t)
+				       (1- (match-beginning 0))))
+			(> (point) pos)
+			(list beg end 'inlinetask))))))
+	    ;; List actual candidates
+	    (context-list (delq nil (list heading drawerp blockp inlinetaskp))))
+       ;; Return the closest context around
+       (assq (apply 'max (mapcar 'car context-list)) context-list)))))
 
 (defun org-list-struct ()
   "Return structure of list at point.
@@ -1197,8 +1183,7 @@ This function modifies STRUCT."
       ;; 4. Insert effectively item into buffer
       (goto-char item)
       (org-indent-to-column ind)
-      (insert body)
-      (insert item-sep)
+      (insert body item-sep)
       ;; 5. Add new item to STRUCT.
       (mapc (lambda (e)
       	      (let ((p (car e))
@@ -1238,7 +1223,7 @@ This function modifies STRUCT."
 		 ;; SIZE-OFFSET.
 		 (t (setcar e (+ p size-offset))
 		    (setcar (nthcdr 6 e) (+ end size-offset))))))
-      	    struct)
+	    struct)
       (push (list item ind bullet nil box nil (+ item item-size)) struct)
       (setq struct (sort struct (lambda (e1 e2) (< (car e1) (car e2)))))
       ;; 6. If not BEFOREP, new item must appear after ITEM, so
