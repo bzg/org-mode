@@ -4695,7 +4695,7 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 	   "\\|\\(<%%\\(([^>\n]+)\\)>\\)"))
 	 marker hdmarker deadlinep scheduledp clockp closedp inactivep
 	 donep tmp priority category ee txt timestr tags b0 b3 e3 head
-	 todo-state end-of-match)
+	 todo-state end-of-match show-all)
     (goto-char (point-min))
     (while (setq end-of-match (re-search-forward regexp nil t))
       (setq b0 (match-beginning 0)
@@ -5051,7 +5051,7 @@ FRACTION is what fraction of the head-warning time has passed."
 			      (cons (marker-position mm) a)))
 		  deadline-results))
 	 d2 diff pos pos1 category tags donep
-	 ee txt head pastschedp todo-state face timestr s habitp)
+	 ee txt head pastschedp todo-state face timestr s habitp show-all)
     (goto-char (point-min))
     (while (re-search-forward regexp nil t)
       (catch :skip
