@@ -69,14 +69,16 @@
 		      ((math-read-number res) (math-read-number res))
 		      ((listp res) (error "calc error \"%s\" on input \"%s\""
 					  (cadr res) line))
-		      (t (calc-eval
-			  (math-evaluate-expr
-			   ;; resolve user variables, calc built in
-			   ;; variables are handled automatically
-			   ;; upstream by calc
-			   (mapcar #'ob-calc-maybe-resolve-var
-				   ;; parse line into calc objects
-				   (car (math-read-exprs line))))))))
+		      (t (replace-regexp-in-string
+			  "'\\[" "["
+			  (calc-eval
+			   (math-evaluate-expr
+			    ;; resolve user variables, calc built in
+			    ;; variables are handled automatically
+			    ;; upstream by calc
+			    (mapcar #'ob-calc-maybe-resolve-var
+				    ;; parse line into calc objects
+				    (car (math-read-exprs line)))))))))
 		   (calc-eval line))))))))
      (mapcar #'org-babel-trim
 	     (split-string (org-babel-expand-body:calc body params) "[\n\r]"))))
