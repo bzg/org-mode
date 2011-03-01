@@ -516,73 +516,74 @@ are boundaries and CONTEXT is a symbol among `drawer', `block',
 
 Contexts `block' and `invalid' refer to `org-list-forbidden-blocks'."
   (save-match-data
-    (org-with-limited-levels
-     (beginning-of-line)
-     (let* ((case-fold-search t) (pos (point)) beg end
-	    ;; Compute position of surrounding headings. This is the
-	    ;; default context.
-	    (heading
-	     (save-excursion
-	       (list (or (and (org-at-heading-p) (point-at-bol))
-			 (outline-previous-heading)
-			 (point-min))
-		     (or (outline-next-heading) (point-max))
-		     nil)))
-	    (prev-head (car heading))
-	    (next-head (nth 1 heading))
-	    ;; Is point inside a drawer?
-	    (drawerp
-	     (save-excursion
-	       (let ((end-re "^[ \t]*:END:")
-		     ;; Can't use org-drawers-regexp as this function
-		     ;; might be called in buffers not in Org mode
-		     (drawers-re (concat "^[ \t]*:\\("
-					 (mapconcat 'regexp-quote org-drawers "\\|")
-				"\\):[ \t]*$")))
-		 (and (not (looking-at drawers-re))
-		      (not (looking-at end-re))
-		      (setq beg (and (re-search-backward drawers-re prev-head t)
-				     (1+ (point-at-eol))))
-		      (setq end (or (and (re-search-forward end-re next-head t)
-					 (1- (match-beginning 0)))
-				    next-head))
-		      (>= end pos)
-		      (list beg end 'drawer)))))
-	    ;; Is point strictly in a block, and of which type?
-	    (blockp
-	     (save-excursion
-	       (let ((block-re "^[ \t]*#\\+\\(begin\\|end\\)_") type)
-		 (and (not (looking-at block-re))
-		      (setq beg (and (re-search-backward block-re prev-head t)
-				     (1+ (point-at-eol))))
-		      (looking-at "^[ \t]*#\\+begin_\\(\\S-+\\)")
-		      (setq type (downcase (match-string 1)))
-		      (goto-char beg)
-		      (setq end (or (and (re-search-forward block-re next-head t)
-					 (1- (point-at-bol)))
-				    next-head))
-		      (>= end pos)
-		      (equal (downcase (match-string 1)) "end")
-		      (list beg end (if (member type org-list-forbidden-blocks)
-					'invalid 'block))))))
-	    ;; Is point in an inlinetask?
-	    (inlinetaskp
-	     (when (featurep 'org-inlinetask)
+    (save-excursion
+      (beginning-of-line)
+      (let* ((case-fold-search t) (pos (point)) beg end
+	     ;; Compute position of surrounding headings. This is the
+	     ;; default context.
+	     (heading
+	      (org-with-limited-levels
 	       (save-excursion
-		 (let* ((stars-re (org-inlinetask-outline-regexp))
-			(end-re (concat stars-re "END[ \t]*$")))
-		   (and (not (looking-at "^\\*+"))
-			(setq beg (and (re-search-backward stars-re prev-head t)
-				       (1+ (point-at-eol))))
-			(not (looking-at end-re))
-			(setq end (and (re-search-forward end-re next-head t)
-				       (1- (match-beginning 0))))
-			(> (point) pos)
-			(list beg end 'inlinetask))))))
-	    ;; List actual candidates
-	    (context-list (delq nil (list heading drawerp blockp inlinetaskp))))
-       ;; Return the closest context around
-       (assq (apply 'max (mapcar 'car context-list)) context-list)))))
+		 (list (or (and (org-at-heading-p) (point-at-bol))
+			   (outline-previous-heading)
+			   (point-min))
+		       (or (outline-next-heading) (point-max))
+		       nil))))
+	     (prev-head (car heading))
+	     (next-head (nth 1 heading))
+	     ;; Is point inside a drawer?
+	     (drawerp
+	      (save-excursion
+		(let ((end-re "^[ \t]*:END:")
+		      ;; Can't use org-drawers-regexp as this function
+		      ;; might be called in buffers not in Org mode
+		      (drawers-re (concat "^[ \t]*:\\("
+					  (mapconcat 'regexp-quote org-drawers "\\|")
+					  "\\):[ \t]*$")))
+		  (and (not (looking-at drawers-re))
+		       (not (looking-at end-re))
+		       (setq beg (and (re-search-backward drawers-re prev-head t)
+				      (1+ (point-at-eol))))
+		       (setq end (or (and (re-search-forward end-re next-head t)
+					  (1- (match-beginning 0)))
+				     next-head))
+		       (>= end pos)
+		       (list beg end 'drawer)))))
+	     ;; Is point strictly in a block, and of which type?
+	     (blockp
+	      (save-excursion
+		(let ((block-re "^[ \t]*#\\+\\(begin\\|end\\)_") type)
+		  (and (not (looking-at block-re))
+		       (setq beg (and (re-search-backward block-re prev-head t)
+				      (1+ (point-at-eol))))
+		       (looking-at "^[ \t]*#\\+begin_\\(\\S-+\\)")
+		       (setq type (downcase (match-string 1)))
+		       (goto-char beg)
+		       (setq end (or (and (re-search-forward block-re next-head t)
+					  (1- (point-at-bol)))
+				     next-head))
+		       (>= end pos)
+		       (equal (downcase (match-string 1)) "end")
+		       (list beg end (if (member type org-list-forbidden-blocks)
+					 'invalid 'block))))))
+	     ;; Is point in an inlinetask?
+	     (inlinetaskp
+	      (when (featurep 'org-inlinetask)
+		(save-excursion
+		  (let* ((stars-re (org-inlinetask-outline-regexp))
+			 (end-re (concat stars-re "END[ \t]*$")))
+		    (and (not (looking-at "^\\*+"))
+			 (setq beg (and (re-search-backward stars-re prev-head t)
+					(1+ (point-at-eol))))
+			 (not (looking-at end-re))
+			 (setq end (and (re-search-forward end-re next-head t)
+					(1- (match-beginning 0))))
+			 (> (point) pos)
+			 (list beg end 'inlinetask))))))
+	     ;; List actual candidates
+	     (context-list (delq nil (list heading drawerp blockp inlinetaskp))))
+	;; Return the closest context around
+	(assq (apply 'max (mapcar 'car context-list)) context-list)))))
 
 (defun org-list-struct ()
   "Return structure of list at point.
