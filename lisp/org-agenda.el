@@ -4307,7 +4307,7 @@ of what a project is and how to check if it stuck, customize the variable
 
 (defvar org-disable-agenda-to-diary nil)          ;Dynamically-scoped param.
 (defvar list-diary-entries-hook)
-
+(defvar diary-time-regexp)
 (defun org-get-entries-from-diary (date)
   "Get the (Emacs Calendar) diary entries for DATE."
   (require 'diary-lib)
@@ -5472,12 +5472,6 @@ The modified list may contain inherited tags, and tags matched by
       (if (member 'time-up org-agenda-sorting-strategy-selected)
 	  (append new list)
 	(append list new)))))
-
-(defun org-eval (form)
-  "Eval FORM and return result."
-  (condition-case error
-      (eval form)
-    (error (format "%%![Error: %s]" error))))
 
 (defun org-compile-prefix-format (key)
   "Compile the prefix format into a Lisp form that can be evaluated.

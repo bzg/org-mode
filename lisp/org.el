@@ -18201,6 +18201,12 @@ With prefix arg UNCOMPILED, load the uncompiled versions."
       (display-buffer buf)
       (sit-for 0))))
 
+(defun org-eval (form)
+  "Eval FORM and return result."
+  (condition-case error
+      (eval form)
+    (error (format "%%![Error: %s]" error))))
+
 (defun org-in-commented-line ()
   "Is point in a line starting with `#'?"
   (equal (char-after (point-at-bol)) ?#))

@@ -1054,7 +1054,7 @@ Point will remain at the first line after the inserted text."
     (setq beg (point))
     (cond
      ((and (eq type 'entry) (org-mode-p))
-      (org-capture-verify-tree txt)
+      (org-capture-verify-tree (org-capture-get :template))
       (org-paste-subtree nil template t))
      ((and (memq type '(item checkitem))
 	   (org-mode-p)
