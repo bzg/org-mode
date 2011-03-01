@@ -76,8 +76,6 @@
   (require 'cl))
 (require 'org)
 
-(defvar backend) ; dynamically scoped from caller
-
 (defvar org-exp-blocks-block-regexp
   (concat
    "^\\([ \t]*\\)#\\+begin_\\(\\S-+\\)"
@@ -222,6 +220,7 @@ which defaults to the value of `org-export-blocks-witheld'."
 				(file-name-directory (or load-file-name buffer-file-name)))))))
   "Path to the ditaa jar executable.")
 
+(defvar org-export-current-backend) ; dynamically bound in org-exp.el
 (defun org-export-blocks-format-ditaa (body &rest headers)
   "DEPRECATED: use begin_src ditaa code blocks
 
@@ -250,7 +249,7 @@ passed to the ditaa utility as command line arguments."
 			    "\n")))
     (prog1
     (cond
-     ((member backend '(html latex docbook))
+     ((member org-export-current-backend '(html latex docbook))
       (unless (file-exists-p out-file)
         (mapc ;; remove old hashed versions of this file
          (lambda (file)
@@ -309,7 +308,7 @@ digraph data_relationships {
 	 (out-file (concat (car out-file-parts) "_" hash "." (cdr out-file-parts))))
     (prog1
     (cond
-     ((member backend '(html latex docbook))
+     ((member org-export-current-backend '(html latex docbook))
       (unless (file-exists-p out-file)
 	(mapc ;; remove old hashed versions of this file
 	 (lambda (file)
@@ -341,7 +340,7 @@ other backends, it converts the comment into an EXAMPLE segment."
   (let ((owner (if headers (car headers)))
 	(title (if (cdr headers) (mapconcat 'identity (cdr headers) " "))))
     (cond
-     ((eq backend 'html) ;; We are exporting to HTML
+     ((eq org-export-current-backend 'html) ;; We are exporting to HTML
       (concat "#+BEGIN_HTML\n"
 	      "<div class=\"org-comment\""
 	      (if owner (format " id=\"org-comment-%s\" " owner))
