@@ -1334,8 +1334,10 @@ OPT-PLIST is the options plist for current buffer."
   (let ((toc (plist-get opt-plist :table-of-contents))
 	(author (org-export-apply-macros-in-string
 		 (plist-get opt-plist :author)))
-	(email (org-export-apply-macros-in-string
-		(plist-get opt-plist :email))))
+	(email (replace-regexp-in-string 
+		"_" "\\\\_" 
+		(org-export-apply-macros-in-string
+		 (plist-get opt-plist :email)))))
     (concat
      (if (plist-get opt-plist :time-stamp-file)
 	 (format-time-string "%% Created %Y-%m-%d %a %H:%M\n"))
@@ -1361,11 +1363,10 @@ OPT-PLIST is the options plist for current buffer."
      (if (plist-get opt-plist :author-info)
 	 (format "\\author{%s%s}\n"
 		 (org-export-latex-fontify-headline (or author user-full-name))
-		 (org-export-latex-fontify-headline 
-		  (if (and (plist-get opt-plist :email-info) email
+		 (if (and (plist-get opt-plist :email-info) email
 			   (string-match "\\S-" email))
 		      (format "\\thanks{%s}" email)
-		    "")))
+		   ""))
        (format "%%\\author{%s}\n"
 	       (org-export-latex-fontify-headline (or author user-full-name))))
      ;; insert the date
