@@ -1913,16 +1913,15 @@ block but are passed literally to the \"example-block\"."
 
 (defun org-babel-read (cell &optional inhibit-lisp-eval)
   "Convert the string value of CELL to a number if appropriate.
-Otherwise if cell looks like lisp (meaning it starts with a \"(\"
-or a \"'\") then read it as lisp, otherwise return it unmodified
-as a string.  Optional argument NO-LISP-EVAL inhibits lisp
-evaluation for situations in which is it not appropriate."
+Otherwise if cell looks like lisp (meaning it starts with a
+\"(\", \"'\", \"`\" or a \"[\") then read it as lisp, otherwise
+return it unmodified as a string.  Optional argument NO-LISP-EVAL
+inhibits lisp evaluation for situations in which is it not
+appropriate."
   (if (and (stringp cell) (not (equal cell "")))
       (or (org-babel-number-p cell)
           (if (and (not inhibit-lisp-eval)
-		   (or (equal "(" (substring cell 0 1))
-		       (equal "'" (substring cell 0 1))
-		       (equal "`" (substring cell 0 1))))
+		   (member (substring cell 0 1) '("(" "'" "`" "[")))
               (eval (read cell))
             (progn (set-text-properties 0 (length cell) nil cell) cell)))
     cell))
