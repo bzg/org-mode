@@ -76,8 +76,9 @@ be indented by this many characters. See
 `org-babel-function-def-export-name' for the definition of a
 source block function.")
 
-(defmacro org-babel-exp-in-export-file (&rest body)
-  `(let* ((lang-headers (intern (concat "org-babel-default-header-args:" lang)))
+(defmacro org-babel-exp-in-export-file (lang &rest body)
+  (declare (indent 1))
+  `(let* ((lang-headers (intern (concat "org-babel-default-header-args:" ,lang)))
 	  (heading (nth 4 (ignore-errors (org-heading-components))))
 	  (link (when org-current-export-file
 		  (org-make-link-string
@@ -125,15 +126,15 @@ none ----- do not display either code or results upon export"
       (when info
 	;; if we're actually going to need the parameters
 	(when (member (cdr (assoc :exports (nth 2 info))) '("both" "results"))
-	  (org-babel-exp-in-export-file
-	   (setf (nth 2 info)
-		 (org-babel-process-params
-		  (org-babel-merge-params
-		   org-babel-default-header-args
-		   (org-babel-params-from-buffer)
-		   (org-babel-params-from-properties lang)
-		   (if (boundp lang-headers) (eval lang-headers) nil)
-		   raw-params))))
+	  (org-babel-exp-in-export-file lang
+	    (setf (nth 2 info)
+		  (org-babel-process-params
+		   (org-babel-merge-params
+		    org-babel-default-header-args
+		    (org-babel-params-from-buffer)
+		    (org-babel-params-from-properties lang)
+		    (if (boundp lang-headers) (eval lang-headers) nil)
+		    raw-params))))
 	  (setf hash (org-babel-sha1-hash info)))
 	;; expand noweb references in the original file
 	(setf (nth 1 info)
@@ -157,8 +158,7 @@ options and are taken from `org-babel-default-inline-header-args'."
 	     (params (nth 2 info)) code-replacement)
 	(save-match-data
 	  (goto-char (match-beginning 2))
-	  (if (org-babel-in-example-or-verbatim)
-	      (buffer-substring (match-beginning 0) (match-end 0))
+	  (when (not (org-babel-in-example-or-verbatim))
 	    ;; expand noweb references in the original file
 	    (setf (nth 1 info)
 		  (if (and (cdr (assoc :noweb params))
@@ -248,12 +248,12 @@ This function is called by `org-babel-exp-do-export'.  The code
 block will be evaluated.  Optional argument SILENT can be used to
 inhibit insertion of results into the buffer."
   (when (and org-export-babel-evaluate
-	     (not (equal hash (org-babel-exp-in-export-file
-			       (org-babel-result-hash)))))
+	     (not (equal hash (org-babel-exp-in-export-file (nth 0 info)
+				(org-babel-result-hash)))))
     (let ((lang (nth 0 info))
 	  (body (nth 1 info)))
-      (setf (nth 2 info) (org-babel-exp-in-export-file
-			  (org-babel-process-params (nth 2 info))))
+      (setf (nth 2 info) (org-babel-exp-in-export-file lang
+			   (org-babel-process-params (nth 2 info))))
       ;; skip code blocks which we can't evaluate
       (when (fboundp (intern (concat "org-babel-execute:" lang)))
 	(org-babel-eval-wipe-error-buffer)
