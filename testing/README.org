@@ -4,10 +4,11 @@
 The following instructions describe how to get started using the
 Org-mode test framework.
 
-1) Install the ERT and jump.el testing dependencies which are included
-   as git submodules in the org-mode repository.  To do so run the
-   following git submodule commands from inside the base of the
-   Org-mode directory (or just execute the following code block).
+1) Install the jump.el testing dependency which is included as a git
+   submodule in the org-mode repository.  To do so run the following
+   git submodule commands from inside the base of the Org-mode
+   directory (or just execute the following code block).
+
    #+begin_src sh
      cd ..
      git submodule init
@@ -26,13 +27,7 @@ Org-mode test framework.
    prefix argument, and the corresponding test file will be stubbed
    out if it doesn't already exist.
 
-4) Review the ERT documentation, to do this run =makeinfo= in the
-   =testing/ert= directory,
-   #+begin_src sh
-     cd ert
-     makeinfo ert.texinfo
-   #+end_src
-   then browse the [[elisp:(info (expand-file-name "ert/ert.info"))][resulting info file]].
+4) [[info:ert#Top][Review the ERT documentation]] 
 
 5) A number of org-mode-specific functions and macros are provided in
    =org-test.el= see the [[file:org-test.el::%3B%3B%3B%20Functions%20for%20writing%20tests][;;; Functions for Writing Tests]] subsection of

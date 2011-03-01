@@ -32,12 +32,8 @@
 		   (cons
 		    (expand-file-name "jump" org-test-dir)
 		    load-path))))
-  (require 'ert-batch)
   (require 'ert)
-  (require 'ert-exp)
-  (require 'ert-exp-t)
-  (require 'ert-run)
-  (require 'ert-ui)
+  (require 'ert-x)
   (require 'jump)
   (require 'which-func)
   (require 'org))

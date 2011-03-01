@@ -95,10 +95,11 @@ elements in the final html."
       (should (string-match "<pre.*>[^\000]*</pre>" html))
       (should (string-match "<table.*>[^\000]*</table>" html)))))
 
-(ert-deftest ob-exp/export-subtree ()
-  (org-test-at-id "5daa4d03-e3ea-46b7-b093-62c1b7632df3"
-    (org-mark-subtree)
-    (org-export-as-latex nil)))
+;; TODO
+;; (ert-deftest ob-exp/export-subtree ()
+;;   (org-test-at-id "5daa4d03-e3ea-46b7-b093-62c1b7632df3"
+;;     (org-mark-subtree)
+;;     (org-export-as-latex nil)))
 
 (provide 'test-ob-exp)
 
