@@ -6720,7 +6720,7 @@ If this information is not given, the function uses the tree at point."
 	   (pos (marker-position marker))
 	   (rfloc (or rfloc
 		      (org-refile-get-location
-		       (if goto "Goto: " "Refile to: ") buffer
+		       (if goto "Goto" "Refile to") buffer
 		       org-refile-allow-creating-parent-nodes))))
       (with-current-buffer buffer
 	(save-excursion
@@ -7986,7 +7986,7 @@ The prefix arg is passed through to the command if possible."
 
      ((member action '(?r ?w))
       (setq rfloc (org-refile-get-location
-		   "Refile to: "
+		   "Refile to"
 		   (marker-buffer (car org-agenda-bulk-marked-entries))
 		   org-refile-allow-creating-parent-nodes))
       (if (nth 3 rfloc)

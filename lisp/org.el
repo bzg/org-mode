@@ -6554,7 +6554,7 @@ the headline hierarchy above."
 	 (selected-point
 	  (if (eq interface 'outline)
 	      (car (org-get-location (current-buffer) org-goto-help))
-	    (let ((pa (org-refile-get-location "Goto: ")))
+	    (let ((pa (org-refile-get-location "Goto")))
 	      (org-refile-check-position pa)
 	      (nth 3 pa)))))
     (if selected-point
@@ -10307,7 +10307,7 @@ This can be done with a 0 prefix: `C-0 C-c C-w'"
 	       (setq it (or rfloc
 			    (save-excursion
 			      (org-refile-get-location
-			       (if goto "Goto: " "Refile to: ") default-buffer
+			       (if goto "Goto" "Refile to") default-buffer
 			       org-refile-allow-creating-parent-nodes)))))
 	  (setq file (nth 1 it)
 		re (nth 2 it)
@@ -10388,13 +10388,20 @@ This can be done with a 0 prefix: `C-0 C-c C-w'"
   (message "This is the location of the last refile"))
 
 (defun org-refile-get-location (&optional prompt default-buffer new-nodes)
-  "Prompt the user for a refile location, using PROMPT."
+  "Prompt the user for a refile location, using PROMPT.
+PROMPT should not be prefixed with a colon and a space, because
+this function prepends the default value from
+`org-refile-history' automatically, if that is not empty."
   (let ((org-refile-targets org-refile-targets)
 	(org-refile-use-outline-path org-refile-use-outline-path))
     (setq org-refile-target-table (org-get-refile-targets default-buffer)))
   (unless org-refile-target-table
     (error "No refile targets"))
-  (let* ((cbuf (current-buffer))
+  (let* ((prompt (concat prompt
+			 (and (car org-refile-history)
+			      (concat " (default " (car org-refile-history) ")"))
+			 ": "))
+	 (cbuf (current-buffer))
 	 (partial-completion-mode nil)
 	 (cfn (buffer-file-name (buffer-base-buffer cbuf)))
 	 (cfunc (if (and org-refile-use-outline-path
@@ -10417,7 +10424,7 @@ This can be done with a 0 prefix: `C-0 C-c C-w'"
 	 pa answ parent-target child parent old-hist)
     (setq old-hist org-refile-history)
     (setq answ (funcall cfunc prompt tbl nil (not new-nodes)
-			nil 'org-refile-history))
+			nil 'org-refile-history (car org-refile-history)))
     (setq pa (or (assoc answ tbl) (assoc (concat answ "/") tbl)))
     (org-refile-check-position pa)
     (if pa

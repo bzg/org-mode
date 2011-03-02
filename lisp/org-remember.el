@@ -1004,7 +1004,7 @@ See also the variable `org-reverse-note-order'."
 	     ((eq org-remember-interactive-interface 'outline-path-completion)
 	      (let ((org-refile-targets '((nil . (:maxlevel . 10))))
 		    (org-refile-use-outline-path t))
-		(setq spos (org-refile-get-location "Heading: ")
+		(setq spos (org-refile-get-location "Heading")
 		      exitcmd 'return
 		      spos (nth 3 spos))))
 	     (t (error "This should not happen")))
