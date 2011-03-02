@@ -252,6 +252,55 @@ This assumes the point is inside an inline task."
     (re-search-backward (org-inlinetask-outline-regexp) nil t)
     (- (match-end 1) (match-beginning 1))))
 
+(defun org-inlinetask-promote ()
+  "Promote the inline task at point.
+If the task has an end part, promote it.  Also, prevents level from
+going below `org-inlinetask-min-level'."
+  (interactive)
+  (if (not (org-inlinetask-in-task-p))
+      (error "Not in an inline task")
+    (save-excursion
+      (let* ((lvl (org-inlinetask-get-task-level))
+	     (next-lvl (org-get-valid-level lvl -1))
+	     (diff (- next-lvl lvl))
+	     (down-task (concat (make-string next-lvl ?*)))
+	     beg)
+	(if (< next-lvl org-inlinetask-min-level)
+	    (error "Cannot promote an inline task at minimum level")
+	  (org-inlinetask-goto-beginning)
+	  (setq beg (point))
+	  (replace-match down-task nil t nil 1)
+	  (org-inlinetask-goto-end)
+	  (if (eobp) (beginning-of-line) (forward-line -1))
+	  (unless (= (point) beg)
+	    (replace-match down-task nil t nil 1)
+	    (when org-adapt-indentation
+	      (goto-char beg)
+	      (org-fixup-indentation diff))))))))
+
+(defun org-inlinetask-demote ()
+  "Demote the inline task at point.
+If the task has an end part, also demote it."
+  (interactive)
+  (if (not (org-inlinetask-in-task-p))
+      (error "Not in an inline task")
+    (save-excursion
+      (let* ((lvl (org-inlinetask-get-task-level))
+	     (next-lvl (org-get-valid-level lvl 1))
+	     (diff (- next-lvl lvl))
+	     (down-task (concat (make-string next-lvl ?*)))
+	     beg)
+	(org-inlinetask-goto-beginning)
+	(setq beg (point))
+	(replace-match down-task nil t nil 1)
+	(org-inlinetask-goto-end)
+	(if (eobp) (beginning-of-line) (forward-line -1))
+	(unless (= (point) beg)
+	  (replace-match down-task nil t nil 1)
+	  (when org-adapt-indentation
+	    (goto-char beg)
+	    (org-fixup-indentation diff)))))))
+
 (defvar org-export-current-backend) ; dynamically bound in org-exp.el
 (defun org-inlinetask-export-handler ()
   "Handle headlines with level larger or equal to `org-inlinetask-min-level'.
