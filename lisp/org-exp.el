@@ -1513,6 +1513,7 @@ from the buffer."
 	(tags (plist-get opts :tags))
 	(pri  (plist-get opts :priority))
 	(elts '(1 2 3 4 5))
+	(case-fold-search nil)
 	rpl)
     (setq elts (delq nil (list 1 (if todo 2) (if pri 3) 4 (if tags 5))))
     (when (or (not todo) (not tags) (not pri))
