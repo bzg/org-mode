@@ -7579,11 +7579,12 @@ If yes, remember the marker and the distance to BEG."
   (interactive)
   (save-excursion
     (save-match-data
-      (narrow-to-region
-       (progn (org-back-to-heading t) (point))
-       (progn (org-end-of-subtree t t)
-	      (if (and (org-on-heading-p) (not (eobp))) (backward-char 1))
-	      (point))))))
+      (org-with-limited-levels
+       (narrow-to-region
+	(progn (org-back-to-heading t) (point))
+	(progn (org-end-of-subtree t t)
+	       (if (and (org-on-heading-p) (not (eobp))) (backward-char 1))
+	       (point)))))))
 
 (defun org-narrow-to-block ()
   "Narrow buffer to the current block."
