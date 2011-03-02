@@ -584,6 +584,14 @@ table.el tables."
 
 (defconst org-level-max 20)
 
+(defvar org-export-current-backend nil
+  "During export, this will be bound to a symbol such as 'html,
+  'latex, 'docbook, 'ascii, etc, indicating which of the export
+  backends is in use. Otherwise it has the value nil. Users
+  should not attempt to change the value of this variable
+  directly, but it can be used in code to test whether export is
+  in progress, and if so, what the backend is.")
+
 (defvar org-current-export-file nil) ; dynamically scoped parameter
 (defvar org-current-export-dir nil) ; dynamically scoped parameter
 (defvar org-export-opt-plist nil
@@ -1033,7 +1041,7 @@ to export.  It then creates a temporary buffer where it does its job.
 The result is then again returned as a string, and the exporter works
 on this string to produce the exported version."
   (interactive)
-  (let* ((backend (plist-get parameters :for-backend))
+  (let* ((org-export-current-backend (plist-get parameters :for-backend))
 	 (archived-trees (plist-get parameters :archived-trees))
 	 (inhibit-read-only t)
 	 (drawers org-drawers)
@@ -1091,22 +1099,22 @@ on this string to produce the exported version."
 
       ;; Change lists ending. Other parts of export may insert blank
       ;; lines and lists' structure could be altered.
-      (org-export-mark-list-end backend)
+      (org-export-mark-list-end)
 
       ;; Export code blocks
       (org-export-blocks-preprocess)
 
       ;; Mark lists with properties
-      (org-export-mark-list-properties backend)
+      (org-export-mark-list-properties)
 
       ;; Handle source code snippets
-      (org-export-replace-src-segments-and-examples backend)
+      (org-export-replace-src-segments-and-examples)
 
       ;; Protect short examples marked by a leading colon
       (org-export-protect-colon-examples)
 
       ;; Protected spaces
-      (org-export-convert-protected-spaces backend)
+      (org-export-convert-protected-spaces)
 
       ;; Normalize footnotes
       (when (plist-get parameters :footnotes)
@@ -1122,7 +1130,7 @@ on this string to produce the exported version."
 
       ;; Get rid of drawers
       (org-export-remove-or-extract-drawers
-       drawers (plist-get parameters :drawers) backend)
+       drawers (plist-get parameters :drawers))
 
       ;; Get the correct stuff before the first headline
       (when (plist-get parameters :skip-before-1st-heading)
@@ -1145,7 +1153,7 @@ on this string to produce the exported version."
       ;; Select and protect backend specific stuff, throw away stuff
       ;; that is specific for other backends
       (run-hooks 'org-export-preprocess-before-selecting-backend-code-hook)
-      (org-export-select-backend-specific-text backend)
+      (org-export-select-backend-specific-text)
 
       ;; Protect quoted subtrees
       (org-export-protect-quoted-subtrees)
@@ -1165,8 +1173,7 @@ on this string to produce the exported version."
 	(org-export-remove-timestamps))
 
       ;; Attach captions to the correct object
-      (setq target-alist (org-export-attach-captions-and-attributes
-			  backend target-alist))
+      (setq target-alist (org-export-attach-captions-and-attributes target-alist))
 
       ;; Find matches for radio targets and turn them into internal links
       (org-export-mark-radio-links)
@@ -1198,7 +1205,7 @@ on this string to produce the exported version."
       (run-hooks 'org-export-preprocess-before-backend-specifics-hook)
 
       ;; Backend-specific preprocessing
-      (let* ((backend-name (symbol-name backend))
+      (let* ((backend-name (symbol-name org-export-current-backend))
 	     (f (intern (format "org-export-%s-preprocess" backend-name))))
 	(require (intern (concat "org-" backend-name)) nil)
 	(funcall f parameters))
@@ -1374,17 +1381,16 @@ the current file."
 The function must accept three parameters:
   NAME     the drawer name, like \"PROPERTIES\"
   CONTENT  the content of the drawer.
-  BACKEND  one of the symbols html, docbook, latex, ascii, xoxo
+You can check the export backend through `org-export-current-backend'.
 The function should return the text to be inserted into the buffer.
 If this is nil, `org-export-format-drawer' is used as a default.")
 
-(defun org-export-remove-or-extract-drawers (all-drawers exp-drawers backend)
+(defun org-export-remove-or-extract-drawers (all-drawers exp-drawers)
   "Remove drawers, or extract and format the content.
 ALL-DRAWERS is a list of all drawer names valid in the current buffer.
 EXP-DRAWERS can be t to keep all drawer contents, or a list of drawers
 whose content to keep.  Any drawers that are in ALL-DRAWERS but not in
-EXP-DRAWERS will be removed.
-BACKEND is the current export backend."
+EXP-DRAWERS will be removed."
   (goto-char (point-min))
   (let ((re (concat "^[ \t]*:\\("
 		    (mapconcat 'identity all-drawers "\\|")
@@ -1408,10 +1414,10 @@ BACKEND is the current export backend."
 		   (member name exp-drawers))
 	   (setq content (funcall (or org-export-format-drawer-function
 				      'org-export-format-drawer)
-				  name content backend))
+				  name content))
 	   (insert content)))))))
 
-(defun org-export-format-drawer (name content backend)
+(defun org-export-format-drawer (name content)
   "Format the content of a drawer as a colon example."
   (if (string-match "[ \t]+\\'" content)
       (setq content (substring content (match-beginning 0))))
@@ -1547,7 +1553,7 @@ from the buffer."
       (add-text-properties (point) (org-end-of-subtree t)
 			   '(org-protected t)))))
 
-(defun org-export-convert-protected-spaces (backend)
+(defun org-export-convert-protected-spaces ()
   "Convert strings like \\____ to protected spaces in all backends."
   (goto-char (point-min))
   (while (re-search-forward "\\\\__+" nil t)
@@ -1555,13 +1561,13 @@ from the buffer."
      (replace-match
       (org-add-props
 	  (cond
-	   ((eq backend 'latex)
+	   ((eq org-export-current-backend 'latex)
 	    (format "\\hspace{%dex}" (- (match-end 0) (match-beginning 0))))
-	   ((eq backend 'html)
+	   ((eq org-export-current-backend 'html)
 	    (org-add-props (match-string 0) nil
 	      'org-whitespace (- (match-end 0) (match-beginning 0))))
-	   ;; ((eq backend 'docbook))
-	   ((eq backend 'ascii)
+	   ;; ((eq org-export-current-backend 'docbook))
+	   ((eq org-export-current-backend 'ascii)
 	    (org-add-props (match-string 0) '(org-whitespace t)))
 	   (t (make-string (- (match-end 0) (match-beginning 0)) ?\ )))
 	  '(org-protected t))
@@ -1589,7 +1595,7 @@ from the buffer."
       (add-text-properties beg (if (bolp) (1- (point)) (point))
 			   '(org-protected t)))))
 
-(defun org-export-select-backend-specific-text (backend)
+(defun org-export-select-backend-specific-text ()
   (let ((formatters
 	 '((docbook "DOCBOOK" "BEGIN_DOCBOOK" "END_DOCBOOK")
 	   (html "HTML" "BEGIN_HTML" "END_HTML")
@@ -1605,7 +1611,7 @@ from the buffer."
       (goto-char (point-min))
       (while (re-search-forward (concat "^\\([ \t]*\\)#\\+" (cadr fmt)
 					":[ \t]*\\(.*\\)") nil t)
-	(if (not (eq (car fmt) backend))
+	(if (not (eq (car fmt) org-export-current-backend))
 	    (delete-region (point-at-bol) (min (1+ (point-at-eol)) (point-max)))
 	  (replace-match "\\1\\2" t)
 	  (add-text-properties
@@ -1618,7 +1624,7 @@ from the buffer."
       (while (re-search-forward (concat "^\\([ \t]*\\)#\\+attr_" (cadr fmt)
 					":[ \t]*\\(.*\\)") nil t)
 	(setq ind (org-get-indentation))
-	(when (not (eq (car fmt) backend))
+	(when (not (eq (car fmt) org-export-current-backend))
 	  (delete-region (point-at-bol) (min (1+ (point-at-eol)) (point-max)))))
       ;; Handle #+begin_backend and #+end_backend stuff
       (goto-char (point-min))
@@ -1629,7 +1635,7 @@ from the buffer."
 	(when (re-search-forward (concat "^[ \t]*#\\+" (cadddr fmt) "\\>.*\n?")
 				 nil t)
 	  (setq end (match-end 0) end-content (match-beginning 0))
-	  (if (eq (car fmt) backend)
+	  (if (eq (car fmt) org-export-current-backend)
 	      ;; yes, keep this
 	      (progn
 		(add-text-properties
@@ -1666,9 +1672,9 @@ These special cookies will later be interpreted by the backend."
 	(delete-region beg end)
 	(insert (org-add-props content nil 'original-indentation ind))))))
 
-(defun org-export-mark-list-end (backend)
+(defun org-export-mark-list-end ()
   "Mark all list endings with a special string."
-  (unless (eq backend 'ascii)
+  (unless (eq org-export-current-backend 'ascii)
     (mapc
      (lambda (e)
        ;; For each type allowing list export, find every list, remove
@@ -1697,7 +1703,7 @@ These special cookies will later be interpreted by the backend."
 			 (list 'original-indentation top-ind)))))))
      (cons nil org-list-export-context))))
 
-(defun org-export-mark-list-properties (backend)
+(defun org-export-mark-list-properties ()
   "Mark list with special properties.
 These special properties will later be interpreted by the backend."
   (let ((mark-list
@@ -1750,7 +1756,7 @@ These special properties will later be interpreted by the backend."
 	      ;; Following property is used by LaTeX exporter.
 	      (add-text-properties top (point) (list 'list-context ctxt)))))))
     ;; Mark lists except for backends not interpreting them.
-    (unless (eq backend 'ascii)
+    (unless (eq org-export-current-backend 'ascii)
       (let ((org-list-end-re "^ORG-LIST-END-MARKER\n"))
 	(mapc
 	 (lambda (e)
@@ -1759,7 +1765,7 @@ These special properties will later be interpreted by the backend."
 	     (when (eq (nth 2 (org-list-context)) e) (funcall mark-list e))))
 	 (cons nil org-list-export-context))))))
 
-(defun org-export-attach-captions-and-attributes (backend target-alist)
+(defun org-export-attach-captions-and-attributes (target-alist)
   "Move #+CAPTION, #+ATTR_BACKEND, and #+LABEL text into text properties.
 If the next thing following is a table, add the text properties to the first
 table line.  If it is a link, add it to the line containing the link."
@@ -1769,7 +1775,7 @@ table line.  If it is a link, add it to the line containing the link."
   (let ((case-fold-search t)
 	(re (concat "^[ \t]*#\\+caption:[ \t]+\\(.*\\)"
 		    "\\|"
-		    "^[ \t]*#\\+attr_" (symbol-name backend) ":[ \t]+\\(.*\\)"
+		    "^[ \t]*#\\+attr_" (symbol-name org-export-current-backend) ":[ \t]+\\(.*\\)"
 		    "\\|"
 		    "^[ \t]*#\\+label:[ \t]+\\(.*\\)"
 		    "\\|"
@@ -2318,7 +2324,7 @@ in the list) and remove property and value from the list in LISTVAR."
 
 (defvar org-export-last-code-line-counter-value 0)
 
-(defun org-export-replace-src-segments-and-examples (backend)
+(defun org-export-replace-src-segments-and-examples ()
   "Replace source code segments with special code for export."
   (setq org-export-last-code-line-counter-value 0)
   (let ((case-fold-search t)
@@ -2351,7 +2357,7 @@ in the list) and remove property and value from the list in LISTVAR."
               caption (get-text-property 0 'org-caption (match-string 0))))
 
       (setq trans (org-export-format-source-code-or-example
-		   backend lang code opts indent caption))
+		   lang code opts indent caption))
       (replace-match trans t t))))
 
 (defvar org-export-latex-verbatim-wrap) ;; defined in org-latex.el
@@ -2364,7 +2370,7 @@ in the list) and remove property and value from the list in LISTVAR."
 (defvar org-export-latex-minted-options) ;; defined in org-latex.el
 
 (defun org-export-format-source-code-or-example
-  (backend lang code &optional opts indent caption)
+  (lang code &optional opts indent caption)
   "Format CODE from language LANG and return it formatted for export.
 If LANG is nil, do not add any fontification.
 OPTS contains formatting options, like `-n' for triggering numbering lines,
@@ -2390,7 +2396,7 @@ INDENT was the original indentation of the block."
 		   (org-count-lines code))
 	    fmt (if (string-match "-l[ \t]+\"\\([^\"\n]+\\)\"" opts)
 		    (match-string 1 opts)))
-      (when (and textareap (eq backend 'html))
+      (when (and textareap (eq org-export-current-backend 'html))
 	;; we cannot use numbering or highlighting.
 	(setq num nil cont nil lang nil))
       (if keepp (setq rpllbl 'keep))
@@ -2410,15 +2416,15 @@ INDENT was the original indentation of the block."
       ;; Now backend-specific coding
       (setq rtn
 	    (cond
-	     ((eq backend 'docbook)
-	      (setq rtn (org-export-number-lines rtn 'docbook 0 0 num cont rpllbl fmt))
+	     ((eq org-export-current-backend 'docbook)
+	      (setq rtn (org-export-number-lines rtn 0 0 num cont rpllbl fmt))
 	      (concat "\n#+BEGIN_DOCBOOK\n"
 		      (org-add-props (concat "<programlisting><![CDATA["
 					     rtn
 					     "]]></programlisting>\n")
 			  '(org-protected t org-example t))
 		      "#+END_DOCBOOK\n"))
-	     ((eq backend 'html)
+	     ((eq org-export-current-backend 'html)
 	      ;; We are exporting to HTML
 	      (when lang
 		(if (featurep 'xemacs)
@@ -2482,13 +2488,12 @@ INDENT was the original indentation of the block."
 		    (setq rtn (buffer-string)))
 		  (setq rtn (concat "<pre class=\"example\">\n" rtn "</pre>\n"))))
 	      (unless textareap
-		(setq rtn (org-export-number-lines rtn 'html 1 1 num
-						   cont rpllbl fmt)))
+		(setq rtn (org-export-number-lines rtn 1 1 num cont rpllbl fmt)))
 	      (if (string-match "\\(\\`<[^>]*>\\)\n" rtn)
 		  (setq rtn (replace-match "\\1" t nil rtn)))
 	      (concat "\n#+BEGIN_HTML\n" (org-add-props rtn '(org-protected t org-example t)) "\n#+END_HTML\n\n"))
-	     ((eq backend 'latex)
-	      (setq rtn (org-export-number-lines rtn 'latex 0 0 num cont rpllbl fmt))
+	     ((eq org-export-current-backend 'latex)
+	      (setq rtn (org-export-number-lines rtn 0 0 num cont rpllbl fmt))
 	      (concat
 	       "#+BEGIN_LaTeX\n"
 	       (org-add-props
@@ -2544,9 +2549,9 @@ INDENT was the original indentation of the block."
                                rtn (cdr org-export-latex-verbatim-wrap))))
                    '(org-protected t org-example t))
                "#+END_LaTeX\n"))
-             ((eq backend 'ascii)
+             ((eq org-export-current-backend 'ascii)
               ;; This is not HTML or LaTeX, so just make it an example.
-              (setq rtn (org-export-number-lines rtn 'ascii 0 0 num cont rpllbl fmt))
+              (setq rtn (org-export-number-lines rtn 0 0 num cont rpllbl fmt))
               (concat caption "\n"
                       "#+BEGIN_ASCII\n"
                       (org-add-props
@@ -2560,8 +2565,7 @@ INDENT was the original indentation of the block."
                       "#+END_ASCII\n"))))
       (org-add-props rtn nil 'original-indentation indent))))
 
-(defun org-export-number-lines (text backend
-				     &optional skip1 skip2 number cont
+(defun org-export-number-lines (text &optional skip1 skip2 number cont
 				     replace-labels label-format)
   (setq skip1 (or skip1 0) skip2 (or skip2 0))
   (if (not cont) (setq org-export-last-code-line-counter-value 0))
@@ -2577,11 +2581,11 @@ INDENT was the original indentation of the block."
 	   (fmt (format "%%%dd:  " (length (number-to-string nmax))))
 	   (fm
 	    (cond
-	     ((eq backend 'html) (format "<span class=\"linenr\">%s</span>"
+	     ((eq org-export-current-backend 'html) (format "<span class=\"linenr\">%s</span>"
 					 fmt))
-	     ((eq backend 'ascii) fmt)
-	     ((eq backend 'latex) fmt)
-	     ((eq backend 'docbook) fmt)
+	     ((eq org-export-current-backend 'ascii) fmt)
+	     ((eq org-export-current-backend 'latex) fmt)
+	     ((eq org-export-current-backend 'docbook) fmt)
 	     (t "")))
 	   (label-format (or label-format org-coderef-label-format))
 	   (label-pre (if (string-match "%s" label-format)
@@ -2626,7 +2630,7 @@ INDENT was the original indentation of the block."
 		 (delete-region (match-beginning 2) (match-end 2))
 		 (insert "(" ref ")")
 		 (push (cons ref (concat "(" ref ")")) org-export-code-refs)))
-	  (when (eq backend 'html)
+	  (when (eq org-export-current-backend 'html)
 	    (save-excursion
 	      (beginning-of-line 1)
 	      (insert (format "<span id=\"coderef-%s\" class=\"coderef-off\">"

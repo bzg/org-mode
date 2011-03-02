@@ -252,7 +252,7 @@ This assumes the point is inside an inline task."
     (re-search-backward (org-inlinetask-outline-regexp) nil t)
     (- (match-end 1) (match-beginning 1))))
 
-(defvar backend) ; dynamically scoped into the next function
+(defvar org-export-current-backend) ; dynamically bound in org-exp.el
 (defun org-inlinetask-export-handler ()
   "Handle headlines with level larger or equal to `org-inlinetask-min-level'.
 Either remove headline and meta data, or do special formatting."
@@ -302,7 +302,8 @@ Either remove headline and meta data, or do special formatting."
 		 (priority (or (match-string 3 headline) ""))
 		 (heading (or (match-string 4 headline) ""))
 		 (tags (or (match-string 5 headline) ""))
-		 (backend-spec (assq backend org-inlinetask-export-templates))
+		 (backend-spec (assq org-export-current-backend 
+				     org-inlinetask-export-templates))
 		 (format-str (org-add-props (nth 1 backend-spec)
 				 '(org-protected t)))
 		 (tokens (cadr (nth 2 backend-spec)))

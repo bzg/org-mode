@@ -931,7 +931,6 @@ the project."
 
 ;;; Index generation
 
-(defvar backend) ; dynamically scoped
 (defun org-publish-aux-preprocess ()
   "Find index entries and write them to an .orgx file."
   (let ((case-fold-search t)
@@ -942,7 +941,7 @@ the project."
 	 (re-search-forward "^[ \t]*#\\+index:[ \t]*\\(.*?\\)[ \t]*$" nil t)
 	 (> (match-end 1) (match-beginning 1)))
       (setq entry (match-string 1))
-      (when (eq backend 'latex)
+      (when (eq org-export-current-backend 'latex)
 	(replace-match (format "\\index{%s}" entry) t t))
       (save-excursion
 	(ignore-errors (org-back-to-heading t))
