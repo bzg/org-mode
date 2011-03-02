@@ -7012,7 +7012,7 @@ When a subtree is being promoted, the hook will be called for each node.")
 See also `org-promote'."
   (interactive)
   (save-excursion
-    (org-map-tree 'org-promote))
+    (org-with-limited-levels (org-map-tree 'org-promote)))
   (org-fix-position-after-promote))
 
 (defun org-demote-subtree ()
@@ -7020,7 +7020,7 @@ See also `org-promote'."
 See also `org-promote'."
   (interactive)
   (save-excursion
-    (org-map-tree 'org-demote))
+    (org-with-limited-levels (org-map-tree 'org-demote)))
   (org-fix-position-after-promote))
 
 
