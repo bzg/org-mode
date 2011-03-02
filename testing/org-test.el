@@ -183,6 +183,18 @@ files."
     (set-text-properties 0 (length noprop) nil noprop)
     noprop))
 
+
+(defun org-test-string-exact-match (regex string &optional start)
+  "case sensative string-match"
+  (let ((case-fold-search nil)
+        (case-replace nil))
+    (if(and (equal regex "")
+	    (not(equal string "")))
+        nil
+      (if (equal 0 (string-match regex string start))
+          t
+        nil))))
+
 ;;; Load and Run tests
 (defun org-test-load ()
   "Load up the org-mode test suite."

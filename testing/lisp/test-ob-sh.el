@@ -6,8 +6,6 @@
 ;; Released under the GNU General Public License version 3
 ;; see: http://www.gnu.org/licenses/gpl-3.0.html
 
-;;;; Comments:
-
 ;; Template test file for Org-mode tests
 
 
