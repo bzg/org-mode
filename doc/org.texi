@@ -378,7 +378,7 @@ The spreadsheet
 * References::                  How to refer to another field or range
 * Formula syntax for Calc::     Using Calc to compute stuff
 * Formula syntax for Lisp::     Writing formulas in Emacs Lisp
-* Field formulas::              Formulas valid for a single field
+* Field and range formulas::    Formula for specific (ranges of) fields
 * Column formulas::             Formulas valid for an entire column
 * Editing and debugging formulas::  Fixing formulas
 * Updating the table::          Recomputing all dependent fields
@@ -670,6 +670,8 @@ Specific header arguments
                                 directory for code block execution
 * exports::                     Export code and/or results
 * tangle::                      Toggle tangling and specify file name
+* mkdirp::                      Toggle creation of parent directories of target
+                                files during tangling
 * comments::                    Toggle insertion of comments in tangled
                                 code files
 * no-expand::                   Turn off variable assignment and noweb
@@ -677,7 +679,7 @@ Specific header arguments
 * session::                     Preserve the state of code evaluation
 * noweb::                       Toggle expansion of noweb references
 * cache::                       Avoid re-evaluating unchanged code blocks
-* sep::                         Specify delimiter for writing external tables
+* sep::                         Delimiter for writing tabular results outside Org
 * hlines::                      Handle horizontal lines in tables
 * colnames::                    Handle column names in tables
 * rownames::                    Handle row names in tables
@@ -2243,7 +2245,7 @@ formula, moving these references by arrow keys
 * References::                  How to refer to another field or range
 * Formula syntax for Calc::     Using Calc to compute stuff
 * Formula syntax for Lisp::     Writing formulas in Emacs Lisp
-* Field formulas::              Formulas valid for a single field
+* Field and range formulas::    Formula for specific (ranges of) fields
 * Column formulas::             Formulas valid for an entire column
 * Editing and debugging formulas::  Fixing formulas
 * Updating the table::          Recomputing all dependent fields
@@ -2278,20 +2280,29 @@ Org also uses another, more general operator that looks like this:
 @end example
 
 @noindent
+and allows relative relative references, i.e. references relative to the
+row/column of the field whose value is being computed.  These relative
+references make it possible to store a formula only once and use it in many
+fields without copying and modifying it.
+
 Column references can be absolute like @samp{1}, @samp{2},...@samp{@var{N}},
 or relative to the current column like @samp{+1} or @samp{-2}.
 
-The row specification only counts data lines and ignores horizontal
-separator lines (hlines).  You can use absolute row numbers
-@samp{1}...@samp{@var{N}}, and row numbers relative to the current row like
-@samp{+3} or @samp{-1}.  Or specify the row relative to one of the
-hlines: @samp{I} refers to the first hline@footnote{Note that only
-hlines are counted that @emph{separate} table lines.  If the table
-starts with a hline above the header, it does not count.}, @samp{II} to
-the second, etc@.  @samp{-I} refers to the first such line above the
-current line, @samp{+I} to the first such line below the current line.
-You can also write @samp{III+2} which is the second data line after the
-third hline in the table.
+The row specification only counts data lines and ignores horizontal separator
+lines (hlines).  You can use absolute row numbers @samp{1}...@samp{@var{N}},
+and row numbers relative to the current row like @samp{+3} or @samp{-1}.  A
+special case is @code{@@L} which stands for the last row in the
+table@footnote{For backward compatibility you can also use special names like
+@samp{$LR5} and @samp{$LR12} to refer in a stable way to the 5th and 12th
+field in the last row of the table.  However, this syntax is deprecated, it
+should not be used for new documents.}, and you can use offsets from it like
+@code{@@L-2}.  Or specify the row relative to one of the hlines: @samp{I}
+refers to the first hline@footnote{Note that only hlines are counted that
+@emph{separate} table lines.  If the table starts with a hline above the
+header, it does not count.}, @samp{II} to the second, etc@.  @samp{-I} refers
+to the first such line above the current line, @samp{+I} to the first such
+line below the current line.  You can also write @samp{III+2} which is the
+second data line after the third hline in the table.
 
 @samp{0} refers to the current row and column.  Also, if you omit
 either the column or the row part of the reference, the current
@@ -2304,9 +2315,6 @@ Org's references with @emph{signed} numbers are floating
 references because the same reference operator can reference different
 fields depending on the field being calculated by the formula.
 
-As a special case, references like @samp{$LR5} and @samp{$LR12} can be used
-to refer in a stable way to the 5th and 12th field in the last row of the
-table.
 
 Here are a few examples:
 
@@ -2332,11 +2340,12 @@ format at least for the first field (i.e the reference must start with
 @samp{@@} in order to be interpreted correctly).  Examples:
 
 @example
-$1..$3        @r{First three fields in the current row.}
+$1..$3        @r{First three fields in the current row}
 $P..$Q        @r{Range, using column names (see under Advanced)}
-@@2$1..@@4$3    @r{6 fields between these two fields.}
-A2..C4        @r{Same as above.}
+@@2$1..@@4$3    @r{6 fields between these two fields}
+A2..C4        @r{Same as above}
 @@-1$-2..@@-1   @r{3 numbers from the column to the left, 2 up to current row}
+@@I..II        @r{Between first and second hline, short for @code{@@I..@@II}}
 @end example
 
 @noindent Range references return a vector of values that can be fed
@@ -2501,7 +2510,7 @@ Calc also contains a complete set of logical operations.  For example
 if($1<20,teen,string(""))  @r{``teen'' if age $1 less than 20, else empty}
 @end example
 
-@node Formula syntax for Lisp, Field formulas, Formula syntax for Calc, The spreadsheet
+@node Formula syntax for Lisp, Field and range formulas, Formula syntax for Calc, The spreadsheet
 @subsection Emacs Lisp forms as formulas
 @cindex Lisp forms, as table formulas
 
@@ -2520,7 +2529,7 @@ you provide the @samp{L} flag, all fields will be interpolated literally,
 without quotes.  i.e., if you want a reference to be interpreted as a string
 by the Lisp form, enclose the reference operator itself in double-quotes,
 like @code{"$3"}.  Ranges are inserted as space-separated fields, so you can
-+embed them in list or vector syntax.  Here are a few examples---note how the
+embed them in list or vector syntax.  Here are a few examples---note how the
 @samp{N} mode is used when we do computations in Lisp:
 
 @example
@@ -2532,16 +2541,18 @@ like @code{"$3"}.  Ranges are inserted as space-separated fields, so you can
   '(apply '+ '($1..$4));N
 @end example
 
-@node Field formulas, Column formulas, Formula syntax for Lisp, The spreadsheet
-@subsection Field formulas
+@node Field and range formulas, Column formulas, Formula syntax for Lisp, The spreadsheet
+@subsection Field and range formulas
 @cindex field formula
+@cindex range formula
 @cindex formula, for individual table field
+@cindex formula, for range of fields
 
-To assign a formula to a particular field, type it directly into the
-field, preceded by @samp{:=}, for example @samp{:=$1+$2}.  When you
-press @key{TAB} or @key{RET} or @kbd{C-c C-c} with the cursor still in
-the field, the formula will be stored as the formula for this field,
-evaluated, and the current field replaced with the result.
+To assign a formula to a particular field, type it directly into the field,
+preceded by @samp{:=}, for example @samp{:=vsum(@@II..III)}.  When you press
+@key{TAB} or @key{RET} or @kbd{C-c C-c} with the cursor still in the field,
+the formula will be stored as the formula for this field, evaluated, and the
+current field will be replaced with the result.
 
 @cindex #+TBLFM
 Formulas are stored in a special line starting with @samp{#+TBLFM:}
@@ -2552,9 +2563,6 @@ with the appropriate commands, @i{absolute references} (but not relative
 ones) in stored formulas are modified in order to still reference the
 same field.  Of course this is not true if you edit the table structure
 with normal editing commands---then you must fix the equations yourself.
-The left-hand side of a formula may also be a named field (@pxref{Advanced
-features}), or a last-row reference like @samp{$LR3}.
-
 Instead of typing an equation into the field, you may also use the
 following command
 
@@ -2565,17 +2573,38 @@ formula with default taken from the @samp{#+TBLFM:} line, applies
 it to the current field, and stores it.
 @end table
 
-@node Column formulas, Editing and debugging formulas, Field formulas, The spreadsheet
+The left-hand side of a formula can also be a special expression in order to
+assign the formula to a number of different fields.  There is no keyboard
+shortcut to enter such range formulas.  To add them, use the formula editor
+(@pxref{Editing and debugging formulas}) or edit the @code{#+TBLFM:} line
+directly.
+
+@table @code
+@item $2=
+Column formula, valid for the entire column.  This is so common that Org
+treats these formulas in a special way, see @ref{Column formulas}.
+@item @@3=
+Row formula, applies to all fields in the specified row.  @code{@@L=} means
+the last row.
+@item @@1$2..@@4$3=
+Range formula, applies to all fields in the given rectangular range.  This
+can also be used to assign a formula to some but not all fields in a row.
+@item $name=
+Named field, see @ref{Advanced features}.
+@end table
+
+@node Column formulas, Editing and debugging formulas, Field and range formulas, The spreadsheet
 @subsection Column formulas
 @cindex column formula
 @cindex formula, for table column
 
-Often in a table, the same formula should be used for all fields in a
-particular column.  Instead of having to copy the formula to all fields
-in that column, Org allows you to assign a single formula to an entire
-column.  If the table contains horizontal separator hlines, everything
-before the first such line is considered part of the table @emph{header}
-and will not be modified by column formulas.
+When you assign a formula to a simple column reference like @code{$3=}, the
+same formula will be used in all fields of that column, with the following
+very convenient exceptions: (i) If the table contains horizontal separator
+hlines, everything before the first such line is considered part of the table
+@emph{header} and will not be modified by column formulas.  (ii) Fields that
+already get a value from a fild/range formula will be left alone by column
+formulas.  These conditions make column formulas very easy to use.
 
 To assign a formula to a column, type it directly into any field in the
 column, preceded by an equal sign, like @samp{=$1+$2}.  When you press
@@ -2584,9 +2613,9 @@ the formula will be stored as the formula for the current column, evaluated
 and the current field replaced with the result.  If the field contains only
 @samp{=}, the previously stored formula for this column is used.  For each
 column, Org will only remember the most recently used formula.  In the
-@samp{#+TBLFM:} line, column formulas will look like @samp{$4=$1+$2}.  The left-hand
-side of a column formula cannot currently be the name of column, it
-must be the numeric column reference.
+@samp{#+TBLFM:} line, column formulas will look like @samp{$4=$1+$2}.  The
+left-hand side of a column formula can not be the name of column, it must be
+the numeric column reference.
 
 Instead of typing an equation into the field, you may also use the
 following command:
@@ -2617,7 +2646,7 @@ if possible.  If you prefer to only work with the internal format (like
 @table @kbd
 @orgcmdkkc{C-c =,C-u C-c =,org-table-eval-formula}
 Edit the formula associated with the current column/field in the
-minibuffer.  See @ref{Column formulas}, and @ref{Field formulas}.
+minibuffer.  See @ref{Column formulas}, and @ref{Field and range formulas}.
 @orgcmd{C-u C-u C-c =,org-table-eval-formula}
 Re-insert the active formula (either a
 field formula, or a column formula) into the current field, so that you
@@ -2720,7 +2749,7 @@ following commands:
 @table @kbd
 @orgcmd{C-c *,org-table-recalculate}
 Recalculate the current row by first applying the stored column formulas
-from left to right, and all field formulas in the current row.
+from left to right, and all field/range formulas in the current row.
 @c
 @kindex C-u C-c *
 @item C-u C-c *
