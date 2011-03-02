@@ -252,16 +252,16 @@ inhibit insertion of results into the buffer."
 				(org-babel-result-hash)))))
     (let ((lang (nth 0 info))
 	  (body (nth 1 info)))
-      (setf (nth 2 info) (org-babel-exp-in-export-file lang
-			   (org-babel-process-params (nth 2 info))))
       ;; skip code blocks which we can't evaluate
       (when (fboundp (intern (concat "org-babel-execute:" lang)))
 	(org-babel-eval-wipe-error-buffer)
 	(prog1 nil
 	  (setf (nth 2 info)
-		(org-babel-merge-params
-		 (nth 2 info)
-		 `((:results . ,(if silent "silent" "replace")))))
+		(org-babel-exp-in-export-file lang
+		  (org-babel-process-params
+		   (org-babel-merge-params
+		    (nth 2 info)
+		    `((:results . ,(if silent "silent" "replace")))))))
 	  (cond
 	   ((or (equal type 'block) (equal type 'inline))
 	    (org-babel-execute-src-block nil info))
