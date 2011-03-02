@@ -354,7 +354,10 @@ Setting :html-preamble in publishing projects will override this."
   '(("en" "<h1 class=\"title\">%t</h1>"))
   "The format for the HTML preamble.
 
-%t stands for the title."
+%t stands for the title.
+
+If you need to use a \"%\" character, you need to escape it
+like that: \"%%\"."
   :group 'org-export-html
   :type 'string)
 
@@ -377,7 +380,10 @@ Setting :html-postamble in publishing projects will override this."
 %e stands for the email(s).
 %d stands for the date.
 %c will be replaced by information about Org/Emacs.
-%v will be replaced by `org-export-html-validation-link'."
+%v will be replaced by `org-export-html-validation-link'.
+
+If you need to use a \"%\" character, you need to escape it
+like that: \"%%\"."
   :group 'org-export-html
   :type 'string)
 
