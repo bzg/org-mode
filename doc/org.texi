@@ -11941,7 +11941,7 @@ another by commas, as shown in the following example.
 @subsubheading Emacs Lisp evaluation of variables
 
 Emacs lisp code can be used to initialize variable values.  When a variable
-value starts with @code{(}, @code{'} or @code{`} it will be evaluated as
+value starts with @code{(}, @code{[}, @code{'} or @code{`} it will be evaluated as
 Emacs Lisp and the result of the evaluation will be assigned as the variable
 value.  The following example demonstrates use of this evaluation to reliably
 pass the file-name of the org-mode buffer to a code block---note that

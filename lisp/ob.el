@@ -1924,7 +1924,9 @@ appropriate."
           (if (and (not inhibit-lisp-eval)
 		   (member (substring cell 0 1) '("(" "'" "`" "[")))
               (eval (read cell))
-            (progn (set-text-properties 0 (length cell) nil cell) cell)))
+            (if (string= (substring cell 0 1) "\"")
+		(read cell)
+	      (progn (set-text-properties 0 (length cell) nil cell) cell))))
     cell))
 
 (defun org-babel-number-p (string)
