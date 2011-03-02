@@ -58,6 +58,8 @@
 
 (require 'org)
 (require 'org-exp)
+
+(defvar org-export-current-backend) ; dynamically bound in org-exp.el
 (defun org-export-bibtex-preprocess ()
   "Export all BibTeX."
   (interactive)
@@ -72,7 +74,7 @@
 	    (opt   (org-exp-bibtex-options-to-plist (match-string 3))))
 	(replace-match
 	(cond
-	 ((eq backend 'html) ;; We are exporting to HTML
+	 ((eq org-export-current-backend 'html) ;; We are exporting to HTML
 	  (let (extra-args cite-list end-hook tmp-files)
 	    (dolist (elt opt)
 	      (when (equal "option" (car elt))
@@ -106,12 +108,12 @@
 	      (while (re-search-forward "<hr>" nil t)
 		(replace-match "<hr/>" t t))
 	      (concat "\n#+BEGIN_HTML\n<div id=\"bibliography\">\n" (buffer-string) "\n</div>\n#+END_HTML\n"))))
-	 ((eq backend 'latex) ;; Latex export
+	 ((eq org-export-current-backend 'latex) ;; Latex export
 	  (concat "\n#+LATEX: \\bibliographystyle{" style "}"
 		  "\n#+LATEX: \\bibliography{" file "}\n"))) t t)))
 
     ;; Convert cites to links in html
-    (when (eq backend 'html)
+    (when (eq org-export-current-backend 'html)
       ;; Split citation commands with multiple keys
       (org-exp-bibtex-docites
        (lambda ()
@@ -130,7 +132,7 @@
   (save-excursion
     (save-match-data
       (goto-char (point-min))
-      (when (eq backend 'html)
+      (when (eq org-export-current-backend 'html)
 	(while (re-search-forward "\\\\cite{\\([^}\n]+\\)}" nil t)
 	  (apply fun nil))))))
 
