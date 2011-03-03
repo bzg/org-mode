@@ -5575,7 +5575,9 @@ sexp entry matches.
 @node Inserting deadline/schedule, Repeated tasks, Deadlines and scheduling, Deadlines and scheduling
 @subsection Inserting deadlines or schedules
 
-The following commands allow you to quickly insert a deadline or to schedule
+The following commands allow you to quickly insert@footnote{The @samp{SCHEDULED} and
+@samp{DEADLINE} dates are inserted on the line right below the headline.  Don't put
+any text between this line and the headline.} a deadline or to schedule
 an item:
 
 @table @kbd
