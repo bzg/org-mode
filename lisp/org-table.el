@@ -2994,7 +2994,7 @@ Parameters get priority."
     s))
 
 (defun org-table-convert-refs-to-rc (s)
-  "Convert spreadsheet references from AB7 to @7$28.
+  "Convert spreadsheet references from A7 to @7$28.
 Works for single references, but also for entire formulas and even the
 full TBLFM line."
   (let ((start 0))
