@@ -248,8 +248,9 @@ This function is called by `org-babel-exp-do-export'.  The code
 block will be evaluated.  Optional argument SILENT can be used to
 inhibit insertion of results into the buffer."
   (when (and org-export-babel-evaluate
-	     (not (equal hash (org-babel-exp-in-export-file (nth 0 info)
-				(org-babel-result-hash)))))
+	     (not (and hash
+		       (equal hash (org-babel-exp-in-export-file (nth 0 info)
+				     (org-babel-result-hash))))))
     (let ((lang (nth 0 info))
 	  (body (nth 1 info)))
       ;; skip code blocks which we can't evaluate
