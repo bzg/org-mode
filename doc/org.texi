@@ -2286,23 +2286,25 @@ references make it possible to store a formula only once and use it in many
 fields without copying and modifying it.
 
 Column references can be absolute like @samp{1}, @samp{2},...@samp{@var{N}},
-or relative to the current column like @samp{+1} or @samp{-2}.
+or relative to the current column like @samp{+1} or @samp{-2}.  @code{$>}
+references the last column in the table, and you can use offsets like
+@code{$>-2}, meaning the third column from the right.
 
 The row specification only counts data lines and ignores horizontal separator
-lines (hlines).  You can use absolute row numbers @samp{1}...@samp{@var{N}},
-and row numbers relative to the current row like @samp{+3} or @samp{-1}.  A
-special case is @code{@@L} which stands for the last row in the
+lines (hlines).  Like with columns, you can use absolute row numbers
+@samp{1}...@samp{@var{N}}, and row numbers relative to the current row like
+@samp{+3} or @samp{-1}, and @code{@@>} references the last row in the
 table@footnote{For backward compatibility you can also use special names like
 @samp{$LR5} and @samp{$LR12} to refer in a stable way to the 5th and 12th
 field in the last row of the table.  However, this syntax is deprecated, it
-should not be used for new documents.}, and you can use offsets from it like
-@code{@@L-2}.  Or specify the row relative to one of the hlines: @samp{I}
-refers to the first hline@footnote{Note that only hlines are counted that
-@emph{separate} table lines.  If the table starts with a hline above the
-header, it does not count.}, @samp{II} to the second, etc@.  @samp{-I} refers
-to the first such line above the current line, @samp{+I} to the first such
-line below the current line.  You can also write @samp{III+2} which is the
-second data line after the third hline in the table.
+should not be used for new documents.}.  You may also specify the row
+relative to one of the hlines: @samp{I} refers to the first
+hline@footnote{Note that only hlines are counted that @emph{separate} table
+lines.  If the table starts with a hline above the header, it does not
+count.}, @samp{II} to the second, etc@.  @samp{-I} refers to the first such
+line above the current line, @samp{+I} to the first such line below the
+current line.  You can also write @samp{III+2} which is the second data line
+after the third hline in the table.
 
 @samp{0} refers to the current row and column.  Also, if you omit
 either the column or the row part of the reference, the current
@@ -2603,7 +2605,7 @@ same formula will be used in all fields of that column, with the following
 very convenient exceptions: (i) If the table contains horizontal separator
 hlines, everything before the first such line is considered part of the table
 @emph{header} and will not be modified by column formulas.  (ii) Fields that
-already get a value from a fild/range formula will be left alone by column
+already get a value from a field/range formula will be left alone by column
 formulas.  These conditions make column formulas very easy to use.
 
 To assign a formula to a column, type it directly into any field in the
@@ -2615,7 +2617,7 @@ and the current field replaced with the result.  If the field contains only
 column, Org will only remember the most recently used formula.  In the
 @samp{#+TBLFM:} line, column formulas will look like @samp{$4=$1+$2}.  The
 left-hand side of a column formula can not be the name of column, it must be
-the numeric column reference.
+the numeric column reference or @code{$>}.
 
 Instead of typing an equation into the field, you may also use the
 following command:
