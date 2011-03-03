@@ -176,7 +176,7 @@ this line."
   :tag "Org Table Calculation"
   :group 'org-table)
 
-(defcustom org-table-use-standard-references t
+(defcustom org-table-use-standard-references 'from
   "Should org-mode work with table references like B3 instead of @3$2?
 Possible values are:
 nil     never use them
