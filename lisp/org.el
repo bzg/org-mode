@@ -7271,6 +7271,7 @@ case."
 		   'org-get-last-sibling))
 	(ins-point (make-marker))
 	(cnt (abs arg))
+	(col (current-column))
 	beg beg0 end txt folded ne-beg ne-end ne-ins ins-end)
     ;; Select the tree
     (org-back-to-heading)
@@ -7336,7 +7337,9 @@ case."
       (org-show-entry)
       (show-children)
       (org-cycle-hide-drawers 'children))
-    (org-clean-visibility-after-subtree-move)))
+    (org-clean-visibility-after-subtree-move)
+    ;; move back to the initial column we were at
+    (move-to-column col)))
 
 (defvar org-subtree-clip ""
   "Clipboard for cut and paste of subtrees.
