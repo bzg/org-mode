@@ -2394,12 +2394,9 @@ not overwrite the stored one."
 		 t t form)))
 	(setq form0 form)
 	;; Insert the references to fields in same row
-	(while (string-match "\\$\\([-+]?[0-9]+\\)" form)
+	(while (string-match "\\$\\(\\([-+]\\)?[0-9]+\\)" form)
 	  (setq n (+ (string-to-number (match-string 1 form))
-		     (if (member (substring form (match-beginning 1)
-					    (1+ (match-beginning 1)))
-				 '("+" "-"))
-			 n0 0))
+		     (if (match-end 2) n0 0))
 		x (nth (1- (if (= n 0) n0 (max n 1))) fields))
 	  (unless x (error "Invalid field specifier \"%s\""
 			   (match-string 0 form)))
