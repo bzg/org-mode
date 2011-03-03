@@ -2665,10 +2665,9 @@ known that the table will be realigned a little later anyway."
 		    eqlist))
       ;; Split the equation list
       (while (setq eq (pop eqlist))
-	(cond
-	 ((<= (string-to-char (car eq)) ?9)
-	  (push eq eqlnum))
-	 (t (push eq eqlname))))
+	(if (<= (string-to-char (car eq)) ?9)
+	    (push eq eqlnum)
+	  (push eq eqlname)))
       (setq eqlnum (nreverse eqlnum) eqlname (nreverse eqlname))
       ;; Expand ranges in lhs of formulas
       (setq eqlname (org-table-expand-lhs-ranges eqlname))
