@@ -2269,12 +2269,14 @@ field, or press @kbd{C-c @}} to toggle the display of a grid.
 Formulas can reference the value of another field in two ways.  Like in
 any other spreadsheet, you may reference fields with a letter/number
 combination like @code{B3}, meaning the 2nd field in the 3rd row.
-@c Such references are always fixed to that field, they don't change
-@c when you copy and paste a formula to a different field.  So
-@c Org's @code{B3} behaves like @code{$B$3} in other spreadsheets.
 
 @noindent
-Org also uses another, more general operator that looks like this:
+@vindex org-table-use-standard-references
+Org prefers@footnote{Org will understand references typed by the user as
+@samp{B4}, but it will not use this syntax when offering a formula for
+editing.  You can customize this behavior using the variable
+@code{org-table-use-standard-references}.}  to use another, more general
+operator that looks like this:
 @example
 @@@var{row}$@var{column}
 @end example
