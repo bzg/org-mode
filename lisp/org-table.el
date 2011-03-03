@@ -181,7 +181,7 @@ this line."
 Possible values are:
 nil     never use them
 from    accept as input, do not present for editing
-t:      accept as input and present for editing"
+t       accept as input and present for editing"
   :group 'org-table-calculation
   :type '(choice
 	  (const :tag "Never, don't even check user input for them" nil)
