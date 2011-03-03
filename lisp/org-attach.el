@@ -96,9 +96,13 @@ ln    create a hard link.  Note that this is not supported
   :group 'org-attach
   :type 'boolean)
 
-
 (defvar org-attach-inherited nil
   "Indicates if the last access to the attachment directory was inherited.")
+
+(defcustom org-attach-store-link-p nil
+  "Non-nil means store a link to a file when attaching it."
+  :group 'org-attach
+  :type 'boolean)
 
 ;;;###autoload
 (defun org-attach ()
@@ -264,6 +268,14 @@ This checks for the existence of a \".git\" directory in that directory."
   "Turn the autotag off."
   (org-attach-tag 'off))
 
+(defun org-attach-store-link (file)
+  "Add a link to `org-stored-link' when attaching a file.
+Only do this when `org-attach-store-link-p' is non-nil."
+  (setq org-stored-links
+	(cons (list (org-attach-expand-link file)
+		    (file-name-nondirectory file))
+	      org-stored-links)))
+
 (defun org-attach-attach (file &optional visit-dir method)
   "Move/copy/link FILE into the attachment directory of the current task.
 If VISIT-DIR is non-nil, visit the directory with dired.
@@ -282,6 +294,8 @@ METHOD may be `cp', `mv', or `ln', default taken from `org-attach-method'."
        ((eq method 'ln) (add-name-to-file file fname)))
       (org-attach-commit)
       (org-attach-tag)
+      (when org-attach-store-link-p 
+	(org-attach-store-link file))
       (if visit-dir
 	  (dired attach-dir)
 	(message "File \"%s\" is now a task attachment." basename)))))
