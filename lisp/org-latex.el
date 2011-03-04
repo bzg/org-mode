@@ -1352,9 +1352,6 @@ OPT-PLIST is the options plist for current buffer."
      (org-export-apply-macros-in-string org-export-latex-append-header)
      ;; define alert if not yet defined
      "\n\\providecommand{\\alert}[1]{\\textbf{#1}}"
-     ;; beginning of the document
-     "\n\\begin{document}\n\n"
-     ;; insert the title
      (format
       "\n\n\\title{%s}\n"
       ;; convert the title
@@ -1374,6 +1371,9 @@ OPT-PLIST is the options plist for current buffer."
 	     (format-time-string
 	      (or (plist-get opt-plist :date)
 		  org-export-latex-date-format)))
+     ;; beginning of the document
+     "\n\\begin{document}\n\n"
+     ;; insert the title
      ;; insert the title command
      (when (string-match "\\S-" title)
        (if (string-match "%s" org-export-latex-title-command)
