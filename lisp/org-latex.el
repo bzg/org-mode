@@ -397,7 +397,7 @@ example using customize, or with
   (require 'org-latex)
   (add-to-list 'org-export-latex-packages-alist '(\"\" \"minted\"))
 
-In addition, it is necessary to install 
+In addition, it is necessary to install
 pygments (http://pygments.org), and to configure the variable
 `org-latex-to-pdf-process' so that the -shell-escape option is
 passed to pdflatex.
@@ -1334,8 +1334,8 @@ OPT-PLIST is the options plist for current buffer."
   (let ((toc (plist-get opt-plist :table-of-contents))
 	(author (org-export-apply-macros-in-string
 		 (plist-get opt-plist :author)))
-	(email (replace-regexp-in-string 
-		"_" "\\\\_" 
+	(email (replace-regexp-in-string
+		"_" "\\\\_"
 		(org-export-apply-macros-in-string
 		 (plist-get opt-plist :email)))))
     (concat
@@ -1352,17 +1352,17 @@ OPT-PLIST is the options plist for current buffer."
      (org-export-apply-macros-in-string org-export-latex-append-header)
      ;; define alert if not yet defined
      "\n\\providecommand{\\alert}[1]{\\textbf{#1}}"
+     ;; insert the title
      (format
       "\n\n\\title{%s}\n"
-      ;; convert the title
       (org-export-latex-fontify-headline title))
      ;; insert author info
      (if (plist-get opt-plist :author-info)
 	 (format "\\author{%s%s}\n"
 		 (org-export-latex-fontify-headline (or author user-full-name))
 		 (if (and (plist-get opt-plist :email-info) email
-			   (string-match "\\S-" email))
-		      (format "\\thanks{%s}" email)
+			  (string-match "\\S-" email))
+		     (format "\\thanks{%s}" email)
 		   ""))
        (format "%%\\author{%s}\n"
 	       (org-export-latex-fontify-headline (or author user-full-name))))
@@ -1373,7 +1373,6 @@ OPT-PLIST is the options plist for current buffer."
 		  org-export-latex-date-format)))
      ;; beginning of the document
      "\n\\begin{document}\n\n"
-     ;; insert the title
      ;; insert the title command
      (when (string-match "\\S-" title)
        (if (string-match "%s" org-export-latex-title-command)
