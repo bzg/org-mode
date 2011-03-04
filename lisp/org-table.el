@@ -176,7 +176,7 @@ this line."
   :tag "Org Table Calculation"
   :group 'org-table)
 
-(defcustom org-table-use-standard-references t
+(defcustom org-table-use-standard-references 'from
   "Should org-mode work with table references like B3 instead of @3$2?
 Possible values are:
 nil     never use them
@@ -1133,7 +1133,7 @@ is always the old value."
 	   (eql (org-table-expand-lhs-ranges
 		 (mapcar
 		  (lambda (e)
-		    (cons (org-table-formula-handle-@L (car e)) (cdr e)))
+		    (cons (org-table-formula-handle-lastrc (car e)) (cdr e)))
 		  (org-table-get-stored-formulas))))
 	   (dline (org-table-current-dline))
 	   (ref (format "@%d$%d" dline col))
@@ -1975,6 +1975,10 @@ When NAMED is non-nil, look for a named equation."
 	    "\n")))
 
 (defsubst org-table-formula-make-cmp-string (a)
+  (when (string-match "\\`$>" a)
+    ;; Fake a high number to make sure this is sorted at the end.
+    (setq a (org-table-formula-handle-lastrc a))
+    (setq a (format "$%d" (+ 10000 (string-to-number (substring a 1))))))
   (when (string-match "^\\(@\\([0-9]+\\)\\)?\\(\\$?\\([0-9]+\\)\\)?\\(\\$?[a-zA-Z0-9]+\\)?" a)
     (concat
      (if (match-end 2) (format "@%05d" (string-to-number (match-string 2 a))) "")
@@ -1994,12 +1998,14 @@ When NAMED is non-nil, look for a named equation."
     (save-excursion
       (goto-char (org-table-end))
       (when (looking-at "\\([ \t]*\n\\)*[ \t]*#\\+TBLFM: *\\(.*\\)")
-	(setq strings (org-split-string (match-string 2) " *:: *"))
+	(setq strings (org-split-string (org-match-string-no-properties 2)
+					" *:: *"))
 	(while (setq string (pop strings))
-	  (when (string-match "\\`\\(@[-+LI0-9.$@]+\\|@?[0-9]+\\|\\$\\([a-zA-Z0-9]+\\)\\) *= *\\(.*[^ \t]\\)" string)
+	  (when (string-match "\\`\\(@[-+I>0-9.$@]+\\|@?[0-9]+\\|\\$\\([a-zA-Z0-9]+\\|>\\(?:[-+][0-9]+\\)?\\)\\) *= *\\(.*[^ \t]\\)" string)
 	    (setq scol (if (match-end 2)
 			   (match-string 2 string)
 			 (match-string 1 string))
+		  scol (if (= (string-to-char scol) ?>) (concat "$" scol) scol)
 		  eq (match-string 3 string)
 		  eq-alist (cons (cons scol eq) eq-alist))
 	    (if (member scol seen)
@@ -2388,9 +2394,10 @@ not overwrite the stored one."
 		 t t form)))
 	(setq form0 form)
 	;; Insert the references to fields in same row
-	(while (string-match "\\$\\([0-9]+\\)" form)
-	  (setq n (string-to-number (match-string 1 form))
-		x (nth (1- (if (= n 0) n0 n)) fields))
+	(while (string-match "\\$\\(\\([-+]\\)?[0-9]+\\)" form)
+	  (setq n (+ (string-to-number (match-string 1 form))
+		     (if (match-end 2) n0 0))
+		x (nth (1- (if (= n 0) n0 (max n 1))) fields))
 	  (unless x (error "Invalid field specifier \"%s\""
 			   (match-string 0 form)))
 	  (setq form (replace-match
@@ -2632,19 +2639,29 @@ known that the table will be realigned a little later anyway."
     (org-table-get-specials)
     (let* ((eqlist (sort (org-table-get-stored-formulas)
 			 (lambda (a b) (string< (car a) (car b)))))
+	   (eqlist1 (copy-sequence eqlist))
 	   (inhibit-redisplay (not debug-on-error))
 	   (line-re org-table-dataline-regexp)
 	   (thisline (org-current-line))
 	   (thiscol (org-table-current-column))
-	   seen-fields
+	   seen-fields lhs1
 	   beg end entry eqlnum eqlname eqlname1 eql (cnt 0) eq a name name1)
       ;; Insert constants in all formulas
       (setq eqlist
 	    (mapcar (lambda (x)
+		      (when (string-match "\\`$>" (car x))
+			(setq lhs1 (car x))
+			(setq x (cons (substring
+				       (org-table-formula-handle-lastrc
+					(car x)) 1)
+				      (cdr x)))
+			(if (assoc (car x) eqlist1)
+			    (error "\"%s=\" formula tries to overwrite existing formula for column %s"
+				   lhs1 (car x))))
 		      (cons
-		       (org-table-formula-handle-@L (car x))
+		       (org-table-formula-handle-lastrc (car x))
 		       (org-table-formula-substitute-names
-			(org-table-formula-handle-@L (cdr x)))))
+			(org-table-formula-handle-lastrc (cdr x)))))
 		    eqlist))
       ;; Split the equation list
       (while (setq eq (pop eqlist))
@@ -2702,6 +2719,7 @@ known that the table will be realigned a little later anyway."
 	  (org-table-goto-column (nth 2 a))
 	  (push (append a (list (cdr eq))) eqlname1)
 	  (org-table-put-field-property :org-untouchable t)))
+      (setq eqlname1 (nreverse eqlname1))
       
       ;; Now evaluate the column formulas, but skip fields covered by
       ;; field formulas
@@ -2742,7 +2760,9 @@ known that the table will be realigned a little later anyway."
 	  (and all (message "Re-applying formulas...done"))))))
 
 (defun org-table-iterate (&optional arg)
-  "Recalculate the table until it does not change anymore."
+  "Recalculate the table until it does not change anymore.
+The maximun number of iterations is 10, but you can chose a different value
+with the prefix ARG."
   (interactive "P")
   (let ((imax (if arg (prefix-numeric-value arg) 10))
 	(i 0)
@@ -2824,14 +2844,18 @@ them to individual field equations for each field."
 				       :orig-eqn e (caar res)))))))
     (nreverse res)))
 
-(defun org-table-formula-handle-@L (s)
-  "Replace @L with the last row data row of the table."
-  (while (string-match "@L\\(-[0-9]+\\)?" s)
+(defun org-table-formula-handle-lastrc (s)
+  "Replace @> / $> with the last row/column of the table."
+  (while (string-match "\\([@$]\\)>\\(-[0-9]+\\)?" s)
     (setq s (replace-match
-	     (format "@%d" (+ (length org-table-dlines) -1
-			      (if (match-end 1)
-				  (string-to-number (match-string 1 s))
-				0)))
+	     (format "%s%d"
+		     (match-string 1 s)
+		     (+ (if (equal (match-string 1 s) "@")
+			    (1- (length org-table-dlines))
+			  org-table-current-ncol)
+			(if (match-end 2)
+			    (string-to-number (match-string 2 s))
+			  0)))
 	     t t s)))
   s)
 
@@ -2955,6 +2979,7 @@ Parameters get priority."
     (setq startline (org-current-line))
     (while (setq entry (pop eql))
       (setq type (cond
+		  ((string-match "\\`$>" (car entry)) 'column)
 		  ((equal (string-to-char (car entry)) ?@) 'field)
 		  ((string-match "^[0-9]" (car entry)) 'column)
 		  (t 'named)))
@@ -2963,7 +2988,7 @@ Parameters get priority."
 	(insert (org-add-props (cdr title) nil 'face font-lock-comment-face))
 	(setq titles (remove title titles)))
       (if (equal key (car entry)) (setq startline (org-current-line)))
-      (setq s (concat (if (equal (string-to-char (car entry)) ?@) "" "$")
+      (setq s (concat (if (member (string-to-char (car entry)) '(?@ ?$)) "" "$")
 		      (car entry) " = " (cdr entry) "\n"))
       (remove-text-properties 0 (length s) '(face nil) s)
       (insert s))
@@ -3178,7 +3203,7 @@ With prefix ARG, apply the new formulas to the table."
   (let ((pos org-pos) (sel-win org-selected-window) eql var form)
     (goto-char (point-min))
     (while (re-search-forward
-	    "^\\(@[-+IL0-9.$@]+\\|@?[0-9]+\\|\\$\\([a-zA-Z0-9]+\\)\\) *= *\\(.*\\(\n[ \t]+.*$\\)*\\)"
+	    "^\\(@[-+I>0-9.$@]+\\|@?[0-9]+\\|\\$\\([a-zA-Z0-9]+\\|>[-+0-9]*\\)\\) *= *\\(.*\\(\n[ \t]+.*$\\)*\\)"
 	    nil t)
       (setq var (if (match-end 2) (match-string 2) (match-string 1))
 	    form (match-string 3))
