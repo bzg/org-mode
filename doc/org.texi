@@ -9437,11 +9437,17 @@ d:         @r{turn on/off inclusion of drawers}
 @end example
 @noindent
 These options take effect in both the HTML and @LaTeX{} export, except for
-@code{TeX} and @code{LaTeX}, which are respectively @code{t} and @code{nil}
-for the @LaTeX{} export.  The default values for these and many other options
-are given by a set of variables.  For a list of such variables, the
-corresponding OPTIONS keys and also the publishing keys (@pxref{Project
-alist}), see the constant @code{org-export-plist-vars}.
+@code{TeX} and @code{LaTeX} options, which are respectively @code{t} and
+@code{nil} for the @LaTeX{} export.
+
+Setting @code{org-export-html-pre/postamble} to @code{t} will override the
+values of the @code{author}, @code{email} and @code{creator} options in HTML
+export: it will use @code{org-export-html-pre/postamble-format} instead.
+
+The default values for these and many other options are given by a set of
+variables.  For a list of such variables, the corresponding OPTIONS keys and
+also the publishing keys (@pxref{Project alist}), see the constant
+@code{org-export-plist-vars}.
 
 When exporting only a single subtree by selecting it with @kbd{C-c @@} before
 calling an export command, the subtree can overrule some of the file's export
@@ -10711,7 +10717,7 @@ and many other properties of a project.
 * Sources and destinations::    From here to there
 * Selecting files::             What files are part of the project?
 * Publishing action::           Setting the function doing the publishing
-* Publishing options::          Tweaking HTML export
+* Publishing options::          Tweaking HTML/@LaTeX{} export
 * Publishing links::            Which links keep working after publishing?
 * Sitemap::                     Generating a list of all pages
 * Generating an index::         An index that reaches across pages
@@ -10920,6 +10926,8 @@ respective variable for details.
 @item @code{:skip-before-1st-heading} @tab @code{org-export-skip-text-before-1st-heading}
 @item @code{:fixed-width}           @tab @code{org-export-with-fixed-width}
 @item @code{:timestamps}            @tab @code{org-export-with-timestamps}
+@item @code{:author}                @tab @code{user-full-name}
+@item @code{:email}                 @tab @code{user-mail-address} : @code{addr;addr;..}
 @item @code{:author-info}           @tab @code{org-export-author-info}
 @item @code{:email-info}            @tab @code{org-export-email-info}
 @item @code{:creator-info}          @tab @code{org-export-creator-info}
@@ -10932,15 +10940,13 @@ respective variable for details.
 @item @code{:convert-org-links}     @tab @code{org-export-html-link-org-files-as-html}
 @item @code{:inline-images}         @tab @code{org-export-html-inline-images}
 @item @code{:html-extension}        @tab @code{org-export-html-extension}
+@item @code{:html-preamble}         @tab @code{org-export-html-preamble}
+@item @code{:html-postamble}        @tab @code{org-export-html-postamble}
 @item @code{:xml-declaration}       @tab @code{org-export-html-xml-declaration}
 @item @code{:html-table-tag}        @tab @code{org-export-html-table-tag}
 @item @code{:expand-quoted-html}    @tab @code{org-export-html-expand}
 @item @code{:timestamp}             @tab @code{org-export-html-with-timestamp}
 @item @code{:publishing-directory}  @tab @code{org-export-publishing-directory}
-@item @code{:html-preamble}         @tab @code{org-export-html-preamble}
-@item @code{:html-postamble}        @tab @code{org-export-html-postamble}
-@item @code{:author}                @tab @code{user-full-name}
-@item @code{:email}                 @tab @code{user-mail-address} : @code{addr;addr;..}
 @item @code{:select-tags}           @tab @code{org-export-select-tags}
 @item @code{:exclude-tags}          @tab @code{org-export-exclude-tags}
 @item @code{:latex-image-options}   @tab @code{org-export-latex-image-default-option}
@@ -10948,8 +10954,11 @@ respective variable for details.
 
 Most of the @code{org-export-with-*} variables have the same effect in
 both HTML and @LaTeX{} exporters, except for @code{:TeX-macros} and
-@code{:LaTeX-fragments}, respectively @code{nil} and @code{t} in the
-@LaTeX{} export.
+@code{:LaTeX-fragments} options, respectively @code{nil} and @code{t} in the
+@LaTeX{} export.  See @code{org-export-plist-vars} to check this list of
+options.
+
+
 
 @vindex org-publish-project-alist
 When a property is given a value in @code{org-publish-project-alist},
