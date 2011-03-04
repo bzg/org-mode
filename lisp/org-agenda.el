@@ -2470,11 +2470,14 @@ s   Search for keywords                 C   Configure custom agenda commands
 	   ((equal c ?q) (error "Abort"))
 	   (t (error "Invalid key %c" c))))))))
 
+(defvar org-agenda-overriding-arguments nil) ; dynamically scoped parameter
+(defvar org-agenda-last-arguments nil
+  "The arguments of the previous call to `org-agenda'.")
 (defun org-run-agenda-series (name series)
   (org-let (nth 1 series) '(org-prepare-agenda name))
   (let* ((org-agenda-multi t)
 	 (redo (list 'org-run-agenda-series name (list 'quote series)))
-	 (org-agenda-overriding-arguments 
+	 (org-agenda-overriding-arguments
 	  (or org-agenda-overriding-arguments
 	      (unless (null (delq nil (get 'org-agenda-redo-command 'last-args)))
 		(get 'org-agenda-redo-command 'last-args))))
@@ -3418,11 +3421,8 @@ When EMPTY is non-nil, also include days without any entries."
 
 ;;; Agenda Daily/Weekly
 
-(defvar org-agenda-overriding-arguments nil) ; dynamically scoped parameter
 (defvar org-agenda-start-day nil  ; dynamically scoped parameter
 "Custom commands can set this variable in the options section.")
-(defvar org-agenda-last-arguments nil
-  "The arguments of the previous call to `org-agenda'.")
 (defvar org-starting-day nil) ; local variable in the agenda buffer
 (defvar org-agenda-current-span nil
   "The current span used in the agenda view.") ; local variable in the agenda buffer
