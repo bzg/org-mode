@@ -88,7 +88,7 @@ is nil, the buffer remains buried also in these cases."
 
 (defcustom org-export-kill-product-buffer-when-displayed nil
   "Non-nil means kill the product buffer if it is displayed immediately.
-This applied to the commands `org-export-html-and-open' and
+This applied to the commands `org-export-as-html-and-open' and
 `org-export-as-pdf-and-open'."
   :group 'org-export-general
   :type 'boolean)
