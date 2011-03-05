@@ -1587,6 +1587,11 @@ single keystroke rather than having to type \"yes\"."
      'safe-local-variable
      '(lambda (x) (member x '(yes-or-no-p y-or-n-p))))
 
+(defcustom org-confirm-shell-link-not-regexp ""
+  "A regexp to skip confirmation for shell links."
+  :group 'org-link-follow
+  :type 'regexp)
+
 (defcustom org-confirm-elisp-link-function 'yes-or-no-p
   "Non-nil means ask for confirmation before executing Emacs Lisp links.
 Elisp links can be dangerous: just think about a link
@@ -1606,6 +1611,11 @@ single keystroke rather than having to type \"yes\"."
 (put 'org-confirm-shell-link-function
      'safe-local-variable
      '(lambda (x) (member x '(yes-or-no-p y-or-n-p))))
+
+(defcustom org-confirm-elisp-link-not-regexp ""
+  "A regexp to skip confirmation for Elisp links."
+  :group 'org-link-follow
+  :type 'regexp)
 
 (defconst org-file-apps-defaults-gnu
   '((remote . emacs)
@@ -9314,7 +9324,8 @@ application the system uses for this file type."
 
 	 ((string= type "shell")
 	  (let ((cmd path))
-	    (if (or (not org-confirm-shell-link-function)
+	    (if (or (string-match org-confirm-shell-link-not-regexp cmd)
+		    (not org-confirm-shell-link-function)
 		    (funcall org-confirm-shell-link-function
 			     (format "Execute \"%s\" in shell? "
 				     (org-add-props cmd nil
@@ -9326,7 +9337,8 @@ application the system uses for this file type."
 
 	 ((string= type "elisp")
 	  (let ((cmd path))
-	    (if (or (not org-confirm-elisp-link-function)
+	    (if (or (string-match org-confirm-elisp-link-not-regexp cmd)
+		    (not org-confirm-elisp-link-function)
 		    (funcall org-confirm-elisp-link-function
 			     (format "Execute \"%s\" as elisp? "
 				     (org-add-props cmd nil
