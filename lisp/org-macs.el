@@ -333,6 +333,15 @@ point nowhere."
 		 (and (markerp (cdr c)) (move-marker (cdr c) nil)))
 	       data)))))
 
+(defmacro org-with-wide-buffer (&rest body)
+  "Execute body while temporarily widening the buffer."
+  `(let ((beg (point-min)) (end (point-max)) (pos (point)))
+     (prog2
+	 (widen)
+	 ,@body
+       (narrow-to-region beg end)
+       (goto-char pos))))
+
 (defmacro org-with-limited-levels (&rest body)
   "Execute BODY with limited number of outline levels."
   `(let* ((outline-regexp (org-get-limited-outline-regexp)))
@@ -344,7 +353,6 @@ point nowhere."
   "Return outline-regexp with limited number of levels.
 The number of levels is controlled by `org-inlinetask-min-level'"
   (if (or (not (org-mode-p)) (not (featurep 'org-inlinetask)))
-
       outline-regexp
     (let* ((limit-level (1- org-inlinetask-min-level))
 	   (nstars (if org-odd-levels-only (1- (* limit-level 2)) limit-level)))

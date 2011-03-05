@@ -10936,8 +10936,9 @@ For calling through lisp, arg is also interpreted in the following way:
 		  (not (member this org-done-keywords)))
 	    (unless (save-excursion
 		      (save-match-data
-			(run-hook-with-args-until-failure
-			 'org-blocker-hook change-plist)))
+			(org-with-wide-buffer
+			 (run-hook-with-args-until-failure
+			  'org-blocker-hook change-plist))))
 	      (if (interactive-p)
 		  (error "TODO state change from %s to %s blocked" this state)
 		;; fail silently
