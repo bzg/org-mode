@@ -10389,8 +10389,8 @@ This can be done with a 0 prefix: `C-0 C-c C-w'"
 
 (defun org-refile-get-location (&optional prompt default-buffer new-nodes)
   "Prompt the user for a refile location, using PROMPT.
-PROMPT should not be prefixed with a colon and a space, because
-this function prepends the default value from
+PROMPT should not be suffixed with a colon and a space, because
+this function appends the default value from 
 `org-refile-history' automatically, if that is not empty."
   (let ((org-refile-targets org-refile-targets)
 	(org-refile-use-outline-path org-refile-use-outline-path))
