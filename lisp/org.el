@@ -9338,7 +9338,7 @@ application the system uses for this file type."
 
 	 ((string= type "elisp")
 	  (let ((cmd path))
-	    (if (or (and (not (string= "" org-confirm-elisp-link-not-regexp))
+	    (if (or (and (not (string= org-confirm-elisp-link-not-regexp ""))
 			 (string-match org-confirm-elisp-link-not-regexp cmd))
 		    (not org-confirm-elisp-link-function)
 		    (funcall org-confirm-elisp-link-function
