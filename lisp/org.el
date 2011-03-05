@@ -9324,7 +9324,8 @@ application the system uses for this file type."
 
 	 ((string= type "shell")
 	  (let ((cmd path))
-	    (if (or (string-match org-confirm-shell-link-not-regexp cmd)
+	    (if (or (and (not (zerop (length org-confirm-shell-link-not-regexp)))
+			 (string-match org-confirm-shell-link-not-regexp cmd))
 		    (not org-confirm-shell-link-function)
 		    (funcall org-confirm-shell-link-function
 			     (format "Execute \"%s\" in shell? "
@@ -9337,7 +9338,8 @@ application the system uses for this file type."
 
 	 ((string= type "elisp")
 	  (let ((cmd path))
-	    (if (or (string-match org-confirm-elisp-link-not-regexp cmd)
+	    (if (or (and (not (zerop (length org-confirm-elisp-link-not-regexp)))
+			 (string-match org-confirm-elisp-link-not-regexp cmd))
 		    (not org-confirm-elisp-link-function)
 		    (funcall org-confirm-elisp-link-function
 			     (format "Execute \"%s\" as elisp? "
