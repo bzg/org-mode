@@ -63,6 +63,11 @@ org-agenda-text-search-extra-files
 	       (repeat :inline t :tag "Additional files"
 		       (file))))
 
+(defcustom org-mobile-files-exclude-regexp ""
+  "A regexp to exclude files from `org-mobile-files'."
+  :group 'org-mobile
+  :type 'regexp)
+
 (defcustom org-mobile-directory ""
   "The WebDAV directory where the interaction with the mobile takes place."
   :group 'org-mobile
@@ -241,7 +246,8 @@ using `rsync' or `scp'.")
   (setq org-mobile-checksum-files nil))
 
 (defun org-mobile-files-alist ()
-  "Expand the list in `org-mobile-files' to a list of existing files."
+  "Expand the list in `org-mobile-files' to a list of existing files.
+Also exclude files matching `org-mobile-files-exclude-regexp'."
   (let* ((include-archives
 	  (and (member 'org-agenda-text-search-extra-files org-mobile-files)
 	       (member 'agenda-archives	org-agenda-text-search-extra-files)
@@ -263,6 +269,13 @@ using `rsync' or `scp'.")
 		      (list f))
 		     (t nil)))
 		  org-mobile-files)))
+	 (files (delete
+		 nil 
+		 (mapcar (lambda (f)
+			   (unless (and (not (string= org-mobile-files-exclude-regexp ""))
+					(string-match org-mobile-files-exclude-regexp f))
+			     (identity f)))
+			 files)))
 	 (orgdir-uname (file-name-as-directory (file-truename org-directory)))
 	 (orgdir-re (concat "\\`" (regexp-quote orgdir-uname)))
 	 uname seen rtn file link-name)
