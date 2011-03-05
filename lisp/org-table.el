@@ -162,6 +162,17 @@ Only relevant when `org-enable-table-editor' is equal to `optimized'."
   :group 'org-table-editing
   :type 'boolean)
 
+(defcustom org-table-fix-formulas-confirm nil
+  "Whether the user should confirm when Org fixes formulas."
+  :group 'org-table-editing
+  :type '(choice
+	  (const :tag "with yes-or-no" yes-or-no-p)
+	  (const :tag "with y-or-n" y-or-n-p)
+	  (const :tag "no confirmation" nil)))
+(put 'org-table-fix-formulas-confirm
+     'safe-local-variable
+     '(lambda (x) (member x '(yes-or-no-p y-or-n-p))))
+
 (defcustom org-table-tab-jumps-over-hlines t
   "Non-nil means tab in the last column of a table with jump over a hline.
 If a horizontal separator line is following the current line,
@@ -1232,8 +1243,10 @@ However, when FORCE is non-nil, create new columns if necessary."
     (org-goto-line linepos)
     (org-table-goto-column colpos)
     (org-table-align)
-    (org-table-fix-formulas "$" nil (1- col) 1)
-    (org-table-fix-formulas "$LR" nil (1- col) 1)))
+    (when (or (not org-table-fix-formulas-confirm)
+	      (funcall org-table-fix-formulas-confirm "Fix formulas? "))
+      (org-table-fix-formulas "$" nil (1- col) 1)
+      (org-table-fix-formulas "$LR" nil (1- col) 1))))
 
 (defun org-table-find-dataline ()
   "Find a data line in the current table, which is needed for column commands."
@@ -1301,10 +1314,12 @@ first dline below it is used.  When ABOVE is non-nil, the one above is used."
     (org-goto-line linepos)
     (org-table-goto-column colpos)
     (org-table-align)
-    (org-table-fix-formulas "$" (list (cons (number-to-string col) "INVALID"))
-			    col -1 col)
-    (org-table-fix-formulas "$LR" (list (cons (number-to-string col) "INVALID"))
-			    col -1 col)))
+    (when (or (not org-table-fix-formulas-confirm)
+	      (funcall org-table-fix-formulas-confirm "Fix formulas? "))
+      (org-table-fix-formulas "$" (list (cons (number-to-string col) "INVALID"))
+			      col -1 col)
+      (org-table-fix-formulas "$LR" (list (cons (number-to-string col) "INVALID"))
+			      col -1 col))))
 
 (defun org-table-move-column-right ()
   "Move column to the right."
@@ -1345,12 +1360,14 @@ first dline below it is used.  When ABOVE is non-nil, the one above is used."
     (org-goto-line linepos)
     (org-table-goto-column colpos)
     (org-table-align)
-    (org-table-fix-formulas
-     "$" (list (cons (number-to-string col) (number-to-string colpos))
-	       (cons (number-to-string colpos) (number-to-string col))))
-    (org-table-fix-formulas
-     "$LR" (list (cons (number-to-string col) (number-to-string colpos))
-		 (cons (number-to-string colpos) (number-to-string col))))))
+    (when (or (not org-table-fix-formulas-confirm)
+	      (funcall org-table-fix-formulas-confirm "Fix formulas? "))
+      (org-table-fix-formulas
+       "$" (list (cons (number-to-string col) (number-to-string colpos))
+		 (cons (number-to-string colpos) (number-to-string col))))
+      (org-table-fix-formulas
+       "$LR" (list (cons (number-to-string col) (number-to-string colpos))
+		   (cons (number-to-string colpos) (number-to-string col)))))))
 
 (defun org-table-move-row-down ()
   "Move table row down."
@@ -1386,7 +1403,10 @@ first dline below it is used.  When ABOVE is non-nil, the one above is used."
     (insert txt)
     (beginning-of-line 0)
     (org-move-to-column col)
-    (unless (or hline1p hline2p)
+    (unless (or hline1p hline2p
+		(not (or (not org-table-fix-formulas-confirm)
+			 (funcall org-table-fix-formulas-confirm 
+				  "Fix formulas? "))))
       (org-table-fix-formulas
        "@" (list (cons (number-to-string dline1) (number-to-string dline2))
 		 (cons (number-to-string dline2) (number-to-string dline1)))))))
@@ -1408,7 +1428,9 @@ With prefix ARG, insert below the current line."
     (re-search-forward "| ?" (point-at-eol) t)
     (and (or org-table-may-need-update org-table-overlay-coordinates)
 	 (org-table-align))
-    (org-table-fix-formulas "@" nil (1- (org-table-current-dline)) 1)))
+    (when (or (not org-table-fix-formulas-confirm)
+	      (funcall org-table-fix-formulas-confirm "Fix formulas? "))
+      (org-table-fix-formulas "@" nil (1- (org-table-current-dline)) 1))))
 
 (defun org-table-insert-hline (&optional above)
   "Insert a horizontal-line below the current line into the table.
@@ -1469,8 +1491,10 @@ In particular, this does handle wide and invisible characters."
     (kill-region (point-at-bol) (min (1+ (point-at-eol)) (point-max)))
     (if (not (org-at-table-p)) (beginning-of-line 0))
     (org-move-to-column col)
-    (org-table-fix-formulas "@" (list (cons (number-to-string dline) "INVALID"))
-			    dline -1 dline)))
+    (when (or (not org-table-fix-formulas-confirm)
+	      (funcall org-table-fix-formulas-confirm "Fix formulas? "))
+      (org-table-fix-formulas "@" (list (cons (number-to-string dline) "INVALID"))
+			      dline -1 dline))))
 
 (defun org-table-sort-lines (with-case &optional sorting-type)
   "Sort table lines according to the column at point.
@@ -4218,7 +4242,7 @@ This generic routine can be used for many standard cases.
 TABLE is a list, each entry either the symbol `hline' for a horizontal
 separator line, or a list of fields for that line.
 PARAMS is a property list of parameters that can influence the conversion.
-For the generic converter, some parameters are obligatory:  You need to
+For the generic converter, some parameters are obligatory: you need to
 specify either :lfmt, or all of (:lstart :lend :sep).
 
 Valid parameters are
