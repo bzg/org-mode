@@ -2282,7 +2282,7 @@ operator that looks like this:
 @end example
 
 @noindent
-and allows relative relative references, i.e. references relative to the
+and allows relative references, i.e. references relative to the
 row/column of the field whose value is being computed.  These relative
 references make it possible to store a formula only once and use it in many
 fields without copying and modifying it.
