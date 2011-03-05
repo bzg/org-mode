@@ -10002,7 +10002,6 @@ on the system \"/user@host:\"."
 (defvar org-refile-cache nil
   "Cache for refile targets.")
 
-
 (defvar org-refile-markers nil
   "All the markers used for caching refile locations.")
 
@@ -10051,7 +10050,7 @@ on the system \"/user@host:\"."
 			   org-refile-cache))))
       (and set (org-refile-cache-check-set set) set)))))
 
-(defun org-get-refile-targets (&optional default-buffer)
+(defun org-refile-get-targets (&optional default-buffer)
   "Produce a table with refile targets."
   (let ((case-fold-search nil)
 	;; otherwise org confuses "TODO" as a kw and "Todo" as a word
@@ -10394,7 +10393,7 @@ this function appends the default value from
 `org-refile-history' automatically, if that is not empty."
   (let ((org-refile-targets org-refile-targets)
 	(org-refile-use-outline-path org-refile-use-outline-path))
-    (setq org-refile-target-table (org-get-refile-targets default-buffer)))
+    (setq org-refile-target-table (org-refile-get-targets default-buffer)))
   (unless org-refile-target-table
     (error "No refile targets"))
   (let* ((prompt (concat prompt
