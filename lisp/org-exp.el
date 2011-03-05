@@ -560,6 +560,13 @@ the values of constants may be useful to have."
   :group 'org-export-tables
   :type 'boolean)
 
+(defcustom org-export-table-remove-empty-lines t
+  "Remove empty lines when exporting tables.
+This is the global equivalent of the :remove-nil-lines option
+when locally sending a table with #+ORGTBL."
+  :group 'org-export-tables
+  :type 'boolean)
+
 (defcustom org-export-prefer-native-exporter-for-tables nil
   "Non-nil means always export tables created with table.el natively.
 Natively means use the HTML code generator in table.el.
@@ -1909,7 +1916,7 @@ When it is nil, all comments will be removed."
 
 (defun org-export-remove-special-table-lines ()
   "Remove tables lines that are used for internal purposes.
-Also, store forcedalignment information found in such lines."
+Also, store forced alignment information found in such lines."
   (goto-char (point-min))
   (while (re-search-forward "^[ \t]*|" nil t)
     (org-if-unprotected-at (1- (point))
@@ -1920,7 +1927,7 @@ Also, store forcedalignment information found in such lines."
 		nil
 		(mapcar
 		 (lambda (f)
-		   (or (= (length f) 0)
+		   (or (and org-export-table-remove-empty-lines (= (length f) 0))
 		       (string-match
 			"\\`<\\([0-9]\\|[lrc]\\|[lrc][0-9]+\\)>\\'" f)))
 		 (org-split-string ;; FIXME, can't we do without splitting???
