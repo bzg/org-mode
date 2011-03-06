@@ -6291,8 +6291,8 @@ through the interactive template selection, you can create your key binding
 like this:
 
 @lisp
-(define-key global-map "\C-cc"
-   (lambda () (interactive) (org-capture nil "t")))
+(define-key global-map "\C-cx"
+   (lambda () (interactive) (org-capture nil "x")))
 @end lisp
 
 @menu
