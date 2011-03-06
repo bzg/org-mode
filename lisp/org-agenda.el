@@ -3492,10 +3492,8 @@ given in `org-agenda-start-on-weekday'."
   (setq org-agenda-last-arguments (list include-all start-day span))
   (org-compile-prefix-format 'agenda)
   (org-set-sorting-strategy 'agenda)
-  (let* ((span (org-agenda-ndays-to-span (or span
-					     org-agenda-current-span
-					     org-agenda-ndays
-					     org-agenda-span)))
+  (let* ((span (org-agenda-ndays-to-span 
+		(or span org-agenda-ndays org-agenda-span)))
 	 (today (org-today))
 	 (sd (or start-day today))
 	 (ndays (org-agenda-span-to-ndays span sd))
