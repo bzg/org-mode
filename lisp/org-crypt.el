@@ -204,12 +204,17 @@ This setting can also be overridden in the CRYPTKEY property."
    'org-mode-hook
    (lambda () (add-hook 'before-save-hook 'org-encrypt-entries nil t))))
 
+;; FIXME Find a better way to encrypt Org auto-saved buffers?
 ;; When `auto-save-default' is non-nil, make sure entries are
 ;; encrypted before auto-saving
+;; (when auto-save-default
+;;    (add-hook
+;;     'org-mode-hook
+;;     (lambda () (add-hook 'auto-save-hook 'org-encrypt-entries nil t))))
+
 (when auto-save-default
-   (add-hook
-    'org-mode-hook
-    (lambda () (add-hook 'auto-save-hook 'org-encrypt-entries nil t))))
+  (message "Warning: turn auto-save-mode off in Org buffers containing crypted entries.")
+  (sit-for 5))
 
 (add-hook 'org-reveal-start-hook 'org-decrypt-entry)
 
