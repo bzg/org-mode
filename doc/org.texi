@@ -1283,19 +1283,17 @@ See also the variable @code{org-goto-interface}.
 @table @asis
 @orgcmd{M-@key{RET},org-insert-heading}
 @vindex org-M-RET-may-split-line
-Insert new heading with same level as current.  If the cursor is in a
-plain list item, a new item is created (@pxref{Plain lists}).  To force
-creation of a new headline, use a prefix argument, or first press @key{RET}
-to get to the beginning of the next line.  When this command is used in
-the middle of a line, the line is split and the rest of the line becomes
-the new headline@footnote{If you do not want the line to be split,
-customize the variable @code{org-M-RET-may-split-line}.}.  If the
-command is used at the beginning of a headline, the new headline is
-created before the current line.  If at the beginning of any other line,
-the content of that line is made the new heading.  If the command is
-used at the end of a folded subtree (i.e.@: behind the ellipses at the end
-of a headline), then a headline like the current one will be inserted
-after the end of the subtree.
+Insert new heading with same level as current.  If the cursor is in a plain
+list item, a new item is created (@pxref{Plain lists}).  To force creation of
+a new headline, use a prefix argument.  When this command is used in the
+middle of a line, the line is split and the rest of the line becomes the new
+headline@footnote{If you do not want the line to be split, customize the
+variable @code{org-M-RET-may-split-line}.}.  If the command is used at the
+beginning of a headline, the new headline is created before the current line.
+If at the beginning of any other line, the content of that line is made the
+new heading.  If the command is used at the end of a folded subtree (i.e.@:
+behind the ellipses at the end of a headline), then a headline like the
+current one will be inserted after the end of the subtree.
 @orgcmd{C-@key{RET},org-insert-heading-respect-content}
 Just like @kbd{M-@key{RET}}, except when adding a new heading below the
 current heading, the new heading is placed after the body instead of before
@@ -1489,10 +1487,10 @@ Org knows ordered lists, unordered lists, and description lists.
 @emph{Unordered} list items start with @samp{-}, @samp{+}, or
 @samp{*}@footnote{When using @samp{*} as a bullet, lines must be indented or
 they will be seen as top-level headlines.  Also, when you are hiding leading
-stars to get a clean outline view, plain list items starting with a star are
-visually indistinguishable from true headlines.  In short: even though
-@samp{*} is supported, it may be better to not use it for plain list items.}
-as bullets.
+stars to get a clean outline view, plain list items starting with a star may
+be hard to distinguish from true headlines.  In short: even though @samp{*}
+is supported, it may be better to not use it for plain list items.}  as
+bullets.
 @item
 @vindex org-plain-list-ordered-item-terminator
 @vindex org-alphabetical-lists
@@ -1518,7 +1516,7 @@ Items belonging to the same list must have the same indentation on the first
 line.  In particular, if an ordered list reaches number @samp{10.}, then the
 2--digit numbers must be written left-aligned with the other numbers in the
 list.  An item ends before the next line that is less or equally indented
-than the bullet/number.
+than its bullet/number.
 
 @vindex org-list-ending-method
 @vindex org-list-end-regexp
@@ -1556,8 +1554,7 @@ XEmacs, you should use Kyle E. Jones' @file{filladapt.el}.  To turn this on,
 put into @file{.emacs}: @code{(require 'filladapt)}}, and by exporting them
 properly (@pxref{Exporting}).  Since indentation is what governs the
 structure of these lists, many structural constructs like @code{#+BEGIN_...}
-blocks can be indented to signal that they should be considered as a list
-item.
+blocks can be indented to signal that they belong to a particular item.
 
 @vindex org-list-demote-modify-bullet
 If you find that using a different bullet for a sub-list (than that used for
@@ -1586,16 +1583,11 @@ headlines, however; the hierarchies remain completely separated.
 @vindex org-list-automatic-rules
 Insert new item at current level.  With a prefix argument, force a new
 heading (@pxref{Structure editing}).  If this command is used in the middle
-of a line, the line is @emph{split} and the rest of the line becomes the new
-item@footnote{If you do not want the line to be split, customize the variable
-@code{org-M-RET-may-split-line}.}.  If this command is executed @emph{before
-an item's body}, the new item is created @emph{before} the current item.  If the
-command is executed in the white space before the text that is part of an
-item but does not contain the bullet, a bullet is added to the current line.
-
-As a new item cannot be inserted in a structural construct (like an example
-or source code block) within a list, Org will instead insert it right before
-the structure, or return an error.
+of an item, that item is @emph{split} in two, and the second part becomes the
+new item@footnote{If you do not want the item to be split, customize the
+variable @code{org-M-RET-may-split-line}.}.  If this command is executed
+@emph{before item's body}, the new item is created @emph{before} the current
+one.
 @kindex M-S-@key{RET}
 @item M-S-@key{RET}
 Insert a new item with a checkbox (@pxref{Checkboxes}).
@@ -1643,9 +1635,8 @@ influence on the text @emph{after} the list.
 @kindex C-c C-c
 @item C-c C-c
 If there is a checkbox (@pxref{Checkboxes}) in the item line, toggle the
-state of the checkbox.  Also, makes sure that all the
-items on this list level use the same bullet and that the numbering of list
-items (if applicable) is correct.
+state of the checkbox.  In any case, verify bullets and indentation
+consistency in the whole list.
 @kindex C-c -
 @vindex org-plain-list-ordered-item-terminator
 @vindex org-list-automatic-rules
@@ -1658,7 +1649,7 @@ and its position@footnote{See @code{bullet} rule in
 prefix argument N, select the Nth bullet from this list.  If there is an
 active region when calling this, selected text will be changed into an item.
 With a prefix argument, all lines will be converted to list items.  If the
-first line already was a list item, any item markers will be removed from the
+first line already was a list item, any item marker will be removed from the
 list.  Finally, even without an active region, a normal line will be
 converted into a list item.
 @kindex C-c *
@@ -1701,7 +1692,7 @@ look like this:
 ** This is a headline
    Still outside the drawer
    :DRAWERNAME:
-      This is inside the drawer.
+   This is inside the drawer.
    :END:
    After the drawer.
 @end example

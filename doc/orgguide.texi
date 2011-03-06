@@ -494,7 +494,7 @@ description.
 @end itemize
 
 Items belonging to the same list must have the same indentation on the first
-line.  An item ends before the next line that is indented like the
+line.  An item ends before the next line that is indented like its
 bullet/number, or less.  A list ends when all items are closed, or before two
 blank lines. An example:
 
@@ -533,8 +533,8 @@ Decrease/increase the indentation of an item, leaving children alone.
 Decrease/increase the indentation of the item, including subitems.
 @item C-c C-c
 If there is a checkbox (@pxref{Checkboxes}) in the item line, toggle the
-state of the checkbox.  Also make sure all items have the same bullet type
-and renumber ordered lists.
+state of the checkbox.  Also verify bullets and indentation consistency in
+the whole list.
 @item C-c -
 Cycle the entire list level through the different itemize/enumerate bullets
 (@samp{-}, @samp{+}, @samp{*}, @samp{1.}, @samp{1)}).
