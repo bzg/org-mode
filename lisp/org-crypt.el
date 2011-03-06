@@ -204,6 +204,13 @@ This setting can also be overridden in the CRYPTKEY property."
    'org-mode-hook
    (lambda () (add-hook 'before-save-hook 'org-encrypt-entries nil t))))
 
+;; When `auto-save-default' is non-nil, make sure entries are
+;; encrypted before auto-saving
+(when auto-save-default
+   (add-hook
+    'org-mode-hook
+    (lambda () (add-hook 'auto-save-hook 'org-encrypt-entries nil t))))
+
 (add-hook 'org-reveal-start-hook 'org-decrypt-entry)
 
 (provide 'org-crypt)
