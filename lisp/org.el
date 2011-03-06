@@ -13955,7 +13955,7 @@ Each entry should have the following format:
  (PROPERTY . READ-FUNCTION)
 
 The read function will be called with the same argument as
-`org-completing-read.")
+`org-completing-read'.")
 
 (defun org-set-property-function (property)
   "Get the function that should be used to set PROPERTY.
