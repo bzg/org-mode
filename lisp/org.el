@@ -15553,12 +15553,10 @@ customizing `org-effort-durations' (which see).
 Entries containing a colon are interpreted as H:MM by
 `org-hh:mm-string-to-minutes'."
   (let ((result 0)
-	(regex (rx-to-string (group (1+ (any "0-9")))
-			     (0+ (syntax whitespace))
-			     (group
-			      (eval (cons 'or
-					  (mapcar 'car org-effort-durations)))))))
-    (while (string-match regex s)
+	(re (concat "\\([0-9]+\\) *\\(" 
+		    (regexp-opt (mapcar 'car org-effort-durations))
+		    "\\)")))
+    (while (string-match re s)
       (incf result (* (cdr (assoc (match-string 2 s) org-effort-durations))
 		      (string-to-number (match-string 1 s))))
       (setq s (replace-match "" nil t s)))
