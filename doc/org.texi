@@ -6359,10 +6359,6 @@ Valid values are:
 @item (file "path/to/file")
 Text will be placed at the beginning or end of that file.
 
-@item (currentfile)
-Text will be placed at the beginning or end of the file 
-@code{org-capture} is called from.
-
 @item (id "id of existing org entry")
 Filing as child of this entry, or in the body of the entry.
 
