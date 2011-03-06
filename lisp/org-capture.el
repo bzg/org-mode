@@ -271,8 +271,6 @@ calendar                |  %:type %:date"
 		   (list :tag "File"
 			 (const :format "" file)
 			 (file :tag "  File"))
-		   (list :tag "Current file"
-			 (const :format "" currentfile))
 		   (list :tag "ID"
 			 (const :format "" id)
 			 (string :tag "  ID"))
