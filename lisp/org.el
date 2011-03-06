@@ -1918,7 +1918,7 @@ When the value is `file', also include the file name (without directory)
 into the path.  In this case, you can also stop the completion after
 the file name, to get entries inserted as top level in the file.
 
-  When `full-file-path', include the full file path."
+When `full-file-path', include the full file path."
   :group 'org-refile
   :type '(choice
 	  (const :tag "Not" nil)
