@@ -455,7 +455,7 @@ bypassed."
 		    (org-capture-get :key)
 		    (nth 1 error))))
 	  (if (org-capture-get :immediate-finish)
-	      (org-capture-finalize)
+	      (org-capture-finalize nil t)
 	    (if (and (org-mode-p)
 		     (org-capture-get :clock-in))
 		(condition-case nil
@@ -467,7 +467,6 @@ bypassed."
 		      (org-set-local 'org-capture-clock-was-started t))
 		  (error
 		   "Could not start the clock in this capture buffer")))))))))))
-
 
 (defun org-capture-get-template ()
   "Get the template from a file or a function if necessary."
@@ -487,10 +486,12 @@ bypassed."
      (t (setq txt "* Invalid capture template")))
     (org-capture-put :template txt)))
 
-(defun org-capture-finalize (&optional stay-with-capture)
+(defun org-capture-finalize (&optional stay-with-capture clock-out)
   "Finalize the capture process.
 With prefix argument STAY-WITH-CAPTURE, jump to the location of the
-captured item after finalizing."
+captured item after finalizing.
+A second optional argument tells whether finalizing the capture
+process should clock-out the captured entry."
   (interactive "P")
   (unless (and org-capture-mode
 	       (buffer-base-buffer (current-buffer)))
@@ -503,7 +504,7 @@ captured item after finalizing."
 	     (> org-clock-marker (point-min))
 	     (< org-clock-marker (point-max)))
     ;; Looks like the clock we started is still running.  Clock out.
-    (let (org-log-note-clock-out) (org-clock-out))
+    (when clock-out (let (org-log-note-clock-out) (org-clock-out)))
     (when (and (org-capture-get :clock-resume 'local)
 	       (markerp (org-capture-get :interrupted-clock 'local))
 	       (buffer-live-p (marker-buffer
@@ -701,13 +702,13 @@ already gone.  Any prefix argument will be passed to the refile command."
 
 	   ((eq (car target) 'file+datetree+prompt)
 	    ;; prompt for date
-	    (time-to-days (org-read-date 
+	    (time-to-days (org-read-date
 			   nil t nil "Date for tree entry:"
 			   (current-time))))
 	   (t
 	    ;; current date, possible corrected for late night workers
 	    (org-today))))))
-       
+
        ((eq (car target) 'file+function)
 	(set-buffer (org-capture-target-buffer (nth 1 target)))
 	(funcall (nth 2 target))
