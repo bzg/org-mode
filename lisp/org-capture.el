@@ -517,7 +517,11 @@ process should clock-out the captured entry."
   (let ((beg (point-min))
 	(end (point-max))
 	(abort-note nil))
+    ;; Store the size of the capture buffer
+    (org-capture-put :captured-entry-size (- (point-max) (point-min)))
     (widen)
+    ;; Store the insertion point in the target buffer
+    (org-capture-put :insertion-point (point))
 
     (if org-note-abort
 	(let ((m1 (org-capture-get :begin-marker 'local))
@@ -567,8 +571,29 @@ process should clock-out the captured entry."
 	  (kill-buffer (org-capture-get :kill-buffer 'local))
 	  (base-buffer (buffer-base-buffer (current-buffer))))
 
-      ;; Kill the indiret buffer
+      ;; Kill the indirect buffer
       (kill-buffer (current-buffer))
+
+      ;; Narrow back the target buffer to its previous state
+      (with-current-buffer (org-capture-get :buffer)
+        (let ((reg (org-capture-get :initial-target-region))
+	      (pos (org-capture-get :initial-target-position))
+	      (ipt (org-capture-get :insertion-point))
+	      (size (org-capture-get :captured-entry-size)))
+	  (when reg
+	    (cond ((< ipt (car reg))
+		   ;; insertion point is before the narrowed region
+		   (narrow-to-region (+ size (car reg)) (+ size (cdr reg))))
+		  ((> ipt (cdr reg))
+		   ;; insertion point is after the narrowed region
+		   (narrow-to-region (car reg) (cdr reg)))
+		  (t
+		   ;; insertion point is within the narrowed region
+		   (narrow-to-region (car reg) (+ size (cdr reg)))))
+	    ;; now place back the point at its original position
+	    (if (< ipt (car reg))
+		(goto-char (+ size pos))
+	      (goto-char (if (< ipt pos) (+ size pos) pos))))))
 
       ;; Kill the target buffer if that is desired
       (when (and base-buffer new-buffer kill-buffer)
@@ -629,6 +654,16 @@ already gone.  Any prefix argument will be passed to the refile command."
 
 ;;; Supporting functions for handling the process
 
+(defun org-capture-put-target-region-and-position ()
+  "Store the initial region with `org-capture-put'."
+  (org-capture-put
+   :initial-target-region
+   ;; Check if the buffer is currently narrowed
+   (when (/= (buffer-size) (- (point-max) (point-min)))
+     (cons (point-min) (point-max))))
+  ;; store the current point
+  (org-capture-put :initial-target-position (point)))
+
 (defun org-capture-set-target-location (&optional target)
   "Find target buffer and position and store then in the property list."
   (let ((target-entry-p t))
@@ -637,12 +672,16 @@ already gone.  Any prefix argument will be passed to the refile command."
       (cond
        ((eq (car target) 'file)
 	(set-buffer (org-capture-target-buffer (nth 1 target)))
+	(org-capture-put-target-region-and-position)
+	(widen)
 	(setq target-entry-p nil))
 
        ((eq (car target) 'currentfile)
 	(if (not (and (buffer-file-name) (org-mode-p)))
 	    (error "Cannot call this capture template outside of an Org buffer")
 	  (set-buffer (org-capture-target-buffer (buffer-file-name)))
+	  (org-capture-put-target-region-and-position)
+	  (widen)
 	  (setq target-entry-p nil)))
 
        ((eq (car target) 'id)
@@ -650,10 +689,14 @@ already gone.  Any prefix argument will be passed to the refile command."
 	  (if (not loc)
 	      (error "Cannot find target ID \"%s\"" (nth 1 target))
 	    (set-buffer (org-capture-target-buffer (car loc)))
+	    (widen)
+	    (org-capture-put-target-region-and-position)
 	    (goto-char (cdr loc)))))
 
        ((eq (car target) 'file+headline)
 	(set-buffer (org-capture-target-buffer (nth 1 target)))
+	(org-capture-put-target-region-and-position)
+	(widen)
 	(let ((hd (nth 2 target)))
 	  (goto-char (point-min))
 	  (unless (org-mode-p)
@@ -674,10 +717,14 @@ already gone.  Any prefix argument will be passed to the refile command."
 		  (cons (org-capture-expand-file (nth 1 target))
 			(cddr target)))))
 	  (set-buffer (marker-buffer m))
+	  (org-capture-put-target-region-and-position)
+	  (widen)
 	  (goto-char m)))
 
        ((eq (car target) 'file+regexp)
 	(set-buffer (org-capture-target-buffer (nth 1 target)))
+	(org-capture-put-target-region-and-position)
+	(widen)
 	(goto-char (point-min))
 	(if (re-search-forward (nth 2 target) nil t)
 	    (progn
@@ -690,6 +737,8 @@ already gone.  Any prefix argument will be passed to the refile command."
        ((memq (car target) '(file+datetree file+datetree+prompt))
 	(require 'org-datetree)
 	(set-buffer (org-capture-target-buffer (nth 1 target)))
+	(org-capture-put-target-region-and-position)
+	(widen)
 	;; Make a date tree entry, with the current date (or yesterday,
 	;; if we are extending dates for a couple of hours)
 	(org-datetree-find-date-create
@@ -711,6 +760,8 @@ already gone.  Any prefix argument will be passed to the refile command."
 
        ((eq (car target) 'file+function)
 	(set-buffer (org-capture-target-buffer (nth 1 target)))
+	(org-capture-put-target-region-and-position)
+	(widen)
 	(funcall (nth 2 target))
 	(org-capture-put :exact-position (point))
 	(setq target-entry-p (and (org-mode-p) (org-at-heading-p))))
@@ -724,6 +775,8 @@ already gone.  Any prefix argument will be passed to the refile command."
 	(if (and (markerp org-clock-hd-marker)
 		 (marker-buffer org-clock-hd-marker))
 	    (progn (set-buffer (marker-buffer org-clock-hd-marker))
+		   (org-capture-put-target-region-and-position)
+		   (widen)
 		   (goto-char org-clock-hd-marker))
 	  (error "No running clock that could be used as capture target")))
 
