@@ -2173,7 +2173,7 @@ With optional prefix argument ALL, do this for the whole buffer."
 			     (or (org-entry-get nil "COOKIE_DATA") ""))))
 	  (bounds (if all
 		      (cons (point-min) (point-max))
-		    (cons (or (ignore-errors (org-back-to-heading) (point))
+		    (cons (or (ignore-errors (org-back-to-heading t) (point))
 			      (point-min))
 			  (save-excursion (outline-next-heading) (point)))))
 	  (count-boxes
