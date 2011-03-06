@@ -2223,7 +2223,7 @@ Pressing `<' twice means to restrict to the current subtree or region
 	       ((fboundp type)
 		(org-let lprops '(funcall type match)))
 	       (t (error "Invalid custom agenda command type %s" type))))
-	  (org-run-agenda-series (nth 1 entry) (cddr entry))))
+	  (org-agenda-run-series (nth 1 entry) (cddr entry))))
        ((equal keys "C")
 	(setq org-agenda-custom-commands org-agenda-custom-commands-orig)
 	(customize-variable 'org-agenda-custom-commands))
@@ -2473,10 +2473,10 @@ s   Search for keywords                 C   Configure custom agenda commands
 (defvar org-agenda-overriding-arguments nil) ; dynamically scoped parameter
 (defvar org-agenda-last-arguments nil
   "The arguments of the previous call to `org-agenda'.")
-(defun org-run-agenda-series (name series)
+(defun org-agenda-run-series (name series)
   (org-let (nth 1 series) '(org-prepare-agenda name))
   (let* ((org-agenda-multi t)
-	 (redo (list 'org-run-agenda-series name (list 'quote series)))
+	 (redo (list 'org-agenda-run-series name (list 'quote series)))
 	 (org-agenda-overriding-arguments
 	  (or org-agenda-overriding-arguments
 	      (unless (null (delq nil (get 'org-agenda-redo-command 'last-args)))
