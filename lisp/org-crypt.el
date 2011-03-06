@@ -80,19 +80,22 @@
 
 (defgroup org-crypt nil
   "Org Crypt"
-  :tag "Org Crypt" :group 'org)
+  :tag "Org Crypt" 
+  :group 'org)
 
 (defcustom org-crypt-tag-matcher "crypt"
   "The tag matcher used to find headings whose contents should be encrypted.
 
 See the \"Match syntax\" section of the org manual for more details."
-  :type 'string :group 'org-crypt)
+  :type 'string 
+  :group 'org-crypt)
 
-(defcustom org-crypt-key nil
+(defcustom org-crypt-key ""
   "The default key to use when encrypting the contents of a heading.
 
 This setting can also be overridden in the CRYPTKEY property."
-  :type 'string :group 'org-crypt)
+  :type 'string 
+  :group 'org-crypt)
 
 (defun org-crypt-key-for-heading ()
   "Return the encryption key for the current heading."
