@@ -2682,7 +2682,7 @@ command."
 	   (message "Export visible: [a]SCII  [h]tml  [b]rowse HTML [H/R]buffer with HTML  [D]ocBook  [l]atex  [p]df  [d]view pdf  [L]atex buffer  [x]OXO  [ ]keep buffer")
 	   (read-char-exclusive))
 	 current-prefix-arg))
-  (if (not (member type '(?a ?n ?u ?\C-a ?b ?\C-b ?h ?D ?x ?\ ?l ?p ?d ?L)))
+  (if (not (member type '(?a ?n ?u ?\C-a ?b ?\C-b ?h ?D ?x ?\ ?l ?p ?d ?L ?H ?R)))
       (error "Invalid export key"))
   (let* ((binding (cdr (assoc type
 			      '(
