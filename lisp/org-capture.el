@@ -460,7 +460,7 @@ bypassed."
 		    (org-capture-get :key)
 		    (nth 1 error))))
 	  (if (org-capture-get :immediate-finish)
-	      (org-capture-finalize nil (not (org-capture-get :clock-keep)))
+	      (org-capture-finalize nil (org-capture-get :clock-keep))
 	    (if (and (org-mode-p)
 		     (org-capture-get :clock-in))
 		(condition-case nil
@@ -491,12 +491,12 @@ bypassed."
      (t (setq txt "* Invalid capture template")))
     (org-capture-put :template txt)))
 
-(defun org-capture-finalize (&optional stay-with-capture clock-out)
+(defun org-capture-finalize (&optional stay-with-capture clock-keep)
   "Finalize the capture process.
 With prefix argument STAY-WITH-CAPTURE, jump to the location of the
 captured item after finalizing.
 A second optional argument tells whether finalizing the capture
-process should clock-out the captured entry."
+process should keep the clock running in the filed entry."
   (interactive "P")
   (unless (and org-capture-mode
 	       (buffer-base-buffer (current-buffer)))
@@ -509,8 +509,8 @@ process should clock-out the captured entry."
 	     (> org-clock-marker (point-min))
 	     (< org-clock-marker (point-max)))
     ;; Looks like the clock we started is still running.  Clock out.
-    (when clock-out (let (org-log-note-clock-out) (org-clock-out)))
-    (when (and clock-out
+    (when (not clock-keep) (let (org-log-note-clock-out) (org-clock-out)))
+    (when (and (not clock-keep)
 	       (org-capture-get :clock-resume 'local)
 	       (markerp (org-capture-get :interrupted-clock 'local))
 	       (buffer-live-p (marker-buffer
