@@ -6,7 +6,7 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 7.4
+;; Version: 7.5
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -192,7 +192,7 @@ identifier."
 
 ;;; Version
 
-(defconst org-version "7.4"
+(defconst org-version "7.5"
   "The version number of the file org.el.")
 
 (defun org-version (&optional here)
