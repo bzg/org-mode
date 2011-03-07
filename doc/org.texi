@@ -6408,12 +6408,14 @@ before and after the new item.  Default 0, only common other value is 1.
 @item :clock-in
 Start the clock in this item.
 
+@item :clock-keep
+Keep the clock running when filing the captured entry.
+
 @item :clock-resume
 If starting the capture interrupted a clock, restart that clock when finished
-with the capture.
-
-@item :no-clock-out
-Don't clock out when filing the captured entry.
+with the capture.  Note that @code{:clock-keep} has precedence over
+@code{:clock-resume}.  When setting both to @code{t}, the current clock will
+run and the previous one will not be resumed.
 
 @item :unnarrowed
 Do not narrow the target buffer, simply show the full buffer.  Default is to

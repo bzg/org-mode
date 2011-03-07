@@ -182,9 +182,12 @@ properties are:
 
  :clock-in           Start the clock in this item.
 
- :clock-resume       Start the interrupted clock when finishing the capture.
+ :clock-keep         Keep the clock running when filing the captured entry.
 
- :no-clock-out       Don't clock out when filing the captured entry.
+ :clock-resume       Start the interrupted clock when finishing the capture.
+                     Note that :clock-keep has precedence over :clock-resume.
+                     When setting both to `t', the current clock will run and
+                     the previous one will not be resumed.
 
  :unnarrowed         Do not narrow the target buffer, simply show the
                      full buffer.  Default is to narrow it so that you
@@ -318,7 +321,7 @@ calendar                |  %:type %:date"
 			    ((const :format "%v " :immediate-finish) (const t))
 			    ((const :format "%v " :empty-lines) (const 1))
 			    ((const :format "%v " :clock-in) (const t))
-			    ((const :format "%v " :no-clock-out) (const nil))
+			    ((const :format "%v " :clock-keep) (const nil))
 			    ((const :format "%v " :clock-resume) (const t))
 			    ((const :format "%v " :unnarrowed) (const t))
 			    ((const :format "%v " :kill-buffer) (const t))))))))
@@ -457,7 +460,7 @@ bypassed."
 		    (org-capture-get :key)
 		    (nth 1 error))))
 	  (if (org-capture-get :immediate-finish)
-	      (org-capture-finalize nil (not (org-capture-get :no-clock-out)))
+	      (org-capture-finalize nil (not (org-capture-get :clock-keep)))
 	    (if (and (org-mode-p)
 		     (org-capture-get :clock-in))
 		(condition-case nil
@@ -507,7 +510,8 @@ process should clock-out the captured entry."
 	     (< org-clock-marker (point-max)))
     ;; Looks like the clock we started is still running.  Clock out.
     (when clock-out (let (org-log-note-clock-out) (org-clock-out)))
-    (when (and (org-capture-get :clock-resume 'local)
+    (when (and clock-out
+	       (org-capture-get :clock-resume 'local)
 	       (markerp (org-capture-get :interrupted-clock 'local))
 	       (buffer-live-p (marker-buffer
 			       (org-capture-get :interrupted-clock 'local))))
