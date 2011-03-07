@@ -153,15 +153,15 @@ webserver directory.
 While working on master between releases, I used to use something like
 7.02trans as the version string.  I no longer do this.  =M-x
 org-version= will spit ut complete version infor related to git, with
-the neares commit and tag.  I you ever need to set a special version
+the nearest commit and tag.  I you ever need to set a special version
 number, use this:
 
 : UTILITIES/set_version 7.02trans
 
 and commit the result.  Note that the above command does not change
-the version string in the file from which Org's homepage is
-generated.  To change that as well, you would use a =--all= flag.  To
-change only this file, use =--only=.
+the version string in the file from which Org's homepage is generated.
+To change that as well, you would use a =--all= flag.  To change only
+this file, use =--only=.
 
 * Synchonization with Emacs
 
