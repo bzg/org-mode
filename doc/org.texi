@@ -6412,6 +6412,9 @@ Start the clock in this item.
 If starting the capture interrupted a clock, restart that clock when finished
 with the capture.
 
+@item :no-clock-out
+Don't clock out when filing the captured entry.
+
 @item :unnarrowed
 Do not narrow the target buffer, simply show the full buffer.  Default is to
 narrow it so that you only see the new material.

@@ -184,6 +184,8 @@ properties are:
 
  :clock-resume       Start the interrupted clock when finishing the capture.
 
+ :no-clock-out       Don't clock out when filing the captured entry.
+
  :unnarrowed         Do not narrow the target buffer, simply show the
                      full buffer.  Default is to narrow it so that you
                      only see the new stuff.
@@ -316,6 +318,7 @@ calendar                |  %:type %:date"
 			    ((const :format "%v " :immediate-finish) (const t))
 			    ((const :format "%v " :empty-lines) (const 1))
 			    ((const :format "%v " :clock-in) (const t))
+			    ((const :format "%v " :no-clock-out) (const nil))
 			    ((const :format "%v " :clock-resume) (const t))
 			    ((const :format "%v " :unnarrowed) (const t))
 			    ((const :format "%v " :kill-buffer) (const t))))))))
@@ -454,7 +457,7 @@ bypassed."
 		    (org-capture-get :key)
 		    (nth 1 error))))
 	  (if (org-capture-get :immediate-finish)
-	      (org-capture-finalize nil t)
+	      (org-capture-finalize nil (not (org-capture-get :no-clock-out)))
 	    (if (and (org-mode-p)
 		     (org-capture-get :clock-in))
 		(condition-case nil
