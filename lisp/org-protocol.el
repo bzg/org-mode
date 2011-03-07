@@ -9,7 +9,7 @@
 ;; Author: Ross Patterson <me AT rpatterson DOT net>
 ;; Maintainer: Sebastian Rose <sebastian_rose AT gmx DOT de>
 ;; Keywords: org, emacsclient, wp
-;; Version: 7.4
+;; Version: 7.5
 
 ;; This file is part of GNU Emacs.
 ;;
