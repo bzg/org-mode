@@ -71,7 +71,7 @@ This function is called by `org-babel-execute-src-block'."
                                      (or cmdline "")
                                      (org-babel-process-file-name in-file)
                                      (org-babel-process-file-name out-file)))
-                    ('mysql (format "mysql %s -e \"source %s\" > %s"
+                    ('mysql (format "mysql %s < %s > %s"
                                     (or cmdline "")
 				    (org-babel-process-file-name in-file)
 				    (org-babel-process-file-name out-file)))
