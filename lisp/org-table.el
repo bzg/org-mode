@@ -1144,7 +1144,8 @@ is always the old value."
 	   (eql (org-table-expand-lhs-ranges
 		 (mapcar
 		  (lambda (e)
-		    (cons (org-table-formula-handle-lastrc (car e)) (cdr e)))
+		    (cons (org-table-formula-handle-first/last-rc
+			   (car e)) (cdr e)))
 		  (org-table-get-stored-formulas))))
 	   (dline (org-table-current-dline))
 	   (ref (format "@%d$%d" dline col))
@@ -1999,15 +2000,23 @@ When NAMED is non-nil, look for a named equation."
 	    "\n")))
 
 (defsubst org-table-formula-make-cmp-string (a)
-  (when (string-match "\\`$>" a)
-    ;; Fake a high number to make sure this is sorted at the end.
-    (setq a (org-table-formula-handle-lastrc a))
-    (setq a (format "$%d" (+ 10000 (string-to-number (substring a 1))))))
-  (when (string-match "^\\(@\\([0-9]+\\)\\)?\\(\\$?\\([0-9]+\\)\\)?\\(\\$?[a-zA-Z0-9]+\\)?" a)
+  (when (string-match "\\`$[<>]" a)
+    (let ((arrow (string-to-char (substring a 1))))
+      ;; Fake a high number to make sure this is sorted at the end.
+      (setq a (org-table-formula-handle-first/last-rc a))
+      (setq a (format "$%d" (+ 10000
+			       (if (= arrow ?<) -1000 0)
+			       (string-to-number (substring a 1)))))))
+  (when (string-match
+	 "^\\(@\\([0-9]+\\)\\)?\\(\\$?\\([0-9]+\\)\\)?\\(\\$?[a-zA-Z0-9]+\\)?"
+	 a)
     (concat
-     (if (match-end 2) (format "@%05d" (string-to-number (match-string 2 a))) "")
-     (if (match-end 4) (format "$%05d" (string-to-number (match-string 4 a))) "")
-     (if (match-end 5) (concat "@@" (match-string 5 a))))))
+     (if (match-end 2)
+	 (format "@%05d" (string-to-number (match-string 2 a))) "")
+     (if (match-end 4)
+	 (format "$%05d" (string-to-number (match-string 4 a))) "")
+     (if (match-end 5)
+	 (concat "@@" (match-string 5 a))))))
 
 (defun org-table-formula-less-p (a b)
   "Compare two formulas for sorting."
@@ -2025,11 +2034,12 @@ When NAMED is non-nil, look for a named equation."
 	(setq strings (org-split-string (org-match-string-no-properties 2)
 					" *:: *"))
 	(while (setq string (pop strings))
-	  (when (string-match "\\`\\(@[-+I>0-9.$@]+\\|@?[0-9]+\\|\\$\\([a-zA-Z0-9]+\\|>\\(?:[-+][0-9]+\\)?\\)\\) *= *\\(.*[^ \t]\\)" string)
+	  (when (string-match "\\`\\(@[-+I<>0-9.$@]+\\|@?[0-9]+\\|\\$\\([a-zA-Z0-9]+\\|[<>]+\\)\\) *= *\\(.*[^ \t]\\)" string)
 	    (setq scol (if (match-end 2)
 			   (match-string 2 string)
 			 (match-string 1 string))
-		  scol (if (= (string-to-char scol) ?>) (concat "$" scol) scol)
+		  scol (if (member (string-to-char scol) '(?< ?>))
+			   (concat "$" scol) scol)
 		  eq (match-string 3 string)
 		  eq-alist (cons (cons scol eq) eq-alist))
 	    (if (member scol seen)
@@ -2673,19 +2683,19 @@ known that the table will be realigned a little later anyway."
       ;; Insert constants in all formulas
       (setq eqlist
 	    (mapcar (lambda (x)
-		      (when (string-match "\\`$>" (car x))
+		      (when (string-match "\\`$[<>]" (car x))
 			(setq lhs1 (car x))
 			(setq x (cons (substring
-				       (org-table-formula-handle-lastrc
+				       (org-table-formula-handle-first/last-rc
 					(car x)) 1)
 				      (cdr x)))
 			(if (assoc (car x) eqlist1)
 			    (error "\"%s=\" formula tries to overwrite existing formula for column %s"
 				   lhs1 (car x))))
 		      (cons
-		       (org-table-formula-handle-lastrc (car x))
+		       (org-table-formula-handle-first/last-rc (car x))
 		       (org-table-formula-substitute-names
-			(org-table-formula-handle-lastrc (cdr x)))))
+			(org-table-formula-handle-first/last-rc (cdr x)))))
 		    eqlist))
       ;; Split the equation list
       (while (setq eq (pop eqlist))
@@ -2868,19 +2878,29 @@ them to individual field equations for each field."
 				       :orig-eqn e (caar res)))))))
     (nreverse res)))
 
-(defun org-table-formula-handle-lastrc (s)
-  "Replace @> / $> with the last row/column of the table."
-  (while (string-match "\\([@$]\\)>\\(-[0-9]+\\)?" s)
-    (setq s (replace-match
-	     (format "%s%d"
-		     (match-string 1 s)
-		     (+ (if (equal (match-string 1 s) "@")
-			    (1- (length org-table-dlines))
-			  org-table-current-ncol)
-			(if (match-end 2)
-			    (string-to-number (match-string 2 s))
-			  0)))
-	     t t s)))
+(defun org-table-formula-handle-first/last-rc (s)
+  "Replace @<, @>, $<, $> with first/last row/column of the table.
+So @< and $< will always be replaced with @1 and $1, respectively.
+The advantage of these special markers are that structure editing of
+the table will not change them, while @1 and $1 will be modified
+when a line/row is swaped out of that privileged position.  So for
+formulas that use a range of rows or columns, it may often be better
+to anchor the formula with \"I\" row markers, or to offset from the
+borders of the table using the @< @> $< $> makers."
+  (let (n nmax len)
+    (while (string-match "\\([@$]\\)\\(<+\\|>+\\)" s)
+      (setq nmax (if (equal (match-string 1 s) "@")
+		     (1- (length org-table-dlines))
+		   org-table-current-ncol)
+	    len (- (match-end 2) (match-beginning 2))
+	    char (string-to-char (match-string 2 s))
+	    n (if (= char ?<)
+		  len
+		(- nmax len -1)))
+      (if (or (< n 1) (> n nmax))
+	  (error "Reference \"%s\" in expression \"%s\" points outside table"
+		 (match-string 0 s) s))
+      (setq s (replace-match (format "%s%d" (match-string 1 s) n) t t s))))
   s)
 
 (defun org-table-formula-substitute-names (f)
@@ -3003,7 +3023,7 @@ Parameters get priority."
     (setq startline (org-current-line))
     (while (setq entry (pop eql))
       (setq type (cond
-		  ((string-match "\\`$>" (car entry)) 'column)
+		  ((string-match "\\`$[<>]" (car entry)) 'column)
 		  ((equal (string-to-char (car entry)) ?@) 'field)
 		  ((string-match "^[0-9]" (car entry)) 'column)
 		  (t 'named)))
@@ -3227,7 +3247,7 @@ With prefix ARG, apply the new formulas to the table."
   (let ((pos org-pos) (sel-win org-selected-window) eql var form)
     (goto-char (point-min))
     (while (re-search-forward
-	    "^\\(@[-+I>0-9.$@]+\\|@?[0-9]+\\|\\$\\([a-zA-Z0-9]+\\|>[-+0-9]*\\)\\) *= *\\(.*\\(\n[ \t]+.*$\\)*\\)"
+	    "^\\(@[-+I<>0-9.$@]+\\|@?[0-9]+\\|\\$\\([a-zA-Z0-9]+\\|[<>]+\\)\\) *= *\\(.*\\(\n[ \t]+.*$\\)*\\)"
 	    nil t)
       (setq var (if (match-end 2) (match-string 2) (match-string 1))
 	    form (match-string 3))
