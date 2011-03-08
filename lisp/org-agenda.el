@@ -7969,7 +7969,7 @@ The prefix arg is passed through to the command if possible."
   (interactive "P")
   (unless org-agenda-bulk-marked-entries
     (error "No entries are marked"))
-  (message "Bulk: [r]efile [$]arch [A]rch->sib [t]odo [+/-]tag [s]chd [S]catter [d]eadline")
+  (message "Bulk: [r]efile [$]arch [A]rch->sib [t]odo [+/-]tag [s]chd [S]catter [d]eadline [f]unction")
   (let* ((action (read-char-exclusive))
 	 (org-log-refile (if org-log-refile 'time nil))
 	 (entries (reverse org-agenda-bulk-marked-entries))
@@ -8058,6 +8058,11 @@ The prefix arg is passed through to the command if possible."
 		   (condition-case nil
 		       (org-agenda-date-later distance)
 		     (error nil)))))))
+
+     ((equal action ?f)
+      (setq cmd (list (intern 
+		       (org-icompleting-read "Function: "
+					     obarray 'fboundp t nil nil)))))
 
      (t (error "Invalid bulk action")))
 
