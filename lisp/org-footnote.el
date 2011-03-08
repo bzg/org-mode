@@ -314,7 +314,7 @@ or new, let the user edit the definition of the footnote."
     ;; Skip existing footnotes
     (while (re-search-forward "^[[:space:]]*\\[[^]]+\\] " nil t)
       (forward-line))
-    (insert "[" label "] \n")
+    (insert "\n[" label "] \n")
     (goto-char (1- (point)))
     (message "Edit definition and go back with `C-c &' or, if unique, with `C-c C-c'.")))
 
@@ -500,7 +500,7 @@ ENTRY is (fn-label num-mark definition)."
     (when (re-search-forward (format ".\\[%s[]:]" (regexp-quote (car entry)))
 			     nil t)
       (org-footnote-goto-local-insertion-point)
-      (insert (format "\n\n[%s] %s" (car entry) (nth 2 entry))))))
+      (insert (format "\n[%s] %s\n" (car entry) (nth 2 entry))))))
 
 (defun org-footnote-goto-local-insertion-point ()
   "Find insertion point for footnote, just before next outline heading."
