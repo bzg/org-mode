@@ -1715,7 +1715,7 @@ lang=\"%s\" xml:lang=\"%s\">
       (if org-export-html-with-timestamp
 	  (insert org-export-html-html-helper-timestamp))
 
-      (insert "\n</div>\n</body>\n</html>\n")
+      (unless body-only (insert "\n</div>\n</body>\n</html>\n"))
 
       (unless (plist-get opt-plist :buffer-will-be-killed)
 	(normal-mode)
