@@ -10390,7 +10390,7 @@ This can be done with a 0 prefix: `C-0 C-c C-w'"
 (defun org-refile-get-location (&optional prompt default-buffer new-nodes)
   "Prompt the user for a refile location, using PROMPT.
 PROMPT should not be suffixed with a colon and a space, because
-this function appends the default value from 
+this function appends the default value from
 `org-refile-history' automatically, if that is not empty."
   (let ((org-refile-targets org-refile-targets)
 	(org-refile-use-outline-path org-refile-use-outline-path))
@@ -13401,8 +13401,9 @@ but in some other way.")
 (defconst org-default-properties
   '("ARCHIVE" "CATEGORY" "SUMMARY" "DESCRIPTION" "CUSTOM_ID"
     "LOCATION" "LOGGING" "COLUMNS" "VISIBILITY"
-    "TABLE_EXPORT_FORMAT" "TABLE_EXPORT_FILE" "EXPORT_OPTIONS"
-    "EXPORT_FILE_NAME" "EXPORT_TITLE" "EXPORT_AUTHOR" "EXPORT_DATE"
+    "TABLE_EXPORT_FORMAT" "TABLE_EXPORT_FILE"
+    "EXPORT_OPTIONS" "EXPORT_TEXT" "EXPORT_FILE_NAME"
+    "EXPORT_TITLE" "EXPORT_AUTHOR" "EXPORT_DATE"
     "ORDERED" "NOBLOCKING" "COOKIE_DATA" "LOG_INTO_DRAWER" "REPEAT_TO_STATE"
     "CLOCK_MODELINE_TOTAL" "STYLE" "HTML_CONTAINER_CLASS")
   "Some properties that are used by Org-mode for various purposes.
@@ -15554,7 +15555,7 @@ customizing `org-effort-durations' (which see).
 Entries containing a colon are interpreted as H:MM by
 `org-hh:mm-string-to-minutes'."
   (let ((result 0)
-	(re (concat "\\([0-9]+\\) *\\(" 
+	(re (concat "\\([0-9]+\\) *\\("
 		    (regexp-opt (mapcar 'car org-effort-durations))
 		    "\\)")))
     (while (string-match re s)
