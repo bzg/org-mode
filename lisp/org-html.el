@@ -1996,8 +1996,8 @@ for formatting.  This is required for the DocBook exporter."
       ;; DocBook document, we want to always include the caption to make
       ;; DocBook XML file valid.
       (push (format "<caption>%s</caption>" (or caption "")) html)
-      (when label (push (format "<a name=\"%s\" id=\"%s\"></a>" (org-solidify-link-text label) (org-solidify-link-text label))
-			html))
+      (when label
+	      (setq html-table-tag (org-export-splice-attributes html-table-tag (format "id=\"%s\"" (org-solidify-link-text label)))))
       (push html-table-tag html))
     (setq html (mapcar
 		(lambda (x)
@@ -2181,12 +2181,12 @@ that uses these same face definitions."
 (defun org-html-protect (s)
   "Convert characters to HTML equivalent.
 Possible conversions are set in `org-export-html-protect-char-alist'."
-  (let ((start 0)
-	(cl org-export-html-protect-char-alist) c)
+  (let ((cl org-export-html-protect-char-alist) c)
     (while (setq c (pop cl))
-      (while (string-match (car c) s start)
-	(setq s (replace-match (cdr c) t t s)
-	      start (1+ (match-beginning 0)))))
+      (let ((start 0))
+	(while (string-match (car c) s start)
+	  (setq s (replace-match (cdr c) t t s)
+		start (match-beginning 0)))))
     s))
 
 (defun org-html-expand (string)
