@@ -334,13 +334,11 @@ point nowhere."
 	       data)))))
 
 (defmacro org-with-wide-buffer (&rest body)
-  "Execute body while temporarily widening the buffer."
-  `(let ((beg (point-min)) (end (point-max)) (pos (point)))
-     (prog2
-	 (widen)
-	 ,@body
-       (narrow-to-region beg end)
-       (goto-char pos))))
+ "Execute body while temporarily widening the buffer."
+ `(save-excursion
+    (save-restriction
+       (widen)
+       ,@body)))
 
 (defmacro org-with-limited-levels (&rest body)
   "Execute BODY with limited number of outline levels."
