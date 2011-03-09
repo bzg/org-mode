@@ -18773,7 +18773,6 @@ Taken from `count' in cl-seq.el with all keyword arguments removed."
   "Move backwards over whitespace, to the beginning of the first empty line.
 Returns the number of empty lines passed."
   (let ((pos (point)))
-    ;;(skip-chars-backward " \t\n\r")
     (if (cdr (assoc 'heading org-blank-before-new-entry))
        (skip-chars-backward " \t\n\r")
       (forward-line -1))
