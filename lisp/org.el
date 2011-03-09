@@ -19208,15 +19208,15 @@ the functionality can be provided as a fall-back.")
        ;; Comment line
        ((looking-at "#[ \t]+")
 	(match-string-no-properties 0))
+       ;; Plain list item
+       ((org-at-item-p)
+	(make-string (org-list-item-body-column (point-at-bol)) ?\ ))
        ;; Point is in a list after `backward-paragraph': original
        ;; point wasn't in the list, or filling would have been taken
        ;; care of by `org-auto-fill-function', but the list and the
        ;; real paragraph are not separated by a blank line. Thus, move
        ;; point after the list to go back to real paragraph and
-       ;; determine fill-prefix. If point is at an item, do not
-       ;; compute prefix and list structure, as first line of
-       ;; paragraph will be skipped anyway.
-       ((org-at-item-p) "")
+       ;; determine fill-prefix.
        ((setq itemp (org-in-item-p))
 	(goto-char itemp)
 	(let* ((struct (org-list-struct))
