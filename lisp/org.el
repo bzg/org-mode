@@ -18991,6 +18991,12 @@ If point is in an inline task, mark that task instead."
      ;; Literal examples
      ((looking-at "[ \t]*:[ \t]")
       (setq column (org-get-indentation))) ; do nothing
+     ;; Lists
+     ((ignore-errors (goto-char (org-in-item-p)))
+      (setq column (if itemp
+		       (org-get-indentation)
+		     (org-list-item-body-column (point))))
+      (goto-char pos))
      ;; Drawers
      ((and (looking-at "[ \t]*:END:")
 	   (save-excursion (re-search-backward org-drawer-regexp nil t)))
@@ -19012,12 +19018,6 @@ If point is in an inline task, mark that task instead."
 		;; src blocks: let `org-edit-src-exit' handle them
 		(org-get-indentation)
 	      (org-get-indentation (match-string 0)))))
-     ;; Lists
-     ((ignore-errors (goto-char (org-in-item-p)))
-      (setq column (if itemp
-		       (org-get-indentation)
-		     (org-list-item-body-column (point))))
-      (goto-char pos))
      ;; This line has nothing special, look at the previous relevant
      ;; line to compute indentation
      (t
