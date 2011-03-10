@@ -992,6 +992,7 @@ the clocking selection, associated with the letter `d'."
 	  ts selected-task target-pos (msg-extra "")
 	  (leftover (and (not org-clock-resolving-clocks)
 			  org-clock-leftover-time)))
+
       (when (and org-clock-auto-clock-resolution
 		 (or (not interrupting)
 		     (eq t org-clock-auto-clock-resolution))
@@ -1000,11 +1001,17 @@ the clocking selection, associated with the letter `d'."
 	(setq org-clock-leftover-time nil)
 	(let ((org-clock-clocking-in t))
 	  (org-resolve-clocks)))	; check if any clocks are dangling
+
       (when (equal select '(4))
 	(setq selected-task (org-clock-select-task "Clock-in on task: "))
 	(if selected-task
 	    (setq selected-task (copy-marker selected-task))
 	  (error "Abort")))
+
+      (when (equal select '(16))
+	;; Mark as default clocking task
+	(org-clock-mark-default-task))
+
       (when interrupting
 	;; We are interrupting the clocking of a different task.
 	;; Save a marker to this task, so that we can go back.
@@ -1027,10 +1034,6 @@ the clocking selection, associated with the letter `d'."
 		     (marker-buffer org-clock-marker))
 	(let ((org-clock-clocking-in t))
 	  (org-clock-out t)))
-
-      (when (equal select '(16))
-	;; Mark as default clocking task
-	(org-clock-mark-default-task))
 
       ;; Clock in at which position?
       (setq target-pos
