@@ -19185,13 +19185,13 @@ the functionality can be provided as a fall-back.")
 	  ;; a paragraph adjacent to a list: make sure this paragraph
 	  ;; doesn't get merged with the end of the list by narrowing
 	  ;; buffer first.
-	  ((save-excursion (fill-forward-paragraph -1)
+	  ((save-excursion (forward-paragraph -1)
 			   (setq itemp (org-in-item-p)))
 	   (let ((struct (save-excursion (goto-char itemp)
 					 (org-list-struct))))
 	     (save-restriction
 	       (narrow-to-region (org-list-get-bottom-point struct)
-				 (save-excursion (fill-forward-paragraph 1)
+				 (save-excursion (forward-paragraph 1)
 						 (point)))
 	       (fill-paragraph justify) t)))
 	  ;; Else simply call `fill-paragraph'.
