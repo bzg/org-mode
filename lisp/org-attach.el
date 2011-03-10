@@ -105,7 +105,7 @@ ln    create a hard link.  Note that this is not supported
   :type '(choice
 	  (const :tag "Don't store link" nil)
 	  (const :tag "Link to origin location" t)
-	  (const :tag "Link to the attach-dir location" 'attach-dir)))
+	  (const :tag "Link to the attach-dir location" 'attached)))
 
 ;;;###autoload
 (defun org-attach ()
@@ -297,7 +297,7 @@ METHOD may be `cp', `mv', or `ln', default taken from `org-attach-method'."
        ((eq method 'ln) (add-name-to-file file fname)))
       (org-attach-commit)
       (org-attach-tag)
-      (cond ((eq org-attach-store-link-p 'attach-dir)
+      (cond ((eq org-attach-store-link-p 'attached)
 	     (org-attach-store-link fname))
 	    ((eq org-attach-store-link-p t)
 	     (org-attach-store-link file)))
