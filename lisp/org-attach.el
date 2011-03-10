@@ -102,7 +102,10 @@ ln    create a hard link.  Note that this is not supported
 (defcustom org-attach-store-link-p nil
   "Non-nil means store a link to a file when attaching it."
   :group 'org-attach
-  :type 'boolean)
+  :type '(choice
+	  (const :tag "Don't store link" nil)
+	  (const :tag "Link to origin location" 'origin)
+	  (const :tag "Link to the attach-dir location" 'attach-dir)))
 
 ;;;###autoload
 (defun org-attach ()
@@ -294,8 +297,10 @@ METHOD may be `cp', `mv', or `ln', default taken from `org-attach-method'."
        ((eq method 'ln) (add-name-to-file file fname)))
       (org-attach-commit)
       (org-attach-tag)
-      (when org-attach-store-link-p 
-	(org-attach-store-link file))
+      (cond ((eq org-attach-store-link-p 'origin)
+	     (org-attach-store-link file))
+	    ((eq org-attach-store-link-p 'attach-dir)
+	     (org-attach-store-link fname)))
       (if visit-dir
 	  (dired attach-dir)
 	(message "File \"%s\" is now a task attachment." basename)))))
