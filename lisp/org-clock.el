@@ -1026,7 +1026,8 @@ the clocking selection, associated with the letter `d'."
 		     (= (marker-position org-clock-hd-marker)
 			(if selected-task
 			    (marker-position selected-task)
-			  (point)))))
+			  (point)))
+		     (equal org-clock-current-task (nth 4 (org-heading-components)))))
 	  (message "Clock continues in \"%s\"" org-clock-heading)
 	  (throw 'abort nil))
 	(move-marker org-clock-interrupted-task
