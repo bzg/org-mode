@@ -310,10 +310,10 @@ or new, let the user edit the definition of the footnote."
 	  (skip-chars-backward " \t\r\n")
 	  (delete-region (point) max)
 	  (insert "\n\n")
-	  (insert org-footnote-tag-for-non-org-mode-files "\n")))))
-    ;; Skip existing footnotes
-    (while (re-search-forward "^[[:space:]]*\\[[^]]+\\] " nil t)
-      (forward-line))
+	  (insert org-footnote-tag-for-non-org-mode-files "\n")))
+	;; Skip existing footnotes
+      (while (re-search-forward "^[[:space:]]*\\[[^]]+\\] " nil t)
+	(forward-line))))
     (insert "\n[" label "] \n")
     (goto-char (1- (point)))
     (message "Edit definition and go back with `C-c &' or, if unique, with `C-c C-c'.")))
