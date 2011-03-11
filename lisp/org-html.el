@@ -2186,7 +2186,7 @@ Possible conversions are set in `org-export-html-protect-char-alist'."
       (let ((start 0))
 	(while (string-match (car c) s start)
 	  (setq s (replace-match (cdr c) t t s)
-		start (match-beginning 0)))))
+		start (1+ (match-beginning 0))))))
     s))
 
 (defun org-html-expand (string)
