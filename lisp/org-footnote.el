@@ -291,6 +291,7 @@ or new, let the user edit the definition of the footnote."
 	  ;; No section, put footnote into the current outline node
 	  nil
 	;; Try to find or make the special node
+	(goto-char (point-min))
 	(setq re (concat "^\\*+[ \t]+" org-footnote-section "[ \t]*$"))
 	(unless (or (re-search-forward re nil t)
 		    (and (progn (widen) t)
