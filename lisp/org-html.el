@@ -1289,7 +1289,7 @@ lang=\"%s\" xml:lang=\"%s\">
 				   `((?t . ,title)
 				     (?a . ,author) (?d . ,date) (?e . ,email)))))
 	  (insert  "<h1 class=\"title\">" title "</h1>")))
-      
+
       (if (and org-export-with-toc (not body-only))
 	  (progn
 	    (push (format "<h%d>%s</h%d>\n"
@@ -1705,7 +1705,8 @@ lang=\"%s\" xml:lang=\"%s\">
 	  (when (and (plist-get opt-plist :author-info) author)
 	    (insert "<p class=\"author\">" (nth 1 lang-words) ": " author "</p>\n"))
 	  (when (and (plist-get opt-plist :email-info) email)
-	    (insert "<p class=\"mailto:" email "\">&lt;" email "&gt;</p>\n"))
+	    (insert "<p class=\"email\"><a href=\"mailto:"
+		    email "\">&lt;" email "&gt;</a></p>\n"))
 	  (when (plist-get opt-plist :creator-info)
 	    (insert "<p class=\"creator\">"
 		    (concat "Org version " org-version " with Emacs version "
