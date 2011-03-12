@@ -19180,6 +19180,11 @@ the functionality can be provided as a fall-back.")
   ;; and fixed-width regions are not wrapped.  That function will pass
   ;; through to `fill-paragraph' when appropriate.
   (org-set-local 'fill-paragraph-function 'org-fill-paragraph)
+  ;; Prevent auto-fill from inserting unwanted new items.
+  (org-set-local 'fill-nobreak-predicate
+		 (if (memq 'org-fill-item-nobreak-p fill-nobreak-predicate)
+		     fill-nobreak-predicate
+		   (cons 'org-fill-item-nobreak-p fill-nobreak-predicate)))
   ;; Adaptive filling: To get full control, first make sure that
   ;; `adaptive-fill-regexp' never matches.  Then install our own matcher.
   (unless (local-variable-p 'adaptive-fill-regexp (current-buffer))
@@ -19194,6 +19199,10 @@ the functionality can be provided as a fall-back.")
    '((org-in-buffer-settings
       (regexp . "^#\\+[A-Z_]+:\\(\\s-*\\)\\S-+")
       (modes . '(org-mode))))))
+
+(defun org-fill-item-nobreak-p ()
+  "Non-nil when a line break at point would insert a new item."
+  (and (looking-at (org-item-re)) (org-list-in-valid-context-p)))
 
 (defun org-fill-paragraph (&optional justify)
   "Re-align a table, pass through to fill-paragraph if no table."

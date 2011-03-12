@@ -401,7 +401,7 @@ group 4: description tag")
            (goto-char (match-end 0)))
 	 (looking-at regexp))))
 
-(defun org-list-in-valid-block-p ()
+(defun org-list-in-valid-context-p ()
   "Non-nil if point is in a valid block.
 Invalid blocks are referring to `org-list-forbidden-blocks'."
   (save-match-data
@@ -491,7 +491,7 @@ This checks `org-list-ending-method'."
   "Is point in a line starting a hand-formatted item?"
   (save-excursion
     (beginning-of-line)
-    (and (looking-at (org-item-re)) (org-list-in-valid-block-p))))
+    (and (looking-at (org-item-re)) (org-list-in-valid-context-p))))
 
 (defun org-at-item-bullet-p ()
   "Is point at the bullet of a plain list item?"
@@ -1053,7 +1053,7 @@ in `re-search-forward'."
 			    nil)))
 	;; 2. Match in valid context: return point. Else, continue
 	;;    searching.
-	(when (org-list-in-valid-block-p) (throw 'exit (point)))))))
+	(when (org-list-in-valid-context-p) (throw 'exit (point)))))))
 
 (defun org-list-search-backward (regexp &optional bound noerror)
   "Like `re-search-backward' but stop only where lists are recognized.
