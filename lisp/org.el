@@ -17514,8 +17514,8 @@ This command does many different things, depending on context:
 			       (cond
 				((equal arg '(16)) "[-]")
 				((equal arg '(4)) nil)
-				((equal "[ ]" cbox) "[X]")
-				(t "[ ]")))
+				((equal "[X]" cbox) "[ ]")
+				(t "[X]")))
 	(org-list-struct-fix-ind struct parents)
 	(org-list-struct-fix-bul struct prevs)
 	(setq block-item

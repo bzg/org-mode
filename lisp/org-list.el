@@ -2107,8 +2107,8 @@ in subtree, ignoring drawers."
 		 ((equal toggle-presence '(16)) "[-]")
 		 ((equal toggle-presence '(4))
 		  (unless cbox "[ ]"))
-		 ((equal "[ ]" cbox) "[X]")
-		 (t "[ ]"))))))
+		 ((equal "[X]" cbox) "[ ]")
+		 (t "[X]"))))))
       ;; When an item is found within bounds, grab the full list at
       ;; point structure, then: 1. set checkbox of all its items
       ;; within bounds to ref-checkbox; 2. fix checkboxes of the whole
