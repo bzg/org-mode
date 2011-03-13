@@ -2652,6 +2652,36 @@ This may t or nil, or the symbol `org-read-date-prefer-future'."
 	  (const :tag "Never" nil)
 	  (const :tag "Always" t)))
 
+(defcustom org-read-date-force-compatible-dates t
+  "Should date/time prompt force dates that are guaranteed to work in Emacs?
+
+Depending on the system Emacs is running on, certain dates cannot
+be represented with the type used internally to represent time.
+Dates between 1970-1-1 and 2038-1-1 can always be represented
+correctly.  Some systems allow for earlier dates, some for later,
+some for both.  One way to find out it to insert any date into an
+Org buffer, putting the cursor on the year and hitting S-up and
+S-down to test the range.
+
+When this variable is set to t, the date/time prompt will not let
+you specify dates outside the 1970-2037 range, so it is certain that
+these dates will work in whatever version of Emacs you are
+running, and also that you can move a file from one Emacs implementation
+to another.  WHenever Org is forcing the year for you, it will display
+a message and beep.
+
+When this variable is nil, Org will check if the date is
+representable in the specific Emacs implementation you are using.
+If not, it will force a year, usually the current year, and beep
+to remind you.  Currently this setting is not recommended because
+the likelihood that you will open your Org files in an Emacs that
+has limited date range is not negligible.
+
+A workaround for this problem is to use diary sexp dates for time
+stamps outside of this range."
+  :group 'org-time
+  :type 'boolean)
+
 (defcustom org-read-date-display-live t
   "Non-nil means display current interpretation of date prompt live.
 This display will be in an overlay, in the minibuffer."
@@ -14332,6 +14362,8 @@ So these are more for recording a certain time/date."
 (defvar org-dcst nil) ; dynamically scoped
 (defvar org-read-date-history nil)
 (defvar org-read-date-final-answer nil)
+(defvar org-read-date-analyze-futurep nil)
+(defvar org-read-date-analyze-forced-year nil)
 
 (defun org-read-date (&optional with-time to-time from-string prompt
 				default-time default-input)
@@ -14504,6 +14536,13 @@ user."
 
     (setq final (org-read-date-analyze ans def defdecode))
 
+    (when org-read-date-analyze-forced-year
+      (message "Year was forced into %s"
+	       (if org-read-date-force-compatible-dates
+		   "compatible range (1970-2037)"
+		 "range representable on this machine"))
+      (ding))
+
     ;; One round trip to get rid of 34th of August and stuff like that....
     (setq final (decode-time (apply 'encode-time final)))
 
@@ -14520,7 +14559,6 @@ user."
 (defvar def)
 (defvar defdecode)
 (defvar with-time)
-(defvar org-read-date-analyze-futurep nil)
 (defun org-read-date-display ()
   "Display the current date prompt interpretation in the minibuffer."
   (when org-read-date-display-live
@@ -14563,7 +14601,8 @@ user."
 	delta deltan deltaw deltadef year month day
 	hour minute second wday pm h2 m2 tl wday1
 	iso-year iso-weekday iso-week iso-year iso-date futurep kill-year)
-    (setq org-read-date-analyze-futurep nil)
+    (setq org-read-date-analyze-futurep nil
+	  org-read-date-analyze-forced-year nil)
     (when (string-match "\\`[ \t]*\\.[ \t]*\\'" ans)
       (setq ans "+0"))
 
@@ -14721,7 +14760,18 @@ user."
 	     (nth 2 tl))
 	(setq org-time-was-given t))
     (if (< year 100) (setq year (+ 2000 year)))
-    (if (< year 1970) (setq year (nth 5 defdecode))) ; not representable
+    ;; Check of the date is representable
+    (if org-read-date-force-compatible-dates
+	(progn
+	  (if (< year 1970)
+	      (setq year 1970 org-read-date-analyze-forced-year t))
+	  (if (> year 2037)
+	      (setq year 2037  org-read-date-analyze-forced-year t)))
+      (condition-case nil
+	  (encode-time second minute hour day month year)
+	(error
+	 (setq year (nth 5 defdecode))
+	 (setq org-read-date-analyze-forced-year t))))
     (setq org-read-date-analyze-futurep futurep)
     (list second minute hour day month year)))
 

@@ -5397,9 +5397,17 @@ The function understands English month and weekday abbreviations.  If
 you want to use unabbreviated names and/or other languages, configure
 the variables @code{parse-time-months} and @code{parse-time-weekdays}.
 
+@vindex org-read-date-force-compatible-dates
+Not all dates can be represented in a given Emacs implementation.  By default
+Org mode forces dates into the compatibility range 1970--2037 which works on
+all Emacs implementations.  If you want to use dates outside of this range,
+read the docstring of the variable
+@code{org-read-date-force-compatible-dates}.
+
 You can specify a time range by giving start and end times or by giving a
-start time and a duration (in HH:MM format). Use `-' or `-@{@}-' as the separator
-in the former case and use '+' as the separator in the latter case. E.g.@:
+start time and a duration (in HH:MM format). Use `-' or `-@{@}-' as the
+separator in the former case and use '+' as the separator in the latter
+case. E.g.@:
 
 @example
 11am-1:15pm    @result{} 11:00-13:15
