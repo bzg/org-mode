@@ -826,9 +826,9 @@ MAY-INLINE-P allows inlining it as an image."
 	       (message "image %s %s" thefile org-par-open)
 	       (org-export-html-format-image thefile org-par-open))
 	    (concat
-	       "<a href=\"" thefile "\"" (if attr (concat " " attr)) ">"
+	       "@<a href=\"" thefile "\"" (if attr (concat " " attr)) ">"
 	       (org-export-html-format-desc desc)
-	       "</a>")))))
+	       "@</a>")))))
 
 (defun org-html-handle-links (line opt-plist)
   "Return LINE with markup of Org mode links.
@@ -864,7 +864,7 @@ OPT-PLIST is the export options list."
 	  (if (string-match "^file:" desc)
 	      (setq desc (substring desc (match-end 0)))))
 	(setq desc (org-add-props
-		       (concat "<img src=\"" desc "\"/>")
+		       (concat "@<img src=\"" desc "\"/>")
 		       '(org-protected t))))
       (cond
        ((equal type "internal")
@@ -990,9 +990,9 @@ OPT-PLIST is the export options list."
 
        (t
 	;; just publish the path, as default
-	(setq rpl (concat "<i>&lt;" type ":"
+	(setq rpl (concat "@<i>&lt;" type ":"
 			  (save-match-data (org-link-unescape path))
-			  "&gt;</i>"))))
+			  "&gt;@</i>"))))
       (setq line (replace-match rpl t t line)
 	    start (+ start (length rpl))))
     line))
@@ -1504,16 +1504,16 @@ lang=\"%s\" xml:lang=\"%s\">
 				  "@</a> ")
 			  t t line)))))
 
+	  ;; Format the links
+	  (setq line (org-html-handle-links line opt-plist))
+
+	  (setq line (org-html-handle-time-stamps line))
+
 	  ;; replace "&" by "&amp;", "<" and ">" by "&lt;" and "&gt;"
 	  ;; handle @<..> HTML tags (replace "@&gt;..&lt;" by "<..>")
 	  ;; Also handle sub_superscripts and checkboxes
 	  (or (string-match org-table-hline-regexp line)
 	      (setq line (org-html-expand line)))
-
-	  ;; Format the links
-	  (setq line (org-html-handle-links line opt-plist))
-
-	  (setq line (org-html-handle-time-stamps line))
 
 	  ;; TODO items
 	  (if (and (string-match org-todo-line-regexp line)
