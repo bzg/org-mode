@@ -400,6 +400,17 @@ group 4: description tag")
            (goto-char (match-end 0)))
 	 (looking-at regexp))))
 
+(defun org-list-in-valid-block-p ()
+  "Non-nil if point is in a valid block.
+Invalid blocks are referring to `org-list-forbidden-blocks'."
+  (save-match-data
+    (let ((case-fold-search t))
+      (not (org-in-regexps-block-p
+	    (concat "^[ \t]*#\\+begin_\\("
+		    (mapconcat 'regexp-quote org-list-forbidden-blocks "\\|")
+		    "\\)")
+	    '(concat "^[ \t]*#\\+end_" (match-string 1)))))))
+
 (defun org-in-item-p ()
   "Return item beginning position when in a plain list, nil otherwise.
 This checks `org-list-ending-method'."
@@ -476,8 +487,7 @@ This checks `org-list-ending-method'."
   "Is point in a line starting a hand-formatted item?"
   (save-excursion
     (beginning-of-line)
-    (and (looking-at (org-item-re))
-	 (not (eq (nth 2 (org-list-context)) 'invalid)))))
+    (and (looking-at (org-item-re)) (org-list-in-valid-block-p))))
 
 (defun org-at-item-bullet-p ()
   "Is point at the bullet of a plain list item?"
@@ -1037,9 +1047,9 @@ in `re-search-forward'."
 	(unless (funcall search re bound noerr)
 	  (throw 'exit (and (goto-char (if (memq noerr '(t nil)) origin bound))
 			    nil)))
-	;; 2. Match in an `invalid' context: continue searching. Else,
-	;;    return point.
-	(unless (eq (org-list-context) 'invalid) (throw 'exit (point)))))))
+	;; 2. Match in valid context: return point. Else, continue
+	;;    searching.
+	(when (org-list-in-valid-block-p) (throw 'exit (point)))))))
 
 (defun org-list-search-backward (regexp &optional bound noerror)
   "Like `re-search-backward' but stop only where lists are recognized.
@@ -1150,10 +1160,10 @@ This function modifies STRUCT."
 	   ;;    BEFOREP and SPLIT-LINE-P. The difference of size
 	   ;;    between what was cut and what was inserted in buffer
 	   ;;    is stored in SIZE-OFFSET.
-	   (ind (let ((ind-ref (org-list-get-ind item struct)))
-		  (if (not indent-tabs-mode)
-		      ind-ref
-		    (+ (/ ind-ref tab-width) (mod ind-ref tab-width)))))
+	   (ind (org-list-get-ind item struct))
+	   (ind-size (if indent-tabs-mode
+			 (+ (/ ind tab-width) (mod ind tab-width))
+		       ind))
 	   (bullet (org-list-bullet-string (org-list-get-bullet item struct)))
 	   (box (when checkbox "[ ]"))
 	   (text-cut
@@ -1170,7 +1180,7 @@ This function modifies STRUCT."
 				    text-cut))
 			     "")))
 	   (item-sep (make-string  (1+ blank-nb) ?\n))
-	   (item-size (+ ind (length body) (length item-sep)))
+	   (item-size (+ ind-size (length body) (length item-sep)))
 	   (size-offset (- item-size (length text-cut))))
       ;; 4. Insert effectively item into buffer
       (goto-char item)
@@ -2097,8 +2107,8 @@ in subtree, ignoring drawers."
 		 ((equal toggle-presence '(16)) "[-]")
 		 ((equal toggle-presence '(4))
 		  (unless cbox "[ ]"))
-		 ((equal "[ ]" cbox) "[X]")
-		 (t "[ ]"))))))
+		 ((equal "[X]" cbox) "[ ]")
+		 (t "[X]"))))))
       ;; When an item is found within bounds, grab the full list at
       ;; point structure, then: 1. set checkbox of all its items
       ;; within bounds to ref-checkbox; 2. fix checkboxes of the whole

@@ -10390,7 +10390,7 @@ This can be done with a 0 prefix: `C-0 C-c C-w'"
 (defun org-refile-get-location (&optional prompt default-buffer new-nodes)
   "Prompt the user for a refile location, using PROMPT.
 PROMPT should not be suffixed with a colon and a space, because
-this function appends the default value from 
+this function appends the default value from
 `org-refile-history' automatically, if that is not empty."
   (let ((org-refile-targets org-refile-targets)
 	(org-refile-use-outline-path org-refile-use-outline-path))
@@ -13402,7 +13402,8 @@ but in some other way.")
   '("ARCHIVE" "CATEGORY" "SUMMARY" "DESCRIPTION" "CUSTOM_ID"
     "LOCATION" "LOGGING" "COLUMNS" "VISIBILITY"
     "TABLE_EXPORT_FORMAT" "TABLE_EXPORT_FILE"
-    "EXPORT_FILE_NAME" "EXPORT_TITLE" "EXPORT_AUTHOR" "EXPORT_DATE"
+    "EXPORT_OPTIONS" "EXPORT_TEXT" "EXPORT_FILE_NAME"
+    "EXPORT_TITLE" "EXPORT_AUTHOR" "EXPORT_DATE"
     "ORDERED" "NOBLOCKING" "COOKIE_DATA" "LOG_INTO_DRAWER" "REPEAT_TO_STATE"
     "CLOCK_MODELINE_TOTAL" "STYLE" "HTML_CONTAINER_CLASS")
   "Some properties that are used by Org-mode for various purposes.
@@ -13853,7 +13854,8 @@ and the new value.")
 With INCLUDE-SPECIALS, also list the special properties that reflect things
 like tags and TODO state.
 With INCLUDE-DEFAULTS, also include properties that has special meaning
-internally: ARCHIVE, CATEGORY, SUMMARY, DESCRIPTION, LOCATION, and LOGGING.
+internally: ARCHIVE, CATEGORY, SUMMARY, DESCRIPTION, LOCATION, and LOGGING
+and others.
 With INCLUDE-COLUMNS, also include property names given in COLUMN
 formats in the current buffer."
   (let (rtn range cfmt s p)
@@ -15553,7 +15555,7 @@ customizing `org-effort-durations' (which see).
 Entries containing a colon are interpreted as H:MM by
 `org-hh:mm-string-to-minutes'."
   (let ((result 0)
-	(re (concat "\\([0-9]+\\) *\\(" 
+	(re (concat "\\([0-9]+\\) *\\("
 		    (regexp-opt (mapcar 'car org-effort-durations))
 		    "\\)")))
     (while (string-match re s)
@@ -17512,8 +17514,8 @@ This command does many different things, depending on context:
 			       (cond
 				((equal arg '(16)) "[-]")
 				((equal arg '(4)) nil)
-				((equal "[ ]" cbox) "[X]")
-				(t "[ ]")))
+				((equal "[X]" cbox) "[ ]")
+				(t "[X]")))
 	(org-list-struct-fix-ind struct parents)
 	(org-list-struct-fix-bul struct prevs)
 	(setq block-item
@@ -18773,10 +18775,9 @@ Taken from `count' in cl-seq.el with all keyword arguments removed."
   "Move backwards over whitespace, to the beginning of the first empty line.
 Returns the number of empty lines passed."
   (let ((pos (point)))
-    (skip-chars-backward " \t\n\r")
-    ;; (if (cdr (assoc 'heading org-blank-before-new-entry))
-    ;;    (skip-chars-backward " \t\n\r")
-    ;;   (forward-line -1))
+    (if (cdr (assoc 'heading org-blank-before-new-entry))
+       (skip-chars-backward " \t\n\r")
+      (forward-line -1))
     (beginning-of-line 2)
     (goto-char (min (point) pos))
     (count-lines (point) pos)))
@@ -18990,6 +18991,12 @@ If point is in an inline task, mark that task instead."
      ;; Literal examples
      ((looking-at "[ \t]*:[ \t]")
       (setq column (org-get-indentation))) ; do nothing
+     ;; Lists
+     ((ignore-errors (goto-char (org-in-item-p)))
+      (setq column (if itemp
+		       (org-get-indentation)
+		     (org-list-item-body-column (point))))
+      (goto-char pos))
      ;; Drawers
      ((and (looking-at "[ \t]*:END:")
 	   (save-excursion (re-search-backward org-drawer-regexp nil t)))
@@ -19011,12 +19018,6 @@ If point is in an inline task, mark that task instead."
 		;; src blocks: let `org-edit-src-exit' handle them
 		(org-get-indentation)
 	      (org-get-indentation (match-string 0)))))
-     ;; Lists
-     ((ignore-errors (goto-char (org-in-item-p)))
-      (setq column (if itemp
-		       (org-get-indentation)
-		     (org-list-item-body-column (point))))
-      (goto-char pos))
      ;; This line has nothing special, look at the previous relevant
      ;; line to compute indentation
      (t
@@ -19184,13 +19185,13 @@ the functionality can be provided as a fall-back.")
 	  ;; a paragraph adjacent to a list: make sure this paragraph
 	  ;; doesn't get merged with the end of the list by narrowing
 	  ;; buffer first.
-	  ((save-excursion (fill-forward-paragraph -1)
+	  ((save-excursion (forward-paragraph -1)
 			   (setq itemp (org-in-item-p)))
 	   (let ((struct (save-excursion (goto-char itemp)
 					 (org-list-struct))))
 	     (save-restriction
 	       (narrow-to-region (org-list-get-bottom-point struct)
-				 (save-excursion (fill-forward-paragraph 1)
+				 (save-excursion (forward-paragraph 1)
 						 (point)))
 	       (fill-paragraph justify) t)))
 	  ;; Else simply call `fill-paragraph'.
@@ -19207,15 +19208,15 @@ the functionality can be provided as a fall-back.")
        ;; Comment line
        ((looking-at "#[ \t]+")
 	(match-string-no-properties 0))
+       ;; Plain list item
+       ((org-at-item-p)
+	(make-string (org-list-item-body-column (point-at-bol)) ?\ ))
        ;; Point is in a list after `backward-paragraph': original
        ;; point wasn't in the list, or filling would have been taken
        ;; care of by `org-auto-fill-function', but the list and the
        ;; real paragraph are not separated by a blank line. Thus, move
        ;; point after the list to go back to real paragraph and
-       ;; determine fill-prefix. If point is at an item, do not
-       ;; compute prefix and list structure, as first line of
-       ;; paragraph will be skipped anyway.
-       ((org-at-item-p) "")
+       ;; determine fill-prefix.
        ((setq itemp (org-in-item-p))
 	(goto-char itemp)
 	(let* ((struct (org-list-struct))
