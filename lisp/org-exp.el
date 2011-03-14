@@ -1879,7 +1879,7 @@ table line.  If it is a link, add it to the line containing the link."
     (goto-char (point-min))
     (setq case-fold-search t)
     (while (re-search-forward
-	    "^#\\+begin_comment[ \t]*\n[^\000]*?^#\\+end_comment\\>.*" nil t)
+	    "^#\\+begin_comment[ \t]*\n[^\000]*?\n#\\+end_comment\\>.*" nil t)
       (replace-match "" t t))
     ;; Remove subtrees that are commented
     (goto-char (point-min))
