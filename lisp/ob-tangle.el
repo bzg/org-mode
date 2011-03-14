@@ -63,6 +63,11 @@ then the name of the language is used."
   :group 'org-babel
   :type 'hook)
 
+(defcustom org-babel-tangle-body-hook nil
+  "Hook run over the contents of each code block body."
+  :group 'org-babel
+  :type 'hook)
+
 (defcustom org-babel-tangle-pad-newline t
   "Switch indicating whether to pad tangled code with newlines."
   :group 'org-babel
@@ -307,22 +312,27 @@ code blocks by language."
 		   (assignments-cmd
 		    (intern (concat "org-babel-variable-assignments:" src-lang)))
 		   (body
-		    ((lambda (body)
-		       (if (assoc :no-expand params)
-			   body
-			 (if (fboundp expand-cmd)
-			     (funcall expand-cmd body params)
-			   (org-babel-expand-body:generic
-			    body params
-			    (and (fboundp assignments-cmd)
-				 (funcall assignments-cmd params))))))
-		     (if (and (cdr (assoc :noweb params))
-			      (let ((nowebs (split-string
-					     (cdr (assoc :noweb params)))))
-				(or (member "yes" nowebs)
-				    (member "tangle" nowebs))))
-			 (org-babel-expand-noweb-references info)
-		       (nth 1 info))))
+		    ((lambda (body) ;; run the tangle-body-hook
+		       (with-temp-buffer
+			 (insert body)
+			 (run-hooks 'org-babel-tangle-body-hook)
+			 (buffer-string)))
+		     ((lambda (body) ;; expand the body in language specific manner
+			(if (assoc :no-expand params)
+			    body
+			  (if (fboundp expand-cmd)
+			      (funcall expand-cmd body params)
+			    (org-babel-expand-body:generic
+			     body params
+			     (and (fboundp assignments-cmd)
+				  (funcall assignments-cmd params))))))
+		      (if (and (cdr (assoc :noweb params)) ;; expand noweb refs
+			       (let ((nowebs (split-string
+					      (cdr (assoc :noweb params)))))
+				 (or (member "yes" nowebs)
+				     (member "tangle" nowebs))))
+			  (org-babel-expand-noweb-references info)
+			(nth 1 info)))))
 		   (comment
 		    (when (or (string= "both" (cdr (assoc :comments params)))
 			      (string= "org" (cdr (assoc :comments params))))
