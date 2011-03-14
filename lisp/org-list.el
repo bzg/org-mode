@@ -2663,7 +2663,7 @@ Point is left at list end."
 	   (lambda (e)
 	     (let ((start (save-excursion
 			    (goto-char e)
-			    (looking-at "[ \t]*\\S-+[ \t]+\\(\\[@[:[:alnum:]]+\\][ \t]*\\)?")
+			    (looking-at "[ \t]*\\S-+\\([ \t]+\\[@\\(start:\\)?\\([0-9]+\\|[a-zA-Z]\\)\\]\\)?[ \t]*")
 			    (match-end 0)))
 		   ;; Get counter number. For alphabetic counter, get
 		   ;; its position in the alphabet.
