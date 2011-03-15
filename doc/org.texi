@@ -581,6 +581,7 @@ Exporting
 HTML export
 
 * HTML Export commands::        How to invoke HTML export
+* HTML preamble and postamble::  How to insert a preamble and a postamble
 * Quoting HTML tags::           Using direct HTML in Org-mode
 * Links in HTML export::        How links will be interpreted and formatted
 * Tables in HTML export::       How to modify the formatting of tables
@@ -621,7 +622,7 @@ Configuration
 * Sources and destinations::    From here to there
 * Selecting files::             What files are part of the project?
 * Publishing action::           Setting the function doing the publishing
-* Publishing options::          Tweaking HTML export
+* Publishing options::          Tweaking HTML/@LaTeX{} export
 * Publishing links::            Which links keep working after publishing?
 * Sitemap::                     Generating a list of all pages
 * Generating an index::         An index that reaches across pages
@@ -9400,6 +9401,11 @@ settings.  Here you can:
 @cindex @LaTeX{} fragments
 @cindex author info, in export
 @cindex time info, in export
+@vindex org-export-plist-vars
+@vindex org-export-author-info
+@vindex org-export-creator-info
+@vindex org-export-email-info
+@vindex org-export-time-stamp-file
 @example
 H:         @r{set the number of headline levels for export}
 num:       @r{turn on/off section-numbers}
@@ -9431,10 +9437,6 @@ d:         @r{turn on/off inclusion of drawers}
 These options take effect in both the HTML and @LaTeX{} export, except for
 @code{TeX} and @code{LaTeX} options, which are respectively @code{t} and
 @code{nil} for the @LaTeX{} export.
-
-Setting @code{org-export-html-pre/postamble} to @code{t} will override the
-values of the @code{author}, @code{email} and @code{creator} options in HTML
-export: it will use @code{org-export-html-pre/postamble-format} instead.
 
 The default values for these and many other options are given by a set of
 variables.  For a list of such variables, the corresponding OPTIONS keys and
@@ -9547,6 +9549,7 @@ language, but with additional support for tables.
 
 @menu
 * HTML Export commands::        How to invoke HTML export
+* HTML preamble and postamble::  How to insert a preamble and a postamble
 * Quoting HTML tags::           Using direct HTML in Org-mode
 * Links in HTML export::        How links will be interpreted and formatted
 * Tables in HTML export::       How to modify the formatting of tables
@@ -9557,7 +9560,7 @@ language, but with additional support for tables.
 * JavaScript support::          Info and Folding in a web browser
 @end menu
 
-@node HTML Export commands, Quoting HTML tags, HTML export, HTML export
+@node HTML Export commands, HTML preamble and postamble, HTML export, HTML export
 @subsection HTML export commands
 
 @cindex region, active
@@ -9606,7 +9609,39 @@ specify it with a numeric prefix argument.  For example,
 @noindent
 creates two levels of headings and does the rest as items.
 
-@node Quoting HTML tags, Links in HTML export, HTML Export commands, HTML export
+
+@node HTML preamble and postamble, Quoting HTML tags, HTML Export commands, HTML export
+@subsection HTML preamble and postamble
+@vindex org-export-html-preamble
+@vindex org-export-html-postamble
+@vindex org-export-html-preamble-format
+@vindex org-export-html-postamble-format
+@vindex org-export-html-validation-link
+@vindex org-export-author-info
+@vindex org-export-email-info
+@vindex org-export-creator-info
+@vindex org-export-time-stamp-file
+
+The HTML exporter lets you define a preamble and a postamble.
+
+The default value for @code{org-export-html-preamble} is @code{t}, which
+means that the preamble is inserted depending on the relevant formatting
+string in @code{org-export-html-preamble-format}.  Setting
+@code{org-export-html-preamble} to a string will override the default
+formatting string.  Setting it to a function, will insert the output of the
+function.  Setting to @code{nil} will not insert any preamble.
+
+The default value for @code{org-export-html-postamble} is @code{'auto}, which
+means that the HTML exporter will look for the value of
+@code{org-export-author-info}, @code{org-export-email-info},
+@code{org-export-creator-info} and @code{org-export-time-stamp-file},
+@code{org-export-html-validation-link} and build the postamble from these
+values.  Setting @code{org-export-html-postamble} to @code{t} will insert the
+postamble from the relevant formatting string found in
+@code{org-export-html-postamble-format}.  Setting it to @code{nil} will not
+insert any postamble.
+
+@node Quoting HTML tags, Links in HTML export, HTML preamble and postamble, HTML export
 @subsection Quoting HTML tags
 
 Plain @samp{<} and @samp{>} are always transformed to @samp{&lt;} and
@@ -10871,8 +10906,9 @@ respective variable for details.
 @vindex org-export-with-fixed-width
 @vindex org-export-with-timestamps
 @vindex org-export-author-info
-@vindex org-export-email
+@vindex org-export-email-info
 @vindex org-export-creator-info
+@vindex org-export-time-stamp-file
 @vindex org-export-with-tables
 @vindex org-export-highlight-first-table-line
 @vindex org-export-html-style-include-default
