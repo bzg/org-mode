@@ -531,14 +531,13 @@ a file."
   :group 'org-export-html
   :type 'string)
 
-
 (defcustom org-export-html-protect-char-alist
   '(("&" . "&amp;")
     ("<" . "&lt;")
     (">" . "&gt;"))
   "Alist of characters to be converted by `org-html-protect'."
-  :type '((repeat (cons (string :tag "Character")
-			(string :tag "HTML equivalent")))))
+  :type '(repeat (cons (string :tag "Character")
+		       (string :tag "HTML equivalent"))))
 
 (defgroup org-export-htmlize nil
   "Options for processing examples with htmlize.el."
