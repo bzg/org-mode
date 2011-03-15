@@ -541,7 +541,7 @@ When nil, also column one will use data tags."
 
 (defcustom org-export-html-with-timestamp nil
   "If non-nil, write timestamp into the exported HTML text.
-If non-nil Write `org-export-html-html-helper-timestamp' into the
+If non-nil, write `org-export-html-html-helper-timestamp' into the
 exported HTML text.  Otherwise, the buffer will just be saved to
 a file."
   :group 'org-export-html
@@ -1725,7 +1725,8 @@ lang=\"%s\" xml:lang=\"%s\">
 		  ((eq html-post 'auto)
 		   ;; fall back on default postamble
 		   (insert "<div id=\"postamble\">\n")
-		   (insert "<p class=\"date\">" (nth 2 lang-words) ": " date "</p>\n")
+		   (when (plist-get opt-plist :time-stamp-file)
+		     (insert "<p class=\"date\">" (nth 2 lang-words) ": " date "</p>\n"))
 		   (when (and (plist-get opt-plist :author-info) author)
 		       (insert "<p class=\"author\">" (nth 1 lang-words) ": " author "</p>\n"))
 		   (when (and (plist-get opt-plist :email-info) email)
