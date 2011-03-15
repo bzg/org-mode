@@ -291,14 +291,15 @@ then run `org-babel-pop-to-session'."
 
 (defconst org-babel-header-arg-names
   '(cache cmdline colnames dir exports file noweb results
-    session tangle var eval noeval comments no-expand)
+    session tangle var eval noeval comments no-expand shebang padline)
   "Common header arguments used by org-babel.
 Note that individual languages may define their own language
 specific header arguments as well.")
 
 (defvar org-babel-default-header-args
   '((:session . "none") (:results . "replace") (:exports . "code")
-    (:cache . "no") (:noweb . "no") (:hlines . "no") (:tangle . "no"))
+    (:cache . "no") (:noweb . "no") (:hlines . "no") (:tangle . "no")
+    (:padnewline . "yes"))
   "Default arguments to use when evaluating a source block.")
 
 (defvar org-babel-default-inline-header-args
@@ -1679,7 +1680,7 @@ parameters when merging lists."
 	   ("output" "value")))
 	(exports-exclusive-groups
 	 '(("code" "results" "both" "none")))
-	params results exports tangle noweb cache vars shebang comments)
+	params results exports tangle noweb cache vars shebang comments padline)
     (flet ((e-merge (exclusive-groups &rest result-params)
              ;; maintain exclusivity of mutually exclusive parameters
              (let (output)
@@ -1746,6 +1747,9 @@ parameters when merging lists."
 	      (:cache
 	       (setq cache (e-merge '(("yes" "no")) cache
 				    (split-string (or (cdr pair) "")))))
+	      (:padline
+	       (setq padline (e-merge '(("yes" "no")) padline
+				      (split-string (or (cdr pair) "")))))
 	      (:shebang ;; take the latest -- always overwrite
 	       (setq shebang (or (list (cdr pair)) shebang)))
 	      (:comments
@@ -1756,17 +1760,13 @@ parameters when merging lists."
 	  plist))
        plists))
     (while vars (setq params (cons (cons :var (cddr (pop vars))) params)))
-    (cons (cons :comments (mapconcat 'identity comments " "))
-          (cons (cons :shebang (mapconcat 'identity shebang " "))
-                (cons (cons :cache (mapconcat 'identity cache " "))
-                      (cons (cons :noweb (mapconcat 'identity noweb " "))
-                            (cons (cons :tangle (mapconcat 'identity tangle " "))
-                                  (cons (cons :exports
-                                              (mapconcat 'identity exports " "))
-                                        (cons
-                                         (cons :results
-                                               (mapconcat 'identity results " "))
-                                         params)))))))))
+    (mapc
+     (lambda (hd)
+       (let ((key (intern (concat ":" (symbol-name hd))))
+	     (val (eval hd)))
+	 (setf params (cons (cons key (mapconcat 'identity val " ")) params))))
+     '(results exports tangle noweb padline cache shebang comments))
+    params))
 
 (defun org-babel-expand-noweb-references (&optional info parent-buffer)
   "Expand Noweb references in the body of the current source code block.

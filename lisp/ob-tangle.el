@@ -68,11 +68,6 @@ then the name of the language is used."
   :group 'org-babel
   :type 'hook)
 
-(defcustom org-babel-tangle-pad-newline t
-  "Switch indicating whether to pad tangled code with newlines."
-  :group 'org-babel
-  :type 'boolean)
-
 (defcustom org-babel-tangle-comment-format-beg "[[%link][%source-name]]"
   "Format of inserted comments in tangled code files.
 The following format strings can be used to insert special
@@ -378,6 +373,7 @@ form
 	 (body (nth 5 spec))
 	 (comment (nth 6 spec))
 	 (comments (cdr (assoc :comments (nth 4 spec))))
+	 (padline (not (string= "no" (cdr (assoc :padline (nth 4 spec))))))
 	 (link-p (or (string= comments "both") (string= comments "link")
 		     (string= comments "yes") (string= comments "noweb")))
 	 (link-data (mapcar (lambda (el)
@@ -390,14 +386,14 @@ form
             (let ((text (org-babel-trim text)))
 	      (when (and comments (not (string= comments "no"))
 			 (> (length text) 0))
-		(when org-babel-tangle-pad-newline (insert "\n"))
+		(when padline (insert "\n"))
 		(comment-region (point) (progn (insert text) (point)))
 		(end-of-line nil) (insert "\n")))))
       (when comment (insert-comment comment))
       (when link-p
 	(insert-comment
 	 (org-fill-template org-babel-tangle-comment-format-beg link-data)))
-      (when org-babel-tangle-pad-newline (insert "\n"))
+      (when padline (insert "\n"))
       (insert
        (format
 	"%s\n"

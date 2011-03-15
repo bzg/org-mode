@@ -675,6 +675,8 @@ Specific header arguments
                                 files during tangling
 * comments::                    Toggle insertion of comments in tangled
                                 code files
+* padline::                     Control insertion of padding lines in tangled
+                                code files
 * no-expand::                   Turn off variable assignment and noweb
                                 expansion during tangling
 * session::                     Preserve the state of code evaluation
@@ -11817,6 +11819,8 @@ The following header arguments are defined:
                                 files during tangling
 * comments::                    Toggle insertion of comments in tangled
                                 code files
+* padline::                     Control insertion of padding lines in tangled
+                                code files
 * no-expand::                   Turn off variable assignment and noweb
                                 expansion during tangling
 * session::                     Preserve the state of code evaluation
@@ -12276,7 +12280,7 @@ The @code{:mkdirp} header argument can be used to create parent directories
 of tangled files when missing.  This can be set to @code{yes} to enable
 directory creation or to @code{no} to inhibit directory creation.
 
-@node comments, no-expand, mkdirp, Specific header arguments
+@node comments, padline, mkdirp, Specific header arguments
 @subsubsection @code{:comments}
 By default code blocks are tangled to source-code files without any insertion
 of comments beyond those which may already exist in the body of the code
@@ -12303,7 +12307,20 @@ Turns on the ``link'' comment option, and additionally wraps expanded noweb
 references in the code block body in link comments.
 @end itemize
 
-@node no-expand, session, comments, Specific header arguments
+@node padline, no-expand, comments, Specific header arguments
+Control in insertion of padding lines around code block bodies in tangled
+code files.  The default value is @code{yes} which results in insertion of
+newlines before and after each tangled code block.  The following arguments
+are accepted.
+
+@itemize @bullet
+@item @code{yes}
+Insert newlines before and after each code block body in tangled code files.
+@item @code{no}
+Do not insert any newline padding in tangled output.
+@end itemize
+
+@node no-expand, session, padline, Specific header arguments
 @subsubsection @code{:no-expand}
 
 By default, code blocks are expanded with @code{org-babel-expand-src-block}
