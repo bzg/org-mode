@@ -345,12 +345,13 @@ CSS classes, then this prefix can be very useful."
 
 (defcustom org-export-html-preamble t
   "Non-nil means insert a preamble in HTML export.
-When `t', insert a string as defined by the formatting string in
-`org-export-html-preamble-format'.  When set to a string, this
-string overrides `org-export-html-preamble-format'.  When set to
-a function, apply this function and insert the returned string.
-The function takes the property list of export options as its
-only argument.
+
+When `t', insert a string as defined by one of the formatting
+strings in `org-export-html-preamble-format'.  When set to a
+string, this string overrides `org-export-html-preamble-format'.
+When set to a function, apply this function and insert the
+returned string.  The function takes the property list of export
+options as its only argument.
 
 Setting :html-preamble in publishing projects will take
 precedence over this variable."
