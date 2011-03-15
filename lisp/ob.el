@@ -291,7 +291,7 @@ then run `org-babel-pop-to-session'."
 
 (defconst org-babel-header-arg-names
   '(cache cmdline colnames dir exports file noweb results
-    session tangle var eval noeval comments no-expand)
+    session tangle var eval noeval comments no-expand shebang)
   "Common header arguments used by org-babel.
 Note that individual languages may define their own language
 specific header arguments as well.")
