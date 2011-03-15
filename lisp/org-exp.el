@@ -579,12 +579,6 @@ table.el tables."
   :group 'org-export-tables
   :type 'boolean)
 
-
-(defgroup org-export-xml nil
-  "Options specific for XML export of Org-mode files."
-  :tag "Org Export XML"
-  :group 'org-export)
-
 ;;;; Exporting
 
 ;;; Variables, constants, and parameter plists
