@@ -343,13 +343,22 @@ CSS classes, then this prefix can be very useful."
   :group 'org-export-html
   :type 'string)
 
-(defcustom org-export-html-preamble nil
+(defcustom org-export-html-preamble t
   "Non-nil means insert a preamble in HTML export.
-If this is a string, use it as a formatting string it instead of
-`org-export-html-preamble-format'.  Setting :html-preamble in
-publishing projects will override this."
+When `t', insert a string as defined by the formatting string in
+`org-export-html-preamble-format'.  When set to a string, this
+string overrides `org-export-html-preamble-format'.  When set to
+a function, apply this function and insert the returned string.
+The function takes the property list of export options as its
+only argument.
+
+Setting :html-preamble in publishing projects will take
+precedence over this variable."
   :group 'org-export-html
-  :type 'boolean)
+  :type '(choice (const :tag "No preamble" nil)
+		 (const :tag "Default preamble" t)
+		 (string :tag "Custom formatting string")
+		 (function :tag "Function (must return a string)")))
 
 (defcustom org-export-html-preamble-format
   '(("en" "<h1 class=\"title\">%t</h1>"))
@@ -362,13 +371,26 @@ like that: \"%%\"."
   :group 'org-export-html
   :type 'string)
 
-(defcustom org-export-html-postamble nil
+(defcustom org-export-html-postamble 'auto
   "Non-nil means insert a postamble in HTML export.
-If this is a string, use it as a formatting string it instead of
-`org-export-html-postamble-format'.  Setting :html-postamble in
-publishing projects will override this."
+
+When `t', insert a string as defined by the formatting string in
+`org-export-html-postamble-format'.  When set to a string, this
+string overrides `org-export-html-postamble-format'.  When set to
+'auto, discard `org-export-html-postamble-format' and honor
+`org-export-author/email/creator-info' variables.  When set to a
+function, apply this function and insert the returned string.
+The function takes the property list of export options as its
+only argument.
+
+Setting :html-postamble in publishing projects will take
+precedence over this variable."
   :group 'org-export-html
-  :type 'boolean)
+  :type '(choice (const :tag "No postamble" nil)
+		 (const :tag "Auto preamble" 'auto)
+		 (const :tag "Default formatting string" t)
+		 (string :tag "Custom formatting string")
+		 (function :tag "Function (must return a string)")))
 
 (defcustom org-export-html-postamble-format
   '(("en" "<p class=\"author\">Author: %a (%e)</p>
@@ -1276,18 +1298,22 @@ lang=\"%s\" xml:lang=\"%s\">
 		   "")))
 
 	;; insert html preamble
-	(if (plist-get opt-plist :html-preamble)
-	    (let* ((html-preamble (plist-get opt-plist :html-preamble))
-		   (html-preamble-format
-		    (if (stringp html-preamble)
-			html-preamble
-		      (cadr (or (assoc (nth 0 lang-words)
-				       org-export-html-preamble-format)
-				(assoc "en" org-export-html-preamble-format))))))
-	      (insert (format-spec html-preamble-format
-				   `((?t . ,title)
-				     (?a . ,author) (?d . ,date) (?e . ,email)))))
-	  (insert  "<h1 class=\"title\">" title "</h1>")))
+	(when (plist-get opt-plist :html-preamble)
+	  (let ((html-pre (plist-get opt-plist :html-preamble)))
+	    (cond ((stringp html-pre)
+		   (insert
+		    (format-spec html-pre `((?t . ,title) (?a . ,author)
+					    (?d . ,date) (?e . ,email)))))
+		  ((functionp html-pre)
+		   (funcall html-pre opt-plist))
+		  (t
+		   (insert
+		    (format-spec
+		     (or (cadr (assoc (nth 0 lang-words)
+				      org-export-html-preamble-format))
+			 (cadr (assoc "en" org-export-html-preamble-format)))
+		     `((?t . ,title) (?a . ,author)
+		       (?d . ,date) (?e . ,email)))))))))
 
       (if (and org-export-with-toc (not body-only))
 	  (progn
@@ -1677,40 +1703,49 @@ lang=\"%s\" xml:lang=\"%s\">
 
       ;; export html postamble
       (unless body-only
-	(if (plist-get opt-plist :html-postamble)
-	    (let* ((html-postamble (plist-get opt-plist :html-postamble))
-		   (html-postamble-format
-		    (if (stringp html-postamble)
-			html-postamble
-		      (or (cadr (assoc (nth 0 lang-words)
-				       org-export-html-postamble-format))
-			  (cadr (assoc "en" org-export-html-postamble-format)))))
-		   (email
-		    (mapconcat (lambda(e)
-				 (format "<a href=\"mailto:%s\">%s</a>" e e))
-			       (split-string email ",+ *")
-			       ", "))
-		   (creator-info
-		    (concat "Org version " org-version " with Emacs version "
-			    (number-to-string emacs-major-version))))
-	      (insert "<div id=\"postamble\">\n")
-	      (insert (format-spec html-postamble-format
-				   `((?a . ,author) (?e . ,email)
-				     (?d . ,date)   (?c . ,creator-info)
-				     (?v . ,html-validation-link))))
-	      (insert "</div>"))
-	  ;; fall back on default postamble
-	  (insert "<div id=\"postamble\">\n")
-	  (when (and (plist-get opt-plist :author-info) author)
-	    (insert "<p class=\"author\">" (nth 1 lang-words) ": " author "</p>\n"))
-	  (when (and (plist-get opt-plist :email-info) email)
-	    (insert "<p class=\"email\"><a href=\"mailto:"
-		    email "\">&lt;" email "&gt;</a></p>\n"))
-	  (when (plist-get opt-plist :creator-info)
-	    (insert "<p class=\"creator\">"
-		    (concat "Org version " org-version " with Emacs version "
-			    (number-to-string emacs-major-version) "</p>\n")))
-	  (insert html-validation-link "\n</div>")))
+	(let ((html-post (plist-get opt-plist :html-postamble))
+	      (email
+	       (mapconcat (lambda(e)
+			    (format "<a href=\"mailto:%s\">%s</a>" e e))
+			  (split-string email ",+ *")
+			  ", "))
+	      (creator-info
+	       (concat "Org version " org-version " with Emacs version "
+		       (number-to-string emacs-major-version))))
+	  (when (plist-get opt-plist :html-postamble)
+	    (cond ((stringp html-post)
+		   (insert "<div id=\"postamble\">\n")
+		   (insert (format-spec html-post
+					`((?a . ,author) (?e . ,email)
+					  (?d . ,date)   (?c . ,creator-info)
+					  (?v . ,html-validation-link))))
+		   (insert "</div>"))
+		  ((functionp html-post)
+		   (funcall html-post opt-plist))
+		  ((eq html-post 'auto)
+		   ;; fall back on default postamble
+		   (insert "<div id=\"postamble\">\n")
+		   (insert "<p class=\"date\">" (nth 2 lang-words) ": " date "</p>\n")
+		   (when (and (plist-get opt-plist :author-info) author)
+		       (insert "<p class=\"author\">" (nth 1 lang-words) ": " author "</p>\n"))
+		   (when (and (plist-get opt-plist :email-info) email)
+		     (insert "<p class=\"email\"><a href=\"mailto:" 
+			     email "\">&lt;" email "&gt;</p>\n"))
+		   (when (plist-get opt-plist :creator-info)
+		     (insert "<p class=\"creator\">"
+			     (concat "Org version " org-version " with Emacs version "
+				     (number-to-string emacs-major-version) "</p>\n")))
+		   (insert html-validation-link "\n</div>"))
+		  (t
+		   (insert "<div id=\"postamble\">\n")
+		   (insert (format-spec
+			    (or (cadr (assoc (nth 0 lang-words)
+					     org-export-html-postamble-format))
+				(cadr (assoc "en" org-export-html-postamble-format)))
+			    `((?a . ,author) (?e . ,email)
+			      (?d . ,date)   (?c . ,creator-info)
+			      (?v . ,html-validation-link))))
+		   (insert "</div>"))))))
 
       (if org-export-html-with-timestamp
 	  (insert org-export-html-html-helper-timestamp))
@@ -1772,13 +1807,6 @@ lang=\"%s\" xml:lang=\"%s\">
 	  (prog1 (buffer-substring (point-min) (point-max))
 	    (kill-buffer (current-buffer)))
 	(current-buffer)))))
-
-(defun org-export-html-insert-plist-item (plist key &rest args)
-  (let ((item (plist-get plist key)))
-    (cond ((functionp item)
-           (apply item args))
-          (item
-           (insert item)))))
 
 (defun org-export-html-format-href (s)
   "Make sure the S is valid as a href reference in an XHTML document."
