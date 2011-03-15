@@ -1838,7 +1838,7 @@ lang=\"%s\" xml:lang=\"%s\">
 	(concat
 	(if caption
 	    (format "%s@<div %sclass=\"figure\">
-<p>"
+@<p>"
 		    (if org-par-open "@</p>\n" "")
 		    (if label (format "id=\"%s\" " (org-solidify-link-text label)) "")))
 	(format "@<img src=\"%s\"%s />"
