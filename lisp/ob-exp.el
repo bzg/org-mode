@@ -232,7 +232,7 @@ options are taken from `org-babel-default-header-args'."
   "Return a string with the exported content of a code block.
 The function respects the value of the :exports header argument."
   (flet ((silently () (let ((session (cdr (assoc :session (nth 2 info)))))
-			(when (and session (not (equal "none" session)))
+			(when (not (and session (equal "none" session)))
 			  (org-babel-exp-results info type 'silent))))
 	 (clean () (unless (eq type 'inline) (org-babel-remove-result info))))
     (case (intern (or (cdr (assoc :exports (nth 2 info))) "code"))
