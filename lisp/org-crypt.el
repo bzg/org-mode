@@ -56,9 +56,6 @@
 ;; 4. To automatically encrypt all necessary entries when saving a
 ;;    file, call `org-crypt-use-before-save-magic' after loading
 ;;    org-crypt.el.
-;;
-;; TODO:
-;;   - Allow symmetric encryption as well
 
 ;;; Thanks:
 
