@@ -1731,8 +1731,7 @@ lang=\"%s\" xml:lang=\"%s\">
 		   (when (and (plist-get opt-plist :author-info) author)
 		       (insert "<p class=\"author\">" (nth 1 lang-words) ": " author "</p>\n"))
 		   (when (and (plist-get opt-plist :email-info) email)
-		     (insert "<p class=\"email\"><a href=\"mailto:" 
-			     email "\">&lt;" email "&gt;</p>\n"))
+		     (insert "<p class=\"email\">" email "</p>\n"))
 		   (when (plist-get opt-plist :creator-info)
 		     (insert "<p class=\"creator\">"
 			     (concat "Org version " org-version " with Emacs version "
