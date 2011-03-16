@@ -295,7 +295,7 @@ code blocks by language."
           (unless (and language (not (string= language src-lang)))
 	    (let* ((info (org-babel-get-src-block-info))
 		   (params (nth 2 info))
-		   (link (progn (call-interactively 'org-store-link)
+		   (link (progn (org-store-link nil)
 				(org-babel-clean-text-properties
 				 (car (pop org-stored-links)))))
 		   (source-name
