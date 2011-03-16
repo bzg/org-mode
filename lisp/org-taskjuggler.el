@@ -263,9 +263,10 @@ defined in `org-export-taskjuggler-default-reports'."
   (let* ((tasks
 	  (org-taskjuggler-resolve-dependencies
 	   (org-taskjuggler-assign-task-ids 
-	    (org-map-entries 
-	     '(org-taskjuggler-components) 
-	     org-export-taskjuggler-project-tag nil 'archive 'comment))))
+	    (org-taskjuggler-compute-task-leafiness
+	     (org-map-entries 
+	      '(org-taskjuggler-components) 
+	      org-export-taskjuggler-project-tag nil 'archive 'comment)))))
 	 (resources
 	  (org-taskjuggler-assign-resource-ids
 	   (org-map-entries 
@@ -391,6 +392,23 @@ a path to the current task."
 	(push (cons "path" (mapconcat 'identity (reverse path) ".")) task)
 	(setq previous-level level)
 	(setq resolved-tasks (append resolved-tasks (list task)))))))
+
+(defun org-taskjuggler-compute-task-leafiness (tasks)
+  "Figure out if each task is a leaf by looking at it's level,
+and the level of its successor. If the successor is higher (ie
+deeper), then it's not a leaf."
+  (cond
+   ((null tasks) nil)
+   ;; if a task has no successors it is a leaf
+   ((null (car (cdr tasks)))
+    (cons (cons (cons "leaf-node" t) (car tasks)) 
+	  (org-taskjuggler-compute-task-leafiness (cdr tasks))))
+   ;; if the successor has a lower level than task it is a leaf
+   ((<= (cdr (assoc "level" (car (cdr tasks)))) (cdr (assoc "level" (car tasks)))) 
+    (cons (cons (cons "leaf-node" t) (car tasks)) 
+	  (org-taskjuggler-compute-task-leafiness (cdr tasks))))
+   ;; otherwise examine the rest of the tasks
+   (t (cons (car tasks) (org-taskjuggler-compute-task-leafiness (cdr tasks))))))
 
 (defun org-taskjuggler-assign-resource-ids (resources &optional unique-ids)
   "Given a list of resources return the same list, assigning a
@@ -621,11 +639,17 @@ org-mode priority string."
 		      (cdr (assoc "complete" task))))
 	(parent-ordered (cdr (assoc "parent-ordered" task)))
 	(previous-sibling (cdr (assoc "previous-sibling" task)))
+	(milestone (or (cdr (assoc "milestone" task))
+		       (and (assoc "leaf-node" task)
+			    (not (or effort 
+				     (cdr (assoc "duration" task))
+				     (cdr (assoc "end" task))
+				     (cdr (assoc "period" task)))))))
 	(attributes 
 	 '(account start note duration endbuffer endcredit end
-	   flags journalentry length maxend maxstart milestone
-	   minend minstart period reference responsible
-	   scheduling startbuffer startcredit statusnote)))
+	   flags journalentry length maxend maxstart minend
+	   minstart period reference responsible scheduling
+	   startbuffer startcredit statusnote)))
     (insert
      (concat 
       "task " unique-id " \"" headline "\" {\n" 
@@ -639,6 +663,7 @@ org-mode priority string."
       (and complete (format " complete %s\n" complete))
       (and effort (format " effort %s\n" effort))
       (and priority (format " priority %s\n" priority))
+      (and milestone (format " milestone\n"))
       
       (org-taskjuggler-get-attributes task attributes)
       "\n"))))
