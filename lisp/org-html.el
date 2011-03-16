@@ -1838,7 +1838,7 @@ lang=\"%s\" xml:lang=\"%s\">
 	(concat
 	(if caption
 	    (format "%s@<div %sclass=\"figure\">
-<p>"
+@<p>"
 		    (if org-par-open "@</p>\n" "")
 		    (if label (format "id=\"%s\" " (org-solidify-link-text label)) "")))
 	(format "@<img src=\"%s\"%s />"
@@ -2474,7 +2474,9 @@ the alist of previous items."
 	      ;; Ending for every item
 	      (org-close-li type)
 	      ;; We're ending last item of the list: end list.
-	      (when lastp (insert (format "</%sl>\n" type)))))
+	      (when lastp
+		(insert (format "</%sl>\n" type))
+		(org-open-par))))
 	  (funcall get-closings pos))
     (cond
      ;; At an item: insert appropriate tags in export buffer.

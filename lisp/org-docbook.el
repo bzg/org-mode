@@ -1371,7 +1371,9 @@ the alist of previous items."
 			  "</listitem></varlistentry>\n"
 			"</listitem>\n"))
 	      ;; We're ending last item of the list: end list.
-	      (when lastp (insert (format "</%slist>\n" type)))))
+	      (when lastp
+		(insert (format "</%slist>\n" type))
+		(org-export-docbook-open-para))))
 	  (funcall get-closings pos))
     (cond
      ;; At an item: insert appropriate tags in export buffer.
