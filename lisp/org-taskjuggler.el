@@ -181,6 +181,11 @@ resources for the project."
   :group 'org-export-taskjuggler
   :type 'string)
 
+(defcustom org-export-taskjuggler-target-version 2.4
+  "Which version of TaskJuggler the exporter is targeting."
+  :group 'org-export-taskjuggler
+  :type 'number)
+
 (defcustom org-export-taskjuggler-default-project-version "1.0"
   "Default version string for the project."
   :group 'org-export-taskjuggler
@@ -330,6 +335,10 @@ with the TaskJuggler GUI."
 	 (process-name "TaskJugglerUI")
 	 (command (concat process-name " " file-name)))
     (start-process-shell-command process-name nil command)))
+
+(defun org-taskjuggler-targeting-tj3-p ()
+  "Return true if we are targeting TaskJuggler III."
+  (< org-export-taskjuggler-target-version 3.0))
 
 (defun org-taskjuggler-parent-is-ordered-p ()
   "Return true if the parent of the current node has a property
@@ -623,7 +632,10 @@ org-mode priority string."
       (if (and parent-ordered previous-sibling)
 	  (format " depends %s\n" previous-sibling)
 	(and depends (format " depends %s\n" depends)))
-      (and allocate (format " purge allocations\n allocate %s\n" allocate))
+      (and allocate (format " purge %s\n allocate %s\n"
+			    (or (and (org-taskjuggler-targeting-tj3-p) "allocations")
+				"allocate")
+			    allocate))
       (and complete (format " complete %s\n" complete))
       (and effort (format " effort %s\n" effort))
       (and priority (format " priority %s\n" priority))
