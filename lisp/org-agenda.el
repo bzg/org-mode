@@ -4735,7 +4735,7 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 	    (setq head (match-string 1))
 	    (setq txt (org-format-agenda-item
 		       (if inactivep org-agenda-inactive-leader nil)
-		       head category tags timestr nil
+		       head category tags timestr
 		       remove-re)))
 	  (setq priority (org-get-priority txt))
 	  (org-add-props txt props
@@ -5104,7 +5104,7 @@ FRACTION is what fraction of the head-warning time has passed."
 				     (- 1 diff)))
 			   head category tags
 			   (if (not (= diff 0)) nil timestr)
-			   nil nil habitp))))
+			   nil habitp))))
 	    (when txt
 	      (setq face
 		    (cond
@@ -5225,7 +5225,7 @@ The flag is set if the currently compiled format contains a `%e'.")
       (return (apply 'create-image (cdr entry)))))))
 
 (defun org-format-agenda-item (extra txt &optional category tags dotime
-				     noprefix remove-re habitp)
+				     remove-re habitp)
   "Format TXT to be inserted into the agenda buffer.
 In particular, it adds the prefix and corresponding text properties.  EXTRA
 must be a string and replaces the `%s' specifier in the prefix format.
@@ -5234,9 +5234,7 @@ category taken from local variable or file name.  It will replace the `%c'
 specifier in the format.  DOTIME, when non-nil, indicates that a
 time-of-day should be extracted from TXT for sorting of this entry, and for
 the `%t' specifier in the format.  When DOTIME is a string, this string is
-searched for a time before TXT is.  NOPREFIX is a flag and indicates that
-only the correctly processes TXT should be returned - this is used by
-`org-agenda-change-all-lines'.  TAGS can be the tags of the headline.
+searched for a time before TXT is.  TAGS can be the tags of the headline.
 Any match of REMOVE-RE will be removed from TXT."
   (save-match-data
     ;; Diary entries sometimes have extra whitespace at the beginning
@@ -5335,38 +5333,35 @@ Any match of REMOVE-RE will be removed from TXT."
       ;; heading.
       (setq txt (propertize txt 'org-heading t))
 
-      ;; Create the final string
-      (if noprefix
-	  (setq rtn txt)
-	;; Prepare the variables needed in the eval of the compiled format
-	(setq time (cond (s2 (concat
-			      (org-agenda-time-of-day-to-ampm-maybe s1)
-			      "-" (org-agenda-time-of-day-to-ampm-maybe s2)
-			      (if org-agenda-timegrid-use-ampm " ")))
-			 (s1 (concat
-			      (org-agenda-time-of-day-to-ampm-maybe s1)
-			      (if org-agenda-timegrid-use-ampm
-				  "........ "
-				"......")))
-			 (t ""))
-	      extra (or (and (not habitp) extra) "")
-	      category (if (symbolp category) (symbol-name category) category)
-	      thecategory (copy-sequence category))
-	(if (string-match org-bracket-link-regexp category)
-	    (progn
-	      (setq l (if (match-end 3)
-			  (- (match-end 3) (match-beginning 3))
-			(- (match-end 1) (match-beginning 1))))
-	      (when (< l (or org-prefix-category-length 0))
-		(setq category (copy-sequence category))
-		(org-add-props category nil
-		  'extra-space (make-string
-				(- org-prefix-category-length l 1) ?\ ))))
-	  (if (and org-prefix-category-max-length
-		   (>= (length category) org-prefix-category-max-length))
-	      (setq category (substring category 0 (1- org-prefix-category-max-length)))))
-	;; Evaluate the compiled format
-	(setq rtn (concat (eval org-prefix-format-compiled) txt)))
+      ;; Prepare the variables needed in the eval of the compiled format
+      (setq time (cond (s2 (concat
+			    (org-agenda-time-of-day-to-ampm-maybe s1)
+			    "-" (org-agenda-time-of-day-to-ampm-maybe s2)
+			    (if org-agenda-timegrid-use-ampm " ")))
+		       (s1 (concat
+			    (org-agenda-time-of-day-to-ampm-maybe s1)
+			    (if org-agenda-timegrid-use-ampm
+				"........ "
+			      "......")))
+		       (t ""))
+	    extra (or (and (not habitp) extra) "")
+	    category (if (symbolp category) (symbol-name category) category)
+	    thecategory (copy-sequence category))
+      (if (string-match org-bracket-link-regexp category)
+	  (progn
+	    (setq l (if (match-end 3)
+			(- (match-end 3) (match-beginning 3))
+		      (- (match-end 1) (match-beginning 1))))
+	    (when (< l (or org-prefix-category-length 0))
+	      (setq category (copy-sequence category))
+	      (org-add-props category nil
+		'extra-space (make-string
+			      (- org-prefix-category-length l 1) ?\ ))))
+	(if (and org-prefix-category-max-length
+		 (>= (length category) org-prefix-category-max-length))
+	    (setq category (substring category 0 (1- org-prefix-category-max-length)))))
+      ;; Evaluate the compiled format
+      (setq rtn (concat (eval org-prefix-format-compiled) txt))
 
       ;; And finally add the text properties
       (remove-text-properties 0 (length rtn) '(line-prefix t wrap-prefix t) rtn)
@@ -7049,14 +7044,14 @@ If FORCE-TAGS is non nil, the car of it returns the new tags."
 		dotime (org-get-at-bol 'dotime)
 		cat (org-get-at-bol 'org-category)
 		tags thetags
-		new (org-format-agenda-item "x" newhead cat tags dotime 'noprefix)
+		new (org-format-agenda-item (org-get-at-bol 'extra)
+					    newhead cat tags dotime)
 		pl (text-property-any (point-at-bol) (point-at-eol) 'org-heading t)
 		undone-face (org-get-at-bol 'undone-face)
 		done-face (org-get-at-bol 'done-face))
-	  (goto-char pl)
+	  (beginning-of-line 1)
 	  (cond
 	   ((equal new "")
-	    (beginning-of-line 1)
 	    (and (looking-at ".*\n?") (replace-match "")))
 	   ((looking-at ".*")
 	    (replace-match new t t)
