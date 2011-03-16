@@ -630,12 +630,12 @@ The table of checksums is written to the file mobile-checksums."
 		      (get-text-property (point) 'org-marker)))
 	  (setq sexp (member (get-text-property (point) 'type)
 			     '("diary" "sexp")))
-	  (if (setq pl (get-text-property (point) 'prefix-length))
+	  (if (setq pl (text-property-any (point) (point-at-eol) 'org-heading t))
 	      (progn
 		(setq prefix (org-trim (buffer-substring
-					(point) (+ (point) pl)))
+					(point) pl))
 		      line (org-trim (buffer-substring
-				      (+ (point) pl)
+				      pl
 				      (point-at-eol))))
 		(delete-region (point-at-bol) (point-at-eol))
 		(insert line "<before>" prefix "</before>")
