@@ -848,9 +848,9 @@ MAY-INLINE-P allows inlining it as an image."
 	       (message "image %s %s" thefile org-par-open)
 	       (org-export-html-format-image thefile org-par-open))
 	    (concat
-	       "@<a href=\"" thefile "\"" (if attr (concat " " attr)) ">"
+	       "<a href=\"" thefile "\"" (if attr (concat " " attr)) ">"
 	       (org-export-html-format-desc desc)
-	       "@</a>")))))
+	       "</a>")))))
 
 (defun org-html-handle-links (line opt-plist)
   "Return LINE with markup of Org mode links.
@@ -1530,9 +1530,6 @@ lang=\"%s\" xml:lang=\"%s\">
 				  "@</a> ")
 			  t t line)))))
 
-	  ;; Format the links
-	  (setq line (org-html-handle-links line opt-plist))
-
 	  (setq line (org-html-handle-time-stamps line))
 
 	  ;; replace "&" by "&amp;", "<" and ">" by "&lt;" and "&gt;"
@@ -1540,6 +1537,9 @@ lang=\"%s\" xml:lang=\"%s\">
 	  ;; Also handle sub_superscripts and checkboxes
 	  (or (string-match org-table-hline-regexp line)
 	      (setq line (org-html-expand line)))
+
+	  ;; Format the links
+	  (setq line (org-html-handle-links line opt-plist))
 
 	  ;; TODO items
 	  (if (and (string-match org-todo-line-regexp line)
@@ -1829,7 +1829,7 @@ lang=\"%s\" xml:lang=\"%s\">
   "Create image tag with source and attributes."
   (save-match-data
     (if (string-match "^ltxpng/" src)
-	(format "@<img src=\"%s\" alt=\"%s\"/>"
+	(format "<img src=\"%s\" alt=\"%s\"/>"
                 src (org-find-text-property-in-string 'org-latex-src src))
       (let* ((caption (org-find-text-property-in-string 'org-caption src))
 	     (attr (org-find-text-property-in-string 'org-attributes src))
@@ -1837,20 +1837,20 @@ lang=\"%s\" xml:lang=\"%s\">
 	(setq caption (and caption (org-html-do-expand caption)))
 	(concat
 	(if caption
-	    (format "%s@<div %sclass=\"figure\">
-@<p>"
-		    (if org-par-open "@</p>\n" "")
+	    (format "%s<div %sclass=\"figure\">
+<p>"
+		    (if org-par-open "</p>\n" "")
 		    (if label (format "id=\"%s\" " (org-solidify-link-text label)) "")))
-	(format "@<img src=\"%s\"%s />"
+	(format "<img src=\"%s\"%s />"
 		src
 		(if (string-match "\\<alt=" (or attr ""))
 		    (concat " " attr )
 		  (concat " " attr " alt=\"" src "\"")))
 	(if caption
-	    (format "@</p>%s
-@</div>%s"
-		(concat "\n@<p>" caption "@</p>")
-		(if org-par-open "\n@<p>" ""))))))))
+	    (format "</p>%s
+</div>%s"
+		(concat "\n<p>" caption "</p>")
+		(if org-par-open "\n<p>" ""))))))))
 
 (defun org-export-html-get-bibliography ()
   "Find bibliography, cut it out and return it."
