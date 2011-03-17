@@ -5592,7 +5592,7 @@ could bind the variable in the options section of a custom command.")
 	      (goto-char (match-beginning 1))
 	      (insert (format org-agenda-todo-keyword-format s)))))
       (let ((pl (text-property-any 0 (length x) 'org-heading t x)))
-	(setq re (concat (get-text-property 0 'org-todo-regexp x)))
+	(setq re (get-text-property 0 'org-todo-regexp x))
 	(when (and re
 		   (equal (string-match (concat "\\(\\.*\\)" re "\\( +\\)")
 					x (or pl 0)) pl))
