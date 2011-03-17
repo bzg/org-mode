@@ -339,7 +339,7 @@ with the TaskJuggler GUI."
 
 (defun org-taskjuggler-targeting-tj3-p ()
   "Return true if we are targeting TaskJuggler III."
-  (< org-export-taskjuggler-target-version 3.0))
+  (>= org-export-taskjuggler-target-version 3.0))
 
 (defun org-taskjuggler-parent-is-ordered-p ()
   "Return true if the parent of the current node has a property
