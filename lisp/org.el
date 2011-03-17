@@ -12551,7 +12551,7 @@ instead of the agenda files."
 		     (org-agenda-files))))))))
 
 (defun org-make-tags-matcher (match)
-  "Create the TAGS//TODO matcher form for the selection string MATCH."
+  "Create the TAGS/TODO matcher form for the selection string MATCH."
   ;; todo-only is scoped dynamically into this function, and the function
   ;; may change it if the matcher asks for it.
   (unless match
