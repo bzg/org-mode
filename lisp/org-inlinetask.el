@@ -107,12 +107,12 @@ When nil, they will not be exported."
   :type 'boolean)
 
 (defvar org-inlinetask-export-templates
-  '((html "<pre class=\"inlinetask\"><b>%s%s</b><br />\n%s\n</pre>"
+  '((html "<pre class=\"inlinetask\"><b>%s%s</b><br />%s</pre>"
 	  '((unless (eq todo "")
 	      (format "<span class=\"%s %s\">%s%s</span> "
 		      class todo todo priority))
 	    heading content))
-    (latex "\\begin\{description\}\n\\item[%s%s]~\n%s\n\\end\{description\}"
+    (latex "\\begin\{description\}\n\\item[%s%s]~%s\\end\{description\}"
 	   '((unless (eq todo "") (format "\\textsc\{%s%s\} " todo priority))
 	     heading content))
     (ascii "     -- %s%s%s"
@@ -306,66 +306,74 @@ If the task has an end part, also demote it."
   "Handle headlines with level larger or equal to `org-inlinetask-min-level'.
 Either remove headline and meta data, or do special formatting."
   (goto-char (point-min))
-  (let* ((nstars (if org-odd-levels-only
-		     (1- (* 2 (or org-inlinetask-min-level 200)))
-		   (or org-inlinetask-min-level 200)))
-	 (re1 (format "^\\(\\*\\{%d,\\}\\)[ \t]+.*\n" nstars))
-	 (re2 (concat "^[ \t]*" org-keyword-time-regexp))
-	 headline beg end stars content)
-    (while (re-search-forward re1 nil t)
-      (setq headline (match-string 0)
-	    stars (match-string 1)
-	    content nil)
-      (replace-match "")
-      (while (looking-at re2)
-	(delete-region (point) (1+ (point-at-eol))))
-      (while (looking-at org-drawer-regexp)
-	(setq beg (point))
-	(if (re-search-forward org-property-end-re nil t)
-	    (delete-region beg (1+ (match-end 0)))))
-      (setq beg (point))
-      (when (and (re-search-forward "^\\(\\*+\\)[ \t]+" nil t)
-		 (= (length (match-string 1)) (length stars))
-		 (progn (goto-char (match-end 0))
-			(looking-at "END[ \t]*$")))
-	(setq content (buffer-substring beg (1- (point-at-bol))))
-	(delete-region beg (1+ (match-end 0))))
+  (let* ((keywords-re (concat "^[ \t]*" org-keyword-time-regexp))
+	 (inline-re (concat (org-inlinetask-outline-regexp) ".*")))
+    (while (re-search-forward inline-re nil t)
+      (let ((headline (match-string 0))
+	    (beg (point-at-bol))
+	    (end (copy-marker (save-excursion
+				(org-inlinetask-goto-end) (point))))
+	    content)
+      ;; Delete SCHEDULED, DEADLINE...
+      (while (re-search-forward keywords-re end t)
+	(delete-region (point-at-bol) (1+ (point-at-eol))))
       (goto-char beg)
+      ;; Delete drawers
+      (while (re-search-forward org-drawer-regexp end t)
+	(when (save-excursion (re-search-forward org-property-end-re nil t))
+	  (delete-region beg (1+ (match-end 0)))))
+      ;; Get CONTENT, if any.
+      (goto-char beg)
+      (forward-line 1)
+      (unless (= (point) end)
+	(setq content (buffer-substring (point)
+					(save-excursion (goto-char end)
+							(forward-line -1)
+							(point)))))
+      ;; Remove the task.
+      (goto-char beg)
+      (delete-region beg end)
       (when org-inlinetask-export
-	;; content formatting
-	(when content
-	    (if (not (string-match "\\S-" content))
-		(setq content nil)
-	      (if (string-match "[ \t\n]+\\'" content)
+	;; Format CONTENT, if appropriate.
+	(setq content
+	      (if (not (and content (string-match "\\S-" content)))
+		  ""
+		;; Ensure CONTENT has minimal indentation, a single
+		;; newline character at its boundaries, and isn't
+		;; protected.
+		(when (string-match "`\\([ \t]*\n\\)+" content)
+		  (setq content (substring content (match-end 0))))
+		(when (string-match "[ \t\n]+\\'" content)
 		  (setq content (substring content 0 (match-beginning 0))))
-	      (setq content (org-remove-indentation content))))
-	;; Prevent from protecting content if there's any
-	(setq content (or (and content
-			       (org-add-props content '(org-protected nil)))
-			  ""))
-	;; grab elements to export
+		(org-add-props (concat "\n" (org-remove-indentation content) "\n")
+		    '(org-protected nil))))
 	(when (string-match org-complex-heading-regexp headline)
-	  (let* ((todo (or (match-string 2 headline) ""))
+	  (let* ((nil-to-str
+		  (function
+		   ;; Change nil arguments into empty strings.
+		   (lambda (el) (or (eval el) ""))))
+		 ;;  Set up keywords provided to templates.
+		 (todo (or (match-string 2 headline) ""))
 		 (class (or (and (eq "" todo) "")
 			    (if (member todo org-done-keywords) "done" "todo")))
 		 (priority (or (match-string 3 headline) ""))
 		 (heading (or (match-string 4 headline) ""))
 		 (tags (or (match-string 5 headline) ""))
-		 (backend-spec (assq org-export-current-backend 
+		 ;; Read `org-inlinetask-export-templates'.
+		 (backend-spec (assq org-export-current-backend
 				     org-inlinetask-export-templates))
 		 (format-str (org-add-props (nth 1 backend-spec)
 				 '(org-protected t)))
 		 (tokens (cadr (nth 2 backend-spec)))
-		 (nil-to-str
-		  ;; Change nil arguments into empty strings
-		  (lambda (el) (or (eval el) "")))
-		 ;; Build and ensure export string will not break lists
+		 ;; Build export string. Ensure it won't break
+		 ;; surrounding lists by giving it arbitrary high
+		 ;; indentation.
 		 (export-str (org-add-props
 				 (eval (append '(format format-str)
 					       (mapcar nil-to-str tokens)))
 				 '(original-indentation 1000))))
-	    ;; Eventually insert it
-	    (insert export-str "\n")))))))
+	    (insert export-str)
+	    (unless (bolp) (insert "\n")))))))))
 
 (defun org-inlinetask-get-current-indentation ()
   "Get the indentation of the last non-while line above this one."
