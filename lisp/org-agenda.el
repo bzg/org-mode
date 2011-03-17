@@ -5329,9 +5329,9 @@ Any match of REMOVE-RE will be removed from TXT."
 	(while (string-match remove-re txt)
 	  (setq txt (replace-match "" t t txt))))
 
-      ;; Set org-heading property on `rtn' to mark the start of the
+      ;; Set org-heading property on `txt' to mark the start of the
       ;; heading.
-      (setq txt (propertize txt 'org-heading t))
+      (add-text-properties 0 (1- (length txt)) '(org-heading t) txt)
 
       ;; Prepare the variables needed in the eval of the compiled format
       (setq time (cond (s2 (concat
