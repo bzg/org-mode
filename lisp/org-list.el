@@ -2850,13 +2850,19 @@ items."
 	   ;; extra information that needs to be processed.
 	   (lambda (item type depth)
 	     (let* ((counter (pop item))
-		    (fmt (concat (cond
-				  ((eq type 'descriptive)
-				   (concat (org-trim (eval istart)) "%s"
-				   (eval ddend)))
-				  ((and counter (eq type 'ordered))
-				   (concat (eval icount) "%s"))
-				  (t (concat (eval istart) "%s")))
+		    (fmt (concat
+			  (cond
+			   ((eq type 'descriptive)
+			    ;; Stick DTSTART to ISTART by
+			    ;; left-trimming the latter.
+			    (concat (let ((s (eval istart)))
+				      (or (and (string-match "[ \t\n\r]+\\'" s)
+					       (replace-match "" t t s))
+					  istart))
+				    "%s" (eval ddend)))
+			   ((and counter (eq type 'ordered))
+			    (concat (eval icount) "%s"))
+			   (t (concat (eval istart) "%s")))
 				 (eval iend)))
 		    (first (car item)))
 	       ;; Replace checkbox if any is found.
@@ -2868,12 +2874,17 @@ items."
 		((string-match "\\[-\\]" first)
 		 (setq first (replace-match "$\\boxminus$" t t first))))
 	       ;; Insert descriptive term if TYPE is `descriptive'.
-	       (when (and (eq type 'descriptive)
-			  (string-match "^\\(.*\\)[ \t]+::" first))
-		 (setq first (concat
-			      (eval dtstart) (org-trim (match-string 1 first))
-			      (eval dtend) (eval ddstart)
-			      (org-trim (substring first (match-end 0))) "")))
+	       (when (eq type 'descriptive)
+		 (let* ((complete (string-match "^\\(.*\\)[ \t]+::" first))
+			(term (if complete
+				  (save-match-data
+				    (org-trim (match-string 1 first)))
+				"???"))
+			(desc (if complete
+				  (org-trim (substring first (match-end 0)))
+				first)))
+		   (setq first (concat (eval dtstart) term (eval dtend)
+				       (eval ddstart) desc))))
 	       (setcar item first)
 	       (format fmt
 		       (mapconcat (lambda (e)
@@ -2889,10 +2900,10 @@ items."
 		    (fmt (concat (cond
 				  (splicep "%s")
 				  ((eq type 'ordered)
-				   (concat (eval ostart) "\n%s" (eval oend)))
+				   (concat (eval ostart) "%s" (eval oend)))
 				  ((eq type 'descriptive)
-				   (concat (eval dstart) "\n%s" (eval dend)))
-				  (t (concat (eval ustart) "\n%s" (eval uend))))
+				   (concat (eval dstart) "%s" (eval dend)))
+				  (t (concat (eval ustart) "%s" (eval uend))))
 				 (eval lsep))))
 	       (format fmt (mapconcat (lambda (e)
 					(funcall export-item e type depth))
@@ -2906,9 +2917,9 @@ with overruling parameters for `org-list-to-generic'."
   (org-list-to-generic
    list
    (org-combine-plists
-    '(:splice nil :ostart "\\begin{enumerate}" :oend "\\end{enumerate}"
-	       :ustart "\\begin{itemize}" :uend "\\end{itemize}"
-	       :dstart "\\begin{description}" :dend "\\end{description}"
+    '(:splice nil :ostart "\\begin{enumerate}\n" :oend "\\end{enumerate}"
+	       :ustart "\\begin{itemize}\n" :uend "\\end{itemize}"
+	       :dstart "\\begin{description}\n" :dend "\\end{description}"
 	       :dtstart "[" :dtend "] "
 	       :istart "\\item " :iend "\n"
 	       :icount (let ((enum (nth depth '("i" "ii" "iii" "iv"))))
@@ -2927,12 +2938,12 @@ with overruling parameters for `org-list-to-generic'."
   (org-list-to-generic
    list
    (org-combine-plists
-    '(:splice nil :ostart "<ol>" :oend "\n</ol>"
-	       :ustart "<ul>" :uend "\n</ul>"
-	       :dstart "<dl>" :dend "</dl>"
+    '(:splice nil :ostart "<ol>\n" :oend "\n</ol>"
+	       :ustart "<ul>\n" :uend "\n</ul>"
+	       :dstart "<dl>\n" :dend "\n</dl>"
 	       :dtstart "<dt>" :dtend "</dt>\n"
 	       :ddstart "<dd>" :ddend "</dd>"
-	       :istart "<li>" :iend "\n</li>"
+	       :istart "<li>" :iend "</li>"
 	       :icount (format "<li value=\"%s\">" counter)
 	       :isep "\n" :lsep "\n" :csep "\n"
 	       :cbon "<code>[X]</code>" :cboff "<code>[ ]</code>")
@@ -2945,9 +2956,9 @@ with overruling parameters for `org-list-to-generic'."
   (org-list-to-generic
    list
    (org-combine-plists
-    '(:splice nil :ostart "@itemize @minus" :oend "@end itemize"
-	       :ustart "@enumerate" :uend "@end enumerate"
-	       :dstart "@table @asis" :dend "@end table"
+    '(:splice nil :ostart "@itemize @minus\n" :oend "@end itemize"
+	       :ustart "@enumerate\n" :uend "@end enumerate"
+	       :dstart "@table @asis\n" :dend "@end table"
 	       :dtstart " " :dtend "\n"
 	       :istart "@item\n" :iend "\n"
 	       :icount "@item\n"
