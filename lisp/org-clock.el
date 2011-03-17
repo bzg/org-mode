@@ -1652,7 +1652,10 @@ fontified, and then returned."
 (defun org-clock-report (&optional arg)
   "Create a table containing a report about clocked time.
 If the cursor is inside an existing clocktable block, then the table
-will be updated.  If not, a new clocktable will be inserted.
+will be updated.  If not, a new clocktable will be inserted.  The scope
+of the new clock will be subtree when called from within a subtree, and 
+file elsewhere.
+
 When called with a prefix argument, move to the first clock table in the
 buffer and update it."
   (interactive "P")
@@ -1662,8 +1665,12 @@ buffer and update it."
     (org-show-entry))
   (if (org-in-clocktable-p)
       (goto-char (org-in-clocktable-p))
-    (org-create-dblock (append (list :name "clocktable")
-			       org-clock-clocktable-default-properties)))
+    (let ((props (if (ignore-errors 
+		       (save-excursion (org-back-to-heading)))
+		     (list :name "clocktable" :scope 'subtree)
+		   (list :name "clocktable"))))
+      (org-create-dblock 
+       (org-combine-plists org-clock-clocktable-default-properties props))))
   (org-update-dblock))
 
 (defun org-in-clocktable-p ()
