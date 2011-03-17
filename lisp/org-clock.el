@@ -259,11 +259,12 @@ For more information, see `org-clocktable-write-default'."
   :group 'org-clocktable
   :type 'function)
 
+;; FIXME: translate es and nl last string "Clock summary at"
 (defcustom org-clock-clocktable-language-setup
-  '(("en" "File"     "L"  "Timestamp"  "Headline" "Time"  "ALL"   "Total time"   "File time")
-    ("es" "Archivo"  "N"  "Fecha y hora" "Tarea" "Tiempo" "TODO" "Tiempo total" "Tiempo archivo")
-    ("fr" "Fichier"  "N"  "Horodatage" "En-tête"  "Durée" "TOUT"  "Durée totale" "Durée fichier")
-    ("nl" "Bestand"  "N"  "Tijdstip"   "Hoofding" "Duur"  "ALLES" "Totale duur"  "Bestandstijd"))
+  '(("en" "File"     "L"  "Timestamp"  "Headline" "Time"  "ALL"   "Total time"   "File time" "Clock summary at")
+    ("es" "Archivo"  "N"  "Fecha y hora" "Tarea" "Tiempo" "TODO" "Tiempo total" "Tiempo archivo" "Clock summary at")
+    ("fr" "Fichier"  "N"  "Horodatage" "En-tête"  "Durée" "TOUT"  "Durée totale" "Durée fichier" "Horodatage sommaire à")
+    ("nl" "Bestand"  "N"  "Tijdstip"   "Hoofding" "Duur"  "ALLES" "Totale duur"  "Bestandstijd" "Clock summary at"))
   "Terms used in clocktable, translated to different languages."
   :group 'org-clocktable
   :type 'alist)
@@ -2099,7 +2100,7 @@ from the dynamic block defintion."
        (or header
 	   ;; Format the standard header
 	   (concat
-	    "Clock summary at ["
+	    (nth 9 lwords) " ["
 	    (substring
 	     (format-time-string (cdr org-time-stamp-formats))
 	     1 -1)
