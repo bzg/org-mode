@@ -5331,7 +5331,7 @@ Any match of REMOVE-RE will be removed from TXT."
 
       ;; Set org-heading property on `txt' to mark the start of the
       ;; heading.
-      (add-text-properties 0 (1- (length txt)) '(org-heading t) txt)
+      (add-text-properties 0 (length txt) '(org-heading t) txt)
 
       ;; Prepare the variables needed in the eval of the compiled format
       (setq time (cond (s2 (concat
