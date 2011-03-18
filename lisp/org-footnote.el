@@ -160,7 +160,7 @@ If yes, return the beginning position, the label, and the definition, if local."
 (defun org-footnote-at-definition-p ()
   "Is the cursor at a footnote definition.
 This matches only pure definitions like [1] or [fn:name] at the beginning
-of a line.  It does not a references like [fn:name:definition], where the
+of a line.  It does not match references like [fn:name:definition], where the
 footnote text is included and defined locally.
 The return value will be nil if not at a footnote definition, and a list
 with start and label of the footnote if there is a definition at point."
