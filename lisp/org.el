@@ -19052,6 +19052,8 @@ If point is in an inline task, mark that task instead."
      ((looking-at "# ") (setq column 0))
      ;; Headings
      ((looking-at "\\*+ ") (setq column 0))
+     ;; Footnote definition
+     ((looking-at org-footnote-definition-re) (setq column 0))
      ;; Literal examples
      ((looking-at "[ \t]*:[ \t]")
       (setq column (org-get-indentation))) ; do nothing
@@ -19090,15 +19092,16 @@ If point is in an inline task, mark that task instead."
 		  (not (looking-at org-drawer-regexp))
 		  ;; When point started in an inline task, do not move
 		  ;; above task starting line.
-		  (not (and inline-task-p
-			    (looking-at inline-re)))
-		  ;; Skip comments, verbatim, empty lines, tables,
-		  ;; inline tasks, lists, drawers and blocks.
+		  (not (and inline-task-p (looking-at inline-re)))
+		  ;; Skip drawers, blocks, empty lines, verbatim,
+		  ;; comments, tables, footnotes definitions, lists,
+		  ;; inline tasks.
 		  (or (and (looking-at "[ \t]*:END:")
 			   (re-search-backward org-drawer-regexp nil t))
 		      (and (looking-at "[ \t]*#\\+end_")
 			   (re-search-backward "[ \t]*#\\+begin_"nil t))
 		      (looking-at "[ \t]*[\n:#|]")
+		      (looking-at org-footnote-definition-re)
 		      (and (ignore-errors (goto-char (org-in-item-p)))
 			   (goto-char
 			    (org-list-get-top-point (org-list-struct))))
