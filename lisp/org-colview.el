@@ -186,8 +186,17 @@ This is the compiled version of the format.")
 	    title (nth 1 column)
 	    ass (if (equal property "ITEM")
 		    (cons "ITEM"
-			  (org-no-properties
-			   (org-get-at-bol 'txt)))
+			  ;; When in a buffer, get the whole line,
+			  ;; we'll clean it later…
+			  (if (org-mode-p)
+			      (save-match-data
+				(org-no-properties
+				 (org-remove-tabs
+				  (buffer-substring-no-properties
+				   (point-at-bol) (point-at-eol)))))
+			    ;; In agenda, just get the `txt' property
+			    (org-no-properties
+			     (org-get-at-bol 'txt))))
 		  (assoc property props))
 	    width (or (cdr (assoc property org-columns-current-maxwidths))
 		      (nth 2 column)
