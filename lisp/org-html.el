@@ -2482,7 +2482,7 @@ the alist of previous items."
      ;; At an item: insert appropriate tags in export buffer.
      ((assq pos struct)
       (string-match
-       (concat "[ \t]*\\(\\S-+[ \t]+\\)"
+       (concat "[ \t]*\\(\\S-+[ \t]*\\)"
 	       "\\(?:\\[@\\(?:start:\\)?\\([0-9]+\\|[A-Za-z]\\)\\]\\)?"
 	       "\\(?:\\(\\[[ X-]\\]\\)[ \t]+\\)?"
 	       "\\(?:\\(.*\\)[ \t]+::[ \t]+\\)?"
