@@ -2415,7 +2415,8 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 			    (if (re-search-forward "^$\\|^#.*$\\|\\[[0-9]+\\]" nil t)
 				(match-beginning 0) (point-max)))))
 		 (setq footnote (concat (org-trim (buffer-substring (point) end))
-					" ")) ; prevent last } being part of a link
+					; last } won't be part of a link or list.
+					"\n"))
 		 (delete-region (point) end))
 	       (goto-char foot-beg)
 	       (delete-region foot-beg foot-end)
