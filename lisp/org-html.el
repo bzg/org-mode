@@ -1691,9 +1691,12 @@ lang=\"%s\" xml:lang=\"%s\">
 
       (save-excursion
 	(goto-char (point-min))
-	(while (re-search-forward "<p class=\"footnote\">[^\000]*?\\(</p>\\|\\'\\)" nil t)
-	  (push (match-string 0) footnotes)
-	  (replace-match "" t t)))
+	(while (re-search-forward 
+		"\\(\\(<p class=\"footnote\">\\)[^\000]*?\\)\\(\\(\\2\\)\\|\\'\\)" 
+		nil t)
+	  (push (match-string 1) footnotes)
+	  (replace-match "\\4" t nil)
+	  (goto-char (match-beginning 0))))
       (when footnotes
 	(insert (format org-export-html-footnotes-section
 			(nth 4 lang-words)
