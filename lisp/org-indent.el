@@ -48,8 +48,12 @@
 
 (defconst org-indent-max 40
   "Maximum indentation in characters.")
-(defconst org-indent-max-levels 40
-  "Maximum indentation in characters.")
+(defconst org-indent-max-levels 20
+  "Maximum added level through virtual indentation, in
+characters.
+
+It is computed by multiplying `org-indent-indentation-per-level'
+minus one by actual level of the headline minus one.")
 
 (defvar org-indent-strings nil
   "Vector with all indentation strings.
@@ -227,8 +231,11 @@ useful to make it ever so slightly different."
 	     ;; move forward. If H is non-nil, `line-prefix' will be
 	     ;; starred. Assume point is at bol.
 	     (lambda (l w h)
-	       (let ((line (aref (if h org-indent-stars org-indent-strings) l))
-		     (wrap (aref org-indent-strings w)))
+	       (let ((line (if h (aref org-indent-stars
+				       (min l org-indent-max-levels))
+			     (aref org-indent-strings
+				   (min l org-indent-max))))
+		     (wrap (aref org-indent-strings (min w org-indent-max))))
 		(add-text-properties (point) (point-at-eol)
 				     `(line-prefix ,line wrap-prefix ,wrap)))
 	       (forward-line 1)))))
@@ -302,7 +309,7 @@ This function is meant to be called by `after-change-functions'."
        ((and (/= beg end)
 	     (save-excursion
 	       (goto-char beg)
-	       (re-search-forward org-outline-regexp-bol end t)))
+	       (re-search-forward org-indent-outline-re end t)))
 	(let ((end (save-excursion
 		     (goto-char end) (outline-next-heading) (point))))
 	  (org-indent-remove-properties beg end)
