@@ -54,7 +54,7 @@
 (require 'org-mks)
 
 (declare-function org-datetree-find-date-create "org-datetree"
-		  (DATE &optional KEEP-RESTRICTION))
+		  (date &optional keep-restriction))
 (declare-function org-table-get-specials "org-table" ())
 (declare-function org-table-goto-line "org-table" (N))
 (defvar org-remember-default-headline)
