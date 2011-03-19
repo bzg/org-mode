@@ -113,12 +113,14 @@ t          create unique labels of the form [fn:1], [fn:2], ...
 confirm    like t, but let the user edit the created value.  In particular,
            the label can be removed from the minibuffer, to create
            an anonymous footnote.
+random	   Automatically generate a unique, random label.
 plain      Automatically create plain number labels like [1]"
   :group 'org-footnote
   :type '(choice
 	  (const :tag "Prompt for label" nil)
 	  (const :tag "Create automatic [fn:N]" t)
 	  (const :tag "Offer automatic [fn:N] for editing" confirm)
+	  (const :tag "Create a random label" random)
 	  (const :tag "Create automatic [N]" plain)))
 
 (defcustom org-footnote-auto-adjust nil
@@ -253,16 +255,22 @@ This command prompts for a label.  If this is a label referencing an
 existing label, only insert the label.  If the footnote label is empty
 or new, let the user edit the definition of the footnote."
   (interactive)
-  (let* ((labels (org-footnote-all-labels))
+  (let* ((labels (and (not (equal org-footnote-auto-label 'random))
+		      (org-footnote-all-labels)))
 	 (propose (org-footnote-unique-label labels))
 	 (label
-	  (if (member org-footnote-auto-label '(t plain))
-	      propose
+	  (cond 
+	   ((member org-footnote-auto-label '(t plain))
+	    propose)
+	   ((equal org-footnote-auto-label 'random)
+	    (require 'org-id)
+	    (substring (org-id-uuid) 0 8))
+	   (t
 	    (completing-read
 	     "Label (leave empty for anonymous): "
 	     (mapcar 'list labels) nil nil
 	     (if (eq org-footnote-auto-label 'confirm) propose nil)
-	     'org-footnote-label-history))))
+	     'org-footnote-label-history)))))
     (setq label (org-footnote-normalize-label label))
     (cond
      ((equal label "")
@@ -291,6 +299,7 @@ or new, let the user edit the definition of the footnote."
 	  ;; No section, put footnote into the current outline node
 	  nil
 	;; Try to find or make the special node
+	(goto-char (point-min))
 	(setq re (concat "^\\*+[ \t]+" org-footnote-section "[ \t]*$"))
 	(unless (or (re-search-forward re nil t)
 		    (and (progn (widen) t)
@@ -310,10 +319,10 @@ or new, let the user edit the definition of the footnote."
 	  (skip-chars-backward " \t\r\n")
 	  (delete-region (point) max)
 	  (insert "\n\n")
-	  (insert org-footnote-tag-for-non-org-mode-files "\n")))))
-    ;; Skip existing footnotes
-    (while (re-search-forward "^[[:space:]]*\\[[^]]+\\] " nil t)
-      (forward-line))
+	  (insert org-footnote-tag-for-non-org-mode-files "\n")))
+	;; Skip existing footnotes
+      (while (re-search-forward "^[[:space:]]*\\[[^]]+\\] " nil t)
+	(forward-line))))
     (insert "\n[" label "] \n")
     (goto-char (1- (point)))
     (message "Edit definition and go back with `C-c &' or, if unique, with `C-c C-c'.")))

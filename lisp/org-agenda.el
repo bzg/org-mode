@@ -5329,9 +5329,9 @@ Any match of REMOVE-RE will be removed from TXT."
 	(while (string-match remove-re txt)
 	  (setq txt (replace-match "" t t txt))))
 
-      ;; Set org-heading property on `rtn' to mark the start of the
+      ;; Set org-heading property on `txt' to mark the start of the
       ;; heading.
-      (setq txt (propertize txt 'org-heading t))
+      (add-text-properties 0 (length txt) '(org-heading t) txt)
 
       ;; Prepare the variables needed in the eval of the compiled format
       (setq time (cond (s2 (concat
@@ -5592,7 +5592,7 @@ could bind the variable in the options section of a custom command.")
 	      (goto-char (match-beginning 1))
 	      (insert (format org-agenda-todo-keyword-format s)))))
       (let ((pl (text-property-any 0 (length x) 'org-heading t x)))
-	(setq re (concat (get-text-property 0 'org-todo-regexp x)))
+	(setq re (get-text-property 0 'org-todo-regexp x))
 	(when (and re
 		   (equal (string-match (concat "\\(\\.*\\)" re "\\( +\\)")
 					x (or pl 0)) pl))

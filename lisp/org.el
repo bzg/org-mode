@@ -9019,7 +9019,7 @@ from."
        (let ((ido-enter-matching-directory nil))
 	 (apply 'ido-completing-read (concat (car args))
 		(if (consp (car (nth 1 args)))
-		    (mapcar (lambda (x) (car x)) (nth 1 args))
+		    (mapcar 'car (nth 1 args))
 		  (nth 1 args))
 		(cddr args)))
      (if (and org-completion-use-iswitchb
@@ -9027,7 +9027,7 @@ from."
 	      (listp (second args)))
 	 (apply 'org-iswitchb-completing-read (concat (car args))
 		(if (consp (car (nth 1 args)))
-		    (mapcar (lambda (x) (car x)) (nth 1 args))
+		    (mapcar 'car (nth 1 args))
 		  (nth 1 args))
 		(cddr args))
        (apply 'completing-read args)))))
@@ -12551,7 +12551,7 @@ instead of the agenda files."
 		     (org-agenda-files))))))))
 
 (defun org-make-tags-matcher (match)
-  "Create the TAGS//TODO matcher form for the selection string MATCH."
+  "Create the TAGS/TODO matcher form for the selection string MATCH."
   ;; todo-only is scoped dynamically into this function, and the function
   ;; may change it if the matcher asks for it.
   (unless match

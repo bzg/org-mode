@@ -16,6 +16,7 @@ org-bookmark.el          --- Links to bookmarks
 org-checklist.el         --- org functions for checklist handling
 org-choose.el            --- Use TODO keywords to mark decision states
 org-collector.el         --- Collect properties into tables
+org-contacts             --- Contacts management
 org-contribdir.el        --- Dummy file to mark the org contrib Lisp directory
 org-depend.el            --- TODO dependencies for Org-mode
 org-drill.el             --- Self-testing with org-learn
