@@ -2889,7 +2889,7 @@ when a line/row is swaped out of that privileged position.  So for
 formulas that use a range of rows or columns, it may often be better
 to anchor the formula with \"I\" row markers, or to offset from the
 borders of the table using the @< @> $< $> makers."
-  (let (n nmax len)
+  (let (n nmax len char)
     (while (string-match "\\([@$]\\)\\(<+\\|>+\\)" s)
       (setq nmax (if (equal (match-string 1 s) "@")
 		     (1- (length org-table-dlines))
