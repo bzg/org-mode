@@ -419,6 +419,9 @@ This checks `org-list-ending-method'."
     (let* ((case-fold-search t)
 	   (context (org-list-context))
 	   (lim-up (car context))
+	   (drawers-re (concat "^[ \t]*:\\("
+			       (mapconcat 'regexp-quote org-drawers "\\|")
+			       "\\):[ \t]*$"))
 	   (inlinetask-re (and (featurep 'org-inlinetask)
 			       (org-inlinetask-outline-regexp)))
 	   (item-re (org-item-re))
@@ -468,7 +471,7 @@ This checks `org-list-ending-method'."
 	       ((looking-at "^[ \t]*#\\+end_")
 		(re-search-backward "^[ \t]*#\\+begin_" nil t))
 	       ((looking-at "^[ \t]*:END:")
-		(re-search-backward org-drawer-regexp nil t)
+		(re-search-backward drawers-re nil t)
 		(beginning-of-line))
 	       ((and inlinetask-re (looking-at inlinetask-re))
 		(org-inlinetask-goto-beginning)
