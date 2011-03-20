@@ -886,7 +886,7 @@ OPT-PLIST is the export options list."
 	  (if (string-match "^file:" desc)
 	      (setq desc (substring desc (match-end 0)))))
 	(setq desc (org-add-props
-		       (concat "@<img src=\"" desc "\"/>")
+		       (concat "<img src=\"" desc "\"/>")
 		       '(org-protected t))))
       (cond
        ((equal type "internal")
