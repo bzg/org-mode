@@ -418,15 +418,13 @@ deeper), then it's not a leaf."
 (defun org-taskjuggler-assign-resource-ids (resources)
   "Given a list of resources return the same list, assigning a
 unique id to each resource."
-  (cond
-   ((null resources) nil)
-   (t
-    (let* ((resource (car resources))
-	   (unique-id (org-taskjuggler-get-unique-id resource unique-ids)))
-      (push (cons "unique-id" unique-id) resource)
-      (cons resource
-	    (org-taskjuggler-assign-resource-ids (cdr resources)
-						 (cons unique-id unique-ids)))))))
+  (let (unique-ids new-list)
+    (dolist (resource resources new-list)
+      (let ((unique-id (org-taskjuggler-get-unique-id resource unique-ids)))
+	(push (cons "unique-id" unique-id) resource)
+	(push unique-id unique-ids)
+	(push resource new-list)))
+    (nreverse new-list)))
 
 (defun org-taskjuggler-resolve-dependencies (tasks)
   (let ((previous-level 0)
