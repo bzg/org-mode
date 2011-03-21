@@ -144,7 +144,7 @@
 ;;   - Look at org-file-properties, org-global-properties and
 ;;     org-global-properties-fixed
 ;;   - What about property inheritance and org-property-inherit-p?
-;;   - Use TYP_TODO as an way to assign resources
+;;   - Use TYPE_TODO as an way to assign resources
 ;;   - Make sure multiple dependency definitions (i.e. BLOCKER on
 ;;     previous-sibling and on a specific task_id) in multiple
 ;;     attributes are properly exported.
