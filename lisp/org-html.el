@@ -2155,7 +2155,7 @@ But it has the disadvantage, that Org-mode's HTML conversions cannot be used."
 	  s
 	(setq r (concat r s))
 	(unless (string-match "\\S-" (concat b s))
-	  (setq r (concat r "<br/>")))
+	  (setq r (concat r "@<br/>")))
 	r))))
 
 (defvar htmlize-buffer-places)  ; from htmlize.el
