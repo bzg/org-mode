@@ -56,7 +56,7 @@ This will be passed to  `shell-command-on-region'")
 This function is called by `org-babel-execute-src-block'."
   (let* ((session (org-babel-sh-initiate-session
 		   (cdr (assoc :session params))))
-         (result-params (cdr (assoc :result-params params))) 
+         (result-params (cdr (assoc :result-params params)))
          (full-body (org-babel-expand-body:generic
 		     body params (org-babel-variable-assignments:sh params))))
     (org-babel-reassemble-table
@@ -101,20 +101,14 @@ This function is called by `org-babel-execute-src-block'."
   "Convert an elisp value to a shell variable.
 Convert an elisp var into a string of shell commands specifying a
 var of the same value."
-  (if (listp var)
-      (flet ((deep-string (el)
-                          (if (listp el)
-                              (mapcar #'deep-string el)
-			    (org-babel-sh-var-to-sh el sep))))
-	(format org-babel-sh-var-quote-fmt
-		(orgtbl-to-generic
-		 (deep-string (if (listp (car var)) var (list var)))
-		 (list :sep (or sep "\t")))))
-    (if (stringp var)
-	(if (string-match "[ \t\n\r]" var)
-	    (format org-babel-sh-var-quote-fmt var)
-	  (format "%s" var))
-      (format "%S" var))))
+  (flet ((echo-var (v) (if (stringp v) v (format "%S" v))))
+    ((lambda (var) (format org-babel-sh-var-quote-fmt var))
+     (cond
+      ((and (listp var) (listp (car var)))
+       (orgtbl-to-generic var  (list :sep (or sep "\t") :fmt #'echo-var)))
+      ((listp var)
+       (mapconcat #'echo-var var "\n"))
+      (t (echo-var var))))))
 
 (defun org-babel-sh-table-or-results (results)
   "Convert RESULTS to an appropriate elisp value.
