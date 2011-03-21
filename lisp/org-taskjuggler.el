@@ -660,8 +660,8 @@ org-mode priority string."
 	  (format " depends %s\n" previous-sibling)
 	(and depends (format " depends %s\n" depends)))
       (and allocate (format " purge %s\n allocate %s\n"
-			    (or (and (org-taskjuggler-targeting-tj3-p) "allocations")
-				"allocate")
+			    (or (and (org-taskjuggler-targeting-tj3-p) "allocate")
+				"allocations")
 			    allocate))
       (and complete (format " complete %s\n" complete))
       (and effort (format " effort %s\n" effort))
