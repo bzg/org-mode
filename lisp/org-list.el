@@ -81,14 +81,15 @@
 (require 'org-macs)
 (require 'org-compat)
 
-(defvar org-blank-before-new-entry)
-(defvar org-complex-heading-regexp)
-(defvar org-description-max-indent)
-(defvar org-drawer-regexp)
-(defvar org-drawers)
 (defvar org-M-RET-may-split-line)
+(defvar org-blank-before-new-entry)
+(defvar org-clock-string)
+(defvar org-closed-string)
+(defvar org-deadline-string)
+(defvar org-description-max-indent)
+(defvar org-drawers)
 (defvar org-odd-levels-only)
-(defvar org-outline-regexp)
+(defvar org-scheduled-string)
 (defvar org-ts-regexp)
 (defvar org-ts-regexp-both)
 
@@ -2076,7 +2077,11 @@ in subtree, ignoring drawers."
 	   (drawer-re (concat "^[ \t]*:\\("
 			      (mapconcat 'regexp-quote org-drawers "\\|")
 			      "\\):[ \t]*$"))
-	   (keyword-re (concat "^[ \t]*" org-keyword-time-regexp))
+	   (keyword-re (concat "^[ \t]*\\<\\(" org-scheduled-string
+			       "\\|" org-deadline-string
+			       "\\|" org-closed-string
+			       "\\|" org-clock-string "\\)"
+			       " *[[<]\\([^]>]+\\)[]>]"))
 	   (orderedp (org-entry-get nil "ORDERED"))
 	   (bounds
 	    ;; In a region, start at first item in region
