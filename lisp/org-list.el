@@ -2073,6 +2073,10 @@ in subtree, ignoring drawers."
 	   block-item
 	   lim-up
 	   lim-down
+	   (drawer-re (concat "^[ \t]*:\\("
+			      (mapconcat 'regexp-quote org-drawers "\\|")
+			      "\\):[ \t]*$"))
+	   (keyword-re (concat "^[ \t]*" org-keyword-time-regexp))
 	   (orderedp (org-entry-get nil "ORDERED"))
 	   (bounds
 	    ;; In a region, start at first item in region
@@ -2085,11 +2089,14 @@ in subtree, ignoring drawers."
 		  (error "No item in region"))
 		(setq lim-down (copy-marker limit))))
 	     ((org-on-heading-p)
-	      ;; On an heading, start at first item after drawers
+	      ;; On an heading, start at first item after drawers and
+	      ;; time-stamps (scheduled, etc.)
 	      (let ((limit (save-excursion (outline-next-heading) (point))))
 		(forward-line 1)
-		(when (looking-at org-drawer-regexp)
-		  (re-search-forward "^[ \t]*:END:" limit nil))
+		(while (or (looking-at drawer-re) (looking-at keyword-re))
+		  (if (looking-at keyword-re)
+		      (forward-line 1)
+		    (re-search-forward "^[ \t]*:END:" limit nil)))
 		(if (org-list-search-forward (org-item-beginning-re) limit t)
 		    (setq lim-up (point-at-bol))
 		  (error "No item in subtree"))
