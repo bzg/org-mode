@@ -269,7 +269,9 @@ Here is an example:
   :type '(alist))
 
 (defcustom org-protocol-default-template-key nil
-  "The default org-remember-templates key to use."
+  "The default template key to use.
+This is usually a single character string but can also be a
+string with two characters."
   :group 'org-protocol
   :type 'string)
 
@@ -301,9 +303,9 @@ part."
 
 (defun org-protocol-flatten-greedy (param-list &optional strip-path replacement)
   "Greedy handlers might receive a list like this from emacsclient:
- '( (\"/dir/org-protocol:/greedy:/~/path1\" (23 . 12)) (\"/dir/param\")
+ '((\"/dir/org-protocol:/greedy:/~/path1\" (23 . 12)) (\"/dir/param\")
 where \"/dir/\" is the absolute path to emacsclients working directory.  This
-function transforms it into a flat list utilizing `org-protocol-flatten' and
+function transforms it into a flat list using `org-protocol-flatten' and
 transforms the elements of that list as follows:
 
 If strip-path is non-nil, remove the \"/dir/\" prefix from all members of
@@ -434,7 +436,7 @@ Now template ?b will be used."
   "Support `org-capture' and `org-remember' alike.
 CAPTURE-FUNC is either the symbol `org-remember' or `org-capture'."
   (let* ((parts (org-protocol-split-data info t))
-	 (template (or (and (= 1 (length (car parts))) (pop parts))
+	 (template (or (and (>= 2 (length (car parts))) (pop parts))
 		       org-protocol-default-template-key))
 	 (url (org-protocol-sanitize-uri (car parts)))
 	 (type (if (string-match "^\\([a-z]+\\):" url)
