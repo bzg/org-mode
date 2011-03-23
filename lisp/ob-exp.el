@@ -250,7 +250,7 @@ inhibit insertion of results into the buffer."
   (when (and org-export-babel-evaluate
 	     (not (and hash
 		       (equal hash (org-babel-exp-in-export-file (nth 0 info)
-				     (org-babel-result-hash))))))
+				     (org-babel-result-hash info))))))
     (let ((lang (nth 0 info))
 	  (body (nth 1 info)))
       ;; skip code blocks which we can't evaluate
