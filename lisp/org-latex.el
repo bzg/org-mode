@@ -258,7 +258,7 @@ For example \orgTITLE for #+TITLE."
   :type 'boolean)
 
 (defcustom org-export-latex-date-format
-  "%d %B %Y"
+  "\\today"
   "Format string for \\date{...}."
   :group 'org-export-latex
   :type 'string)
