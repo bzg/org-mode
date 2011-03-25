@@ -164,7 +164,6 @@ for `org-protocol-the-protocol' and sub-procols defined in
   "Default protocols to use.
 See `org-protocol-protocol-alist' for a description of this variable.")
 
-
 (defconst org-protocol-the-protocol "org-protocol"
   "This is the protocol to detect if org-protocol.el is loaded.
 `org-protocol-protocol-alist-default' and `org-protocol-protocol-alist' hold
@@ -172,11 +171,10 @@ the sub-protocols that trigger the required action.  You will have to define
 just one protocol handler OS-wide (MS-Windows) or per application (Linux).
 That protocol handler should call emacsclient.")
 
-
 ;;; User variables:
 
 (defcustom org-protocol-reverse-list-of-files t
-  "* Non-nil means re-reverse the list of filenames passed on the command line.
+  "Non-nil means re-reverse the list of filenames passed on the command line.
 The filenames passed on the command line are passed to the emacs-server in
 reverse order.  Set to t (default) to re-reverse the list, i.e. use the
 sequence on the command line.  If nil, the sequence of the filenames is
@@ -184,9 +182,8 @@ unchanged."
   :group 'org-protocol
   :type 'boolean)
 
-
 (defcustom org-protocol-project-alist nil
-  "* Map URLs to local filenames for `org-protocol-open-source' (open-source).
+  "Map URLs to local filenames for `org-protocol-open-source' (open-source).
 
 Each element of this list must be of the form:
 
@@ -228,7 +225,6 @@ Consider using the interactive functions `org-protocol-create' and
 `org-protocol-create-for-org' to help you filling this variable with valid contents."
   :group 'org-protocol
   :type 'alist)
-
 
 (defcustom org-protocol-protocol-alist nil
   "* Register custom handlers for org-protocol.
@@ -273,7 +269,9 @@ Here is an example:
   :type '(alist))
 
 (defcustom org-protocol-default-template-key nil
-  "The default org-remember-templates key to use."
+  "The default template key to use.
+This is usually a single character string but can also be a
+string with two characters."
   :group 'org-protocol
   :type 'string)
 
@@ -287,14 +285,13 @@ Slashes are sanitized to double slashes here."
       (setq uri (concat (car splitparts) "//" (mapconcat 'identity (cdr splitparts) "/")))))
   uri)
 
-
-(defun org-protocol-split-data(data &optional unhexify separator)
-  "Split, what an org-protocol handler function gets as only argument.
-DATA is that one argument. DATA is split at each occurrence of
-SEPARATOR (regexp). If no SEPARATOR is specified or SEPARATOR is
+(defun org-protocol-split-data (data &optional unhexify separator)
+  "Split what an org-protocol handler function gets as only argument.
+DATA is that one argument.  DATA is split at each occurrence of
+SEPARATOR (regexp).  If no SEPARATOR is specified or SEPARATOR is
 nil, assume \"/+\".  The results of that splitting are returned
-as a list. If UNHEXIFY is non-nil, hex-decode each split part. If
-UNHEXIFY is a function, use that function to decode each split
+as a list.  If UNHEXIFY is non-nil, hex-decode each split part.
+If UNHEXIFY is a function, use that function to decode each split
 part."
   (let* ((sep (or separator "/+"))
          (split-parts (split-string data sep)))
@@ -306,9 +303,9 @@ part."
 
 (defun org-protocol-flatten-greedy (param-list &optional strip-path replacement)
   "Greedy handlers might receive a list like this from emacsclient:
- '( (\"/dir/org-protocol:/greedy:/~/path1\" (23 . 12)) (\"/dir/param\")
+ '((\"/dir/org-protocol:/greedy:/~/path1\" (23 . 12)) (\"/dir/param\")
 where \"/dir/\" is the absolute path to emacsclients working directory.  This
-function transforms it into a flat list utilizing `org-protocol-flatten' and
+function transforms it into a flat list using `org-protocol-flatten' and
 transforms the elements of that list as follows:
 
 If strip-path is non-nil, remove the \"/dir/\" prefix from all members of
@@ -348,7 +345,6 @@ returned list."
        ret)
     l)))
 
-
 (defun org-protocol-flatten (l)
   "Greedy handlers might receive a list like this from emacsclient:
  '( (\"/dir/org-protocol:/greedy:/~/path1\" (23 . 12)) (\"/dir/param\")
@@ -358,6 +354,7 @@ This function transforms it into a flat list."
     (if (listp l)
        (append (org-protocol-flatten (car l)) (org-protocol-flatten (cdr l)))
       (list l))))
+
 
 ;;; Standard protocol handlers:
 
@@ -390,7 +387,7 @@ The sub-protocol used to reach this function is set in
              uri))
   nil)
 
-(defun org-protocol-remember  (info)
+(defun org-protocol-remember (info)
   "Process an org-protocol://remember:// style url.
 
 The location for a browser's bookmark has to look like this:
@@ -408,7 +405,7 @@ See the docs for `org-protocol-capture' for more information."
       (message "Org-mode not loaded."))
   nil)
 
-(defun org-protocol-capture  (info)
+(defun org-protocol-capture (info)
   "Process an org-protocol://capture:// style url.
 
 The sub-protocol used to reach this function is set in
@@ -439,12 +436,12 @@ Now template ?b will be used."
   "Support `org-capture' and `org-remember' alike.
 CAPTURE-FUNC is either the symbol `org-remember' or `org-capture'."
   (let* ((parts (org-protocol-split-data info t))
-	 (template (or (and (= 1 (length (car parts))) (pop parts))
+	 (template (or (and (>= 2 (length (car parts))) (pop parts))
 		       org-protocol-default-template-key))
 	 (url (org-protocol-sanitize-uri (car parts)))
 	 (type (if (string-match "^\\([a-z]+\\):" url)
 		   (match-string 1 url)))
-	 (title(or (cadr parts) ""))
+	 (title (or (cadr parts) ""))
 	 (region (or (caddr parts) ""))
 	 (orglink (org-make-link-string
 		   url (if (string-match "[^[:space:]]" title) title url)))
@@ -461,7 +458,6 @@ CAPTURE-FUNC is either the symbol `org-remember' or `org-capture'."
     (raise-frame)
     (funcall capture-func nil template)))
 
-
 (defun org-protocol-open-source (fname)
   "Process an org-protocol://open-source:// style url.
 
@@ -472,7 +468,6 @@ The location for a browser's bookmark should look like this:
 
   javascript:location.href='org-protocol://open-source://'+ \\
         encodeURIComponent(location.href)"
-
   ;; As we enter this function for a match on our protocol, the return value
   ;; defaults to nil.
   (let ((result nil)
@@ -541,12 +536,14 @@ function returns nil, the filename is removed from the list of filenames
 passed from emacsclient to the server.
 If the function returns a non nil value, that value is passed to the server
 as filename."
-  (let ((sub-protocols (append org-protocol-protocol-alist org-protocol-protocol-alist-default)))
+  (let ((sub-protocols (append org-protocol-protocol-alist
+			       org-protocol-protocol-alist-default)))
     (catch 'fname
       (let ((the-protocol (concat (regexp-quote org-protocol-the-protocol) ":/+")))
         (when (string-match the-protocol fname)
           (dolist (prolist sub-protocols)
-            (let ((proto (concat the-protocol (regexp-quote (plist-get (cdr prolist) :protocol)) ":/+")))
+            (let ((proto (concat the-protocol
+				 (regexp-quote (plist-get (cdr prolist) :protocol)) ":/+")))
               (when (string-match proto fname)
                 (let* ((func (plist-get (cdr prolist) :function))
                        (greedy (plist-get (cdr prolist) :greedy))
@@ -563,7 +560,6 @@ as filename."
       ;; (message "fname: %s" fname)
       fname)))
 
-
 (defadvice server-visit-files (before org-protocol-detect-protocol-server activate)
   "Advice server-visit-flist to call `org-protocol-modify-filename-for-protocol'."
   (let ((flist (if org-protocol-reverse-list-of-files
@@ -572,16 +568,17 @@ as filename."
         (client (ad-get-arg 1)))
     (catch 'greedy
       (dolist (var flist)
-        (let ((fname  (expand-file-name (car var)))) ;; `\' to `/' on windows. FIXME: could this be done any better?
-          (setq fname (org-protocol-check-filename-for-protocol fname (member var flist)  client))
+	;; `\' to `/' on windows. FIXME: could this be done any better?
+        (let ((fname  (expand-file-name (car var))))
+          (setq fname (org-protocol-check-filename-for-protocol
+		       fname (member var flist)  client))
           (if (eq fname t) ;; greedy? We need the `t' return value.
               (progn
                 (ad-set-arg 0 nil)
                 (throw 'greedy t))
             (if (stringp fname) ;; probably filename
                 (setcar var fname)
-              (ad-set-arg 0 (delq var (ad-get-arg 0))))))
-        ))))
+              (ad-set-arg 0 (delq var (ad-get-arg 0))))))))))
 
 ;;; Org specific functions:
 
@@ -597,8 +594,7 @@ most of the work."
       (message "Not in an org-project. Did mean %s?"
                (substitute-command-keys"\\[org-protocol-create]")))))
 
-
-(defun org-protocol-create(&optional project-plist)
+(defun org-protocol-create (&optional project-plist)
   "Create a new org-protocol project interactively.
 An org-protocol project is an entry in `org-protocol-project-alist'
 which is used by `org-protocol-open-source'.
@@ -606,15 +602,15 @@ Optionally use project-plist to initialize the defaults for this project. If
 project-plist is the CDR of an element in `org-publish-project-alist', reuse
 :base-directory, :html-extension and :base-extension."
   (interactive)
-  (let ((working-dir (expand-file-name(or (plist-get project-plist :base-directory) default-directory)))
+  (let ((working-dir (expand-file-name
+		      (or (plist-get project-plist :base-directory)
+			  default-directory)))
         (base-url "http://orgmode.org/worg/")
         (strip-suffix (or (plist-get project-plist :html-extension) ".html"))
         (working-suffix (if (plist-get project-plist :base-extension)
                             (concat "." (plist-get project-plist :base-extension))
                           ".org"))
-
         (worglet-buffer nil)
-
         (insert-default-directory t)
         (minibuffer-allow-text-properties nil))
 
@@ -630,12 +626,12 @@ project-plist is the CDR of an element in `org-publish-project-alist', reuse
 
     (setq strip-suffix
           (read-string
-           (concat "Extension to strip from published URLs ("strip-suffix"): ")
+           (concat "Extension to strip from published URLs (" strip-suffix "): ")
                    strip-suffix nil strip-suffix t))
 
     (setq working-suffix
           (read-string
-           (concat "Extension of editable files ("working-suffix"): ")
+           (concat "Extension of editable files (" working-suffix "): ")
                    working-suffix nil working-suffix t))
 
     (when (yes-or-no-p "Save the new org-protocol-project to your init file? ")

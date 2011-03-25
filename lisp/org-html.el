@@ -1150,6 +1150,7 @@ PUB-DIR is set, use this as the publishing directory."
 	 (language    (plist-get opt-plist :language))
 	 (keywords    (plist-get opt-plist :keywords))
 	 (description (plist-get opt-plist :description))
+	 (num         (plist-get opt-plist :section-numbers))
 	 (lang-words  nil)
 	 (head-count  0) cnt
 	 (start       0)
@@ -1355,7 +1356,7 @@ lang=\"%s\" xml:lang=\"%s\">
 				   (if (string-match quote-re0 txt)
 				       (setq txt (replace-match "" t t txt)))
 				   (setq snumber (org-section-number level))
-				   (if org-export-with-section-numbers
+				   (if (and num (integerp num) (>= num level))
 				       (setq txt (concat snumber " " txt)))
 				   (if (<= level (max umax umax-toc))
 				       (setq head-count (+ head-count 1)))
@@ -1591,7 +1592,7 @@ lang=\"%s\" xml:lang=\"%s\">
 	    (setq first-heading-pos (or first-heading-pos (point)))
 	    (org-html-level-start level txt umax
 				  (and org-export-with-toc (<= level umax))
-				  head-count)
+				  head-count opt-plist)
 
 	    ;; QUOTES
 	    (when (string-match quote-re line)
@@ -1684,15 +1685,18 @@ lang=\"%s\" xml:lang=\"%s\">
 
       (org-html-level-start 1 nil umax
 			    (and org-export-with-toc (<= level umax))
-			    head-count)
+			    head-count opt-plist)
       ;; the </div> to close the last text-... div.
       (when (and (> umax 0) first-heading-pos) (insert "</div>\n"))
 
       (save-excursion
 	(goto-char (point-min))
-	(while (re-search-forward "<p class=\"footnote\">[^\000]*?\\(</p>\\|\\'\\)" nil t)
-	  (push (match-string 0) footnotes)
-	  (replace-match "" t t)))
+	(while (re-search-forward
+		"\\(\\(<p class=\"footnote\">\\)[^\000]*?\\)\\(\\(\\2\\)\\|\\'\\)"
+		nil t)
+	  (push (match-string 1) footnotes)
+	  (replace-match "\\4" t nil)
+	  (goto-char (match-beginning 0))))
       (when footnotes
 	(insert (format org-export-html-footnotes-section
 			(nth 4 lang-words)
@@ -2330,7 +2334,7 @@ If there are links in the string, don't modify these."
   (insert (if (equal type "d") "</dd>\n" "</li>\n")))
 
 (defvar body-only) ; dynamically scoped into this.
-(defun org-html-level-start (level title umax with-toc head-count)
+(defun org-html-level-start (level title umax with-toc head-count &optional opt-plist)
   "Insert a new level in HTML export.
 When TITLE is nil, just close all open levels."
   (org-close-par-maybe)
@@ -2341,6 +2345,7 @@ When TITLE is nil, just close all open levels."
 	 (preferred (and target
 			 (cdr (assoc target org-export-preferred-target-alist))))
 	 (l org-level-max)
+	 (num (plist-get opt-plist :section-numbers))
 	 snumber snu href suffix)
     (setq extra-targets (remove (or preferred target) extra-targets))
     (setq extra-targets
@@ -2395,10 +2400,20 @@ When TITLE is nil, just close all open levels."
 	(setq snumber (org-section-number level)
 	      snu (replace-regexp-in-string "\\." "_" snumber))
 	(setq level (+ level org-export-html-toplevel-hlevel -1))
-	(if (and org-export-with-section-numbers (not body-only))
+	(if (and num (not body-only))
 	    (setq title (concat
 			 (format "<span class=\"section-number-%d\">%s</span>"
-				 level snumber)
+				 level
+				 (if (and (integerp num)
+					  ;; fix up num to take into
+					  ;; account the top-level
+					  ;; heading value
+					  (>= (+ num
+						 org-export-html-toplevel-hlevel
+						 -1)
+					      level))
+					   snumber
+					 ""))
 			 " " title)))
 	(unless (= head-count 1) (insert "\n</div>\n"))
 	(setq href (cdr (assoc (concat "sec-" snu) org-export-preferred-target-alist)))

@@ -258,7 +258,7 @@ For example \orgTITLE for #+TITLE."
   :type 'boolean)
 
 (defcustom org-export-latex-date-format
-  "%d %B %Y"
+  "\\today"
   "Format string for \\date{...}."
   :group 'org-export-latex
   :type 'string)
@@ -1151,7 +1151,9 @@ and its content."
 
 (defun org-export-latex-subcontent (subcontent num)
   "Export each cell of SUBCONTENT to LaTeX.
-If NUM, export sections as numerical sections."
+If NUM is non-nil export numbered sections, otherwise use unnumbered
+sections.  If NUM is an integer, export the highest NUM levels as
+numbered sections and lower levels as unnumbered sections."
   (let* ((heading (cdr (assoc 'heading subcontent)))
 	 (level (- (cdr (assoc 'level subcontent))
 		   org-export-latex-add-level))
@@ -1187,6 +1189,9 @@ If NUM, export sections as numerical sections."
      ;; Normal conversion
      ((<= level depth)
       (let* ((sec (nth (1- level) sectioning))
+	     (num (if (integerp num)
+		      (>= num level)
+		    num))
 	     start end)
 	(if (consp (cdr sec))
 	    (setq start (nth (if num 0 2) sec)
@@ -2340,7 +2345,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
   ;; Protect LaTeX commands like \command[...]{...} or \command{...}
   (goto-char (point-min))
   (let ((re (concat
-	     "\\\\\\([a-zA-Z]+\\)"
+	     "\\\\\\([a-zA-Z]+\\*?\\)"
 	     "\\(?:<[^<>\n]*>\\)*"
 	     "\\(?:\\[[^][\n]*?\\]\\)*"
 	     "\\(?:<[^<>\n]*>\\)*"
