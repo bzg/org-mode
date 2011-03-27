@@ -1524,7 +1524,7 @@ links, keywords, lists, tables, fixed-width"
 	  (format org-export-latex-tag-markup
 		  (save-match-data
 		    (replace-regexp-in-string
-		     "_" "\\\\_" (match-string 0)))))
+		     "\\([_#]\\)" "\\\\\\1" (match-string 0)))))
 	 t t)))))
 
 (defun org-export-latex-fontify-headline (string)
