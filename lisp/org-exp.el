@@ -1904,7 +1904,10 @@ When it is nil, all comments will be removed."
 		 (not (equal (char-before (match-end 1)) ?+)))
 	    (progn (add-text-properties
 		    (match-beginning 0) (match-end 0) '(org-protected t))
-		   (replace-match (format commentsp (match-string 2)) t t))
+		   (replace-match (org-add-props
+				      (format commentsp (match-string 2))
+				      nil 'org-protected t)
+				  t t))
 	  (goto-char (1+ pos))
 	  (replace-match "")
 	  (goto-char (max (point-min) (1- pos))))))))
