@@ -19649,8 +19649,9 @@ empty."
   (and (looking-at "[ \t]*$")
        (save-excursion
          (beginning-of-line 1)
-         (looking-at (concat "^\\(\\*+\\)[ \t]+\\(" org-todo-regexp
-			     "\\)?[ \t]*$")))))
+	 (let ((case-fold-search nil))
+	   (looking-at (concat "^\\(\\*+\\)[ \t]+\\(" org-todo-regexp
+			       "\\)?[ \t]*$"))))))
 (defun org-at-heading-or-item-p ()
   (or (org-on-heading-p) (org-at-item-p)))
 
