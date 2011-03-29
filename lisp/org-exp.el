@@ -296,6 +296,12 @@ When nil, remove all these keywords from the export."
   :group 'org-export-general
   :type 'boolean)
 
+(defcustom org-export-with-done-tasks t
+  "Non-nil means include DONE items for export.
+When nil, remove the entire subtrees belonging to DONE tasks."
+  :group 'org-export-general
+  :type 'boolean)
+
 (defcustom org-export-with-priority nil
   "Non-nil means include priority cookies in export.
 When nil, remove priority cookies for export."
@@ -621,6 +627,7 @@ table.el tables."
     (:drawers		      "d"	  org-export-with-drawers)
     (:tags		      "tags"	  org-export-with-tags)
     (:todo-keywords	      "todo"	  org-export-with-todo-keywords)
+    (:done-tasks	      "donetasks" org-export-with-done-tasks)
     (:priority		      "pri"	  org-export-with-priority)
     (:TeX-macros	      "TeX"	  org-export-with-TeX-macros)
     (:LaTeX-fragments	      "LaTeX"	  org-export-with-LaTeX-fragments)
@@ -1098,6 +1105,10 @@ on this string to produce the exported version."
 				     (plist-get parameters :exclude-tags))
       (run-hooks 'org-export-preprocess-after-tree-selection-hook)
 
+      ;; Get rid of DONE tasks if that option is configured
+      (unless (plist-get parameters :done-tasks)
+	(org-export-remove-done-tasks))
+
       ;; Change lists ending. Other parts of export may insert blank
       ;; lines and lists' structure could be altered.
       (org-export-mark-list-end)
@@ -1487,6 +1498,20 @@ removed as well."
       (setq end (or (next-single-property-change beg :org-delete)
 		    (point-max)))
       (delete-region beg end))))
+
+(defun org-export-remove-done-tasks ()
+  "Remove all tasks that are done."
+  (let ((re (concat "^\\*+[ \t]+\\("
+		    (mapconcat 'regexp-quote org-done-keywords "\\|")
+		    "\\)\\($\\|[ \t]\\)"))
+	(case-fold-search nil)
+	beg)
+    (goto-char (point-min))
+    (while (re-search-forward re nil t)
+      (org-if-unprotected
+       (setq beg (match-beginning 0))
+       (org-end-of-subtree t t)
+       (delete-region beg (point))))))
 
 (defun org-export-remove-archived-trees (export-archived-trees)
   "Remove archived trees.

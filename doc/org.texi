@@ -9307,26 +9307,33 @@ enabled (default in Emacs 23).
 
 @node Selective export, Export options, Exporting, Exporting
 @section Selective export
-@cindex export, selective by tags
+@cindex export, selective by tags or TODO keyword
 
 @vindex org-export-select-tags
 @vindex org-export-exclude-tags
+@cindex org-export-with-done-tasks
 You may use tags to select the parts of a document that should be exported,
 or to exclude parts from export.  This behavior is governed by two variables:
 @code{org-export-select-tags} and @code{org-export-exclude-tags}.
 
-Org first checks if any of the @emph{select} tags is present in the buffer.
-If yes, all trees that do not carry one of these tags will be excluded.  If a
-selected tree is a subtree, the heading hierarchy above it will also be
-selected for export, but not the text below those headings.
+@enumerate
+@item 
+Org first checks if any of the @emph{select} tags is present in the
+buffer.  If yes, all trees that do not carry one of these tags will be
+excluded.  If a selected tree is a subtree, the heading hierarchy above it
+will also be selected for export, but not the text below those headings.
 
-@noindent
+@item
 If none of the select tags is found, the whole buffer will be selected for
 export.
 
-@noindent
+@item
 Finally, all subtrees that are marked by any of the @emph{exclude} tags will
 be removed from the export buffer.
+@end enumerate
+
+Also, if the variable @code{org-export-with-done-tasks} is @code{nil}, the
+entire subtree of entries starting with a DONE state keyword will be removed.
 
 @node Export options, The export dispatcher, Selective export, Exporting
 @section Export options
@@ -9426,6 +9433,7 @@ toc:       @r{turn on/off table of contents, or set level limit (integer)}
 -:         @r{turn on/off conversion of special strings.}
 f:         @r{turn on/off footnotes like this[1].}
 todo:      @r{turn on/off inclusion of TODO keywords into exported text}
+donetasks: @r{turn on/off inclusion of DONE tasks}
 pri:       @r{turn on/off priority cookies}
 tags:      @r{turn on/off inclusion of tags, may also be @code{not-in-toc}}
 <:         @r{turn on/off inclusion of any time/date stamps like DEADLINES}
@@ -10905,6 +10913,7 @@ respective variable for details.
 @vindex org-export-with-drawers
 @vindex org-export-with-tags
 @vindex org-export-with-todo-keywords
+@vindex org-export-with-done-tasks
 @vindex org-export-with-priority
 @vindex org-export-with-TeX-macros
 @vindex org-export-with-LaTeX-fragments
@@ -10953,6 +10962,7 @@ respective variable for details.
 @item @code{:drawers}               @tab @code{org-export-with-drawers}
 @item @code{:tags}                  @tab @code{org-export-with-tags}
 @item @code{:todo-keywords}         @tab @code{org-export-with-todo-keywords}
+@item @code{:done-tasks}            @tab @code{org-export-with-done-tasks}
 @item @code{:priority}              @tab @code{org-export-with-priority}
 @item @code{:TeX-macros}            @tab @code{org-export-with-TeX-macros}
 @item @code{:LaTeX-fragments}       @tab @code{org-export-with-LaTeX-fragments}
