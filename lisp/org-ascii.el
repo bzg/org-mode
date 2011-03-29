@@ -303,6 +303,7 @@ publishing directory."
 		  :footnotes (plist-get opt-plist :footnotes)
 		  :timestamps (plist-get opt-plist :timestamps)
 		  :todo-keywords (plist-get opt-plist :todo-keywords)
+		  :tasks (plist-get opt-plist :tasks)
 		  :done-tasks (plist-get opt-plist :done-tasks)
 		  :verbatim-multiline t
 		  :select-tags (plist-get opt-plist :select-tags)

@@ -869,6 +869,7 @@ when PUB-DIR is set, use this as the publishing directory."
 		:drawers (plist-get opt-plist :drawers)
 		:timestamps (plist-get opt-plist :timestamps)
 		:todo-keywords (plist-get opt-plist :todo-keywords)
+		:tasks (plist-get opt-plist :tasks)
 		:done-tasks (plist-get opt-plist :done-tasks)
 		:add-text nil
 		:skip-before-1st-heading skip
@@ -887,6 +888,7 @@ when PUB-DIR is set, use this as the publishing directory."
 	   :drawers (plist-get opt-plist :drawers)
 	   :timestamps (plist-get opt-plist :timestamps)
 	   :todo-keywords (plist-get opt-plist :todo-keywords)
+	   :tasks (plist-get opt-plist :tasks)
 	   :done-tasks (plist-get opt-plist :done-tasks)
 	   :add-text (if (eq to-buffer 'string) nil text)
 	   :skip-before-1st-heading skip

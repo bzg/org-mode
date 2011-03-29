@@ -296,6 +296,12 @@ When nil, remove all these keywords from the export."
   :group 'org-export-general
   :type 'boolean)
 
+(defcustom org-export-with-tasks t
+  "Non-nil means include TODO items for export.
+When nil, remove the entire subtrees belonging to tasks, independent of state."
+  :group 'org-export-general
+  :type 'boolean)
+
 (defcustom org-export-with-done-tasks t
   "Non-nil means include DONE items for export.
 When nil, remove the entire subtrees belonging to DONE tasks."
@@ -627,6 +633,7 @@ table.el tables."
     (:drawers		      "d"	  org-export-with-drawers)
     (:tags		      "tags"	  org-export-with-tags)
     (:todo-keywords	      "todo"	  org-export-with-todo-keywords)
+    (:tasks	              "tasks"     org-export-with-tasks)
     (:done-tasks	      "donetasks" org-export-with-done-tasks)
     (:priority		      "pri"	  org-export-with-priority)
     (:TeX-macros	      "TeX"	  org-export-with-TeX-macros)
@@ -1106,8 +1113,9 @@ on this string to produce the exported version."
       (run-hooks 'org-export-preprocess-after-tree-selection-hook)
 
       ;; Get rid of DONE tasks if that option is configured
-      (unless (plist-get parameters :done-tasks)
-	(org-export-remove-done-tasks))
+      (org-export-remove-tasks
+       (plist-get parameters :tasks)
+       (plist-get parameters :done-tasks))
 
       ;; Change lists ending. Other parts of export may insert blank
       ;; lines and lists' structure could be altered.
@@ -1499,19 +1507,29 @@ removed as well."
 		    (point-max)))
       (delete-region beg end))))
 
-(defun org-export-remove-done-tasks ()
-  "Remove all tasks that are done."
-  (let ((re (concat "^\\*+[ \t]+\\("
-		    (mapconcat 'regexp-quote org-done-keywords "\\|")
-		    "\\)\\($\\|[ \t]\\)"))
+(defun org-export-remove-tasks (tasks done-tasks)
+  "Remove tasks depending on configuration.
+When TASKS is nil, remove all tasks.
+When DONE-TASKS is nil remove the DONE tasks."
+  (unless (and tasks done-tasks)
+    (let ((re (concat "^\\*+[ \t]+\\("
+		      (mapconcat
+		       'regexp-quote
+		       (cond ((not tasks) org-todo-keywords-1)
+			     ((not done-tasks) org-done-keywords))
+		       "\\|")
+		      "\\)\\($\\|[ \t]\\)"))
 	(case-fold-search nil)
 	beg)
-    (goto-char (point-min))
-    (while (re-search-forward re nil t)
-      (org-if-unprotected
-       (setq beg (match-beginning 0))
-       (org-end-of-subtree t t)
-       (delete-region beg (point))))))
+      (goto-char (point-min))
+      (while (re-search-forward re nil t)
+	(org-if-unprotected
+	 (setq beg (match-beginning 0))
+	 (org-end-of-subtree t t)
+	 (if (looking-at "^\\*+[ \t]+END[ \t]*$")
+	     ;; Kill the END line of the inline task
+	     (goto-char (min (point-max) (1+ (match-end 0)))))
+	 (delete-region beg (point)))))))
 
 (defun org-export-remove-archived-trees (export-archived-trees)
   "Remove archived trees.
