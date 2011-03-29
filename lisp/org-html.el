@@ -1357,7 +1357,9 @@ lang=\"%s\" xml:lang=\"%s\">
 				   (if (string-match quote-re0 txt)
 				       (setq txt (replace-match "" t t txt)))
 				   (setq snumber (org-section-number level))
-				   (if (and num (integerp num) (>= num level))
+				   (if (and num (if (integerp num)
+						    (>= num level)
+						  num))
 				       (setq txt (concat snumber " " txt)))
 				   (if (<= level (max umax umax-toc))
 				       (setq head-count (+ head-count 1)))
@@ -2405,16 +2407,16 @@ When TITLE is nil, just close all open levels."
 	    (setq title (concat
 			 (format "<span class=\"section-number-%d\">%s</span>"
 				 level
-				 (if (and (integerp num)
-					  ;; fix up num to take into
-					  ;; account the top-level
-					  ;; heading value
-					  (>= (+ num
-						 org-export-html-toplevel-hlevel
-						 -1)
-					      level))
-					   snumber
-					 ""))
+				 (if (and num
+					  (if (integerp num)
+					      ;; fix up num to take into
+					      ;; account the top-level
+					      ;; heading value
+					      (>= (+ num org-export-html-toplevel-hlevel -1)
+						  level)
+					    num))
+				     snumber
+				   ""))
 			 " " title)))
 	(unless (= head-count 1) (insert "\n</div>\n"))
 	(setq href (cdr (assoc (concat "sec-" snu) org-export-preferred-target-alist)))
