@@ -1021,7 +1021,7 @@ OPT-PLIST is the export options list."
 
 ;;; org-export-as-html
 ;;;###autoload
-(defun org-export-as-html (arg &optional hidden ext-plist
+q(defun org-export-as-html (arg &optional hidden ext-plist
 			       to-buffer body-only pub-dir)
   "Export the outline as a pretty HTML file.
 If there is an active region, export only the region.  The prefix
@@ -1180,7 +1180,6 @@ PUB-DIR is set, use this as the publishing directory."
 	    :drawers (plist-get opt-plist :drawers)
 	    :todo-keywords (plist-get opt-plist :todo-keywords)
 	    :tasks (plist-get opt-plist :tasks)
-	    :done-tasks (plist-get opt-plist :done-tasks)
 	    :tags (plist-get opt-plist :tags)
 	    :priority (plist-get opt-plist :priority)
 	    :footnotes (plist-get opt-plist :footnotes)

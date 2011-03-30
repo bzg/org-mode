@@ -298,15 +298,20 @@ When nil, remove all these keywords from the export."
 
 (defcustom org-export-with-tasks t
   "Non-nil means include TODO items for export.
-When nil, remove the entire subtrees belonging to tasks, independent of state."
+This may have the following values:
+t                    include tasks independent of state.
+todo                 include only tasks that are not yet done.
+done                 include only tasks that are already done.
+nil                  remove all tasks before export
+list of TODO kwds    keep only tasks with these keywords"
   :group 'org-export-general
-  :type 'boolean)
-
-(defcustom org-export-with-done-tasks t
-  "Non-nil means include DONE items for export.
-When nil, remove the entire subtrees belonging to DONE tasks."
-  :group 'org-export-general
-  :type 'boolean)
+  :type '(choice
+	  (const :tag "All tasks" t)
+	  (const :tag "No tasks" nil)
+	  (const :tag "Not-done tasks" todo)
+	  (const :tag "Only done tasks" done)
+	  (repeat :tag "Specific TODO keywords"
+		  (string :tag "Keyword"))))
 
 (defcustom org-export-with-priority nil
   "Non-nil means include priority cookies in export.
@@ -634,7 +639,6 @@ table.el tables."
     (:tags		      "tags"	  org-export-with-tags)
     (:todo-keywords	      "todo"	  org-export-with-todo-keywords)
     (:tasks	              "tasks"     org-export-with-tasks)
-    (:done-tasks	      "donetasks" org-export-with-done-tasks)
     (:priority		      "pri"	  org-export-with-priority)
     (:TeX-macros	      "TeX"	  org-export-with-TeX-macros)
     (:LaTeX-fragments	      "LaTeX"	  org-export-with-LaTeX-fragments)
@@ -855,7 +859,7 @@ security risks."
 	(while (setq o (pop op))
 	  (if (and (nth 1 o)
 		   (string-match (concat "\\<" (regexp-quote (nth 1 o))
-					 ":\\([^ \t\n\r;,.]*\\)")
+					 ":\\(([^)\n]+)\\|[^ \t\n\r;,.]*\\)")
 				 options))
 	      (setq p (plist-put p (car o)
 				 (car (read-from-string
@@ -1112,10 +1116,8 @@ on this string to produce the exported version."
 				     (plist-get parameters :exclude-tags))
       (run-hooks 'org-export-preprocess-after-tree-selection-hook)
 
-      ;; Get rid of DONE tasks if that option is configured
-      (org-export-remove-tasks
-       (plist-get parameters :tasks)
-       (plist-get parameters :done-tasks))
+      ;; Get rid of tasks, depending on configuration
+      (org-export-remove-tasks (plist-get parameters :tasks))
 
       ;; Change lists ending. Other parts of export may insert blank
       ;; lines and lists' structure could be altered.
@@ -1507,16 +1509,22 @@ removed as well."
 		    (point-max)))
       (delete-region beg end))))
 
-(defun org-export-remove-tasks (tasks done-tasks)
+(defun org-export-remove-tasks (keep)
   "Remove tasks depending on configuration.
-When TASKS is nil, remove all tasks.
-When DONE-TASKS is nil remove the DONE tasks."
-  (unless (and tasks done-tasks)
+When KEEP is nil, remove all tasks.
+When KEEP is `todo', remove the tasks that are DONE.
+When KEEP is `done', remove the tasks that are not yet done.
+When it is a list of strings, keep only tasks with these TODO keywords."
+  (when (or (listp keep) (memq keep '(todo done nil)))
     (let ((re (concat "^\\*+[ \t]+\\("
 		      (mapconcat
 		       'regexp-quote
-		       (cond ((not tasks) org-todo-keywords-1)
-			     ((not done-tasks) org-done-keywords))
+		       (cond ((not keep) org-todo-keywords-1)
+			     ((eq keep 'todo) org-done-keywords)
+			     ((eq keep 'done) org-not-done-keywords)
+			     ((listp keep)
+			      (org-delete-all keep (copy-sequence
+						    org-todo-keywords-1))))
 		       "\\|")
 		      "\\)\\($\\|[ \t]\\)"))
 	(case-fold-search nil)

@@ -9312,7 +9312,6 @@ enabled (default in Emacs 23).
 @vindex org-export-select-tags
 @vindex org-export-exclude-tags
 @cindex org-export-with-tasks
-@cindex org-export-with-done-tasks
 You may use tags to select the parts of a document that should be exported,
 or to exclude parts from export.  This behavior is governed by two variables:
 @code{org-export-select-tags} and @code{org-export-exclude-tags}.
@@ -9333,10 +9332,9 @@ Finally, all subtrees that are marked by any of the @emph{exclude} tags will
 be removed from the export buffer.
 @end enumerate
 
-If the variable @code{org-export-with-tasks} is nil, all TODO items will be
-removed for export along with the subtree belonging to the item.  If the
-variable @code{org-export-with-done-tasks} is @code{nil}, TODO items will
-still be exported, but items with a DONE state will not be exported.
+The variable @code{org-export-with-tasks} can be configured to select which
+kind of tasks should be included for export.  See the docstring of the
+variable for more information.
 
 @node Export options, The export dispatcher, Selective export, Exporting
 @section Export options
@@ -9436,8 +9434,8 @@ toc:       @r{turn on/off table of contents, or set level limit (integer)}
 -:         @r{turn on/off conversion of special strings.}
 f:         @r{turn on/off footnotes like this[1].}
 todo:      @r{turn on/off inclusion of TODO keywords into exported text}
-tasks:     @r{turn on/off inclusion of tasks (TODO items)}
-donetasks: @r{turn on/off inclusion of DONE tasks}
+tasks:     @r{turn on/off inclusion of tasks (TODO items), can be nil to remove}
+           @r{all tasks, @code{todo} to remove DONE tasks, or list of kwds to keep}
 pri:       @r{turn on/off priority cookies}
 tags:      @r{turn on/off inclusion of tags, may also be @code{not-in-toc}}
 <:         @r{turn on/off inclusion of any time/date stamps like DEADLINES}
@@ -10968,7 +10966,6 @@ respective variable for details.
 @item @code{:tags}                  @tab @code{org-export-with-tags}
 @item @code{:todo-keywords}         @tab @code{org-export-with-todo-keywords}
 @item @code{:tasks}                 @tab @code{org-export-with-tasks}
-@item @code{:done-tasks}            @tab @code{org-export-with-done-tasks}
 @item @code{:priority}              @tab @code{org-export-with-priority}
 @item @code{:TeX-macros}            @tab @code{org-export-with-TeX-macros}
 @item @code{:LaTeX-fragments}       @tab @code{org-export-with-LaTeX-fragments}

@@ -530,7 +530,6 @@ publishing directory."
 	    :drawers (plist-get opt-plist :drawers)
 	    :todo-keywords (plist-get opt-plist :todo-keywords)
 	    :tasks (plist-get opt-plist :tasks)
-	    :done-tasks (plist-get opt-plist :done-tasks)
 	    :tags (plist-get opt-plist :tags)
 	    :priority (plist-get opt-plist :priority)
 	    :footnotes (plist-get opt-plist :footnotes)
