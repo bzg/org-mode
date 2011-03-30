@@ -1021,7 +1021,7 @@ OPT-PLIST is the export options list."
 
 ;;; org-export-as-html
 ;;;###autoload
-q(defun org-export-as-html (arg &optional hidden ext-plist
+(defun org-export-as-html (arg &optional hidden ext-plist
 			       to-buffer body-only pub-dir)
   "Export the outline as a pretty HTML file.
 If there is an active region, export only the region.  The prefix
