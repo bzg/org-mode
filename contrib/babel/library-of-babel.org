@@ -282,14 +282,55 @@ are optional.
 | 3 | 6 |
 
 * Misc
+
+** File-specific Version Control logging
+   :PROPERTIES:
+   :AUTHOR: Luke Crook
+   :END:
+
+This function will attempt to retrieve the entire commit log for the
+file associated with the current buffer and insert this log into the
+export. The function uses the Emacs VC commands to interface to the
+local version control system, but has only been tested to work with
+Git. 'limit' is currently unsupported.
+
+#+source: vc-log
+#+headers: :var limit=-1
+#+headers: :var buf=(buffer-name (current-buffer))
+#+begin_src emacs-lisp
+  ;; Most of this code is copied from vc.el vc-print-log
+  (require 'vc)
+  (when (vc-find-backend-function
+         (vc-backend (buffer-file-name (get-buffer buf))) 'print-log)
+    (let ((limit -1)
+          (vc-fileset nil)
+          (backend nil)
+          (files nil))
+      (with-current-buffer (get-buffer buf)
+        (setq vc-fileset (vc-deduce-fileset t)) ; FIXME: Why t? --Stef
+        (setq backend (car vc-fileset))
+        (setq files (cadr vc-fileset)))
+      (with-temp-buffer 
+        (let ((status (vc-call-backend
+                       backend 'print-log files (current-buffer))))
+          (when (and (processp status)   ; Make sure status is a process
+                     (= 0 (process-exit-status status))) ; which has not terminated
+            (while (not (eq 'exit (process-status status)))
+              (sit-for 1 t)))
+          (buffer-string)))))
+#+end_src
+
+** Trivial python code blocks
 #+srcname: python-identity(a=1)
 #+begin_src python
 a
 #+end_src
+
 #+srcname: python-add(a=1, b=2)
 #+begin_src python
 a + b
 #+end_src
+
 * GANTT Charts
 
 The =elispgantt= source block was sent to the mailing list by Eric
