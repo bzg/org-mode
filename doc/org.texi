@@ -4274,7 +4274,7 @@ be placed into a headline or into (the first line of) a plain list item.
 Each cookie covers checkboxes of direct children structurally below the
 headline/item on which the cookie appears@footnote{Set the variable
 @code{org-hierarchical-checkbox-statistics} if you want such cookies to
-represent the all checkboxes below the cookie, not just the direct
+count all checkboxes below the cookie, not just those belonging to direct
 children.}.  You have to insert the cookie yourself by typing either
 @samp{[/]} or @samp{[%]}.  With @samp{[/]} you get an @samp{n out of m}
 result, as in the examples above.  With @samp{[%]} you get information about
@@ -4331,8 +4331,7 @@ a @kbd{C-u} prefix, update the entire file.  Checkbox statistic cookies are
 updated automatically if you toggle checkboxes with @kbd{C-c C-c} and make
 new ones with @kbd{M-S-@key{RET}}.  TODO statistics cookies update when
 changing TODO states.  If you delete boxes/entries or add/change them by
-hand, use this command to get things back into sync.  Or simply toggle any
-entry twice (checkboxes with @kbd{C-c C-c}).
+hand, use this command to get things back into sync.
 @end table
 
 @node Tags, Properties and Columns, TODO Items, Top
