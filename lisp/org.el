@@ -1104,12 +1104,6 @@ breaking the list structure."
 			(const :tag "Always" t)
 			(const :tag "Auto" auto)))))
 
-(defcustom org-numbered-action-format "TODO Action #%d "
-  "Default structure of the headling of a new action.
-%d will become the number of the action."
-  :group 'org-edit-structure
-  :type 'string)  
-
 (defcustom org-insert-heading-hook nil
   "Hook being run after inserting a new heading."
   :group 'org-edit-structure
@@ -6930,29 +6924,6 @@ This is important for non-interactive uses of the command."
 	    (hide-subtree)))
 	(run-hooks 'org-insert-heading-hook)))))
 
-(defun org-new-numbered-action (&optional inline)
-  "Insert a new numbered action, using `org-numbered-action-format'.
-With prefix argument, insert an inline task."
-  (interactive "P")
-  (let* ((num (let ((re "\\`#\\([0-9]+\\)\\'"))
-		(1+ (apply 'max 0
-			   (mapcar
-			    (lambda (e)
-			      (if (string-match re (car e))
-				  (string-to-number (match-string 1 (car e)))
-				0))
-			    (org-get-buffer-tags))))))
-	 (tag (concat "#" (number-to-string num))))
-    (if inline
-          (org-inlinetask-insert-task)
-      (org-insert-heading nil 'force))
-    (unless (eql (char-before) ?\ ) (insert " "))
-    (insert (format org-numbered-action-format num))
-    (org-toggle-tag tag 'on)
-    (if (= (point-max) (point-at-bol))
-	(save-excursion (goto-char (point-at-eol)) (insert "\n")))
-    (unless (eql (char-before) ?\ ) (insert " "))))
-
 (defun org-get-heading (&optional no-tags)
   "Return the heading of the current entry, without the stars."
   (save-excursion
@@ -7599,33 +7570,6 @@ If optional TXT is given, check this string instead of the current kill."
 	  (when (< (- (match-end 0) (match-beginning 0) 1) start-level)
 	    (throw 'exit nil)))
 	t))))
-
-(defun org-collect-todos-in-subtree ()
-  "Collect all TODO items in the current subtree into a flat list."
-  (interactive)
-  (let ((buf (get-buffer-create "Org TODO Collect"))
-	(cnt 0))
-    (with-current-buffer buf (erase-buffer) (org-mode))
-    (save-excursion
-      (save-restriction
-	(org-narrow-to-subtree)
-	(goto-char (point-min))
-	(while (re-search-forward org-complex-heading-regexp nil t)
-	  (when (and (match-end 2)
-		     (member (match-string 2) org-not-done-keywords))
-	    (setq beg (match-beginning 0)
-		  cnt (1+ cnt))
-	    (org-end-of-subtree t t)
-	    (setq end (point))
-	    (copy-region-as-kill beg end)
-	    (with-current-buffer buf
-	      (org-paste-subtree 1)
-	      (or (bolp) (insert "\n"))
-	      (set-buffer-modified-p nil))))))
-    (with-current-buffer buf
-      (kill-region (point-min) (point-max)))
-    (kill-buffer buf)
-    (message "Collected %d TODO items as flat list into the kill buffer" cnt)))
 
 (defvar org-markers-to-move nil
   "Markers that should be moved with a cut-and-paste operation.
