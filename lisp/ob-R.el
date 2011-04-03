@@ -51,6 +51,12 @@
 (defvar org-babel-R-command "R --slave --no-save"
   "Name of command to use for executing R code.")
 
+(defun org-babel-edit-prep:R (info)
+  (let ((session (cdr (assoc :session (nth 2 info)))))
+    (when (and session (string-match "^\\*\\(.+?\\)\\*$" session))
+      (save-match-data (org-babel-R-initiate-session session nil))
+      (setq ess-local-process-name (match-string 1 session)))))
+
 (defun org-babel-expand-body:R (body params &optional graphics-file)
   "Expand BODY according to PARAMS, return the expanded body."
   (let ((graphics-file
