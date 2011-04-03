@@ -15402,7 +15402,6 @@ With prefix ARG, change that many days."
 The date will be changed by N times WHAT.  WHAT can be `day', `month',
 `year', `minute', `second'.  If WHAT is not given, the cursor position
 in the timestamp determines what will be changed."
-  (debug)
   (let ((pos (point))
 	with-hm inactive
 	(dm (max (nth 1 org-time-stamp-rounding-minutes) 1))
