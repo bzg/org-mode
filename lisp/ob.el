@@ -996,8 +996,10 @@ may be specified in the current buffer."
     (append
      (mapcar (lambda (var) (cons :var var)) (car vars-and-names))
      (list
-      (cons :colname-names (cadr  vars-and-names))
-      (cons :rowname-names (caddr vars-and-names))
+      (cons :colname-names (or (cdr (assoc :colname-names params))
+			       (cadr  vars-and-names)))
+      (cons :rowname-names (or (cdr (assoc :rowname-names params))
+			       (caddr vars-and-names)))
       (cons :result-params result-params)
       (cons :result-type  (cond ((member "output" result-params) 'output)
 				((member "value" result-params) 'value)
