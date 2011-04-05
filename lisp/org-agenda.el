@@ -3457,11 +3457,6 @@ the daily/weekly agenda, see `org-agenda-skip-function'.")
 The view will be for the current day or week, but from the overview buffer
 you will be able to go to other days/weeks.
 
-With one \\[universal-argument] prefix argument INCLUDE-ALL,
-all unfinished TODO items will also be shown, before the agenda.
-This feature is considered obsolete, please use the TODO list or a block
-agenda instead.
-
 With a numeric prefix argument in an interactive call, the agenda will
 span INCLUDE-ALL days.  Lisp programs should instead specify SPAN to change
 the number of days.  SPAN defaults to `org-agenda-span'.
@@ -3516,24 +3511,6 @@ given in `org-agenda-start-on-weekday'."
     (org-set-local 'org-starting-day (car day-numbers))
     (org-set-local 'org-include-all-loc include-all)
     (org-set-local 'org-agenda-current-span (org-agenda-ndays-to-span span))
-    (when (and (or include-all org-agenda-include-all-todo)
-	       (member today day-numbers))
-      (setq files thefiles
-	    rtnall nil)
-      (while (setq file (pop files))
-	(catch 'nextfile
-	  (org-check-agenda-file file)
-	  (setq date (calendar-gregorian-from-absolute today)
-		rtn (org-agenda-get-day-entries
-		     file date :todo))
-	  (setq rtnall (append rtnall rtn))))
-      (when rtnall
-	(insert "All currently open TODO items:\n")
-	(add-text-properties (point-min) (1- (point))
-			     (list 'face 'org-agenda-structure
-				   'short-heading "All TODO items"))
-	(org-agenda-mark-header-line (point-min))
-	(insert (org-finalize-agenda-entries rtnall) "\n")))
     (unless org-agenda-compact-blocks
       (let* ((d1 (car day-numbers))
 	     (d2 (org-last day-numbers))
