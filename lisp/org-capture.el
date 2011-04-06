@@ -215,6 +215,7 @@ Furthermore, the following %-escapes will be replaced with content:
   %u, %U      like the above, but inactive time stamps
   %^t         like %t, but prompt for date.  Similarly %^T, %^u, %^U.
               You may define a prompt like %^{Please specify birthday
+  %<...>      the result of format-time-string on the ... format specification
   %n          user name (taken from `user-full-name')
   %a          annotation, normally the link created with `org-store-link'
   %i          initial content, copied from the active region.  If %i is
@@ -1298,6 +1299,11 @@ The template may still contain \"%?\" for cursor positioning."
 	    (let ((result (org-eval (read (current-buffer)))))
 	      (delete-region template-start (point))
 	      (insert result)))))
+
+      ;; The current time
+      (goto-char (point-min))
+      (while (re-search-forward "%<\\([^>\n]+\\)>" nil t)
+	(replace-match (format-time-string (match-string 1)) t t))
 
       ;; Simple %-escapes
       (goto-char (point-min))

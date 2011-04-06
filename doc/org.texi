@@ -6456,6 +6456,7 @@ dynamic insertion of content:
 %u, %U      @r{like the above, but inactive timestamps}
 %^t         @r{like @code{%t}, but prompt for date.  Similarly @code{%^T}, @code{%^u}, @code{%^U}}
             @r{You may define a prompt like @code{%^@{Birthday@}t}}
+%<...>      @r{the result of format-time-string on the ... format specification}
 %n          @r{user name (taken from @code{user-full-name})}
 %c          @r{Current kill ring head.}
 %x          @r{Content of the X clipboard.}
