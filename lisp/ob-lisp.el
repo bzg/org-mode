@@ -69,7 +69,9 @@
      ((lambda (result)
 	(if (member "output" (cdr (assoc :result-params params)))
 	    (car result)
-	    (condition-case nil (read (cadr result)) (error (cadr result)))))
+	    (condition-case nil
+		(read (org-bable-lisp-vector-to-list (cadr result)))
+	      (error (cadr results)))))
       (slime-eval `(swank:eval-and-grab-output
 		    ,(buffer-substring-no-properties (point-min) (point-max)))
 		  (cdr (assoc :package params)))))
@@ -77,6 +79,10 @@
 			(cdr (assoc :colnames params)))
    (org-babel-pick-name (cdr (assoc :rowname-names params))
 			(cdr (assoc :rownames params)))))
+
+(defun org-bable-lisp-vector-to-list (results)
+  ;; TODO: better would be to replace #(...) with [...]
+  (replace-regexp-in-string "#(" "(" results))
 
 (provide 'ob-lisp)
 
