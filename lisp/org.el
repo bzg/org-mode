@@ -19826,6 +19826,27 @@ If there is no such heading, return nil."
 	(unless (eobp) (backward-char 1)))
     ad-do-it))
 
+(defun org-end-of-meta-data-and-drawers ()
+  "Jump to the first text after meta data and drawers in the current entry.
+This will move over empty lines, lines with planning time stamps,
+clocking lines, and drawers."
+  (org-back-to-heading t)
+  (let ((end (save-excursion (outline-next-heading) (point)))
+	(re (concat "[ \t]*$"
+		    "\\|"
+		    "\\(" org-drawer-regexp "\\)" ; group 1 are drawers
+		    "\\|"
+		    "\\([ \t]*\\(" org-keyword-time-regexp "\\)\\)")))
+    (forward-line 1)
+    (while (looking-at (concat "[ \t]*\\(" org-keyword-time-regexp "\\)"))
+      (if (not (match-end 1))
+	  ;; empty or planning line
+	  (forward-line 1)
+	;; a drawer, find the end
+	(re-search-forward "^[ \t]*:END:" end 'move)
+	(forward-line 1)))
+    (point)))
+
 (defun org-forward-same-level (arg &optional invisible-ok)
   "Move forward to the arg'th subheading at same level as this one.
 Stop at the first and last subheadings of a superior heading.

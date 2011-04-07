@@ -1012,13 +1012,27 @@ it.  When it is a variable, retrieve the value.  Return whatever we get."
     (org-table-align)))
 
 (defun org-capture-place-plain-text ()
-  "Place the template plainly."
+  "Place the template plainly.
+If the target locator points at an Org node, place the template into
+the text of the entry, before the first child.  If not, place the
+template at the beginning or end of the file.
+Of course, if exact position has been required, just put it at point."
   (let* ((txt (org-capture-get :template))
 	 beg end)
-    (goto-char (cond
-		((org-capture-get :exact-position))
-		((org-capture-get :prepend) (point-min))
-		(t (point-max))))
+    (cond
+     ((org-capture-get :exact-position))
+     ((and (org-capture-get :target-entry-p)
+	   (bolp)
+	   (looking-at org-outline-regexp))
+      ;; we should place the text into this entry
+      (if (org-capture-get :prepend)
+	  ;; Skip meta data and drawers
+	  (org-end-of-meta-data-and-drawers)
+	;; go to ent of the entry text, before the next headline
+	(outline-next-heading)))
+     (t
+      ;; beginning or end of file
+      (goto-char (if (org-capture-get :prepend) (point-min) (point-max)))))
     (or (bolp) (newline))
     (org-capture-empty-lines-before)
     (setq beg (point))
