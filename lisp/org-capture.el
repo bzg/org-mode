@@ -1016,11 +1016,12 @@ it.  When it is a variable, retrieve the value.  Return whatever we get."
 If the target locator points at an Org node, place the template into
 the text of the entry, before the first child.  If not, place the
 template at the beginning or end of the file.
-Of course, if exact position has been required, just put it at point."
+Of course, if exact position has been required, just put it there."
   (let* ((txt (org-capture-get :template))
 	 beg end)
     (cond
-     ((org-capture-get :exact-position))
+     ((org-capture-get :exact-position)
+      (goto-char (org-capture-get :exact-position)))
      ((and (org-capture-get :target-entry-p)
 	   (bolp)
 	   (looking-at org-outline-regexp))
