@@ -71,7 +71,7 @@
 	    (car result)
 	    (condition-case nil
 		(read (org-bable-lisp-vector-to-list (cadr result)))
-	      (error (cadr results)))))
+	      (error (cadr result)))))
       (slime-eval `(swank:eval-and-grab-output
 		    ,(buffer-substring-no-properties (point-min) (point-max)))
 		  (cdr (assoc :package params)))))
