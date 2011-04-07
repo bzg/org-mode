@@ -63,15 +63,20 @@
 (defun org-babel-execute:lisp (body params)
   "Execute a block of Common Lisp code with Babel."
   (require 'slime)
-  (with-temp-buffer
-    (insert (org-babel-expand-body:lisp body params))
-    ((lambda (result)
-       (if (member "output" (cdr (assoc :result-params params)))
-	   (car result)
-	 (condition-case nil (read (cadr result)) (error (cadr result)))))
-     (slime-eval `(swank:eval-and-grab-output
-		   ,(buffer-substring-no-properties (point-min) (point-max)))
-		 (cdr (assoc :package params))))))
+  (org-babel-reassemble-table
+   (with-temp-buffer
+     (insert (org-babel-expand-body:lisp body params))
+     ((lambda (result)
+	(if (member "output" (cdr (assoc :result-params params)))
+	    (car result)
+	    (condition-case nil (read (cadr result)) (error (cadr result)))))
+      (slime-eval `(swank:eval-and-grab-output
+		    ,(buffer-substring-no-properties (point-min) (point-max)))
+		  (cdr (assoc :package params)))))
+   (org-babel-pick-name (cdr (assoc :colname-names params))
+			(cdr (assoc :colnames params)))
+   (org-babel-pick-name (cdr (assoc :rowname-names params))
+			(cdr (assoc :rownames params)))))
 
 (provide 'ob-lisp)
 
