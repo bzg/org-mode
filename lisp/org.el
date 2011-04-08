@@ -14636,6 +14636,19 @@ user."
       (if (< year 100) (setq year (+ 2000 year)))
       (setq ans (replace-match (format "%04d-%02d-%02d\\5" year month day)
 			       t nil ans)))
+
+    ;; Help matching dottet european dates
+    (when (string-match
+	   "^ *\\(3[01]\\|0?[1-9]\\|[12][0-9]\\)\\. ?\\(0?[1-9]\\|1[012]\\)\\. ?\\([1-9][0-9][0-9][0-9]\\)?" ans)
+      (setq year (if (match-end 3)
+		     (string-to-number (match-string 3 ans))
+		   (progn (setq kill-year t)
+			  (string-to-number (format-time-string "%Y"))))
+	    day (string-to-number (match-string 1 ans))
+	    month (string-to-number (match-string 2 ans))
+	    ans (replace-match (format "%04d-%02d-%02d\\5" year month day)
+				     t nil ans)))
+
     ;; Help matching american dates, like 5/30 or 5/30/7
     (when (string-match
 	   "^ *\\(0?[1-9]\\|1[012]\\)/\\(0?[1-9]\\|[12][0-9]\\|3[01]\\)\\(/\\([0-9]+\\)\\)?\\([^/0-9]\\|$\\)" ans)
