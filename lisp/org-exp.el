@@ -1095,15 +1095,15 @@ on this string to produce the exported version."
       ;; Call the hook
       (run-hooks 'org-export-preprocess-hook)
 
-      ;; Process the macros
-      (org-export-preprocess-apply-macros)
-      (run-hooks 'org-export-preprocess-after-macros-hook)
-
       (untabify (point-min) (point-max))
 
       ;; Handle include files, and call a hook
       (org-export-handle-include-files-recurse)
       (run-hooks 'org-export-preprocess-after-include-files-hook)
+
+      ;; Process the macros
+      (org-export-preprocess-apply-macros)
+      (run-hooks 'org-export-preprocess-after-macros-hook)
 
       ;; Get rid of archived trees
       (org-export-remove-archived-trees archived-trees)
