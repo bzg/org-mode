@@ -8082,6 +8082,21 @@ s  @r{Schedule all items to a new date.  To shift existing schedule dates}
 S  @r{Reschedule randomly by N days.  N will be prompted for.  With prefix}
    @r{arg (@kbd{C-u B S}), scatter only accross weekdays.}
 d  @r{Set deadline to a specific date.}
+f  @r{Apply a function to marked entries.}
+   @r{For example, the function below sets the CATEGORY property of the}
+   @r{entries to web.}
+   @r{(defun set-category ()}
+   @r{  (interactive "P")}
+   @r{  (let* ((marker (or (org-get-at-bol 'org-hd-marker)}
+   @r{                     (org-agenda-error)))}
+   @r{            (buffer (marker-buffer marker)))}
+   @r{       (with-current-buffer buffer}
+   @r{         (save-excursion}
+   @r{           (save-restriction}
+   @r{             (widen)}
+   @r{             (goto-char marker)}
+   @r{             (org-back-to-heading t)}
+   @r{             (org-set-property "CATEGORY" "web"))))))}
 @end example
 
 
