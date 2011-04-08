@@ -7692,6 +7692,10 @@ will be followed without a selection prompt.
 
 @tsubheading{Change display}
 @cindex display changing, in agenda
+@kindex A
+@item A
+Interactively select another agenda view and append it to the current view.
+@c
 @kindex o
 @item o
 Delete other windows.
@@ -7883,7 +7887,7 @@ Internet, and outside of business hours, with something like this:
 @end group
 @end lisp
 
-@orgcmd{\,org-agenda-filter-by-tag-refine}
+@orgcmd{\\,org-agenda-filter-by-tag-refine}
 Narrow the current agenda filter by an additional condition.  When called with
 prefix arg, remove the entries that @emph{do} have the tag, or that do match
 the effort criterion.  You can achieve the same effect by pressing @kbd{+} or
@@ -8047,6 +8051,9 @@ Jump to the running clock in another window.
 @orgcmd{m,org-agenda-bulk-mark}
 Mark the entry at point for bulk action.  With prefix arg, mark that many
 successive entries.
+@c
+@orgcmd{%,org-agenda-bulk-mark-regexp}
+Mark entries matching a regular expression for bulk action.
 @c
 @orgcmd{u,org-agenda-bulk-unmark}
 Unmark entry for bulk action.
