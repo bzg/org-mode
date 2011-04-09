@@ -13930,7 +13930,7 @@ formats in the current buffer."
     (sort rtn (lambda (a b) (string< (upcase a) (upcase b))))))
 
 (defun org-property-values (key)
-  "Return a list of all values of property KEY."
+  "Return a list of all values of property KEY in the current buffer."
   (save-excursion
     (save-restriction
       (widen)
