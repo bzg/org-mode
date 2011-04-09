@@ -8867,7 +8867,9 @@ package is included by the LaTeX header, and ensuring that the
 @code{org-export-latex-listings} and @code{org-export-latex-minted} for
 further details.}.  This is done with the @samp{src} block, where you also
 need to specify the name of the major mode that should be used to fontify the
-example:
+example@footnote{Code in @samp{src} blocks may also be evaluated either
+interactively or on export.  See @pxref{Working With Source Code} for more
+information on evaluating code blocks.}: 
 @cindex #+BEGIN_SRC
 
 @example
