@@ -5593,8 +5593,8 @@ needs to be inserted at a specific position in the font-lock sequence.")
 	       '("\\[\\([0-9]*%\\)\\]\\|\\[\\([0-9]*\\)/\\([0-9]*\\)\\]"
 		 (0 (org-get-checkbox-statistics-face) t)))
 	   ;; Description list items
-	   '("^[ \t]*\\([-+*]\\|[0-9]+[.)]\\)[ \t]+\\(.*? ::\\)"
-	     2 'bold prepend)
+	   '("^[ \t]*[-+*][ \t]+\\(.*?[ \t]+::\\)\\([ \t]+\\|$\\)"
+	     1 'bold prepend)
 	   ;; ARCHIVEd headings
 	   (list (concat "^\\*+ \\(.*:" org-archive-tag ":.*\\)")
 		 '(1 'org-archived prepend))
