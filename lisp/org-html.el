@@ -2503,7 +2503,7 @@ the alist of previous items."
        (concat "[ \t]*\\(\\S-+[ \t]*\\)"
 	       "\\(?:\\[@\\(?:start:\\)?\\([0-9]+\\|[A-Za-z]\\)\\]\\)?"
 	       "\\(?:\\(\\[[ X-]\\]\\)[ \t]+\\)?"
-	       "\\(?:\\(.*\\)[ \t]+::[ \t]+\\)?"
+	       "\\(?:\\(.*\\)[ \t]+::\\(?:[ \t]+\\|$\\)\\)?"
 	       "\\(.*\\)") line)
       (let* ((checkbox (match-string 3 line))
 	     (desc-tag (or (match-string 4 line) "???"))
