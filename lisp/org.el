@@ -13694,7 +13694,7 @@ when a \"nil\" value can supersede a non-nil value higher up the hierarchy."
 	  (if (and range
 		   (goto-char (car range))
 		   (re-search-forward
-		    (concat "^[ \t]*:" property ":[ \t]*\\(.*[^ \t\r\n\f\v]\\)?")
+		    (org-re-property property)
 		    (cdr range) t))
 	      ;; Found the property, return it.
 	      (if (match-end 1)
@@ -13720,7 +13720,7 @@ If yes, return this value.  If not, return the current value of the variable."
 	(if (and range
 		 (goto-char (car range))
 		 (re-search-forward
-		  (concat "^[ \t]*:" property ":[ \t]*\\(.*[^ \t\r\n\f\v]\\)")
+		  (org-re-property property)
 		  (cdr range) t))
 	    (progn
 	      (delete-region (match-beginning 0) (1+ (point-at-eol)))
@@ -13867,7 +13867,7 @@ and the new value.")
 	  (setq range (org-get-property-block beg end 'force))
 	  (goto-char (car range))
 	  (if (re-search-forward
-	       (concat "^[ \t]*:" property ":\\(.*\\)") (cdr range) t)
+	       (org-re-property property) (cdr range) t)
 	      (progn
 		(delete-region (match-beginning 1) (match-end 1))
 		(goto-char (match-beginning 1)))
@@ -13929,13 +13929,18 @@ formats in the current buffer."
 
     (sort rtn (lambda (a b) (string< (upcase a) (upcase b))))))
 
+(defsubst org-re-property (property)
+  "Return a regexp matching PROPERTY.
+Match group 1 will be set to the value "
+  (concat "^[ \t]*:" (regexp-quote property) ":[ \t]*\\(\\S-.*\\)"))
+
 (defun org-property-values (key)
   "Return a list of all values of property KEY in the current buffer."
   (save-excursion
     (save-restriction
       (widen)
       (goto-char (point-min))
-      (let ((re (concat "^[ \t]*:" key ":[ \t]*\\(\\S-.*\\)"))
+      (let ((re (org-re-property key))
 	    values)
 	(while (re-search-forward re nil t)
 	  (add-to-list 'values (org-trim (match-string 1))))
@@ -14068,7 +14073,7 @@ in the current file."
       (goto-char (point-min))
       (let ((cnt 0))
 	(while (re-search-forward
-		(concat "^[ \t]*:" (regexp-quote property) ":.*\n?")
+		(org-re-property property)
 		nil t)
 	  (setq cnt (1+ cnt))
 	  (replace-match ""))
