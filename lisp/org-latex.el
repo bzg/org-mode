@@ -2412,12 +2412,15 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 		 (replace-match (org-export-latex-protect-string
 				 (concat "$^{" (match-string 1) "}$")))
 	       (replace-match "")
-	       (let ((end (save-excursion
-			    (if (re-search-forward "^$\\|^#.*$\\|\\[[0-9]+\\]" nil t)
-				(match-beginning 0) (point-max)))))
-		 (setq footnote (concat (org-trim (buffer-substring (point) end))
-					; last } won't be part of a link or list.
-					"\n"))
+	       (let* ((end (save-excursion
+			     (if (re-search-forward "^$\\|^#.*$\\|\\[[0-9]+\\]" nil t)
+				 (match-beginning 0) (point-max))))
+		      (body (org-trim (buffer-substring (point) end))))
+		 ;; Fix for footnotes ending on a link or a list.
+		 (setq footnote
+		       (concat body
+			       (if (string-match "ORG-LIST-END-MARKER\\'" body)
+				   "\n" " ")))
 		 (delete-region (point) end))
 	       (goto-char foot-beg)
 	       (delete-region foot-beg foot-end)
