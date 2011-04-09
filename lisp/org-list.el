@@ -396,9 +396,13 @@ group 4: description tag")
   (and (org-at-item-p)
        (save-excursion
 	 (goto-char (match-end 0))
-         ;; Ignore counter if any
-         (when (looking-at "\\(?:\\[@\\(?:start:\\)?[0-9]+\\][ \t]*\\)?")
-           (goto-char (match-end 0)))
+	 (let ((counter-re (concat "\\(?:\\[@\\(?:start:\\)?"
+				   (if org-alphabetical-lists
+				       "\\([0-9]+\\|[A-Za-z]\\)"
+				     "[0-9]+")
+				   "\\][ \t]*\\)")))
+	   ;; Ignore counter if any
+	   (when (looking-at counter-re) (goto-char (match-end 0))))
 	 (looking-at regexp))))
 
 (defun org-list-in-valid-context-p ()
