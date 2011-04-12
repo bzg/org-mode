@@ -249,7 +249,7 @@ If `org-store-link' was called with a prefix arg the meaning of
   (when article
     (setq article (org-substring-no-properties article)))
   (cond ((and group article)
-	 (gnus-activate-group group t)
+	 (gnus-activate-group group)
 	 (condition-case nil
 	     (let* ((method (gnus-find-method-for-group group))
 		    (backend (car method))
