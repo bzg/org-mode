@@ -4710,7 +4710,7 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 	    (setq hdmarker (org-agenda-new-marker)
 		  tags (org-get-tags-at))
 	    (looking-at "\\*+[ \t]+\\([^\r\n]+\\)")
-	    (setq head (match-string 1))
+	    (setq head (or (match-string 1) ""))
 	    (setq txt (org-format-agenda-item
 		       (if inactivep org-agenda-inactive-leader nil)
 		       head category tags timestr
