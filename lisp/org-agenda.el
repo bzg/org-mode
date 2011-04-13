@@ -7933,8 +7933,18 @@ This will remove the markers, and the overlays."
   "Execute an remote-editing action on all marked entries.
 The prefix arg is passed through to the command if possible."
   (interactive "P")
-  (unless org-agenda-bulk-marked-entries
-    (error "No entries are marked"))
+  ;; Make sure we have markers, and only valid ones
+  (unless org-agenda-bulk-marked-entries (error "No entries are marked"))
+  (mapc
+   (lambda (m)
+     (unless (and (markerp m)
+		  (marker-buffer m)
+		  (buffer-live-p (marker-buffer m))
+		  (marker-position m))
+       (error "Marker %s for bulk command is invalid" m)))
+   entries)
+
+  ;; Prompt for the bulk command
   (message "Bulk: [r]efile [$]arch [A]rch->sib [t]odo [+/-]tag [s]chd [S]catter [d]eadline [f]unction")
   (let* ((action (read-char-exclusive))
 	 (org-log-refile (if org-log-refile 'time nil))
@@ -7999,7 +8009,7 @@ The prefix arg is passed through to the command if possible."
 			 (fmakunbound 'read-string)))))))
 
      ((equal action ?S)
-      (if (not (org-agenda-check-type nil 'agenda 'timeline))
+      (if (not (org-agenda-check-type nil 'agenda 'timeline 'todo))
 	  (error "Can't scatter tasks in \"%s\" agenda view" org-agenda-type)
 	(let ((days (read-number
 		     (format "Scatter tasks across how many %sdays: "
@@ -8022,7 +8032,9 @@ The prefix arg is passed through to the command if possible."
 			       (setq day-of-week 0)))))
 		   ;; silently fail when try to replan a sexp entry
 		   (condition-case nil
-		       (org-agenda-date-later distance)
+		       (org-agenda-schedule nil
+					    (days-to-time
+					     (+ (org-today) distance)))
 		     (error nil)))))))
 
      ((equal action ?f)
