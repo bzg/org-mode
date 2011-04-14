@@ -5905,7 +5905,7 @@ to switch to narrowing."
 	 (effort-prompt "")
 	 (inhibit-read-only t)
 	 (current org-agenda-filter)
-	 maybe-reftresh a n tag)
+	 maybe-refresh a n tag)
     (unless char
       (message
        "%s by tag [%s ], [TAB], %s[/]:off, [+-]:narrow, [>=<?]:effort: "
@@ -5952,12 +5952,12 @@ to switch to narrowing."
 		(push modifier org-agenda-filter))))
 	(if (not (null org-agenda-filter))
 	    (org-agenda-filter-apply org-agenda-filter)))
-      (setq maybe-reftresh t))
+      (setq maybe-refresh t))
      ((equal char ?/)
       (org-agenda-filter-by-tag-show-all)
       (when (get 'org-agenda-filter :preset-filter)
 	(org-agenda-filter-apply org-agenda-filter))
-      (setq maybe-reftresh t))
+      (setq maybe-refresh t))
      ((or (equal char ?\ )
 	  (setq a (rassoc char alist))
 	  (and (>= char ?0) (<= char ?9)
@@ -5974,9 +5974,9 @@ to switch to narrowing."
 	    (cons (concat (if strip "-" "+") tag)
 		  (if narrow current nil)))
       (org-agenda-filter-apply org-agenda-filter)
-      (setq maybe-reftresh t))
+      (setq maybe-refresh t))
      (t (error "Invalid tag selection character %c" char)))
-    (when (and maybe-reftresh
+    (when (and maybe-refresh
 	       (eq org-agenda-clockreport-mode 'with-filter))
       (org-agenda-redo))))
 
