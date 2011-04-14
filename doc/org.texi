@@ -8080,7 +8080,7 @@ s  @r{Schedule all items to a new date.  To shift existing schedule dates}
    @r{by a fixed number of days, use something starting with double plus}
    @r{at the prompt, for example @samp{++8d} or @samp{++2w}.}
 S  @r{Reschedule randomly into the coming N days.  N will be prompted for.}
-   @r{With prefix arg (@kbd{C-u B S}), scatter only accross weekdays.}
+   @r{With prefix arg (@kbd{C-u B S}), scatter only across weekdays.}
 d  @r{Set deadline to a specific date.}
 f  @r{Apply a function to marked entries.}
    @r{For example, the function below sets the CATEGORY property of the}
