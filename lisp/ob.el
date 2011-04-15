@@ -306,10 +306,6 @@ specific header arguments as well.")
   '((:session . "none") (:results . "replace") (:exports . "results"))
   "Default arguments to use when evaluating an inline source block.")
 
-(defvar org-babel-current-buffer-properties nil
-  "Local cache for buffer properties.")
-(make-variable-buffer-local 'org-babel-current-buffer-properties)
-
 (defvar org-babel-result-regexp
   "^[ \t]*#\\+res\\(ults\\|name\\)\\(\\[\\([[:alnum:]]+\\)\\]\\)?\\:[ \t]*"
   "Regular expression used to match result lines.
@@ -892,20 +888,20 @@ may be specified in the properties of the current outline entry."
   "Retrieve per-buffer parameters.
  Return an association list of any source block params which
 may be specified in the current buffer."
-  (or org-babel-current-buffer-properties
-      (save-match-data
-	(save-excursion
-	  (save-restriction
-	    (widen)
-	    (goto-char (point-min))
-	    (while (re-search-forward
-		    (org-make-options-regexp (list "BABEL")) nil t)
-	      (setq org-babel-current-buffer-properties
-		    (org-babel-merge-params
-		     org-babel-current-buffer-properties
-		     (org-babel-parse-header-arguments
-		      (org-match-string-no-properties 2)))))
-	    org-babel-current-buffer-properties)))))
+  (let (local-properties)
+    (save-match-data
+      (save-excursion
+	(save-restriction
+	  (widen)
+	  (goto-char (point-min))
+	  (while (re-search-forward
+		  (org-make-options-regexp (list "BABEL" "PROPERTIES")) nil t)
+	    (setq local-properties
+		  (org-babel-merge-params
+		   local-properties
+		   (org-babel-parse-header-arguments
+		    (org-match-string-no-properties 2)))))
+	  local-properties)))))
 
 (defvar org-src-preserve-indentation)
 (defun org-babel-parse-src-block-match ()
