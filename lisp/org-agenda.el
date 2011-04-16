@@ -7942,7 +7942,7 @@ The prefix arg is passed through to the command if possible."
 		  (buffer-live-p (marker-buffer m))
 		  (marker-position m))
        (error "Marker %s for bulk command is invalid" m)))
-   entries)
+   org-agenda-bulk-marked-entries)
 
   ;; Prompt for the bulk command
   (message "Bulk: [r]efile [$]arch [A]rch->sib [t]odo [+/-]tag [s]chd [S]catter [d]eadline [f]unction")
