@@ -41,6 +41,8 @@
 
 ;;; Code:
 
+(require 'org)
+
 ;; Install the link type
 (org-add-link-type "notmuch" 'org-notmuch-open)
 (add-hook 'org-store-link-functions 'org-notmuch-store-link)
