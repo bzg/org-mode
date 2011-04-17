@@ -1895,10 +1895,11 @@ calculator).
 @section The built-in table editor
 @cindex table editor, built-in
 
-Org makes it easy to format tables in plain ASCII.  Any line with
-@samp{|} as the first non-whitespace character is considered part of a
-table.  @samp{|} is also the column separator.  A table might look like
-this:
+Org makes it easy to format tables in plain ASCII.  Any line with @samp{|} as
+the first non-whitespace character is considered part of a table.  @samp{|}
+is also the column separator@footnote{To insert a vertical bar into a table
+field, use @code{\vert} or, inside a word @code{abc\vert@{@}def}.}.  A table
+might look like this:
 
 @example
 | Name  | Phone | Age |
