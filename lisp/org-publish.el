@@ -860,7 +860,7 @@ system's modification time.
 It returns time in `current-time' format."
   (let ((visiting (find-buffer-visiting file)))
     (save-excursion
-      (switch-to-buffer (or visiting (find-file file)))
+      (switch-to-buffer (or visiting (find-file-noselect file nil t)))
       (let* ((plist (org-infile-export-plist))
 	     (date (plist-get plist :date)))
 	(unless visiting
