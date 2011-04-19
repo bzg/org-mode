@@ -8530,7 +8530,7 @@ This causes the following issues:
 Org needs to make a decision which @code{COLUMNS} format to use.  Since the
 entries in the agenda are collected from different files, and different files
 may have different @code{COLUMNS} formats, this is a non-trivial problem.
-Org first checks if the variable @code{org-overriding-columns-format} is
+Org first checks if the variable @code{org-agenda-overriding-columns-format} is
 currently set, and if so, takes the format from there.  Otherwise it takes
 the format associated with the first item in the agenda, or, if that item
 does not have a specific format (defined in a property, or in its file), it
