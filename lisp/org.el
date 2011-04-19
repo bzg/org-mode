@@ -15592,6 +15592,7 @@ In fact, the first hh:mm or number in the string will be taken,
 there can be extra stuff in the string.
 If no number is found, the return value is 0."
   (cond
+   ((integerp s) s)
    ((string-match "\\([0-9]+\\):\\([0-9]+\\)" s)
     (+ (* (string-to-number (match-string 1 s)) 60)
        (string-to-number (match-string 2 s))))

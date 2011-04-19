@@ -1096,6 +1096,36 @@ the agenda to display all available LOG items temporarily."
   :group 'org-agenda-daily/weekly
   :type '(set :greedy t (const closed) (const clock) (const state)))
 
+(defcustom org-agenda-clock-consistency-checks
+  '(:max-duration "10:00" :min-duration 0 :max-gap "0:05" :gap-ok ("4:00"))
+  "How to check clock times for consistency.
+This is a property list, with the following keys:
+
+:max-duration    Mark clocking chunks that are longer than this time.
+                 This is a time string like \"HH:MM\", or the number
+                 of minutes as an integer.
+
+:min-duration    Mark clocking chunks that are shorter that this.
+                 This is a time string like \"HH:MM\", or the number
+                 of minutes as an integer.
+
+:max-gap         Mark gaps between clocking chunks that are longer than
+                 this duration.  A number of minutes, or a string
+                 like \"HH:MM\".
+
+:gap-ok-around   List of times during the day which are usually not working
+                 times.  When a gap is detected, but the gap contains any
+                 of these times, the gap is *not* reported.  For example,
+                 if this is (\"4:00\" \"13:00\") then gaps that contain
+                 4:00 in the morning (i.e. the night) and 13:00
+                 (i.e. a typical lunch time) do not cause a warning.
+                 You should have at least one time during the night in this
+                 list, or otherwise the first task each morning will trigger
+                 a warning because it follows a long gap."
+  :group 'org-agenda-daily/weekly
+  :group 'org-clock
+  :type 'plist)
+
 (defcustom org-agenda-log-mode-add-notes t
   "Non-nil means add first line of notes to log entries in agenda views.
 If a log item like a state change or a clock entry is associated with
@@ -3550,7 +3580,7 @@ given in `org-agenda-start-on-weekday'."
 	      (setq org-agenda-entry-types
 		    (delq :deadline org-agenda-entry-types)))
 	    (cond
-	     ((eq org-agenda-show-log 'only)
+	     ((memq org-agenda-show-log '(only clockcheck))
 	      (setq rtn (org-agenda-get-day-entries
 			 file date :closed)))
 	     (org-agenda-show-log
@@ -3621,6 +3651,8 @@ given in `org-agenda-start-on-weekday'."
 	    (recenter 1))))
     (goto-char (or start-pos 1))
     (add-text-properties (point-min) (point-max) '(org-agenda-type agenda))
+    (if (eq org-agenda-show-log 'clockcheck)
+	(org-agenda-show-clocking-issues))
     (org-finalize-agenda)
     (setq buffer-read-only t)
     (message "")))
@@ -4808,7 +4840,9 @@ be skipped."
 			      (abbreviate-file-name buffer-file-name))))
 	 (items (if (consp org-agenda-show-log)
 		    org-agenda-show-log
-		  org-agenda-log-mode-items))
+		  (if (eq org-agenda-show-log 'clockcheck)
+		      '(clock)
+		    org-agenda-log-mode-items)))
 	 (parts
 	  (delq nil
 		(list
@@ -4889,6 +4923,117 @@ be skipped."
 	  (push txt ee))
 	(goto-char (point-at-eol))))
     (nreverse ee)))
+
+(defun org-agenda-show-clocking-issues ()
+  "Add overlays, showing issues with clocking.
+See also the user option `org-agenda-clock-consistency-checks'."
+  (interactive)
+  (let* ((pl org-agenda-clock-consistency-checks)
+	 (re (concat "^[ \t]*"
+		     org-clock-string
+		     "[ \t]+"
+		     "\\(\\[.*?\\]\\)" ; group 1 is first stamp
+		     "\\(-\\{1,3\\}\\(\\[.*?\\]\\)\\)?")) ; group 3 is second
+	 (tlstart 0.)
+	 (tlend 0.)
+	 (maxtime (org-hh:mm-string-to-minutes 
+		   (or (plist-get pl :max-duration) "24:00")))
+	 (mintime (org-hh:mm-string-to-minutes 
+		   (or (plist-get pl :min-duration) 0)))
+	 (maxgap  (org-hh:mm-string-to-minutes
+		   ;; default 30:00 means never complain
+		   (or (plist-get pl :max-gap) "30:00")))
+	 (gapok (mapcar 'org-hh:mm-string-to-minutes
+			(plist-get pl :gap-ok-around)))
+	 issue)
+    (goto-char (point-min))
+    (while (re-search-forward " Clocked: +(-\\|\\([0-9]+:[0-9]+\\))" nil t)
+      (setq issue nil)
+      (catch 'next
+	(setq m (org-get-at-bol 'org-marker)
+	      te nil ts nil)
+	(unless (and m (markerp m))
+	  (setq issue "No valid clock line") (throw 'next t))
+	(org-with-point-at m
+	  (save-excursion
+	    (goto-char (point-at-bol))
+	    (unless (looking-at re)
+	      (error "No valid Clock line")
+	      (throw 'next t))
+	    (unless (match-end 3)
+	      (setq issue "No end time")
+	      (throw 'next t))
+	    (setq ts (match-string 1)
+		  te (match-string 3)
+		  ts (org-float-time
+		      (apply 'encode-time (org-parse-time-string ts)))
+		  te (org-float-time
+		      (apply 'encode-time (org-parse-time-string te)))
+		  dt (- te ts))))
+	(cond
+	 ((> dt (* 60 maxtime))
+	  ;; a very long clocking chunk
+	  (setq issue (format "Clocking interval is very long: %s"
+			      (org-minutes-to-hh:mm-string
+			       (floor (/ (float dt) 60.))))))
+	 ((< dt (* 60 mintime))
+	  ;; a very short clocking chunk
+	  (setq issue (format "Clocking interval is very short: %s"
+			      (org-minutes-to-hh:mm-string
+			       (floor (/ (float dt) 60.))))))
+	 ((and (> tlend 0) (< ts tlend))
+	  ;; Two clock entries are overlapping
+	  (setq issue (format "Clocking overlap: %d minutes" (/ (- tlend ts) 60))))
+	 ((and (> tlend 0) (> ts (+ tlend (* 60 maxgap))))
+	  ;; There is a gap, lets see if we need to report it
+	  (unless (org-agenda-check-clock-gap tlend ts gapok)
+	    (setq issue (format "Clocking gap: %d minutes"
+				  (/ (- ts tlend) 60)))))
+	 (t nil)))
+      (setq tlend (or te tlend) tlstart (or ts tlstart))
+      (when issue
+	;; OK, there was some issue, add an overlay to show the issue
+	(setq ov (make-overlay (point-at-bol) (point-at-eol)))
+	(overlay-put ov 'before-string
+		     (concat
+		      (org-add-props
+			  (format "%-43s" (concat " " issue))
+			  nil
+			'face '((:background "DarkRed") (:foreground "white")))
+		      "\n"))
+	(overlay-put ov 'evaporate t)))))
+
+(defun org-agenda-check-clock-gap (t1 t2 ok-list)
+  "Check if gap T1 -> T2 contains one of the OK-LIST time-of-day values."
+  (catch 'exit
+    (unless ok-list
+      ;; there are no OK times for gaps...
+      (throw 'exit nil))
+    (if (> (- (/ t2 36000) (/ t1 36000)) 24)
+	;; This is more than 24 hours, so it is OK.
+	;; because we have at least one OK time, that must be in the
+	;; 24 hour interval.
+	(throw 'exit t))
+    ;; We have a shorter gap.
+    ;; Now we have to get the minute of the day when these times are
+    (let* ((t1dec (decode-time (seconds-to-time t1)))
+	   (t2dec (decode-time (seconds-to-time t2)))
+	   ;; compute the minute on the day
+	   (min1 (+ (nth 1 t1dec) (* 60 (nth 2 t1dec))))
+	   (min2 (+ (nth 1 t2dec) (* 60 (nth 2 t2dec)))))
+      (when (< min2 min1)
+	;; if min2 is smaller than min1, this means it is on the next day.
+	;; Wrap it to after midnight.
+	(setq min2 (+ min2 1440)))
+      ;; Now check if any of the OK times is in the gap
+      (mapcar (lambda (x)
+		;; Wrap the time to after midnight if necessary
+		(if (< x min1) (setq x (+ x 1440)))
+		;; Check if in interval
+		(and (<= min1 x) (>= min2 x) (throw 'exit t)))
+	      ok-list)
+      ;; Nope, this gap is not OK
+      nil)))
 
 (defun org-agenda-get-deadlines ()
   "Return the deadline information for agenda display."
@@ -6194,9 +6339,10 @@ With prefix ARG, go backward that many times the current span."
 (defun org-agenda-view-mode-dispatch ()
   "Call one of the view mode commands."
   (interactive)
-  (message "View: [d]ay [w]eek [m]onth [y]ear [SPC]reset                [q]uit/abort
-      time[G]rid     [[]inactive [f]ollow [l]og [L]og-all   [E]ntryText
-      [a]rch-trees   [A]rch-files    clock[R]eport   include[D]iary")
+  (message "View: [d]ay [w]eek [m]onth [y]ear [SPC]reset    [q]uit/abort
+      time[G]rid     [[]inactive [f]ollow [l]og [L]og-all   [c]lockcheck
+      [a]rch-trees   [A]rch-files    clock[R]eport   include[D]iary
+      [E]ntryText")
   (let ((a (read-char-exclusive)))
     (case a
       (?\  (call-interactively 'org-agenda-reset-view))
@@ -6206,6 +6352,7 @@ With prefix ARG, go backward that many times the current span."
       (?y (call-interactively 'org-agenda-year-view))
       (?l (call-interactively 'org-agenda-log-mode))
       (?L (org-agenda-log-mode '(4)))
+      (?c (org-agenda-log-mode 'clockcheck))
       ((?F ?f) (call-interactively 'org-agenda-follow-mode))
       (?a (call-interactively 'org-agenda-archives-mode))
       (?A (org-agenda-archives-mode 'files))
@@ -6409,10 +6556,13 @@ With a double `C-u' prefix arg, show *only* log items, nothing else."
   (interactive "P")
   (org-agenda-check-type t 'agenda 'timeline)
   (setq org-agenda-show-log
-	(if (equal special '(16))
-	    'only
-	  (if special '(closed clock state)
-	    (not org-agenda-show-log))))
+	(cond
+	 ((equal special '(16)) 'only)
+	 ((eq special 'clockcheck)
+	  (if (eq org-agenda-show-log 'clockcheck)
+	      nil 'clockcheck))
+	 (special '(closed clock state))
+	 (t (not org-agenda-show-log))))
   (org-agenda-set-mode-name)
   (org-agenda-redo)
   (message "Log mode is %s"
@@ -6481,8 +6631,11 @@ When called with a prefix argument, include all archive files as well."
 	      (if org-agenda-use-time-grid   " Grid"   "")
 	      (if (and (boundp 'org-habit-show-habits)
 		       org-habit-show-habits) " Habit"   "")
-	      (if (consp org-agenda-show-log) " LogAll"
-		(if org-agenda-show-log " Log" ""))
+	      (cond
+	       ((consp org-agenda-show-log) " LogAll")
+	       ((eq org-agenda-show-log 'clockcheck) " ClkCk")
+	       (org-agenda-show-log " Log")
+	       (t ""))
 	      (if (or org-agenda-filter (get 'org-agenda-filter
 					     :preset-filter))
 		  (concat " {" (mapconcat

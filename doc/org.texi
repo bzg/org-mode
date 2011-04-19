@@ -7774,6 +7774,15 @@ when toggling this mode (i.e.@: @kbd{C-u R}), the clock table will not show
 contributions from entries that are hidden by agenda filtering@footnote{Only
 tags filtering will be respected here, effort filtering is ignored.}.
 @c
+@orgkey{v c}
+@vindex org-agenda-clock-consistency-checks
+Show overlapping clock entries, clocking gaps, and other clocking problems in
+the current agenda range.  You can then visit clocking lines and fix them
+manually. See the variable @code{org-agenda-clock-consistency-checks} for
+information on how to customize the definition of what constituted a clocking
+problem.  To return to normal agenda display, press @kbd{l} to exit Logbook
+mode.
+@c
 @orgcmdkskc{v E,E,org-agenda-entry-text-mode}
 @vindex org-agenda-start-with-entry-text-mode
 @vindex org-agenda-entry-text-maxlines
