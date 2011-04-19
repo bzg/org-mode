@@ -7145,6 +7145,7 @@ If the region is active in `transient-mark-mode', promote all headings
 in the region."
   (org-back-to-heading t)
   (let* ((level (save-match-data (funcall outline-level)))
+	 (after-change-functions)
 	 (up-head (concat (make-string (org-get-valid-level level -1) ?*) " "))
 	 (diff (abs (- level (length up-head) -1))))
     (if (= level 1) (error "Cannot promote to level 0. UNDO to recover if necessary"))
@@ -7160,6 +7161,7 @@ If the region is active in `transient-mark-mode', demote all headings
 in the region."
   (org-back-to-heading t)
   (let* ((level (save-match-data (funcall outline-level)))
+	 (after-change-functions)
 	 (down-head (concat (make-string (org-get-valid-level level 1) ?*) " "))
 	 (diff (abs (- level (length down-head) -1))))
     (replace-match down-head nil t)
