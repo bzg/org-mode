@@ -4710,7 +4710,7 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 	    (setq hdmarker (org-agenda-new-marker)
 		  tags (org-get-tags-at))
 	    (looking-at "\\*+[ \t]+\\([^\r\n]+\\)")
-	    (setq head (match-string 1))
+	    (setq head (or (match-string 1) ""))
 	    (setq txt (org-format-agenda-item
 		       (if inactivep org-agenda-inactive-leader nil)
 		       head category tags timestr
@@ -5905,7 +5905,7 @@ to switch to narrowing."
 	 (effort-prompt "")
 	 (inhibit-read-only t)
 	 (current org-agenda-filter)
-	 maybe-reftresh a n tag)
+	 maybe-refresh a n tag)
     (unless char
       (message
        "%s by tag [%s ], [TAB], %s[/]:off, [+-]:narrow, [>=<?]:effort: "
@@ -5952,12 +5952,12 @@ to switch to narrowing."
 		(push modifier org-agenda-filter))))
 	(if (not (null org-agenda-filter))
 	    (org-agenda-filter-apply org-agenda-filter)))
-      (setq maybe-reftresh t))
+      (setq maybe-refresh t))
      ((equal char ?/)
       (org-agenda-filter-by-tag-show-all)
       (when (get 'org-agenda-filter :preset-filter)
 	(org-agenda-filter-apply org-agenda-filter))
-      (setq maybe-reftresh t))
+      (setq maybe-refresh t))
      ((or (equal char ?\ )
 	  (setq a (rassoc char alist))
 	  (and (>= char ?0) (<= char ?9)
@@ -5974,9 +5974,9 @@ to switch to narrowing."
 	    (cons (concat (if strip "-" "+") tag)
 		  (if narrow current nil)))
       (org-agenda-filter-apply org-agenda-filter)
-      (setq maybe-reftresh t))
+      (setq maybe-refresh t))
      (t (error "Invalid tag selection character %c" char)))
-    (when (and maybe-reftresh
+    (when (and maybe-refresh
 	       (eq org-agenda-clockreport-mode 'with-filter))
       (org-agenda-redo))))
 
@@ -7942,7 +7942,7 @@ The prefix arg is passed through to the command if possible."
 		  (buffer-live-p (marker-buffer m))
 		  (marker-position m))
        (error "Marker %s for bulk command is invalid" m)))
-   entries)
+   org-agenda-bulk-marked-entries)
 
   ;; Prompt for the bulk command
   (message "Bulk: [r]efile [$]arch [A]rch->sib [t]odo [+/-]tag [s]chd [S]catter [d]eadline [f]unction")

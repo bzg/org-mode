@@ -826,7 +826,8 @@ MAY-INLINE-P allows inlining it as an image."
 		(not type)
 		(string= type "http")
 		(string= type "https")
-		(string= type "file"))
+		(string= type "file")
+		(string= type "coderef"))
 	       (if fragment
 		  (setq thefile (concat thefile "#" fragment))))
 
@@ -836,7 +837,8 @@ MAY-INLINE-P allows inlining it as an image."
 	 (setq thefile
 	    (let
 	       ((str (org-export-html-format-href thefile)))
-	      (if (and type (not (string= "file" type)))
+	      (if (and type (not (or (string= "file" type)
+				     (string= "coderef" type))))
 		  (concat type ":" str)
 		  str)))
 
@@ -886,7 +888,8 @@ OPT-PLIST is the export options list."
 	  (if (string-match "^file:" desc)
 	      (setq desc (substring desc (match-end 0)))))
 	(setq desc (org-add-props
-		       (concat "<img src=\"" desc "\"/>")
+		       (concat "<img src=\"" desc "\" alt=\"" 
+			       (file-name-nondirectory desc) "\"/>")
 		       '(org-protected t))))
       (cond
        ((equal type "internal")

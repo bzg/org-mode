@@ -305,9 +305,9 @@ create all custom agenda views, for upload to the mobile phone."
 	  (org-agenda-redo-command org-agenda-redo-command))
       (save-excursion
 	(save-window-excursion
+	  (run-hooks 'org-mobile-pre-push-hook)
 	  (org-mobile-check-setup)
 	  (org-mobile-prepare-file-lists)
-	  (run-hooks 'org-mobile-pre-push-hook)
 	  (message "Creating agendas...")
 	  (let ((inhibit-redisplay t)) (org-mobile-create-sumo-agenda))
 	  (message "Creating agendas...done")

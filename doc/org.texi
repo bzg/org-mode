@@ -1895,10 +1895,11 @@ calculator).
 @section The built-in table editor
 @cindex table editor, built-in
 
-Org makes it easy to format tables in plain ASCII.  Any line with
-@samp{|} as the first non-whitespace character is considered part of a
-table.  @samp{|} is also the column separator.  A table might look like
-this:
+Org makes it easy to format tables in plain ASCII.  Any line with @samp{|} as
+the first non-whitespace character is considered part of a table.  @samp{|}
+is also the column separator@footnote{To insert a vertical bar into a table
+field, use @code{\vert} or, inside a word @code{abc\vert@{@}def}.}.  A table
+might look like this:
 
 @example
 | Name  | Phone | Age |
@@ -8529,7 +8530,7 @@ This causes the following issues:
 Org needs to make a decision which @code{COLUMNS} format to use.  Since the
 entries in the agenda are collected from different files, and different files
 may have different @code{COLUMNS} formats, this is a non-trivial problem.
-Org first checks if the variable @code{org-overriding-columns-format} is
+Org first checks if the variable @code{org-agenda-overriding-columns-format} is
 currently set, and if so, takes the format from there.  Otherwise it takes
 the format associated with the first item in the agenda, or, if that item
 does not have a specific format (defined in a property, or in its file), it
