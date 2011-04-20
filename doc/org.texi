@@ -8926,6 +8926,10 @@ If the syntax for the label format conflicts with the language syntax, use a
 HTML export also allows examples to be published as text areas, @xref{Text
 areas in HTML export}.
 
+Because the @code{#+BEGIN_...} and @code{#+END_...} patterns need to be added
+so often, shortcuts are provided using the Easy Templates facility
+(@pxref{Easy Templates}).
+
 @table @kbd
 @kindex C-c '
 @item C-c '
