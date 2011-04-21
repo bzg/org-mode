@@ -995,6 +995,7 @@ Pressing `1' will switch between these two options."
 		 (message "Export subtree: "))))
 	(when (eq r1 ?\ )
 	  (let ((case-fold-search t))
+	    (outline-next-heading)
 	    (if (re-search-backward
 		 "^[ \t]+\\(:latex_class:\\|:export_title:\\)[ \t]+\\S-"
 		 nil t)
