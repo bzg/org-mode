@@ -12068,8 +12068,8 @@ org-mode file, while there is no such guarantee for evaluation of the code
 block body.
 
 @example
-#+begin_src sh :var file-name=(buffer-file-name) :exports both
-  wc -w $file
+#+begin_src sh :var filename=(buffer-file-name) :exports both
+  wc -w $filename
 #+end_src
 @end example
 
