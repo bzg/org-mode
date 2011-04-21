@@ -994,11 +994,12 @@ Pressing `1' will switch between these two options."
 		 (setq subtree-p t)
 		 (message "Export subtree: "))))
 	(when (eq r1 ?\ )
-	  (let ((case-fold-search t))
+	  (let ((case-fold-search t)
+		(end (save-excursion (while (org-up-heading-safe)) (point))))
 	    (outline-next-heading)
 	    (if (re-search-backward
 		 "^[ \t]+\\(:latex_class:\\|:export_title:\\)[ \t]+\\S-"
-		 nil t)
+		 end t)
 		(progn
 		  (org-back-to-heading t)
 		  (setq subtree-p t)
