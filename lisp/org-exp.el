@@ -998,7 +998,7 @@ Pressing `1' will switch between these two options."
 		(end (save-excursion (while (org-up-heading-safe)) (point))))
 	    (outline-next-heading)
 	    (if (re-search-backward
-		 "^[ \t]+\\(:latex_class:\\|:export_title:\\)[ \t]+\\S-"
+		 "^[ \t]+\\(:latex_class:\\|:export_title:\\|:export_file_name:\\)[ \t]+\\S-"
 		 end t)
 		(progn
 		  (org-back-to-heading t)
@@ -1006,7 +1006,7 @@ Pressing `1' will switch between these two options."
 		  (setq bpos (point))
 		  (message "Select command (for subtree): ")
 		  (setq r1 (read-char-exclusive)))
-	      (error "No enclosing node with LaTeX_CLASS or EXPORT_FILE_NAME")
+	      (error "No enclosing node with LaTeX_CLASS or EXPORT_TITLE or EXPORT_FILE_NAME")
 	      )))))
     (redisplay)
     (and bpos (goto-char bpos))
