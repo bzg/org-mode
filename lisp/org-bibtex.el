@@ -117,6 +117,7 @@
 (declare-function bibtex-generate-autokey "bibtex" ())
 (declare-function bibtex-parse-entry "bibtex" (&optional content))
 (declare-function bibtex-url "bibtex" (&optional pos no-browse))
+(declare-function longlines-mode "longlines" (&optional arg))
 
 
 ;;; Bibtex data
@@ -271,13 +272,14 @@ For example setting to 'BIB_' would allow interoperability with fireforg."
   (unless (assoc field org-bibtex-fields)
     (error "field:%s is not known" field))
   (save-window-excursion
-    (with-temp-buffer
-      (setf (buffer-name) (format "*Bibtex Help %s*" field))
-      (insert (cdr (assoc field org-bibtex-fields)))
-      (fill-paragraph)
-      (pop-to-buffer (current-buffer))
+    (let* ((name (substring (symbol-name field) 1))
+	   (buf-name (format "*Bibtex Help %s*" name)))
+      (with-output-to-temp-buffer buf-name
+	(princ (cdr (assoc field org-bibtex-fields))))
+      (with-current-buffer buf-name (longlines-mode t))
+      (org-fit-window-to-buffer (get-buffer-window buf-name))
       ((lambda (result) (when (> (length result) 0) result))
-       (read-from-minibuffer (format "%s " field))))))
+       (read-from-minibuffer (format "%s: " name))))))
 
 (defun org-bibtex-autokey ()
   "Generate an autokey for the current headline"
