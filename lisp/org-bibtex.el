@@ -295,6 +295,7 @@ For example setting to 'BIB_' would allow interoperability with fireforg."
   "Fleshout the current heading, ensuring that all required fields are present.
 With optional argument OPTIONAL, also prompt for optional fields."
   (flet ((get (key lst) (cdr (assoc key lst)))
+	 (keyword (name) (intern (concat ":" (downcase name))))
          (name (keyword) (upcase (substring (symbol-name keyword) 1))))
     (dolist (field (append
 		    (remove :title (get :required (get type org-bibtex-types)))
@@ -304,9 +305,8 @@ With optional argument OPTIONAL, also prompt for optional fields."
                                 (mapcar
                                  (lambda (f) (when (org-bibtex-get (name f)) f))
                                  field)))))
-          (setf field (or present
-			  (intern (org-icompleting-read
-				   "Field: " (mapcar #'symbol-name field)))))))
+          (setf field (or present (keyword (org-icompleting-read
+					    "Field: " (mapcar #'name field)))))))
       (let ((name (name field)))
         (unless (org-bibtex-get name)
           (let ((prop (org-bibtex-ask field)))
@@ -439,7 +439,7 @@ With prefix argument OPTIONAL also prompt for optional fields."
   "Create a new entry at the given level."
   (interactive
    (list (org-icompleting-read
-          "Type:"
+          "Type: "
 	  (mapcar (lambda (type) (symbol-name (car type))) org-bibtex-types))))
   (let ((type (if (keywordp type) type (intern type))))
     (unless (assoc type org-bibtex-types)
