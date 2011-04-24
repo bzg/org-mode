@@ -404,7 +404,7 @@ With optional argument OPTIONAL, also prompt for optional fields."
 	    (goto-char p)
 	    (bibtex-url)))
       (recenter 0))  ; Move entry start to beginning of window
-  ;; return t to indicate that the search is done.
+    ;; return t to indicate that the search is done.
     t))
 
 ;; Finally add the link search function to the right hook.
@@ -458,7 +458,7 @@ This uses `bibtex-parse-entry'."
          (clean-space (str) (replace-regexp-in-string
                              "[[:space:]\n\r]+" " " str))
          (strip-delim (str)	     ; strip enclosing "..." and {...}
-		      (dolist (pair '((34 . 34) (123 . 125)))
+		      (dolist (pair '((34 . 34) (123 . 125) (123 . 125)))
 			(when (and (= (aref str 0) (car pair))
 				   (= (aref str (1- (length str))) (cdr pair)))
 			  (setf str (subseq str 1 (1- (length str)))))) str))
@@ -478,7 +478,8 @@ This uses `bibtex-parse-entry'."
   (interactive)
   (when (= (length *org-bibtex-entries*) 0)
     (error "No entries in `*org-bibtex-entries*'."))
-  (let ((entry (pop *org-bibtex-entries*)))
+  (let ((entry (pop *org-bibtex-entries*))
+	(org-special-properties nil)) ; avoids errors with `org-entry-put'
     (flet ((get (field) (cdr (assoc field entry))))
       (org-insert-heading)
       (insert (get :title))
@@ -490,6 +491,15 @@ This uses `bibtex-parse-entry'."
           (:type     nil)
           (:key      (org-bibtex-put "CUSTOM_ID" (cdr pair)))
           (otherwise (org-bibtex-put (car pair)  (cdr pair))))))))
+
+(defun org-bibtex-yank ()
+  "If kill ring holds a bibtex entry yank it as an Org-mode headline."
+  (interactive)
+  (let (entry)
+    (with-temp-buffer (yank 1) (setf entry (org-bibtex-read)))
+    (if entry
+	(org-bibtex-write)
+      (error "yanked text does not appear to contain a bibtex entry"))))
 
 (provide 'org-bibtex)
 
