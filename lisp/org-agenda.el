@@ -1097,7 +1097,8 @@ the agenda to display all available LOG items temporarily."
   :type '(set :greedy t (const closed) (const clock) (const state)))
 
 (defcustom org-agenda-clock-consistency-checks
-  '(:max-duration "10:00" :min-duration 0 :max-gap "0:05" :gap-ok ("4:00"))
+  '(:max-duration "10:00" :min-duration 0 :max-gap "0:05"
+		  :gap-ok-around ("4:00"))
   "How to check clock times for consistency.
 This is a property list, with the following keys:
 
