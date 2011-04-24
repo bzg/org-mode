@@ -1103,6 +1103,10 @@ on this string to produce the exported version."
       (org-export-handle-include-files-recurse)
       (run-hooks 'org-export-preprocess-after-include-files-hook)
 
+      ;; Change lists ending. Other parts of export may insert blank
+      ;; lines and lists' structure could be altered.
+      (org-export-mark-list-end)
+
       ;; Process the macros
       (org-export-preprocess-apply-macros)
       (run-hooks 'org-export-preprocess-after-macros-hook)
@@ -1120,10 +1124,6 @@ on this string to produce the exported version."
 
       ;; Get rid of tasks, depending on configuration
       (org-export-remove-tasks (plist-get parameters :tasks))
-
-      ;; Change lists ending. Other parts of export may insert blank
-      ;; lines and lists' structure could be altered.
-      (org-export-mark-list-end)
 
       ;; Export code blocks
       (org-export-blocks-preprocess)
@@ -2219,26 +2219,35 @@ TYPE must be a string, any of:
 (defun org-export-preprocess-apply-macros ()
   "Replace macro references."
   (goto-char (point-min))
-  (let (sy val key args args2 s n)
+  (let (sy val key args args2 ind-str s n)
     (while (re-search-forward
 	    "{{{\\([a-zA-Z][-a-zA-Z0-9_]*\\)\\(([ \t\n]*\\([^\000]*?\\))\\)?}}}"
 	    nil t)
-      (unless (save-match-data
-		(save-excursion
-		  (goto-char (point-at-bol))
-		  (looking-at "[ \t]*#\\+macro")))
+      (unless (save-match-data (save-excursion
+				 (goto-char (point-at-bol))
+				 (looking-at "[ \t]*#\\+macro")))
+	;; Get macro name (KEY), arguments (ARGS), and indentation of
+	;; current line (IND-STR) as strings.
 	(setq key (downcase (match-string 1))
-	      args (match-string 3))
+	      args (match-string 3)
+	      ind-str (save-match-data (save-excursion
+					 (beginning-of-line)
+					 (looking-at "^\\([ \t]*\\).*")
+					 (match-string 1))))
+	;; When macro is defined, retrieve replacement text in VAL,
+	;; and proceed with expansion.
 	(when (setq val (or (plist-get org-export-opt-plist
 				       (intern (concat ":macro-" key)))
 			    (plist-get org-export-opt-plist
 				       (intern (concat ":" key)))))
 	  (save-match-data
+	    ;; If arguments are provided, first retreive them properly
+	    ;; (in ARGS, as a list), then replace them in VAL.
 	    (when args
 	      (setq args (org-split-string args ",") args2 nil)
 	      (while args
 		(while (string-match "\\\\\\'" (car args))
-		  ;; repair bad splits
+		  ;; Repair bad splits.
 		  (setcar (cdr args) (concat (substring (car args) 0 -1)
 					     "," (nth 1 args)))
 		  (pop args))
@@ -2250,13 +2259,22 @@ TYPE must be a string, any of:
 		      n (string-to-number (match-string 1 val)))
 		(and (>= (length args) n)
 		     (setq val (replace-match (nth (1- n) args) t t val)))))
+	    ;; VAL starts with "(eval": it is a sexp, `eval' it.
 	    (when (string-match "\\`(eval\\>" val)
 	      (setq val (eval (read val))))
-	    (if (and val (not (stringp val)))
-		(setq val (format "%s" val))))
-	  (and (stringp val)
-	       (prog1 (replace-match val t t)
-		 (goto-char (match-beginning 0)))))))))
+	    ;; Ensure VAL is a string (or nil) and that each new line
+	    ;; is indented as the first one.
+	    (setq val (and val
+			   (mapconcat 'identity
+				      (org-split-string
+				       (if (stringp val) val (format "%s" val))
+				       "\n")
+				      (concat "\n" ind-str)))))
+	  ;; Eventually do the replacement, if VAL isn't nil. Move
+	  ;; point at beginning of macro for recursive expansions.
+	  (when val
+	    (replace-match val t t)
+	    (goto-char (match-beginning 0))))))))
 
 (defun org-export-apply-macros-in-string (s)
   "Apply the macros in string S."
