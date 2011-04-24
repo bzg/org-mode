@@ -603,8 +603,8 @@ values are:
 2. bullet with trailing whitespace,
 3. bullet counter, if any,
 4. checkbox, if any,
-5. description tag, if any.
-6. position at item end,
+5. description tag, if any,
+6. position at item end.
 
 Thus the following list, where numbers in parens are
 point-at-bol:
