@@ -603,8 +603,8 @@ values are:
 2. bullet with trailing whitespace,
 3. bullet counter, if any,
 4. checkbox, if any,
-5. position at item end,
-6. description tag, if any.
+5. description tag, if any.
+6. position at item end,
 
 Thus the following list, where numbers in parens are
 point-at-bol:
@@ -692,8 +692,20 @@ Assume point is at an item."
 		(throw 'exit
 		       (setq itm-lst
 			     (memq (assq (car beg-cell) itm-lst) itm-lst))))
-	       ;; Skip blocks, drawers, inline tasks, blank lines
-	       ;; along the way.
+	       ;; Point is at an item. Add data to ITM-LST. It may
+	       ;; also end a previous item: save it in END-LST. If ind
+	       ;; is less or equal than BEG-CELL and there is no end
+	       ;; at this ind or lesser, this item becomes the new
+	       ;; BEG-CELL.
+	       ((looking-at item-re)
+		(push (funcall assoc-at-point ind) itm-lst)
+		(push (cons ind (point)) end-lst)
+		(when (or (and (eq org-list-ending-method 'regexp)
+			       (<= ind (cdr beg-cell)))
+			  (< ind text-min-ind))
+		  (setq beg-cell (cons (point) ind)))
+		(forward-line -1))
+	       ;; Skip blocks, drawers, inline tasks, blank lines.
 	       ((and (looking-at "^[ \t]*#\\+end_")
 		     (re-search-backward "^[ \t]*#\\+begin_" lim-up t)))
 	       ((and (looking-at "^[ \t]*:END:")
@@ -704,26 +716,13 @@ Assume point is at an item."
 		(forward-line -1))
 	       ((looking-at "^[ \t]*$")
 		(forward-line -1))
-	       ((looking-at item-re)
-		;; Point is at an item. Add data to ITM-LST. It may
-		;; also end a previous item: save it in END-LST. If
-		;; ind is less or equal than BEG-CELL and there is no
-		;; end at this ind or lesser, this item becomes the
-		;; new BEG-CELL.
-		(push (funcall assoc-at-point ind) itm-lst)
-		(push (cons ind (point)) end-lst)
-		(when (or (and (eq org-list-ending-method 'regexp)
-			       (<= ind (cdr beg-cell)))
-			  (< ind text-min-ind))
-		  (setq beg-cell (cons (point) ind)))
-		(forward-line -1))
 	       ;; From there, point is not at an item. Unless ending
 	       ;; method is `regexp', interpret line's indentation:
 	       ;; - text at column 0 is necessarily out of any list.
 	       ;;   Dismiss data recorded above BEG-CELL. Jump to
 	       ;;   part 2.
-	       ;; - any other case, it can possibly be an ending
-	       ;;   position for an item above. Save it and proceed.
+	       ;; - any other case may be an ending position for an
+	       ;;   hypothetical item above. Store it and proceed.
 	       ((eq org-list-ending-method 'regexp) (forward-line -1))
 	       ((zerop ind)
 		(throw 'exit
@@ -734,9 +733,9 @@ Assume point is at an item."
 		(push (cons ind (point)) end-lst)
 		(forward-line -1)))))))
       ;; 2. Read list from starting point to its end, that is until we
-      ;;    get out of context, or a non-item line is less or equally
-      ;;    indented that BEG-CELL's cdr. Also store ending position
-      ;;    of items in END-LST-2.
+      ;;    get out of context, or that a non-item line is less or
+      ;;    equally indented than BEG-CELL's cdr. Also, store ending
+      ;;    position of items in END-LST-2.
       (catch 'exit
       	(while t
       	  (let ((ind (+ (or (get-text-property (point) 'original-indentation) 0)
@@ -759,41 +758,39 @@ Assume point is at an item."
 	     ((and (not (eq org-list-ending-method 'indent))
 		   (looking-at org-list-end-re))
 	      (throw 'exit (push (cons 0 (point)) end-lst-2)))
-	     ;; Skip blocks, drawers, inline tasks and blank lines
-	     ;; along the way
-	     ((and (looking-at "^[ \t]*#\\+begin_")
-		   (re-search-forward "^[ \t]*#\\+end_" lim-down t))
-	      (forward-line 1))
-	     ((and (looking-at drawers-re)
-		   (re-search-forward "^[ \t]*:END:" lim-down t))
-	      (forward-line 1))
-	     ((and inlinetask-re (looking-at inlinetask-re))
-	      (org-inlinetask-goto-end))
-	     ((looking-at "^[ \t]*$")
-	      (forward-line 1))
 	     ((looking-at item-re)
 	      ;; Point is at an item. Add data to ITM-LST-2. It may also
 	      ;; end a previous item, so save it in END-LST-2.
 	      (push (funcall assoc-at-point ind) itm-lst-2)
 	      (push (cons ind (point)) end-lst-2)
 	      (forward-line 1))
-	     ;; From there, point is not at an item. If ending method
-	     ;; is not `regexp', two situations are of interest:
-	     ;; - ind is lesser or equal than BEG-CELL's. The list is
-	     ;;   over. Store point as an ending position and jump to
-	     ;;   part 3.
-	     ;; - ind is lesser or equal than previous item's. This
-	     ;;   is an ending position. Store it and proceed.
-	     ((eq org-list-ending-method 'regexp) (forward-line 1))
-	     ((<= ind (cdr beg-cell))
+	     ;; Skip inline tasks and blank lines along the way
+	     ((and inlinetask-re (looking-at inlinetask-re))
+	      (org-inlinetask-goto-end))
+	     ((looking-at "^[ \t]*$")
+	      (forward-line 1))
+	     ;; Ind is lesser or equal than BEG-CELL's. The list is
+	     ;; over: store point as an ending position and jump to
+	     ;; part 3.
+	     ((and (not (eq org-list-ending-method 'regexp))
+		   (<= ind (cdr beg-cell)))
 	      (throw 'exit
 		     (push (cons 0 (funcall end-before-blank)) end-lst-2)))
-	     ((<= ind (nth 1 (car itm-lst-2)))
-	      (push (cons ind (point)) end-lst-2)
-	      (forward-line 1))
-	     (t (forward-line 1))))))
-      (setq struct (append itm-lst (cdr (nreverse itm-lst-2))))
-      (setq end-lst (append end-lst (cdr (nreverse end-lst-2))))
+	     ;; Else, if ind is lesser or equal than previous item's,
+	     ;; this is an ending position: store it. In any case,
+	     ;; skip block or drawer at point, and move to next line.
+	     (t
+	      (when (and (not (eq org-list-ending-method 'regexp))
+			 (<= ind (nth 1 (car itm-lst-2))))
+		(push (cons ind (point)) end-lst-2))
+	      (cond
+	       ((and (looking-at "^[ \t]*#\\+begin_")
+		     (re-search-forward "^[ \t]*#\\+end_" lim-down t)))
+	       ((and (looking-at drawers-re)
+		     (re-search-forward "^[ \t]*:END:" lim-down t))))
+	      (forward-line 1))))))
+      (setq struct (append itm-lst (cdr (nreverse itm-lst-2)))
+	    end-lst (append end-lst (cdr (nreverse end-lst-2))))
       ;; 3. Correct ill-formed lists by ensuring top item is the least
       ;;    indented.
       (let ((min-ind (nth 1 (car struct))))
@@ -802,7 +799,8 @@ Assume point is at an item."
 		      (bul (nth 2 item)))
 		  (when (< ind min-ind)
 		    (setcar (cdr item) min-ind)
-		    ;; Modify bullet to be sure item will be modified
+		    ;; Trim bullet so item will be seen as different
+		    ;; when compared with repaired version.
 		    (setcar (nthcdr 2 item) (org-trim bul)))))
 	      struct))
       ;; 4. Associate each item to its end pos.
