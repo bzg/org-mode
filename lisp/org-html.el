@@ -1543,6 +1543,7 @@ lang=\"%s\" xml:lang=\"%s\">
 	  ;; handle @<..> HTML tags (replace "@&gt;..&lt;" by "<..>")
 	  ;; Also handle sub_superscripts and checkboxes
 	  (or (string-match org-table-hline-regexp line)
+	      (string-match "^[ \t]*\\([+]-\\||[ ]\\)[-+ |]*[+|][ \t]*$" line)
 	      (setq line (org-html-expand line)))
 
 	  ;; Format the links
@@ -1888,24 +1889,13 @@ NO-CSS is passed to the exporter."
   (if (string-match "^[ \t]*|" (car lines))
       ;; A normal org table
       (org-format-org-table-html lines nil no-css)
-    ;; Table made by table.el - test for spanning
-    (let* ((hlines (delq nil (mapcar
-			      (lambda (x)
-				(if (string-match "^[ \t]*\\+-" x) x
-				  nil))
-			      lines)))
-	   (first (car hlines))
-	   (ll (and (string-match "\\S-+" first)
-		    (match-string 0 first)))
-	   (re (concat "^[ \t]*" (regexp-quote ll)))
-	   (spanning (delq nil (mapcar (lambda (x) (not (string-match re x)))
-				       hlines))))
-      (if (and (not spanning)
-	       (not org-export-prefer-native-exporter-for-tables))
-	  ;; We can use my own converter with HTML conversions
-	  (org-format-table-table-html lines)
-	;; Need to use the code generator in table.el, with the original text.
-	(org-format-table-table-html-using-table-generate-source olines)))))
+    ;; Table made by table.el 
+    (or (org-format-table-table-html-using-table-generate-source
+	 olines (not org-export-prefer-native-exporter-for-tables))
+	;; We are here only when table.el table has NO col or row
+	;; spanning and the user prefers using org's own converter for
+	;; exporting of such simple table.el tables.
+	(org-format-table-table-html lines))))
 
 (defvar org-table-number-fraction) ; defined in org-table.el
 (defun org-format-org-table-html (lines &optional splice no-css)
@@ -2116,10 +2106,20 @@ But it has the disadvantage, that no cell- or row-spanning is allowed."
     (setq html (concat html "</table>\n"))
     html))
 
-(defun org-format-table-table-html-using-table-generate-source (lines)
+(defun org-format-table-table-html-using-table-generate-source (lines
+								&optional
+								spanned-only)
   "Format a table into html, using `table-generate-source' from table.el.
-This has the advantage that cell- or row-spanning is allowed.
-But it has the disadvantage, that Org-mode's HTML conversions cannot be used."
+Use SPANNED-ONLY to suppress exporting of simple table.el tables.
+
+When SPANNED-ONLY is nil, all table.el tables are exported.  When
+SPANNED-ONLY is non-nil, only tables with either row or column
+spans are exported.
+
+This routine returns the generated source or nil as appropriate.
+
+Refer docstring of `org-export-prefer-native-exporter-for-tables'
+for further information."
   (require 'table)
   (with-current-buffer (get-buffer-create " org-tmp1 ")
     (erase-buffer)
@@ -2128,10 +2128,14 @@ But it has the disadvantage, that Org-mode's HTML conversions cannot be used."
     (if (not (re-search-forward "|[^+]" nil t))
 	(error "Error processing table"))
     (table-recognize-table)
-    (with-current-buffer (get-buffer-create " org-tmp2 ") (erase-buffer))
-    (table-generate-source 'html " org-tmp2 ")
-    (set-buffer " org-tmp2 ")
-    (buffer-substring (point-min) (point-max))))
+    (when (or (not spanned-only)
+	      (let* ((dim (table-query-dimension))
+		     (c (nth 4 dim)) (r (nth 5 dim)) (cells (nth 6 dim)))
+		(not (= (* c r) cells))))
+      (with-current-buffer (get-buffer-create " org-tmp2 ") (erase-buffer))
+      (table-generate-source 'html " org-tmp2 ")
+      (set-buffer " org-tmp2 ")
+      (buffer-substring (point-min) (point-max)))))
 
 (defun org-export-splice-style (style extra)
   "Splice EXTRA into STYLE, just before \"</style>\"."
@@ -2234,16 +2238,14 @@ If there are links in the string, don't modify these."
   (let* ((re (concat org-bracket-link-regexp "\\|"
 		     (org-re "[ \t]+\\(:[[:alnum:]_@#%:]+:\\)[ \t]*$")))
 	 m s l res)
-    (if (string-match "^[ \t]*\\+-[-+]*\\+[ \t]*$" string)
-	string
-      (while (setq m (string-match re string))
-	(setq s (substring string 0 m)
-	      l (match-string 0 string)
-	      string (substring string (match-end 0)))
-	(push (org-html-do-expand s) res)
-	(push l res))
-      (push (org-html-do-expand string) res)
-      (apply 'concat (nreverse res)))))
+    (while (setq m (string-match re string))
+      (setq s (substring string 0 m)
+	    l (match-string 0 string)
+	    string (substring string (match-end 0)))
+      (push (org-html-do-expand s) res)
+      (push l res))
+    (push (org-html-do-expand string) res)
+    (apply 'concat (nreverse res))))
 
 (defun org-html-do-expand (s)
   "Apply all active conversions to translate special ASCII to HTML."
