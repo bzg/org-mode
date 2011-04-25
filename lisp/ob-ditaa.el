@@ -54,8 +54,9 @@ This function is called by `org-babel-execute-src-block'."
 			   "ditaa code block requires :file header argument")))
 		    (cdr (assoc :file params))))
 	 (cmdline (cdr (assoc :cmdline params)))
+	 (java (cdr (assoc :java params)))
 	 (in-file (org-babel-temp-file "ditaa-"))
-	 (cmd (concat "java -jar "
+	 (cmd (concat "java " java " -jar "
 		      (shell-quote-argument
 		       (expand-file-name org-ditaa-jar-path))
 		      " " cmdline
