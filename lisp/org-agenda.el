@@ -1098,9 +1098,11 @@ the agenda to display all available LOG items temporarily."
 
 (defcustom org-agenda-clock-consistency-checks
   '(:max-duration "10:00" :min-duration 0 :max-gap "0:05"
-		  :gap-ok-around ("4:00"))
-  "How to check clock times for consistency.
-This is a property list, with the following keys:
+		  :gap-ok-around ("4:00")
+		  :default-face ((:background "DarkRed") (:foreground "white"))
+		  :overlap-face nil :gap-face nil :no-end-time-face nil
+		  :long-face nil :short-face nil)
+  "This is a property list, with the following keys:
 
 :max-duration    Mark clocking chunks that are longer than this time.
                  This is a time string like \"HH:MM\", or the number
@@ -1122,7 +1124,17 @@ This is a property list, with the following keys:
                  (i.e. a typical lunch time) do not cause a warning.
                  You should have at least one time during the night in this
                  list, or otherwise the first task each morning will trigger
-                 a warning because it follows a long gap."
+                 a warning because it follows a long gap.
+
+Furthermore, the following properties can be used to define faces for
+issue display.
+
+:default-face         the default face, if the specific face is undefined
+:overlap-face         face for overlapping clocks
+:gap-face             face for gaps between clocks
+:no-end-time-face     face for incomplete clocks
+:long-face            face for clock intervals that are too long
+:short-face           face for clock intervals that are too short"
   :group 'org-agenda-daily/weekly
   :group 'org-clock
   :type 'plist)
@@ -4946,10 +4958,12 @@ See also the user option `org-agenda-clock-consistency-checks'."
 		   (or (plist-get pl :max-gap) "30:00")))
 	 (gapok (mapcar 'org-hh:mm-string-to-minutes
 			(plist-get pl :gap-ok-around)))
+	 (def-face (or (plist-get pl :default-face)
+		       '((:background "DarkRed") (:foreground "white"))))
 	 issue)
     (goto-char (point-min))
     (while (re-search-forward " Clocked: +(-\\|\\([0-9]+:[0-9]+\\))" nil t)
-      (setq issue nil)
+      (setq issue nil face def-face)
       (catch 'next
 	(setq m (org-get-at-bol 'org-marker)
 	      te nil ts nil)
@@ -4962,7 +4976,8 @@ See also the user option `org-agenda-clock-consistency-checks'."
 	      (error "No valid Clock line")
 	      (throw 'next t))
 	    (unless (match-end 3)
-	      (setq issue "No end time")
+	      (setq issue "No end time"
+		    face (or (plist-get pl :no-end-time-face) face))
 	      (throw 'next t))
 	    (setq ts (match-string 1)
 		  te (match-string 3)
@@ -4976,20 +4991,25 @@ See also the user option `org-agenda-clock-consistency-checks'."
 	  ;; a very long clocking chunk
 	  (setq issue (format "Clocking interval is very long: %s"
 			      (org-minutes-to-hh:mm-string
-			       (floor (/ (float dt) 60.))))))
+			       (floor (/ (float dt) 60.))))
+		face (or (plist-get pl :long-face) face)))
 	 ((< dt (* 60 mintime))
 	  ;; a very short clocking chunk
 	  (setq issue (format "Clocking interval is very short: %s"
 			      (org-minutes-to-hh:mm-string
-			       (floor (/ (float dt) 60.))))))
+			       (floor (/ (float dt) 60.))))
+		face (or (plist-get pl :short-face) face)))
 	 ((and (> tlend 0) (< ts tlend))
 	  ;; Two clock entries are overlapping
-	  (setq issue (format "Clocking overlap: %d minutes" (/ (- tlend ts) 60))))
+	  (setq issue (format "Clocking overlap: %d minutes"
+			      (/ (- tlend ts) 60))
+		face (or (plist-get pl :overlap-face) face)))
 	 ((and (> tlend 0) (> ts (+ tlend (* 60 maxgap))))
 	  ;; There is a gap, lets see if we need to report it
 	  (unless (org-agenda-check-clock-gap tlend ts gapok)
 	    (setq issue (format "Clocking gap: %d minutes"
-				  (/ (- ts tlend) 60)))))
+				  (/ (- ts tlend) 60))
+		  face (or (plist-get pl :gap-face) face))))
 	 (t nil)))
       (setq tlend (or te tlend) tlstart (or ts tlstart))
       (when issue
@@ -5000,7 +5020,7 @@ See also the user option `org-agenda-clock-consistency-checks'."
 		      (org-add-props
 			  (format "%-43s" (concat " " issue))
 			  nil
-			'face '((:background "DarkRed") (:foreground "white")))
+			'face face)
 		      "\n"))
 	(overlay-put ov 'evaporate t)))))
 
