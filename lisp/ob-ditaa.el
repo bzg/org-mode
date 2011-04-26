@@ -40,7 +40,7 @@
 (require 'ob)
 
 (defvar org-babel-default-header-args:ditaa
-  '((:results . "file") (:exports . "results"))
+  '((:results . "file") (:exports . "results") (:java . "-Dfile.encoding=UTF-8"))
   "Default arguments for evaluating a ditaa source block.")
 
 (defvar org-ditaa-jar-path)
