@@ -221,6 +221,24 @@ For example setting to 'BIB_' would allow interoperability with fireforg."
   :group 'org-bibtex
   :type  'string)
 
+(defcustom org-bibtex-export-arbitrary-fields nil
+  "When converting to bibtex allow fields not defined in `org-bibtex-fields'.
+This only has effect if org-bibtex-prefix is defined, so as to
+ensure that other org-properties, such as CATEGORY or LOGGING are
+not placed in the exported bibtex entry."
+  :group 'org-bibtex
+  :type 'boolean)
+
+;; TODO if ID, test to make sure ID is unique
+(defcustom org-bibtex-key-property "CUSTOM_ID"
+  "Property that holds the bibtex key.
+By default, this is CUSTOM_ID, which enables easy linking to
+bibtex headlines from within an org file. This can be set to ID
+to enable global links, but only with great caution, as global
+IDs must be unique."
+  :group 'org-bibtex
+  :type 'string)
+
 
 ;;; Utility functions
 (defun org-bibtex-get (property)
@@ -232,21 +250,22 @@ For example setting to 'BIB_' would allow interoperability with fireforg."
                           (substring (symbol-name property) 1)
                         property))))
     (org-set-property
-     (concat (unless (string= "CUSTOM_ID" prop) org-bibtex-prefix) prop)
+     (concat (unless (string= org-bibtex-key-property prop) org-bibtex-prefix)
+	     prop)
      value)))
 
 (defun org-bibtex-headline ()
   "Return a bibtex entry of the given headline as a string."
   (flet ((get (key lst) (cdr (assoc key lst)))
-         (to-k (string) (intern (concat ":" string)))
-         (from-k (key) (substring (symbol-name key) 1))
+         (to (string) (intern (concat ":" string)))
+         (from (key) (substring (symbol-name key) 1))
          (flatten (&rest lsts)
                   (apply #'append (mapcar
                                    (lambda (e)
                                      (if (listp e) (apply #'flatten e) (list e)))
                                    lsts))))
     (let ((notes (buffer-string))
-          (id (org-bibtex-get "custom_id"))
+          (id (org-bibtex-get org-bibtex-key-property))
           (type (org-bibtex-get "type")))
       (when type
         (let ((entry (format
@@ -254,15 +273,25 @@ For example setting to 'BIB_' would allow interoperability with fireforg."
                       (mapconcat
                        (lambda (pair) (format "  %s={%s}" (car pair) (cdr pair)))
                        (remove nil
-			 (mapcar
-			  (lambda (field)
-			    (let ((value (or (org-bibtex-get (from-k field))
-					     (and (equal :title field)
-						  (org-get-heading)))))
-			      (when value (cons (from-k field) value))))
-			  (flatten
-			   (get :required (get (to-k type) org-bibtex-types))
-			   (get :optional (get (to-k type) org-bibtex-types)))))
+			 (if (and org-bibtex-export-arbitrary-fields
+				  org-bibtex-prefix)
+			     (mapcar 
+			      (lambda (kv)
+				(when (string-match org-bibtex-prefix (car kv))
+				  (cons (downcase (replace-regexp-in-string 
+						   org-bibtex-prefix ""
+						   (car kv)))
+					(cdr kv))))
+			      (org-entry-properties nil 'standard))
+			   (mapcar
+			    (lambda (field)
+			      (let ((value (or (org-bibtex-get (from field))
+					       (and (equal :title field)
+						    (org-get-heading)))))
+				(when value (cons (from field) value))))
+			    (flatten
+			     (get :required (get (to type) org-bibtex-types))
+			     (get :optional (get (to type) org-bibtex-types))))))
                        ",\n"))))
           (with-temp-buffer
             (insert entry)
@@ -283,7 +312,7 @@ For example setting to 'BIB_' would allow interoperability with fireforg."
 
 (defun org-bibtex-autokey ()
   "Generate an autokey for the current headline"
-  (org-bibtex-put "CUSTOM_ID"
+  (org-bibtex-put org-bibtex-key-property
                   (if org-bibtex-autogen-keys
                       (let ((entry (org-bibtex-headline)))
                         (with-temp-buffer
@@ -312,7 +341,7 @@ With optional argument OPTIONAL, also prompt for optional fields."
           (let ((prop (org-bibtex-ask field)))
             (when prop (org-bibtex-put name prop)))))))
   (when (and type (assoc type org-bibtex-types)
-             (not (org-bibtex-get "CUSTOM_ID")))
+             (not (org-bibtex-get org-bibtex-key-property)))
     (org-bibtex-autokey)))
 
 
@@ -489,7 +518,7 @@ This uses `bibtex-parse-entry'."
         (case (car pair)
           (:title    nil)
           (:type     nil)
-          (:key      (org-bibtex-put "CUSTOM_ID" (cdr pair)))
+          (:key      (org-bibtex-put org-bibtex-key-property (cdr pair)))
           (otherwise (org-bibtex-put (car pair)  (cdr pair))))))))
 
 (defun org-bibtex-yank ()
