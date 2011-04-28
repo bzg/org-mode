@@ -441,12 +441,16 @@ With optional argument OPTIONAL, also prompt for optional fields."
 
 
 ;;; Bibtex <-> Org-mode headline translation functions
-(defun org-bibtex ()
+(defun org-bibtex (&optional filename)
   "Export each headline in the current file to a bibtex entry.
 Headlines are exported using `org-bibtex-export-headline'."
-  (interactive)
+  (interactive
+   (list (read-file-name
+	  "Bibtex file: " nil nil nil
+	  (file-name-nondirectory
+	   (concat (file-name-sans-extension (buffer-file-name)) ".bib")))))
   (let ((bibtex-entries (remove nil (org-map-entries #'org-bibtex-headline))))
-    (with-temp-file (concat (file-name-sans-extension (buffer-file-name)) ".bib")
+    (with-temp-file filename
       (insert (mapconcat #'identity bibtex-entries "\n")))))
 
 (defun org-bibtex-check (&optional optional)
