@@ -464,20 +464,20 @@ With prefix argument OPTIONAL also prompt for optional fields."
 With prefix argument OPTIONAL also prompt for optional fields."
   (interactive) (org-map-entries (lambda () (org-bibtex-check optional))))
 
-(defun org-bibtex-create (type)
+(defun org-bibtex-create (&optional arg)
   "Create a new entry at the given level."
-  (interactive
-   (list (org-icompleting-read
-          "Type: "
-	  (mapcar (lambda (type) (symbol-name (car type))) org-bibtex-types))))
-  (let ((type (if (keywordp type) type (intern type))))
+  (interactive "P")
+  (let* ((type (org-icompleting-read
+		"Type: " (mapcar (lambda (type) (symbol-name (car type)))
+				 org-bibtex-types)))
+	 (type (if (keywordp type) type (intern type))))
     (unless (assoc type org-bibtex-types)
       (error "type:%s is not known" type))
     (org-insert-heading)
     (let ((title (org-bibtex-ask :title)))
       (insert title) (org-bibtex-put "TITLE" title))
     (org-bibtex-put "TYPE" (substring (symbol-name type) 1))
-    (org-bibtex-fleshout type)))
+    (org-bibtex-fleshout type arg)))
 
 (defun org-bibtex-read ()
   "Read a bibtex entry and save to `*org-bibtex-entries*'.
