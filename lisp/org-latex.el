@@ -2322,6 +2322,15 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
     (and (looking-at "[ \t]*ORG-VERSE-END.*")
 	 (org-replace-match-keep-properties "\\end{verse}" t t)))
 
+  ;; Convert #+INDEX to LaTeX \\index.
+  (goto-char (point-min))
+  (let ((case-fold-search t))
+    (while (re-search-forward
+	    "^[ \t]*#\\+index:[ \t]*\\([^ \t\r\n].*?\\)[ \t]*$"
+	    nil t)
+      (let ((entry (match-string 1)))
+	(replace-match (format "\\index{%s}" (match-string 1)) t t))))
+
   ;; Convert center
   (goto-char (point-min))
   (while (search-forward "ORG-CENTER-START" nil t)
