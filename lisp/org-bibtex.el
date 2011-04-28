@@ -256,7 +256,7 @@ IDs must be unique."
 
 (defun org-bibtex-headline ()
   "Return a bibtex entry of the given headline as a string."
-  (flet ((get (key lst) (cdr (assoc key lst)))
+  (flet ((val (key lst) (cdr (assoc key lst)))
          (to (string) (intern (concat ":" string)))
          (from (key) (substring (symbol-name key) 1))
          (flatten (&rest lsts)
@@ -290,8 +290,8 @@ IDs must be unique."
 						    (org-get-heading)))))
 				(when value (cons (from field) value))))
 			    (flatten
-			     (get :required (get (to type) org-bibtex-types))
-			     (get :optional (get (to type) org-bibtex-types))))))
+			     (val :required (val (to type) org-bibtex-types))
+			     (val :optional (val (to type) org-bibtex-types))))))
                        ",\n"))))
           (with-temp-buffer
             (insert entry)
@@ -323,12 +323,12 @@ IDs must be unique."
 (defun org-bibtex-fleshout (type &optional optional)
   "Fleshout the current heading, ensuring that all required fields are present.
 With optional argument OPTIONAL, also prompt for optional fields."
-  (flet ((get (key lst) (cdr (assoc key lst)))
+  (flet ((val (key lst) (cdr (assoc key lst)))
 	 (keyword (name) (intern (concat ":" (downcase name))))
          (name (keyword) (upcase (substring (symbol-name keyword) 1))))
     (dolist (field (append
-		    (remove :title (get :required (get type org-bibtex-types)))
-		    (when optional (get :optional (get type org-bibtex-types)))))
+		    (remove :title (val :required (val type org-bibtex-types)))
+		    (when optional (val :optional (val type org-bibtex-types)))))
       (when (consp field) ; or'd pair of fields e.g., (:editor :author)
         (let ((present (first (remove nil
                                 (mapcar
@@ -490,7 +490,7 @@ This uses `bibtex-parse-entry'."
 		      (dolist (pair '((34 . 34) (123 . 125) (123 . 125)))
 			(when (and (= (aref str 0) (car pair))
 				   (= (aref str (1- (length str))) (cdr pair)))
-			  (setf str (subseq str 1 (1- (length str)))))) str))
+			  (setf str (substring str 1 (1- (length str)))))) str))
     (push (mapcar
            (lambda (pair)
              (cons (let ((field (keyword (car pair))))
@@ -509,11 +509,11 @@ This uses `bibtex-parse-entry'."
     (error "No entries in `*org-bibtex-entries*'."))
   (let ((entry (pop *org-bibtex-entries*))
 	(org-special-properties nil)) ; avoids errors with `org-entry-put'
-    (flet ((get (field) (cdr (assoc field entry))))
+    (flet ((val (field) (cdr (assoc field entry))))
       (org-insert-heading)
-      (insert (get :title))
-      (org-bibtex-put "TITLE" (get :title))
-      (org-bibtex-put "TYPE"  (downcase (get :type)))
+      (insert (val :title))
+      (org-bibtex-put "TITLE" (val :title))
+      (org-bibtex-put "TYPE"  (downcase (val :type)))
       (dolist (pair entry)
         (case (car pair)
           (:title    nil)
