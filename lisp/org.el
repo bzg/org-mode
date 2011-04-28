@@ -5159,7 +5159,7 @@ will be prompted for."
 	      (beg1 (line-beginning-position 2))
 	      (dc1 (downcase (match-string 2)))
 	      (dc3 (downcase (match-string 3)))
-	      end end1 quoting block-type)
+	      end end1 quoting block-type ovl)
 	  (cond
 	   ((member dc1 '("html:" "ascii:" "latex:" "docbook:"))
 	    ;; a single line of backend-specific content
@@ -5193,8 +5193,15 @@ will be prompted for."
 	      (cond
 	       ((and lang org-src-fontify-natively)
 		(org-src-font-lock-fontify-block lang block-start block-end)
-                (overlay-put (make-overlay beg1 block-end)
-                             'face 'org-block-background))
+		;; remove old background overlays
+		(mapc (lambda (ov)
+			(if (eq (overlay-get ov 'face) 'org-block-background)
+			    (delete-overlay ov)))
+		      (overlays-at (/ (+ beg1 block-end) 2)))
+		;; add a background overlay
+		(setq ovl (make-overlay beg1 block-end))
+                (overlay-put ovl 'face 'org-block-background)
+                (overlay-put ovl 'evaporate t))  ;; make it go away when empty
 	       (quoting
 		(add-text-properties beg1 (+ end1 1) '(face org-block)))
 					; end of source block
