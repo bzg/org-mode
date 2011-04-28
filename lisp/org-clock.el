@@ -2424,6 +2424,8 @@ This function is made for clock tables."
 			tot))))
 	0))))
 
+;; Saving and loading the clock
+
 (defvar org-clock-loaded nil
   "Was the clock file loaded?")
 

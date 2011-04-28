@@ -57,7 +57,10 @@
   "Execute a block of emacs-lisp code with Babel."
   (save-window-excursion
     (org-babel-reassemble-table
-     (eval (read (format "(progn %s)"
+     (eval (read (format (if (member "output"
+				     (cdr (assoc :result-params params)))
+			     "(with-output-to-string %s)"
+			   "(progn %s)")
 			 (org-babel-expand-body:emacs-lisp body params))))
      (org-babel-pick-name (cdr (assoc :colname-names params))
 			  (cdr (assoc :colnames params)))

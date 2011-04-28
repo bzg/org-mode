@@ -5003,13 +5003,13 @@ This should be called after the variable `org-link-types' has changed."
 
 (defconst org-ts-regexp "<\\([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\} [^\r\n>]*?\\)>"
   "Regular expression for fast time stamp matching.")
-(defconst org-ts-regexp-both "[[<]\\([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\} [^\r\n>]*?\\)[]>]"
+(defconst org-ts-regexp-both "[[<]\\([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\} [^]\r\n>]*?\\)[]>]"
   "Regular expression for fast time stamp matching.")
-(defconst org-ts-regexp0 "\\(\\([0-9]\\{4\\}\\)-\\([0-9]\\{2\\}\\)-\\([0-9]\\{2\\}\\) *\\([^]-+0-9>\r\n ]*\\)\\( \\([0-9]\\{2\\}\\):\\([0-9]\\{2\\}\\)\\)?\\)"
+(defconst org-ts-regexp0 "\\(\\([0-9]\\{4\\}\\)-\\([0-9]\\{2\\}\\)-\\([0-9]\\{2\\}\\) *\\([^]+0-9>\r\n -]*\\)\\( \\([0-9]\\{2\\}\\):\\([0-9]\\{2\\}\\)\\)?\\)"
   "Regular expression matching time strings for analysis.
 This one does not require the space after the date, so it can be used
 on a string that terminates immediately after the date.")
-(defconst org-ts-regexp1 "\\(\\([0-9]\\{4\\}\\)-\\([0-9]\\{2\\}\\)-\\([0-9]\\{2\\}\\) +\\([^]-+0-9>\r\n ]*\\)\\( \\([0-9]\\{2\\}\\):\\([0-9]\\{2\\}\\)\\)?\\)"
+(defconst org-ts-regexp1 "\\(\\([0-9]\\{4\\}\\)-\\([0-9]\\{2\\}\\)-\\([0-9]\\{2\\}\\) +\\([^]+0-9>\r\n -]*\\)\\( \\([0-9]\\{2\\}\\):\\([0-9]\\{2\\}\\)\\)?\\)"
   "Regular expression matching time strings for analysis.")
 (defconst org-ts-regexp2 (concat "<" org-ts-regexp1 "[^>\n]\\{0,16\\}>")
   "Regular expression matching time stamps, with groups.")
@@ -5593,8 +5593,8 @@ needs to be inserted at a specific position in the font-lock sequence.")
 	       '("\\[\\([0-9]*%\\)\\]\\|\\[\\([0-9]*\\)/\\([0-9]*\\)\\]"
 		 (0 (org-get-checkbox-statistics-face) t)))
 	   ;; Description list items
-	   '("^[ \t]*\\([-+*]\\|[0-9]+[.)]\\)[ \t]+\\(.*? ::\\)"
-	     2 'bold prepend)
+	   '("^[ \t]*[-+*][ \t]+\\(.*?[ \t]+::\\)\\([ \t]+\\|$\\)"
+	     1 'bold prepend)
 	   ;; ARCHIVEd headings
 	   (list (concat "^\\*+ \\(.*:" org-archive-tag ":.*\\)")
 		 '(1 'org-archived prepend))
@@ -7145,6 +7145,8 @@ If the region is active in `transient-mark-mode', promote all headings
 in the region."
   (org-back-to-heading t)
   (let* ((level (save-match-data (funcall outline-level)))
+	 (after-change-functions (remove 'flyspell-after-change-function
+					  after-change-functions))
 	 (up-head (concat (make-string (org-get-valid-level level -1) ?*) " "))
 	 (diff (abs (- level (length up-head) -1))))
     (if (= level 1) (error "Cannot promote to level 0. UNDO to recover if necessary"))
@@ -7160,6 +7162,8 @@ If the region is active in `transient-mark-mode', demote all headings
 in the region."
   (org-back-to-heading t)
   (let* ((level (save-match-data (funcall outline-level)))
+	 (after-change-functions (remove 'flyspell-after-change-function
+					  after-change-functions))
 	 (down-head (concat (make-string (org-get-valid-level level 1) ?*) " "))
 	 (diff (abs (- level (length down-head) -1))))
     (replace-match down-head nil t)
@@ -13694,7 +13698,7 @@ when a \"nil\" value can supersede a non-nil value higher up the hierarchy."
 	  (if (and range
 		   (goto-char (car range))
 		   (re-search-forward
-		    (concat "^[ \t]*:" property ":[ \t]*\\(.*[^ \t\r\n\f\v]\\)?")
+		    (org-re-property property)
 		    (cdr range) t))
 	      ;; Found the property, return it.
 	      (if (match-end 1)
@@ -13720,7 +13724,7 @@ If yes, return this value.  If not, return the current value of the variable."
 	(if (and range
 		 (goto-char (car range))
 		 (re-search-forward
-		  (concat "^[ \t]*:" property ":[ \t]*\\(.*[^ \t\r\n\f\v]\\)")
+		  (org-re-property property)
 		  (cdr range) t))
 	    (progn
 	      (delete-region (match-beginning 0) (1+ (point-at-eol)))
@@ -13867,7 +13871,7 @@ and the new value.")
 	  (setq range (org-get-property-block beg end 'force))
 	  (goto-char (car range))
 	  (if (re-search-forward
-	       (concat "^[ \t]*:" property ":\\(.*\\)") (cdr range) t)
+	       (org-re-property property) (cdr range) t)
 	      (progn
 		(delete-region (match-beginning 1) (match-end 1))
 		(goto-char (match-beginning 1)))
@@ -13929,13 +13933,18 @@ formats in the current buffer."
 
     (sort rtn (lambda (a b) (string< (upcase a) (upcase b))))))
 
+(defsubst org-re-property (property)
+  "Return a regexp matching PROPERTY.
+Match group 1 will be set to the value "
+  (concat "^[ \t]*:" (regexp-quote property) ":[ \t]*\\(\\S-.*\\)"))
+
 (defun org-property-values (key)
-  "Return a list of all values of property KEY."
+  "Return a list of all values of property KEY in the current buffer."
   (save-excursion
     (save-restriction
       (widen)
       (goto-char (point-min))
-      (let ((re (concat "^[ \t]*:" key ":[ \t]*\\(\\S-.*\\)"))
+      (let ((re (org-re-property key))
 	    values)
 	(while (re-search-forward re nil t)
 	  (add-to-list 'values (org-trim (match-string 1))))
@@ -14068,7 +14077,7 @@ in the current file."
       (goto-char (point-min))
       (let ((cnt 0))
 	(while (re-search-forward
-		(concat "^[ \t]*:" (regexp-quote property) ":.*\n?")
+		(org-re-property property)
 		nil t)
 	  (setq cnt (1+ cnt))
 	  (replace-match ""))
@@ -14180,7 +14189,7 @@ only headings."
 	 (level 1)
 	 (lmin 1)
 	 (lmax 1)
-	 limit re end found pos heading cnt)
+	 limit re end found pos heading cnt flevel)
     (unless buffer (error "File not found :%s" file))
     (with-current-buffer buffer
       (save-excursion
@@ -14195,13 +14204,13 @@ only headings."
 	    (while (re-search-forward re end t)
 	      (setq level (- (match-end 1) (match-beginning 1)))
 	      (if (and (>= level lmin) (<= level lmax))
-		  (setq found (match-beginning 0) cnt (1+ cnt))))
+		  (setq found (match-beginning 0) flevel level cnt (1+ cnt))))
 	    (when (= cnt 0) (error "Heading not found on level %d: %s"
 				   lmax heading))
 	    (when (> cnt 1) (error "Heading not unique on level %d: %s"
 				   lmax heading))
 	    (goto-char found)
-	    (setq lmin (1+ level) lmax (+ lmin (if org-odd-levels-only 1 0)))
+	    (setq lmin (1+ flevel) lmax (+ lmin (if org-odd-levels-only 1 0)))
 	    (setq end (save-excursion (org-end-of-subtree t t))))
 	  (when (org-on-heading-p)
 	    (move-marker (make-marker) (point))))))))
@@ -14636,6 +14645,19 @@ user."
       (if (< year 100) (setq year (+ 2000 year)))
       (setq ans (replace-match (format "%04d-%02d-%02d\\5" year month day)
 			       t nil ans)))
+
+    ;; Help matching dottet european dates
+    (when (string-match
+	   "^ *\\(3[01]\\|0?[1-9]\\|[12][0-9]\\)\\. ?\\(0?[1-9]\\|1[012]\\)\\. ?\\([1-9][0-9][0-9][0-9]\\)?" ans)
+      (setq year (if (match-end 3)
+		     (string-to-number (match-string 3 ans))
+		   (progn (setq kill-year t)
+			  (string-to-number (format-time-string "%Y"))))
+	    day (string-to-number (match-string 1 ans))
+	    month (string-to-number (match-string 2 ans))
+	    ans (replace-match (format "%04d-%02d-%02d\\5" year month day)
+				     t nil ans)))
+
     ;; Help matching american dates, like 5/30 or 5/30/7
     (when (string-match
 	   "^ *\\(0?[1-9]\\|1[012]\\)/\\(0?[1-9]\\|[12][0-9]\\|3[01]\\)\\(/\\([0-9]+\\)\\)?\\([^/0-9]\\|$\\)" ans)
@@ -15570,6 +15592,7 @@ In fact, the first hh:mm or number in the string will be taken,
 there can be extra stuff in the string.
 If no number is found, the return value is 0."
   (cond
+   ((integerp s) s)
    ((string-match "\\([0-9]+\\):\\([0-9]+\\)" s)
     (+ (* (string-to-number (match-string 1 s)) 60)
        (string-to-number (match-string 2 s))))
@@ -19039,6 +19062,8 @@ If point is in an inline task, mark that task instead."
      ((looking-at "# ") (setq column 0))
      ;; Headings
      ((looking-at "\\*+ ") (setq column 0))
+     ;; Footnote definition
+     ((looking-at org-footnote-definition-re) (setq column 0))
      ;; Literal examples
      ((looking-at "[ \t]*:[ \t]")
       (setq column (org-get-indentation))) ; do nothing
@@ -19077,15 +19102,16 @@ If point is in an inline task, mark that task instead."
 		  (not (looking-at org-drawer-regexp))
 		  ;; When point started in an inline task, do not move
 		  ;; above task starting line.
-		  (not (and inline-task-p
-			    (looking-at inline-re)))
-		  ;; Skip comments, verbatim, empty lines, tables,
-		  ;; inline tasks, lists, drawers and blocks.
+		  (not (and inline-task-p (looking-at inline-re)))
+		  ;; Skip drawers, blocks, empty lines, verbatim,
+		  ;; comments, tables, footnotes definitions, lists,
+		  ;; inline tasks.
 		  (or (and (looking-at "[ \t]*:END:")
 			   (re-search-backward org-drawer-regexp nil t))
 		      (and (looking-at "[ \t]*#\\+end_")
 			   (re-search-backward "[ \t]*#\\+begin_"nil t))
 		      (looking-at "[ \t]*[\n:#|]")
+		      (looking-at org-footnote-definition-re)
 		      (and (ignore-errors (goto-char (org-in-item-p)))
 			   (goto-char
 			    (org-list-get-top-point (org-list-struct))))
@@ -19164,6 +19190,11 @@ the functionality can be provided as a fall-back.")
   ;; and fixed-width regions are not wrapped.  That function will pass
   ;; through to `fill-paragraph' when appropriate.
   (org-set-local 'fill-paragraph-function 'org-fill-paragraph)
+  ;; Prevent auto-fill from inserting unwanted new items.
+  (org-set-local 'fill-nobreak-predicate
+		 (if (memq 'org-fill-item-nobreak-p fill-nobreak-predicate)
+		     fill-nobreak-predicate
+		   (cons 'org-fill-item-nobreak-p fill-nobreak-predicate)))
   ;; Adaptive filling: To get full control, first make sure that
   ;; `adaptive-fill-regexp' never matches.  Then install our own matcher.
   (unless (local-variable-p 'adaptive-fill-regexp (current-buffer))
@@ -19178,6 +19209,10 @@ the functionality can be provided as a fall-back.")
    '((org-in-buffer-settings
       (regexp . "^#\\+[A-Z_]+:\\(\\s-*\\)\\S-+")
       (modes . '(org-mode))))))
+
+(defun org-fill-item-nobreak-p ()
+  "Non-nil when a line break at point would insert a new item."
+  (and (looking-at (org-item-re)) (org-list-in-valid-context-p)))
 
 (defun org-fill-paragraph (&optional justify)
   "Re-align a table, pass through to fill-paragraph if no table."
@@ -19649,8 +19684,9 @@ empty."
   (and (looking-at "[ \t]*$")
        (save-excursion
          (beginning-of-line 1)
-         (looking-at (concat "^\\(\\*+\\)[ \t]+\\(" org-todo-regexp
-			     "\\)?[ \t]*$")))))
+	 (let ((case-fold-search nil))
+	   (looking-at (concat "^\\(\\*+\\)[ \t]+\\(" org-todo-regexp
+			       "\\)?[ \t]*$"))))))
 (defun org-at-heading-or-item-p ()
   (or (org-on-heading-p) (org-at-item-p)))
 
@@ -19825,6 +19861,27 @@ If there is no such heading, return nil."
 	(org-end-of-subtree nil t)
 	(unless (eobp) (backward-char 1)))
     ad-do-it))
+
+(defun org-end-of-meta-data-and-drawers ()
+  "Jump to the first text after meta data and drawers in the current entry.
+This will move over empty lines, lines with planning time stamps,
+clocking lines, and drawers."
+  (org-back-to-heading t)
+  (let ((end (save-excursion (outline-next-heading) (point)))
+	(re (concat "[ \t]*$"
+		    "\\|"
+		    "\\(" org-drawer-regexp "\\)" ; group 1 are drawers
+		    "\\|"
+		    "\\([ \t]*\\(" org-keyword-time-regexp "\\)\\)")))
+    (forward-line 1)
+    (while (looking-at (concat "[ \t]*\\(" org-keyword-time-regexp "\\)"))
+      (if (not (match-end 1))
+	  ;; empty or planning line
+	  (forward-line 1)
+	;; a drawer, find the end
+	(re-search-forward "^[ \t]*:END:" end 'move)
+	(forward-line 1)))
+    (point)))
 
 (defun org-forward-same-level (arg &optional invisible-ok)
   "Move forward to the arg'th subheading at same level as this one.

@@ -1895,10 +1895,11 @@ calculator).
 @section The built-in table editor
 @cindex table editor, built-in
 
-Org makes it easy to format tables in plain ASCII.  Any line with
-@samp{|} as the first non-whitespace character is considered part of a
-table.  @samp{|} is also the column separator.  A table might look like
-this:
+Org makes it easy to format tables in plain ASCII.  Any line with @samp{|} as
+the first non-whitespace character is considered part of a table.  @samp{|}
+is also the column separator@footnote{To insert a vertical bar into a table
+field, use @code{\vert} or, inside a word @code{abc\vert@{@}def}.}.  A table
+might look like this:
 
 @example
 | Name  | Phone | Age |
@@ -4274,7 +4275,7 @@ be placed into a headline or into (the first line of) a plain list item.
 Each cookie covers checkboxes of direct children structurally below the
 headline/item on which the cookie appears@footnote{Set the variable
 @code{org-hierarchical-checkbox-statistics} if you want such cookies to
-represent the all checkboxes below the cookie, not just the direct
+count all checkboxes below the cookie, not just those belonging to direct
 children.}.  You have to insert the cookie yourself by typing either
 @samp{[/]} or @samp{[%]}.  With @samp{[/]} you get an @samp{n out of m}
 result, as in the examples above.  With @samp{[%]} you get information about
@@ -4331,8 +4332,7 @@ a @kbd{C-u} prefix, update the entire file.  Checkbox statistic cookies are
 updated automatically if you toggle checkboxes with @kbd{C-c C-c} and make
 new ones with @kbd{M-S-@key{RET}}.  TODO statistics cookies update when
 changing TODO states.  If you delete boxes/entries or add/change them by
-hand, use this command to get things back into sync.  Or simply toggle any
-entry twice (checkboxes with @kbd{C-c C-c}).
+hand, use this command to get things back into sync.
 @end table
 
 @node Tags, Properties and Columns, TODO Items, Top
@@ -6457,6 +6457,7 @@ dynamic insertion of content:
 %u, %U      @r{like the above, but inactive timestamps}
 %^t         @r{like @code{%t}, but prompt for date.  Similarly @code{%^T}, @code{%^u}, @code{%^U}}
             @r{You may define a prompt like @code{%^@{Birthday@}t}}
+%<...>      @r{the result of format-time-string on the ... format specification}
 %n          @r{user name (taken from @code{user-full-name})}
 %c          @r{Current kill ring head.}
 %x          @r{Content of the X clipboard.}
@@ -7692,6 +7693,10 @@ will be followed without a selection prompt.
 
 @tsubheading{Change display}
 @cindex display changing, in agenda
+@kindex A
+@item A
+Interactively select another agenda view and append it to the current view.
+@c
 @kindex o
 @item o
 Delete other windows.
@@ -7768,6 +7773,15 @@ agenda buffers can be set with the variable
 when toggling this mode (i.e.@: @kbd{C-u R}), the clock table will not show
 contributions from entries that are hidden by agenda filtering@footnote{Only
 tags filtering will be respected here, effort filtering is ignored.}.
+@c
+@orgkey{v c}
+@vindex org-agenda-clock-consistency-checks
+Show overlapping clock entries, clocking gaps, and other clocking problems in
+the current agenda range.  You can then visit clocking lines and fix them
+manually. See the variable @code{org-agenda-clock-consistency-checks} for
+information on how to customize the definition of what constituted a clocking
+problem.  To return to normal agenda display, press @kbd{l} to exit Logbook
+mode.
 @c
 @orgcmdkskc{v E,E,org-agenda-entry-text-mode}
 @vindex org-agenda-start-with-entry-text-mode
@@ -7883,7 +7897,7 @@ Internet, and outside of business hours, with something like this:
 @end group
 @end lisp
 
-@orgcmd{\,org-agenda-filter-by-tag-refine}
+@orgcmd{\\,org-agenda-filter-by-tag-refine}
 Narrow the current agenda filter by an additional condition.  When called with
 prefix arg, remove the entries that @emph{do} have the tag, or that do match
 the effort criterion.  You can achieve the same effect by pressing @kbd{+} or
@@ -8048,6 +8062,9 @@ Jump to the running clock in another window.
 Mark the entry at point for bulk action.  With prefix arg, mark that many
 successive entries.
 @c
+@orgcmd{%,org-agenda-bulk-mark-regexp}
+Mark entries matching a regular expression for bulk action.
+@c
 @orgcmd{u,org-agenda-bulk-unmark}
 Unmark entry for bulk action.
 @c
@@ -8072,9 +8089,24 @@ t  @r{Change TODO state.  This prompts for a single TODO keyword and}
 s  @r{Schedule all items to a new date.  To shift existing schedule dates}
    @r{by a fixed number of days, use something starting with double plus}
    @r{at the prompt, for example @samp{++8d} or @samp{++2w}.}
-S  @r{Reschedule randomly by N days.  N will be prompted for.  With prefix}
-   @r{arg (@kbd{C-u B S}), scatter only accross weekdays.}
+S  @r{Reschedule randomly into the coming N days.  N will be prompted for.}
+   @r{With prefix arg (@kbd{C-u B S}), scatter only across weekdays.}
 d  @r{Set deadline to a specific date.}
+f  @r{Apply a function to marked entries.}
+   @r{For example, the function below sets the CATEGORY property of the}
+   @r{entries to web.}
+   @r{(defun set-category ()}
+   @r{  (interactive "P")}
+   @r{  (let* ((marker (or (org-get-at-bol 'org-hd-marker)}
+   @r{                     (org-agenda-error)))}
+   @r{            (buffer (marker-buffer marker)))}
+   @r{       (with-current-buffer buffer}
+   @r{         (save-excursion}
+   @r{           (save-restriction}
+   @r{             (widen)}
+   @r{             (goto-char marker)}
+   @r{             (org-back-to-heading t)}
+   @r{             (org-set-property "CATEGORY" "web"))))))}
 @end example
 
 
@@ -8507,7 +8539,7 @@ This causes the following issues:
 Org needs to make a decision which @code{COLUMNS} format to use.  Since the
 entries in the agenda are collected from different files, and different files
 may have different @code{COLUMNS} formats, this is a non-trivial problem.
-Org first checks if the variable @code{org-overriding-columns-format} is
+Org first checks if the variable @code{org-agenda-overriding-columns-format} is
 currently set, and if so, takes the format from there.  Otherwise it takes
 the format associated with the first item in the agenda, or, if that item
 does not have a specific format (defined in a property, or in its file), it
@@ -8845,7 +8877,9 @@ package is included by the LaTeX header, and ensuring that the
 @code{org-export-latex-listings} and @code{org-export-latex-minted} for
 further details.}.  This is done with the @samp{src} block, where you also
 need to specify the name of the major mode that should be used to fontify the
-example:
+example@footnote{Code in @samp{src} blocks may also be evaluated either
+interactively or on export.  See @pxref{Working With Source Code} for more
+information on evaluating code blocks.}: 
 @cindex #+BEGIN_SRC
 
 @example
@@ -9307,26 +9341,34 @@ enabled (default in Emacs 23).
 
 @node Selective export, Export options, Exporting, Exporting
 @section Selective export
-@cindex export, selective by tags
+@cindex export, selective by tags or TODO keyword
 
 @vindex org-export-select-tags
 @vindex org-export-exclude-tags
+@cindex org-export-with-tasks
 You may use tags to select the parts of a document that should be exported,
 or to exclude parts from export.  This behavior is governed by two variables:
 @code{org-export-select-tags} and @code{org-export-exclude-tags}.
 
-Org first checks if any of the @emph{select} tags is present in the buffer.
-If yes, all trees that do not carry one of these tags will be excluded.  If a
-selected tree is a subtree, the heading hierarchy above it will also be
-selected for export, but not the text below those headings.
+@enumerate
+@item 
+Org first checks if any of the @emph{select} tags is present in the
+buffer.  If yes, all trees that do not carry one of these tags will be
+excluded.  If a selected tree is a subtree, the heading hierarchy above it
+will also be selected for export, but not the text below those headings.
 
-@noindent
+@item
 If none of the select tags is found, the whole buffer will be selected for
 export.
 
-@noindent
+@item
 Finally, all subtrees that are marked by any of the @emph{exclude} tags will
 be removed from the export buffer.
+@end enumerate
+
+The variable @code{org-export-with-tasks} can be configured to select which
+kind of tasks should be included for export.  See the docstring of the
+variable for more information.
 
 @node Export options, The export dispatcher, Selective export, Exporting
 @section Export options
@@ -9426,6 +9468,8 @@ toc:       @r{turn on/off table of contents, or set level limit (integer)}
 -:         @r{turn on/off conversion of special strings.}
 f:         @r{turn on/off footnotes like this[1].}
 todo:      @r{turn on/off inclusion of TODO keywords into exported text}
+tasks:     @r{turn on/off inclusion of tasks (TODO items), can be nil to remove}
+           @r{all tasks, @code{todo} to remove DONE tasks, or list of kwds to keep}
 pri:       @r{turn on/off priority cookies}
 tags:      @r{turn on/off inclusion of tags, may also be @code{not-in-toc}}
 <:         @r{turn on/off inclusion of any time/date stamps like DEADLINES}
@@ -10905,6 +10949,8 @@ respective variable for details.
 @vindex org-export-with-drawers
 @vindex org-export-with-tags
 @vindex org-export-with-todo-keywords
+@vindex org-export-with-tasks
+@vindex org-export-with-done-tasks
 @vindex org-export-with-priority
 @vindex org-export-with-TeX-macros
 @vindex org-export-with-LaTeX-fragments
@@ -10953,6 +10999,7 @@ respective variable for details.
 @item @code{:drawers}               @tab @code{org-export-with-drawers}
 @item @code{:tags}                  @tab @code{org-export-with-tags}
 @item @code{:todo-keywords}         @tab @code{org-export-with-todo-keywords}
+@item @code{:tasks}                 @tab @code{org-export-with-tasks}
 @item @code{:priority}              @tab @code{org-export-with-priority}
 @item @code{:TeX-macros}            @tab @code{org-export-with-TeX-macros}
 @item @code{:LaTeX-fragments}       @tab @code{org-export-with-LaTeX-fragments}
@@ -12030,8 +12077,8 @@ org-mode file, while there is no such guarantee for evaluation of the code
 block body.
 
 @example
-#+begin_src sh :var file-name=(buffer-file-name) :exports both
-  wc -w $file
+#+begin_src sh :var filename=(buffer-file-name) :exports both
+  wc -w $filename
 #+end_src
 @end example
 

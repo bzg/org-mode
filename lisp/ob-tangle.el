@@ -243,7 +243,8 @@ exported source code blocks by language."
        (org-babel-tangle-collect-blocks lang))
       (message "tangled %d code block%s from %s" block-counter
                (if (= block-counter 1) "" "s")
-	       (file-name-nondirectory (buffer-file-name (current-buffer))))
+	       (file-name-nondirectory
+		(buffer-file-name (or (buffer-base-buffer) (current-buffer)))))
       ;; run `org-babel-post-tangle-hook' in all tangled files
       (when org-babel-post-tangle-hook
 	(mapc
@@ -295,9 +296,11 @@ code blocks by language."
           (unless (and language (not (string= language src-lang)))
 	    (let* ((info (org-babel-get-src-block-info))
 		   (params (nth 2 info))
-		   (link (progn (org-store-link nil)
-				(org-babel-clean-text-properties
-				 (car (pop org-stored-links)))))
+		   (link ((lambda (link)
+			    (and (string-match org-bracket-link-regexp link)
+				 (match-string 1 link)))
+			  (org-babel-clean-text-properties
+			   (org-store-link nil))))
 		   (source-name
 		    (intern (or (nth 4 info)
 				(format "%s:%d"

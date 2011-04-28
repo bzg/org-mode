@@ -62,6 +62,8 @@ This function is called by `org-babel-execute-src-block'."
 			 (expand-file-name org-plantuml-jar-path))
 			(if (string= (file-name-extension out-file) "svg")
 			    " -tsvg" "")
+			(if (string= (file-name-extension out-file) "eps")
+			    " -teps" "")
 			" -p " cmdline " < "
 			(org-babel-process-file-name in-file)
 			" > "

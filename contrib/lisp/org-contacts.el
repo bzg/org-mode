@@ -37,9 +37,7 @@
 ;;; Code:
 
 (eval-and-compile
-  (require 'org)
-  (require 'gnus)
-  (require 'gnus-art))
+  (require 'org))
 
 (defgroup org-contacts nil
   "Options concerning contacts management."
@@ -253,8 +251,6 @@ If both match values are nil, return all contacts."
                ;; show the next heading
                (org-flag-heading nil)))))))
 
-(define-key gnus-summary-mode-map ";" 'org-contacts-gnus-article-from-goto)
-
 (defun org-contacts-anniversaries (&optional field format)
   "Compute FIELD anniversary for each contact, returning FORMAT.
 Default FIELD value is \"BIRTHDAY\".
@@ -323,8 +319,6 @@ This function should be called from `gnus-article-prepare-hook'."
                  (link (gnus-with-article-buffer (org-store-link nil))))
             (org-set-property org-contacts-last-read-mail-property link)))))))
 
-(add-hook 'gnus-article-prepare-hook 'org-contacts-gnus-store-last-mail)
-
 (defun org-contacts-icon-as-string ()
   (let ((image (org-contacts-get-icon)))
     (concat
@@ -386,7 +380,17 @@ This function should be called from `gnus-article-prepare-hook'."
       (org-with-point-at marker
         (org-contacts-check-mail-address (cadr (org-contacts-gnus-get-name-email)))))))
 
-(add-hook 'gnus-article-prepare-hook 'org-contacts-gnus-check-mail-address)
+(defun org-contacts-gnus-insinuate ()
+  "Add some hooks for Gnus user.
+This adds `org-contacts-gnus-check-mail-address' and
+`org-contacts-gnus-store-last-mail' to
+`gnus-article-prepare-hook'. It also adds a binding on `;' in
+`gnus-summary-mode-map' to `org-contacts-gnus-article-from-goto'"
+  (require 'gnus)
+  (require 'gnus-art)
+  (define-key gnus-summary-mode-map ";" 'org-contacts-gnus-article-from-goto)
+  (add-hook 'gnus-article-prepare-hook 'org-contacts-gnus-check-mail-address)
+  (add-hook 'gnus-article-prepare-hook 'org-contacts-gnus-store-last-mail))
 
 (defun org-contacts-view-send-email (&optional ask)
   "Send email to the contact at point.

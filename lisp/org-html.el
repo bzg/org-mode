@@ -826,7 +826,8 @@ MAY-INLINE-P allows inlining it as an image."
 		(not type)
 		(string= type "http")
 		(string= type "https")
-		(string= type "file"))
+		(string= type "file")
+		(string= type "coderef"))
 	       (if fragment
 		  (setq thefile (concat thefile "#" fragment))))
 
@@ -836,7 +837,8 @@ MAY-INLINE-P allows inlining it as an image."
 	 (setq thefile
 	    (let
 	       ((str (org-export-html-format-href thefile)))
-	      (if (and type (not (string= "file" type)))
+	      (if (and type (not (or (string= "file" type)
+				     (string= "coderef" type))))
 		  (concat type ":" str)
 		  str)))
 
@@ -886,7 +888,8 @@ OPT-PLIST is the export options list."
 	  (if (string-match "^file:" desc)
 	      (setq desc (substring desc (match-end 0)))))
 	(setq desc (org-add-props
-		       (concat "<img src=\"" desc "\"/>")
+		       (concat "<img src=\"" desc "\" alt=\"" 
+			       (file-name-nondirectory desc) "\"/>")
 		       '(org-protected t))))
       (cond
        ((equal type "internal")
@@ -1179,6 +1182,7 @@ PUB-DIR is set, use this as the publishing directory."
 	    (plist-get opt-plist :skip-before-1st-heading)
 	    :drawers (plist-get opt-plist :drawers)
 	    :todo-keywords (plist-get opt-plist :todo-keywords)
+	    :tasks (plist-get opt-plist :tasks)
 	    :tags (plist-get opt-plist :tags)
 	    :priority (plist-get opt-plist :priority)
 	    :footnotes (plist-get opt-plist :footnotes)
@@ -1356,7 +1360,9 @@ lang=\"%s\" xml:lang=\"%s\">
 				   (if (string-match quote-re0 txt)
 				       (setq txt (replace-match "" t t txt)))
 				   (setq snumber (org-section-number level))
-				   (if (and num (integerp num) (>= num level))
+				   (if (and num (if (integerp num)
+						    (>= num level)
+						  num))
 				       (setq txt (concat snumber " " txt)))
 				   (if (<= level (max umax umax-toc))
 				       (setq head-count (+ head-count 1)))
@@ -2404,16 +2410,16 @@ When TITLE is nil, just close all open levels."
 	    (setq title (concat
 			 (format "<span class=\"section-number-%d\">%s</span>"
 				 level
-				 (if (and (integerp num)
-					  ;; fix up num to take into
-					  ;; account the top-level
-					  ;; heading value
-					  (>= (+ num
-						 org-export-html-toplevel-hlevel
-						 -1)
-					      level))
-					   snumber
-					 ""))
+				 (if (and num
+					  (if (integerp num)
+					      ;; fix up num to take into
+					      ;; account the top-level
+					      ;; heading value
+					      (>= (+ num org-export-html-toplevel-hlevel -1)
+						  level)
+					    num))
+				     snumber
+				   ""))
 			 " " title)))
 	(unless (= head-count 1) (insert "\n</div>\n"))
 	(setq href (cdr (assoc (concat "sec-" snu) org-export-preferred-target-alist)))
@@ -2500,7 +2506,7 @@ the alist of previous items."
        (concat "[ \t]*\\(\\S-+[ \t]*\\)"
 	       "\\(?:\\[@\\(?:start:\\)?\\([0-9]+\\|[A-Za-z]\\)\\]\\)?"
 	       "\\(?:\\(\\[[ X-]\\]\\)[ \t]+\\)?"
-	       "\\(?:\\(.*\\)[ \t]+::[ \t]+\\)?"
+	       "\\(?:\\(.*\\)[ \t]+::\\(?:[ \t]+\\|$\\)\\)?"
 	       "\\(.*\\)") line)
       (let* ((checkbox (match-string 3 line))
 	     (desc-tag (or (match-string 4 line) "???"))

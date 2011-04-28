@@ -869,6 +869,7 @@ when PUB-DIR is set, use this as the publishing directory."
 		:drawers (plist-get opt-plist :drawers)
 		:timestamps (plist-get opt-plist :timestamps)
 		:todo-keywords (plist-get opt-plist :todo-keywords)
+		:tasks (plist-get opt-plist :tasks)
 		:add-text nil
 		:skip-before-1st-heading skip
 		:select-tags nil
@@ -886,6 +887,7 @@ when PUB-DIR is set, use this as the publishing directory."
 	   :drawers (plist-get opt-plist :drawers)
 	   :timestamps (plist-get opt-plist :timestamps)
 	   :todo-keywords (plist-get opt-plist :todo-keywords)
+	   :tasks (plist-get opt-plist :tasks)
 	   :add-text (if (eq to-buffer 'string) nil text)
 	   :skip-before-1st-heading skip
 	   :select-tags (plist-get opt-plist :select-tags)
@@ -1524,7 +1526,7 @@ links, keywords, lists, tables, fixed-width"
 	  (format org-export-latex-tag-markup
 		  (save-match-data
 		    (replace-regexp-in-string
-		     "_" "\\\\_" (match-string 0)))))
+		     "\\([_#]\\)" "\\\\\\1" (match-string 0)))))
 	 t t)))))
 
 (defun org-export-latex-fontify-headline (string)
@@ -1684,13 +1686,7 @@ See the `org-export-latex.el' code for a complete conversion table."
 	  "\\(\\(\\\\?\\$\\)\\)"
 	  "\\([a-zA-Z0-9()]+\\|[ \t\n]\\|\\b\\|\\\\\\)\\(_\\|\\^\\)\\({[^{}]+}\\|[a-zA-Z0-9]+\\|[ \t\n]\\|[:punct:]\\|)\\|{[a-zA-Z0-9]+}\\|([a-zA-Z0-9]+)\\)"
 	  "\\(.\\|^\\)\\(\\\\\\)\\([ \t\n]\\|\\([&#%{}\"]\\|[a-zA-Z][a-zA-Z0-9]*\\)\\)"
-	  "\\(.\\|^\\)\\(&\\)"
-	  "\\(.\\|^\\)\\(#\\)"
-	  "\\(.\\|^\\)\\(%\\)"
-	  "\\(.\\|^\\)\\({\\)"
-	  "\\(.\\|^\\)\\(}\\)"
-	  "\\(.\\|^\\)\\(~\\)"
-	  "\\(.\\|^\\)\\(\\.\\.\\.\\)"
+	  "\\(^\\|.\\)\\([&#%{}~]\\|\\.\\.\\.\\)"
 	  ;; (?\< . "\\textless{}")
 	  ;; (?\> . "\\textgreater{}")
 	  )))
@@ -1994,7 +1990,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
       (setq tbl (concat "\\begin{center}\n" tbl "\\end{center}")))
     (when floatp
       (setq tbl (concat "\\begin{table}\n"
-			(format "\\caption%s{%s}%s\n"
+			(format "\\caption%s{%s%s}\n"
 				(if shortn (format "[%s]" shortn) "")
 				(if label (format "\\label{%s}" label) "")
 				(or caption ""))
@@ -2416,12 +2412,15 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 		 (replace-match (org-export-latex-protect-string
 				 (concat "$^{" (match-string 1) "}$")))
 	       (replace-match "")
-	       (let ((end (save-excursion
-			    (if (re-search-forward "^$\\|^#.*$\\|\\[[0-9]+\\]" nil t)
-				(match-beginning 0) (point-max)))))
-		 (setq footnote (concat (org-trim (buffer-substring (point) end))
-					; last } won't be part of a link or list.
-					"\n"))
+	       (let* ((end (save-excursion
+			     (if (re-search-forward "^$\\|^#.*$\\|\\[[0-9]+\\]" nil t)
+				 (match-beginning 0) (point-max))))
+		      (body (org-trim (buffer-substring (point) end))))
+		 ;; Fix for footnotes ending on a link or a list.
+		 (setq footnote
+		       (concat body
+			       (if (string-match "ORG-LIST-END-MARKER\\'" body)
+				   "\n" " ")))
 		 (delete-region (point) end))
 	       (goto-char foot-beg)
 	       (delete-region foot-beg foot-end)

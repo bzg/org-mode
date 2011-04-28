@@ -215,6 +215,7 @@ Furthermore, the following %-escapes will be replaced with content:
   %u, %U      like the above, but inactive time stamps
   %^t         like %t, but prompt for date.  Similarly %^T, %^u, %^U.
               You may define a prompt like %^{Please specify birthday
+  %<...>      the result of format-time-string on the ... format specification
   %n          user name (taken from `user-full-name')
   %a          annotation, normally the link created with `org-store-link'
   %i          initial content, copied from the active region.  If %i is
@@ -346,6 +347,9 @@ The remember buffer is still current when this hook runs."
   "Local variable holding the plist in a capture buffer.
 This is used to store the plist for use when finishing a capture process.
 Another such process might have changed the global variable by then.")
+(defvar org-capture-clock-keep nil
+  "Local variable to store the value of the :clock-keep parameter.
+This is needed in case org-capture-finalize is called interactively.")
 
 (defun org-capture-put (&rest stuff)
   (while stuff
@@ -446,6 +450,7 @@ bypassed."
 	   (if (get-buffer "*Capture*") (kill-buffer "*Capture*"))
 	   (error "Capture abort: %s" error)))
 
+	(setq org-capture-clock-keep (org-capture-get :clock-keep))
 	(if (equal goto 0)
 	    ;;insert at point
 	    (org-capture-insert-template-here)
@@ -459,19 +464,19 @@ bypassed."
 	     (error "Capture template `%s': %s"
 		    (org-capture-get :key)
 		    (nth 1 error))))
+	  (if (and (org-mode-p)
+		   (org-capture-get :clock-in))
+	      (condition-case nil
+		  (progn
+		    (if (org-clock-is-active)
+			(org-capture-put :interrupted-clock
+					 (copy-marker org-clock-marker)))
+		    (org-clock-in)
+		    (org-set-local 'org-capture-clock-was-started t))
+		(error
+		 "Could not start the clock in this capture buffer")))
 	  (if (org-capture-get :immediate-finish)
-	      (org-capture-finalize nil (org-capture-get :clock-keep))
-	    (if (and (org-mode-p)
-		     (org-capture-get :clock-in))
-		(condition-case nil
-		    (progn
-		      (if (org-clock-is-active)
-			  (org-capture-put :interrupted-clock
-					   (copy-marker org-clock-marker)))
-		      (org-clock-in)
-		      (org-set-local 'org-capture-clock-was-started t))
-		  (error
-		   "Could not start the clock in this capture buffer")))))))))))
+	      (org-capture-finalize nil)))))))))
 
 (defun org-capture-get-template ()
   "Get the template from a file or a function if necessary."
@@ -491,12 +496,10 @@ bypassed."
      (t (setq txt "* Invalid capture template")))
     (org-capture-put :template txt)))
 
-(defun org-capture-finalize (&optional stay-with-capture clock-keep)
+(defun org-capture-finalize (&optional stay-with-capture)
   "Finalize the capture process.
 With prefix argument STAY-WITH-CAPTURE, jump to the location of the
-captured item after finalizing.
-A second optional argument tells whether finalizing the capture
-process should keep the clock running in the filed entry."
+captured item after finalizing."
   (interactive "P")
   (unless (and org-capture-mode
 	       (buffer-base-buffer (current-buffer)))
@@ -509,8 +512,8 @@ process should keep the clock running in the filed entry."
 	     (> org-clock-marker (point-min))
 	     (< org-clock-marker (point-max)))
     ;; Looks like the clock we started is still running.  Clock out.
-    (when (not clock-keep) (let (org-log-note-clock-out) (org-clock-out)))
-    (when (and (not clock-keep)
+    (when (not org-capture-clock-keep) (let (org-log-note-clock-out) (org-clock-out)))
+    (when (and (not org-capture-clock-keep)
 	       (org-capture-get :clock-resume 'local)
 	       (markerp (org-capture-get :interrupted-clock 'local))
 	       (buffer-live-p (marker-buffer
@@ -1011,13 +1014,28 @@ it.  When it is a variable, retrieve the value.  Return whatever we get."
     (org-table-align)))
 
 (defun org-capture-place-plain-text ()
-  "Place the template plainly."
+  "Place the template plainly.
+If the target locator points at an Org node, place the template into
+the text of the entry, before the first child.  If not, place the
+template at the beginning or end of the file.
+Of course, if exact position has been required, just put it there."
   (let* ((txt (org-capture-get :template))
 	 beg end)
-    (goto-char (cond
-		((org-capture-get :exact-position))
-		((org-capture-get :prepend) (point-min))
-		(t (point-max))))
+    (cond
+     ((org-capture-get :exact-position)
+      (goto-char (org-capture-get :exact-position)))
+     ((and (org-capture-get :target-entry-p)
+	   (bolp)
+	   (looking-at org-outline-regexp))
+      ;; we should place the text into this entry
+      (if (org-capture-get :prepend)
+	  ;; Skip meta data and drawers
+	  (org-end-of-meta-data-and-drawers)
+	;; go to ent of the entry text, before the next headline
+	(outline-next-heading)))
+     (t
+      ;; beginning or end of file
+      (goto-char (if (org-capture-get :prepend) (point-min) (point-max)))))
     (or (bolp) (newline))
     (org-capture-empty-lines-before)
     (setq beg (point))
@@ -1298,6 +1316,11 @@ The template may still contain \"%?\" for cursor positioning."
 	    (let ((result (org-eval (read (current-buffer)))))
 	      (delete-region template-start (point))
 	      (insert result)))))
+
+      ;; The current time
+      (goto-char (point-min))
+      (while (re-search-forward "%<\\([^>\n]+\\)>" nil t)
+	(replace-match (format-time-string (match-string 1)) t t))
 
       ;; Simple %-escapes
       (goto-char (point-min))

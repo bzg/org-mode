@@ -5,7 +5,7 @@
 ;; Author: Torsten Anders and Eric Schulte 
 ;; Keywords: literate programming, reproducible research
 ;; Homepage: http://orgmode.org
-;; Version: 0.01
+;; Version: 0.02
 
 ;;; License:
 
@@ -120,7 +120,7 @@
 (defvar org-babel-oz-server-dir
   (file-name-as-directory
    (expand-file-name
-    "scripts"
+    "contrib/scripts"
     (file-name-as-directory
      (expand-file-name
       "../../.."
@@ -196,53 +196,41 @@ StartOzServer.oz is located.")
 	    (setq org-babel-oz-collected-result nil))))
     result))
 
-(defun org-babel-expand-body:oz (body params &optional processed-params)
-  (let ((vars (second (or processed-params (org-babel-process-params params))))))
-  (if vars
-      ;; only add var declarations if any variables are there
-      (concat
-       ;; prepend code to define all arguments passed to the code block
-       "local\n"
-       (mapconcat
-        (lambda (pair)
-          (format "%s=%s"
-                  (car pair)
-                  (org-babel-oz-var-to-oz (cdr pair))))
-        vars "\n") "\n" 
-        "in\n"
-        body 
-        "end\n")
-    body))
+(defun org-babel-expand-body:oz (body params)
+  (let ((vars (mapcar #'cdr (org-babel-get-header params :var))))
+    (if vars
+	;; prepend code to define all arguments passed to the code block
+	(let ((var-string (mapcar (lambda (pair)
+				    (format "%s=%s"
+					    (car pair)
+					    (org-babel-oz-var-to-oz (cdr pair))))
+				  vars)))
+	  ;; only add var declarations if any variables are there
+	  (mapconcat #'identity
+		     (append (list "local") var-string (list "in" body "end"))
+		     "\n"))
+      body)))
 
 (defun org-babel-execute:oz (body params)
   "Execute a block of Oz code with org-babel.  This function is
 called by `org-babel-execute-src-block' via multiple-value-bind."
-  (let* ((processed-params (org-babel-process-params params))
-;; 	(session (org-babel-ruby-initiate-session (first processed-params)))
-	(vars (second processed-params))
-;; 	(result-params (third processed-params))
-	(result-type (fourth processed-params))
-	(full-body (org-babel-expand-body:oz body params processed-params))
-	(wait-time (plist-get params :wait-time))
-        ;; set the session if the session variable is non-nil
-;; 	(session-buffer (org-babel-oz-initiate-session session))
-;; 	(session (org-babel-prep-session:oz session params))
-	)
+  (let* ((result-params (cdr (assoc :result-params params)))
+	 (full-body (org-babel-expand-body:oz body params))
+	 (wait-time (plist-get params :wait-time)))
     ;; actually execute the source-code block
     (org-babel-reassemble-table
-     (case result-type
-       (output
-	(progn 
-	  (message "Org-babel: executing Oz statement")
-	  (oz-send-string full-body)))
-       (value
-	(progn 
-	  (message "Org-babel: executing Oz expression")
-	  (oz-send-string-expression full-body (if wait-time
-						   wait-time
-						 1)))))
-     (org-babel-pick-name (nth 4 processed-params) (cdr (assoc :colnames params)))
-     (org-babel-pick-name (nth 5 processed-params) (cdr (assoc :rownames params))))))
+     (cond
+      ((member "output" result-params)
+       (message "Org-babel: executing Oz statement")
+       (oz-send-string full-body))
+      ((member "value" result-params)
+       (message "Org-babel: executing Oz expression")
+       (oz-send-string-expression full-body (or wait-time 1)))
+      (t (error "either 'output' or 'results' must be members of :results.")))
+     (org-babel-pick-name (cdr (assoc :colname-names params))
+			  (cdr (assoc :colnames params)))
+     (org-babel-pick-name (cdr (assoc :roname-names params))
+			  (cdr (assoc :rownames params))))))
 
 ;; This function should be used to assign any variables in params in
 ;; the context of the session environment.

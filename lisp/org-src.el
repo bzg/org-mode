@@ -153,7 +153,7 @@ but which mess up the display of a snippet in Org exported files.")
 (defcustom org-src-lang-modes
   '(("ocaml" . tuareg) ("elisp" . emacs-lisp) ("ditaa" . artist)
     ("asymptote" . asy) ("dot" . fundamental) ("sqlite" . sql)
-    ("calc" . fundamental))
+    ("calc" . fundamental) ("C" . c))
   "Alist mapping languages to their major mode.
 The key is the language name, the value is the string that should
 be inserted as the name of the major mode.  For many languages this is
@@ -214,6 +214,7 @@ buffer."
   (let ((mark (and (org-region-active-p) (mark)))
 	(case-fold-search t)
 	(info (org-edit-src-find-region-and-lang))
+	(full-info (org-babel-get-src-block-info))
 	(org-mode-p (or (org-mode-p) (derived-mode-p 'org-mode)))
 	(beg (make-marker))
 	(end (make-marker))
@@ -323,7 +324,10 @@ buffer."
 	(org-src-mode)
 	(set-buffer-modified-p nil)
 	(and org-edit-src-persistent-message
-	     (org-set-local 'header-line-format msg)))
+	     (org-set-local 'header-line-format msg))
+	(let ((edit-prep-func (intern (concat "org-babel-edit-prep:" lang))))
+	  (when (fboundp edit-prep-func)
+	    (funcall edit-prep-func full-info))))
       t)))
 
 (defun org-edit-src-continue (e)

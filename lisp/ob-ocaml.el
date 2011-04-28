@@ -125,30 +125,17 @@ OUTPUT is string output from an ocaml process."
   "Convert RESULTS into an elisp table or string.
 If the results look like a table, then convert them into an
 Emacs-lisp table, otherwise return the results as a string."
-  (org-babel-read
-   (if (and (stringp results) (string-match "^\\[.+\\]$" results))
-       (org-babel-read
-        (replace-regexp-in-string
-         "\\[" "(" (replace-regexp-in-string
-                    "\\]" ")" (replace-regexp-in-string
-                               "; " " " (replace-regexp-in-string
-                                         "'" "\"" results)))))
-     results)))
+  (org-babel-script-escape (replace-regexp-in-string ";" "," results)))
 
 (defun org-babel-ocaml-read-array (results)
   "Convert RESULTS into an elisp table or string.
 If the results look like a table, then convert them into an
 Emacs-lisp table, otherwise return the results as a string."
-  (org-babel-read
-   (if (and (stringp results) (string-match "^\\[.+\\]$" results))
-       (org-babel-read
-	(concat
-	 "'" (replace-regexp-in-string
-	      "\\[|" "(" (replace-regexp-in-string
-			  "|\\]" ")" (replace-regexp-in-string
-				      "; " " " (replace-regexp-in-string
-						"'" "\"" results))))))
-     results)))
+    (org-babel-script-escape
+     (replace-regexp-in-string
+      "\\[|" "[" (replace-regexp-in-string
+		  "|\\]" "]" (replace-regexp-in-string
+			      "; " "," results)))))
 
 (provide 'ob-ocaml)
 

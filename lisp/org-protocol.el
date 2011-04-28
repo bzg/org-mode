@@ -400,9 +400,9 @@ The location for a browser's bookmark has to look like this:
 See the docs for `org-protocol-capture' for more information."
 
   (if (and (boundp 'org-stored-links)
-           (or (fboundp 'org-capture))
+           (fboundp 'org-capture)
 	   (org-protocol-do-capture info 'org-remember))
-      (message "Org-mode not loaded."))
+      (message "Item remembered."))
   nil)
 
 (defun org-protocol-capture (info)
@@ -427,9 +427,9 @@ But you may prepend the encoded URL with a character and a slash like so:
 
 Now template ?b will be used."
   (if (and (boundp 'org-stored-links)
-           (or (fboundp 'org-capture))
+           (fboundp 'org-capture)
 	   (org-protocol-do-capture info 'org-capture))
-      (message "Org-mode not loaded."))
+      (message "Item captured."))
   nil)
 
 (defun org-protocol-do-capture (info capture-func)

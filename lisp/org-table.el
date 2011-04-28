@@ -3702,14 +3702,14 @@ Use COMMAND to do the motion, repeat if necessary to end up in a data line."
 
 (defun org-table-cleanup-narrow-column-properties ()
   "Remove all properties related to narrow-column invisibility."
-  (let ((s 1))
+  (let ((s (point-min)))
     (while (setq s (text-property-any s (point-max)
 				      'display org-narrow-column-arrow))
       (remove-text-properties s (1+ s) '(display t)))
-    (setq s 1)
+    (setq s (point-min))
     (while (setq s (text-property-any s (point-max) 'org-cwidth 1))
       (remove-text-properties s (1+ s) '(org-cwidth t)))
-    (setq s 1)
+    (setq s (point-min))
     (while (setq s (text-property-any s (point-max) 'invisible 'org-cwidth))
       (remove-text-properties s (1+ s) '(invisible t)))))
 

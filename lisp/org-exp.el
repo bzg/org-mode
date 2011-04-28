@@ -296,6 +296,23 @@ When nil, remove all these keywords from the export."
   :group 'org-export-general
   :type 'boolean)
 
+(defcustom org-export-with-tasks t
+  "Non-nil means include TODO items for export.
+This may have the following values:
+t                    include tasks independent of state.
+todo                 include only tasks that are not yet done.
+done                 include only tasks that are already done.
+nil                  remove all tasks before export
+list of TODO kwds    keep only tasks with these keywords"
+  :group 'org-export-general
+  :type '(choice
+	  (const :tag "All tasks" t)
+	  (const :tag "No tasks" nil)
+	  (const :tag "Not-done tasks" todo)
+	  (const :tag "Only done tasks" done)
+	  (repeat :tag "Specific TODO keywords"
+		  (string :tag "Keyword"))))
+
 (defcustom org-export-with-priority nil
   "Non-nil means include priority cookies in export.
 When nil, remove priority cookies for export."
@@ -621,6 +638,7 @@ table.el tables."
     (:drawers		      "d"	  org-export-with-drawers)
     (:tags		      "tags"	  org-export-with-tags)
     (:todo-keywords	      "todo"	  org-export-with-todo-keywords)
+    (:tasks	              "tasks"     org-export-with-tasks)
     (:priority		      "pri"	  org-export-with-priority)
     (:TeX-macros	      "TeX"	  org-export-with-TeX-macros)
     (:LaTeX-fragments	      "LaTeX"	  org-export-with-LaTeX-fragments)
@@ -841,7 +859,7 @@ security risks."
 	(while (setq o (pop op))
 	  (if (and (nth 1 o)
 		   (string-match (concat "\\<" (regexp-quote (nth 1 o))
-					 ":\\([^ \t\n\r;,.]*\\)")
+					 ":\\(([^)\n]+)\\|[^ \t\n\r;,.]*\\)")
 				 options))
 	      (setq p (plist-put p (car o)
 				 (car (read-from-string
@@ -976,17 +994,19 @@ Pressing `1' will switch between these two options."
 		 (setq subtree-p t)
 		 (message "Export subtree: "))))
 	(when (eq r1 ?\ )
-	  (let ((case-fold-search t))
+	  (let ((case-fold-search t)
+		(end (save-excursion (while (org-up-heading-safe)) (point))))
+	    (outline-next-heading)
 	    (if (re-search-backward
-		 "^[ \t]+\\(:latex_class:\\|:export_title:\\)[ \t]+\\S-"
-		 nil t)
+		 "^[ \t]+\\(:latex_class:\\|:export_title:\\|:export_file_name:\\)[ \t]+\\S-"
+		 end t)
 		(progn
 		  (org-back-to-heading t)
 		  (setq subtree-p t)
 		  (setq bpos (point))
 		  (message "Select command (for subtree): ")
 		  (setq r1 (read-char-exclusive)))
-	      (error "No enclosing node with LaTeX_CLASS or EXPORT_FILE_NAME")
+	      (error "No enclosing node with LaTeX_CLASS or EXPORT_TITLE or EXPORT_FILE_NAME")
 	      )))))
     (redisplay)
     (and bpos (goto-char bpos))
@@ -1077,15 +1097,19 @@ on this string to produce the exported version."
       ;; Call the hook
       (run-hooks 'org-export-preprocess-hook)
 
-      ;; Process the macros
-      (org-export-preprocess-apply-macros)
-      (run-hooks 'org-export-preprocess-after-macros-hook)
-
       (untabify (point-min) (point-max))
 
       ;; Handle include files, and call a hook
       (org-export-handle-include-files-recurse)
       (run-hooks 'org-export-preprocess-after-include-files-hook)
+
+      ;; Change lists ending. Other parts of export may insert blank
+      ;; lines and lists' structure could be altered.
+      (org-export-mark-list-end)
+
+      ;; Process the macros
+      (org-export-preprocess-apply-macros)
+      (run-hooks 'org-export-preprocess-after-macros-hook)
 
       ;; Get rid of archived trees
       (org-export-remove-archived-trees archived-trees)
@@ -1098,9 +1122,8 @@ on this string to produce the exported version."
 				     (plist-get parameters :exclude-tags))
       (run-hooks 'org-export-preprocess-after-tree-selection-hook)
 
-      ;; Change lists ending. Other parts of export may insert blank
-      ;; lines and lists' structure could be altered.
-      (org-export-mark-list-end)
+      ;; Get rid of tasks, depending on configuration
+      (org-export-remove-tasks (plist-get parameters :tasks))
 
       ;; Export code blocks
       (org-export-blocks-preprocess)
@@ -1488,6 +1511,36 @@ removed as well."
 		    (point-max)))
       (delete-region beg end))))
 
+(defun org-export-remove-tasks (keep)
+  "Remove tasks depending on configuration.
+When KEEP is nil, remove all tasks.
+When KEEP is `todo', remove the tasks that are DONE.
+When KEEP is `done', remove the tasks that are not yet done.
+When it is a list of strings, keep only tasks with these TODO keywords."
+  (when (or (listp keep) (memq keep '(todo done nil)))
+    (let ((re (concat "^\\*+[ \t]+\\("
+		      (mapconcat
+		       'regexp-quote
+		       (cond ((not keep) org-todo-keywords-1)
+			     ((eq keep 'todo) org-done-keywords)
+			     ((eq keep 'done) org-not-done-keywords)
+			     ((listp keep)
+			      (org-delete-all keep (copy-sequence
+						    org-todo-keywords-1))))
+		       "\\|")
+		      "\\)\\($\\|[ \t]\\)"))
+	(case-fold-search nil)
+	beg)
+      (goto-char (point-min))
+      (while (re-search-forward re nil t)
+	(org-if-unprotected
+	 (setq beg (match-beginning 0))
+	 (org-end-of-subtree t t)
+	 (if (looking-at "^\\*+[ \t]+END[ \t]*$")
+	     ;; Kill the END line of the inline task
+	     (goto-char (min (point-max) (1+ (match-end 0)))))
+	 (delete-region beg (point)))))))
+
 (defun org-export-remove-archived-trees (export-archived-trees)
   "Remove archived trees.
 When EXPORT-ARCHIVED-TREES is `headline;, only the headline will be exported.
@@ -1828,7 +1881,7 @@ table line.  If it is a link, add it to the line containing the link."
     (goto-char (point-min))
     (setq case-fold-search t)
     (while (re-search-forward
-	    "^#\\+begin_comment[ \t]*\n[^\000]*?^#\\+end_comment\\>.*" nil t)
+	    "^#\\+begin_comment[ \t]*\n[^\000]*?\n#\\+end_comment\\>.*" nil t)
       (replace-match "" t t))
     ;; Remove subtrees that are commented
     (goto-char (point-min))
@@ -1853,7 +1906,10 @@ When it is nil, all comments will be removed."
 		 (not (equal (char-before (match-end 1)) ?+)))
 	    (progn (add-text-properties
 		    (match-beginning 0) (match-end 0) '(org-protected t))
-		   (replace-match (format commentsp (match-string 2)) t t))
+		   (replace-match (org-add-props
+				      (format commentsp (match-string 2))
+				      nil 'org-protected t)
+				  t t))
 	  (goto-char (1+ pos))
 	  (replace-match "")
 	  (goto-char (max (point-min) (1- pos))))))))
@@ -2163,26 +2219,35 @@ TYPE must be a string, any of:
 (defun org-export-preprocess-apply-macros ()
   "Replace macro references."
   (goto-char (point-min))
-  (let (sy val key args args2 s n)
+  (let (sy val key args args2 ind-str s n)
     (while (re-search-forward
 	    "{{{\\([a-zA-Z][-a-zA-Z0-9_]*\\)\\(([ \t\n]*\\([^\000]*?\\))\\)?}}}"
 	    nil t)
-      (unless (save-match-data
-		(save-excursion
-		  (goto-char (point-at-bol))
-		  (looking-at "[ \t]*#\\+macro")))
+      (unless (save-match-data (save-excursion
+				 (goto-char (point-at-bol))
+				 (looking-at "[ \t]*#\\+macro")))
+	;; Get macro name (KEY), arguments (ARGS), and indentation of
+	;; current line (IND-STR) as strings.
 	(setq key (downcase (match-string 1))
-	      args (match-string 3))
+	      args (match-string 3)
+	      ind-str (save-match-data (save-excursion
+					 (beginning-of-line)
+					 (looking-at "^\\([ \t]*\\).*")
+					 (match-string 1))))
+	;; When macro is defined, retrieve replacement text in VAL,
+	;; and proceed with expansion.
 	(when (setq val (or (plist-get org-export-opt-plist
 				       (intern (concat ":macro-" key)))
 			    (plist-get org-export-opt-plist
 				       (intern (concat ":" key)))))
 	  (save-match-data
+	    ;; If arguments are provided, first retreive them properly
+	    ;; (in ARGS, as a list), then replace them in VAL.
 	    (when args
 	      (setq args (org-split-string args ",") args2 nil)
 	      (while args
 		(while (string-match "\\\\\\'" (car args))
-		  ;; repair bad splits
+		  ;; Repair bad splits.
 		  (setcar (cdr args) (concat (substring (car args) 0 -1)
 					     "," (nth 1 args)))
 		  (pop args))
@@ -2194,13 +2259,22 @@ TYPE must be a string, any of:
 		      n (string-to-number (match-string 1 val)))
 		(and (>= (length args) n)
 		     (setq val (replace-match (nth (1- n) args) t t val)))))
+	    ;; VAL starts with "(eval": it is a sexp, `eval' it.
 	    (when (string-match "\\`(eval\\>" val)
 	      (setq val (eval (read val))))
-	    (if (and val (not (stringp val)))
-		(setq val (format "%s" val))))
-	  (and (stringp val)
-	       (prog1 (replace-match val t t)
-		 (goto-char (match-beginning 0)))))))))
+	    ;; Ensure VAL is a string (or nil) and that each new line
+	    ;; is indented as the first one.
+	    (setq val (and val
+			   (mapconcat 'identity
+				      (org-split-string
+				       (if (stringp val) val (format "%s" val))
+				       "\n")
+				      (concat "\n" ind-str)))))
+	  ;; Eventually do the replacement, if VAL isn't nil. Move
+	  ;; point at beginning of macro for recursive expansions.
+	  (when val
+	    (replace-match val t t)
+	    (goto-char (match-beginning 0))))))))
 
 (defun org-export-apply-macros-in-string (s)
   "Apply the macros in string S."
