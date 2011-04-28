@@ -10760,14 +10760,17 @@ This function can be used in a hook."
          "<literal style=\"html\">?</literal>")
     ("a" "#+begin_ascii\n?\n#+end_ascii")
     ("A" "#+ascii: ")
-    ("i" "#+include %file ?"
+    ("i" "#+index: ?"
+     "#+index: ?")
+    ("I" "#+include %file ?"
          "<include file=%file markup=\"?\">")
     )
   "Structure completion elements.
 This is a list of abbreviation keys and values.  The value gets inserted
 if you type `<' followed by the key and then press the completion key,
 usually `M-TAB'.  %file will be replaced by a file name after prompting
-for the file using completion.
+for the file using completion.  The cursor will be placed at the position
+of the `?` in the template.
 There are two templates for each key, the first uses the original Org syntax,
 the second uses Emacs Muse-like syntax tags.  These Muse-like tags become
 the default when the /org-mtags.el/ module has been loaded.  See also the
@@ -10786,7 +10789,7 @@ expands them."
   (let ((l (buffer-substring (point-at-bol) (point)))
 	a)
     (when (and (looking-at "[ \t]*$")
-	       (string-match "^[ \t]*<\\([a-z]+\\)$"l)
+	       (string-match "^[ \t]*<\\([a-zA-Z]+\\)$" l)
 	       (setq a (assoc (match-string 1 l) org-structure-template-alist)))
       (org-complete-expand-structure-template (+ -1 (point-at-bol)
 						 (match-beginning 1)) a)

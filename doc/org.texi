@@ -12976,7 +12976,8 @@ The following template selectors are currently supported.
 @item @kbd{H} @tab @code{#+html:}
 @item @kbd{a} @tab @code{#+begin_ascii   ... #+end_ascii}
 @item @kbd{A} @tab @code{#+ascii:}
-@item @kbd{i} @tab @code{#+include:} line
+@item @kbd{i} @tab @code{#+index:} line
+@item @kbd{I} @tab @code{#+include:} line
 @end multitable
 
 For example, on an empty line, typing "<e" and then pressing TAB, will expand
