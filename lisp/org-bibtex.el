@@ -110,6 +110,8 @@
 
 (require 'org)
 (require 'bibtex)
+(eval-when-compile
+  (require 'cl))
 
 (defvar description nil) ; dynamically scoped from org.el
 
