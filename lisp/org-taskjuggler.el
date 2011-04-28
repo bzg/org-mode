@@ -542,7 +542,12 @@ finally add more underscore characters (\"_\")."
 
 (defun org-taskjuggler-clean-id (id)
   "Clean and return ID to make it acceptable for taskjuggler."
-  (and id (replace-regexp-in-string "[^a-zA-Z0-9_]" "_" id)))
+  (and id
+       ;; replace non-ascii by _
+       (replace-regexp-in-string
+	"[^a-zA-Z0-9_]" "_"
+	;; make sure id doesn't start with a number
+	(replace-regexp-in-string "^\\([0-9]\\)" "_\\1" id))))
 
 (defun org-taskjuggler-open-project (project)
   "Insert the beginning of a project declaration. All valid
