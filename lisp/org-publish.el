@@ -178,6 +178,11 @@ sitemap of files or summary page for a given project.
                          `tree' (the directory structure of the source
                          files is reflected in the sitemap).  Defaults to
                          `tree'.
+  :sitemap-sans-extension Remove extension from sitemap's
+                           filenames.  Useful to have cool
+                           URIs (see
+                           http://www.w3.org/Provider/Style/URI).
+                           Defaults to nil.
 
   If you create a sitemap file, adjust the sorting like this:
 
@@ -758,6 +763,7 @@ Default for SITEMAP-FILENAME is 'sitemap.org'."
 			  (concat "Sitemap for project " (car project))))
 	 (sitemap-style (or (plist-get project-plist :sitemap-style)
 			  'tree))
+	 (sitemap-sans-extension (plist-get project-plist :sitemap-sans-extension))
 	 (visiting (find-buffer-visiting sitemap-filename))
 	 (ifn (file-name-nondirectory sitemap-filename))
 	 file sitemap-buffer)
@@ -769,6 +775,8 @@ Default for SITEMAP-FILENAME is 'sitemap.org'."
 	(let ((fn (file-name-nondirectory file))
 	      (link (file-relative-name file dir))
 	      (oldlocal localdir))
+	  (when sitemap-sans-extension
+	    (setq link (file-name-sans-extension link)))
 	  ;; sitemap shouldn't list itself
 	  (unless (equal (file-truename sitemap-filename)
 			 (file-truename file))
