@@ -63,11 +63,13 @@
 		  body))))
     (if (or (member "code" result-params)
 	    (member "pp" result-params))
-	(format (concat "(let [org-mode-print-catcher (java.io.StringWriter.)]"
-			"(clojure.pprint/with-pprint-dispatch %s-dispatch"
-			"(clojure.pprint/pprint %s org-mode-print-catcher)"
-			"(str org-mode-print-catcher)))")
-		(if (member "code" result-params) "code" "simple") body)
+	(format
+	 (concat
+	  "(let [org-mode-print-catcher (java.io.StringWriter.)] "
+	  "(clojure.pprint/with-pprint-dispatch clojure.pprint/%s-dispatch "
+	  "(clojure.pprint/pprint (do %s) org-mode-print-catcher) "
+	  "(str org-mode-print-catcher)))")
+	 (if (member "code" result-params) "code" "simple") body)
       body)))
 
 (defun org-babel-execute:clojure (body params)
