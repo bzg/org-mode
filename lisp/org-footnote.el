@@ -53,14 +53,15 @@
 (defvar message-signature-separator) ;; defined in message.el
 
 (defconst org-footnote-re
-  (concat "[^][\n]"   ; to make sure it is not at the beginning of a line
-	  "\\["
-	  "\\(?:"
-	  "\\([0-9]+\\)"
-	  "\\|"
-	  (org-re "\\(fn:\\([-_[:word:]]+?\\)?\\)\\(?::\\([^\]]*?\\)\\)?")
-	  "\\)"
-	  "\\]")
+  ;; Footnotes ain't closed in this regexp, as their definition might
+  ;; contain square brackets \(i.e. links\).
+  ;;
+  ;; `org-re' is used for regexp compatibility with XEmacs.
+  (org-re (concat "\\[\\(?:"
+		  ;; Match inline footnotes.
+		  "fn:\\([-_[:word:]]+\\)?:\\|"
+		  ;; Match other footnotes.
+		  "\\([0-9]+\\)\\|\\(fn:[-_[:word:]]+\\)\\)"))
   "Regular expression for matching footnotes.")
 
 (defconst org-footnote-definition-re
@@ -151,43 +152,92 @@ extracted will be filled again."
 
 (defun org-footnote-at-reference-p ()
   "Is the cursor at a footnote reference?
-If yes, return the beginning position, the label, and the definition, if local."
-  (when (org-in-regexp org-footnote-re 15)
-    (list (match-beginning 0)
-	  (or (match-string 1)
-	      (if (equal (match-string 2) "fn:") nil (match-string 2)))
-	  (match-string 4))))
+
+If so, return an list containing its label, beginning and ending
+positions, and the definition, if local."
+  (when (and (not (or (org-in-commented-line)
+		      (org-in-verbatim-emphasis)))
+	     (or (org-in-regexp org-footnote-re)
+		 (save-excursion (re-search-backward org-footnote-re nil t)))
+	     ;; A footnote reference cannot start at bol.
+	     (/= (match-beginning 0) (point-at-bol)))
+    (let* ((beg (match-beginning 0))
+	   (label (or (match-string 2) (match-string 3)
+		      ;; Anonymous footnotes don't have labels
+		      (and (match-string 1) (concat "fn:" (match-string 1)))))
+	   ;; Inline footnotes don't end at (match-end 0) as
+	   ;; `org-footnote-re' stops just after the second colon.
+	   ;; Find the real ending with `scan-sexps', so Org doesn't
+	   ;; get fooled by unrelated closing square brackets.
+	   (end (ignore-errors (scan-sexps beg 1))))
+      ;; Point is really at a reference if it's located before true
+      ;; ending of the footnote and isn't within a LaTeX macro. About
+      ;; that case, some special attention should be paid. Indeed,
+      ;; when two footnotes are side by side, once the first one is
+      ;; changed into LaTeX, the second one might then be considered
+      ;; as an optional argument of the command. To prevent that, we
+      ;; have a look at the `org-protected' property of that LaTeX
+      ;; command.
+      (when (and end (< (point) end)
+		 (or (not (org-inside-latex-macro-p))
+		     (and (get-text-property (1- beg) 'org-protected)
+			  (not (get-text-property beg 'org-protected)))))
+	(list label beg end
+	      ;; Definition: ensure this is an inline footnote first.
+	      (and (or (not label) (match-string 1))
+		   (org-trim (buffer-substring (match-end 0) (1- end)))))))))
 
 (defun org-footnote-at-definition-p ()
-  "Is the cursor at a footnote definition.
+  "Is the cursor at a footnote definition?
+
 This matches only pure definitions like [1] or [fn:name] at the beginning
 of a line.  It does not match references like [fn:name:definition], where the
 footnote text is included and defined locally.
-The return value will be nil if not at a footnote definition, and a list
-with start and label of the footnote if there is a definition at point."
+
+The return value will be nil if not at a footnote definition, and a list with
+label, start, end and definition of the footnote otherwise."
   (save-excursion
-    (end-of-line 1)
+    (end-of-line)
     (let ((lim (save-excursion (re-search-backward "^\\*+ \\|^[ \t]*$" nil t))))
       (when (re-search-backward org-footnote-definition-re lim t)
-	(list (match-beginning 0) (match-string 2))))))
+	(end-of-line)
+	(list (match-string 2)
+	      (match-beginning 0)
+	      (save-match-data
+		(or (and (re-search-forward
+			  (org-re "^[ \t]*$\\|^\\*+ \\|^\\[\\([0-9]+\\|fn:[-_[:word:]]+\\)\\]")
+			  nil t)
+			 (progn (skip-chars-forward " \t\n") (point-at-bol)))
+		    (point-max)))
+	      (org-trim (buffer-substring (match-end 0) (point))))))))
+
+(defun org-footnote-get-definition (label)
+  "Return label, boundaries and definition of the footnote LABEL."
+  (let* ((label (regexp-quote (org-footnote-normalize-label label)))
+	 (re (format "^\\[%s\\]\\|.\\[%s:" label label))
+	 pos)
+    (save-excursion
+      (when (or (re-search-forward re nil t)
+		(and (goto-char (point-min))
+		     (re-search-forward re nil t))
+		(and (progn (widen) t)
+		     (goto-char (point-min))
+		     (re-search-forward re nil t)))
+	(let ((refp (org-footnote-at-reference-p)))
+	  (cond
+	   ((and (nth 3 refp) refp))
+	   ((org-footnote-at-definition-p))))))))
 
 (defun org-footnote-goto-definition (label)
-  "Find the definition of the footnote with label LABEL."
+  "Move point to the definition of the footnote LABEL."
   (interactive "sLabel: ")
   (org-mark-ring-push)
-  (setq label (org-footnote-normalize-label label))
-  (let ((re (format "^\\[%s\\]\\|.\\[%s:" label label))
-	pos)
-    (save-excursion
-      (setq pos (or (re-search-forward re nil t)
-		    (and (goto-char (point-min))
-			 (re-search-forward re nil t))
-		    (and (progn (widen) t)
-			 (goto-char (point-min))
-			 (re-search-forward re nil t)))))
-    (if (not pos)
+  (let ((def (org-footnote-get-definition label)))
+    (if (not def)
 	(error "Cannot find definition of footnote %s" label)
-      (goto-char pos)
+      (goto-char (nth 1 def))
+      (looking-at (format "^\\[%s\\]\\|.\\[%s:" label label))
+      (goto-char (match-end 0))
       (org-show-context 'link-search)
       (message "Edit definition and go back with `C-c &' or, if unique, with `C-c C-c'."))))
 
@@ -231,9 +281,11 @@ with start and label of the footnote if there is a definition at point."
 	  (and l (add-to-list 'rtn l)))
 	(goto-char (point-min))
 	(while (re-search-forward org-footnote-re nil t)
-	  (setq l (or (org-match-string-no-properties 1)
-		      (org-match-string-no-properties 2)))
-	  (and l (not (equal l "fn:")) (add-to-list 'rtn l)))))
+	  (backward-char)
+	  (let* ((full-ref (org-footnote-at-reference-p))
+		 (l (car full-ref)))
+	    ;; Skip anonymous footnotes.
+	    (and l (add-to-list 'rtn l))))))
     rtn))
 
 (defun org-footnote-unique-label (&optional current)
@@ -355,11 +407,12 @@ With prefix arg SPECIAL, offer additional commands in a menu."
 	(org-footnote-delete))
        (t (error "No such footnote command %c" c))))
      ((setq tmp (org-footnote-at-reference-p))
-      (if (nth 1 tmp)
-	  (org-footnote-goto-definition (nth 1 tmp))
-	(goto-char (match-beginning 4))))
+      (if (car tmp)
+	  (org-footnote-goto-definition (car tmp))
+	(goto-char (nth 1 tmp))
+	(forward-char 5)))
      ((setq tmp (org-footnote-at-definition-p))
-      (org-footnote-goto-previous-reference (nth 1 tmp)))
+      (org-footnote-goto-previous-reference (car tmp)))
      (t (org-footnote-new)))))
 
 (defvar org-footnote-insert-pos-for-preprocessor 'point-max
@@ -548,36 +601,47 @@ ENTRY is (fn-label num-mark definition)."
 (defun org-footnote-delete (&optional label)
   "Delete the footnote at point.
 This will remove the definition (even multiple definitions if they exist)
-and all references of a footnote label."
+and all references of a footnote label.
+
+If LABEL is non-nil, delete that footnote instead."
   (catch 'done
-    (let (x label l beg def-re (nref 0) (ndef 0))
-      (unless label
-	(when (setq x (org-footnote-at-reference-p))
-	  (setq label (nth 1 x))
-	  (when (or (not label) (equal "fn:" label))
-	    (delete-region (1+ (match-beginning 0)) (match-end 0))
-	    (message "Anonymous footnote removed")
-	    (throw 'done t)))
-	(when (and (not label) (setq x (org-footnote-at-definition-p)))
-	  (setq label (nth 1 x)))
-	(unless label (error "Don't know which footnote to remove")))
+    (let* ((nref 0) (ndef 0) x
+	   ;; 1. Determine LABEL of footnote at point.
+	   (label (cond
+		   ;; LABEL is provided as argument.
+		   (label)
+		   ;; Footnote reference at point. If the footnote is
+		   ;; anonymous, delete it and exit instead.
+		   ((setq x (org-footnote-at-reference-p))
+		    (or (car x)
+			(progn
+			  (delete-region (nth 1 x) (nth 2 x))
+			  (message "Anonymous footnote removed")
+			  (throw 'done t))))
+		   ;; Footnote definition at point.
+		   ((setq x (org-footnote-at-definition-p))
+		    (car x))
+		   (t (error "Don't know which footnote to remove")))))
+      ;; 2. Now that LABEL is non-nil, find every reference to it and
+      ;;    delete it. Increase counter NREF in the process.
       (save-excursion
 	(save-restriction
 	  (goto-char (point-min))
 	  (while (re-search-forward org-footnote-re nil t)
-	    (setq l (or (match-string 1) (match-string 2)))
-	    (when (equal l label)
-	      (delete-region (1+ (match-beginning 0)) (match-end 0))
-	      (incf nref)))
+	    (backward-char)
+	    (let* ((full-ref (org-footnote-at-reference-p))
+		   (l (car full-ref)))
+	      (when (equal l label)
+		(delete-region (nth 1 full-ref) (nth 2 full-ref))
+		(incf nref))))
+	  ;; 3. Find every definition of footnote LABEL and delete it.
+	  ;;    Increase counter NDEF in the process.
 	  (goto-char (point-min))
-	  (setq def-re (concat "^\\[" (regexp-quote label) "\\]"))
-	  (while (re-search-forward def-re nil t)
-	    (setq beg (match-beginning 0))
-	    (if (re-search-forward "^\\[\\|^[ \t]*$\\|^\\*+ " nil t)
-		(goto-char (match-beginning 0))
-	      (goto-char (point-max)))
-	    (delete-region beg (point))
-	    (incf ndef))))
+	  (let ((def-re (concat "^\\[" (regexp-quote label) "\\]")) beg)
+	    (while (re-search-forward def-re nil t)
+	      (let ((full-def (org-footnote-at-definition-p)))
+		(delete-region (nth 1 full-def) (nth 2 full-def)))
+	      (incf ndef)))))
       (org-footnote-auto-adjust-maybe)
       (message "%d definition(s) of and %d reference(s) of footnote %s removed"
 	       ndef nref label))))
@@ -605,7 +669,7 @@ and all references of a footnote label."
   (when (memq org-footnote-auto-adjust '(t renumber))
     (org-footnote-renumber-fn:N))
   (when (memq org-footnote-auto-adjust '(t sort))
-    (let ((label (nth 1 (org-footnote-at-definition-p))))
+    (let ((label (car (org-footnote-at-definition-p))))
       (org-footnote-normalize 'sort)
       (when label
 	(goto-char (point-min))
