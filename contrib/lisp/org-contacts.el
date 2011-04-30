@@ -54,6 +54,11 @@ If set to nil, all your Org files will be used."
   :type 'string
   :group 'org-contacts)
 
+(defcustom org-contacts-address-property "ADDRESS"
+  "Name of the property for contact address."
+  :type 'string
+  :group 'org-contacts)
+
 (defcustom org-contacts-birthday-property "BIRTHDAY"
   "Name of the property for contact birthday date."
   :type 'string
@@ -593,5 +598,18 @@ Org-contacts does not specify how to encode the name. So we try to do our best."
     (if to-buffer
 	(current-buffer)
 	(progn (save-buffer) (kill-buffer)))))
+
+(defun org-contacts-show-map (&optional name)
+  "Show contacts on a map. Requires google-maps-el."
+  (interactive)
+  (unless (fboundp 'google-maps-static-show)
+    (error "org-contacts-show-map requires google-maps-el."))
+  (google-maps-static-show
+   :markers
+   (loop
+      for contact in (org-contacts-filter name)
+      for addr = (cdr (assoc-string org-contacts-address-property (caddr contact)))
+      if addr
+      collect (cons (list addr) (list :label (string-to-char (car contact)))))))
 
 (provide 'org-contacts)
