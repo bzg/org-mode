@@ -12798,7 +12798,9 @@ ignore inherited ones."
 		      (or (org-up-heading-safe) (error nil))
 		      (setq parent t)))
 		(error nil)))))
-	(append (org-remove-uniherited-tags org-file-tags) tags)))))
+	(if local 
+	    tags
+	  (append (org-remove-uniherited-tags org-file-tags) tags))))))
 
 (defun org-add-prop-inherited (s)
   (add-text-properties 0 (length s) '(inherited t) s)
