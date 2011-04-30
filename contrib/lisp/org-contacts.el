@@ -59,6 +59,16 @@ If set to nil, all your Org files will be used."
   :type 'string
   :group 'org-contacts)
 
+(defcustom org-contacts-birthday-format "Birthday: %l (%Y)"
+  "Format of the anniversary agenda entry. The following replacements are available:
+
+  %h - Heading name
+  %l - Link to the heading
+  %y - Number of year
+  %Y - Number of year (ordinal)"
+  :type 'string
+  :group 'org-contacts)
+
 (defcustom org-contacts-last-read-mail-property "LAST_READ_MAIL"
   "Name of the property for contact last read email link storage."
   :type 'string
@@ -263,6 +273,7 @@ Format is a string matching the following format specification:
   %Y - Number of year (ordinal)"
   (let ((calendar-date-style 'american)
         (entry ""))
+    (unless format (setq format org-contacts-birthday-format))
     (loop for contact in (org-contacts-filter)
           for anniv = (let ((anniv (cdr (assoc-string
                                          (or field org-contacts-birthday-property)
@@ -272,7 +283,7 @@ Format is a string matching the following format specification:
                            (org-time-string-to-absolute anniv))))
           ;; Use `diary-anniversary' to compute anniversary.
           if (and anniv (apply 'diary-anniversary anniv))
-          collect (format-spec (or format "Birthday: %l (%Y)")
+          collect (format-spec format
                                `((?l . ,(org-with-point-at (cadr contact) (org-store-link nil)))
                                  (?h . ,(car contact))
                                  (?y . ,(- (calendar-extract-year date)
