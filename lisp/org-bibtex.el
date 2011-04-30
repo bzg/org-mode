@@ -223,6 +223,14 @@ For example setting to 'BIB_' would allow interoperability with fireforg."
   :group 'org-bibtex
   :type  'string)
 
+(defcustom org-bibtex-treat-headline-as-title t
+  "Treat headline text as title if title property is absent.
+If an entry is missing a title property, use the headline text as
+the property. If this value is t, `org-bibtex-check` will ignore
+a missing title field."
+  :group 'org-bibtex
+  :type 'boolean)
+
 (defcustom org-bibtex-export-arbitrary-fields nil
   "When converting to bibtex allow fields not defined in `org-bibtex-fields'.
 This only has effect if org-bibtex-prefix is defined, so as to
@@ -324,7 +332,7 @@ This variable is relevant only if `org-bibtex-export-tags-as-keywords` is t."
 			    (lambda (field)
 			      (let ((value (or (org-bibtex-get (from field))
 					       (and (equal :title field)
-						    (org-get-heading)))))
+						    (nth 4 (org-heading-components))))))
 				(when value (cons (from field) value))))
 			    (flatten
 			     (val :required (val (to type) org-bibtex-types))
@@ -379,7 +387,9 @@ With optional argument OPTIONAL, also prompt for optional fields."
 	 (keyword (name) (intern (concat ":" (downcase name))))
          (name (keyword) (upcase (substring (symbol-name keyword) 1))))
     (dolist (field (append
-		    (remove :title (val :required (val type org-bibtex-types)))
+		    (if org-bibtex-treat-headline-as-title
+			(remove :title (val :required (val type org-bibtex-types)))
+		      (val :required (val type org-bibtex-types)))
 		    (when optional (val :optional (val type org-bibtex-types)))))
       (when (consp field) ; or'd pair of fields e.g., (:editor :author)
         (let ((present (first (remove nil
