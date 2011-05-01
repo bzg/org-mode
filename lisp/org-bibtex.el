@@ -226,14 +226,14 @@ For example setting to 'BIB_' would allow interoperability with fireforg."
 (defcustom org-bibtex-treat-headline-as-title t
   "Treat headline text as title if title property is absent.
 If an entry is missing a title property, use the headline text as
-the property. If this value is t, `org-bibtex-check` will ignore
+the property. If this value is t, `org-bibtex-check' will ignore
 a missing title field."
   :group 'org-bibtex
   :type 'boolean)
 
 (defcustom org-bibtex-export-arbitrary-fields nil
   "When converting to bibtex allow fields not defined in `org-bibtex-fields'.
-This only has effect if org-bibtex-prefix is defined, so as to
+This only has effect if `org-bibtex-prefix' is defined, so as to
 ensure that other org-properties, such as CATEGORY or LOGGING are
 not placed in the exported bibtex entry."
   :group 'org-bibtex
@@ -303,7 +303,7 @@ This variable is relevant only if `org-bibtex-export-tags-as-keywords` is t."
           (type (org-bibtex-get "type"))
 	  (tags (when org-bibtex-tags-are-keywords
 		  (delq nil
-			(mapcar 
+			(mapcar
 			 (lambda (tag)
 			   (unless (member tag
 					   (append org-bibtex-tags
@@ -318,13 +318,13 @@ This variable is relevant only if `org-bibtex-export-tags-as-keywords` is t."
                        (remove nil
 			 (if (and org-bibtex-export-arbitrary-fields
 				  org-bibtex-prefix)
-			     (mapcar 
+			     (mapcar
 			      (lambda (kv)
 				(let ((key (car kv)) (val (cdr kv)))
 				  (when (and (string-match org-bibtex-prefix key)
-					     (not (equalp 
+					     (not (equalp
 						   (concat org-bibtex-prefix "TYPE") key)))
-				    (cons (downcase (replace-regexp-in-string 
+				    (cons (downcase (replace-regexp-in-string
 						     org-bibtex-prefix "" key))
 					  val))))
 			      (org-entry-properties nil 'standard))
@@ -366,7 +366,7 @@ This variable is relevant only if `org-bibtex-export-tags-as-keywords` is t."
   (org-bibtex-put org-bibtex-key-property
                   (if org-bibtex-autogen-keys
                       (let* ((entry (org-bibtex-headline))
-			     (key 
+			     (key
 			      (with-temp-buffer
 				(insert entry)
 				(bibtex-generate-autokey))))
@@ -385,7 +385,7 @@ This variable is relevant only if `org-bibtex-export-tags-as-keywords` is t."
 With optional argument OPTIONAL, also prompt for optional fields."
   (flet ((val (key lst) (cdr (assoc key lst)))
 	 (keyword (name) (intern (concat ":" (downcase name))))
-         (name (keyword) (upcase (substring (symbol-name keyword) 1))))
+         (name (keyword) (substring (symbol-name keyword) 1)))
     (dolist (field (append
 		    (if org-bibtex-treat-headline-as-title
 			(remove :title (val :required (val type org-bibtex-types)))
@@ -530,21 +530,35 @@ With prefix argument OPTIONAL also prompt for optional fields."
 With prefix argument OPTIONAL also prompt for optional fields."
   (interactive) (org-map-entries (lambda () (org-bibtex-check optional))))
 
-(defun org-bibtex-create (&optional arg)
-  "Create a new entry at the given level."
+(defun org-bibtex-create (&optional arg nonew)
+  "Create a new entry at the given level.
+With a prefix arg, query for optional fields as well.
+If nonew is t, add data to the headline of the entry at point."
   (interactive "P")
   (let* ((type (org-icompleting-read
-		"Type: " (mapcar (lambda (type) (symbol-name (car type)))
-				 org-bibtex-types)))
-	 (type (if (keywordp type) type (intern type))))
+		"Type: " (mapcar (lambda (type)
+				   (substring (symbol-name (car type)) 1))
+				 org-bibtex-types)
+		nil nil (when nonew (org-bibtex-get "TYPE"))))
+	 (type (if (keywordp type) type (intern (concat ":" type))))
+	 (org-bibtex-treat-headline-as-title (if nonew nil t)))
     (unless (assoc type org-bibtex-types)
       (error "type:%s is not known" type))
-    (org-insert-heading)
-    (let ((title (org-bibtex-ask :title)))
-      (insert title) (org-bibtex-put "TITLE" title))
+    (if nonew
+	(org-back-to-heading)
+      (org-insert-heading)
+      (let ((title (org-bibtex-ask :title)))
+	(insert title)
+	(org-bibtex-put "TITLE" title)))
     (org-bibtex-put "TYPE" (substring (symbol-name type) 1))
     (org-bibtex-fleshout type arg)
     (mapc (lambda (tag) (org-toggle-tag tag t)) org-bibtex-tags)))
+
+(defun org-bibtex-create-in-current-entry (&optional arg)
+  "Add bibliographical data to the current entry.
+With a prefix arg, query for optional fields."
+  (interactive "P")
+  (org-bibtex-create arg t))
 
 (defun org-bibtex-read ()
   "Read a bibtex entry and save to `*org-bibtex-entries*'.
@@ -588,11 +602,11 @@ This uses `bibtex-parse-entry'."
           (:type     nil)
           (:key      (org-bibtex-put org-bibtex-key-property (cdr pair)))
 	  (:keywords (if org-bibtex-tags-are-keywords
-			  (mapc 
+			  (mapc
 			   (lambda (kw)
 			     (togtag
 			      (replace-regexp-in-string
-			       "[^[:alnum:]_@#%]" "" 
+			       "[^[:alnum:]_@#%]" ""
 			       (replace-regexp-in-string "[ \t]+" "_" kw))))
 			   (split-string (cdr pair) ", *"))
 		       (org-bibtex-put (car pair) (cdr pair))))
@@ -607,6 +621,21 @@ This uses `bibtex-parse-entry'."
     (if entry
 	(org-bibtex-write)
       (error "yanked text does not appear to contain a bibtex entry"))))
+
+(defun org-bibtex-export-to-kill-ring ()
+  "Export current headline to kill ring as bibtex entry."
+  (interactive)
+  (kill-new (org-bibtex-headline)))
+
+(defun org-bibtex-search (string)
+  "Search for bibliographical entries in agenda files.
+This function relies `org-search-view' to locate results."
+  (interactive "sSearch string: ")
+  (let ((org-agenda-overriding-header "Bib search results:")
+        (org-agenda-search-view-always-boolean t))
+    (org-search-view nil
+		     (format "%s +{:%sTYPE:}"
+			     string org-bibtex-prefix))))
 
 (provide 'org-bibtex)
 
