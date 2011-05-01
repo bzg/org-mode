@@ -231,7 +231,6 @@ not placed in the exported bibtex entry."
   :group 'org-bibtex
   :type 'boolean)
 
-;; TODO if ID, test to make sure ID is unique
 (defcustom org-bibtex-key-property "CUSTOM_ID"
   "Property that holds the bibtex key.
 By default, this is CUSTOM_ID, which enables easy linking to
@@ -356,10 +355,19 @@ This variable is relevant only if `org-bibtex-export-tags-as-keywords` is t."
   "Generate an autokey for the current headline"
   (org-bibtex-put org-bibtex-key-property
                   (if org-bibtex-autogen-keys
-                      (let ((entry (org-bibtex-headline)))
-                        (with-temp-buffer
-                          (insert entry)
-                          (bibtex-generate-autokey)))
+                      (let* ((entry (org-bibtex-headline))
+			     (key 
+			      (with-temp-buffer
+				(insert entry)
+				(bibtex-generate-autokey))))
+			;; test for duplicate IDs if using global ID
+			(when (and
+			       (equal org-bibtex-key-property "ID")
+			       (featurep 'org-id)
+			       (hash-table-p org-id-locations)
+			       (gethash key org-id-locations))
+			  (warn "Another entry has the same ID"))
+			key)
                     (read-from-minibuffer "id: "))))
 
 (defun org-bibtex-fleshout (type &optional optional)
