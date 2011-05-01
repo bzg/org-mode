@@ -312,11 +312,13 @@ This variable is relevant only if `org-bibtex-export-tags-as-keywords` is t."
 				  org-bibtex-prefix)
 			     (mapcar 
 			      (lambda (kv)
-				(when (string-match org-bibtex-prefix (car kv))
-				  (cons (downcase (replace-regexp-in-string 
-						   org-bibtex-prefix ""
-						   (car kv)))
-					(cdr kv))))
+				(let ((key (car kv)) (val (cdr kv)))
+				  (when (and (string-match org-bibtex-prefix key)
+					     (not (equalp 
+						   (concat org-bibtex-prefix "TYPE") key)))
+				    (cons (downcase (replace-regexp-in-string 
+						     org-bibtex-prefix "" key))
+					  val))))
 			      (org-entry-properties nil 'standard))
 			   (mapcar
 			    (lambda (field)
