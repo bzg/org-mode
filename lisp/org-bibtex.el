@@ -241,6 +241,31 @@ IDs must be unique."
   :group 'org-bibtex
   :type 'string)
 
+(defcustom org-bibtex-tags nil
+  "List of tag(s) that should be added to new bib entries."
+  :group 'org-bibtex
+  :type '(repeat  :tag "Tag" (string)))
+
+(defcustom org-bibtex-tags-are-keywords nil
+  "Convert the value of the keywords field to tags and vice versa.
+If set to t, comma-separated entries in a bibtex entry's keywords
+field will be converted to org tags. Note: spaces will be escaped
+with underscores, and characters that are not permitted in org
+tags will be removed.
+
+If t, local tags in an org entry will be exported as a
+comma-separated string of keywords when exported to bibtex. Tags
+defined in `org-bibtex-tags' or `org-bibtex-no-export-tags' will
+not be exported."
+  :group 'org-bibtex
+  :type 'boolean)
+
+(defcustom org-bibtex-no-export-tags nil
+  "List of tag(s) that should not be converted to keywords.
+This variable is relevant only if `org-bibtex-export-tags-as-keywords` is t."
+  :group 'org-bibtex
+  :type '(repeat :tag "Tag" (string)))
+
 
 ;;; Utility functions
 (defun org-bibtex-get (property)
@@ -268,7 +293,16 @@ IDs must be unique."
                                    lsts))))
     (let ((notes (buffer-string))
           (id (org-bibtex-get org-bibtex-key-property))
-          (type (org-bibtex-get "type")))
+          (type (org-bibtex-get "type"))
+	  (tags (when org-bibtex-tags-are-keywords
+		  (delq nil
+			(mapcar 
+			 (lambda (tag)
+			   (unless (member tag
+					   (append org-bibtex-tags
+						   org-bibtex-no-export-tags))
+			     tag))
+			 (org-get-local-tags-at))))))
       (when type
         (let ((entry (format
                       "@%s{%s,\n%s\n}\n" type id
@@ -297,6 +331,12 @@ IDs must be unique."
                        ",\n"))))
           (with-temp-buffer
             (insert entry)
+	    (when tags
+	      (bibtex-beginning-of-entry)
+	      (if (re-search-forward "keywords.*=.*{\\(.*\\)}" nil t)
+	    	  (progn (goto-char (match-end 1)) (insert ", "))
+	    	(bibtex-make-field "keywords" t t))
+	      (insert (mapconcat #'identity tags ", ")))
             (bibtex-reformat) (buffer-string)))))))
 
 (defun org-bibtex-ask (field)
@@ -483,7 +523,8 @@ With prefix argument OPTIONAL also prompt for optional fields."
     (let ((title (org-bibtex-ask :title)))
       (insert title) (org-bibtex-put "TITLE" title))
     (org-bibtex-put "TYPE" (substring (symbol-name type) 1))
-    (org-bibtex-fleshout type arg)))
+    (org-bibtex-fleshout type arg)
+    (mapc (lambda (tag) (org-toggle-tag tag t)) org-bibtex-tags)))
 
 (defun org-bibtex-read ()
   "Read a bibtex entry and save to `*org-bibtex-entries*'.
@@ -515,7 +556,8 @@ This uses `bibtex-parse-entry'."
     (error "No entries in `*org-bibtex-entries*'."))
   (let ((entry (pop *org-bibtex-entries*))
 	(org-special-properties nil)) ; avoids errors with `org-entry-put'
-    (flet ((val (field) (cdr (assoc field entry))))
+    (flet ((val (field) (cdr (assoc field entry)))
+	   (togtag (tag) (org-toggle-tag tag t)))
       (org-insert-heading)
       (insert (val :title))
       (org-bibtex-put "TITLE" (val :title))
@@ -525,7 +567,17 @@ This uses `bibtex-parse-entry'."
           (:title    nil)
           (:type     nil)
           (:key      (org-bibtex-put org-bibtex-key-property (cdr pair)))
-          (otherwise (org-bibtex-put (car pair)  (cdr pair))))))))
+	  (:keywords (if org-bibtex-tags-are-keywords
+			  (mapc 
+			   (lambda (kw)
+			     (togtag
+			      (replace-regexp-in-string
+			       "[^[:alnum:]_@#%]" "" 
+			       (replace-regexp-in-string "[ \t]+" "_" kw))))
+			   (split-string (cdr pair) ", *"))
+		       (org-bibtex-put (car pair) (cdr pair))))
+          (otherwise (org-bibtex-put (car pair)  (cdr pair)))))
+      (mapc #'togtag org-bibtex-tags))))
 
 (defun org-bibtex-yank ()
   "If kill ring holds a bibtex entry yank it as an Org-mode headline."
