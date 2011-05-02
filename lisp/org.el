@@ -12798,7 +12798,7 @@ ignore inherited ones."
 		      (or (org-up-heading-safe) (error nil))
 		      (setq parent t)))
 		(error nil)))))
-	(if local 
+	(if local
 	    tags
 	  (append (org-remove-uniherited-tags org-file-tags) tags))))))
 
