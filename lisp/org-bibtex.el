@@ -143,7 +143,7 @@
     (:inbook
      (:description . "A part of a book, which may be a chapter (or section or whatever) and/or a range of pages.")
      (:required (:author :editor) :title (:chapter :pages) :publisher :year)
-     (:optional (:volume :number) :series :type :address :edition :month :note))
+     (:optional :crossref (:volume :number) :series :type :address :edition :month :note))
     (:incollection
      (:description . "A part of a book having its own title.")
      (:required :author :title :booktitle :publisher :year)
@@ -151,7 +151,7 @@
     (:inproceedings
      (:description . "An article in a conference proceedings")
      (:required :author :title :booktitle :year)
-     (:optional :editor (:volume :number) :series :pages :address :month :organization :publisher :note))
+     (:optional :crossref :editor (:volume :number) :series :pages :address :month :organization :publisher :note))
     (:manual
      (:description . "Technical documentation.")
      (:required :title)
