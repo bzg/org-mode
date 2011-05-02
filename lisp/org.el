@@ -12433,7 +12433,7 @@ only lines with a TODO keyword are included in the output."
 			 org-tags-exclude-from-inheritance))
 	    ;; selective inheritance, remove uninherited ones
 	    (setcdr (car tags-alist)
-		    (org-remove-uniherited-tags (cdar tags-alist))))
+		    (org-remove-uninherited-tags (cdar tags-alist))))
 	  (when (and (or (not todo-only)
 			 (and (member todo org-not-done-keywords)
 			      (or (not org-agenda-tags-todo-honor-ignore-options)
@@ -12493,7 +12493,7 @@ only lines with a TODO keyword are included in the output."
       (org-hide-archived-subtrees (point-min) (point-max)))
     (nreverse rtn)))
 
-(defun org-remove-uniherited-tags (tags)
+(defun org-remove-uninherited-tags (tags)
   "Remove all tags that are not inherited from the list TAGS."
   (cond
    ((eq org-use-tag-inheritance t)
@@ -12790,7 +12790,7 @@ ignore inherited ones."
 			  (setq ltags (mapcar 'org-add-prop-inherited ltags)))
 			(setq tags (append
 				    (if parent
-					(org-remove-uniherited-tags ltags)
+					(org-remove-uninherited-tags ltags)
 				      ltags)
 				    tags)))
 		      (or org-use-tag-inheritance (throw 'done t))
@@ -12800,7 +12800,7 @@ ignore inherited ones."
 		(error nil)))))
 	(if local
 	    tags
-	  (append (org-remove-uniherited-tags org-file-tags) tags))))))
+	  (append (org-remove-uninherited-tags org-file-tags) tags))))))
 
 (defun org-add-prop-inherited (s)
   (add-text-properties 0 (length s) '(inherited t) s)
