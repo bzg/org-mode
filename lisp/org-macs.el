@@ -323,16 +323,18 @@ but it also means that the buffer should stay alive
 during the operation, because otherwise all these markers will
 point nowhere."
   (declare (indent 1))
-  `(let ((data (org-outline-overlay-data ,use-markers)))
+  `(let ((data (org-outline-overlay-data ,use-markers))
+	 rtn)
      (unwind-protect
 	 (progn
-	   ,@body
+	   (setq rtn (progn ,@body))
 	   (org-set-outline-overlay-data data))
        (when ,use-markers
 	 (mapc (lambda (c)
 		 (and (markerp (car c)) (move-marker (car c) nil))
 		 (and (markerp (cdr c)) (move-marker (cdr c) nil)))
-	       data)))))
+	       data)))
+     rtn))
 
 (defmacro org-with-wide-buffer (&rest body)
  "Execute body while temporarily widening the buffer."
