@@ -221,17 +221,36 @@ the buffer position bounding the search.
 Return value is a list like those provided by `org-footnote-at-reference-p'.
 If no footnote is found, return nil."
   (save-excursion
-    (let* ((label-fmt (if label
-			  (format "\\[%s[]:]" label)
-			(org-re "\\[[-_[:word:]]+[]:]"))))
+    (let* ((label-fmt (if label (format "\\[%s[]:]" label) org-footnote-re)))
       (catch 'exit
 	(while t
 	  (unless (funcall (if backward #'re-search-backward #'re-search-forward)
 			   label-fmt limit t)
 	    (throw 'exit nil))
 	  (unless backward (backward-char))
-	  (when (setq ref (org-footnote-at-reference-p))
-	    (throw 'exit ref)))))))
+	  (let ((ref (org-footnote-at-reference-p)))
+	    (when ref (throw 'exit ref))))))))
+
+(defun org-footnote-next-reference-or-definition (limit)
+  "Move point to next footnote reference or definition.
+
+LIMIT is the buffer position bounding the search.
+
+Return value is a list like those provided by
+`org-footnote-at-reference-p' or `org-footnote-at-definition-p'.
+If no footnote is found, return nil."
+  (let* (ref)
+    (catch 'exit
+      (while t
+	(unless (re-search-forward org-footnote-re limit t)
+	  (throw 'exit nil))
+	(cond
+	 ((setq ref (org-footnote-at-reference-p))
+	  (throw 'exit ref))
+	 ;; Definition: also grab the last square bracket, not matched
+	 ;; in `org-footnote-re'
+	 ((= (point-at-bol) (match-beginning 0))
+	  (throw 'exit (list nil (match-beginning 0) (1+ (match-end 0))))))))))
 
 (defun org-footnote-get-definition (label)
   "Return label, boundaries and definition of the footnote LABEL."

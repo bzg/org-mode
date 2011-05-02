@@ -5272,20 +5272,20 @@ will be prompted for."
 
 (defun org-activate-footnote-links (limit)
   "Run through the buffer and add overlays to links."
-  (if (re-search-forward "\\(^\\|[^][]\\)\\(\\[\\([0-9]+\\]\\|fn:[^ \t\r\n:]+?[]:]\\)\\)"
-			 limit t)
-      (progn
-	(org-remove-flyspell-overlays-in (match-beginning 0) (match-end 0))
-	(add-text-properties (match-beginning 2) (match-end 2)
+  (let ((fn (org-footnote-next-reference-or-definition limit)))
+    (when fn
+      (let ((beg (nth 1 fn)) (end (nth 2 fn)))
+	(org-remove-flyspell-overlays-in beg end)
+	(add-text-properties beg end
 			     (list 'mouse-face 'highlight
 				   'keymap org-mouse-map
 				   'help-echo
-				   (if (= (point-at-bol) (match-beginning 2))
+				   (if (= (point-at-bol) beg)
 				       "Footnote definition"
-				     "Footnote reference")
-				   ))
-	(org-rear-nonsticky-at (match-end 2))
-	t)))
+				     "Footnote reference")))
+	(save-excursion
+	  (goto-char beg)
+	  (looking-at (regexp-quote (buffer-substring beg end))))))))
 
 (defun org-activate-bracket-links (limit)
   "Run through the buffer and add overlays to bracketed links."
@@ -5581,7 +5581,7 @@ needs to be inserted at a specific position in the font-lock sequence.")
 	   (if (memq 'radio lk) '(org-activate-target-links (0 'org-link t)))
 	   (if (memq 'date lk) '(org-activate-dates (0 'org-date t)))
 	   (if (memq 'footnote lk) '(org-activate-footnote-links
-				     (2 'org-footnote t)))
+				     (0 'org-footnote t)))
 	   '("^&?%%(.*\\|<%%([^>\n]*?>" (0 'org-sexp-date t))
 	   '(org-hide-wide-columns (0 nil append))
 	   ;; TODO lines
