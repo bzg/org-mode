@@ -5892,7 +5892,8 @@ be selected:
              @r{To use this, @code{:block} or @code{:tstart}, @code{:tend} are needed.}
 :stepskip0   @r{Do not show steps that have zero time.}
 :fileskip0   @r{Do not show table sections from files which did not contribute.}
-:tags        @r{A tags match to select entries that should contribute}.
+:tags        @r{A tags match to select entries that should contribute.  See}
+             @r{@ref{Matching tags and properties} for the match syntax.}
 @end example
 
 Then there are options which determine the formatting of the table.  There
