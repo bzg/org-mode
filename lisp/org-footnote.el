@@ -301,10 +301,13 @@ If no footnote is found, return nil."
       (org-show-context 'link-search))))
 
 (defun org-footnote-normalize-label (label)
-  (if (numberp label) (setq label (number-to-string label)))
-  (if (not (string-match "^[0-9]+$\\|^$\\|^fn:" label))
-      (setq label (concat "fn:" label)))
-  label)
+  "Return LABEL as an appropriate string."
+  (cond
+   ((numberp label) (number-to-string label))
+   ((equal "" label) nil)
+   ((not (string-match "^[0-9]+$\\|^fn:" label))
+    (concat "fn:" label))
+   (t label)))
 
 (defun org-footnote-all-labels ()
   "Return list with all defined foot labels used in the buffer."
@@ -348,21 +351,21 @@ or new, let the user edit the definition of the footnote."
 		      (org-footnote-all-labels)))
 	 (propose (org-footnote-unique-label labels))
 	 (label
-	  (cond 
-	   ((member org-footnote-auto-label '(t plain))
-	    propose)
-	   ((equal org-footnote-auto-label 'random)
-	    (require 'org-id)
-	    (substring (org-id-uuid) 0 8))
-	   (t
-	    (completing-read
-	     "Label (leave empty for anonymous): "
-	     (mapcar 'list labels) nil nil
-	     (if (eq org-footnote-auto-label 'confirm) propose nil)
-	     'org-footnote-label-history)))))
-    (setq label (org-footnote-normalize-label label))
+	  (org-footnote-normalize-label
+	   (cond
+	    ((member org-footnote-auto-label '(t plain))
+	     propose)
+	    ((equal org-footnote-auto-label 'random)
+	     (require 'org-id)
+	     (substring (org-id-uuid) 0 8))
+	    (t
+	     (completing-read
+	      "Label (leave empty for anonymous): "
+	      (mapcar 'list labels) nil nil
+	      (if (eq org-footnote-auto-label 'confirm) propose nil)
+	      'org-footnote-label-history))))))
     (cond
-     ((equal label "")
+     ((not label)
       (insert "[fn:: ]")
       (backward-char 1))
      ((member label labels)
@@ -380,35 +383,33 @@ or new, let the user edit the definition of the footnote."
 (defun org-footnote-create-definition (label)
   "Start the definition of a footnote with label LABEL."
   (interactive "sLabel: ")
-  (setq label (org-footnote-normalize-label label))
-  (let (re)
+  (let ((label (org-footnote-normalize-label label)))
     (cond
      ((org-mode-p)
-      (if (not org-footnote-section)
-	  ;; No section, put footnote into the current outline node
-	  nil
-	;; Try to find or make the special node
+      ;; No section, put footnote into the current outline node Try to
+      ;; find or make the special node
+      (when org-footnote-section
 	(goto-char (point-min))
-	(setq re (concat "^\\*+[ \t]+" org-footnote-section "[ \t]*$"))
-	(unless (or (re-search-forward re nil t)
-		    (and (progn (widen) t)
-			 (re-search-forward re nil t)))
+	(let ((re (concat "^\\*+[ \t]+" org-footnote-section "[ \t]*$")))
+	  (unless (or (re-search-forward re nil t)
+		      (and (progn (widen) t)
+			   (re-search-forward re nil t)))
 	  (goto-char (point-max))
-	  (insert "\n\n* " org-footnote-section "\n")))
+	  (insert "\n\n* " org-footnote-section "\n"))))
       ;; Now go to the end of this entry and insert there.
       (org-footnote-goto-local-insertion-point)
       (org-show-context 'link-search))
      (t
-      (setq re (concat "^" org-footnote-tag-for-non-org-mode-files "[ \t]*$"))
-      (unless (re-search-forward re nil t)
-	(let ((max (if (and (derived-mode-p 'message-mode)
-			    (re-search-forward message-signature-separator nil t))
-		       (progn (beginning-of-line) (point))
-		     (goto-char (point-max)))))
-	  (skip-chars-backward " \t\r\n")
-	  (delete-region (point) max)
-	  (insert "\n\n")
-	  (insert org-footnote-tag-for-non-org-mode-files "\n")))
+      (let ((re (concat "^" org-footnote-tag-for-non-org-mode-files "[ \t]*$")))
+	(unless (re-search-forward re nil t)
+	  (let ((max (if (and (derived-mode-p 'message-mode)
+			      (re-search-forward message-signature-separator nil t))
+			 (progn (beginning-of-line) (point))
+		       (goto-char (point-max)))))
+	    (skip-chars-backward " \t\r\n")
+	    (delete-region (point) max)
+	    (insert "\n\n")
+	    (insert org-footnote-tag-for-non-org-mode-files "\n"))))
 	;; Skip existing footnotes
       (while (re-search-forward "^[[:space:]]*\\[[^]]+\\] " nil t)
 	(forward-line))))
