@@ -147,7 +147,7 @@
     (:incollection
      (:description . "A part of a book having its own title.")
      (:required :author :title :booktitle :publisher :year)
-     (:optional :editor (:volume :number) :series :type :chapter :pages :address :edition :month :note))
+     (:optional :crossref :editor (:volume :number) :series :type :chapter :pages :address :edition :month :note))
     (:inproceedings
      (:description . "An article in a conference proceedings")
      (:required :author :title :booktitle :year)
