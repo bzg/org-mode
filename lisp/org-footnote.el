@@ -277,7 +277,7 @@ If no footnote is found, return nil."
     (if (not def)
 	(error "Cannot find definition of footnote %s" label)
       (goto-char (nth 1 def))
-      (looking-at (format "^\\[%s\\]\\|.\\[%s:" label label))
+      (looking-at (format "\\[%s\\]\\|\\[%s:" label label))
       (goto-char (match-end 0))
       (org-show-context 'link-search)
       (message "Edit definition and go back with `C-c &' or, if unique, with `C-c C-c'."))))
