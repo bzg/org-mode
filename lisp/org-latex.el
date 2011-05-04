@@ -2328,8 +2328,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
     (while (re-search-forward
 	    "^[ \t]*#\\+index:[ \t]*\\([^ \t\r\n].*?\\)[ \t]*$"
 	    nil t)
-      (let ((entry (match-string 1)))
-	(replace-match (format "\\index{%s}" (match-string 1)) t t))))
+      (replace-match (format "\\index{%s}" (match-string 1)) t t)))
 
   ;; Convert center
   (goto-char (point-min))
