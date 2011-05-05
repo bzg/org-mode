@@ -403,6 +403,32 @@ This adds `org-contacts-gnus-check-mail-address' and
   (add-hook 'gnus-article-prepare-hook 'org-contacts-gnus-check-mail-address)
   (add-hook 'gnus-article-prepare-hook 'org-contacts-gnus-store-last-mail))
 
+(defun wl-get-from-header-content ()
+  (save-excursion
+    (set-buffer (org-capture-get :original-buffer))
+    (cond
+     ((eq major-mode 'wl-summary-mode) (when wl-summary-buffer-elmo-folder
+                                         (elmo-message-field
+                                          wl-summary-buffer-elmo-folder
+                                          (wl-summary-message-number)
+                                          'from)))
+     ((eq major-mode 'mime-view-mode) (std11-narrow-to-header)
+                                      (prog1
+                                          (std11-fetch-field "From")
+                                        (widen))))))
+
+(defun org-contacts-template-wl-name (&optional return-value)
+  (let ((from (wl-get-from-header-content)))
+    (or (and from (wl-address-header-extract-realname from))
+       return-value
+       "%^{Name}")))
+
+(defun org-contacts-template-wl-email (&optional return-value)
+  (let ((from (wl-get-from-header-content)))
+    (or (and from (wl-address-header-extract-address from))
+       return-value
+       (concat "%^{" org-contacts-email-property "}p"))))
+
 (defun org-contacts-view-send-email (&optional ask)
   "Send email to the contact at point.
 If ASK is set, ask for the email address even if there's only one address."
