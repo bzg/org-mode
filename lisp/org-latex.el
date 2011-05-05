@@ -2330,7 +2330,8 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 	    nil t)
       (setq entry 
 	    (save-match-data
-	      (org-export-latex-fontify-headline (match-string 1))))
+	      (org-export-latex-protect-string
+	       (org-export-latex-fontify-headline (match-string 1)))))
       (replace-match (format "\\index{%s}" entry) t t)))
 
   ;; Convert center
