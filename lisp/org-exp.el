@@ -864,7 +864,7 @@ security risks."
 				 options))
 	      (setq p (plist-put p (car o)
 				 (car (read-from-string
-				       (match-string 1 options))))))))))
+				       (match-string 2 options))))))))))
   p)
 
 (defun org-export-add-subtree-options (p pos)
