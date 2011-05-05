@@ -2324,11 +2324,14 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 
   ;; Convert #+INDEX to LaTeX \\index.
   (goto-char (point-min))
-  (let ((case-fold-search t))
+  (let ((case-fold-search t) entry)
     (while (re-search-forward
 	    "^[ \t]*#\\+index:[ \t]*\\([^ \t\r\n].*?\\)[ \t]*$"
 	    nil t)
-      (replace-match (format "\\index{%s}" (match-string 1)) t t)))
+      (setq entry 
+	    (save-match-data
+	      (org-export-latex-fontify-headline (match-string 1))))
+      (replace-match (format "\\index{%s}" entry) t t)))
 
   ;; Convert center
   (goto-char (point-min))
