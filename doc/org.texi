@@ -6429,6 +6429,12 @@ run and the previous one will not be resumed.
 Do not narrow the target buffer, simply show the full buffer.  Default is to
 narrow it so that you only see the new material.
 
+@item :table-line-pos
+Specification of the location in the table where the new line should be
+inserted.  It should be a string like @code{"II-3"} meaning that the new
+line should become the third line before the second horizontal separator
+line.
+
 @item :kill-buffer
 If the target file was not yet visited when capture was invoked, kill the
 buffer again after capture is completed.

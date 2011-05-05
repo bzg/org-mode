@@ -194,9 +194,9 @@ properties are:
                      only see the new stuff.
 
  :table-line-pos     Specification of the location in the table where the
-                     new line should be inserted.  It looks like \"II-3\"
-                     which means that the new line should become the third
-                     line before the second horizontal separator line.
+                     new line should be inserted.  It should be a string like
+                     \"II-3\", meaning that the new line should become the
+                     third line before the second horizontal separator line.
 
  :kill-buffer        If the target file was not yet visited by a buffer when
                      capture was invoked, kill the buffer again after capture
