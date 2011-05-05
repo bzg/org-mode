@@ -11896,6 +11896,9 @@ The following header arguments are defined:
 * eval::                        Limit evaluation of specific code blocks
 @end menu
 
+Additional header arguments are defined on a language-specific basis, see
+@ref{Languages}.
+
 @node var, results, Specific header arguments, Specific header arguments
 @subsubsection @code{:var}
 The @code{:var} header argument is used to pass arguments to code blocks.
