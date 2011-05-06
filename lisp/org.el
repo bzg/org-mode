@@ -13439,7 +13439,7 @@ a *different* entry, you cannot use these techniques."
 
 (defconst org-special-properties
   '("TODO" "TAGS" "ALLTAGS" "DEADLINE" "SCHEDULED" "CLOCK" "CLOSED" "PRIORITY"
-    "TIMESTAMP" "TIMESTAMP_IA" "BLOCKED" "FILE")
+    "TIMESTAMP" "TIMESTAMP_IA" "BLOCKED" "FILE" "CLOCKSUM")
   "The special properties valid in Org-mode.
 
 These are properties that are not defined in the property drawer,
