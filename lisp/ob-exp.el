@@ -93,7 +93,8 @@ source block function.")
        (set-buffer (get-file-buffer org-current-export-file))
        (save-restriction
 	 (condition-case nil
-	     (org-open-link-from-string link)
+	     (let ((org-link-search-inhibit-query t))
+	       (org-open-link-from-string link))
 	   (error (when heading
 		    (goto-char (point-min))
 		    (re-search-forward (regexp-quote heading) nil t))))
