@@ -404,6 +404,9 @@ This adds `org-contacts-gnus-check-mail-address' and
   (add-hook 'gnus-article-prepare-hook 'org-contacts-gnus-store-last-mail))
 
 (defun wl-get-from-header-content ()
+  "Retrieve the content of the `From' header of an email.
+Works from wl-summary-mode and mime-view-mode - that is while viewing email.
+Depends on Wanderlust been loaded."
   (save-excursion
     (set-buffer (org-capture-get :original-buffer))
     (cond
