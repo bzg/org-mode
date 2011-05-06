@@ -116,17 +116,16 @@ the variable."
       (save-restriction
 	(widen)
 	(goto-char (point-min))
-	(if (let ((result_regexp (concat "^[ \t]*#\\+\\(TBLNAME\\|RESNAME"
-					 "\\|RESULTS\\):[ \t]*"
-					 (regexp-quote ref) "[ \t]*$"))
-		  (regexp (concat org-babel-src-name-regexp
-				  (regexp-quote ref) "\\(\(.*\)\\)?" "[ \t]*$")))
+	(if (let* ((rx (regexp-quote ref))
+		   (res-rx (concat org-babel-result-regexp rx "[ \t]*$"))
+		   (src-rx (concat org-babel-src-name-regexp
+				   rx "\\(\(.*\)\\)?" "[ \t]*$")))
 	      ;; goto ref in the current buffer
 	      (or (and (not args)
-		       (or (re-search-forward result_regexp nil t)
-			   (re-search-backward result_regexp nil t)))
-		  (re-search-forward regexp nil t)
-		  (re-search-backward regexp nil t)
+		       (or (re-search-forward res-rx nil t)
+			   (re-search-backward res-rx nil t)))
+		  (re-search-forward src-rx nil t)
+		  (re-search-backward src-rx nil t)
 		  ;; check the Library of Babel
 		  (setq lob-info (cdr (assoc (intern ref)
 					     org-babel-library-of-babel)))))

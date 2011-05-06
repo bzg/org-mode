@@ -306,8 +306,12 @@ specific header arguments as well.")
   '((:session . "none") (:results . "replace") (:exports . "results"))
   "Default arguments to use when evaluating an inline source block.")
 
+(defvar org-babel-data-names '("TBLNAME" "RESNAME" "RESULTS" "DATA"))
+
 (defvar org-babel-result-regexp
-  "^[ \t]*#\\+res\\(ults\\|name\\)\\(\\[\\([[:alnum:]]+\\)\\]\\)?\\:[ \t]*"
+  (concat "^[ \t]*#\\+"
+	  (regexp-opt org-babel-data-names)
+	  "\\(\\[\\([[:alnum:]]+\\)\\]\\)?\\:[ \t]*")
   "Regular expression used to match result lines.
 If the results are associated with a hash key then the hash will
 be saved in the second match data.")
