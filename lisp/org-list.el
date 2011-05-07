@@ -2586,7 +2586,8 @@ compare entries."
 		    (string-to-number (buffer-substring (match-end 0)
 							(point-at-eol))))
 		   ((= dcst ?a)
-		    (buffer-substring (match-end 0) (point-at-eol)))
+		    (funcall case-func
+			     (buffer-substring (match-end 0) (point-at-eol))))
 		   ((= dcst ?t)
 		    (cond
 		     ;; If it is a timer list, convert timer to seconds
