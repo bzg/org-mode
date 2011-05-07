@@ -369,7 +369,7 @@ It depends on `org-empty-line-terminates-plain-lists'.")
   (concat "^[ \t]*\\(\\(?:[-+*]\\|\\(?:[0-9]+\\|[A-Za-z]\\)[.)]\\)[ \t]*\\)"
 	  "\\(?:\\[@\\(?:start:\\)?\\([0-9]+\\|[A-Za-z]\\)\\]\\)?"
 	  "\\(?:\\(\\[[ X-]\\]\\)[ \t]+\\)?"
-	  "\\(?:\\(.*\\)[ \t]+::[ \t]+\\)?")
+	  "\\(?:\\(.*\\)[ \t]+::\\(?:[ \t]+\\|$\\)\\)?")
   "Matches a list item and puts everything into groups:
 group 1: bullet
 group 2: counter
