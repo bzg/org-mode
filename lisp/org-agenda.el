@@ -4575,13 +4575,12 @@ the documentation of `org-diary'."
       (catch :skip
 	(save-match-data
 	  (beginning-of-line)
+	  (org-agenda-skip)
 	  (setq beg (point) end (save-excursion (outline-next-heading) (point)))
 	  (when (org-agenda-check-for-timestamp-as-reason-to-ignore-todo-item end)
 	    (goto-char (1+ beg))
 	    (or org-agenda-todo-list-sublevels (org-end-of-subtree 'invisible))
 	    (throw :skip nil)))
-	(goto-char beg)
-	(org-agenda-skip)
 	(goto-char (match-beginning 1))
 	(setq marker (org-agenda-new-marker (match-beginning 0))
 	      category (org-get-category)

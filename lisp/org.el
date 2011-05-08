@@ -12437,17 +12437,31 @@ only lines with a TODO keyword are included in the output."
 	    ;; selective inheritance, remove uninherited ones
 	    (setcdr (car tags-alist)
 		    (org-remove-uninherited-tags (cdar tags-alist))))
-	  (when (and (or (not todo-only)
-			 (and (member todo org-not-done-keywords)
-			      (or (not org-agenda-tags-todo-honor-ignore-options)
-				  (not (org-agenda-check-for-timestamp-as-reason-to-ignore-todo-item)))))
-		     (let ((case-fold-search t)) (eval matcher))
-		     (or
-		      (not (member org-archive-tag tags-list))
-		      ;; we have an archive tag, should we use this anyway?
-		      (or (not org-agenda-skip-archived-trees)
-			  (and (eq action 'agenda) org-agenda-archives-mode))))
-	    (unless (eq action 'sparse-tree) (org-agenda-skip))
+	  (when (and
+
+		 ;; eval matcher only when the todo condition is OK
+		 (and (or (not todo-only) (member todo org-not-done-keywords))
+		      (let ((case-fold-search t)) (eval matcher)))
+
+		 ;; Call the skipper, but return t if it does not skip,
+		 ;; so that the `and' form continues evaluating
+		 (progn
+		   (unless (eq action 'sparse-tree) (org-agenda-skip))
+		   t)
+		     
+		 ;; Check if timestamps are deselecting this entry
+		 (or (not todo-only)
+		     (and (member todo org-not-done-keywords)
+			  (or (not org-agenda-tags-todo-honor-ignore-options)
+			      (not (org-agenda-check-for-timestamp-as-reason-to-ignore-todo-item)))))
+
+		 ;; Extra check for the archive tag
+		 ;; FIXME: Does the skipper already do this????
+		 (or
+		  (not (member org-archive-tag tags-list))
+		  ;; we have an archive tag, should we use this anyway?
+		  (or (not org-agenda-skip-archived-trees)
+		      (and (eq action 'agenda) org-agenda-archives-mode))))
 
 	    ;; select this headline
 
