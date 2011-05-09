@@ -8817,6 +8817,11 @@ the object with @code{\ref@{tab:basic-data@}}:
    |-----|----|
 @end example
 
+Optionally, the caption can take the form:
+@example
+#+CAPTION: [Caption for list of figures]{Caption for table (or link).}
+@end example
+
 @cindex inlined images, markup rules
 Some backends (HTML, @LaTeX{}, and DocBook) allow you to directly include
 images into the exported document.  Org does this, if a link to an image

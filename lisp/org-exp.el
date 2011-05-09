@@ -1871,7 +1871,7 @@ table line.  If it is a link, add it to the line containing the link."
 				   'org-label label))
 	(if label (push (cons label label) target-alist))
 	(goto-char end)
-	(setq cap nil attr nil label nil)))))
+	(setq cap nil shortn nil attr nil label nil)))))
   target-alist)
 
 (defun org-export-remove-comment-blocks-and-subtrees ()

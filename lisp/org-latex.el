@@ -2199,12 +2199,12 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 	   (multicolumnp "\\begin{figure*}%placement
 \\centering
 \\includegraphics[%attr]{%path}
-\\caption{%labelcmd%caption}
+\\caption%shortn{%labelcmd%caption}
 \\end{figure*}")
 	   (floatp "\\begin{figure}%placement
 \\centering
 \\includegraphics[%attr]{%path}
-\\caption{%labelcmd%caption}
+\\caption%shortn{%labelcmd%caption}
 \\end{figure}")
 	   (t "\\includegraphics[%attr]{%path}")))
 
