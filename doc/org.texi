@@ -11156,6 +11156,11 @@ for the title of the file, @code{%a} stands for the author of the file and
 a sitemap entry's date is to be formated. This property bypasses
 @code{org-publish-sitemap-date-format} which defaults to @code{%Y-%m-%d}.
 
+@item @code{:sitemap-sans-extension}
+@tab When non-nil, remove filenames' extensions from the generated sitemap. 
+Useful to have cool URIs (see @uref{http://www.w3.org/Provider/Style/URI}).
+Defaults to @code{nil}.
+
 @end multitable
 
 @node Generating an index,  , Sitemap, Configuration
