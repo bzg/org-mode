@@ -65,6 +65,8 @@
 (defvar org-export-latex-display-custom-times nil)
 (defvar org-export-latex-all-targets-re nil)
 (defvar org-export-latex-add-level 0)
+(defvar org-export-latex-footmark-seen nil
+  "List of footnotes markers seen so far by exporter.")
 (defvar org-export-latex-sectioning "")
 (defvar org-export-latex-sectioning-depth 0)
 (defvar org-export-latex-special-keyword-regexp
@@ -766,7 +768,10 @@ when PUB-DIR is set, use this as the publishing directory."
 			     '(:org-license-to-kill nil))))
   (org-update-radio-target-regexp)
   (org-export-latex-set-initial-vars ext-plist arg)
-  (setq org-export-opt-plist org-export-latex-options-plist)
+  (setq org-export-opt-plist org-export-latex-options-plist
+	org-export-footnotes-data (org-footnote-all-labels 'with-defs)
+	org-export-footnotes-markers nil
+	org-export-latex-footmark-seen nil)
   (org-install-letbind)
   (run-hooks 'org-export-latex-after-initial-vars-hook)
   (let* ((wcf (current-window-configuration))
@@ -2412,60 +2417,54 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
     (org-if-unprotected
      (replace-match "")))
 
-  ;; When converting to LaTeX, replace footnotes
-  ;; FIXME: don't protect footnotes from conversion
-  (when (plist-get org-export-latex-options-plist :footnotes)
+  ;; When converting to LaTeX, replace footnotes.
+  (when (plist-get opt-plist :footnotes)
     (goto-char (point-min))
-    (while (and (re-search-forward "\\[\\([0-9]+\\)\\]" nil t)
-		(not (equal (char-before (match-beginning 0)) ?\])))
-      (org-if-unprotected
-       (when (and (save-match-data
-		    (save-excursion (beginning-of-line)
-				    (looking-at "[^:|#]")))
-		  (not (org-in-verbatim-emphasis)))
-	 (let ((foot-beg (match-beginning 0))
-	       (foot-end (match-end 0))
-	       (foot-prefix (match-string 0))
-	       footnote footnote-rpl)
-	   (save-excursion
-	     (if (not (re-search-forward (concat "^" (regexp-quote foot-prefix))
-					 nil t))
-		 (replace-match (org-export-latex-protect-string
-				 (concat "$^{" (match-string 1) "}$")))
-	       (replace-match "")
-	       (let* ((end (save-excursion
-			     (if (re-search-forward "^$\\|^#.*$\\|\\[[0-9]+\\]" nil t)
-				 (match-beginning 0) (point-max))))
-		      (body (org-trim (buffer-substring (point) end))))
-		 ;; Fix for footnotes ending on a link or a list.
-		 (setq footnote
-		       (concat body
-			       (if (string-match "ORG-LIST-END-MARKER\\'" body)
-				   "\n" " ")))
-		 (delete-region (point) end))
-	       (goto-char foot-beg)
-	       (delete-region foot-beg foot-end)
-	       (unless (null footnote)
-		 (setq footnote-rpl (format "\\footnote{%s}" footnote))
-		 (add-text-properties 0 10 '(org-protected t) footnote-rpl)
-		 (add-text-properties (1- (length footnote-rpl))
-				      (length footnote-rpl)
-				      '(org-protected t) footnote-rpl)
-		 (put-text-property 0 (length footnote-rpl)
-				    'original-indentation 1000 footnote-rpl)
-		 (if (org-on-heading-p)
-		     (setq footnote-rpl
-			   (concat (org-export-latex-protect-string "\\protect")
-				   footnote-rpl)))
-		 (insert footnote-rpl)))
-	     )))))
+    (let (ref mark-max)
+      (while (setq ref (org-footnote-get-next-reference))
+	(let* ((beg (nth 1 ref))
+	       (lbl (string-to-number (car ref)))
+	       (def (or (cdr (assoc lbl org-export-footnotes-markers)) "")))
+	  ;; Fix body for footnotes ending on a link or a list and
+	  ;; remove definition from buffer.
+	  (setq def
+		(concat def
+			(if (string-match "ORG-LIST-END-MARKER\\'" def)
+			    "\n" " ")))
+	  (org-footnote-delete-definitions (number-to-string lbl))
+	  ;; Compute string to insert (FNOTE), and protect the outside
+	  ;; macro from further transformation. When footnote at point
+	  ;; is referring to a previously defined footnote, use
+	  ;; \footnotemark. Otherwise, use \footnote.
+	  (let ((fnote (if (memq lbl org-export-latex-footmark-seen)
+			   (org-export-latex-protect-string
+			    (format "\\footnotemark[%d]" lbl))
+			 (push lbl org-export-latex-footmark-seen)
+			 (concat (org-export-latex-protect-string "\\footnote{")
+				 def
+				 (org-export-latex-protect-string "}")))))
+	    (when (org-on-heading-p)
+	      (setq fnote
+		    (concat (org-export-latex-protect-string "\\protect") fnote)))
+	    ;; Replace footnote reference with FOOTNOTE.
+	    ;; `save-excursion' is required if there are two footnotes
+	    ;; in a row. In that case, point would be left at the
+	    ;; beginning of the second one, and
+	    ;; `org-footnote-get-next-reference' would then skip it.
+	    (goto-char beg)
+	    (delete-region beg (nth 2 ref))
+	    (save-excursion (insert fnote)))))))
 
-    ;; Remove footnote section tag for LaTeX
-    (goto-char (point-min))
-    (while (re-search-forward
-	    (concat "^" footnote-section-tag-regexp) nil t)
-      (org-if-unprotected
-       (replace-match "")))))
+  ;; Remove footnote section tag for LaTeX
+  (goto-char (point-min))
+  (while (re-search-forward
+	  (concat "^" footnote-section-tag-regexp) nil t)
+    (org-if-unprotected
+     (replace-match "")))
+  ;; Remove any left-over footnote definition.
+  (goto-char (point-min))
+  (mapc (lambda (fn) (org-footnote-delete-definitions (car fn)))
+	org-export-footnotes-data))
 
 (defun org-export-latex-fix-inputenc ()
   "Set the coding system in inputenc to what the buffer is."

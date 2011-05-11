@@ -623,6 +623,10 @@ table.el tables."
 (defvar org-last-level nil) ; dynamically scoped variable
 (defvar org-min-level nil) ; dynamically scoped variable
 (defvar org-levels-open nil) ; dynamically scoped parameter
+(defvar org-export-footnotes-markers nil
+  "Alist of markers used for footnotes, along with their associated definition.")
+(defvar org-export-footnotes-data nil
+  "Alist of labels used in buffers, along with their associated definition.")
 
 (defconst org-export-plist-vars
   '((:link-up		      nil	  org-export-html-link-up)
@@ -1153,7 +1157,7 @@ on this string to produce the exported version."
 
       ;; Normalize footnotes
       (when (plist-get parameters :footnotes)
-	(org-footnote-normalize nil t))
+	(org-footnote-normalize nil 'pre-process-p))
 
       ;; Find all headings and compute the targets for them
       (setq target-alist (org-export-define-heading-targets target-alist))

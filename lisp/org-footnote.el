@@ -309,22 +309,37 @@ If no footnote is found, return nil."
     (concat "fn:" label))
    (t label)))
 
-(defun org-footnote-all-labels ()
-  "Return list with all defined foot labels used in the buffer."
-  (let (rtn l ref)
+(defun org-footnote-all-labels (&optional with-defs)
+  "Return list with all defined foot labels used in the buffer.
+
+If WITH-DEFS is non-nil, also associate the definition to each
+label.  The function will then return an alist whose key is label
+and value definition."
+  (let (rtn
+	(push-to-rtn
+	 (function
+	  ;; Depending on WITH-DEFS, store label or (label . def) of
+	  ;; footnote reference/definition given as argument in RTN.
+	  (lambda (el)
+	    (let ((lbl (car el)))
+	      (push (if with-defs (cons lbl (nth 3 el)) lbl) rtn))))))
     (save-excursion
       (save-restriction
 	(widen)
 	;; Find all labels found in definitions.
 	(goto-char (point-min))
-	(while (re-search-forward org-footnote-definition-re nil t)
-	  (setq l (org-match-string-no-properties 2))
-	  (and l (add-to-list 'rtn l)))
+	(let (def)
+	  (while (re-search-forward org-footnote-definition-re nil t)
+	    (when (setq def (org-footnote-at-definition-p))
+	      (funcall push-to-rtn def))))
 	;; Find all labels found in references.
 	(goto-char (point-min))
-	(while (and (setq ref (org-footnote-get-next-reference))
-		    (goto-char (nth 2 ref)))
-	  (and (car ref) (add-to-list 'rtn (car ref))))))
+	(let (ref)
+	  (while (setq ref (org-footnote-get-next-reference))
+	    (goto-char (nth 2 ref))
+	    (and (car ref)		; ignore anonymous footnotes
+		 (not (funcall (if with-defs #'assoc #'member) (car ref) rtn))
+		 (funcall push-to-rtn ref))))))
     rtn))
 
 (defun org-footnote-unique-label (&optional current)
