@@ -454,7 +454,7 @@ Example: (round-float 3.56755765 3) -> 3.568"
    time))
 
 
-(defun org-map-drill-entries (func scope &rest skip)
+(defun org-map-drill-entries (func &optional scope &rest skip)
   "Like `org-map-entries', but only drill entries are processed."
   (apply 'org-map-entries func
          (concat "+" org-drill-question-tag) scope skip))
