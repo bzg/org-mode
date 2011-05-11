@@ -2064,7 +2064,10 @@ increment.  This key is also used by shift-selection and related modes
 Edit the current field in a separate window.  This is useful for fields that
 are not fully visible (@pxref{Column width and alignment}).  When called with
 a @kbd{C-u} prefix, just make the full field visible, so that it can be
-edited in place.
+edited in place.  When called with two @kbd{C-u} prefixes, make the editor
+window follow the cursor through the table and always show the current
+field.  The follow mode exits automatically when the cursor leaves the table,
+or when you repeat this command with @kbd{C-u C-u C-c `}.
 @c
 @item M-x org-table-import
 Import a file as a table.  The table should be TAB or whitespace
