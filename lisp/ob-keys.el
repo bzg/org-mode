@@ -73,6 +73,8 @@ functions which are assigned key bindings, and see
     ("t" . org-babel-tangle)
     ("\C-f" . org-babel-tangle-file)
     ("f" . org-babel-tangle-file)
+    ("\C-c" . org-babel-check-src-block)
+    ("c" . org-babel-check-src-block)
     ("\C-l" . org-babel-load-in-session)
     ("l" . org-babel-load-in-session)
     ("\C-i" . org-babel-lob-ingest)

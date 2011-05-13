@@ -461,13 +461,50 @@ arguments and pop open the results in a preview buffer."
                               (string= "yes" (cdr (assoc :noweb params))))
 			 (org-babel-expand-noweb-references info) (nth 1 info))))
          (expand-cmd (intern (concat "org-babel-expand-body:" lang)))
-	 (assignments-cmd (intern (concat "org-babel-variable-assignments:" lang)))
+	 (assignments-cmd (intern (concat "org-babel-variable-assignments:"
+					  lang)))
          (expanded
 	  (if (fboundp expand-cmd) (funcall expand-cmd body params)
 	    (org-babel-expand-body:generic
-	     body params (and (fboundp assignments-cmd) (funcall assignments-cmd params))))))
+	     body params (and (fboundp assignments-cmd)
+			      (funcall assignments-cmd params))))))
     (org-edit-src-code
      nil expanded (concat "*Org-Babel Preview " (buffer-name) "[ " lang " ]*"))))
+
+(defun org-babel-edit-distance (s1 s2)
+  "Return the edit (levenshtein) distance between strings S1 S2."
+  (let* ((l1 (length s1))
+	 (l2 (length s2))
+	 (dist (map 'vector (lambda (_) (make-vector (1+ l2) nil))
+		    (number-sequence 1 (1+ l1)))))
+    (flet ((in (i j) (aref (aref dist i) j))
+	   (mmin (&rest lst) (apply #'min (remove nil lst))))
+      (setf (aref (aref dist 0) 0) 0)
+      (dolist (i (number-sequence 1 l1))
+	(dolist (j (number-sequence 1 l2))
+	  (setf (aref (aref dist i) j)
+		(+ (if (equal (aref s1 (1- i)) (aref s2 (1- j))) 0 1)
+		   (mmin (in (1- i) j) (in i (1- j)) (in (1- i) (1- j)))))))
+      (in l1 l2))))
+
+;;;###autoload
+(defun org-babel-check-src-block ()
+  "Check for misspelled header arguments in the current code block."
+  (interactive)
+  ;; TODO: report malformed code block
+  ;; TODO: report incompatible combinations of header arguments
+  (let ((too-close 2)) ;; <- control closeness to report potential match
+    (dolist (header (mapcar (lambda (arg) (substring (symbol-name (car arg)) 1))
+			    (and (org-babel-where-is-src-block-head)
+				 (org-babel-parse-header-arguments
+				  (org-babel-clean-text-properties
+				   (match-string 4))))))
+      (dolist (name (mapcar #'symbol-name org-babel-header-arg-names))
+	(when (and (not (string= header name))
+		   (<= (org-babel-edit-distance header name) too-close))
+	  (error "supplied header \"%S\" is suspiciously close to \"%S\""
+		 header name))))
+    (message "No suspicious header arguments found.")))
 
 ;;;###autoload
 (defun org-babel-load-in-session (&optional arg info)
