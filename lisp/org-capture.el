@@ -322,7 +322,7 @@ calendar                |  %:type %:date"
 			    ((const :format "%v " :immediate-finish) (const t))
 			    ((const :format "%v " :empty-lines) (const 1))
 			    ((const :format "%v " :clock-in) (const t))
-			    ((const :format "%v " :clock-keep) (const nil))
+			    ((const :format "%v " :clock-keep) (const t))
 			    ((const :format "%v " :clock-resume) (const t))
 			    ((const :format "%v " :unnarrowed) (const t))
 			    ((const :format "%v " :kill-buffer) (const t))))))))

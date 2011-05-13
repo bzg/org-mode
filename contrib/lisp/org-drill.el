@@ -232,6 +232,35 @@ alist takes one of two forms:
   :type '(alist :key-type (choice string (const nil)) :value-type function))
 
 
+(defcustom org-drill-scope
+  'file
+  "The scope in which to search for drill items when conducting a
+drill session. This can be any of:
+
+file                 The current buffer, respecting the restriction if any.
+                     This is the default.
+tree                 The subtree started with the entry at point
+file-no-restriction  The current buffer, without restriction
+file-with-archives   The current buffer, and any archives associated with it.
+agenda               All agenda files
+agenda-with-archives All agenda files with any archive files associated
+                     with them.
+directory            All files with the extension '.org' in the same
+                     directory as the current file (includes the current
+                     file if it is an .org file.)
+ (FILE1 FILE2 ...)   If this is a list, all files in the list will be scanned.
+"
+  ;; Note -- meanings differ slightly from the argument to org-map-entries:
+  ;; 'file' means current file/buffer, respecting any restriction
+  ;; 'file-no-restriction' means current file/buffer, ignoring restrictions
+  ;; 'directory' means all *.org files in current directory
+  :group 'org-drill
+  :type '(choice (const 'file) (const 'tree) (const 'file-no-restriction)
+                 (const 'file-with-archives) (const 'agenda)
+                 (const 'agenda-with-archives) (const 'directory)
+                 list))
+
+
 (defcustom org-drill-spaced-repetition-algorithm
   'sm5
   "Which SuperMemo spaced repetition algorithm to use for scheduling items.
@@ -247,7 +276,6 @@ Available choices are:
   from SM11, a later version of the algorithm, and included in Simple8."
   :group 'org-drill
   :type '(choice (const 'sm2) (const 'sm5) (const 'simple8)))
-
 
 
 (defcustom org-drill-optimal-factor-matrix
@@ -401,6 +429,8 @@ for review unless they were already reviewed in the recent past?")
 (put 'org-drill-learn-fraction 'safe-local-variable 'floatp)
 (put 'org-drill-days-before-old 'safe-local-variable 'integerp)
 (put 'org-drill-overdue-interval-factor 'safe-local-variable 'floatp)
+(put 'org-drill-scope 'safe-local-variable
+     '(lambda (val) (or (symbolp val) (listp val))))
 
 
 ;;;; Utilities ================================================================
@@ -448,6 +478,7 @@ Example: (round-float 3.56755765 3) -> 3.568"
   (let ((n (expt 10 fix)))
     (/ (float (round (* floatnum n))) n)))
 
+
 (defun time-to-inactive-org-timestamp (time)
   (format-time-string
    (concat "[" (substring (cdr org-time-stamp-formats) 1 -1) "]")
@@ -456,8 +487,17 @@ Example: (round-float 3.56755765 3) -> 3.568"
 
 (defun org-map-drill-entries (func &optional scope &rest skip)
   "Like `org-map-entries', but only drill entries are processed."
-  (apply 'org-map-entries func
-         (concat "+" org-drill-question-tag) scope skip))
+  (let ((org-drill-scope (or scope org-drill-scope)))
+    (apply 'org-map-entries func
+           (concat "+" org-drill-question-tag)
+           (case org-drill-scope
+             (file nil)
+             (file-no-restriction 'file)
+             (directory
+              (directory-files (file-name-directory (buffer-file-name))
+                               t "\\.org$"))
+             (t org-drill-scope))
+           skip)))
 
 
 (defmacro with-hidden-cloze-text (&rest body)
@@ -1125,7 +1165,7 @@ How well did you do? (0-5, ?=help, e=edit, t=tags, q=quit)"
                                  (round (nth 3 next-review-dates))
                                  (round (nth 4 next-review-dates))
                                  (round (nth 5 next-review-dates)))
-                       "How well did you do? (0-5, ?=help, e=edit, q=quit)")))
+                       "How well did you do? (0-5, ?=help, e=edit, t=tags, q=quit)")))
         (cond
          ((stringp input)
           (setq ch (elt input 0)))
@@ -1899,7 +1939,8 @@ Session finished. Press a key to continue..."
       (sit-for 0.5))
     (read-char-exclusive)
 
-    (if (< pass-percent (- 100 org-drill-forgetting-index))
+    (if (and *org-drill-session-qualities*
+             (< pass-percent (- 100 org-drill-forgetting-index)))
         (read-char-exclusive
          (format
           "%s
@@ -1963,19 +2004,8 @@ Org-drill proceeds by:
   eligible topics will be presented.
 
 SCOPE determines the scope in which to search for
-questions.  It is passed to `org-map-entries', and can be any of:
-
-nil     The current buffer, respecting the restriction if any.
-        This is the default.
-tree    The subtree started with the entry at point
-file    The current buffer, without restriction
-file-with-archives
-        The current buffer, and any archives associated with it
-agenda  All agenda files
-agenda-with-archives
-        All agenda files with any archive files associated with them
- (file1 file2 ...)
-        If this is a list, all files in the list will be scanned.
+questions.  It accepts the same values as `org-drill-scope',
+which see.
 
 If RESUME-P is non-nil, resume a suspended drill session rather
 than starting a new one."
@@ -2116,6 +2146,13 @@ subtree at point."
   (org-drill 'tree))
 
 
+(defun org-drill-directory ()
+  "Run an interactive drill session using drill items from all org
+files in the same directory as the current file."
+  (interactive)
+  (org-drill 'directory))
+
+
 (defun org-drill-resume ()
   "Resume a suspended drill session. Sessions are suspended by
 exiting them with the `edit' option."
@@ -2134,7 +2171,7 @@ exiting them with the `edit' option."
 function may be useful if you want to give your collection of
 entries to someone else.  Scope defaults to the current buffer,
 and is specified by the argument SCOPE, which accepts the same
-values as `org-drill'."
+values as `org-drill-scope'."
   (interactive)
   (when (yes-or-no-p
          "Delete scheduling data from ALL items in scope: are you sure?")
@@ -2240,7 +2277,8 @@ wants to migrate to the updated set without losing their scheduling data."
        (lambda ()
          (let ((this-id (org-id-get)))
            (when this-id
-             (puthash this-id (point-marker) *org-drill-dest-id-table*))))))
+             (puthash this-id (point-marker) *org-drill-dest-id-table*))))
+       'file))
     ;; Look through all entries in source buffer.
     (with-current-buffer src
       (org-map-drill-entries
@@ -2280,7 +2318,8 @@ wants to migrate to the updated set without losing their scheduling data."
              ;; item in SRC has ID, but no matching ID in DEST.
              ;; It must be a new item that does not exist in DEST.
              ;; Copy the entire item to the *end* of DEST.
-             (org-drill-copy-entry-to-other-buffer dest)))))))))
+             (org-drill-copy-entry-to-other-buffer dest)))))
+       'file))))
 
 
 
