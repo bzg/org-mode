@@ -976,6 +976,16 @@ so long."
 			 60.0))))
 	   org-clock-user-idle-start)))))
 
+(defvar org-clock-current-task nil
+  "Task currently clocked in.")
+(defun org-clock-set-current ()
+  "Set `org-clock-current-task' to the task currently clocked in."
+  (setq org-clock-current-task (nth 4 (org-heading-components))))
+
+(defun org-clock-delete-current ()
+  "Reset `org-clock-current-task' to nil."
+  (setq org-clock-current-task nil))
+
 (defun org-clock-in (&optional select start-time)
   "Start the clock on the current item.
 If necessary, clock-out of the currently active clock.
@@ -1156,16 +1166,6 @@ the clocking selection, associated with the letter `d'."
 		  (run-with-timer 60 60 'org-resolve-clocks-if-idle))
 	    (message "Clock starts at %s - %s" ts msg-extra)
 	    (run-hooks 'org-clock-in-hook)))))))
-
-(defvar org-clock-current-task nil
-  "Task currently clocked in.")
-(defun org-clock-set-current ()
-  "Set `org-clock-current-task' to the task currently clocked in."
-  (setq org-clock-current-task (nth 4 (org-heading-components))))
-
-(defun org-clock-delete-current ()
-  "Reset `org-clock-current-task' to nil."
-  (setq org-clock-current-task nil))
 
 (defun org-clock-mark-default-task ()
   "Mark current task as default task."

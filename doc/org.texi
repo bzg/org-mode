@@ -2064,7 +2064,10 @@ increment.  This key is also used by shift-selection and related modes
 Edit the current field in a separate window.  This is useful for fields that
 are not fully visible (@pxref{Column width and alignment}).  When called with
 a @kbd{C-u} prefix, just make the full field visible, so that it can be
-edited in place.
+edited in place.  When called with two @kbd{C-u} prefixes, make the editor
+window follow the cursor through the table and always show the current
+field.  The follow mode exits automatically when the cursor leaves the table,
+or when you repeat this command with @kbd{C-u C-u C-c `}.
 @c
 @item M-x org-table-import
 Import a file as a table.  The table should be TAB or whitespace
@@ -8819,7 +8822,7 @@ the object with @code{\ref@{tab:basic-data@}}:
 
 Optionally, the caption can take the form:
 @example
-#+CAPTION: [Caption for list of figures]{Caption for table (or link).}
+#+CAPTION: [Caption for list of figures]@{Caption for table (or link).@}
 @end example
 
 @cindex inlined images, markup rules
@@ -11152,6 +11155,11 @@ for the title of the file, @code{%a} stands for the author of the file and
 @tab Format string for the @code{format-time-string} function that tells how
 a sitemap entry's date is to be formated. This property bypasses
 @code{org-publish-sitemap-date-format} which defaults to @code{%Y-%m-%d}.
+
+@item @code{:sitemap-sans-extension}
+@tab When non-nil, remove filenames' extensions from the generated sitemap. 
+Useful to have cool URIs (see @uref{http://www.w3.org/Provider/Style/URI}).
+Defaults to @code{nil}.
 
 @end multitable
 

@@ -4959,7 +4959,7 @@ See also the user option `org-agenda-clock-consistency-checks'."
 			(plist-get pl :gap-ok-around)))
 	 (def-face (or (plist-get pl :default-face)
 		       '((:background "DarkRed") (:foreground "white"))))
-	 issue)
+	 issue face m te ts dt ov)
     (goto-char (point-min))
     (while (re-search-forward " Clocked: +(-\\|\\([0-9]+:[0-9]+\\))" nil t)
       (setq issue nil face def-face)
@@ -5046,12 +5046,12 @@ See also the user option `org-agenda-clock-consistency-checks'."
 	;; Wrap it to after midnight.
 	(setq min2 (+ min2 1440)))
       ;; Now check if any of the OK times is in the gap
-      (mapcar (lambda (x)
-		;; Wrap the time to after midnight if necessary
-		(if (< x min1) (setq x (+ x 1440)))
-		;; Check if in interval
-		(and (<= min1 x) (>= min2 x) (throw 'exit t)))
-	      ok-list)
+      (mapc (lambda (x)
+	      ;; Wrap the time to after midnight if necessary
+	      (if (< x min1) (setq x (+ x 1440)))
+	      ;; Check if in interval
+	      (and (<= min1 x) (>= min2 x) (throw 'exit t)))
+	    ok-list)
       ;; Nope, this gap is not OK
       nil)))
 
