@@ -148,6 +148,11 @@ avoid same set of footnote IDs being used multiple times."
   :group 'org-export-docbook
   :type 'string)
 
+(defcustom org-export-docbook-footnote-separator "<superscript>, </superscript>"
+  "Text used to separate footnotes."
+  :group 'org-export-docbook
+  :type 'string)
+
 (defcustom org-export-docbook-emphasis-alist
   `(("*" "<emphasis role=\"bold\">" "</emphasis>")
     ("/" "<emphasis>" "</emphasis>")
@@ -942,14 +947,22 @@ publishing directory."
 					  org-export-docbook-footnote-id-prefix num)
 				  t t line))
 		    (setq line (replace-match
-				(format "%s<footnote xml:id=\"%s%s\"><para>%s</para></footnote>"
-					(match-string 1 line)
-					org-export-docbook-footnote-id-prefix
-					num
-					(if footnote-def
-					    (save-match-data
-					      (org-docbook-expand (cdr footnote-def)))
-					  (format "FOOTNOTE DEFINITION NOT FOUND: %s" num)))
+				(concat
+				 (format "%s<footnote xml:id=\"%s%s\"><para>%s</para></footnote>"
+					 (match-string 1 line)
+					 org-export-docbook-footnote-id-prefix
+					 num
+					 (if footnote-def
+					     (save-match-data
+					       (org-docbook-expand (cdr footnote-def)))
+					   (format "FOOTNOTE DEFINITION NOT FOUND: %s" num)))
+				 ;; If another footnote is following the
+				 ;; current one, add a separator.
+				 (if (save-match-data
+				       (string-match "\\`\\[[0-9]+\\]"
+						     (substring line (match-end 0))))
+				     org-export-docbook-footnote-separator
+				   ""))
 				t t line))
 		    (push (cons num 1) footref-seen))))))
 

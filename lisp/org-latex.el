@@ -311,6 +311,11 @@ will be filled with the link, the second with its description."
   :group 'org-export-latex
   :type 'string)
 
+(defcustom org-export-latex-footnote-separator "\\textsuperscript{,}\\,"
+  "Text used to separate footnotes."
+  :group 'org-export-latex
+  :type 'string)
+
 (defcustom org-export-latex-tables-verbatim nil
   "When non-nil, tables are exported verbatim."
   :group 'org-export-latex
@@ -2420,7 +2425,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
   ;; When converting to LaTeX, replace footnotes.
   (when (plist-get opt-plist :footnotes)
     (goto-char (point-min))
-    (let (ref mark-max)
+    (let (ref)
       (while (setq ref (org-footnote-get-next-reference))
 	(let* ((beg (nth 1 ref))
 	       (lbl (string-to-number (car ref)))
@@ -2442,7 +2447,12 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 			 (push lbl org-export-latex-footmark-seen)
 			 (concat (org-export-latex-protect-string "\\footnote{")
 				 def
-				 (org-export-latex-protect-string "}")))))
+				 (org-export-latex-protect-string "}"))))
+		(sep (org-export-latex-protect-string
+		      (if (save-excursion (goto-char (1- (nth 2 ref)))
+					  (let ((next (org-footnote-get-next-reference)))
+					    (and next (= (nth 1 next) (nth 2 ref)))))
+			  org-export-latex-footnote-separator ""))))
 	    (when (org-on-heading-p)
 	      (setq fnote
 		    (concat (org-export-latex-protect-string "\\protect") fnote)))
@@ -2453,7 +2463,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 	    ;; `org-footnote-get-next-reference' would then skip it.
 	    (goto-char beg)
 	    (delete-region beg (nth 2 ref))
-	    (save-excursion (insert fnote)))))))
+	    (save-excursion (insert fnote sep)))))))
 
   ;; Remove footnote section tag for LaTeX
   (goto-char (point-min))

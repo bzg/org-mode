@@ -60,6 +60,12 @@ by the footnotes themselves."
   :group 'org-export-html
   :type 'string)
 
+
+(defcustom org-export-html-footnote-separator "<sup>, </sup>"
+  "Text used to separate footnotes."
+  :group 'org-export-html
+  :type 'string)
+
 (defcustom org-export-html-coding-system nil
   "Coding system for HTML export, defaults to `buffer-file-coding-system'."
   :group 'org-export-html
@@ -1587,11 +1593,19 @@ lang=\"%s\" xml:lang=\"%s\">
 		    (push (cons n 1) footref-seen))
 		  (setq line
 			(replace-match
-			 (format
-			  (concat "%s"
-			 	  (format org-export-html-footnote-format
-			 		  "<a class=\"footref\" name=\"fnr.%s%s\" href=\"#fn.%s\">%s</a>"))
-			  (or (match-string 1 line) "") n extra n n)
+			 (concat
+			  (format
+			   (concat "%s"
+				   (format org-export-html-footnote-format
+					   (concat "<a class=\"footref\" name=\"fnr.%s%s\" href=\"#fn.%s\">%s</a>")))
+			   (or (match-string 1 line) "") n extra n n)
+			  ;; If another footnote is following the
+			  ;; current one, add a separator.
+			  (if (save-match-data
+				(string-match "\\`\\[[0-9]+\\]"
+					      (substring line (match-end 0))))
+			      org-export-html-footnote-separator
+			    ""))
 			 t t line))))))
 
 	  (cond
