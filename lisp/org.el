@@ -19088,6 +19088,8 @@ If point is in an inline task, mark that task instead."
      ((looking-at "# ") (setq column 0))
      ;; Headings
      ((looking-at "\\*+ ") (setq column 0))
+     ;; Included files
+     ((looking-at "#\\+include:") (setq column 0))
      ;; Footnote definition
      ((looking-at org-footnote-definition-re) (setq column 0))
      ;; Literal examples
