@@ -2428,26 +2428,28 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
     (let (ref)
       (while (setq ref (org-footnote-get-next-reference))
 	(let* ((beg (nth 1 ref))
-	       (lbl (string-to-number (car ref)))
-	       (def (or (cdr (assoc lbl org-export-footnotes-markers)) "")))
+	       (lbl (car ref))
+	       (def (or (nth 3 (org-footnote-get-definition lbl)) "")))
 	  ;; Fix body for footnotes ending on a link or a list and
 	  ;; remove definition from buffer.
 	  (setq def
 		(concat def
 			(if (string-match "ORG-LIST-END-MARKER\\'" def)
 			    "\n" " ")))
-	  (org-footnote-delete-definitions (number-to-string lbl))
+	  (org-footnote-delete-definitions lbl)
 	  ;; Compute string to insert (FNOTE), and protect the outside
 	  ;; macro from further transformation. When footnote at point
 	  ;; is referring to a previously defined footnote, use
 	  ;; \footnotemark. Otherwise, use \footnote.
-	  (let ((fnote (if (memq lbl org-export-latex-footmark-seen)
+	  (let ((fnote (if (member lbl org-export-latex-footmark-seen)
 			   (org-export-latex-protect-string
-			    (format "\\footnotemark[%d]" lbl))
+			    (format "\\footnotemark[%s]" lbl))
 			 (push lbl org-export-latex-footmark-seen)
 			 (concat (org-export-latex-protect-string "\\footnote{")
 				 def
 				 (org-export-latex-protect-string "}"))))
+		;; Check if another footnote is immediately following.
+		;; If so, add a separator in-between.
 		(sep (org-export-latex-protect-string
 		      (if (save-excursion (goto-char (1- (nth 2 ref)))
 					  (let ((next (org-footnote-get-next-reference)))
@@ -2456,7 +2458,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 	    (when (org-on-heading-p)
 	      (setq fnote
 		    (concat (org-export-latex-protect-string "\\protect") fnote)))
-	    ;; Replace footnote reference with FOOTNOTE.
+	    ;; Replace footnote reference with FNOTE and, maybe, SEP.
 	    ;; `save-excursion' is required if there are two footnotes
 	    ;; in a row. In that case, point would be left at the
 	    ;; beginning of the second one, and
@@ -2472,9 +2474,10 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
     (org-if-unprotected
      (replace-match "")))
   ;; Remove any left-over footnote definition.
-  (goto-char (point-min))
   (mapc (lambda (fn) (org-footnote-delete-definitions (car fn)))
-	org-export-footnotes-data))
+	org-export-footnotes-data)
+  (mapc (lambda (fn) (org-footnote-delete-definitions fn))
+	org-export-latex-footmark-seen))
 
 (defun org-export-latex-fix-inputenc ()
   "Set the coding system in inputenc to what the buffer is."

@@ -1118,6 +1118,10 @@ on this string to produce the exported version."
       (org-export-handle-include-files-recurse)
       (run-hooks 'org-export-preprocess-after-include-files-hook)
 
+      ;; Normalize footnotes
+      (when (plist-get parameters :footnotes)
+	(org-footnote-normalize nil 'pre-process-p))
+
       ;; Change lists ending. Other parts of export may insert blank
       ;; lines and lists' structure could be altered.
       (org-export-mark-list-end)
@@ -1154,10 +1158,6 @@ on this string to produce the exported version."
 
       ;; Protected spaces
       (org-export-convert-protected-spaces)
-
-      ;; Normalize footnotes
-      (when (plist-get parameters :footnotes)
-	(org-footnote-normalize nil 'pre-process-p))
 
       ;; Find all headings and compute the targets for them
       (setq target-alist (org-export-define-heading-targets target-alist))
