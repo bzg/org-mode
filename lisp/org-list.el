@@ -1090,7 +1090,7 @@ It determines the number of whitespaces to append by looking at
 (defun org-list-separating-blank-lines-number (pos struct prevs)
   "Return number of blank lines that should separate items in list.
 
-POS is the position at item beginning to be considered.
+POS is the position of point where `org-list-insert-item' was called.
 
 STRUCT is the list structure. PREVS is the alist of previous
 items, as returned by `org-list-prevs-alist'.
@@ -1098,7 +1098,8 @@ items, as returned by `org-list-prevs-alist'.
 Assume point is at item's beginning. If the item is alone, apply
 some heuristics to guess the result."
   (save-excursion
-    (let ((insert-blank-p
+    (let ((item (point))
+	  (insert-blank-p
 	   (cdr (assq 'plain-list-item org-blank-before-new-entry)))
 	  usr-blank)
       (cond
@@ -1110,16 +1111,16 @@ some heuristics to guess the result."
        ((eq insert-blank-p t) 1)
        ;; plain-list-item is 'auto. Count blank lines separating
        ;; neighbours items in list.
-       (t (let ((next-p (org-list-get-next-item (point) struct prevs)))
+       (t (let ((next-p (org-list-get-next-item item struct prevs)))
 	    (cond
 	     ;; Is there a next item?
 	     (next-p (goto-char next-p)
 		     (org-back-over-empty-lines))
 	     ;; Is there a previous item?
-	     ((org-list-get-prev-item (point) struct prevs)
+	     ((org-list-get-prev-item item struct prevs)
 	      (org-back-over-empty-lines))
 	     ;; User inserted blank lines, trust him
-	     ((and (> pos (org-list-get-item-end-before-blank pos struct))
+	     ((and (> pos (org-list-get-item-end-before-blank item struct))
 		   (> (save-excursion
 			(goto-char pos)
 			(skip-chars-backward " \t")
@@ -1128,7 +1129,7 @@ some heuristics to guess the result."
 	     ;; Are there blank lines inside the item ?
 	     ((save-excursion
 		(org-list-search-forward
-		 "^[ \t]*$" (org-list-get-item-end-before-blank pos struct) t))
+		 "^[ \t]*$" (org-list-get-item-end-before-blank item struct) t))
 	      1)
 	     ;; No parent: no blank line.
 	     (t 0))))))))
@@ -1158,7 +1159,7 @@ This function modifies STRUCT."
 			 (<= pos (match-end 0))))
 	   (split-line-p (org-get-alist-option org-M-RET-may-split-line 'item))
 	   (blank-nb (org-list-separating-blank-lines-number
-		      item struct prevs))
+		      pos struct prevs))
 	   ;; 2. Build the new item to be created. Concatenate same
 	   ;;    bullet as item, checkbox, text AFTER-BULLET if
 	   ;;    provided, and text cut from point to end of item
