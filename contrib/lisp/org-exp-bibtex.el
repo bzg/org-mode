@@ -107,7 +107,7 @@
 	      (goto-char (point-min))
 	      (while (re-search-forward "<hr>" nil t)
 		(replace-match "<hr/>" t t))
-	      (concat "\n#+BEGIN_HTML\n<div id=\"bibliography\">\n" (buffer-string) "\n</div>\n#+END_HTML\n"))))
+	      (concat "\n#+BEGIN_HTML\n<div id=\"bibliography\">\n<h2>References</h2>\n" (buffer-string) "\n</div>\n#+END_HTML\n"))))
 	 ((eq org-export-current-backend 'latex) ;; Latex export
 	  (concat "\n#+LATEX: \\bibliographystyle{" style "}"
 		  "\n#+LATEX: \\bibliography{" file "}\n"))) t t)))
