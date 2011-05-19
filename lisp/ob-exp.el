@@ -238,9 +238,17 @@ The function respects the value of the :exports header argument."
 	 (clean () (unless (eq type 'inline) (org-babel-remove-result info))))
     (case (intern (or (cdr (assoc :exports (nth 2 info))) "code"))
       ('none (silently) (clean) "")
-      ('code (silently) (clean) nil)
+      ('code (silently) (clean) (org-babel-exp-code info))
       ('results (org-babel-exp-results info type nil hash) "")
-      ('both (org-babel-exp-results info type nil hash) nil))))
+      ('both (org-babel-exp-results info type nil hash)
+	     (org-babel-exp-code info)))))
+
+(defun org-babel-exp-code (info)
+  "Return the original code block formatted for export."
+  (org-fill-template "#+BEGIN_SRC %lang%flags\n%body\n#+END_SRC\n"
+		     `(("lang"  . ,(nth 0 info))
+		       ("flags" . ,(when-let (f (nth 3 info)) (concat " " f)))
+		       ("body"  . ,(nth 1 info)))))
 
 (defun org-babel-exp-results (info type &optional silent hash)
   "Evaluate and return the results of the current code block for export.
