@@ -1298,7 +1298,7 @@ Also find all ID and CUSTOM_ID properties and store them."
 				       (org-outline-level))))
 	  (setq target (org-solidify-link-text
 			(format "sec-%s" (replace-regexp-in-string
-					  "\\." "_"
+					  "\\." "-"
 					  (org-section-number level)))))
 	  (setq last-section-target target)
 	  (push (cons target target) target-alist)
