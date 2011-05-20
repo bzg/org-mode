@@ -313,6 +313,7 @@ to add the symbol `xyz', and the package must have a call to
 	(const :tag "C  choose:            Use TODO keywords to mark decisions states" org-choose)
 	(const :tag "C  collector:         Collect properties into tables" org-collector)
 	(const :tag "C  depend:            TODO dependencies for Org-mode\n\t\t\t(PARTIALLY OBSOLETE, see built-in dependency support))" org-depend)
+	(const :tag "C  drill:             Flashcards and spaced repetition for Org-mode" org-drill)
 	(const :tag "C  elisp-symbol:      Org-mode links to emacs-lisp symbols" org-elisp-symbol)
 	(const :tag "C  eshell             Support for links to working directories in eshell" org-eshell)
 	(const :tag "C  eval:              Include command output as text" org-eval)
@@ -12448,7 +12449,7 @@ only lines with a TODO keyword are included in the output."
 		 (progn
 		   (unless (eq action 'sparse-tree) (org-agenda-skip))
 		   t)
-		     
+
 		 ;; Check if timestamps are deselecting this entry
 		 (or (not todo-only)
 		     (and (member todo org-not-done-keywords)
