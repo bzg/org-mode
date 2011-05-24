@@ -1,7 +1,8 @@
+;;; -*- coding: utf-8-unix -*-
 ;;; org-drill.el - Self-testing using spaced repetition
 ;;;
 ;;; Author: Paul Sexton <eeeickythump@gmail.com>
-;;; Version: 2.3.2
+;;; Version: 2.3.3
 ;;; Repository at http://bitbucket.org/eeeickythump/org-drill/
 ;;;
 ;;;
@@ -212,6 +213,8 @@ during a drill session."
     ("show1cloze" . org-drill-present-multicloze-show1)
     ("show2cloze" . org-drill-present-multicloze-show2)
     ("multicloze" . org-drill-present-multicloze-hide1)
+    ("hidefirst" . org-drill-present-multicloze-hide-first)
+    ("hidelast" . org-drill-present-multicloze-hide-last)
     ("hide1_firstmore" . org-drill-present-multicloze-hide1-firstmore)
     ("show1_lastmore" . org-drill-present-multicloze-show1-lastmore)
     ("show1_firstless" . org-drill-present-multicloze-show1-firstless)
@@ -1410,8 +1413,9 @@ visual overlay, or with the string TEXT if it is supplied."
     (while (re-search-forward org-drill-cloze-regexp nil t)
       ;; Don't hide org links, partly because they might contain inline
       ;; images which we want to keep visible
-      (unless (org-pos-in-regexp (match-beginning 0)
-                                 org-bracket-link-regexp 1)
+      (unless (save-match-data
+                (org-pos-in-regexp (match-beginning 0)
+                                   org-bracket-link-regexp 1))
         (org-drill-hide-matched-cloze-text)))))
 
 
@@ -1436,8 +1440,9 @@ visual overlay, or with the string TEXT if it is supplied."
 (defun org-drill-hide-cloze-hints ()
   (save-excursion
     (while (re-search-forward org-drill-cloze-regexp nil t)
-      (unless (or (org-pos-in-regexp (match-beginning 0)
-                                     org-bracket-link-regexp 1)
+      (unless (or (save-match-data
+                    (org-pos-in-regexp (match-beginning 0)
+                                       org-bracket-link-regexp 1))
                   (null (match-beginning 2))) ; hint subexpression matched
         (org-drill-hide-region (match-beginning 2) (match-end 2))))))
 
@@ -1599,14 +1604,19 @@ items if FORCE-SHOW-FIRST or FORCE-SHOW-LAST is non-nil)."
       (save-excursion
         (goto-char body-start)
         (while (re-search-forward org-drill-cloze-regexp item-end t)
-          (incf match-count)))
+          (let ((in-regexp? (save-match-data
+                              (org-pos-in-regexp (match-beginning 0)
+                                                 org-bracket-link-regexp 1))))
+            (unless in-regexp?
+              (incf match-count)))))
       (if (minusp number-to-hide)
           (setq number-to-hide (+ match-count number-to-hide)))
       (when (plusp match-count)
         (let* ((positions (shuffle-list (loop for i from 1
                                               to match-count
                                               collect i)))
-               (match-nums nil))
+               (match-nums nil)
+               (cnt nil))
           (if force-hide-first
               ;; Force '1' to be in the list, and to be the first item
               ;; in the list.
@@ -1618,12 +1628,23 @@ items if FORCE-SHOW-FIRST or FORCE-SHOW-LAST is non-nil)."
           (setq match-nums
                 (subseq positions
                         0 (min number-to-hide (length positions))))
-          (dolist (pos-to-hide match-nums)
-            (save-excursion
-              (goto-char body-start)
-              (re-search-forward org-drill-cloze-regexp
-                                 item-end t pos-to-hide)
-              (org-drill-hide-matched-cloze-text)))))
+          ;; (dolist (pos-to-hide match-nums)
+          (save-excursion
+            (goto-char body-start)
+            (setq cnt 0)
+            (while (re-search-forward org-drill-cloze-regexp item-end t)
+              (unless (save-match-data
+                        (org-pos-in-regexp (match-beginning 0)
+                                           org-bracket-link-regexp 1))
+                (incf cnt)
+                (if (memq cnt match-nums)
+                    (org-drill-hide-matched-cloze-text)))))))
+      ;; (loop
+      ;;  do (re-search-forward org-drill-cloze-regexp
+      ;;                        item-end t pos-to-hide)
+      ;;  while (org-pos-in-regexp (match-beginning 0)
+      ;;                           org-bracket-link-regexp 1))
+      ;; (org-drill-hide-matched-cloze-text)))))
       (org-display-inline-images t)
       (org-cycle-hide-drawers 'all)
       (prog1 (org-drill-presentation-prompt)
@@ -1631,20 +1652,9 @@ items if FORCE-SHOW-FIRST or FORCE-SHOW-LAST is non-nil)."
         (org-drill-unhide-clozed-text))))))
 
 
-(defun org-drill-present-multicloze-hide1 ()
-  "Hides one of the pieces of text that are marked for cloze deletion,
-chosen at random."
-  (org-drill-present-multicloze-hide-n 1))
-
-
-(defun org-drill-present-multicloze-hide2 ()
-  "Hides two of the pieces of text that are marked for cloze deletion,
-chosen at random."
-  (org-drill-present-multicloze-hide-n 2))
-
-
-(defun org-drill-present-multicloze-hide-nth (cnt)
-  "Hide the CNT'th piece of clozed text. 1 is the first piece. If
+(defun org-drill-present-multicloze-hide-nth (to-hide)
+  "Hide the TO-HIDE'th piece of clozed text. 1 is the first piece. If
+TO-HIDE is negative, count backwards, so -1 means the last item, -2
 CNT is negative, count backwards, so -1 means the last item, -2
 the second to last, etc."
   (with-hidden-comments
@@ -1652,7 +1662,8 @@ the second to last, etc."
     (let ((item-end nil)
           (match-count 0)
           (body-start (or (cdr (org-get-property-block))
-                          (point))))
+                          (point)))
+          (cnt 0))
       (org-drill-hide-all-subheadings-except nil)
       (save-excursion
         (outline-next-heading)
@@ -1660,23 +1671,29 @@ the second to last, etc."
       (save-excursion
         (goto-char body-start)
         (while (re-search-forward org-drill-cloze-regexp item-end t)
-          (incf match-count)))
+          (let ((in-regexp? (save-match-data
+                              (org-pos-in-regexp (match-beginning 0)
+                                                 org-bracket-link-regexp 1))))
+            (unless in-regexp?
+              (incf match-count)))))
+      (if (minusp to-hide)
+          (setq to-hide (+ 1 to-hide match-count)))
       (cond
        ((or (not (plusp match-count))
-            (> cnt match-count)
+            (> to-hide match-count))
             (and (minusp cnt) (> (abs cnt) match-count)))
         nil)
        (t
         (save-excursion
           (goto-char body-start)
-          (re-search-forward org-drill-cloze-regexp
-                             item-end t (if (minusp cnt) (+ 1 cnt match-count) cnt))
-          (org-drill-hide-matched-cloze-text))))
-      (org-display-inline-images t)
-      (org-cycle-hide-drawers 'all)
-      (prog1 (org-drill-presentation-prompt)
-        (org-drill-hide-subheadings-if 'org-drill-entry-p)
-        (org-drill-unhide-clozed-text))))))
+          (setq cnt 0)
+          (while (re-search-forward org-drill-cloze-regexp item-end t)
+            (unless (save-match-data
+                      (org-pos-in-regexp (match-beginning 0)
+                                         org-bracket-link-regexp 1))
+              (incf cnt)
+              (if (= cnt to-hide)
+                  (org-drill-hide-matched-cloze-text)))))))
 
 
 (defun org-drill-present-multicloze-hide-first ()
@@ -1714,7 +1731,7 @@ piece. The effect is similar to 'show1cloze' except that the last
 item is much less likely to be the item that is visible."
   (if (zerop (mod (1+ (org-drill-entry-total-repeats 0)) 4))
       ;; 25% of time, show any item except the last
-      (org-drill-present-multicloze-hide-n -1 nil t)
+      (org-drill-present-multicloze-hide-n -1 nil nil t)
     ;; 75% of time, show the LAST item
     (org-drill-present-multicloze-hide-n -1 nil t)))
 
@@ -2008,19 +2025,32 @@ RESUMING-P is true if we are resuming a suspended drill session."
     (setq prompt
           (format
            "%d items reviewed. Session duration %s.
-%d/%d items awaiting review (%s, %s, %s, %s, %s).
-
 Recall of reviewed items:
  Excellent (5):     %3d%%   |   Near miss (2):      %3d%%
  Good (4):          %3d%%   |   Failure (1):        %3d%%
  Hard (3):          %3d%%   |   Abject failure (0): %3d%%
 
 You successfully recalled %d%% of reviewed items (quality > %s)
+%d/%d items still await review (%s, %s, %s, %s, %s).
 Tomorrow, %d more items will become due for review.
 Session finished. Press a key to continue..."
            (length *org-drill-done-entries*)
            (format-seconds "%h:%.2m:%.2s"
                            (- (float-time (current-time)) *org-drill-start-time*))
+           (round (* 100 (count 5 *org-drill-session-qualities*))
+                  (max 1 (length *org-drill-session-qualities*)))
+           (round (* 100 (count 2 *org-drill-session-qualities*))
+                  (max 1 (length *org-drill-session-qualities*)))
+           (round (* 100 (count 4 *org-drill-session-qualities*))
+                  (max 1 (length *org-drill-session-qualities*)))
+           (round (* 100 (count 1 *org-drill-session-qualities*))
+                  (max 1 (length *org-drill-session-qualities*)))
+           (round (* 100 (count 3 *org-drill-session-qualities*))
+                  (max 1 (length *org-drill-session-qualities*)))
+           (round (* 100 (count 0 *org-drill-session-qualities*))
+                  (max 1 (length *org-drill-session-qualities*)))
+           pass-percent
+           org-drill-failure-quality
            (org-drill-pending-entry-count)
            (+ (org-drill-pending-entry-count)
               *org-drill-dormant-entry-count*)
@@ -2045,20 +2075,6 @@ Session finished. Press a key to continue..."
             (format "%d old"
                     (length *org-drill-old-mature-entries*))
             'face `(:foreground ,org-drill-mature-count-color))
-           (round (* 100 (count 5 *org-drill-session-qualities*))
-                  (max 1 (length *org-drill-session-qualities*)))
-           (round (* 100 (count 2 *org-drill-session-qualities*))
-                  (max 1 (length *org-drill-session-qualities*)))
-           (round (* 100 (count 4 *org-drill-session-qualities*))
-                  (max 1 (length *org-drill-session-qualities*)))
-           (round (* 100 (count 1 *org-drill-session-qualities*))
-                  (max 1 (length *org-drill-session-qualities*)))
-           (round (* 100 (count 3 *org-drill-session-qualities*))
-                  (max 1 (length *org-drill-session-qualities*)))
-           (round (* 100 (count 0 *org-drill-session-qualities*))
-                  (max 1 (length *org-drill-session-qualities*)))
-           pass-percent
-           org-drill-failure-quality
            *org-drill-due-tomorrow-count*
            ))
 
@@ -2430,12 +2446,15 @@ values as `org-drill-scope'."
 
 
 
-(add-hook 'org-mode-hook
-          (lambda ()
-            (when org-drill-use-visible-cloze-face-p
-              (font-lock-add-keywords 'org-mode
-                                      org-drill-cloze-keywords
-                                      nil))))
+(defun org-drill-add-cloze-fontification ()
+  (when org-drill-use-visible-cloze-face-p
+    (font-lock-add-keywords 'org-mode
+                            org-drill-cloze-keywords
+                            nil)))
+
+(add-hook 'org-mode-hook 'org-drill-add-cloze-fontification)
+
+(org-drill-add-cloze-fontification)
 
 
 ;;; Synching card collections =================================================
@@ -2505,10 +2524,6 @@ equivalent location in DEST to its location in SRC, by matching
 the heading hierarchy. However if IGNORE-NEW-ITEMS-P is non-nil,
 we simply ignore any items that do not exist in DEST, and do not
 copy them across."
-  ;; In future could look at what to do if we find an item in SRC whose ID
-  ;; is not present in DEST -- copy the whole item to DEST?
-  ;; org-copy-subtree --> org-paste-subtree
-  ;; could try to put it "near" the closest marker
   (interactive "bImport scheduling info from which buffer?")
   (unless dest
     (setq dest (current-buffer)))
