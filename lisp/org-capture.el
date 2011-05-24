@@ -415,7 +415,7 @@ bypassed."
 	   (annotation (if (and (boundp 'org-capture-link-is-already-stored)
 				org-capture-link-is-already-stored)
 			   (plist-get org-store-link-plist :annotation)
-			 (org-store-link nil)))
+			 (ignore-errors (org-store-link nil))))
 	   (initial (and (org-region-active-p)
 			 (buffer-substring (point) (mark))))
 	   (entry (org-capture-select-template keys)))
