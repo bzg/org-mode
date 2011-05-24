@@ -403,7 +403,7 @@ This adds `org-contacts-gnus-check-mail-address' and
   (add-hook 'gnus-article-prepare-hook 'org-contacts-gnus-check-mail-address)
   (add-hook 'gnus-article-prepare-hook 'org-contacts-gnus-store-last-mail))
 
-(defun wl-get-from-header-content ()
+(defun org-contacts-wl-get-from-header-content ()
   "Retrieve the content of the `From' header of an email.
 Works from wl-summary-mode and mime-view-mode - that is while viewing email.
 Depends on Wanderlust been loaded."
@@ -420,17 +420,27 @@ Depends on Wanderlust been loaded."
                                           (std11-fetch-field "From")
                                         (widen))))))
 
+(defun org-contacts-wl-get-name-email ()
+  "Get name and email address from wanderlust email.
+See `org-contacts-wl-get-from-header-content' for limitations."
+  (let ((from (org-contacts-wl-get-from-header-content)))
+    (when from
+      (list (wl-address-header-extract-realname from)
+	    (wl-address-header-extract-address from)))))
+
 (defun org-contacts-template-wl-name (&optional return-value)
-  (let ((from (wl-get-from-header-content)))
-    (or (and from (wl-address-header-extract-realname from))
-       return-value
-       "%^{Name}")))
+  "Try to return the contact name for a template from wl.
+If not found return RETURN-VALUE or something that would ask the user."
+  (or (car (org-contacts-wl-get-name-email))
+      return-value
+      "%^{Name}"))
 
 (defun org-contacts-template-wl-email (&optional return-value)
-  (let ((from (wl-get-from-header-content)))
-    (or (and from (wl-address-header-extract-address from))
-       return-value
-       (concat "%^{" org-contacts-email-property "}p"))))
+  "Try to return the contact email for a template from wl.
+If not found return RETURN-VALUE or something that would ask the user."
+  (or (cadr (org-contacts-wl-get-name-email))
+      return-value
+      (concat "%^{" org-contacts-email-property "}p")))
 
 (defun org-contacts-view-send-email (&optional ask)
   "Send email to the contact at point.
