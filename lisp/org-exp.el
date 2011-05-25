@@ -2446,6 +2446,15 @@ in the list) and remove property and value from the list in LISTVAR."
 (defvar org-export-latex-listings-options) ;; defined in org-latex.el
 (defvar org-export-latex-minted-options) ;; defined in org-latex.el
 
+(defun org-remove-formatting-on-newlines-in-region (beg end)
+  "Remove formatting on newline characters"
+  (interactive "r")
+  (save-excursion
+    (goto-char beg)
+    (while (progn (end-of-line) (< (point) end))
+      (put-text-property (point) (1+ (point)) 'face nil)
+      (forward-char 1))))
+
 (defun org-export-format-source-code-or-example
   (lang code &optional opts indent caption)
   "Format CODE from language LANG and return it formatted for export.
@@ -2532,6 +2541,8 @@ INDENT was the original indentation of the block."
 				(funcall mode)
 			      (fundamental-mode))
 			    (font-lock-fontify-buffer)
+			    ;; markup each line separately
+			    (org-remove-formatting-on-newlines-in-region (point-min) (point-max))
 			    (org-src-mode)
 			    (set-buffer-modified-p nil)
 			    (org-export-htmlize-region-for-paste
