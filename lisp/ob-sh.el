@@ -28,6 +28,7 @@
 
 ;;; Code:
 (require 'ob)
+(require 'ob-ref)
 (require 'ob-comint)
 (require 'ob-eval)
 (require 'shell)
@@ -57,10 +58,13 @@ This function is called by `org-babel-execute-src-block'."
   (let* ((session (org-babel-sh-initiate-session
 		   (cdr (assoc :session params))))
          (result-params (cdr (assoc :result-params params)))
+	 (stdin ((lambda (stdin) (when stdin (org-babel-sh-var-to-string
+					 (org-babel-ref-resolve stdin))))
+		 (cdr (assoc :stdin params))))
          (full-body (org-babel-expand-body:generic
 		     body params (org-babel-variable-assignments:sh params))))
     (org-babel-reassemble-table
-     (org-babel-sh-evaluate session full-body result-params)
+     (org-babel-sh-evaluate session full-body result-params stdin)
      (org-babel-pick-name
       (cdr (assoc :colname-names params)) (cdr (assoc :colnames params)))
      (org-babel-pick-name
@@ -101,14 +105,17 @@ This function is called by `org-babel-execute-src-block'."
   "Convert an elisp value to a shell variable.
 Convert an elisp var into a string of shell commands specifying a
 var of the same value."
+  (format org-babel-sh-var-quote-fmt (org-babel-sh-var-to-string var sep)))
+
+(defun org-babel-sh-var-to-string (var &optional sep)
+  "Convert an elisp value to a string."
   (flet ((echo-var (v) (if (stringp v) v (format "%S" v))))
-    ((lambda (var) (format org-babel-sh-var-quote-fmt var))
-     (cond
-      ((and (listp var) (listp (car var)))
-       (orgtbl-to-generic var  (list :sep (or sep "\t") :fmt #'echo-var)))
-      ((listp var)
-       (mapconcat #'echo-var var "\n"))
-      (t (echo-var var))))))
+    (cond
+     ((and (listp var) (listp (car var)))
+      (orgtbl-to-generic var  (list :sep (or sep "\t") :fmt #'echo-var)))
+     ((listp var)
+      (mapconcat #'echo-var var "\n"))
+     (t (echo-var var)))))
 
 (defun org-babel-sh-table-or-results (results)
   "Convert RESULTS to an appropriate elisp value.
@@ -128,7 +135,7 @@ Emacs-lisp table, otherwise return the results as a string."
 (defvar org-babel-sh-eoe-output "org_babel_sh_eoe"
   "String to indicate that evaluation has completed.")
 
-(defun org-babel-sh-evaluate (session body &optional result-params)
+(defun org-babel-sh-evaluate (session body &optional result-params stdin)
   "Pass BODY to the Shell process in BUFFER.
 If RESULT-TYPE equals 'output then return a list of the outputs
 of the statements in BODY, if RESULT-TYPE equals 'value then
@@ -141,8 +148,19 @@ return the value of the last statement in BODY."
 	 (let ((tmp-file (org-babel-temp-file "sh-")))
 	   (with-temp-file tmp-file (insert results))
 	   (org-babel-import-elisp-from-file tmp-file)))))
-   (if (not session)
-       (org-babel-eval org-babel-sh-command (org-babel-trim body))
+   (cond
+    (stdin				; external shell script w/STDIN
+     (let ((script-file (org-babel-temp-file "sh-script-"))
+	   (stdin-file (org-babel-temp-file "sh-stdin-")))
+       (with-temp-file script-file (insert body))
+       (with-temp-file stdin-file (insert stdin))
+       (with-temp-buffer
+	 (call-process-shell-command
+	  (format "%s %s" org-babel-sh-command script-file)
+	  stdin-file
+	  (current-buffer))
+	 (buffer-string))))
+    (session 				; session evaluation
      (mapconcat
       #'org-babel-sh-strip-weird-long-prompt
       (mapcar
@@ -156,7 +174,9 @@ return the value of the last statement in BODY."
 	   (append
 	    (split-string (org-babel-trim body) "\n")
 	    (list org-babel-sh-eoe-indicator))))
-	2)) "\n"))))
+	2)) "\n"))
+    ('otherwise				; external shell script
+     (org-babel-eval org-babel-sh-command (org-babel-trim body))))))
 
 (defun org-babel-sh-strip-weird-long-prompt (string)
   "Remove prompt cruft from a string of shell output."
