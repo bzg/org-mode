@@ -150,6 +150,7 @@ requirements) is loaded."
   :type '(alist :tag "Babel Languages"
 		:key-type
 		(choice
+		 (const :tag "Awk" awk)
 		 (const :tag "C" C)
 		 (const :tag "R" R)
 		 (const :tag "Asymptote" asymptote)
