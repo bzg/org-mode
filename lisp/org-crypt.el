@@ -209,7 +209,8 @@ This setting can also be overridden in the CRYPTKEY property."
 ;;     'org-mode-hook
 ;;     (lambda () (add-hook 'auto-save-hook 'org-encrypt-entries nil t))))
 
-(when (and (not (daemonp)) auto-save-default)
+(when (and (functionp 'daemonp)
+	   (not (daemonp)) auto-save-default)
   (message "Warning: turn auto-save-mode off in Org buffers containing crypted entries.")
   (sit-for 5))
 
