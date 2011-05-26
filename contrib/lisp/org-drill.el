@@ -1655,7 +1655,6 @@ items if FORCE-SHOW-FIRST or FORCE-SHOW-LAST is non-nil)."
 (defun org-drill-present-multicloze-hide-nth (to-hide)
   "Hide the TO-HIDE'th piece of clozed text. 1 is the first piece. If
 TO-HIDE is negative, count backwards, so -1 means the last item, -2
-CNT is negative, count backwards, so -1 means the last item, -2
 the second to last, etc."
   (with-hidden-comments
    (with-hidden-cloze-hints
@@ -1681,7 +1680,6 @@ the second to last, etc."
       (cond
        ((or (not (plusp match-count))
             (> to-hide match-count))
-            (and (minusp cnt) (> (abs cnt) match-count)))
         nil)
        (t
         (save-excursion
@@ -1694,6 +1692,23 @@ the second to last, etc."
               (incf cnt)
               (if (= cnt to-hide)
                   (org-drill-hide-matched-cloze-text)))))))
+      (org-display-inline-images t)
+      (org-cycle-hide-drawers 'all)
+      (prog1 (org-drill-presentation-prompt)
+        (org-drill-hide-subheadings-if 'org-drill-entry-p)
+        (org-drill-unhide-clozed-text))))))
+
+
+(defun org-drill-present-multicloze-hide1 ()
+  "Hides one of the pieces of text that are marked for cloze deletion,
+chosen at random."
+  (org-drill-present-multicloze-hide-n 1))
+
+
+(defun org-drill-present-multicloze-hide2 ()
+  "Hides two of the pieces of text that are marked for cloze deletion,
+chosen at random."
+  (org-drill-present-multicloze-hide-n 2))
 
 
 (defun org-drill-present-multicloze-hide-first ()
