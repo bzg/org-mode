@@ -1141,7 +1141,8 @@ is always the old value."
       (let* ((pos (match-beginning 0))
 	     (val (buffer-substring (1+ pos) (match-end 0))))
 	(if replace
-	    (replace-match (concat "|" replace) t t))
+	    (replace-match (concat "|" (if (equal replace "") " " replace))
+			   t t))
 	(goto-char (min (point-at-eol) (+ 2 pos)))
 	val)
     (forward-char 1) ""))
