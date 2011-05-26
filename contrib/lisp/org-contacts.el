@@ -224,11 +224,6 @@ If both match values are nil, return all contacts."
         (when (mail-abbrev-in-expansion-header-p)
           (org-contacts-complete-name))))
 
-(add-hook 'message-mode-hook
-          (lambda ()
-            (add-to-list 'completion-at-point-functions
-                         'org-contacts-message-complete-function)))
-
 (defun org-contacts-gnus-get-name-email ()
   "Get name and email address from Gnus message."
   (gnus-with-article-headers
@@ -402,6 +397,12 @@ This adds `org-contacts-gnus-check-mail-address' and
   (define-key gnus-summary-mode-map ";" 'org-contacts-gnus-article-from-goto)
   (add-hook 'gnus-article-prepare-hook 'org-contacts-gnus-check-mail-address)
   (add-hook 'gnus-article-prepare-hook 'org-contacts-gnus-store-last-mail))
+
+(when (boundp 'completion-at-point-functions)
+  (add-hook 'message-mode-hook
+	    (lambda ()
+	      (add-to-list 'completion-at-point-functions
+			   'org-contacts-message-complete-function))))
 
 (defun org-contacts-wl-get-from-header-content ()
   "Retrieve the content of the `From' header of an email.
