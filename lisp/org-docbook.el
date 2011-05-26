@@ -936,7 +936,10 @@ publishing directory."
 	  (when org-export-with-footnotes
 	    (setq start 0)
 	    (while (string-match "\\([^* \t].*?\\)\\[\\([0-9]+\\)\\]" line start)
-	      (if (get-text-property (match-beginning 2) 'org-protected line)
+	      ;; Discard protected matches not clearly identified as
+	      ;; footnote markers.
+	      (if (or (get-text-property (match-beginning 2) 'org-protected line)
+		      (not (get-text-property (match-beginning 2) 'org-footnote line)))
 		  (setq start (match-end 2))
 		(let* ((num (match-string 2 line))
 		       (footnote-def (assoc num footnote-list)))

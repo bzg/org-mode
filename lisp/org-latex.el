@@ -2456,8 +2456,11 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 					    (and next (= (nth 1 next) (nth 2 ref)))))
 			  org-export-latex-footnote-separator ""))))
 	    (when (org-on-heading-p)
-	      (setq fnote
-		    (concat (org-export-latex-protect-string "\\protect") fnote)))
+	      (setq fnote (concat (org-export-latex-protect-string"\\protect")
+				  fnote)))
+	    ;; Ensure a footnote at column 0 cannot end a list
+	    ;; containing it.
+	    (put-text-property 0 (length fnote) 'original-indentation 1000 fnote)
 	    ;; Replace footnote reference with FNOTE and, maybe, SEP.
 	    ;; `save-excursion' is required if there are two footnotes
 	    ;; in a row. In that case, point would be left at the

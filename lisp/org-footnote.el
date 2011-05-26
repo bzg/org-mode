@@ -532,11 +532,16 @@ Additional note on `org-footnote-insert-pos-for-preprocessor':
 	  ;; Replace footnote reference with [MARKER]. Maybe fill
 	  ;; paragraph once done. If SORT-ONLY is non-nil, only move
 	  ;; to the end of reference found to avoid matching it twice.
+	  ;; If PRE-PROCESS-P isn't nil, also add `org-footnote'
+	  ;; property to it, so it can be easily recognized by
+	  ;; exporters.
 	  (if sort-only
 	      (goto-char (nth 2 ref))
 	    (delete-region (nth 1 ref) (nth 2 ref))
 	    (goto-char (nth 1 ref))
-	    (insert (format "[%d]" marker))
+	    (let ((new-ref (format "[%d]" marker)))
+	      (when pre-process-p (org-add-props new-ref '(org-footnote t)))
+	      (insert new-ref))
 	    (and inlinep
 		 org-footnote-fill-after-inline-note-extraction
 		 (org-fill-paragraph)))
