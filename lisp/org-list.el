@@ -2558,9 +2558,8 @@ compare entries."
 	     "Sort plain list: [a]lpha  [n]umeric  [t]ime  [f]unc   A/N/T/F means reversed:")
 	    (read-char-exclusive)))
 	 (getkey-func (and (= (downcase sorting-type) ?f)
-			   (org-icompleting-read "Sort using function: "
-						 obarray 'fboundp t nil nil)
-			   (intern getkey-func))))
+			   (intern (org-icompleting-read "Sort using function: "
+							 obarray 'fboundp t nil nil)))))
     (message "Sorting items...")
     (save-restriction
       (narrow-to-region start end)
