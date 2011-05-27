@@ -1818,7 +1818,11 @@ These special properties will later be interpreted by the backend."
 	 (lambda (e)
 	   (goto-char (point-min))
 	   (while (re-search-forward (org-item-beginning-re) nil t)
-	     (when (eq (nth 2 (org-list-context)) e) (funcall mark-list e))))
+	     (let ((context (nth 2 (org-list-context))))
+	       (if (eq context e)
+		   (funcall mark-list e)
+		 (put-text-property (point-at-bol) (point-at-eol)
+				    'list-context context)))))
 	 (cons nil org-list-export-context))))))
 
 (defun org-export-attach-captions-and-attributes (target-alist)
