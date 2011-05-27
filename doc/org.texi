@@ -11565,9 +11565,8 @@ blocks located in the current Org-mode buffer or in the ``Library of Babel''
 (see @ref{Library of Babel}).  These lines use the following syntax.
 
 @example
-#+call: <name>(<arguments>) <header arguments>
-#+function: <name>(<arguments>) <header arguments>
-#+lob: <name>(<arguments>) <header arguments>
+#+call: <name>(<arguments>)
+#+call: <name>[<header arguments>](<arguments>) <header arguments>
 @end example
 
 @table @code
@@ -11581,25 +11580,33 @@ original code block named @code{double} has the header argument @code{:var
 n=2}, then the call line passing the number four to that block would be
 written as @code{#+call: double(n=2)}.
 @item <header arguments>
-Header arguments can be placed after the function invocation.  See
-@ref{Header arguments} for more information on header arguments.
-@end table
-
-All header arguments placed in the @code{<header arguments>} section
-described above will be applied to the evaluation of the @code{#+call:} line,
-however it is sometimes desirable to specify header arguments to be passed to
-the code block being evaluated.
-
-This is possible through the use of the following optional extended syntax.
+Header arguments can be placed either inside the call to the code block or at
+the end of the line as shown below.
 
 @example
-#+call: <name>[<block header arguments>](<arguments>) <header arguments>
+#+call: code_bloc_name[XXXX](arguments) YYYY
 @end example
 
-Any header argument placed between the square brackets in the @code{<block
-header arguments>} section will be applied to the evaluation of the named
-code block.  For more examples of passing header arguments to @code{#+call:}
-lines see @ref{Header arguments in function calls}.
+Header arguments located in these two locations are treated differently.
+
+@table @code
+@item XXXX
+Those placed in the @code{XXXX} location are passed through and applied to
+the code block being called.  These header arguments affect how the code
+block is evaluated, for example @code{[:results output]} will collect the
+results from @code{STDOUT} of the called code block.
+@item YYYY
+Those placed in the @code{YYYY} location are applied to the call line and do
+not affect the code block being called.  These header arguments affect how
+the results are incorporated into the Org-mode buffer when the call line is
+evaluated, and how the call line is exported.  For example @code{:results
+org} at the end of the call line will insert the results of the call line
+inside of an Org-mode block.
+@end table
+
+For more examples of passing header arguments to @code{#+call:} lines see
+@ref{Header arguments in function calls}.
+@end table
 
 @node Library of Babel, Languages, Evaluating code blocks, Working With Source Code
 @section Library of Babel
