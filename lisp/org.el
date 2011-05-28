@@ -17907,29 +17907,36 @@ such that the lines become children of the current entry.  However,
 when a prefix argument is given, its value determines the number of
 stars to add."
   (interactive "P")
-  (let (l2 l itemp beg end)
+  (let ((skip-blanks
+	 (function
+	  ;; Return beginning of first non-blank line, starting from
+	  ;; line at POS.
+	  (lambda (pos)
+	    (save-excursion
+	      (goto-char pos)
+	      (skip-chars-forward " \r\t\n")
+	      (point-at-bol)))))
+	beg end)
+    ;; Determine boundaries of changes. If region ends at a bol, do
+    ;; not consider the last line to be in the region.
     (if (org-region-active-p)
-	(setq beg (region-beginning) end (copy-marker (region-end)))
-      (setq beg (point-at-bol)
-	    end (min (1+ (point-at-eol)) (point-max))))
+	(setq beg (funcall skip-blanks (region-beginning))
+	      end (copy-marker (save-excursion
+				 (goto-char (region-end))
+				 (if (bolp) (point) (point-at-eol)))))
+      (setq beg (funcall skip-blanks (point-at-bol))
+	    end (copy-marker (point-at-eol))))
     ;; Ensure inline tasks don't count as headings.
     (org-with-limited-levels
      (save-excursion
-       (goto-char end)
-       (setq l2 (org-current-line))
        (goto-char beg)
-       (beginning-of-line 1)
-       ;; Ignore blank lines at beginning of region
-       (skip-chars-forward " \t\r\n")
-       (beginning-of-line 1)
-       (setq l (1- (org-current-line)))
        (cond
 	;; Case 1. Started at an heading: de-star headings.
 	((org-on-heading-p)
-	 (while (< (setq l (1+ l)) l2)
+	 (while (< (point) end)
 	   (when (org-on-heading-p t)
 	     (looking-at outline-regexp) (replace-match ""))
-	   (beginning-of-line 2)))
+	   (forward-line)))
 	;; Case 2. Started at an item: change items into headlines.
 	((org-at-item-p)
 	 (let ((stars (make-string
@@ -17941,7 +17948,7 @@ stars to add."
 	     (when (org-at-item-p)
 	       ;; Pay attention to cases when region ends before list.
 	       (let* ((struct (org-list-struct))
-		      (list-end (min (org-list-get-bottom-point struct) end)))
+		      (list-end (min (org-list-get-bottom-point struct) (1+ end))))
 		 (save-restriction
 		   (narrow-to-region (point) list-end)
 		   (insert
@@ -17950,7 +17957,7 @@ stars to add."
 		     '(:istart (concat stars (funcall get-stars depth))
 			       :icount (concat stars
 					       (funcall get-stars depth))))))))
-	     (beginning-of-line 2))))
+	     (forward-line))))
 	;; Case 3. Started at normal text: make every line an heading,
 	;;         skipping headlines and items.
 	(t (let* ((stars (make-string
@@ -17963,11 +17970,11 @@ stars to add."
 				   (org-odd-levels-only "**")
 				   (t "*")))
 		  (rpl (concat stars add-stars " ")))
-	     (while (< (setq l (1+ l)) l2)
-	       (unless (or (org-on-heading-p) (org-at-item-p))
-		 (when (looking-at "\\([ \t]*\\)\\(\\S-\\)")
-		   (replace-match (concat rpl (match-string 2)))))
-	       (beginning-of-line 2)))))))))
+	     (while (< (point) end)
+	       (when (and (not (org-on-heading-p)) (not (org-at-item-p))
+			  (looking-at "\\([ \t]*\\)\\(\\S-\\)"))
+		 (replace-match (concat rpl (match-string 2))))
+	       (forward-line)))))))))
 
 (defun org-meta-return (&optional arg)
   "Insert a new heading or wrap a region in a table.
