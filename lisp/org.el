@@ -7122,7 +7122,10 @@ first headline."
 (defun org-reduced-level (l)
   "Compute the effective level of a heading.
 This takes into account the setting of `org-odd-levels-only'."
-  (if org-odd-levels-only (1+ (floor (/ l 2))) l))
+  (cond
+   ((zerop l) 0)
+   (org-odd-levels-only (1+ (floor (/ l 2))))
+   (t l)))
 
 (defun org-level-increment ()
   "Return the number of stars that will be added or removed at a
