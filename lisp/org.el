@@ -17815,7 +17815,7 @@ argument ARG, change each line in region into an item."
     (if (org-region-active-p)
 	(setq beg (funcall skip-blanks (region-beginning))
 	      end (copy-marker (region-end)))
-      (setq beg (funcall skip-blank (point-at-bol))
+      (setq beg (funcall skip-blanks (point-at-bol))
 	    end (copy-marker (point-at-eol))))
     ;; Depending on the starting line, choose an action on the text
     ;; between BEG and END.
