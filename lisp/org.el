@@ -17823,9 +17823,9 @@ argument ARG, change each line in region into an item."
      (save-excursion
        (goto-char beg)
        (cond
-	;; Case 1. Start at an item: de-itemize.  Note that it only
-	;; happens when a region is active: `org-ctrl-c-minus' would
-	;; call `org-cycle-list-bullet' otherwise.
+	;; Case 1. Start at an item: de-itemize. Note that it only
+	;;         happens when a region is active: `org-ctrl-c-minus'
+	;;         would call `org-cycle-list-bullet' otherwise.
 	((org-at-item-p)
 	 (while (< (point) end)
 	   (when (org-at-item-p)
@@ -17847,8 +17847,12 @@ argument ARG, change each line in region into an item."
 		;; compared to it to determine hierarchy in the list.
 		(ref-level (org-reduced-level (org-outline-level))))
 	   (while (< (point) end)
-	     (let ((delta (max 0 (- (org-reduced-level (org-outline-level))
-				    ref-level))))
+	     (let* ((level (org-reduced-level (org-outline-level)))
+		    (delta (max 0 (- level ref-level))))
+	       ;; If current headline is less indented than the first
+	       ;; one, set it as reference, in order to preserve
+	       ;; subtrees.
+	       (when (< level ref-level) (setq ref-level level))
 	       (replace-match bul t t)
 	       (org-indent-line-to (+ start-ind (* delta bul-len)))
 	       ;; Ensure all text down to END (or SECTION-END) belongs
