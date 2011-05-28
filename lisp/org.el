@@ -17762,65 +17762,109 @@ Calls `org-table-insert-hline', `org-toggle-item', or
 If there is no active region, only the current line is considered.
 
 If the first non blank line in the region is an headline, convert
-all headlines to items.
+all headlines to items, shifting text accordingly.
 
 If it is an item, convert all items to normal lines.
 
 If it is normal text, change region into an item. With a prefix
 argument ARG, change each line in region into an item."
   (interactive "P")
-  (let (l2 l beg end)
+  (let ((shift-text
+	 (function
+	  ;; Shift text in current section to IND, from point to END.
+	  ;; The function leaves point to END line.
+	  (lambda (ind end)
+	    (let ((min-i 1000) (end (copy-marker end)))
+	      ;; First determine the minimum indentation (MIN-I) of
+	      ;; the text.
+	      (save-excursion
+		(catch 'exit
+		  (while (< (point) end)
+		    (let ((i (org-get-indentation)))
+		      (cond
+		       ;; Skip blank lines and inline tasks.
+		       ((looking-at "^[ \t]*$"))
+		       ((looking-at "^\\*+ "))
+		       ;; We can't find less than 0 indentation.
+		       ((zerop i) (throw 'exit (setq min-i 0)))
+		       ((< i min-i) (setq min-i i))))
+		    (forward-line))))
+	      ;; Then indent each line so that a line indented to
+	      ;; MIN-I becomes indented to IND.  Ignore blank lines
+	      ;; and inline tasks in the process.
+	      (let ((delta (- ind min-i)))
+		(while (< (point) end)
+		  (unless (or (looking-at "^[ \t]*$")
+			      (looking-at "^\\*+ "))
+		    (org-indent-line-to (+ (org-get-indentation) delta)))
+		  (forward-line)))))))
+	(skip-blanks
+	 (function
+	  ;; Return beginning of first non-blank line, starting from
+	  ;; line at POS.
+	  (lambda (pos)
+	    (save-excursion
+	      (goto-char pos)
+	      (skip-chars-forward " \r\t\n")
+	      (point-at-bol)))))
+	beg end)
+    ;; Determine boundaries of changes.
     (if (org-region-active-p)
-	(setq beg (region-beginning) end (region-end))
-      (setq beg (point-at-bol)
-	    end (min (1+ (point-at-eol)) (point-max))))
+	(setq beg (funcall skip-blanks (region-beginning))
+	      end (copy-marker (region-end)))
+      (setq beg (funcall skip-blank (point-at-bol))
+	    end (copy-marker (point-at-eol))))
+    ;; Depending on the starting line, choose an action on the text
+    ;; between BEG and END.
     (org-with-limited-levels
      (save-excursion
-       (goto-char end)
-       (setq l2 (org-current-line))
        (goto-char beg)
-       (beginning-of-line 1)
-       ;; Ignore blank lines at beginning of region
-       (skip-chars-forward " \t\r\n")
-       (beginning-of-line 1)
-       (setq l (1- (org-current-line)))
        (cond
-	;; Case 1. Start at an item: de-itemize.
+	;; Case 1. Start at an item: de-itemize.  Note that it only
+	;; happens when a region is active: `org-ctrl-c-minus' would
+	;; call `org-cycle-list-bullet' otherwise.
 	((org-at-item-p)
-	 (while (< (setq l (1+ l)) l2)
+	 (while (< (point) end)
 	   (when (org-at-item-p)
 	     (skip-chars-forward " \t")
 	     (delete-region (point) (match-end 0)))
-	   (beginning-of-line 2)))
-	;; Case 2. Start an an heading: convert to items.
+	   (forward-line)))
+	;; Case 2. Start at an heading: convert to items.
 	((org-on-heading-p)
 	 (let* ((bul (org-list-bullet-string "-"))
-		(len (length bul))
-		(ind 0) (level 0))
-	   (while (< (setq l (1+ l)) l2)
-	     (cond
-	      ((looking-at outline-regexp)
-	       (let* ((lvl (org-reduced-level
-			    (- (length (match-string 0)) 2)))
-		      (s (concat (make-string (* len lvl) ? ) bul)))
-		 (replace-match s t t)
-		 (setq ind (length s) level lvl)))
-	      ;; Ignore blank lines and inline tasks.
-	      ((looking-at "^[ \t]*$"))
-	      ((looking-at "^\\*+ "))
-	      ;; Ensure normal text belongs to the new item.
-	      (t (org-indent-line-to (+ (max (- (org-get-indentation) level 2) 0)
-					ind))))
-	     (beginning-of-line 2))))
-	;; Case 3. Normal line with ARG: turn each of them into items
-	;;         unless they are already one.
+		(bul-len (length bul))
+		;; Indentation of the first heading.  It should be
+		;; relative to the indentation of its parent, if any.
+		(start-ind (save-excursion
+			     (cond
+			      ((not org-adapt-indentation) 0)
+			      ((not (outline-previous-heading)) 0)
+			      (t (length (match-string 0))))))
+		;; Level of first heading. Further headings will be
+		;; compared to it to determine hierarchy in the list.
+		(ref-level (org-reduced-level (org-outline-level))))
+	   (while (< (point) end)
+	     (let ((delta (max 0 (- (org-reduced-level (org-outline-level))
+				    ref-level))))
+	       (replace-match bul t t)
+	       (org-indent-line-to (+ start-ind (* delta bul-len)))
+	       ;; Ensure all text down to END (or SECTION-END) belongs
+	       ;; to the newly created item.
+	       (let ((section-end (save-excursion
+				    (or (outline-next-heading) (point)))))
+		 (forward-line)
+		 (funcall shift-text
+			  (+ start-ind (* (1+ delta) bul-len))
+			  (min end section-end)))))))
+	;; Case 3. Normal line with ARG: turn each non-item line into
+	;;         an item.
 	(arg
-	 (while (< (setq l (1+ l)) l2)
+	 (while (< (point end))
 	   (unless (or (org-on-heading-p) (org-at-item-p))
 	     (if (looking-at "\\([ \t]*\\)\\(\\S-\\)")
 		 (replace-match
 		  (concat "\\1" (org-list-bullet-string "-") "\\2"))))
-	   (beginning-of-line 2)))
+	   (forward-line)))
 	;; Case 4. Normal line without ARG: make the first line of
 	;;         region an item, and shift indentation of others
 	;;         lines to set them as item's body.
@@ -17829,13 +17873,15 @@ argument ARG, change each line in region into an item."
 		  (ref-ind (org-get-indentation)))
 	     (skip-chars-forward " \t")
 	     (insert bul)
-	     (beginning-of-line 2)
-	     (while (and (< (setq l (1+ l)) l2) (< (point) end))
+	     (forward-line)
+	     (while (< (point) end)
 	       ;; Ensure that lines less indented than first one
 	       ;; still get included in item body.
-	       (org-indent-line-to (+ (max ref-ind (org-get-indentation))
-				      bul-len))
-	       (beginning-of-line 2)))))))))
+	       (funcall shift-text
+			(+ ref-ind bul-len)
+			(min end (save-excursion (or (outline-next-heading)
+						     (point)))))
+	       (forward-line)))))))))
 
 (defun org-toggle-heading (&optional nstars)
   "Convert headings to normal text, or items or text to headings.
