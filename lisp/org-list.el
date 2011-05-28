@@ -115,6 +115,7 @@
 (declare-function org-on-heading-p "org" (&optional invisible-ok))
 (declare-function org-previous-line-empty-p "org" ())
 (declare-function org-remove-if "org" (predicate seq))
+(declare-function org-reduced-level "org" (L))
 (declare-function org-show-subtree "org" ())
 (declare-function org-time-string-to-seconds "org" (s))
 (declare-function org-timer-hms-to-secs "org-timer" (hms))
