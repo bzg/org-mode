@@ -1031,7 +1031,7 @@ Pressing `1' will switch between these two options."
 	  (set-process-sentinel p 'org-export-process-sentinel)
 	  (message "Background process \"%s\": started" p))
       ;; background processing not requested, or not possible
-      (if subtree-p (progn (org-mark-subtree) (activate-mark)))
+      (if subtree-p (progn (org-mark-subtree) (org-activate-mark)))
       (call-interactively (nth 1 ass))
       (when (and bpos (get-buffer-window cbuf))
 	(let ((cw (selected-window)))

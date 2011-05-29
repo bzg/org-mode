@@ -247,6 +247,15 @@ Works on both Emacs and XEmacs."
 	     (> (point) (region-beginning)))
     (exchange-point-and-mark)))
 
+;; Emacs 22 misses `activate-mark'
+(if (fboundp 'activate-mark)
+    (defalias 'org-activate-mark 'activate-mark)
+  (defun org-activate-mark ()
+    (when (mark t)
+      (setq mark-active t)
+      (unless transient-mark-mode
+	(setq transient-mark-mode 'lambda)))))
+
 ;; Invisibility compatibility
 
 (defun org-remove-from-invisibility-spec (arg)
