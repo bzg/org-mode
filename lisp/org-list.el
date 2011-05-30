@@ -115,6 +115,7 @@
 (declare-function org-on-heading-p "org" (&optional invisible-ok))
 (declare-function org-previous-line-empty-p "org" ())
 (declare-function org-remove-if "org" (predicate seq))
+(declare-function org-reduced-level "org" (L))
 (declare-function org-show-subtree "org" ())
 (declare-function org-time-string-to-seconds "org" (s))
 (declare-function org-timer-hms-to-secs "org-timer" (hms))
@@ -2989,7 +2990,7 @@ with overruling parameters for `org-list-to-generic'."
 LIST is as returned by `org-list-parse-list'.  PARAMS is a property list
 with overruling parameters for `org-list-to-generic'."
   (let* ((rule (cdr (assq 'heading org-blank-before-new-entry)))
-	 (level (or (org-current-level) 0))
+	 (level (org-reduced-level (or (org-current-level) 0)))
 	 (blankp (or (eq rule t)
 		     (and (eq rule 'auto)
 			  (save-excursion
@@ -3000,11 +3001,12 @@ with overruling parameters for `org-list-to-generic'."
 	   ;; Return the string for the heading, depending on depth D
 	   ;; of current sub-list.
 	   (lambda (d)
-	     (concat
-	      (make-string (+ level
-			      (if org-odd-levels-only (* 2 (1+ d)) (1+ d)))
-			   ?*)
-	      " ")))))
+	     (let ((oddeven-level (+ level d 1)))
+	       (concat (make-string (if org-odd-levels-only
+					(1- (* 2 oddeven-level))
+				      oddeven-level)
+				    ?*)
+		       " "))))))
     (org-list-to-generic
      list
      (org-combine-plists
