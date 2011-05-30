@@ -238,30 +238,30 @@ lisp/org-install.el: $(LISPFILES0) Makefile
 	mv org-install.el lisp
 
 doc/org: doc/org.texi
-	(cd doc; $(MAKEINFO) --no-split org.texi -o org)
+	(cd doc && $(MAKEINFO) --no-split org.texi -o org)
 
 doc/org.pdf: doc/org.texi
-	(cd doc; $(TEXI2PDF) org.texi)
+	(cd doc && $(TEXI2PDF) org.texi)
 
 doc/orgguide.pdf: doc/orgguide.texi
-	(cd doc; $(TEXI2PDF) orgguide.texi)
+	(cd doc && $(TEXI2PDF) orgguide.texi)
 
 doc/org.html: doc/org.texi
-	(cd doc; $(TEXI2HTML) --no-split -o org.html org.texi)
+	(cd doc && $(TEXI2HTML) --no-split -o org.html org.texi)
 	UTILITIES/manfull.pl doc/org.html
 
 doc/orgcard.pdf: doc/orgcard.tex
-	(cd doc; pdftex orgcard.tex)
+	(cd doc && pdftex orgcard.tex)
 
 doc/orgcard.txt: doc/orgcard.tex
-	(cd doc; perl ../UTILITIES/orgcard2txt.pl orgcard.tex > orgcard.txt)
+	(cd doc && perl ../UTILITIES/orgcard2txt.pl orgcard.tex > orgcard.txt)
 
 doc/orgcard_letter.tex: doc/orgcard.tex
 	perl -pe 's/\\pdflayout=\(0l\)/\\pdflayout=(1l)/' \
                    doc/orgcard.tex > doc/orgcard_letter.tex
 
 doc/orgcard_letter.pdf: doc/orgcard_letter.tex
-	(cd doc; pdftex orgcard_letter.tex)
+	(cd doc && pdftex orgcard_letter.tex)
 
 # Below here are special targets for maintenance only
 
@@ -427,11 +427,11 @@ cleancontrib:
 cleanelc:
 	rm -f $(ELCFILES)
 cleandoc:
-	(cd doc; rm -f org.pdf org org.html orgcard.pdf orgguide.pdf)
-	(cd doc; rm -f *.aux *.cp *.cps *.dvi *.fn *.fns *.ky *.kys *.pg *.pgs)
-	(cd doc; rm -f *.toc *.tp *.tps *.vr *.vrs *.log *.html *.ps)
-	(cd doc; rm -f orgcard_letter.tex orgcard_letter.pdf)
-	(cd doc; rm -rf manual)
+	-(cd doc && rm -f org.pdf org org.html orgcard.pdf orgguide.pdf)
+	-(cd doc && rm -f *.aux *.cp *.cps *.dvi *.fn *.fns *.ky *.kys *.pg *.pgs)
+	-(cd doc && rm -f *.toc *.tp *.tps *.vr *.vrs *.log *.html *.ps)
+	-(cd doc && rm -f orgcard_letter.tex orgcard_letter.pdf)
+	-(cd doc && rm -rf manual)
 
 cleanrel:
 	rm -rf RELEASEDIR
