@@ -5917,6 +5917,9 @@ but you can specify your own function using the @code{:formatter} parameter.
              @r{All are overwritten except if there is an explicit @code{:narrow}}
 :timestamp   @r{A timestamp for the entry, when available.  Look for SCHEDULED,}
              @r{DEADLINE, TIMESTAMP and TIMESTAMP_IA, in this order.}
+:properties  @r{List of properties that should be shown in the table.  Each}
+             @r{property will get its own column.}
+:inherit-props @r{When this flag is @code{t}, the values for @code{:properties} will be inherited.}
 :formula     @r{Content of a @code{#+TBLFM} line to be added and evaluated.}
              @r{As a special case, @samp{:formula %} adds a column with % time.}
              @r{If you do not specify a formula here, any existing formula}

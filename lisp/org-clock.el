@@ -1,6 +1,6 @@
 ;;; org-clock.el --- The time clocking code for Org-mode
 
-;; Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009, 2010
+;; Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011
 ;;   Free Software Foundation, Inc.
 
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
@@ -2059,6 +2059,7 @@ from the dynamic block defintion."
 	 (emph (plist-get params :emphasize))
 	 (level-p (plist-get params :level))
 	 (timestamp (plist-get params :timestamp))
+	 (properties (plist-get params :properties))
 	 (ntcol (max 1 (or (plist-get params :tcolumns) 100)))
 	 (rm-file-column (plist-get params :one-file-with-archives))
 	 (indent (plist-get params :indent))
@@ -2122,6 +2123,7 @@ from the dynamic block defintion."
 	 (if multifile "|" "")          ; file column, maybe
 	 (if level-p   "|" "")          ; level column, maybe
 	 (if timestamp "|" "")          ; timestamp column, maybe
+	 (if properties (make-string (length properties) ?|) "")  ;properties columns, maybe
 	 (format "<%d>| |\n" narrow)))  ; headline and time columns
 
       ;; Insert the table header line
@@ -2130,6 +2132,7 @@ from the dynamic block defintion."
        (if multifile (concat (nth 1 lwords) "|") "")  ; file column, maybe
        (if level-p   (concat (nth 2 lwords) "|") "")  ; level column, maybe
        (if timestamp (concat (nth 3 lwords) "|") "")  ; timestamp column, maybe
+       (if properties (concat (mapconcat 'identity properties "|") "|") "") ;properties columns, maybe
        (concat (nth 4 lwords) "|" 
 	       (nth 5 lwords) "|\n"))                 ; headline and time columns
 
@@ -2141,6 +2144,7 @@ from the dynamic block defintion."
 				         ; file column, maybe
        (if level-p   "|"      "")        ; level column, maybe
        (if timestamp "|"      "")        ; timestamp column, maybe
+       (if properties (make-string (length properties) ?|) "")  ;properties columns, maybe
        (concat "*" (nth 7 lwords) "*| ") ; instead of a headline
        "*"
        (org-minutes-to-hh:mm-string (or total-time 0)) ; the time
@@ -2164,6 +2168,7 @@ from the dynamic block defintion."
 		       (file-name-nondirectory (car tbl))
 		       (if level-p   "| " "") ; level column, maybe
 		       (if timestamp "| " "") ; timestamp column, maybe
+		       (if properties (make-string (length properties) ?|) "")  ;properties columns, maybe
 		       (org-minutes-to-hh:mm-string (nth 1 tbl))))) ; the time
 
 	    ;; Get the list of node entries and iterate over it
@@ -2188,6 +2193,11 @@ from the dynamic block defintion."
 	       (if multifile "|" "")    ; free space for file name column?
 	       (if level-p (format "%d|" (car entry)) "")   ; level, maybe
 	       (if timestamp (concat (nth 2 entry) "|") "") ; timestamp, maybe
+	       (if properties
+		   (concat
+		    (mapconcat
+		     (lambda (p) (or (cdr (assoc p (nth 4 entry))) ""))
+		     properties "|") "|") "")  ;properties columns, maybe
 	       (if indent (org-clocktable-indent-string level) "") ; indentation
 	       hlc headline hlc "|"                                ; headline
 	       (make-string (min (1- ntcol) (or (- level 1))) ?|)
@@ -2342,6 +2352,8 @@ TIME:      The sum of all time spend in this tree, in minutes.  This time
 	 (block (plist-get params :block))
 	 (link (plist-get params :link))
 	 (tags (plist-get params :tags))
+	 (properties (plist-get params :properties))
+	 (inherit-property-p (plist-get params :inherit-props))
 	 (matcher (if tags (cdr (org-make-tags-matcher tags))))
 	 cc range-text st p time level hdl props tsp tbl)
 
@@ -2395,8 +2407,15 @@ TIME:      The sum of all time spend in this tree, in minutes.  This time
 			  (or (cdr (assoc "SCHEDULED" props))
 			      (cdr (assoc "DEADLINE" props))
 			      (cdr (assoc "TIMESTAMP" props))
-			      (cdr (assoc "TIMESTAMP_IA" props)))))
-	      (when (> time 0) (push (list level hdl tsp time) tbl))))))
+			      (cdr (assoc "TIMESTAMP_IA" props))))
+	    props (when properties
+		    (remove nil
+			    (mapcar
+			     (lambda (p)
+			       (when (org-entry-get (point) p inherit-property-p)
+				 (cons p (org-entry-get (point) p inherit-property-p))))
+			     properties))))
+	      (when (> time 0) (push (list level hdl tsp time props) tbl))))))
       (setq tbl (nreverse tbl))
       (list file org-clock-file-total-minutes tbl))))
 
