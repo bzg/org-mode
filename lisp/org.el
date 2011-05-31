@@ -17878,7 +17878,7 @@ argument ARG, change each line in region into an item."
 	;; Case 3. Normal line with ARG: turn each non-item line into
 	;;         an item.
 	(arg
-	 (while (< (point end))
+	 (while (< (point) end)
 	   (unless (or (org-on-heading-p) (org-at-item-p))
 	     (if (looking-at "\\([ \t]*\\)\\(\\S-\\)")
 		 (replace-match
