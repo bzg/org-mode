@@ -16922,7 +16922,7 @@ overwritten, and the table is not marked as requiring realignment."
 	  (if (>= org-self-insert-command-undo-counter 20)
 	      (setq org-self-insert-command-undo-counter 1)
 	    (and (> org-self-insert-command-undo-counter 0)
-		 buffer-undo-list
+		 buffer-undo-list (listp buffer-undo-list)
 		 (not (cadr buffer-undo-list)) ; remove nil entry
 		 (setcdr buffer-undo-list (cddr buffer-undo-list)))
 	    (setq org-self-insert-command-undo-counter
