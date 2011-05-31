@@ -2488,14 +2488,20 @@ Must have a larger ASCII number than `org-highest-priority'."
 
 (defcustom org-default-priority ?B
   "The default priority of TODO items.
-This is the priority an item get if no explicit priority is given."
+This is the priority an item gets if no explicit priority is given.
+When starting to cycle on an empty priority the first step in the cycle
+depends on `org-priority-start-cycle-with-default'.  The resulting first
+step priority must not exceed the range from `org-highest-priority' to
+`org-lowest-priority' which means that `org-default-priority' has to be
+in this range exclusive or inclusive the range boundaries."
   :group 'org-priorities
   :type 'character)
 
 (defcustom org-priority-start-cycle-with-default t
   "Non-nil means start with default priority when starting to cycle.
 When this is nil, the first step in the cycle will be (depending on the
-command used) one higher or lower that the default priority."
+command used) one higher or lower than the default priority.
+See also `org-default-priority'."
   :group 'org-priorities
   :type 'boolean)
 
@@ -12306,12 +12312,18 @@ ACTION can be `set', `up', `down', or a character."
 	(if (and (not have) (eq last-command this-command))
 	    (setq new org-lowest-priority)
 	  (setq new (if (and org-priority-start-cycle-with-default (not have))
-			org-default-priority (1- current)))))
+			org-default-priority (1- current)))
+	  (when (< (upcase new) org-highest-priority)
+	    (error
+	     "See `org-default-priority' for range limit exceeded here"))))
        ((eq action 'down)
 	(if (and (not have) (eq last-command this-command))
 	    (setq new org-highest-priority)
 	  (setq new (if (and org-priority-start-cycle-with-default (not have))
-			org-default-priority (1+ current)))))
+			org-default-priority (1+ current)))
+	  (when (> (upcase new) org-lowest-priority)
+	    (error
+	     "See `org-default-priority' for range limit exceeded here"))))
        (t (error "Invalid action")))
       (if (or (< (upcase new) org-highest-priority)
 	      (> (upcase new) org-lowest-priority))
