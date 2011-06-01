@@ -2488,14 +2488,20 @@ Must have a larger ASCII number than `org-highest-priority'."
 
 (defcustom org-default-priority ?B
   "The default priority of TODO items.
-This is the priority an item get if no explicit priority is given."
+This is the priority an item gets if no explicit priority is given.
+When starting to cycle on an empty priority the first step in the cycle
+depends on `org-priority-start-cycle-with-default'.  The resulting first
+step priority must not exceed the range from `org-highest-priority' to
+`org-lowest-priority' which means that `org-default-priority' has to be
+in this range exclusive or inclusive the range boundaries."
   :group 'org-priorities
   :type 'character)
 
 (defcustom org-priority-start-cycle-with-default t
   "Non-nil means start with default priority when starting to cycle.
 When this is nil, the first step in the cycle will be (depending on the
-command used) one higher or lower that the default priority."
+command used) one higher or lower than the default priority.
+See also `org-default-priority'."
   :group 'org-priorities
   :type 'boolean)
 
@@ -7122,7 +7128,10 @@ first headline."
 (defun org-reduced-level (l)
   "Compute the effective level of a heading.
 This takes into account the setting of `org-odd-levels-only'."
-  (if org-odd-levels-only (1+ (floor (/ l 2))) l))
+  (cond
+   ((zerop l) 0)
+   (org-odd-levels-only (1+ (floor (/ l 2))))
+   (t l)))
 
 (defun org-level-increment ()
   "Return the number of stars that will be added or removed at a
@@ -12303,12 +12312,18 @@ ACTION can be `set', `up', `down', or a character."
 	(if (and (not have) (eq last-command this-command))
 	    (setq new org-lowest-priority)
 	  (setq new (if (and org-priority-start-cycle-with-default (not have))
-			org-default-priority (1- current)))))
+			org-default-priority (1- current)))
+	  (when (< (upcase new) org-highest-priority)
+	    (error
+	     "See `org-default-priority' for range limit exceeded here"))))
        ((eq action 'down)
 	(if (and (not have) (eq last-command this-command))
 	    (setq new org-highest-priority)
 	  (setq new (if (and org-priority-start-cycle-with-default (not have))
-			org-default-priority (1+ current)))))
+			org-default-priority (1+ current)))
+	  (when (> (upcase new) org-lowest-priority)
+	    (error
+	     "See `org-default-priority' for range limit exceeded here"))))
        (t (error "Invalid action")))
       (if (or (< (upcase new) org-highest-priority)
 	      (> (upcase new) org-lowest-priority))
@@ -16919,7 +16934,7 @@ overwritten, and the table is not marked as requiring realignment."
 	  (if (>= org-self-insert-command-undo-counter 20)
 	      (setq org-self-insert-command-undo-counter 1)
 	    (and (> org-self-insert-command-undo-counter 0)
-		 buffer-undo-list
+		 buffer-undo-list (listp buffer-undo-list)
 		 (not (cadr buffer-undo-list)) ; remove nil entry
 		 (setcdr buffer-undo-list (cddr buffer-undo-list)))
 	    (setq org-self-insert-command-undo-counter
@@ -17762,65 +17777,113 @@ Calls `org-table-insert-hline', `org-toggle-item', or
 If there is no active region, only the current line is considered.
 
 If the first non blank line in the region is an headline, convert
-all headlines to items.
+all headlines to items, shifting text accordingly.
 
 If it is an item, convert all items to normal lines.
 
 If it is normal text, change region into an item. With a prefix
 argument ARG, change each line in region into an item."
   (interactive "P")
-  (let (l2 l beg end)
+  (let ((shift-text
+	 (function
+	  ;; Shift text in current section to IND, from point to END.
+	  ;; The function leaves point to END line.
+	  (lambda (ind end)
+	    (let ((min-i 1000) (end (copy-marker end)))
+	      ;; First determine the minimum indentation (MIN-I) of
+	      ;; the text.
+	      (save-excursion
+		(catch 'exit
+		  (while (< (point) end)
+		    (let ((i (org-get-indentation)))
+		      (cond
+		       ;; Skip blank lines and inline tasks.
+		       ((looking-at "^[ \t]*$"))
+		       ((looking-at "^\\*+ "))
+		       ;; We can't find less than 0 indentation.
+		       ((zerop i) (throw 'exit (setq min-i 0)))
+		       ((< i min-i) (setq min-i i))))
+		    (forward-line))))
+	      ;; Then indent each line so that a line indented to
+	      ;; MIN-I becomes indented to IND.  Ignore blank lines
+	      ;; and inline tasks in the process.
+	      (let ((delta (- ind min-i)))
+		(while (< (point) end)
+		  (unless (or (looking-at "^[ \t]*$")
+			      (looking-at "^\\*+ "))
+		    (org-indent-line-to (+ (org-get-indentation) delta)))
+		  (forward-line)))))))
+	(skip-blanks
+	 (function
+	  ;; Return beginning of first non-blank line, starting from
+	  ;; line at POS.
+	  (lambda (pos)
+	    (save-excursion
+	      (goto-char pos)
+	      (skip-chars-forward " \r\t\n")
+	      (point-at-bol)))))
+	beg end)
+    ;; Determine boundaries of changes.
     (if (org-region-active-p)
-	(setq beg (region-beginning) end (region-end))
-      (setq beg (point-at-bol)
-	    end (min (1+ (point-at-eol)) (point-max))))
+	(setq beg (funcall skip-blanks (region-beginning))
+	      end (copy-marker (region-end)))
+      (setq beg (funcall skip-blanks (point-at-bol))
+	    end (copy-marker (point-at-eol))))
+    ;; Depending on the starting line, choose an action on the text
+    ;; between BEG and END.
     (org-with-limited-levels
      (save-excursion
-       (goto-char end)
-       (setq l2 (org-current-line))
        (goto-char beg)
-       (beginning-of-line 1)
-       ;; Ignore blank lines at beginning of region
-       (skip-chars-forward " \t\r\n")
-       (beginning-of-line 1)
-       (setq l (1- (org-current-line)))
        (cond
-	;; Case 1. Start at an item: de-itemize.
+	;; Case 1. Start at an item: de-itemize. Note that it only
+	;;         happens when a region is active: `org-ctrl-c-minus'
+	;;         would call `org-cycle-list-bullet' otherwise.
 	((org-at-item-p)
-	 (while (< (setq l (1+ l)) l2)
+	 (while (< (point) end)
 	   (when (org-at-item-p)
 	     (skip-chars-forward " \t")
 	     (delete-region (point) (match-end 0)))
-	   (beginning-of-line 2)))
-	;; Case 2. Start an an heading: convert to items.
+	   (forward-line)))
+	;; Case 2. Start at an heading: convert to items.
 	((org-on-heading-p)
 	 (let* ((bul (org-list-bullet-string "-"))
-		(len (length bul))
-		(ind 0) (level 0))
-	   (while (< (setq l (1+ l)) l2)
-	     (cond
-	      ((looking-at outline-regexp)
-	       (let* ((lvl (org-reduced-level
-			    (- (length (match-string 0)) 2)))
-		      (s (concat (make-string (* len lvl) ? ) bul)))
-		 (replace-match s t t)
-		 (setq ind (length s) level lvl)))
-	      ;; Ignore blank lines and inline tasks.
-	      ((looking-at "^[ \t]*$"))
-	      ((looking-at "^\\*+ "))
-	      ;; Ensure normal text belongs to the new item.
-	      (t (org-indent-line-to (+ (max (- (org-get-indentation) level 2) 0)
-					ind))))
-	     (beginning-of-line 2))))
-	;; Case 3. Normal line with ARG: turn each of them into items
-	;;         unless they are already one.
+		(bul-len (length bul))
+		;; Indentation of the first heading.  It should be
+		;; relative to the indentation of its parent, if any.
+		(start-ind (save-excursion
+			     (cond
+			      ((not org-adapt-indentation) 0)
+			      ((not (outline-previous-heading)) 0)
+			      (t (length (match-string 0))))))
+		;; Level of first heading. Further headings will be
+		;; compared to it to determine hierarchy in the list.
+		(ref-level (org-reduced-level (org-outline-level))))
+	   (while (< (point) end)
+	     (let* ((level (org-reduced-level (org-outline-level)))
+		    (delta (max 0 (- level ref-level))))
+	       ;; If current headline is less indented than the first
+	       ;; one, set it as reference, in order to preserve
+	       ;; subtrees.
+	       (when (< level ref-level) (setq ref-level level))
+	       (replace-match bul t t)
+	       (org-indent-line-to (+ start-ind (* delta bul-len)))
+	       ;; Ensure all text down to END (or SECTION-END) belongs
+	       ;; to the newly created item.
+	       (let ((section-end (save-excursion
+				    (or (outline-next-heading) (point)))))
+		 (forward-line)
+		 (funcall shift-text
+			  (+ start-ind (* (1+ delta) bul-len))
+			  (min end section-end)))))))
+	;; Case 3. Normal line with ARG: turn each non-item line into
+	;;         an item.
 	(arg
-	 (while (< (setq l (1+ l)) l2)
+	 (while (< (point) end)
 	   (unless (or (org-on-heading-p) (org-at-item-p))
 	     (if (looking-at "\\([ \t]*\\)\\(\\S-\\)")
 		 (replace-match
 		  (concat "\\1" (org-list-bullet-string "-") "\\2"))))
-	   (beginning-of-line 2)))
+	   (forward-line)))
 	;; Case 4. Normal line without ARG: make the first line of
 	;;         region an item, and shift indentation of others
 	;;         lines to set them as item's body.
@@ -17829,13 +17892,15 @@ argument ARG, change each line in region into an item."
 		  (ref-ind (org-get-indentation)))
 	     (skip-chars-forward " \t")
 	     (insert bul)
-	     (beginning-of-line 2)
-	     (while (and (< (setq l (1+ l)) l2) (< (point) end))
+	     (forward-line)
+	     (while (< (point) end)
 	       ;; Ensure that lines less indented than first one
 	       ;; still get included in item body.
-	       (org-indent-line-to (+ (max ref-ind (org-get-indentation))
-				      bul-len))
-	       (beginning-of-line 2)))))))))
+	       (funcall shift-text
+			(+ ref-ind bul-len)
+			(min end (save-excursion (or (outline-next-heading)
+						     (point)))))
+	       (forward-line)))))))))
 
 (defun org-toggle-heading (&optional nstars)
   "Convert headings to normal text, or items or text to headings.
@@ -17854,29 +17919,36 @@ such that the lines become children of the current entry.  However,
 when a prefix argument is given, its value determines the number of
 stars to add."
   (interactive "P")
-  (let (l2 l itemp beg end)
+  (let ((skip-blanks
+	 (function
+	  ;; Return beginning of first non-blank line, starting from
+	  ;; line at POS.
+	  (lambda (pos)
+	    (save-excursion
+	      (goto-char pos)
+	      (skip-chars-forward " \r\t\n")
+	      (point-at-bol)))))
+	beg end)
+    ;; Determine boundaries of changes. If region ends at a bol, do
+    ;; not consider the last line to be in the region.
     (if (org-region-active-p)
-	(setq beg (region-beginning) end (copy-marker (region-end)))
-      (setq beg (point-at-bol)
-	    end (min (1+ (point-at-eol)) (point-max))))
+	(setq beg (funcall skip-blanks (region-beginning))
+	      end (copy-marker (save-excursion
+				 (goto-char (region-end))
+				 (if (bolp) (point) (point-at-eol)))))
+      (setq beg (funcall skip-blanks (point-at-bol))
+	    end (copy-marker (point-at-eol))))
     ;; Ensure inline tasks don't count as headings.
     (org-with-limited-levels
      (save-excursion
-       (goto-char end)
-       (setq l2 (org-current-line))
        (goto-char beg)
-       (beginning-of-line 1)
-       ;; Ignore blank lines at beginning of region
-       (skip-chars-forward " \t\r\n")
-       (beginning-of-line 1)
-       (setq l (1- (org-current-line)))
        (cond
 	;; Case 1. Started at an heading: de-star headings.
 	((org-on-heading-p)
-	 (while (< (setq l (1+ l)) l2)
+	 (while (< (point) end)
 	   (when (org-on-heading-p t)
 	     (looking-at outline-regexp) (replace-match ""))
-	   (beginning-of-line 2)))
+	   (forward-line)))
 	;; Case 2. Started at an item: change items into headlines.
 	((org-at-item-p)
 	 (let ((stars (make-string
@@ -17888,7 +17960,7 @@ stars to add."
 	     (when (org-at-item-p)
 	       ;; Pay attention to cases when region ends before list.
 	       (let* ((struct (org-list-struct))
-		      (list-end (min (org-list-get-bottom-point struct) end)))
+		      (list-end (min (org-list-get-bottom-point struct) (1+ end))))
 		 (save-restriction
 		   (narrow-to-region (point) list-end)
 		   (insert
@@ -17897,7 +17969,7 @@ stars to add."
 		     '(:istart (concat stars (funcall get-stars depth))
 			       :icount (concat stars
 					       (funcall get-stars depth))))))))
-	     (beginning-of-line 2))))
+	     (forward-line))))
 	;; Case 3. Started at normal text: make every line an heading,
 	;;         skipping headlines and items.
 	(t (let* ((stars (make-string
@@ -17910,11 +17982,11 @@ stars to add."
 				   (org-odd-levels-only "**")
 				   (t "*")))
 		  (rpl (concat stars add-stars " ")))
-	     (while (< (setq l (1+ l)) l2)
-	       (unless (or (org-on-heading-p) (org-at-item-p))
-		 (when (looking-at "\\([ \t]*\\)\\(\\S-\\)")
-		   (replace-match (concat rpl (match-string 2)))))
-	       (beginning-of-line 2)))))))))
+	     (while (< (point) end)
+	       (when (and (not (org-on-heading-p)) (not (org-at-item-p))
+			  (looking-at "\\([ \t]*\\)\\(\\S-\\)"))
+		 (replace-match (concat rpl (match-string 2))))
+	       (forward-line)))))))))
 
 (defun org-meta-return (&optional arg)
   "Insert a new heading or wrap a region in a table.

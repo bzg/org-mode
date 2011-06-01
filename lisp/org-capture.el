@@ -343,23 +343,37 @@ The remember buffer is still current when this hook runs."
 
 (defvar org-capture-plist nil
   "Plist for the current capture process, global, to avoid having to pass it.")
+
 (defvar org-capture-current-plist nil
   "Local variable holding the plist in a capture buffer.
-This is used to store the plist for use when finishing a capture process.
-Another such process might have changed the global variable by then.")
+This is used to store the plist for use when finishing a capture process
+because another such process might have changed the global variable by then.
+
+Each time a new capture buffer has been set up, the global `org-capture-plist'
+is copied to this variable, which is local in the indirect buffer.")
+
 (defvar org-capture-clock-keep nil
   "Local variable to store the value of the :clock-keep parameter.
 This is needed in case org-capture-finalize is called interactively.")
 
 (defun org-capture-put (&rest stuff)
+  "Add properties to the capture property list `org-capture-plist'."
   (while stuff
     (setq org-capture-plist (plist-put org-capture-plist
 				       (pop stuff) (pop stuff)))))
 (defun org-capture-get (prop &optional local)
+  "Get properties from the capture property list `org-capture-plist'.
+When LOCAL is set, use the local variable `org-capture-current-plist',
+this is necessary after initialization of the capture process,
+to avoid conflicts with other active capture processes."
   (plist-get (if local org-capture-current-plist org-capture-plist) prop))
 
-(defun org-capture-member (prop)
-  (plist-get org-capture-plist prop))
+(defun org-capture-member (prop &optional local)
+  "Is PROP a preperty in `org-capture-plist'.
+When LOCAL is set, use the local variable `org-capture-current-plist',
+this is necessary after initialization of the capture process,
+to avoid conflicts with other active capture processes."
+  (plist-get (if local org-capture-current-plist org-capture-plist) prop))
 
 ;;; The minor mode
 
@@ -745,16 +759,17 @@ already gone.  Any prefix argument will be passed to the refile command."
 	(org-datetree-find-date-create
 	 (calendar-gregorian-from-absolute
 	  (cond
-
 	   (org-overriding-default-time
 	    ;; use the overriding default time
 	    (time-to-days org-overriding-default-time))
 
 	   ((eq (car target) 'file+datetree+prompt)
 	    ;; prompt for date
-	    (time-to-days (org-read-date
-			   nil t nil "Date for tree entry:"
-			   (current-time))))
+	    (let ((prompt-time (org-read-date
+				nil t nil "Date for tree entry:"
+				(current-time))))
+	      (org-capture-put :prompt-time prompt-time)
+	      (time-to-days prompt-time)))
 	   (t
 	    ;; current date, possible corrected for late night workers
 	    (org-today))))))

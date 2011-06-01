@@ -1,6 +1,6 @@
 ;;; org-html.el --- HTML export for Org-mode
 
-;; Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009, 2010
+;; Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011
 ;;   Free Software Foundation, Inc.
 
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
@@ -604,6 +604,11 @@ with a link to this URL."
   :type '(choice
 	  (const :tag "Keep internal css" nil)
 	  (string :tag "URL or local href")))
+
+(defcustom org-export-content-div "content"
+  "The name of the container DIV that holds all the page contents."
+  :group 'org-export-htmlize
+  :type 'string)
 
 ;;; Hooks
 
@@ -1278,7 +1283,7 @@ lang=\"%s\" xml:lang=\"%s\">
 %s
 </head>
 <body>
-<div id=\"content\">
+<div id=\"%s\">
 %s
 "
 		 (format
@@ -1295,6 +1300,7 @@ lang=\"%s\" xml:lang=\"%s\">
 		 date author description keywords
 		 style
 		 mathjax
+		 org-export-content-div
 		 (if (or link-up link-home)
 		     (concat
 		      (format org-export-html-home/up-format
