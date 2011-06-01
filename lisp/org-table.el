@@ -47,6 +47,7 @@
 (defvar orgtbl-mode-menu) ; defined when orgtbl mode get initialized
 (defvar org-export-html-table-tag) ; defined in org-exp.el
 (defvar constants-unit-system)
+(defvar org-table-follow-field-mode)
 
 (defvar orgtbl-after-send-table-hook nil
   "Hook for functions attaching to `C-c C-c', if the table is sent.
