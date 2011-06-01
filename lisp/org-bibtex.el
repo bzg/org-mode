@@ -114,6 +114,7 @@
   (require 'cl))
 
 (defvar description nil) ; dynamically scoped from org.el
+(defvar org-id-locations)
 
 (declare-function bibtex-beginning-of-entry "bibtex" ())
 (declare-function bibtex-generate-autokey "bibtex" ())
