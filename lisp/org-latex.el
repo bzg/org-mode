@@ -1844,7 +1844,8 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
                   longtblp (and attr (stringp attr)
                                 (string-match "\\<longtable\\>" attr))
 		  tblenv (if (and attr (stringp attr)
-				  (string-match (regexp-quote "table*") attr))
+				  (or (string-match (regexp-quote "table*") attr)
+				      (string-match "\\<multicolumn\\>" attr)))
 			     "table*" "table")
 		  tabular-env
 		  (if (and attr (stringp attr)
@@ -1857,7 +1858,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
                   align (and attr (stringp attr)
                              (string-match "\\<align=\\([^ \t\n\r]+\\)" attr)
                              (match-string 1 attr))
-                  floatp (or caption label)
+                  floatp (or caption label (string= "table*" tblenv))
 		  placement     (if (and attr
 					 (stringp attr)
 					 (string-match "[ \t]*\\<placement=\\(\\S-+\\)" attr))
