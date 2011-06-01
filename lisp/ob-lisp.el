@@ -64,14 +64,14 @@
   "Execute a block of Common Lisp code with Babel."
   (require 'slime)
   (org-babel-reassemble-table
-   (with-temp-buffer
-     (insert (org-babel-expand-body:lisp body params))
-     ((lambda (result)
-	(if (member "output" (cdr (assoc :result-params params)))
-	    (car result)
-	    (condition-case nil
-		(read (org-bable-lisp-vector-to-list (cadr result)))
-	      (error (cadr result)))))
+   ((lambda (result)
+      (if (member "output" (cdr (assoc :result-params params)))
+	  (car result)
+	(condition-case nil
+	    (read (org-bable-lisp-vector-to-list (cadr result)))
+	  (error (cadr result)))))
+    (with-temp-buffer
+      (insert (org-babel-expand-body:lisp body params))
       (slime-eval `(swank:eval-and-grab-output
 		    ,(format "(progn %s)" (buffer-substring-no-properties
 					   (point-min) (point-max))))
