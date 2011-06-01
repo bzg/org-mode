@@ -1628,7 +1628,7 @@ See the `org-export-latex.el' code for a complete conversion table."
 	  (while (re-search-forward c nil t)
 	    ;; Put the point where to check for org-protected
 	    (unless (or (get-text-property (match-beginning 2) 'org-protected)
-			(org-at-table.el-p))
+			(save-match-data (org-at-table.el-p)))
 	      (cond ((member (match-string 2) '("\\$" "$"))
 		     (if (equal (match-string 2) "\\$")
 			 nil
