@@ -5917,6 +5917,9 @@ but you can specify your own function using the @code{:formatter} parameter.
              @r{All are overwritten except if there is an explicit @code{:narrow}}
 :timestamp   @r{A timestamp for the entry, when available.  Look for SCHEDULED,}
              @r{DEADLINE, TIMESTAMP and TIMESTAMP_IA, in this order.}
+:properties  @r{List of properties that should be shown in the table.  Each}
+             @r{property will get its own column.}
+:inherit-props @r{When this flag is @code{t}, the values for @code{:properties} will be inherited.}
 :formula     @r{Content of a @code{#+TBLFM} line to be added and evaluated.}
              @r{As a special case, @samp{:formula %} adds a column with % time.}
              @r{If you do not specify a formula here, any existing formula}
@@ -10160,13 +10163,14 @@ All lines between these markers are exported literally
 @subsection Tables in @LaTeX{} export
 @cindex tables, in @LaTeX{} export
 
-For @LaTeX{} export of a table, you can specify a label and a caption
-(@pxref{Images and tables}).  You can also use the @code{ATTR_LaTeX} line to
-request a @code{longtable} environment for the table, so that it may span
-several pages, or to change the default table environment from @code{table}
-to @code{table*} or to change the default inner tabular environment to
-@code{tabularx} or @code{tabulary}.  Finally, you can set the alignment
-string, and (with @code{tabularx} or @code{tabulary}) the width:
+For @LaTeX{} export of a table, you can specify a label, a caption and
+placement options (@pxref{Images and tables}).  You can also use the
+@code{ATTR_LaTeX} line to request a @code{longtable} environment for the
+table, so that it may span several pages, or to change the default table
+environment from @code{table} to @code{table*} or to change the default inner
+tabular environment to @code{tabularx} or @code{tabulary}.  Finally, you can
+set the alignment string, and (with @code{tabularx} or @code{tabulary}) the
+width:
 
 @cindex #+CAPTION
 @cindex #+LABEL
@@ -10207,7 +10211,20 @@ element.  You can use an @code{#+ATTR_LaTeX:} line to specify the various
 options that can be used in the optional argument of the
 @code{\includegraphics} macro.  To modify the placement option of the
 @code{figure} environment, add something like @samp{placement=[h!]} to the
-Attributes.
+Attributes. It is to be noted this option can be used with tables as well.
+The options are passed as the placement option to floating environments like
+@code{figure} or @code{table}. One can pass other compatible options as well.
+For example the @code{#+ATTR_LaTeX:} line below is exported as the
+@code{figure} environment below it.
+
+@cindex #+ATTR_LaTeX
+@example
+#+ATTR_LaTeX: placement=[<options>]\footnotesize
+
+\begin{figure}[<options>]\footnotesize
+...
+\end{figure}
+@end example
 
 If you would like to let text flow around the image, add the word @samp{wrap}
 to the @code{#+ATTR_LaTeX:} line, which will make the figure occupy the left

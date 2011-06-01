@@ -54,7 +54,7 @@
 			       (format "(%S (quote %S))" (car var) (cdr var)))
 			     vars "\n      ")
 			    ")\n" body ")")
-		  (format "(progn %s)" body)))))
+		  body))))
     (if (or (member "code" result-params)
 	    (member "pp" result-params))
 	(format "(pprint %s)" body)
@@ -73,7 +73,8 @@
 		(read (org-bable-lisp-vector-to-list (cadr result)))
 	      (error (cadr result)))))
       (slime-eval `(swank:eval-and-grab-output
-		    ,(buffer-substring-no-properties (point-min) (point-max)))
+		    ,(format "(progn %s)" (buffer-substring-no-properties
+					   (point-min) (point-max))))
 		  (cdr (assoc :package params)))))
    (org-babel-pick-name (cdr (assoc :colname-names params))
 			(cdr (assoc :colnames params)))

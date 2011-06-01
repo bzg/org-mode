@@ -114,6 +114,7 @@
   (require 'cl))
 
 (defvar description nil) ; dynamically scoped from org.el
+(defvar org-id-locations)
 
 (declare-function bibtex-beginning-of-entry "bibtex" ())
 (declare-function bibtex-generate-autokey "bibtex" ())
@@ -322,8 +323,8 @@ This variable is relevant only if `org-bibtex-export-tags-as-keywords` is t."
 			      (lambda (kv)
 				(let ((key (car kv)) (val (cdr kv)))
 				  (when (and (string-match org-bibtex-prefix key)
-					     (not (equalp
-						   (concat org-bibtex-prefix "TYPE") key)))
+					     (not (string=
+						   (downcase (concat org-bibtex-prefix "TYPE")) (downcase key))))
 				    (cons (downcase (replace-regexp-in-string
 						     org-bibtex-prefix "" key))
 					  val))))

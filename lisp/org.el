@@ -13509,6 +13509,11 @@ Being in this list makes sure that they are offered for completion.")
 	  org-property-end-re "\\)\n?")
   "Matches an entire clock drawer.")
 
+(defsubst org-re-property (property)
+  "Return a regexp matching PROPERTY.
+Match group 1 will be set to the value "
+  (concat "^[ \t]*:" (regexp-quote property) ":[ \t]*\\(\\S-.*\\)"))
+
 (defun org-property-action ()
   "Do an action on properties."
   (interactive)
@@ -13975,11 +13980,6 @@ formats in the current buffer."
 		(add-to-list 'rtn (match-string 1 cfmt))))))))
 
     (sort rtn (lambda (a b) (string< (upcase a) (upcase b))))))
-
-(defsubst org-re-property (property)
-  "Return a regexp matching PROPERTY.
-Match group 1 will be set to the value "
-  (concat "^[ \t]*:" (regexp-quote property) ":[ \t]*\\(\\S-.*\\)"))
 
 (defun org-property-values (key)
   "Return a list of all values of property KEY in the current buffer."
@@ -16921,7 +16921,7 @@ overwritten, and the table is not marked as requiring realignment."
      (looking-at "[^|\n]*  |"))
     (let (org-table-may-need-update)
       (goto-char (1- (match-end 0)))
-      (delete-backward-char 1)
+      (delete-char -1)
       (goto-char (match-beginning 0))
       (self-insert-command N)))
    (t

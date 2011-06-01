@@ -151,9 +151,7 @@ This variable is only relevant when `org-id-track-globally' is set."
   :type 'file)
 
 (defvar org-id-locations nil
-  "List of files with IDs in those files.
-Depending on `org-id-use-hash' this can also be a hash table mapping IDs
-to files.")
+  "List of files with IDs in those files.")
 
 (defvar org-id-files nil
   "List of files that contain IDs.")
