@@ -2493,7 +2493,9 @@ When starting to cycle on an empty priority the first step in the cycle
 depends on `org-priority-start-cycle-with-default'.  The resulting first
 step priority must not exceed the range from `org-highest-priority' to
 `org-lowest-priority' which means that `org-default-priority' has to be
-in this range exclusive or inclusive the range boundaries."
+in this range exclusive or inclusive the range boundaries.  Else the
+first step refuses to set the default and the second will fall back
+to (depending on the command used) the highest or lowest priority."
   :group 'org-priorities
   :type 'character)
 
@@ -12288,8 +12290,7 @@ ACTION can be `set', `up', `down', or a character."
       (org-back-to-heading t)
       (if (looking-at org-priority-regexp)
 	  (setq current (string-to-char (match-string 2))
-		have t)
-	(setq current org-default-priority))
+		have t))
       (cond
        ((eq action 'remove)
 	(setq remove t new ?\ ))
@@ -12309,25 +12310,36 @@ ACTION can be `set', `up', `down', or a character."
 	       (error "Priority must be between `%c' and `%c'"
 		      org-highest-priority org-lowest-priority))))
        ((eq action 'up)
-	(if (and (not have) (eq last-command this-command))
-	    (setq new org-lowest-priority)
-	  (setq new (if (and org-priority-start-cycle-with-default (not have))
-			org-default-priority (1- current)))
-	  (when (< (upcase new) org-highest-priority)
-	    (error
-	     "See `org-default-priority' for range limit exceeded here"))))
+	(setq new (if have
+		      (1- current)  ; normal cycling
+		    ;; last priority was empty
+		    (if (eq last-command this-command)
+			org-lowest-priority  ; wrap around empty to lowest
+		      ;; default
+		      (if org-priority-start-cycle-with-default
+			  org-default-priority
+			(1- org-default-priority))))))
        ((eq action 'down)
-	(if (and (not have) (eq last-command this-command))
-	    (setq new org-highest-priority)
-	  (setq new (if (and org-priority-start-cycle-with-default (not have))
-			org-default-priority (1+ current)))
-	  (when (> (upcase new) org-lowest-priority)
-	    (error
-	     "See `org-default-priority' for range limit exceeded here"))))
+	(setq new (if have
+		      (1+ current)  ; normal cycling
+		    ;; last priority was empty
+		    (if (eq last-command this-command)
+			org-highest-priority  ; wrap around empty to highest
+		      ;; default
+		      (if org-priority-start-cycle-with-default
+			  org-default-priority
+			(1+ org-default-priority))))))
        (t (error "Invalid action")))
       (if (or (< (upcase new) org-highest-priority)
 	      (> (upcase new) org-lowest-priority))
-	  (setq remove t))
+	  (if (and (memq action '(up down))
+		   (not have) (not (eq last-command this-command)))
+              ;; `new' is from default priority
+	      (error
+	       "The default can not be set, see `org-default-priority' why")
+            ;; normal cycling: `new' is beyond highest/lowest priority
+            ;; and is wrapped around to the empty priority
+	    (setq remove t)))
       (setq news (format "%c" new))
       (if have
 	  (if remove
