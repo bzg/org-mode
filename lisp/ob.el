@@ -310,7 +310,7 @@ specific header arguments as well.")
 
 (defvar org-babel-result-regexp
   (concat "^[ \t]*#\\+"
-	  (regexp-opt org-babel-data-names)
+	  (regexp-opt org-babel-data-names t)
 	  "\\(\\[\\([[:alnum:]]+\\)\\]\\)?\\:[ \t]*")
   "Regular expression used to match result lines.
 If the results are associated with a hash key then the hash will
