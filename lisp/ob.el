@@ -767,7 +767,7 @@ the current subtree."
 				  (cond
 				   ((and (listp v) ; lists are sorted
 					 (member (car arg) '(:result-params)))
-				    (sort v #'string<))
+				    (sort (copy-sequence v) #'string<))
 				   ((and (stringp v) ; strings are sorted
 					 (member (car arg) '(:results :exports)))
 				    (mapconcat #'identity (sort (split-string v)
