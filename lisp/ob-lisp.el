@@ -41,6 +41,12 @@
 (defvar org-babel-default-header-args:lisp '())
 (defvar org-babel-header-arg-names:lisp '(package))
 
+(defcustom org-babel-lisp-dir-fmt
+  "(let ((*default-pathname-defaults* #P%S)) %%s)"
+  "Format string used to wrap code bodies to set the current directory.
+For example a value of \"(progn ;; %s\\n   %%s)\" would ignore the
+current directory string.")
+
 (defun org-babel-expand-body:lisp (body params)
   "Expand BODY according to PARAMS, return the expanded body."
   (let* ((vars (mapcar #'cdr (org-babel-get-header params :var)))
@@ -64,17 +70,22 @@
   "Execute a block of Common Lisp code with Babel."
   (require 'slime)
   (org-babel-reassemble-table
-   (with-temp-buffer
-     (insert (org-babel-expand-body:lisp body params))
-     ((lambda (result)
-	(if (member "output" (cdr (assoc :result-params params)))
-	    (car result)
-	    (condition-case nil
-		(read (org-bable-lisp-vector-to-list (cadr result)))
-	      (error (cadr result)))))
+   ((lambda (result)
+      (if (member "output" (cdr (assoc :result-params params)))
+	  (car result)
+	(condition-case nil
+	    (read (org-bable-lisp-vector-to-list (cadr result)))
+	  (error (cadr result)))))
+    (with-temp-buffer
+      (insert (org-babel-expand-body:lisp body params))
       (slime-eval `(swank:eval-and-grab-output
-		    ,(format "(progn %s)" (buffer-substring-no-properties
-					   (point-min) (point-max))))
+		    ,(let ((dir (if (assoc :dir params)
+					    (cdr (assoc :dir params))
+					  default-directory)))
+		       (format
+			(if dir (format org-babel-lisp-dir-fmt dir) "(progn %s)")
+			(buffer-substring-no-properties
+			 (point-min) (point-max)))))
 		  (cdr (assoc :package params)))))
    (org-babel-pick-name (cdr (assoc :colname-names params))
 			(cdr (assoc :colnames params)))

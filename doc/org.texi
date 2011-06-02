@@ -10221,9 +10221,9 @@ For example the @code{#+ATTR_LaTeX:} line below is exported as the
 @example
 #+ATTR_LaTeX: placement=[<options>]\footnotesize
 
-\begin{figure}[<options>]\footnotesize
+\begin@{figure@}[<options>]\footnotesize
 ...
-\end{figure}
+\end@{figure@}
 @end example
 
 If you would like to let text flow around the image, add the word @samp{wrap}
