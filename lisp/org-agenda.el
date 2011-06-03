@@ -89,16 +89,20 @@ only needed when the text to be killed contains more than N non-white lines."
 
 (defcustom org-agenda-compact-blocks nil
   "Non-nil means make the block agenda more compact.
-This is done by leaving out unnecessary lines."
+This is done globally by leaving out lines like the agenda span
+name and week number or the separator lines."
   :group 'org-agenda
   :type 'boolean)
 
 (defcustom org-agenda-block-separator ?=
   "The separator between blocks in the agenda.
 If this is a string, it will be used as the separator, with a newline added.
-If it is a character, it will be repeated to fill the window width."
+If it is a character, it will be repeated to fill the window width.
+If nil the separator is disabled.  In `org-agenda-custom-commands' this
+addresses the separator between the current and the previous block."
   :group 'org-agenda
   :type '(choice
+	  (const :tag "Disabled" nil)
 	  (character)
 	  (string)))
 
@@ -3030,7 +3034,8 @@ the global options and expect it to be applied to the entire view.")
       (progn
 	(setq buffer-read-only nil)
 	(goto-char (point-max))
-	(unless (or (bobp) org-agenda-compact-blocks)
+	(unless (or (bobp) org-agenda-compact-blocks
+		    (not org-agenda-block-separator))
 	  (insert "\n"
 		  (if (stringp org-agenda-block-separator)
 		      org-agenda-block-separator
@@ -4111,7 +4116,7 @@ This is basically a temporary global variable that can be set and then
 used by user-defined selections using `org-agenda-skip-function'.")
 
 (defvar org-agenda-overriding-header nil
-  "When this is set during todo and tags searches, will replace header.
+  "When set during agenda, todo and tags searches it replaces the header.
 This variable should not be set directly, but custom commands can bind it
 in the options section.")
 
