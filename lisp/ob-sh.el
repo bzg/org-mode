@@ -170,7 +170,13 @@ return the value of the last statement in BODY."
 	    (session org-babel-sh-eoe-output t body)
 	  (mapc
 	   (lambda (line)
-	     (insert line) (comint-send-input nil t) (sleep-for 0.25))
+	     (insert line)
+	     (comint-send-input nil t)
+	     (while (save-excursion
+		      (goto-char comint-last-input-end)
+		      (not (re-search-forward
+			    comint-prompt-regexp nil t)))
+	       (accept-process-output (get-buffer-process (current-buffer)))))
 	   (append
 	    (split-string (org-babel-trim body) "\n")
 	    (list org-babel-sh-eoe-indicator))))
