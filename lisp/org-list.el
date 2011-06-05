@@ -82,6 +82,7 @@
 (require 'org-compat)
 
 (defvar org-M-RET-may-split-line)
+(defvar org-auto-align-tags)
 (defvar org-blank-before-new-entry)
 (defvar org-clock-string)
 (defvar org-closed-string)
@@ -2308,7 +2309,8 @@ With optional prefix argument ALL, do this for the whole buffer."
 			    (format "[%d/%d]" checked total))))
 		(goto-char beg)
 		(insert new)
-		(delete-region (point) (+ (point) (- end beg)))))
+		(delete-region (point) (+ (point) (- end beg)))
+		(when org-auto-align-tags (org-fix-tags-on-the-fly))))
 	    cookies-list))))
 
 (defun org-get-checkbox-statistics-face ()

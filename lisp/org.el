@@ -2850,10 +2850,10 @@ it means that the tags should be flushright to that column.  For example,
   :type 'integer)
 
 (defcustom org-auto-align-tags t
-  "Non-nil means realign tags after pro/demotion of TODO state change.
-These operations change the length of a headline and therefore shift
-the tags around.  With this options turned on, after each such operation
-the tags are again aligned to `org-tags-column'."
+  "Non-nil keeps tags aligned when modifying headlines.
+Some operations (i.e. demoting) change the length of a headline and
+therefore shift the tags around.  With this option turned on, after
+each such operation the tags are again aligned to `org-tags-column'."
   :group 'org-tags
   :type 'boolean)
 
@@ -11339,6 +11339,7 @@ statistics everywhere."
 	    (goto-char checkbox-beg)
 	    (insert new)
 	    (delete-region (point) (+ (point) ndel))
+	    (when org-auto-align-tags (org-fix-tags-on-the-fly))
 	    (when ov (move-overlay ov ovs ove)))
 	  (when cookie-present
 	    (run-hook-with-args 'org-after-todo-statistics-hook
