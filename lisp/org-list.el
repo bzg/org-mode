@@ -102,6 +102,7 @@
 (declare-function org-current-level "org" ())
 (declare-function org-entry-get "org"
 		  (pom property &optional inherit literal-nil))
+(declare-function org-fix-tags-on-the-fly "org" ())
 (declare-function org-get-indentation "org" (&optional line))
 (declare-function org-icompleting-read "org" (&rest args))
 (declare-function org-in-regexp "org" (re &optional nlines visually))
