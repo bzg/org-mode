@@ -10674,15 +10674,15 @@ examples should illustrate this:
   :END:
 ** Markup Guidelines
    :PROPERTIES:
-   :Effort:   2.0
+   :Effort:   2d
    :END:
 ** Workflow Guidelines
    :PROPERTIES:
-   :Effort:   2.0
+   :Effort:   2d
    :END:
 * Presentation
   :PROPERTIES:
-  :Effort:   2.0
+  :Effort:   2d
   :BLOCKER:  training_material @{ gapduration 1d @} preparation
   :END:
 @end example

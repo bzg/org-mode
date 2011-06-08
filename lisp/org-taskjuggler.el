@@ -126,15 +126,15 @@
 ;;   :END:
 ;; ** Markup Guidelines
 ;;    :PROPERTIES:
-;;    :Effort:   2.0
+;;    :Effort:   2d
 ;;    :END:
 ;; ** Workflow Guidelines
 ;;    :PROPERTIES:
-;;    :Effort:   2.0
+;;    :Effort:   2d
 ;;    :END:
 ;; * Presentation
 ;;   :PROPERTIES:
-;;   :Effort:   2.0
+;;   :Effort:   2d
 ;;   :BLOCKER:  training_material { gapduration 1d } some_other_task
 ;;   :END:
 ;;
@@ -613,20 +613,13 @@ is defined it will calculate a unique id for the resource using
 
 (defun org-taskjuggler-clean-effort (effort)
   "Translate effort strings into a format acceptable to taskjuggler,
-i.e. REAL UNIT. If the effort string is something like 5:30 it
-will be assumed to be hours and will be translated into 5.5h.
-Otherwise if it contains something like 3.0 it is assumed to be
-days and will be translated into 3.0d. Other formats that
-taskjuggler supports (like weeks, months and years) are currently
-not supported."
+i.e. REAL UNIT. A valid effort string can be anything that is
+accepted by `org-duration-string-to-minutes´."
   (cond
    ((null effort) effort)
-   ((string-match "\\([0-9]+\\):\\([0-9]+\\)" effort)
-    (let ((hours (string-to-number (match-string 1 effort)))
-	  (minutes (string-to-number (match-string 2 effort))))
-      (format "%dh" (+ hours (/ minutes 60.0)))))
-   ((string-match "\\([0-9]+\\).\\([0-9]+\\)" effort) (concat effort "d"))
-   (t (error "Not a valid effort (%s)" effort))))
+   (t (let* ((minutes (org-duration-string-to-minutes effort))
+	     (hours (/ minutes 60.0)))
+	(format "%.1fh" hours)))))
 
 (defun org-taskjuggler-get-priority (priority)
   "Return a priority between 1 and 1000 based on PRIORITY, an
