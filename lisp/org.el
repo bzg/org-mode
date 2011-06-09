@@ -17963,12 +17963,20 @@ stars to add."
 	     (looking-at outline-regexp) (replace-match ""))
 	   (forward-line)))
 	;; Case 2. Started at an item: change items into headlines.
+	;;         One star will be added by `org-list-to-subtree'.
 	((org-at-item-p)
-	 (let ((stars (make-string
-		       (if nstars
-			   (prefix-numeric-value current-prefix-arg)
-			 (or (org-current-level) 0))
-		       ?*)))
+	 (let* ((stars (make-string
+			(if nstars
+			    ;; subtract the star that will be added again by
+			    ;; `org-list-to-subtree'
+			    (1- (prefix-numeric-value current-prefix-arg))
+			  (or (org-current-level) 0))
+			?*))
+		(add-stars
+		 (cond (nstars "")               ; stars from prefix only
+		       ((equal stars "") "")     ; before first heading
+		       (org-odd-levels-only "*") ; inside heading, odd
+		       (t ""))))                 ; inside heading, oddeven
 	   (while (< (point) end)
 	     (when (org-at-item-p)
 	       ;; Pay attention to cases when region ends before list.
@@ -17979,9 +17987,8 @@ stars to add."
 		   (insert
 		    (org-list-to-subtree
 		     (org-list-parse-list t)
-		     '(:istart (concat stars (funcall get-stars depth))
-			       :icount (concat stars
-					       (funcall get-stars depth))))))))
+		     '(:istart (concat stars add-stars (funcall get-stars depth))
+			       :icount (concat stars add-stars (funcall get-stars depth))))))))
 	     (forward-line))))
 	;; Case 3. Started at normal text: make every line an heading,
 	;;         skipping headlines and items.
@@ -17990,10 +17997,11 @@ stars to add."
 			      (prefix-numeric-value current-prefix-arg)
 			    (or (org-current-level) 0))
 			  ?*))
-		  (add-stars (cond (nstars "")
-				   ((equal stars "") "*")
-				   (org-odd-levels-only "**")
-				   (t "*")))
+		  (add-stars
+		   (cond (nstars "")                ; stars from prefix only
+			 ((equal stars "") "*")     ; before first heading
+			 (org-odd-levels-only "**") ; inside heading, odd
+			 (t "*")))                  ; inside heading, oddeven
 		  (rpl (concat stars add-stars " ")))
 	     (while (< (point) end)
 	       (when (and (not (org-on-heading-p)) (not (org-at-item-p))
