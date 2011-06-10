@@ -96,10 +96,14 @@ controlled by the :comments header argument."
   :group 'org-babel
   :type 'string)
 
-(defcustom org-babel-tangle-do-combine-named-blocks nil
+(defcustom org-babel-tangle-named-block-combination nil
   "Combine blocks of the same name during tangling."
   :group 'org-babel
-  :type 'bool)
+  :type '(choice
+	  (const :tag "Default: no special handling" nil)
+	  (const :tag "Append all blocks of the same name" append)
+	  (const :tag "Only keep the first block of the same name" first)
+	  (const :tag "Only keep the last block of the same name" last)))
 
 (defun org-babel-find-file-noselect-refresh (file)
   "Find file ensuring that the latest changes on disk are
@@ -245,9 +249,7 @@ exported source code blocks by language."
                     (setq block-counter (+ 1 block-counter))
                     (add-to-list 'path-collector file-name)))))
             specs)))
-       (funcall (if org-babel-tangle-do-combine-named-blocks
-		    #'org-babel-tangle-combine-named-blocks
-		  #'identity)
+       (org-babel-tangle-combine-named-blocks
 	(org-babel-tangle-collect-blocks lang)))
       (message "tangled %d code block%s from %s" block-counter
                (if (= block-counter 1) "" "s")
@@ -373,25 +375,34 @@ code blocks by language."
   "Combine blocks of the same name.
 This function follows noweb behavior of appending blocks of the
 same name in the order they appear in the file."
-  (let (tangled-names)
-    (mapcar
-     (lambda (by-lang)
-       (cons
-	(car by-lang)
-	(mapcar (lambda (spec)
-		  (let ((name (nth 3 spec)))
-		    (unless (member name tangled-names)
-		      (when name
-			(setf (nth 5 spec)
-			      (mapconcat
-			       (lambda (el) (nth 5 el))
-			       (remove-if (lambda (el) (not (equal name (nth 3 el))))
-					  (cdr by-lang))
-			       "\n"))
-			(add-to-list 'tangled-names name))
-		      spec)))
-		(cdr by-lang))))
-     blocks)))
+  (if org-babel-tangle-named-block-combination
+      (let (tangled-names)
+	(mapcar
+	 (lambda (by-lang)
+	   (cons
+	    (car by-lang)
+	    (mapcar (lambda (spec)
+		      (let ((name (nth 3 spec)))
+			(unless (member name tangled-names)
+			  (when name
+			    (setf
+			     (nth 5 spec)
+			     (let ((named (mapcar
+					   (lambda (el) (nth 5 el))
+					   (remove-if
+					    (lambda (el)
+					      (not (equal name (nth 3 el))))
+					    (cdr by-lang)))))
+			       (case org-babel-tangle-named-block-combination
+				 (append (mapconcat #'identity
+						    named "\n"))
+				 (first  (first named))
+				 (last   (car (last  named))))))
+			    (add-to-list 'tangled-names name))
+			  spec)))
+		    (cdr by-lang))))
+	 blocks))
+    blocks))
 
 (defun org-babel-spec-to-string (spec)
   "Insert SPEC into the current file.
