@@ -11414,7 +11414,9 @@ This name is associated with the code block.  This is similar to the
 @samp{#+tblname} lines that can be used to name tables in Org-mode files.
 Referencing the name of a code block makes it possible to evaluate the
 block from other places in the file, other files, or from Org-mode table
-formulas (see @ref{The spreadsheet}).
+formulas (see @ref{The spreadsheet}).  Names are assumed to be unique by
+evaluation functions and the behavior of multiple blocks of the same name is
+undefined.
 @item <language>
 The language of the code in the block.
 @item <switches>
