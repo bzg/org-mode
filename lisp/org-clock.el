@@ -2162,9 +2162,9 @@ from the dynamic block defintion."
 	    (insert-before-markers "|-\n")  ; a hline because a new file starts
 	    ;; First the file time, if we have multiple files
 	    (when multifile
-	      ;; Summarize the time colleted from this file
+	      ;; Summarize the time collected from this file
 	      (insert-before-markers
-	       (format (concat "| %s %s | %s*" (nth 8 lwords) "* | *%s*|\n")
+	       (format (concat "| %s %s | %s%s*" (nth 8 lwords) "* | *%s*|\n")
 		       (file-name-nondirectory (car tbl))
 		       (if level-p   "| " "") ; level column, maybe
 		       (if timestamp "| " "") ; timestamp column, maybe
