@@ -44,6 +44,7 @@
 (eval-when-compile (require 'cl))
 
 (declare-function run-ruby "ext:inf-ruby" (&optional command name))
+(declare-function xmp "ext:rcodetools" (&optional option))
 
 (add-to-list 'org-babel-tangle-lang-exts '("ruby" . "rb"))
 
@@ -61,8 +62,14 @@ This function is called by `org-babel-execute-src-block'."
          (result-type (cdr (assoc :result-type params)))
          (full-body (org-babel-expand-body:generic
 		     body params (org-babel-variable-assignments:ruby params)))
-         (result (org-babel-ruby-evaluate
-		  session full-body result-type result-params)))
+         (result (if (member "xmp" result-params)
+		     (with-temp-buffer
+		     (require 'rcodetools)
+		     (insert full-body)
+		     (xmp (cdr (assoc :xmp-option params)))
+		     (buffer-string))
+		   (org-babel-ruby-evaluate
+		      session full-body result-type result-params))))
     (org-babel-reassemble-table
      result
      (org-babel-pick-name (cdr (assoc :colname-names params))
