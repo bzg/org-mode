@@ -986,7 +986,13 @@ when PUB-DIR is set, use this as the publishing directory."
 	 (file (buffer-file-name lbuf))
 	 (base (file-name-sans-extension (buffer-file-name lbuf)))
 	 (pdffile (concat base ".pdf"))
-	 (cmds org-latex-to-pdf-process)
+	 (cmds (if (eq org-export-latex-listings 'minted)
+		   ;; automatically add -shell-escape when needed
+		   (mapcar (lambda (cmd)
+			     (replace-regexp-in-string
+			      "pdflatex " "pdflatex -shell-escape " cmd))
+			   org-latex-to-pdf-process)
+		 org-latex-to-pdf-process))
 	 (outbuf (get-buffer-create "*Org PDF LaTeX Output*"))
 	 (bibtex-p (with-current-buffer lbuf
 		     (save-excursion
