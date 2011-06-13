@@ -395,7 +395,7 @@ same name in the order they appear in the file."
 					    (cdr by-lang)))))
 			       (case org-babel-tangle-named-block-combination
 				 (append (mapconcat #'identity
-						    named "\n"))
+						    named ""))
 				 (first  (first named))
 				 (last   (car (last  named))))))
 			    (add-to-list 'tangled-names name))
