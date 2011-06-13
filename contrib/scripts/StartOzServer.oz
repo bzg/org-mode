@@ -60,7 +60,7 @@ MyCompiler = Emacs.condSend.compiler
 {MyCompiler enqueue(setSwitch(expression true))}
 {Browse
  {MyCompiler enqueue(feedVirtualString(
-			{LUtils.accum ["try\n"
+			{Accum ["try\n"
 % 				       "skip\n" % do something in any case..
 				       "1 div 0" % my code
 % 				       "1" % my code
@@ -188,7 +188,7 @@ thread
     proc {$ Code}
        Result
        %% Catch any exception (so the will not cause blocking) and return nil in that case
-       FullCode = {LUtils.accum ["try\n"
+       FullCode = {Accum ["try\n"
 % 				 "skip\n" % do something in any case..
 				 Code
 				 "\ncatch E then {Error.printException E}\n"
@@ -198,7 +198,7 @@ thread
     in
        %% ?? Should I make setting switches etc atomic?
        {MyCompiler enqueue(setSwitch(expression true))}
-       Result = {MyCompiler enqueue(feedVirtualString(FullCode return(result: $)))}
+       {MyCompiler enqueue(feedVirtualString(FullCode return(result: ?Result)))}
        {MyCompiler enqueue(setSwitch(expression false))}
        %%
        {Wait Result}
@@ -211,6 +211,17 @@ thread
 end
 
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%% Aux defs
+%%
+
+/** %% Binds the accumulation of the binary function Fn on all neighbors in Xs to Y. E.g., Accum returns the sum in Xs if Fn is Number.'+'.
+%% */
+proc {Accum Xs Fn Y}
+   {List.foldL Xs.2 Fn Xs.1 Y}
+end
 
 
 
