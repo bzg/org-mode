@@ -1395,7 +1395,7 @@ lang=\"%s\" xml:lang=\"%s\">
 					   (setq txt (replace-match "" t t txt)))
 					 (setq href
 					       (replace-regexp-in-string
-						"\\." "_" (format "sec-%s" snumber)))
+						"\\." "-" (format "sec-%s" snumber)))
 					 (setq href (org-solidify-link-text (or (cdr (assoc href org-export-preferred-target-alist)) href)))
 					 (push
 					  (format
@@ -2412,7 +2412,7 @@ When TITLE is nil, just close all open levels."
 		(insert "<ul>\n<li>" title "<br/>\n"))))
 	(aset org-levels-open (1- level) t)
 	(setq snumber (org-section-number level)
-	      snu (replace-regexp-in-string "\\." "_" snumber))
+	      snu (replace-regexp-in-string "\\." "-" snumber))
 	(setq level (+ level org-export-html-toplevel-hlevel -1))
 	(if (and num (not body-only))
 	    (setq title (concat
