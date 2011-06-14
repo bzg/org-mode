@@ -8199,9 +8199,11 @@ The prefix arg is passed through to the command if possible."
 			       (setq day-of-week 0)))))
 		   ;; silently fail when try to replan a sexp entry
 		   (condition-case nil
-		       (org-agenda-schedule nil
-					    (days-to-time
-					     (+ (org-today) distance)))
+		       (let* ((date (calendar-gregorian-from-absolute
+				     (+ (org-today) distance)))
+			      (time (encode-time 0 0 0 (nth 1 date) (nth 0 date)
+						 (nth 2 date))))
+			 (org-agenda-schedule nil time))
 		     (error nil)))))))
 
      ((equal action ?f)
