@@ -320,7 +320,7 @@ could call this function in the following way:
 When called interactively, the output buffer is selected, and shown
 in a window.  A non-interactive call will only return the buffer."
   (interactive "r\nP")
-  (when (interactive-p)
+  (when (called-interactively-p 'any)
     (setq buffer "*Org DocBook Export*"))
   (let ((transient-mark-mode t)
 	(zmacs-regions t)
@@ -332,7 +332,7 @@ in a window.  A non-interactive call will only return the buffer."
 	       nil nil
 	       buffer body-only))
     (if (fboundp 'deactivate-mark) (deactivate-mark))
-    (if (and (interactive-p) (bufferp rtn))
+    (if (and (called-interactively-p 'any) (bufferp rtn))
 	(switch-to-buffer-other-window rtn)
       rtn)))
 
