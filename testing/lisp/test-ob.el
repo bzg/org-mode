@@ -76,47 +76,23 @@
 	    "#+headers: blah1 blah2 blah3 \t\n\t\n blah4 blah5 blah6 \n"))))
 
 (ert-deftest test-org-babel/src-block-regexp ()
-  (should(equal
-	  (concat "^\\([ \t]*\\)#\\+begin_src[ \t]+\\([^ \f\t\n\r\v]+\\)[ \t]*"
-		  "\\([^\":\n]*\"[^\"\n*]*\"[^\":\n]*\\|[^\":\n]*\\)"
-		  "\\([^\n]*\\)\n"
-		  "\\([^\000]*?\n*\\)[ \t]*#\\+end_src")
-	  org-babel-src-block-regexp))
-  (let ((test-block(concat
-   "#+begin_src language -n-r-a-b -c :argument-1 yes :argument-2 no\n"
-   "echo this is a test\n"
-   "echo Currently in ' $PWD"
-   "#+end_src"))
-	(language) (flags) (arguments) (body))
-    (should (string-match
-	     org-babel-src-block-regexp
-	     (upcase test-block)))
-    (should (string-match
-	     org-babel-src-block-regexp
-	     test-block))
-    (should(equal "language"
-		  (setq language 
-			(match-string
-			 2
-			 test-block))))
+  (let ((test-block
+	 (concat
+	  "#+begin_src language -n-r-a-b -c :argument-1 yes :argument-2 no\n"
+	  "echo this is a test\n"
+	  "echo Currently in ' $PWD\n"
+	  "#+end_src"))
+	(language "language")
+	(flags "-n-r-a-b -c ")
+	(arguments ":argument-1 yes :argument-2 no")
+	(body "echo this is a test\necho Currently in ' $PWD\n"))
+    (should (string-match org-babel-src-block-regexp test-block))
+    (should (string-match org-babel-src-block-regexp (upcase test-block)))
+    (should(equal language (match-string 2 test-block)))
     ;;TODO Consider refactoring
-    (should(equal "-n-r-a-b -c "
-		  (setq flags (match-string
-			       3
-			       test-block))))
-    (should(equal ":argument-1 yes :argument-2 no"
-		  (setq arguments (match-string
-				   4
-				   test-block))))
-    (should(equal "echo this is a test\necho Currently in ' $PWD" 
-		  (setq body (match-string
-			      5
-			      test-block))))
-    ;;no language
-    ;;TODO Is this a valid response?
-    (should (org-test-string-exact-match
-	     org-babel-src-block-regexp
-	     (replace-regexp-in-string language "" test-block)))
+    (should (equal flags (match-string 3 test-block)))
+    (should (equal arguments (match-string 4 test-block)))
+    (should (equal body (match-string 5 test-block)))
     ;;no switches
     (should (org-test-string-exact-match
      	     org-babel-src-block-regexp
@@ -125,10 +101,11 @@
     (should (org-test-string-exact-match
      	     org-babel-src-block-regexp
 	     (replace-regexp-in-string arguments "" test-block)))
-    ;;TODO Check this ...valid with no body?
+    ;; should be valid with no body
     (should (org-test-string-exact-match
-		 org-babel-src-block-regexp
-		 (replace-regexp-in-string body "" test-block)))))
+	     org-babel-src-block-regexp
+	     (replace-regexp-in-string body "" test-block)))))
+
 
 (ert-deftest test-org-babel/inline-src-block-regexp ()
   (should(equal (concat "[^-[:alnum:]]\\(src_\\([^ \f\t\n\r\v]+\\)"
@@ -139,12 +116,6 @@
   ;; 	   org-babel-inline-src-block-regexp
   ;; 	   "src_lang[:testing1 yes :testing2 no]{ echo This is a test }\n"))
   )
-
-(ert-deftest test-org-babel/default-header-args ()
-  (should
-   (equal '((:session . "none") (:results . "replace") (:exports . "code")
-	    (:cache . "no") (:noweb . "no") (:hlines . "no") (:tangle . "no"))
-	  org-babel-default-header-args)))
 
 (ert-deftest test-org-babel/get-header ()
   (should (not (org-babel-get-header
@@ -157,21 +128,20 @@
 		 org-babel-default-header-args :session nil)))
   (should (not (org-babel-get-header
 		org-babel-default-header-args :SESSION)))
-  (should(equal '((:tangle . "no"))
-		(org-babel-get-header
-		 org-babel-default-header-args :tangle)))
+  (should (equal '((:tangle . "no"))
+		 (org-babel-get-header
+		  org-babel-default-header-args :tangle)))
   ;; with OTHERS option
-  (should(equal org-babel-default-header-args
-		(org-babel-get-header
-		 org-babel-default-header-args :doesnt-exist 'others)))
-  (should(equal org-babel-default-header-args
-		(org-babel-get-header
-		 org-babel-default-header-args nil 'others)))
-  (should(equal
-	  '((:session . "none") (:results . "replace") (:exports . "code")
-	    (:cache . "no") (:hlines . "no") (:tangle . "no"))
-	  (org-babel-get-header
-	   org-babel-default-header-args :noweb 'others))))
+  (should (equal org-babel-default-header-args
+		 (org-babel-get-header
+		  org-babel-default-header-args :doesnt-exist 'others)))
+  (should (equal org-babel-default-header-args
+		 (org-babel-get-header
+		  org-babel-default-header-args nil 'others)))
+  (should (null
+	   (assoc :noweb
+		  (org-babel-get-header
+		   org-babel-default-header-args :noweb 'others)))))
 
 (ert-deftest test-org-babel/default-inline-header-args ()
   (should(equal
@@ -226,7 +196,7 @@
 (ert-deftest test-org-babel/sha1-hash ()
   (org-test-at-id "f68821bc-7f49-4389-85b5-914791ee3718"
     (org-babel-next-src-block 2)
-    (should(string= "7374bf4f8a18dfcb6f365f93d15f1a0ef42db745"
+    (should(string= "ede4619c95e0467fd23d40d81385445281a483ee"
 		    (org-babel-sha1-hash)))))
 
 (ert-deftest test-org-babel/parse-header-args ()
