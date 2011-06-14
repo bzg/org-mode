@@ -14853,7 +14853,7 @@ user."
 	  (if (> year 2037)
 	      (setq year 2037  org-read-date-analyze-forced-year t)))
       (condition-case nil
-	  (encode-time second minute hour day month year)
+	  (ignore (encode-time second minute hour day month year))
 	(error
 	 (setq year (nth 5 defdecode))
 	 (setq org-read-date-analyze-forced-year t))))

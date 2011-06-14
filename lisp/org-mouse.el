@@ -149,6 +149,8 @@
 		  (newhead hdmarker &optional fixface just-this))
 (declare-function org-verify-change-for-undo "org-agenda" (l1 l2))
 (declare-function org-apply-on-list "org-list" (function init-value &rest args))
+(declare-function org-agenda-earlier "org-agenda" (arg))
+(declare-function org-agenda-later "org-agenda" (arg))
 
 (defvar org-mouse-plain-list-regexp "\\([ \t]*\\)\\([-+*]\\|[0-9]+[.)]\\) "
   "Regular expression that matches a plain list.")
@@ -1128,6 +1130,7 @@ This means, between the beginning of line and the point."
 
 
 ; (setq org-agenda-mode-hook nil)
+(defvar org-agenda-mode-map)
 (add-hook 'org-agenda-mode-hook
    #'(lambda ()
      (setq org-mouse-context-menu-function 'org-mouse-agenda-context-menu)
