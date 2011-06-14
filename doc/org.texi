@@ -11414,7 +11414,9 @@ This name is associated with the code block.  This is similar to the
 @samp{#+tblname} lines that can be used to name tables in Org-mode files.
 Referencing the name of a code block makes it possible to evaluate the
 block from other places in the file, other files, or from Org-mode table
-formulas (see @ref{The spreadsheet}).
+formulas (see @ref{The spreadsheet}).  Names are assumed to be unique by
+evaluation functions and the behavior of multiple blocks of the same name is
+undefined.
 @item <language>
 The language of the code in the block.
 @item <switches>
@@ -11542,6 +11544,23 @@ Include the code block in the tangled output to file @samp{filename}.
 Tangle the current file.  Bound to @kbd{C-c C-v t}.
 @item org-babel-tangle-file
 Choose a file to tangle.   Bound to @kbd{C-c C-v f}.
+@end table
+
+@subsubheading Variables
+@table @code
+@item org-babel-tangle-named-block-combination
+This variable controls the tangling of multiple code blocks with the same
+name.
+@table @code
+@item nil
+The default behavior.  Blocks with the same name are tangled as normal.
+@item append
+The bodies of all blocks of the same name are appended during tangling.
+@item first
+Only the body of the first block of any given name is kept during tangling.
+@item last
+Only the body of the last block of any given name is kept during tangling.
+@end table
 @end table
 
 @subsubheading Hooks

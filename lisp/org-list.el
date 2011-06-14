@@ -2946,8 +2946,11 @@ with overruling parameters for `org-list-to-generic'."
 	       :istart "\\item " :iend "\n"
 	       :icount (let ((enum (nth depth '("i" "ii" "iii" "iv"))))
 			 (if enum
+			     ;; LaTeX increments counter just before
+			     ;; using it, so set it to the desired
+			     ;; value, minus one.
 			     (format "\\setcounter{enum%s}{%s}\n\\item "
-				     enum counter)
+				     enum (1- counter))
 			   "\\item "))
 	       :csep "\n"
 	       :cbon "\\texttt{[X]}" :cboff "\\texttt{[ ]}")
