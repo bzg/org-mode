@@ -9828,6 +9828,10 @@ onto the ring."
 
 
 ;;; Following file links
+(declare-function mailcap-parse-mailcaps "mailcap" (&optional path force))
+(declare-function mailcap-extension-to-mime "mailcap" (extn))
+(declare-function mailcap-mime-info
+		  "mailcap" (string &optional request no-decode))
 (defvar org-wait nil)
 (defun org-open-file (path &optional in-emacs line search)
   "Open the file at PATH.
