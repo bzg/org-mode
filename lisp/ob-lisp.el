@@ -45,7 +45,9 @@
   "(let ((*default-pathname-defaults* #P%S)) %%s)"
   "Format string used to wrap code bodies to set the current directory.
 For example a value of \"(progn ;; %s\\n   %%s)\" would ignore the
-current directory string.")
+current directory string."
+  :group 'org-babel
+  :type 'string)
 
 (defun org-babel-expand-body:lisp (body params)
   "Expand BODY according to PARAMS, return the expanded body."

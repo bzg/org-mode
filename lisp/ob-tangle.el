@@ -279,6 +279,7 @@ references."
                    (save-excursion (end-of-line 1) (forward-char 1) (point)))))
 
 (defvar org-stored-links)
+(defvar org-bracket-link-regexp)
 (defun org-babel-tangle-collect-blocks (&optional language)
   "Collect source blocks in the current Org-mode file.
 Return an association list of source-code block specifications of
@@ -389,10 +390,13 @@ same name in the order they appear in the file."
 			     (nth 5 spec)
 			     (let ((named (mapcar
 					   (lambda (el) (nth 5 el))
-					   (remove-if
-					    (lambda (el)
-					      (not (equal name (nth 3 el))))
-					    (cdr by-lang)))))
+					   (delq
+					    nil
+					    (mapcar
+					     (lambda (el)
+					       (when (equal name (nth 3 el))
+						 el))
+					     (cdr by-lang))))))
 			       (case org-babel-tangle-named-block-combination
 				 (append (mapconcat #'identity
 						    named ""))

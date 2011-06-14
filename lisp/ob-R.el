@@ -51,6 +51,7 @@
 (defvar org-babel-R-command "R --slave --no-save"
   "Name of command to use for executing R code.")
 
+(defvar ess-local-process-name)
 (defun org-babel-edit-prep:R (info)
   (let ((session (cdr (assoc :session (nth 2 info)))))
     (when (and session (string-match "^\\*\\(.+?\\)\\*$" session))
