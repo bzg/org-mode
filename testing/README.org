@@ -4,6 +4,10 @@
 The following instructions describe how to get started using the
 Org-mode test framework.
 
+* To run the tests interactively
+  :PROPERTIES:
+  :tangle:   no
+  :END:
 1) Install the jump.el testing dependency which is included as a git
    submodule in the org-mode repository.  To do so run the following
    git submodule commands from inside the base of the Org-mode
@@ -57,3 +61,50 @@ Org-mode test framework.
      (org-test-run-all-tests)
    #+end_src
 
+* To run the tests in batch mode
+First tangle this file out to your desktop.
+#+headers: :tangle ~/Desktop/run-org-tests.el
+#+begin_src emacs-lisp :var org-dir=(expand-file-name ".." (file-name-directory (or load-file-name (buffer-file-name))))
+  ;; add to the load path
+  (add-to-list 'load-path (concat org-dir "/lisp/"))
+  (add-to-list 'load-path (concat org-dir "/lisp/testing/"))
+  (add-to-list 'load-path (concat org-dir "/lisp/testing/ert/"))
+  
+  ;; load Org-mode
+  (require 'org)
+  
+  ;; setup the ID locations used in tests
+  (require 'org-id)
+  (org-id-update-id-locations
+   (list (concat org-dir "/testing/examples/babel.org")
+         (concat org-dir "/testing/examples/normal.org")
+         (concat org-dir "/testing/examples/link-in-heading.org")
+         (concat org-dir "/testing/examples/links.org")))
+  
+  ;; ensure that the latest Org-mode is loaded
+  (org-reload)
+  
+  ;; load the test suite
+  (load-file (concat org-dir "/testing/org-test.el"))
+  
+  ;; configure Babel
+  (org-babel-lob-ingest (concat org-dir "/contrib/babel/library-of-babel.org"))
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((emacs-lisp . t)
+     (sh . t)))
+  (setq org-confirm-babel-evaluate nil)
+  
+  ;; run the test suite
+  (org-test-run-all-tests)
+  
+  ;; print the results
+  (with-current-buffer "*ert*"
+    (print (buffer-string)))
+#+end_src
+
+Then run the test suite with the following command which could use any
+version of Emacs.
+#+begin_src sh :results output silent
+  emacs --batch -Q -l ~/Desktop/run-org-tests.el
+#+end_src
