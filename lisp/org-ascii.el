@@ -371,7 +371,7 @@ publishing directory."
 	  (push (concat (nth 3 lang-words) "\n") thetoc)
 	  (push (concat (make-string (string-width (nth 3 lang-words)) ?=)
 			"\n") thetoc)
-	  (mapc '(lambda (line)
+	  (mapc #'(lambda (line)
 		   (if (string-match org-todo-line-regexp
 				     line)
 		       ;; This is a headline

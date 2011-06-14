@@ -253,7 +253,7 @@ This checks for the existence of a \".git\" directory in that directory."
 	(cd dir)
 	(shell-command "git add .")
 	(shell-command "git ls-files --deleted" t)
-	(mapc '(lambda (file)
+	(mapc #'(lambda (file)
 		 (unless (string= file "")
 		   (shell-command
 		    (concat "git rm \"" file "\""))))
