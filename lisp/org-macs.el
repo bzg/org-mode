@@ -116,9 +116,9 @@ Also, do not record undo information."
 		       partial-completion-mode)))
      (unwind-protect
 	 (progn
-	   (if pc-mode (partial-completion-mode -1))
+	   (when pc-mode (funcall pc-mode -1))
 	   ,@body)
-       (if pc-mode (partial-completion-mode 1)))))
+       (when pc-mode (funcall pc-mode 1)))))
 
 (defmacro org-maybe-intangible (props)
   "Add '(intangible t) to PROPS if Emacs version is earlier than Emacs 22.
