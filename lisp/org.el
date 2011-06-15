@@ -3902,7 +3902,7 @@ If yes, offer to stop it and to save the buffer with the changes."
 
 (defun org-clocktable-try-shift (dir n)
   "Check if this line starts a clock table, if yes, shift the time block."
-  (when (org-match-line "#\\+BEGIN: clocktable\\>")
+  (when (org-match-line "^[ \t]*#\\+BEGIN:[ \t]+clocktable\\>")
     (org-clocktable-shift dir n)))
 
 ;; Autoload org-timer.el
@@ -10598,7 +10598,7 @@ If not found, stay at current position and return nil."
   (let (pos)
     (save-excursion
       (goto-char (point-min))
-      (setq pos (and (re-search-forward (concat "^#\\+BEGIN:[ \t]+" name "\\>")
+      (setq pos (and (re-search-forward (concat "^[ \t]*#\\+BEGIN:[ \t]+" name "\\>")
 					nil t)
 		     (match-beginning 0))))
     (if pos (goto-char pos))
