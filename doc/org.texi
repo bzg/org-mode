@@ -12429,6 +12429,7 @@ references in the code block body in link comments.
 @end itemize
 
 @node padline, no-expand, comments, Specific header arguments
+@subsubsection @code{:padline}
 Control in insertion of padding lines around code block bodies in tangled
 code files.  The default value is @code{yes} which results in insertion of
 newlines before and after each tangled code block.  The following arguments
