@@ -11926,6 +11926,7 @@ The following header arguments are defined:
                                 expansion during tangling
 * session::                     Preserve the state of code evaluation
 * noweb::                       Toggle expansion of noweb references
+* noweb-ref::                   Specify block's noweb reference resolution target
 * cache::                       Avoid re-evaluating unchanged code blocks
 * sep::                         Delimiter for writing tabular results outside Org
 * hlines::                      Handle horizontal lines in tables
@@ -12446,7 +12447,7 @@ A string passed to the @code{:session} header argument will give the session
 a name.  This makes it possible to run concurrent sessions for each
 interpreted language.
 
-@node noweb, cache, session, Specific header arguments
+@node noweb, noweb-ref, session, Specific header arguments
 @subsubsection @code{:noweb}
 
 The @code{:noweb} header argument controls expansion of ``noweb'' style (see
@@ -12492,7 +12493,49 @@ Note that noweb replacement text that does not contain any newlines will not
 be affected by this change, so it is still possible to use inline noweb
 references.
 
-@node cache, sep, noweb, Specific header arguments
+@node noweb-ref, cache, noweb, Specific header arguments
+@subsubsection @code{:noweb-ref}
+When expanding ``noweb'' style references the bodies of all code block with
+@emph{either} a block name matching the reference name @emph{or} a
+@code{:noweb-ref} header argument matching the reference name will be
+concatenated together to form the replacement text.
+
+By setting this header argument at the sub-tree or file level, simple code
+block concatenation may be achieved.  For example, when tangling the
+following Org-mode file, the bodies of code blocks will be concatenated into
+the resulting pure code file.
+
+@example
+ #+begin_src sh :tangle yes :noweb yes :shebang #!/bin/sh
+   <<fullest-disk>>
+ #+end_src
+ * the mount point of the fullest disk
+   :PROPERTIES:
+   :noweb-ref: fullest-disk
+   :END:
+
+ ** query all mounted disks
+ #+begin_src sh
+   df \
+ #+end_src
+
+ ** strip the header row
+ #+begin_src sh
+   |sed '1d' \
+ #+end_src
+
+ ** sort by the percent full
+ #+begin_src sh
+   |awk '@{print $5 " " $6@}'|sort -n |tail -1 \
+ #+end_src
+
+ ** extract the mount point
+ #+begin_src sh
+   |awk '@{print $2@}'
+ #+end_src
+@end example
+
+@node cache, sep, noweb-ref, Specific header arguments
 @subsubsection @code{:cache}
 
 The @code{:cache} header argument controls the use of in-buffer caching of
