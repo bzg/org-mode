@@ -774,7 +774,7 @@ fontification of code blocks see `org-src-fontify-block' and
 	      (get-buffer-create
 	       (concat " org-src-fontification:" (symbol-name lang-mode)))
 	    (delete-region (point-min) (point-max))
-	    (insert string)
+	    (insert (concat string " ")) ;; so there's a final property change
 	    (unless (eq major-mode lang-mode) (funcall lang-mode))
 	    (font-lock-fontify-buffer)
 	    (setq pos (point-min))
