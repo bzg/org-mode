@@ -2629,10 +2629,10 @@ compare entries."
   "Parse the list at point and maybe DELETE it.
 
 Return a list whose car is a symbol of list type, among
-`ordered', `unordered' and `descriptive'. Then, each item is a
-list whose car is counter, and cdr are strings and other
-sub-lists. Inside strings, checkboxes are replaced by \"[CBON]\"
-and \"[CBOFF]\".
+`ordered', `unordered' and `descriptive'.  Then, each item is
+a list whose car is counter, and cdr are strings and other
+sub-lists.  Inside strings, check-boxes are replaced by
+\"[CBON]\", \"[CBOFF]\" and \"[CBTRANS]\".
 
 For example, the following list:
 
@@ -2666,9 +2666,13 @@ Point is left at list end."
 	   ;; checkboxes replaced.
 	   (lambda (beg end)
 	     (let ((text (org-trim (buffer-substring beg end))))
-	       (if (string-match "\\`\\[\\([X ]\\)\\]" text)
+	       (if (string-match "\\`\\[\\([-X ]\\)\\]" text)
 		   (replace-match
-		    (if (equal (match-string 1 text) " ") "CBOFF" "CBON")
+		    (let ((box (match-string 1 text)))
+		      (cond
+		       ((equal box " ") "CBOFF")
+		       ((equal box "-") "CBTRANS")
+		       (t "CBON")))
 		    t nil text 1)
 		 text)))))
 	 (parse-sublist
@@ -2834,8 +2838,9 @@ Valid parameters PARAMS are
 :lsep	    String to separate sublists
 :csep	    String to separate text from a sub-list
 
-:cboff      String to insert for an unchecked checkbox
-:cbon       String to insert for a checked checkbox
+:cboff      String to insert for an unchecked check-box
+:cbon       String to insert for a checked check-box
+:cbtrans    String to insert for a check-box in transitional state
 
 Alternatively, each parameter can also be a form returning a
 string. These sexp can use keywords `counter' and `depth',
@@ -2864,6 +2869,7 @@ items."
 	 (csep (plist-get p :csep))
 	 (cbon (plist-get p :cbon))
 	 (cboff (plist-get p :cboff))
+	 (cbtrans (plist-get p :cbtrans))
 	 export-sublist			; for byte-compiler
 	 (export-item
 	  (function
@@ -2893,8 +2899,8 @@ items."
 		 (setq first (replace-match cbon t t first)))
 		((string-match "\\[CBOFF\\]" first)
 		 (setq first (replace-match cboff t t first)))
-		((string-match "\\[-\\]" first)
-		 (setq first (replace-match "$\\boxminus$" t t first))))
+		((string-match "\\[CBTRANS\\]" first)
+		 (setq first (replace-match cbtrans t t first))))
 	       ;; Insert descriptive term if TYPE is `descriptive'.
 	       (when (eq type 'descriptive)
 		 (let* ((complete (string-match "^\\(.*\\)[ \t]+::" first))
@@ -2953,7 +2959,8 @@ with overruling parameters for `org-list-to-generic'."
 				     enum (1- counter))
 			   "\\item "))
 	       :csep "\n"
-	       :cbon "\\texttt{[X]}" :cboff "\\texttt{[ ]}")
+	       :cbon "\\texttt{[X]}" :cboff "\\texttt{[ ]}"
+	       :cbtrans "$\\boxminus$")
     params)))
 
 (defun org-list-to-html (list &optional params)
@@ -2971,7 +2978,8 @@ with overruling parameters for `org-list-to-generic'."
 	       :istart "<li>" :iend "</li>"
 	       :icount (format "<li value=\"%s\">" counter)
 	       :isep "\n" :lsep "\n" :csep "\n"
-	       :cbon "<code>[X]</code>" :cboff "<code>[ ]</code>")
+	       :cbon "<code>[X]</code>" :cboff "<code>[ ]</code>"
+	       :cbtrans "<code>[-]</code>")
     params)))
 
 (defun org-list-to-texinfo (list &optional params)
@@ -2988,7 +2996,8 @@ with overruling parameters for `org-list-to-generic'."
 	       :istart "@item\n" :iend "\n"
 	       :icount "@item\n"
 	       :csep "\n"
-	       :cbon "@code{[X]}" :cboff "@code{[ ]}")
+	       :cbon "@code{[X]}" :cboff "@code{[ ]}"
+	       :cbtrans "@code{[-]}")
     params)))
 
 (defun org-list-to-subtree (list &optional params)
@@ -3022,7 +3031,7 @@ with overruling parameters for `org-list-to-generic'."
 		:icount (funcall get-stars depth)
 		:isep (if blankp "\n\n" "\n")
 		:csep (if blankp "\n\n" "\n")
-		:cbon "DONE" :cboff "TODO")
+		:cbon "DONE" :cboff "TODO" :cbtrans "TODO")
       params))))
 
 (provide 'org-list)
