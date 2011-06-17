@@ -710,7 +710,7 @@ a Lisp program could call this function in the following way:
 When called interactively, the output buffer is selected, and shown
 in a window.  A non-interactive call will only return the buffer."
   (interactive "r\nP")
-  (when (called-interactively-p 'any)
+  (when (interactive-p)
     (setq buffer "*Org LaTeX Export*"))
   (let ((transient-mark-mode t) (zmacs-regions t)
 	ext-plist rtn)
@@ -722,7 +722,7 @@ in a window.  A non-interactive call will only return the buffer."
 	       nil nil ext-plist
 	       buffer body-only))
     (if (fboundp 'deactivate-mark) (deactivate-mark))
-    (if (and (called-interactively-p 'any) (bufferp rtn))
+    (if (and (interactive-p) (bufferp rtn))
 	(switch-to-buffer-other-window rtn)
       rtn)))
 

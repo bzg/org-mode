@@ -49,12 +49,12 @@
 
 (defmacro org-called-interactively-p (&optional kind)
   `(if (featurep 'xemacs)
-       (called-interactively-p 'any)
+       (interactive-p)
      (if (or (> emacs-major-version 23)
 	     (and (>= emacs-major-version 23)
 		  (>= emacs-minor-version 2)))
 	 (with-no-warnings (called-interactively-p ,kind)) ;; defined with no argument in <=23.1
-       (called-interactively-p 'any))))
+       (interactive-p))))
 
 (if (and (not (fboundp 'with-silent-modifications))
 	 (or (< emacs-major-version 23)
