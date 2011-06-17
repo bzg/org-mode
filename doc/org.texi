@@ -5225,9 +5225,12 @@ following will show up in the agenda every Wednesday:
 @end example
 
 @item Diary-style sexp entries
-For more complex date specifications, Org-mode supports using the
-special sexp diary entries implemented in the Emacs calendar/diary
-package.  For example
+For more complex date specifications, Org-mode supports using the special
+sexp diary entries implemented in the Emacs calendar/diary
+package@footnote{Note that in diary sexp functions, the order of the
+arguments sometimes evilly depend on the variable @code{calendar-date-style},
+e.g. @code{(diary-date 12 1 2005)} versus @code{(diary-date 1 12 2005)}.}.
+For example
 
 @example
 * The nerd meeting on every 2nd Thursday of the month
