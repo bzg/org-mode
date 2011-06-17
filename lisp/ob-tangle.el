@@ -96,15 +96,6 @@ controlled by the :comments header argument."
   :group 'org-babel
   :type 'string)
 
-(defcustom org-babel-tangle-named-block-combination nil
-  "Combine blocks of the same name during tangling."
-  :group 'org-babel
-  :type '(choice
-	  (const :tag "Default: no special handling" nil)
-	  (const :tag "Append all blocks of the same name" append)
-	  (const :tag "Only keep the first block of the same name" first)
-	  (const :tag "Only keep the last block of the same name" last)))
-
 (defun org-babel-find-file-noselect-refresh (file)
   "Find file ensuring that the latest changes on disk are
 represented in the file."
@@ -249,8 +240,7 @@ exported source code blocks by language."
                     (setq block-counter (+ 1 block-counter))
                     (add-to-list 'path-collector file-name)))))
             specs)))
-       (org-babel-tangle-combine-named-blocks
-	(org-babel-tangle-collect-blocks lang)))
+       (org-babel-tangle-collect-blocks lang))
       (message "tangled %d code block%s from %s" block-counter
                (if (= block-counter 1) "" "s")
 	       (file-name-nondirectory
@@ -370,42 +360,6 @@ code blocks by language."
           (mapcar
 	   (lambda (by-lang) (cons (car by-lang) (reverse (cdr by-lang))))
 	   blocks))
-    blocks))
-
-(defun org-babel-tangle-combine-named-blocks (blocks)
-  "Combine blocks of the same name.
-This function follows noweb behavior of appending blocks of the
-same name in the order they appear in the file."
-  (if org-babel-tangle-named-block-combination
-      (let (tangled-names)
-	(mapcar
-	 (lambda (by-lang)
-	   (cons
-	    (car by-lang)
-	    (mapcar (lambda (spec)
-		      (let ((name (nth 3 spec)))
-			(unless (member name tangled-names)
-			  (when name
-			    (setf
-			     (nth 5 spec)
-			     (let ((named (mapcar
-					   (lambda (el) (nth 5 el))
-					   (delq
-					    nil
-					    (mapcar
-					     (lambda (el)
-					       (when (equal name (nth 3 el))
-						 el))
-					     (cdr by-lang))))))
-			       (case org-babel-tangle-named-block-combination
-				 (append (mapconcat #'identity
-						    named ""))
-				 (first  (first named))
-				 (last   (car (last  named))))))
-			    (add-to-list 'tangled-names name))
-			  spec)))
-		    (cdr by-lang))))
-	 blocks))
     blocks))
 
 (defun org-babel-spec-to-string (spec)

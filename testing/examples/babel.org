@@ -174,3 +174,31 @@
 #+begin_src emacs-lisp :var lst=a-list :results list
   (reverse lst)
 #+end_src
+* using the =:noweb-ref= header argument
+  :PROPERTIES:
+  :ID:       54d68d4b-1544-4745-85ab-4f03b3cbd8a0
+  :END:
+
+#+begin_src sh :tangle yes :noweb yes :shebang #!/bin/sh
+  <<fullest-disk>>
+#+end_src
+
+** query all mounted disks
+#+begin_src sh :noweb-ref fullest-disk
+  df \
+#+end_src
+
+** strip the header row
+#+begin_src sh :noweb-ref fullest-disk
+  |sed '1d' \
+#+end_src
+
+** sort by the percent full
+#+begin_src sh :noweb-ref fullest-disk
+  |awk '{print $5 " " $6}'|sort -n |tail -1 \
+#+end_src
+
+** extract the mount point
+#+begin_src sh :noweb-ref fullest-disk
+  |awk '{print $2}'
+#+end_src

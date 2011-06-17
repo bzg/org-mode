@@ -1759,11 +1759,11 @@ The following commands are available:
   (org-add-hook 'post-command-hook 'org-agenda-post-command-hook nil 'local)
   (org-add-hook 'pre-command-hook 'org-unhighlight nil 'local)
   ;; Make sure properties are removed when copying text
-  (when (boundp 'filter-buffer-substring-functions)
-    (org-set-local 'filter-buffer-substring-functions
+  (when (boundp 'buffer-substring-filters)
+    (org-set-local 'buffer-substring-filters
 		   (cons (lambda (x)
                            (set-text-properties 0 (length x) nil x) x)
-			 filter-buffer-substring-functions)))
+			 buffer-substring-filters)))
   (unless org-agenda-keep-modes
     (setq org-agenda-follow-mode org-agenda-start-with-follow-mode
 	  org-agenda-entry-text-mode org-agenda-start-with-entry-text-mode
@@ -4816,19 +4816,40 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 	    (push txt ee)))))
     (nreverse ee)))
 
-(defun org-diary-class (m1 d1 y1 m2 d2 y2 dayname &rest skip-weeks)
+;; Calendar sanity: define some functions that are independent of
+;; `calendar-date-style'.
+;; Normally I would like to use ISO format when calling the diary functions,
+;; but to make sure we still have Emacs 22 compatibility we bind
+;; also `european-calendar-style' and use european format
+(defun org-anniversary (year month day &optional mark)
+  "Like `diary-anniversary', but with fixed (ISO) order of arguments."
+  (org-no-warnings
+   (let ((calendar-date-style 'european) (european-calendar-style t))
+     (diary-anniversary day month year mark))))
+(defun org-cyclic (N year month day &optional mark)
+  "Like `diary-cyclic', but with fixed (ISO) order of arguments."
+  (org-no-warnings
+   (let ((calendar-date-style 'european)	(european-calendar-style t))
+     (diary-cyclic N day month year mark))))
+(defun org-block (Y1 M1 D1 Y2 M2 D2 &optional mark)
+  "Like `diary-block', but with fixed (ISO) order of arguments."
+  (org-no-warnings
+   (let ((calendar-date-style 'european)	(european-calendar-style t))
+     (diary-block D1 M1 Y1 D2 M2 Y2 mark))))
+(defun org-date (year month day &optional mark)
+  "Like `diary-date', but with fixed (ISO) order of arguments."
+  (org-no-warnings
+   (let ((calendar-date-style 'european)	(european-calendar-style t))
+     (diary-date day month year mark))))
+
+;; Define the` org-class' function
+(defun org-class (y1 m1 d1 y2 m2 d2 dayname &rest skip-weeks)
   "Entry applies if date is between dates on DAYNAME, but skips SKIP-WEEKS.
-The order of the first 2 times 3 arguments depends on the variable
-`calendar-date-style' or, if that is not defined, on `european-calendar-style'.
-So for American calendars, give this as MONTH DAY YEAR, for European as
-DAY MONTH YEAR, and for ISO as YEAR MONTH DAY.
 DAYNAME is a number between 0 (Sunday) and 6 (Saturday).  SKIP-WEEKS
 is any number of ISO weeks in the block period for which the item should
 be skipped."
-  (let* ((date1 (calendar-absolute-from-gregorian
-		 (org-order-calendar-date-args m1 d1 y1)))
-	 (date2 (calendar-absolute-from-gregorian
-		 (org-order-calendar-date-args m2 d2 y2)))
+  (let* ((date1 (calendar-absolute-from-gregorian (list m1 d1 y1)))
+	 (date2 (calendar-absolute-from-gregorian (list m2 d2 y2)))
 	 (d (calendar-absolute-from-gregorian date)))
     (and
      (<= date1 d)
@@ -4839,6 +4860,28 @@ be skipped."
 	   (require 'cal-iso)
 	   (not (member (car (calendar-iso-from-absolute d)) skip-weeks))))
      entry)))
+
+(defun org-diary-class (m1 d1 y1 m2 d2 y2 dayname &rest skip-weeks)
+  "Like `org-class', but honor `calendar-date-style'.
+The order of the first 2 times 3 arguments depends on the variable
+`calendar-date-style' or, if that is not defined, on `european-calendar-style'.
+So for American calendars, give this as MONTH DAY YEAR, for European as
+DAY MONTH YEAR, and for ISO as YEAR MONTH DAY.
+DAYNAME is a number between 0 (Sunday) and 6 (Saturday).  SKIP-WEEKS
+is any number of ISO weeks in the block period for which the item should
+be skipped.
+
+This function is here only for backward compatibility and it is deprecated,
+please use `org-class' instead."
+  (let* ((date1 (calendar-absolute-from-gregorian
+		 (org-order-calendar-date-args m1 d1 y1)))
+	 (date2 (calendar-absolute-from-gregorian
+		 (org-order-calendar-date-args m2 d2 y2)))
+	 (d (calendar-absolute-from-gregorian date)))
+    (org-class
+     (nth 2 date1) (car date1) (nth 1 date1)
+     (nth 2 date2) (car date2) (nth 1 date2)
+     dayname skip-weeks)))
 
 (defalias 'org-get-closed 'org-agenda-get-progress)
 (defun org-agenda-get-progress ()
@@ -7768,17 +7811,8 @@ the resulting entry will not be shown.  When TEXT is empty, switch to
       (org-back-over-empty-lines)
       (backward-char 1)
       (insert "\n")
-      (require 'diary-lib)
-      (let ((calendar-date-display-form
-	     (if (if (boundp 'calendar-date-style)
-		     (eq calendar-date-style 'european)
-		   (with-no-warnings ;; european-calendar-style is obsolete as of version 23.1
-		     (org-bound-and-true-p european-calendar-style))) ; Emacs 22
-		 '(day " " month " " year)
-	       '(month " " day " " year))))
-
-	(insert (format "%%%%(diary-anniversary %s) %s"
-			(calendar-date-string d1 nil t) text))))
+      (insert (format "%%%%(org-anniversary %d %2d %2d) %s"
+		      (nth 2 d1) (car d1) (nth 1 d1) text)))
      ((eq type 'day)
       (let ((org-prefix-has-time t)
 	    (org-agenda-time-leading-zero t)
