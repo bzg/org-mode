@@ -267,9 +267,11 @@ last statement in BODY, as elisp."
 	  (org-babel-comint-with-output
 	      (session org-babel-python-eoe-indicator t body)
 	    (let ((comint-process-echoes nil))
-	      (input-body body)
-	      (insert org-babel-python-eoe-indicator)
-	      (comint-send-input))) 2) "\n"))
+	      (mapc
+	       (lambda (line)
+		 (insert line) (comint-send-input nil t))
+	       (append (split-string body "[\n\r]") (list org-babel-python-eoe-indicator)))))
+	  2) "\n"))
        (value
 	(let ((tmp-file (org-babel-temp-file "python-")))
 	  (org-babel-comint-with-output
