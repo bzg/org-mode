@@ -2176,17 +2176,19 @@ in subtree, ignoring drawers."
 (defun org-reset-checkbox-state-subtree ()
   "Reset all checkboxes in an entry subtree."
   (interactive "*")
-  (save-restriction
-    (save-excursion
-      (org-narrow-to-subtree)
-      (org-show-subtree)
-      (goto-char (point-min))
-      (let ((end (point-max)))
-	(while (< (point) end)
-	  (when (org-at-item-checkbox-p)
-	    (replace-match "[ ]" t t nil 1))
-	  (beginning-of-line 2))))
-    (org-update-checkbox-count-maybe)))
+  (if (org-before-first-heading-p)
+      (error "Not inside a tree")
+    (save-restriction
+      (save-excursion
+	(org-narrow-to-subtree)
+	(org-show-subtree)
+	(goto-char (point-min))
+	(let ((end (point-max)))
+	  (while (< (point) end)
+	    (when (org-at-item-checkbox-p)
+	      (replace-match "[ ]" t t nil 1))
+	    (beginning-of-line 2)))
+	(org-update-checkbox-count-maybe 'all)))))
 
 (defun org-update-checkbox-count (&optional all)
   "Update the checkbox statistics in the current section.
@@ -2272,7 +2274,8 @@ With optional prefix argument ALL, do this for the whole buffer."
 	       ;; next headline, and save them in STRUCTS-BAK.
 	       ((org-on-heading-p)
 		(setq backup-end (save-excursion
-				   (outline-next-heading) (point)))
+				   (outline-next-heading) (point))
+		      structs-bak nil)
 		(while (org-list-search-forward box-re backup-end 'move)
 		  (let* ((struct (org-list-struct))
 			 (bottom (org-list-get-bottom-point struct)))
@@ -2327,10 +2330,10 @@ Otherwise it will be `org-todo'."
 	'org-checkbox-statistics-done
       'org-checkbox-statistics-todo)))
 
-(defun org-update-checkbox-count-maybe ()
+(defun org-update-checkbox-count-maybe (&optional all)
   "Update checkbox statistics unless turned off by user."
   (when (cdr (assq 'checkbox org-list-automatic-rules))
-    (org-update-checkbox-count))
+    (org-update-checkbox-count all))
   (run-hooks 'org-checkbox-statistics-hook))
 
 (defvar org-last-indent-begin-marker (make-marker))
