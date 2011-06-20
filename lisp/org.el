@@ -5157,6 +5157,11 @@ will be prompted for."
   :group 'org-babel)
 
 (defun org-fontify-meta-lines-and-blocks (limit)
+  (condition-case nil
+      (org-fontify-meta-lines-and-blocks-1 limit)
+    (error (message "org-mode fontification error"))))
+
+(defun org-fontify-meta-lines-and-blocks-1 (limit)
   "Fontify #+ lines and blocks, in the correct ways."
   (let ((case-fold-search t))
     (if (re-search-forward
