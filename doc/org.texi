@@ -12789,11 +12789,19 @@ future work.)
 
 @subsection Session
 @subsubsection @code{:results value}
-The code is passed to the interpreter running as an interactive Emacs
-inferior process. The result returned is the result of the last evaluation
-performed by the interpreter. (This is obtained in a language-specific
-manner: the value of the variable @code{_} in Python and Ruby, and the value
-of @code{.Last.value} in R).
+The code is passed to an interpreter running as an interactive Emacs inferior
+process. Only languages which provide tools for interactive evaluation of
+code have session support, so some language (e.g., C and ditaa) do not
+support the @code{:session} header argument, and in other languages (e.g.,
+Python and Haskell) which have limitations on the code which may be entered
+into interactive sessions, those limitations apply to the code in code blocks
+using the @code{:session} header argument as well.
+
+Unless the @code{:results output} option is supplied (see below) the result
+returned is the result of the last evaluation performed by the
+interpreter. (This is obtained in a language-specific manner: the value of
+the variable @code{_} in Python and Ruby, and the value of @code{.Last.value}
+in R).
 
 @subsubsection @code{:results output}
 The code is passed to the interpreter running as an interactive Emacs
