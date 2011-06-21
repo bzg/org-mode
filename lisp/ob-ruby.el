@@ -46,6 +46,7 @@
 (declare-function run-ruby "ext:inf-ruby" (&optional command name))
 (declare-function xmp "ext:rcodetools" (&optional option))
 
+(defvar org-babel-tangle-lang-exts)
 (add-to-list 'org-babel-tangle-lang-exts '("ruby" . "rb"))
 
 (defvar org-babel-default-header-args:ruby '())

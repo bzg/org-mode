@@ -44,6 +44,7 @@
 (declare-function tuareg-run-caml "ext:tuareg" ())
 (declare-function tuareg-interactive-send-input "ext:tuareg" ())
 
+(defvar org-babel-tangle-lang-exts)
 (add-to-list 'org-babel-tangle-lang-exts '("ocaml" . "ml"))
 
 (defvar org-babel-default-header-args:ocaml '())

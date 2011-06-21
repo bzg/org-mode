@@ -51,6 +51,7 @@
 (declare-function inferior-haskell-load-file
 		  "ext:inf-haskell" (&optional reload))
 
+(defvar org-babel-tangle-lang-exts)
 (add-to-list 'org-babel-tangle-lang-exts '("haskell" . "hs"))
 
 (defvar org-babel-default-header-args:haskell '())

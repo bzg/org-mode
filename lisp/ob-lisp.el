@@ -36,6 +36,7 @@
 
 (declare-function slime-eval "ext:slime" (sexp &optional package))
 
+(defvar org-babel-tangle-lang-exts)
 (add-to-list 'org-babel-tangle-lang-exts '("lisp" . "lisp"))
 
 (defvar org-babel-default-header-args:lisp '())

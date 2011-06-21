@@ -38,6 +38,8 @@
 (declare-function org-entry-get "org"
 		  (pom property &optional inherit literal-nil))
 
+
+(defvar org-babel-tangle-lang-exts)
 (add-to-list 'org-babel-tangle-lang-exts '("C++" . "cpp"))
 
 (defvar org-babel-default-header-args:C '())

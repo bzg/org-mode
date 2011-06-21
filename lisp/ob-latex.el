@@ -37,6 +37,7 @@
 (declare-function org-splice-latex-header "org"
 		  (tpl def-pkg pkg snippets-p &optional extra))
 (declare-function org-export-latex-fix-inputenc "org-latex" ())
+(defvar org-babel-tangle-lang-exts)
 (add-to-list 'org-babel-tangle-lang-exts '("latex" . "tex"))
 
 (defvar org-format-latex-header)

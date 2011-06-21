@@ -38,6 +38,7 @@
 (declare-function py-toggle-shells "ext:python-mode" (arg))
 (declare-function run-python "ext:python" (&optional cmd noshow new))
 
+(defvar org-babel-tangle-lang-exts)
 (add-to-list 'org-babel-tangle-lang-exts '("python" . "py"))
 
 (defvar org-babel-default-header-args:python '())

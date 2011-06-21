@@ -31,6 +31,7 @@
 (require 'ob-eval)
 (eval-when-compile (require 'cl))
 
+(defvar org-babel-tangle-lang-exts)
 (add-to-list 'org-babel-tangle-lang-exts '("perl" . "pl"))
 
 (defvar org-babel-default-header-args:perl '())

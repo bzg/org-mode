@@ -42,6 +42,7 @@
 
 (declare-function slime-eval "ext:slime" (sexp &optional package))
 
+(defvar org-babel-tangle-lang-exts)
 (add-to-list 'org-babel-tangle-lang-exts '("clojure" . "clj"))
 
 (defvar org-babel-default-header-args:clojure '())
