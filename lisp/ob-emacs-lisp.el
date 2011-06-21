@@ -57,7 +57,8 @@
   "Execute a block of emacs-lisp code with Babel."
   (save-window-excursion
     ((lambda (result)
-       (if (member "scalar" (cdr (assoc :result-params params)))
+       (if (or (member "scalar" (cdr (assoc :result-params params)))
+	       (member "verbatim" (cdr (assoc :result-params params))))
 	   (let ((print-level nil)
 		 (print-length nil))
 	     (format "%S" result))
