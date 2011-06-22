@@ -5227,14 +5227,21 @@ following will show up in the agenda every Wednesday:
 @item Diary-style sexp entries
 For more complex date specifications, Org-mode supports using the special
 sexp diary entries implemented in the Emacs calendar/diary
-package@footnote{Note that in diary sexp functions, the order of the
-arguments sometimes evilly depend on the variable @code{calendar-date-style},
-e.g. @code{(diary-date 12 1 2005)} versus @code{(diary-date 1 12 2005)}.}.
-For example
+package@footnote{When working with the standard diary sexp functions, you
+need to be very careful with the order of the arguments.  That order depend
+evilly on the variable @code{calendar-date-style} (or, for older Emacs
+versions, @code{european-calendar-style}).  For example, to specify a date
+December 12, 2005, the call might look like @code{(diary-date 12 1 2005)} or
+@code{(diary-date 1 12 2005)} or @code{(diary-date 2005 12 1)}, depending on
+the settings.  This has been the source of much confusion.  Org-mode users
+can resort to special versions of these functions like @code{org-date} or
+@code{org-anniversary}.  These work just like the corresponding @code{diary-}
+functions, but with stable ISO order of arguments (year, month, day) wherever
+applicable, independent of the value of @code{calendar-date-style}.}.  For example
 
 @example
 * The nerd meeting on every 2nd Thursday of the month
-  <%%(diary-float t 4 2)>
+  <%%(org-float t 4 2)>
 @end example
 
 @item Time/Date range
@@ -5568,7 +5575,7 @@ entries.  Org-mode will issue early and late warnings based on the
 assumption that the timestamp represents the @i{nearest instance} of
 the repeater.  However, the use of diary sexp entries like
 @c
-@code{<%%(diary-float t 42)>}
+@code{<%%(org-float t 42)>}
 @c
 in scheduling and deadline timestamps is limited.  Org-mode does not
 know enough about the internals of each sexp function to issue early and
@@ -7139,8 +7146,8 @@ will be made in the agenda:
 #+CATEGORY: Holiday
 %%(org-calendar-holiday)   ; special function for holiday names
 #+CATEGORY: Ann
-%%(diary-anniversary  5 14 1956)@footnote{Note that the order of the arguments (month, day, year) depends on the setting of @code{calendar-date-style}.} Arthur Dent is %d years old
-%%(diary-anniversary 10  2 1869) Mahatma Gandhi would be %d years old
+%%(org-anniversary 1956  5 14)@footnote{@code{org-anniversary} is just like @code{diary-anniversary}, but the argument order is allways according to ISO and therefore independent of the value of @code{calendar-date-style}.} Arthur Dent is %d years old
+%%(org-anniversary 1869 10  2) Mahatma Gandhi would be %d years old
 @end example
 
 @subsubheading Anniversaries from BBDB
