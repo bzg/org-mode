@@ -49,6 +49,12 @@
 (declare-function org-table-cookie-line-p "org-table" (line))
 (declare-function org-table-colgroup-line-p "org-table" (line))
 (autoload 'org-export-generic "org-export-generic" "Export using the generic exporter" t)
+
+(autoload 'org-export-as-odt "org-odt"
+  "Export the outline to a OpenDocumentText file." t)
+(autoload 'org-export-as-odt-and-open "org-odt"
+  "Export the outline to a OpenDocumentText file and open it." t)
+
 (defgroup org-export nil
   "Options for exporting org-listings."
   :tag "Org Export"
@@ -933,6 +939,8 @@ Pressing `1' will switch between these two options."
 
 \[D] export as DocBook   [V] export as DocBook, process to PDF, and open
 
+\[o] export as OpenDocumentText                    [O] ... and open
+
 \[j] export as TaskJuggler                         [J] ... and open
 
 \[m] export as Freemind mind map
@@ -961,6 +969,8 @@ Pressing `1' will switch between these two options."
 	    (?g org-export-generic t)
 	    (?D org-export-as-docbook t)
 	    (?V org-export-as-docbook-pdf-and-open t)
+	    (?o org-export-as-odt t)
+	    (?O org-export-as-odt-and-open t)
 	    (?j org-export-as-taskjuggler t)
 	    (?J org-export-as-taskjuggler-and-open t)
 	    (?m org-export-as-freemind t)
