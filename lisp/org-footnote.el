@@ -362,6 +362,9 @@ With prefix arg SPECIAL, offer additional commands in a menu."
       (org-footnote-goto-previous-reference (nth 1 tmp)))
      (t (org-footnote-new)))))
 
+(defvar org-footnote-insert-pos-for-preprocessor 'point-max
+  "See `org-footnote-normalize'.")
+
 ;;;###autoload
 (defun org-footnote-normalize (&optional sort-only for-preprocessor)
   "Collect the footnotes in various formats and normalize them.
@@ -369,7 +372,20 @@ This finds the different sorts of footnotes allowed in Org, and
 normalizes them to the usual [N] format that is understood by the
 Org-mode exporters.
 When SORT-ONLY is set, only sort the footnote definitions into the
-referenced sequence."
+referenced sequence.
+
+When FOR-PREPROCESSOR is non nil, the default action, is to
+insert normalized footnotes towards the end of the pre-processing
+buffer. Some exporters like docbook, odt etc expect that footnote
+definitions be available before any references to them. Such
+exporters can let bind `org-footnote-insert-pos-for-preprocessor'
+to symbol 'point-min to achieve the desired behaviour.
+
+Additional note on `org-footnote-insert-pos-for-preprocessor':
+1. This variable has not effect when FOR-PREPROCESSOR is nil.
+2. This variable (potentially) obviates the need for extra scan
+   of pre-processor buffer as witnessed in
+   `org-export-docbook-get-footnotes'."
   ;; This is based on Paul's function, but rewritten.
   (let* ((limit-level
 	  (and (boundp 'org-inlinetask-min-level)
@@ -461,7 +477,12 @@ referenced sequence."
 	(setq ins-point (point))))
 
       ;; Insert the footnotes again
-      (goto-char (or ins-point (point-max)))
+      (goto-char (or (and for-preprocessor
+			  (equal org-footnote-insert-pos-for-preprocessor
+				 'point-min)
+			  (point-min))
+		     ins-point
+		     (point-max)))
       (setq ref-table (reverse ref-table))
       (when sort-only
 	;; remove anonymous and inline footnotes from the list
