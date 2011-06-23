@@ -95,7 +95,7 @@ results - just like none only the block is run on export ensuring
 
 none ----- do not display either code or results upon export"
   (interactive)
-  (message "org-babel-exp processing...")
+  (unless noninteractive (message "org-babel-exp processing..."))
   (save-excursion
     (goto-char (match-beginning 0))
     (let* ((info (org-babel-get-src-block-info 'light))
