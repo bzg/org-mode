@@ -1661,52 +1661,53 @@ from the buffer."
       (add-text-properties beg (if (bolp) (1- (point)) (point))
 			   '(org-protected t)))))
 
+(defvar org-export-backends
+  '(docbook html beamer ascii latex)
+  "List of Org supported export backends.")
+
 (defun org-export-select-backend-specific-text ()
-  (let ((formatters
-	 '((docbook "DOCBOOK" "BEGIN_DOCBOOK" "END_DOCBOOK")
-	   (html "HTML" "BEGIN_HTML" "END_HTML")
-	   (beamer "BEAMER" "BEGIN_BEAMER" "END_BEAMER")
-	   (ascii "ASCII" "BEGIN_ASCII" "END_ASCII")
-	   (latex "LaTeX" "BEGIN_LaTeX" "END_LaTeX")))
+  (let ((formatters org-export-backends)
 	(case-fold-search t)
-	fmt beg beg-content end end-content ind)
+	backend backend-name beg beg-content end end-content ind)
 
     (while formatters
-      (setq fmt (pop formatters))
-      ;; Handle #+backend: stuff
+      (setq backend (pop formatters)
+	    backend-name (symbol-name backend))
+
+      ;; Handle #+BACKEND: stuff
       (goto-char (point-min))
-      (while (re-search-forward (concat "^\\([ \t]*\\)#\\+" (cadr fmt)
+      (while (re-search-forward (concat "^\\([ \t]*\\)#\\+" backend-name
 					":[ \t]*\\(.*\\)") nil t)
-	(if (not (eq (car fmt) org-export-current-backend))
+	(if (not (eq backend org-export-current-backend))
 	    (delete-region (point-at-bol) (min (1+ (point-at-eol)) (point-max)))
 	  (replace-match "\\1\\2" t)
 	  (add-text-properties
 	   (point-at-bol) (min (1+ (point-at-eol)) (point-max))
-	   `(org-protected t original-indentation ,ind))))
-      ;; Delete #+attr_Backend: stuff of another backend. Those
+	   `(org-protected t original-indentation ,ind org-native-text t))))
+      ;; Delete #+ATTR_BACKEND: stuff of another backend. Those
       ;; matching the current backend will be taken care of by
       ;; `org-export-attach-captions-and-attributes'
       (goto-char (point-min))
-      (while (re-search-forward (concat "^\\([ \t]*\\)#\\+attr_" (cadr fmt)
+      (while (re-search-forward (concat "^\\([ \t]*\\)#\\+ATTR_" backend-name
 					":[ \t]*\\(.*\\)") nil t)
 	(setq ind (org-get-indentation))
-	(when (not (eq (car fmt) org-export-current-backend))
+	(when (not (eq backend org-export-current-backend))
 	  (delete-region (point-at-bol) (min (1+ (point-at-eol)) (point-max)))))
-      ;; Handle #+begin_backend and #+end_backend stuff
+      ;; Handle #+BEGIN_BACKEND and #+END_BACKEND stuff
       (goto-char (point-min))
-      (while (re-search-forward (concat "^[ \t]*#\\+" (caddr fmt) "\\>.*\n?")
+      (while (re-search-forward (concat "^[ \t]*#\\+BEGIN_" backend-name "\\>.*\n?")
 				nil t)
 	(setq beg (match-beginning 0) beg-content (match-end 0))
 	(setq ind (save-excursion (goto-char beg) (org-get-indentation)))
-	(when (re-search-forward (concat "^[ \t]*#\\+" (cadddr fmt) "\\>.*\n?")
+	(when (re-search-forward (concat "^[ \t]*#\\+END_" backend-name "\\>.*\n?")
 				 nil t)
 	  (setq end (match-end 0) end-content (match-beginning 0))
-	  (if (eq (car fmt) org-export-current-backend)
+	  (if (eq backend org-export-current-backend)
 	      ;; yes, keep this
 	      (progn
 		(add-text-properties
 		 beg-content end-content
-		 `(org-protected t original-indentation ,ind))
+		 `(org-protected t original-indentation ,ind org-native-text t))
 		(delete-region (match-beginning 0) (match-end 0))
 		(save-excursion
 		  (goto-char beg)
