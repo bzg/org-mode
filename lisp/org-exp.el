@@ -2473,6 +2473,16 @@ in the list) and remove property and value from the list in LISTVAR."
 (defun org-export-format-source-code-or-example
   (lang code &optional opts indent caption)
   "Format CODE from language LANG and return it formatted for export.
+The CODE is marked up in `org-export-current-backend' format.
+
+Check if a function by name
+\"org-<backend>-format-source-code-or-example\" is bound. If yes,
+use it as the custom formatter. Otherwise, use the default
+formatter. Default formatters are provided for docbook, html,
+latex and ascii backends. For example, use
+`org-html-format-source-code-or-example' to provide a custom
+formatter for export to \"html\".
+
 If LANG is nil, do not add any fontification.
 OPTS contains formatting options, like `-n' for triggering numbering lines,
 and `+n' for continuing previous numbering.
@@ -2480,7 +2490,15 @@ Code formatting according to language currently only works for HTML.
 Numbering lines works for all three major backends (html, latex, and ascii).
 INDENT was the original indentation of the block."
   (save-match-data
-    (let (num cont rtn rpllbl keepp textareap preserve-indentp cols rows fmt)
+    (let* ((backend-name (symbol-name org-export-current-backend))
+	   (backend-formatter
+	    (intern (format "org-%s-format-source-code-or-example"
+			    backend-name)))
+	   (backend-feature (intern (concat "org-" backend-name)))
+	   (backend-formatter
+	    (and (require (intern (concat "org-" backend-name)) nil)
+		 (fboundp backend-formatter) backend-formatter))
+	   num cont rtn rpllbl keepp textareap preserve-indentp cols rows fmt)
       (setq opts (or opts "")
 	    num (string-match "[-+]n\\>" opts)
 	    cont (string-match "\\+n\\>" opts)
@@ -2517,6 +2535,9 @@ INDENT was the original indentation of the block."
       ;; Now backend-specific coding
       (setq rtn
 	    (cond
+	     (backend-formatter
+	      (funcall backend-formatter lang caption textareap cols rows num
+		       cont rpllbl fmt))
 	     ((eq org-export-current-backend 'docbook)
 	      (setq rtn (org-export-number-lines rtn 0 0 num cont rpllbl fmt))
 	      (concat "\n#+BEGIN_DOCBOOK\n"
