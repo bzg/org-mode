@@ -212,7 +212,7 @@ This setting can also be overridden in the CRYPTKEY property."
 (when (and (functionp 'daemonp)
 	   (not (daemonp)) auto-save-default)
   (message "Warning: turn auto-save-mode off in Org buffers containing crypted entries.")
-  (sit-for 5))
+  (sit-for 1))
 
 (add-hook 'org-reveal-start-hook 'org-decrypt-entry)
 
