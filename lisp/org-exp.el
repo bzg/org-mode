@@ -49,6 +49,12 @@
 (declare-function org-table-cookie-line-p "org-table" (line))
 (declare-function org-table-colgroup-line-p "org-table" (line))
 (autoload 'org-export-generic "org-export-generic" "Export using the generic exporter" t)
+
+(autoload 'org-export-as-odt "org-odt"
+  "Export the outline to a OpenDocumentText file." t)
+(autoload 'org-export-as-odt-and-open "org-odt"
+  "Export the outline to a OpenDocumentText file and open it." t)
+
 (defgroup org-export nil
   "Options for exporting org-listings."
   :tag "Org Export"
@@ -933,6 +939,8 @@ Pressing `1' will switch between these two options."
 
 \[D] export as DocBook   [V] export as DocBook, process to PDF, and open
 
+\[o] export as OpenDocumentText                    [O] ... and open
+
 \[j] export as TaskJuggler                         [J] ... and open
 
 \[m] export as Freemind mind map
@@ -961,6 +969,8 @@ Pressing `1' will switch between these two options."
 	    (?g org-export-generic t)
 	    (?D org-export-as-docbook t)
 	    (?V org-export-as-docbook-pdf-and-open t)
+	    (?o org-export-as-odt t)
+	    (?O org-export-as-odt-and-open t)
 	    (?j org-export-as-taskjuggler t)
 	    (?J org-export-as-taskjuggler-and-open t)
 	    (?m org-export-as-freemind t)
@@ -1651,52 +1661,53 @@ from the buffer."
       (add-text-properties beg (if (bolp) (1- (point)) (point))
 			   '(org-protected t)))))
 
+(defvar org-export-backends
+  '(docbook html beamer ascii latex)
+  "List of Org supported export backends.")
+
 (defun org-export-select-backend-specific-text ()
-  (let ((formatters
-	 '((docbook "DOCBOOK" "BEGIN_DOCBOOK" "END_DOCBOOK")
-	   (html "HTML" "BEGIN_HTML" "END_HTML")
-	   (beamer "BEAMER" "BEGIN_BEAMER" "END_BEAMER")
-	   (ascii "ASCII" "BEGIN_ASCII" "END_ASCII")
-	   (latex "LaTeX" "BEGIN_LaTeX" "END_LaTeX")))
+  (let ((formatters org-export-backends)
 	(case-fold-search t)
-	fmt beg beg-content end end-content ind)
+	backend backend-name beg beg-content end end-content ind)
 
     (while formatters
-      (setq fmt (pop formatters))
-      ;; Handle #+backend: stuff
+      (setq backend (pop formatters)
+	    backend-name (symbol-name backend))
+
+      ;; Handle #+BACKEND: stuff
       (goto-char (point-min))
-      (while (re-search-forward (concat "^\\([ \t]*\\)#\\+" (cadr fmt)
+      (while (re-search-forward (concat "^\\([ \t]*\\)#\\+" backend-name
 					":[ \t]*\\(.*\\)") nil t)
-	(if (not (eq (car fmt) org-export-current-backend))
+	(if (not (eq backend org-export-current-backend))
 	    (delete-region (point-at-bol) (min (1+ (point-at-eol)) (point-max)))
 	  (replace-match "\\1\\2" t)
 	  (add-text-properties
 	   (point-at-bol) (min (1+ (point-at-eol)) (point-max))
-	   `(org-protected t original-indentation ,ind))))
-      ;; Delete #+attr_Backend: stuff of another backend. Those
+	   `(org-protected t original-indentation ,ind org-native-text t))))
+      ;; Delete #+ATTR_BACKEND: stuff of another backend. Those
       ;; matching the current backend will be taken care of by
       ;; `org-export-attach-captions-and-attributes'
       (goto-char (point-min))
-      (while (re-search-forward (concat "^\\([ \t]*\\)#\\+attr_" (cadr fmt)
+      (while (re-search-forward (concat "^\\([ \t]*\\)#\\+ATTR_" backend-name
 					":[ \t]*\\(.*\\)") nil t)
 	(setq ind (org-get-indentation))
-	(when (not (eq (car fmt) org-export-current-backend))
+	(when (not (eq backend org-export-current-backend))
 	  (delete-region (point-at-bol) (min (1+ (point-at-eol)) (point-max)))))
-      ;; Handle #+begin_backend and #+end_backend stuff
+      ;; Handle #+BEGIN_BACKEND and #+END_BACKEND stuff
       (goto-char (point-min))
-      (while (re-search-forward (concat "^[ \t]*#\\+" (caddr fmt) "\\>.*\n?")
+      (while (re-search-forward (concat "^[ \t]*#\\+BEGIN_" backend-name "\\>.*\n?")
 				nil t)
 	(setq beg (match-beginning 0) beg-content (match-end 0))
 	(setq ind (save-excursion (goto-char beg) (org-get-indentation)))
-	(when (re-search-forward (concat "^[ \t]*#\\+" (cadddr fmt) "\\>.*\n?")
+	(when (re-search-forward (concat "^[ \t]*#\\+END_" backend-name "\\>.*\n?")
 				 nil t)
 	  (setq end (match-end 0) end-content (match-beginning 0))
-	  (if (eq (car fmt) org-export-current-backend)
+	  (if (eq backend org-export-current-backend)
 	      ;; yes, keep this
 	      (progn
 		(add-text-properties
 		 beg-content end-content
-		 `(org-protected t original-indentation ,ind))
+		 `(org-protected t original-indentation ,ind org-native-text t))
 		(delete-region (match-beginning 0) (match-end 0))
 		(save-excursion
 		  (goto-char beg)
@@ -2462,6 +2473,16 @@ in the list) and remove property and value from the list in LISTVAR."
 (defun org-export-format-source-code-or-example
   (lang code &optional opts indent caption)
   "Format CODE from language LANG and return it formatted for export.
+The CODE is marked up in `org-export-current-backend' format.
+
+Check if a function by name
+\"org-<backend>-format-source-code-or-example\" is bound. If yes,
+use it as the custom formatter. Otherwise, use the default
+formatter. Default formatters are provided for docbook, html,
+latex and ascii backends. For example, use
+`org-html-format-source-code-or-example' to provide a custom
+formatter for export to \"html\".
+
 If LANG is nil, do not add any fontification.
 OPTS contains formatting options, like `-n' for triggering numbering lines,
 and `+n' for continuing previous numbering.
@@ -2469,7 +2490,15 @@ Code formatting according to language currently only works for HTML.
 Numbering lines works for all three major backends (html, latex, and ascii).
 INDENT was the original indentation of the block."
   (save-match-data
-    (let (num cont rtn rpllbl keepp textareap preserve-indentp cols rows fmt)
+    (let* ((backend-name (symbol-name org-export-current-backend))
+	   (backend-formatter
+	    (intern (format "org-%s-format-source-code-or-example"
+			    backend-name)))
+	   (backend-feature (intern (concat "org-" backend-name)))
+	   (backend-formatter
+	    (and (require (intern (concat "org-" backend-name)) nil)
+		 (fboundp backend-formatter) backend-formatter))
+	   num cont rtn rpllbl keepp textareap preserve-indentp cols rows fmt)
       (setq opts (or opts "")
 	    num (string-match "[-+]n\\>" opts)
 	    cont (string-match "\\+n\\>" opts)
@@ -2506,14 +2535,14 @@ INDENT was the original indentation of the block."
       ;; Now backend-specific coding
       (setq rtn
 	    (cond
+	     (backend-formatter
+	      (funcall backend-formatter lang caption textareap cols rows num
+		       cont rpllbl fmt))
 	     ((eq org-export-current-backend 'docbook)
 	      (setq rtn (org-export-number-lines rtn 0 0 num cont rpllbl fmt))
-	      (concat "\n#+BEGIN_DOCBOOK\n"
-		      (org-add-props (concat "<programlisting><![CDATA["
-					     rtn
-					     "]]></programlisting>\n")
-			  '(org-protected t org-example t))
-		      "#+END_DOCBOOK\n"))
+	      (concat "<programlisting><![CDATA["
+		      rtn
+		      "]]></programlisting>\n"))
 	     ((eq org-export-current-backend 'html)
 	      ;; We are exporting to HTML
 	      (when lang
@@ -2583,78 +2612,79 @@ INDENT was the original indentation of the block."
 		(setq rtn (org-export-number-lines rtn 1 1 num cont rpllbl fmt)))
 	      (if (string-match "\\(\\`<[^>]*>\\)\n" rtn)
 		  (setq rtn (replace-match "\\1" t nil rtn)))
-	      (concat "\n#+BEGIN_HTML\n" (org-add-props rtn '(org-protected t org-example t)) "\n#+END_HTML\n\n"))
+	      rtn)
 	     ((eq org-export-current-backend 'latex)
 	      (setq rtn (org-export-number-lines rtn 0 0 num cont rpllbl fmt))
-	      (concat
-	       "#+BEGIN_LaTeX\n"
-	       (org-add-props
-		   (cond
-		    ((and lang org-export-latex-listings)
-                     (flet ((make-option-string
-                             (pair)
-                             (concat (first pair)
-				     (if (> (length (second pair)) 0)
-					 (concat "=" (second pair))))))
-		       (let* ((lang-sym (intern lang))
-			      (minted-p (eq org-export-latex-listings 'minted))
-			      (listings-p (not minted-p))
-			      (backend-lang
-			       (or (cadr
-				    (assq
-				     lang-sym
-				     (cond
-				      (minted-p org-export-latex-minted-langs)
-				      (listings-p org-export-latex-listings-langs))))
-				   lang))
-			      (custom-environment
-			       (cadr
-				(assq
-				 lang-sym
-				 org-export-latex-custom-lang-environments))))
-			 (concat
-			  (when (and listings-p (not custom-environment))
-			    (format
-			     "\\lstset{%s}\n"
-			     (mapconcat
-			      #'make-option-string
-			      (append org-export-latex-listings-options
-				      `(("language" ,backend-lang))) ",")))
-			  (when (and caption org-export-latex-listings-w-names)
-			    (format
-			     "\n%s $\\equiv$ \n"
-			     (replace-regexp-in-string "_" "\\\\_" caption)))
-			  (cond
-			   (custom-environment
-			    (format "\\begin{%s}\n%s\\end{%s}\n"
-				    custom-environment rtn custom-environment))
-			   (listings-p
-			    (format "\\begin{%s}\n%s\\end{%s}\n"
-				    "lstlisting" rtn "lstlisting"))
-			   (minted-p
-			    (format
-			     "\\begin{minted}[%s]{%s}\n%s\\end{minted}\n"
-			     (mapconcat #'make-option-string
-					org-export-latex-minted-options ",")
-			     backend-lang rtn)))))))
-                    (t (concat (car org-export-latex-verbatim-wrap)
-                               rtn (cdr org-export-latex-verbatim-wrap))))
-                   '(org-protected t org-example t))
-               "#+END_LaTeX\n"))
+	      (cond
+	       ((and lang org-export-latex-listings)
+		(flet ((make-option-string
+			(pair)
+			(concat (first pair)
+				(if (> (length (second pair)) 0)
+				    (concat "=" (second pair))))))
+		  (let* ((lang-sym (intern lang))
+			 (minted-p (eq org-export-latex-listings 'minted))
+			 (listings-p (not minted-p))
+			 (backend-lang
+			  (or (cadr
+			       (assq
+				lang-sym
+				(cond
+				 (minted-p org-export-latex-minted-langs)
+				 (listings-p org-export-latex-listings-langs))))
+			      lang))
+			 (custom-environment
+			  (cadr
+			   (assq
+			    lang-sym
+			    org-export-latex-custom-lang-environments))))
+		    (concat
+		     (when (and listings-p (not custom-environment))
+		       (format
+			"\\lstset{%s}\n"
+			(mapconcat
+			 #'make-option-string
+			 (append org-export-latex-listings-options
+				 `(("language" ,backend-lang))) ",")))
+		     (when (and caption org-export-latex-listings-w-names)
+		       (format
+			"\n%s $\\equiv$ \n"
+			(replace-regexp-in-string "_" "\\\\_" caption)))
+		     (cond
+		      (custom-environment
+		       (format "\\begin{%s}\n%s\\end{%s}\n"
+			       custom-environment rtn custom-environment))
+		      (listings-p
+		       (format "\\begin{%s}\n%s\\end{%s}\n"
+			       "lstlisting" rtn "lstlisting"))
+		      (minted-p
+		       (format
+			"\\begin{minted}[%s]{%s}\n%s\\end{minted}\n"
+			(mapconcat #'make-option-string
+				   org-export-latex-minted-options ",")
+			backend-lang rtn)))))))
+	       (t (concat (car org-export-latex-verbatim-wrap)
+			  rtn (cdr org-export-latex-verbatim-wrap)))))
              ((eq org-export-current-backend 'ascii)
               ;; This is not HTML or LaTeX, so just make it an example.
               (setq rtn (org-export-number-lines rtn 0 0 num cont rpllbl fmt))
               (concat caption "\n"
-                      "#+BEGIN_ASCII\n"
-                      (org-add-props
-                          (concat
-                           (mapconcat
-                            (lambda (l) (concat "  " l))
-                            (org-split-string rtn "\n")
-                            "\n")
-                           "\n")
-                          '(org-protected t org-example t))
-                      "#+END_ASCII\n"))))
+		      (concat
+		       (mapconcat
+			(lambda (l) (concat "  " l))
+			(org-split-string rtn "\n")
+			"\n")
+		       "\n")
+		      ))
+	     (t
+	      (error "Don't know how to markup source or example block in %s"
+		     (upcase backend-name)))))
+      (setq rtn
+	    (concat
+	     "\n#+BEGIN_" backend-name "\n"
+	     (org-add-props rtn
+		 '(org-protected t org-example t org-native-text t))
+	     "\n#+END_" backend-name "\n\n"))
       (org-add-props rtn nil 'original-indentation indent))))
 
 (defun org-export-number-lines (text &optional skip1 skip2 number cont
