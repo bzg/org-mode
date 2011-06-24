@@ -1949,7 +1949,7 @@ C-u} forces TAB, and a numeric argument N indicates that at least N
 consecutive spaces, or alternatively a TAB will be the separator.
 @*
 If there is no active region, this command creates an empty Org
-table.  But it's easier just to start typing, like
+table.  But it is easier just to start typing, like
 @kbd{|Name|Phone|Age @key{RET} |- @key{TAB}}.
 
 @tsubheading{Re-aligning and field motion}
@@ -3570,7 +3570,7 @@ entire buffer, but shows all TODO items (with not-DONE state) and the
 headings hierarchy above them.  With a prefix argument (or by using @kbd{C-c
 / T}), search for a specific TODO.  You will be prompted for the keyword, and
 you can also give a list of keywords like @code{KWD1|KWD2|...} to list
-entries that match any one of these keywords.  With numeric prefix argument
+entries that match any one of these keywords.  With a numeric prefix argument
 N, show the tree for the Nth keyword in the variable
 @code{org-todo-keywords}.  With two prefix arguments, find all TODO states,
 both un-done and done.
@@ -3741,8 +3741,8 @@ key after each keyword, in parentheses.  For example:
 @end lisp
 
 @vindex org-fast-tag-selection-include-todo
-If you then press @code{C-c C-t} followed by the selection key, the entry
-will be switched to this state.  @key{SPC} can be used to remove any TODO
+If you then press @kbd{C-c C-t} followed by the selection key, the entry
+will be switched to this state.  @kbd{SPC} can be used to remove any TODO
 keyword from an entry.@footnote{Check also the variable
 @code{org-fast-tag-selection-include-todo}, it allows you to change the TODO
 state through the tags interface (@pxref{Setting tags}), in case you like to
@@ -4025,7 +4025,7 @@ called ``habits''.  A habit has the following properties:
 You have enabled the @code{habits} module by customizing the variable
 @code{org-modules}.
 @item
-The habit is a TODO, with a TODO keyword representing an open state.
+The habit is a TODO item, with a TODO keyword representing an open state.
 @item
 The property @code{STYLE} is set to the value @code{habit}.
 @item
@@ -4039,8 +4039,8 @@ syntax @samp{.+2d/3d}, which says that you want to do the task at least every
 three days, but at most every two days.
 @item
 You must also have state logging for the @code{DONE} state enabled, in order
-for historical data to be represented in the consistency graph.  If it's not
-enabled it's not an error, but the consistency graphs will be largely
+for historical data to be represented in the consistency graph.  If it is not
+enabled it is not an error, but the consistency graphs will be largely
 meaningless.
 @end enumerate
 
@@ -4098,7 +4098,7 @@ habits are displayed in the agenda.
 @table @code
 @item org-habit-graph-column
 The buffer column at which the consistency graph should be drawn.  This will
-overwrite any text in that column, so it's a good idea to keep your habits'
+overwrite any text in that column, so it is a good idea to keep your habits'
 titles brief and to the point.
 @item org-habit-preceding-days
 The amount of history, in days before today, to appear in consistency graphs.
@@ -4437,7 +4437,7 @@ When the cursor is in a headline, this does the same as @kbd{C-c C-q}.
 @end table
 
 @vindex org-tag-alist
-Org will support tag insertion based on a @emph{list of tags}.  By
+Org supports tag insertion based on a @emph{list of tags}.  By
 default this list is constructed dynamically, containing all tags
 currently used in the buffer.  You may also globally specify a hard list
 of tags with the variable @code{org-tag-alist}.  Finally you can set
@@ -4941,7 +4941,7 @@ optional.  The individual parts have the following meaning:
 @var{property}        @r{The property that should be edited in this column.}
                 @r{Special properties representing meta data are allowed here}
                 @r{as well (@pxref{Special properties})}
-@var{title}     @r{The header text for the column. If omitted, the property}
+@var{title}           @r{The header text for the column. If omitted, the property}
                 @r{name is used.}
 @{@var{summary-type}@}  @r{The summary type.  If specified, the column values for}
                 @r{parent nodes are computed from the children.}
@@ -6025,7 +6025,7 @@ If you restart Emacs and clock into any task, Org will notice that you have a
 dangling clock which was never clocked out from your last session.  Using
 that clock's starting time as the beginning of the unaccounted-for period,
 Org will ask how you want to resolve that time.  The logic and behavior is
-identical to dealing with away time due to idleness; it's just happening due
+identical to dealing with away time due to idleness; it is just happening due
 to a recovery event rather than a set amount of idle time.
 
 You can also check all the files visited by your Org agenda for dangling
@@ -6062,7 +6062,7 @@ together with clock sums (if you want to clock your time).  For a specific
 buffer you can use
 
 @example
-#+PROPERTY: Effort_ALL 0 0:10 0:30 1:00 2:00 3:00 4:00 5:00 6:00 7:00 8:00
+#+PROPERTY: Effort_ALL 0 0:10 0:30 1:00 2:00 3:00 4:00 5:00 6:00 7:00
 #+COLUMNS: %40ITEM(Task) %17Effort(Estimated Effort)@{:@} %CLOCKSUM
 @end example
 
@@ -6141,7 +6141,7 @@ not started at exactly the right moment.
 @kindex ;
 
 Calling @code{org-timer-set-timer} from an Org-mode buffer runs a countdown
-timer.  Use @key{;} from agenda buffers, @key{C-c C-x ;} everwhere else.
+timer.  Use @kbd{;} from agenda buffers, @key{C-c C-x ;} everwhere else.
 
 @code{org-timer-set-timer} prompts the user for a duration and displays a
 countdown timer in the modeline.  @code{org-timer-default-timer} sets the
@@ -6507,8 +6507,8 @@ similar way.}:
 
 @vindex org-from-is-user-regexp
 @smallexample
-Link type          |  Available keywords
--------------------+----------------------------------------------
+Link type               |  Available keywords
+------------------------+----------------------------------------------
 bbdb                    |  %:name %:company
 irc                     |  %:server %:port %:nick
 vm, wl, mh, mew, rmail  |  %:type %:subject %:message-id
@@ -7009,7 +7009,7 @@ Lift the restriction.
 @cindex agenda dispatcher
 @cindex dispatching agenda commands
 The views are created through a dispatcher, which should be bound to a
-global key---for example @kbd{C-c a} (@pxref{Installation}).  In the
+global key---for example @kbd{C-c a} (@pxref{Activation}).  In the
 following we will assume that @kbd{C-c a} is indeed how the dispatcher
 is accessed and list keyboard access to commands accordingly.  After
 pressing @kbd{C-c a}, an additional letter is required to execute a
@@ -8406,7 +8406,7 @@ version of some agenda views to carry around.  Org-mode can export custom
 agenda views as plain text, HTML@footnote{You need to install Hrvoje Niksic's
 @file{htmlize.el}.}, Postscript, PDF@footnote{To create PDF output, the
 ghostscript @file{ps2pdf} utility must be installed on the system.  Selecting
-a PDF file with also create the postscript file.}, and iCalendar files.  If
+a PDF file will also create the postscript file.}, and iCalendar files.  If
 you want to do this only occasionally, use the command
 
 @table @kbd
@@ -8711,7 +8711,7 @@ If you still want to have some text before the first headline, use the
 #+OPTIONS: skip:t
 #+TEXT: This text will go before the *first* headline.
 #+TEXT: [TABLE-OF-CONTENTS]
-#+TEXT: This goes between the table of contents and the first headline
+#+TEXT: This goes between the table of contents and the *first* headline
 @end example
 
 @node Lists, Paragraphs, Initial text, Structural markup elements
@@ -8950,8 +8950,8 @@ If the syntax for the label format conflicts with the language syntax, use a
 @code{-l} switch to change the format, for example @samp{#+BEGIN_SRC pascal
 -n -r -l "((%s))"}.  See also the variable @code{org-coderef-label-format}.
 
-HTML export also allows examples to be published as text areas, @xref{Text
-areas in HTML export}.
+HTML export also allows examples to be published as text areas (@xref{Text
+areas in HTML export}).
 
 Because the @code{#+BEGIN_...} and @code{#+END_...} patterns need to be added
 so often, shortcuts are provided using the Easy Templates facility
@@ -9651,8 +9651,8 @@ language, but with additional support for tables.
 @table @kbd
 @orgcmd{C-c C-e h,org-export-as-html}
 @cindex property, EXPORT_FILE_NAME
-Export as HTML file @file{myfile.html}.  For an Org file @file{myfile.org},
-the ASCII file will be @file{myfile.html}.  The file will be overwritten
+Export as HTML file.  For an Org file @file{myfile.org},
+the HTML file will be @file{myfile.html}.  The file will be overwritten
 without warning.  If there is an active region@footnote{This requires
 @code{transient-mark-mode} be turned on.}, only the region will be
 exported. If the selected region is a single tree@footnote{To select the
@@ -10067,7 +10067,7 @@ sections.
 @table @kbd
 @orgcmd{C-c C-e l,org-export-as-latex}
 @cindex property EXPORT_FILE_NAME
-Export as @LaTeX{} file @file{myfile.tex}.  For an Org file
+Export as @LaTeX{} file.  For an Org file
 @file{myfile.org}, the @LaTeX{} file will be @file{myfile.tex}.  The file will
 be overwritten without warning.  If there is an active region@footnote{This
 requires @code{transient-mark-mode} be turned on.}, only the region will be
@@ -10617,7 +10617,7 @@ Export as TaskJuggler file and then open the file with TaskJugglerUI.
 
 @vindex org-export-taskjuggler-project-tag
 Create your tasks as you usually do with Org-mode. Assign efforts to each
-task using properties (it's easiest to do this in the column view). You
+task using properties (it is easiest to do this in the column view). You
 should end up with something similar to the example by Peter Jones in
 @url{http://www.contextualdevelopment.com/static/artifacts/articles/2008/project-planning/project-planning.org}.
 Now mark the top node of your tasks with a tag named
@@ -10720,7 +10720,8 @@ The Freemind exporter was written by Lennart Borgman.
 
 @table @kbd
 @orgcmd{C-c C-e m,org-export-as-freemind}
-Export as Freemind mind map @file{myfile.mm}.
+Export as Freemind mind map. For an Org file @file{myfile.org}, the Freemind 
+file will be @file{myfile.mm}.
 @end table
 
 @node XOXO export, iCalendar export, Freemind export, Exporting
@@ -10733,7 +10734,8 @@ does not interpret any additional Org-mode features.
 
 @table @kbd
 @orgcmd{C-c C-e x,org-export-as-xoxo}
-Export as XOXO file @file{myfile.html}.
+Export as XOXO file. For an Org file @file{myfile.org}, the XOXO file will be 
+@file{myfile.html}.
 @orgkey{C-c C-e v x}
 Export only the visible part of the document.
 @end table
@@ -12462,7 +12464,7 @@ interpreted language.
 
 The @code{:noweb} header argument controls expansion of ``noweb'' style (see
 @ref{Noweb reference syntax}) references in a code block.  This header
-argument can have one of three values: @code{yes} @code{no} or @code{tangle}.
+argument can have one of three values: @code{yes}, @code{no}, or @code{tangle}.
 
 @itemize @bullet
 @item @code{yes}
@@ -14088,7 +14090,8 @@ package, special contexts are lines that start with @code{#+R:} or
 The function first checks if the cursor is in such a line.  If that is the
 case, @code{org-R-apply} is called and the function returns @code{t} to
 signal that action was taken, and @kbd{C-c C-c} will stop looking for other
-contexts.  If the function finds it should do nothing locally, it returns @code{nil} so that other, similar functions can have a try.
+contexts.  If the function finds it should do nothing locally, it returns
+@code{nil} so that other, similar functions can have a try.
 
 
 @node Tables in arbitrary syntax, Dynamic blocks, Context-sensitive commands, Hacking
@@ -14101,7 +14104,7 @@ Since Orgtbl mode can be used as a minor mode in arbitrary buffers, a
 frequent feature request has been to make it work with native tables in
 specific languages, for example @LaTeX{}.  However, this is extremely
 hard to do in a general way, would lead to a customization nightmare,
-and would take away much of the simplicity of the Orgtbl-mode table
+and would take away much of the simplicity of the Orgtbl mode table
 editor.
 
 This appendix describes a different approach.  We keep the Orgtbl mode
@@ -14944,7 +14947,7 @@ and to read captured notes from there.
 This operation copies all files currently listed in @code{org-mobile-files}
 to the directory @code{org-mobile-directory}.  By default this list contains
 all agenda files (as listed in @code{org-agenda-files}), but additional files
-can be included by customizing @code{org-mobiles-files}.  File names will be
+can be included by customizing @code{org-mobile-files}.  File names will be
 staged with paths relative to @code{org-directory}, so all files should be
 inside this directory.  The push operation also creates a special Org file
 @file{agendas.org} with all custom agenda view defined by the
