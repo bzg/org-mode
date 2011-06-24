@@ -43,6 +43,9 @@ To add files to this list use the `org-babel-lob-ingest' command."
   :group 'org-babel
   :type 'list)
 
+(defvar org-babel-default-lob-header-args '((:exports . "results"))
+  "Default header arguments to use when exporting #+lob/call lines.")
+
 ;;;###autoload
 (defun org-babel-lob-ingest (&optional file)
   "Add all named source-blocks defined in FILE to

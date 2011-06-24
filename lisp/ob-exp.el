@@ -178,6 +178,7 @@ org-mode text."
 	  (looking-at "[ \t]*:[ \t]")))
       (org-in-regexps-block-p "^[ \t]*#\\+begin_src" "^[ \t]*#\\+end_src")))
 
+(defvar org-babel-default-lob-header-args)
 (defun org-babel-exp-lob-one-liners (start end)
   "Process Library of Babel calls between START and END for export.
 See `org-babel-exp-src-block' for export options. Currently the
@@ -195,6 +196,7 @@ options are taken from `org-babel-default-header-args'."
 		   (list "emacs-lisp" "results"
 			 (org-babel-merge-params
 			  org-babel-default-header-args
+			  org-babel-default-lob-header-args
 			  (org-babel-params-from-buffer)
 			  (org-babel-params-from-properties)
 			  (org-babel-parse-header-arguments
@@ -202,7 +204,7 @@ options are taken from `org-babel-default-header-args'."
 			    (concat ":var results="
 				    (mapconcat #'identity
 					       (butlast lob-info) " ")))))
-			 (car (last lob-info)))
+			 "" nil (car (last lob-info)))
 		   'lob))))
 	(setq end (+ end (- (length replacement) (length (match-string 0)))))
 	(if replacement (replace-match replacement t t))))))
