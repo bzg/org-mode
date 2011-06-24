@@ -70,12 +70,25 @@ To add files to this list use the `org-babel-lob-ingest' command."
 If you change the value of this variable then your files may
   become unusable by other org-babel users, and vice versa.")
 
-(defconst org-babel-lob-one-liner-regexp
+(defconst org-babel-block-lob-one-liner-regexp
   (concat
    "^\\([ \t]*\\)#\\+\\(?:"
    (mapconcat #'regexp-quote org-babel-lob-call-aliases "\\|")
    "\\):[ \t]+\\([^\(\)\n]+?\\)\\(\\[\\(.*\\)\\]\\|\\(\\)\\)"
-   "\(\\([^\n]*\\)\)\\(\\[.+\\]\\|\\)[ \t]*\\([^\n]*\\)")
+   "\(\\([^\n]*\\)\)\\(\\[.+\\]\\|\\)[ \t]*\\(\\([^\n]*\\)\\)?")
+  "Regexp to match non-inline calls to predefined source block functions.")
+
+(defconst org-babel-inline-lob-one-liner-regexp
+  (concat
+   "\\([^\n]*\\)\\(?:"
+   (mapconcat #'regexp-quote org-babel-lob-call-aliases "\\|")
+   "\\)_\\([^\(\)\n]+?\\)\\(\\[\\(.*\\)\\]\\|\\(\\)\\)"
+   "\(\\([^\n]*\\)\)\\(\\[.+\\]\\|\\)\\(\\[\\([^\\[\\]]*\\)\\]\\)?[ \t]*")
+  "Regexp to match inline calls to predefined source block functions.")
+
+(defconst org-babel-lob-one-liner-regexp
+  (concat "\\(" org-babel-block-lob-one-liner-regexp
+	  "\\|" org-babel-inline-lob-one-liner-regexp "\\)")
   "Regexp to match calls to predefined source block functions.")
 
 ;; functions for executing lob one-liners
@@ -91,20 +104,24 @@ if so then run the appropriate source block from the Library."
 ;;;###autoload
 (defun org-babel-lob-get-info ()
   "Return a Library of Babel function call as a string."
-  (let ((case-fold-search t))
-    (save-excursion
-      (beginning-of-line 1)
-      (if (looking-at org-babel-lob-one-liner-regexp)
-          (append
+  (flet ((nonempty (a b)
+		   (let ((it (match-string a)))
+		     (if (= (length it) 0) (match-string b) it))))
+    (let ((case-fold-search t))
+      (save-excursion
+	(beginning-of-line 1)
+	(when (looking-at org-babel-lob-one-liner-regexp)
+	  (append
 	   (mapcar #'org-babel-clean-text-properties 
 		   (list
 		    (format "%s%s(%s)%s"
-			    (match-string 2)
-			    (if (match-string 4)
-				(concat "[" (match-string 4) "]") "")
-			    (or (match-string 6) "") (match-string 7))
-		    (match-string 8)))
-	   (list (length (match-string 1))))))))
+			    (nonempty 3 12)
+			    (if (not (= 0 (length (nonempty 5 13))))
+				(concat "[" (nonempty 5 13) "]") "")
+			    (nonempty 7 16)
+			    (or (nonempty 8 18) ""))
+		    (nonempty 9 17)))
+	   (list (length (nonempty 1 11)))))))))
   
 (defun org-babel-lob-execute (info)
   "Execute the lob call specified by INFO."

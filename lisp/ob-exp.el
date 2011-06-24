@@ -206,8 +206,12 @@ options are taken from `org-babel-default-header-args'."
 					       (butlast lob-info) " ")))))
 			 "" nil (car (last lob-info)))
 		   'lob))))
-	(setq end (+ end (- (length replacement) (length (match-string 0)))))
-	(if replacement (replace-match replacement t t))))))
+	(setq end (+ end (- (length replacement)
+			    (- (length (match-string 0))
+			       (length (or (match-string 11) ""))))))
+	(when replacement
+	  ;; when (match-string 11) from (match-end 11) to (match-end 0) else replace-match
+	  (replace-match replacement t t))))))
 
 (defun org-babel-exp-do-export (info type &optional hash)
   "Return a string with the exported content of a code block.
