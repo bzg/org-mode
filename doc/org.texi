@@ -7821,13 +7821,13 @@ prefix argument will temporarily modify that number to the prefix value.
 Toggle the time grid on and off.  See also the variables
 @code{org-agenda-use-time-grid} and @code{org-agenda-time-grid}.
 @c
-@orgcmd{r,org-agenda-rodo}
+@orgcmd{r,org-agenda-redo}
 Recreate the agenda buffer, for example to reflect the changes after
 modification of the timestamps of items with @kbd{S-@key{left}} and
 @kbd{S-@key{right}}.  When the buffer is the global TODO list, a prefix
 argument is interpreted to create a selective list for a specific TODO
 keyword.
-@orgcmd{g,org-agenda-rodo}
+@orgcmd{g,org-agenda-redo}
 Same as @kbd{r}.
 @c
 @orgcmdkskc{C-x C-s,s,org-save-all-org-buffers}
