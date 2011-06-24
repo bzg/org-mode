@@ -11593,11 +11593,20 @@ It is also possible to evaluate named code blocks from anywhere in an
 Org-mode buffer or an Org-mode table.  @code{#+call} (or synonymously
 @code{#+function} or @code{#+lob}) lines can be used to remotely execute code
 blocks located in the current Org-mode buffer or in the ``Library of Babel''
-(see @ref{Library of Babel}).  These lines use the following syntax.
+(see @ref{Library of Babel}).  These lines use the following syntax to place
+a call on a line by itself.
 
 @example
 #+call: <name>(<arguments>)
-#+call: <name>[<header arguments>](<arguments>) <header arguments>
+#+call: <name>[<header args>](<arguments>) <header args>
+@end example
+
+The following syntax can be used to place these calls within a block of
+prose.
+
+@example
+...prose... call_<name>(<arguments>) ...prose...
+...prose... call_<name>[<header args>](<arguments>)[<header args>] ...prose...
 @end example
 
 @table @code
@@ -11610,7 +11619,7 @@ block expressed using standard function call syntax.  For example if the
 original code block named @code{double} has the header argument @code{:var
 n=2}, then the call line passing the number four to that block would be
 written as @code{#+call: double(n=2)}.
-@item <header arguments>
+@item <header args>
 Header arguments can be placed either inside the call to the code block or at
 the end of the line as shown below.
 
