@@ -95,6 +95,7 @@
 (defvar org-ts-regexp-both)
 
 (declare-function org-at-heading-p "org" (&optional ignored))
+(declare-function org-before-first-heading-p "org" ())
 (declare-function org-back-over-empty-lines "org" ())
 (declare-function org-back-to-heading "org" (&optional invisible-ok))
 (declare-function org-combine-plists "org" (&rest plists))
