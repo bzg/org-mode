@@ -1529,12 +1529,14 @@ code ---- the results are extracted in the syntax of the source
 	(message (replace-regexp-in-string "%" "%%" (format "%S" result)))
 	result)
     (save-excursion
-      (let* ((inlinep (save-excursion
-			(re-search-backward "[ \f\t\n\r\v]" nil t)
-			(when (looking-at org-babel-inline-src-block-regexp)
-			  (goto-char (match-end 0))
-			  (insert (if (listp result) "\n" " "))
-			  (point))))
+      (let* ((inlinep
+	      (save-excursion
+		(re-search-backward "[ \f\t\n\r\v]" nil t)
+		(when (or (looking-at org-babel-inline-src-block-regexp)
+			  (looking-at org-babel-inline-lob-one-liner-regexp))
+		  (goto-char (match-end 0))
+		  (insert (if (listp result) "\n" " "))
+		  (point))))
 	     (existing-result (unless inlinep
 				(org-babel-where-is-src-block-result
 				 t info hash indent)))

@@ -83,7 +83,7 @@ If you change the value of this variable then your files may
    "\\([^\n]*\\)\\(?:"
    (mapconcat #'regexp-quote org-babel-lob-call-aliases "\\|")
    "\\)_\\([^\(\)\n]+?\\)\\(\\[\\(.*\\)\\]\\|\\(\\)\\)"
-   "\(\\([^\n]*\\)\)\\(\\[.+\\]\\|\\)\\(\\[\\([^\\[\\]]*\\)\\]\\)?[ \t]*")
+   "\(\\([^\n]*\\)\)\\(\\[.+\\]\\|\\)\\(\\[\\([^\\[\\]]*\\)\\]\\)?")
   "Regexp to match inline calls to predefined source block functions.")
 
 (defconst org-babel-lob-one-liner-regexp
