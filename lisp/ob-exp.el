@@ -184,34 +184,39 @@ org-mode text."
 See `org-babel-exp-src-block' for export options. Currently the
 options are taken from `org-babel-default-header-args'."
   (interactive)
-  (let (replacement)
-    (save-excursion
-      (goto-char start)
-      (while (and (< (point) end)
-		  (re-search-forward org-babel-lob-one-liner-regexp nil t))
-	(setq replacement
-	      (let ((lob-info (org-babel-lob-get-info)))
-		(save-match-data
-		  (org-babel-exp-do-export
-		   (list "emacs-lisp" "results"
-			 (org-babel-merge-params
-			  org-babel-default-header-args
-			  org-babel-default-lob-header-args
-			  (org-babel-params-from-buffer)
-			  (org-babel-params-from-properties)
-			  (org-babel-parse-header-arguments
-			   (org-babel-clean-text-properties
-			    (concat ":var results="
-				    (mapconcat #'identity
-					       (butlast lob-info) " ")))))
-			 "" nil (car (last lob-info)))
-		   'lob))))
-	(setq end (+ end (- (length replacement)
+  (save-excursion
+    (goto-char start)
+    (while (and (< (point) end)
+		(re-search-forward org-babel-lob-one-liner-regexp nil t))
+      (let* ((lob-info (org-babel-lob-get-info))
+	     (inlinep (match-string 11))
+	     (inline-start (match-end 11))
+	     (inline-end (match-end 0))
+	     (rep (let ((lob-info (org-babel-lob-get-info)))
+		    (save-match-data
+		      (org-babel-exp-do-export
+		       (list "emacs-lisp" "results"
+			     (org-babel-merge-params
+			      org-babel-default-header-args
+			      org-babel-default-lob-header-args
+			      (org-babel-params-from-buffer)
+			      (org-babel-params-from-properties)
+			      (org-babel-parse-header-arguments
+			       (org-babel-clean-text-properties
+				(concat ":var results="
+					(mapconcat #'identity
+						   (butlast lob-info) " ")))))
+			     "" nil (car (last lob-info)))
+		       'lob)))))
+	(setq end (+ end (- (length rep)
 			    (- (length (match-string 0))
 			       (length (or (match-string 11) ""))))))
-	(when replacement
-	  ;; when (match-string 11) from (match-end 11) to (match-end 0) else replace-match
-	  (replace-match replacement t t))))))
+	(if inlinep
+	    (save-excursion
+	      (goto-char inline-start)
+	      (delete-region inline-start inline-end)
+	      (insert rep))
+	  (replace-match rep t t))))))
 
 (defun org-babel-exp-do-export (info type &optional hash)
   "Return a string with the exported content of a code block.
