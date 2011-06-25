@@ -2536,7 +2536,7 @@ INDENT was the original indentation of the block."
       (setq rtn
 	    (cond
 	     (backend-formatter
-	      (funcall backend-formatter lang caption textareap cols rows num
+	      (funcall backend-formatter rtn lang caption textareap cols rows num
 		       cont rpllbl fmt))
 	     ((eq org-export-current-backend 'docbook)
 	      (setq rtn (org-export-number-lines rtn 0 0 num cont rpllbl fmt))
