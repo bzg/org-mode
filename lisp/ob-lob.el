@@ -22,12 +22,6 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
-;;; Commentary:
-
-;; See the online documentation for more information
-;; 
-;;   http://orgmode.org/worg/org-contrib/babel/
-
 ;;; Code:
 (require 'ob)
 (require 'ob-table)
