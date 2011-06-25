@@ -1716,6 +1716,7 @@ parameters when merging lists."
 	   ("output" "value")))
 	(exports-exclusive-groups
 	 '(("code" "results" "both" "none")))
+	(variable-index 0)
 	params results exports tangle noweb cache vars shebang comments padline)
     (flet ((e-merge (exclusive-groups &rest result-params)
              ;; maintain exclusivity of mutually exclusive parameters
@@ -1747,15 +1748,19 @@ parameters when merging lists."
 			     (and (string-match "^\\([^= \f\t\n\r\v]+\\)[ \t]*="
 						(cdr pair))
 				  (intern (match-string 1 (cdr pair)))))))
-		 (when name
-		   (setq vars
-			 (cons (cons name pair)
-			       (if (member name (mapcar #'car vars))
-				   (delq nil
-					 (mapcar
-					  (lambda (p) (unless (equal (car p) name) p))
-					  vars))
-				 vars))))))
+		 (if name
+		     (setq vars
+			   (cons (cons name pair)
+				 (if (member name (mapcar #'car vars))
+				     (delq nil
+					   (mapcar
+					    (lambda (p) (unless (equal (car p) name) p))
+					    vars))
+				   vars)))
+		   ;; if no name is given, then assign to variables in order
+		   (setf (cddr (nth variable-index vars))
+			 (concat (symbol-name (car (nth variable-index vars)))
+				 "=" (cdr pair))))))
 	      (:results
 	       (setq results (e-merge results-exclusive-groups
 				      results
