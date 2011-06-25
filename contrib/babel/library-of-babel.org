@@ -331,6 +331,27 @@ a
 a + b
 #+end_src
 
+** Arithmetic
+#+source: lob-add
+#+begin_src emacs-lisp :var a=0 :var b=0
+  (+ a b)
+#+end_src
+
+#+source: lob-minus
+#+begin_src emacs-lisp :var a=0 :var b=0
+  (- a b)
+#+end_src
+
+#+source: lob-times
+#+begin_src emacs-lisp :var a=0 :var b=0
+  (* a b)
+#+end_src
+
+#+source: lob-div
+#+begin_src emacs-lisp :var a=0 :var b=0
+  (/ a b)
+#+end_src
+
 * GANTT Charts
 
 The =elispgantt= source block was sent to the mailing list by Eric
