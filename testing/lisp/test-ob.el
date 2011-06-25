@@ -88,7 +88,7 @@
 	(body "echo this is a test\necho Currently in ' $PWD\n"))
     (should (string-match org-babel-src-block-regexp test-block))
     (should (string-match org-babel-src-block-regexp (upcase test-block)))
-    (should(equal language (match-string 2 test-block)))
+    (should (equal language (match-string 2 test-block)))
     ;;TODO Consider refactoring
     (should (equal flags (match-string 3 test-block)))
     (should (equal arguments (match-string 4 test-block)))
@@ -192,12 +192,6 @@
     (let ((results (org-babel-execute-src-block)))
       (should(equal 'a (cadr (assoc 1 results))))
       (should(equal 'd (cadr (assoc 4 results)))))))
-
-(ert-deftest test-org-babel/sha1-hash ()
-  (org-test-at-id "f68821bc-7f49-4389-85b5-914791ee3718"
-    (org-babel-next-src-block 2)
-    (should(string= "ede4619c95e0467fd23d40d81385445281a483ee"
-		    (org-babel-sha1-hash)))))
 
 (ert-deftest test-org-babel/parse-header-args ()
   (org-test-at-id "7eb0dc6e-1c53-4275-88b3-b22f3113b9c3"
