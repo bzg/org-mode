@@ -1750,17 +1750,21 @@ parameters when merging lists."
 				  (intern (match-string 1 (cdr pair)))))))
 		 (if name
 		     (setq vars
-			   (cons (cons name pair)
-				 (if (member name (mapcar #'car vars))
-				     (delq nil
-					   (mapcar
-					    (lambda (p) (unless (equal (car p) name) p))
-					    vars))
-				   vars)))
+			   (append
+			    (if (member name (mapcar #'car vars))
+				(delq nil
+				      (mapcar
+				       (lambda (p)
+					 (unless (equal (car p) name) p))
+				       vars))
+			      vars)
+			    (list (cons name pair))))
 		   ;; if no name is given, then assign to variables in order
-		   (setf (cddr (nth variable-index vars))
-			 (concat (symbol-name (car (nth variable-index vars)))
-				 "=" (cdr pair))))))
+		   (prog1 (setf (cddr (nth variable-index vars))
+				(concat (symbol-name
+					 (car (nth variable-index vars)))
+					"=" (cdr pair)))
+		     (incf variable-index)))))
 	      (:results
 	       (setq results (e-merge results-exclusive-groups
 				      results
