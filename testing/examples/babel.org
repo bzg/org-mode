@@ -150,6 +150,8 @@
 #+call: echo(input="testing") :results vector
 #+call: echo[:var input="testing"]()
 #+call: echo[:var input="testing"]() :results vector
+#+call: echo("testing")
+#+call: echo("testing") :results vector
 
 * parsing header arguments
   :PROPERTIES:
