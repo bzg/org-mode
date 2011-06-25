@@ -1426,7 +1426,7 @@ commands can be accessed through a dispatcher:
 This prompts for an extra key to select a sparse-tree creating command.
 @orgcmd{C-c / r,org-occur}
 @vindex org-remove-highlights-with-change
-Occur.  Prompts for a regexp and shows a sparse tree with all matches.  If
+Prompts for a regexp and shows a sparse tree with all matches.  If
 the match is in a headline, the headline is made visible.  If the match is in
 the body of an entry, headline and body are made visible.  In order to
 provide minimal context, also the full hierarchy of headlines above the match
@@ -1658,7 +1658,7 @@ converted into a list item.
 @kindex C-c *
 @item C-c *
 Turn a plain list item into a headline (so that it becomes a subheading at
-its location). @xref{Structure editing}, for a detailed explanation.
+its location).  @xref{Structure editing}, for a detailed explanation.
 @kindex C-c C-*
 @item C-c C-*
 Turn the whole plain list into a subtree of the current heading.  Checkboxes
@@ -1940,7 +1940,7 @@ unpredictable for you, configure the variables
 @table @kbd
 @tsubheading{Creation and conversion}
 @orgcmd{C-c |,org-table-create-or-convert-from-region}
-Convert the active region to table. If every line contains at least one
+Convert the active region to table.  If every line contains at least one
 TAB character, the function assumes that the material is tab separated.
 If every line contains a comma, comma-separated values (CSV) are assumed.
 If not, lines are split at whitespace into fields.  You can use a prefix
@@ -2520,7 +2520,7 @@ a Lisp string (in double-quotes) containing the field.  If you provide the
 @samp{N} mode switch, all referenced elements will be numbers (non-number
 fields will be zero) and interpolated as Lisp numbers, without quotes.  If
 you provide the @samp{L} flag, all fields will be interpolated literally,
-without quotes.  i.e., if you want a reference to be interpreted as a string
+without quotes.  I.e., if you want a reference to be interpreted as a string
 by the Lisp form, enclose the reference operator itself in double-quotes,
 like @code{"$3"}.  Ranges are inserted as space-separated fields, so you can
 embed them in list or vector syntax.  Here are a few examples---note how the
@@ -3027,7 +3027,7 @@ or with a mouse click (@pxref{Handling links}).  Links to custom IDs will
 point to the corresponding headline.  The preferred match for a text link is
 a @i{dedicated target}: the same string in double angular brackets.  Targets
 may be located anywhere; sometimes it is convenient to put them into a
-comment line. For example
+comment line.  For example
 
 @example
 # <<My Target>>
@@ -3323,7 +3323,7 @@ displayed at startup by configuring the variable
 @orgcmd{C-c %,org-mark-ring-push}
 @cindex mark ring
 Push the current position onto the mark ring, to be able to return
-easily. Commands following an internal link do this automatically.
+easily.  Commands following an internal link do this automatically.
 @c
 @orgcmd{C-c &,org-mark-ring-goto}
 @cindex links, returning to
@@ -3428,7 +3428,7 @@ not accept any arguments, and return the full link with prefix.
 File links can contain additional information to make Emacs jump to a
 particular location in the file when following a link.  This can be a
 line number or a search option after a double@footnote{For backward
-compatibility, line numbers can also follow a single colon.} colon. For
+compatibility, line numbers can also follow a single colon.} colon.  For
 example, when the command @kbd{C-c l} creates a link (@pxref{Handling
 links}) to a file, it encodes the words in the current line as a search
 string that can be used to find this line back later when following the
@@ -4239,7 +4239,7 @@ large number of subtasks (@pxref{Checkboxes}).
 
 @vindex org-list-automatic-rules
 Every item in a plain list@footnote{With the exception of description
-lists. But you can allow it by modifying @code{org-list-automatic-rules}
+lists.  But you can allow it by modifying @code{org-list-automatic-rules}
 accordingly.} (@pxref{Plain lists}) can be made into a checkbox by starting
 it with the string @samp{[ ]}.  This feature is similar to TODO items
 (@pxref{TODO Items}), but is more lightweight.  Checkboxes are not included
@@ -4941,7 +4941,7 @@ optional.  The individual parts have the following meaning:
 @var{property}        @r{The property that should be edited in this column.}
                 @r{Special properties representing meta data are allowed here}
                 @r{as well (@pxref{Special properties})}
-@var{title}           @r{The header text for the column. If omitted, the property}
+@var{title}           @r{The header text for the column.  If omitted, the property}
                 @r{name is used.}
 @{@var{summary-type}@}  @r{The summary type.  If specified, the column values for}
                 @r{parent nodes are computed from the children.}
@@ -4967,7 +4967,7 @@ optional.  The individual parts have the following meaning:
 
 @noindent
 Be aware that you can only have one summary type for any property you
-include. Subsequent columns referencing the same property will all display the
+include.  Subsequent columns referencing the same property will all display the
 same summary information.
 
 The @code{est+} summary type requires further explanation.  It is used for
@@ -4983,7 +4983,7 @@ statistical mean and variance of the sub-tasks, generating a final estimate
 from the sum.  For example, suppose you had ten tasks, each of which was
 estimated at 0.5 to 2 days of work.  Straight addition produces an estimate
 of 5 to 20 days, representing what to expect if everything goes either
-extremely well or extremely poorly. In contrast, @code{est+} estimates the
+extremely well or extremely poorly.  In contrast, @code{est+} estimates the
 full job more realistically, at 10-15 days.
 
 Here is an example for a complete columns definition, along with allowed
@@ -5321,7 +5321,7 @@ like @samp{15:30-16:30}, modifying the first time will also shift the second,
 shifting the time block with constant length.  To change the length, modify
 the second time.  Note that if the cursor is in a headline and not at a
 timestamp, these same keys modify the priority of an item.
-(@pxref{Priorities}). The key bindings also conflict with shift-selection and
+(@pxref{Priorities}).  The key bindings also conflict with shift-selection and
 related modes (@pxref{Conflicts}).
 @c
 @orgcmd{C-c C-y,org-evaluate-time-range}
@@ -5388,7 +5388,7 @@ letter ([dwmy]) to indicate change in days, weeks, months, or years.  With a
 single plus or minus, the date is always relative to today.  With a
 double plus or minus, it is relative to the default date.  If instead of
 a single letter, you use the abbreviation of day name, the date will be
-the Nth such day.  e.g.@:
+the Nth such day, e.g.@:
 
 @example
 +0            @result{} today
@@ -5414,9 +5414,9 @@ read the docstring of the variable
 @code{org-read-date-force-compatible-dates}.
 
 You can specify a time range by giving start and end times or by giving a
-start time and a duration (in HH:MM format). Use `-' or `-@{@}-' as the
+start time and a duration (in HH:MM format).  Use `-' or `-@{@}-' as the
 separator in the former case and use '+' as the separator in the latter
-case. E.g.@:
+case, e.g.@:
 
 @example
 11am-1:15pm    @result{} 11:00-13:15
@@ -6939,7 +6939,7 @@ The information to be shown is normally collected from all @emph{agenda
 files}, the files listed in the variable
 @code{org-agenda-files}@footnote{If the value of that variable is not a
 list, but a single file name, then the list of agenda files will be
-maintained in that external file.}. If a directory is part of this list,
+maintained in that external file.}.  If a directory is part of this list,
 all files with the extension @file{.org} in this directory will be part
 of the list.
 
@@ -7134,7 +7134,7 @@ between calendar and agenda.
 
 If you are using the diary only for sexp entries and holidays, it is
 faster to not use the above setting, but instead to copy or even move
-the entries into an Org file. Org-mode evaluates diary-style sexp
+the entries into an Org file.  Org-mode evaluates diary-style sexp
 entries, and does it faster because there is no overhead for first
 creating the diary display.  Note that the sexp entries must start at
 the left margin, no whitespace is allowed before them.  For example,
@@ -7173,7 +7173,7 @@ you need to press @kbd{C-o anniversary @key{RET}} with the cursor in a BBDB
 record and then add the date in the format @code{YYYY-MM-DD} or @code{MM-DD},
 followed by a space and the class of the anniversary (@samp{birthday} or
 @samp{wedding}, or a format string).  If you omit the class, it will default to
-@samp{birthday}. Here are a few examples, the header for the file
+@samp{birthday}.  Here are a few examples, the header for the file
 @file{org-bbdb.el} contains more detailed information.
 
 @example
@@ -7197,7 +7197,7 @@ Org can interact with Emacs appointments notification facility.  To add all
 the appointments of your agenda files, use the command
 @code{org-agenda-to-appt}.  This command also lets you filter through the
 list of your appointments and add only those belonging to a specific category
-or matching a regular expression. See the docstring for details.
+or matching a regular expression.  See the docstring for details.
 
 @node Global TODO list, Matching tags and properties, Weekly/daily agenda, Built-in agenda views
 @subsection The global TODO list
@@ -7739,7 +7739,7 @@ February 1st, @kbd{9 w} to ISO week number 9.  When setting day, week, or
 month view, a year may be encoded in the prefix argument as well.  For
 example, @kbd{200712 w} will jump to week 12 in 2007.  If such a year
 specification has only one or two digits, it will be mapped to the interval
-1938-2037. @kbd{v @key{SPC}} will reset to what is set in
+1938-2037.  @kbd{v @key{SPC}} will reset to what is set in
 @code{org-agenda-span}.
 @c
 @orgcmd{f,org-agenda-later}
@@ -7801,7 +7801,7 @@ tags filtering will be respected here, effort filtering is ignored.}.
 @vindex org-agenda-clock-consistency-checks
 Show overlapping clock entries, clocking gaps, and other clocking problems in
 the current agenda range.  You can then visit clocking lines and fix them
-manually. See the variable @code{org-agenda-clock-consistency-checks} for
+manually.  See the variable @code{org-agenda-clock-consistency-checks} for
 information on how to customize the definition of what constituted a clocking
 problem.  To return to normal agenda display, press @kbd{l} to exit Logbook
 mode.
@@ -8892,16 +8892,16 @@ look like the fontified Emacs buffer@footnote{This works automatically for
 the HTML backend (it requires version 1.34 of the @file{htmlize.el} package,
 which is distributed with Org).  Fontified code chunks in LaTeX can be
 achieved using either the listings or the
-@url{http://code.google.com/p/minted, minted,} package. To use listings, turn
+@url{http://code.google.com/p/minted, minted,} package.  To use listings, turn
 on the variable @code{org-export-latex-listings} and ensure that the listings
 package is included by the LaTeX header (e.g.@: by configuring
-@code{org-export-latex-packages-alist}). See the listings documentation for
+@code{org-export-latex-packages-alist}).  See the listings documentation for
 configuration options, including obtaining colored output.  For minted it is
 necessary to install the program @url{http://pygments.org, pygments}, in
 addition to setting @code{org-export-latex-minted}, ensuring that the minted
 package is included by the LaTeX header, and ensuring that the
 @code{-shell-escape} option is passed to @file{pdflatex} (see
-@code{org-latex-to-pdf-process}). See the documentation of the variables
+@code{org-latex-to-pdf-process}).  See the documentation of the variables
 @code{org-export-latex-listings} and @code{org-export-latex-minted} for
 further details.}.  This is done with the @samp{src} block, where you also
 need to specify the name of the major mode that should be used to fontify the
@@ -9079,7 +9079,7 @@ include scientific notes, which often require mathematical symbols and the
 occasional formula.  @LaTeX{}@footnote{@LaTeX{} is a macro system based on
 Donald E. Knuth's @TeX{} system.  Many of the features described here as
 ``@LaTeX{}'' are really from @TeX{}, but for simplicity I am blurring this
-distinction.}  is widely used to typeset scientific documents. Org-mode
+distinction.}  is widely used to typeset scientific documents.  Org-mode
 supports embedding @LaTeX{} code into its files, because many academics are
 used to writing and reading @LaTeX{} source code, and because it can be
 readily processed to produce pretty output for a number of export backends.
@@ -9192,7 +9192,7 @@ this regularly or on pages with significant page views, you should install
 @file{MathJax} on your own
 server in order to limit the load of our server.}.  Finally, it can also
 process the mathematical expressions into images@footnote{For this to work
-you need to be on a system with a working @LaTeX{} installation. You also
+you need to be on a system with a working @LaTeX{} installation.  You also
 need the @file{dvipng} program, available at
 @url{http://sourceforge.net/projects/dvipng/}.  The @LaTeX{} header that will
 be used when processing a fragment can be configured with the variable
@@ -9272,7 +9272,7 @@ Remove the overlay preview images.
 
 @vindex org-format-latex-options
 You can customize the variable @code{org-format-latex-options} to influence
-some aspects of the preview. In particular, the @code{:scale} (and for HTML
+some aspects of the preview.  In particular, the @code{:scale} (and for HTML
 export, @code{:html-scale}) property can be used to adjust the size of the
 preview images.
 
@@ -9345,7 +9345,7 @@ Org-mode documents can be exported into a variety of other formats.  For
 printing and sharing of notes, ASCII export produces a readable and simple
 version of an Org file.  HTML export allows you to publish a notes file on
 the web, while the XOXO format provides a solid base for exchange with a
-broad range of other applications. @LaTeX{} export lets you use Org-mode and
+broad range of other applications.  @LaTeX{} export lets you use Org-mode and
 its structured editing functions to easily create @LaTeX{} files.  DocBook
 export makes it possible to convert Org files to many other formats using
 DocBook tools.  For project management you can create gantt and resource
@@ -9580,7 +9580,7 @@ Export as ASCII file.  For an Org file, @file{myfile.org}, the ASCII file
 will be @file{myfile.txt}.  The file will be overwritten without
 warning.  If there is an active region@footnote{This requires
 @code{transient-mark-mode} be turned on.}, only the region will be
-exported. If the selected region is a single tree@footnote{To select the
+exported.  If the selected region is a single tree@footnote{To select the
 current subtree, use @kbd{C-c @@}.}, the tree head will
 become the document title.  If the tree head entry has or inherits an
 @code{EXPORT_FILE_NAME} property, that name will be used for the
@@ -9655,7 +9655,7 @@ Export as HTML file.  For an Org file @file{myfile.org},
 the HTML file will be @file{myfile.html}.  The file will be overwritten
 without warning.  If there is an active region@footnote{This requires
 @code{transient-mark-mode} be turned on.}, only the region will be
-exported. If the selected region is a single tree@footnote{To select the
+exported.  If the selected region is a single tree@footnote{To select the
 current subtree, use @kbd{C-c @@}.}, the tree head will become the document
 title.  If the tree head entry has, or inherits, an @code{EXPORT_FILE_NAME}
 property, that name will be used for the export.
@@ -10071,7 +10071,7 @@ Export as @LaTeX{} file.  For an Org file
 @file{myfile.org}, the @LaTeX{} file will be @file{myfile.tex}.  The file will
 be overwritten without warning.  If there is an active region@footnote{This
 requires @code{transient-mark-mode} be turned on.}, only the region will be
-exported. If the selected region is a single tree@footnote{To select the
+exported.  If the selected region is a single tree@footnote{To select the
 current subtree, use @kbd{C-c @@}.}, the tree head will become the document
 title.  If the tree head entry has or inherits an @code{EXPORT_FILE_NAME}
 property, that name will be used for the export.
@@ -10101,7 +10101,7 @@ convert them to a custom string depending on
 @code{org-latex-low-levels}.
 
 If you want that transition to occur at a different level, specify it
-with a numeric prefix argument. For example,
+with a numeric prefix argument.  For example,
 
 @example
 @kbd{C-2 C-c C-e l}
@@ -10221,9 +10221,9 @@ element.  You can use an @code{#+ATTR_LaTeX:} line to specify the various
 options that can be used in the optional argument of the
 @code{\includegraphics} macro.  To modify the placement option of the
 @code{figure} environment, add something like @samp{placement=[h!]} to the
-Attributes. It is to be noted this option can be used with tables as well.
+Attributes.  It is to be noted this option can be used with tables as well.
 The options are passed as the placement option to floating environments like
-@code{figure} or @code{table}. One can pass other compatible options as well.
+@code{figure} or @code{table}.  One can pass other compatible options as well.
 For example the @code{#+ATTR_LaTeX:} line below is exported as the
 @code{figure} environment below it.
 
@@ -10599,7 +10599,7 @@ nodes of a document or strictly follow the order of the nodes in the
 document.
 
 Instead the TaskJuggler exporter looks for a tree that defines the tasks and
-a optionally tree that defines the resources for this project. It then
+a optionally tree that defines the resources for this project.  It then
 creates a TaskJuggler file based on these trees and the attributes defined in
 all the nodes.
 
@@ -10616,30 +10616,30 @@ Export as TaskJuggler file and then open the file with TaskJugglerUI.
 @subsection Tasks
 
 @vindex org-export-taskjuggler-project-tag
-Create your tasks as you usually do with Org-mode. Assign efforts to each
-task using properties (it is easiest to do this in the column view). You
+Create your tasks as you usually do with Org-mode.  Assign efforts to each
+task using properties (it is easiest to do this in the column view).  You
 should end up with something similar to the example by Peter Jones in
 @url{http://www.contextualdevelopment.com/static/artifacts/articles/2008/project-planning/project-planning.org}.
 Now mark the top node of your tasks with a tag named
 @code{:taskjuggler_project:} (or whatever you customized
-@code{org-export-taskjuggler-project-tag} to). You are now ready to export
+@code{org-export-taskjuggler-project-tag} to).  You are now ready to export
 the project plan with @kbd{C-c C-e J} which will export the project plan and
 open a gantt chart in TaskJugglerUI.
 
 @subsection Resources
 
 @vindex org-export-taskjuggler-resource-tag
-Next you can define resources and assign those to work on specific tasks. You
-can group your resources hierarchically. Tag the top node of the resources
+Next you can define resources and assign those to work on specific tasks.  You
+can group your resources hierarchically.  Tag the top node of the resources
 with @code{:taskjuggler_resource:} (or whatever you customized
-@code{org-export-taskjuggler-resource-tag} to). You can optionally assign an
+@code{org-export-taskjuggler-resource-tag} to).  You can optionally assign an
 identifier (named @samp{resource_id}) to the resources (using the standard
 Org properties commands, @pxref{Property syntax}) or you can let the exporter
 generate identifiers automatically (the exporter picks the first word of the
 headline as the identifier as long as it is unique---see the documentation of
-@code{org-taskjuggler-get-unique-id}). Using that identifier you can then
-allocate resources to tasks. This is again done with the @samp{allocate}
-property on the tasks. Do this in column view or when on the task type
+@code{org-taskjuggler-get-unique-id}).  Using that identifier you can then
+allocate resources to tasks.  This is again done with the @samp{allocate}
+property on the tasks.  Do this in column view or when on the task type
 @kbd{C-c C-x p allocate @key{RET} <resource_id> @key{RET}}.
 
 Once the allocations are done you can again export to TaskJuggler and check
@@ -10650,7 +10650,7 @@ time.
 
 The exporter also takes TODO state information into consideration, i.e.@: if a
 task is marked as done it will have the corresponding attribute in
-TaskJuggler (@samp{complete 100}). Also it will export any property on a task
+TaskJuggler (@samp{complete 100}).  Also it will export any property on a task
 resource or resource node which is known to TaskJuggler, such as
 @samp{limits}, @samp{vacation}, @samp{shift}, @samp{booking},
 @samp{efficiency}, @samp{journalentry}, @samp{rate} for resources or
@@ -10663,12 +10663,12 @@ resource or resource node which is known to TaskJuggler, such as
 The exporter will handle dependencies that are defined in the tasks either
 with the @samp{ORDERED} attribute (@pxref{TODO dependencies}), with the
 @samp{BLOCKER} attribute (see @file{org-depend.el}) or alternatively with a
-@samp{depends} attribute. Both the @samp{BLOCKER} and the @samp{depends}
+@samp{depends} attribute.  Both the @samp{BLOCKER} and the @samp{depends}
 attribute can be either @samp{previous-sibling} or a reference to an
 identifier (named @samp{task_id}) which is defined for another task in the
-project. @samp{BLOCKER} and the @samp{depends} attribute can define multiple
-dependencies separated by either space or comma. You can also specify
-optional attributes on the dependency by simply appending it. The following
+project.  @samp{BLOCKER} and the @samp{depends} attribute can define multiple
+dependencies separated by either space or comma.  You can also specify
+optional attributes on the dependency by simply appending it.  The following
 examples should illustrate this:
 
 @example
@@ -10701,11 +10701,11 @@ examples should illustrate this:
 
 @vindex org-export-taskjuggler-default-reports
 TaskJuggler can produce many kinds of reports (e.g.@: gantt chart, resource
-allocation, etc). The user defines what kind of reports should be generated
-for a project in the TaskJuggler file. The exporter will automatically insert
-some default reports in the file. These defaults are defined in
-@code{org-export-taskjuggler-default-reports}. They can be modified using
-customize along with a number of other options. For a more complete list, see
+allocation, etc).  The user defines what kind of reports should be generated
+for a project in the TaskJuggler file.  The exporter will automatically insert
+some default reports in the file.  These defaults are defined in
+@code{org-export-taskjuggler-default-reports}.  They can be modified using
+customize along with a number of other options.  For a more complete list, see
 @kbd{M-x customize-group @key{RET} org-export-taskjuggler @key{RET}}.
 
 For more information and examples see the Org-taskjuggler tutorial at
@@ -10720,7 +10720,7 @@ The Freemind exporter was written by Lennart Borgman.
 
 @table @kbd
 @orgcmd{C-c C-e m,org-export-as-freemind}
-Export as Freemind mind map. For an Org file @file{myfile.org}, the Freemind 
+Export as Freemind mind map.  For an Org file @file{myfile.org}, the Freemind 
 file will be @file{myfile.mm}.
 @end table
 
@@ -10734,7 +10734,7 @@ does not interpret any additional Org-mode features.
 
 @table @kbd
 @orgcmd{C-c C-e x,org-export-as-xoxo}
-Export as XOXO file. For an Org file @file{myfile.org}, the XOXO file will be 
+Export as XOXO file.  For an Org file @file{myfile.org}, the XOXO file will be 
 @file{myfile.html}.
 @orgkey{C-c C-e v x}
 Export only the visible part of the document.
@@ -11109,9 +11109,9 @@ to link to that, use an @code{http:} link instead of a @code{file:} link,
 because @code{file:} links are converted to link to the corresponding
 @file{html} file.
 
-You may also link to related files, such as images. Provided you are careful
+You may also link to related files, such as images.  Provided you are careful
 with relative file names, and provided you have also configured Org to upload
-the related files, these links will work too. See @ref{Complex example}, for
+the related files, these links will work too.  See @ref{Complex example}, for
 an example of this usage.
 
 Sometimes an Org file to be published may contain links that are
@@ -11145,11 +11145,11 @@ a map of files for a given project.
 or @code{org-publish-all}.
 
 @item @code{:sitemap-filename}
-@tab Filename for output of sitemap. Defaults to @file{sitemap.org} (which
+@tab Filename for output of sitemap.  Defaults to @file{sitemap.org} (which
 becomes @file{sitemap.html}).
 
 @item @code{:sitemap-title}
-@tab Title of sitemap page. Defaults to name of file.
+@tab Title of sitemap page.  Defaults to name of file.
 
 @item @code{:sitemap-function}
 @tab Plug-in function to use for generation of the sitemap.
@@ -11164,9 +11164,9 @@ respectively.  Any other value will mix files and folders.
 @item @code{:sitemap-sort-files}
 @tab How the files are sorted in the site map.  Set this to
 @code{alphabetically} (default), @code{chronologically} or
-@code{anti-chronologically}. @code{chronologically} sorts the files with
+@code{anti-chronologically}.  @code{chronologically} sorts the files with
 older date first while @code{anti-chronologically} sorts the files with newer
-date first. @code{alphabetically} sorts the files alphabetically. The date of
+date first.  @code{alphabetically} sorts the files alphabetically.  The date of
 a file is retrieved with @code{org-publish-find-date}.
 
 @item @code{:sitemap-ignore-case}
@@ -11174,15 +11174,15 @@ a file is retrieved with @code{org-publish-find-date}.
 
 @item @code{:sitemap-file-entry-format}
 @tab With this option one can tell how a sitemap's entry is formated in the
-sitemap. This is a format string with some escape sequences: @code{%t} stands
+sitemap.  This is a format string with some escape sequences: @code{%t} stands
 for the title of the file, @code{%a} stands for the author of the file and
-@code{%d} stands for the date of the file. The date is retrieved with the
+@code{%d} stands for the date of the file.  The date is retrieved with the
 @code{org-publish-find-date} function and formated with
-@code{org-publish-sitemap-date-format}. Default @code{%t}.
+@code{org-publish-sitemap-date-format}.  Default @code{%t}.
 
 @item @code{:sitemap-date-format}
 @tab Format string for the @code{format-time-string} function that tells how
-a sitemap entry's date is to be formated. This property bypasses
+a sitemap entry's date is to be formated.  This property bypasses
 @code{org-publish-sitemap-date-format} which defaults to @code{%Y-%m-%d}.
 
 @item @code{:sitemap-sans-extension}
@@ -11277,12 +11277,12 @@ directory on the local machine.
 
 This more complicated example publishes an entire website, including
 Org files converted to HTML, image files, Emacs Lisp source code, and
-style sheets. The publishing directory is remote and private files are
+style sheets.  The publishing directory is remote and private files are
 excluded.
 
 To ensure that links are preserved, care should be taken to replicate
 your directory structure on the web server, and to use relative file
-paths. For example, if your Org files are kept in @file{~/org} and your
+paths.  For example, if your Org files are kept in @file{~/org} and your
 publishable images in @file{~/images}, you would link to an image with
 @c
 @example
@@ -11290,7 +11290,7 @@ file:../images/myimage.png
 @end example
 @c
 On the web server, the relative path to the image should be the
-same. You can accomplish this by setting up an "images" folder in the
+same.  You can accomplish this by setting up an "images" folder in the
 right place on the web server, and publishing images to it.
 
 @lisp
@@ -11339,8 +11339,8 @@ Publish every project.
 @end table
 
 @vindex org-publish-use-timestamps-flag
-Org uses timestamps to track when a file has changed. The above functions
-normally only publish changed files. You can override this and force
+Org uses timestamps to track when a file has changed.  The above functions
+normally only publish changed files.  You can override this and force
 publishing of all files by giving a prefix argument to any of the commands
 above, or by customizing the variable @code{org-publish-use-timestamps-flag}.
 This may be necessary in particular if files include other files via
@@ -11407,7 +11407,7 @@ The structure of code blocks is as follows:
 #+end_src
 @end example
 
-Switches and header arguments are optional. Code can also be embedded in text
+Switches and header arguments are optional.  Code can also be embedded in text
 inline using
 
 @example
@@ -11452,21 +11452,21 @@ The source code.
 @cindex source code, editing
 
 @kindex C-c '
-Use @kbd{C-c '} to edit the current code block. This brings up
+Use @kbd{C-c '} to edit the current code block.  This brings up
 a language major-mode edit buffer containing the body of the code
-block. Saving this buffer will write the new contents back to the Org
-buffer. Use @kbd{C-c '} again to exit.
+block.  Saving this buffer will write the new contents back to the Org
+buffer.  Use @kbd{C-c '} again to exit.
 
-The @code{org-src-mode} minor mode will be active in the edit buffer. The
+The @code{org-src-mode} minor mode will be active in the edit buffer.  The
 following variables can be used to configure the behavior of the edit
-buffer. See also the customization group @code{org-edit-structure} for
+buffer.  See also the customization group @code{org-edit-structure} for
 further configuration options.
 
 @table @code
 @item org-src-lang-modes
 If an Emacs major-mode named @code{<lang>-mode} exists, where
 @code{<lang>} is the language named in the header line of the code block,
-then the edit buffer will be placed in that major-mode. This variable
+then the edit buffer will be placed in that major-mode.  This variable
 can be used to map arbitrary language names to existing major modes.
 @item org-src-window-setup
 Controls the way Emacs windows are rearranged when the edit buffer is created.
@@ -11491,7 +11491,7 @@ variable @code{org-src-fontify-natively}.
 
 It is possible to export the @emph{contents} of code blocks, the
 @emph{results} of code block evaluation, @emph{neither}, or @emph{both}.  For
-most languages, the default exports the contents of code blocks. However, for
+most languages, the default exports the contents of code blocks.  However, for
 some languages (e.g.@: @code{ditaa}) the default exports the results of code
 block evaluation.  For information on exporting code block bodies, see
 @ref{Literal examples}.
@@ -11502,7 +11502,7 @@ behavior:
 @subsubheading Header arguments:
 @table @code
 @item :exports code
-The default in most languages. The body of the code block is exported, as
+The default in most languages.  The body of the code block is exported, as
 described in @ref{Literal examples}.
 @item :exports results
 The code block will be evaluated and the results will be placed in the
@@ -11516,7 +11516,7 @@ Both the code block and its results will be exported.
 Neither the code block nor its results will be exported.
 @end table
 
-It is possible to inhibit the evaluation of code blocks during export.
+It is possible to inhibit the evaluation of code blocks during export. 
 Setting the @code{org-export-babel-evaluate} variable to @code{nil} will
 ensure that no code blocks are evaluated as part of the export process.  This
 can be useful in situations where potentially untrusted Org-mode files are
@@ -11542,7 +11542,7 @@ using @code{org-babel-expand-src-block} which can expand both variable and
 @item :tangle no
 The default.  The code block is not included in the tangled output.
 @item :tangle yes
-Include the code block in the tangled output. The output file name is the
+Include the code block in the tangled output.  The output file name is the
 name of the org file with the extension @samp{.org} replaced by the extension
 for the block language.
 @item :tangle filename
@@ -11555,13 +11555,13 @@ Include the code block in the tangled output to file @samp{filename}.
 @item org-babel-tangle 
 Tangle the current file.  Bound to @kbd{C-c C-v t}.
 @item org-babel-tangle-file
-Choose a file to tangle.   Bound to @kbd{C-c C-v f}.
+Choose a file to tangle.  Bound to @kbd{C-c C-v f}.
 @end table
 
 @subsubheading Hooks
 @table @code
 @item org-babel-post-tangle-hook
-This hook is run from within code files tangled by @code{org-babel-tangle}.
+This hook is run from within code files tangled by @code{org-babel-tangle}. 
 Example applications could include post-processing, compilation or evaluation
 of tangled code files.
 @end table
@@ -11656,7 +11656,7 @@ For more examples of passing header arguments to @code{#+call:} lines see
 
 The ``Library of Babel'' is a library of code blocks
 that can be called from any Org-mode file.  The library is housed in an
-Org-mode file located in the @samp{contrib} directory of Org-mode.
+Org-mode file located in the @samp{contrib} directory of Org-mode. 
 Org-mode users can deposit functions they believe to be generally
 useful in the library.
 
@@ -11823,7 +11823,7 @@ inserted into the buffer.
 @subsubheading Header arguments in Org-mode properties
 
 Header arguments are also read from Org-mode properties (see @ref{Property
-syntax}), which can be set on a buffer-wide or per-heading basis. An example
+syntax}), which can be set on a buffer-wide or per-heading basis.  An example
 of setting a header argument for all code blocks in a buffer is
 
 @example
@@ -11854,7 +11854,7 @@ in Org-mode documents.
 
 The most common way to assign values to header arguments is at the
 code block level.  This can be done by listing a sequence of header
-arguments and their values as part of the @code{#+begin_src} line.
+arguments and their values as part of the @code{#+begin_src} line. 
 Properties set in this way override both the values of
 @code{org-babel-default-header-args} and header arguments specified as
 properties.  In the following example, the @code{:results} header argument
@@ -11962,9 +11962,9 @@ Additional header arguments are defined on a language-specific basis, see
 
 @node var, results, Specific header arguments, Specific header arguments
 @subsubsection @code{:var}
-The @code{:var} header argument is used to pass arguments to code blocks.
+The @code{:var} header argument is used to pass arguments to code blocks. 
 The specifics of how arguments are included in a code block vary by language;
-these are addressed in the language-specific documentation. However, the
+these are addressed in the language-specific documentation.  However, the
 syntax used to specify arguments is the same across all languages.  The
 values passed to arguments can be literal values, values from org-mode tables
 and literal example blocks, the results of other code blocks, or Emacs Lisp
@@ -12120,7 +12120,7 @@ column is referenced.
 | 1 | 2 | 3 | 4 |
 @end example
 
-It is possible to index into the results of code blocks as well as tables.
+It is possible to index into the results of code blocks as well as tables. 
 Any number of dimensions can be indexed.  Dimensions are separated from one
 another by commas, as shown in the following example.
 
@@ -12202,7 +12202,7 @@ This is the default.  The result is the value of the last statement in the
 code block.  This header argument places the evaluation in functional
 mode.  Note that in some languages, e.g., Python, use of this result type
 requires that a @code{return} statement be included in the body of the source
-code block. E.g., @code{:results value}.
+code block.  E.g., @code{:results value}.
 @item @code{output}
 The result is the collection of everything printed to STDOUT during the
 execution of the code block.  This header argument places the
@@ -12218,7 +12218,7 @@ table or scalar depending on their value.
 @itemize @bullet
 @item @code{table}, @code{vector}
 The results should be interpreted as an Org-mode table.  If a single value is
-returned, it will be converted into a table with one row and one column.
+returned, it will be converted into a table with one row and one column. 
 E.g., @code{:results value table}.
 @item @code{list}
 The results should be interpreted as an Org-mode list.  If a single scalar
@@ -12238,10 +12238,10 @@ such by Org-mode.  E.g., @code{:results value raw}.
 Results are assumed to be HTML and will be enclosed in a @code{begin_html}
 block.  E.g., @code{:results value html}.
 @item @code{latex}
-Results assumed to be LaTeX and are enclosed in a @code{begin_latex} block.
+Results assumed to be LaTeX and are enclosed in a @code{begin_latex} block. 
 E.g., @code{:results value latex}.
 @item @code{code}
-Result are assumed to be parseable code and are enclosed in a code block.
+Result are assumed to be parseable code and are enclosed in a code block. 
 E.g., @code{:results value code}.
 @item @code{pp}
 The result is converted to pretty-printed code and is enclosed in a code
@@ -12296,10 +12296,10 @@ should be the path to a file and the second a description for the link.
 
 While the @code{:file} header argument can be used to specify the path to the
 output file, @code{:dir} specifies the default directory during code block
-execution. If it is absent, then the directory associated with the current
-buffer is used. In other words, supplying @code{:dir path} temporarily has
+execution.  If it is absent, then the directory associated with the current
+buffer is used.  In other words, supplying @code{:dir path} temporarily has
 the same effect as changing the current directory with @kbd{M-x cd path}, and
-then not supplying @code{:dir}. Under the surface, @code{:dir} simply sets
+then not supplying @code{:dir}.  Under the surface, @code{:dir} simply sets
 the value of the Emacs variable @code{default-directory}.
 
 When using @code{:dir}, you should supply a relative path for file output
@@ -12317,7 +12317,7 @@ matplot(matrix(rnorm(100), 10), type="l")
 
 @subsubheading Remote execution
 A directory on a remote machine can be specified using tramp file syntax, in
-which case the code will be evaluated on the remote machine. An example is
+which case the code will be evaluated on the remote machine.  An example is
 
 @example
 #+begin_src R :file plot.png :dir /dand@@yakuba.princeton.edu:
@@ -12327,7 +12327,7 @@ plot(1:10, main=system("hostname", intern=TRUE))
 
 Text results will be returned to the local Org-mode buffer as usual, and file
 output will be created on the remote machine with relative paths interpreted
-relative to the remote directory. An Org-mode link to the remote file will be
+relative to the remote directory.  An Org-mode link to the remote file will be
 created.
 
 So, in the above example a plot will be created on the remote machine,
@@ -12339,7 +12339,7 @@ and a link of the following form will be inserted in the org buffer:
 
 Most of this functionality follows immediately from the fact that @code{:dir}
 sets the value of the Emacs variable @code{default-directory}, thanks to
-tramp. Those using XEmacs, or GNU Emacs prior to version 23 may need to
+tramp.  Those using XEmacs, or GNU Emacs prior to version 23 may need to
 install tramp separately in order for these features to work correctly.
 
 @subsubheading Further points
@@ -12351,10 +12351,10 @@ determine the starting directory for a new session as expected, no attempt is
 currently made to alter the directory associated with an existing session.
 @item
 @code{:dir} should typically not be used to create files during export with
-@code{:exports results} or @code{:exports both}. The reason is that, in order
+@code{:exports results} or @code{:exports both}.  The reason is that, in order
 to retain portability of exported material between machines, during export
 links inserted into the buffer will *not* be expanded against @code{default
-directory}. Therefore, if @code{default-directory} is altered using
+directory}.  Therefore, if @code{default-directory} is altered using
 @code{:dir}, it is probable that the file will be created in a location to
 which the link does not point.
 @end itemize
@@ -12370,10 +12370,10 @@ or LaTeX exports of the Org-mode file.
 The default.  The body of code is included into the exported file.  E.g.,
 @code{:exports code}.
 @item @code{results}
-The result of evaluating the code is included in the exported file. E.g.,
+The result of evaluating the code is included in the exported file.  E.g.,
 @code{:exports results}.
 @item @code{both}
-Both the code and results are included in the exported file. E.g.,
+Both the code and results are included in the exported file.  E.g.,
 @code{:exports both}.
 @item @code{none}
 Nothing is included in the exported file.  E.g., @code{:exports none}.
@@ -12391,7 +12391,7 @@ The code block is exported to a source code file named after the
 basename (name w/o extension) of the Org-mode file.  E.g., @code{:tangle
 yes}.
 @item @code{no}
-The default.  The code block is not exported to a source code file.
+The default.  The code block is not exported to a source code file. 
 E.g., @code{:tangle no}.
 @item other
 Any other string passed to the @code{:tangle} header argument is interpreted
@@ -12577,7 +12577,7 @@ changed since the last time it was evaluated, it will not be re-evaluated.
 @end itemize
 
 Code block caches notice if the value of a variable argument
-to the code block has changed. If this is the case, the cache is
+to the code block has changed.  If this is the case, the cache is
 invalidated and the code block is re-run.  In the following example,
 @code{caller} will not be re-run unless the results of @code{random} have
 changed since it was last run.
@@ -12647,7 +12647,7 @@ default value yields the following results.
 @end example
 
 @item @code{yes}
-Leaves hlines in the table. Setting @code{:hlines yes} has this effect.
+Leaves hlines in the table.  Setting @code{:hlines yes} has this effect.
 
 @example
 #+tblname: many-cols
@@ -12774,7 +12774,7 @@ execution of a code block regardless of the value of the
 
 The way in which results are handled depends on whether a session is invoked,
 as well as on whether @code{:results value} or @code{:results output} is
-used. The following table shows the table possibilities.  For a full listing
+used.  The following table shows the table possibilities.  For a full listing
 of the possible results header arguments see @ref{results}.
 
 @multitable @columnfractions 0.26 0.33 0.41
@@ -12789,10 +12789,10 @@ vector of strings or numbers) when appropriate.
 
 @subsection Non-session
 @subsubsection @code{:results value}
-This is the default. Internally, the value is obtained by wrapping the code
+This is the default.  Internally, the value is obtained by wrapping the code
 in a function definition in the external language, and evaluating that
-function. Therefore, code should be written as if it were the body of such a
-function. In particular, note that Python does not automatically return a
+function.  Therefore, code should be written as if it were the body of such a
+function.  In particular, note that Python does not automatically return a
 value from a function unless a @code{return} statement is present, and so a
 @samp{return} statement will usually be required in Python.
 
@@ -12801,14 +12801,14 @@ automatically wrapped in a function definition.
 
 @subsubsection @code{:results output}
 The code is passed to the interpreter as an external process, and the
-contents of the standard output stream are returned as text. (In certain
+contents of the standard output stream are returned as text.  (In certain
 languages this also contains the error output stream; this is an area for
 future work.)
 
 @subsection Session
 @subsubsection @code{:results value}
 The code is passed to an interpreter running as an interactive Emacs inferior
-process. Only languages which provide tools for interactive evaluation of
+process.  Only languages which provide tools for interactive evaluation of
 code have session support, so some language (e.g., C and ditaa) do not
 support the @code{:session} header argument, and in other languages (e.g.,
 Python and Haskell) which have limitations on the code which may be entered
@@ -12817,17 +12817,17 @@ using the @code{:session} header argument as well.
 
 Unless the @code{:results output} option is supplied (see below) the result
 returned is the result of the last evaluation performed by the
-interpreter. (This is obtained in a language-specific manner: the value of
+interpreter.  (This is obtained in a language-specific manner: the value of
 the variable @code{_} in Python and Ruby, and the value of @code{.Last.value}
 in R).
 
 @subsubsection @code{:results output}
 The code is passed to the interpreter running as an interactive Emacs
-inferior process. The result returned is the concatenation of the sequence of
-(text) output from the interactive interpreter. Notice that this is not
+inferior process.  The result returned is the concatenation of the sequence of
+(text) output from the interactive interpreter.  Notice that this is not
 necessarily the same as what would be sent to @code{STDOUT} if the same code
 were passed to a non-interactive interpreter running as an external
-process. For example, compare the following two blocks:
+process.  For example, compare the following two blocks:
 
 @example
 #+begin_src python :results output
@@ -12856,7 +12856,7 @@ In non-session mode, the `2' is not printed and does not appear.
 @end example
 
 But in @code{:session} mode, the interactive interpreter receives input `2'
-and prints out its value, `2'. (Indeed, the other print statements are
+and prints out its value, `2'.  (Indeed, the other print statements are
 unnecessary here).
 
 @node Noweb reference syntax, Key bindings and useful functions, Results of evaluation, Working With Source Code
@@ -13106,7 +13106,7 @@ For example, on an empty line, typing "<e" and then pressing TAB, will expand
 into a complete EXAMPLE template.
 
 You can install additional templates by customizing the variable
-@code{org-structure-template-alist}. See the docstring of the variable for
+@code{org-structure-template-alist}.  See the docstring of the variable for
 additional details.
 
 @node Speed keys, Code evaluation security, Easy Templates, Miscellaneous
@@ -13429,7 +13429,7 @@ fnadjust    @r{automatically renumber and sort footnotes}
 nofnadjust  @r{do not renumber and sort automatically}
 @end example
 @cindex org-hide-block-startup
-To hide blocks on startup, use these keywords. The corresponding variable is
+To hide blocks on startup, use these keywords.  The corresponding variable is
 @code{org-hide-block-startup}.
 @cindex @code{hideblocks}, STARTUP keyword
 @cindex @code{nohideblocks}, STARTUP keyword
@@ -13705,7 +13705,7 @@ checks for the availability of Calc by looking for the function
 @code{calc-eval} which will have been autoloaded during setup if Calc has
 been installed properly.  As of Emacs 22, Calc is part of the Emacs
 distribution.  Another possibility for interaction between the two
-packages is using Calc for embedded calculations. @xref{Embedded Mode,
+packages is using Calc for embedded calculations.  @xref{Embedded Mode,
 , Embedded Mode, Calc, GNU Emacs Calc Manual}.
 @item @file{constants.el} by Carsten Dominik
 @cindex @file{constants.el}
@@ -13717,7 +13717,7 @@ constants in the variable @code{org-table-formula-constants}, install
 the @file{constants} package which defines a large number of constants
 and units, and lets you use unit prefixes like @samp{M} for
 @samp{Mega}, etc@.  You will need version 2.0 of this package, available
-at @url{http://www.astro.uva.nl/~dominik/Tools}. Org checks for
+at @url{http://www.astro.uva.nl/~dominik/Tools}.  Org checks for
 the function @code{constants-get}, which has to be autoloaded in your
 setup.  See the installation instructions in the file
 @file{constants.el}.
@@ -13840,7 +13840,7 @@ fixed this problem:
             (define-key yas/keymap [tab] 'yas/next-field-group)))
 @end lisp
 
-The latest version of yasnippet doesn't play well with Org mode. If the
+The latest version of yasnippet doesn't play well with Org mode.  If the
 above code does not fix the conflict, start by defining the following
 function:
 
@@ -13896,11 +13896,11 @@ another key for this command, or override the key in
 +@cindex @code{org-decrypt-entry}
 
 Org-crypt will encrypt the text of an entry, but not the headline, or
-properties. Org-crypt uses the Emacs EasyPG library to encrypt and decrypt
+properties.  Org-crypt uses the Emacs EasyPG library to encrypt and decrypt
 files.
 
 Any text below a headline that has a @samp{:crypt:} tag will be
-automatically be encrypted when the file is saved. If you want to use a
+automatically be encrypted when the file is saved.  If you want to use a
 different tag just customize the @code{org-crypt-tag-matcher} setting.
 
 To use org-crypt it is suggested that you have the following in your
@@ -14161,7 +14161,7 @@ example:
 
 @noindent
 @code{table_name} is the reference name for the table that is also used
-in the receiver lines. @code{translation_function} is the Lisp function
+in the receiver lines.  @code{translation_function} is the Lisp function
 that does the translation.  Furthermore, the line can contain a list of
 arguments (alternating key and value) at the end.  The arguments will be
 passed as a property list to the translation function for
@@ -14299,7 +14299,7 @@ tabular environment.  Default is nil.
 A format to be used to wrap each field, it should contain @code{%s} for the
 original field value.  For example, to wrap each field value in dollars,
 you could use @code{:fmt "$%s$"}.  This may also be a property list with
-column numbers and formats. for example @code{:fmt (2 "$%s$" 4 "%s\\%%")}.
+column numbers and formats, for example @code{:fmt (2 "$%s$" 4 "%s\\%%")}.
 A function of one argument can be used in place of the strings; the
 function must return a formatted string.
 
@@ -14505,11 +14505,11 @@ other block) with @code{org-narrow-to-block}.
 @vindex org-agenda-skip-function-global
 Org provides a special hook that can be used to narrow down the selection
 made by these agenda views: @code{agenda}, @code{todo}, @code{alltodo},
-@code{tags}, @code{tags-todo}, @code{tags-tree}. You may specify a function
+@code{tags}, @code{tags-todo}, @code{tags-tree}.  You may specify a function
 that is used at each match to verify if the match should indeed be part of
-the agenda view, and if not, how much should be skipped. You can specify a
+the agenda view, and if not, how much should be skipped.  You can specify a
 global condition that will be applied to all agenda views, this condition
-would be stored in the variable @code{org-agenda-skip-function-global}. More
+would be stored in the variable @code{org-agenda-skip-function-global}.  More
 commonly, such a definition is applied only to specific custom searches,
 using @code{org-agenda-skip-function}.
 
