@@ -77,7 +77,7 @@ If you change the value of this variable then your files may
    "\\([^\n]*\\)\\(?:"
    (mapconcat #'regexp-quote org-babel-lob-call-aliases "\\|")
    "\\)_\\([^\(\)\n]+?\\)\\(\\[\\(.*\\)\\]\\|\\(\\)\\)"
-   "\(\\([^\n]*\\)\)\\(\\[.+\\]\\|\\)\\(\\[\\([^\\[\\]]*\\)\\]\\)?")
+   "\(\\([^\n]*\\)\)\\(\\[\\(.*?\\)\\]\\)?")
   "Regexp to match inline calls to predefined source block functions.")
 
 (defconst org-babel-lob-one-liner-regexp
@@ -113,8 +113,8 @@ if so then run the appropriate source block from the Library."
 			    (if (not (= 0 (length (nonempty 5 13))))
 				(concat "[" (nonempty 5 13) "]") "")
 			    (or (nonempty 7 16) "")
-			    (or (nonempty 8 18) ""))
-		    (nonempty 9 17)))
+			    (or (nonempty 8 19) ""))
+		    (nonempty 9 18)))
 	   (list (length (nonempty 1 11)))))))))
   
 (defun org-babel-lob-execute (info)
