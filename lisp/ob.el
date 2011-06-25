@@ -753,7 +753,7 @@ the current subtree."
     (setf (nth 2 info)
 	  (sort (copy-sequence (nth 2 info))
 		(lambda (a b) (string< (car a) (car b)))))
-    ((lambda (hash) (when (called-interactively-p 'interactive) (message hash)) hash)
+    ((lambda (hash) (when (interactive-p) (message hash)) hash)
      (sha1 (format "%s-%s"
 		   (mapconcat
 		    #'identity
