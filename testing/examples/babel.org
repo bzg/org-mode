@@ -155,6 +155,7 @@
 #+call: echo("testing") :results vector
 This is an inline call call_echo(input="testing") embedded in prose.
 This is an inline call call_echo(input="testing")[:results vector] embedded in prose.
+#+call: lob-minus(8, 4)
 
 * parsing header arguments
   :PROPERTIES:
