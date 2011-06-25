@@ -112,7 +112,7 @@ if so then run the appropriate source block from the Library."
 			    (nonempty 3 12)
 			    (if (not (= 0 (length (nonempty 5 13))))
 				(concat "[" (nonempty 5 13) "]") "")
-			    (nonempty 7 16)
+			    (or (nonempty 7 16) "")
 			    (or (nonempty 8 18) ""))
 		    (nonempty 9 17)))
 	   (list (length (nonempty 1 11)))))))))
