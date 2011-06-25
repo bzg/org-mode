@@ -1,4 +1,5 @@
 #+Title: a collection of examples for Babel tests
+#+OPTIONS: ^:nil
 
 * =:noweb= header argument expansion
   :PROPERTIES:
@@ -152,6 +153,8 @@
 #+call: echo[:var input="testing"]() :results vector
 #+call: echo("testing")
 #+call: echo("testing") :results vector
+This is an inline call call_echo(input="testing") embedded in prose.
+This is an inline call call_echo(input="testing")[:results vector] embedded in prose.
 
 * parsing header arguments
   :PROPERTIES:
