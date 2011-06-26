@@ -2429,7 +2429,9 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
       (while (setq ref (org-footnote-get-next-reference))
 	(let* ((beg (nth 1 ref))
 	       (lbl (car ref))
-	       (def (or (nth 3 (org-footnote-get-definition lbl)) "")))
+	       (def (nth 1 (assoc (string-to-number lbl)
+				  (mapcar (lambda (e) (cdr e))
+					  org-export-footnotes-markers)))))
 	  ;; Fix body for footnotes ending on a link or a list and
 	  ;; remove definition from buffer.
 	  (setq def
