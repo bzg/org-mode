@@ -775,7 +775,7 @@ when PUB-DIR is set, use this as the publishing directory."
   (org-export-latex-set-initial-vars ext-plist arg)
   (setq org-export-opt-plist org-export-latex-options-plist
 	org-export-footnotes-data (org-footnote-all-labels 'with-defs)
-	org-export-footnotes-markers nil
+	org-export-footnotes-seen nil
 	org-export-latex-footmark-seen nil)
   (org-install-letbind)
   (run-hooks 'org-export-latex-after-initial-vars-hook)
@@ -2431,7 +2431,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 	       (lbl (car ref))
 	       (def (nth 1 (assoc (string-to-number lbl)
 				  (mapcar (lambda (e) (cdr e))
-					  org-export-footnotes-markers)))))
+					  org-export-footnotes-seen)))))
 	  ;; Fix body for footnotes ending on a link or a list and
 	  ;; remove definition from buffer.
 	  (setq def

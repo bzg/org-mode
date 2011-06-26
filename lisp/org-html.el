@@ -1183,7 +1183,7 @@ PUB-DIR is set, use this as the publishing directory."
 	   (if region-p (region-beginning) (point-min))
 	   (if region-p (region-end) (point-max))))
 	 (org-export-have-math nil)
-	 (org-export-footnotes-markers nil)
+	 (org-export-footnotes-seen nil)
 	 (org-export-footnotes-data (org-footnote-all-labels 'with-defs))
 	 (lines
 	  (org-split-string

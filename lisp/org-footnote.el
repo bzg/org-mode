@@ -508,7 +508,7 @@ Additional note on `org-footnote-insert-pos-for-preprocessor':
 	 (outline-regexp
 	  (concat "\\*" (if nstars (format "\\{1,%d\\} " nstars) "+ ")))
 	 ;; Determine the highest marker used so far.
-	 (ref-table (when pre-process-p org-export-footnotes-markers))
+	 (ref-table (when pre-process-p org-export-footnotes-seen))
 	 (count (if (and pre-process-p ref-table)
 		    (apply 'max (mapcar (lambda (e) (nth 1 e)) ref-table))
 		  0))
@@ -628,9 +628,9 @@ Additional note on `org-footnote-insert-pos-for-preprocessor':
 			   ref-table "\n\n")
 		"\n\n")
        ;; When exporting, add newly insert markers along with their
-       ;; associated definition to `org-export-footnotes-markers'.
+       ;; associated definition to `org-export-footnotes-seen'.
 	(when pre-process-p
-	  (setq org-export-footnotes-markers ref-table)))
+	  (setq org-export-footnotes-seen ref-table)))
        ;; Else, insert each definition at the end of the section
        ;; containing their first reference. Happens only in Org
        ;; files with no special footnote section, and only when

@@ -291,7 +291,7 @@ publishing directory."
 	  (buffer-substring
 	   (if (org-region-active-p) (region-beginning) (point-min))
 	   (if (org-region-active-p) (region-end) (point-max))))
-	 (org-export-footnotes-markers nil)
+	 (org-export-footnotes-seen nil)
 	 (org-export-footnotes-data (org-footnote-all-labels 'with-defs))
 	 (lines (org-split-string
 		 (org-export-preprocess-string
