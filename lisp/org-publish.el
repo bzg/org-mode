@@ -1157,9 +1157,12 @@ Returns value on success, else nil."
 
 (defun org-publish-cache-ctime-of-src (filename)
   "Get the FILENAME ctime as an integer."
-  (let ((src-attr (file-attributes (if (stringp (file-symlink-p filename))
-				       (file-symlink-p filename)
-				     filename))))
+  (let* ((symlink-maybe (or (file-symlink-p filename) filename))
+	 (src-attr (file-attributes (if (file-name-absolute-p symlink-maybe)
+					symlink-maybe
+				      (expand-file-name 
+				       symlink-maybe
+				       (file-name-directory filename))))))
     (+
      (lsh (car (nth 5 src-attr)) 16)
      (cadr (nth 5 src-attr)))))
