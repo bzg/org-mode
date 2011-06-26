@@ -482,11 +482,11 @@ When SORT-ONLY is set, only sort the footnote definitions into the
 referenced sequence.
 
 When PRE-PROCESS-P is non-nil, the default action, is to insert
-normalized footnotes towards the end of the pre-processing
-buffer.  Some exporters like docbook, odt etc expect that footnote
+normalized footnotes towards the end of the pre-processing buffer.
+Some exporters like docbook, odt, etc. expect that footnote
 definitions be available before any references to them.  Such
-exporters can let bind `org-footnote-insert-pos-for-preprocessor'
-to symbol 'point-min to achieve the desired behaviour.
+exporters can let bind `org-footnote-insert-pos-for-preprocessor' to
+symbol 'point-min to achieve the desired behaviour.
 
 Additional note on `org-footnote-insert-pos-for-preprocessor':
 1. This variable has not effect when FOR-PREPROCESSOR is nil.
@@ -607,8 +607,14 @@ Additional note on `org-footnote-insert-pos-for-preprocessor':
 		      (t x)))
 		   ref-table)))
       (setq ref-table (nreverse ref-table))
-      ;; 4. Insert the footnotes again in the buffer, at INS-POINT.
-      (goto-char (or ins-point (point-max)))
+      ;; 4. Insert the footnotes again in the buffer, at the
+      ;;    appropriate spot.
+      (goto-char (or
+		  (and pre-process-p
+		       (eq org-footnote-insert-pos-for-preprocessor 'point-min)
+		       (point-min))
+		  ins-point
+		  (point-max)))
       (cond
        ((not ref-table))		; no footnote: exit
        ;; Cases when footnotes should be inserted together in one place.
