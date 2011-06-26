@@ -115,7 +115,8 @@ if so then run the appropriate source block from the Library."
 			    (or (nonempty 7 16) "")
 			    (or (nonempty 8 19) ""))
 		    (nonempty 9 18)))
-	   (list (length (nonempty 1 11)))))))))
+	   (list (length (if (= (length (match-string 12)) 0)
+			     (match-string 2) (match-string 11))))))))))
   
 (defun org-babel-lob-execute (info)
   "Execute the lob call specified by INFO."
