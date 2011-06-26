@@ -508,10 +508,11 @@ Additional note on `org-footnote-insert-pos-for-preprocessor':
 	 (outline-regexp
 	  (concat "\\*" (if nstars (format "\\{1,%d\\} " nstars) "+ ")))
 	 ;; Determine the highest marker used so far.
-	 (count (if (and pre-process-p org-export-footnotes-markers)
-		    (apply 'max (mapcar 'car org-export-footnotes-markers))
+	 (ref-table (when pre-process-p org-export-footnotes-markers))
+	 (count (if (and pre-process-p ref-table)
+		    (apply 'max (mapcar (lambda (e) (nth 1 e)) ref-table))
 		  0))
-	 ref-table ins-point ref)
+	 ins-point ref)
     (save-excursion
       ;; 1. Find every footnote reference, extract the definition, and
       ;;    collect that data in REF-TABLE. If SORT-ONLY is nil, also
@@ -629,10 +630,7 @@ Additional note on `org-footnote-insert-pos-for-preprocessor':
        ;; When exporting, add newly insert markers along with their
        ;; associated definition to `org-export-footnotes-markers'.
 	(when pre-process-p
-	  (setq org-export-footnotes-markers
-		(append (mapcar (lambda (ref) (cons (nth 1 ref) (nth 2 ref)))
-				ref-table)
-			org-export-footnotes-markers))))
+	  (setq org-export-footnotes-markers ref-table)))
        ;; Else, insert each definition at the end of the section
        ;; containing their first reference. Happens only in Org
        ;; files with no special footnote section, and only when
