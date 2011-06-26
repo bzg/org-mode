@@ -181,7 +181,12 @@ options are taken from `org-babel-default-header-args'."
   (save-excursion
     (goto-char start)
     (while (and (< (point) end)
-		(re-search-forward org-babel-lob-one-liner-regexp nil t))
+		(re-search-forward org-babel-lob-one-liner-regexp nil t)
+		(or (not (match-string 12))
+		    (save-match-data
+		      (save-excursion (goto-char (match-beginning 12))
+				      (backward-char)
+				      (thing-at-point 'whitespace)))))
       (let* ((lob-info (org-babel-lob-get-info))
 	     (inlinep (match-string 11))
 	     (inline-start (match-end 11))
