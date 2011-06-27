@@ -13890,10 +13890,10 @@ another key for this command, or override the key in
 
 @end table
 
-+@node org-crypt.el,  , Interaction, Miscellaneous
-+@section org-crypt.el
-+@cindex @file{org-crypt.el}
-+@cindex @code{org-decrypt-entry}
+@node org-crypt.el,  , Interaction, Miscellaneous
+@section org-crypt.el
+@cindex @file{org-crypt.el}
+@cindex @code{org-decrypt-entry}
 
 Org-crypt will encrypt the text of an entry, but not the headline, or
 properties.  Org-crypt uses the Emacs EasyPG library to encrypt and decrypt
