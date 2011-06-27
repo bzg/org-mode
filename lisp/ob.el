@@ -1805,6 +1805,7 @@ parameters when merging lists."
 	       (setq params (cons pair (assq-delete-all (car pair) params))))))
 	  plist))
        plists))
+    (setq vars (reverse vars))
     (while vars (setq params (cons (cons :var (cddr (pop vars))) params)))
     (mapc
      (lambda (hd)

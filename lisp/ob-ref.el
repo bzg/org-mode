@@ -207,7 +207,7 @@ to \"0:-1\"."
       (cond
        ((string= holder ",")
         (when (= depth 0)
-          (setq return (reverse (cons (substring buffer 0 -1) return)))
+          (setq return (cons (substring buffer 0 -1) return))
           (setq buffer "")))
        ((or (string= holder "(") (string= holder "[")) (setq depth (+ depth 1)))
        ((or (string= holder ")") (string= holder "]")) (setq depth (- depth 1)))))
