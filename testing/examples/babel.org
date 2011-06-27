@@ -158,6 +158,32 @@ This is an inline call call_echo(input="testing")[:results vector] embedded in p
 #+call: lob-minus(8, 4)
 call_echo("testing")
 
+* exporting an lob call line
+  :PROPERTIES:
+  :ID:       72ddeed3-2d17-4c7f-8192-a575d535d3fc
+  :END:
+
+#+source: double
+#+begin_src emacs-lisp :var it=0
+  (* 2 it)
+#+end_src
+
+The following exports as a normal call line
+#+call: double(it=0)
+
+Now here is an inline call call_double(it=1) stuck in the middle of
+some prose.
+
+This one should not be exported =call_double(it=2)= because it is
+quoted.
+
+Finally this next one should export, even though it starts a line
+call_double(it=3) because sometimes inline blocks fold with a
+paragraph.
+
+And, a call with raw results call_double(4)[:results raw] should not
+have quoted results.
+
 * parsing header arguments
   :PROPERTIES:
   :ID:       7eb0dc6e-1c53-4275-88b3-b22f3113b9c3
