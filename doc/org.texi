@@ -13921,9 +13921,13 @@ To use org-crypt it is suggested that you have the following in your
 
 (setq auto-save-default nil)
   ;; Auto-saving does not cooperate with org-crypt.el: so you need
-  ;; to turn it off if you plan to use org-crypt.el quite often.  
+  ;; to turn it off if you plan to use org-crypt.el quite often.
   ;; Otherwise, you'll get an (annoying) message each time you 
   ;; start Org.
+
+  ;; To turn it off only locally, you can insert this:
+  ;;
+  ;; # -*- buffer-auto-save-file-name: nil; -*-
 @end example
 
 Excluding the crypt tag from inheritance prevents already encrypted text
