@@ -64,6 +64,22 @@ which see."
 	  (const :tag "Into LOGBOOK drawer" "LOGBOOK")
 	  (string :tag "Into Drawer named...")))
 
+(defun org-clock-into-drawer ()
+  "Return the value of `org-clock-into-drawer', but let properties overrule.
+If the current entry has or inherits a CLOCK_INTO_DRAWER
+property, it will be used instead of the default value; otherwise
+if the current entry has or inherits a LOG_INTO_DRAWER property,
+it will be used instead of the default value.
+The default is the value of the customizable variable `org-clock-into-drawer',
+which see."
+  (let ((p (org-entry-get nil "CLOCK_INTO_DRAWER" 'inherit))
+	(q (org-entry-get nil "LOG_INTO_DRAWER" 'inherit)))
+    (cond
+     ((or (not (or p q)) (equal p "nil") (equal q "nil")) org-clock-into-drawer)
+     ((or (equal p "t") (equal q "t")) "LOGBOOK")
+     ((not p) q)
+     (t p))))
+
 (defcustom org-clock-out-when-done t
   "When non-nil, clock will be stopped when the clocked entry is marked DONE.
 DONE here means any DONE-like state.
@@ -761,7 +777,8 @@ If necessary, clock-out of the currently active clock."
 
 (defun org-clock-jump-to-current-clock (&optional effective-clock)
   (interactive)
-  (let ((clock (or effective-clock (cons org-clock-marker
+  (let ((org-clock-into-drawer (org-clock-into-drawer))
+	(clock (or effective-clock (cons org-clock-marker
 					 org-clock-start-time))))
     (unless (marker-buffer (car clock))
       (error "No clock is currently running"))
@@ -1216,16 +1233,17 @@ When FIND-UNCLOSED is non-nil, first check if there is an unclosed clock
 line and position cursor in that line."
   (org-back-to-heading t)
   (catch 'exit
-    (let ((beg (save-excursion
-		 (beginning-of-line 2)
-		 (or (bolp) (newline))
-		 (point)))
-	  (end (progn (outline-next-heading) (point)))
-	  (re (concat "^[ \t]*" org-clock-string))
-	  (cnt 0)
-	  (drawer (if (stringp org-clock-into-drawer)
-		      org-clock-into-drawer "LOGBOOK"))
-	  first last ind-last)
+    (let* ((org-clock-into-drawer (org-clock-into-drawer))
+	   (beg (save-excursion
+		  (beginning-of-line 2)
+		  (or (bolp) (newline))
+		  (point)))
+	   (end (progn (outline-next-heading) (point)))
+	   (re (concat "^[ \t]*" org-clock-string))
+	   (cnt 0)
+	   (drawer (if (stringp org-clock-into-drawer)
+		       org-clock-into-drawer "LOGBOOK"))
+	   first last ind-last)
       (goto-char beg)
       (when (and find-unclosed
 		 (re-search-forward

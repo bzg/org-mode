@@ -5759,11 +5759,15 @@ what to do with it.
 @table @kbd
 @orgcmd{C-c C-x C-i,org-clock-in}
 @vindex org-clock-into-drawer
+@cindex property, LOG_INTO_DRAWER
 Start the clock on the current item (clock-in).  This inserts the CLOCK
 keyword together with a timestamp.  If this is not the first clocking of
 this item, the multiple CLOCK lines will be wrapped into a
 @code{:LOGBOOK:} drawer (see also the variable
-@code{org-clock-into-drawer}).  When called with a @kbd{C-u} prefix argument,
+@code{org-clock-into-drawer}).  You can also overrule
+the setting of this variable for a subtree by setting a
+@code{CLOCK_INTO_DRAWER} or @code{LOG_INTO_DRAWER} property.
+When called with a @kbd{C-u} prefix argument,
 select the task from a list of recently clocked tasks.  With two @kbd{C-u
 C-u} prefixes, clock into the task at point and mark it as the default task.
 The default task will always be available when selecting a clocking task,
@@ -8950,7 +8954,7 @@ If the syntax for the label format conflicts with the language syntax, use a
 @code{-l} switch to change the format, for example @samp{#+BEGIN_SRC pascal
 -n -r -l "((%s))"}.  See also the variable @code{org-coderef-label-format}.
 
-HTML export also allows examples to be published as text areas (@xref{Text
+HTML export also allows examples to be published as text areas (@pxref{Text
 areas in HTML export}).
 
 Because the @code{#+BEGIN_...} and @code{#+END_...} patterns need to be added

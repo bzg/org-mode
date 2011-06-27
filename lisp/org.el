@@ -2375,7 +2375,7 @@ When nil, state changes notes will be inserted after the headline and
 any scheduling and clock lines, but not inside a drawer.
 
 The value of this variable should be the name of the drawer to use.
-LOGBOOK is proposed at the default drawer for this purpose, you can
+LOGBOOK is proposed as the default drawer for this purpose, you can
 also set this to a string to define the drawer of your choice.
 
 A value of t is also allowed, representing \"LOGBOOK\".
