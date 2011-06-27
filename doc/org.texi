@@ -13903,9 +13903,9 @@ Org-crypt will encrypt the text of an entry, but not the headline, or
 properties.  Org-crypt uses the Emacs EasyPG library to encrypt and decrypt
 files.
 
-Any text below a headline that has a @samp{:crypt:} tag will be
-automatically be encrypted when the file is saved.  If you want to use a
-different tag just customize the @code{org-crypt-tag-matcher} setting.
+Any text below a headline that has a @samp{:crypt:} tag will be automatically
+be encrypted when the file is saved.  If you want to use a different tag just
+customize the @code{org-crypt-tag-matcher} setting.
 
 To use org-crypt it is suggested that you have the following in your
 @file{.emacs}:
@@ -13914,9 +13914,16 @@ To use org-crypt it is suggested that you have the following in your
 (require 'org-crypt)
 (org-crypt-use-before-save-magic)
 (setq org-tags-exclude-from-inheritance (quote ("crypt")))
-;; GPG key to use for encryption
-;; Either the Key ID or set to nil to use symmetric encryption.
+
 (setq org-crypt-key nil)
+  ;; GPG key to use for encryption
+  ;; Either the Key ID or set to nil to use symmetric encryption.
+
+(setq auto-save-default nil)
+  ;; Auto-saving does not cooperate with org-crypt.el: so you need
+  ;; to turn it off if you plan to use org-crypt.el quite often.  
+  ;; Otherwise, you'll get an (annoying) message each time you 
+  ;; start Org.
 @end example
 
 Excluding the crypt tag from inheritance prevents already encrypted text
