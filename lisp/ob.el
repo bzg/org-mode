@@ -1525,7 +1525,8 @@ code ---- the results are extracted in the syntax of the source
     (save-excursion
       (let* ((inlinep
 	      (save-excursion
-		(re-search-backward "[ \f\t\n\r\v]" nil t)
+		(or (= (point) (point-at-bol))
+		    (re-search-backward "[ \f\t\n\r\v]" nil t))
 		(when (or (looking-at org-babel-inline-src-block-regexp)
 			  (looking-at org-babel-inline-lob-one-liner-regexp))
 		  (goto-char (match-end 0))
