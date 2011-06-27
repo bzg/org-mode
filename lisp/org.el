@@ -6591,7 +6591,7 @@ in an indirect buffer, in overview mode.  You can dive into the tree in
 that copy, use org-occur and incremental search to find a location.
 When pressing RET or `Q', the command returns to the original buffer in
 which the visibility is still unchanged.  After RET is will also jump to
-the location selected in the indirect buffer and expose the headline 
+the location selected in the indirect buffer and expose the headline
 hierarchy above."
   (interactive "P")
   (let* ((org-refile-targets `((nil . (:maxlevel . ,org-goto-max-level))))
@@ -14095,7 +14095,20 @@ This is computed according to `org-property-set-functions-alist'."
   "Read a property name."
   (let* ((completion-ignore-case t)
 	 (keys (org-buffer-property-keys nil t t))
-	 (property (org-icompleting-read "Property: " (mapcar 'list keys))))
+	 (default-prop (save-excursion
+	 		 (save-match-data
+	 		   (beginning-of-line)
+	 		   (and (looking-at "^\\s-*:\\([^:\n]+\\):")
+	 			(null (string= (match-string 1) "END"))
+	 			(match-string 1)))))
+	 (property (org-icompleting-read
+		    (concat "Property"
+			    (if default-prop (concat " [" default-prop "]") "")
+			    ": ")
+		    (mapcar 'list keys)
+		    nil nil nil nil
+		    default-prop
+		    )))
     (if (member property keys)
 	property
       (or (cdr (assoc (downcase property)
@@ -16120,7 +16133,7 @@ sequence appearing also before point.
 Even though the matchers for math are configurable, this function assumes
 that \\begin, \\(, \\[, and $$ are always used.  Only the single dollar
 delimiters are skipped when they have been removed by customization.
-The return value is nil, or a cons cell with the delimiter and the 
+The return value is nil, or a cons cell with the delimiter and the
 position of this delimiter.
 
 This function does a reasonably good job, but can locally be fooled by
