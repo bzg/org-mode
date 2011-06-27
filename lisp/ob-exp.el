@@ -181,41 +181,44 @@ options are taken from `org-babel-default-header-args'."
   (save-excursion
     (goto-char start)
     (while (and (< (point) end)
-		(re-search-forward org-babel-lob-one-liner-regexp nil t)
-		(or (not (match-string 12))
-		    (save-match-data
-		      (save-excursion (goto-char (match-beginning 12))
-				      (backward-char)
-				      (thing-at-point 'whitespace)))))
-      (let* ((lob-info (org-babel-lob-get-info))
-	     (inlinep (match-string 11))
-	     (inline-start (match-end 11))
-	     (inline-end (match-end 0))
-	     (rep (let ((lob-info (org-babel-lob-get-info)))
-		    (save-match-data
-		      (org-babel-exp-do-export
-		       (list "emacs-lisp" "results"
-			     (org-babel-merge-params
-			      org-babel-default-header-args
-			      org-babel-default-lob-header-args
-			      (org-babel-params-from-buffer)
-			      (org-babel-params-from-properties)
-			      (org-babel-parse-header-arguments
-			       (org-babel-clean-text-properties
-				(concat ":var results="
-					(mapconcat #'identity
-						   (butlast lob-info) " ")))))
-			     "" nil (car (last lob-info)))
-		       'lob)))))
-	(setq end (+ end (- (length rep)
-			    (- (length (match-string 0))
-			       (length (or (match-string 11) ""))))))
-	(if inlinep
-	    (save-excursion
-	      (goto-char inline-start)
-	      (delete-region inline-start inline-end)
-	      (insert rep))
-	  (replace-match rep t t))))))
+		(re-search-forward org-babel-lob-one-liner-regexp nil t))
+			     ; TODO: move this logic to `org-babel-lob-get-info'
+      (when (or		                        ; either this is:
+	     (not (match-string 12))	        ; not an inline call at all
+	     (let ((prefix (match-string 11)))
+	       (or (string= "" prefix)          ; is at the beginning of a line
+		   (let ((last (substring prefix (- (length prefix) 1))))
+		     (or (string= " " last)     ; or is preceded by whitespace
+			 (string= "\t" last))))))
+	(let* ((lob-info (org-babel-lob-get-info))
+	       (inlinep (match-string 11))
+	       (inline-start (match-end 11))
+	       (inline-end (match-end 0))
+	       (rep (let ((lob-info (org-babel-lob-get-info)))
+		      (save-match-data
+			(org-babel-exp-do-export
+			 (list "emacs-lisp" "results"
+			       (org-babel-merge-params
+				org-babel-default-header-args
+				org-babel-default-lob-header-args
+				(org-babel-params-from-buffer)
+				(org-babel-params-from-properties)
+				(org-babel-parse-header-arguments
+				 (org-babel-clean-text-properties
+				  (concat ":var results="
+					  (mapconcat #'identity
+						     (butlast lob-info) " ")))))
+			       "" nil (car (last lob-info)))
+			 'lob)))))
+	  (setq end (+ end (- (length rep)
+			      (- (length (match-string 0))
+				 (length (or (match-string 11) ""))))))
+	  (if inlinep
+	      (save-excursion
+		(goto-char inline-start)
+		(delete-region inline-start inline-end)
+		(insert rep))
+	    (replace-match rep t t)))))))
 
 (defun org-babel-exp-do-export (info type &optional hash)
   "Return a string with the exported content of a code block.
