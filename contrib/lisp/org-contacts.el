@@ -36,6 +36,9 @@
 ;;
 ;;; Code:
 
+(eval-when-compile
+  (require 'cl))
+
 (eval-and-compile
   (require 'org))
 
