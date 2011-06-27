@@ -14382,6 +14382,13 @@ at the cursor, it will be modified."
 	       (apply 'encode-time (org-parse-time-string (match-string 1)))
 	     (current-time)))
 	 (default-input (and ts (org-get-compact-tod ts)))
+	 (repeater (save-excursion
+	 	     (save-match-data
+	 	       (end-of-line)
+	 	       (when (re-search-backward
+			      "\\([.+]+[0-9]+[dwmy]\\(?:[/ ][-+]?[0-9]+[dwmy]\\)?\\) ?"
+			      (- (point) 20) t)
+			 (match-string 1)))))
 	 org-time-was-given org-end-time-was-given time)
     (cond
      ((and (org-at-timestamp-p t)
@@ -14401,7 +14408,11 @@ at the cursor, it will be modified."
 	(setq org-last-changed-timestamp
 	      (org-insert-time-stamp
 	       time (or org-time-was-given arg)
-	       inactive nil nil (list org-end-time-was-given))))
+	       inactive nil nil (list org-end-time-was-given)))
+	(when repeater (goto-char (1- (point))) (insert " " repeater)
+	      (setq org-last-changed-timestamp
+		    (concat (substring org-last-inserted-timestamp 0 -1)
+			    " " repeater ">"))))
       (message "Timestamp updated"))
      (t
       (setq time (let ((this-command this-command))
