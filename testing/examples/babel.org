@@ -244,3 +244,29 @@ an = sign.
 #+begin_src sh :noweb-ref fullest-disk
   |awk '{print $2}'
 #+end_src
+* resolving sub-trees as references
+  :PROPERTIES:
+  :ID:       2409e8ba-7b5f-4678-8888-e48aa02d8cb4
+  :results:  silent
+  :END:
+
+#+begin_src emacs-lisp :var text=d4faa7b3-072b-4dcf-813c-dd7141c633f3
+  (length text)
+#+end_src
+
+#+begin_src org :noweb yes
+  <<simple-subtree>>
+  <<d4faa7b3-072b-4dcf-813c-dd7141c633f3>>
+#+end_src
+
+** simple subtree with custom ID
+   :PROPERTIES:
+   :CUSTOM_ID: simple-subtree
+   :END:
+this is simple
+
+** simple subtree with global ID
+   :PROPERTIES:
+   :ID:       d4faa7b3-072b-4dcf-813c-dd7141c633f3
+   :END:
+has length 14
