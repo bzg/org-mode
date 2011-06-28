@@ -12393,16 +12393,16 @@ block should be included in tangled extraction of source code files.
 
 @itemize @bullet
 @item @code{tangle}
-The code block is exported to a source code file named after the
-basename (name w/o extension) of the Org-mode file.  E.g., @code{:tangle
-yes}.
+The code block is exported to a source code file named after the full path
+(including the directory) and file name (w/o extension) of the Org-mode file.
+E.g., @code{:tangle yes}.
 @item @code{no}
 The default.  The code block is not exported to a source code file. 
 E.g., @code{:tangle no}.
 @item other
 Any other string passed to the @code{:tangle} header argument is interpreted
-as a file basename to which the block will be exported.  E.g., @code{:tangle
-basename}.
+as a path (directory and file name relative to the directory of the Org-mode
+file) to which the block will be exported.  E.g., @code{:tangle path}.
 @end itemize
 
 @node mkdirp, comments, tangle, Specific header arguments
