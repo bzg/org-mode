@@ -1935,14 +1935,17 @@ block but are passed literally to the \"example-block\"."
   "Strip protective commas from bodies of source blocks."
   (replace-regexp-in-string "^,#" "#" body))
 
-(defun org-babel-script-escape (str)
+(defun org-babel-script-escape (str &optional force)
   "Safely convert tables into elisp lists."
   (let (in-single in-double out)
     ((lambda (escaped) (condition-case nil (org-babel-read escaped) (error escaped)))
-     (if (and (stringp str)
-	      (> (length str) 2)
-	      (string-equal "[" (substring str 0 1))
-	      (string-equal "]" (substring str -1)))
+     (if (or force
+	     (and (stringp str)
+		  (> (length str) 2)
+		  (or (and (string-equal "[" (substring str 0 1))
+			   (string-equal "]" (substring str -1)))
+		      (and (string-equal "{" (substring str 0 1))
+			   (string-equal "}" (substring str -1))))))
 	 (org-babel-read
 	  (concat
 	   "'"
@@ -1958,6 +1961,12 @@ block but are passed literally to the \"example-block\"."
 		   (93 (if (or in-double in-single) ; ]
 			   (cons 93 out)
 			 (cons 41 out)))
+		   (123 (if (or in-double in-single) ; {
+			    (cons 123 out)
+			  (cons 40 out)))
+		   (125 (if (or in-double in-single) ; }
+			    (cons 125 out)
+			  (cons 41 out)))
 		   (44 (if (or in-double in-single) ; ,
 			   (cons 44 out) (cons 32 out)))
 		   (39 (if in-double	; '
