@@ -157,6 +157,12 @@ This is an inline call call_echo(input="testing") embedded in prose.
 This is an inline call call_echo(input="testing")[:results vector] embedded in prose.
 #+call: lob-minus(8, 4)
 call_echo("testing")
+call_concat(1,2,3)
+
+#+source: concat
+#+begin_src emacs-lisp :var a=0 :var b=0 :var c=0
+  (format "%S%S%S" a b c)
+#+end_src
 
 * exporting an lob call line
   :PROPERTIES:
