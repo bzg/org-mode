@@ -2497,7 +2497,7 @@ Return t at each successful move."
     (let* ((org-adapt-indentation nil)
 	   (struct (org-list-struct))
 	   (ind (org-list-get-ind (point-at-bol) struct))
-	   (bullet (org-list-get-bullet (point-at-bol) struct)))
+	   (bullet (org-trim (buffer-substring (point-at-bol) (point-at-eol)))))
       ;; Accept empty items or if cycle has already started.
       (when (or (eq last-command 'org-cycle-item-indentation)
 		(and (save-excursion
@@ -2511,7 +2511,7 @@ Return t at each successful move."
 	(setq this-command 'org-cycle-item-indentation)
 	;; When in the middle of the cycle, try to outdent first.  If
 	;; it fails, and point is still at initial position, indent.
-	;; Else, go back to original position.
+	;; Else, re-create it at its original position.
 	(if (eq last-command 'org-cycle-item-indentation)
 	    (cond
 	     ((ignore-errors (org-list-indent-item-generic -1 t struct)))
@@ -2519,7 +2519,7 @@ Return t at each successful move."
 		   (ignore-errors (org-list-indent-item-generic 1 t struct))))
 	     (t (delete-region (point-at-bol) (point-at-eol))
 		(org-indent-to-column (car org-tab-ind-state))
-		(insert (cdr org-tab-ind-state))
+		(insert (cdr org-tab-ind-state) " ")
 		;; Break cycle
 		(setq this-command 'identity)))
 	  ;; If a cycle is starting, remember indentation and bullet,
