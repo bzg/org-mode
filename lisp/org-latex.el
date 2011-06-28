@@ -1588,6 +1588,7 @@ links, keywords, lists, tables, fixed-width"
     (when (plist-get org-export-latex-options-plist :emphasize)
       (org-export-latex-fontify))
     (org-export-latex-time-stamps)
+    (org-export-latex-quotation-marks)
     (org-export-latex-keywords-maybe)
     (org-export-latex-special-chars
      (plist-get org-export-latex-options-plist :sub-superscript))
