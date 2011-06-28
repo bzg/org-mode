@@ -3176,7 +3176,9 @@ buffer:
 @b{Org-mode buffers}@*
 For Org files, if there is a @samp{<<target>>} at the cursor, the link points
 to the target.  Otherwise it points to the current headline, which will also
-be the description.
+be the description@footnote{If the headline contains a timestamp, it will be
+removed from the link and result in a wrong link -- you should avoid putting
+timestamp in the headline.}.
 
 @vindex org-link-to-org-use-id
 @cindex property, CUSTOM_ID
