@@ -53,15 +53,18 @@
 (defvar message-signature-separator) ;; defined in message.el
 
 (defconst org-footnote-re
-  ;; Footnotes ain't closed in this regexp, as their definition might
-  ;; contain square brackets \(i.e. links\).
+  ;; Only [1]-like footnotes are closed in this regexp, as footnotes
+  ;; from other types might contain square brackets (i.e. links) in
+  ;; their definition.
   ;;
   ;; `org-re' is used for regexp compatibility with XEmacs.
   (org-re (concat "\\[\\(?:"
 		  ;; Match inline footnotes.
 		  "fn:\\([-_[:word:]]+\\)?:\\|"
 		  ;; Match other footnotes.
-		  "\\([0-9]+\\)\\|\\(fn:[-_[:word:]]+\\)\\)"))
+		  "\\(?:\\([0-9]+\\)\\]\\)\\|"
+		  "\\(fn:[-_[:word:]]+\\)"
+		  "\\)"))
   "Regular expression for matching footnotes.")
 
 (defconst org-footnote-definition-re
@@ -244,13 +247,19 @@ If no footnote is found, return nil."
       (while t
 	(unless (re-search-forward org-footnote-re limit t)
 	  (throw 'exit nil))
+	;; Beware: with [1]-like footnotes point will be just after
+	;; the closing square bracket.
+	(backward-char)
 	(cond
 	 ((setq ref (org-footnote-at-reference-p))
 	  (throw 'exit ref))
-	 ;; Definition: also grab the last square bracket, not matched
-	 ;; in `org-footnote-re'
+	 ;; Definition: also grab the last square bracket, only
+	 ;; matched in `org-footnote-re' for [1]-like footnotes.
 	 ((= (point-at-bol) (match-beginning 0))
-	  (throw 'exit (list nil (match-beginning 0) (1+ (match-end 0))))))))))
+	  (let ((end (match-end 0)))
+	    (throw 'exit
+		   (list nil (match-beginning 0)
+			 (if (eq (char-before end) 93) end (1+ end)))))))))))
 
 (defun org-footnote-get-definition (label)
   "Return label, boundaries and definition of the footnote LABEL."
