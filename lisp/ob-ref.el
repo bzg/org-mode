@@ -81,6 +81,24 @@ the variable."
 		    (org-babel-ref-resolve ref))
 		out))))))
 
+(defun org-babel-ref-goto-headline-id (id)
+  (let ((rx (regexp-quote id)))
+    (or (re-search-forward
+	 (concat "^[ \t]*:CUSTOM_ID:[ \t]+" rx "[ \t]*$") nil t)
+	(condition-case nil (progn (org-id-goto id) t) (error nil)))))
+
+(defun org-babel-ref-headline-body ()
+  (save-restriction
+    (org-narrow-to-subtree)
+    (buffer-substring
+     (save-excursion (goto-char (point-min))
+		     (forward-line 1)
+		     (when (looking-at "[ \t]*:PROPERTIES:")
+		       (re-search-forward ":END:" nil)
+		       (forward-char))
+		     (point))
+     (point-max))))
+
 (defvar org-babel-library-of-babel)
 (defun org-babel-ref-resolve (ref)
   "Resolve the reference REF and return its value."
@@ -127,16 +145,11 @@ the variable."
 		  (re-search-forward src-rx nil t)
 		  (re-search-backward src-rx nil t)
 		  ;; check for local or global headlines by id
-		  (setq id
-			(or
-			 (re-search-forward (concat "^[ \t]*:CUSTOM_ID:[ \t]+"
-						    rx "[ \t]*$") nil t)
-			 (condition-case nil (progn (org-id-goto ref) t)
-			     (error nil))))
+		  (setq id (org-babel-ref-goto-headline-id ref))
 		  ;; check the Library of Babel
 		  (setq lob-info (cdr (assoc (intern ref)
 					     org-babel-library-of-babel)))))
-	    (unless lob-info (goto-char (match-beginning 0)))
+	    (unless (or lob-info id) (goto-char (match-beginning 0)))
 	  ;; ;; TODO: allow searching for names in other buffers
 	  ;; (setq id-loc (org-id-find ref 'marker)
 	  ;;       buffer (marker-buffer id-loc)
@@ -155,21 +168,13 @@ the variable."
 	  (setq result
 		(case type
 		  (results-line (org-babel-read-result))
-		  (table (org-babel-read-table))
-		  (list (org-babel-read-list))
-		  (file (org-babel-read-link))
+		  (table        (org-babel-read-table))
+		  (list         (org-babel-read-list))
+		  (file         (org-babel-read-link))
 		  (source-block (org-babel-execute-src-block nil nil params))
-		  (lob (org-babel-execute-src-block nil lob-info params))
-		  (id (save-restriction
-			(org-narrow-to-subtree)
-			(buffer-substring
-			 (save-excursion (goto-char (point-min))
-					 (forward-line 1)
-					 (when (looking-at "[ \t]*:PROPERTIES:")
-					   (re-search-forward ":END:" nil)
-					   (forward-char))
-					 (point))
-			 (point-max)))))))
+		  (lob          (org-babel-execute-src-block
+				 nil lob-info params))
+		  (id           (org-babel-ref-headline-body)))))
 	(if (symbolp result)
 	    (format "%S" result)
 	  (if (and index (listp result))
