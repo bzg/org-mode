@@ -59,7 +59,9 @@
     (should (= 4 (org-babel-lob-execute (org-babel-lob-get-info))))
     (forward-line 1)
     (should (string= "testing" (org-babel-lob-execute
-				(org-babel-lob-get-info))))))
+				(org-babel-lob-get-info))))
+    (forward-line 1)
+    (should (string= "123" (org-babel-lob-execute (org-babel-lob-get-info))))))
 
 (ert-deftest test-ob-lob/export-lob-lines ()
   "Test the export of a variety of library babel call lines."
@@ -81,7 +83,13 @@
 	;; 6 should also be inline
 	(should (re-search-forward "6" nil t))
 	(should (re-search-forward (regexp-quote "</code>") (point-at-eol) t))
-	(should (re-search-backward (regexp-quote "<code>") (point-at-bol) t))))))
+	(should (re-search-backward (regexp-quote "<code>") (point-at-bol) t))
+	;; 8 should not be quoted
+	(should (re-search-forward "8" nil t))
+	(should (not (= ?= (char-after (point)))))
+	(should (not (= ?= (char-before (- (point) 1)))))
+	;; 10 should export
+	(should (re-search-forward "10" nil t))))))
 
 (provide 'test-ob-lob)
 

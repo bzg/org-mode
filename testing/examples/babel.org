@@ -157,6 +157,12 @@ This is an inline call call_echo(input="testing") embedded in prose.
 This is an inline call call_echo(input="testing")[:results vector] embedded in prose.
 #+call: lob-minus(8, 4)
 call_echo("testing")
+call_concat(1,2,3)
+
+#+source: concat
+#+begin_src emacs-lisp :var a=0 :var b=0 :var c=0
+  (format "%S%S%S" a b c)
+#+end_src
 
 * exporting an lob call line
   :PROPERTIES:
@@ -183,6 +189,9 @@ paragraph.
 
 And, a call with raw results call_double(4)[:results raw] should not
 have quoted results.
+
+The following 2*5=call_double(5) should export even when prefixed by
+an = sign.
 
 * parsing header arguments
   :PROPERTIES:
@@ -235,3 +244,29 @@ have quoted results.
 #+begin_src sh :noweb-ref fullest-disk
   |awk '{print $2}'
 #+end_src
+* resolving sub-trees as references
+  :PROPERTIES:
+  :ID:       2409e8ba-7b5f-4678-8888-e48aa02d8cb4
+  :results:  silent
+  :END:
+
+#+begin_src emacs-lisp :var text=d4faa7b3-072b-4dcf-813c-dd7141c633f3
+  (length text)
+#+end_src
+
+#+begin_src org :noweb yes
+  <<simple-subtree>>
+  <<d4faa7b3-072b-4dcf-813c-dd7141c633f3>>
+#+end_src
+
+** simple subtree with custom ID
+   :PROPERTIES:
+   :CUSTOM_ID: simple-subtree
+   :END:
+this is simple
+
+** simple subtree with global ID
+   :PROPERTIES:
+   :ID:       d4faa7b3-072b-4dcf-813c-dd7141c633f3
+   :END:
+has length 14

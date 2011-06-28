@@ -69,6 +69,14 @@
 	(should (re-search-forward (regexp-quote tangled) nil t)))
       (delete-file "babel.sh"))))
 
+(ert-deftest ob-tangle/expand-headers-as-noweb-references ()
+  "Test that references to headers are expanded during noweb expansion."
+  (org-test-at-id "2409e8ba-7b5f-4678-8888-e48aa02d8cb4"
+    (org-babel-next-src-block 2)
+    (let ((expanded (org-babel-expand-noweb-references)))
+      (should (string-match (regexp-quote "simple") expanded))
+      (should (string-match (regexp-quote "length 14") expanded)))))
+
 (provide 'test-ob-tangle)
 
 ;;; test-ob-tangle.el ends here

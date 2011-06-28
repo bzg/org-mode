@@ -206,6 +206,13 @@
       (should(equal '(:result-type . output) (assoc :result-type params)))
       (should(equal '(num . 9) (cdr (assoc :var params)))))))
 
+(ert-deftest test-org-babel/parse-header-args ()
+  (org-test-at-id "2409e8ba-7b5f-4678-8888-e48aa02d8cb4"
+    (should (string-match (regexp-quote "this is simple")
+			  (org-babel-ref-resolve "simple-subtree")))
+    (org-babel-next-src-block)
+    (should (= 14 (org-babel-execute-src-block)))))
+
 (provide 'test-ob)
 
 ;;; test-ob ends here

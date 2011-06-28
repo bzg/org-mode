@@ -68,6 +68,8 @@
 (declare-function org-babel-ref-split-args "ob-ref" (arg-string))
 (declare-function org-babel-ref-parse "ob-ref" (assignment))
 (declare-function org-babel-ref-resolve "ob-ref" (ref))
+(declare-function org-babel-ref-goto-headline-id "ob-ref" (id))
+(declare-function org-babel-ref-headline-body "ob-ref" ())
 (declare-function org-babel-lob-execute-maybe "ob-lob" ())
 (declare-function org-number-sequence "org-compat" (from &optional to inc))
 (declare-function org-at-item-p "org-list" ())
@@ -1893,28 +1895,33 @@ block but are passed literally to the \"example-block\"."
 		  ;; retrieve from the library of babel
 		  (nth 2 (assoc (intern source-name)
 				org-babel-library-of-babel))
+		  ;; return the contents of headlines literally
+		  (save-excursion
+		    (when (org-babel-ref-goto-headline-id source-name)
+		      (org-babel-ref-headline-body)))
 		  ;; find the expansion of reference in this buffer
-		  (or (mapconcat
-		       (lambda (i)
-			 (when (string= source-name
-					(or (cdr (assoc :noweb-ref (nth 2 i)))
-					    (nth 4 i)))
-			   (let ((body (org-babel-expand-noweb-references i)))
-			     (if comment
-				 ((lambda (cs) (concat (c-wrap (car cs)) "\n"
-						  body "\n" (c-wrap (cadr cs))))
-				  (org-babel-tangle-comment-links i))
-			       body))))
-		       (or blocks-in-buffer
-			   (setq blocks-in-buffer (blocks)))
-		       "")
-		      ;; possibly raise an error if named block doesn't exist
-		      (if (member lang org-babel-noweb-error-langs)
-			  (error "%s" (concat
-				       "<<" source-name ">> "
-				       "could not be resolved (see "
-				       "`org-babel-noweb-error-langs')"))
-			""))))
+		  (mapconcat
+		   (lambda (i)
+		     (when (string= source-name
+				    (or (cdr (assoc :noweb-ref (nth 2 i)))
+					(nth 4 i)))
+		       (let ((body (org-babel-expand-noweb-references i)))
+			 (if comment
+			     ((lambda (cs)
+				(concat (c-wrap (car cs)) "\n"
+					body "\n" (c-wrap (cadr cs))))
+			      (org-babel-tangle-comment-links i))
+			   body))))
+		   (or blocks-in-buffer
+		       (setq blocks-in-buffer (blocks)))
+		   "")
+		  ;; possibly raise an error if named block doesn't exist
+		  (if (member lang org-babel-noweb-error-langs)
+		      (error "%s" (concat
+				   "<<" source-name ">> "
+				   "could not be resolved (see "
+				   "`org-babel-noweb-error-langs')"))
+		    "")))
 	       "[\n\r]") (concat "\n" prefix)))))
         (nb-add (buffer-substring index (point-max)))))
     new-body))
@@ -1928,14 +1935,17 @@ block but are passed literally to the \"example-block\"."
   "Strip protective commas from bodies of source blocks."
   (replace-regexp-in-string "^,#" "#" body))
 
-(defun org-babel-script-escape (str)
+(defun org-babel-script-escape (str &optional force)
   "Safely convert tables into elisp lists."
   (let (in-single in-double out)
     ((lambda (escaped) (condition-case nil (org-babel-read escaped) (error escaped)))
-     (if (and (stringp str)
-	      (> (length str) 2)
-	      (string-equal "[" (substring str 0 1))
-	      (string-equal "]" (substring str -1)))
+     (if (or force
+	     (and (stringp str)
+		  (> (length str) 2)
+		  (or (and (string-equal "[" (substring str 0 1))
+			   (string-equal "]" (substring str -1)))
+		      (and (string-equal "{" (substring str 0 1))
+			   (string-equal "}" (substring str -1))))))
 	 (org-babel-read
 	  (concat
 	   "'"
@@ -1951,6 +1961,12 @@ block but are passed literally to the \"example-block\"."
 		   (93 (if (or in-double in-single) ; ]
 			   (cons 93 out)
 			 (cons 41 out)))
+		   (123 (if (or in-double in-single) ; {
+			    (cons 123 out)
+			  (cons 40 out)))
+		   (125 (if (or in-double in-single) ; }
+			    (cons 125 out)
+			  (cons 41 out)))
 		   (44 (if (or in-double in-single) ; ,
 			   (cons 44 out) (cons 32 out)))
 		   (39 (if in-double	; '
