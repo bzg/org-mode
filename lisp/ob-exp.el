@@ -166,10 +166,11 @@ Example and verbatim code include escaped portions of
 an org-mode buffer code that should be treated as normal
 org-mode text."
   (or (org-in-indented-comment-line) 
-      (save-excursion
-	(save-match-data
+      (save-match-data
+	(save-excursion
 	  (goto-char (point-at-bol))
 	  (looking-at "[ \t]*:[ \t]")))
+      (org-in-verbatim-emphasis)
       (org-in-regexps-block-p "^[ \t]*#\\+begin_src" "^[ \t]*#\\+end_src")))
 
 (defvar org-babel-default-lob-header-args)
@@ -182,14 +183,7 @@ options are taken from `org-babel-default-header-args'."
     (goto-char start)
     (while (and (< (point) end)
 		(re-search-forward org-babel-lob-one-liner-regexp nil t))
-			     ; TODO: move this logic to `org-babel-lob-get-info'
-      (when (or		                        ; either this is:
-	     (not (match-string 12))	        ; not an inline call at all
-	     (let ((prefix (match-string 11)))
-	       (or (string= "" prefix)          ; is at the beginning of a line
-		   (let ((last (substring prefix (- (length prefix) 1))))
-		     (or (string= " " last)     ; or is preceded by whitespace
-			 (string= "\t" last))))))
+      (unless (and (match-string 12) (org-babel-in-example-or-verbatim))
 	(let* ((lob-info (org-babel-lob-get-info))
 	       (inlinep (match-string 11))
 	       (inline-start (match-end 11))

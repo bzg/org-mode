@@ -184,6 +184,9 @@ paragraph.
 And, a call with raw results call_double(4)[:results raw] should not
 have quoted results.
 
+The following 2*5=call_double(5) should export even when prefixed by
+an = sign.
+
 * parsing header arguments
   :PROPERTIES:
   :ID:       7eb0dc6e-1c53-4275-88b3-b22f3113b9c3

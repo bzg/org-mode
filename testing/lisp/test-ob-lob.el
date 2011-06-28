@@ -85,7 +85,9 @@
 	;; 8 should not be quoted
 	(should (re-search-forward "8" nil t))
 	(should (not (= ?= (char-after (point)))))
-	(should (not (= ?= (char-before (- (point) 1)))))))))
+	(should (not (= ?= (char-before (- (point) 1)))))
+	;; 10 should export
+	(should (re-search-forward "10" nil t))))))
 
 (provide 'test-ob-lob)
 
