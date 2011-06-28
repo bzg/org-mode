@@ -1119,10 +1119,6 @@ on this string to produce the exported version."
       (org-export-handle-include-files-recurse)
       (run-hooks 'org-export-preprocess-after-include-files-hook)
 
-      ;; Normalize footnotes
-      (when (plist-get parameters :footnotes)
-	(org-footnote-normalize nil 'pre-process-p))
-
       ;; Change lists ending. Other parts of export may insert blank
       ;; lines and lists' structure could be altered.
       (org-export-mark-list-end)
@@ -1130,7 +1126,7 @@ on this string to produce the exported version."
       ;; Process the macros
       (org-export-preprocess-apply-macros)
       (run-hooks 'org-export-preprocess-after-macros-hook)
-
+      
       ;; Get rid of archived trees
       (org-export-remove-archived-trees archived-trees)
 
@@ -1141,6 +1137,10 @@ on this string to produce the exported version."
       (org-export-handle-export-tags (plist-get parameters :select-tags)
 				     (plist-get parameters :exclude-tags))
       (run-hooks 'org-export-preprocess-after-tree-selection-hook)
+
+      ;; Normalize footnotes
+      (when (plist-get parameters :footnotes)
+	(org-footnote-normalize nil 'pre-process-p))
 
       ;; Get rid of tasks, depending on configuration
       (org-export-remove-tasks (plist-get parameters :tasks))
