@@ -82,6 +82,7 @@ the variable."
 		out))))))
 
 (defun org-babel-ref-goto-headline-id (id)
+  (goto-char (point-min))
   (let ((rx (regexp-quote id)))
     (or (re-search-forward
 	 (concat "^[ \t]*:CUSTOM_ID:[ \t]+" rx "[ \t]*$") nil t)
