@@ -1708,6 +1708,12 @@ from the buffer."
 		(add-text-properties
 		 beg-content end-content
 		 `(org-protected t original-indentation ,ind org-native-text t))
+		;; strip protective commas
+		(save-excursion
+		  (save-match-data
+		    (goto-char beg-content)
+		    (while (re-search-forward "^[ \t]*\\(,\\)" end-content t)
+		      (replace-match "" nil nil nil 1))))
 		(delete-region (match-beginning 0) (match-end 0))
 		(save-excursion
 		  (goto-char beg)
