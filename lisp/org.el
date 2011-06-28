@@ -14386,7 +14386,7 @@ at the cursor, it will be modified."
 	 	     (save-match-data
 	 	       (end-of-line)
 	 	       (when (re-search-backward
-			      "\\([.+]+[0-9]+[dwmy]\\(?:[/ ][-+]?[0-9]+[dwmy]\\)?\\) ?"
+			      "\\([.+-]+[0-9]+[dwmy]\\(?:[/ ][-+]?[0-9]+[dwmy]\\)?\\) ?"
 			      (- (point) 20) t)
 			 (match-string 1)))))
 	 org-time-was-given org-end-time-was-given time)
