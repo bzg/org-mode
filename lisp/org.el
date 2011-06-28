@@ -11653,7 +11653,7 @@ scheduling will use the corresponding date."
   (let* ((old-date (org-entry-get nil "DEADLINE"))
 	 (repeater (and old-date
 			(string-match
-			 "\\([.+]+[0-9]+[dwmy]\\(?:[/ ][-+]?[0-9]+[dwmy]\\)?\\) ?"
+			 "\\([.+-]+[0-9]+[dwmy]\\(?:[/ ][-+]?[0-9]+[dwmy]\\)?\\) ?"
 			 old-date)
 			(match-string 1 old-date))))
     (if remove
@@ -11693,7 +11693,7 @@ scheduling will use the corresponding date."
   (let* ((old-date (org-entry-get nil "SCHEDULED"))
 	 (repeater (and old-date
 			(string-match
-			 "\\([.+]+[0-9]+[dwmy]\\(?:[/ ][-+]?[0-9]+[dwmy]\\)?\\) ?"
+			 "\\([.+-]+[0-9]+[dwmy]\\(?:[/ ][-+]?[0-9]+[dwmy]\\)?\\) ?"
 			 old-date)
 			(match-string 1 old-date))))
     (if remove
@@ -14384,11 +14384,11 @@ at the cursor, it will be modified."
 	 (default-input (and ts (org-get-compact-tod ts)))
 	 (repeater (save-excursion
 	 	     (save-match-data
-	 	       (end-of-line)
-	 	       (when (re-search-backward
-			      "\\([.+-]+[0-9]+[dwmy]\\(?:[/ ][-+]?[0-9]+[dwmy]\\)?\\) ?"
-			      (- (point) 20) t)
-			 (match-string 1)))))
+	 	       (beginning-of-line)
+	 	       (when (re-search-forward
+			      "\\([.+-]+[0-9]+[dwmy] ?\\)+" ;;\\(?:[/ ][-+]?[0-9]+[dwmy]\\)?\\) ?"
+			      (save-excursion (progn (end-of-line) (point))) t)
+			 (match-string 0)))))
 	 org-time-was-given org-end-time-was-given time)
     (cond
      ((and (org-at-timestamp-p t)
