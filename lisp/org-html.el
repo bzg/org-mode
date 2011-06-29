@@ -196,7 +196,7 @@ For example, a valid value would be:
     ]]>
    </style>
 
-If you'd like to refer to en external style file, use something like
+If you'd like to refer to an external style file, use something like
 
    <link rel=\"stylesheet\" type=\"text/css\" href=\"mystyles.css\">
 
