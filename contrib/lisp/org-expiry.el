@@ -186,7 +186,7 @@ restart `org-mode' if necessary."
     ;; need this to refresh org-mode hooks
     (when (org-mode-p)
       (org-mode)
-      (if (interactive-p)
+      (if (org-called-interactively-p)
 	  (message "Org-expiry insinuated, `org-mode' restarted.")))))
 
 (defun org-expiry-deinsinuate (&optional arg)
@@ -207,7 +207,7 @@ and restart `org-mode' if necessary."
     ;; need this to refresh org-mode hooks
     (when (org-mode-p)
       (org-mode)
-      (if (interactive-p)
+      (if (org-called-interactively-p)
 	  (message "Org-expiry de-insinuated, `org-mode' restarted.")))))
 
 ;;; org-expiry-expired-p:
@@ -238,7 +238,7 @@ If FORCE is non-nil, don't require confirmation from the user.
 Otherwise rely on `org-expiry-confirm-flag' to decide."
   (interactive "P")
   (save-excursion
-    (when (interactive-p) (org-reveal))
+    (when (org-called-interactively-p) (org-reveal))
     (when (org-expiry-expired-p)
       (org-back-to-heading)
       (looking-at org-complex-heading-regexp)
@@ -270,7 +270,7 @@ The expiry process will run the function defined by
 	(while (and (outline-next-heading) (< (point) end))
 	  (when (org-expiry-expired-p)
 	    (setq expired (1+ expired))
-	    (if (if (interactive-p)
+	    (if (if (org-called-interactively-p)
 		    (call-interactively 'org-expiry-process-entry)
 		  (org-expiry-process-entry))
 		(setq processed (1+ processed)))))
@@ -338,7 +338,7 @@ and insert today's date."
   (save-excursion
     (if (org-expiry-expired-p)
 	(org-archive-subtree)
-      (if (interactive-p)
+      (if (org-called-interactively-p)
 	  (message "Entry at point is not expired.")))))
 
 (defun org-expiry-add-keyword (&optional keyword)
@@ -349,7 +349,7 @@ and insert today's date."
       (save-excursion
 	(if (org-expiry-expired-p)
 	    (org-todo keyword)
-	  (if (interactive-p)
+	  (if (org-called-interactively-p)
 	      (message "Entry at point is not expired."))))
     (error "\"%s\" is not a to-do keyword in this buffer" keyword)))
 

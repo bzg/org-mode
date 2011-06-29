@@ -1117,7 +1117,7 @@ Return t when the line exists, nil if it does not exist."
   "Blank the current table field or active region."
   (interactive)
   (org-table-check-inside-data-field)
-  (if (and (interactive-p) (org-region-active-p))
+  (if (and (org-called-interactively-p) (org-region-active-p))
       (let (org-table-clip)
 	(org-table-cut-region (region-beginning) (region-end)))
     (skip-chars-backward "^|")
@@ -1193,27 +1193,27 @@ is always the old value."
 (defun org-table-current-column ()
   "Find out which column we are in."
   (interactive)
-  (if (interactive-p) (org-table-check-inside-data-field))
+  (if (org-called-interactively-p) (org-table-check-inside-data-field))
   (save-excursion
     (let ((cnt 0) (pos (point)))
       (beginning-of-line 1)
       (while (search-forward "|" pos t)
 	(setq cnt (1+ cnt)))
-      (if (interactive-p) (message "In table column %d" cnt))
+      (if (org-called-interactively-p) (message "In table column %d" cnt))
       cnt)))
 
 (defun org-table-current-dline ()
   "Find out what table data line we are in.
 Only data lines count for this."
   (interactive)
-  (if (interactive-p) (org-table-check-inside-data-field))
+  (if (org-called-interactively-p) (org-table-check-inside-data-field))
   (save-excursion
     (let ((cnt 0) (pos (point)))
       (goto-char (org-table-begin))
       (while (<= (point) pos)
 	(if (looking-at org-table-dataline-regexp) (setq cnt (1+ cnt)))
 	(beginning-of-line 2))
-      (if (interactive-p) (message "This is table line %d" cnt))
+      (if (org-called-interactively-p) (message "This is table line %d" cnt))
       cnt)))
 
 (defun org-table-goto-column (n &optional on-delim force)
@@ -1540,7 +1540,7 @@ should be done in reverse order."
 	 (thiscol (org-table-current-column))
 	 beg end bcol ecol tend tbeg column lns pos)
     (when (equal thiscol 0)
-      (if (interactive-p)
+      (if (org-called-interactively-p)
 	  (setq thiscol
 		(string-to-number
 		 (read-string "Use column N for sorting: ")))
@@ -1933,7 +1933,7 @@ If NLAST is a number, only the NLAST fields will actually be summed."
 			   s diff)
 		     (format "%d:%02d:%02d" h m s))))
 	(kill-new sres)
-	(if (interactive-p)
+	(if (org-called-interactively-p)
 	    (message "%s"
 		     (substitute-command-keys
 		      (format "Sum of %d items: %-20s     (\\[yank] will insert result into buffer)"
@@ -2303,7 +2303,7 @@ of the new mark."
 	  (org-goto-line l1)))
     (if (not (= epos (point-at-eol))) (org-table-align))
     (org-goto-line l)
-    (and (interactive-p) (message "%s" (cdr (assoc new org-recalc-marks))))))
+    (and (org-called-interactively-p) (message "%s" (cdr (assoc new org-recalc-marks))))))
 
 (defun org-table-maybe-recalculate-line ()
   "Recompute the current line if marked for it, and if we haven't just done it."
@@ -2521,7 +2521,7 @@ $1->    %s\n" orig formula form0 form))
 			     (if fmt (format fmt (string-to-number ev)) ev)))))
 	  (setq bw (get-buffer-window "*Substitution History*"))
 	  (org-fit-window-to-buffer bw)
-	  (unless (and (interactive-p) (not ndown))
+	  (unless (and (org-called-interactively-p) (not ndown))
 	    (unless (let (inhibit-redisplay)
 		      (y-or-n-p "Debugging Formula.  Continue to next? "))
 	      (org-table-align)
@@ -4149,7 +4149,7 @@ this table."
   (catch 'exit
     (unless (org-at-table-p) (error "Not at a table"))
     ;; when non-interactive, we assume align has just happened.
-    (when (interactive-p) (org-table-align))
+    (when (org-called-interactively-p) (org-table-align))
     (let ((dests (orgtbl-gather-send-defs))
 	  (txt (buffer-substring-no-properties (org-table-begin)
 					       (org-table-end)))

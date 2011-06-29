@@ -6083,7 +6083,7 @@ When this is the global TODO list, a prefix argument will be interpreted."
     (message "Rebuilding agenda buffer...done")
     (put 'org-agenda-filter :preset-filter preset)
     (and (or filter preset) (org-agenda-filter-apply filter))
-    (and cols (interactive-p) (org-agenda-columns))
+    (and cols (org-called-interactively-p) (org-agenda-columns))
     (org-goto-line line)
     (recenter window-line)))
 
@@ -7034,7 +7034,7 @@ if it was hidden in the outline."
 	(org-back-to-heading)
 	(run-hook-with-args 'org-cycle-hook 'folded))
       (message "Remote: FOLDED"))
-     ((and (interactive-p) (= more 1))
+     ((and (org-called-interactively-p) (= more 1))
       (message "Remote: show with default settings"))
      ((= more 2)
       (show-entry)
@@ -7335,7 +7335,7 @@ the same tree node, and the headline of the tree node in the Org-mode file."
   "Set tags for the current headline."
   (interactive)
   (org-agenda-check-no-diary)
-  (if (and (org-region-active-p) (interactive-p))
+  (if (and (org-region-active-p) (org-called-interactively-p))
       (call-interactively 'org-change-tag-in-region)
     (let* ((hdmarker (or (org-get-at-bol 'org-hd-marker)
 			 (org-agenda-error)))
