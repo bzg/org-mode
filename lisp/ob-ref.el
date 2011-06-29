@@ -57,6 +57,7 @@
 (declare-function org-at-table-p "org" (&optional table-type))
 (declare-function org-count "org" (CL-ITEM CL-SEQ))
 (declare-function org-at-item-p "org-list" ())
+(declare-function org-narrow-to-subtree "org" ())
 
 (defvar org-babel-ref-split-regexp
   "[ \f\t\n\r\v]*\\(.+?\\)[ \f\t\n\r\v]*=[ \f\t\n\r\v]*\\(.+\\)[ \f\t\n\r\v]*")
