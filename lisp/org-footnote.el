@@ -444,9 +444,15 @@ or new, let the user edit the definition of the footnote."
 ;;;###autoload
 (defun org-footnote-action (&optional special)
   "Do the right thing for footnotes.
-When at a footnote reference, jump to the definition.  When at a definition,
-jump to the references.  When neither at definition or reference,
-create a new footnote, interactively.
+
+When at a footnote reference, jump to the definition.
+
+When at a definition, jump to the references if they exist, offer
+to create them otherwise.
+
+When neither at definition or reference, create a new footnote,
+interactively.
+
 With prefix arg SPECIAL, offer additional commands in a menu."
   (interactive "P")
   (let (tmp c)
@@ -455,23 +461,26 @@ With prefix arg SPECIAL, offer additional commands in a menu."
       (message "Footnotes: [s]ort  |  [r]enumber fn:N  |  [S]=r+s |->[n]umeric  |  [d]elete")
       (setq c (read-char-exclusive))
       (cond
-       ((equal c ?s)
-	(org-footnote-normalize 'sort))
-       ((equal c ?r)
-	(org-footnote-renumber-fn:N))
-       ((equal c ?S)
+       ((eq c ?s) (org-footnote-normalize 'sort))
+       ((eq c ?r) (org-footnote-renumber-fn:N))
+       ((eq c ?S)
 	(org-footnote-renumber-fn:N)
 	(org-footnote-normalize 'sort))
-       ((equal c ?n)
-	(org-footnote-normalize))
-       ((equal c ?d)
-	(org-footnote-delete))
+       ((eq c ?n) (org-footnote-normalize))
+       ((eq c ?d) (org-footnote-delete))
        (t (error "No such footnote command %c" c))))
      ((setq tmp (org-footnote-at-reference-p))
-      (if (car tmp)
-	  (org-footnote-goto-definition (car tmp))
+      (cond
+       ;; Anonymous footnote: move point at the beginning of its
+       ;; definition.
+       ((not (car tmp))
 	(goto-char (nth 1 tmp))
-	(forward-char 5)))
+	(forward-char 5))
+       ;; A definition exists: move to it.
+       ((ignore-errors (org-footnote-goto-definition (car tmp))))
+       ;; No definition exists: offer to create it.
+       ((yes-or-no-p (format "No definition for %s.  Create one? " (car tmp)))
+	(org-footnote-create-definition (car tmp)))))
      ((setq tmp (org-footnote-at-definition-p))
       (org-footnote-goto-previous-reference (car tmp)))
      (t (org-footnote-new)))))
