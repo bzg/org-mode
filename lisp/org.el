@@ -4830,7 +4830,7 @@ The following commands are available:
 
   ;; If empty file that did not turn on org-mode automatically, make it to.
   (if (and org-insert-mode-line-in-empty-file
-	   (org-called-interactively-p)
+	   (org-called-interactively-p 'any)
 	   (= (point-min) (point-max)))
       (insert "#    -*- mode: org -*-\n\n"))
   (unless org-inhibit-startup
@@ -7437,7 +7437,7 @@ of some markers in the region, even if CUT is non-nil.  This is
 useful if the caller implements cut-and-paste as copy-then-paste-then-cut."
   (interactive "p")
   (let (beg end folded (beg0 (point)))
-    (if (org-called-interactively-p)
+    (if (org-called-interactively-p 'any)
 	(org-back-to-heading nil) ; take what looks like a subtree
       (org-back-to-heading t)) ; take what is really there
     (org-back-over-empty-lines)
@@ -7566,7 +7566,7 @@ the inserted text when done."
 	  (setq shift (+ delta shift)))
 	(goto-char (point-min))
 	(setq newend (point-max))))
-    (when (or (org-called-interactively-p) for-yank)
+    (when (or (org-called-interactively-p 'interactive) for-yank)
       (message "Clipboard pasted as level %d subtree" new-level))
     (if (and (not for-yank) ; in this case, org-yank will decide about folding
 	     kill-ring
@@ -8443,7 +8443,7 @@ For file links, arg negates `org-context-in-file-links'."
 	 (when m
 	   (org-with-point-at m
 	     (setq agenda-link
-		   (if (org-called-interactively-p)
+		   (if (org-called-interactively-p 'any)
 		       (call-interactively 'org-store-link)
 		     (org-store-link nil)))))))
 
@@ -8506,9 +8506,10 @@ For file links, arg negates `org-context-in-file-links'."
 	((and (featurep 'org-id)
 	      (or (eq org-link-to-org-use-id t)
 		  (and (eq org-link-to-org-use-id 'create-if-interactive)
-		       (org-called-interactively-p))
-		  (and (eq org-link-to-org-use-id 'create-if-interactive-and-no-custom-id)
-		       (org-called-interactively-p)
+		       (org-called-interactively-p 'any))
+		  (and (eq org-link-to-org-use-id
+			   'create-if-interactive-and-no-custom-id)
+		       (org-called-interactively-p 'any)
 		       (not custom-id))
 		  (and org-link-to-org-use-id
 			   (org-entry-get nil "ID"))))
@@ -8563,7 +8564,7 @@ For file links, arg negates `org-context-in-file-links'."
 		 desc "NONE")))
        (setq link (org-make-link cpltxt)))
 
-      ((org-called-interactively-p)
+      ((org-called-interactively-p 'interactive)
        (error "Cannot link to a buffer which is not visiting a file"))
 
       (t (setq link nil)))
@@ -8573,7 +8574,7 @@ For file links, arg negates `org-context-in-file-links'."
 	   desc (or desc cpltxt))
      (if (equal desc "NONE") (setq desc nil))
 
-     (if (and (or (org-called-interactively-p) executing-kbd-macro) link)
+     (if (and (or (org-called-interactively-p 'any) executing-kbd-macro) link)
 	 (progn
 	   (setq org-stored-links
 		 (cons (list link desc) org-stored-links))
@@ -11015,7 +11016,7 @@ For calling through lisp, arg is also interpreted in the following way:
 			(org-with-wide-buffer
 			 (run-hook-with-args-until-failure
 			  'org-blocker-hook change-plist))))
-	      (if (org-called-interactively-p)
+	      (if (org-called-interactively-p 'interactive)
 		  (error "TODO state change from %s to %s blocked" this state)
 		;; fail silently
 		(message "TODO state change from %s to %s blocked" this state)
@@ -12162,7 +12163,7 @@ that the match should indeed be shown."
     (unless org-sparse-tree-open-archived-trees
       (org-hide-archived-subtrees (point-min) (point-max)))
     (run-hooks 'org-occur-hook)
-    (if (org-called-interactively-p)
+    (if (org-called-interactively-p 'interactive)
 	(message "%d match(es) for regexp %s" cnt regexp))
     cnt))
 
