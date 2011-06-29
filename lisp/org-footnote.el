@@ -49,6 +49,7 @@
 (declare-function org-in-verbatim-emphasis "org" ())
 (declare-function org-inside-latex-macro-p "org" ())
 (declare-function org-id-uuid "org" ())
+(declare-function org-fill-paragraph "org" (justify))
 (defvar org-odd-levels-only) ;; defined in org.el
 (defvar message-signature-separator) ;; defined in message.el
 
