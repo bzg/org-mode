@@ -113,7 +113,7 @@ Also, do not record undo information."
 
 (defmacro org-without-partial-completion (&rest body)
   `(let ((pc-mode (and (boundp 'partial-completion-mode)
-		       'partial-completion-mode)))
+		       partial-completion-mode)))
      (unwind-protect
 	 (progn
 	   (when pc-mode (funcall pc-mode -1))
