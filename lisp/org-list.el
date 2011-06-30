@@ -1156,7 +1156,7 @@ This function modifies STRUCT."
     ;;    functions, position of point with regards to item start
     ;;    (BEFOREP), blank lines number separating items (BLANK-NB),
     ;;    position of split (POS) if we're allowed to (SPLIT-LINE-P).
-    (let* ((item (goto-char (org-list-get-item-begin)))
+    (let* ((item (progn (goto-char pos) (goto-char (org-list-get-item-begin))))
 	   (item-end (org-list-get-item-end item struct))
 	   (item-end-no-blank (org-list-get-item-end-before-blank item struct))
 	   (beforep (and (looking-at org-list-full-item-re)
