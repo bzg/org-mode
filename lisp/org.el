@@ -13013,10 +13013,9 @@ With prefix ARG, realign all tags in headings in the current buffer."
 			 org-todo-key-alist))
 		  (let ((org-add-colon-after-tag-completion t))
 		    (org-trim
-		     (org-without-partial-completion
-		      (org-icompleting-read "Tags: "
-					    'org-tags-completion-function
-				       nil nil current 'org-tags-history)))))))
+		     (org-icompleting-read "Tags: "
+					   'org-tags-completion-function
+					   nil nil current 'org-tags-history))))))
 	(while (string-match "[-+&]+" tags)
 	  ;; No boolean logic, just a list
 	  (setq tags (replace-match ":" t t tags))))
