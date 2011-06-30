@@ -2,7 +2,7 @@
 ;;; org-drill.el - Self-testing using spaced repetition
 ;;;
 ;;; Author: Paul Sexton <eeeickythump@gmail.com>
-;;; Version: 2.3.3
+;;; Version: 2.3.5
 ;;; Repository at http://bitbucket.org/eeeickythump/org-drill/
 ;;;
 ;;;
@@ -307,6 +307,15 @@ pace of learning."
   :type 'sexp)
 
 
+(defcustom org-drill-sm5-initial-interval
+  4.0
+  "In the SM5 algorithm, the initial interval after the first
+successful presentation of an item is always 4 days. If you wish to change
+this, you can do so here."
+  :group 'org-drill
+  :type 'float)
+
+
 (defcustom org-drill-add-random-noise-to-intervals-p
   nil
   "If true, the number of days until an item's next repetition
@@ -332,6 +341,27 @@ Note that this option currently has no effect if the SM2 algorithm
 is used."
   :group 'org-drill
   :type 'boolean)
+
+
+(defcustom org-drill-cloze-text-weight
+  4
+  "For card types 'hide1_firstmore', 'show1_lastmore' and 'show1_firstless',
+this number determines how often the 'less favoured' situation
+should arise. It will occur 1 in every N trials, where N is the
+value of the variable.
+
+For example, with the hide1_firstmore card type, the first piece
+of clozed text should be hidden more often than the other
+pieces. If this variable is set to 4 (default), the first item
+will only be shown 25% of the time (1 in 4 trials). Similarly for
+show1_lastmore, the last item will be shown 75% of the time, and
+for show1_firstless, the first item would only be shown 25% of the
+time.
+
+If the value of this variable is NIL, then weighting is disabled, and
+all weighted card types are treated as their unweighted equivalents."
+  :group 'org-drill
+  :type '(choice integer (const nil)))
 
 
 (defcustom org-drill-cram-hours
@@ -436,6 +466,7 @@ for review unless they were already reviewed in the recent past?")
 (put 'org-drill-hide-item-headings-p 'safe-local-variable 'booleanp)
 (put 'org-drill-spaced-repetition-algorithm 'safe-local-variable
      '(lambda (val) (memq val '(simple8 sm5 sm2))))
+(put 'org-drill-sm5-initial-interval 'safe-local-variable 'floatp)
 (put 'org-drill-add-random-noise-to-intervals-p 'safe-local-variable 'booleanp)
 (put 'org-drill-adjust-intervals-for-early-and-late-repetitions-p
      'safe-local-variable 'booleanp)
@@ -446,6 +477,8 @@ for review unless they were already reviewed in the recent past?")
 (put 'org-drill-scope 'safe-local-variable
      '(lambda (val) (or (symbolp val) (listp val))))
 (put 'org-drill-save-buffers-after-drill-sessions-p 'safe-local-variable 'booleanp)
+(put 'org-drill-cloze-text-weight 'safe-local-variable
+     '(lambda (val) (or (null val) (integerp val))))
 
 
 ;;;; Utilities ================================================================
@@ -891,9 +924,23 @@ Returns a list: (INTERVAL REPEATS EF FAILURES MEAN TOTAL-REPEATS OFMATRIX), wher
 ;;; SM5 Algorithm =============================================================
 
 
+
+(defun initial-optimal-factor-sm5 (n ef)
+  (if (= 1 n)
+      org-drill-sm5-initial-interval
+    ef))
+
+(defun get-optimal-factor-sm5 (n ef of-matrix)
+  (let ((factors (assoc n of-matrix)))
+    (or (and factors
+	     (let ((ef-of (assoc ef (cdr factors))))
+	       (and ef-of (cdr ef-of))))
+	(initial-optimal-factor-sm5 n ef))))
+
+
 (defun inter-repetition-interval-sm5 (last-interval n ef &optional of-matrix)
-  (let ((of (get-optimal-factor n ef (or of-matrix
-                                         org-drill-optimal-factor-matrix))))
+  (let ((of (get-optimal-factor-sm5 n ef (or of-matrix
+                                             org-drill-optimal-factor-matrix))))
     (if (= 1 n)
 	of
       (* of last-interval))))
@@ -917,20 +964,20 @@ Returns a list: (INTERVAL REPEATS EF FAILURES MEAN TOTAL-REPEATS OFMATRIX), wher
 
   (let ((next-ef (modify-e-factor ef quality))
         (old-ef ef)
-        (new-of (modify-of (get-optimal-factor n ef of-matrix)
+        (new-of (modify-of (get-optimal-factor-sm5 n ef of-matrix)
                            quality org-drill-learn-fraction))
         (interval nil))
     (when (and org-drill-adjust-intervals-for-early-and-late-repetitions-p
                delta-days (minusp delta-days))
       (setq new-of (org-drill-early-interval-factor
-                    (get-optimal-factor n ef of-matrix)
+                    (get-optimal-factor-sm5 n ef of-matrix)
                     (inter-repetition-interval-sm5
                      last-interval n ef of-matrix)
                     delta-days)))
 
     (setq of-matrix
           (set-optimal-factor n next-ef of-matrix
-                              (round-float new-of 3)))     ; round OF to 3 d.p.
+                              (round-float new-of 3))) ; round OF to 3 d.p.
 
     (setq ef next-ef)
 
@@ -939,7 +986,7 @@ Returns a list: (INTERVAL REPEATS EF FAILURES MEAN TOTAL-REPEATS OFMATRIX), wher
      ((<= quality org-drill-failure-quality)
       (list -1 1 old-ef (1+ failures) meanq (1+ total-repeats)
             of-matrix))     ; Not clear if OF matrix is supposed to be
-                            ; preserved
+                                        ; preserved
      ;; For a zero-based quality of 4 or 5, don't repeat
      ;; ((and (>= quality 4)
      ;;       (not org-learn-always-reschedule))
@@ -1101,12 +1148,15 @@ item will be scheduled exactly this many days into the future."
         (if (numberp days-ahead)
             (setq next-interval days-ahead))
 
-        (org-drill-store-item-data next-interval repetitions failures
-                                   total-repeats meanq ease)
         (if (and (null days-ahead)
                  (numberp weight) (plusp weight)
                  (not (minusp next-interval)))
-            (setq next-interval (max 1.0 (/ next-interval weight))))
+            (setq next-interval
+                  (max 1.0 (+ last-interval
+                              (/ (- next-interval last-interval) weight)))))
+
+        (org-drill-store-item-data next-interval repetitions failures
+                                   total-repeats meanq ease)
 
         (if (eql 'sm5 org-drill-spaced-repetition-algorithm)
             (setq org-drill-optimal-factor-matrix new-ofmatrix))
@@ -1150,7 +1200,8 @@ of QUALITY."
          ((not (plusp next-interval))
           0)
          ((and (numberp weight) (plusp weight))
-          (max 1.0 (/ next-interval weight)))
+          (+ last-interval
+             (max 1.0 (/ (- next-interval last-interval) weight))))
          (t
           next-interval))))))
 
@@ -1722,46 +1773,84 @@ chosen at random."
 
 
 (defun org-drill-present-multicloze-hide1-firstmore ()
-  "Three out of every four repetitions, hides the FIRST piece of
-text that is marked for cloze deletion. One out of every four
-repetitions, hide one of the other pieces of text, chosen at
-random."
+  "Commonly, hides the FIRST piece of text that is marked for
+cloze deletion. Uncommonly, hide one of the other pieces of text,
+chosen at random.
+
+The definitions of 'commonly' and 'uncommonly' are determined by
+the value of `org-drill-cloze-text-weight'."
   ;; The 'firstmore' and 'lastmore' functions used to randomly choose whether
   ;; to hide the 'favoured' piece of text. However even when the chance of
   ;; hiding it was set quite high (80%), the outcome was too unpredictable over
   ;; the small number of repetitions where most learning takes place for each
   ;; item. In other words, the actual frequency during the first 10 repetitions
   ;; was often very different from 80%. Hence we use modulo instead.
-  (if (zerop (mod (1+ (org-drill-entry-total-repeats 0)) 4))
-      ;; 25% of time, hide any item except the first
-      (org-drill-present-multicloze-hide-n 1 t)
-    ;; 75% of time, hide first item
-    (org-drill-present-multicloze-hide-first)))
+  (cond
+   ((null org-drill-cloze-text-weight)
+    ;; Behave as hide1cloze
+    (org-drill-present-multicloze-hide1))
+   ((not (and (integerp org-drill-cloze-text-weight)
+              (plusp org-drill-cloze-text-weight)))
+    (error "Illegal value for org-drill-cloze-text-weight: %S"
+           org-drill-cloze-text-weight))
+   ((zerop (mod (1+ (org-drill-entry-total-repeats 0))
+                org-drill-cloze-text-weight))
+    ;; Uncommonly, hide any item except the first
+    (org-drill-present-multicloze-hide-n 1 t))
+   (t
+    ;; Commonly, hide first item
+    (org-drill-present-multicloze-hide-first))))
 
 
 (defun org-drill-present-multicloze-show1-lastmore ()
-  "Three out of every four repetitions, hides all pieces except
-the last. One out of every four repetitions, shows any random
-piece. The effect is similar to 'show1cloze' except that the last
-item is much less likely to be the item that is visible."
-  (if (zerop (mod (1+ (org-drill-entry-total-repeats 0)) 4))
-      ;; 25% of time, show any item except the last
-      (org-drill-present-multicloze-hide-n -1 nil nil t)
-    ;; 75% of time, show the LAST item
-    (org-drill-present-multicloze-hide-n -1 nil t)))
+  "Commonly, hides all pieces except the last. Uncommonly, shows
+any random piece. The effect is similar to 'show1cloze' except
+that the last item is much less likely to be the item that is
+visible.
+
+The definitions of 'commonly' and 'uncommonly' are determined by
+the value of `org-drill-cloze-text-weight'."
+  (cond
+   ((null org-drill-cloze-text-weight)
+    ;; Behave as show1cloze
+    (org-drill-present-multicloze-show1))
+   ((not (and (integerp org-drill-cloze-text-weight)
+              (plusp org-drill-cloze-text-weight)))
+    (error "Illegal value for org-drill-cloze-text-weight: %S"
+           org-drill-cloze-text-weight))
+   ((zerop (mod (1+ (org-drill-entry-total-repeats 0))
+                org-drill-cloze-text-weight))
+    ;; Uncommonly, show any item except the last
+    (org-drill-present-multicloze-hide-n -1 nil nil t))
+   (t
+    ;; Commonly, show the LAST item
+    (org-drill-present-multicloze-hide-n -1 nil t))))
 
 
 (defun org-drill-present-multicloze-show1-firstless ()
-  "Three out of every four repetitions, hides all pieces except
-one, where the shown piece is guaranteed NOT to be the first
-piece. One out of every four repetitions, shows any random
-piece. The effect is similar to 'show1cloze' except that the
-first item is much less likely to be the item that is visible."
-  (if (zerop (mod (1+ (org-drill-entry-total-repeats 0)) 4))
-      ;; 25% of time, show the first item
-      (org-drill-present-multicloze-hide-n -1 t)
-    ;; 75% of time, show any item, except the first
-    (org-drill-present-multicloze-hide-n -1 nil nil t)))
+  "Commonly, hides all pieces except one, where the shown piece
+is guaranteed NOT to be the first piece. Uncommonly, shows any
+random piece. The effect is similar to 'show1cloze' except that
+the first item is much less likely to be the item that is
+visible.
+
+The definitions of 'commonly' and 'uncommonly' are determined by
+the value of `org-drill-cloze-text-weight'."
+  (cond
+   ((null org-drill-cloze-text-weight)
+    ;; Behave as show1cloze
+    (org-drill-present-multicloze-show1))
+   ((not (and (integerp org-drill-cloze-text-weight)
+              (plusp org-drill-cloze-text-weight)))
+    (error "Illegal value for org-drill-cloze-text-weight: %S"
+           org-drill-cloze-text-weight))
+   ((zerop (mod (1+ (org-drill-entry-total-repeats 0))
+                org-drill-cloze-text-weight))
+    ;; Uncommonly, show the first item
+    (org-drill-present-multicloze-hide-n -1 t))
+   (t
+    ;; Commonly, show any item, except the first
+    (org-drill-present-multicloze-hide-n -1 nil nil t))))
 
 
 (defun org-drill-present-multicloze-show1 ()
@@ -2195,6 +2284,19 @@ one of the following values:
        due))))
 
 
+(defun org-drill-progress-message (collected scanned)
+  (when (zerop (% scanned 50))
+    (let* ((meter-width 40)
+           (sym1 (if (oddp (floor scanned (* 50 meter-width))) ?| ?.))
+           (sym2 (if (eql sym1 ?.) ?| ?.)))
+      (message "Collecting due drill items:%4d %s%s"
+              collected
+              (make-string (% (ceiling scanned 50) meter-width)
+                           sym2)
+              (make-string (- meter-width (% (ceiling scanned 50) meter-width))
+                           sym1)))))
+
+
 (defun org-drill (&optional scope resume-p)
   "Begin an interactive 'drill session'. The user is asked to
 review a series of topics (headers). Each topic is initially
@@ -2255,14 +2357,13 @@ than starting a new one."
                     (warned-about-id-creation nil))
                 (org-map-drill-entries
                  (lambda ()
-                   (when (zerop (% (incf cnt) 50))
-                     (message "Processing drill items: %4d%s"
+                   (org-drill-progress-message
                               (+ (length *org-drill-new-entries*)
                                  (length *org-drill-overdue-entries*)
                                  (length *org-drill-young-mature-entries*)
                                  (length *org-drill-old-mature-entries*)
                                  (length *org-drill-failed-entries*))
-                              (make-string (ceiling cnt 50) ?.)))
+                              (incf cnt))
                    (cond
                     ((not (org-drill-entry-p))
                      nil)               ; skip
@@ -2361,6 +2462,7 @@ than starting a new one."
           (org-drill-save-optimal-factor-matrix))
       (if org-drill-save-buffers-after-drill-sessions-p
           (save-some-buffers))
+      (message "Drill session finished!")
       ))))
 
 
