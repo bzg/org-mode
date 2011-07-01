@@ -242,14 +242,15 @@ LINE is the erroneous line"
 FILE-NAME is full path to lilypond file.
 LINENO is the number of the erroneous line"
  
-  (set-buffer (get-buffer-create "temp-buf"))
-  (insert-file-contents (ly-switch-extension file-name ".ly")
-                        nil nil nil t)
-  (if (> lineNo 0)
-      (progn
-        (goto-line lineNo)
-        (buffer-substring (point) (point-at-eol)))
-    nil))
+  (with-temp-buffer
+    (insert-file-contents (ly-switch-extension file-name ".ly")
+			  nil nil nil t)
+    (if (> lineNo 0)
+	(progn
+	  (goto-char (point-min))
+	  (forward-line (- lineNo 1))
+	  (buffer-substring (point) (point-at-eol)))
+      nil)))
     
 (defun ly-attempt-to-open-pdf (file-name &optional test)
   "Attempt to display the generated pdf file
