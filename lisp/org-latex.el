@@ -292,6 +292,11 @@ markup defined, the first one in the association list will be used."
   :group 'org-export-latex
   :type 'string)
 
+(defcustom org-export-latex-timestamp-inactive-markup "\\textit{%s}"
+  "A printf format string to be applied to inactive time stamps."
+  :group 'org-export-latex
+  :type 'string)
+
 (defcustom org-export-latex-timestamp-keyword-markup "\\texttt{%s}"
   "A printf format string to be applied to time stamps."
   :group 'org-export-latex
@@ -1613,7 +1618,9 @@ links, keywords, lists, tables, fixed-width"
       (org-if-unprotected-at (1- (point))
        (replace-match
 	(org-export-latex-protect-string
-	 (format org-export-latex-timestamp-markup
+	 (format (if (string= "<" (substring (match-string 0) 0 1))
+		     org-export-latex-timestamp-markup
+		   org-export-latex-timestamp-inactive-markup)
 		 (substring (org-translate-time (match-string 0)) 1 -1)))
 	t t)))))
 
