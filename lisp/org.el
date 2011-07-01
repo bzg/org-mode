@@ -5248,7 +5248,8 @@ will be prompted for."
 	    t)
 	   ((or (member dc1 '("begin:" "end:" "caption:" "label:"
 			      "orgtbl:" "tblfm:" "tblname:" "result:"
-			      "results:" "source:" "srcname:" "call:"))
+			      "results:" "source:" "srcname:" "call:"
+			      "data:" "header:" "headers:"))
 		(and (match-end 4) (equal dc3 "attr")))
 	    (add-text-properties
 	     beg (match-end 0)
@@ -10754,7 +10755,7 @@ This function can be used in a hook."
     "BEGIN_SRC" "END_SRC"
     "BEGIN_RESULT" "END_RESULT"
     "SOURCE:" "SRCNAME:" "FUNCTION:"
-    "RESULTS:"
+    "RESULTS:" "DATA:"
     "HEADER:" "HEADERS:"
     "BABEL:"
     "CATEGORY:" "COLUMNS:" "PROPERTY:"
