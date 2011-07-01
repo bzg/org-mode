@@ -44,6 +44,13 @@
   :tag "Org Export HTML"
   :group 'org-export)
 
+(defconst org-export-xhtml-special-string-regexps
+  '(("\\\\-" . "&shy;")
+    ("---\\([^-]\\)" . "&mdash;\\1")
+    ("--\\([^-]\\)" . "&ndash;\\1")
+    ("\\.\\.\\." . "&hellip;"))
+  "Regular expressions for special string conversion.")
+
 (defcustom org-export-xhtml-footnotes-section "<div id=\"footnotes\">
 <h2 class=\"footnotes\">%s: </h2>
 <div id=\"text-footnotes\">
