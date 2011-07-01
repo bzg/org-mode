@@ -1398,7 +1398,7 @@ the alist of previous items."
      ;; At an item: insert appropriate tags in export buffer.
      ((assq pos struct)
       (string-match (concat "[ \t]*\\(\\S-+[ \t]*\\)"
-			    "\\(?:\\[@\\(?:start:\\)?\\([0-9]+\\|[a-zA-Z]\\)\\]\\)?"
+			    "\\(?:\\[@\\(?:start:\\)?\\([0-9]+\\|[a-zA-Z]\\)\\][ \t]*\\)?"
 			    "\\(?:\\(\\[[ X-]\\]\\)[ \t]+\\)?"
 			    "\\(?:\\(.*\\)[ \t]+::\\(?:[ \t]+\\|$\\)\\)?"
 			    "\\(.*\\)")

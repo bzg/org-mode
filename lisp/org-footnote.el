@@ -161,7 +161,8 @@ If so, return an list containing its label, beginning and ending
 positions, and the definition, if local."
   (when (and (not (or (org-in-commented-line)
 		      (org-in-verbatim-emphasis)))
-	     (or (org-in-regexp org-footnote-re)
+	     (or (looking-at org-footnote-re)
+		 (org-in-regexp org-footnote-re)
 		 (save-excursion (re-search-backward org-footnote-re nil t)))
 	     ;; A footnote reference cannot start at bol.
 	     (/= (match-beginning 0) (point-at-bol)))

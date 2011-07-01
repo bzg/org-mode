@@ -1,43 +1,39 @@
 ;;; ob-lilypond.el --- org-babel functions for lilypond evaluation
 
-;; Copyright (C) Shelagh Manton, Martyn Jago
+;; Copyright (C) 2010  Free Software Foundation, Inc.
 
-;; Authors: Shelagh Manton, Martyn Jago
-;; Keywords: literate programming, weaving markup
-;; Homepage: https://github.com/sshelagh/ob-lilypond
-;; Version: 0.1
+;; Author: Martyn Jago
+;; Keywords: babel language, literate programming
+;; Homepage: https://github.com/mjago/ob-lilypond
+;; Version: 0.2
 
-;;; License:
+;; This file is part of GNU Emacs.
 
-;; This program is free software; you can redistribute it and/or modify
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 3, or (at your option)
-;; any later version.
-;;
-;; This program is distributed in the hope that it will be useful,
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
-;;
+
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING. If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
- 
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
 ;;; Commentary:
 
-;; see http://github.com/mjago/ob-lilypond
+;; Installation / usage info, and examples are available at
+;; https://github.com/mjago/ob-lilypond
 
-;;; Requirements:
-
-;; You need to have a copy of LilyPond
-
+;;; Code:
 (require 'ob)
 (require 'ob-eval)
 (defalias 'lilypond-mode 'LilyPond-mode)
 (add-to-list 'org-babel-tangle-lang-exts '("LilyPond" . "ly"))
 
-(defconst ly-version "0.1"
+(defconst ly-version "0.2"
   "The version number of the file ob-lilypond.el.")
 
 (defvar ly-compile-post-tangle t
@@ -372,5 +368,7 @@ If TEST is non-nil, it contains a simulation of the OS for test purposes"
            file-name) ext))
 
 (provide 'ob-lilypond)
+
+;; arch-tag: ac449eea-2cf2-4dc5-ae33-426f57ba4894
  
 ;;; ob-lilypond.el ends here

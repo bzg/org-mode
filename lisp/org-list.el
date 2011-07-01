@@ -370,8 +370,8 @@ specifically, type `block' is determined by the variable
 It depends on `org-empty-line-terminates-plain-lists'.")
 
 (defconst org-list-full-item-re
-  (concat "^[ \t]*\\(\\(?:[-+*]\\|\\(?:[0-9]+\\|[A-Za-z]\\)[.)]\\)[ \t]*\\)"
-	  "\\(?:\\[@\\(?:start:\\)?\\([0-9]+\\|[A-Za-z]\\)\\]\\)?"
+  (concat "^[ \t]*\\(\\(?:[-+*]\\|\\(?:[0-9]+\\|[A-Za-z]\\)[.)]\\)[ \t]+\\)"
+	  "\\(?:\\[@\\(?:start:\\)?\\([0-9]+\\|[A-Za-z]\\)\\][ \t]*\\)?"
 	  "\\(?:\\(\\[[ X-]\\]\\)[ \t]+\\)?"
 	  "\\(?:\\(.*\\)[ \t]+::\\(?:[ \t]+\\|$\\)\\)?")
   "Matches a list item and puts everything into groups:
@@ -1156,7 +1156,7 @@ This function modifies STRUCT."
     ;;    functions, position of point with regards to item start
     ;;    (BEFOREP), blank lines number separating items (BLANK-NB),
     ;;    position of split (POS) if we're allowed to (SPLIT-LINE-P).
-    (let* ((item (goto-char (org-list-get-item-begin)))
+    (let* ((item (progn (goto-char pos) (goto-char (org-list-get-item-begin))))
 	   (item-end (org-list-get-item-end item struct))
 	   (item-end-no-blank (org-list-get-item-end-before-blank item struct))
 	   (beforep (and (looking-at org-list-full-item-re)
@@ -1647,11 +1647,13 @@ Initial position of cursor is restored after the changes."
 		((and (match-string 3) new-box)
 		 (replace-match new-box nil nil nil 3))
 		((match-string 3)
-		 (goto-char (or (match-end 2) (match-end 1)))
-		 (looking-at "\\[[ X-]\\][ \t]+")
-		 (replace-match ""))
-		(t (goto-char (or (match-end 2) (match-end 1)))
-		   (insert (concat new-box " "))))
+		 ;; (goto-char (or (match-end 2) (match-end 1)))
+		 ;; (skip-chars-backward " \t")
+		 (looking-at ".*?\\([ \t]*\\[[ X-]\\]\\)")
+		 (replace-match "" nil nil nil 1))
+		(t (let ((counterp (match-end 2)))
+		     (goto-char (if counterp (1+ counterp) (match-end 1)))
+		   (insert (concat new-box (unless counterp " "))))))
 	       ;; c. Indent item to appropriate column.
 	       (unless (= new-ind old-ind)
 		 (delete-region (goto-char (point-at-bol))
