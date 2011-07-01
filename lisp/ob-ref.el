@@ -87,7 +87,15 @@ the variable."
   (let ((rx (regexp-quote id)))
     (or (re-search-forward
 	 (concat "^[ \t]*:CUSTOM_ID:[ \t]+" rx "[ \t]*$") nil t)
-	(condition-case nil (progn (org-id-goto id) t) (error nil)))))
+	(let* ((file (org-id-find-id-file id))
+	       (m (when file (org-id-find-id-in-file id file 'marker))))
+	  (when (and file m)
+	    (message "file:%S" file)
+	    (switch-to-buffer (marker-buffer m))
+	    (goto-char m)
+	    (move-marker m nil)
+	    (org-show-context)
+	    t)))))
 
 (defun org-babel-ref-headline-body ()
   (save-restriction
