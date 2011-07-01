@@ -1,4 +1,4 @@
-;;; org-html.el --- HTML export for Org-mode (uses org-lparse)
+;;; org-xhtml.el --- XHTML export for Org-mode (uses org-lparse)
 
 ;; Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011
 ;;   Free Software Foundation, Inc.
@@ -39,12 +39,12 @@
 (declare-function org-id-find-id-file "org-id" (id))
 (declare-function htmlize-region "ext:htmlize" (beg end))
 
-(defgroup org-export-html nil
+(defgroup org-export-xhtml nil
   "Options specific for HTML export of Org-mode files."
   :tag "Org Export HTML"
   :group 'org-export)
 
-(defcustom org-export-html-footnotes-section "<div id=\"footnotes\">
+(defcustom org-export-xhtml-footnotes-section "<div id=\"footnotes\">
 <h2 class=\"footnotes\">%s: </h2>
 <div id=\"text-footnotes\">
 %s
@@ -54,53 +54,53 @@
 Should contain a two instances of %s.  The first will be replaced with the
 language-specific word for \"Footnotes\", the second one will be replaced
 by the footnotes themselves."
-  :group 'org-export-html
+  :group 'org-export-xhtml
   :type 'string)
 
-(defcustom org-export-html-footnote-format "<sup>%s</sup>"
+(defcustom org-export-xhtml-footnote-format "<sup>%s</sup>"
   "The format for the footnote reference.
 %s will be replaced by the footnote reference itself."
-  :group 'org-export-html
+  :group 'org-export-xhtml
   :type 'string)
 
 
-(defcustom org-export-html-footnote-separator "<sup>, </sup>"
+(defcustom org-export-xhtml-footnote-separator "<sup>, </sup>"
   "Text used to separate footnotes."
-  :group 'org-export-html
+  :group 'org-export-xhtml
   :type 'string)
 
-(defcustom org-export-html-coding-system nil
+(defcustom org-export-xhtml-coding-system nil
   "Coding system for HTML export, defaults to `buffer-file-coding-system'."
-  :group 'org-export-html
+  :group 'org-export-xhtml
   :type 'coding-system)
 
-(defcustom org-export-html-extension "html"
+(defcustom org-export-xhtml-extension "html"
   "The extension for exported HTML files."
-  :group 'org-export-html
+  :group 'org-export-xhtml
   :type 'string)
 
-(defcustom org-export-html-xml-declaration
+(defcustom org-export-xhtml-xml-declaration
   '(("html" . "<?xml version=\"1.0\" encoding=\"%s\"?>")
     ("php" . "<?php echo \"<?xml version=\\\"1.0\\\" encoding=\\\"%s\\\" ?>\"; ?>"))
   "The extension for exported HTML files.
 %s will be replaced with the charset of the exported file.
 This may be a string, or an alist with export extensions
 and corresponding declarations."
-  :group 'org-export-html
+  :group 'org-export-xhtml
   :type '(choice
 	  (string :tag "Single declaration")
 	  (repeat :tag "Dependent on extension"
 		  (cons (string :tag "Extension")
 			(string :tag "Declaration")))))
 
-(defcustom org-export-html-style-include-scripts t
+(defcustom org-export-xhtml-style-include-scripts t
   "Non-nil means include the JavaScript snippets in exported HTML files.
-The actual script is defined in `org-export-html-scripts' and should
+The actual script is defined in `org-export-xhtml-scripts' and should
 not be modified."
-  :group 'org-export-html
+  :group 'org-export-xhtml
   :type 'boolean)
 
-(defconst org-export-html-scripts
+(defconst org-export-xhtml-scripts
 "<script type=\"text/javascript\">
 <!--/*--><![CDATA[/*><!--*/
  function CodeHighlightOn(elem, id)
@@ -125,7 +125,7 @@ not be modified."
 </script>"
 "Basic JavaScript that is needed by HTML files produced by Org-mode.")
 
-(defconst org-export-html-style-default
+(defconst org-export-xhtml-style-default
 "<style type=\"text/css\">
  <!--/*--><![CDATA[/*><!--*/
   html { font-family: Times, serif; font-size: 12pt; }
@@ -170,22 +170,22 @@ not be modified."
   /*]]>*/-->
 </style>"
   "The default style specification for exported HTML files.
-Please use the variables `org-export-html-style' and
-`org-export-html-style-extra' to add to this style.  If you wish to not
+Please use the variables `org-export-xhtml-style' and
+`org-export-xhtml-style-extra' to add to this style.  If you wish to not
 have the default style included, customize the variable
-`org-export-html-style-include-default'.")
+`org-export-xhtml-style-include-default'.")
 
-(defcustom org-export-html-style-include-default t
+(defcustom org-export-xhtml-style-include-default t
   "Non-nil means include the default style in exported HTML files.
-The actual style is defined in `org-export-html-style-default' and should
-not be modified.  Use the variables `org-export-html-style' to add
+The actual style is defined in `org-export-xhtml-style-default' and should
+not be modified.  Use the variables `org-export-xhtml-style' to add
 your own style information."
-  :group 'org-export-html
+  :group 'org-export-xhtml
   :type 'boolean)
 ;;;###autoload
-(put 'org-export-html-style-include-default 'safe-local-variable 'booleanp)
+(put 'org-export-xhtml-style-include-default 'safe-local-variable 'booleanp)
 
-(defcustom org-export-html-style ""
+(defcustom org-export-xhtml-style ""
   "Org-wide style definitions for exported HTML files.
 
 This variable needs to contain the full HTML structure to provide a style,
@@ -211,24 +211,24 @@ If you'd like to refer to an external style file, use something like
 
 As the value of this option simply gets inserted into the HTML <head> header,
 you can \"misuse\" it to add arbitrary text to the header.
-See also the variable `org-export-html-style-extra'."
-  :group 'org-export-html
+See also the variable `org-export-xhtml-style-extra'."
+  :group 'org-export-xhtml
   :type 'string)
 ;;;###autoload
-(put 'org-export-html-style 'safe-local-variable 'stringp)
+(put 'org-export-xhtml-style 'safe-local-variable 'stringp)
 
-(defcustom org-export-html-style-extra ""
+(defcustom org-export-xhtml-style-extra ""
   "Additional style information for HTML export.
 The value of this variable is inserted into the HTML buffer right after
-the value of `org-export-html-style'.  Use this variable for per-file
+the value of `org-export-xhtml-style'.  Use this variable for per-file
 settings of style information, and do not forget to surround the style
 settings with <style>...</style> tags."
-  :group 'org-export-html
+  :group 'org-export-xhtml
   :type 'string)
 ;;;###autoload
-(put 'org-export-html-style-extra 'safe-local-variable 'stringp)
+(put 'org-export-xhtml-style-extra 'safe-local-variable 'stringp)
 
-(defcustom org-export-html-mathjax-options
+(defcustom org-export-xhtml-mathjax-options
   '((path  "http://orgmode.org/mathjax/MathJax.js")
     (scale "100")
     (align "center")
@@ -248,7 +248,7 @@ mathml      Should a MathML player be used if available?
 You can also customize this for each buffer, using something like
 
 #+MATHJAX: scale:\"133\" align:\"right\" mathml:t path:\"/MathJax/\""
-  :group 'org-export-html
+  :group 'org-export-xhtml
   :type '(list :greedy t
 	      (list :tag "path   (the path from where to load MathJax.js)"
 		    (const :format "       " path) (string))
@@ -261,7 +261,7 @@ You can also customize this for each buffer, using something like
 	      (list :tag "mathml (should MathML display be used is possible)"
 		    (const :format "       " mathml) (boolean))))
 
-(defun org-export-html-mathjax-config (template options in-buffer)
+(defun org-export-xhtml-mathjax-config (template options in-buffer)
   "Insert the user setup into the matchjax template."
   (let (name val (yes "   ") (no "// ") x)
     (mapc
@@ -288,7 +288,7 @@ You can also customize this for each buffer, using something like
     ;; Return the modified template
     template))
 
-(defcustom org-export-html-mathjax-template
+(defcustom org-export-xhtml-mathjax-template
   "<script type=\"text/javascript\" src=\"%PATH\">
 <!--/*--><![CDATA[/*><!--*/
     MathJax.Hub.Config({
@@ -331,46 +331,46 @@ You can also customize this for each buffer, using something like
 /*]]>*///-->
 </script>"
   "The MathJax setup for XHTML files."
-  :group 'org-export-html
+  :group 'org-export-xhtml
   :type 'string)
 
-(defcustom org-export-html-tag-class-prefix ""
+(defcustom org-export-xhtml-tag-class-prefix ""
   "Prefix to class names for TODO keywords.
 Each tag gets a class given by the tag itself, with this prefix.
 The default prefix is empty because it is nice to just use the keyword
 as a class name.  But if you get into conflicts with other, existing
 CSS classes, then this prefix can be very useful."
-  :group 'org-export-html
+  :group 'org-export-xhtml
   :type 'string)
 
-(defcustom org-export-html-todo-kwd-class-prefix ""
+(defcustom org-export-xhtml-todo-kwd-class-prefix ""
   "Prefix to class names for TODO keywords.
 Each TODO keyword gets a class given by the keyword itself, with this prefix.
 The default prefix is empty because it is nice to just use the keyword
 as a class name.  But if you get into conflicts with other, existing
 CSS classes, then this prefix can be very useful."
-  :group 'org-export-html
+  :group 'org-export-xhtml
   :type 'string)
 
-(defcustom org-export-html-preamble t
+(defcustom org-export-xhtml-preamble t
   "Non-nil means insert a preamble in HTML export.
 
 When `t', insert a string as defined by one of the formatting
-strings in `org-export-html-preamble-format'.  When set to a
-string, this string overrides `org-export-html-preamble-format'.
+strings in `org-export-xhtml-preamble-format'.  When set to a
+string, this string overrides `org-export-xhtml-preamble-format'.
 When set to a function, apply this function and insert the
 returned string.  The function takes the property list of export
 options as its only argument.
 
 Setting :html-preamble in publishing projects will take
 precedence over this variable."
-  :group 'org-export-html
+  :group 'org-export-xhtml
   :type '(choice (const :tag "No preamble" nil)
 		 (const :tag "Default preamble" t)
 		 (string :tag "Custom formatting string")
 		 (function :tag "Function (must return a string)")))
 
-(defcustom org-export-html-preamble-format
+(defcustom org-export-xhtml-preamble-format
   '(("en" "<h1 class=\"title\">%t</h1>"))
   "The format for the HTML preamble.
 
@@ -378,16 +378,16 @@ precedence over this variable."
 
 If you need to use a \"%\" character, you need to escape it
 like that: \"%%\"."
-  :group 'org-export-html
+  :group 'org-export-xhtml
   :type 'string)
 
-(defcustom org-export-html-postamble 'auto
+(defcustom org-export-xhtml-postamble 'auto
   "Non-nil means insert a postamble in HTML export.
 
 When `t', insert a string as defined by the formatting string in
-`org-export-html-postamble-format'.  When set to a string, this
-string overrides `org-export-html-postamble-format'.  When set to
-'auto, discard `org-export-html-postamble-format' and honor
+`org-export-xhtml-postamble-format'.  When set to a string, this
+string overrides `org-export-xhtml-postamble-format'.  When set to
+'auto, discard `org-export-xhtml-postamble-format' and honor
 `org-export-author/email/creator-info' variables.  When set to a
 function, apply this function and insert the returned string.
 The function takes the property list of export options as its
@@ -395,14 +395,14 @@ only argument.
 
 Setting :html-postamble in publishing projects will take
 precedence over this variable."
-  :group 'org-export-html
+  :group 'org-export-xhtml
   :type '(choice (const :tag "No postamble" nil)
 		 (const :tag "Auto preamble" 'auto)
 		 (const :tag "Default formatting string" t)
 		 (string :tag "Custom formatting string")
 		 (function :tag "Function (must return a string)")))
 
-(defcustom org-export-html-postamble-format
+(defcustom org-export-xhtml-postamble-format
   '(("en" "<p class=\"author\">Author: %a (%e)</p>
 <p class=\"date\">Date: %d</p>
 <p class=\"creator\">Generated by %c</p>
@@ -414,14 +414,14 @@ precedence over this variable."
 %e stands for the email(s).
 %d stands for the date.
 %c will be replaced by information about Org/Emacs.
-%v will be replaced by `org-export-html-validation-link'.
+%v will be replaced by `org-export-xhtml-validation-link'.
 
 If you need to use a \"%\" character, you need to escape it
 like that: \"%%\"."
-  :group 'org-export-html
+  :group 'org-export-xhtml
   :type 'string)
 
-(defcustom org-export-html-home/up-format
+(defcustom org-export-xhtml-home/up-format
   "<div id=\"org-div-home-and-up\" style=\"text-align:right;font-size:70%%;white-space:nowrap;\">
  <a accesskey=\"h\" href=\"%s\"> UP </a>
  |
@@ -429,13 +429,13 @@ like that: \"%%\"."
 </div>"
   "Snippet used to insert the HOME and UP links.
 This is a format string, the first %s will receive the UP link,
-the second the HOME link.  If both `org-export-html-link-up' and
-`org-export-html-link-home' are empty, the entire snippet will be
+the second the HOME link.  If both `org-export-xhtml-link-up' and
+`org-export-xhtml-link-home' are empty, the entire snippet will be
 ignored."
-  :group 'org-export-html
+  :group 'org-export-xhtml
   :type 'string)
 
-(defcustom org-export-html-toplevel-hlevel 2
+(defcustom org-export-xhtml-toplevel-hlevel 2
   "The <H> level for level 1 headings in HTML export.
 This is also important for the classes that will be wrapped around headlines
 and outline structure.  If this variable is 1, the top-level headlines will
@@ -443,10 +443,10 @@ be <h1>, and the corresponding classes will be outline-1, section-number-1,
 and outline-text-1.  If this is 2, all of these will get a 2 instead.
 The default for this variable is 2, because we use <h1> for formatting the
 document title."
-  :group 'org-export-html
+  :group 'org-export-xhtml
   :type 'string)
 
-(defcustom org-export-html-link-org-files-as-html t
+(defcustom org-export-xhtml-link-org-files-as-html t
   "Non-nil means make file links to `file.org' point to `file.html'.
 When org-mode is exporting an org-mode file to HTML, links to
 non-html files are directly put into a href tag in HTML.
@@ -455,32 +455,32 @@ extension `.org.) should become links to the corresponding html
 file, assuming that the linked org-mode file will also be
 converted to HTML.
 When nil, the links still point to the plain `.org' file."
-  :group 'org-export-html
+  :group 'org-export-xhtml
   :type 'boolean)
 
-(defcustom org-export-html-inline-images 'maybe
+(defcustom org-export-xhtml-inline-images 'maybe
   "Non-nil means inline images into exported HTML pages.
 This is done using an <img> tag.  When nil, an anchor with href is used to
 link to the image.  If this option is `maybe', then images in links with
 an empty description will be inlined, while images with a description will
 be linked only."
-  :group 'org-export-html
+  :group 'org-export-xhtml
   :type '(choice (const :tag "Never" nil)
 		 (const :tag "Always" t)
 		 (const :tag "When there is no description" maybe)))
 
-(defcustom org-export-html-inline-image-extensions
+(defcustom org-export-xhtml-inline-image-extensions
   '("png" "jpeg" "jpg" "gif" "svg")
   "Extensions of image files that can be inlined into HTML."
-  :group 'org-export-html
+  :group 'org-export-xhtml
   :type '(repeat (string :tag "Extension")))
 
-(defcustom org-export-html-table-tag
+(defcustom org-export-xhtml-table-tag
   "<table border=\"2\" cellspacing=\"0\" cellpadding=\"6\" rules=\"groups\" frame=\"hsides\">"
   "The HTML tag that is used to start a table.
 This must be a <table> tag, but you may change the options like
 borders and spacing."
-  :group 'org-export-html
+  :group 'org-export-xhtml
   :type 'string)
 
 (defcustom org-export-table-header-tags '("<th scope=\"%s\"%s>" . "</th>")
@@ -488,8 +488,8 @@ borders and spacing."
 This is customizable so that alignment options can be specified.
 The first %s will be filled with the scope of the field, either row or col.
 The second %s will be replaced by a style entry to align the field.
-See also the variable `org-export-html-table-use-header-tags-for-first-column'.
-See also the variable `org-export-html-table-align-individual-fields'."
+See also the variable `org-export-xhtml-table-use-header-tags-for-first-column'.
+See also the variable `org-export-xhtml-table-align-individual-fields'."
   :group 'org-export-tables
   :type '(cons (string :tag "Opening tag") (string :tag "Closing tag")))
 
@@ -498,7 +498,7 @@ See also the variable `org-export-html-table-align-individual-fields'."
 This is customizable so that alignment options can be specified.
 The first %s will be filled with the scope of the field, either row or col.
 The second %s will be replaced by a style entry to align the field.
-See also the variable `org-export-html-table-align-individual-fields'."
+See also the variable `org-export-xhtml-table-align-individual-fields'."
   :group 'org-export-tables
   :type '(cons (string :tag "Opening tag") (string :tag "Closing tag")))
 
@@ -529,7 +529,7 @@ will give even lines the class \"tr-even\" and odd lines the class \"tr-odd\"."
 		  (string :tag "Specify")
 		  (sexp))))
 
-(defcustom org-export-html-table-align-individual-fields t
+(defcustom org-export-xhtml-table-align-individual-fields t
   "Non-nil means attach style attributes for alignment to each table field.
 When nil, alignment will only be specified in the column tags, but this
 is ignored by some browsers (like Firefox, Safari).  Opera does it right
@@ -537,33 +537,33 @@ though."
   :group 'org-export-tables
   :type 'boolean)
 
-(defcustom org-export-html-table-use-header-tags-for-first-column nil
+(defcustom org-export-xhtml-table-use-header-tags-for-first-column nil
   "Non-nil means format column one in tables with header tags.
 When nil, also column one will use data tags."
   :group 'org-export-tables
   :type 'boolean)
 
-(defcustom org-export-html-validation-link
+(defcustom org-export-xhtml-validation-link
   "<a href=\"http://validator.w3.org/check?uri=referer\">Validate XHTML 1.0</a>"
   "Link to HTML validation service."
-  :group 'org-export-html
+  :group 'org-export-xhtml
   :type 'string)
 
-(defcustom org-export-html-with-timestamp nil
+(defcustom org-export-xhtml-with-timestamp nil
   "If non-nil, write timestamp into the exported HTML text.
-If non-nil, write `org-export-html-html-helper-timestamp' into the
+If non-nil, write `org-export-xhtml-html-helper-timestamp' into the
 exported HTML text.  Otherwise, the buffer will just be saved to
 a file."
-  :group 'org-export-html
+  :group 'org-export-xhtml
   :type 'boolean)
 
-(defcustom org-export-html-html-helper-timestamp
+(defcustom org-export-xhtml-html-helper-timestamp
   "<br/><br/><hr/><p><!-- hhmts start --> <!-- hhmts end --></p>\n"
   "The HTML tag used as timestamp delimiter for HTML-helper-mode."
-  :group 'org-export-html
+  :group 'org-export-xhtml
   :type 'string)
 
-(defcustom org-export-html-protect-char-alist
+(defcustom org-export-xhtml-protect-char-alist
   '(("&" . "&amp;")
     ("<" . "&lt;")
     (">" . "&gt;"))
@@ -571,12 +571,12 @@ a file."
   :type '(repeat (cons (string :tag "Character")
 		       (string :tag "HTML equivalent"))))
 
-(defgroup org-export-htmlize nil
+(defgroup org-export-xhtmlize nil
   "Options for processing examples with htmlize.el."
   :tag "Org Export Htmlize"
-  :group 'org-export-html)
+  :group 'org-export-xhtml)
 
-(defcustom org-export-htmlize-output-type 'inline-css
+(defcustom org-export-xhtmlize-output-type 'inline-css
   "Output type to be used by htmlize when formatting code snippets.
 Choices are `css', to export the CSS selectors only, or `inline-css', to
 export the CSS attribute values inline in the HTML.  We use as default
@@ -591,16 +591,16 @@ a style file to define the look of these classes.
 To get a start for your css file, start Emacs session and make sure that
 all the faces you are interested in are defined, for example by loading files
 in all modes you want.  Then, use the command
-\\[org-export-htmlize-generate-css] to extract class definitions."
-  :group 'org-export-htmlize
+\\[org-export-xhtmlize-generate-css] to extract class definitions."
+  :group 'org-export-xhtmlize
   :type '(choice (const css) (const inline-css)))
 
-(defcustom org-export-htmlize-css-font-prefix "org-"
+(defcustom org-export-xhtmlize-css-font-prefix "org-"
   "The prefix for CSS class names for htmlize font specifications."
-  :group 'org-export-htmlize
+  :group 'org-export-xhtmlize
   :type 'string)
 
-(defcustom org-export-htmlized-org-css-url nil
+(defcustom org-export-xhtmlized-org-css-url nil
   "URL pointing to a CSS file defining text colors for htmlized Emacs buffers.
 Normally when creating an htmlized version of an Org buffer, htmlize will
 create CSS to define the font colors.  However, this does not work when
@@ -609,22 +609,22 @@ with different fontification setup work on the same website.
 When this variable is non-nil, creating an htmlized version of an Org buffer
 using `org-export-as-org' will remove the internal CSS section and replace it
 with a link to this URL."
-  :group 'org-export-htmlize
+  :group 'org-export-xhtmlize
   :type '(choice
 	  (const :tag "Keep internal css" nil)
 	  (string :tag "URL or local href")))
 
 ;;; Hooks
 
-(defvar org-export-html-after-blockquotes-hook nil
+(defvar org-export-xhtml-after-blockquotes-hook nil
   "Hook run during HTML export, after blockquote, verse, center are done.")
 
-(defvar org-export-html-final-hook nil
+(defvar org-export-xhtml-final-hook nil
   "Hook run at the end of HTML export, in the new buffer.")
 
 ;;; HTML export
 
-(defun org-export-html-preprocess (parameters)
+(defun org-export-xhtml-preprocess (parameters)
   "Convert LaTeX fragments to images."
   (when (and org-current-export-file
 	     (plist-get parameters :LaTeX-fragments))
@@ -653,6 +653,8 @@ with a link to this URL."
 
 (defvar html-table-tag nil) ; dynamically scoped into this.
 
+
+;; FIXME: it already exists in org-html.el
 (defconst org-html-cvt-link-fn
    nil
    "Function to convert link URLs to exportable URLs.
@@ -661,14 +663,16 @@ Returns exportable url as (TYPE PATH), or nil to signal that it
 didn't handle this case.
 Intended to be locally bound around a call to `org-export-as-html'." )
 
+
+;; FIXME: it already exists in org-html.el
 (defun org-html-cvt-org-as-html (opt-plist type path)
    "Convert an org filename to an equivalent html filename.
 If TYPE is not file, just return `nil'.
-See variable `org-export-html-link-org-files-as-html'"
+See variable `org-export-xhtml-link-org-files-as-html'"
 
    (save-match-data
       (and
-	 org-export-html-link-org-files-as-html
+	 org-export-xhtml-link-org-files-as-html
 	 (string= type "file")
 	 (string-match "\\.org$" path)
 	 (progn
@@ -763,6 +767,8 @@ MAY-INLINE-P allows inlining it as an image."
   ;; FIXME: alt text missing here?
   (org-xhtml-format-tags "<img src=\"%s\" alt=\"\"/>" "" desc))
 
+
+;; FIXME: the org-lparse defvar belongs to org-lparse.el
 (defvar org-lparse-link-description-is-image)
 
 (defun org-xhtml-format-image (src)
@@ -797,7 +803,7 @@ MAY-INLINE-P allows inlining it as an image."
 	      (buffer-string))
 	  img)))))
 
-(defun org-export-html-get-bibliography ()
+(defun org-export-xhtml-get-bibliography ()
   "Find bibliography, cut it out and return it."
   (catch 'exit
     (let (beg end (cnt 1) bib)
@@ -851,6 +857,8 @@ NO-CSS is passed to the exporter."
 	 (org-xhtml-format-table-no-css no-css))
     (org-lparse-format-org-table lines splice)))
 
+
+;; FIXME: it already exists in org-html.el
 (defun org-export-splice-attributes (tag attributes)
   "Read attributes in string ATTRIBUTES, add and replace in HTML tag TAG."
   (if (not attributes)
@@ -877,6 +885,8 @@ NO-CSS is passed to the exporter."
 	  (org-lparse-get 'ENTITY-FORMAT)))
     (org-lparse-format-table-table lines)))
 
+
+;; FIXME: it already exists in org-html.el
 (defun org-export-splice-style (style extra)
   "Splice EXTRA into STYLE, just before \"</style>\"."
   (if (and (stringp extra)
@@ -888,12 +898,12 @@ NO-CSS is passed to the exporter."
     style))
 
 (defvar htmlize-buffer-places)  ; from htmlize.el
-(defun org-export-htmlize-region-for-paste (beg end)
+(defun org-export-xhtmlize-region-for-paste (beg end)
   "Convert the region to HTML, using htmlize.el.
 This is much like `htmlize-region-for-paste', only that it uses
 the settings define in the org-... variables."
-  (let* ((htmlize-output-type org-export-htmlize-output-type)
-	 (htmlize-css-name-prefix org-export-htmlize-css-font-prefix)
+  (let* ((htmlize-output-type org-export-xhtmlize-output-type)
+	 (htmlize-css-name-prefix org-export-xhtmlize-css-font-prefix)
 	 (htmlbuf (htmlize-region beg end)))
     (unwind-protect
 	(with-current-buffer htmlbuf
@@ -902,7 +912,7 @@ the settings define in the org-... variables."
       (kill-buffer htmlbuf))))
 
 ;;;###autoload
-(defun org-export-htmlize-generate-css ()
+(defun org-export-xhtmlize-generate-css ()
   "Create the CSS for all font definitions in the current Emacs session.
 Use this to create face definitions in your CSS style file that can then
 be used by code snippets transformed by htmlize.
@@ -910,8 +920,8 @@ This command just produces a buffer that contains class definitions for all
 faces used in the current Emacs session.  You can copy and paste the ones you
 need into your CSS file.
 
-If you then set `org-export-htmlize-output-type' to `css', calls to
-the function `org-export-htmlize-region-for-paste' will produce code
+If you then set `org-export-xhtmlize-output-type' to `css', calls to
+the function `org-export-xhtmlize-region-for-paste' will produce code
 that uses these same face definitions."
   (interactive)
   (require 'htmlize)
@@ -940,6 +950,8 @@ that uses these same face definitions."
 
 ;; Following variable is let bound when `org-do-lparse' is in
 ;; progress. See org-lparse.el.
+
+;; FIXME: the org-lparse defvar belongs to org-lparse.el
 (defvar org-lparse-toc)
 (defvar org-lparse-footnote-buffer)
 (defvar org-lparse-footnote-definitions)
@@ -978,7 +990,7 @@ that uses these same face definitions."
     (kill-buffer org-lparse-footnote-buffer))
 
   ;; Run the hook
-  (run-hooks 'org-export-html-final-hook))
+  (run-hooks 'org-export-xhtml-final-hook))
 
 (defun org-xhtml-format-toc-entry (snumber todo headline tags href)
   (setq headline (concat
@@ -1186,7 +1198,7 @@ make any modifications to the exporter file.  For example,
     (org-lparse-insert-tag "<div id=\"content\">")
     (insert  "\n"
 	     (or (and (or link-up link-home)
-		      (format org-export-html-home/up-format
+		      (format org-export-xhtml-home/up-format
 			      (or link-up link-home)
 			      (or link-home link-up))) "")
 	     "\n"))
@@ -1206,20 +1218,20 @@ make any modifications to the exporter file.  For example,
 					      'mime-charset))
 		      "iso-8859-1"))
 	 (style (concat (if (plist-get opt-plist :style-include-default)
-			    org-export-html-style-default)
+			    org-export-xhtml-style-default)
 			(plist-get opt-plist :style)
 			(plist-get opt-plist :style-extra)
 			"\n"
 			(if (plist-get opt-plist :style-include-scripts)
-			    org-export-html-scripts)))
+			    org-export-xhtml-scripts)))
 	 (mathjax
 	  (if (or (eq (plist-get opt-plist :LaTeX-fragments) 'mathjax)
 		  (and org-export-have-math
 		       (eq (plist-get opt-plist :LaTeX-fragments) t)))
 
-	      (org-export-html-mathjax-config
-	       org-export-html-mathjax-template
-	       org-export-html-mathjax-options
+	      (org-export-xhtml-mathjax-config
+	       org-export-xhtml-mathjax-template
+	       org-export-xhtml-mathjax-options
 	       (or (plist-get opt-plist :mathjax) "")) "")))
     (insert (format
 	     "%s
@@ -1240,11 +1252,11 @@ lang=\"%s\" xml:lang=\"%s\">
 </head>
 "
 	     (format
-	      (or (and (stringp org-export-html-xml-declaration)
-		       org-export-html-xml-declaration)
+	      (or (and (stringp org-export-xhtml-xml-declaration)
+		       org-export-xhtml-xml-declaration)
 		  (cdr (assoc (plist-get opt-plist :html-extension)
-			      org-export-html-xml-declaration))
-		  (cdr (assoc "html" org-export-html-xml-declaration))
+			      org-export-xhtml-xml-declaration))
+		  (cdr (assoc "html" org-export-xhtml-xml-declaration))
 
 		  "")
 	      charset)
@@ -1416,6 +1428,8 @@ lang=\"%s\" xml:lang=\"%s\">
 
 ;; Following variables are let bound when table emission is in
 ;; progress. See org-lparse.el.
+
+;; FIXME: the org-lparse defvar belongs to org-lparse.el
 (defvar org-lparse-table-begin-marker)
 (defvar org-lparse-table-ncols)
 (defvar org-lparse-table-rowgrp-open)
@@ -1492,7 +1506,7 @@ lang=\"%s\" xml:lang=\"%s\">
     (while (re-search-forward "@@class\\([0-9]+\\)@@" nil t)
       (let ((c (string-to-number (match-string 1))))
 	(replace-match
-	 (if org-export-html-table-align-individual-fields
+	 (if org-export-xhtml-table-align-individual-fields
 	     (format (if org-xhtml-format-table-no-css " align=\"%s\""
 		       " class=\"%s\"")
 		     (or (aref org-lparse-table-colalign-vector c) "left")) "")
@@ -1512,7 +1526,7 @@ lang=\"%s\" xml:lang=\"%s\">
      (org-lparse-table-cur-rowgrp-is-hdr
       (org-xhtml-format-tags
        org-export-table-header-tags text  "col" cell-style-cookie))
-     ((and (= c 0) org-export-html-table-use-header-tags-for-first-column)
+     ((and (= c 0) org-export-xhtml-table-use-header-tags-for-first-column)
       (org-xhtml-format-tags
        org-export-table-header-tags text "row" cell-style-cookie))
      (t
@@ -1523,7 +1537,7 @@ lang=\"%s\" xml:lang=\"%s\">
   (org-lparse-begin-paragraph 'footnote)
   (insert
    (format
-    (format org-export-html-footnote-format
+    (format org-export-xhtml-footnote-format
 	    "<a class=\"footnum\" name=\"fn.%s\" href=\"#fnr.%s\">%s</a>")
     n n n)))
 
@@ -1607,14 +1621,14 @@ lang=\"%s\" xml:lang=\"%s\">
 
 (defun org-xhtml-format-footnote-reference (n def refcnt)
   (let ((extra (if (= refcnt 1) "" (format ".%d"  refcnt))))
-    (format org-export-html-footnote-format
+    (format org-export-xhtml-footnote-format
 	    (format
 	     "<a class=\"footref\" name=\"fnr.%s%s\" href=\"#fn.%s\">%s</a>"
 	     n extra n n))))
 
 (defun org-xhtml-format-footnotes-section (section-name definitions)
   (if (not definitions) ""
-    (format org-export-html-footnotes-section section-name definitions)))
+    (format org-export-xhtml-footnotes-section section-name definitions)))
 
 (defun org-xhtml-format-org-entity (wd)
   (org-entity-get-representation wd 'html))
@@ -1639,26 +1653,26 @@ lang=\"%s\" xml:lang=\"%s\">
     (EXPORT-BUFFER-NAME "*Org HTML Export*")
     (ENTITY-CONTROL org-xhtml-entity-control-callbacks-alist)
     (ENTITY-FORMAT org-xhtml-entity-format-callbacks-alist)
-    (TOPLEVEL-HLEVEL org-export-html-toplevel-hlevel)
-    (SPECIAL-STRING-REGEXPS org-export-html-special-string-regexps)
-    (CODING-SYSTEM-FOR-WRITE org-export-html-coding-system)
-    (CODING-SYSTEM-FOR-SAVE org-export-html-coding-system)
-    (INLINE-IMAGES org-export-html-inline-images)
-    (INLINE-IMAGE-EXTENSIONS org-export-html-inline-image-extensions)
-    (PLAIN-TEXT-MAP org-export-html-protect-char-alist)
+    (TOPLEVEL-HLEVEL org-export-xhtml-toplevel-hlevel)
+    (SPECIAL-STRING-REGEXPS org-export-xhtml-special-string-regexps)
+    (CODING-SYSTEM-FOR-WRITE org-export-xhtml-coding-system)
+    (CODING-SYSTEM-FOR-SAVE org-export-xhtml-coding-system)
+    (INLINE-IMAGES org-export-xhtml-inline-images)
+    (INLINE-IMAGE-EXTENSIONS org-export-xhtml-inline-image-extensions)
+    (PLAIN-TEXT-MAP org-export-xhtml-protect-char-alist)
     (TABLE-FIRST-COLUMN-AS-LABELS
-     org-export-html-table-use-header-tags-for-first-column)
-    (TODO-KWD-CLASS-PREFIX org-export-html-todo-kwd-class-prefix)
-    (TAG-CLASS-PREFIX org-export-html-tag-class-prefix)
-    (FOOTNOTE-SEPARATOR org-export-html-footnote-separator)
+     org-export-xhtml-table-use-header-tags-for-first-column)
+    (TODO-KWD-CLASS-PREFIX org-export-xhtml-todo-kwd-class-prefix)
+    (TAG-CLASS-PREFIX org-export-xhtml-tag-class-prefix)
+    (FOOTNOTE-SEPARATOR org-export-xhtml-footnote-separator)
     (t (error "Unknown property: %s"  what))))
 
 (defun org-xhtml-get-coding-system-for-write ()
-  (or org-export-html-coding-system
+  (or org-export-xhtml-coding-system
       (and (boundp 'buffer-file-coding-system) buffer-file-coding-system)))
 
 (defun org-xhtml-get-coding-system-for-save ()
-  (or org-export-html-coding-system
+  (or org-export-xhtml-coding-system
       (and (boundp 'buffer-file-coding-system) buffer-file-coding-system)))
 
 (defun org-xhtml-insert-toc (toc)
@@ -1696,8 +1710,8 @@ lang=\"%s\" xml:lang=\"%s\">
 	     (insert
 	      (format-spec
 	       (or (cadr (assoc (nth 0 lang-words)
-				org-export-html-preamble-format))
-		   (cadr (assoc "en" org-export-html-preamble-format)))
+				org-export-xhtml-preamble-format))
+		   (cadr (assoc "en" org-export-xhtml-preamble-format)))
 	       `((?t . ,title) (?a . ,author)
 		 (?d . ,date) (?e . ,email)))))))))
 
@@ -1708,7 +1722,7 @@ lang=\"%s\" xml:lang=\"%s\">
       'FOOTNOTES-SECTION (nth 4 (plist-get opt-plist :lang-words))
       (mapconcat (lambda (x) (cdr x))
 		 (nreverse org-lparse-footnote-definitions) "\n"))))
-  (let ((bib (org-export-html-get-bibliography)))
+  (let ((bib (org-export-xhtml-get-bibliography)))
     (when bib
       (insert "\n" bib "\n")))
 
@@ -1719,7 +1733,7 @@ lang=\"%s\" xml:lang=\"%s\">
 	   (author (plist-get opt-plist :author))
 	   (email  (plist-get opt-plist :email))
 	   (lang-words (plist-get opt-plist :lang-words))
-	   (html-validation-link (or org-export-html-validation-link ""))
+	   (html-validation-link (or org-export-xhtml-validation-link ""))
 	   (email
 	    (mapconcat (lambda(e)
 			 (format "<a href=\"mailto:%s\">%s</a>" e e))
@@ -1756,16 +1770,15 @@ lang=\"%s\" xml:lang=\"%s\">
 	       (insert "<div id=\"postamble\">\n")
 	       (insert (format-spec
 			(or (cadr (assoc (nth 0 lang-words)
-					 org-export-html-postamble-format))
-			    (cadr (assoc "en" org-export-html-postamble-format)))
+					 org-export-xhtml-postamble-format))
+			    (cadr (assoc "en" org-export-xhtml-postamble-format)))
 			`((?a . ,author) (?e . ,email)
 			  (?d . ,date)   (?c . ,creator-info)
 			  (?v . ,html-validation-link))))
 	       (insert "</div>"))))))
 
-  (if org-export-html-with-timestamp
-      (insert org-export-html-html-helper-timestamp)))
-
+  (if org-export-xhtml-with-timestamp
+      (insert org-export-xhtml-html-helper-timestamp)))
 
 ;; There are references to org-html-expand, org-html-protect and
 ;; org-html-do-expand outside of org-html.el. For now provide a
@@ -1783,15 +1796,15 @@ lang=\"%s\" xml:lang=\"%s\">
 ;;   "A simple wrapper around `org-xml-encode-org-text'."
 ;;   (org-xml-encode-org-text s))
 
-;; (defun org-export-html-format-href (s)
+;; (defun org-export-xhtml-format-href (s)
 ;;   "A simple wrapper around `org-xml-format-href'."
 ;;   (org-xml-format-href s))
 
-;; (defun org-export-html-format-desc (s)
+;; (defun org-export-xhtml-format-desc (s)
 ;;   "A simple wrapper around `org-xml-format-desc'."
 ;;   (org-xml-format-desc s))
 
 (provide 'org-xhtml)
 
 ;; arch-tag: 8109d84d-eb8f-460b-b1a8-f45f3a6c7ea1
-;;; org-html.el ends here
+;;; org-xhtml.el ends here
