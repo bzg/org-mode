@@ -8776,9 +8776,9 @@ but not any simpler
 @cindex footnotes, markup rules
 @cindex @file{footnote.el}
 
-Footnotes defined in the way described in @ref{Footnotes}, will be exported by
-all backends.  Org allows multiple references to the same note, and
-different backends support this to varying degrees.
+Footnotes defined in the way described in @ref{Footnotes}, will be exported
+by all backends.  Org allows multiple references to the same note, and
+multiple footnotes side by side.
 
 @node Emphasis and monospace, Horizontal rules, Footnote markup, Structural markup elements
 @subheading Emphasis and monospace
