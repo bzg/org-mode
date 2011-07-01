@@ -1,0 +1,152 @@
+  <!-- scripts -->
+  <office:scripts/>
+
+  <!-- font face declarations -->
+  <office:font-face-decls>
+    <style:font-face style:name="Tahoma1" svg:font-family="Tahoma"/>
+    <style:font-face style:name="courier" svg:font-family="courier, monospace"/>
+    <style:font-face style:name="Arial Unicode MS" svg:font-family="&apos;Arial Unicode MS&apos;" style:font-pitch="variable"/>
+    <style:font-face style:name="HG Mincho Light J" svg:font-family="&apos;HG Mincho Light J&apos;" style:font-pitch="variable"/>
+    <style:font-face style:name="Thorndale" svg:font-family="Thorndale" style:font-family-generic="roman" style:font-pitch="variable"/>
+    <style:font-face style:name="Times New Roman" svg:font-family="&apos;Times New Roman&apos;" style:font-family-generic="roman" style:font-pitch="variable"/>
+    <style:font-face style:name="Albany" svg:font-family="Albany" style:font-family-generic="swiss" style:font-pitch="variable"/>
+    <style:font-face style:name="SimSun" svg:font-family="SimSun" style:font-family-generic="system" style:font-pitch="variable"/>
+    <style:font-face style:name="Tahoma" svg:font-family="Tahoma" style:font-family-generic="system" style:font-pitch="variable"/>
+  </office:font-face-decls>
+
+  <!-- automatic styles -->
+  <office:automatic-styles>
+  <style:style style:name="OrgTable" style:family="table">
+   <style:table-properties style:width="12cm" table:align="center"/>
+  </style:style>
+  <style:style style:name="OrgTblCell" style:family="table-cell">
+      <style:table-cell-properties style:vertical-align="middle" fo:padding="0.159cm" fo:border-top="none" fo:border-bottom="none" fo:border-left="none" fo:border-right="none"/>
+    </style:style>
+  <style:style style:name="OrgTblCellL" style:family="table-cell">
+      <style:table-cell-properties style:vertical-align="middle" fo:padding="0.159cm" fo:border-top="none" fo:border-bottom="none" fo:border-left="0.035cm solid #808080" fo:border-right="none"/>
+    </style:style>
+  <style:style style:name="OrgTblCellR" style:family="table-cell">
+      <style:table-cell-properties style:vertical-align="middle" fo:padding="0.159cm" fo:border-top="none" fo:border-bottom="none" fo:border-left="none" fo:border-right="0.035cm solid #808080"/>
+    </style:style>
+  <style:style style:name="OrgTblCellLR" style:family="table-cell">
+      <style:table-cell-properties style:vertical-align="middle" fo:padding="0.159cm" fo:border-top="none" fo:border-bottom="none" fo:border-left="0.035cm solid #808080" fo:border-right="0.035cm solid #808080"/>
+    </style:style>
+  <style:style style:name="OrgTblCellT" style:family="table-cell">
+      <style:table-cell-properties style:vertical-align="middle" fo:padding="0.159cm" fo:border-top="0.035cm solid #808080" fo:border-bottom="none" fo:border-left="none" fo:border-right="none"/>
+    </style:style>
+  <style:style style:name="OrgTblCellTL" style:family="table-cell">
+      <style:table-cell-properties style:vertical-align="middle" fo:padding="0.159cm" fo:border-top="0.035cm solid #808080" fo:border-bottom="none" fo:border-left="0.035cm solid #808080" fo:border-right="none"/>
+    </style:style>
+  <style:style style:name="OrgTblCellTR" style:family="table-cell">
+      <style:table-cell-properties style:vertical-align="middle" fo:padding="0.159cm" fo:border-top="0.035cm solid #808080" fo:border-bottom="none" fo:border-left="none" fo:border-right="0.035cm solid #808080"/>
+    </style:style>
+  <style:style style:name="OrgTblCellTLR" style:family="table-cell">
+      <style:table-cell-properties style:vertical-align="middle" fo:padding="0.159cm" fo:border-top="0.035cm solid #808080" fo:border-bottom="none" fo:border-left="0.035cm solid #808080" fo:border-right="0.035cm solid #808080"/>
+    </style:style>
+  <style:style style:name="OrgTblCellB" style:family="table-cell">
+      <style:table-cell-properties style:vertical-align="middle" fo:padding="0.159cm" fo:border-top="none" fo:border-bottom="0.035cm solid #808080" fo:border-left="none" fo:border-right="none"/>
+    </style:style>
+  <style:style style:name="OrgTblCellBL" style:family="table-cell">
+      <style:table-cell-properties style:vertical-align="middle" fo:padding="0.159cm" fo:border-top="none" fo:border-bottom="0.035cm solid #808080" fo:border-left="0.035cm solid #808080" fo:border-right="none"/>
+    </style:style>
+  <style:style style:name="OrgTblCellBR" style:family="table-cell">
+      <style:table-cell-properties style:vertical-align="middle" fo:padding="0.159cm" fo:border-top="none" fo:border-bottom="0.035cm solid #808080" fo:border-left="none" fo:border-right="0.035cm solid #808080"/>
+    </style:style>
+  <style:style style:name="OrgTblCellBLR" style:family="table-cell">
+      <style:table-cell-properties style:vertical-align="middle" fo:padding="0.159cm" fo:border-top="none" fo:border-bottom="0.035cm solid #808080" fo:border-left="0.035cm solid #808080" fo:border-right="0.035cm solid #808080"/>
+    </style:style>
+  <style:style style:name="OrgTblCellTB" style:family="table-cell">
+      <style:table-cell-properties style:vertical-align="middle" fo:padding="0.159cm" fo:border-top="0.035cm solid #808080" fo:border-bottom="0.035cm solid #808080" fo:border-left="none" fo:border-right="none"/>
+    </style:style>
+  <style:style style:name="OrgTblCellTBL" style:family="table-cell">
+      <style:table-cell-properties style:vertical-align="middle" fo:padding="0.159cm" fo:border-top="0.035cm solid #808080" fo:border-bottom="0.035cm solid #808080" fo:border-left="0.035cm solid #808080" fo:border-right="none"/>
+    </style:style>
+  <style:style style:name="OrgTblCellTBR" style:family="table-cell">
+      <style:table-cell-properties style:vertical-align="middle" fo:padding="0.159cm" fo:border-top="0.035cm solid #808080" fo:border-bottom="0.035cm solid #808080" fo:border-left="none" fo:border-right="0.035cm solid #808080"/>
+    </style:style>
+  <style:style style:name="OrgTblCellTBLR" style:family="table-cell">
+      <style:table-cell-properties style:vertical-align="middle" fo:padding="0.159cm" fo:border-top="0.035cm solid #808080" fo:border-bottom="0.035cm solid #808080" fo:border-left="0.035cm solid #808080" fo:border-right="0.035cm solid #808080"/>
+    </style:style>
+    <style:style style:name="OrgFrame" 
+		 style:family="graphic" 
+		 style:parent-style-name="Frame">
+      <style:graphic-properties fo:margin-left="0cm" 
+				fo:margin-right="0cm" 
+				fo:margin-top="0cm" 
+				fo:margin-bottom="0cm" 
+				style:run-through="foreground" 
+				style:wrap="none" 
+				style:vertical-pos="top" 
+				style:vertical-rel="paragraph" 
+				style:horizontal-pos="center" 
+				style:horizontal-rel="paragraph" 
+				fo:padding="0cm" fo:border="none" 
+				style:shadow="none"/>
+    </style:style>
+
+    <style:style style:name="OrgGraphicsParagraphContent" 
+		 style:family="graphic" 
+		 style:parent-style-name="Graphics">
+      <style:graphic-properties fo:margin-left="0cm" 
+				fo:margin-right="0cm" 
+				fo:margin-top="0cm" 
+				fo:margin-bottom="0cm" 
+				style:run-through="foreground" 
+				style:wrap="none" 
+				style:vertical-pos="from-top" 
+				style:vertical-rel="paragraph-content" 
+				style:horizontal-pos="from-left" 
+				style:horizontal-rel="paragraph-content" 
+				fo:padding="0cm" 
+				fo:border="none" 
+				style:shadow="none" 
+				style:mirror="none" 
+				fo:clip="rect(0cm, 0cm, 0cm, 0cm)" 
+				draw:luminance="0%" 
+				draw:contrast="0%" 
+				draw:red="0%" 
+				draw:green="0%" 
+				draw:blue="0%" 
+				draw:gamma="100%" 
+				draw:color-inversion="false" 
+				draw:image-opacity="100%" 
+				draw:color-mode="standard"/>
+    </style:style>
+
+    <style:style style:name="OrgGraphicsBaseline" 
+		 style:family="graphic" 
+		 style:parent-style-name="Graphics">
+      <style:graphic-properties style:vertical-pos="top" 
+				style:vertical-rel="baseline" 
+				style:mirror="none" 
+				fo:clip="rect(0cm, 0cm, 0cm, 0cm)" 
+				draw:luminance="0%" 
+				draw:contrast="0%" 
+				draw:red="0%" 
+				draw:green="0%" 
+				draw:blue="0%" 
+				draw:gamma="100%" 
+				draw:color-inversion="false" 
+				draw:image-opacity="100%" 
+				draw:color-mode="standard"/>
+    </style:style>
+
+    <style:style style:name="OrgGraphicsParagraph" 
+		 style:family="graphic" 
+		 style:parent-style-name="Graphics">
+      <style:graphic-properties style:horizontal-pos="center" 
+				style:horizontal-rel="paragraph" 
+				style:mirror="none" 
+				fo:clip="rect(0cm, 0cm, 0cm, 0cm)" 
+				draw:luminance="0%" 
+				draw:contrast="0%" 
+				draw:red="0%" 
+				draw:green="0%" 
+				draw:blue="0%" 
+				draw:gamma="100%" 
+				draw:color-inversion="false" 
+				draw:image-opacity="100%" 
+				draw:color-mode="standard"/>
+    </style:style>
+
+  </office:automatic-styles>
