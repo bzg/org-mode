@@ -2430,7 +2430,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
      (replace-match "")))
 
   ;; When converting to LaTeX, replace footnotes.
-  (when (plist-get opt-plist :footnotes)
+  (when (plist-get parameters :footnotes)
     (goto-char (point-min))
     (let (ref)
       (while (setq ref (org-footnote-get-next-reference))
