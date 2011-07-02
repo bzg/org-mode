@@ -11851,6 +11851,9 @@ be removed."
 			    (and (eq what 'closed) org-log-done-with-time))
 			(eq what 'closed)
 			nil nil (list org-end-time-was-given)))
+	      (insert 
+	       (if (not (or (bolp) (eq (char-before) ?\ )
+			    (eq (char-after) ?\ ))) " " ""))
 	      (end-of-line 1))
 	    (goto-char (point-min))
 	    (widen)
