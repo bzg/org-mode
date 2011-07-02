@@ -50,8 +50,6 @@
 ;;; See README.org file that comes with this library for answers to
 ;;; FAQs and more information on using this library.
 
-;;; Use M-x `org-odt-unit-test' for test driving the odt exporter
-
 ;;; Code:
 
 (require 'org-exp)
@@ -59,10 +57,11 @@
 
 ;;;###autoload
 (defun org-lparse-and-open (target-backend native-backend arg)
-  "Export the outline as HTML and immediately open it with a browser.
-If there is an active region, export only the region.
-The prefix ARG specifies how many levels of the outline should become
-headlines.  The default is 3.  Lower levels will become bulleted lists."
+  "Export the outline to TARGET-BACKEND via NATIVE-BACKEND and open exported file.
+If there is an active region, export only the region.  The prefix
+ARG specifies how many levels of the outline should become
+headlines.  The default is 3.  Lower levels will become bulleted
+lists."
   ;; (interactive "Mbackend: \nP")
   (interactive
    (let* ((input (if (featurep 'ido) 'ido-completing-read 'completing-read))
@@ -102,8 +101,9 @@ emacs   --batch
 
 ;;;###autoload
 (defun org-lparse-to-buffer (backend arg)
-  "Call `org-lparse` with output to a temporary buffer.
-No file is created.  The prefix ARG is passed through to `org-lparse'."
+  "Call `org-lparse' with output to a temporary buffer.
+No file is created.  The prefix ARG is passed through to
+`org-lparse'."
   (interactive "Mbackend: \nP")
   (let ((tempbuf (format "*Org %s Export*" (upcase backend))))
       (org-lparse backend backend arg nil nil tempbuf)
@@ -508,9 +508,36 @@ then that converter is used.  Otherwise
 (defvar org-lparse-toc)
 (defvar org-lparse-entity-control-callbacks-alist)
 (defvar org-lparse-entity-format-callbacks-alist)
-(defvar org-lparse-backend)
-(defvar org-lparse-body-only)
-(defvar org-lparse-to-buffer)
+(defvar org-lparse-backend nil
+  "The native backend to which the document is currently exported.
+This variable is let bound during `org-lparse'.  Valid values are
+one of the symbols corresponding to `org-lparse-native-backends'.
+
+Compare this variable with `org-export-current-backend' which is
+bound only during `org-export-preprocess-string' stage of the
+export process.
+
+See also `org-lparse-other-backend'.")
+
+(defvar org-lparse-other-backend nil
+  "The target backend to which the document is currently exported.
+This variable is let bound during `org-lparse'.  This variable is
+set to either `org-lparse-backend' or one of the symbols
+corresponding to OTHER-BACKENDS specification of the
+org-lparse-backend.
+
+For example, if a document is exported to \"odt\" then both
+org-lparse-backend and org-lparse-other-backend are bound to
+'odt.  On the other hand, if a document is exported to \"odt\"
+and then converted to \"doc\" then org-lparse-backend is set to
+'odt and org-lparse-other-backend is set to 'doc.")
+
+(defvar org-lparse-body-only nil
+  "Bind this to BODY-ONLY arg of `org-lparse'.")
+
+(defvar org-lparse-to-buffer nil
+  "Bind this to TO-BUFFER arg of `org-lparse'.")
+
 (defun org-do-lparse (arg &optional hidden ext-plist
 			  to-buffer body-only pub-dir)
   "Export the outline to various formats.
@@ -1240,6 +1267,7 @@ But it has the disadvantage, that no cell- or row-spanning is allowed."
     (org-lparse-do-format-table-table lines)
     (buffer-substring-no-properties (point-min) (point-max))))
 
+(defvar table-source-languages)		; defined in table.el
 (defun org-lparse-format-table-table-using-table-generate-source (backend
 								 lines
 								 &optional
@@ -1948,7 +1976,7 @@ Replaces invalid characters with \"_\"."
 
 (defun org-lparse-format-section-number (&optional snumber level)
   (and org-export-with-section-numbers
-       (not body-only) snumber level
+       (not org-lparse-body-only) snumber level
        (org-lparse-format 'FONTIFY snumber (format "section-number-%d" level))))
 
 (defun org-lparse-warn (msg)

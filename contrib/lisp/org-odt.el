@@ -27,8 +27,6 @@
 ;;
 ;;; Commentary:
 
-;;; Use M-x `org-odt-unit-test' to test drive the exporter
-
 ;;; Code:
 (eval-when-compile (require 'cl))
 (require 'org-lparse)
@@ -1498,15 +1496,6 @@ To disable outline numbering pass a LEVEL of 0."
 	(when (> (string-to-number (match-string 1)) level)
 	  (replace-match replacement t nil))))
     (save-buffer 0)))
-
-;;;###autoload
-(defun org-odt-unit-test (&optional linger)
-  "Automatically visit the Unit Test file and export it."
-  (interactive "P")
-  (with-current-buffer
-      (find-file (expand-file-name "tests/test.org" org-odt-data-dir))
-    (unless linger
-      (call-interactively 'org-export-as-odt-and-open))))
 
 (provide 'org-odt)
 
