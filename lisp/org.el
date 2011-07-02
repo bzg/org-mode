@@ -5207,7 +5207,7 @@ will be prompted for."
 	      (add-text-properties end1 (+ end 1) '(face org-meta-line))
 					; for end_src
 	      (cond
-	       ((and lang (not (string= lang "") org-src-fontify-natively))
+	       ((and lang (not (string= lang "")) org-src-fontify-natively)
 		(org-src-font-lock-fontify-block lang block-start block-end)
 		;; remove old background overlays
 		(mapc (lambda (ov)
