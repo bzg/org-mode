@@ -11828,7 +11828,6 @@ be removed."
 	    (setq list (cons what remove))
 	    (while list
 	      (setq elt (pop list))
-	      (goto-char (point-min))
 	      (when (or (and (eq elt 'scheduled)
 			     (re-search-forward org-scheduled-time-regexp nil t))
 			(and (eq elt 'deadline)
@@ -11836,10 +11835,8 @@ be removed."
 			(and (eq elt 'closed)
 			     (re-search-forward org-closed-time-regexp nil t)))
 		(replace-match "")
-		(if (looking-at "--+<[^>]+>") (replace-match ""))
-		(skip-chars-backward " ")
-		(if (looking-at " +") (replace-match ""))))
-	    (goto-char (point-max))
+		(if (looking-at "--+<[^>]+>") (replace-match ""))))
+	    (and (looking-at "^[ \t]+") (replace-match ""))
 	    (and org-adapt-indentation (bolp) (org-indent-to-column col))
 	    (when what
 	      (insert
