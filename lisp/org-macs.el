@@ -113,6 +113,7 @@ Also, do not record undo information."
 
 (defmacro org-without-partial-completion (&rest body)
   `(if (and (boundp 'partial-completion-mode)
+	    partial-completion-mode
 	    (fboundp 'partial-completion-mode))
      (unwind-protect
 	 (progn
