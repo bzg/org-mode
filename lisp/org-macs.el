@@ -112,13 +112,14 @@ Also, do not record undo information."
        (org-move-to-column _col))))
 
 (defmacro org-without-partial-completion (&rest body)
-  `(when (and (boundp 'partial-completion-mode)
-	      (fboundp 'partial-completion-mode))
+  `(if (and (boundp 'partial-completion-mode)
+	    (fboundp 'partial-completion-mode))
      (unwind-protect
 	 (progn
 	   (partial-completion-mode -1)
 	   ,@body)
-       (partial-completion-mode 1))))
+       (partial-completion-mode 1))
+     ,@body))
 
 (defmacro org-maybe-intangible (props)
   "Add '(intangible t) to PROPS if Emacs version is earlier than Emacs 22.
