@@ -565,6 +565,7 @@ a file."
     ("<" . "&lt;")
     (">" . "&gt;"))
   "Alist of characters to be converted by `org-html-protect'."
+  :group 'org-export-html
   :type '(repeat (cons (string :tag "Character")
 		       (string :tag "HTML equivalent"))))
 
