@@ -192,7 +192,7 @@ constructs (header arguments, no-web syntax etc...) are ignored."
     (save-excursion
       ;; export to latex w/org and save as .lhs
       (find-file tmp-org-file) (funcall 'org-export-as-latex nil)
-      (kill-buffer)
+      (kill-buffer nil)
       (delete-file tmp-org-file)
       (find-file tmp-tex-file)
       (goto-char (point-min)) (forward-line 2)
@@ -202,7 +202,7 @@ constructs (header arguments, no-web syntax etc...) are ignored."
         (replace-match (save-match-data (org-remove-indentation (match-string 0)))
                        t t))
       (setq contents (buffer-string))
-      (save-buffer) (kill-buffer))
+      (save-buffer) (kill-buffer nil))
     (delete-file tmp-tex-file)
     ;; save org exported latex to a .lhs file
     (with-temp-file lhs-file (insert contents))
