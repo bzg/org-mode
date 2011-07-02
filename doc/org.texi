@@ -574,6 +574,7 @@ Exporting
 * HTML export::                 Exporting to HTML
 * LaTeX and PDF export::        Exporting to @LaTeX{}, and processing to PDF
 * DocBook export::              Exporting to DocBook
+* OpenDocumentText export::     Exporting to OpenDocumentText
 * TaskJuggler export::          Exporting to TaskJuggler
 * Freemind export::             Exporting to Freemind mind maps
 * XOXO export::                 Exporting to XOXO
@@ -609,6 +610,16 @@ DocBook export
 * Tables in DocBook export::    Tables are exported as HTML tables
 * Images in DocBook export::    How to insert figures into DocBook output
 * Special characters::          How to handle special characters
+
+OpenDocument export
+
+* OpenDocumentText export commands::    How to invoke OpenDocumentText export
+* Applying Custom Styles::      How to apply custom styles to the output
+* Converting to Other formats:: How to convert to formats like doc, docx etc
+* Links in OpenDocumentText export::  How links will be interpreted and formatted
+* Tables in OpenDocumentText export::    How Tables are handled
+* Images in OpenDocumentText export::    How to insert figures
+* Additional Documentation::          How to handle special characters
 
 Publishing
 
@@ -9378,11 +9389,13 @@ the web, while the XOXO format provides a solid base for exchange with a
 broad range of other applications.  @LaTeX{} export lets you use Org-mode and
 its structured editing functions to easily create @LaTeX{} files.  DocBook
 export makes it possible to convert Org files to many other formats using
-DocBook tools.  For project management you can create gantt and resource
-charts by using TaskJuggler export.  To incorporate entries with associated
-times like deadlines or appointments into a desktop calendar program like
-iCal, Org-mode can also produce extracts in the iCalendar format.  Currently
-Org-mode only supports export, not import of these different formats.
+DocBook tools.  OpenDocumentText export allows seamless colloboration across
+organizational boundaries.  For project management you can create gantt and
+resource charts by using TaskJuggler export.  To incorporate entries with
+associated times like deadlines or appointments into a desktop calendar
+program like iCal, Org-mode can also produce extracts in the iCalendar
+format.  Currently Org-mode only supports export, not import of these
+different formats.
 
 Org supports export of selected regions when @code{transient-mark-mode} is
 enabled (default in Emacs 23).
@@ -9395,6 +9408,7 @@ enabled (default in Emacs 23).
 * HTML export::                 Exporting to HTML
 * LaTeX and PDF export::        Exporting to @LaTeX{}, and processing to PDF
 * DocBook export::              Exporting to DocBook
+* OpenDocumentText export::     Exporting to OpenDocumentText
 * TaskJuggler export::          Exporting to TaskJuggler
 * Freemind export::             Exporting to Freemind mind maps
 * XOXO export::                 Exporting to XOXO
@@ -10416,7 +10430,7 @@ Here is a simple example Org document that is intended for beamer export.
 
 For more information, see the documentation on Worg.
 
-@node DocBook export, TaskJuggler export, LaTeX and PDF export, Exporting
+@node DocBook export, OpenDocumentText export, LaTeX and PDF export, Exporting
 @section DocBook export
 @cindex DocBook export
 @cindex PDF export
@@ -10613,7 +10627,156 @@ special characters included in XHTML entities:
 "
 @end example
 
-@node  TaskJuggler export, Freemind export, DocBook export, Exporting
+@c begin opendocument
+
+@node OpenDocumentText export, TaskJuggler export, DocBook export, Exporting
+@section OpenDocumentText export
+@cindex OpenDocumentText export
+@cindex K, Jambunathan
+
+Org-mode 7.6 supports export to OpenDocumentText format using
+@file{org-odt.el} module contributed by Jambunathan K.  This module can be
+enabled in one of the following ways based on your mode of installation.
+
+@enumerate
+@item
+If you have downloaded the Org from the Web, either as a distribution
+@file{.zip} or @file{.tar} file, or as a Git archive, enable the @code{odt}
+option in variable @code{org-modules}.
+@item
+If you are using Org that comes bundled with Emacs, then you can install the
+OpenDocumentText exporter using the package manager. To do this, customize
+the variable @code{package-archives} to include
+@uref{http://orgmode.org/pkg/releases/} as one of the package archives.
+@end enumerate
+
+@menu
+* OpenDocumentText export commands::How to invoke OpenDocumentText export
+* Applying Custom Styles::      How to apply custom styles to the output
+* Converting to Other formats:: How to convert to formats like doc, docx etc
+* Links in OpenDocumentText export::  How links will be interpreted and formatted
+* Tables in OpenDocumentText export::    Tables are exported as HTML tables
+* Images in OpenDocumentText export::    How to insert figures into DocBook output
+* Additional Documentation::    Where to find more information
+@end menu
+
+@node OpenDocumentText export commands, Applying Custom Styles, OpenDocumentText export, OpenDocumentText export
+@subsection OpenDocumentText export commands
+
+@cindex region, active
+@cindex active region
+@cindex transient-mark-mode
+@table @kbd
+@orgcmd{C-c C-e o,org-export-as-odt}
+@cindex property EXPORT_FILE_NAME
+Export as OpenDocumentText file.  For an Org file, @file{myfile.org}, the
+OpenDocumentText file will be @file{myfile.odt}.  The file will be
+overwritten without warning.  If there is an active region@footnote{This
+requires @code{transient-mark-mode} to be turned on}, only the region will be
+exported.  If the selected region is a single tree@footnote{To select the
+current subtree, use @kbd{C-c @@}.}, the tree head will become the document
+title.  If the tree head entry has, or inherits, an @code{EXPORT_FILE_NAME}
+property, that name will be used for the export.
+@orgcmd{C-c C-e O,org-export-as-odt-and-open}
+Export as OpenDocumentText file and open the resulting file.
+@end table
+
+@node Applying Custom Styles, Converting to Other formats, OpenDocumentText export commands, OpenDocumentText export
+@subsection Applying Custom Styles
+@cindex styles, custom
+@cindex template, custom
+
+@vindex org-export-odt-styles-file
+
+OpenDocumentExporter ships with a custom @file{styles.xml} for formatting of
+the exported file.  To customize the output to suit your needs you can use
+one of the following methods:
+
+@enumerate
+@item
+Customize the variable @code{org-export-odt-styles-file} to point to either a
+@file{styles.xml} file, a OpenDocument Text Template file @code{.ott} or a
+combination of Text or Template Document together with a set of member files.
+Use the first two options if the styles.xml has no references to additional
+set of files and use the last option if the @file{styles.xml} references
+additional files like header and footer images.
+@item
+Use an external tool like unoconv to apply custom templates.
+@end enumerate
+
+For best results, it is necessary that the style names used by
+OpenDocumentText exporter match that used in the @file{styles.xml}.
+
+@node Converting to Other formats, Links in OpenDocumentText export, Applying Custom Styles, OpenDocumentText export
+@subsection Converting to Other formats
+
+@cindex convert
+@cindex doc, docx
+
+@vindex org-export-odt-styles-file
+
+Often times there is a need to convert OpenDocumentText files to other
+formats like doc, docx or pdf.  You can accomplish this by one of the
+following methods:
+
+@table @kbd
+@item M-x org-lparse
+Export the outline first to one of the native formats (like OpenDocumentText)
+and immediately post-process it to other formats using an external converter.
+
+@item M-x org-export-convert
+Export an existing document to other formats using an external converter.
+@end table
+
+You can choose the converter used for conversion by customizing the variable
+@code{org-export-convert-process}.
+
+@node Links in OpenDocumentText export, Tables in OpenDocumentText export, Converting to Other formats, OpenDocumentText export
+@subsection Links in OpenDocumentText export
+@cindex tables, in DocBook export
+
+OpenDocumentExporter creates cross-references (aka bookmarks) for links that
+are destined locally. It creates internet style links for all other links.
+
+@node Tables in OpenDocumentText export, Images in OpenDocumentText export, Links in OpenDocumentText export, OpenDocumentText export
+@subsection Tables in OpenDocumentText export
+@cindex tables, in DocBook export
+
+Export of @file{table.el} tables with row or column spanning is not
+supported.  Such tables are stripped from the exported document.
+
+@node Images in OpenDocumentText export, Additional Documentation, Tables in OpenDocumentText export, OpenDocumentText export
+@subsection Images in OpenDocumentText export
+@cindex images, embedding in OpenDocumentText
+@cindex embedding images in OpenDocumentText
+
+OpenDocumentText exporter can embed images within the exported document. To
+embed images, provide a link to the desired image file with no link
+description. For example, the following links @samp{[[file:img.jpg]]} or
+@samp{[[./img.jpg]]}, will result in embedding of @samp{img.jpg} in the
+exported file.
+
+The exporter can also embed scaled and explicitly sized images within the
+exported document.  The markup of the scale and size specifications has not
+been standardized yet and is hence conveniently skipped in this document.
+
+The exporter can also make an image the clickable part of a link. To create
+clickable images, provide a link whose description is a link to an image
+file. For example, the following link
+@samp{[[http://Orgmode.org][./img.jpg]]}, will result in a clickable image
+that links to @uref{http://Orgmode.org} website.
+
+@node Additional Documentation, , Images in OpenDocumentText export, OpenDocumentText export
+@subsection Additional Documentation
+
+OpenDocumentText exporter is a beta software and is quickly evolving.  So the
+documentation in this section of the manual should not be considered as
+authoritative. For up to date information, you are requested to follow the
+Org mailing list @email{emacs-orgmode@@gnu.org} closely.
+
+@c end opendocument
+
+@node  TaskJuggler export, Freemind export, OpenDocumentText export, Exporting
 @section TaskJuggler export
 @cindex TaskJuggler export
 @cindex Project management
@@ -15327,6 +15490,8 @@ with links transformation to Org syntax.
 @i{David O'Toole} wrote @file{org-publish.el} and drafted the manual
 chapter about publishing.
 @item
+@i{Jambunathan K} contributed the OpenDocumentText exporter.
+@item
 @i{Sebastien Vauban} reported many issues with LaTeX and BEAMER export and
 enabled source code highlighling in Gnus.
 @item
@@ -15353,6 +15518,7 @@ work on a tty.
 @item
 @i{Piotr Zielinski} wrote @file{org-mouse.el}, proposed agenda blocks
 and contributed various ideas and code snippets.
+@item
 @end itemize
 
 
