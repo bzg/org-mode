@@ -2391,7 +2391,7 @@ not overwrite the stored one."
 	   (modes (copy-sequence org-calc-default-modes))
 	   (numbers nil) ; was a variable, now fixed default
 	   (keep-empty nil)
-	   n form form0 bw fmt x ev orig c lispp literal)
+	   n form form0 bw fmt x ev orig c lispp literal duration)
       ;; Parse the format string.  Since we have a lot of modes, this is
       ;; a lot of work.  However, I think calc still uses most of the time.
       (if (string-match ";" formula)
@@ -2410,8 +2410,11 @@ not overwrite the stored one."
 						   (?s . sci) (?e . eng))))
 				   n))))
 	      (setq fmt (replace-match "" t t fmt)))
-	    (if (string-match "[NT]" fmt)
-		(setq numbers (equal (match-string 0 fmt) "N")
+	    (if (string-match "T" fmt)
+		(setq duration t numbers t
+		      fmt (replace-match "" t t fmt)))
+	    (if (string-match "N" fmt)
+		(setq numbers t
 		      fmt (replace-match "" t t fmt)))
 	    (if (string-match "L" fmt)
 		(setq literal t
@@ -2428,10 +2431,14 @@ not overwrite the stored one."
 	  (setq formula (org-table-formula-substitute-names formula)))
       (setq orig (or (get-text-property 1 :orig-formula formula) "?"))
       (while (> ndown 0)
-	(setq fields (org-split-string
-		      (org-no-properties
-		       (buffer-substring (point-at-bol) (point-at-eol)))
-		      " *| *"))
+	(setq fields 
+	      (mapcar (lambda (cell)
+			(let ((duration (org-table-time-string-to-seconds cell)))
+			  (if duration (number-to-string duration) cell)))
+		      (org-split-string
+		       (org-no-properties
+			(buffer-substring (point-at-bol) (point-at-eol)))
+		       " *| *")))
 	(if (eq numbers t)
 	    (setq fields (mapcar
 			  (lambda (x) (number-to-string (string-to-number x)))
@@ -2504,7 +2511,9 @@ not overwrite the stored one."
 	    (setq ev (condition-case nil
 			 (eval (eval (read form)))
 		       (error "#ERROR"))
-		  ev (if (numberp ev) (number-to-string ev) ev))
+		  ev (if (numberp ev) (number-to-string ev) ev)
+		  ev (if duration (org-table-time-seconds-to-string 
+				   (string-to-number ev))))
 	  (or (fboundp 'calc-eval)
 	      (error "Calc does not seem to be installed, and is needed to evaluate the formula"))
 	  (setq ev (calc-eval (cons form modes)
@@ -3191,6 +3200,27 @@ For example:  28 -> AB."
       (setq s (concat (char-to-string (+ (mod (1- n) 26) ?A)) s)
 	    n (/ (1- n) 26)))
     s))
+
+(defun org-table-time-string-to-seconds (s)
+  "Convert a time string into numerical duration in seconds."
+  (cond
+   ((and (stringp s)
+	 (string-match "\\([0-9]+\\):\\([0-9]+\\):\\([0-9]+\\)" s))
+    (let ((hour (string-to-number (match-string 1 s)))
+	  (min (string-to-number (match-string 2 s)))
+	  (sec (string-to-number (match-string 3 s))))
+      (+ (* hour 3600) (* min 60) sec)))
+   ((and (stringp s)
+	 (string-match "\\([0-9]+\\):\\([0-9]+\\)" s))
+    (let ((min (string-to-number (match-string 1 s)))
+	  (sec (string-to-number (match-string 2 s))))
+      (+ (* min 60) sec)))))
+
+(defun org-table-time-seconds-to-string (secs)
+  "Convert a number of seconds to a time string."
+  (cond ((>= secs 3600) (format-seconds "%h:%.2m:%.2s" secs))
+	((>= secs 60) (format-seconds "%m:%.2s" secs))
+	(t (format-seconds "%s" secs))))
 
 (defun org-table-fedit-convert-buffer (function)
   "Convert all references in this buffer, using FUNCTION."
