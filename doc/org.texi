@@ -378,6 +378,7 @@ The spreadsheet
 * References::                  How to refer to another field or range
 * Formula syntax for Calc::     Using Calc to compute stuff
 * Formula syntax for Lisp::     Writing formulas in Emacs Lisp
+* Durations and time values::   How to compute durations and time values
 * Field and range formulas::    Formula for specific (ranges of) fields
 * Column formulas::             Formulas valid for an entire column
 * Editing and debugging formulas::  Fixing formulas
@@ -681,6 +682,7 @@ Specific header arguments
                                 expansion during tangling
 * session::                     Preserve the state of code evaluation
 * noweb::                       Toggle expansion of noweb references
+* noweb-ref::                   Specify block's noweb reference resolution target
 * cache::                       Avoid re-evaluating unchanged code blocks
 * sep::                         Delimiter for writing tabular results outside Org
 * hlines::                      Handle horizontal lines in tables
@@ -701,6 +703,7 @@ Miscellaneous
 * Clean view::                  Getting rid of leading stars in the outline
 * TTY keys::                    Using Org on a tty
 * Interaction::                 Other Emacs packages
+* org-crypt.el::                Encrypting Org files
 
 Interaction with other packages
 
@@ -2243,6 +2246,7 @@ formula, moving these references by arrow keys
 * References::                  How to refer to another field or range
 * Formula syntax for Calc::     Using Calc to compute stuff
 * Formula syntax for Lisp::     Writing formulas in Emacs Lisp
+* Durations and time values::   How to compute durations and time values
 * Field and range formulas::    Formula for specific (ranges of) fields
 * Column formulas::             Formulas valid for an entire column
 * Editing and debugging formulas::  Fixing formulas
@@ -2504,7 +2508,7 @@ Calc also contains a complete set of logical operations.  For example
 if($1<20,teen,string(""))  @r{"teen" if age $1 less than 20, else empty}
 @end example
 
-@node Formula syntax for Lisp, Field and range formulas, Formula syntax for Calc, The spreadsheet
+@node Formula syntax for Lisp, Durations and time values, Formula syntax for Calc, The spreadsheet
 @subsection Emacs Lisp forms as formulas
 @cindex Lisp forms, as table formulas
 
@@ -2535,7 +2539,26 @@ embed them in list or vector syntax.  Here are a few examples---note how the
   '(apply '+ '($1..$4));N
 @end example
 
-@node Field and range formulas, Column formulas, Formula syntax for Lisp, The spreadsheet
+@node Durations and time values, Field and range formulas, Formula syntax for Lisp, The spreadsheet
+@subsection Durations and time values
+@cindex Duration, computing
+@cindex Time, computing
+
+If you want to compute time values use the @code{T} flag, either in Calc
+formulas or Elisp formulas:
+
+@example
+@group
+| Task 1 | Task 2 |   Total |
+|--------+--------+---------|
+|  35:00 |  35:00 | 1:10:00 |
+#+TBLFM: @@2$3=$1+$2;T
+@end group
+@end example
+
+Values must be of the form @code{[HH:]MM:SS}, where hours are optional.
+
+@node Field and range formulas, Column formulas, Durations and time values, The spreadsheet
 @subsection Field and range formulas
 @cindex field formula
 @cindex range formula
@@ -2775,6 +2798,7 @@ dependencies.
 If you want the recalculation of fields to happen automatically, or if
 you want to be able to assign @i{names} to fields and columns, you need
 to reserve the first column of the table for special marking characters.
+
 @table @kbd
 @orgcmd{C-#,org-table-rotate-recalc-marks}
 Rotate the calculation mark in first column through the states @samp{ },
