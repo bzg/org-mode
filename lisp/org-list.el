@@ -1239,6 +1239,149 @@ This function modifies STRUCT."
 		    item struct (org-list-prevs-alist struct))))
       struct)))
 
+(defun org-list-delete-item (item struct)
+  "Remove ITEM from the list and return the new structure.
+
+STRUCT is the list structure."
+  (let* ((end (org-list-get-item-end item struct))
+	 (beg (if (= (org-list-get-bottom-point struct) end)
+		  ;; If ITEM ends with the list, delete blank lines
+		  ;; before it.
+		  (save-excursion
+		    (goto-char item)
+		    (skip-chars-backward " \r\t\n")
+		    (min (1+ (point-at-eol)) (point-max)))
+		item)))
+    ;; Remove item from buffer.
+    (delete-region beg end)
+    ;; Remove item from structure and shift others items accordingly.
+    ;; Don't forget to shift also ending position when appropriate.
+    (let ((size (- end beg)))
+      (delq nil (mapcar (lambda (e)
+			  (let ((pos (car e)))
+			    (cond
+			     ((< pos item)
+			      (let ((end-e (nth 6 e)))
+				(cond
+				 ((< end-e item) e)
+				 ((= end-e item)
+				  (append (butlast e) (list beg)))
+				 (t
+				  (append (butlast e) (list (- end-e size)))))))
+			     ((< pos end) nil)
+			     (t
+			      (cons (- pos size)
+				    (append (butlast (cdr e))
+					    (list (- (nth 6 e) size))))))))
+			struct)))))
+
+(defun org-list-send-item (item dest struct)
+  "Send ITEM to destination DEST.
+
+STRUCT is the list structure.
+
+DEST can have various values.
+
+If DEST is a buffer position, the function will assume it points
+to another item in the same list as ITEM, and will move the
+latter just before the former.
+
+If DEST is `begin' \(resp. `end'\), ITEM will be moved at the
+beginning \(resp. end\) of the list it belongs to.
+
+If DEST is a string like \"N\", where N is an integer, ITEM will
+be moved at the Nth position in the list.
+
+If DEST is `kill', ITEM will be deleted and its body will be
+added to the kill-ring.
+
+If DEST is `delete', ITEM will be deleted.
+
+This function returns, destructively, the new list structure."
+  (let* ((prevs (org-list-prevs-alist struct))
+	 (item-end (org-list-get-item-end item struct))
+	 ;; Grab full item body minus its bullet.
+	 (body (org-trim
+		(buffer-substring
+		 (save-excursion
+		   (goto-char item)
+		   (looking-at
+		    (concat "[ \t]*"
+			    (regexp-quote (org-list-get-bullet item struct))))
+		   (match-end 0))
+		 item-end)))
+	 ;; Change DEST into a buffer position.  A trick is needed
+	 ;; when ITEM is meant to be sent at the end of the list.
+	 ;; Indeed, by setting locally `org-M-RET-may-split-line' to
+	 ;; nil and insertion point (INS-POINT) to the first line's
+	 ;; end of the last item, we ensure the new item will be
+	 ;; inserted after the last item, and not after any of its
+	 ;; hypothetical sub-items.
+	 (ins-point (cond
+		     ((or (eq dest 'kill) (eq dest 'delete)))
+		     ((eq dest 'begin)
+		      (setq dest (org-list-get-list-begin item struct prevs)))
+		     ((eq dest 'end)
+		      (setq dest (org-list-get-list-end item struct prevs))
+		      (save-excursion
+			(goto-char (org-list-get-last-item item struct prevs))
+			(point-at-eol)))
+		     ((string-match "\\`[0-9]+\\'" dest)
+		      (let* ((all (org-list-get-all-items item struct prevs))
+			     (len (length all))
+			     (index (mod (string-to-number dest) len)))
+			(if (not (zerop index))
+			    (setq dest (nth (1- index) all))
+			  ;; Send ITEM at the end of the list.
+			  (setq dest (org-list-get-list-end item struct prevs))
+			  (save-excursion
+			    (goto-char
+			     (org-list-get-last-item item struct prevs))
+			    (point-at-eol)))))
+		     (t dest)))
+	 (org-M-RET-may-split-line nil))
+    (cond
+     ((eq dest 'delete) (org-list-delete-item item struct))
+     ((eq dest 'kill)
+      (kill-new body)
+      (org-list-delete-item item struct))
+     ((and (integerp dest) (/= item ins-point))
+      (setq item (copy-marker item))
+      (setq struct (org-list-insert-item ins-point struct prevs nil body))
+      ;; 1. Structure returned by `org-list-insert-item' may not be
+      ;;    accurate, as it cannot see sub-items included in BODY.
+      ;;    Thus, first compute the real structure so far.
+      (let ((moved-items
+	     (cons (marker-position item)
+		   (org-list-get-subtree (marker-position item) struct)))
+	    (new-end (org-list-get-item-end (point) struct))
+	    (old-end (org-list-get-item-end (marker-position item) struct))
+	    (new-item (point))
+	    (shift (- (point) item)))
+	;; 1.1. Remove the item just created in structure.
+	(setq struct (delete (assq new-item struct) struct))
+	;; 1.2. Copy ITEM and any of its sub-items at NEW-ITEM.
+	(setq struct (sort*
+		      (append
+		       struct
+		       (mapcar (lambda (e)
+				 (let* ((cell (assq e struct))
+					(pos (car cell))
+					(end (nth 6 cell)))
+				   (cons (+ pos shift)
+					 (append (butlast (cdr cell))
+						 (list (if (= end old-end)
+							   new-end
+							 (+ end shift)))))))
+			       moved-items))
+		      (lambda (e1 e2) (< (car e1) (car e2))))))
+      ;; 2. Eventually delete the extra copy of the item and clean
+      ;;    marker.
+      (prog1
+	  (org-list-delete-item (marker-position item) struct)
+	(move-marker item nil)))
+     (t struct))))
+
 (defun org-list-exchange-items (beg-A beg-B struct)
   "Swap item starting at BEG-A with item starting at BEG-B in STRUCT.
 Blank lines at the end of items are left in place.  Return the
