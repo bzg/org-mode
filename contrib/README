@@ -33,12 +33,14 @@ org-interactive-query.el --- Interactive modification of tags query
 org-invoice.el           --- Help manage client invoices in OrgMode
 org-jira.el              --- Add a jira:ticket protocol to Org
 org-learn.el             --- SuperMemo's incremental learning algorithm
+org-lparse.el            --- Library for building custom exporters
 org-mac-iCal.el          --- Imports events from iCal.app to the Emacs diary
 org-mac-link-grabber.el  --- Grab links and URLs from various Mac applications
 org-mairix.el 	         --- Hook mairix search into Org for different MUAs
 org-man.el 	         --- Support for links to manpages in Org-mode
 org-mime.el              --- org html export for text/html MIME emails
 org-mtags.el 	         --- Support for some Muse-like tags in Org-mode
+org-odt.el 	         --- OpenDocumentText exporter for Org-mode
 org-panel.el 	         --- Simple routines for us with bad memory
 org-registry.el          --- A registry for Org links
 org-screen.el            --- Visit screen sessions through Org-mode links
