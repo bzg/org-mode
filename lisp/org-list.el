@@ -296,6 +296,18 @@ indent    when non-nil, indenting or outdenting list top-item
 		 :value-type
 		 (boolean :tag "Activate" :value t)))
 
+(defcustom org-list-use-circular-motion nil
+  "Non-nil means commands implying motion in lists should be cyclic.
+
+In that case, the item following the last item is the first one,
+and the item preceding the first item is the last one.
+
+This affects the behavior of \\[org-move-item-up],
+ \\[org-move-item-down], \\[org-next-item] and
+ \\[org-previous-item]."
+  :group 'org-plain-lists
+  :type 'boolean)
+
 (defvar org-checkbox-statistics-hook nil
   "Hook that is run whenever Org thinks checkbox statistics should be updated.
 This hook runs even if checkbox rule in
@@ -2005,86 +2017,79 @@ Throw an error when not in a list."
 
 (defun org-previous-item ()
   "Move to the beginning of the previous item.
-Throw an error when not in a list, or at first item."
+Throw an error when not in a list.  Also throw an error when at
+first item, unless `org-list-use-circular-motion' is non-nil."
   (interactive)
-  (let ((begin (org-in-item-p)))
-    (if (not begin)
+  (let ((item (org-in-item-p)))
+    (if (not item)
 	(error "Not in an item")
-      (goto-char begin)
+      (goto-char item)
       (let* ((struct (org-list-struct))
 	     (prevs (org-list-prevs-alist struct))
-	     (prevp (org-list-get-prev-item begin struct prevs)))
-	(if prevp (goto-char prevp) (error "On first item"))))))
+	     (prevp (org-list-get-prev-item item struct prevs)))
+	(cond
+	 (prevp (goto-char prevp))
+	 (org-list-use-circular-motion
+	  (goto-char (org-list-get-last-item item struct prevs)))
+	 (t (error "On first item")))))))
 
 (defun org-next-item ()
   "Move to the beginning of the next item.
-Throw an error when not in a plain list, or at last item."
+Throw an error when not in a list.  Also throw an error when at
+last item, unless `org-list-use-circular-motion' is non-nil."
   (interactive)
-  (let ((begin (org-in-item-p)))
-    (if (not begin)
+  (let ((item (org-in-item-p)))
+    (if (not item)
 	(error "Not in an item")
-      (goto-char begin)
+      (goto-char item)
       (let* ((struct (org-list-struct))
 	     (prevs (org-list-prevs-alist struct))
-	     (prevp (org-list-get-next-item begin struct prevs)))
-	(if prevp (goto-char prevp) (error "On last item"))))))
+	     (prevp (org-list-get-next-item item struct prevs)))
+	(cond
+	 (prevp (goto-char prevp))
+	 (org-list-use-circular-motion
+	  (goto-char (org-list-get-first-item item struct prevs)))
+	 (t (error "On last item")))))))
 
 (defun org-move-item-down ()
   "Move the item at point down, i.e. swap with following item.
-Subitems (items with larger indentation) are considered part of
+Sub-items (items with larger indentation) are considered part of
 the item, so this really moves item trees."
   (interactive)
   (unless (org-at-item-p) (error "Not at an item"))
-  (let* ((pos (point))
-	 (col (current-column))
-	 (actual-item (point-at-bol))
+  (let* ((col (current-column))
+	 (item (point-at-bol))
 	 (struct (org-list-struct))
 	 (prevs (org-list-prevs-alist struct))
 	 (next-item (org-list-get-next-item (point-at-bol) struct prevs)))
+    (unless (or next-item org-list-use-circular-motion)
+      (error "Cannot move this item further down"))
     (if (not next-item)
-	(progn
-	  (goto-char pos)
-	  (error "Cannot move this item further down"))
-      (setq struct
-	    (org-list-exchange-items actual-item next-item struct))
-      ;; Use a short variation of `org-list-write-struct' as there's
-      ;; no need to go through all the steps.
-      (let ((old-struct (copy-tree struct))
-	    (prevs (org-list-prevs-alist struct))
-	    (parents (org-list-parents-alist struct)))
-        (org-list-struct-fix-bul struct prevs)
-        (org-list-struct-fix-ind struct parents)
-        (org-list-struct-apply-struct struct old-struct)
-	(goto-char (org-list-get-next-item (point-at-bol) struct prevs)))
-      (org-move-to-column col))))
+	(setq struct (org-list-send-item item 'begin struct))
+      (setq struct (org-list-exchange-items item next-item struct))
+      (goto-char
+       (org-list-get-next-item item struct (org-list-prevs-alist struct))))
+    (org-list-write-struct struct (org-list-parents-alist struct))
+    (org-move-to-column col)))
 
 (defun org-move-item-up ()
   "Move the item at point up, i.e. swap with previous item.
-Subitems (items with larger indentation) are considered part of
+Sub-items (items with larger indentation) are considered part of
 the item, so this really moves item trees."
   (interactive)
   (unless (org-at-item-p) (error "Not at an item"))
-  (let* ((pos (point))
-	 (col (current-column))
-	 (actual-item (point-at-bol))
+  (let* ((col (current-column))
+	 (item (point-at-bol))
 	 (struct (org-list-struct))
 	 (prevs (org-list-prevs-alist struct))
 	 (prev-item (org-list-get-prev-item (point-at-bol) struct prevs)))
+    (unless (or prev-item org-list-use-circular-motion)
+      (error "Cannot move this item further up"))
     (if (not prev-item)
-	(progn
-	  (goto-char pos)
-	  (error "Cannot move this item further up"))
-      (setq struct
-	    (org-list-exchange-items prev-item actual-item struct))
-      ;; Use a short variation of `org-list-write-struct' as there's
-      ;; no need to go through all the steps.
-      (let ((old-struct (copy-tree struct))
-	    (prevs (org-list-prevs-alist struct))
-	    (parents (org-list-parents-alist struct)))
-        (org-list-struct-fix-bul struct prevs)
-        (org-list-struct-fix-ind struct parents)
-        (org-list-struct-apply-struct struct old-struct))
-      (org-move-to-column col))))
+	(setq struct (org-list-send-item item 'end struct))
+      (setq struct (org-list-exchange-items prev-item item struct)))
+    (org-list-write-struct struct (org-list-parents-alist struct))
+    (org-move-to-column col)))
 
 (defun org-insert-item (&optional checkbox)
   "Insert a new item at the current level.
