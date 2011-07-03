@@ -255,12 +255,13 @@ last statement in BODY, as elisp."
 			   (split-string body "[\r\n]"))
 		     (send-wait)))
     ((lambda (results)
-       (if (or (member "code" result-params)
-	       (member "pp" result-params)
-	       (and (member "output" result-params)
-		    (not (member "table" result-params))))
-	   results
-	 (org-babel-python-table-or-string results)))
+       (unless (string= (substring org-babel-python-eoe-indicator 1 -1) results)
+	 (if (or (member "code" result-params)
+		 (member "pp" result-params)
+		 (and (member "output" result-params)
+		      (not (member "table" result-params))))
+	     results
+	   (org-babel-python-table-or-string results))))
      (case result-type
        (output
 	(mapconcat
