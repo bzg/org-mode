@@ -238,10 +238,11 @@ last statement in BODY, as elisp."
 If RESULT-TYPE equals 'output then return standard output as a
 string. If RESULT-TYPE equals 'value then return the value of the
 last statement in BODY, as elisp."
-  (flet ((dump-last-value
+  (flet ((send-wait () (comint-send-input nil t) (sleep-for 0 5))
+	 (dump-last-value
 	  (tmp-file pp)
 	  (mapc
-	   (lambda (statement) (insert statement) (comint-send-input))
+	   (lambda (statement) (insert statement) (send-wait))
 	   (if pp
 	       (list
 		"import pprint"
@@ -250,9 +251,9 @@ last statement in BODY, as elisp."
 	     (list (format "open('%s', 'w').write(str(_))"
 			   (org-babel-process-file-name tmp-file 'noquote))))))
 	 (input-body (body)
-		     (mapc (lambda (statement) (insert statement) (comint-send-input))
-			   (split-string (org-babel-trim body) "[\r\n]+"))
-		     (comint-send-input) (comint-send-input)))
+		     (mapc (lambda (line) (insert line) (send-wait))
+			   (split-string body "[\r\n]"))
+		     (send-wait)))
     ((lambda (results)
        (if (or (member "code" result-params)
 	       (member "pp" result-params)
@@ -267,11 +268,9 @@ last statement in BODY, as elisp."
 	 (butlast
 	  (org-babel-comint-with-output
 	      (session org-babel-python-eoe-indicator t body)
-	    (let ((comint-process-echoes nil))
-	      (mapc
-	       (lambda (line)
-		 (insert line) (comint-send-input nil t))
-	       (append (split-string body "[\n\r]") (list org-babel-python-eoe-indicator)))))
+	    (input-body body)
+	    (insert org-babel-python-eoe-indicator)
+	    (send-wait) (send-wait))
 	  2) "\n"))
        (value
 	(let ((tmp-file (org-babel-temp-file "python-")))
@@ -280,9 +279,9 @@ last statement in BODY, as elisp."
 	    (let ((comint-process-echoes nil))
 	      (input-body body)
 	      (dump-last-value tmp-file (member "pp" result-params))
-	      (comint-send-input) (comint-send-input)
+	      (send-wait) (send-wait)
 	      (insert org-babel-python-eoe-indicator)
-	      (comint-send-input)))
+	      (send-wait)))
 	  (org-babel-eval-read-file tmp-file)))))))
 
 (defun org-babel-python-read-string (string)
