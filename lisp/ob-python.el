@@ -269,8 +269,9 @@ last statement in BODY, as elisp."
 	  (org-babel-comint-with-output
 	      (session org-babel-python-eoe-indicator t body)
 	    (input-body body)
+	    (send-wait) (send-wait)
 	    (insert org-babel-python-eoe-indicator)
-	    (send-wait) (send-wait))
+	    (send-wait))
 	  2) "\n"))
        (value
 	(let ((tmp-file (org-babel-temp-file "python-")))
