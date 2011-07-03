@@ -49,7 +49,7 @@
 (declare-function org-in-verbatim-emphasis "org" ())
 (declare-function org-inside-latex-macro-p "org" ())
 (declare-function org-id-uuid "org" ())
-(declare-function org-fill-paragraph "org" (justify))
+(declare-function org-fill-paragraph "org" (&optional justify))
 (defvar org-odd-levels-only) ;; defined in org.el
 (defvar message-signature-separator) ;; defined in message.el
 
@@ -326,14 +326,14 @@ If no footnote is found, return nil."
 If WITH-DEFS is non-nil, also associate the definition to each
 label.  The function will then return an alist whose key is label
 and value definition."
-  (let (rtn
-	(push-to-rtn
-	 (function
-	  ;; Depending on WITH-DEFS, store label or (label . def) of
-	  ;; footnote reference/definition given as argument in RTN.
-	  (lambda (el)
-	    (let ((lbl (car el)))
-	      (push (if with-defs (cons lbl (nth 3 el)) lbl) rtn))))))
+  (let* (rtn
+	 (push-to-rtn
+	  (function
+	   ;; Depending on WITH-DEFS, store label or (label . def) of
+	   ;; footnote reference/definition given as argument in RTN.
+	   (lambda (el)
+	     (let ((lbl (car el)))
+	       (push (if with-defs (cons lbl (nth 3 el)) lbl) rtn))))))
     (save-excursion
       (save-restriction
 	(widen)
@@ -489,6 +489,9 @@ With prefix arg SPECIAL, offer additional commands in a menu."
 
 (defvar org-footnote-insert-pos-for-preprocessor 'point-max
   "See `org-footnote-normalize'.")
+
+(defvar org-export-footnotes-seen nil) ; silence byte-compiler
+(defvar org-export-footnotes-data nil) ; silence byte-compiler
 
 ;;;###autoload
 (defun org-footnote-normalize (&optional sort-only pre-process-p)
