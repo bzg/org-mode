@@ -361,6 +361,12 @@ The number of levels is controlled by `org-inlinetask-min-level'"
 	   (nstars (if org-odd-levels-only (1- (* limit-level 2)) limit-level)))
       (format "\\*\\{1,%d\\} " nstars))))
 
+(defun org-format-seconds (string seconds)
+  "Compatibility function replacing format-seconds"
+  (if (fboundp 'format-seconds)
+      (format-seconds string seconds)
+    (format-time-string string (seconds-to-time seconds))))
+
 (provide 'org-macs)
 
 ;; arch-tag: 7e6a73ce-aac9-4fc0-9b30-ce6f89dc6668

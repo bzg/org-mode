@@ -3220,9 +3220,9 @@ For example:  28 -> AB."
 
 (defun org-table-time-seconds-to-string (secs)
   "Convert a number of seconds to a time string."
-  (cond ((>= secs 3600) (format-seconds "%h:%.2m:%.2s" secs))
-	((>= secs 60) (format-seconds "%m:%.2s" secs))
-	(t (format-seconds "%s" secs))))
+  (cond ((>= secs 3600) (org-format-seconds "%h:%.2m:%.2s" secs))
+	((>= secs 60) (org-format-seconds "%m:%.2s" secs))
+	(t (org-format-seconds "%s" secs))))
 
 (defun org-table-fedit-convert-buffer (function)
   "Convert all references in this buffer, using FUNCTION."
