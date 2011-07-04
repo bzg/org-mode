@@ -58,6 +58,8 @@
 (declare-function org-count "org" (CL-ITEM CL-SEQ))
 (declare-function org-at-item-p "org-list" ())
 (declare-function org-narrow-to-subtree "org" ())
+(declare-function org-id-find-id-in-file "org-id" (id file &optional markerp))
+(declare-function org-show-context "org" (&optional key))
 
 (defvar org-babel-ref-split-regexp
   "[ \f\t\n\r\v]*\\(.+?\\)[ \f\t\n\r\v]*=[ \f\t\n\r\v]*\\(.+\\)[ \f\t\n\r\v]*")
