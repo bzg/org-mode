@@ -5015,7 +5015,7 @@ of estimating a particular task will take 5 days, you might estimate it as
 average at 5.5 days, but the first represents a more predictable delivery.
 
 When combining a set of such estimates, simply adding the lows and highs
-produces an unrealistically wide result. Instead, @code{est+} adds the
+produces an unrealistically wide result.  Instead, @code{est+} adds the
 statistical mean and variance of the sub-tasks, generating a final estimate
 from the sum.  For example, suppose you had ten tasks, each of which was
 estimated at 0.5 to 2 days of work.  Straight addition produces an estimate
@@ -5857,12 +5857,12 @@ Jump to the headline of the currently clocked in task.  With a @kbd{C-u}
 prefix arg, select the target task from a list of recently clocked tasks.
 @orgcmd{C-c C-x C-d,org-clock-display}
 @vindex org-remove-highlights-with-change
-Display time summaries for each subtree in the current buffer.  This
-puts overlays at the end of each headline, showing the total time
-recorded under that heading, including the time of any subheadings. You
-can use visibility cycling to study the tree, but the overlays disappear
-when you change the buffer (see variable
-@code{org-remove-highlights-with-change}) or press @kbd{C-c C-c}.
+Display time summaries for each subtree in the current buffer.  This puts
+overlays at the end of each headline, showing the total time recorded under
+that heading, including the time of any subheadings.  You can use visibility
+cycling to study the tree, but the overlays disappear when you change the
+buffer (see variable @code{org-remove-highlights-with-change}) or press
+@kbd{C-c C-c}.
 @end table
 
 The @kbd{l} key may be used in the timeline (@pxref{Timeline}) and in
@@ -6384,9 +6384,8 @@ selection.
 The type of entry, a symbol.  Valid values are:
 @table @code
 @item entry
-An Org-mode node, with a headline. Will be filed as the child of the
-target entry or as a top-level entry.  The target file should be an Org-mode
-file.
+An Org-mode node, with a headline.  Will be filed as the child of the target
+entry or as a top-level entry.  The target file should be an Org-mode file.
 @item item
 A plain list item, placed in the first plain  list at the target
 location.  Again the target file should be an Org file.
@@ -8044,8 +8043,8 @@ agenda, change a tag for all headings in the region.
 @kindex ,
 @item ,
 Set the priority for the current item (@command{org-agenda-priority}).
-Org-mode prompts for the priority character. If you reply with @key{SPC}, the
-priority cookie is removed from the entry.
+Org-mode prompts for the priority character.  If you reply with @key{SPC},
+the priority cookie is removed from the entry.
 @c
 @orgcmd{P,org-agenda-show-priority}
 Display weighted priority of current item.
@@ -8842,7 +8841,7 @@ a horizontal line (@samp{<hr/>} in HTML and @code{\hrule} in @LaTeX{}).
 @cindex #+BEGIN_COMMENT
 
 Lines starting with @samp{#} in column zero are treated as comments and will
-never be exported. If you want an indented line to be treated as a comment,
+never be exported.  If you want an indented line to be treated as a comment,
 start it with @samp{#+ }.  Also entire subtrees starting with the word
 @samp{COMMENT} will never be exported.  Finally, regions surrounded by
 @samp{#+BEGIN_COMMENT} ... @samp{#+END_COMMENT} will not be exported.
@@ -10294,9 +10293,9 @@ for @code{\includegraphics} and @code{wrapfigure}.
 [[./img/hst.png]]
 @end example
 
-If you wish to include an image which spans multiple columns in a page,
-you can use the keyword @code{multicolumn} in the @code{#+ATTR_LaTeX}
-line. This will export the image wrapped in a @code{figure*} environment.
+If you wish to include an image which spans multiple columns in a page, you
+can use the keyword @code{multicolumn} in the @code{#+ATTR_LaTeX} line.  This
+will export the image wrapped in a @code{figure*} environment.
 
 If you need references to a label created in this way, write
 @samp{\ref@{fig:SED-HR4049@}} just like in @LaTeX{}.
@@ -10643,7 +10642,7 @@ If you have downloaded the Org from the Web, either as a distribution
 option in variable @code{org-modules}.
 @item
 If you are using Org that comes bundled with Emacs, then you can install the
-OpenDocumentText exporter using the package manager. To do this, customize
+OpenDocumentText exporter using the package manager.  To do this, customize
 the variable @code{package-archives} to include
 @uref{http://orgmode.org/pkg/releases/} as one of the package archives.
 @end enumerate
@@ -10734,7 +10733,7 @@ You can choose the converter used for conversion by customizing the variable
 @cindex tables, in DocBook export
 
 OpenDocumentExporter creates cross-references (aka bookmarks) for links that
-are destined locally. It creates internet style links for all other links.
+are destined locally.  It creates internet style links for all other links.
 
 @node Tables in OpenDocumentText export, Images in OpenDocumentText export, Links in OpenDocumentText export, OpenDocumentText export
 @subsection Tables in OpenDocumentText export
@@ -10748,9 +10747,9 @@ supported.  Such tables are stripped from the exported document.
 @cindex images, embedding in OpenDocumentText
 @cindex embedding images in OpenDocumentText
 
-OpenDocumentText exporter can embed images within the exported document. To
+OpenDocumentText exporter can embed images within the exported document.  To
 embed images, provide a link to the desired image file with no link
-description. For example, the following links @samp{[[file:img.jpg]]} or
+description.  For example, the following links @samp{[[file:img.jpg]]} or
 @samp{[[./img.jpg]]}, will result in embedding of @samp{img.jpg} in the
 exported file.
 
@@ -10758,9 +10757,9 @@ The exporter can also embed scaled and explicitly sized images within the
 exported document.  The markup of the scale and size specifications has not
 been standardized yet and is hence conveniently skipped in this document.
 
-The exporter can also make an image the clickable part of a link. To create
+The exporter can also make an image the clickable part of a link.  To create
 clickable images, provide a link whose description is a link to an image
-file. For example, the following link
+file.  For example, the following link
 @samp{[[http://Orgmode.org][./img.jpg]]}, will result in a clickable image
 that links to @uref{http://Orgmode.org} website.
 
@@ -10769,7 +10768,7 @@ that links to @uref{http://Orgmode.org} website.
 
 OpenDocumentText exporter is a beta software and is quickly evolving.  So the
 documentation in this section of the manual should not be considered as
-authoritative. For up to date information, you are requested to follow the
+authoritative.  For up to date information, you are requested to follow the
 Org mailing list @email{emacs-orgmode@@gnu.org} closely.
 
 @c end opendocument
@@ -11665,8 +11664,8 @@ Controls the way Emacs windows are rearranged when the edit buffer is created.
 This variable is especially useful for tangling languages such as
 Python, in which whitespace indentation in the output is critical.
 @item org-src-ask-before-returning-to-edit-buffer
-By default, Org will ask before returning to an open edit buffer. Set
-this variable to nil to switch without asking.
+By default, Org will ask before returning to an open edit buffer.  Set this
+variable to nil to switch without asking.
 @end table
 
 To turn on native code fontification in the @emph{Org} buffer, configure the
