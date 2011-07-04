@@ -10261,24 +10261,18 @@ output file resulting from @LaTeX{} processing.  Org will use an
 @code{\includegraphics} macro to insert the image.  If you have specified a
 caption and/or a label as described in @ref{Images and tables}, the figure
 will be wrapped into a @code{figure} environment and thus become a floating
-element.  You can use an @code{#+ATTR_LaTeX:} line to specify the various
-options that can be used in the optional argument of the
-@code{\includegraphics} macro.  To modify the placement option of the
-@code{figure} environment, add something like @samp{placement=[h!]} to the
-Attributes.  It is to be noted this option can be used with tables as well.
-The options are passed as the placement option to floating environments like
-@code{figure} or @code{table}.  One can pass other compatible options as well.
-For example the @code{#+ATTR_LaTeX:} line below is exported as the
-@code{figure} environment below it.
-
-@cindex #+ATTR_LaTeX
-@example
-#+ATTR_LaTeX: placement=[<options>]\footnotesize
-
-\begin@{figure@}[<options>]\footnotesize
-...
-\end@{figure@}
-@end example
+element.  You can use an @code{#+ATTR_LaTeX:} line to specify various other
+options.  You can ask org to export an image as a float without specifying
+a label or a caption by using the keyword @code{float} in this line.  Various
+optional arguments to the @code{\includegraphics} macro can also be specified
+in this fashion.  To modify the placement option of the floating environment,
+add something like @samp{placement=[h!]} to the attributes.  It is to be noted
+this option can be used with tables as well@footnote{One can also take
+advantage of this option to pass other, unrelated options into the figure or
+table environment.  For an example see the section ``Exporting org files'' in
+@url{http://orgmode.org/worg/org-hacks.html}}.  For example the
+@code{#+ATTR_LaTeX:} line below is exported as the @code{figure} environment
+below it.
 
 If you would like to let text flow around the image, add the word @samp{wrap}
 to the @code{#+ATTR_LaTeX:} line, which will make the figure occupy the left
@@ -10299,6 +10293,10 @@ for @code{\includegraphics} and @code{wrapfigure}.
 #+ATTR_LaTeX: width=0.38\textwidth wrap placement=@{r@}@{0.4\textwidth@}
 [[./img/hst.png]]
 @end example
+
+If you wish to include an image which spans multiple columns in a page,
+you can use the keyword @code{multicolumn} in the @code{#+ATTR_LaTeX}
+line. This will export the image wrapped in a @code{figure*} environment.
 
 If you need references to a label created in this way, write
 @samp{\ref@{fig:SED-HR4049@}} just like in @LaTeX{}.
