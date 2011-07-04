@@ -2513,13 +2513,13 @@ not overwrite the stored one."
 		       (error "#ERROR"))
 		  ev (if (numberp ev) (number-to-string ev) ev)
 		  ev (if duration (org-table-time-seconds-to-string 
-				   (string-to-number ev) ev)))
+				   (string-to-number ev)) ev))
 	  (or (fboundp 'calc-eval)
 	      (error "Calc does not seem to be installed, and is needed to evaluate the formula"))
 	  (setq ev (calc-eval (cons form modes)
 			      (if numbers 'num))
 		ev (if duration (org-table-time-seconds-to-string 
-				 (string-to-number ev) ev))))
+				 (string-to-number ev)) ev)))
 
 	(when org-table-formula-debug
 	  (with-output-to-temp-buffer "*Substitution History*"
