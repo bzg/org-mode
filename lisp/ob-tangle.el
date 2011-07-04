@@ -230,7 +230,7 @@ exported source code blocks by language."
                       (delete-file file-name))
                     ;; drop source-block to file
                     (with-temp-buffer
-                      (when (fboundp lang-f) (funcall lang-f))
+                      (when (fboundp lang-f) (ignore-errors (funcall lang-f)))
                       (when (and she-bang (not (member file-name she-banged)))
                         (insert (concat she-bang "\n"))
                         (setq she-banged (cons file-name she-banged)))
