@@ -26,7 +26,7 @@
   (should
    (string= "A1" (org-table-convert-refs-to-an "@1$1"))))
 
-;; TODO Test broken
+;; TODO: Test broken
 ;; (ert-deftest test-org-table/org-table-convert-refs-to-an/2 ()
 ;;   "Self reference @1$1."
 ;;   (should
@@ -47,11 +47,19 @@
   (should
    (string= "@1$1 = $0" (org-table-convert-refs-to-rc "A1 = $0"))))
 
-;; TODO Test Broken
+;; TODO: Test Broken
 ;; (ert-deftest test-org-table/org-table-convert-refs-to-rc/3 ()
 ;;   "Remote reference."
 ;;   (should
 ;;    (string= "$3 = remote(FOO, @@#$2)" (org-table-convert-refs-to-rc "C& = remote(FOO, @@#B&)"))))
+
+(ert-deftest test-org-table/simple-formula ()
+  (org-test-at-id "563523f7-3f3e-49c9-9622-9216cc9a5d95"
+    (re-search-forward (regexp-quote "#+tblname: simple-formula") nil t)
+    (forward-line 1)
+    (should (org-at-table-p))
+    (should (org-table-recalculate 'all))
+    (should (string= "10" (first (nth 5 (org-table-to-lisp)))))))
 
 (provide 'test-org-table)
 
