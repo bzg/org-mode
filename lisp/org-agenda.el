@@ -4879,11 +4879,8 @@ be skipped.
 
 This function is here only for backward compatibility and it is deprecated,
 please use `org-class' instead."
-  (let* ((date1 (calendar-absolute-from-gregorian
-		 (org-order-calendar-date-args m1 d1 y1)))
-	 (date2 (calendar-absolute-from-gregorian
-		 (org-order-calendar-date-args m2 d2 y2)))
-	 (d (calendar-absolute-from-gregorian date)))
+  (let* ((date1 (org-order-calendar-date-args m1 d1 y1))
+	 (date2 (org-order-calendar-date-args m2 d2 y2)))
     (org-class
      (nth 2 date1) (car date1) (nth 1 date1)
      (nth 2 date2) (car date2) (nth 1 date2)
