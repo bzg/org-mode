@@ -496,7 +496,7 @@ description.
 Items belonging to the same list must have the same indentation on the first
 line.  An item ends before the next line that is indented like its
 bullet/number, or less.  A list ends when all items are closed, or before two
-blank lines. An example:
+blank lines.  An example:
 
 @smallexample
 @group
@@ -628,10 +628,10 @@ field is automatically made blank.
 @table @kbd
 @tsubheading{Creation and conversion}
 @item C-c |
-Convert the active region to table. If every line contains at least one
-TAB character, the function assumes that the material is tab separated.
-If every line contains a comma, comma-separated values (CSV) are assumed.
-If not, lines are split at whitespace into fields.
+Convert the active region to table.  If every line contains at least one TAB
+character, the function assumes that the material is tab separated.  If every
+line contains a comma, comma-separated values (CSV) are assumed.  If not,
+lines are split at whitespace into fields.
 @*
 If there is no active region, this command creates an empty Org
 table.  But it's easier just to start typing, like
@@ -2158,7 +2158,7 @@ consisting of only dashes, and at least 5 of them.
 @subheading Comment lines
 
 Lines starting with @samp{#} in column zero are treated as comments and will
-never be exported. If you want an indented line to be treated as a comment,
+never be exported.  If you want an indented line to be treated as a comment,
 start it with @samp{#+ }.  Also entire subtrees starting with the word
 @samp{COMMENT} will never be exported.  Finally, regions surrounded by
 @samp{#+BEGIN_COMMENT} ... @samp{#+END_COMMENT} will not be exported.
@@ -2468,8 +2468,8 @@ Publish only the current file.
 Publish every project.
 @end table
 
-Org uses timestamps to track when a file has changed. The above functions
-normally only publish changed files. You can override this and force
+Org uses timestamps to track when a file has changed.  The above functions
+normally only publish changed files.  You can override this and force
 publishing of all files by giving a prefix argument to any of the commands
 above.
 
@@ -2507,9 +2507,9 @@ behavior as demonstrated below, and @code{<body>} contains the actual source
 code.
 
 @subheading Editing source code
-Use @kbd{C-c '} to edit the current code block. This brings up a language
-major-mode edit buffer containing the body of the code block. Saving this
-buffer will write the new contents back to the Org buffer. Use @kbd{C-c '}
+Use @kbd{C-c '} to edit the current code block.  This brings up a language
+major-mode edit buffer containing the body of the code block.  Saving this
+buffer will write the new contents back to the Org buffer.  Use @kbd{C-c '}
 again to exit the edit buffer.
 
 @subheading Evaluating code blocks
