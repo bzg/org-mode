@@ -367,6 +367,12 @@ The number of levels is controlled by `org-inlinetask-min-level'"
       (format-seconds string seconds)
     (format-time-string string (seconds-to-time seconds))))
 
+(unless (or (and (>= 24 emacs-major-version)
+		 (>= 1 emacs-minor-version))
+	    (boundp 'filter-buffer-substring-functions))
+  (defvaralias 'filter-buffer-substring-functions
+    'buffer-substring-filters))
+
 (provide 'org-macs)
 
 ;; arch-tag: 7e6a73ce-aac9-4fc0-9b30-ce6f89dc6668
