@@ -1138,12 +1138,12 @@ on this string to produce the exported version."
 				     (plist-get parameters :exclude-tags))
       (run-hooks 'org-export-preprocess-after-tree-selection-hook)
 
+      ;; Get rid of tasks, depending on configuration
+      (org-export-remove-tasks (plist-get parameters :tasks))
+
       ;; Normalize footnotes
       (when (plist-get parameters :footnotes)
 	(org-footnote-normalize nil 'pre-process-p))
-
-      ;; Get rid of tasks, depending on configuration
-      (org-export-remove-tasks (plist-get parameters :tasks))
 
       ;; Export code blocks
       (org-export-blocks-preprocess)
