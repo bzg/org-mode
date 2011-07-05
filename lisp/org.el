@@ -20032,11 +20032,18 @@ This will move over empty lines, lines with planning time stamps,
 clocking lines, and drawers."
   (org-back-to-heading t)
   (let ((end (save-excursion (outline-next-heading) (point)))
-	(re (concat "[ \t]*$"
-		    "\\|" org-drawer-regexp 
+	(re (concat "\\(" org-drawer-regexp "\\)"
 		    "\\|" "[ \t]*" org-keyword-time-regexp)))
-    (while (re-search-forward re end 'move) 
-      (forward-line 1))))
+    (forward-line 1)
+    (while (re-search-forward re end t)
+      (if (not (match-end 1))
+	  ;; empty or planning line
+	  (forward-line 1)
+	;; a drawer, find the end
+	(re-search-forward "^[ \t]*:END:" end 'move)
+	(forward-line 1)))
+    (and (re-search-forward "[^\n]" nil t) (backward-char 1))
+    (point)))
 
 (defun org-forward-same-level (arg &optional invisible-ok)
   "Move forward to the arg'th subheading at same level as this one.
