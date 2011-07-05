@@ -513,3 +513,20 @@ lisp/org-vm.elc:	lisp/org.el
 lisp/org-w3m.elc:	lisp/org.el
 lisp/org-wl.elc:	lisp/org.el
 lisp/org-xoxo.elc:	lisp/org-exp.el
+
+# Describe valid make targets for org-mode.
+targets help:
+	@echo "make - compile Org ELisp files"
+	@echo "make clean - clean Elisp and documentation files"
+	@echo "make all - compile Org ELisp files and documentation"
+	@echo ""
+	@echo "make doc - make all documentation"
+	@echo "make info - make Info documentation"
+	@echo "make html - make HTML documentation"
+	@echo "make pdf - make pdf documentation"
+	@echo "make card - make refcards documentation"
+	@echo ""
+	@echo "make install - install Org"
+	@echo "make install-lisp - install Org ELisp files"
+	@echo "make install-info - install Org Info file"
+	@echo "make install-info-debian - install info on old debian systems (newer use ginstall)"
