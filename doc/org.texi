@@ -5451,7 +5451,7 @@ read the docstring of the variable
 @code{org-read-date-force-compatible-dates}.
 
 You can specify a time range by giving start and end times or by giving a
-start time and a duration (in HH:MM format).  Use `-' or `-@{@}-' as the
+start time and a duration (in HH:MM format).  Use one or two dash(es) as the
 separator in the former case and use '+' as the separator in the latter
 case, e.g.@:
 
