@@ -176,14 +176,20 @@ positions, and the definition, if local."
 	   ;; get fooled by unrelated closing square brackets.
 	   (end (ignore-errors (scan-sexps beg 1))))
       ;; Point is really at a reference if it's located before true
-      ;; ending of the footnote and isn't within a LaTeX macro. About
-      ;; that case, some special attention should be paid. Indeed,
-      ;; when two footnotes are side by side, once the first one is
-      ;; changed into LaTeX, the second one might then be considered
-      ;; as an optional argument of the command. To prevent that, we
-      ;; have a look at the `org-protected' property of that LaTeX
-      ;; command.
+      ;; ending of the footnote and isn't within a link or a LaTeX
+      ;; macro.  About that case, some special attention should be
+      ;; paid.  Indeed, when two footnotes are side by side, once the
+      ;; first one is changed into LaTeX, the second one might then be
+      ;; considered as an optional argument of the command.  To
+      ;; prevent that, we have a look at the `org-protected' property
+      ;; of that LaTeX command.
       (when (and end (< (point) end)
+		 (not (save-excursion
+			(goto-char beg)
+			(let ((linkp
+			       (save-match-data
+				 (org-in-regexp org-bracket-link-regexp))))
+			  (and linkp (< (point) (cdr linkp))))))
 		 (or (not (org-inside-latex-macro-p))
 		     (and (get-text-property (1- beg) 'org-protected)
 			  (not (get-text-property beg 'org-protected)))))
@@ -257,7 +263,7 @@ If no footnote is found, return nil."
 	  (throw 'exit ref))
 	 ;; Definition: also grab the last square bracket, only
 	 ;; matched in `org-footnote-re' for [1]-like footnotes.
-	 ((= (point-at-bol) (match-beginning 0))
+	 ((save-match-data (org-footnote-at-definition-p))
 	  (let ((end (match-end 0)))
 	    (throw 'exit
 		   (list nil (match-beginning 0)
