@@ -51,6 +51,11 @@
   :tag "Org Faces"
   :group 'org-appearance)
 
+(defface org-default
+  (org-compatible-face 'default nil)
+  "Face used for default text."
+  :group 'org-faces)
+
 (defface org-hide
   '((((background light)) (:foreground "white"))
     (((background dark)) (:foreground "black")))
