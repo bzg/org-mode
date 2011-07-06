@@ -1,14 +1,14 @@
-;;; org-mediawiki.el --- mediawiki backend for org-export.el
+;;; org-mw.el --- Mediawiki backend for org-export.el
 ;;
-;; Copyright 2010 Bastien Guerry
+;; Copyright 2010, 2011 Bastien Guerry
 ;;
 ;; Emacs Lisp Archive Entry
-;; Filename: org-mediawiki.el
+;; Filename: org-mw.el
 ;; Version: 0.3a
 ;; Author: Bastien <bzg AT altern DOT org>
 ;; Maintainer: Bastien <bzg AT altern DOT org>
-;; Keywords:
-;; Description:
+;; Keywords: Mediawiki Org export
+;; Description: Mediawiki exporter for Org
 ;; URL: [Not distributed yet]
 ;;
 ;; This program is free software; you can redistribute it and/or modify
@@ -27,11 +27,11 @@
 ;;
 ;;; Commentary:
 ;;
-;; org-mediawiki.el lets you convert Org files to mediawiki files using
+;; org-mw.el lets you convert Org files to mediawiki files using
 ;; the org-export.el experimental engine.
 ;;
 ;; Put this file into your load-path and the following into your ~/.emacs:
-;;   (require 'org-mediawiki)
+;;   (require 'org-mw)
 ;;
 ;; You also need to fetch Org's git repository and add the EXPERIMENTAL/
 ;; directory in your load path.
@@ -73,13 +73,14 @@
 (defun org-mw-export ()
   "Export the current buffer to Mediawiki."
   (interactive)
+  (setq org-export-current-backend 'mw)
   (org-export-set-backend "mw")
   ;; FIXME see the problem `org-mw-export-footnotes'
   ;; (add-hook 'org-export-preprocess-final-hook 'org-mw-export-footnotes)
   (add-hook 'org-export-preprocess-before-backend-specifics-hook
 	    'org-mw-export-src-example)
   (org-export-render)
-  (remove-hook 'org-export-preprocess-final-hook 'org-mw-export-footnotes)
+  ;; (remove-hook 'org-export-preprocess-final-hook 'org-mw-export-footnotes)
   (remove-hook 'org-export-preprocess-before-backend-specifics-hook 
 	       'org-mw-export-src-example))
 
@@ -178,31 +179,25 @@
       (delete-char 1))))
 
 (defun org-mw-export-lists ()
-  "Export lists"
-  (while (re-search-forward org-item-beginning-re nil t)
+  "Export lists to mediawiki syntax."
+  (while (re-search-forward (org-item-beginning-re) nil t)
     (move-beginning-of-line 1)
-    (org-list-to-mw (org-list-parse-list t))))
-
-(defun org-list-to-mw (list &optional level leveluptype)
-  "Convert LIST into a mediawiki list.
-LIST is a list returned by `org-list-parse-list'.  A second
-optional LEVEL argument defines the level at which the parsing
-starts.  An optional third argument LEVELUPTYPE tells what type
-of list we are in at LEVEL."
-  (let ((lvl (or level 1))
-	(ltype (cond ((eq (car list) 'unordered) ?*)
-		     ((eq (car list) 'ordered) ?#)
-		     ((eq (car list) 'descriptive) ?\;)))
-	(luptype leveluptype))
-    (dolist (item (cdr list))
-      (if (stringp item)
-	  (progn
-	    (setq item (replace-regexp-in-string "\n[ \t]*" " " item))
-	    (when (eq ltype ?\;) 
-	      (setq item (replace-regexp-in-string "::" ":" item)))
-	    (insert (if luptype (make-string (1- lvl) luptype) "")
-		    (char-to-string ltype) " " item "\n"))
-	(org-list-to-mw item (1+ lvl) ltype)))))
+    (insert (org-list-to-generic 
+	     (org-list-parse-list t)
+	     (org-combine-plists
+	      '(:splice nil 
+			:ostart "" :oend ""
+			:ustart "" :uend ""
+			:dstart "" :dend ""
+			:dtstart "" :dtend " "
+			:istart (concat (make-string (* 2 depth) ?  )
+					(if (eq type 'unordered)
+					    "- " "# "))
+			:iend "\n"
+			:icount nil
+			:csep "\n"
+			:cbon "[X]" :cboff "[ ]"
+			:cbtrans "[-]"))))))
 
 (defun org-mw-export-tables ()
   "Convert tables in the current buffer to mediawiki tables."
@@ -243,3 +238,8 @@ of list we are in at LEVEL."
 (defun org-mw-export-footer () "")
 (defun org-mw-export-section-beginning (section-properties) "")
 (defun org-mw-export-section-end (section-properties) "")
+(defun org-export-mw-preprocess (parameters)
+  "Do extra work for Mediawiki export."
+  nil)
+
+(provide 'org-mw)
