@@ -157,8 +157,8 @@ FIXME:  How to update when broken?"
       (org-set-local 'org-hide-leading-stars-before-indent-mode
 		     org-hide-leading-stars)
       (org-set-local 'org-hide-leading-stars t))
-    (make-local-variable 'filter-buffer-substring-functions)
-    (add-to-list 'filter-buffer-substring-functions
+    (make-local-variable 'buffer-substring-filters)
+    (add-to-list 'buffer-substring-filters
 		 'org-indent-remove-properties-from-string)
     (org-add-hook 'org-after-demote-entry-hook
 		  'org-indent-refresh-section nil 'local)
@@ -177,9 +177,9 @@ FIXME:  How to update when broken?"
 	(when (boundp 'org-hide-leading-stars-before-indent-mode)
 	  (org-set-local 'org-hide-leading-stars
 			 org-hide-leading-stars-before-indent-mode))
-	(setq filter-buffer-substring-functions
+	(setq buffer-substring-filters
 	      (delq 'org-indent-remove-properties-from-string
-		    filter-buffer-substring-functions))
+		    buffer-substring-filters))
 	(remove-hook 'org-after-promote-entry-hook
 		     'org-indent-refresh-section 'local)
 	(remove-hook 'org-after-demote-entry-hook
