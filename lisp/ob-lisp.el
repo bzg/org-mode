@@ -5,7 +5,7 @@
 ;; Author: Joel Boehland, Eric Schulte, David T. O'Toole <dto@gnu.org>
 ;; Keywords: literate programming, reproducible research
 ;; Homepage: http://orgmode.org
-;; Version: 7.5
+;; Version: 7.6
 
 ;; This file is part of GNU Emacs.
 

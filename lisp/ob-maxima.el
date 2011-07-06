@@ -5,7 +5,7 @@
 ;; Author: Eric S Fraga, Eric Schulte
 ;; Keywords: literate programming, reproducible research, maxima
 ;; Homepage: http://orgmode.org
-;; Version: 0.01
+;; Version: 7.6
 
 ;;; License:
 

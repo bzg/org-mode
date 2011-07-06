@@ -5,7 +5,7 @@
 ;; Author: Martyn Jago
 ;; Keywords: babel language, literate programming
 ;; Homepage: https://github.com/mjago/ob-lilypond
-;; Version: 0.3
+;; Version: 7.6
 
 ;; This file is part of GNU Emacs.
 
