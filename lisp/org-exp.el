@@ -1078,7 +1078,8 @@ to export.  It then creates a temporary buffer where it does its job.
 The result is then again returned as a string, and the exporter works
 on this string to produce the exported version."
   (interactive)
-  (let* ((org-export-current-backend (plist-get parameters :for-backend))
+  (let* ((org-export-current-backend (or (plist-get parameters :for-backend)
+					 org-export-current-backend))
 	 (archived-trees (plist-get parameters :archived-trees))
 	 (inhibit-read-only t)
 	 (drawers org-drawers)

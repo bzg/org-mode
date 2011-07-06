@@ -34,14 +34,15 @@
 ;;
 ;;; Todo:
 ;; 
-;; Rewrite `org-export-export-preprocess-string'.
-;;
 ;;; Code:
 
 (eval-when-compile
   (require 'cl))
 
 ;;; Preparation functions:
+
+;; Currently needed for `org-export-preprocess-string'
+(require 'org-exp)
 
 (defvar org-export-structure nil)
 (defvar org-export-content nil)
@@ -125,7 +126,7 @@ export the (filtered) list with `org-export-render-structure'."
 	 (parsed-buffer
 	  (with-temp-buffer
 	    (org-mode)
-	    (insert (apply 'org-export-export-preprocess-string 
+	    (insert (apply 'org-export-preprocess-string 
 			   bstring org-export-properties))
 	    (goto-char (point-min))
 	    (setq first-lines (org-export-get-entry-content))
@@ -190,204 +191,6 @@ the docstring of `org-export-latex-filter'."
 			  (org-export-filter (plist-get s :subtree) filter))
 	       s))) ;; return the section if it isn't filtered out
     parsed-buffer)))
-
-;; FIXME This function is a copy of `org-export-preprocess-string' which
-;; should be rewritten for this export engine to work okay.
-(defun org-export-export-preprocess-string (string &rest parameters)
-  "Cleanup STRING so that that the true exported has a more consistent source.
-This function takes STRING, which should be a buffer-string of an org-file
-to export.  It then creates a temporary buffer where it does its job.
-The result is then again returned as a string, and the exporter works
-on this string to produce the exported version."
-  (interactive)
-  (let* ((htmlp (plist-get parameters :for-html))
-	 (asciip (plist-get parameters :for-ascii))
-	 (latexp (plist-get parameters :for-LaTeX))
-	 (docbookp (plist-get parameters :for-docbook))
-	 (backend (cond (htmlp 'html)
-			(latexp 'latex)
-			(asciip 'ascii)
-			(docbookp 'docbook)))
-	 (archived-trees (plist-get parameters :archived-trees))
-	 (inhibit-read-only t)
-	 (drawers org-drawers)
-	 (outline-regexp "\\*+ ")
-	 target-alist rtn)
-
-    (setq org-export-target-aliases nil
-	  org-export-preferred-target-alist nil
-	  org-export-id-target-alist nil
-	  org-export-code-refs nil)
-
-    (with-current-buffer (get-buffer-create " org-mode-tmp")
-      (erase-buffer)
-      (insert string)
-      (setq case-fold-search t)
-
-      (let ((inhibit-read-only t))
-	(remove-text-properties (point-min) (point-max)
-				'(read-only t)))
-
-      ;; Remove license-to-kill stuff
-      ;; The caller marks some stuff for killing, stuff that has been
-      ;; used to create the page title, for example.
-      (org-export-kill-licensed-text)
-
-      (let ((org-inhibit-startup t)) (org-mode))
-      (setq case-fold-search t)
-      (org-install-letbind)
-
-      ;; Call the hook
-      (run-hooks 'org-export-preprocess-hook)
-
-      ;; Process the macros
-      (org-export-preprocess-apply-macros)
-      (run-hooks 'org-export-preprocess-after-macros-hook)
-
-      (untabify (point-min) (point-max))
-
-      ;; Handle include files, and call a hook
-      (org-export-handle-include-files-recurse)
-      (run-hooks 'org-export-preprocess-after-include-files-hook)
-
-      ;; Get rid of archived trees
-      (org-export-remove-archived-trees archived-trees)
-
-      ;; Remove comment environment and comment subtrees
-      (org-export-remove-comment-blocks-and-subtrees)
-
-      ;; Get rid of excluded trees, and call a hook
-      (org-export-handle-export-tags (plist-get parameters :select-tags)
-				     (plist-get parameters :exclude-tags))
-      (run-hooks 'org-export-preprocess-after-tree-selection-hook)
-
-      ;; Mark end of lists
-      (org-export-mark-list-ending backend)
-
-      ;; Handle source code snippets
-      ;; (org-export-export-replace-src-segments-and-examples backend)
-
-      ;; Protect short examples marked by a leading colon
-      (org-export-protect-colon-examples)
-
-      ;; Normalize footnotes
-      (when (plist-get parameters :footnotes)
-	(org-footnote-normalize nil t))
-
-      ;; Find all headings and compute the targets for them
-      (setq target-alist (org-export-define-heading-targets target-alist))
-
-      (run-hooks 'org-export-preprocess-after-headline-targets-hook)
-
-      ;; Find HTML special classes for headlines
-      (org-export-remember-html-container-classes)
-
-      ;; Get rid of drawers
-      (org-export-remove-or-extract-drawers
-       drawers (plist-get parameters :drawers) backend)
-
-      ;; Get the correct stuff before the first headline
-      (when (plist-get parameters :skip-before-1st-heading)
-	(goto-char (point-min))
-	(when (re-search-forward "^\\(#.*\n\\)?\\*+[ \t]" nil t)
-	  (delete-region (point-min) (match-beginning 0))
-	  (goto-char (point-min))
-	  (insert "\n")))
-      (when (plist-get parameters :text)
-	(goto-char (point-min))
-	(insert (plist-get parameters :text) "\n"))
-
-      ;; Remove todo-keywords before exporting, if the user has requested so
-      (org-export-remove-headline-metadata parameters)
-
-      ;; Find targets in comments and move them out of comments,
-      ;; but mark them as targets that should be invisible
-      (setq target-alist (org-export-handle-invisible-targets target-alist))
-
-      ;; Select and protect backend specific stuff, throw away stuff
-      ;; that is specific for other backends
-      (run-hooks 'org-export-preprocess-before-selecting-backend-code-hook)
-      (org-export-select-backend-specific-text backend)
-
-      ;; Protect quoted subtrees
-      (org-export-protect-quoted-subtrees)
-
-      ;; Remove clock lines
-      (org-export-remove-clock-lines)
-
-      ;; Protect verbatim elements
-      (org-export-protect-verbatim)
-
-      ;; Blockquotes, verse, and center
-      (org-export-mark-blockquote-verse-center)
-      (run-hooks 'org-export-preprocess-after-blockquote-hook)
-
-      ;; Remove timestamps, if the user has requested so
-      (unless (plist-get parameters :timestamps)
-	(org-export-remove-timestamps))
-
-      ;; Attach captions to the correct object
-      ;; (setq target-alist (org-export-attach-captions-and-attributes
-      ;; 			  backend target-alist))
-
-      ;; Find matches for radio targets and turn them into internal links
-      (org-export-mark-radio-links)
-      (run-hooks 'org-export-preprocess-after-radio-targets-hook)
-
-      ;; Find all links that contain a newline and put them into a single line
-      (org-export-concatenate-multiline-links)
-
-      ;; Normalize links: Convert angle and plain links into bracket links
-      ;; and expand link abbreviations
-      (run-hooks 'org-export-preprocess-before-normalizing-links-hook)
-      (org-export-normalize-links)
-
-      ;; Find all internal links.  If they have a fuzzy match (i.e. not
-      ;; a *dedicated* target match, let the link  point to the
-      ;; corresponding section.
-      (org-export-target-internal-links target-alist)
-
-      ;; Find multiline emphasis and put them into single line
-      (when (plist-get parameters :emph-multiline)
-	(org-export-concatenate-multiline-emphasis))
-
-      ;; Remove special table lines
-      (when org-export-table-remove-special-lines
-	(org-export-remove-special-table-lines))
-
-      ;; Another hook
-      (run-hooks 'org-export-preprocess-before-backend-specifics-hook)
-
-      ;; LaTeX-specific preprocessing
-      (when latexp
-	(require 'org-latex nil)
-	(org-export-latex-preprocess parameters))
-
-      ;; ASCII-specific preprocessing
-      (when asciip
-	(org-export-ascii-preprocess parameters))
-
-      ;; HTML-specific preprocessing
-      (when htmlp
-	(org-export-html-preprocess parameters))
-
-      ;; DocBook-specific preprocessing
-      (when docbookp
-	(require 'org-docbook nil)
-	(org-export-docbook-preprocess parameters))
-
-      ;; Remove or replace comments
-      (org-export-handle-comments (plist-get parameters :comments))
-
-      ;; Remove #+TBLFM and #+TBLNAME lines
-      (org-export-handle-table-metalines)
-      
-      ;; Run the final hook
-      (run-hooks 'org-export-preprocess-final-hook)
-
-      (setq rtn (buffer-string))
-      (kill-buffer " org-mode-tmp"))
-    rtn))
 
 (provide 'org-export)
 
