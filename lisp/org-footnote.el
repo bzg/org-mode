@@ -154,6 +154,7 @@ extracted will be filled again."
   :group 'org-footnote
   :type 'boolean)
 
+(defvar org-bracket-link-regexp) ; silent compiler
 (defun org-footnote-at-reference-p ()
   "Is the cursor at a footnote reference?
 
