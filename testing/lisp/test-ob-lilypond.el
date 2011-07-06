@@ -32,10 +32,10 @@
   (should (boundp 'ly-version)))
 
 (ert-deftest ob-lilypond/ly-version-command ()
-  (should (equal "ob-lilypond version 0.2" (ly-version)))
+  (should (equal "ob-lilypond version 0.3" (ly-version)))
   (with-temp-buffer
     (ly-version t)
-    (should (equal "ob-lilypond version 0.2"
+    (should (equal "ob-lilypond version 0.3"
                    (buffer-substring (point-min) (point-max))))))
 
 (ert-deftest ob-lilypond/ly-compile-lilyfile ()
@@ -109,12 +109,15 @@
 (ert-deftest ob-lilypond/use-eps ()
   (should (boundp 'ly-use-eps)))
 
-(ert-deftest ob-lilypond/org-babel-default-header-args:lilypond ()
-  (should (equal  '((:tangle . "yes")
-                    (:noweb . "yes")
-                    (:results . "silent")
-                    (:comments . "yes"))
-                  org-babel-default-header-args:lilypond)))
+(ert-deftest ob-lilypond/ly-arrange-mode ()
+  (should (boundp 'ly-arrange-mode)))
+
+;; (ert-deftest ob-lilypond/org-babel-default-header-args:lilypond ()
+;;   (should (equal  '((:tangle . "yes")
+;;                     (:noweb . "yes")
+;;                     (:results . "silent")
+;;                     (:comments . "yes"))
+;;                   org-babel-default-header-args:lilypond)))
 
 ;;TODO finish...
 (ert-deftest ob-lilypond/org-babel-expand-body:lilypond ()
@@ -197,7 +200,7 @@
         (pdf-file (concat
                    ly-here
                    "../examples/ob-lilypond-test.pdf")))
-    (setq ly-open-pdf-post-tangle t)
+    (setq ly-display-pdf-post-tangle t)
     (when (not (file-exists-p pdf-file))
       (set-buffer (get-buffer-create (file-name-nondirectory pdf-file)))
       (write-file pdf-file))
@@ -258,7 +261,7 @@
                  (ly-determine-midi-path "win32")))
   (should (equal ly-nix-midi-path
                  (ly-determine-midi-path "nix"))))
- 
+
 (ert-deftest ob-lilypond/ly-toggle-midi-play-toggles-flag ()
   (if ly-play-midi-post-tangle
       (progn
@@ -283,6 +286,18 @@
     (ly-toggle-pdf-display)
     (should (not ly-display-pdf-post-tangle))))
 
+(ert-deftest ob-lilypond/ly-toggle-arrange-mode ()
+  (if ly-arrange-mode
+      (progn
+        (ly-toggle-arrange-mode)
+        (should (not ly-arrange-mode))
+        (ly-toggle-arrange-mode)
+        (should ly-arrange-mode))
+    (ly-toggle-arrange-mode)
+    (should ly-arrange-mode)
+    (ly-toggle-arrange-mode)
+    (should (not ly-arrange-mode))))
+
 (ert-deftest ob-lilypond/ly-toggle-png-generation-toggles-flag ()
   (if ly-gen-png
       (progn
@@ -294,7 +309,7 @@
     (should ly-gen-png)
     (ly-toggle-png-generation)
     (should (not ly-gen-png))))
-
+ 
 (ert-deftest ob-lilypond/ly-toggle-html-generation-toggles-flag ()
   (if ly-gen-html
       (progn
@@ -319,6 +334,29 @@
   (should (equal "/some/path/to/test-name.xyz"
                   (ly-switch-extension "/some/path/to/test-name" ".xyz"))))
 
+(ert-deftest ob-lilypond/ly-get-header-args ()
+  (should (equal '((:tangle . "yes")
+                   (:noweb . "yes")
+                   (:results . "silent")
+                   (:comments . "yes"))
+                 (ly-set-header-args t)))
+  (should (equal '((:results . "file")
+                   (:exports . "results"))
+                 (ly-set-header-args nil))))
+
+(ert-deftest ob-lilypond/ly-set-header-args ()
+  (ly-set-header-args t)
+  (should (equal '((:tangle . "yes")
+                   (:noweb . "yes")
+                   (:results . "silent")
+                   (:comments . "yes"))
+                 org-babel-default-header-args:lilypond))
+  (ly-set-header-args nil)
+  (should (equal '((:results . "file")
+                   (:exports . "results"))
+                 org-babel-default-header-args:lilypond)))
+                 
 (provide 'test-ob-lilypond)
 
 ;;; test-ob-lilypond.el ends here
+ 
