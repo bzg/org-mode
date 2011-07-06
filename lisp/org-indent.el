@@ -212,7 +212,7 @@ useful to make it ever so slightly different."
       (remove-text-properties beg end '(line-prefix nil wrap-prefix nil)))))
 
 (defun org-indent-remove-properties-from-string (string)
-  "Remove indentations between BEG and END."
+  "Remove indentation properties from STRING."
   (remove-text-properties 0 (length string)
 			  '(line-prefix nil wrap-prefix nil) string)
   string)
