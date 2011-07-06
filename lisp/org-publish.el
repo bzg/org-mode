@@ -1105,12 +1105,13 @@ so that the file including them will be republished as well."
 	 (pstamp (org-publish-cache-get key))
 	 included-files-ctime)
     (with-temp-buffer 
-      (find-file (expand-file-name filename))
-      (goto-char (point-min))
-      (while (re-search-forward "^#\\+INCLUDE: \\(.+\\)[ ^\t]*$" nil t)
-	(let* ((included-file (expand-file-name (match-string 1))))
-	  (add-to-list 'included-files-ctime
-		       (org-publish-cache-ctime-of-src included-file) t))))
+      (when (equal (file-name-extension filename) "org")
+	(find-file (expand-file-name filename))
+	(goto-char (point-min))
+	(while (re-search-forward "^#\\+INCLUDE: \\(.+\\)[ ^\t]*$" nil t)
+	  (let* ((included-file (expand-file-name (match-string 1))))
+	    (add-to-list 'included-files-ctime
+			 (org-publish-cache-ctime-of-src included-file) t)))))
     (if (null pstamp)
 	t
       (let ((ctime (org-publish-cache-ctime-of-src filename)))
