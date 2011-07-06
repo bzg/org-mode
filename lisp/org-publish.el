@@ -1096,15 +1096,28 @@ If FREE-CACHE, empty the cache."
 
 (defun org-publish-cache-file-needs-publishing (filename &optional pub-dir pub-func)
   "Check the timestamp of the last publishing of FILENAME.
-Return `t', if the file needs publishing"
+Return `t', if the file needs publishing.  The function also
+checks if any included files have been more recently published,
+so that the file including them will be republished as well."
   (unless org-publish-cache
     (error "%s" "`org-publish-cache-file-needs-publishing' called, but no cache present"))
   (let* ((key (org-publish-timestamp-filename filename pub-dir pub-func))
-	 (pstamp (org-publish-cache-get key)))
+	 (pstamp (org-publish-cache-get key))
+	 included-files-ctime)
+    (with-temp-buffer 
+      (find-file (expand-file-name filename))
+      (goto-char (point-min))
+      (while (re-search-forward "^#\\+INCLUDE: \\(.+\\)[ ^\t]*$" nil t)
+	(let* ((included-file (expand-file-name (match-string 1))))
+	  (add-to-list 'included-files-ctime
+		       (org-publish-cache-ctime-of-src included-file) t))))
     (if (null pstamp)
 	t
       (let ((ctime (org-publish-cache-ctime-of-src filename)))
-	(< pstamp ctime)))))
+	(or (< pstamp ctime)
+	    (when included-files-ctime
+	      (not (null (delq nil (mapcar (lambda(ct) (< ctime ct)) 
+					   included-files-ctime))))))))))
 
 (defun org-publish-cache-set-file-property (filename property value &optional project-name)
   "Set the VALUE for a PROPERTY of file FILENAME in publishing cache to VALUE.
