@@ -5524,7 +5524,9 @@ Any match of REMOVE-RE will be removed from TXT."
 		(error nil)))
 	(when effort
 	  (setq neffort (org-duration-string-to-minutes effort)
-		effort (setq effort (concat "[" effort "]" )))))
+		effort (setq effort (concat "[" effort "]")))))
+      ;; prevent erroring out with %e format when there is no effort
+      (or effort (setq effort ""))
 
       (when remove-re
 	(while (string-match remove-re txt)
@@ -5562,6 +5564,7 @@ Any match of REMOVE-RE will be removed from TXT."
 		 (>= (length category) org-prefix-category-max-length))
 	    (setq category (substring category 0 (1- org-prefix-category-max-length)))))
       ;; Evaluate the compiled format
+      (assert effort)
       (setq rtn (concat (eval org-prefix-format-compiled) txt))
 
       ;; And finally add the text properties
