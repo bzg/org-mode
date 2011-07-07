@@ -11869,14 +11869,15 @@ Code blocks in the following languages are supported.
 
 @multitable @columnfractions 0.28 0.3 0.22 0.2
 @item @b{Language} @tab @b{Identifier} @tab @b{Language} @tab @b{Identifier}
-@item Asymptote @tab asymptote @tab Emacs Calc @tab calc
-@item C @tab C @tab C++ @tab C++
-@item Clojure @tab clojure @tab CSS @tab css
-@item ditaa @tab ditaa  @tab Graphviz @tab dot
-@item Emacs Lisp @tab emacs-lisp  @tab gnuplot @tab gnuplot
-@item Haskell @tab haskell @tab Javascript @tab js
-@item LaTeX @tab latex @tab Ledger @tab ledger
-@item Lisp @tab lisp @tab MATLAB @tab matlab
+@item Asymptote @tab asymptote @tab Awk @tab awk
+@item Emacs Calc @tab calc @tab C @tab C
+@item C++ @tab C++ @tab Clojure @tab clojure
+@item CSS @tab css @tab ditaa @tab ditaa
+@item Graphviz @tab dot @tab Emacs Lisp @tab emacs-lisp
+@item gnuplot @tab gnuplot @tab Haskell @tab haskell
+@item Javascript @tab js @tab LaTeX @tab latex 
+@item Ledger @tab ledger @tab Lisp @tab lisp 
+@item Lilypond @tab lilypond @tab MATLAB @tab matlab
 @item Mscgen @tab mscgen @tab Objective Caml @tab ocaml
 @item Octave @tab octave @tab Org-mode @tab org
 @item Oz @tab oz @tab Perl @tab perl
