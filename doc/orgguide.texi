@@ -4,7 +4,7 @@
 @settitle The compact Org-mode Guide
 
 @set VERSION 7.6
-@set DATE juillet 2011
+@set DATE July 2011
 
 @c Use proper quote and backtick for code sections in PDF output
 @c Cf. Texinfo manual 14.2
