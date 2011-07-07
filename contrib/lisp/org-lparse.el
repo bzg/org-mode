@@ -1,4 +1,4 @@
-;;; org-lparse.el --- Line-oriented exporter for Org-mode
+;;; org-lparse.el --- Line-oriented parser-exporter for Org-mode
 
 ;; Copyright (C) 2010, 2011
 ;;   Jambunathan <kjambunathan at gmail dot com>
@@ -27,28 +27,28 @@
 ;;
 ;;; Commentary:
 
-;;; `org-lparse' is the entry point for the generic line-oriented
-;;; exporter.  `org-do-lparse' is the genericized version of the
-;;; original `org-export-as-html' routine.
+;; `org-lparse' is the entry point for the generic line-oriented
+;; exporter.  `org-do-lparse' is the genericized version of the
+;; original `org-export-as-html' routine.
 
-;;; `org-lparse-native-backends' is a good starting point for
-;;; exploring the generic exporter.
+;; `org-lparse-native-backends' is a good starting point for
+;; exploring the generic exporter.
 
-;;; Following new interactive commands are provided by this library.
-;;; `org-lparse', `org-lparse-and-open', `org-lparse-to-buffer'
-;;; `org-replace-region-by', `org-lparse-region'.
+;; Following new interactive commands are provided by this library.
+;; `org-lparse', `org-lparse-and-open', `org-lparse-to-buffer'
+;; `org-replace-region-by', `org-lparse-region'.
 
-;;; Note that the above routines correspond to the following routines
-;;; in the html exporter `org-export-as-html',
-;;; `org-export-as-html-and-open', `org-export-as-html-to-buffer',
-;;; `org-replace-region-by-html' and `org-export-region-as-html'.
+;; Note that the above routines correspond to the following routines
+;; in the html exporter `org-export-as-html',
+;; `org-export-as-html-and-open', `org-export-as-html-to-buffer',
+;; `org-replace-region-by-html' and `org-export-region-as-html'.
 
-;;; The all new interactive command `org-export-convert' can be used
-;;; to convert documents between various formats.  Use this to
-;;; command, for example, to convert odt file to doc or pdf format.
+;; The all new interactive command `org-export-convert' can be used to
+;; convert documents between various formats.  Use this to command,
+;; for example, to convert odt file to doc or pdf format.
 
-;;; See README.org file that comes with this library for answers to
-;;; FAQs and more information on using this library.
+;; See README.org file that comes with this library for answers to
+;; FAQs and more information on using this library.
 
 ;;; Code:
 
