@@ -443,15 +443,15 @@ cleanrel:
 
 
 push:
-	git-push orgmode@orgmode.org:org-mode.git master
+	git push orgmode@orgmode.org:org-mode.git master
 
 pushtag:
-	git-tag -m "Adding tag" -a $(TAG)
-	git-push orgmode@orgmode.org:org-mode.git $(TAG)
+	git tag -m "Adding tag" -a $(TAG)
+	git push orgmode@orgmode.org:org-mode.git $(TAG)
 
 pushreleasetag:
-	git-tag -m "Adding release tag" -a release_$(TAG)
-	git-push orgmode@orgmode.org:org-mode.git release_$(TAG)
+	git tag -m "Adding release tag" -a release_$(TAG)
+	git push orgmode@orgmode.org:org-mode.git release_$(TAG)
 
 # Dependencies
 
