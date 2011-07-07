@@ -286,7 +286,7 @@ pdf:	doc/org.pdf doc/orgguide.pdf
 card:	doc/orgcard.pdf doc/orgcard_letter.pdf doc/orgcard.txt
 
 testrelease:
-	git checkout -b testrelease maint
+	git checkout -b testrelease origin/maint
 	git merge -s recursive -X theirs master
 	UTILITIES/set-version.pl testing
 	git commit -a -m "Release testing"
