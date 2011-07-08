@@ -106,9 +106,8 @@
 (declare-function org-fix-tags-on-the-fly "org" ())
 (declare-function org-get-indentation "org" (&optional line))
 (declare-function org-icompleting-read "org" (&rest args))
+(declare-function org-in-block-p "org" (names))
 (declare-function org-in-regexp "org" (re &optional nlines visually))
-(declare-function org-in-regexps-block-p "org"
-		  (start-re end-re &optional bound))
 (declare-function org-inlinetask-goto-beginning "org-inlinetask" ())
 (declare-function org-inlinetask-goto-end "org-inlinetask" ())
 (declare-function org-inlinetask-in-task-p "org-inlinetask" ())
@@ -410,15 +409,8 @@ group 4: description tag")
 	 (looking-at regexp))))
 
 (defun org-list-in-valid-context-p ()
-  "Non-nil if point is in a valid block.
-Invalid blocks are referring to `org-list-forbidden-blocks'."
-  (save-match-data
-    (let ((case-fold-search t))
-      (not (org-in-regexps-block-p
-	    (concat "^[ \t]*#\\+begin_\\("
-		    (mapconcat 'regexp-quote org-list-forbidden-blocks "\\|")
-		    "\\)")
-	    '(concat "^[ \t]*#\\+end_" (match-string 1)))))))
+  "Is point in a context where lists are allowed?"
+  (not (org-in-block-p org-list-forbidden-blocks)))
 
 (defun org-in-item-p ()
   "Return item beginning position when in a plain list, nil otherwise.
