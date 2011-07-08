@@ -1338,7 +1338,7 @@ for further information."
       (while (string-match org-maybe-keyword-time-regexp s)
 	(or b (setq b (substring s 0 (match-beginning 0))))
 	(setq r (concat
-		 r (substring s 0 (match-beginning 0))
+		 r (substring s 0 (match-beginning 0)) " "
 		 (org-lparse-format
 		  'FONTIFY
 		  (concat
@@ -1346,6 +1346,7 @@ for further information."
 		       (org-lparse-format
 			'FONTIFY
 			(match-string 1 s) "timestamp-kwd"))
+		   " "
 		   (org-lparse-format
 		    'FONTIFY
 		    (substring (org-translate-time (match-string 3 s)) 1 -1)
