@@ -128,8 +128,11 @@
 		(cons (concat  "\\." (car desc) "\\'") 'system)))
  org-odt-ms-file-extensions)
 
-;; register the odt exporter
+;; register the odt exporter with the pre-processor
 (add-to-list 'org-export-backends 'odt)
+
+;; register the odt exporter with org-lparse library
+(org-lparse-register-backend 'odt)
 
 (defcustom org-export-odt-automatic-styles-file nil
   "Default style file for use with ODT exporter."

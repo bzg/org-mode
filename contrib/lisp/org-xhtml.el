@@ -1194,6 +1194,9 @@ make any modifications to the exporter file.  For example,
 `org-xhtml-format-table-row' encloses incoming entity in <tr>
 </tr> tags and returns it.  See also `org-lparse-format'.")
 
+;; register the xhtml exporter with org-lparse library
+(org-lparse-register-backend 'xhtml)
+
 (defun org-xhtml-begin-document-body (opt-plist)
   (let ((link-up (and (plist-get opt-plist :link-up)
 		      (string-match "\\S-" (plist-get opt-plist :link-up))
@@ -1652,7 +1655,7 @@ lang=\"%s\" xml:lang=\"%s\">
     (SAVE-METHOD nil)
     (CLEANUP-METHOD nil)
     (OTHER-BACKENDS
-     '("etext" "html" "html10" "mediawiki" "pdf" "sdw" "sdw3" "sdw4"
+     '("xhtml" "etext" "html" "html10" "mediawiki" "pdf" "sdw" "sdw3" "sdw4"
        "text" "text10" "odt" "vor" "vor4"))
     (CONVERT-METHOD org-lparse-convert-process)
     (EXPORT-DIR (org-export-directory :html opt-plist))

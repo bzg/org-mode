@@ -337,9 +337,11 @@ OPT-PLIST is the export options list."
      (when org-lparse-do-open-par
        (org-lparse-begin-paragraph))))
 
-(defvar org-lparse-native-backends
-  '("xhtml" "odt")
+(defvar org-lparse-native-backends nil
   "List of native backends registered with `org-lparse'.
+A backend can use `org-lparse-register-backend' to add itself to
+this list.
+
 All native backends must implement a get routine and a mandatory
 set of callback routines.
 
@@ -353,6 +355,16 @@ For the sake of illustration, the html backend implements
 `org-xhtml-entity-control-callbacks-alist' and
 `org-xhtml-entity-format-callbacks-alist' as the values of
 ENTITY-CONTROL and ENTITY-FORMAT settings.")
+
+(defun org-lparse-register-backend (backend)
+  "Make BACKEND known to org-lparse library.
+Add BACKEND to `org-lparse-native-backends'."
+  (when backend
+    (setq backend (cond
+		   ((symbolp backend) (symbol-name backend))
+		   ((stringp backend) backend)
+		   (t (error "Error while registering backend: %S" backend))))
+    (add-to-list 'org-lparse-native-backends backend)))
 
 (defun org-lparse-get-other-backends (native-backend)
   (org-lparse-backend-get native-backend 'OTHER-BACKENDS))
