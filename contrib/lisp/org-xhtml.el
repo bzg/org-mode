@@ -1654,7 +1654,7 @@ lang=\"%s\" xml:lang=\"%s\">
     (OTHER-BACKENDS
      '("etext" "html" "html10" "mediawiki" "pdf" "sdw" "sdw3" "sdw4"
        "text" "text10" "odt" "vor" "vor4"))
-    (CONVERT-METHOD org-export-convert-process)
+    (CONVERT-METHOD org-lparse-convert-process)
     (EXPORT-DIR (org-export-directory :html opt-plist))
     (FILE-NAME-EXTENSION (plist-get opt-plist :html-extension))
     (EXPORT-BUFFER-NAME "*Org HTML Export*")

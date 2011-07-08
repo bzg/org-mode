@@ -10721,12 +10721,12 @@ following methods:
 Export the outline first to one of the native formats (like OpenDocumentText)
 and immediately post-process it to other formats using an external converter.
 
-@item M-x org-export-convert
+@item M-x org-lparse-convert
 Export an existing document to other formats using an external converter.
 @end table
 
 You can choose the converter used for conversion by customizing the variable
-@code{org-export-convert-process}.
+@code{org-lparse-convert-process}.
 
 @node Links in OpenDocumentText export, Tables in OpenDocumentText export, Converting to Other formats, OpenDocumentText export
 @subsection Links in OpenDocumentText export

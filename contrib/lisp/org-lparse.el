@@ -43,7 +43,7 @@
 ;; `org-export-as-html-and-open', `org-export-as-html-to-buffer',
 ;; `org-replace-region-by-html' and `org-export-region-as-html'.
 
-;; The all new interactive command `org-export-convert' can be used to
+;; The new interactive command `org-lparse-convert' can be used to
 ;; convert documents between various formats.  Use this to command,
 ;; for example, to convert odt file to doc or pdf format.
 
@@ -428,7 +428,7 @@ PUB-DIR specifies the publishing directory."
     (run-hooks 'org-export-first-hook)
     (org-do-lparse arg hidden ext-plist to-buffer body-only pub-dir)))
 
-(defcustom org-export-convert-process
+(defcustom org-lparse-convert-process
   '("soffice" "-norestore" "-invisible" "-headless" "\"macro:///BasicODConverter.Main.Convert(%I,%f,%O)\"")
   "Command to covert a Org exported format to other formats.
 The variable is an list of the form (PROCESS ARG1 ARG2 ARG3
@@ -440,14 +440,14 @@ The variable is an list of the form (PROCESS ARG1 ARG2 ARG3
 %O output file name as a URL
 %d output dir in full
 %D output dir as a URL"
-  :group 'org-export)
+  :group 'org-lparse)
 
 (defcustom org-lparse-use-flashy-warning t
   "Use flashy warnings when exporting to ODT."
   :type 'boolean
   :group 'org-export)
 
-(defun org-export-convert (&optional in-file fmt)
+(defun org-lparse-convert (&optional in-file fmt)
   "Convert file from one format to another using a converter.
 IN-FILE is the file to be converted.  If unspecified, it defaults
 to variable `buffer-file-name'.  FMT is the desired output format.  If the
@@ -473,7 +473,7 @@ then that converter is used.  Otherwise
 	 (backend (when (boundp 'org-lparse-backend) org-lparse-backend))
 	 (convert-process
 	  (or (ignore-errors (org-lparse-backend-get backend 'CONVERT-METHOD))
-	      org-export-convert-process))
+	      org-lparse-convert-process))
 	 program arglist)
 
     (setq program (and convert-process (consp convert-process)
@@ -1114,9 +1114,9 @@ version."
 	(or (when (and (boundp 'org-lparse-other-backend)
 		       org-lparse-other-backend
 		       (not (equal org-lparse-backend org-lparse-other-backend)))
-	      (let ((org-export-convert-process (org-lparse-get 'CONVERT-METHOD)))
-		(when org-export-convert-process
-		  (org-export-convert buffer-file-name
+	      (let ((org-lparse-convert-process (org-lparse-get 'CONVERT-METHOD)))
+		(when org-lparse-convert-process
+		  (org-lparse-convert buffer-file-name
 				      (symbol-name org-lparse-other-backend)))))
 	    (current-buffer)))
        ((eq to-buffer 'string)
@@ -1582,9 +1582,9 @@ the alist of previous items."
 (defvar org-lparse-output-buffer)
 
 (defcustom org-lparse-debug nil
-  "."
-  :group 'org-lparse
-  :type 'boolean)
+  "Turn on/off debugging for `org-lparse'."
+  :type 'boolean
+  :group 'org-lparse)
 
 (defun org-lparse-begin (entity &rest args)
   "Begin ENTITY in current buffer. ARGS is entity specific.
