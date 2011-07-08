@@ -156,7 +156,8 @@ LISPF      = 	org.el			\
 		ob-plantuml.el		\
 		ob-org.el		\
 		ob-js.el		\
-		ob-scheme.el
+		ob-scheme.el		\
+		ob-lilypond.el
 
 LISPFILES0  = $(LISPF:%=lisp/%)
 LISPFILES   = $(LISPFILES0) lisp/org-install.el
