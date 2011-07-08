@@ -108,9 +108,10 @@ utf8      Use all UTF-8 characters")
 
 ;;;###autoload
 (defun org-export-as-utf8 (&rest args)
-  "Like `org-export-as-ascii', use use encoding for special symbols."
+  "Like `org-export-as-ascii', use encoding for special symbols."
   (interactive)
-  (org-export-as-encoding 'org-export-as-ascii (org-called-interactively-p)
+  (org-export-as-encoding 'org-export-as-ascii 
+			  (org-called-interactively-p 'any)
 			  'utf8 args))
 
 ;;;###autoload
