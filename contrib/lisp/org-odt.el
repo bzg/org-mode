@@ -133,8 +133,8 @@
 
 (defcustom org-export-odt-automatic-styles-file nil
   "Default style file for use with ODT exporter."
-  :group 'org-export-odt
-  :type 'file)
+  :type 'file
+  :group 'org-export-odt)
 
 ;; TODO: Make configuration user-friendly.
 (defcustom org-export-odt-styles-file nil
@@ -146,19 +146,20 @@ and MEMBER1, MEMBER2 etc are copied in to the generated odt
 file. The last form is particularly useful if the styles.xml has
 reference to additional files like header and footer images.
 "
-  :group 'org-export-odt
-  :type 'file)
-(defconst  org-export-odt-tmpdir-prefix "odt-")
+  :type 'file
+  :group 'org-export-odt)
+
+(defconst org-export-odt-tmpdir-prefix "odt-")
 (defconst org-export-odt-bookmark-prefix "OrgXref.")
 (defcustom org-export-odt-use-bookmarks-for-internal-links t
   "Export Internal links as bookmarks?."
-  :group 'org-export-odt
-  :type 'boolean)
+  :type 'boolean
+  :group 'org-export-odt)
 
 (defcustom org-export-odt-embed-images t
   "Should the images be copied in to the odt file or just linked?"
-  :group 'org-export-odt
-  :type 'boolean)
+  :type 'boolean
+  :group 'org-export-odt)
 
 (defcustom org-odt-export-inline-images 'maybe
   "Non-nil means inline images into exported HTML pages.
@@ -174,13 +175,14 @@ be linked only."
 (defcustom org-odt-export-inline-image-extensions
   '("png" "jpeg" "jpg" "gif")
   "Extensions of image files that can be inlined into HTML."
-  :group 'org-odt-export
-  :type '(repeat (string :tag "Extension")))
+  :type '(repeat (string :tag "Extension"))
+  :group 'org-odt-export)
 
 (defcustom org-export-odt-pixels-per-inch display-pixels-per-inch
+  ;; FIXME add docstring
   ""
-  :group 'org-export-odt
-  :type 'float)
+  :type 'float
+  :group 'org-export-odt)
 
 (defvar org-export-odt-default-org-styles-alist
   '((paragraph . ((default . "Text_20_body")
@@ -1367,7 +1369,7 @@ MAY-INLINE-P allows inlining it as an image."
      '("bib" "doc" "doc6" "doc95" "html" "xhtml" "latex" "odt" "ott" "pdf" "rtf"
        "sdw" "sdw3" "sdw4" "stw " "sxw" "mediawiki" "text" "txt" "uot" "vor"
        "vor3" "vor4" "docbook" "ooxml" "ppt" "odp"))
-    (CONVERT-METHOD org-export-convert-process)
+    (CONVERT-METHOD org-lparse-convert-process)
     (TOPLEVEL-HLEVEL 1)
     (SPECIAL-STRING-REGEXPS org-export-odt-special-string-regexps)
     (INLINE-IMAGES 'maybe)
