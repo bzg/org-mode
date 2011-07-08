@@ -10764,12 +10764,11 @@ file.  For example, the following link
 that links to @uref{http://Orgmode.org} website.
 
 @node Additional Documentation, , Images in OpenDocumentText export, OpenDocumentText export
-@subsection Additional Documentation
+@subsection Additional documentation
 
-OpenDocumentText exporter is a beta software and is quickly evolving.  So the
-documentation in this section of the manual should not be considered as
-authoritative.  For up to date information, you are requested to follow the
-Org mailing list @email{emacs-orgmode@@gnu.org} closely.
+The OpenDocumentText exporter is still in development.  For up to date
+information, please follow Org mailing list @email{emacs-orgmode@@gnu.org}
+closely.
 
 @c end opendocument
 
