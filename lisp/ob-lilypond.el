@@ -30,7 +30,7 @@
 ;;; Code:
 (require 'ob)
 (require 'ob-eval)
-(require 'ob-tangle) ;;compiler requesting fun org-babel-tangle
+(require 'ob-tangle)
 (defalias 'lilypond-mode 'LilyPond-mode)
 
 (declare-function show-all "outline" ())
