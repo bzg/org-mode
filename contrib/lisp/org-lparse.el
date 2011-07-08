@@ -454,7 +454,7 @@ The variable is an list of the form (PROCESS ARG1 ARG2 ARG3
 %D output dir as a URL"
   :group 'org-lparse)
 
-(defcustom org-lparse-use-flashy-warning t
+(defcustom org-lparse-use-flashy-warning nil
   "Use flashy warnings when exporting to ODT."
   :type 'boolean
   :group 'org-export)
