@@ -398,6 +398,8 @@ This command prompts for a label.  If this is a label referencing an
 existing label, only insert the label.  If the footnote label is empty
 or new, let the user edit the definition of the footnote."
   (interactive)
+  (unless (org-footnote-in-valid-context-p)
+    (error "Cannot insert a footnote here"))
   (let* ((labels (and (not (equal org-footnote-auto-label 'random))
 		      (org-footnote-all-labels)))
 	 (propose (org-footnote-unique-label labels))
