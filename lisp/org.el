@@ -18915,6 +18915,22 @@ defaults to previous heading or `point-min'."
 	       ;; ... but no end-re between start-re and point.
 	       (not (re-search-forward (eval end-re) pos t)))))))
 
+(defun org-in-block-p (names)
+  "Is point inside any block whose name belongs to NAMES?
+
+NAMES is a list of strings containing names of blocks."
+  (save-match-data
+    (catch 'exit
+      (let ((case-fold-search t))
+	(mapc (lambda (name)
+		(let ((n (regexp-quote name)))
+		  (when (org-in-regexps-block-p
+			 (concat "^[ \t]*#\\+begin_" n)
+			 (concat "^[ \t]*#\\+end_" n))
+		    (throw 'exit t))))
+	      names))
+      nil)))
+
 (defun org-occur-in-agenda-files (regexp &optional nlines)
   "Call `multi-occur' with buffers for all agenda files."
   (interactive "sOrg-files matching: \np")

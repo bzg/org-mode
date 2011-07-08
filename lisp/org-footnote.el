@@ -39,7 +39,9 @@
 (require 'org-compat)
 
 (declare-function org-in-commented-line "org" ())
+(declare-function org-in-indented-comment-line "org" ())
 (declare-function org-in-regexp "org" (re &optional nlines visually))
+(declare-function org-in-block-p "org" (names))
 (declare-function org-mark-ring-push "org" (&optional pos buffer))
 (declare-function outline-next-heading "outline")
 (declare-function org-trim "org" (s))
@@ -51,6 +53,7 @@
 (declare-function org-id-uuid "org" ())
 (declare-function org-fill-paragraph "org" (&optional justify))
 (defvar org-odd-levels-only) ;; defined in org.el
+(defvar org-bracket-link-regexp) ; defined in org.el
 (defvar message-signature-separator) ;; defined in message.el
 
 (defconst org-footnote-re
@@ -71,6 +74,11 @@
 (defconst org-footnote-definition-re
   (org-re "^\\(\\[\\([0-9]+\\|fn:[-_[:word:]]+\\)\\]\\)")
   "Regular expression matching the definition of a footnote.")
+
+(defvar org-footnote-forbidden-blocks '("example" "verse" "src"
+					"latex" "html" "docbook")
+  "Names of blocks where footnotes are not allowed.
+Names must be in lower case.")
 
 (defgroup org-footnote nil
   "Footnotes in Org-mode."
@@ -154,19 +162,29 @@ extracted will be filled again."
   :group 'org-footnote
   :type 'boolean)
 
-(defvar org-bracket-link-regexp) ; silent compiler
+(defun org-footnote-in-valid-context-p ()
+  "Is point in a context where footnotes are allowed?"
+  (not (or (org-in-commented-line)
+	   (org-in-indented-comment-line)
+	   (org-in-verbatim-emphasis)
+	   ;; No footnote in literal example.
+	   (save-excursion
+	     (beginning-of-line)
+	     (looking-at "[ \t]*:[ \t]+"))
+	   (org-in-block-p org-footnote-forbidden-blocks))))
+
 (defun org-footnote-at-reference-p ()
   "Is the cursor at a footnote reference?
 
 If so, return an list containing its label, beginning and ending
 positions, and the definition, if local."
-  (when (and (not (or (org-in-commented-line)
-		      (org-in-verbatim-emphasis)))
+  (when (and (org-footnote-in-valid-context-p)
 	     (or (looking-at org-footnote-re)
 		 (org-in-regexp org-footnote-re)
 		 (save-excursion (re-search-backward org-footnote-re nil t)))
-	     ;; A footnote reference cannot start at bol.
-	     (/= (match-beginning 0) (point-at-bol)))
+	     ;; Only inline footnotes can start at bol.
+	     (or (eq (char-before (match-end 0)) 58)
+		 (/= (match-beginning 0) (point-at-bol))))
     (let* ((beg (match-beginning 0))
 	   (label (or (match-string 2) (match-string 3)
 		      ;; Anonymous footnotes don't have labels
