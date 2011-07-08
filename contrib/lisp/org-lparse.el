@@ -442,6 +442,11 @@ The variable is an list of the form (PROCESS ARG1 ARG2 ARG3
 %D output dir as a URL"
   :group 'org-export)
 
+(defcustom org-lparse-use-flashy-warning t
+  "Use flashy warnings when exporting to ODT."
+  :type 'boolean
+  :group 'org-export)
+
 (defun org-export-convert (&optional in-file fmt)
   "Convert file from one format to another using a converter.
 IN-FILE is the file to be converted.  If unspecified, it defaults
@@ -1980,9 +1985,11 @@ Replaces invalid characters with \"_\"."
        (org-lparse-format 'FONTIFY snumber (format "section-number-%d" level))))
 
 (defun org-lparse-warn (msg)
-  (put-text-property 0 (length msg) 'face 'font-lock-warning-face msg)
-  (message msg)
-  (sleep-for 3))
+  (if (not org-lparse-use-flashy-warning)
+      (message msg)
+    (put-text-property 0 (length msg) 'face 'font-lock-warning-face msg)
+    (message msg)
+    (sleep-for 3)))
 
 (defun org-xml-format-href (s)
   "Make sure the S is valid as a href reference in an XHTML document."
