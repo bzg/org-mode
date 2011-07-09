@@ -1405,6 +1405,60 @@ If there is no running clock, throw an error, unless FAIL-QUIETLY is set."
 	  (org-remove-empty-drawer-at clock-drawer (point))
 	  (forward-line 1))))))
 
+(defun org-at-clock-log-p nil
+  "Is the cursor on the clock log line?"
+  (save-excursion
+    (move-beginning-of-line 1)
+    (looking-at "^[ \t]*CLOCK:")))
+
+(defun org-clock-timestamps-up nil
+  "Increase CLOCK timestamps at cursor."
+  (interactive)
+  (org-clock-timestamps-change 'up))
+
+(defun org-clock-timestamps-down nil
+  "Increase CLOCK timestamps at cursor."
+  (interactive)
+  (org-clock-timestamps-change 'down))
+
+(defun org-clock-timestamps-change (updown)
+  "Change CLOCK timestamps synchronuously at cursor.
+UPDOWN tells whether to change 'up or 'down."
+  (setq org-ts-what nil)
+  (when (org-at-timestamp-p t)
+    (let ((tschange (if (eq updown 'up) 'org-timestamp-up 
+		      'org-timestamp-down))
+	  ts1 begts1 ts2 begts2 updatets1 tdiff)
+      (save-excursion
+	(move-beginning-of-line 1)
+	(re-search-forward org-ts-regexp3 nil t)
+	(setq ts1 (match-string 0) begts1 (match-beginning 0))
+	(when (re-search-forward org-ts-regexp3 nil t)
+	  (setq ts2 (match-string 0) begts2 (match-beginning 0))))
+      ; Are we on the second timestamp?
+      (if (<= begts2 (point)) (setq updatets1 t))
+      (if (not ts2)
+	  ;; fall back on org-timestamp-up if there is only one
+	  (funcall tschange)
+	;; setq this so that (boundp 'org-ts-what is non-nil)
+	(funcall tschange)
+	(let ((ts (if updatets1 ts2 ts1))
+	      (begts (if updatets1 begts1 begts2)))
+	  (setq tdiff		    
+		(subtract-time
+		 (org-time-string-to-time org-last-changed-timestamp)
+		 (org-time-string-to-time ts)))
+	  (save-excursion
+	    (goto-char begts)
+	    (org-timestamp-change
+	     (round (/ (org-float-time tdiff) 
+		       (cond ((eq org-ts-what 'minute) 60)
+			     ((eq org-ts-what 'hour) 3600)
+			     ((eq org-ts-what 'day) (* 24 3600))
+			     ((eq org-ts-what 'month) (* 24 3600 31))
+			     ((eq org-ts-what 'year) (* 24 3600 365.2)))))
+	     org-ts-what 'updown)))))))
+
 (defun org-clock-cancel ()
   "Cancel the running clock by removing the start timestamp."
   (interactive)

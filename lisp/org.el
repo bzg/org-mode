@@ -16656,6 +16656,8 @@ BEG and END default to the buffer boundaries."
 
 (org-defkey org-mode-map [(control shift right)] 'org-shiftcontrolright)
 (org-defkey org-mode-map [(control shift left)]  'org-shiftcontrolleft)
+(org-defkey org-mode-map [(control shift up)] 'org-shiftcontrolup)
+(org-defkey org-mode-map [(control shift down)]  'org-shiftcontroldown)
 
 ;; Babel keys
 (define-key org-mode-map org-babel-key-prefix org-babel-map)
@@ -17540,6 +17542,22 @@ Depending on context, this does one of the following:
    (org-support-shift-select
     (org-call-for-shift-select 'backward-word))
    (t (org-shiftselect-error))))
+
+(defun org-shiftcontrolup ()
+  "Change timestamps synchronuously up in CLOCK log lines."
+  (interactive)
+  (cond ((and (not org-support-shift-select)
+	      (org-at-clock-log-p))
+	 (org-clock-timestamps-up))
+	(t (org-shiftselect-error))))
+
+(defun org-shiftcontroldown ()
+  "Change timestamps synchronuously down in CLOCK log lines."
+  (interactive)
+  (cond ((and (not org-support-shift-select)
+	      (org-at-clock-log-p))
+	 (org-clock-timestamps-down))
+	(t (org-shiftselect-error))))
 
 (defun org-ctrl-c-ret ()
   "Call `org-table-hline-and-move' or `org-insert-heading' dep. on context."
