@@ -1422,7 +1422,7 @@ If there is no running clock, throw an error, unless FAIL-QUIETLY is set."
   (org-clock-timestamps-change 'down))
 
 (defun org-clock-timestamps-change (updown)
-  "Change CLOCK timestamps synchronuously at cursor.
+  "Change CLOCK timestamps synchronously at cursor.
 UPDOWN tells whether to change 'up or 'down."
   (setq org-ts-what nil)
   (when (org-at-timestamp-p t)

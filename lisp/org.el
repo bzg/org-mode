@@ -17544,7 +17544,7 @@ Depending on context, this does one of the following:
    (t (org-shiftselect-error))))
 
 (defun org-shiftcontrolup ()
-  "Change timestamps synchronuously up in CLOCK log lines."
+  "Change timestamps synchronously up in CLOCK log lines."
   (interactive)
   (cond ((and (not org-support-shift-select)
 	      (org-at-clock-log-p))
@@ -17552,7 +17552,7 @@ Depending on context, this does one of the following:
 	(t (org-shiftselect-error))))
 
 (defun org-shiftcontroldown ()
-  "Change timestamps synchronuously down in CLOCK log lines."
+  "Change timestamps synchronously down in CLOCK log lines."
   (interactive)
   (cond ((and (not org-support-shift-select)
 	      (org-at-clock-log-p))
