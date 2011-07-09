@@ -17547,7 +17547,8 @@ Depending on context, this does one of the following:
   "Change timestamps synchronously up in CLOCK log lines."
   (interactive)
   (cond ((and (not org-support-shift-select)
-	      (org-at-clock-log-p))
+	      (org-at-clock-log-p)
+	      (org-at-timestamp-p t))
 	 (org-clock-timestamps-up))
 	(t (org-shiftselect-error))))
 
@@ -17555,7 +17556,8 @@ Depending on context, this does one of the following:
   "Change timestamps synchronously down in CLOCK log lines."
   (interactive)
   (cond ((and (not org-support-shift-select)
-	      (org-at-clock-log-p))
+	      (org-at-clock-log-p)
+	      (org-at-timestamp-p t))
 	 (org-clock-timestamps-down))
 	(t (org-shiftselect-error))))
 
