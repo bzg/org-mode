@@ -1389,6 +1389,22 @@ If there is no running clock, throw an error, unless FAIL-QUIETLY is set."
           (run-hooks 'org-clock-out-hook)
 	  (org-clock-delete-current))))))
 
+(add-hook 'org-clock-out-hook 'org-clock-remove-empty-clock-drawer)
+
+(defun org-clock-remove-empty-clock-drawer nil
+  "Remove empty clock drawer in the current subtree."
+  (let* ((olid (or (org-entry-get (point) "LOG_INTO_DRAWER")
+		   org-log-into-drawer))
+	 (clock-drawer (if (eq t olid) "LOGBOOK" olid))
+	 (end (save-excursion (org-end-of-subtree t t))))
+    (when clock-drawer
+      (save-excursion
+	(org-back-to-heading t)
+	(while (search-forward clock-drawer end t)
+	  (goto-char (match-beginning 0))
+	  (org-remove-empty-drawer-at clock-drawer (point))
+	  (forward-line 1))))))
+
 (defun org-clock-cancel ()
   "Cancel the running clock by removing the start timestamp."
   (interactive)
