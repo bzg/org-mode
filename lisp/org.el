@@ -7718,6 +7718,19 @@ and still retain the repeater to cover future instances of the task."
     (or (bolp) (insert "\n"))
     (setq end (point))
     (setq template (buffer-substring beg end))
+    ;; Remove clocks and empty drawers
+    (with-temp-buffer
+      (insert template)
+      (goto-char (point-min))
+      (while (re-search-forward 
+	      "^[ \t]*CLOCK:.*$" (save-excursion (org-end-of-subtree t t)) t)
+	(replace-match "")
+	(kill-whole-line))
+      (goto-char (point-min))
+      (while (re-search-forward 
+	      (concat "^[ \t]*:" (regexp-opt org-drawers) ":[ \t]*$") nil t)
+	(mapc (lambda(d) (org-remove-empty-drawer-at d (point))) org-drawers))
+      (setq template (buffer-substring (point-min) (point-max))))
     (when (and doshift
 	       (string-match "<[^<>\n]+ \\+[0-9]+[dwmy][^<>\n]*>" template))
       (delete-region beg end)
