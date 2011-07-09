@@ -1930,7 +1930,9 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
                   (mapcar
                    (lambda(elem)
                      (or (and (string-match "[ \t]*|-+" elem) 'hline)
-                         (org-split-string (org-trim elem) "|")))
+                         (org-split-string 
+			  (progn (set-text-properties 0 (length elem) nil elem)
+				 (org-trim elem)) "|")))
                    lines))
             (when insert
               (insert (org-export-latex-protect-string
