@@ -3213,6 +3213,7 @@ For example:  28 -> AB."
 	  (sec (string-to-number (match-string 3 s))))
       (+ (* hour 3600) (* min 60) sec)))
    ((and (stringp s)
+	 (not (string-match org-ts-regexp-both s))
 	 (string-match "\\([0-9]+\\):\\([0-9]+\\)" s))
     (let ((min (string-to-number (match-string 1 s)))
 	  (sec (string-to-number (match-string 2 s))))
