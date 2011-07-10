@@ -202,10 +202,7 @@ into
 
 (defcustom org-plain-list-ordered-item-terminator t
   "The character that makes a line with leading number an ordered list item.
-Valid values are ?. and ?\).  To get both terminators, use t.  While
-?. may look nicer, it creates the danger that a line with leading
-number may be incorrectly interpreted as an item.  ?\) therefore is
-the safe choice."
+Valid values are ?. and ?\).  To get both terminators, use t."
   :group 'org-plain-lists
   :type '(choice (const :tag "dot like in \"2.\"" ?.)
 		 (const :tag "paren like in \"2)\"" ?\))
