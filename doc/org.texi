@@ -5846,6 +5846,9 @@ Update the effort estimate for the current clock task.
 Recompute the time interval after changing one of the timestamps.  This
 is only necessary if you edit the timestamps directly.  If you change
 them with @kbd{S-@key{cursor}} keys, the update is automatic.
+@orgcmd{C-S-@key{up/down},org-clock-timestamps-up/down}
+On @code{CLOCK} log lines, increase/decrease both timestamps at the same
+time so that duration keeps the same.
 @orgcmd{C-c C-t,org-todo}
 Changing the TODO state of an item to DONE automatically stops the clock
 if it is running in this same item.
