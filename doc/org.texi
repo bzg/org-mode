@@ -880,15 +880,21 @@ make install
 @end example
 
 Installing Info files is system dependent, because of differences in the
-@file{install-info} program.  In Debian it copies the info files into the
-correct directory and modifies the info directory file.  In many other
-systems, the files need to be copied to the correct directory separately, and
-@file{install-info} then only modifies the directory file.  Check your system
-documentation to find out which of the following commands you need:
+@file{install-info} program.  The following should correctly install the Info
+files on most systems, please send a bug report if not@footnote{The output
+from install-info (if any) is also system dependent.  In particular Debian
+and it's derivatives use two different versions of install-info and you may
+see the message:
+
+@example
+This is not dpkg install-info anymore, but GNU install-info
+See the man page for ginstall-info for command line arguments
+@end example
+
+@noindent which can be safely ignored.}.
 
 @example
 make install-info
-make install-info-debian
 @end example
 
 Then add the following line to @file{.emacs}.  It is needed so that

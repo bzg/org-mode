@@ -222,9 +222,6 @@ install-lisp: $(LISPFILES) $(ELCFILES)
 install-info: $(INFOFILES)
 	if [ ! -d $(infodir) ]; then $(MKDIR) $(infodir); else true; fi ;
 	$(CP) $(INFOFILES) $(infodir)
-	$(INSTALL_INFO) --info-file=$(INFOFILES) --info-dir=$(infodir)
-
-install-info-debian: $(INFOFILES)
 	$(INSTALL_INFO) --infodir=$(infodir) $(INFOFILES)
 
 autoloads: lisp/org-install.el
