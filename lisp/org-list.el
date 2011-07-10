@@ -348,7 +348,8 @@ list, obtained by prompting the user."
 	  (list (symbol :tag "Major mode")
 		(string :tag "Format"))))
 
-(defvar org-list-forbidden-blocks '("example" "verse" "src" "latex" "html" "docbook")
+(defvar org-list-forbidden-blocks '("example" "verse" "src" "ascii" "beamer"
+				    "docbook" "html" "latex" "odt")
   "Names of blocks where lists are not allowed.
 Names must be in lower case.")
 

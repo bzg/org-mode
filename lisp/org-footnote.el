@@ -75,10 +75,9 @@
   (org-re "^\\(\\[\\([0-9]+\\|fn:[-_[:word:]]+\\)\\]\\)")
   "Regular expression matching the definition of a footnote.")
 
-(defvar org-footnote-forbidden-blocks '("example" "verse" "src"
-					"latex" "html" "docbook")
-  "Names of blocks where footnotes are not allowed.
-Names must be in lower case.")
+(defvar org-footnote-forbidden-blocks '("example" "verse" "src" "ascii" "beamer"
+					"docbook" "html" "latex" "odt")
+  "Names of blocks where footnotes are not allowed.")
 
 (defgroup org-footnote nil
   "Footnotes in Org-mode."
