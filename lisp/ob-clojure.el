@@ -78,11 +78,16 @@
   (require 'slime) (require 'swank-clojure)
   (with-temp-buffer
     (insert (org-babel-expand-body:clojure body params))
-    ((lambda (result) (condition-case nil (org-babel-script-escape result)
-		   (error result)))
+    ((lambda (result)
+       (let ((result-params (cdr (assoc :result-params params))))
+	 (if (or (member "scalar" result-params)
+		 (member "verbatim" result-params))
+	     result
+	   (condition-case nil (org-babel-script-escape result)
+	     (error result)))))
      (slime-eval
       `(swank:interactive-eval-region
-	,(buffer-substring-no-properties (point-min) (point-max)))
+     	,(buffer-substring-no-properties (point-min) (point-max)))
       (cdr (assoc :package params))))))
 
 (provide 'ob-clojure)
