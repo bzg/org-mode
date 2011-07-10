@@ -1955,7 +1955,9 @@ block but are passed literally to the \"example-block\"."
 		  (or (and (string-equal "[" (substring str 0 1))
 			   (string-equal "]" (substring str -1)))
 		      (and (string-equal "{" (substring str 0 1))
-			   (string-equal "}" (substring str -1))))))
+			   (string-equal "}" (substring str -1)))
+		      (and (string-equal "(" (substring str 0 1))
+			   (string-equal ")" (substring str -1))))))
 	 (org-babel-read
 	  (concat
 	   "'"
