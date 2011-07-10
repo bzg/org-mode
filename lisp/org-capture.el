@@ -328,8 +328,8 @@ calendar                |  %:type %:date"
 			    ((const :format "%v " :kill-buffer) (const t))))))))
 
 (defcustom org-capture-before-finalize-hook nil
-  "Hook that is run right before a remember process is finalized.
-The remember buffer is still current when this hook runs."
+  "Hook that is run right before a capture process is finalized.
+The capture buffer is still current when this hook runs."
   :group 'org-capture
   :type 'hook)
 
@@ -380,13 +380,13 @@ to avoid conflicts with other active capture processes."
 (defvar org-capture-mode-map (make-sparse-keymap)
   "Keymap for `org-capture-mode', a minor mode.
 Use this map to set additional keybindings for when Org-mode is used
-for a Remember buffer.")
+for a capture buffer.")
 
 (defvar org-capture-mode-hook nil
   "Hook for the minor `org-capture-mode'.")
 
 (define-minor-mode org-capture-mode
-  "Minor mode for special key bindings in a remember buffer."
+  "Minor mode for special key bindings in a capture buffer."
   nil " Rem" org-capture-mode-map
   (org-set-local
    'header-line-format
@@ -669,7 +669,7 @@ already gone.  Any prefix argument will be passed to the refile command."
     (org-capture-finalize)))
 
 (defun org-capture-goto-last-stored ()
-  "Go to the location where the last remember note was stored."
+  "Go to the location where the last capture note was stored."
   (interactive)
   (org-goto-marker-or-bmk org-capture-last-stored-marker
 			  "org-capture-last-stored")
