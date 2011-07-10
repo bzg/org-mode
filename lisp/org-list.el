@@ -330,6 +330,13 @@ When the indentation would be larger than this, it will become
   :group 'org-plain-lists
   :type 'integer)
 
+(defcustom org-list-indent-offset 0
+  "Additional indentation for sub-items in a list.
+By setting this to a small number, usually 1 or 2, one can more
+clearly distinguish sub-items in a list."
+  :group 'org-plain-lists
+  :type 'integer)
+
 (defcustom org-list-radio-list-templates
   '((latex-mode "% BEGIN RECEIVE ORGLST %n
 % END RECEIVE ORGLST %n
@@ -1662,12 +1669,14 @@ This function modifies STRUCT."
           (lambda (item)
             (let ((parent (org-list-get-parent item struct parents)))
               (if parent
-                  ;; Indent like parent + length of parent's bullet.
+                  ;; Indent like parent + length of parent's bullet +
+		  ;; sub-list offset.
                   (org-list-set-ind
 		   item struct (+ (or bullet-size
 				      (length
 				       (org-list-get-bullet parent struct)))
-				  (org-list-get-ind parent struct)))
+				  (org-list-get-ind parent struct)
+				  org-list-indent-offset))
                 ;; If no parent, indent like top-point.
 		(org-list-set-ind item struct top-ind))))))
     (mapc new-ind (mapcar 'car (cdr struct)))))
