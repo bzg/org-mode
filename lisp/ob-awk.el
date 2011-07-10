@@ -82,6 +82,7 @@ called by `org-babel-execute-src-block'"
      ((lambda (results)
 	(when results
 	  (if (or (member "scalar" result-params)
+		  (member "verbatim" result-params)
 		  (member "output" result-params))
 	      results
 	    (let ((tmp (org-babel-temp-file "awk-results-")))

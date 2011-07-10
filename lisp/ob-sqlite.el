@@ -89,6 +89,7 @@ This function is called by `org-babel-execute-src-block'."
 	;; body of the code block
 	(org-babel-expand-body:sqlite body params)))
       (if (or (member "scalar" result-params)
+	      (member "verbatim" result-params)
 	      (member "html" result-params)
 	      (member "code" result-params)
 	      (equal (point-min) (point-max)))
