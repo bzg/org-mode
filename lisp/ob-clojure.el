@@ -79,7 +79,7 @@
   (with-temp-buffer
     (insert (org-babel-expand-body:clojure body params))
     ((lambda (result) (condition-case nil
-		     (read (org-babel-script-escape result 'force))
+		     (org-babel-script-escape result 'force)
 		   (error result)))
      (slime-eval
       `(swank:interactive-eval-region
