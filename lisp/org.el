@@ -1089,10 +1089,10 @@ for the duration of the command."
 (defcustom org-blank-before-new-entry '((heading . auto)
 					(plain-list-item . auto))
   "Should `org-insert-heading' leave a blank line before new heading/item?
-The value is an alist, with `heading' and `plain-list-item' as car,
-and a boolean flag as cdr. The cdr may also be the symbol `auto', and then
-Org will look at the surrounding headings/items and try to make an
-intelligent decision whether to insert a blank line or not.
+The value is an alist, with `heading' and `plain-list-item' as CAR,
+and a boolean flag as CDR.  The cdr may also be the symbol `auto', in 
+which case Org will look at the surrounding headings/items and try to 
+make an intelligent decision whether to insert a blank line or not.
 
 For plain lists, if the variable `org-empty-line-terminates-plain-lists' is
 set, the setting here is ignored and no empty line is inserted, to avoid
