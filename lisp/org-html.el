@@ -612,6 +612,11 @@ with a link to this URL."
 	  (const :tag "Keep internal css" nil)
 	  (string :tag "URL or local href")))
 
+(defcustom org-export-html-before-content-div ""
+  "Arbitrary HTML code placed before <div id=\"content\">."
+  :group 'org-export-htmlize
+  :type 'string)
+
 (defcustom org-export-html-content-div "content"
   "The name of the container DIV that holds all the page contents."
   :group 'org-export-htmlize
@@ -1292,6 +1297,7 @@ lang=\"%s\" xml:lang=\"%s\">
 %s
 </head>
 <body>
+%s
 <div id=\"%s\">
 %s
 "
@@ -1309,6 +1315,7 @@ lang=\"%s\" xml:lang=\"%s\">
 		 date author description keywords
 		 style
 		 mathjax
+		 org-export-html-before-content-div
 		 org-export-html-content-div
 		 (if (or link-up link-home)
 		     (concat
