@@ -1132,12 +1132,12 @@ some heuristics to guess the result."
 			(skip-chars-backward " \t")
 			(setq usr-blank (org-back-over-empty-lines))) 0))
 	      usr-blank)
-	     ;; Are there blank lines inside the item?
+	     ;; Are there blank lines inside the list so far?
 	     ((save-excursion
-		(org-list-search-forward
-		 "^[ \t]*$" (org-list-get-item-end-before-blank item struct) t))
+		(goto-char (org-list-get-top-point struct))
+		(org-list-search-forward "^[ \t]*$" item t))
 	      1)
-	     ;; No parent: no blank line.
+	     ;; Default choice: no blank line.
 	     (t 0))))))))
 
 (defun org-list-insert-item (pos struct prevs &optional checkbox after-bullet)
