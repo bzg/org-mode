@@ -12960,6 +12960,10 @@ dangerous code blocks.  @code{:eval query} will require a query for every
 execution of a code block regardless of the value of the
 @code{org-confirm-babel-evaluate} variable.
 
+If this header argument is not set then evaluation is determined by the value
+of the @code{org-confirm-babel-evaluate} variable see @ref{Code evaluation
+security}.
+
 @node Results of evaluation, Noweb reference syntax, Header arguments, Working With Source Code
 @section Results of evaluation
 @cindex code block, results of evaluation
