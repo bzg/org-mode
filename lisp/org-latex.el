@@ -391,7 +391,7 @@ string should be like \"\\end{itemize\"."
 		 (string :tag "Use a section string" :value "\\subparagraph{%s}")))
 
 (defcustom org-export-latex-list-parameters
-  '(:cbon "$\\boxtimes$" :cboff "$\\Box$")
+  '(:cbon "$\\boxtimes$" :cboff "$\\Box$" :cbtrans "$\\boxminus$")
   "Parameters for the LaTeX list exporter.
 These parameters will be passed on to `org-list-to-latex', which in turn
 will pass them (combined with the LaTeX default list parameters) to

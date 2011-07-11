@@ -3109,7 +3109,7 @@ with overruling parameters for `org-list-to-generic'."
 			   "\\item "))
 	       :csep "\n"
 	       :cbon "\\texttt{[X]}" :cboff "\\texttt{[ ]}"
-	       :cbtrans "$\\boxminus$")
+	       :cbtrans "\\texttt{[-]}")
     params)))
 
 (defun org-list-to-html (list &optional params)
