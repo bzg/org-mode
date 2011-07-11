@@ -1695,6 +1695,19 @@ the lower-case version of all tags."
   :group 'org-agenda
   :type 'function)
 
+(defcustom org-agenda-bulk-custom-functions nil
+  "Alist of characters and custom functions for bulk action.
+For example, this value makes those two functions available:
+
+  '((?R set-category)
+    (?C bulk-cut))
+
+With selected entries in an agenda buffer, `B R' will execute
+set-category on the selected entries.  Note that functions in
+this alist don't need to be quoted."
+  :type 'alist
+  :group 'org-agenda)
+
 (eval-when-compile
   (require 'cl))
 (require 'org)
@@ -8149,7 +8162,13 @@ The prefix arg is passed through to the command if possible."
    org-agenda-bulk-marked-entries)
 
   ;; Prompt for the bulk command
-  (message "Bulk: [r]efile [$]arch [A]rch->sib [t]odo [+/-]tag [s]chd [S]catter [d]eadline [f]unction")
+  (message (concat "Bulk: [r]efile [$]arch [A]rch->sib [t]odo"
+		   " [+/-]tag [s]chd [S]catter [d]eadline [f]unction"
+		   (when org-agenda-bulk-custom-functions
+		     (concat " Custom: ["
+			     (mapconcat (lambda(f) (char-to-string (car f)))
+					org-agenda-bulk-custom-functions "")
+			     "]"))))
   (let* ((action (read-char-exclusive))
 	 (org-log-refile (if org-log-refile 'time nil))
 	 (entries (reverse org-agenda-bulk-marked-entries))
@@ -8242,6 +8261,10 @@ The prefix arg is passed through to the command if possible."
 						 (nth 2 date))))
 			 (org-agenda-schedule nil time))
 		     (error nil)))))))
+
+     ((assoc action org-agenda-bulk-custom-functions)
+      (setq cmd (list (cadr (assoc action org-agenda-bulk-custom-functions)))
+	    redo-at-end t))
 
      ((equal action ?f)
       (setq cmd (list (intern
