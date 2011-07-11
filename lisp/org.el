@@ -11868,7 +11868,8 @@ be removed."
 			nil nil (list org-end-time-was-given)))
 	      (insert 
 	       (if (not (or (bolp) (eq (char-before) ?\ )
-			    (eq (char-after) ?\ ))) " " ""))
+			    (memq (char-after) '(32 10))
+			    (eobp))) " " ""))
 	      (end-of-line 1))
 	    (goto-char (point-min))
 	    (widen)
