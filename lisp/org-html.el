@@ -612,7 +612,7 @@ with a link to this URL."
 	  (const :tag "Keep internal css" nil)
 	  (string :tag "URL or local href")))
 
-(defcustom org-export-content-div "content"
+(defcustom org-export-html-content-div "content"
   "The name of the container DIV that holds all the page contents."
   :group 'org-export-htmlize
   :type 'string)
@@ -1309,7 +1309,7 @@ lang=\"%s\" xml:lang=\"%s\">
 		 date author description keywords
 		 style
 		 mathjax
-		 org-export-content-div
+		 org-export-html-content-div
 		 (if (or link-up link-home)
 		     (concat
 		      (format org-export-html-home/up-format
