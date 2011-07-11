@@ -614,12 +614,12 @@ with a link to this URL."
 
 (defcustom org-export-html-before-content-div ""
   "Arbitrary HTML code placed before <div id=\"content\">."
-  :group 'org-export-htmlize
+  :group 'org-export-html
   :type 'string)
 
 (defcustom org-export-html-content-div "content"
   "The name of the container DIV that holds all the page contents."
-  :group 'org-export-htmlize
+  :group 'org-export-html
   :type 'string)
 
 ;;; Hooks
