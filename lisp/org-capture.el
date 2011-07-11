@@ -551,6 +551,9 @@ captured item after finalizing."
 	      (m2 (org-capture-get :end-marker 'local)))
 	  (if (and m1 m2 (= m1 beg) (= m2 end))
 	      (progn
+		(setq m2 (if (cdr (assoc 'heading org-blank-before-new-entry))
+			     m2 (1+ m2))
+		      m2 (if (< (point-max) m2) (point-max) m2))
 		(setq abort-note 'clean)
 		(kill-region m1 m2))
 	    (setq abort-note 'dirty)))
@@ -576,16 +579,14 @@ captured item after finalizing."
 		   (org-at-table-p))
 	  (if (org-table-get-stored-formulas)
 	      (org-table-recalculate 'all) ;; FIXME: Should we iterate???
-	    (org-table-align)))
-	)
+	    (org-table-align))))
       ;; Store this place as the last one where we stored something
       ;; Do the marking in the base buffer, so that it makes sense after
       ;; the indirect buffer has been killed.
       (org-capture-bookmark-last-stored-position)
 
       ;; Run the hook
-      (run-hooks 'org-capture-before-finalize-hook)
-      )
+      (run-hooks 'org-capture-before-finalize-hook))
 
     ;; Kill the indirect buffer
     (save-buffer)
@@ -665,7 +666,8 @@ already gone.  Any prefix argument will be passed to the refile command."
   (interactive)
   ;; FIXME: This does not do the right thing, we need to remove the new stuff
   ;; By hand it is easy: undo, then kill the buffer
-  (let ((org-note-abort t) (org-capture-before-finalize-hook nil))
+  (let ((org-note-abort t) 
+	(org-capture-before-finalize-hook nil))
     (org-capture-finalize)))
 
 (defun org-capture-goto-last-stored ()
