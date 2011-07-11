@@ -14116,12 +14116,13 @@ This is computed according to `org-property-set-functions-alist'."
   "Read a property name."
   (let* ((completion-ignore-case t)
 	 (keys (org-buffer-property-keys nil t t))
-	 (default-prop (save-excursion
-	 		 (save-match-data
-	 		   (beginning-of-line)
-	 		   (and (looking-at "^\\s-*:\\([^:\n]+\\):")
-	 			(null (string= (match-string 1) "END"))
-	 			(match-string 1)))))
+	 (default-prop (or (save-excursion
+			     (save-match-data
+			       (beginning-of-line)
+			       (and (looking-at "^\\s-*:\\([^:\n]+\\):")
+				    (null (string= (match-string 1) "END"))
+				    (match-string 1))))
+			   org-last-set-property))
 	 (property (org-icompleting-read
 		    (concat "Property"
 			    (if default-prop (concat " [" default-prop "]") "")
@@ -14137,6 +14138,7 @@ This is computed according to `org-property-set-functions-alist'."
 			      keys)))
 	  property))))
 
+(defvar org-last-set-property nil)
 (defun org-set-property (property value)
   "In the current entry, set PROPERTY to VALUE.
 When called interactively, this will prompt for a property name, offering
@@ -14147,6 +14149,7 @@ in the current file."
   (interactive (list nil nil))
   (let* ((property (or property (org-read-property-name)))
 	 (value (or value (org-read-property-value property))))
+    (setq org-last-set-property property)
     (unless (equal (org-entry-get nil property) value)
       (org-entry-put nil property value))))
 
