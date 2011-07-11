@@ -1461,8 +1461,6 @@ If END is non-nil, it is the end of the region."
 
 (defvar org-export-latex-header-defs nil
   "The header definitions that might be used in the LaTeX body.")
-(defvar org-export-latex-header-defs-re nil
-  "The header definitions that might be used in the LaTeX body.")
 
 (defun org-export-latex-content (content &optional exclude-list)
   "Convert CONTENT string to LaTeX.
