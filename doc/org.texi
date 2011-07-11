@@ -883,7 +883,7 @@ Installing Info files is system dependent, because of differences in the
 @file{install-info} program.  The following should correctly install the Info
 files on most systems, please send a bug report if not@footnote{The output
 from install-info (if any) is also system dependent.  In particular Debian
-and it's derivatives use two different versions of install-info and you may
+and its derivatives use two different versions of install-info and you may
 see the message:
 
 @example
