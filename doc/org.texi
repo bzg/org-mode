@@ -1580,9 +1580,12 @@ structure of these lists, many structural constructs like @code{#+BEGIN_...}
 blocks can be indented to signal that they belong to a particular item.
 
 @vindex org-list-demote-modify-bullet
+@vindex org-list-indent-offset
 If you find that using a different bullet for a sub-list (than that used for
 the current list-level) improves readability, customize the variable
-@code{org-list-demote-modify-bullet}.
+@code{org-list-demote-modify-bullet}.  To get a greater difference of
+indentation between items and theirs sub-items, customize
+@code{org-list-indent-offset}.
 
 @vindex org-list-automatic-rules
 The following commands act on items when the cursor is in the first line of
@@ -1624,17 +1627,21 @@ position.
 @itemx S-@key{down}
 @cindex shift-selection-mode
 @vindex org-support-shift-select
-Jump to the previous/next item in the current list, but only if
+@vindex org-list-use-circular-motion
+Jump to the previous/next item in the current list@footnote{If you want to
+cycle around items that way, you may customize
+@code{org-list-use-circular-motion}.}, but only if
 @code{org-support-shift-select} is off.  If not, you can still use paragraph
 jumping commands like @kbd{C-@key{up}} and @kbd{C-@key{down}} to quite
 similar effect.
-@kindex M-S-@key{up}
-@kindex M-S-@key{down}
-@item M-S-@key{up}
-@itemx M-S-@key{down}
-Move the item including subitems up/down (swap with previous/next item
-of same indentation).  If the list is ordered, renumbering is
-automatic.
+@kindex M-@key{up}
+@kindex M-@key{down}
+@item M-@key{up}
+@itemx M-@key{down}
+Move the item including subitems up/down@footnote{See
+@code{org-liste-use-circular-motion} for a cyclic behavior.} (swap with
+previous/next item of same indentation).  If the list is ordered, renumbering
+is automatic.
 @kindex M-@key{left}
 @kindex M-@key{right}
 @item M-@key{left}
