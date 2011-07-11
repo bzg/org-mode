@@ -321,6 +321,32 @@ will be filled with the link, the second with its description."
   :group 'org-export-latex
   :type 'string)
 
+(defcustom org-export-latex-quotes
+  '(("fr" ("\\(\\s-\\|[[(]\\)\"" . "«~") ("\\(\\S-\\)\"" . "~»") ("\\(\\s-\\|(\\)'" . "'"))
+    ("en" ("\\(\\s-\\|[[(]\\)\"" . "``") ("\\(\\S-\\)\"" . "''") ("\\(\\s-\\|(\\)'" . "`")))
+  "Alist for quotes to use when converting english double-quotes.
+
+The CAR of each item in this alist is the language code.
+The CDR of each item in this alist is a list of three CONS:
+- the first CONS defines the opening quote;
+- the second CONS defines the closing quote;
+- the last CONS defines single quotes.
+
+For each item in a CONS, the first string is a regexp
+for allowed characters before/after the quote, the second
+string defines the replacement string for this quote."
+  :group 'org-export-latex
+  :type '(list
+	  (cons :tag "Opening quote"
+		(string :tag "Regexp for char before") 
+		(string :tag "Replacement quote     "))
+	  (cons :tag "Closing quote"
+		(string :tag "Regexp for char after ") 
+		(string :tag "Replacement quote     "))
+	  (cons :tag "Single quote"
+		(string :tag "Regexp for char before") 
+		(string :tag "Replacement quote     "))))
+
 (defcustom org-export-latex-tables-verbatim nil
   "When non-nil, tables are exported verbatim."
   :group 'org-export-latex
@@ -1624,21 +1650,18 @@ links, keywords, lists, tables, fixed-width"
 
 (defun org-export-latex-quotation-marks ()
   "Export quotation marks depending on language conventions."
-  (let* ((lang (plist-get org-export-latex-options-plist :language))
-	 (quote-rpl (if (equal lang "fr")
-			'(("\\(\\s-\\)\"" "«~")
-			  ("\\(\\S-\\)\"" "~»")
-			  ("\\(\\s-\\)'" "`"))
-		      '(("\\(\\s-\\|[[(]\\)\"" "``")
-			("\\(\\S-\\)\"" "''")
-			("\\(\\s-\\|(\\)'" "`")))))
-    (mapc (lambda(l) (goto-char (point-min))
-	    (while (re-search-forward (car l) nil t)
-	      (let ((rpl (concat (match-string 1)
-				 (org-export-latex-protect-string
-				  (copy-sequence (cadr l))))))
-		(org-if-unprotected-1
-		 (replace-match rpl t t))))) quote-rpl)))
+  (mapc (lambda(l)
+	  (goto-char (point-min))
+	  (while (re-search-forward (car l) nil t)
+	    (let ((rpl (concat (match-string 1)
+			       (org-export-latex-protect-string
+				(copy-sequence (cdr l))))))
+	      (org-if-unprotected-1
+	       (replace-match rpl t t))))) 
+	(cdr (or (assoc (plist-get org-export-latex-options-plist :language)
+			org-export-latex-quotes)
+		 ;; falls back on english
+		 (assoc "en" org-export-latex-quotes)))))
 
 (defun org-export-latex-special-chars (sub-superscript)
   "Export special characters to LaTeX.
