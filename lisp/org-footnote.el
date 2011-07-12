@@ -52,6 +52,8 @@
 (declare-function org-inside-latex-macro-p "org" ())
 (declare-function org-id-uuid "org" ())
 (declare-function org-fill-paragraph "org" (&optional justify))
+(declare-function org-export-preprocess-string "org-exp"
+		  (string &rest parameters))
 (defvar org-odd-levels-only) ;; defined in org.el
 (defvar org-bracket-link-regexp) ; defined in org.el
 (defvar message-signature-separator) ;; defined in message.el
@@ -520,7 +522,7 @@ With prefix arg SPECIAL, offer additional commands in a menu."
 (defvar org-export-footnotes-data nil) ; silence byte-compiler
 
 ;;;###autoload
-(defun org-footnote-normalize (&optional sort-only pre-process-p)
+(defun org-footnote-normalize (&optional sort-only export-props)
   "Collect the footnotes in various formats and normalize them.
 
 This finds the different sorts of footnotes allowed in Org, and
@@ -530,7 +532,10 @@ Org-mode exporters.
 When SORT-ONLY is set, only sort the footnote definitions into the
 referenced sequence.
 
-When PRE-PROCESS-P is non-nil, the default action, is to insert
+If Org is amidst an export process, EXPORT-PROPS will hold the
+export properties of the buffer.
+
+When EXPORT-PROPS is non-nil, the default action is to insert
 normalized footnotes towards the end of the pre-processing buffer.
 Some exporters like docbook, odt, etc. expect that footnote
 definitions be available before any references to them.  Such
@@ -557,8 +562,8 @@ Additional note on `org-footnote-insert-pos-for-preprocessor':
 	 (outline-regexp
 	  (concat "\\*" (if nstars (format "\\{1,%d\\} " nstars) "+ ")))
 	 ;; Determine the highest marker used so far.
-	 (ref-table (when pre-process-p org-export-footnotes-seen))
-	 (count (if (and pre-process-p ref-table)
+	 (ref-table (when export-props org-export-footnotes-seen))
+	 (count (if (and export-props ref-table)
 		    (apply 'max (mapcar (lambda (e) (nth 1 e)) ref-table))
 		  0))
 	 ins-point ref)
@@ -582,7 +587,7 @@ Additional note on `org-footnote-insert-pos-for-preprocessor':
 	  ;; Replace footnote reference with [MARKER]. Maybe fill
 	  ;; paragraph once done. If SORT-ONLY is non-nil, only move
 	  ;; to the end of reference found to avoid matching it twice.
-	  ;; If PRE-PROCESS-P isn't nil, also add `org-footnote'
+	  ;; If EXPORT-PROPS isn't nil, also add `org-footnote'
 	  ;; property to it, so it can be easily recognized by
 	  ;; exporters.
 	  (if sort-only
@@ -590,7 +595,7 @@ Additional note on `org-footnote-insert-pos-for-preprocessor':
 	    (delete-region (nth 1 ref) (nth 2 ref))
 	    (goto-char (nth 1 ref))
 	    (let ((new-ref (format "[%d]" marker)))
-	      (when pre-process-p (org-add-props new-ref '(org-footnote t)))
+	      (when export-props (org-add-props new-ref '(org-footnote t)))
 	      (insert new-ref))
 	    (and inlinep
 		 org-footnote-fill-after-inline-note-extraction
@@ -599,10 +604,22 @@ Additional note on `org-footnote-insert-pos-for-preprocessor':
 	  ;; to REF-TABLE if data was unknown.
 	  (unless a
 	    (let ((def (or (nth 3 ref) ; inline
-			   (and pre-process-p
+			   (and export-props
 				(cdr (assoc lbl org-export-footnotes-data)))
 			   (nth 3 (org-footnote-get-definition lbl)))))
-	      (push (list lbl marker def inlinep) ref-table)))
+	      (push (list lbl marker
+			  ;; When exporting, each definition goes
+			  ;; through `org-export-preprocess-string' so
+			  ;; it is ready to insert in the
+			  ;; backend-specific buffer.
+			  (if export-props
+			      (let ((parameters
+				     (org-combine-plists
+				      export-props
+				      '(:todo-keywords t :tags t :priority t))))
+				(org-export-preprocess-string def parameters))
+			      def)
+			  inlinep) ref-table)))
 	  ;; Remove definition of non-inlined footnotes.
 	  (unless inlinep (org-footnote-delete-definitions lbl))))
       ;; 2. Find and remove the footnote section, if any. If we are
@@ -617,14 +634,14 @@ Additional note on `org-footnote-insert-pos-for-preprocessor':
 		  (concat "^\\*[ \t]+" (regexp-quote org-footnote-section)
 			  "[ \t]*$")
 		  nil t))
-	    (if pre-process-p
+	    (if export-props
 		(replace-match "")
 	      (org-back-to-heading t)
 	      (forward-line 1)
 	      (setq ins-point (point))
 	      (delete-region (point) (org-end-of-subtree t)))
 	  (goto-char (point-max))
-	  (unless pre-process-p
+	  (unless export-props
 	    (when org-footnote-section
 	      (or (bolp) (insert "\n"))
 	      (insert "* " org-footnote-section "\n")
@@ -660,7 +677,7 @@ Additional note on `org-footnote-insert-pos-for-preprocessor':
       ;; 4. Insert the footnotes again in the buffer, at the
       ;;    appropriate spot.
       (goto-char (or
-		  (and pre-process-p
+		  (and export-props
 		       (eq org-footnote-insert-pos-for-preprocessor 'point-min)
 		       (point-min))
 		  ins-point
@@ -678,7 +695,7 @@ Additional note on `org-footnote-insert-pos-for-preprocessor':
 		"\n\n")
        ;; When exporting, add newly insert markers along with their
        ;; associated definition to `org-export-footnotes-seen'.
-	(when pre-process-p
+	(when export-props
 	  (setq org-export-footnotes-seen ref-table)))
        ;; Else, insert each definition at the end of the section
        ;; containing their first reference. Happens only in Org

@@ -1092,7 +1092,7 @@ on this string to produce the exported version."
 	  org-export-id-target-alist nil
 	  org-export-code-refs nil)
 
-    (with-current-buffer (get-buffer-create " org-mode-tmp")
+    (with-temp-buffer
       (erase-buffer)
       (insert string)
       (setq case-fold-search t)
@@ -1120,14 +1120,6 @@ on this string to produce the exported version."
       (org-export-handle-include-files-recurse)
       (run-hooks 'org-export-preprocess-after-include-files-hook)
 
-      ;; Change lists ending. Other parts of export may insert blank
-      ;; lines and lists' structure could be altered.
-      (org-export-mark-list-end)
-
-      ;; Process the macros
-      (org-export-preprocess-apply-macros)
-      (run-hooks 'org-export-preprocess-after-macros-hook)
-      
       ;; Get rid of archived trees
       (org-export-remove-archived-trees archived-trees)
 
@@ -1142,9 +1134,35 @@ on this string to produce the exported version."
       ;; Get rid of tasks, depending on configuration
       (org-export-remove-tasks (plist-get parameters :tasks))
 
-      ;; Normalize footnotes
+      ;; Prepare footnotes for export.  During that process, footnotes
+      ;; actually included in the exported part of the buffer go
+      ;; though some transformations:
+
+      ;; 1. They have their label normalized (like "[N]");
+
+      ;; 2. They get moved at the same place in the buffer (usually at
+      ;;    its end, but backends may define another place via
+      ;;    `org-footnote-insert-pos-for-preprocessor');
+
+      ;; 3. The are stored in `org-export-footnotes-seen', while
+      ;;    `org-export-preprocess-string' is applied to their
+      ;;    definition.
+
+      ;; Line-wise exporters ignore `org-export-footnotes-seen', as
+      ;; they interpret footnotes at the moment they see them in the
+      ;; buffer.  Context-wise exporters grab all the info needed in
+      ;; that variable and delete moved definitions (as described in
+      ;; 2nd step).
       (when (plist-get parameters :footnotes)
-	(org-footnote-normalize nil 'pre-process-p))
+	(org-footnote-normalize nil parameters))
+
+      ;; Change lists ending. Other parts of export may insert blank
+      ;; lines and lists' structure could be altered.
+      (org-export-mark-list-end)
+
+      ;; Process the macros
+      (org-export-preprocess-apply-macros)
+      (run-hooks 'org-export-preprocess-after-macros-hook)
 
       ;; Export code blocks
       (org-export-blocks-preprocess)
@@ -1261,7 +1279,6 @@ on this string to produce the exported version."
       (run-hooks 'org-export-preprocess-final-hook)
 
       (setq rtn (buffer-string)))
-    (kill-buffer " org-mode-tmp")
     rtn))
 
 (defun org-export-kill-licensed-text ()
