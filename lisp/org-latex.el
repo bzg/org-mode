@@ -2296,6 +2296,68 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 
 (defun org-export-latex-preprocess (parameters)
   "Clean stuff in the LaTeX export."
+  ;; Replace footnotes.
+  (when (plist-get parameters :footnotes)
+    (goto-char (point-min))
+    (let (ref)
+      (while (setq ref (org-footnote-get-next-reference))
+	(let* ((beg (nth 1 ref))
+	       (lbl (car ref))
+	       (def (nth 1 (assoc (string-to-number lbl)
+				  (mapcar (lambda (e) (cdr e))
+					  org-export-footnotes-seen)))))
+	  ;; Fix body for footnotes ending on a link or a list and
+	  ;; remove definition from buffer.
+	  (setq def
+		(concat def
+			(if (string-match "ORG-LIST-END-MARKER\\'" def)
+			    "\n" " ")))
+	  (org-footnote-delete-definitions lbl)
+	  ;; Compute string to insert (FNOTE), and protect the outside
+	  ;; macro from further transformation.  When footnote at
+	  ;; point is referring to a previously defined footnote, use
+	  ;; \footnotemark. Otherwise, use \footnote.
+	  (let ((fnote (if (member lbl org-export-latex-footmark-seen)
+			   (org-export-latex-protect-string
+			    (format "\\footnotemark[%s]" lbl))
+			 (push lbl org-export-latex-footmark-seen)
+			 (concat (org-export-latex-protect-string "\\footnote{")
+				 def
+				 (org-export-latex-protect-string "}"))))
+		;; Check if another footnote is immediately following.
+		;; If so, add a separator in-between.
+		(sep (org-export-latex-protect-string
+		      (if (save-excursion (goto-char (1- (nth 2 ref)))
+					  (let ((next (org-footnote-get-next-reference)))
+					    (and next (= (nth 1 next) (nth 2 ref)))))
+			  org-export-latex-footnote-separator ""))))
+	    (when (org-on-heading-p)
+	      (setq fnote (concat (org-export-latex-protect-string "\\protect")
+				  fnote)))
+	    ;; Ensure a footnote at column 0 cannot end a list
+	    ;; containing it.
+	    (put-text-property 0 (length fnote) 'original-indentation 1000 fnote)
+	    ;; Replace footnote reference with FNOTE and, maybe, SEP.
+	    ;; `save-excursion' is required if there are two footnotes
+	    ;; in a row.  In that case, point would be left at the
+	    ;; beginning of the second one, and
+	    ;; `org-footnote-get-next-reference' would then skip it.
+	    (goto-char beg)
+	    (delete-region beg (nth 2 ref))
+	    (save-excursion (insert fnote sep)))))))
+
+  ;; Remove footnote section tag for LaTeX
+  (goto-char (point-min))
+  (while (re-search-forward
+	  (concat "^" footnote-section-tag-regexp) nil t)
+    (org-if-unprotected
+     (replace-match "")))
+  ;; Remove any left-over footnote definition.
+  (mapc (lambda (fn) (org-footnote-delete-definitions (car fn)))
+	org-export-footnotes-data)
+  (mapc (lambda (fn) (org-footnote-delete-definitions fn))
+	org-export-latex-footmark-seen)
+
   ;; Preserve line breaks
   (goto-char (point-min))
   (while (re-search-forward "\\\\\\\\" nil t)
@@ -2317,7 +2379,6 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 	 (goto-char (point-at-eol))))))
 
   ;; Preserve math snippets
-
   (let* ((matchers (plist-get org-format-latex-options :matchers))
 	 (re-list org-latex-regexps)
 	 beg end re e m n block off)
@@ -2409,12 +2470,17 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 	     "\\(" (org-create-multibrace-regexp "{" "}" 3) "\\)\\{1,3\\}")))
     (while (re-search-forward re nil t)
       (unless (or
-	       ;; check for comment line
+	       ;; Check for comment line.
 	       (save-excursion (goto-char (match-beginning 0))
 			       (org-in-indented-comment-line))
-	       ;; Check if this is a defined entity, so that is may need conversion
+	       ;; Check if this is a defined entity, so that is may
+	       ;; need conversion.
 	       (org-entity-get (match-string 1))
-	       )
+	       ;; Do not protect interior of footnotes.  Those have
+	       ;; already been taken care of earlier in the function.
+	       ;; Yet, keep looking inside them for more commands.
+	       (and (equal (match-string 1) "footnote")
+		    (goto-char (match-end 1))))
 	(add-text-properties (match-beginning 0) (match-end 0)
 			     '(org-protected t)))))
 
@@ -2450,69 +2516,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
   (goto-char (point-min))
   (while (re-search-forward "@<\\(?:[^\"\n]\\|\".*\"\\)*?>" nil t)
     (org-if-unprotected
-     (replace-match "")))
-
-  ;; When converting to LaTeX, replace footnotes.
-  (when (plist-get parameters :footnotes)
-    (goto-char (point-min))
-    (let (ref)
-      (while (setq ref (org-footnote-get-next-reference))
-	(let* ((beg (nth 1 ref))
-	       (lbl (car ref))
-	       (def (nth 1 (assoc (string-to-number lbl)
-				  (mapcar (lambda (e) (cdr e))
-					  org-export-footnotes-seen)))))
-	  ;; Fix body for footnotes ending on a link or a list and
-	  ;; remove definition from buffer.
-	  (setq def
-		(concat def
-			(if (string-match "ORG-LIST-END-MARKER\\'" def)
-			    "\n" " ")))
-	  (org-footnote-delete-definitions lbl)
-	  ;; Compute string to insert (FNOTE), and protect the outside
-	  ;; macro from further transformation. When footnote at point
-	  ;; is referring to a previously defined footnote, use
-	  ;; \footnotemark. Otherwise, use \footnote.
-	  (let ((fnote (if (member lbl org-export-latex-footmark-seen)
-			   (org-export-latex-protect-string
-			    (format "\\footnotemark[%s]" lbl))
-			 (push lbl org-export-latex-footmark-seen)
-			 (concat (org-export-latex-protect-string "\\footnote{")
-				 def
-				 (org-export-latex-protect-string "}"))))
-		;; Check if another footnote is immediately following.
-		;; If so, add a separator in-between.
-		(sep (org-export-latex-protect-string
-		      (if (save-excursion (goto-char (1- (nth 2 ref)))
-					  (let ((next (org-footnote-get-next-reference)))
-					    (and next (= (nth 1 next) (nth 2 ref)))))
-			  org-export-latex-footnote-separator ""))))
-	    (when (org-on-heading-p)
-	      (setq fnote (concat (org-export-latex-protect-string"\\protect")
-				  fnote)))
-	    ;; Ensure a footnote at column 0 cannot end a list
-	    ;; containing it.
-	    (put-text-property 0 (length fnote) 'original-indentation 1000 fnote)
-	    ;; Replace footnote reference with FNOTE and, maybe, SEP.
-	    ;; `save-excursion' is required if there are two footnotes
-	    ;; in a row. In that case, point would be left at the
-	    ;; beginning of the second one, and
-	    ;; `org-footnote-get-next-reference' would then skip it.
-	    (goto-char beg)
-	    (delete-region beg (nth 2 ref))
-	    (save-excursion (insert fnote sep)))))))
-
-  ;; Remove footnote section tag for LaTeX
-  (goto-char (point-min))
-  (while (re-search-forward
-	  (concat "^" footnote-section-tag-regexp) nil t)
-    (org-if-unprotected
-     (replace-match "")))
-  ;; Remove any left-over footnote definition.
-  (mapc (lambda (fn) (org-footnote-delete-definitions (car fn)))
-	org-export-footnotes-data)
-  (mapc (lambda (fn) (org-footnote-delete-definitions fn))
-	org-export-latex-footmark-seen))
+     (replace-match ""))))
 
 (defun org-export-latex-fix-inputenc ()
   "Set the coding system in inputenc to what the buffer is."
