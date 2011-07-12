@@ -338,13 +338,13 @@ string defines the replacement string for this quote."
   :group 'org-export-latex
   :type '(list
 	  (cons :tag "Opening quote"
-		(string :tag "Regexp for char before") 
+		(string :tag "Regexp for char before")
 		(string :tag "Replacement quote     "))
 	  (cons :tag "Closing quote"
-		(string :tag "Regexp for char after ") 
+		(string :tag "Regexp for char after ")
 		(string :tag "Replacement quote     "))
 	  (cons :tag "Single quote"
-		(string :tag "Regexp for char before") 
+		(string :tag "Regexp for char before")
 		(string :tag "Replacement quote     "))))
 
 (defcustom org-export-latex-tables-verbatim nil
@@ -1657,7 +1657,7 @@ links, keywords, lists, tables, fixed-width"
 			       (org-export-latex-protect-string
 				(copy-sequence (cdr l))))))
 	      (org-if-unprotected-1
-	       (replace-match rpl t t))))) 
+	       (replace-match rpl t t)))))
 	(cdr (or (assoc (plist-get org-export-latex-options-plist :language)
 			org-export-latex-quotes)
 		 ;; falls back on english
@@ -1951,7 +1951,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
                   (mapcar
                    (lambda(elem)
                      (or (and (string-match "[ \t]*|-+" elem) 'hline)
-                         (org-split-string 
+                         (org-split-string
 			  (progn (set-text-properties 0 (length elem) nil elem)
 				 (org-trim elem)) "|")))
                    lines))
@@ -2377,7 +2377,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
     (while (re-search-forward
 	    "^[ \t]*#\\+index:[ \t]*\\([^ \t\r\n].*?\\)[ \t]*$"
 	    nil t)
-      (setq entry 
+      (setq entry
 	    (save-match-data
 	      (org-export-latex-protect-string
 	       (org-export-latex-fontify-headline (match-string 1)))))
