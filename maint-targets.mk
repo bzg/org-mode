@@ -1,6 +1,15 @@
+.PHONY:	p g html_manual html_guide \
+	testrelease release fixrelease \
+	relup makerelease sync_release sync_manual \
+	distfile pkg push pushtag pushreleasetag
+.NOTPARALLEL: .PHONY
 # Below here are special targets for maintenance only
 
-html: doc/org.html
+p:	pdf
+	open doc/org.pdf
+
+g:	pdf
+	open doc/orgguide.pdf
 
 html_manual: doc/org.texi
 	rm -rf doc/manual
@@ -13,12 +22,6 @@ html_guide: doc/orgguide.texi
 	mkdir doc/guide
 	$(TEXI2HTML) -o doc/guide doc/orgguide.texi
 	UTILITIES/guidesplit.pl doc/guide/*.html
-
-info:	doc/org
-
-pdf:	doc/org.pdf doc/orgguide.pdf
-
-card:	doc/orgcard.pdf doc/orgcard_letter.pdf doc/orgcard.txt
 
 testrelease:
 	git checkout -b testrelease origin/maint
@@ -145,37 +148,6 @@ pkg:
 	cp -r $(PKG_FILES) org-$(PKG_TAG)
 	echo "(define-package \"org\" \"$(PKG_TAG)\" \"$(PKG_DOC)\" $(PKG_REQ))" > org-$(PKG_TAG)/org-pkg.el
 	tar cf org-$(PKG_TAG).tar org-$(PKG_TAG) --remove-files
-
-cleanall:
-	${MAKE} clean
-	rm -f lisp/org-install.el
-
-clean:
-	${MAKE} cleanelc
-	${MAKE} cleandoc
-	${MAKE} cleanrel
-	rm -f *~ */*~ */*/*~
-
-cleancontrib:
-	find contrib -name \*~ -exec rm {} \;
-
-cleanelc:
-	rm -f $(ELCFILES)
-cleandoc:
-	-(cd doc && rm -f org.pdf org org.html orgcard.pdf orgguide.pdf)
-	-(cd doc && rm -f *.aux *.cp *.cps *.dvi *.fn *.fns *.ky *.kys *.pg *.pgs)
-	-(cd doc && rm -f *.toc *.tp *.tps *.vr *.vrs *.log *.html *.ps)
-	-(cd doc && rm -f orgcard_letter.tex orgcard_letter.pdf)
-	-(cd doc && rm -rf manual)
-
-cleanrel:
-	rm -rf RELEASEDIR
-	rm -rf org-7.*
-	rm -rf org-7*zip org-7*tar.gz
-
-.el.elc:
-	$(ELC) $<
-
 
 push:
 	git push orgmode@orgmode.org:org-mode.git master

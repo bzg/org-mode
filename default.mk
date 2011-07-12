@@ -39,6 +39,12 @@ MAKEINFO = makeinfo
 # How to create the HTML file
 TEXI2HTML = makeinfo --html --number-sections
 
+# How to find files
+FIND    = find
+
+# How to remove files
+RM      = rm
+
 # How to copy the lisp files and elc files to their destination.
 # CP    = cp -p         # try this if there is no install
 CP      = install -p

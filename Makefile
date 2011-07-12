@@ -3,10 +3,9 @@
 # Maintainer: Carsten Dominik <dominik@science.uva.nl>
 # Version: VERSIONTAG
 #
-# To install org-mode, edit the Makefile, type `make', then `make install'.
-# To create the PDF and HTML documentation files, type `make doc'.
 
 # Describe valid make targets for org-mode.
+.PHONY:	targets help
 targets help:
 	@echo "make - compile Org ELisp files"
 	@echo "make clean - clean Elisp and documentation files"
