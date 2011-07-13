@@ -3899,7 +3899,7 @@ example:
 
 * Parent
   :PROPERTIES:
-    :ORDERED: t
+  :ORDERED: t
   :END:
 ** TODO a
 ** TODO b, needs to wait for (a)
