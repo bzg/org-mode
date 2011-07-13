@@ -527,4 +527,3 @@ targets help:
 	@echo "make install - install Org"
 	@echo "make install-lisp - install Org ELisp files"
 	@echo "make install-info - install Org Info file"
-	@echo "make install-info-debian - install info on old debian systems (newer use ginstall)"
