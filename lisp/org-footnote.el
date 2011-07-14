@@ -177,8 +177,8 @@ extracted will be filled again."
 (defun org-footnote-at-reference-p ()
   "Is the cursor at a footnote reference?
 
-If so, return an list containing its label, beginning and ending
-positions, and the definition, if local."
+If so, return a list containing its label, beginning and ending
+positions, and the definition, when inlined."
   (when (and (org-footnote-in-valid-context-p)
 	     (or (looking-at org-footnote-re)
 		 (org-in-regexp org-footnote-re)
