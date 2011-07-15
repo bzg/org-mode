@@ -235,11 +235,20 @@ label, start, end and definition of the footnote otherwise."
 	(list (match-string 2)
 	      (match-beginning 0)
 	      (save-match-data
-		(or (and (re-search-forward
-			  (org-re "^[ \t]*$\\|^\\*+ \\|^\\[\\([0-9]+\\|fn:[-_[:word:]]+\\)\\]")
-			  nil t)
-			 (progn (skip-chars-forward " \t\n") (point-at-bol)))
-		    (point-max)))
+		;; In a message, limit search to signature.
+		(let ((bound (and (derived-mode-p 'message-mode)
+				  (save-excursion
+				    (goto-char (point-max))
+				    (re-search-backward
+				     message-signature-separator nil t)))))
+		  (or (and (re-search-forward
+			    (org-re
+			     (concat "^[ \t]*$" "\\|"
+				     "^\\*+ " "\\|"
+				     "^\\[\\([0-9]+\\|fn:[-_[:word:]]+\\)\\]"))
+			    bound 'move)
+			   (progn (skip-chars-forward " \t\n") (point-at-bol)))
+		      (point))))
 	      (org-trim (buffer-substring (match-end 0) (point))))))))
 
 (defun org-footnote-get-next-reference (&optional label backward limit)
@@ -603,7 +612,7 @@ Additional note on `org-footnote-insert-pos-for-preprocessor':
 	  ;; Add label (REF), identifier (MARKER) and definition (DEF)
 	  ;; to REF-TABLE if data was unknown.
 	  (unless a
-	    (let ((def (or (nth 3 ref) ; inline
+	    (let ((def (or (nth 3 ref)	; inline
 			   (and export-props
 				(cdr (assoc lbl org-export-footnotes-data)))
 			   (nth 3 (org-footnote-get-definition lbl)))))
@@ -618,7 +627,7 @@ Additional note on `org-footnote-insert-pos-for-preprocessor':
 				      export-props
 				      '(:todo-keywords t :tags t :priority t))))
 				(org-export-preprocess-string def parameters))
-			      def)
+			    def)
 			  inlinep) ref-table)))
 	  ;; Remove definition of non-inlined footnotes.
 	  (unless inlinep (org-footnote-delete-definitions lbl))))
@@ -653,9 +662,17 @@ Additional note on `org-footnote-insert-pos-for-preprocessor':
 		     "[ \t]*$")
 	     nil t)
 	    (replace-match ""))
-	(goto-char (point-max))
-	(skip-chars-backward " \t\n\r")
-	(delete-region (point) (point-max))
+	;; In message-mode, ensure footnotes are inserted before the
+	;; signature.
+	(let ((pt-max
+	       (or (and (derived-mode-p 'message-mode)
+			(save-excursion
+			  (goto-char (point-max))
+			  (re-search-backward message-signature-separator nil t)))
+		   (point-max))))
+	  (goto-char pt-max)
+	  (skip-chars-backward " \t\n\r")
+	  (delete-region (point) pt-max))
 	(insert "\n\n" org-footnote-tag-for-non-org-mode-files "\n")
 	(setq ins-point (point))))
       ;; 3. Clean-up REF-TABLE.
@@ -693,8 +710,8 @@ Additional note on `org-footnote-insert-pos-for-preprocessor':
 					  (nth (if sort-only 0 1) x) (nth 2 x)))
 			   ref-table "\n\n")
 		"\n\n")
-       ;; When exporting, add newly insert markers along with their
-       ;; associated definition to `org-export-footnotes-seen'.
+	;; When exporting, add newly inserted markers along with their
+	;; associated definition to `org-export-footnotes-seen'.
 	(when export-props
 	  (setq org-export-footnotes-seen ref-table)))
        ;; Else, insert each definition at the end of the section
