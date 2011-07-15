@@ -957,7 +957,11 @@ may be specified in the current buffer."
 	 (lang (org-babel-clean-text-properties (match-string 2)))
          (lang-headers (intern (concat "org-babel-default-header-args:" lang)))
 	 (switches (match-string 3))
-         (body (org-babel-clean-text-properties (match-string 5)))
+         (body (org-babel-clean-text-properties
+		(let* ((body (match-string 5))
+		       (sub-length (- (length body) 1)))
+		  (when (string= "\n" (substring body sub-length))
+		    (substring body 0 sub-length)))))
 	 (preserve-indentation (or org-src-preserve-indentation
 				   (string-match "-i\\>" switches))))
     (list lang
