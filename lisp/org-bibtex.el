@@ -121,6 +121,7 @@
 (declare-function bibtex-parse-entry "bibtex" (&optional content))
 (declare-function bibtex-url "bibtex" (&optional pos no-browse))
 (declare-function longlines-mode "longlines" (&optional arg))
+(declare-function org-babel-trim "ob" (string &optional regexp))
 
 
 ;;; Bibtex data
@@ -277,8 +278,9 @@ This variable is relevant only if `org-bibtex-export-tags-as-keywords` is t."
 
 ;;; Utility functions
 (defun org-bibtex-get (property)
-  (or (org-entry-get (point) (upcase property))
-      (org-entry-get (point) (concat org-bibtex-prefix (upcase property)))))
+  (org-babel-trim
+   (or (org-entry-get (point) (upcase property))
+       (org-entry-get (point) (concat org-bibtex-prefix (upcase property))))))
 
 (defun org-bibtex-put (property value)
   (let ((prop (upcase (if (keywordp property)
