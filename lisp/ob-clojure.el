@@ -62,16 +62,16 @@
 			     vars "\n      ")
 			    "]\n" body ")")
 		  body))))
-    (if (or (member "code" result-params)
-	    (member "pp" result-params))
-	(format
-	 (concat
-	  "(let [org-mode-print-catcher (java.io.StringWriter.)] "
-	  "(clojure.pprint/with-pprint-dispatch clojure.pprint/%s-dispatch "
-	  "(clojure.pprint/pprint (do %s) org-mode-print-catcher) "
-	  "(str org-mode-print-catcher)))")
-	 (if (member "code" result-params) "code" "simple") body)
-      body)))
+    (cond ((or (member "code" result-params) (member "pp" result-params))
+	   (format (concat "(let [org-mode-print-catcher (java.io.StringWriter.)] "
+			   "(clojure.pprint/with-pprint-dispatch clojure.pprint/%s-dispatch "
+			   "(clojure.pprint/pprint (do %s) org-mode-print-catcher) "
+			   "(str org-mode-print-catcher)))")
+		   (if (member "code" result-params) "code" "simple") body))
+	  ;; if (:results output), collect printed output
+	  ((member "output" result-params)
+	   (format "(clojure.core/with-out-str %s)" body))
+	  (t body))))
 
 (defun org-babel-execute:clojure (body params)
   "Execute a block of Clojure code with Babel."
