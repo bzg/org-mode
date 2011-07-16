@@ -1,13 +1,15 @@
-.PHONY:	default all up2 update compile \
+.PHONY:	default all up2 update compile lisp\
 	install info html pdf card doc install-lisp install-info \
 	autoloads cleanall clean cleancontrib cleanelc cleandoc cleanrel
 .NOTPARALLEL: .PHONY
 # Additional distribution files
 DISTFILES_extra=  Makefile request-assign-future.txt contrib etc
+.EXPORT_ALL_VARIABLES:
 
-default: $(ELCFILES)
+lisp compile:
+	$(MAKE) -C lisp compile
 
-all:	default $(INFOFILES)
+all:	lisp $(INFOFILES)
 
 up2:	update
 	sudo ${MAKE} install
@@ -16,8 +18,6 @@ update:
 	git pull
 	${MAKE} clean
 	${MAKE} all
-
-compile: $(ELCFILES0)
 
 install: install-lisp
 
@@ -31,27 +31,17 @@ card:	doc/orgcard.pdf doc/orgcard_letter.pdf doc/orgcard.txt
 
 doc:	html pdf card
 
-install-lisp: $(LISPFILES) default
+install-lisp:
 	if [ ! -d $(lispdir) ]; then $(MKDIR) $(lispdir); else true; fi ;
-	$(CP) $(LISPFILES)  $(lispdir)
-	$(CP) $(ELCFILES)   $(lispdir)
+	$(MAKE) -C lisp install
 
 install-info: $(INFOFILES)
 	if [ ! -d $(infodir) ]; then $(MKDIR) $(infodir); else true; fi ;
 	$(CP) $(INFOFILES) $(infodir)
 	$(INSTALL_INFO) --infodir=$(infodir) $(INFOFILES)
 
-autoloads: lisp/org-install.el
-
-lisp/org-install.el: $(LISPFILES0) maint.mk dependencies.mk
-	$(BATCH) \
-	 --eval "(require 'autoload)" \
-	 --eval '(find-file "org-install.el")' \
-	 --eval '(erase-buffer)' \
-	 --eval '(mapc (lambda (x) (generate-file-autoloads (symbol-name x))) (quote ($(LISPFILES0))))' \
-	 --eval '(insert "\n(provide (quote org-install))\n")' \
-	 --eval '(save-buffer)'
-	mv org-install.el lisp
+autoloads: lisp maint.mk
+	$(MAKE) -C lisp autoloads
 
 doc/org: doc/org.texi
 	(cd doc && $(MAKEINFO) --no-split org.texi -o org)
@@ -75,16 +65,14 @@ doc/orgcard_letter.tex: doc/orgcard.tex
                    doc/orgcard.tex > doc/orgcard_letter.tex
 
 cleanall: clean
-	$(RM) lisp/org-install.el
+	$(MAKE) -C lisp cleanall
 
-clean:	cleanelc cleandoc cleanrel cleancontrib
+clean:	cleandoc cleanrel cleancontrib
+	$(MAKE) -C lisp clean
 	-$(FIND) . -name \*~ -exec $(RM) {} \;
 
 cleancontrib:
 	-$(FIND) contrib -name \*~ -exec $(RM) {} \;
-
-cleanelc:
-	rm -f $(ELCFILES)
 
 cleandoc:
 	-(cd doc && rm -f org.pdf org org.html orgcard.pdf orgguide.pdf)
@@ -97,6 +85,3 @@ cleanrel:
 	rm -rf RELEASEDIR
 	rm -rf org-7.*
 	rm -rf org-7*zip org-7*tar.gz
-
-.el.elc:
-	$(ELC) $<

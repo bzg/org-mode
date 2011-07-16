@@ -9,7 +9,7 @@ EMACS   = emacs
 prefix  = /usr/share
 
 # Where local lisp files go.
-lispdir = $(prefix)/emacs/site-lisp
+lispdir = $(prefix)/emacs/site-lisp/org
 
 # Where info files go.
 infodir = $(prefix)/info
@@ -20,8 +20,8 @@ infodir = $(prefix)/info
 
 # Using emacs in batch mode.
 
-BATCH   = $(EMACS) -batch -q -no-site-file -eval                        \
-          "(setq load-path (cons (expand-file-name \"./lisp/\")         \
+BATCH   = $(EMACS) -batch -q -no-site-file -eval          \
+          "(setq load-path (cons (expand-file-name \".\") \
                                  (cons \"$(lispdir)\" load-path)))"
 
 # Specify the byte-compiler for compiling org-mode files
@@ -43,7 +43,7 @@ TEXI2HTML = makeinfo --html --number-sections
 FIND    = find
 
 # How to remove files
-RM      = rm
+RM      = rm -f
 
 # How to copy the lisp files and elc files to their destination.
 # CP    = cp -p         # try this if there is no install

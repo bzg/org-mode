@@ -21,8 +21,8 @@ targets help:
 	@echo "make install-lisp - install Org ELisp files"
 	@echo "make install-info - install Org Info file"
 
-include default.mk
-include maint.mk
-include targets.mk
-include maint-targets.mk
-include dependencies.mk
+ include default.mk
+-include local.mk
+ include maint.mk
+ include targets.mk
+ include maint-targets.mk
