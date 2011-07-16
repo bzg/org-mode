@@ -960,8 +960,9 @@ may be specified in the current buffer."
          (body (org-babel-clean-text-properties
 		(let* ((body (match-string 5))
 		       (sub-length (- (length body) 1)))
-		  (when (string= "\n" (substring body sub-length))
-		    (substring body 0 sub-length)))))
+		  (if (string= "\n" (substring body sub-length))
+		      (substring body 0 sub-length)
+		    body))))
 	 (preserve-indentation (or org-src-preserve-indentation
 				   (string-match "-i\\>" switches))))
     (list lang
@@ -1947,7 +1948,8 @@ block but are passed literally to the \"example-block\"."
 
 (defun org-babel-strip-protective-commas (body)
   "Strip protective commas from bodies of source blocks."
-  (replace-regexp-in-string "^,#" "#" body))
+  (when body
+    (replace-regexp-in-string "^,#" "#" body)))
 
 (defun org-babel-script-escape (str &optional force)
   "Safely convert tables into elisp lists."
