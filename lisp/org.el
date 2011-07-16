@@ -5207,8 +5207,8 @@ will be prompted for."
 	       beg end
 	       '(font-lock-fontified t font-lock-multiline t))
 	      (add-text-properties beg beg1 '(face org-meta-line))
-	      (add-text-properties end1 (+ end 1) '(face org-meta-line))
-					; for end_src
+	      (add-text-properties end1 (min (point-max) (1+ end))
+				   '(face org-meta-line)) ; for end_src
 	      (cond
 	       ((and lang (not (string= lang "")) org-src-fontify-natively)
 		(org-src-font-lock-fontify-block lang block-start block-end)
@@ -5222,8 +5222,8 @@ will be prompted for."
                 (overlay-put ovl 'face 'org-block-background)
                 (overlay-put ovl 'evaporate t))  ;; make it go away when empty
 	       (quoting
-		(add-text-properties beg1 (+ end1 1) '(face org-block)))
-					; end of source block
+		(add-text-properties beg1 (min (point-max) (1+ end1))
+				     '(face org-block))) ; end of source block
 	       ((not org-fontify-quote-and-verse-blocks))
 	       ((string= block-type "quote")
 		(add-text-properties beg1 (1+ end1) '(face org-quote)))
