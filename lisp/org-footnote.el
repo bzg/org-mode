@@ -632,10 +632,8 @@ Additional note on `org-footnote-insert-pos-for-preprocessor':
 			  inlinep) ref-table)))
 	  ;; Remove definition of non-inlined footnotes.
 	  (unless inlinep (org-footnote-delete-definitions lbl))))
-      ;; 2. Find and remove the footnote section, if any. If we are
-      ;; exporting, insert it again at end of buffer. In a non
-      ;; org-mode file, insert instead
-      ;; `org-footnote-tag-for-non-org-mode-files'.
+      ;; 2. Find and remove the footnote section, if any.  Also
+      ;;    determine where footnotes shall be inserted (INS-POINT).
       (goto-char (point-min))
       (cond
        ((org-mode-p)
@@ -644,37 +642,31 @@ Additional note on `org-footnote-insert-pos-for-preprocessor':
 		  (concat "^\\*[ \t]+" (regexp-quote org-footnote-section)
 			  "[ \t]*$")
 		  nil t))
-	    (if export-props
-		(replace-match "")
-	      (org-back-to-heading t)
-	      (forward-line 1)
-	      (setq ins-point (point))
-	      (delete-region (point) (org-end-of-subtree t)))
-	  (goto-char (point-max))
-	  (unless export-props
-	    (when org-footnote-section
-	      (or (bolp) (insert "\n"))
-	      (insert "* " org-footnote-section "\n")
-	      (setq ins-point (point))))))
+	    (progn
+	      (setq ins-point (match-beginning 0))
+	      (delete-region (match-beginning 0) (org-end-of-subtree t)))
+	  (setq ins-point (point-max))))
        (t
-	(if (re-search-forward
-	     (concat "^"
-		     (regexp-quote org-footnote-tag-for-non-org-mode-files)
-		     "[ \t]*$")
-	     nil t)
-	    (replace-match ""))
+	(when (re-search-forward
+	       (concat "^"
+		       (regexp-quote org-footnote-tag-for-non-org-mode-files)
+		       "[ \t]*$")
+	       nil t)
+	  (replace-match ""))
 	;; In message-mode, ensure footnotes are inserted before the
 	;; signature.
 	(let ((pt-max
 	       (or (and (derived-mode-p 'message-mode)
 			(save-excursion
 			  (goto-char (point-max))
-			  (re-search-backward message-signature-separator nil t)))
+			  (re-search-backward
+			   message-signature-separator nil t)
+			  (1- (point))))
 		   (point-max))))
 	  (goto-char pt-max)
 	  (skip-chars-backward " \t\n\r")
+	  (forward-line)
 	  (delete-region (point) pt-max))
-	(insert "\n\n" org-footnote-tag-for-non-org-mode-files "\n")
 	(setq ins-point (point))))
       ;; 3. Clean-up REF-TABLE.
       (setq ref-table
@@ -701,11 +693,20 @@ Additional note on `org-footnote-insert-pos-for-preprocessor':
 		  ins-point
 		  (point-max)))
       (cond
-       ((not ref-table))		; no footnote: exit
-       ;; Cases when footnotes should be inserted together in one place.
+       ;; No footnote: exit.
+       ((not ref-table))
+       ;; Cases when footnotes should be inserted in one place.
        ((or (not (org-mode-p))
 	    org-footnote-section
 	    (not sort-only))
+	;; Insert again the section title.
+	(cond
+	 ((not (org-mode-p))
+	  (insert "\n\n" org-footnote-tag-for-non-org-mode-files "\n"))
+	 ((and org-footnote-section (not export-props))
+	  (or (bolp) (insert "\n"))
+	  (insert "* " org-footnote-section "\n")))
+	;; Insert the footnotes.
 	(insert "\n"
 		(mapconcat (lambda (x) (format "[%s] %s"
 					  (nth (if sort-only 0 1) x) (nth 2 x)))
