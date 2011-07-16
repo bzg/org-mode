@@ -579,14 +579,14 @@ Additional note on `org-footnote-insert-pos-for-preprocessor':
 	 ins-point ref)
     (save-excursion
       ;; 1. Find every footnote reference, extract the definition, and
-      ;;    collect that data in REF-TABLE. If SORT-ONLY is nil, also
+      ;;    collect that data in REF-TABLE.  If SORT-ONLY is nil, also
       ;;    normalize references.
       (goto-char (point-min))
       (while (setq ref (org-footnote-get-next-reference))
 	(let* ((lbl (car ref))
 	       ;; When footnote isn't anonymous, check if it's label
-	       ;; (REF) is already stored in REF-TABLE. In that case,
-	       ;; extract number used to identify it (MARKER). If
+	       ;; (REF) is already stored in REF-TABLE.  In that case,
+	       ;; extract number used to identify it (MARKER).  If
 	       ;; footnote is unknown, increment the global counter
 	       ;; (COUNT) to create an unused identifier.
 	       (a (and lbl (assoc lbl ref-table)))
@@ -594,8 +594,8 @@ Additional note on `org-footnote-insert-pos-for-preprocessor':
 	       ;; Is the reference inline or pointing to an inline
 	       ;; footnote?
 	       (inlinep (or (stringp (nth 3 ref)) (nth 3 a))))
-	  ;; Replace footnote reference with [MARKER]. Maybe fill
-	  ;; paragraph once done. If SORT-ONLY is non-nil, only move
+	  ;; Replace footnote reference with [MARKER].  Maybe fill
+	  ;; paragraph once done.  If SORT-ONLY is non-nil, only move
 	  ;; to the end of reference found to avoid matching it twice.
 	  ;; If EXPORT-PROPS isn't nil, also add `org-footnote'
 	  ;; property to it, so it can be easily recognized by
@@ -717,9 +717,9 @@ Additional note on `org-footnote-insert-pos-for-preprocessor':
 	(when export-props
 	  (setq org-export-footnotes-seen ref-table)))
        ;; Else, insert each definition at the end of the section
-       ;; containing their first reference. Happens only in Org
-       ;; files with no special footnote section, and only when
-       ;; doing sorting.
+       ;; containing their first reference.  Happens only in Org files
+       ;; with no special footnote section, and only when doing
+       ;; sorting.
        (t (mapc 'org-insert-footnote-reference-near-definition
 		ref-table))))))
 
