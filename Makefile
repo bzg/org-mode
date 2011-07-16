@@ -228,12 +228,11 @@ autoloads: lisp/org-install.el
 
 lisp/org-install.el: $(LISPFILES0) Makefile
 	$(BATCH) --eval "(require 'autoload)" \
-		--eval '(find-file "org-install.el")'  \
+		--eval '(find-file "lisp/org-install.el")'  \
 		--eval '(erase-buffer)' \
-		--eval '(mapc (lambda (x) (generate-file-autoloads (symbol-name x))) (quote ($(LISPFILES0))))' \
+		--eval '(mapc (lambda (x) (generate-file-autoloads (symbol-name x))) (quote ($(LISPF))))' \
 		--eval '(insert "\n(provide (quote org-install))\n")' \
 		--eval '(save-buffer)'
-	mv org-install.el lisp
 
 doc/org: doc/org.texi
 	(cd doc && $(MAKEINFO) --no-split org.texi -o org)
