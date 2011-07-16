@@ -1043,26 +1043,28 @@ when PUB-DIR is set, use this as the publishing directory."
     (with-current-buffer outbuf (erase-buffer))
     (message (concat "Processing LaTeX file " file "..."))
     (setq output-dir (file-name-directory file))
-    (if (and cmds (symbolp cmds))
-	(funcall cmds (shell-quote-argument file))
-      (while cmds
-	(setq cmd (pop cmds))
-	(while (string-match "%b" cmd)
-	  (setq cmd (replace-match
-		     (save-match-data
-		       (shell-quote-argument base))
-		     t t cmd)))
-	(while (string-match "%f" cmd)
-	  (setq cmd (replace-match
-		     (save-match-data
-		       (shell-quote-argument file))
-		     t t cmd)))
-	(while (string-match "%o" cmd)
-	  (setq cmd (replace-match
-		     (save-match-data
-		       (shell-quote-argument output-dir))
-		     t t cmd)))
-	(shell-command cmd outbuf)))
+    (with-current-buffer lbuf
+      (save-excursion
+	(if (and cmds (symbolp cmds))
+	    (funcall cmds (shell-quote-argument file))
+	  (while cmds
+	    (setq cmd (pop cmds))
+	    (while (string-match "%b" cmd)
+	      (setq cmd (replace-match
+			 (save-match-data
+			   (shell-quote-argument base))
+			 t t cmd)))
+	    (while (string-match "%f" cmd)
+	      (setq cmd (replace-match
+			 (save-match-data
+			   (shell-quote-argument file))
+			 t t cmd)))
+	    (while (string-match "%o" cmd)
+	      (setq cmd (replace-match
+			 (save-match-data
+			   (shell-quote-argument output-dir))
+			 t t cmd)))
+	    (shell-command cmd outbuf)))))
     (message (concat "Processing LaTeX file " file "...done"))
     (setq errors (org-export-latex-get-error outbuf))
     (if (not (file-exists-p pdffile))
