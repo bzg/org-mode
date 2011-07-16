@@ -38,6 +38,7 @@
 (require 'org-macs)
 (require 'org-compat)
 
+(declare-function org-combine-plists "org" (&rest plists))
 (declare-function org-in-commented-line "org" ())
 (declare-function org-in-indented-comment-line "org" ())
 (declare-function org-in-regexp "org" (re &optional nlines visually))
