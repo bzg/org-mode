@@ -572,7 +572,7 @@ and `org-export-with-tags' instead."
   :type 'plist
   :group 'org-export-latex)
 
-(defcustom org-export-latex-image-default-option "width=10em"
+(defcustom org-export-latex-image-default-option "width=.9\\linewidth"
   "Default option for images."
   :group 'org-export-latex
   :type 'string)
