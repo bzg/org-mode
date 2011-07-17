@@ -1,3 +1,7 @@
+ifeq ($(MAKELEVEL), 0)
+  $(error This make needs to be started as a sub-make from the toplevel directory.)
+endif
+
 LISPO = org-install.el
 LISPF = $(subst $(LISPO),,$(wildcard *.el))
 LISPC = $(LISPF:%el=%elc)
@@ -6,9 +10,7 @@ include dependencies.mk
 
 .PHONY:		autoloads compile install clean cleanall
 
-$(LISPC):	dependencies.mk
-
-compile:	$(LISPC)
+all compile:	$(LISPC)
 
 autoloads:	$(LISPO)
 
@@ -22,6 +24,7 @@ org-install.el:	$(LISPC)
 	 --eval '(save-buffer)'
 
 install:	$(LISPF) compile autoloads
+	if [ ! -d $(lispdir) ]; then $(MKDIR) $(lispdir); else true; fi ;
 	$(CP) $(LISPC) $(LISPF) $(LISPO) $(lispdir)
 
 clean:
@@ -29,6 +32,8 @@ clean:
 
 cleanall:
 	$(RM) $(LISPC) $(LISPO)
+
+$(LISPC):	dependencies.mk
 
 .SUFFIXES:	# we don't need default suffix rules
 .SUFFIXES:	.el .elc

@@ -30,6 +30,9 @@ ELC     = $(BATCH) -f batch-byte-compile
 # How to make a pdf file from a texinfo file
 TEXI2PDF = texi2pdf
 
+# How to make a pdf file from a tex file
+PDFTEX = pdftex
+
 # How to create directories
 MKDIR   = mkdir -p
 
@@ -44,6 +47,9 @@ FIND    = find
 
 # How to remove files
 RM      = rm -f
+
+# How to remove files recursively
+RMR     = rm -fr
 
 # How to copy the lisp files and elc files to their destination.
 # CP    = cp -p         # try this if there is no install

@@ -11,17 +11,8 @@ p:	pdf
 g:	pdf
 	open doc/orgguide.pdf
 
-html_manual: doc/org.texi
-	rm -rf doc/manual
-	mkdir doc/manual
-	$(TEXI2HTML) -o doc/manual doc/org.texi
-	UTILITIES/mansplit.pl doc/manual/*.html
-
-html_guide: doc/orgguide.texi
-	rm -rf doc/guide
-	mkdir doc/guide
-	$(TEXI2HTML) -o doc/guide doc/orgguide.texi
-	UTILITIES/guidesplit.pl doc/guide/*.html
+html_manual html_guide:
+	$(MAKE) -C doc $(@:html_%=%)
 
 testrelease:
 	git checkout -b testrelease origin/maint

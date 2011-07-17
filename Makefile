@@ -7,19 +7,22 @@
 # Describe valid make targets for org-mode.
 .PHONY:	targets help
 targets help:
-	@echo "make - compile Org ELisp files"
-	@echo "make clean - clean Elisp and documentation files"
-	@echo "make all - compile Org ELisp files and documentation"
+	$(info )
+	$(info make              - show this help)
+	$(info )
+	$(info make clean        - clean Elisp and documentation files)
+	$(info make all          - compile Org ELisp files and documentation)
+	$(info )
+	$(info make docs         - make all documentation)
+	$(info make info         - make Info documentation)
+	$(info make html         - make HTML documentation)
+	$(info make pdf          - make pdf documentation)
+	$(info make card         - make refcards documentation)
+	$(info )
+	$(info make install      - install Org, both ELisp and Info files)
+	$(info make install-lisp - install Org ELisp files)
+	$(info make install-info - install Org Info file)
 	@echo ""
-	@echo "make doc - make all documentation"
-	@echo "make info - make Info documentation"
-	@echo "make html - make HTML documentation"
-	@echo "make pdf - make pdf documentation"
-	@echo "make card - make refcards documentation"
-	@echo ""
-	@echo "make install - install Org"
-	@echo "make install-lisp - install Org ELisp files"
-	@echo "make install-info - install Org Info file"
 
  include default.mk
 -include local.mk
