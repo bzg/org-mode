@@ -1245,15 +1245,20 @@ This function modifies STRUCT."
 	    (and (not beforep) split-line-p
 		 (progn
 		   (goto-char pos)
+		   ;; If POS is greater than ITEM-END, then point is
+		   ;; in some white lines after the end of the list.
+		   ;; Those must be removed, or they will be left,
+		   ;; stacking up after the list.
+		   (when (< item-end pos)
+		     (delete-region (1- item-end) (point-at-eol)))
 		   (skip-chars-backward " \r\t\n")
 		   (setq pos (point))
 		   (delete-and-extract-region pos item-end-no-blank))))
 	   (body (concat bullet (when box (concat box " ")) after-bullet
-			 (or (and text-cut
-				  (if (string-match "\\`[ \t]+" text-cut)
-				      (replace-match "" t t text-cut)
-				    text-cut))
-			     "")))
+			 (and text-cut
+			      (if (string-match "\\`[ \t]+" text-cut)
+				  (replace-match "" t t text-cut)
+				text-cut))))
 	   (item-sep (make-string  (1+ blank-nb) ?\n))
 	   (item-size (+ ind-size (length body) (length item-sep)))
 	   (size-offset (- item-size (length text-cut))))
