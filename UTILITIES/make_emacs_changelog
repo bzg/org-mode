@@ -59,8 +59,8 @@ for $i (0..$#commits) {
     
     # remove stuff which is not for this output
     if ($kind =~ /\S/) { 
-      remove_parts("contrib/","testing/","xemacs/");
-      remove_parts("Makefile","README");
+      remove_parts("contrib/","testing/","xemacs/","UTILITIES/");
+      remove_parts(".*Makefile","README",".+\.mk");
     }
     if ($kind eq "lisp") { remove_parts("doc/")                               }
     if ($kind eq "texi") { remove_parts("lisp/","doc/orgcard","doc/orgguide") }
