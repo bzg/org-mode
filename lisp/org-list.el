@@ -1454,8 +1454,7 @@ This function returns, destructively, the new list structure."
 							 (+ end shift)))))))
 			       moved-items))
 		      (lambda (e1 e2) (< (car e1) (car e2))))))
-      ;; 2. Eventually delete the extra copy of the item and clean
-      ;;    marker.
+      ;; 2. Eventually delete extra copy of the item and clean marker.
       (prog1
 	  (org-list-delete-item (marker-position item) struct)
 	(move-marker item nil)))
@@ -1756,7 +1755,7 @@ the structure to be applied.  The function will only modify parts
 of the list which have changed.
 
 Initial position of cursor is restored after the changes."
-  (let* ((pos (copy-marker (point)))
+  (let* ((origin (copy-marker (point)))
 	 (inlinetask-re (and (featurep 'org-inlinetask)
 			     (org-inlinetask-outline-regexp)))
 	 (item-re (org-item-re))
@@ -1867,8 +1866,9 @@ Initial position of cursor is restored after the changes."
 		(unless (or (not cell) (equal cell (assq beg old-struct)))
 		  (funcall modify-item beg))))
 	    sliced-struct))
-    ;; 4. Go back to initial position.
-    (goto-char pos)))
+    ;; 4. Go back to initial position and clean marker.
+    (goto-char origin)
+    (move-marker origin nil)))
 
 (defun org-list-write-struct (struct parents)
   "Correct bullets, checkboxes and indentation in list at point.
@@ -1942,6 +1942,7 @@ beginning of the item."
 	    (setq value (apply function value args)))
 	  (nreverse all))
     (goto-char item)
+    (move-marker item nil)
     value))
 
 (defun org-list-set-item-visibility (item struct view)
@@ -2289,11 +2290,9 @@ in subtree, ignoring drawers."
 		 ((equal "[X]" cbox) "[ ]")
 		 (t "[X]"))))))
       ;; When an item is found within bounds, grab the full list at
-      ;; point structure, then:
-      ;; 1. set check-box of all its items within bounds to
-      ;;    REF-CHECKBOX;
-      ;; 2. fix check-boxes of the whole list; 3. move point after the
-      ;;    list.
+      ;; point structure, then: (1) set check-box of all its items
+      ;; within bounds to REF-CHECKBOX, (2) fix check-boxes of the
+      ;; whole list, (3) move point after the list.
       (goto-char lim-up)
       (while (and (< (point) lim-down)
 		  (org-list-search-forward (org-item-beginning-re)
@@ -2330,6 +2329,8 @@ in subtree, ignoring drawers."
 	     "Checkboxes were removed due to unchecked box at line %d"
 	     (org-current-line block-item))))
 	  (goto-char bottom)
+	  (move-marker lim-down nil)
+	  (move-marker bottom nil)
 	  (org-list-struct-apply-struct struct struct-copy)))))
   (org-update-checkbox-count-maybe))
 
