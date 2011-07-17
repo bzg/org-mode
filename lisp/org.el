@@ -212,6 +212,10 @@ identifier."
 (defconst org-version "7.8.09"
   "The version number of the file org.el.")
 
+(defconst org-git-version "N/A"
+  "The Git version of org-mode.  Inserted by installing org-mode
+  or when a release is made.")
+
 ;;;###autoload
 (defun org-version (&optional here)
   "Show the org-mode version in the echo area.
@@ -219,7 +223,7 @@ With prefix arg HERE, insert it at point."
   (interactive "P")
   (let* ((origin default-directory)
 	 (version org-version)
-	 (git-version)
+	 (git-version org-git-version)
 	 (dir (concat (file-name-directory (locate-library "org")) "../" )))
     (when (and (file-exists-p (expand-file-name ".git" dir))
 	       (executable-find "git"))
@@ -232,12 +236,11 @@ With prefix arg HERE, insert it at point."
 		(setq git-version (buffer-substring (point) (point-at-eol))))
 	      (subst-char-in-string ?- ?. git-version t)
 	      (when (string-match "\\S-"
-				  (shell-command-to-string
-				   "git diff-index --name-only HEAD --"))
+				  (shell-command-to-string "git status -uno --porcelain"))
 		(setq git-version (concat git-version ".dirty")))
 	      (setq version (concat version " (" git-version ")"))))
 	(cd origin)))
-    (setq version (format "Org-mode version %s" version))
+    (setq version (format "Org-mode version %s (%s)" version git-version))
     (if here (insert version))
     (message version)))
 
