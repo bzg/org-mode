@@ -10331,25 +10331,24 @@ the *old* location.")
 
 (defvar org-capture-last-stored-marker)
 (defun org-refile (&optional goto default-buffer rfloc)
-  "Move the entry at point to another heading.
+  "Move the entry or entries at point to another heading.
 The list of target headings is compiled using the information in
-`org-refile-targets', which see.  This list is created before each use
-and will therefore always be up-to-date.
+`org-refile-targets', which see.
 
-At the target location, the entry is filed as a subitem of the target heading.
-Depending on `org-reverse-note-order', the new subitem will either be the
-first or the last subitem.
+At the target location, the entry is filed as a subitem of the target 
+heading.  Depending on `org-reverse-note-order', the new subitem will 
+either be the first or the last subitem.
 
 If there is an active region, all entries in that region will be moved.
 However, the region must fulfill the requirement that the first heading
 is the first one sets the top-level of the moved text - at most siblings
 below it are allowed.
 
-With prefix arg GOTO, the command will only visit the target location,
-not actually move anything.
+With prefix arg GOTO, the command will only visit the target location
+and not actually move anything.
+
 With a double prefix arg \\[universal-argument] \\[universal-argument], \
-go to the location where the last refiling
-operation has put the subtree.
+go to the location where the last refiling operation has put the subtree.
 With a prefix argument of `2', refile to the running clock.
 
 RFLOC can be a refile location obtained in a different way.
@@ -10358,7 +10357,9 @@ See also `org-refile-use-outline-path' and `org-completion-use-ido'.
 
 If you are using target caching (see `org-refile-use-cache'),
 You have to clear the target cache in order to find new targets.
-This can be done with a 0 prefix: `C-0 C-c C-w'"
+This can be done with a 0 prefix (`C-0 C-c C-w') or a triple 
+prefix argument (`C-u C-u C-u C-c C-w')."
+
   (interactive "P")
   (if (member goto '(0 (64)))
       (org-refile-cache-clear)
