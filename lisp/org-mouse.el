@@ -635,7 +635,7 @@ This means, between the beginning of line and the point."
 (defun org-mouse-match-todo-keyword ()
   (save-excursion
     (org-back-to-heading)
-    (if (looking-at outline-regexp) (goto-char (match-end 0)))
+    (if (looking-at org-outline-regexp) (goto-char (match-end 0)))
     (or (looking-at (concat " +" org-todo-regexp " *"))
 	(looking-at " \\( *\\)"))))
 
@@ -927,7 +927,7 @@ This means, between the beginning of line and the point."
      (when (memq 'activate-stars org-mouse-features)
        (font-lock-add-keywords
 	nil
-	`((,outline-regexp
+	`((,org-outline-regexp
 	   0 `(face org-link mouse-face highlight keymap ,org-mouse-map)
 	   'prepend))
 	t))
@@ -999,7 +999,7 @@ This means, between the beginning of line and the point."
 	(end-of-line)
 	(if (eobp) (newline) (forward-char)))
 
-      (when (looking-at outline-regexp)
+      (when (looking-at org-outline-regexp)
 	(let ((level (- (match-end 0) (match-beginning 0))))
 	  (when (> end (match-end 0))
 	    (outline-end-of-subtree)
@@ -1019,11 +1019,11 @@ This means, between the beginning of line and the point."
 	(replace-text (concat (match-string 0) "* ")))
     (beginning-of-line 2)
     (save-excursion
-      (while (not (or (eobp) (looking-at outline-regexp)))
+      (while (not (or (eobp) (looking-at org-outline-regexp)))
 	(when (looking-at org-mouse-plain-list-regexp)
 	  (setq minlevel (min minlevel (- (match-end 1) (match-beginning 1)))))
 	(forward-line)))
-    (while (not (or (eobp) (looking-at outline-regexp)))
+    (while (not (or (eobp) (looking-at org-outline-regexp)))
       (when (and (looking-at org-mouse-plain-list-regexp)
 		 (eq minlevel (- (match-end 1) (match-beginning 1))))
 	(replace-match replace-text))

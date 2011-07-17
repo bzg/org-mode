@@ -479,7 +479,7 @@ pointing to it."
 		    heading (org-get-heading 'notags)
 		    prefix (save-excursion
 			     (org-back-to-heading t)
-			     (looking-at "\\*+ ")
+			     (looking-at org-outline-regexp)
 			     (match-string 0))
 		    task (substring
 			  (org-fontify-like-in-org-mode
@@ -1092,7 +1092,7 @@ the clocking selection, associated with the letter `d'."
 					    (match-string 2))))
 		     (if newstate (org-todo newstate))))
 		  ((and org-clock-in-switch-to-state
-			(not (looking-at (concat outline-regexp "[ \t]*"
+			(not (looking-at (concat org-outline-regexp "[ \t]*"
 						 org-clock-in-switch-to-state
 						 "\\>"))))
 		   (org-todo org-clock-in-switch-to-state)))
@@ -1380,7 +1380,7 @@ If there is no running clock, throw an error, unless FAIL-QUIETLY is set."
 					   (match-string 2))))
 		    (if newstate (org-todo newstate))))
 		 ((and org-clock-out-switch-to-state
-		       (not (looking-at (concat outline-regexp "[ \t]*"
+		       (not (looking-at (concat org-outline-regexp "[ \t]*"
 						org-clock-out-switch-to-state
 						"\\>"))))
 		  (org-todo org-clock-out-switch-to-state))))))
@@ -2106,7 +2106,7 @@ the currently selected interval size."
 	    (setq level (string-to-number (match-string 1 (symbol-name scope))))
 	    (catch 'exit
 	      (while (org-up-heading-safe)
-		(looking-at outline-regexp)
+		(looking-at org-outline-regexp)
 		(if (<= (org-reduced-level (funcall outline-level)) level)
 		    (throw 'exit nil))))
 	    (org-narrow-to-subtree)))

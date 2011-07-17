@@ -1083,7 +1083,6 @@ on this string to produce the exported version."
 	 (archived-trees (plist-get parameters :archived-trees))
 	 (inhibit-read-only t)
 	 (drawers org-drawers)
-	 (outline-regexp "\\*+ ")
 	 (source-buffer (current-buffer))
 	 target-alist rtn)
 

@@ -217,7 +217,7 @@ useful to make it ever so slightly different."
 			  '(line-prefix nil wrap-prefix nil) string)
   string)
 
-(defvar org-indent-outline-re (concat "^" org-outline-regexp)
+(defvar org-indent-outline-re org-outline-regexp-bol
   "Outline heading regexp.")
 
 (defun org-indent-add-properties (beg end)
@@ -273,7 +273,7 @@ Point is assumed to be at the beginning of a headline."
   (when org-indent-mode
     (let (beg end)
       (save-excursion
-	(when (ignore-errors (let ((outline-regexp (format "\\*\\{1,%s\\}[ \t]+"
+	(when (ignore-errors (let ((org-outline-regexp (format "\\*\\{1,%s\\}[ \t]+"
 				(if (featurep 'org-inlinetask)
 				    (1- org-inlinetask-min-level)
 				  ""))))
@@ -290,7 +290,7 @@ Point is assumed to be at the beginning of a headline."
   (when org-indent-mode
     (let ((beg (point)) (end limit))
       (save-excursion
-	(and (ignore-errors (let ((outline-regexp (format "\\*\\{1,%s\\}[ \t]+"
+	(and (ignore-errors (let ((org-outline-regexp (format "\\*\\{1,%s\\}[ \t]+"
 				(if (featurep 'org-inlinetask)
 				    (1- org-inlinetask-min-level)
 				  ""))))

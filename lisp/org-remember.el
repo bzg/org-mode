@@ -1072,7 +1072,7 @@ See also the variable `org-reverse-note-order'."
 		   (save-restriction
 		     (widen)
 		     (goto-char (point-min))
-		     (re-search-forward "^\\*+ " nil t)
+		     (re-search-forward org-outline-regexp-bol nil t)
 		     (beginning-of-line 1)
 		     (org-paste-subtree 1 txt)
 		     (and org-auto-align-tags (org-set-tags nil t))

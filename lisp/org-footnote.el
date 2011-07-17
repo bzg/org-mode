@@ -230,7 +230,9 @@ The return value will be nil if not at a footnote definition, and a list with
 label, start, end and definition of the footnote otherwise."
   (save-excursion
     (end-of-line)
-    (let ((lim (save-excursion (re-search-backward "^\\*+ \\|^[ \t]*$" nil t))))
+    (let ((lim (save-excursion (re-search-backward
+				(concat org-outline-regexp-bol
+					"\\|^[ \t]*$") nil t))))
       (when (re-search-backward org-footnote-definition-re lim t)
 	(end-of-line)
 	(list (match-string 2)
@@ -245,7 +247,8 @@ label, start, end and definition of the footnote otherwise."
 		  (or (and (re-search-forward
 			    (org-re
 			     (concat "^[ \t]*$" "\\|"
-				     "^\\*+ " "\\|"
+				     org-outline-regexp-bol
+				     "\\|"
 				     "^\\[\\([0-9]+\\|fn:[-_[:word:]]+\\)\\]"))
 			    bound 'move)
 			   (progn (skip-chars-forward " \t\n") (point-at-bol)))
@@ -569,7 +572,7 @@ Additional note on `org-footnote-insert-pos-for-preprocessor':
 		      (if org-odd-levels-only
 			  (and limit-level (1- (* limit-level 2)))
 			limit-level)))
-	 (outline-regexp
+	 (org-outline-regexp
 	  (concat "\\*" (if nstars (format "\\{1,%d\\} " nstars) "+ ")))
 	 ;; Determine the highest marker used so far.
 	 (ref-table (when export-props org-export-footnotes-seen))

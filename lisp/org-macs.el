@@ -347,7 +347,7 @@ point nowhere."
 
 (defmacro org-with-limited-levels (&rest body)
   "Execute BODY with limited number of outline levels."
-  `(let* ((outline-regexp (org-get-limited-outline-regexp)))
+  `(let* ((org-outline-regexp (org-get-limited-outline-regexp)))
      ,@body))
 
 (defvar org-odd-levels-only) ; defined in org.el
@@ -356,7 +356,7 @@ point nowhere."
   "Return outline-regexp with limited number of levels.
 The number of levels is controlled by `org-inlinetask-min-level'"
   (if (or (not (org-mode-p)) (not (featurep 'org-inlinetask)))
-      outline-regexp
+      org-outline-regexp
     (let* ((limit-level (1- org-inlinetask-min-level))
 	   (nstars (if org-odd-levels-only (1- (* limit-level 2)) limit-level)))
       (format "\\*\\{1,%d\\} " nstars))))

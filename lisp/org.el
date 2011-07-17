@@ -4696,6 +4696,7 @@ This variable is set by `org-before-change-function'.
 (defvar org-inhibit-blocking nil)       ; Dynamically-scoped param.
 (defvar org-table-buffer-is-an nil)
 (defconst org-outline-regexp "\\*+ ")
+(defconst org-outline-regexp-bol "^\\*+ ")
 
 ;;;###autoload
 (define-derived-mode org-mode outline-mode "Org"
@@ -5529,7 +5530,7 @@ by `outline-regexp'.  Otherwise it returns garbage.
 If this is called at a normal headline, the level is the number of stars.
 Use `org-reduced-level' to remove the effect of `org-odd-levels'."
   (save-excursion
-    (looking-at outline-regexp)
+    (looking-at org-outline-regexp)
     (1- (- (match-end 0) (match-beginning 0)))))
 
 (defvar org-font-lock-keywords nil)
@@ -5622,7 +5623,9 @@ needs to be inserted at a specific position in the font-lock sequence.")
 	   '("^[ \t]*[-+*][ \t]+\\(.*?[ \t]+::\\)\\([ \t]+\\|$\\)"
 	     1 'bold prepend)
 	   ;; ARCHIVEd headings
-	   (list (concat "^\\*+ \\(.*:" org-archive-tag ":.*\\)")
+	   (list (concat
+		  org-outline-regexp-bol
+		  "\\(.*:" org-archive-tag ":.*\\)")
 		 '(1 'org-archived prepend))
 	   ;; Specials
 	   '(org-do-latex-and-special-faces)
@@ -5905,12 +5908,12 @@ in special contexts.
 		      (if org-odd-levels-only
 			  (and limit-level (1- (* limit-level 2)))
 			limit-level)))
-	   (outline-regexp
+	   (org-outline-regexp
 	    (if (not (org-mode-p))
 		outline-regexp
 	      (concat "\\*" (if nstars (format "\\{1,%d\\} " nstars) "+ "))))
 	   (bob-special (and org-cycle-global-at-bob (not arg) (bobp)
-			     (not (looking-at outline-regexp))))
+			     (not (looking-at org-outline-regexp))))
 	   (org-cycle-hook
 	    (if bob-special
 		(delq 'org-optimize-window-after-visibility-change
@@ -5972,7 +5975,7 @@ in special contexts.
        ;; At an item/headline: delegate to `org-cycle-internal-local'.
        ((and (or (and org-cycle-include-plain-lists (org-at-item-p))
 		 (save-excursion (beginning-of-line 1)
-				 (looking-at outline-regexp)))
+				 (looking-at org-outline-regexp)))
 	     (or (bolp) (not (eq org-cycle-emulate-tab 'exc-hl-bol))))
 	(org-cycle-internal-local))
 
@@ -5991,7 +5994,7 @@ in special contexts.
 
        ((and (eq org-cycle-emulate-tab 'exc-hl-bol)
 	     (or (not (bolp))
-		 (not (looking-at outline-regexp))))
+		 (not (looking-at org-outline-regexp))))
 	(call-interactively (global-key-binding "\t")))
 
        ((if (and (memq org-cycle-emulate-tab '(white whitestart))
@@ -6213,7 +6216,7 @@ results."
   (interactive)
   (let ((level (save-excursion
 		 (goto-char (point-min))
-		 (if (re-search-forward (concat "^" outline-regexp) nil t)
+		 (if (re-search-forward org-outline-regexp-bol nil t)
 		     (progn
 		       (goto-char (match-beginning 0))
 		       (funcall outline-level))))))
@@ -6232,7 +6235,7 @@ With numerical argument N, show content up to level N."
 			     (outline-previous-visible-heading 1)
 			   (error (goto-char (point-min))))
 			 t)
-		  (looking-at outline-regexp))
+		  (looking-at org-outline-regexp))
 	(if (integerp arg)
 	    (show-children (1- arg))
 	  (show-branches))
@@ -6385,8 +6388,7 @@ open and agenda-wise Org files."
   (save-excursion
     (beginning-of-line 1)
     (when (looking-at "^[ \t]*:[a-zA-Z][a-zA-Z0-9]*:")
-      (let ((b (match-end 0))
-	    (outline-regexp org-outline-regexp))
+      (let ((b (match-end 0)))
 	(if (re-search-forward
 	     "^[ \t]*:END:"
 	     (save-excursion (outline-next-heading) (point)) t)
@@ -6402,7 +6404,7 @@ open and agenda-wise Org files."
   "Move cursor to the first headline and recenter the headline.
 Optional argument N means put the headline into the Nth line of the window."
   (goto-char (point-min))
-  (when (re-search-forward (concat "^\\(" outline-regexp "\\)") nil t)
+  (when (re-search-forward (concat "^\\(" org-outline-regexp "\\)") nil t)
     (beginning-of-line)
     (recenter (prefix-numeric-value N))))
 
@@ -7027,7 +7029,7 @@ state (TODO by default).  Also with prefix arg, force first state."
 	    'org-todo-get-default-hook new-mark-x nil)
 	   new-mark-x)))
       (beginning-of-line 1)
-      (and (looking-at "\\*+ ") (goto-char (match-end 0))
+      (and (looking-at org-outline-regexp) (goto-char (match-end 0))
 	   (if org-treat-insert-todo-heading-as-state-change
 	       (org-todo new-mark)
 	     (insert new-mark " "))))
@@ -7255,7 +7257,7 @@ After top level, it switches back to sibling level."
     (save-excursion
       (setq end (copy-marker end))
       (goto-char beg)
-      (if (and (re-search-forward (concat "^" outline-regexp) nil t)
+      (if (and (re-search-forward org-outline-regexp-bol nil t)
 	       (< (point) end))
 	  (funcall fun))
       (while (and (progn
@@ -7291,8 +7293,7 @@ This will leave level 1 alone, convert level 2 to level 3, level 3 to
 level 5 etc."
   (interactive)
   (when (yes-or-no-p "Are you sure you want to globally change levels to odd? ")
-    (let ((outline-regexp org-outline-regexp)
-	  (outline-level 'org-outline-level)
+    (let ((outline-level 'org-outline-level)
 	  (org-odd-levels-only nil) n)
       (save-excursion
 	(goto-char (point-min))
@@ -7369,7 +7370,7 @@ case."
 	(setq beg (point))))
     ;; Find insertion point, with error handling
     (while (> cnt 0)
-      (or (and (funcall movfunc) (looking-at outline-regexp))
+      (or (and (funcall movfunc) (looking-at org-outline-regexp))
 	  (progn (goto-char beg0)
 		 (error "Cannot move past superior level or buffer limit")))
       (setq cnt (1- cnt)))
@@ -7499,8 +7500,8 @@ the inserted text when done."
       "The kill is not a (set of) tree(s) - please use \\[yank] to yank anyway")))
   (let* ((visp (not (outline-invisible-p)))
 	 (txt tree)
-	 (^re (concat "^\\(" outline-regexp "\\)"))
-	 (re  (concat "\\(" outline-regexp "\\)"))
+	 (^re (concat "^\\(" org-outline-regexp "\\)"))
+	 (re  (concat "\\(" org-outline-regexp "\\)"))
 	 (^re_ (concat "\\(\\*+\\)[  \t]*"))
 
 	 (old-level (if (string-match ^re txt)
@@ -7527,7 +7528,7 @@ the inserted text when done."
 	 (next-level (save-excursion
 		       (condition-case nil
 			   (progn
-			     (or (looking-at outline-regexp)
+			     (or (looking-at org-outline-regexp)
 				 (outline-next-visible-heading 1))
 			     (if (looking-at re)
 				 (- (match-end 0) (match-beginning 0) 1)
@@ -7593,7 +7594,7 @@ If optional TXT is given, check this string instead of the current kill."
 						 org-outline-regexp "\\)")
 					 kill)
 			   (- (match-end 2) (match-beginning 2) 1)))
-	 (re (concat "^" org-outline-regexp))
+	 (re org-outline-regexp-bol)
 	 (start (1+ (or (match-beginning 2) -1))))
     (if (not start-level)
 	(progn
@@ -8230,8 +8231,7 @@ Possible values in the list of contexts are `table', `headline', and `item'."
     (prog1 (or (and (memq 'table contexts)
 		    (looking-at "[ \t]*|"))
 	       (and (memq 'headline contexts)
-;;?????????		    (looking-at "\\*+"))
-		    (looking-at outline-regexp))
+		    (looking-at org-outline-regexp))
 	       (and (memq 'item contexts)
 		    (looking-at "[ \t]*\\([-+*] \\|[0-9]+[.)] \\)"))
 	       (and (memq 'item-body contexts)
@@ -10430,7 +10430,7 @@ prefix argument (`C-u C-u C-u C-c C-w')."
 		  (if pos
 		      (progn
 			(goto-char pos)
-			(looking-at outline-regexp)
+			(looking-at org-outline-regexp)
 			(setq level (org-get-valid-level (funcall outline-level) 1))
 			(goto-char
 			 (if reversed
@@ -10575,7 +10575,7 @@ this function appends the default value from
 	      (goto-char pos)
 	    (goto-char (point-max))
 	    (if (not (bolp)) (newline)))
-	  (when (looking-at outline-regexp)
+	  (when (looking-at org-outline-regexp)
 	    (setq level (funcall outline-level))
 	    (org-end-of-subtree t t))
 	  (org-back-over-empty-lines)
@@ -10873,10 +10873,10 @@ expands them."
   (save-excursion
     (org-back-to-heading)
     (let (case-fold-search)
-      (if (looking-at (concat outline-regexp
+      (if (looking-at (concat org-outline-regexp
 			      "\\( *\\<" org-comment-string "\\>[ \t]*\\)"))
 	  (replace-match "" t t nil 1)
-	(if (looking-at outline-regexp)
+	(if (looking-at org-outline-regexp)
 	    (progn
 	      (goto-char (match-end 0))
 	      (insert org-comment-string " ")))))))
@@ -10941,7 +10941,7 @@ For calling through lisp, arg is also interpreted in the following way:
     (save-excursion
       (catch 'exit
 	(org-back-to-heading t)
-	(if (looking-at outline-regexp) (goto-char (1- (match-end 0))))
+	(if (looking-at org-outline-regexp) (goto-char (1- (match-end 0))))
 	(or (looking-at (concat " +" org-todo-regexp "\\( +\\|$\\)"))
 	    (looking-at " *"))
 	(let* ((match-data (match-data))
@@ -11656,7 +11656,7 @@ of `org-todo-keywords-1'."
 				   org-todo-keywords-1)))
 	       (t (error "Invalid prefix argument: %s" arg)))))
     (message "%d TODO entries found"
-	     (org-occur (concat "^" outline-regexp " *" kwd-re )))))
+	     (org-occur (concat "^" org-outline-regexp " *" kwd-re )))))
 
 (defun org-deadline (&optional remove time)
   "Insert the \"DEADLINE:\" string with a timestamp to make a deadline.
@@ -11812,7 +11812,7 @@ be removed."
 	(save-restriction
 	  (let (col list elt ts buffer-invisibility-spec)
 	    (org-back-to-heading t)
-	    (looking-at (concat outline-regexp "\\( *\\)[^\r\n]*"))
+	    (looking-at (concat org-outline-regexp "\\( *\\)[^\r\n]*"))
 	    (goto-char (match-end 1))
 	    (setq col (current-column))
 	    (goto-char (match-end 0))
@@ -11823,7 +11823,7 @@ be removed."
 				     org-keyword-time-not-clock-regexp))))
 	      ;; Nothing to add, nothing to remove...... :-)
 	      (throw 'exit nil))
-	    (if (and (not (looking-at outline-regexp))
+	    (if (and (not (looking-at org-outline-regexp))
 		     (looking-at (concat "[^\r\n]*?" org-keyword-time-regexp
 					 "[^\r\n]*"))
 		     (not (equal (match-string 1) org-clock-string)))
@@ -11909,7 +11909,7 @@ EXTRA is additional text that will be inserted into the notes buffer."
 	  (org-back-to-heading t)
 	  (narrow-to-region (point) (save-excursion
 				      (outline-next-heading) (point)))
-	  (looking-at (concat outline-regexp "\\( *\\)[^\r\n]*"
+	  (looking-at (concat org-outline-regexp "\\( *\\)[^\r\n]*"
 			      "\\(\n[^\r\n]*?" org-keyword-time-not-clock-regexp
 			      "[^\r\n]*\\)?"))
 	  (goto-char (match-end 0))
@@ -12427,7 +12427,7 @@ MATCHER is a Lisp form to be evaluated, testing if a given set of tags
 qualifies a headline for inclusion.  When TODO-ONLY is non-nil,
 only lines with a TODO keyword are included in the output."
   (require 'org-agenda)
-  (let* ((re (concat "^" outline-regexp " *\\(\\<\\("
+  (let* ((re (concat "^" org-outline-regexp " *\\(\\<\\("
 		     (mapconcat 'regexp-quote org-todo-keywords-1 "\\|")
 		     (org-re
 		      "\\>\\)\\)? *\\(.*?\\)\\(:[[:alnum:]_@#%:]+:\\)?[ \t]*$")))
@@ -12988,7 +12988,7 @@ If DATA is nil or the empty string, any tags will be removed."
   "Set the tags for the current headline.
 With prefix ARG, realign all tags in headings in the current buffer."
   (interactive "P")
-  (let* ((re (concat "^" outline-regexp))
+  (let* ((re org-outline-regexp-bol)
 	 (current (org-get-tags-string))
 	 (col (current-column))
 	 (org-setting-tags t)
@@ -14033,7 +14033,7 @@ formats in the current buffer."
   "Insert a property drawer into the current entry."
   (interactive)
   (org-back-to-heading t)
-  (looking-at outline-regexp)
+  (looking-at org-outline-regexp)
   (let ((indent (if org-adapt-indentation
 		    (- (match-end 0)(match-beginning 0))
 		  0))
@@ -16096,7 +16096,7 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
 		  (if (org-on-heading-p t)
 		      (add-text-properties (point-at-bol) (org-end-of-subtree t) pa))))
 	      (goto-char (point-min))
-	      (setq re (concat "^\\*+ +" org-comment-string "\\>"))
+	      (setq re (concat org-outline-regexp-bol "+" org-comment-string "\\>"))
 	      (while (re-search-forward re nil t)
 		(add-text-properties
 		 (match-beginning 0) (org-end-of-subtree t) pc)))
@@ -16266,7 +16266,7 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
 	(cond
 	 ((or (equal subtree '(16))
 	      (not (save-excursion
-		     (re-search-backward (concat "^" outline-regexp) nil t))))
+		     (re-search-backward org-outline-regexp-bol nil t))))
 	  (setq beg (point-min) end (point-max)
 		msg "Creating images for buffer...%s"))
 	 ((equal subtree '(4))
@@ -16920,7 +16920,7 @@ If not, return to the original position and throw an error."
   "Hook for activating single-letter speed commands.
 `org-speed-commands-default' specifies a minimal command set. Use
 `org-speed-commands-user' for further customization."
-  (when (or (and (bolp) (looking-at outline-regexp))
+  (when (or (and (bolp) (looking-at org-outline-regexp))
 	    (and (functionp org-use-speed-commands)
 		 (funcall org-use-speed-commands)))
     (cdr (assoc keys (append org-speed-commands-user
@@ -17347,7 +17347,7 @@ WHAT can be either `headlines' or `items'.  If the current line is
 an outline or item heading and it has a folded subtree below it,
 this function returns t, nil otherwise."
   (let ((re (cond
-	     ((eq what 'headlines) (concat "^" org-outline-regexp))
+	     ((eq what 'headlines) org-outline-regexp-bol)
 	     ((eq what 'items) (org-item-beginning-re))
 	     (t (error "This should not happen"))))
 	beg end)
@@ -17882,7 +17882,7 @@ argument ARG, change each line in region into an item."
 		      (cond
 		       ;; Skip blank lines and inline tasks.
 		       ((looking-at "^[ \t]*$"))
-		       ((looking-at "^\\*+ "))
+		       ((looking-at org-outline-regexp-bol))
 		       ;; We can't find less than 0 indentation.
 		       ((zerop i) (throw 'exit (setq min-i 0)))
 		       ((< i min-i) (setq min-i i))))
@@ -17893,7 +17893,7 @@ argument ARG, change each line in region into an item."
 	      (let ((delta (- ind min-i)))
 		(while (< (point) end)
 		  (unless (or (looking-at "^[ \t]*$")
-			      (looking-at "^\\*+ "))
+			      (looking-at org-outline-regexp-bol))
 		    (org-indent-line-to (+ (org-get-indentation) delta)))
 		  (forward-line)))))))
 	(skip-blanks
@@ -18030,7 +18030,7 @@ stars to add."
 	((org-on-heading-p)
 	 (while (< (point) end)
 	   (when (org-on-heading-p t)
-	     (looking-at outline-regexp) (replace-match ""))
+	     (looking-at org-outline-regexp) (replace-match ""))
 	   (forward-line)))
 	;; Case 2. Started at an item: change items into headlines.
 	;;         One star will be added by `org-list-to-subtree'.
@@ -19271,7 +19271,7 @@ If point is in an inline task, mark that task instead."
      ;; Comments
      ((looking-at "# ") (setq column 0))
      ;; Headings
-     ((looking-at "\\*+ ") (setq column 0))
+     ((looking-at org-outline-regexp) (setq column 0))
      ;; Included files
      ((looking-at "#\\+include:") (setq column 0))
      ;; Footnote definition
@@ -19380,7 +19380,7 @@ the functionality can be provided as a fall-back.")
    (concat
     "\f" "\\|"
     "[ 	]*$" "\\|"
-    "\\*+ " "\\|"
+    org-outline-regexp "\\|"
     "[ \t]*#" "\\|"
     (org-item-re) "\\|"
     "[ \t]*[:|]" "\\|"
@@ -19390,7 +19390,8 @@ the functionality can be provided as a fall-back.")
   ;; But only if the user has not turned off tables or fixed-width regions
   (org-set-local
    'auto-fill-inhibit-regexp
-   (concat "\\*+ \\|#\\+"
+   (concat org-outline-regexp
+	   "\\|#\\+"
 	   "\\|[ \t]*" org-keyword-time-regexp
 	   (if (or org-enable-table-editor org-enable-fixed-width-editor)
 	       (concat
@@ -19433,7 +19434,7 @@ the functionality can be provided as a fall-back.")
 	(itemp (org-in-item-p)))
     (cond ((and (equal (char-after (point-at-bol)) ?*)
 		(save-excursion (goto-char (point-at-bol))
-				(looking-at outline-regexp)))
+				(looking-at org-outline-regexp)))
 	   t)				; skip headlines
 	  (table.el-p t)		; skip table.el tables
 	  (table-p (org-table-align) t)	; align Org tables
@@ -19577,10 +19578,10 @@ this line is also exported in fixed-width font."
 	    (forward-line 1)))
       (save-excursion
 	(org-back-to-heading)
-	(if (looking-at (concat outline-regexp
+	(if (looking-at (concat org-outline-regexp
 				"\\( *\\<" org-quote-string "\\>[ \t]*\\)"))
 	    (replace-match "" t t nil 1)
-	  (if (looking-at outline-regexp)
+	  (if (looking-at org-outline-regexp)
 	      (progn
 		(goto-char (match-end 0))
 		(insert org-quote-string " "))))))))
@@ -19807,9 +19808,9 @@ interactive command with similar behavior."
 	  (when (and (bolp) subtreep
 		     (not (setq swallowp
 				(org-yank-folding-would-swallow-text beg end))))
-	    (or (looking-at outline-regexp)
-		(re-search-forward (concat "^" outline-regexp) end t))
-	    (while (and (< (point) end) (looking-at outline-regexp))
+	    (or (looking-at org-outline-regexp)
+		(re-search-forward org-outline-regexp-bol end t))
+	    (while (and (< (point) end) (looking-at org-outline-regexp))
 	      (hide-subtree)
 	      (org-cycle-show-empty-lines 'folded)
 	      (condition-case nil
@@ -19835,8 +19836,8 @@ interactive command with similar behavior."
   (let (level)
     (save-excursion
       (goto-char beg)
-      (when (or (looking-at outline-regexp)
-		(re-search-forward (concat "^" outline-regexp) end t))
+      (when (or (looking-at org-outline-regexp)
+		(re-search-forward org-outline-regexp-bol end t))
 	(setq level (org-outline-level)))
       (goto-char end)
       (skip-chars-forward " \t\r\n\v\f")
@@ -19882,7 +19883,7 @@ This version does not only check the character property, but also
   "Before first heading?"
   (save-excursion
     (end-of-line)
-    (null (re-search-backward "^\\*+ " nil t))))
+    (null (re-search-backward org-outline-regexp-bol nil t))))
 
 (defun org-on-heading-p (&optional ignored)
   (outline-on-heading-p t))
@@ -19934,7 +19935,7 @@ make a significant difference in outlines with very many siblings."
 (defun org-first-sibling-p ()
   "Is this heading the first child of its parents?"
   (interactive)
-  (let ((re (concat "^" outline-regexp))
+  (let ((re org-outline-regexp-bol)
 	level l)
     (unless (org-at-heading-p t)
       (error "Not at a heading"))
@@ -19952,7 +19953,7 @@ when a sibling was found.  When none is found, return nil and don't
 move point."
   (let ((fun (if previous 're-search-backward 're-search-forward))
 	(pos (point))
-	(re (concat "^" outline-regexp))
+	(re org-outline-regexp-bol)
 	level l)
     (when (condition-case nil (org-back-to-heading t) (error nil))
       (setq level (funcall outline-level))
@@ -19977,7 +19978,7 @@ move point."
   "Goto the first child, even if it is invisible.
 Return t when a child was found. Otherwise don't move point and
 return nil."
-  (let (level (pos (point)) (re (concat "^" outline-regexp)))
+  (let (level (pos (point)) (re org-outline-regexp-bol))
     (when (condition-case nil (org-back-to-heading t) (error nil))
       (setq level (outline-level))
       (forward-char 1)
@@ -20153,7 +20154,7 @@ Show the heading too, if it is currently invisible."
 	   (max (point-min) (1- (point)))
 	   (save-excursion
 	     (if (re-search-forward
-		  (concat "[\r\n]\\(" outline-regexp "\\)") nil t)
+		  (concat "[\r\n]\\(" org-outline-regexp "\\)") nil t)
 		 (match-beginning 1)
 	       (point-max)))
 	   nil)

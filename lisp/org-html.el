@@ -1439,7 +1439,7 @@ lang=\"%s\" xml:lang=\"%s\">
 	(catch 'nextline
 
 	  ;; end of quote section?
-	  (when (and inquote (string-match "^\\*+ " line))
+	  (when (and inquote (string-match org-outline-regexp-bol line))
 	    (insert "</pre>\n")
 	    (org-open-par)
 	    (setq inquote nil))

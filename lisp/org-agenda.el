@@ -2263,7 +2263,7 @@ Pressing `<' twice means to restrict to the current subtree or region
 	       ((eq type 'todo-tree)
 		(org-check-for-org-mode)
 		(org-let lprops
-		  '(org-occur (concat "^" outline-regexp "[ \t]*"
+		  '(org-occur (concat "^" org-outline-regexp "[ \t]*"
 				      (regexp-quote match) "\\>"))))
 	       ((eq type 'occur-tree)
 		(org-check-for-org-mode)
@@ -3873,7 +3873,7 @@ in `org-agenda-text-search-extra-files'."
 	    regexps+))
     (setq regexps+ (sort regexps+ (lambda (a b) (> (length a) (length b)))))
     (if (not regexps+)
-	(setq regexp (concat "^" org-outline-regexp))
+	(setq regexp org-outline-regexp-bol)
       (setq regexp (pop regexps+))
       (if hdl-only (setq regexp (concat "^" org-outline-regexp ".*?"
 					regexp))))
@@ -4311,9 +4311,11 @@ of what a project is and how to check if it stuck, customize the variable
 			  "\\)\\>"))
 	 (tags (nth 2 org-stuck-projects))
 	 (tags-re (if (member "*" tags)
-		      (org-re "^\\*+ .*:[[:alnum:]_@#%]+:[ \t]*$")
+		      (org-re (concat org-outline-regexp-bol
+				      ".*:[[:alnum:]_@#%]+:[ \t]*$"))
 		    (if tags
-			(concat "^\\*+ .*:\\("
+			(concat org-outline-regexp-bol
+				".*:\\("
 				(mapconcat 'identity tags "\\|")
 				(org-re "\\):[[:alnum:]_@#%:]*[ \t]*$")))))
 	 (gen-re (nth 3 org-stuck-projects))
@@ -4766,7 +4768,7 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 	(setq marker (org-agenda-new-marker b0)
 	      category (org-get-category b0))
 	(save-excursion
-	  (if (not (re-search-backward "^\\*+ " nil t))
+	  (if (not (re-search-backward org-outline-regexp-bol nil t))
 	      (setq txt org-agenda-no-heading-message)
 	    (goto-char (match-beginning 0))
 	    (setq hdmarker (org-agenda-new-marker)
@@ -4967,7 +4969,7 @@ please use `org-class' instead."
 		 (clockp
 		  (and (looking-at ".*\n[ \t]*-[ \t]+\\([^-\n \t].*?\\)[ \t]*$")
 		       (match-string 1)))))
-	  (if (not (re-search-backward "^\\*+ " nil t))
+	  (if (not (re-search-backward org-outline-regexp-bol nil t))
 	      (setq txt org-agenda-no-heading-message)
 	    (goto-char (match-beginning 0))
 	    (setq hdmarker (org-agenda-new-marker)
@@ -5366,7 +5368,7 @@ FRACTION is what fraction of the head-warning time has passed."
 		    (throw :skip t))
 		(setq marker (org-agenda-new-marker (point)))
 		(setq category (org-get-category))
-		(if (not (re-search-backward "^\\*+ " nil t))
+		(if (not (re-search-backward org-outline-regexp-bol nil t))
 		    (setq txt org-agenda-no-heading-message)
 		  (goto-char (match-beginning 0))
 		  (setq hdmarker (org-agenda-new-marker (point)))
