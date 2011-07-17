@@ -1380,6 +1380,8 @@ MAY-INLINE-P allows inlining it as an image."
     (PLAIN-TEXT-MAP '(("&" . "&amp;") ("<" . "&lt;") (">" . "&gt;")))
     (TABLE-FIRST-COLUMN-AS-LABELS nil)
     (FOOTNOTE-SEPARATOR (org-lparse-format 'FONTIFY "," 'superscript))
+    (CODING-SYSTEM-FOR-WRITE 'utf-8)
+    (CODING-SYSTEM-FOR-SAVE 'utf-8)
     (t (error "Unknown property: %s"  what))))
 
 (defun org-odt-parse-label (label)
