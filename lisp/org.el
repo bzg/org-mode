@@ -10497,64 +10497,67 @@ this function appends the default value from
 `org-refile-history' automatically, if that is not empty."
   (let ((org-refile-targets org-refile-targets)
 	(org-refile-use-outline-path org-refile-use-outline-path))
-    (setq org-refile-target-table (org-refile-get-targets default-buffer)))
-  (unless org-refile-target-table
-    (error "No refile targets"))
-  (let* ((prompt (concat prompt
-			 (and (car org-refile-history)
-			      (concat " (default " (car org-refile-history) ")"))
-			 ": "))
-	 (cbuf (current-buffer))
-	 (partial-completion-mode nil)
-	 (cfn (buffer-file-name (buffer-base-buffer cbuf)))
-	 (cfunc (if (and org-refile-use-outline-path
-			 org-outline-path-complete-in-steps)
-		    'org-olpath-completing-read
-		  'org-icompleting-read))
-	 (extra (if org-refile-use-outline-path "/" ""))
-	 (filename (and cfn (expand-file-name cfn)))
-	 (tbl (mapcar
-	       (lambda (x)
-		 (if (and (not (member org-refile-use-outline-path
-				       '(file full-file-path)))
-			  (not (equal filename (nth 1 x))))
-		     (cons (concat (car x) extra " ("
-				   (file-name-nondirectory (nth 1 x)) ")")
-			   (cdr x))
-		   (cons (concat (car x) extra) (cdr x))))
-	       org-refile-target-table))
-	 (completion-ignore-case t)
-	 pa answ parent-target child parent old-hist)
-    (setq old-hist org-refile-history)
-    (setq answ (funcall cfunc prompt tbl nil (not new-nodes)
-			nil 'org-refile-history (car org-refile-history)))
-    (setq pa (or (assoc answ tbl) (assoc (concat answ "/") tbl)))
-    (org-refile-check-position pa)
-    (if pa
-	(progn
-	  (when (or (not org-refile-history)
-		    (not (eq old-hist org-refile-history))
-		    (not (equal (car pa) (car org-refile-history))))
-	    (setq org-refile-history
-		  (cons (car pa) (if (assoc (car org-refile-history) tbl)
-				     org-refile-history
-				   (cdr org-refile-history))))
-	    (if (equal (car org-refile-history) (nth 1 org-refile-history))
-		(pop org-refile-history)))
-	  pa)
-      (if (string-match "\\`\\(.*\\)/\\([^/]+\\)\\'" answ)
+    (setq org-refile-target-table (org-refile-get-targets default-buffer))
+    (setq org-refile-target-table
+	  (delq (assoc (org-get-heading) org-refile-target-table)
+		org-refile-target-table))
+    (unless org-refile-target-table
+      (error "No refile targets"))
+    (let* ((prompt (concat prompt
+			   (and (car org-refile-history)
+				(concat " (default " (car org-refile-history) ")"))
+			   ": "))
+	   (cbuf (current-buffer))
+	   (partial-completion-mode nil)
+	   (cfn (buffer-file-name (buffer-base-buffer cbuf)))
+	   (cfunc (if (and org-refile-use-outline-path
+			   org-outline-path-complete-in-steps)
+		      'org-olpath-completing-read
+		    'org-icompleting-read))
+	   (extra (if org-refile-use-outline-path "/" ""))
+	   (filename (and cfn (expand-file-name cfn)))
+	   (tbl (mapcar
+		 (lambda (x)
+		   (if (and (not (member org-refile-use-outline-path
+					 '(file full-file-path)))
+			    (not (equal filename (nth 1 x))))
+		       (cons (concat (car x) extra " ("
+				     (file-name-nondirectory (nth 1 x)) ")")
+			     (cdr x))
+		     (cons (concat (car x) extra) (cdr x))))
+		 org-refile-target-table))
+	   (completion-ignore-case t)
+	   pa answ parent-target child parent old-hist)
+      (setq old-hist org-refile-history)
+      (setq answ (funcall cfunc prompt tbl nil (not new-nodes)
+			  nil 'org-refile-history (car org-refile-history)))
+      (setq pa (or (assoc answ tbl) (assoc (concat answ "/") tbl)))
+      (org-refile-check-position pa)
+      (if pa
 	  (progn
-	    (setq parent (match-string 1 answ)
-		  child (match-string 2 answ))
-	    (setq parent-target (or (assoc parent tbl)
-				    (assoc (concat parent "/") tbl)))
-	    (when (and parent-target
-		       (or (eq new-nodes t)
-			   (and (eq new-nodes 'confirm)
-				(y-or-n-p (format "Create new node \"%s\"? "
-						  child)))))
-	      (org-refile-new-child parent-target child)))
-	(error "Invalid target location")))))
+	    (when (or (not org-refile-history)
+		      (not (eq old-hist org-refile-history))
+		      (not (equal (car pa) (car org-refile-history))))
+	      (setq org-refile-history
+		    (cons (car pa) (if (assoc (car org-refile-history) tbl)
+				       org-refile-history
+				     (cdr org-refile-history))))
+	      (if (equal (car org-refile-history) (nth 1 org-refile-history))
+		  (pop org-refile-history)))
+	    pa)
+	(if (string-match "\\`\\(.*\\)/\\([^/]+\\)\\'" answ)
+	    (progn
+	      (setq parent (match-string 1 answ)
+		    child (match-string 2 answ))
+	      (setq parent-target (or (assoc parent tbl)
+				      (assoc (concat parent "/") tbl)))
+	      (when (and parent-target
+			 (or (eq new-nodes t)
+			     (and (eq new-nodes 'confirm)
+				  (y-or-n-p (format "Create new node \"%s\"? "
+						    child)))))
+		(org-refile-new-child parent-target child)))
+	  (error "Invalid target location"))))))
 
 (defun org-refile-check-position (refile-pointer)
   "Check if the refile pointer matches the readline to which it points."
