@@ -462,7 +462,8 @@ the children that do not contain any open TODO items."
 (defun org-archive-set-tag ()
   "Set the ARCHIVE tag."
   (interactive)
-  (org-toggle-tag org-archive-tag 'on))
+  (org-loop-over-siblings-in-active-region
+   (org-toggle-tag org-archive-tag 'on)))
 
 ;;;###autoload
 (defun org-archive-subtree-default ()

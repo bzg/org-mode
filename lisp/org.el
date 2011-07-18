@@ -1983,7 +1983,8 @@ The list of commands is:
 - `org-deadline'
 - `org-archive-subtree'
 - `org-archive-to-archive-sibling'
-- `org-archive-set-tag'"
+- `org-archive-set-tag'
+- `org-toggle-archive-tag'"
   :group 'org-todo
   :group 'org-archive)
 
