@@ -29,14 +29,16 @@ install:	org
 	$(CP) org $(infodir)
 	$(INSTALL_INFO) --infodir=$(infodir) org
 
-clean cleanall:
+clean:
 	$(RM) org *.pdf *.html *_letter.tex \
 	      *.aux *.cp *.cps *.dvi *.fn *.fns *.ky *.kys *.pg *.pgs \
 	      *.toc *.tp *.tps *.vr *.vrs *.log *.html *.ps
+cleanall:	clean
+	$(RMR) guide manual
 
 clean-install:
 	$(RM) $(infodir)/org*
-	@echo You should run $(INSTALL_INFO) again to correct dir entries.
+	$(INSTALL_INFO) --infodir=$(infodir) --remove org
 
 .SUFFIXES:	# we don't need default suffix rules
 .SUFFIXES:	.texi .tex .txt

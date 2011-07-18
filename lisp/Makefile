@@ -51,5 +51,4 @@ $(LISPC):	dependencies.mk
 .SUFFIXES:	.el .elc
 
 .el.elc:
-	$(info in subdir lisp)
 	$(ELC) $<
