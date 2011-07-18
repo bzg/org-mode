@@ -11890,6 +11890,7 @@ Code blocks in the following languages are supported.
 @item CSS @tab css @tab ditaa @tab ditaa
 @item Graphviz @tab dot @tab Emacs Lisp @tab emacs-lisp
 @item gnuplot @tab gnuplot @tab Haskell @tab haskell
+@item Java @tab java @tab @tab
 @item Javascript @tab js @tab LaTeX @tab latex 
 @item Ledger @tab ledger @tab Lisp @tab lisp 
 @item Lilypond @tab lilypond @tab MATLAB @tab matlab

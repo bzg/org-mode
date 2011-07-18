@@ -157,7 +157,8 @@ LISPF      = 	org.el			\
 		ob-org.el		\
 		ob-js.el		\
 		ob-scheme.el		\
-		ob-lilypond.el
+		ob-lilypond.el		\
+		ob-java.el
 
 LISPFILES0  = $(LISPF:%=lisp/%)
 LISPFILES   = $(LISPFILES0) lisp/org-install.el

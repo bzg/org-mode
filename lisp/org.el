@@ -162,6 +162,7 @@ requirements) is loaded."
 		 (const :tag "Emacs Lisp" emacs-lisp)
 		 (const :tag "Gnuplot" gnuplot)
 		 (const :tag "Haskell" haskell)
+		 (const :tag "Java" java)
 		 (const :tag "Javascript" js)
 		 (const :tag "Latex" latex)
 		 (const :tag "Ledger" ledger)
