@@ -55,6 +55,8 @@
 (declare-function org-fill-paragraph "org" (&optional justify))
 (declare-function org-export-preprocess-string "org-exp"
 		  (string &rest parameters))
+
+(defvar org-outline-regexp-bol) ; defined in org.el
 (defvar org-odd-levels-only) ;; defined in org.el
 (defvar org-bracket-link-regexp) ; defined in org.el
 (defvar message-signature-separator) ;; defined in message.el

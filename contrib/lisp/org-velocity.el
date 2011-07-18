@@ -279,7 +279,7 @@ If there is no last heading, return nil."
          (org-velocity-edit-entry ',heading)
        (progn
          (message "%s" ,(org-velocity-heading-name heading))
-         (switch-to-buffer (marker-buffer
+         (org-pop-to-buffer-same-window (marker-buffer
                             ,(org-velocity-heading-marker heading)))
          (goto-char (marker-position
                      ,(org-velocity-heading-marker heading)))))))
@@ -681,7 +681,7 @@ Use method specified by `org-velocity-search-method'."
 		   (read-string prompt))))
            (remove-hook 'post-command-hook
                         'org-velocity-display-for-incremental))))
-    (if (bufferp res) (switch-to-buffer res) res)))
+    (if (bufferp res) (org-pop-to-buffer-same-window res) res)))
 
 (defun org-velocity-read (arg &optional search)
   "Read a search string SEARCH for Org-Velocity interface.

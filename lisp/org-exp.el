@@ -48,6 +48,9 @@
 (declare-function org-inlinetask-remove-END-maybe "org-inlinetask" ())
 (declare-function org-table-cookie-line-p "org-table" (line))
 (declare-function org-table-colgroup-line-p "org-table" (line))
+(declare-function org-pop-to-buffer-same-window "org-compat" 
+		  (&optional buffer-or-name norecord label))
+
 (autoload 'org-export-generic "org-export-generic" "Export using the generic exporter" t)
 
 (autoload 'org-export-as-odt "org-odt"
@@ -1633,9 +1636,9 @@ from the buffer."
 
 (defun org-export-protect-quoted-subtrees ()
   "Mark quoted subtrees with the protection property."
-  (let ((re-quote (concat "^\\*+[ \t]+" org-quote-string "\\>")))
+  (let ((org-re-quote (concat "^\\*+[ \t]+" org-quote-string "\\>")))
     (goto-char (point-min))
-    (while (re-search-forward re-quote nil t)
+    (while (re-search-forward org-re-quote nil t)
       (goto-char (match-beginning 0))
       (end-of-line 1)
       (add-text-properties (point) (org-end-of-subtree t)
@@ -1934,9 +1937,9 @@ table line.  If it is a link, add it to the line containing the link."
       (goto-char (match-beginning 0))
       (delete-region (point) (org-end-of-subtree t)))))
 
-(defun org-export-handle-comments (commentsp)
+(defun org-export-handle-comments (org-commentsp)
   "Remove comments, or convert to backend-specific format.
-COMMENTSP can be a format string for publishing comments.
+ORG-COMMENTSP can be a format string for publishing comments.
 When it is nil, all comments will be removed."
   (let ((re "^\\(#\\|[ \t]*#\\+ \\)\\(.*\n?\\)")
 	pos)
@@ -1946,12 +1949,12 @@ When it is nil, all comments will be removed."
       (setq pos (match-beginning 0))
       (if (get-text-property pos 'org-protected)
 	  (goto-char (1+ pos))
-	(if (and commentsp
+	(if (and org-commentsp
 		 (not (equal (char-before (match-end 1)) ?+)))
 	    (progn (add-text-properties
 		    (match-beginning 0) (match-end 0) '(org-protected t))
 		   (replace-match (org-add-props
-				      (format commentsp (match-string 2))
+				      (format org-commentsp (match-string 2))
 				      nil 'org-protected t)
 				  t t))
 	  (goto-char (1+ pos))
@@ -2967,7 +2970,7 @@ directory."
 	 (region (buffer-string))
          str-ret)
     (save-excursion
-      (switch-to-buffer buffer)
+      (org-pop-to-buffer-same-window buffer)
       (erase-buffer)
       (insert region)
       (let ((org-inhibit-startup t)) (org-mode))

@@ -126,7 +126,7 @@ the the Emacs diary"
   (setq usedCalendarsFiles (directory-files "~/Library/Calendars" 1 ".*ics$"))
   (omi-delete-ics-file usedCalendarsFiles)
 
-  (switch-to-buffer currentBuffer))
+  (org-pop-to-buffer-same-window currentBuffer))
 
 (defun omi-concat-leopard-ics (list)
   "Leopard stores each iCal.app event in a separate ics file.

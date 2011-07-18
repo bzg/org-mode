@@ -38,6 +38,9 @@
 
 (eval-when-compile (require 'cl))
 
+(declare-function org-pop-to-buffer-same-window 
+		  "org-compat" (&optional buffer-or-name norecord label))
+
 (defgroup org-mobile nil
   "Options concerning support for a viewer/editor on a mobile device."
   :tag "Org Mobile"
@@ -909,7 +912,7 @@ If BEG and END are given, only do this in that region."
 				   (buffer-file-name (current-buffer))))))
 		(error (setq org-mobile-error msg))))
 	    (when org-mobile-error
-	      (switch-to-buffer (marker-buffer marker))
+	      (org-pop-to-buffer-same-window (marker-buffer marker))
 	      (goto-char marker)
 	      (incf cnt-error)
 	      (insert (if (stringp (nth 1 org-mobile-error))

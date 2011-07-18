@@ -34,12 +34,16 @@
 (eval-when-compile
   (require 'cl))
 (require 'org)
+(require 'org-compat)
 (require 'org-datetree)
 
 (declare-function remember-mode "remember" ())
 (declare-function remember "remember" (&optional initial))
 (declare-function remember-buffer-desc "remember" ())
 (declare-function remember-finalize "remember" ())
+(declare-function org-pop-to-buffer-same-window 
+		  "org-compat" (&optional buffer-or-name norecord label))
+
 (defvar remember-save-after-remembering)
 (defvar remember-register)
 (defvar remember-buffer)
@@ -785,7 +789,7 @@ The user is queried for the template."
       (setq heading org-remember-default-headline))
     (setq visiting (org-find-base-buffer-visiting file))
     (if (not visiting) (find-file-noselect file))
-    (switch-to-buffer (or visiting (get-file-buffer file)))
+    (org-pop-to-buffer-same-window (or visiting (get-file-buffer file)))
     (widen)
     (goto-char (point-min))
     (if (re-search-forward

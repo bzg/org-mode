@@ -943,7 +943,7 @@ that uses these same face definitions."
 	(when (and (symbolp f) (or (not i) (not (listp i))))
 	  (insert (org-add-props (copy-sequence "1") nil 'face f))))
       (htmlize-region (point-min) (point-max))))
-  (switch-to-buffer "*html*")
+  (org-pop-to-buffer-same-window "*html*")
   (goto-char (point-min))
   (if (re-search-forward "<style" nil t)
       (delete-region (point-min) (match-beginning 0)))

@@ -57,6 +57,9 @@
 		  (date &optional keep-restriction))
 (declare-function org-table-get-specials "org-table" ())
 (declare-function org-table-goto-line "org-table" (N))
+(declare-function org-pop-to-buffer-same-window "org-compat" 
+		  (&optional buffer-or-name norecord label))
+
 (defvar org-remember-default-headline)
 (defvar org-remember-templates)
 (defvar org-table-hlines)
@@ -1193,7 +1196,7 @@ The user is queried for the template."
       (error "No capture template selected"))
     (org-capture-set-plist entry)
     (org-capture-set-target-location)
-    (switch-to-buffer (org-capture-get :buffer))
+    (org-pop-to-buffer-same-window (org-capture-get :buffer))
     (goto-char (org-capture-get :pos))))
 
 (defun org-capture-get-indirect-buffer (&optional buffer prefix)
@@ -1303,7 +1306,7 @@ The template may still contain \"%?\" for cursor positioning."
 	    (sit-for 1))
     (save-window-excursion
       (delete-other-windows)
-      (switch-to-buffer (get-buffer-create "*Capture*"))
+      (org-pop-to-buffer-same-window (get-buffer-create "*Capture*"))
       (erase-buffer)
       (insert template)
       (goto-char (point-min))

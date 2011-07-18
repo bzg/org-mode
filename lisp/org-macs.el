@@ -350,6 +350,7 @@ point nowhere."
   `(let* ((org-outline-regexp (org-get-limited-outline-regexp)))
      ,@body))
 
+(defvar org-outline-regexp) ; defined in org.el
 (defvar org-odd-levels-only) ; defined in org.el
 (defvar org-inlinetask-min-level) ; defined in org-inlinetask.el
 (defun org-get-limited-outline-regexp ()

@@ -43,6 +43,8 @@
 (declare-function org-at-table.el-p "org" ())
 (declare-function org-get-indentation "org" (&optional line))
 (declare-function org-switch-to-buffer-other-window "org" (&rest args))
+(declare-function org-pop-to-buffer-same-window 
+		  "org-compat" (&optional buffer-or-name norecord label))
 
 (defcustom org-edit-src-region-extra nil
   "Additional regexps to identify regions for editing with `org-edit-src-code'.
@@ -340,7 +342,7 @@ buffer."
 (defun org-src-switch-to-buffer (buffer context)
   (case org-src-window-setup
     ('current-window
-     (switch-to-buffer buffer))
+     (org-pop-to-buffer-same-window buffer))
     ('other-window
      (switch-to-buffer-other-window buffer))
     ('other-frame
@@ -351,7 +353,7 @@ buffer."
 	  (delete-frame frame)))
        ('save
 	(kill-buffer (current-buffer))
-	(switch-to-buffer buffer))
+	(org-pop-to-buffer-same-window buffer))
        (t
 	(switch-to-buffer-other-frame buffer))))
     ('reorganize-frame
@@ -363,7 +365,7 @@ buffer."
     (t
      (message "Invalid value %s for org-src-window-setup"
 	      (symbol-name org-src-window-setup))
-     (switch-to-buffer buffer))))
+     (org-pop-to-buffer-same-window buffer))))
 
 (defun org-src-construct-edit-buffer-name (org-buffer-name lang)
   "Construct the buffer name for a source editing buffer."
@@ -423,7 +425,7 @@ the fragment in the Org-mode buffer."
 	    begline (save-excursion (goto-char beg) (org-current-line)))
       (if (and (setq buffer (org-edit-src-find-buffer beg end))
 	       (y-or-n-p "Return to existing edit buffer? [n] will revert changes: "))
-	  (switch-to-buffer buffer)
+	  (org-pop-to-buffer-same-window buffer)
 	(when buffer
 	  (with-current-buffer buffer
 	    (if (boundp 'org-edit-src-overlay)
@@ -443,7 +445,7 @@ the fragment in the Org-mode buffer."
 			   (define-key map [mouse-1] 'org-edit-src-continue)
 			   map))
 	(overlay-put ovl :read-only "Leave me alone")
-	(switch-to-buffer buffer)
+	(org-pop-to-buffer-same-window buffer)
 	(insert code)
 	(remove-text-properties (point-min) (point-max)
 				'(display nil invisible nil intangible nil))
