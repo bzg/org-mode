@@ -278,7 +278,7 @@ This variable is relevant only if `org-bibtex-export-tags-as-keywords` is t."
 
 ;;; Utility functions
 (defun org-bibtex-get (property)
-  (org-babel-trim
+  ((lambda (it) (when it (org-babel-trim it)))
    (or (org-entry-get (point) (upcase property))
        (org-entry-get (point) (concat org-bibtex-prefix (upcase property))))))
 
