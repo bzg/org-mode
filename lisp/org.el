@@ -11331,6 +11331,16 @@ statistics everywhere."
       (save-excursion
 	(beginning-of-line 1)
 	(setq ltoggle (funcall outline-level))
+	;; Three situations are to consider:
+
+	;; 1. if `org-hierarchical-todo-statistics' is nil, repeat up
+	;;    to the top-level ancestor on the headline;
+
+	;; 2. If parent has "recursive" property, repeat up to the
+	;;    headline setting that property, taking inheritance into
+	;;    account;
+
+	;; 3. Else, move up to direct parent and proceed only once.
 	(while (and (setq level (org-up-heading-safe))
 		    (or recursive first)
 		    (>= (point) lim))
