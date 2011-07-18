@@ -11306,16 +11306,12 @@ This should be called with the cursor in a line with a statistics cookie."
 When `org-hierarchical-todo-statistics' is nil, statistics will cover
 the entire subtree and this will travel up the hierarchy and update
 statistics everywhere."
-  (interactive)
-  (let* ((lim 0) prop
+  (let* ((prop (save-excursion (org-up-heading-safe)
+			       (org-entry-get nil "COOKIE_DATA" 'inherit)))
 	 (recursive (or (not org-hierarchical-todo-statistics)
-			(string-match
-			 "\\<recursive\\>"
-			 (or (setq prop (org-entry-get
-					 nil "COOKIE_DATA" 'inherit)) ""))))
-	 (lim (or (and prop (marker-position
-			     org-entry-property-inherited-from))
-		  lim))
+			(and prop (string-match "\\<recursive\\>" prop))))
+	 (lim (or (and prop (marker-position org-entry-property-inherited-from))
+		  0))
 	 (first t)
 	 (box-re "\\(\\(\\[[0-9]*%\\]\\)\\|\\(\\[[0-9]*/[0-9]*\\]\\)\\)")
 	 level ltoggle l1 new ndel
@@ -11324,9 +11320,7 @@ statistics everywhere."
     (catch 'exit
       (save-excursion
 	(beginning-of-line 1)
-	(if (org-at-heading-p)
-	    (setq ltoggle (funcall outline-level))
-	  (error "This should not happen"))
+	(setq ltoggle (funcall outline-level))
 	(while (and (setq level (org-up-heading-safe))
 		    (or recursive first)
 		    (>= (point) lim))
@@ -11334,10 +11328,8 @@ statistics everywhere."
 	  (unless (and level
 		       (not (string-match
 			     "\\<checkbox\\>"
-			     (downcase
-			      (or (org-entry-get
-				   nil "COOKIE_DATA")
-				  "")))))
+			     (downcase (or (org-entry-get nil "COOKIE_DATA")
+					   "")))))
 	    (throw 'exit nil))
 	  (while (re-search-forward box-re (point-at-eol) t)
 	    (setq cnt-all 0 cnt-done 0 cookie-present t)
