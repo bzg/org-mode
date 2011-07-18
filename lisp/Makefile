@@ -2,8 +2,9 @@ ifeq ($(MAKELEVEL), 0)
   $(error This make needs to be started as a sub-make from the toplevel directory.)
 endif
 
-GITVERSION = $(shell git describe --abbrev=6 HEAD)
-ifneq ($(shell git status -uno --porcelain), '')
+GITVERSION	= $(shell git describe --abbrev=6 HEAD)
+GITSTATUS	= $(shell git status -uno --porcelain)
+ifneq ("$(GITSTATUS)", "")
   GITVERSION := $(GITVERSION).dirty
 endif
 
@@ -13,7 +14,7 @@ LISPC = $(LISPF:%el=%elc)
 
 include dependencies.mk
 
-.PHONY:		autoloads compile install clean cleanall
+.PHONY:		all autoloads compile install clean cleanall clean-install
 
 all compile:	$(LISPC)
 
@@ -31,14 +32,18 @@ org-install.el:	$(LISPC)
 install:	$(LISPF) compile autoloads
 	if [ ! -d $(lispdir) ]; then $(MKDIR) $(lispdir); else true; fi ;
 	$(CP) $(LISPC) $(LISPF) $(LISPO) $(lispdir)
-	perl -i -pe 's/^(\(defconst org-git-version ).*/\1 "$(GITVERSION)"/;' $(lispdir)/org.el
+	-$(SED) -e 's/^\((defconst org-git-version \).*/\1 "$(GITVERSION)"/;' org.el > $(lispdir)/org.el
 	$(MAKE) $(lispdir)/org.elc
 
 clean:
-	$(RM) $(LISPC)
+	$(RM) *.elc
 
 cleanall:
-	$(RM) $(LISPC) $(LISPO)
+	$(RM) *.elc $(LISPO)
+
+clean-install:
+	if [ ! -d $(lispdir) ]; then $(MKDIR) $(lispdir); else true; fi ;
+	$(RM) $(lispdir)/org*.el* $(lispdir)/ob*.el*
 
 $(LISPC):	dependencies.mk
 

@@ -12,7 +12,8 @@ SUBDIRS		= doc $(LISPDIRS) #contrib
 compile:	lisp
 	$(MAKE) -C $< $@
 
-all:	$(SUBDIRS)
+all \
+clean-install:	$(SUBDIRS)
 	$(foreach dir, $?, $(MAKE) -C $(dir) $@;)
 
 up2:	update

@@ -51,6 +51,9 @@ RM      = rm -f
 # How to remove files recursively
 RMR     = rm -fr
 
+# How to stream edit a file
+SED     = sed
+
 # How to copy the lisp files and elc files to their destination.
 # CP    = cp -p         # try this if there is no install
 CP      = install -p

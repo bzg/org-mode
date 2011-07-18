@@ -2,7 +2,7 @@ ifeq ($(MAKELEVEL), 0)
   $(error This make needs to be started as a sub-make from the toplevel directory.)
 endif
 
-.PHONY:		all info html pdf card manual guide install clean cleanall
+.PHONY:		all info html pdf card manual guide install clean cleanall clean-install
 
 all:		info html pdf card
 
@@ -30,9 +30,13 @@ install:	org
 	$(INSTALL_INFO) --infodir=$(infodir) org
 
 clean cleanall:
-	$(RM) dir org *.pdf *.html *_letter.tex \
+	$(RM) org *.pdf *.html *_letter.tex \
 	      *.aux *.cp *.cps *.dvi *.fn *.fns *.ky *.kys *.pg *.pgs \
 	      *.toc *.tp *.tps *.vr *.vrs *.log *.html *.ps
+
+clean-install:
+	$(RM) $(infodir)/org*
+	@echo You should run $(INSTALL_INFO) again to correct dir entries.
 
 .SUFFIXES:	# we don't need default suffix rules
 .SUFFIXES:	.texi .tex .txt
