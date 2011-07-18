@@ -555,7 +555,7 @@ If nonew is t, add data to the headline of the entry at point."
 	(org-bibtex-put "TITLE" title)))
     (org-bibtex-put "TYPE" (substring (symbol-name type) 1))
     (org-bibtex-fleshout type arg)
-    (mapc (lambda (tag) (org-toggle-tag tag t)) org-bibtex-tags)))
+    (mapc (lambda (tag) (org-toggle-tag tag 'on)) org-bibtex-tags)))
 
 (defun org-bibtex-create-in-current-entry (&optional arg)
   "Add bibliographical data to the current entry.
@@ -594,7 +594,7 @@ This uses `bibtex-parse-entry'."
   (let ((entry (pop *org-bibtex-entries*))
 	(org-special-properties nil)) ; avoids errors with `org-entry-put'
     (flet ((val (field) (cdr (assoc field entry)))
-	   (togtag (tag) (org-toggle-tag tag t)))
+	   (togtag (tag) (org-toggle-tag tag 'on)))
       (org-insert-heading)
       (insert (val :title))
       (org-bibtex-put "TITLE" (val :title))
