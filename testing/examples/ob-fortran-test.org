@@ -1,0 +1,76 @@
+* Test org fortran file
+#+begin_src fortran
+print *, 'Hello world'
+#+end_src
+
+#+begin_src fortran
+integer, parameter :: i = 10
+print *, 'i = ', i
+#+end_src
+
+#+begin_src fortran :var N = 10
+print *, 'N = ', N
+#+end_src
+
+Define for preprocessed fortran
+#+begin_src fortran :defines N 42
+implicit none
+print *, 'N = ', N
+#+end_src
+
+#+begin_src fortran :var s="word"
+print *, 's = ', s
+print *, 'size(s) = ', size(s)
+#+end_src
+
+#+begin_src fortran :var s=42.0
+print *, 's = ', s
+print *, 'kind(s) = ', kind(s)
+#+end_src
+
+#+begin_src fortran
+program ex
+print *, "output of ex program"
+end program ex
+#+end_src
+
+Should fail (TODO: add input variables for the case with explicit
+program statement)
+#+begin_src fortran :var s="word"
+program ex
+print *, "output of ex program"
+end program ex
+#+end_src
+
+Real array as input
+#+begin_src fortran :var s='(1.0 2.0 3.0)
+print *, s
+#+end_src
+
+#+tblname: test_tbl
+| 1.0 |
+| 2.0 |
+
+Real array as input
+#+begin_src fortran :var s=test_tbl
+print *, s
+#+end_src
+
+Fails to compile (TODO: error check in ob-fortran.el)
+#+begin_src fortran :var s='(1 ())
+print *, s
+#+end_src
+
+Should fail to compile with gfortran
+#+begin_src fortran :flags --std=f95 --pedantic-error
+program ex
+integer*8 :: i
+end program ex
+#+end_src
+
+Pass parameters to the program
+#+begin_src fortran :cmdline "23"
+character(len=255) :: cmd
+call get_command(cmd)
+write (*,*) trim(cmd)
+#+end_src
