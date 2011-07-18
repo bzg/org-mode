@@ -1216,10 +1216,9 @@ function ends.
 
 This function modifies STRUCT."
   (let ((case-fold-search t))
-    ;; 1. Get information about list: structure, usual helper
-    ;;    functions, position of point with regards to item start
-    ;;    (BEFOREP), blank lines number separating items (BLANK-NB),
-    ;;    position of split (POS) if we're allowed to (SPLIT-LINE-P).
+    ;; 1. Get information about list: position of point with regards
+    ;;    to item start (BEFOREP), blank lines number separating items
+    ;;    (BLANK-NB), if we're allowed to (SPLIT-LINE-P).
     (let* ((item (progn (goto-char pos) (goto-char (org-list-get-item-begin))))
 	   (item-end (org-list-get-item-end item struct))
 	   (item-end-no-blank (org-list-get-item-end-before-blank item struct))
@@ -2127,8 +2126,8 @@ item is invisible."
 	    (org-at-item-timer-p))
 	  ;; Timer list: delegate to `org-timer-item'.
 	  (progn (org-timer-item) t)
-	(goto-char itemp)
-	(let* ((struct (org-list-struct))
+	(let* ((struct (save-excursion (goto-char itemp)
+				       (org-list-struct)))
 	       (prevs (org-list-prevs-alist struct))
 	       ;; If we're in a description list, ask for the new term.
 	       (desc (when (org-list-get-tag itemp struct)
