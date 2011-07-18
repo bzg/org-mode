@@ -782,9 +782,9 @@ the current subtree."
 			 (nth 1 info))))
 	 (sha1 it))))))
 
-(defun org-babel-result-hash (&optional info)
+(defun org-babel-current-result-hash ()
   "Return the in-buffer hash associated with INFO."
-  (org-babel-where-is-src-block-result nil info)
+  (org-babel-where-is-src-block-result)
   (org-babel-clean-text-properties (match-string 3)))
 
 (defun org-babel-hide-hash ()
