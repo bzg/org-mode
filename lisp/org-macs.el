@@ -367,6 +367,26 @@ The number of levels is controlled by `org-inlinetask-min-level'"
       (format-seconds string seconds)
     (format-time-string string (seconds-to-time seconds))))
 
+(defmacro org-loop-over-siblings-in-active-region (&rest body)
+  "Execute BODY on possibly several headlines."
+  `(if (or (not (org-region-active-p))
+	   (not org-loop-over-siblings-within-active-region-p))
+       ,@body
+     (save-excursion
+       (let ((beg (region-beginning))
+	     (end (region-end))
+	     mrkrs mrkr nxt)
+	 (goto-char beg)
+	 (or (org-at-heading-p) (outline-next-heading))
+	 (setq mrkrs (list (set-marker (make-marker) (point))))
+	 (while (and (setq nxt (org-get-next-sibling)) (< nxt end))
+	   (setq mrkrs 
+		 (append mrkrs (list (set-marker 
+				      (make-marker) (point))))))
+	 (while (setq mrkr (pop mrkrs))
+	   (goto-char mrkr)
+	   ,@body)))))
+
 (provide 'org-macs)
 
 ;; arch-tag: 7e6a73ce-aac9-4fc0-9b30-ce6f89dc6668
