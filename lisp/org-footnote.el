@@ -199,23 +199,29 @@ positions, and the definition, when inlined."
 	   ;; get fooled by unrelated closing square brackets.
 	   (end (ignore-errors (scan-sexps beg 1))))
       ;; Point is really at a reference if it's located before true
-      ;; ending of the footnote and isn't within a link or a LaTeX
-      ;; macro.  About that case, some special attention should be
-      ;; paid.  Indeed, when two footnotes are side by side, once the
-      ;; first one is changed into LaTeX, the second one might then be
-      ;; considered as an optional argument of the command.  To
-      ;; prevent that, we have a look at the `org-protected' property
-      ;; of that LaTeX command.
-      (when (and end (< (point) end)
-		 (not (save-excursion
-			(goto-char beg)
-			(let ((linkp
-			       (save-match-data
-				 (org-in-regexp org-bracket-link-regexp))))
-			  (and linkp (< (point) (cdr linkp))))))
-		 (or (not (org-inside-latex-macro-p))
-		     (and (get-text-property (1- beg) 'org-protected)
-			  (not (get-text-property beg 'org-protected)))))
+      ;; ending of the footnote.
+      (when (save-match-data
+	      (and end (< (point) end)
+		   ;; Verify match isn't a part of a link.
+		   (not (save-excursion
+			  (goto-char beg)
+			  (let ((linkp (org-in-regexp org-bracket-link-regexp)))
+			    (and linkp (< (point) (cdr linkp))))))
+		   ;; When in message-mode, verify match doesn't belong
+		   ;; to cited text.
+		   (not (and (derived-mode-p 'message-mode)
+			     (save-excursion
+			       (beginning-of-line)
+			       (looking-at message-cite-prefix-regexp))))
+		   ;; Verify point doesn't belong to a LaTeX macro.
+		   ;; Beware though, when two footnotes are side by
+		   ;; side, once the first one is changed into LaTeX,
+		   ;; the second one might then be considered as an
+		   ;; optional argument of the command.  Thus, check
+		   ;; the `org-protected' property of that command.
+		   (or (not (org-inside-latex-macro-p))
+		       (and (get-text-property (1- beg) 'org-protected)
+			    (not (get-text-property beg 'org-protected))))))
 	(list label beg end
 	      ;; Definition: ensure this is an inline footnote first.
 	      (and (or (not label) (match-string 1))
@@ -230,32 +236,33 @@ footnote text is included and defined locally.
 
 The return value will be nil if not at a footnote definition, and a list with
 label, start, end and definition of the footnote otherwise."
-  (save-excursion
-    (end-of-line)
-    (let ((lim (save-excursion (re-search-backward
-				(concat org-outline-regexp-bol
-					"\\|^[ \t]*$") nil t))))
-      (when (re-search-backward org-footnote-definition-re lim t)
-	(end-of-line)
-	(list (match-string 2)
-	      (match-beginning 0)
-	      (save-match-data
-		;; In a message, limit search to signature.
-		(let ((bound (and (derived-mode-p 'message-mode)
-				  (save-excursion
-				    (goto-char (point-max))
-				    (re-search-backward
-				     message-signature-separator nil t)))))
-		  (or (and (re-search-forward
-			    (org-re
-			     (concat "^[ \t]*$" "\\|"
-				     org-outline-regexp-bol
-				     "\\|"
-				     "^\\[\\([0-9]+\\|fn:[-_[:word:]]+\\)\\]"))
-			    bound 'move)
-			   (progn (skip-chars-forward " \t\n") (point-at-bol)))
-		      (point))))
-	      (org-trim (buffer-substring (match-end 0) (point))))))))
+  (when (org-footnote-in-valid-context-p)
+    (save-excursion
+      (end-of-line)
+      (let ((lim (save-excursion (re-search-backward
+				  (concat org-outline-regexp-bol
+					  "\\|^[ \t]*$") nil t))))
+	(when (re-search-backward org-footnote-definition-re lim t)
+	  (end-of-line)
+	  (list (match-string 2)
+		(match-beginning 0)
+		(save-match-data
+		  ;; In a message, limit search to signature.
+		  (let ((bound (and (derived-mode-p 'message-mode)
+				    (save-excursion
+				      (goto-char (point-max))
+				      (re-search-backward
+				       message-signature-separator nil t)))))
+		    (or (and (re-search-forward
+			      (org-re
+			       (concat "^[ \t]*$" "\\|"
+				       org-outline-regexp-bol
+				       "\\|"
+				       "^\\[\\([0-9]+\\|fn:[-_[:word:]]+\\)\\]"))
+			      bound 'move)
+			     (progn (skip-chars-forward " \t\n") (point-at-bol)))
+			(point))))
+		(org-trim (buffer-substring (match-end 0) (point)))))))))
 
 (defun org-footnote-get-next-reference (&optional label backward limit)
   "Return complete reference of the next footnote.
@@ -414,7 +421,7 @@ This command prompts for a label.  If this is a label referencing an
 existing label, only insert the label.  If the footnote label is empty
 or new, let the user edit the definition of the footnote."
   (interactive)
-  (unless (org-footnote-in-valid-context-p)
+  (unless (and (not (bolp)) (org-footnote-in-valid-context-p))
     (error "Cannot insert a footnote here"))
   (let* ((labels (and (not (equal org-footnote-auto-label 'random))
 		      (org-footnote-all-labels)))
