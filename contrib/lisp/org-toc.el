@@ -210,7 +210,7 @@ specified, then make `org-toc-recenter' use this value."
 (defun org-toc-before-first-heading-p ()
   "Before first heading?"
   (save-excursion
-    (null (re-search-backward "^\\*+ " nil t))))
+    (null (re-search-backward org-outline-regexp-bol nil t))))
 
 ;;;###autoload
 (defun org-toc-show (&optional depth position)
@@ -226,7 +226,7 @@ specified, then make `org-toc-recenter' use this value."
   (let ((pos (or position
 		 (save-excursion
 		   (if (org-toc-before-first-heading-p)
-		       (progn (re-search-forward "^\\*+ " nil t)
+		       (progn (re-search-forward org-outline-regexp-bol nil t)
 			      (match-beginning 0))
 		     (point))))))
     (setq org-toc-cycle-global-status org-cycle-global-status)
@@ -441,7 +441,7 @@ status."
       (goto-char (point-min))
       (while (and (not (eobp))
 		  (goto-char (next-overlay-change (point))))
-	(when (looking-at "^\\*+ ")
+	(when (looking-at org-outline-regexp-bol)
 	  (add-to-list
 	   'output
 	   (cons (buffer-substring-no-properties

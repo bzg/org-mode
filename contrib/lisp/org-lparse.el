@@ -791,7 +791,7 @@ version."
       (while (setq line (pop lines) origline line)
 	(catch 'nextline
 	  (when (and (org-lparse-current-environment-p 'quote)
-		     (string-match "^\\*+ " line))
+		     (string-match org-outline-regexp-bol line))
 	    (org-lparse-end-environment 'quote))
 
 	  (when (org-lparse-current-environment-p 'quote)

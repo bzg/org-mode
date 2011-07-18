@@ -846,7 +846,7 @@ underlined headlines.  The default is 3."
     (org-init-section-numbers)
     (org-export-generic-check-section "top")
     (while (setq line (pop lines))
-      (when (and link-buffer (string-match "^\\*+ " line))
+      (when (and link-buffer (string-match org-outline-regexp-bol line))
 	(org-export-generic-push-links (nreverse link-buffer))
 	(setq link-buffer nil))
       (setq wrap nil)
