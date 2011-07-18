@@ -1,5 +1,6 @@
 ;;; ob-fortran.el --- org-babel functions for fortran
-;; Copyright (C) 2010  Free Software Foundation, Inc.
+
+;; Copyright (C) 2011  Free Software Foundation, Inc.
 
 ;; Author: Sergey Litvinov (based on ob-C.el by Eric Schulte)
 ;; Keywords: literate programming, reproducible research, fortran
@@ -27,10 +28,6 @@
 ;;
 
 ;;; Code:
-
-;; Org-Babel support for evaluating fortran code.
-;;
-
 (require 'ob)
 (require 'ob-eval)
 (require 'cc-mode)
@@ -48,39 +45,12 @@
   executable.")
 
 (defun org-babel-execute:fortran (body params)
-  "Execute BODY according to PARAMS.  This function calls
-`org-babel-execute:fortran'."
-  (org-babel-execute:fortran body params))
-
-(defun org-babel-execute:fortran (body params)
-    "Execute a block of fortran code with org-babel.  This function is
-called by `org-babel-execute-src-block'."
-  (org-babel-fortran-execute body params))
-
-(defun org-babel-expand-body:fortran (body params)
-  "Expand a block of fortran code with org-babel according to it's
-header arguments (calls `org-babel-fortran-expand')."
-  (org-babel-fortran-expand body params))
-
-(defun org-babel-execute:fortran (body params)
-  "Execute a block of fortran code with org-babel.  This function is
-called by `org-babel-execute-src-block'."
-  (org-babel-fortran-execute body params))
-
-(defun org-babel-expand-body:fortran (body params)
-  "Expand a block of fortran code with org-babel according to it's
-header arguments (calls `org-babel-fortran-expand')."
-  (org-babel-fortran-expand body params))
-
-(defun org-babel-fortran-execute (body params)
   "This function should only be called by `org-babel-execute:fortran'"
-  (let* ((tmp-src-file (org-babel-temp-file
-			"fortran-src-"
-			".F90"))
+  (let* ((tmp-src-file (org-babel-temp-file "fortran-src-" ".F90"))
          (tmp-bin-file (org-babel-temp-file "fortran-bin-"))
          (cmdline (cdr (assoc :cmdline params)))
          (flags (cdr (assoc :flags params)))
-         (full-body (org-babel-fortran-expand body params))
+         (full-body (org-babel-expand-body:fortran body params))
          (compile
 	  (progn
 	    (with-temp-file tmp-src-file (insert full-body))
@@ -106,7 +76,7 @@ header arguments (calls `org-babel-fortran-expand')."
        (org-babel-eval
 	(concat tmp-bin-file (if cmdline (concat " " cmdline) "")) "")))))
 
-(defun org-babel-fortran-expand (body params)
+(defun org-babel-expand-body:fortran (body params)
   "Expand a block of fortran or fortran code with org-babel according to
 it's header arguments."
   (let ((vars (mapcar #'cdr (org-babel-get-header params :var)))
@@ -128,14 +98,14 @@ it's header arguments."
 		  (if (listp defines) defines (list defines)) "\n")
 		 ;; body
 		 (if main-p
-		     (org-babel-fortran-ensure-main-wrap 
-		      (concat 
+		     (org-babel-fortran-ensure-main-wrap
+		      (concat
 		       ;; variables
-		       (mapconcat 'org-babel-fortran-var-to-fortran vars "\n") 
-		       body))
+		       (mapconcat 'org-babel-fortran-var-to-fortran vars "\n")
+		       body) params)
 		   body) "\n") "\n")))
 
-(defun org-babel-fortran-ensure-main-wrap (body)
+(defun org-babel-fortran-ensure-main-wrap (body params)
   "Wrap body in a \"program ... end program\" block if none exists."
   (if (string-match "^[ \t]*program[ \t]*.*" (capitalize body))
        (let ((vars (mapcar #'cdr (org-babel-get-header params :var))))
@@ -176,9 +146,11 @@ of the same value."
       (format "character, parameter ::  %S(%d) = '%s'\n"
               var (length val) val))
      ((listp val)
-      (format "real, parameter :: %S(%d) = %s\n" var (length val) (ob-fortran-transform-list val)))
+      (format "real, parameter :: %S(%d) = %s\n"
+	      var (length val) (ob-fortran-transform-list val)))
      (t
-      (error (format "the type of parameter %s is not supported by ob-fortran" var))))))
+      (error (format "the type of parameter %s is not supported by ob-fortran"
+		     var))))))
 
 (defun ob-fortran-transform-list (val)
   "Return a fortran representation of enclose syntactic lists."
@@ -187,5 +159,7 @@ of the same value."
     (format "%S" val)))
 
 (provide 'ob-fortran)
+
+;; arch-tag: 466c8aa4-b919-462d-b1da-3e147073b56e
 
 ;;; ob-fortran.el ends here
