@@ -373,7 +373,7 @@ block."
 			  (string= "yes" (cdr (assoc :cache params)))))
 	     (result-params (cdr (assoc :result-params params)))
 	     (new-hash (when cache? (org-babel-sha1-hash info)))
-	     (old-hash (when cache? (org-babel-result-hash info)))
+	     (old-hash (when cache? (org-babel-current-result-hash)))
 	     (body (setf (nth 1 info)
 			 (let ((noweb (cdr (assoc :noweb params))))
 			   (if (and noweb
