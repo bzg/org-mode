@@ -52,6 +52,8 @@
   (require 'cl))
 (require 'org)
 (require 'org-mks)
+;; Needed for the variable `dired-buffers'
+(require 'dired)
 
 (declare-function org-datetree-find-date-create "org-datetree"
 		  (date &optional keep-restriction))
