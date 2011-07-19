@@ -52,7 +52,7 @@
 		 (org-babel-eval
 		  (concat org-babel-java-compiler " " src-file) ""))))
     ;; created package-name directories if missing
-    (unless (file-exists-p packagename)
+    (unless (or (not packagename) (file-exists-p packagename))
       (make-directory packagename 'parents))
     ((lambda (results)
        (org-babel-reassemble-table
