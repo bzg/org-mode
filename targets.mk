@@ -1,13 +1,15 @@
-.PHONY:	default all up2 update compile lisp doc \
-	install info html pdf card doc install-lisp install-info \
-	autoloads cleanall clean cleancontrib cleanelc cleandoc cleanrel
 .NOTPARALLEL: .PHONY
 # Additional distribution files
 DISTFILES_extra=  Makefile request-assign-future.txt contrib etc
 .EXPORT_ALL_VARIABLES:
 
-LISPDIRS	= lisp #contrib
-SUBDIRS		= doc $(LISPDIRS) #contrib
+LISPDIRS	= lisp
+SUBDIRS		= doc $(LISPDIRS)
+INSTSUB         = $(SUBDIRS:%=install-%)
+
+.PHONY:	default all up2 update compile lisp doc \
+	install info html pdf card docs $(INSTSUB) \
+	autoloads cleanall clean cleancontrib cleanelc cleandoc cleanrel
 
 compile:	lisp
 	$(MAKE) -C $< $@
@@ -24,18 +26,17 @@ update:
 	${MAKE} clean
 	${MAKE} all
 
-install: install-lisp install-info
+install:	$(INSTSUB)
+
+install-info:	install-doc
 
 docs:	info html pdf card
 
 info html pdf card:
 	$(MAKE) -C doc $@
 
-install-lisp:
-	$(MAKE) -C lisp install
-
-install-info:
-	$(MAKE) -C doc install
+$(INSTSUB):
+	$(MAKE) -C $(@:install-%=%) install
 
 autoloads: lisp maint.mk
 	$(MAKE) -C $< $@
