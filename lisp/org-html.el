@@ -1335,7 +1335,7 @@ lang=\"%s\" xml:lang=\"%s\">
 		    (format-spec html-pre `((?t . ,title) (?a . ,author)
 					    (?d . ,date) (?e . ,email)))))
 		  ((functionp html-pre)
-		   (funcall html-pre opt-plist))
+		   (funcall html-pre))
 		  (t
 		   (insert
 		    (format-spec
@@ -1768,7 +1768,7 @@ lang=\"%s\" xml:lang=\"%s\">
 					  (?v . ,html-validation-link))))
 		   (insert "</div>"))
 		  ((functionp html-post)
-		   (funcall html-post opt-plist))
+		   (funcall html-post))
 		  ((eq html-post 'auto)
 		   ;; fall back on default postamble
 		   (insert "<div id=\"postamble\">\n")

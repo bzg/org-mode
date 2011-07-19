@@ -9766,10 +9766,14 @@ The HTML exporter lets you define a preamble and a postamble.
 
 The default value for @code{org-export-html-preamble} is @code{t}, which
 means that the preamble is inserted depending on the relevant formatting
-string in @code{org-export-html-preamble-format}.  Setting
-@code{org-export-html-preamble} to a string will override the default
+string in @code{org-export-html-preamble-format}.
+
+Setting @code{org-export-html-preamble} to a string will override the default
 formatting string.  Setting it to a function, will insert the output of the
-function.  Setting to @code{nil} will not insert any preamble.
+function, which must be a string; such a function takes no argument but you
+can check against the value of @code{opt-plist}, which contains the list of
+publishing properties for the current file.  Setting to @code{nil} will not
+insert any preamble.
 
 The default value for @code{org-export-html-postamble} is @code{'auto}, which
 means that the HTML exporter will look for the value of
