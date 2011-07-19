@@ -6522,7 +6522,7 @@ dynamic insertion of content:
 
 @smallexample
 %^@{@var{prompt}@}  @r{prompt the user for a string and replace this sequence with it.}
-            @r{You may specify a default value and a completion table with.}
+            @r{You may specify a default value and a completion table with}
             @r{%^@{prompt|default|completion2|completion3...@}.}
             @r{The arrow keys access a prompt-specific history.}
 %a          @r{annotation, normally the link created with @code{org-store-link}.}
