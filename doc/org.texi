@@ -10779,7 +10779,7 @@ been standardized yet and is hence conveniently skipped in this document.
 The exporter can also make an image the clickable part of a link.  To create
 clickable images, provide a link whose description is a link to an image
 file.  For example, the following link
-@samp{[[http://Orgmode.org][./img.jpg]]}, will result in a clickable image
+@samp{[[http://orgmode.org][./img.jpg]]}, will result in a clickable image
 that links to @uref{http://Orgmode.org} website.
 
 @node Additional Documentation, , Images in OpenDocumentText export, OpenDocumentText export
