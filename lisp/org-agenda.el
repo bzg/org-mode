@@ -1699,15 +1699,15 @@ the lower-case version of all tags."
   :type 'function)
 
 (defcustom org-agenda-bulk-custom-functions nil
-  "Alist of characters and custom functions for bulk action.
+  "Alist of characters and custom functions for bulk actions.
 For example, this value makes those two functions available:
 
   '((?R set-category)
     (?C bulk-cut))
 
-With selected entries in an agenda buffer, `B R' will execute
-set-category on the selected entries.  Note that functions in
-this alist don't need to be quoted."
+With selected entries in an agenda buffer, `B R' will call
+the custom function `set-category' on the selected entries.  
+Note that functions in this alist don't need to be quoted."
   :type 'alist
   :group 'org-agenda)
 
