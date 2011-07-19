@@ -4711,7 +4711,10 @@ This variable is set by `org-before-change-function'.
 (defvar org-inhibit-logging nil)        ; Dynamically-scoped param.
 (defvar org-inhibit-blocking nil)       ; Dynamically-scoped param.
 (defvar org-table-buffer-is-an nil)
-(defconst org-outline-regexp "\\*+ ")
+
+;; org-outline-regexp ought to be a defconst but is let-binding 
+;; in some places -- e.g. see the macro org-with-limited-levels
+(defvar org-outline-regexp "\\*+ ")
 (defconst org-outline-regexp-bol "^\\*+ ")
 
 ;;;###autoload
