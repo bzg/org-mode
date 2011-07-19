@@ -65,6 +65,7 @@
 (defvar org-remember-default-headline)
 (defvar org-remember-templates)
 (defvar org-table-hlines)
+(defvar dired-buffers)
 
 (defvar org-capture-clock-was-started nil
   "Internal flag, noting if the clock was started.")
@@ -453,7 +454,9 @@ bypassed."
 	(org-capture-get-template)
 	(org-capture-put :original-buffer orig-buf
 			 :original-file (or (buffer-file-name orig-buf)
-					    (car (rassq orig-buf dired-buffers)))
+					    (and (featurep 'dired)
+						 (car (rassq orig-buf
+							     dired-buffers))))
 			 :original-file-nondirectory
 			 (and (buffer-file-name orig-buf)
 			      (file-name-nondirectory
