@@ -168,14 +168,22 @@ extracted will be filled again."
 
 (defun org-footnote-in-valid-context-p ()
   "Is point in a context where footnotes are allowed?"
-  (not (or (org-in-commented-line)
-	   (org-in-indented-comment-line)
-	   (org-in-verbatim-emphasis)
-	   ;; No footnote in literal example.
-	   (save-excursion
-	     (beginning-of-line)
-	     (looking-at "[ \t]*:[ \t]+"))
-	   (org-in-block-p org-footnote-forbidden-blocks))))
+  (save-match-data
+    (not (or (org-in-commented-line)
+	     (org-in-indented-comment-line)
+	     (org-in-verbatim-emphasis)
+	     ;; Avoid literal example.
+	     (save-excursion
+	       (beginning-of-line)
+	       (looking-at "[ \t]*:[ \t]+"))
+	     ;; Avoid cited text and headers in message-mode.
+	     (and (derived-mode-p 'message-mode)
+		  (or (save-excursion
+			(beginning-of-line)
+			(looking-at message-cite-prefix-regexp))
+		      (message-point-in-header-p)))
+	     ;; Avoid forbidden blocks.
+	     (org-in-block-p org-footnote-forbidden-blocks)))))
 
 (defun org-footnote-at-reference-p ()
   "Is the cursor at a footnote reference?
@@ -200,28 +208,23 @@ positions, and the definition, when inlined."
 	   (end (ignore-errors (scan-sexps beg 1))))
       ;; Point is really at a reference if it's located before true
       ;; ending of the footnote.
-      (when (save-match-data
-	      (and end (< (point) end)
-		   ;; Verify match isn't a part of a link.
-		   (not (save-excursion
-			  (goto-char beg)
-			  (let ((linkp (org-in-regexp org-bracket-link-regexp)))
-			    (and linkp (< (point) (cdr linkp))))))
-		   ;; When in message-mode, verify match doesn't belong
-		   ;; to cited text.
-		   (not (and (derived-mode-p 'message-mode)
-			     (save-excursion
-			       (beginning-of-line)
-			       (looking-at message-cite-prefix-regexp))))
-		   ;; Verify point doesn't belong to a LaTeX macro.
-		   ;; Beware though, when two footnotes are side by
-		   ;; side, once the first one is changed into LaTeX,
-		   ;; the second one might then be considered as an
-		   ;; optional argument of the command.  Thus, check
-		   ;; the `org-protected' property of that command.
-		   (or (not (org-inside-latex-macro-p))
-		       (and (get-text-property (1- beg) 'org-protected)
-			    (not (get-text-property beg 'org-protected))))))
+      (when (and end (< (point) end)
+		 ;; Verify match isn't a part of a link.
+		 (not (save-excursion
+			(goto-char beg)
+			(let ((linkp
+			       (save-match-data
+				 (org-in-regexp org-bracket-link-regexp))))
+			  (and linkp (< (point) (cdr linkp))))))
+		 ;; Verify point doesn't belong to a LaTeX macro.
+		 ;; Beware though, when two footnotes are side by
+		 ;; side, once the first one is changed into LaTeX,
+		 ;; the second one might then be considered as an
+		 ;; optional argument of the command.  Thus, check
+		 ;; the `org-protected' property of that command.
+		 (or (not (org-inside-latex-macro-p))
+		     (and (get-text-property (1- beg) 'org-protected)
+			  (not (get-text-property beg 'org-protected)))))
 	(list label beg end
 	      ;; Definition: ensure this is an inline footnote first.
 	      (and (or (not label) (match-string 1))
