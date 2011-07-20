@@ -771,9 +771,7 @@ PUB-DIR is set, use this as the publishing directory."
     (format "\n<!-- %s  -->\n" comment)))
 
 (defun org-odt-format-org-entity (wd)
-  ;; FIXME: Seems to work. But is this correct?
-  (let ((s (org-entity-get-representation wd 'utf8)))
-    (and s (format "&#x%x;" (string-to-char s)))))
+  (org-entity-get-representation wd 'utf8))
 
 (defun org-odt-fill-tabs-and-spaces (line)
   (replace-regexp-in-string
