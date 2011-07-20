@@ -142,8 +142,8 @@ of the same value."
      ((or (characterp val))
       (format "character, parameter :: %S = '%S'\n" var val))
      ((stringp val)
-      (format "character, parameter ::  %S(%d) = '%s'\n"
-              var (length val) val))
+      (format "character(len=%d), parameter ::  %S = '%s'\n"
+              (length val) var val))
      ((listp val)
       (format "real, parameter :: %S(%d) = %s\n"
 	      var (length val) (ob-fortran-transform-list val)))
