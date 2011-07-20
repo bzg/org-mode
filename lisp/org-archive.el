@@ -207,7 +207,9 @@ this heading."
 	   (this-buffer (current-buffer))
 	   ;; start of variables that will be used for saving context
 	   ;; The compiler complains about them - keep them anyway!
-	   (file (abbreviate-file-name (buffer-file-name (buffer-base-buffer))))
+	   (file (abbreviate-file-name
+		  (or (buffer-file-name (buffer-base-buffer))
+		      (error "No file associated to buffer"))))
 	   (olpath (mapconcat 'identity (org-get-outline-path) "/"))
 	   (time (format-time-string
 		  (substring (cdr org-time-stamp-formats) 1 -1)
