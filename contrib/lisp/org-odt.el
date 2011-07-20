@@ -691,14 +691,15 @@ PUB-DIR is set, use this as the publishing directory."
       </text:table-of-content-entry-template>
 " level level)))
 
-  (insert  "
+  (insert
+   (format  "
      </text:table-of-content-source>
 
      <text:index-body>
       <text:index-title text:style-name=\"Sect1\" text:name=\"Table of Contents1_Head\">
-       <text:p text:style-name=\"Contents_20_Heading\">Table of Contents</text:p>
+       <text:p text:style-name=\"Contents_20_Heading\">%s</text:p>
       </text:index-title>
-"))
+" lang-specific-heading)))
 
 (defun org-odt-end-toc ()
   (insert "
