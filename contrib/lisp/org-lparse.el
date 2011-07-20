@@ -1595,9 +1595,24 @@ the alist of previous items."
 (defvar org-lparse-output-buffer)
 
 (defcustom org-lparse-debug nil
-  "Turn on/off debugging for `org-lparse'."
-  :type 'boolean
-  :group 'org-lparse)
+  "Enable or Disable logging of `org-lparse' callbacks.
+The parameters passed to the backend-registered ENTITY-CONTROL
+and ENTITY-FORMAT callbacks are logged as comment strings in the
+exported buffer.  (org-lparse-format 'COMMENT fmt args) is used
+for logging.  Customize this variable only if you are an expert
+user.  Valid values of this variable are:
+nil     : Disable logging
+control : Log all invocations of `org-lparse-begin' and
+          `org-lparse-end' callbacks.
+format  : Log invocations of `org-lparse-format' callbacks.
+t       : Log all invocations of `org-lparse-begin', `org-lparse-end'
+          and `org-lparse-format' callbacks,"
+  :group 'org-lparse
+  :type '(choice
+	  (const :tag "Disable" nil)
+	  (const :tag "Format callbacks" format)
+	  (const :tag "Control callbacks" control)
+	  (const :tag "Format and Control callbacks" t)))
 
 (defun org-lparse-begin (entity &rest args)
   "Begin ENTITY in current buffer. ARGS is entity specific.
