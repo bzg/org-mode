@@ -165,10 +165,11 @@ if LOCATION is not given, the value of `org-archive-location' is used."
   (setq location (or location org-archive-location))
   (if (string-match "\\(.*\\)::\\(.*\\)" location)
       (if (= (match-beginning 1) (match-end 1))
-	  (buffer-file-name)
+	  (buffer-file-name (buffer-base-buffer))
 	(expand-file-name
 	 (format (match-string 1 location)
-		 (file-name-nondirectory buffer-file-name))))))
+		 (file-name-nondirectory
+		  (buffer-file-name (buffer-base-buffer))))))))
 
 (defun org-extract-archive-heading (&optional location)
   "Extract the heading from archive LOCATION.
@@ -176,7 +177,8 @@ if LOCATION is not given, the value of `org-archive-location' is used."
   (setq location (or location org-archive-location))
   (if (string-match "\\(.*\\)::\\(.*\\)" location)
       (format (match-string 2 location)
-	      (file-name-nondirectory buffer-file-name))))
+	      (file-name-nondirectory
+	       (buffer-file-name (buffer-base-buffer))))))
 
 (defun org-archive-subtree (&optional find-done)
   "Move the current subtree to the archive.
@@ -205,7 +207,7 @@ this heading."
 	   (this-buffer (current-buffer))
 	   ;; start of variables that will be used for saving context
 	   ;; The compiler complains about them - keep them anyway!
-	   (file (abbreviate-file-name (buffer-file-name)))
+	   (file (abbreviate-file-name (buffer-file-name (buffer-base-buffer))))
 	   (olpath (mapconcat 'identity (org-get-outline-path) "/"))
 	   (time (format-time-string
 		  (substring (cdr org-time-stamp-formats) 1 -1)
