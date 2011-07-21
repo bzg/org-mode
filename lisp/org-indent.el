@@ -63,8 +63,6 @@ It will be set in `org-indent-initialize'.")
 It will be set in `org-indent-initialize'.")
 (defvar org-hide-leading-stars-before-indent-mode nil
   "Used locally.")
-(defvar org-indent-outline-re (concat "^" outline-regexp)
-  "Regexp matching and headline or inline task.")
 (defvar org-indent-deleted-headline-flag nil
   "Non nil if the last deletion acted on an headline.
 It is modified by `org-indent-notify-deleted-headline'.")
@@ -286,7 +284,6 @@ Flag will be non-nil if command is going to delete an headline."
 	(and (/= beg end)
 	     (save-excursion
 	       (goto-char beg)
-	       (re-search-forward org-indent-outline-re end t)))))
 	       (save-match-data
 		 (re-search-forward org-outline-regexp-bol end t))))))
 
@@ -309,7 +306,7 @@ This function is meant to be called by `after-change-functions'."
        ((and (/= beg end)
 	     (save-excursion
 	       (goto-char beg)
-	       (re-search-forward org-indent-outline-re end t)))
+	       (re-search-forward org-outline-regexp-bol end t)))
 	(let ((end (save-excursion
 		     (goto-char end) (outline-next-heading) (point))))
 	  (org-indent-remove-properties beg end)
