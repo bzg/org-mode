@@ -61,8 +61,10 @@ It will be set in `org-indent-initialize'.")
 (defvar org-indent-stars nil
   "Vector with all indentation star strings.
 It will be set in `org-indent-initialize'.")
+(defvar org-indent-inlinetask-first-star (org-add-props "*" '(face org-warning))
+  "First star of inline tasks, with correct face.")
 (defvar org-indent-initial-marker nil
-  "Position of initialization process before interrupt.")
+  "Position of initialization before interrupt.")
 (defvar org-indent-initial-timer nil
   "Timer used for initialization.")
 (defvar org-indent-initial-lock nil
@@ -262,13 +264,21 @@ you want to use this feature."
 	     (function
 	      ;; Set prefix properties `line-prefix' and `wrap-prefix'
 	      ;; in current line to, respectively, length L and W and
-	      ;; move forward. If H is non-nil, `line-prefix' will be
-	      ;; starred. Assume point is at bol.
+	      ;; move forward.  If H is non-nil, `line-prefix' will be
+	      ;; starred.  If H is `inline', the first star will have
+	      ;; `org-warning' face.  Assume point is at bol.
 	      (lambda (l w h)
-		(let ((line (if h (aref org-indent-stars
-					(min l org-indent-max-levels))
-			      (aref org-indent-strings
-				    (min l org-indent-max))))
+		(let ((line (cond
+			     ((eq 'inline h)
+			      (let ((stars (aref org-indent-stars
+						 (min l org-indent-max-levels))))
+				(and stars
+				     (concat org-indent-inlinetask-first-star
+					     (substring stars 1)))))
+			     (h (aref org-indent-stars
+				      (min l org-indent-max-levels)))
+			     (t (aref org-indent-strings
+				      (min l org-indent-max)))))
 		      (wrap (aref org-indent-strings (min w org-indent-max))))
 		  (add-text-properties (point) (point-at-eol)
 				       `(line-prefix ,line wrap-prefix ,wrap)))
@@ -294,11 +304,11 @@ you want to use this feature."
 	       (setq pf wrap))
 	      ;; End of inline task: PF-INLINE is now nil.
 	      ((looking-at "\\*+ end[ \t]*$")
-	       (funcall set-prop-and-move line wrap t)
+	       (funcall set-prop-and-move line wrap 'inline)
 	       (setq pf-inline nil))
 	      ;; Start of inline task. Determine if it contains text,
 	      ;; or is only one line long. Set PF-INLINE accordingly.
-	      (t (funcall set-prop-and-move line wrap t)
+	      (t (funcall set-prop-and-move line wrap 'inline)
 		 (setq pf-inline (and (org-inlinetask-in-task-p) wrap))))))
 	  ;; List item: `wrap-prefix' is set where body starts.
 	  ((org-at-item-p)

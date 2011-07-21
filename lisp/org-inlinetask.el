@@ -188,14 +188,15 @@ If prefix arg NO-STATE is set, ignore `org-inlinetask-default-state'."
 	     (not (and (org-inlinetask-at-task-p) (bolp))))
     (error "Cannot nest inline tasks"))
   (or (bolp) (newline))
-  (let ((indent org-inlinetask-min-level))
-    (if org-odd-levels-only
-        (setq indent (- (* 2 indent) 1)))
-    (insert (make-string indent ?*)
-            (if (or no-state (not org-inlinetask-default-state))
-		" \n"
-	      (concat " " org-inlinetask-default-state " \n"))
-            (make-string indent ?*) " END\n"))
+  (let* ((indent (if org-odd-levels-only
+		     (1- (* 2 org-inlinetask-min-level))
+		   org-inlinetask-min-level))
+	 (indent-string (concat (make-string indent ?*) " ")))
+    (insert indent-string
+	    (if (or no-state (not org-inlinetask-default-state))
+		"\n"
+	      (concat org-inlinetask-default-state " \n"))
+	    indent-string "END\n"))
   (end-of-line -1))
 (define-key org-mode-map "\C-c\C-xt" 'org-inlinetask-insert-task)
 
@@ -403,6 +404,7 @@ Either remove headline and meta data, or do special formatting."
     (goto-char (match-end 0))
     (current-column)))
 
+(defvar org-indent-indentation-per-level) ; defined in org-indent.el
 (defun org-inlinetask-fontify (limit)
   "Fontify the inline tasks."
   (let* ((nstars (if org-odd-levels-only
@@ -410,10 +412,16 @@ Either remove headline and meta data, or do special formatting."
 		   (or org-inlinetask-min-level 200)))
 	 (re (concat "^\\(\\*\\)\\(\\*\\{"
 		    (format "%d" (- nstars 3))
-		    ",\\}\\)\\(\\*\\* .*\\)")))
+		    ",\\}\\)\\(\\*\\* .*\\)"))
+	 ;; Virtual indentation will add the warning face on the first
+	 ;; star. Thus, in that case, only hide it.
+	 (start-face (if (and (org-bound-and-true-p org-indent-mode)
+			      (> org-indent-indentation-per-level 1))
+			 'org-hide
+		       'org-warning)))
     (while (re-search-forward re limit t)
       (add-text-properties (match-beginning 1) (match-end 1)
-			   '(face org-warning font-lock-fontified t))
+			   `(face ,start-face font-lock-fontified t))
       (add-text-properties (match-beginning 2) (match-end 2)
 			   '(face org-hide font-lock-fontified t))
       (add-text-properties (match-beginning 3) (match-end 3)
