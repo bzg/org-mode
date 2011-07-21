@@ -183,12 +183,12 @@ useful to make it ever so slightly different."
   (interactive)
   (if (not (org-mode-p))
       (error "Buffer major mode must be Org")
-    (message "Initializing buffer indentation. It may take a few seconds...")
+    (message "Setting buffer indentation. It may take a few seconds...")
     (org-with-wide-buffer
      (with-silent-modifications
        (org-indent-remove-properties (point-min) (point-max))
        (org-indent-add-properties (point-min) (point-max))))
-    (message "Indentation of buffer initialized.")))
+    (message "Indentation of buffer set.")))
 
 (defsubst org-indent-remove-properties (beg end)
   "Remove indentations between BEG and END."
