@@ -1391,34 +1391,31 @@ When nil, such items are sorted as 0 minutes effort."
     (tags  . " %i %-12:c")
     (search . " %i %-12:c"))
   "Format specifications for the prefix of items in the agenda views.
-An alist with four entries, for the different agenda types.  The keys to the
-sublists are `agenda', `timeline', `todo', `search' and `tags'.  The values
-are format strings.
+An alist with five entries, each for the different agenda types.  The 
+keys of the sublists are `agenda', `timeline', `todo', `search' and `tags'.  
+The values are format strings.
+
 This format works similar to a printf format, with the following meaning:
 
-  %c   the category of the item, \"Diary\" for entries from the diary, or
-       as given by the CATEGORY keyword or derived from the file name.
-  %i   the icon category of the item, as give in
-       `org-agenda-category-icon-alist'.
-  %T   the *last* tag of the item.  Last because inherited tags come
-       first in the list.
-  %t   the time-of-day specification if one applies to the entry, in the
-       format HH:MM
+  %c   the category of the item, \"Diary\" for entries from the diary, 
+       or as given by the CATEGORY keyword or derived from the file name
+  %i   the icon category of the item, see `org-agenda-category-icon-alist'
+  %T   the last tag of the item (ignore inherited tags, which come first)
+  %t   the HH:MM time-of-day specification if one applies to the entry
   %s   Scheduling/Deadline information, a short string
   %(expression) Eval EXPRESSION and replace the control string
                 by the result
 
 All specifiers work basically like the standard `%s' of printf, but may
-contain two additional characters:  A question mark just after the `%' and
-a whitespace/punctuation character just before the final letter.
+contain two additional characters:  a question mark just after the `%'
+and a whitespace/punctuation character just before the final letter.
 
 If the first character after `%' is a question mark, the entire field
-will only be included if the corresponding value applies to the
-current entry.  This is useful for fields which should have fixed
-width when present, but zero width when absent.  For example,
-\"%?-12t\" will result in a 12 character time field if a time of the
-day is specified, but will completely disappear in entries which do
-not contain a time.
+will only be included if the corresponding value applies to the current 
+entry.  This is useful for fields which should have fixed width when 
+present, but zero width when absent.  For example, \"%?-12t\" will 
+result in a 12 character time field if a time of the day is specified, 
+but will completely disappear in entries which do not contain a time.
 
 If there is punctuation or whitespace character just before the final
 format letter, this character will be appended to the field value if
@@ -1426,19 +1423,16 @@ the value is not empty.  For example, the format \"%-12:c\" leads to
 \"Diary: \" if the category is \"Diary\".  If the category were be
 empty, no additional colon would be inserted.
 
-The default value of this option is \"  %-12:c%?-12t% s\", meaning:
+The default value for the agenda sublist is \"  %-12:c%?-12t% s\", 
+which means:
+
 - Indent the line with two space characters
-- Give the category in a 12 chars wide field, padded with whitespace on
+- Give the category a 12 chars wide field, padded with whitespace on
   the right (because of `-').  Append a colon if there is a category
   (because of `:').
 - If there is a time-of-day, put it into a 12 chars wide field.  If no
   time, don't put in an empty field, just skip it (because of '?').
-- Finally, put the scheduling information and append a whitespace.
-
-As another example, if you don't want the time-of-day of entries in
-the prefix, you could use:
-
-  (setq org-agenda-prefix-format \"  %-11:c% s\")
+- Finally, put the scheduling information.
 
 See also the variables `org-agenda-remove-times-when-in-prefix' and
 `org-agenda-remove-tags'.
