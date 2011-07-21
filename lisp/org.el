@@ -10937,6 +10937,32 @@ nil or a string to be used for the todo mark." )
 
 (defvar org-agenda-headline-snapshot-before-repeat)
 
+(defun org-current-effective-time ()
+  "Return current time adjusted for `org-extend-today-until' variable"
+  (let* ((ct (org-current-time))
+	  (dct (decode-time ct))
+	  (ct1
+	   (if (< (nth 2 dct) org-extend-today-until)
+	       (encode-time 0 59 23 (1- (nth 3 dct)) (nth 4 dct) (nth 5 dct))
+	     ct)))
+    ct1))
+
+(defun org-todo-yesterday (&optional arg)
+  "Like `org-todo' but the time of change will be 23:59 of yesterday"
+  (interactive "P")
+  (let* ((hour (third (decode-time
+                       (org-current-time))))
+         (org-extend-today-until (1+ hour)))
+    (org-todo arg)))
+
+(defun org-agenda-todo-yesterday (&optional arg)
+  "Like `org-agenda-todo' but the time of change will be 23:59 of yesterday"
+  (interactive "P")
+  (let* ((hour (third (decode-time
+                       (org-current-time))))
+         (org-extend-today-until (1+ hour)))
+    (org-agenda-todo arg)))
+
 (defun org-todo (&optional arg)
   "Change the TODO state of an item.
 The state of an item is given by a keyword at the start of the heading,
@@ -11116,7 +11142,7 @@ For calling through lisp, arg is also interpreted in the following way:
 	      (org-add-planning-info nil nil 'closed))
 	    (when (and now-done-p org-log-done)
 	      ;; It is now done, and it was not done before
-	      (org-add-planning-info 'closed (org-current-time))
+	      (org-add-planning-info 'closed (org-current-effective-time))
 	      (if (and (not dolog) (eq 'note org-log-done))
 		  (org-add-log-setup 'done state this 'findpos 'note)))
 	    (when (and state dolog)
@@ -11657,7 +11683,7 @@ This function is run automatically after each state change to a DONE state."
 	     ((equal (match-string 1 ts) ".")
 	      ;; Shift starting date to today
 	      (org-timestamp-change
-	       (- (time-to-days (current-time)) (time-to-days time))
+	       (- (org-today) (time-to-days time))
 	       'day))
 	     ((equal (match-string 1 ts) "+")
 	      (let ((nshiftmax 10) (nshift 0))
@@ -11938,6 +11964,11 @@ be removed."
 (defvar org-log-note-extra nil)
 (defvar org-log-note-window-configuration nil)
 (defvar org-log-note-return-to (make-marker))
+(defvar org-log-note-effective-time nil
+  "Remembered current time so that dynamically scoped
+`org-extend-today-until' affects tha timestamps in state change
+log")
+
 (defvar org-log-post-message nil
   "Message to be displayed after a log note has been stored.
 The auto-repeater uses this.")
@@ -12005,7 +12036,8 @@ EXTRA is additional text that will be inserted into the notes buffer."
 	      org-log-note-state state
 	      org-log-note-previous-state prev-state
 	      org-log-note-how how
-	      org-log-note-extra extra)
+	      org-log-note-extra extra
+	      org-log-note-effective-time (org-current-effective-time))
 	(add-hook 'post-command-hook 'org-add-log-note 'append)))))
 
 (defun org-skip-over-state-notes ()
@@ -12076,10 +12108,10 @@ EXTRA is additional text that will be inserted into the notes buffer."
 		   (cons "%U" user-full-name)
 		   (cons "%t" (format-time-string
 			       (org-time-stamp-format 'long 'inactive)
-			       (current-time)))
+			       org-log-note-effective-time))
 		   (cons "%T" (format-time-string
 			       (org-time-stamp-format 'long nil)
-			       (current-time)))
+			       org-log-note-effective-time))
 		   (cons "%s" (if org-log-note-state
 				  (concat "\"" org-log-note-state "\"")
 				""))
