@@ -6971,15 +6971,25 @@ This is important for non-interactive uses of the command."
 	    (hide-subtree)))
 	(run-hooks 'org-insert-heading-hook)))))
 
-(defun org-get-heading (&optional no-tags)
-  "Return the heading of the current entry, without the stars."
+(defun org-get-heading (&optional no-tags no-todo)
+  "Return the heading of the current entry, without the stars.
+When NO-TAGS is non-nil, don't include tags.
+When NO-TODO is non-nil, don't include TODO keywords."
   (save-excursion
     (org-back-to-heading t)
-    (if (looking-at
-	 (if no-tags
-	     (org-re "\\*+[ \t]+\\([^\n\r]*?\\)\\([ \t]+:[[:alnum:]:_@#%]+:[ \t]*\\)?$")
-	   "\\*+[ \t]+\\([^\r\n]*\\)"))
-	(match-string 1) "")))
+    (cond 
+     ((and no-tags no-todo)
+      (looking-at org-complex-heading-regexp)
+      (match-string 4))
+     (no-tags
+      (looking-at "\\*+[ \t]+\\([^\n\r]*?\\)\\([ \t]+:[[:alnum:]:_@#%]+:[ \t]*\\)?$")
+      (match-string 1))
+     (no-todo
+      (looking-at (concat "\\*+[ \t]+" org-todo-regexp " +"
+			  "\\([^\n\r]*?[ \t]+:[[:alnum:]:_@#%]+:[ \t]*\\)?$"))
+      (match-string 2))
+     (t (looking-at "\\*+[ \t]+\\([^\r\n]*\\)")
+	(match-string 1)))))
 
 (defun org-heading-components ()
   "Return the components of the current heading.
@@ -10505,7 +10515,7 @@ this function appends the default value from
       (org-map-tree
        (lambda()
 	 (setq excluded-entries
-	       (append excluded-entries (list (org-get-heading t)))))))
+	       (append excluded-entries (list (org-get-heading t t)))))))
     (setq org-refile-target-table
 	  (org-refile-get-targets default-buffer excluded-entries)))
   (unless org-refile-target-table
