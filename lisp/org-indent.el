@@ -61,6 +61,12 @@ It will be set in `org-indent-initialize'.")
 (defvar org-indent-stars nil
   "Vector with all indentation star strings.
 It will be set in `org-indent-initialize'.")
+(defvar org-indent-initial-marker nil
+  "Position of initialization process before interrupt.")
+(defvar org-indent-initial-timer nil
+  "Timer used for initialization.")
+(defvar org-indent-initial-lock nil
+  "Lock used of initialization.")
 (defvar org-hide-leading-stars-before-indent-mode nil
   "Used locally.")
 (defvar org-indent-deleted-headline-flag nil
@@ -138,7 +144,8 @@ properties, after each buffer modifiation, on the modified zone."
     ;; mode was turned on.
     (org-set-local 'indent-tabs-mode nil)
     (or org-indent-strings (org-indent-initialize))
-    (org-indent-indent-buffer)
+    (org-set-local 'org-indent-initial-marker (copy-marker 1))
+    (org-set-local 'org-indent-initial-lock nil)
     (when org-indent-mode-turns-off-org-adapt-indentation
       (org-set-local 'org-adapt-indentation nil))
     (when org-indent-mode-turns-on-hiding-stars
@@ -151,12 +158,19 @@ properties, after each buffer modifiation, on the modified zone."
     (org-add-hook 'after-change-functions 'org-indent-refresh-maybe nil 'local)
     (org-add-hook 'before-change-functions
 		  'org-indent-notify-deleted-headline nil 'local)
-    (and font-lock-mode (org-restart-font-lock)))
+    (and font-lock-mode (org-restart-font-lock))
+    (with-silent-modifications
+      (org-indent-remove-properties (point-min) (point-max)))
+    (org-set-local 'org-indent-initial-timer
+		   (run-with-idle-timer 0.2 t #'org-indent-initialize-buffer)))
    (t
     ;; mode was turned off (or we refused to turn it on)
     (save-excursion
       (save-restriction
-	(org-indent-remove-properties (point-min) (point-max))
+	(when org-indent-initialize-marker
+	  (set-marker org-indent-initialize-marker nil))
+	(with-silent-modifications
+	  (org-indent-remove-properties (point-min) (point-max)))
 	(kill-local-variable 'org-adapt-indentation)
 	(when (boundp 'org-hide-leading-stars-before-indent-mode)
 	  (org-set-local 'org-hide-leading-stars
@@ -185,9 +199,8 @@ useful to make it ever so slightly different."
       (error "Buffer major mode must be Org")
     (message "Setting buffer indentation. It may take a few seconds...")
     (org-with-wide-buffer
-     (with-silent-modifications
-       (org-indent-remove-properties (point-min) (point-max))
-       (org-indent-add-properties (point-min) (point-max))))
+     (org-indent-remove-properties (point-min) (point-max))
+     (org-indent-add-properties (point-min) (point-max)))
     (message "Indentation of buffer set.")))
 
 (defsubst org-indent-remove-properties (beg end)
@@ -200,77 +213,102 @@ useful to make it ever so slightly different."
 			  '(line-prefix nil wrap-prefix nil) string)
   string)
 
-(defun org-indent-add-properties (beg end)
-  "Add indentation properties between BEG and END."
-  (org-with-wide-buffer
-    (goto-char beg)
-    (beginning-of-line)
-    ;; 1. Initialize prefix at BEG. This is done by storing two
-    ;;    variables: INLINE-PF and PF, representing respectively
-    ;;    length of current `line-prefix' when line is inside an
-    ;;    inline task or not.
-    (let* ((case-fold-search t)
-	   (limited-re (org-get-limited-outline-regexp))
-	   (added-ind-per-lvl (1- org-indent-indentation-per-level))
-	   (pf (let ((outline-regexp limited-re))
-		 (save-excursion
-		   (and (ignore-errors (org-back-to-heading t))
-			(looking-at org-outline-regexp)
-			(+ (* org-indent-indentation-per-level
-			      (- (match-end 0) (match-beginning 0) 2)) 2)))))
-	   (pf-inline (and (featurep 'org-inlinetask)
-			   (org-inlinetask-in-task-p)
-			   (+ (* org-indent-indentation-per-level
-				 (1- (org-inlinetask-get-task-level))) 2)))
-	   (set-prop-and-move
-	    (function
-	     ;; Set prefix properties `line-prefix' and `wrap-prefix'
-	     ;; in current line to, respectively, length L and W and
-	     ;; move forward. If H is non-nil, `line-prefix' will be
-	     ;; starred. Assume point is at bol.
-	     (lambda (l w h)
-	       (let ((line (if h (aref org-indent-stars
-				       (min l org-indent-max-levels))
-			     (aref org-indent-strings
-				   (min l org-indent-max))))
-		     (wrap (aref org-indent-strings (min w org-indent-max))))
-		(add-text-properties (point) (point-at-eol)
-				     `(line-prefix ,line wrap-prefix ,wrap)))
-	       (forward-line 1)))))
-      ;; 2. For each line, set `line-prefix' and `wrap-prefix'
-      ;;    properties depending on the type of line (headline, inline
-      ;;    task, item or other).
-      (while (< (point) end)
-	(cond
-	 ;; Empty line: do nothing.
-	 ((eolp) (forward-line 1))
-	 ;; Headline or inline task.
-	 ((looking-at "\\*+ ")
-	  (let* ((nstars (- (match-end 0) (match-beginning 0) 1))
-		 (line (* added-ind-per-lvl (1- nstars)))
-		 (wrap (+ line (1+ nstars))))
-	    (cond
-	     ;; Headline: new value for PF.
-	     ((looking-at limited-re)
-	      (funcall set-prop-and-move line wrap t)
-	      (setq pf wrap))
-	     ;; End of inline task: PF-INLINE is now nil.
-	     ((looking-at "\\*+ end[ \t]*$")
-	      (funcall set-prop-and-move line wrap t)
-	      (setq pf-inline nil))
-	     ;; Start of inline task. Determine if it contains text,
-	     ;; or is only one line long. Set PF-INLINE accordingly.
-	     (t (funcall set-prop-and-move line wrap t)
-		(setq pf-inline (and (org-inlinetask-in-task-p) wrap))))))
-	 ;; List item: `wrap-prefix' is set where body starts.
-	 ((org-at-item-p)
-	  (let* ((line (or pf-inline pf 0))
-		 (wrap (+ (org-list-item-body-column (point)) line)))
-	    (funcall set-prop-and-move line wrap nil)))
-	 ;; Normal line: use PF-INLINE, PF or nil as prefixes.
-	 (t (let* ((line (or pf-inline pf 0))
-		   (wrap (+ line (org-get-indentation))))
-	      (funcall set-prop-and-move line wrap nil))))))))
+(defun org-indent-initialize-buffer ()
+  "Set virtual indentation for the whole buffer asynchronously."
+  (when (and org-indent-mode (not org-indent-initial-lock))
+    (org-with-wide-buffer
+     (setq org-indent-initial-lock t)
+     (let ((interruptp
+	    ;; Always nil unless interrupted.
+	    (catch 'interrupt
+	      (and org-indent-initial-marker
+		   (marker-position org-indent-initial-marker)
+		   (org-indent-add-properties org-indent-initial-marker
+					      (point-max) t)
+		   nil))))
+       (move-marker org-indent-initial-marker interruptp)
+       ;; Job is complete: stop idle timer.
+       (unless interruptp (cancel-timer org-indent-initial-timer))))
+    (setq org-indent-initial-lock nil)))
+
+(defun org-indent-add-properties (beg end &optional async)
+  "Add indentation properties between BEG and END.
+
+If ASYNC is non-nil, allow to interrupt the process.  This is
+done by throwing the `interrupt' tag along with the buffer
+position where the process stopped.  Be sure to catch this tag if
+you want to use this feature."
+  (save-match-data
+    (org-with-wide-buffer
+     (goto-char beg)
+     (beginning-of-line)
+     ;; 1. Initialize prefix at BEG. This is done by storing two
+     ;;    variables: INLINE-PF and PF, representing respectively
+     ;;    length of current `line-prefix' when line is inside an
+     ;;    inline task or not.
+     (let* ((case-fold-search t)
+	    (limited-re (org-get-limited-outline-regexp))
+	    (added-ind-per-lvl (1- org-indent-indentation-per-level))
+	    (pf (save-excursion
+		  (and (ignore-errors (let ((outline-regexp limited-re))
+					(org-back-to-heading t)))
+		       (+ (* org-indent-indentation-per-level
+			     (- (match-end 0) (match-beginning 0) 2)) 2))))
+	    (pf-inline (and (featurep 'org-inlinetask)
+			    (org-inlinetask-in-task-p)
+			    (+ (* org-indent-indentation-per-level
+				  (1- (org-inlinetask-get-task-level))) 2)))
+	    (set-prop-and-move
+	     (function
+	      ;; Set prefix properties `line-prefix' and `wrap-prefix'
+	      ;; in current line to, respectively, length L and W and
+	      ;; move forward. If H is non-nil, `line-prefix' will be
+	      ;; starred. Assume point is at bol.
+	      (lambda (l w h)
+		(let ((line (if h (aref org-indent-stars
+					(min l org-indent-max-levels))
+			      (aref org-indent-strings
+				    (min l org-indent-max))))
+		      (wrap (aref org-indent-strings (min w org-indent-max))))
+		  (add-text-properties (point) (point-at-eol)
+				       `(line-prefix ,line wrap-prefix ,wrap)))
+		(forward-line 1)))))
+       ;; 2. For each line, set `line-prefix' and `wrap-prefix'
+       ;;    properties depending on the type of line (headline, inline
+       ;;    task, item or other).
+       (while (< (point) end)
+	 (cond
+	  ;; When in async mode, check if interrupt is required.
+	  ((and async (input-pending-p)) (throw 'interrupt (point)))
+	  ;; Empty line: do nothing.
+	  ((eolp) (forward-line 1))
+	  ;; Headline or inline task.
+	  ((looking-at org-outline-regexp)
+	   (let* ((nstars (- (match-end 0) (match-beginning 0) 1))
+		  (line (* added-ind-per-lvl (1- nstars)))
+		  (wrap (+ line (1+ nstars))))
+	     (cond
+	      ;; Headline: new value for PF.
+	      ((looking-at limited-re)
+	       (funcall set-prop-and-move line wrap t)
+	       (setq pf wrap))
+	      ;; End of inline task: PF-INLINE is now nil.
+	      ((looking-at "\\*+ end[ \t]*$")
+	       (funcall set-prop-and-move line wrap t)
+	       (setq pf-inline nil))
+	      ;; Start of inline task. Determine if it contains text,
+	      ;; or is only one line long. Set PF-INLINE accordingly.
+	      (t (funcall set-prop-and-move line wrap t)
+		 (setq pf-inline (and (org-inlinetask-in-task-p) wrap))))))
+	  ;; List item: `wrap-prefix' is set where body starts.
+	  ((org-at-item-p)
+	   (let* ((line (or pf-inline pf 0))
+		  (wrap (+ (org-list-item-body-column (point)) line)))
+	     (funcall set-prop-and-move line wrap nil)))
+	  ;; Normal line: use PF-INLINE, PF or nil as prefixes.
+	  (t (let* ((line (or pf-inline pf 0))
+		    (wrap (+ line (org-get-indentation))))
+	       (funcall set-prop-and-move line wrap nil)))))))))
 
 (defun org-indent-notify-deleted-headline (beg end)
   "Set `org-indent-deleted-headline-flag' depending on the current command.
@@ -279,13 +317,15 @@ BEG and END are the positions of the beginning and end of the
 range of deleted text.
 
 This function is meant to be called by `before-change-functions'.
-Flag will be non-nil if command is going to delete an headline."
-  (setq org-indent-deleted-headline-flag
-	(and (/= beg end)
-	     (save-excursion
-	       (goto-char beg)
-	       (save-match-data
-		 (re-search-forward org-outline-regexp-bol end t))))))
+Flag will be non-nil if command is going to modify or delete an
+headline."
+  (when org-indent-mode
+    (setq org-indent-modified-headline-flag
+	  (save-excursion
+	    (goto-char beg)
+	    (save-match-data
+	      (or (and (org-at-heading-p) (< beg (match-end 0)))
+		  (re-search-forward org-outline-regexp-bol end t)))))))
 
 (defun org-indent-refresh-maybe (beg end dummy)
   "Refresh indentation properties in an adequate portion of buffer.
