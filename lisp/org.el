@@ -7517,88 +7517,86 @@ the inserted text when done."
     (error "%s"
      (substitute-command-keys
       "The kill is not a (set of) tree(s) - please use \\[yank] to yank anyway")))
-  (let* ((visp (not (outline-invisible-p)))
-	 (txt tree)
-	 (^re (concat "^\\(" org-outline-regexp "\\)"))
-	 (re  (concat "\\(" org-outline-regexp "\\)"))
-	 (^re_ (concat "\\(\\*+\\)[  \t]*"))
-
-	 (old-level (if (string-match ^re txt)
-			(- (match-end 0) (match-beginning 0) 1)
-		      -1))
-	 (force-level (cond (level (prefix-numeric-value level))
-			    ((and (looking-at "[ \t]*$")
-				  (string-match
-				   ^re_ (buffer-substring
-					 (point-at-bol) (point))))
-			     (- (match-end 1) (match-beginning 1)))
-			    ((and (bolp)
-				  (looking-at org-outline-regexp))
-			     (- (match-end 0) (point) 1))
-			    (t nil)))
-	 (previous-level (save-excursion
-			   (condition-case nil
-			       (progn
-				 (outline-previous-visible-heading 1)
-				 (if (looking-at re)
-				     (- (match-end 0) (match-beginning 0) 1)
-				   1))
-			     (error 1))))
-	 (next-level (save-excursion
-		       (condition-case nil
-			   (progn
-			     (or (looking-at org-outline-regexp)
-				 (outline-next-visible-heading 1))
-			     (if (looking-at re)
-				 (- (match-end 0) (match-beginning 0) 1)
-			       1))
-			 (error 1))))
-	 (new-level (or force-level (max previous-level next-level)))
-	 (shift (if (or (= old-level -1)
-			(= new-level -1)
-			(= old-level new-level))
-		    0
-		  (- new-level old-level)))
-	 (delta (if (> shift 0) -1 1))
-	 (func (if (> shift 0) 'org-demote 'org-promote))
-	 (org-odd-levels-only nil)
-	 beg end newend)
-    ;; Remove the forced level indicator
-    (if force-level
-	(delete-region (point-at-bol) (point)))
-    ;; Paste
-    (beginning-of-line 1)
-    (unless for-yank (org-back-over-empty-lines))
-    (setq beg (point))
-    (and (fboundp 'org-id-paste-tracker) (org-id-paste-tracker txt))
-    (insert-before-markers txt)
-    (unless (string-match "\n\\'" txt) (insert "\n"))
-    (setq newend (point))
-    (org-reinstall-markers-in-region beg)
-    (setq end (point))
-    (goto-char beg)
-    (skip-chars-forward " \t\n\r")
-    (setq beg (point))
-    (if (and (outline-invisible-p) visp)
-	(save-excursion (outline-show-heading)))
-    ;; Shift if necessary
-    (unless (= shift 0)
-      (save-restriction
-	(narrow-to-region beg end)
-	(while (not (= shift 0))
-	  (org-map-region func (point-min) (point-max))
-	  (setq shift (+ delta shift)))
-	(goto-char (point-min))
-	(setq newend (point-max))))
-    (when (or (org-called-interactively-p 'interactive) for-yank)
-      (message "Clipboard pasted as level %d subtree" new-level))
-    (if (and (not for-yank) ; in this case, org-yank will decide about folding
-	     kill-ring
-	     (eq org-subtree-clip (current-kill 0))
-	     org-subtree-clip-folded)
-	;; The tree was folded before it was killed/copied
-	(hide-subtree))
-    (and for-yank (goto-char newend))))
+  (org-with-limited-levels
+   (let* ((visp (not (outline-invisible-p)))
+	  (txt tree)
+	  (^re_ (concat "\\(\\*+\\)[  \t]*"))
+	  (old-level (if (string-match org-outline-regexp-bol txt)
+			 (- (match-end 0) (match-beginning 0) 1)
+		       -1))
+	  (force-level (cond (level (prefix-numeric-value level))
+			     ((and (looking-at "[ \t]*$")
+				   (string-match
+				    ^re_ (buffer-substring
+					  (point-at-bol) (point))))
+			      (- (match-end 1) (match-beginning 1)))
+			     ((and (bolp)
+				   (looking-at org-outline-regexp))
+			      (- (match-end 0) (point) 1))
+			     (t nil)))
+	  (previous-level (save-excursion
+			    (condition-case nil
+				(progn
+				  (outline-previous-visible-heading 1)
+				  (if (looking-at re)
+				      (- (match-end 0) (match-beginning 0) 1)
+				    1))
+			      (error 1))))
+	  (next-level (save-excursion
+			(condition-case nil
+			    (progn
+			      (or (looking-at org-outline-regexp)
+				  (outline-next-visible-heading 1))
+			      (if (looking-at re)
+				  (- (match-end 0) (match-beginning 0) 1)
+				1))
+			  (error 1))))
+	  (new-level (or force-level (max previous-level next-level)))
+	  (shift (if (or (= old-level -1)
+			 (= new-level -1)
+			 (= old-level new-level))
+		     0
+		   (- new-level old-level)))
+	  (delta (if (> shift 0) -1 1))
+	  (func (if (> shift 0) 'org-demote 'org-promote))
+	  (org-odd-levels-only nil)
+	  beg end newend)
+     ;; Remove the forced level indicator
+     (if force-level
+	 (delete-region (point-at-bol) (point)))
+     ;; Paste
+     (beginning-of-line 1)
+     (unless for-yank (org-back-over-empty-lines))
+     (setq beg (point))
+     (and (fboundp 'org-id-paste-tracker) (org-id-paste-tracker txt))
+     (insert-before-markers txt)
+     (unless (string-match "\n\\'" txt) (insert "\n"))
+     (setq newend (point))
+     (org-reinstall-markers-in-region beg)
+     (setq end (point))
+     (goto-char beg)
+     (skip-chars-forward " \t\n\r")
+     (setq beg (point))
+     (if (and (outline-invisible-p) visp)
+	 (save-excursion (outline-show-heading)))
+     ;; Shift if necessary
+     (unless (= shift 0)
+       (save-restriction
+	 (narrow-to-region beg end)
+	 (while (not (= shift 0))
+	   (org-map-region func (point-min) (point-max))
+	   (setq shift (+ delta shift)))
+	 (goto-char (point-min))
+	 (setq newend (point-max))))
+     (when (or (org-called-interactively-p 'interactive) for-yank)
+       (message "Clipboard pasted as level %d subtree" new-level))
+     (if (and (not for-yank) ; in this case, org-yank will decide about folding
+	      kill-ring
+	      (eq org-subtree-clip (current-kill 0))
+	      org-subtree-clip-folded)
+	 ;; The tree was folded before it was killed/copied
+	 (hide-subtree))
+     (and for-yank (goto-char newend)))))
 
 (defun org-kill-is-subtree-p (&optional txt)
   "Check if the current kill is an outline subtree, or a set of trees.
@@ -7608,12 +7606,12 @@ So this will actually accept several entries of equal levels as well,
 which is OK for `org-paste-subtree'.
 If optional TXT is given, check this string instead of the current kill."
   (let* ((kill (or txt (and kill-ring (current-kill 0)) ""))
+	 (re (org-get-limited-outline-regexp))
 	 (start-level (and kill
-			   (string-match (concat "\\`\\([ \t\n\r]*?\n\\)?\\("
-						 org-outline-regexp "\\)")
-					 kill)
+			   (string-match
+			    (concat "\\`\\([ \t\n\r]*?\n\\)?\\(" re "\\)")
+			    kill)
 			   (- (match-end 2) (match-beginning 2) 1)))
-	 (re org-outline-regexp-bol)
 	 (start (1+ (or (match-beginning 2) -1))))
     (if (not start-level)
 	(progn
@@ -19840,17 +19838,18 @@ interactive command with similar behavior."
 	  (when (and (bolp) subtreep
 		     (not (setq swallowp
 				(org-yank-folding-would-swallow-text beg end))))
-	    (or (looking-at org-outline-regexp)
-		(re-search-forward org-outline-regexp-bol end t))
-	    (while (and (< (point) end) (looking-at org-outline-regexp))
-	      (hide-subtree)
-	      (org-cycle-show-empty-lines 'folded)
-	      (condition-case nil
-		  (outline-forward-same-level 1)
-		(error (goto-char end)))))
+	    (org-with-limited-levels
+	     (or (looking-at org-outline-regexp)
+		 (re-search-forward org-outline-regexp-bol end t))
+	     (while (and (< (point) end) (looking-at org-outline-regexp))
+	       (hide-subtree)
+	       (org-cycle-show-empty-lines 'folded)
+	       (condition-case nil
+		   (outline-forward-same-level 1)
+		 (error (goto-char end))))))
 	  (when swallowp
 	    (message
-            "Inserted text not folded because that would swallow text"))
+	     "Inserted text not folded because that would swallow text"))
 
 	  (goto-char end)
 	  (skip-chars-forward " \t\n\r")
@@ -19866,18 +19865,19 @@ interactive command with similar behavior."
 (defun org-yank-folding-would-swallow-text (beg end)
   "Would hide-subtree at BEG swallow any text after END?"
   (let (level)
-    (save-excursion
-      (goto-char beg)
-      (when (or (looking-at org-outline-regexp)
-		(re-search-forward org-outline-regexp-bol end t))
-	(setq level (org-outline-level)))
-      (goto-char end)
-      (skip-chars-forward " \t\r\n\v\f")
-      (if (or (eobp)
-	      (and (bolp) (looking-at org-outline-regexp)
-		   (<= (org-outline-level) level)))
-	  nil ; Nothing would be swallowed
-	t)))) ; something would swallow
+    (org-with-limited-levels
+     (save-excursion
+       (goto-char beg)
+       (when (or (looking-at org-outline-regexp)
+		 (re-search-forward org-outline-regexp-bol end t))
+	 (setq level (org-outline-level)))
+       (goto-char end)
+       (skip-chars-forward " \t\r\n\v\f")
+       (if (or (eobp)
+	       (and (bolp) (looking-at org-outline-regexp)
+		    (<= (org-outline-level) level)))
+	   nil				; Nothing would be swallowed
+	 t)))))				; something would swallow
 
 (define-key org-mode-map "\C-y" 'org-yank)
 
