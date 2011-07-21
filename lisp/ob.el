@@ -754,7 +754,7 @@ the current subtree."
 		   (setq lst (remove p lst)))
 		 lst)
 	     (norm (arg)
-		   (let ((v (if (listp (cdr arg))
+		   (let ((v (if (and (listp (cdr arg)) (null (cddr arg)))
 				(copy-seq (cdr arg))
 			      (cdr arg))))
 		     (when (and v (not (and (sequencep v)
