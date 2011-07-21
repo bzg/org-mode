@@ -1095,8 +1095,8 @@ for the duration of the command."
 					(plain-list-item . auto))
   "Should `org-insert-heading' leave a blank line before new heading/item?
 The value is an alist, with `heading' and `plain-list-item' as CAR,
-and a boolean flag as CDR.  The cdr may also be the symbol `auto', in 
-which case Org will look at the surrounding headings/items and try to 
+and a boolean flag as CDR.  The cdr may also be the symbol `auto', in
+which case Org will look at the surrounding headings/items and try to
 make an intelligent decision whether to insert a blank line or not.
 
 For plain lists, if the variable `org-empty-line-terminates-plain-lists' is
@@ -1983,7 +1983,7 @@ Interested libraries should add to this list.")
 
 (defcustom org-loop-over-siblings-within-active-region-p nil
   "Shall some commands act upon siblings in the active region?
-The list of commands is: 
+The list of commands is:
 - `org-schedule'
 - `org-deadline'
 - `org-archive-subtree'
@@ -4712,7 +4712,7 @@ This variable is set by `org-before-change-function'.
 (defvar org-inhibit-blocking nil)       ; Dynamically-scoped param.
 (defvar org-table-buffer-is-an nil)
 
-;; org-outline-regexp ought to be a defconst but is let-binding 
+;; org-outline-regexp ought to be a defconst but is let-binding
 ;; in some places -- e.g. see the macro org-with-limited-levels
 (defvar org-outline-regexp "\\*+ ")
 (defconst org-outline-regexp-bol "^\\*+ ")
@@ -7741,12 +7741,12 @@ and still retain the repeater to cover future instances of the task."
     (with-temp-buffer
       (insert template)
       (goto-char (point-min))
-      (while (re-search-forward 
+      (while (re-search-forward
 	      "^[ \t]*CLOCK:.*$" (save-excursion (org-end-of-subtree t t)) t)
 	(replace-match "")
 	(kill-whole-line))
       (goto-char (point-min))
-      (while (re-search-forward 
+      (while (re-search-forward
 	      (concat "^[ \t]*:" (regexp-opt org-drawers) ":[ \t]*$") nil t)
 	(mapc (lambda(d) (org-remove-empty-drawer-at d (point))) org-drawers))
       (setq template (buffer-substring (point-min) (point-max))))
@@ -10154,7 +10154,7 @@ on the system \"/user@host:\"."
 			   org-refile-cache))))
       (and set (org-refile-cache-check-set set) set)))))
 
-(defun org-refile-get-targets (&optional default-buffer)
+(defun org-refile-get-targets (&optional default-buffer excluded-entries)
   "Produce a table with refile targets."
   (let ((case-fold-search nil)
 	;; otherwise org confuses "TODO" as a kw and "Todo" as a word
@@ -10217,7 +10217,8 @@ on the system \"/user@host:\"."
 			 (save-match-data
 			   (or (funcall org-refile-target-verify-function)
 			       (throw 'next t))))
-		       (when (looking-at org-complex-heading-regexp)
+		       (when (and (looking-at org-complex-heading-regexp)
+				  (not (member (match-string 4) excluded-entries)))
 			 (setq level (org-reduced-level
 				      (- (match-end 1) (match-beginning 1)))
 			       txt (org-link-display-format (match-string 4))
@@ -10353,8 +10354,8 @@ the *old* location.")
 The list of target headings is compiled using the information in
 `org-refile-targets', which see.
 
-At the target location, the entry is filed as a subitem of the target 
-heading.  Depending on `org-reverse-note-order', the new subitem will 
+At the target location, the entry is filed as a subitem of the target
+heading.  Depending on `org-reverse-note-order', the new subitem will
 either be the first or the last subitem.
 
 If there is an active region, all entries in that region will be moved.
@@ -10375,7 +10376,7 @@ See also `org-refile-use-outline-path' and `org-completion-use-ido'.
 
 If you are using target caching (see `org-refile-use-cache'),
 You have to clear the target cache in order to find new targets.
-This can be done with a 0 prefix (`C-0 C-c C-w') or a triple 
+This can be done with a 0 prefix (`C-0 C-c C-w') or a triple
 prefix argument (`C-u C-u C-u C-c C-w')."
 
   (interactive "P")
@@ -10497,8 +10498,16 @@ PROMPT should not be suffixed with a colon and a space, because
 this function appends the default value from
 `org-refile-history' automatically, if that is not empty."
   (let ((org-refile-targets org-refile-targets)
-	(org-refile-use-outline-path org-refile-use-outline-path))
-    (setq org-refile-target-table (org-refile-get-targets default-buffer)))
+	(org-refile-use-outline-path org-refile-use-outline-path)
+	excluded-entries)
+    (when (and (eq major-mode 'org-mode)
+	       (not org-refile-use-cache))
+      (org-map-tree
+       (lambda()
+	 (setq excluded-entries
+	       (append excluded-entries (list (org-get-heading t)))))))
+    (setq org-refile-target-table
+	  (org-refile-get-targets default-buffer excluded-entries)))
   (unless org-refile-target-table
     (error "No refile targets"))
   (let* ((prompt (concat prompt
@@ -11889,7 +11898,7 @@ be removed."
 			    (and (eq what 'closed) org-log-done-with-time))
 			(eq what 'closed)
 			nil nil (list org-end-time-was-given)))
-	      (insert 
+	      (insert
 	       (if (not (or (bolp) (eq (char-before) ?\ )
 			    (memq (char-after) '(32 10))
 			    (eobp))) " " ""))
