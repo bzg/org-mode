@@ -5564,7 +5564,6 @@ Any match of REMOVE-RE will be removed from TXT."
 		 (>= (length category) org-prefix-category-max-length))
 	    (setq category (substring category 0 (1- org-prefix-category-max-length)))))
       ;; Evaluate the compiled format
-      (assert effort)
       (setq rtn (concat (eval org-prefix-format-compiled) txt))
 
       ;; And finally add the text properties
@@ -5581,6 +5580,7 @@ Any match of REMOVE-RE will be removed from TXT."
 	'txt txt
 	'time time
 	'extra extra
+	'format org-prefix-format-compiled
 	'dotime dotime))))
 
 (defun org-agenda-fix-displayed-tags (txt tags add-inherited hide-re)
@@ -7255,8 +7255,16 @@ If FORCE-TAGS is non nil, the car of it returns the new tags."
 		dotime (org-get-at-bol 'dotime)
 		cat (org-get-at-bol 'org-category)
 		tags thetags
-		new (org-format-agenda-item (org-get-at-bol 'extra)
-					    newhead cat tags dotime)
+		new
+		(let ((org-prefix-format-compiled
+		       (or (get-text-property (point) 'format)
+			   org-prefix-format-compiled)))
+		  (with-current-buffer (marker-buffer hdmarker)
+		    (save-excursion
+		      (save-restriction
+			(widen)
+			(org-format-agenda-item (org-get-at-bol 'extra)
+						newhead cat tags dotime)))))
 		pl (text-property-any (point-at-bol) (point-at-eol) 'org-heading t)
 		undone-face (org-get-at-bol 'undone-face)
 		done-face (org-get-at-bol 'done-face))
