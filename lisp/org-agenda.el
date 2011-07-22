@@ -7426,10 +7426,12 @@ the same tree node, and the headline of the tree node in the Org-mode file."
 	  (org-show-context 'agenda))
 	(save-excursion
 	  (and (outline-next-heading)
-	       (org-flag-heading nil)))   ; show the next heading
+	       (org-flag-heading nil)))	; show the next heading
 	(goto-char pos)
 	(call-interactively 'org-set-effort)
-	(end-of-line 1)))))
+	(end-of-line 1)
+	(setq newhead (org-get-heading)))
+      (org-agenda-change-all-lines newhead hdmarker))))
 
 (defun org-agenda-toggle-archive-tag ()
   "Toggle the archive tag for the current entry."
