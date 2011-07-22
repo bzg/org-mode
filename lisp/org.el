@@ -15563,7 +15563,7 @@ With prefix ARG, change that many days."
 The date will be changed by N times WHAT.  WHAT can be `day', `month',
 `year', `minute', `second'.  If WHAT is not given, the cursor position
 in the timestamp determines what will be changed."
-  (let ((pos (copy-marker (point)))
+  (let ((pos (point))
 	with-hm inactive
 	(dm (max (nth 1 org-time-stamp-rounding-minutes) 1))
 	org-ts-what
@@ -15627,7 +15627,6 @@ in the timestamp determines what will be changed."
 	    (org-insert-time-stamp time with-hm inactive nil nil extra))
       (org-clock-update-time-maybe)
       (goto-char pos)
-      (move-marker pos nil)
       ;; Try to recenter the calendar window, if any
       (if (and org-calendar-follow-timestamp-change
 	       (get-buffer-window "*Calendar*" t)
