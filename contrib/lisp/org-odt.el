@@ -1226,6 +1226,10 @@ MAY-INLINE-P allows inlining it as an image."
     (apply 'org-lparse-format-tags tag text prefix suffix args)))
 
 (defun org-odt-init-outfile (filename)
+  (unless (executable-find "zip")
+    ;; Not at all OSes ship with zip by default
+    (error "Executable \"zip\" needed for creating OpenDocument files. Aborting."))
+
   (let* ((outdir (make-temp-file org-export-odt-tmpdir-prefix t))
 	 (mimetype-file (expand-file-name "mimetype" outdir))
 	 (content-file (expand-file-name "content.xml" outdir))
