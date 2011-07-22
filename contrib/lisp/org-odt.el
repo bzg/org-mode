@@ -73,7 +73,16 @@
     (cond
      ((file-directory-p dir1) dir1)
      ((file-directory-p dir2) dir2)
-     (t (error "Cannot find factory styles file. Check package dir layout")))))
+     (t (error "Cannot find factory styles file. Check package dir layout"))))
+  "Directory that holds auxiliary files used by the ODT exporter.
+
+The 'styles' subdir contains the following xml files -
+ 'OrgOdtStyles.xml' and 'OrgOdtAutomaticStyles.xml' - which are
+ used as factory settings of `org-export-odt-styles-file' and
+ `org-export-odt-automatic-styles-file'.
+
+The 'etc/schema' subdir contains rnc files for validating of
+OpenDocument xml files.")
 
 (defvar org-odt-file-extensions
   '(("odt" . "OpenDocument Text")
@@ -135,22 +144,47 @@
 (org-lparse-register-backend 'odt)
 
 (defcustom org-export-odt-automatic-styles-file nil
-  "Default style file for use with ODT exporter."
+  "Automatic styles for use with ODT exporter.
+If unspecified, the file under `org-odt-data-dir' is used."
   :type 'file
   :group 'org-export-odt)
 
-;; TODO: Make configuration user-friendly.
 (defcustom org-export-odt-styles-file nil
-  "Default style file for use with ODT exporter.
-Valid values are path to an styles.xml file or a path to a valid
-*.odt or a *.ott file or a list of the form (FILE (MEMBER1
-MEMBER2 ...)). In the last case, the specified FILE is unzipped
-and MEMBER1, MEMBER2 etc are copied in to the generated odt
-file. The last form is particularly useful if the styles.xml has
-reference to additional files like header and footer images.
-"
-  :type 'file
-  :group 'org-export-odt)
+  "Default styles file for use with ODT export.
+Valid values are one of:
+1. nil
+2. path to a styles.xml file
+3. path to a *.odt or a *.ott file
+4. list of the form (ODT-OR-OTT-FILE (FILE-MEMBER-1 FILE-MEMBER-2
+...))
+
+In case of option 1, an in-built styles.xml is used. See
+`org-odt-data-dir' for more information.
+
+In case of option 3, the specified file is unzipped and the
+styles.xml embedded therein is used.
+
+In case of option 4, the specified ODT-OR-OTT-FILE is unzipped
+and FILE-MEMBER-1, FILE-MEMBER-2 etc are copied in to the
+generated odt file.  Use relative path for specifying the
+FILE-MEMBERS.  styles.xml must be specified as one of the
+FILE-MEMBERS.
+
+Use options 1, 2 or 3 only if styles.xml alone suffices for
+achieving the desired formatting.  Use option 4, if the styles.xml
+references additional files like header and footer images for
+achieving the desired formattting."
+  :group 'org-export-odt
+  :type
+  '(choice
+    (const :tag "Factory settings" nil)
+    (file :must-match t :tag "styles.xml")
+    (file :must-match t :tag "ODT or OTT file")
+    (list :tag "ODT or OTT file + Members"
+	  (file :must-match t :tag "ODF Text or Text Template file")
+	  (cons :tag "Members"
+		(file :tag "	Member" "styles.xml")
+		(repeat (file :tag "Member"))))))
 
 (defconst org-export-odt-tmpdir-prefix "odt-")
 (defconst org-export-odt-bookmark-prefix "OrgXref.")
