@@ -6977,7 +6977,7 @@ When NO-TAGS is non-nil, don't include tags.
 When NO-TODO is non-nil, don't include TODO keywords."
   (save-excursion
     (org-back-to-heading t)
-    (cond 
+    (cond
      ((and no-tags no-todo)
       (looking-at org-complex-heading-regexp)
       (match-string 4))
