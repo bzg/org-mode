@@ -359,7 +359,7 @@ other backends, it converts the comment into an EXAMPLE segment."
 	      (if owner (format " id=\"org-comment-%s\" " owner))
 	      ">\n"
 	      (if owner (concat "<b>" owner "</b> ") "")
-	      (if (and title (> (length title) 0)) (concat " -- " title "</br>\n") "</br>\n")
+	      (if (and title (> (length title) 0)) (concat " -- " title "<br/>\n") "<br/>\n")
 	      "<p>\n"
 	      "#+END_HTML\n"
 	      body
