@@ -71,9 +71,9 @@ It will be set in `org-indent-initialize'.")
   "Lock used of initialization.")
 (defvar org-hide-leading-stars-before-indent-mode nil
   "Used locally.")
-(defvar org-indent-deleted-headline-flag nil
+(defvar org-indent-modified-headline-flag nil
   "Non nil if the last deletion acted on an headline.
-It is modified by `org-indent-notify-deleted-headline'.")
+It is modified by `org-indent-notify-modified-headline'.")
 
 
 (defcustom org-indent-boundary-char ?\   ; comment to protect space char
@@ -159,7 +159,7 @@ properties, after each buffer modifiation, on the modified zone."
 		 'org-indent-remove-properties-from-string)
     (org-add-hook 'after-change-functions 'org-indent-refresh-maybe nil 'local)
     (org-add-hook 'before-change-functions
-		  'org-indent-notify-deleted-headline nil 'local)
+		  'org-indent-notify-modified-headline nil 'local)
     (and font-lock-mode (org-restart-font-lock))
     (with-silent-modifications
       (org-indent-remove-properties (point-min) (point-max)))
@@ -182,7 +182,7 @@ properties, after each buffer modifiation, on the modified zone."
 		    buffer-substring-filters))
 	(remove-hook 'after-change-functions 'org-indent-refresh-maybe 'local)
 	(remove-hook 'before-change-functions
-		     'org-indent-notify-deleted-headline 'local)
+		     'org-indent-notify-modified-headline 'local)
 	(and font-lock-mode (org-restart-font-lock))
 	(redraw-display))))))
 
@@ -320,8 +320,8 @@ you want to use this feature."
 		    (wrap (+ line (org-get-indentation))))
 	       (funcall set-prop-and-move line wrap nil)))))))))
 
-(defun org-indent-notify-deleted-headline (beg end)
-  "Set `org-indent-deleted-headline-flag' depending on the current command.
+(defun org-indent-notify-modified-headline (beg end)
+  "Set `org-indent-modified-headline-flag' depending on the current command.
 
 BEG and END are the positions of the beginning and end of the
 range of deleted text.
@@ -345,31 +345,20 @@ range of inserted text.  DUMMY is an unused argument.
 This function is meant to be called by `after-change-functions'."
   (when org-indent-mode
     (save-match-data
-      (cond
-       ;; An headline was deleted.
-       (org-indent-deleted-headline-flag
-	(setq org-indent-deleted-headline-flag nil)
-	(let ((end (save-excursion (outline-next-heading) (point))))
-	  (org-indent-remove-properties beg end)
-	  (org-indent-add-properties beg end)))
-       ;; An headline was inserted.
-       ((and (/= beg end)
-	     (save-excursion
-	       (goto-char beg)
-	       (re-search-forward org-outline-regexp-bol end t)))
+      ;; If an headline was modified or inserted, set properties until
+      ;; next headline.
+      (if (or org-indent-modified-headline-flag
+	      (save-excursion
+		(goto-char beg)
+		(re-search-forward org-outline-regexp-bol end t)))
 	(let ((end (save-excursion
-		     (goto-char end) (outline-next-heading) (point))))
-	  (org-indent-remove-properties beg end)
-	  (org-indent-add-properties beg end)))
-       ;; At an headline, modifying stars.
-       ((save-excursion (goto-char beg)
-			(and (org-at-heading-p) (< beg (match-end 0))))
-	(let ((beg (point-at-bol))
-	      (end (save-excursion (outline-next-heading) (point))))
-	  (org-indent-remove-properties beg end)
-	  (org-indent-add-properties beg end)))
-       ;; Else, refresh properties of modified area.
-       (t (org-indent-add-properties beg end))))))
+		     (goto-char end)
+		     (org-with-limited-levels (outline-next-heading))
+		     (point))))
+	  (setq org-indent-modified-headline-flag nil)
+	  (org-indent-add-properties beg end))
+	;; Otherwise, only set properties on modified area.
+	(org-indent-add-properties beg end)))))
 
 (provide 'org-indent)
 
