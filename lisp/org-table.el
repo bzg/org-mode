@@ -1818,6 +1818,12 @@ it can be edited in place."
 	  (font-lock-fontify-block))))
    (t
     (let ((pos (move-marker (make-marker) (point)))
+	  (coord
+	   (if (eq org-table-use-standard-references t)
+	       (concat (org-number-to-letters (org-table-current-column))
+		       (int-to-string (org-table-current-dline)))
+	     (concat "@" (int-to-string (org-table-current-dline))
+		     "$" (int-to-string (org-table-current-column)))))
 	  (field (org-table-get-field))
 	  (cw (current-window-configuration))
 	  p)
@@ -1827,7 +1833,7 @@ it can be edited in place."
 		 (markerp org-field-marker))
 	(move-marker org-field-marker nil))
       (erase-buffer)
-      (insert "#\n# Edit field and finish with C-c C-c\n#\n")
+      (insert "#\n# Edit field " coord " and finish with C-c C-c\n#\n")
       (let ((org-inhibit-startup t)) (org-mode))
       (auto-fill-mode -1)
       (setq truncate-lines nil)
