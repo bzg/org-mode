@@ -548,19 +548,15 @@ When nil, also column one will use data tags."
   :group 'org-export-html
   :type 'string)
 
-(defcustom org-export-html-with-timestamp nil
-  "If non-nil, write timestamp into the exported HTML text.
-If non-nil, write `org-export-html-html-helper-timestamp' into the
-exported HTML text.  Otherwise, the buffer will just be saved to
-a file."
-  :group 'org-export-html
-  :type 'boolean)
+;; FIXME Obsolete since Org 7.7
+;; Use the :timestamp option or `org-export-time-stamp-file' instead
+(defvar org-export-html-with-timestamp nil
+  "If non-nil, write container for HTML-helper-mode timestamp.")
 
-(defcustom org-export-html-html-helper-timestamp
-  "<br/><br/><hr/><p><!-- hhmts start --> <!-- hhmts end --></p>\n"
-  "The HTML tag used as timestamp delimiter for HTML-helper-mode."
-  :group 'org-export-html
-  :type 'string)
+;; FIXME Obsolete since Org 7.7
+(defvar org-export-html-html-helper-timestamp
+  "\n<p><br/><br/>\n<!-- hhmts start --> <!-- hhmts end --></p>\n"
+  "The HTML tag used as timestamp delimiter for HTML-helper-mode.")
 
 (defcustom org-export-html-protect-char-alist
   '(("&" . "&amp;")
@@ -614,15 +610,22 @@ with a link to this URL."
 	  (const :tag "Keep internal css" nil)
 	  (string :tag "URL or local href")))
 
-(defcustom org-export-html-before-content-div ""
-  "Arbitrary HTML code placed before <div id=\"content\">."
-  :group 'org-export-html
-  :type 'string)
+;; FIXME: The following variable is obsolete since Org 7.7 but is
+;; still declared and checked within code for compatibility reasons.
+;; Use the custom variables `org-export-html-divs' instead.
+(defvar org-export-html-content-div "content"
+  "The name of the container DIV that holds all the page contents.
 
-(defcustom org-export-html-content-div "content"
-  "The name of the container DIV that holds all the page contents."
+This variable is obsolete since Org version 7.7.
+Please set `org-export-html-divs' instead.")
+
+(defcustom org-export-html-divs '("preamble" "content" "postamble")
+  "The name of the main divs for HTML export."
   :group 'org-export-html
-  :type 'string)
+  :type '(list
+	  (string :tag " Div for the preamble:")
+	  (string :tag "  Div for the content:")
+	  (string :tag "Div for the postamble:")))
 
 ;;; Hooks
 
@@ -1300,8 +1303,6 @@ lang=\"%s\" xml:lang=\"%s\">
 </head>
 <body>
 %s
-<div id=\"%s\">
-%s
 "
 		 (format
 		  (or (and (stringp org-export-html-xml-declaration)
@@ -1317,8 +1318,6 @@ lang=\"%s\" xml:lang=\"%s\">
 		 date author description keywords
 		 style
 		 mathjax
-		 org-export-html-before-content-div
-		 org-export-html-content-div
 		 (if (or link-up link-home)
 		     (concat
 		      (format org-export-html-home/up-format
@@ -1330,6 +1329,7 @@ lang=\"%s\" xml:lang=\"%s\">
 	;; insert html preamble
 	(when (plist-get opt-plist :html-preamble)
 	  (let ((html-pre (plist-get opt-plist :html-preamble)))
+	    (insert "<div id=\"" (nth 0 org-export-html-divs) "\">\n")
 	    (cond ((stringp html-pre)
 		   (insert
 		    (format-spec html-pre `((?t . ,title) (?a . ,author)
@@ -1343,8 +1343,15 @@ lang=\"%s\" xml:lang=\"%s\">
 				      org-export-html-preamble-format))
 			 (cadr (assoc "en" org-export-html-preamble-format)))
 		     `((?t . ,title) (?a . ,author)
-		       (?d . ,date) (?e . ,email)))))))))
+		       (?d . ,date) (?e . ,email))))))
+	    (insert "\n</div>\n")))
 
+	;; begin wrap around body
+	(insert (format "\n<div id=\"%s\">" 
+			(or org-export-html-content-div ; <= FIXME obsolete since 7.7
+			    (nth 1 org-export-html-divs)))))
+
+      ;; insert body
       (if (and org-export-with-toc (not body-only))
 	  (progn
 	    (push (format "<h%d>%s</h%d>\n"
@@ -1748,8 +1755,11 @@ lang=\"%s\" xml:lang=\"%s\">
 	(when bib
 	  (insert "\n" bib "\n")))
 
-      ;; export html postamble
       (unless body-only
+	;; end wrap around body
+	(insert "</div>\n")
+
+	;; export html postamble
 	(let ((html-post (plist-get opt-plist :html-postamble))
 	      (email
 	       (mapconcat (lambda(e)
@@ -1759,19 +1769,18 @@ lang=\"%s\" xml:lang=\"%s\">
 	      (creator-info
 	       (concat "Org version " org-version " with Emacs version "
 		       (number-to-string emacs-major-version))))
+
 	  (when (plist-get opt-plist :html-postamble)
+	    (insert "\n<div id=\"" (nth 2 org-export-html-divs) "\">\n")
 	    (cond ((stringp html-post)
-		   (insert "<div id=\"postamble\">\n")
 		   (insert (format-spec html-post
 					`((?a . ,author) (?e . ,email)
 					  (?d . ,date)   (?c . ,creator-info)
-					  (?v . ,html-validation-link))))
-		   (insert "</div>"))
+					  (?v . ,html-validation-link)))))
 		  ((functionp html-post)
 		   (funcall html-post))
 		  ((eq html-post 'auto)
 		   ;; fall back on default postamble
-		   (insert "<div id=\"postamble\">\n")
 		   (when (plist-get opt-plist :time-stamp-file)
 		     (insert "<p class=\"date\">" (nth 2 lang-words) ": " date "</p>\n"))
 		   (when (and (plist-get opt-plist :author-info) author)
@@ -1782,22 +1791,23 @@ lang=\"%s\" xml:lang=\"%s\">
 		     (insert "<p class=\"creator\">"
 			     (concat "Org version " org-version " with Emacs version "
 				     (number-to-string emacs-major-version) "</p>\n")))
-		   (insert html-validation-link "\n</div>"))
+		   (insert html-validation-link "\n"))
 		  (t
-		   (insert "<div id=\"postamble\">\n")
 		   (insert (format-spec
 			    (or (cadr (assoc (nth 0 lang-words)
 					     org-export-html-postamble-format))
 				(cadr (assoc "en" org-export-html-postamble-format)))
 			    `((?a . ,author) (?e . ,email)
 			      (?d . ,date)   (?c . ,creator-info)
-			      (?v . ,html-validation-link))))
-		   (insert "</div>"))))))
-
+			      (?v . ,html-validation-link))))))
+	    (insert "\n</div>"))))
+      
+      ;; FIXME `org-export-html-with-timestamp' has been declared
+      ;; obsolete since Org 7.7 -- don't forget to remove this.
       (if org-export-html-with-timestamp
 	  (insert org-export-html-html-helper-timestamp))
 
-      (unless body-only (insert "\n</div>\n</body>\n</html>\n"))
+      (unless body-only (insert "\n</body>\n</html>\n"))
 
       (unless (plist-get opt-plist :buffer-will-be-killed)
 	(normal-mode)
