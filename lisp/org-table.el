@@ -52,7 +52,7 @@
 (defvar orgtbl-after-send-table-hook nil
   "Hook for functions attaching to `C-c C-c', if the table is sent.
 This can be used to add additional functionality after the table is sent
-to the receiver position, othewise, if table is not sent, the functions 
+to the receiver position, othewise, if table is not sent, the functions
 are not run.")
 
 (defcustom orgtbl-optimized (eq org-enable-table-editor 'optimized)
@@ -547,7 +547,7 @@ property, locally or anywhere up in the hierarchy."
 	 (end (org-table-end))
 	 (txt (buffer-substring-no-properties beg end))
 	 (file (or file (org-entry-get beg "TABLE_EXPORT_FILE" t)))
-	 (format (or format 
+	 (format (or format
 		     (org-entry-get beg "TABLE_EXPORT_FORMAT" t)))
 	 buf deffmt-readable)
     (unless file
@@ -1426,7 +1426,7 @@ first dline below it is used.  When ABOVE is non-nil, the one above is used."
     (org-move-to-column col)
     (unless (or hline1p hline2p
 		(not (or (not org-table-fix-formulas-confirm)
-			 (funcall org-table-fix-formulas-confirm 
+			 (funcall org-table-fix-formulas-confirm
 				  "Fix formulas? "))))
       (org-table-fix-formulas
        "@" (list (cons (number-to-string dline1) (number-to-string dline2))
@@ -2391,7 +2391,7 @@ not overwrite the stored one."
 	   (modes (copy-sequence org-calc-default-modes))
 	   (numbers nil) ; was a variable, now fixed default
 	   (keep-empty nil)
-	   n form form0 bw fmt x ev orig c lispp literal duration)
+	   n form form0 formrpl bw fmt x ev orig c lispp literal duration)
       ;; Parse the format string.  Since we have a lot of modes, this is
       ;; a lot of work.  However, I think calc still uses most of the time.
       (if (string-match ";" formula)
@@ -2431,7 +2431,7 @@ not overwrite the stored one."
 	  (setq formula (org-table-formula-substitute-names formula)))
       (setq orig (or (get-text-property 1 :orig-formula formula) "?"))
       (while (> ndown 0)
-	(setq fields 
+	(setq fields
 	      (mapcar (lambda (cell)
 			(let ((duration (org-table-time-string-to-seconds cell)))
 			  (if duration (number-to-string duration) cell)))
@@ -2476,13 +2476,15 @@ not overwrite the stored one."
 	;; Insert complex ranges
 	(while (and (string-match org-table-range-regexp form)
 		    (> (length (match-string 0 form)) 1))
-	  (setq form
-		(replace-match
-		 (save-match-data
-		   (org-table-make-reference
-		    (org-table-get-range (match-string 0 form) nil n0)
-		    keep-empty numbers lispp))
-		 t t form)))
+	  (setq formrpl
+		(save-match-data
+		  (org-table-make-reference
+		   (org-table-get-range (match-string 0 form) nil n0)
+		   keep-empty numbers lispp)))
+	  (if (not (save-match-data
+		     (string-match (regexp-quote form) formrpl)))
+	      (setq form (replace-match formrpl t t form))
+	    (error "Spreadsheet error: invalid reference \"%s\"" form)))
 	;; Insert simple ranges
 	(while (string-match "\\$\\([0-9]+\\)\\.\\.\\$\\([0-9]+\\)"  form)
 	  (setq form
@@ -2512,13 +2514,13 @@ not overwrite the stored one."
 			 (eval (eval (read form)))
 		       (error "#ERROR"))
 		  ev (if (numberp ev) (number-to-string ev) ev)
-		  ev (if duration (org-table-time-seconds-to-string 
+		  ev (if duration (org-table-time-seconds-to-string
 				   (string-to-number ev)) ev))
 	  (or (fboundp 'calc-eval)
 	      (error "Calc does not seem to be installed, and is needed to evaluate the formula"))
 	  (setq ev (calc-eval (cons form modes)
 			      (if numbers 'num))
-		ev (if duration (org-table-time-seconds-to-string 
+		ev (if duration (org-table-time-seconds-to-string
 				 (string-to-number ev)) ev)))
 
 	(when org-table-formula-debug
@@ -2777,7 +2779,7 @@ known that the table will be realigned a little later anyway."
       (setq eqlnum (nreverse eqlnum) eqlname (nreverse eqlname))
       ;; Expand ranges in lhs of formulas
       (setq eqlname (org-table-expand-lhs-ranges eqlname))
-      
+
       ;; Get the correct line range to process
       (if all
 	  (progn
@@ -2809,7 +2811,7 @@ known that the table will be realigned a little later anyway."
 	(when (member name1 seen-fields)
 	      (error "Several field/range formulas try to set %s" name1))
 	(push name1 seen-fields)
-	  
+
 	(and (not a)
 	     (string-match "@\\([0-9]+\\)\\$\\([0-9]+\\)" name)
 	     (setq a (list name
@@ -2826,7 +2828,7 @@ known that the table will be realigned a little later anyway."
 	  (push (append a (list (cdr eq))) eqlname1)
 	  (org-table-put-field-property :org-untouchable t)))
       (setq eqlname1 (nreverse eqlname1))
-      
+
       ;; Now evaluate the column formulas, but skip fields covered by
       ;; field formulas
       (goto-char beg)
