@@ -2573,14 +2573,17 @@ formulas or Elisp formulas:
 
 @example
 @group
-| Task 1 | Task 2 |   Total |
-|--------+--------+---------|
-|  35:00 |  35:00 | 1:10:00 |
-#+TBLFM: @@2$3=$1+$2;T
+  |  Task 1 |   Task 2 |    Total |
+  |---------+----------+----------|
+  |    2:12 |     1:47 | 03:59:00 |
+  | 3:02:20 | -2:07:00 | 00:55:20 |
+  #+TBLFM: $3=$1+$2;T
 @end group
 @end example
 
-Values must be of the form @code{[HH:]MM:SS}, where hours are optional.
+Values must be of the form @code{[HH:MM[:SS]}, where seconds are optional.
+The resulting duration will always be displayed as @code{[HH:MM:SS}.  Note
+that negative values can be manipulated as well.
 
 @node Field and range formulas, Column formulas, Durations and time values, The spreadsheet
 @subsection Field and range formulas
