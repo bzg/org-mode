@@ -2897,8 +2897,9 @@ Point is left at list end."
     (when delete
       (delete-region top bottom)
       (when (and (not (eq org-list-ending-method 'indent))
+		 (not (looking-at "[ \t]*$"))
 		 (looking-at org-list-end-re))
-	(replace-match "\n")))
+	(replace-match "")))
     out))
 
 (defun org-list-make-subtree ()
