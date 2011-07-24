@@ -27,7 +27,13 @@
 ;; This is an implementation of dynamic virtual indentation.  It works
 ;; by adding text properties to a buffer to make sure lines are
 ;; indented according to outline structure.
-
+;;
+;; The process is synchronous, toggled at every buffer modification.
+;; Though, the initialization (indentation of text already in the
+;; buffer), which can take a few seconds in large buffers, happens on
+;; idle time and only when the buffer being initialized is the active
+;; one.
+;;
 ;;; Code:
 
 (require 'org-macs)
@@ -127,8 +133,11 @@ turn on `org-hide-leading-stars'."
   "When active, indent text according to outline structure.
 
 Internally this works by adding `line-prefix' and `wrap-prefix'
-properties, after each buffer modifiation, on the modified zone."
-  nil " Ind" nil
+properties, after each buffer modification, on the modified zone.
+
+The process is synchronous.  Though, initial indentation of
+buffer, which can take a few seconds on large buffers, is done
+during idle time." nil " Ind" nil
   (cond
    ((org-bound-and-true-p org-inhibit-startup)
     (setq org-indent-mode nil))
@@ -242,7 +251,7 @@ you want to use this feature."
     (org-with-wide-buffer
      (goto-char beg)
      (beginning-of-line)
-     ;; 1. Initialize prefix at BEG. This is done by storing two
+     ;; 1. Initialize prefix at BEG.  This is done by storing two
      ;;    variables: INLINE-PF and PF, representing respectively
      ;;    length of current `line-prefix' when line is inside an
      ;;    inline task or not.
@@ -305,8 +314,9 @@ you want to use this feature."
 		((looking-at "\\*+ end[ \t]*$")
 		 (funcall set-prop-and-move line wrap 'inline)
 		 (setq pf-inline nil))
-		;; Start of inline task. Determine if it contains text,
-		;; or is only one line long. Set PF-INLINE accordingly.
+		;; Start of inline task.  Determine if it contains
+		;; text, or if it is only one line long.  Set
+		;; PF-INLINE accordingly.
 		(t (funcall set-prop-and-move line wrap 'inline)
 		   (setq pf-inline (and (org-inlinetask-in-task-p) wrap))))))
 	    ;; List item: `wrap-prefix' is set where body starts.
@@ -320,7 +330,7 @@ you want to use this feature."
 		 (funcall set-prop-and-move line wrap nil))))))))))
 
 (defun org-indent-notify-modified-headline (beg end)
-  "Set `org-indent-modified-headline-flag' depending on the current command.
+  "Set `org-indent-modified-headline-flag' depending on context.
 
 BEG and END are the positions of the beginning and end of the
 range of deleted text.
