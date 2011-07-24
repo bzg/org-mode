@@ -2431,21 +2431,22 @@ not overwrite the stored one."
 	  (setq formula (org-table-formula-substitute-names formula)))
       (setq orig (or (get-text-property 1 :orig-formula formula) "?"))
       (while (> ndown 0)
-	(setq fields
-	      (mapcar (lambda (cell)
-			(let ((duration (org-table-time-string-to-seconds cell)))
-			  (if duration (number-to-string duration) cell)))
-		      (org-split-string
-		       (org-no-properties
-			(buffer-substring (point-at-bol) (point-at-eol)))
-		       " *| *")))
+	(setq fields (org-split-string
+		      (org-no-properties
+		       (buffer-substring (point-at-bol) (point-at-eol)))
+		      " *| *"))
+	;; replace fields with duration values if relevant
+	(if duration
+	    (setq fields
+		  (mapcar (lambda (x) (org-table-time-string-to-seconds x))
+			  fields)))
 	(if (eq numbers t)
 	    (setq fields (mapcar
 			  (lambda (x) (number-to-string (string-to-number x)))
 			  fields)))
 	(setq ndown (1- ndown))
 	(setq form (copy-sequence formula)
-	      lispp (and (> (length form) 2)(equal (substring form 0 2) "'(")))
+	      lispp (and (> (length form) 2) (equal (substring form 0 2) "'(")))
 	(if (and lispp literal) (setq lispp 'literal))
 
 	;; Insert row and column number of formula result field
@@ -2479,7 +2480,12 @@ not overwrite the stored one."
 	  (setq formrpl
 		(save-match-data
 		  (org-table-make-reference
-		   (org-table-get-range (match-string 0 form) nil n0)
+		   ;; possibly handle durations
+		   (if duration
+		       (mapcar (lambda(x)
+				 (org-table-time-string-to-seconds x))
+			       (org-table-get-range (match-string 0 form) nil n0))
+		     (org-table-get-range (match-string 0 form) nil n0))
 		   keep-empty numbers lispp)))
 	  (if (not (save-match-data
 		     (string-match (regexp-quote form) formrpl)))
@@ -2518,8 +2524,7 @@ not overwrite the stored one."
 				   (string-to-number ev)) ev))
 	  (or (fboundp 'calc-eval)
 	      (error "Calc does not seem to be installed, and is needed to evaluate the formula"))
-	  (setq ev (calc-eval (cons form modes)
-			      (if numbers 'num))
+	  (setq ev (calc-eval (cons form modes) (if numbers 'num))
 		ev (if duration (org-table-time-seconds-to-string
 				 (string-to-number ev)) ev)))
 
@@ -3208,25 +3213,28 @@ For example:  28 -> AB."
 (defun org-table-time-string-to-seconds (s)
   "Convert a time string into numerical duration in seconds.
 S must be a string matching either -?HH:MM:SS or -?HH:MM."
-  (cond
-   ((and (stringp s)
-	 (string-match "\\(-?\\)\\([0-9]+\\):\\([0-9]+\\):\\([0-9]+\\)" s))
-    (let ((minus (< 0 (length (match-string 1 s))))
-	  (hour (string-to-number (match-string 2 s)))
-	  (min (string-to-number (match-string 3 s)))
-	  (sec (string-to-number (match-string 4 s))))
+  (let (hour min sec res)
+    (cond
+     ((and (stringp s)
+	   (string-match "\\(-?\\)\\([0-9]+\\):\\([0-9]+\\):\\([0-9]+\\)" s))
+      (setq minus (< 0 (length (match-string 1 s)))
+	    hour (string-to-number (match-string 2 s))
+	    min (string-to-number (match-string 3 s))
+	    sec (string-to-number (match-string 4 s)))
       (if minus
-	  (- (+ (* hour 3600) (* min 60) sec))
-	(+ (* hour 3600) (* min 60) sec))))
-   ((and (stringp s)
-	 (not (string-match org-ts-regexp-both s))
-	 (string-match "\\(-?\\)\\([0-9]+\\):\\([0-9]+\\)" s))
-    (let ((minus (< 0 (length (match-string 1 s))))
-	  (hour (string-to-number (match-string 2 s)))
-	  (min (string-to-number (match-string 3 s))))
+	  (setq res (- (+ (* hour 3600) (* min 60) sec)))
+	(setq res (+ (* hour 3600) (* min 60) sec))))
+     ((and (stringp s)
+	   (not (string-match org-ts-regexp-both s))
+	   (string-match "\\(-?\\)\\([0-9]+\\):\\([0-9]+\\)" s))
+      (setq minus (< 0 (length (match-string 1 s)))
+	    hour (string-to-number (match-string 2 s))
+	    min (string-to-number (match-string 3 s)))
       (if minus
-	  (- (+ (* hour 3600) (* min 60)))
-	(+ (* hour 3600) (* min 60)))))))
+	  (setq res (- (+ (* hour 3600) (* min 60))))
+	(setq res (+ (* hour 3600) (* min 60)))))
+     (t (setq res (string-to-number s))))
+    (number-to-string res)))
 
 (defun org-table-time-seconds-to-string (secs)
   "Convert a number of seconds to a time string."
