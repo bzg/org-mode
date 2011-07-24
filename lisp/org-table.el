@@ -3206,7 +3206,8 @@ For example:  28 -> AB."
     s))
 
 (defun org-table-time-string-to-seconds (s)
-  "Convert a time string into numerical duration in seconds."
+  "Convert a time string into numerical duration in seconds.
+S is a string matching either HH:MM:SS or HH:MM."
   (cond
    ((and (stringp s)
 	 (string-match "\\([0-9]+\\):\\([0-9]+\\):\\([0-9]+\\)" s))
@@ -3217,9 +3218,9 @@ For example:  28 -> AB."
    ((and (stringp s)
 	 (not (string-match org-ts-regexp-both s))
 	 (string-match "\\([0-9]+\\):\\([0-9]+\\)" s))
-    (let ((min (string-to-number (match-string 1 s)))
-	  (sec (string-to-number (match-string 2 s))))
-      (+ (* min 60) sec)))))
+    (let ((hour (string-to-number (match-string 1 s)))
+	  (min (string-to-number (match-string 2 s))))
+      (+ (* hour 3600) (* min 60))))))
 
 (defun org-table-time-seconds-to-string (secs)
   "Convert a number of seconds to a time string."
