@@ -17151,13 +17151,30 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
   (org-defkey org-mode-map "|" 'org-force-self-insert))
 
 (defvar org-ctrl-c-ctrl-c-hook nil
-  "Hook for functions attaching themselves to  `C-c C-c'.
-This can be used to add additional functionality to the C-c C-c key which
-executes context-dependent commands.
-Each function will be called with no arguments.  The function must check
-if the context is appropriate for it to act.  If yes, it should do its
-thing and then return a non-nil value.  If the context is wrong,
-just do nothing and return nil.")
+  "Hook for functions attaching themselves to `C-c C-c'.
+
+This can be used to add additional functionality to the C-c C-c
+key which executes context-dependent commands.  This hook is run
+before any other test, while `org-ctrl-c-ctrl-c-final-hook' is
+run after the last test.
+
+Each function will be called with no arguments.  The function
+must check if the context is appropriate for it to act.  If yes,
+it should do its thing and then return a non-nil value.  If the
+context is wrong, just do nothing and return nil.")
+
+(defvar org-ctrl-c-ctrl-c-final-hook nil
+  "Hook for functions attaching themselves to `C-c C-c'.
+
+This can be used to add additional functionality to the C-c C-c
+key which executes context-dependent commands.  This hook is run
+after any other test, while `org-ctrl-c-ctrl-c-hook' is run
+before the first test.
+
+Each function will be called with no arguments.  The function
+must check if the context is appropriate for it to act.  If yes,
+it should do its thing and then return a non-nil value.  If the
+context is wrong, just do nothing and return nil.")
 
 (defvar org-tab-first-hook nil
   "Hook for functions to attach themselves to TAB.
@@ -17817,7 +17834,9 @@ This command does many different things, depending on context:
 	  (org-save-outline-visibility 'use-markers (org-mode-restart)))
 	(message "Local setup has been refreshed"))))
      ((org-clock-update-time-maybe))
-     (t (error "C-c C-c can do nothing useful at this location")))))
+     (t 
+      (or (run-hook-with-args-until-success 'org-ctrl-c-ctrl-c-final-hook)
+	  (error "C-c C-c can do nothing useful at this location"))))))
 
 (defun org-mode-restart ()
   "Restart Org-mode, to scan again for special lines.
