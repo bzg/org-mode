@@ -126,7 +126,6 @@ turn on `org-hide-leading-stars'."
 (define-minor-mode org-indent-mode
   "When active, indent text according to outline structure.
 
-
 Internally this works by adding `line-prefix' and `wrap-prefix'
 properties, after each buffer modifiation, on the modified zone."
   nil " Ind" nil
@@ -161,31 +160,29 @@ properties, after each buffer modifiation, on the modified zone."
     (org-add-hook 'before-change-functions
 		  'org-indent-notify-modified-headline nil 'local)
     (and font-lock-mode (org-restart-font-lock))
-    (with-silent-modifications
-      (org-indent-remove-properties (point-min) (point-max)))
+    (org-indent-remove-properties (point-min) (point-max))
     (org-set-local 'org-indent-initial-timer
 		   (run-with-idle-timer 0.2 t #'org-indent-initialize-buffer)))
    (t
     ;; mode was turned off (or we refused to turn it on)
-    (save-excursion
-      (save-restriction
-	(when org-indent-initialize-marker
-	  (set-marker org-indent-initialize-marker nil))
-	(with-silent-modifications
-	  (org-indent-remove-properties (point-min) (point-max)))
-	(kill-local-variable 'org-adapt-indentation)
-	(when (boundp 'org-hide-leading-stars-before-indent-mode)
-	  (org-set-local 'org-hide-leading-stars
-			 org-hide-leading-stars-before-indent-mode))
-	(setq buffer-substring-filters
-	      (delq 'org-indent-remove-properties-from-string
-		    buffer-substring-filters))
-	(remove-hook 'after-change-functions 'org-indent-refresh-maybe 'local)
-	(remove-hook 'before-change-functions
-		     'org-indent-notify-modified-headline 'local)
-	(and font-lock-mode (org-restart-font-lock))
-	(redraw-display))))))
-
+    (kill-local-variable 'org-adapt-indentation)
+    (when (timerp org-indent-initial-timer)
+      (cancel-timer org-indent-initial-timer))
+    (when (markerp org-indent-initial-marker)
+      (set-marker org-indent-initial-marker nil))
+    (when (boundp 'org-hide-leading-stars-before-indent-mode)
+      (org-set-local 'org-hide-leading-stars
+		     org-hide-leading-stars-before-indent-mode))
+    (setq buffer-substring-filters
+	  (delq 'org-indent-remove-properties-from-string
+		buffer-substring-filters))
+    (remove-hook 'after-change-functions 'org-indent-refresh-maybe 'local)
+    (remove-hook 'before-change-functions
+		 'org-indent-notify-modified-headline 'local)
+    (org-with-wide-buffer
+     (org-indent-remove-properties (point-min) (point-max)))
+    (and font-lock-mode (org-restart-font-lock))
+    (redraw-display))))
 
 (defface org-indent
   (org-compatible-face nil nil)
@@ -207,7 +204,8 @@ useful to make it ever so slightly different."
 
 (defsubst org-indent-remove-properties (beg end)
   "Remove indentations between BEG and END."
-  (remove-text-properties beg end '(line-prefix nil wrap-prefix nil)))
+  (with-silent-modifications
+    (remove-text-properties beg end '(line-prefix nil wrap-prefix nil))))
 
 (defun org-indent-remove-properties-from-string (string)
   "Remove indentation properties from STRING."
@@ -286,39 +284,40 @@ you want to use this feature."
        ;; 2. For each line, set `line-prefix' and `wrap-prefix'
        ;;    properties depending on the type of line (headline, inline
        ;;    task, item or other).
-       (while (< (point) end)
-	 (cond
-	  ;; When in async mode, check if interrupt is required.
-	  ((and async (input-pending-p)) (throw 'interrupt (point)))
-	  ;; Empty line: do nothing.
-	  ((eolp) (forward-line 1))
-	  ;; Headline or inline task.
-	  ((looking-at org-outline-regexp)
-	   (let* ((nstars (- (match-end 0) (match-beginning 0) 1))
-		  (line (* added-ind-per-lvl (1- nstars)))
-		  (wrap (+ line (1+ nstars))))
-	     (cond
-	      ;; Headline: new value for PF.
-	      ((looking-at limited-re)
-	       (funcall set-prop-and-move line wrap t)
-	       (setq pf wrap))
-	      ;; End of inline task: PF-INLINE is now nil.
-	      ((looking-at "\\*+ end[ \t]*$")
-	       (funcall set-prop-and-move line wrap 'inline)
-	       (setq pf-inline nil))
-	      ;; Start of inline task. Determine if it contains text,
-	      ;; or is only one line long. Set PF-INLINE accordingly.
-	      (t (funcall set-prop-and-move line wrap 'inline)
-		 (setq pf-inline (and (org-inlinetask-in-task-p) wrap))))))
-	  ;; List item: `wrap-prefix' is set where body starts.
-	  ((org-at-item-p)
-	   (let* ((line (or pf-inline pf 0))
-		  (wrap (+ (org-list-item-body-column (point)) line)))
-	     (funcall set-prop-and-move line wrap nil)))
-	  ;; Normal line: use PF-INLINE, PF or nil as prefixes.
-	  (t (let* ((line (or pf-inline pf 0))
-		    (wrap (+ line (org-get-indentation))))
-	       (funcall set-prop-and-move line wrap nil)))))))))
+       (with-silent-modifications
+	 (while (< (point) end)
+	   (cond
+	    ;; When in async mode, check if interrupt is required.
+	    ((and async (input-pending-p)) (throw 'interrupt (point)))
+	    ;; Empty line: do nothing.
+	    ((eolp) (forward-line 1))
+	    ;; Headline or inline task.
+	    ((looking-at org-outline-regexp)
+	     (let* ((nstars (- (match-end 0) (match-beginning 0) 1))
+		    (line (* added-ind-per-lvl (1- nstars)))
+		    (wrap (+ line (1+ nstars))))
+	       (cond
+		;; Headline: new value for PF.
+		((looking-at limited-re)
+		 (funcall set-prop-and-move line wrap t)
+		 (setq pf wrap))
+		;; End of inline task: PF-INLINE is now nil.
+		((looking-at "\\*+ end[ \t]*$")
+		 (funcall set-prop-and-move line wrap 'inline)
+		 (setq pf-inline nil))
+		;; Start of inline task. Determine if it contains text,
+		;; or is only one line long. Set PF-INLINE accordingly.
+		(t (funcall set-prop-and-move line wrap 'inline)
+		   (setq pf-inline (and (org-inlinetask-in-task-p) wrap))))))
+	    ;; List item: `wrap-prefix' is set where body starts.
+	    ((org-at-item-p)
+	     (let* ((line (or pf-inline pf 0))
+		    (wrap (+ (org-list-item-body-column (point)) line)))
+	       (funcall set-prop-and-move line wrap nil)))
+	    ;; Normal line: use PF-INLINE, PF or nil as prefixes.
+	    (t (let* ((line (or pf-inline pf 0))
+		      (wrap (+ line (org-get-indentation))))
+		 (funcall set-prop-and-move line wrap nil))))))))))
 
 (defun org-indent-notify-modified-headline (beg end)
   "Set `org-indent-modified-headline-flag' depending on the current command.
