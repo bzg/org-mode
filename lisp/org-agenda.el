@@ -7572,7 +7572,7 @@ be used to request time specification in the time stamp."
 
 (defun org-agenda-schedule (arg &optional time)
   "Schedule the item at point.
-Arg is passed through to `org-schedule'."
+ARG is passed through to `org-schedule'."
   (interactive "P")
   (org-agenda-check-type t 'agenda 'timeline 'todo 'tags 'search)
   (org-agenda-check-no-diary)
@@ -7594,7 +7594,7 @@ Arg is passed through to `org-schedule'."
 
 (defun org-agenda-deadline (arg &optional time)
   "Schedule the item at point.
-Arg is passed through to `org-deadline'."
+ARG is passed through to `org-deadline'."
   (interactive "P")
   (org-agenda-check-type t 'agenda 'timeline 'todo 'tags 'search)
   (org-agenda-check-no-diary)
