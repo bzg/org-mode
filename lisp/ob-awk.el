@@ -26,8 +26,7 @@
 
 ;;; Commentary:
 
-;; Babel's awk support relies on two special header argument one of
-;; which is required to pass data to the awk process.
+;; Babel's awk can use special header argument:
 ;; 
 ;; - :in-file takes a path to a file of data to be processed by awk
 ;;   
@@ -89,11 +88,10 @@ called by `org-babel-execute-src-block'"
 	      (with-temp-file tmp (insert results))
 	      (org-babel-import-elisp-from-file tmp)))))
       (cond
-       (in-file (org-babel-eval cmd ""))
        (stdin (with-temp-buffer
 		(call-process-shell-command cmd stdin (current-buffer))
 		(buffer-string)))
-       (t (error "ob-awk: must specify either :in-file or :stdin"))))
+       (t (org-babel-eval cmd ""))))
      (org-babel-pick-name
       (cdr (assoc :colname-names params)) (cdr (assoc :colnames params)))
      (org-babel-pick-name

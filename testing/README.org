@@ -78,6 +78,7 @@ First tangle this file out to your desktop.
   (org-id-update-id-locations
    (list (concat org-dir "/testing/examples/babel.org")
          (concat org-dir "/testing/examples/normal.org")
+         (concat org-dir "/testing/examples/ob-awk-test.org")
          (concat org-dir "/testing/examples/ob-fortran-test.org")
          (concat org-dir "/testing/examples/link-in-heading.org")
          (concat org-dir "/testing/examples/links.org")))
