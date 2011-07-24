@@ -3230,9 +3230,7 @@ S must be a string matching either -?HH:MM:SS or -?HH:MM."
 
 (defun org-table-time-seconds-to-string (secs)
   "Convert a number of seconds to a time string."
-  (cond ((>= secs 3600) (org-format-seconds "%h:%.2m:%.2s" secs))
-	((>= secs 60) (org-format-seconds "%m:%.2s" secs))
-	(t (org-format-seconds "%s" secs))))
+  (org-format-seconds "%.2h:%.2m:%.2s" secs))
 
 (defun org-table-fedit-convert-buffer (function)
   "Convert all references in this buffer, using FUNCTION."
