@@ -34,7 +34,7 @@
 
 @c Below we define the following macros for Org key tables:
 
-@c orgkey{key}                        A key item                     
+@c orgkey{key}                        A key item
 @c orgcmd{key,cmd}                    Key with command name
 @c xorgcmd{key,cmmand}                Key with command name as @itemx
 @c orgcmdnki{key,cmd}                 Like orgcmd, but do not index the key
@@ -5649,14 +5649,13 @@ an item:
 @c
 @orgcmd{C-c C-d,org-deadline}
 Insert @samp{DEADLINE} keyword along with a stamp.  The insertion will happen
-in the line directly following the headline.  When called with a prefix arg,
-an existing deadline will be removed from the entry.  Depending on the
-variable @code{org-log-redeadline}@footnote{with corresponding
+in the line directly following the headline.  Any CLOSED timestamp will be
+removed.  When called with a prefix arg, an existing deadline will be removed 
+from the entry.  Depending on the variable @code{org-log-redeadline}@footnote{with corresponding
 @code{#+STARTUP} keywords @code{logredeadline}, @code{lognoteredeadline},
 and @code{nologredeadline}}, a note will be taken when changing an existing
 deadline.
-@c FIXME Any CLOSED timestamp will be removed.????????
-@c
+
 @orgcmd{C-c C-s,org-schedule}
 Insert @samp{SCHEDULED} keyword along with a stamp.  The insertion will
 happen in the line directly following the headline.  Any CLOSED timestamp
@@ -5690,6 +5689,11 @@ Sparse tree for deadlines and scheduled items before a given date.
 @orgcmd{C-c / a,org-check-after-date}
 Sparse tree for deadlines and scheduled items after a given date.
 @end table
+
+Note that @code{org-schedule} and @code{org-deadline} supports
+setting the date by indicating a relative time: e.g. +1d will set
+the date to the next day after today, and --1w will set the date
+to the previous week before any current timestamp.
 
 @node Repeated tasks,  , Inserting deadline/schedule, Deadlines and scheduling
 @subsection Repeated tasks
@@ -6376,14 +6380,14 @@ like this:
 @subsubsection Template elements
 
 Now lets look at the elements of a template definition.  Each entry in
-@code{org-capture-templates} is a list with the following items: 
+@code{org-capture-templates} is a list with the following items:
 
 @table @var
 @item keys
 The keys that will select the template, as a string, characters
 only, for example @code{"a"} for a template to be selected with a
 single key, or @code{"bt"} for selection with two keys.  When using
-several keys, keys using the same prefix key must be sequential 
+several keys, keys using the same prefix key must be sequential
 in the list and preceded by a 2-element entry explaining the
 prefix key, for example
 @example
@@ -8962,7 +8966,7 @@ further details.}.  This is done with the @samp{src} block, where you also
 need to specify the name of the major mode that should be used to fontify the
 example@footnote{Code in @samp{src} blocks may also be evaluated either
 interactively or on export.  See @pxref{Working With Source Code} for more
-information on evaluating code blocks.}: 
+information on evaluating code blocks.}:
 @cindex #+BEGIN_SRC
 
 @example
@@ -9441,7 +9445,7 @@ or to exclude parts from export.  This behavior is governed by two variables:
 @code{org-export-select-tags} and @code{org-export-exclude-tags}.
 
 @enumerate
-@item 
+@item
 Org first checks if any of the @emph{select} tags is present in the
 buffer.  If yes, all trees that do not carry one of these tags will be
 excluded.  If a selected tree is a subtree, the heading hierarchy above it
@@ -10139,7 +10143,7 @@ title.  If the tree head entry has or inherits an @code{EXPORT_FILE_NAME}
 property, that name will be used for the export.
 @orgcmd{C-c C-e L,org-export-as-latex-to-buffer}
 Export to a temporary buffer.  Do not create a file.
-@item C-c C-e v l/L 
+@item C-c C-e v l/L
 Export only the visible part of the document.
 @item M-x org-export-region-as-latex
 Convert the region to @LaTeX{} under the assumption that it was Org-mode
@@ -10928,7 +10932,7 @@ The Freemind exporter was written by Lennart Borgman.
 
 @table @kbd
 @orgcmd{C-c C-e m,org-export-as-freemind}
-Export as Freemind mind map.  For an Org file @file{myfile.org}, the Freemind 
+Export as Freemind mind map.  For an Org file @file{myfile.org}, the Freemind
 file will be @file{myfile.mm}.
 @end table
 
@@ -10942,7 +10946,7 @@ does not interpret any additional Org-mode features.
 
 @table @kbd
 @orgcmd{C-c C-e x,org-export-as-xoxo}
-Export as XOXO file.  For an Org file @file{myfile.org}, the XOXO file will be 
+Export as XOXO file.  For an Org file @file{myfile.org}, the XOXO file will be
 @file{myfile.html}.
 @orgkey{C-c C-e v x}
 Export only the visible part of the document.
@@ -11067,7 +11071,7 @@ variable, called @code{org-publish-project-alist}.  Each element of the list
 configures one project, and may be in one of the two following forms:
 
 @lisp
-   ("project-name" :property value :property value ...) 
+   ("project-name" :property value :property value ...)
      @r{i.e.@: a well-formed property list with alternating keys and values}
 @r{or}
    ("project-name" :components ("project-name" "project-name" ...))
@@ -11394,7 +11398,7 @@ a sitemap entry's date is to be formated.  This property bypasses
 @code{org-publish-sitemap-date-format} which defaults to @code{%Y-%m-%d}.
 
 @item @code{:sitemap-sans-extension}
-@tab When non-nil, remove filenames' extensions from the generated sitemap. 
+@tab When non-nil, remove filenames' extensions from the generated sitemap.
 Useful to have cool URIs (see @uref{http://www.w3.org/Provider/Style/URI}).
 Defaults to @code{nil}.
 
@@ -11576,7 +11580,7 @@ e.g.@:
 
 Org-mode provides a number of features for working with live source code,
 including editing of code blocks in their native major-mode, evaluation of
-code blocks, converting code blocks into source files (known as @dfn{tangling} 
+code blocks, converting code blocks into source files (known as @dfn{tangling}
 in literate programming), and exporting code blocks and their
 results in several formats.  This functionality was contributed by Eric
 Schulte and Dan Davison, and was originally named Org-babel.
@@ -11644,7 +11648,7 @@ Optional switches controlling exportation of the code block (see switches discus
 @ref{Literal examples})
 @item <header arguments>
 Optional header arguments control many aspects of evaluation, export and
-tangling of code blocks.  See the @ref{Header arguments}. 
+tangling of code blocks.  See the @ref{Header arguments}.
 Header arguments can also be set on a per-buffer or per-subtree
 basis using properties.
 @item <body>
@@ -11724,7 +11728,7 @@ Both the code block and its results will be exported.
 Neither the code block nor its results will be exported.
 @end table
 
-It is possible to inhibit the evaluation of code blocks during export. 
+It is possible to inhibit the evaluation of code blocks during export.
 Setting the @code{org-export-babel-evaluate} variable to @code{nil} will
 ensure that no code blocks are evaluated as part of the export process.  This
 can be useful in situations where potentially untrusted Org-mode files are
@@ -11760,7 +11764,7 @@ Include the code block in the tangled output to file @samp{filename}.
 @kindex  C-c C-v t
 @subsubheading Functions
 @table @code
-@item org-babel-tangle 
+@item org-babel-tangle
 Tangle the current file.  Bound to @kbd{C-c C-v t}.
 @item org-babel-tangle-file
 Choose a file to tangle.  Bound to @kbd{C-c C-v f}.
@@ -11769,7 +11773,7 @@ Choose a file to tangle.  Bound to @kbd{C-c C-v f}.
 @subsubheading Hooks
 @table @code
 @item org-babel-post-tangle-hook
-This hook is run from within code files tangled by @code{org-babel-tangle}. 
+This hook is run from within code files tangled by @code{org-babel-tangle}.
 Example applications could include post-processing, compilation or evaluation
 of tangled code files.
 @end table
@@ -11864,7 +11868,7 @@ For more examples of passing header arguments to @code{#+call:} lines see
 
 The ``Library of Babel'' is a library of code blocks
 that can be called from any Org-mode file.  The library is housed in an
-Org-mode file located in the @samp{contrib} directory of Org-mode. 
+Org-mode file located in the @samp{contrib} directory of Org-mode.
 Org-mode users can deposit functions they believe to be generally
 useful in the library.
 
@@ -11894,8 +11898,8 @@ Code blocks in the following languages are supported.
 @item Graphviz @tab dot @tab Emacs Lisp @tab emacs-lisp
 @item gnuplot @tab gnuplot @tab Haskell @tab haskell
 @item Java @tab java @tab @tab
-@item Javascript @tab js @tab LaTeX @tab latex 
-@item Ledger @tab ledger @tab Lisp @tab lisp 
+@item Javascript @tab js @tab LaTeX @tab latex
+@item Ledger @tab ledger @tab Lisp @tab lisp
 @item Lilypond @tab lilypond @tab MATLAB @tab matlab
 @item Mscgen @tab mscgen @tab Objective Caml @tab ocaml
 @item Octave @tab octave @tab Org-mode @tab org
@@ -12064,7 +12068,7 @@ in Org-mode documents.
 
 The most common way to assign values to header arguments is at the
 code block level.  This can be done by listing a sequence of header
-arguments and their values as part of the @code{#+begin_src} line. 
+arguments and their values as part of the @code{#+begin_src} line.
 Properties set in this way override both the values of
 @code{org-babel-default-header-args} and header arguments specified as
 properties.  In the following example, the @code{:results} header argument
@@ -12172,7 +12176,7 @@ Additional header arguments are defined on a language-specific basis, see
 
 @node var, results, Specific header arguments, Specific header arguments
 @subsubsection @code{:var}
-The @code{:var} header argument is used to pass arguments to code blocks. 
+The @code{:var} header argument is used to pass arguments to code blocks.
 The specifics of how arguments are included in a code block vary by language;
 these are addressed in the language-specific documentation.  However, the
 syntax used to specify arguments is the same across all languages.  The
@@ -12330,7 +12334,7 @@ column is referenced.
 | 1 | 2 | 3 | 4 |
 @end example
 
-It is possible to index into the results of code blocks as well as tables. 
+It is possible to index into the results of code blocks as well as tables.
 Any number of dimensions can be indexed.  Dimensions are separated from one
 another by commas, as shown in the following example.
 
@@ -12428,7 +12432,7 @@ table or scalar depending on their value.
 @itemize @bullet
 @item @code{table}, @code{vector}
 The results should be interpreted as an Org-mode table.  If a single value is
-returned, it will be converted into a table with one row and one column. 
+returned, it will be converted into a table with one row and one column.
 E.g., @code{:results value table}.
 @item @code{list}
 The results should be interpreted as an Org-mode list.  If a single scalar
@@ -12448,10 +12452,10 @@ such by Org-mode.  E.g., @code{:results value raw}.
 Results are assumed to be HTML and will be enclosed in a @code{begin_html}
 block.  E.g., @code{:results value html}.
 @item @code{latex}
-Results assumed to be LaTeX and are enclosed in a @code{begin_latex} block. 
+Results assumed to be LaTeX and are enclosed in a @code{begin_latex} block.
 E.g., @code{:results value latex}.
 @item @code{code}
-Result are assumed to be parseable code and are enclosed in a code block. 
+Result are assumed to be parseable code and are enclosed in a code block.
 E.g., @code{:results value code}.
 @item @code{pp}
 The result is converted to pretty-printed code and is enclosed in a code
@@ -12601,7 +12605,7 @@ The code block is exported to a source code file named after the full path
 (including the directory) and file name (w/o extension) of the Org-mode file.
 E.g., @code{:tangle yes}.
 @item @code{no}
-The default.  The code block is not exported to a source code file. 
+The default.  The code block is not exported to a source code file.
 E.g., @code{:tangle no}.
 @item other
 Any other string passed to the @code{:tangle} header argument is interpreted
@@ -14132,7 +14136,7 @@ To use org-crypt it is suggested that you have the following in your
 (setq auto-save-default nil)
   ;; Auto-saving does not cooperate with org-crypt.el: so you need
   ;; to turn it off if you plan to use org-crypt.el quite often.
-  ;; Otherwise, you'll get an (annoying) message each time you 
+  ;; Otherwise, you'll get an (annoying) message each time you
   ;; start Org.
 
   ;; To turn it off only locally, you can insert this:

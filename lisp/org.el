@@ -11708,8 +11708,8 @@ of `org-todo-keywords-1'."
 (defun org-deadline (&optional remove time)
   "Insert the \"DEADLINE:\" string with a timestamp to make a deadline.
 With argument REMOVE, remove any deadline from the item.
-When TIME is set, it should be an internal time specification, and the
-scheduling will use the corresponding date."
+With argument TIME, set the deadline at the corresponding date.  TIME
+can either be an Org date like \"2011-07-24\" or a delta like \"+2d\"."
   (interactive "P")
   (org-loop-over-siblings-in-active-region
    (let* ((old-date (org-entry-get nil "DEADLINE"))
@@ -11749,8 +11749,8 @@ scheduling will use the corresponding date."
 (defun org-schedule (&optional remove time)
   "Insert the SCHEDULED: string with a timestamp to schedule a TODO item.
 With argument REMOVE, remove any scheduling date from the item.
-When TIME is set, it should be an internal time specification, and the
-scheduling will use the corresponding date."
+With argument TIME, scheduled at the corresponding date.  TIME can
+either be an Org date like \"2011-07-24\" or a delta like \"+2d\"."
   (interactive "P")
   (org-loop-over-siblings-in-active-region
    (let* ((old-date (org-entry-get nil "SCHEDULED"))
@@ -11832,7 +11832,10 @@ be removed."
 			   end default-time default-input)
 
     (catch 'exit
-      (when (and (not time) (memq what '(scheduled deadline)))
+      (when (and (memq what '(scheduled deadline))
+		 (or (not time)
+		     (and (stringp time)
+			  (string-match "^[-+]+[0-9]" time))))
 	;; Try to get a default date/time from existing timestamp
 	(save-excursion
 	  (org-back-to-heading t)
@@ -11846,9 +11849,16 @@ be removed."
 		  (apply 'encode-time (org-parse-time-string ts))
 		  default-input (and ts (org-get-compact-tod ts))))))
       (when what
-	;; If necessary, get the time from the user
-	(setq time (or time (org-read-date nil 'to-time nil nil
-					   default-time default-input))))
+	(setq time
+	      (if (and (stringp time)
+		       (string-match "^[-+]+[0-9]" time))
+		  ;; This is a relative time, set the proper date
+		  (apply 'encode-time
+			 (org-read-date-analyze
+			  time default-time (decode-time default-time)))
+		;; If necessary, get the time from the user
+		(or time (org-read-date nil 'to-time nil nil
+					default-time default-input)))))
 
       (when (and org-insert-labeled-timestamps-at-point
 		 (member what '(scheduled deadline)))
@@ -17834,7 +17844,7 @@ This command does many different things, depending on context:
 	  (org-save-outline-visibility 'use-markers (org-mode-restart)))
 	(message "Local setup has been refreshed"))))
      ((org-clock-update-time-maybe))
-     (t 
+     (t
       (or (run-hook-with-args-until-success 'org-ctrl-c-ctrl-c-final-hook)
 	  (error "C-c C-c can do nothing useful at this location"))))))
 
