@@ -2581,9 +2581,10 @@ formulas or Elisp formulas:
 @end group
 @end example
 
-Values must be of the form @code{[HH:MM[:SS]}, where seconds are optional.
-The resulting duration will always be displayed as @code{[HH:MM:SS}.  Note
-that negative values can be manipulated as well.
+Duration values are of the form @code{[HH:MM[:SS]}, where seconds are
+optional.  The computed duration will be displayed as @code{[HH:MM:SS}.
+Negative values can be manipulated as well, and integers are considered
+as seconds in addition and subtraction.
 
 @node Field and range formulas, Column formulas, Durations and time values, The spreadsheet
 @subsection Field and range formulas

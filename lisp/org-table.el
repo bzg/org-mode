@@ -2391,7 +2391,7 @@ not overwrite the stored one."
 	   (modes (copy-sequence org-calc-default-modes))
 	   (numbers nil) ; was a variable, now fixed default
 	   (keep-empty nil)
-	   n form form0 formrpl bw fmt x ev orig c lispp literal duration)
+	   n form form0 formrpl formrg bw fmt x ev orig c lispp literal duration)
       ;; Parse the format string.  Since we have a lot of modes, this is
       ;; a lot of work.  However, I think calc still uses most of the time.
       (if (string-match ";" formula)
@@ -2477,15 +2477,17 @@ not overwrite the stored one."
 	;; Insert complex ranges
 	(while (and (string-match org-table-range-regexp form)
 		    (> (length (match-string 0 form)) 1))
+	  (setq formrg (save-match-data 
+			 (org-table-get-range (match-string 0 form) nil n0)))
 	  (setq formrpl
 		(save-match-data
 		  (org-table-make-reference
 		   ;; possibly handle durations
 		   (if duration
-		       (mapcar (lambda(x)
-				 (org-table-time-string-to-seconds x))
-			       (org-table-get-range (match-string 0 form) nil n0))
-		     (org-table-get-range (match-string 0 form) nil n0))
+		       (if (listp formrg)
+			   (mapcar (lambda(x) (org-table-time-string-to-seconds x)) formrg)
+			 (org-table-time-string-to-seconds formrg))
+		     formrg)
 		   keep-empty numbers lispp)))
 	  (if (not (save-match-data
 		     (string-match (regexp-quote form) formrpl)))
@@ -3212,11 +3214,11 @@ For example:  28 -> AB."
 
 (defun org-table-time-string-to-seconds (s)
   "Convert a time string into numerical duration in seconds.
-S must be a string matching either -?HH:MM:SS or -?HH:MM."
+S can be a string matching either -?HH:MM:SS or -?HH:MM.
+If S is a string representing a number, keep this number."
   (let (hour min sec res)
     (cond
-     ((and (stringp s)
-	   (string-match "\\(-?\\)\\([0-9]+\\):\\([0-9]+\\):\\([0-9]+\\)" s))
+     ((and (string-match "\\(-?\\)\\([0-9]+\\):\\([0-9]+\\):\\([0-9]+\\)" s))
       (setq minus (< 0 (length (match-string 1 s)))
 	    hour (string-to-number (match-string 2 s))
 	    min (string-to-number (match-string 3 s))
@@ -3224,8 +3226,7 @@ S must be a string matching either -?HH:MM:SS or -?HH:MM."
       (if minus
 	  (setq res (- (+ (* hour 3600) (* min 60) sec)))
 	(setq res (+ (* hour 3600) (* min 60) sec))))
-     ((and (stringp s)
-	   (not (string-match org-ts-regexp-both s))
+     ((and (not (string-match org-ts-regexp-both s))
 	   (string-match "\\(-?\\)\\([0-9]+\\):\\([0-9]+\\)" s))
       (setq minus (< 0 (length (match-string 1 s)))
 	    hour (string-to-number (match-string 2 s))
