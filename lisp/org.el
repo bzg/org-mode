@@ -4537,38 +4537,40 @@ means to push this value onto the list in the variable.")
 	    org-not-done-heading-regexp
 	    (concat "^\\(\\*+\\)[ \t]+\\("
 		    (mapconcat 'regexp-quote org-not-done-keywords "\\|")
-		    "\\)\\>")
+		    "\\)[ \t]+")
 	    org-todo-line-regexp
 	    (concat "^\\(\\*+\\)[ \t]+\\(?:\\("
 		    (mapconcat 'regexp-quote org-todo-keywords-1 "\\|")
-		    "\\)\\>\\)?[ \t]*\\(.*\\)")
+		    "\\)[ \t]+\\)?\\(.*\\)")
 	    org-complex-heading-regexp
 	    (concat "^\\(\\*+\\)[ \t]+\\(?:\\("
 		    (mapconcat 'regexp-quote org-todo-keywords-1 "\\|")
-		    "\\)\\>\\)?\\(?:[ \t]*\\(\\[#.\\]\\)\\)?[ \t]*\\(.*?\\)"
+		    "\\)[ \t]+\\)?"
+		    "\\(?:\\(\\[#.\\]\\)[ \t]+\\)?"
+		    "\\(.*?\\)"
 		    "\\(?:[ \t]+\\(:[[:alnum:]_@#%:]+:\\)\\)?[ \t]*$")
 	    org-complex-heading-regexp-format
 	    (concat "^\\(\\*+\\)[ \t]+\\(?:\\("
 		    (mapconcat 'regexp-quote org-todo-keywords-1 "\\|")
-		    "\\)\\>\\)?"
-		    "\\(?:[ \t]*\\(\\[#.\\]\\)\\)?"
-		    "\\(?:[ \t]*\\(?:\\[[0-9%%/]+\\]\\)\\)?" ;; stats cookie
-		    "[ \t]*\\(%s\\)"
-		    "\\(?:[ \t]*\\(?:\\[[0-9%%/]+\\]\\)\\)?" ;; stats cookie
-		    "\\(?:[ \t]+\\(:[[:alnum:]_@#%%:]+:\\)\\)?[ \t]*$")
+		    "\\)[ \t]+\\)?"
+		    "\\(?:\\(\\[#.\\]\\)[ \t]+\\)?"
+		    "\\(?:\\(?:\\[[0-9%%/]+\\]\\)[ \t]+\\)?" ; stats cookie
+		    "\\(%s\\)[ \t]*"
+		    "\\(?:\\[[0-9%%/]+\\]\\)?" ; stats cookie
+		    (org-re "\\(?:[ \t]+\\(:[[:alnum:]_@#%%:]+:\\)\\)?[ \t]*$"))
 	    org-nl-done-regexp
 	    (concat "\n\\*+[ \t]+"
 		    "\\(?:" (mapconcat 'regexp-quote org-done-keywords "\\|")
-		    "\\)" "\\>")
+		    "\\)" "[ \t]+")
 	    org-todo-line-tags-regexp
 	    (concat "^\\(\\*+\\)[ \t]+\\(?:\\("
 		    (mapconcat 'regexp-quote org-todo-keywords-1 "\\|")
-		    (org-re
-		     "\\)\\>\\)? *\\(.*?\\([ \t]:[[:alnum:]:_@#%]+:[ \t]*\\)?$\\)"))
+		    "\\)[ \t]+\\)"
+		    (org-re "\\(.*?\\([ \t]:[[:alnum:]:_@#%]+:[ \t]*\\)?$\\)"))
 	    org-looking-at-done-regexp
 	    (concat "^" "\\(?:"
 		    (mapconcat 'regexp-quote org-done-keywords "\\|") "\\)"
-		    "\\>")
+		    "[ \t]+")
 	    org-deadline-regexp (concat "\\<" org-deadline-string)
 	    org-deadline-time-regexp
 	    (concat "\\<" org-deadline-string " *<\\([^>]+\\)>")
