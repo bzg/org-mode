@@ -479,21 +479,30 @@ or new, let the user edit the definition of the footnote."
       (org-footnote-goto-local-insertion-point)
       (org-show-context 'link-search))
      (t
-      (let ((re (concat "^" org-footnote-tag-for-non-org-mode-files "[ \t]*$")))
-	(unless (re-search-forward re nil t)
-	  (let ((max (if (and (derived-mode-p 'message-mode)
-			      (re-search-forward message-signature-separator nil t))
-			 (progn (beginning-of-line) (point))
-		       (goto-char (point-max)))))
-	    (skip-chars-backward " \t\r\n")
-	    (delete-region (point) max)
-	    (insert "\n\n")
-	    (insert org-footnote-tag-for-non-org-mode-files "\n"))))
-	;; Skip existing footnotes
-      (while (re-search-forward "^[[:space:]]*\\[[^]]+\\] " nil t)
-	(forward-line))))
+      ;; In a non-Org file.  Search for footnote tag, or create it if
+      ;; necessary (at the end of buffer, or before a signature if in
+      ;; Message mode).  Set point after any definition already there.
+      (let ((tag (concat "^" org-footnote-tag-for-non-org-mode-files "[ \t]*$"))
+	    (max (save-excursion
+		   (if (and (derived-mode-p 'message-mode)
+			    (re-search-forward
+			     message-signature-separator nil t))
+		       (copy-marker (point-at-bol) t)
+		     (copy-marker (point-max) t)))))
+	(goto-char max)
+	(unless (re-search-backward tag nil t)
+	  (skip-chars-backward " \t\r\n")
+	  (delete-region (point) max)
+	  (insert "\n\n" org-footnote-tag-for-non-org-mode-files "\n"))
+	;; Skip existing footnotes.
+	(while (re-search-forward org-footnote-definition-re max t))
+	(let ((def (org-footnote-at-definition-p)))
+	  (when def (goto-char (nth 2 def))))
+	(set-marker max nil))))
+    ;; Insert footnote label, position point and notify user.
+    (unless (bolp) (insert "\n"))
     (insert "\n[" label "] \n")
-    (goto-char (1- (point)))
+    (backward-char)
     (message "Edit definition and go back with `C-c &' or, if unique, with `C-c C-c'.")))
 
 ;;;###autoload

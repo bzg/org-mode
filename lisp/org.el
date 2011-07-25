@@ -15592,7 +15592,7 @@ With prefix ARG, change that many days."
 The date will be changed by N times WHAT.  WHAT can be `day', `month',
 `year', `minute', `second'.  If WHAT is not given, the cursor position
 in the timestamp determines what will be changed."
-  (let ((pos (point))
+  (let ((origin (point)) origin-cat
 	with-hm inactive
 	(dm (max (nth 1 org-time-stamp-rounding-minutes) 1))
 	org-ts-what
@@ -15602,6 +15602,10 @@ in the timestamp determines what will be changed."
 	(error "Not at a timestamp"))
     (if (and (not what) (eq org-ts-what 'bracket))
 	(org-toggle-timestamp-type)
+      ;; Point isn't on brackets.  Remember the part of the time-stamp
+      ;; the point was in.  Indeed, size of time-stamps may change,
+      ;; but point must be kept in the same category nonetheless.
+      (setq origin-cat org-ts-what)
       (if (and (not what) (not (eq org-ts-what 'day))
 	       org-display-custom-times
 	       (get-text-property (point) 'display)
@@ -15652,11 +15656,30 @@ in the timestamp determines what will be changed."
 	    (setcar (nthcdr 1 time0) (or (nth 1 time0) 0))
 	    (setcar (nthcdr 2 time0) (or (nth 2 time0) 0))
 	    (setq time (apply 'encode-time time0))))
-      (setq org-last-changed-timestamp
-	    (org-insert-time-stamp time with-hm inactive nil nil extra))
+      ;; Insert the new time-stamp, and ensure point stays in the same
+      ;; category as before (i.e. not after the last position in that
+      ;; category).
+      (let ((pos (point)))
+	;; Stay before inserted string. `save-excursion' is of no use.
+	(setq org-last-changed-timestamp
+	      (org-insert-time-stamp time with-hm inactive nil nil extra))
+	(goto-char pos))
+      (save-match-data
+	(looking-at org-ts-regexp3)
+	(goto-char (cond
+		    ;; `day' category ends before `hour' if any, or at
+		    ;; the end of the day name.
+		    ((eq origin-cat 'day)
+		     (min (or (match-beginning 7) (1- (match-end 5))) origin))
+		    ((eq origin-cat 'hour) (min (match-end 7) origin))
+		    ((eq origin-cat 'minute) (min (1- (match-end 8)) origin))
+		    ((integerp origin-cat) (min (1- (match-end 0)) origin))
+		    ;; `year' and `month' have both fixed size: point
+		    ;; couldn't have moved into another part.
+		    (t origin))))
+      ;; Update clock if on a CLOCK line.
       (org-clock-update-time-maybe)
-      (goto-char pos)
-      ;; Try to recenter the calendar window, if any
+      ;; Try to recenter the calendar window, if any.
       (if (and org-calendar-follow-timestamp-change
 	       (get-buffer-window "*Calendar*" t)
 	       (memq org-ts-what '(day month year)))
