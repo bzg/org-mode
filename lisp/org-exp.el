@@ -746,7 +746,7 @@ modified) list.")
 	    (case-fold-search t)
 	    p key val text options mathjax a pr style
 	    latex-header latex-class macros letbind
-	    ext-setup-or-nil setup-contents (start 0))
+	    ext-setup-or-nil setup-file setup-dir setup-contents (start 0))
 	(while (or (and ext-setup-or-nil
 			(string-match re ext-setup-or-nil start)
 			(setq start (match-end 0)))
@@ -793,11 +793,14 @@ modified) list.")
 	   ((string-equal key "MACRO")
 	    (push val macros))
 	   ((equal key "SETUPFILE")
-	    (setq setup-contents (org-file-contents
-				  (expand-file-name
-				   (org-remove-double-quotes
-				    (org-trim val)))
-				  'noerror))
+	    (setq setup-file (org-remove-double-quotes (org-trim val))
+		  ;; take care of recursive inclusion of setupfiles
+		  setup-file (if (or (file-name-absolute-p val) (not setup-dir))
+				 (expand-file-name setup-file)
+			       (let ((default-directory setup-dir))
+				 (expand-file-name setup-file))))
+	    (setq setup-dir (file-name-directory setup-file))
+	    (setq setup-contents (org-file-contents setup-file 'noerror))
 	    (if (not ext-setup-or-nil)
 		(setq ext-setup-or-nil setup-contents start 0)
 	      (setq ext-setup-or-nil
