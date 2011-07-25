@@ -206,39 +206,40 @@ properties are:
                      capture was invoked, kill the buffer again after capture
                      is finalized.
 
-The template defines the text to be inserted.  Often this is an org-mode
-entry (so the first line should start with a star) that will be filed as a
-child of the target headline.  It can also be freely formatted text.
-Furthermore, the following %-escapes will be replaced with content:
+The template defines the text to be inserted.  Often this is an
+org-mode entry (so the first line should start with a star) that
+will be filed as a child of the target headline.  It can also be
+freely formatted text.  Furthermore, the following %-escapes will
+be replaced with content and expanded in this order:
 
-  %^{prompt}  prompt the user for a string and replace this sequence with it.
-              A default value and a completion table ca be specified like this:
-              %^{prompt|default|completion2|completion3|...}.
+  %[pathname] insert the contents of the file given by `pathname'.
+  %(sexp)     evaluate elisp `(sexp)' and replace with the result.
+  %<...>      the result of format-time-string on the ... format specification.
   %t          time stamp, date only.
   %T          time stamp with date and time.
   %u, %U      like the above, but inactive time stamps.
-  %^t         like %t, but prompt for date.  Similarly %^T, %^u, %^U.
-              You may define a prompt like %^{Please specify birthday.
-  %<...>      the result of format-time-string on the ... format specification.
-  %n          user name (taken from `user-full-name').
   %a          annotation, normally the link created with `org-store-link'.
   %i          initial content, copied from the active region.  If %i is
               indented, the entire inserted text will be indented as well.
+  %A          like %a, but prompt for the description part.
   %c          current kill ring head.
   %x          content of the X clipboard.
-  %^C         interactive selection of which kill or clip to use.
-  %^L         like %^C, but insert as link.
   %k          title of currently clocked task.
   %K          link to currently clocked task.
+  %n          user name (taken from `user-full-name').
   %f          file visited by current buffer when org-capture was called.
   %F          full path of the file or directory visited by current buffer.
+  %:keyword   specific information for certain link types, see below.
   %^g         prompt for tags, with completion on tags in target file.
   %^G         prompt for tags, with completion on all tags in all agenda files.
+  %^t         like %t, but prompt for date.  Similarly %^T, %^u, %^U.
+              You may define a prompt like %^{Please specify birthday.
+  %^C         interactive selection of which kill or clip to use.
+  %^L         like %^C, but insert as link.
   %^{prop}p   prompt the user for a value for property `prop'.
-  %:keyword   specific information for certain link types, see below.
-  %[pathname] insert the contents of the file given by `pathname'.
-  %(sexp)     evaluate elisp `(sexp)' and replace with the result.
-
+  %^{prompt}  prompt the user for a string and replace this sequence with it.
+              A default value and a completion table ca be specified like this:
+              %^{prompt|default|completion2|completion3|...}.
   %?          After completing the template, position cursor here.
 
 Apart from these general escapes, you can access information specific to the

@@ -6526,39 +6526,39 @@ buffer again after capture is completed.
 
 In the template itself, special @kbd{%}-escapes@footnote{If you need one of
 these sequences literally, escape the @kbd{%} with a backslash.}  allow
-dynamic insertion of content:
+dynamic insertion of content. The templates are expanded in the order given here:
 
 @smallexample
+%[@var{file}]     @r{insert the contents of the file given by @var{file}.}
+%(@var{sexp})     @r{evaluate Elisp @var{sexp} and replace with the result.}
+%<...>      @r{the result of format-time-string on the ... format specification.}
+%t          @r{timestamp, date only.}
+%T          @r{timestamp with date and time.}
+%u, %U      @r{like the above, but inactive timestamps.}
+%a          @r{annotation, normally the link created with @code{org-store-link}.}
+%i          @r{initial content, the region when capture is called while the}
+            @r{region is active.}
+            @r{The entire text will be indented like @code{%i} itself.}
+%A          @r{like @code{%a}, but prompt for the description part.}
+%c          @r{Current kill ring head.}
+%x          @r{Content of the X clipboard.}
+%k          @r{title of the currently clocked task.}
+%K          @r{link to the currently clocked task.}
+%n          @r{user name (taken from @code{user-full-name}).}
+%f          @r{file visited by current buffer when org-capture was called.}
+%F          @r{full path of the file or directory visited by current buffer.}
+%:keyword   @r{specific information for certain link types, see below.}
+%^g         @r{prompt for tags, with completion on tags in target file.}
+%^G         @r{prompt for tags, with completion all tags in all agenda files.}
+%^t         @r{like @code{%t}, but prompt for date.  Similarly @code{%^T}, @code{%^u}, @code{%^U}.}
+            @r{You may define a prompt like @code{%^@{Birthday@}t}.}
+%^C         @r{Interactive selection of which kill or clip to use.}
+%^L         @r{Like @code{%^C}, but insert as link.}
+%^@{@var{prop}@}p   @r{Prompt the user for a value for property @var{prop}.}
 %^@{@var{prompt}@}  @r{prompt the user for a string and replace this sequence with it.}
             @r{You may specify a default value and a completion table with}
             @r{%^@{prompt|default|completion2|completion3...@}.}
             @r{The arrow keys access a prompt-specific history.}
-%a          @r{annotation, normally the link created with @code{org-store-link}.}
-%A          @r{like @code{%a}, but prompt for the description part.}
-%i          @r{initial content, the region when capture is called while the}
-            @r{region is active.}
-            @r{The entire text will be indented like @code{%i} itself.}
-%t          @r{timestamp, date only.}
-%T          @r{timestamp with date and time.}
-%u, %U      @r{like the above, but inactive timestamps.}
-%^t         @r{like @code{%t}, but prompt for date.  Similarly @code{%^T}, @code{%^u}, @code{%^U}.}
-            @r{You may define a prompt like @code{%^@{Birthday@}t}.}
-%<...>      @r{the result of format-time-string on the ... format specification.}
-%n          @r{user name (taken from @code{user-full-name}).}
-%c          @r{Current kill ring head.}
-%x          @r{Content of the X clipboard.}
-%^C         @r{Interactive selection of which kill or clip to use.}
-%^L         @r{Like @code{%^C}, but insert as link.}
-%k          @r{title of the currently clocked task.}
-%K          @r{link to the currently clocked task.}
-%f          @r{file visited by current buffer when org-capture was called.}
-%F          @r{full path of the file or directory visited by current buffer.}
-%^g         @r{prompt for tags, with completion on tags in target file.}
-%^G         @r{prompt for tags, with completion all tags in all agenda files.}
-%^@{@var{prop}@}p   @r{Prompt the user for a value for property @var{prop}.}
-%:keyword   @r{specific information for certain link types, see below.}
-%[@var{file}]     @r{insert the contents of the file given by @var{file}.}
-%(@var{sexp})     @r{evaluate Elisp @var{sexp} and replace with the result.}
 @end smallexample
 
 @noindent
