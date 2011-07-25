@@ -251,6 +251,34 @@ then run `org-babel-execute-src-block'."
 	       (org-babel-execute-src-block current-prefix-arg info) t) nil)))
 
 ;;;###autoload
+(defun org-babel-view-src-block-info ()
+  "Display information on the current source block.
+This includes header arguments, language and name, and is largely
+a window into the `org-babel-get-src-block-info' function."
+  (interactive)
+  (let ((info (org-babel-get-src-block-info 'light)))
+    (flet ((full (it) (> (length it) 0))
+	   (printf (fmt &rest args) (princ (apply #'format fmt args))))
+      (when info
+	(with-help-window (help-buffer)
+	  (let ((name        (nth 4 info))
+		(lang        (nth 0 info))
+		(switches    (nth 3 info))
+		(header-args (nth 2 info)))
+	    (when name            (printf "Name: %s\n"     name))
+	    (when lang            (printf "Lang: %s\n"     lang))
+	    (when (full switches) (printf "Switches: %s\n" switches))
+	    (printf "Header Arguments:\n")
+	    (dolist (pair (sort header-args
+				(lambda (a b) (string< (symbol-name (car a))
+						  (symbol-name (car b))))))
+	      (when (full (cdr pair))
+		(printf "\t%S%s\t%s\n"
+			(car pair)
+			(if (> (length (format "%S" (car pair))) 7) "" "\t")
+			(cdr pair))))))))))
+
+;;;###autoload
 (defun org-babel-expand-src-block-maybe ()
   "Conditionally expand a source block.
 Detect if this is context for a org-babel src-block and if so
