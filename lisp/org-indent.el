@@ -201,14 +201,13 @@ useful to make it ever so slightly different."
   :group 'org-faces)
 
 (defun org-indent-indent-buffer ()
-  "Add indentation properties for the whole buffer."
+  "Add indentation properties to the accessible part of the buffer."
   (interactive)
   (if (not (org-mode-p))
-      (error "Buffer major mode must be Org")
+      (error "Not in Org mode")
     (message "Setting buffer indentation. It may take a few seconds...")
-    (org-with-wide-buffer
-     (org-indent-remove-properties (point-min) (point-max))
-     (org-indent-add-properties (point-min) (point-max)))
+    (org-indent-remove-properties (point-min) (point-max))
+    (org-indent-add-properties (point-min) (point-max))
     (message "Indentation of buffer set.")))
 
 (defsubst org-indent-remove-properties (beg end)
