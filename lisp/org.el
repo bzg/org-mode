@@ -16810,6 +16810,7 @@ BEG and END default to the buffer boundaries."
 (org-defkey org-mode-map "\C-c\C-m" 'org-ctrl-c-ret)
 (org-defkey org-mode-map "\M-\C-m"  'org-insert-heading)
 (org-defkey org-mode-map "\C-c\C-xc" 'org-clone-subtree-with-time-shift)
+(org-defkey org-mode-map "\C-c\C-xv" 'org-copy-visible)
 (org-defkey org-mode-map [(control return)] 'org-insert-heading-respect-content)
 (org-defkey org-mode-map [(shift control return)] 'org-insert-todo-heading-respect-content)
 (org-defkey org-mode-map "\C-c\C-x\C-n" 'org-next-link)
@@ -18297,6 +18298,8 @@ See the individual commands for more information."
      ["Paste Subtree"  org-paste-special (not (org-at-table-p))]
      "--"
      ["Clone subtree, shift time" org-clone-subtree-with-time-shift t]
+     "--"
+     ["Copy visible text"  org-copy-visible t]
      "--"
      ["Promote Heading" org-metaleft (not (org-at-table-p))]
      ["Promote Subtree" org-shiftmetaleft (not (org-at-table-p))]

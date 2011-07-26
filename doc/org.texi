@@ -1216,6 +1216,8 @@ but without affecting visibility in that buffer.}.  With a numeric
 prefix argument N, go up to level N and then take that tree.  If N is
 negative then go up that many levels.  With a @kbd{C-u} prefix, do not remove
 the previously used indirect buffer.
+@orgcmd{C-c C-x v,org-copy-visible}
+Copy the @i{visible} text in the region into the kill ring.
 @end table
 
 @vindex org-startup-folded
