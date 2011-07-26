@@ -17664,6 +17664,20 @@ Depending on context, this does one of the following:
    ((org-at-table-p) (call-interactively 'org-table-hline-and-move))
    (t (call-interactively 'org-insert-heading))))
 
+(defun org-copy-visible (beg end)
+  "Copy the visible parts of the region."
+ (interactive "r")
+ (let (snippets s)
+   (save-excursion
+     (save-restriction
+	(narrow-to-region beg end)
+	(setq s (goto-char (point-min)))
+	(while (not (= (point) (point-max)))
+	  (goto-char (org-find-invisible))
+	  (push (buffer-substring s (point)) snippets)
+	  (setq s (goto-char (org-find-visible))))))
+   (kill-new (apply 'concat (nreverse snippets)))))
+
 (defun org-copy-special ()
   "Copy region in table or copy current subtree.
 Calls `org-table-copy' or `org-copy-subtree', depending on context.
