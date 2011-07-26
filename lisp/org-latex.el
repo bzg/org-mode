@@ -304,8 +304,10 @@ markup defined, the first one in the association list will be used."
 
 (defcustom org-export-latex-href-format "\\href{%s}{%s}"
   "A printf format string to be applied to href links.
-The format must contain two %s instances.  The first will be filled with
-the link, the second with the link description."
+The format must contain either two %s instances or just one.  
+If it contains two %s instances, the first will be filled with 
+the link, the second with the link description.  If it contains
+only one, the %s will be filled with the link."
   :group 'org-export-latex
   :type 'string)
 
@@ -2201,7 +2203,10 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 		;; a LaTeX issue, but we here implement a work-around anyway.
 		(setq path (org-export-latex-protect-amp path)
 		      desc (org-export-latex-protect-amp desc)))
-	      (insert (format org-export-latex-href-format path desc)))
+	      (insert 
+	       (if (string-match "%s.*%s" org-export-latex-href-format)
+		   (format org-export-latex-href-format path desc)
+		 (format org-export-latex-href-format path))))
 
 	     ((functionp (setq fnc (nth 2 (assoc type org-link-protocols))))
 	      ;; The link protocol has a function for formatting the link
