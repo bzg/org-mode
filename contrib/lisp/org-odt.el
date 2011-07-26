@@ -1091,7 +1091,7 @@ MAY-INLINE-P allows inlining it as an image."
 
 ;; xml files generated on-the-fly
 (defconst org-export-odt-save-list
-  '("META-INF/manifest.xml" "content.xml" "meta.xml" "styles.xml"))
+  '("mimetype" "META-INF/manifest.xml" "content.xml" "meta.xml" "styles.xml"))
 
 ;; xml files that are copied
 (defconst org-export-odt-nosave-list '())
@@ -1262,6 +1262,10 @@ MAY-INLINE-P allows inlining it as an image."
       (save-excursion
 	(insert (mapconcat 'identity (cdr org-export-odt-meta-lines) "\n"))))
 
+    ;; mimetype
+    (with-current-buffer (find-file-noselect mimetype-file t)
+      (insert "application/vnd.oasis.opendocument.text"))
+
     ;; styles file
     ;; (copy-file org-export-odt-styles-file styles-file t)
 
@@ -1272,9 +1276,6 @@ MAY-INLINE-P allows inlining it as an image."
     (setq org-export-odt-file-list
 	  (append org-export-odt-save-list org-export-odt-nosave-list)))
     content-file))
-
-(defconst org-export-odt-mimetype-lines
-  '("application/vnd.oasis.opendocument.text"))
 
 (defconst org-odt-manifest-file-entry-tag
   "<manifest:file-entry manifest:media-type=\"%s\" manifest:full-path=\"%s\"/>")
@@ -1319,23 +1320,22 @@ MAY-INLINE-P allows inlining it as an image."
 
     (let* ((target-name (file-name-nondirectory target))
 	   (target-dir (file-name-directory target))
-	   (cmd (format "zip -rmTq %s %s" target-name ".")))
+	   (cmds `(("zip" "-mX0" ,target-name "mimetype")
+		   ("zip" "-rmTq" ,target-name "."))))
       (when (file-exists-p target)
 	;; FIXME: If the file is locked this throws a cryptic error
 	(delete-file target))
 
       (let ((coding-system-for-write 'no-conversion) exitcode)
-	(message "Creating odt file using \"%s\"" cmd)
-	(setq exitcode
-	      (apply 'call-process
-		     "zip"
-		     nil
-		     nil
-		     nil
-		     (append (list "-rmTq") (list target-name "."))))
-
-	(or (zerop exitcode)
-	    (error "Unable to create odt file (%S)" exitcode)))
+	(message "Creating odt file...")
+	(mapc
+	 (lambda (cmd)
+	   (message "Running %s" (mapconcat 'identity cmd " "))
+	   (setq exitcode
+		 (apply 'call-process (car cmd) nil nil nil (cdr cmd)))
+	   (or (zerop exitcode)
+	       (error "Unable to create odt file (%S)" exitcode)))
+	 cmds))
 
       ;; move the file from outdir to target-dir
       (rename-file target-name target-dir)
