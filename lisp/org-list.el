@@ -1197,7 +1197,8 @@ some heuristics to guess the result."
 	     ;; Are there blank lines inside the list so far?
 	     ((save-excursion
 		(goto-char (org-list-get-top-point struct))
-		(org-list-search-forward "^[ \t]*$" item t))
+		(org-list-search-forward
+		 "^[ \t]*$" (org-list-get-item-end-before-blank item struct) t))
 	      1)
 	     ;; Default choice: no blank line.
 	     (t 0))))))))
