@@ -1351,10 +1351,36 @@ MAY-INLINE-P allows inlining it as an image."
   (message "Created %s" target)
   (set-buffer (find-file-noselect target t)))
 
+(defun org-odt-format-date (date)
+  (let ((warning-msg
+	 "OpenDocument files require that dates be in ISO-8601 format. Please review your DATE options for compatibility."))
+    ;; If the user is not careful with the date specification, an
+    ;; invalid meta.xml will be emitted.
+
+    ;; For now honor user's diktat and let him off with a warning
+    ;; message. This is OK as LibreOffice (and possibly other
+    ;; apps) doesn't deem this deviation as critical and continue
+    ;; to load the file.
+
+    ;; FIXME: Surely there a better way to handle this. Revisit this
+    ;; later.
+    (cond
+     ((and date (string-match "%" date))
+      ;; Honor user's diktat. See comments above
+      (org-lparse-warn warning-msg)
+      (format-time-string date))
+     (date
+      ;; Honor user's diktat. See comments above
+      (org-lparse-warn warning-msg)
+      date)
+     (t
+      ;; ISO 8601 format
+      (format-time-string "%Y-%m-%dT%T%:z")))))
+
 (defun org-odt-update-meta-file (opt-plist)
   (with-current-buffer
       (find-file-noselect (expand-file-name "meta.xml") t)
-    (let ((date (or (plist-get opt-plist :effective-date) ""))
+    (let ((date (org-odt-format-date (plist-get opt-plist :date)))
 	  (author (or (plist-get opt-plist :author) ""))
 	  (email (plist-get opt-plist :email))
 	  (keywords (plist-get opt-plist :keywords))
