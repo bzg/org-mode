@@ -231,6 +231,18 @@ relies on the variables to be present in the list."
   :group 'org-table-calculation
   :type 'plist)
 
+(defcustom org-table-duration-custom-format 'hours
+  "Format for the output of calc computations like $1+$2;t.
+The default value is 'hours, and will output the results as a
+number of hours.  Other allowed values are 'seconds, 'minutes and
+'days, and the output will be a fraction of seconds, minutes or
+days."
+  :group 'org-table-calculation
+  :type '(choice (symbol :tag "Seconds" 'seconds)
+		 (symbol :tag "Minutes" 'minutes)
+		 (symbol :tag "Hours  " 'hours)
+		 (symbol :tag "Days   " 'days)))
+
 (defcustom org-table-formula-evaluate-inline t
   "Non-nil means TAB and RET evaluate a formula in current table field.
 If the current field starts with an equal sign, it is assumed to be a formula
@@ -2412,6 +2424,12 @@ not overwrite the stored one."
 	      (setq fmt (replace-match "" t t fmt)))
 	    (if (string-match "T" fmt)
 		(setq duration t numbers t
+		      duration-output-format nil
+		      fmt (replace-match "" t t fmt)))
+	    (if (string-match "t" fmt)
+		(setq duration t 
+		      duration-output-format org-table-duration-custom-format
+		      numbers t
 		      fmt (replace-match "" t t fmt)))
 	    (if (string-match "N" fmt)
 		(setq numbers t
@@ -2523,12 +2541,14 @@ not overwrite the stored one."
 		       (error "#ERROR"))
 		  ev (if (numberp ev) (number-to-string ev) ev)
 		  ev (if duration (org-table-time-seconds-to-string
-				   (string-to-number ev)) ev))
+				   (string-to-number ev)
+				   duration-output-format) ev))
 	  (or (fboundp 'calc-eval)
 	      (error "Calc does not seem to be installed, and is needed to evaluate the formula"))
 	  (setq ev (calc-eval (cons form modes) (if numbers 'num))
 		ev (if duration (org-table-time-seconds-to-string
-				 (string-to-number ev)) ev)))
+				 (string-to-number ev)
+				 duration-output-format) ev)))
 
 	(when org-table-formula-debug
 	  (with-output-to-temp-buffer "*Substitution History*"
@@ -3237,9 +3257,19 @@ If S is a string representing a number, keep this number."
      (t (setq res (string-to-number s))))
     (number-to-string res)))
 
-(defun org-table-time-seconds-to-string (secs)
-  "Convert a number of seconds to a time string."
-  (org-format-seconds "%.2h:%.2m:%.2s" secs))
+(defun org-table-time-seconds-to-string (secs &optional output-format)
+  "Convert a number of seconds to a time string.
+If OUTPUT-FORMAT is non-nil, return a number of days, hours,
+minutes or seconds."
+  (cond ((eq output-format 'days)
+	 (format "%.3f" (/ (float secs) 86400)))
+	((eq output-format 'hours)
+	 (format "%.2f" (/ (float secs) 3600)))
+	((eq output-format 'minutes)
+	 (format "%.1f" (/ (float secs) 60)))
+	((eq output-format 'seconds)
+	 (format "%d" secs))
+	(t (org-format-seconds "%.2h:%.2m:%.2s" secs))))
 
 (defun org-table-fedit-convert-buffer (function)
   "Convert all references in this buffer, using FUNCTION."

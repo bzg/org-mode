@@ -2497,7 +2497,6 @@ n3 s3 e2 f4   @r{Normal, scientific, engineering, or fixed}
 D R           @r{angle modes: degrees, radians}
 F S           @r{fraction and symbolic modes}
 N             @r{interpret all fields as numbers, use 0 for non-numbers}
-T             @r{force text interpretation}
 E             @r{keep empty fields in ranges}
 L             @r{literal}
 @end example
@@ -2534,6 +2533,9 @@ Calc also contains a complete set of logical operations.  For example
 if($1<20,teen,string(""))  @r{"teen" if age $1 less than 20, else empty}
 @end example
 
+Note that you can also use two org-specific flags @code{T} and @code{t} for
+durations computations @ref{Durations and time values}.
+
 @node Formula syntax for Lisp, Durations and time values, Formula syntax for Calc, The spreadsheet
 @subsection Emacs Lisp forms as formulas
 @cindex Lisp forms, as table formulas
@@ -2569,6 +2571,7 @@ embed them in list or vector syntax.  Here are a few examples---note how the
 @subsection Durations and time values
 @cindex Duration, computing
 @cindex Time, computing
+@vindex org-table-duration-custom-format
 
 If you want to compute time values use the @code{T} flag, either in Calc
 formulas or Elisp formulas:
@@ -2578,15 +2581,21 @@ formulas or Elisp formulas:
   |  Task 1 |   Task 2 |    Total |
   |---------+----------+----------|
   |    2:12 |     1:47 | 03:59:00 |
-  | 3:02:20 | -2:07:00 | 00:55:20 |
-  #+TBLFM: $3=$1+$2;T
+  | 3:02:20 | -2:07:00 |     0.92 |
+  #+TBLFM: @@2$3=$1+$2;T::@@3$3=$1+$2;t
 @end group
 @end example
 
-Duration values are of the form @code{[HH:MM[:SS]}, where seconds are
-optional.  The computed duration will be displayed as @code{[HH:MM:SS}.
-Negative values can be manipulated as well, and integers are considered
-as seconds in addition and subtraction.
+Input duration values must be of the form @code{[HH:MM[:SS]}, where seconds
+are optional.  With the @code{T} flag, computed durations will be displayed
+as @code{[HH:MM:SS} (see the first formula above).  With the @code{t} flag,
+computed durations will be displayed according to the value of the variable
+@code{org-table-duration-custom-format}, which defaults to @code{'hours} and
+will display the result as a fraction of hours (see the second formula in the
+example above).
+
+Negative duration values can be manipulated as well, and integers will be
+considered as seconds in addition and subtraction.
 
 @node Field and range formulas, Column formulas, Durations and time values, The spreadsheet
 @subsection Field and range formulas
