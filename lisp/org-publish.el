@@ -41,16 +41,6 @@
 ;;; Code:
 
 
-(defun org-publish-sanitize-plist (plist)
-  (mapcar (lambda (x)
-	    (or (cdr (assq x '((:index-filename . :sitemap-filename)
-			       (:index-title . :sitemap-title)
-			       (:index-function . :sitemap-function)
-			       (:index-style . :sitemap-style)
-			       (:auto-index . :auto-sitemap))))
-		x))
-	  plist))
-
 (eval-when-compile
   (require 'cl))
 (require 'org)
@@ -60,6 +50,17 @@
 (eval-and-compile
   (unless (fboundp 'declare-function)
     (defmacro declare-function (fn file &optional arglist fileonly))))
+
+(defvar org-publish-initial-buffer nil
+  "The buffer `org-publish' has been called from.")
+
+(defvar org-publish-temp-files nil
+  "Temporary list of files to be published.")
+
+;; Here, so you find the variable right before it's used the first time:
+(defvar org-publish-cache nil
+  "This will cache timestamps and titles for files in publishing projects.
+Blocks could hash sha1 values here.")
 
 (defgroup org-publish nil
   "Options for publishing a set of Org-mode and related files."
@@ -287,6 +288,21 @@ You could use brackets to delimit on what part the link will be.
   :group 'org-publish
   :type 'string)
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Sanitize-plist (FIXME why?)
+
+(defun org-publish-sanitize-plist (plist)
+  ;; FIXME document
+  (mapcar (lambda (x)
+	    (or (cdr (assq x '((:index-filename . :sitemap-filename)
+			       (:index-title . :sitemap-title)
+			       (:index-function . :sitemap-function)
+			       (:index-style . :sitemap-style)
+			       (:auto-index . :auto-sitemap))))
+		x))
+	  plist))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Timestamp-related functions
 
@@ -333,20 +349,6 @@ If there is no timestamp, create one."
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;
-
-(defvar org-publish-initial-buffer nil
-  "The buffer `org-publish' has been called from.")
-(defvar org-publish-temp-files nil
-  "Temporary list of files to be published.")
-
-;; Here, so you find the variable right before it's used the first time:
-(defvar org-publish-cache nil
-  "This will cache timestamps and titles for files in publishing projects.
-Blocks could hash sha1 values here.")
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Compatibility aliases
 
 ;; Delete-dups is not in Emacs <22
@@ -387,20 +389,19 @@ This splices all the components into the list."
 	(push p rtn)))
     (nreverse (org-publish-delete-dups (delq nil rtn)))))
 
-
-(defvar sitemap-sort-files)
-(defvar sitemap-sort-folders)
-(defvar sitemap-ignore-case)
-(defvar sitemap-requested)
-(defvar sitemap-date-format)
-(defvar sitemap-file-entry-format)
+(defvar org-sitemap-sort-files)
+(defvar org-sitemap-sort-folders)
+(defvar org-sitemap-ignore-case)
+(defvar org-sitemap-requested)
+(defvar org-sitemap-date-format)
+(defvar org-sitemap-file-entry-format)
 (defun org-publish-compare-directory-files (a b)
   "Predicate for `sort', that sorts folders and files for sitemap."
   (let ((retval t))
-    (when (or sitemap-sort-files sitemap-sort-folders)
+    (when (or org-sitemap-sort-files org-sitemap-sort-folders)
       ;; First we sort files:
-      (when sitemap-sort-files
-	(cond ((equal sitemap-sort-files 'alphabetically)
+      (when org-sitemap-sort-files
+	(cond ((equal org-sitemap-sort-files 'alphabetically)
 	       (let* ((adir (file-directory-p a))
 		      (aorg (and (string-match "\\.org$" a) (not adir)))
 		      (bdir (file-directory-p b))
@@ -411,27 +412,27 @@ This splices all the components into the list."
 		      (B (if borg
 			     (concat (file-name-directory b)
 				     (org-publish-find-title b)) b)))
-		 (setq retval (if sitemap-ignore-case
+		 (setq retval (if org-sitemap-ignore-case
 				  (not (string-lessp (upcase B) (upcase A)))
 				(not (string-lessp B A))))))
-		((or (equal sitemap-sort-files 'chronologically)
-		     (equal sitemap-sort-files 'anti-chronologically))
+		((or (equal org-sitemap-sort-files 'chronologically)
+		     (equal org-sitemap-sort-files 'anti-chronologically))
 		 (let* ((adate (org-publish-find-date a))
 			(bdate (org-publish-find-date b))
 			(A (+ (lsh (car adate) 16) (cadr adate)))
 			(B (+ (lsh (car bdate) 16) (cadr bdate))))
-		   (setq retval (if (equal sitemap-sort-files 'chronologically)
+		   (setq retval (if (equal org-sitemap-sort-files 'chronologically)
 				    (<= A B)
 				  (>= A B)))))))
       ;; Directory-wise wins:
-      (when sitemap-sort-folders
+      (when org-sitemap-sort-folders
         ;; a is directory, b not:
         (cond
          ((and (file-directory-p a) (not (file-directory-p b)))
-          (setq retval (equal sitemap-sort-folders 'first)))
+          (setq retval (equal org-sitemap-sort-folders 'first)))
           ;; a is not a directory, but b is:
          ((and (not (file-directory-p a)) (file-directory-p b))
-          (setq retval (equal sitemap-sort-folders 'last))))))
+          (setq retval (equal org-sitemap-sort-folders 'last))))))
     retval))
 
 (defun org-publish-get-base-files-1 (base-dir &optional recurse match skip-file skip-dir)
@@ -454,7 +455,7 @@ matching the regexp SKIP-DIR when recursing through BASE-DIR."
 			  (not (string-match match fnd)))
 
 		(pushnew f org-publish-temp-files)))))
-	(if sitemap-requested
+	(if org-sitemap-requested
 	    (sort (directory-files base-dir t (unless recurse match))
 		  'org-publish-compare-directory-files)
 	  (directory-files base-dir t (unless recurse match)))))
@@ -471,16 +472,16 @@ matching filenames."
 	 (extension (or (plist-get project-plist :base-extension) "org"))
 	 ;; sitemap-... variables are dynamically scoped for
 	 ;; org-publish-compare-directory-files:
-	 (sitemap-requested
+	 (org-sitemap-requested
 	  (plist-get project-plist :auto-sitemap))
 	 (sitemap-filename
 	  (or (plist-get project-plist :sitemap-filename)
 	      "sitemap.org"))
-	 (sitemap-sort-folders
+	 (org-sitemap-sort-folders
 	  (if (plist-member project-plist :sitemap-sort-folders)
 	      (plist-get project-plist :sitemap-sort-folders)
 	    org-publish-sitemap-sort-folders))
-	 (sitemap-sort-files
+	 (org-sitemap-sort-files
 	  (cond ((plist-member project-plist :sitemap-sort-files)
 		 (plist-get project-plist :sitemap-sort-files))
 		;; For backward compatibility:
@@ -488,19 +489,19 @@ matching filenames."
 		 (if (plist-get project-plist :sitemap-alphabetically)
 		     'alphabetically nil))
 		(t org-publish-sitemap-sort-files)))
-	 (sitemap-ignore-case
+	 (org-sitemap-ignore-case
 	  (if (plist-member project-plist :sitemap-ignore-case)
 	      (plist-get project-plist :sitemap-ignore-case)
 	    org-publish-sitemap-sort-ignore-case))
 	 (match (if (eq extension 'any)
                     "^[^\\.]"
 		  (concat "^[^\\.].*\\.\\(" extension "\\)$"))))
-    ;; Make sure sitemap-sort-folders' has an accepted value
-    (unless (memq sitemap-sort-folders '(first last))
-      (setq sitemap-sort-folders nil))
+    ;; Make sure `org-sitemap-sort-folders' has an accepted value
+    (unless (memq org-sitemap-sort-folders '(first last))
+      (setq org-sitemap-sort-folders nil))
 
     (setq org-publish-temp-files nil)
-    (if sitemap-requested
+    (if org-sitemap-requested
 	(pushnew (expand-file-name (concat base-dir sitemap-filename))
 		  org-publish-temp-files))
     (org-publish-get-base-files-1 base-dir recurse match
@@ -648,10 +649,10 @@ See `org-publish-org-to' to the list of arguments."
   "Publish a file with no transformation of any kind.
 See `org-publish-org-to' to the list of arguments."
   ;; make sure eshell/cp code is loaded
-    (unless (file-directory-p pub-dir)
-      (make-directory pub-dir t))
-    (or (equal (expand-file-name (file-name-directory filename))
-	       (file-name-as-directory (expand-file-name pub-dir)))
+  (unless (file-directory-p pub-dir)
+    (make-directory pub-dir t))
+  (or (equal (expand-file-name (file-name-directory filename))
+	     (file-name-as-directory (expand-file-name pub-dir)))
       (copy-file filename
 		 (expand-file-name (file-name-nondirectory filename) pub-dir)
 		 t)))
@@ -727,9 +728,9 @@ If :makeindex is set, also produce a file theindex.org."
 				"sitemap.org"))
 	  (sitemap-function (or (plist-get project-plist :sitemap-function)
 				'org-publish-org-sitemap))
-	  (sitemap-date-format (or (plist-get project-plist :sitemap-date-format)
+	  (org-sitemap-date-format (or (plist-get project-plist :sitemap-date-format)
 				   org-publish-sitemap-date-format))
-	  (sitemap-file-entry-format (or (plist-get project-plist :sitemap-file-entry-format)
+	  (org-sitemap-file-entry-format (or (plist-get project-plist :sitemap-file-entry-format)
 					 org-publish-sitemap-file-entry-format))
 	  (preparation-function (plist-get project-plist :preparation-function))
 	  (completion-function (plist-get project-plist :completion-function))
@@ -740,11 +741,13 @@ If :makeindex is set, also produce a file theindex.org."
 	 (org-publish-file file project t))
        (when (plist-get project-plist :makeindex)
 	 (org-publish-index-generate-theindex.inc
-	  (plist-get project-plist :base-directory))
+	  ;; (or org-publish-orgx-directory
+	      (plist-get project-plist :base-directory)); )
 	 (org-publish-file (expand-file-name
 			    "theindex.org"
 			    (plist-get project-plist :base-directory))
-			   project t))
+			   project t)
+	 (delete-file (expand-file-name "theindex.orgx")))
        (when completion-function (run-hooks 'completion-function))
      (org-publish-write-cache-file)))
    (org-publish-expand-projects projects)))
@@ -810,7 +813,7 @@ Default for SITEMAP-FILENAME is 'sitemap.org'."
 					(+ (length indent-str) 2) ?\ )))))))
 	    ;; This is common to 'flat and 'tree
 	    (let ((entry
-		   (org-publish-format-file-entry sitemap-file-entry-format
+		   (org-publish-format-file-entry org-sitemap-file-entry-format
 						  file project-plist))
 		  (regexp "\\(.*\\)\\[\\([^][]+\\)\\]\\(.*\\)"))
 	      (cond ((string-match-p regexp entry)
@@ -829,7 +832,7 @@ Default for SITEMAP-FILENAME is 'sitemap.org'."
 (defun org-publish-format-file-entry (fmt file project-plist)
   (format-spec fmt
 	     `((?t . ,(org-publish-find-title file t))
-	       (?d . ,(format-time-string sitemap-date-format
+	       (?d . ,(format-time-string org-sitemap-date-format
 					  (org-publish-find-date file)))
 	       (?a . ,(or (plist-get project-plist :author) user-full-name)))))
 
@@ -838,21 +841,21 @@ Default for SITEMAP-FILENAME is 'sitemap.org'."
   (or
    (and (not reset) (org-publish-cache-get-file-property file :title nil t))
    (let* ((visiting (find-buffer-visiting file))
-	 (buffer (or visiting (find-file-noselect file)))
-	 title)
-    (with-current-buffer buffer
-      (let* ((opt-plist (org-combine-plists (org-default-export-plist)
-					    (org-infile-export-plist))))
-	(setq title
-	      (or (plist-get opt-plist :title)
-		  (and (not
-			(plist-get opt-plist :skip-before-1st-heading))
-		       (org-export-grab-title-from-buffer))
-		  (file-name-nondirectory (file-name-sans-extension file))))))
-    (unless visiting
-      (kill-buffer buffer))
-    (org-publish-cache-set-file-property file :title title)
-    title)))
+	  (buffer (or visiting (find-file-noselect file)))
+	  title)
+     (with-current-buffer buffer
+       (let* ((opt-plist (org-combine-plists (org-default-export-plist)
+					     (org-infile-export-plist))))
+	 (setq title
+	       (or (plist-get opt-plist :title)
+		   (and (not
+			 (plist-get opt-plist :skip-before-1st-heading))
+			(org-export-grab-title-from-buffer))
+		   (file-name-nondirectory (file-name-sans-extension file))))))
+     (unless visiting
+       (kill-buffer buffer))
+     (org-publish-cache-set-file-property file :title title)
+     title)))
 
 (defun org-publish-find-date (file)
   "Find the date of FILE in project.
@@ -966,7 +969,7 @@ the project."
 	(insert (format "INDEX: (%s) %s\n" (cdr entry) (car entry)))))))
 
 (defun org-publish-index-generate-theindex.inc (directory)
-  "Generate the index from all .orgx files in the current directory and below."
+  "Generate the index from all .orgx files in DIRECTORY."
   (require 'find-lisp)
   (let* ((fulldir (file-name-as-directory
 		   (expand-file-name directory)))
@@ -990,6 +993,8 @@ the project."
 		entry (match-string 2))
 	  (push (list entry origfile target) index)))
       (kill-buffer buf))
+    ;; delete .orgx files from current directory:
+    (mapc 'delete-file full-files)
     (setq index (sort index (lambda (a b) (string< (downcase (car a))
 						   (downcase (car b))))))
     (setq ibuffer (find-file-noselect (expand-file-name "theindex.inc" directory)))
@@ -1105,15 +1110,19 @@ so that the file including them will be republished as well."
     (error "%s" "`org-publish-cache-file-needs-publishing' called, but no cache present"))
   (let* ((key (org-publish-timestamp-filename filename pub-dir pub-func))
 	 (pstamp (org-publish-cache-get key))
-	 included-files-ctime)
-    (with-temp-buffer 
-      (when (equal (file-name-extension filename) "org")
-	(find-file (expand-file-name filename))
+	 (visiting (find-buffer-visiting filename))
+	 included-files-ctime buf)
+
+    (when (equal (file-name-extension filename) "org")
+      (setq buf (find-file (expand-file-name filename)))
+      (with-current-buffer buf
 	(goto-char (point-min))
 	(while (re-search-forward "^#\\+INCLUDE:[ \t]+\"?\\([^ \t\"]*\\)\"?[ \t]*.*$" nil t)
 	  (let* ((included-file (expand-file-name (match-string 1))))
 	    (add-to-list 'included-files-ctime
-			 (org-publish-cache-ctime-of-src included-file) t)))))
+			 (org-publish-cache-ctime-of-src included-file) t))))
+      ;; FIXME don't kill current buffer
+      (unless visiting (kill-buffer buf)))
     (if (null pstamp)
 	t
       (let ((ctime (org-publish-cache-ctime-of-src filename)))
