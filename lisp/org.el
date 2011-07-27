@@ -13496,6 +13496,7 @@ SCOPE determines the scope of this command.  It can be any of:
 
 nil     The current buffer, respecting the restriction if any
 tree    The subtree started with the entry at point
+region  The entries within the active region, if any
 file    The current buffer, without restriction
 file-with-archives
         The current buffer, and any archives associated with it
@@ -13544,10 +13545,13 @@ a *different* entry, you cannot use these techniques."
 
     (save-excursion
       (save-restriction
-	(when (eq scope 'tree)
-	  (org-back-to-heading t)
-	  (org-narrow-to-subtree)
-	  (setq scope nil))
+	(cond ((eq scope 'tree)
+	       (org-back-to-heading t)
+	       (org-narrow-to-subtree)
+	       (setq scope nil))
+	      ((and (eq scope 'region) (org-region-active-p))
+	       (narrow-to-region (region-beginning) (region-end))
+	       (setq scope nil)))
 
 	(if (not scope)
 	    (progn
