@@ -73,6 +73,12 @@ It will be set in `org-indent-initialize'.")
   "Position of initialization before interrupt.")
 (defvar org-indent-initial-timer nil
   "Timer used for initialization.")
+(defvar org-indent-initial-resume-timer nil
+  "Timer used to reschedule initialization process.")
+(defvar org-indent-initial-process-duration '(0 2 0)
+  "How long before initialization gives hand to other idle processes.")
+(defvar org-indent-initial-resume-delay '(0 0 200000)
+  "How long before resuming initialization process.")
 (defvar org-indent-initial-lock nil
   "Lock used of initialization.")
 (defvar org-hide-leading-stars-before-indent-mode nil
@@ -224,6 +230,9 @@ useful to make it ever so slightly different."
 (defun org-indent-initialize-buffer ()
   "Set virtual indentation for the whole buffer asynchronously."
   (when (and org-indent-mode (not org-indent-initial-lock))
+    ;; Clean reschedule timer (cf `org-indent-add-properties').
+    (when org-indent-initial-resume-timer
+      (cancel-timer org-indent-initial-resume-timer))
     (org-with-wide-buffer
      (setq org-indent-initial-lock t)
      (let ((interruptp
@@ -291,7 +300,9 @@ you want to use this feature."
 	    (pf-inline (and (featurep 'org-inlinetask)
 			    (org-inlinetask-in-task-p)
 			    (+ (* org-indent-indentation-per-level
-				  (1- (org-inlinetask-get-task-level))) 2))))
+				  (1- (org-inlinetask-get-task-level))) 2)))
+	    (time-limit (time-add (current-time)
+				  org-indent-initial-process-duration)))
        ;; 2. For each line, set `line-prefix' and `wrap-prefix'
        ;;    properties depending on the type of line (headline,
        ;;    inline task, item or other).
@@ -300,6 +311,17 @@ you want to use this feature."
 	   (cond
 	    ;; When in async mode, check if interrupt is required.
 	    ((and async (input-pending-p)) (throw 'interrupt (point)))
+	    ;; In async mode, take a break of
+	    ;; `org-indent-initial-resume-delay' every
+	    ;; `org-indent-initial-process-duration' to avoid blocking
+	    ;; any other idle timer or process output.
+	    ((and async (time-less-p time-limit (current-time)))
+	     (setq org-indent-initial-resume-timer
+		   (run-with-idle-timer
+		    (time-add (current-idle-time)
+			      org-indent-initial-resume-delay)
+		    nil #'org-indent-initialize-buffer))
+	     (throw 'interrupt (point)))
 	    ;; Empty line: do nothing.
 	    ((eolp) (forward-line 1))
 	    ;; Headline or inline task.
