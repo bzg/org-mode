@@ -63,23 +63,23 @@
 ;;    - The first sibling on the list is changed into KEYWORD state
 ;;    - The sibling also gets the same TRIGGER property
 ;;      "chain-find-next", so the chain can continue.
-;;      
+;;
 ;;    OPTIONS should be a comma separated string without spaces, and
 ;;    can contain following options:
-;;    
+;;
 ;;    - from-top      the candidate list is all of the siblings in
 ;;                    the current subtree
-;;                    
+;;
 ;;    - from-bottom   candidate list are all siblings from bottom up
-;;    
+;;
 ;;    - from-current  candidate list are all siblings from current item
 ;;                    until end of subtree, then wrapped around from
 ;;                    first sibling
-;;                    
+;;
 ;;    - no-wrap       candidate list are siblings from current one down
-;;    
+;;
 ;;    - todo-only     Only consider siblings that have a todo keyword
-;;    - 
+;;    -
 ;;    - todo-and-done-only
 ;;                    Same as above but also include done items.
 ;;
@@ -88,7 +88,7 @@
 ;;    - effort-up     sort by highest effort
 ;;    - effort-down   sort by lowest effort
 ;;
-;;    Default OPTIONS are from-top 
+;;    Default OPTIONS are from-top
 ;;
 ;;
 ;; 4) If the TRIGGER property contains any other words like
@@ -133,7 +133,7 @@
 ;;    :PROPERTIES:
 ;;      :TRIGGER: chain-siblings(NEXT)
 ;;    :END:
-;; 
+;;
 ;; ** This is the second in this chain
 ;;
 ;; ** This is the third in this chain
@@ -148,7 +148,7 @@
 ;;   :END:
 ;;
 ;; ** This is the fifth in this chain
-;; 
+;;
 ;; * Start writing report
 ;;   :PROPERTIES:
 ;;     :ID: XYZ-is-my-id
@@ -378,7 +378,7 @@ this ID property, that entry is also checked."
 	    ;; and split it on whitespace.
 	    (setq blocker (org-entry-get pos "BLOCKER")
 		  blockers (and blocker (org-split-string blocker "[ \t]+")))
-	    
+
 	    ;; go through all the blockers
 	    (while (setq bl (pop blockers))
 	      (cond
@@ -409,7 +409,7 @@ this ID property, that entry is also checked."
 	    )))
     (when org-depend-tag-blocked
       (org-toggle-tag "blocked" (if proceed-p 'off 'on)))
-    
+
     proceed-p))
 
 (add-hook 'org-trigger-hook 'org-depend-trigger-todo)
