@@ -239,6 +239,32 @@ useful to make it ever so slightly different."
        (unless interruptp (cancel-timer org-indent-initial-timer))))
     (setq org-indent-initial-lock nil)))
 
+(defsubst org-indent-set-line-properties (l w h)
+  "Set prefix properties on current line an move to next one.
+
+Prefix properties `line-prefix' and `wrap-prefix' in current line
+are set to, respectively, length L and W.
+
+If H is non-nil, `line-prefix' will be starred.  If H is
+`inline', the first star will have `org-warning' face.
+
+Assume point is at bol."
+  (let ((line (cond
+	       ((eq 'inline h)
+		(let ((stars (aref org-indent-stars
+				   (min l org-indent-max-levels))))
+		  (and stars
+		       (concat org-indent-inlinetask-first-star
+			       (substring stars 1)))))
+	       (h (aref org-indent-stars
+			(min l org-indent-max-levels)))
+	       (t (aref org-indent-strings
+			(min l org-indent-max)))))
+	(wrap (aref org-indent-strings (min w org-indent-max))))
+    (add-text-properties (point) (point-at-eol)
+			 `(line-prefix ,line wrap-prefix ,wrap)))
+  (forward-line 1))
+
 (defun org-indent-add-properties (beg end &optional async)
   "Add indentation properties between BEG and END.
 
@@ -265,33 +291,10 @@ you want to use this feature."
 	    (pf-inline (and (featurep 'org-inlinetask)
 			    (org-inlinetask-in-task-p)
 			    (+ (* org-indent-indentation-per-level
-				  (1- (org-inlinetask-get-task-level))) 2)))
-	    (set-prop-and-move
-	     (function
-	      ;; Set prefix properties `line-prefix' and `wrap-prefix'
-	      ;; in current line to, respectively, length L and W and
-	      ;; move forward.  If H is non-nil, `line-prefix' will be
-	      ;; starred.  If H is `inline', the first star will have
-	      ;; `org-warning' face.  Assume point is at bol.
-	      (lambda (l w h)
-		(let ((line (cond
-			     ((eq 'inline h)
-			      (let ((stars (aref org-indent-stars
-						 (min l org-indent-max-levels))))
-				(and stars
-				     (concat org-indent-inlinetask-first-star
-					     (substring stars 1)))))
-			     (h (aref org-indent-stars
-				      (min l org-indent-max-levels)))
-			     (t (aref org-indent-strings
-				      (min l org-indent-max)))))
-		      (wrap (aref org-indent-strings (min w org-indent-max))))
-		  (add-text-properties (point) (point-at-eol)
-				       `(line-prefix ,line wrap-prefix ,wrap)))
-		(forward-line 1)))))
+				  (1- (org-inlinetask-get-task-level))) 2))))
        ;; 2. For each line, set `line-prefix' and `wrap-prefix'
-       ;;    properties depending on the type of line (headline, inline
-       ;;    task, item or other).
+       ;;    properties depending on the type of line (headline,
+       ;;    inline task, item or other).
        (with-silent-modifications
 	 (while (< (point) end)
 	   (cond
@@ -307,26 +310,26 @@ you want to use this feature."
 	       (cond
 		;; Headline: new value for PF.
 		((looking-at limited-re)
-		 (funcall set-prop-and-move line wrap t)
+		 (org-indent-set-line-properties line wrap t)
 		 (setq pf wrap))
 		;; End of inline task: PF-INLINE is now nil.
 		((looking-at "\\*+ end[ \t]*$")
-		 (funcall set-prop-and-move line wrap 'inline)
+		 (org-indent-set-line-properties line wrap 'inline)
 		 (setq pf-inline nil))
 		;; Start of inline task.  Determine if it contains
 		;; text, or if it is only one line long.  Set
 		;; PF-INLINE accordingly.
-		(t (funcall set-prop-and-move line wrap 'inline)
+		(t (org-indent-set-line-properties line wrap 'inline)
 		   (setq pf-inline (and (org-inlinetask-in-task-p) wrap))))))
 	    ;; List item: `wrap-prefix' is set where body starts.
 	    ((org-at-item-p)
 	     (let* ((line (or pf-inline pf 0))
 		    (wrap (+ (org-list-item-body-column (point)) line)))
-	       (funcall set-prop-and-move line wrap nil)))
+	       (org-indent-set-line-properties line wrap nil)))
 	    ;; Normal line: use PF-INLINE, PF or nil as prefixes.
 	    (t (let* ((line (or pf-inline pf 0))
 		      (wrap (+ line (org-get-indentation))))
-		 (funcall set-prop-and-move line wrap nil))))))))))
+		 (org-indent-set-line-properties line wrap nil))))))))))
 
 (defun org-indent-notify-modified-headline (beg end)
   "Set `org-indent-modified-headline-flag' depending on context.
