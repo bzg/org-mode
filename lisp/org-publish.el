@@ -740,14 +740,12 @@ If :makeindex is set, also produce a file theindex.org."
        (while (setq file (pop files))
 	 (org-publish-file file project t))
        (when (plist-get project-plist :makeindex)
-	 (org-publish-index-generate-theindex.inc
-	  ;; (or org-publish-orgx-directory
-	      (plist-get project-plist :base-directory)); )
+	 (org-publish-index-generate-theindex
+	  (plist-get project-plist :base-directory))
 	 (org-publish-file (expand-file-name
 			    "theindex.org"
 			    (plist-get project-plist :base-directory))
-			   project t)
-	 (delete-file (expand-file-name "theindex.orgx")))
+			   project t))
        (when completion-function (run-hooks 'completion-function))
      (org-publish-write-cache-file)))
    (org-publish-expand-projects projects)))
@@ -964,11 +962,14 @@ the project."
 			 target ""))
 	(push (cons entry target) index)))
     (with-temp-file
-	(concat (file-name-sans-extension org-current-export-file) ".orgx")
+	(concat
+	 (file-name-directory org-current-export-file) "."
+	 (file-name-sans-extension
+	  (file-name-nondirectory org-current-export-file)) ".orgx")
       (dolist (entry (nreverse index))
 	(insert (format "INDEX: (%s) %s\n" (cdr entry) (car entry)))))))
 
-(defun org-publish-index-generate-theindex.inc (directory)
+(defun org-publish-index-generate-theindex (directory)
   "Generate the index from all .orgx files in DIRECTORY."
   (require 'find-lisp)
   (let* ((fulldir (file-name-as-directory
@@ -984,7 +985,7 @@ the project."
 	 main last-main letter last-letter file sub link tgext)
     ;; `files' contains the list of relative file names
     (dolist (file files)
-      (setq origfile (substring file 0 -1))
+      (setq origfile (substring file 1 -1))
       (setq buf (find-file-noselect file))
       (with-current-buffer buf
 	(goto-char (point-min))
@@ -993,11 +994,9 @@ the project."
 		entry (match-string 2))
 	  (push (list entry origfile target) index)))
       (kill-buffer buf))
-    ;; delete .orgx files from current directory:
-    (mapc 'delete-file full-files)
     (setq index (sort index (lambda (a b) (string< (downcase (car a))
 						   (downcase (car b))))))
-    (setq ibuffer (find-file-noselect (expand-file-name "theindex.inc" directory)))
+    (setq ibuffer (find-file-noselect (expand-file-name "theindex.org" directory)))
     (with-current-buffer ibuffer
       (erase-buffer)
       (insert "* Index\n")
@@ -1024,17 +1023,7 @@ the project."
 	    (insert "     - " link "\n")
 	  (insert "   - " link "\n")))
       (save-buffer))
-    (kill-buffer ibuffer)
-
-    (let ((index-file (expand-file-name "theindex.org" directory)))
-      (unless (file-exists-p index-file)
-	(setq ibuffer (find-file-noselect index-file))
-	(with-current-buffer ibuffer
-	  (erase-buffer)
-	  (insert "\n\n#+include: \"theindex.inc\"\n\n")
-	  (save-buffer))
-	(kill-buffer ibuffer)))))
-
+    (kill-buffer ibuffer)))
 
 ;; Caching functions:
 
