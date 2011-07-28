@@ -257,7 +257,7 @@ are set to, respectively, length L and W.
 If H is non-nil, `line-prefix' will be starred.  If H is
 `inline', the first star will have `org-warning' face.
 
-Assume point is at bol."
+Assume point is at beginning of line."
   (let ((line (cond
 	       ((eq 'inline h)
 		(let ((stars (aref org-indent-stars
@@ -270,7 +270,8 @@ Assume point is at bol."
 	       (t (aref org-indent-strings
 			(min l org-indent-max)))))
 	(wrap (aref org-indent-strings (min w org-indent-max))))
-    (add-text-properties (point) (point-at-eol)
+    ;; Add properties down to the next line to indent empty lines.
+    (add-text-properties (point) (min (1+ (point-at-eol)) (point-max))
 			 `(line-prefix ,line wrap-prefix ,wrap)))
   (forward-line 1))
 
@@ -307,7 +308,7 @@ you want to use this feature."
        ;;    properties depending on the type of line (headline,
        ;;    inline task, item or other).
        (with-silent-modifications
-	 (while (< (point) end)
+	 (while (and (<= (point) end) (not (eobp)))
 	   (cond
 	    ;; When in async mode, check if interrupt is required.
 	    ((and async (input-pending-p)) (throw 'interrupt (point)))
@@ -322,8 +323,6 @@ you want to use this feature."
 			      org-indent-initial-resume-delay)
 		    nil #'org-indent-initialize-buffer))
 	     (throw 'interrupt (point)))
-	    ;; Empty line: do nothing.
-	    ((eolp) (forward-line 1))
 	    ;; Headline or inline task.
 	    ((looking-at org-outline-regexp)
 	     (let* ((nstars (- (match-end 0) (match-beginning 0) 1))
