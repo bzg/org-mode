@@ -15062,6 +15062,7 @@ SCOPE determines the scope of this command.  It can be any of:
 @example
 nil     @r{the current buffer, respecting the restriction if any}
 tree    @r{the subtree started with the entry at point}
+region  @r{The entries within the active region, if any}
 file    @r{the current buffer, without restriction}
 file-with-archives
         @r{the current buffer, and any archives associated with it}
