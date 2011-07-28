@@ -195,7 +195,7 @@ this heading."
   (if find-done
       (org-archive-all-done)
     ;; Save all relevant TODO keyword-relatex variables
-    
+
     (let ((tr-org-todo-line-regexp org-todo-line-regexp) ; keep despite compiler
 	  (tr-org-todo-keywords-1 org-todo-keywords-1)
 	  (tr-org-todo-kwd-alist org-todo-kwd-alist)
@@ -216,7 +216,7 @@ this heading."
 	  category todo priority ltags itags atags
 	  ;; end of variables that will be used for saving context
 	  location afile heading buffer level newfile-p infile-p visiting)
-      
+
       ;; Find the local archive location
       (setq location (org-get-local-archive-location)
 	    afile (org-extract-archive-file location)
@@ -224,7 +224,7 @@ this heading."
 	    infile-p (equal file (abbreviate-file-name afile)))
       (unless afile
 	(error "Invalid `org-archive-location'"))
-      
+
       (if (> (length afile) 0)
 	  (setq newfile-p (not (file-exists-p afile))
 		visiting (find-buffer-visiting afile)
@@ -305,7 +305,7 @@ this heading."
 	  (org-paste-subtree (org-get-valid-level level (and heading 1)))
 	  ;; Shall we append inherited tags?
 	  (and itags
-	       (or (and (eq org-archive-subtree-add-inherited-tags 'infile) 
+	       (or (and (eq org-archive-subtree-add-inherited-tags 'infile)
 			infile-p)
 		   (eq org-archive-subtree-add-inherited-tags t))
 	       (org-set-tags-to atags))
@@ -318,7 +318,7 @@ this heading."
 	      (org-todo
 	       (car (or (member org-archive-mark-done org-done-keywords)
 			org-done-keywords)))))
-	  
+
 	  ;; Add the context info
 	  (when org-archive-save-context-info
 	    (let ((l org-archive-save-context-info) e n v)
@@ -327,7 +327,7 @@ this heading."
 			   (stringp v) (string-match "\\S-" v))
 		  (setq n (concat "ARCHIVE_" (upcase (symbol-name e))))
 		  (org-entry-put (point) n v)))))
-	  
+
 	  ;; Save and kill the buffer, if it is not the same buffer.
 	  (when (not (eq this-buffer buffer))
 	    (save-buffer))))
