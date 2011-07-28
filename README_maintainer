@@ -171,7 +171,7 @@ Emacs uses bzr.  A useful introduction to bzr for Emacs developers can
 be found [[http://www.emacswiki.org/emacs/BzrForEmacsDevs][here]].  While I see all the advantages this would have, I
 cannot bring myself to switch away from git for my day-to-day work,
 because I know git so well, and because git seems to me as being much
-more powerful, conceptionally simple (once you have [[http://www.newartisans.com/2008/04/git-from-the-bottom-up.html][bent your head
+more powerful, conceptionally simple (once you have [[http://newartisans.com/2008/04/git-from-the-bottom-up/][bent your head
 around it]]), and so much faster.
 
 So the way I have been doing things with Emacs is this:
