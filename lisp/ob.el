@@ -251,6 +251,34 @@ then run `org-babel-execute-src-block'."
 	       (org-babel-execute-src-block current-prefix-arg info) t) nil)))
 
 ;;;###autoload
+(defun org-babel-view-src-block-info ()
+  "Display information on the current source block.
+This includes header arguments, language and name, and is largely
+a window into the `org-babel-get-src-block-info' function."
+  (interactive)
+  (let ((info (org-babel-get-src-block-info 'light)))
+    (flet ((full (it) (> (length it) 0))
+	   (printf (fmt &rest args) (princ (apply #'format fmt args))))
+      (when info
+	(with-help-window (help-buffer)
+	  (let ((name        (nth 4 info))
+		(lang        (nth 0 info))
+		(switches    (nth 3 info))
+		(header-args (nth 2 info)))
+	    (when name            (printf "Name: %s\n"     name))
+	    (when lang            (printf "Lang: %s\n"     lang))
+	    (when (full switches) (printf "Switches: %s\n" switches))
+	    (printf "Header Arguments:\n")
+	    (dolist (pair (sort header-args
+				(lambda (a b) (string< (symbol-name (car a))
+						  (symbol-name (car b))))))
+	      (when (full (cdr pair))
+		(printf "\t%S%s\t%s\n"
+			(car pair)
+			(if (> (length (format "%S" (car pair))) 7) "" "\t")
+			(cdr pair))))))))))
+
+;;;###autoload
 (defun org-babel-expand-src-block-maybe ()
   "Conditionally expand a source block.
 Detect if this is context for a org-babel src-block and if so
@@ -373,7 +401,7 @@ block."
 			  (string= "yes" (cdr (assoc :cache params)))))
 	     (result-params (cdr (assoc :result-params params)))
 	     (new-hash (when cache? (org-babel-sha1-hash info)))
-	     (old-hash (when cache? (org-babel-result-hash info)))
+	     (old-hash (when cache? (org-babel-current-result-hash)))
 	     (body (setf (nth 1 info)
 			 (let ((noweb (cdr (assoc :noweb params))))
 			   (if (and noweb
@@ -754,7 +782,7 @@ the current subtree."
 		   (setq lst (remove p lst)))
 		 lst)
 	     (norm (arg)
-		   (let ((v (if (listp (cdr arg))
+		   (let ((v (if (and (listp (cdr arg)) (null (cddr arg)))
 				(copy-seq (cdr arg))
 			      (cdr arg))))
 		     (when (and v (not (and (sequencep v)
@@ -782,9 +810,9 @@ the current subtree."
 			 (nth 1 info))))
 	 (sha1 it))))))
 
-(defun org-babel-result-hash (&optional info)
+(defun org-babel-current-result-hash ()
   "Return the in-buffer hash associated with INFO."
-  (org-babel-where-is-src-block-result nil info)
+  (org-babel-where-is-src-block-result)
   (org-babel-clean-text-properties (match-string 3)))
 
 (defun org-babel-hide-hash ()
@@ -957,7 +985,12 @@ may be specified in the current buffer."
 	 (lang (org-babel-clean-text-properties (match-string 2)))
          (lang-headers (intern (concat "org-babel-default-header-args:" lang)))
 	 (switches (match-string 3))
-         (body (org-babel-clean-text-properties (match-string 5)))
+         (body (org-babel-clean-text-properties
+		(let* ((body (match-string 5))
+		       (sub-length (- (length body) 1)))
+		  (if (string= "\n" (substring body sub-length))
+		      (substring body 0 sub-length)
+		    body))))
 	 (preserve-indentation (or org-src-preserve-indentation
 				   (string-match "-i\\>" switches))))
     (list lang
@@ -1723,7 +1756,7 @@ Later elements of PLISTS override the values of previous elements.
 This takes into account some special considerations for certain
 parameters when merging lists."
   (let ((results-exclusive-groups
-	 '(("file" "list" "vector" "table" "scalar" "raw" "org"
+	 '(("file" "list" "vector" "table" "scalar" "verbatim" "raw" "org"
             "html" "latex" "code" "pp" "wrap")
 	   ("replace" "silent" "append" "prepend")
 	   ("output" "value")))
@@ -1943,7 +1976,8 @@ block but are passed literally to the \"example-block\"."
 
 (defun org-babel-strip-protective-commas (body)
   "Strip protective commas from bodies of source blocks."
-  (replace-regexp-in-string "^,#" "#" body))
+  (when body
+    (replace-regexp-in-string "^,#" "#" body)))
 
 (defun org-babel-script-escape (str &optional force)
   "Safely convert tables into elisp lists."
@@ -1955,7 +1989,9 @@ block but are passed literally to the \"example-block\"."
 		  (or (and (string-equal "[" (substring str 0 1))
 			   (string-equal "]" (substring str -1)))
 		      (and (string-equal "{" (substring str 0 1))
-			   (string-equal "}" (substring str -1))))))
+			   (string-equal "}" (substring str -1)))
+		      (and (string-equal "(" (substring str 0 1))
+			   (string-equal ")" (substring str -1))))))
 	 (org-babel-read
 	  (concat
 	   "'"

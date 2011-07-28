@@ -108,9 +108,10 @@ utf8      Use all UTF-8 characters")
 
 ;;;###autoload
 (defun org-export-as-utf8 (&rest args)
-  "Like `org-export-as-ascii', use use encoding for special symbols."
+  "Like `org-export-as-ascii', use encoding for special symbols."
   (interactive)
-  (org-export-as-encoding 'org-export-as-ascii (org-called-interactively-p)
+  (org-export-as-encoding 'org-export-as-ascii 
+			  (org-called-interactively-p 'any)
 			  'utf8 args))
 
 ;;;###autoload
@@ -427,7 +428,7 @@ publishing directory."
 
     (org-init-section-numbers)
     (while (setq line (pop lines))
-      (when (and link-buffer (string-match "^\\*+ " line))
+      (when (and link-buffer (string-match org-outline-regexp-bol line))
 	(org-export-ascii-push-links (nreverse link-buffer))
 	(setq link-buffer nil))
       (setq wrap nil)
@@ -628,7 +629,9 @@ publishing directory."
       (save-match-data
 	(if (save-excursion
 	      (re-search-backward
-	       "^\\(\\([ \t]*\\)\\|\\(\\*+ \\)\\)[^ \t\n]" nil t))
+	       (concat "^\\(\\([ \t]*\\)\\|\\("
+		       org-outline-regexp
+		       "\\)\\)[^ \t\n]") nil t))
 	    (setq ind (or (match-string 2)
 			  (make-string (length (match-string 3)) ?\ )))))
       (mapc (lambda (x) (insert ind "[" (car x) "]: " (cdr x) "\n"))

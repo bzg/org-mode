@@ -96,8 +96,8 @@ is copied from ansi-term method."
   (let ((screen-buffer-name (org-screen-buffer-name name)))
     (if (member screen-buffer-name
                 (mapcar 'buffer-name (buffer-list)))
-        (switch-to-buffer screen-buffer-name)
-      (switch-to-buffer (org-screen-helper name "-dr")))))
+        (org-pop-to-buffer-same-window screen-buffer-name)
+      (org-pop-to-buffer-same-window (org-screen-helper name "-dr")))))
 
 (if org-link-abbrev-alist
     (add-to-list 'org-link-abbrev-alist

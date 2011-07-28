@@ -33,7 +33,7 @@
 		  (plist-get export-plist :archived-trees-export)
 		  :add-text (plist-get opt-plist :text)))))
     (save-excursion
-      (switch-to-buffer "*preproc-temp*")
+      (org-pop-to-buffer-same-window "*preproc-temp*")
       (point-max)
       (insert string))))
 

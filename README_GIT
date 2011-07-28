@@ -9,28 +9,34 @@ development.
 
 * Main rules
 
-1. The git repository is hosted publicly at repo.or.cz.  Anyone
-   can get a clone of the current repository state using the
-   command
+1. The master git repository is hosted publicly at orgmode.org.
+   Anyone can get a clone of the current repository state using
+   the command
 
-     git clone git://repo.or.cz/org-mode.git
+     git clone git://orgmode.org/org-mode.git
 
    Having a clone is sufficient to start hacking and to produce
    patches that can easily and consistently be applied to the
    main repository.
 
-2. People who are interested to participate in the Org-mode
-   development can do so by sending patches to
-   emacs-orgmode@gnu.org.
+2. There is a mirror hosted publicly at repo.or.cz.  Anyone can
+   get a clone of the current repository state using the command
 
-3. An interested developer can also request push access to the
-   central repository by sending his/her user-info at repo.or.cz
-   the maintainer of Org-mode.
+     git clone git://repo.or.cz/org-mode.git
+
+3. People who are interested to participate in the Org-mode
+   development can to so by sending patches to this address:
+
+     emacs-orgmode@gnu.org
+
+4. An interested developer can also request push access to the
+   central repository by sending her/his user-info to the
+   maintainer of Org-mode or the webmaster of orgmode.org.
 
    After you have been added as a user with push privileges,
    clone the repository through ssh using
 
-        git+ssh://repo.or.cz/srv/git/org-mode.git
+        git clone orgmode@orgmode.org:org-mode.git
 
    By requesting push access, you acknowledge that you have read
    and agreed with the following rules:

@@ -79,6 +79,8 @@ functions which are assigned key bindings, and see
     ("l" . org-babel-load-in-session)
     ("\C-i" . org-babel-lob-ingest)
     ("i" . org-babel-lob-ingest)
+    ("\C-I" . org-babel-view-src-block-info)
+    ("I" . org-babel-view-src-block-info)
     ("\C-z" . org-babel-switch-to-session)
     ("z" . org-babel-switch-to-session-with-code)
     ("\C-a" . org-babel-sha1-hash)

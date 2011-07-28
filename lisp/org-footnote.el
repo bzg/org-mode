@@ -38,8 +38,11 @@
 (require 'org-macs)
 (require 'org-compat)
 
+(declare-function org-combine-plists "org" (&rest plists))
 (declare-function org-in-commented-line "org" ())
+(declare-function org-in-indented-comment-line "org" ())
 (declare-function org-in-regexp "org" (re &optional nlines visually))
+(declare-function org-in-block-p "org" (names))
 (declare-function org-mark-ring-push "org" (&optional pos buffer))
 (declare-function outline-next-heading "outline")
 (declare-function org-trim "org" (s))
@@ -50,7 +53,12 @@
 (declare-function org-inside-latex-macro-p "org" ())
 (declare-function org-id-uuid "org" ())
 (declare-function org-fill-paragraph "org" (&optional justify))
+(declare-function org-export-preprocess-string "org-exp"
+		  (string &rest parameters))
+
+(defvar org-outline-regexp-bol) ; defined in org.el
 (defvar org-odd-levels-only) ;; defined in org.el
+(defvar org-bracket-link-regexp) ; defined in org.el
 (defvar message-signature-separator) ;; defined in message.el
 
 (defconst org-footnote-re
@@ -71,6 +79,10 @@
 (defconst org-footnote-definition-re
   (org-re "^\\(\\[\\([0-9]+\\|fn:[-_[:word:]]+\\)\\]\\)")
   "Regular expression matching the definition of a footnote.")
+
+(defvar org-footnote-forbidden-blocks '("example" "verse" "src" "ascii" "beamer"
+					"docbook" "html" "latex" "odt")
+  "Names of blocks where footnotes are not allowed.")
 
 (defgroup org-footnote nil
   "Footnotes in Org-mode."
@@ -154,19 +166,37 @@ extracted will be filled again."
   :group 'org-footnote
   :type 'boolean)
 
-(defvar org-bracket-link-regexp) ; silent compiler
+(defun org-footnote-in-valid-context-p ()
+  "Is point in a context where footnotes are allowed?"
+  (save-match-data
+    (not (or (org-in-commented-line)
+	     (org-in-indented-comment-line)
+	     (org-in-verbatim-emphasis)
+	     ;; Avoid literal example.
+	     (save-excursion
+	       (beginning-of-line)
+	       (looking-at "[ \t]*:[ \t]+"))
+	     ;; Avoid cited text and headers in message-mode.
+	     (and (derived-mode-p 'message-mode)
+		  (or (save-excursion
+			(beginning-of-line)
+			(looking-at message-cite-prefix-regexp))
+		      (message-point-in-header-p)))
+	     ;; Avoid forbidden blocks.
+	     (org-in-block-p org-footnote-forbidden-blocks)))))
+
 (defun org-footnote-at-reference-p ()
   "Is the cursor at a footnote reference?
 
-If so, return an list containing its label, beginning and ending
-positions, and the definition, if local."
-  (when (and (not (or (org-in-commented-line)
-		      (org-in-verbatim-emphasis)))
+If so, return a list containing its label, beginning and ending
+positions, and the definition, when inlined."
+  (when (and (org-footnote-in-valid-context-p)
 	     (or (looking-at org-footnote-re)
 		 (org-in-regexp org-footnote-re)
 		 (save-excursion (re-search-backward org-footnote-re nil t)))
-	     ;; A footnote reference cannot start at bol.
-	     (/= (match-beginning 0) (point-at-bol)))
+	     ;; Only inline footnotes can start at bol.
+	     (or (eq (char-before (match-end 0)) 58)
+		 (/= (match-beginning 0) (point-at-bol))))
     (let* ((beg (match-beginning 0))
 	   (label (or (match-string 2) (match-string 3)
 		      ;; Anonymous footnotes don't have labels
@@ -177,20 +207,21 @@ positions, and the definition, if local."
 	   ;; get fooled by unrelated closing square brackets.
 	   (end (ignore-errors (scan-sexps beg 1))))
       ;; Point is really at a reference if it's located before true
-      ;; ending of the footnote and isn't within a link or a LaTeX
-      ;; macro.  About that case, some special attention should be
-      ;; paid.  Indeed, when two footnotes are side by side, once the
-      ;; first one is changed into LaTeX, the second one might then be
-      ;; considered as an optional argument of the command.  To
-      ;; prevent that, we have a look at the `org-protected' property
-      ;; of that LaTeX command.
+      ;; ending of the footnote.
       (when (and end (< (point) end)
+		 ;; Verify match isn't a part of a link.
 		 (not (save-excursion
 			(goto-char beg)
 			(let ((linkp
 			       (save-match-data
 				 (org-in-regexp org-bracket-link-regexp))))
 			  (and linkp (< (point) (cdr linkp))))))
+		 ;; Verify point doesn't belong to a LaTeX macro.
+		 ;; Beware though, when two footnotes are side by
+		 ;; side, once the first one is changed into LaTeX,
+		 ;; the second one might then be considered as an
+		 ;; optional argument of the command.  Thus, check
+		 ;; the `org-protected' property of that command.
 		 (or (not (org-inside-latex-macro-p))
 		     (and (get-text-property (1- beg) 'org-protected)
 			  (not (get-text-property beg 'org-protected)))))
@@ -208,20 +239,33 @@ footnote text is included and defined locally.
 
 The return value will be nil if not at a footnote definition, and a list with
 label, start, end and definition of the footnote otherwise."
-  (save-excursion
-    (end-of-line)
-    (let ((lim (save-excursion (re-search-backward "^\\*+ \\|^[ \t]*$" nil t))))
-      (when (re-search-backward org-footnote-definition-re lim t)
-	(end-of-line)
-	(list (match-string 2)
-	      (match-beginning 0)
-	      (save-match-data
-		(or (and (re-search-forward
-			  (org-re "^[ \t]*$\\|^\\*+ \\|^\\[\\([0-9]+\\|fn:[-_[:word:]]+\\)\\]")
-			  nil t)
-			 (progn (skip-chars-forward " \t\n") (point-at-bol)))
-		    (point-max)))
-	      (org-trim (buffer-substring (match-end 0) (point))))))))
+  (when (org-footnote-in-valid-context-p)
+    (save-excursion
+      (end-of-line)
+      (let ((lim (save-excursion (re-search-backward
+				  (concat org-outline-regexp-bol
+					  "\\|^[ \t]*$") nil t))))
+	(when (re-search-backward org-footnote-definition-re lim t)
+	  (end-of-line)
+	  (list (match-string 2)
+		(match-beginning 0)
+		(save-match-data
+		  ;; In a message, limit search to signature.
+		  (let ((bound (and (derived-mode-p 'message-mode)
+				    (save-excursion
+				      (goto-char (point-max))
+				      (re-search-backward
+				       message-signature-separator nil t)))))
+		    (or (and (re-search-forward
+			      (org-re
+			       (concat "^[ \t]*$" "\\|"
+				       org-outline-regexp-bol
+				       "\\|"
+				       "^\\[\\([0-9]+\\|fn:[-_[:word:]]+\\)\\]"))
+			      bound 'move)
+			     (progn (skip-chars-forward " \t\n") (point-at-bol)))
+			(point))))
+		(org-trim (buffer-substring (match-end 0) (point)))))))))
 
 (defun org-footnote-get-next-reference (&optional label backward limit)
   "Return complete reference of the next footnote.
@@ -380,6 +424,8 @@ This command prompts for a label.  If this is a label referencing an
 existing label, only insert the label.  If the footnote label is empty
 or new, let the user edit the definition of the footnote."
   (interactive)
+  (unless (and (not (bolp)) (org-footnote-in-valid-context-p))
+    (error "Cannot insert a footnote here"))
   (let* ((labels (and (not (equal org-footnote-auto-label 'random))
 		      (org-footnote-all-labels)))
 	 (propose (org-footnote-unique-label labels))
@@ -433,21 +479,30 @@ or new, let the user edit the definition of the footnote."
       (org-footnote-goto-local-insertion-point)
       (org-show-context 'link-search))
      (t
-      (let ((re (concat "^" org-footnote-tag-for-non-org-mode-files "[ \t]*$")))
-	(unless (re-search-forward re nil t)
-	  (let ((max (if (and (derived-mode-p 'message-mode)
-			      (re-search-forward message-signature-separator nil t))
-			 (progn (beginning-of-line) (point))
-		       (goto-char (point-max)))))
-	    (skip-chars-backward " \t\r\n")
-	    (delete-region (point) max)
-	    (insert "\n\n")
-	    (insert org-footnote-tag-for-non-org-mode-files "\n"))))
-	;; Skip existing footnotes
-      (while (re-search-forward "^[[:space:]]*\\[[^]]+\\] " nil t)
-	(forward-line))))
+      ;; In a non-Org file.  Search for footnote tag, or create it if
+      ;; necessary (at the end of buffer, or before a signature if in
+      ;; Message mode).  Set point after any definition already there.
+      (let ((tag (concat "^" org-footnote-tag-for-non-org-mode-files "[ \t]*$"))
+	    (max (save-excursion
+		   (if (and (derived-mode-p 'message-mode)
+			    (re-search-forward
+			     message-signature-separator nil t))
+		       (copy-marker (point-at-bol) t)
+		     (copy-marker (point-max) t)))))
+	(goto-char max)
+	(unless (re-search-backward tag nil t)
+	  (skip-chars-backward " \t\r\n")
+	  (delete-region (point) max)
+	  (insert "\n\n" org-footnote-tag-for-non-org-mode-files "\n"))
+	;; Skip existing footnotes.
+	(while (re-search-forward org-footnote-definition-re max t))
+	(let ((def (org-footnote-at-definition-p)))
+	  (when def (goto-char (nth 2 def))))
+	(set-marker max nil))))
+    ;; Insert footnote label, position point and notify user.
+    (unless (bolp) (insert "\n"))
     (insert "\n[" label "] \n")
-    (goto-char (1- (point)))
+    (backward-char)
     (message "Edit definition and go back with `C-c &' or, if unique, with `C-c C-c'.")))
 
 ;;;###autoload
@@ -501,7 +556,7 @@ With prefix arg SPECIAL, offer additional commands in a menu."
 (defvar org-export-footnotes-data nil) ; silence byte-compiler
 
 ;;;###autoload
-(defun org-footnote-normalize (&optional sort-only pre-process-p)
+(defun org-footnote-normalize (&optional sort-only export-props)
   "Collect the footnotes in various formats and normalize them.
 
 This finds the different sorts of footnotes allowed in Org, and
@@ -511,7 +566,10 @@ Org-mode exporters.
 When SORT-ONLY is set, only sort the footnote definitions into the
 referenced sequence.
 
-When PRE-PROCESS-P is non-nil, the default action, is to insert
+If Org is amidst an export process, EXPORT-PROPS will hold the
+export properties of the buffer.
+
+When EXPORT-PROPS is non-nil, the default action is to insert
 normalized footnotes towards the end of the pre-processing buffer.
 Some exporters like docbook, odt, etc. expect that footnote
 definitions be available before any references to them.  Such
@@ -535,24 +593,24 @@ Additional note on `org-footnote-insert-pos-for-preprocessor':
 		      (if org-odd-levels-only
 			  (and limit-level (1- (* limit-level 2)))
 			limit-level)))
-	 (outline-regexp
+	 (org-outline-regexp
 	  (concat "\\*" (if nstars (format "\\{1,%d\\} " nstars) "+ ")))
 	 ;; Determine the highest marker used so far.
-	 (ref-table (when pre-process-p org-export-footnotes-seen))
-	 (count (if (and pre-process-p ref-table)
+	 (ref-table (when export-props org-export-footnotes-seen))
+	 (count (if (and export-props ref-table)
 		    (apply 'max (mapcar (lambda (e) (nth 1 e)) ref-table))
 		  0))
 	 ins-point ref)
     (save-excursion
       ;; 1. Find every footnote reference, extract the definition, and
-      ;;    collect that data in REF-TABLE. If SORT-ONLY is nil, also
+      ;;    collect that data in REF-TABLE.  If SORT-ONLY is nil, also
       ;;    normalize references.
       (goto-char (point-min))
       (while (setq ref (org-footnote-get-next-reference))
 	(let* ((lbl (car ref))
 	       ;; When footnote isn't anonymous, check if it's label
-	       ;; (REF) is already stored in REF-TABLE. In that case,
-	       ;; extract number used to identify it (MARKER). If
+	       ;; (REF) is already stored in REF-TABLE.  In that case,
+	       ;; extract number used to identify it (MARKER).  If
 	       ;; footnote is unknown, increment the global counter
 	       ;; (COUNT) to create an unused identifier.
 	       (a (and lbl (assoc lbl ref-table)))
@@ -560,10 +618,10 @@ Additional note on `org-footnote-insert-pos-for-preprocessor':
 	       ;; Is the reference inline or pointing to an inline
 	       ;; footnote?
 	       (inlinep (or (stringp (nth 3 ref)) (nth 3 a))))
-	  ;; Replace footnote reference with [MARKER]. Maybe fill
-	  ;; paragraph once done. If SORT-ONLY is non-nil, only move
+	  ;; Replace footnote reference with [MARKER].  Maybe fill
+	  ;; paragraph once done.  If SORT-ONLY is non-nil, only move
 	  ;; to the end of reference found to avoid matching it twice.
-	  ;; If PRE-PROCESS-P isn't nil, also add `org-footnote'
+	  ;; If EXPORT-PROPS isn't nil, also add `org-footnote'
 	  ;; property to it, so it can be easily recognized by
 	  ;; exporters.
 	  (if sort-only
@@ -571,7 +629,7 @@ Additional note on `org-footnote-insert-pos-for-preprocessor':
 	    (delete-region (nth 1 ref) (nth 2 ref))
 	    (goto-char (nth 1 ref))
 	    (let ((new-ref (format "[%d]" marker)))
-	      (when pre-process-p (org-add-props new-ref '(org-footnote t)))
+	      (when export-props (org-add-props new-ref '(org-footnote t)))
 	      (insert new-ref))
 	    (and inlinep
 		 org-footnote-fill-after-inline-note-extraction
@@ -579,17 +637,27 @@ Additional note on `org-footnote-insert-pos-for-preprocessor':
 	  ;; Add label (REF), identifier (MARKER) and definition (DEF)
 	  ;; to REF-TABLE if data was unknown.
 	  (unless a
-	    (let ((def (or (nth 3 ref) ; inline
-			   (and pre-process-p
+	    (let ((def (or (nth 3 ref)	; inline
+			   (and export-props
 				(cdr (assoc lbl org-export-footnotes-data)))
 			   (nth 3 (org-footnote-get-definition lbl)))))
-	      (push (list lbl marker def inlinep) ref-table)))
+	      (push (list lbl marker
+			  ;; When exporting, each definition goes
+			  ;; through `org-export-preprocess-string' so
+			  ;; it is ready to insert in the
+			  ;; backend-specific buffer.
+			  (if export-props
+			      (let ((parameters
+				     (org-combine-plists
+				      export-props
+				      '(:todo-keywords t :tags t :priority t))))
+				(org-export-preprocess-string def parameters))
+			    def)
+			  inlinep) ref-table)))
 	  ;; Remove definition of non-inlined footnotes.
 	  (unless inlinep (org-footnote-delete-definitions lbl))))
-      ;; 2. Find and remove the footnote section, if any. If we are
-      ;; exporting, insert it again at end of buffer. In a non
-      ;; org-mode file, insert instead
-      ;; `org-footnote-tag-for-non-org-mode-files'.
+      ;; 2. Find and remove the footnote section, if any.  Also
+      ;;    determine where footnotes shall be inserted (INS-POINT).
       (goto-char (point-min))
       (cond
        ((org-mode-p)
@@ -598,29 +666,31 @@ Additional note on `org-footnote-insert-pos-for-preprocessor':
 		  (concat "^\\*[ \t]+" (regexp-quote org-footnote-section)
 			  "[ \t]*$")
 		  nil t))
-	    (if pre-process-p
-		(replace-match "")
-	      (org-back-to-heading t)
-	      (forward-line 1)
-	      (setq ins-point (point))
-	      (delete-region (point) (org-end-of-subtree t)))
-	  (goto-char (point-max))
-	  (unless pre-process-p
-	    (when org-footnote-section
-	      (or (bolp) (insert "\n"))
-	      (insert "* " org-footnote-section "\n")
-	      (setq ins-point (point))))))
+	    (progn
+	      (setq ins-point (match-beginning 0))
+	      (delete-region (match-beginning 0) (org-end-of-subtree t)))
+	  (setq ins-point (point-max))))
        (t
-	(if (re-search-forward
-	     (concat "^"
-		     (regexp-quote org-footnote-tag-for-non-org-mode-files)
-		     "[ \t]*$")
-	     nil t)
-	    (replace-match ""))
-	(goto-char (point-max))
-	(skip-chars-backward " \t\n\r")
-	(delete-region (point) (point-max))
-	(insert "\n\n" org-footnote-tag-for-non-org-mode-files "\n")
+	(when (re-search-forward
+	       (concat "^"
+		       (regexp-quote org-footnote-tag-for-non-org-mode-files)
+		       "[ \t]*$")
+	       nil t)
+	  (replace-match ""))
+	;; In message-mode, ensure footnotes are inserted before the
+	;; signature.
+	(let ((pt-max
+	       (or (and (derived-mode-p 'message-mode)
+			(save-excursion
+			  (goto-char (point-max))
+			  (re-search-backward
+			   message-signature-separator nil t)
+			  (1- (point))))
+		   (point-max))))
+	  (goto-char pt-max)
+	  (skip-chars-backward " \t\n\r")
+	  (forward-line)
+	  (delete-region (point) pt-max))
 	(setq ins-point (point))))
       ;; 3. Clean-up REF-TABLE.
       (setq ref-table
@@ -641,30 +711,39 @@ Additional note on `org-footnote-insert-pos-for-preprocessor':
       ;; 4. Insert the footnotes again in the buffer, at the
       ;;    appropriate spot.
       (goto-char (or
-		  (and pre-process-p
+		  (and export-props
 		       (eq org-footnote-insert-pos-for-preprocessor 'point-min)
 		       (point-min))
 		  ins-point
 		  (point-max)))
       (cond
-       ((not ref-table))		; no footnote: exit
-       ;; Cases when footnotes should be inserted together in one place.
+       ;; No footnote: exit.
+       ((not ref-table))
+       ;; Cases when footnotes should be inserted in one place.
        ((or (not (org-mode-p))
 	    org-footnote-section
 	    (not sort-only))
+	;; Insert again the section title.
+	(cond
+	 ((not (org-mode-p))
+	  (insert "\n\n" org-footnote-tag-for-non-org-mode-files "\n"))
+	 ((and org-footnote-section (not export-props))
+	  (or (bolp) (insert "\n"))
+	  (insert "* " org-footnote-section "\n")))
+	;; Insert the footnotes.
 	(insert "\n"
 		(mapconcat (lambda (x) (format "[%s] %s"
 					  (nth (if sort-only 0 1) x) (nth 2 x)))
 			   ref-table "\n\n")
 		"\n\n")
-       ;; When exporting, add newly insert markers along with their
-       ;; associated definition to `org-export-footnotes-seen'.
-	(when pre-process-p
+	;; When exporting, add newly inserted markers along with their
+	;; associated definition to `org-export-footnotes-seen'.
+	(when export-props
 	  (setq org-export-footnotes-seen ref-table)))
        ;; Else, insert each definition at the end of the section
-       ;; containing their first reference. Happens only in Org
-       ;; files with no special footnote section, and only when
-       ;; doing sorting.
+       ;; containing their first reference.  Happens only in Org files
+       ;; with no special footnote section, and only when doing
+       ;; sorting.
        (t (mapc 'org-insert-footnote-reference-near-definition
 		ref-table))))))
 

@@ -57,9 +57,13 @@
 		  (date &optional keep-restriction))
 (declare-function org-table-get-specials "org-table" ())
 (declare-function org-table-goto-line "org-table" (N))
+(declare-function org-pop-to-buffer-same-window "org-compat" 
+		  (&optional buffer-or-name norecord label))
+
 (defvar org-remember-default-headline)
 (defvar org-remember-templates)
 (defvar org-table-hlines)
+(defvar dired-buffers)
 
 (defvar org-capture-clock-was-started nil
   "Internal flag, noting if the clock was started.")
@@ -113,11 +117,11 @@ type         The type of entry.  Valid types are:
 target       Specification of where the captured item should be placed.
              In Org-mode files, targets usually define a node.  Entries will
              become children of this node, other types will be added to the
-             table or list in the body of this node.  
+             table or list in the body of this node.
 
-             Most target specifications contain a file name.  If that file 
-             name is the empty string, it defaults to `org-default-notes-file'.  
-             A file can also be given as a variable, function, or Emacs Lisp 
+             Most target specifications contain a file name.  If that file
+             name is the empty string, it defaults to `org-default-notes-file'.
+             A file can also be given as a variable, function, or Emacs Lisp
              form.
 
              Valid values are:
@@ -202,39 +206,40 @@ properties are:
                      capture was invoked, kill the buffer again after capture
                      is finalized.
 
-The template defines the text to be inserted.  Often this is an org-mode
-entry (so the first line should start with a star) that will be filed as a
-child of the target headline.  It can also be freely formatted text.
-Furthermore, the following %-escapes will be replaced with content:
+The template defines the text to be inserted.  Often this is an
+org-mode entry (so the first line should start with a star) that
+will be filed as a child of the target headline.  It can also be
+freely formatted text.  Furthermore, the following %-escapes will
+be replaced with content and expanded in this order:
 
-  %^{prompt}  prompt the user for a string and replace this sequence with it.
-              A default value and a completion table ca be specified like this:
-              %^{prompt|default|completion2|completion3|...}
-  %t          time stamp, date only
-  %T          time stamp with date and time
-  %u, %U      like the above, but inactive time stamps
-  %^t         like %t, but prompt for date.  Similarly %^T, %^u, %^U.
-              You may define a prompt like %^{Please specify birthday
-  %<...>      the result of format-time-string on the ... format specification
-  %n          user name (taken from `user-full-name')
-  %a          annotation, normally the link created with `org-store-link'
+  %[pathname] insert the contents of the file given by `pathname'.
+  %(sexp)     evaluate elisp `(sexp)' and replace with the result.
+  %<...>      the result of format-time-string on the ... format specification.
+  %t          time stamp, date only.
+  %T          time stamp with date and time.
+  %u, %U      like the above, but inactive time stamps.
+  %a          annotation, normally the link created with `org-store-link'.
   %i          initial content, copied from the active region.  If %i is
               indented, the entire inserted text will be indented as well.
-  %c          current kill ring head
-  %x          content of the X clipboard
-  %^C         interactive selection of which kill or clip to use
-  %^L         like %^C, but insert as link
-  %k          title of currently clocked task
-  %K          link to currently clocked task
-  %f          file visited by current buffer when org-capture was called
-  %F          like @code{%f}, but include full path
-  %^g         prompt for tags, with completion on tags in target file
-  %^G         prompt for tags, with completion on all tags in all agenda files
-  %^{prop}p   prompt the user for a value for property `prop'
-  %:keyword   specific information for certain link types, see below
-  %[pathname] insert the contents of the file given by `pathname'
-  %(sexp)     evaluate elisp `(sexp)' and replace with the result
-
+  %A          like %a, but prompt for the description part.
+  %c          current kill ring head.
+  %x          content of the X clipboard.
+  %k          title of currently clocked task.
+  %K          link to currently clocked task.
+  %n          user name (taken from `user-full-name').
+  %f          file visited by current buffer when org-capture was called.
+  %F          full path of the file or directory visited by current buffer.
+  %:keyword   specific information for certain link types, see below.
+  %^g         prompt for tags, with completion on tags in target file.
+  %^G         prompt for tags, with completion on all tags in all agenda files.
+  %^t         like %t, but prompt for date.  Similarly %^T, %^u, %^U.
+              You may define a prompt like %^{Please specify birthday.
+  %^C         interactive selection of which kill or clip to use.
+  %^L         like %^C, but insert as link.
+  %^{prop}p   prompt the user for a value for property `prop'.
+  %^{prompt}  prompt the user for a string and replace this sequence with it.
+              A default value and a completion table ca be specified like this:
+              %^{prompt|default|completion2|completion3|...}.
   %?          After completing the template, position cursor here.
 
 Apart from these general escapes, you can access information specific to the
@@ -328,8 +333,8 @@ calendar                |  %:type %:date"
 			    ((const :format "%v " :kill-buffer) (const t))))))))
 
 (defcustom org-capture-before-finalize-hook nil
-  "Hook that is run right before a remember process is finalized.
-The remember buffer is still current when this hook runs."
+  "Hook that is run right before a capture process is finalized.
+The capture buffer is still current when this hook runs."
   :group 'org-capture
   :type 'hook)
 
@@ -380,13 +385,13 @@ to avoid conflicts with other active capture processes."
 (defvar org-capture-mode-map (make-sparse-keymap)
   "Keymap for `org-capture-mode', a minor mode.
 Use this map to set additional keybindings for when Org-mode is used
-for a Remember buffer.")
+for a capture buffer.")
 
 (defvar org-capture-mode-hook nil
   "Hook for the minor `org-capture-mode'.")
 
 (define-minor-mode org-capture-mode
-  "Minor mode for special key bindings in a remember buffer."
+  "Minor mode for special key bindings in a capture buffer."
   nil " Rem" org-capture-mode-map
   (org-set-local
    'header-line-format
@@ -447,7 +452,10 @@ bypassed."
 	(org-capture-set-plist entry)
 	(org-capture-get-template)
 	(org-capture-put :original-buffer orig-buf
-			 :original-file (buffer-file-name orig-buf)
+			 :original-file (or (buffer-file-name orig-buf)
+					    (and (featurep 'dired)
+						 (car (rassq orig-buf
+							     dired-buffers))))
 			 :original-file-nondirectory
 			 (and (buffer-file-name orig-buf)
 			      (file-name-nondirectory
@@ -551,6 +559,9 @@ captured item after finalizing."
 	      (m2 (org-capture-get :end-marker 'local)))
 	  (if (and m1 m2 (= m1 beg) (= m2 end))
 	      (progn
+		(setq m2 (if (cdr (assoc 'heading org-blank-before-new-entry))
+			     m2 (1+ m2))
+		      m2 (if (< (point-max) m2) (point-max) m2))
 		(setq abort-note 'clean)
 		(kill-region m1 m2))
 	    (setq abort-note 'dirty)))
@@ -576,16 +587,14 @@ captured item after finalizing."
 		   (org-at-table-p))
 	  (if (org-table-get-stored-formulas)
 	      (org-table-recalculate 'all) ;; FIXME: Should we iterate???
-	    (org-table-align)))
-	)
+	    (org-table-align))))
       ;; Store this place as the last one where we stored something
       ;; Do the marking in the base buffer, so that it makes sense after
       ;; the indirect buffer has been killed.
       (org-capture-bookmark-last-stored-position)
 
       ;; Run the hook
-      (run-hooks 'org-capture-before-finalize-hook)
-      )
+      (run-hooks 'org-capture-before-finalize-hook))
 
     ;; Kill the indirect buffer
     (save-buffer)
@@ -665,11 +674,12 @@ already gone.  Any prefix argument will be passed to the refile command."
   (interactive)
   ;; FIXME: This does not do the right thing, we need to remove the new stuff
   ;; By hand it is easy: undo, then kill the buffer
-  (let ((org-note-abort t) (org-capture-before-finalize-hook nil))
+  (let ((org-note-abort t)
+	(org-capture-before-finalize-hook nil))
     (org-capture-finalize)))
 
 (defun org-capture-goto-last-stored ()
-  "Go to the location where the last remember note was stored."
+  "Go to the location where the last capture note was stored."
   (interactive)
   (org-goto-marker-or-bmk org-capture-last-stored-marker
 			  "org-capture-last-stored")
@@ -1191,7 +1201,7 @@ The user is queried for the template."
       (error "No capture template selected"))
     (org-capture-set-plist entry)
     (org-capture-set-target-location)
-    (switch-to-buffer (org-capture-get :buffer))
+    (org-pop-to-buffer-same-window (org-capture-get :buffer))
     (goto-char (org-capture-get :pos))))
 
 (defun org-capture-get-indirect-buffer (&optional buffer prefix)
@@ -1301,7 +1311,7 @@ The template may still contain \"%?\" for cursor positioning."
 	    (sit-for 1))
     (save-window-excursion
       (delete-other-windows)
-      (switch-to-buffer (get-buffer-create "*Capture*"))
+      (org-pop-to-buffer-same-window (get-buffer-create "*Capture*"))
       (erase-buffer)
       (insert template)
       (goto-char (point-min))

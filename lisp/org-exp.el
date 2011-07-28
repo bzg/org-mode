@@ -48,6 +48,9 @@
 (declare-function org-inlinetask-remove-END-maybe "org-inlinetask" ())
 (declare-function org-table-cookie-line-p "org-table" (line))
 (declare-function org-table-colgroup-line-p "org-table" (line))
+(declare-function org-pop-to-buffer-same-window "org-compat" 
+		  (&optional buffer-or-name norecord label))
+
 (autoload 'org-export-generic "org-export-generic" "Export using the generic exporter" t)
 
 (autoload 'org-export-as-odt "org-odt"
@@ -743,7 +746,7 @@ modified) list.")
 	    (case-fold-search t)
 	    p key val text options mathjax a pr style
 	    latex-header latex-class macros letbind
-	    ext-setup-or-nil setup-contents (start 0))
+	    ext-setup-or-nil setup-file setup-dir setup-contents (start 0))
 	(while (or (and ext-setup-or-nil
 			(string-match re ext-setup-or-nil start)
 			(setq start (match-end 0)))
@@ -790,11 +793,14 @@ modified) list.")
 	   ((string-equal key "MACRO")
 	    (push val macros))
 	   ((equal key "SETUPFILE")
-	    (setq setup-contents (org-file-contents
-				  (expand-file-name
-				   (org-remove-double-quotes
-				    (org-trim val)))
-				  'noerror))
+	    (setq setup-file (org-remove-double-quotes (org-trim val))
+		  ;; take care of recursive inclusion of setupfiles
+		  setup-file (if (or (file-name-absolute-p val) (not setup-dir))
+				 (expand-file-name setup-file)
+			       (let ((default-directory setup-dir))
+				 (expand-file-name setup-file))))
+	    (setq setup-dir (file-name-directory setup-file))
+	    (setq setup-contents (org-file-contents setup-file 'noerror))
 	    (if (not ext-setup-or-nil)
 		(setq ext-setup-or-nil setup-contents start 0)
 	      (setq ext-setup-or-nil
@@ -1083,7 +1089,6 @@ on this string to produce the exported version."
 	 (archived-trees (plist-get parameters :archived-trees))
 	 (inhibit-read-only t)
 	 (drawers org-drawers)
-	 (outline-regexp "\\*+ ")
 	 (source-buffer (current-buffer))
 	 target-alist rtn)
 
@@ -1092,7 +1097,7 @@ on this string to produce the exported version."
 	  org-export-id-target-alist nil
 	  org-export-code-refs nil)
 
-    (with-current-buffer (get-buffer-create " org-mode-tmp")
+    (with-temp-buffer
       (erase-buffer)
       (insert string)
       (setq case-fold-search t)
@@ -1120,14 +1125,6 @@ on this string to produce the exported version."
       (org-export-handle-include-files-recurse)
       (run-hooks 'org-export-preprocess-after-include-files-hook)
 
-      ;; Change lists ending. Other parts of export may insert blank
-      ;; lines and lists' structure could be altered.
-      (org-export-mark-list-end)
-
-      ;; Process the macros
-      (org-export-preprocess-apply-macros)
-      (run-hooks 'org-export-preprocess-after-macros-hook)
-      
       ;; Get rid of archived trees
       (org-export-remove-archived-trees archived-trees)
 
@@ -1142,9 +1139,35 @@ on this string to produce the exported version."
       ;; Get rid of tasks, depending on configuration
       (org-export-remove-tasks (plist-get parameters :tasks))
 
-      ;; Normalize footnotes
+      ;; Prepare footnotes for export.  During that process, footnotes
+      ;; actually included in the exported part of the buffer go
+      ;; though some transformations:
+
+      ;; 1. They have their label normalized (like "[N]");
+
+      ;; 2. They get moved at the same place in the buffer (usually at
+      ;;    its end, but backends may define another place via
+      ;;    `org-footnote-insert-pos-for-preprocessor');
+
+      ;; 3. The are stored in `org-export-footnotes-seen', while
+      ;;    `org-export-preprocess-string' is applied to their
+      ;;    definition.
+
+      ;; Line-wise exporters ignore `org-export-footnotes-seen', as
+      ;; they interpret footnotes at the moment they see them in the
+      ;; buffer.  Context-wise exporters grab all the info needed in
+      ;; that variable and delete moved definitions (as described in
+      ;; 2nd step).
       (when (plist-get parameters :footnotes)
-	(org-footnote-normalize nil 'pre-process-p))
+	(org-footnote-normalize nil parameters))
+
+      ;; Change lists ending. Other parts of export may insert blank
+      ;; lines and lists' structure could be altered.
+      (org-export-mark-list-end)
+
+      ;; Process the macros
+      (org-export-preprocess-apply-macros)
+      (run-hooks 'org-export-preprocess-after-macros-hook)
 
       ;; Export code blocks
       (org-export-blocks-preprocess)
@@ -1261,7 +1284,6 @@ on this string to produce the exported version."
       (run-hooks 'org-export-preprocess-final-hook)
 
       (setq rtn (buffer-string)))
-    (kill-buffer " org-mode-tmp")
     rtn))
 
 (defun org-export-kill-licensed-text ()
@@ -1617,9 +1639,9 @@ from the buffer."
 
 (defun org-export-protect-quoted-subtrees ()
   "Mark quoted subtrees with the protection property."
-  (let ((re-quote (concat "^\\*+[ \t]+" org-quote-string "\\>")))
+  (let ((org-re-quote (concat "^\\*+[ \t]+" org-quote-string "\\>")))
     (goto-char (point-min))
-    (while (re-search-forward re-quote nil t)
+    (while (re-search-forward org-re-quote nil t)
       (goto-char (match-beginning 0))
       (end-of-line 1)
       (add-text-properties (point) (org-end-of-subtree t)
@@ -1767,6 +1789,7 @@ These special cookies will later be interpreted by the backend."
 		  (top-ind (org-list-get-ind top struct)))
 	     (goto-char bottom)
 	     (when (and (not (eq org-list-ending-method 'indent))
+			(not (looking-at "[ \t]*$"))
 			(looking-at org-list-end-re))
 	       (replace-match ""))
 	     (unless (bolp) (insert "\n"))
@@ -1825,6 +1848,7 @@ These special properties will later be interpreted by the backend."
 	      (goto-char bottom)
 	      (when (or (looking-at "^ORG-LIST-END-MARKER\n")
 			(and (not (eq org-list-ending-method 'indent))
+			     (not (looking-at "[ \t]*$"))
 			     (looking-at org-list-end-re)))
 		(replace-match ""))
 	      (unless (bolp) (insert "\n"))
@@ -1918,9 +1942,9 @@ table line.  If it is a link, add it to the line containing the link."
       (goto-char (match-beginning 0))
       (delete-region (point) (org-end-of-subtree t)))))
 
-(defun org-export-handle-comments (commentsp)
+(defun org-export-handle-comments (org-commentsp)
   "Remove comments, or convert to backend-specific format.
-COMMENTSP can be a format string for publishing comments.
+ORG-COMMENTSP can be a format string for publishing comments.
 When it is nil, all comments will be removed."
   (let ((re "^\\(#\\|[ \t]*#\\+ \\)\\(.*\n?\\)")
 	pos)
@@ -1930,12 +1954,12 @@ When it is nil, all comments will be removed."
       (setq pos (match-beginning 0))
       (if (get-text-property pos 'org-protected)
 	  (goto-char (1+ pos))
-	(if (and commentsp
+	(if (and org-commentsp
 		 (not (equal (char-before (match-end 1)) ?+)))
 	    (progn (add-text-properties
 		    (match-beginning 0) (match-end 0) '(org-protected t))
 		   (replace-match (org-add-props
-				      (format commentsp (match-string 2))
+				      (format org-commentsp (match-string 2))
 				      nil 'org-protected t)
 				  t t))
 	  (goto-char (1+ pos))
@@ -2951,7 +2975,7 @@ directory."
 	 (region (buffer-string))
          str-ret)
     (save-excursion
-      (switch-to-buffer buffer)
+      (org-pop-to-buffer-same-window buffer)
       (erase-buffer)
       (insert region)
       (let ((org-inhibit-startup t)) (org-mode))

@@ -621,7 +621,7 @@ situation use `org-part-of-drill-entry-p'."
 
 
 (defun org-drill-goto-entry (marker)
-  (switch-to-buffer (marker-buffer marker))
+  (org-pop-to-buffer-same-window (marker-buffer marker))
   (goto-char marker))
 
 
@@ -2602,7 +2602,7 @@ the tag 'imported'."
           (unless path
             (setq path (org-get-outline-path)))
           (org-copy-subtree)
-          (switch-to-buffer dest)
+          (org-pop-to-buffer-same-window dest)
           (setq m
                 (condition-case nil
                     (org-find-olp path t)
@@ -2684,7 +2684,7 @@ copy them across."
                        scheduled-time (org-get-scheduled-time (point)))
                  (save-excursion
                    ;; go to matching entry in destination buffer
-                   (switch-to-buffer (marker-buffer marker))
+                   (org-pop-to-buffer-same-window (marker-buffer marker))
                    (goto-char marker)
                    (org-drill-strip-entry-data)
                    (unless (zerop total-repeats)

@@ -55,7 +55,43 @@
 ;;    - The sibling also gets the same TRIGGER property
 ;;      "chain-siblings-scheduled", so the chain can continue.
 ;;
-;; 3) If the TRIGGER property contains any other words like
+;; 3) If the TRIGGER property contains the string
+;;    "chain-find-next(KEYWORD[,OPTIONS])", then switching that entry
+;;    to DONE do the following:
+;;    - All siblings are of the entry are collected into a temporary
+;;      list and then filtered and sorted according to OPTIONS
+;;    - The first sibling on the list is changed into KEYWORD state
+;;    - The sibling also gets the same TRIGGER property
+;;      "chain-find-next", so the chain can continue.
+;;
+;;    OPTIONS should be a comma separated string without spaces, and
+;;    can contain following options:
+;;
+;;    - from-top      the candidate list is all of the siblings in
+;;                    the current subtree
+;;
+;;    - from-bottom   candidate list are all siblings from bottom up
+;;
+;;    - from-current  candidate list are all siblings from current item
+;;                    until end of subtree, then wrapped around from
+;;                    first sibling
+;;
+;;    - no-wrap       candidate list are siblings from current one down
+;;
+;;    - todo-only     Only consider siblings that have a todo keyword
+;;    -
+;;    - todo-and-done-only
+;;                    Same as above but also include done items.
+;;
+;;    - priority-up   sort by highest priority
+;;    - priority-down sort by lowest priority
+;;    - effort-up     sort by highest effort
+;;    - effort-down   sort by lowest effort
+;;
+;;    Default OPTIONS are from-top
+;;
+;;
+;; 4) If the TRIGGER property contains any other words like
 ;;    XYZ(KEYWORD), these are treated as entry id's with keywords.  That
 ;;    means Org-mode will search for an entry with the ID property XYZ
 ;;    and switch that entry to KEYWORD as well.
@@ -97,7 +133,7 @@
 ;;    :PROPERTIES:
 ;;      :TRIGGER: chain-siblings(NEXT)
 ;;    :END:
-;; 
+;;
 ;; ** This is the second in this chain
 ;;
 ;; ** This is the third in this chain
@@ -112,7 +148,7 @@
 ;;   :END:
 ;;
 ;; ** This is the fifth in this chain
-;; 
+;;
 ;; * Start writing report
 ;;   :PROPERTIES:
 ;;     :ID: XYZ-is-my-id
@@ -121,11 +157,19 @@
 ;;
 
 (require 'org)
+(eval-when-compile
+  (require 'cl))
 
 (defcustom org-depend-tag-blocked t
   "Whether to indicate blocked TODO items by a special tag."
   :group 'org
   :type 'boolean)
+
+(defcustom org-depend-find-next-options
+  "from-current,todo-only,priority-up"
+  "Default options for chain-find-next trigger"
+  :group 'org
+  :type 'string)
 
 (defmacro org-depend-act-on-sibling (trigger-val &rest rest)
   "Perform a set of actions on the next sibling, if it exists,
@@ -142,6 +186,8 @@ copying the sibling spec TRIGGER-VAL to the next sibling."
        ;; make sure the sibling will continue the chain
        (org-entry-add-to-multivalued-property
         nil "TRIGGER" ,trigger-val))))
+
+(defvar org-depend-doing-chain-find-next nil)
 
 (defun org-depend-trigger-todo (change-plist)
   "Trigger new TODO entries after the current is switched to DONE.
@@ -184,12 +230,107 @@ This does two different kinds of triggers:
       ;; Go through all the triggers
       (while (setq tr (pop triggers))
 	(cond
+	 ((and (not org-depend-doing-chain-find-next)
+	       (string-match "\\`chain-find-next(\\b\\(.+?\\)\\b\\(.*\\))\\'" tr))
+	  ;; smarter sibling selection
+	  (let* ((org-depend-doing-chain-find-next t)
+		 (kwd (match-string 1 tr))
+		 (options (match-string 2 tr))
+		 (options (if (or (null options)
+				  (equal options ""))
+			      org-depend-find-next-options
+			    options))
+		 (todo-only (string-match "todo-only" options))
+		 (todo-and-done-only (string-match "todo-and-done-only"
+						   options))
+		 (from-top (string-match "from-top" options))
+		 (from-bottom (string-match "from-bottom" options))
+		 (from-current (string-match "from-current" options))
+		 (no-wrap (string-match "no-wrap" options))
+		 (priority-up (string-match "priority-up" options))
+		 (priority-down (string-match "priority-down" options))
+		 (effort-up (string-match "effort-up" options))
+		 (effort-down (string-match "effort-down" options)))
+	    (save-excursion
+	      (org-back-to-heading t)
+	      (let ((this-item (point)))
+		;; go up to the parent headline, then advance to next child
+		(org-up-heading-safe)
+		(let ((end (save-excursion (org-end-of-subtree t)
+					   (point)))
+		      (done nil)
+		      (items '()))
+		  (outline-next-heading)
+		  (while (not done)
+		    (if (not (looking-at org-complex-heading-regexp))
+			(setq done t)
+		      (let ((todo-kwd (match-string 2))
+			    (tags (match-string 5))
+			    (priority (org-get-priority (or (match-string 3) "")))
+			    (effort (when (or effort-up effort-down)
+				      (let ((effort (org-get-effort)))
+					(when effort
+					  (org-duration-string-to-minutes effort))))))
+			(push (list (point) todo-kwd priority tags effort)
+			      items))
+		      (unless (org-goto-sibling)
+			(setq done t))))
+		  ;; massage the list according to options
+		  (setq items
+			(cond (from-top (nreverse items))
+			      (from-bottom items)
+			      ((or from-current no-wrap)
+			       (let* ((items (nreverse items))
+				      (pos (position this-item items :key #'first))
+				      (items-before (subseq items 0 pos))
+				      (items-after (subseq items pos)))
+				 (if no-wrap items-after
+				   (append items-after items-before))))
+			      (t (nreverse items))))
+		  (setq items (remove-if
+			       (lambda (item)
+				 (or (equal (first item) this-item)
+				     (and (not todo-and-done-only)
+					  (member (second item) org-done-keywords))
+				     (and (or todo-only
+					      todo-and-done-only)
+					  (null (second item)))))
+			       items))
+		  (setq items
+			(sort
+			 items
+			 (lambda (item1 item2)
+			   (let* ((p1 (third item1))
+				  (p2 (third item2))
+				  (e1 (fifth item1))
+				  (e2 (fifth item2))
+				  (p1-lt (< p1 p2))
+				  (p1-gt (> p1 p2))
+				  (e1-lt (and e1 (or (not e2) (< e1 e2))))
+				  (e2-gt (and e2 (or (not e1) (> e1 e2)))))
+			     (cond (priority-up
+				    (or p1-gt
+					(and (equal p1 p2)
+					     (or (and effort-up e1-gt)
+						 (and effort-down e1-lt)))))
+				   (priority-down
+				    (or p1-lt
+					(and (equal p1 p2)
+					     (or (and effort-up e1-gt)
+						 (and effort-down e1-lt)))))
+				   (effort-up
+				    (or e1-gt (and (equal e1 e2) p1-gt)))
+				   (effort-down
+				    (or e1-lt (and (equal e1 e2) p1-gt))))))))
+		  (when items
+		    (goto-char (first (first items)))
+		    (org-entry-add-to-multivalued-property nil "TRIGGER" tr)
+		    (org-todo kwd)))))))
 	 ((string-match "\\`chain-siblings(\\(.*?\\))\\'" tr)
 	  ;; This is a TODO chain of siblings
 	  (setq kwd (match-string 1 tr))
           (org-depend-act-on-sibling (format "chain-siblings(%s)" kwd)
                                      (org-todo kwd)))
-
 	 ((string-match "\\`\\(\\S-+\\)(\\(.*?\\))\\'" tr)
 	  ;; This seems to be ENTRY_ID(KEYWORD)
 	  (setq id (match-string 1 tr)
@@ -237,7 +378,7 @@ this ID property, that entry is also checked."
 	    ;; and split it on whitespace.
 	    (setq blocker (org-entry-get pos "BLOCKER")
 		  blockers (and blocker (org-split-string blocker "[ \t]+")))
-	    
+
 	    ;; go through all the blockers
 	    (while (setq bl (pop blockers))
 	      (cond
@@ -268,7 +409,7 @@ this ID property, that entry is also checked."
 	    )))
     (when org-depend-tag-blocked
       (org-toggle-tag "blocked" (if proceed-p 'off 'on)))
-    
+
     proceed-p))
 
 (add-hook 'org-trigger-hook 'org-depend-trigger-todo)

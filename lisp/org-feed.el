@@ -436,7 +436,7 @@ it can be a list structured like an entry in `org-feed-alist'."
   (if (stringp feed) (setq feed (assoc feed org-feed-alist)))
   (unless feed
     (error "No such feed in `org-feed-alist"))
-  (switch-to-buffer
+  (org-pop-to-buffer-same-window
    (org-feed-update feed 'retrieve-only))
   (goto-char (point-min)))
 

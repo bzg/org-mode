@@ -696,7 +696,7 @@ around it."
 	  (save-restriction
 	    (narrow-to-region beg end)
 	    (org-clock-sum))))
-      (while (re-search-forward (concat "^" outline-regexp) end t)
+      (while (re-search-forward org-outline-regexp-bol end t)
 	(if (and org-columns-skip-archived-trees
 		 (looking-at (concat ".*:" org-archive-tag ":")))
 	    (org-end-of-subtree t)
@@ -929,7 +929,7 @@ Don't set this, this is meant for dynamic scoping.")
 (defun org-columns-compute (property)
   "Sum the values of property PROPERTY hierarchically, for the entire buffer."
   (interactive)
-  (let* ((re (concat "^" outline-regexp))
+  (let* ((re org-outline-regexp-bol)
 	 (lmax 30) ; Does anyone use deeper levels???
 	 (lvals (make-vector lmax nil))
 	 (lflag (make-vector lmax nil))

@@ -121,6 +121,7 @@
 (declare-function bibtex-parse-entry "bibtex" (&optional content))
 (declare-function bibtex-url "bibtex" (&optional pos no-browse))
 (declare-function longlines-mode "longlines" (&optional arg))
+(declare-function org-babel-trim "ob" (string &optional regexp))
 
 
 ;;; Bibtex data
@@ -277,8 +278,9 @@ This variable is relevant only if `org-bibtex-export-tags-as-keywords` is t."
 
 ;;; Utility functions
 (defun org-bibtex-get (property)
-  (or (org-entry-get (point) (upcase property))
-      (org-entry-get (point) (concat org-bibtex-prefix (upcase property)))))
+  ((lambda (it) (when it (org-babel-trim it)))
+   (or (org-entry-get (point) (upcase property))
+       (org-entry-get (point) (concat org-bibtex-prefix (upcase property))))))
 
 (defun org-bibtex-put (property value)
   (let ((prop (upcase (if (keywordp property)
@@ -553,7 +555,7 @@ If nonew is t, add data to the headline of the entry at point."
 	(org-bibtex-put "TITLE" title)))
     (org-bibtex-put "TYPE" (substring (symbol-name type) 1))
     (org-bibtex-fleshout type arg)
-    (mapc (lambda (tag) (org-toggle-tag tag t)) org-bibtex-tags)))
+    (mapc (lambda (tag) (org-toggle-tag tag 'on)) org-bibtex-tags)))
 
 (defun org-bibtex-create-in-current-entry (&optional arg)
   "Add bibliographical data to the current entry.
@@ -592,7 +594,7 @@ This uses `bibtex-parse-entry'."
   (let ((entry (pop *org-bibtex-entries*))
 	(org-special-properties nil)) ; avoids errors with `org-entry-put'
     (flet ((val (field) (cdr (assoc field entry)))
-	   (togtag (tag) (org-toggle-tag tag t)))
+	   (togtag (tag) (org-toggle-tag tag 'on)))
       (org-insert-heading)
       (insert (val :title))
       (org-bibtex-put "TITLE" (val :title))

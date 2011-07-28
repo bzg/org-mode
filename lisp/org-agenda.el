@@ -61,6 +61,9 @@
 (declare-function org-is-habit-p "org-habit" (&optional pom))
 (declare-function org-habit-parse-todo "org-habit" (&optional pom))
 (declare-function org-habit-get-priority "org-habit" (habit &optional moment))
+(declare-function org-pop-to-buffer-same-window "org-compat" 
+		  (&optional buffer-or-name norecord label))
+
 (defvar calendar-mode-map)
 (defvar org-clock-current-task) ; defined in org-clock.el
 (defvar org-mobile-force-id-on-agenda-items) ; defined in org-mobile.el
@@ -1388,34 +1391,31 @@ When nil, such items are sorted as 0 minutes effort."
     (tags  . " %i %-12:c")
     (search . " %i %-12:c"))
   "Format specifications for the prefix of items in the agenda views.
-An alist with four entries, for the different agenda types.  The keys to the
-sublists are `agenda', `timeline', `todo', `search' and `tags'.  The values
-are format strings.
+An alist with five entries, each for the different agenda types.  The 
+keys of the sublists are `agenda', `timeline', `todo', `search' and `tags'.  
+The values are format strings.
+
 This format works similar to a printf format, with the following meaning:
 
-  %c   the category of the item, \"Diary\" for entries from the diary, or
-       as given by the CATEGORY keyword or derived from the file name.
-  %i   the icon category of the item, as give in
-       `org-agenda-category-icon-alist'.
-  %T   the *last* tag of the item.  Last because inherited tags come
-       first in the list.
-  %t   the time-of-day specification if one applies to the entry, in the
-       format HH:MM
+  %c   the category of the item, \"Diary\" for entries from the diary, 
+       or as given by the CATEGORY keyword or derived from the file name
+  %i   the icon category of the item, see `org-agenda-category-icon-alist'
+  %T   the last tag of the item (ignore inherited tags, which come first)
+  %t   the HH:MM time-of-day specification if one applies to the entry
   %s   Scheduling/Deadline information, a short string
   %(expression) Eval EXPRESSION and replace the control string
                 by the result
 
 All specifiers work basically like the standard `%s' of printf, but may
-contain two additional characters:  A question mark just after the `%' and
-a whitespace/punctuation character just before the final letter.
+contain two additional characters:  a question mark just after the `%'
+and a whitespace/punctuation character just before the final letter.
 
 If the first character after `%' is a question mark, the entire field
-will only be included if the corresponding value applies to the
-current entry.  This is useful for fields which should have fixed
-width when present, but zero width when absent.  For example,
-\"%?-12t\" will result in a 12 character time field if a time of the
-day is specified, but will completely disappear in entries which do
-not contain a time.
+will only be included if the corresponding value applies to the current 
+entry.  This is useful for fields which should have fixed width when 
+present, but zero width when absent.  For example, \"%?-12t\" will 
+result in a 12 character time field if a time of the day is specified, 
+but will completely disappear in entries which do not contain a time.
 
 If there is punctuation or whitespace character just before the final
 format letter, this character will be appended to the field value if
@@ -1423,19 +1423,16 @@ the value is not empty.  For example, the format \"%-12:c\" leads to
 \"Diary: \" if the category is \"Diary\".  If the category were be
 empty, no additional colon would be inserted.
 
-The default value of this option is \"  %-12:c%?-12t% s\", meaning:
+The default value for the agenda sublist is \"  %-12:c%?-12t% s\", 
+which means:
+
 - Indent the line with two space characters
-- Give the category in a 12 chars wide field, padded with whitespace on
+- Give the category a 12 chars wide field, padded with whitespace on
   the right (because of `-').  Append a colon if there is a category
   (because of `:').
 - If there is a time-of-day, put it into a 12 chars wide field.  If no
   time, don't put in an empty field, just skip it (because of '?').
-- Finally, put the scheduling information and append a whitespace.
-
-As another example, if you don't want the time-of-day of entries in
-the prefix, you could use:
-
-  (setq org-agenda-prefix-format \"  %-11:c% s\")
+- Finally, put the scheduling information.
 
 See also the variables `org-agenda-remove-times-when-in-prefix' and
 `org-agenda-remove-tags'.
@@ -1694,6 +1691,19 @@ all tags will be considered, so that this function will only ever see
 the lower-case version of all tags."
   :group 'org-agenda
   :type 'function)
+
+(defcustom org-agenda-bulk-custom-functions nil
+  "Alist of characters and custom functions for bulk actions.
+For example, this value makes those two functions available:
+
+  '((?R set-category)
+    (?C bulk-cut))
+
+With selected entries in an agenda buffer, `B R' will call
+the custom function `set-category' on the selected entries.  
+Note that functions in this alist don't need to be quoted."
+  :type 'alist
+  :group 'org-agenda)
 
 (eval-when-compile
   (require 'cl))
@@ -2250,7 +2260,7 @@ Pressing `<' twice means to restrict to the current subtree or region
 	       ((eq type 'todo-tree)
 		(org-check-for-org-mode)
 		(org-let lprops
-		  '(org-occur (concat "^" outline-regexp "[ \t]*"
+		  '(org-occur (concat "^" org-outline-regexp "[ \t]*"
 				      (regexp-quote match) "\\>"))))
 	       ((eq type 'occur-tree)
 		(org-check-for-org-mode)
@@ -3058,7 +3068,7 @@ the global options and expect it to be applied to the entire view.")
        (awin (select-window awin))
        ((not (setq org-pre-agenda-window-conf (current-window-configuration))))
        ((equal org-agenda-window-setup 'current-window)
-	(switch-to-buffer abuf))
+	(org-pop-to-buffer-same-window abuf))
        ((equal org-agenda-window-setup 'other-window)
 	(org-switch-to-buffer-other-window abuf))
        ((equal org-agenda-window-setup 'other-frame)
@@ -3069,7 +3079,7 @@ the global options and expect it to be applied to the entire view.")
       ;; additional test in case agenda is invoked from within agenda
       ;; buffer via elisp link
       (unless (equal (current-buffer) abuf)
-	(switch-to-buffer abuf)))
+	(org-pop-to-buffer-same-window abuf)))
     (setq buffer-read-only nil)
     (let ((inhibit-read-only t)) (erase-buffer))
     (org-agenda-mode)
@@ -3860,7 +3870,7 @@ in `org-agenda-text-search-extra-files'."
 	    regexps+))
     (setq regexps+ (sort regexps+ (lambda (a b) (> (length a) (length b)))))
     (if (not regexps+)
-	(setq regexp (concat "^" org-outline-regexp))
+	(setq regexp org-outline-regexp-bol)
       (setq regexp (pop regexps+))
       (if hdl-only (setq regexp (concat "^" org-outline-regexp ".*?"
 					regexp))))
@@ -4298,9 +4308,11 @@ of what a project is and how to check if it stuck, customize the variable
 			  "\\)\\>"))
 	 (tags (nth 2 org-stuck-projects))
 	 (tags-re (if (member "*" tags)
-		      (org-re "^\\*+ .*:[[:alnum:]_@#%]+:[ \t]*$")
+		      (org-re (concat org-outline-regexp-bol
+				      ".*:[[:alnum:]_@#%]+:[ \t]*$"))
 		    (if tags
-			(concat "^\\*+ .*:\\("
+			(concat org-outline-regexp-bol
+				".*:\\("
 				(mapconcat 'identity tags "\\|")
 				(org-re "\\):[[:alnum:]_@#%:]*[ \t]*$")))))
 	 (gen-re (nth 3 org-stuck-projects))
@@ -4753,7 +4765,7 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 	(setq marker (org-agenda-new-marker b0)
 	      category (org-get-category b0))
 	(save-excursion
-	  (if (not (re-search-backward "^\\*+ " nil t))
+	  (if (not (re-search-backward org-outline-regexp-bol nil t))
 	      (setq txt org-agenda-no-heading-message)
 	    (goto-char (match-beginning 0))
 	    (setq hdmarker (org-agenda-new-marker)
@@ -4954,7 +4966,7 @@ please use `org-class' instead."
 		 (clockp
 		  (and (looking-at ".*\n[ \t]*-[ \t]+\\([^-\n \t].*?\\)[ \t]*$")
 		       (match-string 1)))))
-	  (if (not (re-search-backward "^\\*+ " nil t))
+	  (if (not (re-search-backward org-outline-regexp-bol nil t))
 	      (setq txt org-agenda-no-heading-message)
 	    (goto-char (match-beginning 0))
 	    (setq hdmarker (org-agenda-new-marker)
@@ -5353,7 +5365,7 @@ FRACTION is what fraction of the head-warning time has passed."
 		    (throw :skip t))
 		(setq marker (org-agenda-new-marker (point)))
 		(setq category (org-get-category))
-		(if (not (re-search-backward "^\\*+ " nil t))
+		(if (not (re-search-backward org-outline-regexp-bol nil t))
 		    (setq txt org-agenda-no-heading-message)
 		  (goto-char (match-beginning 0))
 		  (setq hdmarker (org-agenda-new-marker (point)))
@@ -5512,7 +5524,9 @@ Any match of REMOVE-RE will be removed from TXT."
 		(error nil)))
 	(when effort
 	  (setq neffort (org-duration-string-to-minutes effort)
-		effort (setq effort (concat "[" effort "]" )))))
+		effort (setq effort (concat "[" effort "]")))))
+      ;; prevent erroring out with %e format when there is no effort
+      (or effort (setq effort ""))
 
       (when remove-re
 	(while (string-match remove-re txt)
@@ -5566,6 +5580,7 @@ Any match of REMOVE-RE will be removed from TXT."
 	'txt txt
 	'time time
 	'extra extra
+	'format org-prefix-format-compiled
 	'dotime dotime))))
 
 (defun org-agenda-fix-displayed-tags (txt tags add-inherited hide-re)
@@ -6187,8 +6202,8 @@ to switch to narrowing."
       (org-agenda-filter-apply org-agenda-filter)
       (setq maybe-refresh t))
      (t (error "Invalid tag selection character %c" char)))
-    (when (and maybe-refresh
-	       (eq org-agenda-clockreport-mode 'with-filter))
+    (when (or maybe-refresh
+	      (eq org-agenda-clockreport-mode 'with-filter))
       (org-agenda-redo))))
 
 (defun org-agenda-get-represented-tags ()
@@ -6958,7 +6973,7 @@ at the text of the entry itself."
 		       (org-agenda-error)))
 	   (buffer (marker-buffer marker))
 	   (pos (marker-position marker)))
-      (switch-to-buffer buffer)
+      (org-pop-to-buffer-same-window buffer)
       (and delete-other-windows (delete-other-windows))
       (widen)
       (goto-char pos)
@@ -7240,8 +7255,16 @@ If FORCE-TAGS is non nil, the car of it returns the new tags."
 		dotime (org-get-at-bol 'dotime)
 		cat (org-get-at-bol 'org-category)
 		tags thetags
-		new (org-format-agenda-item (org-get-at-bol 'extra)
-					    newhead cat tags dotime)
+		new
+		(let ((org-prefix-format-compiled
+		       (or (get-text-property (point) 'format)
+			   org-prefix-format-compiled)))
+		  (with-current-buffer (marker-buffer hdmarker)
+		    (save-excursion
+		      (save-restriction
+			(widen)
+			(org-format-agenda-item (org-get-at-bol 'extra)
+						newhead cat tags dotime)))))
 		pl (text-property-any (point-at-bol) (point-at-eol) 'org-heading t)
 		undone-face (org-get-at-bol 'undone-face)
 		done-face (org-get-at-bol 'done-face))
@@ -7403,10 +7426,12 @@ the same tree node, and the headline of the tree node in the Org-mode file."
 	  (org-show-context 'agenda))
 	(save-excursion
 	  (and (outline-next-heading)
-	       (org-flag-heading nil)))   ; show the next heading
+	       (org-flag-heading nil)))	; show the next heading
 	(goto-char pos)
 	(call-interactively 'org-set-effort)
-	(end-of-line 1)))))
+	(end-of-line 1)
+	(setq newhead (org-get-heading)))
+      (org-agenda-change-all-lines newhead hdmarker))))
 
 (defun org-agenda-toggle-archive-tag ()
   "Toggle the archive tag for the current entry."
@@ -7560,7 +7585,7 @@ be used to request time specification in the time stamp."
 
 (defun org-agenda-schedule (arg &optional time)
   "Schedule the item at point.
-Arg is passed through to `org-schedule'."
+ARG is passed through to `org-schedule'."
   (interactive "P")
   (org-agenda-check-type t 'agenda 'timeline 'todo 'tags 'search)
   (org-agenda-check-no-diary)
@@ -7582,7 +7607,7 @@ Arg is passed through to `org-schedule'."
 
 (defun org-agenda-deadline (arg &optional time)
   "Schedule the item at point.
-Arg is passed through to `org-deadline'."
+ARG is passed through to `org-deadline'."
   (interactive "P")
   (org-agenda-check-type t 'agenda 'timeline 'todo 'tags 'search)
   (org-agenda-check-no-diary)
@@ -8149,7 +8174,13 @@ The prefix arg is passed through to the command if possible."
    org-agenda-bulk-marked-entries)
 
   ;; Prompt for the bulk command
-  (message "Bulk: [r]efile [$]arch [A]rch->sib [t]odo [+/-]tag [s]chd [S]catter [d]eadline [f]unction")
+  (message (concat "Bulk: [r]efile [$]arch [A]rch->sib [t]odo"
+		   " [+/-]tag [s]chd [S]catter [d]eadline [f]unction"
+		   (when org-agenda-bulk-custom-functions
+		     (concat " Custom: ["
+			     (mapconcat (lambda(f) (char-to-string (car f)))
+					org-agenda-bulk-custom-functions "")
+			     "]"))))
   (let* ((action (read-char-exclusive))
 	 (org-log-refile (if org-log-refile 'time nil))
 	 (entries (reverse org-agenda-bulk-marked-entries))
@@ -8242,6 +8273,10 @@ The prefix arg is passed through to the command if possible."
 						 (nth 2 date))))
 			 (org-agenda-schedule nil time))
 		     (error nil)))))))
+
+     ((assoc action org-agenda-bulk-custom-functions)
+      (setq cmd (list (cadr (assoc action org-agenda-bulk-custom-functions)))
+	    redo-at-end t))
 
      ((equal action ?f)
       (setq cmd (list (intern

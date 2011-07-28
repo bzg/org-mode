@@ -143,6 +143,7 @@ return the value of the last statement in BODY."
   ((lambda (results)
      (when results
        (if (or (member "scalar" result-params)
+	       (member "verbatim" result-params)
 	       (member "output" result-params))
 	   results
 	 (let ((tmp-file (org-babel-temp-file "sh-")))

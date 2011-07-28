@@ -156,7 +156,9 @@ LISPF      = 	org.el			\
 		ob-plantuml.el		\
 		ob-org.el		\
 		ob-js.el		\
-		ob-scheme.el
+		ob-scheme.el		\
+		ob-lilypond.el		\
+		ob-java.el
 
 LISPFILES0  = $(LISPF:%=lisp/%)
 LISPFILES   = $(LISPFILES0) lisp/org-install.el
@@ -221,21 +223,17 @@ install-lisp: $(LISPFILES) $(ELCFILES)
 install-info: $(INFOFILES)
 	if [ ! -d $(infodir) ]; then $(MKDIR) $(infodir); else true; fi ;
 	$(CP) $(INFOFILES) $(infodir)
-	$(INSTALL_INFO) --info-file=$(INFOFILES) --info-dir=$(infodir)
-
-install-info-debian: $(INFOFILES)
 	$(INSTALL_INFO) --infodir=$(infodir) $(INFOFILES)
 
 autoloads: lisp/org-install.el
 
 lisp/org-install.el: $(LISPFILES0) Makefile
 	$(BATCH) --eval "(require 'autoload)" \
-		--eval '(find-file "org-install.el")'  \
+		--eval '(find-file "lisp/org-install.el")'  \
 		--eval '(erase-buffer)' \
-		--eval '(mapc (lambda (x) (generate-file-autoloads (symbol-name x))) (quote ($(LISPFILES0))))' \
+		--eval '(mapc (lambda (x) (generate-file-autoloads (symbol-name x))) (quote ($(LISPF))))' \
 		--eval '(insert "\n(provide (quote org-install))\n")' \
 		--eval '(save-buffer)'
-	mv org-install.el lisp
 
 doc/org: doc/org.texi
 	(cd doc && $(MAKEINFO) --no-split org.texi -o org)
@@ -443,15 +441,15 @@ cleanrel:
 
 
 push:
-	git-push orgmode@orgmode.org:org-mode.git master
+	git push orgmode@orgmode.org:org-mode.git master
 
 pushtag:
-	git-tag -m "Adding tag" -a $(TAG)
-	git-push orgmode@orgmode.org:org-mode.git $(TAG)
+	git tag -m "Adding tag" -a $(TAG)
+	git push orgmode@orgmode.org:org-mode.git $(TAG)
 
 pushreleasetag:
-	git-tag -m "Adding release tag" -a release_$(TAG)
-	git-push orgmode@orgmode.org:org-mode.git release_$(TAG)
+	git tag -m "Adding release tag" -a release_$(TAG)
+	git push orgmode@orgmode.org:org-mode.git release_$(TAG)
 
 # Dependencies
 
@@ -529,4 +527,3 @@ targets help:
 	@echo "make install - install Org"
 	@echo "make install-lisp - install Org ELisp files"
 	@echo "make install-info - install Org Info file"
-	@echo "make install-info-debian - install info on old debian systems (newer use ginstall)"

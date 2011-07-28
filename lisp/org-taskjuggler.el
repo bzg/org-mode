@@ -265,12 +265,12 @@ defined in `org-export-taskjuggler-default-reports'."
 	   (org-taskjuggler-assign-task-ids
 	    (org-taskjuggler-compute-task-leafiness
 	     (org-map-entries
-	      '(org-taskjuggler-components)
+	      'org-taskjuggler-components
 	      org-export-taskjuggler-project-tag nil 'archive 'comment)))))
 	 (resources
 	  (org-taskjuggler-assign-resource-ids
 	   (org-map-entries
-	    '(org-taskjuggler-components)
+	    'org-taskjuggler-components
 	    org-export-taskjuggler-resource-tag nil 'archive 'comment)))
 	 (filename (expand-file-name
 		    (concat
@@ -555,10 +555,10 @@ attributes from the PROJECT alist are inserted. If no end date is
 specified it is calculated
 `org-export-taskjuggler-default-project-duration' days from now."
   (let* ((unique-id (cdr (assoc "unique-id" project)))
-	(headline (cdr (assoc "headline" project)))
-	(version (cdr (assoc "version" project)))
-	(start (cdr (assoc "start" project)))
-	(end (cdr (assoc "end" project))))
+	 (headline (cdr (assoc "headline" project)))
+	 (version (cdr (assoc "version" project)))
+	 (start (cdr (assoc "start" project)))
+	 (end (cdr (assoc "end" project))))
     (insert
      (format "project %s \"%s\" \"%s\" %s +%sd {\n }\n"
 	     unique-id headline version start
@@ -629,28 +629,28 @@ org-mode priority string."
 
 (defun org-taskjuggler-open-task (task)
   (let* ((unique-id (cdr (assoc "unique-id" task)))
-	(headline (cdr (assoc "headline" task)))
-	(effort (org-taskjuggler-clean-effort (cdr (assoc org-effort-property task))))
-	(depends (cdr (assoc "depends" task)))
-	(allocate (cdr (assoc "allocate" task)))
-	(priority-raw (cdr (assoc "PRIORITY" task)))
-	(priority (and priority-raw (org-taskjuggler-get-priority priority-raw)))
-	(state (cdr (assoc "TODO" task)))
-	(complete (or (and (member state org-done-keywords) "100")
-		      (cdr (assoc "complete" task))))
-	(parent-ordered (cdr (assoc "parent-ordered" task)))
-	(previous-sibling (cdr (assoc "previous-sibling" task)))
-	(milestone (or (cdr (assoc "milestone" task))
-		       (and (assoc "leaf-node" task)
-			    (not (or effort
-				     (cdr (assoc "duration" task))
-				     (cdr (assoc "end" task))
-				     (cdr (assoc "period" task)))))))
-	(attributes
-	 '(account start note duration endbuffer endcredit end
-	   flags journalentry length maxend maxstart minend
-	   minstart period reference responsible scheduling
-	   startbuffer startcredit statusnote)))
+	 (headline (cdr (assoc "headline" task)))
+	 (effort (org-taskjuggler-clean-effort (cdr (assoc org-effort-property task))))
+	 (depends (cdr (assoc "depends" task)))
+	 (allocate (cdr (assoc "allocate" task)))
+	 (priority-raw (cdr (assoc "PRIORITY" task)))
+	 (priority (and priority-raw (org-taskjuggler-get-priority priority-raw)))
+	 (state (cdr (assoc "TODO" task)))
+	 (complete (or (and (member state org-done-keywords) "100")
+		       (cdr (assoc "complete" task))))
+	 (parent-ordered (cdr (assoc "parent-ordered" task)))
+	 (previous-sibling (cdr (assoc "previous-sibling" task)))
+	 (milestone (or (cdr (assoc "milestone" task))
+			(and (assoc "leaf-node" task)
+			     (not (or effort
+				      (cdr (assoc "duration" task))
+				      (cdr (assoc "end" task))
+				      (cdr (assoc "period" task)))))))
+	 (attributes
+	  '(account start note duration endbuffer endcredit end
+		    flags journalentry length maxend maxstart minend
+		    minstart period reference responsible scheduling
+		    startbuffer startcredit statusnote)))
     (insert
      (concat
       "task " unique-id " \"" headline "\" {\n"

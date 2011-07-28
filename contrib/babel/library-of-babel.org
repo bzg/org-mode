@@ -1,26 +1,26 @@
 #+title:    The Library of Babel
 #+author:     Org-mode People
-#+STARTUP:  odd hideblocks
+#+STARTUP:  oddeven hideblocks
 
 * Introduction
+
   The Library of Babel is an extensible collection of ready-made and
-  easily-shortcut-callable source-code blocks for handling common
-  tasks.  Org-babel comes pre-populated with the source-code blocks
-  located in this file. It is possible to add source-code blocks from
-  any org-mode file to the library by calling =(org-babel-lob-ingest
-  "path/to/file.org")=.
+  easily-shortcut-callable source-code blocks for handling common tasks.
+  Org-babel comes pre-populated with the source-code blocks located in this
+  file. It is possible to add source-code blocks from any org-mode file to
+  the library by calling =(org-babel-lob-ingest "path/to/file.org")=.
   
-  This file is included in worg mainly less for viewing through the
-  web interface, and more for contribution through the worg git
-  repository.  If you have code snippets that you think others may
-  find useful please add them to this file and [[file:~/src/worg/worg-git.org::contribute-to-worg][contribute them]] to
-  worg.
+  This file is included in worg mainly less for viewing through the web
+  interface, and more for contribution through the worg git repository.  If
+  you have code snippets that you think others may find useful please add
+  them to this file and [[file:~/src/worg/worg-git.org::contribute-to-worg][contribute them]] to worg.
   
   The raw Org-mode text of this file can be downloaded at
   [[repofile:contrib/babel/library-of-babel.org][library-of-babel.org]]
 
 * Simple
-A collection of simple utility functions
+
+A collection of simple utility functions:
 
 #+srcname: echo
 #+begin_src emacs-lisp :var input="echo'd"
@@ -28,10 +28,13 @@ A collection of simple utility functions
 #+end_src
 
 * File I/O
-** reading and writing files
+
+** Reading and writing files
+
 Read the contents of the file at =file=.  The =:results vector= and
 =:results scalar= header arguments can be used to read the contents of
 file as either a table or a string.
+
 #+srcname: read
 #+begin_src emacs-lisp :var file="" :var format=""
   (if (string= format "csv")
@@ -45,6 +48,7 @@ file as either a table or a string.
 
 Write =data= to a file at =file=.  If =data= is a list, then write it
 as a table in traditional Org-mode table syntax.
+
 #+srcname: write
 #+begin_src emacs-lisp :var data="" :var file="" :var ext='()
   (flet ((echo (r) (if (stringp r) r (format "%S" r))))
@@ -57,9 +61,12 @@ as a table in traditional Org-mode table syntax.
   nil
 #+end_src
 
-** remote files
+** Remote files
+
 **** json
+
 Read local or remote file in [[http://www.json.org/][json]] format into emacs-lisp objects.
+
 #+srcname: json
 #+begin_src emacs-lisp :var file='() :var url='()
   (require 'json)
@@ -77,15 +84,18 @@ Read local or remote file in [[http://www.json.org/][json]] format into emacs-li
 #+end_src
 
 **** Google docs
+
 The following code blocks make use of the [[http://code.google.com/p/googlecl/][googlecl]] Google command line
 tool.  This tool provides functionality for accessing Google services
 from the command line, and the following code blocks use /googlecl/
 for reading from and writing to Google docs with Org-mode code blocks.
 
-****** read a document from Google docs
+****** Read a document from Google docs
+
 The =google= command seems to be throwing "Moved Temporarily" errors
 when trying to download textual documents, but this is working fine
 for spreadsheets.
+
 #+source: gdoc-read
 #+begin_src emacs-lisp :var title="example" :var format="csv"
   (let* ((file (concat title "." format))
@@ -107,12 +117,15 @@ contents of a spreadsheet named =num-cells= into a table.
 
 A line like the following can be used to read the contents of a
 document as a string.
+
 : #+call: gdoc-read(title="loremi", :format "txt")
 
-****** write a document to a Google docs
+****** Write a document to a Google docs
+
 Write =data= to a google document named =title=.  If =data= is tabular
 it will be saved to a spreadsheet, otherwise it will be saved as a
 normal document.
+
 #+source: gdoc-write
 #+begin_src emacs-lisp :var title="babel-upload" :var data=fibs(n=10) :results silent
   (let* ((format (if (listp data) "csv" "txt"))
@@ -140,7 +153,9 @@ example usage
 * Plotting code
 
 ** R
-  Plot column 2 (y axis) against column 1 (x axis). Columns 3 and beyond, if present, are ignored.
+
+  Plot column 2 (y axis) against column 1 (x axis). Columns 3 and
+  beyond, if present, are ignored.
 
 #+srcname: R-plot(data=R-plot-example-data)
 #+begin_src R
@@ -162,7 +177,9 @@ plot(data)
 ** Gnuplot
 
 * Org reference
-** headline references
+
+** Headline references
+
 #+source: headline
 #+begin_src emacs-lisp :var headline=top :var file='()
   (save-excursion
@@ -176,11 +193,15 @@ plot(data)
 #+call: headline(headline="headline references")
 
 * Tables
+
 ** LaTeX Table export
+
 *** booktabs
+
 This block can be used to wrap a table in the latex =booktabs=
 environment, it takes the following arguments -- all but the first two
 are optional.
+
 | arg   | description                                |
 |-------+--------------------------------------------|
 | table | a reference to the table                   |
@@ -220,10 +241,12 @@ are optional.
               (to-tab table))))))
 #+end_src
 
-*** longtable
+*** Longtable
+
 This block can be used to wrap a table in the latex =longtable=
 environment, it takes the following arguments -- all but the first two
 are optional.
+
 | arg       | description                                                 |
 |-----------+-------------------------------------------------------------|
 | table     | a reference to the table                                    |
@@ -287,7 +310,7 @@ are optional.
    :PROPERTIES:
    :AUTHOR: Luke Crook
    :END:
-
+   
 This function will attempt to retrieve the entire commit log for the
 file associated with the current buffer and insert this log into the
 export. The function uses the Emacs VC commands to interface to the
@@ -321,6 +344,7 @@ Git. 'limit' is currently unsupported.
 #+end_src
 
 ** Trivial python code blocks
+
 #+srcname: python-identity(a=1)
 #+begin_src python
 a
@@ -332,6 +356,7 @@ a + b
 #+end_src
 
 ** Arithmetic
+
 #+source: lob-add
 #+begin_src emacs-lisp :var a=0 :var b=0
   (+ a b)
@@ -430,3 +455,35 @@ Fraga.  It was modified slightly by Tom Dye.
   %s
   \\end{tikzpicture}" projecttime ntasks tasks milestones dates))
 #+end_src
+
+* Available languages
+  :PROPERTIES:
+  :AUTHOR:   Bastien
+  :END:
+
+** From Org's core
+
+| Language   | Identifier | Language       | Identifier |
+|------------+------------+----------------+------------|
+| Asymptote  | asymptote  | Awk            | awk        |
+| Emacs Calc | calc       | C              | C          |
+| C++        | C++        | Clojure        | clojure    |
+| CSS        | css        | ditaa          | ditaa      |
+| Graphviz   | dot        | Emacs Lisp     | emacs-lisp |
+| gnuplot    | gnuplot    | Haskell        | haskell    |
+| Javascript | js         | LaTeX          | latex      |
+| Ledger     | ledger     | Lisp           | lisp       |
+| Lilypond   | lilypond   | MATLAB         | matlab     |
+| Mscgen     | mscgen     | Objective Caml | ocaml      |
+| Octave     | octave     | Org-mode       | org        |
+|            |            | Perl           | perl       |
+| Plantuml   | plantuml   | Python         | python     |
+| R          | R          | Ruby           | ruby       |
+| Sass       | sass       | Scheme         | scheme     |
+| GNU Screen | screen     | shell          | sh         |
+| SQL        | sql        | SQLite         | sqlite     |
+
+** From Org's contrib/babel/langs
+
+- ob-oz.el, by Torsten Anders and Eric Schulte 
+- ob-fomus.el, by Torsten Anders

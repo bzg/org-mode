@@ -1,4 +1,4 @@
-;;; org-lparse.el --- Line-oriented exporter for Org-mode
+;;; org-lparse.el --- Line-oriented parser-exporter for Org-mode
 
 ;; Copyright (C) 2010, 2011
 ;;   Jambunathan <kjambunathan at gmail dot com>
@@ -27,28 +27,28 @@
 ;;
 ;;; Commentary:
 
-;;; `org-lparse' is the entry point for the generic line-oriented
-;;; exporter.  `org-do-lparse' is the genericized version of the
-;;; original `org-export-as-html' routine.
+;; `org-lparse' is the entry point for the generic line-oriented
+;; exporter.  `org-do-lparse' is the genericized version of the
+;; original `org-export-as-html' routine.
 
-;;; `org-lparse-native-backends' is a good starting point for
-;;; exploring the generic exporter.
+;; `org-lparse-native-backends' is a good starting point for
+;; exploring the generic exporter.
 
-;;; Following new interactive commands are provided by this library.
-;;; `org-lparse', `org-lparse-and-open', `org-lparse-to-buffer'
-;;; `org-replace-region-by', `org-lparse-region'.
+;; Following new interactive commands are provided by this library.
+;; `org-lparse', `org-lparse-and-open', `org-lparse-to-buffer'
+;; `org-replace-region-by', `org-lparse-region'.
 
-;;; Note that the above routines correspond to the following routines
-;;; in the html exporter `org-export-as-html',
-;;; `org-export-as-html-and-open', `org-export-as-html-to-buffer',
-;;; `org-replace-region-by-html' and `org-export-region-as-html'.
+;; Note that the above routines correspond to the following routines
+;; in the html exporter `org-export-as-html',
+;; `org-export-as-html-and-open', `org-export-as-html-to-buffer',
+;; `org-replace-region-by-html' and `org-export-region-as-html'.
 
-;;; The all new interactive command `org-export-convert' can be used
-;;; to convert documents between various formats.  Use this to
-;;; command, for example, to convert odt file to doc or pdf format.
+;; The new interactive command `org-lparse-convert' can be used to
+;; convert documents between various formats.  Use this to command,
+;; for example, to convert odt file to doc or pdf format.
 
-;;; See README.org file that comes with this library for answers to
-;;; FAQs and more information on using this library.
+;; See README.org file that comes with this library for answers to
+;; FAQs and more information on using this library.
 
 ;;; Code:
 
@@ -337,9 +337,11 @@ OPT-PLIST is the export options list."
      (when org-lparse-do-open-par
        (org-lparse-begin-paragraph))))
 
-(defvar org-lparse-native-backends
-  '("xhtml" "odt")
+(defvar org-lparse-native-backends nil
   "List of native backends registered with `org-lparse'.
+A backend can use `org-lparse-register-backend' to add itself to
+this list.
+
 All native backends must implement a get routine and a mandatory
 set of callback routines.
 
@@ -353,6 +355,16 @@ For the sake of illustration, the html backend implements
 `org-xhtml-entity-control-callbacks-alist' and
 `org-xhtml-entity-format-callbacks-alist' as the values of
 ENTITY-CONTROL and ENTITY-FORMAT settings.")
+
+(defun org-lparse-register-backend (backend)
+  "Make BACKEND known to org-lparse library.
+Add BACKEND to `org-lparse-native-backends'."
+  (when backend
+    (setq backend (cond
+		   ((symbolp backend) (symbol-name backend))
+		   ((stringp backend) backend)
+		   (t (error "Error while registering backend: %S" backend))))
+    (add-to-list 'org-lparse-native-backends backend)))
 
 (defun org-lparse-get-other-backends (native-backend)
   (org-lparse-backend-get native-backend 'OTHER-BACKENDS))
@@ -428,7 +440,7 @@ PUB-DIR specifies the publishing directory."
     (run-hooks 'org-export-first-hook)
     (org-do-lparse arg hidden ext-plist to-buffer body-only pub-dir)))
 
-(defcustom org-export-convert-process
+(defcustom org-lparse-convert-process
   '("soffice" "-norestore" "-invisible" "-headless" "\"macro:///BasicODConverter.Main.Convert(%I,%f,%O)\"")
   "Command to covert a Org exported format to other formats.
 The variable is an list of the form (PROCESS ARG1 ARG2 ARG3
@@ -440,9 +452,14 @@ The variable is an list of the form (PROCESS ARG1 ARG2 ARG3
 %O output file name as a URL
 %d output dir in full
 %D output dir as a URL"
+  :group 'org-lparse)
+
+(defcustom org-lparse-use-flashy-warning nil
+  "Use flashy warnings when exporting to ODT."
+  :type 'boolean
   :group 'org-export)
 
-(defun org-export-convert (&optional in-file fmt)
+(defun org-lparse-convert (&optional in-file fmt)
   "Convert file from one format to another using a converter.
 IN-FILE is the file to be converted.  If unspecified, it defaults
 to variable `buffer-file-name'.  FMT is the desired output format.  If the
@@ -468,7 +485,7 @@ then that converter is used.  Otherwise
 	 (backend (when (boundp 'org-lparse-backend) org-lparse-backend))
 	 (convert-process
 	  (or (ignore-errors (org-lparse-backend-get backend 'CONVERT-METHOD))
-	      org-export-convert-process))
+	      org-lparse-convert-process))
 	 program arglist)
 
     (setq program (and convert-process (consp convert-process)
@@ -774,7 +791,7 @@ version."
       (while (setq line (pop lines) origline line)
 	(catch 'nextline
 	  (when (and (org-lparse-current-environment-p 'quote)
-		     (string-match "^\\*+ " line))
+		     (string-match org-outline-regexp-bol line))
 	    (org-lparse-end-environment 'quote))
 
 	  (when (org-lparse-current-environment-p 'quote)
@@ -1109,9 +1126,9 @@ version."
 	(or (when (and (boundp 'org-lparse-other-backend)
 		       org-lparse-other-backend
 		       (not (equal org-lparse-backend org-lparse-other-backend)))
-	      (let ((org-export-convert-process (org-lparse-get 'CONVERT-METHOD)))
-		(when org-export-convert-process
-		  (org-export-convert buffer-file-name
+	      (let ((org-lparse-convert-process (org-lparse-get 'CONVERT-METHOD)))
+		(when org-lparse-convert-process
+		  (org-lparse-convert buffer-file-name
 				      (symbol-name org-lparse-other-backend)))))
 	    (current-buffer)))
        ((eq to-buffer 'string)
@@ -1321,7 +1338,7 @@ for further information."
       (while (string-match org-maybe-keyword-time-regexp s)
 	(or b (setq b (substring s 0 (match-beginning 0))))
 	(setq r (concat
-		 r (substring s 0 (match-beginning 0))
+		 r (substring s 0 (match-beginning 0)) " "
 		 (org-lparse-format
 		  'FONTIFY
 		  (concat
@@ -1329,6 +1346,7 @@ for further information."
 		       (org-lparse-format
 			'FONTIFY
 			(match-string 1 s) "timestamp-kwd"))
+		   " "
 		   (org-lparse-format
 		    'FONTIFY
 		    (substring (org-translate-time (match-string 3 s)) 1 -1)
@@ -1513,9 +1531,9 @@ the alist of previous items."
      ((assq pos struct)
       (string-match
        (concat "[ \t]*\\(\\S-+[ \t]*\\)"
-	       "\\(?:\\[@\\(?:start:\\)?\\([0-9]+\\|[A-Za-z]\\)\\]\\)?"
+	       "\\(?:\\[@\\(?:start:\\)?\\([0-9]+\\|[A-Za-z]\\)\\][ \t]*\\)?"
 	       "\\(?:\\(\\[[ X-]\\]\\)[ \t]+\\)?"
-	       "\\(?:\\(.*\\)[ \t]+::[ \t]+\\)?"
+	       "\\(?:\\(.*\\)[ \t]+::\\(?:[ \t]+\\|$\\)\\)?"
 	       "\\(.*\\)") line)
       (let* ((checkbox (match-string 3 line))
 	     (desc-tag (or (match-string 4 line) "???"))
@@ -1577,9 +1595,24 @@ the alist of previous items."
 (defvar org-lparse-output-buffer)
 
 (defcustom org-lparse-debug nil
-  "."
+  "Enable or Disable logging of `org-lparse' callbacks.
+The parameters passed to the backend-registered ENTITY-CONTROL
+and ENTITY-FORMAT callbacks are logged as comment strings in the
+exported buffer.  (org-lparse-format 'COMMENT fmt args) is used
+for logging.  Customize this variable only if you are an expert
+user.  Valid values of this variable are:
+nil     : Disable logging
+control : Log all invocations of `org-lparse-begin' and
+          `org-lparse-end' callbacks.
+format  : Log invocations of `org-lparse-format' callbacks.
+t       : Log all invocations of `org-lparse-begin', `org-lparse-end'
+          and `org-lparse-format' callbacks,"
   :group 'org-lparse
-  :type 'boolean)
+  :type '(choice
+	  (const :tag "Disable" nil)
+	  (const :tag "Format callbacks" format)
+	  (const :tag "Control callbacks" control)
+	  (const :tag "Format and Control callbacks" t)))
 
 (defun org-lparse-begin (entity &rest args)
   "Begin ENTITY in current buffer. ARGS is entity specific.
@@ -1980,9 +2013,11 @@ Replaces invalid characters with \"_\"."
        (org-lparse-format 'FONTIFY snumber (format "section-number-%d" level))))
 
 (defun org-lparse-warn (msg)
-  (put-text-property 0 (length msg) 'face 'font-lock-warning-face msg)
-  (message msg)
-  (sleep-for 3))
+  (if (not org-lparse-use-flashy-warning)
+      (message msg)
+    (put-text-property 0 (length msg) 'face 'font-lock-warning-face msg)
+    (message msg)
+    (sleep-for 3)))
 
 (defun org-xml-format-href (s)
   "Make sure the S is valid as a href reference in an XHTML document."

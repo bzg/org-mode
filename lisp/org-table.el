@@ -52,7 +52,7 @@
 (defvar orgtbl-after-send-table-hook nil
   "Hook for functions attaching to `C-c C-c', if the table is sent.
 This can be used to add additional functionality after the table is sent
-to the receiver position, othewise, if table is not sent, the functions 
+to the receiver position, othewise, if table is not sent, the functions
 are not run.")
 
 (defcustom orgtbl-optimized (eq org-enable-table-editor 'optimized)
@@ -230,6 +230,18 @@ Don't remove any of the default settings, just change the values.  Org-mode
 relies on the variables to be present in the list."
   :group 'org-table-calculation
   :type 'plist)
+
+(defcustom org-table-duration-custom-format 'hours
+  "Format for the output of calc computations like $1+$2;t.
+The default value is 'hours, and will output the results as a
+number of hours.  Other allowed values are 'seconds, 'minutes and
+'days, and the output will be a fraction of seconds, minutes or
+days."
+  :group 'org-table-calculation
+  :type '(choice (symbol :tag "Seconds" 'seconds)
+		 (symbol :tag "Minutes" 'minutes)
+		 (symbol :tag "Hours  " 'hours)
+		 (symbol :tag "Days   " 'days)))
 
 (defcustom org-table-formula-evaluate-inline t
   "Non-nil means TAB and RET evaluate a formula in current table field.
@@ -547,7 +559,7 @@ property, locally or anywhere up in the hierarchy."
 	 (end (org-table-end))
 	 (txt (buffer-substring-no-properties beg end))
 	 (file (or file (org-entry-get beg "TABLE_EXPORT_FILE" t)))
-	 (format (or format 
+	 (format (or format
 		     (org-entry-get beg "TABLE_EXPORT_FORMAT" t)))
 	 buf deffmt-readable)
     (unless file
@@ -1426,7 +1438,7 @@ first dline below it is used.  When ABOVE is non-nil, the one above is used."
     (org-move-to-column col)
     (unless (or hline1p hline2p
 		(not (or (not org-table-fix-formulas-confirm)
-			 (funcall org-table-fix-formulas-confirm 
+			 (funcall org-table-fix-formulas-confirm
 				  "Fix formulas? "))))
       (org-table-fix-formulas
        "@" (list (cons (number-to-string dline1) (number-to-string dline2))
@@ -1806,6 +1818,12 @@ it can be edited in place."
 	  (font-lock-fontify-block))))
    (t
     (let ((pos (move-marker (make-marker) (point)))
+	  (coord
+	   (if (eq org-table-use-standard-references t)
+	       (concat (org-number-to-letters (org-table-current-column))
+		       (int-to-string (org-table-current-dline)))
+	     (concat "@" (int-to-string (org-table-current-dline))
+		     "$" (int-to-string (org-table-current-column)))))
 	  (field (org-table-get-field))
 	  (cw (current-window-configuration))
 	  p)
@@ -1815,7 +1833,7 @@ it can be edited in place."
 		 (markerp org-field-marker))
 	(move-marker org-field-marker nil))
       (erase-buffer)
-      (insert "#\n# Edit field and finish with C-c C-c\n#\n")
+      (insert "#\n# Edit field " coord " and finish with C-c C-c\n#\n")
       (let ((org-inhibit-startup t)) (org-mode))
       (auto-fill-mode -1)
       (setq truncate-lines nil)
@@ -2391,7 +2409,7 @@ not overwrite the stored one."
 	   (modes (copy-sequence org-calc-default-modes))
 	   (numbers nil) ; was a variable, now fixed default
 	   (keep-empty nil)
-	   n form form0 bw fmt x ev orig c lispp literal duration)
+	   n form form0 formrpl formrg bw fmt x ev orig c lispp literal duration)
       ;; Parse the format string.  Since we have a lot of modes, this is
       ;; a lot of work.  However, I think calc still uses most of the time.
       (if (string-match ";" formula)
@@ -2412,6 +2430,12 @@ not overwrite the stored one."
 	      (setq fmt (replace-match "" t t fmt)))
 	    (if (string-match "T" fmt)
 		(setq duration t numbers t
+		      duration-output-format nil
+		      fmt (replace-match "" t t fmt)))
+	    (if (string-match "t" fmt)
+		(setq duration t 
+		      duration-output-format org-table-duration-custom-format
+		      numbers t
 		      fmt (replace-match "" t t fmt)))
 	    (if (string-match "N" fmt)
 		(setq numbers t
@@ -2431,21 +2455,22 @@ not overwrite the stored one."
 	  (setq formula (org-table-formula-substitute-names formula)))
       (setq orig (or (get-text-property 1 :orig-formula formula) "?"))
       (while (> ndown 0)
-	(setq fields 
-	      (mapcar (lambda (cell)
-			(let ((duration (org-table-time-string-to-seconds cell)))
-			  (if duration (number-to-string duration) cell)))
-		      (org-split-string
-		       (org-no-properties
-			(buffer-substring (point-at-bol) (point-at-eol)))
-		       " *| *")))
+	(setq fields (org-split-string
+		      (org-no-properties
+		       (buffer-substring (point-at-bol) (point-at-eol)))
+		      " *| *"))
+	;; replace fields with duration values if relevant
+	(if duration
+	    (setq fields
+		  (mapcar (lambda (x) (org-table-time-string-to-seconds x))
+			  fields)))
 	(if (eq numbers t)
 	    (setq fields (mapcar
 			  (lambda (x) (number-to-string (string-to-number x)))
 			  fields)))
 	(setq ndown (1- ndown))
 	(setq form (copy-sequence formula)
-	      lispp (and (> (length form) 2)(equal (substring form 0 2) "'(")))
+	      lispp (and (> (length form) 2) (equal (substring form 0 2) "'(")))
 	(if (and lispp literal) (setq lispp 'literal))
 
 	;; Insert row and column number of formula result field
@@ -2476,13 +2501,22 @@ not overwrite the stored one."
 	;; Insert complex ranges
 	(while (and (string-match org-table-range-regexp form)
 		    (> (length (match-string 0 form)) 1))
-	  (setq form
-		(replace-match
-		 (save-match-data
-		   (org-table-make-reference
-		    (org-table-get-range (match-string 0 form) nil n0)
-		    keep-empty numbers lispp))
-		 t t form)))
+	  (setq formrg (save-match-data 
+			 (org-table-get-range (match-string 0 form) nil n0)))
+	  (setq formrpl
+		(save-match-data
+		  (org-table-make-reference
+		   ;; possibly handle durations
+		   (if duration
+		       (if (listp formrg)
+			   (mapcar (lambda(x) (org-table-time-string-to-seconds x)) formrg)
+			 (org-table-time-string-to-seconds formrg))
+		     formrg)
+		   keep-empty numbers lispp)))
+	  (if (not (save-match-data
+		     (string-match (regexp-quote form) formrpl)))
+	      (setq form (replace-match formrpl t t form))
+	    (error "Spreadsheet error: invalid reference \"%s\"" form)))
 	;; Insert simple ranges
 	(while (string-match "\\$\\([0-9]+\\)\\.\\.\\$\\([0-9]+\\)"  form)
 	  (setq form
@@ -2512,14 +2546,15 @@ not overwrite the stored one."
 			 (eval (eval (read form)))
 		       (error "#ERROR"))
 		  ev (if (numberp ev) (number-to-string ev) ev)
-		  ev (if duration (org-table-time-seconds-to-string 
-				   (string-to-number ev)) ev))
+		  ev (if duration (org-table-time-seconds-to-string
+				   (string-to-number ev)
+				   duration-output-format) ev))
 	  (or (fboundp 'calc-eval)
 	      (error "Calc does not seem to be installed, and is needed to evaluate the formula"))
-	  (setq ev (calc-eval (cons form modes)
-			      (if numbers 'num))
-		ev (if duration (org-table-time-seconds-to-string 
-				 (string-to-number ev)) ev)))
+	  (setq ev (calc-eval (cons form modes) (if numbers 'num))
+		ev (if duration (org-table-time-seconds-to-string
+				 (string-to-number ev)
+				 duration-output-format) ev)))
 
 	(when org-table-formula-debug
 	  (with-output-to-temp-buffer "*Substitution History*"
@@ -2777,7 +2812,7 @@ known that the table will be realigned a little later anyway."
       (setq eqlnum (nreverse eqlnum) eqlname (nreverse eqlname))
       ;; Expand ranges in lhs of formulas
       (setq eqlname (org-table-expand-lhs-ranges eqlname))
-      
+
       ;; Get the correct line range to process
       (if all
 	  (progn
@@ -2809,7 +2844,7 @@ known that the table will be realigned a little later anyway."
 	(when (member name1 seen-fields)
 	      (error "Several field/range formulas try to set %s" name1))
 	(push name1 seen-fields)
-	  
+
 	(and (not a)
 	     (string-match "@\\([0-9]+\\)\\$\\([0-9]+\\)" name)
 	     (setq a (list name
@@ -2826,7 +2861,7 @@ known that the table will be realigned a little later anyway."
 	  (push (append a (list (cdr eq))) eqlname1)
 	  (org-table-put-field-property :org-untouchable t)))
       (setq eqlname1 (nreverse eqlname1))
-      
+
       ;; Now evaluate the column formulas, but skip fields covered by
       ;; field formulas
       (goto-char beg)
@@ -3204,25 +3239,43 @@ For example:  28 -> AB."
     s))
 
 (defun org-table-time-string-to-seconds (s)
-  "Convert a time string into numerical duration in seconds."
-  (cond
-   ((and (stringp s)
-	 (string-match "\\([0-9]+\\):\\([0-9]+\\):\\([0-9]+\\)" s))
-    (let ((hour (string-to-number (match-string 1 s)))
-	  (min (string-to-number (match-string 2 s)))
-	  (sec (string-to-number (match-string 3 s))))
-      (+ (* hour 3600) (* min 60) sec)))
-   ((and (stringp s)
-	 (string-match "\\([0-9]+\\):\\([0-9]+\\)" s))
-    (let ((min (string-to-number (match-string 1 s)))
-	  (sec (string-to-number (match-string 2 s))))
-      (+ (* min 60) sec)))))
+  "Convert a time string into numerical duration in seconds.
+S can be a string matching either -?HH:MM:SS or -?HH:MM.
+If S is a string representing a number, keep this number."
+  (let (hour min sec res)
+    (cond
+     ((and (string-match "\\(-?\\)\\([0-9]+\\):\\([0-9]+\\):\\([0-9]+\\)" s))
+      (setq minus (< 0 (length (match-string 1 s)))
+	    hour (string-to-number (match-string 2 s))
+	    min (string-to-number (match-string 3 s))
+	    sec (string-to-number (match-string 4 s)))
+      (if minus
+	  (setq res (- (+ (* hour 3600) (* min 60) sec)))
+	(setq res (+ (* hour 3600) (* min 60) sec))))
+     ((and (not (string-match org-ts-regexp-both s))
+	   (string-match "\\(-?\\)\\([0-9]+\\):\\([0-9]+\\)" s))
+      (setq minus (< 0 (length (match-string 1 s)))
+	    hour (string-to-number (match-string 2 s))
+	    min (string-to-number (match-string 3 s)))
+      (if minus
+	  (setq res (- (+ (* hour 3600) (* min 60))))
+	(setq res (+ (* hour 3600) (* min 60)))))
+     (t (setq res (string-to-number s))))
+    (number-to-string res)))
 
-(defun org-table-time-seconds-to-string (secs)
-  "Convert a number of seconds to a time string."
-  (cond ((>= secs 3600) (org-format-seconds "%h:%.2m:%.2s" secs))
-	((>= secs 60) (org-format-seconds "%m:%.2s" secs))
-	(t (org-format-seconds "%s" secs))))
+(defun org-table-time-seconds-to-string (secs &optional output-format)
+  "Convert a number of seconds to a time string.
+If OUTPUT-FORMAT is non-nil, return a number of days, hours,
+minutes or seconds."
+  (cond ((eq output-format 'days)
+	 (format "%.3f" (/ (float secs) 86400)))
+	((eq output-format 'hours)
+	 (format "%.2f" (/ (float secs) 3600)))
+	((eq output-format 'minutes)
+	 (format "%.1f" (/ (float secs) 60)))
+	((eq output-format 'seconds)
+	 (format "%d" secs))
+	(t (org-format-seconds "%.2h:%.2m:%.2s" secs))))
 
 (defun org-table-fedit-convert-buffer (function)
   "Convert all references in this buffer, using FUNCTION."

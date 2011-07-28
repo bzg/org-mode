@@ -1,6 +1,6 @@
 ;;; org-odt.el --- OpenDocumentText export for Org-mode
 
-;; Copyright (C) 2010-2011
+;; Copyright (C) 2010, 2011
 ;;   Jambunathan <kjambunathan at gmail dot com>
 
 ;; Author: Jambunathan K <kjambunathan at gmail dot com>
@@ -73,7 +73,16 @@
     (cond
      ((file-directory-p dir1) dir1)
      ((file-directory-p dir2) dir2)
-     (t (error "Cannot find factory styles file. Check package dir layout")))))
+     (t (error "Cannot find factory styles file. Check package dir layout"))))
+  "Directory that holds auxiliary files used by the ODT exporter.
+
+The 'styles' subdir contains the following xml files -
+ 'OrgOdtStyles.xml' and 'OrgOdtAutomaticStyles.xml' - which are
+ used as factory settings of `org-export-odt-styles-file' and
+ `org-export-odt-automatic-styles-file'.
+
+The 'etc/schema' subdir contains rnc files for validating of
+OpenDocument xml files.")
 
 (defvar org-odt-file-extensions
   '(("odt" . "OpenDocument Text")
@@ -128,37 +137,66 @@
 		(cons (concat  "\\." (car desc) "\\'") 'system)))
  org-odt-ms-file-extensions)
 
-;; register the odt exporter
+;; register the odt exporter with the pre-processor
 (add-to-list 'org-export-backends 'odt)
 
-(defcustom org-export-odt-automatic-styles-file nil
-  "Default style file for use with ODT exporter."
-  :group 'org-export-odt
-  :type 'file)
+;; register the odt exporter with org-lparse library
+(org-lparse-register-backend 'odt)
 
-;; TODO: Make configuration user-friendly.
+(defcustom org-export-odt-automatic-styles-file nil
+  "Automatic styles for use with ODT exporter.
+If unspecified, the file under `org-odt-data-dir' is used."
+  :type 'file
+  :group 'org-export-odt)
+
 (defcustom org-export-odt-styles-file nil
-  "Default style file for use with ODT exporter.
-Valid values are path to an styles.xml file or a path to a valid
-*.odt or a *.ott file or a list of the form (FILE (MEMBER1
-MEMBER2 ...)). In the last case, the specified FILE is unzipped
-and MEMBER1, MEMBER2 etc are copied in to the generated odt
-file. The last form is particularly useful if the styles.xml has
-reference to additional files like header and footer images.
-"
+  "Default styles file for use with ODT export.
+Valid values are one of:
+1. nil
+2. path to a styles.xml file
+3. path to a *.odt or a *.ott file
+4. list of the form (ODT-OR-OTT-FILE (FILE-MEMBER-1 FILE-MEMBER-2
+...))
+
+In case of option 1, an in-built styles.xml is used. See
+`org-odt-data-dir' for more information.
+
+In case of option 3, the specified file is unzipped and the
+styles.xml embedded therein is used.
+
+In case of option 4, the specified ODT-OR-OTT-FILE is unzipped
+and FILE-MEMBER-1, FILE-MEMBER-2 etc are copied in to the
+generated odt file.  Use relative path for specifying the
+FILE-MEMBERS.  styles.xml must be specified as one of the
+FILE-MEMBERS.
+
+Use options 1, 2 or 3 only if styles.xml alone suffices for
+achieving the desired formatting.  Use option 4, if the styles.xml
+references additional files like header and footer images for
+achieving the desired formattting."
   :group 'org-export-odt
-  :type 'file)
-(defconst  org-export-odt-tmpdir-prefix "odt-")
+  :type
+  '(choice
+    (const :tag "Factory settings" nil)
+    (file :must-match t :tag "styles.xml")
+    (file :must-match t :tag "ODT or OTT file")
+    (list :tag "ODT or OTT file + Members"
+	  (file :must-match t :tag "ODF Text or Text Template file")
+	  (cons :tag "Members"
+		(file :tag "	Member" "styles.xml")
+		(repeat (file :tag "Member"))))))
+
+(defconst org-export-odt-tmpdir-prefix "odt-")
 (defconst org-export-odt-bookmark-prefix "OrgXref.")
 (defcustom org-export-odt-use-bookmarks-for-internal-links t
   "Export Internal links as bookmarks?."
-  :group 'org-export-odt
-  :type 'boolean)
+  :type 'boolean
+  :group 'org-export-odt)
 
 (defcustom org-export-odt-embed-images t
   "Should the images be copied in to the odt file or just linked?"
-  :group 'org-export-odt
-  :type 'boolean)
+  :type 'boolean
+  :group 'org-export-odt)
 
 (defcustom org-odt-export-inline-images 'maybe
   "Non-nil means inline images into exported HTML pages.
@@ -174,13 +212,14 @@ be linked only."
 (defcustom org-odt-export-inline-image-extensions
   '("png" "jpeg" "jpg" "gif")
   "Extensions of image files that can be inlined into HTML."
-  :group 'org-odt-export
-  :type '(repeat (string :tag "Extension")))
+  :type '(repeat (string :tag "Extension"))
+  :group 'org-odt-export)
 
 (defcustom org-export-odt-pixels-per-inch display-pixels-per-inch
+  ;; FIXME add docstring
   ""
-  :group 'org-export-odt
-  :type 'float)
+  :type 'float
+  :group 'org-export-odt)
 
 (defvar org-export-odt-default-org-styles-alist
   '((paragraph . ((default . "Text_20_body")
@@ -686,14 +725,15 @@ PUB-DIR is set, use this as the publishing directory."
       </text:table-of-content-entry-template>
 " level level)))
 
-  (insert  "
+  (insert
+   (format  "
      </text:table-of-content-source>
 
      <text:index-body>
       <text:index-title text:style-name=\"Sect1\" text:name=\"Table of Contents1_Head\">
-       <text:p text:style-name=\"Contents_20_Heading\">Table of Contents</text:p>
+       <text:p text:style-name=\"Contents_20_Heading\">%s</text:p>
       </text:index-title>
-"))
+" lang-specific-heading)))
 
 (defun org-odt-end-toc ()
   (insert "
@@ -766,9 +806,7 @@ PUB-DIR is set, use this as the publishing directory."
     (format "\n<!-- %s  -->\n" comment)))
 
 (defun org-odt-format-org-entity (wd)
-  ;; FIXME: Seems to work. But is this correct?
-  (let ((s (org-entity-get-representation wd 'utf8)))
-    (and s (format "&#x%x;" (string-to-char s)))))
+  (org-entity-get-representation wd 'utf8))
 
 (defun org-odt-fill-tabs-and-spaces (line)
   (replace-regexp-in-string
@@ -1053,7 +1091,7 @@ MAY-INLINE-P allows inlining it as an image."
 
 ;; xml files generated on-the-fly
 (defconst org-export-odt-save-list
-  '("META-INF/manifest.xml" "content.xml" "meta.xml" "styles.xml"))
+  '("mimetype" "META-INF/manifest.xml" "content.xml" "meta.xml" "styles.xml"))
 
 ;; xml files that are copied
 (defconst org-export-odt-nosave-list '())
@@ -1188,6 +1226,10 @@ MAY-INLINE-P allows inlining it as an image."
     (apply 'org-lparse-format-tags tag text prefix suffix args)))
 
 (defun org-odt-init-outfile (filename)
+  (unless (executable-find "zip")
+    ;; Not at all OSes ship with zip by default
+    (error "Executable \"zip\" needed for creating OpenDocument files. Aborting."))
+
   (let* ((outdir (make-temp-file org-export-odt-tmpdir-prefix t))
 	 (mimetype-file (expand-file-name "mimetype" outdir))
 	 (content-file (expand-file-name "content.xml" outdir))
@@ -1220,6 +1262,10 @@ MAY-INLINE-P allows inlining it as an image."
       (save-excursion
 	(insert (mapconcat 'identity (cdr org-export-odt-meta-lines) "\n"))))
 
+    ;; mimetype
+    (with-current-buffer (find-file-noselect mimetype-file t)
+      (insert "application/vnd.oasis.opendocument.text"))
+
     ;; styles file
     ;; (copy-file org-export-odt-styles-file styles-file t)
 
@@ -1230,9 +1276,6 @@ MAY-INLINE-P allows inlining it as an image."
     (setq org-export-odt-file-list
 	  (append org-export-odt-save-list org-export-odt-nosave-list)))
     content-file))
-
-(defconst org-export-odt-mimetype-lines
-  '("application/vnd.oasis.opendocument.text"))
 
 (defconst org-odt-manifest-file-entry-tag
   "<manifest:file-entry manifest:media-type=\"%s\" manifest:full-path=\"%s\"/>")
@@ -1277,23 +1320,22 @@ MAY-INLINE-P allows inlining it as an image."
 
     (let* ((target-name (file-name-nondirectory target))
 	   (target-dir (file-name-directory target))
-	   (cmd (format "zip -rmTq %s %s" target-name ".")))
+	   (cmds `(("zip" "-mX0" ,target-name "mimetype")
+		   ("zip" "-rmTq" ,target-name "."))))
       (when (file-exists-p target)
 	;; FIXME: If the file is locked this throws a cryptic error
 	(delete-file target))
 
       (let ((coding-system-for-write 'no-conversion) exitcode)
-	(message "Creating odt file using \"%s\"" cmd)
-	(setq exitcode
-	      (apply 'call-process
-		     "zip"
-		     nil
-		     nil
-		     nil
-		     (append (list "-rmTq") (list target-name "."))))
-
-	(or (zerop exitcode)
-	    (error "Unable to create odt file (%S)" exitcode)))
+	(message "Creating odt file...")
+	(mapc
+	 (lambda (cmd)
+	   (message "Running %s" (mapconcat 'identity cmd " "))
+	   (setq exitcode
+		 (apply 'call-process (car cmd) nil nil nil (cdr cmd)))
+	   (or (zerop exitcode)
+	       (error "Unable to create odt file (%S)" exitcode)))
+	 cmds))
 
       ;; move the file from outdir to target-dir
       (rename-file target-name target-dir)
@@ -1309,10 +1351,36 @@ MAY-INLINE-P allows inlining it as an image."
   (message "Created %s" target)
   (set-buffer (find-file-noselect target t)))
 
+(defun org-odt-format-date (date)
+  (let ((warning-msg
+	 "OpenDocument files require that dates be in ISO-8601 format. Please review your DATE options for compatibility."))
+    ;; If the user is not careful with the date specification, an
+    ;; invalid meta.xml will be emitted.
+
+    ;; For now honor user's diktat and let him off with a warning
+    ;; message. This is OK as LibreOffice (and possibly other
+    ;; apps) doesn't deem this deviation as critical and continue
+    ;; to load the file.
+
+    ;; FIXME: Surely there a better way to handle this. Revisit this
+    ;; later.
+    (cond
+     ((and date (string-match "%" date))
+      ;; Honor user's diktat. See comments above
+      (org-lparse-warn warning-msg)
+      (format-time-string date))
+     (date
+      ;; Honor user's diktat. See comments above
+      (org-lparse-warn warning-msg)
+      date)
+     (t
+      ;; ISO 8601 format
+      (format-time-string "%Y-%m-%dT%T%:z")))))
+
 (defun org-odt-update-meta-file (opt-plist)
   (with-current-buffer
       (find-file-noselect (expand-file-name "meta.xml") t)
-    (let ((date (or (plist-get opt-plist :effective-date) ""))
+    (let ((date (org-odt-format-date (plist-get opt-plist :date)))
 	  (author (or (plist-get opt-plist :author) ""))
 	  (email (plist-get opt-plist :email))
 	  (keywords (plist-get opt-plist :keywords))
@@ -1367,7 +1435,7 @@ MAY-INLINE-P allows inlining it as an image."
      '("bib" "doc" "doc6" "doc95" "html" "xhtml" "latex" "odt" "ott" "pdf" "rtf"
        "sdw" "sdw3" "sdw4" "stw " "sxw" "mediawiki" "text" "txt" "uot" "vor"
        "vor3" "vor4" "docbook" "ooxml" "ppt" "odp"))
-    (CONVERT-METHOD org-export-convert-process)
+    (CONVERT-METHOD org-lparse-convert-process)
     (TOPLEVEL-HLEVEL 1)
     (SPECIAL-STRING-REGEXPS org-export-odt-special-string-regexps)
     (INLINE-IMAGES 'maybe)
@@ -1375,6 +1443,8 @@ MAY-INLINE-P allows inlining it as an image."
     (PLAIN-TEXT-MAP '(("&" . "&amp;") ("<" . "&lt;") (">" . "&gt;")))
     (TABLE-FIRST-COLUMN-AS-LABELS nil)
     (FOOTNOTE-SEPARATOR (org-lparse-format 'FONTIFY "," 'superscript))
+    (CODING-SYSTEM-FOR-WRITE 'utf-8)
+    (CODING-SYSTEM-FOR-SAVE 'utf-8)
     (t (error "Unknown property: %s"  what))))
 
 (defun org-odt-parse-label (label)

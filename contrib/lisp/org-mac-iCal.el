@@ -99,7 +99,7 @@ the the Emacs diary"
   ;; for each calendar, concatenate individual events into a single ics file
   (with-temp-buffer
     (shell-command "sw_vers" (current-buffer))
-    (when (re-search-backward "10\\.[56]" nil t)
+    (when (re-search-backward "10\\.[567]" nil t)
       (omi-concat-leopard-ics all-calendars)))
   
   ;; move all caldav ics files to the same place as local ics files
@@ -126,7 +126,7 @@ the the Emacs diary"
   (setq usedCalendarsFiles (directory-files "~/Library/Calendars" 1 ".*ics$"))
   (omi-delete-ics-file usedCalendarsFiles)
 
-  (switch-to-buffer currentBuffer))
+  (org-pop-to-buffer-same-window currentBuffer))
 
 (defun omi-concat-leopard-ics (list)
   "Leopard stores each iCal.app event in a separate ics file.

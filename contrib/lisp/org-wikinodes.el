@@ -155,7 +155,7 @@ setting of `org-wikinodes-create-targets'."
        ((stringp create)
 	;; Make new node in another file
 	(org-mark-ring-push (point))
-	(switch-to-buffer (find-file-noselect create))
+	(org-pop-to-buffer-same-window (find-file-noselect create))
 	(goto-char (point-max))
 	(or (bolp) (newline))
 	(insert "\n* " target "\n")
