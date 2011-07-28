@@ -6,7 +6,7 @@
 ;;         Ulf Stegemann <ulf at zeitform dot de>
 ;; Keywords: outlines, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 7.6
+;; Version: 7.7
 ;;
 ;; This file is part of GNU Emacs.
 ;;
