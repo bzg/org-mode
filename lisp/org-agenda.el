@@ -6202,8 +6202,8 @@ to switch to narrowing."
       (org-agenda-filter-apply org-agenda-filter)
       (setq maybe-refresh t))
      (t (error "Invalid tag selection character %c" char)))
-    (when (and maybe-refresh
-	       (eq org-agenda-clockreport-mode 'with-filter))
+    (when (or maybe-refresh
+	      (eq org-agenda-clockreport-mode 'with-filter))
       (org-agenda-redo))))
 
 (defun org-agenda-get-represented-tags ()
