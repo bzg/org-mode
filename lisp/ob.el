@@ -65,6 +65,7 @@
 (declare-function orgtbl-to-orgtbl "org-table" (table params))
 (declare-function org-babel-tangle-comment-links "ob-tangle" (&optional info))
 (declare-function org-babel-lob-get-info "ob-lob" nil)
+(declare-function org-babel-map-call-lines "ob-lob" (file &rest body))
 (declare-function org-babel-ref-split-args "ob-ref" (arg-string))
 (declare-function org-babel-ref-parse "ob-ref" (assignment))
 (declare-function org-babel-ref-resolve "ob-ref" (ref))
@@ -721,12 +722,11 @@ end-body --------- point at the end of the body"
        (unless visited-p (kill-buffer to-be-removed))
        (goto-char point))))
 
-;;;###autoload
-(defmacro org-babel-map-inline-src-blocks (file &rest body)
-  "Evaluate BODY forms on each inline source-block in FILE.
+(defmacro org-babel-map-regexp (regexp file &rest body)
+  "Evaluate BODY forms on each match of REGEXP in FILE.
 If FILE is nil evaluate BODY forms on source blocks in current
 buffer."
-  (declare (indent 1))
+  (declare (indent 2))
   (let ((tempvar (make-symbol "file")))
     `(let* ((,tempvar ,file)
 	    (visited-p (or (null ,tempvar)
@@ -736,12 +736,20 @@ buffer."
 	 (when ,tempvar (find-file ,tempvar))
 	 (setq to-be-removed (current-buffer))
 	 (goto-char (point-min))
-	 (while (re-search-forward org-babel-inline-src-block-regexp nil t)
+	 (while (re-search-forward ,regexp nil t)
 	   (goto-char (match-beginning 1))
 	   (save-match-data ,@body)
 	   (goto-char (match-end 0))))
        (unless visited-p (kill-buffer to-be-removed))
        (goto-char point))))
+
+;;;###autoload
+(defmacro org-babel-map-inline-src-blocks (file &rest body)
+  "Evaluate BODY forms on each inline source-block in FILE.
+If FILE is nil evaluate BODY forms on source blocks in current
+buffer."
+  (declare (indent 1))
+  `(org-babel-map-regexp ,org-babel-inline-src-block-regexp ,file ,@body))
 
 ;;;###autoload
 (defun org-babel-execute-buffer (&optional arg)
@@ -1325,6 +1333,7 @@ With optional prefix argument ARG, jump backward ARG many source blocks."
        (goto-char (match-beginning 5))))
    (org-babel-where-is-src-block-head)))
 
+;;;###autoload
 (defun org-babel-demarcate-block (&optional arg)
   "Wrap or split the code in the region or on the point.
 When called from inside of a code block the current block is
@@ -1366,6 +1375,17 @@ region is not active then the point is demarcated."
 				(string-match "[\r\n]$" body)) "" "\n")
 			"#+end_src\n"))
 	(goto-char start) (move-end-of-line 1)))))
+
+;;;###autoload
+(defun org-babel-kill-results (arg)
+  "Remove the results from the current code block or call line.
+When called with prefix argument remove all results in the current file."
+  (interactive "P")
+  (if (null arg)
+      (org-babel-remove-result)
+    (org-babel-map-call-lines nil (org-babel-remove-result))
+    (org-babel-map-src-blocks nil (org-babel-remove-result))
+    (org-babel-map-inline-src-blocks nil (org-babel-remove-result))))
 
 (defvar org-babel-lob-one-liner-regexp)
 (defvar org-babel-inline-lob-one-liner-regexp)
