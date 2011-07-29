@@ -1441,7 +1441,7 @@ the current file."
 
 (defvar org-export-format-drawer-function nil
   "Function to be called to format the contents of a drawer.
-The function must accept three parameters:
+The function must accept two parameters:
   NAME     the drawer name, like \"PROPERTIES\"
   CONTENT  the content of the drawer.
 You can check the export backend through `org-export-current-backend'.
