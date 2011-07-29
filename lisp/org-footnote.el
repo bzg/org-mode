@@ -295,10 +295,11 @@ LIMIT is the buffer position bounding the search.
 Return value is a list like those provided by
 `org-footnote-at-reference-p' or `org-footnote-at-definition-p'.
 If no footnote is found, return nil."
-  (let* (ref)
+  (let* (ref (origin (point)))
     (catch 'exit
       (while t
 	(unless (re-search-forward org-footnote-re limit t)
+	  (goto-char origin)
 	  (throw 'exit nil))
 	;; Beware: with [1]-like footnotes point will be just after
 	;; the closing square bracket.
