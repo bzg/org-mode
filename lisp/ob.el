@@ -141,15 +141,16 @@ remove code block execution from the C-c C-c keybinding."
    "\\([^\000]*?\\)[ \t]*#\\+end_src")
   "Regexp used to identify code blocks.")
 
-(defvar org-babel-inline-src-block-regexp
-  (concat
-   ;; (1) replacement target (2) lang
-   "[^-[:alnum:]]\\(src_\\([^ \f\t\n\r\v]+\\)"
-   ;; (3,4) (unused, headers)
-   "\\(\\|\\[\\(.*?\\)\\]\\)"
-   ;; (5) body
-   "{\\([^\f\n\r\v]+?\\)}\\)")
-  "Regexp used to identify inline src-blocks.")
+(eval-when-compile
+  (defvar org-babel-inline-src-block-regexp
+    (concat
+     ;; (1) replacement target (2) lang
+     "[^-[:alnum:]]\\(src_\\([^ \f\t\n\r\v]+\\)"
+     ;; (3,4) (unused, headers)
+     "\\(\\|\\[\\(.*?\\)\\]\\)"
+     ;; (5) body
+     "{\\([^\f\n\r\v]+?\\)}\\)")
+    "Regexp used to identify inline src-blocks."))
 
 (defun org-babel-get-header (params key &optional others)
   "Select only header argument of type KEY from a list.
