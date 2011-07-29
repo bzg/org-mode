@@ -7670,17 +7670,11 @@ If yes, remember the marker and the distance to BEG."
 (defun org-narrow-to-block ()
   "Narrow buffer to the current block."
   (interactive)
-  (let ((bstart "^[ \t]*#\\+begin")
-	(bend "[ \t]*#\\+end")
-	(case-fold-search t) ;; allow #+BEGIN
-	b_start b_end)
-    (if (org-in-regexps-block-p bstart bend)
-	(progn
-	  (save-excursion (re-search-backward bstart nil t)
-			  (setq b_start (match-beginning 0)))
-	  (save-excursion (re-search-forward  bend nil t)
-			  (setq b_end (match-end 0)))
-	  (narrow-to-region b_start b_end))
+  (let* ((case-fold-search t)
+	 (blockp (org-in-regexps-block-p "^[ \t]*#\\+begin_.*"
+					 "^[ \t]*#\\+end_.*")))
+    (if blockp
+	(narrow-to-region (car blockp) (cdr blockp))
       (error "Not in a block"))))
 
 (eval-when-compile
@@ -19067,23 +19061,37 @@ really on, so that the block visually is on the match."
 	      (throw 'exit t)))
 	nil))))
 
-(defun org-in-regexps-block-p (start-re end-re &optional bound)
-  "Return t if the current point is between matches of START-RE and END-RE.
-This will also return t if point is on one of the two matches or
-in an unfinished block. END-RE can be a string or a form
-returning a string.
+(defun org-in-regexps-block-p (start-re end-re &optional lim-up lim-down)
+  "Non-nil when point is between matches of START-RE and END-RE.
 
-An optional third argument bounds the search for START-RE. It
-defaults to previous heading or `point-min'."
-  (let ((pos (point))
-	(limit (or bound (save-excursion (outline-previous-heading)))))
-    (save-excursion
-      ;; we're on a block when point is on start-re...
-      (or (org-at-regexp-p start-re)
-	  ;; ... or start-re can be found above...
-	  (and (re-search-backward start-re limit t)
-	       ;; ... but no end-re between start-re and point.
-	       (not (re-search-forward (eval end-re) pos t)))))))
+Also return a non-nil value when point is on one of the matches.
+
+Optional arguments LIM-UP and LIM-DOWN bound the search; they are
+buffer positions.  Default values are the positions of headlines
+surrounding the point.
+
+The functions returns a cons cell whose car (resp. cdr) is the
+position before START-RE (resp. after END-RE)."
+  (save-match-data
+    (let ((pos (point))
+	  (limit-up (or lim-up (save-excursion (outline-previous-heading))))
+	  (limit-down (or lim-down (save-excursion (outline-next-heading))))
+	  beg end)
+      (save-excursion
+	;; Point is on a block when on START-RE or if START-RE can be
+	;; found before it...
+	(and (or (org-at-regexp-p start-re)
+		 (re-search-backward start-re limit-up t))
+	     (setq beg (match-beginning 0))
+	     ;; ... and END-RE after it...
+	     (goto-char (match-end 0))
+	     (re-search-forward end-re limit-down t)
+	     (> (setq end (match-end 0)) pos)
+	     ;; ... without another START-RE in-between.
+	     (goto-char (match-beginning 0))
+	     (not (re-search-backward start-re pos t))
+	     ;; Return value.
+	     (cons beg end))))))
 
 (defun org-in-block-p (names)
   "Is point inside any block whose name belongs to NAMES?
@@ -19091,12 +19099,15 @@ defaults to previous heading or `point-min'."
 NAMES is a list of strings containing names of blocks."
   (save-match-data
     (catch 'exit
-      (let ((case-fold-search t))
+      (let ((case-fold-search t)
+	    (lim-up (save-excursion (outline-previous-heading)))
+	    (lim-down (save-excursion (outline-next-heading))))
 	(mapc (lambda (name)
 		(let ((n (regexp-quote name)))
 		  (when (org-in-regexps-block-p
 			 (concat "^[ \t]*#\\+begin_" n)
-			 (concat "^[ \t]*#\\+end_" n))
+			 (concat "^[ \t]*#\\+end_" n)
+			 lim-up lim-down)
 		    (throw 'exit t))))
 	      names))
       nil)))
