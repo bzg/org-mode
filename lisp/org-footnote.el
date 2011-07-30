@@ -171,8 +171,10 @@ extracted will be filled again."
   (save-match-data
     (not (or (org-in-commented-line)
 	     (org-in-indented-comment-line)
-	     (org-in-verbatim-emphasis)
+	     ;; Avoid protected environments (LaTeX export)
+	     (get-text-property (point) 'org-protected)
 	     ;; Avoid literal example.
+	     (org-in-verbatim-emphasis)
 	     (save-excursion
 	       (beginning-of-line)
 	       (looking-at "[ \t]*:[ \t]+"))
@@ -223,8 +225,7 @@ positions, and the definition, when inlined."
 		 ;; optional argument of the command.  Thus, check
 		 ;; the `org-protected' property of that command.
 		 (or (not (org-inside-latex-macro-p))
-		     (and (get-text-property (1- beg) 'org-protected)
-			  (not (get-text-property beg 'org-protected)))))
+		     (get-text-property (1- beg) 'org-protected)))
 	(list label beg end
 	      ;; Definition: ensure this is an inline footnote first.
 	      (and (or (not label) (match-string 1))
