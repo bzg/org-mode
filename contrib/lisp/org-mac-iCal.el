@@ -162,23 +162,25 @@ date range so that Emacs calendar view doesn't grind to a halt"
 	(re-search-forward "\\(^DTSTART;.*:\\)\\([0-9][0-9][0-9][0-9]\\)\\([0-9][0-9]\\)" nil t)
 	(if (or (eq (match-string 2) nil) (eq (match-string 3) nil))
 	    (progn
-	      (setq yearEntry 0)
-	      (setq monthEntry 0))
+	      (setq yearEntry 1)
+	      (setq monthEntry 1))
 	  (setq yearEntry (string-to-number (match-string 2)))
 	  (setq monthEntry (string-to-number (match-string 3))))
 	(setq year (string-to-number (format-time-string "%Y")))
 	(setq month (string-to-number (format-time-string "%m")))
-	(when (or
-	       (and
-		(= yearEntry year)
-		(or (< monthEntry (- month (/ org-mac-iCal-range 2))) (> monthEntry (+ month (/ org-mac-iCal-range 2)))))
-	       (< yearEntry (- year 1))
-	       (> yearEntry (+ year 1))
-	       (and
-		(= yearEntry (- year 1)) (/= monthEntry 12))
-	       (and
-		(= yearEntry (+ year 1)) (/= monthEntry 1)))
-	  (delete-region startEntry endEntry))))
+        (setq now (list month 1 year))
+        (setq entryDate (list monthEntry 1 yearEntry))
+        ;; Check to see if this is a repeating event
+        (goto-char (point-min))
+        (setq isRepeating (re-search-forward "^RRULE:" nil t))
+	;; Delete if outside range and not repeating
+        (when (and
+               (not isRepeating)
+               (> (abs (- (calendar-absolute-from-gregorian now)
+                          (calendar-absolute-from-gregorian entryDate)))
+                  (* (/ org-mac-iCal-range 2) 30))
+	  (delete-region startEntry endEntry)))
+          (goto-char (point-max))))
     (while 
 	(re-search-forward "^END:VEVENT$" nil t)
       (delete-blank-lines))
