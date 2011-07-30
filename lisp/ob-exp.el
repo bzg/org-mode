@@ -166,13 +166,13 @@ has taken place."
 Example and verbatim code include escaped portions of
 an org-mode buffer code that should be treated as normal
 org-mode text."
-  (or (org-in-indented-comment-line) 
+  (or (org-in-indented-comment-line)
       (save-match-data
 	(save-excursion
 	  (goto-char (point-at-bol))
 	  (looking-at "[ \t]*:[ \t]")))
       (org-in-verbatim-emphasis)
-      (org-in-regexps-block-p "^[ \t]*#\\+begin_src" "^[ \t]*#\\+end_src")))
+      (org-between-regexps-p "^[ \t]*#\\+begin_src" "^[ \t]*#\\+end_src")))
 
 (defvar org-babel-default-lob-header-args)
 (defun org-babel-exp-lob-one-liners (start end)

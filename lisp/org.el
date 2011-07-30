@@ -7671,7 +7671,7 @@ If yes, remember the marker and the distance to BEG."
   "Narrow buffer to the current block."
   (interactive)
   (let* ((case-fold-search t)
-	 (blockp (org-in-regexps-block-p "^[ \t]*#\\+begin_.*"
+	 (blockp (org-between-regexps-p "^[ \t]*#\\+begin_.*"
 					 "^[ \t]*#\\+end_.*")))
     (if blockp
 	(narrow-to-region (car blockp) (cdr blockp))
@@ -19061,7 +19061,7 @@ really on, so that the block visually is on the match."
 	      (throw 'exit t)))
 	nil))))
 
-(defun org-in-regexps-block-p (start-re end-re &optional lim-up lim-down)
+(defun org-between-regexps-p (start-re end-re &optional lim-up lim-down)
   "Non-nil when point is between matches of START-RE and END-RE.
 
 Also return a non-nil value when point is on one of the matches.
@@ -19104,7 +19104,7 @@ NAMES is a list of strings containing names of blocks."
 	    (lim-down (save-excursion (outline-next-heading))))
 	(mapc (lambda (name)
 		(let ((n (regexp-quote name)))
-		  (when (org-in-regexps-block-p
+		  (when (org-between-regexps-p
 			 (concat "^[ \t]*#\\+begin_" n)
 			 (concat "^[ \t]*#\\+end_" n)
 			 lim-up lim-down)
@@ -19449,7 +19449,7 @@ If point is in an inline task, mark that task instead."
 	      (concat "^[ \t]*#\\+begin_" (downcase (match-string 1))) nil t)))
       (setq column (org-get-indentation (match-string 0))))
      ((and (not (looking-at "[ \t]*#\\+begin_"))
-	   (org-in-regexps-block-p "^[ \t]*#\\+begin_" "[ \t]*#\\+end_"))
+	   (org-between-regexps-p "^[ \t]*#\\+begin_" "[ \t]*#\\+end_"))
       (save-excursion
 	(re-search-backward "^[ \t]*#\\+begin_\\([a-z]+\\)" nil t))
       (setq column
