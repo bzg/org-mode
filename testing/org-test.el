@@ -204,7 +204,7 @@ files."
 		 (lambda (path)
 		   (if (file-directory-p path) (rload path) (load-file path)))
 		 (directory-files base 'full
-				  "^\\([^.]\\|\\.\\([^.]\\|\\..\\)\\).*\\.el"))))
+				  "^\\([^.]\\|\\.\\([^.]\\|\\..\\)\\).*\\.el$"))))
     (rload (expand-file-name "lisp" org-test-dir))
     (rload (expand-file-name "lisp"
 			     (expand-file-name "contrib" org-test-dir)))))
