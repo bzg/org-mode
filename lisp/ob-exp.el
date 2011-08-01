@@ -118,7 +118,6 @@ none ----- do not display either code or results upon export"
 		(nth 1 info)))
 	(org-babel-exp-do-export info 'block hash)))))
 
-(defvar org-babel-inline-src-block-regexp)
 (defun org-babel-exp-inline-src-blocks (start end)
   "Process inline source blocks between START and END for export.
 See `org-babel-exp-src-block' for export options, currently the
