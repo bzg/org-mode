@@ -63,8 +63,6 @@ functions which are assigned key bindings, and see
     ("g" . org-babel-goto-named-src-block)
     ("r" . org-babel-goto-named-result)
     ("\C-r" . org-babel-goto-named-result)
-    ("k" . org-babel-kill-results)
-    ("\C-k" . org-babel-kill-results)
     ("\C-b" . org-babel-execute-buffer)
     ("b" . org-babel-execute-buffer)
     ("\C-s" . org-babel-execute-subtree)

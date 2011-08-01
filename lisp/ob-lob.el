@@ -87,14 +87,7 @@ If you change the value of this variable then your files may
 	  "\\|" org-babel-inline-lob-one-liner-regexp "\\)")
   "Regexp to match calls to predefined source block functions.")
 
-;;;###autoload
-(defmacro org-babel-map-call-lines (file &rest body)
-  "Evaluate BODY forms on each #+call line in FILE.
-If FILE is nil evaluate BODY forms on source blocks in current
-buffer."
-  (declare (indent 1))
-  `(org-babel-map-regexp ,org-babel-block-lob-one-liner-regexp ,file ,@body))
-
+;; functions for executing lob one-liners
 ;;;###autoload
 (defun org-babel-lob-execute-maybe ()
   "Execute a Library of Babel source block, if appropriate.
