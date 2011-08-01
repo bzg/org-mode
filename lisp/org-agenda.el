@@ -5169,7 +5169,7 @@ See also the user option `org-agenda-clock-consistency-checks'."
 			(let ((org-deadline-warning-days suppress-prewarning))
 			  (org-get-wdays s))
 		      (org-get-wdays s))
-	      dfrac (/ (* 1.0 (- wdays diff)) (max wdays 1))
+	      dfrac (- 1 (/ (* 1.0 diff) (max wdays 1)))
 	      upcomingp (and todayp (> diff 0)))
 	;; When to show a deadline in the calendar:
 	;; If the expiration is within wdays warning time.
@@ -5211,7 +5211,7 @@ See also the user option `org-agenda-clock-consistency-checks'."
 			     head category tags
 			     (if (not (= diff 0)) nil timestr)))))
 	      (when txt
-		(setq face (org-agenda-deadline-face dfrac wdays))
+		(setq face (org-agenda-deadline-face dfrac))
 		(org-add-props txt props
 		  'org-marker (org-agenda-new-marker pos)
 		  'org-hd-marker (org-agenda-new-marker pos1)
@@ -5226,10 +5226,9 @@ See also the user option `org-agenda-clock-consistency-checks'."
 		(push txt ee))))))
     (nreverse ee)))
 
-(defun org-agenda-deadline-face (fraction &optional wdays)
+(defun org-agenda-deadline-face (fraction)
   "Return the face to displaying a deadline item.
 FRACTION is what fraction of the head-warning time has passed."
-  (if (equal wdays 0) (setq fraction 1.))
   (let ((faces org-agenda-deadline-faces) f)
     (catch 'exit
       (while (setq f (pop faces))
