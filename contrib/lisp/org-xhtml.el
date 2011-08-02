@@ -1197,6 +1197,11 @@ make any modifications to the exporter file.  For example,
 ;; register the xhtml exporter with org-lparse library
 (org-lparse-register-backend 'xhtml)
 
+(defun org-xhtml-unload-function ()
+  ;; notify org-lparse library on unload
+  (org-lparse-unregister-backend 'xhtml)
+  nil)
+
 (defun org-xhtml-begin-document-body (opt-plist)
   (let ((link-up (and (plist-get opt-plist :link-up)
 		      (string-match "\\S-" (plist-get opt-plist :link-up))

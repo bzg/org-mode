@@ -143,6 +143,11 @@ OpenDocument xml files.")
 ;; register the odt exporter with org-lparse library
 (org-lparse-register-backend 'odt)
 
+(defun org-odt-unload-function ()
+  ;; notify org-lparse library on unload
+  (org-lparse-unregister-backend 'odt)
+  nil)
+
 (defcustom org-export-odt-automatic-styles-file nil
   "Automatic styles for use with ODT exporter.
 If unspecified, the file under `org-odt-data-dir' is used."

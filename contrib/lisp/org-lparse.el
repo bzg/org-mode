@@ -366,6 +366,14 @@ Add BACKEND to `org-lparse-native-backends'."
 		   (t (error "Error while registering backend: %S" backend))))
     (add-to-list 'org-lparse-native-backends backend)))
 
+(defun org-lparse-unregister-backend (backend)
+  (setq org-lparse-native-backends
+	(remove (cond
+		 ((symbolp backend) (symbol-name backend))
+		 ((stringp backend) backend))
+		org-lparse-native-backends))
+  (message "Unregistered backend %S" backend))
+
 (defun org-lparse-get-other-backends (native-backend)
   (org-lparse-backend-get native-backend 'OTHER-BACKENDS))
 
