@@ -266,6 +266,30 @@ be linked only."
      (error "Cannot determine style name for entity %s of type %s"
 	    entity category))))
 
+(defcustom org-export-odt-preferred-output-format nil
+  "Automatically post-process to this format after exporting to \"odt\".
+Interactive commands `org-export-as-odt' and
+`org-export-as-odt-and-open' export first to \"odt\" format and
+then use an external converter to convert the resulting document
+to this format.
+
+The converter used is that specified with CONVERT-METHOD option
+in `org-odt-get'. If the above option is unspecified then
+`org-lparse-convert-process' is used.
+
+The format specified here should be listed in OTHER-BACKENDS
+option of `org-odt-get' or `org-lparse-convert-capabilities' as
+appropriate."
+  :group 'org-odt
+  :type '(choice :convert-widget
+		 (lambda (w)
+		   (apply 'widget-convert (widget-type w)
+			  (eval (car (widget-get w :args)))))
+		 `((const :tag "None" nil)
+		   ,@(mapcar (lambda (c)
+			       `(const :tag ,(car c) ,(car c)))
+			     (org-lparse-get-other-backends "odt")))))
+
 ;;;###autoload
 (defun org-export-as-odt-and-open (arg)
   "Export the outline as ODT and immediately open it with a browser.
@@ -273,7 +297,8 @@ If there is an active region, export only the region.
 The prefix ARG specifies how many levels of the outline should become
 headlines.  The default is 3.  Lower levels will become bulleted lists."
   (interactive "P")
-  (org-lparse-and-open "odt" "odt" arg))
+  (org-lparse-and-open
+   (or org-export-odt-preferred-output-format "odt") "odt" arg))
 
 ;;;###autoload
 (defun org-export-as-odt-batch ()
@@ -338,7 +363,8 @@ the file header and footer, simply return the content of
 <body>...</body>, without even the body tags themselves.  When
 PUB-DIR is set, use this as the publishing directory."
   (interactive "P")
-  (org-lparse "odt" "odt" arg hidden ext-plist to-buffer body-only pub-dir))
+  (org-lparse (or org-export-odt-preferred-output-format "odt")
+	      "odt" arg hidden ext-plist to-buffer body-only pub-dir))
 
 (defvar org-odt-entity-control-callbacks-alist
   `((EXPORT
@@ -1436,11 +1462,8 @@ MAY-INLINE-P allows inlining it as an image."
     (INIT-METHOD 'org-odt-init-outfile)
     (FINAL-METHOD 'org-odt-finalize-outfile)
     (SAVE-METHOD 'org-odt-save-as-outfile)
-    (OTHER-BACKENDS
-     '("bib" "doc" "doc6" "doc95" "html" "xhtml" "latex" "odt" "ott" "pdf" "rtf"
-       "sdw" "sdw3" "sdw4" "stw " "sxw" "mediawiki" "text" "txt" "uot" "vor"
-       "vor3" "vor4" "docbook" "ooxml" "ppt" "odp"))
-    (CONVERT-METHOD org-lparse-convert-process)
+    ;; (OTHER-BACKENDS)			; see note in `org-xhtml-get'
+    ;; (CONVERT-METHOD)			; see note in `org-xhtml-get'
     (TOPLEVEL-HLEVEL 1)
     (SPECIAL-STRING-REGEXPS org-export-odt-special-string-regexps)
     (INLINE-IMAGES 'maybe)

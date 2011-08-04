@@ -1659,10 +1659,17 @@ lang=\"%s\" xml:lang=\"%s\">
     (INIT-METHOD nil)
     (SAVE-METHOD nil)
     (CLEANUP-METHOD nil)
-    (OTHER-BACKENDS
-     '("xhtml" "etext" "html" "html10" "mediawiki" "pdf" "sdw" "sdw3" "sdw4"
-       "text" "text10" "odt" "vor" "vor4"))
-    (CONVERT-METHOD org-lparse-convert-process)
+    ;; (OTHER-BACKENDS
+    ;;  ;; There is a provision to register a per-backend converter and
+    ;;  ;; output formats. Refer `org-lparse-get-converter' and
+    ;;  ;; `org-lparse-get-other-backends'.
+
+    ;;  ;; The default behaviour is to use `org-lparse-convert-process'
+    ;;  ;; and `org-lparse-convert-capabilities'.
+    ;;  )
+    ;; (CONVERT-METHOD
+    ;;  ;; See note above
+    ;;  )
     (EXPORT-DIR (org-export-directory :html opt-plist))
     (FILE-NAME-EXTENSION (plist-get opt-plist :html-extension))
     (EXPORT-BUFFER-NAME "*Org HTML Export*")
