@@ -783,7 +783,7 @@ the current subtree."
 		 lst)
 	     (norm (arg)
 		   (let ((v (if (and (listp (cdr arg)) (null (cddr arg)))
-				(copy-seq (cdr arg))
+				(copy-sequence (cdr arg))
 			      (cdr arg))))
 		     (when (and v (not (and (sequencep v)
 					    (not (consp v))
