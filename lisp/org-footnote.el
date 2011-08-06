@@ -424,9 +424,9 @@ or new, let the user edit the definition of the footnote."
   (interactive)
   (unless (and (not (bolp)) (org-footnote-in-valid-context-p))
     (error "Cannot insert a footnote here"))
-  (let* ((labels (and (not (equal org-footnote-auto-label 'random))
-		      (org-footnote-all-labels)))
-	 (propose (org-footnote-unique-label labels))
+  (let* ((lbls (and (not (equal org-footnote-auto-label 'random))
+		    (org-footnote-all-labels)))
+	 (propose (org-footnote-unique-label lbls))
 	 (label
 	  (org-footnote-normalize-label
 	   (cond
@@ -436,15 +436,15 @@ or new, let the user edit the definition of the footnote."
 	     (require 'org-id)
 	     (substring (org-id-uuid) 0 8))
 	    (t
-	     (completing-read
+	     (org-icompleting-read
 	      "Label (leave empty for anonymous): "
-	      (mapcar 'list labels) nil nil
+	      (mapcar 'list lbls) nil nil
 	      (if (eq org-footnote-auto-label 'confirm) propose nil)))))))
     (cond
      ((not label)
       (insert "[fn:: ]")
       (backward-char 1))
-     ((member label labels)
+     ((member label lbls)
       (insert "[" label "]")
       (message "New reference to existing note"))
      (org-footnote-define-inline
