@@ -51,7 +51,7 @@
 (declare-function org-end-of-subtree "org"  (&optional invisible-ok to-heading))
 (declare-function org-in-verbatim-emphasis "org" ())
 (declare-function org-inside-latex-macro-p "org" ())
-(declare-function org-id-uuid "org" ())
+(declare-function org-id-uuid "org-id" ())
 (declare-function org-fill-paragraph "org" (&optional justify))
 (declare-function org-export-preprocess-string "org-exp"
 		  (string &rest parameters))
