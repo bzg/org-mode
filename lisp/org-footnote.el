@@ -422,7 +422,7 @@ This command prompts for a label.  If this is a label referencing an
 existing label, only insert the label.  If the footnote label is empty
 or new, let the user edit the definition of the footnote."
   (interactive)
-  (unless (and (not (bolp)) (org-footnote-in-valid-context-p))
+  (unless (org-footnote-in-valid-context-p)
     (error "Cannot insert a footnote here"))
   (let* ((lbls (and (not (equal org-footnote-auto-label 'random))
 		    (org-footnote-all-labels)))
@@ -441,6 +441,8 @@ or new, let the user edit the definition of the footnote."
 	      (mapcar 'list lbls) nil nil
 	      (if (eq org-footnote-auto-label 'confirm) propose nil)))))))
     (cond
+     ((and label (bolp) (not org-footnote-define-inline))
+      (error "Cannot create a non-inlined footnote at left margin"))
      ((not label)
       (insert "[fn:: ]")
       (backward-char 1))
