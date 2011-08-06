@@ -239,9 +239,10 @@ If both match values are nil, return all contacts."
 
 (defun org-contacts-gnus-get-name-email ()
   "Get name and email address from Gnus message."
-  (gnus-with-article-headers
-    (mail-extract-address-components
-     (or (mail-fetch-field "From") ""))))
+  (if (gnus-alive-p)
+      (gnus-with-article-headers
+        (mail-extract-address-components
+         (or (mail-fetch-field "From") "")))))
 
 (defun org-contacts-gnus-article-from-get-marker ()
   "Return a marker for a contact based on From."
@@ -533,10 +534,11 @@ If ASK is set, ask for the email address even if there's only one address."
 
 (defun erc-nicknames-list ()
   "Return all nicknames of all ERC buffers."
-  (loop for buffer in (erc-buffer-list)
-        nconc (with-current-buffer buffer
-                (loop for user-entry in (mapcar 'car (erc-get-channel-user-list))
-                      collect (elt user-entry 1)))))
+  (if (fboundp 'erc-buffer-list)
+      (loop for buffer in (erc-buffer-list)
+            nconc (with-current-buffer buffer
+                    (loop for user-entry in (mapcar 'car (erc-get-channel-user-list))
+                          collect (elt user-entry 1))))))
 
 (add-to-list 'org-property-set-functions-alist
              `(,org-contacts-nickname-property . org-contacts-completing-read-nickname))
