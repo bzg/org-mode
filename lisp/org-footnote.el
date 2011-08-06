@@ -651,7 +651,8 @@ Additional note on `org-footnote-insert-pos-for-preprocessor':
 				     (org-combine-plists
 				      export-props
 				      '(:todo-keywords t :tags t :priority t))))
-				(org-export-preprocess-string def parameters))
+				(if def
+				    (org-export-preprocess-string def parameters)))
 			    def)
 			  inlinep) ref-table)))
 	  ;; Remove definition of non-inlined footnotes.
