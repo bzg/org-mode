@@ -416,10 +416,6 @@ The returns the firsts fn:N labels that is currently not used."
       (incf cnt))
     (format fmt cnt)))
 
-(defvar org-footnote-label-history nil
-  "History of footnote labels entered in current buffer.")
-(make-variable-buffer-local 'org-footnote-label-history)
-
 (defun org-footnote-new ()
   "Insert a new footnote.
 This command prompts for a label.  If this is a label referencing an
@@ -443,8 +439,7 @@ or new, let the user edit the definition of the footnote."
 	     (completing-read
 	      "Label (leave empty for anonymous): "
 	      (mapcar 'list labels) nil nil
-	      (if (eq org-footnote-auto-label 'confirm) propose nil)
-	      'org-footnote-label-history))))))
+	      (if (eq org-footnote-auto-label 'confirm) propose nil)))))))
     (cond
      ((not label)
       (insert "[fn:: ]")
