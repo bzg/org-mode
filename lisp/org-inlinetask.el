@@ -333,7 +333,9 @@ Either remove headline and meta data, or do special formatting."
       ;; Remove the task.
       (goto-char beg)
       (delete-region beg end)
-      (when org-inlinetask-export
+      (when (and org-inlinetask-export
+		 (assq org-export-current-backend
+		       org-inlinetask-export-templates))
 	;; Format CONTENT, if appropriate.
 	(setq content
 	      (if (not (and content (string-match "\\S-" content)))
