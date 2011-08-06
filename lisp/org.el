@@ -6855,7 +6855,7 @@ This is important for non-interactive uses of the command."
 	  (and (not (save-excursion
 		      (and (ignore-errors (org-back-to-heading invisible-ok))
 			   (org-on-heading-p))))
-	       (not (org-in-item-p))))
+	       (or force-heading (not (org-in-item-p)))))
       (progn
 	(insert "\n* ")
 	(run-hooks 'org-insert-heading-hook))
