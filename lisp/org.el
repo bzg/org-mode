@@ -251,6 +251,11 @@ With prefix arg HERE, insert it at point."
   :group 'org
   :type 'hook)
 
+(defcustom org-log-buffer-setup-hook nil
+  "Hook that is run after an Org log buffer is created."
+  :group 'org
+  :type 'hook)
+
 (defvar org-modules)  ; defined below
 (defvar org-modules-loaded nil
   "Have the modules been loaded already?")
@@ -12066,7 +12071,8 @@ EXTRA is additional text that will be inserted into the notes buffer."
 		      "this entry")
 		     (t (error "This should not happen")))))
     (if org-log-note-extra (insert org-log-note-extra))
-    (org-set-local 'org-finish-function 'org-store-log-note)))
+    (org-set-local 'org-finish-function 'org-store-log-note)
+    (run-hooks 'org-log-buffer-setup-hook)))
 
 (defvar org-note-abort nil) ; dynamically scoped
 (defun org-store-log-note ()
