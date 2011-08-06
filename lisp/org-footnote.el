@@ -408,7 +408,8 @@ and value definition."
 
 (defun org-footnote-unique-label (&optional current)
   "Return a new unique footnote label.
-The returns the firsts fn:N labels that is currently not used."
+The function returns the first \"fn:N\" or \"N\" label that is
+currently not used."
   (unless current (setq current (org-footnote-all-labels)))
   (let ((fmt (if (eq org-footnote-auto-label 'plain) "%d" "fn:%d"))
 	(cnt 1))
