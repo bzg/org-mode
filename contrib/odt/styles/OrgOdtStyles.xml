@@ -30,7 +30,7 @@
   </style:default-style>
 
   <!-- Outline numbering -->
-  <text:outline-style>
+  <text:outline-style style:name="OrgOutline">
    <text:outline-level-style text:level="1" style:num-suffix=". " style:num-format="1">
     <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
      <style:list-level-label-alignment text:label-followed-by="nothing" fo:text-indent="-0.762cm" fo:margin-left="0.762cm"/>
