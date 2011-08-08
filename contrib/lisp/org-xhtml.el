@@ -1016,13 +1016,13 @@ that uses these same face definitions."
   (when (> level org-last-level)
     (let ((cnt (- level org-last-level)))
       (while (>= (setq cnt (1- cnt)) 0)
-	(org-lparse-begin 'LIST 'unordered)
+	(org-lparse-begin-list 'unordered)
 	(org-lparse-begin 'LIST-ITEM 'unordered))))
   (when (< level org-last-level)
     (let ((cnt (- org-last-level level)))
       (while (>= (setq cnt (1- cnt)) 0)
 	(org-lparse-end-list-item)
-	(org-lparse-end 'LIST 'unordered))))
+	(org-lparse-end-list 'unordered))))
 
   (org-lparse-end-list-item)
   (org-lparse-begin 'LIST-ITEM 'unordered)
@@ -1034,14 +1034,14 @@ that uses these same face definitions."
    (org-lparse-format 'HEADING lang-specific-heading
 		     (or (org-lparse-get 'TOPLEVEL-HLEVEL) 1)))
   (org-lparse-insert-tag "<div id=\"text-table-of-contents\">")
-  (org-lparse-begin 'LIST 'unordered)
+  (org-lparse-begin-list 'unordered)
   (org-lparse-begin 'LIST-ITEM 'unordered))
 
 (defun org-xhtml-end-toc ()
   (while (> org-last-level (1- org-min-level))
     (setq org-last-level (1- org-last-level))
     (org-lparse-end-list-item)
-    (org-lparse-end 'LIST 'unordered))
+    (org-lparse-end-list 'unordered))
   (org-lparse-insert-tag "</div>")
   (org-lparse-insert-tag "</div>")
 
@@ -1387,12 +1387,12 @@ lang=\"%s\" xml:lang=\"%s\">
 (defun org-xhtml-end-environment (style)
   (org-xhtml-format-environment style 'END))
 
-(defun org-xhtml-begin-list (ltype &optional arg1)
+(defun org-xhtml-begin-list (ltype)
   (setq ltype (or (org-lparse-html-list-type-to-canonical-list-type ltype)
 		  ltype))
-
   (case ltype
-    (ordered (let ((extra (if arg1 (format " start=\"%d\"" arg1) "")))
+    (ordered (let* ((arg1 nil)
+		    (extra (if arg1 (format " start=\"%d\"" arg1) "")))
 	       (org-lparse-insert-tag "<ol%s>" extra)))
     (unordered (org-lparse-insert-tag "<ul>"))
     (description (org-lparse-insert-tag "<dl>"))

@@ -719,6 +719,9 @@ version."
   (setq-default org-maybe-keyword-time-regexp org-maybe-keyword-time-regexp)
   (let* (org-lparse-encode-pending
 	 org-lparse-par-open
+	 (org-lparse-list-level 0)	; list level starts at 1. A
+					; value of 0 implies we are
+					; outside of any list
 	 org-lparse-outline-text-open
 	 (org-lparse-latex-fragment-fallback ; currently used only by
 					; odt exporter
@@ -1661,7 +1664,7 @@ the alist of previous items."
 	      (org-lparse-end-list-item type)
 	      ;; We're ending last item of the list: end list.
 	      (when lastp
-		(org-lparse-end 'LIST type)
+		(org-lparse-end-list type)
 		(org-lparse-begin-paragraph))))
 	  (funcall get-closings pos))
     (cond
@@ -1690,7 +1693,7 @@ the alist of previous items."
 			  count-tmp)))))
 	(when firstp
 	  (org-lparse-end-paragraph)
-	  (org-lparse-begin 'LIST type))
+	  (org-lparse-begin-list type))
 
 	(let ((arg (cond ((equal type "d") desc-tag)
 			 ((equal type "o") counter))))
@@ -2024,7 +2027,7 @@ When TITLE is nil, just close all open levels."
 	      (org-lparse-end-list-item)
 	    (aset org-levels-open (1- level) t)
 	    (org-lparse-end-paragraph)
-	    (org-lparse-begin 'LIST 'unordered))
+	    (org-lparse-begin-list 'unordered))
 	  (org-lparse-begin
 	   'LIST-ITEM 'unordered target
 	   (org-lparse-format 'HEADLINE title extra-targets tags)))
@@ -2045,7 +2048,7 @@ When TITLE is nil, just close all open levels."
 	     (if (<= l umax)
 		 (org-lparse-end-outline-text-or-outline)
 	       (org-lparse-end-list-item)
-	       (org-lparse-end 'LIST 'unordered))
+	       (org-lparse-end-list 'unordered))
 	     (aset org-levels-open (1- l) nil))))
 
 (defvar org-lparse-outline-text-open)
@@ -2072,6 +2075,15 @@ When TITLE is nil, just close all open levels."
   (cdr (assoc ltype '(("o" . ordered)
 		      ("u" . unordered)
 		      ("d" . description)))))
+
+(defvar org-lparse-list-level) ; dynamically bound in org-do-lparse
+(defun org-lparse-begin-list (ltype)
+  (incf org-lparse-list-level)
+  (org-lparse-begin 'LIST ltype))
+
+(defun org-lparse-end-list (ltype)
+  (decf org-lparse-list-level)
+  (org-lparse-end 'LIST ltype))
 
 (defvar org-lparse-table-rowgrp-info)
 (defun org-lparse-begin-table-rowgroup (&optional is-header-row)

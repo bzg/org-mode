@@ -564,14 +564,15 @@ PUB-DIR is set, use this as the publishing directory."
      (list))
     (t (error "Unknown environment %s" style))))
 
-(defun org-odt-begin-list (ltype &optional arg1)
+(defvar org-lparse-list-level) ; dynamically bound in org-do-lparse
+(defun org-odt-begin-list (ltype)
   (setq ltype (or (org-lparse-html-list-type-to-canonical-list-type ltype)
 		  ltype))
   (let* ((style-name (org-odt-get-style-name-for-entity 'list ltype))
-	 (extra (if style-name
-		    (format " text:style-name=\"%s\""  style-name) "")))
-
-    ;; FIXME: Handle arg1 incase of ordered lists.
+	 (extra (concat (when (= org-lparse-list-level 1)
+			  " text:continue-numbering=\"false\"")
+			(when style-name
+			  (format " text:style-name=\"%s\""  style-name)))))
     (case ltype
       ((ordered unordered description)
        (org-lparse-end-paragraph)
@@ -608,7 +609,7 @@ PUB-DIR is set, use this as the publishing directory."
 	 '("<text:list-item>" . "</text:list-item>")
 	 (org-odt-format-stylized-paragraph 'definition-term term)))
        (org-lparse-begin 'LIST-ITEM 'unordered)
-       (org-lparse-begin 'LIST 'description)
+       (org-lparse-begin-list 'description)
        (org-lparse-begin 'LIST-ITEM 'unordered)))
     (t (error "Unknown list type"))))
 
@@ -620,7 +621,7 @@ PUB-DIR is set, use this as the publishing directory."
      (org-lparse-insert-tag "</text:list-item>"))
     (description
      (org-lparse-end-list-item)
-     (org-lparse-end 'LIST 'description)
+     (org-lparse-end-list 'description)
      (org-lparse-end-list-item))
     (t (error "Unknown list type"))))
 
