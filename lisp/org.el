@@ -17940,7 +17940,7 @@ See the individual commands for more information."
    ((and (org-in-item-p) indent)
     (if (and (org-at-item-p) (>= (point) (match-end 0)))
 	(progn
-	  (newline)
+	  (save-match-data (newline))
 	  (org-indent-line-to (length (match-string 0))))
       (let ((ind (org-get-indentation)))
 	(newline)
