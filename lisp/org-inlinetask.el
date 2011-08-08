@@ -372,6 +372,11 @@ Either remove headline and meta data, or do special formatting."
 				 (eval (append '(format format-str)
 					       (mapcar nil-to-str tokens)))
 				 '(original-indentation 1000))))
+	    ;; Ensure task starts a new paragraph.
+	    (unless (or (bobp)
+			(save-excursion (forward-line -1)
+					(looking-at "[ \t]*$")))
+	      (insert "\n"))
 	    (insert export-str)
 	    (unless (bolp) (insert "\n")))))))))
 
