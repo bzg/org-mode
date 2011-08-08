@@ -473,182 +473,119 @@
     <style:text-properties style:font-name="OpenSymbol"/>
    </text:list-level-style-bullet>
   </text:list-style>
-  <text:list-style style:name="OrgBulletedList">
-   <text:list-level-style-bullet text:level="1" text:style-name="Bullet_20_Symbols" style:num-suffix="." text:bullet-char="•">
-    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="1.27cm" fo:text-indent="-0.635cm" fo:margin-left="1.27cm"/>
-    </style:list-level-properties>
-    <style:text-properties style:font-name="StarSymbol"/>
-   </text:list-level-style-bullet>
-   <text:list-level-style-bullet text:level="2" text:style-name="Bullet_20_Symbols" style:num-suffix="." text:bullet-char="•">
-    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="1.905cm" fo:text-indent="-0.635cm" fo:margin-left="1.905cm"/>
-    </style:list-level-properties>
-    <style:text-properties style:font-name="StarSymbol"/>
-   </text:list-level-style-bullet>
-   <text:list-level-style-bullet text:level="3" text:style-name="Bullet_20_Symbols" style:num-suffix="." text:bullet-char="•">
-    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="2.54cm" fo:text-indent="-0.635cm" fo:margin-left="2.54cm"/>
-    </style:list-level-properties>
-    <style:text-properties style:font-name="StarSymbol"/>
-   </text:list-level-style-bullet>
-   <text:list-level-style-bullet text:level="4" text:style-name="Bullet_20_Symbols" style:num-suffix="." text:bullet-char="•">
-    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="3.175cm" fo:text-indent="-0.635cm" fo:margin-left="3.175cm"/>
-    </style:list-level-properties>
-    <style:text-properties style:font-name="StarSymbol"/>
-   </text:list-level-style-bullet>
-   <text:list-level-style-bullet text:level="5" text:style-name="Bullet_20_Symbols" style:num-suffix="." text:bullet-char="•">
-    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="3.81cm" fo:text-indent="-0.635cm" fo:margin-left="3.81cm"/>
-    </style:list-level-properties>
-    <style:text-properties style:font-name="StarSymbol"/>
-   </text:list-level-style-bullet>
-   <text:list-level-style-bullet text:level="6" text:style-name="Bullet_20_Symbols" style:num-suffix="." text:bullet-char="•">
-    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="4.445cm" fo:text-indent="-0.635cm" fo:margin-left="4.445cm"/>
-    </style:list-level-properties>
-    <style:text-properties style:font-name="StarSymbol"/>
-   </text:list-level-style-bullet>
-   <text:list-level-style-bullet text:level="7" text:style-name="Bullet_20_Symbols" style:num-suffix="." text:bullet-char="•">
-    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="5.08cm" fo:text-indent="-0.635cm" fo:margin-left="5.08cm"/>
-    </style:list-level-properties>
-    <style:text-properties style:font-name="StarSymbol"/>
-   </text:list-level-style-bullet>
-   <text:list-level-style-bullet text:level="8" text:style-name="Bullet_20_Symbols" style:num-suffix="." text:bullet-char="•">
-    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="5.715cm" fo:text-indent="-0.635cm" fo:margin-left="5.715cm"/>
-    </style:list-level-properties>
-    <style:text-properties style:font-name="StarSymbol"/>
-   </text:list-level-style-bullet>
-   <text:list-level-style-bullet text:level="9" text:style-name="Bullet_20_Symbols" style:num-suffix="." text:bullet-char="•">
-    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="6.35cm" fo:text-indent="-0.635cm" fo:margin-left="6.35cm"/>
-    </style:list-level-properties>
-    <style:text-properties style:font-name="StarSymbol"/>
-   </text:list-level-style-bullet>
-   <text:list-level-style-bullet text:level="10" text:style-name="Bullet_20_Symbols" style:num-suffix="." text:bullet-char="•">
-    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="6.985cm" fo:text-indent="-0.635cm" fo:margin-left="6.985cm"/>
-    </style:list-level-properties>
-    <style:text-properties style:font-name="StarSymbol"/>
-   </text:list-level-style-bullet>
-  </text:list-style>
+
+  <!-- Numbered List -->
   <text:list-style style:name="OrgNumberedList">
    <text:list-level-style-number text:level="1" style:num-suffix="." style:num-format="1">
-    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="1.27cm" fo:text-indent="-0.635cm" fo:margin-left="1.27cm"/>
-    </style:list-level-properties>
+    <style:list-level-properties text:space-before="0.635cm" text:min-label-width="0.635cm"/>
    </text:list-level-style-number>
    <text:list-level-style-number text:level="2" style:num-suffix="." style:num-format="1">
-    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="1.905cm" fo:text-indent="-0.635cm" fo:margin-left="1.905cm"/>
-    </style:list-level-properties>
+    <style:list-level-properties text:space-before="1.27cm" text:min-label-width="0.635cm"/>
    </text:list-level-style-number>
    <text:list-level-style-number text:level="3" style:num-suffix="." style:num-format="1">
-    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="2.54cm" fo:text-indent="-0.635cm" fo:margin-left="2.54cm"/>
-    </style:list-level-properties>
+    <style:list-level-properties text:space-before="1.905cm" text:min-label-width="0.635cm"/>
    </text:list-level-style-number>
    <text:list-level-style-number text:level="4" style:num-suffix="." style:num-format="1">
-    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="3.175cm" fo:text-indent="-0.635cm" fo:margin-left="3.175cm"/>
-    </style:list-level-properties>
+    <style:list-level-properties text:space-before="2.54cm" text:min-label-width="0.635cm"/>
    </text:list-level-style-number>
    <text:list-level-style-number text:level="5" style:num-suffix="." style:num-format="1">
-    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="3.81cm" fo:text-indent="-0.635cm" fo:margin-left="3.81cm"/>
-    </style:list-level-properties>
+    <style:list-level-properties text:space-before="3.175cm" text:min-label-width="0.635cm"/>
    </text:list-level-style-number>
    <text:list-level-style-number text:level="6" style:num-suffix="." style:num-format="1">
-    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="4.445cm" fo:text-indent="-0.635cm" fo:margin-left="4.445cm"/>
-    </style:list-level-properties>
+    <style:list-level-properties text:space-before="3.81cm" text:min-label-width="0.635cm"/>
    </text:list-level-style-number>
    <text:list-level-style-number text:level="7" style:num-suffix="." style:num-format="1">
-    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="5.08cm" fo:text-indent="-0.635cm" fo:margin-left="5.08cm"/>
-    </style:list-level-properties>
+    <style:list-level-properties text:space-before="4.445cm" text:min-label-width="0.635cm"/>
    </text:list-level-style-number>
    <text:list-level-style-number text:level="8" style:num-suffix="." style:num-format="1">
-    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="5.715cm" fo:text-indent="-0.635cm" fo:margin-left="5.715cm"/>
-    </style:list-level-properties>
+    <style:list-level-properties text:space-before="5.08cm" text:min-label-width="0.635cm"/>
    </text:list-level-style-number>
    <text:list-level-style-number text:level="9" style:num-suffix="." style:num-format="1">
-    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="6.35cm" fo:text-indent="-0.635cm" fo:margin-left="6.35cm"/>
-    </style:list-level-properties>
+    <style:list-level-properties text:space-before="5.715cm" text:min-label-width="0.635cm"/>
    </text:list-level-style-number>
    <text:list-level-style-number text:level="10" style:num-suffix="." style:num-format="1">
-    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="6.985cm" fo:text-indent="-0.635cm" fo:margin-left="6.985cm"/>
-    </style:list-level-properties>
+    <style:list-level-properties text:space-before="6.35cm" text:min-label-width="0.635cm"/>
    </text:list-level-style-number>
   </text:list-style>
-  <text:list-style style:name="OrgDescriptionList">
-   <text:list-level-style-bullet text:level="1" text:style-name="Bullet_20_Symbols" style:num-suffix="." text:bullet-char=" ">
-    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="1.27cm" fo:text-indent="-0.635cm" fo:margin-left="1.27cm"/>
-    </style:list-level-properties>
-    <style:text-properties style:font-name="Tahoma"/>
+
+  <!-- Bulleted List -->
+  <text:list-style style:name="OrgBulletedList">
+   <text:list-level-style-bullet text:level="1" text:style-name="Bullet_20_Symbols" style:num-suffix="." text:bullet-char="•">
+    <style:list-level-properties text:space-before="0.635cm" text:min-label-width="0.635cm"/>
+    <style:text-properties fo:font-family="StarSymbol" style:font-charset="x-symbol"/>
    </text:list-level-style-bullet>
-   <text:list-level-style-bullet text:level="2" text:style-name="Bullet_20_Symbols" style:num-suffix="." text:bullet-char=" ">
-    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="1.905cm" fo:text-indent="-0.635cm" fo:margin-left="1.905cm"/>
-    </style:list-level-properties>
-    <style:text-properties style:font-name="Tahoma"/>
+   <text:list-level-style-bullet text:level="2" text:style-name="Bullet_20_Symbols" style:num-suffix="." text:bullet-char="•">
+    <style:list-level-properties text:space-before="1.27cm" text:min-label-width="0.635cm"/>
+    <style:text-properties fo:font-family="StarSymbol" style:font-charset="x-symbol"/>
    </text:list-level-style-bullet>
-   <text:list-level-style-bullet text:level="3" text:style-name="Bullet_20_Symbols" style:num-suffix="." text:bullet-char=" ">
-    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="2.54cm" fo:text-indent="-0.635cm" fo:margin-left="2.54cm"/>
-    </style:list-level-properties>
-    <style:text-properties style:font-name="Tahoma"/>
+   <text:list-level-style-bullet text:level="3" text:style-name="Bullet_20_Symbols" style:num-suffix="." text:bullet-char="•">
+    <style:list-level-properties text:space-before="1.905cm" text:min-label-width="0.635cm"/>
+    <style:text-properties fo:font-family="StarSymbol" style:font-charset="x-symbol"/>
    </text:list-level-style-bullet>
-   <text:list-level-style-bullet text:level="4" text:style-name="Bullet_20_Symbols" style:num-suffix="." text:bullet-char=" ">
-    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="3.175cm" fo:text-indent="-0.635cm" fo:margin-left="3.175cm"/>
-    </style:list-level-properties>
-    <style:text-properties style:font-name="Tahoma"/>
+   <text:list-level-style-bullet text:level="4" text:style-name="Bullet_20_Symbols" style:num-suffix="." text:bullet-char="•">
+    <style:list-level-properties text:space-before="2.54cm" text:min-label-width="0.635cm"/>
+    <style:text-properties fo:font-family="StarSymbol" style:font-charset="x-symbol"/>
    </text:list-level-style-bullet>
-   <text:list-level-style-bullet text:level="5" text:style-name="Bullet_20_Symbols" style:num-suffix="." text:bullet-char=" ">
-    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="3.81cm" fo:text-indent="-0.635cm" fo:margin-left="3.81cm"/>
-    </style:list-level-properties>
-    <style:text-properties style:font-name="Tahoma"/>
+   <text:list-level-style-bullet text:level="5" text:style-name="Bullet_20_Symbols" style:num-suffix="." text:bullet-char="•">
+    <style:list-level-properties text:space-before="3.175cm" text:min-label-width="0.635cm"/>
+    <style:text-properties fo:font-family="StarSymbol" style:font-charset="x-symbol"/>
    </text:list-level-style-bullet>
-   <text:list-level-style-bullet text:level="6" text:style-name="Bullet_20_Symbols" style:num-suffix="." text:bullet-char=" ">
-    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="4.445cm" fo:text-indent="-0.635cm" fo:margin-left="4.445cm"/>
-    </style:list-level-properties>
-    <style:text-properties style:font-name="Tahoma"/>
+   <text:list-level-style-bullet text:level="6" text:style-name="Bullet_20_Symbols" style:num-suffix="." text:bullet-char="•">
+    <style:list-level-properties text:space-before="3.81cm" text:min-label-width="0.635cm"/>
+    <style:text-properties fo:font-family="StarSymbol" style:font-charset="x-symbol"/>
    </text:list-level-style-bullet>
-   <text:list-level-style-bullet text:level="7" text:style-name="Bullet_20_Symbols" style:num-suffix="." text:bullet-char=" ">
-    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="5.08cm" fo:text-indent="-0.635cm" fo:margin-left="5.08cm"/>
-    </style:list-level-properties>
-    <style:text-properties style:font-name="Tahoma"/>
+   <text:list-level-style-bullet text:level="7" text:style-name="Bullet_20_Symbols" style:num-suffix="." text:bullet-char="•">
+    <style:list-level-properties text:space-before="4.445cm" text:min-label-width="0.635cm"/>
+    <style:text-properties fo:font-family="StarSymbol" style:font-charset="x-symbol"/>
    </text:list-level-style-bullet>
-   <text:list-level-style-bullet text:level="8" text:style-name="Bullet_20_Symbols" style:num-suffix="." text:bullet-char=" ">
-    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="5.715cm" fo:text-indent="-0.635cm" fo:margin-left="5.715cm"/>
-    </style:list-level-properties>
-    <style:text-properties style:font-name="Tahoma"/>
+   <text:list-level-style-bullet text:level="8" text:style-name="Bullet_20_Symbols" style:num-suffix="." text:bullet-char="•">
+    <style:list-level-properties text:space-before="5.08cm" text:min-label-width="0.635cm"/>
+    <style:text-properties fo:font-family="StarSymbol" style:font-charset="x-symbol"/>
    </text:list-level-style-bullet>
-   <text:list-level-style-bullet text:level="9" text:style-name="Bullet_20_Symbols" style:num-suffix="." text:bullet-char=" ">
-    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="6.35cm" fo:text-indent="-0.635cm" fo:margin-left="6.35cm"/>
-    </style:list-level-properties>
-    <style:text-properties style:font-name="Tahoma"/>
+   <text:list-level-style-bullet text:level="9" text:style-name="Bullet_20_Symbols" style:num-suffix="." text:bullet-char="•">
+    <style:list-level-properties text:space-before="5.715cm" text:min-label-width="0.635cm"/>
+    <style:text-properties fo:font-family="StarSymbol" style:font-charset="x-symbol"/>
    </text:list-level-style-bullet>
-   <text:list-level-style-bullet text:level="10" text:style-name="Bullet_20_Symbols" style:num-suffix="." text:bullet-char=" ">
-    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-     <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="6.985cm" fo:text-indent="-0.635cm" fo:margin-left="6.985cm"/>
-    </style:list-level-properties>
-    <style:text-properties style:font-name="Tahoma"/>
+   <text:list-level-style-bullet text:level="10" text:style-name="Bullet_20_Symbols" style:num-suffix="." text:bullet-char="•">
+    <style:list-level-properties text:space-before="6.35cm" text:min-label-width="0.635cm"/>
+    <style:text-properties fo:font-family="StarSymbol" style:font-charset="x-symbol"/>
    </text:list-level-style-bullet>
   </text:list-style>
+
+  <!-- Description List -->
+  <text:list-style style:name="OrgDescriptionList">
+   <text:list-level-style-number text:level="1" style:num-format="">
+    <style:list-level-properties text:space-before="0.635cm" text:min-label-width="0.635cm"/>
+   </text:list-level-style-number>
+   <text:list-level-style-number text:level="2" style:num-format="">
+    <style:list-level-properties text:space-before="1.27cm" text:min-label-width="0.635cm"/>
+   </text:list-level-style-number>
+   <text:list-level-style-number text:level="3" style:num-format="">
+    <style:list-level-properties text:space-before="1.905cm" text:min-label-width="0.635cm"/>
+   </text:list-level-style-number>
+   <text:list-level-style-number text:level="4" style:num-format="">
+    <style:list-level-properties text:space-before="2.54cm" text:min-label-width="0.635cm"/>
+   </text:list-level-style-number>
+   <text:list-level-style-number text:level="5" style:num-format="">
+    <style:list-level-properties text:space-before="3.175cm" text:min-label-width="0.635cm"/>
+   </text:list-level-style-number>
+   <text:list-level-style-number text:level="6" style:num-format="">
+    <style:list-level-properties text:space-before="3.81cm" text:min-label-width="0.635cm"/>
+   </text:list-level-style-number>
+   <text:list-level-style-number text:level="7" style:num-format="">
+    <style:list-level-properties text:space-before="4.445cm" text:min-label-width="0.635cm"/>
+   </text:list-level-style-number>
+   <text:list-level-style-number text:level="8" style:num-format="">
+    <style:list-level-properties text:space-before="5.08cm" text:min-label-width="0.635cm"/>
+   </text:list-level-style-number>
+   <text:list-level-style-number text:level="9" style:num-format="">
+    <style:list-level-properties text:space-before="5.715cm" text:min-label-width="0.635cm"/>
+   </text:list-level-style-number>
+   <text:list-level-style-number text:level="10" style:num-format="">
+    <style:list-level-properties text:space-before="6.35cm" text:min-label-width="0.635cm"/>
+   </text:list-level-style-number>
+  </text:list-style>
+
   <text:notes-configuration text:note-class="footnote" text:citation-style-name="Footnote_20_Symbol" text:citation-body-style-name="Footnote_20_anchor" style:num-format="1" text:start-value="0" text:footnotes-position="page" text:start-numbering-at="document"/>
   <text:notes-configuration text:note-class="endnote" style:num-format="i" text:start-value="0"/>
   <text:linenumbering-configuration text:number-lines="false" text:offset="0.499cm" style:num-format="1" text:number-position="left" text:increment="5"/>
