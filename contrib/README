@@ -46,6 +46,7 @@ org-registry.el          --- A registry for Org links
 org-screen.el            --- Visit screen sessions through Org-mode links
 org-secretary.el         --- Team management with org-mode
 org-special-blocks.el    --- Turn blocks into LaTeX envs and HTML divs
+org-sudoku.el            --- Create and solve SUDOKU puzzles in Org tables
 orgtbl-sqlinsert.el      --- Convert Org-mode tables to SQL insertions
 org-toc.el 	         --- Table of contents for Org-mode buffer
 org-track.el             --- Keep up with Org development
