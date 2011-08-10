@@ -110,12 +110,13 @@ Also, do not record undo information."
     s))
 
 (defmacro org-preserve-lc (&rest body)
-  `(let ((_line (org-current-line))
-	 (_col (current-column)))
-     (unwind-protect
-	 (progn ,@body)
-       (org-goto-line _line)
-       (org-move-to-column _col))))
+  (org-with-gensyms (line col)
+    `(let ((,line (org-current-line))
+	   (,col (current-column)))
+       (unwind-protect
+	   (progn ,@body)
+	 (org-goto-line ,line)
+	 (org-move-to-column ,col)))))
 
 (defmacro org-without-partial-completion (&rest body)
   `(if (and (boundp 'partial-completion-mode)
@@ -142,12 +143,13 @@ We use a macro so that the test can happen at compilation time."
 
 (defmacro org-with-point-at (pom &rest body)
   "Move to buffer and point of point-or-marker POM for the duration of BODY."
-  `(let ((pom ,pom))
-     (save-excursion
-       (if (markerp pom) (set-buffer (marker-buffer pom)))
+  (org-with-gensyms (mpom)
+    `(let ((,mpom ,pom))
        (save-excursion
-	 (goto-char (or pom (point)))
-	 ,@body))))
+	 (if (markerp ,mpom) (set-buffer (marker-buffer ,mpom)))
+	 (save-excursion
+	   (goto-char (or ,mpom (point)))
+	   ,@body)))))
 (put 'org-with-point-at 'lisp-indent-function 1)
 
 (defmacro org-no-warnings (&rest body)
@@ -180,26 +182,27 @@ We use a macro so that the test can happen at compilation time."
 
 (defmacro org-with-remote-undo (_buffer &rest _body)
   "Execute BODY while recording undo information in two buffers."
-  `(let ((_cline (org-current-line))
-	 (_cmd this-command)
-	 (_buf1 (current-buffer))
-	 (_buf2 ,_buffer)
-	 (_undo1 buffer-undo-list)
-	 (_undo2 (with-current-buffer ,_buffer buffer-undo-list))
-	 _c1 _c2)
-     ,@_body
-     (when org-agenda-allow-remote-undo
-       (setq _c1 (org-verify-change-for-undo
-		  _undo1 (with-current-buffer _buf1 buffer-undo-list))
-	     _c2 (org-verify-change-for-undo
-		  _undo2 (with-current-buffer _buf2 buffer-undo-list)))
-       (when (or _c1 _c2)
-	 ;; make sure there are undo boundaries
-	 (and _c1 (with-current-buffer _buf1 (undo-boundary)))
-	 (and _c2 (with-current-buffer _buf2 (undo-boundary)))
-	 ;; remember which buffer to undo
-	 (push (list _cmd _cline _buf1 _c1 _buf2 _c2)
-	       org-agenda-undo-list)))))
+  (org-with-gensyms (cline cmd buf1 buf2 undo1 undo2 c1 c2)
+    `(let ((,cline (org-current-line))
+	   (,cmd this-command)
+	   (,buf1 (current-buffer))
+	   (,buf2 ,_buffer)
+	   (,undo1 buffer-undo-list)
+	   (,undo2 (with-current-buffer ,_buffer buffer-undo-list))
+	   ,c1 ,c2)
+       ,@_body
+       (when org-agenda-allow-remote-undo
+	 (setq ,c1 (org-verify-change-for-undo
+		    ,undo1 (with-current-buffer ,buf1 buffer-undo-list))
+	       ,c2 (org-verify-change-for-undo
+		    ,undo2 (with-current-buffer ,buf2 buffer-undo-list)))
+	 (when (or ,c1 ,c2)
+	   ;; make sure there are undo boundaries
+	   (and ,c1 (with-current-buffer ,buf1 (undo-boundary)))
+	   (and ,c2 (with-current-buffer ,buf2 (undo-boundary)))
+	   ;; remember which buffer to undo
+	   (push (list ,cmd ,cline ,buf1 ,c1 ,buf2 ,c2)
+		 org-agenda-undo-list))))))
 (put 'org-with-remote-undo 'lisp-indent-function 1)
 
 (defmacro org-no-read-only (&rest body)
@@ -331,18 +334,19 @@ but it also means that the buffer should stay alive
 during the operation, because otherwise all these markers will
 point nowhere."
   (declare (indent 1))
-  `(let ((data (org-outline-overlay-data ,use-markers))
-	 rtn)
-     (unwind-protect
-	 (progn
-	   (setq rtn (progn ,@body))
-	   (org-set-outline-overlay-data data))
-       (when ,use-markers
-	 (mapc (lambda (c)
-		 (and (markerp (car c)) (move-marker (car c) nil))
-		 (and (markerp (cdr c)) (move-marker (cdr c) nil)))
-	       data)))
-     rtn))
+  (org-with-gensyms (data rtn)
+    `(let ((,data (org-outline-overlay-data ,use-markers))
+	   ,rtn)
+       (unwind-protect
+	   (progn
+	     (setq ,rtn (progn ,@body))
+	     (org-set-outline-overlay-data ,data))
+	 (when ,use-markers
+	   (mapc (lambda (c)
+		   (and (markerp (car c)) (move-marker (car c) nil))
+		   (and (markerp (cdr c)) (move-marker (cdr c) nil)))
+		 ,data)))
+       ,rtn)))
 
 (defmacro org-with-wide-buffer (&rest body)
  "Execute body while temporarily widening the buffer."
