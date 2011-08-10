@@ -1714,12 +1714,13 @@ Note that functions in this alist don't need to be quoted."
 If STRING is non-nil, the text property will be fetched from position 0
 in that string.  If STRING is nil, it will be fetched from the beginning
 of the current line."
-  `(let ((marker (get-text-property (if string 0 (point-at-bol))
-				    'org-hd-marker string)))
-     (with-current-buffer (marker-buffer marker)
-       (save-excursion
-	 (goto-char marker)
-	 ,@body))))
+  (org-with-gensyms (marker)
+    `(let ((,marker (get-text-property (if string 0 (point-at-bol))
+				       'org-hd-marker string)))
+       (with-current-buffer (marker-buffer ,marker)
+	 (save-excursion
+	   (goto-char ,marker)
+	   ,@body)))))
 
 (defun org-add-agenda-custom-command (entry)
   "Replace or add a command in `org-agenda-custom-commands'.
