@@ -2720,10 +2720,8 @@ This ensures the export commands can easily use it."
   (let ((cmds (org-agenda-normalize-custom-commands org-agenda-custom-commands))
 	(pop-up-frames nil)
 	(dir default-directory)
-	pars cmd thiscmdkey files opts cmd-or-set)
-    (while parameters
-      (push (list (pop parameters) (if parameters (pop parameters))) pars))
-    (setq pars (reverse pars))
+	(pars (org-make-parameter-alist parameters))
+	cmd thiscmdkey files opts cmd-or-set)
     (save-window-excursion
       (while cmds
 	(setq cmd (pop cmds)
@@ -2733,13 +2731,14 @@ This ensures the export commands can easily use it."
 	      files (nth (if (listp cmd-or-set) 4 5) cmd))
 	(if (stringp files) (setq files (list files)))
 	(when files
-	  (eval (list 'let (append org-agenda-exporter-settings opts pars)
-		      (list 'org-agenda nil thiscmdkey)))
+	  (org-eval-in-environment (append org-agenda-exporter-settings
+					   opts pars)
+	    (org-agenda nil thiscmdkey))
 	  (set-buffer org-agenda-buffer-name)
 	  (while files
-	    (eval (list 'let (append org-agenda-exporter-settings opts pars)
-			(list 'org-write-agenda
-			      (expand-file-name (pop files) dir) nil t))))
+	    (org-eval-in-environment (append org-agenda-exporter-settings
+					     opts pars)
+	      (org-write-agenda (expand-file-name (pop files) dir) nil t)))
 	  (and (get-buffer org-agenda-buffer-name)
 	       (kill-buffer org-agenda-buffer-name)))))))
 
