@@ -386,6 +386,15 @@ The number of levels is controlled by `org-inlinetask-min-level'"
   `(eval (list 'let ,environment ',form)))
 (put 'org-eval-in-environment 'lisp-indent-function 1)
 
+(defun org-make-parameter-alist (flat)
+  "Return alist based on FLAT.
+FLAT is a list with alternating symbol names and values. The
+returned alist is a list of lists with the symbol name in car and
+the value in cdr."
+  (when flat
+    (cons (list (car flat) (cadr flat))
+         (org-make-parameter-alist (cddr flat)))))
+
 (provide 'org-macs)
 
 ;; arch-tag: 7e6a73ce-aac9-4fc0-9b30-ce6f89dc6668
