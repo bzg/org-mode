@@ -7541,7 +7541,7 @@ the inserted text when done."
 			    (condition-case nil
 				(progn
 				  (outline-previous-visible-heading 1)
-				  (if (looking-at re)
+				  (if (looking-at ^re_)
 				      (- (match-end 0) (match-beginning 0) 1)
 				    1))
 			      (error 1))))
@@ -7550,7 +7550,7 @@ the inserted text when done."
 			    (progn
 			      (or (looking-at org-outline-regexp)
 				  (outline-next-visible-heading 1))
-			      (if (looking-at re)
+			      (if (looking-at ^re_)
 				  (- (match-end 0) (match-beginning 0) 1)
 				1))
 			  (error 1))))
