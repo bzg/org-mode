@@ -93,21 +93,23 @@ Also, do not record undo information."
 	    before-change-functions after-change-functions)
 	,@body))))
 
+(defun org-substitute-posix-classes (re)
+  "Substitute posix classes in regular expression RE."
+  (let ((ss re))
+    (save-match-data
+      (while (string-match "\\[:alnum:\\]" ss)
+	(setq ss (replace-match "a-zA-Z0-9" t t ss)))
+      (while (string-match "\\[:word:\\]" ss)
+	(setq ss (replace-match "a-zA-Z0-9" t t ss)))
+      (while (string-match "\\[:alpha:\\]" ss)
+	(setq ss (replace-match "a-zA-Z" t t ss)))
+      (while (string-match "\\[:punct:\\]" ss)
+	(setq ss (replace-match "\001-@[-`{-~" t t ss)))
+      ss)))
+
 (defmacro org-re (s)
   "Replace posix classes in regular expression."
-  (if (featurep 'xemacs)
-      (let ((ss s))
-	(save-match-data
-	  (while (string-match "\\[:alnum:\\]" ss)
-	    (setq ss (replace-match "a-zA-Z0-9" t t ss)))
-	  (while (string-match "\\[:word:\\]" ss)
-	    (setq ss (replace-match "a-zA-Z0-9" t t ss)))
-	  (while (string-match "\\[:alpha:\\]" ss)
-	    (setq ss (replace-match "a-zA-Z" t t ss)))
-	  (while (string-match "\\[:punct:\\]" ss)
-	    (setq ss (replace-match "\001-@[-`{-~" t t ss)))
-	  ss))
-    s))
+  (if (featurep 'xemacs) `(org-substitute-posix-classes ,s) s))
 
 (defmacro org-preserve-lc (&rest body)
   (org-with-gensyms (line col)
