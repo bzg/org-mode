@@ -2645,7 +2645,7 @@ extra        Sting with extra planning info
 priority-l   The priority letter if any was given
 priority-n   The computed numerical priority
 agenda-day   The day in the agenda where this is listed"
-  (org-eval-in-environment (append (org-agenda-remove-tags t)
+  (org-eval-in-environment (append '((org-agenda-remove-tags t))
 				   (org-make-parameter-alist parameters))
     (if (> (length cmd-key) 2)
 	(org-tags-view nil cmd-key)
