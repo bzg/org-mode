@@ -7530,8 +7530,8 @@ the inserted text when done."
 	  (force-level (cond (level (prefix-numeric-value level))
 			     ((and (looking-at "[ \t]*$")
 				   (string-match
-				    ^re_ (buffer-substring
-					  (point-at-bol) (point))))
+				    "^\\*+$" (buffer-substring
+					      (point-at-bol) (point))))
 			      (- (match-end 1) (match-beginning 1)))
 			     ((and (bolp)
 				   (looking-at org-outline-regexp))
@@ -7568,7 +7568,7 @@ the inserted text when done."
      (if force-level
 	 (delete-region (point-at-bol) (point)))
      ;; Paste
-     (beginning-of-line 1)
+     (beginning-of-line (if (org-at-heading-p) 2 1))
      (unless for-yank (org-back-over-empty-lines))
      (setq beg (point))
      (and (fboundp 'org-id-paste-tracker) (org-id-paste-tracker txt))
