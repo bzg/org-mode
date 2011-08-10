@@ -8587,7 +8587,7 @@ in @code{org-agenda-custom-commands} take precedence.
 @noindent
 From the command line you may also use
 @example
-emacs -f org-batch-store-agenda-views -kill
+emacs -eval (org-batch-store-agenda-views) -kill
 @end example
 @noindent
 or, if you need to modify some parameters@footnote{Quoting depends on the
