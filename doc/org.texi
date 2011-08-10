@@ -8594,7 +8594,7 @@ or, if you need to modify some parameters@footnote{Quoting depends on the
 system you use, please check the FAQ for examples.}
 @example
 emacs -eval '(org-batch-store-agenda-views                      \
-              org-agenda-span month                             \
+              org-agenda-span (quote month)                     \
               org-agenda-start-day "2007-11-01"                 \
               org-agenda-include-diary nil                      \
               org-agenda-files (quote ("~/org/project.org")))'  \
@@ -14878,7 +14878,7 @@ You may also modify parameters on the fly like this:
 @example
 emacs -batch -l ~/.emacs                                      \
    -eval '(org-batch-agenda "a"                               \
-            org-agenda-span month                             \
+            org-agenda-span (quote month)                     \
             org-agenda-include-diary nil                      \
             org-agenda-files (quote ("~/org/project.org")))'  \
    | lpr
