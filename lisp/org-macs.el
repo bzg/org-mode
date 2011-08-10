@@ -47,6 +47,12 @@
 (declare-function org-add-props "org-compat" (string plist &rest props))
 (declare-function org-string-match-p "org-compat" (&rest args))
 
+(defmacro org-with-gensyms (symbols &rest body)
+  `(let ,(mapcar (lambda (s)
+		   `(,s (make-symbol (concat "--" (symbol-name ',s))))) symbols)
+     ,@body))
+(put 'org-with-gensyms 'lisp-indent-function 1)
+
 (defmacro org-called-interactively-p (&optional kind)
   (if (featurep 'xemacs)
        `(interactive-p)
