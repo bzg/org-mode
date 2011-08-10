@@ -380,6 +380,10 @@ The number of levels is controlled by `org-inlinetask-min-level'"
       (format-seconds string seconds)
     (format-time-string string (seconds-to-time seconds))))
 
+(defmacro org-eval-in-environment (environment form)
+  `(eval (list 'let ,environment ',form)))
+(put 'org-eval-in-environment 'lisp-indent-function 1)
+
 (provide 'org-macs)
 
 ;; arch-tag: 7e6a73ce-aac9-4fc0-9b30-ce6f89dc6668
