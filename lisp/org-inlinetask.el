@@ -132,9 +132,9 @@ When nil, they will not be exported."
 	       heading content)))
   "Templates for inline tasks in various exporters.
 
-This variable is an alist in the shape of (BACKEND STRING OBJECTS).
+This variable is an alist in the shape of \(BACKEND STRING OBJECTS\).
 
-BACKEND is the name of the backend for the template (ascii, html...).
+BACKEND is the name of the backend for the template \(ascii, html...\).
 
 STRING is a format control string.
 
@@ -151,14 +151,14 @@ defined in an inline task, their value is the empty string.
 
 As an example, valid associations are:
 
-(html \"<ul><li>%s <p>%s</p></li></ul>\" (heading content))
+\(html \"<ul><li>%s <p>%s</p></li></ul>\" \(heading content\)\)
 
 or, with the additional package \"todonotes\" for LaTeX,
 
-(latex \"\\todo[inline]{\\textbf{\\textsf{%s %s}}\\linebreak{} %s}\"
-       '((unless (eq todo \"\")
-	   (format \"\\textsc{%s%s}\" todo priority))
-	 heading content)))")
+\(latex \"\\todo[inline]{\\textbf{\\textsf{%s %s}}\\linebreak{} %s}\"
+       '\(\(unless \(eq todo \"\"\)
+	   \(format \"\\textsc{%s%s}\" todo priority\)\)
+	 heading content\)\)\)")
 
 (defvar org-odd-levels-only)
 (defvar org-keyword-time-regexp)
