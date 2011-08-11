@@ -5160,7 +5160,7 @@ will be prompted for."
 	    t)))))
 
 (defun org-activate-code (limit)
-  (if (re-search-forward "^[ \t]*\\(: .*\n?\\)" limit t)
+  (if (re-search-forward "^[ \t]*\\(:\\(?: .*\\)?\n?\\)" limit t)
       (progn
 	(org-remove-flyspell-overlays-in (match-beginning 0) (match-end 0))
 	(remove-text-properties (match-beginning 0) (match-end 0)
@@ -19435,7 +19435,7 @@ If point is in an inline task, mark that task instead."
      ;; Footnote definition
      ((looking-at org-footnote-definition-re) (setq column 0))
      ;; Literal examples
-     ((looking-at "[ \t]*:[ \t]")
+     ((looking-at "[ \t]*:\\( \\|$\\)")
       (setq column (org-get-indentation))) ; do nothing
      ;; Lists
      ((ignore-errors (goto-char (org-in-item-p)))
@@ -19718,7 +19718,7 @@ this line is also exported in fixed-width font."
 	 (end (if regionp (region-end)))
 	 (nlines (or arg (if (and beg end) (count-lines beg end) 1)))
 	 (case-fold-search nil)
-	 (re "[ \t]*\\(: \\)")
+	 (re "[ \t]*\\(:\\(?: \\|$\\)\\)")
 	 off)
     (if regionp
 	(save-excursion
