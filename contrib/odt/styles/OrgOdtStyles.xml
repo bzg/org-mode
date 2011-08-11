@@ -359,6 +359,17 @@
   <style:style style:name="Frame" style:family="graphic">
    <style:graphic-properties text:anchor-type="paragraph" svg:x="0cm" svg:y="0cm" fo:margin-left="0.201cm" fo:margin-right="0.201cm" fo:margin-top="0.201cm" fo:margin-bottom="0.201cm" style:wrap="parallel" style:number-wrapped-paragraphs="no-limit" style:wrap-contour="false" style:vertical-pos="top" style:vertical-rel="paragraph-content" style:horizontal-pos="center" style:horizontal-rel="paragraph-content" fo:padding="0.15cm" fo:border="0.002cm solid #000000"/>
   </style:style>
+
+  <!-- Inline Tasks -->
+  <style:style style:name="OrgInlineTaskHeading" style:family="paragraph" style:parent-style-name="Caption" style:next-style-name="Text_20_body">
+   <style:text-properties style:font-name="Arial1" fo:font-style="normal" fo:font-weight="bold"/>
+  </style:style>
+  <style:style style:name="OrgInlineTaskFrame" style:family="graphic" style:parent-style-name="Frame">
+   <style:graphic-properties svg:x="0cm" svg:y="0cm" style:wrap="none" style:vertical-pos="top" style:vertical-rel="paragraph-content" style:horizontal-pos="center" style:horizontal-rel="paragraph-content" fo:background-color="#ffffcc" style:background-transparency="0%" fo:padding="0.15cm" fo:border="0.26pt solid #000000" style:shadow="none">
+    <style:background-image/>
+   </style:graphic-properties>
+  </style:style>
+
   <text:list-style style:name="Numbering_20_1" style:display-name="Numbering 1">
    <text:list-level-style-number text:level="1" text:style-name="Numbering_20_Symbols" style:num-suffix="." style:num-format="1">
     <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">

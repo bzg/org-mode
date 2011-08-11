@@ -107,11 +107,14 @@ When nil, they will not be exported."
   :type 'boolean)
 
 (defvar org-inlinetask-export-templates
-  '((html "<pre class=\"inlinetask\"><b>%s%s</b><br />%s</pre>"
+  '((html "<div class=\"inlinetask\"><b>%s%s</b><br />%s</div>"
 	  '((unless (eq todo "")
 	      (format "<span class=\"%s %s\">%s%s</span> "
 		      class todo todo priority))
 	    heading content))
+    (odt "%s" '((org-odt-format-inlinetask heading content
+					   todo priority tags)))
+
     (latex "\\begin\{description\}\n\\item[%s%s]~%s\\end\{description\}"
 	   '((unless (eq todo "") (format "\\textsc\{%s%s\} " todo priority))
 	     heading content))
@@ -349,12 +352,14 @@ Either remove headline and meta data, or do special formatting."
 		;; Ensure CONTENT has minimal indentation, a single
 		;; newline character at its boundaries, and isn't
 		;; protected.
-		(when (string-match "`\\([ \t]*\n\\)+" content)
+		(when (string-match "\\`\\([ \t]*\n\\)+" content)
 		  (setq content (substring content (match-end 0))))
 		(when (string-match "[ \t\n]+\\'" content)
 		  (setq content (substring content 0 (match-beginning 0))))
-		(org-add-props (concat "\n" (org-remove-indentation content) "\n")
-		    '(org-protected nil))))
+		(org-add-props
+		    (concat "\n\n" (org-remove-indentation content) "\n\n")
+		    '(org-protected nil org-native-text nil))))
+
 	(when (string-match org-complex-heading-regexp headline)
 	  (let* ((nil-to-str
 		  (function
@@ -371,7 +376,7 @@ Either remove headline and meta data, or do special formatting."
 		 (backend-spec (assq org-export-current-backend
 				     org-inlinetask-export-templates))
 		 (format-str (org-add-props (nth 1 backend-spec)
-				 '(org-protected t)))
+				 '(org-protected t org-native-text t)))
 		 (tokens (cadr (nth 2 backend-spec)))
 		 ;; Build export string. Ensure it won't break
 		 ;; surrounding lists by giving it arbitrary high

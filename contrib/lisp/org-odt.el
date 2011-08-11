@@ -1076,6 +1076,28 @@ MAY-INLINE-P allows inlining it as an image."
 
       (org-export-odt-do-format-image embed-as caption attr label
 				       size href))))
+(defun org-odt-format-textbox (text style)
+  (let ((draw-frame-pair
+	 '("<draw:frame draw:style-name=\"%s\"
+              text:anchor-type=\"paragraph\"
+              style:rel-width=\"100%%\"
+              draw:z-index=\"0\">" . "</draw:frame>")))
+    (org-odt-format-tags
+     draw-frame-pair
+     (org-odt-format-tags
+      '("<draw:text-box fo:min-height=\"%dcm\">" . "</draw:text-box>")
+      text 0) style)))
+
+(defun org-odt-format-inlinetask (heading content
+					  &optional todo priority tags)
+  (org-odt-format-stylized-paragraph
+   nil (org-odt-format-textbox
+	(concat (org-odt-format-stylized-paragraph
+		 "OrgInlineTaskHeading"
+		 (org-lparse-format
+		  'HEADLINE (concat (org-lparse-format-todo todo) " " heading)
+		  nil tags))
+		content) "OrgInlineTaskFrame")))
 
 (defun org-export-odt-do-format-image (embed-as caption attr label
 						size href)
