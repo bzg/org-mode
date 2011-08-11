@@ -119,6 +119,7 @@ evaluating BODY."
 	 (setf ,temp-result (progn ,@body)))
        (unless ,visited-p (kill-buffer ,temp-file))
        ,temp-result)))
+(def-edebug-spec org-babel-with-temp-filebuffer (form body))
 
 ;;;###autoload
 (defun org-babel-load-file (file)

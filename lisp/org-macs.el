@@ -51,6 +51,7 @@
   `(let ,(mapcar (lambda (s)
 		   `(,s (make-symbol (concat "--" (symbol-name ',s))))) symbols)
      ,@body))
+(def-edebug-spec org-with-gensyms (sexp body))
 (put 'org-with-gensyms 'lisp-indent-function 1)
 
 (defmacro org-called-interactively-p (&optional kind)
@@ -61,17 +62,20 @@
 		  (>= emacs-minor-version 2)))
 	 `(with-no-warnings (called-interactively-p ,kind)) ;; defined with no argument in <=23.1
        `(interactive-p))))
+(def-edebug-spec org-called-interactively-p (&optional ("quote" symbolp)))
 
-(if (and (not (fboundp 'with-silent-modifications))
+(when (and (not (fboundp 'with-silent-modifications))
 	 (or (< emacs-major-version 23)
 	     (and (= emacs-major-version 23)
 		  (< emacs-minor-version 2))))
     (defmacro with-silent-modifications (&rest body)
-      `(org-unmodified ,@body)))
+      `(org-unmodified ,@body))
+    (def-edebug-spec with-silent-modifications (body)))
 
 (defmacro org-bound-and-true-p (var)
   "Return the value of symbol VAR if it is bound, else nil."
   `(and (boundp (quote ,var)) ,var))
+(def-edebug-spec org-bound-and-true-p (symbolp))
 
 (defun org-string-nw-p (s)
   "Is S a string with a non-white character?"
@@ -92,6 +96,7 @@ Also, do not record undo information."
       (let ((buffer-undo-list t)
 	    before-change-functions after-change-functions)
 	,@body))))
+(def-edebug-spec org-unmodified (body))
 
 (defun org-substitute-posix-classes (re)
   "Substitute posix classes in regular expression RE."
@@ -110,6 +115,7 @@ Also, do not record undo information."
 (defmacro org-re (s)
   "Replace posix classes in regular expression."
   (if (featurep 'xemacs) `(org-substitute-posix-classes ,s) s))
+(def-edebug-spec org-re (form))
 
 (defmacro org-preserve-lc (&rest body)
   (org-with-gensyms (line col)
@@ -119,6 +125,7 @@ Also, do not record undo information."
 	   (progn ,@body)
 	 (org-goto-line ,line)
 	 (org-move-to-column ,col)))))
+(def-edebug-spec org-preserve-lc (body))
 
 (defmacro org-without-partial-completion (&rest body)
   `(if (and (boundp 'partial-completion-mode)
@@ -130,7 +137,9 @@ Also, do not record undo information."
 	   ,@body)
        (partial-completion-mode 1))
      ,@body))
+(def-edebug-spec org-without-partial-completion (body))
 
+;; FIXME: Slated for removal. Current Org mode does not support Emacs < 22
 (defmacro org-maybe-intangible (props)
   "Add '(intangible t) to PROPS if Emacs version is earlier than Emacs 22.
 In Emacs 21, invisible text is not avoided by the command loop, so the
@@ -152,25 +161,30 @@ We use a macro so that the test can happen at compilation time."
 	 (save-excursion
 	   (goto-char (or ,mpom (point)))
 	   ,@body)))))
+(def-edebug-spec org-with-point-at (form body))
 (put 'org-with-point-at 'lisp-indent-function 1)
 
 (defmacro org-no-warnings (&rest body)
   (cons (if (fboundp 'with-no-warnings) 'with-no-warnings 'progn) body))
+(def-edebug-spec org-no-warnings (body))
 
 (defmacro org-if-unprotected (&rest body)
   "Execute BODY if there is no `org-protected' text property at point."
   `(unless (get-text-property (point) 'org-protected)
      ,@body))
+(def-edebug-spec org-if-unprotected (body))
 
 (defmacro org-if-unprotected-1 (&rest body)
   "Execute BODY if there is no `org-protected' text property at point-1."
   `(unless (get-text-property (1- (point)) 'org-protected)
      ,@body))
+(def-edebug-spec org-if-unprotected-1 (body))
 
 (defmacro org-if-unprotected-at (pos &rest body)
   "Execute BODY if there is no `org-protected' text property at POS."
   `(unless (get-text-property ,pos 'org-protected)
      ,@body))
+(def-edebug-spec org-if-unprotected-at (form body))
 (put 'org-if-unprotected-at 'lisp-indent-function 1)
 
 (defun org-re-search-forward-unprotected (&rest args)
@@ -182,6 +196,7 @@ We use a macro so that the test can happen at compilation time."
       (unless (get-text-property (match-beginning 0) 'org-protected)
 	(throw 'exit (point))))))
 
+;; FIXME: Normalize argument names
 (defmacro org-with-remote-undo (_buffer &rest _body)
   "Execute BODY while recording undo information in two buffers."
   (org-with-gensyms (cline cmd buf1 buf2 undo1 undo2 c1 c2)
@@ -205,11 +220,13 @@ We use a macro so that the test can happen at compilation time."
 	   ;; remember which buffer to undo
 	   (push (list ,cmd ,cline ,buf1 ,c1 ,buf2 ,c2)
 		 org-agenda-undo-list))))))
+(def-edebug-spec org-with-remote-undo (form body))
 (put 'org-with-remote-undo 'lisp-indent-function 1)
 
 (defmacro org-no-read-only (&rest body)
   "Inhibit read-only for BODY."
   `(let ((inhibit-read-only t)) ,@body))
+(def-edebug-spec org-no-read-only (body))
 
 (defconst org-rm-props '(invisible t face t keymap t intangible t mouse-face t
 				   rear-nonsticky t mouse-map t fontified t
@@ -349,6 +366,7 @@ point nowhere."
 		   (and (markerp (cdr c)) (move-marker (cdr c) nil)))
 		 ,data)))
        ,rtn)))
+(def-edebug-spec org-save-outline-visibility (form body))
 
 (defmacro org-with-wide-buffer (&rest body)
  "Execute body while temporarily widening the buffer."
@@ -356,6 +374,7 @@ point nowhere."
     (save-restriction
        (widen)
        ,@body)))
+(def-edebug-spec org-with-wide-buffer (body))
 
 (defmacro org-with-limited-levels (&rest body)
   "Execute BODY with limited number of outline levels."
@@ -363,6 +382,7 @@ point nowhere."
 	  (outline-regexp org-outline-regexp)
 	  (org-outline-regexp-at-bol (concat "^" org-outline-regexp)))
      ,@body))
+(def-edebug-spec org-with-limited-levels (body))
 
 (defvar org-outline-regexp) ; defined in org.el
 (defvar org-odd-levels-only) ; defined in org.el
@@ -384,6 +404,7 @@ The number of levels is controlled by `org-inlinetask-min-level'"
 
 (defmacro org-eval-in-environment (environment form)
   `(eval (list 'let ,environment ',form)))
+(def-edebug-spec org-eval-in-environment (form form))
 (put 'org-eval-in-environment 'lisp-indent-function 1)
 
 (defun org-make-parameter-alist (flat)

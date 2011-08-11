@@ -693,7 +693,7 @@ Use alsa's aplay tool if available."
 	 (goto-char (car ,clock))
 	 (beginning-of-line)
 	 ,@forms))))
-
+(def-edebug-spec org-with-clock-position (form body))
 (put 'org-with-clock-position 'lisp-indent-function 1)
 
 (defmacro org-with-clock (clock &rest forms)
@@ -709,7 +709,7 @@ This macro also protects the current active clock from being altered."
 				  (outline-back-to-heading t)
 				  (point-marker))))
        ,@forms)))
-
+(def-edebug-spec org-with-clock (form body))
 (put 'org-with-clock 'lisp-indent-function 1)
 
 (defsubst org-clock-clock-in (clock &optional resume start-time)
