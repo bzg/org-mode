@@ -179,6 +179,12 @@ default, or nil of no state should be assigned."
   "Insert an inline task.
 If prefix arg NO-STATE is set, ignore `org-inlinetask-default-state'."
   (interactive "P")
+  ;; Error when inside an inline task, except if point was at its very
+  ;; beginning, in which case the new inline task will be inserted
+  ;; before this one.
+  (when (and (org-inlinetask-in-task-p)
+	     (not (and (org-inlinetask-at-task-p) (bolp))))
+    (error "Cannot nest inline tasks"))
   (or (bolp) (newline))
   (let ((indent org-inlinetask-min-level))
     (if org-odd-levels-only
