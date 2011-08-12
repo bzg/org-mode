@@ -2275,7 +2275,7 @@ in subtree, ignoring drawers."
 	     ((org-at-item-p)
 	      (setq singlep t)
 	      (setq lim-up (point-at-bol)
-		    lim-down (point-at-eol)))
+		    lim-down (copy-marker (point-at-eol))))
 	     (t (error "Not at an item or heading, and no active region"))))
 	   ;; Determine the checkbox going to be applied to all items
 	   ;; within bounds.
