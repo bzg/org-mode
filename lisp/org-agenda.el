@@ -1738,6 +1738,7 @@ of the current line."
 	 (save-excursion
 	   (goto-char ,marker)
 	   ,@body)))))
+(def-edebug-spec org-agenda-with-point-at-orig-entry (form body))
 
 (defun org-add-agenda-custom-command (entry)
   "Replace or add a command in `org-agenda-custom-commands'.
@@ -2599,6 +2600,7 @@ before running the agenda command."
       (org-agenda nil cmd-key)))
   (set-buffer org-agenda-buffer-name)
   (princ (org-encode-for-stdout (buffer-string))))
+(def-edebug-spec org-batch-agenda (form &rest sexp))
 
 ;(defun org-encode-for-stdout (string)
 ;  (if (fboundp 'encode-coding-string)
@@ -2665,6 +2667,7 @@ agenda-day   The day in the agenda where this is listed"
 				    priority-letter priority agenda-day)
 		     ",")))
 	(princ "\n")))))
+(def-edebug-spec org-batch-agenda-csv (form &rest sexp))
 
 (defun org-fix-agenda-info (props)
   "Make sure all properties on an agenda item have a canonical form.
@@ -2741,6 +2744,7 @@ This ensures the export commands can easily use it."
 	      (org-write-agenda (expand-file-name (pop files) dir) nil t)))
 	  (and (get-buffer org-agenda-buffer-name)
 	       (kill-buffer org-agenda-buffer-name)))))))
+(def-edebug-spec org-batch-store-agenda-views (&rest sexp))
 
 (defun org-agenda-mark-header-line (pos)
   "Mark the line at POS as an agenda structure header."

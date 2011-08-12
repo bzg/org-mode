@@ -286,6 +286,7 @@ Works on both Emacs and XEmacs."
      (dolist (ext-inv-spec ext-inv-specs)
        (set-extent-property (car ext-inv-spec) 'invisible
 			    (cadr ext-inv-spec)))))
+(def-edebug-spec org-xemacs-without-invisibility (body))
 
 (defun org-indent-to-column (column &optional minimum buffer)
   "Work around a bug with extents with invisibility in XEmacs."

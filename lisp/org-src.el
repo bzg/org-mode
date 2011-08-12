@@ -718,6 +718,7 @@ the language, a switch telling if the content should be in a single line."
 	 (with-current-buffer (marker-buffer beg-marker)
 	   (goto-char (marker-position beg-marker))
 	   ,@body))))
+(def-edebug-spec org-src-do-at-code-block (body))
 
 (defun org-src-do-key-sequence-at-code-block (&optional key)
   "Execute key sequence at code block in the source Org buffer.

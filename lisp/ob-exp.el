@@ -73,6 +73,7 @@ process."
 	 (setq results ,@body))
        (set-buffer export-buffer)
        results)))
+(def-edebug-spec org-babel-exp-in-export-file (form body))
 
 (defun org-babel-exp-src-block (body &rest headers)
   "Process source block for export.

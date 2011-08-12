@@ -624,6 +624,7 @@ Return t if a code block was found at point, nil otherwise."
 	 (if (org-bound-and-true-p org-edit-src-from-org-mode)
 	     (org-edit-src-exit)))
        t)))
+(def-edebug-spec org-babel-do-in-edit-buffer (body))
 
 (defun org-babel-do-key-sequence-in-edit-buffer (key)
   "Read key sequence and execute the command in edit buffer.
@@ -720,6 +721,7 @@ end-body --------- point at the end of the body"
 	     (goto-char end-block))))
        (unless visited-p (kill-buffer to-be-removed))
        (goto-char point))))
+(def-edebug-spec org-babel-map-src-blocks (form body))
 
 ;;;###autoload
 (defmacro org-babel-map-inline-src-blocks (file &rest body)
@@ -742,6 +744,7 @@ buffer."
 	   (goto-char (match-end 0))))
        (unless visited-p (kill-buffer to-be-removed))
        (goto-char point))))
+(def-edebug-spec org-babel-map-inline-src-blocks (form body))
 
 ;;;###autoload
 (defun org-babel-execute-buffer (&optional arg)

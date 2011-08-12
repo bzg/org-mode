@@ -602,6 +602,7 @@ PUB-DIR is the publishing directory."
 		   org-export-preprocess-after-headline-targets-hook)
 	   org-export-preprocess-after-headline-targets-hook)))
      ,@body))
+(def-edebug-spec org-publish-with-aux-preprocess-maybe (body))
 
 (defvar project-plist)
 (defun org-publish-org-to-latex (plist filename pub-dir)

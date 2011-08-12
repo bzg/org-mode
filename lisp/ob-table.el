@@ -118,6 +118,7 @@ example above."
            (org-babel-execute-src-block
             nil (list "emacs-lisp" "results" params) '((:results . "silent"))))
        ""))))
+(def-edebug-spec sbe (form form))
 
 (provide 'ob-table)
 
