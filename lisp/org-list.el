@@ -2329,9 +2329,9 @@ in subtree, ignoring drawers."
 	     "Checkboxes were removed due to unchecked box at line %d"
 	     (org-current-line block-item))))
 	  (goto-char bottom)
-	  (move-marker lim-down nil)
 	  (move-marker bottom nil)
-	  (org-list-struct-apply-struct struct struct-copy)))))
+	  (org-list-struct-apply-struct struct struct-copy)))
+      (move-marker lim-down nil)))
   (org-update-checkbox-count-maybe))
 
 (defun org-reset-checkbox-state-subtree ()
