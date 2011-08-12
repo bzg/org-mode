@@ -5160,7 +5160,7 @@ will be prompted for."
 	    t)))))
 
 (defun org-activate-code (limit)
-  (if (re-search-forward "^[ \t]*\\(:\\(?: .*\\)?\n?\\)" limit t)
+  (if (re-search-forward "^[ \t]*\\(:\\(?: .*\\|$\\)\n?\\)" limit t)
       (progn
 	(org-remove-flyspell-overlays-in (match-beginning 0) (match-end 0))
 	(remove-text-properties (match-beginning 0) (match-end 0)
