@@ -1,6 +1,6 @@
 ;;; ob-maxima.el --- org-babel functions for maxima evaluation
 
-;; Copyright (c) 2009, 2010, 2011 Eric S Fraga, Eric Schulte
+;; Copyright (c) 2009-2011 Eric S Fraga, Eric Schulte
 
 ;; Author: Eric S Fraga, Eric Schulte
 ;; Keywords: literate programming, reproducible research, maxima
