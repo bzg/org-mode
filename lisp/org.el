@@ -7568,7 +7568,7 @@ the inserted text when done."
      (if force-level
 	 (delete-region (point-at-bol) (point)))
      ;; Paste
-     (beginning-of-line (if (bolp) 2 1))
+     (beginning-of-line (if (bolp) 1 2))
      (unless for-yank (org-back-over-empty-lines))
      (setq beg (point))
      (and (fboundp 'org-id-paste-tracker) (org-id-paste-tracker txt))
