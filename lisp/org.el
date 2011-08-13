@@ -2742,6 +2742,14 @@ be the favorite working time of John Wiegley :-)"
   :group 'org-time
   :type 'integer)
 
+(defcustom org-use-effective-time nil
+  "If non-nil, consider `org-extend-today-until' when creating timestamps.
+For example, if `org-extend-today-until' is 8, and it's 4am, then the
+\"effective time\" of any timestamps between midnight and 8am will be
+23:59 of the previous day."
+  :group 'boolean
+  :type 'integer)
+
 (defcustom org-edit-timestamp-down-means-later nil
   "Non-nil means S-down will increase the time in a time stamp.
 When nil, S-up will increase."
@@ -10929,7 +10937,8 @@ nil or a string to be used for the todo mark." )
   (let* ((ct (org-current-time))
 	  (dct (decode-time ct))
 	  (ct1
-	   (if (< (nth 2 dct) org-extend-today-until)
+	   (if (and org-use-effective-time
+		    (< (nth 2 dct) org-extend-today-until))
 	       (encode-time 0 59 23 (1- (nth 3 dct)) (nth 4 dct) (nth 5 dct))
 	     ct)))
     ct1))
