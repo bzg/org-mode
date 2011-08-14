@@ -38,7 +38,9 @@
 (require 'org-macs)
 (require 'org-compat)
 
+(declare-function message-point-in-header-p "message" ())
 (declare-function org-combine-plists "org" (&rest plists))
+(declare-function org-icompleting-read "org" (&rest args))
 (declare-function org-in-commented-line "org" ())
 (declare-function org-in-indented-comment-line "org" ())
 (declare-function org-in-regexp "org" (re &optional nlines visually))
@@ -56,10 +58,11 @@
 (declare-function org-export-preprocess-string "org-exp"
 		  (string &rest parameters))
 
-(defvar org-outline-regexp-bol) ; defined in org.el
-(defvar org-odd-levels-only) ;; defined in org.el
-(defvar org-bracket-link-regexp) ; defined in org.el
-(defvar message-signature-separator) ;; defined in message.el
+(defvar org-outline-regexp-bol)		; defined in org.el
+(defvar org-odd-levels-only)		; defined in org.el
+(defvar org-bracket-link-regexp)	; defined in org.el
+(defvar message-cite-prefix-regexp)	; defined in message.el
+(defvar message-signature-separator)	; defined in message.el
 
 (defconst org-footnote-re
   ;; Only [1]-like footnotes are closed in this regexp, as footnotes
