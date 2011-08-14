@@ -1837,7 +1837,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 		  (replace-match (concat (match-string 1)
 					 (match-string 2)) t t)
 		  (forward-line))
-		(insert "\\end{verbatim}\n\n"))
+		(insert "\\end{verbatim}\n"))
        (progn (goto-char (match-beginning 0))
 	      (while (looking-at "^\\([ \t]*\\):\\(\\([ \t]\\|$\\).*\\)$")
 		(replace-match (concat "%" (match-string 1)
