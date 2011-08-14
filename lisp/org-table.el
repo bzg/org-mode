@@ -2409,7 +2409,8 @@ not overwrite the stored one."
 	   (modes (copy-sequence org-calc-default-modes))
 	   (numbers nil) ; was a variable, now fixed default
 	   (keep-empty nil)
-	   n form form0 formrpl formrg bw fmt x ev orig c lispp literal duration)
+	   n form form0 formrpl formrg bw fmt x ev orig c lispp literal 
+	   duration duration-output-format)
       ;; Parse the format string.  Since we have a lot of modes, this is
       ;; a lot of work.  However, I think calc still uses most of the time.
       (if (string-match ";" formula)
@@ -3242,7 +3243,7 @@ For example:  28 -> AB."
   "Convert a time string into numerical duration in seconds.
 S can be a string matching either -?HH:MM:SS or -?HH:MM.
 If S is a string representing a number, keep this number."
-  (let (hour min sec res)
+  (let (hour minus min sec res)
     (cond
      ((and (string-match "\\(-?\\)\\([0-9]+\\):\\([0-9]+\\):\\([0-9]+\\)" s))
       (setq minus (< 0 (length (match-string 1 s)))
