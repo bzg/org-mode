@@ -4,7 +4,7 @@
 ;;
 ;; Emacs Lisp Archive Entry
 ;; Filename: org-mw.el
-;; Version: 0.3a
+;; Version: 0.3b
 ;; Author: Bastien <bzg AT altern DOT org>
 ;; Maintainer: Bastien <bzg AT altern DOT org>
 ;; Keywords: Mediawiki Org export
@@ -182,7 +182,7 @@
   "Export lists to mediawiki syntax."
   (while (re-search-forward (org-item-beginning-re) nil t)
     (move-beginning-of-line 1)
-    (insert (org-list-to-generic 
+    (insert (org-list-to-generic
 	     (org-list-parse-list t)
 	     (org-combine-plists
 	      '(:splice nil 
@@ -190,10 +190,11 @@
 			:ustart "" :uend ""
 			:dstart "" :dend ""
 			:dtstart "" :dtend " "
-			:istart (concat (make-string (* 2 depth) ?  )
-					(if (eq type 'unordered)
-					    "- " "# "))
+			:istart (concat
+				 (make-string
+				  (1+ depth) (if (eq type 'unordered) ?* ?#)) " ")
 			:iend "\n"
+			:nobr t
 			:icount nil
 			:csep "\n"
 			:cbon "[X]" :cboff "[ ]"
