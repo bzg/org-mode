@@ -2976,6 +2976,10 @@ for this list."
 	  (insert txt "\n")))
       (message "List converted and installed at receiver location"))))
 
+(defsubst org-list-item-trim-br (item)
+  "Trim line breaks in a list ITEM."
+  (setq item (replace-regexp-in-string "\n +" " " item)))
+
 (defun org-list-to-generic (list params)
   "Convert a LIST parsed through `org-list-parse-list' to other formats.
 Valid parameters PARAMS are:
@@ -3007,6 +3011,8 @@ Valid parameters PARAMS are:
 :cbon       String to insert for a checked check-box
 :cbtrans    String to insert for a check-box in transitional state
 
+:nobr       Non-nil means remove line breaks in lists items.
+
 Alternatively, each parameter can also be a form returning
 a string.  These sexp can use keywords `counter' and `depth',
 reprensenting respectively counter associated to the current
@@ -3035,6 +3041,7 @@ items."
 	 (cbon (plist-get p :cbon))
 	 (cboff (plist-get p :cboff))
 	 (cbtrans (plist-get p :cbtrans))
+	 (nobr (plist-get p :nobr))
 	 export-sublist			; for byte-compiler
 	 (export-item
 	  (function
@@ -3066,6 +3073,8 @@ items."
 		 (setq first (replace-match cboff t t first)))
 		((string-match "\\[CBTRANS\\]" first)
 		 (setq first (replace-match cbtrans t t first))))
+	       ;; Replace line breaks if required
+	       (when nobr (setq first (org-list-item-trim-br first)))
 	       ;; Insert descriptive term if TYPE is `descriptive'.
 	       (when (eq type 'descriptive)
 		 (let* ((complete (string-match "^\\(.*\\)[ \t]+::" first))
