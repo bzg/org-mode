@@ -279,11 +279,8 @@ This variable is relevant only if `org-bibtex-export-tags-as-keywords` is t."
 ;;; Utility functions
 (defun org-bibtex-get (property)
   ((lambda (it) (when it (org-babel-trim it)))
-   (let ((org-special-properties
-	  (delete "FILE" (copy-sequence org-special-properties))))
-     (or
-      (org-entry-get (point) (upcase property))
-      (org-entry-get (point) (concat org-bibtex-prefix (upcase property)))))))
+   (or (org-entry-get (point) (upcase property))
+       (org-entry-get (point) (concat org-bibtex-prefix (upcase property))))))
 
 (defun org-bibtex-put (property value)
   (let ((prop (upcase (if (keywordp property)
