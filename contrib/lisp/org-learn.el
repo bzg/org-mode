@@ -174,6 +174,6 @@ OF matrix."
 
 (provide 'org-learn)
 
-;; arch-tag: a46bb0e5-e4fb-4004-a9b8-63933c55af33
+
 
 ;;; org-learn.el ends here

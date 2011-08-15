@@ -648,6 +648,6 @@ a time), or the day by one (if it does not contain a time)."
 
 (provide 'org2rem)
 
-;; arch-tag: 65985fe9-095c-49c7-a7b6-cb4ee15c0a95
+
 
 ;;; org-exp.el ends here

@@ -334,6 +334,6 @@ with working links."
 
 (provide 'org-wikinodes)
 
-;; arch-tag: e3b56e38-a2be-478c-b56c-68a913ec54ec
+
 
 ;;; org-wikinodes.el ends here

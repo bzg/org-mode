@@ -1827,5 +1827,5 @@ lang=\"%s\" xml:lang=\"%s\">
 
 (provide 'org-xhtml)
 
-;; arch-tag: 8109d84d-eb8f-460b-b1a8-f45f3a6c7ea1
+
 ;;; org-xhtml.el ends here
