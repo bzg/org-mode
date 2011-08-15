@@ -6227,6 +6227,9 @@ With a numeric prefix, show all headlines up to that level."
 	(org-cycle-hide-drawers 'all)
 	(org-cycle-show-empty-lines 'all)))))
 
+;; This function uses outline-regexp instead of the more fundamental
+;; org-outline-regexp so that org-cycle-global works outside of Org
+;; buffers, where outline-regexp is needed.
 (defun org-overview ()
   "Switch to overview mode, showing only top-level headlines.
 Really, this shows all headlines with level equal or greater than the level
@@ -6236,7 +6239,7 @@ results."
   (interactive)
   (let ((level (save-excursion
 		 (goto-char (point-min))
-		 (if (re-search-forward org-outline-regexp-bol nil t)
+		 (if (re-search-forward (concat "^" outline-regexp) nil t)
 		     (progn
 		       (goto-char (match-beginning 0))
 		       (funcall outline-level))))))
