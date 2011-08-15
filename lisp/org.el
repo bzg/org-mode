@@ -15586,7 +15586,10 @@ With prefix ARG, change that many days."
 	 (setq org-ts-what
 	      (cond
 	       ((= pos (match-beginning 0))         'bracket)
-	       ((= pos (1- (match-end 0)))          'bracket)
+	       ;; Point is considered to be "on the bracket" whether
+	       ;; it's really on it or right after it.
+	       ((or (= pos (1- (match-end 0)))
+                    (= pos (match-end 0)))          'bracket)
 	       ((org-pos-in-match-range pos 2)      'year)
 	       ((org-pos-in-match-range pos 3)      'month)
 	       ((org-pos-in-match-range pos 7)      'hour)
