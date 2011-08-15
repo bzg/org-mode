@@ -2,7 +2,7 @@
 ;;
 ;; Copyright 2007-2011 Free Software Foundation, Inc.
 ;;
-;; Author: bzg AT altern DOT org
+;; Author: bzg AT gnu DOT org
 ;; Version: 0.2
 ;; Keywords: org, remember, lisp
 ;; URL: http://www.cognition.ens.fr/~guerry/u/org-elisp-symbol.el

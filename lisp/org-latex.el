@@ -5,7 +5,7 @@
 ;; Emacs Lisp Archive Entry
 ;; Filename: org-latex.el
 ;; Version: 7.7
-;; Author: Bastien Guerry <bzg AT altern DOT org>
+;; Author: Bastien Guerry <bzg AT gnu DOT org>
 ;; Maintainer: Carsten Dominik <carsten.dominik AT gmail DOT com>
 ;; Keywords: org, wp, tex
 ;; Description: Converts an org-mode buffer into LaTeX

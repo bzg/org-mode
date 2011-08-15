@@ -5,8 +5,8 @@
 ;; Emacs Lisp Archive Entry
 ;; Filename: org-registry.el
 ;; Version: 0.1a
-;; Author: Bastien Guerry <bzg AT altern DOT org>
-;; Maintainer: Bastien Guerry <bzg AT altern DOT org>
+;; Author: Bastien Guerry <bzg AT gnu DOT org>
+;; Maintainer: Bastien Guerry <bzg AT gnu DOT org>
 ;; Keywords: org, wp, registry
 ;; Description: Shows Org files where the current buffer is linked
 ;; URL: http://www.cognition.ens.fr/~guerry/u/org-registry.el
