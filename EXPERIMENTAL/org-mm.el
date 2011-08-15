@@ -1,6 +1,6 @@
 ;;; org-mm.el --- MoinMoin backend for org-export.el
 ;;
-;; Copyright 2010, 2011 Puneeth Chaganti
+;; Copyright 2010-2011 Puneeth Chaganti
 ;;
 ;; Emacs Lisp Archive Entry
 ;; Filename: org-mm.el
@@ -8,6 +8,8 @@
 ;; Author: Puneeth Chaganti <punchagan [at] gmail [dot] com>
 ;; Keywords: MoinMoin Org export
 ;; Description: MoinMoin exporter for Org
+;;
+;; This file is not part of GNU Emacs.
 ;;
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by

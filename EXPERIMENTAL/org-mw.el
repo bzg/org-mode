@@ -1,6 +1,6 @@
 ;;; org-mw.el --- Mediawiki backend for org-export.el
 ;;
-;; Copyright 2010, 2011 Bastien Guerry
+;; Copyright 2010-2011 Free Software Foundation, Inc.
 ;;
 ;; Emacs Lisp Archive Entry
 ;; Filename: org-mw.el
@@ -10,6 +10,8 @@
 ;; Keywords: Mediawiki Org export
 ;; Description: Mediawiki exporter for Org
 ;; URL: [Not distributed yet]
+;;
+;; This file is not part of GNU Emacs.
 ;;
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by

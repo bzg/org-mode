@@ -1,6 +1,6 @@
 ;;; org-export.el --- Export engine for Org
 ;;
-;; Copyright 2008 2010 Bastien Guerry
+;; Copyright 2008-2011 Free Software Foundation, Inc.
 ;;
 ;; Emacs Lisp Archive Entry
 ;; Filename: org-export.el
@@ -10,6 +10,8 @@
 ;; Keywords:
 ;; Description:
 ;; URL: [Not distributed yet]
+;;
+;; This file is not part of GNU Emacs.
 ;;
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
