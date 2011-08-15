@@ -8456,6 +8456,14 @@ belonging to the \"Work\" category."
 		date)))
     (eq date today)))
 
+(defun org-agenda-todo-yesterday (&optional arg)
+  "Like `org-agenda-todo' but the time of change will be 23:59 of yesterday"
+  (interactive "P")
+  (let* ((hour (third (decode-time
+                       (org-current-time))))
+         (org-extend-today-until (1+ hour)))
+    (org-agenda-todo arg)))
+
 (provide 'org-agenda)
 
 ;; arch-tag: 77f7565d-7c4b-44af-a2df-9f6f7070cff1
