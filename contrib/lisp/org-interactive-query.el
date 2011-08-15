@@ -1,10 +1,12 @@
 ;;; org-interactive-query.el --- Interactive modification of agenda query
 ;;
-;; Copyright 2007 Free Software Foundation, Inc.
+;; Copyright 2007-2011 Free Software Foundation, Inc.
 ;;
 ;; Author: Christopher League <league at contrapunctus dot net>
 ;; Version: 1.0
 ;; Keywords: org, wp
+;;
+;; This file is not part of GNU Emacs. 
 ;;
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by

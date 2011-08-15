@@ -1,11 +1,13 @@
 ;;; org-mac-link-grabber.el --- Grab links and url from various mac
 ;;; application and insert them as links into org-mode documents
 ;;
-;; Copyright (c) 2010 Free Software Foundation, Inc.
+;; Copyright (c) 2010-2011 Free Software Foundation, Inc.
 ;; 
 ;; Author: Anthony Lander <anthony.lander@gmail.com>
 ;; Version: 1.0.1
 ;; Keywords: org, mac, hyperlink
+;;
+;; This file is not part of GNU Emacs.
 ;;
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by

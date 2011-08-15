@@ -1,11 +1,13 @@
 ;;; org-toc.el --- Table of contents for Org-mode buffer
 
-;; Copyright 2007 Bastien Guerry
+;; Copyright 2007-2011 Free Software Foundation, Inc.
 ;;
 ;; Author: Bastien Guerry <bzg AT altern DOT org>
 ;; Keywords: Org table of contents
 ;; Homepage: http://www.cognition.ens.fr/~guerry/u/org-toc.el
 ;; Version: 0.8
+
+;; This file is not part of GNU Emacs.
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by

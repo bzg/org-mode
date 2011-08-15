@@ -1,6 +1,6 @@
 ;;; org-mac-iCal.el --- Imports events from iCal.app to the Emacs diary
 
-;; Copyright (C) 2009 Christopher Suckling
+;; Copyright (C) 2009-2011 Christopher Suckling
 
 ;; Author: Christopher Suckling <suckling at gmail dot com>
 

@@ -1,7 +1,6 @@
 ;;; org-lparse.el --- Line-oriented parser-exporter for Org-mode
 
-;; Copyright (C) 2010, 2011
-;;   Jambunathan <kjambunathan at gmail dot com>
+;; Copyright (C) 2010-2011 Jambunathan <kjambunathan at gmail dot com>
 
 ;; Author: Jambunathan K <kjambunathan at gmail dot com>
 ;; Keywords: outlines, hypermedia, calendar, wp

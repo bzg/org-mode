@@ -1,12 +1,13 @@
 ;;; org-expiry.el --- expiry mechanism for Org entries
 ;;
-;; Copyright 2007 2008 Bastien Guerry
+;; Copyright 2007-2011 Free Software Foundation, Inc.
 ;;
 ;; Author: bzg AT altern DOT org
 ;; Version: 0.2
 ;; Keywords: org expiry
-;; URL: http://www.cognition.ens.fr/~guerry/u/org-expiry.el
-;;
+
+;; This file is not part of GNU Emacs.
+
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
 ;; the Free Software Foundation; either version 3, or (at your option)
