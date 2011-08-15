@@ -2896,17 +2896,6 @@ command."
       (switch-to-buffer-other-window buffer)
       (goto-char (point-min)))))
 
-(defun org-find-visible ()
-  (let ((s (point)))
-    (while (and (not (= (point-max) (setq s (next-overlay-change s))))
-		(get-char-property s 'invisible)))
-    s))
-(defun org-find-invisible ()
-  (let ((s (point)))
-    (while (and (not (= (point-max) (setq s (next-overlay-change s))))
-		(not (get-char-property s 'invisible))))
-    s))
-
 (defvar org-export-htmlized-org-css-url) ;; defined in org-html.el
 
 (defun org-export-string (string fmt &optional dir)
