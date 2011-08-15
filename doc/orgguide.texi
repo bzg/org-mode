@@ -2677,10 +2677,6 @@ manual}@*
 
 @bye
 
-@ignore
-        arch-tag: 8f0a8557-0acc-4436-b2b2-0197699e1452
-@end ignore
-
 @c Local variables:
 @c fill-column: 77
 @c End:
