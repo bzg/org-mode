@@ -75,7 +75,7 @@
 
 ;;; Code:
 
-(eval-when-compile 
+(eval-when-compile
   (require 'cl))
 (require 'org-macs)
 (require 'org-compat)
@@ -1804,8 +1804,6 @@ Initial position of cursor is restored after the changes."
 		((and (match-string 3) new-box)
 		 (replace-match new-box nil nil nil 3))
 		((match-string 3)
-		 ;; (goto-char (or (match-end 2) (match-end 1)))
-		 ;; (skip-chars-backward " \t")
 		 (looking-at ".*?\\([ \t]*\\[[ X-]\\]\\)")
 		 (replace-match "" nil nil nil 1))
 		(t (let ((counterp (match-end 2)))
