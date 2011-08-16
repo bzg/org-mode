@@ -244,11 +244,13 @@
     <style:background-image/>
    </style:paragraph-properties>
   </style:style>
-  <style:style style:name="OrgSourceBlock" style:family="paragraph" style:parent-style-name="Preformatted_20_Text">
+
+  <style:style style:name="OrgFixedWidthBlock" style:family="paragraph" style:parent-style-name="Preformatted_20_Text">
    <style:paragraph-properties fo:background-color="#c0c0c0" fo:padding="0.049cm" fo:border="0.018cm solid #000000" style:shadow="none">
     <style:background-image/>
    </style:paragraph-properties>
   </style:style>
+
   <style:style style:name="OrgCenter" style:family="paragraph" style:parent-style-name="Text_20_body">
    <style:paragraph-properties fo:text-align="center" style:justify-single-word="false"/>
   </style:style>

@@ -227,7 +227,7 @@ be linked only."
 
 (defvar org-export-odt-default-org-styles-alist
   '((paragraph . ((default . "Text_20_body")
-		  (fixedwidth . "OrgSourceBlock")
+		  (fixedwidth . "OrgFixedWidthBlock")
 		  (verse . "OrgVerse")
 		  (quote . "Quotations")
 		  (blockquote . "Quotations")
@@ -834,8 +834,8 @@ PUB-DIR is set, use this as the publishing directory."
   (case org-lparse-dyn-current-environment
     (fixedwidth (concat
 		 (org-odt-format-stylized-paragraph
-		  'src (org-odt-fill-tabs-and-spaces
-			(org-xml-encode-plain-text line))) "\n"))
+		  'fixedwidth (org-odt-fill-tabs-and-spaces
+			       (org-xml-encode-plain-text line))) "\n"))
     (t (concat line "\n"))))
 
 (defun org-odt-format-comment (fmt &rest args)
@@ -859,7 +859,7 @@ PUB-DIR is set, use this as the publishing directory."
   (mapconcat
    (lambda (line)
      (org-odt-format-stylized-paragraph
-      'src (org-odt-fill-tabs-and-spaces line)))
+      'fixedwidth (org-odt-fill-tabs-and-spaces line)))
    (org-split-string lines "[\r\n]") "\n"))
 
 (defun org-xml-encode-plain-text-lines (rtn)
