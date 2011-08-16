@@ -813,7 +813,11 @@ PUB-DIR is set, use this as the publishing directory."
      desc href (or attr "")))))
 
 (defun org-odt-format-spaces (n)
-  (org-odt-format-tags "<text:s text:c=\"%d\"/>" "" n))
+  (cond
+   ((= n 1) " ")
+   ((> n 1) (concat
+	     " " (org-odt-format-tags "<text:s text:c=\"%d\"/>" "" (1- n))))
+   (t "")))
 
 (defun org-odt-format-tabs (&optional n)
   (let ((tab "<text:tab/>")
@@ -842,11 +846,9 @@ PUB-DIR is set, use this as the publishing directory."
 (defun org-odt-fill-tabs-and-spaces (line)
   (replace-regexp-in-string
    "\\([\t]\\|\\([ ]+\\)\\)" (lambda (s)
-	    (cond
-	     ((string= s "\t") (org-odt-format-tabs))
-	     ((> (length s) 1)
-	      (org-odt-format-spaces (length s)))
-	     (t " "))) line))
+			       (cond
+				((string= s "\t") (org-odt-format-tabs))
+				(t (org-odt-format-spaces (length s))))) line))
 
 (defun org-odt-format-source-code-or-example-line (line)
   (org-odt-format-stylized-paragraph 'src (org-odt-fill-tabs-and-spaces line)))
@@ -1463,7 +1465,6 @@ MAY-INLINE-P allows inlining it as an image."
     (insert (format org-odt-manifest-file-entry-tag media-type full-path))))
 
 (defun org-odt-finalize-outfile ()
-  (message "org-newodt: Finalizing outfile")
   (org-odt-delete-empty-paragraphs))
 
 (defun org-odt-delete-empty-paragraphs ()
