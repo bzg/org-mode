@@ -678,13 +678,12 @@ Additional note on `org-footnote-insert-pos-for-preprocessor':
 			  ;; through `org-export-preprocess-string' so
 			  ;; it is ready to insert in the
 			  ;; backend-specific buffer.
-			  (if export-props
+			  (if (and export-props def)
 			      (let ((parameters
 				     (org-combine-plists
 				      export-props
 				      '(:todo-keywords t :tags t :priority t))))
-				(if def
-				    (org-export-preprocess-string def parameters)))
+				(org-export-preprocess-string def parameters))
 			    def)
 			  inlinep) ref-table)))
 	  ;; Remove definition of non-inlined footnotes.
@@ -894,7 +893,10 @@ If LABEL is non-nil, delete that footnote instead."
 	    (push (cons i (number-to-string (incf n))) map)))
 	(goto-char (point-min))
 	(while (re-search-forward "\\(\\[fn:\\)\\([0-9]+\\)\\([]:]\\)" nil t)
-	  (replace-match (concat "\\1" (cdr (assq (string-to-number (match-string 2)) map)) "\\3")))))))
+	  (replace-match (concat "\\1"
+				 (cdr (assq (string-to-number (match-string 2))
+					    map))
+				 "\\3")))))))
 
 (defun org-footnote-auto-adjust-maybe ()
   "Renumber and/or sort footnotes according to user settings."
