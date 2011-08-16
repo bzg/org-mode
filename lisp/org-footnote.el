@@ -262,10 +262,9 @@ label, start, end and definition of the footnote otherwise."
 				       message-signature-separator nil t)))))
 		    (or (and (re-search-forward
 			      (org-re
-			       (concat "^[ \t]*$" "\\|"
-				       org-outline-regexp-bol
-				       "\\|"
-				       "^\\[\\([0-9]+\\|fn:[-_[:word:]]+\\)\\]"))
+			       (concat org-outline-regexp-bol "\\|"
+				       org-footnote-definition-re "\\|"
+				       "^[ \t]*$"))
 			      bound 'move)
 			     (progn (skip-chars-forward " \t\n") (point-at-bol)))
 			(point))))
