@@ -5832,7 +5832,7 @@ could bind the variable in the options section of a custom command.")
 	  (t nil))))
 
 (defsubst org-cmp-effort (a b)
-  "Compare the priorities of string A and B."
+  "Compare the effort values of string A and B."
   (let* ((def (if org-sort-agenda-noeffort-is-high 32767 -1))
 	 (ea (or (get-text-property 1 'effort-minutes a) def))
 	 (eb (or (get-text-property 1 'effort-minutes b) def)))
