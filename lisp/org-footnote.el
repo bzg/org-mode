@@ -351,7 +351,8 @@ If no footnote is found, return nil."
       (looking-at (format "\\[%s\\]\\|\\[%s:" label label))
       (goto-char (match-end 0))
       (org-show-context 'link-search)
-      (message "Edit definition and go back with `C-c &' or, if unique, with `C-c C-c'."))))
+      (when (org-mode-p)
+	(message "Edit definition and go back with `C-c &' or, if unique, with `C-c C-c'.")))))
 
 (defun org-footnote-goto-previous-reference (label)
   "Find the first closest (to point) reference of footnote with label LABEL."
