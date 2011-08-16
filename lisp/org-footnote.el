@@ -80,7 +80,7 @@
   "Regular expression for matching footnotes.")
 
 (defconst org-footnote-definition-re
-  (org-re "^\\(\\[\\([0-9]+\\|fn:[-_[:word:]]+\\)\\]\\)")
+  (org-re "^\\[\\([0-9]+\\|fn:[-_[:word:]]+\\)\\]")
   "Regular expression matching the definition of a footnote.")
 
 (defvar org-footnote-forbidden-blocks '("example" "verse" "src" "ascii" "beamer"
@@ -251,7 +251,7 @@ label, start, end and definition of the footnote otherwise."
 					  "\\|^[ \t]*$") nil t))))
 	(when (re-search-backward org-footnote-definition-re lim t)
 	  (end-of-line)
-	  (list (match-string 2)
+	  (list (match-string 1)
 		(match-beginning 0)
 		(save-match-data
 		  ;; In a message, limit search to signature.
