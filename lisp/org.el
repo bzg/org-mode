@@ -11918,7 +11918,7 @@ be removed."
 			     (re-search-forward org-closed-time-regexp nil t)))
 		(replace-match "")
 		(if (looking-at "--+<[^>]+>") (replace-match ""))))
-	    (and (looking-at "^[ \t]+") (replace-match ""))
+	    (and (looking-at "[ \t]+") (replace-match ""))
 	    (and org-adapt-indentation (bolp) (org-indent-to-column col))
 	    (when what
 	      (insert
