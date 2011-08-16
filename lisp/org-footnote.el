@@ -39,24 +39,25 @@
 (require 'org-compat)
 
 (declare-function message-point-in-header-p "message" ())
+(declare-function org-back-over-empty-lines "org" ())
+(declare-function org-back-to-heading "org" (&optional invisible-ok))
 (declare-function org-combine-plists "org" (&rest plists))
+(declare-function org-end-of-subtree "org"  (&optional invisible-ok to-heading))
+(declare-function org-export-preprocess-string "org-exp"
+		  (string &rest parameters))
+(declare-function org-fill-paragraph "org" (&optional justify))
 (declare-function org-icompleting-read "org" (&rest args))
+(declare-function org-id-uuid "org-id" ())
+(declare-function org-in-block-p "org" (names))
 (declare-function org-in-commented-line "org" ())
 (declare-function org-in-indented-comment-line "org" ())
 (declare-function org-in-regexp "org" (re &optional nlines visually))
-(declare-function org-in-block-p "org" (names))
-(declare-function org-mark-ring-push "org" (&optional pos buffer))
-(declare-function outline-next-heading "outline")
-(declare-function org-trim "org" (s))
-(declare-function org-show-context "org" (&optional key))
-(declare-function org-back-to-heading "org" (&optional invisible-ok))
-(declare-function org-end-of-subtree "org"  (&optional invisible-ok to-heading))
 (declare-function org-in-verbatim-emphasis "org" ())
 (declare-function org-inside-latex-macro-p "org" ())
-(declare-function org-id-uuid "org-id" ())
-(declare-function org-fill-paragraph "org" (&optional justify))
-(declare-function org-export-preprocess-string "org-exp"
-		  (string &rest parameters))
+(declare-function org-mark-ring-push "org" (&optional pos buffer))
+(declare-function org-show-context "org" (&optional key))
+(declare-function org-trim "org" (s))
+(declare-function outline-next-heading "outline")
 
 (defvar org-outline-regexp-bol)		; defined in org.el
 (defvar org-odd-levels-only)		; defined in org.el
@@ -109,13 +110,17 @@ heading will be removed after extracting footnote definitions."
 
 (defcustom org-footnote-tag-for-non-org-mode-files "Footnotes:"
   "Tag marking the beginning of footnote section.
-The Org-mode footnote engine can be used in arbitrary text files as well
-as in Org-mode.  Outside Org-mode, new footnotes are always placed at
+The Org footnote engine can be used in arbitrary text files as well
+as in Org-mode.  Outside Org mode, new footnotes are always placed at
 the end of the file.  When you normalize the notes, any line containing
 only this tag will be removed, a new one will be inserted at the end
-of the file, followed by the collected and normalized footnotes."
+of the file, followed by the collected and normalized footnotes.
+
+If you don't want any tag in such buffers, set this variable to nil."
   :group 'org-footnote
-  :type 'string)
+  :type '(choice
+	  (string :tag "Collect footnotes under tag")
+	  (const :tag "Don't use a tag" nil)))
 
 (defcustom org-footnote-define-inline nil
   "Non-nil means define footnotes inline, at reference location.
@@ -466,46 +471,71 @@ or new, let the user edit the definition of the footnote."
   (interactive "sLabel: ")
   (let ((label (org-footnote-normalize-label label)))
     (cond
+     ;; In an Org file.
      ((org-mode-p)
-      ;; No section, put footnote into the current outline node Try to
-      ;; find or make the special node
+      ;; If `org-footnote-section' is defined, find it, or create it
+      ;; at the end of the buffer.
       (when org-footnote-section
 	(goto-char (point-min))
 	(let ((re (concat "^\\*+[ \t]+" org-footnote-section "[ \t]*$")))
 	  (unless (or (re-search-forward re nil t)
 		      (and (progn (widen) t)
 			   (re-search-forward re nil t)))
-	  (goto-char (point-max))
-	  (insert "\n\n* " org-footnote-section "\n"))))
-      ;; Now go to the end of this entry and insert there.
+	    (goto-char (point-max))
+	    (skip-chars-backward " \t\r\n")
+	    (unless (bolp) (newline))
+	    ;; Insert new section.  Separate it from the previous one
+	    ;; with a blank line, unless `org-blank-before-new-entry'
+	    ;; explicitly says no.
+	    (when (and (cdr (assq 'heading org-blank-before-new-entry))
+		       (zerop (save-excursion (org-back-over-empty-lines))))
+	      (insert "\n"))
+	    (insert "* " org-footnote-section "\n"))))
+      ;; Move to the end of this entry (which may be
+      ;; `org-footnote-section' or the current one).
       (org-footnote-goto-local-insertion-point)
       (org-show-context 'link-search))
      (t
       ;; In a non-Org file.  Search for footnote tag, or create it if
-      ;; necessary (at the end of buffer, or before a signature if in
+      ;; specified (at the end of buffer, or before signature if in
       ;; Message mode).  Set point after any definition already there.
-      (let ((tag (concat "^" org-footnote-tag-for-non-org-mode-files "[ \t]*$"))
-	    (max (save-excursion
-		   (if (and (derived-mode-p 'message-mode)
-			    (re-search-forward
-			     message-signature-separator nil t))
-		       (copy-marker (point-at-bol) t)
-		     (copy-marker (point-max) t)))))
+      (let ((tag (and org-footnote-tag-for-non-org-mode-files
+		      (concat "^" (regexp-quote
+				   org-footnote-tag-for-non-org-mode-files)
+			      "[ \t]*$")))
+	    (max (if (and (derived-mode-p 'message-mode)
+			  (goto-char (point-max))
+			  (re-search-backward
+			   message-signature-separator nil t))
+		     (progn
+		       ;; Ensure one blank line separates last
+		       ;; footnote from signature.
+		       (beginning-of-line)
+		       (open-line 2)
+		       (point-marker))
+		   (point-max-marker))))
 	(goto-char max)
-	(unless (re-search-backward tag nil t)
-	  (skip-chars-backward " \t\r\n")
-	  (delete-region (point) max)
-	  (insert "\n\n" org-footnote-tag-for-non-org-mode-files "\n"))
-	;; Skip existing footnotes.
-	(while (re-search-forward org-footnote-definition-re max t))
-	(let ((def (org-footnote-at-definition-p)))
-	  (when def (goto-char (nth 2 def))))
+	;; Check if the footnote tag is defined but missing.  In this
+	;; case, insert it, before any footnote or one blank line
+	;; after any previous text.
+	(save-excursion
+	  (when (and tag (not (re-search-backward tag nil t)))
+	    (skip-chars-backward " \t\r\n")
+	    (while (re-search-backward org-footnote-definition-re nil t))
+	    (unless (bolp) (newline 2))
+	    (insert org-footnote-tag-for-non-org-mode-files "\n\n")))
+	;; Remove superfluous white space and clear marker.
+	(skip-chars-backward " \t\r\n")
+	(delete-region (point) max)
+	(unless (bolp) (newline))
 	(set-marker max nil))))
-    ;; Insert footnote label, position point and notify user.
-    (unless (bolp) (insert "\n"))
-    (insert "\n[" label "] \n")
-    (backward-char)
-    (message "Edit definition and go back with `C-c &' or, if unique, with `C-c C-c'.")))
+    ;; Insert footnote label.
+    (insert "\n[" label "] ")
+    ;; Only notify user about next possible action when in an Org
+    ;; buffer, as the bindings may have different meanings otherwise.
+    (when (org-mode-p)
+      (message
+       "Edit definition and go back with `C-c &' or, if unique, with `C-c C-c'."))))
 
 ;;;###autoload
 (defun org-footnote-action (&optional special)
@@ -672,28 +702,37 @@ Additional note on `org-footnote-insert-pos-for-preprocessor':
 	    (progn
 	      (setq ins-point (match-beginning 0))
 	      (delete-region (match-beginning 0) (org-end-of-subtree t)))
-	  (setq ins-point (point-max))))
+	  ;; Remove superfluous blank lines at the end of buffer.
+	  (goto-char (point-max))
+	  (skip-chars-backward " \r\t\n")
+	  (delete-region (point) (point-max))
+	  (unless (bolp) (newline))
+	  (setq ins-point (point))))
        (t
-	(when (re-search-forward
-	       (concat "^"
-		       (regexp-quote org-footnote-tag-for-non-org-mode-files)
-		       "[ \t]*$")
-	       nil t)
+	(when (and (not (equal org-footnote-tag-for-non-org-mode-files ""))
+		   (re-search-forward
+		    (concat "^" (regexp-quote
+				 org-footnote-tag-for-non-org-mode-files)
+			    "[ \t]*$")
+		    nil t))
 	  (replace-match ""))
-	;; In message-mode, ensure footnotes are inserted before the
+	;; In Message mode, ensure footnotes are inserted before the
 	;; signature.
-	(let ((pt-max
-	       (or (and (derived-mode-p 'message-mode)
-			(save-excursion
-			  (goto-char (point-max))
-			  (re-search-backward
-			   message-signature-separator nil t)
-			  (1- (point))))
-		   (point-max))))
+	(let ((pt-max (if (and (derived-mode-p 'message-mode)
+			       (goto-char (point-max))
+			       (re-search-backward
+				message-signature-separator nil t))
+			  (progn
+			    ;; Ensure one blank line separates last
+			    ;; footnote from signature.
+			    (beginning-of-line)
+			    (open-line 2)
+			    (point))
+			(point-max))))
 	  (goto-char pt-max)
 	  (skip-chars-backward " \t\n\r")
-	  (forward-line)
 	  (delete-region (point) pt-max))
+	(unless (bolp) (newline))
 	(setq ins-point (point))))
       ;; 3. Clean-up REF-TABLE.
       (setq ref-table
@@ -726,19 +765,26 @@ Additional note on `org-footnote-insert-pos-for-preprocessor':
        ((or (not (org-mode-p))
 	    org-footnote-section
 	    (not sort-only))
-	;; Insert again the section title.
+	;; Insert again the section title, if any.  Ensure that title,
+	;; or the subsequent footnotes, will be separated by a blank
+	;; lines from the rest of the document.  In an Org buffer,
+	;; separate section with a blank line, unless explicitly
+	;; stated in `org-blank-before-new-entry'.
 	(cond
 	 ((not (org-mode-p))
-	  (insert "\n\n" org-footnote-tag-for-non-org-mode-files "\n"))
+	  (unless (bolp) (newline))
+	  (when org-footnote-tag-for-non-org-mode-files
+	    (insert "\n" org-footnote-tag-for-non-org-mode-files "\n")))
 	 ((and org-footnote-section (not export-props))
-	  (or (bolp) (insert "\n"))
+	  (unless (bolp) (newline))
+	  (when (and (cdr (assq 'heading org-blank-before-new-entry))
+		     (zerop (save-excursion (org-back-over-empty-lines))))
+	    (insert "\n"))
 	  (insert "* " org-footnote-section "\n")))
-	;; Insert the footnotes.
-	(insert "\n"
-		(mapconcat (lambda (x) (format "[%s] %s"
+	;; Insert the footnotes, separated by a blank line.
+	(insert (mapconcat (lambda (x) (format "\n[%s] %s"
 					  (nth (if sort-only 0 1) x) (nth 2 x)))
-			   ref-table "\n\n")
-		"\n\n")
+			   ref-table "\n"))
 	;; When exporting, add newly inserted markers along with their
 	;; associated definition to `org-export-footnotes-seen'.
 	(when export-props
