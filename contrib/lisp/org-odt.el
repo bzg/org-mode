@@ -832,8 +832,10 @@ PUB-DIR is set, use this as the publishing directory."
 
 (defun org-odt-format-line (line)
   (case org-lparse-dyn-current-environment
-    (fixedwidth (concat (org-odt-format-source-code-or-example-line
-			 (org-xml-encode-plain-text line)) "\n"))
+    (fixedwidth (concat
+		 (org-odt-format-stylized-paragraph
+		  'src (org-odt-fill-tabs-and-spaces
+			(org-xml-encode-plain-text line))) "\n"))
     (t (concat line "\n"))))
 
 (defun org-odt-format-comment (fmt &rest args)
@@ -850,21 +852,15 @@ PUB-DIR is set, use this as the publishing directory."
 				((string= s "\t") (org-odt-format-tabs))
 				(t (org-odt-format-spaces (length s))))) line))
 
-(defun org-odt-format-source-code-or-example-line (line)
-  (org-odt-format-stylized-paragraph 'src (org-odt-fill-tabs-and-spaces line)))
-
-(defun org-odt-format-example (lines)
+(defun org-odt-format-source-code-or-example
+  (lines lang caption textareap cols rows num cont rpllbl fmt)
+  (setq lines (org-export-number-lines (org-xml-encode-plain-text-lines lines)
+				       0 0 num cont rpllbl fmt))
   (mapconcat
    (lambda (line)
-     (org-odt-format-source-code-or-example-line line))
+     (org-odt-format-stylized-paragraph
+      'src (org-odt-fill-tabs-and-spaces line)))
    (org-split-string lines "[\r\n]") "\n"))
-
-(defun org-odt-format-source-code-or-example (lines lang caption textareap
-						    cols rows num cont
-						    rpllbl fmt)
-  (org-odt-format-example (org-export-number-lines
-			   (org-xml-encode-plain-text-lines lines)
-			   0 0 num cont rpllbl fmt)))
 
 (defun org-xml-encode-plain-text-lines (rtn)
   (mapconcat 'org-xml-encode-plain-text (org-split-string rtn "[\r\n]") "\n"))
