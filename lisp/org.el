@@ -2967,6 +2967,28 @@ lined-up with respect to each other."
   :group 'org-properties
   :type 'string)
 
+(defcustom org-properties-postprocess-alist nil
+  "Alist of properties and functions to adjust inserted values.
+Elements of this alist must be of the form 
+
+  ([string] [function])
+
+where [string] must be a property name and [function] must be a
+lambda expression: this lambda expression must take one argument,
+the value to adjust, and return the new value as a string.
+
+For example, this element will allow the property \"Remaining\"
+to be updated wrt the relation between the \"Effort\" property
+and the clock summary:
+
+ ((\"Remaining\" (lambda(value)
+                   (let ((clocksum (org-clock-sum-current-item))
+                         (effort (org-duration-string-to-minutes 
+                                   (org-entry-get (point) \"Effort\"))))
+                     (org-minutes-to-hh:mm-string (- effort clocksum))))))"
+  :group 'org-properties
+  :type 'alist)
+
 (defcustom org-use-property-inheritance nil
   "Non-nil means properties apply also for sublevels.
 
@@ -14239,6 +14261,9 @@ in the current file."
   (let* ((property (or property (org-read-property-name)))
 	 (value (or value (org-read-property-value property))))
     (setq org-last-set-property property)
+    ;; Possibly postprocess the inserted value:
+    (when (assoc property org-properties-postprocess-alist)
+      (setq value (funcall (cadr fn) value)))
     (unless (equal (org-entry-get nil property) value)
       (org-entry-put nil property value))))
 
