@@ -709,13 +709,14 @@ Additional note on `org-footnote-insert-pos-for-preprocessor':
 	  (unless (bolp) (newline))
 	  (setq ins-point (point))))
        (t
-	(when (and (not (equal org-footnote-tag-for-non-org-mode-files ""))
-		   (re-search-forward
-		    (concat "^" (regexp-quote
-				 org-footnote-tag-for-non-org-mode-files)
-			    "[ \t]*$")
-		    nil t))
-	  (replace-match ""))
+	;; Remove any left-over tag in the buffer, if one is set up.
+	(when org-footnote-tag-for-non-org-mode-files
+	  (let ((tag (concat "^" (regexp-quote
+				  org-footnote-tag-for-non-org-mode-files)
+			     "[ \t]*$")))
+	    (while (re-search-forward tag nil t)
+	      (replace-match "")
+	      (delete-region (point) (progn (forward-line) (point))))))
 	;; In Message mode, ensure footnotes are inserted before the
 	;; signature.
 	(let ((pt-max (if (and (derived-mode-p 'message-mode)
