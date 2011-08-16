@@ -1335,6 +1335,15 @@ MAY-INLINE-P allows inlining it as an image."
 (defconst org-odt-manifest-file-entry-tag
   "<manifest:file-entry manifest:media-type=\"%s\" manifest:full-path=\"%s\"/>")
 
+(defcustom org-export-odt-prettify-xml nil
+  "Specify whether or not the xml output should be prettified.
+When this option is turned on, `indent-region' is run on all
+component xml buffers before they are saved.  Turn this off for
+regular use.  Turn this on if you need to examine the xml
+visually."
+  :group 'org-export-odt
+  :type 'boolean)
+
 (defun org-odt-save-as-outfile (target opt-plist)
   ;; write meta file
   (org-odt-update-meta-file opt-plist)
@@ -1368,8 +1377,9 @@ MAY-INLINE-P allows inlining it as an image."
     (mapc (lambda (file)
 	    (with-current-buffer
 		(find-file-noselect (expand-file-name file) t)
-	      ;; prettify output
-	      (indent-region (point-min) (point-max))
+	      ;; prettify output if needed
+	      (when org-export-odt-prettify-xml
+		(indent-region (point-min) (point-max)))
 	      (save-buffer)))
 	  org-export-odt-save-list)
 
