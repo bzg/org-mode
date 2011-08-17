@@ -1326,6 +1326,18 @@ description to use."
   :group 'org-link
   :type 'function)
 
+(defcustom org-link-display-descriptive t
+  "Non-nil means Org will display descriptive links.
+E.g. [[http://orgmode.org][Org website]] will be displayed as
+\"Org Website\", hiding the link itself and just displaying its
+description.  When set to `nil', Org will display the full links
+literally.
+
+You can interactively set the value of this variable using the
+`org-toggle-link-display'."
+  :group 'org-link
+  :type 'boolean)
+
 (defgroup org-link-store nil
   "Options concerning storing links in Org-mode."
   :tag "Org Store Link"
@@ -18425,14 +18437,14 @@ See the individual commands for more information."
      ["Previous link" org-previous-link t]
      "--"
      ["Descriptive Links"
-      (progn (add-to-invisibility-spec '(org-link)) (org-restart-font-lock))
+      org-toggle-link-display
       :style radio
-      :selected (member '(org-link) buffer-invisibility-spec)]
+      :selected org-link-display-descriptive
+      ]
      ["Literal Links"
-      (progn
-	(org-remove-from-invisibility-spec '(org-link)) (org-restart-font-lock))
+      org-toggle-link-display
       :style radio
-      :selected (not (member '(org-link) buffer-invisibility-spec))])
+      :selected (not org-link-display-descriptive)])
     "--"
     ("TODO Lists"
      ["TODO/DONE/-" org-todo t]
@@ -20488,6 +20500,17 @@ if no description is present"
 				     (match-string 3 link)))
 			   nil t link)
       link)))
+
+(defun org-toggle-link-display ()
+  "Toggle the literal or descriptive display of links."
+  (interactive)
+  (if org-link-display-descriptive
+      (progn (org-remove-from-invisibility-spec '(org-link))
+	     (org-restart-font-lock)
+	     (setq org-link-display-descriptive nil))
+    (progn (add-to-invisibility-spec '(org-link)) 
+	   (org-restart-font-lock)
+	   (setq org-link-display-descriptive t))))
 
 ;; Speedbar support
 
