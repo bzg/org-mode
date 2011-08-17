@@ -354,7 +354,7 @@ sibling does not exist, it will be created at the end of the subtree."
     (widen)
     (let (b e pos leader level)
       (org-back-to-heading t)
-      (looking-at outline-regexp)
+      (looking-at org-outline-regexp)
       (setq leader (match-string 0)
 	    level (funcall outline-level))
       (setq pos (point))
