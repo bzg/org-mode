@@ -466,6 +466,7 @@ or new, let the user edit the definition of the footnote."
       (org-footnote-create-definition label)
       (org-footnote-auto-adjust-maybe)))))
 
+(defvar org-blank-before-new-entry nil) ; silence byte-compiler
 (defun org-footnote-create-definition (label)
   "Start the definition of a footnote with label LABEL."
   (interactive "sLabel: ")
