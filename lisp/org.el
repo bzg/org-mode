@@ -19115,7 +19115,7 @@ position before START-RE (resp. after END-RE)."
 	     (> (setq end (match-end 0)) pos)
 	     ;; ... without another START-RE in-between.
 	     (goto-char (match-beginning 0))
-	     (not (re-search-backward start-re pos t))
+	     (not (re-search-backward start-re (1+ pos) t))
 	     ;; Return value.
 	     (cons beg end))))))
 
