@@ -2969,7 +2969,7 @@ lined-up with respect to each other."
 
 (defcustom org-properties-postprocess-alist nil
   "Alist of properties and functions to adjust inserted values.
-Elements of this alist must be of the form 
+Elements of this alist must be of the form
 
   ([string] [function])
 
@@ -2983,7 +2983,7 @@ and the clock summary:
 
  ((\"Remaining\" (lambda(value)
                    (let ((clocksum (org-clock-sum-current-item))
-                         (effort (org-duration-string-to-minutes 
+                         (effort (org-duration-string-to-minutes
                                    (org-entry-get (point) \"Effort\"))))
                      (org-minutes-to-hh:mm-string (- effort clocksum))))))"
   :group 'org-properties
