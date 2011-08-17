@@ -1970,6 +1970,16 @@ heading."
 	  (const :tag "Always" t)
 	  (const :tag "Prompt for confirmation" confirm)))
 
+(defcustom org-refile-active-region-within-subtree nil
+  "Non-nil means also refile active region within a subtree.
+
+By default `org-refile' doesn't allow refiling regions if they
+don't contain a set of subtrees, but it might be convenient to
+do so sometimes: in that case, the first line of the region is
+converted to a headline before refiling."
+  :group 'org-refile
+  :type 'boolean)
+
 (defgroup org-todo nil
   "Options concerning TODO items in Org-mode."
   :tag "Org TODO"
@@ -10435,8 +10445,10 @@ prefix argument (`C-u C-u C-u C-c C-w')."
 	(goto-char region-start)
 	(or (bolp) (goto-char (point-at-bol)))
 	(setq region-start (point))
-	(unless (org-kill-is-subtree-p
-		 (buffer-substring region-start region-end))
+	(unless (or (org-kill-is-subtree-p
+		     (buffer-substring region-start region-end))
+		    (prog1 org-refile-active-region-within-subtree
+		      (org-toggle-heading)))
 	  (error "The region is not a (sequence of) subtree(s)")))
       (if (equal goto '(16))
 	  (org-refile-goto-last-stored)
@@ -10452,8 +10464,11 @@ prefix argument (`C-u C-u C-u C-c C-w')."
 		      (setq goto nil)))
 	       (setq it (or rfloc
 			    (save-excursion
+			      (org-back-to-heading t)
 			      (org-refile-get-location
-			       (if goto "Goto" "Refile to") default-buffer
+			       (cond (goto "Goto")
+				     (regionp "Refile region to")
+				     (t "Refile subtree to")) default-buffer
 			       org-refile-allow-creating-parent-nodes)))))
 	  (setq file (nth 1 it)
 		re (nth 2 it)
