@@ -3339,6 +3339,7 @@ link and description parts of the link.
 @cindex following links
 @orgcmd{C-c C-o,org-open-at-point}
 @vindex org-file-apps
+@vindex org-link-frame-setup
 Open link at point.  This will launch a web browser for URLs (using
 @command{browse-url-at-point}), run VM/MH-E/Wanderlust/Rmail/Gnus/BBDB for
 the corresponding links, and execute the command in a shell link.  When the
@@ -3352,7 +3353,9 @@ Classification of files is based on file extension only.  See option
 visit the file with Emacs, use a @kbd{C-u} prefix.  If you want to avoid
 opening in Emacs, use a @kbd{C-u C-u} prefix.@*
 If the cursor is on a headline, but not on a link, offer all links in the
-headline and entry text.
+headline and entry text.  If you want to setup the frame configuration for
+following links, customize @code{org-link-frame-setup}.
+
 @orgkey @key{RET}
 @vindex org-return-follows-link
 When @code{org-return-follows-link} is set, @kbd{@key{RET}} will also follow
