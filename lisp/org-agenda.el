@@ -78,6 +78,9 @@
 (declare-function org-habit-get-priority "org-habit" (habit &optional moment))
 (declare-function org-pop-to-buffer-same-window "org-compat" 
 		  (&optional buffer-or-name norecord label))
+(declare-function org-duration-string-to-minutes "org-clock" (s))
+(declare-function org-hh:mm-string-to-minutes "org-clock" (s))
+(declare-function org-minutes-to-hh:mm-string "org-clock" (m))
 
 (defvar calendar-mode-map)
 (defvar org-clock-current-task) ; defined in org-clock.el

@@ -15867,27 +15867,6 @@ If there is already a time stamp at the cursor position, update it."
       (org-insert-time-stamp
        (encode-time 0 0 0 (nth 1 cal-date) (car cal-date) (nth 2 cal-date))))))
 
-(defun org-minutes-to-hh:mm-string (m)
-  "Compute H:MM from a number of minutes."
-  (let ((h (/ m 60)))
-    (setq m (- m (* 60 h)))
-    (format org-time-clocksum-format h m)))
-
-(defun org-hh:mm-string-to-minutes (s)
-  "Convert a string H:MM to a number of minutes.
-If the string is just a number, interpret it as minutes.
-In fact, the first hh:mm or number in the string will be taken,
-there can be extra stuff in the string.
-If no number is found, the return value is 0."
-  (cond
-   ((integerp s) s)
-   ((string-match "\\([0-9]+\\):\\([0-9]+\\)" s)
-    (+ (* (string-to-number (match-string 1 s)) 60)
-       (string-to-number (match-string 2 s))))
-   ((string-match "\\([0-9]+\\)" s)
-    (string-to-number (match-string 1 s)))
-   (t 0)))
-
 (defcustom org-effort-durations
   `(("h" . 60)
     ("d" . ,(* 60 8))
@@ -15907,25 +15886,6 @@ effort string \"2hours\" is equivalent to 120 minutes."
   :group 'org-agenda
   :type '(alist :key-type (string :tag "Modifier")
 		:value-type (number :tag "Minutes")))
-
-(defun org-duration-string-to-minutes (s)
-  "Convert a duration string S to minutes.
-
-A bare number is interpreted as minutes, modifiers can be set by
-customizing `org-effort-durations' (which see).
-
-Entries containing a colon are interpreted as H:MM by
-`org-hh:mm-string-to-minutes'."
-  (let ((result 0)
-	(re (concat "\\([0-9]+\\) *\\("
-		    (regexp-opt (mapcar 'car org-effort-durations))
-		    "\\)")))
-    (while (string-match re s)
-      (incf result (* (cdr (assoc (match-string 2 s) org-effort-durations))
-		      (string-to-number (match-string 1 s))))
-      (setq s (replace-match "" nil t s)))
-    (incf result (org-hh:mm-string-to-minutes s))
-    result))
 
 ;;;; Files
 
