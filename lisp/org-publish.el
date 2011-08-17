@@ -4,7 +4,6 @@
 ;; Author: David O'Toole <dto@gnu.org>
 ;; Maintainer: Carsten Dominik <carsten DOT dominik AT gmail DOT com>
 ;; Keywords: hypermedia, outlines, wp
-;; Version: 7.7
 
 ;; This file is part of GNU Emacs.
 ;;
@@ -1182,7 +1181,5 @@ Returns value on success, else nil."
      (cadr (nth 5 src-attr)))))
 
 (provide 'org-publish)
-
-
 
 ;;; org-publish.el ends here

@@ -5,7 +5,6 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 7.7
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -683,6 +682,5 @@ a time), or the day by one (if it does not contain a time)."
 					       have-time))))))
 
 (provide 'org-icalendar)
-
 
 ;;; org-icalendar.el ends here

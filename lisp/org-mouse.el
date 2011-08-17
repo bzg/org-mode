@@ -4,7 +4,7 @@
 ;;
 ;; Author: Piotr Zielinski <piotr dot zielinski at gmail dot com>
 ;; Maintainer: Carsten Dominik <carsten at orgmode dot org>
-;; Version: 7.7
+
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -70,8 +70,7 @@
 ;;
 ;; Since version 5.10: Changes are listed in the general org-mode docs.
 ;;
-;; Version 5.09
-;; + Version number synchronization with Org-mode.
+;; Version 5.09;; + Version number synchronization with Org-mode.
 ;;
 ;; Version 0.25
 ;; + made compatible with org-mode 4.70 (thanks to Carsten for the patch)
@@ -1145,7 +1144,5 @@ This means, between the beginning of line and the point."
 	    (:right (org-agenda-later 1)))))))
 
 (provide 'org-mouse)
-
-
 
 ;;; org-mouse.el ends here

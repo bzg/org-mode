@@ -4,7 +4,6 @@
 ;;
 ;; Author: Philip Jackson <emacs@shellarchive.co.uk>
 ;; Keywords: erc, irc, link, org
-;; Version: 7.7
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -252,7 +251,5 @@ default."
 	(erc-select :server server :port port))))
 
 (provide 'org-irc)
-
-
 
 ;;; org-irc.el ends here

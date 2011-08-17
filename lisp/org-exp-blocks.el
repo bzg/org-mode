@@ -3,7 +3,6 @@
 ;; Copyright (C) 2009-2011 Free Software Foundation, Inc.
 
 ;; Author: Eric Schulte
-;; Version: 7.7
 
 ;; This file is part of GNU Emacs.
 ;;
@@ -375,6 +374,5 @@ other backends, it converts the comment into an EXAMPLE segment."
 	      "#+END_EXAMPLE\n")))))
 
 (provide 'org-exp-blocks)
-
 
 ;;; org-exp-blocks.el ends here

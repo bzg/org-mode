@@ -5,7 +5,6 @@
 ;; Author: Eric Schulte <schulte dot eric at gmail dot com>
 ;; Keywords: tables, plotting
 ;; Homepage: http://orgmode.org
-;; Version: 7.7
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -349,6 +348,5 @@ line directly before or after the table."
       (run-with-idle-timer 0.1 nil (lambda () (delete-file data-file))))))
 
 (provide 'org-plot)
-
 
 ;;; org-plot.el ends here

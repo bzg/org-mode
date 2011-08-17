@@ -222,4 +222,5 @@ variables and values specified in props"
     (delq nil results)) '()))
 
 (provide 'org-collector)
+
 ;;; org-collector ends here

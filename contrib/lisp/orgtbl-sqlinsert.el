@@ -112,4 +112,5 @@ to sanitize STR for use in SQL statements."
         (t nil)))
 
 (provide 'orgtbl-sqlinsert)
+
 ;;; orgtbl-sqlinsert.el ends here

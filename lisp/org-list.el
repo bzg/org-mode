@@ -6,7 +6,6 @@
 ;;	   Bastien Guerry <bzg AT gnu DOT org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 7.7
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -3206,6 +3205,5 @@ with overruling parameters for `org-list-to-generic'."
       params))))
 
 (provide 'org-list)
-
 
 ;;; org-list.el ends here

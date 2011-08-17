@@ -648,6 +648,4 @@ a time), or the day by one (if it does not contain a time)."
 
 (provide 'org2rem)
 
-
-
 ;;; org-exp.el ends here

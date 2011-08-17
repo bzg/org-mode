@@ -5,7 +5,6 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 7.7
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -443,7 +442,5 @@ With two arguments, return floor and remainder of their quotient."
     (funcall 'switch-to-buffer buffer-or-name norecord)))
 
 (provide 'org-compat)
-
-
 
 ;;; org-compat.el ends here

@@ -6,7 +6,6 @@
 ;;         Tassilo Horn <tassilo at member dot fsf dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 7.7
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -289,7 +288,6 @@ If `org-store-link' was called with a prefix arg the meaning of
   (if (not (gnus-alive-p)) (gnus)))
 
 (provide 'org-gnus)
-
 
 
 ;;; org-gnus.el ends here

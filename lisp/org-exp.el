@@ -5,7 +5,6 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 7.7
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -3218,7 +3217,5 @@ The depends on the variable `org-export-copy-to-kill'."
     (message "%s export done, pushed to kill ring and clipboard" format)))
 
 (provide 'org-exp)
-
-
 
 ;;; org-exp.el ends here

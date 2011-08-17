@@ -7,7 +7,6 @@
 ;;         Dan Davison <davison at stats dot ox dot ac dot uk>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 7.7
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -813,6 +812,5 @@ LANG is a string, and the returned major mode is a symbol."
      (or (cdr (assoc lang org-src-lang-modes)) lang)) "-mode")))
 
 (provide 'org-src)
-
 
 ;;; org-src.el ends here

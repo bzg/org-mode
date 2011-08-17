@@ -5,7 +5,6 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 7.7
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -914,7 +913,5 @@ If LABEL is non-nil, delete that footnote instead."
 		    (just-one-space)))))))
 
 (provide 'org-footnote)
-
-
 
 ;;; org-footnote.el ends here

@@ -4,7 +4,6 @@
 ;;
 ;; Emacs Lisp Archive Entry
 ;; Filename: org-docbook.el
-;; Version: 7.7
 ;; Author: Baoqiu Cui <cbaoqiu AT yahoo DOT com>
 ;; Maintainer: Baoqiu Cui <cbaoqiu AT yahoo DOT com>
 ;; Keywords: org, wp, docbook
@@ -1444,6 +1443,5 @@ the alist of previous items."
      (t line))))
 
 (provide 'org-docbook)
-
 
 ;;; org-docbook.el ends here

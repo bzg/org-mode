@@ -216,4 +216,5 @@
           (buffer-substring 12 (1- (point-max))))))) ; to strip off final newline
 
 (provide 'org-git-link)
+
 ;;; org-git-link.el ends here

@@ -174,6 +174,4 @@ OF matrix."
 
 (provide 'org-learn)
 
-
-
 ;;; org-learn.el ends here

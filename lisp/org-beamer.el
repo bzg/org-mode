@@ -2,7 +2,6 @@
 ;;
 ;; Copyright (C) 2007-2011 Free Software Foundation, Inc.
 ;;
-;; Version: 7.7
 ;; Author: Carsten Dominik <carsten.dominik AT gmail DOT com>
 ;; Maintainer: Carsten Dominik <carsten.dominik AT gmail DOT com>
 ;; Keywords: org, wp, tex
@@ -631,7 +630,5 @@ include square brackets."
 	  'org-beamer-allowed-property-values)
 
 (provide 'org-beamer)
-
-
 
 ;;; org-beamer.el ends here

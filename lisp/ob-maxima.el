@@ -6,7 +6,6 @@
 ;;	   Eric Schulte
 ;; Keywords: literate programming, reproducible research, maxima
 ;; Homepage: http://orgmode.org
-;; Version: 7.7
 
 ;; This file is part of GNU Emacs.
 

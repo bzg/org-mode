@@ -1833,5 +1833,4 @@ lang=\"%s\" xml:lang=\"%s\">
 
 (provide 'org-xhtml)
 
-
 ;;; org-xhtml.el ends here

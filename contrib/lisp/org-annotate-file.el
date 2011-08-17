@@ -127,4 +127,5 @@ show the relevant section"
   (insert link))
 
 (provide 'org-annotate-file)
+
 ;;; org-annotate-file.el ends here

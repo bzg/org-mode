@@ -4,7 +4,6 @@
 
 ;; Emacs Lisp Archive Entry
 ;; Filename: org-crypt.el
-;; Version: 7.7
 ;; Keywords: org-mode
 ;; Author: John Wiegley <johnw@gnu.org>
 ;; Maintainer: Peter Jones <pjones@pmade.com>
@@ -251,7 +250,5 @@ nil      : Leave auto-save-mode enabled.
 (add-hook 'org-reveal-start-hook 'org-decrypt-entry)
 
 (provide 'org-crypt)
-
-
 
 ;;; org-crypt.el ends here

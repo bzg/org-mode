@@ -334,6 +334,4 @@ with working links."
 
 (provide 'org-wikinodes)
 
-
-
 ;;; org-wikinodes.el ends here

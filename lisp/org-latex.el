@@ -4,7 +4,6 @@
 ;;
 ;; Emacs Lisp Archive Entry
 ;; Filename: org-latex.el
-;; Version: 7.7
 ;; Author: Bastien Guerry <bzg AT gnu DOT org>
 ;; Maintainer: Carsten Dominik <carsten.dominik AT gmail DOT com>
 ;; Keywords: org, wp, tex
@@ -2768,7 +2767,5 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 
 (provide 'org-export-latex)
 (provide 'org-latex)
-
-
 
 ;;; org-latex.el ends here

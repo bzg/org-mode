@@ -5,7 +5,6 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 7.7
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -2034,6 +2033,44 @@ the currently selected interval size."
 	 (org-update-dblock)
 	 t)))))
 
+(defun org-clocktable-sort-clock-data (tables params)
+  "TABLES is a list of tables with clocking data as produced by
+`org-clock-get-table-data'.  PARAMS is the parameter property
+list obtained from the dynamic block defintion.
+
+When PARAMS contains a :SORT entry, sort the tables and the entries
+inside them accordnly:
+
+:SORT time-up or T, sorts by most time spent on top
+:SORT time-down, sorts by least time spent on top
+
+Returns the sorted table list"
+  (let ((sort (plist-get params :sort)))
+    (if (not sort) tables
+      (sort (mapcar
+             (lambda (table)
+               (list (nth 0 table)
+                     (nth 1 table)
+                     (sort
+                      (third table)
+                      (lambda (elem1 elem2)
+                        (let ((d1 (nth 3 elem1))
+                              (d2 (nth 3 elem2)))
+                          (cond ((memq sort '(t time-up))
+                                 (> d1 d2))
+                                ((eq sort 'time-down)
+                                 (< d1 d2))
+                                (t (error "Invalid :sort parameter %s" sort))))))))
+             tables)
+            (lambda (table1 table2)
+              (let ((d1 (nth 1 table1))
+                    (d2 (nth 1 table2)))
+                (cond ((memq sort '(t time-up))
+                       (> d1 d2))
+                      ((eq sort 'time-down)
+                       (< d1 d2))
+                      (t (error "Invalid :sort parameter %s" sort)))))))))
+
 (defun org-dblock-write:clocktable (params)
   "Write the standard clocktable."
   (setq params (org-combine-plists org-clocktable-defaults params))
@@ -2051,7 +2088,6 @@ the currently selected interval size."
 			  'org-clocktable-write-default))
 	   cc range-text ipos pos one-file-with-archives
 	   scope-is-list tbls level)
-
       ;; Check if we need to do steps
       (when block
 	;; Get the range text for the header
@@ -2120,7 +2156,8 @@ the currently selected interval size."
       (setq params (plist-put params :one-file-with-archives
 			      one-file-with-archives))
 
-      (funcall formatter ipos tbls params))))
+      (funcall formatter ipos
+	       (org-clocktable-sort-clock-data tbls params) params))))
 
 (defun org-clocktable-write-default (ipos tables params)
   "Write out a clock table at position IPOS in the current buffer.
@@ -2638,8 +2675,6 @@ The details of what will be saved are regulated by the variable
 (org-defkey org-mode-map "\C-c\C-x\C-e" 'org-clock-modify-effort-estimate)
 
 (provide 'org-clock)
-
-
 
 ;;; org-clock.el ends here
 

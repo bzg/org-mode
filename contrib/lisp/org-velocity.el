@@ -711,4 +711,5 @@ file.  Calling with ARG forces current file."
 	(delete-other-windows)))))
 
 (provide 'org-velocity)
+
 ;;; org-velocity.el ends here

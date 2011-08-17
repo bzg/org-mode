@@ -6,7 +6,6 @@
 ;;         Carsten Dominik <carsten dot dominik at gmail dot com>
 ;;         Eric Schulte <schulte dot eric at gmail dot com>
 ;; Keywords: org, wp, remember
-;; Version: 7.7
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -641,7 +640,5 @@ This function relies `org-search-view' to locate results."
 			     string org-bibtex-prefix))))
 
 (provide 'org-bibtex)
-
-
 
 ;;; org-bibtex.el ends here

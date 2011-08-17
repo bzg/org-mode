@@ -3,10 +3,9 @@
 ;; Copyright (C) 2007-2011 Free Software Foundation, Inc.
 
 ;; Author: Paul Sexton <eeeickythump@gmail.com>
-;; Version: 7.7
+
 
 ;; Keywords: org, wp
-;; Version: 7.7
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -538,6 +537,5 @@ a new topic."
 (org-ctags-enable)
 
 (provide 'org-ctags)
-
 
 ;;; org-ctags.el ends here

@@ -5,7 +5,6 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 7.7
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -673,6 +672,5 @@ formatted as a string, not the original XML data."
     entry))
 
 (provide 'org-feed)
-
 
 ;;; org-feed.el ends here

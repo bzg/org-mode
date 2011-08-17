@@ -5,7 +5,6 @@
 ;; Author: Thomas Baumann <thomas dot baumann at ch dot tum dot de>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 7.7
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -224,7 +223,5 @@ folders."
       (error "Message not found"))))
 
 (provide 'org-mhe)
-
-
 
 ;;; org-mhe.el ends here
