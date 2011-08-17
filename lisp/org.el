@@ -4715,10 +4715,19 @@ This variable is set by `org-before-change-function'.
 (defvar org-inhibit-blocking nil)       ; Dynamically-scoped param.
 (defvar org-table-buffer-is-an nil)
 
-;; org-outline-regexp ought to be a defconst but is let-binding
-;; in some places -- e.g. see the macro org-with-limited-levels
-(defvar org-outline-regexp "\\*+ ")
-(defconst org-outline-regexp-bol "^\\*+ ")
+;; `org-outline-regexp' ought to be a defconst but is let-binding in
+;; some places -- e.g. see the macro org-with-limited-levels.
+;;
+;; In Org buffers, the value of `outline-regexp' is that of
+;; `org-outline-regexp'.  The only function still directly relying on
+;; `outline-regexp' is `org-overview' so that `org-cycle' can do its
+;; job when `orgstruct-mode' is active.
+(defvar org-outline-regexp "\\*+ "
+  "Regexp to match Org headlines.")
+(defconst org-outline-regexp-bol "^\\*+ "
+  "Regexp to match Org headlines.
+This is similar to `org-outline-regexp' but additionally makes
+sure that we are at the beginning of the line.")
 
 ;;;###autoload
 (define-derived-mode org-mode outline-mode "Org"
