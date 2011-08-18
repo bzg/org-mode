@@ -667,8 +667,8 @@ Additional note on `org-footnote-insert-pos-for-preprocessor':
 	    (and inlinep
 		 org-footnote-fill-after-inline-note-extraction
 		 (org-fill-paragraph)))
-	  ;; Add label (REF), identifier (MARKER) and definition (DEF)
-	  ;; to REF-TABLE if data was unknown.
+	  ;; Add label (REF), identifier (MARKER), definition (DEF)
+	  ;; and type (INLINEP) to REF-TABLE if data was unknown.
 	  (unless a
 	    (let ((def (or (nth 3 ref)	; inline
 			   (and export-props
@@ -686,28 +686,21 @@ Additional note on `org-footnote-insert-pos-for-preprocessor':
 				      '(:todo-keywords t :tags t :priority t))))
 				(org-export-preprocess-string def parameters))
 			    def)
-			  inlinep) ref-table)))
-	  ;; Remove definition of non-inlined footnotes.
-	  (unless inlinep (org-footnote-delete-definitions lbl))))
+			  inlinep) ref-table)))))
       ;; 2. Find and remove the footnote section, if any.  Also
       ;;    determine where footnotes shall be inserted (INS-POINT).
       (goto-char (point-min))
       (cond
+       ((and org-footnote-section
+	     (org-mode-p)
+	     (re-search-forward
+	      (concat "^\\*[ \t]+" (regexp-quote org-footnote-section)
+		      "[ \t]*$")
+	      nil t))
+	(delete-region (match-beginning 0) (org-end-of-subtree t)))
        ((org-mode-p)
-	(if (and org-footnote-section
-		 (re-search-forward
-		  (concat "^\\*[ \t]+" (regexp-quote org-footnote-section)
-			  "[ \t]*$")
-		  nil t))
-	    (progn
-	      (setq ins-point (match-beginning 0))
-	      (delete-region (match-beginning 0) (org-end-of-subtree t)))
-	  ;; Remove superfluous blank lines at the end of buffer.
-	  (goto-char (point-max))
-	  (skip-chars-backward " \r\t\n")
-	  (delete-region (point) (point-max))
-	  (unless (bolp) (newline))
-	  (setq ins-point (point))))
+	(goto-char (point-max))
+	(unless (bolp) (newline)))
        (t
 	;; Remove any left-over tag in the buffer, if one is set up.
 	(when org-footnote-tag-for-non-org-mode-files
@@ -719,22 +712,19 @@ Additional note on `org-footnote-insert-pos-for-preprocessor':
 	      (delete-region (point) (progn (forward-line) (point))))))
 	;; In Message mode, ensure footnotes are inserted before the
 	;; signature.
-	(let ((pt-max (if (and (derived-mode-p 'message-mode)
-			       (goto-char (point-max))
-			       (re-search-backward
-				message-signature-separator nil t))
-			  (progn
-			    ;; Ensure one blank line separates last
-			    ;; footnote from signature.
-			    (beginning-of-line)
-			    (open-line 2)
-			    (point))
-			(point-max))))
-	  (goto-char pt-max)
-	  (skip-chars-backward " \t\n\r")
-	  (delete-region (point) pt-max))
-	(unless (bolp) (newline))
-	(setq ins-point (point))))
+	(if (and (derived-mode-p 'message-mode)
+		 (goto-char (point-max))
+		 (re-search-backward message-signature-separator nil t))
+	    (beginning-of-line)
+	  (goto-char (point-max)))))
+      ;; During export, `org-footnote-insert-pos-for-preprocessor' has
+      ;; precedence over previously found position.
+      (setq ins-point
+	    (copy-marker
+	     (if (and export-props
+		      (eq org-footnote-insert-pos-for-preprocessor 'point-min))
+		 (point-min)
+	       (point))))
       ;; 3. Clean-up REF-TABLE.
       (setq ref-table
 	    (delq nil
@@ -751,14 +741,13 @@ Additional note on `org-footnote-insert-pos-for-preprocessor':
 		      (t x)))
 		   ref-table)))
       (setq ref-table (nreverse ref-table))
-      ;; 4. Insert the footnotes again in the buffer, at the
+      ;; 4. Remove left-over definitions in the buffer.
+      (mapc (lambda (x) (unless (nth 3 x)
+		     (org-footnote-delete-definitions (car x))))
+	    ref-table)
+      ;; 5. Insert the footnotes again in the buffer, at the
       ;;    appropriate spot.
-      (goto-char (or
-		  (and export-props
-		       (eq org-footnote-insert-pos-for-preprocessor 'point-min)
-		       (point-min))
-		  ins-point
-		  (point-max)))
+      (goto-char ins-point)
       (cond
        ;; No footnote: exit.
        ((not ref-table))
@@ -773,15 +762,22 @@ Additional note on `org-footnote-insert-pos-for-preprocessor':
 	;; stated in `org-blank-before-new-entry'.
 	(cond
 	 ((not (org-mode-p))
+	  (skip-chars-backward " \t\n\r")
+	  (delete-region (point) ins-point)
 	  (unless (bolp) (newline))
+	  ;; Keep one blank line between footnotes and signature.
+	  (when (and (derived-mode-p 'message-mode)
+		     (save-excursion
+		       (re-search-forward message-signature-separator nil t)))
+	    (open-line 2))
 	  (when org-footnote-tag-for-non-org-mode-files
 	    (insert "\n" org-footnote-tag-for-non-org-mode-files "\n")))
 	 ((and org-footnote-section (not export-props))
-	  (unless (bolp) (newline))
 	  (when (and (cdr (assq 'heading org-blank-before-new-entry))
 		     (zerop (save-excursion (org-back-over-empty-lines))))
 	    (insert "\n"))
 	  (insert "* " org-footnote-section "\n")))
+	(set-marker ins-point nil)
 	;; Insert the footnotes, separated by a blank line.
 	(insert (mapconcat (lambda (x) (format "\n[%s] %s"
 					  (nth (if sort-only 0 1) x) (nth 2 x)))
