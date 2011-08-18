@@ -1420,8 +1420,8 @@ nil   Never use an ID to make a link, instead link using a text search for
   "Non-nil means file links from `org-store-link' contain context.
 A search string will be added to the file name with :: as separator and
 used to find the context when the link is activated by the command
-`org-open-at-point'. When this option is t, the entire active region
-will be placed in the search string of the file link. If set to a
+`org-open-at-point'.  When this option is t, the entire active region
+will be placed in the search string of the file link.  If set to a
 positive integer, only the first n lines of context will be stored.
 
 Using a prefix arg to the command \\[org-store-link] (`org-store-link')
@@ -1889,7 +1889,7 @@ This is list of cons cells.  Each cell contains:
   - a cons cell (:level . N).  Any headline of level N is considered a target.
     Note that, when `org-odd-levels-only' is set, level corresponds to
     order in hierarchy, not to the number of stars.
-  - a cons cell (:maxlevel . N). Any headline with level <= N is a target.
+  - a cons cell (:maxlevel . N).  Any headline with level <= N is a target.
     Note that, when `org-odd-levels-only' is set, level corresponds to
     order in hierarchy, not to the number of stars.
 
@@ -2473,7 +2473,7 @@ An auto-repeating task is immediately switched back to TODO when
 marked DONE.  If you are not logging state changes (by adding \"@\"
 or \"!\" to the TODO keyword definition), or set `org-log-done' to
 record a closing note, there will be no record of the task moving
-through DONE. This variable forces taking a note anyway.
+through DONE.  This variable forces taking a note anyway.
 
 nil     Don't force a record
 time    Record a time stamp
@@ -7261,7 +7261,7 @@ in the region."
 					  after-change-functions))
 	 (up-head (concat (make-string (org-get-valid-level level -1) ?*) " "))
 	 (diff (abs (- level (length up-head) -1))))
-    (if (= level 1) (error "Cannot promote to level 0. UNDO to recover if necessary"))
+    (if (= level 1) (error "Cannot promote to level 0.  UNDO to recover if necessary"))
     (replace-match up-head nil t)
     ;; Fixup tag positioning
     (and org-auto-align-tags (org-set-tags nil t))
@@ -8853,7 +8853,7 @@ If optional argument MERGE is set, merge TABLE into
 
 (defun org-link-unescape (str)
   "Unhex hexified unicode strings as returned from the JavaScript function
-encodeURIComponent. E.g. `%C3%B6' is the german Umlaut `ö'."
+encodeURIComponent.  E.g. `%C3%B6' is the german Umlaut `ö'."
   (unless (and (null str) (string= "" str))
     (let ((pos 0) (case-fold-search t) unhexed)
       (while (setq pos (string-match "\\(%[0-9a-f][0-9a-f]\\)+" str pos))
@@ -8863,7 +8863,7 @@ encodeURIComponent. E.g. `%C3%B6' is the german Umlaut `ö'."
   str)
 
 (defun org-link-unescape-compound (hex)
-  "Unhexify unicode hex-chars. E.g. `%C3%B6' is the German Umlaut `ö'.
+  "Unhexify unicode hex-chars.  E.g. `%C3%B6' is the German Umlaut `ö'.
 Note: this function also decodes single byte encodings like
 `%E1' (\"á\") if not followed by another `%[A-F0-9]{2}' group."
   (save-match-data
@@ -8948,8 +8948,8 @@ be displayed in the buffer instead of the link.
 If there is already a link at point, this command will allow you to edit link
 and description parts.
 
-With a \\[universal-argument] prefix, prompts for a file to link to. The file name can
-be selected using completion. The path to the file will be relative to the
+With a \\[universal-argument] prefix, prompts for a file to link to.  The file name can
+be selected using completion.  The path to the file will be relative to the
 current directory if the file is in the current directory or a subdirectory.
 Otherwise, the link will be the absolute path as completed in the minibuffer
 \(i.e. normally ~/path/to/file).  You can configure this behavior using the
@@ -17069,8 +17069,8 @@ If not, return to the original position and throw an error."
 
 (defun org-speed-command-default-hook (keys)
   "Hook for activating single-letter speed commands.
-`org-speed-commands-default' specifies a minimal command set. Use
-`org-speed-commands-user' for further customization."
+`org-speed-commands-default' specifies a minimal command set.  
+Use `org-speed-commands-user' for further customization."
   (when (or (and (bolp) (looking-at org-outline-regexp))
 	    (and (functionp org-use-speed-commands)
 		 (funcall org-use-speed-commands)))
@@ -17092,11 +17092,11 @@ Each hook takes a single argument, a user-pressed command key
 which is also a `self-insert-command' from the global map.
 
 Within the hook, examine the cursor position and the command key
-and return nil or a valid handler as appropriate. Handler could
+and return nil or a valid handler as appropriate.  Handler could
 be one of an interactive command, a function, or a form.
 
 Set `org-use-speed-commands' to non-nil value to enable this
-hook. The default setting is `org-speed-command-default-hook'."
+hook.  The default setting is `org-speed-command-default-hook'."
   :group 'org-structure
   :type 'hook)
 
@@ -17924,8 +17924,8 @@ This command does many different things, depending on context:
 	(org-update-checkbox-count-maybe)
 	(when firstp (org-list-send-list 'maybe))))
      ((org-at-item-p)
-      ;; Cursor at an item: repair list. Do checkbox related actions
-      ;; only if function was called with an argument. Send list only
+      ;; Cursor at an item: repair list.  Do checkbox related actions
+      ;; only if function was called with an argument.  Send list only
       ;; if at top item.
       (let* ((struct (org-list-struct))
 	     (old-struct (copy-tree struct))
@@ -18059,7 +18059,7 @@ all headlines to items, shifting text accordingly.
 
 If it is an item, convert all items to normal lines.
 
-If it is normal text, change region into an item. With a prefix
+If it is normal text, change region into an item.  With a prefix
 argument ARG, change each line in region into an item."
   (interactive "P")
   (let ((shift-text
@@ -18113,7 +18113,7 @@ argument ARG, change each line in region into an item."
      (save-excursion
        (goto-char beg)
        (cond
-	;; Case 1. Start at an item: de-itemize. Note that it only
+	;; Case 1. Start at an item: de-itemize.  Note that it only
 	;;         happens when a region is active: `org-ctrl-c-minus'
 	;;         would call `org-cycle-list-bullet' otherwise.
 	((org-at-item-p)
@@ -19997,7 +19997,7 @@ plainly yank the text as it is.
   "Perform some yank-like command.
 
 This function implements the behavior described in the `org-yank'
-documentation. However, it has been generalized to work for any
+documentation.  However, it has been generalized to work for any
 interactive command with similar behavior."
 
   ;; pretend to be command COMMAND
@@ -20197,7 +20197,7 @@ move point."
 
 (defun org-goto-first-child ()
   "Goto the first child, even if it is invisible.
-Return t when a child was found. Otherwise don't move point and
+Return t when a child was found.  Otherwise don't move point and
 return nil."
   (let (level (pos (point)) (re org-outline-regexp-bol))
     (when (condition-case nil (org-back-to-heading t) (error nil))
