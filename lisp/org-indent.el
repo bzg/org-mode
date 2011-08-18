@@ -69,18 +69,19 @@ It will be set in `org-indent-initialize'.")
 It will be set in `org-indent-initialize'.")
 (defvar org-indent-inlinetask-first-star (org-add-props "*" '(face org-warning))
   "First star of inline tasks, with correct face.")
+(defvar org-indent-agent-timer nil
+  "Timer running the initialize agent.")
+(defvar org-indent-agentized-buffers nil
+  "List of buffers watched by the initialize agent.")
+(defvar org-indent-agent-resume-timer nil
+  "Timer to reschedule agent after switching to other idle processes.")
+(defvar org-indent-agent-process-duration '(0 2 0)
+  "Time to run agent before switching to other idle processes.")
+(defvar org-indent-agent-resume-delay '(0 0 200000)
+  "Minimal time for other idle processes before switching back to agent.")
 (defvar org-indent-initial-marker nil
-  "Position of initialization before interrupt.")
-(defvar org-indent-initial-timer nil
-  "Timer used for initialization.")
-(defvar org-indent-initial-resume-timer nil
-  "Timer used to reschedule initialization process.")
-(defvar org-indent-initial-process-duration '(0 2 0)
-  "How long before initialization gives hand to other idle processes.")
-(defvar org-indent-initial-resume-delay '(0 0 200000)
-  "How long before resuming initialization process.")
-(defvar org-indent-initial-lock nil
-  "Lock used of initialization.")
+  "Position of initialization before interrupt.
+This is used locally in each buffer being initialized.")
 (defvar org-hide-leading-stars-before-indent-mode nil
   "Used locally.")
 (defvar org-indent-modified-headline-flag nil
@@ -173,8 +174,6 @@ during idle time." nil " Ind" nil
     (org-set-local 'indent-tabs-mode nil)
     (or org-indent-strings (org-indent-initialize))
     (org-set-local 'org-indent-initial-marker (copy-marker 1))
-    (org-set-local 'org-indent-initial-lock nil)
-    (org-set-local 'org-indent-initial-resume-timer nil)
     (when org-indent-mode-turns-off-org-adapt-indentation
       (org-set-local 'org-adapt-indentation nil))
     (when org-indent-mode-turns-on-hiding-stars
@@ -189,13 +188,19 @@ during idle time." nil " Ind" nil
 		  'org-indent-notify-modified-headline nil 'local)
     (and font-lock-mode (org-restart-font-lock))
     (org-indent-remove-properties (point-min) (point-max))
-    (org-set-local 'org-indent-initial-timer
-		   (run-with-idle-timer 0.2 t #'org-indent-initialize-buffer)))
+    ;; Submit current buffer to initialize agent.  If it's the first
+    ;; buffer submitted, also start the agent.  Current buffer is
+    ;; pushed in both cases to avoid a race condition.
+    (if org-indent-agentized-buffers
+	(push (current-buffer) org-indent-agentized-buffers)
+      (push (current-buffer) org-indent-agentized-buffers)
+      (setq org-indent-agent-timer
+	    (run-with-idle-timer 0.2 t #'org-indent-initialize-agent))))
    (t
     ;; mode was turned off (or we refused to turn it on)
     (kill-local-variable 'org-adapt-indentation)
-    (when (timerp org-indent-initial-timer)
-      (cancel-timer org-indent-initial-timer))
+    (setq org-indent-agentized-buffers
+	  (delq (current-buffer) org-indent-agentized-buffers))
     (when (markerp org-indent-initial-marker)
       (set-marker org-indent-initial-marker nil))
     (when (boundp 'org-hide-leading-stars-before-indent-mode)
@@ -228,26 +233,36 @@ during idle time." nil " Ind" nil
 			  '(line-prefix nil wrap-prefix nil) string)
   string)
 
-(defun org-indent-initialize-buffer ()
-  "Set virtual indentation for the whole buffer asynchronously."
-  (when (and org-indent-mode (not org-indent-initial-lock))
-    ;; Clean reschedule timer (cf `org-indent-add-properties').
-    (when org-indent-initial-resume-timer
-      (cancel-timer org-indent-initial-resume-timer))
-    (org-with-wide-buffer
-     (setq org-indent-initial-lock t)
-     (let ((interruptp
-	    ;; Always nil unless interrupted.
-	    (catch 'interrupt
-	      (and org-indent-initial-marker
-		   (marker-position org-indent-initial-marker)
-		   (org-indent-add-properties org-indent-initial-marker
-					      (point-max) t)
-		   nil))))
-       (move-marker org-indent-initial-marker interruptp)
-       ;; Job is complete: stop idle timer.
-       (unless interruptp (cancel-timer org-indent-initial-timer))))
-    (setq org-indent-initial-lock nil)))
+(defun org-indent-initialize-agent ()
+  "Start or resume current buffer initialization.
+Only buffers in `org-indent-agentized-buffers' trigger an action.
+When no more buffer is being watched, the agent suppress itself."
+  (setq org-indent-agentized-buffers
+	(org-remove-if-not #'buffer-live-p org-indent-agentized-buffers))
+  (unless org-indent-agentized-buffers (cancel-timer org-indent-agent-timer))
+  (when org-indent-agent-resume-timer
+    (cancel-timer org-indent-agent-resume-timer))
+  (when (memq (current-buffer) org-indent-agentized-buffers)
+    (org-indent-initialize-buffer (current-buffer))))
+
+(defun org-indent-initialize-buffer (buffer)
+  "Set virtual indentation for the buffer BUFFER, asynchronously."
+  (with-current-buffer buffer
+    (when org-indent-mode
+      (org-with-wide-buffer
+       (let ((interruptp
+	      ;; Always nil unless interrupted.
+	      (catch 'interrupt
+		(and org-indent-initial-marker
+		     (marker-position org-indent-initial-marker)
+		     (org-indent-add-properties org-indent-initial-marker
+						(point-max) t)
+		     nil))))
+	 (move-marker org-indent-initial-marker interruptp)
+	 ;; Job is complete: un-agentize buffer.
+	 (unless interruptp
+	   (setq org-indent-agentized-buffers
+		 (delq buffer org-indent-agentized-buffers))))))))
 
 (defsubst org-indent-set-line-properties (l w h)
   "Set prefix properties on current line an move to next one.
@@ -304,7 +319,7 @@ you want to use this feature."
 			    (+ (* org-indent-indentation-per-level
 				  (1- (org-inlinetask-get-task-level))) 2)))
 	    (time-limit (time-add (current-time)
-				  org-indent-initial-process-duration)))
+				  org-indent-agent-process-duration)))
        ;; 2. For each line, set `line-prefix' and `wrap-prefix'
        ;;    properties depending on the type of line (headline,
        ;;    inline task, item or other).
@@ -314,15 +329,15 @@ you want to use this feature."
 	    ;; When in async mode, check if interrupt is required.
 	    ((and async (input-pending-p)) (throw 'interrupt (point)))
 	    ;; In async mode, take a break of
-	    ;; `org-indent-initial-resume-delay' every
-	    ;; `org-indent-initial-process-duration' to avoid blocking
+	    ;; `org-indent-agent-resume-delay' every
+	    ;; `org-indent-agent-process-duration' to avoid blocking
 	    ;; any other idle timer or process output.
 	    ((and async (time-less-p time-limit (current-time)))
-	     (setq org-indent-initial-resume-timer
+	     (setq org-indent-agent-resume-timer
 		   (run-with-idle-timer
 		    (time-add (current-idle-time)
-			      org-indent-initial-resume-delay)
-		    nil #'org-indent-initialize-buffer))
+			      org-indent-agent-resume-delay)
+		    nil #'org-indent-initialize-agent))
 	     (throw 'interrupt (point)))
 	    ;; Headline or inline task.
 	    ((looking-at org-outline-regexp)
