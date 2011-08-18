@@ -717,7 +717,10 @@ version."
   (setq-default org-deadline-line-regexp org-deadline-line-regexp)
   (setq-default org-done-keywords org-done-keywords)
   (setq-default org-maybe-keyword-time-regexp org-maybe-keyword-time-regexp)
-  (let* (org-lparse-encode-pending
+  (let* (hfy-user-sheet-assoc		; let `htmlfontify' know that
+					; we are interested in
+					; collecting styles
+	 org-lparse-encode-pending
 	 org-lparse-par-open
 	 (org-lparse-list-level 0)	; list level starts at 1. A
 					; value of 0 implies we are
