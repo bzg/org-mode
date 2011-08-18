@@ -117,6 +117,13 @@ turn on `org-hide-leading-stars'."
   :group 'org-indent
   :type 'integer)
 
+(defface org-indent
+  (org-compatible-face nil nil)
+  "Face for outline indentation.
+The default is to make it look like whitespace.  But you may find it
+useful to make it ever so slightly different."
+  :group 'org-faces)
+
 (defun org-indent-initialize ()
   "Initialize the indentation strings."
   (setq org-indent-strings (make-vector (1+ org-indent-max) nil))
@@ -133,6 +140,11 @@ turn on `org-hide-leading-stars'."
 	(aset org-indent-stars i
 	      (org-add-props (make-string i ?*)
 		  nil 'face 'org-hide))))
+
+(defsubst org-indent-remove-properties (beg end)
+  "Remove indentations between BEG and END."
+  (with-silent-modifications
+    (remove-text-properties beg end '(line-prefix nil wrap-prefix nil))))
 
 ;;;###autoload
 (define-minor-mode org-indent-mode
@@ -199,13 +211,6 @@ during idle time." nil " Ind" nil
     (and font-lock-mode (org-restart-font-lock))
     (redraw-display))))
 
-(defface org-indent
-  (org-compatible-face nil nil)
-  "Face for outline indentation.
-The default is to make it look like whitespace.  But you may find it
-useful to make it ever so slightly different."
-  :group 'org-faces)
-
 (defun org-indent-indent-buffer ()
   "Add indentation properties to the accessible part of the buffer."
   (interactive)
@@ -215,11 +220,6 @@ useful to make it ever so slightly different."
     (org-indent-remove-properties (point-min) (point-max))
     (org-indent-add-properties (point-min) (point-max))
     (message "Indentation of buffer set.")))
-
-(defsubst org-indent-remove-properties (beg end)
-  "Remove indentations between BEG and END."
-  (with-silent-modifications
-    (remove-text-properties beg end '(line-prefix nil wrap-prefix nil))))
 
 (defun org-indent-remove-properties-from-string (string)
   "Remove indentation properties from STRING."
