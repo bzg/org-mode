@@ -174,6 +174,7 @@ during idle time." nil " Ind" nil
     (or org-indent-strings (org-indent-initialize))
     (org-set-local 'org-indent-initial-marker (copy-marker 1))
     (org-set-local 'org-indent-initial-lock nil)
+    (org-set-local 'org-indent-initial-resume-timer nil)
     (when org-indent-mode-turns-off-org-adapt-indentation
       (org-set-local 'org-adapt-indentation nil))
     (when org-indent-mode-turns-on-hiding-stars
