@@ -2038,7 +2038,8 @@ the currently selected interval size."
                         (encode-time 0 0 0 (+ d n) m y))))
           ((and wp (string-match "w\\|W" wp) mw (> (length wp) 0))
            (require 'cal-iso)
-           (setq date (calendar-gregorian-from-absolute (calendar-absolute-from-iso (list (+ mw n) 1 y))))
+           (setq date (calendar-gregorian-from-absolute 
+		       (calendar-absolute-from-iso (list (+ mw n) 1 y))))
            (setq ins (format-time-string
                       "%G-W%V"
                       (encode-time 0 0 0 (nth 1 date) (car date) (nth 2 date)))))
@@ -2054,7 +2055,8 @@ the currently selected interval size."
                (setq mw 5
                      y (- y 1))
              ())
-           (setq date (calendar-gregorian-from-absolute (calendar-absolute-from-iso (org-quarter-to-date (+ mw n) y))))
+           (setq date (calendar-gregorian-from-absolute 
+		       (calendar-absolute-from-iso (org-quarter-to-date (+ mw n) y))))
            (setq ins (format-time-string
                       (concatenate 'string (number-to-string y) "-Q" (number-to-string (+ mw n)))
                       (encode-time 0 0 0 (nth 1 date) (car date) (nth 2 date)))))
@@ -2072,44 +2074,6 @@ the currently selected interval size."
 	 (beginning-of-line 1)
 	 (org-update-dblock)
 	 t)))))
-
-(defun org-clocktable-sort-clock-data (tables params)
-  "TABLES is a list of tables with clocking data as produced by
-`org-clock-get-table-data'.  PARAMS is the parameter property
-list obtained from the dynamic block defintion.
-
-When PARAMS contains a :SORT entry, sort the tables and the entries
-inside them accordnly:
-
-:SORT time-up or T, sorts by most time spent on top
-:SORT time-down, sorts by least time spent on top
-
-Returns the sorted table list"
-  (let ((sort (plist-get params :sort)))
-    (if (not sort) tables
-      (sort (mapcar
-             (lambda (table)
-               (list (nth 0 table)
-                     (nth 1 table)
-                     (sort
-                      (third table)
-                      (lambda (elem1 elem2)
-                        (let ((d1 (nth 3 elem1))
-                              (d2 (nth 3 elem2)))
-                          (cond ((memq sort '(t time-up))
-                                 (> d1 d2))
-                                ((eq sort 'time-down)
-                                 (< d1 d2))
-                                (t (error "Invalid :sort parameter %s" sort))))))))
-             tables)
-            (lambda (table1 table2)
-              (let ((d1 (nth 1 table1))
-                    (d2 (nth 1 table2)))
-                (cond ((memq sort '(t time-up))
-                       (> d1 d2))
-                      ((eq sort 'time-down)
-                       (< d1 d2))
-                      (t (error "Invalid :sort parameter %s" sort)))))))))
 
 (defun org-dblock-write:clocktable (params)
   "Write the standard clocktable."
@@ -2196,8 +2160,7 @@ Returns the sorted table list"
       (setq params (plist-put params :one-file-with-archives
 			      one-file-with-archives))
 
-      (funcall formatter ipos
-	       (org-clocktable-sort-clock-data tbls params) params))))
+      (funcall formatter ipos tbls params))))
 
 (defun org-clocktable-write-default (ipos tables params)
   "Write out a clock table at position IPOS in the current buffer.
