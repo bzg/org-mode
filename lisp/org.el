@@ -7348,6 +7348,7 @@ After top level, it switches back to sibling level."
 		  (not (eobp)))
 	(funcall fun)))))
 
+(defvar org-property-end-re) ; silence byte-compiler
 (defun org-fixup-indentation (diff)
   "Change the indentation in the current entry by DIFF.
 However, if any line in the current entry has no indentation, or if it
@@ -14304,11 +14305,11 @@ xxx_ALL property) or on existing values in other instances of this property
 in the current file."
   (interactive (list nil nil))
   (let* ((property (or property (org-read-property-name)))
-	 (value (or value (org-read-property-value property))))
+	 (value (or value (org-read-property-value property)))
+	 (fn (assoc property org-properties-postprocess-alist)))
     (setq org-last-set-property property)
     ;; Possibly postprocess the inserted value:
-    (when (assoc property org-properties-postprocess-alist)
-      (setq value (funcall (cadr fn) value)))
+    (when fn (setq value (funcall (cadr fn) value)))
     (unless (equal (org-entry-get nil property) value)
       (org-entry-put nil property value))))
 
