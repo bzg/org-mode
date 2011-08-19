@@ -351,7 +351,8 @@ This will be spliced into the custom type of
 `org-agenda-custom-commands'.")
 
 
-(defcustom org-agenda-custom-commands nil
+(defcustom org-agenda-custom-commands '(("n" "Agenda and all TODO's"
+					 ((agenda "") (alltodo))))
   "Custom commands for the agenda.
 These commands will be offered on the splash screen displayed by the
 agenda dispatcher \\[org-agenda].  Each entry is a list like this:
