@@ -231,7 +231,7 @@ The function respects the value of the :exports header argument."
 (defun org-babel-exp-code (info)
   "Return the original code block formatted for export."
   (org-fill-template
-   "#+BEGIN_SRC %lang%flags\n%body\n#+END_SRC\n"
+   "#+BEGIN_SRC %lang%flags\n%body\n#+END_SRC"
    `(("lang"  . ,(nth 0 info))
      ("flags" . ,((lambda (f) (when f (concat " " f))) (nth 3 info)))
      ("body"  . ,(nth 1 info)))))

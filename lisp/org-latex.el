@@ -401,7 +401,7 @@ will pass them (combined with the LaTeX default list parameters) to
   :type 'plist)
 
 (defcustom org-export-latex-verbatim-wrap
-  '("\\begin{verbatim}\n" . "\\end{verbatim}\n")
+  '("\\begin{verbatim}\n" . "\\end{verbatim}")
   "Environment to be wrapped around a fixed-width section in LaTeX export.
 This is a cons with two strings, to be added before and after the
 fixed-with text.

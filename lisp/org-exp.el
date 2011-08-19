@@ -2718,7 +2718,7 @@ INDENT was the original indentation of the block."
 	     "\n#+BEGIN_" backend-name "\n"
 	     (org-add-props rtn
 		 '(org-protected t org-example t org-native-text t))
-	     "\n#+END_" backend-name "\n\n"))
+	     "\n#+END_" backend-name "\n"))
       (org-add-props rtn nil 'original-indentation indent))))
 
 (defun org-export-number-lines (text &optional skip1 skip2 number cont
