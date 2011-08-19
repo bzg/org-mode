@@ -155,7 +155,6 @@
 
 (require 'org)
 (require 'org-exp)
-(require 'org-clock)
 
 ;;; User variables:
 

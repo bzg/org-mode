@@ -30,7 +30,6 @@
 
 (eval-when-compile (require 'cl))
 (require 'org)
-(require 'org-clock)
 
 (declare-function org-agenda-redo "org-agenda" ())
 (declare-function org-agenda-do-context-action "org-agenda" ())
