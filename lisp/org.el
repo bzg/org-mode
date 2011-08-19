@@ -7366,15 +7366,16 @@ would end up with no indentation after the change, nothing at all is done."
 	   col)
       (while (re-search-forward
 	      (concat "\\(" (regexp-opt org-all-time-keywords)
-		      "\\|" "^[ \t]*:[a-zA-Z][a-zA-Z0-9]*:.*$"
-		      "\\)") drawer-end t)
+		      "\\|" "^[ \t]*" org-tsr-regexp-both "*$"
+		      "\\|" "^[ \t]*:[a-zA-Z][a-zA-Z0-9_]*:.*$"
+		      "\\)") (or drawer-end end) t)
 	(beginning-of-line)
 	(when (looking-at "^[ \t]+")
 	  (goto-char (match-end 0))
 	  (setq col (current-column))
 	  (if (< diff 0) (replace-match ""))
 	  (org-indent-to-column (+ diff col))
-	  (setq drawer-end (+ diff drawer-end)))
+	  (if drawer-end (setq drawer-end (+ diff drawer-end))))
 	(end-of-line))
       (unless (save-excursion (end-of-line 1)
       			      (re-search-forward prohibit end t))
