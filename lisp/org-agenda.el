@@ -1417,6 +1417,7 @@ This format works similar to a printf format, with the following meaning:
 
   %c   the category of the item, \"Diary\" for entries from the diary, 
        or as given by the CATEGORY keyword or derived from the file name
+  %e   the effort required by the item
   %i   the icon category of the item, see `org-agenda-category-icon-alist'
   %T   the last tag of the item (ignore inherited tags, which come first)
   %t   the HH:MM time-of-day specification if one applies to the entry
@@ -5683,7 +5684,8 @@ The modified list may contain inherited tags, and tags matched by
 The resulting form is returned and stored in the variable
 `org-prefix-format-compiled'."
   (setq org-prefix-has-time nil org-prefix-has-tag nil
-	org-prefix-category-length nil	org-prefix-has-effort nil)
+	org-prefix-category-length nil
+	org-prefix-has-effort nil)
   (let ((s (cond
 	    ((stringp org-agenda-prefix-format)
 	     org-agenda-prefix-format)
