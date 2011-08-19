@@ -1081,14 +1081,6 @@ Custom commands can set this variable in the options section."
   :group 'org-agenda-daily/weekly
   :type 'boolean)
 
-(defcustom org-agenda-include-all-todo nil
-  "Set  means weekly/daily agenda will always contain all TODO entries.
-The TODO entries will be listed at the top of the agenda, before
-the entries for specific days.
-This option is deprecated, it is better to define a block agenda instead."
-  :group 'org-agenda-daily/weekly
-  :type 'boolean)
-
 (defcustom org-agenda-repeating-timestamp-show-all t
   "Non-nil means show all occurrences of a repeating stamp in the agenda.
 When set to a list of strings, only show occurrences of repeating
@@ -3351,7 +3343,7 @@ no longer in use."
 
 (defvar org-agenda-only-exact-dates nil) ; dynamically scoped
 
-(defun org-timeline (&optional include-all)
+(defun org-timeline (&optional dotodo)
   "Show a time-sorted view of the entries in the current org file.
 Only entries with a time stamp of today or later will be listed.  With
 \\[universal-argument] prefix, all unfinished TODO items will also be shown,
@@ -3362,7 +3354,6 @@ dates."
   (org-compile-prefix-format 'timeline)
   (org-set-sorting-strategy 'timeline)
   (let* ((dopast t)
-	 (dotodo include-all)
 	 (doclosed org-agenda-show-log)
 	 (entry (buffer-file-name (or (buffer-base-buffer (current-buffer))
 				      (current-buffer))))
@@ -3381,7 +3372,7 @@ dates."
     (setq org-agenda-redo-command
 	  (list 'progn
 		(list 'org-switch-to-buffer-other-window (current-buffer))
-		(list 'org-timeline (list 'quote include-all))))
+		(list 'org-timeline (list 'quote dotodo))))
     (if (not dopast)
 	;; Remove past dates from the list of dates.
 	(setq day-numbers (delq nil (mapcar (lambda(x)
@@ -3489,7 +3480,7 @@ Custom commands can set this variable in the options section.")
 (defvar org-starting-day nil) ; local variable in the agenda buffer
 (defvar org-agenda-current-span nil
   "The current span used in the agenda view.") ; local variable in the agenda buffer
-(defvar org-include-all-loc nil) ; local variable
+(defvar org-arg-loc nil) ; local variable
 
 (defvar org-agenda-entry-types '(:deadline :scheduled :timestamp :sexp)
   "List of types searched for when creating the daily/weekly agenda.
@@ -3525,29 +3516,29 @@ somewhat less efficient) way of determining what is included in
 the daily/weekly agenda, see `org-agenda-skip-function'.")
 
 ;;;###autoload
-(defun org-agenda-list (&optional include-all start-day span)
+(defun org-agenda-list (&optional arg start-day span)
   "Produce a daily/weekly view from all files in variable `org-agenda-files'.
 The view will be for the current day or week, but from the overview buffer
 you will be able to go to other days/weeks.
 
 With a numeric prefix argument in an interactive call, the agenda will
-span INCLUDE-ALL days.  Lisp programs should instead specify SPAN to change
+span ARG days.  Lisp programs should instead specify SPAN to change
 the number of days.  SPAN defaults to `org-agenda-span'.
 
 START-DAY defaults to TODAY, or to the most recent match for the weekday
 given in `org-agenda-start-on-weekday'."
   (interactive "P")
-  (if (and (integerp include-all) (> include-all 0))
-      (setq span include-all include-all nil))
+  (if (and (integerp arg) (> arg 0))
+      (setq span arg arg nil))
   (setq start-day (or start-day org-agenda-start-day))
   (if org-agenda-overriding-arguments
-      (setq include-all (car org-agenda-overriding-arguments)
+      (setq arg (car org-agenda-overriding-arguments)
 	    start-day (nth 1 org-agenda-overriding-arguments)
 	    span (nth 2 org-agenda-overriding-arguments)))
   (if (stringp start-day)
       ;; Convert to an absolute day number
       (setq start-day (time-to-days (org-read-date nil t start-day))))
-  (setq org-agenda-last-arguments (list include-all start-day span))
+  (setq org-agenda-last-arguments (list arg start-day span))
   (org-compile-prefix-format 'agenda)
   (org-set-sorting-strategy 'agenda)
   (let* ((span (org-agenda-ndays-to-span
@@ -3574,7 +3565,7 @@ given in `org-agenda-start-on-weekday'."
 	 s e rtn rtnall file date d start-pos end-pos todayp
 	 clocktable-start clocktable-end filter)
     (setq org-agenda-redo-command
-	  (list 'org-agenda-list (list 'quote include-all) start-day (list 'quote span)))
+	  (list 'org-agenda-list (list 'quote arg) start-day (list 'quote span)))
     (dotimes (n (1- ndays))
       (push (1+ (car day-numbers)) day-numbers))
     (setq day-numbers (nreverse day-numbers))
@@ -3582,7 +3573,7 @@ given in `org-agenda-start-on-weekday'."
 	  clocktable-end (1+ (or (org-last day-numbers) 0)))
     (org-prepare-agenda "Day/Week")
     (org-set-local 'org-starting-day (car day-numbers))
-    (org-set-local 'org-include-all-loc include-all)
+    (org-set-local 'org-arg-loc arg)
     (org-set-local 'org-agenda-current-span (org-agenda-ndays-to-span span))
     (unless org-agenda-compact-blocks
       (let* ((d1 (car day-numbers))
