@@ -1678,8 +1678,9 @@ code ---- the results are extracted in the syntax of the source
   (interactive)
   (let ((location (org-babel-where-is-src-block-result nil info)) start)
     (when location
+      (setq start (- location 1))
       (save-excursion
-        (goto-char location) (setq start (point)) (forward-line 1)
+        (goto-char location) (forward-line 1)
         (delete-region start (org-babel-result-end))))))
 
 (defun org-babel-result-end ()
