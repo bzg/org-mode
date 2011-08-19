@@ -2689,11 +2689,11 @@ INDENT was the original indentation of the block."
 		       (format "\\begin{%s}\n%s\\end{%s}\n"
 			       custom-environment rtn custom-environment))
 		      (listings-p
-		       (format "\\begin{%s}\n%s\\end{%s}\n"
+		       (format "\\begin{%s}\n%s\\end{%s}"
 			       "lstlisting" rtn "lstlisting"))
 		      (minted-p
 		       (format
-			"\\begin{minted}[%s]{%s}\n%s\\end{minted}\n"
+			"\\begin{minted}[%s]{%s}\n%s\\end{minted}"
 			(mapconcat #'make-option-string
 				   org-export-latex-minted-options ",")
 			backend-lang rtn)))))))
