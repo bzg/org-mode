@@ -12200,7 +12200,8 @@ these are addressed in the language-specific documentation.  However, the
 syntax used to specify arguments is the same across all languages.  The
 values passed to arguments can be literal values, values from org-mode tables
 and literal example blocks, the results of other code blocks, or Emacs Lisp
-code---see the ``Emacs Lisp evaluation of variables'' heading below.
+code---see the ``Emacs Lisp evaluation of variables'' heading below.  In
+every case, variables require a default value when they are declared.
 
 These values can be indexed in a manner similar to arrays---see the
 ``indexable variable values'' heading below.
