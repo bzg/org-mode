@@ -12158,7 +12158,8 @@ evaluation of the @code{factorial} code block.
 
 @node Specific header arguments,  , Using header arguments, Header arguments
 @subsection Specific header arguments
-The following header arguments are defined:
+Header arguments consist of an initial colon followed by the name of the
+argument in lowercase letters.  The following header arguments are defined:
 
 @menu
 * var::                         Pass arguments to code blocks
