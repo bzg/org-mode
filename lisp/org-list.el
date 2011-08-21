@@ -94,7 +94,6 @@
 
 (declare-function org-at-heading-p "org" (&optional ignored))
 (declare-function org-before-first-heading-p "org" ())
-(declare-function org-back-over-empty-lines "org" ())
 (declare-function org-back-to-heading "org" (&optional invisible-ok))
 (declare-function org-combine-plists "org" (&rest plists))
 (declare-function org-count "org" (cl-item cl-seq))
@@ -1167,7 +1166,16 @@ some heuristics to guess the result."
     (let ((item (point))
 	  (insert-blank-p
 	   (cdr (assq 'plain-list-item org-blank-before-new-entry)))
-	  usr-blank)
+	  usr-blank
+	  (count-blanks
+	   (function
+	    (lambda ()
+	      ;; Count blank lines above beginning of line.
+	      (save-excursion
+		(count-lines (goto-char (point-at-bol))
+			     (progn (skip-chars-backward " \r\t\n")
+				    (forward-line)
+				    (point))))))))
       (cond
        ;; Trivial cases where there should be none.
        ((or (and (not (eq org-list-ending-method 'indent))
@@ -1181,16 +1189,15 @@ some heuristics to guess the result."
 	    (cond
 	     ;; Is there a next item?
 	     (next-p (goto-char next-p)
-		     (org-back-over-empty-lines))
+		     (funcall count-blanks))
 	     ;; Is there a previous item?
 	     ((org-list-get-prev-item item struct prevs)
-	      (org-back-over-empty-lines))
+	      (funcall count-blanks))
 	     ;; User inserted blank lines, trust him.
 	     ((and (> pos (org-list-get-item-end-before-blank item struct))
-		   (> (save-excursion
-			(goto-char pos)
-			(skip-chars-backward " \t")
-			(setq usr-blank (org-back-over-empty-lines))) 0))
+		   (> (save-excursion (goto-char pos)
+				      (setq usr-blank (funcall count-blanks)))
+		      0))
 	      usr-blank)
 	     ;; Are there blank lines inside the list so far?
 	     ((save-excursion
