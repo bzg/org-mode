@@ -128,10 +128,10 @@ options and are taken from `org-babel-default-inline-header-args'."
     (while (and (< (point) end)
                 (re-search-forward org-babel-inline-src-block-regexp end t))
       (let* ((info (save-match-data (org-babel-parse-inline-src-block-match)))
-	     (params (nth 2 info)) code-replacement)
+	     (params (nth 2 info)))
 	(save-match-data
 	  (goto-char (match-beginning 2))
-	  (when (not (org-babel-in-example-or-verbatim))
+	  (unless (org-babel-in-example-or-verbatim)
 	    ;; expand noweb references in the original file
 	    (setf (nth 1 info)
 		  (if (and (cdr (assoc :noweb params))
@@ -139,11 +139,11 @@ options and are taken from `org-babel-default-inline-header-args'."
 		      (org-babel-expand-noweb-references
 		       info (get-file-buffer org-current-export-file))
 		    (nth 1 info)))
-	    (setq code-replacement (org-babel-exp-do-export info 'inline))))
-	(if code-replacement
-	    (replace-match code-replacement nil nil nil 1)
-	  (org-babel-examplize-region (match-beginning 1) (match-end 1))
-	  (forward-char 2))))))
+	    (let ((code-replacement (org-babel-exp-do-export info 'inline)))
+	      (if code-replacement
+		  (replace-match code-replacement nil nil nil 1)
+		(org-babel-examplize-region (match-beginning 1) (match-end 1))
+		(forward-char 2)))))))))
 
 (defun org-exp-res/src-name-cleanup ()
   "Clean up #+results and #+srcname lines for export.
