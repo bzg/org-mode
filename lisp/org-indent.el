@@ -31,8 +31,7 @@
 ;; The process is synchronous, toggled at every buffer modification.
 ;; Though, the initialization (indentation of text already in the
 ;; buffer), which can take a few seconds in large buffers, happens on
-;; idle time and only when the buffer being initialized is the active
-;; one.
+;; idle time.
 ;;
 ;;; Code:
 
@@ -75,9 +74,13 @@ It will be set in `org-indent-initialize'.")
   "List of buffers watched by the initialize agent.")
 (defvar org-indent-agent-resume-timer nil
   "Timer to reschedule agent after switching to other idle processes.")
-(defvar org-indent-agent-process-duration '(0 2 0)
-  "Time to run agent before switching to other idle processes.")
-(defvar org-indent-agent-resume-delay '(0 0 200000)
+(defvar org-indent-agent-active-delay '(0 2 0)
+  "Time to run agent before switching to other idle processes.
+Delay used when the buffer to initialize is current.")
+(defvar org-indent-agent-passive-delay '(0 0 400000)
+  "Time to run agent before switching to other idle processes.
+Delay used when the buffer to initialize isn't current.")
+(defvar org-indent-agent-resume-delay '(0 0 100000)
   "Minimal time for other idle processes before switching back to agent.")
 (defvar org-indent-initial-marker nil
   "Position of initialization before interrupt.
@@ -237,16 +240,27 @@ during idle time." nil " Ind" nil
   "Start or resume current buffer initialization.
 Only buffers in `org-indent-agentized-buffers' trigger an action.
 When no more buffer is being watched, the agent suppress itself."
-  (setq org-indent-agentized-buffers
-	(org-remove-if-not #'buffer-live-p org-indent-agentized-buffers))
-  (unless org-indent-agentized-buffers (cancel-timer org-indent-agent-timer))
   (when org-indent-agent-resume-timer
     (cancel-timer org-indent-agent-resume-timer))
-  (when (memq (current-buffer) org-indent-agentized-buffers)
-    (org-indent-initialize-buffer (current-buffer))))
+  (setq org-indent-agentized-buffers
+	(org-remove-if-not #'buffer-live-p org-indent-agentized-buffers))
+  (cond
+   ;; Job done:  kill agent.
+   ((not org-indent-agentized-buffers) (cancel-timer org-indent-agent-timer))
+   ;; Current buffer is agentized: start/resume initialization
+   ;; somewhat aggressively.
+   ((memq (current-buffer) org-indent-agentized-buffers)
+    (org-indent-initialize-buffer (current-buffer)
+				  org-indent-agent-active-delay))
+   ;; Else, start/resume initialization of the last agentized buffer,
+   ;; softly.
+   (t (org-indent-initialize-buffer (car org-indent-agentized-buffers)
+				    org-indent-agent-passive-delay))))
 
-(defun org-indent-initialize-buffer (buffer)
-  "Set virtual indentation for the buffer BUFFER, asynchronously."
+(defun org-indent-initialize-buffer (buffer delay)
+  "Set virtual indentation for the buffer BUFFER, asynchronously.
+Give hand to other idle processes if it takes longer than DELAY,
+a time value."
   (with-current-buffer buffer
     (when org-indent-mode
       (org-with-wide-buffer
@@ -256,7 +270,8 @@ When no more buffer is being watched, the agent suppress itself."
 		(and org-indent-initial-marker
 		     (marker-position org-indent-initial-marker)
 		     (org-indent-add-properties org-indent-initial-marker
-						(point-max) t)
+						(point-max)
+						delay)
 		     nil))))
 	 (move-marker org-indent-initial-marker interruptp)
 	 ;; Job is complete: un-agentize buffer.
@@ -291,13 +306,14 @@ Assume point is at beginning of line."
 			 `(line-prefix ,line wrap-prefix ,wrap)))
   (forward-line 1))
 
-(defun org-indent-add-properties (beg end &optional async)
+(defun org-indent-add-properties (beg end &optional delay)
   "Add indentation properties between BEG and END.
 
-If ASYNC is non-nil, allow to interrupt the process.  This is
-done by throwing the `interrupt' tag along with the buffer
-position where the process stopped.  Be sure to catch this tag if
-you want to use this feature."
+When DELAY is non-nil, it must be a time value.  In that case,
+the process is asynchronous and can be interrupted, either by
+user request, or after DELAY.  This is done by throwing the
+`interrupt' tag along with the buffer position where the process
+stopped."
   (save-match-data
     (org-with-wide-buffer
      (goto-char beg)
@@ -318,21 +334,20 @@ you want to use this feature."
 			    (org-inlinetask-in-task-p)
 			    (+ (* org-indent-indentation-per-level
 				  (1- (org-inlinetask-get-task-level))) 2)))
-	    (time-limit (time-add (current-time)
-				  org-indent-agent-process-duration)))
+	    (time-limit (and delay (time-add (current-time) delay))))
        ;; 2. For each line, set `line-prefix' and `wrap-prefix'
        ;;    properties depending on the type of line (headline,
        ;;    inline task, item or other).
        (with-silent-modifications
 	 (while (and (<= (point) end) (not (eobp)))
 	   (cond
-	    ;; When in async mode, check if interrupt is required.
-	    ((and async (input-pending-p)) (throw 'interrupt (point)))
-	    ;; In async mode, take a break of
-	    ;; `org-indent-agent-resume-delay' every
-	    ;; `org-indent-agent-process-duration' to avoid blocking
-	    ;; any other idle timer or process output.
-	    ((and async (time-less-p time-limit (current-time)))
+	    ;; When in asynchronous mode, check if interrupt is
+	    ;; required.
+	    ((and delay (input-pending-p)) (throw 'interrupt (point)))
+	    ;; In asynchronous mode, take a break of
+	    ;; `org-indent-agent-resume-delay' every DELAY to avoid
+	    ;; blocking any other idle timer or process output.
+	    ((and delay (time-less-p time-limit (current-time)))
 	     (setq org-indent-agent-resume-timer
 		   (run-with-idle-timer
 		    (time-add (current-idle-time)
