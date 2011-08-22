@@ -139,7 +139,8 @@ options and are taken from `org-babel-default-inline-header-args'."
 		      (org-babel-expand-noweb-references
 		       info (get-file-buffer org-current-export-file))
 		    (nth 1 info)))
-	    (let ((code-replacement (org-babel-exp-do-export info 'inline)))
+	    (let ((code-replacement (save-match-data
+				      (org-babel-exp-do-export info 'inline))))
 	      (if code-replacement
 		  (replace-match code-replacement nil nil nil 1)
 		(org-babel-examplize-region (match-beginning 1) (match-end 1))
@@ -257,7 +258,15 @@ inhibit insertion of results into the buffer."
 		    (nth 2 info)
 		    `((:results . ,(if silent "silent" "replace")))))))
 	  (cond
-	   ((or (equal type 'block) (equal type 'inline))
+	   ((equal type 'block)
+	    (org-babel-execute-src-block nil info))
+	   ((equal type 'inline)
+	    ;; position the point on the inline source block allowing
+	    ;; `org-babel-insert-result' to check that the block is
+	    ;; inline
+	    (re-search-backward "[ \f\t\n\r\v]" nil t)
+	    (re-search-forward org-babel-inline-src-block-regexp nil t)
+	    (re-search-backward "src_" nil t)
 	    (org-babel-execute-src-block nil info))
 	   ((equal type 'lob)
 	    (save-excursion
