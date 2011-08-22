@@ -158,10 +158,6 @@ The optional OPEN and CLOSE tags will be inserted around BODY."
    (or close "")
    "#+END_LaTeX\n"))
 
-(defun org-marker-from-point (point)
-  "Return a marker located at POINT."
-  (save-excursion (goto-char point) (point-marker)))
-
 (defun org-export-blocks-preprocess ()
   "Export all blocks according to the `org-export-blocks' block export alist.
 Does not export block types specified in specified in BLOCKS
@@ -179,8 +175,8 @@ which defaults to the value of `org-export-blocks-witheld'."
 	(setq start (point))
 	(let ((beg-re "^\\([ \t]*\\)#\\+begin_\\(\\S-+\\)[ \t]*\\(.*\\)?[\r\n]"))
 	  (while (re-search-forward beg-re nil t)
-	    (let* ((match-start (org-marker-from-point (match-beginning 0)))
-		   (body-start (org-marker-from-point (match-end 0)))
+	    (let* ((match-start (copy-marker (match-beginning 0)))
+		   (body-start (copy-marker (match-end 0)))
 		   (indentation (length (match-string 1)))
 		   (inner-re (format "[\r\n]*[ \t]*#\\+\\(begin\\|end\\)_%s"
 				     (regexp-quote (downcase (match-string 2)))))
@@ -199,7 +195,7 @@ which defaults to the value of `org-export-blocks-witheld'."
 	      (when (not (zerop balanced))
 		(error "unbalanced begin/end_%s blocks with %S"
 		       type (buffer-substring match-start (point))))
-	      (setq match-end (org-marker-from-point (match-end 0)))
+	      (setq match-end (copy-marker (match-end 0)))
 	      (unless preserve-indent
 		(setq body (save-match-data (org-remove-indentation
 					     (buffer-substring
