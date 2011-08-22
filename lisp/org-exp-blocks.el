@@ -210,7 +210,11 @@ which defaults to the value of `org-export-blocks-witheld'."
 		    (delete-region match-start match-end)
 		    (goto-char match-start) (insert replacement)
 		    (unless preserve-indent
-		      (indent-code-rigidly match-start (point) indentation))))))
+		      (indent-code-rigidly match-start (point) indentation)))))
+	      ;; cleanup markers
+	      (set-marker match-start nil)
+	      (set-marker body-start nil)
+	      (set-marker match-end nil))
 	    (setq start (point))))
 	(interblock start (point-max))
 	(run-hooks 'org-export-blocks-postblock-hook)))))
