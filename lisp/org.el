@@ -10487,7 +10487,7 @@ prefix argument (`C-u C-u C-u C-c C-w')."
 		      (setq goto nil)))
 	       (setq it (or rfloc
 			    (save-excursion
-			      (org-back-to-heading t)
+			      (unless goto (org-back-to-heading t))
 			      (org-refile-get-location
 			       (cond (goto "Goto")
 				     (regionp "Refile region to")
