@@ -8407,6 +8407,7 @@ call CMD."
 	     (org-back-to-heading t)
 	     (setq beg (point) end (org-end-of-subtree t t)))
 	   (put-text-property beg end 'org-category cat)
+	   (put-text-property beg end 'org-category-position beg)
 	   (goto-char pos)))))))
 
 

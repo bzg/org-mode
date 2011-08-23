@@ -3937,6 +3937,7 @@ in `org-agenda-text-search-extra-files'."
 		      (goto-char beg)
 		      (setq marker (org-agenda-new-marker (point))
 			    category (org-get-category)
+			    category-pos (get-text-property (point) 'org-category-position)
 			    tags (org-get-tags-at (point))
 			    txt (org-format-agenda-item
 				 ""
@@ -3948,6 +3949,7 @@ in `org-agenda-text-search-extra-files'."
 			'org-todo-regexp org-todo-regexp
 			'org-complex-heading-regexp org-complex-heading-regexp
 			'priority 1000 'org-category category
+			'org-category-position category-pos
 			'type "search")
 		      (push txt ee)
 		      (goto-char (1- end))))))))))
@@ -4613,6 +4615,7 @@ the documentation of `org-diary'."
 	(org-add-props txt props
 	  'org-marker marker 'org-hd-marker marker
 	  'priority priority 'org-category category
+	  'org-category-position category-pos
 	  'type "todo" 'todo-state todo-state)
 	(push txt ee)
 	(if org-agenda-todo-list-sublevels
@@ -4785,6 +4788,7 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 	    'org-marker marker 'org-hd-marker hdmarker)
 	  (org-add-props txt nil 'priority priority
 			 'org-category category 'date date
+			 'org-category-position category-pos
 			 'todo-state todo-state
 			 'type "timestamp")
 	  (push txt ee))
@@ -4833,6 +4837,7 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 	    (org-add-props txt props 'org-marker marker)
 	    (org-add-props txt nil
 	      'org-category category 'date date 'todo-state todo-state
+	      'org-category-position category-pos
 	      'type "sexp")
 	    (push txt ee)))))
     (nreverse ee)))
@@ -4992,6 +4997,7 @@ please use `org-class' instead."
 	  (org-add-props txt props
 	    'org-marker marker 'org-hd-marker hdmarker 'face 'org-agenda-done
 	    'priority priority 'org-category category
+	    'org-category-position category-pos
 	    'type "closed" 'date date
 	    'undone-face 'org-warning 'done-face 'org-agenda-done)
 	  (push txt ee))
@@ -5175,7 +5181,8 @@ See also the user option `org-agenda-clock-consistency-checks'."
 		       (or org-agenda-skip-deadline-if-done
 			   (not (= diff 0))))
 		  (setq txt nil)
-		(setq category (org-get-category))
+		(setq category (org-get-category)
+		      category-pos (get-text-property (point) 'org-category-position))
 		(if (not (re-search-backward "^\\*+[ \t]+" nil t))
 		    (setq txt org-agenda-no-heading-message)
 		  (goto-char (match-end 0))
@@ -5209,6 +5216,7 @@ See also the user option `org-agenda-clock-consistency-checks'."
 		  'priority (+ (- diff)
 			       (org-get-priority txt))
 		  'org-category category
+		  'org-category-position category-pos
 		  'todo-state todo-state
 		  'type (if upcomingp "upcoming-deadline" "deadline")
 		  'date (if upcomingp date d2)
@@ -5277,7 +5285,8 @@ FRACTION is what fraction of the head-warning time has passed."
 		(setq txt nil)
 	      (setq habitp (and (functionp 'org-is-habit-p)
 				(org-is-habit-p)))
-	      (setq category (org-get-category))
+	      (setq category (org-get-category)
+		    category-pos (get-text-property (point) 'org-category-position))
 	      (if (not (re-search-backward "^\\*+[ \t]+" nil t))
 		  (setq txt org-agenda-no-heading-message)
 		(goto-char (match-end 0))
@@ -5328,6 +5337,7 @@ FRACTION is what fraction of the head-warning time has passed."
 			      (org-habit-get-priority habitp)
 			    (+ 94 (- 5 diff) (org-get-priority txt)))
 		'org-category category
+		'org-category-position category-pos
 		'org-habit-p habitp
 		'todo-state todo-state)
 	      (push txt ee))))))
@@ -5367,7 +5377,8 @@ FRACTION is what fraction of the head-warning time has passed."
 		(if (and donep org-agenda-skip-timestamp-if-done)
 		    (throw :skip t))
 		(setq marker (org-agenda-new-marker (point)))
-		(setq category (org-get-category))
+		(setq category (org-get-category)
+		      category-pos (get-text-property (point) 'org-category-position))
 		(if (not (re-search-backward org-outline-regexp-bol nil t))
 		    (setq txt org-agenda-no-heading-message)
 		  (goto-char (match-beginning 0))
@@ -5398,7 +5409,8 @@ FRACTION is what fraction of the head-warning time has passed."
 		  'org-marker marker 'org-hd-marker hdmarker
 		  'type "block" 'date date
 		  'todo-state todo-state
-		  'priority (org-get-priority txt) 'org-category category)
+		  'priority (org-get-priority txt) 'org-category category
+		  'org-category-position category-pos)
 		(push txt ee))))
 	(goto-char pos)))
     ;; Sort the entries by expiration date.
@@ -6222,7 +6234,7 @@ to switch to narrowing."
     tags))
 
 (defun org-agenda-filter-by-tag-refine (strip &optional char)
-  "Refine the current filter.  See `org-agenda-filter-by-tag."
+  "Refine the current filter.  See `org-agenda-filter-by-tag'."
   (interactive "P")
   (org-agenda-filter-by-tag strip char 'refine))
 
