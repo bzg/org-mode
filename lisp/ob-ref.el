@@ -148,7 +148,7 @@ the variable."
 	(widen)
 	(goto-char (point-min))
 	(if (let* ((rx (regexp-quote ref))
-		   (res-rx (concat org-babel-result-regexp rx "[ \t]*$"))
+		   (res-rx (concat org-babel-result-regexp rx "[ \t]*.*$"))
 		   (src-rx (concat org-babel-src-name-regexp
 				   rx "\\(\(.*\)\\)?" "[ \t]*$")))
 	      ;; goto ref in the current buffer
