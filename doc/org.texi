@@ -383,7 +383,7 @@ The spreadsheet
 * Column formulas::             Formulas valid for an entire column
 * Editing and debugging formulas::  Fixing formulas
 * Updating the table::          Recomputing all dependent fields
-* Advanced features::           Field names, parameters and automatic recalc
+* Advanced features::           Field and column names, parameters and automatic recalc
 
 Hyperlinks
 
@@ -2277,7 +2277,7 @@ formula, moving these references by arrow keys
 * Column formulas::             Formulas valid for an entire column
 * Editing and debugging formulas::  Fixing formulas
 * Updating the table::          Recomputing all dependent fields
-* Advanced features::           Field names, parameters and automatic recalc
+* Advanced features::           Field and column names, parameters and automatic recalc
 @end menu
 
 @node References, Formula syntax for Calc, The spreadsheet, The spreadsheet
@@ -2834,9 +2834,11 @@ dependencies.
 @node Advanced features,  , Updating the table, The spreadsheet
 @subsection Advanced features
 
-If you want the recalculation of fields to happen automatically, or if
-you want to be able to assign @i{names} to fields and columns, you need
-to reserve the first column of the table for special marking characters.
+If you want the recalculation of fields to happen automatically, or if you
+want to be able to assign @i{names}@footnote{Such names must start by an
+alphabetic character and use only alphanumeric/underscore characters.} to
+fields and columns, you need to reserve the first column of the table for
+special marking characters.
 
 @table @kbd
 @orgcmd{C-#,org-table-rotate-recalc-marks}
