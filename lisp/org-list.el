@@ -269,7 +269,7 @@ By default, automatic actions are taken when using
  \\[org-meta-return], \\[org-metaright], \\[org-metaleft],
  \\[org-shiftmetaright], \\[org-shiftmetaleft],
  \\[org-ctrl-c-minus], \\[org-toggle-checkbox] or
- \\[org-insert-todo-heading]. You can disable individually these
+ \\[org-insert-todo-heading].  You can disable individually these
  rules by setting them to nil.  Valid rules are:
 
 bullet    when non-nil, cycling bullet do not allow lists at
@@ -990,8 +990,8 @@ items, as returned by `org-list-prevs-alist'."
 
 (defun org-list-get-children (item struct parents)
   "List all children of ITEM, or nil.
-STRUCT is the list structure. PARENTS is the alist of parents, as
-returned by `org-list-parents-alist'."
+STRUCT is the list structure.  PARENTS is the alist of parents,
+as returned by `org-list-parents-alist'."
   (let (all child)
     (while (setq child (car (rassq item parents)))
       (setq parents (cdr (member (assq child parents) parents)))
@@ -1370,8 +1370,8 @@ If DEST is a buffer position, the function will assume it points
 to another item in the same list as ITEM, and will move the
 latter just before the former.
 
-If DEST is `begin' \(resp. `end'\), ITEM will be moved at the
-beginning \(resp. end\) of the list it belongs to.
+If DEST is `begin' \(respectively `end'\), ITEM will be moved at
+the beginning \(respectively end\) of the list it belongs to.
 
 If DEST is a string like \"N\", where N is an integer, ITEM will
 be moved at the Nth position in the list.
@@ -1554,7 +1554,7 @@ bullets between START and END."
 (defun org-list-use-alpha-bul-p (first struct prevs)
   "Non-nil if list starting at FIRST can have alphabetical bullets.
 
-STRUCT is list structure. PREVS is the alist of previous items,
+STRUCT is list structure.  PREVS is the alist of previous items,
 as returned by `org-list-prevs-alist'."
   (and org-alphabetical-lists
        (catch 'exit
@@ -1753,7 +1753,7 @@ This function modifies STRUCT."
 	    (nth index all-items)))))))
 
 (defun org-list-struct-apply-struct (struct old-struct)
-  "Apply set-difference between STRUCT and OLD-STRUCT to the buffer.
+  "Apply set difference between STRUCT and OLD-STRUCT to the buffer.
 
 OLD-STRUCT is the structure before any modifications, and STRUCT
 the structure to be applied.  The function will only modify parts
@@ -1814,7 +1814,7 @@ Initial position of cursor is restored after the changes."
 		 (replace-match "" nil nil nil 1))
 		(t (let ((counterp (match-end 2)))
 		     (goto-char (if counterp (1+ counterp) (match-end 1)))
-		   (insert (concat new-box (unless counterp " "))))))
+		     (insert (concat new-box (unless counterp " "))))))
 	       ;; c. Indent item to appropriate column.
 	       (unless (= new-ind old-ind)
 		 (delete-region (goto-char (point-at-bol))
@@ -1951,7 +1951,7 @@ beginning of the item."
 (defun org-list-set-item-visibility (item struct view)
   "Set visibility of ITEM in STRUCT to VIEW.
 
-Possible values are: `folded', `children' or `subtree'. See
+Possible values are: `folded', `children' or `subtree'.  See
 `org-cycle' for more information."
   (cond
    ((eq view 'folded)
@@ -2495,7 +2495,8 @@ Otherwise it will be `org-todo'."
       'org-checkbox-statistics-todo)))
 
 (defun org-update-checkbox-count-maybe (&optional all)
-  "Update checkbox statistics unless turned off by user."
+  "Update checkbox statistics unless turned off by user.
+With an optional argument ALL, update them in the whole buffer."
   (when (cdr (assq 'checkbox org-list-automatic-rules))
     (org-update-checkbox-count all))
   (run-hooks 'org-checkbox-statistics-hook))
@@ -2715,7 +2716,7 @@ Capital letters will reverse the sort order.
 If the SORTING-TYPE is ?f or ?F, then GETKEY-FUNC specifies
 a function to be called with point at the beginning of the
 record.  It must return either a string or a number that should
-serve as the sorting key for that record. It will then use
+serve as the sorting key for that record.  It will then use
 COMPARE-FUNC to compare entries."
   (interactive "P")
   (let* ((case-func (if with-case 'identity 'downcase))

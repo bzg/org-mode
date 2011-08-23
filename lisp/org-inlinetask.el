@@ -406,7 +406,7 @@ Either remove headline and meta data, or do special formatting."
 
 (defvar org-indent-indentation-per-level) ; defined in org-indent.el
 (defun org-inlinetask-fontify (limit)
-  "Fontify the inline tasks."
+  "Fontify the inline tasks down to LIMIT."
   (let* ((nstars (if org-odd-levels-only
 		     (1- (* 2 (or org-inlinetask-min-level 200)))
 		   (or org-inlinetask-min-level 200)))
