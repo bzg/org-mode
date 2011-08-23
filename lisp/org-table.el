@@ -2166,7 +2166,7 @@ For all numbers larger than LIMIT, shift them by DELTA."
 	      cnt 1)
 	(while (setq name (pop names))
 	  (setq cnt (1+ cnt))
-	  (if (string-match "^[a-zA-Z][a-zA-Z0-9]*$" name)
+	  (if (string-match "^[a-zA-Z][_a-zA-Z0-9]*$" name)
 	      (push (cons name (int-to-string cnt)) org-table-column-names))))
       (setq org-table-column-names (nreverse org-table-column-names))
       (setq org-table-column-name-regexp
@@ -2190,7 +2190,7 @@ For all numbers larger than LIMIT, shift them by DELTA."
 	(while (and fields1 (setq field (pop fields)))
 	  (setq v (pop fields1) col (1+ col))
 	  (when (and (stringp field) (stringp v)
-		     (string-match "^[a-zA-Z][a-zA-Z0-9]*$" field))
+		     (string-match "^[a-zA-Z][_a-zA-Z0-9]*$" field))
 	      (push (cons field v) org-table-local-parameters)
 	      (push (list field line col) org-table-named-field-locations))))
       ;; Analyse the line types
@@ -2952,7 +2952,7 @@ them to individual field equations for each field."
        ((string-match "^@-?[-+I0-9]+\\$-?[0-9]+$" lhs)
 	;; This just refers to one fixed field
 	(push e res))
-       ((string-match "^[a-zA-Z][a-zA-Z0-9]*$" lhs)
+       ((string-match "^[a-zA-Z][_a-zA-Z0-9]*$" lhs)
 	;; This just refers to one fixed named field
 	(push e res))
        ((string-match "^@[0-9]+$" lhs)
