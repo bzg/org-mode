@@ -9460,7 +9460,8 @@ enabled (default in Emacs 23).
 @cindex org-export-with-tasks
 You may use tags to select the parts of a document that should be exported,
 or to exclude parts from export.  This behavior is governed by two variables:
-@code{org-export-select-tags} and @code{org-export-exclude-tags}.
+@code{org-export-select-tags} and @code{org-export-exclude-tags},
+respectively defaulting to @code{'(:export:)} and @code{'(:noexport:)}.
 
 @enumerate
 @item
