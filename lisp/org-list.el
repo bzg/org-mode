@@ -1770,7 +1770,7 @@ the structure to be applied.  The function will only modify parts
 of the list which have changed.
 
 Initial position of cursor is restored after the changes."
-  (let* ((origin (copy-marker (point)))
+  (let* ((origin (point-maker))
 	 (inlinetask-re (and (featurep 'org-inlinetask)
 			     (org-inlinetask-outline-regexp)))
 	 (item-re (org-item-re))
