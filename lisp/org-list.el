@@ -27,30 +27,31 @@
 
 ;; This file contains the code dealing with plain lists in Org-mode.
 
-;; The fundamental idea behind lists work is to use structures.
-;; A structure is a snapshot of the list, in the shape of data tree
-;; (see `org-list-struct').
+;; The core concept behind lists is their structure.  A structure is
+;; a snapshot of the list, in the shape of a data tree (see
+;; `org-list-struct').
 
 ;; Once the list structure is stored, it is possible to make changes
-;; directly on it or get useful information about the list, with the
-;; two helper functions, namely `org-list-parents-alist' and
-;; `org-list-prevs-alist', and using accessors or methods.
+;; on it that will be mirrored to the real list or to get information
+;; about the list, using accessors and methods provided in the
+;; library. Most of them require the use of one or two helper
+;; functions, namely `org-list-parents-alist' and
+;; `org-list-prevs-alist'.
 
 ;; Structure is eventually applied to the buffer with
 ;; `org-list-write-struct'.  This function repairs (bullets,
-;; indentation, checkboxes) the structure before applying it.  It
-;; should be called near the end of any function working on
-;; structures.
+;; indentation, checkboxes) the list in the process.  It should be
+;; called near the end of any function working on structures.
 
 ;; Thus, a function applying to lists should usually follow this
 ;; template:
 
 ;; 1. Verify point is in a list and grab item beginning (with the same
 ;;    function `org-in-item-p').  If the function requires the cursor
-;;    to be at item's bullet, `org-at-item-p' is more selective.  If
-;;    the cursor is amidst the buffer, it is possible to find the
-;;    closest item with `org-list-search-backward', or
-;;    `org-list-search-forward', applied to `org-item-beginning-re'.
+;;    to be at item's bullet, `org-at-item-p' is more selective.  It
+;;    is also possible to move point to the closest item with
+;;    `org-list-search-backward', or `org-list-search-forward',
+;;    applied to the function `org-item-beginning-re'.
 
 ;; 2. Get list structure with `org-list-struct'.
 
@@ -61,13 +62,14 @@
 ;; 4. Proceed with the modifications, using methods and accessors.
 
 ;; 5. Verify and apply structure to buffer, using
-;;    `org-list-write-struct'.  Possibly use
-;;    `org-update-checkbox-count-maybe' if checkboxes might have been
-;;    modified.
+;;    `org-list-write-struct'.
 
-;; Computing a list structure can be a costly operation on huge lists
-;; (a few thousand lines long).  Thus, code should follow the rule :
-;; "collect once, use many".  As a corollary, it is usally a bad idea
+;; 6. If changes made to the list might have modified check-boxes,
+;;    call `org-update-checkbox-count-maybe'.
+
+;; Computing a structure can be a costly operation on huge lists (a
+;; few thousand lines long).  Thus, code should follow the rule:
+;; "collect once, use many".  As a corollary, it is usually a bad idea
 ;; to use directly an interactive function inside the code, as those,
 ;; being independant entities, read the whole list structure another
 ;; time.
@@ -126,6 +128,8 @@
 (declare-function outline-next-heading "outline" ())
 (declare-function outline-previous-heading "outline" ())
 
+
+
 ;;; Configuration variables
 
 (defgroup org-plain-lists nil
@@ -374,6 +378,7 @@ specifically, type `block' is determined by the variable
 `org-list-forbidden-blocks'.")
 
 
+
 ;;; Predicates and regexps
 
 (defconst org-list-end-re (if org-empty-line-terminates-plain-lists
@@ -533,6 +538,7 @@ This checks `org-list-ending-method'."
        (match-string 2)))
 
 
+
 ;;; Structures and helper functions
 
 (defun org-list-context ()
@@ -873,6 +879,7 @@ This function modifies STRUCT."
 		  (cdr struct)))))
 
 
+
 ;;; Accessors
 
 (defsubst org-list-get-nth (n key struct)
@@ -1050,6 +1057,7 @@ type is determined by the first item of the list."
      (t 'unordered))))
 
 
+
 ;;; Searching
 
 (defun org-list-search-generic (search re bound noerr)
@@ -1082,6 +1090,7 @@ Arguments REGEXP, BOUND and NOERROR are similar to those used in
 			   regexp (or bound (point-max)) noerror))
 
 
+
 ;;; Methods on structures
 
 (defsubst org-list-bullet-string (bullet)
@@ -1549,6 +1558,7 @@ bullets between START and END."
     (mapcar ind parents)))
 
 
+
 ;;; Repairing structures
 
 (defun org-list-use-alpha-bul-p (first struct prevs)
@@ -1920,6 +1930,7 @@ as returned by `org-list-parents-alist'."
   (org-list-struct-apply-struct struct old-struct)))
 
 
+
 ;;; Misc Tools
 
 (defun org-apply-on-list (function init-value &rest args)
@@ -1987,6 +1998,7 @@ Possible values are: `folded', `children' or `subtree'.  See
     tcol))
 
 
+
 ;;; Interactive functions
 
 (defalias 'org-list-get-item-begin 'org-in-item-p)
@@ -2791,6 +2803,7 @@ COMPARE-FUNC to compare entries."
 	(message "Sorting items...done")))))
 
 
+
 ;;; Send and receive lists
 
 (defun org-list-parse-list (&optional delete)
