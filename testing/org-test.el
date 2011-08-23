@@ -222,10 +222,17 @@ files."
 		(file-name-nondirectory (buffer-file-name)))
 	       "/")))
 
+(defun org-test-touch-all-examples ()
+  (dolist (file (directory-files
+		 org-test-example-dir 'full
+		 "^\\([^.]\\|\\.\\([^.]\\|\\..\\)\\).*\\.org$"))
+    (find-file file)))
+
 (defun org-test-run-all-tests ()
   "Run all defined tests matching \"\\(org\\|ob\\)\".
 Load all test files first."
   (interactive)
+  (org-test-touch-all-examples)
   (org-test-load)
   (ert "\\(org\\|ob\\)"))
 
