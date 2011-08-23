@@ -1268,10 +1268,14 @@ See the manual for examples."
 	    (function)))))
 
 (defcustom org-descriptive-links t
-  "Non-nil means hide link part and only show description of bracket links.
-Bracket links are like [[link][description]].  This variable sets the initial
-state in new org-mode buffers.  The setting can then be toggled on a
-per-buffer basis from the Org->Hyperlinks menu."
+  "Non-nil means Org will display descriptive links.
+E.g. [[http://orgmode.org][Org website]] will be displayed as
+\"Org Website\", hiding the link itself and just displaying its
+description.  When set to `nil', Org will display the full links
+literally.
+
+You can interactively set the value of this variable by calling
+`org-toggle-link-display' or from the menu Org>Hyperlinks menu."
   :group 'org-link
   :type 'boolean)
 
@@ -1326,18 +1330,6 @@ description `org-insert-link' has generated, and should return the
 description to use."
   :group 'org-link
   :type 'function)
-
-(defcustom org-link-display-descriptive t
-  "Non-nil means Org will display descriptive links.
-E.g. [[http://orgmode.org][Org website]] will be displayed as
-\"Org Website\", hiding the link itself and just displaying its
-description.  When set to `nil', Org will display the full links
-literally.
-
-You can interactively set the value of this variable using the
-`org-toggle-link-display'."
-  :group 'org-link
-  :type 'boolean)
 
 (defgroup org-link-store nil
   "Options concerning storing links in Org-mode."
@@ -18458,12 +18450,12 @@ See the individual commands for more information."
      ["Descriptive Links"
       org-toggle-link-display
       :style radio
-      :selected org-link-display-descriptive
+      :selected org-descriptive-links
       ]
      ["Literal Links"
       org-toggle-link-display
       :style radio
-      :selected (not org-link-display-descriptive)])
+      :selected (not org-descriptive-links)])
     "--"
     ("TODO Lists"
      ["TODO/DONE/-" org-todo t]
@@ -20524,13 +20516,13 @@ if no description is present"
 (defun org-toggle-link-display ()
   "Toggle the literal or descriptive display of links."
   (interactive)
-  (if org-link-display-descriptive
+  (if org-descriptive-links
       (progn (org-remove-from-invisibility-spec '(org-link))
 	     (org-restart-font-lock)
-	     (setq org-link-display-descriptive nil))
+	     (setq org-descriptive-links nil))
     (progn (add-to-invisibility-spec '(org-link)) 
 	   (org-restart-font-lock)
-	   (setq org-link-display-descriptive t))))
+	   (setq org-descriptive-links t))))
 
 ;; Speedbar support
 
