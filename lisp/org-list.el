@@ -34,7 +34,7 @@
 ;; Once the list structure is stored, it is possible to make changes
 ;; on it that will be mirrored to the real list or to get information
 ;; about the list, using accessors and methods provided in the
-;; library. Most of them require the use of one or two helper
+;; library.  Most of them require the use of one or two helper
 ;; functions, namely `org-list-parents-alist' and
 ;; `org-list-prevs-alist'.
 
