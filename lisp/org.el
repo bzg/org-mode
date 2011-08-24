@@ -4246,6 +4246,10 @@ collapsed state."
 
 ;;; Variables for pre-computed regular expressions, all buffer local
 
+(defvar org-heading-regexp nil
+  "Matches an headline.
+Stars are put in group 1 and the trimmed body in group 2.")
+(make-variable-buffer-local 'org-heading-regexp)
 (defvar org-drawer-regexp nil
   "Matches first line of a hidden block.")
 (make-variable-buffer-local 'org-drawer-regexp)
@@ -4269,22 +4273,28 @@ group 3: Priority cookie
 group 4: True headline
 group 5: Tags")
 (make-variable-buffer-local 'org-complex-heading-regexp)
+(defvar org-heading-keyword-regexp-format nil
+  "Printf format to make regexp to match an headline with some keyword.
+This regexp will match the headline of any node which has the
+exact keyword that is put into the format.  The keyword isn't in
+any group by default, but the stars and the body are.")
+(make-variable-buffer-local 'org-heading-keyword-regexp-format)
+(defvar org-heading-keyword-maybe-regexp-format nil
+  "Printf format to make regexp to match an headline with some keyword.
+This regexp can match any headline with the specified keyword, or
+a without a keyword.  The keyword isn't in any group by default,
+but the stars and the body are.")
+(make-variable-buffer-local 'org-heading-keyword-maybe-regexp-format)
 (defvar org-complex-heading-regexp-format nil
   "Printf format to make regexp to match an exact headline.
-This regexp will match the headline of any node which hase the exact
-headline text that is put into the format, but may have any TODO state,
-priority and tags.")
+This regexp will match the headline of any node which has the
+exact headline text that is put into the format, but may have any
+TODO state, priority and tags.")
 (make-variable-buffer-local 'org-complex-heading-regexp-format)
 (defvar org-todo-line-tags-regexp nil
   "Matches a headline and puts TODO state into group 2 if present.
 Also put tags into group 4 if tags are present.")
 (make-variable-buffer-local 'org-todo-line-tags-regexp)
-(defvar org-nl-done-regexp nil
-  "Matches newline followed by a headline with the DONE keyword.")
-(make-variable-buffer-local 'org-nl-done-regexp)
-(defvar org-looking-at-done-regexp nil
-  "Matches the DONE keyword a point.")
-(make-variable-buffer-local 'org-looking-at-done-regexp)
 (defvar org-ds-keyword-length 12
   "Maximum length of the Deadline and SCHEDULED keywords.")
 (make-variable-buffer-local 'org-ds-keyword-length)
@@ -4619,7 +4629,9 @@ means to push this value onto the list in the variable.")
 		     (assoc (car e) org-tag-alist))
 		(push e org-tag-alist)))))
 
-      ;; Compute the regular expressions and other local variables
+      ;; Compute the regular expressions and other local variables.
+      ;; Using `org-outline-regexp-bol' would complicate them much,
+      ;; because of the fixed white space at the end of that string.
       (if (not org-done-keywords)
 	  (setq org-done-keywords (and org-todo-keywords-1
 				       (list (org-last org-todo-keywords-1)))))
@@ -4634,49 +4646,48 @@ means to push this value onto the list in the variable.")
 	    org-not-done-keywords
 	    (org-delete-all org-done-keywords (copy-sequence org-todo-keywords-1))
 	    org-todo-regexp
-	    (concat "\\<\\(" (mapconcat 'regexp-quote org-todo-keywords-1
-					"\\|") "\\)\\>")
+	    (concat "\\("
+		    (mapconcat 'regexp-quote org-todo-keywords-1 "\\|")
+		    "\\)")
 	    org-not-done-regexp
-	    (concat "\\<\\("
+	    (concat "\\("
 		    (mapconcat 'regexp-quote org-not-done-keywords "\\|")
-		    "\\)\\>")
+		    "\\)")
+	    org-heading-regexp
+	    "\\(\\*+\\)\\(?: +\\(.*?\\)\\)?[ \t]*$"
+	    org-heading-keyword-regexp-format
+	    "\\(\\*+\\)\\(?: +%s\\)\\(?: +\\(.*?\\)\\)?[ \t]*$"
+	    org-heading-keyword-maybe-regexp-format
+	    "\\(\\*+\\)\\(?: +%s\\)?\\(?: +\\(.*?\\)\\)?[ \t]*$"
 	    org-not-done-heading-regexp
-	    (concat "^\\(\\*+\\)[ \t]+\\("
-		    (mapconcat 'regexp-quote org-not-done-keywords "\\|")
-		    "\\)[ \t]+")
+	    (format org-heading-keyword-regexp-format org-not-done-regexp)
 	    org-todo-line-regexp
-	    (concat "^\\(\\*+\\)[ \t]+\\(?:\\("
-		    (mapconcat 'regexp-quote org-todo-keywords-1 "\\|")
-		    "\\)[ \t]+\\)?\\(.*\\)")
+	    (format org-heading-keyword-maybe-regexp-format org-todo-regexp)
 	    org-complex-heading-regexp
-	    (concat "^\\(\\*+\\)[ \t]+\\(?:\\("
-		    (mapconcat 'regexp-quote org-todo-keywords-1 "\\|")
-		    "\\)[ \t]+\\)?"
-		    "\\(?:\\(\\[#.\\]\\)[ \t]+\\)?"
-		    "\\(.*?\\)"
-		    "\\(?:[ \t]+\\(:[[:alnum:]_@#%:]+:\\)\\)?[ \t]*$")
+	    (concat "\\(\\*+\\)"
+		    "\\(?: +" org-todo-regexp "\\)?"
+		    "\\(?: +\\(\\[#.\\]\\)\\)?"
+		    "\\(?: +\\(.*?\\)\\)?"
+		    (org-re "\\(?:[ \t]+\\(:[[:alnum:]_@#%:]+:\\)\\)?")
+		    "[ \t]*$")
 	    org-complex-heading-regexp-format
-	    (concat "^\\(\\*+\\)[ \t]+\\(?:\\("
-		    (mapconcat 'regexp-quote org-todo-keywords-1 "\\|")
-		    "\\)[ \t]+\\)?"
-		    "\\(?:\\(\\[#.\\]\\)[ \t]+\\)?"
-		    "\\(?:\\(?:\\[[0-9%%/]+\\]\\)[ \t]+\\)?" ; stats cookie
-		    "\\(%s\\)[ \t]*"
-		    "\\(?:\\[[0-9%%/]+\\]\\)?" ; stats cookie
-		    (org-re "\\(?:[ \t]+\\(:[[:alnum:]_@#%%:]+:\\)\\)?[ \t]*$"))
-	    org-nl-done-regexp
-	    (concat "\n\\*+[ \t]+"
-		    "\\(?:" (mapconcat 'regexp-quote org-done-keywords "\\|")
-		    "\\)" "[ \t]+")
+	    (concat "\\(\\*+\\)"
+		    "\\(?: +" org-todo-regexp "\\)?"
+		    "\\(?: +\\(\\[#.\\]\\)\\)?"
+		    "\\(?: +"
+		    ;; Stats cookies can be sticked to body.
+		    "\\(?:\\[[0-9%%/]+\\] *\\)?"
+		    "\\(%s\\)"
+		    "\\(?: *\\[[0-9%%/]+\\]\\)?"
+		    "\\)"
+		    (org-re "\\(?:[ \t]+\\(:[[:alnum:]_@#%%:]+:\\)\\)?")
+		    "[ \t]*$")
 	    org-todo-line-tags-regexp
-	    (concat "^\\(\\*+\\)[ \t]+\\(?:\\("
-		    (mapconcat 'regexp-quote org-todo-keywords-1 "\\|")
-		    "\\)[ \t]+\\)"
-		    (org-re "\\(.*?\\([ \t]:[[:alnum:]:_@#%]+:[ \t]*\\)?$\\)"))
-	    org-looking-at-done-regexp
-	    (concat "^" "\\(?:"
-		    (mapconcat 'regexp-quote org-done-keywords "\\|") "\\)"
-		    "[ \t]+")
+	    (concat "\\(\\*+\\)"
+		    "\\(?: +" org-todo-regexp "\\)?"
+		    "\\(?: +\\(.*?\\)\\)?"
+		    (org-re "\\(?:[ \t]+\\(:[[:alnum:]:_@#%]+:\\)\\)?")
+		    "[ \t]*$")
 	    org-deadline-regexp (concat "\\<" org-deadline-string)
 	    org-deadline-time-regexp
 	    (concat "\\<" org-deadline-string " *<\\([^>]+\\)>")
@@ -5727,14 +5738,17 @@ needs to be inserted at a specific position in the font-lock sequence.")
 	   (if (memq 'footnote lk) '(org-activate-footnote-links))
 	   '("^&?%%(.*\\|<%%([^>\n]*?>" (0 'org-sexp-date t))
 	   '(org-hide-wide-columns (0 nil append))
-	   ;; TODO lines
-	   (list (concat "^\\*+[ \t]+" org-todo-regexp "\\([ \t]\\|$\\)")
-		 '(1 (org-get-todo-face 1) t))
+	   ;; TODO keyword
+	   (list (format org-heading-keyword-regexp-format
+			 org-todo-regexp)
+		 '(2 (org-get-todo-face 2) t))
 	   ;; DONE
 	   (if org-fontify-done-headline
-	       (list (concat "^[*]+ +\\<\\("
-			     (mapconcat 'regexp-quote org-done-keywords "\\|")
-			     "\\)\\(.*\\)")
+	       (list (format org-heading-keyword-regexp-format
+			     (concat
+			      "\\("
+			      (mapconcat 'regexp-quote org-done-keywords "\\|")
+			      "\\)"))
 		     '(2 'org-headline-done t))
 	     nil)
 	   ;; Priorities
@@ -5772,8 +5786,10 @@ needs to be inserted at a specific position in the font-lock sequence.")
 	   ;; Code
 	   '(org-activate-code (1 'org-code t))
 	   ;; COMMENT
-	   (list (concat "^\\*+[ \t]+\\<\\(" org-comment-string
-			 "\\|" org-quote-string "\\)\\>")
+	   (list (format org-heading-keyword-regexp-format
+			 (concat "\\("
+				 org-comment-string "\\|" org-quote-string
+				 "\\)"))
 		 '(1 'org-special-keyword t))
 	   '("^#.*" (0 'font-lock-comment-face t))
 	   ;; Blocks and meta lines
@@ -7038,6 +7054,7 @@ This is important for non-interactive uses of the command."
 			(let ((p (point)))
 			  (goto-char (point-at-bol))
 			  (and (looking-at org-complex-heading-regexp)
+			       (match-beginning 4)
 			       (> p (match-beginning 4)))))))
 		tags pos)
 	    (cond
@@ -7098,14 +7115,15 @@ When NO-TODO is non-nil, don't include TODO keywords."
       (looking-at org-complex-heading-regexp)
       (match-string 4))
      (no-tags
-      (looking-at "\\*+[ \t]+\\([^\n\r]*?\\)\\([ \t]+:[[:alnum:]:_@#%]+:[ \t]*\\)?$")
+      (looking-at (concat org-outline-regexp
+			  "\\(.*?\\)"
+			  "\\(?:[ \t]+:[[:alnum:]:_@#%]+:\\)?[ \t]*$"))
       (match-string 1))
      (no-todo
-      (looking-at (concat "\\*+[ \t]+" org-todo-regexp " +"
-			  "\\([^\n\r]*?[ \t]+:[[:alnum:]:_@#%]+:[ \t]*\\)?$"))
-      (match-string 2))
-     (t (looking-at "\\*+[ \t]+\\([^\r\n]*\\)")
-	(match-string 1)))))
+      (looking-at org-todo-line-regexp)
+      (match-string 3))
+     (t (looking-at org-heading-regexp)
+	(match-string 2)))))
 
 (defun org-heading-components ()
   "Return the components of the current heading.
@@ -7266,9 +7284,8 @@ in the region."
 The level is the number of stars at the beginning of the headline."
   (save-excursion
     (org-with-limited-levels
-     (ignore-errors
-       (org-back-to-heading t)
-       (funcall outline-level)))))
+     (if (ignore-errors (org-back-to-heading t))
+	 (funcall outline-level)))))
 
 (defun org-get-previous-line-level ()
   "Return the outline depth of the last headline before the current line.
@@ -11047,13 +11064,16 @@ expands them."
   (save-excursion
     (org-back-to-heading)
     (let (case-fold-search)
-      (if (looking-at (concat org-outline-regexp
-			      "\\( *\\<" org-comment-string "\\>[ \t]*\\)"))
-	  (replace-match "" t t nil 1)
-	(if (looking-at org-outline-regexp)
-	    (progn
-	      (goto-char (match-end 0))
-	      (insert org-comment-string " ")))))))
+      (cond
+       ((looking-at (format org-heading-keyword-regexp-format
+			    org-comment-string))
+	(goto-char (match-end 1))
+	(looking-at (concat " +" org-comment-string))
+	(replace-match "" t t)
+	(when (eolp) (insert " ")))
+       ((looking-at org-outline-regexp)
+	(goto-char (match-end 0))
+	(insert org-comment-string " "))))))
 
 (defvar org-last-todo-state-is-todo nil
   "This is non-nil when the last TODO state change led to a TODO state.
@@ -11135,8 +11155,8 @@ For calling through lisp, arg is also interpreted in the following way:
       (catch 'exit
 	(org-back-to-heading t)
 	(if (looking-at org-outline-regexp) (goto-char (1- (match-end 0))))
-	(or (looking-at (concat " +" org-todo-regexp "\\( +\\|$\\)"))
-	    (looking-at " *"))
+	(or (looking-at (concat " +" org-todo-regexp "\\( +\\|[ \t]*$\\)"))
+	    (looking-at "\\(?: *\\|[ \t]*$\\)"))
 	(let* ((match-data (match-data))
 	       (startpos (point-at-bol))
 	       (logging (save-match-data (org-entry-get nil "LOGGING" t t)))
@@ -16386,7 +16406,8 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
 		  (if (org-on-heading-p t)
 		      (add-text-properties (point-at-bol) (org-end-of-subtree t) pa))))
 	      (goto-char (point-min))
-	      (setq re (concat org-outline-regexp-bol "+" org-comment-string "\\>"))
+	      (setq re (format org-heading-keyword-regexp-format
+			       org-comment-string))
 	      (while (re-search-forward re nil t)
 		(add-text-properties
 		 (match-beginning 0) (org-end-of-subtree t) pc)))
@@ -20054,13 +20075,16 @@ this line is also exported in fixed-width font."
 	    (forward-line 1)))
       (save-excursion
 	(org-back-to-heading)
-	(if (looking-at (concat org-outline-regexp
-				"\\( *\\<" org-quote-string "\\>[ \t]*\\)"))
-	    (replace-match "" t t nil 1)
-	  (if (looking-at org-outline-regexp)
-	      (progn
-		(goto-char (match-end 0))
-		(insert org-quote-string " "))))))))
+	(cond
+	 ((looking-at (format org-heading-keyword-regexp-format
+			      org-quote-string))
+	  (goto-char (match-end 1))
+	  (looking-at (concat " +" org-quote-string))
+	  (replace-match "" t t)
+	  (when (eolp) (insert " ")))
+	 ((looking-at org-outline-regexp)
+	  (goto-char (match-end 0))
+	  (insert org-quote-string " ")))))))
 
 (defun org-reftex-citation ()
   "Use reftex-citation to insert a citation into the buffer.
@@ -20379,8 +20403,9 @@ empty."
        (save-excursion
          (beginning-of-line 1)
 	 (let ((case-fold-search nil))
-	   (looking-at (concat "^\\(\\*+\\)[ \t]+\\(" org-todo-regexp
-			       "\\)?[ \t]*$"))))))
+	   (looking-at org-todo-line-regexp)))
+       (string= (match-string 3) "")))
+
 (defun org-at-heading-or-item-p ()
   (or (org-on-heading-p) (org-at-item-p)))
 

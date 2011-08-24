@@ -631,13 +631,6 @@ This means, between the beginning of line and the point."
 	(set-match-data ',match)
 	(apply ',function rest)))))
 
-(defun org-mouse-match-todo-keyword ()
-  (save-excursion
-    (org-back-to-heading)
-    (if (looking-at org-outline-regexp) (goto-char (match-end 0)))
-    (or (looking-at (concat " +" org-todo-regexp " *"))
-	(looking-at " \\( *\\)"))))
-
 (defun org-mouse-yank-link (click)
   (interactive "e")
   ;; Give temporary modes such as isearch a chance to turn off.

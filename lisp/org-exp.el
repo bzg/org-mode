@@ -1638,7 +1638,8 @@ from the buffer."
 
 (defun org-export-protect-quoted-subtrees ()
   "Mark quoted subtrees with the protection property."
-  (let ((org-re-quote (concat "^\\*+[ \t]+" org-quote-string "\\>")))
+  (let ((org-re-quote (format org-heading-keyword-regexp-format
+			      org-quote-string)))
     (goto-char (point-min))
     (while (re-search-forward org-re-quote nil t)
       (goto-char (match-beginning 0))
@@ -1932,7 +1933,8 @@ table line.  If it is a link, add it to the line containing the link."
 
 (defun org-export-remove-comment-blocks-and-subtrees ()
   "Remove the comment environment, and also commented subtrees."
-  (let ((re-commented (concat "^\\*+[ \t]+" org-comment-string "\\>"))
+  (let ((re-commented (format org-heading-keyword-regexp-format
+			      org-comment-string))
 	case-fold-search)
     ;; Remove comment environment
     (goto-char (point-min))

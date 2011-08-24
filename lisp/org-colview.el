@@ -1152,11 +1152,12 @@ containing the title row and all other rows.  Each row is a list
 of fields."
   (save-excursion
     (let* ((title (mapcar 'cadr org-columns-current-fmt-compiled))
-	   (re-comment (concat "\\*+[ \t]+" org-comment-string "\\>"))
+	   (re-comment (format org-heading-keyword-regexp-format
+			       org-comment-string))
 	   (re-archive (concat ".*:" org-archive-tag ":"))
 	   (n (length title)) row tbl)
       (goto-char (point-min))
-      (while (re-search-forward "^\\(\\*+\\) " nil t)
+      (while (re-search-forward org-heading-regexp nil t)
 	(catch 'next
 	  (when (and (or (null maxlevel)
 			 (>= maxlevel

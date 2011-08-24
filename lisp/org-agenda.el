@@ -3887,7 +3887,7 @@ in `org-agenda-text-search-extra-files'."
     (if (not regexps+)
 	(setq regexp org-outline-regexp-bol)
       (setq regexp (pop regexps+))
-      (if hdl-only (setq regexp (concat "^" org-outline-regexp ".*?"
+      (if hdl-only (setq regexp (concat org-outline-regexp-bol " .*?"
 					regexp))))
     (setq files (org-agenda-files nil 'ifmode))
     (when (eq (car org-agenda-text-search-extra-files) 'agenda-archives)
@@ -4593,18 +4593,21 @@ the documentation of `org-diary'."
 		      'help-echo
 		      (format "mouse-2 or RET jump to org file %s"
 			      (abbreviate-file-name buffer-file-name))))
-	 (regexp (concat "^\\*+[ \t]+\\("
-			 (if org-select-this-todo-keyword
-			     (if (equal org-select-this-todo-keyword "*")
-				 org-todo-regexp
-			       (concat "\\<\\("
-				       (mapconcat 'identity
-						  (org-split-string
-						   org-select-this-todo-keyword "|") "\\|")
-				     "\\)\\>"))
-			   org-not-done-regexp)
-			 "[^\n\r]*\\)"))
-	 marker priority category org-category-pos tags todo-state ee txt beg end)
+	 (regexp (format org-heading-keyword-regexp-format
+			 (cond
+			  ((and org-select-this-todo-keyword
+				(equal org-select-this-todo-keyword "*"))
+			   org-todo-regexp)
+			  (org-select-this-todo-keyword
+			   (concat "\\("
+				   (mapconcat 'identity
+					      (org-split-string
+					       org-select-this-todo-keyword
+					       "|")
+					      "\\|") "\\)"))
+			  (t org-not-done-regexp))))
+	 marker priority category org-category-pos tags todo-state
+	 ee txt beg end)
     (goto-char (point-min))
     (while (re-search-forward regexp nil t)
       (catch :skip
@@ -4616,11 +4619,11 @@ the documentation of `org-diary'."
 	    (goto-char (1+ beg))
 	    (or org-agenda-todo-list-sublevels (org-end-of-subtree 'invisible))
 	    (throw :skip nil)))
-	(goto-char (match-beginning 1))
+	(goto-char (match-beginning 2))
 	(setq marker (org-agenda-new-marker (match-beginning 0))
 	      category (org-get-category)
 	      org-category-pos (get-text-property (point) 'org-category-position)
-	      txt (match-string 1)
+	      txt (match-string 2)
 	      tags (org-get-tags-at (point))
 	      txt (org-agenda-format-item "" txt category tags)
 	      priority (1+ (org-get-priority txt))
@@ -4632,7 +4635,7 @@ the documentation of `org-diary'."
 	  'type "todo" 'todo-state todo-state)
 	(push txt ee)
 	(if org-agenda-todo-list-sublevels
-	    (goto-char (match-end 1))
+	    (goto-char (match-end 2))
 	  (org-end-of-subtree 'invisible))))
     (nreverse ee)))
 

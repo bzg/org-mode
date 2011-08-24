@@ -1175,8 +1175,9 @@ PUB-DIR is set, use this as the publishing directory."
 			 (plist-get opt-plist :link-home)))
 	 (dummy (setq opt-plist (plist-put opt-plist :title title)))
 	 (html-table-tag (plist-get opt-plist :html-table-tag))
-	 (quote-re0   (concat "^[ \t]*" org-quote-string "\\>"))
-	 (quote-re    (concat "^\\(\\*+\\)\\([ \t]+" org-quote-string "\\>\\)"))
+	 (quote-re0   (concat "^ *" org-quote-string "\\( +\\|[ \t]*$\\)"))
+	 (quote-re    (format org-heading-keyword-regexp-format
+			      org-quote-string))
 	 (inquote     nil)
 	 (infixed     nil)
 	 (inverse     nil)
@@ -1647,7 +1648,7 @@ lang=\"%s\" xml:lang=\"%s\">
 			 t t line))))))
 
 	  (cond
-	   ((string-match "^\\(\\*+\\)[ \t]+\\(.*\\)" line)
+	   ((string-match "\\(\\*+\\)\\(?: +\\(.*?\\)\\)?[ \t]*$" line)
 	    ;; This is a headline
 	    (setq level (org-tr-level (- (match-end 1) (match-beginning 1)
 					 level-offset))

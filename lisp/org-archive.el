@@ -404,7 +404,7 @@ sibling does not exist, it will be created at the end of the subtree."
 If the cursor is not on a headline, try all level 1 trees.  If
 it is on a headline, try all direct children.
 When TAG is non-nil, don't move trees, but mark them with the ARCHIVE tag."
-  (let ((re (concat org-outline-regexp-bol "+" org-not-done-regexp)) re1
+  (let ((re org-not-done-heading-regexp) re1
 	(rea (concat ".*:" org-archive-tag ":"))
 	(begm (make-marker))
 	(endm (make-marker))
