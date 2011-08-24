@@ -4607,6 +4607,7 @@ the documentation of `org-diary'."
 	(goto-char (match-beginning 1))
 	(setq marker (org-agenda-new-marker (match-beginning 0))
 	      category (org-get-category)
+	      category-pos (get-text-property (point) 'org-category-position)
 	      txt (match-string 1)
 	      tags (org-get-tags-at (point))
 	      txt (org-format-agenda-item "" txt category tags)
