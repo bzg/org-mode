@@ -417,7 +417,7 @@ When COMBINE is non nil, add the category to each line."
 	  (let ((t1 (ignore-errors (org-parse-time-string ts 'nodefault))))
 	    (if (and (> org-icalendar-alarm-time 0)
 		     (car t1) (nth 1 t1) (nth 2 t1))
-		(setq alarm (format "\nBEGIN:VALARM\nACTION:DISPLAY\nDESCRIPTION:%s\nTRIGGER:-P0D0H%dM0S\nEND:VALARM" summary org-icalendar-alarm-time))
+		(setq alarm (format "\nBEGIN:VALARM\nACTION:DISPLAY\nDESCRIPTION:%s\nTRIGGER:-P0DT0H%dM0S\nEND:VALARM" summary org-icalendar-alarm-time))
 	      (setq alarm ""))
 	    )
 	  (if (string-match org-bracket-link-regexp summary)
