@@ -8358,7 +8358,8 @@ The prefix arg is passed through to the command if possible."
 	  (progn (message "Skipping removed entry at %s" e)
 		 (setq cntskip (1+ cntskip)))
 	(goto-char pos)
-	(eval cmd)
+	(let (org-loop-over-headlines-in-active-region)
+	  (eval cmd))
 	(setq org-agenda-bulk-marked-entries
 	      (delete e org-agenda-bulk-marked-entries))
 	(setq cnt (1+ cnt))))
