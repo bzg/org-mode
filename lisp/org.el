@@ -11873,7 +11873,7 @@ can either be an Org date like \"2011-07-24\" or a delta like \"+2d\"."
   (if (and (org-region-active-p) org-loop-over-headlines-in-active-region)
       (let (org-loop-over-headlines-in-active-region)
 	(org-map-entries
-	 `(org-deadline ',remove ,time) org-loop-over-headlines-in-active-region 'region))
+	 `(org-deadline ',remove ,time) org-loop-over-headlines-in-active-region 'region (if (outline-invisible-p) (org-end-of-subtree nil t))))
     (let* ((old-date (org-entry-get nil "DEADLINE"))
 	   (repeater (and old-date
 			  (string-match
@@ -11917,7 +11917,7 @@ either be an Org date like \"2011-07-24\" or a delta like \"+2d\"."
   (if (and (org-region-active-p) org-loop-over-headlines-in-active-region)
       (let (org-loop-over-headlines-in-active-region)
 	(org-map-entries
-	 `(org-schedule ',remove ,time) org-loop-over-headlines-in-active-region 'region))
+	 `(org-schedule ',remove ,time) org-loop-over-headlines-in-active-region 'region (if (outline-invisible-p) (org-end-of-subtree nil t))))
     (let* ((old-date (org-entry-get nil "SCHEDULED"))
 	   (repeater (and old-date
 			  (string-match
