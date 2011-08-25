@@ -328,16 +328,17 @@ If no footnote is found, return nil."
 	 (re (format "^\\[%s\\]\\|.\\[%s:" label label))
 	 pos)
     (save-excursion
-      (when (or (re-search-forward re nil t)
-		(and (goto-char (point-min))
-		     (re-search-forward re nil t))
-		(and (progn (widen) t)
-		     (goto-char (point-min))
-		     (re-search-forward re nil t)))
-	(let ((refp (org-footnote-at-reference-p)))
-	  (cond
-	   ((and (nth 3 refp) refp))
-	   ((org-footnote-at-definition-p))))))))
+      (save-restriction
+	(when (or (re-search-forward re nil t)
+		  (and (goto-char (point-min))
+		       (re-search-forward re nil t))
+		  (and (progn (widen) t)
+		       (goto-char (point-min))
+		       (re-search-forward re nil t)))
+	  (let ((refp (org-footnote-at-reference-p)))
+	    (cond
+	     ((and (nth 3 refp) refp))
+	     ((org-footnote-at-definition-p)))))))))
 
 (defun org-footnote-goto-definition (label)
   "Move point to the definition of the footnote LABEL."
