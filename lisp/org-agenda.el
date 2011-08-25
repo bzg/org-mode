@@ -76,7 +76,7 @@
 (declare-function org-is-habit-p "org-habit" (&optional pom))
 (declare-function org-habit-parse-todo "org-habit" (&optional pom))
 (declare-function org-habit-get-priority "org-habit" (habit &optional moment))
-(declare-function org-pop-to-buffer-same-window "org-compat" 
+(declare-function org-pop-to-buffer-same-window "org-compat"
 		  (&optional buffer-or-name norecord label))
 
 (defvar calendar-mode-map)
@@ -1399,13 +1399,13 @@ When nil, such items are sorted as 0 minutes effort."
     (tags  . " %i %-12:c")
     (search . " %i %-12:c"))
   "Format specifications for the prefix of items in the agenda views.
-An alist with five entries, each for the different agenda types.  The 
-keys of the sublists are `agenda', `timeline', `todo', `search' and `tags'.  
+An alist with five entries, each for the different agenda types.  The
+keys of the sublists are `agenda', `timeline', `todo', `search' and `tags'.
 The values are format strings.
 
 This format works similar to a printf format, with the following meaning:
 
-  %c   the category of the item, \"Diary\" for entries from the diary, 
+  %c   the category of the item, \"Diary\" for entries from the diary,
        or as given by the CATEGORY keyword or derived from the file name
   %e   the effort required by the item
   %i   the icon category of the item, see `org-agenda-category-icon-alist'
@@ -1420,10 +1420,10 @@ contain two additional characters:  a question mark just after the `%'
 and a whitespace/punctuation character just before the final letter.
 
 If the first character after `%' is a question mark, the entire field
-will only be included if the corresponding value applies to the current 
-entry.  This is useful for fields which should have fixed width when 
-present, but zero width when absent.  For example, \"%?-12t\" will 
-result in a 12 character time field if a time of the day is specified, 
+will only be included if the corresponding value applies to the current
+entry.  This is useful for fields which should have fixed width when
+present, but zero width when absent.  For example, \"%?-12t\" will
+result in a 12 character time field if a time of the day is specified,
 but will completely disappear in entries which do not contain a time.
 
 If there is punctuation or whitespace character just before the final
@@ -1432,7 +1432,7 @@ the value is not empty.  For example, the format \"%-12:c\" leads to
 \"Diary: \" if the category is \"Diary\".  If the category were be
 empty, no additional colon would be inserted.
 
-The default value for the agenda sublist is \"  %-12:c%?-12t% s\", 
+The default value for the agenda sublist is \"  %-12:c%?-12t% s\",
 which means:
 
 - Indent the line with two space characters
@@ -1709,7 +1709,7 @@ For example, this value makes those two functions available:
     (?C bulk-cut))
 
 With selected entries in an agenda buffer, `B R' will call
-the custom function `set-category' on the selected entries.  
+the custom function `set-category' on the selected entries.
 Note that functions in this alist don't need to be quoted."
   :type 'alist
   :group 'org-agenda)
@@ -4723,8 +4723,8 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 	   "\\|\\(<[0-9]+-[0-9]+-[0-9]+[^>\n]+?\\+[0-9]+[dwmy]>\\)"
 	   "\\|\\(<%%\\(([^>\n]+)\\)>\\)"))
 	 marker hdmarker deadlinep scheduledp clockp closedp inactivep
-	 donep tmp priority category ee txt timestr tags b0 b3 e3 head
-	 todo-state end-of-match show-all)
+	 donep tmp priority category category-pos ee txt timestr tags
+	 b0 b3 e3 head todo-state end-of-match show-all)
     (goto-char (point-min))
     (while (setq end-of-match (re-search-forward regexp nil t))
       (setq b0 (match-beginning 0)
@@ -4763,7 +4763,8 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 	    ;; substring should only run to end of time stamp
 	    (setq timestr (substring timestr 0 (match-end 0))))
 	(setq marker (org-agenda-new-marker b0)
-	      category (org-get-category b0))
+	      category (org-get-category b0)
+	      category-pos (get-text-property b0 'org-category-position))
 	(save-excursion
 	  (if (not (re-search-backward org-outline-regexp-bol nil t))
 	      (setq txt org-agenda-no-heading-message)
@@ -4798,8 +4799,8 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 		      (format "mouse-2 or RET jump to org file %s"
 			      (abbreviate-file-name buffer-file-name))))
 	 (regexp "^&?%%(")
-	 marker category ee txt tags entry result beg b sexp sexp-entry
-	 todo-state)
+	 marker category category-pos ee txt tags entry
+	 result beg b sexp sexp-entry todo-state)
     (goto-char (point-min))
     (while (re-search-forward regexp nil t)
       (catch :skip
@@ -4816,6 +4817,7 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 	(when result
 	  (setq marker (org-agenda-new-marker beg)
 		category (org-get-category beg)
+		category-pos (get-text-property beg 'org-category-position)
 		todo-state (org-get-todo-state))
 
 	  (dolist (r (if (stringp result)
@@ -4934,8 +4936,8 @@ please use `org-class' instead."
 			    (list 0 0 0 (nth 1 date) (car date) (nth 2 date))))
 		    1 11))))
 	 (org-agenda-search-headline-for-time nil)
-	 marker hdmarker priority category tags closedp statep clockp state
-	 ee txt extra timestr rest clocked)
+	 marker hdmarker priority category category-pos tags closedp
+	 statep clockp state ee txt extra timestr rest clocked)
     (goto-char (point-min))
     (while (re-search-forward regexp nil t)
       (catch :skip
@@ -4946,14 +4948,15 @@ please use `org-class' instead."
 	      clockp (not (or closedp statep))
 	      state (and statep (match-string 2))
 	      category (org-get-category (match-beginning 0))
-	      timestr (buffer-substring (match-beginning 0) (point-at-eol))
-	      )
+	      category-pos (get-text-property (match-beginning 0) 'org-category-position)
+	      timestr (buffer-substring (match-beginning 0) (point-at-eol)))
 	(when (string-match "\\]" timestr)
 	  ;; substring should only run to end of time stamp
 	  (setq rest (substring timestr (match-end 0))
 		timestr (substring timestr 0 (match-end 0)))
 	  (if (and (not closedp) (not statep)
-		   (string-match "\\([0-9]\\{1,2\\}:[0-9]\\{2\\}\\)\\].*?\\([0-9]\\{1,2\\}:[0-9]\\{2\\}\\)" rest))
+		   (string-match "\\([0-9]\\{1,2\\}:[0-9]\\{2\\}\\)\\].*?\\([0-9]\\{1,2\\}:[0-9]\\{2\\}\\)"
+				 rest))
 	      (progn (setq timestr (concat (substring timestr 0 -1)
 					   "-" (match-string 1 rest) "]"))
 		     (setq clocked (match-string 2 rest)))
@@ -5009,9 +5012,9 @@ See also the user option `org-agenda-clock-consistency-checks'."
 		     "\\(-\\{1,3\\}\\(\\[.*?\\]\\)\\)?")) ; group 3 is second
 	 (tlstart 0.)
 	 (tlend 0.)
-	 (maxtime (org-hh:mm-string-to-minutes 
+	 (maxtime (org-hh:mm-string-to-minutes
 		   (or (plist-get pl :max-duration) "24:00")))
-	 (mintime (org-hh:mm-string-to-minutes 
+	 (mintime (org-hh:mm-string-to-minutes
 		   (or (plist-get pl :min-duration) 0)))
 	 (maxgap  (org-hh:mm-string-to-minutes
 		   ;; default 30:00 means never complain
