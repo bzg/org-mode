@@ -626,7 +626,10 @@ This variable is obsolete since Org version 7.7.
 Please set `org-export-html-divs' instead.")
 
 (defcustom org-export-html-divs '("preamble" "content" "postamble")
-  "The name of the main divs for HTML export."
+  "The name of the main divs for HTML export.
+This is a list of three strings, the first one for the preamble
+DIV, the second one for the content DIV and the third one for the
+postamble DIV."
   :group 'org-export-html
   :type '(list
 	  (string :tag " Div for the preamble:")
