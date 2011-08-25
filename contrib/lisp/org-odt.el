@@ -648,7 +648,9 @@ PUB-DIR is set, use this as the publishing directory."
 (defun org-odt-end-table ()
   (goto-char org-lparse-table-begin-marker)
   (loop for level from 0 below org-lparse-table-ncols
-	do (insert (org-odt-format-tags "<table:table-column/>"  "")))
+	do (insert
+	    (org-odt-format-tags
+	     "<table:table-column table:style-name=\"OrgTableColumn\"/>"  "")))
 
   ;; fill style attributes for table cells
   (when org-lparse-table-is-styled
@@ -995,7 +997,7 @@ Use `org-odt-format-source-code-or-example-plain' or
 value of `org-export-odt-use-htmlfontify."
   (funcall
    (if (and org-export-odt-use-htmlfontify
-	    (or (featurep 'htmlfontify) (require 'htmlfontify)) 
+	    (or (featurep 'htmlfontify) (require 'htmlfontify))
 	    (fboundp 'htmlfontify-string))
        'org-odt-format-source-code-or-example-colored
      'org-odt-format-source-code-or-example-plain)

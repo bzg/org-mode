@@ -17,8 +17,13 @@
   <!-- automatic styles -->
   <office:automatic-styles>
   <style:style style:name="OrgTable" style:family="table">
-   <style:table-properties style:width="12cm" table:align="center"/>
+   <style:table-properties style:rel-width="90%" table:align="center"/>
   </style:style>
+
+  <style:style style:name="OrgTableColumn" style:family="table-column">
+   <style:table-column-properties style:rel-column-width="1*"/>
+  </style:style>
+
   <style:style style:name="OrgTblCell" style:family="table-cell">
       <style:table-cell-properties style:vertical-align="middle" fo:padding="0.159cm" fo:border-top="none" fo:border-bottom="none" fo:border-left="none" fo:border-right="none"/>
     </style:style>
