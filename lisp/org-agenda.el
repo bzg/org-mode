@@ -3785,7 +3785,7 @@ in `org-agenda-text-search-extra-files'."
 	 (full-words org-agenda-search-view-force-full-words)
 	 (org-agenda-text-search-extra-files org-agenda-text-search-extra-files)
 	 regexp rtn rtnall files file pos
-	 marker category tags c neg re boolean
+	 marker category category-pos tags c neg re boolean
 	 ee txt beg end words regexps+ regexps- hdl-only buffer beg1 str)
     (unless (and (not edit-at)
 		 (stringp string)
@@ -4579,12 +4579,13 @@ the documentation of `org-diary'."
 			     (if (equal org-select-this-todo-keyword "*")
 				 org-todo-regexp
 			       (concat "\\<\\("
-				       (mapconcat 'identity (org-split-string org-select-this-todo-keyword "|") "\\|")
+				       (mapconcat 'identity
+						  (org-split-string
+						   org-select-this-todo-keyword "|") "\\|")
 				     "\\)\\>"))
 			   org-not-done-regexp)
 			 "[^\n\r]*\\)"))
-	 marker priority category tags todo-state
-	 ee txt beg end)
+	 marker priority category category-pos tags todo-state ee txt beg end)
     (goto-char (point-min))
     (while (re-search-forward regexp nil t)
       (catch :skip
@@ -5131,9 +5132,9 @@ See also the user option `org-agenda-clock-consistency-checks'."
 	 (regexp org-deadline-time-regexp)
 	 (todayp (org-agenda-todayp date)) ; DATE bound by calendar
 	 (d1 (calendar-absolute-from-gregorian date))  ; DATE bound by calendar
-	 d2 diff dfrac wdays pos pos1 category tags
-	 suppress-prewarning
-	 ee txt head face s todo-state show-all upcomingp donep timestr)
+	 d2 diff dfrac wdays pos pos1 category category-pos
+	 tags suppress-prewarning ee txt head face s todo-state
+	 show-all upcomingp donep timestr)
     (goto-char (point-min))
     (while (re-search-forward regexp nil t)
       (setq suppress-prewarning nil)
@@ -5248,7 +5249,7 @@ FRACTION is what fraction of the head-warning time has passed."
 					0 'org-hd-marker a))
 			      (cons (marker-position mm) a)))
 		  deadline-results))
-	 d2 diff pos pos1 category tags donep
+	 d2 diff pos pos1 category category-pos tags donep
 	 ee txt head pastschedp todo-state face timestr s habitp show-all)
     (goto-char (point-min))
     (while (re-search-forward regexp nil t)
