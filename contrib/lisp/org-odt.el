@@ -1757,18 +1757,15 @@ visually."
 (defun org-odt-configure-outline-numbering (level)
   "Outline numbering is retained only upto LEVEL.
 To disable outline numbering pass a LEVEL of 0."
-  (if (not (string= org-export-odt-factory-settings (sha1 (current-buffer))))
-      (org-lparse-warn
-       "org-odt: Using custom styles file? Consider tweaking styles.xml for better output. To suppress this warning update `org-export-odt-factory-settings'")
-    (goto-char (point-min))
-    (let ((regex
-	   "<text:outline-level-style\\(.*\\)text:level=\"\\(.*\\)\"\\(.*\\)>")
-	  (replacement
-	   "<text:outline-level-style\\1text:level=\"\\2\" style:num-format=\"\">"))
-      (while (re-search-forward regex nil t)
-	(when (> (string-to-number (match-string 1)) level)
-	  (replace-match replacement t nil))))
-    (save-buffer 0)))
+  (goto-char (point-min))
+  (let ((regex
+	 "<text:outline-level-style\\(.*\\)text:level=\"\\([^\"]*\\)\"\\(.*\\)>")
+	(replacement
+	 "<text:outline-level-style\\1text:level=\"\\2\" style:num-format=\"\">"))
+    (while (re-search-forward regex nil t)
+      (when (> (string-to-number (match-string 2)) level)
+	(replace-match replacement t nil))))
+  (save-buffer 0))
 
 (provide 'org-odt)
 

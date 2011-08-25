@@ -415,8 +415,12 @@ and value definition."
 
 (defun org-footnote-unique-label (&optional current)
   "Return a new unique footnote label.
+
 The function returns the first \"fn:N\" or \"N\" label that is
-currently not used."
+currently not used.
+
+Optional argument CURRENT is the list of labels active in the
+buffer."
   (unless current (setq current (org-footnote-all-labels)))
   (let ((fmt (if (eq org-footnote-auto-label 'plain) "%d" "fn:%d"))
 	(cnt 1))
@@ -603,11 +607,11 @@ If Org is amidst an export process, EXPORT-PROPS will hold the
 export properties of the buffer.
 
 When EXPORT-PROPS is non-nil, the default action is to insert
-normalized footnotes towards the end of the pre-processing buffer.
-Some exporters like docbook, odt, etc. expect that footnote
-definitions be available before any references to them.  Such
-exporters can let bind `org-footnote-insert-pos-for-preprocessor' to
-symbol 'point-min to achieve the desired behaviour.
+normalized footnotes towards the end of the pre-processing
+buffer.  Some exporters (docbook, odt...) expect footnote
+definitions to be available before any references to them.  Such
+exporters can let bind `org-footnote-insert-pos-for-preprocessor'
+to symbol `point-min' to achieve the desired behaviour.
 
 Additional note on `org-footnote-insert-pos-for-preprocessor':
 1. This variable has not effect when FOR-PREPROCESSOR is nil.

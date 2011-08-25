@@ -54,8 +54,7 @@
 (defconst org-indent-max 40
   "Maximum indentation in characters.")
 (defconst org-indent-max-levels 20
-  "Maximum added level through virtual indentation, in
-characters.
+  "Maximum added level through virtual indentation, in characters.
 
 It is computed by multiplying `org-indent-indentation-per-level'
 minus one by actual level of the headline minus one.")
@@ -88,7 +87,7 @@ This is used locally in each buffer being initialized.")
 (defvar org-hide-leading-stars-before-indent-mode nil
   "Used locally.")
 (defvar org-indent-modified-headline-flag nil
-  "Non nil if the last deletion acted on an headline.
+  "Non-nil means the last deletion operated on an headline.
 It is modified by `org-indent-notify-modified-headline'.")
 
 

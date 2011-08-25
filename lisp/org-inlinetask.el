@@ -405,8 +405,14 @@ Either remove headline and meta data, or do special formatting."
     (current-column)))
 
 (defvar org-indent-indentation-per-level) ; defined in org-indent.el
+
+(defface org-inlinetask
+  (org-compatible-face 'shadow '((t (:bold t))))
+  "Face for inlinetask headlines."
+  :group 'org-faces)
+
 (defun org-inlinetask-fontify (limit)
-  "Fontify the inline tasks."
+  "Fontify the inline tasks down to LIMIT."
   (let* ((nstars (if org-odd-levels-only
 		     (1- (* 2 (or org-inlinetask-min-level 200)))
 		   (or org-inlinetask-min-level 200)))
@@ -425,7 +431,7 @@ Either remove headline and meta data, or do special formatting."
       (add-text-properties (match-beginning 2) (match-end 2)
 			   '(face org-hide font-lock-fontified t))
       (add-text-properties (match-beginning 3) (match-end 3)
-			   '(face shadow font-lock-fontified t)))))
+			   '(face org-inlinetask font-lock-fontified t)))))
 
 (defun org-inlinetask-toggle-visibility ()
   "Toggle visibility of inline task at point."

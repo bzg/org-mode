@@ -3198,17 +3198,9 @@ the global options and expect it to be applied to the entire view.")
 	(setq org-blocked-by-checkboxes nil invis1 invis)
 	(let ((marker (org-get-at-bol 'org-hd-marker)))
 	  (when (and marker
-		     (not (with-current-buffer (marker-buffer marker)
-			    (save-excursion
-			      (goto-char marker)
-			      (if (org-entry-get nil "NOBLOCKING")
-				  t ;; Never block this entry
-				(run-hook-with-args-until-failure
-				 'org-blocker-hook
-				 (list :type 'todo-state-change
-				       :position marker
-				       :from 'todo
-				       :to 'done)))))))
+		     (with-current-buffer (marker-buffer marker)
+		       (save-excursion (goto-char marker)
+				       (org-entry-blocked-p))))
 	    (if org-blocked-by-checkboxes (setq invis1 nil))
 	    (setq b (if invis1
 			(max (point-min) (1- (point-at-bol)))
@@ -4607,6 +4599,7 @@ the documentation of `org-diary'."
 	(goto-char (match-beginning 1))
 	(setq marker (org-agenda-new-marker (match-beginning 0))
 	      category (org-get-category)
+	      category-pos (get-text-property (point) 'org-category-position)
 	      txt (match-string 1)
 	      tags (org-get-tags-at (point))
 	      txt (org-format-agenda-item "" txt category tags)
