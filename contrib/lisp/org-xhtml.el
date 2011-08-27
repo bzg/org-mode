@@ -633,24 +633,30 @@ with a link to this URL."
 (defvar org-export-xhtml-final-hook nil
   "Hook run at the end of HTML export, in the new buffer.")
 
-;;; HTML export
+(defun org-export-xhtml-preprocess-latex-fragments ()
+  (when (equal org-lparse-backend 'xhtml)
+    (org-export-xhtml-do-preprocess-latex-fragments)))
 
-(defun org-export-xhtml-preprocess (parameters)
+(defvar org-lparse-opt-plist)		    ; bound during org-do-lparse
+(defun org-export-xhtml-do-preprocess-latex-fragments ()
   "Convert LaTeX fragments to images."
-  (when (and org-current-export-file
-	     (plist-get parameters :LaTeX-fragments))
-    (org-format-latex
-     (concat "ltxpng/" (file-name-sans-extension
-			(file-name-nondirectory
-			 org-current-export-file)))
-     org-current-export-dir nil "Creating LaTeX image %s"
-     nil nil
-     (cond
-      ((eq (plist-get parameters :LaTeX-fragments) 'verbatim) 'verbatim)
-      ((eq (plist-get parameters :LaTeX-fragments) 'mathjax ) 'mathjax)
-      ((eq (plist-get parameters :LaTeX-fragments) t        ) 'mathjax)
-      ((eq (plist-get parameters :LaTeX-fragments) 'dvipng  ) 'dvipng)
-      (t nil))))
+  (let* ((latex-frag-opt (plist-get org-lparse-opt-plist :LaTeX-fragments))
+	 (latex-frag-opt-1		; massage the options
+	  (cond
+	   ((eq latex-frag-opt 'verbatim) 'verbatim)
+	   ((eq latex-frag-opt 'mathjax ) 'mathjax)
+	   ((eq latex-frag-opt t        ) 'mathjax)
+	   ((eq latex-frag-opt 'dvipng  ) 'dvipng)
+	   (t nil))))
+    (when (and org-current-export-file latex-frag-opt)
+      (org-format-latex
+       (concat "ltxpng/" (file-name-sans-extension
+			  (file-name-nondirectory
+			   org-current-export-file)))
+       org-current-export-dir nil "Creating LaTeX image %s"
+       nil nil latex-frag-opt-1))))
+
+(defun org-export-xhtml-preprocess-label-references ()
   (goto-char (point-min))
   (let (label l1)
     (while (re-search-forward "\\\\ref{\\([^{}\n]+\\)}" nil t)
@@ -661,6 +667,19 @@ with a link to this URL."
 	      (setq l1 (substring label (match-beginning 1)))
 	    (setq l1 label)))
 	(replace-match (format "[[#%s][%s]]" label l1) t t)))))
+
+(defun org-export-xhtml-preprocess (parameters)
+  (org-export-xhtml-preprocess-label-references))
+
+;; Process latex fragments as part of
+;; `org-export-preprocess-after-blockquote-hook'. Note that this hook
+;; is the one that is closest and well before the call to
+;; `org-export-attach-captions-and-attributes' in
+;; `org-export-preprocess-stirng'.  The above arrangement permits
+;; captions, labels and attributes to be attached to png images
+;; generated out of latex equations.
+(add-hook 'org-export-preprocess-after-blockquote-hook
+	  'org-export-xhtml-preprocess-latex-fragments)
 
 (defvar html-table-tag nil) ; dynamically scoped into this.
 
@@ -785,34 +804,34 @@ MAY-INLINE-P allows inlining it as an image."
 (defun org-xhtml-format-image (src)
   "Create image tag with source and attributes."
   (save-match-data
-    (if (string-match "^ltxpng/" src)
-	(format "<img src=\"%s\" alt=\"%s\"/>"
-                src (org-find-text-property-in-string 'org-latex-src src))
-      (let* ((caption (org-find-text-property-in-string 'org-caption src))
-	     (attr (org-find-text-property-in-string 'org-attributes src))
-	     (label (org-find-text-property-in-string 'org-label src))
-	     (caption (and caption (org-xml-encode-org-text caption)))
-	     (img (format "<img src=\"%s\"%s />"
-			  src
-			  (if (string-match "\\<alt=" (or attr ""))
-			      (concat " " attr )
-			    (concat " " attr " alt=\"" src "\""))))
-	     (extra (concat
-		     (and label
-			  (format "id=\"%s\" " (org-solidify-link-text label)))
-		     "class=\"figure\"")))
-	(if caption
-	    (with-temp-buffer
-	      (with-org-lparse-preserve-paragraph-state
-	       (insert
-		(org-lparse-format
-		 '("<div %s>" . "\n</div>")
-		 (concat
-		  (org-lparse-format '("\n<p>" . "</p>") img)
-		  (org-lparse-format '("\n<p>" . "</p>") caption))
-		 extra)))
-	      (buffer-string))
-	  img)))))
+    (let* ((caption (org-find-text-property-in-string 'org-caption src))
+	   (attr (org-find-text-property-in-string 'org-attributes src))
+	   (label (org-find-text-property-in-string 'org-label src))
+	   (caption (and caption (org-xml-encode-org-text caption)))
+	   (img-extras (if (string-match "^ltxpng/" src)
+			   (format " alt=\"%s\""
+				   (org-find-text-property-in-string
+				    'org-latex-src src))
+			 (if (string-match "\\<alt=" (or attr ""))
+			     (concat " " attr )
+			   (concat " " attr " alt=\"" src "\""))))
+	   (img (format "<img src=\"%s\"%s />" src img-extras))
+	   (extra (concat
+		   (and label
+			(format "id=\"%s\" " (org-solidify-link-text label)))
+		   "class=\"figure\"")))
+      (if caption
+	  (with-temp-buffer
+	    (with-org-lparse-preserve-paragraph-state
+	     (insert
+	      (org-lparse-format
+	       '("<div %s>" . "\n</div>")
+	       (concat
+		(org-lparse-format '("\n<p>" . "</p>") img)
+		(org-lparse-format '("\n<p>" . "</p>") caption))
+	       extra)))
+	    (buffer-string))
+	img))))
 
 (defun org-export-xhtml-get-bibliography ()
   "Find bibliography, cut it out and return it."
@@ -1202,8 +1221,9 @@ make any modifications to the exporter file.  For example,
 (org-lparse-register-backend 'xhtml)
 
 (defun org-xhtml-unload-function ()
-  ;; notify org-lparse library on unload
   (org-lparse-unregister-backend 'xhtml)
+  (remove-hook 'org-export-preprocess-after-blockquote-hook
+	       'org-export-xhtml-preprocess-latex-fragments)
   nil)
 
 (defun org-xhtml-begin-document-body (opt-plist)
