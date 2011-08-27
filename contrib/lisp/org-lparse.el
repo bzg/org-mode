@@ -1291,7 +1291,9 @@ version."
       (org-lparse-format-org-table lines nil)
     ;; Table made by table.el
     (or (org-lparse-format-table-table-using-table-generate-source
-	 org-lparse-backend olines
+	 ;; FIXME: Need to take care of this during merge
+	 (if (eq org-lparse-backend 'xhtml) 'html org-lparse-backend)
+	 olines
 	 (not org-export-prefer-native-exporter-for-tables))
 	;; We are here only when table.el table has NO col or row
 	;; spanning and the user prefers using org's own converter for

@@ -29,10 +29,9 @@
 ;;; Code:
 
 (require 'org-exp)
+(require 'org-html) 			; FIXME; remove during merge
 (require 'format-spec)
-
 (require 'org-lparse)
-
 (eval-when-compile (require 'cl) (require 'table) (require 'browse-url))
 
 (declare-function org-id-find-id-file "org-id" (id))
