@@ -1651,7 +1651,7 @@ visually."
 
 (defvar org-lparse-latex-fragment-fallback) ; set by org-do-lparse
 (defvar org-lparse-opt-plist)		    ; bound during org-do-lparse
-(defun org-export-odt-preprocess-latex-fragments ()
+(defun org-export-odt-do-preprocess-latex-fragments ()
   "Convert LaTeX fragments to images."
   (let* ((latex-frag-opt (plist-get org-lparse-opt-plist :LaTeX-fragments))
 	 (latex-frag-opt-1		;  massage the options
@@ -1672,6 +1672,10 @@ visually."
 			   org-current-export-file)))
        org-current-export-dir nil "Creating LaTeX image %s"
        nil nil latex-frag-opt-1))))
+
+(defun org-export-odt-preprocess-latex-fragments ()
+  (when (equal org-export-current-backend 'odt)
+    (org-export-odt-do-preprocess-latex-fragments)))
 
 (defun org-export-odt-preprocess-label-references ()
   (goto-char (point-min))
