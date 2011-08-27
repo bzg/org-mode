@@ -983,10 +983,11 @@ turned on."
 	  (lambda (style text-block text-id text-begins-block-p)
 	    (insert (format "<text:span text:style-name=\"%s\">" style))))
 	 (hfy-end-span-handler (lambda nil (insert "</text:span>"))))
-    (mapconcat
-     (lambda (line)
-       (org-odt-format-stylized-paragraph 'src (htmlfontify-string line)))
-     (org-split-string lines "[\r\n]") "\n")))
+    (when (fboundp 'htmlfontify-string)
+      (mapconcat
+       (lambda (line)
+	 (org-odt-format-stylized-paragraph 'src (htmlfontify-string line)))
+       (org-split-string lines "[\r\n]") "\n"))))
 
 (defun org-odt-format-source-code-or-example (lines lang caption textareap
 						    cols rows num cont
@@ -1481,6 +1482,7 @@ visually."
   :group 'org-export-odt
   :type 'boolean)
 
+(defvar hfy-user-sheet-assoc)		; bound during org-do-lparse
 (defun org-odt-save-as-outfile (target opt-plist)
   ;; write meta file
   (org-odt-update-meta-file opt-plist)
