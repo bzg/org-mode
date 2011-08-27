@@ -847,6 +847,7 @@ version."
 	 (org-export-footnotes-seen nil)
 	 (org-export-footnotes-data (org-footnote-all-labels 'with-defs))
 	 (org-footnote-insert-pos-for-preprocessor 'point-min)
+	 (org-lparse-opt-plist opt-plist)
 	 (lines
 	  (org-split-string
 	   (org-export-preprocess-string

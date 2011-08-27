@@ -143,8 +143,9 @@ OpenDocument xml files.")
 (org-lparse-register-backend 'odt)
 
 (defun org-odt-unload-function ()
-  ;; notify org-lparse library on unload
   (org-lparse-unregister-backend 'odt)
+  (remove-hook 'org-export-preprocess-after-blockquote-hook
+	       'org-export-odt-preprocess-latex-fragments)
   nil)
 
 (defcustom org-export-odt-automatic-styles-file nil
@@ -435,6 +436,7 @@ PUB-DIR is set, use this as the publishing directory."
 	<text:sequence-decl text:display-outline-level=\"0\" text:name=\"Table\"/>
 	<text:sequence-decl text:display-outline-level=\"0\" text:name=\"Text\"/>
 	<text:sequence-decl text:display-outline-level=\"0\" text:name=\"Drawing\"/>
+	<text:sequence-decl text:display-outline-level=\"0\" text:name=\"Equation\"/>
       </text:sequence-decls>"))
 
 ;; Following variable is let bound when `org-do-lparse' is in
@@ -1648,29 +1650,28 @@ visually."
        (substring label (match-beginning 1))))))
 
 (defvar org-lparse-latex-fragment-fallback) ; set by org-do-lparse
-(defun org-export-odt-preprocess-latex-fragments (parameters)
+(defvar org-lparse-opt-plist)		    ; bound during org-do-lparse
+(defun org-export-odt-preprocess-latex-fragments ()
   "Convert LaTeX fragments to images."
-  (when (and org-current-export-file
-	     (plist-get parameters :LaTeX-fragments))
-    (org-format-latex
-     (concat "ltxpng/" (file-name-sans-extension
-			(file-name-nondirectory
-			 org-current-export-file)))
-     org-current-export-dir nil "Creating LaTeX image %s"
-     nil nil
-     (cond
-      ((eq (plist-get parameters :LaTeX-fragments) 'verbatim) 'verbatim)
+  (let* ((latex-frag-opt (plist-get org-lparse-opt-plist :LaTeX-fragments))
+	 (latex-frag-opt-1		;  massage the options
+	  (or (and (member latex-frag-opt '(mathjax t))
+		   (prog1 org-lparse-latex-fragment-fallback
+		     (org-lparse-warn
+		      (concat
+		       "Use of MathJax is incompatible with ODT exporter. "
+		       (format "Using %S instead."
+			       org-lparse-latex-fragment-fallback)))))
+	      latex-frag-opt)))
+    (when (and org-current-export-file latex-frag-opt-1)
       ;; Investigate MathToWeb for converting TeX equations to MathML
-      ;; See http://lists.gnu.org/archive/html/emacs-orgmode/2011-03/msg01755.html
-      ((or (eq (plist-get parameters :LaTeX-fragments) 'mathjax )
-	   (eq (plist-get parameters :LaTeX-fragments) t        ))
-       (org-lparse-warn
-	(concat
-	 "Use of MathJax is incompatible with ODT exporter. "
-	 (format "Using %S instead."  org-lparse-latex-fragment-fallback)))
-	 org-lparse-latex-fragment-fallback)
-      ((eq (plist-get parameters :LaTeX-fragments) 'dvipng  ) 'dvipng)
-      (t nil)))))
+      ;; http://lists.gnu.org/archive/html/emacs-orgmode/2011-03/msg01755.html
+      (org-format-latex
+       (concat "ltxpng/" (file-name-sans-extension
+			  (file-name-nondirectory
+			   org-current-export-file)))
+       org-current-export-dir nil "Creating LaTeX image %s"
+       nil nil latex-frag-opt-1))))
 
 (defun org-export-odt-preprocess-label-references ()
   (goto-char (point-min))
@@ -1688,8 +1689,17 @@ visually."
 	    '("<text:sequence-ref text:reference-format=\"category-and-value\" text:ref-name=\"%s\">"
 	      . "</text:sequence-ref>") pretty-label label)) t t)))))
 
+;; process latex fragments as part of
+;; `org-export-preprocess-after-blockquote-hook'. Note that this hook
+;; is the one that is closest and well before the call to
+;; `org-export-attach-captions-and-attributes' in
+;; `org-export-preprocess-stirng'.  The above arrangement permits
+;; captions, labels and attributes to be attached to png images
+;; generated out of latex equations.
+(add-hook 'org-export-preprocess-after-blockquote-hook
+	  'org-export-odt-preprocess-latex-fragments)
+
 (defun org-export-odt-preprocess (parameters)
-  (org-export-odt-preprocess-latex-fragments parameters)
   (org-export-odt-preprocess-label-references))
 
 (declare-function archive-zip-extract "arc-mode.el" (archive name))
