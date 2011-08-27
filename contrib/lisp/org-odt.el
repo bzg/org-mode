@@ -1663,7 +1663,7 @@ visually."
        (substring label (match-beginning 1))))))
 
 (defvar org-lparse-latex-fragment-fallback) ; set by org-do-lparse
-(defun org-export-odt-preprocess (parameters)
+(defun org-export-odt-preprocess-latex-fragments (parameters)
   "Convert LaTeX fragments to images."
   (when (and org-current-export-file
 	     (plist-get parameters :LaTeX-fragments))
@@ -1685,7 +1685,9 @@ visually."
 	 (format "Using %S instead."  org-lparse-latex-fragment-fallback)))
 	 org-lparse-latex-fragment-fallback)
       ((eq (plist-get parameters :LaTeX-fragments) 'dvipng  ) 'dvipng)
-      (t nil))))
+      (t nil)))))
+
+(defun org-export-odt-preprocess-label-references ()
   (goto-char (point-min))
   (let (label label-components category value pretty-label)
     (while (re-search-forward "\\\\ref{\\([^{}\n]+\\)}" nil t)
@@ -1700,6 +1702,10 @@ visually."
 	   (org-odt-format-tags
 	    '("<text:sequence-ref text:reference-format=\"category-and-value\" text:ref-name=\"%s\">"
 	      . "</text:sequence-ref>") pretty-label label)) t t)))))
+
+(defun org-export-odt-preprocess (parameters)
+  (org-export-odt-preprocess-latex-fragments parameters)
+  (org-export-odt-preprocess-label-references))
 
 (declare-function archive-zip-extract "arc-mode.el" (archive name))
 (defun org-odt-zip-extract-one (archive member &optional target)
