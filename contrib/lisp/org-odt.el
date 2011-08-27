@@ -1185,37 +1185,22 @@ MAY-INLINE-P allows inlining it as an image."
    (expand-file-name
     (concat (sha1 file-name) "." (file-name-extension file-name)) "Pictures")))
 
-(defun org-export-odt-format-image (src href
-					;; par-open
-					)
+(defun org-export-odt-format-image (src href)
   "Create image tag with source and attributes."
   (save-match-data
-
-    (let (embed-as caption attr label attr-plist size width height)
-
-      (cond
-       ((string-match "^ltxpng/" src)
-	;; FIXME: Anyway the latex src can be embedded as an
-	;; annotation
-
-	;; (org-find-text-property-in-string 'org-latex-src src)
-	(setq caption nil attr nil label nil embed-as 'character))
-
-       (t
-	(setq caption (org-find-text-property-in-string 'org-caption src)
-	      caption (and caption (org-xml-format-desc caption))
-	      attr (org-find-text-property-in-string 'org-attributes src)
-	      label (org-find-text-property-in-string 'org-label src)
-	      embed-as 'paragraph)))
-
-      (setq attr-plist (when attr (read  attr)))
-      (setq size (org-odt-image-size-from-file
+    (let* ((caption (org-find-text-property-in-string 'org-caption src))
+	   (caption (and caption (org-xml-format-desc caption)))
+	   (attr (org-find-text-property-in-string 'org-attributes src))
+	   (label (org-find-text-property-in-string 'org-label src))
+	   (embed-as (if (string-match "^ltxpng/" src) 'character 'paragraph))
+	   (attr-plist (when attr (read  attr)))
+	   (size (org-odt-image-size-from-file
 		  src (plist-get attr-plist :width)
 		  (plist-get attr-plist :height)
-		  (plist-get attr-plist :scale) nil embed-as))
+		  (plist-get attr-plist :scale) nil embed-as)))
+      (org-export-odt-do-format-image
+       embed-as caption attr label size href))))
 
-      (org-export-odt-do-format-image embed-as caption attr label
-				       size href))))
 (defun org-odt-format-textbox (text style)
   (let ((draw-frame-pair
 	 '("<draw:frame draw:style-name=\"%s\"
