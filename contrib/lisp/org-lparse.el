@@ -335,6 +335,7 @@ OPT-PLIST is the export options list."
      ,@body
      (when org-lparse-do-open-par
        (org-lparse-begin-paragraph))))
+(def-edebug-spec with-org-lparse-preserve-paragraph-state (body))
 
 (defvar org-lparse-native-backends nil
   "List of native backends registered with `org-lparse'.
