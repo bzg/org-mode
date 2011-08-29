@@ -108,23 +108,29 @@ a variable of the same value."
      ((stringp val)
       (format "string %S=\"%s\";" var val))
      ((listp val)
-      (let* ((dimension-2-p (not (null (cdr val))))
+      (let* ((dimension-2-p (cdr val))
              (dim (if dimension-2-p "[][]" "[]"))
              (type (org-babel-asymptote-define-type val))
              (array (org-babel-asymptote-table-to-array
-                     val
+                     val type
                      (if dimension-2-p '(:lstart "{" :lend "}," :llend "}")))))
         (format "%S%s %S=%s;" type dim var array))))))
 
-(defun org-babel-asymptote-table-to-array (table params)
-  "Convert values of an elisp table into a string of an asymptote array.
+(defun org-babel-asymptote-table-to-array (table type params)
+  "Convert values of TABLE into a string of an asymptote array.
+
+TABLE is a list whose atoms are assumed to be of type
+TYPE. PARAMS is a plist of parameters that can influence the
+conversion.
+
 Empty cells are ignored."
   (labels ((atom-to-string (table)
                            (cond
                             ((null table) '())
                             ((not (listp (car table)))
-                             (cons (if (and (stringp (car table))
-                                            (not (string= (car table) "")))
+                             (cons (if (or (eq type 'string)
+                                           (and (stringp (car table))
+                                                (not (string= (car table) ""))))
                                        (format "\"%s\"" (car table))
                                      (format "%s" (car table)))
                                    (atom-to-string (cdr table))))
@@ -140,22 +146,22 @@ Empty cells are ignored."
 
 (defun org-babel-asymptote-define-type (data)
   "Determine type of DATA.
-DATA is a list. Type symbol is returned as 'symbol. The type is
-usually the type of the first atom encountered, except for arrays
-of int, where every cell must be of int type."
-  (labels ((anything-but-int (el)
-                             (cond
-                              ((null el) nil)
-                              ((not (listp (car el)))
-                               (cond
-                                ((floatp (car el)) 'real)
-                                ((stringp (car el)) 'string)
-                                (t
-                                 (anything-but-int (cdr el)))))
-                              (t
-                               (or (anything-but-int (car el))
-                                   (anything-but-int (cdr el)))))))
-    (or (anything-but-int data) 'int)))
+
+DATA is a list.  Return type as a symbol.
+
+The type is `string' if any element in DATA is
+a string. Otherwise, it is either `float', if some elements are
+floats, or `int'."
+  (let* ((type 'int)
+	 (find-type
+	  (lambda (row)
+	    (catch 'exit
+	      (mapc (lambda (el)
+		      (cond ((listp el) (funcall find-type el))
+			    ((stringp el) (throw 'exit (setq type 'string)))
+			    ((floatp el) (setq type 'float))))
+		    row)))))
+    (funcall find-type data) type))
 
 (provide 'ob-asymptote)
 
