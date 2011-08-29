@@ -193,6 +193,15 @@ have quoted results.
 The following 2*5=call_double(5) should export even when prefixed by
 an = sign.
 
+* inline source block
+  :PROPERTIES:
+  :results:  silent
+  :ID:       54cb8dc3-298c-4883-a933-029b3c9d4b18
+  :END:
+Here is one in the middle src_sh{echo 1} of a line.
+Here is one at the end of a line. src_sh{echo 2}
+src_sh{echo 3} Here is one at the beginning of a line.
+
 * parsing header arguments
   :PROPERTIES:
   :ID:       7eb0dc6e-1c53-4275-88b3-b22f3113b9c3
