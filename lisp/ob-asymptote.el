@@ -150,7 +150,7 @@ Empty cells are ignored."
 DATA is a list.  Return type as a symbol.
 
 The type is `string' if any element in DATA is
-a string. Otherwise, it is either `float', if some elements are
+a string. Otherwise, it is either `real', if some elements are
 floats, or `int'."
   (let* ((type 'int)
 	 (find-type
@@ -159,7 +159,7 @@ floats, or `int'."
 	      (mapc (lambda (el)
 		      (cond ((listp el) (funcall find-type el))
 			    ((stringp el) (throw 'exit (setq type 'string)))
-			    ((floatp el) (setq type 'float))))
+			    ((floatp el) (setq type 'real))))
 		    row)))))
     (funcall find-type data) type))
 
