@@ -774,7 +774,7 @@ Additional note on `org-footnote-insert-pos-for-preprocessor':
 	  (when (and (derived-mode-p 'message-mode)
 		     (save-excursion
 		       (re-search-forward message-signature-separator nil t)))
-	    (open-line 2))
+	    (open-line 1))
 	  (when org-footnote-tag-for-non-org-mode-files
 	    (insert "\n" org-footnote-tag-for-non-org-mode-files "\n")))
 	 ((and org-footnote-section (not export-props))
@@ -787,6 +787,7 @@ Additional note on `org-footnote-insert-pos-for-preprocessor':
 	(insert (mapconcat (lambda (x) (format "\n[%s] %s"
 					  (nth (if sort-only 0 1) x) (nth 2 x)))
 			   ref-table "\n"))
+	(unless (eobp) (insert "\n"))
 	;; When exporting, add newly inserted markers along with their
 	;; associated definition to `org-export-footnotes-seen'.
 	(when export-props
