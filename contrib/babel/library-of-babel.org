@@ -366,6 +366,39 @@ span. Note the use of LaTeX, rather than Org-mode, markup.
 | 2 | 5 |
 | 3 | 6 |
 
+** Convert every element of a table to a string
+
+#+tblname: hetero-table
+| 1 | 2 | 3 |
+| a | b | c |
+
+#+source: all-to-string
+#+begin_src emacs-lisp :var tbl='()
+  (defun all-to-string (tbl)
+    (if (listp tbl)
+        (mapcar #'all-to-string tbl)
+      (if (stringp tbl)
+          tbl
+        (format "%s" tbl))))
+  (all-to-string tbl)
+#+end_src
+
+#+begin_src emacs-lisp :var tbl=hetero-table
+  (mapcar (lambda (row) (mapcar (lambda (cell) (stringp cell)) row)) tbl)
+#+end_src
+
+#+results:
+| nil | nil | nil |
+| t   | t   | t   |
+
+#+begin_src emacs-lisp :var tbl=all-to-string(hetero-table)
+  (mapcar (lambda (row) (mapcar (lambda (cell) (stringp cell)) row)) tbl)
+#+end_src
+
+#+results:
+| t | t | t |
+| t | t | t |
+
 * Misc
 
 ** File-specific Version Control logging
