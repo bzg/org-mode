@@ -13658,66 +13658,67 @@ with `org-get-tags-at'.  If your function gets properties with
 to t around the call to `org-entry-properties' to get the same speedup.
 Note that if your function moves around to retrieve tags and properties at
 a *different* entry, you cannot use these techniques."
-  (let* ((org-agenda-archives-mode nil) ; just to make sure
-	 (org-agenda-skip-archived-trees (memq 'archive skip))
-	 (org-agenda-skip-comment-trees (memq 'comment skip))
-	 (org-agenda-skip-function
-	  (car (org-delete-all '(comment archive) skip)))
-	 (org-tags-match-list-sublevels t)
-	 matcher file res
-	 org-todo-keywords-for-agenda
-	 org-done-keywords-for-agenda
-	 org-todo-keyword-alist-for-agenda
-	 org-drawers-for-agenda
-	 org-tag-alist-for-agenda)
+  (unless (and (eq scope 'region) (not (org-region-active-p)))
+    (let* ((org-agenda-archives-mode nil) ; just to make sure
+	   (org-agenda-skip-archived-trees (memq 'archive skip))
+	   (org-agenda-skip-comment-trees (memq 'comment skip))
+	   (org-agenda-skip-function
+	    (car (org-delete-all '(comment archive) skip)))
+	   (org-tags-match-list-sublevels t)
+	   matcher file res
+	   org-todo-keywords-for-agenda
+	   org-done-keywords-for-agenda
+	   org-todo-keyword-alist-for-agenda
+	   org-drawers-for-agenda
+	   org-tag-alist-for-agenda)
 
-    (cond
-     ((eq match t)   (setq matcher t))
-     ((eq match nil) (setq matcher t))
-     (t (setq matcher (if match (cdr (org-make-tags-matcher match)) t))))
+      (cond
+       ((eq match t)   (setq matcher t))
+       ((eq match nil) (setq matcher t))
+       (t (setq matcher (if match (cdr (org-make-tags-matcher match)) t))))
 
-    (save-excursion
-      (save-restriction
-	(cond ((eq scope 'tree)
-	       (org-back-to-heading t)
-	       (org-narrow-to-subtree)
-	       (setq scope nil))
-	      ((and (eq scope 'region) (org-region-active-p))
-	       (narrow-to-region (region-beginning)
-				 (save-excursion
-				   (goto-char (region-end))
-				   (unless (and (bolp) (org-at-heading-p))
-				     (outline-next-heading))
-				   (point)))
-	       (setq scope nil)))
+      (save-excursion
+	(save-restriction
+	  (cond ((eq scope 'tree)
+		 (org-back-to-heading t)
+		 (org-narrow-to-subtree)
+		 (setq scope nil))
+		((and (eq scope 'region) (org-region-active-p))
+		 (narrow-to-region (region-beginning)
+				   (save-excursion
+				     (goto-char (region-end))
+				     (unless (and (bolp) (org-at-heading-p))
+				       (outline-next-heading))
+				     (point)))
+		 (setq scope nil)))
 
-	(if (not scope)
-	    (progn
-	      (org-prepare-agenda-buffers
-	       (list (buffer-file-name (current-buffer))))
-	      (setq res (org-scan-tags func matcher)))
-	  ;; Get the right scope
-	  (cond
-	   ((and scope (listp scope) (symbolp (car scope)))
-	    (setq scope (eval scope)))
-	   ((eq scope 'agenda)
-	    (setq scope (org-agenda-files t)))
-	   ((eq scope 'agenda-with-archives)
-	    (setq scope (org-agenda-files t))
-	    (setq scope (org-add-archive-files scope)))
-	   ((eq scope 'file)
-	    (setq scope (list (buffer-file-name))))
-	   ((eq scope 'file-with-archives)
-	    (setq scope (org-add-archive-files (list (buffer-file-name))))))
-	  (org-prepare-agenda-buffers scope)
-	  (while (setq file (pop scope))
-	    (with-current-buffer (org-find-base-buffer-visiting file)
-	      (save-excursion
-		(save-restriction
-		  (widen)
-		  (goto-char (point-min))
-		  (setq res (append res (org-scan-tags func matcher))))))))))
-    res))
+	  (if (not scope)
+	      (progn
+		(org-prepare-agenda-buffers
+		 (list (buffer-file-name (current-buffer))))
+		(setq res (org-scan-tags func matcher)))
+	    ;; Get the right scope
+	    (cond
+	     ((and scope (listp scope) (symbolp (car scope)))
+	      (setq scope (eval scope)))
+	     ((eq scope 'agenda)
+	      (setq scope (org-agenda-files t)))
+	     ((eq scope 'agenda-with-archives)
+	      (setq scope (org-agenda-files t))
+	      (setq scope (org-add-archive-files scope)))
+	     ((eq scope 'file)
+	      (setq scope (list (buffer-file-name))))
+	     ((eq scope 'file-with-archives)
+	      (setq scope (org-add-archive-files (list (buffer-file-name))))))
+	    (org-prepare-agenda-buffers scope)
+	    (while (setq file (pop scope))
+	      (with-current-buffer (org-find-base-buffer-visiting file)
+		(save-excursion
+		  (save-restriction
+		    (widen)
+		    (goto-char (point-min))
+		    (setq res (append res (org-scan-tags func matcher))))))))))
+      res)))
 
 ;;;; Properties
 
