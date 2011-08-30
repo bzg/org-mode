@@ -949,9 +949,7 @@ may be specified in the properties of the current outline entry."
       (delq nil
 	    (mapcar
 	     (lambda (header-arg)
-	       (and (setq val
-			  (or (org-entry-get (point) header-arg t)
-			      (org-entry-get (point) (concat ":" header-arg) t)))
+	       (and (setq val (org-entry-get (point) header-arg t))
 		    (cons (intern (concat ":" header-arg))
 			  (org-babel-read val))))
 	     (mapcar
