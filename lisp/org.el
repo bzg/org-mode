@@ -13683,7 +13683,12 @@ a *different* entry, you cannot use these techniques."
 	       (org-narrow-to-subtree)
 	       (setq scope nil))
 	      ((and (eq scope 'region) (org-region-active-p))
-	       (narrow-to-region (region-beginning) (region-end))
+	       (narrow-to-region (region-beginning)
+				 (save-excursion
+				   (goto-char (region-end))
+				   (unless (and (bolp) (org-at-heading-p))
+				     (outline-next-heading))
+				   (point)))
 	       (setq scope nil)))
 
 	(if (not scope)
