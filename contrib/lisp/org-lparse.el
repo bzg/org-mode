@@ -1321,6 +1321,30 @@ version."
 ;; Following variables are defined in org-table.el
 (defvar org-table-number-fraction)
 (defvar org-table-number-regexp)
+(defun org-lparse-org-table-to-list-table (lines &optional splice)
+  "Convert org-table to list-table.
+LINES is a list of the form (ROW1 ROW2 ROW3 ...) where each
+element is a `string' representing a single row of org-table.
+Thus each ROW has vertical separators \"|\" separating the table
+fields.  A ROW could also be a row-group separator of the form
+\"|---...|\".  Return a list of the form (ROW1 ROW2 ROW3
+...). ROW could either be symbol `:hrule' or a list of the
+form (FIELD1 FIELD2 FIELD3 ...) as appropriate."
+  (let (line lines-1)
+    (cond
+     (splice
+      (while (setq line (pop lines))
+	(unless (string-match "^[ \t]*|-" line)
+	  (push (org-split-string line "[ \t]*|[ \t]*") lines-1))))
+     (t
+      (while (setq line (pop lines))
+	(cond
+	 ((string-match "^[ \t]*|-" line)
+	  (when lines
+	    (push :hrule lines-1)))
+	 (t
+	  (push (org-split-string line "[ \t]*|[ \t]*") lines-1))))))
+    (nreverse lines-1)))
 
 (defun org-lparse-do-format-org-table (lines &optional splice)
   "Format a org-type table into backend-specific code.
@@ -1338,7 +1362,6 @@ for formatting.  This is required for the DocBook exporter."
     ;; Check if the table has a marking column.  If yes remove the
     ;; column and the special lines
     (setq lines (org-table-clean-before-export lines)))
-
   (let* ((caption (org-find-text-property-in-string 'org-caption (car lines)))
 	 (caption (and caption (org-xml-encode-org-text caption)))
 	 (label (org-find-text-property-in-string 'org-label (car lines)))
@@ -1359,14 +1382,12 @@ for formatting.  This is required for the DocBook exporter."
 	 org-lparse-table-begin-marker
 	 (org-lparse-table-style 'org-table)
 	 org-lparse-table-is-styled)
+    (setq lines (org-lparse-org-table-to-list-table lines splice))
     (cond
      (splice
       (setq org-lparse-table-is-styled nil)
       (while (setq line (pop lines))
-	(unless (string-match "^[ \t]*|-" line)
-	  (insert
-	   (org-lparse-format-table-row
-	    (org-split-string line "[ \t]*|[ \t]*")) "\n"))))
+	(insert (org-lparse-format-table-row line) "\n")))
      (t
       (setq org-lparse-table-is-styled t)
       (org-lparse-begin 'TABLE caption label attributes)
@@ -1374,12 +1395,10 @@ for formatting.  This is required for the DocBook exporter."
       (org-lparse-begin-table-rowgroup head)
       (while (setq line (pop lines))
 	(cond
-	 ((string-match "^[ \t]*|-" line)
-	  (when lines (org-lparse-begin-table-rowgroup)))
+	 ((equal line :hrule)
+	  (org-lparse-begin-table-rowgroup))
 	 (t
-	  (insert
-	   (org-lparse-format-table-row
-	    (org-split-string line "[ \t]*|[ \t]*")) "\n"))))
+	  (insert (org-lparse-format-table-row line) "\n"))))
       (org-lparse-end 'TABLE-ROWGROUP)
       (org-lparse-end-table)))))
 
