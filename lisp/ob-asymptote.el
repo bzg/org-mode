@@ -113,38 +113,14 @@ a variable of the same value."
 	(format "%s[] %S={%s};" type var vect)))
      ((listp val)
       (let* ((type (org-babel-asymptote-define-type val))
-             (array (org-babel-asymptote-table-to-array
-                     val type
-                     '(:lstart "{" :lend "}," :llend "}"))))
-        (format "%S[][] %S=%s;" type var array))))))
-
-(defun org-babel-asymptote-table-to-array (table type params)
-  "Convert values of TABLE into a string of an asymptote array.
-
-TABLE is a list whose atoms are assumed to be of type
-TYPE. PARAMS is a plist of parameters that can influence the
-conversion.
-
-Empty cells are ignored."
-  (labels ((atom-to-string (table)
-                           (cond
-                            ((null table) '())
-                            ((not (listp (car table)))
-                             (cons (if (or (eq type 'string)
-                                           (and (stringp (car table))
-                                                (not (string= (car table) ""))))
-                                       (format "\"%s\"" (car table))
-                                     (format "%s" (car table)))
-                                   (atom-to-string (cdr table))))
-                            (t
-                             (cons (atom-to-string (car table))
-                                   (atom-to-string (cdr table))))))
-           ;; Remove any empty row
-           (fix-empty-lines (table)
-                            (delq nil (mapcar (lambda (l) (delq "" l)) table))))
-    (orgtbl-to-generic
-     (fix-empty-lines (atom-to-string table))
-     (org-combine-plists '(:hline nil :sep "," :tstart "{" :tend "}") params))))
+	     (fmt (if (eq 'string type) "\"%s\"" "%s"))
+             (array (mapconcat (lambda (row)
+				 (concat "{"
+					 (mapconcat (lambda (e) (format fmt e))
+						    row ", ")
+					 "}"))
+			       val ",")))
+        (format "%S[][] %S={%s};" type var array))))))
 
 (defun org-babel-asymptote-define-type (data)
   "Determine type of DATA.
