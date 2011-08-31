@@ -1373,7 +1373,7 @@ for formatting.  This is required for the DocBook exporter."
 			       (lambda (x) (string-match "^[ \t]*|-" x))
 			       (cdr lines)))))
 	 (org-lparse-table-rownum -1) org-lparse-table-ncols i (cnt 0)
-	 tbopen line fields
+	 tbopen fields
 	 org-lparse-table-cur-rowgrp-is-hdr
 	 org-lparse-table-rowgrp-open
 	 org-lparse-table-num-numeric-items-per-column
@@ -1383,6 +1383,12 @@ for formatting.  This is required for the DocBook exporter."
 	 (org-lparse-table-style 'org-table)
 	 org-lparse-table-is-styled)
     (setq lines (org-lparse-org-table-to-list-table lines splice))
+
+    (org-lparse-do-format-list-table lines splice caption label attributes head)))
+
+(defun org-lparse-do-format-list-table (lines &optional splice
+					      caption label attributes head)
+  (let (line)
     (cond
      (splice
       (setq org-lparse-table-is-styled nil)
@@ -1405,6 +1411,11 @@ for formatting.  This is required for the DocBook exporter."
 (defun org-lparse-format-org-table (lines &optional splice)
   (with-temp-buffer
     (org-lparse-do-format-org-table lines splice)
+    (buffer-substring-no-properties (point-min) (point-max))))
+
+(defun org-lparse-format-list-table (lines &optional splice)
+  (with-temp-buffer
+    (org-lparse-do-format-list-table lines splice)
     (buffer-substring-no-properties (point-min) (point-max))))
 
 (defun org-lparse-do-format-table-table (lines)
