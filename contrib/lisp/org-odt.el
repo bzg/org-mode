@@ -609,9 +609,9 @@ PUB-DIR is set, use this as the publishing directory."
 	(org-odt-format-tags
 	 '("<text:list-item>" . "</text:list-item>")
 	 (org-odt-format-stylized-paragraph 'definition-term term)))
-       (org-lparse-begin 'LIST-ITEM 'unordered)
+       (org-lparse-begin-list-item 'unordered)
        (org-lparse-begin-list 'description)
-       (org-lparse-begin 'LIST-ITEM 'unordered)))
+       (org-lparse-begin-list-item 'unordered)))
     (t (error "Unknown list type"))))
 
 (defun org-odt-end-list-item (ltype)
@@ -621,9 +621,9 @@ PUB-DIR is set, use this as the publishing directory."
     ((ordered unordered)
      (org-lparse-insert-tag "</text:list-item>"))
     (description
-     (org-lparse-end-list-item)
+     (org-lparse-end-list-item-1)
      (org-lparse-end-list 'description)
-     (org-lparse-end-list-item))
+     (org-lparse-end-list-item-1))
     (t (error "Unknown list type"))))
 
 ;; Following variables are let bound when table emission is in

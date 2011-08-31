@@ -1667,7 +1667,7 @@ the alist of previous items."
 		   (type (funcall get-type first-item struct prevs)))
 	      (org-lparse-end-paragraph)
 	      ;; Ending for every item
-	      (org-lparse-end-list-item type)
+	      (org-lparse-end-list-item-1 type)
 	      ;; We're ending last item of the list: end list.
 	      (when lastp
 		(org-lparse-end-list type)
@@ -1703,7 +1703,7 @@ the alist of previous items."
 
 	(let ((arg (cond ((equal type "d") desc-tag)
 			 ((equal type "o") counter))))
-	  (org-lparse-begin 'LIST-ITEM type arg))
+	  (org-lparse-begin-list-item type arg))
 
 	;; If line had a checkbox, some additional modification is required.
 	(when checkbox
@@ -1808,10 +1808,10 @@ information."
     (org-lparse-end 'PARAGRAPH)
     (setq org-lparse-par-open nil)))
 
-(defun org-lparse-end-list-item (&optional type)
+(defun org-lparse-end-list-item-1 (&optional type)
   "Close <li> if necessary."
   (org-lparse-end-paragraph)
-  (org-lparse-end 'LIST-ITEM (or type "u")))
+  (org-lparse-end-list-item (or type "u")))
 
 (defvar org-lparse-dyn-current-environment nil)
 (defun org-lparse-begin-environment (style)
@@ -2030,13 +2030,13 @@ When TITLE is nil, just close all open levels."
     (if (> level umax)
 	(progn
 	  (if (aref org-levels-open (1- level))
-	      (org-lparse-end-list-item)
+	      (org-lparse-end-list-item-1)
 	    (aset org-levels-open (1- level) t)
 	    (org-lparse-end-paragraph)
 	    (org-lparse-begin-list 'unordered))
-	  (org-lparse-begin
-	   'LIST-ITEM 'unordered target
-	   (org-lparse-format 'HEADLINE title extra-targets tags)))
+	  (org-lparse-begin-list-item
+	   'unordered target (org-lparse-format
+			      'HEADLINE title extra-targets tags)))
       (aset org-levels-open (1- level) t)
       (setq snumber (org-section-number level))
       (setq level1 (+ level (or (org-lparse-get 'TOPLEVEL-HLEVEL) 1) -1))
@@ -2053,7 +2053,7 @@ When TITLE is nil, just close all open levels."
 	     ;; Terminate one level in HTML export
 	     (if (<= l umax)
 		 (org-lparse-end-outline-text-or-outline)
-	       (org-lparse-end-list-item)
+	       (org-lparse-end-list-item-1)
 	       (org-lparse-end-list 'unordered))
 	     (aset org-levels-open (1- l) nil))))
 
@@ -2090,6 +2090,12 @@ When TITLE is nil, just close all open levels."
 (defun org-lparse-end-list (ltype)
   (decf org-lparse-list-level)
   (org-lparse-end 'LIST ltype))
+
+(defun org-lparse-begin-list-item (ltype &optional arg headline)
+  (org-lparse-begin 'LIST-ITEM ltype arg headline))
+
+(defun org-lparse-end-list-item (ltype)
+  (org-lparse-end 'LIST-ITEM ltype))
 
 (defvar org-lparse-table-rowgrp-info)
 (defun org-lparse-begin-table-rowgroup (&optional is-header-row)
