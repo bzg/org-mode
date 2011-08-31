@@ -97,9 +97,8 @@ Asymptote does not support sessions"
 The elisp value PAIR is converted into Asymptote code specifying
 a variable of the same value."
   (let ((var (car pair))
-        (val (if (symbolp (cdr pair))
-                 (symbol-name (cdr pair))
-               (cdr pair))))
+        (val (let ((v (cdr pair)))
+	       (if (symbolp v) (symbol-name v) v))))
     (cond
      ((integerp val)
       (format "int %S=%S;" var val))
@@ -107,14 +106,17 @@ a variable of the same value."
       (format "real %S=%S;" var val))
      ((stringp val)
       (format "string %S=\"%s\";" var val))
+     ((and (listp val) (not (listp (car val))))
+      (let* ((type (org-babel-asymptote-define-type val))
+	     (fmt (if (eq 'string type) "\"%s\"" "%s"))
+	     (vect (mapconcat (lambda (e) (format fmt e)) val ", ")))
+	(format "%s[] %S={%s};" type var vect)))
      ((listp val)
-      (let* ((dimension-2-p (cdr val))
-             (dim (if dimension-2-p "[][]" "[]"))
-             (type (org-babel-asymptote-define-type val))
+      (let* ((type (org-babel-asymptote-define-type val))
              (array (org-babel-asymptote-table-to-array
                      val type
-                     (if dimension-2-p '(:lstart "{" :lend "}," :llend "}")))))
-        (format "%S%s %S=%s;" type dim var array))))))
+                     '(:lstart "{" :lend "}," :llend "}"))))
+        (format "%S[][] %S=%s;" type var array))))))
 
 (defun org-babel-asymptote-table-to-array (table type params)
   "Convert values of TABLE into a string of an asymptote array.
