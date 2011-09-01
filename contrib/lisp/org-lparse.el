@@ -693,12 +693,6 @@ and then converted to \"doc\" then org-lparse-backend is set to
 (defvar org-lparse-to-buffer nil
   "Bind this to TO-BUFFER arg of `org-lparse'.")
 
-(defvar org-lparse-current-paragraph-style nil
-  "Default paragraph style to use.
-Exporter sets or resets this as it enters and leaves special
-contexts.  Currently this is used for formatting of paragraphs
-that are part of table-cells created from list-tables.")
-
 (defun org-do-lparse (arg &optional hidden ext-plist
 			  to-buffer body-only pub-dir)
   "Export the outline to various formats.
@@ -728,7 +722,6 @@ version."
 					; collecting styles
 	 org-lparse-encode-pending
 	 org-lparse-par-open
-	 org-lparse-current-paragraph-style
 	 org-lparse-list-table-p
 	 (org-lparse-list-level 0)	; list level starts at 1. A
 					; value of 0 implies we are
@@ -1274,7 +1267,7 @@ version."
       ;; kill collection buffer
       (when org-lparse-collect-buffer
 	(kill-buffer org-lparse-collect-buffer))
-
+      
       (goto-char (point-min))
       (or (org-export-push-to-kill-ring
 	   (upcase (symbol-name org-lparse-backend)))
