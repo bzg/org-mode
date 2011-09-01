@@ -708,32 +708,30 @@ PUB-DIR is set, use this as the publishing directory."
 (defun org-odt-get-paragraph-style-for-table-cell (r c)
   (capitalize (aref org-lparse-table-colalign-vector c)))
 
+(defun org-odt-get-paragraph-style-cookie-for-table-cell (r c)
+  (concat
+   (cond
+    (org-lparse-table-cur-rowgrp-is-hdr "OrgTableHeading")
+    ((and (= c 0) (org-lparse-get 'TABLE-FIRST-COLUMN-AS-LABELS))
+     "OrgTableHeading")
+    (t "OrgTableContents"))
+   (and org-lparse-table-is-styled
+	(format "@@table-cell:p@@%03d@@%03d@@" r c))))
+
+(defun org-odt-get-style-name-cookie-for-table-cell (r c)
+  (when org-lparse-table-is-styled
+    (format "@@table-cell:style-name@@%03d@@%03d@@" r c)))
+
 (defun org-odt-format-table-cell (data r c)
-  (if (not org-lparse-table-is-styled)
-      (org-odt-format-tags
-       '("<table:table-cell>" . "</table:table-cell>")
-       (org-odt-format-stylized-paragraph
-	(cond
-	 (org-lparse-table-cur-rowgrp-is-hdr "OrgTableHeading")
-	 ((and (= c 0) (org-lparse-get 'TABLE-FIRST-COLUMN-AS-LABELS))
-	  "OrgTableHeading")
-	 (t "OrgTableContents"))
-	data))
-    (let* ((style-name-cookie
-	    (format "@@table-cell:style-name@@%03d@@%03d@@" r c))
-	   (paragraph-style-cookie
-	    (concat
-	     (cond
-	      (org-lparse-table-cur-rowgrp-is-hdr "OrgTableHeading")
-	      ((and (= c 0) (org-lparse-get 'TABLE-FIRST-COLUMN-AS-LABELS))
-	       "OrgTableHeading")
-	      (t "OrgTableContents"))
-	     (format "@@table-cell:p@@%03d@@%03d@@" r c))))
-      (org-odt-format-tags
-       '("<table:table-cell table:style-name=\"%s\">" .
-	 "</table:table-cell>")
-       (org-odt-format-stylized-paragraph paragraph-style-cookie data)
-       style-name-cookie))))
+  (let* ((paragraph-style-cookie
+	  (org-odt-get-paragraph-style-cookie-for-table-cell r c))
+	 (style-name-cookie
+	  (org-odt-get-style-name-cookie-for-table-cell r c))
+	 (extra (if style-name-cookie
+		    (format " table:style-name=\"%s\""  style-name-cookie) "")))
+    (org-odt-format-tags
+     '("<table:table-cell%s>" . "</table:table-cell>")
+     (org-odt-format-stylized-paragraph paragraph-style-cookie data) extra)))
 
 (defun org-odt-begin-footnote-definition (n)
   (org-lparse-begin-paragraph 'footnote))
