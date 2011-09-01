@@ -731,7 +731,8 @@ PUB-DIR is set, use this as the publishing directory."
 		    (format " table:style-name=\"%s\""  style-name-cookie) "")))
     (org-odt-format-tags
      '("<table:table-cell%s>" . "</table:table-cell>")
-     (org-odt-format-stylized-paragraph paragraph-style-cookie data) extra)))
+     (if org-lparse-list-table-p data
+       (org-odt-format-stylized-paragraph paragraph-style-cookie data)) extra)))
 
 (defun org-odt-begin-footnote-definition (n)
   (org-lparse-begin-paragraph 'footnote))
