@@ -722,6 +722,7 @@ version."
 					; collecting styles
 	 org-lparse-encode-pending
 	 org-lparse-par-open
+	 org-lparse-list-table-p
 	 (org-lparse-list-level 0)	; list level starts at 1. A
 					; value of 0 implies we are
 					; outside of any list
@@ -1041,7 +1042,7 @@ version."
 		   (f (cdr (assoc (match-string 2 line)
 				  '(("START" . org-lparse-begin-environment)
 				    ("END" . org-lparse-end-environment))))))
-	      (when (memq style '(blockquote verse center))
+	      (when (memq style '(blockquote verse center list-table))
 		(funcall f style)
 		(throw 'nextline nil))))
 
@@ -1843,17 +1844,49 @@ information."
   (org-lparse-end-paragraph)
   (org-lparse-end-list-item (or type "u")))
 
+(defcustom org-lparse-list-table-enable nil
+  "Specify whether a list be exported as a table.
+When this option is enabled, lists that are enclosed in
+\"#+begin_list-table...#+end_list-table\" are exported as
+tables. Otherwise they are exported normally."
+  :type 'boolean
+  :group 'org-lparse)
+
+(defun org-lparse-preprocess-after-blockquote-hook ()
+  "Treat #+begin_list-table...#+end_list-table blocks specially.
+When `org-lparse-list-table-enable' is non-nil, enclose these
+blocks within ORG-LIST-TABLE-START...ORG-LIST-TABLE-END."
+  (when org-lparse-list-table-enable
+    (goto-char (point-min))
+    (while (re-search-forward "^[ \t]*#\\+\\(begin\\|end\\)_\\(.*\\)$" nil t)
+      (when (string= (downcase (match-string 2)) "list-table")
+	(replace-match (if (equal (downcase (match-string 1)) "begin")
+			   "ORG-LIST-TABLE-START"
+			 "ORG-LIST-TABLE-END") t t)))))
+
+(add-hook 'org-export-preprocess-after-blockquote-hook
+	  'org-lparse-preprocess-after-blockquote-hook)
+
+(defvar org-lparse-list-table-p nil
+  "Non-nil if `org-do-lparse' is within a list-table.
+See `org-lparse-list-table-enable'.")
+
 (defvar org-lparse-dyn-current-environment nil)
 (defun org-lparse-begin-environment (style)
-  (assert (not org-lparse-dyn-current-environment) t)
-  (setq org-lparse-dyn-current-environment style)
-  (org-lparse-begin 'ENVIRONMENT  style))
+  (case style
+    (list-table
+     (setq org-lparse-list-table-p org-lparse-list-table-enable))
+    (t
+     (setq org-lparse-dyn-current-environment style)
+     (org-lparse-begin 'ENVIRONMENT  style))))
 
 (defun org-lparse-end-environment (style)
-  (org-lparse-end 'ENVIRONMENT style)
-
-  (assert (eq org-lparse-dyn-current-environment style) t)
-  (setq org-lparse-dyn-current-environment nil))
+  (case style
+    (list-table
+     (setq org-lparse-list-table-p nil))
+    (t
+     (org-lparse-end 'ENVIRONMENT style)
+     (setq org-lparse-dyn-current-environment nil))))
 
 (defun org-lparse-current-environment-p (style)
   (eq org-lparse-dyn-current-environment style))
