@@ -383,6 +383,8 @@ PUB-DIR is set, use this as the publishing directory."
      . (org-odt-begin-table org-odt-end-table))
     (TABLE-ROWGROUP
      . (org-odt-begin-table-rowgroup org-odt-end-table-rowgroup))
+    (TABLE-CELL
+     . (org-odt-begin-table-cell org-odt-end-table-cell))
     (LIST
      . (org-odt-begin-list org-odt-end-list))
     (LIST-ITEM
@@ -522,7 +524,10 @@ PUB-DIR is set, use this as the publishing directory."
 (defun org-odt-end-outline-text ()
   (ignore))
 
+(defvar org-lparse-current-paragraph-style) ; bound during
+					    ; `org-do-lparse'
 (defun org-odt-begin-paragraph (&optional style)
+  (setq style (or style org-lparse-current-paragraph-style))
   (org-lparse-insert-tag
    "<text:p%s>" (org-odt-get-extra-attrs-for-paragraph-style style)))
 
@@ -543,7 +548,8 @@ PUB-DIR is set, use this as the publishing directory."
 (defun org-odt-format-stylized-paragraph (style text)
   (org-odt-format-tags
    '("<text:p%s>" . "</text:p>") text
-   (org-odt-get-extra-attrs-for-paragraph-style style)))
+   (org-odt-get-extra-attrs-for-paragraph-style
+    (or style org-lparse-current-paragraph-style))))
 
 (defun org-odt-begin-environment (style)
   (case style
@@ -722,16 +728,26 @@ PUB-DIR is set, use this as the publishing directory."
   (when org-lparse-table-is-styled
     (format "@@table-cell:style-name@@%03d@@%03d@@" r c)))
 
-(defun org-odt-format-table-cell (data r c)
-  (let* ((paragraph-style-cookie
-	  (org-odt-get-paragraph-style-cookie-for-table-cell r c))
-	 (style-name-cookie
+(defun org-odt-begin-table-cell (r c)
+  (setq org-lparse-current-paragraph-style
+	(org-odt-get-paragraph-style-cookie-for-table-cell r c))
+  (let* ((style-name-cookie
 	  (org-odt-get-style-name-cookie-for-table-cell r c))
 	 (extra (if style-name-cookie
 		    (format " table:style-name=\"%s\""  style-name-cookie) "")))
-    (org-odt-format-tags
-     '("<table:table-cell%s>" . "</table:table-cell>")
-     (org-odt-format-stylized-paragraph paragraph-style-cookie data) extra)))
+    (org-lparse-insert-tag "<table:table-cell%s>" extra)))
+
+(defun org-odt-end-table-cell ()
+  (org-lparse-insert-tag "</table:table-cell>")
+  (setq org-lparse-current-paragraph-style nil))
+
+(defun org-odt-format-table-cell (data r c)
+  (with-temp-buffer
+    (org-odt-begin-table-cell r c)
+    (insert (org-odt-format-stylized-paragraph
+	     org-lparse-current-paragraph-style data))
+    (org-odt-end-table-cell)
+    (buffer-string)))
 
 (defun org-odt-begin-footnote-definition (n)
   (org-lparse-begin-paragraph 'footnote))
