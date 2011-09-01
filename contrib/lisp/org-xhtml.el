@@ -1524,7 +1524,8 @@ lang=\"%s\" xml:lang=\"%s\">
 	     "")
 
 	   (let* ((align (aref org-lparse-table-colalign-vector c))
-		  (alignspec (if org-xhtml-format-table-no-css
+		  (alignspec (if (and (boundp 'org-xhtml-format-table-no-css)
+				      org-xhtml-format-table-no-css)
 				 " align=\"%s\"" " class=\"%s\""))
 		  (extra (format alignspec  align)))
 	     (format "<col%s />" extra))
@@ -1541,8 +1542,9 @@ lang=\"%s\" xml:lang=\"%s\">
       (let ((c (string-to-number (match-string 1))))
 	(replace-match
 	 (if org-export-xhtml-table-align-individual-fields
-	     (format (if org-xhtml-format-table-no-css " align=\"%s\""
-		       " class=\"%s\"")
+	     (format (if (and (boundp 'org-xhtml-format-table-no-css)
+			      org-xhtml-format-table-no-css)
+			 " align=\"%s\"" " class=\"%s\"")
 		     (or (aref org-lparse-table-colalign-vector c) "left")) "")
 	 t t)))
     (goto-char (point-max)))
