@@ -983,7 +983,6 @@ that uses these same face definitions."
 
 ;; FIXME: the org-lparse defvar belongs to org-lparse.el
 (defvar org-lparse-toc)
-(defvar org-lparse-footnote-buffer)
 (defvar org-lparse-footnote-definitions)
 (defvar org-lparse-dyn-first-heading-pos)
 
@@ -1014,10 +1013,6 @@ that uses these same face definitions."
 
   ;; Remove display properties
   (remove-text-properties (point-min) (point-max) '(display t))
-
-  ;; kill temporary buffers
-  (when org-lparse-footnote-buffer
-    (kill-buffer org-lparse-footnote-buffer))
 
   ;; Run the hook
   (run-hooks 'org-export-xhtml-final-hook))

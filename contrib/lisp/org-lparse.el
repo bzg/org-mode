@@ -884,7 +884,12 @@ version."
 	 org-lparse-output-buffer
 	 org-lparse-footnote-definitions
 	 org-lparse-footnote-number
-	 org-lparse-footnote-buffer
+	 ;; collection
+	 org-lparse-collect-buffer
+	 (org-lparse-collect-count 0)	; things will get haywire if
+					; collections are chained. Use
+					; this variable to assert this
+					; pre-requisite
 	 org-lparse-toc
 	 href
 	 )
@@ -1259,6 +1264,10 @@ version."
 
       (org-lparse-end 'EXPORT)
 
+      ;; kill collection buffer
+      (when org-lparse-collect-buffer
+	(kill-buffer org-lparse-collect-buffer))
+      
       (goto-char (point-min))
       (or (org-export-push-to-kill-ring
 	   (upcase (symbol-name org-lparse-backend)))
@@ -1769,8 +1778,10 @@ the alist of previous items."
 (defvar org-lparse-table-cur-rowgrp-is-hdr)
 (defvar org-lparse-footnote-number)
 (defvar org-lparse-footnote-definitions)
-(defvar org-lparse-footnote-buffer)
-(defvar org-lparse-output-buffer)
+(defvar org-lparse-output-buffer nil
+  "Buffer to which `org-do-lparse' writes to.
+This buffer contains the contents of the to-be-created exported
+document.")
 
 (defcustom org-lparse-debug nil
   "Enable or Disable logging of `org-lparse' callbacks.
@@ -1892,19 +1903,47 @@ See `org-lparse-list-table-enable'.")
   (eq org-lparse-dyn-current-environment style))
 
 (defun org-lparse-begin-footnote-definition (n)
-  (unless org-lparse-footnote-buffer
-    (setq org-lparse-footnote-buffer
-	  (get-buffer-create "*Org HTML Export Footnotes*")))
-  (set-buffer org-lparse-footnote-buffer)
-  (erase-buffer)
+  (org-lparse-begin-collect)
   (setq org-lparse-insert-tag-with-newlines nil)
   (org-lparse-begin 'FOOTNOTE-DEFINITION n))
 
 (defun org-lparse-end-footnote-definition (n)
   (org-lparse-end 'FOOTNOTE-DEFINITION n)
   (setq org-lparse-insert-tag-with-newlines 'both)
-  (push (cons n (buffer-string)) org-lparse-footnote-definitions)
-  (set-buffer org-lparse-output-buffer))
+  (let ((footnote-def (org-lparse-end-collect)))
+    (push (cons n footnote-def) org-lparse-footnote-definitions)))
+
+(defvar org-lparse-collect-buffer nil
+  "An auxiliary buffer named \"*Org Lparse Collect*\".
+`org-do-lparse' uses this as output buffer while collecting
+footnote definitions and table-cell contents of list-tables.  See
+`org-lparse-begin-collect' and `org-lparse-end-collect'.")
+
+(defvar org-lparse-collect-count nil
+  "Count number of calls to `org-lparse-begin-collect'.
+Use this counter to catch chained collections if they ever
+happen.")
+
+(defun org-lparse-begin-collect ()
+  "Temporarily switch to `org-lparse-collect-buffer'.
+Also erase it's contents."
+  (unless (zerop org-lparse-collect-count)
+    (error "FIXME (org-lparse.el): Encountered chained collections"))
+  (incf org-lparse-collect-count)
+  (unless org-lparse-collect-buffer
+    (setq org-lparse-collect-buffer
+	  (get-buffer-create "*Org Lparse Collect*")))
+  (set-buffer org-lparse-collect-buffer)
+  (erase-buffer))
+
+(defun org-lparse-end-collect ()
+  "Switch to `org-lparse-output-buffer'.
+Return contents of `org-lparse-collect-buffer' as a `string'."
+  (assert (> org-lparse-collect-count 0))
+  (decf org-lparse-collect-count)
+  (prog1 (buffer-string)
+    (erase-buffer)
+    (set-buffer org-lparse-output-buffer)))
 
 (defun org-lparse-format (entity &rest args)
   "Format ENTITY in backend-specific way and return it.
