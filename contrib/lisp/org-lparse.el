@@ -2049,7 +2049,12 @@ See `org-xhtml-entity-format-callbacks-alist' for more information."
   lines)
 
 (defun org-lparse-format-table-row (fields &optional text-for-empty-fields)
-  (unless org-lparse-table-ncols
+  (if org-lparse-table-ncols
+      ;; second and subsequent rows of the table
+      (when (and org-lparse-list-table-p
+		 (> (length fields) org-lparse-table-ncols))
+	(error "Table row has %d columns but header row claims %d columns"
+	       (length fields) org-lparse-table-ncols))
     ;; first row of the table
     (setq org-lparse-table-ncols (length fields))
     (when org-lparse-table-is-styled
