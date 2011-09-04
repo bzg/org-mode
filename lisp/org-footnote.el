@@ -52,6 +52,7 @@
 (declare-function org-in-indented-comment-line "org" ())
 (declare-function org-in-regexp "org" (re &optional nlines visually))
 (declare-function org-in-verbatim-emphasis "org" ())
+(declare-function org-inside-LaTeX-fragment-p "org" ())
 (declare-function org-inside-latex-macro-p "org" ())
 (declare-function org-mark-ring-push "org" (&optional pos buffer))
 (declare-function org-show-context "org" (&optional key))
@@ -178,6 +179,7 @@ extracted will be filled again."
   (save-match-data
     (not (or (org-in-commented-line)
 	     (org-in-indented-comment-line)
+	     (org-inside-LaTeX-fragment-p)
 	     ;; Avoid protected environments (LaTeX export)
 	     (get-text-property (point) 'org-protected)
 	     ;; Avoid literal example.
