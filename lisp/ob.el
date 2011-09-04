@@ -1334,6 +1334,8 @@ is created.  In both cases if the region is demarcated and if the
 region is not active then the point is demarcated."
   (interactive "P")
   (let ((info (org-babel-get-src-block-info 'light))
+	(headers (progn (org-babel-where-is-src-block-head)
+			(match-string 4)))
 	(stars (concat (make-string (or (org-current-level) 1) ?*) " ")))
     (if info
         (mapc
@@ -1346,11 +1348,16 @@ region is not active then the point is demarcated."
 				   (buffer-substring (point-at-bol)
 						     (point-at-eol)))
 		 (delete-region (point-at-bol) (point-at-eol)))
-               (insert (concat (if (looking-at "^") "" "\n")
-                               indent "#+end_src\n"
-                               (if arg stars indent) "\n"
-                               indent "#+begin_src " lang
-                               (if (looking-at "[\n\r]") "" "\n")))))
+               (insert (concat
+			(if (looking-at "^") "" "\n")
+			indent "#+end_src\n"
+			(if arg stars indent) "\n"
+			indent "#+begin_src " lang
+			(if (> (length headers) 1)
+			    (concat " " headers) headers)
+			(if (looking-at "[\n\r]")
+			    ""
+			  (concat "\n" (make-string (current-column) ? )))))))
 	   (move-end-of-line 2))
          (sort (if (region-active-p) (list (mark) (point)) (list (point))) #'>))
       (let ((start (point))
