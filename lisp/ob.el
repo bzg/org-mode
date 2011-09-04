@@ -1632,6 +1632,7 @@ code ---- the results are extracted in the syntax of the source
 			   '(:fmt (lambda (cell) (format "%s" cell)))) "\n"))
 	  (goto-char beg) (when (org-at-table-p) (org-table-align)))
 	 ((member "file" result-params)
+	  (when inlinep (goto-char inlinep))
 	  (insert result))
 	 (t (goto-char beg) (insert result)))
 	(when (listp result) (goto-char (org-table-end)))
