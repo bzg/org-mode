@@ -1287,17 +1287,6 @@ MAY-INLINE-P allows inlining it as an image."
      "<manifest:file-entry manifest:media-type=\"text/xml\" manifest:full-path=\"meta.xml\"/>"
      "<manifest:file-entry manifest:media-type=\"\" manifest:full-path=\"Pictures/\"/>") . ("</manifest:manifest>")))
 
-(defconst org-export-odt-meta-lines
-  '(("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-     "<office:document-meta"
-     "    xmlns:office=\"urn:oasis:names:tc:opendocument:xmlns:office:1.0\""
-     "    xmlns:xlink=\"http://www.w3.org/1999/xlink\""
-     "    xmlns:dc=\"http://purl.org/dc/elements/1.1/\""
-     "    xmlns:meta=\"urn:oasis:names:tc:opendocument:xmlns:meta:1.0\""
-     "    xmlns:ooo=\"http://openoffice.org/2004/office\" "
-     "    office:version=\"1.2\">"
-     "  <office:meta>") . ("  </office:meta>" "</office:document-meta>")))
-
 (defun org-odt-copy-image-file (path &optional target-file)
   "Returns the internal name of the file"
   (let* ((image-type (file-name-extension path))
@@ -1433,14 +1422,6 @@ MAY-INLINE-P allows inlining it as an image."
 	(save-excursion
 	  (insert (mapconcat 'identity (cdr org-export-odt-manifest-lines) "\n"))))
 
-    ;; meta file
-    (with-current-buffer (find-file-noselect meta-file t)
-      (erase-buffer)
-      (insert (mapconcat 'identity (car org-export-odt-meta-lines) "\n"))
-      (insert "\n")
-      (save-excursion
-	(insert (mapconcat 'identity (cdr org-export-odt-meta-lines) "\n"))))
-
     ;; mimetype
     (with-current-buffer (find-file-noselect mimetype-file t)
       (insert "application/vnd.oasis.opendocument.text"))
@@ -1512,7 +1493,7 @@ visually."
 	      ;; prettify output if needed
 	      (when org-export-odt-prettify-xml
 		(indent-region (point-min) (point-max)))
-	      (save-buffer)))
+	      (save-buffer 0)))
 	  org-export-odt-save-list)
 
     (let* ((target-name (file-name-nondirectory target))
@@ -1575,31 +1556,40 @@ visually."
       (format-time-string "%Y-%m-%dT%T%:z")))))
 
 (defun org-odt-update-meta-file (opt-plist)
-  (with-current-buffer
-      (find-file-noselect (expand-file-name "meta.xml") t)
-    (let ((date (org-odt-format-date (plist-get opt-plist :date)))
-	  (author (or (plist-get opt-plist :author) ""))
-	  (email (plist-get opt-plist :email))
-	  (keywords (plist-get opt-plist :keywords))
-	  (description (plist-get opt-plist :description))
-	  (title (plist-get opt-plist :title)))
+  (let ((date (org-odt-format-date (plist-get opt-plist :date)))
+	(author (or (plist-get opt-plist :author) ""))
+	(email (plist-get opt-plist :email))
+	(keywords (plist-get opt-plist :keywords))
+	(description (plist-get opt-plist :description))
+	(title (plist-get opt-plist :title)))
 
-      (insert
-       "\n"
-       (org-odt-format-tags '("<dc:creator>" . "</dc:creator>") author)
-       (org-odt-format-tags
-	'("\n<meta:initial-creator>" . "</meta:initial-creator>") author)
-       (org-odt-format-tags '("\n<dc:date>" . "</dc:date>") date)
-       (org-odt-format-tags
-	'("\n<meta:creation-date>" . "</meta:creation-date>") date)
-       (org-odt-format-tags '("\n<meta:generator>" . "</meta:generator>")
-			     (when org-export-creator-info
-			       (format "Org-%s/Emacs-%s"
-				       org-version emacs-version)))
-       (org-odt-format-tags '("\n<meta:keyword>" . "</meta:keyword>") keywords)
-       (org-odt-format-tags '("\n<dc:subject>" . "</dc:subject>") description)
-       (org-odt-format-tags '("\n<dc:title>" . "</dc:title>") title)
-       "\n"))))
+    (write-region
+     (concat
+      "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+     <office:document-meta
+         xmlns:office=\"urn:oasis:names:tc:opendocument:xmlns:office:1.0\"
+         xmlns:xlink=\"http://www.w3.org/1999/xlink\"
+         xmlns:dc=\"http://purl.org/dc/elements/1.1/\"
+         xmlns:meta=\"urn:oasis:names:tc:opendocument:xmlns:meta:1.0\"
+         xmlns:ooo=\"http://openoffice.org/2004/office\"
+         office:version=\"1.2\">
+       <office:meta>" "\n"
+      (org-odt-format-tags '("<dc:creator>" . "</dc:creator>") author)
+      (org-odt-format-tags
+       '("\n<meta:initial-creator>" . "</meta:initial-creator>") author)
+      (org-odt-format-tags '("\n<dc:date>" . "</dc:date>") date)
+      (org-odt-format-tags
+       '("\n<meta:creation-date>" . "</meta:creation-date>") date)
+      (org-odt-format-tags '("\n<meta:generator>" . "</meta:generator>")
+			   (when org-export-creator-info
+			     (format "Org-%s/Emacs-%s"
+				     org-version emacs-version)))
+      (org-odt-format-tags '("\n<meta:keyword>" . "</meta:keyword>") keywords)
+      (org-odt-format-tags '("\n<dc:subject>" . "</dc:subject>") description)
+      (org-odt-format-tags '("\n<dc:title>" . "</dc:title>") title)
+      "\n"
+      "  </office:meta>" "</office:document-meta>")
+     nil (expand-file-name "meta.xml"))))
 
 (defun org-odt-update-manifest-file (media-type full-path)
   (with-current-buffer
