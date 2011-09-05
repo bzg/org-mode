@@ -1422,10 +1422,6 @@ MAY-INLINE-P allows inlining it as an image."
 	(save-excursion
 	  (insert (mapconcat 'identity (cdr org-export-odt-manifest-lines) "\n"))))
 
-    ;; mimetype
-    (with-current-buffer (find-file-noselect mimetype-file t)
-      (insert "application/vnd.oasis.opendocument.text"))
-
     ;; styles file
     ;; (copy-file org-export-odt-styles-file styles-file t)
 
@@ -1451,6 +1447,10 @@ visually."
 
 (defvar hfy-user-sheet-assoc)		; bound during org-do-lparse
 (defun org-odt-save-as-outfile (target opt-plist)
+  ;; create mimetype file
+  (write-region "application/vnd.oasis.opendocument.text" nil
+		(expand-file-name "mimetype"))
+
   ;; write meta file
   (org-odt-update-meta-file opt-plist)
 
