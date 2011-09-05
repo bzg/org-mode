@@ -1272,9 +1272,6 @@ MAY-INLINE-P allows inlining it as an image."
 (defconst org-export-odt-save-list
   '("mimetype" "META-INF/manifest.xml" "content.xml" "meta.xml" "styles.xml"))
 
-;; xml files that are copied
-(defconst org-export-odt-nosave-list '())
-
 ;; xml files that contribute to the final odt file
 (defvar org-export-odt-file-list nil)
 
@@ -1429,8 +1426,7 @@ MAY-INLINE-P allows inlining it as an image."
     (make-directory pictures-dir)
 
     ;; initialize list of files that contribute to the odt file
-    (setq org-export-odt-file-list
-	  (append org-export-odt-save-list org-export-odt-nosave-list)))
+    (setq org-export-odt-file-list org-export-odt-save-list))
     content-file))
 
 (defconst org-odt-manifest-file-entry-tag
