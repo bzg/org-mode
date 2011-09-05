@@ -279,3 +279,12 @@ this is simple
    :ID:       d4faa7b3-072b-4dcf-813c-dd7141c633f3
    :END:
 has length 14
+* org-babel-get-inline-src-block-matches
+  :PROPERTIES:  
+  :results:  silent
+  :ID:       0D0983D4-DE33-400A-8A05-A225A567BC74
+  :END:
+src_sh{echo "One"} block at start of line
+ One spaced block in  src_sh{ echo "middle" } of line 
+src_sh{echo 2} blocks on the src_emacs-lisp{"same"} line
+ Inline block with src_sh[:results silent]{ echo "parameters" }.

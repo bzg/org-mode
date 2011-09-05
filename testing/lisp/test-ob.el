@@ -223,6 +223,29 @@
       (next) (should (equal 2 (org-babel-execute-src-block)))
       (next) (should (equal 3 (org-babel-execute-src-block))))))
 
+(ert-deftest test-org-babel/org-babel-get-inline-src-block-matches ()
+  (org-test-at-id "0D0983D4-DE33-400A-8A05-A225A567BC74"
+    (should (fboundp 'org-babel-get-inline-src-block-matches))
+    (should (re-search-forward "src_" nil t)) ;; 1
+    (should (= 6132 (match-end 0)))
+    (should (org-babel-get-inline-src-block-matches))
+    (should (re-search-forward "}" nil (point-at-bol))) ;; 1
+    (should-not (org-babel-get-inline-src-block-matches))
+    (should (re-search-forward "in" nil t)) ;; 2
+    (should-not (org-babel-get-inline-src-block-matches))
+    (should (re-search-forward "echo" nil t)) ;; 2
+    (should (org-babel-get-inline-src-block-matches))
+    (should (re-search-forward "blocks" nil t)) ;; 3
+    (left-char 8) ;; 3
+    (should (org-babel-get-inline-src-block-matches))
+    (right-char 1) ;;3
+    (should-not (org-babel-get-inline-src-block-matches))
+    (should (re-search-forward ":results" nil t)) ;; 4
+    (should (org-babel-get-inline-src-block-matches))
+    (end-of-line)
+    (should-not (org-babel-get-inline-src-block-matches))
+    ))
+
 (provide 'test-ob)
 
 ;;; test-ob ends here

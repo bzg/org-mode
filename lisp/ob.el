@@ -159,6 +159,39 @@ not match KEY should be returned."
 	 (lambda (p) (when (funcall (if others #'not #'identity) (eq (car p) key)) p))
 	 params)))
 
+(defun org-babel-get-inline-src-block-matches()
+  "Set match data if within body of an inline source block.
+Returns non-nil if match-data set"
+  (let ((src-at-0-p (save-excursion
+		      (beginning-of-line 1)
+		      (string= "src" (thing-at-point 'word))))
+	(first-line-p (= 1 (line-number-at-pos)))
+      (orig (point)))
+    (let ((search-for (cond (src-at-0-p "src_")
+			    (first-line-p " src_")
+			    (t "[ \f\t\n\r\v]src_")))
+	  (lower-limit (if (= 1 (line-number-at-pos))
+			   nil
+			 (- (point-at-bol) 1))))
+      (save-excursion
+	(when (or (and src-at-0-p (bobp))
+		  (and (re-search-forward "}" (point-at-eol) t)
+		       (re-search-backward search-for lower-limit t)
+		       (> orig (point))))
+	  (when (looking-at org-babel-inline-src-block-regexp)
+	    t ))))))
+
+(defun org-babel-get-lob-one-liner-matches()
+  "Set match data if on line of an lob one liner.
+Returns non-nil if match-data set"
+
+  (save-excursion
+    (unless (= (point) (point-at-bol)) ;; move before inline block
+      (re-search-backward "[ \f\t\n\r\v]" nil t))
+    (if (looking-at org-babel-inline-lob-one-liner-regexp)
+	t
+      nil)))
+
 (defun org-babel-get-src-block-info (&optional light)
   "Get information on the current source block.
 
@@ -191,8 +224,7 @@ Returns a list
 			     (org-babel-ref-split-args (match-string 6)))
 		     (nth 2 info))))))
       ;; inline source block
-      (when (save-excursion (re-search-backward "[ \f\t\n\r\v]" nil t)
-			    (looking-at org-babel-inline-src-block-regexp))
+      (when (org-babel-get-inline-src-block-matches)
 	(setq info (org-babel-parse-inline-src-block-match))))
     ;; resolve variable references and add summary parameters
     (when (and info (not light))
@@ -1387,10 +1419,8 @@ following the source block."
     (let* ((on-lob-line (save-excursion
 			  (beginning-of-line 1)
 			  (looking-at org-babel-lob-one-liner-regexp)))
-	   (inlinep (save-excursion
-		      (re-search-backward "[ \f\t\n\r\v]" nil t)
-		      (when (looking-at org-babel-inline-src-block-regexp)
-			(match-end 0))))
+	   (inlinep (when (org-babel-get-inline-src-block-matches)
+			(match-end 0)))
 	   (name (if on-lob-line
 		     (nth 0 (org-babel-lob-get-info))
 		   (nth 4 (or info (org-babel-get-src-block-info 'light)))))
@@ -1578,10 +1608,8 @@ code ---- the results are extracted in the syntax of the source
     (save-excursion
       (let* ((inlinep
 	      (save-excursion
-		(unless (= (point) (point-at-bol)) ;; move before inline block
-		  (re-search-backward "[ \f\t\n\r\v]" nil t))
-		(when (or (looking-at org-babel-inline-src-block-regexp)
-			  (looking-at org-babel-inline-lob-one-liner-regexp))
+		(when (or (org-babel-get-inline-src-block-matches)
+			  (org-babel-get-lob-one-liner-matches))
 		  (goto-char (match-end 0))
 		  (insert (if (listp result) "\n" " "))
 		  (point))))
