@@ -1275,15 +1275,6 @@ MAY-INLINE-P allows inlining it as an image."
 ;; xml files that contribute to the final odt file
 (defvar org-export-odt-file-list nil)
 
-(defconst org-export-odt-manifest-lines
-  '(("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-     "<manifest:manifest xmlns:manifest=\"urn:oasis:names:tc:opendocument:xmlns:manifest:1.0\" manifest:version=\"1.2\">"
-     "<manifest:file-entry manifest:media-type=\"application/vnd.oasis.opendocument.text\" manifest:version=\"1.2\" manifest:full-path=\"/\"/>"
-     "<manifest:file-entry manifest:media-type=\"text/xml\" manifest:full-path=\"content.xml\"/>"
-     "<manifest:file-entry manifest:media-type=\"text/xml\" manifest:full-path=\"styles.xml\"/>"
-     "<manifest:file-entry manifest:media-type=\"text/xml\" manifest:full-path=\"meta.xml\"/>"
-     "<manifest:file-entry manifest:media-type=\"\" manifest:full-path=\"Pictures/\"/>") . ("</manifest:manifest>")))
-
 (defun org-odt-copy-image-file (path &optional target-file)
   "Returns the internal name of the file"
   (let* ((image-type (file-name-extension path))
@@ -1297,9 +1288,18 @@ MAY-INLINE-P allows inlining it as an image."
     (when (not org-lparse-to-buffer)
       (message "Embedding %s as %s ..."
 	       (substring-no-properties path) target-file)
-      (copy-file src-file target-file 'overwrite)
-      (org-odt-update-manifest-file media-type target-file)
-      (push target-file org-export-odt-file-list)) target-file))
+
+      ;; create Pictures dir if needed
+      (let ((pictures-dir (file-name-directory target-file)))
+	(unless (file-directory-p pictures-dir)
+	  (make-directory pictures-dir)
+	  (org-odt-create-manifest-file-entry "" pictures-dir)))
+
+      ;; copy image file
+      (unless (file-readable-p target-file)
+	(copy-file src-file target-file 'overwrite)
+	(org-odt-create-manifest-file-entry media-type target-file)
+	(push target-file org-export-odt-file-list))) target-file))
 
 (defun org-odt-image-attrs-from-size (&optional width height)
   (concat
@@ -1410,27 +1410,13 @@ MAY-INLINE-P allows inlining it as an image."
 
     ;; FIXME: How to factor in body-only here
     (unless body-only
-      ;; manifest file
-      (make-directory (file-name-directory manifest-file))
-      (with-current-buffer (find-file-noselect manifest-file t)
-	(erase-buffer)
-	(insert (mapconcat 'identity (car org-export-odt-manifest-lines) "\n"))
-	(insert "\n")
-	(save-excursion
-	  (insert (mapconcat 'identity (cdr org-export-odt-manifest-lines) "\n"))))
+      ;; initialize list of files that contribute to the odt file
+      (setq org-export-odt-file-list org-export-odt-save-list))
 
-    ;; styles file
-    ;; (copy-file org-export-odt-styles-file styles-file t)
+    ;; no manifest file entries for now
+    (setq org-odt-manifest-file-entries nil)
 
-    ;; Pictures dir
-    (make-directory pictures-dir)
-
-    ;; initialize list of files that contribute to the odt file
-    (setq org-export-odt-file-list org-export-odt-save-list))
     content-file))
-
-(defconst org-odt-manifest-file-entry-tag
-  "<manifest:file-entry manifest:media-type=\"%s\" manifest:full-path=\"%s\"/>")
 
 (defcustom org-export-odt-prettify-xml nil
   "Specify whether or not the xml output should be prettified.
@@ -1478,6 +1464,15 @@ visually."
     (lambda (style)
       (format " %s\n" (cddr style)))
     hfy-user-sheet-assoc ""))
+
+  ;; create a manifest entry for content.xml
+  (org-odt-create-manifest-file-entry
+   "application/vnd.oasis.opendocument.text" "/" "1.2")
+
+  (org-odt-create-manifest-file-entry "text/xml" "content.xml")
+
+  ;; write out the manifest entries before zipping
+  (org-odt-write-manifest-file)
 
   (let ((zipdir default-directory))
     (message "Switching to directory %s" (expand-file-name zipdir))
@@ -1551,6 +1546,34 @@ visually."
       ;; ISO 8601 format
       (format-time-string "%Y-%m-%dT%T%:z")))))
 
+(defconst org-odt-manifest-file-entry-tag
+  "
+<manifest:file-entry manifest:media-type=\"%s\" manifest:full-path=\"%s\"%s/>")
+
+(defvar org-odt-manifest-file-entries nil)
+
+(defun org-odt-create-manifest-file-entry (&rest args)
+  (push args org-odt-manifest-file-entries))
+
+(defun org-odt-write-manifest-file ()
+  (make-directory "META-INF")
+  (let ((manifest-file (expand-file-name "META-INF/manifest.xml")))
+    (write-region
+     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+     <manifest:manifest xmlns:manifest=\"urn:oasis:names:tc:opendocument:xmlns:manifest:1.0\" manifest:version=\"1.2\">\n"
+     nil manifest-file)
+    (mapc
+     (lambda (file-entry)
+       (let* ((version (nth 2 file-entry))
+	      (extra (if version
+			 (format  " manifest:version=\"%s\"" version)
+		       "")))
+	 (write-region
+	  (format org-odt-manifest-file-entry-tag
+		  (nth 0 file-entry) (nth 1 file-entry) extra)
+	  nil manifest-file t))) org-odt-manifest-file-entries)
+    (write-region "\n</manifest:manifest>" nil manifest-file t)))
+
 (defun org-odt-update-meta-file (opt-plist)
   (let ((date (org-odt-format-date (plist-get opt-plist :date)))
 	(author (or (plist-get opt-plist :author) ""))
@@ -1585,12 +1608,10 @@ visually."
       (org-odt-format-tags '("\n<dc:title>" . "</dc:title>") title)
       "\n"
       "  </office:meta>" "</office:document-meta>")
-     nil (expand-file-name "meta.xml"))))
+     nil (expand-file-name "meta.xml")))
 
-(defun org-odt-update-manifest-file (media-type full-path)
-  (with-current-buffer
-      (find-file-noselect (expand-file-name "META-INF/manifest.xml") t)
-    (insert (format org-odt-manifest-file-entry-tag media-type full-path))))
+  ;; create a manifest entry for meta.xml
+  (org-odt-create-manifest-file-entry "text/xml" "meta.xml"))
 
 (defun org-odt-finalize-outfile ()
   (org-odt-delete-empty-paragraphs))
@@ -1731,7 +1752,7 @@ visually."
 	 (when (org-file-image-p member)
 	   (let* ((image-type (file-name-extension member))
 		  (media-type (format "image/%s" image-type)))
-	     (org-odt-update-manifest-file media-type member))))
+	     (org-odt-create-manifest-file-entry media-type member))))
        members)))
    ((and (stringp styles-file) (file-exists-p styles-file))
     (let ((styles-file-type (file-name-extension styles-file)))
@@ -1742,7 +1763,10 @@ visually."
 	(org-odt-zip-extract styles-file "styles.xml")))))
    (t
     (error (format "Invalid specification of styles.xml file: %S"
-		   org-export-odt-styles-file)))))
+		   org-export-odt-styles-file))))
+
+  ;; create a manifest entry for styles.xml
+  (org-odt-create-manifest-file-entry "text/xml" "styles.xml"))
 
 (defvar org-export-odt-factory-settings
   "d4328fb9d1b6cb211d4320ff546829f26700dc5e"
