@@ -108,7 +108,7 @@
 
 
 (ert-deftest test-org-babel/inline-src-block-regexp ()
-  (should(equal (concat "[^-[:alnum:]]\\(src_\\([^ \f\t\n\r\v]+\\)"
+  (should(equal (concat "\\(?:^\\|[^-[:alnum:]]\\)\\(src_\\([^ \f\t\n\r\v]+\\)"
 			"\\(\\|\\[\\(.*?\\)\\]\\)"
 			"{\\([^\f\n\r\v]+?\\)}\\)")
 		org-babel-inline-src-block-regexp))
@@ -206,7 +206,7 @@
       (should(equal '(:result-type . output) (assoc :result-type params)))
       (should(equal '(num . 9) (cdr (assoc :var params)))))))
 
-(ert-deftest test-org-babel/parse-header-args ()
+(ert-deftest test-org-babel/parse-header-args2 ()
   (org-test-at-id "2409e8ba-7b5f-4678-8888-e48aa02d8cb4"
     (should (string-match (regexp-quote "this is simple")
 			  (org-babel-ref-resolve "simple-subtree")))
@@ -225,26 +225,27 @@
 
 (ert-deftest test-org-babel/org-babel-get-inline-src-block-matches ()
   (org-test-at-id "0D0983D4-DE33-400A-8A05-A225A567BC74"
-    (should (fboundp 'org-babel-get-inline-src-block-matches))
-    (should (re-search-forward "src_" nil t)) ;; 1
-    (should (= 6132 (match-end 0)))
-    (should (org-babel-get-inline-src-block-matches))
-    (should (re-search-forward "}" nil (point-at-bol))) ;; 1
-    (should-not (org-babel-get-inline-src-block-matches))
-    (should (re-search-forward "in" nil t)) ;; 2
-    (should-not (org-babel-get-inline-src-block-matches))
-    (should (re-search-forward "echo" nil t)) ;; 2
-    (should (org-babel-get-inline-src-block-matches))
-    (should (re-search-forward "blocks" nil t)) ;; 3
-    (left-char 8) ;; 3
-    (should (org-babel-get-inline-src-block-matches))
-    (right-char 1) ;;3
-    (should-not (org-babel-get-inline-src-block-matches))
-    (should (re-search-forward ":results" nil t)) ;; 4
-    (should (org-babel-get-inline-src-block-matches))
-    (end-of-line)
-    (should-not (org-babel-get-inline-src-block-matches))
-    ))
+    (let ((test-point (point)))
+      (should (fboundp 'org-babel-get-inline-src-block-matches))
+      (should (re-search-forward "src_" nil t)) ;; 1
+      (should (= (+ test-point 140) (match-end 0)))
+      (should (org-babel-get-inline-src-block-matches))
+      (should (re-search-forward "}" nil (point-at-bol))) ;; 1
+      (should-not (org-babel-get-inline-src-block-matches))
+      (should (re-search-forward "in" nil t)) ;; 2
+      (should-not (org-babel-get-inline-src-block-matches))
+      (should (re-search-forward "echo" nil t)) ;; 2
+      (should (org-babel-get-inline-src-block-matches))
+      (should (re-search-forward "blocks" nil t)) ;; 3
+      (left-char 8) ;; 3
+      (should (org-babel-get-inline-src-block-matches))
+      (right-char 1) ;;3
+      (should-not (org-babel-get-inline-src-block-matches))
+      (should (re-search-forward ":results" nil t)) ;; 4
+      (should (org-babel-get-inline-src-block-matches))
+      (end-of-line)
+      (should-not (org-babel-get-inline-src-block-matches))
+    )))
 
 (provide 'test-ob)
 

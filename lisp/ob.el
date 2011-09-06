@@ -166,11 +166,11 @@ Returns non-nil if match-data set"
 		      (beginning-of-line 1)
 		      (string= "src" (thing-at-point 'word))))
 	(first-line-p (= 1 (line-number-at-pos)))
-      (orig (point)))
-    (let ((search-for (cond (src-at-0-p "src_")
-			    (first-line-p " src_")
+	(orig (point)))
+    (let ((search-for (cond ((and src-at-0-p first-line-p  "src_"))
+			    (first-line-p "[ \t]src_")
 			    (t "[ \f\t\n\r\v]src_")))
-	  (lower-limit (if (= 1 (line-number-at-pos))
+	  (lower-limit (if first-line-p
 			   nil
 			 (- (point-at-bol) 1))))
       (save-excursion
