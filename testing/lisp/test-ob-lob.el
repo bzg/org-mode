@@ -8,19 +8,22 @@
 
 ;;;; Comments:
 
-;; Template test file for Org-mode tests
-
-
-;;; Code:
-(let ((load-path (cons (expand-file-name
-			".." (file-name-directory
-			      (or load-file-name buffer-file-name)))
-		       load-path)))
-  (require 'org-test)
-  (require 'org-test-ob-consts))
-
 
 ;;; Tests
+(org-babel-lob-ingest
+ (expand-file-name
+  "library-of-babel.org"
+  (expand-file-name
+   "babel"
+   (expand-file-name
+    "contrib"
+    (expand-file-name
+     ".."
+     (expand-file-name
+      ".."
+      (file-name-directory
+       (or load-file-name buffer-file-name))))))))
+
 (ert-deftest test-ob-lob/ingest ()
   "Test the ingestion of an org-mode file."
   (should (< 0 (org-babel-lob-ingest

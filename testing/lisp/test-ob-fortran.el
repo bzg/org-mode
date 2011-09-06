@@ -1,5 +1,18 @@
-(require 'ob-fortran)
- 
+(let ((load-path (cons (expand-file-name
+			"langs"
+			(expand-file-name
+			 "babel"
+			 (expand-file-name
+			  "contrib"
+			  (expand-file-name
+			   ".."
+			   (expand-file-name
+			    ".."
+			    (file-name-directory
+			     (or load-file-name buffer-file-name)))))))
+		       load-path)))
+  (require 'ob-fortran))
+
 (ert-deftest ob-fortran/assert ()
   (should t))
 
