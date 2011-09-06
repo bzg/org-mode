@@ -106,17 +106,6 @@
 	     org-babel-src-block-regexp
 	     (replace-regexp-in-string body "" test-block)))))
 
-
-(ert-deftest test-org-babel/inline-src-block-regexp ()
-  (should(equal (concat "\\(?:^\\|[^-[:alnum:]]\\)\\(src_\\([^ \f\t\n\r\v]+\\)"
-			"\\(\\|\\[\\(.*?\\)\\]\\)"
-			"{\\([^\f\n\r\v]+?\\)}\\)")
-		org-babel-inline-src-block-regexp))
-  ;; (should (org-test-string-exact-match
-  ;; 	   org-babel-inline-src-block-regexp
-  ;; 	   "src_lang[:testing1 yes :testing2 no]{ echo This is a test }\n"))
-  )
-
 (ert-deftest test-org-babel/get-header ()
   (should (not (org-babel-get-header
 		org-babel-default-header-args :doesnt-exist)))
