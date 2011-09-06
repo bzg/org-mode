@@ -1525,7 +1525,8 @@ visually."
       date)
      (t
       ;; ISO 8601 format
-      (format-time-string "%Y-%m-%dT%T%:z")))))
+      (let ((stamp (format-time-string "%Y-%m-%dT%H:%M:%S%z")))
+	(format "%s:%s" (substring stamp 0 -2) (substring stamp -2)))))))
 
 (defconst org-odt-manifest-file-entry-tag
   "
