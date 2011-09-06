@@ -1268,38 +1268,28 @@ MAY-INLINE-P allows inlining it as an image."
 	 ;; (when par-open (org-odt-open-par))
 	 ))))))
 
-;; xml files generated on-the-fly
-(defconst org-export-odt-save-list
-  '("mimetype" "META-INF/manifest.xml" "content.xml" "meta.xml" "styles.xml"))
-
-;; xml files that contribute to the final odt file
-(defvar org-export-odt-file-list nil)
-
-(defun org-odt-copy-image-file (path &optional target-file)
+(defvar org-odt-embedded-images-count 0)
+(defun org-odt-copy-image-file (path)
   "Returns the internal name of the file"
   (let* ((image-type (file-name-extension path))
 	 (media-type (format "image/%s" image-type))
 	 (src-file (expand-file-name
 		    path (file-name-directory org-current-export-file)))
-	 (target-file (or target-file (org-odt-get-image-name src-file)))
-	 ;; FIXME
-	 (body-only nil))
-
+	 (target-dir "Images/")
+	 (target-file
+	  (format "%s%04d.%s" target-dir
+		  (incf org-odt-embedded-images-count) image-type)))
     (when (not org-lparse-to-buffer)
       (message "Embedding %s as %s ..."
 	       (substring-no-properties path) target-file)
 
-      ;; create Pictures dir if needed
-      (let ((pictures-dir (file-name-directory target-file)))
-	(unless (file-directory-p pictures-dir)
-	  (make-directory pictures-dir)
-	  (org-odt-create-manifest-file-entry "" pictures-dir)))
+      (when (= 1 org-odt-embedded-images-count)
+	(make-directory target-dir)
+	(org-odt-create-manifest-file-entry "" target-dir))
 
-      ;; copy image file
-      (unless (file-readable-p target-file)
-	(copy-file src-file target-file 'overwrite)
-	(org-odt-create-manifest-file-entry media-type target-file)
-	(push target-file org-export-odt-file-list))) target-file))
+      (copy-file src-file target-file 'overwrite)
+      (org-odt-create-manifest-file-entry media-type target-file))
+    target-file))
 
 (defun org-odt-image-attrs-from-size (&optional width height)
   (concat
@@ -1393,28 +1383,17 @@ MAY-INLINE-P allows inlining it as an image."
 (defun org-odt-init-outfile (filename)
   (unless (executable-find "zip")
     ;; Not at all OSes ship with zip by default
-    (error "Executable \"zip\" needed for creating OpenDocument files. Aborting."))
+    (error "Executable \"zip\" needed for creating OpenDocument files"))
 
   (let* ((outdir (make-temp-file org-export-odt-tmpdir-prefix t))
-	 (mimetype-file (expand-file-name "mimetype" outdir))
-	 (content-file (expand-file-name "content.xml" outdir))
-	 (manifest-file (expand-file-name "META-INF/manifest.xml" outdir))
-	 (meta-file (expand-file-name "meta.xml" outdir))
-	 (styles-file (expand-file-name "styles.xml" outdir))
-	 (pictures-dir (expand-file-name "Pictures" outdir))
-	 (body-only nil))
+	 (content-file (expand-file-name "content.xml" outdir)))
 
-    ;; content file
-    (with-current-buffer (find-file-noselect content-file t)
-      (erase-buffer))
+    ;; init conten.xml
+    (with-current-buffer (find-file-noselect content-file t))
 
-    ;; FIXME: How to factor in body-only here
-    (unless body-only
-      ;; initialize list of files that contribute to the odt file
-      (setq org-export-odt-file-list org-export-odt-save-list))
-
-    ;; no manifest file entries for now
-    (setq org-odt-manifest-file-entries nil)
+    ;; reset variables
+    (setq org-odt-manifest-file-entries nil
+	  org-odt-embedded-images-count 0)
 
     content-file))
 
@@ -1474,7 +1453,9 @@ visually."
   ;; write out the manifest entries before zipping
   (org-odt-write-manifest-file)
 
-  (let ((zipdir default-directory))
+  (let ((xml-files '("mimetype" "META-INF/manifest.xml" "content.xml"
+		     "meta.xml" "styles.xml"))
+	(zipdir default-directory))
     (message "Switching to directory %s" (expand-file-name zipdir))
 
     ;; save all xml files
@@ -1485,7 +1466,7 @@ visually."
 	      (when org-export-odt-prettify-xml
 		(indent-region (point-min) (point-max)))
 	      (save-buffer 0)))
-	  org-export-odt-save-list)
+	  xml-files)
 
     (let* ((target-name (file-name-nondirectory target))
 	   (target-dir (file-name-directory target))
@@ -1513,7 +1494,7 @@ visually."
       (mapc (lambda (file)
 	      (kill-buffer
 	       (find-file-noselect (expand-file-name file zipdir) t)))
-	    org-export-odt-save-list)
+	    xml-files)
 
       (delete-directory zipdir)))
 
