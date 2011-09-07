@@ -1200,19 +1200,26 @@ MAY-INLINE-P allows inlining it as an image."
 		  (plist-get attr-plist :height)
 		  (plist-get attr-plist :scale) nil embed-as)))
       (org-export-odt-do-format-image
-       embed-as caption attr label size href))))
+       embed-as caption attr label (car size) (cdr size) href))))
 
-(defun org-odt-format-textbox (text style)
-  (let ((draw-frame-pair
-	 '("<draw:frame draw:style-name=\"%s\"
-              text:anchor-type=\"paragraph\"
-              style:rel-width=\"100%%\"
-              draw:z-index=\"0\">" . "</draw:frame>")))
+(defun org-odt-format-frame (text style &optional
+				  width height extra anchor-type)
+  (let ((frame-attrs
+	 (concat
+	  (if width (format " svg:width=\"%0.2fcm\"" width) "")
+	  (if height (format " svg:height=\"%0.2fcm\"" height) "")
+	  extra
+	  (format " text:anchor-type=\"%s\"" (or anchor-type "paragraph")))))
     (org-odt-format-tags
-     draw-frame-pair
-     (org-odt-format-tags
-      '("<draw:text-box fo:min-height=\"%dcm\">" . "</draw:text-box>")
-      text 0) style)))
+     '("<draw:frame draw:style-name=\"%s\"%s>" . "</draw:frame>")
+     text style frame-attrs)))
+
+(defun org-odt-format-textbox (text style &optional width height)
+  (org-odt-format-frame
+   (org-odt-format-tags
+    '("<draw:text-box %s>" . "</draw:text-box>")
+    text (format " fo:min-height=\"%0.2fcm\"" (or height 0.5)))
+   style width nil (and (not width) " style:rel-width=\"100%\"")))
 
 (defun org-odt-format-inlinetask (heading content
 					  &optional todo priority tags)
@@ -1226,47 +1233,29 @@ MAY-INLINE-P allows inlining it as an image."
 		content) "OrgInlineTaskFrame")))
 
 (defun org-export-odt-do-format-image (embed-as caption attr label
-						size href)
+						width height href)
   "Create image tag with source and attributes."
   (save-match-data
-    (let ((width (car size)) (height (cdr size))
-	  (draw-frame-pair
-	   '("<draw:frame draw:style-name=\"%s\"
-              text:anchor-type=\"%s\"
-              draw:z-index=\"%d\" %s>" . "</draw:frame>")))
-      (cond
-       ((and (not caption) (not label))
-	(let (style-name anchor-type)
-	  (cond
-	   ((eq embed-as 'paragraph)
-	    (setq style-name  "OrgGraphicsParagraph" anchor-type "paragraph"))
-	   ((eq embed-as 'character)
-	    (setq style-name  "OrgGraphicsBaseline" anchor-type "as-char")))
-	  (org-odt-format-tags
-	   draw-frame-pair href style-name anchor-type 0
-	   (org-odt-image-attrs-from-size width height))))
-
-       (t
-	(concat
-	 ;; (when par-open (org-odt-close-par))
-	 (org-odt-format-tags
-	  draw-frame-pair
-	  (org-odt-format-tags
-	   '("<draw:text-box fo:min-height=\"%dcm\">" . "</draw:text-box>")
-	   (org-odt-format-stylized-paragraph
-	    'illustration
-	    (concat
-	     (let ((extra " style:rel-width=\"100%\" style:rel-height=\"scale\""))
-	       (org-odt-format-tags
-		draw-frame-pair href "OrgGraphicsParagraphContent" "paragraph" 2
-		(concat (org-odt-image-attrs-from-size width height) extra)))
-	     (org-odt-format-entity-caption label caption)))
-	   height)
-	  "OrgFrame" "paragraph" 1
-	  (org-odt-image-attrs-from-size width))
-
-	 ;; (when par-open (org-odt-open-par))
-	 ))))))
+    (cond
+     ((and (not caption) (not label))
+      (let (style-name anchor-type)
+	(cond
+	 ((eq embed-as 'paragraph)
+	  (setq style-name  "OrgSimpleGraphics" anchor-type "paragraph"))
+	 ((eq embed-as 'character)
+	  (setq style-name  "OrgInlineGraphics" anchor-type "as-char")))
+	(org-odt-format-frame href style-name width height nil anchor-type)))
+     (t
+      (concat
+       (org-odt-format-textbox
+	(org-odt-format-stylized-paragraph
+	 'illustration
+	 (concat
+	  (let ((extra " style:rel-width=\"100%\" style:rel-height=\"scale\""))
+	    (org-odt-format-frame
+	     href "OrgCaptionedGraphics" width height extra "paragraph"))
+	  (org-odt-format-entity-caption label caption)))
+	"OrgCaptionFrame" width height))))))
 
 (defvar org-odt-embedded-images-count 0)
 (defun org-odt-copy-image-file (path)
@@ -1290,12 +1279,6 @@ MAY-INLINE-P allows inlining it as an image."
       (copy-file src-file target-file 'overwrite)
       (org-odt-create-manifest-file-entry media-type target-file))
     target-file))
-
-(defun org-odt-image-attrs-from-size (&optional width height)
-  (concat
-   (when width (format "svg:width=\"%0.2fcm\""  width))
-   " "
-   (when height (format "svg:height=\"%0.2fcm\""  height))))
 
 (defvar org-export-odt-image-size-probe-method
   '(emacs imagemagick force)
