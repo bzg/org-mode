@@ -12,12 +12,12 @@
 
 
 ;;; Code:
-(let ((load-path (cons (expand-file-name
-			".." (file-name-directory
-			      (or load-file-name buffer-file-name)))
-		       load-path)))
-  (require 'org-test)
-  (require 'org-test-ob-consts))
+(let* ((testing-lisp-dir (file-name-directory
+			  (or load-file-name buffer-file-name)))
+       (load-path (cons testing-lisp-dir load-path)))
+  (dolist (file (directory-files testing-lisp-dir 'full
+				 "^\\([^.]\\|\\.\\([^.]\\|\\..\\)\\).*\\.org$"))
+    (require (intern (substring file 0 (- (length file) 3))))))
 
 
 ;;; Tests
