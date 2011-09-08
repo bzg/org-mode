@@ -228,6 +228,14 @@ files."
 		 "^\\([^.]\\|\\.\\([^.]\\|\\..\\)\\).*\\.org$"))
     (find-file file)))
 
+(defun org-test-run-batch-tests ()
+  "Run all defined tests matching \"\\(org\\|ob\\)\".
+Load all test files first."
+  (interactive)
+  (org-test-touch-all-examples)
+  (org-test-load)
+  (ert-run-tests-batch-and-exit "\\(org\\|ob\\)"))
+
 (defun org-test-run-all-tests ()
   "Run all defined tests matching \"\\(org\\|ob\\)\".
 Load all test files first."
