@@ -1741,6 +1741,7 @@ visually."
       (setq cache-dir "ltxpng/")
       (setq display-msg "Creating LaTeX image %s"))
      ((member latex-frag-opt '(mathjax t))
+      (setq latex-frag-opt 'mathml)
       (setq cache-dir "ltxmathml/")
       (setq display-msg "Creating MathML formula %s")))
     (when (and org-current-export-file)
