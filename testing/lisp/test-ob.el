@@ -236,6 +236,178 @@
       (should-not (org-babel-get-inline-src-block-matches))
     )))
 
+(ert-deftest test-org-babel/inline-src_blk-default-results-replace-line-1 ()
+  (with-temp-buffer
+
+    ;; src_ at bol line 1...
+    (let ((test-line "src_sh{echo 1}"))
+      (insert test-line)
+      (should-error (org-ctrl-c-ctrl-c))
+      (goto-char (point-min)) (org-ctrl-c-ctrl-c)
+      (should (string=
+       	       (concat test-line " =1=")
+       	       (buffer-substring-no-properties (point-at-bol) (point-at-eol))))
+      (forward-char) (org-ctrl-c-ctrl-c)
+      (should (string=
+       	       (concat test-line " =1= =1=")
+       	       (buffer-substring-no-properties (point-at-bol) (point-at-eol))))
+      (re-search-forward "1}")
+      (should-error (org-ctrl-c-ctrl-c))
+      (backward-char) ;; last char of block body
+      (org-ctrl-c-ctrl-c)
+      (should (string=
+       	       (concat test-line " =1= =1= =1=")
+       	       (buffer-substring-no-properties (point-at-bol) (point-at-eol)))))
+
+    ;; src_ follows space line 1...
+    (let ((test-line " src_emacs-lisp{ 1 }"))
+      (beginning-of-line)
+      (insert (concat test-line "\n"))
+      (goto-char (point-min))
+      (should-error (org-ctrl-c-ctrl-c))
+      (forward-char) (org-ctrl-c-ctrl-c) 
+      (should (string=
+	       (concat test-line " =1=")
+	       (buffer-substring-no-properties (point-at-bol) (point-at-eol))))
+      (re-search-forward "{ 1 ") (org-ctrl-c-ctrl-c)
+      (should (string=
+	       (concat test-line " =1= =1=")
+	       (buffer-substring-no-properties (point-at-bol) (point-at-eol))))
+      (forward-char)
+      (should-error (org-ctrl-c-ctrl-c))
+      )))
+
+(ert-deftest test-org-babel/inline-src_blk-default-results-replace-line-2 ()
+  (with-temp-buffer
+
+    ;; src_ at bol line 2...
+    (let ((test-line " src_emacs-lisp{ \"x\" }"))
+      (insert (concat "\n" test-line))
+      (should-error (org-ctrl-c-ctrl-c))
+      (goto-char (point-min))
+      (should-error (org-ctrl-c-ctrl-c))
+      (forward-line)
+      (should-error (org-ctrl-c-ctrl-c))
+      (forward-char) (org-ctrl-c-ctrl-c)
+      (should (string=
+	       (concat test-line " =x=")
+	       (buffer-substring-no-properties (point-at-bol) (point-at-eol)))))
+
+    (let ((test-line "Some text prior to block src_emacs-lisp{ \"y\" }"))
+      (goto-char (point-max))
+      (insert (concat "\n" test-line " end"))
+      (re-search-backward "src") (org-ctrl-c-ctrl-c)
+      (should (string=
+       	       (concat test-line " =y= end")
+       	       (buffer-substring-no-properties (point-at-bol) (point-at-eol))))
+      (re-search-forward "\" ") (org-ctrl-c-ctrl-c)
+      (should (string=
+	       (concat test-line " =y= =y= end")
+       	       (buffer-substring-no-properties (point-at-bol) (point-at-eol))))
+      (forward-char)
+      (should-error (org-ctrl-c-ctrl-c))
+      )))
+
+(ert-deftest test-org-babel/inline-src_blk-manual-results-replace ()
+  (with-temp-buffer
+
+    (let ((test-line " src_emacs-lisp[:results replace]{ \"x\" }"))
+      (insert (concat "\n" test-line))
+      (should-error (org-ctrl-c-ctrl-c))
+      (goto-char (point-min))
+      (should-error (org-ctrl-c-ctrl-c))
+      (forward-line)
+      (should-error (org-ctrl-c-ctrl-c))
+      (forward-char) (org-ctrl-c-ctrl-c)
+      (should (string=
+      	       (concat test-line " =x=")
+      	       (buffer-substring-no-properties (point-at-bol) (point-at-eol)))))
+    
+    (let ((test-line " Some text prior to block src_emacs-lisp[:results replace]{ \"y\" }"))
+      (goto-char (point-max))
+      (insert (concat "\n" test-line " end"))
+      (re-search-backward "src") (org-ctrl-c-ctrl-c)
+      (should (string=
+    	       (concat test-line " =y= end")
+    	       (buffer-substring-no-properties (point-at-bol) (point-at-eol))))
+      (re-search-forward "\" ") (org-ctrl-c-ctrl-c)
+      (should (string=
+    	       (concat test-line " =y= =y= end")
+    	       (buffer-substring-no-properties (point-at-bol) (point-at-eol))))
+      (forward-char)
+      (should-error (org-ctrl-c-ctrl-c)))
+    ))
+
+(ert-deftest test-org-babel/inline-src_blk-results-silent ()
+  (with-temp-buffer
+
+    (let ((test-line "src_emacs-lisp[ :results silent ]{ \"x\" }"))
+      (insert test-line)
+      (should-error (org-ctrl-c-ctrl-c))
+      (goto-char (point-min)) (org-ctrl-c-ctrl-c)
+      (should (string= test-line
+		       (buffer-substring-no-properties (point-at-bol) (point-at-eol)))))
+    (let ((test-line " Some text prior to block src_emacs-lisp[ :results silent ]{ \"y\" }"))
+      (goto-char (point-max))
+      (insert (concat "\n" test-line " end"))
+      (re-search-backward "src_") (org-ctrl-c-ctrl-c)
+      (should (string= (concat test-line " end")
+		       (buffer-substring-no-properties (point-at-bol) (point-at-eol))))
+      (re-search-forward "\" ") (org-ctrl-c-ctrl-c)
+      (should (string= (concat test-line " end")
+		       (buffer-substring-no-properties (point-at-bol) (point-at-eol))))
+      (forward-char)
+      (should-error (org-ctrl-c-ctrl-c)))
+      ))
+
+(ert-deftest test-org-babel/inline-src_blk-results-raw ()
+  (with-temp-buffer
+
+    (let ((test-line "src_emacs-lisp[ :results raw ]{ \"x\" }"))
+      (insert test-line)
+      (goto-char (point-min)) (org-ctrl-c-ctrl-c)
+      (should (string= (concat test-line " x")
+		       (buffer-substring-no-properties (point-at-bol) (point-at-eol)))))
+    (let ((test-line " Some text prior to block src_emacs-lisp[ :results raw ]{ \"the\" }"))
+      (goto-char (point-max))
+      (insert (concat "\n" test-line " end"))
+      (re-search-backward "src_") (org-ctrl-c-ctrl-c)
+      (should (string= (concat test-line " the end")
+		       (buffer-substring-no-properties (point-at-bol) (point-at-eol))))
+      (re-search-forward "\" ") (org-ctrl-c-ctrl-c)
+      (should (string= (concat test-line " the the end")
+		       (buffer-substring-no-properties (point-at-bol) (point-at-eol))))
+      (forward-char)
+      (should-error (org-ctrl-c-ctrl-c)))
+      ))
+
+(ert-deftest test-org-babel/inline-src_blk-results-file ()
+  (with-temp-buffer
+
+    (let ((test-line "src_emacs-lisp[ :results file ]{ \"~/test-file\"  }"))
+      (insert test-line)
+      (goto-char (point-min)) (org-ctrl-c-ctrl-c)
+      (should (string= (concat test-line " [[file:~/test-file]]")
+		       (buffer-substring-no-properties (point-min) (point-max)))))))
+
+(ert-deftest test-org-babel/inline-src_blk-results-scaler ()
+  (with-temp-buffer
+
+    (let ((test-line "src_emacs-lisp[ :results scaler ]{ \"x\"  }"))
+      (insert test-line)
+      (goto-char (point-min)) (org-ctrl-c-ctrl-c)
+      (should (string= (concat test-line " =x=")
+		       (buffer-substring-no-properties (point-min) (point-max)))))))
+
+(ert-deftest test-org-babel/inline-src_blk-results-verbatim ()
+  (with-temp-buffer
+
+    (let ((test-line "src_emacs-lisp[ :results verbatim ]{ \"x\"  }"))
+      (insert test-line)
+      (goto-char (point-min)) (org-ctrl-c-ctrl-c)
+      (should (string= (concat test-line " =\"x\"=")
+		       (buffer-substring-no-properties (point-min) (point-max)))))))
+
 (provide 'test-ob)
 
 ;;; test-ob ends here
