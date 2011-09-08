@@ -1055,6 +1055,98 @@ value of `org-export-odt-use-htmlfontify."
 	       (org-odt-copy-image-file thefile) thelink))))
     (org-export-odt-format-image thefile href)))
 
+(defun org-export-odt-do-format-numbered-formula (embed-as caption attr label
+							   width height href)
+  (with-temp-buffer
+    (let ((org-lparse-table-colalign-info '((0 "c" "8") (0 "c" "1"))))
+      (org-lparse-do-format-list-table
+       `((,(org-export-odt-do-format-formula ; caption and label
+					     ; should be nil
+	    embed-as nil attr nil width height href)
+	  ,(org-odt-format-entity-caption label caption "Equation")))
+       nil nil nil nil nil org-lparse-table-colalign-info))
+    (buffer-substring-no-properties (point-min) (point-max))))
+
+(defun org-export-odt-do-format-formula (embed-as caption attr label
+						  width height href)
+  "Create image tag with source and attributes."
+  (save-match-data
+    (cond
+     ((and (not caption) (not label))
+      (let (style-name anchor-type)
+	(case embed-as
+	  (paragraph
+	   (setq style-name  "OrgSimpleGraphics" anchor-type "paragraph"))
+	  (character
+	   (setq style-name  "OrgInlineGraphics" anchor-type "as-char"))
+	  (t
+	   (error "Unknown value for embed-as %S" embed-as)))
+	(org-odt-format-frame href style-name width height nil anchor-type)))
+     (t
+      (concat
+       (org-odt-format-textbox
+	(org-odt-format-stylized-paragraph
+	 'illustration
+	 (concat
+	  (let ((extra ""))
+	    (org-odt-format-frame
+	     href "" width height extra "paragraph"))
+	  (org-odt-format-entity-caption label caption)))
+	"OrgCaptionFrame" width height))))))
+
+(defun org-export-odt-format-formula (src href &optional embed-as)
+  "Create image tag with source and attributes."
+  (save-match-data
+    (let* ((caption (org-find-text-property-in-string 'org-caption src))
+	   (caption (and caption (org-xml-format-desc caption)))
+	   (attr (org-find-text-property-in-string 'org-attributes src))
+	   (label (org-find-text-property-in-string 'org-label src))
+	   (embed-as (or embed-as
+			 (and (org-find-text-property-in-string
+			       'org-latex-src src)
+			      (org-find-text-property-in-string
+			       'org-latex-src-embed-type src))
+			 'paragraph))
+	   (attr-plist (when attr (read  attr)))
+	   (width (plist-get attr-plist :width))
+	   (height (plist-get attr-plist :height)))
+      (org-export-odt-do-format-formula
+       embed-as caption attr label width height href))))
+
+(defvar org-odt-embedded-formulas-count 0)
+(defun org-odt-copy-formula-file (path)
+  "Returns the internal name of the file"
+  (let* ((src-file (expand-file-name
+		    path (file-name-directory org-current-export-file)))
+	 (target-dir (format "Formula-%04d/"
+			     (incf org-odt-embedded-formulas-count)))
+	 (target-file (concat target-dir "content.xml")))
+    (when (not org-lparse-to-buffer)
+      (message "Embedding %s as %s ..."
+	       (substring-no-properties path) target-file)
+
+	(make-directory target-dir)
+	(org-odt-create-manifest-file-entry
+	 "application/vnd.oasis.opendocument.formula" target-dir "1.2")
+
+	(copy-file src-file target-file 'overwrite)
+	(org-odt-create-manifest-file-entry "text/xml" target-file))
+    target-file))
+
+(defun org-odt-format-inline-formula (thefile)
+  (let* ((thelink (if (file-name-absolute-p thefile) thefile
+		    (org-xml-format-href
+		     (org-odt-relocate-relative-path
+		      thefile org-current-export-file))))
+	 (href
+	  (org-odt-format-tags
+	   "<draw:object xlink:href=\"%s\" xlink:type=\"simple\" xlink:show=\"embed\" xlink:actuate=\"onLoad\"/>" ""
+	   (file-name-directory (org-odt-copy-formula-file thefile)))))
+    (org-export-odt-format-formula thefile href)))
+
+(defun org-odt-is-formula-link-p (file)
+  (member (downcase (file-name-extension file)) '("mathml")))
+
 (defun org-odt-format-org-link (opt-plist type-1 path fragment desc attr
 					  descp)
   "Make an HTML link.
@@ -1065,7 +1157,6 @@ FRAGMENT is the fragment part of the link, if any (foo.html#THIS)
 DESC is the link description, if any.
 ATTR is a string of other attributes of the a element.
 MAY-INLINE-P allows inlining it as an image."
-
   (declare (special org-lparse-par-open))
   (save-match-data
     (let* ((may-inline-p
@@ -1075,7 +1166,6 @@ MAY-INLINE-P allows inlining it as an image."
 	   (type (if (equal type-1 "id") "file" type-1))
 	   (filename path)
 	   (thefile path))
-
       (cond
        ;; check for inlined images
        ((and (member type '("file"))
@@ -1084,12 +1174,13 @@ MAY-INLINE-P allows inlining it as an image."
 	      filename org-odt-export-inline-image-extensions)
 	     (or (eq t org-odt-export-inline-images)
 		 (and org-odt-export-inline-images (not descp))))
-
-	;; (when (and (string= type "file") (file-name-absolute-p path))
-	;;   (setq thefile (concat "file://" (expand-file-name path))))
-	;; (setq thefile (org-xml-format-href thefile))
-	;; (org-export-html-format-image thefile)
 	(org-odt-format-inline-image thefile))
+       ;; check for embedded formulas
+       ((and (member type '("file"))
+	     (not fragment)
+	     (org-odt-is-formula-link-p filename)
+	     (or (not descp)))
+	(org-odt-format-inline-formula thefile))
        (t
 	(when (string= type "file")
 	  (setq thefile
@@ -1186,14 +1277,19 @@ MAY-INLINE-P allows inlining it as an image."
    (expand-file-name
     (concat (sha1 file-name) "." (file-name-extension file-name)) "Pictures")))
 
-(defun org-export-odt-format-image (src href)
+(defun org-export-odt-format-image (src href &optional embed-as)
   "Create image tag with source and attributes."
   (save-match-data
     (let* ((caption (org-find-text-property-in-string 'org-caption src))
 	   (caption (and caption (org-xml-format-desc caption)))
 	   (attr (org-find-text-property-in-string 'org-attributes src))
 	   (label (org-find-text-property-in-string 'org-label src))
-	   (embed-as (if (string-match "^ltxpng/" src) 'character 'paragraph))
+	   (embed-as (or embed-as
+			 (if (org-find-text-property-in-string
+			      'org-latex-src src)
+			     (or (org-find-text-property-in-string
+				  'org-latex-src-embed-type src) 'character)
+			   'paragraph)))
 	   (attr-plist (when attr (read  attr)))
 	   (size (org-odt-image-size-from-file
 		  src (plist-get attr-plist :width)
@@ -1214,12 +1310,13 @@ MAY-INLINE-P allows inlining it as an image."
      '("<draw:frame draw:style-name=\"%s\"%s>" . "</draw:frame>")
      text style frame-attrs)))
 
-(defun org-odt-format-textbox (text style &optional width height)
+(defun org-odt-format-textbox (text style &optional width height extra)
   (org-odt-format-frame
    (org-odt-format-tags
     '("<draw:text-box %s>" . "</draw:text-box>")
-    text (format " fo:min-height=\"%0.2fcm\"" (or height 0.5)))
-   style width nil (and (not width) " style:rel-width=\"100%\"")))
+    text (concat (format " fo:min-height=\"%0.2fcm\"" (or height .2))
+		 (format " fo:min-width=\"%0.2fcm\"" (or width .2))))
+   style width nil extra))
 
 (defun org-odt-format-inlinetask (heading content
 					  &optional todo priority tags)
@@ -1230,8 +1327,7 @@ MAY-INLINE-P allows inlining it as an image."
 		 (org-lparse-format
 		  'HEADLINE (concat (org-lparse-format-todo todo) " " heading)
 		  nil tags))
-		content) "OrgInlineTaskFrame")))
-
+		content) "OrgInlineTaskFrame" nil nil " style:rel-width=\"100%\"")))
 (defun org-export-odt-do-format-image (embed-as caption attr label
 						width height href)
   "Create image tag with source and attributes."
@@ -1239,11 +1335,13 @@ MAY-INLINE-P allows inlining it as an image."
     (cond
      ((and (not caption) (not label))
       (let (style-name anchor-type)
-	(cond
-	 ((eq embed-as 'paragraph)
-	  (setq style-name  "OrgSimpleGraphics" anchor-type "paragraph"))
-	 ((eq embed-as 'character)
-	  (setq style-name  "OrgInlineGraphics" anchor-type "as-char")))
+	(case embed-as
+	  (paragraph
+	   (setq style-name  "OrgSimpleGraphics" anchor-type "paragraph"))
+	  (character
+	   (setq style-name  "OrgInlineGraphics" anchor-type "as-char"))
+	  (t
+	   (error "Unknown value for embed-as %S" embed-as)))
 	(org-odt-format-frame href style-name width height nil anchor-type)))
      (t
       (concat
@@ -1376,7 +1474,8 @@ MAY-INLINE-P allows inlining it as an image."
 
     ;; reset variables
     (setq org-odt-manifest-file-entries nil
-	  org-odt-embedded-images-count 0)
+	  org-odt-embedded-images-count 0
+	  org-odt-embedded-formulas-count 0)
 
     content-file))
 
@@ -1625,24 +1724,31 @@ visually."
 (defun org-export-odt-do-preprocess-latex-fragments ()
   "Convert LaTeX fragments to images."
   (let* ((latex-frag-opt (plist-get org-lparse-opt-plist :LaTeX-fragments))
-	 (latex-frag-opt-1		;  massage the options
+	 (latex-frag-opt		;  massage the options
 	  (or (and (member latex-frag-opt '(mathjax t))
+		   (not (and (fboundp 'org-format-latex-mathml-available-p)
+			     (org-format-latex-mathml-available-p)))
 		   (prog1 org-lparse-latex-fragment-fallback
 		     (org-lparse-warn
 		      (concat
-		       "Use of MathJax is incompatible with ODT exporter. "
+		       "LaTeX to MathML converter not available. "
 		       (format "Using %S instead."
 			       org-lparse-latex-fragment-fallback)))))
-	      latex-frag-opt)))
-    (when (and org-current-export-file latex-frag-opt-1)
-      ;; Investigate MathToWeb for converting TeX equations to MathML
-      ;; http://lists.gnu.org/archive/html/emacs-orgmode/2011-03/msg01755.html
+	      latex-frag-opt))
+	 cache-dir display-msg)
+    (cond
+     ((eq latex-frag-opt 'dvipng)
+      (setq cache-dir "ltxpng/")
+      (setq display-msg "Creating LaTeX image %s"))
+     ((member latex-frag-opt '(mathjax t))
+      (setq cache-dir "ltxmathml/")
+      (setq display-msg "Creating MathML formula %s")))
+    (when (and org-current-export-file)
       (org-format-latex
-       (concat "ltxpng/" (file-name-sans-extension
-			  (file-name-nondirectory
-			   org-current-export-file)))
-       org-current-export-dir nil "Creating LaTeX image %s"
-       nil nil latex-frag-opt-1))))
+       (concat cache-dir (file-name-sans-extension
+			  (file-name-nondirectory org-current-export-file)))
+       org-current-export-dir nil display-msg
+       nil nil latex-frag-opt))))
 
 (defun org-export-odt-preprocess-latex-fragments ()
   (when (equal org-export-current-backend 'odt)
