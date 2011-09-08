@@ -390,13 +390,13 @@
       (should (string= (concat test-line " [[file:~/test-file]]")
 		       (buffer-substring-no-properties (point-min) (point-max)))))))
 
-(ert-deftest test-org-babel/inline-src_blk-results-scaler ()
+(ert-deftest test-org-babel/inline-src_blk-results-scalar ()
   (with-temp-buffer
 
-    (let ((test-line "src_emacs-lisp[ :results scaler ]{ \"x\"  }"))
+    (let ((test-line "src_emacs-lisp[ :results scalar ]{ \"x\"  }"))
       (insert test-line)
       (goto-char (point-min)) (org-ctrl-c-ctrl-c)
-      (should (string= (concat test-line " =x=")
+      (should (string= (concat test-line  " =\"x\"=")
 		       (buffer-substring-no-properties (point-min) (point-max)))))))
 
 (ert-deftest test-org-babel/inline-src_blk-results-verbatim ()
