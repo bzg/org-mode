@@ -1843,12 +1843,16 @@ parameters when merging lists."
 				       vars))
 			      vars)
 			    (list (cons name pair))))
-		   ;; if no name is given, then assign to variables in order
-		   (prog1 (setf (cddr (nth variable-index vars))
-				(concat (symbol-name
-					 (car (nth variable-index vars)))
-					"=" (cdr pair)))
-		     (incf variable-index)))))
+		   ;; if no name is given and we already have named variables
+		   ;; then assign to named variables in order
+		   (if (and vars (nth variable-index vars))
+		       (prog1 (setf (cddr (nth variable-index vars))
+				    (concat (symbol-name
+					     (car (nth variable-index vars)))
+					    "=" (cdr pair)))
+			 (incf variable-index))
+		     (error "variable \"%s\" must be assigned a default value"
+			    (cdr pair))))))
 	      (:results
 	       (setq results (e-merge results-exclusive-groups
 				      results
