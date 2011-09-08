@@ -1059,7 +1059,7 @@ value of `org-export-odt-use-htmlfontify."
 							   width height href)
   (with-temp-buffer
     (let ((org-lparse-table-colalign-info '((0 "c" "8") (0 "c" "1"))))
-      (org-lparse-do-format-list-table
+      (org-lparse-insert-list-table
        `((,(org-export-odt-do-format-formula ; caption and label
 					     ; should be nil
 	    embed-as nil attr nil width height href)
