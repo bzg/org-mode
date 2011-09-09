@@ -24,19 +24,26 @@
 
 
 ;;;; Code:
-(let* ((org-test-dir (expand-file-name
+(let ((org-test-dir (expand-file-name
 		      (file-name-directory
-		       (or load-file-name buffer-file-name))))
-       (load-path (cons
-		   (expand-file-name "ert" org-test-dir)
-		   (cons
-		    (expand-file-name "jump" org-test-dir)
-		    load-path))))
-  (require 'ert)
-  (require 'ert-x)
-  (require 'jump)
-  (require 'which-func)
-  (require 'org))
+		       (or load-file-name buffer-file-name)))))
+   (let ((org-lisp-dir (expand-file-name
+   		       (concat org-test-dir "../lisp"))))
+     (unless (member 'features "org")
+       (setq load-path (cons org-lisp-dir load-path))
+       (org-babel-do-load-languages
+	'org-babel-load-languages '((sh . t)))))
+   (let* ((load-path (cons
+		     (expand-file-name "ert" org-test-dir)
+		     (cons
+		      (expand-file-name "jump" org-test-dir)
+		      load-path))))
+    (require 'ert)
+    (require 'ert-x)
+    (require 'jump)
+    (require 'which-func)
+    (require 'org)))
+
 
 (defconst org-test-default-test-file-name "tests.el"
   "For each defun a separate file with tests may be defined.
