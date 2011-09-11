@@ -226,9 +226,9 @@
       (should (re-search-forward "echo" nil t)) ;; 2
       (should (org-babel-get-inline-src-block-matches))
       (should (re-search-forward "blocks" nil t)) ;; 3
-      (left-char 8) ;; 3
+      (backward-char 8) ;; 3
       (should (org-babel-get-inline-src-block-matches))
-      (right-char 1) ;;3
+      (forward-char 1) ;;3
       (should-not (org-babel-get-inline-src-block-matches))
       (should (re-search-forward ":results" nil t)) ;; 4
       (should (org-babel-get-inline-src-block-matches))
