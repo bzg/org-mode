@@ -365,10 +365,10 @@ In Emacs 23, when `shift-select-mode' is on, shifted cursor keys
 start selecting a region, or enlarge regions started in this way.
 In Org-mode, in special contexts, these same keys are used for
 other purposes, important enough to compete with shift selection.
-Org tries to balance these needs by supporting `shift-select-mode' 
+Org tries to balance these needs by supporting `shift-select-mode'
 outside these special contexts, under control of this variable.
 
-The default of this variable is nil, to avoid confusing behavior.  Shifted 
+The default of this variable is nil, to avoid confusing behavior.  Shifted
 cursor keys will then execute Org commands in the following contexts:
 - on a headline, changing TODO state (left/right) and priority (up/down)
 - on a time stamp, changing the time
@@ -9392,7 +9392,8 @@ application the system uses for this file type."
 	(save-excursion
 	  (when (or (org-in-regexp org-angle-link-re)
 		    (org-in-regexp org-plain-link-re))
-	    (setq type (match-string 1) path (match-string 2))
+	    (setq type (match-string 1)
+		  path (org-link-unescape (match-string 2)))
 	    (throw 'match t)))
 	(save-excursion
 	  (when (org-in-regexp (org-re "\\(:[[:alnum:]_@#%:]+\\):[ \t]*$"))
@@ -9999,8 +10000,8 @@ If the file does not exist, an error is thrown."
 				 match)
 			(progn (setq in-emacs (or in-emacs line search))
 			       nil))) ; if we have no match in apps-dlink,
-		                      ; always open the file in emacs if line or search
-		                      ; is given (for backwards compatibility)
+				      ; always open the file in emacs if line or search
+				      ; is given (for backwards compatibility)
 		    (assoc-default dfile (org-apps-regexp-alist apps a-m-a-p)
 				   'string-match)
 		    (cdr (assoc ext apps))
@@ -17089,7 +17090,7 @@ If not, return to the original position and throw an error."
 
 (defun org-speed-command-default-hook (keys)
   "Hook for activating single-letter speed commands.
-`org-speed-commands-default' specifies a minimal command set.  
+`org-speed-commands-default' specifies a minimal command set.
 Use `org-speed-commands-user' for further customization."
   (when (or (and (bolp) (looking-at org-outline-regexp))
 	    (and (functionp org-use-speed-commands)
@@ -20504,7 +20505,7 @@ if no description is present"
       (progn (org-remove-from-invisibility-spec '(org-link))
 	     (org-restart-font-lock)
 	     (setq org-descriptive-links nil))
-    (progn (add-to-invisibility-spec '(org-link)) 
+    (progn (add-to-invisibility-spec '(org-link))
 	   (org-restart-font-lock)
 	   (setq org-descriptive-links t))))
 
