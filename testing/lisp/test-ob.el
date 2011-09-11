@@ -204,13 +204,15 @@
 
 (ert-deftest test-org-babel/inline-src-blocks ()
   (org-test-at-id "54cb8dc3-298c-4883-a933-029b3c9d4b18"
-    (flet ((next ()
-		 (move-end-of-line 1)
-		 (re-search-forward org-babel-inline-src-block-regexp nil t)
-		 (goto-char (match-beginning 1))))
-      (next) (should (equal 1 (org-babel-execute-src-block)))
-      (next) (should (equal 2 (org-babel-execute-src-block)))
-      (next) (should (equal 3 (org-babel-execute-src-block))))))
+    (macrolet ((at-next (&rest body)
+		 `(progn
+		    (move-end-of-line 1)
+		    (re-search-forward org-babel-inline-src-block-regexp nil t)
+		    (goto-char (match-beginning 1))
+		    (save-match-data ,@body))))
+      (at-next (should (equal 1 (org-babel-execute-src-block))))
+      (at-next (should (equal 2 (org-babel-execute-src-block))))
+      (at-next (should (equal 3 (org-babel-execute-src-block)))))))
 
 (ert-deftest test-org-babel/org-babel-get-inline-src-block-matches ()
   (org-test-at-id "0D0983D4-DE33-400A-8A05-A225A567BC74"
