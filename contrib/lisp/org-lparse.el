@@ -199,7 +199,7 @@ OPT-PLIST is the export options list."
 			 (string-match "^\\.\\.?/" path)))
 		   "file")
 		  (t "internal")))
-      (setq path (org-extract-attributes (org-link-unescape path)))
+      (setq path (org-extract-attributes path))
       (setq attr (get-text-property 0 'org-attributes path))
       (setq desc1 (if (match-end 5) (match-string 5 line))
 	    desc2 (if (match-end 2) (concat type ":" path) path)
