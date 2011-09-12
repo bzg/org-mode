@@ -12,7 +12,6 @@
 		       load-path)))
   (require 'org-test)
   (require 'org-test-ob-consts))
-  (require 'org-test)
 
 (ert-deftest test-org-babel/src-name-regexp ()
   (should(equal "^[ \t]*#\\+\\(srcname\\|source\\|function\\):[ \t]*"

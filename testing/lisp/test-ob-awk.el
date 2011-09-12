@@ -1,3 +1,18 @@
+;;; test-ob-awk.el --- tests for ob-awk.el
+
+;; Copyright (c) 2010 Eric Schulte
+;; Authors: Eric Schulte
+
+;; Released under the GNU General Public License version 3
+;; see: http://www.gnu.org/licenses/gpl-3.0.html
+
+(let ((load-path (cons (expand-file-name
+			".." (file-name-directory
+			      (or load-file-name buffer-file-name)))
+		       load-path)))
+  (require 'org-test)
+  (require 'org-test-ob-consts))
+
 (require 'ob-awk)
 
 (ert-deftest ob-awk/input-none ()
@@ -17,3 +32,4 @@
   (org-test-at-id "9e998b2a-3581-43fe-b26d-07d3c507b86a"
     (org-babel-next-src-block 3)
     (should (= 150 (org-babel-execute-src-block)))))
+

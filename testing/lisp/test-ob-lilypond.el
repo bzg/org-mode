@@ -1,11 +1,26 @@
+;;; test-ob-lilypond.el --- tests for ob-lilypond.el
+
+;; Copyright (c) 2010 Martyn Jago
+;; Authors: Martyn Jago
+
+;; Released under the GNU General Public License version 3
+;; see: http://www.gnu.org/licenses/gpl-3.0.html
+
+(let ((load-path (cons (expand-file-name
+			".." (file-name-directory
+			      (or load-file-name buffer-file-name)))
+		       load-path)))
+  (require 'org-test)
+  (require 'org-test-ob-consts))
+
+(require 'ob-lilypond)
+
 (save-excursion
   (set-buffer (get-buffer-create "test-ob-lilypond.el"))
   (setq ly-here
         (file-name-directory
          (or load-file-name (buffer-file-name)))))
 
-(require 'ob-lilypond)
- 
 (ert-deftest ob-lilypond/assert ()
   (should t))
  
