@@ -76,9 +76,9 @@
   "Directory that holds auxiliary files used by the ODT exporter.
 
 The 'styles' subdir contains the following xml files -
- 'OrgOdtStyles.xml' and 'OrgOdtAutomaticStyles.xml' - which are
+ 'OrgOdtStyles.xml' and 'OrgOdtContentTemplate.xml' - which are
  used as factory settings of `org-export-odt-styles-file' and
- `org-export-odt-automatic-styles-file'.
+ `org-export-odt-content-template-file'.
 
 The 'etc/schema' subdir contains rnc files for validating of
 OpenDocument xml files.")
@@ -148,9 +148,13 @@ OpenDocument xml files.")
 	       'org-export-odt-preprocess-latex-fragments)
   nil)
 
-(defcustom org-export-odt-automatic-styles-file nil
-  "Automatic styles for use with ODT exporter.
-If unspecified, the file under `org-odt-data-dir' is used."
+(defcustom org-export-odt-content-template-file nil
+  "Template file for \"content.xml\".
+The exporter embeds the exported content just before
+\"</office:text>\" element.
+
+If unspecified, the file named \"OrgOdtContentTemplate.xml\"
+under `org-odt-data-dir' is used."
   :type 'file
   :group 'org-export-odt)
 
@@ -428,16 +432,14 @@ PUB-DIR is set, use this as the publishing directory."
 ;;;_. control callbacks
 ;;;_ , document body
 (defun org-odt-begin-office-body ()
-  (insert "
-  <office:body>
-    <office:text>
-      <text:sequence-decls>
-	<text:sequence-decl text:display-outline-level=\"0\" text:name=\"Illustration\"/>
-	<text:sequence-decl text:display-outline-level=\"0\" text:name=\"Table\"/>
-	<text:sequence-decl text:display-outline-level=\"0\" text:name=\"Text\"/>
-	<text:sequence-decl text:display-outline-level=\"0\" text:name=\"Drawing\"/>
-	<text:sequence-decl text:display-outline-level=\"0\" text:name=\"Equation\"/>
-      </text:sequence-decls>"))
+  ;; automatic styles
+  (insert-file-contents
+   (or org-export-odt-content-template-file
+       (expand-file-name "styles/OrgOdtContentTemplate.xml"
+			 org-odt-data-dir)))
+  (goto-char (point-min))
+  (re-search-forward "</office:text>" nil nil)
+  (delete-region (match-beginning 0) (point-max)))
 
 ;; Following variable is let bound when `org-do-lparse' is in
 ;; progress. See org-html.el.
@@ -460,48 +462,8 @@ PUB-DIR is set, use this as the publishing directory."
     (org-lparse-insert-tag "</office:text>")
     (org-lparse-insert-tag "</office:body>")))
 
-(defconst org-odt-document-content-header
-  "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
-<office:document-content
-    xmlns:office=\"urn:oasis:names:tc:opendocument:xmlns:office:1.0\"
-    xmlns:style=\"urn:oasis:names:tc:opendocument:xmlns:style:1.0\"
-    xmlns:text=\"urn:oasis:names:tc:opendocument:xmlns:text:1.0\"
-    xmlns:table=\"urn:oasis:names:tc:opendocument:xmlns:table:1.0\"
-    xmlns:draw=\"urn:oasis:names:tc:opendocument:xmlns:drawing:1.0\"
-    xmlns:fo=\"urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0\"
-    xmlns:xlink=\"http://www.w3.org/1999/xlink\"
-    xmlns:dc=\"http://purl.org/dc/elements/1.1/\"
-    xmlns:meta=\"urn:oasis:names:tc:opendocument:xmlns:meta:1.0\"
-    xmlns:number=\"urn:oasis:names:tc:opendocument:xmlns:datastyle:1.0\"
-    xmlns:svg=\"urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0\"
-    xmlns:chart=\"urn:oasis:names:tc:opendocument:xmlns:chart:1.0\"
-    xmlns:dr3d=\"urn:oasis:names:tc:opendocument:xmlns:dr3d:1.0\"
-    xmlns:math=\"http://www.w3.org/1998/Math/MathML\"
-    xmlns:form=\"urn:oasis:names:tc:opendocument:xmlns:form:1.0\"
-    xmlns:script=\"urn:oasis:names:tc:opendocument:xmlns:script:1.0\"
-    xmlns:ooo=\"http://openoffice.org/2004/office\"
-    xmlns:ooow=\"http://openoffice.org/2004/writer\"
-    xmlns:oooc=\"http://openoffice.org/2004/calc\"
-    xmlns:dom=\"http://www.w3.org/2001/xml-events\"
-    xmlns:xforms=\"http://www.w3.org/2002/xforms\"
-    xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"
-    xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"
-    xmlns:rpt=\"http://openoffice.org/2005/report\"
-    xmlns:of=\"urn:oasis:names:tc:opendocument:xmlns:of:1.2\"
-    xmlns:xodt=\"http://www.w3.org/1999/xodt\"
-    xmlns:field=\"urn:openoffice:names:experimental:ooo-ms-interop:xmlns:field:1.0\"    office:version=\"1.2\">
-")
-
 (defun org-odt-begin-document-content (opt-plist)
-  ;; document header
-  (insert org-odt-document-content-header)
-
-  ;; automatic styles
-  (insert-file-contents
-   (or org-export-odt-automatic-styles-file
-       (expand-file-name "styles/OrgOdtAutomaticStyles.xml"
-			 org-odt-data-dir)))
-   (goto-char (point-max)))
+  (ignore))
 
 (defun org-odt-end-document-content ()
   (org-lparse-insert-tag "</office:document-content>"))
