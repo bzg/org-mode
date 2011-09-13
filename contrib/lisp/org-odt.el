@@ -598,15 +598,107 @@ PUB-DIR is set, use this as the publishing directory."
 (defvar org-lparse-table-is-styled)
 (defvar org-lparse-table-rowgrp-info)
 (defvar org-lparse-table-colalign-vector)
+
+(defvar org-odt-table-style nil
+  "Table style specified by \"#+ATTR_ODT: <style-name>\" line.
+This is set during `org-odt-begin-table'.")
+
+(defvar org-odt-table-style-spec nil
+  "Entry for `org-odt-table-style' in `org-export-odt-table-styles'.")
+
+(defcustom org-export-odt-table-styles nil
+  "Specify how Table Styles should be derived from a Table Template.
+This is a list where each element is of the
+form (TABLE-STYLE-NAME TABLE-TEMPLATE-NAME TABLE-CELL-OPTIONS).
+
+TABLE-STYLE-NAME is the style associated with the table through
+`org-odt-table-style'.
+
+TABLE-TEMPLATE-NAME is a set of - upto 9 - automatic
+TABLE-CELL-STYLE-NAMEs and PARAGRAPH-STYLE-NAMEs (as defined
+below) that is included in
+`org-export-odt-content-template-file'.
+
+TABLE-CELL-STYLE-NAME := TABLE-TEMPLATE-NAME + TABLE-CELL-TYPE +
+                         \"TableCell\"
+PARAGRAPH-STYLE-NAME  := TABLE-TEMPLATE-NAME + TABLE-CELL-TYPE +
+                         \"TableParagraph\"
+TABLE-CELL-TYPE       := \"FirstRow\"   | \"LastColumn\" |
+                         \"FirstRow\"   | \"LastRow\"    |
+                         \"EvenRow\"    | \"OddRow\"     |
+                         \"EvenColumn\" | \"OddColumn\"  | \"\"
+where \"+\" above denotes string concatenation.
+
+TABLE-CELL-OPTIONS is an alist where each element is of the
+form (TABLE-CELL-STYLE-SELECTOR . ON-OR-OFF).
+TABLE-CELL-STYLE-SELECTOR := `use-first-row-styles'       |
+                             `use-last-row-styles'        |
+                             `use-first-column-styles'    |
+                             `use-last-column-styles'     |
+                             `use-banding-rows-styles'    |
+                             `use-banding-columns-styles' |
+                             `use-first-row-styles'
+ON-OR-OFF                 := `t' | `nil'
+
+For example, with the following configuration
+
+\(setq org-export-odt-table-styles
+      '\(\(\"TableWithHeaderRowsAndColumns\" \"Custom\"
+         \(\(use-first-row-styles . t\)
+          \(use-first-column-styles . t\)\)\)
+        \(\"TableWithHeaderColumns\" \"Custom\"
+         \(\(use-first-column-styles . t\)\)\)\)\)
+
+1. A table associated with \"TableWithHeaderRowsAndColumns\"
+   style will use the following table-cell styles -
+   \"CustomFirstRowTableCell\", \"CustomFirstColumnTableCell\",
+   \"CustomTableCell\" and the following paragraph styles
+   \"CustomFirstRowTableParagraph\",
+   \"CustomFirstColumnTableParagraph\", \"CustomTableParagraph\"
+   as appropriate.
+
+2. A table associated with \"TableWithHeaderColumns\" style will
+   use the following table-cell styles -
+   \"CustomFirstColumnTableCell\", \"CustomTableCell\" and the
+   following paragraph styles
+   \"CustomFirstColumnTableParagraph\", \"CustomTableParagraph\"
+   as appropriate..
+
+Note that TABLE-TEMPLATE-NAME corresponds to the
+\"<table:table-template>\" elements contained within
+\"<office:styles>\".  The entries (TABLE-STYLE-NAME
+TABLE-TEMPLATE-NAME TABLE-CELL-OPTIONS) correspond to
+\"table:template-name\" and \"table:use-first-row-styles\" etc
+attributes of \"<table:table>\" element.  Refer ODF-1.2
+specification for more information.  Also consult the
+implementation filed under `org-odt-get-table-cell-styles'."
+  :group 'org-export-odt
+  :type '(choice
+          (const :tag "None" nil)
+          (repeat :tag "Table Styles"
+                  (list :tag "Table Style Specification"
+                   (string :tag "Table Style Name")
+                   (string  :tag "Table Template Name")
+                   (alist :options (use-first-row-styles
+                                    use-last-row-styles
+                                    use-first-column-styles
+                                    use-last-column-styles
+                                    use-banding-rows-styles
+                                    use-banding-columns-styles)
+                          :key-type symbol
+                          :value-type (const :tag "True" t))))))
+
 (defun org-odt-begin-table (caption label attributes)
+  (setq org-odt-table-style attributes)
+  (setq org-odt-table-style-spec
+	(assoc org-odt-table-style org-export-odt-table-styles))
   (when label
     (insert
      (org-odt-format-stylized-paragraph
       'table (org-odt-format-entity-caption label caption "Table"))))
-
   (org-lparse-insert-tag
    "<table:table table:name=\"%s\" table:style-name=\"%s\">"
-   (or label "") "OrgTable")
+   (or label "") (or (nth 1 org-odt-table-style-spec) "OrgTable"))
   (setq org-lparse-table-begin-marker (point)))
 
 (defun org-odt-end-table ()
@@ -614,22 +706,24 @@ PUB-DIR is set, use this as the publishing directory."
   (loop for level from 0 below org-lparse-table-ncols
 	do (insert
 	    (org-odt-format-tags
-	     "<table:table-column table:style-name=\"OrgTableColumn\"/>"  "")))
+	     "<table:table-column table:style-name=\"%sColumn\"/>"
+	     "" (or (nth 1 org-odt-table-style-spec) "OrgTable"))))
 
   ;; fill style attributes for table cells
   (when org-lparse-table-is-styled
     (while (re-search-forward "@@\\(table-cell:p\\|table-cell:style-name\\)@@\\([0-9]+\\)@@\\([0-9]+\\)@@" nil t)
-      (let ((spec (match-string 1))
-	    (r (string-to-number (match-string 2)))
-	    (c (string-to-number (match-string 3))))
+      (let* ((spec (match-string 1))
+	     (r (string-to-number (match-string 2)))
+	     (c (string-to-number (match-string 3)))
+	     (cell-styles (org-odt-get-table-cell-styles
+			   r c org-odt-table-style-spec))
+	     (table-cell-style (car cell-styles))
+	     (table-cell-paragraph-style (cdr cell-styles)))
 	(cond
 	 ((equal spec "table-cell:p")
-	  (let ((style-name (org-odt-get-paragraph-style-for-table-cell r c)))
-	    (replace-match style-name t t)))
+	  (replace-match table-cell-paragraph-style t t))
 	 ((equal spec "table-cell:style-name")
-	  (let ((style-name (org-odt-get-style-name-for-table-cell r c)))
-	    (replace-match style-name t t)))))))
-
+	  (replace-match table-cell-style t t))))))
   (goto-char (point-max))
   (org-lparse-insert-tag "</table:table>"))
 
@@ -653,30 +747,87 @@ PUB-DIR is set, use this as the publishing directory."
   (org-odt-format-tags
    '("<table:table-row>" . "</table:table-row>") row))
 
-(defun org-odt-get-style-name-for-table-cell (r c)
-  (concat
-   "OrgTblCell"
-   (cond
-    ((= r 0) "T")
-    ((eq (cdr (assoc r org-lparse-table-rowgrp-info))  :start) "T")
-    (t ""))
-   (when (= r org-lparse-table-rownum) "B")
-   (cond
-    ((= c 0) "")
-    ((or (memq (nth c org-table-colgroup-info) '(:start :startend))
-	 (memq (nth (1- c) org-table-colgroup-info) '(:end :startend))) "L")
-    (t ""))))
+(defun org-odt-get-table-cell-styles (r c &optional style-spec)
+  "Retrieve styles applicable to a table cell.
+R and C are (zero-based) row and column numbers of the table
+cell.  STYLE-SPEC is an entry in `org-export-odt-table-styles'
+applicable to the current table.  It is `nil' if the table is not
+associated with any style attributes.
 
-(defun org-odt-get-paragraph-style-for-table-cell (r c)
-  (capitalize (aref org-lparse-table-colalign-vector c)))
+Return a cons of (TABLE-CELL-STYLE-NAME . PARAGRAPH-STYLE-NAME).
+
+When STYLE-SPEC is nil, style the table cell the conventional way
+- choose cell borders based on row and column groupings and
+choose paragraph alignment based on `org-col-cookies' text
+property.  See also
+`org-odt-get-paragraph-style-cookie-for-table-cell'.
+
+When STYLE-SPEC is non-nil, ignore the above cookie and return
+styles congruent with the ODF-1.2 specification."
+  (cond
+   (style-spec
+
+    ;; LibreOffice - particularly the Writer - honors neither table
+    ;; templates nor custom table-cell styles.  Inorder to retain
+    ;; inter-operability with LibreOffice, only automatic styles are
+    ;; used for styling of table-cells.  The current implementation is
+    ;; congruent with ODF-1.2 specification and hence is
+    ;; future-compatible.
+
+    ;; Additional Note: LibreOffice's AutoFormat facility for tables -
+    ;; which recognizes as many as 16 different cell types - is much
+    ;; richer. Unfortunately it is NOT amenable to easy configuration
+    ;; by hand.
+
+    (let* ((template-name (nth 1 style-spec))
+	   (cell-style-selectors (nth 2 style-spec))
+	   (cell-type
+	    (cond
+	     ((and (cdr (assoc 'use-first-column-styles cell-style-selectors))
+		   (= c 0)) "FirstColumn")
+	     ((and (cdr (assoc 'use-last-column-styles cell-style-selectors))
+		   (= c (1- org-lparse-table-ncols))) "LastColumn")
+	     ((and (cdr (assoc 'use-first-row-styles cell-style-selectors))
+		   (= r 0)) "FirstRow")
+	     ((and (cdr (assoc 'use-last-row-styles cell-style-selectors))
+		   (= r org-lparse-table-rownum))
+	      "LastRow")
+	     ((and (cdr (assoc 'use-banding-rows-styles cell-style-selectors))
+		   (= (% r 2) 1)) "EvenRow")
+	     ((and (cdr (assoc 'use-banding-rows-styles cell-style-selectors))
+		   (= (% r 2) 0)) "OddRow")
+	     ((and (cdr (assoc 'use-banding-columns-styles cell-style-selectors))
+		   (= (% c 2) 1)) "EvenColumn")
+	     ((and (cdr (assoc 'use-banding-columns-styles cell-style-selectors))
+		   (= (% c 2) 0)) "OddColumn")
+	     (t ""))))
+      (cons
+       (concat template-name cell-type "TableCell")
+       (concat template-name cell-type "TableParagraph"))))
+   (t
+    (cons
+     (concat
+      "OrgTblCell"
+      (cond
+       ((= r 0) "T")
+       ((eq (cdr (assoc r org-lparse-table-rowgrp-info))  :start) "T")
+       (t ""))
+      (when (= r org-lparse-table-rownum) "B")
+      (cond
+       ((= c 0) "")
+       ((or (memq (nth c org-table-colgroup-info) '(:start :startend))
+	    (memq (nth (1- c) org-table-colgroup-info) '(:end :startend))) "L")
+       (t "")))
+     (capitalize (aref org-lparse-table-colalign-vector c))))))
 
 (defun org-odt-get-paragraph-style-cookie-for-table-cell (r c)
   (concat
-   (cond
-    (org-lparse-table-cur-rowgrp-is-hdr "OrgTableHeading")
-    ((and (= c 0) (org-lparse-get 'TABLE-FIRST-COLUMN-AS-LABELS))
-     "OrgTableHeading")
-    (t "OrgTableContents"))
+   (and (not org-odt-table-style-spec)
+	(cond
+	 (org-lparse-table-cur-rowgrp-is-hdr "OrgTableHeading")
+	 ((and (= c 0) (org-lparse-get 'TABLE-FIRST-COLUMN-AS-LABELS))
+	  "OrgTableHeading")
+	 (t "OrgTableContents")))
    (and org-lparse-table-is-styled
 	(format "@@table-cell:p@@%03d@@%03d@@" r c))))
 
