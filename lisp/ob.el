@@ -1021,7 +1021,8 @@ may be specified in the current buffer."
          (body (org-babel-clean-text-properties
 		(let* ((body (match-string 5))
 		       (sub-length (- (length body) 1)))
-		  (if (string= "\n" (substring body sub-length))
+		  (if (and (> sub-length 0)
+			   (string= "\n" (substring body sub-length)))
 		      (substring body 0 sub-length)
 		    body))))
 	 (preserve-indentation (or org-src-preserve-indentation
