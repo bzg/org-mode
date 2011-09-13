@@ -1024,7 +1024,7 @@ may be specified in the current buffer."
 		  (if (and (> sub-length 0)
 			   (string= "\n" (substring body sub-length)))
 		      (substring body 0 sub-length)
-		    body))))
+		    (or body "")))))
 	 (preserve-indentation (or org-src-preserve-indentation
 				   (string-match "-i\\>" switches))))
     (list lang
