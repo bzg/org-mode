@@ -1012,6 +1012,7 @@ Pressing `1' will switch between these two options."
 		 (message "Export buffer: "))
 		((not subtree-p)
 		 (setq subtree-p t)
+		 (setq bpos (point))
 		 (message "Export subtree: "))))
 	(when (eq r1 ?\ )
 	  (let ((case-fold-search t)
