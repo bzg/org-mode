@@ -1739,8 +1739,14 @@ from the buffer."
 		(save-excursion
 		  (save-match-data
 		    (goto-char beg-content)
-		    (while (re-search-forward "^[ \t]*\\(,\\)" end-content t)
-		      (replace-match "" nil nil nil 1))))
+		    (let ((front-line (save-excursion
+					(re-search-forward
+					 "[^[:space:]]" end-content t)
+					(goto-char (match-beginning 0))
+					(current-column))))
+		      (while (re-search-forward "^[ \t]*\\(,\\)" end-content t)
+			(when (= (current-column) front-line)
+			  (replace-match "" nil nil nil 1))))))
 		(delete-region (match-beginning 0) (match-end 0))
 		(save-excursion
 		  (goto-char beg)

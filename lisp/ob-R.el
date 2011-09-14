@@ -294,7 +294,7 @@ last statement in BODY, as elisp."
 	      (mapcar
 	       (lambda (line) ;; cleanup extra prompts left in output
 		 (if (string-match
-		      "^\\([ ]*[>+][ ]?\\)+\\([[0-9]+\\|[ ]\\)" line)
+		      "^\\([ ]*[>+\\.][ ]?\\)+\\([[0-9]+\\|[ ]\\)" line)
 		     (substring line (match-end 1))
 		   line))
 	       (org-babel-comint-with-output (session org-babel-R-eoe-output)

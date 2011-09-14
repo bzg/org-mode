@@ -277,6 +277,7 @@ defined in `org-export-taskjuggler-default-reports'."
 		      (file-name-nondirectory buffer-file-name))
 		     org-export-taskjuggler-extension)))
 	 (buffer (find-file-noselect filename))
+	 (old-buffer (current-buffer))
 	 (org-export-taskjuggler-old-level 0)
 	 task resource)
     (unless tasks
@@ -304,6 +305,7 @@ defined in `org-export-taskjuggler-default-reports'."
 	(setcar tasks (push (cons "version" version) task))))
     (with-current-buffer buffer
       (erase-buffer)
+      (org-clone-local-variables old-buffer "^org-")
       (org-taskjuggler-open-project (car tasks))
       (insert org-export-taskjuggler-default-global-properties)
       (insert "\n")

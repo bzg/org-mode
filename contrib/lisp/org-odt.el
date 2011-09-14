@@ -76,9 +76,9 @@
   "Directory that holds auxiliary files used by the ODT exporter.
 
 The 'styles' subdir contains the following xml files -
- 'OrgOdtStyles.xml' and 'OrgOdtAutomaticStyles.xml' - which are
+ 'OrgOdtStyles.xml' and 'OrgOdtContentTemplate.xml' - which are
  used as factory settings of `org-export-odt-styles-file' and
- `org-export-odt-automatic-styles-file'.
+ `org-export-odt-content-template-file'.
 
 The 'etc/schema' subdir contains rnc files for validating of
 OpenDocument xml files.")
@@ -148,9 +148,13 @@ OpenDocument xml files.")
 	       'org-export-odt-preprocess-latex-fragments)
   nil)
 
-(defcustom org-export-odt-automatic-styles-file nil
-  "Automatic styles for use with ODT exporter.
-If unspecified, the file under `org-odt-data-dir' is used."
+(defcustom org-export-odt-content-template-file nil
+  "Template file for \"content.xml\".
+The exporter embeds the exported content just before
+\"</office:text>\" element.
+
+If unspecified, the file named \"OrgOdtContentTemplate.xml\"
+under `org-odt-data-dir' is used."
   :type 'file
   :group 'org-export-odt)
 
@@ -383,8 +387,6 @@ PUB-DIR is set, use this as the publishing directory."
      . (org-odt-begin-table org-odt-end-table))
     (TABLE-ROWGROUP
      . (org-odt-begin-table-rowgroup org-odt-end-table-rowgroup))
-    (TABLE-CELL
-     . (org-odt-begin-table-cell org-odt-end-table-cell))
     (LIST
      . (org-odt-begin-list org-odt-end-list))
     (LIST-ITEM
@@ -430,16 +432,14 @@ PUB-DIR is set, use this as the publishing directory."
 ;;;_. control callbacks
 ;;;_ , document body
 (defun org-odt-begin-office-body ()
-  (insert "
-  <office:body>
-    <office:text>
-      <text:sequence-decls>
-	<text:sequence-decl text:display-outline-level=\"0\" text:name=\"Illustration\"/>
-	<text:sequence-decl text:display-outline-level=\"0\" text:name=\"Table\"/>
-	<text:sequence-decl text:display-outline-level=\"0\" text:name=\"Text\"/>
-	<text:sequence-decl text:display-outline-level=\"0\" text:name=\"Drawing\"/>
-	<text:sequence-decl text:display-outline-level=\"0\" text:name=\"Equation\"/>
-      </text:sequence-decls>"))
+  ;; automatic styles
+  (insert-file-contents
+   (or org-export-odt-content-template-file
+       (expand-file-name "styles/OrgOdtContentTemplate.xml"
+			 org-odt-data-dir)))
+  (goto-char (point-min))
+  (re-search-forward "</office:text>" nil nil)
+  (delete-region (match-beginning 0) (point-max)))
 
 ;; Following variable is let bound when `org-do-lparse' is in
 ;; progress. See org-html.el.
@@ -462,48 +462,8 @@ PUB-DIR is set, use this as the publishing directory."
     (org-lparse-insert-tag "</office:text>")
     (org-lparse-insert-tag "</office:body>")))
 
-(defconst org-odt-document-content-header
-  "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
-<office:document-content
-    xmlns:office=\"urn:oasis:names:tc:opendocument:xmlns:office:1.0\"
-    xmlns:style=\"urn:oasis:names:tc:opendocument:xmlns:style:1.0\"
-    xmlns:text=\"urn:oasis:names:tc:opendocument:xmlns:text:1.0\"
-    xmlns:table=\"urn:oasis:names:tc:opendocument:xmlns:table:1.0\"
-    xmlns:draw=\"urn:oasis:names:tc:opendocument:xmlns:drawing:1.0\"
-    xmlns:fo=\"urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0\"
-    xmlns:xlink=\"http://www.w3.org/1999/xlink\"
-    xmlns:dc=\"http://purl.org/dc/elements/1.1/\"
-    xmlns:meta=\"urn:oasis:names:tc:opendocument:xmlns:meta:1.0\"
-    xmlns:number=\"urn:oasis:names:tc:opendocument:xmlns:datastyle:1.0\"
-    xmlns:svg=\"urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0\"
-    xmlns:chart=\"urn:oasis:names:tc:opendocument:xmlns:chart:1.0\"
-    xmlns:dr3d=\"urn:oasis:names:tc:opendocument:xmlns:dr3d:1.0\"
-    xmlns:math=\"http://www.w3.org/1998/Math/MathML\"
-    xmlns:form=\"urn:oasis:names:tc:opendocument:xmlns:form:1.0\"
-    xmlns:script=\"urn:oasis:names:tc:opendocument:xmlns:script:1.0\"
-    xmlns:ooo=\"http://openoffice.org/2004/office\"
-    xmlns:ooow=\"http://openoffice.org/2004/writer\"
-    xmlns:oooc=\"http://openoffice.org/2004/calc\"
-    xmlns:dom=\"http://www.w3.org/2001/xml-events\"
-    xmlns:xforms=\"http://www.w3.org/2002/xforms\"
-    xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"
-    xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"
-    xmlns:rpt=\"http://openoffice.org/2005/report\"
-    xmlns:of=\"urn:oasis:names:tc:opendocument:xmlns:of:1.2\"
-    xmlns:xodt=\"http://www.w3.org/1999/xodt\"
-    xmlns:field=\"urn:openoffice:names:experimental:ooo-ms-interop:xmlns:field:1.0\"    office:version=\"1.2\">
-")
-
 (defun org-odt-begin-document-content (opt-plist)
-  ;; document header
-  (insert org-odt-document-content-header)
-
-  ;; automatic styles
-  (insert-file-contents
-   (or org-export-odt-automatic-styles-file
-       (expand-file-name "styles/OrgOdtAutomaticStyles.xml"
-			 org-odt-data-dir)))
-   (goto-char (point-max)))
+  (ignore))
 
 (defun org-odt-end-document-content ()
   (org-lparse-insert-tag "</office:document-content>"))
@@ -524,10 +484,7 @@ PUB-DIR is set, use this as the publishing directory."
 (defun org-odt-end-outline-text ()
   (ignore))
 
-(defvar org-lparse-current-paragraph-style) ; bound during
-					    ; `org-do-lparse'
 (defun org-odt-begin-paragraph (&optional style)
-  (setq style (or style org-lparse-current-paragraph-style))
   (org-lparse-insert-tag
    "<text:p%s>" (org-odt-get-extra-attrs-for-paragraph-style style)))
 
@@ -548,8 +505,7 @@ PUB-DIR is set, use this as the publishing directory."
 (defun org-odt-format-stylized-paragraph (style text)
   (org-odt-format-tags
    '("<text:p%s>" . "</text:p>") text
-   (org-odt-get-extra-attrs-for-paragraph-style
-    (or style org-lparse-current-paragraph-style))))
+   (org-odt-get-extra-attrs-for-paragraph-style style)))
 
 (defun org-odt-begin-environment (style)
   (case style
@@ -728,26 +684,17 @@ PUB-DIR is set, use this as the publishing directory."
   (when org-lparse-table-is-styled
     (format "@@table-cell:style-name@@%03d@@%03d@@" r c)))
 
-(defun org-odt-begin-table-cell (r c)
-  (setq org-lparse-current-paragraph-style
-	(org-odt-get-paragraph-style-cookie-for-table-cell r c))
-  (let* ((style-name-cookie
+(defun org-odt-format-table-cell (data r c)
+  (let* ((paragraph-style-cookie
+	  (org-odt-get-paragraph-style-cookie-for-table-cell r c))
+	 (style-name-cookie
 	  (org-odt-get-style-name-cookie-for-table-cell r c))
 	 (extra (if style-name-cookie
 		    (format " table:style-name=\"%s\""  style-name-cookie) "")))
-    (org-lparse-insert-tag "<table:table-cell%s>" extra)))
-
-(defun org-odt-end-table-cell ()
-  (org-lparse-insert-tag "</table:table-cell>")
-  (setq org-lparse-current-paragraph-style nil))
-
-(defun org-odt-format-table-cell (data r c)
-  (with-temp-buffer
-    (org-odt-begin-table-cell r c)
-    (insert (org-odt-format-stylized-paragraph
-	     org-lparse-current-paragraph-style data))
-    (org-odt-end-table-cell)
-    (buffer-string)))
+    (org-odt-format-tags
+     '("<table:table-cell%s>" . "</table:table-cell>")
+     (if org-lparse-list-table-p data
+       (org-odt-format-stylized-paragraph paragraph-style-cookie data)) extra)))
 
 (defun org-odt-begin-footnote-definition (n)
   (org-lparse-begin-paragraph 'footnote))
@@ -1070,6 +1017,98 @@ value of `org-export-odt-use-htmlfontify."
 	       (org-odt-copy-image-file thefile) thelink))))
     (org-export-odt-format-image thefile href)))
 
+(defun org-export-odt-do-format-numbered-formula (embed-as caption attr label
+							   width height href)
+  (with-temp-buffer
+    (let ((org-lparse-table-colalign-info '((0 "c" "8") (0 "c" "1"))))
+      (org-lparse-insert-list-table
+       `((,(org-export-odt-do-format-formula ; caption and label
+					     ; should be nil
+	    embed-as nil attr nil width height href)
+	  ,(org-odt-format-entity-caption label caption "Equation")))
+       nil nil nil nil nil org-lparse-table-colalign-info))
+    (buffer-substring-no-properties (point-min) (point-max))))
+
+(defun org-export-odt-do-format-formula (embed-as caption attr label
+						  width height href)
+  "Create image tag with source and attributes."
+  (save-match-data
+    (cond
+     ((and (not caption) (not label))
+      (let (style-name anchor-type)
+	(case embed-as
+	  (paragraph
+	   (setq style-name  "OrgSimpleGraphics" anchor-type "paragraph"))
+	  (character
+	   (setq style-name  "OrgInlineGraphics" anchor-type "as-char"))
+	  (t
+	   (error "Unknown value for embed-as %S" embed-as)))
+	(org-odt-format-frame href style-name width height nil anchor-type)))
+     (t
+      (concat
+       (org-odt-format-textbox
+	(org-odt-format-stylized-paragraph
+	 'illustration
+	 (concat
+	  (let ((extra ""))
+	    (org-odt-format-frame
+	     href "" width height extra "paragraph"))
+	  (org-odt-format-entity-caption label caption)))
+	"OrgCaptionFrame" width height))))))
+
+(defun org-export-odt-format-formula (src href &optional embed-as)
+  "Create image tag with source and attributes."
+  (save-match-data
+    (let* ((caption (org-find-text-property-in-string 'org-caption src))
+	   (caption (and caption (org-xml-format-desc caption)))
+	   (attr (org-find-text-property-in-string 'org-attributes src))
+	   (label (org-find-text-property-in-string 'org-label src))
+	   (embed-as (or embed-as
+			 (and (org-find-text-property-in-string
+			       'org-latex-src src)
+			      (org-find-text-property-in-string
+			       'org-latex-src-embed-type src))
+			 'paragraph))
+	   (attr-plist (when attr (read  attr)))
+	   (width (plist-get attr-plist :width))
+	   (height (plist-get attr-plist :height)))
+      (org-export-odt-do-format-formula
+       embed-as caption attr label width height href))))
+
+(defvar org-odt-embedded-formulas-count 0)
+(defun org-odt-copy-formula-file (path)
+  "Returns the internal name of the file"
+  (let* ((src-file (expand-file-name
+		    path (file-name-directory org-current-export-file)))
+	 (target-dir (format "Formula-%04d/"
+			     (incf org-odt-embedded-formulas-count)))
+	 (target-file (concat target-dir "content.xml")))
+    (when (not org-lparse-to-buffer)
+      (message "Embedding %s as %s ..."
+	       (substring-no-properties path) target-file)
+
+	(make-directory target-dir)
+	(org-odt-create-manifest-file-entry
+	 "application/vnd.oasis.opendocument.formula" target-dir "1.2")
+
+	(copy-file src-file target-file 'overwrite)
+	(org-odt-create-manifest-file-entry "text/xml" target-file))
+    target-file))
+
+(defun org-odt-format-inline-formula (thefile)
+  (let* ((thelink (if (file-name-absolute-p thefile) thefile
+		    (org-xml-format-href
+		     (org-odt-relocate-relative-path
+		      thefile org-current-export-file))))
+	 (href
+	  (org-odt-format-tags
+	   "<draw:object xlink:href=\"%s\" xlink:type=\"simple\" xlink:show=\"embed\" xlink:actuate=\"onLoad\"/>" ""
+	   (file-name-directory (org-odt-copy-formula-file thefile)))))
+    (org-export-odt-format-formula thefile href)))
+
+(defun org-odt-is-formula-link-p (file)
+  (member (downcase (file-name-extension file)) '("mathml")))
+
 (defun org-odt-format-org-link (opt-plist type-1 path fragment desc attr
 					  descp)
   "Make an HTML link.
@@ -1080,7 +1119,6 @@ FRAGMENT is the fragment part of the link, if any (foo.html#THIS)
 DESC is the link description, if any.
 ATTR is a string of other attributes of the a element.
 MAY-INLINE-P allows inlining it as an image."
-
   (declare (special org-lparse-par-open))
   (save-match-data
     (let* ((may-inline-p
@@ -1090,7 +1128,6 @@ MAY-INLINE-P allows inlining it as an image."
 	   (type (if (equal type-1 "id") "file" type-1))
 	   (filename path)
 	   (thefile path))
-
       (cond
        ;; check for inlined images
        ((and (member type '("file"))
@@ -1099,12 +1136,13 @@ MAY-INLINE-P allows inlining it as an image."
 	      filename org-odt-export-inline-image-extensions)
 	     (or (eq t org-odt-export-inline-images)
 		 (and org-odt-export-inline-images (not descp))))
-
-	;; (when (and (string= type "file") (file-name-absolute-p path))
-	;;   (setq thefile (concat "file://" (expand-file-name path))))
-	;; (setq thefile (org-xml-format-href thefile))
-	;; (org-export-html-format-image thefile)
 	(org-odt-format-inline-image thefile))
+       ;; check for embedded formulas
+       ((and (member type '("file"))
+	     (not fragment)
+	     (org-odt-is-formula-link-p filename)
+	     (or (not descp)))
+	(org-odt-format-inline-formula thefile))
        (t
 	(when (string= type "file")
 	  (setq thefile
@@ -1201,33 +1239,46 @@ MAY-INLINE-P allows inlining it as an image."
    (expand-file-name
     (concat (sha1 file-name) "." (file-name-extension file-name)) "Pictures")))
 
-(defun org-export-odt-format-image (src href)
+(defun org-export-odt-format-image (src href &optional embed-as)
   "Create image tag with source and attributes."
   (save-match-data
     (let* ((caption (org-find-text-property-in-string 'org-caption src))
 	   (caption (and caption (org-xml-format-desc caption)))
 	   (attr (org-find-text-property-in-string 'org-attributes src))
 	   (label (org-find-text-property-in-string 'org-label src))
-	   (embed-as (if (string-match "^ltxpng/" src) 'character 'paragraph))
+	   (embed-as (or embed-as
+			 (if (org-find-text-property-in-string
+			      'org-latex-src src)
+			     (or (org-find-text-property-in-string
+				  'org-latex-src-embed-type src) 'character)
+			   'paragraph)))
 	   (attr-plist (when attr (read  attr)))
 	   (size (org-odt-image-size-from-file
 		  src (plist-get attr-plist :width)
 		  (plist-get attr-plist :height)
 		  (plist-get attr-plist :scale) nil embed-as)))
       (org-export-odt-do-format-image
-       embed-as caption attr label size href))))
+       embed-as caption attr label (car size) (cdr size) href))))
 
-(defun org-odt-format-textbox (text style)
-  (let ((draw-frame-pair
-	 '("<draw:frame draw:style-name=\"%s\"
-              text:anchor-type=\"paragraph\"
-              style:rel-width=\"100%%\"
-              draw:z-index=\"0\">" . "</draw:frame>")))
+(defun org-odt-format-frame (text style &optional
+				  width height extra anchor-type)
+  (let ((frame-attrs
+	 (concat
+	  (if width (format " svg:width=\"%0.2fcm\"" width) "")
+	  (if height (format " svg:height=\"%0.2fcm\"" height) "")
+	  extra
+	  (format " text:anchor-type=\"%s\"" (or anchor-type "paragraph")))))
     (org-odt-format-tags
-     draw-frame-pair
-     (org-odt-format-tags
-      '("<draw:text-box fo:min-height=\"%dcm\">" . "</draw:text-box>")
-      text 0) style)))
+     '("<draw:frame draw:style-name=\"%s\"%s>" . "</draw:frame>")
+     text style frame-attrs)))
+
+(defun org-odt-format-textbox (text style &optional width height extra)
+  (org-odt-format-frame
+   (org-odt-format-tags
+    '("<draw:text-box %s>" . "</draw:text-box>")
+    text (concat (format " fo:min-height=\"%0.2fcm\"" (or height .2))
+		 (format " fo:min-width=\"%0.2fcm\"" (or width .2))))
+   style width nil extra))
 
 (defun org-odt-format-inlinetask (heading content
 					  &optional todo priority tags)
@@ -1238,103 +1289,56 @@ MAY-INLINE-P allows inlining it as an image."
 		 (org-lparse-format
 		  'HEADLINE (concat (org-lparse-format-todo todo) " " heading)
 		  nil tags))
-		content) "OrgInlineTaskFrame")))
-
+		content) "OrgInlineTaskFrame" nil nil " style:rel-width=\"100%\"")))
 (defun org-export-odt-do-format-image (embed-as caption attr label
-						size href)
+						width height href)
   "Create image tag with source and attributes."
   (save-match-data
-    (let ((width (car size)) (height (cdr size))
-	  (draw-frame-pair
-	   '("<draw:frame draw:style-name=\"%s\"
-              text:anchor-type=\"%s\"
-              draw:z-index=\"%d\" %s>" . "</draw:frame>")))
-      (cond
-       ((and (not caption) (not label))
-	(let (style-name anchor-type)
-	  (cond
-	   ((eq embed-as 'paragraph)
-	    (setq style-name  "OrgGraphicsParagraph" anchor-type "paragraph"))
-	   ((eq embed-as 'character)
-	    (setq style-name  "OrgGraphicsBaseline" anchor-type "as-char")))
-	  (org-odt-format-tags
-	   draw-frame-pair href style-name anchor-type 0
-	   (org-odt-image-attrs-from-size width height))))
+    (cond
+     ((and (not caption) (not label))
+      (let (style-name anchor-type)
+	(case embed-as
+	  (paragraph
+	   (setq style-name  "OrgSimpleGraphics" anchor-type "paragraph"))
+	  (character
+	   (setq style-name  "OrgInlineGraphics" anchor-type "as-char"))
+	  (t
+	   (error "Unknown value for embed-as %S" embed-as)))
+	(org-odt-format-frame href style-name width height nil anchor-type)))
+     (t
+      (concat
+       (org-odt-format-textbox
+	(org-odt-format-stylized-paragraph
+	 'illustration
+	 (concat
+	  (let ((extra " style:rel-width=\"100%\" style:rel-height=\"scale\""))
+	    (org-odt-format-frame
+	     href "OrgCaptionedGraphics" width height extra "paragraph"))
+	  (org-odt-format-entity-caption label caption)))
+	"OrgCaptionFrame" width height))))))
 
-       (t
-	(concat
-	 ;; (when par-open (org-odt-close-par))
-	 (org-odt-format-tags
-	  draw-frame-pair
-	  (org-odt-format-tags
-	   '("<draw:text-box fo:min-height=\"%dcm\">" . "</draw:text-box>")
-	   (org-odt-format-stylized-paragraph
-	    'illustration
-	    (concat
-	     (let ((extra " style:rel-width=\"100%\" style:rel-height=\"scale\""))
-	       (org-odt-format-tags
-		draw-frame-pair href "OrgGraphicsParagraphContent" "paragraph" 2
-		(concat (org-odt-image-attrs-from-size width height) extra)))
-	     (org-odt-format-entity-caption label caption)))
-	   height)
-	  "OrgFrame" "paragraph" 1
-	  (org-odt-image-attrs-from-size width))
-
-	 ;; (when par-open (org-odt-open-par))
-	 ))))))
-
-;; xml files generated on-the-fly
-(defconst org-export-odt-save-list
-  '("mimetype" "META-INF/manifest.xml" "content.xml" "meta.xml" "styles.xml"))
-
-;; xml files that are copied
-(defconst org-export-odt-nosave-list '())
-
-;; xml files that contribute to the final odt file
-(defvar org-export-odt-file-list nil)
-
-(defconst org-export-odt-manifest-lines
-  '(("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-     "<manifest:manifest xmlns:manifest=\"urn:oasis:names:tc:opendocument:xmlns:manifest:1.0\" manifest:version=\"1.2\">"
-     "<manifest:file-entry manifest:media-type=\"application/vnd.oasis.opendocument.text\" manifest:version=\"1.2\" manifest:full-path=\"/\"/>"
-     "<manifest:file-entry manifest:media-type=\"text/xml\" manifest:full-path=\"content.xml\"/>"
-     "<manifest:file-entry manifest:media-type=\"text/xml\" manifest:full-path=\"styles.xml\"/>"
-     "<manifest:file-entry manifest:media-type=\"text/xml\" manifest:full-path=\"meta.xml\"/>"
-     "<manifest:file-entry manifest:media-type=\"\" manifest:full-path=\"Pictures/\"/>") . ("</manifest:manifest>")))
-
-(defconst org-export-odt-meta-lines
-  '(("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-     "<office:document-meta"
-     "    xmlns:office=\"urn:oasis:names:tc:opendocument:xmlns:office:1.0\""
-     "    xmlns:xlink=\"http://www.w3.org/1999/xlink\""
-     "    xmlns:dc=\"http://purl.org/dc/elements/1.1/\""
-     "    xmlns:meta=\"urn:oasis:names:tc:opendocument:xmlns:meta:1.0\""
-     "    xmlns:ooo=\"http://openoffice.org/2004/office\" "
-     "    office:version=\"1.2\">"
-     "  <office:meta>") . ("  </office:meta>" "</office:document-meta>")))
-
-(defun org-odt-copy-image-file (path &optional target-file)
+(defvar org-odt-embedded-images-count 0)
+(defun org-odt-copy-image-file (path)
   "Returns the internal name of the file"
   (let* ((image-type (file-name-extension path))
 	 (media-type (format "image/%s" image-type))
 	 (src-file (expand-file-name
 		    path (file-name-directory org-current-export-file)))
-	 (target-file (or target-file (org-odt-get-image-name src-file)))
-	 ;; FIXME
-	 (body-only nil))
-
+	 (target-dir "Images/")
+	 (target-file
+	  (format "%s%04d.%s" target-dir
+		  (incf org-odt-embedded-images-count) image-type)))
     (when (not org-lparse-to-buffer)
       (message "Embedding %s as %s ..."
 	       (substring-no-properties path) target-file)
-      (copy-file src-file target-file 'overwrite)
-      (org-odt-update-manifest-file media-type target-file)
-      (push target-file org-export-odt-file-list)) target-file))
 
-(defun org-odt-image-attrs-from-size (&optional width height)
-  (concat
-   (when width (format "svg:width=\"%0.2fcm\""  width))
-   " "
-   (when height (format "svg:height=\"%0.2fcm\""  height))))
+      (when (= 1 org-odt-embedded-images-count)
+	(make-directory target-dir)
+	(org-odt-create-manifest-file-entry "" target-dir))
+
+      (copy-file src-file target-file 'overwrite)
+      (org-odt-create-manifest-file-entry media-type target-file))
+    target-file))
 
 (defvar org-export-odt-image-size-probe-method
   '(emacs imagemagick force)
@@ -1422,57 +1426,20 @@ MAY-INLINE-P allows inlining it as an image."
 (defun org-odt-init-outfile (filename)
   (unless (executable-find "zip")
     ;; Not at all OSes ship with zip by default
-    (error "Executable \"zip\" needed for creating OpenDocument files. Aborting."))
+    (error "Executable \"zip\" needed for creating OpenDocument files"))
 
   (let* ((outdir (make-temp-file org-export-odt-tmpdir-prefix t))
-	 (mimetype-file (expand-file-name "mimetype" outdir))
-	 (content-file (expand-file-name "content.xml" outdir))
-	 (manifest-file (expand-file-name "META-INF/manifest.xml" outdir))
-	 (meta-file (expand-file-name "meta.xml" outdir))
-	 (styles-file (expand-file-name "styles.xml" outdir))
-	 (pictures-dir (expand-file-name "Pictures" outdir))
-	 (body-only nil))
+	 (content-file (expand-file-name "content.xml" outdir)))
 
-    ;; content file
-    (with-current-buffer (find-file-noselect content-file t)
-      (erase-buffer))
+    ;; init conten.xml
+    (with-current-buffer (find-file-noselect content-file t))
 
-    ;; FIXME: How to factor in body-only here
-    (unless body-only
-      ;; manifest file
-      (make-directory (file-name-directory manifest-file))
-      (with-current-buffer (find-file-noselect manifest-file t)
-	(erase-buffer)
-	(insert (mapconcat 'identity (car org-export-odt-manifest-lines) "\n"))
-	(insert "\n")
-	(save-excursion
-	  (insert (mapconcat 'identity (cdr org-export-odt-manifest-lines) "\n"))))
+    ;; reset variables
+    (setq org-odt-manifest-file-entries nil
+	  org-odt-embedded-images-count 0
+	  org-odt-embedded-formulas-count 0)
 
-    ;; meta file
-    (with-current-buffer (find-file-noselect meta-file t)
-      (erase-buffer)
-      (insert (mapconcat 'identity (car org-export-odt-meta-lines) "\n"))
-      (insert "\n")
-      (save-excursion
-	(insert (mapconcat 'identity (cdr org-export-odt-meta-lines) "\n"))))
-
-    ;; mimetype
-    (with-current-buffer (find-file-noselect mimetype-file t)
-      (insert "application/vnd.oasis.opendocument.text"))
-
-    ;; styles file
-    ;; (copy-file org-export-odt-styles-file styles-file t)
-
-    ;; Pictures dir
-    (make-directory pictures-dir)
-
-    ;; initialize list of files that contribute to the odt file
-    (setq org-export-odt-file-list
-	  (append org-export-odt-save-list org-export-odt-nosave-list)))
     content-file))
-
-(defconst org-odt-manifest-file-entry-tag
-  "<manifest:file-entry manifest:media-type=\"%s\" manifest:full-path=\"%s\"/>")
 
 (defcustom org-export-odt-prettify-xml nil
   "Specify whether or not the xml output should be prettified.
@@ -1485,6 +1452,10 @@ visually."
 
 (defvar hfy-user-sheet-assoc)		; bound during org-do-lparse
 (defun org-odt-save-as-outfile (target opt-plist)
+  ;; create mimetype file
+  (write-region "application/vnd.oasis.opendocument.text" nil
+		(expand-file-name "mimetype"))
+
   ;; write meta file
   (org-odt-update-meta-file opt-plist)
 
@@ -1517,7 +1488,18 @@ visually."
       (format " %s\n" (cddr style)))
     hfy-user-sheet-assoc ""))
 
-  (let ((zipdir default-directory))
+  ;; create a manifest entry for content.xml
+  (org-odt-create-manifest-file-entry
+   "application/vnd.oasis.opendocument.text" "/" "1.2")
+
+  (org-odt-create-manifest-file-entry "text/xml" "content.xml")
+
+  ;; write out the manifest entries before zipping
+  (org-odt-write-manifest-file)
+
+  (let ((xml-files '("mimetype" "META-INF/manifest.xml" "content.xml"
+		     "meta.xml" "styles.xml"))
+	(zipdir default-directory))
     (message "Switching to directory %s" (expand-file-name zipdir))
 
     ;; save all xml files
@@ -1527,8 +1509,8 @@ visually."
 	      ;; prettify output if needed
 	      (when org-export-odt-prettify-xml
 		(indent-region (point-min) (point-max)))
-	      (save-buffer)))
-	  org-export-odt-save-list)
+	      (save-buffer 0)))
+	  xml-files)
 
     (let* ((target-name (file-name-nondirectory target))
 	   (target-dir (file-name-directory target))
@@ -1556,7 +1538,7 @@ visually."
       (mapc (lambda (file)
 	      (kill-buffer
 	       (find-file-noselect (expand-file-name file zipdir) t)))
-	    org-export-odt-save-list)
+	    xml-files)
 
       (delete-directory zipdir)))
 
@@ -1587,39 +1569,75 @@ visually."
       date)
      (t
       ;; ISO 8601 format
-      (format-time-string "%Y-%m-%dT%T%:z")))))
+      (let ((stamp (format-time-string "%Y-%m-%dT%H:%M:%S%z")))
+	(format "%s:%s" (substring stamp 0 -2) (substring stamp -2)))))))
+
+(defconst org-odt-manifest-file-entry-tag
+  "
+<manifest:file-entry manifest:media-type=\"%s\" manifest:full-path=\"%s\"%s/>")
+
+(defvar org-odt-manifest-file-entries nil)
+
+(defun org-odt-create-manifest-file-entry (&rest args)
+  (push args org-odt-manifest-file-entries))
+
+(defun org-odt-write-manifest-file ()
+  (make-directory "META-INF")
+  (let ((manifest-file (expand-file-name "META-INF/manifest.xml")))
+    (write-region
+     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+     <manifest:manifest xmlns:manifest=\"urn:oasis:names:tc:opendocument:xmlns:manifest:1.0\" manifest:version=\"1.2\">\n"
+     nil manifest-file)
+    (mapc
+     (lambda (file-entry)
+       (let* ((version (nth 2 file-entry))
+	      (extra (if version
+			 (format  " manifest:version=\"%s\"" version)
+		       "")))
+	 (write-region
+	  (format org-odt-manifest-file-entry-tag
+		  (nth 0 file-entry) (nth 1 file-entry) extra)
+	  nil manifest-file t))) org-odt-manifest-file-entries)
+    (write-region "\n</manifest:manifest>" nil manifest-file t)))
 
 (defun org-odt-update-meta-file (opt-plist)
-  (with-current-buffer
-      (find-file-noselect (expand-file-name "meta.xml") t)
-    (let ((date (org-odt-format-date (plist-get opt-plist :date)))
-	  (author (or (plist-get opt-plist :author) ""))
-	  (email (plist-get opt-plist :email))
-	  (keywords (plist-get opt-plist :keywords))
-	  (description (plist-get opt-plist :description))
-	  (title (plist-get opt-plist :title)))
+  (let ((date (org-odt-format-date (plist-get opt-plist :date)))
+	(author (or (plist-get opt-plist :author) ""))
+	(email (plist-get opt-plist :email))
+	(keywords (plist-get opt-plist :keywords))
+	(description (plist-get opt-plist :description))
+	(title (plist-get opt-plist :title)))
 
-      (insert
-       "\n"
-       (org-odt-format-tags '("<dc:creator>" . "</dc:creator>") author)
-       (org-odt-format-tags
-	'("\n<meta:initial-creator>" . "</meta:initial-creator>") author)
-       (org-odt-format-tags '("\n<dc:date>" . "</dc:date>") date)
-       (org-odt-format-tags
-	'("\n<meta:creation-date>" . "</meta:creation-date>") date)
-       (org-odt-format-tags '("\n<meta:generator>" . "</meta:generator>")
-			     (when org-export-creator-info
-			       (format "Org-%s/Emacs-%s"
-				       org-version emacs-version)))
-       (org-odt-format-tags '("\n<meta:keyword>" . "</meta:keyword>") keywords)
-       (org-odt-format-tags '("\n<dc:subject>" . "</dc:subject>") description)
-       (org-odt-format-tags '("\n<dc:title>" . "</dc:title>") title)
-       "\n"))))
+    (write-region
+     (concat
+      "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+     <office:document-meta
+         xmlns:office=\"urn:oasis:names:tc:opendocument:xmlns:office:1.0\"
+         xmlns:xlink=\"http://www.w3.org/1999/xlink\"
+         xmlns:dc=\"http://purl.org/dc/elements/1.1/\"
+         xmlns:meta=\"urn:oasis:names:tc:opendocument:xmlns:meta:1.0\"
+         xmlns:ooo=\"http://openoffice.org/2004/office\"
+         office:version=\"1.2\">
+       <office:meta>" "\n"
+      (org-odt-format-tags '("<dc:creator>" . "</dc:creator>") author)
+      (org-odt-format-tags
+       '("\n<meta:initial-creator>" . "</meta:initial-creator>") author)
+      (org-odt-format-tags '("\n<dc:date>" . "</dc:date>") date)
+      (org-odt-format-tags
+       '("\n<meta:creation-date>" . "</meta:creation-date>") date)
+      (org-odt-format-tags '("\n<meta:generator>" . "</meta:generator>")
+			   (when org-export-creator-info
+			     (format "Org-%s/Emacs-%s"
+				     org-version emacs-version)))
+      (org-odt-format-tags '("\n<meta:keyword>" . "</meta:keyword>") keywords)
+      (org-odt-format-tags '("\n<dc:subject>" . "</dc:subject>") description)
+      (org-odt-format-tags '("\n<dc:title>" . "</dc:title>") title)
+      "\n"
+      "  </office:meta>" "</office:document-meta>")
+     nil (expand-file-name "meta.xml")))
 
-(defun org-odt-update-manifest-file (media-type full-path)
-  (with-current-buffer
-      (find-file-noselect (expand-file-name "META-INF/manifest.xml") t)
-    (insert (format org-odt-manifest-file-entry-tag media-type full-path))))
+  ;; create a manifest entry for meta.xml
+  (org-odt-create-manifest-file-entry "text/xml" "meta.xml"))
 
 (defun org-odt-finalize-outfile ()
   (org-odt-delete-empty-paragraphs))
@@ -1668,24 +1686,32 @@ visually."
 (defun org-export-odt-do-preprocess-latex-fragments ()
   "Convert LaTeX fragments to images."
   (let* ((latex-frag-opt (plist-get org-lparse-opt-plist :LaTeX-fragments))
-	 (latex-frag-opt-1		;  massage the options
+	 (latex-frag-opt		;  massage the options
 	  (or (and (member latex-frag-opt '(mathjax t))
+		   (not (and (fboundp 'org-format-latex-mathml-available-p)
+			     (org-format-latex-mathml-available-p)))
 		   (prog1 org-lparse-latex-fragment-fallback
 		     (org-lparse-warn
 		      (concat
-		       "Use of MathJax is incompatible with ODT exporter. "
+		       "LaTeX to MathML converter not available. "
 		       (format "Using %S instead."
 			       org-lparse-latex-fragment-fallback)))))
-	      latex-frag-opt)))
-    (when (and org-current-export-file latex-frag-opt-1)
-      ;; Investigate MathToWeb for converting TeX equations to MathML
-      ;; http://lists.gnu.org/archive/html/emacs-orgmode/2011-03/msg01755.html
+	      latex-frag-opt))
+	 cache-dir display-msg)
+    (cond
+     ((eq latex-frag-opt 'dvipng)
+      (setq cache-dir "ltxpng/")
+      (setq display-msg "Creating LaTeX image %s"))
+     ((member latex-frag-opt '(mathjax t))
+      (setq latex-frag-opt 'mathml)
+      (setq cache-dir "ltxmathml/")
+      (setq display-msg "Creating MathML formula %s")))
+    (when (and org-current-export-file)
       (org-format-latex
-       (concat "ltxpng/" (file-name-sans-extension
-			  (file-name-nondirectory
-			   org-current-export-file)))
-       org-current-export-dir nil "Creating LaTeX image %s"
-       nil nil latex-frag-opt-1))))
+       (concat cache-dir (file-name-sans-extension
+			  (file-name-nondirectory org-current-export-file)))
+       org-current-export-dir nil display-msg
+       nil nil latex-frag-opt))))
 
 (defun org-export-odt-preprocess-latex-fragments ()
   (when (equal org-export-current-backend 'odt)
@@ -1760,7 +1786,7 @@ visually."
 	 (when (org-file-image-p member)
 	   (let* ((image-type (file-name-extension member))
 		  (media-type (format "image/%s" image-type)))
-	     (org-odt-update-manifest-file media-type member))))
+	     (org-odt-create-manifest-file-entry media-type member))))
        members)))
    ((and (stringp styles-file) (file-exists-p styles-file))
     (let ((styles-file-type (file-name-extension styles-file)))
@@ -1771,7 +1797,10 @@ visually."
 	(org-odt-zip-extract styles-file "styles.xml")))))
    (t
     (error (format "Invalid specification of styles.xml file: %S"
-		   org-export-odt-styles-file)))))
+		   org-export-odt-styles-file))))
+
+  ;; create a manifest entry for styles.xml
+  (org-odt-create-manifest-file-entry "text/xml" "styles.xml"))
 
 (defvar org-export-odt-factory-settings
   "d4328fb9d1b6cb211d4320ff546829f26700dc5e"

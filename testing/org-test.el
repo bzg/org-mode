@@ -16,27 +16,38 @@
 ;; called while in a `defun' all ert tests with names matching the
 ;; name of the function are run.
 
-;;; Prerequisites:
-
-;; ERT and jump.el are both included as git submodules, install with
-;;   $ git submodule init
-;;   $ git submodule update
+;;; Test Development
+;; For test development purposes a number of navigation and test
+;; function construction routines are available as a git submodule
+;; (jump.el)
+;; Install with...
+;; $ git submodule init
+;; $ git submodule update
 
 
 ;;;; Code:
-(let* ((org-test-dir (expand-file-name
+(let ((org-test-dir (expand-file-name
 		      (file-name-directory
-		       (or load-file-name buffer-file-name))))
-       (load-path (cons
-		   (expand-file-name "ert" org-test-dir)
-		   (cons
-		    (expand-file-name "jump" org-test-dir)
-		    load-path))))
-  (require 'ert)
-  (require 'ert-x)
-  (require 'jump)
-  (require 'which-func)
-  (require 'org))
+		       (or load-file-name buffer-file-name)))))
+   (let ((org-lisp-dir (expand-file-name
+   		       (concat org-test-dir "../lisp"))))
+     (unless (member 'features "org")
+       (setq load-path (cons org-lisp-dir load-path))
+       (org-babel-do-load-languages
+	'org-babel-load-languages '((sh . t)))))
+   (let* ((load-path (cons
+		     (expand-file-name "ert" org-test-dir)
+		     (cons
+		      (expand-file-name "jump" org-test-dir)
+		      load-path))))
+    (require 'cl)
+    (require 'ert)
+    (require 'ert-x)
+    (when (file-exists-p
+	   (expand-file-name "jump/jump.el" org-test-dir))
+      (require 'jump)
+      (require 'which-func))
+    (require 'org)))
 
 (defconst org-test-default-test-file-name "tests.el"
   "For each defun a separate file with tests may be defined.
@@ -129,6 +140,7 @@ files."
 
 
 ;;; Navigation Functions
+(when (featurep 'jump)
 (defjump org-test-jump
   (("lisp/\\1.el" . "testing/lisp/test-\\1.el")
    ("lisp/\\1.el" . "testing/lisp/\\1.el/test.*.el")
@@ -171,7 +183,7 @@ files."
        "  (should-error (error \"errr...\")))\n\n\n"
        "(provide '" name ")\n\n"
        ";;; " file-name " ends here\n") full-path))
-  (lambda () ((lambda (res) (if (listp res) (car res) res)) (which-function))))
+  (lambda () ((lambda (res) (if (listp res) (car res) res)) (which-function)))))
 
 (define-key emacs-lisp-mode-map "\M-\C-j" 'org-test-jump)
 
@@ -227,6 +239,14 @@ files."
 		 org-test-example-dir 'full
 		 "^\\([^.]\\|\\.\\([^.]\\|\\..\\)\\).*\\.org$"))
     (find-file file)))
+
+(defun org-test-run-batch-tests ()
+  "Run all defined tests matching \"\\(org\\|ob\\)\".
+Load all test files first."
+  (interactive)
+  (org-test-touch-all-examples)
+  (org-test-load)
+  (ert-run-tests-batch-and-exit "\\(org\\|ob\\)"))
 
 (defun org-test-run-all-tests ()
   "Run all defined tests matching \"\\(org\\|ob\\)\".

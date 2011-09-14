@@ -365,10 +365,10 @@ In Emacs 23, when `shift-select-mode' is on, shifted cursor keys
 start selecting a region, or enlarge regions started in this way.
 In Org-mode, in special contexts, these same keys are used for
 other purposes, important enough to compete with shift selection.
-Org tries to balance these needs by supporting `shift-select-mode' 
+Org tries to balance these needs by supporting `shift-select-mode'
 outside these special contexts, under control of this variable.
 
-The default of this variable is nil, to avoid confusing behavior.  Shifted 
+The default of this variable is nil, to avoid confusing behavior.  Shifted
 cursor keys will then execute Org commands in the following contexts:
 - on a headline, changing TODO state (left/right) and priority (up/down)
 - on a time stamp, changing the time
@@ -7346,39 +7346,20 @@ After top level, it switches back to sibling level."
 However, if any line in the current entry has no indentation, or if it
 would end up with no indentation after the change, nothing at all is done."
   (save-excursion
-    (let* ((end (save-excursion (outline-next-heading)
-				(point-marker)))
-	   ;; FIXME we should use `org-end-of-meta-data-and-drawers'
-	   ;; here but it matches misplaced :END:...
-	   (drawer-end (save-excursion
-			 (and (re-search-forward
-			       org-property-end-re end t)
-			      (match-end 0))))
-	   (prohibit (if (> diff 0)
-			 "^\\S-"
-		       (concat "^ \\{0," (int-to-string (- diff)) "\\}\\S-")))
-	   col)
-      (while (re-search-forward
-	      (concat "\\(" (regexp-opt org-all-time-keywords)
-		      "\\|" "^[ \t]*" org-tsr-regexp-both "*$"
-		      "\\|" "^[ \t]*:[a-zA-Z][a-zA-Z0-9_]*:.*$"
-		      "\\)") (or drawer-end end) t)
-	(beginning-of-line)
-	(when (looking-at "^[ \t]+")
+    (let ((end (save-excursion (outline-next-heading)
+			       (point-marker)))
+	  (prohibit (if (> diff 0)
+			"^\\S-"
+		      (concat "^ \\{0," (int-to-string (- diff)) "\\}\\S-")))
+	  col)
+      (unless (save-excursion (end-of-line 1)
+			      (re-search-forward prohibit end t))
+	(while (and (< (point) end)
+		    (re-search-forward "^[ \t]+" end t))
 	  (goto-char (match-end 0))
 	  (setq col (current-column))
 	  (if (< diff 0) (replace-match ""))
-	  (org-indent-to-column (+ diff col))
-	  (if drawer-end (setq drawer-end (+ diff drawer-end))))
-	(end-of-line))
-      (unless (save-excursion (end-of-line 1)
-      			      (re-search-forward prohibit end t))
-      	(while (and (< (point) end)
-      		    (re-search-forward "^[ \t]+" end t))
-      	  (goto-char (match-end 0))
-      	  (setq col (current-column))
-      	  (if (< diff 0) (replace-match ""))
-      	  (org-indent-to-column (+ diff col))))
+	  (org-indent-to-column (+ diff col))))
       (move-marker end nil))))
 
 (defun org-convert-to-odd-levels ()
@@ -9411,7 +9392,8 @@ application the system uses for this file type."
 	(save-excursion
 	  (when (or (org-in-regexp org-angle-link-re)
 		    (org-in-regexp org-plain-link-re))
-	    (setq type (match-string 1) path (match-string 2))
+	    (setq type (match-string 1)
+		  path (org-link-unescape (match-string 2)))
 	    (throw 'match t)))
 	(save-excursion
 	  (when (org-in-regexp (org-re "\\(:[[:alnum:]_@#%:]+\\):[ \t]*$"))
@@ -10018,8 +10000,8 @@ If the file does not exist, an error is thrown."
 				 match)
 			(progn (setq in-emacs (or in-emacs line search))
 			       nil))) ; if we have no match in apps-dlink,
-		                      ; always open the file in emacs if line or search
-		                      ; is given (for backwards compatibility)
+				      ; always open the file in emacs if line or search
+				      ; is given (for backwards compatibility)
 		    (assoc-default dfile (org-apps-regexp-alist apps a-m-a-p)
 				   'string-match)
 		    (cdr (assoc ext apps))
@@ -13707,7 +13689,7 @@ Being in this list makes sure that they are offered for completion.")
 
 (defsubst org-re-property (property)
   "Return a regexp matching PROPERTY.
-Match group 1 will be set to the value of the property."
+Match group 1 will be set to the value "
   (concat "^[ \t]*:" (regexp-quote property) ":[ \t]*\\(\\S-.*\\)"))
 
 (defun org-property-action ()
@@ -17108,7 +17090,7 @@ If not, return to the original position and throw an error."
 
 (defun org-speed-command-default-hook (keys)
   "Hook for activating single-letter speed commands.
-`org-speed-commands-default' specifies a minimal command set.  
+`org-speed-commands-default' specifies a minimal command set.
 Use `org-speed-commands-user' for further customization."
   (when (or (and (bolp) (looking-at org-outline-regexp))
 	    (and (functionp org-use-speed-commands)
@@ -20335,7 +20317,6 @@ If there is no such heading, return nil."
 	(unless (eobp) (backward-char 1)))
     ad-do-it))
 
-;; FIXME This should not match :END: for custom drawers?
 (defun org-end-of-meta-data-and-drawers ()
   "Jump to the first text after meta data and drawers in the current entry.
 This will move over empty lines, lines with planning time stamps,
@@ -20524,7 +20505,7 @@ if no description is present"
       (progn (org-remove-from-invisibility-spec '(org-link))
 	     (org-restart-font-lock)
 	     (setq org-descriptive-links nil))
-    (progn (add-to-invisibility-spec '(org-link)) 
+    (progn (add-to-invisibility-spec '(org-link))
 	   (org-restart-font-lock)
 	   (setq org-descriptive-links t))))
 

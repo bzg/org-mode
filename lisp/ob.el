@@ -159,6 +159,39 @@ not match KEY should be returned."
 	 (lambda (p) (when (funcall (if others #'not #'identity) (eq (car p) key)) p))
 	 params)))
 
+(defun org-babel-get-inline-src-block-matches()
+  "Set match data if within body of an inline source block.
+Returns non-nil if match-data set"
+  (let ((src-at-0-p (save-excursion
+		      (beginning-of-line 1)
+		      (string= "src" (thing-at-point 'word))))
+	(first-line-p (= 1 (line-number-at-pos)))
+	(orig (point)))
+    (let ((search-for (cond ((and src-at-0-p first-line-p  "src_"))
+			    (first-line-p "[ \t]src_")
+			    (t "[ \f\t\n\r\v]src_")))
+	  (lower-limit (if first-line-p
+			   nil
+			 (- (point-at-bol) 1))))
+      (save-excursion
+	(when (or (and src-at-0-p (bobp))
+		  (and (re-search-forward "}" (point-at-eol) t)
+		       (re-search-backward search-for lower-limit t)
+		       (> orig (point))))
+	  (when (looking-at org-babel-inline-src-block-regexp)
+	    t ))))))
+
+(defun org-babel-get-lob-one-liner-matches()
+  "Set match data if on line of an lob one liner.
+Returns non-nil if match-data set"
+
+  (save-excursion
+    (unless (= (point) (point-at-bol)) ;; move before inline block
+      (re-search-backward "[ \f\t\n\r\v]" nil t))
+    (if (looking-at org-babel-inline-lob-one-liner-regexp)
+	t
+      nil)))
+
 (defun org-babel-get-src-block-info (&optional light)
   "Get information on the current source block.
 
@@ -191,8 +224,7 @@ Returns a list
 			     (org-babel-ref-split-args (match-string 6)))
 		     (nth 2 info))))))
       ;; inline source block
-      (when (save-excursion (re-search-backward "[ \f\t\n\r\v]" nil t)
-			    (looking-at org-babel-inline-src-block-regexp))
+      (when (org-babel-get-inline-src-block-matches)
 	(setq info (org-babel-parse-inline-src-block-match))))
     ;; resolve variable references and add summary parameters
     (when (and info (not light))
@@ -989,9 +1021,10 @@ may be specified in the current buffer."
          (body (org-babel-clean-text-properties
 		(let* ((body (match-string 5))
 		       (sub-length (- (length body) 1)))
-		  (if (string= "\n" (substring body sub-length))
+		  (if (and (> sub-length 0)
+			   (string= "\n" (substring body sub-length)))
 		      (substring body 0 sub-length)
-		    body))))
+		    (or body "")))))
 	 (preserve-indentation (or org-src-preserve-indentation
 				   (string-match "-i\\>" switches))))
     (list lang
@@ -1334,6 +1367,8 @@ is created.  In both cases if the region is demarcated and if the
 region is not active then the point is demarcated."
   (interactive "P")
   (let ((info (org-babel-get-src-block-info 'light))
+	(headers (progn (org-babel-where-is-src-block-head)
+			(match-string 4)))
 	(stars (concat (make-string (or (org-current-level) 1) ?*) " ")))
     (if info
         (mapc
@@ -1346,11 +1381,16 @@ region is not active then the point is demarcated."
 				   (buffer-substring (point-at-bol)
 						     (point-at-eol)))
 		 (delete-region (point-at-bol) (point-at-eol)))
-               (insert (concat (if (looking-at "^") "" "\n")
-                               indent "#+end_src\n"
-                               (if arg stars indent) "\n"
-                               indent "#+begin_src " lang
-                               (if (looking-at "[\n\r]") "" "\n")))))
+               (insert (concat
+			(if (looking-at "^") "" "\n")
+			indent "#+end_src\n"
+			(if arg stars indent) "\n"
+			indent "#+begin_src " lang
+			(if (> (length headers) 1)
+			    (concat " " headers) headers)
+			(if (looking-at "[\n\r]")
+			    ""
+			  (concat "\n" (make-string (current-column) ? )))))))
 	   (move-end-of-line 2))
          (sort (if (region-active-p) (list (mark) (point)) (list (point))) #'>))
       (let ((start (point))
@@ -1380,10 +1420,8 @@ following the source block."
     (let* ((on-lob-line (save-excursion
 			  (beginning-of-line 1)
 			  (looking-at org-babel-lob-one-liner-regexp)))
-	   (inlinep (save-excursion
-		      (re-search-backward "[ \f\t\n\r\v]" nil t)
-		      (when (looking-at org-babel-inline-src-block-regexp)
-			(match-end 0))))
+	   (inlinep (when (org-babel-get-inline-src-block-matches)
+			(match-end 0)))
 	   (name (if on-lob-line
 		     (nth 0 (org-babel-lob-get-info))
 		   (nth 4 (or info (org-babel-get-src-block-info 'light)))))
@@ -1571,10 +1609,8 @@ code ---- the results are extracted in the syntax of the source
     (save-excursion
       (let* ((inlinep
 	      (save-excursion
-		(unless (= (point) (point-at-bol)) ;; move before inline block
-		  (re-search-backward "[ \f\t\n\r\v]" nil t))
-		(when (or (looking-at org-babel-inline-src-block-regexp)
-			  (looking-at org-babel-inline-lob-one-liner-regexp))
+		(when (or (org-babel-get-inline-src-block-matches)
+			  (org-babel-get-lob-one-liner-matches))
 		  (goto-char (match-end 0))
 		  (insert (if (listp result) "\n" " "))
 		  (point))))
@@ -1632,6 +1668,7 @@ code ---- the results are extracted in the syntax of the source
 			   '(:fmt (lambda (cell) (format "%s" cell)))) "\n"))
 	  (goto-char beg) (when (org-at-table-p) (org-table-align)))
 	 ((member "file" result-params)
+	  (when inlinep (goto-char inlinep))
 	  (insert result))
 	 (t (goto-char beg) (insert result)))
 	(when (listp result) (goto-char (org-table-end)))
@@ -1807,12 +1844,16 @@ parameters when merging lists."
 				       vars))
 			      vars)
 			    (list (cons name pair))))
-		   ;; if no name is given, then assign to variables in order
-		   (prog1 (setf (cddr (nth variable-index vars))
-				(concat (symbol-name
-					 (car (nth variable-index vars)))
-					"=" (cdr pair)))
-		     (incf variable-index)))))
+		   ;; if no name is given and we already have named variables
+		   ;; then assign to named variables in order
+		   (if (and vars (nth variable-index vars))
+		       (prog1 (setf (cddr (nth variable-index vars))
+				    (concat (symbol-name
+					     (car (nth variable-index vars)))
+					    "=" (cdr pair)))
+			 (incf variable-index))
+		     (error "variable \"%s\" must be assigned a default value"
+			    (cdr pair))))))
 	      (:results
 	       (setq results (e-merge results-exclusive-groups
 				      results

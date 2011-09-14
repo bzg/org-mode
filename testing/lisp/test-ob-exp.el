@@ -50,7 +50,7 @@
 			  (buffer-string))))
   (when (get-buffer "*Org HTML Export*") (kill-buffer "*Org HTML Export*")))
 
-(ert-deftest test-ob-exp/org-babel-exp-src-blocks/w-no-headers ()
+(ert-deftest test-ob-exp/org-babel-exp-src-blocks/w-no-headers2 ()
   "Testing export without any headlines in the org-mode file."
   (let ((html-file (concat (file-name-sans-extension
 			    org-test-link-in-heading-file)
