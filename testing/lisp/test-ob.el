@@ -409,6 +409,18 @@
       (should (string= (concat test-line " =\"x\"=")
 		       (buffer-substring-no-properties (point-min) (point-max)))))))
 
+(ert-deftest test-org-babel/combining-scalar-and-raw-result-types ()
+  (flet ((next-result ()
+		      (org-babel-next-src-block)
+		      (org-babel-execute-src-block)
+		      (goto-char (org-babel-where-is-src-block-result))
+		      (forward-line 1)))
+    (org-test-at-id "a73a2ab6-b8b2-4c0e-ae7f-23ad14eab7bc"
+      (next-result)
+      (should (org-babel-in-example-or-verbatim))
+      (next-result)
+      (should (not (org-babel-in-example-or-verbatim))))))
+
 (provide 'test-ob)
 
 ;;; test-ob ends here
