@@ -1803,8 +1803,8 @@ Later elements of PLISTS override the values of previous elements.
 This takes into account some special considerations for certain
 parameters when merging lists."
   (let ((results-exclusive-groups
-	 '(("file" "list" "vector" "table" "scalar" "verbatim" "raw" "org"
-            "html" "latex" "code" "pp" "wrap")
+	 '(("file" "list" "vector" "table" "scalar" "verbatim")
+	   ("raw" "org" "html" "latex" "code" "pp" "wrap")
 	   ("replace" "silent" "append" "prepend")
 	   ("output" "value")))
 	(exports-exclusive-groups
