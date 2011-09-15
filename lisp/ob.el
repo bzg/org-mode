@@ -220,8 +220,15 @@ Returns a list
 	    (when (match-string 6)
 	      (setf (nth 2 info) ;; merge functional-syntax vars and header-args
 		    (org-babel-merge-params
-		     (mapcar (lambda (ref) (cons :var ref))
-			     (org-babel-ref-split-args (match-string 6)))
+		     (mapcar
+		      (lambda (ref) (cons :var ref))
+		      (mapcar
+		       (lambda (var) ;; check that each variable is initialized
+			 (unless (string-match ".+=.+" var)
+			   (error
+			    "variable \"%s\"%s must be assigned a default value"
+			    var (if name (format " in block \"%s\"" name) ""))))
+		       (org-babel-ref-split-args (match-string 6))))
 		     (nth 2 info))))))
       ;; inline source block
       (when (org-babel-get-inline-src-block-matches)
