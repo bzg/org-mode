@@ -550,6 +550,7 @@ arguments and pop open the results in a preview buffer."
   (interactive)
   ;; TODO: report malformed code block
   ;; TODO: report incompatible combinations of header arguments
+  ;; TODO: report uninitialized variables
   (let ((too-close 2)) ;; <- control closeness to report potential match
     (dolist (header (mapcar (lambda (arg) (substring (symbol-name (car arg)) 1))
 			    (and (org-babel-where-is-src-block-head)
