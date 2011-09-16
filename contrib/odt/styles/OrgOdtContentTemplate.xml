@@ -111,8 +111,8 @@
 	<text:sequence-decl text:display-outline-level="0" text:name="Text"/>
 	<text:sequence-decl text:display-outline-level="0" text:name="Drawing"/>
 	<text:sequence-decl text:display-outline-level="0" text:name="Equation"/>
+	<text:sequence-decl text:display-outline-level="0" text:name="Figure"/>
       </text:sequence-decls>
-
     </office:text>
   </office:body>
 </office:document-content>

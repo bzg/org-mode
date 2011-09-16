@@ -31,6 +31,8 @@
 (require 'org-lparse)
 
 (defun org-odt-end-export ()
+  (org-odt-fixup-label-references)
+
   ;; remove empty paragraphs
   (goto-char (point-min))
   (while (re-search-forward
@@ -1204,7 +1206,7 @@ value of `org-export-odt-use-htmlfontify."
 	  (let ((extra ""))
 	    (org-odt-format-frame
 	     href "" width height extra "paragraph"))
-	  (org-odt-format-entity-caption label caption)))
+	  (org-odt-format-entity-caption label caption "Equation")))
 	"OrgCaptionFrame" width height))))))
 
 (defun org-export-odt-format-formula (src href &optional embed-as)
@@ -1465,7 +1467,7 @@ MAY-INLINE-P allows inlining it as an image."
 	  (let ((extra " style:rel-width=\"100%\" style:rel-height=\"scale\""))
 	    (org-odt-format-frame
 	     href "OrgCaptionedGraphics" width height extra "paragraph"))
-	  (org-odt-format-entity-caption label caption)))
+	  (org-odt-format-entity-caption label caption "Figure")))
 	"OrgCaptionFrame" width height))))))
 
 (defvar org-odt-embedded-images-count 0)
@@ -1552,22 +1554,105 @@ MAY-INLINE-P allows inlining it as an image."
      (t (ignore)))
     (cons width height)))
 
-(defvar org-odt-default-entity "Illustration")
-(defun org-odt-format-entity-caption (label caption &optional default-entity)
-  (if (not label) (or caption "")
-    (let* ((label-components (org-odt-parse-label label))
-	   (entity (car label-components))
-	   (seqno (cdr label-components))
-	   (caption (and caption (concat ": " caption))))
-      (unless seqno
-	(setq seqno label
-	      entity (or default-entity org-odt-default-entity)))
-      (concat
-       entity " "
-       (org-odt-format-tags
-	'("<text:sequence text:ref-name=\"%s\" text:name=\"%s\" text:formula=\"ooow:%s+1\" style:num-format=\"1\">" . "</text:sequence>")
-	seqno label entity entity)
-       caption))))
+(defvar org-odt-entity-labels-alist nil
+  "Associate Labels with the Labelled entities.
+Each element of the alist is of the form (LABEL-NAME
+CATEGORY-NAME SEQNO).  LABEL-NAME is same as that specified by
+\"#+LABEL: ...\" line.  CATEGORY-NAME is the type of the entity
+that LABEL-NAME is attached to.  CATEGORY-NAME can be one of
+\"Table\", \"Figure\" or \"Equation\".  SEQNO is the unique
+number assigned to the referenced entity on a per-CATEGORY basis.
+It is generated sequentially and is 1-based.
+
+Update this alist with `org-odt-add-label-definition' and
+retrieve an entry with `org-odt-get-label-definition'.")
+
+(defvar org-odt-entity-counts-plist nil
+  "Plist of running counters of SEQNOs for each of the CATEGORY-NAMEs.
+See `org-odt-entity-labels-alist' for known CATEGORY-NAMEs.")
+
+(defvar org-odt-label-def-ref-spec
+  '(;; ("Equation" "(%n)" "text" "(%n)")
+    ("" "%e %n%c" "category-and-value" "%e %n"))
+  "Specify how labels are applied and referenced.
+This is an alist where each element is of the form (CATEGORY-NAME
+LABEL-APPLY-FMT LABEL-REF-MODE LABEL-REF-FMT).  CATEGORY-NAME is
+as defined in `org-odt-entity-labels-alist'.  It can additionally
+be an empty string in which case it is used as a catch-all
+specifier.
+
+LABEL-APPLY-FMT is used for applying labels and captions.  It may
+contain following specifiers - %e, %n and %c.  %e is replaced
+with the CATEGORY-NAME.  %n is replaced with \"<text:sequence
+...> SEQNO </text:sequence>\".  %c is replaced with CAPTION. See
+`org-odt-format-label-definition'.
+
+LABEL-REF-MODE and LABEL-REF-FMT are used for generating the
+following label reference - \"<text:sequence-ref
+text:reference-format=\"LABEL-REF-MODE\" ...> LABEL-REF-FMT
+</text:sequence-ref>\".  LABEL-REF-FMT may contain following
+specifiers - %e and %n.  %e is replaced with the CATEGORY-NAME.  %n is
+replaced with SEQNO. See `org-odt-format-label-reference'.")
+
+(defun org-odt-add-label-definition (label category)
+  "Return (SEQNO . LABEL-APPLY-FMT).
+See `org-odt-label-def-ref-spec'."
+  (setq label (substring-no-properties label))
+  (let (seqno label-props fmt (category-sym (intern category)))
+    (setq seqno (1+ (plist-get org-odt-entity-counts-plist category-sym))
+	  org-odt-entity-counts-plist (plist-put org-odt-entity-counts-plist
+						 category-sym seqno)
+	  fmt (cadr (or (assoc-string category org-odt-label-def-ref-spec t)
+			(assoc-string "" org-odt-label-def-ref-spec t)))
+	  label-props (list label category seqno))
+    (push label-props org-odt-entity-labels-alist)
+    (cons seqno fmt)))
+
+(defun org-odt-get-label-definition (label)
+  "Return (LABEL-NAME CATEGORY-NAME SEQNO LABEL-REF-MODE LABEL-REF-FMT).
+See `org-odt-entity-labels-alist' and
+`org-odt-label-def-ref-spec'."
+  (let* ((label-props (assoc label org-odt-entity-labels-alist))
+	 (category (nth 1 label-props)))
+    (append label-props
+	    (cddr (or (assoc-string category org-odt-label-def-ref-spec t)
+		      (assoc-string "" org-odt-label-def-ref-spec t))))))
+
+(defun org-odt-format-label-definition (label category caption)
+  (assert label)
+  (let* ((label-props (org-odt-add-label-definition label category))
+	 (seqno (car label-props))
+	 (fmt (cdr label-props)))
+    (or (format-spec
+	 fmt
+	 `((?e . ,category)
+	   (?n . ,(org-odt-format-tags
+		   '("<text:sequence text:ref-name=\"%s\" text:name=\"%s\" text:formula=\"ooow:%s+1\" style:num-format=\"1\">" . "</text:sequence>")
+		   (format "%d" seqno) label category category))
+	   (?c . ,(or (and caption (concat ": " caption)) ""))))
+	caption "")))
+
+(defun org-odt-format-label-reference (label category seqno fmt1 fmt2)
+  (assert label)
+  (save-match-data
+    (org-odt-format-tags
+     '("<text:sequence-ref text:reference-format=\"%s\" text:ref-name=\"%s\">"
+       . "</text:sequence-ref>")
+     (format-spec fmt2 `((?e . ,category)
+			 (?n . ,(format "%d" seqno)))) fmt1 label)))
+
+(defun org-odt-fixup-label-references ()
+  (goto-char (point-min))
+  (while (re-search-forward
+	  "<text:sequence-ref text:ref-name=\"\\([^\"]+\\)\"/>" nil t)
+    (let* ((label (match-string 1)))
+      (replace-match
+       (apply 'org-odt-format-label-reference
+	      (org-odt-get-label-definition label)) t t))))
+
+(defun org-odt-format-entity-caption (label caption category)
+  (or (and label (org-odt-format-label-definition label category caption))
+      caption ""))
 
 (defun org-odt-format-tags (tag text &rest args)
   (let ((prefix (when org-lparse-encode-pending "@"))
@@ -1588,8 +1673,9 @@ MAY-INLINE-P allows inlining it as an image."
     ;; reset variables
     (setq org-odt-manifest-file-entries nil
 	  org-odt-embedded-images-count 0
-	  org-odt-embedded-formulas-count 0)
-
+	  org-odt-embedded-formulas-count 0
+	  org-odt-entity-labels-alist nil
+	  org-odt-entity-counts-plist (list 'Table 0 'Equation 0 'Figure 0))
     content-file))
 
 (defcustom org-export-odt-prettify-xml nil
@@ -1824,14 +1910,6 @@ visually."
     (CODING-SYSTEM-FOR-SAVE 'utf-8)
     (t (error "Unknown property: %s"  what))))
 
-(defun org-odt-parse-label (label)
-  (save-match-data
-    (if (not (string-match "\\`[a-zA-Z]+:\\(.+\\)" label))
-	(cons label nil)
-      (cons
-       (capitalize (substring label 0 (1- (match-beginning 1))))
-       (substring label (match-beginning 1))))))
-
 (defvar org-lparse-latex-fragment-fallback) ; set by org-do-lparse
 (defvar org-lparse-opt-plist)		    ; bound during org-do-lparse
 (defun org-export-odt-do-preprocess-latex-fragments ()
@@ -1873,16 +1951,18 @@ visually."
   (let (label label-components category value pretty-label)
     (while (re-search-forward "\\\\ref{\\([^{}\n]+\\)}" nil t)
       (org-if-unprotected-at (match-beginning 1)
-	(setq label (match-string 1)
-	      label-components (org-odt-parse-label label)
-	      category (car label-components)
-	      value (cdr label-components)
-	      pretty-label (if value (concat category " " value) label))
 	(replace-match
-	 (let ((org-lparse-encode-pending t))
+	 (let ((org-lparse-encode-pending t)
+	       (label (match-string 1)))
+	   ;; markup generated below is mostly an eye-candy.  At
+	   ;; pre-processing stage, there is no information on which
+	   ;; entity a label reference points to.  The actual markup
+	   ;; is generated as part of `org-odt-fixup-label-references'
+	   ;; which gets called at the fag end of export.  By this
+	   ;; time we would have seen and collected all the label
+	   ;; definitions in `org-odt-entity-labels-alist'.
 	   (org-odt-format-tags
-	    '("<text:sequence-ref text:reference-format=\"category-and-value\" text:ref-name=\"%s\">"
-	      . "</text:sequence-ref>") pretty-label label)) t t)))))
+	    "<text:sequence-ref text:ref-name=\"%s\"/>" "" label)) t t)))))
 
 ;; process latex fragments as part of
 ;; `org-export-preprocess-after-blockquote-hook'. Note that this hook
