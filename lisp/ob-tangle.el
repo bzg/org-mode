@@ -358,12 +358,14 @@ code blocks by language."
 		       (buffer-substring
 			(max (condition-case nil
 				 (save-excursion
-				   (org-back-to-heading t) (point))
-			       (error 0))
+				   (org-back-to-heading t)  ; sets match data
+				   (match-end 0))
+			       (error (point-min)))
 			     (save-excursion
-			       (re-search-backward
-				org-babel-src-block-regexp nil t)
-			       (match-end 0)))
+			       (if (re-search-backward
+				    org-babel-src-block-regexp nil t)
+				   (match-end 0)
+				 (point-min))))
 			(point)))))
 		   by-lang)
 	      ;; add the spec for this block to blocks under it's language
