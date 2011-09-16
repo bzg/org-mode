@@ -224,7 +224,8 @@ Returns a list
 		      (lambda (ref) (cons :var ref))
 		      (mapcar
 		       (lambda (var) ;; check that each variable is initialized
-			 (unless (string-match ".+=.+" var)
+			 (if (string-match ".+=.+" var)
+			     var
 			   (error
 			    "variable \"%s\"%s must be assigned a default value"
 			    var (if name (format " in block \"%s\"" name) ""))))
