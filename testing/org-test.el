@@ -31,7 +31,7 @@
 		       (or load-file-name buffer-file-name)))))
    (let ((org-lisp-dir (expand-file-name
    		       (concat org-test-dir "../lisp"))))
-     (unless (member 'features "org")
+     (unless (featurep 'org)
        (setq load-path (cons org-lisp-dir load-path))
        (org-babel-do-load-languages
 	'org-babel-load-languages '((sh . t)))))
