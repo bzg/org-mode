@@ -1,6 +1,6 @@
 ;;; test-ob.el --- tests for ob.el
 
-;; Copyright (c) 2010 Eric Schulte
+;; Copyright (c) 2010, 2011 Eric Schulte
 ;; Authors: Eric Schulte, Martyn Jago
 
 ;; Released under the GNU General Public License version 3
@@ -420,6 +420,15 @@
       (should (org-babel-in-example-or-verbatim))
       (next-result)
       (should (not (org-babel-in-example-or-verbatim))))))
+
+(ert-deftest test-org-babel/no-defaut-value-for-var ()
+  "Test that the absence of a default value for a variable DOES THROW
+  a proper error."
+  (org-test-at-id "f2df5ba6-75fa-4e6b-8441-65ed84963627"
+    (org-babel-next-src-block)
+    (let ((err
+	   (should-error (org-babel-execute-src-block) :type 'error)))
+      (should (equal '(error "variable \"x\" in block \"carre\" must be assigned a default value") err)))))
 
 (provide 'test-ob)
 
