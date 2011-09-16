@@ -308,15 +308,3 @@ src_sh{echo 2} blocks on the src_emacs-lisp{"same"} line
 #+results:
 [[file:./cv.cls]]
 
-* no default value for vars
-  :PROPERTIES:
-  :ID:       f2df5ba6-75fa-4e6b-8441-65ed84963627
-  :END:
-
-There is no default value assigned to =x= variable. This is not permitted
-anymore.
-
-#+source: carre(x)
-#+begin_src python
-  return x*x
-#+end_src
