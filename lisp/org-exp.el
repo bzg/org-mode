@@ -2731,7 +2731,7 @@ INDENT was the original indentation of the block."
 (defun org-export-number-lines (text &optional skip1 skip2 number cont
 				     replace-labels label-format)
   (setq skip1 (or skip1 0) skip2 (or skip2 0))
-  (if (not cont) (setq org-export-last-code-line-counter-value 0))
+  (if (and number (not cont)) (setq org-export-last-code-line-counter-value 0))
   (with-temp-buffer
     (insert text)
     (goto-char (point-max))
