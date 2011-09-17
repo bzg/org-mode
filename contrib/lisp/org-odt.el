@@ -1170,51 +1170,11 @@ value of `org-export-odt-use-htmlfontify."
 	       (org-odt-copy-image-file thefile) thelink))))
     (org-export-odt-format-image thefile href)))
 
-(defun org-export-odt-do-format-numbered-formula (embed-as caption attr label
-							   width height href)
-  (with-temp-buffer
-    (let ((org-lparse-table-colalign-info '((0 "c" "8") (0 "c" "1"))))
-      (org-lparse-insert-list-table
-       `((,(org-export-odt-do-format-formula ; caption and label
-					     ; should be nil
-	    embed-as nil attr nil width height href)
-	  ,(org-odt-format-entity-caption label caption "Equation")))
-       nil nil nil nil nil org-lparse-table-colalign-info))
-    (buffer-substring-no-properties (point-min) (point-max))))
-
-(defun org-export-odt-do-format-formula (embed-as caption attr label
-						  width height href)
-  "Create image tag with source and attributes."
-  (save-match-data
-    (cond
-     ((and (not caption) (not label))
-      (let (style-name anchor-type)
-	(case embed-as
-	  (paragraph
-	   (setq style-name  "OrgSimpleGraphics" anchor-type "paragraph"))
-	  (character
-	   (setq style-name  "OrgInlineGraphics" anchor-type "as-char"))
-	  (t
-	   (error "Unknown value for embed-as %S" embed-as)))
-	(org-odt-format-frame href style-name width height nil anchor-type)))
-     (t
-      (concat
-       (org-odt-format-textbox
-	(org-odt-format-stylized-paragraph
-	 'illustration
-	 (concat
-	  (let ((extra ""))
-	    (org-odt-format-frame
-	     href "" width height extra "paragraph"))
-	  (org-odt-format-entity-caption label caption "Equation")))
-	"OrgCaptionFrame" width height))))))
-
 (defun org-export-odt-format-formula (src href &optional embed-as)
   "Create image tag with source and attributes."
   (save-match-data
     (let* ((caption (org-find-text-property-in-string 'org-caption src))
 	   (caption (and caption (org-xml-format-desc caption)))
-	   (attr (org-find-text-property-in-string 'org-attributes src))
 	   (label (org-find-text-property-in-string 'org-label src))
 	   (embed-as (or embed-as
 			 (and (org-find-text-property-in-string
@@ -1222,11 +1182,20 @@ value of `org-export-odt-use-htmlfontify."
 			      (org-find-text-property-in-string
 			       'org-latex-src-embed-type src))
 			 'paragraph))
-	   (attr-plist (when attr (read  attr)))
-	   (width (plist-get attr-plist :width))
-	   (height (plist-get attr-plist :height)))
-      (org-export-odt-do-format-formula
-       embed-as caption attr label width height href))))
+	   width height)
+      (cond
+       ((eq embed-as 'character)
+	(org-odt-format-entity "InlineFormula" href width height))
+       (t
+	(org-lparse-end-paragraph)
+	(org-lparse-insert-list-table
+	 `((,(org-odt-format-entity
+	      (if caption "CaptionedDisplayFormula" "DisplayFormula")
+	      href width height caption nil)
+	    ,(if (not label) ""
+	       (org-odt-format-entity-caption label nil "Equation"))))
+	 nil nil nil "OrgEquation" nil '((1 "c" 8) (2 "c" 1)))
+	(throw 'nextline nil))))))
 
 (defvar org-odt-embedded-formulas-count 0)
 (defun org-odt-copy-formula-file (path)
@@ -1409,12 +1378,20 @@ MAY-INLINE-P allows inlining it as an image."
 	   (size (org-odt-image-size-from-file
 		  src (plist-get attr-plist :width)
 		  (plist-get attr-plist :height)
-		  (plist-get attr-plist :scale) nil embed-as)))
-      (org-export-odt-do-format-image
-       embed-as caption attr label (car size) (cdr size) href))))
+		  (plist-get attr-plist :scale) nil embed-as))
+	   (width (car size)) (height (cdr size)))
+      (cond
+       ((not (or caption label))
+	(case embed-as
+	  (paragraph (org-odt-format-entity "DisplayImage" href width height))
+	  (character (org-odt-format-entity "InlineImage" href width height))
+	  (t (error "Unknown value for embed-as %S" embed-as))))
+       (t
+	(org-odt-format-entity
+	 "CaptionedDisplayImage" href width height caption label))))))
 
-(defun org-odt-format-frame (text style &optional
-				  width height extra anchor-type)
+(defun org-odt-format-frame (text width height style &optional
+				  extra anchor-type)
   (let ((frame-attrs
 	 (concat
 	  (if width (format " svg:width=\"%0.2fcm\"" width) "")
@@ -1425,13 +1402,14 @@ MAY-INLINE-P allows inlining it as an image."
      '("<draw:frame draw:style-name=\"%s\"%s>" . "</draw:frame>")
      text style frame-attrs)))
 
-(defun org-odt-format-textbox (text style &optional width height extra)
+(defun org-odt-format-textbox (text width height style &optional
+				    extra anchor-type)
   (org-odt-format-frame
    (org-odt-format-tags
     '("<draw:text-box %s>" . "</draw:text-box>")
     text (concat (format " fo:min-height=\"%0.2fcm\"" (or height .2))
 		 (format " fo:min-width=\"%0.2fcm\"" (or width .2))))
-   style width nil extra))
+   width nil style extra anchor-type))
 
 (defun org-odt-format-inlinetask (heading content
 					  &optional todo priority tags)
@@ -1442,33 +1420,34 @@ MAY-INLINE-P allows inlining it as an image."
 		 (org-lparse-format
 		  'HEADLINE (concat (org-lparse-format-todo todo) " " heading)
 		  nil tags))
-		content) "OrgInlineTaskFrame" nil nil " style:rel-width=\"100%\"")))
-(defun org-export-odt-do-format-image (embed-as caption attr label
-						width height href)
-  "Create image tag with source and attributes."
-  (save-match-data
-    (cond
-     ((and (not caption) (not label))
-      (let (style-name anchor-type)
-	(case embed-as
-	  (paragraph
-	   (setq style-name  "OrgSimpleGraphics" anchor-type "paragraph"))
-	  (character
-	   (setq style-name  "OrgInlineGraphics" anchor-type "as-char"))
-	  (t
-	   (error "Unknown value for embed-as %S" embed-as)))
-	(org-odt-format-frame href style-name width height nil anchor-type)))
-     (t
-      (concat
-       (org-odt-format-textbox
-	(org-odt-format-stylized-paragraph
-	 'illustration
-	 (concat
-	  (let ((extra " style:rel-width=\"100%\" style:rel-height=\"scale\""))
-	    (org-odt-format-frame
-	     href "OrgCaptionedGraphics" width height extra "paragraph"))
-	  (org-odt-format-entity-caption label caption "Figure")))
-	"OrgCaptionFrame" width height))))))
+		content) nil nil "OrgInlineTaskFrame" " style:rel-width=\"100%\"")))
+
+(defvar org-odt-entity-frame-styles
+  '(("InlineImage" "Figure" ("OrgInlineImage" nil "as-char"))
+    ("DisplayImage" "Figure" ("OrgDisplayImage" nil "paragraph"))
+    ("CaptionedDisplayImage" "Figure"
+     ("OrgCaptionedImage"
+      " style:rel-width=\"100%\" style:rel-height=\"scale\"" "paragraph")
+     ("OrgImageCaptionFrame"))
+    ("InlineFormula" "Equation" ("OrgInlineFormula" nil "as-char"))
+    ("DisplayFormula" "Equation" ("OrgDisplayFormula" nil "as-char"))
+    ("CaptionedDisplayFormula" "Equation"
+     ("OrgCaptionedFormula" nil "paragraph")
+     ("OrgFormulaCaptionFrame" nil "as-char"))))
+
+(defun org-odt-format-entity (entity href width height &optional caption label)
+  (let* ((entity-style (assoc entity org-odt-entity-frame-styles))
+	 (entity-frame (apply 'org-odt-format-frame
+			      href width height (nth 2 entity-style))))
+    (if (not (or caption label)) entity-frame
+      (apply 'org-odt-format-textbox
+	     (org-odt-format-stylized-paragraph
+	      'illustration
+	      (concat entity-frame (org-odt-format-entity-caption
+				    label caption (nth 1 entity-style))))
+	     width height (nth 3 entity-style)))))
+
+
 
 (defvar org-odt-embedded-images-count 0)
 (defun org-odt-copy-image-file (path)
@@ -1572,7 +1551,7 @@ retrieve an entry with `org-odt-get-label-definition'.")
 See `org-odt-entity-labels-alist' for known CATEGORY-NAMEs.")
 
 (defvar org-odt-label-def-ref-spec
-  '(;; ("Equation" "(%n)" "text" "(%n)")
+  '(("Equation" "(%n)" "text" "(%n)")
     ("" "%e %n%c" "category-and-value" "%e %n"))
   "Specify how labels are applied and referenced.
 This is an alist where each element is of the form (CATEGORY-NAME
