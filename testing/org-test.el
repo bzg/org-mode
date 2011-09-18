@@ -4,9 +4,13 @@
 ;; Authors:
 ;;     Sebastian Rose, Hannover, Germany, sebastian_rose gmx de
 ;;     Eric Schulte, Santa Fe, New Mexico, USA, schulte.eric gmail com
+;;     David Maus, Brunswick, Germany, dmaus ictsoc de
 
 ;; Released under the GNU General Public License version 3
 ;; see: http://www.gnu.org/licenses/gpl-3.0.html
+
+;; Definition of `special-mode' copied from Emacs23's simple.el to be
+;; provide a testing environment for Emacs22.
 
 ;;;; Comments:
 
@@ -41,6 +45,25 @@
 		      (expand-file-name "jump" org-test-dir)
 		      load-path))))
     (require 'cl)
+    (when (= emacs-major-version 22)
+      (defvar special-mode-map
+	(let ((map (make-sparse-keymap)))
+	  (suppress-keymap map)
+	  (define-key map "q" 'quit-window)
+	  (define-key map " " 'scroll-up)
+	  (define-key map "\C-?" 'scroll-down)
+	  (define-key map "?" 'describe-mode)
+	  (define-key map "h" 'describe-mode)
+	  (define-key map ">" 'end-of-buffer)
+	  (define-key map "<" 'beginning-of-buffer)
+	  (define-key map "g" 'revert-buffer)
+	  (define-key map "z" 'kill-this-buffer)
+	  map))
+
+      (put 'special-mode 'mode-class 'special)
+      (define-derived-mode special-mode nil "Special"
+	"Parent major mode from which special major modes should inherit."
+	(setq buffer-read-only t)))
     (require 'ert)
     (require 'ert-x)
     (when (file-exists-p
