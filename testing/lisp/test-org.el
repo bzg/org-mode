@@ -82,7 +82,7 @@
   (should
    (string=
     "àâçèéêîôùû"
-    (org-link-unescape "%E0%E2%E7%E8%E9%EA%EE%F4%F9%FB"))))
+        (decode-coding-string (org-link-unescape "%E0%E2%E7%E8%E9%EA%EE%F4%F9%FB") 'latin-1))))
 
 (ert-deftest test-org/org-link-escape-url-with-escaped-char ()
   "Escape and unscape a URL that includes an escaped char.
