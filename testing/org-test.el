@@ -161,6 +161,23 @@ files."
      (re-search-forward (regexp-quote ,marker))
      ,@body))
 
+(defmacro org-test-with-temp-text (text &rest body)
+  "Run body in a temporary buffer with Org-mode as the active
+mode holding TEXT.  If the string \"<point>\" appears in TEXT
+then remove it and place the point there before running BODY."
+  (declare (indent 1))
+  `(with-temp-buffer
+     (org-mode)
+     ,(let ((point (string-match (regexp-quote "<point>") text)))
+	(if point
+	    `(progn
+	       (insert `(replace-match "" nil nil text))
+	       (goto-char ,(match-beginning 0)))
+	  `(progn
+	     (insert ,text)
+	     (goto-char (point-min)))))
+     ,@body))
+
 
 ;;; Navigation Functions
 (when (featurep 'jump)
