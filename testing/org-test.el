@@ -166,17 +166,16 @@ files."
 mode holding TEXT.  If the string \"<point>\" appears in TEXT
 then remove it and place the point there before running BODY."
   (declare (indent 1))
-  `(with-temp-buffer
-     (org-mode)
-     ,(let ((point (string-match (regexp-quote "<point>") text)))
-	(if point
-	    `(progn
-	       (insert `(replace-match "" nil nil text))
-	       (goto-char ,(match-beginning 0)))
-	  `(progn
-	     (insert ,text)
-	     (goto-char (point-min)))))
-     ,@body))
+  (let ((inside-text (if (stringp text) text (eval text))))
+    `(with-temp-buffer
+       (org-mode)
+       ,(let ((point (string-match (regexp-quote "<point>") inside-text)))
+	  (if point
+	      `(progn (insert `(replace-match "" nil nil inside-text))
+		      (goto-char ,(match-beginning 0)))
+	    `(progn (insert ,inside-text)
+		    (goto-char (point-min)))))
+       ,@body)))
 
 
 ;;; Navigation Functions
