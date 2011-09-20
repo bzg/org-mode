@@ -139,7 +139,7 @@ of the same value."
       (format "integer, parameter  ::  %S = %S\n" var val))
      ((floatp val)
       (format "real, parameter ::  %S = %S\n" var val))
-     ((or (characterp val))
+     ((or (integerp val))
       (format "character, parameter :: %S = '%S'\n" var val))
      ((stringp val)
       (format "character(len=%d), parameter ::  %S = '%s'\n"

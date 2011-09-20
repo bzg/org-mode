@@ -289,3 +289,22 @@ src_sh{echo "One"} block at start of line
  One spaced block in  src_sh{ echo "middle" } of line 
 src_sh{echo 2} blocks on the src_emacs-lisp{"same"} line
  Inline block with src_sh[:results silent]{ echo "parameters" }.
+* returning file names -- interpreted as lists
+  :PROPERTIES:
+  :ID:       a73a2ab6-b8b2-4c0e-ae7f-23ad14eab7bc
+  :END:
+
+#+begin_src sh :results scalar
+  echo "[[file:./cv.cls]]"
+#+end_src
+
+#+results:
+: [[file:./cv.cls]]
+
+#+begin_src sh :results raw scalar
+   echo "[[file:./cv.cls]]"
+#+end_src
+
+#+results:
+[[file:./cv.cls]]
+

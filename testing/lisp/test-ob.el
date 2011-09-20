@@ -1,6 +1,6 @@
 ;;; test-ob.el --- tests for ob.el
 
-;; Copyright (c) 2010 Eric Schulte
+;; Copyright (c) 2010, 2011 Eric Schulte
 ;; Authors: Eric Schulte, Martyn Jago
 
 ;; Released under the GNU General Public License version 3
@@ -408,6 +408,27 @@
       (goto-char (point-min)) (org-ctrl-c-ctrl-c)
       (should (string= (concat test-line " =\"x\"=")
 		       (buffer-substring-no-properties (point-min) (point-max)))))))
+
+(ert-deftest test-org-babel/combining-scalar-and-raw-result-types ()
+  (flet ((next-result ()
+		      (org-babel-next-src-block)
+		      (org-babel-execute-src-block)
+		      (goto-char (org-babel-where-is-src-block-result))
+		      (forward-line 1)))
+    (org-test-at-id "a73a2ab6-b8b2-4c0e-ae7f-23ad14eab7bc"
+      (next-result)
+      (should (org-babel-in-example-or-verbatim))
+      (next-result)
+      (should (not (org-babel-in-example-or-verbatim))))))
+
+(ert-deftest test-org-babel/no-defaut-value-for-var ()
+  "Test that the absence of a default value for a variable DOES THROW
+  a proper error."
+  (org-test-at-id "f2df5ba6-75fa-4e6b-8441-65ed84963627"
+    (org-babel-next-src-block)
+    (let ((err
+	   (should-error (org-babel-execute-src-block) :type 'error)))
+      (should (equal '(error "variable \"x\" in block \"carre\" must be assigned a default value") err)))))
 
 (provide 'test-ob)
 

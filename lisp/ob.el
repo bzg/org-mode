@@ -220,8 +220,16 @@ Returns a list
 	    (when (match-string 6)
 	      (setf (nth 2 info) ;; merge functional-syntax vars and header-args
 		    (org-babel-merge-params
-		     (mapcar (lambda (ref) (cons :var ref))
-			     (org-babel-ref-split-args (match-string 6)))
+		     (mapcar
+		      (lambda (ref) (cons :var ref))
+		      (mapcar
+		       (lambda (var) ;; check that each variable is initialized
+			 (if (string-match ".+=.+" var)
+			     var
+			   (error
+			    "variable \"%s\"%s must be assigned a default value"
+			    var (if name (format " in block \"%s\"" name) ""))))
+		       (org-babel-ref-split-args (match-string 6))))
 		     (nth 2 info))))))
       ;; inline source block
       (when (org-babel-get-inline-src-block-matches)
@@ -550,6 +558,7 @@ arguments and pop open the results in a preview buffer."
   (interactive)
   ;; TODO: report malformed code block
   ;; TODO: report incompatible combinations of header arguments
+  ;; TODO: report uninitialized variables
   (let ((too-close 2)) ;; <- control closeness to report potential match
     (dolist (header (mapcar (lambda (arg) (substring (symbol-name (car arg)) 1))
 			    (and (org-babel-where-is-src-block-head)
@@ -1795,8 +1804,8 @@ Later elements of PLISTS override the values of previous elements.
 This takes into account some special considerations for certain
 parameters when merging lists."
   (let ((results-exclusive-groups
-	 '(("file" "list" "vector" "table" "scalar" "verbatim" "raw" "org"
-            "html" "latex" "code" "pp" "wrap")
+	 '(("file" "list" "vector" "table" "scalar" "verbatim")
+	   ("raw" "org" "html" "latex" "code" "pp" "wrap")
 	   ("replace" "silent" "append" "prepend")
 	   ("output" "value")))
 	(exports-exclusive-groups

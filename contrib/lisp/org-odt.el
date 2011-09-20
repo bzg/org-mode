@@ -31,6 +31,8 @@
 (require 'org-lparse)
 
 (defun org-odt-end-export ()
+  (org-odt-fixup-label-references)
+
   ;; remove empty paragraphs
   (goto-char (point-min))
   (while (re-search-forward
@@ -598,15 +600,107 @@ PUB-DIR is set, use this as the publishing directory."
 (defvar org-lparse-table-is-styled)
 (defvar org-lparse-table-rowgrp-info)
 (defvar org-lparse-table-colalign-vector)
+
+(defvar org-odt-table-style nil
+  "Table style specified by \"#+ATTR_ODT: <style-name>\" line.
+This is set during `org-odt-begin-table'.")
+
+(defvar org-odt-table-style-spec nil
+  "Entry for `org-odt-table-style' in `org-export-odt-table-styles'.")
+
+(defcustom org-export-odt-table-styles nil
+  "Specify how Table Styles should be derived from a Table Template.
+This is a list where each element is of the
+form (TABLE-STYLE-NAME TABLE-TEMPLATE-NAME TABLE-CELL-OPTIONS).
+
+TABLE-STYLE-NAME is the style associated with the table through
+`org-odt-table-style'.
+
+TABLE-TEMPLATE-NAME is a set of - upto 9 - automatic
+TABLE-CELL-STYLE-NAMEs and PARAGRAPH-STYLE-NAMEs (as defined
+below) that is included in
+`org-export-odt-content-template-file'.
+
+TABLE-CELL-STYLE-NAME := TABLE-TEMPLATE-NAME + TABLE-CELL-TYPE +
+                         \"TableCell\"
+PARAGRAPH-STYLE-NAME  := TABLE-TEMPLATE-NAME + TABLE-CELL-TYPE +
+                         \"TableParagraph\"
+TABLE-CELL-TYPE       := \"FirstRow\"   | \"LastColumn\" |
+                         \"FirstRow\"   | \"LastRow\"    |
+                         \"EvenRow\"    | \"OddRow\"     |
+                         \"EvenColumn\" | \"OddColumn\"  | \"\"
+where \"+\" above denotes string concatenation.
+
+TABLE-CELL-OPTIONS is an alist where each element is of the
+form (TABLE-CELL-STYLE-SELECTOR . ON-OR-OFF).
+TABLE-CELL-STYLE-SELECTOR := `use-first-row-styles'       |
+                             `use-last-row-styles'        |
+                             `use-first-column-styles'    |
+                             `use-last-column-styles'     |
+                             `use-banding-rows-styles'    |
+                             `use-banding-columns-styles' |
+                             `use-first-row-styles'
+ON-OR-OFF                 := `t' | `nil'
+
+For example, with the following configuration
+
+\(setq org-export-odt-table-styles
+      '\(\(\"TableWithHeaderRowsAndColumns\" \"Custom\"
+         \(\(use-first-row-styles . t\)
+          \(use-first-column-styles . t\)\)\)
+        \(\"TableWithHeaderColumns\" \"Custom\"
+         \(\(use-first-column-styles . t\)\)\)\)\)
+
+1. A table associated with \"TableWithHeaderRowsAndColumns\"
+   style will use the following table-cell styles -
+   \"CustomFirstRowTableCell\", \"CustomFirstColumnTableCell\",
+   \"CustomTableCell\" and the following paragraph styles
+   \"CustomFirstRowTableParagraph\",
+   \"CustomFirstColumnTableParagraph\", \"CustomTableParagraph\"
+   as appropriate.
+
+2. A table associated with \"TableWithHeaderColumns\" style will
+   use the following table-cell styles -
+   \"CustomFirstColumnTableCell\", \"CustomTableCell\" and the
+   following paragraph styles
+   \"CustomFirstColumnTableParagraph\", \"CustomTableParagraph\"
+   as appropriate..
+
+Note that TABLE-TEMPLATE-NAME corresponds to the
+\"<table:table-template>\" elements contained within
+\"<office:styles>\".  The entries (TABLE-STYLE-NAME
+TABLE-TEMPLATE-NAME TABLE-CELL-OPTIONS) correspond to
+\"table:template-name\" and \"table:use-first-row-styles\" etc
+attributes of \"<table:table>\" element.  Refer ODF-1.2
+specification for more information.  Also consult the
+implementation filed under `org-odt-get-table-cell-styles'."
+  :group 'org-export-odt
+  :type '(choice
+          (const :tag "None" nil)
+          (repeat :tag "Table Styles"
+                  (list :tag "Table Style Specification"
+                   (string :tag "Table Style Name")
+                   (string  :tag "Table Template Name")
+                   (alist :options (use-first-row-styles
+                                    use-last-row-styles
+                                    use-first-column-styles
+                                    use-last-column-styles
+                                    use-banding-rows-styles
+                                    use-banding-columns-styles)
+                          :key-type symbol
+                          :value-type (const :tag "True" t))))))
+
 (defun org-odt-begin-table (caption label attributes)
+  (setq org-odt-table-style attributes)
+  (setq org-odt-table-style-spec
+	(assoc org-odt-table-style org-export-odt-table-styles))
   (when label
     (insert
      (org-odt-format-stylized-paragraph
       'table (org-odt-format-entity-caption label caption "Table"))))
-
   (org-lparse-insert-tag
    "<table:table table:name=\"%s\" table:style-name=\"%s\">"
-   (or label "") "OrgTable")
+   (or label "") (or (nth 1 org-odt-table-style-spec) "OrgTable"))
   (setq org-lparse-table-begin-marker (point)))
 
 (defun org-odt-end-table ()
@@ -614,22 +708,24 @@ PUB-DIR is set, use this as the publishing directory."
   (loop for level from 0 below org-lparse-table-ncols
 	do (insert
 	    (org-odt-format-tags
-	     "<table:table-column table:style-name=\"OrgTableColumn\"/>"  "")))
+	     "<table:table-column table:style-name=\"%sColumn\"/>"
+	     "" (or (nth 1 org-odt-table-style-spec) "OrgTable"))))
 
   ;; fill style attributes for table cells
   (when org-lparse-table-is-styled
     (while (re-search-forward "@@\\(table-cell:p\\|table-cell:style-name\\)@@\\([0-9]+\\)@@\\([0-9]+\\)@@" nil t)
-      (let ((spec (match-string 1))
-	    (r (string-to-number (match-string 2)))
-	    (c (string-to-number (match-string 3))))
+      (let* ((spec (match-string 1))
+	     (r (string-to-number (match-string 2)))
+	     (c (string-to-number (match-string 3)))
+	     (cell-styles (org-odt-get-table-cell-styles
+			   r c org-odt-table-style-spec))
+	     (table-cell-style (car cell-styles))
+	     (table-cell-paragraph-style (cdr cell-styles)))
 	(cond
 	 ((equal spec "table-cell:p")
-	  (let ((style-name (org-odt-get-paragraph-style-for-table-cell r c)))
-	    (replace-match style-name t t)))
+	  (replace-match table-cell-paragraph-style t t))
 	 ((equal spec "table-cell:style-name")
-	  (let ((style-name (org-odt-get-style-name-for-table-cell r c)))
-	    (replace-match style-name t t)))))))
-
+	  (replace-match table-cell-style t t))))))
   (goto-char (point-max))
   (org-lparse-insert-tag "</table:table>"))
 
@@ -653,30 +749,87 @@ PUB-DIR is set, use this as the publishing directory."
   (org-odt-format-tags
    '("<table:table-row>" . "</table:table-row>") row))
 
-(defun org-odt-get-style-name-for-table-cell (r c)
-  (concat
-   "OrgTblCell"
-   (cond
-    ((= r 0) "T")
-    ((eq (cdr (assoc r org-lparse-table-rowgrp-info))  :start) "T")
-    (t ""))
-   (when (= r org-lparse-table-rownum) "B")
-   (cond
-    ((= c 0) "")
-    ((or (memq (nth c org-table-colgroup-info) '(:start :startend))
-	 (memq (nth (1- c) org-table-colgroup-info) '(:end :startend))) "L")
-    (t ""))))
+(defun org-odt-get-table-cell-styles (r c &optional style-spec)
+  "Retrieve styles applicable to a table cell.
+R and C are (zero-based) row and column numbers of the table
+cell.  STYLE-SPEC is an entry in `org-export-odt-table-styles'
+applicable to the current table.  It is `nil' if the table is not
+associated with any style attributes.
 
-(defun org-odt-get-paragraph-style-for-table-cell (r c)
-  (capitalize (aref org-lparse-table-colalign-vector c)))
+Return a cons of (TABLE-CELL-STYLE-NAME . PARAGRAPH-STYLE-NAME).
+
+When STYLE-SPEC is nil, style the table cell the conventional way
+- choose cell borders based on row and column groupings and
+choose paragraph alignment based on `org-col-cookies' text
+property.  See also
+`org-odt-get-paragraph-style-cookie-for-table-cell'.
+
+When STYLE-SPEC is non-nil, ignore the above cookie and return
+styles congruent with the ODF-1.2 specification."
+  (cond
+   (style-spec
+
+    ;; LibreOffice - particularly the Writer - honors neither table
+    ;; templates nor custom table-cell styles.  Inorder to retain
+    ;; inter-operability with LibreOffice, only automatic styles are
+    ;; used for styling of table-cells.  The current implementation is
+    ;; congruent with ODF-1.2 specification and hence is
+    ;; future-compatible.
+
+    ;; Additional Note: LibreOffice's AutoFormat facility for tables -
+    ;; which recognizes as many as 16 different cell types - is much
+    ;; richer. Unfortunately it is NOT amenable to easy configuration
+    ;; by hand.
+
+    (let* ((template-name (nth 1 style-spec))
+	   (cell-style-selectors (nth 2 style-spec))
+	   (cell-type
+	    (cond
+	     ((and (cdr (assoc 'use-first-column-styles cell-style-selectors))
+		   (= c 0)) "FirstColumn")
+	     ((and (cdr (assoc 'use-last-column-styles cell-style-selectors))
+		   (= c (1- org-lparse-table-ncols))) "LastColumn")
+	     ((and (cdr (assoc 'use-first-row-styles cell-style-selectors))
+		   (= r 0)) "FirstRow")
+	     ((and (cdr (assoc 'use-last-row-styles cell-style-selectors))
+		   (= r org-lparse-table-rownum))
+	      "LastRow")
+	     ((and (cdr (assoc 'use-banding-rows-styles cell-style-selectors))
+		   (= (% r 2) 1)) "EvenRow")
+	     ((and (cdr (assoc 'use-banding-rows-styles cell-style-selectors))
+		   (= (% r 2) 0)) "OddRow")
+	     ((and (cdr (assoc 'use-banding-columns-styles cell-style-selectors))
+		   (= (% c 2) 1)) "EvenColumn")
+	     ((and (cdr (assoc 'use-banding-columns-styles cell-style-selectors))
+		   (= (% c 2) 0)) "OddColumn")
+	     (t ""))))
+      (cons
+       (concat template-name cell-type "TableCell")
+       (concat template-name cell-type "TableParagraph"))))
+   (t
+    (cons
+     (concat
+      "OrgTblCell"
+      (cond
+       ((= r 0) "T")
+       ((eq (cdr (assoc r org-lparse-table-rowgrp-info))  :start) "T")
+       (t ""))
+      (when (= r org-lparse-table-rownum) "B")
+      (cond
+       ((= c 0) "")
+       ((or (memq (nth c org-table-colgroup-info) '(:start :startend))
+	    (memq (nth (1- c) org-table-colgroup-info) '(:end :startend))) "L")
+       (t "")))
+     (capitalize (aref org-lparse-table-colalign-vector c))))))
 
 (defun org-odt-get-paragraph-style-cookie-for-table-cell (r c)
   (concat
-   (cond
-    (org-lparse-table-cur-rowgrp-is-hdr "OrgTableHeading")
-    ((and (= c 0) (org-lparse-get 'TABLE-FIRST-COLUMN-AS-LABELS))
-     "OrgTableHeading")
-    (t "OrgTableContents"))
+   (and (not org-odt-table-style-spec)
+	(cond
+	 (org-lparse-table-cur-rowgrp-is-hdr "OrgTableHeading")
+	 ((and (= c 0) (org-lparse-get 'TABLE-FIRST-COLUMN-AS-LABELS))
+	  "OrgTableHeading")
+	 (t "OrgTableContents")))
    (and org-lparse-table-is-styled
 	(format "@@table-cell:p@@%03d@@%03d@@" r c))))
 
@@ -1017,51 +1170,11 @@ value of `org-export-odt-use-htmlfontify."
 	       (org-odt-copy-image-file thefile) thelink))))
     (org-export-odt-format-image thefile href)))
 
-(defun org-export-odt-do-format-numbered-formula (embed-as caption attr label
-							   width height href)
-  (with-temp-buffer
-    (let ((org-lparse-table-colalign-info '((0 "c" "8") (0 "c" "1"))))
-      (org-lparse-insert-list-table
-       `((,(org-export-odt-do-format-formula ; caption and label
-					     ; should be nil
-	    embed-as nil attr nil width height href)
-	  ,(org-odt-format-entity-caption label caption "Equation")))
-       nil nil nil nil nil org-lparse-table-colalign-info))
-    (buffer-substring-no-properties (point-min) (point-max))))
-
-(defun org-export-odt-do-format-formula (embed-as caption attr label
-						  width height href)
-  "Create image tag with source and attributes."
-  (save-match-data
-    (cond
-     ((and (not caption) (not label))
-      (let (style-name anchor-type)
-	(case embed-as
-	  (paragraph
-	   (setq style-name  "OrgSimpleGraphics" anchor-type "paragraph"))
-	  (character
-	   (setq style-name  "OrgInlineGraphics" anchor-type "as-char"))
-	  (t
-	   (error "Unknown value for embed-as %S" embed-as)))
-	(org-odt-format-frame href style-name width height nil anchor-type)))
-     (t
-      (concat
-       (org-odt-format-textbox
-	(org-odt-format-stylized-paragraph
-	 'illustration
-	 (concat
-	  (let ((extra ""))
-	    (org-odt-format-frame
-	     href "" width height extra "paragraph"))
-	  (org-odt-format-entity-caption label caption)))
-	"OrgCaptionFrame" width height))))))
-
 (defun org-export-odt-format-formula (src href &optional embed-as)
   "Create image tag with source and attributes."
   (save-match-data
     (let* ((caption (org-find-text-property-in-string 'org-caption src))
 	   (caption (and caption (org-xml-format-desc caption)))
-	   (attr (org-find-text-property-in-string 'org-attributes src))
 	   (label (org-find-text-property-in-string 'org-label src))
 	   (embed-as (or embed-as
 			 (and (org-find-text-property-in-string
@@ -1069,11 +1182,20 @@ value of `org-export-odt-use-htmlfontify."
 			      (org-find-text-property-in-string
 			       'org-latex-src-embed-type src))
 			 'paragraph))
-	   (attr-plist (when attr (read  attr)))
-	   (width (plist-get attr-plist :width))
-	   (height (plist-get attr-plist :height)))
-      (org-export-odt-do-format-formula
-       embed-as caption attr label width height href))))
+	   width height)
+      (cond
+       ((eq embed-as 'character)
+	(org-odt-format-entity "InlineFormula" href width height))
+       (t
+	(org-lparse-end-paragraph)
+	(org-lparse-insert-list-table
+	 `((,(org-odt-format-entity
+	      (if caption "CaptionedDisplayFormula" "DisplayFormula")
+	      href width height caption nil)
+	    ,(if (not label) ""
+	       (org-odt-format-entity-caption label nil "Equation"))))
+	 nil nil nil "OrgEquation" nil '((1 "c" 8) (2 "c" 1)))
+	(throw 'nextline nil))))))
 
 (defvar org-odt-embedded-formulas-count 0)
 (defun org-odt-copy-formula-file (path)
@@ -1256,12 +1378,20 @@ MAY-INLINE-P allows inlining it as an image."
 	   (size (org-odt-image-size-from-file
 		  src (plist-get attr-plist :width)
 		  (plist-get attr-plist :height)
-		  (plist-get attr-plist :scale) nil embed-as)))
-      (org-export-odt-do-format-image
-       embed-as caption attr label (car size) (cdr size) href))))
+		  (plist-get attr-plist :scale) nil embed-as))
+	   (width (car size)) (height (cdr size)))
+      (cond
+       ((not (or caption label))
+	(case embed-as
+	  (paragraph (org-odt-format-entity "DisplayImage" href width height))
+	  (character (org-odt-format-entity "InlineImage" href width height))
+	  (t (error "Unknown value for embed-as %S" embed-as))))
+       (t
+	(org-odt-format-entity
+	 "CaptionedDisplayImage" href width height caption label))))))
 
-(defun org-odt-format-frame (text style &optional
-				  width height extra anchor-type)
+(defun org-odt-format-frame (text width height style &optional
+				  extra anchor-type)
   (let ((frame-attrs
 	 (concat
 	  (if width (format " svg:width=\"%0.2fcm\"" width) "")
@@ -1272,13 +1402,14 @@ MAY-INLINE-P allows inlining it as an image."
      '("<draw:frame draw:style-name=\"%s\"%s>" . "</draw:frame>")
      text style frame-attrs)))
 
-(defun org-odt-format-textbox (text style &optional width height extra)
+(defun org-odt-format-textbox (text width height style &optional
+				    extra anchor-type)
   (org-odt-format-frame
    (org-odt-format-tags
     '("<draw:text-box %s>" . "</draw:text-box>")
     text (concat (format " fo:min-height=\"%0.2fcm\"" (or height .2))
 		 (format " fo:min-width=\"%0.2fcm\"" (or width .2))))
-   style width nil extra))
+   width nil style extra anchor-type))
 
 (defun org-odt-format-inlinetask (heading content
 					  &optional todo priority tags)
@@ -1289,33 +1420,34 @@ MAY-INLINE-P allows inlining it as an image."
 		 (org-lparse-format
 		  'HEADLINE (concat (org-lparse-format-todo todo) " " heading)
 		  nil tags))
-		content) "OrgInlineTaskFrame" nil nil " style:rel-width=\"100%\"")))
-(defun org-export-odt-do-format-image (embed-as caption attr label
-						width height href)
-  "Create image tag with source and attributes."
-  (save-match-data
-    (cond
-     ((and (not caption) (not label))
-      (let (style-name anchor-type)
-	(case embed-as
-	  (paragraph
-	   (setq style-name  "OrgSimpleGraphics" anchor-type "paragraph"))
-	  (character
-	   (setq style-name  "OrgInlineGraphics" anchor-type "as-char"))
-	  (t
-	   (error "Unknown value for embed-as %S" embed-as)))
-	(org-odt-format-frame href style-name width height nil anchor-type)))
-     (t
-      (concat
-       (org-odt-format-textbox
-	(org-odt-format-stylized-paragraph
-	 'illustration
-	 (concat
-	  (let ((extra " style:rel-width=\"100%\" style:rel-height=\"scale\""))
-	    (org-odt-format-frame
-	     href "OrgCaptionedGraphics" width height extra "paragraph"))
-	  (org-odt-format-entity-caption label caption)))
-	"OrgCaptionFrame" width height))))))
+		content) nil nil "OrgInlineTaskFrame" " style:rel-width=\"100%\"")))
+
+(defvar org-odt-entity-frame-styles
+  '(("InlineImage" "Figure" ("OrgInlineImage" nil "as-char"))
+    ("DisplayImage" "Figure" ("OrgDisplayImage" nil "paragraph"))
+    ("CaptionedDisplayImage" "Figure"
+     ("OrgCaptionedImage"
+      " style:rel-width=\"100%\" style:rel-height=\"scale\"" "paragraph")
+     ("OrgImageCaptionFrame"))
+    ("InlineFormula" "Equation" ("OrgInlineFormula" nil "as-char"))
+    ("DisplayFormula" "Equation" ("OrgDisplayFormula" nil "as-char"))
+    ("CaptionedDisplayFormula" "Equation"
+     ("OrgCaptionedFormula" nil "paragraph")
+     ("OrgFormulaCaptionFrame" nil "as-char"))))
+
+(defun org-odt-format-entity (entity href width height &optional caption label)
+  (let* ((entity-style (assoc entity org-odt-entity-frame-styles))
+	 (entity-frame (apply 'org-odt-format-frame
+			      href width height (nth 2 entity-style))))
+    (if (not (or caption label)) entity-frame
+      (apply 'org-odt-format-textbox
+	     (org-odt-format-stylized-paragraph
+	      'illustration
+	      (concat entity-frame (org-odt-format-entity-caption
+				    label caption (nth 1 entity-style))))
+	     width height (nth 3 entity-style)))))
+
+
 
 (defvar org-odt-embedded-images-count 0)
 (defun org-odt-copy-image-file (path)
@@ -1401,22 +1533,105 @@ MAY-INLINE-P allows inlining it as an image."
      (t (ignore)))
     (cons width height)))
 
-(defvar org-odt-default-entity "Illustration")
-(defun org-odt-format-entity-caption (label caption &optional default-entity)
-  (if (not label) (or caption "")
-    (let* ((label-components (org-odt-parse-label label))
-	   (entity (car label-components))
-	   (seqno (cdr label-components))
-	   (caption (and caption (concat ": " caption))))
-      (unless seqno
-	(setq seqno label
-	      entity (or default-entity org-odt-default-entity)))
-      (concat
-       entity " "
-       (org-odt-format-tags
-	'("<text:sequence text:ref-name=\"%s\" text:name=\"%s\" text:formula=\"ooow:%s+1\" style:num-format=\"1\">" . "</text:sequence>")
-	seqno label entity entity)
-       caption))))
+(defvar org-odt-entity-labels-alist nil
+  "Associate Labels with the Labelled entities.
+Each element of the alist is of the form (LABEL-NAME
+CATEGORY-NAME SEQNO).  LABEL-NAME is same as that specified by
+\"#+LABEL: ...\" line.  CATEGORY-NAME is the type of the entity
+that LABEL-NAME is attached to.  CATEGORY-NAME can be one of
+\"Table\", \"Figure\" or \"Equation\".  SEQNO is the unique
+number assigned to the referenced entity on a per-CATEGORY basis.
+It is generated sequentially and is 1-based.
+
+Update this alist with `org-odt-add-label-definition' and
+retrieve an entry with `org-odt-get-label-definition'.")
+
+(defvar org-odt-entity-counts-plist nil
+  "Plist of running counters of SEQNOs for each of the CATEGORY-NAMEs.
+See `org-odt-entity-labels-alist' for known CATEGORY-NAMEs.")
+
+(defvar org-odt-label-def-ref-spec
+  '(("Equation" "(%n)" "text" "(%n)")
+    ("" "%e %n%c" "category-and-value" "%e %n"))
+  "Specify how labels are applied and referenced.
+This is an alist where each element is of the form (CATEGORY-NAME
+LABEL-APPLY-FMT LABEL-REF-MODE LABEL-REF-FMT).  CATEGORY-NAME is
+as defined in `org-odt-entity-labels-alist'.  It can additionally
+be an empty string in which case it is used as a catch-all
+specifier.
+
+LABEL-APPLY-FMT is used for applying labels and captions.  It may
+contain following specifiers - %e, %n and %c.  %e is replaced
+with the CATEGORY-NAME.  %n is replaced with \"<text:sequence
+...> SEQNO </text:sequence>\".  %c is replaced with CAPTION. See
+`org-odt-format-label-definition'.
+
+LABEL-REF-MODE and LABEL-REF-FMT are used for generating the
+following label reference - \"<text:sequence-ref
+text:reference-format=\"LABEL-REF-MODE\" ...> LABEL-REF-FMT
+</text:sequence-ref>\".  LABEL-REF-FMT may contain following
+specifiers - %e and %n.  %e is replaced with the CATEGORY-NAME.  %n is
+replaced with SEQNO. See `org-odt-format-label-reference'.")
+
+(defun org-odt-add-label-definition (label category)
+  "Return (SEQNO . LABEL-APPLY-FMT).
+See `org-odt-label-def-ref-spec'."
+  (setq label (substring-no-properties label))
+  (let (seqno label-props fmt (category-sym (intern category)))
+    (setq seqno (1+ (plist-get org-odt-entity-counts-plist category-sym))
+	  org-odt-entity-counts-plist (plist-put org-odt-entity-counts-plist
+						 category-sym seqno)
+	  fmt (cadr (or (assoc-string category org-odt-label-def-ref-spec t)
+			(assoc-string "" org-odt-label-def-ref-spec t)))
+	  label-props (list label category seqno))
+    (push label-props org-odt-entity-labels-alist)
+    (cons seqno fmt)))
+
+(defun org-odt-get-label-definition (label)
+  "Return (LABEL-NAME CATEGORY-NAME SEQNO LABEL-REF-MODE LABEL-REF-FMT).
+See `org-odt-entity-labels-alist' and
+`org-odt-label-def-ref-spec'."
+  (let* ((label-props (assoc label org-odt-entity-labels-alist))
+	 (category (nth 1 label-props)))
+    (append label-props
+	    (cddr (or (assoc-string category org-odt-label-def-ref-spec t)
+		      (assoc-string "" org-odt-label-def-ref-spec t))))))
+
+(defun org-odt-format-label-definition (label category caption)
+  (assert label)
+  (let* ((label-props (org-odt-add-label-definition label category))
+	 (seqno (car label-props))
+	 (fmt (cdr label-props)))
+    (or (format-spec
+	 fmt
+	 `((?e . ,category)
+	   (?n . ,(org-odt-format-tags
+		   '("<text:sequence text:ref-name=\"%s\" text:name=\"%s\" text:formula=\"ooow:%s+1\" style:num-format=\"1\">" . "</text:sequence>")
+		   (format "%d" seqno) label category category))
+	   (?c . ,(or (and caption (concat ": " caption)) ""))))
+	caption "")))
+
+(defun org-odt-format-label-reference (label category seqno fmt1 fmt2)
+  (assert label)
+  (save-match-data
+    (org-odt-format-tags
+     '("<text:sequence-ref text:reference-format=\"%s\" text:ref-name=\"%s\">"
+       . "</text:sequence-ref>")
+     (format-spec fmt2 `((?e . ,category)
+			 (?n . ,(format "%d" seqno)))) fmt1 label)))
+
+(defun org-odt-fixup-label-references ()
+  (goto-char (point-min))
+  (while (re-search-forward
+	  "<text:sequence-ref text:ref-name=\"\\([^\"]+\\)\"/>" nil t)
+    (let* ((label (match-string 1)))
+      (replace-match
+       (apply 'org-odt-format-label-reference
+	      (org-odt-get-label-definition label)) t t))))
+
+(defun org-odt-format-entity-caption (label caption category)
+  (or (and label (org-odt-format-label-definition label category caption))
+      caption ""))
 
 (defun org-odt-format-tags (tag text &rest args)
   (let ((prefix (when org-lparse-encode-pending "@"))
@@ -1437,8 +1652,9 @@ MAY-INLINE-P allows inlining it as an image."
     ;; reset variables
     (setq org-odt-manifest-file-entries nil
 	  org-odt-embedded-images-count 0
-	  org-odt-embedded-formulas-count 0)
-
+	  org-odt-embedded-formulas-count 0
+	  org-odt-entity-labels-alist nil
+	  org-odt-entity-counts-plist (list 'Table 0 'Equation 0 'Figure 0))
     content-file))
 
 (defcustom org-export-odt-prettify-xml nil
@@ -1673,14 +1889,6 @@ visually."
     (CODING-SYSTEM-FOR-SAVE 'utf-8)
     (t (error "Unknown property: %s"  what))))
 
-(defun org-odt-parse-label (label)
-  (save-match-data
-    (if (not (string-match "\\`[a-zA-Z]+:\\(.+\\)" label))
-	(cons label nil)
-      (cons
-       (capitalize (substring label 0 (1- (match-beginning 1))))
-       (substring label (match-beginning 1))))))
-
 (defvar org-lparse-latex-fragment-fallback) ; set by org-do-lparse
 (defvar org-lparse-opt-plist)		    ; bound during org-do-lparse
 (defun org-export-odt-do-preprocess-latex-fragments ()
@@ -1722,16 +1930,18 @@ visually."
   (let (label label-components category value pretty-label)
     (while (re-search-forward "\\\\ref{\\([^{}\n]+\\)}" nil t)
       (org-if-unprotected-at (match-beginning 1)
-	(setq label (match-string 1)
-	      label-components (org-odt-parse-label label)
-	      category (car label-components)
-	      value (cdr label-components)
-	      pretty-label (if value (concat category " " value) label))
 	(replace-match
-	 (let ((org-lparse-encode-pending t))
+	 (let ((org-lparse-encode-pending t)
+	       (label (match-string 1)))
+	   ;; markup generated below is mostly an eye-candy.  At
+	   ;; pre-processing stage, there is no information on which
+	   ;; entity a label reference points to.  The actual markup
+	   ;; is generated as part of `org-odt-fixup-label-references'
+	   ;; which gets called at the fag end of export.  By this
+	   ;; time we would have seen and collected all the label
+	   ;; definitions in `org-odt-entity-labels-alist'.
 	   (org-odt-format-tags
-	    '("<text:sequence-ref text:reference-format=\"category-and-value\" text:ref-name=\"%s\">"
-	      . "</text:sequence-ref>") pretty-label label)) t t)))))
+	    "<text:sequence-ref text:ref-name=\"%s\"/>" "" label)) t t)))))
 
 ;; process latex fragments as part of
 ;; `org-export-preprocess-after-blockquote-hook'. Note that this hook

@@ -249,7 +249,7 @@ footnote text is included and defined locally.
 
 The return value will be nil if not at a footnote definition, and a list with
 label, start, end and definition of the footnote otherwise."
-  (when (org-footnote-in-valid-context-p)
+  (when (save-excursion (beginning-of-line) (org-footnote-in-valid-context-p))
     (save-excursion
       (end-of-line)
       (let ((lim (save-excursion (re-search-backward

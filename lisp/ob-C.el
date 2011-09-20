@@ -179,7 +179,7 @@ of the same value."
       (format "int %S = %S;" var val))
      ((floatp val)
       (format "double %S = %S;" var val))
-     ((or (characterp val))
+     ((or (integerp val))
       (format "char %S = '%S';" var val))
      ((stringp val)
       (format "char %S[%d] = \"%s\";"

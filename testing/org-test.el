@@ -4,9 +4,13 @@
 ;; Authors:
 ;;     Sebastian Rose, Hannover, Germany, sebastian_rose gmx de
 ;;     Eric Schulte, Santa Fe, New Mexico, USA, schulte.eric gmail com
+;;     David Maus, Brunswick, Germany, dmaus ictsoc de
 
 ;; Released under the GNU General Public License version 3
 ;; see: http://www.gnu.org/licenses/gpl-3.0.html
+
+;; Definition of `special-mode' copied from Emacs23's simple.el to be
+;; provide a testing environment for Emacs22.
 
 ;;;; Comments:
 
@@ -31,7 +35,7 @@
 		       (or load-file-name buffer-file-name)))))
    (let ((org-lisp-dir (expand-file-name
    		       (concat org-test-dir "../lisp"))))
-     (unless (member 'features "org")
+     (unless (featurep 'org)
        (setq load-path (cons org-lisp-dir load-path))
        (org-babel-do-load-languages
 	'org-babel-load-languages '((sh . t)))))
@@ -41,6 +45,25 @@
 		      (expand-file-name "jump" org-test-dir)
 		      load-path))))
     (require 'cl)
+    (when (= emacs-major-version 22)
+      (defvar special-mode-map
+	(let ((map (make-sparse-keymap)))
+	  (suppress-keymap map)
+	  (define-key map "q" 'quit-window)
+	  (define-key map " " 'scroll-up)
+	  (define-key map "\C-?" 'scroll-down)
+	  (define-key map "?" 'describe-mode)
+	  (define-key map "h" 'describe-mode)
+	  (define-key map ">" 'end-of-buffer)
+	  (define-key map "<" 'beginning-of-buffer)
+	  (define-key map "g" 'revert-buffer)
+	  (define-key map "z" 'kill-this-buffer)
+	  map))
+
+      (put 'special-mode 'mode-class 'special)
+      (define-derived-mode special-mode nil "Special"
+	"Parent major mode from which special major modes should inherit."
+	(setq buffer-read-only t)))
     (require 'ert)
     (require 'ert-x)
     (when (file-exists-p
@@ -136,6 +159,23 @@ files."
   `(org-test-in-example-file ,file
      (goto-char (point-min))
      (re-search-forward (regexp-quote ,marker))
+     ,@body))
+
+(defmacro org-test-with-temp-text (text &rest body)
+  "Run body in a temporary buffer with Org-mode as the active
+mode holding TEXT.  If the string \"<point>\" appears in TEXT
+then remove it and place the point there before running BODY."
+  (declare (indent 1))
+  `(with-temp-buffer
+     (org-mode)
+     ,(let ((point (string-match (regexp-quote "<point>") text)))
+	(if point
+	    `(progn
+	       (insert `(replace-match "" nil nil text))
+	       (goto-char ,(match-beginning 0)))
+	  `(progn
+	     (insert ,text)
+	     (goto-char (point-min)))))
      ,@body))
 
 

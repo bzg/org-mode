@@ -79,7 +79,8 @@
   "Execute a block of R code.
 This function is called by `org-babel-execute-src-block'."
   (save-excursion
-    (let* ((result-type (cdr (assoc :result-type params)))
+    (let* ((result-params (cdr (assoc :result-params params)))
+	   (result-type (cdr (assoc :result-type params)))
            (session (org-babel-R-initiate-session
 		     (cdr (assoc :session params)) params))
 	   (colnames-p (cdr (assoc :colnames params)))
@@ -88,7 +89,7 @@ This function is called by `org-babel-execute-src-block'."
 	   (full-body (org-babel-expand-body:R body params graphics-file))
 	   (result
 	    (org-babel-R-evaluate
-	     session full-body result-type
+	     session full-body result-type result-params
 	     (or (equal "yes" colnames-p)
 		 (org-babel-pick-name
 		  (cdr (assoc :colname-names params)) colnames-p))
@@ -231,16 +232,15 @@ current code buffer."
 (defvar org-babel-R-write-object-command "{function(object,transfer.file){object;invisible(if(inherits(try({tfile<-tempfile();write.table(object,file=tfile,sep=\"\\t\",na=\"nil\",row.names=%s,col.names=%s,quote=FALSE);file.rename(tfile,transfer.file)},silent=TRUE),\"try-error\")){if(!file.exists(transfer.file))file.create(transfer.file)})}}(object=%s,transfer.file=\"%s\")")
 
 (defun org-babel-R-evaluate
-  (session body result-type column-names-p row-names-p)
+  (session body result-type result-params column-names-p row-names-p)
   "Evaluate R code in BODY."
-  (if session
-      (org-babel-R-evaluate-session
-       session body result-type column-names-p row-names-p)
-    (org-babel-R-evaluate-external-process
-     body result-type column-names-p row-names-p)))
+  (funcall (if session
+	       #'org-babel-R-evaluate-session
+	     #'org-babel-R-evaluate-external-process)
+	   body result-type result-params column-names-p row-names-p))
 
 (defun org-babel-R-evaluate-external-process
-  (body result-type column-names-p row-names-p)
+  (body result-type result-params column-names-p row-names-p)
   "Evaluate BODY in external R process.
 If RESULT-TYPE equals 'output then return standard output as a
 string. If RESULT-TYPE equals 'value then return the value of the
@@ -257,11 +257,17 @@ last statement in BODY, as elisp."
 			       (format "{function ()\n{\n%s\n}}()" body)
 			       (org-babel-process-file-name tmp-file 'noquote)))
        (org-babel-R-process-value-result
-	(org-babel-import-elisp-from-file tmp-file '(16)) column-names-p)))
+	(if (or (member "scalar" result-params)
+		(member "verbatim" result-params))
+	    (with-temp-buffer
+	      (insert-file-contents tmp-file)
+	      (buffer-string))
+	  (org-babel-import-elisp-from-file tmp-file '(16)))
+	column-names-p)))
     (output (org-babel-eval org-babel-R-command body))))
 
 (defun org-babel-R-evaluate-session
-  (session body result-type column-names-p row-names-p)
+  (session body result-type result-params column-names-p row-names-p)
   "Evaluate BODY in SESSION.
 If RESULT-TYPE equals 'output then return standard output as a
 string. If RESULT-TYPE equals 'value then return the value of the
@@ -283,7 +289,13 @@ last statement in BODY, as elisp."
 		  "FALSE")
 		".Last.value" (org-babel-process-file-name tmp-file 'noquote)))
        (org-babel-R-process-value-result
-	(org-babel-import-elisp-from-file tmp-file '(16))  column-names-p)))
+	(if (or (member "scalar" result-params)
+		(member "verbatim" result-params))
+	    (with-temp-buffer
+	      (insert-file-contents tmp-file)
+	      (buffer-string))
+	  (org-babel-import-elisp-from-file tmp-file '(16)))
+	column-names-p)))
     (output
      (mapconcat
       #'org-babel-chomp
