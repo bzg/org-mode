@@ -30,17 +30,20 @@
 
 
 ;;;; Code:
-(let ((org-test-dir (expand-file-name
+(let* ((org-test-dir (expand-file-name
 		      (file-name-directory
-		       (or load-file-name buffer-file-name)))))
-   (let ((org-lisp-dir (expand-file-name
-   		       (concat org-test-dir "../lisp"))))
-     (unless (featurep 'org)
-       (setq load-path (cons org-lisp-dir load-path))
-       (org-babel-do-load-languages
-	'org-babel-load-languages '((sh . t)))))
-   (let* ((load-path (cons
-		     (expand-file-name "ert" org-test-dir)
+		       (or load-file-name buffer-file-name))))
+       (org-lisp-dir (expand-file-name
+		      (concat org-test-dir "../lisp"))))
+
+  (unless (featurep 'org)
+    (setq load-path (cons org-lisp-dir load-path))
+    (require 'org)
+    (org-babel-do-load-languages
+     'org-babel-load-languages '((sh . t))))
+
+  (let* ((load-path (cons
+		     org-test-dir
 		     (cons
 		      (expand-file-name "jump" org-test-dir)
 		      load-path))))
@@ -69,8 +72,7 @@
     (when (file-exists-p
 	   (expand-file-name "jump/jump.el" org-test-dir))
       (require 'jump)
-      (require 'which-func))
-    (require 'org)))
+      (require 'which-func))))
 
 (defconst org-test-default-test-file-name "tests.el"
   "For each defun a separate file with tests may be defined.
@@ -180,49 +182,49 @@ then remove it and place the point there before running BODY."
 
 ;;; Navigation Functions
 (when (featurep 'jump)
-(defjump org-test-jump
-  (("lisp/\\1.el" . "testing/lisp/test-\\1.el")
-   ("lisp/\\1.el" . "testing/lisp/\\1.el/test.*.el")
-   ("contrib/lisp/\\1.el" . "testing/contrib/lisp/test-\\1.el")
-   ("contrib/lisp/\\1.el" . "testing/contrib/lisp/\\1.el/test.*.el")
-   ("testing/lisp/test-\\1.el" . "lisp/\\1.el")
-   ("testing/lisp/\\1.el" . "lisp/\\1.el/test.*.el")
-   ("testing/contrib/lisp/test-\\1.el" . "contrib/lisp/\\1.el")
-   ("testing/contrib/lisp/test-\\1.el" . "contrib/lisp/\\1.el/test.*.el"))
-  (concat org-base-dir "/")
-  "Jump between org-mode files and their tests."
-  (lambda (path)
-    (let* ((full-path (expand-file-name path org-base-dir))
-	  (file-name (file-name-nondirectory path))
-	  (name (file-name-sans-extension file-name)))
-      (find-file full-path)
-      (insert
-       ";;; " file-name "\n\n"
-       ";; Copyright (c) " (nth 5 (decode-time (current-time)))
-       " " user-full-name "\n"
-       ";; Authors: " user-full-name "\n\n"
-       ";; Released under the GNU General Public License version 3\n"
-       ";; see: http://www.gnu.org/licenses/gpl-3.0.html\n\n"
-       ";;;; Comments:\n\n"
-       ";; Template test file for Org-mode tests\n\n"
-       "\n"
-       ";;; Code:\n"
-       "(let ((load-path (cons (expand-file-name\n"
-       "			\"..\" (file-name-directory\n"
-       "			      (or load-file-name buffer-file-name)))\n"
-       "		       load-path)))\n"
-       "  (require 'org-test)\n"
-       "  (require 'org-test-ob-consts))\n\n"
-       "\n"
-       ";;; Tests\n"
-       "(ert-deftest " name "/example-test ()\n"
-       "  \"Just an example to get you started.\"\n"
-       "  (should t)\n"
-       "  (should-not nil)\n"
-       "  (should-error (error \"errr...\")))\n\n\n"
-       "(provide '" name ")\n\n"
-       ";;; " file-name " ends here\n") full-path))
-  (lambda () ((lambda (res) (if (listp res) (car res) res)) (which-function)))))
+  (defjump org-test-jump
+    (("lisp/\\1.el" . "testing/lisp/test-\\1.el")
+     ("lisp/\\1.el" . "testing/lisp/\\1.el/test.*.el")
+     ("contrib/lisp/\\1.el" . "testing/contrib/lisp/test-\\1.el")
+     ("contrib/lisp/\\1.el" . "testing/contrib/lisp/\\1.el/test.*.el")
+     ("testing/lisp/test-\\1.el" . "lisp/\\1.el")
+     ("testing/lisp/\\1.el" . "lisp/\\1.el/test.*.el")
+     ("testing/contrib/lisp/test-\\1.el" . "contrib/lisp/\\1.el")
+     ("testing/contrib/lisp/test-\\1.el" . "contrib/lisp/\\1.el/test.*.el"))
+    (concat org-base-dir "/")
+    "Jump between org-mode files and their tests."
+    (lambda (path)
+      (let* ((full-path (expand-file-name path org-base-dir))
+	     (file-name (file-name-nondirectory path))
+	     (name (file-name-sans-extension file-name)))
+	(find-file full-path)
+	(insert
+	 ";;; " file-name "\n\n"
+	 ";; Copyright (c) " (nth 5 (decode-time (current-time)))
+	 " " user-full-name "\n"
+	 ";; Authors: " user-full-name "\n\n"
+	 ";; Released under the GNU General Public License version 3\n"
+	 ";; see: http://www.gnu.org/licenses/gpl-3.0.html\n\n"
+	 ";;;; Comments:\n\n"
+	 ";; Template test file for Org-mode tests\n\n"
+	 "\n"
+	 ";;; Code:\n"
+	 "(let ((load-path (cons (expand-file-name\n"
+	 "			\"..\" (file-name-directory\n"
+	 "			      (or load-file-name buffer-file-name)))\n"
+	 "		       load-path)))\n"
+	 "  (require 'org-test)\n"
+	 "  (require 'org-test-ob-consts))\n\n"
+	 "\n"
+	 ";;; Tests\n"
+	 "(ert-deftest " name "/example-test ()\n"
+	 "  \"Just an example to get you started.\"\n"
+	 "  (should t)\n"
+	 "  (should-not nil)\n"
+	 "  (should-error (error \"errr...\")))\n\n\n"
+	 "(provide '" name ")\n\n"
+	 ";;; " file-name " ends here\n") full-path))
+    (lambda () ((lambda (res) (if (listp res) (car res) res)) (which-function)))))
 
 (define-key emacs-lisp-mode-map "\M-\C-j" 'org-test-jump)
 
