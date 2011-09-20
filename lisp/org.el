@@ -7576,7 +7576,7 @@ the inserted text when done."
   (org-with-limited-levels
    (let* ((visp (not (outline-invisible-p)))
 	  (txt tree)
-	  (^re_ (concat "\\(\\*+\\)[  \t]*"))
+	  (^re_ "\\(\\*+\\)[  \t]*")
 	  (old-level (if (string-match org-outline-regexp-bol txt)
 			 (- (match-end 0) (match-beginning 0) 1)
 		       -1))
