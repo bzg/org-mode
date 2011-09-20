@@ -1598,7 +1598,8 @@ lang=\"%s\" xml:lang=\"%s\">
 	  (setq line (org-html-handle-links line opt-plist))
 
 	  ;; TODO items
-	  (if (and (string-match org-todo-line-regexp line)
+	  (if (and org-todo-line-regexp
+		   (string-match org-todo-line-regexp line)
 		   (match-beginning 2))
 
 	      (setq line
@@ -2213,19 +2214,20 @@ for further information."
   "Format time stamps in string S, or remove them."
   (catch 'exit
     (let (r b)
-      (while (string-match org-maybe-keyword-time-regexp s)
-	(or b (setq b (substring s 0 (match-beginning 0))))
-	(setq r (concat
-		 r (substring s 0 (match-beginning 0))
-		 " @<span class=\"timestamp-wrapper\">"
-		 (if (match-end 1)
-		     (format "@<span class=\"timestamp-kwd\">%s @</span>"
-			     (match-string 1 s)))
-		 (format " @<span class=\"timestamp\">%s@</span>"
-			 (substring
-			  (org-translate-time (match-string 3 s)) 1 -1))
-		 "@</span>")
-	      s (substring s (match-end 0))))
+      (when org-maybe-keyword-time-regexp
+	(while (string-match org-maybe-keyword-time-regexp s)
+	  (or b (setq b (substring s 0 (match-beginning 0))))
+	  (setq r (concat
+		   r (substring s 0 (match-beginning 0))
+		   " @<span class=\"timestamp-wrapper\">"
+		   (if (match-end 1)
+		       (format "@<span class=\"timestamp-kwd\">%s @</span>"
+			       (match-string 1 s)))
+		   (format " @<span class=\"timestamp\">%s@</span>"
+			   (substring
+			    (org-translate-time (match-string 3 s)) 1 -1))
+		   "@</span>")
+		s (substring s (match-end 0)))))
       ;; Line break if line started and ended with time stamp stuff
       (if (not r)
 	  s
