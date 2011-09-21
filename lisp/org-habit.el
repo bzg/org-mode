@@ -67,6 +67,16 @@ relative to the current effective date."
   :group 'org-habit
   :type 'boolean)
 
+(defcustom org-habit-today-glyph ?!
+  "Glyph character used to identify today."
+  :group 'org-habit
+  :type 'character)
+
+(defcustom org-habit-completed-glyph ?*
+  "Glyph character used to show completed days on which a task was done."
+  :group 'org-habit
+  :type 'character)
+
 (defface org-habit-clear-face
   '((((background light)) (:background "#8270f9"))
     (((background dark)) (:background "blue")))
@@ -296,7 +306,7 @@ current time."
 			      (days-to-time
 			       (- start (time-to-days starting))))))
 
-	      (aset graph index ?*)
+	      (aset graph index org-habit-completed-glyph)
 	      (setq markedp t)
 	      (put-text-property
 	       index (1+ index) 'help-echo
@@ -306,7 +316,7 @@ current time."
 		(setq last-done-date (car done-dates)
 		      done-dates (cdr done-dates))))
 	  (if todayp
-	      (aset graph index ?!)))
+	      (aset graph index org-habit-today-glyph)))
 	(setq face (if (or in-the-past-p todayp)
 		       (car faces)
 		     (cdr faces)))
