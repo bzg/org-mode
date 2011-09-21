@@ -234,10 +234,11 @@ current code buffer."
 (defun org-babel-R-evaluate
   (session body result-type result-params column-names-p row-names-p)
   "Evaluate R code in BODY."
-  (funcall (if session
-	       #'org-babel-R-evaluate-session
-	     #'org-babel-R-evaluate-external-process)
-	   body result-type result-params column-names-p row-names-p))
+  (if session
+      (org-babel-R-evaluate-session
+       session body result-type result-params column-names-p row-names-p)
+    (org-babel-R-evaluate-external-process
+     body result-type result-params column-names-p row-names-p)))
 
 (defun org-babel-R-evaluate-external-process
   (body result-type result-params column-names-p row-names-p)
