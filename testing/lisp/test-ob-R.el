@@ -1,4 +1,4 @@
-;;; test-ob-fortran.el --- tests for ob-fortran.el
+;;; test-ob-R.el --- tests for ob-R.el
 
 ;; Copyright (c) 2011 Eric Schulte
 ;; Authors: Eric Schulte
@@ -13,14 +13,14 @@
   (require 'org-test)
   (require 'org-test-ob-consts))
 
-(require 'ob-awk)
+(require 'ob-R)
 
 (ert-deftest test-ob-R/simple-session ()
   (org-test-with-temp-text
       "#+begin_src R :session R\n  paste(\"Yep!\")\n#+end_src\n"
     (should (string= "Yep!" (org-babel-execute-src-block)))))
 
-(provide 'test-ob-fortran)
+(provide 'test-ob-R)
 
-;;; test-ob-fortran.el ends here
+;;; test-ob-R.el ends here
  
