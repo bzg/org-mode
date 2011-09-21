@@ -100,8 +100,25 @@ org-test searches this directory up the directory tree.")
 (defconst org-test-link-in-heading-file
   (expand-file-name "link-in-heading.org" org-test-dir))
 
+;; Errors used by test files that shouldn't be run because local
+;; dependencies are missing.
+(put 'org-exe-not-found
+     'error-conditions
+     '(error org-test-missing-dependency org-test-exe-not-found))
+(put 'org-lib-not-found
+     'error-conditions
+     '(error org-test-missing-dependency org-test-lib-not-found))
+
 
 ;;; Functions for writing tests
+(defun org-test-for-executable (exe)
+  "Throw an error if EXE is not available.
+This can be used at the top of code-block-language specific test
+files to avoid loading the file on systems without the
+executable."
+  (unless (> (length (shell-command-to-string (format "which %s" exe))) 0)
+    (signal 'org-test-exe-not-found exe)))
+
 (defun org-test-buffer (&optional file)
   "TODO:  Setup and return a buffer to work with.
 If file is non-nil insert it's contents in there.")
@@ -252,15 +269,22 @@ then remove it and place the point there before running BODY."
 (defun org-test-load ()
   "Load up the org-mode test suite."
   (interactive)
-  (flet ((rload (base)
-		(mapc
-		 (lambda (path)
-		   (if (file-directory-p path) (rload path) (load-file path)))
-		 (directory-files base 'full
-				  "^\\([^.]\\|\\.\\([^.]\\|\\..\\)\\).*\\.el$"))))
-    (rload (expand-file-name "lisp" org-test-dir))
-    (rload (expand-file-name "lisp"
-			     (expand-file-name "contrib" org-test-dir)))))
+  (flet ((rld (base)
+	      ;; Recursively load all files, if files throw errors
+	      ;; then silently ignore the error and continue to the
+	      ;; next file.  This allows files to error out if
+	      ;; required executables aren't available.
+	      (mapc
+	       (lambda (path)
+		 (if (file-directory-p path)
+		     (rld path)
+		   (condition-case nil
+		       (load-file path)
+		     (org-exe-not-found nil))))
+	       (directory-files base 'full
+				"^\\([^.]\\|\\.\\([^.]\\|\\..\\)\\).*\\.el$"))))
+    (rld (expand-file-name "lisp" org-test-dir))
+    (rld (expand-file-name "lisp" (expand-file-name "contrib" org-test-dir)))))
 
 (defun org-test-current-defun ()
   "Test the current function."

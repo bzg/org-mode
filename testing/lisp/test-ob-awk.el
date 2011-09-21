@@ -6,6 +6,8 @@
 ;; Released under the GNU General Public License version 3
 ;; see: http://www.gnu.org/licenses/gpl-3.0.html
 
+(org-test-for-executable "awk")
+
 (let ((load-path (cons (expand-file-name
 			".." (file-name-directory
 			      (or load-file-name buffer-file-name)))
