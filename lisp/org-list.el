@@ -807,21 +807,9 @@ Assume point is at an item."
 	      (forward-line 1))))))
       (setq struct (append itm-lst (cdr (nreverse itm-lst-2)))
 	    end-lst (append end-lst (cdr (nreverse end-lst-2))))
-      ;; 3. Correct ill-formed lists by ensuring top item is the least
-      ;;    indented.
-      (let ((min-ind (nth 1 (car struct))))
-	(mapc (lambda (item)
-		(let ((ind (nth 1 item))
-		      (bul (nth 2 item)))
-		  (when (< ind min-ind)
-		    (setcar (cdr item) min-ind)
-		    ;; Trim bullet so item will be seen as different
-		    ;; when compared with repaired version.
-		    (setcar (nthcdr 2 item) (org-trim bul)))))
-	      struct))
-      ;; 4. Associate each item to its end pos.
+      ;; 3. Associate each item to its end position.
       (org-list-struct-assoc-end struct end-lst)
-      ;; 5. Return STRUCT
+      ;; 4. Return STRUCT
       struct)))
 
 (defun org-list-struct-assoc-end (struct end-list)
@@ -858,8 +846,9 @@ This function modifies STRUCT."
 
 (defun org-list-parents-alist (struct)
   "Return alist between item and parent in STRUCT."
-  (let ((ind-to-ori (list (list (nth 1 (car struct)))))
-	(prev-pos (list (caar struct))))
+  (let* ((ind-to-ori (list (list (nth 1 (car struct)))))
+	 (top-item (org-list-get-top-point struct))
+	 (prev-pos (list top-item)))
     (cons prev-pos
 	  (mapcar (lambda (item)
 		    (let ((pos (car item))
@@ -868,13 +857,29 @@ This function modifies STRUCT."
 		      (push pos prev-pos)
 		      (cond
 		       ((> prev-ind ind)
+			;; A sub-list is over.  Find the associated
+			;; origin in IND-TO-ORI.  If it cannot be
+			;; found (ill-formed list), set its parent as
+			;; the first item less indented.  If there is
+			;; none, make it a top-level item.
 			(setq ind-to-ori
-			      (member (assq ind ind-to-ori) ind-to-ori))
+			      (or (member (assq ind ind-to-ori) ind-to-ori)
+                                  (catch 'exit
+                                    (mapc
+                                     (lambda (e)
+                                       (when (< (car e) ind)
+                                         (throw 'exit (member e ind-to-ori))))
+                                     ind-to-ori)
+                                    (list (list ind)))))
 			(cons pos (cdar ind-to-ori)))
+                       ;; A sub-list starts.  Every item at IND will
+                       ;; have previous item as its parent.
 		       ((< prev-ind ind)
 			(let ((origin (nth 1 prev-pos)))
 			  (push (cons ind origin) ind-to-ori)
 			  (cons pos origin)))
+                       ;; Another item in the same sub-list: it shares
+                       ;; the same parent as the previous item.
 		       (t (cons pos (cdar ind-to-ori))))))
 		  (cdr struct)))))
 
@@ -1762,6 +1767,32 @@ This function modifies STRUCT."
 	    ;; Return blocking item.
 	    (nth index all-items)))))))
 
+(defun org-list-struct-fix-item-end (struct)
+  "Verify and correct each item end position in STRUCT.
+
+This function modifies STRUCT."
+  (let (end-list acc-end)
+    (mapc (lambda (e)
+	    (let* ((pos (car e))
+		   (ind-pos (org-list-get-ind pos struct))
+		   (end-pos (org-list-get-item-end pos struct)))
+	      (unless (assq end-pos struct)
+		;; To determine real ind of an ending position that is
+		;; not at an item, we have to find the item it belongs
+		;; to: it is the last item (ITEM-UP), whose ending is
+		;; further than the position we're interested in.
+		(let ((item-up (assoc-default end-pos acc-end '>)))
+		  (push (cons
+			 ;; Else part is for the bottom point.
+			 (if item-up (+ (org-list-get-ind item-up struct) 2) 0)
+			 end-pos)
+			end-list)))
+	      (push (cons ind-pos pos) end-list)
+	      (push (cons end-pos pos) acc-end)))
+	  struct)
+    (setq end-list (sort end-list (lambda (e1 e2) (< (cdr e1) (cdr e2)))))
+    (org-list-struct-assoc-end struct end-list)))
+
 (defun org-list-struct-apply-struct (struct old-struct)
   "Apply set difference between STRUCT and OLD-STRUCT to the buffer.
 
@@ -1896,38 +1927,17 @@ as returned by `org-list-parents-alist'."
     ;; 1. Set a temporary, but coherent with PARENTS, indentation in
     ;;    order to get items endings and bullets properly
     (org-list-struct-fix-ind struct parents 2)
-    ;; 2. Get pseudo-alist of ending positions and sort it by position.
-    ;;    Then associate them to the structure.
-    (let (end-list acc-end)
-    (mapc (lambda (e)
-	    (let* ((pos (car e))
-		   (ind-pos (org-list-get-ind pos struct))
-		   (end-pos (org-list-get-item-end pos struct)))
-	      (unless (assq end-pos struct)
-		;; To determine real ind of an ending position that is
-		;; not at an item, we have to find the item it belongs
-		;; to: it is the last item (ITEM-UP), whose ending is
-		;; further than the position we're interested in.
-		(let ((item-up (assoc-default end-pos acc-end '>)))
-		  (push (cons
-			 ;; Else part is for the bottom point.
-			 (if item-up (+ (org-list-get-ind item-up struct) 2) 0)
-			 end-pos)
-			end-list)))
-	      (push (cons ind-pos pos) end-list)
-	      (push (cons end-pos pos) acc-end)))
-	  struct)
-    (setq end-list (sort end-list (lambda (e1 e2) (< (cdr e1) (cdr e2)))))
-    (org-list-struct-assoc-end struct end-list))
-  ;; 3. Get bullets right.
-  (let ((prevs (org-list-prevs-alist struct)))
-    (org-list-struct-fix-bul struct prevs)
-    ;; 4. Now get real indentation.
-    (org-list-struct-fix-ind struct parents)
-    ;; 5. Eventually fix checkboxes.
-    (org-list-struct-fix-box struct parents prevs))
-  ;; 6. Apply structure modifications to buffer.
-  (org-list-struct-apply-struct struct old-struct)))
+    ;; 2. Fix each item end to get correct prevs alist.
+    (org-list-struct-fix-item-end struct)
+    ;; 3. Get bullets right.
+    (let ((prevs (org-list-prevs-alist struct)))
+      (org-list-struct-fix-bul struct prevs)
+      ;; 4. Now get real indentation.
+      (org-list-struct-fix-ind struct parents)
+      ;; 5. Eventually fix checkboxes.
+      (org-list-struct-fix-box struct parents prevs))
+    ;; 6. Apply structure modifications to buffer.
+    (org-list-struct-apply-struct struct old-struct)))
 
 
 
