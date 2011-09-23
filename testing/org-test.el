@@ -280,7 +280,7 @@ then remove it and place the point there before running BODY."
 		     (rld path)
 		   (condition-case nil
 		       (load-file path)
-		     (org-exe-not-found nil))))
+		     (org-test-missing-dependency nil))))
 	       (directory-files base 'full
 				"^\\([^.]\\|\\.\\([^.]\\|\\..\\)\\).*\\.el$"))))
     (rld (expand-file-name "lisp" org-test-dir))
