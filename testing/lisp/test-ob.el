@@ -435,6 +435,16 @@
 	  "variable \"x\" in block \"carre\" must be assigned a default value")
 	err)))))
 
+(ert-deftest test-org-babel/just-one-results-block ()
+  "Test that evaluating two times the same code block does not result in a
+duplicate results block."
+  (org-test-with-temp-text "#+begin_src sh\necho Hello\n#+end_src\n"
+    (org-babel-execute-src-block)
+    (org-babel-execute-src-block)     ; second code block execution
+    (should (search-forward "Hello")) ; the string inside the source code block
+    (should (search-forward "Hello")) ; the same string in the results block
+    (should-error (search-forward "Hello"))))
+
 (provide 'test-ob)
 
 ;;; test-ob ends here
