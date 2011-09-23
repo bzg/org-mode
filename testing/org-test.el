@@ -183,7 +183,8 @@ files."
 (defmacro org-test-with-temp-text (text &rest body)
   "Run body in a temporary buffer with Org-mode as the active
 mode holding TEXT.  If the string \"<point>\" appears in TEXT
-then remove it and place the point there before running BODY."
+then remove it and place the point there before running BODY,
+otherwise place the point at the beginning of the inserted text."
   (declare (indent 1))
   (let ((inside-text (if (stringp text) text (eval text))))
     `(with-temp-buffer
