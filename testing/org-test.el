@@ -100,15 +100,6 @@ org-test searches this directory up the directory tree.")
 (defconst org-test-link-in-heading-file
   (expand-file-name "link-in-heading.org" org-test-dir))
 
-;; Errors used by test files that shouldn't be run because local
-;; dependencies are missing.
-(put 'org-exe-not-found
-     'error-conditions
-     '(error org-test-missing-dependency org-test-exe-not-found))
-(put 'org-lib-not-found
-     'error-conditions
-     '(error org-test-missing-dependency org-test-lib-not-found))
-
 
 ;;; Functions for writing tests
 (defun org-test-for-executable (exe)
@@ -117,7 +108,7 @@ This can be used at the top of code-block-language specific test
 files to avoid loading the file on systems without the
 executable."
   (unless (> (length (shell-command-to-string (format "which %s" exe))) 0)
-    (signal 'org-test-exe-not-found exe)))
+    (throw 'missing-test-dependency exe)))
 
 (defun org-test-buffer (&optional file)
   "TODO:  Setup and return a buffer to work with.
@@ -278,10 +269,9 @@ otherwise place the point at the beginning of the inserted text."
 	      (mapc
 	       (lambda (path)
 		 (if (file-directory-p path)
-		     (rld path)
-		   (condition-case nil
-		       (load-file path)
-		     (org-test-missing-dependency nil))))
+		   (rld path)
+		   (catch 'missing-test-dependency
+		     (load-file path))))
 	       (directory-files base 'full
 				"^\\([^.]\\|\\.\\([^.]\\|\\..\\)\\).*\\.el$"))))
     (rld (expand-file-name "lisp" org-test-dir))

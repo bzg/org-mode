@@ -8,7 +8,7 @@
 
 (org-test-for-executable "R")
 (unless (featurep 'ess)
-  (signal 'org-test-lib-not-found "ess"))
+  (throw 'missing-test-dependency "ESS"))
 
 (let ((load-path (cons (expand-file-name
 			".." (file-name-directory
