@@ -872,6 +872,12 @@ Needs to be set before org.el is loaded."
   :group 'org-agenda-startup
   :type 'boolean)
 
+(defcustom org-agenda-follow-indirect nil
+  "Non-nil means `org-agenda-follow-mode' displays only the
+current item's tree, in an indirect buffer."
+  :group 'org-agenda
+  :type 'boolean)
+
 (defcustom org-agenda-show-outline-path t
   "Non-nil means show outline path in echo area after line motion."
   :group 'org-agenda-startup
@@ -6615,8 +6621,7 @@ so that the date SD will be in that range."
   (interactive)
   (setq org-agenda-follow-mode (not org-agenda-follow-mode))
   (org-agenda-set-mode-name)
-  (if (and org-agenda-follow-mode (org-get-at-bol 'org-marker))
-      (org-agenda-show))
+  (org-agenda-do-context-action)
   (message "Follow mode is %s"
 	   (if org-agenda-follow-mode "on" "off")))
 
@@ -6778,7 +6783,9 @@ When called with a prefix argument, include all archive files as well."
   "Show outline path and, maybe, follow mode window."
   (let ((m (org-get-at-bol 'org-marker)))
     (if (and org-agenda-follow-mode m)
-	(org-agenda-show))
+	(if org-agenda-follow-indirect
+	    (org-agenda-tree-to-indirect-buffer)
+	  (org-agenda-show)))
     (if (and m org-agenda-show-outline-path)
 	(org-with-point-at m
 	  (org-display-outline-path t)))))
