@@ -12,8 +12,6 @@ LISPO = org-install.el
 LISPF = $(subst $(LISPO),,$(wildcard *.el))
 LISPC = $(LISPF:%el=%elc)
 
-include dependencies.mk
-
 .PHONY:		all autoloads compile install clean cleanall clean-install
 
 all compile:	$(LISPC)
@@ -44,8 +42,6 @@ cleanall:
 clean-install:
 	if [ ! -d $(lispdir) ]; then $(MKDIR) $(lispdir); else true; fi ;
 	$(RM) $(lispdir)/org*.el* $(lispdir)/ob*.el*
-
-$(LISPC):	dependencies.mk
 
 .SUFFIXES:	# we don't need default suffix rules
 .SUFFIXES:	.el .elc
