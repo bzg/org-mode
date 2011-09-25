@@ -1736,14 +1736,18 @@ visually."
 	;; FIXME: If the file is locked this throws a cryptic error
 	(delete-file target))
 
-      (let ((coding-system-for-write 'no-conversion) exitcode)
+      (let ((coding-system-for-write 'no-conversion) exitcode err-string)
 	(message "Creating odt file...")
 	(mapc
 	 (lambda (cmd)
 	   (message "Running %s" (mapconcat 'identity cmd " "))
-	   (setq exitcode
-		 (apply 'call-process (car cmd) nil nil nil (cdr cmd)))
+	   (setq err-string
+		 (with-output-to-string
+		   (setq exitcode
+			 (apply 'call-process (car cmd)
+				nil standard-output nil (cdr cmd)))))
 	   (or (zerop exitcode)
+	       (ignore (message "%s" err-string))
 	       (error "Unable to create odt file (%S)" exitcode)))
 	 cmds))
 
