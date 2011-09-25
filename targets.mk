@@ -12,6 +12,7 @@ INSTSUB         = $(SUBDIRS:%=install-%)
 	autoloads cleanall clean cleancontrib cleanelc cleandoc cleanrel
 
 compile:	lisp
+	$(MAKE) -C $< clean
 	$(MAKE) -C $< $@
 
 all \
