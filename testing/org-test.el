@@ -107,7 +107,10 @@ org-test searches this directory up the directory tree.")
 This can be used at the top of code-block-language specific test
 files to avoid loading the file on systems without the
 executable."
-  (unless (> (length (shell-command-to-string (format "which %s" exe))) 0)
+  (unless (reduce
+	   (lambda (acc dir)
+	     (or acc (file-exists-p (expand-file-name exe dir))))
+	   exec-path :initial-value nil)
     (throw 'missing-test-dependency exe)))
 
 (defun org-test-buffer (&optional file)
