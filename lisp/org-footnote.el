@@ -522,6 +522,7 @@ or new, let the user edit the definition of the footnote."
 		       (open-line 2)
 		       (point-marker))
 		   (point-max-marker))))
+	(set-marker-insertion-type max t)
 	(goto-char max)
 	;; Check if the footnote tag is defined but missing.  In this
 	;; case, insert it, before any footnote or one blank line
