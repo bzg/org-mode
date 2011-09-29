@@ -148,7 +148,10 @@ This function is called by `org-babel-execute-src-block'."
                   (shell-command-to-string
 		   (format
 		    "gnuplot \"%s\""
-		    (org-babel-process-file-name script-file))))
+		    (org-babel-process-file-name
+		     script-file
+		     (if (member system-type '(cygwin windows-nt ms-dos))
+			 t nil)))))
             (message output))
         (with-temp-buffer
           (insert (concat body "\n"))
