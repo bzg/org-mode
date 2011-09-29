@@ -1342,23 +1342,30 @@ PUB-DIR is set, use this as the publishing directory."
 
 	;; insert html preamble
 	(when (plist-get opt-plist :html-preamble)
-	  (let ((html-pre (plist-get opt-plist :html-preamble)))
-	    (insert "<div id=\"" (nth 0 org-export-html-divs) "\">\n")
+	  (let ((html-pre (plist-get opt-plist :html-preamble))
+		html-pre-real-contents)
 	    (cond ((stringp html-pre)
-		   (insert
-		    (format-spec html-pre `((?t . ,title) (?a . ,author)
-					    (?d . ,date) (?e . ,email)))))
+		   (setq html-pre-real-contents
+			 (format-spec html-pre `((?t . ,title) (?a . ,author)
+						 (?d . ,date) (?e . ,email)))))
 		  ((functionp html-pre)
-		   (funcall html-pre))
+		   (insert "<div id=\"" (nth 0 org-export-html-divs) "\">\n")
+		   (funcall html-pre)
+		   (insert "\n</div>\n"))
 		  (t
-		   (insert
+		   (setq html-pre-real-contents
 		    (format-spec
 		     (or (cadr (assoc (nth 0 lang-words)
 				      org-export-html-preamble-format))
 			 (cadr (assoc "en" org-export-html-preamble-format)))
 		     `((?t . ,title) (?a . ,author)
 		       (?d . ,date) (?e . ,email))))))
-	    (insert "\n</div>\n")))
+	    ;; don't output an empty preamble DIV
+	    (unless (and (functionp html-pre)
+			 (equal html-pre-real-contents ""))
+	      (insert "<div id=\"" (nth 0 org-export-html-divs) "\">\n")
+	      (insert html-pre-real-contents)
+	      (insert "\n</div>\n"))))
 
 	;; begin wrap around body
 	(insert (format "\n<div id=\"%s\">"
