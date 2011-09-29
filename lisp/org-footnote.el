@@ -527,13 +527,13 @@ or new, let the user edit the definition of the footnote."
 	;; Check if the footnote tag is defined but missing.  In this
 	;; case, insert it, before any footnote or one blank line
 	;; after any previous text.
-	(save-excursion
-	  (when (and tag (not (re-search-backward tag nil t)))
-	    (skip-chars-backward " \t\r\n")
-	    (while (re-search-backward org-footnote-definition-re nil t))
-	    (unless (bolp) (newline 2))
-	    (insert org-footnote-tag-for-non-org-mode-files "\n\n")))
+	(when (and tag (not (re-search-backward tag nil t)))
+	  (skip-chars-backward " \t\r\n")
+	  (while (re-search-backward org-footnote-definition-re nil t))
+	  (unless (bolp) (newline 2))
+	  (insert org-footnote-tag-for-non-org-mode-files "\n\n"))
 	;; Remove superfluous white space and clear marker.
+	(goto-char max)
 	(skip-chars-backward " \t\r\n")
 	(delete-region (point) max)
 	(unless (bolp) (newline))
