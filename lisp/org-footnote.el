@@ -343,7 +343,8 @@ If no footnote is found, return nil."
 	     ((org-footnote-at-definition-p)))))))))
 
 (defun org-footnote-goto-definition (label)
-  "Move point to the definition of the footnote LABEL."
+  "Move point to the definition of the footnote LABEL.
+Return a non-nil value when a definition has been found."
   (interactive "sLabel: ")
   (org-mark-ring-push)
   (let ((def (org-footnote-get-definition label)))
@@ -354,7 +355,8 @@ If no footnote is found, return nil."
       (goto-char (match-end 0))
       (org-show-context 'link-search)
       (when (org-mode-p)
-	(message "Edit definition and go back with `C-c &' or, if unique, with `C-c C-c'.")))))
+	(message "Edit definition and go back with `C-c &' or, if unique, with `C-c C-c'."))
+      t)))
 
 (defun org-footnote-goto-previous-reference (label)
   "Find the first closest (to point) reference of footnote with label LABEL."
