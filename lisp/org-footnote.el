@@ -895,16 +895,12 @@ If LABEL is non-nil, delete that footnote instead."
 	(goto-char (point-min))
 	(while (re-search-forward "\\[fn:\\([0-9]+\\)[]:]" nil t)
 	  (setq i (string-to-number (match-string 1)))
-	  (when (and (string-match "\\S-" (buffer-substring
-					   (point-at-bol) (match-beginning 0)))
-		     (not (assq i map)))
+	  (when (not (assq i map))
 	    (push (cons i (number-to-string (incf n))) map)))
 	(goto-char (point-min))
 	(while (re-search-forward "\\(\\[fn:\\)\\([0-9]+\\)\\([]:]\\)" nil t)
-	  (replace-match (concat "\\1"
-				 (cdr (assq (string-to-number (match-string 2))
-					    map))
-				 "\\3")))))))
+	  (setq i (cdr (assq (string-to-number (match-string 2)) map)))
+	  (replace-match (concat "\\1" i "\\3")))))))
 
 (defun org-footnote-auto-adjust-maybe ()
   "Renumber and/or sort footnotes according to user settings."
