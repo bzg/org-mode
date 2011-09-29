@@ -891,15 +891,16 @@ If LABEL is non-nil, delete that footnote instead."
     (org-with-wide-buffer
      (goto-char (point-min))
      (while (re-search-forward "\\[fn:\\([0-9]+\\)[]:]" nil t)
-       (goto-char (match-beginning 0))
-       ;; Ensure match is a footnote reference or definition.
-       (when (or (and (bolp) (save-match-data (org-footnote-at-definition-p)))
-		 (save-match-data (org-footnote-at-reference-p)))
-	 (let ((new-val (or (cdr (assoc (match-string 1) map))
-			    (number-to-string (incf n)))))
-	   (unless (assoc (match-string 1) map)
-	     (push (cons (match-string 1) new-val) map))
-	   (replace-match new-val nil nil nil 1)))))))
+       (save-excursion
+	 (goto-char (match-beginning 0))
+	 ;; Ensure match is a footnote reference or definition.
+	 (when (or (and (bolp) (save-match-data (org-footnote-at-definition-p)))
+		   (save-match-data (org-footnote-at-reference-p)))
+	   (let ((new-val (or (cdr (assoc (match-string 1) map))
+			      (number-to-string (incf n)))))
+	     (unless (assoc (match-string 1) map)
+	       (push (cons (match-string 1) new-val) map))
+	     (replace-match new-val nil nil nil 1))))))))
 
 (defun org-footnote-auto-adjust-maybe ()
   "Renumber and/or sort footnotes according to user settings."
