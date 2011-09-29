@@ -888,19 +888,19 @@ If LABEL is non-nil, delete that footnote instead."
 (defun org-footnote-renumber-fn:N ()
   "Renumber the simple footnotes like fn:17 into a sequence in the document."
   (interactive)
-  (let (map i (n 0))
-    (save-excursion
-      (save-restriction
-	(widen)
-	(goto-char (point-min))
-	(while (re-search-forward "\\[fn:\\([0-9]+\\)[]:]" nil t)
-	  (setq i (string-to-number (match-string 1)))
-	  (when (not (assq i map))
-	    (push (cons i (number-to-string (incf n))) map)))
-	(goto-char (point-min))
-	(while (re-search-forward "\\(\\[fn:\\)\\([0-9]+\\)\\([]:]\\)" nil t)
-	  (setq i (cdr (assq (string-to-number (match-string 2)) map)))
-	  (replace-match (concat "\\1" i "\\3")))))))
+  (let (map (n 0))
+    (org-with-wide-buffer
+     (goto-char (point-min))
+     (while (re-search-forward "\\[fn:\\([0-9]+\\)[]:]" nil t)
+       (goto-char (match-beginning 0))
+       ;; Ensure match is a footnote reference or definition.
+       (when (or (and (bolp) (save-match-data (org-footnote-at-definition-p)))
+		 (save-match-data (org-footnote-at-reference-p)))
+	 (let ((new-val (or (cdr (assoc (match-string 1) map))
+			    (number-to-string (incf n)))))
+	   (unless (assoc (match-string 1) map)
+	     (push (cons (match-string 1) new-val) map))
+	   (replace-match new-val nil nil nil 1)))))))
 
 (defun org-footnote-auto-adjust-maybe ()
   "Renumber and/or sort footnotes according to user settings."
