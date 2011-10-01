@@ -894,8 +894,9 @@ If LABEL is non-nil, delete that footnote instead."
        (save-excursion
 	 (goto-char (match-beginning 0))
 	 ;; Ensure match is a footnote reference or definition.
-	 (when (or (and (bolp) (save-match-data (org-footnote-at-definition-p)))
-		   (save-match-data (org-footnote-at-reference-p)))
+	 (when (save-match-data (if (bolp)
+				    (org-footnote-at-definition-p)
+				  (org-footnote-at-reference-p)))
 	   (let ((new-val (or (cdr (assoc (match-string 1) map))
 			      (number-to-string (incf n)))))
 	     (unless (assoc (match-string 1) map)
