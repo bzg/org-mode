@@ -19919,13 +19919,14 @@ beyond the end of the headline."
   (let ((special (if (consp org-special-ctrl-a/e)
 		     (cdr org-special-ctrl-a/e)
 		   org-special-ctrl-a/e)))
-    (if (or (not special)
-	    (not (org-on-heading-p))
-	    arg)
-	(call-interactively
-	 (cond ((org-bound-and-true-p line-move-visual) 'end-of-visual-line)
-	       ((fboundp 'move-end-of-line) 'move-end-of-line)
-	       (t 'end-of-line)))
+    (cond
+     ((or (not special) arg
+	  (not (or (org-on-heading-p) (org-at-item-p))))
+      (call-interactively
+       (cond ((org-bound-and-true-p line-move-visual) 'end-of-visual-line)
+	     ((fboundp 'move-end-of-line) 'move-end-of-line)
+	     (t 'end-of-line))))
+     ((org-on-heading-p)
       (let ((pos (point)))
 	(beginning-of-line 1)
 	(if (looking-at (org-re ".*?\\(?:\\([ \t]*\\)\\(:[[:alnum:]_@#%:]+:\\)?[ \t]*\\)?$"))
@@ -19940,6 +19941,8 @@ beyond the end of the headline."
 	  (call-interactively (if (fboundp 'move-end-of-line)
 				  'move-end-of-line
 				'end-of-line)))))
+     ;; At an item: Move before any hidden text.
+     (t (call-interactively 'end-of-line)))
     (org-no-warnings
      (and (featurep 'xemacs) (setq zmacs-region-stays t)))))
 
