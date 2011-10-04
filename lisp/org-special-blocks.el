@@ -81,7 +81,7 @@ seen.  This is run after a few special cases are taken care of."
   "Converts the special cookies into div blocks."
   ;; Uses the dynamically-bound variable `line'.
   (when (string-match "^ORG-\\(.*\\)-\\(START\\|END\\)$" line)
-;    (org-close-par-maybe)
+    (org-close-par-maybe)
     (message "%s" (match-string 1))
     (if (equal (match-string 2 line) "START")
 	(insert "<div class=\"" (match-string 1 line) "\">\n")
