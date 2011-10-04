@@ -6869,7 +6869,7 @@ frame is not changed."
     (narrow-to-region beg end)
     (show-all)
     (goto-char pos)
-    (run-hook-with-args 'org-cycle-hook 'all))
+    (run-hook-with-args 'org-cycle-hook 'all)
     (and (window-live-p cwin) (select-window cwin))))
 
 (defun org-get-indirect-buffer (&optional buffer)
