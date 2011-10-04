@@ -3431,22 +3431,26 @@ When EMPTY is non-nil, also include days without any entries."
   (let ((re (concat
 	     (if pre-re pre-re "")
 	     (if inactive org-ts-regexp-both org-ts-regexp)))
-	 dates dates1 date day day1 day2 ts1 ts2)
+	 dates dates1 date day day1 day2 ts1 ts2 pos)
     (if force-today
 	(setq dates (list (org-today))))
     (save-excursion
       (goto-char beg)
       (while (re-search-forward re end t)
 	(setq day (time-to-days (org-time-string-to-time
-				 (substring (match-string 1) 0 10))))
+				 (substring (match-string 1) 0 10)
+				 (current-buffer) (match-beginning 0))))
 	(or (memq day dates) (push day dates)))
       (unless no-ranges
 	(goto-char beg)
 	(while (re-search-forward org-tr-regexp end t)
+	  (setq pos (match-beginning 0))
 	  (setq ts1 (substring (match-string 1) 0 10)
 		ts2 (substring (match-string 2) 0 10)
-		day1 (time-to-days (org-time-string-to-time ts1))
-		day2 (time-to-days (org-time-string-to-time ts2)))
+		day1 (time-to-days (org-time-string-to-time
+				    ts1 (current-buffer) pos))
+		day2 (time-to-days (org-time-string-to-time
+				    ts2  (current-buffer) pos)))
 	  (while (< (setq day1 (1+ day1)) day2)
 	    (or (memq day1 dates) (push day1 dates)))))
       (setq dates (sort dates '<))
@@ -4739,7 +4743,8 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 	(org-agenda-skip)
 	(if (and (match-end 1)
 		 (not (= d1 (org-time-string-to-absolute
-			     (match-string 1) d1 nil show-all))))
+			     (match-string 1) d1 nil show-all
+			     (current-buffer) b0))))
 	    (throw :skip nil))
 	(if (and e3
 		 (not (org-diary-sexp-entry (buffer-substring b3 e3) "" date)))
@@ -5157,7 +5162,8 @@ See also the user option `org-agenda-clock-consistency-checks'."
 			   (member todo-state
 				    org-agenda-repeating-timestamp-show-all))
 	      d2 (org-time-string-to-absolute
-		  (match-string 1) d1 'past show-all)
+		  (match-string 1) d1 'past show-all
+		  (current-buffer) pos)
 	      diff (- d2 d1)
 	      wdays (if suppress-prewarning
 			(let ((org-deadline-warning-days suppress-prewarning))
@@ -5263,7 +5269,8 @@ FRACTION is what fraction of the head-warning time has passed."
 			   (member todo-state
 				   org-agenda-repeating-timestamp-show-all))
 	      d2 (org-time-string-to-absolute
-		  (match-string 1) d1 'past show-all)
+		  (match-string 1) d1 'past show-all
+		  (current-buffer) pos)
 	      diff (- d2 d1))
 	(setq pastschedp (and todayp (< diff 0)))
 	;; When to show a scheduled item in the calendar:
@@ -5363,8 +5370,8 @@ FRACTION is what fraction of the head-warning time has passed."
 	      (end-time (match-string 2)))
 	  (setq s1 (match-string 1)
 		s2 (match-string 2)
-		d1 (time-to-days (org-time-string-to-time s1))
-		d2 (time-to-days (org-time-string-to-time s2)))
+		d1 (time-to-days (org-time-string-to-time s1 (current-buffer) pos))
+		d2 (time-to-days (org-time-string-to-time s2 (current-buffer) pos)))
 	  (if (and (> (- d0 d1) -1) (> (- d2 d0) -1))
 	      ;; Only allow days between the limits, because the normal
 	      ;; date stamps will catch the limits.
