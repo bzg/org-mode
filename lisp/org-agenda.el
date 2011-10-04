@@ -787,7 +787,7 @@ because you will take care of it on the day when scheduled."
 	  (const :tag "Remove prewarning if entry is scheduled" t)
 	  (integer :tag "Restart prewarning N days before deadline")))
 
-(defcustom org-agenda-skip-additional-timestamps-same-entry t
+(defcustom org-agenda-skip-additional-timestamps-same-entry nil
   "When nil, multiple same-day timestamps in entry make multiple agenda lines.
 When non-nil, after the search for timestamps has matched once in an
 entry, the rest of the entry will not be searched."
