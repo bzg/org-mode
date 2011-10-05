@@ -10477,7 +10477,8 @@ prefix argument (`C-u C-u C-u C-c C-w')."
 			       (cond (goto "Goto")
 				     (regionp "Refile region to")
 				     (t "Refile subtree to")) default-buffer
-			       org-refile-allow-creating-parent-nodes)))))
+			       org-refile-allow-creating-parent-nodes
+			       goto)))))
 	  (setq file (nth 1 it)
 		re (nth 2 it)
 		pos (nth 3 it))
@@ -10556,16 +10557,20 @@ prefix argument (`C-u C-u C-u C-c C-w')."
   (bookmark-jump "org-refile-last-stored")
   (message "This is the location of the last refile"))
 
-(defun org-refile-get-location (&optional prompt default-buffer new-nodes)
+(defun org-refile-get-location (&optional prompt default-buffer new-nodes
+					  no-exclude)
   "Prompt the user for a refile location, using PROMPT.
 PROMPT should not be suffixed with a colon and a space, because
 this function appends the default value from
-`org-refile-history' automatically, if that is not empty."
+`org-refile-history' automatically, if that is not empty.
+When NO-EXCLUDE is set, do not exclude headlines in the current subtree,
+this is used for the GOTO interface."
   (let ((org-refile-targets org-refile-targets)
 	(org-refile-use-outline-path org-refile-use-outline-path)
 	excluded-entries)
     (when (and (eq major-mode 'org-mode)
-	       (not org-refile-use-cache))
+	       (not org-refile-use-cache)
+	       (not no-exclude))
       (org-map-tree
        (lambda()
 	 (setq excluded-entries
