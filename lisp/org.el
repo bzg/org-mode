@@ -2879,7 +2879,9 @@ This is an undocumented feature, you should not rely on it.")
   "The column to which tags should be indented in a headline.
 If this number is positive, it specifies the column.  If it is negative,
 it means that the tags should be flushright to that column.  For example,
--80 works well for a normal 80 character screen."
+-80 works well for a normal 80 character screen.
+When 0, place tags directly after headline text, with only one space in
+between."
   :group 'org-tags
   :type 'integer)
 
@@ -13065,7 +13067,7 @@ If ONOFF is `on' or `off', don't toggle but set to this state."
 	  (goto-char (match-beginning 1))
 	  (insert " ")
 	  (delete-region (point) (1+ (match-beginning 2)))
-	  (setq ncol (max (1+ (current-column))
+	  (setq ncol (max (current-column)
 			  (1+ col)
 			  (if (> to-col 0)
 			      to-col
