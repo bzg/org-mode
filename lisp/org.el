@@ -9527,7 +9527,8 @@ application the system uses for this file type."
 			      ((equal arg '(16)) ''org-occur)
 			      (t nil))
 		       ,pos)))
-	    (condition-case nil (eval cmd)
+	    (condition-case nil (let ((org-link-search-inhibit-query t))
+				  (eval cmd))
 	      (error (progn (widen) (eval cmd))))))
 
 	 (t
