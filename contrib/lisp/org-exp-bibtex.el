@@ -102,7 +102,7 @@
 	    (save-match-data
 	      (insert-file-contents (concat file ".html"))
 	      (goto-char (point-min))
-	      (while (re-search-forward "a name=\"\\(\\w+\\)\">\\(\\w+\\)" nil t)
+	      (while (re-search-forward (org-re "a name=\"\\([-_[:word:]]+\\)\">\\([[:word:]]+\\)") nil t)
 		(setq oebp-cite-plist (cons (cons (match-string 1) (match-string 2)) oebp-cite-plist)))
 	      (goto-char (point-min))
 	      (while (re-search-forward "<hr>" nil t)
