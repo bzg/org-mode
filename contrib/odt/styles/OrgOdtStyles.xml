@@ -251,6 +251,14 @@
    </style:paragraph-properties>
   </style:style>
 
+  <style:style style:name="OrgFixedWidthBlockLastLine" style:family="paragraph" style:parent-style-name="OrgFixedWidthBlock">
+   <style:paragraph-properties fo:margin-top="0cm" fo:margin-bottom="0.21cm"/>
+  </style:style>
+
+  <style:style style:name="OrgSrcBlockLastLine" style:family="paragraph" style:parent-style-name="OrgSrcBlock">
+   <style:paragraph-properties fo:margin-top="0cm" fo:margin-bottom="0.21cm"/>
+  </style:style>
+
   <style:style style:name="OrgCenter" style:family="paragraph" style:parent-style-name="Text_20_body">
    <style:paragraph-properties fo:text-align="center" style:justify-single-word="false"/>
   </style:style>

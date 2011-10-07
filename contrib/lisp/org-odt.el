@@ -999,14 +999,18 @@ to make available an enhanced version of `htmlfontify' library."
   "Format source or example blocks much like fixedwidth blocks.
 Use this when `org-export-odt-use-htmlfontify' option is turned
 off."
-  (mapconcat
-   (lambda (line)
-     (org-odt-format-source-line-with-line-number-and-label
-      line rpllbl num (lambda (line)
-			(org-odt-fill-tabs-and-spaces
-			 (org-xml-encode-plain-text line)))
-      'fixedwidth))
-   (org-split-string lines "[\r\n]") "\n"))
+  (let* ((lines (org-split-string lines "[\r\n]"))
+	 (line-count (length lines))
+	 (i 0))
+    (mapconcat
+     (lambda (line)
+       (incf i)
+       (org-odt-format-source-line-with-line-number-and-label
+	line rpllbl num (lambda (line)
+			  (org-odt-fill-tabs-and-spaces
+			   (org-xml-encode-plain-text line)))
+	(if (= i line-count) "OrgFixedWidthBlockLastLine" "OrgFixedWidthBlock")))
+     lines "\n")))
 
 (defvar org-src-block-paragraph-format
   "<style:style style:name=\"OrgSrcBlock\" style:family=\"paragraph\" style:parent-style-name=\"Preformatted_20_Text\">
@@ -1117,11 +1121,16 @@ turned on."
 	    (insert (format "<text:span text:style-name=\"%s\">" style))))
 	 (hfy-end-span-handler (lambda nil (insert "</text:span>"))))
     (when (fboundp 'htmlfontify-string)
-      (mapconcat
-       (lambda (line)
-	 (org-odt-format-source-line-with-line-number-and-label
-	  line rpllbl num 'htmlfontify-string 'src))
-       (org-split-string lines "[\r\n]") "\n"))))
+      (let* ((lines (org-split-string lines "[\r\n]"))
+	     (line-count (length lines))
+	     (i 0))
+	(mapconcat
+	 (lambda (line)
+	   (incf i)
+	   (org-odt-format-source-line-with-line-number-and-label
+	    line rpllbl num 'htmlfontify-string
+	    (if (= i line-count) "OrgSrcBlockLastLine" "OrgSrcBlock")))
+	 lines "\n")))))
 
 (defun org-odt-format-source-code-or-example (lines lang caption textareap
 						    cols rows num cont
