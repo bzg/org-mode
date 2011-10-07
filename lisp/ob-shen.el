@@ -34,7 +34,8 @@
 
 ;;; Code:
 (require 'ob)
-(require 'inf-shen)
+
+(declare-function shen-eval-defun "ext:inf-shen" (&optional and-go))
 
 (defvar org-babel-default-header-args:shen '()
   "Default header arguments for shen code blocks.")
@@ -60,6 +61,7 @@
 (defun org-babel-execute:shen (body params)
   "Execute a block of Shen code with org-babel.
 This function is called by `org-babel-execute-src-block'"
+  (require 'inf-shen)
   (let* ((result-type (cdr (assoc :result-type params)))
          (full-body (org-babel-expand-body:shen body params)))
     ((lambda (results)
