@@ -917,10 +917,13 @@ styles congruent with the ODF-1.2 specification."
   (cond
    ((and (= (string-to-char href) ?#) (not org-odt-suppress-xref))
     (setq href (concat org-export-odt-bookmark-prefix (substring href 1)))
-    (org-odt-format-tags
-     '("<text:bookmark-ref text:reference-format=\"text\" text:ref-name=\"%s\">" .
-       "</text:bookmark-ref>")
-     desc href))
+    (let ((xref-format "text"))
+      (when (numberp desc)
+	(setq desc (format "%d" desc) xref-format "number"))
+      (org-odt-format-tags
+       '("<text:bookmark-ref text:reference-format=\"%s\" text:ref-name=\"%s\">" .
+	 "</text:bookmark-ref>")
+       desc xref-format href)))
    (org-lparse-link-description-is-image
     (org-odt-format-tags
      '("<draw:a xlink:type=\"simple\" xlink:href=\"%s\" %s>" . "</draw:a>")
@@ -978,18 +981,32 @@ to make available an enhanced version of `htmlfontify' library."
   :type 'boolean
   :group 'org-export-odt)
 
+(defun org-odt-format-source-line-with-line-number-and-label
+  (line rpllbl num fontifier par-style)
+
+  (let ((keep-label (not (numberp rpllbl)))
+	(ref (org-find-text-property-in-string 'org-coderef line)))
+    (setq line (concat line (and keep-label ref (format "(%s)" ref))))
+    (setq line (funcall fontifier line))
+    (when ref
+      (setq line (org-odt-format-target line (concat "coderef-" ref))))
+    (setq line (org-odt-format-stylized-paragraph par-style line))
+    (when num
+      (org-odt-format-tags '("<text:list-item>" . "</text:list-item>") line))))
+
 (defun org-odt-format-source-code-or-example-plain
   (lines lang caption textareap cols rows num cont rpllbl fmt)
   "Format source or example blocks much like fixedwidth blocks.
 Use this when `org-export-odt-use-htmlfontify' option is turned
 off."
-  (setq lines (org-export-number-lines (org-xml-encode-plain-text-lines lines)
-				       0 0 num cont rpllbl fmt))
-    (mapconcat
-     (lambda (line)
-       (org-odt-format-stylized-paragraph
-	'fixedwidth (org-odt-fill-tabs-and-spaces line)))
-     (org-split-string lines "[\r\n]") "\n"))
+  (mapconcat
+   (lambda (line)
+     (org-odt-format-source-line-with-line-number-and-label
+      line rpllbl num (lambda (line)
+			(org-odt-fill-tabs-and-spaces
+			 (org-xml-encode-plain-text line)))
+      'fixedwidth))
+   (org-split-string lines "[\r\n]") "\n"))
 
 (defvar org-src-block-paragraph-format
   "<style:style style:name=\"OrgSrcBlock\" style:family=\"paragraph\" style:parent-style-name=\"Preformatted_20_Text\">
@@ -1102,7 +1119,8 @@ turned on."
     (when (fboundp 'htmlfontify-string)
       (mapconcat
        (lambda (line)
-	 (org-odt-format-stylized-paragraph 'src (htmlfontify-string line)))
+	 (org-odt-format-source-line-with-line-number-and-label
+	  line rpllbl num 'htmlfontify-string 'src))
        (org-split-string lines "[\r\n]") "\n"))))
 
 (defun org-odt-format-source-code-or-example (lines lang caption textareap
@@ -1112,16 +1130,22 @@ turned on."
 Use `org-odt-format-source-code-or-example-plain' or
 `org-odt-format-source-code-or-example-colored' depending on the
 value of `org-export-odt-use-htmlfontify."
-  (funcall
-   (if (and org-export-odt-use-htmlfontify
-	    (or (featurep 'htmlfontify) (require 'htmlfontify))
-	    (fboundp 'htmlfontify-string))
-       'org-odt-format-source-code-or-example-colored
-     'org-odt-format-source-code-or-example-plain)
-   lines lang caption textareap cols rows num cont rpllbl fmt))
-
-(defun org-xml-encode-plain-text-lines (rtn)
-  (mapconcat 'org-xml-encode-plain-text (org-split-string rtn "[\r\n]") "\n"))
+  (setq lines (org-export-number-lines
+	       lines 0 0 num cont rpllbl fmt 'preprocess)
+	lines (funcall
+	       (or (and org-export-odt-use-htmlfontify
+			(or (featurep 'htmlfontify)
+			    (require 'htmlfontify))
+			(fboundp 'htmlfontify-string)
+			'org-odt-format-source-code-or-example-colored)
+		   'org-odt-format-source-code-or-example-plain)
+	       lines lang caption textareap cols rows num cont rpllbl fmt))
+  (if (not num) lines
+    (let ((extra (format " text:continue-numbering=\"%s\""
+			 (if cont "true" "false"))))
+      (org-odt-format-tags
+       '("<text:list text:style-name=\"OrgSrcBlockNumberedLine\"%s>"
+	 . "</text:list>") lines extra))))
 
 (defun org-odt-remap-stylenames (style-name)
   (or
@@ -1265,6 +1289,28 @@ MAY-INLINE-P allows inlining it as an image."
 	     (org-odt-is-formula-link-p filename)
 	     (or (not descp)))
 	(org-odt-format-inline-formula thefile))
+       ((string= type "coderef")
+	(let* ((ref fragment)
+	       (lineno-or-ref (cdr (assoc ref org-export-code-refs)))
+	       (desc (and descp desc))
+	       (org-odt-suppress-xref nil)
+	       (href (org-xml-format-href (concat "#coderef-" ref))))
+	  (cond
+	   ((and (numberp lineno-or-ref) (not desc))
+	    (org-odt-format-link lineno-or-ref href))
+	   ((and (numberp lineno-or-ref) desc
+		 (string-match (regexp-quote (concat "(" ref ")")) desc))
+	    (format (replace-match "%s" t t desc)
+		    (org-odt-format-link lineno-or-ref href)))
+	   (t
+	    (setq desc (format
+			(if (and desc (string-match
+				       (regexp-quote (concat "(" ref ")"))
+				       desc))
+			    (replace-match "%s" t t desc)
+			  (or desc "%s"))
+			lineno-or-ref))
+	    (org-odt-format-link (org-xml-format-desc desc) href)))))
        (t
 	(when (string= type "file")
 	  (setq thefile
@@ -1274,16 +1320,15 @@ MAY-INLINE-P allows inlining it as an image."
 		 (t (org-odt-relocate-relative-path
 		     thefile org-current-export-file)))))
 
-	(when (and (member type '("" "http" "https" "file" "coderef"))
-		   fragment)
+	(when (and (member type '("" "http" "https" "file")) fragment)
 	  (setq thefile (concat thefile "#" fragment)))
 
 	(setq thefile (org-xml-format-href thefile))
 
-	(when (not (member type '("" "file" "coderef")))
+	(when (not (member type '("" "file")))
 	  (setq thefile (concat type ":" thefile)))
 
-	(let ((org-odt-suppress-xref (string= type "coderef")))
+	(let ((org-odt-suppress-xref nil))
 	  (org-odt-format-link
 	   (org-xml-format-desc desc) thefile attr)))))))
 
