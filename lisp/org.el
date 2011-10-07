@@ -2375,6 +2375,8 @@ context, and the cdr is the heading to be used.  The heading may also be the
 empty string.
 %t in the heading will be replaced by a time stamp.
 %T will be an active time stamp instead the default inactive one
+%d will be replaced by a short-format time stamp.
+%D will be replaced by an active short-format time stamp.
 %s will be replaced by the new TODO state, in double quotes.
 %S will be replaced by the old TODO state, in double quotes.
 %u will be replaced by the user name.
@@ -12173,6 +12175,12 @@ EXTRA is additional text that will be inserted into the notes buffer."
 			       org-log-note-effective-time))
 		   (cons "%T" (format-time-string
 			       (org-time-stamp-format 'long nil)
+			       org-log-note-effective-time))
+		   (cons "%d" (format-time-string
+			       (org-time-stamp-format nil 'inactive)
+			       org-log-note-effective-time))
+		   (cons "%D" (format-time-string
+			       (org-time-stamp-format nil nil)
 			       org-log-note-effective-time))
 		   (cons "%s" (if org-log-note-state
 				  (concat "\"" org-log-note-state "\"")
