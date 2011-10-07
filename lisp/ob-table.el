@@ -112,9 +112,9 @@ as shown in the example below.
 	   (let ((params
 		  (eval `(org-babel-parse-header-arguments
 			  (concat
-			   ,header-args " "
 			   ":var results="
 			   ,source-block
+			   "[" ,header-args "]"
 			   "("
 			   (mapconcat
 			    (lambda (var-spec)
