@@ -353,10 +353,35 @@ then run `org-babel-pop-to-session'."
 
 (add-hook 'org-metadown-hook 'org-babel-pop-to-session-maybe)
 
+(defconst org-babel-common-header-args-w-values
+  '((cache	. ((no yes)))
+    (cmdline	. :any)
+    (colnames	. ((nil no yes)))
+    (comments	. ((no link yes org both noweb)))
+    (dir	. :any)
+    (eval	. ((never query)))
+    (exports	. ((code results both none)))
+    (file	. :any)
+    (hlines	. ((no yes)))
+    (mkdirp	. ((yes no)))
+    (no-expand)
+    (noeval)
+    (noweb	. ((yes no tangle)))
+    (noweb-ref	. :any)
+    (padline	. ((yes no)))
+    (results	. ((file list vector table scalar verbatim)
+		    (raw org html latex code pp wrap)
+		    (replace silent append prepend)
+		    (output value)))
+    (rownames	. ((no yes)))
+    (sep	. :any)
+    (session	. :any)
+    (shebang	. :any)
+    (tangle	. ((tangle yes no :any)))
+    (var	. :any)))
+
 (defconst org-babel-header-arg-names
-  '(cache cmdline colnames dir exports file noweb results
-    session tangle var eval noeval comments no-expand shebang
-    padline noweb-ref)
+  (mapcar #'car org-babel-common-header-args-w-values)
   "Common header arguments used by org-babel.
 Note that individual languages may define their own language
 specific header arguments as well.")
@@ -571,6 +596,35 @@ arguments and pop open the results in a preview buffer."
 	  (error "supplied header \"%S\" is suspiciously close to \"%S\""
 		 header name))))
     (message "No suspicious header arguments found.")))
+
+;;;###autoload
+(defun org-babel-insert-header-arg ()
+  "Insert a header argument selecting from lists of common args and values."
+  (interactive)
+  (let ((arg (org-icompleting-read
+	      "Header Arg: "
+	      (mapcar
+	       (lambda (header-spec) (symbol-name (car header-spec)))
+	       org-babel-common-header-args-w-values))))
+    (insert arg ":")
+    (let ((vals (cdr (assoc (intern arg)
+			    org-babel-common-header-args-w-values))))
+      (when vals
+	(insert
+	 " "
+	 (cond
+	  ((eq vals :any)
+	   (read-from-minibuffer "value: "))
+	  ((listp vals)
+	   (mapconcat
+	    (lambda (group)
+	      (let ((arg (org-icompleting-read
+			  "value: "
+			  (cons "default" (mapcar #'symbol-name group)))))
+		(if (and arg (not (string= "default" arg)))
+		    (concat arg " ")
+		  "")))
+	    vals ""))))))))
 
 ;;;###autoload
 (defun org-babel-load-in-session (&optional arg info)
@@ -1804,12 +1858,11 @@ Later elements of PLISTS override the values of previous elements.
 This takes into account some special considerations for certain
 parameters when merging lists."
   (let ((results-exclusive-groups
-	 '(("file" "list" "vector" "table" "scalar" "verbatim")
-	   ("raw" "org" "html" "latex" "code" "pp" "wrap")
-	   ("replace" "silent" "append" "prepend")
-	   ("output" "value")))
+	 (mapcar (lambda (group) (mapcar #'symbol-name group))
+		 (cdr (assoc 'results org-babel-common-header-args-w-values))))
 	(exports-exclusive-groups
-	 '(("code" "results" "both" "none")))
+	 (mapcar (lambda (group) (mapcar #'symbol-name group))
+		 (cdr (assoc 'exports org-babel-common-header-args-w-values))))
 	(variable-index 0)
 	params results exports tangle noweb cache vars shebang comments padline)
     (flet ((e-merge (exclusive-groups &rest result-params)
