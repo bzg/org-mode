@@ -254,14 +254,8 @@ OPT-PLIST is the export options list."
 	       'ORG-LINK opt-plist type path nil desc attr descp)))
 
        ((string= type "coderef")
-	(setq rpl
-	      (org-lparse-format
-	       'ORG-LINK opt-plist type "" (format "coderef-%s" path)
-	       (format
-		(org-export-get-coderef-format
-		 path
-		 (and descp desc))
-		(cdr (assoc path org-export-code-refs))) nil descp)))
+	(setq rpl (org-lparse-format
+		   'ORG-LINK opt-plist type "" path desc nil descp)))
 
        ((functionp (setq fnc (nth 2 (assoc type org-link-protocols))))
 	;; The link protocol has a function for format the link

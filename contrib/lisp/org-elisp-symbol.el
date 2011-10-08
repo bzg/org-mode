@@ -106,6 +106,7 @@
 			  ((user-variable-p sym-name) "User variable")
 			  ((string= def "defvar") "Variable")
 			  ((string= def "defmacro") "Macro")
+			  ((string= def "defun") "Function or command")
 			  (t "Symbol")))
 	     (args (if (match-string 3)
 		       (mapconcat (lambda (a) (unless (string-match "^&" a) a))

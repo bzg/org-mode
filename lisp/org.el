@@ -185,6 +185,7 @@ requirements) is loaded."
 		 (const :tag "Scheme" scheme)
 		 (const :tag "Screen" screen)
 		 (const :tag "Shell Script" sh)
+		 (const :tag "Shen" shen)
 		 (const :tag "Sql" sql)
 		 (const :tag "Sqlite" sqlite))
 		:value-type (boolean :tag "Activate" :value t)))
@@ -1864,7 +1865,7 @@ will temporarily be changed to `time'."
 
 (defcustom org-refile-targets nil
   "Targets for refiling entries with \\[org-refile].
-This is list of cons cells.  Each cell contains:
+This is a list of cons cells.  Each cell contains:
 - a specification of the files to be considered, either a list of files,
   or a symbol whose function or variable value will be used to retrieve
   a file name or a list of file names.  If you use `org-agenda-files' for
@@ -1885,6 +1886,10 @@ This is list of cons cells.  Each cell contains:
   - a cons cell (:maxlevel . N).  Any headline with level <= N is a target.
     Note that, when `org-odd-levels-only' is set, level corresponds to
     order in hierarchy, not to the number of stars.
+
+Each element of this list generates a set of possible targets.
+The union of these sets is presented (with completion) to
+the user by `org-refile'.
 
 You can set the variable `org-refile-target-verify-function' to a function
 to verify each headline found by the simple criteria above.
@@ -2879,7 +2884,9 @@ This is an undocumented feature, you should not rely on it.")
   "The column to which tags should be indented in a headline.
 If this number is positive, it specifies the column.  If it is negative,
 it means that the tags should be flushright to that column.  For example,
--80 works well for a normal 80 character screen."
+-80 works well for a normal 80 character screen.
+When 0, place tags directly after headline text, with only one space in
+between."
   :group 'org-tags
   :type 'integer)
 
@@ -9521,7 +9528,8 @@ application the system uses for this file type."
 			      ((equal arg '(16)) ''org-occur)
 			      (t nil))
 		       ,pos)))
-	    (condition-case nil (eval cmd)
+	    (condition-case nil (let ((org-link-search-inhibit-query t))
+				  (eval cmd))
 	      (error (progn (widen) (eval cmd))))))
 
 	 (t
@@ -13065,7 +13073,7 @@ If ONOFF is `on' or `off', don't toggle but set to this state."
 	  (goto-char (match-beginning 1))
 	  (insert " ")
 	  (delete-region (point) (1+ (match-beginning 2)))
-	  (setq ncol (max (1+ (current-column))
+	  (setq ncol (max (current-column)
 			  (1+ col)
 			  (if (> to-col 0)
 			      to-col

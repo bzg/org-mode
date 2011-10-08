@@ -5409,7 +5409,9 @@ FRACTION is what fraction of the head-warning time has passed."
 				     org-agenda-timerange-leaders)
 				(1+ (- d0 d1)) (1+ (- d2 d1)))
 			       head category tags
-			       (cond ((= d1 d0)
+			       (cond ((and (= d1 d0) (= d2 d0))
+				      (concat "<" start-time ">--<" end-time ">"))
+                                     ((= d1 d0)
 				      (concat "<" start-time ">"))
 				     ((= d2 d0)
 				      (concat "<" end-time ">"))
