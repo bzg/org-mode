@@ -14077,7 +14077,7 @@ fixed this problem:
 (add-hook 'org-mode-hook
           (lambda ()
             (org-set-local 'yas/trigger-key [tab])
-            (define-key yas/keymap [tab] 'yas/next-field)))
+            (define-key yas/keymap [tab] 'yas/next-field-or-maybe-expand)))
 @end lisp
 
 The latest version of yasnippet doesn't play well with Org mode.  If the
