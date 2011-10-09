@@ -606,7 +606,7 @@ arguments and pop open the results in a preview buffer."
 	      (mapcar
 	       (lambda (header-spec) (symbol-name (car header-spec)))
 	       org-babel-common-header-args-w-values))))
-    (insert arg ":")
+    (insert ":" arg)
     (let ((vals (cdr (assoc (intern arg)
 			    org-babel-common-header-args-w-values))))
       (when vals
