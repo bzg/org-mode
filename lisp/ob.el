@@ -601,14 +601,20 @@ arguments and pop open the results in a preview buffer."
 (defun org-babel-insert-header-arg ()
   "Insert a header argument selecting from lists of common args and values."
   (interactive)
-  (let ((arg (org-icompleting-read
+  (let* ((lang (car (org-babel-get-src-block-info 'light)))
+	 (lang-headers (intern (concat "org-babel-header-arg-names:" lang)))
+	 (headers (append (if (boundp lang-headers)
+			      (mapcar (lambda (h) (cons h :any))
+				      (eval lang-headers))
+			    nil)
+			  org-babel-common-header-args-w-values))
+	 (arg (org-icompleting-read
 	      "Header Arg: "
 	      (mapcar
 	       (lambda (header-spec) (symbol-name (car header-spec)))
-	       org-babel-common-header-args-w-values))))
+	       headers))))
     (insert ":" arg)
-    (let ((vals (cdr (assoc (intern arg)
-			    org-babel-common-header-args-w-values))))
+    (let ((vals (cdr (assoc (intern arg) headers))))
       (when vals
 	(insert
 	 " "
