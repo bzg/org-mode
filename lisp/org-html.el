@@ -1046,9 +1046,9 @@ OPT-PLIST is the export options list."
 
        (t
 	;; just publish the path, as default
-	(setq rpl (concat "@<i>&lt;" type ":"
+	(setq rpl (concat "<i>&lt;" type ":"
 			  (save-match-data (org-link-unescape path))
-			  "&gt;@</i>"))))
+			  "&gt;</i>"))))
       (setq line (replace-match rpl t t line)
 	    start (+ start (length rpl))))
     line))
