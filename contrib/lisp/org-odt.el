@@ -1140,8 +1140,7 @@ Use `org-odt-format-source-code-or-example-plain' or
 `org-odt-format-source-code-or-example-colored' depending on the
 value of `org-export-odt-use-htmlfontify."
   (setq lines (org-export-number-lines
-	       lines 0 0 num cont rpllbl fmt ;; 'preprocess
-	       )
+	       lines 0 0 num cont rpllbl fmt 'preprocess)
 	lines (funcall
 	       (or (and org-export-odt-use-htmlfontify
 			(or (featurep 'htmlfontify)
