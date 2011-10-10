@@ -73,7 +73,6 @@
 	  org-deadline-string "\\|"
 	  org-closed-string"\\)")
   "Regexp matching special time planning keywords plus the time after it.")
-
 (defvar org-re-quote)  ; dynamically scoped from org.el
 (defvar org-commentsp) ; dynamically scoped from org.el
 
@@ -355,6 +354,12 @@ string defines the replacement string for this quote."
 
 (defcustom org-export-latex-tables-centered t
   "When non-nil, tables are exported in a center environment."
+  :group 'org-export-latex
+  :type 'boolean)
+
+(defcustom org-export-latex-table-caption-above t
+  "When non-nil, the caption is set above the table.  When nil,
+the caption is set below the table."
   :group 'org-export-latex
   :type 'boolean)
 
@@ -1965,13 +1970,13 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
                             (concat "\\begin{longtable}{" align "}\n")
                           (if floatp
 			      (format "\\begin{%s}%s\n" tblenv placement)))
-                        (if floatp
+                        (if (and floatp org-export-latex-table-caption-above)
                             (format
                              "\\caption%s{%s} %s"
                              (if shortn (concat "[" shortn "]") "")
                              (or caption "")
 			     (if label (format "\\label{%s}" label) "")))
-                        (if (and longtblp caption) "\\\\\n" "\n")
+			(if (and longtblp caption) "\\\\\n" "\n")
                         (if (and org-export-latex-tables-centered (not longtblp))
                             "\\begin{center}\n")
                         (if (not longtblp)
@@ -1993,6 +1998,12 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
                         (if (not longtblp) (format "\n\\end{%s}" tabular-env))
                         (if longtblp "\n" (if org-export-latex-tables-centered
                                               "\n\\end{center}\n" "\n"))
+                        (if (and floatp (not org-export-latex-table-caption-above))
+                            (format
+                             "\\caption%s{%s} %s"
+                             (if shortn (concat "[" shortn "]") "")
+                             (or caption "")
+			     (if label (format "\\label{%s}" label) "")))
                         (if longtblp
                             "\\end{longtable}"
                           (if floatp (format "\\end{%s}" tblenv)))))
@@ -2042,11 +2053,12 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
       (setq tbl (concat "\\begin{center}\n" tbl "\\end{center}")))
     (when floatp
       (setq tbl (concat "\\begin{table}\n"
+			(if (not org-export-latex-table-caption-above) tbl)
 			(format "\\caption%s{%s%s}\n"
 				(if shortn (format "[%s]" shortn) "")
 				(if label (format "\\label{%s}" label) "")
 				(or caption ""))
-			tbl
+			(if org-export-latex-table-caption-above tbl)
 			"\n\\end{table}\n")))
     (insert (org-export-latex-protect-string tbl))))
 
