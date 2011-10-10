@@ -1647,6 +1647,8 @@ See `org-odt-entity-labels-alist' and
 `org-odt-label-def-ref-spec'."
   (let* ((label-props (assoc label org-odt-entity-labels-alist))
 	 (category (nth 1 label-props)))
+    (unless label-props
+      (error "There is no entity labelled as %s" label))
     (append label-props
 	    (cddr (or (assoc-string category org-odt-label-def-ref-spec t)
 		      (assoc-string "" org-odt-label-def-ref-spec t))))))
