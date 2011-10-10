@@ -1648,10 +1648,12 @@ See `org-odt-entity-labels-alist' and
   (let* ((label-props (assoc label org-odt-entity-labels-alist))
 	 (category (nth 1 label-props)))
     (unless label-props
-      (error "There is no entity labelled as %s" label))
-    (append label-props
-	    (cddr (or (assoc-string category org-odt-label-def-ref-spec t)
-		      (assoc-string "" org-odt-label-def-ref-spec t))))))
+      (org-lparse-warn
+       (format "Unable to resolve reference to label \"%s\"" label)))
+    (when label-props
+      (append label-props
+	      (cddr (or (assoc-string category org-odt-label-def-ref-spec t)
+			(assoc-string "" org-odt-label-def-ref-spec t)))))))
 
 (defun org-odt-format-label-definition (label category caption)
   (assert label)
@@ -1680,10 +1682,11 @@ See `org-odt-entity-labels-alist' and
   (goto-char (point-min))
   (while (re-search-forward
 	  "<text:sequence-ref text:ref-name=\"\\([^\"]+\\)\"/>" nil t)
-    (let* ((label (match-string 1)))
-      (replace-match
-       (apply 'org-odt-format-label-reference
-	      (org-odt-get-label-definition label)) t t))))
+    (let* ((label (match-string 1))
+	   (label-def (org-odt-get-label-definition label))
+	   (rpl (and label-def
+		     (apply 'org-odt-format-label-reference label-def))))
+      (when rpl (replace-match rpl t t)))))
 
 (defun org-odt-format-entity-caption (label caption category)
   (or (and label (org-odt-format-label-definition label category caption))
