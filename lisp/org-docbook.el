@@ -293,7 +293,7 @@ then use this command to convert it."
   (interactive "r")
   (let (reg docbook buf)
     (save-window-excursion
-      (if (org-mode-p)
+      (if (eq major-mode 'org-mode)
 	  (setq docbook (org-export-region-as-docbook
 			 beg end t 'string))
 	(setq reg (buffer-substring beg end)

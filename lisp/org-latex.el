@@ -723,7 +723,7 @@ then use this command to convert it."
   (interactive "r")
   (let (reg latex buf)
     (save-window-excursion
-      (if (org-mode-p)
+      (if (eq major-mode 'org-mode)
 	  (setq latex (org-export-region-as-latex
 		       beg end t 'string))
 	(setq reg (buffer-substring beg end)

@@ -186,7 +186,7 @@ This is the compiled version of the format.")
 		    (cons "ITEM"
 			  ;; When in a buffer, get the whole line,
 			  ;; we'll clean it later…
-			  (if (org-mode-p)
+			  (if (eq major-mode 'org-mode)
 			      (save-match-data
 				(org-no-properties
 				 (org-remove-tabs
@@ -497,7 +497,7 @@ Where possible, use the standard interface for changing this line."
 		(org-columns-eval eval))
 	    (org-columns-display-here)))
 	(org-move-to-column col)
-	(if (and (org-mode-p)
+	(if (and (eq major-mode 'org-mode)
 		 (nth 3 (assoc key org-columns-current-fmt-compiled)))
 	    (org-columns-update key)))))))
 
@@ -1003,7 +1003,7 @@ Don't set this, this is meant for dynamic scoping.")
       (if (marker-position org-columns-begin-marker)
 	  (goto-char org-columns-begin-marker))
       (org-columns-remove-overlays)
-      (if (org-mode-p)
+      (if (eq major-mode 'org-mode)
 	  (call-interactively 'org-columns)
 	(org-agenda-redo)
 	(call-interactively 'org-agenda-columns)))

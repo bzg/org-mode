@@ -821,7 +821,7 @@ When nil, simply write \"#ERROR\" in corrupted fields.")
     (delete-region (point) end)
     (move-marker end nil)
     (move-marker org-table-aligned-end-marker (point))
-    (when (and orgtbl-mode (not (org-mode-p)))
+    (when (and orgtbl-mode (not (eq major-mode 'org-mode)))
       (goto-char org-table-aligned-begin-marker)
       (while (org-hide-wide-columns org-table-aligned-end-marker)))
     ;; Try to move to the old location
@@ -3799,7 +3799,7 @@ Use COMMAND to do the motion, repeat if necessary to end up in a data line."
   :lighter " OrgTbl" :keymap orgtbl-mode-map
   (org-load-modules-maybe)
   (cond
-   ((org-mode-p)
+   ((eq major-mode 'org-mode)
     ;; Exit without error, in case some hook functions calls this
     ;; by accident in org-mode.
     (message "Orgtbl-mode is not useful in org-mode, command ignored"))

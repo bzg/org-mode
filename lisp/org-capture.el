@@ -485,7 +485,7 @@ bypassed."
 	     (error "Capture template `%s': %s"
 		    (org-capture-get :key)
 		    (nth 1 error))))
-	  (if (and (org-mode-p)
+	  (if (and (eq major-mode 'org-mode)
 		   (org-capture-get :clock-in))
 	      (condition-case nil
 		  (progn
@@ -575,7 +575,7 @@ captured item after finalizing."
 	  (org-capture-empty-lines-after
 	   (or (org-capture-get :empty-lines 'local) 0))))
       ;; Postprocessing:  Update Statistics cookies, do the sorting
-      (when (org-mode-p)
+      (when (eq major-mode 'org-mode)
 	(save-excursion
 	  (when (ignore-errors (org-back-to-heading))
 	    (org-update-parent-todo-statistics)
@@ -723,7 +723,7 @@ already gone.  Any prefix argument will be passed to the refile command."
 	(widen)
 	(let ((hd (nth 2 target)))
 	  (goto-char (point-min))
-	  (unless (org-mode-p)
+	  (unless (eq major-mode 'org-mode)
 	    (error
 	     "Target buffer \"%s\" for file+headline should be in Org mode"
 	     (current-buffer)))
@@ -755,7 +755,7 @@ already gone.  Any prefix argument will be passed to the refile command."
 	      (goto-char (if (org-capture-get :prepend)
 			     (match-beginning 0) (match-end 0)))
 	      (org-capture-put :exact-position (point))
-	      (setq target-entry-p (and (org-mode-p) (org-at-heading-p))))
+	      (setq target-entry-p (and (eq major-mode 'org-mode) (org-at-heading-p))))
 	  (error "No match for target regexp in file %s" (nth 1 target))))
 
        ((memq (car target) '(file+datetree file+datetree+prompt))
@@ -789,12 +789,12 @@ already gone.  Any prefix argument will be passed to the refile command."
 	(widen)
 	(funcall (nth 2 target))
 	(org-capture-put :exact-position (point))
-	(setq target-entry-p (and (org-mode-p) (org-at-heading-p))))
+	(setq target-entry-p (and (eq major-mode 'org-mode) (org-at-heading-p))))
 
        ((eq (car target) 'function)
 	(funcall (nth 1 target))
 	(org-capture-put :exact-position (point))
-	(setq target-entry-p (and (org-mode-p) (org-at-heading-p))))
+	(setq target-entry-p (and (eq major-mode 'org-mode) (org-at-heading-p))))
 
        ((eq (car target) 'clock)
 	(if (and (markerp org-clock-hd-marker)
@@ -1147,11 +1147,11 @@ Point will remain at the first line after the inserted text."
     (or (bolp) (newline))
     (setq beg (point))
     (cond
-     ((and (eq type 'entry) (org-mode-p))
+     ((and (eq type 'entry) (eq major-mode 'org-mode))
       (org-capture-verify-tree (org-capture-get :template))
       (org-paste-subtree nil template t))
      ((and (memq type '(item checkitem))
-	   (org-mode-p)
+	   (eq major-mode 'org-mode)
 	   (save-excursion (skip-chars-backward " \t\n")
 			   (setq pp (point))
 			   (org-in-item-p)))

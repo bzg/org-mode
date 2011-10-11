@@ -99,7 +99,7 @@ show the relevant section"
                        (concat "file:" filename "::" line)
                                (org-annotate-file-elipsify-desc line))))
     (with-current-buffer (find-file org-annotate-file-storage-file)
-      (unless (org-mode-p)
+      (unless (eq major-mode 'org-mode)
         (org-mode))
       (goto-char (point-min))
       (widen)

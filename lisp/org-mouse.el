@@ -615,12 +615,12 @@ This means, between the beginning of line and the point."
   (beginning-of-line))
 
 (defadvice dnd-insert-text (around org-mouse-dnd-insert-text activate)
-  (if (org-mode-p)
+  (if (eq major-mode 'org-mode)
       (org-mouse-insert-item text)
     ad-do-it))
 
 (defadvice dnd-open-file (around org-mouse-dnd-open-file activate)
-  (if (org-mode-p)
+  (if (eq major-mode 'org-mode)
       (org-mouse-insert-item uri)
     ad-do-it))
 

@@ -118,7 +118,7 @@ this command to convert it."
   (interactive "Mbackend: \nr")
   (let (reg backend-string buf pop-up-frames)
     (save-window-excursion
-      (if (org-mode-p)
+      (if (eq major-mode 'org-mode)
 	  (setq backend-string (org-lparse-region backend beg end t 'string))
 	(setq reg (buffer-substring beg end)
 	      buf (get-buffer-create "*Org tmp*"))

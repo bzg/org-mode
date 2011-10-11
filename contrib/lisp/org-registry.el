@@ -219,7 +219,7 @@ Use with caution.  This could slow down things a bit."
 (defun org-registry-update ()
   "Update the registry for the current Org file."
   (interactive)
-  (unless (org-mode-p) (error "Not in org-mode"))
+  (unless (eq major-mode 'org-mode) (error "Not in org-mode"))
   (let* ((from-file (expand-file-name (buffer-file-name)))
 	 (new-entries (org-registry-get-entries from-file)))
     (with-temp-buffer

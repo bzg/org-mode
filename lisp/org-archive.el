@@ -253,7 +253,7 @@ this heading."
 	(let (this-command) (org-copy-subtree 1 nil t))
 	(set-buffer buffer)
 	;; Enforce org-mode for the archive buffer
-	(if (not (org-mode-p))
+	(if (not (eq major-mode 'org-mode))
 	    ;; Force the mode for future visits.
 	    (let ((org-insert-mode-line-in-empty-file t)
 		  (org-inhibit-startup t))

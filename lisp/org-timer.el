@@ -372,7 +372,7 @@ replace any running timer."
 		     (org-show-entry)
 		     (or (ignore-errors (org-get-heading))
 			 (concat "File:" (file-name-nondirectory (buffer-file-name)))))))
-		((org-mode-p)
+		((eq major-mode 'org-mode)
 		 (or (ignore-errors (org-get-heading))
 		     (concat "File:" (file-name-nondirectory (buffer-file-name)))))
 		(t (error "Not in an Org buffer"))))

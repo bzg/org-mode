@@ -272,10 +272,6 @@ we turn off invisibility temporarily.  Use this in a `let' form."
   "Make VAR local in current buffer and set it to VALUE."
   (set (make-local-variable var) value))
 
-(defsubst org-mode-p ()
-  "Check if the current buffer is in Org-mode."
-  (eq major-mode 'org-mode))
-
 (defsubst org-last (list)
   "Return the last element of LIST."
   (car (last list)))
@@ -388,7 +384,7 @@ point nowhere."
 (defun org-get-limited-outline-regexp ()
   "Return outline-regexp with limited number of levels.
 The number of levels is controlled by `org-inlinetask-min-level'"
-  (if (or (not (org-mode-p)) (not (featurep 'org-inlinetask)))
+  (if (or (not (eq major-mode 'org-mode)) (not (featurep 'org-inlinetask)))
       org-outline-regexp
     (let* ((limit-level (1- org-inlinetask-min-level))
 	   (nstars (if org-odd-levels-only (1- (* limit-level 2)) limit-level)))

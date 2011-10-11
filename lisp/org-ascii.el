@@ -144,7 +144,7 @@ command to convert it."
   (interactive "r")
   (let (reg ascii buf pop-up-frames)
     (save-window-excursion
-      (if (org-mode-p)
+      (if (eq major-mode 'org-mode)
 	  (setq ascii (org-export-region-as-ascii
 		      beg end t 'string))
 	(setq reg (buffer-substring beg end)
