@@ -10481,14 +10481,20 @@ prefix argument (`C-u C-u C-u C-c C-w')."
 				       (marker-position org-clock-hd-marker)))
 		      (setq goto nil)))
 	       (setq it (or rfloc
-			    (save-excursion
-			      (unless goto (org-back-to-heading t))
-			      (org-refile-get-location
-			       (cond (goto "Goto")
-				     (regionp "Refile region to")
-				     (t "Refile subtree to")) default-buffer
-			       org-refile-allow-creating-parent-nodes
-			       goto)))))
+			    (let (heading-text)
+			      (save-excursion
+				(unless goto
+				  (org-back-to-heading t)
+				  (setq heading-text
+					(nth 4 (org-heading-components))))
+				(org-refile-get-location
+				 (cond (goto "Goto")
+				       (regionp "Refile region to")
+				       (t (concat "Refile subtree \""
+						  heading-text "\" to")))
+				 default-buffer
+				 org-refile-allow-creating-parent-nodes
+				 goto))))))
 	  (setq file (nth 1 it)
 		re (nth 2 it)
 		pos (nth 3 it))
