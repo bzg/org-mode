@@ -7526,15 +7526,25 @@ the same tree node, and the headline of the tree node in the Org-mode file."
   (let* ((marker (or (org-get-at-bol 'org-marker)
 		     (org-agenda-error)))
 	 (buffer (marker-buffer marker))
-	 (pos (marker-position marker)))
+	 (pos (marker-position marker))
+	 cdate today)
     (org-with-remote-undo buffer
-     (with-current-buffer buffer
-       (widen)
-       (goto-char pos)
-       (if (not (org-at-timestamp-p))
-	   (error "Cannot find time stamp"))
-       (org-timestamp-change arg (or what 'day)))
-     (org-agenda-show-new-time marker org-last-changed-timestamp))
+      (with-current-buffer buffer
+	(widen)
+	(goto-char pos)
+	(if (not (org-at-timestamp-p))
+	    (error "Cannot find time stamp"))
+	(setq cdate (org-parse-time-string (match-string 0) 'nodefault)
+	      cdate (calendar-absolute-from-gregorian 
+		     (list (nth 4 cdate) (nth 3 cdate) (nth 5 cdate)))
+	      today (org-today))
+	(if (and (equal arg 1)
+		 (or (not what) (eq what 'day))
+		 (> today cdate))
+	    ;; immediately shift to today
+	    (org-timestamp-change (- today cdate) 'day)
+	  (org-timestamp-change arg (or what 'day))))
+      (org-agenda-show-new-time marker org-last-changed-timestamp))
     (message "Time stamp changed to %s" org-last-changed-timestamp)))
 
 (defun org-agenda-date-earlier (arg &optional what)
