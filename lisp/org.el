@@ -3283,6 +3283,46 @@ This is a property list with the following properties:
 When nil, just push out a message."
   :group 'org-latex
   :type 'boolean)
+(defcustom org-latex-to-mathml-jar-file nil
+  "Value of\"%j\" in `org-latex-to-mathml-convert-command'.
+Use this to specify additional executable file say a jar file.
+
+When using MathToWeb as the converter, specify the full-path to
+your mathtoweb.jar file."
+  :group 'org-latex
+  :type '(choice
+	  (const :tag "None" nil)
+	  (file :tag "JAR file" :must-match t)))
+
+(defcustom org-latex-to-mathml-convert-command nil
+  "Command to convert LaTeX fragments to MathML.
+Replace format-specifiers in the command as noted below and use
+`shell-command' to convert LaTeX to MathML.
+%j:     Executable file in fully expanded form as specified by
+        `org-latex-to-mathml-jar-file'.
+%I:     Input LaTeX file in fully expanded form
+%o:     Output MathML file
+This command is used by `org-create-math-formula'.
+
+When using MathToWeb as the converter, set this to
+\"java -jar %j -unicode -force -df %o %I\"."
+  :group 'org-latex
+  :type '(choice
+	  (const :tag "None" nil)
+	  (string :tag "\nShell command")))
+
+(defun org-format-latex-mathml-available-p ()
+  "Return t if `org-latex-to-mathml-convert-command' is usable."
+  (save-match-data
+    (when (and (boundp 'org-latex-to-mathml-convert-command)
+	       org-latex-to-mathml-convert-command)
+      (let ((executable (car (split-string
+			      org-latex-to-mathml-convert-command))))
+	(when (executable-find executable)
+	  (if (string-match
+	       "%j" org-latex-to-mathml-convert-command)
+	      (file-readable-p org-latex-to-mathml-jar-file)
+	    t))))))
 
 (defcustom org-format-latex-header "\\documentclass{article}
 \\usepackage[usenames]{color}
@@ -16641,47 +16681,6 @@ Some of the options can be changed using the variable
 	     (t
 	      (error "Unknown conversion type %s for latex fragments"
 		     processing-type)))))))))
-
-(defcustom org-latex-to-mathml-jar-file nil
-  "Value of\"%j\" in `org-latex-to-mathml-convert-command'.
-Use this to specify additional executable file say a jar file.
-
-When using MathToWeb as the converter, specify the full-path to
-your mathtoweb.jar file."
-  :group 'org-latex
-  :type '(choice
-	  (const :tag "None" nil)
-	  (file :tag "JAR file" :must-match t)))
-
-(defcustom org-latex-to-mathml-convert-command nil
-  "Command to convert LaTeX fragments to MathML.
-Replace format-specifiers in the command as noted below and use
-`shell-command' to convert LaTeX to MathML.
-%j:     Executable file in fully expanded form as specified by
-        `org-latex-to-mathml-jar-file'.
-%I:     Input LaTeX file in fully expanded form
-%o:     Output MathML file
-This command is used by `org-create-math-formula'.
-
-When using MathToWeb as the converter, set this to
-\"java -jar %j -unicode -force -df %o %I\"."
-  :group 'org-latex
-  :type '(choice
-	  (const :tag "None" nil)
-	  (string :tag "\nShell command")))
-
-(defun org-format-latex-mathml-available-p ()
-  "Return t if `org-latex-to-mathml-convert-command' is usable."
-  (save-match-data
-    (when (and (boundp 'org-latex-to-mathml-convert-command)
-	       org-latex-to-mathml-convert-command)
-      (let ((executable (car (split-string
-			      org-latex-to-mathml-convert-command))))
-	(when (executable-find executable)
-	  (if (string-match
-	       "%j" org-latex-to-mathml-convert-command)
-	      (file-readable-p org-latex-to-mathml-jar-file)
-	    t))))))
 
 (defun org-create-math-formula (latex-frag &optional mathml-file)
   "Convert LATEX-FRAG to MathML and store it in MATHML-FILE.
