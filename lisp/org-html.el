@@ -1628,9 +1628,9 @@ PUB-DIR is set, use this as the publishing directory."
 			    (if (member (match-string 2 line)
 					org-done-keywords)
 				"done" "todo")
-			    " " (match-string 2 line)
-			    "\"> " (org-export-html-get-todo-kwd-class-name
-				    (match-string 2 line))
+			    " " (org-export-html-get-todo-kwd-class-name
+				 (match-string 2 line))
+			    "\"> " (match-string 2 line)
 			    "</span>" (substring line (match-end 2)))))
 
 	  ;; Does this contain a reference to a footnote?
