@@ -18027,6 +18027,7 @@ When in an #+include line, visit the include file.  Otherwise call
     (call-interactively 'org-table-edit-formulas))
    (t (call-interactively 'ffap))))
 
+(defvar org-table-coordinate-overlays) ; defined in org-table.el
 (defun org-ctrl-c-ctrl-c (&optional arg)
   "Set tags in headline, or update according to changed information at point.
 
@@ -18167,8 +18168,9 @@ This command does many different things, depending on context:
        (t
 	(let ((org-inhibit-startup-visibility-stuff t)
 	      (org-startup-align-all-tables nil))
-	  (mapc 'delete-overlay org-table-coordinate-overlays)
-	  (setq org-table-coordinate-overlays nil)
+	  (when (boundp 'org-table-coordinate-overlays)
+	    (mapc 'delete-overlay org-table-coordinate-overlays)
+	    (setq org-table-coordinate-overlays nil))
 	  (org-save-outline-visibility 'use-markers (org-mode-restart)))
 	(message "Local setup has been refreshed"))))
      ((org-clock-update-time-maybe))
