@@ -2002,23 +2002,28 @@ When it is nil, all comments will be removed."
 
 (defun org-store-forced-table-alignment ()
   "Find table lines which force alignment, store the results in properties."
-  (let (line cnt aligns)
+  (let (line cnt cookies)
     (goto-char (point-min))
-    (while (re-search-forward "|[ \t]*<[lrc][0-9]*>[ \t]*|" nil t)
+    (while (re-search-forward "|[ \t]*<\\([lrc]?[0-9]+\\|[lrc]\\)>[ \t]*|"
+			      nil t)
       ;; OK, this looks like a table line with an alignment cookie
       (org-if-unprotected
        (setq line (buffer-substring (point-at-bol) (point-at-eol)))
        (when (and (org-at-table-p)
 		  (org-table-cookie-line-p line))
-	 (setq cnt 0 aligns nil)
+	 (setq cnt 0 cookies nil)
 	 (mapc
 	  (lambda (x)
 	    (setq cnt (1+ cnt))
-	    (if (string-match "\\`<\\([lrc]\\)" x)
-		(push (cons cnt (downcase (match-string 1 x))) aligns)))
+	    (when (string-match "\\`<\\([lrc]\\)?\\([0-9]+\\)?>\\'" x)
+	      (let ((align (and (match-end 1)
+				(downcase (match-string 1 x))))
+		    (width (and (match-end 2)
+				(string-to-number (match-string 2 x)))))
+		(push (cons cnt (list align width)) cookies))))
 	  (org-split-string line "[ \t]*|[ \t]*"))
 	 (add-text-properties (org-table-begin) (org-table-end)
-			      (list 'org-forced-aligns aligns))))
+			      (list 'org-col-cookies cookies))))
       (goto-char (point-at-eol)))))
 
 (defun org-export-remove-special-table-lines ()

@@ -1980,8 +1980,8 @@ for formatting.  This is required for the DocBook exporter."
 
   (let* ((caption (org-find-text-property-in-string 'org-caption (car lines)))
 	 (label (org-find-text-property-in-string 'org-label (car lines)))
-	 (forced-aligns (org-find-text-property-in-string 'org-forced-aligns
-							  (car lines)))
+	 (col-cookies (org-find-text-property-in-string 'org-col-cookies
+							(car lines)))
 	 (attributes (org-find-text-property-in-string 'org-attributes
 						       (car lines)))
 	 (html-table-tag (org-export-splice-attributes
@@ -1994,9 +1994,9 @@ for formatting.  This is required for the DocBook exporter."
 	 tbopen line fields html gr colgropen rowstart rowend
 	 ali align aligns n)
     (setq caption (and caption (org-html-do-expand caption)))
-    (when (and forced-aligns org-table-clean-did-remove-column)
-    (setq forced-aligns
-	  (mapcar (lambda (x) (cons (1- (car x)) (cdr x))) forced-aligns)))
+    (when (and col-cookies org-table-clean-did-remove-column)
+      (setq col-cookies
+	    (mapcar (lambda (x) (cons (1- (car x)) (cdr x))) col-cookies)))
     (if splice (setq head nil))
     (unless splice (push (if head "<thead>" "<tbody>") html))
     (setq tbopen t)
@@ -2057,8 +2057,8 @@ for formatting.  This is required for the DocBook exporter."
 	     (lambda (x)
 	       (setq gr (pop org-table-colgroup-info)
 		     i (1+ i)
-		     align (if (assoc i forced-aligns)
-			       (cdr (assoc (cdr (assoc i forced-aligns))
+		     align (if (nth 1 (assoc i col-cookies))
+			       (cdr (assoc (nth 1 (assoc i col-cookies))
 					   '(("l" . "left") ("r" . "right")
 					     ("c" . "center"))))
 			     (if (> (/ (float x) nline)
