@@ -5923,7 +5923,8 @@ Insert a dynamic block (@pxref{Dynamic blocks}) containing a clock
 report as an Org-mode table into the current file.  When the cursor is
 at an existing clock table, just update it.  When called with a prefix
 argument, jump to the first clock report in the current document and
-update it.
+update it.   The clock table always includes also trees with
+@code{:ARCHIVE:} tag.
 @orgcmdkkc{C-c C-c,C-c C-x C-u,org-dblock-update}
 Update dynamic block at point.  The cursor needs to be in the
 @code{#+BEGIN} line of the dynamic block.
