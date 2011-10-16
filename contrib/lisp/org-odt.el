@@ -703,14 +703,20 @@ implementation filed under `org-odt-get-table-cell-styles'."
    (or label "") (or (nth 1 org-odt-table-style-spec) "OrgTable"))
   (setq org-lparse-table-begin-marker (point)))
 
+(defvar org-lparse-table-colalign-info)
 (defun org-odt-end-table ()
   (goto-char org-lparse-table-begin-marker)
   (loop for level from 0 below org-lparse-table-ncols
-	do (insert
-	    (org-odt-format-tags
-	     "<table:table-column table:style-name=\"%sColumn\"/>"
-	     "" (or (nth 1 org-odt-table-style-spec) "OrgTable"))))
-
+	do (let* ((col-cookie (and org-lparse-table-is-styled
+				   (cdr (assoc (1+ level)
+					       org-lparse-table-colalign-info))))
+		  (extra-columns (or (nth 1 col-cookie) 0)))
+	     (dotimes (i (1+ extra-columns))
+	       (insert
+		(org-odt-format-tags
+		 "<table:table-column table:style-name=\"%sColumn\"/>"
+		 "" (or (nth 1 org-odt-table-style-spec) "OrgTable"))))
+	     (insert "\n")))
   ;; fill style attributes for table cells
   (when org-lparse-table-is-styled
     (while (re-search-forward "@@\\(table-cell:p\\|table-cell:style-name\\)@@\\([0-9]+\\)@@\\([0-9]+\\)@@" nil t)
@@ -837,17 +843,26 @@ styles congruent with the ODF-1.2 specification."
   (when org-lparse-table-is-styled
     (format "@@table-cell:style-name@@%03d@@%03d@@" r c)))
 
-(defun org-odt-format-table-cell (data r c)
-  (let* ((paragraph-style-cookie
-	  (org-odt-get-paragraph-style-cookie-for-table-cell r c))
-	 (style-name-cookie
-	  (org-odt-get-style-name-cookie-for-table-cell r c))
-	 (extra (if style-name-cookie
-		    (format " table:style-name=\"%s\""  style-name-cookie) "")))
-    (org-odt-format-tags
-     '("<table:table-cell%s>" . "</table:table-cell>")
-     (if org-lparse-list-table-p data
-       (org-odt-format-stylized-paragraph paragraph-style-cookie data)) extra)))
+(defun org-odt-format-table-cell (data r c horiz-span)
+  (concat
+   (let* ((paragraph-style-cookie
+	   (org-odt-get-paragraph-style-cookie-for-table-cell r c))
+	  (style-name-cookie
+	   (org-odt-get-style-name-cookie-for-table-cell r c))
+	  (extra (and style-name-cookie
+		      (format " table:style-name=\"%s\""  style-name-cookie)))
+	  (extra (concat extra
+			 (and (> horiz-span 0)
+			      (format " table:number-columns-spanned=\"%d\""
+				      (1+ horiz-span))))))
+     (org-odt-format-tags
+      '("<table:table-cell%s>" . "</table:table-cell>")
+      (if org-lparse-list-table-p data
+	(org-odt-format-stylized-paragraph paragraph-style-cookie data)) extra))
+   (let (s)
+     (dotimes (i horiz-span)
+       (setq s (concat s "\n<table:covered-table-cell/>"))) s)
+   "\n"))
 
 (defun org-odt-begin-footnote-definition (n)
   (org-lparse-begin-paragraph 'footnote))

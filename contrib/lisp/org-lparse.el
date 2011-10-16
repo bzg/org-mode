@@ -1316,13 +1316,12 @@ version."
 	(org-lparse-format-table-table lines))))
 
 (defun org-lparse-table-get-colalign-info (lines)
-  (let ((forced-aligns (org-find-text-property-in-string
-			'org-forced-aligns (car lines))))
-    (when (and forced-aligns org-table-clean-did-remove-column)
-      (setq forced-aligns
-	    (mapcar (lambda (x) (cons (1- (car x)) (cdr x))) forced-aligns)))
-
-    forced-aligns))
+  (let ((col-cookies (org-find-text-property-in-string
+			'org-col-cookies (car lines))))
+    (when (and col-cookies org-table-clean-did-remove-column)
+      (setq col-cookies
+	    (mapcar (lambda (x) (cons (1- (car x)) (cdr x))) col-cookies)))
+    col-cookies))
 
 (defvar org-lparse-table-style)
 (defvar org-lparse-table-ncols)
@@ -2059,12 +2058,13 @@ See `org-xhtml-entity-format-callbacks-alist' for more information."
 	    (make-vector org-lparse-table-ncols nil))
       (let ((c -1))
 	(while  (< (incf c) org-lparse-table-ncols)
-	  (let ((cookie (cdr (assoc (1+ c) org-lparse-table-colalign-info))))
+	  (let* ((col-cookie (cdr (assoc (1+ c) org-lparse-table-colalign-info)))
+		 (align (nth 0 col-cookie)))
 	    (setf (aref org-lparse-table-colalign-vector c)
 		  (cond
-		   ((string= cookie "l") "left")
-		   ((string= cookie "r") "right")
-		   ((string= cookie "c") "center")
+		   ((string= align "l") "left")
+		   ((string= align "r") "right")
+		   ((string= align "c") "center")
 		   (t nil))))))))
   (incf org-lparse-table-rownum)
   (let ((i -1))
@@ -2075,11 +2075,15 @@ See `org-xhtml-entity-format-callbacks-alist' for more information."
 	(when (and (string= x "") text-for-empty-fields)
 	  (setq x text-for-empty-fields))
 	(incf i)
-	(and org-lparse-table-is-styled
-	     (< i org-lparse-table-ncols)
-	     (string-match org-table-number-regexp x)
-	     (incf (aref org-lparse-table-num-numeric-items-per-column i)))
-	(org-lparse-format 'TABLE-CELL x org-lparse-table-rownum i))
+	(let (col-cookie horiz-span)
+	  (when org-lparse-table-is-styled
+	    (when (and (< i org-lparse-table-ncols)
+		       (string-match org-table-number-regexp x))
+	      (incf (aref org-lparse-table-num-numeric-items-per-column i)))
+	    (setq col-cookie (cdr (assoc (1+ i) org-lparse-table-colalign-info))
+		  horiz-span (nth 1 col-cookie)))
+	  (org-lparse-format
+	   'TABLE-CELL x org-lparse-table-rownum i (or horiz-span 0))))
       fields "\n"))))
 
 (defun org-lparse-get (what &optional opt-plist)

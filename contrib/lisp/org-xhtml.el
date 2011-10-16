@@ -1558,7 +1558,7 @@ lang=\"%s\" xml:lang=\"%s\">
    (cons (eval (car org-export-table-row-tags))
 	 (eval (cdr org-export-table-row-tags))) row))
 
-(defun org-xhtml-format-table-cell (text r c)
+(defun org-xhtml-format-table-cell (text r c horiz-span)
   (let ((cell-style-cookie (or (and org-lparse-table-is-styled
 				    (format "@@class%03d@@" c)) "")))
     (cond
