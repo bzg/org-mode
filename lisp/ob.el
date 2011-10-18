@@ -1272,7 +1272,7 @@ of the vars, cnames and rnames."
             (setq var (cons (car var) (org-babel-del-hlines (cdr var))))))
         var)
       vars)
-     cnames rnames)))
+     (reverse cnames) (reverse rnames))))
 
 (defun org-babel-reassemble-table (table colnames rownames)
   "Add column and row names to a table.
