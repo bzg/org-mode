@@ -2099,7 +2099,7 @@ visually."
 To disable outline numbering pass a LEVEL of 0."
   (goto-char (point-min))
   (let ((regex
-	 "<text:outline-level-style\\(.*\\)text:level=\"\\([^\"]*\\)\"\\(.*\\)>")
+	 "<text:outline-level-style\\([^>]*\\)text:level=\"\\([^\"]*\\)\"\\([^>]*\\)>")
 	(replacement
 	 "<text:outline-level-style\\1text:level=\"\\2\" style:num-format=\"\">"))
     (while (re-search-forward regex nil t)
