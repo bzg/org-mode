@@ -89,7 +89,8 @@ This function is called by `org-babel-execute-src-block'."
 	    (member "html" result-params)
 	    (member "code" result-params)
 	    (equal (point-min) (point-max)))
-	(progn (insert-file-contents-literally out-file) (buffer-string))
+	(with-temp-buffer
+	  (progn (insert-file-contents-literally out-file) (buffer-string)))
       (with-temp-buffer
 	;; need to figure out what the delimiter is for the header row
 	(with-temp-buffer
