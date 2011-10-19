@@ -16381,7 +16381,10 @@ This mode supports entering LaTeX environment and math in LaTeX fragments
 in Org-mode.
 \\{org-cdlatex-mode-map}"
   nil " OCDL" nil
-  (when org-cdlatex-mode (require 'cdlatex))
+  (when org-cdlatex-mode
+    (require 'cdlatex)
+    (run-hooks 'cdlatex-mode-hook)
+    (cdlatex-compute-tables))
   (unless org-cdlatex-texmathp-advice-is-done
     (setq org-cdlatex-texmathp-advice-is-done t)
     (defadvice texmathp (around org-math-always-on activate)
