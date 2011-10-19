@@ -184,7 +184,13 @@ FILE-MEMBERS.
 Use options 1, 2 or 3 only if styles.xml alone suffices for
 achieving the desired formatting.  Use option 4, if the styles.xml
 references additional files like header and footer images for
-achieving the desired formattting."
+achieving the desired formattting.
+
+Use \"#+ODT_STYLES_FILE: ...\" directive to set this variable on
+a per-file basis.  For example,
+
+#+ODT_STYLES_FILE: \"/path/to/styles.xml\" or
+#+ODT_STYLES_FILE: (\"/path/to/file.ott\" (\"styles.xml\" \"image/hdr.png\"))."
   :group 'org-export-odt
   :type
   '(choice
@@ -196,6 +202,10 @@ achieving the desired formattting."
 	  (cons :tag "Members"
 		(file :tag "	Member" "styles.xml")
 		(repeat (file :tag "Member"))))))
+
+(eval-after-load 'org-exp
+  '(add-to-list 'org-export-inbuffer-options-extra
+		'("ODT_STYLES_FILE" :odt-styles-file)))
 
 (defconst org-export-odt-tmpdir-prefix "odt-")
 (defconst org-export-odt-bookmark-prefix "OrgXref.")
@@ -1751,7 +1761,9 @@ visually."
   (org-odt-update-meta-file opt-plist)
 
   ;; write styles file
-  (org-odt-copy-styles-file)
+  (let ((styles-file (plist-get opt-plist :odt-styles-file)))
+    (org-odt-copy-styles-file (and styles-file
+				   (read (org-trim styles-file)))))
 
   ;; Update styles.xml - take care of outline numbering
   (with-current-buffer
