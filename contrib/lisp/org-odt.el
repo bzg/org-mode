@@ -1277,7 +1277,8 @@ value of `org-export-odt-use-htmlfontify."
     (org-export-odt-format-formula thefile href)))
 
 (defun org-odt-is-formula-link-p (file)
-  (member (downcase (file-name-extension file)) '("mathml")))
+  (let ((case-fold-search nil))
+    (string-match "\\.mathml\\'" file)))
 
 (defun org-odt-format-org-link (opt-plist type-1 path fragment desc attr
 					  descp)
