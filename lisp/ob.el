@@ -1061,25 +1061,6 @@ may be specified in the properties of the current outline entry."
 		 (setq sym (intern (concat "org-babel-header-arg-names:" lang)))
 		 (and (boundp sym) (eval sym))))))))))
 
-(defun org-babel-params-from-buffer ()
-  "Retrieve per-buffer parameters.
- Return an association list of any source block params which
-may be specified in the current buffer."
-  (let (local-properties)
-    (save-match-data
-      (save-excursion
-	(save-restriction
-	  (widen)
-	  (goto-char (point-min))
-	  (while (re-search-forward
-		  (org-make-options-regexp '("PROPERTIES")) nil t)
-	    (setq local-properties
-		  (org-babel-merge-params
-		   local-properties
-		   (org-babel-parse-header-arguments
-		    (org-match-string-no-properties 2)))))
-	  local-properties)))))
-
 (defvar org-src-preserve-indentation)
 (defun org-babel-parse-src-block-match ()
   "Parse the results from a match of the `org-babel-src-block-regexp'."
@@ -1105,7 +1086,6 @@ may be specified in the current buffer."
               (buffer-string)))
 	  (org-babel-merge-params
 	   org-babel-default-header-args
-	   (org-babel-params-from-buffer)
            (org-babel-params-from-properties lang)
 	   (if (boundp lang-headers) (eval lang-headers) nil)
 	   (org-babel-parse-header-arguments
@@ -1122,7 +1102,6 @@ may be specified in the current buffer."
            (org-babel-clean-text-properties (match-string 5)))
           (org-babel-merge-params
            org-babel-default-inline-header-args
-	   (org-babel-params-from-buffer)
            (org-babel-params-from-properties lang)
            (if (boundp lang-headers) (eval lang-headers) nil)
            (org-babel-parse-header-arguments

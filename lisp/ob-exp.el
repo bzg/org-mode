@@ -105,7 +105,6 @@ none ----- do not display either code or results upon export"
 		  (org-babel-process-params
 		   (org-babel-merge-params
 		    org-babel-default-header-args
-		    (org-babel-params-from-buffer)
 		    (org-babel-params-from-properties lang)
 		    (if (boundp lang-headers) (eval lang-headers) nil)
 		    raw-params))))
@@ -197,7 +196,6 @@ options are taken from `org-babel-default-header-args'."
 			       (org-babel-merge-params
 				org-babel-default-header-args
 				org-babel-default-lob-header-args
-				(org-babel-params-from-buffer)
 				(org-babel-params-from-properties)
 				(org-babel-parse-header-arguments
 				 (org-babel-clean-text-properties

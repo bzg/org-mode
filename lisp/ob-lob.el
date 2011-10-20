@@ -125,7 +125,6 @@ if so then run the appropriate source block from the Library."
   (let ((params (org-babel-process-params
 		 (org-babel-merge-params
 		  org-babel-default-header-args
-		  (org-babel-params-from-buffer)
 		  (org-babel-params-from-properties)
 		  (org-babel-parse-header-arguments
 		   (org-babel-clean-text-properties
