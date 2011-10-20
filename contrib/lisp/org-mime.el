@@ -205,6 +205,8 @@ export that region, otherwise export the entire body."
          (org-export-htmlize-output-type 'inline-css)
          ;; makes the replies with ">"s look nicer
          (org-export-preserve-breaks org-mime-preserve-breaks)
+	 ;; dvipng for inline latex because MathJax doesn't work in mail
+	 (org-export-with-LaTeX-fragments "dvipng")
          ;; to hold attachments for inline html images
          (html-and-images
           (org-mime-replace-images

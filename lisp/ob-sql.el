@@ -84,31 +84,38 @@ This function is called by `org-babel-execute-src-block'."
       (insert (org-babel-expand-body:sql body params)))
     (message command)
     (shell-command command)
-    (with-temp-buffer
-      ;; need to figure out what the delimiter is for the header row
+    (if (or (member "scalar" result-params)
+	    (member "verbatim" result-params)
+	    (member "html" result-params)
+	    (member "code" result-params)
+	    (equal (point-min) (point-max)))
+	(with-temp-buffer
+	  (progn (insert-file-contents-literally out-file) (buffer-string)))
       (with-temp-buffer
-        (insert-file-contents out-file)
-        (goto-char (point-min))
-        (when (re-search-forward "^\\(-+\\)[^-]" nil t)
-          (setq header-delim (match-string-no-properties 1)))
-        (goto-char (point-max))
-        (forward-char -1)
-        (while (looking-at "\n")
-          (delete-char 1)
-          (goto-char (point-max))
-          (forward-char -1))
-        (write-file out-file))
-      (org-table-import out-file '(16))
-      (org-babel-reassemble-table
-       (mapcar (lambda (x)
-                 (if (string= (car x) header-delim)
-                     'hline
-                   x))
-               (org-table-to-lisp))
-       (org-babel-pick-name (cdr (assoc :colname-names params))
-			    (cdr (assoc :colnames params)))
-       (org-babel-pick-name (cdr (assoc :rowname-names params))
-			    (cdr (assoc :rownames params)))))))
+	;; need to figure out what the delimiter is for the header row
+	(with-temp-buffer
+	  (insert-file-contents out-file)
+	  (goto-char (point-min))
+	  (when (re-search-forward "^\\(-+\\)[^-]" nil t)
+	    (setq header-delim (match-string-no-properties 1)))
+	  (goto-char (point-max))
+	  (forward-char -1)
+	  (while (looking-at "\n")
+	    (delete-char 1)
+	    (goto-char (point-max))
+	    (forward-char -1))
+	  (write-file out-file))
+	(org-table-import out-file '(16))
+	(org-babel-reassemble-table
+	 (mapcar (lambda (x)
+		   (if (string= (car x) header-delim)
+		       'hline
+		     x))
+		 (org-table-to-lisp))
+	 (org-babel-pick-name (cdr (assoc :colname-names params))
+			      (cdr (assoc :colnames params)))
+	 (org-babel-pick-name (cdr (assoc :rowname-names params))
+			      (cdr (assoc :rownames params))))))))
 
 (defun org-babel-sql-expand-vars (body vars)
   "Expand the variables held in VARS in BODY."
