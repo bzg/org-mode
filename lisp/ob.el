@@ -1072,7 +1072,7 @@ may be specified in the current buffer."
 	  (widen)
 	  (goto-char (point-min))
 	  (while (re-search-forward
-		  (org-make-options-regexp (list "BABEL" "PROPERTIES")) nil t)
+		  (org-make-options-regexp '("PROPERTIES")) nil t)
 	    (setq local-properties
 		  (org-babel-merge-params
 		   local-properties
