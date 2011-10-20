@@ -618,7 +618,10 @@ This is set during `org-odt-begin-table'.")
 (defvar org-odt-table-style-spec nil
   "Entry for `org-odt-table-style' in `org-export-odt-table-styles'.")
 
-(defcustom org-export-odt-table-styles nil
+(defcustom org-export-odt-table-styles
+  '(("OrgEquation" "OrgEquation"
+     ((use-first-column-styles . t)
+      (use-last-column-styles . t))))
   "Specify how Table Styles should be derived from a Table Template.
 This is a list where each element is of the
 form (TABLE-STYLE-NAME TABLE-TEMPLATE-NAME TABLE-CELL-OPTIONS).
@@ -683,22 +686,26 @@ TABLE-TEMPLATE-NAME TABLE-CELL-OPTIONS) correspond to
 \"table:template-name\" and \"table:use-first-row-styles\" etc
 attributes of \"<table:table>\" element.  Refer ODF-1.2
 specification for more information.  Also consult the
-implementation filed under `org-odt-get-table-cell-styles'."
+implementation filed under `org-odt-get-table-cell-styles'.
+
+The TABLE-STYLE-NAME \"OrgEquation\" is used internally for
+formatting of numbered display equations.  Do not delete this
+style from the list."
   :group 'org-export-odt
   :type '(choice
           (const :tag "None" nil)
           (repeat :tag "Table Styles"
                   (list :tag "Table Style Specification"
-                   (string :tag "Table Style Name")
-                   (string  :tag "Table Template Name")
-                   (alist :options (use-first-row-styles
-                                    use-last-row-styles
-                                    use-first-column-styles
-                                    use-last-column-styles
-                                    use-banding-rows-styles
-                                    use-banding-columns-styles)
-                          :key-type symbol
-                          :value-type (const :tag "True" t))))))
+			(string :tag "Table Style Name")
+			(string  :tag "Table Template Name")
+			(alist :options (use-first-row-styles
+					 use-last-row-styles
+					 use-first-column-styles
+					 use-last-column-styles
+					 use-banding-rows-styles
+					 use-banding-columns-styles)
+			       :key-type symbol
+			       :value-type (const :tag "True" t))))))
 
 (defun org-odt-begin-table (caption label attributes)
   (setq org-odt-table-style attributes)
