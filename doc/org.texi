@@ -12040,11 +12040,9 @@ language-specific documentation available online at
 
 @node Buffer-wide header arguments, Header arguments in Org-mode properties, Language-specific header arguments, Using header arguments
 @subsubheading Buffer-wide header arguments
-Buffer-wide header arguments may be specified through the use of a
-@code{#+PROPERTIES:}
-line placed anywhere in an Org-mode file.  The line consists of the
-@code{#+PROPERTIES:} keyword followed by a series of header arguments which may be
-specified using the standard header argument syntax.
+Buffer-wide header arguments may be specified as properties through the use
+of @code{#+PROPERTY:} lines placed anywhere in an Org-mode file (see
+@ref{Property syntax}).
 
 For example the following would set @code{session} to @code{*R*}, and
 @code{results} to @code{silent} for every code block in the buffer, ensuring
@@ -12052,7 +12050,8 @@ that all execution took place in the same session, and no results would be
 inserted into the buffer.
 
 @example
-#+PROPERTIES: :session *R* :results silent
+#+PROPERTY: session *R*
+#+PROPERTY: results silent
 @end example
 
 @node Header arguments in Org-mode properties, Code block specific header arguments, Buffer-wide header arguments, Using header arguments
