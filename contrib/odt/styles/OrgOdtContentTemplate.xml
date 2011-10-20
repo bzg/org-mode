@@ -123,6 +123,74 @@
     </style:style>
     <!-- END: Table styles for numbered equations -->
 
+    <!-- BEGIN: Custom Table Template -->
+    <style:style style:name="Custom" style:family="table">
+      <style:table-properties style:rel-width="80%" table:align="center"/>
+    </style:style>
+
+    <style:style style:name="CustomColumn" style:family="table-column">
+      <style:table-column-properties style:rel-column-width="1*"/>
+    </style:style>
+
+    <!-- Table Paragraph Styles -->
+    <style:style style:name="CustomTableParagraph" style:family="paragraph" style:parent-style-name="Table_20_Contents">
+      <style:paragraph-properties fo:text-align="start" style:justify-single-word="false"/>
+      <style:text-properties fo:color="#000000" style:text-outline="false" style:text-line-through-style="none" style:font-name="Times New Roman" fo:font-size="12pt" fo:font-style="normal" fo:text-shadow="none" style:text-underline-style="none" fo:font-weight="normal" style:font-size-asian="12pt" style:font-style-asian="normal" style:font-weight-asian="normal" style:font-size-complex="12pt" style:font-style-complex="normal" style:font-weight-complex="normal" style:text-overline-style="none" style:text-overline-color="font-color"/>
+    </style:style>
+
+    <style:style style:name="CustomLastRowTableParagraph" style:family="paragraph" style:parent-style-name="Table_20_Contents">
+      <style:paragraph-properties fo:text-align="start" style:justify-single-word="false"/>
+      <style:text-properties fo:color="#000000" style:text-outline="false" style:text-line-through-style="none" style:font-name="Times New Roman" fo:font-size="12pt" fo:font-style="normal" fo:text-shadow="none" style:text-underline-style="none" fo:font-weight="normal" style:font-size-asian="12pt" style:font-style-asian="normal" style:font-weight-asian="normal" style:font-size-complex="12pt" style:font-style-complex="normal" style:font-weight-complex="normal" style:text-overline-style="none" style:text-overline-color="font-color"/>
+    </style:style>
+
+    <style:style style:name="CustomLastColumnTableParagraph" style:family="paragraph" style:parent-style-name="Table_20_Contents">
+      <style:paragraph-properties fo:text-align="start" style:justify-single-word="false"/>
+      <style:text-properties fo:color="#000000" style:text-outline="false" style:text-line-through-style="none" style:font-name="Times New Roman" fo:font-size="12pt" fo:font-style="normal" fo:text-shadow="none" style:text-underline-style="none" fo:font-weight="normal" style:font-size-asian="12pt" style:font-style-asian="normal" style:font-weight-asian="normal" style:font-size-complex="12pt" style:font-style-complex="normal" style:font-weight-complex="normal" style:text-overline-style="none" style:text-overline-color="font-color"/>
+    </style:style>
+
+    <style:style style:name="CustomFirstRowTableParagraph" style:family="paragraph" style:parent-style-name="Table_20_Contents">
+      <style:paragraph-properties fo:text-align="start" style:justify-single-word="false"/>
+      <style:text-properties fo:color="#ffffff" style:text-outline="false" style:text-line-through-style="none" style:font-name="Times New Roman" fo:font-size="12pt" fo:font-style="normal" fo:text-shadow="none" style:text-underline-style="none" fo:font-weight="normal" style:font-size-asian="12pt" style:font-style-asian="normal" style:font-weight-asian="normal" style:font-size-complex="12pt" style:font-style-complex="normal" style:font-weight-complex="normal" style:text-overline-style="none" style:text-overline-color="font-color"/>
+    </style:style>
+
+    <style:style style:name="CustomFirstColumnTableParagraph" style:family="paragraph" style:parent-style-name="Table_20_Contents">
+      <style:paragraph-properties fo:text-align="start" style:justify-single-word="false"/>
+      <style:text-properties fo:color="#ffffff" style:text-outline="false" style:text-line-through-style="none" style:font-name="Times New Roman" fo:font-size="12pt" fo:font-style="normal" fo:text-shadow="none" style:text-underline-style="none" fo:font-weight="normal" style:font-size-asian="12pt" style:font-style-asian="normal" style:font-weight-asian="normal" style:font-size-complex="12pt" style:font-style-complex="normal" style:font-weight-complex="normal" style:text-overline-style="none" style:text-overline-color="font-color"/>
+    </style:style>
+
+    <!-- Table Cell Styles -->
+    <style:style style:name="CustomTableCell" style:family="table-cell">
+      <style:table-cell-properties fo:background-color="#ffffff" fo:padding="0.097cm" fo:border-left="0.002cm solid #000000" fo:border-right="0.002cm solid #000000" fo:border-top="0.002cm solid #000000" fo:border-bottom="0.002cm solid #000000">
+	<style:background-image/>
+      </style:table-cell-properties>
+    </style:style>
+
+    <style:style style:name="CustomFirstRowTableCell" style:family="table-cell">
+      <style:table-cell-properties fo:background-color="#000080" fo:padding="0.097cm" fo:border-left="0.002cm solid #000000" fo:border-right="0.002cm solid #000000" fo:border-top="0.002cm solid #000000" fo:border-bottom="0.002cm solid #000000">
+	<style:background-image/>
+      </style:table-cell-properties>
+    </style:style>
+
+    <style:style style:name="CustomLastRowTableCell" style:family="table-cell">
+      <style:table-cell-properties fo:background-color="#cccccc" fo:padding="0.097cm" fo:border-left="0.002cm solid #000000" fo:border-right="0.002cm solid #000000" fo:border-top="0.002cm solid #000000" fo:border-bottom="0.002cm solid #000000">
+	<style:background-image/>
+      </style:table-cell-properties>
+    </style:style>
+
+    <style:style style:name="CustomFirstColumnTableCell" style:family="table-cell">
+      <style:table-cell-properties fo:background-color="#4d4d4d" fo:padding="0.097cm" fo:border-left="0.002cm solid #000000" fo:border-right="0.002cm solid #000000" fo:border-top="0.002cm solid #000000" fo:border-bottom="0.002cm solid #000000">
+	<style:background-image/>
+      </style:table-cell-properties>
+    </style:style>
+
+    <style:style style:name="CustomLastColumnTableCell" style:family="table-cell">
+      <style:table-cell-properties fo:background-color="#cccccc" fo:padding="0.097cm" fo:border-left="0.002cm solid #000000" fo:border-right="0.002cm solid #000000" fo:border-top="0.002cm solid #000000" fo:border-bottom="0.002cm solid #000000">
+	<style:background-image/>
+      </style:table-cell-properties>
+    </style:style>
+
+    <!-- END: Custom Table Template -->
+
   </office:automatic-styles>
 
   <office:body>
